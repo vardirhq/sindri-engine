@@ -47,8 +47,12 @@ class Handler(BaseHTTPRequestHandler):
     def do_POST(self):
         asked = json.loads(self.rfile.read(int(self.headers["Content-Length"])))
         text = asked["messages"][-1]["content"]
-        fix = next((f for name, f in FIXES.items() if name in text), "no idea")
-        self.reply(200, {"choices": [{"message": {"role": "assistant", "content": "```decay\n" + fix + "```"}}]})
+        if "17 + 25" in text:
+            answer = "42"
+        else:
+            fix = next((f for name, f in FIXES.items() if name in text), "no idea")
+            answer = "```decay\n" + fix + "```"
+        self.reply(200, {"choices": [{"message": {"role": "assistant", "content": answer}}]})
 HTTPServer(("127.0.0.1", port), Handler).serve_forever()
 "#;
 
@@ -96,25 +100,50 @@ fn published(root: &Path) -> Option<(Asset, Asset)> {
 }
 
 #[test]
-fn setup_runs_every_step_and_the_model_is_proved_and_remembered() {
+fn setup_ends_on_a_working_model_and_features_are_tested_after() {
     let root = scratch("full");
     let Some((runtime, model)) = published(&root) else {
         return;
     };
     let home = Home::at(root.join("home"));
     let shared = Shared::default();
-    let finished = install(&home, &runtime, &model, &shared).expect("set up");
-    assert_eq!(finished.verified, [Feature::DecayRepair]);
-    assert_eq!(shared.progress().step, Some(Step::Check));
+    let server = install(&home, &runtime, &model, &shared).expect("set up");
+    assert_eq!(shared.progress().step, Some(Step::Answer));
     assert!(home.server(&runtime).is_some());
     assert!(home.has_model(&model));
     assert!(!home.downloads().join("llama-test-bin.tar.gz").exists());
-    let saved = home.load().expect("remembered");
-    assert_eq!(
-        saved.features_for(&model, &runtime),
-        Some(vec![Feature::DecayRepair])
-    );
-    drop(finished);
+    // Set up means it answers; nothing has been tested yet.
+    let known = home
+        .load()
+        .and_then(|saved| saved.known_for(&model, &runtime))
+        .expect("remembered");
+    assert!(known.checked.is_empty());
+
+    let verdict = check_features(
+        &home,
+        &runtime,
+        &model,
+        &mut server.model(),
+        &AtomicBool::new(false),
+    )
+    .expect("tested");
+    assert_eq!(verdict.verified, [Feature::DecayRepair]);
+    let known = home
+        .load()
+        .and_then(|saved| saved.known_for(&model, &runtime))
+        .expect("remembered");
+    assert_eq!(known.verified, [Feature::DecayRepair]);
+    assert_eq!(known.checked, [Feature::DecayRepair]);
+    drop(server);
+
+    // Setting up again keeps what the features proved.
+    let again = install(&home, &runtime, &model, &Shared::default()).expect("set up again");
+    drop(again);
+    let known = home
+        .load()
+        .and_then(|saved| saved.known_for(&model, &runtime))
+        .expect("remembered");
+    assert_eq!(known.verified, [Feature::DecayRepair]);
 
     // A second start downloads nothing: the sources are made unreachable, and
     // it still starts.
@@ -162,4 +191,14 @@ fn a_stopped_setup_says_it_was_stopped() {
         .err()
         .expect("stopped");
     assert!(error.cancelled(), "{error:?}");
+}
+
+#[test]
+fn only_a_correct_answer_passes_the_test_question() {
+    for right in ["42", "42.", "The answer is 42", "```\n42\n```"] {
+        assert!(answers_correctly(right), "{right}");
+    }
+    for wrong in ["", "41", "420", "forty-two", "I cannot help with that"] {
+        assert!(!answers_correctly(wrong), "{wrong}");
+    }
 }

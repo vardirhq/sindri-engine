@@ -167,35 +167,75 @@ impl Home {
     }
 }
 
-/// What verification proved, kept so it is not re-run every time the editor
-/// opens. Tied to the exact model file and runner build it was run against:
-/// either changing means proving it again.
+/// What is known about the installed model, kept so nothing is re-run every
+/// time the editor opens. Tied to the exact model file and runner build: either
+/// changing means finding out again.
+///
+/// Written once setup has seen the model answer, which is what "set up" means.
+/// Each feature is checked separately after that, and recorded as checked
+/// whether or not it passed, so a model that could not do something is not
+/// asked again every time the panel opens.
 #[derive(Clone, Debug, Default, Deserialize, PartialEq, Serialize)]
 pub struct Saved {
     pub model_sha256: String,
     pub runtime_version: String,
+    /// Features the model passed.
     pub verified: Vec<String>,
+    /// Features the model was tested on, passed or not.
+    #[serde(default)]
+    pub checked: Vec<String>,
+}
+
+/// What a saved record says about the files it belongs to.
+#[derive(Clone, Debug, Default, PartialEq)]
+pub struct Known {
+    pub verified: Vec<Feature>,
+    pub checked: Vec<Feature>,
 }
 
 impl Saved {
-    pub fn new(model: &Asset, runtime: &Asset, verified: &[Feature]) -> Self {
+    /// A model that answers and has not been tested on anything yet.
+    pub fn answering(model: &Asset, runtime: &Asset) -> Self {
         Self {
             model_sha256: model.sha256.clone(),
             runtime_version: runtime.version.clone(),
-            verified: verified
-                .iter()
-                .map(|feature| feature.id().to_owned())
-                .collect(),
+            verified: Vec::new(),
+            checked: Vec::new(),
         }
     }
 
-    /// The features proved, if this record is about these files.
-    pub fn features_for(&self, model: &Asset, runtime: &Asset) -> Option<Vec<Feature>> {
+    /// Records the outcome of testing `tested`, of which `passed` passed.
+    pub fn record(&mut self, tested: &[Feature], passed: &[Feature]) {
+        for feature in tested {
+            let id = feature.id().to_owned();
+            self.verified.retain(|known| *known != id);
+            if passed.contains(feature) {
+                self.verified.push(id.clone());
+            }
+            if !self.checked.contains(&id) {
+                self.checked.push(id);
+            }
+        }
+    }
+
+    /// What is known, if this record is about these files.
+    pub fn known_for(&self, model: &Asset, runtime: &Asset) -> Option<Known> {
+        let features = |ids: &[String]| -> Vec<Feature> {
+            ids.iter().filter_map(|id| Feature::from_id(id)).collect()
+        };
         (self.model_sha256 == model.sha256 && self.runtime_version == runtime.version).then(|| {
-            self.verified
-                .iter()
-                .filter_map(|id| Feature::from_id(id))
-                .collect()
+            let verified = features(&self.verified);
+            // A record from before `checked` existed only listed what passed,
+            // and what passed was checked.
+            let mut checked = features(&self.checked);
+            checked.extend(
+                verified
+                    .iter()
+                    .filter(|f| !checked.contains(f))
+                    .copied()
+                    .collect::<Vec<_>>(),
+            );
+            Known { verified, checked }
         })
     }
 }

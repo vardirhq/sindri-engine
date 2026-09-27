@@ -165,7 +165,8 @@ impl EditorApp {
                 }
                 None => panel::note(
                     ui,
-                    "Set up the local assistant from its panel, and it can propose a fix here.",
+                    "Once the local assistant is set up and has passed its script test, it can \
+                     propose a fix here.",
                 ),
             }
         }

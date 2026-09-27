@@ -24,10 +24,12 @@
 > all inside the editor: one button fetches the pinned runner and the pinned
 > Qwen2.5 Coder 7B file into the person's own data folder through the
 > platform's curl, checks each against its SHA-256, unpacks the runner with
-> `tar`, starts it on a free loopback port, waits for `/health`, and runs the
-> verification cases, showing each step with progress, speed and time left
+> `tar`, starts it on a free loopback port, waits for `/health`, and ends on a
+> question with a known answer, showing each step with progress, speed and time left
 > (`assistant/install.rs`, `managed.rs`, `server.rs`,
-> `native/assistant_view/`). What was proved is saved against the exact model
+> `native/assistant_view/`). Setup does not test features: the verification
+> cases run afterwards, each feature switched on by its own result, so a
+> model that fails one is still a working assistant. What was proved is saved against the exact model
 > hash and runner build, so it survives restarts; the server starts on the
 > first fix of a session and stops with the editor; removing everything is one
 > button. The Ollama setup path was removed rather than kept beside it. Runners
