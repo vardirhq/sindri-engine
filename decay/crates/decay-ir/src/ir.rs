@@ -4,7 +4,7 @@
 //! control flow, values, names, member paths, and calls, and nothing
 //! about what a Transform or an Entity is.
 
-use decay_syntax::{BinaryOp, UnaryOp};
+use decay_syntax::{BinaryOp, UnaryOp, VectorOp};
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct IrProgram {
@@ -111,6 +111,20 @@ pub enum Instruction {
     /// What a `break` emits: leaving a loop early still has to let go of what
     /// it was walking.
     IterEnd,
+    /// Pops this many numbers and pushes the vector they make, `x` first.
+    Construct(usize),
+    /// Pops a vector, pushes its component at this position (`x` is 0).
+    Component(usize),
+    /// Pops a number and a vector, pushes the vector with the component at
+    /// this position replaced.
+    ///
+    /// What `v.x = 3.0` lowers to, with a load before and a store after: a
+    /// vector is a value, so changing part of one is making a new one and
+    /// putting it back where the old one was.
+    WithComponent(usize),
+    /// A vector property or method. Pops the arguments, then the vector, and
+    /// pushes the answer.
+    Vector(VectorOp),
     Call {
         callee: Path,
         argument_count: usize,

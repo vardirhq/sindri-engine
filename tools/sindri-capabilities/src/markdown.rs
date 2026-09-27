@@ -21,12 +21,48 @@ pub(crate) fn render(api: &DecayApi) -> String {
     page.push_str("\n## Globals\n\nNames in scope without qualification. Decay has no imports, so each of these is a name a script cannot use for its own.\n\n");
     push_symbols(&mut page, &api.globals);
 
+    page.push_str(&vectors());
+
     page.push_str("\n## Types\n");
     for namespace in &api.types {
         push_namespace(&mut page, namespace);
     }
 
     page
+}
+
+/// What a `Vec2` and a `Vec3` offer. They are the language's own values rather
+/// than the host's, so this is read from the language's list, not the surface.
+fn vectors() -> String {
+    use decay_semantic::{COMPONENTS, Type, VectorOp};
+
+    let mut section = String::from(
+        "\n## Vectors\n\n`Vec2(x, y)` and `Vec3(x, y, z)` build one. Vectors add to and \
+         subtract from vectors of their own size, scale by a number (`v * 2.0`, `2.0 * v`, \
+         `v / 2.0`), negate, and compare with `==`. A component is read and assigned by name: \
+         `v.x`, `v.y += 1.0`.\n\n",
+    );
+    for ty in [Type::Vec2, Type::Vec3] {
+        let name = ty.display_name();
+        let dimensions = ty.dimensions().unwrap_or(0);
+        let _ = writeln!(section, "### `{name}`\n");
+        for component in &COMPONENTS[..dimensions] {
+            let _ = writeln!(section, "- `{component}`: `f32`");
+        }
+        for (op, spelled, _) in VectorOp::ALL {
+            let line = match op {
+                VectorOp::Length => format!("- `{spelled}`: `f32`"),
+                VectorOp::Normalized => format!("- `{spelled}`: `{name}`"),
+                VectorOp::Dot | VectorOp::Distance => format!("- `{spelled}({name})` → `f32`"),
+                VectorOp::Lerp => format!("- `{spelled}({name}, f32)` → `{name}`"),
+            };
+            let _ = writeln!(section, "{line}");
+        }
+        section.push('\n');
+    }
+    section.truncate(section.trim_end().len());
+    section.push('\n');
+    section
 }
 
 fn preamble() -> String {

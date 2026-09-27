@@ -38,6 +38,7 @@ Names in scope without qualification. Decay has no imports, so each of these is 
 - `Gesture`: `Gesture`
 - `Grid`: `Grid`
 - `Input`: `Input`
+- `PI`: `f32`
 - `Physics`: `Physics`
 - `Pointer`: `Pointer`
 - `Profiles`: `Profiles`
@@ -45,6 +46,7 @@ Names in scope without qualification. Decay has no imports, so each of these is 
 - `Save`: `Save`
 - `Scene`: `Scene`
 - `Stick`: `Stick`
+- `TAU`: `f32`
 - `Time`: `Time`
 - `Touch`: `Touch`
 - `Ui`: `Ui`
@@ -52,13 +54,44 @@ Names in scope without qualification. Decay has no imports, so each of these is 
 - `World`: `World`
 - `abs(f32)` → `f32`
 - `atan2(f32, f32)` → `f32`
+- `ceil(f32)` → `f32`
+- `clamp(f32, f32, f32)` → `f32`
 - `cos(f32)` → `f32`
 - `exp(f32)` → `f32`
+- `floor(f32)` → `f32`
+- `lerp(f32, f32, f32)` → `f32`
 - `max(f32, f32)` → `f32`
 - `min(f32, f32)` → `f32`
 - `print(unknown)` → `unit`
+- `round(f32)` → `f32`
+- `sign(f32)` → `f32`
 - `sin(f32)` → `f32`
 - `sqrt(f32)` → `f32`
+
+## Vectors
+
+`Vec2(x, y)` and `Vec3(x, y, z)` build one. Vectors add to and subtract from vectors of their own size, scale by a number (`v * 2.0`, `2.0 * v`, `v / 2.0`), negate, and compare with `==`. A component is read and assigned by name: `v.x`, `v.y += 1.0`.
+
+### `Vec2`
+
+- `x`: `f32`
+- `y`: `f32`
+- `length`: `f32`
+- `normalized`: `Vec2`
+- `dot(Vec2)` → `f32`
+- `distance(Vec2)` → `f32`
+- `lerp(Vec2, f32)` → `Vec2`
+
+### `Vec3`
+
+- `x`: `f32`
+- `y`: `f32`
+- `z`: `f32`
+- `length`: `f32`
+- `normalized`: `Vec3`
+- `dot(Vec3)` → `f32`
+- `distance(Vec3)` → `f32`
+- `lerp(Vec3, f32)` → `Vec3`
 
 ## Types
 
@@ -182,8 +215,10 @@ Names in scope without qualification. Decay has no imports, so each of these is 
 - `just_pressed(String)` → `bool`
 - `just_released(String)` → `bool`
 - `over_ui`: `bool`
+- `overlay`: `Vec2`
 - `overlay_x`: `f32`
 - `overlay_y`: `f32`
+- `position`: `Vec2`
 - `x`: `f32`
 - `y`: `f32`
 
@@ -257,6 +292,7 @@ The host names this type but has not described its members.
 
 - `anchor_x`: `f32`
 - `anchor_y`: `f32`
+- `direction`: `Vec2`
 - `held`: `bool`
 - `x`: `f32`
 - `y`: `f32`
@@ -296,12 +332,6 @@ The host names this type but has not described its members.
 
 - `layer`: `f32`
 - `tint`: `Rgba`
-
-### `Vec3`
-
-- `x`: `f32`
-- `y`: `f32`
-- `z`: `f32`
 
 ### `Viewport`
 

@@ -22,8 +22,7 @@ script Bullet {
     var age: f32 = 0.0;
     var spent: f32 = 0.0;
     var retiring: bool = false;
-    var heading_x: f32 = 0.0;
-    var heading_y: f32 = 1.0;
+    var heading: Vec2 = Vec2(0.0, 1.0);
     var reversed: bool = false;
     var wrapped: bool = false;
     var reservoir: f32 = 0.0;
@@ -34,8 +33,7 @@ script Bullet {
     var visual_style: f32 = 0.0;
 
     fn start() {
-        this.heading_x = this.dir_x;
-        this.heading_y = this.dir_y;
+        this.heading = Vec2(this.dir_x, this.dir_y);
         if this.companion_kind > 0.0 {
             setup_companion_visual();
             choose_trail();
@@ -48,7 +46,7 @@ script Bullet {
         choose_trail();
         this.base_x = this.transform.scale.x;
         this.base_y = this.transform.scale.y;
-        Physics.set_velocity(this.entity, this.heading_x * this.speed, this.heading_y * this.speed);
+        Physics.set_velocity(this.entity, this.heading.x * this.speed, this.heading.y * this.speed);
     }
 
     fn update(dt: f32) {
@@ -67,9 +65,8 @@ script Bullet {
         leave_trail(dt);
         if Game.get("special_reversal_chamber", 0.0) > 0.0 && !this.reversed && this.age >= this.life * 0.52 {
             this.reversed = true;
-            this.heading_x = -this.heading_x;
-            this.heading_y = -this.heading_y;
-            Physics.set_velocity(this.entity, this.heading_x * this.speed, this.heading_y * this.speed);
+            this.heading = -this.heading;
+            Physics.set_velocity(this.entity, this.heading.x * this.speed, this.heading.y * this.speed);
         }
         wrap_horizon();
         if this.age >= this.life {
@@ -139,24 +136,19 @@ script Bullet {
 
     fn seek(dt: f32) {
         if Game.get("target_live", 0.0) <= 0.0 { return; }
-        let to_x = Game.get("target_x", this.transform.position.x) - this.transform.position.x;
-        let to_y = Game.get("target_y", this.transform.position.y) - this.transform.position.y;
-        let far = sqrt(to_x * to_x + to_y * to_y);
-        if far <= 0.0001 { return; }
-        let desired_x = to_x / far;
-        let desired_y = to_y / far;
+        let here = this.transform.position;
+        let to = Vec2(Game.get("target_x", here.x), Game.get("target_y", here.y)) - Vec2(here.x, here.y);
+        if to.length <= 0.0001 { return; }
+        let desired = to.normalized;
         var turn: f32 = 5.0;
         if Game.get("special_homing_instinct", 0.0) > 0.0 { turn *= 1.8; }
         if Game.get("transform_storm", 0.0) > 0.0 { turn = max(turn, 8.0); }
         if Game.get("transform_recursive", 0.0) > 0.0 { turn = max(turn, 9.0); }
         let steer = min(1.0, dt * turn);
-        let next_x = this.heading_x * (1.0 - steer) + desired_x * steer;
-        let next_y = this.heading_y * (1.0 - steer) + desired_y * steer;
-        let length = sqrt(next_x * next_x + next_y * next_y);
-        if length > 0.001 {
-            this.heading_x = next_x / length;
-            this.heading_y = next_y / length;
-            Physics.set_velocity(this.entity, this.heading_x * this.speed, this.heading_y * this.speed);
+        let next = this.heading * (1.0 - steer) + desired * steer;
+        if next.length > 0.001 {
+            this.heading = next.normalized;
+            Physics.set_velocity(this.entity, this.heading.x * this.speed, this.heading.y * this.speed);
         }
     }
 
@@ -172,9 +164,9 @@ script Bullet {
         if this.beam > 0.0 {
             var power: f32 = 0.23;
             if Game.get("transform_rail_prism", 0.0) > 0.0 { power *= 1.45; }
-            spawn_beam(this.heading_x, this.heading_y, this.damage * power);
+            spawn_beam(this.heading.x, this.heading.y, this.damage * power);
             if Game.get("special_prism_mirror", 0.0) > 0.0 {
-                spawn_beam(-this.heading_x, -this.heading_y, this.damage * power);
+                spawn_beam(-this.heading.x, -this.heading.y, this.damage * power);
             }
         }
         if this.nova > 0.0 && (Game.get("transform_critical_mass", 0.0) > 0.0 && this.crit_hit > 0.0) {
@@ -225,7 +217,7 @@ script Bullet {
         let count = Game.get("constellation_count", 0.0) + 1.0;
         if count >= 3.0 {
             Game.set("constellation_count", 0.0);
-            spawn_beam(this.heading_x, this.heading_y, this.damage * 0.8);
+            spawn_beam(this.heading.x, this.heading.y, this.damage * 0.8);
         } else { Game.set("constellation_count", count); }
     }
 
@@ -282,10 +274,10 @@ script Bullet {
                     this.reservoir += 1.0;
                     if this.reservoir >= 3.0 {
                         this.reservoir = 0.0;
-                        let tx = Game.get("target_x", this.transform.position.x + 1.0) - this.transform.position.x;
-                        let ty = Game.get("target_y", this.transform.position.y) - this.transform.position.y;
-                        let far = max(0.001, sqrt(tx * tx + ty * ty));
-                        spawn_beam(tx / far, ty / far, this.damage * 2.0);
+                        let here = this.transform.position;
+                        let to = Vec2(Game.get("target_x", here.x + 1.0), Game.get("target_y", here.y)) - Vec2(here.x, here.y);
+                        let beam = to / max(0.001, to.length);
+                        spawn_beam(beam.x, beam.y, this.damage * 2.0);
                     }
                 }
             }

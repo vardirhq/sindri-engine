@@ -100,6 +100,12 @@ impl Lowerer<'_> {
                 }
             }
             ExprKind::Assign { target, op, value } => {
+                if let ExprKind::Member { object, .. } = &target.kind
+                    && let Some(ValueMember::Component(index)) = self.value_member(target.span)
+                {
+                    self.lower_component_assign(object, index, *op, value, instructions);
+                    return;
+                }
                 let path =
                     Self::path_from_expr(target).unwrap_or_else(|| Path(vec!["<invalid>".into()]));
                 if matches!(op, AssignOp::Assign) {
@@ -107,15 +113,9 @@ impl Lowerer<'_> {
                 } else {
                     instructions.push(Instruction::Load(path.clone()));
                     self.lower_expr(value, instructions);
-                    let binary = match op {
-                        AssignOp::Add => BinaryOp::Add,
-                        AssignOp::Subtract => BinaryOp::Subtract,
-                        AssignOp::Multiply => BinaryOp::Multiply,
-                        AssignOp::Divide => BinaryOp::Divide,
-                        AssignOp::Modulo => BinaryOp::Modulo,
-                        AssignOp::Assign => unreachable!(),
-                    };
-                    instructions.push(Instruction::Binary(binary));
+                    if let Some(binary) = binary_for(*op) {
+                        instructions.push(Instruction::Binary(binary));
+                    }
                 }
                 instructions.push(Instruction::Store(path));
             }
@@ -129,7 +129,16 @@ impl Lowerer<'_> {
                         self.lower_expr(object, instructions);
                         instructions.push(Instruction::Length);
                     }
-                    None => {
+                    Some(ValueMember::Component(index)) => {
+                        self.lower_expr(object, instructions);
+                        instructions.push(Instruction::Component(index));
+                    }
+                    Some(ValueMember::Vector(op)) => {
+                        self.lower_expr(object, instructions);
+                        instructions.push(Instruction::Vector(op));
+                    }
+                    // Only a call is ever noted as a construction.
+                    Some(ValueMember::Construct(_)) | None => {
                         let path = Self::path_from_expr(expr)
                             .unwrap_or_else(|| Path(vec!["<invalid-member>".into()]));
                         instructions.push(Instruction::Load(path));
@@ -141,18 +150,74 @@ impl Lowerer<'_> {
                 self.lower_expr(index, instructions);
                 instructions.push(Instruction::Index);
             }
-            ExprKind::Call { callee, args } => {
+            ExprKind::Call { callee, args } => self.lower_call(expr, callee, args, instructions),
+        }
+    }
+
+    /// A call: building a vector, a vector method, or a call by path.
+    fn lower_call(
+        &self,
+        expr: &Expr,
+        callee: &Expr,
+        args: &[Expr],
+        instructions: &mut Vec<Instruction>,
+    ) {
+        match self.value_member(expr.span) {
+            Some(ValueMember::Construct(dimensions)) => {
                 for argument in args {
                     self.lower_expr(argument, instructions);
                 }
-                let callee = Self::path_from_expr(callee)
-                    .unwrap_or_else(|| Path(vec!["<invalid-call>".into()]));
-                instructions.push(Instruction::Call {
-                    callee,
-                    argument_count: args.len(),
-                });
+                instructions.push(Instruction::Construct(dimensions));
+                return;
             }
+            Some(ValueMember::Vector(op)) => {
+                if let ExprKind::Member { object, .. } = &callee.kind {
+                    self.lower_expr(object, instructions);
+                }
+                for argument in args {
+                    self.lower_expr(argument, instructions);
+                }
+                instructions.push(Instruction::Vector(op));
+                return;
+            }
+            _ => {}
         }
+        for argument in args {
+            self.lower_expr(argument, instructions);
+        }
+        let callee =
+            Self::path_from_expr(callee).unwrap_or_else(|| Path(vec!["<invalid-call>".into()]));
+        instructions.push(Instruction::Call {
+            callee,
+            argument_count: args.len(),
+        });
+    }
+
+    /// `v.x = value`, or `v.x += value`: the vector with one component
+    /// replaced, stored back, and the component left as the expression's value.
+    fn lower_component_assign(
+        &self,
+        object: &Expr,
+        index: usize,
+        op: AssignOp,
+        value: &Expr,
+        instructions: &mut Vec<Instruction>,
+    ) {
+        let path = Self::path_from_expr(object).unwrap_or_else(|| Path(vec!["<invalid>".into()]));
+        instructions.push(Instruction::Load(path.clone()));
+        if let Some(binary) = binary_for(op) {
+            instructions.push(Instruction::Load(path.clone()));
+            instructions.push(Instruction::Component(index));
+            self.lower_expr(value, instructions);
+            instructions.push(Instruction::Binary(binary));
+        } else {
+            self.lower_expr(value, instructions);
+        }
+        instructions.push(Instruction::WithComponent(index));
+        instructions.push(Instruction::Store(path.clone()));
+        instructions.push(Instruction::Pop);
+        instructions.push(Instruction::Load(path));
+        instructions.push(Instruction::Component(index));
     }
 
     pub(super) fn path_from_expr(expr: &Expr) -> Option<Path> {
@@ -176,5 +241,17 @@ impl Lowerer<'_> {
 
         let mut parts = Vec::new();
         collect(expr, &mut parts).then_some(Path(parts))
+    }
+}
+
+/// The arithmetic a compound assignment performs; `None` for plain `=`.
+const fn binary_for(op: AssignOp) -> Option<BinaryOp> {
+    match op {
+        AssignOp::Assign => None,
+        AssignOp::Add => Some(BinaryOp::Add),
+        AssignOp::Subtract => Some(BinaryOp::Subtract),
+        AssignOp::Multiply => Some(BinaryOp::Multiply),
+        AssignOp::Divide => Some(BinaryOp::Divide),
+        AssignOp::Modulo => Some(BinaryOp::Modulo),
     }
 }

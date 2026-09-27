@@ -21,8 +21,7 @@ script Ball {
     @export let heat_gain: f32 = 24.0;
     @export let heat_cool: f32 = 0.055;
 
-    var vx: f32 = 0.0;
-    var vy: f32 = 0.0;
+    var velocity: Vec2 = Vec2(0.0, 0.0);
     var holder: Entity = null;
     var holder_right: bool = true;
     var kicker: Entity = null;
@@ -68,12 +67,11 @@ script Ball {
         let kx = World.take_signal("kick_x");
         let ky = World.take_signal("kick_y");
         if kicked > 0.0 {
-            this.vx = kx / kicked;
-            this.vy = ky / kicked;
+            this.velocity = Vec2(kx, ky) / kicked;
             this.kicker = this.holder;
             this.kicked_ago = 0.0;
             this.holder = null;
-            let speed = sqrt(this.vx * this.vx + this.vy * this.vy);
+            let speed = this.velocity.length;
             if speed > this.heat_threshold {
                 let added = (speed - this.heat_threshold) / this.heat_gain;
                 this.heat = min(1.0, this.heat + added);
@@ -90,8 +88,7 @@ script Ball {
         if (abs(ax) > 0.0 || abs(ay) > 0.0) && this.aftertouch_slot > 0.0 && this.holder == null {
             // The player script sends tiny frame-scaled nudges for only a short
             // time, so aftertouch bends a shot instead of becoming ball steering.
-            this.vx += ax;
-            this.vy += ay;
+            this.velocity += Vec2(ax, ay);
         }
         let lit = World.take_signal("fire");
         if lit > 0.0 {
@@ -105,29 +102,28 @@ script Ball {
     fn touches() {
         for player in World.with_tag("player") {
             let scale = player.transform.scale.x / 3.2;
-            let dx = this.transform.position.x - player.transform.position.x;
-            let dy = this.transform.position.y - (player.transform.position.y - 1.1 * scale);
-            let distance = sqrt(dx * dx + dy * dy);
+            // Measured from the player's feet, where the ball sits when held.
+            let feet = player.transform.position - Vec3(0.0, 1.1 * scale, 0.0);
+            let away = this.transform.position - feet;
+            let offset = Vec2(away.x, away.y);
+            let distance = offset.length;
             // The one who just kicked it does not take it straight back.
             let fresh = player == this.kicker && this.kicked_ago < 0.3;
             if distance < this.reach * scale && player != this.holder && !fresh {
                 if this.fire_left > 0.0 {
-                    bounce(player, dx, dy, distance);
+                    bounce(player, offset, distance);
                 } else {
                     this.holder = player;
                     this.aftertouch_slot = 0.0;
-                    this.vx = 0.0;
-                    this.vy = 0.0;
+                    this.velocity = Vec2(0.0, 0.0);
                     Audio.play("audio/run.wav", 0.5);
                 }
             }
         }
     }
 
-    fn bounce(player: Entity, dx: f32, dy: f32, distance: f32) {
-        let length = max(0.01, distance);
-        this.vx = dx / length * 12.0;
-        this.vy = dy / length * 12.0;
+    fn bounce(player: Entity, offset: Vec2, distance: f32) {
+        this.velocity = offset / max(0.01, distance) * 12.0;
         this.kicker = player;
         this.kicked_ago = 0.0;
         this.aftertouch_slot = 0.0;
@@ -151,12 +147,10 @@ script Ball {
 
     fn roll(dt: f32) {
         Game.set("holder", 0.0);
-        this.vx += Game.get("wind", 0.0) * dt;
-        let keep = max(0.0, 1.0 - this.friction * dt);
-        this.vx = this.vx * keep;
-        this.vy = this.vy * keep;
-        this.transform.position.x += this.vx * dt;
-        this.transform.position.y += this.vy * dt;
+        this.velocity.x += Game.get("wind", 0.0) * dt;
+        this.velocity *= max(0.0, 1.0 - this.friction * dt);
+        let step = this.velocity * dt;
+        this.transform.position += Vec3(step.x, step.y, 0.0);
     }
 
     fn burn(dt: f32) {
@@ -206,18 +200,18 @@ script Ball {
     }
 
     fn hit_post() {
-        let speed = sqrt(this.vx * this.vx + this.vy * this.vy);
+        let speed = this.velocity.length;
         this.aftertouch_slot = 0.0;
         if this.transform.position.x > 0.0 {
             this.transform.position.x = this.goal_line - 0.02;
-            this.vx = -abs(this.vx) * 0.72;
+            this.velocity.x = -abs(this.velocity.x) * 0.72;
         } else {
             this.transform.position.x = 0.02 - this.goal_line;
-            this.vx = abs(this.vx) * 0.72;
+            this.velocity.x = abs(this.velocity.x) * 0.72;
         }
         // Glancing shots keep some vertical motion, so posts create useful
         // rebounds instead of reflecting every miss straight backwards.
-        this.vy = this.vy * 0.82;
+        this.velocity.y *= 0.82;
         Effects.burst(this.entity);
         Audio.play("audio/hit.wav", min(1.0, 0.45 + speed / 45.0));
         Camera.add_trauma(min(0.5, 0.12 + speed / 70.0));
@@ -226,8 +220,7 @@ script Ball {
     fn reset() {
         this.transform.position.x = 0.0;
         this.transform.position.y = 0.0;
-        this.vx = 0.0;
-        this.vy = 0.0;
+        this.velocity = Vec2(0.0, 0.0);
         this.holder = null;
         this.heat = 0.0;
         this.heat_clock = 0.0;

@@ -172,41 +172,39 @@ script Player {
         if target == null { return; }
         if Game.get("overdrive", 0.0) > 0.0 { this.cooldown = Game.get("fire_gap", 0.42) * 0.55; }
         else { this.cooldown = Game.get("fire_gap", 0.42); }
-        let to_x = target.transform.position.x - this.transform.position.x;
-        let to_y = target.transform.position.y - this.transform.position.y;
-        let far = sqrt(to_x * to_x + to_y * to_y);
-        if far <= 0.0 { return; }
-        let forward_x = to_x / far;
-        let forward_y = to_y / far;
+        let to = target.transform.position - this.transform.position;
+        let flat = Vec2(to.x, to.y);
+        if flat.length <= 0.0 { return; }
+        let forward = flat.normalized;
         let count = max(1.0, Game.get("shots", 1.0));
         this.volley += 1.0;
         let echo = Game.get("special_echo_chamber", 0.0) > 0.0 && this.volley % 6.0 == 0.0;
         var made: f32 = 0.0;
         while made < count {
             let spread = (made - (count - 1.0) * 0.5) * 0.16;
-            let aim_x = forward_x - forward_y * spread;
-            let aim_y = forward_y + forward_x * spread;
-            let aim_length = sqrt(aim_x * aim_x + aim_y * aim_y);
+            // Fanned out sideways from straight ahead, then made unit length again.
+            let aim = forward + Vec2(-forward.y, forward.x) * spread;
+            let shot = aim.normalized;
             var damage = Game.get("damage", 1.0) * special_damage_multiplier();
             let crit = Random.value() < Game.get("crit", 0.0);
             if crit { damage *= Game.get("crit_power", 2.0); }
-            fire_one(this.transform.position.x, this.transform.position.y, aim_x / aim_length, aim_y / aim_length, damage, crit, 1.0);
+            fire_one(this.transform.position.x, this.transform.position.y, shot.x, shot.y, damage, crit, 1.0);
             if echo {
-                let angle = atan2(aim_y, aim_x) + 0.12;
+                let angle = atan2(aim.y, aim.x) + 0.12;
                 fire_one(this.transform.position.x, this.transform.position.y, cos(angle), sin(angle), damage * 0.6, false, 0.9);
             }
             if Game.get("grave_echo_time", 0.0) > 0.0 {
-                let angle = atan2(aim_y, aim_x) - 0.14;
+                let angle = atan2(aim.y, aim.x) - 0.14;
                 fire_one(this.transform.position.x, this.transform.position.y, cos(angle), sin(angle), damage * 0.5, false, 0.8);
             }
             this.devour += 1.0;
             if Game.get("special_devouring_moon", 0.0) > 0.0 && this.devour >= 8.0 {
                 this.devour = 0.0;
-                fire_one(this.transform.position.x, this.transform.position.y, aim_x / aim_length, aim_y / aim_length, damage * 4.0, false, 1.8);
+                fire_one(this.transform.position.x, this.transform.position.y, shot.x, shot.y, damage * 4.0, false, 1.8);
             }
             made += 1.0;
         }
-        muzzle_flash(forward_x, forward_y);
+        muzzle_flash(forward.x, forward.y);
         Audio.play("audio/shot.wav", 0.18);
     }
 

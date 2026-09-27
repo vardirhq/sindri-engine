@@ -20,9 +20,10 @@ use decay_syntax::parse;
 
 use analyzer::Analyzer;
 
+pub use decay_syntax::VectorOp;
 pub use diagnostic::{Analysis, Diagnostic, DiagnosticPhase, ValueMember, ValueMembers};
 pub use environment::{Environment, ExternalSymbol};
-pub use types::{FunctionType, HostType, Type};
+pub use types::{COMPONENTS, FunctionType, HostType, Type};
 
 #[must_use]
 pub fn analyze(source: &str) -> Analysis {

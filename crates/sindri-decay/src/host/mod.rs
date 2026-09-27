@@ -42,10 +42,10 @@ use self::convert::{as_f32, describe, number};
 use crate::{
     Blackboard, PrefabSources, ProfileSources,
     surface::{
-        AIM, AIM_VALUES, CAMERA, CAMERA_VALUES, FUNCTIONS, GESTURE, GESTURE_VALUES, Handle,
-        HostFunction, Leaf, POINTER, POINTER_VALUES, PRINT, STICK, STICK_VALUES, TIME, TIME_VALUES,
-        TOUCH, TOUCH_COUNT, TimeValue, VIEWPORT, VIEWPORT_VALUES, ViewportValue, follow_mut,
-        handle, leaf, leaf_through_reference,
+        AIM, AIM_VALUES, CAMERA, CAMERA_VALUES, CONSTANTS, FUNCTIONS, GESTURE, GESTURE_VALUES,
+        Handle, HostFunction, Leaf, POINTER, POINTER_VALUES, PRINT, STICK, STICK_VALUES, TIME,
+        TIME_VALUES, TOUCH, TOUCH_COUNT, TimeValue, VIEWPORT, VIEWPORT_VALUES, ViewportValue,
+        follow_mut, handle, leaf, leaf_through_reference, vector_components,
     },
 };
 
@@ -168,6 +168,14 @@ impl Host for WorldHost<'_> {
                 }));
         }
 
+        // `PI` and the like: named numbers, the same everywhere.
+        if subject.is_none()
+            && let [name] = parts.as_slice()
+            && let Some((_, number)) = CONSTANTS.iter().find(|(known, _)| known == name)
+        {
+            return Ok(Some(Value::Number(*number)));
+        }
+
         // Where the person is pointing, and how many fingers are down. Facts
         // about the frame like `Time.delta`, and never about a subject: a
         // reference cannot be asked where the mouse is.
@@ -236,7 +244,7 @@ impl Host for WorldHost<'_> {
             leaf(&under)
         };
         let Some(leaf) = found else {
-            return Ok(None);
+            return self.load_vector(subject, path, &under);
         };
         let entity = self.subject(subject, path)?;
         let transform = self.transform_of(entity);
@@ -271,7 +279,7 @@ impl Host for WorldHost<'_> {
             leaf(&under)
         };
         let Some(leaf) = found else {
-            return Ok(false);
+            return self.store_vector(subject, path, &under, &value);
         };
         let entity = self.subject(subject, path)?;
         let number = number(path, &value)?;
@@ -424,6 +432,16 @@ impl WorldHost<'_> {
                     // reaching for `print` wanted, and the elements are
                     // reachable one at a time anyway.
                     Some(Value::Array(values)) => format!("{} entries", values.len()),
+                    Some(vector @ (Value::Vec2(_) | Value::Vec3(_))) => format!(
+                        "({})",
+                        vector
+                            .components()
+                            .unwrap_or_default()
+                            .iter()
+                            .map(|c| format!("{c}"))
+                            .collect::<Vec<_>>()
+                            .join(", ")
+                    ),
                 });
                 return Ok(Some(Value::Unit));
             }
@@ -438,6 +456,7 @@ impl WorldHost<'_> {
                 return Ok(Some(Value::Number(match function {
                     HostFunction::Unary(apply) => apply(argument(0)?),
                     HostFunction::Binary(apply) => apply(argument(0)?, argument(1)?),
+                    HostFunction::Ternary(apply) => apply(argument(0)?, argument(1)?, argument(2)?),
                 })));
             }
         }
@@ -484,6 +503,61 @@ impl WorldHost<'_> {
     ///
     /// With a subject the path is already rooted at it, so every part counts.
     /// Without one the path is the script's own and starts with `this`.
+    /// A whole vector, read one component at a time through the leaves that
+    /// answer each of them.
+    fn load_vector(
+        &mut self,
+        subject: Option<u64>,
+        path: &Path,
+        under: &[&str],
+    ) -> Result<Option<Value>, RuntimeError> {
+        let Some(components) = vector_components(under, subject.is_some()) else {
+            return Ok(None);
+        };
+        let mut numbers = Vec::with_capacity(components.len());
+        for (name, _) in components {
+            let mut part = path.clone();
+            part.0.push((*name).to_owned());
+            match self.load(subject, &part)? {
+                Some(Value::Number(number)) => numbers.push(number),
+                _ => return Ok(None),
+            }
+        }
+        Ok(Value::vector(&numbers))
+    }
+
+    /// A whole vector, written one component at a time.
+    fn store_vector(
+        &mut self,
+        subject: Option<u64>,
+        path: &Path,
+        under: &[&str],
+        value: &Value,
+    ) -> Result<bool, RuntimeError> {
+        let Some(components) = vector_components(under, subject.is_some()) else {
+            return Ok(false);
+        };
+        let numbers = value
+            .components()
+            .filter(|numbers| numbers.len() == components.len())
+            .ok_or_else(|| {
+                RuntimeError::Host(format!(
+                    "{} takes a Vec{}, and the script gave {value:?}",
+                    path.dotted(),
+                    components.len()
+                ))
+            })?
+            .to_vec();
+        for ((name, _), number) in components.iter().zip(numbers) {
+            let mut part = path.clone();
+            part.0.push((*name).to_owned());
+            if !self.store(subject, &part, Value::Number(number))? {
+                return Ok(false);
+            }
+        }
+        Ok(true)
+    }
+
     pub(super) fn addressed(subject: Option<u64>, path: &Path) -> Option<Vec<&str>> {
         if subject.is_some() {
             return Some(path.0.iter().map(String::as_str).collect());

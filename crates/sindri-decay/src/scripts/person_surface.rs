@@ -89,6 +89,7 @@ pub(super) fn add_pointer_surface(environment: &mut Environment) {
                 | PointerValue::OverlayX
                 | PointerValue::OverlayY => Type::F32,
                 PointerValue::Inside | PointerValue::OverUi => Type::Bool,
+                PointerValue::Position | PointerValue::Overlay => Type::Vec2,
             },
         );
     }
@@ -123,6 +124,7 @@ pub(super) fn add_pointer_surface(environment: &mut Environment) {
             *name,
             match value {
                 StickValue::Held => Type::Bool,
+                StickValue::Direction => Type::Vec2,
                 StickValue::X | StickValue::Y | StickValue::AnchorX | StickValue::AnchorY => {
                     Type::F32
                 }

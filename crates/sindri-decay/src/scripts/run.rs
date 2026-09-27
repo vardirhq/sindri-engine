@@ -253,7 +253,7 @@ pub(super) fn apply_properties(
         let value = to_value(value).ok_or_else(|| {
             refuse(
                 name,
-                &format!("{value} is not a number, string, or boolean"),
+                &format!("{value} is not a number, string, boolean or vector"),
             )
         })?;
         instance
@@ -269,6 +269,14 @@ pub(super) fn to_value(value: &serde_json::Value) -> Option<Value> {
         serde_json::Value::Bool(value) => Value::Bool(*value),
         serde_json::Value::String(value) => Value::String(value.clone()),
         serde_json::Value::Null => Value::Null,
-        _ => return None,
+        // A vector is stored as its components, the way a transform stores a
+        // position: `[x, y]` or `[x, y, z]`.
+        serde_json::Value::Array(items) => Value::vector(
+            &items
+                .iter()
+                .map(serde_json::Value::as_f64)
+                .collect::<Option<Vec<f64>>>()?,
+        )?,
+        serde_json::Value::Object(_) => return None,
     })
 }

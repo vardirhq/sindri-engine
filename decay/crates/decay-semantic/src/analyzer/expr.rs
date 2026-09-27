@@ -18,6 +18,8 @@ impl Analyzer<'_, '_> {
             ExprKind::Unary { op, expr: inner } => {
                 let inner_type = self.expr_type(inner);
                 match op {
+                    // A vector negates to the vector pointing the other way.
+                    UnaryOp::Negate if inner_type.dimensions().is_some() => inner_type,
                     UnaryOp::Negate => {
                         self.require_type(&inner_type, &Type::F32, inner.span);
                         Type::F32
@@ -71,9 +73,7 @@ impl Analyzer<'_, '_> {
             | BinaryOp::Multiply
             | BinaryOp::Divide
             | BinaryOp::Modulo => {
-                self.require_type(&left_type, &Type::F32, left.span);
-                self.require_type(&right_type, &Type::F32, right.span);
-                Type::F32
+                self.arithmetic_type((&left_type, left.span), op, (&right_type, right.span))
             }
             BinaryOp::Less | BinaryOp::LessEqual | BinaryOp::Greater | BinaryOp::GreaterEqual => {
                 self.require_type(&left_type, &Type::F32, left.span);
@@ -101,15 +101,46 @@ impl Analyzer<'_, '_> {
         }
     }
 
+    /// The type of arithmetic over two operands, vectors or numbers.
+    pub(super) fn arithmetic_type(
+        &mut self,
+        left: (&Type, decay_syntax::Span),
+        op: BinaryOp,
+        right: (&Type, decay_syntax::Span),
+    ) -> Type {
+        if let Some(vector) = self.vector_arithmetic(left, op, right) {
+            return vector;
+        }
+        self.require_type(left.0, &Type::F32, left.1);
+        self.require_type(right.0, &Type::F32, right.1);
+        Type::F32
+    }
+
     pub(super) fn assignment_type(&mut self, target: &Expr, op: AssignOp, value: &Expr) -> Type {
         let target_type = self.assignment_target_type(target);
         let value_type = self.expr_type(value);
 
-        if matches!(op, AssignOp::Assign) {
-            self.check_assignable(&target_type, &value_type, value.span);
-        } else {
-            self.require_type(&target_type, &Type::F32, target.span);
-            self.require_type(&value_type, &Type::F32, value.span);
+        let binary = match op {
+            AssignOp::Assign => None,
+            AssignOp::Add => Some(BinaryOp::Add),
+            AssignOp::Subtract => Some(BinaryOp::Subtract),
+            AssignOp::Multiply => Some(BinaryOp::Multiply),
+            AssignOp::Divide => Some(BinaryOp::Divide),
+            AssignOp::Modulo => Some(BinaryOp::Modulo),
+        };
+        match binary {
+            None => self.check_assignable(&target_type, &value_type, value.span),
+            // `position += velocity * dt` is the arithmetic it spells, and the
+            // result has to fit back where it came from: `speed += direction`
+            // is a vector going into a number.
+            Some(binary) => {
+                let result = self.arithmetic_type(
+                    (&target_type, target.span),
+                    binary,
+                    (&value_type, value.span),
+                );
+                self.check_assignable(&target_type, &result, value.span);
+            }
         }
 
         target_type
@@ -130,7 +161,13 @@ impl Analyzer<'_, '_> {
                     Type::Unknown
                 }
             }
-            ExprKind::Member { object, field } => self.member_type(object, field, target.span),
+            ExprKind::Member { object, field } => {
+                let object_type = self.expr_type(object);
+                if object_type.dimensions().is_some() && self.value_rooted(object) {
+                    self.check_component_target(object, target.span);
+                }
+                self.member_of(object, &object_type, field, target.span)
+            }
             _ => {
                 self.error(target.span, "invalid assignment target".to_owned());
                 Type::Unknown

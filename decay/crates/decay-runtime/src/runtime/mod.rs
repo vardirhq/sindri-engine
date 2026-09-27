@@ -21,13 +21,15 @@ use crate::value::{Value, apply_binary, apply_unary};
 /// Its kind rather than its contents: an error naming "a number" is what an
 /// author needs, and printing the number would put a script's data in a
 /// diagnostic for no gain.
-fn describe(value: &Value) -> String {
+pub(crate) fn describe(value: &Value) -> String {
     match value {
         Value::Number(_) => "a number",
         Value::String(_) => "text",
         Value::Bool(_) => "a truth",
         Value::Reference(_) => "an entity",
         Value::Array(_) => "a collection",
+        Value::Vec2(_) => "a Vec2",
+        Value::Vec3(_) => "a Vec3",
         Value::Null => "null",
         Value::Unit => "nothing",
     }
@@ -291,6 +293,44 @@ impl<'a, H: Host> Runtime<'a, H> {
         Ok(None)
     }
 
+    /// The instructions that build a vector or work on one.
+    fn step_vector(frame: &mut Frame, instruction: &Instruction) -> Result<(), RuntimeError> {
+        let mut pop = || frame.stack.pop().ok_or(RuntimeError::StackUnderflow);
+        let result = match instruction {
+            Instruction::Construct(dimensions) => {
+                let mut components = vec![0.0; *dimensions];
+                for slot in components.iter_mut().rev() {
+                    *slot = match pop()? {
+                        Value::Number(number) => number,
+                        other => return Err(RuntimeError::NotAVector(describe(&other))),
+                    };
+                }
+                Value::vector(&components)
+                    .ok_or_else(|| RuntimeError::NotAVector(format!("{dimensions} numbers")))?
+            }
+            Instruction::Component(index) => crate::vector::component(&pop()?, *index)?,
+            Instruction::WithComponent(index) => {
+                let value = pop()?;
+                crate::vector::with_component(&pop()?, *index, &value)?
+            }
+            Instruction::Vector(op) => {
+                let arity = decay_syntax::VectorOp::ALL
+                    .iter()
+                    .find(|(known, _, _)| known == op)
+                    .map_or(0, |(_, _, arity)| *arity);
+                let mut args = Vec::with_capacity(arity);
+                for _ in 0..arity {
+                    args.push(pop()?);
+                }
+                args.reverse();
+                crate::vector::apply(*op, &pop()?, &args)?
+            }
+            _ => unreachable!("only the vector instructions reach here"),
+        };
+        frame.stack.push(result);
+        Ok(())
+    }
+
     pub(super) fn execute_instructions(
         &mut self,
         container: &IrContainer,
@@ -377,6 +417,10 @@ impl<'a, H: Host> Runtime<'a, H> {
                         continue;
                     }
                 }
+                Instruction::Construct(_)
+                | Instruction::Component(_)
+                | Instruction::WithComponent(_)
+                | Instruction::Vector(_) => Self::step_vector(frame, &instructions[ip])?,
                 Instruction::ScopeEnter => frame.scopes.push(HashMap::new()),
                 Instruction::ScopeExit => {
                     // The base scope holds the parameters, so it is never the

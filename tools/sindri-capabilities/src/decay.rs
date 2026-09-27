@@ -168,6 +168,7 @@ fn type_name(ty: &Type) -> String {
         Type::Unit => "unit".to_owned(),
         Type::Null => "null".to_owned(),
         Type::Named(name) => name.clone(),
+        Type::Vec2 | Type::Vec3 => ty.display_name().into_owned(),
         Type::Array(element) => format!("Array<{}>", type_name(element)),
         Type::Unknown => "unknown".to_owned(),
     }

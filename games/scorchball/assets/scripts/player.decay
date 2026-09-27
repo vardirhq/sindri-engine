@@ -60,8 +60,7 @@ script Player {
     var want_x: f32 = 0.0;
     var want_y: f32 = 0.0;
     var kick_left: f32 = -1.0;
-    var aim_x: f32 = 0.0;
-    var aim_y: f32 = 0.0;
+    var aim: Vec2 = Vec2(0.0, 0.0);
     var kick_now: bool = false;
     var seen_bx: f32 = 0.0;
     var seen_by: f32 = 0.0;
@@ -69,8 +68,7 @@ script Player {
     var ball_vy: f32 = 0.0;
     var bot_sprint_left: f32 = 0.0;
     var bot_shot_charge: f32 = 0.0;
-    var bot_curve_x: f32 = 0.0;
-    var bot_curve_y: f32 = 0.0;
+    var bot_curve: Vec2 = Vec2(0.0, 0.0);
 
     fn start() {
         if this.slot % 2.0 == 1.0 {
@@ -187,14 +185,12 @@ script Player {
             this.charge_fx = 0.0;
             return;
         }
-        var ax: f32 = 0.0;
-        var ay: f32 = 0.0;
+        var aim = Vec2(0.0, 0.0);
         var shot_charge: f32 = 0.0;
         if this.bot {
             if !this.kick_now { return; }
             this.kick_now = false;
-            ax = this.aim_x;
-            ay = this.aim_y;
+            aim = this.aim;
             shot_charge = this.bot_shot_charge;
         } else {
             if Gamepad.is_down(this.slot, "right_bumper") {
@@ -210,24 +206,23 @@ script Player {
             shot_charge = this.charge;
             this.charge = 0.0;
             this.charge_fx = 0.0;
-            ax = Gamepad.axis(this.slot, "right_x");
-            ay = -Gamepad.axis(this.slot, "right_y");
+            aim = Vec2(Gamepad.axis(this.slot, "right_x"), -Gamepad.axis(this.slot, "right_y"));
         }
-        let length = sqrt(ax * ax + ay * ay);
-        if length < 0.3 {
-            ax = -1.0;
-            if this.face_right { ax = 1.0; }
-            ay = 0.0;
+        // A stick barely pushed says nothing about direction: kick the way the
+        // player faces instead.
+        if aim.length < 0.3 {
+            aim = Vec2(-1.0, 0.0);
+            if this.face_right { aim.x = 1.0; }
         } else {
-            ax = ax / length;
-            ay = ay / length;
+            aim = aim.normalized;
         }
         var force = this.kick_speed + (this.charged_kick - this.kick_speed) * shot_charge;
         if this.boost_left > 0.0 {
             force = this.boost_kick + (this.charged_boost_kick - this.boost_kick) * shot_charge;
         }
-        World.send_signal(this.ball, "kick_x", ax * force);
-        World.send_signal(this.ball, "kick_y", ay * force);
+        let kick = aim * force;
+        World.send_signal(this.ball, "kick_x", kick.x);
+        World.send_signal(this.ball, "kick_y", kick.y);
         World.send_signal(this.ball, "kick", 1.0);
         this.aftertouch_left = this.aftertouch_time;
         World.send_signal(this.ball, "aftertouch_slot", this.slot);
@@ -243,17 +238,15 @@ script Player {
             return;
         }
         this.aftertouch_left = max(0.0, this.aftertouch_left - dt);
-        var x: f32 = this.bot_curve_x;
-        var y: f32 = this.bot_curve_y;
+        var pull = this.bot_curve;
         if !this.bot {
-            x = Gamepad.axis(this.slot, "right_x");
-            y = -Gamepad.axis(this.slot, "right_y");
+            pull = Vec2(Gamepad.axis(this.slot, "right_x"), -Gamepad.axis(this.slot, "right_y"));
         }
-        let length = sqrt(x * x + y * y);
-        if length < 0.2 { return; }
+        if pull.length < 0.2 { return; }
         let fade = this.aftertouch_left / this.aftertouch_time;
-        World.send_signal(this.ball, "aftertouch_x", x / length * this.aftertouch_strength * fade * dt);
-        World.send_signal(this.ball, "aftertouch_y", y / length * this.aftertouch_strength * fade * dt);
+        let push = pull.normalized * this.aftertouch_strength * fade * dt;
+        World.send_signal(this.ball, "aftertouch_x", push.x);
+        World.send_signal(this.ball, "aftertouch_y", push.y);
     }
 
     fn grow(dt: f32) {
@@ -387,18 +380,13 @@ script Player {
             var side: f32 = 1.4;
             if oy > 0.0 { side = -1.4; }
             let aim_y = side + Random.range(-this.aim_noise, this.aim_noise);
-            let dx = goal_x + way - bx;
-            let dy = aim_y - by;
-            let length = sqrt(dx * dx + dy * dy);
-            this.aim_x = dx / length;
-            this.aim_y = dy / length;
+            this.aim = Vec2(goal_x + way - bx, aim_y - by).normalized;
             // Nearby finishes are often snapped off; distance gives the bot a
             // reason to hold the same charge control a human would.
             this.bot_shot_charge = min(1.0, max(0.0, (range - 3.0) / 9.0 + Random.range(-0.15, 0.15)));
-            this.bot_curve_x = 0.0;
-            this.bot_curve_y = 0.0;
+            this.bot_curve = Vec2(0.0, 0.0);
             if Random.range(0.0, 1.0) > 0.35 {
-                this.bot_curve_y = (aim_y - by) * 0.35 + Random.range(-0.25, 0.25);
+                this.bot_curve.y = (aim_y - by) * 0.35 + Random.range(-0.25, 0.25);
             }
             // Charging takes time too: longer wind-up for a harder shot.
             this.kick_left = Random.range(0.05, 0.14) + this.bot_shot_charge * this.charge_time;

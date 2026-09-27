@@ -112,10 +112,19 @@ interprets, and `WorldHost` is the only place that gives them a meaning.
 
 | Path | Type | Read | Write |
 | --- | --- | --- | --- |
+| `this.transform.{position,world_position,scale}` | `Vec3` | yes | yes |
 | `this.transform.position.{x,y,z}` | `f32` | yes | yes |
 | `this.transform.world_position.{x,y,z}` | `f32` | yes | yes |
 | `this.transform.scale.{x,y,z}` | `f32` | yes | yes |
 | `this.transform.rotation_z` | `f32` | yes | yes |
+
+**A vector member is reached whole or one component at a time.**
+`this.transform.position` is a `Vec3` a script can hold, add to and store back
+— `this.transform.position += velocity * dt` — and
+`this.transform.position.x` is still the one number it always was. Both go
+through the same accessors, so they cannot disagree: writing a whole vector
+writes its three components, in order. Vectors themselves are the language's,
+not the engine's; `decay/LANGUAGE.md` has what they can do.
 
 **A child's transform is relative to its parent.** Moving, turning or growing a
 parent carries its children, so a marker spawned under a player with
@@ -224,6 +233,7 @@ table above lists, reaching the same numbers.
 
 | Path | Type | Read | Write |
 | --- | --- | --- | --- |
+| `this.entity.transform.{position,world_position,scale}` | `Vec3` | yes | yes |
 | `this.entity.transform.position.{x,y,z}` | `f32` | yes | yes |
 | `this.entity.transform.world_position.{x,y,z}` | `f32` | yes | yes |
 | `this.entity.transform.scale.{x,y,z}` | `f32` | yes | yes |
@@ -1253,6 +1263,8 @@ without changing the scene's authored transform.
 | `Pointer.y` | `f32` |
 | `Pointer.overlay_x` | `f32` |
 | `Pointer.overlay_y` | `f32` |
+| `Pointer.position` | `Vec2` |
+| `Pointer.overlay` | `Vec2` |
 | `Pointer.inside` | `bool` |
 | `Pointer.over_ui` | `bool` |
 
@@ -1471,6 +1483,7 @@ one however convincing it looks.
 | `Stick.held` | `bool` |
 | `Stick.anchor_x` | `f32` |
 | `Stick.anchor_y` | `f32` |
+| `Stick.direction` | `Vec2` |
 
 `Stick` is a joystick made out of whichever finger is steering. It anchors
 where that finger landed, and `x`/`y` are how far it has been pulled from
@@ -1554,12 +1567,24 @@ concatenate, so a `print` that only took text could not report a value.
 
 ### Maths
 
-`abs`, `sqrt`, `sin`, `cos`, `exp`, `atan2`, `min`, `max`.
-That is the entire standard library.
+`abs`, `sqrt`, `sin`, `cos`, `exp`, `atan2`, `min`, `max`, `floor`, `ceil`,
+`round`, `sign`, `clamp`, `lerp`.
+That is the entire standard library of functions, and `PI` and `TAU` are the
+two named numbers.
 Decay has no modules and no imports, so each is a bare global name, and every one
 added is a name a script can no longer use for its own. `exp` is what lets a
 script write frame-rate-independent interpolation such as
 `1 - exp(-speed * dt)` without inventing an approximation in gameplay code.
+
+`clamp(value, low, high)` keeps a number between two others, and takes bounds
+given the wrong way round as meant rather than failing. `lerp(a, b, t)` is the
+number `t` of the way from `a` to `b`. `sign` is -1, 0 or 1 — zero for zero,
+which is the answer "which way is this moving" wants. `round` halves away from
+zero, so `round(-2.5)` is `-3`.
+
+These work on numbers. A vector has its own `length`, `normalized`, `dot`,
+`distance` and `lerp`, described in `decay/LANGUAGE.md`, because a vector
+operation belongs to the value rather than to a global name.
 
 ### Why this list can be trusted
 
@@ -1584,15 +1609,11 @@ than none at all.
 
 ### What is deliberately absent
 
-Three absences, each for a reason worth stating.
+Two absences, each for a reason worth stating.
 
 **No full 3D rotation**: a gameplay script should not be asked to assemble a
 quaternion by hand, and offering a third of a 3D rotation API is worse than
 offering none.
-
-**No `vec2`.** It is a value type, and Decay does not have one yet, so a
-position is two numbers wherever one appears — `Pointer.x` and `Pointer.y` for
-the same reason `Grid.position_x` and `Grid.position_y` are a pair.
 
 **No query by component type.** A script asks for a group by authored tag, and
 that is the only way to ask. Spelling `sindri.sprite` in a script would put

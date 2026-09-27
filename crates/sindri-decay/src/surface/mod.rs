@@ -19,6 +19,7 @@
 
 mod call;
 mod gamepad;
+mod maths;
 mod member;
 pub(super) mod names;
 mod person;
@@ -27,12 +28,13 @@ mod person;
 mod tests;
 
 pub(crate) use call::{
-    ANIMATION_CALLS, AnimationCall, EFFECTS_CALLS, EffectsCall, FUNCTIONS, GAME_CALLS, GRID_CALLS,
-    GameCall, GridCall, HostFunction, PHYSICS_CALLS, PRINT, PROFILE_CALLS, PhysicsCall,
-    ProfileCall, RANDOM_CALLS, RandomCall, SAVE_CALLS, SCENE_CALLS, SaveCall, SceneCall,
-    TIME_VALUES, TimeValue, UI_CALLS, UiCall, WORLD_CALLS, WorldCall,
+    ANIMATION_CALLS, AnimationCall, EFFECTS_CALLS, EffectsCall, GAME_CALLS, GRID_CALLS, GameCall,
+    GridCall, PHYSICS_CALLS, PRINT, PROFILE_CALLS, PhysicsCall, ProfileCall, RANDOM_CALLS,
+    RandomCall, SAVE_CALLS, SCENE_CALLS, SaveCall, SceneCall, TIME_VALUES, TimeValue, UI_CALLS,
+    UiCall, WORLD_CALLS, WorldCall,
 };
 pub(crate) use gamepad::{GAMEPAD_QUERIES, GamepadQuery, gamepad_type};
+pub(crate) use maths::{CONSTANTS, FUNCTIONS, HostFunction};
 pub(crate) use member::{SHAPE_MEMBERS, SPRITE_MEMBERS, TRANSFORM_MEMBERS, UI_IMAGE_MEMBERS};
 pub(crate) use names::{
     AIM, ANIMATION, CAMERA, EFFECTS, ENTITY, GAME, GAMEPAD, GESTURE, GRID, INPUT, PHYSICS, POINTER,
@@ -185,6 +187,36 @@ pub(crate) fn leaf(parts: &[&str]) -> Option<Leaf> {
 /// The same, for a path rooted at a reference rather than at `this`.
 pub(crate) fn leaf_through_reference(parts: &[&str]) -> Option<Leaf> {
     leaf_in(THROUGH_REFERENCE, parts)
+}
+
+/// The component names of the vector a path names whole — `this.transform.position`
+/// rather than `this.transform.position.x` — or `None` when it names something
+/// else.
+///
+/// The host answers such a path by reading or writing each component through
+/// the leaves it already has, so a vector is never a second way to reach a
+/// number that could disagree with the first.
+pub(crate) fn vector_components(
+    parts: &[&str],
+    through_reference: bool,
+) -> Option<&'static [(&'static str, Node)]> {
+    let mut members = if through_reference {
+        THROUGH_REFERENCE
+    } else {
+        THIS
+    };
+    let (last, before) = parts.split_last()?;
+    for step in before {
+        match &members.iter().find(|(name, _)| name == step)?.1 {
+            Node::Group(_, nested) => members = nested,
+            Node::Handle(Handle::Own) => members = THROUGH_REFERENCE,
+            Node::Leaf(_) => return None,
+        }
+    }
+    match &members.iter().find(|(name, _)| name == last)?.1 {
+        Node::Group(name, nested) if *name == names::VEC3 => Some(nested),
+        _ => None,
+    }
 }
 
 /// Finds the handle a path names, when it names one rather than a number.

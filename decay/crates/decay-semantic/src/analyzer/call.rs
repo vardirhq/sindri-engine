@@ -15,6 +15,9 @@ impl Analyzer<'_, '_> {
         // real signature rather than accepted because the callee was unknown.
         if let ExprKind::Member { object, field } = &callee.kind {
             let object_type = self.expr_type(object);
+            if object_type.dimensions().is_some() {
+                return self.vector_call_type(&object_type, field, args, span);
+            }
             match self.member_symbol(&object_type, field) {
                 Some(MemberLookup::Found(ExternalSymbol::Function(function))) => {
                     self.check_call(&function, args, span);
@@ -49,6 +52,11 @@ impl Analyzer<'_, '_> {
     }
 
     pub(super) fn call_named(&mut self, callee: &Expr, args: &[Expr], span: Span) -> Type {
+        if let ExprKind::Identifier(name) = &callee.kind
+            && let Some(vector) = self.construct_type(name, args, span)
+        {
+            return vector;
+        }
         if let ExprKind::Identifier(name) = &callee.kind {
             if let Some(symbol) = self.lookup(name).cloned() {
                 if let Some(function) = symbol.function {

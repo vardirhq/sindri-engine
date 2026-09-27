@@ -89,6 +89,10 @@ pub(crate) enum PointerValue {
     /// guess at a camera on a script's behalf.
     OverlayX,
     OverlayY,
+    /// `x` and `y` together, as a `Vec2`.
+    Position,
+    /// `overlay_x` and `overlay_y` together, as a `Vec2`.
+    Overlay,
 }
 
 pub(crate) const POINTER_VALUES: &[(&str, PointerValue)] = &[
@@ -96,6 +100,8 @@ pub(crate) const POINTER_VALUES: &[(&str, PointerValue)] = &[
     ("y", PointerValue::Y),
     ("overlay_x", PointerValue::OverlayX),
     ("overlay_y", PointerValue::OverlayY),
+    ("position", PointerValue::Position),
+    ("overlay", PointerValue::Overlay),
     ("inside", PointerValue::Inside),
     ("over_ui", PointerValue::OverUi),
 ];
@@ -235,6 +241,8 @@ pub(crate) enum StickValue {
     /// Where the thumb landed, for a game that draws the ring.
     AnchorX,
     AnchorY,
+    /// `x` and `y` together, as a `Vec2`.
+    Direction,
 }
 
 pub(crate) const STICK_VALUES: &[(&str, StickValue)] = &[
@@ -243,6 +251,7 @@ pub(crate) const STICK_VALUES: &[(&str, StickValue)] = &[
     ("held", StickValue::Held),
     ("anchor_x", StickValue::AnchorX),
     ("anchor_y", StickValue::AnchorY),
+    ("direction", StickValue::Direction),
 ];
 
 /// A question about the fingers specifically.
