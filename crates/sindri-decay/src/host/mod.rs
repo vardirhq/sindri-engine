@@ -410,6 +410,13 @@ impl Host for WorldHost<'_> {
             return self.script_on(script, path, args);
         }
 
+        if let [event, name] = parts.as_slice()
+            && *name == decay_semantic::EMIT
+            && let Some(value) = self.emit(event, args)
+        {
+            return Ok(Some(value));
+        }
+
         Ok(None)
     }
 }

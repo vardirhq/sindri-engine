@@ -351,3 +351,45 @@ fn vectors_do_what_the_reference_says() {
         "script T { fn f() { let a = Vec2(1.0, 1.0).z; } }",
     );
 }
+
+/// "Events", and the two words that are special only in their place.
+#[test]
+fn events_do_what_the_reference_says() {
+    accepted(
+        "the events example",
+        "event GoalScored(team: f32);
+         script Ball { fn update(dt: f32) { GoalScored.emit(1.0); } }
+         script Match {
+             var blue: f32 = 0.0;
+             on GoalScored(team) { if team == 1.0 { blue += 1.0; } }
+         }",
+    );
+    accepted(
+        "`event` and `on` as ordinary names elsewhere",
+        "script T { fn f() { let event = 1.0; let on = event; } }",
+    );
+    rejected(
+        "an event parameter without a type",
+        "event Hit(amount); script T { }",
+    );
+    rejected(
+        "calling an event as a function",
+        "event Hit(); script T { fn f() { Hit(); } }",
+    );
+    rejected(
+        "a handler of the wrong type",
+        "event Hit(amount: f32); script T { on Hit(amount: bool) { } }",
+    );
+    rejected(
+        "a handler that returns something",
+        "event Hit(); script T { on Hit() -> f32 { return 1.0; } }",
+    );
+    rejected(
+        "an attribute on a handler",
+        "event Hit(); script T { @export on Hit() { } }",
+    );
+    rejected(
+        "an event with a container's name",
+        "event T(); script T { }",
+    );
+}

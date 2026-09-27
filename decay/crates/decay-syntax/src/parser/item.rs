@@ -5,8 +5,18 @@
 
 use crate::{
     TokenKind,
-    ast::{Attribute, ContainerDecl, FieldDecl, FunctionDecl, Item, Member, Param, TypeRef},
+    ast::{
+        Attribute, ContainerDecl, EventDecl, FieldDecl, FunctionDecl, Item, Member, Param, TypeRef,
+        handler_name,
+    },
 };
+
+/// The word that starts an event declaration, and the one that starts a
+/// handler. Contextual rather than keywords: each is only special where no
+/// other identifier could stand, so a script that already calls something
+/// `event`, or reaches `Bolt.on(hit)`, keeps working.
+pub(super) const EVENT: &str = "event";
+pub(super) const ON: &str = "on";
 
 use super::Parser;
 
@@ -32,6 +42,18 @@ impl Parser<'_> {
                 } else {
                     self.synchronize_member();
                 }
+            } else if self.at_word(ON) {
+                if !attributes.is_empty() {
+                    self.error_span(
+                        attributes[0].span,
+                        "attributes on handlers are not supported yet",
+                    );
+                }
+                if let Some(handler) = self.parse_handler() {
+                    members.push(Member::Function(handler));
+                } else {
+                    self.synchronize_member();
+                }
             } else if self.at(&TokenKind::Let) || self.at(&TokenKind::Var) {
                 if let Some(field) = self.parse_field(attributes) {
                     members.push(Member::Field(field));
@@ -39,7 +61,7 @@ impl Parser<'_> {
                     self.synchronize_member();
                 }
             } else {
-                self.error_here("expected a field or function in declaration body");
+                self.error_here("expected a field, function, or `on` handler in declaration body");
                 self.synchronize_member();
             }
         }
@@ -107,6 +129,66 @@ impl Parser<'_> {
         let start = self.expect_simple(&TokenKind::Fn, "expected `fn`")?;
         let (name, _) = self.expect_identifier("expected function name")?;
         self.expect_simple(&TokenKind::LeftParen, "expected `(` after function name")?;
+        let params = self.parse_params()?;
+        let return_type = if self.consume_simple(&TokenKind::Arrow).is_some() {
+            Some(self.parse_type()?)
+        } else {
+            None
+        };
+        let body = self.parse_block()?;
+        let span = start.join(body.span);
+        Some(FunctionDecl {
+            name,
+            handles: None,
+            params,
+            return_type,
+            body,
+            span,
+        })
+    }
+
+    /// `on GoalScored(team: f32) { ... }`: a function the host calls when the
+    /// event is emitted. It returns nothing, because nothing waits for it.
+    fn parse_handler(&mut self) -> Option<FunctionDecl> {
+        let start = self.current().span;
+        self.advance();
+        let (event, event_span) = self.expect_identifier("expected an event name after `on`")?;
+        self.expect_simple(&TokenKind::LeftParen, "expected `(` after event name")?;
+        let params = self.parse_params()?;
+        if self.at(&TokenKind::Arrow) {
+            self.error_here("a handler returns nothing: nothing waits for it");
+            self.advance();
+            self.parse_type()?;
+        }
+        let body = self.parse_block()?;
+        let span = start.join(body.span);
+        Some(FunctionDecl {
+            name: handler_name(&event),
+            handles: Some((event, event_span)),
+            params,
+            return_type: None,
+            body,
+            span,
+        })
+    }
+
+    /// `event GoalScored(team: f32);`
+    pub(super) fn parse_event(&mut self) -> Option<Item> {
+        let start = self.current().span;
+        self.advance();
+        let (name, _) = self.expect_identifier("expected an event name after `event`")?;
+        self.expect_simple(&TokenKind::LeftParen, "expected `(` after event name")?;
+        let params = self.parse_params()?;
+        let end = self.expect_simple(&TokenKind::Semicolon, "expected `;` after event")?;
+        Some(Item::Event(EventDecl {
+            name,
+            params,
+            span: start.join(end),
+        }))
+    }
+
+    /// A parameter list after its `(`, up to and including the `)`.
+    fn parse_params(&mut self) -> Option<Vec<Param>> {
         let mut params = Vec::new();
         if !self.at(&TokenKind::RightParen) {
             loop {
@@ -124,20 +206,17 @@ impl Parser<'_> {
             }
         }
         self.expect_simple(&TokenKind::RightParen, "expected `)` after parameters")?;
-        let return_type = if self.consume_simple(&TokenKind::Arrow).is_some() {
-            Some(self.parse_type()?)
-        } else {
-            None
-        };
-        let body = self.parse_block()?;
-        let span = start.join(body.span);
-        Some(FunctionDecl {
-            name,
-            params,
-            return_type,
-            body,
-            span,
-        })
+        Some(params)
+    }
+
+    /// Whether the current token is this contextual word, with a name after
+    /// it: `on Hit` starts a handler, `on` alone does not.
+    pub(super) fn at_word(&self, word: &str) -> bool {
+        matches!(&self.current().kind, TokenKind::Identifier(name) if name == word)
+            && matches!(
+                self.tokens.get(self.cursor + 1).map(|token| &token.kind),
+                Some(TokenKind::Identifier(_))
+            )
     }
 
     pub(super) fn parse_optional_type(&mut self) -> Option<TypeRef> {

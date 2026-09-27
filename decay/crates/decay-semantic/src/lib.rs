@@ -23,7 +23,7 @@ use analyzer::Analyzer;
 pub use decay_syntax::VectorOp;
 pub use diagnostic::{Analysis, Diagnostic, DiagnosticPhase, ValueMember, ValueMembers};
 pub use environment::{Environment, ExternalSymbol};
-pub use types::{COMPONENTS, FunctionType, HostType, Type};
+pub use types::{COMPONENTS, EMIT, FunctionType, HostType, Type, event_type};
 
 #[must_use]
 pub fn analyze(source: &str) -> Analysis {

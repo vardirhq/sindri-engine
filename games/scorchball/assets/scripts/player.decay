@@ -53,8 +53,7 @@ script Player {
     var charge: f32 = 0.0;
     var charge_fx: f32 = 0.0;
     var aftertouch_left: f32 = 0.0;
-    var referee: Entity = null;
-    var ball: Entity = null;
+    var ball: Ball = null;
     // A bot's plan: where it is heading, and a kick it has decided on.
     var plan_left: f32 = 0.0;
     var want_x: f32 = 0.0;
@@ -79,8 +78,7 @@ script Player {
             this.skin = 1.0;
             this.face_right = false;
         }
-        this.referee = World.find("Match");
-        this.ball = World.find("Ball");
+        this.ball = Ball.on(World.find("Ball"));
         let marker = World.spawn_child(this.arrow, this.entity);
         Animation.play(marker, marker_clip());
         if this.bot {
@@ -92,14 +90,10 @@ script Player {
 
     fn update(dt: f32) {
         let phase = Game.get("phase", 0.0);
-        take_signals();
         if this.bot {
             think(dt, phase);
         } else {
             lobby(phase);
-        }
-        if this.ready {
-            World.send_signal(this.referee, "ready", 1.0);
         }
         move(dt, phase);
         try_kick(dt, phase);
@@ -109,10 +103,15 @@ script Player {
         show();
     }
 
-    fn take_signals() {
-        if World.take_signal("grow") > 0.0 { this.grow_left = this.power_time; }
-        if World.take_signal("boost") > 0.0 { this.boost_left = this.power_time; }
-        if World.take_signal("burn") > 0.0 && this.burn_left <= 0.0 {
+    // A power-up this player walked into: 1 grows them, 2 boosts their kicks.
+    fn power_up(kind: f32) {
+        if kind == 1.0 { this.grow_left = this.power_time; }
+        if kind == 2.0 { this.boost_left = this.power_time; }
+    }
+
+    // The ball, on fire, touched this player from the other team.
+    fn catch_fire() {
+        if this.burn_left <= 0.0 {
             this.burn_left = this.burn_time;
             this.burn_turn = 0.0;
             Audio.play("audio/hit.wav", 0.8);
@@ -221,11 +220,8 @@ script Player {
             force = this.boost_kick + (this.charged_boost_kick - this.boost_kick) * shot_charge;
         }
         let kick = aim * force;
-        World.send_signal(this.ball, "kick_x", kick.x);
-        World.send_signal(this.ball, "kick_y", kick.y);
-        World.send_signal(this.ball, "kick", 1.0);
+        this.ball.kick(kick, this.slot);
         this.aftertouch_left = this.aftertouch_time;
-        World.send_signal(this.ball, "aftertouch_slot", this.slot);
         Audio.play("audio/hit.wav", min(1.0, 0.72 + shot_charge * 0.28));
     }
 
@@ -245,8 +241,7 @@ script Player {
         if pull.length < 0.2 { return; }
         let fade = this.aftertouch_left / this.aftertouch_time;
         let push = pull.normalized * this.aftertouch_strength * fade * dt;
-        World.send_signal(this.ball, "aftertouch_x", push.x);
-        World.send_signal(this.ball, "aftertouch_y", push.y);
+        this.ball.nudge(push);
     }
 
     fn grow(dt: f32) {

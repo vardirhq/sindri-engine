@@ -93,3 +93,45 @@ fn parser_reports_missing_semicolon() {
     assert_eq!(parsed.diagnostics.len(), 1);
     assert!(parsed.diagnostics[0].message.contains("`;`"));
 }
+
+#[test]
+fn parses_an_event_and_a_handler_for_it() {
+    let parsed = parse(
+        "event GoalScored(team: f32, own: bool);
+         script Board {
+             on GoalScored(team, own: bool) { }
+             fn update(dt: f32) { let on = 1.0; Bolt.on(this.entity); }
+         }",
+    );
+    assert!(parsed.diagnostics.is_empty(), "{:?}", parsed.diagnostics);
+    let Item::Event(event) = &parsed.program.items[0] else {
+        panic!("expected an event");
+    };
+    assert_eq!(event.name, "GoalScored");
+    assert_eq!(event.params.len(), 2);
+    let Item::Script(script) = &parsed.program.items[1] else {
+        panic!("expected a script");
+    };
+    let Member::Function(handler) = &script.members[0] else {
+        panic!("expected a handler");
+    };
+    assert_eq!(handler.name, crate::handler_name("GoalScored"));
+    assert_eq!(
+        handler.handles.as_ref().map(|(event, _)| event.as_str()),
+        Some("GoalScored")
+    );
+    assert!(handler.params[0].ty.is_none());
+}
+
+#[test]
+fn a_handler_that_returns_something_is_refused() {
+    let parsed = parse("script Board { on Hit(amount: f32) -> f32 { return amount; } }");
+    assert!(
+        parsed
+            .diagnostics
+            .iter()
+            .any(|diagnostic| diagnostic.message.contains("a handler returns nothing")),
+        "{:?}",
+        parsed.diagnostics
+    );
+}

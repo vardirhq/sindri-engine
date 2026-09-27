@@ -1,0 +1,11 @@
+// What happens in a match that more than one thing may care about. Whoever
+// causes one emits it, and does not need to know who is listening.
+
+// The ball crossed a goal mouth: 1 for Blue, 2 for Red.
+event GoalScored(team: f32);
+
+// Someone picked up the wind: which way it blows, 1 right or -1 left.
+event WindPicked(blow: f32);
+
+// Someone picked up the fireball: the team that lit it.
+event FirePicked(team: f32);

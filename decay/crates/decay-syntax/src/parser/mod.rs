@@ -54,8 +54,10 @@ impl<'a> Parser<'a> {
                 self.parse_container(true)
             } else if self.at(&TokenKind::Component) {
                 self.parse_container(false)
+            } else if self.at_word(item::EVENT) {
+                self.parse_event()
             } else {
-                self.error_here("expected `script` or `component`");
+                self.error_here("expected `script`, `component`, or `event`");
                 self.advance();
                 None
             };
@@ -72,6 +74,7 @@ impl<'a> Parser<'a> {
                 || self.at(&TokenKind::Let)
                 || self.at(&TokenKind::Var)
                 || self.at(&TokenKind::At)
+                || self.at_word(item::ON)
             {
                 break;
             }

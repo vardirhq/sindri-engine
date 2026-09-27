@@ -27,6 +27,7 @@ to change. Nothing here is a compatibility promise.
 - [Containers](#containers)
 - [Fields](#fields)
 - [Functions](#functions)
+- [Events](#events)
 - [Statements](#statements)
 - [Expressions](#expressions)
 - [Scope](#scope)
@@ -109,7 +110,10 @@ script  component  fn  let  var  if  else  while  for  in  break
 continue  return  true  false  null
 ```
 
-All sixteen are reserved. There are no contextual keywords.
+All sixteen are reserved. Two words are special only where no other name could
+stand: `event` at the start of an item, and `on` followed by a name at the
+start of a member (see [Events](#events)). Elsewhere both are ordinary
+identifiers, so `Bolt.on(hit)` and a local called `event` are unaffected.
 
 ### Number literals
 
@@ -152,12 +156,14 @@ is no indexing and there are no array literals.
 
 ```ebnf
 program      = { item } ;
-item         = ( "script" | "component" ) IDENT "{" { member } "}" ;
-member       = { attribute } ( field | function ) ;
+item         = ( "script" | "component" ) IDENT "{" { member } "}"
+             | "event" IDENT "(" [ params ] ")" ";" ;
+member       = { attribute } ( field | function | handler ) ;
 attribute    = "@" IDENT ;
 
 field        = ( "let" | "var" ) IDENT [ ":" type ] [ "=" expr ] ";" ;
 function     = "fn" IDENT "(" [ params ] ")" [ "->" type ] block ;
+handler      = "on" IDENT "(" [ params ] ")" block ;
 params       = param { "," param } ;
 param        = IDENT [ ":" type ] ;
 type         = IDENT [ "<" type ">" ] ;
@@ -192,8 +198,8 @@ do nothing — they parse as an ordinary grouping expression — so write
 spelling: the parser builds `else { if ... }`, so a chain is nested blocks and
 nothing downstream sees a second kind of conditional.
 
-Attributes are permitted only on fields. An attribute on a function is a
-diagnostic.
+Attributes are permitted only on fields. An attribute on a function or a
+handler is a diagnostic.
 
 ---
 
@@ -272,6 +278,11 @@ a script holds are ones the host gave it. Whether a reference still names
 anything is the host's question to answer — the language has no opinion on
 whether the thing behind one is alive, and against Sindri that is
 `World.exists`.
+
+A path may start from a reference however it is held: a local, a field
+(`this.target.transform`), or a value computed on the spot
+(`World.find("Player").transform`). A computed one is evaluated once, before
+any argument, and the rest of the path is walked from it.
 
 This is what a reference is *for*: it is the difference between a script that
 can only describe itself and one that can say something about another thing in
@@ -468,6 +479,46 @@ Recursion works, bounded by the call-depth limit.
 The language has no lifecycle of its own; the host decides which functions it
 calls. `sindri-decay` calls `start()` once and `update(dt)` each frame, both
 optional and both with exact signatures. See `docs/scripting.md`.
+
+---
+
+## Events
+
+An event is something that happens, declared once at the top level of a file,
+emitted by any script, and handled by any script:
+
+```rust
+event GoalScored(team: f32);
+
+script Ball {
+    fn update(dt: f32) { GoalScored.emit(1.0); }
+}
+
+script Match {
+    var blue: f32 = 0.0;
+    on GoalScored(team) { if team == 1.0 { blue += 1.0; } }
+}
+```
+
+- **Declaring.** Every parameter of an event must be typed. Its name may not be
+  one a container or the host already uses, and a file may declare it once.
+- **Emitting.** `Name.emit(values)` is checked like a call against the
+  declaration and returns unit. An event is not a function: `Name(values)` is a
+  diagnostic that says to write `.emit`. A local of the same name shadows it.
+- **Handling.** `on Name(params) { }` in a container. The handler must take as
+  many values as the event carries; a parameter's type may be left unwritten
+  and is then the event's, and a written one must match it. A handler returns
+  nothing and cannot be called by name.
+
+**When a handler runs is the host's decision**, as the lifecycle is. The
+language lowers `Name.emit(...)` to a call on the host path `Name.emit` and a
+handler to a function named `on Name`, which no script can write. Against
+Sindri, an emit is queued and delivered after the pass to every running
+script with a handler; see `docs/scripting.md`.
+
+A host may declare events of its own — Sindri declares every event in the
+project, so a file handles one declared in another — through the environment.
+One the host reports as declared more than once cannot be used.
 
 ---
 
@@ -693,7 +744,8 @@ inference beyond a binding's own initializer, nullable types, user-defined types
 beyond `script` and `component`.
 
 **Modules:** `import`, `use`, `mod`, `pub`, visibility of any kind, multiple
-files. One file is one compilation unit and cannot refer to another.
+files. One file is one compilation unit and cannot refer to another by itself;
+a host may describe other files' scripts and events to it, as Sindri does.
 
 **Standard library:** `print`, `math.*`, string methods, formatting,
 interpolation, conversion functions, collection *operations* — no `push`,

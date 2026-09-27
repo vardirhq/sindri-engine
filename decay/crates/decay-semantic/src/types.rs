@@ -22,6 +22,16 @@ pub const LENGTH: &str = "len";
 pub const VEC2: &str = "Vec2";
 pub const VEC3: &str = "Vec3";
 
+/// The member an event offers: `GoalScored.emit(1.0)`.
+pub const EMIT: &str = "emit";
+
+/// The type an event's name has in an expression, as a diagnostic names it.
+/// Not a name a script can write, so it can never be confused with one.
+#[must_use]
+pub fn event_type(event: &str) -> String {
+    format!("event {event}")
+}
+
 /// Component names, in order. `x` and `y` for both; `z` only for `Vec3`.
 pub const COMPONENTS: [&str; 3] = ["x", "y", "z"];
 

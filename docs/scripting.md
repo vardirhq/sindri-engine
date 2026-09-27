@@ -393,6 +393,11 @@ cloud it overlaps, and several attacks can add `hazard_damage` to one prop,
 without publishing per-entity facts on the global `Game` board or pretending
 that `World.set_property` mutates a running script.
 
+Signals predate typed access. A message (`Bolt.on(hit).bounce(2.0)`) or an
+event (`GoalScored.emit(1.0)`) says the same with its name and values checked
+when it compiles — see [Other scripts, by type](#other-scripts-by-type) and
+[Events](#events) — and new code should use those.
+
 **A spawned script starts in the same pass.** A bullet created during an update
 moves during that update rather than standing still for a frame. It cannot start
 during the call that created it — building an instance runs the container's
@@ -1573,9 +1578,56 @@ field or message, a wrong argument, and using a message's result. A name two
 scripts declare is left out — which one was meant would be a guess — as is one
 the engine already uses.
 
+A reference is reached however it is held: in a local, in a field
+(`this.target.hit(1.0)`), or straight from the lookup
+(`Bolt.on(hit).damage`), which is computed once and then walked.
+
 Because any script may name any other, every `.decay` file in a project is
 loaded and exported, not only those a scene names; the editor's error preview
 and `decay-lsp` check each script against its whole project.
+
+### Events
+
+A message is for one script the sender knows. An event is for whoever cares:
+the sender says what happened and does not need to know who is listening.
+
+```decay
+// events.decay — any file in the project; each event is declared once.
+event GoalScored(team: f32);
+
+// ball.decay
+GoalScored.emit(1.0);
+
+// match.decay, and any other script that cares.
+script Match {
+    on GoalScored(team) {       // types come from the declaration
+        this.score += 1.0;
+    }
+}
+```
+
+**An event is delivered like a message**, after the pass and in the order
+emitted, to every running script with an `on` handler for it — in the order
+the pass runs them, and the sender's own handler included. An event nobody
+handles goes nowhere, quietly. An event emitted by a handler is delivered in
+a following round, under the same bound of eight as messages, and one that
+never settles is stopped and reported.
+
+**Everything is checked when it compiles**: an unknown event, a wrong value in
+an emit, a handler taking the wrong number or type of values, and calling an
+event as though it were a function (`GoalScored(1.0)` rather than
+`GoalScored.emit(1.0)`). A handler may leave a parameter's type unwritten and
+take the event's; an event's own parameters must be typed, since every handler
+relies on them. An event declared in two files cannot be used until one is
+removed, and an event may not take a name a script or the engine already has.
+
+A handler returns nothing, because nothing waits for it, and is not a function
+a script can call by name. `event` and `on` are special only where no other
+name could stand — at the top of a file, and at the start of a member — so
+`Bolt.on(hit)` and a local called `event` keep working.
+
+Scorchball's goals, wind and fireball are events; its kicks, aftertouch and
+power-ups are messages to the one script they concern.
 
 ### The board scripts share
 

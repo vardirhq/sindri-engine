@@ -50,8 +50,14 @@ script Match {
     }
 
     fn update(dt: f32) {
+        // Counted before anyone new joins, so every player counted has
+        // started and has a `ready` to read.
+        var ready: f32 = 0.0;
+        for someone in World.with_tag("player") {
+            let player = Player.on(someone);
+            if player != null && player.ready { ready += 1.0; }
+        }
         players();
-        let ready = World.take_signal("ready");
         if this.phase == 0.0 && ready >= 2.0 {
             this.phase = 1.0;
             this.countdown = this.countdown_time;
@@ -70,7 +76,6 @@ script Match {
         }
         Game.set("phase", this.phase);
         if this.phase == 2.0 {
-            goals();
             powerups(dt);
             wind(dt);
             match_fx(dt);
@@ -150,21 +155,17 @@ script Match {
         Game.set("joins", this.joins);
     }
 
-    fn goals() {
-        let blue = World.take_signal("goal_blue");
-        let red = World.take_signal("goal_red");
-        if blue > 0.0 {
-            Game.set("score_blue", Game.get("score_blue", 0.0) + blue);
+    on GoalScored(team) {
+        if this.phase != 2.0 { return; }
+        if team == 1.0 {
+            Game.set("score_blue", Game.get("score_blue", 0.0) + 1.0);
+        } else {
+            Game.set("score_red", Game.get("score_red", 0.0) + 1.0);
         }
-        if red > 0.0 {
-            Game.set("score_red", Game.get("score_red", 0.0) + red);
-        }
-        if blue > 0.0 || red > 0.0 {
-            this.goal_shown = 2.0;
-            this.goal_fx_clock = 0.0;
-            Camera.add_trauma(0.6);
-            Audio.play("audio/hit.wav", 1.0);
-        }
+        this.goal_shown = 2.0;
+        this.goal_fx_clock = 0.0;
+        Camera.add_trauma(0.6);
+        Audio.play("audio/hit.wav", 1.0);
     }
 
     // Sprinting and scoring should read even before dedicated character action
@@ -211,12 +212,12 @@ script Match {
     }
 
     // Wind blows towards the goal of whoever did not pick it up.
+    on WindPicked(blow) {
+        this.wind_left = this.wind_time;
+        Game.set("wind", blow * this.wind_speed);
+    }
+
     fn wind(dt: f32) {
-        let blown = World.take_signal("wind");
-        if blown != 0.0 {
-            this.wind_left = this.wind_time;
-            Game.set("wind", blown * this.wind_speed);
-        }
         if this.wind_left > 0.0 {
             this.wind_left -= dt;
             if this.wind_left <= 0.0 {

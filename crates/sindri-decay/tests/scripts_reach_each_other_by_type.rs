@@ -179,3 +179,31 @@ fn a_mistake_about_another_script_does_not_compile() {
         "{failures:?}"
     );
 }
+
+#[test]
+fn a_script_is_reached_straight_from_the_lookup_and_from_a_field() {
+    let mut world = World::default();
+    let bolt = scripted(&mut world, "Bolt", "bolt.decay", "Bolt");
+    scripted(&mut world, "Turret", "turret.decay", "Turret");
+    let mut sources = ScriptSources::new();
+    sources.insert("bolt.decay", BOLT);
+    sources.insert(
+        "turret.decay",
+        "script Turret {
+            var target: Bolt = null;
+            fn start() { this.target = Bolt.on(World.find(\"Bolt\")); }
+            fn update(dt: f32) {
+                Bolt.on(World.find(\"Bolt\")).damage += 1.0;
+                this.target.hit(Bolt.on(World.find(\"Bolt\")).armour);
+            }
+        }",
+    );
+    let failures = frames(&mut world, &sources, 2);
+    assert!(failures.is_empty(), "{failures:?}");
+    // Two frames of +1 damage, shown by the bolt's second update: 2. The
+    // second frame's hit of 2 is delivered after its update, so it shows the
+    // first frame's.
+    let [x, y, _] = position(&world, bolt);
+    assert!((x - 2.0).abs() < 1e-6, "{x}");
+    assert!((y - 2.0).abs() < 1e-6, "{y}");
+}

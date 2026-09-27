@@ -38,6 +38,12 @@ This is the most important Sindri/Decay distinction.
 | `World.property_number(entity, name)` | Reads the numeric value authored on the script component | Any time, but it does not read the script's current field |
 | `World.send_signal(entity, name, value)` | Sends runtime data to a running script | During gameplay |
 | `World.take_signal(name)` | Consumes accumulated runtime signal data on the receiving script | During gameplay |
+| `Name.on(entity).field` | Reads or writes another script's live field, checked when it compiles | Any time; before it starts, a write sets its starting value |
+| `Name.on(entity).message(args)` | Sends a typed message, delivered after the pass | During gameplay |
+| `Event.emit(args)` / `on Event(args) { }` | Emits a declared event to every script handling it, delivered after the pass | During gameplay |
+
+Prefer the typed forms in the last three rows: a misspelt name or a wrong value
+is a compile error rather than a silent fallback.
 
 Do not use `set_property` as a setter for a running script:
 
@@ -54,10 +60,12 @@ World.set_property(part, "group", group);
 World.set_property(part, "leader", this.entity);
 ```
 
-For later changes, send a signal and let the target script update its own state:
+For later changes, write the field through the script's type, or send it a
+message and let it update its own state:
 
 ```decay
-World.send_signal(part, "leader_x", x);
+BodyPart.on(part).leader_x = x;
+BodyPart.on(part).follow(x);
 ```
 
 A read has the same boundary. If a script changes its own `health` field,

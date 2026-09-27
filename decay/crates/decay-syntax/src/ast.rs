@@ -9,6 +9,26 @@ pub struct Program {
 pub enum Item {
     Script(ContainerDecl),
     Component(ContainerDecl),
+    /// `event GoalScored(team: f32);`: something that happens, which any
+    /// script may emit and any script may handle.
+    Event(EventDecl),
+}
+
+/// A declared event: its name, and what it carries.
+#[derive(Debug, Clone, PartialEq)]
+pub struct EventDecl {
+    pub name: String,
+    pub params: Vec<Param>,
+    pub span: Span,
+}
+
+/// The name a handler for `event` is lowered and called under.
+///
+/// Not a name a script can write, because it has a space in it: a handler can
+/// neither be called by name nor collide with a function the script declares.
+#[must_use]
+pub fn handler_name(event: &str) -> String {
+    format!("on {event}")
 }
 
 #[derive(Debug, Clone, PartialEq)]
@@ -68,6 +88,9 @@ impl TypeRef {
 #[derive(Debug, Clone, PartialEq)]
 pub struct FunctionDecl {
     pub name: String,
+    /// For `on GoalScored(team: f32) { ... }`, the event it handles and where
+    /// that was written. Its `name` is then [`handler_name`] of the event.
+    pub handles: Option<(String, Span)>,
     pub params: Vec<Param>,
     pub return_type: Option<TypeRef>,
     pub body: Block,

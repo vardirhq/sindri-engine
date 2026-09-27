@@ -61,6 +61,10 @@ These are defects or sources of actively misleading tooling.
   - [x] Rebuild the project's script types (every `script` a type other
         scripts may name) on initialize and on watched-file changes, and check
         each `--check` file against its own project (nearest `sindri.toml`).
+  - [x] Include the project's declared events, so a file emits and handles
+        one declared in another; list a file's events as document symbols,
+        complete event names and `.emit`, and show an event's declaration on
+        hover. A handler is not offered as a member of `this`.
   - [ ] Keep project-index results deterministic.
 - [ ] Fix completion insertion for functions.
   - [x] Generate zero placeholders for zero-argument functions.

@@ -70,6 +70,17 @@ impl Analyzer<'_, '_> {
                 return Type::Unknown;
             }
 
+            if self.events.contains_key(name) {
+                self.error(
+                    callee.span,
+                    format!("`{name}` is an event: send one with `{name}.emit(...)`"),
+                );
+                for arg in args {
+                    self.expr_type(arg);
+                }
+                return Type::Unknown;
+            }
+
             if let Some(external) = self.environment.globals.get(name).cloned() {
                 match external {
                     ExternalSymbol::Function(function) => {

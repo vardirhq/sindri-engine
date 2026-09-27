@@ -172,9 +172,9 @@ pub(super) fn tick(
 /// a projectile, not a mistake to report.
 pub(super) fn deliver(
     at: &mut TickWorld<'_>,
+    entity: EntityId,
     message: super::Message,
 ) -> Result<Vec<String>, ScriptFailure> {
-    let entity = message.to;
     if at.world.get(entity).is_none() {
         return Ok(Vec::new());
     }
@@ -200,6 +200,23 @@ pub(super) fn deliver(
     let printed = runtime.into_host().take_printed();
     at.running.insert(entity, current);
     outcome.map(|()| printed)
+}
+
+/// Every running script with a function of this name, in the order a pass
+/// runs them: who an event is delivered to.
+pub(super) fn handlers(at: &TickWorld<'_>, function: &str) -> Vec<EntityId> {
+    at.running
+        .iter()
+        .filter(|(_, running)| {
+            at.programs.get(&running.source).is_some_and(|compiled| {
+                compiled.program.containers.iter().any(|container| {
+                    container.name == running.script
+                        && container.functions.iter().any(|f| f.name == function)
+                })
+            })
+        })
+        .map(|(entity, _)| *entity)
+        .collect()
 }
 
 /// The host one call on `entity` runs against, with every other running

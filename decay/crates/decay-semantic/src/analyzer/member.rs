@@ -123,6 +123,9 @@ impl Analyzer<'_, '_> {
                 }
                 this
             }
+            Type::Named(name) if let Some(event) = self.event_member(name, field) => {
+                return Some(event);
+            }
             Type::Named(name) => self.environment.get_type(name)?,
             _ => return None,
         };

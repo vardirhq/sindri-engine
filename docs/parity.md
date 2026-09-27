@@ -328,7 +328,8 @@ Sindri's strongest domain relative to the baseline.
 | Language server: highlight, complete, hover, definitions, diagnostics | — | 🟡 | ✅ | ✅ | **Par** | VS Code only |
 | Vectors as values (`Vec2`, `Vec3`) | ✅ | 🟡 | ✅ | ✅ | **Par** | Arithmetic, `length`, `normalized`, `dot`, `distance`, `lerp`; transform, pointer and stick hand them out whole. Proven in Scorchball's ball and Orbital Last Stand's bullets. A vector `@export` is stored as `[x, y]` and drawn by the inspector's X/Y/Z number row, as a position is; that has not been looked at in the running editor |
 | **Rotations as values** | ❌ | — | ❌ | — | **Behind** | Only `rotation_z` as a number; no quaternion or angle type |
-| Scripts reach each other by type | ✅ | ✅ | ✅ | ✅ | **Par** | `Bolt.on(e).damage`, live fields, typed messages delivered after the pass; checked at compile time across files. Orbital Last Stand's bullets are set up this way; enemy damage reads and signals still use the untyped calls |
+| Scripts reach each other by type | ✅ | ✅ | ✅ | ✅ | **Par** | `Bolt.on(e).damage`, live fields, typed messages delivered after the pass; checked at compile time across files. Orbital Last Stand's bullets are set up this way, and Scorchball's kicks and power-ups; Orbital's enemy damage reads and Orbital Baked's signals still use the untyped calls |
+| Events (emit, handle anywhere) | ✅ | ✅ | ✅ | ✅ | **Par** | `event GoalScored(team: f32);`, `GoalScored.emit(1.0)`, `on GoalScored(team) { }`; delivered after the pass to every listener, checked at compile time across files. Scorchball's goals, wind and fireball |
 | **Coroutines / sequencing** | ❌ | — | ❌ | — | **Absent** | "Wait a second, then do this" is manual state |
 | **Debugger (breakpoints, stepping)** | ❌ | ❌ | ❌ | — | **Absent** | `print` debugging only |
 | **Formatter** | ❌ | ❌ | ❌ | — | **Absent** | — |

@@ -1661,7 +1661,14 @@ for projectile-local damage: ordinary shots, criticals, arcs, novas, mines and
 beams all use the same collision path without a global damage race. A
 running entity receives addressed numeric events through `World.send_signal`
 and consumes their accumulated value through `World.take_signal`; this keeps
-live combat reactions out of both authored properties and the global board. A
+live combat reactions out of both authored properties and the global board.
+Typed access has since superseded both seams for new code: a script names
+another by type (`Bolt.on(hit).damage`, `bolt.bounce(2.0)`), and a project
+declares events (`event GoalScored(team: f32);`) that any script emits and any
+script handles with `on GoalScored(team) { }`, delivered after the pass and
+checked across files. Exercised in
+`crates/sindri-decay/tests/scripts_reach_each_other_by_type.rs`,
+`crates/sindri-decay/tests/scripts_hear_events.rs` and Scorchball. A
 spawned script starts within the same pass, so a bullet fired during an update
 moves during that update. Both the cascade that allows and the number of
 entities one pass may create are bounded and reported rather than run.
@@ -1750,11 +1757,14 @@ through `Gamepad.left()`. Each player readies with North, picks one of two
 characters with the d-pad, walks with the left stick and kicks with the right
 bumper, aimed with the right stick, all read through its own slot.
 
-**Scripts talk by signal.** A player sends `kick_x`, `kick_y` and `kick` to the
-ball and `ready` to the match; a power-up, a signpost that drops from the sky
-onto its growing shadow, sends `grow`, `boost`, `wind` or
-`fire` to whoever it concerns; the ball sends `burn` to an opponent it touches
-while alight, and `goal_blue` or `goal_red` to the match. Possession, pickups
+**Scripts talk by type and by event.** A player kicks the ball with a typed
+message (`this.ball.kick(velocity, slot)`) and bends the shot with `nudge`;
+the match counts players whose live `ready` field is set; a power-up, a
+signpost that drops from the sky onto its growing shadow, sends `power_up` to
+the player who took it, or emits `WindPicked` or `FirePicked` for whoever
+handles them; the ball sends `catch_fire` to an opponent it touches while
+alight, and emits `GoalScored` when it crosses a goal line. Every name and
+value is checked when the project compiles. Possession, pickups
 and reach are distance checks, because a collider does not scale with its
 entity and the Enlarger makes a player bigger.
 

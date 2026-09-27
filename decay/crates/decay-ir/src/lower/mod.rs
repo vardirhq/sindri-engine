@@ -31,13 +31,16 @@ impl<'a> Lowerer<'a> {
             .program
             .items
             .iter()
-            .map(|item| match item {
+            .filter_map(|item| match item {
                 Item::Script(container) => {
-                    lowerer.lower_container(ContainerKind::Script, container)
+                    Some(lowerer.lower_container(ContainerKind::Script, container))
                 }
                 Item::Component(container) => {
-                    lowerer.lower_container(ContainerKind::Component, container)
+                    Some(lowerer.lower_container(ContainerKind::Component, container))
                 }
+                // A declaration and nothing else: an emit is a call the host
+                // answers, and a handler is a function of the script it is in.
+                Item::Event(_) => None,
             })
             .collect();
 
