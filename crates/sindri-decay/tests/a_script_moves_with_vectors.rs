@@ -81,9 +81,9 @@ fn a_script_steps_towards_another_entity_by_vector() {
     );
     let failures = run(&mut world, &sources);
     assert!(failures.is_empty(), "{failures:?}");
-    let moved = transform(&world, mover);
-    assert_close(moved.position, [1.5, 2.0, 0.0]);
-    assert_close(moved.scale, [2.0, 2.0, 2.0]);
+    let after = transform(&world, mover);
+    assert_close(after.position, [1.5, 2.0, 0.0]);
+    assert_close(after.scale, [2.0, 2.0, 2.0]);
 }
 
 #[test]
