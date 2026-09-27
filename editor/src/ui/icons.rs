@@ -99,6 +99,16 @@ pub const RESET_VIEW: MaterialIcon = icons::ICON_CAMERA_ALT;
 pub const FOCUS: MaterialIcon = icons::ICON_CENTER_FOCUS_STRONG;
 pub const SCENE_LIGHTING: MaterialIcon = icons::ICON_LIGHTBULB;
 
+// The local assistant and its setup.
+pub const ASSISTANT: MaterialIcon = icons::ICON_AUTO_AWESOME;
+pub const DOWNLOAD: MaterialIcon = icons::ICON_DOWNLOAD;
+pub const PRIVATE: MaterialIcon = icons::ICON_LOCK;
+pub const MEMORY: MaterialIcon = icons::ICON_MEMORY;
+pub const DONE: MaterialIcon = icons::ICON_CHECK_CIRCLE;
+pub const PENDING: MaterialIcon = icons::ICON_RADIO_BUTTON_UNCHECKED;
+pub const FAILED: MaterialIcon = icons::ICON_ERROR;
+pub const STOP: MaterialIcon = icons::ICON_STOP_CIRCLE;
+
 /// The icon a component type is drawn with, wherever it is named.
 ///
 /// One table, so the hierarchy row for a sprite and the inspector header for

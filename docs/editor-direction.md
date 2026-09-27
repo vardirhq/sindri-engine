@@ -268,29 +268,47 @@ shipping a mode before it does something.
 
 ## What is deliberately not here
 
-**Sindri does not integrate AI in the editor, and this document is not a plan to
-add one.** All generation happens outside the editor today, and that is the
-decision in force: it keeps the editor free of API keys, network calls, per-use
-cost, and a dependency on a service being up.
+**AI in the editor is limited to what Sindri can check.** The decision this
+section used to record was that the editor integrates no AI at all. It changed
+once a local-model setup panel had been built and did nothing, which is the
+placeholder this section warned against. The way out is one feature whose
+answers are graded by the engine rather than trusted: **Decay repair**.
 
-The intent is to revisit this later, so it is worth saying what is already in
-place should that happen, and what is not being built now.
+- A previewed `.decay` script that does not compile shows its errors, from the
+  same check Play compiles with, whether or not any assistant is set up.
+- Once a local model has passed Sindri's own repair cases on this machine, the
+  preview offers **Propose a fix**. The model sees the file, its errors and the
+  generated host API; its answer is compiled, and a failing answer is sent back
+  with its own errors at most twice more. Only a candidate that compiles and
+  keeps every script and component the file declared is shown, as a diff.
+- Nothing is written until the person accepts it, the write refuses a file
+  that changed in the meantime, and the previous text can be put back.
+
+That keeps the reasons for the original decision. The model runs locally, so
+there are no API keys, no per-use cost, and no dependency on a service being up.
+The editor talks to it over loopback, with no HTTP stack or TLS client. Nothing
+depends on it: with no model set up, the editor still shows every error.
+`docs/local-ai-architecture.md` is the wider design this is the first slice of,
+and it is still a proposal.
 
 What the architecture already gives, at no cost and for its own reasons:
 
 - **Every mutation is a checked, named, reversible command** rather than a world
-  write. Anything proposing a change — a person, a script, a tool, eventually a
-  model — goes through the same seam, and anything that comes through it can be
+  write. Anything proposing a change — a person, a script, a tool, a model —
+  goes through the same seam, and anything that comes through it can be
   reviewed and undone.
 - **Panels are data.** A new panel is one `dock::Panel` variant and one arm of
   the match in `native/workspace.rs`. Adding a surface costs no rearrangement of
   the editor around it.
 - **The component schema registry describes components in machine-readable form**
   and `docs/generated/` is regenerated from it, so what the editor knows about a
-  project is already written down rather than implicit in UI code.
+  project is already written down rather than implicit in UI code. The repair
+  prompt carries `docs/generated/decay-api.md` for exactly that reason.
 
-What is **not** being built, and should not be added speculatively: any network
-client, credential storage, provider abstraction, prompt surface, or placeholder
-panel. A seam that is already load-bearing for its own reasons costs nothing to
-keep clean. Scaffolding for a feature nobody is building is a maintenance
-burden and a set of decisions made too early.
+What is **not** being built, and should not be added speculatively: cloud
+providers, credential storage, a chat surface, or an AI feature whose output
+Sindri cannot check before a person sees it. Writing a new script from a
+description is the natural next feature, because it runs through the same
+compile-and-repair loop; scene edits wait for the proposal protocol in
+`docs/ai-authoring-protocol.md`, because nothing yet checks a proposed world
+change the way the compiler checks a script.

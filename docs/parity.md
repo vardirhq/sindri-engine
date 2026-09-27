@@ -1,6 +1,6 @@
 # Parity
 
-Last audited against `main`: **2026-09-17**.
+Last audited against `main`: **2026-09-27**.
 
 What a game engine is expected to do, what Sindri actually does, and the
 distance between them. This file replaces `function-matrix.md` and
@@ -30,7 +30,7 @@ Four surface columns, then the outward judgement:
 | **Engine** | Does the runtime do it? |
 | **Editor** | Can somebody author it without editing JSON by hand? |
 | **Decay** | Can a script reach it? |
-| **Proof** | Does a real game in this repository use it? |
+| **Proof** | Does a project in this repository use it, and which one? |
 
 **Surface legend:** ✅ works and is exercised · 🟡 a useful slice, with the gap
 named · ❌ absent · — genuinely not applicable to that surface.
@@ -44,8 +44,23 @@ named · ❌ absent · — genuinely not applicable to that surface.
 - **Won't** — a deliberate decision not to have it. See the anti-goals.
 
 A ✅ still means what it always meant: implemented *and* exercised, not
-represented by a type, a schema, or an editor control. For a gameplay
-capability, exercised means a game uses it.
+represented by a type, a schema, or an editor control.
+
+**What counts as proof** follows the three kinds of project in `AGENTS.md`.
+For a gameplay capability, exercised means a game uses it: Causeway, Orbital
+Last Stand, or a genre showcase (`games/<genre>` — the platformer and Scorchball
+today). A feature example (`examples/<feature>`) or a lab such as Voxel Lab
+shows a capability on its own; that is a partial proof (🟡) for a rendering or
+tooling row, where isolation is the honest test, and not a proof for a gameplay
+one. Either way the gap cell names the project, so removing a project shows
+which rows it was holding up. Gather's removal is why this rule exists: it left
+eight rows citing a game that no longer existed.
+
+The layout still lags the three kinds. `examples/` holds `camera`, `cube` and
+`triangle`, three feature demos — `voxel-lab`, `weave-poc` and `graphics-lab` —
+live under `games/`, and most of the feature examples `AGENTS.md` names (audio,
+Weave, Decay, tilemaps, isometric, voxels) do not exist as examples yet. Moving
+and filling them is follow-up work, not a change to any cell here.
 
 **Ranking is by "does this stop somebody shipping a game", not by feature
 count.** Unity has thousands of features and most of them do not matter. The
@@ -164,15 +179,15 @@ The ordered work required to close these gaps is tracked in
 | Feature | Engine | Editor | Decay | Proof | vs. baseline | Gap that matters |
 | --- | :-: | :-: | :-: | :-: | --- | --- |
 | Sprites, sheets, UVs, layers, blending | ✅ | ✅ | 🟡 | ✅ | **Par** | Decay has sprite asset and visibility paths only |
-| **Advanced sprite colour transform** | ✅ | ✅ | ✅ | ❌ | **Par** | Per-channel multiply and offset beyond tint, as `sample * tint * multiply + offset`, collapsed behind an advanced section with a reset. A transform that is not finite is refused at extraction; one merely outside zero to one is left to clip. No companion game in this repository proves it |
+| **Advanced sprite colour transform** | ✅ | ✅ | ✅ | ❌ | **Par** | Per-channel multiply and offset beyond tint, as `sample * tint * multiply + offset`, collapsed behind an advanced section with a reset. A transform that is not finite is refused at extraction; one merely outside zero to one is left to clip. No game in this repository proves it; see the proof note below |
 | Sheet-declared ground anchor | ✅ | ✅ | — | ✅ | **Ahead** | Says where a sprite meets the ground, so sorting is authored rather than guessed |
 | Procedural shapes | ✅ | 🟡 | ✅ | ✅ | **Ahead** | Instanced with sprites; Unity needs a plugin or a mesh. No point-handle authoring |
-| Tilemaps (ortho + iso, overhang) | ✅ | ✅ | ✅ | ✅ | **Par** | `Grid.tile`/`set_tile` read and write cells; `Grid.columns`/`rows` give the size. Supported and no longer used by anything shipped here: Gather's floor moved to a tile volume, so this is the flat one-level map a project may still choose rather than the one the companion game exercises |
-| 2D depth and grid placement | ✅ | 🟡 | ❌ | ✅ | **Ahead** | `sindri.grid.placement` names a cell and the runtime derives the transform from it — plane position, the height of the ground in that column, and the Z that orders it. Depth is a consequence of position rather than an authored number, so Gather carries no render layer on any world sprite and its two scripts no longer compute one. `depth_step` on the grid turns projected depth into Z; zero keeps a scene ordering exactly as it did. A moving entity omits the cell and takes depth alone. A placement names its grid with the same stable-ID type an occupant uses and carries the cells it covers, and every one of them has to hold it up: standing over a hole is an error naming that cell rather than a prop resting at height zero. Flat ground no longer draws over what stands on it: a placed entity sorts one cell forward, past ground no higher than its feet, because no face of such a cell — top or wall — can cover it, while a block raised a step ahead keeps its own depth and still covers it. Terrain ordering is untouched by that rule. Placing a prefab by clicking a cell in the editor, and one depth per sprite ordering a tall sprite against a tall block, both remain; `docs/2d-depth-and-placement.md` carries the contract |
-| Ordering a walker against several occluders at once | ❌ | ❌ | ❌ | ❌ | **Behind** | One depth per entity answers for one relationship at a time. Standing in the corner between open ground a step ahead and a raised block a step ahead, the ground wants the walker sorted forward and the wall wants it left alone; the wall wins, and the ground seam returns for that one case. The same single point is why a multi-cell wall or house sorts from one anchor rather than from the cells it occupies. Sort footprints — ordering derived per overlapping pair from occupied cells rather than from one point — are the way out and are not built; `docs/2d-depth-and-placement.md` records why no single depth can do it. Measured rather than estimated: `sweep_occlusion` stands on all 387 standable columns of Gather's island and reaches the corner in 22 of them, and the farm's test holds that number as a budget. The editor draws the report on the grid under Build → Ordering, filling the ground stood on and outlining what covers it. The sweep needs a volume to stand on, so a scene whose props are sprites on no grid gets an empty report rather than a guarantee |
+| Tilemaps (ortho + iso, overhang) | ✅ | ✅ | 🟡 | ✅ | **Par** | `Grid.tile`/`set_tile` read and write cells; `Grid.columns`/`rows` give the size. The platformer's level is a painted tilemap and is the proof. No shipped script reads or writes a cell yet, so the Decay half is exercised only by tests |
+| 2D depth and grid placement | ✅ | 🟡 | ❌ | ✅ | **Ahead** | `sindri.grid.placement` names a cell and the runtime derives the transform from it — plane position, the height of the ground in that column, and the Z that orders it. Depth is a consequence of position rather than an authored number, so a placed sprite carries no render layer and no script computes one. Causeway places its entities this way. `depth_step` on the grid turns projected depth into Z; zero keeps a scene ordering exactly as it did. A moving entity omits the cell and takes depth alone. A placement names its grid with the same stable-ID type an occupant uses and carries the cells it covers, and every one of them has to hold it up: standing over a hole is an error naming that cell rather than a prop resting at height zero. Flat ground no longer draws over what stands on it: a placed entity sorts one cell forward, past ground no higher than its feet, because no face of such a cell — top or wall — can cover it, while a block raised a step ahead keeps its own depth and still covers it. Terrain ordering is untouched by that rule. Placing a prefab by clicking a cell in the editor, and one depth per sprite ordering a tall sprite against a tall block, both remain; `docs/2d-depth-and-placement.md` carries the contract |
+| Ordering a walker against several occluders at once | ❌ | ❌ | ❌ | ❌ | **Behind** | One depth per entity answers for one relationship at a time. Standing in the corner between open ground a step ahead and a raised block a step ahead, the ground wants the walker sorted forward and the wall wants it left alone; the wall wins, and the ground seam returns for that one case. The same single point is why a multi-cell wall or house sorts from one anchor rather than from the cells it occupies. Sort footprints — ordering derived per overlapping pair from occupied cells rather than from one point — are the way out and are not built; `docs/2d-depth-and-placement.md` records why no single depth can do it. It was measured rather than estimated: `sweep_occlusion` stood on all 387 standable columns of Gather's island and reached the corner in 22 of them. That test left with Gather, so no project holds the number as a budget any more. The editor draws the report on the grid under Build → Ordering, filling the ground stood on and outlining what covers it. The sweep needs a volume to stand on, so a scene whose props are sprites on no grid gets an empty report rather than a guarantee |
 | Stackable tile volumes | ✅ | 🟡 | 🟡 | ✅ | **Behind** | Sparse XYZ storage, tile sets, face culling/rendering, undoable block painting, and one engine-owned 16×16 runtime chunk coordinate/store work. Causeway camera-streams deterministic biomed chunks inside a large sparse envelope, and navigation cost follows loaded walkable columns rather than the envelope area. Residency only grows: eviction, persisted edits, asynchronous budgets, side picking, terrain rules, physics collision, asymmetric climb/drop, second walkable levels, and slice views remain |
 | **Autotiling / rule tiles** | ❌ | ❌ | ❌ | ❌ | **Absent** | Unity and Godot both ship it. Painting a wall run by hand is the daily cost |
-| Tilemap collision | ✅ | 🟡 | — | ❌ | **Par** | `sindri.physics2d.tilemap_collider` makes painted tiles solid, merged into as few boxes as cover them so nothing catches on tile seams, with passable sprites for decoration. The Scene view outlines the generated boxes. Passable sprites are typed as names rather than picked from the palette, and no game ships on it yet: the platformer reference game is its proof |
+| Tilemap collision | ✅ | 🟡 | — | ✅ | **Par** | `sindri.physics2d.tilemap_collider` makes painted tiles solid, merged into as few boxes as cover them so nothing catches on tile seams, with passable sprites for decoration. The Scene view outlines the generated boxes. Passable sprites are typed as names rather than picked from the palette. The platformer's level is solid through it |
 | **2D lights and shadows** | ❌ | ❌ | ❌ | ❌ | **Absent** | URP 2D lights, Godot's CanvasModulate + Light2D. Nothing here |
 | **Custom shaders / materials** | ❌ | ❌ | ❌ | ❌ | **Absent** | No material asset, no shader authoring. The single biggest ceiling on visual identity |
 | **3D directional + ambient lighting** | 🟡 | 🟡 | ❌ | 🟡 | **Behind** | `sindri.environment` authors ambient fill and one bounded shadow map, and a `sindri.light` entity is the directional sun, aimed by rotation and drawn in the Scene view, shared by textured world and voxel geometry in editor and browser Voxel Lab. Local lights, materials, cascaded shadow quality, and shipped-game proof remain. |
@@ -208,7 +223,7 @@ events, blending, tweening, and animating anything that is not a sprite frame.
 
 | Feature | Engine | Editor | Decay | Proof | vs. baseline | Gap that matters |
 | --- | :-: | :-: | :-: | :-: | --- | --- |
-| Sprite frame clips, timing, loop state | ✅ | ✅ | ✅ | ✅ | **Par** | `Animation.play`/`stop`/`restart`/`is_finished`/`frame`/`clip`/`set_speed`. Gather's player runs its walk cycle only while walking; Orbital's mine blast plays once and despawns itself when it ends |
+| Sprite frame clips, timing, loop state | ✅ | ✅ | ✅ | ✅ | **Par** | `Animation.play`/`stop`/`restart`/`is_finished`/`frame`/`clip`/`set_speed`. The platformer's hero switches between idle, run, jump and fall; Scorchball's players choose a clip and its speed from how they move; Orbital's mine blast plays once and despawns itself when it ends |
 | Clip authoring and preview | — | ✅ | — | ✅ | **Par** | — |
 | **Animation events (a frame fires a callback)** | ❌ | ❌ | ❌ | ❌ | **Absent** | Footsteps, hit frames, spawn-on-frame all need it |
 | **Property animation (animate any component field)** | ❌ | ❌ | ❌ | ❌ | **Absent** | Unity's Animation window animates any serialized property. We animate sprite frames and nothing else |
@@ -222,7 +237,7 @@ events, blending, tweening, and animating anything that is not a sprite frame.
 | Feature | Engine | Editor | Decay | Proof | vs. baseline | Gap that matters |
 | --- | :-: | :-: | :-: | :-: | --- | --- |
 | Bodies, fixed-step stepping, velocity, impulse | ✅ | 🟡 | ✅ | ✅ | **Par** | — |
-| Compound colliders (several pieces, one body) | ✅ | ✅ | — | ❌ | **Par** | Pieces are added, removed, reordered and fully edited, a piece's shape included. No game authors one yet |
+| Compound colliders (several pieces, one body) | ✅ | ✅ | — | ✅ | **Par** | Pieces are added, removed, reordered and fully edited, a piece's shape included. The platformer's hero is one body of two pieces, a capsule and a box |
 | Masks, sensors, collision events | ✅ | 🟡 | ✅ | ✅ | **Par** | — |
 | **Named collision layers** | ❌ | ❌ | ❌ | — | **Behind** | Masks are raw `u32` bit values. Unity and Godot both name layers in project settings. Cheap to fix, daily friction |
 | Per-piece validation naming the failing index | ✅ | — | — | ✅ | **Ahead** | Neither baseline tells you *which* collider was wrong |
@@ -234,7 +249,7 @@ events, blending, tweening, and animating anything that is not a sprite frame.
 | **One-way platforms** | ❌ | ❌ | ❌ | ❌ | **Absent** | Unity's Platform Effector, Godot's one-way collision. The platformer's plank tile is drawn and not yet used for want of it |
 | **Continuous collision (CCD)** | ❌ | — | — | — | **Absent** | Fast bullets tunnel |
 | Collider gizmos in the Scene view | — | ✅ | — | — | **Par** | Every 2D collider is outlined from the pieces physics is given, tilemap boxes included; the selected one's box edges, circle radius and capsule height drag, one undo step a drag. Offsets and rotations are still typed, and 3D colliders have no gizmo |
-| Scene gravity | ✅ | ✅ | — | ❌ | **Par** | `sindri.physics2d.world` sets the scene's gravity, so editor Play runs a platformer as its build will. One vector; no per-area gravity |
+| Scene gravity | ✅ | ✅ | — | ✅ | **Par** | `sindri.physics2d.world` sets the scene's gravity, so editor Play runs a platformer as its build will; the platformer and Scorchball each set theirs. One vector; no per-area gravity |
 
 ## Navigation and grids
 
@@ -282,13 +297,13 @@ Sindri's strongest domain relative to the baseline.
 | Pointer hit-testing, hover/press/held | ✅ | ✅ | ✅ | ✅ | **Par** | — |
 | Weave responsive stylesheets | 🟡 | 🟡 | — | ✅ | **Ahead** | CSS selectors (element names, compounds, descendant and child combinators, lists) with CSS specificity, inheritance, custom properties with `var()`, and combined media queries. Neither baseline has stylesheets this close to CSS; `docs/ui-direction.md` is the plan to make it complete. `:hover` and `:active` follow the pointer in every host, and hit-testing uses the presented geometry. The editor's Styles section shows each element's box model, matched rules with `file:line` and overridden declarations, and computed values; a value edited there is written into the stylesheet, and an element can be picked by clicking it in the running game |
 | Project fonts | ✅ | ✅ | — | ✅ | **Par** | — |
-| **Slider** | ✅ | ✅ | ✅ | ❌ | **Par** | Horizontal or vertical, with `min`, `max`, `step`, `disabled` and a label; a drag and a scripted write pass through the same clamp-and-quantize contract, so a value cannot enter the component off-step. Weave styles it like any other node. `Ui.slider_value`, `Ui.set_slider_value` and `Ui.slider_changed` read, write and detect the change. The editor names it in Add Component with `orientation` as a declared choice — but no field carries a bounded-range meaning, so `value` is a free number box beside the range it is supposed to obey. No companion game in this repository proves it: `games/weave-poc` demonstrates it and Mujaffa Remaster uses it externally |
+| **Slider** | ✅ | ✅ | ✅ | ❌ | **Par** | Horizontal or vertical, with `min`, `max`, `step`, `disabled` and a label; a drag and a scripted write pass through the same clamp-and-quantize contract, so a value cannot enter the component off-step. Weave styles it like any other node. `Ui.slider_value`, `Ui.set_slider_value` and `Ui.slider_changed` read, write and detect the change. The editor names it in Add Component with `orientation` as a declared choice — but no field carries a bounded-range meaning, so `value` is a free number box beside the range it is supposed to obey. No game in this repository proves it: `games/weave-poc` demonstrates it, as a feature demo rather than a game, and Mujaffa Remaster uses it externally |
 | **Toggle, dropdown, text input** | ❌ | ❌ | ❌ | ❌ | **Absent** | **A settings screen still cannot be built.** The slider arrived alone; a checkbox, a choice list and a typed name have nothing |
 | **Scroll region** | ❌ | ❌ | ❌ | ❌ | **Absent** | No inventory, no credits, no long list |
 | **Rich text** | ❌ | ❌ | ❌ | ❌ | **Absent** | No colour or emphasis inside a string. TextMeshPro was absorbed for exactly this |
 | **World-space text** | ❌ | ❌ | ❌ | ❌ | **Absent** | Damage numbers, name plates |
 | UI transitions | ✅ | ✅ | ✅ | ✅ | **Par** | CSS `transition` with named and `cubic-bezier` easings, delays and `all`, on colours, lengths and numbers; USS has the same. `@keyframes` is still absent |
-| **UI devtools (computed style, which rule won)** | ❌ | ❌ | — | ❌ | **Absent** | Unity's UI Toolkit debugger is the bar; the plan is to pass it |
+| UI devtools (computed style, which rule won) | — | ✅ | — | — | **Par** | Unity's UI Toolkit debugger was the bar. The editor's Styles section now meets it: box model, matched rules with `file:line`, overridden declarations and computed values, and an element picked by clicking the running game — see the Weave row |
 | **Keyboard/gamepad focus navigation** | ❌ | ❌ | ❌ | ❌ | **Absent** | A menu cannot be driven without a pointer |
 | **Accessibility labels** | ❌ | ❌ | ❌ | ❌ | **Absent** | — |
 | **Drag and drop** | ❌ | ❌ | ❌ | ❌ | **Absent** | — |
@@ -307,7 +322,7 @@ Sindri's strongest domain relative to the baseline.
 
 | Feature | Engine | Editor | Decay | Proof | vs. baseline | Gap that matters |
 | --- | :-: | :-: | :-: | :-: | --- | --- |
-| Typed host, compile / run / reload | ✅ | 🟡 | ✅ | ✅ | **Par** | Source editing stays external |
+| Typed host, compile / run / reload | ✅ | 🟡 | ✅ | ✅ | **Par** | Source editing stays external. A previewed script shows its compile errors, from the check Play compiles with |
 | Safe entity, prefab, profile references | ✅ | ✅ | ✅ | ✅ | **Ahead** | A stale handle is refused, not a null dereference |
 | `@export` properties discovered and authored | ✅ | ✅ | ✅ | ✅ | **Par** | — |
 | Language server: highlight, complete, hover, definitions, diagnostics | — | 🟡 | ✅ | ✅ | **Par** | VS Code only |
@@ -324,12 +339,17 @@ Sindri's strongest domain relative to the baseline.
 Where the most day-to-day friction is, and where one architectural change
 removes most of it.
 
-### The root cause of hand-typed fields
+### The root cause of hand-typed fields (fixed)
 
-The editor does infer meaning for some fields, and it is worth being precise
-about how, because the mechanism is the defect rather than its absence.
+This records the defect ranked queue item 1 removed; the tables it describes
+are gone. It stays because its conclusion — a component declares what its
+fields mean, and no consumer guesses it from a name — is the rule every new
+component follows.
 
-Three lookup tables in the editor guess a field's meaning from its **name**:
+The editor used to infer meaning for some fields, and it is worth being precise
+about how, because the mechanism was the defect rather than its absence.
+
+Three lookup tables in the editor guessed a field's meaning from its **name**:
 
 ```rust
 // editor/src/native/inspector_panel/field.rs
@@ -348,7 +368,7 @@ to an enum's spellings. The `choices` module is careful — it takes each list
 from the engine's own constants rather than repeating them — but it is still a
 table in the editor keyed by field name.
 
-Four consequences follow, and they are why more table entries is not the fix:
+Four consequences followed, and they were why more table entries was not the fix:
 
 1. **The bare-key rules are global.** `(_, "texture")`, `(_, "font")` and
    `(_, "clip")` match *any* component, including one a game brings of its own.
@@ -380,17 +400,18 @@ item is what closed it: it says what a piece consists of, what each field means,
 and what a fresh one is, so the panel can draw a list and add to it without
 inventing anything.
 
-The fix is to move meaning to the registration — asset(texture), asset(script),
+The fix was to move meaning to the registration — asset(texture), asset(script),
 asset(clip), entity reference, choice, colour, angle, bounded range, list-of —
-and have the editor read it instead of guessing. It extends the registry that
-already exists, makes the knowledge checkable against the template the way field
-lists already are, travels to every tool rather than only the editor, and fixes
-components not yet written. It is the highest-leverage item in this file.
+and have the editor read it instead of guessing. It extended the registry that
+already existed, made the knowledge checkable against the template the way field
+lists already were, travels to every tool rather than only the editor, and
+covers components not yet written. It was the highest-leverage item in this
+file.
 
 | Feature | Editor | vs. baseline | Gap that matters |
 | --- | :-: | --- | --- |
 | Scene view, hierarchy, generic inspector, project browser | ✅ | **Par** | — |
-| Gizmos: transform, snapping, Z-lock-safe movement | ✅ | **Par** | No collider, camera, or effect gizmos |
+| Gizmos: transform, snapping, Z-lock-safe movement | ✅ | **Par** | No camera or effect gizmos. 2D colliders have theirs; 3D colliders do not |
 | Play / pause / stop / single-step, snapshot restore | ✅ | **Ahead** | Single-step and snapshot restore are better than Unity's play mode |
 | Tilemap painting, sheet slicer, texture picker | ✅ | **Par** | — |
 | **Asset pickers for schema fields generally** | ✅ | **Ahead** | Declared per component in the schema registry, checked against the field template, and carried in `docs/generated/`. Unity needs a plugin (Odin) for the equivalent |
@@ -406,7 +427,8 @@ components not yet written. It is the highest-leverage item in this file.
 | **Multi-select and bulk edit** | ❌ | **Absent** | — |
 | **Customisable layout** | ✅ | **Par** | Every panel is a tab, draggable into any of seven docks or four scene-anchored overlays — edges dock, corners float — with the arrangement and every size persisted. Three presets to start from. Behind Unity and Unreal only in that a panel cannot yet be torn off into a window of its own |
 | **Canvas-first workspace** | ✅ | **Ahead** | The scene view is the document and panels overlay its corners, rather than the viewport being the rectangle left over when the docks have taken theirs. Unity and Godot have no equivalent posture; the nearest comparison is a design tool. Still to come: command palette, chrome collapse, and the Game view as an anchored thumbnail — see `docs/editor-direction.md` |
-| **Guided local-AI setup** | ✅ | **Ahead** | A panel that takes a machine with nothing installed to a verified local model without asking anyone to type. No comparable engine ships one: Unity and Unreal have no local-model story, and every third-party assistant starts from "install this yourself and paste a key" |
+| **Guided local-AI setup** | ✅ | **Ahead** | One button inside the editor downloads a pinned llama.cpp runner and model into the person's own folder, verifies both by SHA-256, starts the runner and checks the model against Sindri's repair cases, showing each step with progress, speed and time left, and resuming where it stopped. No installer, terminal, download page or password; removal is one button. Linux x86-64 and Apple silicon only — Windows and Intel Macs are told it is not available yet. No comparable engine ships a local-model setup: Unity and Unreal have no local story, and third-party assistants start from "install this yourself and paste a key" |
+| **Local AI Decay repair** | 🟡 | **Par** | A previewed script that does not compile offers **Propose a fix** once a model has repaired both verification cases. The answer is compiled by the same check Play uses and sent back with its own errors at most twice; only a candidate that compiles and keeps every declared script is shown, as a diff, and it is written only on Accept, with the previous text kept to put back. Unity's assistant proposes code through a cloud service and does not grade it with the compiler first. No model runs in CI — the loop is proved against scripted models — and it rewrites whole files rather than making semantic edits. Writing a new script from a description is the next use of the same loop |
 | **Command palette** | ✅ | **Ahead** | Ctrl+K over panels, entities, project files, scenes, arrangements and verbs, ranked by a scored subsequence match with multi-term search. Unity has no equivalent; Unreal's is command-only and Godot's is files-only |
 | **Customisable shortcuts** | ❌ | **Behind** | Keys are fixed in `native/shortcuts.rs` |
 | **Live edit while playing** | ❌ | **Behind** | Stop restores the world wholesale, so a value tuned during a run is lost. The largest single cost in the change-and-feel loop; see `docs/editor-direction.md` |
@@ -431,7 +453,7 @@ components not yet written. It is the highest-leverage item in this file.
 | --- | :-: | --- | --- |
 | Named validation errors at the boundary | ✅ | **Ahead** | — |
 | Deterministic replay from a seed | ✅ | **Ahead** | Reproducing a bug is a seed, not a video |
-| In-editor console | ✅ | **Par** | See the editor section: it exists, and the gap is its placement rather than its content |
+| In-editor console | ✅ | **Par** | See the editor section. It can be placed anywhere and opens beside the Scene view |
 | **Profiler / frame timing** | ❌ | **Absent** | `docs/effect-scaling.md` measured by hand, once |
 | **Debug draw from scripts** | ❌ | **Absent** | A script cannot draw a line to show what it thinks it is doing |
 | **Frame / draw-call debugger** | ❌ | **Absent** | — |
@@ -467,7 +489,7 @@ were native gaps. Treat these rows as close to automatic.
 | Package | What it fixed | Sindri |
 | --- | --- | --- |
 | **TextMeshPro** | Text quality, rich text | **Absent** — no rich text |
-| **Cinemachine** | Camera follow, framing, confining, shake | **Absent** — hand-rolled per game |
+| **Cinemachine** | Camera follow, framing, confining, shake | **Behind** — `sindri.camera.behavior` follows, confines and shakes, and the platformer uses it; Decay camera-mode controls and authoring gizmos remain |
 | **Post Processing Stack** | Bloom, colour grading, vignette | **Behind** — an authored world stack now covers exposure, tone mapping, contrast, saturation, bloom, and vignette; LUT grading and advanced cinematic effects remain |
 | **Shader Graph** | Shader authoring without code | **Absent** — no materials at all |
 | **Input System** | Action mapping, rebinding, gamepad | **Behind** — action layer stranded; gamepads read by player slot, without rumble or per-player actions |
@@ -478,7 +500,7 @@ were native gaps. Treat these rows as close to automatic.
 
 | Package | What it fixes | Sindri |
 | --- | --- | --- |
-| **Odin Inspector** | Unity's inspector is not sufficient for real data | **Behind** — and our anti-goal is that ours must be sufficient without one. See the editor root cause |
+| **Odin Inspector** | Unity's inspector is not sufficient for real data | **Par** — components declare what their fields mean, so asset pickers, colours, choices, lists and variants need no plugin, which is the anti-goal met. Multi-select and bulk edit remain absent |
 | **DOTween** | Tweening and easing | **Absent** — the highest-value small feature in this file |
 | **A\* Pathfinding Project** | Real pathfinding | **Ahead** — ours is native |
 | **Behavior Designer** | Behaviour trees, AI authoring | **Absent** — AI is hand-written Decay |
@@ -492,8 +514,8 @@ were native gaps. Treat these rows as close to automatic.
 | **Peek / editor productivity** | Search, navigation, bulk edit | **Absent** |
 
 Read together, the two tiers say the same thing three times: **camera, tweening,
-and input mapping** are the features people reliably pay to add. Two of the
-three we have partially built and stranded.
+and input mapping** are the features people reliably pay to add. Camera is now
+built and used; input mapping is built and still stranded; tweening is absent.
 
 ---
 
@@ -523,9 +545,10 @@ output of the file; everything above is evidence.
    it is on, and is told when a one-shot has ended. The two halves stay where
    they belong — which clip plays is written to the world, where it has got to
    is read from the cursor beside it — so a script driving an animation still
-   does not rewrite the scene it came from. Gather's player is the proof: its
-   walk cycle had run since the sheet was sliced, including while standing
-   still, because the clip was authored and nothing could tell it otherwise.
+   does not rewrite the scene it came from. Gather's player was the first
+   proof — its walk cycle had run even while standing still, because nothing
+   could tell it otherwise — and since Gather was removed the platformer's hero
+   and Scorchball's players carry it.
 3. **UI widget set: toggle, text input, scroll region.** The slider landed —
    authored, styled, scripted, and clamped on one contract — and the rest of
    the set did not, so a settings screen is still missing its checkbox and its
@@ -542,17 +565,25 @@ output of the file; everything above is evidence.
 7. **Named collision layers instead of raw `u32` masks.** Cheap, daily friction.
 8. **Tweening and easing.** The most-installed Unity asset in history. Menus,
    pickups, transitions.
-9. **Collider gizmos in the Scene view.** Colliders are invisible while
-   authoring, and compound pieces made that worse.
-10. **Multiple scenes and additive loading.** A menu plus a level is the normal
-    shape of a game.
+9. ~~**Collider gizmos in the Scene view.**~~ **Done.** Every 2D collider is
+   outlined from the pieces physics is given, and the selected one's edges,
+   radius and height drag as one undo step. Offsets, rotations and 3D colliders
+   remain.
+10. **Multiple scenes and additive loading.** **Mostly done.** Scenes load
+    beside each other and `Scene.go` switches between them natively and in the
+    browser. What remains is editing the scene list in the editor and
+    round-tripping a world that holds several scenes through `to_scene`.
 11. ~~**Un-strand bloom.**~~ **Done.** Bloom now lives inside the authored world post stack used by editor and browser rendering.
-12. **Camera follow, confine, and shake.** Every game re-implements it.
+12. ~~**Camera follow, confine, and shake.**~~ **Done.** `sindri.camera.behavior`
+    follows, confines and shakes in every gameplay host, and the platformer
+    follows its hero with it. Decay camera-mode controls and authoring gizmos
+    remain as the row's gap.
 13. **Autotiling.** The daily cost of painting tilemaps by hand.
 14. **Profiler view.** Needed before performance work is anything but guessing.
 
-Items 1–6 are the ones that block a game today. Items 7–12 are cheap relative to
-their daily cost. Items 13–14 are real but survivable.
+Of the open items, 3–6 are the ones that block a game today; 7, 8 and what is
+left of 10 are cheap relative to their daily cost; 13–14 are real but
+survivable.
 
 ### Proof that lives outside this repository
 
@@ -562,15 +593,17 @@ Mujaffa Remaster, an external project, and both are exercised only there.
 
 That is worth naming rather than tolerating quietly, for two reasons. The
 capability rule does not count an external user, so the Proof column is honest
-at ❌ and will stay ❌ until Gather or Orbital Last Stand picks each one up —
+at ❌ and will stay ❌ until a game here — Orbital Last Stand, Causeway or a
+genre showcase — picks each one up —
 which means neither capability is complete, however finished it looks. And an
 external forcing function finds real gaps: the slider is queue item 3 and the
 colour transform is a genuine limit in `sindri.sprite`, so this is not drift
 into features nobody needed. It is the proof step being skipped, and it is
 cheaper to close now than after a third row joins them.
 
-The two obvious closings are both small. A settings screen in Gather wants a
-volume slider, which also gives queue item 5 somewhere to land. And
+The two obvious closings are both small. A settings or pause screen in the
+platformer or Scorchball wants a volume slider, which also gives queue item 5
+somewhere to land. And
 `games/orbital-baked/assets/scripts/charger.decay` recolours a baked sprite
 through `sprite.tint` every frame — multiply-only, which is the exact limit the
 colour transform was built to lift — so it is the natural first user.
@@ -663,12 +696,13 @@ checklist in the same change that closes or discovers a Decay tooling gap.
 ## Maintenance rule
 
 Update this file in the same change that moves any cell, as
-`AGENTS.md` requires. Three specific rules keep it from rotting into a
+`AGENTS.md` requires. Four specific rules keep it from rotting into a
 checklist nobody reads:
 
 1. **A surface cell claims only what is implemented and exercised.** For a
-   gameplay capability, exercised means a game uses it. `capabilities.md`
-   remains the detailed evidence.
+   gameplay capability, exercised means a game uses it, and the gap cell names
+   which — see "What counts as proof". `capabilities.md` remains the detailed
+   evidence.
 2. **A parity cell is a judgement and must survive an argument.** "Ahead" is a
    claim about the baseline, not enthusiasm.
 3. **Add the row before the feature.** The value of this file is that absent

@@ -24,6 +24,8 @@ use std::fmt;
 use std::fs;
 use std::io::Read;
 use std::path::{Path, PathBuf};
+use std::process::Stdio;
+use std::sync::atomic::{AtomicBool, Ordering};
 
 use serde::Deserialize;
 use sha2::{Digest, Sha256};
@@ -102,6 +104,72 @@ pub enum Trouble {
         actual: String,
     },
     Io(std::io::Error),
+    /// The person stopped it.
+    Cancelled,
+}
+
+impl Trouble {
+    /// What to tell a person, in words that say what to do next.
+    ///
+    /// The `Display` form is for the console and a bug report; this is for the
+    /// setup screen, where "curl: (6) Could not resolve host" is noise.
+    pub fn friendly(&self) -> String {
+        match self {
+            Self::NoDownloader => "This computer has no way to download files that Sindri \
+                                   can use (it looks for curl or wget)."
+                .to_owned(),
+            Self::Unsupported { .. } => {
+                "The assistant is not available for this kind of computer yet.".to_owned()
+            }
+            Self::Transport(detail) => {
+                let detail = detail.to_ascii_lowercase();
+                // curl says "returned error: 403" for an HTTP failure.
+                let status = detail
+                    .split("error: ")
+                    .nth(1)
+                    .and_then(|rest| rest.get(..3))
+                    .and_then(|code| code.parse::<u16>().ok());
+                if matches!(status, Some(401 | 403)) || detail.contains("tunnel") {
+                    "The download server refused the connection. A firewall, proxy or network \
+                     filter may be blocking it; on another network it usually works."
+                        .to_owned()
+                } else if status == Some(404) {
+                    "The file is no longer where Sindri expects it. A newer Sindri will know \
+                     where to find it."
+                        .to_owned()
+                } else if status.is_some_and(|code| code == 429 || code >= 500) {
+                    "The download server is busy or having trouble. Try again in a few minutes \
+                     — it picks up where it left off."
+                        .to_owned()
+                } else if detail.contains("resolve host")
+                    || detail.contains("connect")
+                    || detail.contains("network")
+                    || detail.contains("timed out")
+                {
+                    "Sindri could not reach the download server. Check your internet \
+                     connection, then try again — it picks up where it left off."
+                        .to_owned()
+                } else if detail.contains("space") || detail.contains("failure writing") {
+                    "Your disk is full. Free some space, then try again — it picks up where \
+                     it left off."
+                        .to_owned()
+                } else {
+                    "The download stopped part-way. Try again — it picks up where it left off."
+                        .to_owned()
+                }
+            }
+            Self::Corrupt { .. } => "The download arrived damaged, so Sindri threw it away \
+                                     rather than use it. Trying again usually fixes this."
+                .to_owned(),
+            Self::Io(error) if error.kind() == std::io::ErrorKind::StorageFull => {
+                "Your disk is full. Free some space, then try again.".to_owned()
+            }
+            Self::Io(_) => "Sindri could not write to its own folder. Check that your disk is not \
+                 full or read-only, then try again."
+                .to_owned(),
+            Self::Cancelled => "Stopped. Nothing half-finished was kept in use.".to_owned(),
+        }
+    }
 }
 
 impl fmt::Display for Trouble {
@@ -124,6 +192,7 @@ impl fmt::Display for Trouble {
                 "the file did not match what was expected: wanted {expected}, got {actual}"
             ),
             Self::Io(error) => write!(formatter, "{error}"),
+            Self::Cancelled => write!(formatter, "stopped"),
         }
     }
 }
@@ -176,6 +245,8 @@ impl Downloader {
             Self::Curl => vec![
                 "--location".to_owned(),
                 "--fail".to_owned(),
+                "--silent".to_owned(),
+                "--show-error".to_owned(),
                 "--continue-at".to_owned(),
                 "-".to_owned(),
                 "--output".to_owned(),
@@ -184,6 +255,7 @@ impl Downloader {
             ],
             Self::Wget => vec![
                 "--continue".to_owned(),
+                "--quiet".to_owned(),
                 "--output-document".to_owned(),
                 destination,
                 url.to_owned(),
@@ -288,6 +360,50 @@ pub fn platform_transport(url: &str, into: &Path) -> Result<(), Trouble> {
         String::from_utf8_lossy(&output.stderr).trim().to_owned(),
     ))
 }
+
+/// Downloads through whichever tool the machine has, reporting how many bytes
+/// have arrived and stopping when asked.
+///
+/// The count is read from the growing file rather than from the tool's own
+/// output, which differs between curl and wget and between their versions; a
+/// file's length means the same thing everywhere.
+pub fn watched_transport<'a>(
+    cancel: &'a AtomicBool,
+    arrived: impl Fn(u64) + 'a,
+) -> impl FnOnce(&str, &Path) -> Result<(), Trouble> + 'a {
+    move |url, into| {
+        let tool = Downloader::found().ok_or(Trouble::NoDownloader)?;
+        let mut child = std::process::Command::new(tool.program())
+            .args(tool.arguments(url, into))
+            .stdin(Stdio::null())
+            .stdout(Stdio::null())
+            .stderr(Stdio::piped())
+            .spawn()
+            .map_err(|error| Trouble::Transport(error.to_string()))?;
+        loop {
+            if cancel.load(Ordering::Relaxed) {
+                let _ = child.kill();
+                let _ = child.wait();
+                return Err(Trouble::Cancelled);
+            }
+            if let Some(status) = child.try_wait()? {
+                if status.success() {
+                    return Ok(());
+                }
+                let mut detail = String::new();
+                if let Some(mut stderr) = child.stderr.take() {
+                    let _ = stderr.read_to_string(&mut detail);
+                }
+                return Err(Trouble::Transport(detail.trim().to_owned()));
+            }
+            arrived(fs::metadata(into).map_or(0, |meta| meta.len()));
+            std::thread::sleep(POLL);
+        }
+    }
+}
+
+/// How often a download in flight is looked at.
+const POLL: std::time::Duration = std::time::Duration::from_millis(250);
 
 #[cfg(test)]
 mod tests;

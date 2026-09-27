@@ -201,3 +201,72 @@ fn this_machine_is_described_in_the_manifest_vocabulary() {
     assert!(["linux", "macos", "windows"].contains(&platform()));
     assert!(["x86_64", "arm64"].contains(&architecture()));
 }
+
+/// The real downloader, against a local file: the one test here that runs the
+/// tool rather than a stand-in. Skipped on a machine with neither curl nor wget.
+#[test]
+fn a_watched_download_arrives_and_reports_its_size() {
+    if Downloader::found() != Some(Downloader::Curl) {
+        return;
+    }
+    let directory = scratch("watched");
+    let source = directory.join("source.bin");
+    fs::write(&source, vec![7_u8; 4096]).expect("written");
+    let into = directory.join("copy.part");
+    let cancel = AtomicBool::new(false);
+    let seen = std::cell::Cell::new(0_u64);
+    let transport = watched_transport(&cancel, |bytes| seen.set(bytes));
+    transport(&format!("file://{}", source.display()), &into).expect("downloaded");
+    assert_eq!(fs::read(&into).expect("read").len(), 4096);
+}
+
+#[test]
+fn a_stopped_download_says_it_was_stopped() {
+    if Downloader::found().is_none() {
+        return;
+    }
+    let directory = scratch("stopped");
+    let cancel = AtomicBool::new(true);
+    let transport = watched_transport(&cancel, |_| {});
+    let result = transport("https://example.invalid/never", &directory.join("x.part"));
+    assert!(matches!(result, Err(Trouble::Cancelled)), "{result:?}");
+}
+
+/// What a person reads says what to do, never a tool's own error text.
+#[test]
+fn every_trouble_reads_as_something_to_do() {
+    let troubles = [
+        Trouble::NoDownloader,
+        Trouble::Transport("curl: (6) Could not resolve host: huggingface.co".to_owned()),
+        Trouble::Transport("curl: (23) Failure writing output to destination".to_owned()),
+        Trouble::Transport("curl: (18) transfer closed".to_owned()),
+        Trouble::Corrupt {
+            expected: "a".to_owned(),
+            actual: "b".to_owned(),
+        },
+        Trouble::Io(std::io::Error::other("denied")),
+        Trouble::Cancelled,
+    ];
+    for trouble in &troubles {
+        let said = trouble.friendly();
+        // Only the missing-downloader message may name a tool: it is the answer.
+        if !matches!(trouble, Trouble::NoDownloader) {
+            assert!(!said.contains("curl"), "{said}");
+        }
+        assert!(said.ends_with('.'), "{said}");
+    }
+    assert!(troubles[1].friendly().contains("internet"));
+    let refused = Trouble::Transport("curl: (22) The requested URL returned error: 403".to_owned());
+    assert!(
+        refused.friendly().contains("firewall"),
+        "{}",
+        refused.friendly()
+    );
+    let tunnel = Trouble::Transport("curl: (56) CONNECT tunnel failed, response 403".to_owned());
+    assert!(tunnel.friendly().contains("firewall"));
+    let moved = Trouble::Transport("curl: (22) The requested URL returned error: 404".to_owned());
+    assert!(moved.friendly().contains("no longer"));
+    let busy = Trouble::Transport("curl: (22) The requested URL returned error: 503".to_owned());
+    assert!(busy.friendly().contains("busy"));
+    assert!(troubles[2].friendly().contains("disk is full"));
+}
