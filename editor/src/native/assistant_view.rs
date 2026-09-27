@@ -7,11 +7,14 @@
 //!
 //! Nothing here asks anyone to type. See the module note on `crate::assistant`.
 
+use std::sync::atomic::AtomicBool;
 use std::sync::mpsc::{Receiver, TryRecvError, channel};
 use std::time::{Duration, Instant};
 
 use eframe::egui::{self, RichText};
 
+use crate::assistant::chat::Ollama;
+use crate::assistant::verify::{Verdict, verify};
 use crate::assistant::{
     Action, Feature, InstallPlan, Probe, Profile, Readiness, Tier, probe, readiness,
 };
@@ -44,19 +47,39 @@ pub(crate) struct AssistantState {
     last_looked: Option<Instant>,
     /// What is happening right now, when something is.
     working: Option<String>,
+    /// A verification run in flight, and the model it is testing.
+    checking: Option<(String, Receiver<Verdict>)>,
+    /// A previewed script's compiler errors, and any fix proposed for them.
+    pub(super) repair: super::repair_view::RepairState,
+}
+
+impl AssistantState {
+    fn verified(&self) -> Option<(&str, &[Feature])> {
+        self.verified
+            .as_ref()
+            .map(|(model, features)| (model.as_str(), features.as_slice()))
+    }
+
+    /// The model to ask for a Decay repair, once one has proved it can.
+    ///
+    /// Read from the same readiness the panel draws, so the editor never offers
+    /// a fix the setup panel would not call ready.
+    pub(crate) fn repair_model(&self) -> Option<String> {
+        match readiness(&self.seen, self.verified()) {
+            Readiness::Ready { model, verified } if verified.contains(&Feature::DecayRepair) => {
+                Some(model)
+            }
+            _ => None,
+        }
+    }
 }
 
 impl EditorApp {
     /// The setup flow, or the assistant once there is one.
     pub(super) fn assistant_body(&mut self, ui: &mut egui::Ui) {
         self.poll_probe(ui.ctx());
-        let state = readiness(
-            &self.assistant.seen,
-            self.assistant
-                .verified
-                .as_ref()
-                .map(|(model, features)| (model.as_str(), features.as_slice())),
-        );
+        self.poll_verification(ui.ctx());
+        let state = readiness(&self.assistant.seen, self.assistant.verified());
         panel::body(ui, |ui| {
             if let Readiness::Ready { model, verified } = &state {
                 ready(ui, model, verified);
@@ -109,7 +132,10 @@ impl EditorApp {
                 Ok(seen) => {
                     self.assistant.seen = seen;
                     self.assistant.looking = None;
-                    self.assistant.working = None;
+                    // A check in flight is still working whatever the probe saw.
+                    if self.assistant.checking.is_none() {
+                        self.assistant.working = None;
+                    }
                 }
                 Err(TryRecvError::Empty) => {
                     context.request_repaint_after(Duration::from_millis(200));
@@ -146,8 +172,65 @@ impl EditorApp {
             Action::Install { plan } => self.get_runner(&plan, context),
             Action::Start => self.start_runner(),
             Action::Pull { profile } => self.pull_model(&profile),
-            Action::PickFrom { .. } | Action::Verify { .. } | Action::None => {}
+            Action::Verify { model } => self.check_model(model),
+            Action::PickFrom { .. } | Action::None => {}
         }
+    }
+
+    /// Runs Sindri's own cases against the model, off the frame.
+    ///
+    /// Minutes rather than milliseconds on a modest GPU, so it runs on a worker
+    /// and the panel says what it is doing until the verdict lands.
+    fn check_model(&mut self, model: String) {
+        self.assistant.working = Some(format!(
+            "Checking {model}: it is given two broken scripts to repair…"
+        ));
+        self.console.info(format!("Checking what {model} can do"));
+        let (sender, receiver) = channel();
+        let tested = model.clone();
+        std::thread::spawn(move || {
+            let mut runner = Ollama::new(tested);
+            let _ = sender.send(verify(&mut runner, &AtomicBool::new(false)));
+        });
+        self.assistant.checking = Some((model, receiver));
+    }
+
+    /// Takes a verification verdict when one has landed.
+    fn poll_verification(&mut self, context: &egui::Context) {
+        let Some((model, channel)) = &self.assistant.checking else {
+            return;
+        };
+        let verdict = match channel.try_recv() {
+            Ok(verdict) => verdict,
+            Err(TryRecvError::Empty) => {
+                context.request_repaint_after(Duration::from_millis(500));
+                return;
+            }
+            Err(TryRecvError::Disconnected) => Verdict {
+                verified: Vec::new(),
+                notes: vec!["The check stopped before it finished".to_owned()],
+            },
+        };
+        let model = model.clone();
+        for note in &verdict.notes {
+            self.console.info(format!("{model}: {note}"));
+        }
+        self.console.info(format!(
+            "{model} verified for: {}",
+            if verdict.verified.is_empty() {
+                "nothing".to_owned()
+            } else {
+                verdict
+                    .verified
+                    .iter()
+                    .map(|feature| feature.label())
+                    .collect::<Vec<_>>()
+                    .join(", ")
+            }
+        ));
+        self.assistant.verified = Some((model, verdict.verified));
+        self.assistant.checking = None;
+        self.assistant.working = None;
     }
 
     /// Opens the runner's own download page through the operating system.
@@ -303,6 +386,13 @@ fn ready(ui: &mut egui::Ui, model: &str, verified: &[Feature]) {
     ui.add_space(8.0);
     for feature in Feature::ALL {
         let proved = verified.contains(&feature);
+        let said = if proved {
+            "verified"
+        } else if feature.tested() {
+            "failed"
+        } else {
+            "not offered yet"
+        };
         ui.horizontal(|ui| {
             ui.add_space(metric::GUTTER);
             ui.label(
@@ -316,16 +406,20 @@ fn ready(ui: &mut egui::Ui, model: &str, verified: &[Feature]) {
             );
             ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
                 ui.add_space(metric::GUTTER);
-                ui.label(
-                    RichText::new(if proved { "verified" } else { "unavailable" })
-                        .size(text::NOTE)
-                        .color(if proved {
-                            color::SUCCESS
-                        } else {
-                            color::TEXT_FAINT
-                        }),
-                );
+                ui.label(RichText::new(said).size(text::NOTE).color(if proved {
+                    color::SUCCESS
+                } else if feature.tested() {
+                    color::WARNING
+                } else {
+                    color::TEXT_FAINT
+                }));
             });
         });
     }
+    ui.add_space(8.0);
+    panel::note(
+        ui,
+        "Open a script that does not compile from the project browser, and a fix can be \
+         proposed under its errors.",
+    );
 }

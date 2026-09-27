@@ -70,6 +70,7 @@ mod profile_view;
 mod project_open;
 mod project_panel;
 mod projection;
+mod repair_view;
 mod runtime;
 mod scene_io;
 mod scene_lighting;

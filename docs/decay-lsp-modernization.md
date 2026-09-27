@@ -311,7 +311,21 @@ building another Decay analyzer.
 
 - [ ] Define the boundary by which the editor consumes structured Decay
       diagnostics.
+  - [x] `sindri_decay::check_source` gives the editor the same analyzer and
+        host environment the LSP and batch preflight use, as located
+        diagnostics plus the declared containers, with no second analyzer.
+  - [ ] Converge it with the LSP's `StructuredDiagnostic`, so the editor and
+        external tools share one representation (codes, severity, related
+        spans), not only one analysis.
 - [ ] Add a Problems surface backed by the same diagnostics as CLI/LSP.
+  - [x] A previewed `.decay` file lists its errors by line and column. This is
+        per file, not a project-wide Problems surface, and has no navigation
+        to the span yet.
+  - [ ] Give the local assistant's Decay repair
+        (`editor/src/assistant/repair.rs`) diagnostic codes. It already feeds
+        these diagnostics to a model and grades the answer with the same
+        check; codes would let it target failure classes rather than message
+        text.
 - [ ] Navigate from a problem to file/span.
 - [ ] Reuse semantic completion/hover data if/when the editor grows a Decay
       source editor.

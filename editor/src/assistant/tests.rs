@@ -60,7 +60,7 @@ fn no_step_ever_asks_a_person_to_type_anything() {
         (
             Readiness::Unusable {
                 model: "qwen3:8b".to_owned(),
-                failed: Feature::ToolCalling,
+                failed: Feature::DecayRepair,
             },
             running(&["qwen3:8b"], 12.0),
         ),
@@ -220,26 +220,32 @@ fn a_model_missing_only_vision_is_still_ready() {
 }
 
 #[test]
-fn a_model_that_cannot_hold_a_schema_cannot_author() {
+fn a_model_that_cannot_repair_has_nothing_to_offer() {
     let probe = running(&["qwen3:8b"], 12.0);
     let features: Vec<_> = Feature::ALL
         .into_iter()
-        .filter(|feature| *feature != Feature::StructuredOutput)
+        .filter(|feature| *feature != Feature::DecayRepair)
         .collect();
     assert_eq!(
         readiness(&probe, Some(("qwen3:8b", &features))),
         Readiness::Unusable {
             model: "qwen3:8b".to_owned(),
-            failed: Feature::StructuredOutput,
+            failed: Feature::DecayRepair,
         }
     );
 }
 
+/// Required means something in the editor uses it, and is proved by a case.
+/// A requirement nothing tests could never be met; one nothing uses would
+/// withhold the assistant for a feature that does not exist.
 #[test]
-fn the_required_features_are_the_ones_every_proposal_needs() {
-    assert!(Feature::StructuredOutput.required());
-    assert!(Feature::ToolCalling.required());
+fn the_required_features_are_the_ones_the_editor_offers() {
+    assert!(Feature::DecayRepair.required());
+    assert!(!Feature::StructuredOutput.required());
     assert!(!Feature::Vision.required());
+    for feature in Feature::ALL {
+        assert!(!feature.required() || feature.tested(), "{feature:?}");
+    }
 }
 
 /// The editor keeps watching exactly while the next move happens outside it, so

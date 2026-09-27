@@ -23,6 +23,7 @@
 
 mod audio_host;
 mod blackboard;
+mod check;
 mod component;
 mod error;
 mod exports;
@@ -37,6 +38,7 @@ mod surface;
 
 pub use audio_host::{AudioCommand, HostServices, WorldHost};
 pub use blackboard::Blackboard;
+pub use check::{CheckPhase, SourceCheck, SourceDiagnostic, check_source};
 pub use component::ScriptComponent;
 /// A value a Decay script holds, re-exported so a host can name one without
 /// depending on the language crates directly.

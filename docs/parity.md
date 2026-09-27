@@ -322,7 +322,7 @@ Sindri's strongest domain relative to the baseline.
 
 | Feature | Engine | Editor | Decay | Proof | vs. baseline | Gap that matters |
 | --- | :-: | :-: | :-: | :-: | --- | --- |
-| Typed host, compile / run / reload | ✅ | 🟡 | ✅ | ✅ | **Par** | Source editing stays external |
+| Typed host, compile / run / reload | ✅ | 🟡 | ✅ | ✅ | **Par** | Source editing stays external. A previewed script shows its compile errors, from the check Play compiles with |
 | Safe entity, prefab, profile references | ✅ | ✅ | ✅ | ✅ | **Ahead** | A stale handle is refused, not a null dereference |
 | `@export` properties discovered and authored | ✅ | ✅ | ✅ | ✅ | **Par** | — |
 | Language server: highlight, complete, hover, definitions, diagnostics | — | 🟡 | ✅ | ✅ | **Par** | VS Code only |
@@ -427,7 +427,8 @@ file.
 | **Multi-select and bulk edit** | ❌ | **Absent** | — |
 | **Customisable layout** | ✅ | **Par** | Every panel is a tab, draggable into any of seven docks or four scene-anchored overlays — edges dock, corners float — with the arrangement and every size persisted. Three presets to start from. Behind Unity and Unreal only in that a panel cannot yet be torn off into a window of its own |
 | **Canvas-first workspace** | ✅ | **Ahead** | The scene view is the document and panels overlay its corners, rather than the viewport being the rectangle left over when the docks have taken theirs. Unity and Godot have no equivalent posture; the nearest comparison is a design tool. Still to come: command palette, chrome collapse, and the Game view as an anchored thumbnail — see `docs/editor-direction.md` |
-| **Guided local-AI setup** | ✅ | **Ahead** | A panel that takes a machine with nothing installed to a verified local model without asking anyone to type. No comparable engine ships one: Unity and Unreal have no local-model story, and every third-party assistant starts from "install this yourself and paste a key" |
+| **Guided local-AI setup** | 🟡 | **Ahead** | Finds, starts and feeds a local model runner, suggests a model that fits the machine and downloads it, then checks the model against Sindri's own cases before anything is offered, all without asking anyone to type. Installing the runner still opens its download page, and a verification lasts for the session. No comparable engine ships a local-model setup: Unity and Unreal have no local story, and third-party assistants start from "install this yourself and paste a key" |
+| **Local AI Decay repair** | 🟡 | **Par** | A previewed script that does not compile offers **Propose a fix** once a model has repaired both verification cases. The answer is compiled by the same check Play uses and sent back with its own errors at most twice; only a candidate that compiles and keeps every declared script is shown, as a diff, and it is written only on Accept, with the previous text kept to put back. Unity's assistant proposes code through a cloud service and does not grade it with the compiler first. No model runs in CI — the loop is proved against scripted models — and it rewrites whole files rather than making semantic edits. Writing a new script from a description is the next use of the same loop |
 | **Command palette** | ✅ | **Ahead** | Ctrl+K over panels, entities, project files, scenes, arrangements and verbs, ranked by a scored subsequence match with multi-term search. Unity has no equivalent; Unreal's is command-only and Godot's is files-only |
 | **Customisable shortcuts** | ❌ | **Behind** | Keys are fixed in `native/shortcuts.rs` |
 | **Live edit while playing** | ❌ | **Behind** | Stop restores the world wholesale, so a value tuned during a run is lost. The largest single cost in the change-and-feel loop; see `docs/editor-direction.md` |

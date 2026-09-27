@@ -18,7 +18,7 @@ use std::time::Duration;
 use super::Probe;
 
 /// Where the runner listens by default.
-const ENDPOINT: &str = "127.0.0.1:11434";
+pub(super) const ENDPOINT: &str = "127.0.0.1:11434";
 
 /// How long to wait on a local socket before calling it shut.
 ///

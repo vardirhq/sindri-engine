@@ -7,6 +7,7 @@
 
 use eframe::egui::{self, RichText};
 
+use crate::preview::TextPreview;
 use crate::typeface;
 use crate::ui::theme::{color, metric, text};
 use crate::ui::widgets::{button, button::Intent, panel, property};
@@ -39,7 +40,19 @@ impl EditorApp {
         );
         if preview.truncated() {
             panel::note(ui, "Longer than the preview reads — shown to its cut");
+        } else if preview
+            .path()
+            .extension()
+            .is_some_and(|extension| extension == "decay")
+        {
+            // Owned copies, because checking and proposing a fix borrow the
+            // editor mutably and the preview is part of it.
+            let (path, source) = (preview.path().to_path_buf(), body.to_owned());
+            self.script_problems(ui, &path, &source);
         }
+        let Some(Ok(body)) = self.preview.as_ref().map(TextPreview::body) else {
+            return;
+        };
         ui.add_space(metric::GAP);
         // Monospace and horizontally scrolling, because source is written in
         // columns and wrapping it puts a continuation where a statement was.

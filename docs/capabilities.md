@@ -1253,9 +1253,10 @@ frame.
 - Scene and Game views, the latter rendering through the authored camera with no
   editor chrome painted over it — both live at once in the `Docked` arrangement
 - **A setup flow for the local assistant that asks nobody to type.** An
-  Assistant panel reads the machine and offers one next step at a time: install
-  the runner, start it, download a model picked for the available memory, verify
-  it. Every step is a button; the only thing a person ever types is an operating
+  Assistant panel reads the machine and offers one next step at a time: get the
+  runner (today that opens Ollama's download page and watches for the install),
+  start it, download a model picked for the available memory, and check it.
+  Every step is a button; the only thing a person ever types is an operating
   system password, and only where the platform demands one.
 
   The states are distinguished rather than collapsed — not installed, installed
@@ -1272,6 +1273,33 @@ frame.
   connection light. Detection and model download run over the loopback socket
   using only the standard library, so the editor gains no HTTP client and an
   AI-disabled build remains a normal configuration.
+
+  Checking is real: the model is given two broken scripts — a misspelt host
+  name, and a script's own function called as `this.glow(...)` — and Decay
+  repair counts as verified only if it fixes both, graded by the compiler. A
+  feature with no case says "not offered yet" rather than "failed". The result
+  lasts for the session.
+- **Compile errors under a previewed script, and a fix the local model proposes
+  for them.** Selecting a `.decay` file shows each error with its line and
+  column, from `sindri_decay::check_source` — the analysis and host environment
+  Play compiles with — or says it compiles. Once a model has passed the repair
+  check, **Propose a fix** sends the file, its errors and the generated host API
+  (`docs/generated/decay-api.md`) to the model on a worker thread, and the panel
+  shows how long it has waited with a Stop button.
+
+  The answer is untrusted. `assistant/repair.rs` takes the longest fenced block
+  from it, compiles it, and refuses a candidate that does not compile, is the
+  file unchanged, is larger than 32 KB, or no longer declares a script or
+  component the original did — since a scene names those, and a fix that drops
+  one compiles and breaks the scene anyway. A refused candidate goes back to the
+  model with only its own errors, at most twice. What survives is shown as a
+  diff with the attempt it took; Accept writes it in one step (a staged file
+  renamed over the original), refusing a file that changed on disk since the
+  fix was asked for, and "Put the previous version back" undoes it. Every
+  outcome is logged to the console. The loop is proved against scripted models
+  and the transport against a stand-in runner on a real socket; no model runs
+  in CI. It rewrites whole files, which is what the architecture allows for
+  short scripts; semantic edits wait on the language tooling.
 - **One field that finds anything.** Ctrl+K opens a palette over everything
   else, searching the panels, the scene's entities, the project's files and
   scenes, the arrangements, and the editor's verbs at once; each row says which

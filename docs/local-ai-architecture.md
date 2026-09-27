@@ -4,7 +4,25 @@
 **Scope:** AI-assisted authoring in the Sindri editor  
 **Primary target:** Reliable local inference on an NVIDIA RTX 3060 with 12 GB VRAM  
 **Secondary target:** Optional user-configured cloud providers  
-**Last updated:** 2026-09-11
+**Last updated:** 2026-09-27
+
+> **Implemented so far (2026-09-27).** One slice of Phase 4, ahead of the
+> proposal protocol this document says to build first: **Decay repair**. It
+> skips that order deliberately, because a repair proposes a file, not a world
+> change, and Sindri's compiler already checks a file with full authority. What
+> exists: a previewed script's errors from `sindri_decay::check_source`; a
+> `Model` boundary with an Ollama transport over loopback
+> (`editor/src/assistant/chat.rs`); the draft → compile → at most two repairs
+> loop of [Decay assistance](#decay-assistance), which refuses an answer that
+> does not compile or drops a declared container (`assistant/repair.rs`);
+> capability verification that runs two broken-script cases and switches repair
+> on only if both are fixed (`assistant/verify.rs`); and a diff that is written
+> only on acceptance, with the previous text kept to put back
+> (`native/repair_view.rs`). The setup flow still installs and drives Ollama,
+> not the managed llama.cpp runtime adopted below; verification results last
+> for the session, not across restarts. No model has been run against the
+> cases in CI: the loop is proved against scripted models and a stand-in
+> runner, and the recorded-model evaluation below remains to be built.
 
 ## Executive summary
 

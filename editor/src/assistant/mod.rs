@@ -31,8 +31,12 @@
 //! privilege at all, that route is preferred — see [`Elevation`].
 
 pub mod catalogue;
+pub mod chat;
+pub mod diff;
 pub mod fetch;
 pub mod probe;
+pub mod repair;
+pub mod verify;
 
 pub use catalogue::{DEFAULT_CONTEXT, Profile, Supports, Tier};
 
@@ -110,12 +114,22 @@ impl Feature {
 
     /// Whether the assistant is usable at all without it.
     ///
-    /// The protocol is a schema and every proposal is a tool call, so a model
-    /// failing either of those cannot author anything however well it chats.
-    /// The rest degrade: no vision means no asking about a sprite, not a broken
-    /// assistant.
+    /// The features something in the editor actually offers. Today that is
+    /// Decay repair, and a model that cannot repair has nothing to give the
+    /// editor however well it chats. Structured answers and tool calling join
+    /// this when scene proposals ship, because every one of those is a schema
+    /// and a tool call; until then, requiring them would withhold a working
+    /// feature for the sake of one that does not exist.
     pub const fn required(self) -> bool {
-        matches!(self, Self::StructuredOutput | Self::ToolCalling)
+        matches!(self, Self::DecayRepair)
+    }
+
+    /// Whether verification has a case for it.
+    ///
+    /// A feature with no case is not reported as failed — nothing asked the
+    /// model to do it — but as not offered yet, which is the true answer.
+    pub const fn tested(self) -> bool {
+        matches!(self, Self::DecayRepair)
     }
 }
 
