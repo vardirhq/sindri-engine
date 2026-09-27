@@ -86,6 +86,7 @@ impl<'a> WorldHost<'a> {
             tile_sets,
             walkable: None,
             printed: Vec::new(),
+            peers: None,
         }
     }
 }

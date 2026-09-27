@@ -164,7 +164,7 @@ impl<'a, 'd> Analyzer<'a, 'd> {
     }
 
     pub(super) fn require_type(&mut self, actual: &Type, expected: &Type, span: Span) {
-        if !Self::compatible(expected, actual) {
+        if !self.compatible(expected, actual) {
             self.error(
                 span,
                 format!(
@@ -177,7 +177,7 @@ impl<'a, 'd> Analyzer<'a, 'd> {
     }
 
     pub(super) fn check_assignable(&mut self, expected: &Type, actual: &Type, span: Span) {
-        if !Self::compatible(expected, actual) {
+        if !self.compatible(expected, actual) {
             self.error(
                 span,
                 format!(
@@ -189,11 +189,13 @@ impl<'a, 'd> Analyzer<'a, 'd> {
         }
     }
 
-    pub(super) fn compatible(expected: &Type, actual: &Type) -> bool {
+    pub(super) fn compatible(&self, expected: &Type, actual: &Type) -> bool {
         matches!(expected, Type::Unknown)
             || matches!(actual, Type::Unknown)
             || expected == actual
             || matches!((expected, actual), (Type::Named(_), Type::Null))
+            || matches!((expected, actual), (Type::Named(wanted), Type::Named(given))
+                if self.environment.is_a(given, wanted))
     }
 
     pub(super) fn error(&mut self, span: Span, message: String) {

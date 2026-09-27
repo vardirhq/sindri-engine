@@ -9,10 +9,9 @@ use sindri_platform::InputState;
 
 use crate::{
     Blackboard, Physics2d, PrefabSources, ProfileSources, ScriptComponent, ScriptContext,
-    ScriptFailure, WorldHost, audio_host::AudioCommand, host::Spawning,
+    ScriptFailure, WorldHost, audio_host::AudioCommand, host::Peers, host::Spawning,
 };
 
-use super::environment::environment;
 use super::sources::{START, ScriptSources, UPDATE};
 use super::{Compiled, Running};
 
@@ -23,6 +22,7 @@ use super::{Compiled, Running};
 pub(super) struct TickWorld<'a> {
     pub(super) programs: &'a mut BTreeMap<String, Compiled>,
     pub(super) running: &'a mut BTreeMap<EntityId, Running>,
+    pub(super) starting: &'a mut super::StartingValues,
     pub(super) blackboard: &'a mut Blackboard,
     pub(super) audio: &'a mut Vec<AudioCommand>,
     pub(super) world: &'a mut World,
@@ -41,6 +41,8 @@ pub(super) struct TickWorld<'a> {
     pub(super) started: BTreeSet<EntityId>,
     /// What every call in this pass has created so far.
     pub(super) spawned: Vec<EntityId>,
+    /// Calls scripts made on each other, waiting for the pass to finish.
+    pub(super) messages: Vec<super::Message>,
     /// The physics a script may read and drive, when the host runs any.
     pub(super) physics: Option<Physics2d<'a>>,
     /// Where the screen elements are and what the pointer is doing to them.
@@ -69,10 +71,8 @@ pub(super) fn tick(
     delta_seconds: f32,
 ) -> Result<Vec<String>, ScriptFailure> {
     ensure_compiled(at.programs, at.sources, entity, component)?;
-    let compiled = &at.programs[&component.source];
-
-    let container = compiled
-        .program
+    let program = std::rc::Rc::clone(&at.programs[&component.source].program);
+    let container = program
         .containers
         .iter()
         .find(|container| container.name == component.script)
@@ -87,12 +87,6 @@ pub(super) fn tick(
         .get(&entity)
         .map_or(0.0, |current| current.elapsed_seconds)
         + delta_seconds;
-    let context = ScriptContext {
-        input: at.input,
-        delta_seconds,
-        elapsed_seconds,
-    };
-
     let fresh = !at.running.get(&entity).is_some_and(|current| {
         current.source == component.source && current.script == component.script
     });
@@ -101,89 +95,167 @@ pub(super) fn tick(
     // properties have been decided.
     at.started.insert(entity);
 
-    let mut runtime = Runtime::new(
-        &compiled.program,
-        WorldHost::new(
-            &mut *at.world,
-            entity,
-            context,
-            &mut *at.blackboard,
-            crate::HostServices {
-                spawning: Spawning {
-                    prefabs: at.prefabs,
-                    started: &at.started,
-                    spawned: &mut at.spawned,
-                },
-                profiles: at.profiles,
-                // Reborrowed per tick rather than moved: every script in the
-                // pass reads the same frame's events and drives the same world,
-                // and one taking physics away from the rest would make which
-                // script ran first decide what the others could do.
-                physics: at.physics.as_mut().map(|physics| Physics2d {
-                    world: &mut *physics.world,
-                    events: physics.events,
-                }),
-                screen_ui: at.screen_ui,
-                aim: at.aim,
-                gestures: at.gestures,
-                camera_pan: at.camera_pan,
-                // Reborrowed per tick like physics: one stream, shared by every
-                // script in the pass, so a run's numbers are the run's.
-                random: at.random.as_deref_mut(),
-                saves: at.saves.as_deref_mut(),
-                effects: at.effects.as_deref_mut(),
-                // Reborrowed per tick like the rest: every script in the pass
-                // reads the same step's playback, and one taking the cursors
-                // away from the others would make which script ran first decide
-                // what the rest could see.
-                animations: at.animations.as_deref_mut(),
-                tile_sets: at.tile_sets,
-                audio: &mut *at.audio,
-                // Reborrowed per tick like the rest: one channel for the pass,
-                // so which script ran first does not decide who may ask.
-                scenes: at.scenes.as_deref_mut(),
-            },
-        ),
-    );
-
-    if fresh {
-        let mut instance = runtime
-            .instantiate(&component.script)
-            .map_err(|error| ScriptFailure::runtime(entity, &component.script, START, &error))?;
-        apply_properties(&mut instance, container, entity, component)?;
-        at.running.insert(
-            entity,
-            Running {
+    // Taken out of the map for the call, so the host can lend every *other*
+    // running script to this one, and put back whatever happens.
+    let mut current = if fresh {
+        None
+    } else {
+        at.running.remove(&entity)
+    };
+    let mut starting_values = if fresh {
+        at.starting.remove(&entity)
+    } else {
+        None
+    };
+    let context = ScriptContext {
+        input: at.input,
+        delta_seconds,
+        elapsed_seconds,
+    };
+    let mut runtime = Runtime::new(&program, host_for(at, entity, context));
+    let outcome = (|| {
+        if fresh {
+            let mut instance = runtime.instantiate(&component.script).map_err(|error| {
+                ScriptFailure::runtime(entity, &component.script, START, &error)
+            })?;
+            apply_properties(&mut instance, container, entity, component)?;
+            // Then what another script set on it before it started, which is
+            // later than the scene and so wins.
+            for (field, value) in starting_values.take().unwrap_or_default() {
+                instance.set_field(&field, value).map_err(|error| {
+                    ScriptFailure::runtime(entity, &component.script, START, &error)
+                })?;
+            }
+            current = Some(Running {
                 elapsed_seconds,
                 source: component.source.clone(),
                 script: component.script.clone(),
                 instance,
-            },
-        );
+            });
+        }
+        let Some(running) = current.as_mut() else {
+            return Ok(());
+        };
+        running.elapsed_seconds = elapsed_seconds;
+        if fresh && container.functions.iter().any(|f| f.name == START) {
+            runtime
+                .call_instance(&mut running.instance, START, vec![])
+                .map_err(|error| {
+                    ScriptFailure::runtime(entity, &component.script, START, &error)
+                })?;
+        }
+        if container.functions.iter().any(|f| f.name == UPDATE) {
+            runtime
+                .call_instance(
+                    &mut running.instance,
+                    UPDATE,
+                    vec![Value::Number(f64::from(delta_seconds))],
+                )
+                .map_err(|error| {
+                    ScriptFailure::runtime(entity, &component.script, UPDATE, &error)
+                })?;
+        }
+        Ok(())
+    })();
+    let printed = runtime.into_host().take_printed();
+    if let Some(current) = current {
+        at.running.insert(entity, current);
     }
+    outcome.map(|()| printed)
+}
 
-    let Some(current) = at.running.get_mut(&entity) else {
+/// Runs a message another script sent: `function` on `entity`'s script, with
+/// the arguments it was sent with.
+///
+/// Nothing happens for an entity that has gone, or whose script is not
+/// running: a message to something destroyed this frame is the ordinary end of
+/// a projectile, not a mistake to report.
+pub(super) fn deliver(
+    at: &mut TickWorld<'_>,
+    message: super::Message,
+) -> Result<Vec<String>, ScriptFailure> {
+    let entity = message.to;
+    if at.world.get(entity).is_none() {
+        return Ok(Vec::new());
+    }
+    let Some(mut current) = at.running.remove(&entity) else {
         return Ok(Vec::new());
     };
-    current.elapsed_seconds = elapsed_seconds;
+    let Some(compiled) = at.programs.get(&current.source) else {
+        at.running.insert(entity, current);
+        return Ok(Vec::new());
+    };
+    let program = std::rc::Rc::clone(&compiled.program);
+    let script = current.script.clone();
+    let context = ScriptContext {
+        input: at.input,
+        delta_seconds: 0.0,
+        elapsed_seconds: current.elapsed_seconds,
+    };
+    let mut runtime = Runtime::new(&program, host_for(at, entity, context));
+    let outcome = runtime
+        .call_instance(&mut current.instance, &message.name, message.args)
+        .map(|_| ())
+        .map_err(|error| ScriptFailure::runtime(entity, &script, &message.name, &error));
+    let printed = runtime.into_host().take_printed();
+    at.running.insert(entity, current);
+    outcome.map(|()| printed)
+}
 
-    if fresh && container.functions.iter().any(|f| f.name == START) {
-        runtime
-            .call_instance(&mut current.instance, START, vec![])
-            .map_err(|error| ScriptFailure::runtime(entity, &component.script, START, &error))?;
-    }
-
-    if container.functions.iter().any(|f| f.name == UPDATE) {
-        runtime
-            .call_instance(
-                &mut current.instance,
-                UPDATE,
-                vec![Value::Number(f64::from(delta_seconds))],
-            )
-            .map_err(|error| ScriptFailure::runtime(entity, &component.script, UPDATE, &error))?;
-    }
-
-    Ok(runtime.into_host().take_printed())
+/// The host one call on `entity` runs against, with every other running
+/// script reachable through it.
+fn host_for<'b>(
+    at: &'b mut TickWorld<'_>,
+    entity: EntityId,
+    context: ScriptContext<'b>,
+) -> WorldHost<'b> {
+    WorldHost::new(
+        &mut *at.world,
+        entity,
+        context,
+        &mut *at.blackboard,
+        crate::HostServices {
+            spawning: Spawning {
+                prefabs: at.prefabs,
+                started: &at.started,
+                spawned: &mut at.spawned,
+            },
+            profiles: at.profiles,
+            // Reborrowed per tick rather than moved: every script in the
+            // pass reads the same frame's events and drives the same world,
+            // and one taking physics away from the rest would make which
+            // script ran first decide what the others could do.
+            physics: at.physics.as_mut().map(|physics| Physics2d {
+                world: &mut *physics.world,
+                events: physics.events,
+            }),
+            screen_ui: at.screen_ui,
+            aim: at.aim,
+            gestures: at.gestures,
+            camera_pan: at.camera_pan,
+            // Reborrowed per tick like physics: one stream, shared by every
+            // script in the pass, so a run's numbers are the run's.
+            random: at.random.as_deref_mut(),
+            saves: at.saves.as_deref_mut(),
+            effects: at.effects.as_deref_mut(),
+            // Reborrowed per tick like the rest: every script in the pass
+            // reads the same step's playback, and one taking the cursors
+            // away from the others would make which script ran first decide
+            // what the rest could see.
+            animations: at.animations.as_deref_mut(),
+            tile_sets: at.tile_sets,
+            audio: &mut *at.audio,
+            // Reborrowed per tick like the rest: one channel for the pass,
+            // so which script ran first does not decide who may ask.
+            scenes: at.scenes.as_deref_mut(),
+        },
+    )
+    .with_peers(Peers {
+        running: &mut *at.running,
+        starting: &mut *at.starting,
+        project: at.sources.project_ref(),
+        messages: &mut at.messages,
+    })
 }
 
 pub(super) fn ensure_compiled(
@@ -198,14 +270,13 @@ pub(super) fn ensure_compiled(
             asset: component.source.clone(),
         });
     };
-    if programs
-        .get(&component.source)
-        .is_some_and(|compiled| compiled.source == source)
-    {
+    if programs.get(&component.source).is_some_and(|compiled| {
+        compiled.source == source && compiled.project == sources.project_key()
+    }) {
         return Ok(());
     }
 
-    let lowered = lower_with_environment(source, &environment());
+    let lowered = lower_with_environment(source, sources.environment());
     let program = lowered.program.ok_or_else(|| ScriptFailure::Compile {
         asset: component.source.clone(),
         diagnostics: lowered
@@ -224,7 +295,8 @@ pub(super) fn ensure_compiled(
         component.source.clone(),
         Compiled {
             source: source.to_owned(),
-            program,
+            project: sources.project_key().to_owned(),
+            program: std::rc::Rc::new(program),
         },
     );
     Ok(())
@@ -263,7 +335,7 @@ pub(super) fn apply_properties(
     Ok(())
 }
 
-pub(super) fn to_value(value: &serde_json::Value) -> Option<Value> {
+pub(crate) fn to_value(value: &serde_json::Value) -> Option<Value> {
     Some(match value {
         serde_json::Value::Number(number) => Value::Number(number.as_f64()?),
         serde_json::Value::Bool(value) => Value::Bool(*value),

@@ -19,6 +19,9 @@ mod effects;
 mod gamepad;
 mod geometry;
 mod map;
+mod peers;
+
+pub(crate) use peers::Peers;
 mod person;
 mod physics;
 mod profile;
@@ -145,6 +148,8 @@ pub struct WorldHost<'a> {
     scenes: Option<&'a mut crate::SceneChannel>,
     /// What the script said, in order. Drained by the caller after the call.
     printed: Vec<String>,
+    /// The other scripts in the pass, for a host that runs several.
+    peers: Option<peers::Peers<'a>>,
 }
 
 impl Host for WorldHost<'_> {
@@ -244,7 +249,10 @@ impl Host for WorldHost<'_> {
             leaf(&under)
         };
         let Some(leaf) = found else {
-            return self.load_vector(subject, path, &under);
+            if let Some(vector) = self.load_vector(subject, path, &under)? {
+                return Ok(Some(vector));
+            }
+            return self.peer_load(subject, path);
         };
         let entity = self.subject(subject, path)?;
         let transform = self.transform_of(entity);
@@ -279,7 +287,10 @@ impl Host for WorldHost<'_> {
             leaf(&under)
         };
         let Some(leaf) = found else {
-            return self.store_vector(subject, path, &under, &value);
+            if self.store_vector(subject, path, &under, &value)? {
+                return Ok(true);
+            }
+            return self.peer_store(subject, path, value);
         };
         let entity = self.subject(subject, path)?;
         let number = number(path, &value)?;
@@ -375,9 +386,10 @@ impl Host for WorldHost<'_> {
     ) -> Result<Option<Value>, RuntimeError> {
         // Nothing on the surface is called *through* a reference: an entity is
         // a thing to read and write, not a thing with methods. Refusing here
-        // keeps `target.axis("a", "b")` from reaching `Input`.
+        // keeps `target.axis("a", "b")` from reaching `Input`. What is called
+        // through one is another script, and that is a message.
         if subject.is_some() {
-            return Ok(None);
+            return Ok(self.peer_call(subject, path, args));
         }
         let parts: Vec<&str> = path.0.iter().map(String::as_str).collect();
 
@@ -389,6 +401,13 @@ impl Host for WorldHost<'_> {
             && let Some(result) = self.namespaced_call(namespace, name, path, args)
         {
             return result.map(Some);
+        }
+
+        // `Bolt.on(entity)`: a script found by its type.
+        if let [script, name] = parts.as_slice()
+            && *name == crate::scripts::ON
+        {
+            return self.script_on(script, path, args);
         }
 
         Ok(None)

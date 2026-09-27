@@ -482,3 +482,68 @@ fn a_spawn_cascade_that_does_not_settle_is_reported_rather_than_run() {
         report.failures
     );
 }
+
+/// What `World.set_property` did by name, a typed write does by field: a
+/// spawned script's field set before it starts is what it starts with, and a
+/// misspelling is a compile error rather than a value nobody reads.
+#[test]
+fn a_spawner_sets_a_field_the_new_script_starts_with() {
+    let (mut world, sources, prefabs) = world(
+        r"
+        script Spawner {
+            @export let bullet: Prefab;
+            fn start() {
+                let shot = Bullet.on(World.spawn(this.bullet));
+                shot.speed = 30.0;
+                shot.heading = Vec2(0.0, -1.0);
+            }
+        }
+        ",
+        Some(
+            r"
+            script Bullet {
+                var speed: f32 = 1.0;
+                var heading: Vec2 = Vec2(1.0, 0.0);
+                fn start() {
+                    this.transform.position.x = speed * heading.x;
+                    this.transform.position.y = speed * heading.y;
+                }
+            }
+            ",
+        ),
+    );
+    let report = advance(&mut Scripts::new(), &mut world, &sources, &prefabs);
+    assert!(report.failures.is_empty(), "{:?}", report.failures);
+    let bullets = named(&world, "Bullet");
+    assert_eq!(bullets.len(), 1);
+    let position = bullets[0].transform_3d.expect("a transform").position;
+    assert!(
+        position[0].abs() < 1.0e-5 && (position[1] + 30.0).abs() < 1.0e-5,
+        "{position:?}"
+    );
+}
+
+/// While a project moves over one call at a time, a typed write to an
+/// `@export` field of a script that has not started is also what
+/// `World.property_number` reads, as `World.set_property` made it.
+#[test]
+fn a_typed_starting_value_is_what_an_untyped_read_sees() {
+    let (mut world, sources, prefabs) = world(
+        r#"
+        script Spawner {
+            @export let bullet: Prefab;
+            fn start() {
+                let shot = Bullet.on(World.spawn(this.bullet));
+                shot.speed = 30.0;
+                this.transform.position.x = World.property_number(shot, "speed", 0.0);
+            }
+        }
+        "#,
+        Some("script Bullet { @export let speed: f32 = 1.0; }"),
+    );
+    let report = advance(&mut Scripts::new(), &mut world, &sources, &prefabs);
+    assert!(report.failures.is_empty(), "{:?}", report.failures);
+    let spawner = named(&world, "Spawner");
+    let x = spawner[0].transform_3d.expect("a transform").position[0];
+    assert!((x - 30.0).abs() < 1.0e-5, "{x}");
+}

@@ -140,6 +140,22 @@ impl ProjectExport {
         let mut sources = ScriptSources::new();
         let mut scripts = Scripts::new();
         let mut walked: BTreeSet<String> = BTreeSet::new();
+        // Every script ships, not only those a scene names: any script may
+        // name any other by type (`Bolt.on(hit)`), so each one compiles
+        // against all of them, in the build as much as in the editor.
+        let assets_root = if project.join("assets").is_dir() {
+            project.join("assets")
+        } else {
+            project.to_path_buf()
+        };
+        for source in
+            sindri_assets::FileSystemAssetSource::new(&assets_root).assets_with_extension("decay")
+        {
+            if let Ok(text) = std::fs::read_to_string(resolve(project, &source)) {
+                wanted.insert(source.clone(), AssetKind::Script);
+                sources.insert(source, text);
+            }
+        }
         while let Some(world) = pending.pop() {
             for reference in referenced_textures(&world) {
                 wanted.insert(reference, AssetKind::Texture);

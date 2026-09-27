@@ -9,6 +9,11 @@
 mod environment;
 mod frame;
 mod person_surface;
+mod project;
+
+pub(crate) use project::ON;
+pub use project::Project;
+pub(crate) use run::to_value;
 mod run;
 mod sources;
 
@@ -39,6 +44,10 @@ pub use sources::ScriptSources;
 /// rather than being run until the frame is gone.
 const SPAWN_ROUNDS: usize = 8;
 
+/// How many rounds of messages sending messages a pass delivers before it
+/// stops. Enough for a reply to a reply; a loop that never ends is a bug.
+const MESSAGE_ROUNDS: usize = 8;
+
 /// How many entities one pass of scripts may create.
 ///
 /// Decay's operation budget already stops a loop that never ends, but it stops
@@ -50,7 +59,11 @@ pub(crate) const SPAWN_LIMIT_PER_PASS: usize = 4096;
 
 struct Compiled {
     source: String,
-    program: IrProgram,
+    /// The project's declared shape it was compiled against: another script
+    /// gaining or losing a field changes what this one may say about it.
+    project: String,
+    /// Shared so a call can hold its program while the cache is lent elsewhere.
+    program: std::rc::Rc<IrProgram>,
 }
 
 /// Files one tick's outcome into the report.
@@ -69,17 +82,32 @@ fn collect(
     }
 }
 
-struct Running {
+pub(crate) struct Running {
     elapsed_seconds: f32,
     source: String,
-    script: String,
-    instance: ScriptInstance,
+    pub(crate) script: String,
+    pub(crate) instance: ScriptInstance,
+}
+
+/// Fields set on scripts that have not started, by entity and field.
+pub(crate) type StartingValues = BTreeMap<EntityId, BTreeMap<String, decay_runtime::Value>>;
+
+/// A call one script made on another, waiting to be delivered.
+pub(crate) struct Message {
+    pub(crate) to: EntityId,
+    pub(crate) name: String,
+    pub(crate) args: Vec<decay_runtime::Value>,
 }
 
 #[derive(Default)]
 pub struct Scripts {
     programs: BTreeMap<String, Compiled>,
     running: BTreeMap<EntityId, Running>,
+    /// Fields another script set on one that has not started yet, applied
+    /// when it does. Held here rather than written into the scene's component:
+    /// they are the running game's, not the author's, and can name things only
+    /// a running game has — an entity, most usefully.
+    starting: StartingValues,
     blackboard: Blackboard,
     /// What scripts asked to play, for whoever owns an audio device to perform.
     audio: Vec<AudioCommand>,
@@ -187,12 +215,14 @@ impl Scripts {
         let Self {
             programs,
             running,
+            starting,
             blackboard,
             audio,
         } = self;
         let mut at = TickWorld {
             programs,
             running,
+            starting,
             blackboard,
             audio,
             world,
@@ -213,6 +243,7 @@ impl Scripts {
             tile_sets,
             started: BTreeSet::new(),
             spawned: Vec::new(),
+            messages: Vec::new(),
         };
         at.started.extend(at.running.keys().copied());
         let mut live = BTreeSet::new();
@@ -239,12 +270,53 @@ impl Scripts {
         }
 
         Self::start_spawned(&mut report, &mut live, &mut at, components, delta_seconds);
+        Self::deliver_messages(&mut report, &mut live, &mut at, components, delta_seconds);
 
         at.running.retain(|entity, _| live.contains(entity));
+        // What was waiting for something that never started goes with it.
+        let world = &*at.world;
+        at.starting.retain(|entity, _| world.get(*entity).is_some());
         let world = &*at.world;
         at.blackboard
             .retain_signals(|bits| world.get(EntityId::from_bits(bits)).is_some());
         report
+    }
+
+    /// Delivers the calls scripts made on each other this pass, in the order
+    /// they were made.
+    ///
+    /// After everything else, so a message sees the world its sender left, and
+    /// so a message to something spawned this pass reaches a script that has
+    /// started. A message may send another; those are delivered in a following
+    /// round, up to a bound, and a conversation that never ends is stopped and
+    /// reported rather than taking the frame with it.
+    fn deliver_messages(
+        report: &mut ScriptReport,
+        live: &mut BTreeSet<EntityId>,
+        at: &mut TickWorld<'_>,
+        components: &ComponentSchemaRegistry,
+        delta_seconds: f32,
+    ) {
+        for _ in 0..MESSAGE_ROUNDS {
+            let pending = std::mem::take(&mut at.messages);
+            if pending.is_empty() {
+                return;
+            }
+            for message in pending {
+                let entity = message.to;
+                collect(report, entity, run::deliver(at, message));
+            }
+            // A message may spawn, and what it spawns starts now like anything
+            // else spawned this pass.
+            Self::start_spawned(report, live, at, components, delta_seconds);
+        }
+        if !at.messages.is_empty() {
+            report.failures.push(ScriptFailure::MessagesDidNotSettle {
+                rounds: MESSAGE_ROUNDS,
+                waiting: at.messages.len(),
+            });
+            at.messages.clear();
+        }
     }
 
     /// Whether the world has stopped holding this entity part way through a

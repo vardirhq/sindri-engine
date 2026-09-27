@@ -24,6 +24,10 @@ pub struct Environment {
     /// host attached it to. A container field always wins, so a script can
     /// never be shadowed by the engine growing a name.
     pub(crate) this: HostType,
+    /// Named types that are also another named type: each script a host
+    /// describes is also an entity, so a `Bolt` goes wherever an `Entity`
+    /// does. One way only: an entity is not a `Bolt` until the host says so.
+    pub(crate) supertypes: HashMap<String, String>,
 }
 
 impl Environment {
@@ -60,6 +64,27 @@ impl Environment {
     /// Adds a callable member to `this`.
     pub fn add_this_function(&mut self, name: impl Into<String>, function: FunctionType) {
         self.this = std::mem::take(&mut self.this).with_function(name, function);
+    }
+
+    /// Says that every `name` is also a `supertype`.
+    pub fn add_supertype(&mut self, name: impl Into<String>, supertype: impl Into<String>) {
+        self.supertypes.insert(name.into(), supertype.into());
+    }
+
+    /// Whether a value of type `name` may be used as a `wanted`.
+    #[must_use]
+    pub fn is_a(&self, name: &str, wanted: &str) -> bool {
+        let mut current = name;
+        for _ in 0..8 {
+            if current == wanted {
+                return true;
+            }
+            match self.supertypes.get(current) {
+                Some(next) => current = next,
+                None => return false,
+            }
+        }
+        false
     }
 
     #[must_use]

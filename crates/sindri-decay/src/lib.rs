@@ -38,11 +38,12 @@ mod surface;
 
 pub use audio_host::{AudioCommand, HostServices, WorldHost};
 pub use blackboard::Blackboard;
-pub use check::{CheckPhase, SourceCheck, SourceDiagnostic, check_source};
+pub use check::{CheckPhase, SourceCheck, SourceDiagnostic, check_source, check_source_in};
 pub use component::ScriptComponent;
 /// A value a Decay script holds, re-exported so a host can name one without
 /// depending on the language crates directly.
 pub use decay_runtime::Value as ScriptValue;
+pub use decay_semantic::Environment as ScriptEnvironment;
 pub use error::ScriptFailure;
 pub use exports::ScriptExport;
 pub use host::{ScriptContext, Spawning};

@@ -220,22 +220,24 @@ script Player {
     }
 
     fn fire_one(x: f32, y: f32, dx: f32, dy: f32, damage: f32, crit: bool, size_scale: f32) {
-        let shot = World.spawn(this.bullet);
+        // Typed: a misspelt field is a compile error, not a property the
+        // bullet never reads.
+        let shot = Bullet.on(World.spawn(this.bullet));
         shot.transform.position.x = x;
         shot.transform.position.y = y;
         let size = Game.get("bullet_size", 1.0) * size_scale;
         shot.transform.scale.x *= size;
         shot.transform.scale.y *= size;
-        World.set_property(shot, "dir_x", dx);
-        World.set_property(shot, "dir_y", dy);
-        World.set_property(shot, "speed", Game.get("bullet_speed", 9.0));
-        World.set_property(shot, "damage", damage);
-        World.set_property(shot, "pierce", Game.get("pierce", 0.0));
-        World.set_property(shot, "missile", Game.get("missile", 0.0));
-        World.set_property(shot, "arc", Game.get("arc", 0.0));
-        World.set_property(shot, "nova", Game.get("nova", 0.0));
-        World.set_property(shot, "beam", Game.get("beam", 0.0));
-        World.set_property(shot, "crit_hit", if_number(crit));
+        shot.dir_x = dx;
+        shot.dir_y = dy;
+        shot.speed = Game.get("bullet_speed", 9.0);
+        shot.damage = damage;
+        shot.pierce = Game.get("pierce", 0.0);
+        shot.missile = Game.get("missile", 0.0);
+        shot.arc = Game.get("arc", 0.0);
+        shot.nova = Game.get("nova", 0.0);
+        shot.beam = Game.get("beam", 0.0);
+        shot.crit_hit = if_number(crit);
     }
 
     fn special_damage_multiplier() -> f32 {
