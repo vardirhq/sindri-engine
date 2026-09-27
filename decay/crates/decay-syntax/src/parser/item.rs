@@ -211,6 +211,9 @@ impl Parser<'_> {
                 }
             } else {
                 self.error_here("a state holds only fields: `var name: f32 = 0.0;`");
+                // Past the offending token first: recovery stops at `fn`,
+                // which is exactly what a state cannot hold.
+                self.advance();
                 self.synchronize_member();
             }
         }
