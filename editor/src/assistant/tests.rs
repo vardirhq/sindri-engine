@@ -79,43 +79,33 @@ fn everything_on_disk_but_unchecked_is_not_ready() {
     assert_eq!(setup(&machine), Setup::Unchecked);
 }
 
+/// Ready means set up and answering; each feature then switches on by its
+/// own test, so a model that fails one is still a working assistant.
 #[test]
-fn a_model_that_repaired_both_cases_is_ready() {
-    let machine = Machine {
-        has_runtime: true,
-        has_model: true,
-        verified: Some(vec![Feature::DecayRepair]),
-        ..pinned()
-    };
-    assert_eq!(
-        setup(&machine),
-        Setup::Ready {
-            verified: vec![Feature::DecayRepair]
-        }
-    );
+fn a_model_that_answers_is_ready_whatever_its_features_proved() {
+    for verified in [vec![Feature::DecayRepair], Vec::new()] {
+        let known = managed::Known {
+            checked: vec![Feature::DecayRepair],
+            verified,
+        };
+        let machine = Machine {
+            has_runtime: true,
+            has_model: true,
+            known: Some(known.clone()),
+            ..pinned()
+        };
+        assert_eq!(setup(&machine), Setup::Ready(known));
+    }
 }
 
+/// Everything the editor offers is tested before it is offered.
 #[test]
-fn a_model_that_could_not_repair_is_unusable() {
-    let machine = Machine {
-        has_runtime: true,
-        has_model: true,
-        verified: Some(Vec::new()),
-        ..pinned()
-    };
-    assert_eq!(setup(&machine), Setup::Unusable);
-}
-
-/// Required means something in the editor uses it, and is proved by a case.
-/// A requirement nothing tests could never be met; one nothing uses would
-/// withhold the assistant for a feature that does not exist.
-#[test]
-fn the_required_features_are_the_ones_the_editor_offers() {
-    assert!(Feature::DecayRepair.required());
-    assert!(!Feature::StructuredOutput.required());
-    assert!(!Feature::Vision.required());
-    for feature in Feature::ALL {
-        assert!(!feature.required() || feature.tested(), "{feature:?}");
+fn every_offered_feature_has_a_test_and_says_how_to_use_it() {
+    assert!(Feature::DecayRepair.tested());
+    assert!(!Feature::Vision.tested());
+    for feature in Feature::ALL.into_iter().filter(|feature| feature.tested()) {
+        assert!(feature.test().ends_with('.'), "{feature:?}");
+        assert!(feature.how_to_use().ends_with('.'), "{feature:?}");
     }
 }
 

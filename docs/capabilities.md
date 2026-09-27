@@ -1265,7 +1265,10 @@ frame.
   with SHA-256 and size) into the person's own data folder through the
   platform's curl, refuses any file whose hash does not match, unpacks the
   runner with `tar` beside its libraries, starts it on a free loopback port,
-  waits for its `/health`, and checks the model. The panel shows the four
+  waits for its `/health`, and tests that the model works: a question with a
+  known answer (17 + 25), passed only if the reply is 42. That test is of the
+  assistant, not of any feature, so "set up" means a model that runs here and
+  answers correctly. The panel shows the four
   steps as they happen — a check for each one done, a spinner and a sentence
   for the current one, and for downloads a bar with size, speed and time left,
   then "Checking the download…" while it is hashed. Stop works at every step.
@@ -1279,12 +1282,18 @@ frame.
   told the assistant is not available for them yet, because nothing is pinned
   for them.
 
-  Checking is real: the model is given two broken scripts — a misspelt host
-  name, and a script's own function called as `this.glow(...)` — and Decay
-  repair counts as verified only if it fixes both, graded by the compiler. The
-  result is saved against the exact model hash and runner build, so it
-  survives restarts and is redone if either changes. When ready, the panel
-  names the model and the disk it uses, says whether it is running or resting,
+  What it can do in the editor is tested afterwards, feature by feature, and
+  shown in the ready card under "What it can do in Sindri" — never as a setup
+  step. The test for Decay repair runs by itself as soon as setup finishes:
+  the model is given two broken scripts — a misspelt host name, and a script's
+  own function called as `this.glow(...)` — and repair switches on only if it
+  fixes both, graded by the compiler. A feature that did not pass is shown as
+  off, with "Test again", while the assistant itself stays set up; one that
+  could not be tested says why. Each result is saved against the exact model
+  hash and runner build, passed or not, so it survives restarts, is not re-run
+  every time the panel opens, and is redone if either file changes. When
+  ready, the panel names the model and the disk it uses, says whether it is
+  running or resting,
   stops it on request to free memory, and removes everything, after a
   confirmation, with one button. The server starts by itself on the first fix
   of a session and stops when the editor closes.

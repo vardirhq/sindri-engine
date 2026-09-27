@@ -61,19 +61,52 @@ fn what_was_proved_survives_a_restart_and_belongs_to_its_files() {
     let runtime = runtime_for("linux", "x86_64").expect("pinned");
     let model = model_file(MODEL).expect("pinned");
     assert_eq!(home.load(), None);
-    home.save(&Saved::new(&model, &runtime, &[Feature::DecayRepair]))
-        .expect("saved");
+    let mut saved = Saved::answering(&model, &runtime);
+    saved.record(&[Feature::DecayRepair], &[Feature::DecayRepair]);
+    home.save(&saved).expect("saved");
     let saved = home.load().expect("loaded");
-    assert_eq!(
-        saved.features_for(&model, &runtime),
-        Some(vec![Feature::DecayRepair])
-    );
+    let known = saved.known_for(&model, &runtime).expect("these files");
+    assert_eq!(known.verified, [Feature::DecayRepair]);
+    assert_eq!(known.checked, [Feature::DecayRepair]);
     // A different runner build proves nothing about this one.
     let newer = Asset {
         version: "b9999".to_owned(),
         ..runtime
     };
-    assert_eq!(saved.features_for(&model, &newer), None);
+    assert_eq!(saved.known_for(&model, &newer), None);
+}
+
+/// A failed test is remembered as tested, so it is not re-run every time the
+/// panel opens, and passing later replaces it.
+#[test]
+fn a_feature_that_did_not_pass_is_remembered_as_tested() {
+    let runtime = runtime_for("linux", "x86_64").expect("pinned");
+    let model = model_file(MODEL).expect("pinned");
+    let mut saved = Saved::answering(&model, &runtime);
+    assert_eq!(saved.known_for(&model, &runtime), Some(Known::default()));
+    saved.record(&[Feature::DecayRepair], &[]);
+    let known = saved.known_for(&model, &runtime).expect("these files");
+    assert!(known.verified.is_empty());
+    assert_eq!(known.checked, [Feature::DecayRepair]);
+    saved.record(&[Feature::DecayRepair], &[Feature::DecayRepair]);
+    let known = saved.known_for(&model, &runtime).expect("these files");
+    assert_eq!(known.verified, [Feature::DecayRepair]);
+    assert_eq!(known.checked, [Feature::DecayRepair]);
+}
+
+/// A record written before `checked` existed still reads: what passed was
+/// tested.
+#[test]
+fn an_older_record_reads_its_passes_as_tested() {
+    let runtime = runtime_for("linux", "x86_64").expect("pinned");
+    let model = model_file(MODEL).expect("pinned");
+    let text = format!(
+        r#"{{"model_sha256":"{}","runtime_version":"{}","verified":["decay_repair"]}}"#,
+        model.sha256, runtime.version
+    );
+    let saved: Saved = serde_json::from_str(&text).expect("an older record");
+    let known = saved.known_for(&model, &runtime).expect("these files");
+    assert_eq!(known.checked, [Feature::DecayRepair]);
 }
 
 #[test]

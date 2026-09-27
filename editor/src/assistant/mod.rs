@@ -97,24 +97,35 @@ impl Feature {
         }
     }
 
-    /// Whether the assistant is usable at all without it.
-    ///
-    /// The features something in the editor actually offers. Today that is
-    /// Decay repair, and a model that cannot repair has nothing to give the
-    /// editor however well it chats. Structured answers and tool calling join
-    /// this when scene proposals ship, because every one of those is a schema
-    /// and a tool call; until then, requiring them would withhold a working
-    /// feature for the sake of one that does not exist.
-    pub const fn required(self) -> bool {
-        matches!(self, Self::DecayRepair)
-    }
-
-    /// Whether verification has a case for it.
+    /// Whether verification has a case for it, which is also whether the
+    /// editor offers it: nothing is offered that was not tested, and each
+    /// tested feature is switched on by its own result alone, so a model that
+    /// fails one keeps the others.
     ///
     /// A feature with no case is not reported as failed — nothing asked the
     /// model to do it — but as not offered yet, which is the true answer.
     pub const fn tested(self) -> bool {
         matches!(self, Self::DecayRepair)
+    }
+
+    /// How to use it, once it has passed.
+    pub const fn how_to_use(self) -> &'static str {
+        match self {
+            Self::DecayRepair => {
+                "Open a script that does not compile and press Propose a fix under its errors."
+            }
+            _ => "",
+        }
+    }
+
+    /// What testing it involves, said while the test runs.
+    pub const fn test(self) -> &'static str {
+        match self {
+            Self::DecayRepair => {
+                "Sindri gives it two broken scripts and checks both fixes compile."
+            }
+            _ => "",
+        }
     }
 }
 
@@ -132,8 +143,9 @@ pub struct Machine {
     pub memory: Option<f32>,
     pub has_runtime: bool,
     pub has_model: bool,
-    /// What was proved about exactly these files, if they were checked.
-    pub verified: Option<Vec<Feature>>,
+    /// What is known about exactly these files; `None` until setup has seen
+    /// the model answer.
+    pub known: Option<managed::Known>,
     /// Bytes the assistant takes up on disk.
     pub footprint: u64,
 }
@@ -148,8 +160,8 @@ impl Machine {
             .as_ref()
             .is_some_and(|asset| home.server(asset).is_some());
         let has_model = model.as_ref().is_some_and(|asset| home.has_model(asset));
-        let verified = match (&runtime, &model, home.load()) {
-            (Some(runtime), Some(model), Some(saved)) => saved.features_for(model, runtime),
+        let known = match (&runtime, &model, home.load()) {
+            (Some(runtime), Some(model), Some(saved)) => saved.known_for(model, runtime),
             _ => None,
         };
         Self {
@@ -159,7 +171,7 @@ impl Machine {
             model,
             has_runtime,
             has_model,
-            verified,
+            known,
         }
     }
 }
@@ -171,12 +183,11 @@ pub enum Setup {
     Unavailable,
     /// Not set up, or set up part of the way: offer to finish it.
     Offer(Offer),
-    /// Everything is on disk but the model has not been checked.
+    /// Everything is on disk but the model has not been seen to answer.
     Unchecked,
-    /// Checked, and it can do what the editor offers.
-    Ready { verified: Vec<Feature> },
-    /// Checked, and it could not.
-    Unusable,
+    /// Set up and answering. Which features it offers is each feature's own
+    /// result, in `known`.
+    Ready(managed::Known),
 }
 
 /// What setting up will cost, said before anything starts.
@@ -197,19 +208,7 @@ pub fn setup(machine: &Machine) -> Setup {
         return Setup::Unavailable;
     };
     if machine.has_runtime && machine.has_model {
-        return match &machine.verified {
-            None => Setup::Unchecked,
-            Some(verified)
-                if Feature::ALL
-                    .into_iter()
-                    .all(|feature| !feature.required() || verified.contains(&feature)) =>
-            {
-                Setup::Ready {
-                    verified: verified.clone(),
-                }
-            }
-            Some(_) => Setup::Unusable,
-        };
+        return machine.known.clone().map_or(Setup::Unchecked, Setup::Ready);
     }
     let profile = catalogue::profile_for(&model.id);
     Setup::Offer(Offer {
@@ -230,18 +229,18 @@ pub enum Step {
     Runner,
     Model,
     Start,
-    Check,
+    Answer,
 }
 
 impl Step {
-    pub const ALL: [Self; 4] = [Self::Runner, Self::Model, Self::Start, Self::Check];
+    pub const ALL: [Self; 4] = [Self::Runner, Self::Model, Self::Start, Self::Answer];
 
     pub const fn title(self) -> &'static str {
         match self {
             Self::Runner => "Get the model runner",
             Self::Model => "Download the model",
             Self::Start => "Start it",
-            Self::Check => "Check it can fix scripts",
+            Self::Answer => "Test that it works",
         }
     }
 
@@ -251,7 +250,7 @@ impl Step {
             Self::Runner => "A small program that runs the model on your computer.",
             Self::Model => "The model itself. The largest part; it resumes if interrupted.",
             Self::Start => "Loading the model into memory. Usually under a minute.",
-            Self::Check => "Sindri gives it two broken scripts and checks both fixes compile.",
+            Self::Answer => "Asks it a question with a known answer and checks the reply is right.",
         }
     }
 }

@@ -11,6 +11,7 @@ use eframe::egui::{self, RichText};
 use egui_material_icons::MaterialIcon;
 
 use crate::assistant::install::Progress;
+use crate::assistant::managed::Known;
 use crate::assistant::{Feature, Offer, Setup, Step, Tier, setup, size};
 use crate::ui::icons;
 use crate::ui::theme::{color, metric, text};
@@ -25,6 +26,8 @@ enum Mark {
     Active,
     Waiting,
     Failed,
+    /// Tested and not passed: not an error, just not switched on.
+    Off,
 }
 
 impl EditorApp {
@@ -103,9 +106,8 @@ impl EditorApp {
             Setup::Offer(offer) => {
                 hero(
                     ui,
-                    "Fix broken scripts with a local AI",
-                    "An assistant that runs on your own computer and proposes fixes for Decay \
-                     scripts that do not compile.",
+                    "Sindri's assistant",
+                    "An AI that runs on your own computer and helps with your project.",
                 );
                 if card(ui, |ui| offered(ui, &offer)) {
                     self.begin_setup();
@@ -115,7 +117,7 @@ impl EditorApp {
                 hero(
                     ui,
                     "Almost done",
-                    "Everything is downloaded. One last check and it is ready.",
+                    "Everything is downloaded. One last test and it is ready.",
                 );
                 if card(ui, |ui| {
                     button::wide(
@@ -123,28 +125,7 @@ impl EditorApp {
                         icons::ASSISTANT,
                         "Finish setting up",
                         Intent::Primary,
-                        "Start the model and check it",
-                    )
-                    .clicked()
-                }) {
-                    self.begin_setup();
-                }
-            }
-            Setup::Ready { verified } => self.ready_card(ui, &verified),
-            Setup::Unusable => {
-                hero(
-                    ui,
-                    "The model did not pass",
-                    "It could not fix Sindri's two test scripts, so the editor will not offer its \
-                     fixes. Checking again sometimes helps.",
-                );
-                if card(ui, |ui| {
-                    button::wide(
-                        ui,
-                        icons::REFRESH,
-                        "Check again",
-                        Intent::Primary,
-                        "Run the check again",
+                        "Start the model and test that it works",
                     )
                     .clicked()
                 }) {
@@ -152,17 +133,18 @@ impl EditorApp {
                 }
                 self.remove_row(ui);
             }
+            Setup::Ready(known) => self.ready_card(ui, &known),
         }
     }
 
-    fn ready_card(&mut self, ui: &mut egui::Ui, verified: &[Feature]) {
+    fn ready_card(&mut self, ui: &mut egui::Ui, known: &Known) {
         hero(
             ui,
             "Your assistant is ready",
-            "Open a script that does not compile from the project browser, and press \
-             Propose a fix under its errors.",
+            "It runs on this computer. Nothing you write leaves it.",
         );
         let running = self.assistant.running();
+        let checking = self.assistant.checking.is_some();
         let (name, footprint) = self.assistant.machine.as_ref().map_or_else(
             || (String::new(), 0),
             |machine| {
@@ -176,22 +158,24 @@ impl EditorApp {
                 )
             },
         );
-        let stop = card(ui, |ui| {
+        let check_failed = self.assistant.check_failed.clone();
+        let (stop, check_again) = card(ui, |ui| {
             ui.horizontal(|ui| {
                 ui.label(RichText::new(&name).size(text::BODY).color(color::TEXT));
                 ui.label(faint(&format!("· {} on this computer", size(footprint))));
             });
-            ui.add_space(8.0);
+            ui.add_space(12.0);
+            ui.label(faint("WHAT IT CAN DO IN SINDRI"));
+            ui.add_space(6.0);
+            let mut check_again = false;
             for feature in Feature::ALL.into_iter().filter(|feature| feature.tested()) {
-                let proved = verified.contains(&feature);
-                step_row(
-                    ui,
-                    if proved { Mark::Done } else { Mark::Failed },
-                    feature.label(),
-                    None,
-                );
+                check_again |= feature_row(ui, feature, known, checking, check_failed.as_deref());
             }
-            ui.add_space(8.0);
+            ui.label(faint(
+                "More is added as Sindri grows. Each feature is tested on this computer \
+                 before it is offered.",
+            ));
+            ui.add_space(10.0);
             ui.horizontal(|ui| {
                 dot(
                     ui,
@@ -204,20 +188,28 @@ impl EditorApp {
                 ui.label(muted(if running {
                     "Running — using memory until you stop it or close Sindri"
                 } else {
-                    "Resting — starts by itself when you ask for a fix"
+                    "Resting — starts by itself when something needs it"
                 }));
             });
-            running
+            let stop = running
+                && !checking
                 && button::labelled(
                     ui,
                     "Stop the model",
                     Intent::Quiet,
                     "Free the memory it is using",
                 )
-                .clicked()
+                .clicked();
+            (stop, check_again)
         });
         if stop {
             self.stop_model();
+        }
+        if check_again {
+            self.begin_check();
+        }
+        if checking {
+            ui.ctx().request_repaint_after(Duration::from_millis(200));
         }
         self.remove_row(ui);
     }
@@ -268,7 +260,8 @@ fn offered(ui: &mut egui::Ui, offer: &Offer) -> bool {
     benefit(
         ui,
         icons::SCRIPT,
-        "When a script will not compile, it proposes a fix. You see the change and decide; nothing is written until you accept.",
+        "Starts with fixing Decay scripts that will not compile, with more to come. You see \
+         every change it suggests, and nothing is written until you accept.",
     );
     benefit(
         ui,
@@ -421,6 +414,44 @@ fn failed(ui: &mut egui::Ui, failure: &Shown) -> bool {
     .clicked()
 }
 
+/// One feature in the ready card, with its own test's state. Returns whether
+/// "Check again" was pressed.
+fn feature_row(
+    ui: &mut egui::Ui,
+    feature: Feature,
+    known: &Known,
+    checking: bool,
+    check_failed: Option<&str>,
+) -> bool {
+    let (mark, detail, retry) = if checking {
+        (Mark::Active, feature.test().to_owned(), false)
+    } else if known.verified.contains(&feature) {
+        (Mark::Done, feature.how_to_use().to_owned(), false)
+    } else if known.checked.contains(&feature) {
+        (
+            Mark::Off,
+            "Off: the model did not pass Sindri's test for this. Testing again sometimes \
+             helps."
+                .to_owned(),
+            true,
+        )
+    } else if let Some(said) = check_failed {
+        (Mark::Failed, format!("Could not be tested: {said}"), true)
+    } else {
+        (Mark::Waiting, "Not tested yet.".to_owned(), false)
+    };
+    step_row(ui, mark, feature.label(), Some(&detail));
+    retry && {
+        let mut pressed = false;
+        ui.horizontal(|ui| {
+            ui.add_space(22.0);
+            pressed =
+                button::labelled(ui, "Test again", Intent::Quiet, "Run this test again").clicked();
+        });
+        pressed
+    }
+}
+
 /// One step: its mark, its title, and while it matters, a line about it.
 fn step_row(ui: &mut egui::Ui, mark: Mark, title: &str, detail: Option<&str>) {
     ui.horizontal(|ui| {
@@ -430,13 +461,13 @@ fn step_row(ui: &mut egui::Ui, mark: Mark, title: &str, detail: Option<&str>) {
                 ui.add_sized(size, egui::Spinner::new().size(14.0).color(color::FORGE));
             }
             Mark::Done => glyph(ui, icons::DONE, color::SUCCESS),
-            Mark::Waiting => glyph(ui, icons::PENDING, color::LINE.gamma_multiply(1.6)),
+            Mark::Waiting | Mark::Off => glyph(ui, icons::PENDING, color::LINE.gamma_multiply(1.6)),
             Mark::Failed => glyph(ui, icons::FAILED, color::DANGER),
         }
         ui.label(RichText::new(title).size(text::LABEL).color(match mark {
             Mark::Active | Mark::Failed => color::TEXT,
             Mark::Done => color::TEXT_MUTED,
-            Mark::Waiting => color::TEXT_FAINT,
+            Mark::Waiting | Mark::Off => color::TEXT_FAINT,
         }));
     });
     if let Some(detail) = detail {

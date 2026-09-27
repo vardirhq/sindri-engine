@@ -14,10 +14,11 @@ use std::time::{Duration, Instant};
 
 use eframe::egui;
 
-use crate::assistant::install::{self, Failure, Finished, Shared};
+use crate::assistant::install::{self, Failure, Shared};
 use crate::assistant::managed::Home;
 use crate::assistant::server::{Runner, Server};
-use crate::assistant::{Machine, Setup, Step, setup};
+use crate::assistant::verify::Verdict;
+use crate::assistant::{Feature, Machine, Setup, Step, setup};
 use crate::ui::icons;
 use crate::ui::widgets::button::{self, Intent};
 
@@ -34,6 +35,10 @@ pub(crate) struct AssistantState {
     looked: Option<Instant>,
     job: Option<Job>,
     failure: Option<Shown>,
+    /// Testing what the model can do in the editor, after setup.
+    checking: Option<Checking>,
+    /// Why the last feature check could not run, when it could not.
+    check_failed: Option<String>,
     /// The running model, shared with whatever is asking it something.
     /// Dropping the last handle stops it.
     server: Arc<Mutex<Option<Server>>>,
@@ -45,8 +50,14 @@ pub(crate) struct AssistantState {
 /// A setup running on a worker.
 struct Job {
     shared: Arc<Shared>,
-    done: Receiver<Result<Finished, Failure>>,
+    done: Receiver<Result<Server, Failure>>,
     speed: Speed,
+}
+
+/// A feature check running on a worker.
+struct Checking {
+    shared: Arc<Shared>,
+    done: Receiver<Result<Verdict, String>>,
 }
 
 /// A failure as the panel shows it.
@@ -117,14 +128,33 @@ impl Connector {
     }
 }
 
+impl Connector {
+    /// Tests the editor's features against the model, starting it if needed.
+    fn check(&self, shared: &Shared) -> Result<Verdict, String> {
+        let (Some(runtime), Some(model)) = (&self.machine.runtime, &self.machine.model) else {
+            return Err("the assistant is not set up".to_owned());
+        };
+        let mut runner = self.connect(shared)?;
+        install::check_features(&self.home, runtime, model, &mut runner, &shared.cancel)
+            .map_err(|failure| failure.friendly())
+    }
+}
+
 impl AssistantState {
-    /// The model's name and a way to reach it, once it has proved it can
-    /// repair Decay on this machine.
+    /// The model's name and a way to reach it, once it has passed the repair
+    /// check on this machine.
     pub(crate) fn repairer(&self) -> Option<(String, Connector)> {
         let machine = self.machine.clone()?;
-        if !matches!(setup(&machine), Setup::Ready { .. }) {
+        let Setup::Ready(known) = setup(&machine) else {
+            return None;
+        };
+        if !known.verified.contains(&Feature::DecayRepair) {
             return None;
         }
+        self.connector(machine)
+    }
+
+    fn connector(&self, machine: Machine) -> Option<(String, Connector)> {
         let name = machine.model.as_ref()?.display_name.clone();
         Some((
             name,
@@ -148,6 +178,8 @@ impl EditorApp {
     pub(super) fn assistant_body(&mut self, ui: &mut egui::Ui) {
         self.look_when_due(ui.ctx());
         self.take_finished_job();
+        self.take_finished_check();
+        self.check_when_due();
         egui::ScrollArea::vertical()
             .auto_shrink([false; 2])
             .show(ui, |ui| self.assistant_card(ui));
@@ -203,6 +235,9 @@ impl EditorApp {
             return;
         };
         // One model at a time: a running one would be started a second time.
+        if let Some(checking) = self.assistant.checking.take() {
+            checking.shared.stop();
+        }
         if let Ok(mut server) = self.assistant.server.lock() {
             *server = None;
         }
@@ -236,16 +271,14 @@ impl EditorApp {
         self.assistant.job = None;
         self.assistant.looked = None;
         match result {
-            Ok(finished) => {
-                self.console.info(if finished.verified.is_empty() {
-                    "The local assistant is installed, but the model could not fix Sindri's \
-                     test scripts"
-                } else {
-                    "The local assistant is ready"
-                });
+            Ok(running) => {
+                self.console
+                    .info("The local assistant is set up and working");
                 if let Ok(mut server) = self.assistant.server.lock() {
-                    *server = Some(finished.server);
+                    *server = Some(running);
                 }
+                // What it can do is found out afresh for the new files.
+                self.assistant.check_failed = None;
             }
             Err(failure) if failure.cancelled() => {
                 self.console.info("Stopped setting up the local assistant");
@@ -263,6 +296,10 @@ impl EditorApp {
     }
 
     fn stop_model(&mut self) {
+        // A test in flight would only start the model again.
+        if let Some(checking) = self.assistant.checking.take() {
+            checking.shared.stop();
+        }
         if let Ok(mut server) = self.assistant.server.lock() {
             *server = None;
         }
@@ -281,5 +318,86 @@ impl EditorApp {
         }
         self.assistant.machine = None;
         self.assistant.looked = None;
+    }
+}
+
+impl EditorApp {
+    /// Starts testing the editor's features when the assistant is working and
+    /// some feature has never been tested against these files — right after
+    /// setup, and after the model or runner changes.
+    fn check_when_due(&mut self) {
+        if self.assistant.job.is_some()
+            || self.assistant.checking.is_some()
+            || self.assistant.check_failed.is_some()
+            || self.assistant.looking.is_some()
+        {
+            return;
+        }
+        let Some(machine) = self.assistant.machine.clone() else {
+            return;
+        };
+        let Setup::Ready(known) = setup(&machine) else {
+            return;
+        };
+        let untested = Feature::ALL
+            .into_iter()
+            .any(|feature| feature.tested() && !known.checked.contains(&feature));
+        if untested {
+            self.begin_check();
+        }
+    }
+
+    /// Tests the features now, including ones already tested.
+    pub(super) fn begin_check(&mut self) {
+        let Some(machine) = self.assistant.machine.clone() else {
+            return;
+        };
+        let Some((_, connector)) = self.assistant.connector(machine) else {
+            return;
+        };
+        let shared = Arc::new(Shared::default());
+        let worker = Arc::clone(&shared);
+        let (sender, done) = channel();
+        std::thread::spawn(move || {
+            let _ = sender.send(connector.check(&worker));
+        });
+        self.assistant.check_failed = None;
+        self.assistant.checking = Some(Checking { shared, done });
+    }
+
+    fn take_finished_check(&mut self) {
+        let Some(checking) = &self.assistant.checking else {
+            return;
+        };
+        let result = match checking.done.try_recv() {
+            Ok(result) => result,
+            Err(TryRecvError::Empty) => return,
+            Err(TryRecvError::Disconnected) => {
+                self.assistant.checking = None;
+                return;
+            }
+        };
+        self.assistant.checking = None;
+        self.assistant.looked = None;
+        match result {
+            Ok(verdict) => {
+                for feature in Feature::ALL.into_iter().filter(|f| f.tested()) {
+                    let passed = verdict.verified.contains(&feature);
+                    self.console.info(format!(
+                        "Local assistant: {} {}",
+                        feature.label(),
+                        if passed {
+                            "passed its check"
+                        } else {
+                            "did not pass its check"
+                        }
+                    ));
+                }
+                for note in verdict.notes {
+                    self.console.info(note);
+                }
+            }
+            Err(said) => self.assistant.check_failed = Some(said),
+        }
     }
 }

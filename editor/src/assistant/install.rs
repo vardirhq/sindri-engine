@@ -1,5 +1,10 @@
-//! Doing the setup: fetch, unpack, start, check — on a worker, reporting as it
+//! Doing the setup: fetch, unpack, start, test — on a worker, reporting as it
 //! goes, and stoppable at every step.
+//!
+//! The test at the end is of the assistant, not of any one feature: a question
+//! with a known answer, so "set up" means a model that runs here and replies
+//! correctly. What it can do in the editor is tested afterwards, feature by
+//! feature, by [`check_features`].
 //!
 //! Each step is skipped when its result is already on disk, so running setup
 //! again after an interruption costs only what is missing, and a download that
@@ -9,10 +14,11 @@ use std::path::Path;
 use std::sync::Mutex;
 use std::sync::atomic::{AtomicBool, Ordering};
 
+use super::chat::{Message, Model, Role};
 use super::fetch::{Asset, Trouble, fetch, watched_transport};
 use super::managed::{Home, Saved, unpack};
 use super::server::{Server, StartError};
-use super::verify::verify;
+use super::verify::{Verdict, verify};
 use super::{Feature, Step};
 
 /// Where a running setup has got to, read by the panel every frame.
@@ -72,7 +78,10 @@ pub enum Failure {
     Unpack(std::io::Error),
     #[error("starting: {0}")]
     Start(StartError),
-    #[error("saving what was checked: {0}")]
+    /// It started, but did not answer the test question correctly.
+    #[error("the test question was answered with {0:?}")]
+    Wrong(String),
+    #[error("saving the result: {0}")]
     Save(std::io::Error),
 }
 
@@ -82,7 +91,7 @@ impl Failure {
             Self::Download { step, .. } => *step,
             Self::Unpack(_) => Step::Runner,
             Self::Start(_) => Step::Start,
-            Self::Save(_) => Step::Check,
+            Self::Wrong(_) | Self::Save(_) => Step::Answer,
         }
     }
 
@@ -104,8 +113,12 @@ impl Failure {
                                 happening, remove the assistant and set it up afresh."
                 .to_owned(),
             Self::Start(error) => error.friendly(),
-            Self::Save(_) => "The model passed, but Sindri could not write down that it \
-                              did. Check that your disk is not full."
+            Self::Wrong(_) => "The model started but did not answer correctly. Try again; \
+                               if it keeps happening, remove the assistant and set it up \
+                               again, which replaces a damaged model file."
+                .to_owned(),
+            Self::Save(_) => "The model works, but Sindri could not write that down. Check \
+                              that your disk is not full."
                 .to_owned(),
         }
     }
@@ -119,31 +132,82 @@ impl Failure {
     }
 }
 
-/// A finished setup: the server, running, and what the model proved.
-pub struct Finished {
-    pub server: Server,
-    pub verified: Vec<Feature>,
+/// The question setup ends on, and the answer it must contain.
+///
+/// Arithmetic because the answer is not a matter of opinion or phrasing, and
+/// small enough that any working model gets it: a wrong or empty reply means
+/// the runtime, the model file or the chat template is broken, not that the
+/// model is weak.
+pub const TEST_QUESTION: &str = "What is 17 + 25? Reply with only the number.";
+pub const TEST_ANSWER: &str = "42";
+
+/// Whether a reply to the test question is right.
+pub fn answers_correctly(reply: &str) -> bool {
+    reply
+        .split(|c: char| !c.is_ascii_digit())
+        .any(|number| number == TEST_ANSWER)
 }
 
-/// Runs every step that is not already done.
+/// Asks the test question.
+pub fn test(model: &mut dyn Model) -> Result<(), Failure> {
+    let reply = model
+        .reply(&[Message::new(Role::User, TEST_QUESTION)])
+        .map_err(|error| Failure::Wrong(error.to_string()))?;
+    if answers_correctly(&reply) {
+        Ok(())
+    } else {
+        Err(Failure::Wrong(reply.chars().take(80).collect()))
+    }
+}
+
+/// Runs every step that is not already done, ending on the test question, and
+/// hands back the running server.
 pub fn install(
     home: &Home,
     runtime: &Asset,
     model: &Asset,
     shared: &Shared,
-) -> Result<Finished, Failure> {
+) -> Result<Server, Failure> {
     let server = start(home, runtime, model, shared)?;
-    shared.begin(Step::Check, 0);
-    let verdict = verify(&mut server.model(), &shared.cancel);
+    shared.begin(Step::Answer, 0);
+    test(&mut server.model())?;
     if shared.cancel.load(Ordering::Relaxed) {
         return Err(Failure::Start(StartError::Cancelled));
     }
-    home.save(&Saved::new(model, runtime, &verdict.verified))
-        .map_err(Failure::Save)?;
-    Ok(Finished {
-        server,
-        verified: verdict.verified,
-    })
+    // Kept over a record for these same files, so testing again after a
+    // failed start does not forget what the features proved.
+    let saved = home
+        .load()
+        .filter(|saved| saved.known_for(model, runtime).is_some())
+        .unwrap_or_else(|| Saved::answering(model, runtime));
+    home.save(&saved).map_err(Failure::Save)?;
+    Ok(server)
+}
+
+/// Tests each feature the editor offers against a running model, and records
+/// the outcome — passed or not — so it is not asked again for these files.
+pub fn check_features(
+    home: &Home,
+    runtime: &Asset,
+    model: &Asset,
+    running: &mut dyn Model,
+    cancel: &AtomicBool,
+) -> Result<Verdict, Failure> {
+    let verdict = verify(running, cancel);
+    if cancel.load(Ordering::Relaxed) {
+        return Err(Failure::Start(StartError::Cancelled));
+    }
+    let tested: Vec<Feature> = Feature::ALL
+        .into_iter()
+        .filter(|feature| feature.tested())
+        .collect();
+    let mut saved = home
+        .load()
+        .filter(|saved| saved.known_for(model, runtime).is_some())
+        .unwrap_or_else(|| Saved::answering(model, runtime));
+    saved.record(&tested, &verdict.verified);
+    home.save(&saved).map_err(Failure::Save)?;
+    Ok(verdict)
 }
 
 /// Gets the runner and model onto disk if they are not, and starts the server.
