@@ -170,6 +170,7 @@ impl Analyzer<'_, '_> {
                 if object_type.dimensions().is_some() && self.value_rooted(object) {
                     self.check_component_target(object, target.span);
                 }
+                self.check_state_assignment(object, field, target.span);
                 self.member_of(object, &object_type, field, target.span)
             }
             _ => {

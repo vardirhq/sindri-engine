@@ -11,8 +11,8 @@ mod frame;
 mod person_surface;
 mod project;
 
-pub(crate) use project::ON;
 pub use project::Project;
+pub(crate) use project::{ON, SharedField, board_key};
 pub(crate) use run::to_value;
 mod run;
 mod sources;

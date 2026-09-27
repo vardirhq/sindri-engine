@@ -16,6 +16,7 @@ mod call;
 mod convert;
 mod dispatch;
 mod effects;
+mod frame;
 mod gamepad;
 mod geometry;
 mod map;
@@ -29,6 +30,7 @@ mod random;
 mod save;
 mod scene;
 mod services;
+mod shared;
 mod tiles;
 mod ui;
 
@@ -45,10 +47,10 @@ use self::convert::{as_f32, describe, number};
 use crate::{
     Blackboard, PrefabSources, ProfileSources,
     surface::{
-        AIM, AIM_VALUES, CAMERA, CAMERA_VALUES, CONSTANTS, FUNCTIONS, GESTURE, GESTURE_VALUES,
-        Handle, HostFunction, Leaf, POINTER, POINTER_VALUES, PRINT, STICK, STICK_VALUES, TIME,
-        TIME_VALUES, TOUCH, TOUCH_COUNT, TimeValue, VIEWPORT, VIEWPORT_VALUES, ViewportValue,
-        follow_mut, handle, leaf, leaf_through_reference, vector_components,
+        AIM, AIM_VALUES, CAMERA, CAMERA_VALUES, FUNCTIONS, GESTURE, GESTURE_VALUES, Handle,
+        HostFunction, Leaf, POINTER, POINTER_VALUES, PRINT, STICK, STICK_VALUES, TOUCH,
+        TOUCH_COUNT, VIEWPORT, VIEWPORT_VALUES, ViewportValue, follow_mut, handle, leaf,
+        leaf_through_reference, vector_components,
     },
 };
 
@@ -156,29 +158,18 @@ impl Host for WorldHost<'_> {
     fn load(&mut self, subject: Option<u64>, path: &Path) -> Result<Option<Value>, RuntimeError> {
         let parts: Vec<&str> = path.0.iter().map(String::as_str).collect();
 
-        // `Time.delta` and the like: the frame, not the world. Never about a
-        // subject, so a reference cannot be asked for the time.
+        // `Game.score`: a declared state, before any namespace the engine
+        // offers, since a state may add to one.
         if subject.is_none()
-            && let [namespace, name] = parts.as_slice()
-            && *namespace == TIME
+            && let Some(value) = self.shared_load(path)
         {
-            return Ok(TIME_VALUES
-                .iter()
-                .find(|(known, _)| known == name)
-                .map(|(_, value)| {
-                    Value::Number(f64::from(match value {
-                        TimeValue::Delta => self.context.delta_seconds,
-                        TimeValue::Elapsed => self.context.elapsed_seconds,
-                    }))
-                }));
+            return Ok(Some(value));
         }
 
-        // `PI` and the like: named numbers, the same everywhere.
         if subject.is_none()
-            && let [name] = parts.as_slice()
-            && let Some((_, number)) = CONSTANTS.iter().find(|(known, _)| known == name)
+            && let Some(value) = self.time_or_constant(&parts)
         {
-            return Ok(Some(Value::Number(*number)));
+            return Ok(Some(value));
         }
 
         // Where the person is pointing, and how many fingers are down. Facts
@@ -278,6 +269,9 @@ impl Host for WorldHost<'_> {
         path: &Path,
         value: Value,
     ) -> Result<bool, RuntimeError> {
+        if subject.is_none() && self.shared_store(path, &value)? {
+            return Ok(true);
+        }
         let Some(under) = Self::addressed(subject, path) else {
             return Ok(false);
         };

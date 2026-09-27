@@ -56,8 +56,10 @@ impl<'a> Parser<'a> {
                 self.parse_container(false)
             } else if self.at_word(item::EVENT) {
                 self.parse_event()
+            } else if self.at_word(item::STATE) {
+                self.parse_state()
             } else {
-                self.error_here("expected `script`, `component`, or `event`");
+                self.error_here("expected `script`, `component`, `event`, or `state`");
                 self.advance();
                 None
             };

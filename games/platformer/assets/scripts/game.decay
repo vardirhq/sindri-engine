@@ -1,0 +1,7 @@
+// What the run shares, declared once: the hero keeps it, the HUD shows it.
+state Game {
+    var coins: f32 = 0.0;
+    var coins_total: f32 = 0.0;
+    var falls: f32 = 0.0;
+    var won: bool = false;
+}

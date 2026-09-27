@@ -28,6 +28,7 @@ to change. Nothing here is a compatibility promise.
 - [Fields](#fields)
 - [Functions](#functions)
 - [Events](#events)
+- [State](#state)
 - [Statements](#statements)
 - [Expressions](#expressions)
 - [Scope](#scope)
@@ -110,9 +111,9 @@ script  component  fn  let  var  if  else  while  for  in  break
 continue  return  true  false  null
 ```
 
-All sixteen are reserved. Two words are special only where no other name could
-stand: `event` at the start of an item, and `on` followed by a name at the
-start of a member (see [Events](#events)). Elsewhere both are ordinary
+All sixteen are reserved. Three words are special only where no other name
+could stand: `event` and `state` at the start of an item, and `on` followed by
+a name at the start of a member (see [Events](#events) and [State](#state)). Elsewhere both are ordinary
 identifiers, so `Bolt.on(hit)` and a local called `event` are unaffected.
 
 ### Number literals
@@ -157,7 +158,8 @@ is no indexing and there are no array literals.
 ```ebnf
 program      = { item } ;
 item         = ( "script" | "component" ) IDENT "{" { member } "}"
-             | "event" IDENT "(" [ params ] ")" ";" ;
+             | "event" IDENT "(" [ params ] ")" ";"
+             | "state" IDENT "{" { field } "}" ;
 member       = { attribute } ( field | function | handler ) ;
 attribute    = "@" IDENT ;
 
@@ -519,6 +521,43 @@ script with a handler; see `docs/scripting.md`.
 A host may declare events of its own — Sindri declares every event in the
 project, so a file handles one declared in another — through the environment.
 One the host reports as declared more than once cannot be used.
+
+---
+
+## State
+
+A `state` declares values every script shares, reached by name:
+
+```rust
+state Tuning {
+    let gravity: f32 = 30.0;
+    var paused = false;
+}
+
+script Body {
+    fn update(dt: f32) {
+        if !Tuning.paused { this.transform.position.y -= Tuning.gravity * dt; }
+    }
+}
+```
+
+- **Fields only.** Each holds an `f32` or a `bool`, and its initializer is a
+  literal — a number, a negated number, `true` or `false` — since it is set up
+  before any script runs. A written type must match the literal.
+- **`let` is fixed**: assigning to one is a diagnostic. `var` may be written
+  from anywhere.
+- **Declared once per field.** Several declarations may add fields to the same
+  name; a field declared twice is a diagnostic. A state may not take a
+  container's or an event's name. It may share a name with a namespace the
+  host offers — Sindri's `Game` — as long as it redefines none of its
+  members; its fields are then found first.
+- A misspelt field is a diagnostic, as for any described type. A local of the
+  same name shadows the state.
+
+**Where the values live is the host's decision.** `Tuning.gravity` lowers to
+the host path `Tuning.gravity`, as a read of any host value does. Sindri keeps
+them on its board; see `docs/scripting.md`. A host describes a project's
+state to a file through the environment, as it does events.
 
 ---
 

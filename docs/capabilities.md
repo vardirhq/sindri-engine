@@ -1678,6 +1678,14 @@ gameplay in `games/orbital-last-stand`.
 The board is still there and still earns its place, for facts that belong to the
 game rather than to an entity — the score, whether the game is won.
 
+A project can also declare what goes on the board: `state Game { var score:
+f32 = 0.0; }` in any file makes `Game.score` a checked name every script reads
+and writes, with one type and one starting value, stored under the same board
+name so `Game.get("score", 0.0)` still sees it. A misspelt name, a wrong type
+and a write to a `let` are compile errors across files. Exercised in
+`crates/sindri-decay/tests/scripts_share_state.rs`, and by Scorchball and the
+platformer, whose shared values are declared this way.
+
 **A script can speak in the tilemap's coordinates.** `Grid.position_x` and
 `Grid.position_y` invert a tilemap's projection and full world-XY transform;
 `Grid.place` projects a continuous logical position back while preserving the

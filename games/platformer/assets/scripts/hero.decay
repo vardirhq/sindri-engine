@@ -23,15 +23,15 @@ script Hero {
     var shown: f32 = 0.0;
 
     fn start() {
-        Game.set("coins", 0.0);
-        Game.set("coins_total", World.with_tag("coin").len);
-        Game.set("won", 0.0);
-        Game.set("falls", 0.0);
+        Game.coins = 0.0;
+        Game.coins_total = World.with_tag("coin").len;
+        Game.won = false;
+        Game.falls = 0.0;
     }
 
     fn update(dt: f32) {
         touch();
-        if Game.get("won", 0.0) > 0.0 {
+        if Game.won {
             Physics.set_velocity(this.entity, 0.0, Physics.velocity_y(this.entity));
             show(0.0);
             return;
@@ -94,9 +94,9 @@ script Hero {
                 this.ground += 1.0;
             } else if World.has_tag(other, "coin") && World.exists(other) {
                 World.despawn(other);
-                Game.set("coins", Game.get("coins", 0.0) + 1.0);
+                Game.coins += 1.0;
             } else if World.has_tag(other, "goal") {
-                Game.set("won", 1.0);
+                Game.won = true;
             }
         }
         for other in Physics.sensor_exited() {
@@ -111,7 +111,7 @@ script Hero {
         this.transform.position.y = this.spawn_y;
         Physics.set_velocity(this.entity, 0.0, 0.0);
         this.ground = 0.0;
-        Game.set("falls", Game.get("falls", 0.0) + 1.0);
+        Game.falls += 1.0;
     }
 
     fn show(state: f32) {

@@ -12,6 +12,18 @@ pub enum Item {
     /// `event GoalScored(team: f32);`: something that happens, which any
     /// script may emit and any script may handle.
     Event(EventDecl),
+    /// `state Game { var score: f32 = 0.0; }`: values every script shares,
+    /// reached as `Game.score`.
+    State(StateDecl),
+}
+
+/// Shared, typed values under one name. Several declarations may add to the
+/// same name, as long as no field is declared twice.
+#[derive(Debug, Clone, PartialEq)]
+pub struct StateDecl {
+    pub name: String,
+    pub fields: Vec<FieldDecl>,
+    pub span: Span,
 }
 
 /// A declared event: its name, and what it carries.

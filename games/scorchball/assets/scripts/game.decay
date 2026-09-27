@@ -1,0 +1,18 @@
+// What the whole match shares, declared once: every script reads and writes
+// these as `Game.phase` and so on, checked when the project compiles.
+state Game {
+    // 0 is the lobby, 1 the countdown, 2 play.
+    var phase: f32 = 0.0;
+    var score_blue: f32 = 0.0;
+    var score_red: f32 = 0.0;
+    // Sideways push on the pitch while a Wind power-up blows; 0 when calm.
+    var wind: f32 = 0.0;
+    // The slot of whoever has the ball, or 0 when it is loose.
+    var holder: f32 = 0.0;
+    // How many players the match has made, bots included.
+    var joins: f32 = 0.0;
+    // The title screen has been dismissed.
+    var menu_done: bool = false;
+    // The title screen asked for a bot to play against.
+    var versus_bot: bool = false;
+}

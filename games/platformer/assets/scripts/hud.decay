@@ -7,9 +7,9 @@ script Hud {
     }
 
     fn update(dt: f32) {
-        Ui.set_numbers(this.entity, Game.get("coins", 0.0), Game.get("coins_total", 0.0));
+        Ui.set_numbers(this.entity, Game.coins, Game.coins_total);
         if this.banner != null {
-            World.set_active(this.banner, Game.get("won", 0.0) > 0.0);
+            World.set_active(this.banner, Game.won);
         }
     }
 }

@@ -78,7 +78,7 @@ pub fn check_source_in(source: &str, environment: &decay_semantic::Environment) 
         .iter()
         .filter_map(|item| match item {
             Item::Script(container) | Item::Component(container) => Some(container.name.clone()),
-            Item::Event(_) => None,
+            Item::Event(_) | Item::State(_) => None,
         })
         .collect();
     let diagnostics = lowered

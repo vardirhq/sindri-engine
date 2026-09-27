@@ -37,7 +37,7 @@ pub(crate) fn container_members(source: &str) -> Vec<(String, ExternalSymbol)> {
     let parsed = parse(source);
     let Some(container) = parsed.program.items.iter().find_map(|item| match item {
         Item::Script(container) | Item::Component(container) => Some(container),
-        Item::Event(_) => None,
+        Item::Event(_) | Item::State(_) => None,
     }) else {
         return Vec::new();
     };
@@ -117,6 +117,47 @@ pub(crate) fn events(environment: &Environment, source: &str) -> Vec<(String, Ve
         }
     }
     events
+}
+
+/// A state's fields, the project's and the file's own: what `Game.` offers
+/// beyond the namespace itself.
+pub(crate) fn state_fields(
+    environment: &Environment,
+    source: &str,
+    state: &str,
+) -> Vec<(String, ExternalSymbol)> {
+    let mut fields: Vec<(String, ExternalSymbol)> = environment
+        .state_fields(state)
+        .map(|(name, field)| (name.to_owned(), ExternalSymbol::Value(field.ty.clone())))
+        .collect();
+    for item in parse(source).program.items {
+        let Item::State(declared) = item else {
+            continue;
+        };
+        if declared.name != state {
+            continue;
+        }
+        for field in declared.fields {
+            if !fields.iter().any(|(name, _)| *name == field.name) {
+                let ty = field.ty.as_ref().map_or(Type::Unknown, Type::from_ref);
+                fields.push((field.name, ExternalSymbol::Value(ty)));
+            }
+        }
+    }
+    fields
+}
+
+/// Every state name the file may reach.
+pub(crate) fn states(environment: &Environment, source: &str) -> Vec<String> {
+    let mut names: Vec<String> = environment.states().map(str::to_owned).collect();
+    for item in parse(source).program.items {
+        if let Item::State(declared) = item
+            && !names.contains(&declared.name)
+        {
+            names.push(declared.name);
+        }
+    }
+    names
 }
 
 /// `emit`, the one member an event has.
