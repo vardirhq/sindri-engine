@@ -42,6 +42,10 @@ pub enum ValueMember {
     Construct(usize),
     /// A vector property or method: `v.length`, `a.dot(b)`.
     Vector(decay_syntax::VectorOp),
+    /// Starting a timer: `Timer(seconds)`.
+    StartTimer,
+    /// A timer's property: `t.done`, `t.left`.
+    Timer(decay_syntax::TimerProperty),
 }
 
 /// Which member read, call or construction the language performs itself, by

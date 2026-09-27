@@ -15,10 +15,10 @@ impl Analyzer<'_, '_> {
         for member in &container.members {
             match member {
                 Member::Field(field) => {
-                    let ty = field
-                        .ty
-                        .as_ref()
-                        .map_or(Type::Unknown, |ty| self.resolve_type(ty));
+                    let ty = field.ty.as_ref().map_or_else(
+                        || built_value_type(field.initializer.as_ref()),
+                        |ty| self.resolve_type(ty),
+                    );
                     self.insert_member(
                         &mut members,
                         &field.name,
@@ -246,5 +246,27 @@ impl Analyzer<'_, '_> {
 
     pub(super) fn is_container(&self, name: &str) -> bool {
         self.containers.contains(name)
+    }
+}
+
+/// The type of a field left unannotated whose initializer builds one of the
+/// language's own values: `var fuse = Timer(2.0);`, `var at = Vec2(0.0, 0.0);`.
+///
+/// Only those, and only when spelled as the construction: their members are
+/// answered by the language rather than the host, so a field of unknown type
+/// would read `fuse.left` as a host path and fail when it ran. Every other
+/// unannotated field stays unknown, as it always was.
+fn built_value_type(initializer: Option<&Expr>) -> Type {
+    let Some(ExprKind::Call { callee, .. }) = initializer.map(|expr| &expr.kind) else {
+        return Type::Unknown;
+    };
+    match &callee.kind {
+        ExprKind::Identifier(name) => match name.as_str() {
+            crate::types::VEC2 => Type::Vec2,
+            crate::types::VEC3 => Type::Vec3,
+            crate::types::TIMER => Type::Timer,
+            _ => Type::Unknown,
+        },
+        _ => Type::Unknown,
     }
 }

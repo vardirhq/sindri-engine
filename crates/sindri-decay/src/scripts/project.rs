@@ -365,6 +365,7 @@ fn literal_type(initializer: Option<&decay_syntax::Expr>) -> Type {
         Some(ExprKind::Call { callee, .. }) => match &callee.kind {
             ExprKind::Identifier(name) if name == "Vec2" => Type::Vec2,
             ExprKind::Identifier(name) if name == "Vec3" => Type::Vec3,
+            ExprKind::Identifier(name) if name == decay_semantic::TIMER => Type::Timer,
             _ => Type::Unknown,
         },
         _ => Type::Unknown,

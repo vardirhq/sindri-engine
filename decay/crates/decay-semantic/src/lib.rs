@@ -20,10 +20,10 @@ use decay_syntax::parse;
 
 use analyzer::Analyzer;
 
-pub use decay_syntax::VectorOp;
+pub use decay_syntax::{TimerProperty, VectorOp};
 pub use diagnostic::{Analysis, Diagnostic, DiagnosticPhase, ValueMember, ValueMembers};
 pub use environment::{Environment, ExternalSymbol, StateField};
-pub use types::{COMPONENTS, EMIT, FunctionType, HostType, Type, event_type};
+pub use types::{COMPONENTS, EMIT, FunctionType, HostType, TIMER, Type, event_type};
 
 #[must_use]
 pub fn analyze(source: &str) -> Analysis {

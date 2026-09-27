@@ -28,6 +28,9 @@ pub enum RuntimeError {
     /// Something that is not a vector was asked for a component or a vector
     /// operation, named by what it actually is.
     NotAVector(String),
+    /// Something that is not a timer was read as one, or a timer was started
+    /// from something that is not a number of seconds, named by what it was.
+    NotATimer(String),
     /// An index that is not a number at all.
     IndexNotANumber(String),
     /// An index that is a number and not a position: fractional, negative, or

@@ -32,6 +32,9 @@ pub fn event_type(event: &str) -> String {
     format!("event {event}")
 }
 
+/// How a timer is spelled, as a type and as the call that starts one.
+pub const TIMER: &str = "Timer";
+
 /// Component names, in order. `x` and `y` for both; `z` only for `Vec3`.
 pub const COMPONENTS: [&str; 3] = ["x", "y", "z"];
 
@@ -50,6 +53,10 @@ pub enum Type {
     Vec2,
     /// Three numbers, `x`, `y` and `z`: a position, a scale.
     Vec3,
+    /// A countdown: `Timer(2.4)` runs out 2.4 seconds later. The host decides
+    /// when time passes; Sindri runs down every timer a script's fields hold
+    /// before each `update`.
+    Timer,
     /// A fixed-length collection of one element type.
     ///
     /// The only generic type the language has, and it is not user-definable:
@@ -70,6 +77,7 @@ impl Type {
             "unit" | "void" => Self::Unit,
             VEC2 => Self::Vec2,
             VEC3 => Self::Vec3,
+            TIMER => Self::Timer,
             // `Array` written without an argument is `Array<unknown>` rather
             // than a diagnostic. The analyzer reports the missing argument
             // where the type was written; treating it as unknown here keeps
@@ -134,6 +142,7 @@ impl Type {
             Self::Named(name) => Cow::Borrowed(name),
             Self::Vec2 => Cow::Borrowed(VEC2),
             Self::Vec3 => Cow::Borrowed(VEC3),
+            Self::Timer => Cow::Borrowed(TIMER),
             Self::Array(element) => Cow::Owned(format!("{ARRAY}<{}>", element.display_name())),
             Self::Unknown => Cow::Borrowed("unknown"),
         }
