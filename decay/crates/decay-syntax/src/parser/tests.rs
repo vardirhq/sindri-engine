@@ -135,3 +135,25 @@ fn a_handler_that_returns_something_is_refused() {
         parsed.diagnostics
     );
 }
+
+#[test]
+fn parses_a_state_of_fields_and_refuses_anything_else_in_one() {
+    let parsed = parse("state Game { var score: f32 = 0.0; let lives = 3.0; }");
+    assert!(parsed.diagnostics.is_empty(), "{:?}", parsed.diagnostics);
+    let Item::State(state) = &parsed.program.items[0] else {
+        panic!("expected a state");
+    };
+    assert_eq!(state.name, "Game");
+    assert_eq!(state.fields.len(), 2);
+    assert!(state.fields[0].mutable && !state.fields[1].mutable);
+
+    let parsed = parse("state Game { fn score() { } }");
+    assert!(
+        parsed
+            .diagnostics
+            .iter()
+            .any(|diagnostic| diagnostic.message.contains("a state holds only fields")),
+        "{:?}",
+        parsed.diagnostics
+    );
+}

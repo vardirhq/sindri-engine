@@ -18,8 +18,8 @@ use protocol::{read_message, write_message};
 use serde_json::{Value, json};
 use support::{
     KEYWORDS, completion_chain, completion_item, container_members, emit_symbol, event_hover,
-    events, hover_symbol, initialization_root, offset_at, span_range, string_argument,
-    symbol_completion, type_members, word_at,
+    events, hover_symbol, initialization_root, offset_at, span_range, state_fields, states,
+    string_argument, symbol_completion, type_members, word_at,
 };
 
 #[derive(Clone)]
@@ -283,6 +283,12 @@ impl Server {
                 .into_iter()
                 .map(|(name, _)| completion_item(&name, 24, Some("event"))),
         );
+        items.extend(
+            states(&self.environment, &source)
+                .into_iter()
+                .filter(|name| self.environment.globals().all(|(global, _)| global != name))
+                .map(|name| completion_item(&name, 23, Some("state"))),
+        );
         Value::Array(items)
     }
 
@@ -329,6 +335,28 @@ impl Server {
         for item in parsed.program.items {
             let container = match item {
                 Item::Script(container) | Item::Component(container) => container,
+                Item::State(state) => {
+                    let children = state
+                        .fields
+                        .iter()
+                        .map(|field| {
+                            json!({
+                                "name": field.name,
+                                "kind": 8,
+                                "range": span_range(source, field.span),
+                                "selectionRange": span_range(source, field.span)
+                            })
+                        })
+                        .collect::<Vec<_>>();
+                    symbols.push(json!({
+                        "name": state.name,
+                        "kind": 23,
+                        "range": span_range(source, state.span),
+                        "selectionRange": span_range(source, state.span),
+                        "children": children
+                    }));
+                    continue;
+                }
                 Item::Event(event) => {
                     symbols.push(json!({
                         "name": event.name,
@@ -387,6 +415,21 @@ impl Server {
                 .find(|(name, _)| name == first)
         {
             return vec![(decay_semantic::EMIT.to_owned(), emit_symbol(&params))];
+        }
+        if chain.len() == 1 && first != "this" {
+            let mut members = state_fields(&self.environment, source, first);
+            if let Some(host) = self
+                .root_symbol_type(source, first)
+                .and_then(|ty| type_members(&self.environment, &ty))
+            {
+                members.extend(
+                    host.members()
+                        .map(|(name, symbol)| (name.to_owned(), symbol.clone())),
+                );
+            }
+            if !members.is_empty() {
+                return members;
+            }
         }
         let mut current = if first == "this" {
             None

@@ -9,6 +9,7 @@ mod event;
 mod expr;
 mod item;
 mod member;
+mod state;
 mod stmt;
 mod vector;
 
@@ -58,6 +59,8 @@ pub(super) struct Analyzer<'a, 'd> {
     loop_depth: usize,
     /// Every event this program may emit or handle: the host's, and its own.
     events: HashMap<String, Vec<Type>>,
+    /// Every shared state this program may reach: the host's, and its own.
+    states: HashMap<String, HashMap<String, crate::environment::StateField>>,
 }
 
 #[allow(clippy::zero_sized_map_values)]
@@ -78,6 +81,7 @@ impl<'a, 'd> Analyzer<'a, 'd> {
             containers: HashSet::new(),
             loop_depth: 0,
             events: HashMap::new(),
+            states: HashMap::new(),
         }
     }
 
@@ -94,11 +98,12 @@ impl<'a, 'd> Analyzer<'a, 'd> {
         // And events too, since a handler anywhere may name one declared
         // further down.
         self.collect_events(program);
+        self.collect_states(program);
 
         for item in &program.items {
             let container = match item {
                 Item::Script(container) | Item::Component(container) => container,
-                Item::Event(_) => continue,
+                Item::Event(_) | Item::State(_) => continue,
             };
 
             if containers
@@ -132,6 +137,10 @@ impl<'a, 'd> Analyzer<'a, 'd> {
                 ExternalSymbol::Value(ty) => ty.clone(),
                 ExternalSymbol::Function(_) => Type::Unknown,
             };
+        }
+
+        if let Some(state) = self.state_name_type(name) {
+            return state;
         }
 
         self.error(span, format!("unknown name `{name}`"));

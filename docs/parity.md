@@ -330,6 +330,7 @@ Sindri's strongest domain relative to the baseline.
 | **Rotations as values** | ❌ | — | ❌ | — | **Behind** | Only `rotation_z` as a number; no quaternion or angle type |
 | Scripts reach each other by type | ✅ | ✅ | ✅ | ✅ | **Par** | `Bolt.on(e).damage`, live fields, typed messages delivered after the pass; checked at compile time across files. Orbital Last Stand's bullets are set up this way, and Scorchball's kicks and power-ups; Orbital's enemy damage reads and Orbital Baked's signals still use the untyped calls |
 | Events (emit, handle anywhere) | ✅ | ✅ | ✅ | ✅ | **Par** | `event GoalScored(team: f32);`, `GoalScored.emit(1.0)`, `on GoalScored(team) { }`; delivered after the pass to every listener, checked at compile time across files. Scorchball's goals, wind and fireball |
+| Shared game state, declared and typed | 🟡 | ✅ | 🟡 | 🟡 | **Par** | `state Game { var score: f32 = 0.0; }` gives `Game.score`, checked across files, with one type and one starting value; kept on the board so `Game.get("score", 0.0)` still reads it. Numbers and flags only. Scorchball and the platformer use it; Orbital Last Stand's 456 board calls and Orbital Baked's 732 have not moved |
 | **Coroutines / sequencing** | ❌ | — | ❌ | — | **Absent** | "Wait a second, then do this" is manual state |
 | **Debugger (breakpoints, stepping)** | ❌ | ❌ | ❌ | — | **Absent** | `print` debugging only |
 | **Formatter** | ❌ | ❌ | ❌ | — | **Absent** | — |

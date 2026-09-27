@@ -14,7 +14,8 @@
 //! shape, and what tells a cached program it was compiled against another one.
 //!
 //! Events are read the same way: an `event` declared in any file is one every
-//! file may emit and handle.
+//! file may emit and handle. So is `state`: `state Game { var score: f32 =
+//! 0.0; }` in any file is `Game.score` in every file.
 
 use std::collections::{BTreeMap, BTreeSet};
 
@@ -35,8 +36,46 @@ pub struct Project {
     pub(crate) events: BTreeMap<String, Vec<Type>>,
     /// Events declared more than once, which nothing may use.
     ambiguous_events: BTreeSet<String>,
+    /// Shared state by name, then field.
+    pub(crate) states: BTreeMap<String, BTreeMap<String, SharedField>>,
+    /// State fields declared more than once, as `(state, field)`.
+    ambiguous_fields: BTreeSet<(String, String)>,
     key: String,
 }
+
+/// One field of a `state`: its type, whether scripts may change it, and the
+/// number it starts as.
+#[derive(Clone, Debug, PartialEq)]
+pub(crate) struct SharedField {
+    pub ty: Type,
+    pub mutable: bool,
+    /// Held as a number, as the board holds everything; `true` is `1.0`.
+    pub initial: f64,
+}
+
+impl SharedField {
+    /// A number from the board as the value this field holds.
+    pub(crate) fn value(&self, number: f64) -> decay_runtime::Value {
+        match self.ty {
+            Type::Bool => decay_runtime::Value::Bool(number != 0.0),
+            _ => decay_runtime::Value::Number(number),
+        }
+    }
+}
+
+/// Where a state field lives on the board: `Game.score` under `score`, so a
+/// script still calling `Game.get("score", 0.0)` reads the same number while a
+/// project moves over, and any other state's under its full name.
+pub(crate) fn board_key(state: &str, field: &str) -> String {
+    if state == GAME {
+        field.to_owned()
+    } else {
+        format!("{state}.{field}")
+    }
+}
+
+/// The state that shares the board's own namespace.
+pub(crate) const GAME: &str = "Game";
 
 /// One script's declared shape.
 #[derive(Clone, Debug, Default, PartialEq)]
@@ -59,6 +98,8 @@ impl Project {
         let mut twice = BTreeSet::new();
         let mut events = BTreeMap::new();
         let mut ambiguous_events = BTreeSet::new();
+        let mut states: BTreeMap<String, BTreeMap<String, SharedField>> = BTreeMap::new();
+        let mut ambiguous_fields = BTreeSet::new();
         for source in sources {
             for item in parse(source).program.items {
                 let container = match item {
@@ -74,41 +115,16 @@ impl Project {
                         }
                         continue;
                     }
+                    Item::State(state) => {
+                        read_state(&state, &mut states, &mut ambiguous_fields);
+                        continue;
+                    }
                     Item::Component(_) => continue,
                 };
-                let mut declared = Declared::default();
-                for member in &container.members {
-                    match member {
-                        Member::Field(field) => {
-                            let ty = field.ty.as_ref().map_or_else(
-                                || literal_type(field.initializer.as_ref()),
-                                Type::from_ref,
-                            );
-                            declared.fields.push((field.name.clone(), ty));
-                            if field
-                                .attributes
-                                .iter()
-                                .any(|attribute| attribute.name == "export")
-                            {
-                                declared.exported.push(field.name.clone());
-                            }
-                        }
-                        Member::Function(function)
-                            if function.name != START && function.name != UPDATE =>
-                        {
-                            let params = function
-                                .params
-                                .iter()
-                                .map(|param| {
-                                    param.ty.as_ref().map_or(Type::Unknown, Type::from_ref)
-                                })
-                                .collect();
-                            declared.messages.push((function.name.clone(), params));
-                        }
-                        Member::Function(_) => {}
-                    }
-                }
-                if scripts.insert(container.name.clone(), declared).is_some() {
+                if scripts
+                    .insert(container.name.clone(), Declared::of(&container))
+                    .is_some()
+                {
                     twice.insert(container.name.clone());
                 }
             }
@@ -126,11 +142,15 @@ impl Project {
                 && reserved.get_type(name).is_none()
                 && !reserved.globals().any(|(global, _)| global == name)
         });
-        let key = format!("{scripts:?}{events:?}{ambiguous_events:?}");
+        keep_states(&mut states, &ambiguous_fields, &scripts, &events, reserved);
+        let key =
+            format!("{scripts:?}{events:?}{ambiguous_events:?}{states:?}{ambiguous_fields:?}");
         Self {
             scripts,
             events,
             ambiguous_events,
+            states,
+            ambiguous_fields,
             key,
         }
     }
@@ -198,6 +218,21 @@ impl Project {
         for name in &self.ambiguous_events {
             environment.add_ambiguous_event(name.clone());
         }
+        for (state, fields) in &self.states {
+            for (field, declared) in fields {
+                environment.add_state_field(
+                    state.clone(),
+                    field.clone(),
+                    decay_semantic::StateField {
+                        ty: declared.ty.clone(),
+                        mutable: declared.mutable,
+                    },
+                );
+            }
+        }
+        for (state, field) in &self.ambiguous_fields {
+            environment.add_ambiguous_state_field(state.clone(), field.clone());
+        }
     }
 }
 
@@ -205,6 +240,115 @@ impl Project {
 /// as a diagnostic names it.
 pub(crate) fn finder_type(script: &str) -> String {
     format!("script {script}")
+}
+
+impl Declared {
+    /// What one script declares: its fields, and its functions as messages.
+    fn of(container: &decay_syntax::ContainerDecl) -> Self {
+        let mut declared = Self::default();
+        for member in &container.members {
+            match member {
+                Member::Field(field) => {
+                    let ty = field
+                        .ty
+                        .as_ref()
+                        .map_or_else(|| literal_type(field.initializer.as_ref()), Type::from_ref);
+                    declared.fields.push((field.name.clone(), ty));
+                    if field
+                        .attributes
+                        .iter()
+                        .any(|attribute| attribute.name == "export")
+                    {
+                        declared.exported.push(field.name.clone());
+                    }
+                }
+                // A handler is the host's to call, like `start`, not a message.
+                Member::Function(function)
+                    if function.name != START
+                        && function.name != UPDATE
+                        && function.handles.is_none() =>
+                {
+                    let params = function
+                        .params
+                        .iter()
+                        .map(|param| param.ty.as_ref().map_or(Type::Unknown, Type::from_ref))
+                        .collect();
+                    declared.messages.push((function.name.clone(), params));
+                }
+                Member::Function(_) => {}
+            }
+        }
+        declared
+    }
+}
+
+/// Adds one `state` declaration's fields, noting any declared before.
+fn read_state(
+    state: &decay_syntax::StateDecl,
+    states: &mut BTreeMap<String, BTreeMap<String, SharedField>>,
+    ambiguous: &mut BTreeSet<(String, String)>,
+) {
+    for field in &state.fields {
+        if states
+            .entry(state.name.clone())
+            .or_default()
+            .insert(field.name.clone(), shared_field(field))
+            .is_some()
+        {
+            ambiguous.insert((state.name.clone(), field.name.clone()));
+        }
+    }
+}
+
+/// Leaves out what no script may use: a state named like a script, an event,
+/// or an engine name that is not a namespace, and a field declared twice.
+///
+/// A state may add to a namespace the engine offers, as `Game` adds to the
+/// board; the file declaring it is told by the analyzer when it may not.
+fn keep_states(
+    states: &mut BTreeMap<String, BTreeMap<String, SharedField>>,
+    ambiguous: &BTreeSet<(String, String)>,
+    scripts: &BTreeMap<String, Declared>,
+    events: &BTreeMap<String, Vec<Type>>,
+    reserved: &Environment,
+) {
+    states.retain(|name, _| {
+        !scripts.contains_key(name)
+            && !events.contains_key(name)
+            && reserved.globals().all(|(global, symbol)| {
+                global != name
+                    || matches!(symbol, decay_semantic::ExternalSymbol::Value(Type::Named(ty)) if ty == name)
+            })
+    });
+    for (state, field) in ambiguous {
+        if let Some(fields) = states.get_mut(state) {
+            fields.remove(field);
+        }
+    }
+}
+
+/// A state field as the host keeps it. The analyzer refuses anything but a
+/// number or a flag starting from a literal, so what it cannot read here is a
+/// declaration that will not compile anyway.
+fn shared_field(field: &decay_syntax::FieldDecl) -> SharedField {
+    let ty = field
+        .ty
+        .as_ref()
+        .map_or_else(|| literal_type(field.initializer.as_ref()), Type::from_ref);
+    let initial = match field.initializer.as_ref().map(|expr| &expr.kind) {
+        Some(ExprKind::Number(number)) => *number,
+        Some(ExprKind::Unary { expr, .. }) => match expr.kind {
+            ExprKind::Number(number) => -number,
+            _ => 0.0,
+        },
+        Some(ExprKind::Bool(true)) => 1.0,
+        _ => 0.0,
+    };
+    SharedField {
+        ty,
+        mutable: field.mutable,
+        initial,
+    }
 }
 
 /// A field's type when it is not written, from a literal initializer.

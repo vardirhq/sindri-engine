@@ -89,7 +89,7 @@ script Player {
     }
 
     fn update(dt: f32) {
-        let phase = Game.get("phase", 0.0);
+        let phase = Game.phase;
         if this.bot {
             think(dt, phase);
         } else {
@@ -162,7 +162,7 @@ script Player {
             tx = x * pace;
             ty = -y * pace;
         }
-        tx += Game.get("wind", 0.0) * 0.4;
+        tx += Game.wind * 0.4;
         let ease = min(1.0, dt * 12.0);
         this.vx += (tx - this.vx) * ease;
         this.vy += (ty - this.vy) * ease;
@@ -179,7 +179,7 @@ script Player {
     }
 
     fn try_kick(dt: f32, phase: f32) {
-        if phase < 2.0 || this.burn_left > 0.0 || Game.get("holder", 0.0) != this.slot {
+        if phase < 2.0 || this.burn_left > 0.0 || Game.holder != this.slot {
             this.charge = 0.0;
             this.charge_fx = 0.0;
             return;
@@ -342,7 +342,7 @@ script Player {
         this.seen_bx = bx;
         this.seen_by = by;
 
-        let holder = Game.get("holder", 0.0);
+        let holder = Game.holder;
         if holder == this.slot {
             attack(bx, by);
         } else if holder > 0.0 && holder % 2.0 == this.slot % 2.0 {

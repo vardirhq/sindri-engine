@@ -35,6 +35,7 @@ impl Analyzer<'_, '_> {
             return self.vector_member_type(object, object_type, field, span);
         }
         let object_type = object_type.clone();
+        self.check_ambiguous_use(&object_type, field, span);
         // A collection's length belongs to the value, not to a path the host
         // could answer, so the lowering is told which member read this was.
         if matches!(object_type, Type::Array(_)) && field == crate::types::LENGTH {
@@ -125,6 +126,9 @@ impl Analyzer<'_, '_> {
             }
             Type::Named(name) if let Some(event) = self.event_member(name, field) => {
                 return Some(event);
+            }
+            Type::Named(name) if let Some(state) = self.state_member(name, field) => {
+                return Some(state);
             }
             Type::Named(name) => self.environment.get_type(name)?,
             _ => return None,

@@ -393,3 +393,37 @@ fn events_do_what_the_reference_says() {
         "event T(); script T { }",
     );
 }
+
+/// "State".
+#[test]
+fn state_does_what_the_reference_says() {
+    accepted(
+        "the state example",
+        "state Tuning { let gravity: f32 = 30.0; var paused = false; }
+         script Body {
+             fn update(dt: f32) {
+                 if !Tuning.paused { this.transform.position.y -= Tuning.gravity * dt; }
+             }
+         }",
+    );
+    accepted(
+        "`state` as an ordinary name elsewhere",
+        "script T { fn f() { let state = 1.0; } }",
+    );
+    rejected(
+        "a state field computed rather than written",
+        "state S { var x: f32 = 1.0 + 1.0; } script T { }",
+    );
+    rejected(
+        "a state field that is not a number or a flag",
+        "state S { var x: String = \"a\"; } script T { }",
+    );
+    rejected(
+        "writing a `let` state field",
+        "state S { let x: f32 = 1.0; } script T { fn f() { S.x = 2.0; } }",
+    );
+    rejected(
+        "a misspelt state field",
+        "state S { var x: f32 = 1.0; } script T { fn f() { S.y = 2.0; } }",
+    );
+}

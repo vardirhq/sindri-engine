@@ -1655,11 +1655,48 @@ surface is arranged to avoid.
 The board is runtime state and goes when a run does — stopping and playing again
 does not begin with the last game's score.
 
-This is deliberately a stopgap, and its shape admits it: names are strings and
-nothing checks them. Typed cross-entity access is the better answer and needs a
-Decay value that can hold an entity. The board is here because it is small and
-it unblocks a game, and a game is what tells us which of the bigger answers is
-worth building.
+This was deliberately a stopgap, and its shape admits it: names are strings and
+nothing checks them. Declared state, below, is the checked form of the same
+board.
+
+### Declared state
+
+```decay
+// game.decay — any file in the project.
+state Game {
+    var phase: f32 = 0.0;
+    var score_blue: f32 = 0.0;
+    var won: bool = false;
+    let target: f32 = 5.0;
+}
+
+// Anywhere else.
+Game.score_blue += 1.0;
+if Game.score_blue >= Game.target { Game.won = true; }
+```
+
+A `state` declares values every script shares, each with one type and one
+starting value, written once. A misspelt name is a compile error rather than a
+fallback read silently, and two uses can no longer disagree about what the
+fallback is — Orbital Last Stand reads `hp` with five different ones.
+
+- **Several files may add to one state**, as long as no field is declared
+  twice; a field declared twice is refused where it is declared and wherever
+  it is used, since the file declaring it may be one nothing runs.
+- **A field holds an `f32` or a `bool`** and starts from a literal, because it
+  exists before any script has run to compute it from. `let` makes one no
+  script may change: a tuning value every script agrees on.
+- **`Game` fields live on the board, under their own names.** `Game.score`
+  and `Game.get("score", 0.0)` read the same number, and a `true` is `1.0`, so
+  a project moves over one call at a time and a test reading the board sees
+  either. A field nothing has written yet reads as its declared start.
+- **A state of another name** — `state Tuning { let gravity: f32 = 30.0; }` —
+  is reached as `Tuning.gravity` and kept on the board as `Tuning.gravity`.
+  It may not take a script's or an event's name, and may add to a namespace
+  the engine offers only as `Game` does: without redefining its members.
+
+Like the board, state is runtime state and goes when a run does. Scorchball's
+and the platformer's shared values are declared this way.
 
 ### Saying something
 

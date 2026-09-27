@@ -11,7 +11,7 @@ script Title {
 
     fn update(dt: f32) {
         if Ui.is_pressed(this.bot_button) {
-            Game.set("versus_bot", 1.0);
+            Game.versus_bot = true;
             begin();
             return;
         }
@@ -19,13 +19,13 @@ script Title {
             || Gamepad.just_pressed(0.0, "south")
             || Gamepad.just_pressed(0.0, "start")
             || Gamepad.just_pressed(0.0, "select") {
-            Game.set("versus_bot", 0.0);
+            Game.versus_bot = false;
             begin();
         }
     }
 
     fn begin() {
-        Game.set("menu_done", 1.0);
+        Game.menu_done = true;
         World.despawn(this.entity);
     }
 }

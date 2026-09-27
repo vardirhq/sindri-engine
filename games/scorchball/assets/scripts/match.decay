@@ -39,12 +39,12 @@ script Match {
         this.count_text = World.find("Countdown");
         this.kickoff_text = World.find("Kickoff");
         this.goal_text = World.find("Goal");
-        Game.set("phase", 0.0);
-        Game.set("score_blue", 0.0);
-        Game.set("score_red", 0.0);
-        Game.set("wind", 0.0);
-        Game.set("menu_done", 0.0);
-        Game.set("versus_bot", 0.0);
+        Game.phase = 0.0;
+        Game.score_blue = 0.0;
+        Game.score_red = 0.0;
+        Game.wind = 0.0;
+        Game.menu_done = false;
+        Game.versus_bot = false;
         this.next_power = this.power_min;
         World.spawn(this.title);
     }
@@ -74,7 +74,7 @@ script Match {
                 Audio.play("audio/hit.wav", 1.0);
             }
         }
-        Game.set("phase", this.phase);
+        Game.phase = this.phase;
         if this.phase == 2.0 {
             powerups(dt);
             wind(dt);
@@ -86,8 +86,8 @@ script Match {
         World.set_active(this.count_text, this.phase == 1.0);
         World.set_active(this.kickoff_text, this.kickoff_shown > 0.0);
         World.set_active(this.goal_text, this.goal_shown > 0.0);
-        digit(this.blue_digit, Game.get("score_blue", 0.0));
-        digit(this.red_digit, Game.get("score_red", 0.0));
+        digit(this.blue_digit, Game.score_blue);
+        digit(this.red_digit, Game.score_red);
     }
 
     // A pad that joins gets a player on its side of the pitch; a pad that is
@@ -100,13 +100,13 @@ script Match {
         let joined = Gamepad.joined();
         if joined > 0.0 {
             place(joined, false);
-            if Game.get("versus_bot", 0.0) > 0.0 {
+            if Game.versus_bot {
                 if joined % 2.0 == 1.0 {
                     place(12.0, true);
                 } else {
                     place(11.0, true);
                 }
-                Game.set("versus_bot", 0.0);
+                Game.versus_bot = false;
             }
         }
         if this.phase == 0.0 && Gamepad.just_pressed(0.0, "select") {
@@ -152,15 +152,15 @@ script Match {
         made.transform.position.x = x;
         made.transform.position.y = y;
         this.joins += 1.0;
-        Game.set("joins", this.joins);
+        Game.joins = this.joins;
     }
 
     on GoalScored(team) {
         if this.phase != 2.0 { return; }
         if team == 1.0 {
-            Game.set("score_blue", Game.get("score_blue", 0.0) + 1.0);
+            Game.score_blue += 1.0;
         } else {
-            Game.set("score_red", Game.get("score_red", 0.0) + 1.0);
+            Game.score_red += 1.0;
         }
         this.goal_shown = 2.0;
         this.goal_fx_clock = 0.0;
@@ -214,14 +214,14 @@ script Match {
     // Wind blows towards the goal of whoever did not pick it up.
     on WindPicked(blow) {
         this.wind_left = this.wind_time;
-        Game.set("wind", blow * this.wind_speed);
+        Game.wind = blow * this.wind_speed;
     }
 
     fn wind(dt: f32) {
         if this.wind_left > 0.0 {
             this.wind_left -= dt;
             if this.wind_left <= 0.0 {
-                Game.set("wind", 0.0);
+                Game.wind = 0.0;
             }
         }
     }

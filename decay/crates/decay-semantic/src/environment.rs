@@ -35,6 +35,18 @@ pub struct Environment {
     /// Events declared more than once, which no emit or handler may name:
     /// which declaration it meant would be a guess.
     pub(crate) ambiguous_events: HashSet<String>,
+    /// Shared values, by state name and then field name. A program's own
+    /// `state` declarations are added to these when it is analysed.
+    pub(crate) states: HashMap<String, HashMap<String, StateField>>,
+    /// State fields declared more than once, as `(state, field)`.
+    pub(crate) ambiguous_state_fields: HashSet<(String, String)>,
+}
+
+/// One field of a `state`: what it holds, and whether scripts may change it.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct StateField {
+    pub ty: Type,
+    pub mutable: bool,
 }
 
 impl Environment {
@@ -102,6 +114,48 @@ impl Environment {
         self.events
             .iter()
             .map(|(name, params)| (name.as_str(), params.as_slice()))
+    }
+
+    /// Declares a field of a shared state: `Game.score`.
+    pub fn add_state_field(
+        &mut self,
+        state: impl Into<String>,
+        field: impl Into<String>,
+        declared: StateField,
+    ) {
+        self.states
+            .entry(state.into())
+            .or_default()
+            .insert(field.into(), declared);
+    }
+
+    /// Says a state field was declared more than once, so that using it is
+    /// refused rather than resolved to one of the declarations.
+    pub fn add_ambiguous_state_field(
+        &mut self,
+        state: impl Into<String>,
+        field: impl Into<String>,
+    ) {
+        let (state, field) = (state.into(), field.into());
+        if let Some(fields) = self.states.get_mut(&state) {
+            fields.remove(&field);
+        }
+        self.ambiguous_state_fields.insert((state, field));
+    }
+
+    /// A state's declared fields, for a host describing itself or a tool
+    /// offering completions.
+    pub fn state_fields(&self, state: &str) -> impl Iterator<Item = (&str, &StateField)> {
+        self.states
+            .get(state)
+            .into_iter()
+            .flatten()
+            .map(|(name, field)| (name.as_str(), field))
+    }
+
+    /// Every declared state's name.
+    pub fn states(&self) -> impl Iterator<Item = &str> {
+        self.states.keys().map(String::as_str)
     }
 
     /// Whether a value of type `name` may be used as a `wanted`.

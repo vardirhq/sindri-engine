@@ -40,7 +40,7 @@ impl<'a> Lowerer<'a> {
                 }
                 // A declaration and nothing else: an emit is a call the host
                 // answers, and a handler is a function of the script it is in.
-                Item::Event(_) => None,
+                Item::Event(_) | Item::State(_) => None,
             })
             .collect();
 

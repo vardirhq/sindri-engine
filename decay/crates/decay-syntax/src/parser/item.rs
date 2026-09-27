@@ -6,16 +6,17 @@
 use crate::{
     TokenKind,
     ast::{
-        Attribute, ContainerDecl, EventDecl, FieldDecl, FunctionDecl, Item, Member, Param, TypeRef,
-        handler_name,
+        Attribute, ContainerDecl, EventDecl, FieldDecl, FunctionDecl, Item, Member, Param,
+        StateDecl, TypeRef, handler_name,
     },
 };
 
-/// The word that starts an event declaration, and the one that starts a
+/// The words that start an event declaration, a state declaration, and a
 /// handler. Contextual rather than keywords: each is only special where no
 /// other identifier could stand, so a script that already calls something
-/// `event`, or reaches `Bolt.on(hit)`, keeps working.
+/// `event` or `state`, or reaches `Bolt.on(hit)`, keeps working.
 pub(super) const EVENT: &str = "event";
+pub(super) const STATE: &str = "state";
 pub(super) const ON: &str = "on";
 
 use super::Parser;
@@ -183,6 +184,42 @@ impl Parser<'_> {
         Some(Item::Event(EventDecl {
             name,
             params,
+            span: start.join(end),
+        }))
+    }
+
+    /// `state Game { var score: f32 = 0.0; }`: fields and nothing else.
+    pub(super) fn parse_state(&mut self) -> Option<Item> {
+        let start = self.current().span;
+        self.advance();
+        let (name, _) = self.expect_identifier("expected a name after `state`")?;
+        self.expect_simple(&TokenKind::LeftBrace, "expected `{` after state name")?;
+        let mut fields = Vec::new();
+        while !self.at(&TokenKind::RightBrace) && !self.at(&TokenKind::Eof) {
+            let attributes = self.parse_attributes();
+            if let Some(attribute) = attributes.first() {
+                self.error_span(
+                    attribute.span,
+                    "attributes on state fields are not supported",
+                );
+            }
+            if self.at(&TokenKind::Let) || self.at(&TokenKind::Var) {
+                if let Some(field) = self.parse_field(Vec::new()) {
+                    fields.push(field);
+                } else {
+                    self.synchronize_member();
+                }
+            } else {
+                self.error_here("a state holds only fields: `var name: f32 = 0.0;`");
+                self.synchronize_member();
+            }
+        }
+        let end = self
+            .expect_simple(&TokenKind::RightBrace, "expected `}` after state body")
+            .unwrap_or_else(|| self.current().span);
+        Some(Item::State(StateDecl {
+            name,
+            fields,
             span: start.join(end),
         }))
     }
