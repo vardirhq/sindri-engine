@@ -65,7 +65,10 @@ pub fn verify(model: &mut dyn Model, cancel: &AtomicBool) -> Verdict {
                 ));
                 // A runner that has gone away will not come back for the next
                 // case, and asking again only doubles the wait.
-                if matches!(failure, Failure::Model(_) | Failure::Cancelled) {
+                if matches!(
+                    failure,
+                    Failure::Model(_) | Failure::Cancelled | Failure::Unavailable(_)
+                ) {
                     break;
                 }
             }

@@ -1,238 +1,109 @@
-//! What setup must do, in every state a machine can be in.
+//! What setup must say, in every state a machine can be in.
 
 use super::*;
 
-fn nothing() -> Probe {
-    Probe::default()
-}
-
-fn installed_but_stopped() -> Probe {
-    Probe {
-        backend_installed: true,
-        ..Probe::default()
-    }
-}
-
-fn running(models: &[&str], memory: f32) -> Probe {
-    Probe {
-        backend_installed: true,
-        backend_reachable: true,
-        backend_version: Some("0.5.0".to_owned()),
-        models: models.iter().map(|model| (*model).to_owned()).collect(),
-        available_memory: Some(memory),
-    }
-}
-
-fn all_features() -> Vec<Feature> {
-    Feature::ALL.to_vec()
-}
-
-/// The rule the whole flow is built around: the only thing a person ever types
-/// is a password, and only where the operating system demands one. Asserted
-/// structurally rather than by reading the UI, so an action added later that
-/// wants a name or a path fails here.
-#[test]
-fn no_step_ever_asks_a_person_to_type_anything() {
-    let states = [
-        (Readiness::BackendMissing, nothing()),
-        (Readiness::BackendStopped, installed_but_stopped()),
-        (Readiness::NoModel, running(&[], 12.0)),
-        (Readiness::NoModel, running(&[], 2.0)),
-        (
-            Readiness::Unverified {
-                model: "qwen3:8b".to_owned(),
-            },
-            running(&["qwen3:8b"], 12.0),
-        ),
-        (
-            Readiness::Verifying {
-                model: "qwen3:8b".to_owned(),
-            },
-            running(&["qwen3:8b"], 12.0),
-        ),
-        (
-            Readiness::Ready {
-                model: "qwen3:8b".to_owned(),
-                verified: all_features(),
-            },
-            running(&["qwen3:8b"], 12.0),
-        ),
-        (
-            Readiness::Unusable {
-                model: "qwen3:8b".to_owned(),
-                failed: Feature::DecayRepair,
-            },
-            running(&["qwen3:8b"], 12.0),
-        ),
-    ];
-    for (state, probe) in states {
-        match state.step(&probe).action {
-            // Every one of these is a button. `Install` may raise an OS
-            // password prompt, which is the one allowed exception and is not
-            // Sindri's field to read.
-            Action::Install { .. }
-            | Action::Start
-            | Action::Pull { .. }
-            | Action::PickFrom { .. }
-            | Action::Verify { .. }
-            | Action::None => {}
-        }
+fn pinned() -> Machine {
+    Machine {
+        runtime: managed::runtime_for("linux", "x86_64"),
+        model: managed::model_file(managed::MODEL),
+        memory: Some(12.0),
+        ..Machine::default()
     }
 }
 
 #[test]
-fn a_machine_with_nothing_on_it_is_offered_the_install() {
-    let probe = nothing();
-    let state = readiness(&probe, None);
-    assert_eq!(state, Readiness::BackendMissing);
-    let step = state.step(&probe);
-    assert!(matches!(step.action, Action::Install { .. }));
-    assert!(state.awaiting_the_machine());
-}
-
-/// Installed-but-not-running is a different sentence from not-installed, which
-/// is the entire reason the states are named rather than collapsed into "could
-/// not connect".
-#[test]
-fn a_runner_that_is_installed_but_quiet_is_told_apart_from_a_missing_one() {
-    let probe = installed_but_stopped();
-    let state = readiness(&probe, None);
-    assert_eq!(state, Readiness::BackendStopped);
-    assert_eq!(state.step(&probe).action, Action::Start);
-}
-
-#[test]
-fn a_running_runner_with_no_model_is_offered_one_that_fits() {
-    let probe = running(&[], 12.0);
-    let state = readiness(&probe, None);
-    assert_eq!(state, Readiness::NoModel);
-    let Action::Pull { profile } = state.step(&probe).action else {
-        panic!("a 12 GB machine should be offered a download");
+fn a_computer_nothing_is_published_for_is_told_so() {
+    let machine = Machine {
+        runtime: None,
+        ..pinned()
     };
-    assert_eq!(profile.tier(12.0, DEFAULT_CONTEXT), Tier::Recommended);
+    assert_eq!(setup(&machine), Setup::Unavailable);
 }
 
-/// Consent has to be informed, so the step says the size, the licence and the
-/// reason before anything multi-gigabyte begins.
+/// The whole cost is stated before anything starts.
 #[test]
-fn a_download_says_what_it_costs_before_it_starts() {
-    let probe = running(&[], 12.0);
-    let step = readiness(&probe, None).step(&probe);
-    let Action::Pull { profile } = step.action else {
-        panic!("expected a download");
+fn a_fresh_machine_is_offered_the_whole_download_up_front() {
+    let machine = pinned();
+    let Setup::Offer(offer) = setup(&machine) else {
+        panic!("{:?}", setup(&machine));
     };
-    assert!(
-        step.detail
-            .contains(&format!("{:.1} GB", profile.residency(DEFAULT_CONTEXT)))
-    );
-    assert!(step.detail.contains(&profile.license));
-    assert!(step.detail.contains(&profile.description));
+    let runtime = machine.runtime.as_ref().expect("pinned").size;
+    let model = machine.model.as_ref().expect("pinned").size;
+    assert_eq!(offer.download, runtime + model);
+    assert_eq!(offer.model_name, "Qwen2.5 Coder 7B");
+    assert_eq!(offer.fit, Some(Tier::Recommended));
+    assert!(!offer.partly_done);
 }
 
-/// A machine too small for anything measured still gets a list to click, marked
-/// with what will not fit, rather than a dead end or a text field.
 #[test]
-fn a_small_machine_is_told_the_truth_and_still_given_the_choice() {
-    let probe = running(&[], 2.0);
-    let step = readiness(&probe, None).step(&probe);
-    let Action::PickFrom { choices } = step.action else {
-        panic!("expected a list to pick from");
+fn an_interrupted_setup_offers_to_continue_with_only_what_is_missing() {
+    let machine = Machine {
+        has_runtime: true,
+        ..pinned()
     };
-    assert_eq!(
-        choices.len(),
-        catalogue::profiles().len(),
-        "all of them, graded"
-    );
-    assert!(
-        choices.iter().all(|(_, tier)| *tier == Tier::Unsupported),
-        "nothing fits a 2 GB machine, and each choice says so"
-    );
-    assert!(step.detail.contains("2.0 GB"));
+    let Setup::Offer(offer) = setup(&machine) else {
+        panic!("{:?}", setup(&machine));
+    };
+    assert_eq!(offer.download, machine.model.as_ref().expect("pinned").size);
+    assert!(offer.partly_done);
+}
+
+/// A small machine is told the truth rather than refused.
+#[test]
+fn a_machine_that_cannot_hold_the_model_hears_it_before_downloading() {
+    let small = Machine {
+        memory: Some(3.0),
+        ..pinned()
+    };
+    let Setup::Offer(offer) = setup(&small) else {
+        panic!("{:?}", setup(&small));
+    };
+    assert_eq!(offer.fit, Some(Tier::Unsupported));
+    let unknown = Machine {
+        memory: None,
+        ..pinned()
+    };
+    let Setup::Offer(offer) = setup(&unknown) else {
+        panic!("{:?}", setup(&unknown));
+    };
+    assert_eq!(offer.fit, None, "unknown memory is not no memory");
 }
 
 #[test]
-fn an_undetectable_gpu_is_not_treated_as_an_empty_one() {
-    let probe = Probe {
-        backend_installed: true,
-        backend_reachable: true,
-        models: vec!["qwen3:8b".to_owned()],
-        available_memory: None,
-        ..Probe::default()
+fn everything_on_disk_but_unchecked_is_not_ready() {
+    let machine = Machine {
+        has_runtime: true,
+        has_model: true,
+        ..pinned()
+    };
+    assert_eq!(setup(&machine), Setup::Unchecked);
+}
+
+#[test]
+fn a_model_that_repaired_both_cases_is_ready() {
+    let machine = Machine {
+        has_runtime: true,
+        has_model: true,
+        verified: Some(vec![Feature::DecayRepair]),
+        ..pinned()
     };
     assert_eq!(
-        readiness(&probe, None),
-        Readiness::Unverified {
-            model: "qwen3:8b".to_owned()
-        },
-        "a model that is there is usable even when the memory cannot be read"
-    );
-}
-
-/// A reachable model is not a working one, which is the mistake the whole
-/// verification step exists to stop.
-#[test]
-fn a_model_that_is_merely_present_is_not_called_ready() {
-    let probe = running(&["qwen3:8b"], 12.0);
-    let state = readiness(&probe, None);
-    assert!(!state.is_ready());
-    assert_eq!(
-        state.step(&probe).action,
-        Action::Verify {
-            model: "qwen3:8b".to_owned()
+        setup(&machine),
+        Setup::Ready {
+            verified: vec![Feature::DecayRepair]
         }
     );
 }
 
 #[test]
-fn a_verified_model_is_ready_and_has_nothing_left_to_do() {
-    let probe = running(&["qwen3:8b"], 12.0);
-    let features = all_features();
-    let state = readiness(&probe, Some(("qwen3:8b", &features)));
-    assert!(state.is_ready());
-    assert_eq!(state.step(&probe).action, Action::None);
-    assert!(!state.awaiting_the_machine());
-}
-
-/// Verification belongs to the model it was run against. Swapping the model
-/// must not inherit the last one's results.
-#[test]
-fn verifying_one_model_says_nothing_about_another() {
-    let probe = running(&["gemma3:12b"], 24.0);
-    let features = all_features();
-    assert_eq!(
-        readiness(&probe, Some(("qwen3:8b", &features))),
-        Readiness::Unverified {
-            model: "gemma3:12b".to_owned()
-        }
-    );
-}
-
-/// Missing something optional degrades the assistant; missing something
-/// required means it cannot author at all, and the two must not read the same.
-#[test]
-fn a_model_missing_only_vision_is_still_ready() {
-    let probe = running(&["qwen3:8b"], 12.0);
-    let features: Vec<_> = Feature::ALL
-        .into_iter()
-        .filter(|feature| *feature != Feature::Vision)
-        .collect();
-    assert!(readiness(&probe, Some(("qwen3:8b", &features))).is_ready());
-}
-
-#[test]
-fn a_model_that_cannot_repair_has_nothing_to_offer() {
-    let probe = running(&["qwen3:8b"], 12.0);
-    let features: Vec<_> = Feature::ALL
-        .into_iter()
-        .filter(|feature| *feature != Feature::DecayRepair)
-        .collect();
-    assert_eq!(
-        readiness(&probe, Some(("qwen3:8b", &features))),
-        Readiness::Unusable {
-            model: "qwen3:8b".to_owned(),
-            failed: Feature::DecayRepair,
-        }
-    );
+fn a_model_that_could_not_repair_is_unusable() {
+    let machine = Machine {
+        has_runtime: true,
+        has_model: true,
+        verified: Some(Vec::new()),
+        ..pinned()
+    };
+    assert_eq!(setup(&machine), Setup::Unusable);
 }
 
 /// Required means something in the editor uses it, and is proved by a case.
@@ -248,83 +119,26 @@ fn the_required_features_are_the_ones_the_editor_offers() {
     }
 }
 
-/// The editor keeps watching exactly while the next move happens outside it, so
-/// that finishing an install advances the screen without anyone hunting for a
-/// refresh button.
 #[test]
-fn the_editor_watches_only_while_it_is_waiting_on_the_machine() {
-    assert!(Readiness::BackendMissing.awaiting_the_machine());
-    assert!(Readiness::BackendStopped.awaiting_the_machine());
-    assert!(!Readiness::NoModel.awaiting_the_machine());
-    assert!(
-        !Readiness::Ready {
-            model: "qwen3:8b".to_owned(),
-            verified: all_features(),
-        }
-        .awaiting_the_machine()
-    );
-}
-
-/// A profiled model the machine can hold beats an unprofiled one, because the
-/// profiled ones are the ones Sindri has actually measured.
-#[test]
-fn a_measured_model_is_preferred_over_an_unknown_one() {
-    let probe = running(&["something-else:latest", "qwen3:8b"], 12.0);
-    assert_eq!(
-        readiness(&probe, None),
-        Readiness::Unverified {
-            model: "qwen3:8b".to_owned()
-        }
-    );
-}
-
-/// But a model someone pulled themselves is not refused for being unknown.
-#[test]
-fn an_unprofiled_model_is_still_usable() {
-    let probe = running(&["something-else:latest"], 12.0);
-    assert_eq!(
-        readiness(&probe, None),
-        Readiness::Unverified {
-            model: "something-else:latest".to_owned()
-        }
-    );
-}
-
-/// A profiled model too big for the machine must not be chosen over one that
-/// fits, however capable it is.
-#[test]
-fn a_model_that_does_not_fit_is_not_chosen() {
-    let probe = running(&["qwen3:8b", "qwen3-coder:30b"], 12.0);
-    assert_eq!(
-        readiness(&probe, None),
-        Readiness::Unverified {
-            model: "qwen3:8b".to_owned()
-        }
-    );
+fn every_feature_has_a_stable_saved_name() {
+    for feature in Feature::ALL {
+        assert_eq!(Feature::from_id(feature.id()), Some(feature));
+    }
+    assert_eq!(Feature::from_id("not a feature"), None);
 }
 
 #[test]
-fn every_step_says_something_a_person_can_act_on() {
-    for (state, probe) in [
-        (Readiness::BackendMissing, nothing()),
-        (Readiness::BackendStopped, installed_but_stopped()),
-        (Readiness::NoModel, running(&[], 12.0)),
-    ] {
-        let step = state.step(&probe);
-        assert!(!step.title.is_empty(), "{state:?} has no title");
-        assert!(!step.detail.is_empty(), "{state:?} explains nothing");
+fn every_step_says_what_it_is_doing() {
+    for step in Step::ALL {
+        assert!(!step.title().is_empty());
+        assert!(step.doing().ends_with('.'), "{step:?}");
     }
 }
 
-/// The install plan is shown before it runs, so the step is inspectable rather
-/// than opaque — and its source is pinned rather than discovered.
 #[test]
-fn the_install_says_where_it_comes_from_and_what_it_will_do() {
-    let probe = nothing();
-    let Action::Install { plan } = readiness(&probe, None).step(&probe).action else {
-        panic!("expected an install");
-    };
-    assert!(plan.source.starts_with("https://"));
-    assert!(!plan.performs.is_empty());
-    assert!(plan.download > 0.0);
+fn sizes_read_the_way_a_person_says_them() {
+    assert_eq!(size(31_198_960), "31 MB");
+    assert_eq!(size(4_683_073_536), "4.7 GB");
+    assert_eq!(size(940_000_000), "940 MB");
+    assert_eq!(size(10), "1 MB");
 }

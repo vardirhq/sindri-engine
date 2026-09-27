@@ -1252,33 +1252,47 @@ frame.
   one undoable command-history step
 - Scene and Game views, the latter rendering through the authored camera with no
   editor chrome painted over it — both live at once in the `Docked` arrangement
-- **A setup flow for the local assistant that asks nobody to type.** An
-  Assistant panel reads the machine and offers one next step at a time: get the
-  runner (today that opens Ollama's download page and watches for the install),
-  start it, download a model picked for the available memory, and check it.
-  Every step is a button; the only thing a person ever types is an operating
-  system password, and only where the platform demands one.
+- **The local assistant sets itself up inside the editor.** The Assistant
+  panel opens on one card: what the assistant does, that it runs only on this
+  computer, the whole download (4.7 GB) stated before anything starts, and
+  whether the model fits this machine's memory — GPU memory read through
+  `nvidia-smi` or `rocm-smi`, unified memory on Apple silicon, otherwise system
+  memory. One button, "Set up the assistant", does everything: no download
+  page, no terminal, no installer and no password.
 
-  The states are distinguished rather than collapsed — not installed, installed
-  but not running, running with no usable model, present but unverified, ready,
-  and present but unable to do what a proposal needs — because each is a
-  different sentence and a different action, and an editor that says "could not
-  connect" to all of them has answered none. While the next move is outside the
-  editor it keeps probing, so the screen advances on its own when an install
-  finishes.
+  It fetches the pinned llama.cpp server and the pinned Qwen2.5 Coder 7B file
+  (`editor/assets/ai-runtime.json`, `ai-model-files.json`, commit-pinned URLs
+  with SHA-256 and size) into the person's own data folder through the
+  platform's curl, refuses any file whose hash does not match, unpacks the
+  runner with `tar` beside its libraries, starts it on a free loopback port,
+  waits for its `/health`, and checks the model. The panel shows the four
+  steps as they happen — a check for each one done, a spinner and a sentence
+  for the current one, and for downloads a bar with size, speed and time left,
+  then "Checking the download…" while it is hashed. Stop works at every step.
+  An interrupted setup resumes the download it stopped in and skips what is
+  already there; "Continue setting up" says so.
 
-  A model is recommended only when its weights plus working room fit the memory
-  reported, and a machine that can hold none of them is told so and still given
-  the list. Completion reports the capabilities actually verified rather than a
-  connection light. Detection and model download run over the loopback socket
-  using only the standard library, so the editor gains no HTTP client and an
-  AI-disabled build remains a normal configuration.
+  Failures name their step and say what to do, not what a tool printed: a
+  blocked or offline network, a full disk, a damaged download, a moved file, a
+  busy server, a model that did not fit in memory, and a runner that stopped
+  while loading, whose own log is one click away. Windows and Intel Macs are
+  told the assistant is not available for them yet, because nothing is pinned
+  for them.
 
   Checking is real: the model is given two broken scripts — a misspelt host
   name, and a script's own function called as `this.glow(...)` — and Decay
-  repair counts as verified only if it fixes both, graded by the compiler. A
-  feature with no case says "not offered yet" rather than "failed". The result
-  lasts for the session.
+  repair counts as verified only if it fixes both, graded by the compiler. The
+  result is saved against the exact model hash and runner build, so it
+  survives restarts and is redone if either changes. When ready, the panel
+  names the model and the disk it uses, says whether it is running or resting,
+  stops it on request to free memory, and removes everything, after a
+  confirmation, with one button. The server starts by itself on the first fix
+  of a session and stops when the editor closes.
+
+  Tested without a network by an end-to-end run: real curl fetching local
+  files, real `tar`, and a stand-in runner that answers `/health` and fixes the
+  cases. The real pinned runner has been downloaded, verified, unpacked and
+  started with these flags on Linux; no real model runs in CI.
 - **Compile errors under a previewed script, and a fix the local model proposes
   for them.** Selecting a `.decay` file shows each error with its line and
   column, from `sindri_decay::check_source` — the analysis and host environment
@@ -1296,7 +1310,8 @@ frame.
   diff with the attempt it took; Accept writes it in one step (a staged file
   renamed over the original), refusing a file that changed on disk since the
   fix was asked for, and "Put the previous version back" undoes it. Every
-  outcome is logged to the console. The loop is proved against scripted models
+  outcome is logged to the console. The first fix of a session starts the
+  model and says so while it waits. The loop is proved against scripted models
   and the transport against a stand-in runner on a real socket; no model runs
   in CI. It rewrites whole files, which is what the architecture allows for
   short scripts; semantic edits wait on the language tooling.

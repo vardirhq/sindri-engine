@@ -11,18 +11,32 @@
 > skips that order deliberately, because a repair proposes a file, not a world
 > change, and Sindri's compiler already checks a file with full authority. What
 > exists: a previewed script's errors from `sindri_decay::check_source`; a
-> `Model` boundary with an Ollama transport over loopback
+> `Model` boundary over the OpenAI-style chat endpoint on loopback
 > (`editor/src/assistant/chat.rs`); the draft → compile → at most two repairs
 > loop of [Decay assistance](#decay-assistance), which refuses an answer that
 > does not compile or drops a declared container (`assistant/repair.rs`);
 > capability verification that runs two broken-script cases and switches repair
 > on only if both are fixed (`assistant/verify.rs`); and a diff that is written
 > only on acceptance, with the previous text kept to put back
-> (`native/repair_view.rs`). The setup flow still installs and drives Ollama,
-> not the managed llama.cpp runtime adopted below; verification results last
-> for the session, not across restarts. No model has been run against the
-> cases in CI: the loop is proved against scripted models and a stand-in
-> runner, and the recorded-model evaluation below remains to be built.
+> (`native/repair_view.rs`).
+>
+> Setup is the managed llama.cpp path [adopted below](#decision-manage-llamacpp-rather-than-install-ollama),
+> all inside the editor: one button fetches the pinned runner and the pinned
+> Qwen2.5 Coder 7B file into the person's own data folder through the
+> platform's curl, checks each against its SHA-256, unpacks the runner with
+> `tar`, starts it on a free loopback port, waits for `/health`, and runs the
+> verification cases, showing each step with progress, speed and time left
+> (`assistant/install.rs`, `managed.rs`, `server.rs`,
+> `native/assistant_view/`). What was proved is saved against the exact model
+> hash and runner build, so it survives restarts; the server starts on the
+> first fix of a session and stops with the editor; removing everything is one
+> button. The Ollama setup path was removed rather than kept beside it. Runners
+> are pinned for Linux x86-64 and Apple silicon only, so Windows and Intel Macs
+> are told the assistant is not available yet. The pipeline is tested end to
+> end with a stand-in runner, and the real pinned runner has been downloaded,
+> verified, unpacked and launched with these flags; no real model has been run
+> against the cases in CI, and the recorded-model evaluation below remains to
+> be built.
 
 ## Executive summary
 
@@ -507,9 +521,10 @@ Detection must distinguish these states:
 
 ### Decision: manage llama.cpp rather than install Ollama
 
-**Status: adopted.** This supersedes the provider decision above for the
-*guided* path. Ollama remains supported for anyone already running it; what
-changes is which runtime Sindri installs and manages on someone's behalf.
+**Status: adopted and implemented.** This supersedes the provider decision
+above for the guided path, which is now the only path: the Ollama setup flow
+was removed once the managed runtime worked, rather than kept as a second way
+in that nothing tested.
 
 Ollama is a *system service you install*. That makes the first step of setup a
 platform installer — a gigabyte-plus download, an operating-system permission
@@ -587,7 +602,7 @@ and each needs entries the other does not.
 
 This is a requirement rather than a preference, and it is what separates a setup flow from a page of instructions. An editor that prints `curl … | sh` and waits has not automated anything; it has moved the work into a terminal and called that onboarding. The person who cannot get past that step is precisely the person the flow exists for.
 
-Every step is therefore a button: install the runner, start it, take the suggested model or pick another from a list, verify. `editor/src/assistant` encodes this, and `no_step_ever_asks_a_person_to_type_anything` enforces it against the action set, so a step added later that wants a name or a path fails a test rather than reaching a release.
+So the whole setup is one button — "Set up the assistant" — and the panel has no text field anywhere: every state is a card whose only controls are buttons (set up, stop, try again, stop the model, remove). Because the managed runtime needs no installer, not even the password exception is used.
 
 Doing the install on someone's behalf has to be paid for in care. The source is pinned rather than discovered; what will run is shown before it runs; nothing is elevated without the person seeing why; and consent is explicit at every step that costs disk, time, or privilege.
 

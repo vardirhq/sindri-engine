@@ -9,21 +9,21 @@
 
 use std::path::{Path, PathBuf};
 use std::sync::Arc;
-use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::mpsc::{Receiver, TryRecvError, channel};
 use std::time::{Duration, Instant};
 
 use eframe::egui::{self, RichText};
 use sindri_decay::{SourceCheck, check_source};
 
-use crate::assistant::chat::Ollama;
 use crate::assistant::diff::{self, Line};
+use crate::assistant::install::Shared;
 use crate::assistant::repair::{Failure, MAX_REPAIRS, Proposal, repair};
 use crate::preview::TextPreview;
 use crate::ui::theme::{color, metric, text};
 use crate::ui::widgets::{button, button::Intent, panel};
 
 use super::EditorApp;
+use super::assistant_view::Connector;
 
 /// Unchanged lines shown around each change in a proposed diff.
 const CONTEXT: usize = 2;
@@ -44,7 +44,7 @@ struct Asking {
     path: PathBuf,
     original: String,
     model: String,
-    cancel: Arc<AtomicBool>,
+    cancel: Arc<Shared>,
     answer: Receiver<Result<Proposal, Failure>>,
     since: Instant,
 }
@@ -117,6 +117,7 @@ impl EditorApp {
             let waited = asking.since.elapsed().as_secs();
             let model = asking.model.clone();
             let cancel = Arc::clone(&asking.cancel);
+            let note = "The first fix of a session also starts the model, which can take a minute.";
             let mut stop = false;
             ui.horizontal(|ui| {
                 ui.add_space(metric::GUTTER);
@@ -129,9 +130,10 @@ impl EditorApp {
                     .clicked();
             });
             if stop {
-                cancel.store(true, Ordering::Relaxed);
+                cancel.stop();
                 self.assistant.repair.asking = None;
             }
+            panel::note(ui, note);
             ui.ctx().request_repaint_after(Duration::from_millis(500));
             return;
         }
@@ -145,8 +147,8 @@ impl EditorApp {
             panel::note(ui, said);
         }
         if !compiles {
-            match self.assistant.repair_model() {
-                Some(model) => {
+            match self.assistant.repairer() {
+                Some((model, connector)) => {
                     ui.horizontal(|ui| {
                         ui.add_space(metric::GUTTER);
                         if button::labelled(
@@ -157,13 +159,13 @@ impl EditorApp {
                         )
                         .clicked()
                         {
-                            self.ask_for_fix(path, body, model);
+                            self.ask_for_fix(path, body, model, connector);
                         }
                     });
                 }
                 None => panel::note(
                     ui,
-                    "Once the local assistant is set up and checked, it can propose a fix here.",
+                    "Set up the local assistant from its panel, and it can propose a fix here.",
                 ),
             }
         }
@@ -190,25 +192,29 @@ impl EditorApp {
         }
     }
 
-    fn ask_for_fix(&mut self, path: &Path, body: &str, model: String) {
-        let cancel = Arc::new(AtomicBool::new(false));
+    fn ask_for_fix(&mut self, path: &Path, body: &str, model: String, connector: Connector) {
+        let shared = Arc::new(Shared::default());
         let (sender, answer) = channel();
         let file = path
             .file_name()
             .map_or_else(String::new, |name| name.to_string_lossy().into_owned());
         let source = body.to_owned();
-        let flag = Arc::clone(&cancel);
-        let asked = model.clone();
+        let worker = Arc::clone(&shared);
         std::thread::spawn(move || {
-            let mut runner = Ollama::new(asked);
-            let _ = sender.send(repair(&mut runner, &file, &source, &flag));
+            // Starts the model first if it is resting, which is most of the
+            // wait on a first request.
+            let answer = connector
+                .connect(&worker)
+                .map_err(Failure::Unavailable)
+                .and_then(|mut runner| repair(&mut runner, &file, &source, &worker.cancel));
+            let _ = sender.send(answer);
         });
         self.assistant.repair.outcome = None;
         self.assistant.repair.asking = Some(Asking {
             path: path.to_path_buf(),
             original: body.to_owned(),
             model,
-            cancel,
+            cancel: shared,
             answer,
             since: Instant::now(),
         });
@@ -242,7 +248,10 @@ impl EditorApp {
                 });
             }
             Err(failure) => {
-                let said = format!("No fix to offer: {failure}.");
+                let said = format!(
+                    "No fix to offer: {}.",
+                    failure.to_string().trim_end_matches('.')
+                );
                 self.console
                     .info(format!("{}: {said}", asking.path.display()));
                 self.assistant.repair.outcome = Some((asking.path, said));

@@ -5,18 +5,15 @@
 //! above it, which is what lets the repair loop and the verification cases run
 //! in tests against a scripted model with no runner, no GPU and no network.
 //!
-//! [`Ollama`] is the one transport today, written against the standard library
-//! for the reason `probe` gives: it talks to a loopback address, so it needs no
-//! TLS, and the editor stays free of an HTTP stack.
+//! The transport is written against the standard library: it only ever talks to
+//! the runner on a loopback address, so it needs no TLS, and the editor stays
+//! free of an HTTP stack. `server` owns the runner this talks to.
 
 use std::io::{Read, Write};
 use std::net::{SocketAddr, TcpStream};
 use std::time::Duration;
 
 use serde_json::{Value, json};
-
-use super::DEFAULT_CONTEXT;
-use super::probe::ENDPOINT;
 
 /// Who said a line of the conversation.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
@@ -81,66 +78,50 @@ pub trait Model {
 const ANSWER_TIMEOUT: Duration = Duration::from_mins(5);
 const CONNECT_TIMEOUT: Duration = Duration::from_millis(600);
 
-/// A model served by a local Ollama runner.
-pub struct Ollama {
-    pub model: String,
-    /// Where the runner listens: its default port, unless a test says otherwise.
-    pub endpoint: String,
+/// A conversation as the OpenAI-style chat API every local runner speaks.
+pub fn request(model: &str, conversation: &[Message]) -> Value {
+    json!({
+        "model": model,
+        "messages": conversation
+            .iter()
+            .map(|message| json!({ "role": message.role.wire(), "content": message.content }))
+            .collect::<Vec<_>>(),
+        "stream": false,
+        // Low, because the task is to produce text a compiler will accept,
+        // not to be inventive about it.
+        "temperature": 0.2,
+    })
 }
 
-impl Ollama {
-    pub fn new(model: impl Into<String>) -> Self {
-        Self {
-            model: model.into(),
-            endpoint: ENDPOINT.to_owned(),
-        }
-    }
-
-    /// The request body, separate from sending it so its shape is testable.
-    pub fn request(&self, conversation: &[Message]) -> Value {
-        json!({
-            "model": self.model,
-            "messages": conversation
-                .iter()
-                .map(|message| json!({ "role": message.role.wire(), "content": message.content }))
-                .collect::<Vec<_>>(),
-            "stream": false,
-            // Low, because the task is to produce text a compiler will accept,
-            // not to be inventive about it.
-            "options": { "temperature": 0.2, "num_ctx": DEFAULT_CONTEXT },
-        })
-    }
-}
-
-impl Model for Ollama {
-    fn reply(&mut self, conversation: &[Message]) -> Result<String, ModelError> {
-        let body = self.request(conversation).to_string();
-        let raw = post(&self.endpoint, "/api/chat", &body)?;
-        let (status, body) = parse_response(&raw)?;
-        if status != 200 {
-            let reason = serde_json::from_str::<Value>(&body)
-                .ok()
-                .and_then(|value| value.get("error")?.as_str().map(str::to_owned))
-                .unwrap_or_else(|| format!("HTTP {status}"));
-            return Err(ModelError::Refused(reason));
-        }
-        content(&body)
-    }
-}
-
-/// The reply text out of a `/api/chat` answer.
+/// The reply text out of a `/v1/chat/completions` answer.
 pub fn content(body: &str) -> Result<String, ModelError> {
     let value: Value =
         serde_json::from_str(body).map_err(|error| ModelError::Unreadable(error.to_string()))?;
     value
-        .get("message")
-        .and_then(|message| message.get("content"))
+        .pointer("/choices/0/message/content")
         .and_then(Value::as_str)
         .map(str::to_owned)
         .ok_or_else(|| ModelError::Unreadable("no message content".to_owned()))
 }
 
-fn post(endpoint: &str, path: &str, body: &str) -> Result<Vec<u8>, ModelError> {
+/// What a refused request said about itself, or its status.
+pub fn refusal(status: u16, body: &str) -> ModelError {
+    let reason = serde_json::from_str::<Value>(body)
+        .ok()
+        .and_then(|value| {
+            let error = value.get("error")?;
+            error
+                .get("message")
+                .or(Some(error))?
+                .as_str()
+                .map(str::to_owned)
+        })
+        .unwrap_or_else(|| format!("HTTP {status}"));
+    ModelError::Refused(reason)
+}
+
+/// Sends one request and returns the raw response.
+pub fn post(endpoint: &str, path: &str, body: &str) -> Result<Vec<u8>, ModelError> {
     let address: SocketAddr = endpoint.parse().map_err(|_| ModelError::Unreachable)?;
     let mut stream = TcpStream::connect_timeout(&address, CONNECT_TIMEOUT)
         .map_err(|_| ModelError::Unreachable)?;
@@ -168,6 +149,22 @@ fn post(endpoint: &str, path: &str, body: &str) -> Result<Vec<u8>, ModelError> {
         }
         Err(error) => Err(ModelError::Unreadable(error.to_string())),
     }
+}
+
+/// One GET, returning its status, with a short wait: used to ask a runner
+/// whether it is ready, which it answers at once or not at all.
+pub fn get_status(endpoint: &str, path: &str) -> Option<u16> {
+    let address: SocketAddr = endpoint.parse().ok()?;
+    let mut stream = TcpStream::connect_timeout(&address, CONNECT_TIMEOUT).ok()?;
+    stream.set_read_timeout(Some(Duration::from_secs(2))).ok()?;
+    write!(
+        stream,
+        "GET {path} HTTP/1.1\r\nHost: localhost\r\nConnection: close\r\n\r\n"
+    )
+    .ok()?;
+    let mut raw = Vec::new();
+    let _ = stream.read_to_end(&mut raw);
+    parse_response(&raw).ok().map(|(status, _)| status)
 }
 
 /// Splits a raw HTTP/1.1 response into its status and body.
@@ -259,83 +256,45 @@ mod tests {
     }
 
     #[test]
-    fn the_reply_is_the_message_content() {
-        let body = r#"{"model":"m","message":{"role":"assistant","content":"hi"},"done":true}"#;
+    fn the_reply_is_the_first_choice() {
+        let body = r#"{"choices":[{"message":{"role":"assistant","content":"hi"}}]}"#;
         assert_eq!(content(body), Ok("hi".to_owned()));
-        assert!(content(r#"{"done":true}"#).is_err());
-    }
-
-    /// The whole wire path over a real socket, against a stand-in that answers
-    /// the way the runner does. Nothing else in the suite opens a connection.
-    #[test]
-    fn a_reply_travels_over_a_real_connection() {
-        use std::io::{BufRead, BufReader};
-        use std::net::TcpListener;
-
-        let listener = TcpListener::bind("127.0.0.1:0").expect("a port");
-        let endpoint = listener.local_addr().expect("an address").to_string();
-        let server = std::thread::spawn(move || {
-            let (stream, _) = listener.accept().expect("a connection");
-            let mut reader = BufReader::new(stream);
-            let mut request_line = String::new();
-            reader.read_line(&mut request_line).expect("a request line");
-            let mut length = 0;
-            loop {
-                let mut header = String::new();
-                reader.read_line(&mut header).expect("a header");
-                if header.trim().is_empty() {
-                    break;
-                }
-                if let Some(value) = header.to_ascii_lowercase().strip_prefix("content-length:") {
-                    length = value.trim().parse().expect("a length");
-                }
-            }
-            let mut body = vec![0; length];
-            reader.read_exact(&mut body).expect("the body");
-            let answer = r#"{"message":{"role":"assistant","content":"fixed"},"done":true}"#;
-            let mut stream = reader.into_inner();
-            write!(
-                stream,
-                "HTTP/1.1 200 OK\r\nContent-Length: {}\r\n\r\n{answer}",
-                answer.len()
-            )
-            .expect("an answer");
-            (request_line, String::from_utf8(body).expect("text"))
-        });
-        let mut model = Ollama {
-            model: "qwen".to_owned(),
-            endpoint,
-        };
-        let reply = model.reply(&[Message::new(Role::User, "fix it")]);
-        let (request_line, body) = server.join().expect("the stand-in");
-        assert_eq!(reply, Ok("fixed".to_owned()));
-        assert!(request_line.starts_with("POST /api/chat "));
-        let sent: Value = serde_json::from_str(&body).expect("json");
-        assert_eq!(sent["messages"][0]["content"], "fix it");
+        assert!(content(r#"{"choices":[]}"#).is_err());
     }
 
     #[test]
-    fn a_runner_that_is_not_there_is_unreachable() {
-        let mut model = Ollama {
-            model: "qwen".to_owned(),
-            // A port nothing listens on: bound, read, and let go.
-            endpoint: std::net::TcpListener::bind("127.0.0.1:0")
-                .and_then(|listener| listener.local_addr())
-                .expect("a port")
-                .to_string(),
-        };
-        assert_eq!(model.reply(&[]), Err(ModelError::Unreachable));
+    fn a_refusal_carries_the_runner_s_own_reason() {
+        assert_eq!(
+            refusal(400, r#"{"error":{"message":"context too long"}}"#),
+            ModelError::Refused("context too long".to_owned())
+        );
+        assert_eq!(
+            refusal(500, "oops"),
+            ModelError::Refused("HTTP 500".to_owned())
+        );
     }
 
     #[test]
-    fn the_request_names_the_model_and_does_not_stream() {
-        let request = Ollama::new("qwen").request(&[
-            Message::new(Role::System, "rules"),
-            Message::new(Role::User, "fix it"),
-        ]);
+    fn the_request_does_not_stream_and_keeps_roles() {
+        let request = request(
+            "qwen",
+            &[
+                Message::new(Role::System, "rules"),
+                Message::new(Role::User, "fix it"),
+            ],
+        );
         assert_eq!(request["model"], "qwen");
         assert_eq!(request["stream"], false);
         assert_eq!(request["messages"][0]["role"], "system");
         assert_eq!(request["messages"][1]["content"], "fix it");
+    }
+
+    #[test]
+    fn nothing_listening_has_no_status() {
+        let port = std::net::TcpListener::bind("127.0.0.1:0")
+            .and_then(|listener| listener.local_addr())
+            .expect("a port")
+            .to_string();
+        assert_eq!(get_status(&port, "/health"), None);
     }
 }

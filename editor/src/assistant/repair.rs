@@ -55,6 +55,9 @@ pub enum Failure {
     Model(#[from] ModelError),
     #[error("stopped")]
     Cancelled,
+    /// The model could not be reached or started; says why in words.
+    #[error("{0}")]
+    Unavailable(String),
     #[error("no version compiled after {attempts} attempts: {last}")]
     Exhausted { attempts: usize, last: Problem },
 }
