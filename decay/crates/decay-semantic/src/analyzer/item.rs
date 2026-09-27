@@ -31,12 +31,15 @@ impl Analyzer<'_, '_> {
                     );
                 }
                 Member::Function(function) => {
-                    let signature = FunctionType {
-                        params: function
+                    let params = self.handler_params(function).unwrap_or_else(|| {
+                        function
                             .params
                             .iter()
                             .map(|param| param.ty.as_ref().map_or(Type::Unknown, Type::from_ref))
-                            .collect(),
+                            .collect()
+                    });
+                    let signature = FunctionType {
+                        params: params.clone(),
                         return_type: function
                             .return_type
                             .as_ref()
@@ -214,11 +217,21 @@ impl Analyzer<'_, '_> {
             function.span,
         );
 
-        for param in &function.params {
+        // The declared signature, which for a handler is where an unwritten
+        // parameter type was filled in from its event.
+        let declared = members
+            .get(&function.name)
+            .and_then(|symbol| symbol.function.as_ref())
+            .map(|signature| signature.params.clone())
+            .unwrap_or_default();
+        for (index, param) in function.params.iter().enumerate() {
             self.define_local(
                 &param.name,
                 Symbol {
-                    ty: param.ty.as_ref().map_or(Type::Unknown, Type::from_ref),
+                    ty: declared
+                        .get(index)
+                        .cloned()
+                        .unwrap_or_else(|| param.ty.as_ref().map_or(Type::Unknown, Type::from_ref)),
                     mutable: false,
                     function: None,
                 },

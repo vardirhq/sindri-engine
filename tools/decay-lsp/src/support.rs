@@ -35,15 +35,20 @@ pub(crate) fn type_members<'a>(
 
 pub(crate) fn container_members(source: &str) -> Vec<(String, ExternalSymbol)> {
     let parsed = parse(source);
-    let Some(item) = parsed.program.items.first() else {
+    let Some(container) = parsed.program.items.iter().find_map(|item| match item {
+        Item::Script(container) | Item::Component(container) => Some(container),
+        Item::Event(_) => None,
+    }) else {
         return Vec::new();
-    };
-    let container = match item {
-        Item::Script(container) | Item::Component(container) => container,
     };
     container
         .members
         .iter()
+        // A handler is run by the host when its event is emitted; it is not
+        // a name the script can reach.
+        .filter(
+            |member| !matches!(member, Member::Function(function) if function.handles.is_some()),
+        )
         .map(|member| match member {
             Member::Field(field) => (
                 field.name.clone(),
@@ -91,6 +96,47 @@ pub(crate) fn string_argument(before: &str, call: &str) -> Option<String> {
     let start = before.rfind(&marker)? + marker.len();
     let tail = &before[start..];
     (!tail.contains('"')).then(|| tail.to_owned())
+}
+
+/// Every event the file may emit: the project's, and its own.
+pub(crate) fn events(environment: &Environment, source: &str) -> Vec<(String, Vec<Type>)> {
+    let mut events: Vec<(String, Vec<Type>)> = environment
+        .events()
+        .map(|(name, params)| (name.to_owned(), params.to_vec()))
+        .collect();
+    for item in parse(source).program.items {
+        if let Item::Event(event) = item
+            && !events.iter().any(|(name, _)| *name == event.name)
+        {
+            let params = event
+                .params
+                .iter()
+                .map(|param| param.ty.as_ref().map_or(Type::Unknown, Type::from_ref))
+                .collect();
+            events.push((event.name, params));
+        }
+    }
+    events
+}
+
+/// `emit`, the one member an event has.
+pub(crate) fn emit_symbol(params: &[Type]) -> ExternalSymbol {
+    ExternalSymbol::Function(FunctionType {
+        params: params.to_vec(),
+        return_type: Type::Unit,
+    })
+}
+
+/// How an event reads on hover: its declaration.
+pub(crate) fn event_hover(name: &str, params: &[Type]) -> Value {
+    let carried = params
+        .iter()
+        .map(Type::display_name)
+        .collect::<Vec<_>>()
+        .join(", ");
+    json!({"contents":{"kind":"markdown","value":format!(
+        "```decay\nevent {name}({carried})\n```\nSend one with `{name}.emit(...)`; handle it with `on {name}(...)`."
+    )}})
 }
 
 pub(crate) fn completion_item(label: &str, kind: u8, detail: Option<&str>) -> Value {

@@ -91,20 +91,17 @@ script PowerUp {
 
     fn give(player: Entity) {
         Audio.play("audio/run.wav", 0.8);
-        let slot = World.property_number(player, "slot", 1.0);
-        var team: f32 = 2.0;
-        if slot % 2.0 == 1.0 { team = 1.0; }
-        if this.kind == 1.0 {
-            World.send_signal(player, "grow", 1.0);
-        } else if this.kind == 2.0 {
-            World.send_signal(player, "boost", 1.0);
+        let picker = Player.on(player);
+        if picker == null { return; }
+        if this.kind == 1.0 || this.kind == 2.0 {
+            picker.power_up(this.kind);
         } else if this.kind == 3.0 {
             // Blue attack the right goal, so their wind blows right.
             var blow: f32 = -1.0;
-            if team == 1.0 { blow = 1.0; }
-            World.send_signal(World.find("Match"), "wind", blow);
+            if picker.team == 1.0 { blow = 1.0; }
+            WindPicked.emit(blow);
         } else {
-            World.send_signal(World.find("Ball"), "fire", team);
+            FirePicked.emit(picker.team);
         }
     }
 }

@@ -4,7 +4,7 @@
 //! their members arrive through here, which is why this crate compiles
 //! without an engine and why a second host needs no change to it.
 
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 
 use crate::types::{FunctionType, HostType, Type};
 
@@ -28,6 +28,13 @@ pub struct Environment {
     /// describes is also an entity, so a `Bolt` goes wherever an `Entity`
     /// does. One way only: an entity is not a `Bolt` until the host says so.
     pub(crate) supertypes: HashMap<String, String>,
+    /// Events declared somewhere the host can see, by name, with what each
+    /// carries. A program's own `event` declarations are added to these
+    /// when it is analysed, so one file on its own still knows its events.
+    pub(crate) events: HashMap<String, Vec<Type>>,
+    /// Events declared more than once, which no emit or handler may name:
+    /// which declaration it meant would be a guess.
+    pub(crate) ambiguous_events: HashSet<String>,
 }
 
 impl Environment {
@@ -69,6 +76,32 @@ impl Environment {
     /// Says that every `name` is also a `supertype`.
     pub fn add_supertype(&mut self, name: impl Into<String>, supertype: impl Into<String>) {
         self.supertypes.insert(name.into(), supertype.into());
+    }
+
+    /// Declares an event any script may emit or handle.
+    pub fn add_event(&mut self, name: impl Into<String>, params: Vec<Type>) {
+        self.events.insert(name.into(), params);
+    }
+
+    /// Says an event name was declared more than once, so that using it is
+    /// refused rather than resolved to one of them.
+    pub fn add_ambiguous_event(&mut self, name: impl Into<String>) {
+        let name = name.into();
+        self.events.remove(&name);
+        self.ambiguous_events.insert(name);
+    }
+
+    /// What an event carries, when it is declared exactly once.
+    #[must_use]
+    pub fn event(&self, name: &str) -> Option<&[Type]> {
+        self.events.get(name).map(Vec::as_slice)
+    }
+
+    /// Every declared event, for a host emitting a description of itself.
+    pub fn events(&self) -> impl Iterator<Item = (&str, &[Type])> {
+        self.events
+            .iter()
+            .map(|(name, params)| (name.as_str(), params.as_slice()))
     }
 
     /// Whether a value of type `name` may be used as a `wanted`.

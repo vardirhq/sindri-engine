@@ -33,16 +33,13 @@ script Ball {
     var heat_clock: f32 = 0.0;
     var aftertouch_slot: f32 = 0.0;
     var zone: Entity = null;
-    var referee: Entity = null;
 
     fn start() {
         this.zone = World.find("Ball Ring");
-        this.referee = World.find("Match");
         Game.set("holder", 0.0);
     }
 
     fn update(dt: f32) {
-        take_signals();
         if Game.get("phase", 0.0) < 2.0 {
             // Waiting at the centre spot for kickoff.
             reset();
@@ -62,41 +59,36 @@ script Ball {
         mark();
     }
 
-    fn take_signals() {
-        let kicked = World.take_signal("kick");
-        let kx = World.take_signal("kick_x");
-        let ky = World.take_signal("kick_y");
-        if kicked > 0.0 {
-            this.velocity = Vec2(kx, ky) / kicked;
-            this.kicker = this.holder;
-            this.kicked_ago = 0.0;
-            this.holder = null;
-            let speed = this.velocity.length;
-            if speed > this.heat_threshold {
-                let added = (speed - this.heat_threshold) / this.heat_gain;
-                this.heat = min(1.0, this.heat + added);
-                Effects.burst(this.entity);
-                Camera.add_trauma(min(0.32, (speed - 24.0) / 55.0));
-            }
+    // A player kicked it: off it goes, and whoever kicked it may bend the
+    // shot for a moment.
+    fn kick(velocity: Vec2, slot: f32) {
+        this.velocity = velocity;
+        this.kicker = this.holder;
+        this.kicked_ago = 0.0;
+        this.holder = null;
+        this.aftertouch_slot = slot;
+        let speed = this.velocity.length;
+        if speed > this.heat_threshold {
+            let added = (speed - this.heat_threshold) / this.heat_gain;
+            this.heat = min(1.0, this.heat + added);
+            Effects.burst(this.entity);
+            Camera.add_trauma(min(0.32, (speed - 24.0) / 55.0));
         }
-        let slot = World.take_signal("aftertouch_slot");
-        if slot > 0.0 {
-            this.aftertouch_slot = slot;
+    }
+
+    // The player sends tiny frame-scaled nudges for only a short time, so
+    // aftertouch bends a shot instead of becoming ball steering.
+    fn nudge(push: Vec2) {
+        if this.aftertouch_slot > 0.0 && this.holder == null {
+            this.velocity += push;
         }
-        let ax = World.take_signal("aftertouch_x");
-        let ay = World.take_signal("aftertouch_y");
-        if (abs(ax) > 0.0 || abs(ay) > 0.0) && this.aftertouch_slot > 0.0 && this.holder == null {
-            // The player script sends tiny frame-scaled nudges for only a short
-            // time, so aftertouch bends a shot instead of becoming ball steering.
-            this.velocity += Vec2(ax, ay);
-        }
-        let lit = World.take_signal("fire");
-        if lit > 0.0 {
-            this.fire_left = this.fire_time;
-            this.fire_team = lit;
-            this.holder = null;
-            this.aftertouch_slot = 0.0;
-        }
+    }
+
+    on FirePicked(team) {
+        this.fire_left = this.fire_time;
+        this.fire_team = team;
+        this.holder = null;
+        this.aftertouch_slot = 0.0;
     }
 
     fn touches() {
@@ -128,7 +120,7 @@ script Ball {
         this.kicked_ago = 0.0;
         this.aftertouch_slot = 0.0;
         if team(player) != this.fire_team {
-            World.send_signal(player, "burn", 1.0);
+            Player.on(player).catch_fire();
         }
     }
 
@@ -187,10 +179,10 @@ script Ball {
         let x = this.transform.position.x;
         let y = this.transform.position.y;
         if abs(y) < this.mouth && x > this.goal_line {
-            World.send_signal(this.referee, "goal_blue", 1.0);
+            GoalScored.emit(1.0);
             reset();
         } else if abs(y) < this.mouth && x < -this.goal_line {
-            World.send_signal(this.referee, "goal_red", 1.0);
+            GoalScored.emit(2.0);
             reset();
         } else if abs(x) >= this.goal_line && abs(y) < this.mouth + this.post_radius {
             hit_post();

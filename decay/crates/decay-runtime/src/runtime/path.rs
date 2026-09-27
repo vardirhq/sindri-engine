@@ -17,7 +17,8 @@ impl<H: Host> Runtime<'_, H> {
     /// reference and the rest of the path.
     ///
     /// `target.transform.position.x` where `target` holds a reference becomes
-    /// `(target's id, transform.position.x)`, which is what lets one script say
+    /// `(target's id, transform.position.x)`, and so does
+    /// `this.target.transform.position.x` when `target` is a field, which is what lets one script say
     /// anything about another entity. A path rooted at anything else — a host
     /// global like `Input`, or `this` — is not a subject path and goes to the
     /// host whole.
@@ -35,6 +36,19 @@ impl<H: Host> Runtime<'_, H> {
             return Ok(None);
         }
         let root = &path.0[0];
+        // `this.target.transform` is `target.transform` spelled through
+        // `this`: a field holding a reference is a subject either way. Only a
+        // field that holds one, or null, since `this.transform` is the host's.
+        if root == "this"
+            && path.0.len() > 2
+            && let Some(slot) = fields.get(&path.0[1])
+        {
+            return match slot.value {
+                Value::Reference(id) => Ok(Some((id, Path(path.0[2..].to_vec())))),
+                Value::Null => Err(RuntimeError::NullReference(path.dotted())),
+                _ => Ok(None),
+            };
+        }
         let Some(slot) = frame.lookup(root).or_else(|| fields.get(root)) else {
             return Ok(None);
         };

@@ -7,6 +7,11 @@ use crate::ir::{Constant, Instruction, Path};
 
 use super::Lowerer;
 
+/// The local a computed reference is held in while a path is walked from it.
+/// Not a name a script can write, so it shadows nothing; it is what a
+/// runtime error about a null reference names.
+const HELD: &str = "(reference)";
+
 impl Lowerer<'_> {
     /// `&&` and `||`, as branches rather than as an operation over two values
     /// already evaluated.
@@ -106,8 +111,7 @@ impl Lowerer<'_> {
                     self.lower_component_assign(object, index, *op, value, instructions);
                     return;
                 }
-                let path =
-                    Self::path_from_expr(target).unwrap_or_else(|| Path(vec!["<invalid>".into()]));
+                let (path, held) = self.path_or_held(target, "<invalid>", instructions);
                 if matches!(op, AssignOp::Assign) {
                     self.lower_expr(value, instructions);
                 } else {
@@ -118,6 +122,7 @@ impl Lowerer<'_> {
                     }
                 }
                 instructions.push(Instruction::Store(path));
+                Self::release(held, instructions);
             }
             ExprKind::Member { object, .. } => {
                 // The analysis says whether this reads a property of a value or
@@ -139,9 +144,10 @@ impl Lowerer<'_> {
                     }
                     // Only a call is ever noted as a construction.
                     Some(ValueMember::Construct(_)) | None => {
-                        let path = Self::path_from_expr(expr)
-                            .unwrap_or_else(|| Path(vec!["<invalid-member>".into()]));
+                        let (path, held) =
+                            self.path_or_held(expr, "<invalid-member>", instructions);
                         instructions.push(Instruction::Load(path));
+                        Self::release(held, instructions);
                     }
                 }
             }
@@ -182,15 +188,66 @@ impl Lowerer<'_> {
             }
             _ => {}
         }
+        // The receiver before the arguments: it is evaluated first, and held
+        // before anything else is on the stack.
+        let (callee, held) = self.path_or_held(callee, "<invalid-call>", instructions);
         for argument in args {
             self.lower_expr(argument, instructions);
         }
-        let callee =
-            Self::path_from_expr(callee).unwrap_or_else(|| Path(vec!["<invalid-call>".into()]));
         instructions.push(Instruction::Call {
             callee,
             argument_count: args.len(),
         });
+        Self::release(held, instructions);
+    }
+
+    /// The path an expression walks, when it walks one from something that
+    /// is not a name: `Bolt.on(hit).damage`, `find().kick()`.
+    ///
+    /// The value it starts from is computed once and held in a local nobody
+    /// can name, and the path starts there instead, so the runtime treats it
+    /// as it treats any local holding a reference. `true` when a local was
+    /// opened, which [`Self::release`] then closes.
+    fn path_or_held(
+        &self,
+        expr: &Expr,
+        invalid: &str,
+        instructions: &mut Vec<Instruction>,
+    ) -> (Path, bool) {
+        if let Some(path) = Self::path_from_expr(expr) {
+            return (path, false);
+        }
+        let mut fields = Vec::new();
+        let mut root = expr;
+        loop {
+            match &root.kind {
+                ExprKind::Member { object, field } => {
+                    fields.push(field.clone());
+                    root = object;
+                }
+                ExprKind::Group(inner) => root = inner,
+                _ => break,
+            }
+        }
+        if fields.is_empty() {
+            return (Path(vec![invalid.into()]), false);
+        }
+        fields.push(HELD.to_owned());
+        fields.reverse();
+        instructions.push(Instruction::ScopeEnter);
+        self.lower_expr(root, instructions);
+        instructions.push(Instruction::Declare {
+            name: HELD.to_owned(),
+            mutable: false,
+        });
+        (Path(fields), true)
+    }
+
+    /// Closes the local [`Self::path_or_held`] opened, if it opened one.
+    fn release(held: bool, instructions: &mut Vec<Instruction>) {
+        if held {
+            instructions.push(Instruction::ScopeExit);
+        }
     }
 
     /// `v.x = value`, or `v.x += value`: the vector with one component
@@ -203,7 +260,7 @@ impl Lowerer<'_> {
         value: &Expr,
         instructions: &mut Vec<Instruction>,
     ) {
-        let path = Self::path_from_expr(object).unwrap_or_else(|| Path(vec!["<invalid>".into()]));
+        let (path, held) = self.path_or_held(object, "<invalid>", instructions);
         instructions.push(Instruction::Load(path.clone()));
         if let Some(binary) = binary_for(op) {
             instructions.push(Instruction::Load(path.clone()));
@@ -218,6 +275,7 @@ impl Lowerer<'_> {
         instructions.push(Instruction::Pop);
         instructions.push(Instruction::Load(path));
         instructions.push(Instruction::Component(index));
+        Self::release(held, instructions);
     }
 
     pub(super) fn path_from_expr(expr: &Expr) -> Option<Path> {

@@ -92,9 +92,12 @@ pub(crate) struct Running {
 /// Fields set on scripts that have not started, by entity and field.
 pub(crate) type StartingValues = BTreeMap<EntityId, BTreeMap<String, decay_runtime::Value>>;
 
-/// A call one script made on another, waiting to be delivered.
+/// A call one script made on another, or an event one emitted, waiting to be
+/// delivered.
 pub(crate) struct Message {
-    pub(crate) to: EntityId,
+    /// Who it is for: one entity, or — for an event — every running script
+    /// with a handler for it.
+    pub(crate) to: Option<EntityId>,
     pub(crate) name: String,
     pub(crate) args: Vec<decay_runtime::Value>,
 }
@@ -282,8 +285,12 @@ impl Scripts {
         report
     }
 
-    /// Delivers the calls scripts made on each other this pass, in the order
-    /// they were made.
+    /// Delivers the calls scripts made on each other this pass, and the events
+    /// they emitted, in the order they were made.
+    ///
+    /// An event goes to every running script with a handler for it, in the
+    /// order the pass runs them — the emitter's own handler included, since an
+    /// event is about what happened, not about who noticed.
     ///
     /// After everything else, so a message sees the world its sender left, and
     /// so a message to something spawned this pass reaches a script that has
@@ -303,8 +310,19 @@ impl Scripts {
                 return;
             }
             for message in pending {
-                let entity = message.to;
-                collect(report, entity, run::deliver(at, message));
+                match message.to {
+                    Some(entity) => collect(report, entity, run::deliver(at, entity, message)),
+                    None => {
+                        for entity in run::handlers(at, &message.name) {
+                            let copy = Message {
+                                to: Some(entity),
+                                name: message.name.clone(),
+                                args: message.args.clone(),
+                            };
+                            collect(report, entity, run::deliver(at, entity, copy));
+                        }
+                    }
+                }
             }
             // A message may spawn, and what it spawns starts now like anything
             // else spawned this pass.

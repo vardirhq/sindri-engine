@@ -5,6 +5,7 @@
 //! arm in the matching leaf, not a change to this file.
 
 mod call;
+mod event;
 mod expr;
 mod item;
 mod member;
@@ -55,6 +56,8 @@ pub(super) struct Analyzer<'a, 'd> {
     /// `break` or `continue` with nothing to break out of is refused here
     /// rather than lowered into a jump with no target.
     loop_depth: usize,
+    /// Every event this program may emit or handle: the host's, and its own.
+    events: HashMap<String, Vec<Type>>,
 }
 
 #[allow(clippy::zero_sized_map_values)]
@@ -74,6 +77,7 @@ impl<'a, 'd> Analyzer<'a, 'd> {
             current_return: Type::Unit,
             containers: HashSet::new(),
             loop_depth: 0,
+            events: HashMap::new(),
         }
     }
 
@@ -83,13 +87,18 @@ impl<'a, 'd> Analyzer<'a, 'd> {
         // Collected up front: a function body may name `this`, and `this` can
         // only be resolved once it is known which names are containers.
         for item in &program.items {
-            let (Item::Script(container) | Item::Component(container)) = item;
-            self.containers.insert(container.name.clone());
+            if let Item::Script(container) | Item::Component(container) = item {
+                self.containers.insert(container.name.clone());
+            }
         }
+        // And events too, since a handler anywhere may name one declared
+        // further down.
+        self.collect_events(program);
 
         for item in &program.items {
             let container = match item {
                 Item::Script(container) | Item::Component(container) => container,
+                Item::Event(_) => continue,
             };
 
             if containers
@@ -112,6 +121,10 @@ impl<'a, 'd> Analyzer<'a, 'd> {
                 return Type::Unknown;
             }
             return symbol.ty.clone();
+        }
+
+        if let Some(event) = self.event_name_type(name, span) {
+            return event;
         }
 
         if let Some(symbol) = self.environment.globals.get(name) {

@@ -12,6 +12,9 @@
 //! Only declarations are read, never bodies, so a type changes when a field or
 //! a signature does and not when a line of logic does; [`Project::key`] is that
 //! shape, and what tells a cached program it was compiled against another one.
+//!
+//! Events are read the same way: an `event` declared in any file is one every
+//! file may emit and handle.
 
 use std::collections::{BTreeMap, BTreeSet};
 
@@ -28,6 +31,10 @@ pub(crate) const ON: &str = "on";
 pub struct Project {
     /// Each script by name, with its fields and messages.
     pub(crate) scripts: BTreeMap<String, Declared>,
+    /// Each event by name, with what it carries.
+    pub(crate) events: BTreeMap<String, Vec<Type>>,
+    /// Events declared more than once, which nothing may use.
+    ambiguous_events: BTreeSet<String>,
     key: String,
 }
 
@@ -50,10 +57,24 @@ impl Project {
     pub fn read<'a>(sources: impl IntoIterator<Item = &'a str>, reserved: &Environment) -> Self {
         let mut scripts: BTreeMap<String, Declared> = BTreeMap::new();
         let mut twice = BTreeSet::new();
+        let mut events = BTreeMap::new();
+        let mut ambiguous_events = BTreeSet::new();
         for source in sources {
             for item in parse(source).program.items {
-                let Item::Script(container) = item else {
-                    continue;
+                let container = match item {
+                    Item::Script(container) => container,
+                    Item::Event(event) => {
+                        let params: Vec<Type> = event
+                            .params
+                            .iter()
+                            .map(|param| param.ty.as_ref().map_or(Type::Unknown, Type::from_ref))
+                            .collect();
+                        if events.insert(event.name.clone(), params).is_some() {
+                            ambiguous_events.insert(event.name);
+                        }
+                        continue;
+                    }
+                    Item::Component(_) => continue,
                 };
                 let mut declared = Declared::default();
                 for member in &container.members {
@@ -97,8 +118,21 @@ impl Project {
                 && reserved.get_type(name).is_none()
                 && !reserved.globals().any(|(global, _)| global == name)
         });
-        let key = format!("{scripts:?}");
-        Self { scripts, key }
+        // An event may not take a name a script or the engine already has;
+        // the file declaring it is told so by the analyzer.
+        events.retain(|name, _| {
+            !ambiguous_events.contains(name)
+                && !scripts.contains_key(name)
+                && reserved.get_type(name).is_none()
+                && !reserved.globals().any(|(global, _)| global == name)
+        });
+        let key = format!("{scripts:?}{events:?}{ambiguous_events:?}");
+        Self {
+            scripts,
+            events,
+            ambiguous_events,
+            key,
+        }
     }
 
     /// The declared shape of every script, as one comparable value.
@@ -157,6 +191,12 @@ impl Project {
                 ),
             );
             environment.add_value(name.clone(), Type::Named(finder));
+        }
+        for (name, params) in &self.events {
+            environment.add_event(name.clone(), params.clone());
+        }
+        for name in &self.ambiguous_events {
+            environment.add_ambiguous_event(name.clone());
         }
     }
 }

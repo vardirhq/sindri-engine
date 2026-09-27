@@ -17,9 +17,9 @@ use project::ProjectIndex;
 use protocol::{read_message, write_message};
 use serde_json::{Value, json};
 use support::{
-    KEYWORDS, completion_chain, completion_item, container_members, hover_symbol,
-    initialization_root, offset_at, span_range, string_argument, symbol_completion, type_members,
-    word_at,
+    KEYWORDS, completion_chain, completion_item, container_members, emit_symbol, event_hover,
+    events, hover_symbol, initialization_root, offset_at, span_range, string_argument,
+    symbol_completion, type_members, word_at,
 };
 
 #[derive(Clone)]
@@ -278,6 +278,11 @@ impl Server {
                 .into_iter()
                 .map(|(name, symbol)| symbol_completion(&name, &symbol)),
         );
+        items.extend(
+            events(&self.environment, &source)
+                .into_iter()
+                .map(|(name, _)| completion_item(&name, 24, Some("event"))),
+        );
         Value::Array(items)
     }
 
@@ -290,6 +295,12 @@ impl Server {
         };
         if let Some((_, symbol)) = self.environment.globals().find(|(name, _)| *name == word) {
             return hover_symbol(word, symbol);
+        }
+        if let Some((name, params)) = events(&self.environment, &source)
+            .into_iter()
+            .find(|(name, _)| name == word)
+        {
+            return event_hover(&name, &params);
         }
         if let Some((_, symbol)) = container_members(&source)
             .into_iter()
@@ -318,6 +329,15 @@ impl Server {
         for item in parsed.program.items {
             let container = match item {
                 Item::Script(container) | Item::Component(container) => container,
+                Item::Event(event) => {
+                    symbols.push(json!({
+                        "name": event.name,
+                        "kind": 24,
+                        "range": span_range(source, event.span),
+                        "selectionRange": span_range(source, event.span)
+                    }));
+                    continue;
+                }
             };
             let children = container
                 .members
@@ -361,6 +381,13 @@ impl Server {
         let Some(first) = chain.first() else {
             return Vec::new();
         };
+        if chain.len() == 1
+            && let Some((_, params)) = events(&self.environment, source)
+                .into_iter()
+                .find(|(name, _)| name == first)
+        {
+            return vec![(decay_semantic::EMIT.to_owned(), emit_symbol(&params))];
+        }
         let mut current = if first == "this" {
             None
         } else {

@@ -132,14 +132,14 @@ fn contract_reminders(source: &str) -> Vec<ContractReminder> {
         reminders.push(ContractReminder {
             offset,
             code: "runtime-property-write",
-            message: "World.set_property only authors a newly spawned entity before its script starts; use a signal or another live-state API for an entity that is already running",
+            message: "World.set_property only authors a newly spawned entity before its script starts; write the field through the script's type instead (`Name.on(entity).field = value`), which reaches a running script too",
         });
     }
     if let Some(offset) = source.find("World.property_number(") {
         reminders.push(ContractReminder {
             offset,
             code: "authored-property-read",
-            message: "World.property_number reads the scene-authored property, not the target script's current runtime field",
+            message: "World.property_number reads the scene-authored property, not the target script's current runtime field; read it through the script's type instead (`Name.on(entity).field`)",
         });
     }
     reminders

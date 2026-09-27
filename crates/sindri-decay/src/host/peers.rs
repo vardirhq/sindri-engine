@@ -9,6 +9,10 @@
 //! A call is a message. It is not run there and then: the calling script is in
 //! the middle of its own frame and the world is lent to it. It is queued, and
 //! delivered once the pass has run, in the order it was sent.
+//!
+//! An event is the same, sent to everyone listening: `GoalScored.emit(1.0)`
+//! is queued alongside the messages and delivered, in its turn, to every
+//! running script with an `on GoalScored` handler.
 
 use std::collections::BTreeMap;
 
@@ -260,8 +264,25 @@ impl<'a> WorldHost<'a> {
             return None;
         }
         peers.messages.push(Message {
-            to: entity,
+            to: Some(entity),
             name: name.clone(),
+            args: args.to_vec(),
+        });
+        Some(Value::Unit)
+    }
+}
+
+impl WorldHost<'_> {
+    /// `GoalScored.emit(1.0)`: queued for after the pass, for every script
+    /// with a handler for it.
+    pub(super) fn emit(&mut self, event: &str, args: &[Value]) -> Option<Value> {
+        let peers = self.peers.as_mut()?;
+        if !peers.project.events.contains_key(event) {
+            return None;
+        }
+        peers.messages.push(Message {
+            to: None,
+            name: decay_syntax::handler_name(event),
             args: args.to_vec(),
         });
         Some(Value::Unit)
