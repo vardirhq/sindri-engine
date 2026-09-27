@@ -74,6 +74,13 @@ pub struct SceneScripts {
     loader: Option<AssetLoader<TextAssetDecoder>>,
     watch: Option<AssetWatch>,
     last_examined: Instant,
+    /// Every script in the project, whether or not the scene names it.
+    ///
+    /// Loaded as well as the referenced ones because any script may name any
+    /// other by type (`Bolt.on(hit)`), so compiling one needs to know all of
+    /// them. Listed when the scene opens and again on the watch interval, so
+    /// a script created a moment ago becomes nameable a moment later.
+    project_scripts: Vec<String>,
     sources: ScriptSources,
     /// The prefabs the scene's scripts can spawn.
     ///
@@ -93,8 +100,9 @@ impl SceneScripts {
             loader: root.as_deref().and_then(|root| {
                 AssetLoader::new(FileSystemAssetSource::new(root), QUEUE, TextAssetDecoder).ok()
             }),
-            watch: root.map(AssetWatch::new),
+            watch: root.clone().map(AssetWatch::new),
             last_examined: Instant::now(),
+            project_scripts: root.as_deref().map_or_else(Vec::new, list_scripts),
             sources: ScriptSources::new(),
             prefabs: PrefabSources::new(),
             profiles: ProfileSources::new(),
@@ -114,6 +122,7 @@ impl SceneScripts {
         // fields, so they only become visible once the script has compiled.
         // Asking every frame is what makes a prefab authored a moment ago load
         // a moment later rather than at the next scene open.
+        referenced.extend(self.project_scripts.iter().cloned());
         referenced.extend(self.scripts.referenced_prefabs(world, components));
         referenced.extend(self.scripts.referenced_profiles(world, components));
         let wanted: BTreeSet<AssetId> = referenced
@@ -337,6 +346,12 @@ impl SceneScripts {
     /// meant to fetch: a prefab that was never loaded is an enemy that never
     /// arrives, and the difference is invisible until something spawns one.
     #[must_use]
+    /// What a script in this project compiles against: the engine, and every
+    /// script in the project as a type another may name.
+    pub fn environment(&self) -> &sindri_decay::ScriptEnvironment {
+        self.sources.environment()
+    }
+
     pub fn has_prefab(&self, id: &str) -> bool {
         self.prefabs.get(id).is_some()
     }
@@ -350,6 +365,9 @@ impl SceneScripts {
             return Vec::new();
         }
         self.last_examined = Instant::now();
+        if let Some(root) = self.watch.as_ref().map(|watch| watch.root().to_path_buf()) {
+            self.project_scripts = list_scripts(&root);
+        }
         let Self {
             loader: Some(loader),
             watch: Some(watch),
@@ -366,6 +384,11 @@ impl SceneScripts {
         }
         notes
     }
+}
+
+/// Every `.decay` file under a project's asset root, by the ID a scene uses.
+fn list_scripts(root: &Path) -> Vec<String> {
+    FileSystemAssetSource::new(root).assets_with_extension("decay")
 }
 
 fn root_of(scene: Option<&Path>) -> Option<PathBuf> {

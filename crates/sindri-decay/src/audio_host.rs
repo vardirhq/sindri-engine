@@ -91,6 +91,13 @@ pub struct HostServices<'a> {
 }
 
 impl<'a> WorldHost<'a> {
+    /// Lets this host reach the other scripts in the pass.
+    #[must_use]
+    pub(crate) fn with_peers(mut self, peers: crate::host::Peers<'a>) -> Self {
+        self.inner = self.inner.with_peers(peers);
+        self
+    }
+
     pub fn new(
         world: &'a mut sindri_core::World,
         entity: sindri_core::EntityId,

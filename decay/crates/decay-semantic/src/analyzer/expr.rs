@@ -86,7 +86,11 @@ impl Analyzer<'_, '_> {
                 Type::Bool
             }
             BinaryOp::Equal | BinaryOp::NotEqual => {
-                if !Self::compatible(&left_type, &right_type) {
+                // Either way round: comparing a `Bolt` with an `Entity` asks
+                // whether they are the same thing, whichever is written first.
+                if !self.compatible(&left_type, &right_type)
+                    && !self.compatible(&right_type, &left_type)
+                {
                     self.error(
                         right.span,
                         format!(

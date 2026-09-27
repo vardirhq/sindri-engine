@@ -39,6 +39,11 @@ pub enum ScriptFailure {
          round made; {pending} entities were left unstarted"
     )]
     SpawnCascade { rounds: usize, pending: usize },
+    #[error(
+        "scripts kept messaging each other after {rounds} rounds of delivering what the \
+         last round sent; {waiting} messages were dropped"
+    )]
+    MessagesDidNotSettle { rounds: usize, waiting: usize },
     #[error("entity {entity:?} failed in {script}.{function}: {error}")]
     Runtime {
         entity: EntityId,
@@ -60,6 +65,7 @@ impl ScriptFailure {
             Self::BadDelta(_)
             | Self::Registry(_)
             | Self::SpawnCascade { .. }
+            | Self::MessagesDidNotSettle { .. }
             | Self::Compile { .. } => None,
             Self::MissingSource { entity, .. }
             | Self::UnknownScript { entity, .. }

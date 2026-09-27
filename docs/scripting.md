@@ -1527,6 +1527,56 @@ is what the original objection was actually asking for.
 that is not `update` can reach it. `elapsed` is per script instance rather than
 per world: a script attached later has not been running as long.
 
+### Other scripts, by type
+
+Every `script` in a project is a type every other script can name, whichever
+file it is in:
+
+```decay
+// In turret.decay, about the Bolt declared in bolt.decay.
+let shot = Bolt.on(World.spawn(this.bolt));
+shot.damage = 3.0;              // a field, checked when it compiles
+shot.heading = Vec2(0.0, 1.0);
+
+let hit = Bolt.on(other);       // null when `other` does not run Bolt
+if hit != null {
+    this.hp -= hit.damage;      // its live value, not what the scene authored
+    hit.bounce(2.0);            // a message
+}
+```
+
+`Name.on(entity)` answers with the entity typed as that script when it runs
+it, and `null` when it does not. A script type is also an `Entity`: it reaches
+`transform` and the rest, and goes wherever an entity does. Where a script's
+own name matches an entity's (`transform`, say), the entity's wins.
+
+**Fields are live.** Reading one reads the other script's field as it is now;
+writing one changes it for that script's next line. A `let` cannot be written
+once its script has started. On a script that has not started yet — one
+spawned a moment ago — a write sets what it starts with, applied after
+anything the scene authored, and may name things only a running game has, such
+as another entity. This is what `World.set_property` did by name, and the
+typed form checks the name and the type. So that a project can move over one
+call at a time, a starting value written to an `@export` field is also what
+`World.property_number` reads, exactly as `World.set_property` made it.
+
+**A call is a message.** It is not run when it is made: it is queued, and
+delivered once the pass has run, in the order sent. A message returns nothing,
+may send more — delivered in a following round, up to eight — and to an entity
+that has gone it simply does nothing, which is the ordinary end of a
+projectile. A conversation that never settles is stopped and reported.
+Lifecycle functions (`start`, `update`) are the engine's to call and are not
+messages.
+
+**Everything is checked when it compiles**: an unknown script, a misspelt
+field or message, a wrong argument, and using a message's result. A name two
+scripts declare is left out — which one was meant would be a guess — as is one
+the engine already uses.
+
+Because any script may name any other, every `.decay` file in a project is
+loaded and exported, not only those a scene names; the editor's error preview
+and `decay-lsp` check each script against its whole project.
+
 ### The board scripts share
 
 | Call | Returns |

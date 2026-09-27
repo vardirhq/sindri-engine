@@ -18,6 +18,56 @@ impl FileSystemAssetSource {
         &self.root
     }
 
+    /// Every asset under the root with this extension, as the IDs a scene
+    /// would name them by: relative, with forward slashes, in a stable order.
+    ///
+    /// For assets that belong to the whole project rather than to whatever
+    /// references them — a script's type can be named by any other script, so
+    /// every script has to be known, not only those a scene points at. Hidden
+    /// directories and build output are skipped, and the walk stops a few
+    /// levels down: a project's assets are not a tree worth searching deeply.
+    #[must_use]
+    pub fn assets_with_extension(&self, extension: &str) -> Vec<String> {
+        fn walk(
+            root: &std::path::Path,
+            dir: &std::path::Path,
+            depth: usize,
+            extension: &str,
+            into: &mut Vec<String>,
+        ) {
+            let Ok(entries) = std::fs::read_dir(dir) else {
+                return;
+            };
+            for entry in entries.flatten() {
+                let path = entry.path();
+                let name = entry.file_name();
+                let name = name.to_string_lossy();
+                if name.starts_with('.') || name == "target" || name == "node_modules" {
+                    continue;
+                }
+                if path.is_dir() {
+                    if depth < 6 {
+                        walk(root, &path, depth + 1, extension, into);
+                    }
+                } else if path.extension().is_some_and(|found| found == extension)
+                    && let Ok(relative) = path.strip_prefix(root)
+                {
+                    into.push(
+                        relative
+                            .components()
+                            .map(|part| part.as_os_str().to_string_lossy().into_owned())
+                            .collect::<Vec<_>>()
+                            .join("/"),
+                    );
+                }
+            }
+        }
+        let mut found = Vec::new();
+        walk(&self.root, &self.root, 0, extension, &mut found);
+        found.sort();
+        found
+    }
+
     fn read(&self, id: &AssetId) -> Result<AssetBytes, AssetSourceError> {
         let root = std::fs::canonicalize(&self.root)
             .map_err(|error| io_error(id, "filesystem", "resolve asset root", &error))?;

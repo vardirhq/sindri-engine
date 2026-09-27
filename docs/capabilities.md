@@ -1544,6 +1544,17 @@ Stand's volley spread and bullet homing now use them, with both games' match
 and run simulations passing unchanged. The maths host also gained `floor`,
 `ceil`, `round`, `sign`, `clamp`, `lerp`, `PI` and `TAU`.
 
+**Scripts name each other by type.** Every `script` in a project is a type
+any other script can name: `Bolt.on(entity)` finds one (or `null`), its fields
+read and write live — or set what a just-spawned one starts with, which
+replaces `World.set_property` — and calling one of its functions sends a
+message delivered after the pass, in order, in bounded rounds. A script type is
+also an `Entity`. An unknown script, a misspelt field or message, or a wrong
+argument is a compile error. The editor and the exporter load every project
+script rather than only referenced ones, and the editor's preview and
+`decay-lsp` check against the whole project. Orbital Last Stand's player sets
+up each bullet it fires this way, and its run simulations pass unchanged.
+
 A failing script reports itself and does not stop the others.
 
 **Camera impacts are gameplay, not Rust glue.** Decay exposes

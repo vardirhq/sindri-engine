@@ -140,6 +140,20 @@ impl ProjectExport {
         let mut sources = ScriptSources::new();
         let mut scripts = Scripts::new();
         let mut walked: BTreeSet<String> = BTreeSet::new();
+        // Every script ships, not only those a scene names: any script may
+        // name any other by type (`Bolt.on(hit)`), so each one compiles
+        // against all of them, in the build as much as in the editor.
+        let assets_root = if project.join("assets").is_dir() {
+            project.join("assets")
+        } else {
+            project.to_path_buf()
+        };
+        for source in scripts_under(&assets_root) {
+            if let Ok(text) = std::fs::read_to_string(resolve(project, &source)) {
+                wanted.insert(source.clone(), AssetKind::Script);
+                sources.insert(source, text);
+            }
+        }
         while let Some(world) = pending.pop() {
             for reference in referenced_textures(&world) {
                 wanted.insert(reference, AssetKind::Texture);
@@ -380,4 +394,43 @@ fn leaf(path: &str) -> String {
 /// cannot appear in an asset ID, which is what keeps the two kinds apart.
 fn engine_provided(reference: &str) -> bool {
     reference.contains(':')
+}
+
+/// Every `.decay` file under an asset root, by the ID a scene would name it.
+///
+/// Walked here rather than through `sindri-assets`, whose filesystem source is
+/// native-only: this crate is checked for the browser target too.
+fn scripts_under(root: &Path) -> Vec<String> {
+    fn walk(root: &Path, dir: &Path, depth: usize, into: &mut Vec<String>) {
+        let Ok(entries) = std::fs::read_dir(dir) else {
+            return;
+        };
+        for entry in entries.flatten() {
+            let path = entry.path();
+            let name = entry.file_name();
+            let name = name.to_string_lossy();
+            if name.starts_with('.') || name == "target" || name == "node_modules" {
+                continue;
+            }
+            if path.is_dir() {
+                if depth < 6 {
+                    walk(root, &path, depth + 1, into);
+                }
+            } else if path.extension().is_some_and(|found| found == "decay")
+                && let Ok(relative) = path.strip_prefix(root)
+            {
+                into.push(
+                    relative
+                        .components()
+                        .map(|part| part.as_os_str().to_string_lossy().into_owned())
+                        .collect::<Vec<_>>()
+                        .join("/"),
+                );
+            }
+        }
+    }
+    let mut found = Vec::new();
+    walk(root, root, 0, &mut found);
+    found.sort();
+    found
 }

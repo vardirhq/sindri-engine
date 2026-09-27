@@ -40,7 +40,7 @@ impl Analyzer<'_, '_> {
         if matches!(object_type, Type::Array(_)) && field == crate::types::LENGTH {
             self.value_members.insert(span, ValueMember::Length);
         }
-        match self.member_symbol(&object_type, field) {
+        match self.member_symbol(&object_type, field, super::call::is_this(object)) {
             Some(MemberLookup::Found(ExternalSymbol::Value(ty))) => ty,
             // A function reached without calling it. Decay has no function
             // values, so there is nothing this could evaluate to.
@@ -74,7 +74,18 @@ impl Analyzer<'_, '_> {
     ///
     /// `None` means "nothing is known about this type", which is not the same
     /// as "this type has no such member" and must not be reported as one.
-    pub(super) fn member_symbol(&self, object_type: &Type, field: &str) -> Option<MemberLookup> {
+    ///
+    /// `through_this` is whether the object is `this` itself. A reference to a
+    /// script held in a variable — another instance of this one, or another
+    /// script declared in the same file — is answered by the host's description
+    /// of that script where there is one: its fields, and its functions as
+    /// messages, which `this.helper()` is not.
+    pub(super) fn member_symbol(
+        &self,
+        object_type: &Type,
+        field: &str,
+        through_this: bool,
+    ) -> Option<MemberLookup> {
         // A collection's one member. Not a global `len(x)`: Decay has no
         // modules, so every global name added is one a script can no longer
         // use for its own, and a length is a property of the value anyway.
@@ -86,7 +97,10 @@ impl Analyzer<'_, '_> {
             });
         }
         let described = match object_type {
-            Type::Named(name) if self.is_container(name) => {
+            Type::Named(name)
+                if self.is_container(name)
+                    && (through_this || self.environment.get_type(name).is_none()) =>
+            {
                 // `this` is two things: the script's own state, and the entity
                 // the host attached it to. The script's own members are asked
                 // first, so the engine growing a name can never shadow a

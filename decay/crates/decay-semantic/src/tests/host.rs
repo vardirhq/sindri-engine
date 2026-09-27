@@ -200,3 +200,62 @@ fn reaching_for_a_method_says_what_to_write_instead() {
         analyze(r"script Player { fn helper() -> f32 { return 1.0; } fn update() { helper(); } }");
     assert!(bare.diagnostics.is_empty(), "{:?}", bare.diagnostics);
 }
+
+/// A host may say a named type is also another. One way: a `Bolt` is an
+/// `Entity`, and an `Entity` is not a `Bolt`.
+#[test]
+fn a_subtype_goes_where_its_supertype_does_and_not_back() {
+    let mut environment = Environment::new();
+    environment.add_type("Entity", HostType::new().with_value("alive", Type::Bool));
+    environment.add_type("Bolt", HostType::new().with_value("damage", Type::F32));
+    environment.add_supertype("Bolt", "Entity");
+    let said = |body: &str| {
+        analyze_with_environment(
+            &format!("script T {{ fn f(b: Bolt, e: Entity) {{ {body} }} }}"),
+            &environment,
+        )
+        .diagnostics
+        .into_iter()
+        .map(|diagnostic| diagnostic.message)
+        .collect::<Vec<_>>()
+    };
+    assert!(said("let x: Entity = b; let same = b == e; let also = e == b;").is_empty());
+    assert!(
+        said("let x: Bolt = e;")
+            .join("")
+            .contains("cannot assign `Entity` to `Bolt`")
+    );
+}
+
+/// A reference to another instance of this very script is answered by the
+/// host's description of it, so its functions are callable through it, while
+/// `this.helper()` is still refused.
+#[test]
+fn a_held_reference_to_this_script_is_not_this() {
+    let mut environment = Environment::new();
+    environment.add_type(
+        "Echo",
+        HostType::new().with_value("loud", Type::F32).with_function(
+            "ping",
+            FunctionType {
+                params: vec![Type::F32],
+                return_type: Type::Unit,
+            },
+        ),
+    );
+    let said = |body: &str| {
+        analyze_with_environment(
+            &format!(
+                "script Echo {{ var loud: f32 = 1.0; var other: Echo = null; \
+                 fn ping(x: f32) {{}} fn f() {{ {body} }} }}"
+            ),
+            &environment,
+        )
+        .diagnostics
+        .into_iter()
+        .map(|diagnostic| diagnostic.message)
+        .collect::<Vec<_>>()
+    };
+    assert!(said("other.ping(1.0); let l = other.loud;").is_empty());
+    assert!(!said("this.ping(1.0);").is_empty());
+}

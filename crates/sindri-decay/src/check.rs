@@ -57,9 +57,20 @@ impl SourceCheck {
 }
 
 /// Checks a source against the host surface every Sindri script runs with.
+///
+/// On its own, so another script's type is an unknown name here; a source in
+/// a project is checked with [`check_source_in`] and the project's
+/// [`crate::ScriptSources::environment`].
 #[must_use]
 pub fn check_source(source: &str) -> SourceCheck {
-    let lowered = lower_with_environment(source, &environment());
+    check_source_in(source, &environment())
+}
+
+/// Checks a source against an environment: a project's, where every script
+/// in it is a type this one may name.
+#[must_use]
+pub fn check_source_in(source: &str, environment: &decay_semantic::Environment) -> SourceCheck {
+    let lowered = lower_with_environment(source, environment);
     let declared = lowered
         .analysis
         .program

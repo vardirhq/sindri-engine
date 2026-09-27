@@ -29,14 +29,25 @@ pub(crate) fn run(paths: &[PathBuf], json_output: bool) -> io::Result<bool> {
         ));
     }
 
-    let environment = sindri_decay::environment();
+    // Each file is checked against its own project, where every script is a
+    // type any other may name: its nearest `sindri.toml` and every `.decay`
+    // under it. A file in no project is checked against the others given.
+    let mut environments: std::collections::BTreeMap<Option<PathBuf>, decay_semantic::Environment> =
+        std::collections::BTreeMap::new();
     let mut errors = 0;
     let mut reminders = 0;
     let mut output_diagnostics = Vec::new();
 
     for path in &files {
         let source = fs::read_to_string(path)?;
-        let analysis = decay_semantic::analyze_with_environment(&source, &environment);
+        let root = project_root(path);
+        let environment = environments
+            .entry(root.clone())
+            .or_insert_with(|| match &root {
+                Some(root) => environment_for(Some(root)),
+                None => environment_of(files.iter()),
+            });
+        let analysis = decay_semantic::analyze_with_environment(&source, environment);
         for diagnostic in analysis.diagnostics {
             let diagnostic = StructuredDiagnostic::from_compiler(diagnostic);
             let (line, column) = line_column(&source, diagnostic.span.start);
@@ -144,6 +155,35 @@ fn line_column(source: &str, offset: usize) -> (usize, usize) {
         .count()
         + 1;
     (line, column)
+}
+
+/// The project a file belongs to: the nearest folder above it holding a
+/// `sindri.toml`.
+fn project_root(file: &Path) -> Option<PathBuf> {
+    file.ancestors()
+        .skip(1)
+        .find(|folder| folder.join("sindri.toml").is_file())
+        .map(Path::to_path_buf)
+}
+
+/// What a script under `root` compiles against: the engine, and every script
+/// in the project as a type.
+pub(crate) fn environment_for(root: Option<&Path>) -> decay_semantic::Environment {
+    let mut files = BTreeSet::new();
+    if let Some(root) = root {
+        let _ = collect_decay_files(root, &mut files);
+    }
+    environment_of(files.iter())
+}
+
+fn environment_of<'a>(files: impl Iterator<Item = &'a PathBuf>) -> decay_semantic::Environment {
+    let mut sources = sindri_decay::ScriptSources::new();
+    for file in files {
+        if let Ok(text) = fs::read_to_string(file) {
+            sources.insert(file.display().to_string(), text);
+        }
+    }
+    sources.environment().clone()
 }
 
 #[cfg(test)]

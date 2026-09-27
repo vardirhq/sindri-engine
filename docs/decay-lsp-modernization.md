@@ -58,6 +58,9 @@ These are defects or sources of actively misleading tooling.
         when an unrelated Decay document is saved.
   - [x] Handle created, changed, and deleted project files.
   - [x] Avoid a full recursive project scan on every ordinary script save.
+  - [x] Rebuild the project's script types (every `script` a type other
+        scripts may name) on initialize and on watched-file changes, and check
+        each `--check` file against its own project (nearest `sindri.toml`).
   - [ ] Keep project-index results deterministic.
 - [ ] Fix completion insertion for functions.
   - [x] Generate zero placeholders for zero-argument functions.

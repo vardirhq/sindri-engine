@@ -28,6 +28,13 @@ impl ScriptInstance {
         self.fields.get(name).map(|slot| &slot.value)
     }
 
+    /// Whether the script's own code may reassign this field: `var` rather
+    /// than `let`. `None` for a field the script does not have.
+    #[must_use]
+    pub fn is_mutable(&self, name: &str) -> Option<bool> {
+        self.fields.get(name).map(|slot| slot.mutable)
+    }
+
     /// Sets a field from outside the script, as an authoring tool does.
     ///
     /// This deliberately ignores the field's mutability. `@export let speed`

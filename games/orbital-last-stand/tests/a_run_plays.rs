@@ -572,14 +572,13 @@ fn weapon_flags_make_distinct_projectiles() {
             if data.name.as_deref() != Some("Bullet") {
                 continue;
             }
-            let value = data
-                .components
-                .get("sindri.script")
-                .and_then(|script| script.get("properties"))
-                .and_then(|properties| properties.get("missile"))
-                .and_then(serde_json::Value::as_f64)
-                .unwrap_or_default();
-            saw_missile |= value > 0.0 && run.scripts.is_running(entity);
+            // The running shot's own field: the player sets it on each bullet
+            // it spawns, and what counts is that the live script has it.
+            let value = match run.scripts.field(entity, "missile") {
+                Some(sindri_decay::ScriptValue::Number(value)) => *value,
+                _ => 0.0,
+            };
+            saw_missile |= value > 0.0;
         }
         if saw_missile && saw_arc && saw_nova && saw_mine && saw_beam {
             break;

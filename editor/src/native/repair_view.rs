@@ -13,7 +13,7 @@ use std::sync::mpsc::{Receiver, TryRecvError, channel};
 use std::time::{Duration, Instant};
 
 use eframe::egui::{self, RichText};
-use sindri_decay::{SourceCheck, check_source};
+use sindri_decay::{SourceCheck, check_source_in};
 
 use crate::assistant::diff::{self, Line};
 use crate::assistant::install::Shared;
@@ -67,7 +67,9 @@ impl EditorApp {
             .as_ref()
             .is_none_or(|(checked, source, _)| checked != path || source != body);
         if stale {
-            let check = check_source(body);
+            // Against the project, so naming another script by type is not
+            // reported as a mistake it is not.
+            let check = check_source_in(body, self.scripts.environment());
             self.assistant.repair.checked = Some((path.to_path_buf(), body.to_owned(), check));
         }
         let Some((_, _, check)) = &self.assistant.repair.checked else {

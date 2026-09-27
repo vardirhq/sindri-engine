@@ -92,6 +92,7 @@ impl Server {
     ) -> io::Result<()> {
         self.root = initialization_root(params);
         self.project = ProjectIndex::scan(self.root.as_deref());
+        self.environment = check::environment_for(self.root.as_deref());
         Self::respond(
             id,
             json!({
@@ -197,6 +198,9 @@ impl Server {
 
     fn did_change_watched_files(&mut self) {
         self.project = ProjectIndex::scan(self.root.as_deref());
+        // A script added, renamed or given a new field changes what every
+        // other script may say about it.
+        self.environment = check::environment_for(self.root.as_deref());
     }
 
     fn publish_diagnostics(

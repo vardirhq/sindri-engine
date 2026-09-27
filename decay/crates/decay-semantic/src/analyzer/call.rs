@@ -18,7 +18,7 @@ impl Analyzer<'_, '_> {
             if object_type.dimensions().is_some() {
                 return self.vector_call_type(&object_type, field, args, span);
             }
-            match self.member_symbol(&object_type, field) {
+            match self.member_symbol(&object_type, field, is_this(object)) {
                 Some(MemberLookup::Found(ExternalSymbol::Function(function))) => {
                     self.check_call(&function, args, span);
                     return function.return_type;
@@ -111,4 +111,10 @@ impl Analyzer<'_, '_> {
             self.check_assignable(expected, &actual, argument.span);
         }
     }
+}
+
+/// Whether an expression is `this` itself, rather than a held reference that
+/// happens to have the same type.
+pub(super) fn is_this(expr: &Expr) -> bool {
+    matches!(&expr.kind, ExprKind::Identifier(name) if name == "this")
 }

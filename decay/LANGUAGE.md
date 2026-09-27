@@ -243,6 +243,18 @@ is in `docs/scripting.md`.
 
 ### Host references
 
+A host may say that one named type is also another. Sindri says each script
+type is also an `Entity`, so a `Bolt` goes wherever an `Entity` does and
+compares with one; an `Entity` is not a `Bolt` until the host says so. The
+language has no opinion about what either means.
+
+A value typed as a script is not `this`, even inside that script: reaching
+through one reaches what the host describes for that type, so calling one of
+its functions is whatever the host makes of a call through a reference —
+against Sindri, a message — while `this.helper()` is still refused.
+
+#### Held references
+
 A value of a named host type can be **held**, not only reached through. A host
 may hand one back from a call, and a script can bind it, keep it in a field,
 pass it, and compare it:
