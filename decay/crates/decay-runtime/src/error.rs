@@ -25,6 +25,9 @@ pub enum RuntimeError {
     /// its length. Named by what it actually is, because "not a collection" on
     /// its own does not say which value was wrong.
     NotACollection(String),
+    /// Something that is not a vector was asked for a component or a vector
+    /// operation, named by what it actually is.
+    NotAVector(String),
     /// An index that is not a number at all.
     IndexNotANumber(String),
     /// An index that is a number and not a position: fractional, negative, or

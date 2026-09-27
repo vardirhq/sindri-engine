@@ -198,6 +198,49 @@ pub enum ExprKind {
     Group(Box<Expr>),
 }
 
+/// What a vector can be asked beyond its components and arithmetic.
+///
+/// Here, beside the operators, because it is the same kind of thing: an
+/// operation the language owns over values it owns. The analyzer decides which
+/// member read or call is one of these, the IR carries it, and the runtime
+/// performs it, so all three need one spelling of the list.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum VectorOp {
+    /// `v.length`: how long it is.
+    Length,
+    /// `v.normalized`: the same direction, one unit long, or zero for a zero
+    /// vector rather than a vector of NaN.
+    Normalized,
+    /// `a.dot(b)`.
+    Dot,
+    /// `a.distance(b)`: how far apart two points are.
+    Distance,
+    /// `a.lerp(b, t)`: the point `t` of the way from `a` to `b`.
+    Lerp,
+}
+
+impl VectorOp {
+    /// Every operation, with the name a script spells it by and how many
+    /// arguments it takes after the vector itself. A property is the one that
+    /// takes none.
+    pub const ALL: [(Self, &'static str, usize); 5] = [
+        (Self::Length, "length", 0),
+        (Self::Normalized, "normalized", 0),
+        (Self::Dot, "dot", 1),
+        (Self::Distance, "distance", 1),
+        (Self::Lerp, "lerp", 2),
+    ];
+
+    /// The operation a member name spells, and how many arguments it takes.
+    #[must_use]
+    pub fn named(name: &str) -> Option<(Self, usize)> {
+        Self::ALL
+            .into_iter()
+            .find(|(_, spelled, _)| *spelled == name)
+            .map(|(op, _, arity)| (op, arity))
+    }
+}
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum UnaryOp {
     Negate,

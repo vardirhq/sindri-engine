@@ -28,6 +28,7 @@ impl WorldHost<'_> {
             StickValue::X => Value::Number(f64::from(pushed[0])),
             StickValue::Y => Value::Number(f64::from(pushed[1])),
             StickValue::Held => Value::Bool(stick.is_engaged()),
+            StickValue::Direction => Value::Vec2([f64::from(pushed[0]), f64::from(pushed[1])]),
             // Zero when nothing is holding it, like a pointer position read
             // from outside the window: a script that cares asks `held` first.
             StickValue::AnchorX => Value::Number(f64::from(
@@ -157,6 +158,17 @@ impl WorldHost<'_> {
                 self.screen_ui
                     .is_some_and(sindri_scene::ScreenUi::captures_pointer),
             ),
+            PointerValue::Position => {
+                let [x, y] = position.unwrap_or([0.0, 0.0]);
+                Value::Vec2([f64::from(x), f64::from(y)])
+            }
+            PointerValue::Overlay => {
+                let [x, y] = self
+                    .screen_ui
+                    .and_then(sindri_scene::ScreenUi::pointer_overlay)
+                    .unwrap_or([0.0, 0.0]);
+                Value::Vec2([f64::from(x), f64::from(y)])
+            }
             PointerValue::X => Value::Number(f64::from(position.unwrap_or([0.0, 0.0])[0])),
             PointerValue::Y => Value::Number(f64::from(position.unwrap_or([0.0, 0.0])[1])),
             // Zero with no screen UI running, for the same reason a position

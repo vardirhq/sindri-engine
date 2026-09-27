@@ -33,6 +33,14 @@ pub enum Value {
     /// host built it. Immutability is what makes sharing safe, and sharing is
     /// what keeps `for enemy in enemies` from copying the whole thing.
     Array(Rc<Vec<Value>>),
+    /// Two numbers that travel together, `x` then `y`.
+    ///
+    /// A value like a number, copied rather than shared: `a = b; a.x = 1.0`
+    /// leaves `b` alone, which is what anyone who has used a vector in a game
+    /// expects and what a shared one would get wrong.
+    Vec2([f64; 2]),
+    /// Three numbers, `x`, `y`, `z`.
+    Vec3([f64; 3]),
     Null,
     Unit,
 }
@@ -43,6 +51,26 @@ impl Value {
     pub fn elements(&self) -> Option<&Rc<Vec<Self>>> {
         match self {
             Self::Array(values) => Some(values),
+            _ => None,
+        }
+    }
+
+    /// A vector's components, for a value that is one.
+    #[must_use]
+    pub fn components(&self) -> Option<&[f64]> {
+        match self {
+            Self::Vec2(components) => Some(components),
+            Self::Vec3(components) => Some(components),
+            _ => None,
+        }
+    }
+
+    /// The vector made of these components, when there are two or three.
+    #[must_use]
+    pub fn vector(components: &[f64]) -> Option<Self> {
+        match *components {
+            [x, y] => Some(Self::Vec2([x, y])),
+            [x, y, z] => Some(Self::Vec3([x, y, z])),
             _ => None,
         }
     }
@@ -68,12 +96,18 @@ impl From<&Constant> for Value {
 pub(crate) fn apply_unary(op: UnaryOp, value: Value) -> Result<Value, RuntimeError> {
     match (op, value) {
         (UnaryOp::Negate, Value::Number(value)) => Ok(Value::Number(-value)),
+        (UnaryOp::Negate, vector @ (Value::Vec2(_) | Value::Vec3(_))) => {
+            crate::vector::map(&vector, |component| -component)
+        }
         (UnaryOp::Not, Value::Bool(value)) => Ok(Value::Bool(!value)),
         _ => Err(RuntimeError::InvalidUnary),
     }
 }
 
 pub(crate) fn apply_binary(op: BinaryOp, left: Value, right: Value) -> Result<Value, RuntimeError> {
+    if left.components().is_some() || right.components().is_some() {
+        return crate::vector::arithmetic(op, &left, &right);
+    }
     match op {
         BinaryOp::Add => numbers(left, right, |a, b| a + b),
         BinaryOp::Subtract => numbers(left, right, |a, b| a - b),

@@ -305,3 +305,49 @@ fn a_host_reference_can_be_held_and_compared() {
         "LANGUAGE.md says there is no arithmetic on a reference"
     );
 }
+
+#[test]
+fn vectors_do_what_the_reference_says() {
+    accepted(
+        "vector arithmetic, components and methods",
+        "script T { fn f() -> f32 {
+            var v = Vec2(3.0, 4.0) + Vec2(1.0, 1.0) * 2.0 - -Vec2(0.0, 1.0) / 2.0;
+            v.x += 1.0;
+            v += Vec2(1.0, 1.0);
+            let w = Vec3(1.0, 2.0, 3.0);
+            return v.length + v.normalized.x + v.dot(v) + v.distance(v) + v.lerp(v, 0.5).y + w.z;
+        } }",
+    );
+    accepted(
+        "a vector field with no initializer",
+        "script T { var v: Vec3; }",
+    );
+    rejected(
+        "a Vec2 mixed with a Vec3",
+        "script T { fn f() { let a = Vec2(1.0, 1.0) + Vec3(1.0, 1.0, 1.0); } }",
+    );
+    rejected(
+        "a vector times a vector",
+        "script T { fn f() { let a = Vec2(1.0, 1.0) * Vec2(1.0, 1.0); } }",
+    );
+    rejected(
+        "a number divided by a vector",
+        "script T { fn f() { let a = 1.0 / Vec2(1.0, 1.0); } }",
+    );
+    rejected(
+        "`length` called",
+        "script T { fn f() { let a = Vec2(1.0, 1.0).length(); } }",
+    );
+    rejected(
+        "a component of a `let`",
+        "script T { fn f() { let a = Vec2(1.0, 1.0); a.x = 2.0; } }",
+    );
+    rejected(
+        "a component of a temporary",
+        "script T { fn f() { (Vec2(1.0, 1.0) + Vec2(1.0, 1.0)).x = 2.0; } }",
+    );
+    rejected(
+        "`z` on a Vec2",
+        "script T { fn f() { let a = Vec2(1.0, 1.0).z; } }",
+    );
+}

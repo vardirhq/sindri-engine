@@ -31,16 +31,23 @@ pub struct Diagnostic {
 pub enum ValueMember {
     /// How many elements a collection holds.
     Length,
+    /// One component of a vector the script holds, by position: `x` is 0.
+    ///
+    /// Only for a vector that is a value — a local, a parameter, a field, or
+    /// the result of an expression. `this.transform.position.x` stays a path
+    /// the host answers, which is what keeps every script written before
+    /// vectors existed working unchanged.
+    Component(usize),
+    /// Building a vector: `Vec2(x, y)` or `Vec3(x, y, z)`, by its size.
+    Construct(usize),
+    /// A vector property or method: `v.length`, `a.dot(b)`.
+    Vector(decay_syntax::VectorOp),
 }
 
-/// A map rather than the set Clippy suggests for the one variant it carries
-/// today: what the lowering needs is *which* member, and the next value type to
-/// arrive — a position, with an `x` and a `y` — makes that more than one
-/// answer. A set would have to become this again, and every call site with it.
-#[allow(clippy::zero_sized_map_values)]
+/// Which member read, call or construction the language performs itself, by
+/// where it was written.
 pub type ValueMembers = HashMap<Span, ValueMember>;
 
-#[allow(clippy::zero_sized_map_values)]
 #[derive(Debug, Clone, PartialEq)]
 pub struct Analysis {
     pub program: Program,

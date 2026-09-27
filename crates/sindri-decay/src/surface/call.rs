@@ -3,28 +3,6 @@
 //! One list per host type. A new call is an entry in the matching list
 //! and an arm where the host dispatches it; nothing else moves.
 
-/// A host function, by how many numbers it takes.
-#[derive(Clone, Copy, Debug)]
-pub(crate) enum HostFunction {
-    Unary(fn(f64) -> f64),
-    Binary(fn(f64, f64) -> f64),
-}
-
-/// The maths a script can do beyond arithmetic.
-///
-/// Decay has no modules and no imports, so each of these is a bare global name,
-/// and every one added is a name a script can no longer use for its own.
-pub(crate) const FUNCTIONS: &[(&str, HostFunction)] = &[
-    ("abs", HostFunction::Unary(f64::abs)),
-    ("sqrt", HostFunction::Unary(f64::sqrt)),
-    ("sin", HostFunction::Unary(f64::sin)),
-    ("cos", HostFunction::Unary(f64::cos)),
-    ("exp", HostFunction::Unary(f64::exp)),
-    ("atan2", HostFunction::Binary(f64::atan2)),
-    ("min", HostFunction::Binary(f64::min)),
-    ("max", HostFunction::Binary(f64::max)),
-];
-
 /// The name a script calls to say something into the host's log.
 pub(crate) const PRINT: &str = "print";
 

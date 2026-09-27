@@ -19,6 +19,22 @@ impl Analyzer<'_, '_> {
     /// reject scripts that were working against the other half.
     pub(super) fn member_type(&mut self, object: &Expr, field: &str, span: Span) -> Type {
         let object_type = self.expr_type(object);
+        self.member_of(object, &object_type, field, span)
+    }
+
+    /// The same, for an object whose type is already known: analysing the
+    /// object twice would report its mistakes twice.
+    pub(super) fn member_of(
+        &mut self,
+        object: &Expr,
+        object_type: &Type,
+        field: &str,
+        span: Span,
+    ) -> Type {
+        if object_type.dimensions().is_some() {
+            return self.vector_member_type(object, object_type, field, span);
+        }
+        let object_type = object_type.clone();
         // A collection's length belongs to the value, not to a path the host
         // could answer, so the lowering is told which member read this was.
         if matches!(object_type, Type::Array(_)) && field == crate::types::LENGTH {

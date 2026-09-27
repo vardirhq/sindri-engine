@@ -97,6 +97,15 @@ fn described_entity_paths(environment: &Environment) -> BTreeSet<String> {
         let ExternalSymbol::Value(ty) = symbol else {
             return;
         };
+        // A vector is reached whole and by component, and both are paths the
+        // document has to list.
+        if let Some(dimensions) = ty.dimensions() {
+            for component in &["x", "y", "z"][..dimensions] {
+                into.insert(format!("{prefix}.{component}"));
+            }
+            into.insert(prefix);
+            return;
+        }
         let Type::Named(name) = ty else {
             into.insert(prefix);
             return;

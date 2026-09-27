@@ -23,6 +23,7 @@ to change. Nothing here is a compatibility promise.
 - [Lexical structure](#lexical-structure)
 - [Grammar](#grammar)
 - [Types](#types)
+- [Vectors](#vectors)
 - [Containers](#containers)
 - [Fields](#fields)
 - [Functions](#functions)
@@ -204,6 +205,7 @@ diagnostic.
 | `bool` | `true` or `false` |
 | `String` or `string` | Text |
 | `unit` or `void` | No value; the default return type |
+| `Vec2`, `Vec3` | Two or three numbers that travel together; see [Vectors](#vectors) |
 | `Array<T>` | Several `T`, in a fixed order |
 | anything else | A **named host type**, opaque to Decay |
 
@@ -298,6 +300,56 @@ boundary; `docs/decay-direction.md` records that trade.
 A `for` walks the collection it was given, not the name it came from:
 reassigning that name inside the loop does not change what is being walked.
 
+### Vectors
+
+`Vec2` and `Vec3` are the language's own value types: a position, a direction,
+a velocity. They are built by a script, not handed out by a host.
+
+```rust
+var velocity: Vec2 = Vec2(3.0, 4.0);
+let up = Vec3(0.0, 1.0, 0.0);
+
+velocity.x += 1.0;                 // components are x, y, and z for Vec3
+let speed: f32 = velocity.length;  // 5.0 before the line above
+let heading = velocity.normalized; // same direction, one unit long
+```
+
+| Written | Means |
+| --- | --- |
+| `Vec2(x, y)`, `Vec3(x, y, z)` | Builds one from numbers |
+| `v.x`, `v.y`, `v.z` | One component, readable and assignable |
+| `a + b`, `a - b` | Component by component; both the same size |
+| `v * n`, `n * v`, `v / n` | Scaled by a number |
+| `-v` | Pointing the other way |
+| `a == b`, `a != b` | Equal when every component is |
+| `v.length` | How long it is |
+| `v.normalized` | One unit long; a zero vector stays zero |
+| `a.dot(b)` | The dot product |
+| `a.distance(b)` | How far apart two points are |
+| `a.lerp(b, t)` | The point `t` of the way from `a` to `b` |
+
+Compound assignment works on a whole vector as it does on a number:
+`position += velocity * dt`.
+
+**A vector is a value, copied like a number.** `var b = a; b.x = 9.0;` leaves
+`a` alone. Changing a component is changing the variable or field that holds
+the vector, so `a.x = 1.0` needs `a` to be a `var`, and the component of a
+temporary — `(a + b).x = 1.0`, `f().x = 1.0` — cannot be assigned.
+
+**What is not allowed is refused, not guessed at.** A `Vec2` and a `Vec3` do
+not mix. A vector times a vector has no single obvious meaning, so it is an
+error that points at `dot`; dividing a number by a vector, `%` on a vector,
+and `<` between vectors are errors too. `length` and `normalized` are
+properties and are not called; `dot`, `distance` and `lerp` are methods and
+are.
+
+A host may hand a vector out and take one back: a host member typed `Vec3` is
+reached whole — `this.transform.position` — and `this.transform.position.x`
+is still the one path the host answers, exactly as before vectors existed.
+
+`Vec2` and `Vec3` are reserved type names; `Vec2(…)` and `Vec3(…)` are the
+only calls the language answers itself rather than the host.
+
 ---
 
 ## Containers
@@ -327,7 +379,8 @@ var elapsed: f32 = 0.0;    // reassignable
 
 A field needs a type, an initializer, or both. With neither, it is a diagnostic.
 
-A field with no initializer starts as `null`.
+A field with no initializer starts as `null`, except a `Vec2` or `Vec3` field,
+which starts at zero.
 
 Field initializers run in **declaration order**, and may read fields declared
 **above** them:
@@ -531,7 +584,9 @@ Container fields are visible in every function of that container.
 ## The host boundary
 
 Decay has **no built-in functions and no standard library**. Not even `print` —
-where one exists, the host registered it.
+where one exists, the host registered it. The one exception is vectors: `Vec2`,
+`Vec3`, and what a vector can do belong to the language, because a value type
+a host could not build would be one a script could not either.
 
 Everything a script can name beyond its own container comes from the host, which
 registers globals before compilation. The compiler knows their names and
@@ -598,6 +653,11 @@ Things that are true and that most readers — human or model — will guess wro
    is a parse error rather than a loop.
 10. **A collection index is a float like every other number**, and a fractional
     one is refused rather than rounded.
+11. **A vector is copied, not shared.** Assigning one and changing the copy
+    leaves the original as it was.
+12. **Two vectors do not multiply.** `a * b` is an error; write `a.dot(b)`.
+13. **`v.length` is a property.** `v.length()` is an error, while `a.dot(b)`
+    is a call.
 
 ## What does not exist
 

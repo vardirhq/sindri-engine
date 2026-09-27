@@ -326,7 +326,8 @@ Sindri's strongest domain relative to the baseline.
 | Safe entity, prefab, profile references | ✅ | ✅ | ✅ | ✅ | **Ahead** | A stale handle is refused, not a null dereference |
 | `@export` properties discovered and authored | ✅ | ✅ | ✅ | ✅ | **Par** | — |
 | Language server: highlight, complete, hover, definitions, diagnostics | — | 🟡 | ✅ | ✅ | **Par** | VS Code only |
-| **Structured vectors and rotations** | ❌ | — | ❌ | — | **Behind** | Scripts do component maths on loose numbers |
+| Vectors as values (`Vec2`, `Vec3`) | ✅ | 🟡 | ✅ | ✅ | **Par** | Arithmetic, `length`, `normalized`, `dot`, `distance`, `lerp`; transform, pointer and stick hand them out whole. Proven in Scorchball's ball and Orbital Last Stand's bullets. A vector `@export` is stored as `[x, y]` and drawn by the inspector's X/Y/Z number row, as a position is; that has not been looked at in the running editor |
+| **Rotations as values** | ❌ | — | ❌ | — | **Behind** | Only `rotation_z` as a number; no quaternion or angle type |
 | **Coroutines / sequencing** | ❌ | — | ❌ | — | **Absent** | "Wait a second, then do this" is manual state |
 | **Debugger (breakpoints, stepping)** | ❌ | ❌ | ❌ | — | **Absent** | `print` debugging only |
 | **Formatter** | ❌ | ❌ | ❌ | — | **Absent** | — |

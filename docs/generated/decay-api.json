@@ -55,6 +55,11 @@
     },
     {
       "kind": "value",
+      "name": "PI",
+      "type": "f32"
+    },
+    {
+      "kind": "value",
       "name": "Physics",
       "type": "Physics"
     },
@@ -87,6 +92,11 @@
       "kind": "value",
       "name": "Stick",
       "type": "Stick"
+    },
+    {
+      "kind": "value",
+      "name": "TAU",
+      "type": "f32"
     },
     {
       "kind": "value",
@@ -132,6 +142,24 @@
     },
     {
       "kind": "function",
+      "name": "ceil",
+      "parameters": [
+        "f32"
+      ],
+      "returns": "f32"
+    },
+    {
+      "kind": "function",
+      "name": "clamp",
+      "parameters": [
+        "f32",
+        "f32",
+        "f32"
+      ],
+      "returns": "f32"
+    },
+    {
+      "kind": "function",
       "name": "cos",
       "parameters": [
         "f32"
@@ -142,6 +170,24 @@
       "kind": "function",
       "name": "exp",
       "parameters": [
+        "f32"
+      ],
+      "returns": "f32"
+    },
+    {
+      "kind": "function",
+      "name": "floor",
+      "parameters": [
+        "f32"
+      ],
+      "returns": "f32"
+    },
+    {
+      "kind": "function",
+      "name": "lerp",
+      "parameters": [
+        "f32",
+        "f32",
         "f32"
       ],
       "returns": "f32"
@@ -171,6 +217,22 @@
         "unknown"
       ],
       "returns": "unit"
+    },
+    {
+      "kind": "function",
+      "name": "round",
+      "parameters": [
+        "f32"
+      ],
+      "returns": "f32"
+    },
+    {
+      "kind": "function",
+      "name": "sign",
+      "parameters": [
+        "f32"
+      ],
+      "returns": "f32"
     },
     {
       "kind": "function",
@@ -881,6 +943,11 @@
         },
         {
           "kind": "value",
+          "name": "overlay",
+          "type": "Vec2"
+        },
+        {
+          "kind": "value",
           "name": "overlay_x",
           "type": "f32"
         },
@@ -888,6 +955,11 @@
           "kind": "value",
           "name": "overlay_y",
           "type": "f32"
+        },
+        {
+          "kind": "value",
+          "name": "position",
+          "type": "Vec2"
         },
         {
           "kind": "value",
@@ -1248,6 +1320,11 @@
         },
         {
           "kind": "value",
+          "name": "direction",
+          "type": "Vec2"
+        },
+        {
+          "kind": "value",
           "name": "held",
           "type": "bool"
         },
@@ -1435,26 +1512,6 @@
         }
       ],
       "name": "UiImage"
-    },
-    {
-      "members": [
-        {
-          "kind": "value",
-          "name": "x",
-          "type": "f32"
-        },
-        {
-          "kind": "value",
-          "name": "y",
-          "type": "f32"
-        },
-        {
-          "kind": "value",
-          "name": "z",
-          "type": "f32"
-        }
-      ],
-      "name": "Vec3"
     },
     {
       "members": [

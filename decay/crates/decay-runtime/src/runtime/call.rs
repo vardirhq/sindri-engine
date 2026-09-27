@@ -61,7 +61,13 @@ impl<H: Host> Runtime<'_, H> {
                 let mut frame = Frame::new(HashMap::new());
                 self.execute_instructions(container, &mut fields, &mut frame, initializer)?
             } else {
-                Value::Null
+                // A vector field nobody initialised starts at zero, as a
+                // position or a velocity does; anything else starts absent.
+                match field.type_name.as_deref() {
+                    Some("Vec2") => Value::Vec2([0.0; 2]),
+                    Some("Vec3") => Value::Vec3([0.0; 3]),
+                    _ => Value::Null,
+                }
             };
             fields.insert(
                 field.name.clone(),

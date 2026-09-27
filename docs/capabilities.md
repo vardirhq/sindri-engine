@@ -1527,6 +1527,23 @@ on a container says what to write instead. The analyzer's view and the host's
 accessors are derived from one description, and a test walks every path the
 analyzer accepts to assert the host answers it.
 
+**Vectors are values.** `Vec2` and `Vec3` are the language's own types: built
+with `Vec2(x, y)` and `Vec3(x, y, z)`, added, subtracted, scaled, negated and
+compared, with `x`/`y`/`z` components that read and assign, and `length`,
+`normalized` (zero stays zero rather than NaN), `dot`, `distance` and `lerp`.
+The engine hands them out and takes them back whole —
+`this.transform.{position,world_position,scale}`, the same through a reference,
+`Pointer.position`, `Pointer.overlay` and `Stick.direction` — through the same
+per-component accessors the `.x` paths use, so a whole write and a component
+write cannot disagree, and every `this.transform.position.x` line written before
+vectors still means what it did. A vector `@export` is stored as `[x, y]` or
+`[x, y, z]`, which the inspector draws as its X/Y/Z number row. Mistakes are compile errors: a `Vec2` plus a `Vec3`, a vector times
+a vector (pointing at `dot`), `length()` called, a component of a `let`.
+Scorchball's ball velocity, kick, aftertouch and bot aim and Orbital Last
+Stand's volley spread and bullet homing now use them, with both games' match
+and run simulations passing unchanged. The maths host also gained `floor`,
+`ceil`, `round`, `sign`, `clamp`, `lerp`, `PI` and `TAU`.
+
 A failing script reports itself and does not stop the others.
 
 **Camera impacts are gameplay, not Rust glue.** Decay exposes

@@ -16,12 +16,12 @@ use crate::{
     ScriptComponent,
     audio_host::AUDIO,
     surface::{
-        ANIMATION, ANIMATION_CALLS, AnimationCall, EFFECTS, EFFECTS_CALLS, ENTITY, EffectsCall,
-        FUNCTIONS, GAME, GAME_CALLS, GAMEPAD, GameCall, HostFunction, INPUT, INPUT_QUERIES, Node,
-        PHYSICS, PHYSICS_CALLS, PREFAB, PRINT, PROFILE, PROFILE_CALLS, PROFILES, PhysicsCall,
-        ProfileCall, RANDOM, RANDOM_CALLS, RandomCall, SAVE, SAVE_CALLS, SCENE, SCENE_CALLS,
-        SaveCall, SceneCall, THIS, THROUGH_REFERENCE, TIME, TIME_VALUES, UI, UI_CALLS, UiCall,
-        WORLD, WORLD_CALLS, WorldCall, gamepad_type,
+        ANIMATION, ANIMATION_CALLS, AnimationCall, CONSTANTS, EFFECTS, EFFECTS_CALLS, ENTITY,
+        EffectsCall, FUNCTIONS, GAME, GAME_CALLS, GAMEPAD, GameCall, HostFunction, INPUT,
+        INPUT_QUERIES, Node, PHYSICS, PHYSICS_CALLS, PREFAB, PRINT, PROFILE, PROFILE_CALLS,
+        PROFILES, PhysicsCall, ProfileCall, RANDOM, RANDOM_CALLS, RandomCall, SAVE, SAVE_CALLS,
+        SCENE, SCENE_CALLS, SaveCall, SceneCall, THIS, THROUGH_REFERENCE, TIME, TIME_VALUES, UI,
+        UI_CALLS, UiCall, WORLD, WORLD_CALLS, WorldCall, gamepad_type,
     },
 };
 
@@ -46,6 +46,9 @@ pub fn environment() -> Environment {
         environment.add_type(name, ty);
     }
 
+    for (name, _) in CONSTANTS {
+        environment.add_value(*name, Type::F32);
+    }
     for (name, function) in FUNCTIONS {
         environment.add_function(
             *name,
@@ -53,6 +56,7 @@ pub fn environment() -> Environment {
                 params: match function {
                     HostFunction::Unary(_) => vec![Type::F32],
                     HostFunction::Binary(_) => vec![Type::F32, Type::F32],
+                    HostFunction::Ternary(_) => vec![Type::F32, Type::F32, Type::F32],
                 },
                 return_type: Type::F32,
             },
@@ -506,6 +510,9 @@ pub(super) fn add_audio_surface(environment: &mut Environment) {
 /// The type a node has: a group is its name, a leaf is a number.
 pub(super) fn describe_node(node: &Node) -> Type {
     match node {
+        // The transform's position and scale are the language's own `Vec3`,
+        // not a host type of that name: a script can hold, add and pass one.
+        Node::Group(name, _) if *name == crate::surface::names::VEC3 => Type::Vec3,
         Node::Group(name, _) => Type::Named((*name).to_owned()),
         Node::Leaf(_) => Type::F32,
         Node::Handle(_) => Type::Named(ENTITY.to_owned()),
@@ -522,6 +529,9 @@ pub(super) fn collect_types() -> Vec<(String, HostType)> {
             let Node::Group(name, nested) = node else {
                 continue;
             };
+            if *name == crate::surface::names::VEC3 {
+                continue;
+            }
             let mut ty = HostType::new();
             for (field, child) in *nested {
                 ty = ty.with_value(*field, describe_node(child));

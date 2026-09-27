@@ -6,3 +6,4 @@ mod fields;
 mod loops;
 mod scope;
 mod support;
+mod vectors;

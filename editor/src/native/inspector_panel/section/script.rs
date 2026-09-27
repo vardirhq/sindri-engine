@@ -169,6 +169,10 @@ pub(super) fn script_value_json(value: &ScriptValue) -> Value {
         ScriptValue::Number(number) => Value::from(*number),
         ScriptValue::Bool(flag) => Value::Bool(*flag),
         ScriptValue::String(text) => Value::String(text.clone()),
+        // As its components, the way a transform stores a position, so the
+        // same vector row edits it.
+        ScriptValue::Vec2(components) => Value::from(components.to_vec()),
+        ScriptValue::Vec3(components) => Value::from(components.to_vec()),
         ScriptValue::Reference(_)
         | ScriptValue::Array(_)
         | ScriptValue::Null

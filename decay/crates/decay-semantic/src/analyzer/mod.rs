@@ -9,6 +9,7 @@ mod expr;
 mod item;
 mod member;
 mod stmt;
+mod vector;
 
 use std::collections::{HashMap, HashSet};
 
@@ -37,11 +38,6 @@ pub(super) struct Symbol {
     function: Option<FunctionType>,
 }
 
-// `ValueMembers` carries one variant today, so Clippy would rather it were a
-// set. See its own definition for why it is a map: the next value type to
-// arrive makes "which member" more than one answer, and a set would have to
-// become this again.
-#[allow(clippy::zero_sized_map_values)]
 pub(super) struct Analyzer<'a, 'd> {
     source: &'a str,
     environment: &'a Environment,

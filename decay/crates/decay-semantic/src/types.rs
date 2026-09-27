@@ -16,6 +16,15 @@ pub const ARRAY: &str = "Array";
 /// name.
 pub const LENGTH: &str = "len";
 
+/// How the two vector types are spelled. Language types rather than host
+/// ones: a vector is a value a script builds, adds and keeps, which a host
+/// type — something the host owns and a script can only name — cannot be.
+pub const VEC2: &str = "Vec2";
+pub const VEC3: &str = "Vec3";
+
+/// Component names, in order. `x` and `y` for both; `z` only for `Vec3`.
+pub const COMPONENTS: [&str; 3] = ["x", "y", "z"];
+
 use crate::environment::ExternalSymbol;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -26,6 +35,11 @@ pub enum Type {
     Unit,
     Null,
     Named(String),
+    /// Two numbers, `x` and `y`, that travel together: a point on the screen, a
+    /// direction on a flat board, a velocity in 2D.
+    Vec2,
+    /// Three numbers, `x`, `y` and `z`: a position, a scale.
+    Vec3,
     /// A fixed-length collection of one element type.
     ///
     /// The only generic type the language has, and it is not user-definable:
@@ -44,6 +58,8 @@ impl Type {
             "bool" => Self::Bool,
             "String" | "string" => Self::String,
             "unit" | "void" => Self::Unit,
+            VEC2 => Self::Vec2,
+            VEC3 => Self::Vec3,
             // `Array` written without an argument is `Array<unknown>` rather
             // than a diagnostic. The analyzer reports the missing argument
             // where the type was written; treating it as unknown here keeps
@@ -67,6 +83,26 @@ impl Type {
         }
     }
 
+    /// How many components a vector type has; `None` for anything else.
+    #[must_use]
+    pub const fn dimensions(&self) -> Option<usize> {
+        match self {
+            Self::Vec2 => Some(2),
+            Self::Vec3 => Some(3),
+            _ => None,
+        }
+    }
+
+    /// The vector type with this many components.
+    #[must_use]
+    pub const fn vector(dimensions: usize) -> Option<Self> {
+        match dimensions {
+            2 => Some(Self::Vec2),
+            3 => Some(Self::Vec3),
+            _ => None,
+        }
+    }
+
     /// A collection of `element`.
     #[must_use]
     pub fn array_of(element: Self) -> Self {
@@ -86,6 +122,8 @@ impl Type {
             Self::Unit => Cow::Borrowed("unit"),
             Self::Null => Cow::Borrowed("null"),
             Self::Named(name) => Cow::Borrowed(name),
+            Self::Vec2 => Cow::Borrowed(VEC2),
+            Self::Vec3 => Cow::Borrowed(VEC3),
             Self::Array(element) => Cow::Owned(format!("{ARRAY}<{}>", element.display_name())),
             Self::Unknown => Cow::Borrowed("unknown"),
         }

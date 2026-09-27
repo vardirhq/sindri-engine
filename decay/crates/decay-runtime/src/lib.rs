@@ -12,6 +12,7 @@ mod host;
 mod instance;
 mod runtime;
 mod value;
+mod vector;
 
 #[cfg(test)]
 mod tests;
