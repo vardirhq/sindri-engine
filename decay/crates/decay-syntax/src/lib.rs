@@ -58,6 +58,8 @@ pub enum TokenKind {
     Semicolon,
     Comma,
     Dot,
+    /// `..`, between the two ends of a range.
+    DotDot,
     LeftParen,
     RightParen,
     LeftBrace,
@@ -151,6 +153,7 @@ impl<'a> Lexer<'a> {
                 ':' => self.push(TokenKind::Colon, start),
                 ';' => self.push(TokenKind::Semicolon, start),
                 ',' => self.push(TokenKind::Comma, start),
+                '.' if self.consume('.') => self.push(TokenKind::DotDot, start),
                 '.' => self.push(TokenKind::Dot, start),
                 '(' => self.push(TokenKind::LeftParen, start),
                 ')' => self.push(TokenKind::RightParen, start),

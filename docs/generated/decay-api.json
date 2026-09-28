@@ -846,13 +846,13 @@
           "kind": "function",
           "name": "collision_started",
           "parameters": [],
-          "returns": "Array<Entity>"
+          "returns": "List<Entity>"
         },
         {
           "kind": "function",
           "name": "collision_stopped",
           "parameters": [],
-          "returns": "Array<Entity>"
+          "returns": "List<Entity>"
         },
         {
           "kind": "function",
@@ -868,13 +868,13 @@
           "kind": "function",
           "name": "sensor_entered",
           "parameters": [],
-          "returns": "Array<Entity>"
+          "returns": "List<Entity>"
         },
         {
           "kind": "function",
           "name": "sensor_exited",
           "parameters": [],
-          "returns": "Array<Entity>"
+          "returns": "List<Entity>"
         },
         {
           "kind": "function",
@@ -1089,7 +1089,7 @@
           "kind": "function",
           "name": "pick",
           "parameters": [
-            "Array<Entity>"
+            "List<Entity>"
           ],
           "returns": "Entity"
         },
@@ -1655,7 +1655,7 @@
           "parameters": [
             "String"
           ],
-          "returns": "Array<Entity>"
+          "returns": "List<Entity>"
         }
       ],
       "name": "World"

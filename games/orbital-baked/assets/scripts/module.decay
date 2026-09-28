@@ -20,10 +20,7 @@ script Module {
     }
 
     fn offered_index() -> f32 {
-        if this.slot == 0.0 { return Game.get("offer_0", -1.0); }
-        if this.slot == 1.0 { return Game.get("offer_1", -1.0); }
-        if this.slot == 2.0 { return Game.get("offer_2", -1.0); }
-        return Game.get("offer_3", -1.0);
+        return Game.get("offer_" + this.slot, -1.0);
     }
 
     fn apply(index: f32) {

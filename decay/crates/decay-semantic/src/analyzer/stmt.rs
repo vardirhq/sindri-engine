@@ -5,7 +5,7 @@
 
 use std::collections::HashMap;
 
-use decay_syntax::{Block, Expr, Span, Stmt};
+use decay_syntax::{Block, Expr, ExprKind, Span, Stmt};
 
 use crate::types::Type;
 
@@ -146,7 +146,10 @@ impl Analyzer<'_, '_> {
 
     /// `for name in items { ... }`.
     fn analyze_for(&mut self, name: &str, name_span: Span, iterable: &Expr, body: &Block) {
-        let iterable_type = self.expr_type(iterable);
+        let iterable_type = match &iterable.kind {
+            ExprKind::Range { start, end } => Type::array_of(self.range_type(start, end)),
+            _ => self.expr_type(iterable),
+        };
         let element = match &iterable_type {
             Type::Array(element) => (**element).clone(),
             Type::Unknown => Type::Unknown,

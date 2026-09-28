@@ -30,7 +30,7 @@
       { "name": "storage.type.decay", "match": "\\b(?:let|var)\\b" },
       { "name": "variable.language.this.decay", "match": "\\bthis\\b" }
     ] },
-    "types": { "patterns": [{ "name": "support.type.primitive.decay", "match": "\\b(?:f32|bool|String|string|unit|void|Vec2|Vec3|Timer|Array)\\b" }, { "name": "entity.name.type.decay", "match": "\\b[A-Z][A-Za-z0-9_]*\\b" }] },
+    "types": { "patterns": [{ "name": "support.type.primitive.decay", "match": "\\b(?:f32|bool|String|string|unit|void|Vec2|Vec3|Timer|List|Array)\\b" }, { "name": "entity.name.type.decay", "match": "\\b[A-Z][A-Za-z0-9_]*\\b" }] },
     "literals": { "patterns": [{ "name": "constant.language.decay", "match": "\\b(?:true|false|null)\\b" }, { "name": "constant.numeric.decay", "match": "\\b[0-9]+(?:\\.[0-9]+)?\\b" }] },
     "calls": { "patterns": [{ "name": "entity.name.function.call.decay", "match": "\\b[A-Za-z_][A-Za-z0-9_]*(?=\\s*\\()" }] },
     "member-access": { "patterns": [{ "name": "variable.other.member.decay", "match": "(?<=\\.)[A-Za-z_][A-Za-z0-9_]*\\b" }] },

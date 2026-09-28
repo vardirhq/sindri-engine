@@ -39,6 +39,11 @@ pub enum RuntimeError {
     TextTooLong {
         limit: usize,
     },
+    /// Adding to a list would make it longer than
+    /// [`crate::LIST_LIMIT`] elements.
+    ListTooLong {
+        limit: usize,
+    },
     /// An index that is not a number at all.
     IndexNotANumber(String),
     /// An index that is a number and not a position: fractional, negative, or

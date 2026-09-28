@@ -160,9 +160,18 @@ impl Analyzer<'_, '_> {
                 Self::collect_field_reads(target, out);
                 Self::collect_field_reads(value, out);
             }
-            ExprKind::Index { object, index } => {
+            ExprKind::Index { object, index }
+            | ExprKind::Range {
+                start: object,
+                end: index,
+            } => {
                 Self::collect_field_reads(object, out);
                 Self::collect_field_reads(index, out);
+            }
+            ExprKind::List(elements) => {
+                for element in elements {
+                    Self::collect_field_reads(element, out);
+                }
             }
             ExprKind::Call { callee, args } => {
                 Self::collect_field_reads(callee, out);
@@ -263,6 +272,18 @@ fn built_value_type(initializer: Option<&Expr>) -> Type {
     // Text too: `label.length` is answered by the language.
     if let Some(ExprKind::String(_)) = initializer.map(|expr| &expr.kind) {
         return Type::String;
+    }
+    // And a list: its element's type when the first one is a literal, so
+    // `var ids = [1.0, 2.0];` is a `List<f32>`, and otherwise a list of
+    // something not yet known, which still has a list's members.
+    if let Some(ExprKind::List(elements)) = initializer.map(|expr| &expr.kind) {
+        let element = match elements.first().map(|expr| &expr.kind) {
+            Some(ExprKind::Number(_)) => Type::F32,
+            Some(ExprKind::String(_)) => Type::String,
+            Some(ExprKind::Bool(_)) => Type::Bool,
+            _ => Type::Unknown,
+        };
+        return Type::array_of(element);
     }
     let Some(ExprKind::Call { callee, .. }) = initializer.map(|expr| &expr.kind) else {
         return Type::Unknown;

@@ -103,7 +103,7 @@ fn a_collection_says_how_many_it_holds() {
             r"script Collections {
                 fn count() -> f32 {
                     let items: Array<f32> = Group.of(4.0);
-                    return items.len;
+                    return items.length;
                 }
             }",
             "count",
@@ -398,7 +398,7 @@ fn len_stays_available_as_an_ordinary_name() {
                 fn count() -> f32 {
                     let len: f32 = 2.0;
                     let items: Array<f32> = Group.of(4.0);
-                    return items.len + len;
+                    return items.length + len;
                 }
             }",
             "count",

@@ -278,7 +278,7 @@ question from a lookup of one thing somebody already knows the name of.
 | `World.property_number(entity, name, fallback)` | `f32` |
 | `World.send_signal(entity, name, value)` | nothing |
 | `World.take_signal(name)` | `f32` |
-| `World.with_tag(tag)` | `Array<Entity>` |
+| `World.with_tag(tag)` | `List<Entity>` |
 | `World.has_tag(entity, tag)` | `bool` |
 | `World.set_active(entity, on)` | nothing |
 | `World.is_active(entity)` | `bool` |
@@ -421,7 +421,7 @@ a scene saved with the collision would refuse to load.
 ### Groups of entities
 
 A game that spawns hundreds of enemies cannot hold a reference to each of them.
-`World.with_tag` is how it asks for them all at once, and `Array<Entity>` — see
+`World.with_tag` is how it asks for them all at once, and `List<Entity>` — see
 `decay/LANGUAGE.md` — is what it gets back.
 
 `World.has_tag(entity, tag)` asks the corresponding question about one active
@@ -647,13 +647,12 @@ bias: the naive remainder makes the first few values slightly more likely, which
 nobody notices on a die and which becomes a drop table that feels wrong over a
 long run.
 
-**`pick` exists because Decay has no indexing.** Without it a script cannot
-choose from a group at all, and choosing from a group — a target, a module
-offer, a spawn point — is most of what a game wants randomness for:
+**`pick` chooses from a group** — a target, a module offer, a spawn point —
+which is most of what a game wants randomness for:
 
 ```rust
 let enemies = World.with_tag(this.enemy);
-if enemies.len > 0.0 {
+if enemies.length > 0.0 {
     let target = Random.pick(enemies);
 }
 ```
@@ -871,10 +870,10 @@ a person who has not clicked yet.
 | `Physics.set_velocity(entity, x, y)` | nothing |
 | `Physics.apply_impulse(entity, x, y)` | nothing |
 | `Physics.connect_distance(first, second, max_distance)` | nothing |
-| `Physics.collision_started()` | `Array<Entity>` |
-| `Physics.collision_stopped()` | `Array<Entity>` |
-| `Physics.sensor_entered()` | `Array<Entity>` |
-| `Physics.sensor_exited()` | `Array<Entity>` |
+| `Physics.collision_started()` | `List<Entity>` |
+| `Physics.collision_stopped()` | `List<Entity>` |
+| `Physics.sensor_entered()` | `List<Entity>` |
+| `Physics.sensor_exited()` | `List<Entity>` |
 
 This is **Sindri physics, never Rapier**. `docs/physics.md` makes the backend a
 private implementation detail, and a namespace that leaked its vocabulary would
@@ -1822,6 +1821,35 @@ entity's script rather than the editor.
 Scorchball picks its score digit's and ball ring's clips by joining, where it
 had ten and six `if`s, and both Orbital games clear each stat's `_add` and
 `_mul` keys from its one name.
+
+### Lists and ranges
+
+```decay
+var taken: List<f32> = [];
+for slot in 0..4 {                 // 0, 1, 2, 3
+    let pick = choose(taken);
+    taken.push(pick);
+}
+if taken.contains(7.0) { }
+for card in ["Guidance Kernel", "Arc Imprint"] { this.slots.push(World.find(card)); }
+```
+
+A script writes a list with `[a, b]` and changes the one a `var` or field
+holds with `push`, `pop`, `insert`, `remove_at`, `clear` and `xs[i] = v`;
+`contains`, `index_of` and `length` ask it. `List<T>` is the same type a
+host query such as `World.with_tag` hands back — `Array<T>` is its older
+spelling — so a group from the world can be kept, filtered into another
+list and walked like one the script built. A list is a value: assigning one
+copies it, so a change never reaches a list somewhere else.
+
+`for i in 0..count` walks `0` up to, not including, `count`, without making a
+list of them. A script's list holds at most 10,000 elements; growing one past
+that fails the script rather than the editor.
+
+Orbital's module chooser keeps its four cards, names and blurbs in three lists
+built from the cards' names, where it had twelve numbered fields, walks its
+catalogue with ranges, and passes the modules already on offer as one list
+rather than three parameters.
 
 ### Saying something
 

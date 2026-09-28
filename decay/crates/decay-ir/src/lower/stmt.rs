@@ -95,8 +95,14 @@ impl Lowerer<'_> {
         // reassigns the name it came from does not change what this
         // loop is walking, which is the behaviour a counted lowering
         // would have got wrong.
-        self.lower_expr(iterable, instructions);
-        instructions.push(Instruction::IterBegin);
+        if let decay_syntax::ExprKind::Range { start, end } = &iterable.kind {
+            self.lower_expr(start, instructions);
+            self.lower_expr(end, instructions);
+            instructions.push(Instruction::IterRange);
+        } else {
+            self.lower_expr(iterable, instructions);
+            instructions.push(Instruction::IterBegin);
+        }
 
         // Where `continue` goes: taking the next element is both the
         // test and the step, so one target serves both.

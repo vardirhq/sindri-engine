@@ -89,7 +89,12 @@ impl Lowerer<'_> {
                 instructions.push(Instruction::Push(Constant::String(value.clone())));
             }
             ExprKind::Bool(value) => instructions.push(Instruction::Push(Constant::Bool(*value))),
-            ExprKind::Null => instructions.push(Instruction::Push(Constant::Null)),
+            // A range is refused by the analysis anywhere but a `for`, which
+            // lowers its own, so nothing reaches here from a program that
+            // compiled.
+            ExprKind::Null | ExprKind::Range { .. } => {
+                instructions.push(Instruction::Push(Constant::Null));
+            }
             ExprKind::Group(inner) => self.lower_expr(inner, instructions),
             ExprKind::Unary { op, expr } => {
                 self.lower_expr(expr, instructions);
@@ -105,24 +110,7 @@ impl Lowerer<'_> {
                 }
             }
             ExprKind::Assign { target, op, value } => {
-                if let ExprKind::Member { object, .. } = &target.kind
-                    && let Some(ValueMember::Component(index)) = self.value_member(target.span)
-                {
-                    self.lower_component_assign(object, index, *op, value, instructions);
-                    return;
-                }
-                let (path, held) = self.path_or_held(target, "<invalid>", instructions);
-                if matches!(op, AssignOp::Assign) {
-                    self.lower_expr(value, instructions);
-                } else {
-                    instructions.push(Instruction::Load(path.clone()));
-                    self.lower_expr(value, instructions);
-                    if let Some(binary) = binary_for(*op) {
-                        instructions.push(Instruction::Binary(binary));
-                    }
-                }
-                instructions.push(Instruction::Store(path));
-                Self::release(held, instructions);
+                self.lower_assign(target, *op, value, instructions);
             }
             ExprKind::Member { object, .. } => {
                 // The analysis says whether this reads a property of a value or
@@ -156,7 +144,10 @@ impl Lowerer<'_> {
                         instructions.push(Instruction::Timer(property));
                     }
                     // Only a call is ever noted as a construction.
-                    Some(ValueMember::Construct(_) | ValueMember::StartTimer) | None => {
+                    Some(
+                        ValueMember::Construct(_) | ValueMember::StartTimer | ValueMember::List(_),
+                    )
+                    | None => {
                         let (path, held) =
                             self.path_or_held(expr, "<invalid-member>", instructions);
                         instructions.push(Instruction::Load(path));
@@ -170,6 +161,12 @@ impl Lowerer<'_> {
                 instructions.push(Instruction::Index);
             }
             ExprKind::Call { callee, args } => self.lower_call(expr, callee, args, instructions),
+            ExprKind::List(elements) => {
+                for element in elements {
+                    self.lower_expr(element, instructions);
+                }
+                instructions.push(Instruction::MakeList(elements.len()));
+            }
         }
     }
 
@@ -204,6 +201,26 @@ impl Lowerer<'_> {
                     self.lower_expr(argument, instructions);
                 }
                 instructions.push(Instruction::Vector(op));
+                return;
+            }
+            Some(ValueMember::List(op)) => {
+                let ExprKind::Member { object, .. } = &callee.kind else {
+                    return;
+                };
+                if op.changes() {
+                    let path = Self::path_from_expr(object)
+                        .unwrap_or_else(|| Path(vec!["<invalid-list>".to_owned()]));
+                    for argument in args {
+                        self.lower_expr(argument, instructions);
+                    }
+                    instructions.push(Instruction::ListChange { path, op });
+                } else {
+                    self.lower_expr(object, instructions);
+                    for argument in args {
+                        self.lower_expr(argument, instructions);
+                    }
+                    instructions.push(Instruction::ListRead(op));
+                }
                 return;
             }
             Some(ValueMember::Text(op)) => {
@@ -282,6 +299,81 @@ impl Lowerer<'_> {
 
     /// `v.x = value`, or `v.x += value`: the vector with one component
     /// replaced, stored back, and the component left as the expression's value.
+    /// `target = value`, or a compound assignment: to a list's element, a
+    /// vector's component, or a path.
+    fn lower_assign(
+        &self,
+        target: &Expr,
+        op: AssignOp,
+        value: &Expr,
+        instructions: &mut Vec<Instruction>,
+    ) {
+        if let ExprKind::Index { object, index } = &target.kind {
+            self.lower_element_assign(object, index, op, value, instructions);
+            return;
+        }
+        if let ExprKind::Member { object, .. } = &target.kind
+            && let Some(ValueMember::Component(index)) = self.value_member(target.span)
+        {
+            self.lower_component_assign(object, index, op, value, instructions);
+            return;
+        }
+        let (path, held) = self.path_or_held(target, "<invalid>", instructions);
+        if matches!(op, AssignOp::Assign) {
+            self.lower_expr(value, instructions);
+        } else {
+            instructions.push(Instruction::Load(path.clone()));
+            self.lower_expr(value, instructions);
+            if let Some(binary) = binary_for(op) {
+                instructions.push(Instruction::Binary(binary));
+            }
+        }
+        instructions.push(Instruction::Store(path));
+        Self::release(held, instructions);
+    }
+
+    /// `list[index] = value`, or `list[index] += value`: set in place.
+    ///
+    /// A compound assignment reads the element before setting it, so the
+    /// index is evaluated once and held, as a `match` holds its subject.
+    fn lower_element_assign(
+        &self,
+        object: &Expr,
+        index: &Expr,
+        op: AssignOp,
+        value: &Expr,
+        instructions: &mut Vec<Instruction>,
+    ) {
+        const INDEX: &str = "(index)";
+        let path =
+            Self::path_from_expr(object).unwrap_or_else(|| Path(vec!["<invalid-list>".to_owned()]));
+        let change = Instruction::ListChange {
+            path: path.clone(),
+            op: decay_syntax::ListOp::SetAt,
+        };
+        let Some(binary) = binary_for(op) else {
+            self.lower_expr(index, instructions);
+            self.lower_expr(value, instructions);
+            instructions.push(change);
+            return;
+        };
+        let held = Path(vec![INDEX.to_owned()]);
+        instructions.push(Instruction::ScopeEnter);
+        self.lower_expr(index, instructions);
+        instructions.push(Instruction::Declare {
+            name: INDEX.to_owned(),
+            mutable: false,
+        });
+        instructions.push(Instruction::Load(held.clone()));
+        instructions.push(Instruction::Load(path));
+        instructions.push(Instruction::Load(held));
+        instructions.push(Instruction::Index);
+        self.lower_expr(value, instructions);
+        instructions.push(Instruction::Binary(binary));
+        instructions.push(change);
+        instructions.push(Instruction::ScopeExit);
+    }
+
     fn lower_component_assign(
         &self,
         object: &Expr,

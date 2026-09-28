@@ -18,19 +18,17 @@ use reference::{accepted, rejected};
 /// lying.
 #[test]
 fn nothing_the_reference_calls_absent_compiles() {
-    // `for` exists, and walks a collection; what stays absent is the range it
-    // used to be paired with in this list.
-    rejected("ranges", "script T { fn f() { for i in 0..3 { } } }");
+    // A range exists, and only as what a `for` walks.
+    rejected(
+        "a range outside `for`",
+        "script T { fn f() { let r = 0..3; } }",
+    );
     rejected("`loop`", "script T { fn f() { loop { } } }");
     rejected(
         "`match` on a number",
         "script T { fn f(a: f32) { match a { _ => { } } } }",
     );
-    rejected(
-        "array literals",
-        "script T { fn f() { let a: f32 = [1.0]; } }",
-    );
-    // Indexing exists, and only on a collection. Indexing something that holds
+    // Indexing exists, and only on a list. Indexing something that holds
     // one value is what stays refused.
     rejected(
         "indexing a value that holds one thing",

@@ -47,8 +47,13 @@ impl Analyzer<'_, '_> {
         self.check_ambiguous_use(&object_type, field, span);
         // A collection's length belongs to the value, not to a path the host
         // could answer, so the lowering is told which member read this was.
-        if matches!(object_type, Type::Array(_)) && field == crate::types::LENGTH {
-            self.value_members.insert(span, ValueMember::Length);
+        if let Type::Array(element) = &object_type {
+            if field == crate::types::LENGTH {
+                self.value_members.insert(span, ValueMember::Length);
+                return Type::F32;
+            }
+            self.list_member_error(element, field, span);
+            return Type::Unknown;
         }
         match self.member_symbol(&object_type, field, super::call::is_this(object)) {
             Some(MemberLookup::Found(ExternalSymbol::Value(ty))) => ty,

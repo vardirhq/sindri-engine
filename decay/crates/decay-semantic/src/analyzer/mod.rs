@@ -10,6 +10,7 @@ mod event;
 mod expr;
 mod function;
 mod item;
+mod list;
 mod member;
 mod state;
 mod stmt;
@@ -192,14 +193,14 @@ impl<'a, 'd> Analyzer<'a, 'd> {
     /// one that needs one, so both halves of that are checked here rather than
     /// discovered as an `unknown` element type three errors later.
     pub(super) fn resolve_type(&mut self, reference: &TypeRef) -> Type {
-        let is_array = reference.name == crate::types::ARRAY;
+        let is_array = crate::types::is_list(&reference.name);
         match (&reference.argument, is_array) {
             (None, true) => self.error(
                 reference.span,
                 format!(
                     "`{}` needs an element type, as in `{}<Entity>`",
-                    crate::types::ARRAY,
-                    crate::types::ARRAY
+                    reference.name,
+                    crate::types::LIST
                 ),
             ),
             (Some(_), false) => self.error(
@@ -207,7 +208,7 @@ impl<'a, 'd> Analyzer<'a, 'd> {
                 format!(
                     "`{}` takes no type argument; only `{}` does",
                     reference.name,
-                    crate::types::ARRAY
+                    crate::types::LIST
                 ),
             ),
             _ => {}
@@ -248,6 +249,11 @@ impl<'a, 'd> Analyzer<'a, 'd> {
         matches!(expected, Type::Unknown)
             || matches!(actual, Type::Unknown)
             || expected == actual
+            // An empty list, `[]`, fits any list; a list of `Bolt`s fits a
+            // list of `Entity`. A list is a value, copied where it goes, so
+            // adding an `Entity` to the copy cannot reach the `Bolt`s.
+            || matches!((expected, actual), (Type::Array(wanted), Type::Array(given))
+                if self.compatible(wanted, given))
             || matches!((expected, actual), (Type::Named(_), Type::Null))
             || matches!((expected, actual), (Type::Named(wanted), Type::Named(given))
                 if self.environment.is_a(given, wanted))

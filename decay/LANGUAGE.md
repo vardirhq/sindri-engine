@@ -23,6 +23,7 @@ to change. Nothing here is a compatibility promise.
 - [Lexical structure](#lexical-structure)
 - [Grammar](#grammar)
 - [Types](#types)
+- [Lists](#lists)
 - [Vectors](#vectors)
 - [Text](#text)
 - [Containers](#containers)
@@ -148,13 +149,13 @@ multi-line strings, no interpolation, and no single-quoted characters.
 +=  -=  *=  /=  %=  =
 ==  !=  <   <=  >   >=
 &&  ||  !
-->  @   .   ,   ;   :
+->  @   .   ..  ,   ;   :
 =>  |
 (   )   {   }   [   ]
 ```
 
-`[` and `]` are recognised by the lexer but appear nowhere in the grammar; there
-is no indexing and there are no array literals.
+`[` and `]` write a list and index one; `..` joins a range's two ends, and
+appears only in a `for`.
 
 ---
 
@@ -184,7 +185,7 @@ binding      = ( "let" | "var" ) IDENT [ ":" type ] [ "=" expr ] ";" ;
 return       = "return" [ expr ] ";" ;
 if           = "if" expr block [ "else" ( block | if ) ] ;
 while        = "while" expr block ;
-for          = "for" IDENT "in" expr block ;
+for          = "for" IDENT "in" ( expr | expr ".." expr ) block ;
 match        = "match" expr "{" { arm } "}" ;
 arm          = pattern { "|" pattern } "=>" block ;
 pattern      = IDENT "." IDENT | "_" ;
@@ -198,7 +199,7 @@ unary        = [ "-" | "!" ] unary | postfix ;
 postfix      = primary { "." IDENT | "[" expr "]" | "(" [ args ] ")" } ;
 args         = expr { "," expr } ;
 primary      = IDENT | NUMBER | STRING | "true" | "false" | "null"
-             | "(" expr ")" ;
+             | "(" expr ")" | "[" [ expr { "," expr } [ "," ] ] "]" ;
 ```
 
 Note that `if` and `while` take a **block**, not a statement: `if x > 0.0 { }`,
@@ -224,7 +225,7 @@ handler is a diagnostic.
 | `String` or `string` | Text; see [Text](#text) |
 | `unit` or `void` | No value; the default return type |
 | `Vec2`, `Vec3` | Two or three numbers that travel together; see [Vectors](#vectors) |
-| `Array<T>` | Several `T`, in a fixed order |
+| `List<T>` (or `Array<T>`) | Several `T`, in order; see [Lists](#lists) |
 | anything else | A **named host type**, opaque to Decay |
 
 There is no `i32`, no `u32`, no `f64`, and no integer type of any kind. `7` and
@@ -300,40 +301,64 @@ This is what a reference is *for*: it is the difference between a script that
 can only describe itself and one that can say something about another thing in
 the world. `docs/scripting.md` records what Sindri makes of it.
 
-### Collections
+### Lists
 
-`Array<T>` is the one type that holds more than one value, and the one type
-that takes a type argument. It is not user-definable and there is no literal
-for one: **a collection only ever comes from the host.**
+`List<T>` holds several values of one type, in order. It is the one type that
+takes a type argument; `Array<T>` is its older spelling and means the same.
 
 ```rust
-let enemies: Array<Entity> = World.with_tag(this.enemy);
-let count: f32 = enemies.len;
-let first: Entity = enemies[0.0];
-for enemy in enemies {
-    enemy.transform.position.y -= 1.0;
-}
+var ids = [3.0, 1.0, 4.0];               // a List<f32>
+var held: List<Entity> = [];             // an empty one needs its type
+let enemies = World.with_tag(this.enemy); // the host hands one back
+
+ids.push(5.0);                           // at the end
+ids.insert(0, 9.0);                      // at a position, moving the rest
+let last = ids.pop();                    // off the end
+let first = ids.remove_at(0);            // out of a position
+ids[1] += 10.0;                          // an element, set in place
+ids.clear();
+
+let count: f32 = enemies.length;
+if held.contains(enemies[0]) { }
+let where = ids.index_of(4.0);           // or -1
+for enemy in enemies { enemy.transform.position.y -= 1.0; }
+for i in 0..count { }                     // 0, 1, ... count - 1
 ```
 
-That is the whole of it. There is no way to build, grow, shrink, sort, or write
-into one, and a `for` binding is immutable because an element is what the
-collection holds at that position rather than a place to put something. The
-absence is deliberate: a collection nothing can grow is a collection whose size
-the host decided, which is what lets a host bound one.
+A literal's type is its first element's, and every other element must fit it.
+An empty `[]` fits any list, so it is written where the type is: a field or
+binding annotated `List<T>`. A field whose initializer is a list of literals
+has that list's type without an annotation.
 
-`.len` is a property of the value, not a global `len(x)`. Decay has no modules,
-so every global name added is one a script can no longer use for its own — and
-`len` stays available as an ordinary name because of it.
+**A list is a value, like a vector.** Assigning one copies it: `var b = a;
+b.push(1.0);` leaves `a` as it was. So a change — `push`, `pop`, `insert`,
+`remove_at`, `clear`, `xs[i] = v` — is made to the list a variable, parameter
+or field of this script holds, and that one must be a `var`. Changing a `let`
+list, or one that is not in a variable at all (`World.with_tag("x").push(e)`),
+is a diagnostic. A change is always a call — `xs.pop()`, not `xs.pop` — while
+`length` is a property, as it is for text and vectors. The copy is made only
+when a change needs it, so a list that is never shared is changed in place.
 
 **Indices are the one numeric type.** There is no integer type, so a whole
 number is a property of the *value*, checked where the value is: `items[1.5]`,
-`items[-1.0]`, and `items[7.0]` on a collection of three are three different
-runtime errors, each naming what was wrong. Introducing an integer type for
+`items[-1.0]`, and `items[7.0]` on a list of three are three different runtime
+errors, each naming what was wrong, and so is `pop` on an empty list.
+`insert` takes any position up to the length. Introducing an integer type for
 indexing alone would rewrite every signature in the language and at the host
 boundary; `docs/decay-direction.md` records that trade.
 
-A `for` walks the collection it was given, not the name it came from:
-reassigning that name inside the loop does not change what is being walked.
+A script may put at most 10,000 elements in one list: `push` or `insert` past
+that fails with `ListTooLong`. A list the host hands back is not held to it.
+
+A `for` walks the list it was given, as it was when the loop began: changing
+the list, or the name it came from, inside the loop does not change what is
+being walked. A `for` binding is immutable; to change an element, index it.
+
+**A range** is written only as what a `for` walks: `for i in start..end`
+walks the numbers `start`, `start + 1`, … while they are below `end`, so
+`0..3` is `0, 1, 2` and `3..3` is nothing. Both ends are numbers and are
+evaluated once. A range is never made into a list, so `0..1000000` costs two
+numbers; walking it is bounded by the operation budget like any loop.
 
 ### Vectors
 
@@ -757,9 +782,8 @@ A binding needs a type, an initializer, or both.
 
 ### Loops
 
-`while` and `for`. There is no `loop`, and `for` walks a collection rather than
-a range — see [Collections](#collections) — because a collection is the only
-thing there is to iterate.
+`while` and `for`. There is no `loop`. `for` walks a list or a range — see
+[Lists](#lists).
 
 ```rust
 var i: f32 = 0.0;
@@ -892,7 +916,9 @@ Sindri-specific name, because the language does not have one.
 Decay calls may nest 64 deep by default, after which the script fails with
 `CallDepthExceeded`.
 
-Text is at most 64 KiB; making longer fails with `TextTooLong`.
+Text is at most 64 KiB; making longer fails with `TextTooLong`. A list a script
+builds is at most 10,000 elements; growing one past that fails with
+`ListTooLong`.
 
 One call may execute 1,000,000 instructions by default, after which it fails
 with `OperationBudgetExceeded`. The budget is per outermost call, so a script is
@@ -932,8 +958,8 @@ Things that are true and that most readers — human or model — will guess wro
 8. **A loop can be stopped by its budget.** A script that runs too long fails
    with `OperationBudgetExceeded` rather than hanging, and that failure is
    reported like any other.
-9. **`for` only walks a collection.** There are no ranges, so `for i in 0..3`
-   is a parse error rather than a loop.
+9. **A range exists only in a `for`.** `for i in 0..3` walks `0, 1, 2`;
+   `let r = 0..3;` is a parse error.
 10. **A collection index is a float like every other number**, and a fractional
     one is refused rather than rounded.
 11. **A vector is copied, not shared.** Assigning one and changing the copy
@@ -948,16 +974,16 @@ Do not write these. They are not unimplemented corners; they are absent from the
 grammar, and every one of them is a parse error or a diagnostic.
 
 **Control flow:** `loop`, `match` as an expression or on anything but an enum, ternaries, labelled blocks, `break` or
-`continue` with a label or a value. `for … in` exists and walks a collection;
-there is nothing else to walk and no range to walk over.
+`continue` with a label or a value. `for … in` walks a list or a range, and
+nothing else.
 
-**Data:** array literals, lists, maps, dictionaries, tuples, structs, enums
-with data (`Some(x)`),
-ranges (`0..3`), `Option`, `Result`, `?`. `Array<T>` exists and is indexable,
-but only the host makes one; see "Collections".
+**Data:** maps, dictionaries, sets, tuples, structs, enums with data
+(`Some(x)`), a range as a value outside `for`, a step (`0..10 by 2`), negative
+indices, slicing a list, `Option`, `Result`, `?`. `List<T>` exists; see
+"Lists".
 
 **Functions:** closures, lambdas, function values, default arguments, named
-arguments, variadics, generics beyond `Array<T>`, overloading, methods, `impl`,
+arguments, variadics, generics beyond `List<T>`, overloading, methods, `impl`,
 traits.
 
 **Types:** integers, `f64`, unsigned types, characters, type aliases, casts,
@@ -971,7 +997,7 @@ to it, as Sindri does. There is no `import` line: in a Sindri project every
 file already sees the others.
 
 **Standard library:** `print`, `math.*`, number formatting (`{:.2}`),
-interpolation, parsing text into numbers, conversion functions, collection *operations* — no `push`,
+interpolation, parsing text into numbers, conversion functions, list operations beyond the ones listed — no
 `map`, `filter`, `sort` — time, randomness.
 
 **Other:** operator overloading, macros, attributes other than `@export`, block

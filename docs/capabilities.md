@@ -1618,7 +1618,7 @@ script fills the slot. Exercised in
 `Physics.set_velocity`, `apply_impulse` and `velocity_x`/`_y` act on an entity's
 body; `collision_started`, `collision_stopped`, `sensor_entered` and
 `sensor_exited` answer with the entities this one touched during the last step,
-as an `Array<Entity>`. An event is about a pair, so the answer names the other
+as an `List<Entity>`. An event is about a pair, so the answer names the other
 half — whichever side of the event this entity was on. Despawning either half
 from inside the answer is safe. A host running no physics refuses the call
 rather than reporting a velocity of zero for a body that does not exist.
@@ -1634,7 +1634,7 @@ read as a finger in the corner of the screen. Exercised in
 `crates/sindri-decay/tests/a_script_reads_the_pointer.rs`.
 
 **And a script can ask about several.** `World.with_tag` answers with an
-`Array<Entity>` — every active entity carrying an authored `sindri.tags` tag,
+`List<Entity>` — every active entity carrying an authored `sindri.tags` tag,
 in deterministic world order, bounded at 8192 and refused rather than truncated
 past it. A tag says what an entity *is*, which is the question a game that makes
 its enemies as it goes actually has: they have no authored names for `find` to
@@ -1710,6 +1710,14 @@ and case and trimming, counted in characters and capped at 64 KiB. Exercised
 in `crates/sindri-decay/tests/scripts_use_text.rs`, by Scorchball's digit and
 ring clips, and by both Orbital games' stat keys.
 
+Lists are written (`[a, b]`), changed in place where a `var` or field holds
+them (`push`, `pop`, `insert`, `remove_at`, `clear`, `xs[i] = v`), asked
+(`contains`, `index_of`, `length`) and walked, and `for i in 0..n` walks a
+range without building one. `List<T>` is the type host queries return. A
+script's list is capped at 10,000 elements. Exercised by
+`decay/crates/decay-runtime/src/tests/lists.rs` and by both Orbital games'
+module chooser.
+
 **A script can speak in the tilemap's coordinates.** `Grid.position_x` and
 `Grid.position_y` invert a tilemap's projection and full world-XY transform;
 `Grid.place` projects a continuous logical position back while preserving the
@@ -1747,10 +1755,9 @@ the README.
 
 ### Not yet
 
-- No ranges, so `for` walks a collection and nothing else. `while` and `for`
-  are both bounded by the operation budget alongside the call-depth limit
-- No array literals, `push`, or element assignment: `Array<T>` is a fixed host
-  snapshot. No maps, closures, or first-class functions
+- `while` and `for` are both bounded by the operation budget alongside the
+  call-depth limit, and a script's list by 10,000 elements
+- No maps, sets, closures, or first-class functions
 - No query by more than one tag at a time, and no measured cost for a query at
   combat density
 - The language has no built-in standard library. The Sindri host supplies
