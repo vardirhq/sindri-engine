@@ -157,3 +157,22 @@ fn parses_a_state_of_fields_and_refuses_anything_else_in_one() {
         parsed.diagnostics
     );
 }
+
+#[test]
+fn parses_a_top_level_function_shared_or_not() {
+    let parsed = parse(
+        "fn third(size: f32) -> f32 { return size / 3.0; }
+         shared fn half(size: f32) -> f32 { return size * 0.5; }",
+    );
+    assert!(parsed.diagnostics.is_empty(), "{:?}", parsed.diagnostics);
+    let shared: Vec<(&str, bool)> = parsed
+        .program
+        .items
+        .iter()
+        .filter_map(|item| match item {
+            Item::Function(function) => Some((function.name.as_str(), function.shared)),
+            _ => None,
+        })
+        .collect();
+    assert_eq!(shared, vec![("third", false), ("half", true)]);
+}

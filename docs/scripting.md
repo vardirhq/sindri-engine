@@ -1562,6 +1562,40 @@ only while players are counting down — is still a number the script runs
 down itself. Scorchball's banners, power-ups, burning, aftertouch and bot
 reaction times are timers.
 
+### Shared functions
+
+```decay
+// view.decay — any file in the project.
+shared fn visible_half_x(view_size: f32) -> f32 {
+    let aspect = max(Viewport.aspect, 0.001);
+    if aspect >= 1.0 { return view_size * 0.5 * aspect; }
+    return view_size * 0.5;
+}
+
+// Any script, in any file.
+let half = visible_half_x(this.view_size);
+```
+
+A function written outside any script belongs to its file: the scripts in
+that file call it by name, and no other file sees it. Declared `shared fn`,
+it belongs to the project: every script calls it by name, checked across
+files, with no `import` line — as every script already sees the others'
+types, events and state. Sharing is a decision the author writes down, so a
+helper one file keeps for itself never collides with another file's.
+
+Neither kind has a `this`, so what it needs, it is passed; either can call
+the engine and other top-level functions.
+
+Each script that calls a shared function runs its own copy, linked in when
+it is compiled, so editing one recompiles everything that calls it. A shared
+function in a file that does not compile fails the scripts that call it, with
+that file's errors, and no others. Declaring one twice, or with a name a
+script, event, state or engine function already has, is refused.
+
+Orbital Last Stand and Orbital Baked each keep `visible_half_x`,
+`visible_half_y` and `on_screen` as `shared fn` in `view.decay`, where
+twenty-five scripts used to carry identical copies.
+
 ### Other scripts, by type
 
 Every `script` in a project is a type every other script can name, whichever

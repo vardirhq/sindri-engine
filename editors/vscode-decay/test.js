@@ -29,9 +29,10 @@ function scopeFor(source) {
 const representative = `@export let speed: f32 = 2.0;
 event Goal(player: Entity);
 state Game { var score: f32 = 0; }
+shared fn half(size: f32) -> f32 { return size * 0.5; }
 script Player { on Goal(player: Entity) { this.flash(); } fn flash() { for item in items { if true { item.emit(); } } } }`;
 const scopes = scopeFor(representative);
-for (const expected of ['annotation', 'event', 'state', 'type', 'function', 'control', 'numeric', 'this', 'member', 'operator']) {
+for (const expected of ['annotation', 'shared', 'event', 'state', 'type', 'function', 'control', 'numeric', 'this', 'member', 'operator']) {
   assert.ok(scopes.includes(expected), `representative syntax lacks ${expected} scope`);
 }
 

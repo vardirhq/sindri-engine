@@ -29,6 +29,7 @@ to change. Nothing here is a compatibility promise.
 - [Functions](#functions)
 - [Events](#events)
 - [State](#state)
+- [Shared functions](#shared-functions)
 - [Statements](#statements)
 - [Expressions](#expressions)
 - [Scope](#scope)
@@ -111,9 +112,10 @@ script  component  fn  let  var  if  else  while  for  in  break
 continue  return  true  false  null
 ```
 
-All sixteen are reserved. Three words are special only where no other name
-could stand: `event` and `state` at the start of an item, and `on` followed by
-a name at the start of a member (see [Events](#events) and [State](#state)). Elsewhere both are ordinary
+All sixteen are reserved. Four words are special only where no other name
+could stand: `event` and `state` at the start of an item, `shared` right before
+`fn`, and `on` followed by a name at the start of a member (see
+[Events](#events), [State](#state) and [Shared functions](#shared-functions)). Elsewhere both are ordinary
 identifiers, so `Bolt.on(hit)` and a local called `event` are unaffected.
 
 ### Number literals
@@ -159,7 +161,8 @@ is no indexing and there are no array literals.
 program      = { item } ;
 item         = ( "script" | "component" ) IDENT "{" { member } "}"
              | "event" IDENT "(" [ params ] ")" ";"
-             | "state" IDENT "{" { field } "}" ;
+             | "state" IDENT "{" { field } "}"
+             | [ "shared" ] function ;
 member       = { attribute } ( field | function | handler ) ;
 attribute    = "@" IDENT ;
 
@@ -408,6 +411,42 @@ frame before its `update`, and not on the frame it starts; see
 A field whose initializer is `Timer(...)`, `Vec2(...)` or `Vec3(...)` has that
 type without an annotation. Every other unannotated field is unknown, as
 before.
+
+---
+
+## Shared functions
+
+A function written outside any container belongs to its file: every script in
+that file may call it by name. Marked `shared`, it belongs to the project
+instead, and every script in every file may call it.
+
+```rust
+fn third(size: f32) -> f32 { return size / 3.0; }        // this file's
+shared fn half(size: f32) -> f32 { return size * 0.5; }  // everyone's
+
+script Enemy {
+    let view_size: f32 = 11.0;
+    fn update(dt: f32) { let edge = half(this.view_size) + third(1.0); }
+}
+```
+
+- **No `this`.** A function outside a container belongs to no script, so it
+  has no fields and no `this`; what it needs, it is passed. Using `this` in
+  one is a diagnostic that says so.
+- **Called by bare name**, checked like any call. A script's own function of
+  the same name wins inside that script, and a file's own function wins over
+  a shared one of the same name from another file.
+- **One name, once.** Declaring one twice is a diagnostic, and so is a name a
+  container, an event, a state or the host already has.
+- `shared` is special only right before `fn`; elsewhere it is an ordinary
+  name.
+
+**Across files is the host's decision.** The language lowers a file's
+top-level functions into its program, and `IrProgram::link` adds another
+program's; a bare call tries the script's own functions, then the program's
+top-level ones, then the host. A host that describes other files' `shared fn`
+to the analyzer (`Environment::add_shared_function`) and links them makes
+them callable from every file, which is what Sindri does for a project.
 
 ---
 
@@ -818,7 +857,9 @@ beyond `script` and `component`.
 
 **Modules:** `import`, `use`, `mod`, `pub`, visibility of any kind, multiple
 files. One file is one compilation unit and cannot refer to another by itself;
-a host may describe other files' scripts and events to it, as Sindri does.
+a host may describe other files' scripts, events, state and shared functions
+to it, as Sindri does. There is no `import` line: in a Sindri project every
+file already sees the others.
 
 **Standard library:** `print`, `math.*`, string methods, formatting,
 interpolation, conversion functions, collection *operations* — no `push`,

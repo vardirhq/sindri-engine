@@ -103,8 +103,8 @@ script Player {
         this.transform.rotation_z = this.facing - 1.5707963;
         Game.set("player_facing", this.facing);
         Game.set("player_thrust", min(1.0, length));
-        let edge_x = max(0.0, visible_half_x() - this.edge_padding);
-        let edge_y = max(0.0, visible_half_y() - this.edge_padding);
+        let edge_x = max(0.0, visible_half_x(this.view_size) - this.edge_padding);
+        let edge_y = max(0.0, visible_half_y(this.view_size) - this.edge_padding);
         var velocity_x: f32 = dx * speed;
         var velocity_y: f32 = dy * speed;
         if this.transform.position.x <= -edge_x {
@@ -247,12 +247,12 @@ script Player {
             this.broadside -= dt;
             if this.broadside <= 0.0 {
                 this.broadside = 3.4;
-                let left = -visible_half_x() + 0.2;
-                let right = visible_half_x() - 0.2;
+                let left = -visible_half_x(this.view_size) + 0.2;
+                let right = visible_half_x(this.view_size) - 0.2;
                 var lane: f32 = -1.0;
                 while lane <= 1.0 {
-                    fire_one(left, lane * visible_half_y() * 0.55, 1.0, 0.0, Game.get("damage", 1.0) * 0.72, false, 0.9);
-                    fire_one(right, lane * visible_half_y() * 0.55, -1.0, 0.0, Game.get("damage", 1.0) * 0.72, false, 0.9);
+                    fire_one(left, lane * visible_half_y(this.view_size) * 0.55, 1.0, 0.0, Game.get("damage", 1.0) * 0.72, false, 0.9);
+                    fire_one(right, lane * visible_half_y(this.view_size) * 0.55, -1.0, 0.0, Game.get("damage", 1.0) * 0.72, false, 0.9);
                     lane += 1.0;
                 }
             }
@@ -342,33 +342,13 @@ script Player {
         var best: Entity = null;
         var best_distance: f32 = 0.0;
         for enemy in World.with_tag("enemy") {
-            if !World.exists(enemy) || !is_visible(enemy) { continue; }
+            if !World.exists(enemy) || !on_screen(enemy, this.view_size) { continue; }
             let dx = enemy.transform.position.x - this.transform.position.x;
             let dy = enemy.transform.position.y - this.transform.position.y;
             let distance = dx * dx + dy * dy;
             if best == null || distance < best_distance { best = enemy; best_distance = distance; }
         }
         return best;
-    }
-
-    fn is_visible(enemy: Entity) -> bool {
-        let half_x = visible_half_x();
-        let half_y = visible_half_y();
-        let radius = max(abs(enemy.transform.scale.x), abs(enemy.transform.scale.y)) * 0.5;
-        return enemy.transform.position.x + radius >= -half_x && enemy.transform.position.x - radius <= half_x &&
-               enemy.transform.position.y + radius >= -half_y && enemy.transform.position.y - radius <= half_y;
-    }
-
-    fn visible_half_x() -> f32 {
-        let aspect = max(Viewport.aspect, 0.001);
-        if aspect >= 1.0 { return this.view_size * 0.5 * aspect; }
-        return this.view_size * 0.5;
-    }
-
-    fn visible_half_y() -> f32 {
-        let aspect = max(Viewport.aspect, 0.001);
-        if aspect >= 1.0 { return this.view_size * 0.5; }
-        return this.view_size * 0.5 / aspect;
     }
 
     fn if_number(value: bool) -> f32 { if value { return 1.0; } return 0.0; }

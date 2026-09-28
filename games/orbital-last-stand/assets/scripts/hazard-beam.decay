@@ -40,8 +40,8 @@ script HazardBeam {
     fn update_flare(dt: f32) {
         let time = Game.get("elapsed", 0.0);
         let intensity = (sin(time * 0.72) + 1.0) * 0.5;
-        let half_x = visible_half_x();
-        let half_y = visible_half_y();
+        let half_x = visible_half_x(this.view_size);
+        let half_y = visible_half_y(this.view_size);
         let edge = half_y * 2.0 * (0.18 + 0.08 * sin(time * 0.21));
         let safe = half_y - edge;
         this.transform.position.y = this.side * (half_y - edge * 0.5);
@@ -87,9 +87,9 @@ script HazardBeam {
     fn size_pulse() {
         if this.axis == 1.0 {
             this.transform.scale.x = 0.56;
-            this.transform.scale.y = visible_half_y() * 2.0 + 2.0;
+            this.transform.scale.y = visible_half_y(this.view_size) * 2.0 + 2.0;
         } else {
-            this.transform.scale.x = visible_half_x() * 2.0 + 2.0;
+            this.transform.scale.x = visible_half_x(this.view_size) * 2.0 + 2.0;
             this.transform.scale.y = 0.56;
         }
     }
@@ -97,9 +97,9 @@ script HazardBeam {
     fn size_warning() {
         if this.axis == 1.0 {
             this.transform.scale.x = 0.10;
-            this.transform.scale.y = visible_half_y() * 2.0 + 2.0;
+            this.transform.scale.y = visible_half_y(this.view_size) * 2.0 + 2.0;
         } else {
-            this.transform.scale.x = visible_half_x() * 2.0 + 2.0;
+            this.transform.scale.x = visible_half_x(this.view_size) * 2.0 + 2.0;
             this.transform.scale.y = 0.10;
         }
     }
@@ -156,15 +156,4 @@ script HazardBeam {
         World.set_property(enemy, "hazard_damage", current + amount);
     }
 
-    fn visible_half_x() -> f32 {
-        let aspect = max(Viewport.aspect, 0.001);
-        if aspect >= 1.0 { return this.view_size * 0.5 * aspect; }
-        return this.view_size * 0.5;
-    }
-
-    fn visible_half_y() -> f32 {
-        let aspect = max(Viewport.aspect, 0.001);
-        if aspect >= 1.0 { return this.view_size * 0.5; }
-        return this.view_size * 0.5 / aspect;
-    }
 }

@@ -75,8 +75,8 @@ script HazardField {
         }
         this.transform.position.x += this.vx * dt;
         this.transform.position.y += this.vy * dt;
-        let edge_x = max(0.0, visible_half_x() - this.radius);
-        let edge_y = max(0.0, visible_half_y() - this.radius);
+        let edge_x = max(0.0, visible_half_x(this.view_size) - this.radius);
+        let edge_y = max(0.0, visible_half_y(this.view_size) - this.radius);
         if this.transform.position.x < -edge_x {
             this.transform.position.x = -edge_x;
             this.vx = abs(this.vx);
@@ -137,15 +137,4 @@ script HazardField {
         this.shape.dashes = 24.0;
     }
 
-    fn visible_half_x() -> f32 {
-        let aspect = max(Viewport.aspect, 0.001);
-        if aspect >= 1.0 { return this.view_size * 0.5 * aspect; }
-        return this.view_size * 0.5;
-    }
-
-    fn visible_half_y() -> f32 {
-        let aspect = max(Viewport.aspect, 0.001);
-        if aspect >= 1.0 { return this.view_size * 0.5; }
-        return this.view_size * 0.5 / aspect;
-    }
 }

@@ -335,6 +335,15 @@ impl Server {
         for item in parsed.program.items {
             let container = match item {
                 Item::Script(container) | Item::Component(container) => container,
+                Item::Function(function) => {
+                    symbols.push(json!({
+                        "name": function.name,
+                        "kind": 12,
+                        "range": span_range(source, function.span),
+                        "selectionRange": span_range(source, function.span)
+                    }));
+                    continue;
+                }
                 Item::State(state) => {
                     let children = state
                         .fields

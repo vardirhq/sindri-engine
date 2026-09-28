@@ -11,10 +11,59 @@ pub struct IrProgram {
     pub containers: Vec<IrContainer>,
 }
 
+/// The name of the container a program's top-level functions are lowered
+/// into: its own file's, and any `shared fn` a host linked in from another.
+/// Not a name a script can write, so it can never be a script's.
+pub const FUNCTIONS: &str = "(functions)";
+
+impl IrProgram {
+    /// The top-level functions this program can call: its own file's, and
+    /// any `shared fn` a host linked in from other files.
+    #[must_use]
+    pub fn functions(&self) -> Option<&IrContainer> {
+        self.containers
+            .iter()
+            .find(|container| container.kind == ContainerKind::Functions)
+    }
+
+    /// Adds functions another file shares, so this program can call them.
+    /// One this program already has is kept: its own declaration is the one
+    /// it was checked against.
+    pub fn link(&mut self, functions: impl IntoIterator<Item = IrFunction>) {
+        let index = if let Some(index) = self
+            .containers
+            .iter()
+            .position(|container| container.kind == ContainerKind::Functions)
+        {
+            index
+        } else {
+            self.containers.push(IrContainer {
+                kind: ContainerKind::Functions,
+                name: FUNCTIONS.to_owned(),
+                fields: Vec::new(),
+                functions: Vec::new(),
+            });
+            self.containers.len() - 1
+        };
+        let shared = &mut self.containers[index];
+        for function in functions {
+            if !shared
+                .functions
+                .iter()
+                .any(|known| known.name == function.name)
+            {
+                shared.functions.push(function);
+            }
+        }
+    }
+}
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum ContainerKind {
     Script,
     Component,
+    /// A program's top-level functions: no fields, no `this`, called by name.
+    Functions,
 }
 
 #[derive(Debug, Clone, PartialEq)]

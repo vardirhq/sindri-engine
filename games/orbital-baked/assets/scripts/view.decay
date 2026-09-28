@@ -1,0 +1,25 @@
+// What the camera shows, shared by every script that needs to know: the
+// half-width and half-height of the visible area for a view `view_size`
+// units tall on a landscape screen (wide on a portrait one), and whether a
+// thing is inside it.
+
+shared fn visible_half_x(view_size: f32) -> f32 {
+    let aspect = max(Viewport.aspect, 0.001);
+    if aspect >= 1.0 { return view_size * 0.5 * aspect; }
+    return view_size * 0.5;
+}
+
+shared fn visible_half_y(view_size: f32) -> f32 {
+    let aspect = max(Viewport.aspect, 0.001);
+    if aspect >= 1.0 { return view_size * 0.5; }
+    return view_size * 0.5 / aspect;
+}
+
+// Whether any part of `thing` is on screen, taking its scale as its size.
+shared fn on_screen(thing: Entity, view_size: f32) -> bool {
+    let half_x = visible_half_x(view_size);
+    let half_y = visible_half_y(view_size);
+    let radius = max(abs(thing.transform.scale.x), abs(thing.transform.scale.y)) * 0.5;
+    return thing.transform.position.x + radius >= -half_x && thing.transform.position.x - radius <= half_x &&
+           thing.transform.position.y + radius >= -half_y && thing.transform.position.y - radius <= half_y;
+}
