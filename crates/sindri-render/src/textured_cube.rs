@@ -4,8 +4,9 @@ use glam::{Mat4, Vec3};
 use wgpu::util::DeviceExt;
 
 use crate::{
-    CachedMeshId, DepthTarget, FogSettings, MeshBuffers, MeshSurface, ShadowSettings, TextureId,
-    TextureRegistry, TexturedMeshCacheStats, TexturedVertex, WorldLighting,
+    CachedMeshId, DepthTarget, FogSettings, MeshBuffers, MeshSurface, RegistryIdentity,
+    ShadowSettings, TextureId, TextureRegistry, TexturedMeshCacheStats, TexturedVertex,
+    WorldLighting,
     shadow::{ShadowMap, create_shadow_pipeline},
     textured_mesh_cache::TexturedMeshCache,
 };
@@ -145,6 +146,8 @@ struct MeshBatch {
     shadow_uniform: wgpu::Buffer,
     shadow_bind_group: wgpu::BindGroup,
     bind_groups: std::collections::HashMap<TextureId, wgpu::BindGroup>,
+    /// The registry `bind_groups` were made from; see the sprite batch.
+    registry: RegistryIdentity,
 }
 
 mod context;
@@ -252,6 +255,7 @@ impl TexturedCubeRenderer {
                 shadow_uniform,
                 shadow_bind_group,
                 bind_groups: std::collections::HashMap::new(),
+                registry: RegistryIdentity::default(),
             });
         }
         slot
@@ -266,6 +270,10 @@ impl TexturedCubeRenderer {
         texture: TextureId,
     ) {
         let batch = &mut self.batches[slot];
+        if batch.registry != registry.identity() {
+            batch.bind_groups.clear();
+            batch.registry = registry.identity();
+        }
         if batch.bind_groups.contains_key(&texture) {
             return;
         }

@@ -18,7 +18,8 @@ use thiserror::Error;
 use wgpu::util::DeviceExt;
 
 use crate::{
-    DepthTarget, MeshBuffers, SpriteBlendMode, TextureId, TextureRegistry, TexturedVertex,
+    DepthTarget, MeshBuffers, RegistryIdentity, SpriteBlendMode, TextureId, TextureRegistry,
+    TexturedVertex,
 };
 
 const SHADER: &str = include_str!("../sprite_batch.wgsl");
@@ -50,6 +51,9 @@ struct Batch {
     /// One bind group per texture used in this slot. Keyed per slot because a
     /// bind group names the uniform buffer it reads, and each slot has its own.
     bind_groups: std::collections::HashMap<TextureId, wgpu::BindGroup>,
+    /// The registry `bind_groups` were made from. Handles are only unique
+    /// within one, so a different registry means none of them apply.
+    registry: RegistryIdentity,
 }
 
 #[derive(Debug)]
@@ -298,6 +302,7 @@ impl SpriteBatchRenderer {
                 instances: create_instance_buffer(device, wanted)?,
                 capacity: wanted,
                 bind_groups: std::collections::HashMap::new(),
+                registry: RegistryIdentity::default(),
             });
         }
         let batch = &mut self.batches[slot];
@@ -324,7 +329,12 @@ impl SpriteBatchRenderer {
         slot: usize,
         texture: TextureId,
     ) {
-        if self.batches[slot].bind_groups.contains_key(&texture) {
+        let batch = &mut self.batches[slot];
+        if batch.registry != registry.identity() {
+            batch.bind_groups.clear();
+            batch.registry = registry.identity();
+        }
+        if batch.bind_groups.contains_key(&texture) {
             return;
         }
         let resolved = registry.get(texture);

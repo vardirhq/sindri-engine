@@ -270,6 +270,25 @@ struct TextureSlot {
 pub struct TextureRegistry {
     slots: Vec<TextureSlot>,
     free: Vec<u32>,
+    identity: RegistryIdentity,
+}
+
+/// Which registry a [`TextureId`] came from.
+///
+/// Handles are numbered from one in every registry, so the first texture of
+/// one scene and the first of the next share a handle. A renderer that caches
+/// GPU state by handle — a bind group per texture — must forget it when the
+/// registry it draws from changes, or the next scene draws with the previous
+/// scene's textures: the editor showed the platformer's ground as Orbital's
+/// ship after one project was closed and the other opened.
+#[derive(Clone, Copy, Debug, Default, Eq, Hash, PartialEq)]
+pub struct RegistryIdentity(u64);
+
+impl RegistryIdentity {
+    fn next() -> Self {
+        static NEXT: std::sync::atomic::AtomicU64 = std::sync::atomic::AtomicU64::new(1);
+        Self(NEXT.fetch_add(1, std::sync::atomic::Ordering::Relaxed))
+    }
 }
 
 impl TextureRegistry {
@@ -299,7 +318,14 @@ impl TextureRegistry {
                 texture: Some(missing),
             }],
             free: Vec::new(),
+            identity: RegistryIdentity::next(),
         }
+    }
+
+    /// Which registry this is, unique for the life of the process; see
+    /// [`RegistryIdentity`].
+    pub const fn identity(&self) -> RegistryIdentity {
+        self.identity
     }
 
     /// Adds a texture and returns the handle that draws it.
