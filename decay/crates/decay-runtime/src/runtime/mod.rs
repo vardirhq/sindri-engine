@@ -467,6 +467,17 @@ impl<'a, H: Host> Runtime<'a, H> {
         Ok(())
     }
 
+    /// A number written as text: the count of digits, then the number,
+    /// popped.
+    fn step_number(frame: &mut Frame, op: decay_syntax::NumberOp) -> Result<(), RuntimeError> {
+        let digits = frame.stack.pop().ok_or(RuntimeError::StackUnderflow)?;
+        let number = frame.stack.pop().ok_or(RuntimeError::StackUnderflow)?;
+        frame
+            .stack
+            .push(crate::text::format_number(op, &number, &digits)?);
+        Ok(())
+    }
+
     pub(super) fn execute_instructions(
         &mut self,
         container: &IrContainer,
@@ -557,6 +568,7 @@ impl<'a, H: Host> Runtime<'a, H> {
                 | Instruction::WithComponent(_)
                 | Instruction::Vector(_) => Self::step_vector(frame, &instructions[ip])?,
                 Instruction::Text(op) => Self::step_text(frame, *op)?,
+                Instruction::Number(op) => Self::step_number(frame, *op)?,
                 Instruction::StartTimer | Instruction::Timer(_) => {
                     Self::step_timer(frame, &instructions[ip])?;
                 }

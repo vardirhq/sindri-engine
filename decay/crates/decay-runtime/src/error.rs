@@ -34,6 +34,9 @@ pub enum RuntimeError {
     /// Something that is not text was asked a text question, or joined to
     /// text when it has no spelling, named by what it was.
     NotText(String),
+    /// Something that is not a number was written as one, `n.fixed(2)`, or
+    /// given as a count of digits, named by what it was.
+    NotANumber(String),
     /// Joining or replacing would make text longer than
     /// [`crate::TEXT_LIMIT`] bytes.
     TextTooLong {
@@ -50,6 +53,12 @@ pub enum RuntimeError {
     /// not finite. Decay has one numeric type, so this is a property of the
     /// value rather than of its type, and it is checked where the value is.
     IndexNotWhole(f64),
+    /// `n.fixed(digits)` or `n.padded(width)` asked for a count of digits
+    /// that is not whole, is negative, or is more than `most`.
+    DigitsOutOfRange {
+        asked: f64,
+        most: usize,
+    },
     IndexOutOfRange {
         index: usize,
         length: usize,

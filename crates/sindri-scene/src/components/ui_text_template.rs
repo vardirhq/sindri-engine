@@ -1,15 +1,15 @@
 //! Filling a text component's slots with numbers a script supplies.
 //!
-//! Decay has no string concatenation, no interpolation and no formatting
-//! library, and `decay/LANGUAGE.md` says so deliberately — `+` is numeric
-//! addition and nothing else. A script therefore cannot build `"Score: 1200"`,
-//! and a HUD that cannot show a number is not a HUD.
+//! A script can build `"Score: 1200"` itself — Decay joins text with `+` and
+//! writes a number with `fixed` and `padded` — but a HUD's words are better
+//! kept out of scripts. So the split is: **the scene owns the words and the
+//! script owns the numbers.** A designer authors `"Score: {}"` and a script
+//! calls `Ui.set_number`. The words stay in the scene file where they can be
+//! read, reviewed and one day translated, rather than being assembled inside a
+//! script where none of that is possible.
 //!
-//! So the split is the other way round from most engines: **the scene owns the
-//! words and the script owns the numbers.** A designer authors `"Score: {}"`
-//! and a script calls `Ui.set_number`. The words stay in the scene file where
-//! they can be read, reviewed and one day translated, rather than being
-//! assembled inside a script where none of that is possible.
+//! A slot asks for decimals, `{.2}`, not digits: a text a slot cannot say, such
+//! as a clock's zero-led seconds, is one a script writes with `Ui.set_text`.
 
 /// What a template's slot asks for.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]

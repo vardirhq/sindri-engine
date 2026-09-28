@@ -34,8 +34,6 @@ script Result {
         Ui.set_number(this.score, Game.score);
         Ui.set_number(this.kills, Game.kills);
         Ui.set_number(this.best, Save.number("best_score", 0.0));
-        let elapsed = Game.elapsed;
-        let minutes = (elapsed - elapsed % 60.0) / 60.0;
-        Ui.set_numbers(this.survived, minutes, elapsed % 60.0);
+        Ui.set_text(this.survived, "Survived " + clock_text(Game.elapsed));
     }
 }

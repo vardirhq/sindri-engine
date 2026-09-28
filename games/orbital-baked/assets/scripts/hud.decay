@@ -31,6 +31,7 @@ script Hud {
     var previous_boss_hp: f32 = 0.0;
     var boss_hit: f32 = 0.0;
     var hud_clock: f32 = 0.0;
+    var shown_second: f32 = -1.0;
 
     fn start() {
         this.score = World.find("Score");
@@ -85,9 +86,12 @@ script Hud {
         Ui.set_number(this.score, Game.score);
         Ui.set_number(this.level, Game.level);
 
-        let elapsed = Game.elapsed;
-        let minutes = (elapsed - elapsed % 60.0) / 60.0;
-        Ui.set_numbers(this.clock, minutes, elapsed % 60.0);
+        // Written when the second changes, not every frame.
+        let second = floor(max(Game.elapsed, 0.0));
+        if second != this.shown_second {
+            this.shown_second = second;
+            Ui.set_text(this.clock, clock_text(second));
+        }
         update_sector();
 
         let hp = max(Game.hp, 0.0);
@@ -195,4 +199,13 @@ script Hud {
         if value { return 1.0; }
         return 0.0;
     }
+}
+
+// A run's time as a clock reads it, `4:07`: whole minutes, then whole seconds
+// led with a zero. The scene's number slots could not write this -- `{.2}`
+// asks for two decimals, not two digits, so 65.3 seconds read as `1:5.30`.
+shared fn clock_text(seconds: f32) -> String {
+    let whole = floor(max(seconds, 0.0));
+    let minutes = floor(whole / 60.0);
+    return minutes.fixed(0) + ":" + (whole - minutes * 60.0).padded(2);
 }

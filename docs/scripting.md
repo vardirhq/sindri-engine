@@ -1871,9 +1871,28 @@ field initialized with a text literal is a `String` without an annotation.
 Text is capped at 64 KiB, so a loop that keeps doubling a string fails that
 entity's script rather than the editor.
 
+A number is written a set way by asking it: `n.fixed(2)` gives exactly two
+decimals (`"12.50"`), and `n.padded(2)` the nearest whole number led with
+zeros to two digits (`"05"`). Neither writes `-0`.
+
+```decay
+shared fn clock_text(seconds: f32) -> String {
+    let whole = floor(max(seconds, 0.0));
+    let minutes = floor(whole / 60.0);
+    return minutes.fixed(0) + ":" + (whole - minutes * 60.0).padded(2);   // "1:05"
+}
+```
+
+A HUD label whose words a designer owns is still best as a template in the
+scene — `"Score {}"` filled with `Ui.set_number` — so the words stay in the
+scene file. Reach for `fixed` and `padded` where a script composes the text
+itself, or where a slot cannot say it: `{.2}` asks for decimals, not digits.
+
 Scorchball picks its score digit's and ball ring's clips by joining, where it
 had ten and six `if`s, and both Orbital games clear each stat's `_add` and
-`_mul` keys from its one name.
+`_mul` keys from its one name. Both Orbital games write their run clock and
+the results screen's "Survived" time with `clock_text`, where the scene's
+`"{}:{.2}"` read 65.3 seconds as `1:5.30`.
 
 ### Lists and ranges
 

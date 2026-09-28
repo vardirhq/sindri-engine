@@ -5,7 +5,7 @@
 //! completions, and by the generator that documents them, so none of the
 //! three can say something the others do not.
 
-use decay_syntax::{ListOp, StringOp, TimerProperty, VectorOp};
+use decay_syntax::{ListOp, NumberOp, StringOp, TimerProperty, VectorOp};
 
 use crate::types::{FunctionType, Type};
 
@@ -42,6 +42,14 @@ pub fn string_op_signature(op: StringOp) -> FunctionType {
         StringOp::Find => signature(vec![Type::String], Type::F32),
         StringOp::Slice => signature(vec![Type::F32, Type::F32], Type::String),
         StringOp::Replace => signature(vec![Type::String, Type::String], Type::String),
+    }
+}
+
+/// A number operation: each writes the number as text.
+#[must_use]
+pub fn number_op_signature(op: NumberOp) -> FunctionType {
+    match op {
+        NumberOp::Fixed | NumberOp::Padded => signature(vec![Type::F32], Type::String),
     }
 }
 

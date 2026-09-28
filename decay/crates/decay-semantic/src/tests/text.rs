@@ -62,3 +62,43 @@ fn every_mistake_about_text_is_refused() {
         );
     }
 }
+
+#[test]
+fn a_number_is_written_as_text_by_fixed_and_padded() {
+    let analysis = crate::analyze(
+        "script S { fn f(n: f32) -> String { return n.fixed(2) + \" / \" + (n * 2.0).padded(3); } }",
+    );
+    assert!(
+        analysis.diagnostics.is_empty(),
+        "{:?}",
+        analysis.diagnostics
+    );
+}
+
+#[test]
+fn every_mistake_writing_a_number_is_refused() {
+    let found: Vec<String> = crate::analyze(
+        r#"script S { fn f(n: f32) {
+            let a = n.fixed;
+            let b = n.fixed("2");
+            let c = n.fixed(1.0, 2.0);
+            let d = n.round(1.0);
+            let e = "7".padded(2);
+        } }"#,
+    )
+    .diagnostics
+    .into_iter()
+    .map(|diagnostic| diagnostic.message)
+    .collect();
+    let all = found.join("\n");
+    for expected in [
+        "`fixed` on `f32` needs arguments",
+        "cannot assign `String` to `f32`",
+        "expected 1 argument(s), found 2",
+        "`f32` has no member `round`; it has `fixed(...)`, `padded(...)`",
+        "`String` has no member `padded`",
+    ] {
+        assert!(all.contains(expected), "missing {expected:?} in:\n{all}");
+    }
+    assert_eq!(found.len(), 5, "{all}");
+}

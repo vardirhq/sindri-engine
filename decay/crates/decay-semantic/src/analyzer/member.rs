@@ -41,6 +41,9 @@ impl Analyzer<'_, '_> {
         if *object_type == Type::String {
             return self.string_member_type(field, span);
         }
+        if *object_type == Type::F32 {
+            return self.number_member_type(field, span);
+        }
         if let Some(variant) = self.variant_type(object_type, field, span) {
             return variant;
         }

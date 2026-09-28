@@ -1706,9 +1706,10 @@ by Scorchball's match phase and power-up kinds.
 
 Text joins with `+` — with numbers, flags, vectors and variants too — and has
 `length`, `contains`, `starts_with`, `ends_with`, `find`, `slice`, `replace`
-and case and trimming, counted in characters and capped at 64 KiB. Exercised
-in `crates/sindri-decay/tests/scripts_use_text.rs`, by Scorchball's digit and
-ring clips, and by both Orbital games' stat keys.
+and case and trimming, counted in characters and capped at 64 KiB. A number is written as text with
+`n.fixed(digits)` or `n.padded(width)`. Exercised in
+`crates/sindri-decay/tests/scripts_use_text.rs`, by Scorchball's digit and
+ring clips, and by both Orbital games' stat keys and run clock.
 
 A list or struct `@export` is authored in the scene as JSON shaped like its
 type and drawn by the inspector as rows per item and per field. Exercised in

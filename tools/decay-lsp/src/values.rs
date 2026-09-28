@@ -5,11 +5,12 @@
 use std::collections::BTreeMap;
 
 use decay_semantic::members::{
-    list_op_signature, string_op_signature, timer_property_type, vector_op_signature,
+    list_op_signature, number_op_signature, string_op_signature, timer_property_type,
+    vector_op_signature,
 };
 use decay_semantic::{
-    Analysis, COMPONENTS, Environment, ExternalSymbol, FunctionType, LENGTH, ListOp, StringOp,
-    TimerProperty, Type, VectorOp,
+    Analysis, COMPONENTS, Environment, ExternalSymbol, FunctionType, LENGTH, ListOp, NumberOp,
+    StringOp, TimerProperty, Type, VectorOp,
 };
 
 use crate::support::type_members;
@@ -87,6 +88,10 @@ pub(crate) fn value_members(ty: &Type, structs: &Structs) -> Option<Vec<(String,
         Type::String => StringOp::ALL
             .iter()
             .map(|(op, name, _)| ((*name).to_owned(), member(string_op_signature(*op))))
+            .collect(),
+        Type::F32 => NumberOp::ALL
+            .iter()
+            .map(|(op, name, _)| ((*name).to_owned(), member(number_op_signature(*op))))
             .collect(),
         Type::Array(element) => {
             let mut members = vec![(LENGTH.to_owned(), value(Type::F32))];
