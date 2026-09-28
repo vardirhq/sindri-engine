@@ -40,6 +40,8 @@ pub(super) enum BrowserAction {
     Refresh,
     /// Open a scene the browser is showing.
     Open(PathBuf),
+    /// Open a source file in the configured external code editor.
+    OpenExternal(PathBuf),
     /// Mark an asset as the browser's selection. A texture also opens the
     /// slicer, which is the one asset the editor can do something with.
     Select(PathBuf),
@@ -358,6 +360,7 @@ fn asset_tile(
         return match entry.kind {
             AssetKind::Scene => Some(BrowserAction::Open(entry.path.clone())),
             AssetKind::Folder => Some(BrowserAction::LookIn(entry.path.clone())),
+            AssetKind::Script => Some(BrowserAction::OpenExternal(entry.path.clone())),
             _ => asked,
         };
     }
@@ -436,6 +439,7 @@ impl EditorApp {
             BrowserAction::Open(path) => {
                 self.discard_or_confirm(Discarding::OpenPath(path), context);
             }
+            BrowserAction::OpenExternal(path) => self.open_external_editor(&path),
             BrowserAction::Select(path) => self.select_asset(&path),
             BrowserAction::LookIn(folder) => self.browser.look_in(Some(&folder)),
             BrowserAction::LookInProject => self.browser.look_in(None),
