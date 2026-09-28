@@ -30,7 +30,7 @@ Names in scope without qualification. Decay has no imports, so each of these is 
 - `Aim`: `Aim` — Which block in a 3D block world the mouse or finger is pointing at, for building and digging games.
 - `Animation`: `Animation` — Playing an object's animations, such as walk or jump, set up for it in the scene.
 - `Audio`: `Audio` — Playing sound effects and music.
-- `Camera`: `Camera` — The game's camera: moving the view and shaking it.
+- `Camera`: `Camera` — The game's camera: moving the view and changing its engine-owned follow, confinement, and shake behavior.
 - `Effects`: `Effects` — Particle effects, such as sparks and explosions. The particles are only drawn; they are not objects and nothing can touch them.
 - `Game`: `Game` — Numbers stored under names that every script can read and write, such as a score. Declaring them with `state` is safer, because a misspelt name then becomes an error.
 - `Gamepad`: `Gamepad` — Game controllers. Each player gets a number from 1 to 8 when they press a button on their controller; 0 means any controller.
@@ -141,21 +141,21 @@ Playing sound effects and music.
 
 ### `Camera`
 
-The game's camera: moving the view and shaking it.
+The game's camera: moving the view and changing its engine-owned follow, confinement, and shake behavior.
 
-- `add_trauma(amount: f32)` → `unit` — Shakes the camera, for impacts and explosions. Bigger amounts shake harder, up to 1, and the shake fades by itself.
-- `bounds(f32, f32, f32, f32)` → `unit`
-- `clear_bounds()` → `unit`
-- `clear_follow()` → `unit`
-- `dead_zone(f32, f32)` → `unit`
-- `follow(Entity)` → `unit`
-- `follow_offset(f32, f32, f32)` → `unit`
-- `max_speed(f32)` → `unit`
+- `add_trauma(amount: f32)` → `unit` — Adds impact trauma to the authored behavior camera. Bigger amounts shake harder, up to 1, and the authored shake fades by itself.
+- `bounds(min_x: f32, min_y: f32, max_x: f32, max_y: f32)` → `unit` — Confines the authored behavior camera to the given world-space rectangle.
+- `clear_bounds()` → `unit` — Removes runtime confinement from the authored behavior camera.
+- `clear_follow()` → `unit` — Stops the authored behavior camera following a target.
+- `dead_zone(x: f32, y: f32)` → `unit` — Sets the follow dead-zone size for the authored behavior camera.
+- `follow(target: Entity)` → `unit` — Makes the authored behavior camera follow an entity at runtime.
+- `follow_offset(x: f32, y: f32, z: f32)` → `unit` — Sets the world-space offset from the follow target used by the authored behavior camera.
+- `max_speed(value: f32)` → `unit` — Sets the maximum follow speed of the authored behavior camera.
 - `pan_x`: `f32` — How far the camera view is moved sideways from where it was placed in the scene.
 - `pan_y`: `f32` — How far the camera view is moved up or down from where it was placed in the scene.
 - `pan_z`: `f32` — How far the camera view is moved forwards or backwards from where it was placed in the scene.
-- `shake(f32, f32, f32)` → `unit`
-- `smoothing(f32)` → `unit`
+- `shake(strength: f32, frequency: f32, decay: f32)` → `unit` — Changes the authored behavior camera's shake strength, frequency, and trauma decay.
+- `smoothing(value: f32)` → `unit` — Sets how strongly the authored behavior camera smooths its follow movement.
 
 ### `Effects`
 
