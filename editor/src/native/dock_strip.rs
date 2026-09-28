@@ -122,7 +122,13 @@ impl EditorApp {
             // The panel's own controls, at the far end of the strip that names
             // it. Only the showing panel's: a control belonging to a tab nobody
             // is looking at would act on something off screen.
-            if let Some(panel) = panels.get(active).copied() {
+            //
+            // Not when the tabs are drawn inline in the title bar: the far end
+            // of that is the transport, and the Game view's note was painted
+            // under the Stop button. A floating centre carries its controls on
+            // its own island instead.
+            let inline = matches!(shape, Shape::Inline);
+            if let Some(panel) = panels.get(active).copied().filter(|_| !inline) {
                 ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
                     ui.add_space(metric::GUTTER);
                     self.panel_actions(ui, panel);
