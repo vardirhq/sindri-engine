@@ -78,19 +78,18 @@ fn every_script_the_scene_names_is_loaded() {
     );
 }
 
-/// Why the editor found none of them.
+/// Why the editor used to find none of them, and why one ask now finds all.
 ///
-/// A prefab is named by the declared type of a compiled script's export, so it
-/// cannot be asked for until the script that names it has been loaded *and*
-/// compiled -- and both happen on later turns. One ask finds nothing, however
-/// correct that ask is.
+/// A prefab was only asked for once a compiled script's export named it, so
+/// finding one took a load, a compile and a second ask, and the second ask sat
+/// behind "has the world changed", which compiling never did. An enemy's
+/// drop, named only inside another prefab, was never asked for at all.
 ///
-/// The editor made exactly one, because the call sat behind "has the world
-/// changed since we last looked" and compiling a script changes no world. This
-/// states the property that gate broke; it cannot reach the gate itself, which
-/// lives in a frame loop needing eframe and a GPU.
+/// Opening a project now asks for every script, prefab and profile in it, so
+/// the one ask made when the scene opens is enough: polling alone brings every
+/// prefab in, with no further request.
 #[test]
-fn one_ask_is_never_enough_to_find_a_prefab() {
+fn one_ask_finds_every_prefab() {
     let file = SceneFile::open(scene_path()).expect("the acceptance project opens");
     let extractor = scene_extractor();
     let world = World::from_scene(file.document())
@@ -100,12 +99,17 @@ fn one_ask_is_never_enough_to_find_a_prefab() {
     let mut scripts = SceneScripts::for_scene(Some(&scene_path()));
 
     scripts.request(&world, &components);
-    scripts.poll();
-    assert!(
-        !scripts.has_prefab("prefabs/drifter.prefab.json"),
-        "if one ask were enough, the gate that allowed only one would not have \
-         mattered, and this test would be guarding nothing"
-    );
+    let deadline = Instant::now() + Duration::from_secs(10);
+    while scripts.loading() && Instant::now() < deadline {
+        scripts.poll();
+        std::thread::sleep(Duration::from_millis(5));
+    }
+    for prefab in REQUIRED_PREFABS {
+        assert!(
+            scripts.has_prefab(prefab),
+            "one ask did not bring in {prefab}"
+        );
+    }
 }
 
 #[test]

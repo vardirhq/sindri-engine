@@ -15,7 +15,7 @@ use std::{
 use std::{
     sync::{
         Arc, Mutex,
-        mpsc::{self, Receiver, SyncSender, TrySendError},
+        mpsc::{self, Receiver, Sender},
     },
     thread::{self, JoinHandle},
 };
@@ -85,6 +85,7 @@ impl AssetLoadCompletion {
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub struct AssetLoadQueueConfig {
     pub max_concurrent: usize,
+    /// How many requests may wait at once; [`usize::MAX`] for no limit.
     pub capacity: usize,
 }
 
@@ -94,6 +95,16 @@ impl AssetLoadQueueConfig {
             max_concurrent,
             capacity,
         }
+    }
+
+    /// A queue that takes every request it is given.
+    ///
+    /// For a caller that asks for a known set of files, such as an editor
+    /// opening a project: refusing some of them only means they arrive late,
+    /// or not at all, and nothing is saved by it. Waiting requests cost one
+    /// entry each; nothing is reserved up front.
+    pub const fn unbounded(max_concurrent: usize) -> Self {
+        Self::new(max_concurrent, usize::MAX)
     }
 }
 
@@ -124,7 +135,7 @@ pub enum AssetLoadQueueError {
     Closed,
 }
 
-/// Bounded cross-platform queue for loading undecoded asset bytes.
+/// Cross-platform queue for loading undecoded asset bytes, bounded or not.
 ///
 /// Native builds create and poll source futures on dedicated I/O workers, so a
 /// blocking filesystem source never runs on the frame thread. WebAssembly
@@ -134,7 +145,7 @@ pub struct AssetLoadQueue {
     config: AssetLoadQueueConfig,
     outstanding: BTreeSet<AssetLoadRequest>,
     #[cfg(not(target_arch = "wasm32"))]
-    task_sender: Option<SyncSender<AssetLoadRequest>>,
+    task_sender: Option<Sender<AssetLoadRequest>>,
     #[cfg(not(target_arch = "wasm32"))]
     completion_receiver: Receiver<AssetLoadCompletion>,
     #[cfg(not(target_arch = "wasm32"))]
@@ -162,7 +173,10 @@ impl AssetLoadQueue {
         validate_config(config)?;
 
         let source: Arc<dyn AssetSource + Send + Sync> = Arc::new(source);
-        let (task_sender, task_receiver) = mpsc::sync_channel::<AssetLoadRequest>(config.capacity);
+        // Unbounded, because the capacity is enforced on `outstanding` before a
+        // request is sent; a bounded channel would reserve room for the whole
+        // capacity up front, which an unbounded queue cannot give.
+        let (task_sender, task_receiver) = mpsc::channel::<AssetLoadRequest>();
         let task_receiver = Arc::new(Mutex::new(task_receiver));
         let (completion_sender, completion_receiver) = mpsc::channel();
         let mut workers = Vec::with_capacity(config.max_concurrent);
@@ -249,15 +263,9 @@ impl AssetLoadQueue {
                 .task_sender
                 .as_ref()
                 .ok_or(AssetLoadQueueError::Closed)?;
-            match sender.try_send(request.clone()) {
-                Ok(()) => {}
-                Err(TrySendError::Full(_)) => {
-                    return Err(AssetLoadQueueError::Full {
-                        capacity: self.config.capacity,
-                    });
-                }
-                Err(TrySendError::Disconnected(_)) => return Err(AssetLoadQueueError::Closed),
-            }
+            sender
+                .send(request.clone())
+                .map_err(|_| AssetLoadQueueError::Closed)?;
         }
 
         #[cfg(target_arch = "wasm32")]
