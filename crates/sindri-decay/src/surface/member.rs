@@ -231,6 +231,13 @@ pub(crate) const SHAPE_MEMBERS: &[(&str, Node)] = &[
         }),
     ),
     (
+        "dash_duty",
+        Node::Leaf(Leaf::Component {
+            component: SHAPE_COMPONENT,
+            pointer: &[Seg::Field("dash_duty")],
+        }),
+    ),
+    (
         "layer",
         Node::Leaf(Leaf::Component {
             component: SHAPE_COMPONENT,

@@ -192,6 +192,7 @@ not a number at all is refused when the scene is extracted.
 | `this.shape.sweep_start` | `f32` | yes | yes |
 | `this.shape.sweep_turns` | `f32` | yes | yes |
 | `this.shape.dashes` | `f32` | yes | yes |
+| `this.shape.dash_duty` | `f32` | yes | yes |
 | `this.shape.layer` | `f32` | yes | yes |
 
 `sprite` is the thing in the world and `ui_image` is the thing on the viewport:
@@ -210,7 +211,7 @@ group is worth having at all: a cooldown ring, a charge meter and a boss's
 health arc are each a single float the script already holds, where drawing the
 same thing from a sprite would need a frame of art per step. `stroke_width` is
 how something pulses without changing size, and `dashes` is how a marker reads
-as scanning.
+as scanning; `dash_duty` is how much of each dash is drawn rather than gap.
 
 An irregular polygon can carry up to eight authored 2D points. Those points are
 not exposed as a mutable array path; the bounded host call writes them instead:
@@ -270,6 +271,7 @@ table above lists, reaching the same numbers.
 | `this.entity.shape.sweep_start` | `f32` | yes | yes |
 | `this.entity.shape.sweep_turns` | `f32` | yes | yes |
 | `this.entity.shape.dashes` | `f32` | yes | yes |
+| `this.entity.shape.dash_duty` | `f32` | yes | yes |
 | `this.entity.shape.layer` | `f32` | yes | yes |
 
 | Call | Returns |

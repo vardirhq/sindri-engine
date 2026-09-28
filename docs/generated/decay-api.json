@@ -1755,6 +1755,12 @@
           "type": "f32"
         },
         {
+          "description": "How much of each dash is drawn, from 0 to 1; the rest is the gap before the next. 0.5 draws dashes and gaps of equal length.",
+          "kind": "value",
+          "name": "dash_duty",
+          "type": "f32"
+        },
+        {
           "description": "How many dashes the outline is broken into. 0 draws a solid line.",
           "kind": "value",
           "name": "dashes",

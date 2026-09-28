@@ -323,6 +323,7 @@ Scenes are a game's separate places or screens, such as a menu, a level or a sho
 A shape drawn in the game world, such as a circle, polygon or ring, with an inside colour and an outline.
 
 - `count`: `f32` — How many sides a polygon has (3 is a triangle, 6 a hexagon), or how many cells a grid shape is across.
+- `dash_duty`: `f32` — How much of each dash is drawn, from 0 to 1; the rest is the gap before the next. 0.5 draws dashes and gaps of equal length.
 - `dashes`: `f32` — How many dashes the outline is broken into. 0 draws a solid line.
 - `fill`: `Rgba` — The colour inside the shape.
 - `layer`: `f32` — Drawing order: higher numbers are drawn in front of lower ones.
