@@ -52,6 +52,7 @@ mod console_view;
 mod device;
 mod dock_strip;
 mod editing;
+mod external_editor;
 mod frame;
 mod gizmo_space;
 mod hierarchy;

@@ -3,106 +3,35 @@
   "name": "Decay",
   "scopeName": "source.decay",
   "patterns": [
-    { "include": "#comments" },
-    { "include": "#strings" },
-    { "include": "#numbers" },
-    { "include": "#attributes" },
-    { "include": "#declarations" },
-    { "include": "#keywords" },
-    { "include": "#constants" },
-    { "include": "#types" },
-    { "include": "#host-globals" }
+    { "include": "#comments" }, { "include": "#strings" },
+    { "include": "#annotations" }, { "include": "#items" },
+    { "include": "#members" }, { "include": "#keywords" },
+    { "include": "#types" }, { "include": "#literals" },
+    { "include": "#calls" }, { "include": "#member-access" },
+    { "include": "#operators" }
   ],
   "repository": {
-    "comments": {
-      "patterns": [
-        {
-          "name": "comment.line.double-slash.decay",
-          "match": "//.*$"
-        }
-      ]
-    },
-    "strings": {
-      "patterns": [
-        {
-          "name": "string.quoted.double.decay",
-          "begin": "\"",
-          "end": "\"",
-          "patterns": [
-            { "name": "constant.character.escape.decay", "match": "\\\\." }
-          ]
-        }
-      ]
-    },
-    "numbers": {
-      "patterns": [
-        {
-          "name": "constant.numeric.decay",
-          "match": "\\b[0-9]+(?:\\.[0-9]+)?\\b"
-        }
-      ]
-    },
-    "attributes": {
-      "patterns": [
-        {
-          "name": "storage.modifier.decay",
-          "match": "@[A-Za-z_][A-Za-z0-9_]*"
-        }
-      ]
-    },
-    "declarations": {
-      "patterns": [
-        {
-          "match": "\\b(script|component)\\s+([A-Za-z_][A-Za-z0-9_]*)",
-          "captures": {
-            "1": { "name": "storage.type.decay" },
-            "2": { "name": "entity.name.type.decay" }
-          }
-        },
-        {
-          "match": "\\b(fn)\\s+([A-Za-z_][A-Za-z0-9_]*)",
-          "captures": {
-            "1": { "name": "storage.type.function.decay" },
-            "2": { "name": "entity.name.function.decay" }
-          }
-        }
-      ]
-    },
-    "keywords": {
-      "patterns": [
-        {
-          "name": "keyword.control.decay",
-          "match": "\\b(if|else|while|for|in|break|continue|return)\\b"
-        },
-        {
-          "name": "storage.type.decay",
-          "match": "\\b(let|var)\\b"
-        }
-      ]
-    },
-    "constants": {
-      "patterns": [
-        {
-          "name": "constant.language.decay",
-          "match": "\\b(true|false|null)\\b"
-        }
-      ]
-    },
-    "types": {
-      "patterns": [
-        {
-          "name": "support.type.decay",
-          "match": "\\b(f32|bool|String|string|unit|void)\\b"
-        }
-      ]
-    },
-    "host-globals": {
-      "patterns": [
-        {
-          "name": "support.variable.decay",
-          "match": "\\b(this|Input|World|Time|Game|Grid|Audio)\\b"
-        }
-      ]
-    }
+    "comments": { "patterns": [{ "name": "comment.line.double-slash.decay", "match": "//.*$" }] },
+    "strings": { "patterns": [{ "name": "string.quoted.double.decay", "begin": "\"", "end": "\"", "patterns": [{ "name": "constant.character.escape.decay", "match": "\\\\(?:[nrt\"\\\\])" }, { "name": "invalid.illegal.escape.decay", "match": "\\\\." }] }] },
+    "annotations": { "patterns": [{ "name": "storage.modifier.annotation.decay", "match": "@export\\b" }, { "name": "invalid.illegal.annotation.decay", "match": "@[A-Za-z_][A-Za-z0-9_]*" }] },
+    "items": { "patterns": [
+      { "match": "\\b(script|component)\\s+([A-Za-z_][A-Za-z0-9_]*)", "captures": { "1": { "name": "storage.type.decay" }, "2": { "name": "entity.name.type.decay" } } },
+      { "match": "\\b(event)\\s+([A-Za-z_][A-Za-z0-9_]*)", "captures": { "1": { "name": "storage.type.event.decay" }, "2": { "name": "entity.name.type.event.decay" } } },
+      { "match": "\\b(state)\\s+([A-Za-z_][A-Za-z0-9_]*)", "captures": { "1": { "name": "storage.type.state.decay" }, "2": { "name": "entity.name.type.state.decay" } } }
+    ] },
+    "members": { "patterns": [
+      { "match": "\\b(fn)\\s+([A-Za-z_][A-Za-z0-9_]*)", "captures": { "1": { "name": "storage.type.function.decay" }, "2": { "name": "entity.name.function.decay" } } },
+      { "match": "\\b(on)\\s+([A-Za-z_][A-Za-z0-9_]*)", "captures": { "1": { "name": "storage.type.event.decay" }, "2": { "name": "entity.name.function.event.decay" } } }
+    ] },
+    "keywords": { "patterns": [
+      { "name": "keyword.control.decay", "match": "\\b(?:if|else|while|for|in|break|continue|return)\\b" },
+      { "name": "storage.type.decay", "match": "\\b(?:let|var)\\b" },
+      { "name": "variable.language.this.decay", "match": "\\bthis\\b" }
+    ] },
+    "types": { "patterns": [{ "name": "support.type.primitive.decay", "match": "\\b(?:f32|bool|String|string|unit|void|Vec2|Vec3|Array)\\b" }, { "name": "entity.name.type.decay", "match": "\\b[A-Z][A-Za-z0-9_]*\\b" }] },
+    "literals": { "patterns": [{ "name": "constant.language.decay", "match": "\\b(?:true|false|null)\\b" }, { "name": "constant.numeric.decay", "match": "\\b[0-9]+(?:\\.[0-9]+)?\\b" }] },
+    "calls": { "patterns": [{ "name": "entity.name.function.call.decay", "match": "\\b[A-Za-z_][A-Za-z0-9_]*(?=\\s*\\()" }] },
+    "member-access": { "patterns": [{ "name": "variable.other.member.decay", "match": "(?<=\\.)[A-Za-z_][A-Za-z0-9_]*\\b" }] },
+    "operators": { "patterns": [{ "name": "keyword.operator.decay", "match": "->|\\+=|-=|\\*=|/=|%=|==|!=|<=|>=|&&|\\|\\||[+*/%!=<>.@-]" }] }
   }
 }

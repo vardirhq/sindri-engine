@@ -2,139 +2,134 @@
   <img src="https://github.com/vardirhq/sindri2/blob/main/docs%2Ffile_000000005bd882118094c913acb7257c.png" alt="Sindri Engine" width="680">
 </p>
 
-<p align="center"><strong>A lightweight 2D + 3D game engine built in Rust, with a native visual editor and Decay scripting.</strong></p>
+<p align="center"><strong>A Rust-powered 2D + 3D game engine with a native visual editor, the Decay gameplay language, and responsive Weave UI.</strong></p>
 
-Sindri Engine is a from-the-foundation rebuild of the original Sindri. It is built around one runtime model, one scene format, one asset pipeline, and one renderer that can target native desktops and WebGPU browsers without turning the web into a separate edition of the engine.
+Sindri Engine is a from-the-foundation rebuild of the original Sindri. It is built around one runtime model, one scene format, one asset pipeline, and one renderer targeting native desktops and WebGPU browsers. Games are meant to be authored through the editor, Decay, and Weave; Rust is the implementation language underneath rather than a requirement for ordinary gameplay work.
 
-> **Status:** pre-alpha and under active development. Public APIs, Decay, and serialized formats may change while the engine is being proven through real editor and gameplay use.
+> **Status:** pre-alpha and under active development. Public APIs, Decay, Weave, editor workflows, and serialized formats may change while the engine is proven through real games.
 
-**[Play Gather in your browser](https://vardirhq.github.io/sindri2/)** — the
-companion game runs the same Rust engine, Decay scripts, scene, renderer, and
-project-owned font as its native build. It requires a browser with WebGPU.
+## The authoring model
 
-**[Play Orbital Last Stand](https://vardirhq.github.io/sindri2/examples/orbital-last-stand/)** —
-the forcing-function game built from an authored scene, reusable prefabs and
-profiles, Decay gameplay, physics, audio, persistence, effects, and responsive
-Weave UI.
+Sindri is deliberately more than a Rust framework. Its primary authoring stack is developed together:
 
-**[Open the Weave responsive UI showcase](https://vardirhq.github.io/sindri2/examples/weave-poc/)** —
-one scene recomposed for desktop and portrait viewports through presentation
-rules that resolve into ordinary Sindri UI data. The language, migration guide,
-and current limits are documented in [`docs/weave.md`](docs/weave.md).
+```text
+                 Sindri Editor
+                      |
+              live World / Scene
+               /             \
+          Decay               Weave
+        gameplay                UI
+               \             /
+                 Sindri Engine
+                      |
+                     Rust
+```
+
+- **Editor** authors the same world and scene representation used by the runtime.
+- **Decay** is the statically typed gameplay language: game state, behaviour, events, input, physics, spawning, animation, audio, UI interaction, persistence, and engine-facing logic live here rather than in ordinary Rust gameplay code.
+- **Weave** is Sindri's responsive presentation system. Styles and composition resolve into ordinary Sindri UI data and can adapt one authored interface across different viewport shapes.
+- **Rust** implements the engine, renderer, platform layer, editor, and language/runtime integrations beneath those authoring surfaces.
+
+The goal is that somebody can build and ship a Sindri game without needing to understand the Rust implementation underneath.
 
 ## What Sindri is trying to be
 
-Sindri is deliberately small enough to understand and opinionated enough to build with.
+- **2D and 3D in one engine**, without forcing ordinary 2D work through needlessly complicated 3D abstractions.
+- **A real native visual editor**, not a separate mock representation of the runtime.
+- **A purpose-built gameplay language.** Decay is Rust-inspired, statically typed, project-aware, and designed around game authoring rather than general-purpose systems programming.
+- **Responsive game UI through Weave**, with presentation rules separated from gameplay and authored for multiple viewport shapes.
+- **Native and web from the same foundation**, using Rust, `wgpu`, `winit`, WebGPU, and WASM where appropriate.
+- **Portable, review-friendly projects** with canonical scene files, logical asset IDs, reusable prefabs and profiles, and no hidden sidecar identity system.
+- **Actionable diagnostics and tooling**, including changed-scope preflight, structured CI diagnostics, and project-aware Decay checking.
+- **Features proved by games.** An API, component, editor control, or language feature is not considered complete merely because it exists.
 
-- **2D and 3D in one engine** without forcing 2D through needlessly complicated 3D abstractions.
-- **A real visual editor** that edits the same world and scene representation the runtime uses.
-- **Decay scripting** for gameplay, with typed editor-visible properties and a narrow, checked engine API.
-- **Native and web from the same foundation**, using Rust, `wgpu`, `winit`, and WebGPU/WASM where appropriate.
-- **Portable project data** with versioned, canonical, review-friendly scene files and logical asset IDs.
-- **Measured complexity**: systems are kept simple until profiling or real use proves they need to become more complicated.
-- **Actionable diagnostics**: changed-scope preflight and structured CI diagnostics identify source locations, distinguish infrastructure failures, and correlate duplicate failures across jobs. See [`docs/diagnostics.md`](docs/diagnostics.md).
+Sindri is not trying to win a feature-count contest with mature engines. The goal is a coherent engine and authoring environment that is pleasant to build games with and difficult to accidentally lie about.
 
-Sindri is not trying to win a feature-count contest with mature engines. The current goal is to make the foundation coherent, testable, authorable, and difficult to accidentally lie about.
+## Games prove the engine
+
+Sindri is developed vertically: runtime capability, editor authoring, Decay/Weave access, and a real project evolve together where a feature applies.
+
+- **Causeway** is the flagship showcase: a voxel builder that pushes the engine's world, rendering, authoring, and asset capabilities by trying to become a game worth playing rather than a disposable demo.
+- **Orbital Last Stand** is the forcing function: a recreation of a complete game built through the editor and Decay. Gaps it exposes are closed as general Sindri capabilities rather than game-specific hacks.
+- **Genre showcases** are small complete games that prove ordinary workflows. The platformer exercises the plain 2D path; **Scorchball** exercises local multiplayer, player-slot input, prefab-driven players, animation, typed Decay communication, events, state, and increasingly game-like AI and mechanics.
+- **Feature examples and labs** isolate larger systems such as cameras, Weave, graphics, and voxels when isolation is the honest way to test them.
+
+The exact proof status for each capability lives in [`docs/parity.md`](docs/parity.md), and the detailed evidence lives in [`docs/capabilities.md`](docs/capabilities.md).
 
 ## Decay
 
-Decay is Sindri's gameplay scripting language. The language itself is engine-agnostic; `sindri-decay` is the single binding layer that gives symbolic script paths meaning inside a Sindri world.
+Decay is Sindri's Rust-inspired, statically typed gameplay language. The language implementation lives in its own workspace and is engine-agnostic; `sindri-decay` is the one-way binding layer that exposes Sindri's world and host APIs.
 
 ```rust
 script Player {
     @export
-    let speed: f32 = 6.0;
+    var speed: f32 = 6.0;
 
     fn update(dt: f32) {
         let movement = Input.axis("ArrowLeft", "ArrowRight");
         this.transform.position.x += movement * speed * dt;
-
-        if Input.just_pressed("Space") {
-            print("Back to the middle");
-            this.transform.position.x = 0.0;
-        }
     }
 }
 ```
 
-A script can currently drive transforms and sprites, read keyboard, pointer, and
-touch input, query entities and tags, spawn prefabs, use reusable profile data,
-react to 2D physics and collision events, update UI, play audio, emit effects,
-persist game data, navigate grids, and work with bounded collections and loops.
-Host members are typed: a misspelling such as
-`this.transfrom.position.x` is a compile error with a source location rather
-than a runtime surprise.
+Decay now goes well beyond isolated callbacks and stringly host calls. Current language and Sindri integration include:
 
-`@export` fields are visible in the editor without running the script. The script declares the property's name, type, and default; the scene stores only the value authored for that particular entity.
+- typed editor-visible `@export` fields;
+- `Vec2` and `Vec3` values and vector operations;
+- typed script references, so scripts can find and communicate with other script types without property-name strings;
+- typed script messages;
+- project-wide typed events with `event`, `emit`, and `on`;
+- typed shared project state;
+- arrays, maps, bounded loops, entity/prefab/profile references, and operation budgets;
+- transforms, sprites, animation, input, physics/collisions, spawning, UI, audio, effects, persistence, grids, and other checked host APIs;
+- project-aware checking through `decay-lsp`, including structured diagnostics and completion work that is evolving alongside the language.
 
-Decay is intentionally focused rather than general-purpose. It has safe entity,
-prefab, and profile references, arrays and maps, bounded loops, typed host
-namespaces, and operation budgets, but still lacks structured vectors, script
-coroutines, a debugger, and a full language server. See
-[`decay/LANGUAGE.md`](decay/LANGUAGE.md) for the language reference and
-[`docs/scripting.md`](docs/scripting.md) for the exact Sindri surface scripts
-can reach.
+A misspelled host member, wrong event payload, invalid script relationship, or incompatible type should be caught as a Decay diagnostic rather than becoming a mysterious runtime fallback.
+
+Decay intentionally does **not** inherit Rust's ownership, borrowing, lifetimes, `unsafe`, or systems-programming machinery. Rust inspires the syntax, static typing, and tooling quality; Decay remains focused on gameplay.
+
+See [`decay/LANGUAGE.md`](decay/LANGUAGE.md), [`docs/scripting.md`](docs/scripting.md), and [`docs/decay-direction.md`](docs/decay-direction.md).
+
+## Weave
+
+Weave is Sindri's responsive UI/presentation system. It exists so game interfaces do not have to become piles of viewport-specific coordinates or gameplay code manually rearranging rectangles.
+
+Weave presentation rules resolve into ordinary Sindri UI data, allowing one authored interface to recompose for different viewport shapes while remaining part of the same scene/runtime model. The system is developed alongside Decay and the editor rather than as a separate UI stack bolted on afterward.
+
+The responsive showcase and current language/limitations are documented in [`docs/weave.md`](docs/weave.md).
 
 ## What works today
 
-### Engine
+Sindri is pre-alpha, but the working surface is already broad. Highlights include:
 
-- strict lifecycle semantics with fixed-step simulation, capped frame time, and deterministic manual-clock tests
-- generation-checked entities, safe hierarchies, recursive destruction, and one 2D/3D transform model
-- versioned scene documents with stable authored IDs separate from runtime handles
-- canonical, lossless world-to-scene saving and a scene migration API
-- reversible world commands, transactions, bounded undo/redo, and dirty-state tracking
-- keyboard and pointer input behind a platform-independent boundary
-- headless, native-windowed, and browser host loops
-- portable logical asset IDs, asynchronous loading, typed decoding, manifests, hot reload, and generation-checked texture handles
-- shared `wgpu` device/surface policy for native and WebGPU
-- extraction/preparation/rendering stages with deterministic pass ordering
-- depth-tested 3D meshes, perspective and orthographic cameras, textured/tinted/layered 2D sprites, sprite sheets, and runtime sprite animation
-- a `sindri.ui.*` component family for anchored screen images and text, drawn through a projection the viewport owns rather than through any authored camera
-- orthogonal and isometric tilemaps extracted into the same sprite batches as loose world sprites
-- renderer-independent typed grid coordinates, bounds, neighbours, and reversible orthogonal/isometric projection math
-- authored grid walls and multi-cell occupants, with world-derived occupancy, placement validation, and deterministic A* paths
-- layered screen text rendered from project-owned OpenType font assets
-- deterministic offscreen PNG rendering exercised by CI
-- Decay scripts that run against the live world through a typed host surface
-- reusable prefab and profile assets that survive editor authoring and static export
-- masked Rapier2D bodies, colliders, sensors, events, velocity, and impulse on the shared fixed-step path
-- native and browser audio for WAV, Ogg, and MP3, including looping and pause/resume
-- responsive Weave presentation that resolves into ordinary UI data without mutating the authored world
-- static web export with base-path-aware project assets and cache invalidation
-- browser-playable Gather and Orbital Last Stand builds proving the engine through complete games
+### Engine and runtime
+
+- deterministic lifecycle and fixed-step simulation;
+- generation-checked entities, hierarchies, and composed 2D/3D transforms;
+- canonical, versioned scene serialization and reversible world commands;
+- keyboard, pointer, touch, and local gamepad/player-slot input;
+- logical asset IDs, asynchronous loading, manifests, and hot reload;
+- native-windowed, headless, and WebGPU browser hosts;
+- textured/layered sprites, sprite sheets and animation;
+- 3D meshes, perspective/orthographic cameras, lighting and bounded directional shadows;
+- tilemaps, grids, occupancy, walls, placement validation, and pathfinding;
+- voxel world storage, generation/streaming, meshing, and editor/runtime rendering work;
+- Rapier2D physics with authored bodies/colliders, sensors, masks, events, velocity, and impulses;
+- native/browser audio;
+- prefabs and reusable profile data;
+- responsive Weave presentation;
+- static web export;
+- deterministic rendering/capture paths exercised in CI.
 
 ### Editor
 
-The native editor is already an authoring tool rather than a mock shell. It works on the same world and scene representation as the runtime.
+The native editor works on the same scene/world model as the runtime. It supports scene/project browsing, hierarchy authoring, transforms and component editing, asset selection, sprite-sheet slicing and animation preview, Decay `@export` fields, undo/redo, Scene and Game views, camera navigation and selection, Play/Pause/Stop against the real engine lifecycle, console output, preferences/layout persistence, and asset/script hot reload.
 
-It currently supports:
-
-- opening, saving, reloading, and discarding canonical scene files
-- a searchable, collapsible GameObject hierarchy in which every entity can own children, filtered results retain their ancestor paths, and drag-and-drop reparents onto another GameObject or the top level
-- world objects and UI objects listed apart, decided by the components an entity carries rather than by anything kept in step by hand
-- creating empty root or child GameObjects and deleting subtrees, including undo that restores deleted entities at their original handles
-- editing names and transforms
-- adding, removing, and editing component payloads through the component schema registry, with every field of a component shown whether or not it was written down
-- menus rather than text boxes for values that are one of a few names, including a camera projection switch that writes the fields that projection has
-- slicing sprite sheets, arranging named frames into timed clips, and previewing them in the inspector
-- adding text when the project has a font, editing multiline content, and choosing project font, texture, and script assets from what the project holds
-- editing unknown preserved components instead of silently throwing their data away
-- editing Decay `@export` properties directly in the inspector
-- undo/redo with drag merging and saved-state tracking
-- Scene and Game views with perspective/orthographic viewing, orbit, pan, zoom, click selection, and focus-selection
-- Play and Pause using the real engine lifecycle, with what the editor is doing said in a word
-- Decay execution and sprite animation during play, with the world restored to its pre-play state on Stop
-- keyboard input routed to scripts only while the game owns it
-- project browsing, console output, preferences, remembered layouts, and reopening the previous scene
-- texture and Decay source hot reload through the real asset pipeline
-- deterministic editor screenshot capture in CI
-
-For the deliberately exhaustive and evidence-based inventory, including controls that are still incomplete, see [`docs/capabilities.md`](docs/capabilities.md). The counterparts still needed across runtime, editor, Decay, and games — and an honest account of where Sindri sits against what a game engine is expected to do — are kept together in [`docs/parity.md`](docs/parity.md).
+This summary is intentionally not exhaustive. [`docs/capabilities.md`](docs/capabilities.md) is the evidence-based inventory; [`docs/parity.md`](docs/parity.md) records Engine / Editor / Decay / proof status and the important gaps against a conventional game-engine baseline.
 
 ## Architecture
 
-Sindri keeps engine concerns split into focused crates, while Decay remains its own workspace.
+Sindri keeps engine concerns in focused Rust crates while Decay remains its own workspace.
 
 ```text
                          Sindri Editor
@@ -162,39 +157,27 @@ crates/sindri-decay     knows both halves
 sindri engine crates    do not depend on Decay
 ```
 
-That keeps the scripting decision reversible and prevents engine concepts from leaking into the language implementation. `sindri-decay` also performs no I/O; script sources arrive through the same asset pipeline as the rest of a project.
-
-The renderer-independent core has no dependency on a window, GPU, browser, editor, physics engine, scripting runtime, or async executor.
-
-## Scene and component model
-
-Scenes are versioned JSON documents intended to survive both source control and editor round-trips. Stable authored IDs are deliberately different from generation-checked runtime handles, unknown component payloads are preserved by default, and serialization is canonical so saving an untouched scene reproduces it byte-for-byte.
-
-Components are backed by a schema registry used by both runtime validation and editor authoring. This is why the inspector can edit component payloads generically instead of accumulating a hand-written panel for every component Sindri ever gains.
+That keeps the language embeddable and prevents Sindri implementation details from leaking into Decay core. The renderer-independent engine core likewise has no dependency on a window, GPU, browser, editor, physics engine, scripting runtime, or async executor.
 
 ## Native and web
 
-The web remains a first-class runtime target. Native and browser hosts share the same engine concepts, scene extraction, assets, GPU abstraction, renderer, and presentation policy.
+The web is a first-class runtime target rather than a separate edition. Native and browser hosts share the same engine concepts, scene extraction, assets, GPU abstraction, renderer, Decay gameplay model, and Weave presentation policy.
 
-The old plan described a separate TypeScript authoring API for browser games. That is no longer the primary gameplay direction: Decay is being developed as the common gameplay scripting layer so a game's authoring model does not depend on where it will run.
+Static WebAssembly/WebGPU exports are exercised through repository projects and browser smoke tests. A browser needs WebGPU support.
 
-Gather is built as a static WebAssembly/WebGPU site and deployed from `main` by
-the `Gather Pages` workflow. Relative module paths keep the bundle valid under
-GitHub Pages' `/sindri2/` project subpath rather than assuming a domain root.
+## Important gaps
 
-## What is still missing
+Sindri is still pre-alpha. Among the meaningful gaps and incomplete areas are:
 
-Sindri is pre-alpha, and several large pieces are intentionally not pretending to exist yet. Among the important gaps are:
+- richer asset import, preview, and project-settings workflows;
+- deeper prefab authoring/linked-instance workflows;
+- polished external Decay authoring, formatting, debugging, and the remaining language-server/IDE features;
+- richer Weave editor tooling and accessibility work;
+- native packaging/release tooling beyond the current web exporter;
+- a mature 3D content pipeline, including broader materials, model import, skeletal animation, and more complete lighting/physics features;
+- the accumulated stability, documentation, platform coverage, and real-world usage expected of a mature engine.
 
-- editor prefab creation and linked prefab instances
-- richer asset import, preview, and project-settings workflows
-- Decay source authoring, formatting, language-server support, and debugging
-- structured vector and rotation values across the Decay host boundary
-- Weave editor tooling, hot reload, interaction states, intrinsic sizing, and accessibility mapping
-- native packaging and release tooling beyond the current static web exporter
-- a mature 3D feature set with materials, lighting, glTF import, and 3D physics
-
-The roadmap is in [`ROADMAP.md`](ROADMAP.md). What is demonstrably true **today** lives in [`docs/capabilities.md`](docs/capabilities.md); that file is updated with the implementation it describes rather than being treated as an aspirational checklist.
+For the current outside-in audit rather than an aspirational feature list, see [`docs/parity.md`](docs/parity.md).
 
 ## Try the editor
 
@@ -204,7 +187,7 @@ The workspace currently requires Rust 1.95.
 cargo run --package sindri-editor
 ```
 
-A scene path can also be supplied to the editor. The repository includes fixtures and rendering examples used to prove the engine and editor paths rather than separate mock implementations.
+The repository includes games, feature examples, fixtures, deterministic captures, and regression tests that exercise the same implementations used by the editor and runtime.
 
 ## Development
 
@@ -214,9 +197,10 @@ Engine/editor workspace:
 cargo fmt --all --check
 cargo clippy --workspace --all-targets --all-features
 cargo test --workspace --all-features
+cargo check --workspace --all-features --target wasm32-unknown-unknown
 ```
 
-Decay is intentionally a separate Cargo workspace and has its own CI checks.
+Decay is intentionally a separate Cargo workspace:
 
 ```bash
 cd decay
@@ -225,39 +209,38 @@ cargo clippy --workspace --all-targets -- -D warnings
 cargo test --workspace
 ```
 
-The root workspace explicitly excludes `decay/` so path dependencies cannot silently absorb the language crates into the engine workspace and give them the engine's version and lint configuration.
+For changed Decay scripts, use the typed project-aware preflight rather than treating syntax alone as proof:
+
+```bash
+cargo run --quiet --package decay-lsp -- --check path/to/script-or-project
+```
+
+Repository guidance and the complete required checks live in [`AGENTS.md`](AGENTS.md).
 
 ## Documentation
 
-The detailed contracts live alongside the code:
+Start here:
 
-- [`docs/capabilities.md`](docs/capabilities.md) — what demonstrably works today
-- [`docs/orbital-last-stand-audit.md`](docs/orbital-last-stand-audit.md) — vertical-slice audit against a high-churn 2D action game
-- [`docs/scripting.md`](docs/scripting.md) — the exact Decay-to-Sindri host surface
+- [`docs/parity.md`](docs/parity.md) — outside-in Engine / Editor / Decay / proof audit and important gaps
+- [`docs/capabilities.md`](docs/capabilities.md) — detailed evidence for what demonstrably works
 - [`decay/LANGUAGE.md`](decay/LANGUAGE.md) — Decay language reference
-- [`docs/decay-direction.md`](docs/decay-direction.md) — why Decay exists and how the scripting direction evolved
-- [`docs/2d-model.md`](docs/2d-model.md) — how 2D fits the shared transform/world model
-- [`docs/component-schema-registry.md`](docs/component-schema-registry.md) — component validation and authoring metadata
-- [`docs/scene-serialization.md`](docs/scene-serialization.md) — scene format and canonical round-tripping
-- [`docs/scene-extraction.md`](docs/scene-extraction.md) — world-to-frame extraction
-- [`docs/grid.md`](docs/grid.md) — grid geometry, occupancy, pathfinding, and world adapters
-- [`docs/asset-foundation.md`](docs/asset-foundation.md) — portable asset model
-- [`docs/rendering-transparency.md`](docs/rendering-transparency.md) — transparent rendering
-- [`docs/rendering-color.md`](docs/rendering-color.md) — colour handling
-- [`docs/rendering-surface.md`](docs/rendering-surface.md) — presentation surfaces
-- [`docs/platform-host.md`](docs/platform-host.md) — native/browser host model
-- [`docs/entity-scaling.md`](docs/entity-scaling.md) — measured entity-storage scaling
-- [`docs/versioning.md`](docs/versioning.md) — current versioning rules
-- [`PROJECT_OVERVIEW.md`](PROJECT_OVERVIEW.md) — historical Rust + TypeScript architecture proposal
-- [`ROADMAP.md`](ROADMAP.md) — checkable development roadmap
+- [`docs/scripting.md`](docs/scripting.md) — Decay-to-Sindri host surface
+- [`docs/decay-direction.md`](docs/decay-direction.md) — why Decay exists and how its authoring model evolved
+- [`docs/weave.md`](docs/weave.md) — responsive UI/presentation model
+- [`docs/project-format.md`](docs/project-format.md) — project structure and `sindri.toml`
+- [`docs/diagnostics.md`](docs/diagnostics.md) — diagnostics and CI/preflight model
+- [`ROADMAP.md`](ROADMAP.md) — development plan
+- [`AGENTS.md`](AGENTS.md) — architecture, contribution, proof, and verification rules for coding agents
+
+Subsystem contracts live under `docs/` beside the code they describe.
 
 ## Why Sindri?
 
-The original Sindri proved a lot of useful ideas. This engine is built on those lessons rather than carrying every old architectural decision forward, which is why it takes the name outright instead of shipping beside it.
+Sindri's central bet is that a Rust engine does not have to make Rust the everyday game-authoring experience.
 
-The project has a simple rule: **working code beats plausible architecture**. Features are exercised through real scenes, editor workflows, browser/native paths, deterministic captures, tests, and small gameplay examples before they are described as capabilities.
+The editor owns the world. Decay owns gameplay. Weave owns responsive presentation. Rust provides the engine underneath. Those surfaces are developed together and proved through actual games rather than treated as independent checkboxes.
 
-That makes progress slower than ticking boxes on a roadmap. It also makes the boxes mean something.
+The project has a simple rule: **working code beats plausible architecture**. A capability is not complete because an API exists or an editor control is visible; it is complete when the relevant authoring surface can use it and a real project proves it.
 
 ## Contributing
 

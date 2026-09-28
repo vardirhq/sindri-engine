@@ -62,8 +62,12 @@ pub(crate) fn listing_row(
         return Some(action);
     }
     let mut asked = row_menu(&row.response, entry, scenes);
-    if row.response.double_clicked() && entry.kind == AssetKind::Scene {
-        asked = Some(BrowserAction::Open(entry.path.clone()));
+    if row.response.double_clicked() {
+        asked = match entry.kind {
+            AssetKind::Scene => Some(BrowserAction::Open(entry.path.clone())),
+            AssetKind::Script => Some(BrowserAction::OpenExternal(entry.path.clone())),
+            _ => asked,
+        };
     } else if row.response.clicked() {
         asked = Some(BrowserAction::Select(entry.path.clone()));
     }
@@ -229,6 +233,10 @@ pub(crate) fn row_menu(
             AssetKind::Texture => Some((
                 "Slice into sprites",
                 BrowserAction::Select(entry.path.clone()),
+            )),
+            AssetKind::Script => Some((
+                "Open in External Editor",
+                BrowserAction::OpenExternal(entry.path.clone()),
             )),
             _ => None,
         };
