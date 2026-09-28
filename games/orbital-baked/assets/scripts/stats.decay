@@ -24,20 +24,20 @@ script Stats {
     }
 
     fn wipe() {
-        clear("damage_add", "damage_mul");
-        clear("fire_rate_add", "fire_rate_mul");
-        clear("bullet_speed_add", "bullet_speed_mul");
-        clear("bullet_size_add", "bullet_size_mul");
-        clear("shots_add", "shots_mul");
-        clear("pierce_add", "pierce_mul");
-        clear("crit_add", "crit_mul");
-        clear("crit_power_add", "crit_power_mul");
-        clear("move_speed_add", "move_speed_mul");
-        clear("max_hp_add", "max_hp_mul");
-        clear("armor_add", "armor_mul");
-        clear("regen_add", "regen_mul");
-        clear("magnet_add", "magnet_mul");
-        clear("xp_gain_add", "xp_gain_mul");
+        clear("damage");
+        clear("fire_rate");
+        clear("bullet_speed");
+        clear("bullet_size");
+        clear("shots");
+        clear("pierce");
+        clear("crit");
+        clear("crit_power");
+        clear("move_speed");
+        clear("max_hp");
+        clear("armor");
+        clear("regen");
+        clear("magnet");
+        clear("xp_gain");
         clear_flag("missile"); clear_flag("arc"); clear_flag("nova"); clear_flag("mines"); clear_flag("beam");
         clear_flag("comp_blade"); clear_flag("comp_shield"); clear_flag("comp_ember"); clear_flag("comp_wisp"); clear_flag("comp_drone"); clear_flag("comp_wrecking");
         clear_flag("transform_storm"); clear_flag("transform_horizon"); clear_flag("transform_recursive"); clear_flag("transform_rail_prism"); clear_flag("transform_critical_mass");
@@ -60,9 +60,10 @@ script Stats {
         this.granted_hp = Game.get("max_hp", 5.0);
     }
 
-    fn clear(add: String, mul: String) {
-        Game.set(add, 0.0);
-        Game.set(mul, 1.0);
+    // A stat's two halves: what is added to it, and what it is multiplied by.
+    fn clear(stat: String) {
+        Game.set(stat + "_add", 0.0);
+        Game.set(stat + "_mul", 1.0);
     }
 
     fn clear_flag(key: String) { Game.set(key, 0.0); }

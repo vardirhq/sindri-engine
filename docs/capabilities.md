@@ -423,8 +423,8 @@ grid's `minmax()` and named areas, and accessibility mapping remain absent.
 
 `sindri.ui.image` and `sindri.ui.text` draw against the viewport. Text is a
 **template**: the words carry `{}` slots and a script supplies the numbers, so a
-HUD updates without Decay needing string concatenation it deliberately does not
-have. An image carries a **fill** fraction and the edge it empties from, which is
+HUD's words stay in the scene, and a script that does need to build text joins
+it with `+`. An image carries a **fill** fraction and the edge it empties from, which is
 what makes a bar a bar rather than a picture of one.
 
 `sindri.ui.button` makes an element pressable, its rect being the entity's own
@@ -1703,6 +1703,12 @@ An `enum` in any file is a type every script holds, compares and passes, and
 field and an `@export` authored by variant name, which the inspector offers as
 a dropdown. Exercised in `crates/sindri-decay/tests/scripts_use_enums.rs` and
 by Scorchball's match phase and power-up kinds.
+
+Text joins with `+` — with numbers, flags, vectors and variants too — and has
+`length`, `contains`, `starts_with`, `ends_with`, `find`, `slice`, `replace`
+and case and trimming, counted in characters and capped at 64 KiB. Exercised
+in `crates/sindri-decay/tests/scripts_use_text.rs`, by Scorchball's digit and
+ring clips, and by both Orbital games' stat keys.
 
 **A script can speak in the tilemap's coordinates.** `Grid.position_x` and
 `Grid.position_y` invert a tilemap's projection and full world-XY transform;

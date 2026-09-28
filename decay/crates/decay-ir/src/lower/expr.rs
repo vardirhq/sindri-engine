@@ -142,6 +142,10 @@ impl Lowerer<'_> {
                         self.lower_expr(object, instructions);
                         instructions.push(Instruction::Vector(op));
                     }
+                    Some(ValueMember::Text(op)) => {
+                        self.lower_expr(object, instructions);
+                        instructions.push(Instruction::Text(op));
+                    }
                     Some(ValueMember::Variant) => {
                         let variant = Self::path_from_expr(expr)
                             .map_or_else(|| "<invalid-variant>".to_owned(), |path| path.dotted());
@@ -200,6 +204,16 @@ impl Lowerer<'_> {
                     self.lower_expr(argument, instructions);
                 }
                 instructions.push(Instruction::Vector(op));
+                return;
+            }
+            Some(ValueMember::Text(op)) => {
+                if let ExprKind::Member { object, .. } = &callee.kind {
+                    self.lower_expr(object, instructions);
+                }
+                for argument in args {
+                    self.lower_expr(argument, instructions);
+                }
+                instructions.push(Instruction::Text(op));
                 return;
             }
             _ => {}

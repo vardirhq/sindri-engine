@@ -693,10 +693,10 @@ disqualifying for anything else.
 | `Ui.slider_value(entity)` | `f32` |
 | `Ui.slider_changed(entity)` | `bool` |
 
-**The scene owns the words and the script owns the numbers.** Decay has no
-string concatenation, no interpolation and no formatting library — `+` is
-numeric addition and `decay/LANGUAGE.md` says why. A script therefore cannot
-build `"Score: 1200"`, and a HUD that cannot show a number is not a HUD.
+**The scene owns the words and the script owns the numbers.** A script can
+join text — `Ui.set_text(label, "Score: " + score)` works — but a HUD's words
+still belong in the scene, and a template also formats: `{.2}` is something
+`+` cannot do.
 
 So a `sindri.ui.text` component authors a **template**, and a script fills its
 slots:
@@ -726,8 +726,8 @@ is not a slot — `{.x}`, `{9}` — is drawn exactly as written, so a designer w
 typed it wrong sees it and fixes it rather than watching it vanish.
 
 `set_text` replaces the template itself, for swapping one authored string for
-another: a warning appearing, a label changing with the mode. It takes a
-literal, because a literal is the only string a script has.
+another — a warning appearing, a label changing with the mode — or for text a
+script builds, such as a player's name with their slot.
 
 **`set_fill` is what makes a bar a bar.** A `sindri.ui.image` keeps its authored
 rect and draws a fraction of it, from the edge the scene names — so the empty
@@ -1801,11 +1801,34 @@ hold one too. `print` shows a variant by its full name, `Power.Grow`.
 Scorchball's match phase and its four power-ups are enums, where they were
 `0`/`1`/`2` and `1`–`4` with a comment to decode them.
 
+### Text
+
+```decay
+let clip = "d" + score % 10.0;              // "d0" to "d9"
+Game.set(stat + "_add", 0.0);               // "damage_add"
+if name.starts_with("enemy_") { }
+```
+
+`+` joins text with text, numbers, `bool`s, vectors and variants: a whole
+number is written without its `.0`, and a variant by its own name (`Lobby`).
+Text has `length`, `uppercase`, `lowercase` and `trimmed`, and
+`contains`, `starts_with`, `ends_with`, `find`, `slice` and `replace`,
+counting characters rather than bytes; `decay/LANGUAGE.md` has the table. A
+field initialized with a text literal is a `String` without an annotation.
+
+Text is capped at 64 KiB, so a loop that keeps doubling a string fails that
+entity's script rather than the editor.
+
+Scorchball picks its score digit's and ball ring's clips by joining, where it
+had ten and six `if`s, and both Orbital games clear each stat's `_add` and
+`_mul` keys from its one name.
+
 ### Saying something
 
 `print(anything)` puts a line in the host's log, tagged with the entity that
-said it. It takes any type because Decay has no conversions and `+` does not
-concatenate, so a `print` that only took text could not report a value.
+said it. It takes any type, so `print(hp)` needs no text around it; to say more,
+join it: `print("hp " + hp)`. A number prints as text spells it — `3`, `0.1` —
+and a variant by its full name, `Phase.Play`.
 
 ### Maths
 

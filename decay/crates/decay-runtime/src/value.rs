@@ -118,6 +118,11 @@ pub(crate) fn apply_unary(op: UnaryOp, value: Value) -> Result<Value, RuntimeErr
 }
 
 pub(crate) fn apply_binary(op: BinaryOp, left: Value, right: Value) -> Result<Value, RuntimeError> {
+    if op == BinaryOp::Add
+        && (matches!(left, Value::String(_)) || matches!(right, Value::String(_)))
+    {
+        return crate::text::join(&left, &right);
+    }
     if left.components().is_some() || right.components().is_some() {
         return crate::vector::arithmetic(op, &left, &right);
     }

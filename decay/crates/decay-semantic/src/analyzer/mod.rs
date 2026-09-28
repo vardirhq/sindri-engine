@@ -13,6 +13,7 @@ mod item;
 mod member;
 mod state;
 mod stmt;
+mod text;
 mod timer;
 mod vector;
 

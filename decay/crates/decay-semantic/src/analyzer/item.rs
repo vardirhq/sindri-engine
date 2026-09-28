@@ -252,13 +252,18 @@ impl Analyzer<'_, '_> {
 }
 
 /// The type of a field left unannotated whose initializer builds one of the
-/// language's own values: `var fuse = Timer(2.0);`, `var at = Vec2(0.0, 0.0);`.
+/// language's own values: `var fuse = Timer(2.0);`, `var at = Vec2(0.0, 0.0);`,
+/// `var label = "";`.
 ///
 /// Only those, and only when spelled as the construction: their members are
 /// answered by the language rather than the host, so a field of unknown type
 /// would read `fuse.left` as a host path and fail when it ran. Every other
 /// unannotated field stays unknown, as it always was.
 fn built_value_type(initializer: Option<&Expr>) -> Type {
+    // Text too: `label.length` is answered by the language.
+    if let Some(ExprKind::String(_)) = initializer.map(|expr| &expr.kind) {
+        return Type::String;
+    }
     let Some(ExprKind::Call { callee, .. }) = initializer.map(|expr| &expr.kind) else {
         return Type::Unknown;
     };

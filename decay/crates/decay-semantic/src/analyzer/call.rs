@@ -21,6 +21,9 @@ impl Analyzer<'_, '_> {
             if object_type == Type::Timer {
                 return self.timer_call_type(field, args, span);
             }
+            if object_type == Type::String {
+                return self.string_call_type(field, args, span);
+            }
             match self.member_symbol(&object_type, field, is_this(object)) {
                 Some(MemberLookup::Found(ExternalSymbol::Function(function))) => {
                     self.check_call(&function, args, span);

@@ -6,4 +6,5 @@ mod functions;
 mod host;
 mod language;
 mod states;
+mod text;
 mod timers;

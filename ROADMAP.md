@@ -689,9 +689,12 @@ fires, and an item without a trigger is not ready to be planned.
   deterministic tests both want the host holding the seed
 - [ ] `assert(condition, message)` — trigger: a script where a wrong number is
   harder to find than a wrong path
-- [ ] Strings — concatenation, conversion, formatting, interpolation. Trigger:
-  **the engine can display text.** Until then a formatted string can only be
-  printed, and `print` already takes any type for that reason
+- [x] Strings — joining with `+` (numbers, flags, vectors and variants
+  spelled as they read), and `length`, `contains`, `starts_with`,
+  `ends_with`, `find`, `slice`, `replace`, case and trimming
+- [ ] Number formatting (`{:.2}`) and interpolation in text. Trigger: a script
+  that needs a fixed number of decimals somewhere a `sindri.ui.text` template
+  cannot reach
 
 #### Explicitly not on this list
 

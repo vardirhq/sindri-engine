@@ -4,7 +4,7 @@
 //! control flow, values, names, member paths, and calls, and nothing
 //! about what a Transform or an Entity is.
 
-use decay_syntax::{BinaryOp, TimerProperty, UnaryOp, VectorOp};
+use decay_syntax::{BinaryOp, StringOp, TimerProperty, UnaryOp, VectorOp};
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct IrProgram {
@@ -185,6 +185,9 @@ pub enum Instruction {
     /// A vector property or method. Pops the arguments, then the vector, and
     /// pushes the answer.
     Vector(VectorOp),
+    /// A text property or method. Pops the arguments, then the text, and
+    /// pushes the answer.
+    Text(StringOp),
     /// Pops a number of seconds, pushes a timer that runs out after them.
     StartTimer,
     /// Pops a timer, pushes one of its properties.

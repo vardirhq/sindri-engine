@@ -112,6 +112,9 @@ impl Analyzer<'_, '_> {
         op: BinaryOp,
         right: (&Type, decay_syntax::Span),
     ) -> Type {
+        if let Some(text) = self.string_arithmetic(left, op, right) {
+            return text;
+        }
         if let Some(vector) = self.vector_arithmetic(left, op, right) {
             return vector;
         }

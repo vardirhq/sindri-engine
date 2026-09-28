@@ -377,6 +377,22 @@ impl<'a, H: Host> Runtime<'a, H> {
         Ok(())
     }
 
+    /// A text property or method: the arguments, then the text, popped.
+    fn step_text(frame: &mut Frame, op: decay_syntax::StringOp) -> Result<(), RuntimeError> {
+        let arity = decay_syntax::StringOp::ALL
+            .iter()
+            .find(|(known, _, _)| *known == op)
+            .map_or(0, |(_, _, arity)| *arity);
+        let mut args = Vec::with_capacity(arity);
+        for _ in 0..arity {
+            args.push(frame.stack.pop().ok_or(RuntimeError::StackUnderflow)?);
+        }
+        args.reverse();
+        let text = frame.stack.pop().ok_or(RuntimeError::StackUnderflow)?;
+        frame.stack.push(crate::text::apply(op, &text, &args)?);
+        Ok(())
+    }
+
     pub(super) fn execute_instructions(
         &mut self,
         container: &IrContainer,
@@ -467,6 +483,7 @@ impl<'a, H: Host> Runtime<'a, H> {
                 | Instruction::Component(_)
                 | Instruction::WithComponent(_)
                 | Instruction::Vector(_) => Self::step_vector(frame, &instructions[ip])?,
+                Instruction::Text(op) => Self::step_text(frame, *op)?,
                 Instruction::StartTimer | Instruction::Timer(_) => {
                     Self::step_timer(frame, &instructions[ip])?;
                 }
