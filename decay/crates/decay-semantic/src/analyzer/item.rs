@@ -15,10 +15,12 @@ impl Analyzer<'_, '_> {
         for member in &container.members {
             match member {
                 Member::Field(field) => {
-                    let ty = field.ty.as_ref().map_or_else(
-                        || built_value_type(field.initializer.as_ref()),
-                        |ty| self.resolve_type(ty),
-                    );
+                    let ty = match field.ty.as_ref() {
+                        Some(ty) => self.resolve_type(ty),
+                        None => self
+                            .variant_initializer_type(field.initializer.as_ref())
+                            .unwrap_or_else(|| built_value_type(field.initializer.as_ref())),
+                    };
                     self.insert_member(
                         &mut members,
                         &field.name,

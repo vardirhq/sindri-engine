@@ -452,6 +452,8 @@ impl WorldHost<'_> {
                     // reaching for `print` wanted, and the elements are
                     // reachable one at a time anyway.
                     Some(Value::Array(values)) => format!("{} entries", values.len()),
+                    // Its variant, as the script wrote it: `Phase.Play`.
+                    Some(Value::Variant(name)) => name.to_string(),
                     Some(Value::Timer { left, duration }) => {
                         format!("timer {left}s of {duration}s")
                     }

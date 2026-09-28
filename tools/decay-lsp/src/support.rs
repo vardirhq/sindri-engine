@@ -18,6 +18,7 @@ pub(crate) const KEYWORDS: &[&str] = &[
     "break",
     "continue",
     "return",
+    "match",
     "true",
     "false",
     "null",
@@ -37,7 +38,7 @@ pub(crate) fn container_members(source: &str) -> Vec<(String, ExternalSymbol)> {
     let parsed = parse(source);
     let Some(container) = parsed.program.items.iter().find_map(|item| match item {
         Item::Script(container) | Item::Component(container) => Some(container),
-        Item::Event(_) | Item::State(_) | Item::Function(_) => None,
+        Item::Event(_) | Item::State(_) | Item::Function(_) | Item::Enum(_) => None,
     }) else {
         return Vec::new();
     };
@@ -145,6 +146,42 @@ pub(crate) fn state_fields(
         }
     }
     fields
+}
+
+/// Every enum the file may name, with its variants: the project's, and its
+/// own, which win where both declare one.
+pub(crate) fn enums(environment: &Environment, source: &str) -> Vec<(String, Vec<String>)> {
+    let mut found: Vec<(String, Vec<String>)> = parse(source)
+        .program
+        .items
+        .into_iter()
+        .filter_map(|item| match item {
+            Item::Enum(declared) => Some((
+                declared.name,
+                declared
+                    .variants
+                    .into_iter()
+                    .map(|(name, _)| name)
+                    .collect(),
+            )),
+            _ => None,
+        })
+        .collect();
+    for (name, variants) in environment.enums() {
+        if !found.iter().any(|(known, _)| known == name) {
+            found.push((name.to_owned(), variants.to_vec()));
+        }
+    }
+    found.sort();
+    found
+}
+
+/// How an enum reads on hover: its declaration.
+pub(crate) fn enum_hover(name: &str, variants: &[String]) -> Value {
+    json!({"contents":{"kind":"markdown","value":format!(
+        "```decay\nenum {name} {{ {} }}\n```",
+        variants.join(", ")
+    )}})
 }
 
 /// Every state name the file may reach.

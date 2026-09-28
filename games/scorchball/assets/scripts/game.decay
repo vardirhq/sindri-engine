@@ -1,8 +1,15 @@
 // What the whole match shares, declared once: every script reads and writes
 // these as `Game.phase` and so on, checked when the project compiles.
+
+// Where the match is: players joining and readying up, the countdown to
+// kickoff, and play.
+enum Phase { Lobby, Countdown, Play }
+
+// What a power-up's sign shows, and gives whoever walks into it.
+enum Power { Grow, Boost, Wind, Fire }
+
 state Game {
-    // 0 is the lobby, 1 the countdown, 2 play.
-    var phase: f32 = 0.0;
+    var phase = Phase.Lobby;
     var score_blue: f32 = 0.0;
     var score_red: f32 = 0.0;
     // Sideways push on the pitch while a Wind power-up blows; 0 when calm.

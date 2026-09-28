@@ -3,6 +3,7 @@ mod diagnostics;
 mod project;
 mod protocol;
 mod support;
+mod symbols;
 
 use std::{
     collections::HashMap,
@@ -11,14 +12,13 @@ use std::{
 };
 
 use decay_semantic::{Environment, ExternalSymbol};
-use decay_syntax::{Item, Member, parse};
 use diagnostics::StructuredDiagnostic;
 use project::ProjectIndex;
 use protocol::{read_message, write_message};
 use serde_json::{Value, json};
 use support::{
-    KEYWORDS, completion_chain, completion_item, container_members, emit_symbol, event_hover,
-    events, hover_symbol, initialization_root, offset_at, span_range, state_fields, states,
+    KEYWORDS, completion_chain, completion_item, container_members, emit_symbol, enum_hover, enums,
+    event_hover, events, hover_symbol, initialization_root, offset_at, state_fields, states,
     string_argument, symbol_completion, type_members, word_at,
 };
 
@@ -284,6 +284,11 @@ impl Server {
                 .map(|(name, _)| completion_item(&name, 24, Some("event"))),
         );
         items.extend(
+            enums(&self.environment, &source)
+                .into_iter()
+                .map(|(name, _)| completion_item(&name, 13, Some("enum"))),
+        );
+        items.extend(
             states(&self.environment, &source)
                 .into_iter()
                 .filter(|name| self.environment.globals().all(|(global, _)| global != name))
@@ -301,6 +306,12 @@ impl Server {
         };
         if let Some((_, symbol)) = self.environment.globals().find(|(name, _)| *name == word) {
             return hover_symbol(word, symbol);
+        }
+        if let Some((name, variants)) = enums(&self.environment, &source)
+            .into_iter()
+            .find(|(name, _)| name == word)
+        {
+            return enum_hover(&name, &variants);
         }
         if let Some((name, params)) = events(&self.environment, &source)
             .into_iter()
@@ -326,83 +337,9 @@ impl Server {
         let Some(uri) = params.pointer("/textDocument/uri").and_then(Value::as_str) else {
             return json!([]);
         };
-        let Some(document) = self.documents.get(uri) else {
-            return json!([]);
-        };
-        let source = &document.text;
-        let parsed = parse(source);
-        let mut symbols = Vec::new();
-        for item in parsed.program.items {
-            let container = match item {
-                Item::Script(container) | Item::Component(container) => container,
-                Item::Function(function) => {
-                    symbols.push(json!({
-                        "name": function.name,
-                        "kind": 12,
-                        "range": span_range(source, function.span),
-                        "selectionRange": span_range(source, function.span)
-                    }));
-                    continue;
-                }
-                Item::State(state) => {
-                    let children = state
-                        .fields
-                        .iter()
-                        .map(|field| {
-                            json!({
-                                "name": field.name,
-                                "kind": 8,
-                                "range": span_range(source, field.span),
-                                "selectionRange": span_range(source, field.span)
-                            })
-                        })
-                        .collect::<Vec<_>>();
-                    symbols.push(json!({
-                        "name": state.name,
-                        "kind": 23,
-                        "range": span_range(source, state.span),
-                        "selectionRange": span_range(source, state.span),
-                        "children": children
-                    }));
-                    continue;
-                }
-                Item::Event(event) => {
-                    symbols.push(json!({
-                        "name": event.name,
-                        "kind": 24,
-                        "range": span_range(source, event.span),
-                        "selectionRange": span_range(source, event.span)
-                    }));
-                    continue;
-                }
-            };
-            let children = container
-                .members
-                .into_iter()
-                .map(|member| match member {
-                    Member::Field(field) => json!({
-                        "name": field.name,
-                        "kind": 8,
-                        "range": span_range(source, field.span),
-                        "selectionRange": span_range(source, field.span)
-                    }),
-                    Member::Function(function) => json!({
-                        "name": function.name,
-                        "kind": 12,
-                        "range": span_range(source, function.span),
-                        "selectionRange": span_range(source, function.span)
-                    }),
-                })
-                .collect::<Vec<_>>();
-            symbols.push(json!({
-                "name": container.name,
-                "kind": 5,
-                "range": span_range(source, container.span),
-                "selectionRange": span_range(source, container.span),
-                "children": children
-            }));
-        }
-        Value::Array(symbols)
+        self.documents
+            .get(uri)
+            .map_or_else(|| json!([]), |document| symbols::outline(&document.text))
     }
 
     fn source_and_offset(&self, params: &Value) -> Option<(String, usize)> {
@@ -424,6 +361,21 @@ impl Server {
                 .find(|(name, _)| name == first)
         {
             return vec![(decay_semantic::EMIT.to_owned(), emit_symbol(&params))];
+        }
+        if chain.len() == 1
+            && let Some((name, variants)) = enums(&self.environment, source)
+                .into_iter()
+                .find(|(name, _)| name == first)
+        {
+            return variants
+                .into_iter()
+                .map(|variant| {
+                    (
+                        variant,
+                        ExternalSymbol::Value(decay_semantic::Type::Named(name.clone())),
+                    )
+                })
+                .collect();
         }
         if chain.len() == 1 && first != "this" {
             let mut members = state_fields(&self.environment, source, first);

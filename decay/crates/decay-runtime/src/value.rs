@@ -49,6 +49,10 @@ pub enum Value {
         left: f64,
         duration: f64,
     },
+    /// An enum's variant, held by its full name: `Phase.Lobby`. Two are equal
+    /// when they name the same variant of the same enum, and nothing else
+    /// about one is visible to a script.
+    Variant(Rc<str>),
     Null,
     Unit,
 }
@@ -97,6 +101,7 @@ impl From<&Constant> for Value {
             Constant::String(value) => Self::String(value.clone()),
             Constant::Bool(value) => Self::Bool(*value),
             Constant::Null => Self::Null,
+            Constant::Variant(name) => Self::Variant(Rc::from(name.as_str())),
         }
     }
 }

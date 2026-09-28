@@ -9,6 +9,9 @@ use decay_syntax::{BinaryOp, TimerProperty, UnaryOp, VectorOp};
 #[derive(Debug, Clone, PartialEq)]
 pub struct IrProgram {
     pub containers: Vec<IrContainer>,
+    /// Every enum the program could name, with its variants in order, so a
+    /// host can author an enum field by a variant's name.
+    pub enums: std::collections::BTreeMap<String, Vec<String>>,
 }
 
 /// The name of the container a program's top-level functions are lowered
@@ -17,6 +20,12 @@ pub struct IrProgram {
 pub const FUNCTIONS: &str = "(functions)";
 
 impl IrProgram {
+    /// An enum's variants in order, if the program knows it.
+    #[must_use]
+    pub fn variants(&self, enumeration: &str) -> Option<&[String]> {
+        self.enums.get(enumeration).map(Vec::as_slice)
+    }
+
     /// The top-level functions this program can call: its own file's, and
     /// any `shared fn` a host linked in from other files.
     #[must_use]
@@ -96,6 +105,8 @@ pub enum Constant {
     String(String),
     Bool(bool),
     Null,
+    /// An enum's variant, named with its enum: `Phase.Lobby`.
+    Variant(String),
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]

@@ -103,10 +103,13 @@ script Player {
         show();
     }
 
-    // A power-up this player walked into: 1 grows them, 2 boosts their kicks.
-    fn power_up(kind: f32) {
-        if kind == 1.0 { this.grow_timer = Timer(this.power_time); }
-        if kind == 2.0 { this.boost_timer = Timer(this.power_time); }
+    // A power-up this player walked into that acts on them alone.
+    fn power_up(kind: Power) {
+        match kind {
+            Power.Grow => { this.grow_timer = Timer(this.power_time); }
+            Power.Boost => { this.boost_timer = Timer(this.power_time); }
+            _ => { }
+        }
     }
 
     // The ball, on fire, touched this player from the other team.
@@ -118,7 +121,7 @@ script Player {
         }
     }
 
-    fn lobby(phase: f32) {
+    fn lobby(phase: Phase) {
         if !this.ready && (Gamepad.just_pressed(this.slot, "dpad_up") || Gamepad.just_pressed(this.slot, "dpad_down")) {
             this.skin = 1.0 - this.skin;
         }
@@ -126,20 +129,20 @@ script Player {
             if !this.ready {
                 this.ready = true;
                 Audio.play("audio/run.wav", 0.6);
-            } else if phase < 2.0 {
+            } else if phase != Phase.Play {
                 this.ready = false;
             }
         }
     }
 
-    fn move(dt: f32, phase: f32) {
+    fn move(dt: f32, phase: Phase) {
         var tx: f32 = 0.0;
         var ty: f32 = 0.0;
         this.sprinting = false;
         if !this.burn_timer.done {
             tx = this.burn_x * this.speed;
             ty = this.burn_y * this.speed;
-        } else if this.bot && phase >= 2.0 {
+        } else if this.bot && phase == Phase.Play {
             var pace: f32 = this.speed;
             if !this.sprint_timer.done && (abs(this.want_x) > 0.1 || abs(this.want_y) > 0.1) {
                 pace = this.speed * this.sprint_speed;
@@ -147,7 +150,7 @@ script Player {
             }
             tx = this.want_x * pace;
             ty = this.want_y * pace;
-        } else if this.ready && phase >= 2.0 {
+        } else if this.ready && phase == Phase.Play {
             var x: f32 = Gamepad.axis(this.slot, "left_x");
             var y: f32 = Gamepad.axis(this.slot, "left_y");
             if Gamepad.is_down(this.slot, "dpad_left") { x = -1.0; }
@@ -178,8 +181,8 @@ script Player {
         this.transform.position.z = 1.0 - this.transform.position.y * 0.01;
     }
 
-    fn try_kick(dt: f32, phase: f32) {
-        if phase < 2.0 || !this.burn_timer.done || Game.holder != this.slot {
+    fn try_kick(dt: f32, phase: Phase) {
+        if phase != Phase.Play || !this.burn_timer.done || Game.holder != this.slot {
             this.charge = 0.0;
             this.charge_fx = 0.0;
             return;
@@ -228,8 +231,8 @@ script Player {
     // Both humans and bots use the same short aftertouch window. Humans supply
     // right-stick intent; a bot supplies the imperfect correction it chose
     // while planning the shot. The ball still owns the live velocity change.
-    fn aftertouch(dt: f32, phase: f32) {
-        if this.aftertouch_timer.done || phase < 2.0 {
+    fn aftertouch(dt: f32, phase: Phase) {
+        if this.aftertouch_timer.done || phase != Phase.Play {
             this.aftertouch_timer = Timer(0.0);
             return;
         }
@@ -320,12 +323,12 @@ script Player {
     // A bot observes only a few times a second. It chooses player-like actions
     // from that stale picture: when to sprint, how much to charge a shot, and
     // whether to add a little aftertouch. Physics and possession stay shared.
-    fn think(dt: f32, phase: f32) {
+    fn think(dt: f32, phase: Phase) {
         if this.kick_left >= 0.0 {
             this.kick_left -= dt;
             if this.kick_left < 0.0 { this.kick_now = true; }
         }
-        if phase < 2.0 || !this.plan_timer.done { return; }
+        if phase != Phase.Play || !this.plan_timer.done { return; }
         let look = this.reaction * Random.range(0.7, 1.3);
         this.plan_timer = Timer(look);
         let ball = this.ball;

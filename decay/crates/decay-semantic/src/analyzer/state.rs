@@ -80,7 +80,10 @@ impl Analyzer<'_, '_> {
                 return;
             }
         };
-        if self.is_container(name) || self.events.contains_key(name) {
+        if self.is_container(name)
+            || self.events.contains_key(name)
+            || self.enums.contains_key(name)
+        {
             self.error(
                 state.span,
                 format!("`{name}` is already a name; a state needs one of its own"),
@@ -112,17 +115,21 @@ impl Analyzer<'_, '_> {
                     expr: inner,
                 } if matches!(inner.kind, ExprKind::Number(_)) => Some(Type::F32),
                 ExprKind::Bool(_) => Some(Type::Bool),
+                // A variant, `Phase.Lobby`: its enum is the field's type.
+                ExprKind::Member { .. } => self.variant_initializer_type(Some(expr)),
                 _ => None,
             });
         let written = field.ty.as_ref().map(|ty| self.resolve_type(ty));
         let place = format!("{}.{}", state.name, field.name);
+        let is_enum = |ty: &Type| matches!(ty, Type::Named(name) if self.enums.contains_key(name));
         if let Some(written) = &written
             && !matches!(written, Type::F32 | Type::Bool)
+            && !is_enum(written)
         {
             self.error(
                 field.span,
                 format!(
-                    "`{place}` is a `{}`; a state holds `f32` and `bool` for now",
+                    "`{place}` is a `{}`; a state holds `f32`, `bool` and enums for now",
                     written.display_name()
                 ),
             );
@@ -130,7 +137,9 @@ impl Analyzer<'_, '_> {
         let Some(literal) = literal else {
             self.error(
                 field.span,
-                format!("`{place}` needs a starting value written as a number or `true`/`false`"),
+                format!(
+                    "`{place}` needs a starting value written as a number, `true`/`false`, or a variant"
+                ),
             );
             return written.unwrap_or(Type::Unknown);
         };

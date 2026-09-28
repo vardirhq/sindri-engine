@@ -49,7 +49,10 @@ fn nothing_the_reference_calls_absent_compiles() {
     // used to be paired with in this list.
     rejected("ranges", "script T { fn f() { for i in 0..3 { } } }");
     rejected("`loop`", "script T { fn f() { loop { } } }");
-    rejected("`match`", "script T { fn f(a: f32) { match a { } } }");
+    rejected(
+        "`match` on a number",
+        "script T { fn f(a: f32) { match a { _ => { } } } }",
+    );
     rejected(
         "array literals",
         "script T { fn f() { let a: f32 = [1.0]; } }",
@@ -496,5 +499,68 @@ fn shared_functions_do_what_the_reference_says() {
     rejected(
         "a wrong argument to a shared function",
         "fn half(size: f32) -> f32 { return size; } script T { fn f() { half(true); } }",
+    );
+}
+
+#[test]
+fn enums_do_what_the_reference_says() {
+    accepted(
+        "an enum held, compared and matched",
+        "enum Phase { Lobby, Countdown, Play }
+         state Game { var phase = Phase.Lobby; }
+         script T {
+             var phase = Phase.Lobby;
+             fn go(to: Phase) { this.phase = to; Game.phase = to; }
+             fn update(dt: f32) {
+                 if this.phase != Phase.Play { go(Phase.Countdown); }
+                 match this.phase {
+                     Phase.Lobby => { }
+                     Phase.Countdown | Phase.Play => { }
+                 }
+                 match this.phase { Phase.Play => { } _ => { } }
+             }
+         }",
+    );
+    accepted(
+        "`enum` as an ordinary name",
+        "script T { fn f() { let enum = 1.0; } }",
+    );
+    rejected(
+        "a variant without its enum's name",
+        "enum P { A, B } script T { var p = A; }",
+    );
+    rejected(
+        "arithmetic on a variant",
+        "enum P { A, B } script T { fn f() { let x = P.A + 1.0; } }",
+    );
+    rejected(
+        "ordering variants",
+        "enum P { A, B } script T { fn f() -> bool { return P.A < P.B; } }",
+    );
+    rejected(
+        "comparing variants of two enums",
+        "enum P { A } enum Q { A } script T { fn f() -> bool { return P.A == Q.A; } }",
+    );
+    rejected(
+        "a `match` that misses a variant",
+        "enum P { A, B } script T { fn f(p: P) { match p { P.A => { } } } }",
+    );
+    rejected(
+        "a variant matched twice",
+        "enum P { A, B } script T { fn f(p: P) { match p { P.A => { } P.A | P.B => { } } } }",
+    );
+    rejected(
+        "an arm after `_`",
+        "enum P { A, B } script T { fn f(p: P) { match p { _ => { } P.A => { } } } }",
+    );
+    rejected("an enum with no variants", "enum P { } script T { }");
+    rejected("a variant declared twice", "enum P { A, A } script T { }");
+    rejected(
+        "calling an enum",
+        "enum P { A } script T { fn f() { let p = P(); } }",
+    );
+    rejected(
+        "`match` as a name",
+        "script T { fn f() { let match = 1.0; } }",
     );
 }

@@ -37,6 +37,9 @@ impl Analyzer<'_, '_> {
         if *object_type == Type::Timer {
             return self.timer_member_type(field, span);
         }
+        if let Some(variant) = self.variant_type(object_type, field, span) {
+            return variant;
+        }
         let object_type = object_type.clone();
         self.check_ambiguous_use(&object_type, field, span);
         // A collection's length belongs to the value, not to a path the host

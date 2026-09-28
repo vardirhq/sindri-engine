@@ -51,15 +51,11 @@ impl WorldHost<'_> {
                 path.dotted()
             )));
         }
-        let number = match value {
-            Value::Number(number) => *number,
-            Value::Bool(flag) => f64::from(u8::from(*flag)),
-            other => {
-                return Err(RuntimeError::Host(format!(
-                    "`{}` holds a number or a flag, not {other:?}",
-                    path.dotted()
-                )));
-            }
+        let Some(number) = declared.number(value) else {
+            return Err(RuntimeError::Host(format!(
+                "`{}` cannot hold {value:?}",
+                path.dotted()
+            )));
         };
         self.blackboard.set(key, number);
         Ok(true)

@@ -1,5 +1,6 @@
 //! The analyser's tests.
 
+mod enums;
 mod events;
 mod functions;
 mod host;

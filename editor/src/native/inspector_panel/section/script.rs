@@ -108,7 +108,19 @@ pub(super) fn script_exports_section(
         // Marked when the scene set it: a script export showing its default is
         // one the author has not touched, and the dot says so without a line of
         // prose under every row.
-        if export.type_name.as_deref() == Some("Profile") {
+        if !export.choices.is_empty() {
+            // An enum: its variants, by name, never a number.
+            let current = value.as_str().unwrap_or_default().to_owned();
+            if let Some(chosen) = super::super::field::named_choice_row(
+                ui,
+                &export.name,
+                &export.name,
+                &current,
+                &export.choices,
+            ) {
+                value = Value::String(chosen);
+            }
+        } else if export.type_name.as_deref() == Some("Profile") {
             // An export's name is unique within its script, so it is both
             // the label and what identifies the picker.
             super::super::field::asset_row(
@@ -173,6 +185,12 @@ pub(super) fn script_value_json(value: &ScriptValue) -> Value {
         // same vector row edits it.
         ScriptValue::Vec2(components) => Value::from(components.to_vec()),
         ScriptValue::Vec3(components) => Value::from(components.to_vec()),
+        // By the variant's own name, as a scene authors one.
+        ScriptValue::Variant(name) => Value::String(
+            name.split_once('.')
+                .map_or(&**name, |(_, variant)| variant)
+                .to_owned(),
+        ),
         // A timer is started by the script, not authored: it runs down in
         // play, and a number in the inspector would be stale on the next frame.
         ScriptValue::Reference(_)

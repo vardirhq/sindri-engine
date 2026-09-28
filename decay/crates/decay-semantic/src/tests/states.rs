@@ -100,7 +100,7 @@ fn every_mistake_about_state_is_refused() {
     );
     for expected in [
         "duplicate state field `Game.score`",
-        "`Game.name` is a `String`; a state holds `f32` and `bool` for now",
+        "`Game.name` is a `String`; a state holds `f32`, `bool` and enums for now",
         "`Game.half` needs a starting value written as a number",
         "`Game.flag` is a `bool` but starts as a `f32`",
         "`Game` already has a `get`",

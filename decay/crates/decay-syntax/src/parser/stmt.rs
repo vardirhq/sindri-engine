@@ -44,6 +44,9 @@ impl Parser<'_> {
         if self.at(&TokenKind::For) {
             return self.parse_for_statement();
         }
+        if self.at(&TokenKind::Match) {
+            return self.parse_match_statement();
+        }
         if self.at(&TokenKind::Break) {
             return self.parse_break_statement();
         }
@@ -126,6 +129,65 @@ impl Parser<'_> {
             then_branch,
             else_branch,
             span: start.join(end),
+        })
+    }
+
+    /// `match subject { Phase.Lobby | Phase.Countdown => { ... } _ => { ... } }`.
+    ///
+    /// Each arm's body is a block, as an `if`'s is, and a comma after one is
+    /// allowed and never required.
+    pub(super) fn parse_match_statement(&mut self) -> Option<Stmt> {
+        let start = self.expect_simple(&TokenKind::Match, "expected `match`")?;
+        let subject = self.parse_expression()?;
+        self.expect_simple(
+            &TokenKind::LeftBrace,
+            "expected `{` after the value to match",
+        )?;
+        let mut arms = Vec::new();
+        while !self.at(&TokenKind::RightBrace) && !self.at(&TokenKind::Eof) {
+            let arm_start = self.current().span;
+            let mut patterns = vec![self.parse_pattern()?];
+            while self.consume_simple(&TokenKind::Pipe).is_some() {
+                patterns.push(self.parse_pattern()?);
+            }
+            self.expect_simple(&TokenKind::FatArrow, "expected `=>` after a match pattern")?;
+            let body = self.parse_block()?;
+            let span = arm_start.join(body.span);
+            arms.push(crate::ast::MatchArm {
+                patterns,
+                body,
+                span,
+            });
+            self.consume_simple(&TokenKind::Comma);
+        }
+        let end =
+            self.expect_simple(&TokenKind::RightBrace, "expected `}` after the match arms")?;
+        Some(Stmt::Match {
+            subject,
+            arms,
+            span: start.join(end),
+        })
+    }
+
+    /// `Phase.Lobby`, or `_`.
+    fn parse_pattern(&mut self) -> Option<crate::ast::Pattern> {
+        let (first, first_span) =
+            self.expect_identifier("expected a pattern: `Enum.Variant`, or `_`")?;
+        if first == "_" {
+            return Some(crate::ast::Pattern::Wildcard(first_span));
+        }
+        if self.consume_simple(&TokenKind::Dot).is_none() {
+            self.error_span(
+                first_span,
+                "a variant is written with its enum's name: `Phase.Lobby`",
+            );
+            return None;
+        }
+        let (variant, variant_span) = self.expect_identifier("expected a variant name")?;
+        Some(crate::ast::Pattern::Variant {
+            enumeration: first,
+            variant,
+            span: first_span.join(variant_span),
         })
     }
 

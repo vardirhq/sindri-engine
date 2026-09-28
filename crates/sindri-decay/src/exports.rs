@@ -26,6 +26,9 @@ pub struct ScriptExport {
     pub type_name: Option<String>,
     /// What the field starts as when the scene says nothing.
     pub default: Value,
+    /// For an enum field, its variants in order: what a panel offers to pick
+    /// from. Empty for any other field.
+    pub choices: Vec<String>,
 }
 
 /// Every `@export` field of one container, in declaration order.
@@ -50,14 +53,29 @@ pub(crate) fn exports_of(program: &IrProgram, script: &str) -> Option<Vec<Script
             .fields
             .iter()
             .filter(|field| field.exported)
-            .map(|field| ScriptExport {
-                name: field.name.clone(),
-                type_name: field.type_name.clone(),
-                default: instance
+            .map(|field| {
+                let default = instance
                     .as_ref()
                     .and_then(|instance| instance.field(&field.name))
                     .cloned()
-                    .unwrap_or(Value::Null),
+                    .unwrap_or(Value::Null);
+                // Written as a type, or known from the variant it starts as.
+                let enumeration = field
+                    .type_name
+                    .clone()
+                    .filter(|written| program.variants(written).is_some())
+                    .or_else(|| match &default {
+                        Value::Variant(name) => name.split('.').next().map(str::to_owned),
+                        _ => None,
+                    });
+                ScriptExport {
+                    name: field.name.clone(),
+                    type_name: field.type_name.clone().or_else(|| enumeration.clone()),
+                    choices: enumeration
+                        .and_then(|name| program.variants(&name).map(<[String]>::to_vec))
+                        .unwrap_or_default(),
+                    default,
+                }
             })
             .collect(),
     )

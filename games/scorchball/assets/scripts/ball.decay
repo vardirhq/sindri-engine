@@ -40,7 +40,7 @@ script Ball {
     }
 
     fn update(dt: f32) {
-        if Game.phase < 2.0 {
+        if Game.phase != Phase.Play {
             // Waiting at the centre spot for kickoff.
             reset();
             return;

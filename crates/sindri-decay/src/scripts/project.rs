@@ -41,6 +41,10 @@ pub struct Project {
     pub(crate) states: BTreeMap<String, BTreeMap<String, SharedField>>,
     /// State fields declared more than once, as `(state, field)`.
     ambiguous_fields: BTreeSet<(String, String)>,
+    /// Enums by name, with their variants in order.
+    pub(crate) enums: BTreeMap<String, Vec<String>>,
+    /// Enums declared more than once, which nothing may name.
+    ambiguous_enums: BTreeSet<String>,
     /// Shared functions, declared outside any script, by name.
     pub(crate) functions: BTreeMap<String, FunctionType>,
     /// Shared functions declared more than once, which nothing may call.
@@ -54,16 +58,49 @@ pub struct Project {
 pub(crate) struct SharedField {
     pub ty: Type,
     pub mutable: bool,
-    /// Held as a number, as the board holds everything; `true` is `1.0`.
+    /// Held as a number, as the board holds everything; `true` is `1.0`, and
+    /// a variant is its position in its enum.
     pub initial: f64,
+    /// For an enum field, its variants in order, which the board's number
+    /// indexes. Empty for any other field.
+    pub variants: Vec<String>,
 }
 
 impl SharedField {
-    /// A number from the board as the value this field holds.
+    /// A number from the board as the value this field holds. A number that
+    /// is no variant's position — something older wrote the board by name —
+    /// reads as the first variant rather than as nothing.
     pub(crate) fn value(&self, number: f64) -> decay_runtime::Value {
-        match self.ty {
+        match &self.ty {
             Type::Bool => decay_runtime::Value::Bool(number != 0.0),
+            Type::Named(enumeration) if !self.variants.is_empty() => {
+                #[allow(clippy::cast_possible_truncation, clippy::cast_sign_loss)]
+                let index = if number.is_finite() && number >= 0.0 {
+                    number as usize
+                } else {
+                    0
+                };
+                let variant = self.variants.get(index).unwrap_or(&self.variants[0]);
+                decay_runtime::Value::Variant(format!("{enumeration}.{variant}").into())
+            }
             _ => decay_runtime::Value::Number(number),
+        }
+    }
+
+    /// The number a value of this field is kept on the board as.
+    pub(crate) fn number(&self, value: &decay_runtime::Value) -> Option<f64> {
+        match value {
+            decay_runtime::Value::Number(number) => Some(*number),
+            decay_runtime::Value::Bool(flag) => Some(f64::from(u8::from(*flag))),
+            decay_runtime::Value::Variant(name) => {
+                let variant = super::run::variant_name(name);
+                #[allow(clippy::cast_precision_loss)]
+                self.variants
+                    .iter()
+                    .position(|known| known == variant)
+                    .map(|index| index as f64)
+            }
+            _ => None,
         }
     }
 }
@@ -91,6 +128,12 @@ pub(crate) struct Declared {
     pub exported: Vec<String>,
 }
 
+/// A name neither an engine type nor an engine global, so a project's
+/// declaration of it would shadow nothing.
+fn unreserved(reserved: &Environment, name: &str) -> bool {
+    reserved.get_type(name).is_none() && !reserved.globals().any(|(global, _)| global == name)
+}
+
 impl Project {
     /// Reads every source's declarations.
     ///
@@ -106,6 +149,8 @@ impl Project {
         let mut states: BTreeMap<String, BTreeMap<String, SharedField>> = BTreeMap::new();
         let mut ambiguous_fields = BTreeSet::new();
         let mut functions = BTreeMap::new();
+        let mut enums: BTreeMap<String, Vec<String>> = BTreeMap::new();
+        let mut ambiguous_enums = BTreeSet::new();
         let mut ambiguous_functions = BTreeSet::new();
         // A caller links a copy of each shared function it can reach, so it
         // must recompile when one's body changes, not only its signature.
@@ -144,6 +189,16 @@ impl Project {
                         }
                         continue;
                     }
+                    Item::Enum(declared) => {
+                        let variants = declared.variants.into_iter().map(|(name, _)| name);
+                        if enums
+                            .insert(declared.name.clone(), variants.collect())
+                            .is_some()
+                        {
+                            ambiguous_enums.insert(declared.name);
+                        }
+                        continue;
+                    }
                     Item::Component(_) => continue,
                 };
                 if scripts
@@ -154,30 +209,30 @@ impl Project {
                 }
             }
         }
-        scripts.retain(|name, _| {
-            !twice.contains(name)
-                && reserved.get_type(name).is_none()
-                && !reserved.globals().any(|(global, _)| global == name)
-        });
+        scripts.retain(|name, _| !twice.contains(name) && unreserved(reserved, name));
         // An event may not take a name a script or the engine already has;
         // the file declaring it is told so by the analyzer.
         events.retain(|name, _| {
             !ambiguous_events.contains(name)
                 && !scripts.contains_key(name)
-                && reserved.get_type(name).is_none()
-                && !reserved.globals().any(|(global, _)| global == name)
+                && unreserved(reserved, name)
         });
         keep_states(&mut states, &ambiguous_fields, &scripts, &events, reserved);
+        place_variants(&mut states, &enums);
+        enums.retain(|name, _| {
+            !ambiguous_enums.contains(name)
+                && !scripts.contains_key(name)
+                && unreserved(reserved, name)
+        });
         functions.retain(|name, _| {
             !ambiguous_functions.contains(name)
                 && !scripts.contains_key(name)
                 && !events.contains_key(name)
                 && !states.contains_key(name)
-                && reserved.get_type(name).is_none()
-                && !reserved.globals().any(|(global, _)| global == name)
+                && unreserved(reserved, name)
         });
         let key = format!(
-            "{scripts:?}{events:?}{ambiguous_events:?}{states:?}{ambiguous_fields:?}{functions:?}{ambiguous_functions:?}{bodies}"
+            "{scripts:?}{events:?}{ambiguous_events:?}{states:?}{ambiguous_fields:?}{functions:?}{ambiguous_functions:?}{bodies}{enums:?}{ambiguous_enums:?}"
         );
         Self {
             scripts,
@@ -185,6 +240,8 @@ impl Project {
             ambiguous_events,
             states,
             ambiguous_fields,
+            enums,
+            ambiguous_enums,
             functions,
             ambiguous_functions,
             key,
@@ -268,6 +325,12 @@ impl Project {
         }
         for (state, field) in &self.ambiguous_fields {
             environment.add_ambiguous_state_field(state.clone(), field.clone());
+        }
+        for (name, variants) in &self.enums {
+            environment.add_enum(name.clone(), variants.clone());
+        }
+        for name in &self.ambiguous_enums {
+            environment.add_ambiguous_enum(name.clone());
         }
         for (name, function) in &self.functions {
             environment.add_shared_function(name.clone(), function.clone());
@@ -388,7 +451,7 @@ fn keep_states(
 /// number or a flag starting from a literal, so what it cannot read here is a
 /// declaration that will not compile anyway.
 fn shared_field(field: &decay_syntax::FieldDecl) -> SharedField {
-    let ty = field
+    let mut ty = field
         .ty
         .as_ref()
         .map_or_else(|| literal_type(field.initializer.as_ref()), Type::from_ref);
@@ -399,12 +462,57 @@ fn shared_field(field: &decay_syntax::FieldDecl) -> SharedField {
             _ => 0.0,
         },
         Some(ExprKind::Bool(true)) => 1.0,
+        // A variant is placed once every enum is known; see `place_variants`.
+        Some(ExprKind::Member {
+            object,
+            field: variant,
+        }) => {
+            if let ExprKind::Identifier(enumeration) = &object.kind {
+                if matches!(ty, Type::Unknown) {
+                    ty = Type::Named(enumeration.clone());
+                }
+                return SharedField {
+                    ty,
+                    mutable: field.mutable,
+                    initial: 0.0,
+                    variants: vec![format!("{enumeration}.{variant}")],
+                };
+            }
+            0.0
+        }
         _ => 0.0,
     };
     SharedField {
         ty,
         mutable: field.mutable,
         initial,
+        variants: Vec::new(),
+    }
+}
+
+/// Gives each enum state field its enum's variants, and its starting variant's
+/// position as its starting number. Read before every enum was known, a field
+/// held only the variant it starts as.
+fn place_variants(
+    states: &mut BTreeMap<String, BTreeMap<String, SharedField>>,
+    enums: &BTreeMap<String, Vec<String>>,
+) {
+    for field in states.values_mut().flat_map(BTreeMap::values_mut) {
+        let Type::Named(enumeration) = &field.ty else {
+            continue;
+        };
+        let Some(variants) = enums.get(enumeration) else {
+            continue;
+        };
+        let start = field.variants.first().cloned().unwrap_or_default();
+        let start = super::run::variant_name(&start).to_owned();
+        #[allow(clippy::cast_precision_loss)]
+        let index = variants
+            .iter()
+            .position(|known| *known == start)
+            .unwrap_or(0) as f64;
+        field.initial = index;
+        field.variants.clone_from(variants);
     }
 }
 
