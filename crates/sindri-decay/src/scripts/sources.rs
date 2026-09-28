@@ -15,6 +15,30 @@ pub(super) const START: &str = "start";
 /// The lifecycle function called every frame, with the frame's delta.
 pub(super) const UPDATE: &str = "update";
 
+/// A function the engine calls on a running script by its name.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub struct LifecycleFunction {
+    pub name: &'static str,
+    /// Its parameters, as `(name, type)`.
+    pub params: &'static [(&'static str, &'static str)],
+    /// When the engine calls it.
+    pub when: &'static str,
+}
+
+/// Every lifecycle function, in the order a script meets them.
+pub const LIFECYCLE: [LifecycleFunction; 2] = [
+    LifecycleFunction {
+        name: START,
+        params: &[],
+        when: "once, before the script's first update",
+    },
+    LifecycleFunction {
+        name: UPDATE,
+        params: &[("dt", "f32")],
+        when: "every frame, with the seconds since the last one",
+    },
+];
+
 /// The `.decay` sources a world's scripts refer to, by asset ID.
 ///
 /// This crate does no I/O — it has no more business opening a file than

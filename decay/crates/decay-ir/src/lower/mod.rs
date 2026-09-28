@@ -106,7 +106,7 @@ impl<'a> Lowerer<'a> {
                         exported: field
                             .attributes
                             .iter()
-                            .any(|attribute| attribute.name == "export"),
+                            .any(|attribute| attribute.name == decay_syntax::vocabulary::EXPORT),
                         type_name: field.ty.as_ref().map(|ty| ty.name.clone()),
                         ty: field.ty.as_ref().map(decay_semantic::Type::from_ref),
                         initializer,

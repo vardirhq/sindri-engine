@@ -40,6 +40,21 @@ pub fn is_length(name: &str) -> bool {
 pub const VEC2: &str = "Vec2";
 pub const VEC3: &str = "Vec3";
 
+/// Every built-in type that takes no argument, by each spelling it is written
+/// with. `List<T>` (or `Array<T>`) is the one that takes an argument; every
+/// other name is a declared struct or enum, or a type the host names.
+pub const BUILT_IN_TYPES: [(&str, Type); 9] = [
+    ("f32", Type::F32),
+    ("bool", Type::Bool),
+    ("String", Type::String),
+    ("string", Type::String),
+    ("unit", Type::Unit),
+    ("void", Type::Unit),
+    (VEC2, Type::Vec2),
+    (VEC3, Type::Vec3),
+    (TIMER, Type::Timer),
+];
+
 /// The member an event offers: `GoalScored.emit(1.0)`.
 pub const EMIT: &str = "emit";
 
@@ -95,14 +110,13 @@ pub enum Type {
 impl Type {
     #[must_use]
     pub fn from_ref(reference: &TypeRef) -> Self {
+        if let Some((_, ty)) = BUILT_IN_TYPES
+            .iter()
+            .find(|(spelled, _)| *spelled == reference.name)
+        {
+            return ty.clone();
+        }
         match reference.name.as_str() {
-            "f32" => Self::F32,
-            "bool" => Self::Bool,
-            "String" | "string" => Self::String,
-            "unit" | "void" => Self::Unit,
-            VEC2 => Self::Vec2,
-            VEC3 => Self::Vec3,
-            TIMER => Self::Timer,
             // `Array` written without an argument is `Array<unknown>` rather
             // than a diagnostic. The analyzer reports the missing argument
             // where the type was written; treating it as unknown here keeps

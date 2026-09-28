@@ -1,0 +1,609 @@
+{
+  "about": "The Decay language: its words, operators, built-in types and what each can be asked, the functions the Sindri engine calls, and its limits. Read from the tables the lexer, parser, analyzer and runtime use. decay/LANGUAGE.md explains what each means; docs/generated/decay-api.json lists what the engine offers a script.",
+  "attributes": [
+    "export"
+  ],
+  "constructors": [
+    {
+      "name": "Vec2",
+      "params": [
+        {
+          "name": "x",
+          "type": "f32"
+        },
+        {
+          "name": "y",
+          "type": "f32"
+        }
+      ],
+      "returns": "Vec2"
+    },
+    {
+      "name": "Vec3",
+      "params": [
+        {
+          "name": "x",
+          "type": "f32"
+        },
+        {
+          "name": "y",
+          "type": "f32"
+        },
+        {
+          "name": "z",
+          "type": "f32"
+        }
+      ],
+      "returns": "Vec3"
+    },
+    {
+      "name": "Timer",
+      "params": [
+        {
+          "name": "seconds",
+          "type": "f32"
+        }
+      ],
+      "returns": "Timer"
+    }
+  ],
+  "contextual_keywords": [
+    {
+      "name": "event",
+      "special_at": "the start of an item"
+    },
+    {
+      "name": "state",
+      "special_at": "the start of an item"
+    },
+    {
+      "name": "enum",
+      "special_at": "the start of an item"
+    },
+    {
+      "name": "struct",
+      "special_at": "the start of an item"
+    },
+    {
+      "name": "shared",
+      "special_at": "right before `fn` at the start of an item"
+    },
+    {
+      "name": "on",
+      "special_at": "the start of a member, followed by an event's name"
+    }
+  ],
+  "diagnostic_phases": [
+    "decay-syntax",
+    "decay-semantic"
+  ],
+  "generated_by": "cargo run -p sindri-capabilities -- --write",
+  "items": [
+    "script",
+    "component",
+    "enum",
+    "struct",
+    "event",
+    "state",
+    "fn"
+  ],
+  "keywords": [
+    "script",
+    "component",
+    "fn",
+    "let",
+    "var",
+    "if",
+    "else",
+    "while",
+    "for",
+    "in",
+    "break",
+    "continue",
+    "return",
+    "match",
+    "true",
+    "false",
+    "null"
+  ],
+  "language_version": "0.0.1",
+  "lifecycle": [
+    {
+      "called": "once, before the script's first update",
+      "name": "start",
+      "params": [],
+      "returns": "unit"
+    },
+    {
+      "called": "every frame, with the seconds since the last one",
+      "name": "update",
+      "params": [
+        {
+          "name": "dt",
+          "type": "f32"
+        }
+      ],
+      "returns": "unit"
+    }
+  ],
+  "limits": {
+    "call_depth": 64,
+    "list_elements": 10000,
+    "operations_per_call": 1000000,
+    "text_bytes": 65536
+  },
+  "members": [
+    {
+      "members": [
+        {
+          "kind": "property",
+          "name": "x",
+          "type": "f32"
+        },
+        {
+          "kind": "property",
+          "name": "y",
+          "type": "f32"
+        },
+        {
+          "kind": "property",
+          "name": "length",
+          "type": "f32"
+        },
+        {
+          "kind": "property",
+          "name": "normalized",
+          "type": "Vec2"
+        },
+        {
+          "kind": "method",
+          "name": "dot",
+          "params": [
+            "Vec2"
+          ],
+          "returns": "f32"
+        },
+        {
+          "kind": "method",
+          "name": "distance",
+          "params": [
+            "Vec2"
+          ],
+          "returns": "f32"
+        },
+        {
+          "kind": "method",
+          "name": "lerp",
+          "params": [
+            "Vec2",
+            "f32"
+          ],
+          "returns": "Vec2"
+        }
+      ],
+      "type": "Vec2"
+    },
+    {
+      "members": [
+        {
+          "kind": "property",
+          "name": "x",
+          "type": "f32"
+        },
+        {
+          "kind": "property",
+          "name": "y",
+          "type": "f32"
+        },
+        {
+          "kind": "property",
+          "name": "z",
+          "type": "f32"
+        },
+        {
+          "kind": "property",
+          "name": "length",
+          "type": "f32"
+        },
+        {
+          "kind": "property",
+          "name": "normalized",
+          "type": "Vec3"
+        },
+        {
+          "kind": "method",
+          "name": "dot",
+          "params": [
+            "Vec3"
+          ],
+          "returns": "f32"
+        },
+        {
+          "kind": "method",
+          "name": "distance",
+          "params": [
+            "Vec3"
+          ],
+          "returns": "f32"
+        },
+        {
+          "kind": "method",
+          "name": "lerp",
+          "params": [
+            "Vec3",
+            "f32"
+          ],
+          "returns": "Vec3"
+        }
+      ],
+      "type": "Vec3"
+    },
+    {
+      "members": [
+        {
+          "kind": "property",
+          "name": "done",
+          "type": "bool"
+        },
+        {
+          "kind": "property",
+          "name": "left",
+          "type": "f32"
+        },
+        {
+          "kind": "property",
+          "name": "duration",
+          "type": "f32"
+        },
+        {
+          "kind": "property",
+          "name": "progress",
+          "type": "f32"
+        }
+      ],
+      "type": "Timer"
+    },
+    {
+      "members": [
+        {
+          "kind": "property",
+          "name": "length",
+          "type": "f32"
+        },
+        {
+          "kind": "property",
+          "name": "uppercase",
+          "type": "String"
+        },
+        {
+          "kind": "property",
+          "name": "lowercase",
+          "type": "String"
+        },
+        {
+          "kind": "property",
+          "name": "trimmed",
+          "type": "String"
+        },
+        {
+          "kind": "method",
+          "name": "contains",
+          "params": [
+            "String"
+          ],
+          "returns": "bool"
+        },
+        {
+          "kind": "method",
+          "name": "starts_with",
+          "params": [
+            "String"
+          ],
+          "returns": "bool"
+        },
+        {
+          "kind": "method",
+          "name": "ends_with",
+          "params": [
+            "String"
+          ],
+          "returns": "bool"
+        },
+        {
+          "kind": "method",
+          "name": "find",
+          "params": [
+            "String"
+          ],
+          "returns": "f32"
+        },
+        {
+          "kind": "method",
+          "name": "slice",
+          "params": [
+            "f32",
+            "f32"
+          ],
+          "returns": "String"
+        },
+        {
+          "kind": "method",
+          "name": "replace",
+          "params": [
+            "String",
+            "String"
+          ],
+          "returns": "String"
+        }
+      ],
+      "type": "String"
+    },
+    {
+      "members": [
+        {
+          "kind": "property",
+          "name": "length",
+          "type": "f32"
+        },
+        {
+          "alias_of": "length",
+          "kind": "property",
+          "name": "len",
+          "type": "f32"
+        },
+        {
+          "kind": "method",
+          "name": "push",
+          "params": [
+            "T"
+          ],
+          "returns": "unit"
+        },
+        {
+          "kind": "method",
+          "name": "pop",
+          "params": [],
+          "returns": "T"
+        },
+        {
+          "kind": "method",
+          "name": "insert",
+          "params": [
+            "f32",
+            "T"
+          ],
+          "returns": "unit"
+        },
+        {
+          "kind": "method",
+          "name": "remove_at",
+          "params": [
+            "f32"
+          ],
+          "returns": "T"
+        },
+        {
+          "kind": "method",
+          "name": "clear",
+          "params": [],
+          "returns": "unit"
+        },
+        {
+          "kind": "method",
+          "name": "contains",
+          "params": [
+            "T"
+          ],
+          "returns": "bool"
+        },
+        {
+          "kind": "method",
+          "name": "index_of",
+          "params": [
+            "T"
+          ],
+          "returns": "f32"
+        }
+      ],
+      "type": "List<T>"
+    }
+  ],
+  "operators": {
+    "assignment": [
+      {
+        "associativity": "right",
+        "binds": "looser than any binary operator",
+        "name": "Assign",
+        "symbol": "="
+      },
+      {
+        "associativity": "right",
+        "binds": "looser than any binary operator",
+        "name": "Add",
+        "symbol": "+="
+      },
+      {
+        "associativity": "right",
+        "binds": "looser than any binary operator",
+        "name": "Subtract",
+        "symbol": "-="
+      },
+      {
+        "associativity": "right",
+        "binds": "looser than any binary operator",
+        "name": "Multiply",
+        "symbol": "*="
+      },
+      {
+        "associativity": "right",
+        "binds": "looser than any binary operator",
+        "name": "Divide",
+        "symbol": "/="
+      },
+      {
+        "associativity": "right",
+        "binds": "looser than any binary operator",
+        "name": "Modulo",
+        "symbol": "%="
+      }
+    ],
+    "binary": [
+      {
+        "associativity": "left",
+        "name": "Or",
+        "precedence": 1,
+        "symbol": "||"
+      },
+      {
+        "associativity": "left",
+        "name": "And",
+        "precedence": 2,
+        "symbol": "&&"
+      },
+      {
+        "associativity": "left",
+        "name": "Equal",
+        "precedence": 3,
+        "symbol": "=="
+      },
+      {
+        "associativity": "left",
+        "name": "NotEqual",
+        "precedence": 3,
+        "symbol": "!="
+      },
+      {
+        "associativity": "left",
+        "name": "Less",
+        "precedence": 4,
+        "symbol": "<"
+      },
+      {
+        "associativity": "left",
+        "name": "LessEqual",
+        "precedence": 4,
+        "symbol": "<="
+      },
+      {
+        "associativity": "left",
+        "name": "Greater",
+        "precedence": 4,
+        "symbol": ">"
+      },
+      {
+        "associativity": "left",
+        "name": "GreaterEqual",
+        "precedence": 4,
+        "symbol": ">="
+      },
+      {
+        "associativity": "left",
+        "name": "Add",
+        "precedence": 5,
+        "symbol": "+"
+      },
+      {
+        "associativity": "left",
+        "name": "Subtract",
+        "precedence": 5,
+        "symbol": "-"
+      },
+      {
+        "associativity": "left",
+        "name": "Multiply",
+        "precedence": 6,
+        "symbol": "*"
+      },
+      {
+        "associativity": "left",
+        "name": "Divide",
+        "precedence": 6,
+        "symbol": "/"
+      },
+      {
+        "associativity": "left",
+        "name": "Modulo",
+        "precedence": 6,
+        "symbol": "%"
+      }
+    ],
+    "unary": [
+      {
+        "associativity": "right",
+        "binds": "tighter than any binary operator",
+        "name": "Negate",
+        "symbol": "-"
+      },
+      {
+        "associativity": "right",
+        "binds": "tighter than any binary operator",
+        "name": "Not",
+        "symbol": "!"
+      }
+    ]
+  },
+  "schema": "decay-language/1",
+  "types": [
+    {
+      "name": "f32",
+      "spellings": [
+        "f32"
+      ],
+      "takes": []
+    },
+    {
+      "name": "bool",
+      "spellings": [
+        "bool"
+      ],
+      "takes": []
+    },
+    {
+      "name": "String",
+      "spellings": [
+        "String",
+        "string"
+      ],
+      "takes": []
+    },
+    {
+      "name": "unit",
+      "spellings": [
+        "unit",
+        "void"
+      ],
+      "takes": []
+    },
+    {
+      "name": "Vec2",
+      "spellings": [
+        "Vec2"
+      ],
+      "takes": []
+    },
+    {
+      "name": "Vec3",
+      "spellings": [
+        "Vec3"
+      ],
+      "takes": []
+    },
+    {
+      "name": "Timer",
+      "spellings": [
+        "Timer"
+      ],
+      "takes": []
+    },
+    {
+      "name": "List<T>",
+      "spellings": [
+        "List",
+        "Array"
+      ],
+      "takes": [
+        "T"
+      ]
+    }
+  ]
+}

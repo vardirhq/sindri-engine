@@ -11,16 +11,16 @@ use crate::{
     },
 };
 
+pub(super) use crate::vocabulary::ENUM;
 /// The words that start an event declaration, a state declaration, a shared
 /// function, and a handler. Contextual rather than keywords: each is only special where no
 /// other identifier could stand, so a script that already calls something
 /// `event` or `state`, or reaches `Bolt.on(hit)`, keeps working.
-pub(super) const EVENT: &str = "event";
-pub(super) const STATE: &str = "state";
-pub(super) const SHARED: &str = "shared";
-pub(super) const ENUM: &str = "enum";
-pub(super) const STRUCT: &str = "struct";
-pub(super) const ON: &str = "on";
+pub(super) use crate::vocabulary::EVENT;
+pub(super) use crate::vocabulary::ON;
+pub(super) use crate::vocabulary::SHARED;
+pub(super) use crate::vocabulary::STATE;
+pub(super) use crate::vocabulary::STRUCT;
 
 use super::Parser;
 

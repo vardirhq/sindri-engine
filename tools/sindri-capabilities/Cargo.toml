@@ -10,7 +10,9 @@ repository.workspace = true
 publish = false
 
 [dependencies]
+decay-runtime = { path = "../../decay/crates/decay-runtime" }
 decay-semantic = { path = "../../decay/crates/decay-semantic" }
+decay-syntax = { path = "../../decay/crates/decay-syntax" }
 sindri-core = { path = "../../crates/sindri-core" }
 sindri-decay = { path = "../../crates/sindri-decay" }
 sindri-scene = { path = "../../crates/sindri-scene" }

@@ -7,7 +7,7 @@
 use decay_syntax::{BinaryOp, Expr, Span, StringOp};
 
 use crate::diagnostic::ValueMember;
-use crate::types::{FunctionType, Type};
+use crate::types::Type;
 
 use super::Analyzer;
 
@@ -17,10 +17,7 @@ impl Analyzer<'_, '_> {
         match StringOp::named(field) {
             Some((op, 0)) => {
                 self.value_members.insert(span, ValueMember::Text(op));
-                match op {
-                    StringOp::Length => Type::F32,
-                    _ => Type::String,
-                }
+                crate::members::string_op_signature(op).return_type
             }
             Some(_) => {
                 self.error(
@@ -38,17 +35,9 @@ impl Analyzer<'_, '_> {
 
     /// The type of `text.method(args)`.
     pub(super) fn string_call_type(&mut self, field: &str, args: &[Expr], span: Span) -> Type {
-        let (params, returns) = match StringOp::named(field) {
-            Some((StringOp::Contains | StringOp::StartsWith | StringOp::EndsWith, _)) => {
-                (vec![Type::String], Type::Bool)
-            }
-            Some((StringOp::Find, _)) => (vec![Type::String], Type::F32),
-            Some((StringOp::Slice, _)) => (vec![Type::F32, Type::F32], Type::String),
-            Some((StringOp::Replace, _)) => (vec![Type::String, Type::String], Type::String),
-            Some((
-                StringOp::Length | StringOp::Uppercase | StringOp::Lowercase | StringOp::Trimmed,
-                _,
-            )) => {
+        let op = match StringOp::named(field) {
+            Some((op, arity)) if arity > 0 => op,
+            Some(_) => {
                 self.error(
                     span,
                     format!("`{field}` is a property, not a function -- write `.{field}`"),
@@ -62,18 +51,10 @@ impl Analyzer<'_, '_> {
                 return Type::Unknown;
             }
         };
-        self.check_call(
-            &FunctionType {
-                params,
-                return_type: returns.clone(),
-            },
-            args,
-            span,
-        );
-        if let Some((op, _)) = StringOp::named(field) {
-            self.value_members.insert(span, ValueMember::Text(op));
-        }
-        returns
+        let signature = crate::members::string_op_signature(op);
+        self.check_call(&signature, args, span);
+        self.value_members.insert(span, ValueMember::Text(op));
+        signature.return_type
     }
 
     fn check_text_arguments(&mut self, args: &[Expr]) {

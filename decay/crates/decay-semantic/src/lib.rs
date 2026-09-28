@@ -11,6 +11,7 @@
 mod analyzer;
 mod diagnostic;
 mod environment;
+pub mod members;
 mod types;
 
 #[cfg(test)]
@@ -23,7 +24,10 @@ use analyzer::Analyzer;
 pub use decay_syntax::{ListOp, StringOp, TimerProperty, VectorOp};
 pub use diagnostic::{Analysis, Binding, Diagnostic, DiagnosticPhase, ValueMember, ValueMembers};
 pub use environment::{Environment, ExternalSymbol, StateField};
-pub use types::{COMPONENTS, EMIT, FunctionType, HostType, TIMER, Type, enum_type, event_type};
+pub use types::{
+    BUILT_IN_TYPES, COMPONENTS, EMIT, FunctionType, HostType, LENGTH, LIST, OLD_LENGTH, TIMER,
+    Type, VEC2, VEC3, enum_type, event_type,
+};
 
 #[must_use]
 pub fn analyze(source: &str) -> Analysis {

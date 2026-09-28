@@ -15,6 +15,7 @@ Sindri offers; it is a way to fail CI.
 | --- | --- | --- |
 | `decay-api.json` | What gameplay code may I write? | `sindri_decay::environment()` |
 | `decay-api.md` | The same, for a person | the same model as the JSON |
+| `decay-language.json` | What is the language itself? | the lexer, parser, analyzer and runtime tables |
 | `sindri-capabilities.json` | What may I author? | the built-in `ComponentSchemaRegistry` |
 
 ## Why generated
@@ -34,6 +35,26 @@ has, a **default payload** is what a fresh one is, and only some types have one.
 
 A hand-maintained reference for either would be wrong a release later, and
 wrong in the direction that matters: it would describe calls that do not exist.
+
+## The language
+
+`decay-language.json` describes the language rather than the engine: its
+keywords and contextual words, what may start an item, its attributes, every
+operator with its precedence and grouping, the built-in types and how each is
+spelled, `Vec2`/`Vec3`/`Timer` construction, what a vector, a timer, text and
+a list can be asked (with each operation's parameters and result), the
+lifecycle functions Sindri calls, and the runtime's limits.
+
+Each list is the table the compiler reads: the lexer's `KEYWORDS` and the
+parser's operator tables in `decay_syntax::vocabulary`, the analyzer's
+`BUILT_IN_TYPES` and the member signatures in `decay_semantic::members` (which
+decay-lsp's completion reads too), `sindri_decay::LIFECYCLE`, and the
+runtime's limit constants. Its first key is `"schema": "decay-language/1"`; a
+reader should refuse a schema it does not know rather than guess.
+
+What it does not yet carry is diagnostics by stable ID: the compiler reports
+an error by its phase (`decay-syntax`, `decay-semantic`), which is all the
+file lists. Stable IDs come next, generated from the same place.
 
 ## What is deliberately not here
 
