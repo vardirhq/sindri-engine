@@ -36,13 +36,12 @@ use sindri_core::AssetId;
 use sindri_render::{Texture2D, TextureError, TextureRegistry};
 use sindri_scene::{TextureBindings, TileSetBindings};
 
-/// How many texture loads run at once, and how many may be waiting.
+/// How many texture loads run at once, with no limit on how many may wait.
 ///
 /// Two workers because a scene's textures are large and few rather than small
-/// and many, and sixty-four waiting because that is more than a scene the editor
-/// can currently open will name. A scene that exceeds it says so rather than
-/// dropping the overflow.
-pub(super) const QUEUE: AssetLoadQueueConfig = AssetLoadQueueConfig::new(2, 64);
+/// and many. Nothing is refused for being one too many: a texture refused is a
+/// magenta surface, and there is no number of textures a project may not have.
+pub(super) const QUEUE: AssetLoadQueueConfig = AssetLoadQueueConfig::unbounded(2);
 
 /// How often the files behind a scene's textures are examined.
 ///

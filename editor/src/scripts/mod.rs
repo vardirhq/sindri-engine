@@ -51,9 +51,13 @@ pub struct EditorFrame<'a> {
     pub delta_seconds: f32,
 }
 
-/// Scripts are small and few, so one worker is enough and sixteen waiting is
-/// more than a scene the editor can open will name.
-const QUEUE: AssetLoadQueueConfig = AssetLoadQueueConfig::new(1, 16);
+/// One worker, because scripts, prefabs and profiles are small text files; and
+/// no limit on how many wait, because opening a project asks for every one of
+/// them at once. There used to be a limit of sixteen, which Orbital Baked's 59
+/// scripts overran on every open: the rest were refused, compiled late against
+/// a half-loaded project, and filled the console with errors that went away by
+/// themselves.
+const QUEUE: AssetLoadQueueConfig = AssetLoadQueueConfig::unbounded(1);
 
 /// How often the files behind the loaded scripts are examined. The same second
 /// textures use, for the same reason.
@@ -74,12 +78,15 @@ pub struct SceneScripts {
     loader: Option<AssetLoader<TextAssetDecoder>>,
     watch: Option<AssetWatch>,
     last_examined: Instant,
-    /// Every script in the project, whether or not the scene names it.
+    /// Every script, prefab and profile in the project, whether or not the
+    /// scene names it.
     ///
-    /// Loaded as well as the referenced ones because any script may name any
-    /// other by type (`Bolt.on(hit)`), so compiling one needs to know all of
-    /// them. Listed when the scene opens and again on the watch interval, so
-    /// a script created a moment ago becomes nameable a moment later.
+    /// Scripts, because any script may name any other by type (`Bolt.on(hit)`)
+    /// or call its shared functions, so compiling one needs all of them.
+    /// Prefabs and profiles, because a prefab spawned at runtime can name
+    /// another — an enemy that drops a power-up — which nothing in the scene
+    /// mentions. Listed when the scene opens and again on the watch interval,
+    /// so a file created a moment ago is picked up a moment later.
     project_scripts: Vec<String>,
     sources: ScriptSources,
     /// The prefabs the scene's scripts can spawn.
@@ -181,9 +188,46 @@ impl SceneScripts {
         notes
     }
 
+    /// Whether any of the project is still on its way.
+    ///
+    /// Until it has all arrived nothing compiles or runs: a script compiled
+    /// before the file declaring `state Game` or a shared function has landed
+    /// reports names that are not missing at all, and a spawn before its
+    /// prefab has loaded fails.
+    pub fn loading(&self) -> bool {
+        let Some(loader) = self.loader.as_ref() else {
+            return false;
+        };
+        loader.outstanding() > 0
+            || self
+                .project_scripts
+                .iter()
+                .filter_map(|asset| AssetId::new(asset.clone()).ok())
+                .any(|id| loader.status(&id).is_none())
+    }
+
+    /// Asks for any of the project not asked for yet, such as a file created
+    /// since the scene opened.
+    fn request_project(&mut self) {
+        let Some(loader) = self.loader.as_mut() else {
+            return;
+        };
+        for id in self
+            .project_scripts
+            .iter()
+            .filter_map(|asset| AssetId::new(asset.clone()).ok())
+        {
+            if loader.status(&id).is_none() {
+                // A full queue is not a failure; it is asked again next frame.
+                let _ = loader.request(id);
+            }
+        }
+    }
+
     /// Takes delivery of whatever finished. Called once a frame.
     pub fn poll(&mut self) -> Vec<ScriptNote> {
         let mut notes = self.examine_files();
+        self.request_project();
         let Self {
             loader: Some(loader),
             watch,
@@ -264,6 +308,9 @@ impl SceneScripts {
         world: &World,
         components: &ComponentSchemaRegistry,
     ) -> Vec<ScriptFailure> {
+        if self.loading() {
+            return Vec::new();
+        }
         let mut failures = self.scripts.compile(world, components, &self.sources);
         failures.retain(|failure| match failure {
             ScriptFailure::MissingSource { asset, .. } => !self.is_in_flight(asset),
@@ -294,6 +341,10 @@ impl SceneScripts {
         components: &ComponentSchemaRegistry,
         frame: EditorFrame<'_>,
     ) -> ScriptReport {
+        // Nothing starts against half a project; see `loading`.
+        if self.loading() {
+            return ScriptReport::default();
+        }
         let EditorFrame {
             input,
             physics,
@@ -386,9 +437,18 @@ impl SceneScripts {
     }
 }
 
-/// Every `.decay` file under a project's asset root, by the ID a scene uses.
+/// Every script, prefab and profile under a project's asset root, by the ID a
+/// scene uses.
 fn list_scripts(root: &Path) -> Vec<String> {
-    FileSystemAssetSource::new(root).assets_with_extension("decay")
+    let source = FileSystemAssetSource::new(root);
+    let mut assets = source.assets_with_extension("decay");
+    assets.extend(
+        source
+            .assets_with_extension("json")
+            .into_iter()
+            .filter(|asset| is_prefab(asset) || is_profile(asset)),
+    );
+    assets
 }
 
 fn root_of(scene: Option<&Path>) -> Option<PathBuf> {
@@ -411,100 +471,4 @@ fn is_profile(id: &str) -> bool {
 pub use sindri_core::PREFAB_SUFFIX;
 
 #[cfg(test)]
-mod tests {
-    use std::{collections::BTreeMap, fs, thread::sleep, time::Duration};
-
-    use serde_json::json;
-    use sindri_core::{ComponentSchemaRegistry, EntityData, SceneComponent, World};
-    use sindri_decay::ScriptComponent;
-    use tempfile::TempDir;
-
-    use super::{SceneScripts, ScriptFailure};
-
-    /// A world holding one entity that runs `source`, and a registry that knows
-    /// what `sindri.script` is.
-    fn scripted(source: &str) -> (World, ComponentSchemaRegistry) {
-        let mut components = ComponentSchemaRegistry::default();
-        components
-            .register::<ScriptComponent>("Script")
-            .expect("sindri.script registers once");
-        let mut world = World::default();
-        world.spawn(EntityData {
-            name: Some("Thing".to_owned()),
-            components: BTreeMap::from([(
-                ScriptComponent::TYPE_NAME.to_owned(),
-                json!({ "source": source, "script": "Thing" }),
-            )]),
-            ..EntityData::default()
-        });
-        (world, components)
-    }
-
-    /// A scene directory holding one script, and the scene path inside it.
-    fn project(script: &str, text: &str) -> TempDir {
-        let directory = TempDir::new().expect("a temporary directory");
-        let scripts = directory.path().join("scripts");
-        fs::create_dir_all(&scripts).expect("the scripts directory is creatable");
-        fs::write(scripts.join(script), text).expect("the script is writable");
-        directory
-    }
-
-    /// The bug this guards: a cold open reported one error per scripted entity
-    /// for the moment between the scene landing and its scripts arriving, and
-    /// the console keeps what it is told, so twelve phantom errors sat in the
-    /// status bar of a game that was working.
-    #[test]
-    fn a_script_still_loading_is_not_an_error() {
-        let directory = project("thing.decay", "script Thing {\n    fn update() {}\n}\n");
-        let scene = directory.path().join("thing.scene.json");
-        let (world, components) = scripted("scripts/thing.decay");
-
-        let mut scripts = SceneScripts::for_scene(Some(&scene));
-        scripts.request(&world, &components);
-
-        // Before anything is polled the source cannot have arrived, which is
-        // exactly the window the editor used to report.
-        assert!(
-            scripts.compile(&world, &components).is_empty(),
-            "a source still in flight is not a compile failure"
-        );
-
-        // And once it lands it compiles, so the silence above was not the
-        // failure being swallowed for good.
-        for _ in 0..200 {
-            scripts.poll();
-            if scripts.compile(&world, &components).is_empty()
-                && scripts.exports("scripts/thing.decay", "Thing").is_some()
-            {
-                return;
-            }
-            sleep(Duration::from_millis(10));
-        }
-        panic!("the script never arrived");
-    }
-
-    /// The other half: a source that will never arrive is still reported, so
-    /// suppressing the in-flight case did not suppress a real typo.
-    #[test]
-    fn a_script_that_will_never_arrive_is_an_error() {
-        let directory = project("thing.decay", "script Thing {\n    fn update() {}\n}\n");
-        let scene = directory.path().join("thing.scene.json");
-        let (world, components) = scripted("scripts/absent.decay");
-
-        let mut scripts = SceneScripts::for_scene(Some(&scene));
-        scripts.request(&world, &components);
-
-        for _ in 0..200 {
-            scripts.poll();
-            let failures = scripts.compile(&world, &components);
-            if failures
-                .iter()
-                .any(|failure| matches!(failure, ScriptFailure::MissingSource { .. }))
-            {
-                return;
-            }
-            sleep(Duration::from_millis(10));
-        }
-        panic!("a script that does not exist was never reported");
-    }
-}
+mod tests;
