@@ -1,139 +1,172 @@
 {
-  "about": "Every namespace, call, and member a Decay script may name, derived from the host surface the analyzer and the runtime share. Parameter names are not recorded; see docs/scripting.md for what each argument means.",
+  "about": "Every namespace, call, and member a Decay script may name, derived from the host surface the analyzer and the runtime share, with a description of each and the names of each call's parameters. docs/scripting.md explains the design behind them.",
   "engine_version": "0.1.0",
   "generated_by": "cargo run -p sindri-capabilities -- --write",
   "globals": [
     {
+      "description": "Which block in a 3D block world the mouse or finger is pointing at, for building and digging games.",
       "kind": "value",
       "name": "Aim",
       "type": "Aim"
     },
     {
+      "description": "Playing an object's animations, such as walk or jump, set up for it in the scene.",
       "kind": "value",
       "name": "Animation",
       "type": "Animation"
     },
     {
+      "description": "Playing sound effects and music.",
       "kind": "value",
       "name": "Audio",
       "type": "Audio"
     },
     {
+      "description": "The game's camera: moving the view and shaking it.",
       "kind": "value",
       "name": "Camera",
       "type": "Camera"
     },
     {
+      "description": "Particle effects, such as sparks and explosions. The particles are only drawn; they are not objects and nothing can touch them.",
       "kind": "value",
       "name": "Effects",
       "type": "Effects"
     },
     {
+      "description": "Numbers stored under names that every script can read and write, such as a score. Declaring them with `state` is safer, because a misspelt name then becomes an error.",
       "kind": "value",
       "name": "Game",
       "type": "Game"
     },
     {
+      "description": "Game controllers. Each player gets a number from 1 to 8 when they press a button on their controller; 0 means any controller.",
       "kind": "value",
       "name": "Gamepad",
       "type": "Gamepad"
     },
     {
+      "description": "What the player did with the mouse or a finger: a tap, a hold, a drag or a pinch. Works the same for both.",
       "kind": "value",
       "name": "Gesture",
       "type": "Gesture"
     },
     {
+      "description": "Grids of tiles, flat or stacked in layers like building blocks: what each cell holds, where objects stand on them, and paths across them.",
       "kind": "value",
       "name": "Grid",
       "type": "Grid"
     },
     {
+      "description": "The keyboard. Keys are named by position, such as `\"W\"`, `\"ArrowLeft\"` or `\"Space\"`, so controls work on any keyboard layout.",
       "kind": "value",
       "name": "Input",
       "type": "Input"
     },
     {
+      "description": "The number π (3.14159…): half a full turn when measuring angles in radians.",
       "kind": "value",
       "name": "PI",
       "type": "f32"
     },
     {
+      "description": "2D physics: moving objects with speed and pushes, and finding out what this script's object bumped into.",
       "kind": "value",
       "name": "Physics",
       "type": "Physics"
     },
     {
+      "description": "The mouse, or a finger on a touch screen, handled the same way so one game works on both.",
       "kind": "value",
       "name": "Pointer",
       "type": "Pointer"
     },
     {
+      "description": "Reading settings from a profile, a data file shared across a project, such as a weapon's damage and fire rate.",
       "kind": "value",
       "name": "Profiles",
       "type": "Profiles"
     },
     {
+      "description": "Random numbers. The same seed always gives the same numbers, so a run can be replayed.",
       "kind": "value",
       "name": "Random",
       "type": "Random"
     },
     {
+      "description": "Saving progress between play sessions: numbers and true/false values stored under names, such as a best score.",
       "kind": "value",
       "name": "Save",
       "type": "Save"
     },
     {
+      "description": "Scenes are a game's separate places or screens, such as a menu, a level or a shop. This asks which one is playing and moves to another.",
       "kind": "value",
       "name": "Scene",
       "type": "Scene"
     },
     {
+      "description": "A virtual joystick for touch screens: wherever a thumb lands becomes the centre, and dragging from there steers.",
       "kind": "value",
       "name": "Stick",
       "type": "Stick"
     },
     {
+      "description": "The number τ (6.28318…), which is 2π: one full turn when measuring angles in radians.",
       "kind": "value",
       "name": "TAU",
       "type": "f32"
     },
     {
+      "description": "Time in the game. A game runs as a series of frames, many times a second.",
       "kind": "value",
       "name": "Time",
       "type": "Time"
     },
     {
+      "description": "Every finger on a touch screen, numbered from 0, for games that need more than one finger.",
       "kind": "value",
       "name": "Touch",
       "type": "Touch"
     },
     {
+      "description": "The interface drawn over the game: changing text and bars, and checking buttons and sliders.",
       "kind": "value",
       "name": "Ui",
       "type": "Ui"
     },
     {
+      "description": "The area of the screen the game is drawn in.",
       "kind": "value",
       "name": "Viewport",
       "type": "Viewport"
     },
     {
+      "description": "Finding, creating and removing the objects in a game. Every object in a scene (a player, an enemy, a button) is an entity.",
       "kind": "value",
       "name": "World",
       "type": "World"
     },
     {
+      "description": "The number without its minus sign: `abs(-3.0)` is `3`. Useful for distances and differences where only the size matters.",
       "kind": "function",
       "name": "abs",
+      "parameter_names": [
+        "value"
+      ],
       "parameters": [
         "f32"
       ],
       "returns": "f32"
     },
     {
+      "description": "The angle pointing from the origin towards the point (x, y), in radians. Use it to turn something to face a direction: `atan2(dy, dx)`.",
       "kind": "function",
       "name": "atan2",
+      "parameter_names": [
+        "y",
+        "x"
+      ],
       "parameters": [
         "f32",
         "f32"
@@ -141,16 +174,26 @@
       "returns": "f32"
     },
     {
+      "description": "Rounds up to a whole number: `ceil(2.1)` is `3`.",
       "kind": "function",
       "name": "ceil",
+      "parameter_names": [
+        "value"
+      ],
       "parameters": [
         "f32"
       ],
       "returns": "f32"
     },
     {
+      "description": "Keeps a number between a lowest and a highest value: `clamp(hp, 0.0, 100.0)` never goes below 0 or above 100.",
       "kind": "function",
       "name": "clamp",
+      "parameter_names": [
+        "value",
+        "low",
+        "high"
+      ],
       "parameters": [
         "f32",
         "f32",
@@ -159,32 +202,50 @@
       "returns": "f32"
     },
     {
+      "description": "The cosine of an angle in radians. With `sin`, turns an angle into a direction: `Vec2(cos(a), sin(a))`.",
       "kind": "function",
       "name": "cos",
+      "parameter_names": [
+        "angle"
+      ],
       "parameters": [
         "f32"
       ],
       "returns": "f32"
     },
     {
+      "description": "The number e raised to a power. Mostly used for smooth movement that looks the same at any frame rate: `1.0 - exp(-speed * dt)`.",
       "kind": "function",
       "name": "exp",
+      "parameter_names": [
+        "value"
+      ],
       "parameters": [
         "f32"
       ],
       "returns": "f32"
     },
     {
+      "description": "Rounds down to a whole number: `floor(2.9)` is `2`.",
       "kind": "function",
       "name": "floor",
+      "parameter_names": [
+        "value"
+      ],
       "parameters": [
         "f32"
       ],
       "returns": "f32"
     },
     {
+      "description": "Blends between two numbers: `t` of 0 gives `a`, 1 gives `b`, and 0.5 gives halfway. Used for smooth movement and fades.",
       "kind": "function",
       "name": "lerp",
+      "parameter_names": [
+        "a",
+        "b",
+        "t"
+      ],
       "parameters": [
         "f32",
         "f32",
@@ -193,8 +254,13 @@
       "returns": "f32"
     },
     {
+      "description": "The larger of two numbers.",
       "kind": "function",
       "name": "max",
+      "parameter_names": [
+        "a",
+        "b"
+      ],
       "parameters": [
         "f32",
         "f32"
@@ -202,8 +268,13 @@
       "returns": "f32"
     },
     {
+      "description": "The smaller of two numbers.",
       "kind": "function",
       "name": "min",
+      "parameter_names": [
+        "a",
+        "b"
+      ],
       "parameters": [
         "f32",
         "f32"
@@ -211,40 +282,60 @@
       "returns": "f32"
     },
     {
+      "description": "Writes a message to the log, for checking what a script is doing. Accepts any value; combine text and values with `+`: `print(\"hp \" + hp)`.",
       "kind": "function",
       "name": "print",
+      "parameter_names": [
+        "value"
+      ],
       "parameters": [
         "unknown"
       ],
       "returns": "unit"
     },
     {
+      "description": "Rounds to the nearest whole number: `round(2.5)` is `3` and `round(-2.5)` is `-3`.",
       "kind": "function",
       "name": "round",
+      "parameter_names": [
+        "value"
+      ],
       "parameters": [
         "f32"
       ],
       "returns": "f32"
     },
     {
+      "description": "Whether a number is negative, zero or positive, as -1, 0 or 1. Handy for \"which way is this moving?\".",
       "kind": "function",
       "name": "sign",
+      "parameter_names": [
+        "value"
+      ],
       "parameters": [
         "f32"
       ],
       "returns": "f32"
     },
     {
+      "description": "The sine of an angle in radians. Good for bobbing and waving motion: `sin(Time.elapsed)`.",
       "kind": "function",
       "name": "sin",
+      "parameter_names": [
+        "angle"
+      ],
       "parameters": [
         "f32"
       ],
       "returns": "f32"
     },
     {
+      "description": "The square root of a number.",
       "kind": "function",
       "name": "sqrt",
+      "parameter_names": [
+        "value"
+      ],
       "parameters": [
         "f32"
       ],
@@ -254,26 +345,31 @@
   "schema_version": 1,
   "this": [
     {
+      "description": "The object in the game this script is attached to. Pass it to calls that act on an object, such as `World.despawn(this.entity)`.",
       "kind": "value",
       "name": "entity",
       "type": "Entity"
     },
     {
+      "description": "The drawn shape on this script's object, if it has one: its colours, outline and how much of it is drawn.",
       "kind": "value",
       "name": "shape",
       "type": "Shape"
     },
     {
+      "description": "The image (sprite) on this script's object, if it has one: its colour and drawing order.",
       "kind": "value",
       "name": "sprite",
       "type": "Sprite"
     },
     {
+      "description": "Where this script's object is, how it is turned and how big it is. Change it to move the object.",
       "kind": "value",
       "name": "transform",
       "type": "Transform"
     },
     {
+      "description": "The on-screen interface image on this script's object, if it has one: its colour and drawing order.",
       "kind": "value",
       "name": "ui_image",
       "type": "UiImage"
@@ -281,38 +377,46 @@
   ],
   "types": [
     {
+      "description": "Which block in a 3D block world the mouse or finger is pointing at, for building and digging games.",
       "members": [
         {
+          "description": "Whether the pointer is over a block. Always check this first: when it is false, every other `Aim` value is 0, which is a real position.",
           "kind": "value",
           "name": "hit",
           "type": "bool"
         },
         {
+          "description": "Where a new block would go if placed now: the column of the empty space next to the side being pointed at.",
           "kind": "value",
           "name": "place_x",
           "type": "f32"
         },
         {
+          "description": "The row where a new block would go.",
           "kind": "value",
           "name": "place_y",
           "type": "f32"
         },
         {
+          "description": "The height level where a new block would go.",
           "kind": "value",
           "name": "place_z",
           "type": "f32"
         },
         {
+          "description": "The column of the block being pointed at.",
           "kind": "value",
           "name": "x",
           "type": "f32"
         },
         {
+          "description": "The row of the block being pointed at.",
           "kind": "value",
           "name": "y",
           "type": "f32"
         },
         {
+          "description": "The height level of the block being pointed at.",
           "kind": "value",
           "name": "z",
           "type": "f32"
@@ -321,34 +425,52 @@
       "name": "Aim"
     },
     {
+      "description": "Playing an object's animations, such as walk or jump, set up for it in the scene.",
       "members": [
         {
+          "description": "The name of the animation an object is playing.",
           "kind": "function",
           "name": "clip",
+          "parameter_names": [
+            "entity"
+          ],
           "parameters": [
             "Entity"
           ],
           "returns": "String"
         },
         {
+          "description": "Which picture of its animation an object is showing, counting from the start of the animation.",
           "kind": "function",
           "name": "frame",
+          "parameter_names": [
+            "entity"
+          ],
           "parameters": [
             "Entity"
           ],
           "returns": "f32"
         },
         {
+          "description": "Whether an animation that plays once, such as an attack, has finished.",
           "kind": "function",
           "name": "is_finished",
+          "parameter_names": [
+            "entity"
+          ],
           "parameters": [
             "Entity"
           ],
           "returns": "bool"
         },
         {
+          "description": "Plays one of an object's animations by name, such as `\"walk\"`. Calling it again with the animation already playing does nothing, so it is safe to call every frame.",
           "kind": "function",
           "name": "play",
+          "parameter_names": [
+            "entity",
+            "clip"
+          ],
           "parameters": [
             "Entity",
             "String"
@@ -356,16 +478,25 @@
           "returns": "unit"
         },
         {
+          "description": "Starts an object's current animation again from the beginning.",
           "kind": "function",
           "name": "restart",
+          "parameter_names": [
+            "entity"
+          ],
           "parameters": [
             "Entity"
           ],
           "returns": "unit"
         },
         {
+          "description": "How fast an object's animations play: 1 is normal speed, 2 is twice as fast.",
           "kind": "function",
           "name": "set_speed",
+          "parameter_names": [
+            "entity",
+            "speed"
+          ],
           "parameters": [
             "Entity",
             "f32"
@@ -373,8 +504,12 @@
           "returns": "unit"
         },
         {
+          "description": "Stops an object's animation.",
           "kind": "function",
           "name": "stop",
+          "parameter_names": [
+            "entity"
+          ],
           "parameters": [
             "Entity"
           ],
@@ -384,10 +519,16 @@
       "name": "Animation"
     },
     {
+      "description": "Playing sound effects and music.",
       "members": [
         {
+          "description": "Plays a sound over and over until stopped, such as music, at a volume from 0 (silent) to 1 (full).",
           "kind": "function",
           "name": "loop",
+          "parameter_names": [
+            "clip",
+            "volume"
+          ],
           "parameters": [
             "String",
             "f32"
@@ -395,14 +536,21 @@
           "returns": "unit"
         },
         {
+          "description": "Pauses every sound that is playing.",
           "kind": "function",
           "name": "pause_all",
+          "parameter_names": [],
           "parameters": [],
           "returns": "unit"
         },
         {
+          "description": "Plays a sound once, at a volume from 0 (silent) to 1 (full).",
           "kind": "function",
           "name": "play",
+          "parameter_names": [
+            "clip",
+            "volume"
+          ],
           "parameters": [
             "String",
             "f32"
@@ -410,14 +558,18 @@
           "returns": "unit"
         },
         {
+          "description": "Continues every paused sound.",
           "kind": "function",
           "name": "resume_all",
+          "parameter_names": [],
           "parameters": [],
           "returns": "unit"
         },
         {
+          "description": "Stops every sound that is playing.",
           "kind": "function",
           "name": "stop_all",
+          "parameter_names": [],
           "parameters": [],
           "returns": "unit"
         }
@@ -425,26 +577,34 @@
       "name": "Audio"
     },
     {
+      "description": "The game's camera: moving the view and shaking it.",
       "members": [
         {
+          "description": "Shakes the camera, for impacts and explosions. Bigger amounts shake harder, up to 1, and the shake fades by itself.",
           "kind": "function",
           "name": "add_trauma",
+          "parameter_names": [
+            "amount"
+          ],
           "parameters": [
             "f32"
           ],
           "returns": "unit"
         },
         {
+          "description": "How far the camera view is moved sideways from where it was placed in the scene.",
           "kind": "value",
           "name": "pan_x",
           "type": "f32"
         },
         {
+          "description": "How far the camera view is moved up or down from where it was placed in the scene.",
           "kind": "value",
           "name": "pan_y",
           "type": "f32"
         },
         {
+          "description": "How far the camera view is moved forwards or backwards from where it was placed in the scene.",
           "kind": "value",
           "name": "pan_z",
           "type": "f32"
@@ -453,18 +613,29 @@
       "name": "Camera"
     },
     {
+      "description": "Particle effects, such as sparks and explosions. The particles are only drawn; they are not objects and nothing can touch them.",
       "members": [
         {
+          "description": "Plays the particle burst set up on an object, at that object's position. Gives back how many particles were made.",
           "kind": "function",
           "name": "burst",
+          "parameter_names": [
+            "entity"
+          ],
           "parameters": [
             "Entity"
           ],
           "returns": "f32"
         },
         {
+          "description": "Plays the particle burst set up on an object at another position, such as where an enemy just died.",
           "kind": "function",
           "name": "burst_at",
+          "parameter_names": [
+            "entity",
+            "x",
+            "y"
+          ],
           "parameters": [
             "Entity",
             "f32",
@@ -473,8 +644,10 @@
           "returns": "f32"
         },
         {
+          "description": "How many particles are currently on screen.",
           "kind": "function",
           "name": "live",
+          "parameter_names": [],
           "parameters": [],
           "returns": "f32"
         }
@@ -482,23 +655,28 @@
       "name": "Effects"
     },
     {
+      "description": "An object in the game, such as a player, an enemy or a button. Scripts get these from calls like `World.find` and can store them, compare them and change their transform, sprite or shape.",
       "members": [
         {
+          "description": "The object's drawn shape, if it has one.",
           "kind": "value",
           "name": "shape",
           "type": "Shape"
         },
         {
+          "description": "The object's image (sprite), if it has one.",
           "kind": "value",
           "name": "sprite",
           "type": "Sprite"
         },
         {
+          "description": "Where the object is, how it is turned and how big it is.",
           "kind": "value",
           "name": "transform",
           "type": "Transform"
         },
         {
+          "description": "The object's on-screen interface image, if it has one.",
           "kind": "value",
           "name": "ui_image",
           "type": "UiImage"
@@ -507,10 +685,16 @@
       "name": "Entity"
     },
     {
+      "description": "Numbers stored under names that every script can read and write, such as a score. Declaring them with `state` is safer, because a misspelt name then becomes an error.",
       "members": [
         {
+          "description": "The number stored under a name, or `fallback` if nothing has been stored yet.",
           "kind": "function",
           "name": "get",
+          "parameter_names": [
+            "name",
+            "fallback"
+          ],
           "parameters": [
             "String",
             "f32"
@@ -518,8 +702,13 @@
           "returns": "f32"
         },
         {
+          "description": "Stores a number under a name for any script to read.",
           "kind": "function",
           "name": "set",
+          "parameter_names": [
+            "name",
+            "value"
+          ],
           "parameters": [
             "String",
             "f32"
@@ -530,10 +719,16 @@
       "name": "Game"
     },
     {
+      "description": "Game controllers. Each player gets a number from 1 to 8 when they press a button on their controller; 0 means any controller.",
       "members": [
         {
+          "description": "How far a stick or trigger is pushed. Sticks (`\"left_x\"`, `\"left_y\"`…) give -1 to 1, with right and down positive; triggers give 0 to 1.",
           "kind": "function",
           "name": "axis",
+          "parameter_names": [
+            "slot",
+            "axis"
+          ],
           "parameters": [
             "f32",
             "String"
@@ -541,22 +736,33 @@
           "returns": "f32"
         },
         {
+          "description": "How many players have joined with a controller.",
           "kind": "function",
           "name": "count",
+          "parameter_names": [],
           "parameters": [],
           "returns": "f32"
         },
         {
+          "description": "Whether a player number has a connected controller.",
           "kind": "function",
           "name": "is_connected",
+          "parameter_names": [
+            "slot"
+          ],
           "parameters": [
             "f32"
           ],
           "returns": "bool"
         },
         {
+          "description": "Whether a controller button is held. Buttons are named by position, so `\"south\"` is the bottom face button on every make of controller.",
           "kind": "function",
           "name": "is_down",
+          "parameter_names": [
+            "slot",
+            "button"
+          ],
           "parameters": [
             "f32",
             "String"
@@ -564,14 +770,21 @@
           "returns": "bool"
         },
         {
+          "description": "The player number of a controller that joined this frame, or 0. Use it to add a player.",
           "kind": "function",
           "name": "joined",
+          "parameter_names": [],
           "parameters": [],
           "returns": "f32"
         },
         {
+          "description": "Whether a mouse button was pressed this frame.",
           "kind": "function",
           "name": "just_pressed",
+          "parameter_names": [
+            "slot",
+            "button"
+          ],
           "parameters": [
             "f32",
             "String"
@@ -579,8 +792,13 @@
           "returns": "bool"
         },
         {
+          "description": "Whether a controller button was let go this frame.",
           "kind": "function",
           "name": "just_released",
+          "parameter_names": [
+            "slot",
+            "button"
+          ],
           "parameters": [
             "f32",
             "String"
@@ -588,8 +806,10 @@
           "returns": "bool"
         },
         {
+          "description": "The player number of a controller that was unplugged this frame, or 0. Use it to remove a player.",
           "kind": "function",
           "name": "left",
+          "parameter_names": [],
           "parameters": [],
           "returns": "f32"
         }
@@ -597,58 +817,70 @@
       "name": "Gamepad"
     },
     {
+      "description": "What the player did with the mouse or a finger: a tap, a hold, a drag or a pinch. Works the same for both.",
       "members": [
         {
+          "description": "How far the drag moved sideways this frame. Add it to a camera's position to pan.",
           "kind": "value",
           "name": "drag_x",
           "type": "f32"
         },
         {
+          "description": "How far the drag moved up or down this frame.",
           "kind": "value",
           "name": "drag_y",
           "type": "f32"
         },
         {
+          "description": "Whether the player is dragging.",
           "kind": "value",
           "name": "dragging",
           "type": "bool"
         },
         {
+          "description": "Whether the player has pressed and held still long enough to count as a long press.",
           "kind": "value",
           "name": "held",
           "type": "bool"
         },
         {
+          "description": "Where the long press is, sideways.",
           "kind": "value",
           "name": "hold_x",
           "type": "f32"
         },
         {
+          "description": "Where the long press is, up or down.",
           "kind": "value",
           "name": "hold_y",
           "type": "f32"
         },
         {
+          "description": "How much two fingers pinched this frame: above 1 when spreading apart, below 1 when closing, and 1 when not pinching. Multiply a zoom by it.",
           "kind": "value",
           "name": "pinch",
           "type": "f32"
         },
         {
+          "description": "Whether two fingers are pinching.",
           "kind": "value",
           "name": "pinching",
           "type": "bool"
         },
         {
+          "description": "Where the tap was, sideways.",
           "kind": "value",
           "name": "tap_x",
           "type": "f32"
         },
         {
+          "description": "Where the tap was, up or down.",
           "kind": "value",
           "name": "tap_y",
           "type": "f32"
         },
         {
+          "description": "Whether the player tapped (a quick press without moving) this frame. Check this before reading `tap_x` and `tap_y`.",
           "kind": "value",
           "name": "tapped",
           "type": "bool"
@@ -657,10 +889,18 @@
       "name": "Gesture"
     },
     {
+      "description": "Grids of tiles, flat or stacked in layers like building blocks: what each cell holds, where objects stand on them, and paths across them.",
       "members": [
         {
+          "description": "Which block is in a cell of a layered grid, by name, or `\"\"` if the cell is empty.",
           "kind": "function",
           "name": "block",
+          "parameter_names": [
+            "grid",
+            "column",
+            "row",
+            "level"
+          ],
           "parameters": [
             "Entity",
             "f32",
@@ -670,8 +910,14 @@
           "returns": "String"
         },
         {
+          "description": "Whether a character on a grid can walk to where another object is.",
           "kind": "function",
           "name": "can_reach",
+          "parameter_names": [
+            "mover",
+            "grid",
+            "target"
+          ],
           "parameters": [
             "Entity",
             "Entity",
@@ -680,16 +926,27 @@
           "returns": "bool"
         },
         {
+          "description": "How many columns a grid has.",
           "kind": "function",
           "name": "columns",
+          "parameter_names": [
+            "grid"
+          ],
           "parameters": [
             "Entity"
           ],
           "returns": "f32"
         },
         {
+          "description": "Moves an object to a position on a grid, measured in cells. Fractions place it between cells.",
           "kind": "function",
           "name": "place",
+          "parameter_names": [
+            "entity",
+            "grid",
+            "x",
+            "y"
+          ],
           "parameters": [
             "Entity",
             "Entity",
@@ -699,8 +956,13 @@
           "returns": "unit"
         },
         {
+          "description": "Which column an object is at on a grid, with fractions between cells.",
           "kind": "function",
           "name": "position_x",
+          "parameter_names": [
+            "entity",
+            "grid"
+          ],
           "parameters": [
             "Entity",
             "Entity"
@@ -708,8 +970,13 @@
           "returns": "f32"
         },
         {
+          "description": "Which row an object is at on a grid, with fractions between cells.",
           "kind": "function",
           "name": "position_y",
+          "parameter_names": [
+            "entity",
+            "grid"
+          ],
           "parameters": [
             "Entity",
             "Entity"
@@ -717,16 +984,28 @@
           "returns": "f32"
         },
         {
+          "description": "How many rows a grid has.",
           "kind": "function",
           "name": "rows",
+          "parameter_names": [
+            "grid"
+          ],
           "parameters": [
             "Entity"
           ],
           "returns": "f32"
         },
         {
+          "description": "Places a block, by name, in a cell of a layered grid. `\"\"` removes the block.",
           "kind": "function",
           "name": "set_block",
+          "parameter_names": [
+            "grid",
+            "column",
+            "row",
+            "level",
+            "tile"
+          ],
           "parameters": [
             "Entity",
             "f32",
@@ -737,8 +1016,15 @@
           "returns": "unit"
         },
         {
+          "description": "Changes a flat tile map's cell to one of its tiles, by number. A negative number empties the cell.",
           "kind": "function",
           "name": "set_tile",
+          "parameter_names": [
+            "grid",
+            "column",
+            "row",
+            "index"
+          ],
           "parameters": [
             "Entity",
             "f32",
@@ -748,8 +1034,14 @@
           "returns": "unit"
         },
         {
+          "description": "Moves a character one cell along the shortest walkable path towards a target. Gives back whether it moved.",
           "kind": "function",
           "name": "step_toward",
+          "parameter_names": [
+            "mover",
+            "grid",
+            "target"
+          ],
           "parameters": [
             "Entity",
             "Entity",
@@ -758,8 +1050,16 @@
           "returns": "bool"
         },
         {
+          "description": "Whether the block in a cell has a label, such as `\"hot\"` on lava, given to it where the blocks are defined.",
           "kind": "function",
           "name": "tagged",
+          "parameter_names": [
+            "grid",
+            "column",
+            "row",
+            "level",
+            "tag"
+          ],
           "parameters": [
             "Entity",
             "f32",
@@ -770,8 +1070,14 @@
           "returns": "bool"
         },
         {
+          "description": "Which tile is in a flat tile map's cell, by number, or -1 if it is empty or outside the map.",
           "kind": "function",
           "name": "tile",
+          "parameter_names": [
+            "grid",
+            "column",
+            "row"
+          ],
           "parameters": [
             "Entity",
             "f32",
@@ -780,8 +1086,14 @@
           "returns": "f32"
         },
         {
+          "description": "Whether a character could stand at a point on a grid. False for water, empty space or outside the grid.",
           "kind": "function",
           "name": "walkable",
+          "parameter_names": [
+            "grid",
+            "x",
+            "y"
+          ],
           "parameters": [
             "Entity",
             "f32",
@@ -793,10 +1105,16 @@
       "name": "Grid"
     },
     {
+      "description": "The keyboard. Keys are named by position, such as `\"W\"`, `\"ArrowLeft\"` or `\"Space\"`, so controls work on any keyboard layout.",
       "members": [
         {
+          "description": "-1, 0 or 1 from a pair of keys, for movement: `Input.axis(\"A\", \"D\")` is -1 holding A, 1 holding D and 0 for neither or both.",
           "kind": "function",
           "name": "axis",
+          "parameter_names": [
+            "negative",
+            "positive"
+          ],
           "parameters": [
             "String",
             "String"
@@ -804,24 +1122,36 @@
           "returns": "f32"
         },
         {
+          "description": "Whether a key is being held down.",
           "kind": "function",
           "name": "is_down",
+          "parameter_names": [
+            "key"
+          ],
           "parameters": [
             "String"
           ],
           "returns": "bool"
         },
         {
+          "description": "Whether a key was pressed this frame. True only once per press, however long it is held.",
           "kind": "function",
           "name": "just_pressed",
+          "parameter_names": [
+            "key"
+          ],
           "parameters": [
             "String"
           ],
           "returns": "bool"
         },
         {
+          "description": "Whether a key was let go this frame.",
           "kind": "function",
           "name": "just_released",
+          "parameter_names": [
+            "key"
+          ],
           "parameters": [
             "String"
           ],
@@ -831,10 +1161,17 @@
       "name": "Input"
     },
     {
+      "description": "2D physics: moving objects with speed and pushes, and finding out what this script's object bumped into.",
       "members": [
         {
+          "description": "Gives an object a sudden push in a direction. Heavier objects move less.",
           "kind": "function",
           "name": "apply_impulse",
+          "parameter_names": [
+            "entity",
+            "x",
+            "y"
+          ],
           "parameters": [
             "Entity",
             "f32",
@@ -843,20 +1180,30 @@
           "returns": "unit"
         },
         {
+          "description": "The objects that started touching this script's object since the last frame, as a list.",
           "kind": "function",
           "name": "collision_started",
+          "parameter_names": [],
           "parameters": [],
           "returns": "List<Entity>"
         },
         {
+          "description": "The objects that stopped touching this script's object since the last frame, as a list.",
           "kind": "function",
           "name": "collision_stopped",
+          "parameter_names": [],
           "parameters": [],
           "returns": "List<Entity>"
         },
         {
+          "description": "Ties two objects together like a rope: they can come closer, but never further apart than a distance.",
           "kind": "function",
           "name": "connect_distance",
+          "parameter_names": [
+            "first",
+            "second",
+            "max_distance"
+          ],
           "parameters": [
             "Entity",
             "Entity",
@@ -865,20 +1212,30 @@
           "returns": "unit"
         },
         {
+          "description": "The objects that entered this script's trigger area since the last frame. A trigger area detects things without blocking them, like a pickup.",
           "kind": "function",
           "name": "sensor_entered",
+          "parameter_names": [],
           "parameters": [],
           "returns": "List<Entity>"
         },
         {
+          "description": "The objects that left this script's trigger area since the last frame.",
           "kind": "function",
           "name": "sensor_exited",
+          "parameter_names": [],
           "parameters": [],
           "returns": "List<Entity>"
         },
         {
+          "description": "Sets how fast, and which way, an object is moving.",
           "kind": "function",
           "name": "set_velocity",
+          "parameter_names": [
+            "entity",
+            "x",
+            "y"
+          ],
           "parameters": [
             "Entity",
             "f32",
@@ -887,16 +1244,24 @@
           "returns": "unit"
         },
         {
+          "description": "How fast an object is moving sideways.",
           "kind": "function",
           "name": "velocity_x",
+          "parameter_names": [
+            "entity"
+          ],
           "parameters": [
             "Entity"
           ],
           "returns": "f32"
         },
         {
+          "description": "How fast an object is moving up or down.",
           "kind": "function",
           "name": "velocity_y",
+          "parameter_names": [
+            "entity"
+          ],
           "parameters": [
             "Entity"
           ],
@@ -906,67 +1271,88 @@
       "name": "Physics"
     },
     {
+      "description": "The mouse, or a finger on a touch screen, handled the same way so one game works on both.",
       "members": [
         {
+          "description": "Whether the mouse is over the game or a finger is on the screen. Check this before trusting a position.",
           "kind": "value",
           "name": "inside",
           "type": "bool"
         },
         {
+          "description": "Whether a mouse button, `\"Left\"`, `\"Middle\"` or `\"Right\"`, is held. A finger on the screen counts as `\"Left\"`.",
           "kind": "function",
           "name": "is_down",
+          "parameter_names": [
+            "button"
+          ],
           "parameters": [
             "String"
           ],
           "returns": "bool"
         },
         {
+          "description": "Whether a mouse button was pressed this frame.",
           "kind": "function",
           "name": "just_pressed",
+          "parameter_names": [
+            "button"
+          ],
           "parameters": [
             "String"
           ],
           "returns": "bool"
         },
         {
+          "description": "Whether a mouse button was let go this frame, or the last finger lifted.",
           "kind": "function",
           "name": "just_released",
+          "parameter_names": [
+            "button"
+          ],
           "parameters": [
             "String"
           ],
           "returns": "bool"
         },
         {
+          "description": "Whether the pointer is over part of the interface, such as a button. Check it so clicking a button does not also shoot or move in the game.",
           "kind": "value",
           "name": "over_ui",
           "type": "bool"
         },
         {
+          "description": "The pointer's position in screen units, where 0 is the centre of the screen and the screen is 2 units tall. The same on any screen size.",
           "kind": "value",
           "name": "overlay",
           "type": "Vec2"
         },
         {
+          "description": "The pointer's sideways position in screen units, where 0 is the centre.",
           "kind": "value",
           "name": "overlay_x",
           "type": "f32"
         },
         {
+          "description": "The pointer's up-down position in screen units, where 0 is the centre.",
           "kind": "value",
           "name": "overlay_y",
           "type": "f32"
         },
         {
+          "description": "The pointer's position in pixels, from the top-left corner of the game's view.",
           "kind": "value",
           "name": "position",
           "type": "Vec2"
         },
         {
+          "description": "The pointer's distance from the left edge of the game's view, in pixels.",
           "kind": "value",
           "name": "x",
           "type": "f32"
         },
         {
+          "description": "The pointer's distance from the top edge of the game's view, in pixels.",
           "kind": "value",
           "name": "y",
           "type": "f32"
@@ -975,14 +1361,21 @@
       "name": "Pointer"
     },
     {
+      "description": "A profile: a data file of settings shared across a project. Chosen in the editor for a script's `@export` field and read with `Profiles`.",
       "members": [],
       "name": "Profile"
     },
     {
+      "description": "Reading settings from a profile, a data file shared across a project, such as a weapon's damage and fire rate.",
       "members": [
         {
+          "description": "How many items a list in the profile has.",
           "kind": "function",
           "name": "count",
+          "parameter_names": [
+            "profile",
+            "collection"
+          ],
           "parameters": [
             "Profile",
             "String"
@@ -990,8 +1383,14 @@
           "returns": "f32"
         },
         {
+          "description": "A true/false setting from the profile, or `fallback` if it is missing.",
           "kind": "function",
           "name": "flag",
+          "parameter_names": [
+            "profile",
+            "key",
+            "fallback"
+          ],
           "parameters": [
             "Profile",
             "String",
@@ -1000,8 +1399,16 @@
           "returns": "bool"
         },
         {
+          "description": "A true/false setting from one item in a list in the profile, or `fallback`.",
           "kind": "function",
           "name": "flag_at",
+          "parameter_names": [
+            "profile",
+            "collection",
+            "index",
+            "key",
+            "fallback"
+          ],
           "parameters": [
             "Profile",
             "String",
@@ -1012,24 +1419,38 @@
           "returns": "bool"
         },
         {
+          "description": "What kind of profile it is.",
           "kind": "function",
           "name": "kind",
+          "parameter_names": [
+            "profile"
+          ],
           "parameters": [
             "Profile"
           ],
           "returns": "String"
         },
         {
+          "description": "The profile's name.",
           "kind": "function",
           "name": "name",
+          "parameter_names": [
+            "profile"
+          ],
           "parameters": [
             "Profile"
           ],
           "returns": "String"
         },
         {
+          "description": "A number setting from the profile, or `fallback` if it is missing: `Profiles.number(this.tuning, \"damage\", 1.0)`.",
           "kind": "function",
           "name": "number",
+          "parameter_names": [
+            "profile",
+            "key",
+            "fallback"
+          ],
           "parameters": [
             "Profile",
             "String",
@@ -1038,8 +1459,16 @@
           "returns": "f32"
         },
         {
+          "description": "A number setting from one item in a list in the profile, or `fallback`.",
           "kind": "function",
           "name": "number_at",
+          "parameter_names": [
+            "profile",
+            "collection",
+            "index",
+            "key",
+            "fallback"
+          ],
           "parameters": [
             "Profile",
             "String",
@@ -1050,8 +1479,14 @@
           "returns": "f32"
         },
         {
+          "description": "A text setting from the profile, or `fallback` if it is missing.",
           "kind": "function",
           "name": "text",
+          "parameter_names": [
+            "profile",
+            "key",
+            "fallback"
+          ],
           "parameters": [
             "Profile",
             "String",
@@ -1060,8 +1495,16 @@
           "returns": "String"
         },
         {
+          "description": "A text setting from one item in a list in the profile, or `fallback`.",
           "kind": "function",
           "name": "text_at",
+          "parameter_names": [
+            "profile",
+            "collection",
+            "index",
+            "key",
+            "fallback"
+          ],
           "parameters": [
             "Profile",
             "String",
@@ -1075,10 +1518,16 @@
       "name": "Profiles"
     },
     {
+      "description": "Random numbers. The same seed always gives the same numbers, so a run can be replayed.",
       "members": [
         {
+          "description": "A random whole number from `min` to `max`, both included: `Random.int(1.0, 6.0)` rolls a die.",
           "kind": "function",
           "name": "int",
+          "parameter_names": [
+            "min",
+            "max"
+          ],
           "parameters": [
             "f32",
             "f32"
@@ -1086,16 +1535,25 @@
           "returns": "f32"
         },
         {
+          "description": "A random object from a list, such as a random enemy to target. The list must not be empty.",
           "kind": "function",
           "name": "pick",
+          "parameter_names": [
+            "group"
+          ],
           "parameters": [
             "List<Entity>"
           ],
           "returns": "Entity"
         },
         {
+          "description": "A random number from `min` up to, but not including, `max`.",
           "kind": "function",
           "name": "range",
+          "parameter_names": [
+            "min",
+            "max"
+          ],
           "parameters": [
             "f32",
             "f32"
@@ -1103,16 +1561,22 @@
           "returns": "f32"
         },
         {
+          "description": "Starts the random numbers from a seed. The same seed always gives the same numbers afterwards.",
           "kind": "function",
           "name": "seed",
+          "parameter_names": [
+            "value"
+          ],
           "parameters": [
             "f32"
           ],
           "returns": "unit"
         },
         {
+          "description": "A random number from 0 up to, but not including, 1.",
           "kind": "function",
           "name": "value",
+          "parameter_names": [],
           "parameters": [],
           "returns": "f32"
         }
@@ -1120,23 +1584,28 @@
       "name": "Random"
     },
     {
+      "description": "A colour, made of red, green, blue and alpha (opacity), each from 0 to 1.",
       "members": [
         {
+          "description": "Opacity: 0 is invisible, 1 is solid.",
           "kind": "value",
           "name": "a",
           "type": "f32"
         },
         {
+          "description": "How much blue, from 0 to 1.",
           "kind": "value",
           "name": "b",
           "type": "f32"
         },
         {
+          "description": "How much green, from 0 to 1.",
           "kind": "value",
           "name": "g",
           "type": "f32"
         },
         {
+          "description": "How much red, from 0 to 1.",
           "kind": "value",
           "name": "r",
           "type": "f32"
@@ -1145,16 +1614,24 @@
       "name": "Rgba"
     },
     {
+      "description": "Saving progress between play sessions: numbers and true/false values stored under names, such as a best score.",
       "members": [
         {
+          "description": "Deletes everything saved.",
           "kind": "function",
           "name": "clear",
+          "parameter_names": [],
           "parameters": [],
           "returns": "unit"
         },
         {
+          "description": "A saved true/false value, or `fallback` if nothing is saved under that name yet.",
           "kind": "function",
           "name": "flag",
+          "parameter_names": [
+            "key",
+            "fallback"
+          ],
           "parameters": [
             "String",
             "bool"
@@ -1162,34 +1639,49 @@
           "returns": "bool"
         },
         {
+          "description": "Whether anything is saved under a name.",
           "kind": "function",
           "name": "has",
+          "parameter_names": [
+            "key"
+          ],
           "parameters": [
             "String"
           ],
           "returns": "bool"
         },
         {
+          "description": "Whether saved progress existed but could not be read, so the game can tell the player before overwriting it.",
           "kind": "function",
           "name": "is_damaged",
+          "parameter_names": [],
           "parameters": [],
           "returns": "bool"
         },
         {
+          "description": "Whether the save was made by a newer version of the game. Its values are not loaded.",
           "kind": "function",
           "name": "is_from_newer",
+          "parameter_names": [],
           "parameters": [],
           "returns": "bool"
         },
         {
+          "description": "Whether nothing has been saved yet, as on the first time the game is played.",
           "kind": "function",
           "name": "is_new",
+          "parameter_names": [],
           "parameters": [],
           "returns": "bool"
         },
         {
+          "description": "A saved number, or `fallback` if nothing is saved under that name yet: `Save.number(\"best\", 0.0)`.",
           "kind": "function",
           "name": "number",
+          "parameter_names": [
+            "key",
+            "fallback"
+          ],
           "parameters": [
             "String",
             "f32"
@@ -1197,8 +1689,13 @@
           "returns": "f32"
         },
         {
+          "description": "Saves a true/false value under a name.",
           "kind": "function",
           "name": "set_flag",
+          "parameter_names": [
+            "key",
+            "value"
+          ],
           "parameters": [
             "String",
             "bool"
@@ -1206,8 +1703,13 @@
           "returns": "unit"
         },
         {
+          "description": "Saves a number under a name.",
           "kind": "function",
           "name": "set_number",
+          "parameter_names": [
+            "key",
+            "value"
+          ],
           "parameters": [
             "String",
             "f32"
@@ -1218,16 +1720,23 @@
       "name": "Save"
     },
     {
+      "description": "Scenes are a game's separate places or screens, such as a menu, a level or a shop. This asks which one is playing and moves to another.",
       "members": [
         {
+          "description": "The name of the scene being played.",
           "kind": "function",
           "name": "current",
+          "parameter_names": [],
           "parameters": [],
           "returns": "String"
         },
         {
+          "description": "Moves to another scene by name, at the end of this frame.",
           "kind": "function",
           "name": "go",
+          "parameter_names": [
+            "name"
+          ],
           "parameters": [
             "String"
           ],
@@ -1237,43 +1746,52 @@
       "name": "Scene"
     },
     {
+      "description": "A shape drawn in the game world, such as a circle, polygon or ring, with an inside colour and an outline.",
       "members": [
         {
+          "description": "How many sides a polygon has (3 is a triangle, 6 a hexagon), or how many cells a grid shape is across.",
           "kind": "value",
           "name": "count",
           "type": "f32"
         },
         {
+          "description": "How many dashes the outline is broken into. 0 draws a solid line.",
           "kind": "value",
           "name": "dashes",
           "type": "f32"
         },
         {
+          "description": "The colour inside the shape.",
           "kind": "value",
           "name": "fill",
           "type": "Rgba"
         },
         {
+          "description": "Drawing order: higher numbers are drawn in front of lower ones.",
           "kind": "value",
           "name": "layer",
           "type": "f32"
         },
         {
+          "description": "The colour of the shape's outline.",
           "kind": "value",
           "name": "stroke",
           "type": "Rgba"
         },
         {
+          "description": "How thick the outline is, as a fraction of the shape's size.",
           "kind": "value",
           "name": "stroke_width",
           "type": "f32"
         },
         {
+          "description": "Where the outline starts, as a fraction of the way round from the top.",
           "kind": "value",
           "name": "sweep_start",
           "type": "f32"
         },
         {
+          "description": "How much of the outline is drawn, from 0 to 1. Setting it to 0.5 draws half a ring, which makes cooldown and charge meters.",
           "kind": "value",
           "name": "sweep_turns",
           "type": "f32"
@@ -1282,23 +1800,28 @@
       "name": "Shape"
     },
     {
+      "description": "A 2D image drawn in the game world, and how it is coloured.",
       "members": [
         {
+          "description": "Another colour the image is multiplied by, on top of `tint`.",
           "kind": "value",
           "name": "color_multiply",
           "type": "Rgba"
         },
         {
+          "description": "A colour added on top of the image, which can make it brighter or flash white. Keep its `a` at 0, or the image's transparent edges become visible.",
           "kind": "value",
           "name": "color_offset",
           "type": "Rgba"
         },
         {
+          "description": "Drawing order: higher numbers are drawn in front of lower ones.",
           "kind": "value",
           "name": "layer",
           "type": "f32"
         },
         {
+          "description": "A colour the image is multiplied by. White leaves it unchanged; lowering `a` fades it out.",
           "kind": "value",
           "name": "tint",
           "type": "Rgba"
@@ -1307,33 +1830,40 @@
       "name": "Sprite"
     },
     {
+      "description": "A virtual joystick for touch screens: wherever a thumb lands becomes the centre, and dragging from there steers.",
       "members": [
         {
+          "description": "Where the thumb first landed, sideways. Use it to draw the joystick.",
           "kind": "value",
           "name": "anchor_x",
           "type": "f32"
         },
         {
+          "description": "Where the thumb first landed, up or down.",
           "kind": "value",
           "name": "anchor_y",
           "type": "f32"
         },
         {
+          "description": "Which way and how far the joystick is pushed, as a direction up to 1 long.",
           "kind": "value",
           "name": "direction",
           "type": "Vec2"
         },
         {
+          "description": "Whether a thumb is on the joystick, even if it is not pushing.",
           "kind": "value",
           "name": "held",
           "type": "bool"
         },
         {
+          "description": "How far the joystick is pushed right, from -1 (fully left) to 1 (fully right).",
           "kind": "value",
           "name": "x",
           "type": "f32"
         },
         {
+          "description": "How far the joystick is pushed down, from -1 (fully up) to 1 (fully down).",
           "kind": "value",
           "name": "y",
           "type": "f32"
@@ -1342,13 +1872,16 @@
       "name": "Stick"
     },
     {
+      "description": "Time in the game. A game runs as a series of frames, many times a second.",
       "members": [
         {
+          "description": "How many seconds the last frame took. Multiply speeds by it so movement is the same at any frame rate. The same as `update`'s `dt`.",
           "kind": "value",
           "name": "delta",
           "type": "f32"
         },
         {
+          "description": "How many seconds this script has been running.",
           "kind": "value",
           "name": "elapsed",
           "type": "f32"
@@ -1357,23 +1890,33 @@
       "name": "Time"
     },
     {
+      "description": "Every finger on a touch screen, numbered from 0, for games that need more than one finger.",
       "members": [
         {
+          "description": "How many fingers are on the screen.",
           "kind": "value",
           "name": "count",
           "type": "f32"
         },
         {
+          "description": "A finger's distance from the left edge of the game's view, in pixels.",
           "kind": "function",
           "name": "x",
+          "parameter_names": [
+            "index"
+          ],
           "parameters": [
             "f32"
           ],
           "returns": "f32"
         },
         {
+          "description": "A finger's distance from the top edge of the game's view, in pixels.",
           "kind": "function",
           "name": "y",
+          "parameter_names": [
+            "index"
+          ],
           "parameters": [
             "f32"
           ],
@@ -1383,23 +1926,28 @@
       "name": "Touch"
     },
     {
+      "description": "Where an object is, how it is turned and how big it is. For an object attached to another, these are measured from that parent.",
       "members": [
         {
+          "description": "Where the object is. Change it to move the object: `this.transform.position.x += speed * dt`. Measured from the parent if it has one.",
           "kind": "value",
           "name": "position",
           "type": "Vec3"
         },
         {
+          "description": "How far the object is turned, in radians. A full turn is `TAU`.",
           "kind": "value",
           "name": "rotation_z",
           "type": "f32"
         },
         {
+          "description": "How big the object is on each axis; 1 is its normal size.",
           "kind": "value",
           "name": "scale",
           "type": "Vec3"
         },
         {
+          "description": "Where the object is in the world, even when it is attached to a parent. Use it to compare positions of objects in different places.",
           "kind": "value",
           "name": "world_position",
           "type": "Vec3"
@@ -1408,34 +1956,52 @@
       "name": "Transform"
     },
     {
+      "description": "The interface drawn over the game: changing text and bars, and checking buttons and sliders.",
       "members": [
         {
+          "description": "Whether a button is being held down right now.",
           "kind": "function",
           "name": "is_held",
+          "parameter_names": [
+            "button"
+          ],
           "parameters": [
             "Entity"
           ],
           "returns": "bool"
         },
         {
+          "description": "Whether the mouse or finger is over a button.",
           "kind": "function",
           "name": "is_hovered",
+          "parameter_names": [
+            "button"
+          ],
           "parameters": [
             "Entity"
           ],
           "returns": "bool"
         },
         {
+          "description": "Whether a button was clicked this frame: pressed and let go while on it.",
           "kind": "function",
           "name": "is_pressed",
+          "parameter_names": [
+            "button"
+          ],
           "parameters": [
             "Entity"
           ],
           "returns": "bool"
         },
         {
+          "description": "Shows part of an image, from 0 (none) to 1 (all). This is how health and progress bars work: `Ui.set_fill(bar, hp / max_hp)`.",
           "kind": "function",
           "name": "set_fill",
+          "parameter_names": [
+            "bar",
+            "amount"
+          ],
           "parameters": [
             "Entity",
             "f32"
@@ -1443,8 +2009,13 @@
           "returns": "unit"
         },
         {
+          "description": "Puts a number into a text element. Its text is set up in the scene with a `{}` where the number goes, such as `\"Score: {}\"`.",
           "kind": "function",
           "name": "set_number",
+          "parameter_names": [
+            "label",
+            "value"
+          ],
           "parameters": [
             "Entity",
             "f32"
@@ -1452,8 +2023,14 @@
           "returns": "unit"
         },
         {
+          "description": "Puts two numbers into a text element with two `{}` places, such as `\"{}/{}\"` for `45/100`.",
           "kind": "function",
           "name": "set_numbers",
+          "parameter_names": [
+            "label",
+            "first",
+            "second"
+          ],
           "parameters": [
             "Entity",
             "f32",
@@ -1462,8 +2039,13 @@
           "returns": "unit"
         },
         {
+          "description": "Moves a slider to a value, kept within the slider's range.",
           "kind": "function",
           "name": "set_slider_value",
+          "parameter_names": [
+            "slider",
+            "value"
+          ],
           "parameters": [
             "Entity",
             "f32"
@@ -1471,8 +2053,13 @@
           "returns": "unit"
         },
         {
+          "description": "Changes the words a text element shows.",
           "kind": "function",
           "name": "set_text",
+          "parameter_names": [
+            "label",
+            "text"
+          ],
           "parameters": [
             "Entity",
             "String"
@@ -1480,16 +2067,24 @@
           "returns": "unit"
         },
         {
+          "description": "Whether the player moved a slider this frame.",
           "kind": "function",
           "name": "slider_changed",
+          "parameter_names": [
+            "slider"
+          ],
           "parameters": [
             "Entity"
           ],
           "returns": "bool"
         },
         {
+          "description": "The value a slider is set to.",
           "kind": "function",
           "name": "slider_value",
+          "parameter_names": [
+            "slider"
+          ],
           "parameters": [
             "Entity"
           ],
@@ -1499,13 +2094,16 @@
       "name": "Ui"
     },
     {
+      "description": "An image in the interface drawn over the game, such as a health bar or an icon, rather than in the game world.",
       "members": [
         {
+          "description": "Drawing order: higher numbers are drawn in front of lower ones.",
           "kind": "value",
           "name": "layer",
           "type": "f32"
         },
         {
+          "description": "A colour the image is multiplied by. White leaves it unchanged; lowering `a` fades it out.",
           "kind": "value",
           "name": "tint",
           "type": "Rgba"
@@ -1514,8 +2112,10 @@
       "name": "UiImage"
     },
     {
+      "description": "The area of the screen the game is drawn in.",
       "members": [
         {
+          "description": "The game view's width divided by its height: above 1 for a wide screen, below 1 for a phone held upright.",
           "kind": "value",
           "name": "aspect",
           "type": "f32"
@@ -1524,34 +2124,52 @@
       "name": "Viewport"
     },
     {
+      "description": "Finding, creating and removing the objects in a game. Every object in a scene (a player, an enemy, a button) is an entity.",
       "members": [
         {
+          "description": "Removes an object, and everything attached to it, from the game. Used when an enemy dies or a bullet hits something.",
           "kind": "function",
           "name": "despawn",
+          "parameter_names": [
+            "entity"
+          ],
           "parameters": [
             "Entity"
           ],
           "returns": "unit"
         },
         {
+          "description": "Whether an object still exists. Check before using an object you stored earlier, since it may have been removed since.",
           "kind": "function",
           "name": "exists",
+          "parameter_names": [
+            "entity"
+          ],
           "parameters": [
             "Entity"
           ],
           "returns": "bool"
         },
         {
+          "description": "Finds an object by the name it was given in the scene, such as `World.find(\"Player\")`. Gives `null` if there is none.",
           "kind": "function",
           "name": "find",
+          "parameter_names": [
+            "name"
+          ],
           "parameters": [
             "String"
           ],
           "returns": "Entity"
         },
         {
+          "description": "Whether an object has a tag, a label such as `\"enemy\"` given to it in the scene.",
           "kind": "function",
           "name": "has_tag",
+          "parameter_names": [
+            "entity",
+            "tag"
+          ],
           "parameters": [
             "Entity",
             "String"
@@ -1559,16 +2177,26 @@
           "returns": "bool"
         },
         {
+          "description": "Whether an object is switched on. An object switched off, or inside one that is, is hidden and does nothing.",
           "kind": "function",
           "name": "is_active",
+          "parameter_names": [
+            "entity"
+          ],
           "parameters": [
             "Entity"
           ],
           "returns": "bool"
         },
         {
+          "description": "Reads a number set up for another object's script, such as a bullet's damage, or gives `fallback` if there is none.",
           "kind": "function",
           "name": "property_number",
+          "parameter_names": [
+            "entity",
+            "name",
+            "fallback"
+          ],
           "parameters": [
             "Entity",
             "String",
@@ -1577,8 +2205,14 @@
           "returns": "f32"
         },
         {
+          "description": "Sends a number to another object under a name, for its script to collect with `take_signal`. Older style: events and calling another script's functions are clearer.",
           "kind": "function",
           "name": "send_signal",
+          "parameter_names": [
+            "entity",
+            "name",
+            "value"
+          ],
           "parameters": [
             "Entity",
             "String",
@@ -1587,8 +2221,13 @@
           "returns": "unit"
         },
         {
+          "description": "Switches an object, and everything inside it, on or off. This is how menus and screens are shown and hidden.",
           "kind": "function",
           "name": "set_active",
+          "parameter_names": [
+            "entity",
+            "on"
+          ],
           "parameters": [
             "Entity",
             "bool"
@@ -1596,8 +2235,13 @@
           "returns": "unit"
         },
         {
+          "description": "Attaches an object to another, so it moves, turns and scales with it. `null` detaches it.",
           "kind": "function",
           "name": "set_parent",
+          "parameter_names": [
+            "entity",
+            "parent"
+          ],
           "parameters": [
             "Entity",
             "Entity"
@@ -1605,8 +2249,14 @@
           "returns": "unit"
         },
         {
+          "description": "Sets a starting value on a newly created object's script, before it starts. For example, a bullet's speed right after spawning it.",
           "kind": "function",
           "name": "set_property",
+          "parameter_names": [
+            "entity",
+            "name",
+            "value"
+          ],
           "parameters": [
             "Entity",
             "String",
@@ -1615,8 +2265,14 @@
           "returns": "unit"
         },
         {
+          "description": "Moves one corner, numbered 0 to 7, of this object's custom polygon shape.",
           "kind": "function",
           "name": "set_shape_point",
+          "parameter_names": [
+            "index",
+            "x",
+            "y"
+          ],
           "parameters": [
             "f32",
             "f32",
@@ -1625,16 +2281,25 @@
           "returns": "unit"
         },
         {
+          "description": "Creates a new object from a prefab, a reusable template such as a bullet or an enemy, and gives it back so you can position it.",
           "kind": "function",
           "name": "spawn",
+          "parameter_names": [
+            "prefab"
+          ],
           "parameters": [
             "Prefab"
           ],
           "returns": "Entity"
         },
         {
+          "description": "Creates a new object from a prefab, already attached to a parent object.",
           "kind": "function",
           "name": "spawn_child",
+          "parameter_names": [
+            "prefab",
+            "parent"
+          ],
           "parameters": [
             "Prefab",
             "Entity"
@@ -1642,16 +2307,24 @@
           "returns": "Entity"
         },
         {
+          "description": "Collects the numbers other scripts sent to this object under a name with `send_signal`, added together. Gives 0 when nothing arrived.",
           "kind": "function",
           "name": "take_signal",
+          "parameter_names": [
+            "name"
+          ],
           "parameters": [
             "String"
           ],
           "returns": "f32"
         },
         {
+          "description": "Every switched-on object with a tag, as a list: `for enemy in World.with_tag(\"enemy\") { ... }`. Looks through the whole game, so call it once per frame, not in a loop.",
           "kind": "function",
           "name": "with_tag",
+          "parameter_names": [
+            "tag"
+          ],
           "parameters": [
             "String"
           ],

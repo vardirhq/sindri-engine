@@ -94,9 +94,8 @@ fn preamble() -> String {
          Every namespace, call, and member a Decay script may name in this build\n\
          of the engine, derived from the one description the analyzer\n\
          type-checks against and the runtime host answers.\n\n\
-         Parameter *names* are not recorded — the host surface registers types,\n\
-         because that is what type-checking needs. What each argument means is\n\
-         in [`docs/scripting.md`](../scripting.md).\n\n\
+         Each entry says what it is for; the reasons behind the design are in\n\
+         [`docs/scripting.md`](../scripting.md).\n\n\
          The machine-readable form of this page is\n\
          [`decay-api.json`](decay-api.json).\n\n",
         command = crate::REGENERATE_COMMAND,
@@ -105,6 +104,9 @@ fn preamble() -> String {
 
 fn push_namespace(page: &mut String, namespace: &Namespace) {
     let _ = write!(page, "\n### `{}`\n\n", namespace.name);
+    if let Some(description) = namespace.description {
+        let _ = write!(page, "{description}\n\n");
+    }
     if namespace.members.is_empty() {
         page.push_str("The host names this type but has not described its members.\n");
         return;
@@ -118,19 +120,40 @@ fn push_symbols(page: &mut String, symbols: &[Symbol]) {
         return;
     }
     for symbol in symbols {
-        let _ = writeln!(page, "- {}", signature(symbol));
+        match symbol.reference() {
+            Some(entry) => {
+                let _ = writeln!(page, "- {} — {}", signature(symbol), entry.text);
+            }
+            None => {
+                let _ = writeln!(page, "- {}", signature(symbol));
+            }
+        }
     }
 }
 
 /// One entry, written the way it would be read in a script.
 fn signature(symbol: &Symbol) -> String {
     match symbol {
-        Symbol::Value { name, type_name } => format!("`{name}`: `{type_name}`"),
+        Symbol::Value {
+            name, type_name, ..
+        } => format!("`{name}`: `{type_name}`"),
         Symbol::Function {
             name,
             params,
             returns,
-        } => format!("`{name}({})` → `{returns}`", params.join(", ")),
+            reference,
+        } => {
+            let names = reference.map_or(&[][..], |entry| entry.params);
+            let params: Vec<String> = params
+                .iter()
+                .enumerate()
+                .map(|(index, ty)| match names.get(index) {
+                    Some(name) => format!("{name}: {ty}"),
+                    None => ty.clone(),
+                })
+                .collect();
+            format!("`{name}({})` → `{returns}`", params.join(", "))
+        }
     }
 }
 
@@ -145,8 +168,19 @@ mod tests {
             name: "axis".to_owned(),
             params: vec!["String".to_owned(), "String".to_owned()],
             returns: "f32".to_owned(),
+            reference: None,
         };
         assert_eq!(signature(&symbol), "`axis(String, String)` → `f32`");
+        let named = Symbol::Function {
+            name: "axis".to_owned(),
+            params: vec!["String".to_owned(), "String".to_owned()],
+            returns: "f32".to_owned(),
+            reference: sindri_decay::reference::member_entry("Input", "axis").copied(),
+        };
+        assert_eq!(
+            signature(&named),
+            "`axis(negative: String, positive: String)` → `f32`"
+        );
     }
 
     #[test]
