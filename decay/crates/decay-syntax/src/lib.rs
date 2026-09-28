@@ -4,6 +4,7 @@
 //! testable and extractable before any engine binding exists.
 
 pub mod ast;
+pub mod codes;
 mod parser;
 pub mod vocabulary;
 
@@ -103,6 +104,8 @@ pub struct Token {
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Diagnostic {
+    /// Its stable name; see [`codes::SyntaxCode`].
+    pub code: codes::SyntaxCode,
     pub message: String,
     pub span: Span,
     pub line: usize,
@@ -187,6 +190,7 @@ impl<'a> Lexer<'a> {
                 c if c.is_ascii_digit() => self.lex_number(start),
                 c if is_identifier_start(c) => self.lex_identifier(start),
                 other => self.error(
+                    codes::SyntaxCode::UnexpectedCharacter,
                     start,
                     self.cursor,
                     format!("unexpected character `{other}`"),
@@ -254,7 +258,12 @@ impl<'a> Lexer<'a> {
         let text = &self.source[start..self.cursor];
         match text.parse::<f64>() {
             Ok(value) => self.push(TokenKind::Number(value), start),
-            Err(_) => self.error(start, self.cursor, format!("invalid number `{text}`")),
+            Err(_) => self.error(
+                codes::SyntaxCode::InvalidNumber,
+                start,
+                self.cursor,
+                format!("invalid number `{text}`"),
+            ),
         }
     }
 
@@ -277,6 +286,7 @@ impl<'a> Lexer<'a> {
                     Some(other) => {
                         value.push(other);
                         self.error(
+                            codes::SyntaxCode::UnknownEscape,
                             self.cursor.saturating_sub(other.len_utf8() + 1),
                             self.cursor,
                             format!("unknown escape sequence `\\{other}`"),
@@ -291,7 +301,12 @@ impl<'a> Lexer<'a> {
         if terminated {
             self.push(TokenKind::String(value), start);
         } else {
-            self.error(start, self.cursor, "unterminated string literal".to_owned());
+            self.error(
+                codes::SyntaxCode::UnterminatedString,
+                start,
+                self.cursor,
+                "unterminated string literal".to_owned(),
+            );
         }
     }
 
@@ -310,9 +325,10 @@ impl<'a> Lexer<'a> {
         });
     }
 
-    fn error(&mut self, start: usize, end: usize, message: String) {
+    fn error(&mut self, code: codes::SyntaxCode, start: usize, end: usize, message: String) {
         let (line, column) = line_column(self.source, start);
         self.diagnostics.push(Diagnostic {
+            code,
             message,
             span: Span::new(start, end),
             line,

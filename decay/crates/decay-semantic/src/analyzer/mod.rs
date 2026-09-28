@@ -19,6 +19,7 @@ mod text;
 mod timer;
 mod vector;
 
+use crate::codes::Code;
 use std::collections::{HashMap, HashSet};
 
 use decay_syntax::{Item, Program, Span, TypeRef};
@@ -145,6 +146,7 @@ impl<'a, 'd> Analyzer<'a, 'd> {
                 .is_some()
             {
                 self.error(
+                    Code::Duplicate,
                     container.span,
                     format!("duplicate declaration `{}`", container.name),
                 );
@@ -157,6 +159,7 @@ impl<'a, 'd> Analyzer<'a, 'd> {
     pub(super) fn resolve_identifier(&mut self, name: &str, span: Span) -> Type {
         if self.in_shared_function && name == "this" && self.lookup(name).is_none() {
             self.error(
+                Code::NoThis,
                 span,
                 "a function outside any script has no `this` -- pass what it needs as a parameter"
                     .to_owned(),
@@ -189,7 +192,7 @@ impl<'a, 'd> Analyzer<'a, 'd> {
             return state;
         }
 
-        self.error(span, format!("unknown name `{name}`"));
+        self.error(Code::UnknownName, span, format!("unknown name `{name}`"));
         Type::Unknown
     }
 
@@ -208,6 +211,7 @@ impl<'a, 'd> Analyzer<'a, 'd> {
         let is_array = crate::types::is_list(&reference.name);
         match (&reference.argument, is_array) {
             (None, true) => self.error(
+                Code::MissingType,
                 reference.span,
                 format!(
                     "`{}` needs an element type, as in `{}<Entity>`",
@@ -216,6 +220,7 @@ impl<'a, 'd> Analyzer<'a, 'd> {
                 ),
             ),
             (Some(_), false) => self.error(
+                Code::UnexpectedTypeArgument,
                 reference.span,
                 format!(
                     "`{}` takes no type argument; only `{}` does",
@@ -234,6 +239,7 @@ impl<'a, 'd> Analyzer<'a, 'd> {
     pub(super) fn require_type(&mut self, actual: &Type, expected: &Type, span: Span) {
         if !self.compatible(expected, actual) {
             self.error(
+                Code::TypeMismatch,
                 span,
                 format!(
                     "expected `{}`, found `{}`",
@@ -247,6 +253,7 @@ impl<'a, 'd> Analyzer<'a, 'd> {
     pub(super) fn check_assignable(&mut self, expected: &Type, actual: &Type, span: Span) {
         if !self.compatible(expected, actual) {
             self.error(
+                Code::TypeMismatch,
                 span,
                 format!(
                     "cannot assign `{}` to `{}`",
@@ -281,10 +288,11 @@ impl<'a, 'd> Analyzer<'a, 'd> {
         });
     }
 
-    pub(super) fn error(&mut self, span: Span, message: String) {
+    pub(super) fn error(&mut self, code: Code, span: Span, message: String) {
         let (line, column) = line_column(self.source, span.start);
         self.diagnostics.push(Diagnostic {
             phase: DiagnosticPhase::Semantic,
+            code: code.id(),
             message,
             span,
             line,

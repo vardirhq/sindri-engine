@@ -6,6 +6,7 @@
 //! analysis adds on top of the type is a note for the lowering, as it does
 //! for a vector.
 
+use crate::codes::Code;
 use decay_syntax::{Expr, Span, TimerProperty};
 
 use crate::diagnostic::ValueMember;
@@ -26,6 +27,7 @@ impl Analyzer<'_, '_> {
         }
         if args.len() != 1 {
             self.error(
+                Code::ArgumentCount,
                 span,
                 format!(
                     "`{TIMER}` takes the seconds it runs for, found {} argument(s)",
@@ -44,7 +46,7 @@ impl Analyzer<'_, '_> {
     /// The type of `timer.property`, noting it for the lowering.
     pub(super) fn timer_member_type(&mut self, field: &str, span: Span) -> Type {
         let Some(property) = TimerProperty::named(field) else {
-            self.error(span, missing_member(field));
+            self.error(Code::UnknownMember, span, missing_member(field));
             return Type::Unknown;
         };
         self.value_members
@@ -56,11 +58,12 @@ impl Analyzer<'_, '_> {
     pub(super) fn timer_call_type(&mut self, field: &str, args: &[Expr], span: Span) -> Type {
         if TimerProperty::named(field).is_some() {
             self.error(
+                Code::PropertyCalled,
                 span,
                 format!("`{field}` is a property, not a function -- write `.{field}`"),
             );
         } else {
-            self.error(span, missing_member(field));
+            self.error(Code::UnknownMember, span, missing_member(field));
         }
         for argument in args {
             self.expr_type(argument);
@@ -71,6 +74,7 @@ impl Analyzer<'_, '_> {
     /// `timer.left = 1.0`: a timer is read, never written into.
     pub(super) fn refuse_timer_write(&mut self, field: &str, span: Span) {
         self.error(
+            Code::Immutable,
             span,
             format!("a timer's `{field}` cannot be set -- start a new one with `{TIMER}(seconds)`"),
         );

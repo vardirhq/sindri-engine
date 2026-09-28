@@ -9,6 +9,7 @@
 //! walks into; `diagnostic` is what it reports.
 
 mod analyzer;
+pub mod codes;
 mod diagnostic;
 mod environment;
 pub mod members;
@@ -44,6 +45,7 @@ pub fn analyze_with_environment(source: &str, environment: &Environment) -> Anal
         .into_iter()
         .map(|diagnostic| Diagnostic {
             phase: DiagnosticPhase::Syntax,
+            code: diagnostic.code.id(),
             message: diagnostic.message,
             span: diagnostic.span,
             line: diagnostic.line,

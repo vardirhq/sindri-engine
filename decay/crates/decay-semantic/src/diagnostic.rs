@@ -13,6 +13,9 @@ pub enum DiagnosticPhase {
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Diagnostic {
     pub phase: DiagnosticPhase,
+    /// Its stable name: one of [`crate::codes::Code`]'s, or of
+    /// [`decay_syntax::codes::SyntaxCode`]'s for a syntax diagnostic.
+    pub code: &'static str,
     pub message: String,
     pub span: Span,
     pub line: usize,

@@ -77,6 +77,302 @@
     "decay-syntax",
     "decay-semantic"
   ],
+  "diagnostics": [
+    {
+      "code": "decay-syntax/unexpected-character",
+      "id": "unexpected-character",
+      "phase": "decay-syntax",
+      "summary": "A character that starts no token Decay has."
+    },
+    {
+      "code": "decay-syntax/unterminated-string",
+      "id": "unterminated-string",
+      "phase": "decay-syntax",
+      "summary": "Text opened with `\"` and never closed on its line."
+    },
+    {
+      "code": "decay-syntax/unknown-escape",
+      "id": "unknown-escape",
+      "phase": "decay-syntax",
+      "summary": "A `\\` in text followed by something other than n, r, t, \" or \\."
+    },
+    {
+      "code": "decay-syntax/invalid-number",
+      "id": "invalid-number",
+      "phase": "decay-syntax",
+      "summary": "Digits that do not make a number."
+    },
+    {
+      "code": "decay-syntax/expected-token",
+      "id": "expected-token",
+      "phase": "decay-syntax",
+      "summary": "A particular word or symbol was needed here, such as `;`, `{`, `)` or a name."
+    },
+    {
+      "code": "decay-syntax/expected-expression",
+      "id": "expected-expression",
+      "phase": "decay-syntax",
+      "summary": "A value was needed here and none was written."
+    },
+    {
+      "code": "decay-syntax/expected-item",
+      "id": "expected-item",
+      "phase": "decay-syntax",
+      "summary": "Something at the top of a file that is not a script, component, enum, struct, event, state or function."
+    },
+    {
+      "code": "decay-syntax/expected-member",
+      "id": "expected-member",
+      "phase": "decay-syntax",
+      "summary": "Something inside a script that is not a field, a function or an `on` handler."
+    },
+    {
+      "code": "decay-syntax/attribute-not-allowed",
+      "id": "attribute-not-allowed",
+      "phase": "decay-syntax",
+      "summary": "An attribute such as `@export` somewhere only a script's field may carry one."
+    },
+    {
+      "code": "decay-syntax/variant-needs-enum-name",
+      "id": "variant-needs-enum-name",
+      "phase": "decay-syntax",
+      "summary": "A `match` pattern that names a variant without its enum: write `Phase.Lobby`."
+    },
+    {
+      "code": "decay-syntax/state-fields-only",
+      "id": "state-fields-only",
+      "phase": "decay-syntax",
+      "summary": "Something inside a `state` that is not a field."
+    },
+    {
+      "code": "decay-syntax/handler-returns-value",
+      "id": "handler-returns-value",
+      "phase": "decay-syntax",
+      "summary": "An `on` handler written with a return type; nothing waits for one."
+    },
+    {
+      "code": "decay-syntax/construct-needs-struct-name",
+      "id": "construct-needs-struct-name",
+      "phase": "decay-syntax",
+      "summary": "Named fields, `(name: value)`, after something that is not a struct's name."
+    },
+    {
+      "code": "decay-semantic/unknown-name",
+      "id": "unknown-name",
+      "phase": "decay-semantic",
+      "summary": "A name nothing in scope declares: not a local, a field, a script, an event, a state, an enum, a struct or anything the engine offers."
+    },
+    {
+      "code": "decay-semantic/unknown-member",
+      "id": "unknown-member",
+      "phase": "decay-semantic",
+      "summary": "A member, field or variant the value's type does not have."
+    },
+    {
+      "code": "decay-semantic/not-callable",
+      "id": "not-callable",
+      "phase": "decay-semantic",
+      "summary": "A call to something that is not a function: a value, an event, an enum, or a struct built without naming its fields."
+    },
+    {
+      "code": "decay-semantic/no-methods",
+      "id": "no-methods",
+      "phase": "decay-semantic",
+      "summary": "A call through `this` to the script's own function; call it by its bare name."
+    },
+    {
+      "code": "decay-semantic/property-called",
+      "id": "property-called",
+      "phase": "decay-semantic",
+      "summary": "A property, such as `length` or a vector's `x`, written as a call."
+    },
+    {
+      "code": "decay-semantic/function-not-called",
+      "id": "function-not-called",
+      "phase": "decay-semantic",
+      "summary": "An operation that takes arguments, used without calling it."
+    },
+    {
+      "code": "decay-semantic/argument-count",
+      "id": "argument-count",
+      "phase": "decay-semantic",
+      "summary": "A call, constructor or handler given the wrong number of arguments."
+    },
+    {
+      "code": "decay-semantic/type-mismatch",
+      "id": "type-mismatch",
+      "phase": "decay-semantic",
+      "summary": "A value of one type where another is needed."
+    },
+    {
+      "code": "decay-semantic/cannot-compare",
+      "id": "cannot-compare",
+      "phase": "decay-semantic",
+      "summary": "`==` or `!=` between values of types that cannot be equal."
+    },
+    {
+      "code": "decay-semantic/condition-not-bool",
+      "id": "condition-not-bool",
+      "phase": "decay-semantic",
+      "summary": "An `if` or `while` condition that is not a `bool`; there is no truthiness."
+    },
+    {
+      "code": "decay-semantic/not-indexable",
+      "id": "not-indexable",
+      "phase": "decay-semantic",
+      "summary": "`[index]` on something that is not a list."
+    },
+    {
+      "code": "decay-semantic/not-walkable",
+      "id": "not-walkable",
+      "phase": "decay-semantic",
+      "summary": "`for` over something that is not a list or a range."
+    },
+    {
+      "code": "decay-semantic/invalid-operand",
+      "id": "invalid-operand",
+      "phase": "decay-semantic",
+      "summary": "An operator given a value it does not work on, such as `-` on text or `*` between two vectors."
+    },
+    {
+      "code": "decay-semantic/immutable",
+      "id": "immutable",
+      "phase": "decay-semantic",
+      "summary": "A change to something that may not change: a `let`, a state's `let`, a timer's property."
+    },
+    {
+      "code": "decay-semantic/not-a-place",
+      "id": "not-a-place",
+      "phase": "decay-semantic",
+      "summary": "An assignment or change to something that is not a variable, parameter or field of this script."
+    },
+    {
+      "code": "decay-semantic/duplicate",
+      "id": "duplicate",
+      "phase": "decay-semantic",
+      "summary": "A name declared, given or matched twice where it may appear once."
+    },
+    {
+      "code": "decay-semantic/declared-in-several-files",
+      "id": "declared-in-several-files",
+      "phase": "decay-semantic",
+      "summary": "A script, event, state field, enum, struct or shared function declared in more than one file of the project."
+    },
+    {
+      "code": "decay-semantic/name-taken",
+      "id": "name-taken",
+      "phase": "decay-semantic",
+      "summary": "A declaration taking a name something else already has."
+    },
+    {
+      "code": "decay-semantic/missing-type",
+      "id": "missing-type",
+      "phase": "decay-semantic",
+      "summary": "A binding, field or parameter with no type and nothing to infer one from, or `List` without its element type."
+    },
+    {
+      "code": "decay-semantic/unexpected-type-argument",
+      "id": "unexpected-type-argument",
+      "phase": "decay-semantic",
+      "summary": "A type argument, `<T>`, on a type that takes none."
+    },
+    {
+      "code": "decay-semantic/field-order",
+      "id": "field-order",
+      "phase": "decay-semantic",
+      "summary": "A field's initializer reading itself, or a field declared below it."
+    },
+    {
+      "code": "decay-semantic/outside-loop",
+      "id": "outside-loop",
+      "phase": "decay-semantic",
+      "summary": "`break` or `continue` outside a loop."
+    },
+    {
+      "code": "decay-semantic/no-this",
+      "id": "no-this",
+      "phase": "decay-semantic",
+      "summary": "`this` in a function outside any script."
+    },
+    {
+      "code": "decay-semantic/empty-declaration",
+      "id": "empty-declaration",
+      "phase": "decay-semantic",
+      "summary": "An enum with no variants or a struct with no fields."
+    },
+    {
+      "code": "decay-semantic/not-exhaustive",
+      "id": "not-exhaustive",
+      "phase": "decay-semantic",
+      "summary": "A `match` that says nothing for some variant and has no `_` arm."
+    },
+    {
+      "code": "decay-semantic/unreachable-arm",
+      "id": "unreachable-arm",
+      "phase": "decay-semantic",
+      "summary": "A `match` arm after `_`, which already takes everything."
+    },
+    {
+      "code": "decay-semantic/match-needs-enum",
+      "id": "match-needs-enum",
+      "phase": "decay-semantic",
+      "summary": "A `match` on a value that is not an enum's."
+    },
+    {
+      "code": "decay-semantic/wrong-enum",
+      "id": "wrong-enum",
+      "phase": "decay-semantic",
+      "summary": "A `match` pattern naming another enum's variant."
+    },
+    {
+      "code": "decay-semantic/unknown-event",
+      "id": "unknown-event",
+      "phase": "decay-semantic",
+      "summary": "A handler for an event nothing declares."
+    },
+    {
+      "code": "decay-semantic/handler-signature",
+      "id": "handler-signature",
+      "phase": "decay-semantic",
+      "summary": "A handler whose parameters do not fit what its event carries."
+    },
+    {
+      "code": "decay-semantic/state-field-type",
+      "id": "state-field-type",
+      "phase": "decay-semantic",
+      "summary": "A state field of a type a state cannot hold."
+    },
+    {
+      "code": "decay-semantic/state-start-not-literal",
+      "id": "state-start-not-literal",
+      "phase": "decay-semantic",
+      "summary": "A state field whose starting value is not a literal."
+    },
+    {
+      "code": "decay-semantic/mixed-list",
+      "id": "mixed-list",
+      "phase": "decay-semantic",
+      "summary": "A list literal whose elements are not all one type."
+    },
+    {
+      "code": "decay-semantic/range-outside-for",
+      "id": "range-outside-for",
+      "phase": "decay-semantic",
+      "summary": "A range, `a..b`, anywhere but what a `for` walks."
+    },
+    {
+      "code": "decay-semantic/missing-fields",
+      "id": "missing-fields",
+      "phase": "decay-semantic",
+      "summary": "A struct built without naming every field."
+    },
+    {
+      "code": "decay-semantic/not-a-struct",
+      "id": "not-a-struct",
+      "phase": "decay-semantic",
+      "summary": "Named fields, `Name(field: value)`, after a name that is not a struct."
+    }
+  ],
   "generated_by": "cargo run -p sindri-capabilities -- --write",
   "items": [
     "script",

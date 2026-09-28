@@ -11,6 +11,7 @@ mod stmt;
 #[cfg(test)]
 mod tests;
 
+use crate::codes::SyntaxCode;
 use crate::{
     Diagnostic, Span, Token, TokenKind,
     ast::{Item, Program},
@@ -79,7 +80,10 @@ impl<'a> Parser<'a> {
             } else {
                 let words = crate::vocabulary::ITEM_WORDS.map(|word| format!("`{word}`"));
                 let (last, rest) = words.split_last().expect("there are item words");
-                self.error_here(&format!("expected {}, or {last}", rest.join(", ")));
+                self.error_here(
+                    SyntaxCode::ExpectedItem,
+                    &format!("expected {}, or {last}", rest.join(", ")),
+                );
                 self.advance();
                 None
             };
@@ -128,7 +132,7 @@ impl<'a> Parser<'a> {
             self.advance();
             Some((name, token.span))
         } else {
-            self.error_here(message);
+            self.error_here(SyntaxCode::ExpectedToken, message);
             None
         }
     }
@@ -139,7 +143,7 @@ impl<'a> Parser<'a> {
             self.advance();
             Some(span)
         } else {
-            self.error_here(message);
+            self.error_here(SyntaxCode::ExpectedToken, message);
             None
         }
     }
@@ -168,13 +172,14 @@ impl<'a> Parser<'a> {
         }
     }
 
-    pub(super) fn error_here(&mut self, message: &str) {
-        self.error_span(self.current().span, message);
+    pub(super) fn error_here(&mut self, code: SyntaxCode, message: &str) {
+        self.error_span(code, self.current().span, message);
     }
 
-    pub(super) fn error_span(&mut self, span: Span, message: &str) {
+    pub(super) fn error_span(&mut self, code: SyntaxCode, span: Span, message: &str) {
         let (line, column) = line_column(self.source, span.start);
         self.diagnostics.push(Diagnostic {
+            code,
             message: message.to_owned(),
             span,
             line,

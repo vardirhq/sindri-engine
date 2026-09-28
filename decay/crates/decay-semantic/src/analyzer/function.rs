@@ -7,6 +7,7 @@
 //! declares the shared ones other files hold, as Sindri does for a project; a
 //! file's own are added to those when it is analysed.
 
+use crate::codes::Code;
 use std::collections::{HashMap, HashSet};
 
 use decay_syntax::{FunctionDecl, Item, Program};
@@ -25,11 +26,16 @@ impl Analyzer<'_, '_> {
             };
             let name = &function.name;
             if !own.insert(name.clone()) {
-                self.error(function.span, format!("duplicate declaration `{name}`"));
+                self.error(
+                    Code::Duplicate,
+                    function.span,
+                    format!("duplicate declaration `{name}`"),
+                );
                 continue;
             }
             if self.environment.ambiguous_functions.contains(name) {
                 self.error(
+                    Code::DeclaredInSeveralFiles,
                     function.span,
                     format!("`{name}` is declared in more than one file; keep one"),
                 );
@@ -42,6 +48,7 @@ impl Analyzer<'_, '_> {
                 || self.states.contains_key(name)
             {
                 self.error(
+                    Code::NameTaken,
                     function.span,
                     format!("`{name}` is already a name; a function needs one of its own"),
                 );
@@ -63,6 +70,7 @@ impl Analyzer<'_, '_> {
         }
         if self.environment.ambiguous_functions.contains(name) {
             self.error(
+                Code::DeclaredInSeveralFiles,
                 span,
                 format!("`{name}` is declared in more than one file; keep one"),
             );

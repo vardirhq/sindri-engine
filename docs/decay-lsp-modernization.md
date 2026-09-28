@@ -139,8 +139,12 @@ shared foundation instead of re-rendering the same compiler result repeatedly.
 - [x] Add machine-readable `--check --json` output with a documented schema.
 - [x] Adapt it into `sindri-diagnostics` without parsing human compiler prose.
 - [x] Emit GitHub annotations/summary through the shared diagnostics path.
-- [ ] Preserve diagnostic codes so agents and editor code actions can identify
-      failure classes without matching message strings.
+- [x] Preserve diagnostic codes so agents and editor code actions can identify
+      failure classes without matching message strings. Every syntax and
+      semantic diagnostic carries a stable code (`decay_syntax::codes`,
+      `decay_semantic::codes`), reported as `decay-semantic/<name>` in LSP,
+      `--check` and `--check --json`, carried by `sindri_decay::SourceDiagnostic`,
+      and listed in `docs/generated/decay-language.json`.
 - [ ] Add related spans/information for diagnostics involving two declarations
       or conflicting symbols where the compiler has enough context.
 - [ ] Add suggested fixes only where they are mechanically trustworthy.

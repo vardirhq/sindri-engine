@@ -116,7 +116,7 @@ mod tests {
                         "line": 4,
                         "column": 7,
                         "severity": "error",
-                        "code": "decay-semantic",
+                        "code": "decay-semantic/unknown-name",
                         "source": "decay-semantic",
                         "message": "unknown name",
                         "span": {"start": 20, "end": 24}

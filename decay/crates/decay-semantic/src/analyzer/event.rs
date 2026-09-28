@@ -11,6 +11,7 @@
 //! a call on the path `GoalScored.emit`, and the handler as a function named
 //! by [`decay_syntax::handler_name`].
 
+use crate::codes::Code;
 use decay_syntax::{EventDecl, FunctionDecl, Item, Program, Span};
 
 use crate::environment::ExternalSymbol;
@@ -30,6 +31,7 @@ impl Analyzer<'_, '_> {
             };
             if !own.insert(event.name.clone()) {
                 self.error(
+                    Code::Duplicate,
                     event.span,
                     format!("duplicate declaration `{}`", event.name),
                 );
@@ -49,6 +51,7 @@ impl Analyzer<'_, '_> {
         let name = &event.name;
         if self.environment.ambiguous_events.contains(name) {
             self.error(
+                Code::DeclaredInSeveralFiles,
                 event.span,
                 format!("event `{name}` is declared in more than one file; keep one"),
             );
@@ -58,6 +61,7 @@ impl Analyzer<'_, '_> {
             || self.environment.get_type(name).is_some()
         {
             self.error(
+                Code::NameTaken,
                 event.span,
                 format!("`{name}` is already a name; an event needs one of its own"),
             );
@@ -68,6 +72,7 @@ impl Analyzer<'_, '_> {
                     self.resolve_type(ty);
                 }
                 None => self.error(
+                    Code::MissingType,
                     param.span,
                     format!(
                         "event parameter `{}` needs a type: every handler relies on it",
@@ -85,6 +90,7 @@ impl Analyzer<'_, '_> {
         }
         if self.environment.ambiguous_events.contains(name) {
             self.error(
+                Code::DeclaredInSeveralFiles,
                 span,
                 format!("event `{name}` is declared in more than one file; keep one"),
             );
@@ -116,16 +122,22 @@ impl Analyzer<'_, '_> {
         let Some(expected) = self.events.get(event).cloned() else {
             if self.environment.ambiguous_events.contains(event) {
                 self.error(
+                    Code::DeclaredInSeveralFiles,
                     *span,
                     format!("event `{event}` is declared in more than one file; keep one"),
                 );
             } else {
-                self.error(*span, format!("unknown event `{event}`"));
+                self.error(
+                    Code::UnknownEvent,
+                    *span,
+                    format!("unknown event `{event}`"),
+                );
             }
             return Some(vec![Type::Unknown; function.params.len()]);
         };
         if expected.len() != function.params.len() {
             self.error(
+                Code::HandlerSignature,
                 *span,
                 format!(
                     "`{event}` carries {} value(s), and this handler takes {}",
@@ -143,6 +155,7 @@ impl Analyzer<'_, '_> {
             };
             if !self.compatible(&written, &wanted) {
                 self.error(
+                    Code::HandlerSignature,
                     param.span,
                     format!(
                         "`{event}` carries `{}` here, not `{}`",

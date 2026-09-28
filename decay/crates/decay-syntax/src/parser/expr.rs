@@ -182,6 +182,7 @@ impl Parser<'_> {
         let span = callee.span.join(end);
         let ExprKind::Identifier(name) = callee.kind else {
             self.error_span(
+                crate::codes::SyntaxCode::ConstructNeedsStructName,
                 callee.span,
                 "only a struct's name is built with named fields",
             );
@@ -247,7 +248,10 @@ impl Parser<'_> {
                 });
             }
             _ => {
-                self.error_here("expected expression");
+                self.error_here(
+                    crate::codes::SyntaxCode::ExpectedExpression,
+                    "expected expression",
+                );
                 return None;
             }
         };

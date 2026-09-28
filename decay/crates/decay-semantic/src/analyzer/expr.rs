@@ -1,5 +1,6 @@
 //! One function per expression form, and the types they produce.
 
+use crate::codes::Code;
 use decay_syntax::{AssignOp, BinaryOp, Expr, ExprKind, UnaryOp};
 
 use crate::types::Type;
@@ -60,6 +61,7 @@ impl Analyzer<'_, '_> {
             Type::Unknown => Type::Unknown,
             other => {
                 self.error(
+                    Code::NotIndexable,
                     object.span,
                     format!("`{}` cannot be indexed", other.display_name()),
                 );
@@ -97,6 +99,7 @@ impl Analyzer<'_, '_> {
                     && !self.compatible(&right_type, &left_type)
                 {
                     self.error(
+                        Code::CannotCompare,
                         right.span,
                         format!(
                             "cannot compare `{}` with `{}`",
@@ -163,13 +166,25 @@ impl Analyzer<'_, '_> {
             ExprKind::Identifier(name) => {
                 if let Some(symbol) = self.lookup(name).cloned() {
                     if symbol.function.is_some() {
-                        self.error(target.span, format!("cannot assign to function `{name}`"));
+                        self.error(
+                            Code::NotAPlace,
+                            target.span,
+                            format!("cannot assign to function `{name}`"),
+                        );
                     } else if !symbol.mutable {
-                        self.error(target.span, format!("cannot assign to immutable `{name}`"));
+                        self.error(
+                            Code::Immutable,
+                            target.span,
+                            format!("cannot assign to immutable `{name}`"),
+                        );
                     }
                     symbol.ty
                 } else {
-                    self.error(target.span, format!("unknown name `{name}`"));
+                    self.error(
+                        Code::UnknownName,
+                        target.span,
+                        format!("unknown name `{name}`"),
+                    );
                     Type::Unknown
                 }
             }
@@ -189,7 +204,11 @@ impl Analyzer<'_, '_> {
             }
             ExprKind::Index { object, index } => self.list_element_target_type(object, index),
             _ => {
-                self.error(target.span, "invalid assignment target".to_owned());
+                self.error(
+                    Code::NotAPlace,
+                    target.span,
+                    "invalid assignment target".to_owned(),
+                );
                 Type::Unknown
             }
         }

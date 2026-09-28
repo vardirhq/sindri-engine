@@ -178,6 +178,7 @@ impl Parser<'_> {
         }
         if self.consume_simple(&TokenKind::Dot).is_none() {
             self.error_span(
+                crate::codes::SyntaxCode::VariantNeedsEnumName,
                 first_span,
                 "a variant is written with its enum's name: `Phase.Lobby`",
             );

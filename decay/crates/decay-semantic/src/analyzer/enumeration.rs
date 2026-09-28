@@ -7,6 +7,7 @@
 //! name, `Phase.Lobby`, so reading one never needs the declaration open, and a
 //! `match` on one must say what happens for every variant or say `_`.
 
+use crate::codes::Code;
 use std::collections::HashSet;
 
 use decay_syntax::{EnumDecl, Expr, ExprKind, Item, MatchArm, Pattern, Program, Span};
@@ -27,6 +28,7 @@ impl Analyzer<'_, '_> {
             };
             if !own.insert(declared.name.clone()) {
                 self.error(
+                    Code::Duplicate,
                     declared.span,
                     format!("duplicate declaration `{}`", declared.name),
                 );
@@ -46,6 +48,7 @@ impl Analyzer<'_, '_> {
         let name = &declared.name;
         if self.environment.ambiguous_enums.contains(name) {
             self.error(
+                Code::DeclaredInSeveralFiles,
                 declared.span,
                 format!("enum `{name}` is declared in more than one file; keep one"),
             );
@@ -55,12 +58,14 @@ impl Analyzer<'_, '_> {
             || self.environment.get_type(name).is_some()
         {
             self.error(
+                Code::NameTaken,
                 declared.span,
                 format!("`{name}` is already a name; an enum needs one of its own"),
             );
         }
         if declared.variants.is_empty() {
             self.error(
+                Code::EmptyDeclaration,
                 declared.span,
                 format!("enum `{name}` has no variants, so nothing could ever be one"),
             );
@@ -68,7 +73,11 @@ impl Analyzer<'_, '_> {
         let mut seen = HashSet::new();
         for (variant, span) in &declared.variants {
             if !seen.insert(variant) {
-                self.error(*span, format!("`{name}.{variant}` is declared twice"));
+                self.error(
+                    Code::Duplicate,
+                    *span,
+                    format!("`{name}.{variant}` is declared twice"),
+                );
             }
         }
     }
@@ -88,6 +97,7 @@ impl Analyzer<'_, '_> {
         }
         if self.environment.ambiguous_enums.contains(name) {
             self.error(
+                Code::DeclaredInSeveralFiles,
                 span,
                 format!("enum `{name}` is declared in more than one file; keep one"),
             );
@@ -119,6 +129,7 @@ impl Analyzer<'_, '_> {
             .collect::<Vec<_>>()
             .join(", ");
         self.error(
+            Code::UnknownMember,
             span,
             format!("`{enumeration}` has no variant `{field}`; it has {listed}"),
         );
@@ -150,6 +161,7 @@ impl Analyzer<'_, '_> {
             Type::Unknown => None,
             other => {
                 self.error(
+                    Code::MatchNeedsEnum,
                     subject.span,
                     format!(
                         "`match` takes a value of an enum, found `{}`",
@@ -169,6 +181,7 @@ impl Analyzer<'_, '_> {
             for pattern in &arm.patterns {
                 if wildcard {
                     self.error(
+                        Code::UnreachableArm,
                         pattern.span(),
                         "this can never be reached: `_` above already takes everything".to_owned(),
                     );
@@ -185,13 +198,19 @@ impl Analyzer<'_, '_> {
                         };
                         if written != expected {
                             self.error(
+                                Code::WrongEnum,
                                 *span,
                                 format!("`{written}.{variant}` is not a `{expected}`"),
                             );
                         } else if !variants.contains(variant) {
-                            self.error(*span, format!("`{expected}` has no variant `{variant}`"));
+                            self.error(
+                                Code::UnknownMember,
+                                *span,
+                                format!("`{expected}` has no variant `{variant}`"),
+                            );
                         } else if !covered.insert(variant.clone()) {
                             self.error(
+                                Code::Duplicate,
                                 *span,
                                 format!("`{expected}.{variant}` is already matched above"),
                             );
@@ -211,6 +230,7 @@ impl Analyzer<'_, '_> {
                 .collect::<Vec<_>>();
             if !missing.is_empty() {
                 self.error(
+                    Code::NotExhaustive,
                     span,
                     format!(
                         "this `match` does not say what happens for {} -- add an arm, or `_`",

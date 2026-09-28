@@ -3,6 +3,7 @@
 //! A new statement is an arm in `analyze_stmt` and a function beside
 //! the others here.
 
+use crate::codes::Code;
 use std::collections::HashMap;
 
 use decay_syntax::{Block, Expr, ExprKind, Span, Stmt};
@@ -41,6 +42,7 @@ impl Analyzer<'_, '_> {
 
         if declared_type.is_none() && initializer.is_none() {
             self.error(
+                Code::MissingType,
                 span,
                 format!("binding `{name}` needs a type or initializer"),
             );
@@ -94,6 +96,7 @@ impl Analyzer<'_, '_> {
                 let condition_type = self.expr_type(condition);
                 if !matches!(condition_type, Type::Bool | Type::Unknown) {
                     self.error(
+                        Code::ConditionNotBool,
                         condition.span,
                         format!(
                             "if condition must be `bool`, found `{}`",
@@ -112,6 +115,7 @@ impl Analyzer<'_, '_> {
                 let condition_type = self.expr_type(condition);
                 if !matches!(condition_type, Type::Bool | Type::Unknown) {
                     self.error(
+                        Code::ConditionNotBool,
                         condition.span,
                         format!(
                             "while condition must be `bool`, found `{}`",
@@ -132,12 +136,20 @@ impl Analyzer<'_, '_> {
             } => self.analyze_for(name, *name_span, iterable, body),
             Stmt::Break { span } => {
                 if self.loop_depth == 0 {
-                    self.error(*span, "`break` outside of a loop".to_owned());
+                    self.error(
+                        Code::OutsideLoop,
+                        *span,
+                        "`break` outside of a loop".to_owned(),
+                    );
                 }
             }
             Stmt::Continue { span } => {
                 if self.loop_depth == 0 {
-                    self.error(*span, "`continue` outside of a loop".to_owned());
+                    self.error(
+                        Code::OutsideLoop,
+                        *span,
+                        "`continue` outside of a loop".to_owned(),
+                    );
                 }
             }
             Stmt::Block(block) => self.analyze_block(block, true),
@@ -155,6 +167,7 @@ impl Analyzer<'_, '_> {
             Type::Unknown => Type::Unknown,
             other => {
                 self.error(
+                    Code::NotWalkable,
                     iterable.span,
                     format!(
                         "`for` needs something to walk, and `{}` holds one value",
@@ -193,7 +206,7 @@ impl Analyzer<'_, '_> {
             return;
         };
         if scope.insert(name.to_owned(), symbol).is_some() {
-            self.error(span, format!("duplicate local `{name}`"));
+            self.error(Code::Duplicate, span, format!("duplicate local `{name}`"));
         }
     }
 }
