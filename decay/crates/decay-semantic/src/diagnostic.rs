@@ -74,9 +74,10 @@ pub struct Analysis {
     /// own and the host's. What a host needs to author one of its fields by a
     /// variant's name, without reading the project again.
     pub enums: std::collections::BTreeMap<String, Vec<String>>,
-    /// Every struct the program could name, with its fields in order: what
-    /// the lowering needs to build one whose fields were written in another.
-    pub structs: std::collections::BTreeMap<String, Vec<String>>,
+    /// Every struct the program could name, with its fields and their types
+    /// in order: what the lowering needs to build one whose fields were
+    /// written in another, and what a host needs to author one.
+    pub structs: std::collections::BTreeMap<String, Vec<(String, crate::types::Type)>>,
 }
 
 /// Decay has no methods, and the mistake of reaching for one is worth naming

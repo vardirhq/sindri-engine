@@ -29,6 +29,72 @@ pub struct ScriptExport {
     /// For an enum field, its variants in order: what a panel offers to pick
     /// from. Empty for any other field.
     pub choices: Vec<String>,
+    /// For a list, what one element is: its type, its choices or fields, and
+    /// in `default` what a fresh one starts as. `None` for anything else.
+    pub element: Option<Box<ScriptExport>>,
+    /// For a struct, each field, in declared order, as an export of its own.
+    /// Empty for anything else.
+    pub fields: Vec<ScriptExport>,
+}
+
+impl ScriptExport {
+    /// The export a value of type `ty` is, named `name` and starting as
+    /// `default`: a list says what its elements are, and a struct what its
+    /// fields are, all the way down.
+    fn described(
+        program: &IrProgram,
+        name: &str,
+        ty: Option<&decay_semantic::Type>,
+        default: Value,
+        depth: usize,
+    ) -> Self {
+        use decay_semantic::Type;
+        let type_name = ty
+            .filter(|ty| !matches!(ty, Type::Unknown))
+            .map(|ty| ty.display_name().into_owned());
+        let enumeration = match ty {
+            Some(Type::Named(named)) if program.variants(named).is_some() => Some(named.clone()),
+            _ => match &default {
+                Value::Variant(variant) => variant.split('.').next().map(str::to_owned),
+                _ => None,
+            },
+        };
+        let choices = enumeration
+            .as_deref()
+            .and_then(|named| program.variants(named).map(<[String]>::to_vec))
+            .unwrap_or_default();
+        let deeper = depth < 8;
+        let element = match ty {
+            Some(Type::Array(element)) if deeper => Some(Box::new(Self::described(
+                program,
+                "",
+                Some(element),
+                crate::scripts::blank(program, element),
+                depth + 1,
+            ))),
+            _ => None,
+        };
+        let fields = match (ty, &default) {
+            (Some(Type::Named(named)), Value::Struct { fields: values, .. }) if deeper => program
+                .struct_fields(named)
+                .unwrap_or_default()
+                .iter()
+                .zip(values.iter())
+                .map(|((field, field_type), value)| {
+                    Self::described(program, field, Some(field_type), value.clone(), depth + 1)
+                })
+                .collect(),
+            _ => Vec::new(),
+        };
+        Self {
+            name: name.to_owned(),
+            type_name: type_name.or(enumeration),
+            default,
+            choices,
+            element,
+            fields,
+        }
+    }
 }
 
 /// Every `@export` field of one container, in declaration order.
@@ -59,23 +125,23 @@ pub(crate) fn exports_of(program: &IrProgram, script: &str) -> Option<Vec<Script
                     .and_then(|instance| instance.field(&field.name))
                     .cloned()
                     .unwrap_or(Value::Null);
-                // Written as a type, or known from the variant it starts as.
-                let enumeration = field
-                    .type_name
-                    .clone()
-                    .filter(|written| program.variants(written).is_some())
-                    .or_else(|| match &default {
-                        Value::Variant(name) => name.split('.').next().map(str::to_owned),
-                        _ => None,
-                    });
-                ScriptExport {
-                    name: field.name.clone(),
-                    type_name: field.type_name.clone().or_else(|| enumeration.clone()),
-                    choices: enumeration
-                        .and_then(|name| program.variants(&name).map(<[String]>::to_vec))
-                        .unwrap_or_default(),
-                    default,
+                // A field written without a type is described by its default
+                // only when that is a list or a struct, which a panel cannot
+                // draw without knowing what is inside.
+                let ty = crate::scripts::field_type(field.ty.as_ref(), Some(&default))
+                    .filter(|ty| field.ty.is_some() || crate::scripts::is_compound(program, ty));
+                let mut export =
+                    ScriptExport::described(program, &field.name, ty.as_ref(), default, 0);
+                // As the script wrote it where it wrote one: `Profile`, not a
+                // type the panel would read differently.
+                if export.choices.is_empty()
+                    && field.type_name.is_some()
+                    && export.element.is_none()
+                    && export.fields.is_empty()
+                {
+                    export.type_name.clone_from(&field.type_name);
                 }
+                export
             })
             .collect(),
     )

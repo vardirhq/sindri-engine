@@ -2,13 +2,12 @@
 
 use eframe::egui::{self, RichText};
 use serde_json::Value;
-use sindri_decay::ScriptValue;
 
 use crate::ui::theme::{color, text};
 use crate::ui::widgets::property;
 use crate::{inspector, scripts::SceneScripts};
 
-use super::super::rows::{At, Authored, text_row, value_row};
+use super::super::rows::{Authored, text_row};
 
 /// Which script of the chosen source this entity runs.
 ///
@@ -101,47 +100,23 @@ pub(super) fn script_exports_section(
             .and_then(|properties| properties.get(&export.name))
             .cloned();
         let authored = stored.is_some();
-        let mut value = stored.unwrap_or_else(|| script_value_json(&export.default));
+        let mut value =
+            stored.unwrap_or_else(|| super::script_value::script_value_json(&export.default));
         let label = inspector::humanize(&export.name);
 
         let before = value.clone();
         // Marked when the scene set it: a script export showing its default is
         // one the author has not touched, and the dot says so without a line of
         // prose under every row.
-        if !export.choices.is_empty() {
-            // An enum: its variants, by name, never a number.
-            let current = value.as_str().unwrap_or_default().to_owned();
-            if let Some(chosen) = super::super::field::named_choice_row(
-                ui,
-                &export.name,
-                &export.name,
-                &current,
-                &export.choices,
-            ) {
-                value = Value::String(chosen);
-            }
-        } else if export.type_name.as_deref() == Some("Profile") {
-            // An export's name is unique within its script, so it is both
-            // the label and what identifies the picker.
-            super::super::field::asset_row(
-                ui,
-                &export.name,
-                &export.name,
-                &mut value,
-                profiles,
-                None,
-                0.0,
-            );
-        } else {
-            value_row(
-                ui,
-                At::loose(),
-                &export.name,
-                &mut value,
-                0.0,
-                Authored::of(authored),
-            );
-        }
+        super::script_value::export_row(
+            ui,
+            &export.name,
+            &export,
+            &mut value,
+            0.0,
+            Authored::of(authored),
+            profiles,
+        );
         if value != before {
             // Setting a property is what puts it in the scene: a field left
             // alone stays absent, so a scene records the author's choices
@@ -161,43 +136,5 @@ pub(super) fn script_exports_section(
             crate::ui::widgets::section::caption(ui, &format!("default · {type_name}"));
         }
         let _ = label;
-    }
-}
-
-/// A Decay value as the JSON a scene stores.
-///
-/// A reference stores as null, because it names a runtime handle and runtime
-/// handles are never serialized: writing one to a scene would produce a file
-/// that means something different the next time it is opened. An `@export` of
-/// an entity is not authorable for that reason, and the inspector shows it as
-/// empty rather than as a number nobody can act on.
-///
-/// A collection stores as null for a sharper reason: there is no literal for
-/// one and nothing but the host makes one, so an authored collection is not a
-/// thing that can exist. A field declared `List<T>` has no authorable value
-/// and the panel shows it as empty, which is the truth.
-pub(super) fn script_value_json(value: &ScriptValue) -> Value {
-    match value {
-        ScriptValue::Number(number) => Value::from(*number),
-        ScriptValue::Bool(flag) => Value::Bool(*flag),
-        ScriptValue::String(text) => Value::String(text.clone()),
-        // As its components, the way a transform stores a position, so the
-        // same vector row edits it.
-        ScriptValue::Vec2(components) => Value::from(components.to_vec()),
-        ScriptValue::Vec3(components) => Value::from(components.to_vec()),
-        // By the variant's own name, as a scene authors one.
-        ScriptValue::Variant(name) => Value::String(
-            name.split_once('.')
-                .map_or(&**name, |(_, variant)| variant)
-                .to_owned(),
-        ),
-        // A timer is started by the script, not authored: it runs down in
-        // play, and a number in the inspector would be stale on the next frame.
-        ScriptValue::Reference(_)
-        | ScriptValue::Timer { .. }
-        | ScriptValue::Array(_)
-        | ScriptValue::Struct { .. }
-        | ScriptValue::Null
-        | ScriptValue::Unit => Value::Null,
     }
 }

@@ -1242,6 +1242,12 @@
       "components": {
         "sindri.script": {
           "properties": {
+            "card_names": [
+              "Guidance Kernel",
+              "Arc Imprint",
+              "Nova Imprint",
+              "Gravity Anchor"
+            ],
             "catalog": "profiles/module-catalog.profile.json",
             "offers": 3.0
           },

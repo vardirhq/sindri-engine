@@ -88,15 +88,10 @@ impl Analyzer<'_, '_> {
 
     /// Every struct this program could name, with its fields in order, for
     /// the analysis to hand on.
-    pub(crate) fn known_structs(&self) -> std::collections::BTreeMap<String, Vec<String>> {
+    pub(crate) fn known_structs(&self) -> std::collections::BTreeMap<String, Vec<(String, Type)>> {
         self.structs
             .iter()
-            .map(|(name, fields)| {
-                (
-                    name.clone(),
-                    fields.iter().map(|(field, _)| field.clone()).collect(),
-                )
-            })
+            .map(|(name, fields)| (name.clone(), fields.clone()))
             .collect()
     }
 

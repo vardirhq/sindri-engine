@@ -12,6 +12,9 @@ pub struct IrProgram {
     /// Every enum the program could name, with its variants in order, so a
     /// host can author an enum field by a variant's name.
     pub enums: std::collections::BTreeMap<String, Vec<String>>,
+    /// Every struct the program could name, with its fields and their types
+    /// in order, so a host can author a struct field from a scene.
+    pub structs: std::collections::BTreeMap<String, Vec<(String, decay_semantic::Type)>>,
 }
 
 /// The name of the container a program's top-level functions are lowered
@@ -20,6 +23,12 @@ pub struct IrProgram {
 pub const FUNCTIONS: &str = "(functions)";
 
 impl IrProgram {
+    /// A struct's fields and their types in order, if the program knows it.
+    #[must_use]
+    pub fn struct_fields(&self, name: &str) -> Option<&[(String, decay_semantic::Type)]> {
+        self.structs.get(name).map(Vec::as_slice)
+    }
+
     /// An enum's variants in order, if the program knows it.
     #[must_use]
     pub fn variants(&self, enumeration: &str) -> Option<&[String]> {
@@ -89,6 +98,9 @@ pub struct IrField {
     pub mutable: bool,
     pub exported: bool,
     pub type_name: Option<String>,
+    /// The type as written, argument and all: `List<Card>`, where
+    /// `type_name` is only `List`.
+    pub ty: Option<decay_semantic::Type>,
     pub initializer: Option<Vec<Instruction>>,
 }
 

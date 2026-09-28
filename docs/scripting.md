@@ -57,9 +57,28 @@ the script says a speed exists and what it defaults to, the scene says what
 language over an embedded dynamic one — a property panel needs a declared,
 named, typed field it can draw without executing anything.
 
+A list or a struct `@export` is authored as JSON shaped like its type — a list
+as `[...]` of its elements, a struct as `{"field": value}` — and read by the
+type the script declared, so an enum inside either is written by the variant's
+name and a vector as its components:
+
+```json
+"properties": {
+  "card_names": ["Guidance Kernel", "Arc Imprint"],
+  "loot": [{ "name": "gem", "weight": 1.5, "kind": "Gem" }],
+  "tuning": { "speed": 5.0 }
+}
+```
+
+The inspector draws a list with a row per item and buttons to add, remove and
+move one up, and a struct with a row per field, all the way down; a new item
+starts blank — zero, false, empty, the first variant. Orbital's module chooser
+reads its four cards' names from a list the scene authors.
+
 A property is **refused rather than ignored** in every failing case: a field the
 script does not declare, a field that is not `@export`, or a value Decay has no
-type for. An authored number that silently goes nowhere is precisely the failure
+type for — and, for a list or a struct, the item or field that was wrong and
+why. An authored number that silently goes nowhere is precisely the failure
 this component exists to make visible.
 
 `enabled` defaults to true. A disabled script is still authored, still
@@ -1874,9 +1893,10 @@ sees every struct, as it sees enums. One is built with every field named,
 read with `.field`, and written through the `var` that holds it; like a list
 it is a value, so assigning one copies it. `decay/LANGUAGE.md` has the rules.
 
-A struct lives in a script's fields and locals. A scene cannot author one yet,
-so an `@export` of one shows as empty in the inspector, and a `state` holds
-numbers, flags and enums only. `print` shows every field.
+A struct `@export` is authored in the scene as an object of its fields, and
+the inspector draws a row for each; a field the scene leaves out keeps the
+script's default for it. A `state` holds numbers, flags and enums only.
+`print` shows every field.
 
 Orbital's module chooser keeps each offer slot's card, name and blurb in one
 `OfferCard`, where it kept three lists in step.
