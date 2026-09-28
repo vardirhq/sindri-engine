@@ -294,20 +294,16 @@ impl EditorApp {
     /// Asks again for whatever the world references, after an edit that could
     /// have changed it.
     pub(super) fn refresh_textures(&mut self) {
-        // Scripts are asked every frame, and textures only after an edit,
-        // because they answer to different clocks. A texture is named outright
-        // by a component, so nothing but an edit can change which are wanted.
-        // A *prefab* is named by the declared type of a compiled script's
-        // export, so which are wanted changes when a script finishes
-        // compiling -- frames after the scene opened, without touching the
-        // world at all.
+        // Behind the same gate as the textures: an edit, or a prefab arriving.
         //
-        // Behind the edit gate, the only ask that ever happened was the one on
-        // open, before any script had compiled, and no prefab was ever
-        // discovered: the acceptance project opened in the editor with every
-        // enemy missing and two hundred errors saying so, while the exported
-        // build of the same project played.
-        self.refresh_scripts();
+        // Scripts used to be asked every frame, because a prefab was only
+        // discovered once a compiled script's export named it, which happens
+        // frames after the scene opened without touching the world. Opening a
+        // project now asks for every script, prefab and profile in it, and the
+        // script loader asks again for anything not yet asked for each time it
+        // is polled, so there is nothing left for a frame to discover. Asking
+        // anyway walked the whole world every frame: 2.5 ms idle and 6 ms while
+        // Orbital Baked played, in a release build.
         let now = super::TexturedAt {
             history: self.history.revision(),
             prefabs: self.scripts.prefab_revision(),
@@ -315,6 +311,7 @@ impl EditorApp {
         if self.textured_revision == now {
             return;
         }
+        self.refresh_scripts();
         if self.textured_revision.prefabs != now.prefabs {
             self.textures.set_prefabs(self.scripts.prefabs());
         }
@@ -326,7 +323,7 @@ impl EditorApp {
     /// Asks again for whatever scripts the world names, after an edit that
     /// could have changed it.
     ///
-    /// Shares `textured_revision` deliberately: both ask "has the world changed
+    /// Shares `textured_revision` deliberately: both ask "has anything changed
     /// since we last looked", and two counters that must agree is one more
     /// thing to keep in step than there is any reason for.
     fn refresh_scripts(&mut self) {
