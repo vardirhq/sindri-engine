@@ -247,19 +247,20 @@ impl Host for WorldHost<'_> {
         };
         let entity = self.subject(subject, path)?;
         let transform = self.transform_of(entity);
-        let world = self.world.world_transform(entity);
-        let components = self
-            .world
-            .get(entity)
-            .map_or(serde_json::Value::Null, |data| {
-                serde_json::to_value(&data.components).unwrap_or(serde_json::Value::Null)
-            });
+        // Read in place. Every load used to serialize all of the entity's
+        // components into a fresh JSON object to look one number up, which was
+        // most of what Orbital's scripts spent their time on.
+        let components = self.world.get(entity).map(|data| &data.components);
 
         // `None` is how the runtime says "unknown path" with the name attached,
         // and it is the right answer for an entity that has no sprite: the
         // surface says a script *may* reach one, not that every entity has one.
         Ok(leaf
-            .read(transform.as_ref(), world.as_ref(), &components)
+            .read(
+                transform.as_ref(),
+                || self.world.world_transform(entity),
+                components,
+            )
             .map(Value::Number))
     }
 

@@ -263,20 +263,22 @@ fn leaf_in(root: &'static [(&'static str, Node)], parts: &[&str]) -> Option<Leaf
 impl Leaf {
     /// Reads the number this leaf names, or `None` when the entity has no such
     /// component or the payload does not hold one there.
+    /// Reads one number, asking for the world transform only if it is the
+    /// one being read: it walks every parent, and most reads are local.
     pub(crate) fn read(
         self,
         transform: Option<&Transform3D>,
-        world: Option<&Transform3D>,
-        components: &Json,
+        world: impl FnOnce() -> Option<Transform3D>,
+        components: Option<&std::collections::BTreeMap<String, Json>>,
     ) -> Option<f64> {
         Some(match self {
             Self::TransformAxis(vector, index) if vector.is_world() => {
-                f64::from(vector.get(world?)[index])
+                f64::from(vector.get(&world()?)[index])
             }
             Self::TransformAxis(vector, index) => f64::from(vector.get(transform?)[index]),
             Self::TransformScalar(scalar) => f64::from(scalar.get(transform?)),
             Self::Component { component, pointer } => {
-                follow(components.get(component)?, pointer)?.as_f64()?
+                follow(components?.get(component)?, pointer)?.as_f64()?
             }
         })
     }

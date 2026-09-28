@@ -2,7 +2,7 @@
 
 use std::collections::HashMap;
 
-use decay_ir::{IrContainer, IrFunction};
+use decay_ir::{IrContainer, IrFunction, IrProgram};
 
 use crate::error::RuntimeError;
 use crate::host::Host;
@@ -11,11 +11,11 @@ use crate::value::Value;
 
 use super::{Frame, Runtime};
 
-impl<H: Host> Runtime<'_, H> {
+impl<'a, H: Host> Runtime<'a, H> {
     pub fn instantiate(&mut self, container_name: &str) -> Result<ScriptInstance, RuntimeError> {
         self.begin_budget();
-        let container = self.find_container(container_name)?.clone();
-        let fields = self.initialize_fields(&container)?;
+        let container = self.find_container(container_name)?;
+        let fields = self.initialize_fields(container)?;
         Ok(ScriptInstance {
             container_name: container_name.to_owned(),
             fields,
@@ -39,12 +39,19 @@ impl<H: Host> Runtime<'_, H> {
         args: Vec<Value>,
     ) -> Result<Value, RuntimeError> {
         self.begin_budget();
-        let container = self.find_container(&instance.container_name)?.clone();
-        self.call_in_container(&container, &mut instance.fields, function_name, args)
+        let container = self.find_container(&instance.container_name)?;
+        self.call_in_container(container, &mut instance.fields, function_name, args)
     }
 
-    pub(super) fn find_container(&self, name: &str) -> Result<&IrContainer, RuntimeError> {
-        self.program
+    /// The container by name, borrowed from the program rather than from the
+    /// runtime, so a call can hold it while the runtime runs it.
+    ///
+    /// Callers used to clone it for that reason, which copied every function
+    /// and instruction of the script on every call and freed them after: about
+    /// half of what running Orbital's scripts cost.
+    pub(super) fn find_container(&self, name: &str) -> Result<&'a IrContainer, RuntimeError> {
+        let program: &'a IrProgram = self.program;
+        program
             .containers
             .iter()
             .find(|container| container.name == name)
