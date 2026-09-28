@@ -9,6 +9,7 @@ mod loops;
 mod matching;
 mod scope;
 mod shared;
+mod structs;
 mod subjects;
 mod support;
 mod text;

@@ -109,6 +109,14 @@ pub enum Constant {
     Variant(String),
 }
 
+/// A struct's name and its fields in declared order: what a built one
+/// carries, so a field can be named in a message and printed.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct StructShape {
+    pub name: String,
+    pub fields: Vec<String>,
+}
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Path(pub Vec<String>);
 
@@ -152,6 +160,12 @@ pub enum Instruction {
     /// what the length of a value is. The analyzer says which member reads are
     /// this one; see `decay_semantic::ValueMember`.
     Length,
+    /// Pops one value per field, in the order they were written, and pushes
+    /// the struct: the value written `n`th goes to field `order[n]`.
+    MakeStruct {
+        shape: std::rc::Rc<StructShape>,
+        order: Vec<usize>,
+    },
     /// Pops this many values and pushes the list of them, the first popped
     /// last.
     MakeList(usize),
@@ -173,6 +187,9 @@ pub enum Instruction {
     /// the second holder, and every `push` would copy the whole list.
     ListChange {
         path: Path,
+        /// The struct fields, outermost first, that lead from the place at
+        /// `path` down to the list: none when the place holds the list.
+        fields: Vec<usize>,
         op: ListOp,
     },
     /// Pops a collection and opens a walk over it.

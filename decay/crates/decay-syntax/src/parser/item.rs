@@ -19,6 +19,7 @@ pub(super) const EVENT: &str = "event";
 pub(super) const STATE: &str = "state";
 pub(super) const SHARED: &str = "shared";
 pub(super) const ENUM: &str = "enum";
+pub(super) const STRUCT: &str = "struct";
 pub(super) const ON: &str = "on";
 
 use super::Parser;
@@ -211,6 +212,41 @@ impl Parser<'_> {
         Some(Item::Enum(crate::ast::EnumDecl {
             name,
             variants,
+            span: start.join(end),
+        }))
+    }
+
+    /// `struct Card { root: Entity, name: String }`: typed fields,
+    /// comma-separated, and a trailing comma if you like.
+    pub(super) fn parse_struct(&mut self) -> Option<Item> {
+        let start = self.current().span;
+        self.advance();
+        let (name, _) = self.expect_identifier("expected a name after `struct`")?;
+        self.expect_simple(
+            &TokenKind::LeftBrace,
+            "expected `{` after the struct's name",
+        )?;
+        let mut fields = Vec::new();
+        while !self.at(&TokenKind::RightBrace) && !self.at(&TokenKind::Eof) {
+            let (field, span) = self.expect_identifier("expected a field name")?;
+            self.expect_simple(
+                &TokenKind::Colon,
+                "expected `:` and the field's type -- a struct's fields are always typed",
+            )?;
+            let ty = self.parse_type()?;
+            fields.push(crate::ast::StructField {
+                name: field,
+                span: span.join(ty.span),
+                ty,
+            });
+            if self.consume_simple(&TokenKind::Comma).is_none() {
+                break;
+            }
+        }
+        let end = self.expect_simple(&TokenKind::RightBrace, "expected `}` after the fields")?;
+        Some(Item::Struct(crate::ast::StructDecl {
+            name,
+            fields,
             span: start.join(end),
         }))
     }

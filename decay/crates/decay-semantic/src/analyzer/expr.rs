@@ -36,6 +36,9 @@ impl Analyzer<'_, '_> {
             ExprKind::Call { callee, args } => self.call_type(callee, args, expr.span),
             ExprKind::Index { object, index } => self.index_type(object, index),
             ExprKind::List(elements) => self.list_literal_type(elements),
+            ExprKind::Construct { name, fields } => {
+                self.construct_struct_type(name, fields, expr.span)
+            }
             ExprKind::Range { start, end } => self.stray_range_type(start, end, expr.span),
         }
     }
@@ -172,7 +175,9 @@ impl Analyzer<'_, '_> {
             }
             ExprKind::Member { object, field } => {
                 let object_type = self.expr_type(object);
-                if object_type.dimensions().is_some() && self.value_rooted(object) {
+                if (object_type.dimensions().is_some() && self.value_rooted(object))
+                    || self.is_struct(&object_type)
+                {
                     self.check_component_target(object, target.span);
                 }
                 self.check_state_assignment(object, field, target.span);

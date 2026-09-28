@@ -33,6 +33,7 @@ to change. Nothing here is a compatibility promise.
 - [State](#state)
 - [Shared functions](#shared-functions)
 - [Enums](#enums)
+- [Structs](#structs)
 - [Statements](#statements)
 - [Expressions](#expressions)
 - [Scope](#scope)
@@ -115,8 +116,8 @@ script  component  fn  let  var  if  else  while  for  in  break
 continue  return  true  false  null  match
 ```
 
-All seventeen are reserved. Five words are special only where no other name
-could stand: `event`, `state` and `enum` at the start of an item, `shared` right before
+All seventeen are reserved. Six words are special only where no other name
+could stand: `event`, `state`, `enum` and `struct` at the start of an item, `shared` right before
 `fn`, and `on` followed by a name at the start of a member (see
 [Events](#events), [State](#state) and [Shared functions](#shared-functions)). Elsewhere they are ordinary
 identifiers, so `Bolt.on(hit)` and a local called `event` are unaffected.
@@ -167,6 +168,7 @@ item         = ( "script" | "component" ) IDENT "{" { member } "}"
              | "event" IDENT "(" [ params ] ")" ";"
              | "state" IDENT "{" { field } "}"
              | "enum" IDENT "{" [ IDENT { "," IDENT } [ "," ] ] "}"
+             | "struct" IDENT "{" [ IDENT ":" type { "," IDENT ":" type } [ "," ] ] "}"
              | [ "shared" ] function ;
 member       = { attribute } ( field | function | handler ) ;
 attribute    = "@" IDENT ;
@@ -196,7 +198,8 @@ expr         = assign ;
 assign       = binary [ ( "=" | "+=" | "-=" | "*=" | "/=" | "%=" ) assign ] ;
 binary       = unary { binop unary } ;         (* see the precedence table *)
 unary        = [ "-" | "!" ] unary | postfix ;
-postfix      = primary { "." IDENT | "[" expr "]" | "(" [ args ] ")" } ;
+postfix      = primary { "." IDENT | "[" expr "]" | "(" [ args ] ")" }
+             | IDENT "(" IDENT ":" expr { "," IDENT ":" expr } [ "," ] ")" ;
 args         = expr { "," expr } ;
 primary      = IDENT | NUMBER | STRING | "true" | "false" | "null"
              | "(" expr ")" | "[" [ expr { "," expr } [ "," ] ] "]" ;
@@ -226,6 +229,7 @@ handler is a diagnostic.
 | `unit` or `void` | No value; the default return type |
 | `Vec2`, `Vec3` | Two or three numbers that travel together; see [Vectors](#vectors) |
 | `List<T>` (or `Array<T>`) | Several `T`, in order; see [Lists](#lists) |
+| a declared `struct` or `enum` | See [Structs](#structs) and [Enums](#enums) |
 | anything else | A **named host type**, opaque to Decay |
 
 There is no `i32`, no `u32`, no `f64`, and no integer type of any kind. `7` and
@@ -762,6 +766,54 @@ statement, not an expression: it produces no value.
 
 ---
 
+## Structs
+
+A `struct` names a value made of typed fields, so values that belong together
+travel together:
+
+```rust
+struct Offer { index: f32, weight: f32, name: String }
+
+script Chooser {
+    var offers: List<Offer> = [];
+    var best = Offer(index: -1.0, weight: 0.0, name: "none");
+
+    fn add(index: f32) {
+        offers.push(Offer(index: index, weight: 1.0, name: "module " + index));
+    }
+    fn update(dt: f32) {
+        for offer in offers {
+            if offer.weight > best.weight { best = offer; }
+        }
+        best.weight += 1.0;
+    }
+}
+```
+
+- **Built with every field named**, in any order: `Offer(name: "a",
+  index: 1.0, weight: 2.0)`. A field left out, named twice or not in the
+  struct is a diagnostic, and so is building one with positional arguments.
+  There is no default for a field.
+- **A struct is a value**, like a vector or a list: assigning one copies it,
+  and `==` compares every field. A field is written through the variable,
+  parameter or field of this script that holds the struct — `best.weight =
+  2.0`, `this.hand.best.name = "Nova"`, `slot.at.x += 1.0` — and that one
+  must be a `var`. A field of a list's element cannot be written in place:
+  take it out, change it, and put it back (`var o = offers[i]; o.weight = 2.0;
+  offers[i] = o;`).
+- A list inside a struct is changed in place through it: `hand.cards.push(c)`.
+- Its fields may be any type, including another struct, a list of one, an
+  enum or an entity. It takes its type's name — `var c: Offer` — and a field
+  initialized with one has that type without an annotation.
+- **Declared once.** A struct with no fields, a field declared twice and a
+  struct that takes a name something else already has are diagnostics. A host
+  may describe structs to a file through the environment, as it does enums;
+  Sindri describes every struct in the project to every file.
+- `print` shows one as `Offer(index: 1, weight: 2, name: "a")`. Text does not
+  join with a struct. A timer inside a struct is not run down by the host.
+
+---
+
 ## Statements
 
 ```rust
@@ -978,7 +1030,8 @@ grammar, and every one of them is a parse error or a diagnostic.
 `continue` with a label or a value. `for … in` walks a list or a range, and
 nothing else.
 
-**Data:** maps, dictionaries, sets, tuples, structs, enums with data
+**Data:** maps, dictionaries, sets, tuples, struct methods, default field
+values, enums with data
 (`Some(x)`), a range as a value outside `for`, a step (`0..10 by 2`), negative
 indices, slicing a list, `Option`, `Result`, `?`. `List<T>` exists; see
 "Lists".
@@ -989,7 +1042,7 @@ traits.
 
 **Types:** integers, `f64`, unsigned types, characters, type aliases, casts,
 inference beyond a binding's own initializer, nullable types, user-defined types
-beyond `script`, `component` and `enum`.
+beyond `script`, `component`, `enum` and `struct`.
 
 **Modules:** `import`, `use`, `mod`, `pub`, visibility of any kind, multiple
 files. One file is one compilation unit and cannot refer to another by itself;

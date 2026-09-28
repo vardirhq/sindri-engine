@@ -173,6 +173,11 @@ impl Analyzer<'_, '_> {
                     Self::collect_field_reads(element, out);
                 }
             }
+            ExprKind::Construct { fields, .. } => {
+                for (_, _, value) in fields {
+                    Self::collect_field_reads(value, out);
+                }
+            }
             ExprKind::Call { callee, args } => {
                 Self::collect_field_reads(callee, out);
                 for argument in args {
@@ -284,6 +289,10 @@ fn built_value_type(initializer: Option<&Expr>) -> Type {
             _ => Type::Unknown,
         };
         return Type::array_of(element);
+    }
+    // And a struct: its name is its type.
+    if let Some(ExprKind::Construct { name, .. }) = initializer.map(|expr| &expr.kind) {
+        return Type::Named(name.clone());
     }
     let Some(ExprKind::Call { callee, .. }) = initializer.map(|expr| &expr.kind) else {
         return Type::Unknown;

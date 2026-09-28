@@ -54,8 +54,26 @@ fn count(number: usize) -> Value {
     Value::Number(number as f64)
 }
 
+/// The instructions that build, ask or change a list.
+pub(super) fn step(
+    fields: &mut HashMap<String, Slot>,
+    frame: &mut Frame,
+    instruction: &decay_ir::Instruction,
+) -> Result<(), RuntimeError> {
+    match instruction {
+        decay_ir::Instruction::MakeList(count) => make(frame, *count),
+        decay_ir::Instruction::ListRead(op) => read(frame, *op),
+        decay_ir::Instruction::ListChange {
+            path,
+            fields: inside,
+            op,
+        } => change(fields, frame, (path, inside), *op),
+        _ => unreachable!("only the list instructions reach here"),
+    }
+}
+
 /// Pops `count` values, the last written on top, into the list of them.
-pub(super) fn make(frame: &mut Frame, count: usize) -> Result<(), RuntimeError> {
+fn make(frame: &mut Frame, count: usize) -> Result<(), RuntimeError> {
     if count > frame.stack.len() {
         return Err(RuntimeError::StackUnderflow);
     }
@@ -65,7 +83,7 @@ pub(super) fn make(frame: &mut Frame, count: usize) -> Result<(), RuntimeError> 
 }
 
 /// A question about a list: pops the arguments, then the list.
-pub(super) fn read(frame: &mut Frame, op: ListOp) -> Result<(), RuntimeError> {
+fn read(frame: &mut Frame, op: ListOp) -> Result<(), RuntimeError> {
     let wanted = frame.stack.pop().ok_or(RuntimeError::StackUnderflow)?;
     let list = frame.stack.pop().ok_or(RuntimeError::StackUnderflow)?;
     let values = list
@@ -103,10 +121,10 @@ fn place<'v>(
 
 /// A change to the list at `path`: pops the arguments, and pushes what the
 /// change gives back.
-pub(super) fn change(
+fn change(
     fields: &mut HashMap<String, Slot>,
     frame: &mut Frame,
-    path: &Path,
+    (path, inside): (&Path, &[usize]),
     op: ListOp,
 ) -> Result<(), RuntimeError> {
     let mut args = Vec::with_capacity(op.arity());
@@ -114,7 +132,17 @@ pub(super) fn change(
         args.push(frame.stack.pop().ok_or(RuntimeError::StackUnderflow)?);
     }
     args.reverse();
-    let held = place(fields, frame, path)?;
+    let mut held = place(fields, frame, path)?;
+    // Down through the struct fields to the list, each copied only if it is
+    // shared, as the list itself is.
+    for index in inside {
+        let Value::Struct { fields, .. } = held else {
+            return Err(RuntimeError::NotACollection(describe(held)));
+        };
+        held = Rc::make_mut(fields)
+            .get_mut(*index)
+            .ok_or(RuntimeError::StackUnderflow)?;
+    }
     let Value::Array(list) = held else {
         return Err(RuntimeError::NotACollection(describe(held)));
     };

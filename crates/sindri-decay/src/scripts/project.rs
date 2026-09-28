@@ -41,10 +41,8 @@ pub struct Project {
     pub(crate) states: BTreeMap<String, BTreeMap<String, SharedField>>,
     /// State fields declared more than once, as `(state, field)`.
     ambiguous_fields: BTreeSet<(String, String)>,
-    /// Enums by name, with their variants in order.
-    pub(crate) enums: BTreeMap<String, Vec<String>>,
-    /// Enums declared more than once, which nothing may name.
-    ambiguous_enums: BTreeSet<String>,
+    /// Enums and structs by name.
+    pub(crate) kinds: kinds::Kinds,
     /// Shared functions, declared outside any script, by name.
     pub(crate) functions: BTreeMap<String, FunctionType>,
     /// Shared functions declared more than once, which nothing may call.
@@ -149,8 +147,7 @@ impl Project {
         let mut states: BTreeMap<String, BTreeMap<String, SharedField>> = BTreeMap::new();
         let mut ambiguous_fields = BTreeSet::new();
         let mut functions = BTreeMap::new();
-        let mut enums: BTreeMap<String, Vec<String>> = BTreeMap::new();
-        let mut ambiguous_enums = BTreeSet::new();
+        let mut kinds = kinds::Kinds::default();
         let mut ambiguous_functions = BTreeSet::new();
         // A caller links a copy of each shared function it can reach, so it
         // must recompile when one's body changes, not only its signature.
@@ -189,14 +186,8 @@ impl Project {
                         }
                         continue;
                     }
-                    Item::Enum(declared) => {
-                        let variants = declared.variants.into_iter().map(|(name, _)| name);
-                        if enums
-                            .insert(declared.name.clone(), variants.collect())
-                            .is_some()
-                        {
-                            ambiguous_enums.insert(declared.name);
-                        }
+                    item @ (Item::Enum(_) | Item::Struct(_)) => {
+                        kinds.read(item);
                         continue;
                     }
                     Item::Component(_) => continue,
@@ -218,12 +209,8 @@ impl Project {
                 && unreserved(reserved, name)
         });
         keep_states(&mut states, &ambiguous_fields, &scripts, &events, reserved);
-        place_variants(&mut states, &enums);
-        enums.retain(|name, _| {
-            !ambiguous_enums.contains(name)
-                && !scripts.contains_key(name)
-                && unreserved(reserved, name)
-        });
+        kinds.keep(|name| scripts.contains_key(name) || !unreserved(reserved, name));
+        place_variants(&mut states, &kinds.enums);
         functions.retain(|name, _| {
             !ambiguous_functions.contains(name)
                 && !scripts.contains_key(name)
@@ -232,7 +219,7 @@ impl Project {
                 && unreserved(reserved, name)
         });
         let key = format!(
-            "{scripts:?}{events:?}{ambiguous_events:?}{states:?}{ambiguous_fields:?}{functions:?}{ambiguous_functions:?}{bodies}{enums:?}{ambiguous_enums:?}"
+            "{scripts:?}{events:?}{ambiguous_events:?}{states:?}{ambiguous_fields:?}{functions:?}{ambiguous_functions:?}{bodies}{kinds:?}"
         );
         Self {
             scripts,
@@ -240,8 +227,7 @@ impl Project {
             ambiguous_events,
             states,
             ambiguous_fields,
-            enums,
-            ambiguous_enums,
+            kinds,
             functions,
             ambiguous_functions,
             key,
@@ -326,12 +312,7 @@ impl Project {
         for (state, field) in &self.ambiguous_fields {
             environment.add_ambiguous_state_field(state.clone(), field.clone());
         }
-        for (name, variants) in &self.enums {
-            environment.add_enum(name.clone(), variants.clone());
-        }
-        for name in &self.ambiguous_enums {
-            environment.add_ambiguous_enum(name.clone());
-        }
+        self.kinds.describe(environment);
         for (name, function) in &self.functions {
             environment.add_shared_function(name.clone(), function.clone());
         }
@@ -537,5 +518,6 @@ fn literal_type(initializer: Option<&decay_syntax::Expr>) -> Type {
     }
 }
 
+mod kinds;
 #[cfg(test)]
 mod tests;

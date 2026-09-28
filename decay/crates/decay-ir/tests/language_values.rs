@@ -1,4 +1,4 @@
-//! Does the language reference describe its enums, its text and its lists?
+//! Does the language reference describe its enums, text, lists and structs?
 //!
 //! The same contract as `language_reference.rs`, split from it by size: when
 //! one of these fails, the language changed and `decay/LANGUAGE.md` is now
@@ -159,4 +159,51 @@ fn lists_and_ranges_do_what_the_reference_says() {
         "a range of something but numbers",
         "script T { fn f() { for i in 0..true { } } }",
     );
+}
+
+#[test]
+fn structs_do_what_the_reference_says() {
+    accepted(
+        "a struct built, compared, walked in a list and written through its holder",
+        r#"struct Offer { index: f32, weight: f32, name: String }
+         struct Slot { offer: Offer, at: Vec2, cards: List<f32> }
+         script T {
+             var offers: List<Offer> = [];
+             var best = Offer(index: -1.0, weight: 0.0, name: "none");
+             var slot = Slot(offer: Offer(name: "a", index: 1.0, weight: 2.0), at: Vec2(0.0, 0.0), cards: []);
+             fn f(index: f32) -> bool {
+                 offers.push(Offer(index: index, weight: 1.0, name: "module " + index));
+                 for offer in offers { if offer.weight > best.weight { best = offer; } }
+                 best.weight += 1.0;
+                 this.slot.offer.name = "Nova";
+                 slot.at.x += 1.0;
+                 slot.cards.push(1.0);
+                 var o = offers[0];
+                 o.weight = 2.0;
+                 offers[0] = o;
+                 return best == slot.offer;
+             }
+         }"#,
+    );
+    rejected(
+        "a field left out",
+        "struct P { a: f32, b: f32 } script T { fn f() { let p = P(a: 1.0); } }",
+    );
+    rejected(
+        "positional arguments",
+        "struct P { a: f32 } script T { fn f() { let p = P(1.0); } }",
+    );
+    rejected(
+        "writing a field of a `let`",
+        "struct P { a: f32 } script T { fn f() { let p = P(a: 1.0); p.a = 2.0; } }",
+    );
+    rejected(
+        "writing a field of a list's element in place",
+        "struct P { a: f32 } script T { fn f() { var ps = [P(a: 1.0)]; ps[0].a = 2.0; } }",
+    );
+    rejected(
+        "joining a struct to text",
+        r#"struct P { a: f32 } script T { fn f() { let s = "p " + P(a: 1.0); } }"#,
+    );
+    rejected("a struct with no fields", "struct P { } script T { }");
 }

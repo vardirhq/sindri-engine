@@ -43,6 +43,9 @@ impl Analyzer<'_, '_> {
         if let Some(variant) = self.variant_type(object_type, field, span) {
             return variant;
         }
+        if let Some(field_type) = self.struct_field_type(object_type, field, span) {
+            return field_type;
+        }
         let object_type = object_type.clone();
         self.check_ambiguous_use(&object_type, field, span);
         // A collection's length belongs to the value, not to a path the host

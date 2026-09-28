@@ -20,12 +20,14 @@ use crate::ir::{ContainerKind, Instruction, IrContainer, IrField, IrFunction, Ir
 #[allow(clippy::zero_sized_map_values)]
 pub(crate) struct Lowerer<'a> {
     value_members: &'a ValueMembers,
+    structs: &'a std::collections::BTreeMap<String, Vec<String>>,
 }
 
 impl<'a> Lowerer<'a> {
     pub(crate) fn lower_program(analysis: &'a Analysis) -> IrProgram {
         let lowerer = Self {
             value_members: &analysis.value_members,
+            structs: &analysis.structs,
         };
         let containers = analysis
             .program
@@ -40,7 +42,11 @@ impl<'a> Lowerer<'a> {
                 }
                 // A declaration and nothing else: an emit is a call the host
                 // answers, and a handler is a function of the script it is in.
-                Item::Event(_) | Item::State(_) | Item::Function(_) | Item::Enum(_) => None,
+                Item::Event(_)
+                | Item::State(_)
+                | Item::Function(_)
+                | Item::Enum(_)
+                | Item::Struct(_) => None,
             })
             .collect();
 
@@ -61,6 +67,12 @@ impl<'a> Lowerer<'a> {
             program.link(shared);
         }
         program
+    }
+
+    /// A struct's fields in declared order; empty for a name the analysis
+    /// already refused.
+    pub(super) fn struct_fields(&self, name: &str) -> Vec<String> {
+        self.structs.get(name).cloned().unwrap_or_default()
     }
 
     /// What the analysis decided a member read at this span is, if anything.

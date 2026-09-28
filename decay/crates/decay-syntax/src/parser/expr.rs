@@ -132,6 +132,10 @@ impl Parser<'_> {
                 };
                 continue;
             }
+            if self.at(&TokenKind::LeftParen) && self.at_named_argument(1) {
+                expr = self.parse_construct(expr)?;
+                continue;
+            }
             if self.consume_simple(&TokenKind::LeftParen).is_some() {
                 let mut args = Vec::new();
                 if !self.at(&TokenKind::RightParen) {
@@ -157,6 +161,51 @@ impl Parser<'_> {
             break;
         }
         Some(expr)
+    }
+
+    /// Whether the token `ahead` of the current one starts `name:` — a
+    /// struct's field, which is what makes `Card(root: e)` a construction
+    /// rather than a call.
+    fn at_named_argument(&self, ahead: usize) -> bool {
+        matches!(
+            self.tokens
+                .get(self.cursor + ahead)
+                .map(|token| &token.kind),
+            Some(TokenKind::Identifier(_))
+        ) && matches!(
+            self.tokens
+                .get(self.cursor + ahead + 1)
+                .map(|token| &token.kind),
+            Some(TokenKind::Colon)
+        )
+    }
+
+    /// `Card(root: e, name: "Arc")`, the current token being the `(`.
+    fn parse_construct(&mut self, callee: Expr) -> Option<Expr> {
+        self.advance();
+        let mut fields = Vec::new();
+        while !self.at(&TokenKind::RightParen) && !self.at(&TokenKind::Eof) {
+            let (field, span) = self.expect_identifier("expected a field name")?;
+            self.expect_simple(&TokenKind::Colon, "expected `:` after the field's name")?;
+            let value = self.parse_expression()?;
+            fields.push((field, span, value));
+            if self.consume_simple(&TokenKind::Comma).is_none() {
+                break;
+            }
+        }
+        let end = self.expect_simple(&TokenKind::RightParen, "expected `)` after the fields")?;
+        let span = callee.span.join(end);
+        let ExprKind::Identifier(name) = callee.kind else {
+            self.error_span(
+                callee.span,
+                "only a struct's name is built with named fields",
+            );
+            return None;
+        };
+        Some(Expr {
+            kind: ExprKind::Construct { name, fields },
+            span,
+        })
     }
 
     pub(super) fn parse_primary(&mut self) -> Option<Expr> {

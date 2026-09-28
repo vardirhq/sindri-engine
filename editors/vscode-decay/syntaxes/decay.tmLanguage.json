@@ -18,6 +18,7 @@
       { "match": "\\b(script|component)\\s+([A-Za-z_][A-Za-z0-9_]*)", "captures": { "1": { "name": "storage.type.decay" }, "2": { "name": "entity.name.type.decay" } } },
       { "match": "\\b(event)\\s+([A-Za-z_][A-Za-z0-9_]*)", "captures": { "1": { "name": "storage.type.event.decay" }, "2": { "name": "entity.name.type.event.decay" } } },
       { "match": "\\b(enum)\\s+([A-Za-z_][A-Za-z0-9_]*)", "captures": { "1": { "name": "storage.type.enum.decay" }, "2": { "name": "entity.name.type.enum.decay" } } },
+      { "match": "\\b(struct)\\s+([A-Za-z_][A-Za-z0-9_]*)", "captures": { "1": { "name": "storage.type.struct.decay" }, "2": { "name": "entity.name.type.struct.decay" } } },
       { "match": "\\b(state)\\s+([A-Za-z_][A-Za-z0-9_]*)", "captures": { "1": { "name": "storage.type.state.decay" }, "2": { "name": "entity.name.type.state.decay" } } }
     ] },
     "members": { "patterns": [

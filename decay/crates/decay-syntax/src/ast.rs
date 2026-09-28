@@ -18,6 +18,9 @@ pub enum Item {
     /// `enum Phase { Lobby, Countdown, Play }`: a type whose values are the
     /// variants it names, and nothing else.
     Enum(EnumDecl),
+    /// `struct Card { root: Entity, name: String }`: a value made of named,
+    /// typed fields.
+    Struct(StructDecl),
     /// `fn half(size: f32) -> f32 { ... }` outside any container: a function
     /// the file's scripts call by name, with no `this`. Written `shared fn`,
     /// every script in the project may call it.
@@ -29,6 +32,22 @@ pub enum Item {
 pub struct EnumDecl {
     pub name: String,
     pub variants: Vec<(String, Span)>,
+    pub span: Span,
+}
+
+/// A declared struct: its name, and its fields in order.
+#[derive(Debug, Clone, PartialEq)]
+pub struct StructDecl {
+    pub name: String,
+    pub fields: Vec<StructField>,
+    pub span: Span,
+}
+
+/// One field of a struct: a name and the type it holds.
+#[derive(Debug, Clone, PartialEq)]
+pub struct StructField {
+    pub name: String,
+    pub ty: TypeRef,
     pub span: Span,
 }
 
@@ -287,6 +306,11 @@ pub enum ExprKind {
         args: Vec<Expr>,
     },
     Group(Box<Expr>),
+    /// `Card(root: e, name: "Arc")`: a struct, every field named.
+    Construct {
+        name: String,
+        fields: Vec<(String, Span, Expr)>,
+    },
     /// `[a, b, c]`: a list of what is written, in order.
     List(Vec<Expr>),
     /// `start..end`: the whole numbers from `start` up to, not including,

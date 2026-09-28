@@ -43,12 +43,13 @@ This is the most important Sindri/Decay distinction.
 | `Event.emit(args)` / `on Event(args) { }` | Emits a declared event to every script handling it, delivered after the pass | During gameplay |
 | `Timer(seconds)` in a field, read with `.done` / `.left` / `.progress` | A countdown that runs down on its own before each `update` | Any time |
 | `shared fn name(...)` at the top of any `.decay` file (a plain top-level `fn` is that file's only) | A helper every script calls by name, with no `this` | Any time |
+| `struct Card { name: String, weight: f32 }`, `Card(name: "Arc", weight: 1.0)`, `card.weight` | Values that belong together, as one; copied where assigned | Any time |
 | `var xs: List<f32> = [];`, `xs.push(v)`, `for i in 0..n` | A list the script owns, changed in place; a range walked without building one | Any time |
 | `"Score " + score`, `s.contains("x")`, `s.slice(0, 3)` | Joins text with numbers, flags, vectors and variants; asks text by character | Any time |
 | `enum Phase { Lobby, Play }` in any file, `match p { Phase.Lobby => { } _ => { } }` | A named set of values in place of numbers; `match` must cover every variant or end with `_` | Any time |
 | `Game.field` (declared with `state Game { var field: f32 = 0.0; }`) | Reads or writes a value the whole game shares, checked | Any time |
 
-Prefer the typed forms in the last nine rows: a misspelt name or a wrong value
+Prefer the typed forms in the last ten rows: a misspelt name or a wrong value
 is a compile error rather than a silent fallback.
 
 Do not use `set_property` as a setter for a running script:

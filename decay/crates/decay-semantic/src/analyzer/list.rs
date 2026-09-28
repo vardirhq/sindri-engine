@@ -4,7 +4,7 @@
 //! `push`, `pop`, `xs[i] = v` — is made to the list one variable or field
 //! holds, and needs that variable or field to be one the script may change.
 
-use decay_syntax::{Expr, ExprKind, ListOp, Span};
+use decay_syntax::{Expr, ListOp, Span};
 
 use crate::diagnostic::ValueMember;
 use crate::types::{FunctionType, Type};
@@ -144,19 +144,7 @@ impl Analyzer<'_, '_> {
         } else {
             format!("`{what}` can change it")
         };
-        let place = match &object.kind {
-            ExprKind::Group(inner) => return self.check_list_place(inner, what),
-            ExprKind::Identifier(name) => self
-                .lookup(name)
-                .map(|symbol| (name.clone(), symbol.mutable)),
-            ExprKind::Member {
-                object: inner,
-                field,
-            } if matches!(&inner.kind, ExprKind::Identifier(root) if root == "this") => self
-                .own_field(field)
-                .map(|symbol| (format!("this.{field}"), symbol.mutable)),
-            _ => None,
-        };
+        let place = self.place_root(object);
         match place {
             Some((_, true)) => {}
             Some((name, false)) => self.error(
