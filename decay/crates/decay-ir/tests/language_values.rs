@@ -1,4 +1,4 @@
-//! Does the language reference describe its enums and its text?
+//! Does the language reference describe its enums, its text and its lists?
 //!
 //! The same contract as `language_reference.rs`, split from it by size: when
 //! one of these fails, the language changed and `decay/LANGUAGE.md` is now
@@ -106,5 +106,57 @@ fn text_does_what_the_reference_says() {
     rejected(
         "a text method that does not exist",
         r#"script T { fn f() -> f32 { return "ab".size; } }"#,
+    );
+}
+
+#[test]
+fn lists_and_ranges_do_what_the_reference_says() {
+    accepted(
+        "a list written, walked by a range, asked and changed",
+        r#"script T {
+             var held: List<f32> = [];
+             fn f() -> f32 {
+                 var names = ["a", "b"];
+                 names[0] = "c";
+                 names.insert(1, "d");
+                 names.push("e");
+                 let gone: String = names.remove_at(0) + names.pop();
+                 for i in 0..names.length { held.push(i); }
+                 if names.contains("d") { held.clear(); }
+                 return names.index_of("d") + held.length;
+             }
+         }"#,
+    );
+    accepted(
+        "`len` as the older spelling of `length`",
+        "script T { fn f() -> f32 { return [1.0].len; } }",
+    );
+    accepted(
+        "`Array<T>` as the older spelling of `List<T>`",
+        "script T { var a: Array<f32> = [1.0]; }",
+    );
+    rejected(
+        "a list where a number goes",
+        "script T { fn f() { let a: f32 = [1.0]; } }",
+    );
+    rejected(
+        "a list of two types",
+        r#"script T { fn f() { let a = [1.0, "b"]; } }"#,
+    );
+    rejected(
+        "changing a `let` list",
+        "script T { fn f() { let a = [1.0]; a.push(2.0); } }",
+    );
+    rejected(
+        "changing a list that is not in a variable",
+        "script T { fn f() { [1.0].push(2.0); } }",
+    );
+    rejected(
+        "calling `length`",
+        "script T { fn f() -> f32 { return [1.0].length(); } }",
+    );
+    rejected(
+        "a range of something but numbers",
+        "script T { fn f() { for i in 0..true { } } }",
     );
 }

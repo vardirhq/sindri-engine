@@ -210,11 +210,11 @@ Names in scope without qualification. Decay has no imports, so each of these is 
 ### `Physics`
 
 - `apply_impulse(Entity, f32, f32)` → `unit`
-- `collision_started()` → `Array<Entity>`
-- `collision_stopped()` → `Array<Entity>`
+- `collision_started()` → `List<Entity>`
+- `collision_stopped()` → `List<Entity>`
 - `connect_distance(Entity, Entity, f32)` → `unit`
-- `sensor_entered()` → `Array<Entity>`
-- `sensor_exited()` → `Array<Entity>`
+- `sensor_entered()` → `List<Entity>`
+- `sensor_exited()` → `List<Entity>`
 - `set_velocity(Entity, f32, f32)` → `unit`
 - `velocity_x(Entity)` → `f32`
 - `velocity_y(Entity)` → `f32`
@@ -252,7 +252,7 @@ The host names this type but has not described its members.
 ### `Random`
 
 - `int(f32, f32)` → `f32`
-- `pick(Array<Entity>)` → `Entity`
+- `pick(List<Entity>)` → `Entity`
 - `range(f32, f32)` → `f32`
 - `seed(f32)` → `unit`
 - `value()` → `f32`
@@ -364,4 +364,4 @@ The host names this type but has not described its members.
 - `spawn(Prefab)` → `Entity`
 - `spawn_child(Prefab, Entity)` → `Entity`
 - `take_signal(String)` → `f32`
-- `with_tag(String)` → `Array<Entity>`
+- `with_tag(String)` → `List<Entity>`

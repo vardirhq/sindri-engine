@@ -42,6 +42,8 @@ pub enum ValueMember {
     Construct(usize),
     /// A vector property or method: `v.length`, `a.dot(b)`.
     Vector(decay_syntax::VectorOp),
+    /// A list method: `xs.push(v)`, `xs.contains(v)`.
+    List(decay_syntax::ListOp),
     /// A text property or method: `s.length`, `s.contains(part)`.
     Text(decay_syntax::StringOp),
     /// Starting a timer: `Timer(seconds)`.

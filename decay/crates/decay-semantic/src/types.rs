@@ -6,15 +6,33 @@ use std::collections::HashMap;
 use decay_syntax::TypeRef;
 
 /// How a collection type is spelled in Decay source.
+pub const LIST: &str = "List";
+
+/// The collection type's older spelling, which still means the same type.
 pub const ARRAY: &str = "Array";
 
-/// The member a collection offers.
+/// Whether a written type name is the collection type.
+#[must_use]
+pub fn is_list(name: &str) -> bool {
+    name == LIST || name == ARRAY
+}
+
+/// A collection's size, as text's and a vector's length are spelled.
 ///
 /// A property rather than a `len(x)` global, because Decay has no modules and
 /// every global name added is one a script can no longer use for its own. A
 /// length is a property of the value, and spelling it as one costs nobody a
 /// name.
-pub const LENGTH: &str = "len";
+pub const LENGTH: &str = "length";
+
+/// A collection's size as it was first spelled, which still works.
+pub const OLD_LENGTH: &str = "len";
+
+/// Whether a member name asks a collection its size.
+#[must_use]
+pub fn is_length(name: &str) -> bool {
+    name == LENGTH || name == OLD_LENGTH
+}
 
 /// How the two vector types are spelled. Language types rather than host
 /// ones: a vector is a value a script builds, adds and keeps, which a host
@@ -89,7 +107,7 @@ impl Type {
             // than a diagnostic. The analyzer reports the missing argument
             // where the type was written; treating it as unknown here keeps
             // one mistake from cascading into every use of the binding.
-            ARRAY => Self::Array(Box::new(
+            LIST | ARRAY => Self::Array(Box::new(
                 reference
                     .argument
                     .as_ref()
@@ -150,7 +168,7 @@ impl Type {
             Self::Vec2 => Cow::Borrowed(VEC2),
             Self::Vec3 => Cow::Borrowed(VEC3),
             Self::Timer => Cow::Borrowed(TIMER),
-            Self::Array(element) => Cow::Owned(format!("{ARRAY}<{}>", element.display_name())),
+            Self::Array(element) => Cow::Owned(format!("{LIST}<{}>", element.display_name())),
             Self::Unknown => Cow::Borrowed("unknown"),
         }
     }

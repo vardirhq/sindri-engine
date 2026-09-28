@@ -24,7 +24,7 @@ script Hero {
 
     fn start() {
         Game.coins = 0.0;
-        Game.coins_total = World.with_tag("coin").len;
+        Game.coins_total = World.with_tag("coin").length;
         Game.won = false;
         Game.falls = 0.0;
     }

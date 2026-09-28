@@ -5,6 +5,9 @@
 //! host or an instance, a function in `path`.
 
 mod call;
+mod list;
+
+pub use list::LIST_LIMIT;
 mod path;
 
 use std::collections::HashMap;
@@ -84,9 +87,14 @@ pub(super) struct Frame {
 }
 
 /// One `for` in progress.
-struct Walk {
-    over: std::rc::Rc<Vec<Value>>,
-    next: usize,
+enum Walk {
+    /// Over a collection's elements, by position.
+    Elements {
+        over: std::rc::Rc<Vec<Value>>,
+        next: usize,
+    },
+    /// Over a range's whole numbers, the next one and where it stops.
+    Range { next: f64, end: f64 },
 }
 
 impl Frame {
@@ -288,18 +296,40 @@ impl<'a, H: Host> Runtime<'a, H> {
                     .elements()
                     .ok_or_else(|| RuntimeError::NotACollection(describe(&object)))?
                     .clone();
-                frame.walks.push(Walk { over, next: 0 });
+                frame.walks.push(Walk::Elements { over, next: 0 });
+            }
+            Instruction::IterRange => {
+                let end = frame.stack.pop().ok_or(RuntimeError::StackUnderflow)?;
+                let start = frame.stack.pop().ok_or(RuntimeError::StackUnderflow)?;
+                let (Value::Number(start), Value::Number(end)) = (&start, &end) else {
+                    return Err(RuntimeError::IndexNotANumber(describe(&start)));
+                };
+                frame.walks.push(Walk::Range {
+                    next: *start,
+                    end: *end,
+                });
             }
             Instruction::IterNext(target) => {
                 let walk = frame.walks.last_mut().ok_or(RuntimeError::StackUnderflow)?;
-                let Some(value) = walk.over.get(walk.next).cloned() else {
+                let value = match walk {
+                    Walk::Elements { over, next } => {
+                        let value = over.get(*next).cloned();
+                        *next += 1;
+                        value
+                    }
+                    Walk::Range { next, end } => (*next < *end).then(|| {
+                        let value = Value::Number(*next);
+                        *next += 1.0;
+                        value
+                    }),
+                };
+                let Some(value) = value else {
                     frame.walks.pop();
                     if *target > length {
                         return Err(RuntimeError::InvalidJump(*target));
                     }
                     return Ok(Some(*target));
                 };
-                walk.next += 1;
                 frame.stack.push(value);
             }
             Instruction::IterEnd => {
@@ -467,9 +497,13 @@ impl<'a, H: Host> Runtime<'a, H> {
                     ip = *target;
                     continue;
                 }
+                Instruction::MakeList(count) => list::make(frame, *count)?,
+                Instruction::ListRead(op) => list::read(frame, *op)?,
+                Instruction::ListChange { path, op } => list::change(fields, frame, path, *op)?,
                 Instruction::Index
                 | Instruction::Length
                 | Instruction::IterBegin
+                | Instruction::IterRange
                 | Instruction::IterNext(_)
                 | Instruction::IterEnd => {
                     if let Some(target) =

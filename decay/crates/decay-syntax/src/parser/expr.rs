@@ -186,6 +186,22 @@ impl Parser<'_> {
                 self.advance();
                 ExprKind::Null
             }
+            TokenKind::LeftBracket => {
+                self.advance();
+                let mut elements = Vec::new();
+                while !self.at(&TokenKind::RightBracket) {
+                    elements.push(self.parse_expression()?);
+                    if self.consume_simple(&TokenKind::Comma).is_none() {
+                        break;
+                    }
+                }
+                let end =
+                    self.expect_simple(&TokenKind::RightBracket, "expected `]` after a list")?;
+                return Some(Expr {
+                    span: token.span.join(end),
+                    kind: ExprKind::List(elements),
+                });
+            }
             TokenKind::LeftParen => {
                 self.advance();
                 let inner = self.parse_expression()?;

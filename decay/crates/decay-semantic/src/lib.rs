@@ -20,7 +20,7 @@ use decay_syntax::parse;
 
 use analyzer::Analyzer;
 
-pub use decay_syntax::{StringOp, TimerProperty, VectorOp};
+pub use decay_syntax::{ListOp, StringOp, TimerProperty, VectorOp};
 pub use diagnostic::{Analysis, Diagnostic, DiagnosticPhase, ValueMember, ValueMembers};
 pub use environment::{Environment, ExternalSymbol, StateField};
 pub use types::{COMPONENTS, EMIT, FunctionType, HostType, TIMER, Type, enum_type, event_type};

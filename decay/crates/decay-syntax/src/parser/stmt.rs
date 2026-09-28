@@ -5,7 +5,7 @@
 
 use crate::{
     TokenKind,
-    ast::{Block, Stmt},
+    ast::{Block, Expr, ExprKind, Stmt},
 };
 
 use super::Parser;
@@ -207,7 +207,19 @@ impl Parser<'_> {
         let start = self.expect_simple(&TokenKind::For, "expected `for`")?;
         let (name, name_span) = self.expect_identifier("expected a name for each element")?;
         self.expect_simple(&TokenKind::In, "expected `in` after the loop variable")?;
-        let iterable = self.parse_expression()?;
+        let mut iterable = self.parse_expression()?;
+        // A range is written only here, as what a `for` walks, so it needs
+        // no place in the precedence table.
+        if self.consume_simple(&TokenKind::DotDot).is_some() {
+            let end = self.parse_expression()?;
+            iterable = Expr {
+                span: iterable.span.join(end.span),
+                kind: ExprKind::Range {
+                    start: Box::new(iterable),
+                    end: Box::new(end),
+                },
+            };
+        }
         let body = self.parse_block()?;
         let span = start.join(body.span);
         Some(Stmt::For {

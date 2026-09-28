@@ -35,6 +35,8 @@ impl Analyzer<'_, '_> {
             ExprKind::Member { object, field } => self.member_type(object, field, expr.span),
             ExprKind::Call { callee, args } => self.call_type(callee, args, expr.span),
             ExprKind::Index { object, index } => self.index_type(object, index),
+            ExprKind::List(elements) => self.list_literal_type(elements),
+            ExprKind::Range { start, end } => self.stray_range_type(start, end, expr.span),
         }
     }
 
@@ -180,6 +182,7 @@ impl Analyzer<'_, '_> {
                 }
                 self.member_of(object, &object_type, field, target.span)
             }
+            ExprKind::Index { object, index } => self.list_element_target_type(object, index),
             _ => {
                 self.error(target.span, "invalid assignment target".to_owned());
                 Type::Unknown

@@ -692,6 +692,10 @@ fires, and an item without a trigger is not ready to be planned.
 - [x] Strings — joining with `+` (numbers, flags, vectors and variants
   spelled as they read), and `length`, `contains`, `starts_with`,
   `ends_with`, `find`, `slice`, `replace`, case and trimming
+- [x] Lists and ranges — `[a, b]`, `push`, `pop`, `insert`, `remove_at`,
+  `clear`, `contains`, `index_of`, element assignment, and `for i in 0..n`
+- [ ] Maps, and sorting or filtering a list. Trigger: a script keeping two
+  lists in step, or sorting one by hand
 - [ ] Number formatting (`{:.2}`) and interpolation in text. Trigger: a script
   that needs a fixed number of decimals somewhere a `sindri.ui.text` template
   cannot reach

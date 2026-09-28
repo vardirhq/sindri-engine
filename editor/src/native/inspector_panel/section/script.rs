@@ -174,7 +174,7 @@ pub(super) fn script_exports_section(
 ///
 /// A collection stores as null for a sharper reason: there is no literal for
 /// one and nothing but the host makes one, so an authored collection is not a
-/// thing that can exist. A field declared `Array<T>` has no authorable value
+/// thing that can exist. A field declared `List<T>` has no authorable value
 /// and the panel shows it as empty, which is the truth.
 pub(super) fn script_value_json(value: &ScriptValue) -> Value {
     match value {

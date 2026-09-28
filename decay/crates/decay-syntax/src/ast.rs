@@ -277,7 +277,7 @@ pub enum ExprKind {
         object: Box<Expr>,
         field: String,
     },
-    /// `items[index]`, over a collection the host handed back.
+    /// `items[index]`, over a list.
     Index {
         object: Box<Expr>,
         index: Box<Expr>,
@@ -287,6 +287,81 @@ pub enum ExprKind {
         args: Vec<Expr>,
     },
     Group(Box<Expr>),
+    /// `[a, b, c]`: a list of what is written, in order.
+    List(Vec<Expr>),
+    /// `start..end`: the whole numbers from `start` up to, not including,
+    /// `end`. Written only as what a `for` walks.
+    Range {
+        start: Box<Expr>,
+        end: Box<Expr>,
+    },
+}
+
+/// What a list can be asked, or told to change.
+///
+/// A change — `push`, `pop`, `insert`, `remove_at`, `clear` — is always a
+/// call, never a property, and is made to the list a variable or field holds,
+/// in place.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub enum ListOp {
+    /// `xs.push(value)`: adds `value` at the end.
+    Push,
+    /// `xs.pop()`: takes the last element off and gives it back.
+    Pop,
+    /// `xs.insert(index, value)`: puts `value` at `index`, moving the rest
+    /// along.
+    Insert,
+    /// `xs.remove_at(index)`: takes the element at `index` out and gives it
+    /// back.
+    RemoveAt,
+    /// `xs.clear()`: empties it.
+    Clear,
+    /// `xs.contains(value)`: whether any element equals `value`.
+    Contains,
+    /// `xs.index_of(value)`: where `value` first is, or `-1`.
+    IndexOf,
+    /// `xs[index] = value`: what an element assignment lowers to. Not a name
+    /// a script can call.
+    SetAt,
+}
+
+impl ListOp {
+    /// Every operation a script can call by name, with that name and how
+    /// many arguments it takes after the list itself.
+    pub const ALL: [(Self, &'static str, usize); 7] = [
+        (Self::Push, "push", 1),
+        (Self::Pop, "pop", 0),
+        (Self::Insert, "insert", 2),
+        (Self::RemoveAt, "remove_at", 1),
+        (Self::Clear, "clear", 0),
+        (Self::Contains, "contains", 1),
+        (Self::IndexOf, "index_of", 1),
+    ];
+
+    /// The operation a member name spells, and how many arguments it takes.
+    #[must_use]
+    pub fn named(name: &str) -> Option<(Self, usize)> {
+        Self::ALL
+            .into_iter()
+            .find(|(_, spelled, _)| *spelled == name)
+            .map(|(op, _, arity)| (op, arity))
+    }
+
+    /// How many arguments it takes after the list.
+    #[must_use]
+    pub const fn arity(self) -> usize {
+        match self {
+            Self::Pop | Self::Clear => 0,
+            Self::Push | Self::RemoveAt | Self::Contains | Self::IndexOf => 1,
+            Self::Insert | Self::SetAt => 2,
+        }
+    }
+
+    /// Whether it changes the list rather than only reading it.
+    #[must_use]
+    pub const fn changes(self) -> bool {
+        !matches!(self, Self::Contains | Self::IndexOf)
+    }
 }
 
 /// What a vector can be asked beyond its components and arithmetic.

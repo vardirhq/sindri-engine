@@ -43,9 +43,11 @@ script Stats {
         clear_flag("transform_storm"); clear_flag("transform_horizon"); clear_flag("transform_recursive"); clear_flag("transform_rail_prism"); clear_flag("transform_critical_mass");
         clear_flag("transform_thunder_choir"); clear_flag("transform_razor_prism"); clear_flag("transform_guardian_swarm"); clear_flag("transform_singularity_court");
         clear_specials();
-        Game.set("owned_modules_0", 0.0); Game.set("owned_modules_1", 0.0); Game.set("owned_modules_2", 0.0); Game.set("owned_modules_3", 0.0);
+        for slot in 0..4 {
+            Game.set("owned_modules_" + slot, 0.0);
+            Game.set("offer_" + slot, -1.0);
+        }
         Game.set("black_modules_taken", 0.0); Game.set("picked_module", -1.0);
-        Game.set("offer_0", -1.0); Game.set("offer_1", -1.0); Game.set("offer_2", -1.0); Game.set("offer_3", -1.0);
         Game.set("player_aura_dps", 0.0); Game.set("player_aura_radius", 0.0); Game.set("orbit_loom_dps", 0.0);
         Game.set("grave_echo_time", 0.0); Game.set("companion_spawn_reset", 1.0); Game.set("last_bulkhead_used", 0.0);
         Game.set("constellation_count", 0.0); Game.set("aegis_reservoir", 0.0);

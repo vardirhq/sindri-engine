@@ -4,7 +4,7 @@
 //! control flow, values, names, member paths, and calls, and nothing
 //! about what a Transform or an Entity is.
 
-use decay_syntax::{BinaryOp, StringOp, TimerProperty, UnaryOp, VectorOp};
+use decay_syntax::{BinaryOp, ListOp, StringOp, TimerProperty, UnaryOp, VectorOp};
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct IrProgram {
@@ -152,6 +152,29 @@ pub enum Instruction {
     /// what the length of a value is. The analyzer says which member reads are
     /// this one; see `decay_semantic::ValueMember`.
     Length,
+    /// Pops this many values and pushes the list of them, the first popped
+    /// last.
+    MakeList(usize),
+    /// Pops the end and then the start of a range and opens a walk over the
+    /// whole numbers from the start up to, not including, the end.
+    ///
+    /// Walked like a collection, but never made into one: `0..1000000` holds
+    /// two numbers, not a million.
+    IterRange,
+    /// A list question: pops the arguments, then the list, and pushes the
+    /// answer.
+    ListRead(ListOp),
+    /// A list change, made in place to the list a variable or field holds:
+    /// pops the arguments and pushes what the change gives back — the
+    /// element taken, the element set, or unit.
+    ///
+    /// In place rather than a load, a change and a store, because a list is
+    /// shared until it is changed: loading it would make the variable's copy
+    /// the second holder, and every `push` would copy the whole list.
+    ListChange {
+        path: Path,
+        op: ListOp,
+    },
     /// Pops a collection and opens a walk over it.
     ///
     /// A `for` loop is lowered to this rather than to an index and a counter,

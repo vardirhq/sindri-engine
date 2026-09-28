@@ -169,7 +169,7 @@ fn type_name(ty: &Type) -> String {
         Type::Null => "null".to_owned(),
         Type::Named(name) => name.clone(),
         Type::Vec2 | Type::Vec3 | Type::Timer => ty.display_name().into_owned(),
-        Type::Array(element) => format!("Array<{}>", type_name(element)),
+        Type::Array(element) => format!("List<{}>", type_name(element)),
         Type::Unknown => "unknown".to_owned(),
     }
 }
@@ -231,7 +231,7 @@ mod tests {
     fn an_array_type_reads_as_decay_writes_it() {
         assert_eq!(
             type_name(&Type::Array(Box::new(Type::Named("Entity".to_owned())))),
-            "Array<Entity>"
+            "List<Entity>"
         );
     }
 }

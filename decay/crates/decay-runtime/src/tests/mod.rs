@@ -4,6 +4,7 @@ mod collections;
 mod events;
 mod execution;
 mod fields;
+mod lists;
 mod loops;
 mod matching;
 mod scope;
