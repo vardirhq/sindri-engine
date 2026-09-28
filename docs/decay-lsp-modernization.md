@@ -79,6 +79,9 @@ These are defects or sources of actively misleading tooling.
         hover on a local shows its type.
   - [x] Offer the project's structs as completions, show their fields on
         hover, and list a file's structs and fields as document symbols.
+  - [x] Offer the file's and the project's constants as completions, show
+        each one's type and worked-out value on hover, and list a file's
+        constants as document symbols.
   - [x] Offer the project's enums as completions, complete `Enum.` with its
         variants, show them on hover, and list a file's enums and their
         variants as document symbols.

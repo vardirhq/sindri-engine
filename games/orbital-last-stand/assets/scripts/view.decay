@@ -3,6 +3,11 @@
 // units tall on a landscape screen (wide on a portrait one), and whether a
 // thing is inside it.
 
+// What the camera frames, in world units: `sindri.camera.vertical_size` on
+// every scene's camera. One constant rather than a field on every script that
+// asks, so the two cannot drift apart script by script.
+shared const VIEW_SIZE: f32 = 11.0;
+
 shared fn visible_half_x(view_size: f32) -> f32 {
     let aspect = max(Viewport.aspect, 0.001);
     if aspect >= 1.0 { return view_size * 0.5 * aspect; }

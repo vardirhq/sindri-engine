@@ -11,7 +11,6 @@ script HazardAsteroid {
     @export var vy: f32 = 0.5;
     @export let child_count: f32 = 2.0;
     @export let child: Prefab;
-    @export let view_size: f32 = 11.0;
 
     var hp: f32 = 0.0;
     var drift_x: f32 = 0.0;
@@ -78,8 +77,8 @@ script HazardAsteroid {
     }
 
     fn wrap() {
-        let edge_x = visible_half_x(this.view_size) + 1.2;
-        let edge_y = visible_half_y(this.view_size) + 1.2;
+        let edge_x = visible_half_x(VIEW_SIZE) + 1.2;
+        let edge_y = visible_half_y(VIEW_SIZE) + 1.2;
         if this.transform.position.x < -edge_x { this.transform.position.x = edge_x; }
         else if this.transform.position.x > edge_x { this.transform.position.x = -edge_x; }
         if this.transform.position.y < -edge_y { this.transform.position.y = edge_y; }

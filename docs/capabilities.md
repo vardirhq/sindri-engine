@@ -1715,6 +1715,13 @@ type and drawn by the inspector as rows per item and per field. Exercised in
 `crates/sindri-decay/tests/scenes_author_lists_and_structs.rs` and by both
 Orbital games' card names.
 
+A `const` at the top of a file names a value worked out when the project
+compiles — a number, flag, text or enum variant, from literals, operators and
+other constants — and `shared const` makes it every file's. Each use is the
+value written in place. Exercised in
+`crates/sindri-decay/tests/scripts_share_constants.rs` and by both Orbital
+games' `VIEW_SIZE`.
+
 A `struct` in any file is a value type every script builds with named fields
 (`OfferCard(card: c, name: n, blurb: b)`), reads, writes through the `var`
 holding it, and keeps in lists; it is copied where it is assigned. Exercised

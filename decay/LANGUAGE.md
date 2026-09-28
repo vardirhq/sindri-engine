@@ -32,6 +32,7 @@ to change. Nothing here is a compatibility promise.
 - [Events](#events)
 - [State](#state)
 - [Shared functions](#shared-functions)
+- [Constants](#constants)
 - [Enums](#enums)
 - [Structs](#structs)
 - [Statements](#statements)
@@ -169,7 +170,8 @@ item         = ( "script" | "component" ) IDENT "{" { member } "}"
              | "state" IDENT "{" { field } "}"
              | "enum" IDENT "{" [ IDENT { "," IDENT } [ "," ] ] "}"
              | "struct" IDENT "{" [ IDENT ":" type { "," IDENT ":" type } [ "," ] ] "}"
-             | [ "shared" ] function ;
+             | [ "shared" ] function
+             | [ "shared" ] "const" IDENT ":" type "=" expr ";" ;
 member       = { attribute } ( field | function | handler ) ;
 attribute    = "@" IDENT ;
 
@@ -529,6 +531,53 @@ program's; a bare call tries the script's own functions, then the program's
 top-level ones, then the host. A host that describes other files' `shared fn`
 to the analyzer (`Environment::add_shared_function`) and links them makes
 them callable from every file, which is what Sindri does for a project.
+
+---
+
+## Constants
+
+A constant names a value worked out when the file compiles. Declared outside
+any container, it is usable anywhere in its file; marked `shared`, anywhere in
+the project.
+
+```rust
+enum Phase { Lobby, Play }
+
+shared const VIEW_SIZE: f32 = 11.0;               // everyone's
+const HALF: f32 = VIEW_SIZE / 2.0;                // this file's
+const FIRST: Phase = Phase.Lobby;
+const TITLE: String = "Orbital" + " Baked";
+const WIDE: bool = HALF > 4.0 && !false;
+
+script Enemy {
+    var phase: Phase = FIRST;
+    fn update(dt: f32) { if this.transform.position.x > HALF { phase = Phase.Play; } }
+}
+```
+
+- **Always typed, always given a value.** A constant holds `f32`, `bool`,
+  `String` or an enum; a vector, a list, a struct or an entity is a
+  diagnostic.
+- **Worked out when the file compiles.** Its value may use literals, the
+  operators, an enum's variants and other constants, in any order in the file
+  and across files for shared ones. It may not call anything, read a field,
+  or name a local, so its value is the same every time the game runs. Text
+  joins only to text in a constant (`"a" + "b"`); join a number to one where
+  the constant is used. Dividing by zero, and constants that need each other,
+  are diagnostics.
+- **Never changes.** Assigning one is a diagnostic. Every use of a constant is
+  its value written in place, so it costs what the literal would.
+- **One name, once.** Declaring one twice in a file is a diagnostic, and so is
+  a name a container, an event, a state, an enum, a struct, a function or the
+  host already has. A local of the same name hides it, as it hides a field.
+- `const` is special only at the start of an item or right after `shared`
+  there.
+
+**Across files is the host's decision**, as for shared functions. A host that
+works out every file's `shared const` together (`fold_constants`) and
+describes them to the analyzer (`Environment::add_constant`) makes them usable
+in every file, which is what Sindri does for a project; a file's own
+constant of the same name wins in that file.
 
 ---
 
@@ -1055,7 +1104,8 @@ interpolation, parsing text into numbers, conversion functions, list operations 
 `map`, `filter`, `sort` — time, randomness.
 
 **Other:** operator overloading, macros, attributes other than `@export`, block
-comments, doc comments, `const`, `static`, exceptions, `try`, `panic`,
+comments, doc comments, a `const` inside a container or a function, `static`,
+exceptions, `try`, `panic`,
 concurrency, `async`.
 
 ---

@@ -19,10 +19,11 @@
       { "match": "\\b(event)\\s+([A-Za-z_][A-Za-z0-9_]*)", "captures": { "1": { "name": "storage.type.event.decay" }, "2": { "name": "entity.name.type.event.decay" } } },
       { "match": "\\b(enum)\\s+([A-Za-z_][A-Za-z0-9_]*)", "captures": { "1": { "name": "storage.type.enum.decay" }, "2": { "name": "entity.name.type.enum.decay" } } },
       { "match": "\\b(struct)\\s+([A-Za-z_][A-Za-z0-9_]*)", "captures": { "1": { "name": "storage.type.struct.decay" }, "2": { "name": "entity.name.type.struct.decay" } } },
+      { "match": "\\b(const)\\s+([A-Za-z_][A-Za-z0-9_]*)", "captures": { "1": { "name": "storage.type.const.decay" }, "2": { "name": "variable.other.constant.decay" } } },
       { "match": "\\b(state)\\s+([A-Za-z_][A-Za-z0-9_]*)", "captures": { "1": { "name": "storage.type.state.decay" }, "2": { "name": "entity.name.type.state.decay" } } }
     ] },
     "members": { "patterns": [
-      { "name": "storage.modifier.shared.decay", "match": "\\bshared(?=\\s+fn\\b)" },
+      { "name": "storage.modifier.shared.decay", "match": "\\bshared(?=\\s+(fn|const)\\b)" },
       { "match": "\\b(fn)\\s+([A-Za-z_][A-Za-z0-9_]*)", "captures": { "1": { "name": "storage.type.function.decay" }, "2": { "name": "entity.name.function.decay" } } },
       { "match": "\\b(on)\\s+([A-Za-z_][A-Za-z0-9_]*)", "captures": { "1": { "name": "storage.type.event.decay" }, "2": { "name": "entity.name.function.event.decay" } } }
     ] },

@@ -80,7 +80,11 @@ impl Lowerer<'_> {
     pub(super) fn lower_expr(&self, expr: &Expr, instructions: &mut Vec<Instruction>) {
         match &expr.kind {
             ExprKind::Identifier(name) => {
-                instructions.push(Instruction::Load(Path(vec![name.clone()])));
+                if let Some(constant) = self.constant_at(expr.span) {
+                    instructions.push(Instruction::Push(constant));
+                } else {
+                    instructions.push(Instruction::Load(Path(vec![name.clone()])));
+                }
             }
             ExprKind::Number(value) => {
                 instructions.push(Instruction::Push(Constant::Number(*value)));

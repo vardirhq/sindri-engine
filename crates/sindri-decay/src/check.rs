@@ -85,7 +85,8 @@ pub fn check_source_in(source: &str, environment: &decay_semantic::Environment) 
             | Item::State(_)
             | Item::Function(_)
             | Item::Enum(_)
-            | Item::Struct(_) => None,
+            | Item::Struct(_)
+            | Item::Const(_) => None,
         })
         .collect();
     let diagnostics = lowered

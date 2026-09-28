@@ -25,7 +25,7 @@
         "sindri.sprite": { "texture": "textures/player.png#hull-0", "tint": [1.0,1.0,1.0,1.0], "layer": 10 },
         "sindri.physics2d.rigid_body": { "kind": "dynamic", "pose": { "position": [0.0,0.0], "rotation": 0.0 }, "linear_velocity": [0.0,0.0], "angular_velocity": 0.0, "gravity_scale": 0.0, "linear_damping": 0.0, "angular_damping": 0.0, "lock_rotation": true },
         "sindri.physics2d.collider": { "shape": { "shape": "circle", "radius": 0.28 }, "offset": [0.0,0.0], "rotation": 0.0, "sensor": true, "layers": { "memberships": 4, "filter": 2 }, "friction": 0.0, "restitution": 0.0 },
-        "sindri.script": { "source": "scripts/combat-lab-player.decay", "script": "CombatLabPlayer", "properties": { "speed": 5.2, "view_size": 11.0 } }
+        "sindri.script": { "source": "scripts/combat-lab-player.decay", "script": "CombatLabPlayer", "properties": { "speed": 5.2 } }
       }
     },
     {

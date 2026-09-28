@@ -16,7 +16,9 @@
 //! Events are read the same way: an `event` declared in any file is one every
 //! file may emit and handle, and a function declared outside any script is
 //! one every file may call. So is `state`: `state Game { var score: f32 =
-//! 0.0; }` in any file is `Game.score` in every file.
+//! 0.0; }` in any file is `Game.score` in every file. And `shared const ARENA:
+//! f32 = 12.0;` in any file is `ARENA` in every file, worked out here from
+//! every file's shared constants at once, since one may name another's.
 
 use std::collections::{BTreeMap, BTreeSet};
 
@@ -47,6 +49,10 @@ pub struct Project {
     pub(crate) functions: BTreeMap<String, FunctionType>,
     /// Shared functions declared more than once, which nothing may call.
     ambiguous_functions: BTreeSet<String>,
+    /// Shared constants, worked out, by name.
+    pub(crate) constants: BTreeMap<String, decay_semantic::ConstValue>,
+    /// Shared constants declared more than once, which nothing may use.
+    ambiguous_constants: BTreeSet<String>,
     key: String,
 }
 
@@ -149,6 +155,7 @@ impl Project {
         let mut functions = BTreeMap::new();
         let mut kinds = kinds::Kinds::default();
         let mut ambiguous_functions = BTreeSet::new();
+        let mut constants = constants::SharedConstants::default();
         // A caller links a copy of each shared function it can reach, so it
         // must recompile when one's body changes, not only its signature.
         let mut bodies = String::new();
@@ -190,6 +197,10 @@ impl Project {
                         kinds.read(item);
                         continue;
                     }
+                    Item::Const(constant) => {
+                        constants.read(constant);
+                        continue;
+                    }
                     Item::Component(_) => continue,
                 };
                 if scripts
@@ -218,8 +229,15 @@ impl Project {
                 && !states.contains_key(name)
                 && unreserved(reserved, name)
         });
+        let (constants, ambiguous_constants) = constants.fold(&kinds, reserved, |name| {
+            scripts.contains_key(name)
+                || events.contains_key(name)
+                || states.contains_key(name)
+                || functions.contains_key(name)
+                || !unreserved(reserved, name)
+        });
         let key = format!(
-            "{scripts:?}{events:?}{ambiguous_events:?}{states:?}{ambiguous_fields:?}{functions:?}{ambiguous_functions:?}{bodies}{kinds:?}"
+            "{scripts:?}{events:?}{ambiguous_events:?}{states:?}{ambiguous_fields:?}{functions:?}{ambiguous_functions:?}{bodies}{kinds:?}{constants:?}{ambiguous_constants:?}"
         );
         Self {
             scripts,
@@ -230,6 +248,8 @@ impl Project {
             kinds,
             functions,
             ambiguous_functions,
+            constants,
+            ambiguous_constants,
             key,
         }
     }
@@ -318,6 +338,12 @@ impl Project {
         }
         for name in &self.ambiguous_functions {
             environment.add_ambiguous_function(name.clone());
+        }
+        for (name, value) in &self.constants {
+            environment.add_constant(name.clone(), value.clone());
+        }
+        for name in &self.ambiguous_constants {
+            environment.add_ambiguous_constant(name.clone());
         }
     }
 }
@@ -518,6 +544,7 @@ fn literal_type(initializer: Option<&decay_syntax::Expr>) -> Type {
     }
 }
 
+mod constants;
 mod kinds;
 #[cfg(test)]
 mod tests;

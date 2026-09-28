@@ -11,6 +11,7 @@ use crate::{
     },
 };
 
+pub(super) use crate::vocabulary::CONST;
 pub(super) use crate::vocabulary::ENUM;
 /// The words that start an event declaration, a state declaration, a shared
 /// function, and a handler. Contextual rather than keywords: each is only special where no
@@ -255,6 +256,32 @@ impl Parser<'_> {
         Some(Item::Struct(crate::ast::StructDecl {
             name,
             fields,
+            span: start.join(end),
+        }))
+    }
+
+    /// `const ARENA: f32 = 12.0;`: always typed, always given a value.
+    pub(super) fn parse_const(&mut self, shared: bool) -> Option<Item> {
+        let start = self.current().span;
+        self.advance();
+        let (name, name_span) = self.expect_identifier("expected a name after `const`")?;
+        self.expect_simple(
+            &TokenKind::Colon,
+            "expected `:` and the constant's type -- a constant is always typed",
+        )?;
+        let ty = self.parse_type()?;
+        self.expect_simple(
+            &TokenKind::Equal,
+            "expected `=` and the constant's value -- a constant always has one",
+        )?;
+        let value = self.parse_expression()?;
+        let end = self.expect_simple(&TokenKind::Semicolon, "expected `;` after the constant")?;
+        Some(Item::Const(crate::ast::ConstDecl {
+            name,
+            shared,
+            ty,
+            value,
+            name_span,
             span: start.join(end),
         }))
     }

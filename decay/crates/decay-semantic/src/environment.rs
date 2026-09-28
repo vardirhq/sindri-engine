@@ -46,6 +46,11 @@ pub struct Environment {
     pub(crate) shared_functions: HashSet<String>,
     /// Shared functions declared more than once, which no call may name.
     pub(crate) ambiguous_functions: HashSet<String>,
+    /// Shared constants, worked out by the host from every file's
+    /// declarations, by name.
+    pub(crate) constants: HashMap<String, crate::constant::ConstValue>,
+    /// Shared constants declared more than once, which nothing may use.
+    pub(crate) ambiguous_constants: HashSet<String>,
     /// Enums declared somewhere the host can see, with their variants in
     /// order. A program's own are added to these when it is analysed.
     pub(crate) enums: HashMap<String, Vec<String>>,
@@ -147,6 +152,23 @@ impl Environment {
     }
 
     /// Declares an enum every script may name, with its variants in order.
+    /// A `shared const` another file declared, with its worked-out value.
+    pub fn add_constant(&mut self, name: impl Into<String>, value: crate::constant::ConstValue) {
+        self.constants.insert(name.into(), value);
+    }
+
+    /// A shared constant declared in more than one file.
+    pub fn add_ambiguous_constant(&mut self, name: impl Into<String>) {
+        self.ambiguous_constants.insert(name.into());
+    }
+
+    /// Every shared constant this environment knows, with its value.
+    pub fn constants(&self) -> impl Iterator<Item = (&str, &crate::constant::ConstValue)> {
+        self.constants
+            .iter()
+            .map(|(name, value)| (name.as_str(), value))
+    }
+
     pub fn add_enum(&mut self, name: impl Into<String>, variants: Vec<String>) {
         self.enums.insert(name.into(), variants);
     }

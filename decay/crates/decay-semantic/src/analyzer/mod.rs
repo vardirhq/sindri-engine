@@ -5,6 +5,7 @@
 //! arm in the matching leaf, not a change to this file.
 
 mod call;
+mod constant;
 mod enumeration;
 mod event;
 mod expr;
@@ -83,6 +84,15 @@ pub(super) struct Analyzer<'a, 'd> {
     /// Whether the function being analysed is a shared one, which has no
     /// `this` to reach for.
     in_shared_function: bool,
+    /// Every constant this program may name, worked out: the host's shared
+    /// ones, and its own, which win.
+    constants: HashMap<String, crate::constant::ConstValue>,
+    /// This file's own constants, for a tool.
+    pub(crate) own_constants: std::collections::BTreeMap<String, crate::constant::ConstValue>,
+    /// This file's constants that could not be worked out.
+    broken_constants: HashSet<String>,
+    /// Where a constant was named, for the lowering.
+    pub(crate) constant_uses: crate::diagnostic::ConstantUses,
 }
 
 #[allow(clippy::zero_sized_map_values)]
@@ -110,6 +120,10 @@ impl<'a, 'd> Analyzer<'a, 'd> {
             enums: HashMap::new(),
             structs: HashMap::new(),
             in_shared_function: false,
+            constants: HashMap::new(),
+            own_constants: std::collections::BTreeMap::new(),
+            constant_uses: HashMap::new(),
+            broken_constants: HashSet::new(),
         }
     }
 
@@ -130,11 +144,16 @@ impl<'a, 'd> Analyzer<'a, 'd> {
         self.collect_events(program);
         self.collect_states(program);
         self.collect_functions(program);
+        self.collect_constants(program);
 
         for item in &program.items {
             let container = match item {
                 Item::Script(container) | Item::Component(container) => container,
-                Item::Event(_) | Item::State(_) | Item::Enum(_) | Item::Struct(_) => continue,
+                Item::Event(_)
+                | Item::State(_)
+                | Item::Enum(_)
+                | Item::Struct(_)
+                | Item::Const(_) => continue,
                 Item::Function(function) => {
                     self.analyze_shared_function(function);
                     continue;
@@ -171,6 +190,10 @@ impl<'a, 'd> Analyzer<'a, 'd> {
                 return Type::Unknown;
             }
             return symbol.ty.clone();
+        }
+
+        if let Some(constant) = self.constant_type(name, span) {
+            return constant;
         }
 
         if let Some(event) = self.event_name_type(name, span) {

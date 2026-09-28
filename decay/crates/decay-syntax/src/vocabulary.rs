@@ -43,10 +43,15 @@ pub const STATE: &str = "state";
 pub const ENUM: &str = "enum";
 pub const STRUCT: &str = "struct";
 pub const SHARED: &str = "shared";
+pub const CONST: &str = "const";
 pub const ON: &str = "on";
 
 /// Every contextual word, where the parser treats it as one.
-pub const CONTEXTUAL_KEYWORDS: [ContextualWord; 6] = [
+pub const CONTEXTUAL_KEYWORDS: [ContextualWord; 7] = [
+    ContextualWord {
+        word: CONST,
+        position: "the start of an item, or right after `shared` at one",
+    },
     ContextualWord {
         word: EVENT,
         position: "the start of an item",
@@ -65,7 +70,7 @@ pub const CONTEXTUAL_KEYWORDS: [ContextualWord; 6] = [
     },
     ContextualWord {
         word: SHARED,
-        position: "right before `fn` at the start of an item",
+        position: "right before `fn` or `const` at the start of an item",
     },
     ContextualWord {
         word: ON,
@@ -74,7 +79,16 @@ pub const CONTEXTUAL_KEYWORDS: [ContextualWord; 6] = [
 ];
 
 /// The words that may start an item, in the order a diagnostic lists them.
-pub const ITEM_WORDS: [&str; 7] = ["script", "component", ENUM, STRUCT, EVENT, STATE, "fn"];
+pub const ITEM_WORDS: [&str; 8] = [
+    "script",
+    "component",
+    ENUM,
+    STRUCT,
+    EVENT,
+    STATE,
+    CONST,
+    "fn",
+];
 
 /// The attribute that marks a field a scene may author.
 pub const EXPORT: &str = "export";

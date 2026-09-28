@@ -1,4 +1,5 @@
 mod check;
+mod constants;
 mod diagnostics;
 mod project;
 mod protocol;
@@ -295,6 +296,14 @@ impl Server {
                 .map(|(name, _)| completion_item(&name, 22, Some("struct"))),
         );
         items.extend(
+            constants::constants(&self.environment, &source)
+                .into_iter()
+                .map(|(name, value)| {
+                    let detail = format!("const {}", value.ty().display_name());
+                    completion_item(&name, 21, Some(&detail))
+                }),
+        );
+        items.extend(
             states(&self.environment, &source)
                 .into_iter()
                 .filter(|name| self.environment.globals().all(|(global, _)| global != name))
@@ -340,6 +349,12 @@ impl Server {
             .find(|(name, _)| name == word)
         {
             return event_hover(&name, &params);
+        }
+        if let Some((name, value)) = constants::constants(&self.environment, &source)
+            .into_iter()
+            .find(|(name, _)| name == word)
+        {
+            return constants::constant_hover(&name, &value);
         }
         if let Some((_, symbol)) = container_members(&source)
             .into_iter()

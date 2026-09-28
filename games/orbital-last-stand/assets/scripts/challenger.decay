@@ -3,7 +3,6 @@
 // 6 Architect, 7 Spine, 8 Leviathan, 9 Last Light.
 script Challenger {
     @export let kind: f32 = 0.0;
-    @export let view_size: f32 = 11.0;
     @export let shot: Prefab;
     @export let core: Prefab;
     @export let drop_roll: Prefab;
@@ -151,7 +150,7 @@ script Challenger {
         let dx = player.transform.position.x - this.transform.position.x;
         let dy = player.transform.position.y - this.transform.position.y;
         let far = sqrt(dx * dx + dy * dy);
-        let visible = on_screen(this.entity, this.view_size);
+        let visible = on_screen(this.entity, VIEW_SIZE);
 
         // Off-screen bosses may approach, but cannot aim, wind up, or fire.
         if !visible {
@@ -469,9 +468,9 @@ script Challenger {
         while slot < count {
             let y = target_y + (slot - (count - 1.0) * 0.5) * 1.05;
             if sin(this.clock) < 0.0 {
-                fire_at(-visible_half_x(this.view_size) - 0.3, y, 0.0, 4.2, 1.0);
+                fire_at(-visible_half_x(VIEW_SIZE) - 0.3, y, 0.0, 4.2, 1.0);
             } else {
-                fire_at(visible_half_x(this.view_size) + 0.3, y, 3.14159265, 4.2, 1.0);
+                fire_at(visible_half_x(VIEW_SIZE) + 0.3, y, 3.14159265, 4.2, 1.0);
             }
             slot += 1.0;
         }

@@ -68,6 +68,7 @@ pub(crate) fn outline(source: &str) -> Value {
                 symbol(source, &state.name, 23, state.span, Some(children))
             }
             Item::Event(event) => symbol(source, &event.name, 24, event.span, None),
+            Item::Const(constant) => symbol(source, &constant.name, 14, constant.span, None),
         })
         .collect();
     Value::Array(symbols)

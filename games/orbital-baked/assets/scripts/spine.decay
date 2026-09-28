@@ -2,7 +2,6 @@
 // its independent body sections replay that route. Sections never have to
 // reverse-engineer a corner from another body's velocity.
 script Spine {
-    @export let view_size: f32 = 11.0;
     @export let shot: Prefab;
     @export let core: Prefab;
     @export let drop_roll: Prefab;
@@ -142,14 +141,14 @@ script Spine {
 
     fn half_x() -> f32 {
         let aspect = max(Viewport.aspect, 0.001);
-        if aspect >= 1.0 { return this.view_size * 0.5 * aspect - 0.9; }
-        return this.view_size * 0.5 - 0.9;
+        if aspect >= 1.0 { return VIEW_SIZE * 0.5 * aspect - 0.9; }
+        return VIEW_SIZE * 0.5 - 0.9;
     }
 
     fn half_y() -> f32 {
         let aspect = max(Viewport.aspect, 0.001);
-        if aspect >= 1.0 { return this.view_size * 0.5 - 0.9; }
-        return this.view_size * 0.5 / aspect - 0.9;
+        if aspect >= 1.0 { return VIEW_SIZE * 0.5 - 0.9; }
+        return VIEW_SIZE * 0.5 / aspect - 0.9;
     }
 
     fn choose_initial_direction(player: Entity) {
