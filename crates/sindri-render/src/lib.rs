@@ -61,7 +61,9 @@ pub use text::{
     GlyphQuads, LineAlign, TextAlign, TextCase, TextError, TextFit, TextInstance, TextRenderer,
     TextShadow, TextStroke, TextStyle, TextWrap, aligned_origin,
 };
-pub use texture::{Texture2D, TextureError, TextureFilter, TextureId, TextureRegistry};
+pub use texture::{
+    RegistryIdentity, Texture2D, TextureError, TextureFilter, TextureId, TextureRegistry,
+};
 pub use textured_cube::{DrawContext, TexturedCubeRenderer};
 pub use textured_mesh_cache::{
     CachedMeshId, CachedTexturedMeshUpload, MeshSurface, TexturedMeshCacheStats,
