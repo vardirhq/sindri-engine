@@ -50,6 +50,8 @@ pub enum ValueMember {
     List(decay_syntax::ListOp),
     /// A text property or method: `s.length`, `s.contains(part)`.
     Text(decay_syntax::StringOp),
+    /// A number written as text: `n.fixed(2)`, `n.padded(3)`.
+    Number(decay_syntax::NumberOp),
     /// Starting a timer: `Timer(seconds)`.
     StartTimer,
     /// A timer's property: `t.done`, `t.left`.

@@ -24,7 +24,7 @@ use decay_syntax::parse;
 use analyzer::Analyzer;
 
 pub use constant::{ConstValue, FoldError, fold_constants};
-pub use decay_syntax::{ListOp, StringOp, TimerProperty, VectorOp};
+pub use decay_syntax::{ListOp, NumberOp, StringOp, TimerProperty, VectorOp};
 pub use diagnostic::{
     Analysis, Binding, ConstantUses, Diagnostic, DiagnosticPhase, ValueMember, ValueMembers,
 };

@@ -3,7 +3,7 @@
 //! Positions and lengths count characters, not bytes, so a script never sees
 //! half of one.
 
-use decay_syntax::StringOp;
+use decay_syntax::{NumberOp, StringOp};
 
 use crate::error::RuntimeError;
 use crate::runtime::describe;
@@ -48,6 +48,72 @@ pub fn spell_number(number: f64) -> String {
     } else {
         format!("{number}")
     }
+}
+
+/// The most decimals `n.fixed` writes: past this an `f32` has none left to
+/// give, so more would only show noise.
+pub const MOST_DECIMALS: usize = 9;
+
+/// The most digits `n.padded` leads a number out to.
+pub const MOST_PADDING: usize = 20;
+
+/// A number written as text by `n.fixed(digits)` or `n.padded(width)`.
+///
+/// Both spell `-0` as `0`, as `+` does: a scoreboard at `-0.00` is a
+/// surprise, not information. `fixed` rounds half away from zero on the digit
+/// it stops at, and `padded` rounds to the nearest whole number before
+/// leading it with zeros, the sign going first: `-7` padded to 3 is `-007`.
+pub(crate) fn format_number(
+    op: NumberOp,
+    number: &Value,
+    digits: &Value,
+) -> Result<Value, RuntimeError> {
+    let Value::Number(number) = number else {
+        return Err(RuntimeError::NotANumber(describe(number)));
+    };
+    let most = match op {
+        NumberOp::Fixed => MOST_DECIMALS,
+        NumberOp::Padded => MOST_PADDING,
+    };
+    let count = whole_count(digits, most)?;
+    if !number.is_finite() {
+        return Ok(Value::String(spell_number(*number)));
+    }
+    let text = match op {
+        NumberOp::Fixed => {
+            #[allow(clippy::cast_possible_truncation, clippy::cast_possible_wrap)]
+            let scale = 10f64.powi(count as i32);
+            let rounded = (number * scale).round() / scale;
+            let rounded = if rounded == 0.0 { 0.0 } else { rounded };
+            format!("{rounded:.count$}")
+        }
+        NumberOp::Padded => {
+            let rounded = number.round();
+            let rounded = if rounded == 0.0 { 0.0 } else { rounded };
+            let digits = format!("{:.0}", rounded.abs());
+            let sign = if rounded < 0.0 { "-" } else { "" };
+            format!("{sign}{digits:0>count$}")
+        }
+    };
+    Ok(Value::String(text))
+}
+
+/// A count of digits a script asked for, which must be whole and at most
+/// `most`.
+fn whole_count(value: &Value, most: usize) -> Result<usize, RuntimeError> {
+    let Value::Number(asked) = value else {
+        return Err(RuntimeError::NotANumber(describe(value)));
+    };
+    #[allow(clippy::cast_precision_loss)]
+    let fits = asked.is_finite() && asked.fract() == 0.0 && *asked >= 0.0 && *asked <= most as f64;
+    if !fits {
+        return Err(RuntimeError::DigitsOutOfRange {
+            asked: *asked,
+            most,
+        });
+    }
+    #[allow(clippy::cast_possible_truncation, clippy::cast_sign_loss)]
+    Ok(*asked as usize)
 }
 
 /// How a value is written into text by `+`.

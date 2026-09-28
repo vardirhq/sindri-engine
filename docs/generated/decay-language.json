@@ -660,6 +660,27 @@
     {
       "members": [
         {
+          "kind": "method",
+          "name": "fixed",
+          "params": [
+            "f32"
+          ],
+          "returns": "String"
+        },
+        {
+          "kind": "method",
+          "name": "padded",
+          "params": [
+            "f32"
+          ],
+          "returns": "String"
+        }
+      ],
+      "type": "f32"
+    },
+    {
+      "members": [
+        {
           "kind": "property",
           "name": "length",
           "type": "f32"

@@ -47,10 +47,11 @@ This is the most important Sindri/Decay distinction.
 | `struct Card { name: String, weight: f32 }`, `Card(name: "Arc", weight: 1.0)`, `card.weight` | Values that belong together, as one; copied where assigned | Any time |
 | `var xs: List<f32> = [];`, `xs.push(v)`, `for i in 0..n` | A list the script owns, changed in place; a range walked without building one | Any time |
 | `"Score " + score`, `s.contains("x")`, `s.slice(0, 3)` | Joins text with numbers, flags, vectors and variants; asks text by character | Any time |
+| `n.fixed(2)`, `n.padded(2)` | A number as text with exactly 2 decimals (`"12.50"`), or whole and led with zeros (`"05"`) | Any time |
 | `enum Phase { Lobby, Play }` in any file, `match p { Phase.Lobby => { } _ => { } }` | A named set of values in place of numbers; `match` must cover every variant or end with `_` | Any time |
 | `Game.field` (declared with `state Game { var field: f32 = 0.0; }`) | Reads or writes a value the whole game shares, checked | Any time |
 
-Prefer the typed forms in the last eleven rows: a misspelt name or a wrong value
+Prefer the typed forms in the last twelve rows: a misspelt name or a wrong value
 is a compile error rather than a silent fallback.
 
 Do not use `set_property` as a setter for a running script:

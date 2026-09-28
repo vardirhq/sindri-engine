@@ -464,6 +464,23 @@ long it is, and `s = s + s` in a loop doubles.
 
 A field whose initializer is a text literal is `String` without an annotation.
 
+**A number is written a set way** by asking it:
+
+| Written | Gives |
+| --- | --- |
+| `n.fixed(digits)` | `String` with exactly `digits` decimals: `12.5.fixed(2)` is `"12.50"`, `7.6.fixed(0)` is `"8"` |
+| `n.padded(width)` | `String` of the nearest whole number, led with zeros to `width` digits: `7.0.padded(3)` is `"007"`, `-7.0.padded(3)` is `"-007"` |
+
+Both round half away from zero, and neither ever writes `-0`. `digits` is a
+whole number from 0 to 9 and `width` one from 0 to 20; anything else fails
+with `DigitsOutOfRange` when it runs. A number that is not finite is spelled
+as joining would spell it. These are the only members a number has, and they
+are calls: `n.fixed` alone is a diagnostic.
+
+```rust
+let clock = minutes.fixed(0) + ":" + seconds.padded(2);   // "1:05"
+```
+
 ### Timers
 
 A `Timer` is a countdown, and a value like a number:
@@ -1099,8 +1116,9 @@ a host may describe other files' scripts, events, state and shared functions
 to it, as Sindri does. There is no `import` line: in a Sindri project every
 file already sees the others.
 
-**Standard library:** `print`, `math.*`, number formatting (`{:.2}`),
-interpolation, parsing text into numbers, conversion functions, list operations beyond the ones listed — no
+**Standard library:** `print`, `math.*`, format strings (`{:.2}`) — a number
+is written with `fixed` and `padded` —, interpolation, parsing text into
+numbers, conversion functions, list operations beyond the ones listed — no
 `map`, `filter`, `sort` — time, randomness.
 
 **Other:** operator overloading, macros, attributes other than `@export`, block

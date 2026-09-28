@@ -501,6 +501,33 @@ impl StringOp {
     }
 }
 
+/// What a number can be asked: how to write it as text.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub enum NumberOp {
+    /// `n.fixed(digits)`: with exactly `digits` decimals, `12.50` for
+    /// `12.5.fixed(2)`.
+    Fixed,
+    /// `n.padded(width)`: rounded to a whole number and led with zeros to at
+    /// least `width` digits, `007` for `7.0.padded(3)`.
+    Padded,
+}
+
+impl NumberOp {
+    /// Every operation, with the name a script spells it by and how many
+    /// arguments it takes after the number itself.
+    pub const ALL: [(Self, &'static str, usize); 2] =
+        [(Self::Fixed, "fixed", 1), (Self::Padded, "padded", 1)];
+
+    /// The operation a member name spells, and how many arguments it takes.
+    #[must_use]
+    pub fn named(name: &str) -> Option<(Self, usize)> {
+        Self::ALL
+            .into_iter()
+            .find(|(_, spelled, _)| *spelled == name)
+            .map(|(op, _, arity)| (op, arity))
+    }
+}
+
 /// What a timer can be asked. All are properties: a timer is read, and
 /// replaced with a new one to start it again.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]

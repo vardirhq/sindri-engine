@@ -240,6 +240,9 @@ pub enum Instruction {
     /// A text property or method. Pops the arguments, then the text, and
     /// pushes the answer.
     Text(StringOp),
+    /// A number written as text. Pops the argument, then the number, and
+    /// pushes the text.
+    Number(decay_syntax::NumberOp),
     /// Pops a number of seconds, pushes a timer that runs out after them.
     StartTimer,
     /// Pops a timer, pushes one of its properties.

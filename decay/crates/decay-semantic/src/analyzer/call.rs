@@ -25,6 +25,9 @@ impl Analyzer<'_, '_> {
             if object_type == Type::String {
                 return self.string_call_type(field, args, span);
             }
+            if object_type == Type::F32 {
+                return self.number_call_type(field, args, span);
+            }
             if let Type::Array(element) = &object_type {
                 return self.list_call_type(object, element, field, args, span);
             }

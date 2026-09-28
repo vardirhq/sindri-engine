@@ -12,7 +12,8 @@
 //! reports each error by its phase, not by a name a page can be kept for.
 
 use decay_semantic::members::{
-    list_op_signature, string_op_signature, timer_property_type, vector_op_signature,
+    list_op_signature, number_op_signature, string_op_signature, timer_property_type,
+    vector_op_signature,
 };
 use decay_semantic::{
     BUILT_IN_TYPES, COMPONENTS, FunctionType, LENGTH, OLD_LENGTH, TIMER, Type, VEC2, VEC3,
@@ -21,7 +22,7 @@ use decay_syntax::vocabulary::{
     ASSIGNMENT_OPERATORS, ATTRIBUTES, BINARY_OPERATORS, CONTEXTUAL_KEYWORDS, ITEM_WORDS, KEYWORDS,
     UNARY_OPERATORS, VERSION,
 };
-use decay_syntax::{ListOp, StringOp, TimerProperty, VectorOp};
+use decay_syntax::{ListOp, NumberOp, StringOp, TimerProperty, VectorOp};
 use serde_json::{Value, json};
 
 use crate::decay::type_name;
@@ -230,6 +231,13 @@ fn members() -> Value {
             "members": StringOp::ALL
                 .iter()
                 .map(|(op, name, arity)| member(name, &string_op_signature(*op), *arity > 0))
+                .collect::<Vec<_>>(),
+        },
+        {
+            "type": type_name(&Type::F32),
+            "members": NumberOp::ALL
+                .iter()
+                .map(|(op, name, _)| member(name, &number_op_signature(*op), true))
                 .collect::<Vec<_>>(),
         },
         { "type": type_name(&Type::array_of(element)), "members": list },

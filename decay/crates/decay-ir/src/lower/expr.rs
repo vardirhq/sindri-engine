@@ -149,7 +149,10 @@ impl Lowerer<'_> {
                     }
                     // Only a call is ever noted as a construction.
                     Some(
-                        ValueMember::Construct(_) | ValueMember::StartTimer | ValueMember::List(_),
+                        ValueMember::Construct(_)
+                        | ValueMember::StartTimer
+                        | ValueMember::List(_)
+                        | ValueMember::Number(_),
                     )
                     | None => {
                         let (path, held) =
@@ -237,6 +240,16 @@ impl Lowerer<'_> {
                     self.lower_expr(argument, instructions);
                 }
                 instructions.push(Instruction::Text(op));
+                return;
+            }
+            Some(ValueMember::Number(op)) => {
+                if let ExprKind::Member { object, .. } = &callee.kind {
+                    self.lower_expr(object, instructions);
+                }
+                for argument in args {
+                    self.lower_expr(argument, instructions);
+                }
+                instructions.push(Instruction::Number(op));
                 return;
             }
             _ => {}
