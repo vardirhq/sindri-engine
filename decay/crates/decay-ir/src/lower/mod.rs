@@ -40,11 +40,24 @@ impl<'a> Lowerer<'a> {
                 }
                 // A declaration and nothing else: an emit is a call the host
                 // answers, and a handler is a function of the script it is in.
-                Item::Event(_) | Item::State(_) => None,
+                Item::Event(_) | Item::State(_) | Item::Function(_) => None,
             })
             .collect();
 
-        IrProgram { containers }
+        let mut program = IrProgram { containers };
+        let shared = analysis
+            .program
+            .items
+            .iter()
+            .filter_map(|item| match item {
+                Item::Function(function) => Some(lowerer.lower_function(function)),
+                _ => None,
+            })
+            .collect::<Vec<_>>();
+        if !shared.is_empty() {
+            program.link(shared);
+        }
+        program
     }
 
     /// What the analysis decided a member read at this span is, if anything.

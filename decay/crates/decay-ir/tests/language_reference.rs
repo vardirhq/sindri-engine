@@ -459,3 +459,37 @@ fn timers_do_what_the_reference_says() {
         "script T { var t = Timer(1.0); fn f() -> bool { return t.done(); } }",
     );
 }
+
+/// "Shared functions".
+#[test]
+fn shared_functions_do_what_the_reference_says() {
+    accepted(
+        "the shared functions example",
+        "fn half(size: f32) -> f32 { return size * 0.5; }
+         script Enemy {
+             let view_size: f32 = 11.0;
+             fn update(dt: f32) { let edge = half(this.view_size); }
+         }",
+    );
+    accepted(
+        "a script's own function shadowing a shared one",
+        "fn size() -> f32 { return 1.0; }
+         script T { fn size() -> bool { return true; } fn f() -> bool { return size(); } }",
+    );
+    rejected(
+        "`this` in a shared function",
+        "fn half() -> f32 { return this.size; } script T { }",
+    );
+    rejected(
+        "a shared function declared twice",
+        "fn half() { } fn half() { } script T { }",
+    );
+    rejected(
+        "a shared function with a container's name",
+        "fn T() { } script T { }",
+    );
+    rejected(
+        "a wrong argument to a shared function",
+        "fn half(size: f32) -> f32 { return size; } script T { fn f() { half(true); } }",
+    );
+}

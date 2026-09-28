@@ -11,7 +11,11 @@ mod stmt;
 #[cfg(test)]
 mod tests;
 
-use crate::{Diagnostic, Span, Token, TokenKind, ast::Program, lex, line_column};
+use crate::{
+    Diagnostic, Span, Token, TokenKind,
+    ast::{Item, Program},
+    lex, line_column,
+};
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct Parsed {
@@ -58,8 +62,10 @@ impl<'a> Parser<'a> {
                 self.parse_event()
             } else if self.at_word(item::STATE) {
                 self.parse_state()
+            } else if self.at(&TokenKind::Fn) {
+                self.parse_function().map(Item::Function)
             } else {
-                self.error_here("expected `script`, `component`, `event`, or `state`");
+                self.error_here("expected `script`, `component`, `event`, `state`, or `fn`");
                 self.advance();
                 None
             };

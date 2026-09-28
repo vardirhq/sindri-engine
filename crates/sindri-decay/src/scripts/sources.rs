@@ -3,7 +3,9 @@
 use std::collections::BTreeMap;
 use std::sync::OnceLock;
 
+use decay_ir::{IrFunction, lower_with_environment};
 use decay_semantic::Environment;
+use decay_syntax::{Item, parse};
 
 use super::project::Project;
 
@@ -27,6 +29,20 @@ pub struct ScriptSources {
     /// project compiles against. Worked out the first time it is asked for and
     /// forgotten whenever a source changes.
     project: OnceLock<(Project, Environment)>,
+    /// Every shared function in the project, lowered from the file that
+    /// declares it, for a script's program to link in. Forgotten with the
+    /// project whenever a source changes.
+    shared: OnceLock<SharedFunctions>,
+}
+
+/// The project's shared functions, and the files declaring some that do not
+/// compile, whose functions are therefore missing.
+#[derive(Clone, Debug, Default)]
+pub(crate) struct SharedFunctions {
+    pub(crate) functions: Vec<IrFunction>,
+    /// Each file that declares shared functions and does not compile, with
+    /// the functions it declares and the first of its errors.
+    pub(crate) broken: Vec<(String, Vec<String>, Vec<String>)>,
 }
 
 impl ScriptSources {
@@ -38,10 +54,12 @@ impl ScriptSources {
     pub fn insert(&mut self, id: impl Into<String>, source: impl Into<String>) {
         self.sources.insert(id.into(), source.into());
         self.project = OnceLock::new();
+        self.shared = OnceLock::new();
     }
 
     pub fn remove(&mut self, id: &str) -> Option<String> {
         self.project = OnceLock::new();
+        self.shared = OnceLock::new();
         self.sources.remove(id)
     }
 
@@ -67,6 +85,52 @@ impl ScriptSources {
     /// Every script's declared shape.
     pub(crate) fn project_ref(&self) -> &Project {
         &self.project().0
+    }
+
+    /// Every shared function in the project, lowered once from the file that
+    /// declares it.
+    pub(crate) fn shared_functions(&self) -> &SharedFunctions {
+        self.shared.get_or_init(|| {
+            let mut shared = SharedFunctions::default();
+            for (id, source) in &self.sources {
+                let declared: Vec<String> = parse(source)
+                    .program
+                    .items
+                    .into_iter()
+                    .filter_map(|item| match item {
+                        Item::Function(function) => Some(function.name),
+                        _ => None,
+                    })
+                    .collect();
+                if declared.is_empty() {
+                    continue;
+                }
+                let lowered = lower_with_environment(source, self.environment());
+                match lowered.program {
+                    Some(program) => {
+                        if let Some(functions) = program.shared() {
+                            shared.functions.extend(functions.functions.iter().cloned());
+                        }
+                    }
+                    None => shared.broken.push((
+                        id.clone(),
+                        declared,
+                        lowered
+                            .analysis
+                            .diagnostics
+                            .iter()
+                            .map(|diagnostic| {
+                                format!(
+                                    "{}:{}: {}",
+                                    diagnostic.line, diagnostic.column, diagnostic.message
+                                )
+                            })
+                            .collect(),
+                    )),
+                }
+            }
+            shared
+        })
     }
 
     fn project(&self) -> &(Project, Environment) {

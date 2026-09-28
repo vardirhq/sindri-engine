@@ -29,6 +29,7 @@ to change. Nothing here is a compatibility promise.
 - [Functions](#functions)
 - [Events](#events)
 - [State](#state)
+- [Shared functions](#shared-functions)
 - [Statements](#statements)
 - [Expressions](#expressions)
 - [Scope](#scope)
@@ -159,7 +160,8 @@ is no indexing and there are no array literals.
 program      = { item } ;
 item         = ( "script" | "component" ) IDENT "{" { member } "}"
              | "event" IDENT "(" [ params ] ")" ";"
-             | "state" IDENT "{" { field } "}" ;
+             | "state" IDENT "{" { field } "}"
+             | function ;
 member       = { attribute } ( field | function | handler ) ;
 attribute    = "@" IDENT ;
 
@@ -408,6 +410,37 @@ frame before its `update`, and not on the frame it starts; see
 A field whose initializer is `Timer(...)`, `Vec2(...)` or `Vec3(...)` has that
 type without an annotation. Every other unannotated field is unknown, as
 before.
+
+---
+
+## Shared functions
+
+A function written outside any container is shared: every script may call
+it by name.
+
+```rust
+fn half(size: f32) -> f32 { return size * 0.5; }
+
+script Enemy {
+    let view_size: f32 = 11.0;
+    fn update(dt: f32) { let edge = half(this.view_size); }
+}
+```
+
+- **No `this`.** A shared function belongs to no script, so it has no fields
+  and no `this`; what it needs, it is passed. Using `this` in one is a
+  diagnostic that says so.
+- **Called by bare name**, checked like any call. A script's own function of
+  the same name wins inside that script, as a local wins over a field.
+- **One name, once.** Declaring it twice is a diagnostic, and so is a name a
+  container, an event, a state or the host already has.
+
+**Across files is the host's decision.** The language lowers a file's shared
+functions into its program, and `IrProgram::link` adds another program's; a
+bare call tries the script's own functions, then the shared ones, then the
+host. A host that describes other files' shared functions to the analyzer
+(`Environment::add_shared_function`) and links them makes them callable from
+every file, which is what Sindri does for a project.
 
 ---
 
@@ -818,7 +851,9 @@ beyond `script` and `component`.
 
 **Modules:** `import`, `use`, `mod`, `pub`, visibility of any kind, multiple
 files. One file is one compilation unit and cannot refer to another by itself;
-a host may describe other files' scripts and events to it, as Sindri does.
+a host may describe other files' scripts, events, state and shared functions
+to it, as Sindri does. There is no `import` line: in a Sindri project every
+file already sees the others.
 
 **Standard library:** `print`, `math.*`, string methods, formatting,
 interpolation, conversion functions, collection *operations* — no `push`,

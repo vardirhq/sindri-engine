@@ -7,6 +7,7 @@
 mod call;
 mod event;
 mod expr;
+mod function;
 mod item;
 mod member;
 mod state;
@@ -62,6 +63,11 @@ pub(super) struct Analyzer<'a, 'd> {
     events: HashMap<String, Vec<Type>>,
     /// Every shared state this program may reach: the host's, and its own.
     states: HashMap<String, HashMap<String, crate::environment::StateField>>,
+    /// This file's own shared functions, by name.
+    functions: HashMap<String, FunctionType>,
+    /// Whether the function being analysed is a shared one, which has no
+    /// `this` to reach for.
+    in_shared_function: bool,
 }
 
 #[allow(clippy::zero_sized_map_values)]
@@ -83,6 +89,8 @@ impl<'a, 'd> Analyzer<'a, 'd> {
             loop_depth: 0,
             events: HashMap::new(),
             states: HashMap::new(),
+            functions: HashMap::new(),
+            in_shared_function: false,
         }
     }
 
@@ -100,11 +108,16 @@ impl<'a, 'd> Analyzer<'a, 'd> {
         // further down.
         self.collect_events(program);
         self.collect_states(program);
+        self.collect_functions(program);
 
         for item in &program.items {
             let container = match item {
                 Item::Script(container) | Item::Component(container) => container,
                 Item::Event(_) | Item::State(_) => continue,
+                Item::Function(function) => {
+                    self.analyze_shared_function(function);
+                    continue;
+                }
             };
 
             if containers
@@ -122,6 +135,13 @@ impl<'a, 'd> Analyzer<'a, 'd> {
     }
 
     pub(super) fn resolve_identifier(&mut self, name: &str, span: Span) -> Type {
+        if self.in_shared_function && name == "this" && self.lookup(name).is_none() {
+            self.error(
+                span,
+                "a shared function has no `this` -- pass what it needs as a parameter".to_owned(),
+            );
+            return Type::Unknown;
+        }
         if let Some(symbol) = self.lookup(name) {
             if symbol.function.is_some() {
                 return Type::Unknown;

@@ -417,22 +417,11 @@ script Director {
     }
 
     fn spawn_ring_x() -> f32 {
-        return max(visible_half_x() + this.spawn_margin, this.arena);
+        return max(visible_half_x(this.view_size) + this.spawn_margin, this.arena);
     }
 
     fn spawn_ring_y() -> f32 {
-        return max(visible_half_y() + this.spawn_margin, this.arena);
+        return max(visible_half_y(this.view_size) + this.spawn_margin, this.arena);
     }
 
-    fn visible_half_x() -> f32 {
-        let aspect = max(Viewport.aspect, 0.001);
-        if aspect >= 1.0 { return this.view_size * 0.5 * aspect; }
-        return this.view_size * 0.5;
-    }
-
-    fn visible_half_y() -> f32 {
-        let aspect = max(Viewport.aspect, 0.001);
-        if aspect >= 1.0 { return this.view_size * 0.5; }
-        return this.view_size * 0.5 / aspect;
-    }
 }

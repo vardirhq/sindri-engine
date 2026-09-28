@@ -301,7 +301,7 @@ pub(super) fn ensure_compiled(
     }
 
     let lowered = lower_with_environment(source, sources.environment());
-    let program = lowered.program.ok_or_else(|| ScriptFailure::Compile {
+    let mut program = lowered.program.ok_or_else(|| ScriptFailure::Compile {
         asset: component.source.clone(),
         diagnostics: lowered
             .analysis
@@ -315,6 +315,7 @@ pub(super) fn ensure_compiled(
             })
             .collect(),
     })?;
+    link_shared(&mut program, sources, &component.source)?;
     programs.insert(
         component.source.clone(),
         Compiled {
@@ -324,6 +325,49 @@ pub(super) fn ensure_compiled(
         },
     );
     Ok(())
+}
+
+/// Links in every shared function the project declares, so a call from this
+/// program reaches the one declared in another file.
+///
+/// A function whose file does not compile is missing, and a program that calls
+/// one fails here, naming that file's errors, rather than at the call with an
+/// unknown function nobody declared.
+fn link_shared(
+    program: &mut decay_ir::IrProgram,
+    sources: &ScriptSources,
+    asset: &str,
+) -> Result<(), ScriptFailure> {
+    let shared = sources.shared_functions();
+    for (broken, declared, diagnostics) in &shared.broken {
+        if broken != asset && declared.iter().any(|name| calls(program, name)) {
+            return Err(ScriptFailure::Compile {
+                asset: broken.clone(),
+                diagnostics: diagnostics.clone(),
+            });
+        }
+    }
+    program.link(shared.functions.iter().cloned());
+    Ok(())
+}
+
+/// Whether anything in a program calls a function by this bare name.
+fn calls(program: &decay_ir::IrProgram, name: &str) -> bool {
+    let is_call = |instruction: &decay_ir::Instruction| {
+        matches!(instruction, decay_ir::Instruction::Call { callee, .. }
+            if callee.0.len() == 1 && callee.0[0] == name)
+    };
+    program.containers.iter().any(|container| {
+        container
+            .functions
+            .iter()
+            .any(|function| function.instructions.iter().any(is_call))
+            || container
+                .fields
+                .iter()
+                .filter_map(|field| field.initializer.as_ref())
+                .any(|initializer| initializer.iter().any(is_call))
+    })
 }
 
 pub(super) fn apply_properties(

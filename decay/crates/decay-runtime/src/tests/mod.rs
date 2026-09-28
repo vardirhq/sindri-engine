@@ -6,6 +6,7 @@ mod execution;
 mod fields;
 mod loops;
 mod scope;
+mod shared;
 mod subjects;
 mod support;
 mod timers;

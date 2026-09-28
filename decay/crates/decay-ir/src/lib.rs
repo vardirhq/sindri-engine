@@ -18,7 +18,7 @@ use decay_semantic::{Analysis, Environment, analyze_with_environment};
 use lower::Lowerer;
 
 pub use ir::{
-    Constant, ContainerKind, Instruction, IrContainer, IrField, IrFunction, IrProgram, Path,
+    Constant, ContainerKind, Instruction, IrContainer, IrField, IrFunction, IrProgram, Path, SHARED,
 };
 
 #[derive(Debug, Clone, PartialEq)]

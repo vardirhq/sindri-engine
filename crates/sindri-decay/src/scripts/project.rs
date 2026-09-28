@@ -14,7 +14,8 @@
 //! shape, and what tells a cached program it was compiled against another one.
 //!
 //! Events are read the same way: an `event` declared in any file is one every
-//! file may emit and handle. So is `state`: `state Game { var score: f32 =
+//! file may emit and handle, and a function declared outside any script is
+//! one every file may call. So is `state`: `state Game { var score: f32 =
 //! 0.0; }` in any file is `Game.score` in every file.
 
 use std::collections::{BTreeMap, BTreeSet};
@@ -40,6 +41,10 @@ pub struct Project {
     pub(crate) states: BTreeMap<String, BTreeMap<String, SharedField>>,
     /// State fields declared more than once, as `(state, field)`.
     ambiguous_fields: BTreeSet<(String, String)>,
+    /// Shared functions, declared outside any script, by name.
+    pub(crate) functions: BTreeMap<String, FunctionType>,
+    /// Shared functions declared more than once, which nothing may call.
+    ambiguous_functions: BTreeSet<String>,
     key: String,
 }
 
@@ -100,6 +105,11 @@ impl Project {
         let mut ambiguous_events = BTreeSet::new();
         let mut states: BTreeMap<String, BTreeMap<String, SharedField>> = BTreeMap::new();
         let mut ambiguous_fields = BTreeSet::new();
+        let mut functions = BTreeMap::new();
+        let mut ambiguous_functions = BTreeSet::new();
+        // A caller links a copy of each shared function it can reach, so it
+        // must recompile when one's body changes, not only its signature.
+        let mut bodies = String::new();
         for source in sources {
             for item in parse(source).program.items {
                 let container = match item {
@@ -117,6 +127,18 @@ impl Project {
                     }
                     Item::State(state) => {
                         read_state(&state, &mut states, &mut ambiguous_fields);
+                        continue;
+                    }
+                    Item::Function(function) => {
+                        if let Some(text) = source.get(function.span.start..function.span.end) {
+                            bodies.push_str(text);
+                        }
+                        if functions
+                            .insert(function.name.clone(), signature_of(&function))
+                            .is_some()
+                        {
+                            ambiguous_functions.insert(function.name);
+                        }
                         continue;
                     }
                     Item::Component(_) => continue,
@@ -143,14 +165,25 @@ impl Project {
                 && !reserved.globals().any(|(global, _)| global == name)
         });
         keep_states(&mut states, &ambiguous_fields, &scripts, &events, reserved);
-        let key =
-            format!("{scripts:?}{events:?}{ambiguous_events:?}{states:?}{ambiguous_fields:?}");
+        functions.retain(|name, _| {
+            !ambiguous_functions.contains(name)
+                && !scripts.contains_key(name)
+                && !events.contains_key(name)
+                && !states.contains_key(name)
+                && reserved.get_type(name).is_none()
+                && !reserved.globals().any(|(global, _)| global == name)
+        });
+        let key = format!(
+            "{scripts:?}{events:?}{ambiguous_events:?}{states:?}{ambiguous_fields:?}{functions:?}{ambiguous_functions:?}{bodies}"
+        );
         Self {
             scripts,
             events,
             ambiguous_events,
             states,
             ambiguous_fields,
+            functions,
+            ambiguous_functions,
             key,
         }
     }
@@ -233,6 +266,12 @@ impl Project {
         for (state, field) in &self.ambiguous_fields {
             environment.add_ambiguous_state_field(state.clone(), field.clone());
         }
+        for (name, function) in &self.functions {
+            environment.add_shared_function(name.clone(), function.clone());
+        }
+        for name in &self.ambiguous_functions {
+            environment.add_ambiguous_function(name.clone());
+        }
     }
 }
 
@@ -279,6 +318,21 @@ impl Declared {
             }
         }
         declared
+    }
+}
+
+/// A shared function's type, as a call to it is checked against.
+fn signature_of(function: &decay_syntax::FunctionDecl) -> FunctionType {
+    FunctionType {
+        params: function
+            .params
+            .iter()
+            .map(|param| param.ty.as_ref().map_or(Type::Unknown, Type::from_ref))
+            .collect(),
+        return_type: function
+            .return_type
+            .as_ref()
+            .map_or(Type::Unit, Type::from_ref),
     }
 }
 

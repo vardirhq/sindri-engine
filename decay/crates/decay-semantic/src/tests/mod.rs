@@ -1,6 +1,7 @@
 //! The analyser's tests.
 
 mod events;
+mod functions;
 mod host;
 mod language;
 mod states;

@@ -15,6 +15,10 @@ pub enum Item {
     /// `state Game { var score: f32 = 0.0; }`: values every script shares,
     /// reached as `Game.score`.
     State(StateDecl),
+    /// `fn visible_half_x(view_size: f32) -> f32 { ... }` outside any
+    /// container: a shared function every script may call by name. It has no
+    /// `this`; what it needs, it is passed.
+    Function(FunctionDecl),
 }
 
 /// Shared, typed values under one name. Several declarations may add to the

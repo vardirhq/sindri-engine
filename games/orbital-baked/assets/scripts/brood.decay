@@ -67,7 +67,7 @@ script Brood {
         let far = sqrt(dx * dx + dy * dy);
 
         // Off-screen it may approach, but it cannot aim, wind up, or fire.
-        if is_visible() {
+        if on_screen(this.entity, this.view_size) {
             act(dt, player, dx, dy, far);
         } else {
             chase(dx, dy, far, 1.0);
@@ -180,28 +180,6 @@ script Brood {
         World.set_property(bolt, "dir_y", sin(angle));
         World.set_property(bolt, "speed", velocity);
         World.set_property(bolt, "damage", damage);
-    }
-
-    fn visible_half_x() -> f32 {
-        let aspect = max(Viewport.aspect, 0.001);
-        if aspect >= 1.0 { return this.view_size * 0.5 * aspect; }
-        return this.view_size * 0.5;
-    }
-
-    fn visible_half_y() -> f32 {
-        let aspect = max(Viewport.aspect, 0.001);
-        if aspect >= 1.0 { return this.view_size * 0.5; }
-        return this.view_size * 0.5 / aspect;
-    }
-
-    fn is_visible() -> bool {
-        let half_x = visible_half_x();
-        let half_y = visible_half_y();
-        let radius = max(abs(this.transform.scale.x), abs(this.transform.scale.y)) * 0.5;
-        return this.transform.position.x + radius >= -half_x &&
-               this.transform.position.x - radius <= half_x &&
-               this.transform.position.y + radius >= -half_y &&
-               this.transform.position.y - radius <= half_y;
     }
 
     fn die() {

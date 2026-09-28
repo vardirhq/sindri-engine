@@ -40,6 +40,12 @@ pub struct Environment {
     pub(crate) states: HashMap<String, HashMap<String, StateField>>,
     /// State fields declared more than once, as `(state, field)`.
     pub(crate) ambiguous_state_fields: HashSet<(String, String)>,
+    /// Which global functions a project's scripts declared, as opposed to the
+    /// host's own: a file may declare one of these itself, but never one of
+    /// the host's.
+    pub(crate) shared_functions: HashSet<String>,
+    /// Shared functions declared more than once, which no call may name.
+    pub(crate) ambiguous_functions: HashSet<String>,
 }
 
 /// One field of a `state`: what it holds, and whether scripts may change it.
@@ -114,6 +120,20 @@ impl Environment {
         self.events
             .iter()
             .map(|(name, params)| (name.as_str(), params.as_slice()))
+    }
+
+    /// Declares a function a project's script declared outside any container,
+    /// which every script may call by name.
+    pub fn add_shared_function(&mut self, name: impl Into<String>, function: FunctionType) {
+        let name = name.into();
+        self.shared_functions.insert(name.clone());
+        self.add_function(name, function);
+    }
+
+    /// Says a shared function was declared more than once, so that calling
+    /// it is refused rather than resolved to one of them.
+    pub fn add_ambiguous_function(&mut self, name: impl Into<String>) {
+        self.ambiguous_functions.insert(name.into());
     }
 
     /// Declares a field of a shared state: `Game.score`.

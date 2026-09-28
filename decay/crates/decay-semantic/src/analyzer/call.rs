@@ -78,6 +78,11 @@ impl Analyzer<'_, '_> {
                 return Type::Unknown;
             }
 
+            if let Some(function) = self.shared_function(name, callee.span) {
+                self.check_call(&function, args, span);
+                return function.return_type;
+            }
+
             if self.events.contains_key(name) {
                 self.error(
                     callee.span,
