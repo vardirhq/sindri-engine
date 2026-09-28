@@ -33,14 +33,14 @@ script Challenger {
 
     fn start() {
         configure_kind();
-        let elapsed = Game.get("elapsed", 0.0);
+        let elapsed = Game.elapsed;
         let scale = 1.0 + min(1.35, max(0.0, elapsed - 60.0) * 0.0025);
         this.hp = this.health * scale;
         this.offset = Random.range(0.0, 6.2831853);
         this.attack = 0.75;
         Game.set("boss_max", this.hp);
         Game.set("boss_hp", this.hp);
-        Game.set("boss_kind", this.kind + 1.0);
+        Game.boss_kind = this.kind + 1.0;
     }
 
     fn configure_kind() {
@@ -132,7 +132,7 @@ script Challenger {
     }
 
     fn update(dt: f32) {
-        if Game.get("run_state", 0.0) != 1.0 {
+        if Game.run_state != 1.0 {
             Physics.set_velocity(this.entity, 0.0, 0.0);
             return;
         }
@@ -555,8 +555,7 @@ script Challenger {
     fn receive_hits(player: Entity) {
         for hit in Physics.sensor_entered() {
             if hit == player {
-                Game.set("player_damage_taken",
-                         max(Game.get("player_damage_taken", 0.0), this.touch_damage));
+                Game.player_damage_taken = max(Game.player_damage_taken, this.touch_damage);
             } else if World.exists(hit) && World.has_tag(hit, "player_damage") {
                 var damage: f32 = World.property_number(hit, "damage", 0.0);
                 // The Brood does not defend itself; its children do. While any
@@ -593,10 +592,10 @@ script Challenger {
             World.set_property(wave, "damage", this.death_burst_damage);
         }
         Effects.burst(this.entity);
-        Game.set("screen_trauma", max(Game.get("screen_trauma", 0.0), 0.9));
+        Game.screen_trauma = max(Game.screen_trauma, 0.9);
         Audio.play("audio/kill.wav", 0.6);
-        Game.set("kills", Game.get("kills", 0.0) + 1.0);
-        Game.set("score", Game.get("score", 0.0) + this.worth * 10.0);
+        Game.kills = Game.kills + 1.0;
+        Game.score = Game.score + this.worth * 10.0;
         Game.set("boss_hp", 0.0);
         Game.set("boss_max", 0.0);
 

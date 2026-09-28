@@ -17,14 +17,14 @@ script Hazards {
     var beam_timer: f32 = 0.0;
 
     fn update(dt: f32) {
-        let state = Game.get("run_state", 0.0);
+        let state = Game.run_state;
         if state != 1.0 {
             // Choices and manual pause freeze the reference world. Director
             // clears hazards when a run actually ends; only title/result need
             // to make the next run rebuild Outer Drift.
             if state == 0.0 || state == 4.0 {
                 this.was_sector = -1.0;
-                Game.set("nullified", 0.0);
+                Game.nullified = 0.0;
             }
             return;
         }
@@ -42,7 +42,7 @@ script Hazards {
     }
 
     fn clear_hazards() {
-        Game.set("nullified", 0.0);
+        Game.nullified = 0.0;
         for hazard in World.with_tag("hazard") {
             if World.exists(hazard) {
                 World.despawn(hazard);
@@ -125,7 +125,7 @@ script Hazards {
         this.beam_timer = 3.1;
         let pulse = World.spawn(this.beam);
         World.set_property(pulse, "mode", 2.0);
-        if Game.get("elapsed", 0.0) % 8.0 < 4.0 {
+        if Game.elapsed % 8.0 < 4.0 {
             World.set_property(pulse, "axis", 1.0);
             pulse.transform.position.x = Random.range(-visible_half_x(this.view_size) * 0.6,
                                                        visible_half_x(this.view_size) * 0.6);

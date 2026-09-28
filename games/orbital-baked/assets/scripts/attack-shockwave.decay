@@ -15,7 +15,7 @@ script Shockwave {
     }
 
     fn update(dt: f32) {
-        if Game.get("run_state", 0.0) != 1.0 { return; }
+        if Game.run_state != 1.0 { return; }
         let previous = this.radius;
         this.radius += this.speed * dt;
         sync_visual();
@@ -28,8 +28,8 @@ script Shockwave {
                 let distance = sqrt(dx * dx + dy * dy);
                 if crossed(distance, previous) {
                     this.hit_player = true;
-                    Game.set("player_damage_taken", max(Game.get("player_damage_taken", 0.0), this.damage));
-                    Game.set("screen_trauma", max(Game.get("screen_trauma", 0.0), 0.28));
+                    Game.player_damage_taken = max(Game.player_damage_taken, this.damage);
+                    Game.screen_trauma = max(Game.screen_trauma, 0.28);
                 }
             }
         }

@@ -16,7 +16,7 @@ script BossVisual {
     fn update(dt: f32) {
         let boss = this.boss;
         if boss == null || !World.exists(boss) { return; }
-        if Game.get("run_state", 0.0) == 1.0 { this.clock += dt; }
+        if Game.run_state == 1.0 { this.clock += dt; }
 
         let max_hp = max(1.0, Game.get("boss_max", 1.0));
         let hp_share = max(0.0, Game.get("boss_hp", max_hp)) / max_hp;

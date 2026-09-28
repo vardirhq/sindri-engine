@@ -51,7 +51,7 @@ script Bullet {
 
     fn update(dt: f32) {
         if this.retiring { World.despawn(this.entity); return; }
-        if Game.get("run_state", 0.0) != 1.0 {
+        if Game.run_state != 1.0 {
             Physics.set_velocity(this.entity, 0.0, 0.0);
             return;
         }
@@ -63,7 +63,7 @@ script Bullet {
         this.age += dt;
         animate_visual(dt);
         leave_trail(dt);
-        if Game.get("special_reversal_chamber", 0.0) > 0.0 && !this.reversed && this.age >= this.life * 0.52 {
+        if Game.special_reversal_chamber > 0.0 && !this.reversed && this.age >= this.life * 0.52 {
             this.reversed = true;
             this.heading = -this.heading;
             Physics.set_velocity(this.entity, this.heading.x * this.speed, this.heading.y * this.speed);
@@ -131,19 +131,19 @@ script Bullet {
         World.set_property(flash, "spin", 4.0 + this.visual_style);
         var trauma: f32 = 0.08;
         if this.crit_hit > 0.0 { trauma = 0.36; }
-        Game.set("screen_trauma", max(Game.get("screen_trauma", 0.0), trauma));
+        Game.screen_trauma = max(Game.screen_trauma, trauma);
     }
 
     fn seek(dt: f32) {
-        if Game.get("target_live", 0.0) <= 0.0 { return; }
+        if Game.target_live <= 0.0 { return; }
         let here = this.transform.position;
         let to = Vec2(Game.get("target_x", here.x), Game.get("target_y", here.y)) - Vec2(here.x, here.y);
         if to.length <= 0.0001 { return; }
         let desired = to.normalized;
         var turn: f32 = 5.0;
-        if Game.get("special_homing_instinct", 0.0) > 0.0 { turn *= 1.8; }
-        if Game.get("transform_storm", 0.0) > 0.0 { turn = max(turn, 8.0); }
-        if Game.get("transform_recursive", 0.0) > 0.0 { turn = max(turn, 9.0); }
+        if Game.special_homing_instinct > 0.0 { turn *= 1.8; }
+        if Game.transform_storm > 0.0 { turn = max(turn, 8.0); }
+        if Game.transform_recursive > 0.0 { turn = max(turn, 9.0); }
         let steer = min(1.0, dt * turn);
         let next = this.heading * (1.0 - steer) + desired * steer;
         if next.length > 0.001 {
@@ -156,29 +156,29 @@ script Bullet {
         if this.arc > 0.0 {
             var arc_damage: f32 = this.damage * 0.27;
             var jumps: f32 = 2.0;
-            if Game.get("transform_storm", 0.0) > 0.0 { jumps = 4.0; }
-            if Game.get("special_arc_battery", 0.0) > 0.0 { jumps += 2.0; arc_damage *= 1.2; }
-            if (Game.get("special_critical_arc", 0.0) > 0.0 || Game.get("synergy_critical_conduction", 0.0) > 0.0) && this.crit_hit > 0.0 { arc_damage *= 1.7; }
+            if Game.transform_storm > 0.0 { jumps = 4.0; }
+            if Game.special_arc_battery > 0.0 { jumps += 2.0; arc_damage *= 1.2; }
+            if (Game.special_critical_arc > 0.0 || Game.synergy_critical_conduction > 0.0) && this.crit_hit > 0.0 { arc_damage *= 1.7; }
             spawn_arc(arc_damage, jumps);
         }
         if this.beam > 0.0 {
             var power: f32 = 0.23;
-            if Game.get("transform_rail_prism", 0.0) > 0.0 { power *= 1.45; }
+            if Game.transform_rail_prism > 0.0 { power *= 1.45; }
             spawn_beam(this.heading.x, this.heading.y, this.damage * power);
-            if Game.get("special_prism_mirror", 0.0) > 0.0 {
+            if Game.special_prism_mirror > 0.0 {
                 spawn_beam(-this.heading.x, -this.heading.y, this.damage * power);
             }
         }
-        if this.nova > 0.0 && (Game.get("transform_critical_mass", 0.0) > 0.0 && this.crit_hit > 0.0) {
+        if this.nova > 0.0 && (Game.transform_critical_mass > 0.0 && this.crit_hit > 0.0) {
             spawn_arc(this.damage * 0.42, 3.0);
         }
-        if Game.get("transform_recursive", 0.0) > 0.0 && this.spent > 0.0 {
+        if Game.transform_recursive > 0.0 && this.spent > 0.0 {
             spawn_arc(this.damage * 0.3, 2.0);
         }
     }
 
     fn phase_memory() {
-        if Game.get("special_phase_memory", 0.0) <= 0.0 || this.spent <= 1.0 { return; }
+        if Game.special_phase_memory <= 0.0 || this.spent <= 1.0 { return; }
         spawn_arc(this.damage * 0.12 * (this.spent - 1.0), 1.0);
     }
 
@@ -201,7 +201,7 @@ script Bullet {
     }
 
     fn wrap_horizon() {
-        if this.wrapped || Game.get("special_split_horizon", 0.0) <= 0.0 { return; }
+        if this.wrapped || Game.special_split_horizon <= 0.0 { return; }
         let aspect = max(Viewport.aspect, 0.001);
         var half_x: f32 = 5.5;
         var half_y: f32 = 5.5;
@@ -213,12 +213,12 @@ script Bullet {
     }
 
     fn constellation() {
-        if Game.get("special_constellation_engine", 0.0) <= 0.0 { return; }
-        let count = Game.get("constellation_count", 0.0) + 1.0;
+        if Game.special_constellation_engine <= 0.0 { return; }
+        let count = Game.constellation_count + 1.0;
         if count >= 3.0 {
-            Game.set("constellation_count", 0.0);
+            Game.constellation_count = 0.0;
             spawn_beam(this.heading.x, this.heading.y, this.damage * 0.8);
-        } else { Game.set("constellation_count", count); }
+        } else { Game.constellation_count = count; }
     }
 
     fn setup_companion_visual() {
@@ -245,8 +245,8 @@ script Bullet {
         var radius: f32 = 1.35 + (this.companion_slot % 3.0) * 0.28;
         var orbit_speed: f32 = 2.1;
         if this.companion_kind == 6.0 { radius = 2.0; orbit_speed = 3.0; }
-        if Game.get("special_familiar_guidance", 0.0) > 0.0 && this.companion_kind >= 3.0 { orbit_speed *= 1.25; }
-        if Game.get("synergy_hunters_spark", 0.0) > 0.0 && this.companion_kind == 3.0 { orbit_speed *= 1.25; }
+        if Game.special_familiar_guidance > 0.0 && this.companion_kind >= 3.0 { orbit_speed *= 1.25; }
+        if Game.synergy_hunters_spark > 0.0 && this.companion_kind == 3.0 { orbit_speed *= 1.25; }
         let angle = this.age * orbit_speed + this.companion_slot * 1.67 + this.companion_kind * 0.41;
         this.transform.position.x = player.transform.position.x + cos(angle) * radius;
         this.transform.position.y = player.transform.position.y + sin(angle) * radius;
@@ -270,7 +270,7 @@ script Bullet {
             let dy = hostile.transform.position.y - this.transform.position.y;
             if dx * dx + dy * dy <= 0.35 {
                 World.despawn(hostile);
-                if Game.get("special_aegis_reservoir", 0.0) > 0.0 {
+                if Game.special_aegis_reservoir > 0.0 {
                     this.reservoir += 1.0;
                     if this.reservoir >= 3.0 {
                         this.reservoir = 0.0;

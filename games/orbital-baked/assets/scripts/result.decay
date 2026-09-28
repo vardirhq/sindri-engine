@@ -21,7 +21,7 @@ script Result {
     }
 
     fn update(dt: f32) {
-        let over = Game.get("run_state", 0.0) == 4.0;
+        let over = Game.run_state == 4.0;
         if !over {
             this.shown = false;
             return;
@@ -31,10 +31,10 @@ script Result {
         }
         this.shown = true;
 
-        Ui.set_number(this.score, Game.get("score", 0.0));
-        Ui.set_number(this.kills, Game.get("kills", 0.0));
+        Ui.set_number(this.score, Game.score);
+        Ui.set_number(this.kills, Game.kills);
         Ui.set_number(this.best, Save.number("best_score", 0.0));
-        let elapsed = Game.get("elapsed", 0.0);
+        let elapsed = Game.elapsed;
         let minutes = (elapsed - elapsed % 60.0) / 60.0;
         Ui.set_numbers(this.survived, minutes, elapsed % 60.0);
     }

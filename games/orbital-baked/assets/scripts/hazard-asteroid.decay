@@ -32,7 +32,7 @@ script HazardAsteroid {
     }
 
     fn update(dt: f32) {
-        if Game.get("run_state", 0.0) != 1.0 || Game.get("sector", 0.0) != 1.0 {
+        if Game.run_state != 1.0 || Game.get("sector", 0.0) != 1.0 {
             // Preserve whatever momentum physics produced before freezing for an
             // overlay/sector transition. Resume from that momentum once play returns.
             if !this.suspended {
@@ -77,8 +77,7 @@ script HazardAsteroid {
     fn handle_hit(hit: Entity, player: Entity) {
         if hit == player {
             if this.impact_cd <= 0.0 {
-                Game.set("player_damage_taken",
-                         max(Game.get("player_damage_taken", 0.0), this.impact_damage));
+                Game.player_damage_taken = max(Game.player_damage_taken, this.impact_damage);
                 this.impact_cd = 0.55;
                 knock_from(player);
             }

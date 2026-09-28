@@ -5,18 +5,18 @@ script Module {
     @export let slot: f32 = 0.0;
 
     fn update(dt: f32) {
-        if Game.get("run_state", 0.0) != 2.0 || !Ui.is_pressed(this.entity) { return; }
+        if Game.run_state != 2.0 || !Ui.is_pressed(this.entity) { return; }
         let index = offered_index();
         if index < 0.0 { return; }
         apply(index);
         let owned_key = Profiles.text_at(this.catalog, "modules", index, "owned_key", "");
         Game.set(owned_key, 1.0);
         if Profiles.flag_at(this.catalog, "modules", index, "black_signal", false) {
-            Game.set("black_modules_taken", Game.get("black_modules_taken", 0.0) + 1.0);
+            Game.black_modules_taken = Game.black_modules_taken + 1.0;
         }
-        Game.set("picked_module", index);
+        Game.picked_module = index;
         Audio.play("audio/upgrade.wav", 0.4);
-        Game.set("run_state", 1.0);
+        Game.run_state = 1.0;
     }
 
     fn offered_index() -> f32 {

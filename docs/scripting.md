@@ -1762,8 +1762,12 @@ fallback is — Orbital Last Stand reads `hp` with five different ones.
   It may not take a script's or an event's name, and may add to a namespace
   the engine offers only as `Game` does: without redefining its members.
 
-Like the board, state is runtime state and goes when a run does. Scorchball's
-and the platformer's shared values are declared this way.
+Like the board, state is runtime state and goes when a run does. Scorchball's,
+the platformer's and both Orbital games' shared values are declared this way.
+Each Orbital game keeps its declarations in `game-state.decay` and still reads a
+few values with `Game.get`: keys built at runtime, and eight values whose
+callers disagree about the fallback, which need a starting value chosen before
+they can be declared.
 
 ### Enums and `match`
 

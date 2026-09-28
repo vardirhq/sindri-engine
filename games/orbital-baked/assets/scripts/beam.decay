@@ -24,7 +24,7 @@ script Beam {
             World.despawn(this.entity);
             return;
         }
-        if Game.get("run_state", 0.0) != 1.0 {
+        if Game.run_state != 1.0 {
             Physics.set_velocity(this.entity, 0.0, 0.0);
             return;
         }

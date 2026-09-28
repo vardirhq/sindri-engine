@@ -24,7 +24,7 @@ script PlayerVisual {
         let player = this.player;
         if player == null || !World.exists(player) { return; }
 
-        let state = Game.get("run_state", 0.0);
+        let state = Game.run_state;
         if state == 1.0 { this.clock += dt; }
         this.transform.position.x = player.transform.position.x;
         this.transform.position.y = player.transform.position.y;
@@ -41,14 +41,14 @@ script PlayerVisual {
     }
 
     fn update_shield(dt: f32, state: f32) {
-        var impact = Game.get("shield_impact", 0.0);
+        var impact = Game.shield_impact;
         if state == 1.0 && impact > 0.0 {
             impact = max(0.0, impact - dt / 0.22);
-            Game.set("shield_impact", impact);
+            Game.shield_impact = impact;
         }
-        let armor = min(1.0, max(0.0, Game.get("armor", 0.0) / 0.65));
-        let overdrive = min(1.0, max(0.0, Game.get("overdrive", 0.0) / 4.0));
-        let weapon_load = min(1.0, (Game.get("pierce", 0.0) + Game.get("beam", 0.0) + Game.get("arc", 0.0)) / 3.0);
+        let armor = min(1.0, max(0.0, Game.armor / 0.65));
+        let overdrive = min(1.0, max(0.0, Game.overdrive / 4.0));
+        let weapon_load = min(1.0, (Game.pierce + Game.beam + Game.arc) / 3.0);
         let breath = 0.5 + 0.5 * sin(this.clock * (4.2 + overdrive * 3.0));
         let size = 0.70 + breath * 0.035 + impact * 0.16 + overdrive * 0.055 + weapon_load * 0.025;
         this.transform.scale.x = size;
@@ -62,7 +62,7 @@ script PlayerVisual {
     }
 
     fn update_engine() {
-        let facing = Game.get("player_facing", 1.5707963);
+        let facing = Game.player_facing;
         let forward_x = cos(facing);
         let forward_y = sin(facing);
         let right_x = -forward_y;
@@ -71,10 +71,10 @@ script PlayerVisual {
         this.transform.position.y += -forward_y * 0.20 + right_y * this.side;
         this.transform.rotation_z = facing - 1.5707963;
 
-        let thrust = Game.get("player_thrust", 0.0);
-        let overdrive = min(1.0, max(0.0, Game.get("overdrive", 0.0) / 4.0));
-        let missile = min(1.0, Game.get("missile", 0.0));
-        let nova = min(1.0, Game.get("nova", 0.0));
+        let thrust = Game.player_thrust;
+        let overdrive = min(1.0, max(0.0, Game.overdrive / 4.0));
+        let missile = min(1.0, Game.missile);
+        let nova = min(1.0, Game.nova);
         let pulse = 0.78 + sin(this.clock * (19.0 + overdrive * 11.0) + this.side * 7.0) * 0.16;
         this.transform.scale.x = 0.9 + pulse * 0.08 + overdrive * 0.08 + missile * 0.05;
         this.transform.scale.y = (0.68 + thrust * 0.72 + overdrive * 0.42 + missile * 0.20) * pulse;
@@ -90,15 +90,15 @@ script PlayerVisual {
     }
 
     fn update_core() {
-        let facing = Game.get("player_facing", 1.5707963);
+        let facing = Game.player_facing;
         this.transform.position.x += cos(facing) * 0.045;
         this.transform.position.y += sin(facing) * 0.045;
-        let overdrive = min(1.0, max(0.0, Game.get("overdrive", 0.0) / 4.0));
-        let arc = min(1.0, Game.get("arc", 0.0));
-        let nova = min(1.0, Game.get("nova", 0.0));
-        let beam = min(1.0, Game.get("beam", 0.0));
-        let missile = min(1.0, Game.get("missile", 0.0));
-        let pierce = min(1.0, Game.get("pierce", 0.0));
+        let overdrive = min(1.0, max(0.0, Game.overdrive / 4.0));
+        let arc = min(1.0, Game.arc);
+        let nova = min(1.0, Game.nova);
+        let beam = min(1.0, Game.beam);
+        let missile = min(1.0, Game.missile);
+        let pierce = min(1.0, Game.pierce);
         let signatures = min(4.0, arc + nova + beam + missile + pierce);
         let beat = 0.5 + 0.5 * sin(this.clock * (7.5 + overdrive * 8.0 + signatures * 1.4));
         let pulse = 0.09 + beat * 0.024 + overdrive * 0.035 + signatures * 0.006;

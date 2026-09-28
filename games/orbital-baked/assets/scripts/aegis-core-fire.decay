@@ -6,7 +6,7 @@ script AegisCoreFire {
     var clock: f32 = 0.0;
 
     fn update(dt: f32) {
-        if Game.get("run_state", 0.0) != 1.0 {
+        if Game.run_state != 1.0 {
             World.despawn(this.entity);
             return;
         }
@@ -23,7 +23,7 @@ script AegisCoreFire {
         // A child of the boss, so its bursts come from where the boss is.
         this.transform.position.x = 0.0;
         this.transform.position.y = 0.0;
-        if Game.get("aegis_core_exposed", 0.0) <= 0.0 { return; }
+        if Game.aegis_core_exposed <= 0.0 { return; }
 
         this.clock -= dt;
         if this.clock <= 0.0 {

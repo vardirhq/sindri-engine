@@ -136,7 +136,7 @@ script SpineSegment {
     }
 
     fn update(dt: f32) {
-        if Game.get("run_state", 0.0) != 1.0 {
+        if Game.run_state != 1.0 {
             Physics.set_velocity(this.entity, 0.0, 0.0);
             return;
         }
@@ -318,8 +318,7 @@ script SpineSegment {
                 this.hp -= World.property_number(hit, "damage", 0.0);
                 World.despawn(hit);
             } else if World.has_tag(hit, "player") {
-                Game.set("player_damage_taken",
-                         max(Game.get("player_damage_taken", 0.0), 1.7));
+                Game.player_damage_taken = max(Game.player_damage_taken, 1.7);
             }
         }
         if this.hp <= 0.0 { split(); return; }
@@ -349,7 +348,7 @@ script SpineSegment {
         }
 
         Effects.burst(this.entity);
-        Game.set("screen_trauma", max(Game.get("screen_trauma", 0.0), 0.22));
+        Game.screen_trauma = max(Game.screen_trauma, 0.22);
         Audio.play("audio/kill.wav", 0.25);
         World.despawn(this.entity);
     }
