@@ -1,29 +1,24 @@
-//! Does `docs/scripting.md` describe the surface a script actually has?
+//! Do the Decay scripting contracts describe the surface a script actually has?
 //!
-//! The document lists, in tables, every path and call a script can reach. That
-//! list is believed — it is the only place an author looks to find out what
-//! they can write — and a believed list that is quietly wrong is worse than no
-//! list at all. `docs/capabilities.md` exists in this repository for exactly
-//! that reason.
+//! The main scripting contract and focused runtime-camera contract list, in
+//! tables, every path and call a script can reach. Those lists are believed by
+//! authors, so a surface that grows without its documentation growing with it
+//! fails here, and so does documentation that promises something withdrawn.
 //!
-//! So the tables are parsed and compared against what the host actually
-//! describes. A surface that grows without the documentation growing with it
-//! fails here, and so does a document that promises something withdrawn.
-//!
-//! When this fails, the fix is in the document, not in the assertion.
+//! When this fails, the fix is in the documentation, not in the assertion.
 
 use std::collections::{BTreeMap, BTreeSet};
 
 use decay_semantic::{Environment, ExternalSymbol, Type};
 use sindri_decay::environment;
 
-const DOC: &str = include_str!("../../../docs/scripting.md");
+const DOC: &str = concat!(
+    include_str!("../../../docs/scripting.md"),
+    "\n",
+    include_str!("../../../docs/camera-runtime-scripting.md")
+);
 
-/// The first backticked cell of every table row in the document.
-///
-/// Tables are the only place the surface is listed, and a row always leads with
-/// the thing it describes, so this finds the claims without needing to know
-/// which table it is reading.
+/// The first backticked cell of every table row in the contracts.
 fn documented_cells() -> Vec<String> {
     DOC.lines()
         .filter_map(|line| {
@@ -36,9 +31,6 @@ fn documented_cells() -> Vec<String> {
 }
 
 /// Expands `position.{x,y,z}` into three names.
-///
-/// The document groups axes because listing nine near-identical rows would bury
-/// the two that differ. Expanding here means the shorthand costs nothing.
 fn expand(name: &str) -> Vec<String> {
     let Some((head, rest)) = name.split_once('{') else {
         return vec![name.to_owned()];
@@ -52,11 +44,8 @@ fn expand(name: &str) -> Vec<String> {
         .collect()
 }
 
-/// Everything the document claims, split by what it is.
 struct Documented {
     entity_paths: BTreeSet<String>,
-    /// Namespace to the members listed under it, keyed by the namespace's own
-    /// name so that one nobody thought to check is still checked.
     namespaces: BTreeMap<String, BTreeSet<String>>,
 }
 
@@ -67,8 +56,6 @@ fn documented() -> Documented {
     };
     for cell in documented_cells() {
         for name in expand(&cell) {
-            // A call is written with its arguments; the name is what precedes
-            // them.
             let name = name
                 .split_once('(')
                 .map_or(name.clone(), |(head, _)| head.to_owned());
@@ -86,7 +73,6 @@ fn documented() -> Documented {
     documented
 }
 
-/// Every complete path under `this`, as the analyzer describes them.
 fn described_entity_paths(environment: &Environment) -> BTreeSet<String> {
     fn walk(
         environment: &Environment,
@@ -97,8 +83,6 @@ fn described_entity_paths(environment: &Environment) -> BTreeSet<String> {
         let ExternalSymbol::Value(ty) = symbol else {
             return;
         };
-        // A vector is reached whole and by component, and both are paths the
-        // document has to list.
         if let Some(dimensions) = ty.dimensions() {
             for component in &["x", "y", "z"][..dimensions] {
                 into.insert(format!("{prefix}.{component}"));
@@ -142,18 +126,10 @@ fn the_document_lists_exactly_the_paths_a_script_can_reach() {
     assert_eq!(
         documented.entity_paths,
         described_entity_paths(&environment),
-        "docs/scripting.md and the host surface disagree about what a script \
-         can reach on its entity. The document is the thing to fix."
+        "the Decay scripting contracts and host surface disagree about what a script can reach on its entity"
     );
 }
 
-/// Every namespace the host offers is documented, and every one the document
-/// mentions exists.
-///
-/// Written over whatever namespaces there happen to be rather than over a list
-/// of the ones that existed when this was written — otherwise a new namespace
-/// escapes the check by being new, which is precisely when documentation is
-/// most likely to be missing.
 #[test]
 fn the_document_lists_exactly_the_namespaces_a_script_can_reach() {
     let environment = environment();
@@ -173,20 +149,18 @@ fn the_document_lists_exactly_the_namespaces_a_script_can_reach() {
             .cloned()
             .collect::<BTreeSet<_>>(),
         offered,
-        "docs/scripting.md and the host disagree about which namespaces exist"
+        "the Decay scripting contracts and host disagree about which namespaces exist"
     );
 
     for namespace in offered {
         assert_eq!(
             documented.namespaces[&namespace],
             described_members(&environment, &namespace),
-            "docs/scripting.md and the host disagree about `{namespace}`"
+            "the Decay scripting contracts and host disagree about `{namespace}`"
         );
     }
 }
 
-/// The maths functions are prose rather than a table, so they are read from the
-/// sentence that lists them.
 #[test]
 fn the_document_lists_exactly_the_maths_a_script_can_do() {
     let sentence = DOC
