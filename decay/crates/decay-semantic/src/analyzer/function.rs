@@ -78,6 +78,7 @@ impl Analyzer<'_, '_> {
     /// and no `this`: only its parameters, the other shared functions, and
     /// what the host offers.
     pub(super) fn analyze_shared_function(&mut self, function: &FunctionDecl) {
+        self.binding_scope = function.span;
         self.current_return = function
             .return_type
             .as_ref()

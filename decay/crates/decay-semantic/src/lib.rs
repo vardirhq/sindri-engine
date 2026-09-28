@@ -21,7 +21,7 @@ use decay_syntax::parse;
 use analyzer::Analyzer;
 
 pub use decay_syntax::{ListOp, StringOp, TimerProperty, VectorOp};
-pub use diagnostic::{Analysis, Diagnostic, DiagnosticPhase, ValueMember, ValueMembers};
+pub use diagnostic::{Analysis, Binding, Diagnostic, DiagnosticPhase, ValueMember, ValueMembers};
 pub use environment::{Environment, ExternalSymbol, StateField};
 pub use types::{COMPONENTS, EMIT, FunctionType, HostType, TIMER, Type, enum_type, event_type};
 
@@ -52,6 +52,7 @@ pub fn analyze_with_environment(source: &str, environment: &Environment) -> Anal
     analyzer.analyze_program(&parsed.program);
     let enums = analyzer.known_enums();
     let structs = analyzer.known_structs();
+    let bindings = std::mem::take(&mut analyzer.bindings);
 
     Analysis {
         program: parsed.program,
@@ -59,5 +60,6 @@ pub fn analyze_with_environment(source: &str, environment: &Environment) -> Anal
         value_members,
         enums,
         structs,
+        bindings,
     }
 }

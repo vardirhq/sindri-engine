@@ -11,6 +11,7 @@ use super::{Analyzer, Symbol};
 impl Analyzer<'_, '_> {
     pub(super) fn analyze_container(&mut self, container: &decay_syntax::ContainerDecl) {
         let mut members = HashMap::new();
+        self.binding_scope = container.span;
 
         for member in &container.members {
             match member {
@@ -89,6 +90,9 @@ impl Analyzer<'_, '_> {
         symbol: Symbol,
         span: Span,
     ) {
+        if symbol.function.is_none() {
+            self.record_binding(name, &symbol.ty, span);
+        }
         if members.insert(name.to_owned(), symbol).is_some() {
             self.error(span, format!("duplicate member `{name}`"));
         }
@@ -212,6 +216,18 @@ impl Analyzer<'_, '_> {
     }
 
     pub(super) fn analyze_function(
+        &mut self,
+        container: &decay_syntax::ContainerDecl,
+        function: &FunctionDecl,
+        members: &HashMap<String, Symbol>,
+    ) {
+        let outer = self.binding_scope;
+        self.binding_scope = function.span;
+        self.analyze_function_body(container, function, members);
+        self.binding_scope = outer;
+    }
+
+    fn analyze_function_body(
         &mut self,
         container: &decay_syntax::ContainerDecl,
         function: &FunctionDecl,

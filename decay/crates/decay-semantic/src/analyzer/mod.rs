@@ -55,6 +55,10 @@ pub(super) struct Analyzer<'a, 'd> {
     ///
     value_members: &'d mut ValueMembers,
     scopes: Vec<HashMap<String, Symbol>>,
+    /// The container or function whatever is bound now is visible in.
+    binding_scope: Span,
+    /// Every name bound so far, for a tool; see [`crate::Binding`].
+    pub(crate) bindings: Vec<crate::diagnostic::Binding>,
     current_return: Type,
     /// Every `script` and `component` in the program, so that `this` can be
     /// told apart from a host type of the same shape.
@@ -94,6 +98,8 @@ impl<'a, 'd> Analyzer<'a, 'd> {
             diagnostics,
             value_members,
             scopes: Vec::new(),
+            binding_scope: Span::new(0, 0),
+            bindings: Vec::new(),
             current_return: Type::Unit,
             containers: HashSet::new(),
             loop_depth: 0,
@@ -263,6 +269,16 @@ impl<'a, 'd> Analyzer<'a, 'd> {
             || matches!((expected, actual), (Type::Named(_), Type::Null))
             || matches!((expected, actual), (Type::Named(wanted), Type::Named(given))
                 if self.environment.is_a(given, wanted))
+    }
+
+    /// Notes a name bound here, with its type, for a tool.
+    pub(super) fn record_binding(&mut self, name: &str, ty: &Type, span: Span) {
+        self.bindings.push(crate::diagnostic::Binding {
+            name: name.to_owned(),
+            declared: span.start,
+            scope: self.binding_scope,
+            ty: ty.clone(),
+        });
     }
 
     pub(super) fn error(&mut self, span: Span, message: String) {
