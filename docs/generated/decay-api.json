@@ -592,6 +592,78 @@
           "returns": "unit"
         },
         {
+          "description": null,
+          "kind": "function",
+          "name": "bounds",
+          "parameter_names": null,
+          "parameters": [
+            "f32",
+            "f32",
+            "f32",
+            "f32"
+          ],
+          "returns": "unit"
+        },
+        {
+          "description": null,
+          "kind": "function",
+          "name": "clear_bounds",
+          "parameter_names": null,
+          "parameters": [],
+          "returns": "unit"
+        },
+        {
+          "description": null,
+          "kind": "function",
+          "name": "clear_follow",
+          "parameter_names": null,
+          "parameters": [],
+          "returns": "unit"
+        },
+        {
+          "description": null,
+          "kind": "function",
+          "name": "dead_zone",
+          "parameter_names": null,
+          "parameters": [
+            "f32",
+            "f32"
+          ],
+          "returns": "unit"
+        },
+        {
+          "description": null,
+          "kind": "function",
+          "name": "follow",
+          "parameter_names": null,
+          "parameters": [
+            "Entity"
+          ],
+          "returns": "unit"
+        },
+        {
+          "description": null,
+          "kind": "function",
+          "name": "follow_offset",
+          "parameter_names": null,
+          "parameters": [
+            "f32",
+            "f32",
+            "f32"
+          ],
+          "returns": "unit"
+        },
+        {
+          "description": null,
+          "kind": "function",
+          "name": "max_speed",
+          "parameter_names": null,
+          "parameters": [
+            "f32"
+          ],
+          "returns": "unit"
+        },
+        {
           "description": "How far the camera view is moved sideways from where it was placed in the scene.",
           "kind": "value",
           "name": "pan_x",
@@ -608,6 +680,28 @@
           "kind": "value",
           "name": "pan_z",
           "type": "f32"
+        },
+        {
+          "description": null,
+          "kind": "function",
+          "name": "shake",
+          "parameter_names": null,
+          "parameters": [
+            "f32",
+            "f32",
+            "f32"
+          ],
+          "returns": "unit"
+        },
+        {
+          "description": null,
+          "kind": "function",
+          "name": "smoothing",
+          "parameter_names": null,
+          "parameters": [
+            "f32"
+          ],
+          "returns": "unit"
         }
       ],
       "name": "Camera"

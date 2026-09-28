@@ -1,43 +1,94 @@
 //! Host surface for player input and camera-facing runtime values.
 
 #[derive(Clone, Copy, Debug)]
-pub(crate) enum InputQuery { Axis, Down, Pressed, Released }
+pub(crate) enum InputQuery {
+    Axis,
+    Down,
+    Pressed,
+    Released,
+}
 impl InputQuery {
-    pub(crate) const fn keys(self) -> usize { match self { Self::Axis => 2, _ => 1 } }
-    pub(crate) const fn is_number(self) -> bool { matches!(self, Self::Axis) }
+    pub(crate) const fn keys(self) -> usize {
+        match self {
+            Self::Axis => 2,
+            _ => 1,
+        }
+    }
+    pub(crate) const fn is_number(self) -> bool {
+        matches!(self, Self::Axis)
+    }
 }
 pub(crate) const INPUT_QUERIES: &[(&str, InputQuery)] = &[
-    ("axis", InputQuery::Axis), ("is_down", InputQuery::Down),
-    ("just_pressed", InputQuery::Pressed), ("just_released", InputQuery::Released),
+    ("axis", InputQuery::Axis),
+    ("is_down", InputQuery::Down),
+    ("just_pressed", InputQuery::Pressed),
+    ("just_released", InputQuery::Released),
 ];
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
-pub(crate) enum PointerQuery { Down, Pressed, Released }
+pub(crate) enum PointerQuery {
+    Down,
+    Pressed,
+    Released,
+}
 pub(crate) const POINTER_QUERIES: &[(&str, PointerQuery)] = &[
-    ("is_down", PointerQuery::Down), ("just_pressed", PointerQuery::Pressed),
+    ("is_down", PointerQuery::Down),
+    ("just_pressed", PointerQuery::Pressed),
     ("just_released", PointerQuery::Released),
 ];
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
-pub(crate) enum PointerValue { X, Y, Inside, OverUi, OverlayX, OverlayY, Position, Overlay }
+pub(crate) enum PointerValue {
+    X,
+    Y,
+    Inside,
+    OverUi,
+    OverlayX,
+    OverlayY,
+    Position,
+    Overlay,
+}
 pub(crate) const POINTER_VALUES: &[(&str, PointerValue)] = &[
-    ("x", PointerValue::X), ("y", PointerValue::Y),
-    ("overlay_x", PointerValue::OverlayX), ("overlay_y", PointerValue::OverlayY),
-    ("position", PointerValue::Position), ("overlay", PointerValue::Overlay),
-    ("inside", PointerValue::Inside), ("over_ui", PointerValue::OverUi),
+    ("x", PointerValue::X),
+    ("y", PointerValue::Y),
+    ("overlay_x", PointerValue::OverlayX),
+    ("overlay_y", PointerValue::OverlayY),
+    ("position", PointerValue::Position),
+    ("overlay", PointerValue::Overlay),
+    ("inside", PointerValue::Inside),
+    ("over_ui", PointerValue::OverUi),
 ];
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
-pub(crate) enum AimValue { Hit, X, Y, Z, PlaceX, PlaceY, PlaceZ }
+pub(crate) enum AimValue {
+    Hit,
+    X,
+    Y,
+    Z,
+    PlaceX,
+    PlaceY,
+    PlaceZ,
+}
 pub(crate) const AIM_VALUES: &[(&str, AimValue)] = &[
-    ("hit", AimValue::Hit), ("x", AimValue::X), ("y", AimValue::Y), ("z", AimValue::Z),
-    ("place_x", AimValue::PlaceX), ("place_y", AimValue::PlaceY), ("place_z", AimValue::PlaceZ),
+    ("hit", AimValue::Hit),
+    ("x", AimValue::X),
+    ("y", AimValue::Y),
+    ("z", AimValue::Z),
+    ("place_x", AimValue::PlaceX),
+    ("place_y", AimValue::PlaceY),
+    ("place_z", AimValue::PlaceZ),
 ];
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
-pub(crate) enum CameraValue { PanX, PanY, PanZ }
+pub(crate) enum CameraValue {
+    PanX,
+    PanY,
+    PanZ,
+}
 pub(crate) const CAMERA_VALUES: &[(&str, CameraValue)] = &[
-    ("pan_x", CameraValue::PanX), ("pan_y", CameraValue::PanY), ("pan_z", CameraValue::PanZ),
+    ("pan_x", CameraValue::PanX),
+    ("pan_y", CameraValue::PanY),
+    ("pan_z", CameraValue::PanZ),
 ];
 
 /// Gameplay intent for the engine-owned camera behavior system.
@@ -68,27 +119,61 @@ pub(crate) const CAMERA_CALLS: &[(&str, CameraCall)] = &[
 ];
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
-pub(crate) enum GestureValue { Tapped, TapX, TapY, Held, HoldX, HoldY, Dragging, DragX, DragY, Pinching, Pinch }
+pub(crate) enum GestureValue {
+    Tapped,
+    TapX,
+    TapY,
+    Held,
+    HoldX,
+    HoldY,
+    Dragging,
+    DragX,
+    DragY,
+    Pinching,
+    Pinch,
+}
 pub(crate) const GESTURE_VALUES: &[(&str, GestureValue)] = &[
-    ("tapped", GestureValue::Tapped), ("tap_x", GestureValue::TapX), ("tap_y", GestureValue::TapY),
-    ("held", GestureValue::Held), ("hold_x", GestureValue::HoldX), ("hold_y", GestureValue::HoldY),
-    ("dragging", GestureValue::Dragging), ("drag_x", GestureValue::DragX), ("drag_y", GestureValue::DragY),
-    ("pinching", GestureValue::Pinching), ("pinch", GestureValue::Pinch),
+    ("tapped", GestureValue::Tapped),
+    ("tap_x", GestureValue::TapX),
+    ("tap_y", GestureValue::TapY),
+    ("held", GestureValue::Held),
+    ("hold_x", GestureValue::HoldX),
+    ("hold_y", GestureValue::HoldY),
+    ("dragging", GestureValue::Dragging),
+    ("drag_x", GestureValue::DragX),
+    ("drag_y", GestureValue::DragY),
+    ("pinching", GestureValue::Pinching),
+    ("pinch", GestureValue::Pinch),
 ];
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
-pub(crate) enum ViewportValue { Aspect }
+pub(crate) enum ViewportValue {
+    Aspect,
+}
 pub(crate) const VIEWPORT_VALUES: &[(&str, ViewportValue)] = &[("aspect", ViewportValue::Aspect)];
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
-pub(crate) enum StickValue { X, Y, Held, AnchorX, AnchorY, Direction }
+pub(crate) enum StickValue {
+    X,
+    Y,
+    Held,
+    AnchorX,
+    AnchorY,
+    Direction,
+}
 pub(crate) const STICK_VALUES: &[(&str, StickValue)] = &[
-    ("x", StickValue::X), ("y", StickValue::Y), ("held", StickValue::Held),
-    ("anchor_x", StickValue::AnchorX), ("anchor_y", StickValue::AnchorY),
+    ("x", StickValue::X),
+    ("y", StickValue::Y),
+    ("held", StickValue::Held),
+    ("anchor_x", StickValue::AnchorX),
+    ("anchor_y", StickValue::AnchorY),
     ("direction", StickValue::Direction),
 ];
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
-pub(crate) enum TouchCall { X, Y }
+pub(crate) enum TouchCall {
+    X,
+    Y,
+}
 pub(crate) const TOUCH_CALLS: &[(&str, TouchCall)] = &[("x", TouchCall::X), ("y", TouchCall::Y)];
 pub(crate) const TOUCH_COUNT: &str = "count";

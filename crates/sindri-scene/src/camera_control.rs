@@ -35,7 +35,8 @@ fn edit_behavior(
     let Some(payload) = camera_behavior_payload(world) else {
         return false;
     };
-    let Ok(mut behavior) = serde_json::from_value::<CameraBehaviorComponent>(payload.clone()) else {
+    let Ok(mut behavior) = serde_json::from_value::<CameraBehaviorComponent>(payload.clone())
+    else {
         return false;
     };
     if !edit(&mut behavior) {
@@ -91,7 +92,10 @@ pub fn set_camera_follow_offset(world: &mut World, offset: [f32; 3]) -> bool {
 
 /// Changes the full width and height of the rectangular follow dead zone.
 pub fn set_camera_dead_zone(world: &mut World, dead_zone: [f32; 2]) -> bool {
-    if dead_zone.iter().any(|value| !value.is_finite() || *value < 0.0) {
+    if dead_zone
+        .iter()
+        .any(|value| !value.is_finite() || *value < 0.0)
+    {
         return false;
     }
     edit_behavior(world, |behavior| {

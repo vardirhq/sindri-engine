@@ -144,9 +144,18 @@ Playing sound effects and music.
 The game's camera: moving the view and shaking it.
 
 - `add_trauma(amount: f32)` → `unit` — Shakes the camera, for impacts and explosions. Bigger amounts shake harder, up to 1, and the shake fades by itself.
+- `bounds(f32, f32, f32, f32)` → `unit`
+- `clear_bounds()` → `unit`
+- `clear_follow()` → `unit`
+- `dead_zone(f32, f32)` → `unit`
+- `follow(Entity)` → `unit`
+- `follow_offset(f32, f32, f32)` → `unit`
+- `max_speed(f32)` → `unit`
 - `pan_x`: `f32` — How far the camera view is moved sideways from where it was placed in the scene.
 - `pan_y`: `f32` — How far the camera view is moved up or down from where it was placed in the scene.
 - `pan_z`: `f32` — How far the camera view is moved forwards or backwards from where it was placed in the scene.
+- `shake(f32, f32, f32)` → `unit`
+- `smoothing(f32)` → `unit`
 
 ### `Effects`
 
