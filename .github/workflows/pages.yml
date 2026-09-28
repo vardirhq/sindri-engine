@@ -12,9 +12,13 @@ permissions:
   pages: write
   id-token: write
 
+# Deploys share one group and are never cancelled, so two pushes to main cannot
+# race to publish. A pull request only builds the site to prove it assembles,
+# so each has its own group and a newer push cancels the older build, rather
+# than every open pull request queueing behind every other one and the deploy.
 concurrency:
-  group: pages
-  cancel-in-progress: false
+  group: ${{ github.event_name == 'pull_request' && format('pages-{0}', github.ref) || 'pages' }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
   build:
@@ -33,10 +37,16 @@ jobs:
           tool: wasm-pack@0.13.1
       - name: Install site tools
         run: python -m pip install --disable-pip-version-check 'Markdown==3.8.2'
+      # `wasm-opt` is for what gets deployed. A pull request only proves the
+      # site assembles, so it skips the optimiser, which is most of each build.
       - name: Build the browser host
-        run: wasm-pack build game --target web --release --out-dir pkg
+        env:
+          WASM_OPT: ${{ github.event_name == 'pull_request' && '--no-opt' || '' }}
+        run: wasm-pack build game --target web --release --out-dir pkg $WASM_OPT
       - name: Build Voxel Lab
-        run: wasm-pack build games/voxel-lab --target web --release --out-dir pkg
+        env:
+          WASM_OPT: ${{ github.event_name == 'pull_request' && '--no-opt' || '' }}
+        run: wasm-pack build games/voxel-lab --target web --release --out-dir pkg $WASM_OPT
       - name: Assemble Sindri site
         run: |
           # Assemble into an empty directory. `target/` is restored by

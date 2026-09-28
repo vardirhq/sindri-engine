@@ -549,9 +549,16 @@ jobs:
           npx --prefix scripts/browser playwright install chromium
       - name: Build the browser bundles
         id: browser_build
+        # `wasm-opt` makes the download smaller and was three of this job's
+        # five and a half minutes; cargo's own release build takes half a
+        # minute. The smoke below needs the bundle to run, not to be small, so a
+        # pull request skips it. Main keeps it, so the optimised bundle the
+        # site deploys is still the one proven to start.
+        env:
+          WASM_OPT: ${{ github.event_name == 'pull_request' && '--no-opt' || '' }}
         run: |
-          wasm-pack build examples/cube --target web --out-dir pkg
-          wasm-pack build game --target web --out-dir pkg
+          wasm-pack build examples/cube --target web --out-dir pkg $WASM_OPT
+          wasm-pack build game --target web --out-dir pkg $WASM_OPT
       # Everything below runs against the *exported* directory rather than the
       # source tree. That is the point: what CI proves is what a deployment
       # would serve, page and manifest and hashed assets and all.
