@@ -93,6 +93,7 @@ impl SceneTextures {
             bindings,
             tile_set_bindings,
             pinned: BTreeSet::new(),
+            prefab_world: World::default(),
         }
     }
 
@@ -101,7 +102,8 @@ impl SceneTextures {
         world: &World,
         renderer: &mut TextRenderer,
     ) -> (BTreeSet<AssetId>, Vec<TextureNote>) {
-        let references = referenced_fonts(world);
+        let mut references = referenced_fonts(world);
+        references.extend(referenced_fonts(&self.prefab_world));
         let wanted: BTreeSet<AssetId> = references
             .iter()
             .filter_map(|reference| AssetId::new(reference.clone()).ok())
@@ -148,6 +150,7 @@ impl SceneTextures {
         let (wanted_tile_sets, tile_notes) = self.request_tile_sets(world);
         notes.extend(tile_notes);
         let mut referenced = referenced_textures(world);
+        referenced.extend(referenced_textures(&self.prefab_world));
         let pinned: Vec<SpriteRef> = self
             .pinned
             .iter()
@@ -210,8 +213,7 @@ impl SceneTextures {
                 Some((sheet_id_for(&id)?, reference.clone()))
             })
             .collect();
-        let mut slices = wanted_sheets(world, &self.tile_set_bindings, &wanted_tile_sets);
-        slices.extend(pinned_sheets(&pinned));
+        let slices = self.wanted_slices(world, &wanted_tile_sets, &pinned);
         if let Some(sheets) = &mut self.sheets {
             let released = sheets.retain(&slices);
             for id in &slices {
@@ -255,9 +257,27 @@ impl SceneTextures {
         notes
     }
 
+    /// Every sheet the scene, its prefabs and the pinned sprites are cut by.
+    fn wanted_slices(
+        &self,
+        world: &World,
+        wanted_tile_sets: &BTreeSet<AssetId>,
+        pinned: &[SpriteRef],
+    ) -> BTreeSet<AssetId> {
+        let mut slices = wanted_sheets(world, &self.tile_set_bindings, wanted_tile_sets);
+        slices.extend(wanted_sheets(
+            &self.prefab_world,
+            &self.tile_set_bindings,
+            wanted_tile_sets,
+        ));
+        slices.extend(pinned_sheets(pinned));
+        slices
+    }
+
     fn request_tile_sets(&mut self, world: &World) -> (BTreeSet<AssetId>, Vec<TextureNote>) {
         let wanted: BTreeSet<AssetId> = referenced_tile_sets(world)
             .iter()
+            .chain(referenced_tile_sets(&self.prefab_world).iter())
             .filter_map(|reference| AssetId::new(reference.clone()).ok())
             .collect();
         let mut notes = Vec::new();

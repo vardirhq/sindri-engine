@@ -32,7 +32,7 @@ use sindri_assets::{
     MANIFEST_FILE_NAME, SpriteSheetAssetDecoder, TextureAsset, TextureAssetDecoder,
     TileSetAssetDecoder,
 };
-use sindri_core::AssetId;
+use sindri_core::{AssetId, World};
 use sindri_render::{Texture2D, TextureError, TextureRegistry};
 use sindri_scene::{TextureBindings, TileSetBindings};
 
@@ -101,6 +101,15 @@ pub struct SceneTextures {
     /// the faces of a block set open for editing. Loaded as though the world
     /// named them, so the panel has pictures of them.
     pinned: BTreeSet<String>,
+    /// Every loaded prefab, spawned into a world of its own that nothing runs
+    /// or draws.
+    ///
+    /// What a prefab draws with is only known to the scene once a script
+    /// spawns it, and asking then is a frame of the missing checker for every
+    /// enemy, bullet and asteroid — or every frame, since nothing asked again.
+    /// So the textures, sheets and fonts in here are asked for alongside the
+    /// scene's own, as soon as the prefab has loaded.
+    prefab_world: World,
 }
 
 /// The project's manifest, if it ships one.
@@ -117,6 +126,22 @@ pub(super) fn manifest_beside(root: &Path) -> Option<AssetManifest> {
 /// The directory a scene's references resolve against.
 pub(super) fn root_of(scene: Option<&Path>) -> Option<PathBuf> {
     scene.and_then(Path::parent).map(Path::to_path_buf)
+}
+
+/// Every loaded prefab spawned into one world, for asking what they draw with.
+///
+/// A prefab that will not spawn is skipped rather than reported: the script
+/// loader already reported it when it failed to parse, and a spawn of it
+/// reports again with the script attached.
+#[must_use]
+pub fn prefab_world(prefabs: &sindri_decay::PrefabSources) -> World {
+    let mut world = World::default();
+    for id in prefabs.ids() {
+        if let Some(prefab) = prefabs.get(id) {
+            let _ = world.spawn_prefab(prefab);
+        }
+    }
+    world
 }
 
 /// Puts a decoded texture on the GPU.
@@ -158,6 +183,11 @@ impl SceneTextures {
         }
         self.pinned = sprites;
         true
+    }
+
+    /// Replaces the prefabs whose textures are loaded alongside the scene's.
+    pub fn set_prefabs(&mut self, prefabs: &sindri_decay::PrefabSources) {
+        self.prefab_world = prefab_world(prefabs);
     }
 
     /// Whether anything is still on its way.

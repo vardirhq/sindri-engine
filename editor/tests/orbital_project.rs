@@ -28,10 +28,17 @@ const REQUIRED_PREFABS: [&str; 3] = [
 
 /// The acceptance project's scene, from this crate's own directory.
 fn scene_path() -> PathBuf {
+    game_scene("orbital-last-stand")
+}
+
+/// A game's main scene under `games/`, from this crate's own directory.
+fn game_scene(game: &str) -> PathBuf {
     Path::new(env!("CARGO_MANIFEST_DIR"))
         .parent()
         .expect("the editor crate sits in the workspace")
-        .join("games/orbital-last-stand/assets/orbital.scene.json")
+        .join("games")
+        .join(game)
+        .join("assets/orbital.scene.json")
 }
 
 /// Opens the scene and lets the loader settle, as an editor frame loop does.
@@ -40,13 +47,17 @@ fn scene_path() -> PathBuf {
 /// asynchronous, and a test that gave up after N frames would be measuring this
 /// machine rather than the engine.
 fn opened() -> (SceneScripts, World, ComponentSchemaRegistry) {
-    let file = SceneFile::open(scene_path()).expect("the acceptance project opens");
+    opened_at(&scene_path())
+}
+
+fn opened_at(scene: &Path) -> (SceneScripts, World, ComponentSchemaRegistry) {
+    let file = SceneFile::open(scene).expect("the acceptance project opens");
     let extractor = scene_extractor();
     let world = World::from_scene(file.document())
         .expect("the acceptance scene loads")
         .world;
     let components = extractor.components().clone();
-    let mut scripts = SceneScripts::for_scene(Some(&scene_path()));
+    let mut scripts = SceneScripts::for_scene(Some(scene));
 
     // Kept turning after the scripts compile, because that is when the
     // prefabs first become askable: an ask, a load, and a compile each happen
@@ -121,6 +132,36 @@ fn every_prefab_the_scripts_spawn_is_loaded() {
         assert!(
             scripts.has_prefab(prefab),
             "the editor never loaded {prefab}"
+        );
+    }
+}
+
+/// Orbital Baked's asteroids and enemies drew as the magenta missing checker
+/// in the editor.
+///
+/// Their textures are named only by the prefabs a script spawns, and the
+/// editor asked only for what the scene's own entities draw with. The
+/// prefabs are spawned into a world of their own so their textures can be
+/// asked for alongside the scene's, before anything spawns them.
+#[test]
+fn every_texture_a_spawned_enemy_draws_with_is_asked_for() {
+    let (scripts, world, _components) = opened_at(&game_scene("orbital-baked"));
+    let from_scene = sindri_scene::referenced_textures(&world);
+    let from_prefabs = sindri_scene::referenced_textures(&sindri_editor::textures::prefab_world(
+        scripts.prefabs(),
+    ));
+    for texture in [
+        "textures/asteroid.png",
+        "textures/drifter.png",
+        "textures/charger.png",
+    ] {
+        assert!(
+            !from_scene.contains(texture),
+            "{texture} is named by the scene itself, so this would prove nothing"
+        );
+        assert!(
+            from_prefabs.contains(texture),
+            "{texture} is drawn by a spawned enemy but never asked for"
         );
     }
 }

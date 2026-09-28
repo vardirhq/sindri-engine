@@ -282,7 +282,11 @@ impl EditorApp {
         let state = self.render_state.clone();
         self.renderers.text.clear_bindings();
         self.textures = SceneTextures::for_scene(&state.device, &state.queue, self.file.path());
-        self.textured_revision = self.history.revision();
+        self.textured_revision = super::TexturedAt {
+            history: self.history.revision(),
+            prefabs: self.scripts.prefab_revision(),
+        };
+        self.textures.set_prefabs(self.scripts.prefabs());
         let notes = self.textures.request(&self.world, &mut self.renderers.text);
         self.record_texture_notes(notes);
     }
@@ -304,10 +308,17 @@ impl EditorApp {
         // enemy missing and two hundred errors saying so, while the exported
         // build of the same project played.
         self.refresh_scripts();
-        if self.textured_revision == self.history.revision() {
+        let now = super::TexturedAt {
+            history: self.history.revision(),
+            prefabs: self.scripts.prefab_revision(),
+        };
+        if self.textured_revision == now {
             return;
         }
-        self.textured_revision = self.history.revision();
+        if self.textured_revision.prefabs != now.prefabs {
+            self.textures.set_prefabs(self.scripts.prefabs());
+        }
+        self.textured_revision = now;
         let notes = self.textures.request(&self.world, &mut self.renderers.text);
         self.record_texture_notes(notes);
     }
