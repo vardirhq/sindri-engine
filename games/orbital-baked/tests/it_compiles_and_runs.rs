@@ -61,3 +61,47 @@ fn every_label_is_a_sensible_share_of_the_screen() {
         "only {labels} labels; the scene lost most of them"
     );
 }
+
+/// Every script in the project, not only the ones the scene names.
+///
+/// The test above compiles what the opening scene runs, and a script used only
+/// by prefabs — `enemy-mark.decay`, on the marks spawned over enemies — failed
+/// to compile for weeks without it noticing: it set `Shape.dash_duty`, which
+/// scripts could not reach. The editor reported it; nothing here did.
+#[test]
+fn every_script_in_the_project_compiles() {
+    let scripts = orbital_baked::project().join("assets/scripts");
+    let mut sources = sindri_decay::ScriptSources::new();
+    let mut files: Vec<_> = std::fs::read_dir(&scripts)
+        .expect("the scripts directory reads")
+        .map(|entry| entry.expect("a directory entry").path())
+        .filter(|path| {
+            path.extension()
+                .is_some_and(|extension| extension == "decay")
+        })
+        .collect();
+    files.sort();
+    for path in &files {
+        let text = std::fs::read_to_string(path).expect("a script reads");
+        sources.insert(
+            format!("scripts/{}", path.file_name().unwrap().to_string_lossy()),
+            text,
+        );
+    }
+    let mut failures = Vec::new();
+    for path in &files {
+        let text = std::fs::read_to_string(path).expect("a script reads");
+        let check = sindri_decay::check_source_in(&text, sources.environment());
+        for diagnostic in check.diagnostics {
+            failures.push(format!(
+                "{}:{}:{}: {}",
+                path.file_name().unwrap().to_string_lossy(),
+                diagnostic.line,
+                diagnostic.column,
+                diagnostic.message
+            ));
+        }
+    }
+    assert!(files.len() > 30, "only {} scripts found", files.len());
+    assert!(failures.is_empty(), "{failures:#?}");
+}

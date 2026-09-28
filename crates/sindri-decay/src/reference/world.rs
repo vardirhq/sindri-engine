@@ -153,6 +153,10 @@ pub(super) const TYPES: &[TypeEntry] = &[
                 "How many sides a polygon has (3 is a triangle, 6 a hexagon), or how many cells a grid shape is across.",
             ),
             value(
+                "dash_duty",
+                "How much of each dash is drawn, from 0 to 1; the rest is the gap before the next. 0.5 draws dashes and gaps of equal length.",
+            ),
+            value(
                 "dashes",
                 "How many dashes the outline is broken into. 0 draws a solid line.",
             ),
