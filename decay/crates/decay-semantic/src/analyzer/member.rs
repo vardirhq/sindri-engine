@@ -48,7 +48,7 @@ impl Analyzer<'_, '_> {
         // A collection's length belongs to the value, not to a path the host
         // could answer, so the lowering is told which member read this was.
         if let Type::Array(element) = &object_type {
-            if field == crate::types::LENGTH {
+            if crate::types::is_length(field) {
                 self.value_members.insert(span, ValueMember::Length);
                 return Type::F32;
             }
@@ -105,7 +105,7 @@ impl Analyzer<'_, '_> {
         // modules, so every global name added is one a script can no longer
         // use for its own, and a length is a property of the value anyway.
         if let Type::Array(_) = object_type {
-            return Some(if field == crate::types::LENGTH {
+            return Some(if crate::types::is_length(field) {
                 MemberLookup::Found(ExternalSymbol::Value(Type::F32))
             } else {
                 MemberLookup::Missing

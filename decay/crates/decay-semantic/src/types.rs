@@ -25,6 +25,15 @@ pub fn is_list(name: &str) -> bool {
 /// name.
 pub const LENGTH: &str = "length";
 
+/// A collection's size as it was first spelled, which still works.
+pub const OLD_LENGTH: &str = "len";
+
+/// Whether a member name asks a collection its size.
+#[must_use]
+pub fn is_length(name: &str) -> bool {
+    name == LENGTH || name == OLD_LENGTH
+}
+
 /// How the two vector types are spelled. Language types rather than host
 /// ones: a vector is a value a script builds, adds and keeps, which a host
 /// type — something the host owns and a script can only name — cannot be.

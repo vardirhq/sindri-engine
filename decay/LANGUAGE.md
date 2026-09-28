@@ -336,7 +336,8 @@ b.push(1.0);` leaves `a` as it was. So a change — `push`, `pop`, `insert`,
 or field of this script holds, and that one must be a `var`. Changing a `let`
 list, or one that is not in a variable at all (`World.with_tag("x").push(e)`),
 is a diagnostic. A change is always a call — `xs.pop()`, not `xs.pop` — while
-`length` is a property, as it is for text and vectors. The copy is made only
+`length` is a property, as it is for text and vectors (`len`, its first
+spelling, still works). The copy is made only
 when a change needs it, so a list that is never shared is changed in place.
 
 **Indices are the one numeric type.** There is no integer type, so a whole

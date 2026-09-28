@@ -64,7 +64,7 @@ impl Analyzer<'_, '_> {
         span: Span,
     ) -> Type {
         let Some((op, _)) = ListOp::named(field) else {
-            if field == crate::types::LENGTH {
+            if crate::types::is_length(field) {
                 self.error(
                     span,
                     format!("`{field}` is a property, not a function -- write `.{field}`"),

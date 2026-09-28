@@ -128,6 +128,10 @@ fn lists_and_ranges_do_what_the_reference_says() {
          }"#,
     );
     accepted(
+        "`len` as the older spelling of `length`",
+        "script T { fn f() -> f32 { return [1.0].len; } }",
+    );
+    accepted(
         "`Array<T>` as the older spelling of `List<T>`",
         "script T { var a: Array<f32> = [1.0]; }",
     );
