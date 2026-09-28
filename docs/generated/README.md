@@ -60,18 +60,23 @@ key on it where a message would drift. The tables are `SyntaxCode::ALL` in
 `decay_syntax::codes` and `Code::ALL` in `decay_semantic::codes`, and every
 diagnostic the parser or analyzer raises names one.
 
+## Descriptions and parameter names
+
+Every name in `decay-api.json` carries a `description`, and every call its
+`parameter_names`; every host type has a `description` too. They are written
+for someone who has never used Decay: what a thing is for, in plain words,
+with a short example where one helps. `decay-api.md` shows them beside each
+signature, as `axis(negative: String, positive: String)`.
+
+The surface registers only types, because that is what type-checking needs,
+so the prose lives beside it in `sindri_decay::reference`. It is a separate
+table, but it cannot drift silently: sindri-capabilities fails when a name on
+the surface has no description, when a description names something no longer
+on the surface, or when a call's parameter names do not match its arity. A new
+host call therefore cannot ship undescribed. `docs/scripting.md` remains where
+the reasons behind the design are explained.
+
 ## What is deliberately not here
-
-**Parameter names.** The host surface registers parameter *types*, because that
-is what type-checking needs. Naming the arguments here would be a second source
-of truth for something this tooling cannot know. What each argument means is in
-[`../scripting.md`](../scripting.md).
-
-**Prose descriptions.** Same reason. The doc comments in the surface tables are
-not available at runtime, and copying them would create the drift the whole
-arrangement is built to prevent. Giving the surface tables a description field
-that both the generator and the analyzer read is the honest way to add them, and
-is a change to the surface, not to this tool.
 
 **Anything about the editor.** These files describe the engine, not one client
 of it.

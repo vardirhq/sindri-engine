@@ -7,9 +7,8 @@ Every namespace, call, and member a Decay script may name in this build
 of the engine, derived from the one description the analyzer
 type-checks against and the runtime host answers.
 
-Parameter *names* are not recorded — the host surface registers types,
-because that is what type-checking needs. What each argument means is
-in [`docs/scripting.md`](../scripting.md).
+Each entry says what it is for; the reasons behind the design are in
+[`docs/scripting.md`](../scripting.md).
 
 The machine-readable form of this page is
 [`decay-api.json`](decay-api.json).
@@ -18,55 +17,55 @@ The machine-readable form of this page is
 
 What the entity a script runs on offers, beyond the script's own fields.
 
-- `entity`: `Entity`
-- `shape`: `Shape`
-- `sprite`: `Sprite`
-- `transform`: `Transform`
-- `ui_image`: `UiImage`
+- `entity`: `Entity` — The object in the game this script is attached to. Pass it to calls that act on an object, such as `World.despawn(this.entity)`.
+- `shape`: `Shape` — The drawn shape on this script's object, if it has one: its colours, outline and how much of it is drawn.
+- `sprite`: `Sprite` — The image (sprite) on this script's object, if it has one: its colour and drawing order.
+- `transform`: `Transform` — Where this script's object is, how it is turned and how big it is. Change it to move the object.
+- `ui_image`: `UiImage` — The on-screen interface image on this script's object, if it has one: its colour and drawing order.
 
 ## Globals
 
 Names in scope without qualification. Decay has no imports, so each of these is a name a script cannot use for its own.
 
-- `Aim`: `Aim`
-- `Animation`: `Animation`
-- `Audio`: `Audio`
-- `Camera`: `Camera`
-- `Effects`: `Effects`
-- `Game`: `Game`
-- `Gamepad`: `Gamepad`
-- `Gesture`: `Gesture`
-- `Grid`: `Grid`
-- `Input`: `Input`
-- `PI`: `f32`
-- `Physics`: `Physics`
-- `Pointer`: `Pointer`
-- `Profiles`: `Profiles`
-- `Random`: `Random`
-- `Save`: `Save`
-- `Scene`: `Scene`
-- `Stick`: `Stick`
-- `TAU`: `f32`
-- `Time`: `Time`
-- `Touch`: `Touch`
-- `Ui`: `Ui`
-- `Viewport`: `Viewport`
-- `World`: `World`
-- `abs(f32)` → `f32`
-- `atan2(f32, f32)` → `f32`
-- `ceil(f32)` → `f32`
-- `clamp(f32, f32, f32)` → `f32`
-- `cos(f32)` → `f32`
-- `exp(f32)` → `f32`
-- `floor(f32)` → `f32`
-- `lerp(f32, f32, f32)` → `f32`
-- `max(f32, f32)` → `f32`
-- `min(f32, f32)` → `f32`
-- `print(unknown)` → `unit`
-- `round(f32)` → `f32`
-- `sign(f32)` → `f32`
-- `sin(f32)` → `f32`
-- `sqrt(f32)` → `f32`
+- `Aim`: `Aim` — Which block in a 3D block world the mouse or finger is pointing at, for building and digging games.
+- `Animation`: `Animation` — Playing an object's animations, such as walk or jump, set up for it in the scene.
+- `Audio`: `Audio` — Playing sound effects and music.
+- `Camera`: `Camera` — The game's camera: moving the view and shaking it.
+- `Effects`: `Effects` — Particle effects, such as sparks and explosions. The particles are only drawn; they are not objects and nothing can touch them.
+- `Game`: `Game` — Numbers stored under names that every script can read and write, such as a score. Declaring them with `state` is safer, because a misspelt name then becomes an error.
+- `Gamepad`: `Gamepad` — Game controllers. Each player gets a number from 1 to 8 when they press a button on their controller; 0 means any controller.
+- `Gesture`: `Gesture` — What the player did with the mouse or a finger: a tap, a hold, a drag or a pinch. Works the same for both.
+- `Grid`: `Grid` — Grids of tiles, flat or stacked in layers like building blocks: what each cell holds, where objects stand on them, and paths across them.
+- `Input`: `Input` — The keyboard. Keys are named by position, such as `"W"`, `"ArrowLeft"` or `"Space"`, so controls work on any keyboard layout.
+- `PI`: `f32` — The number π (3.14159…): half a full turn when measuring angles in radians.
+- `Physics`: `Physics` — 2D physics: moving objects with speed and pushes, and finding out what this script's object bumped into.
+- `Pointer`: `Pointer` — The mouse, or a finger on a touch screen, handled the same way so one game works on both.
+- `Profiles`: `Profiles` — Reading settings from a profile, a data file shared across a project, such as a weapon's damage and fire rate.
+- `Random`: `Random` — Random numbers. The same seed always gives the same numbers, so a run can be replayed.
+- `Save`: `Save` — Saving progress between play sessions: numbers and true/false values stored under names, such as a best score.
+- `Scene`: `Scene` — Scenes are a game's separate places or screens, such as a menu, a level or a shop. This asks which one is playing and moves to another.
+- `Stick`: `Stick` — A virtual joystick for touch screens: wherever a thumb lands becomes the centre, and dragging from there steers.
+- `TAU`: `f32` — The number τ (6.28318…), which is 2π: one full turn when measuring angles in radians.
+- `Time`: `Time` — Time in the game. A game runs as a series of frames, many times a second.
+- `Touch`: `Touch` — Every finger on a touch screen, numbered from 0, for games that need more than one finger.
+- `Ui`: `Ui` — The interface drawn over the game: changing text and bars, and checking buttons and sliders.
+- `Viewport`: `Viewport` — The area of the screen the game is drawn in.
+- `World`: `World` — Finding, creating and removing the objects in a game. Every object in a scene (a player, an enemy, a button) is an entity.
+- `abs(value: f32)` → `f32` — The number without its minus sign: `abs(-3.0)` is `3`. Useful for distances and differences where only the size matters.
+- `atan2(y: f32, x: f32)` → `f32` — The angle pointing from the origin towards the point (x, y), in radians. Use it to turn something to face a direction: `atan2(dy, dx)`.
+- `ceil(value: f32)` → `f32` — Rounds up to a whole number: `ceil(2.1)` is `3`.
+- `clamp(value: f32, low: f32, high: f32)` → `f32` — Keeps a number between a lowest and a highest value: `clamp(hp, 0.0, 100.0)` never goes below 0 or above 100.
+- `cos(angle: f32)` → `f32` — The cosine of an angle in radians. With `sin`, turns an angle into a direction: `Vec2(cos(a), sin(a))`.
+- `exp(value: f32)` → `f32` — The number e raised to a power. Mostly used for smooth movement that looks the same at any frame rate: `1.0 - exp(-speed * dt)`.
+- `floor(value: f32)` → `f32` — Rounds down to a whole number: `floor(2.9)` is `2`.
+- `lerp(a: f32, b: f32, t: f32)` → `f32` — Blends between two numbers: `t` of 0 gives `a`, 1 gives `b`, and 0.5 gives halfway. Used for smooth movement and fades.
+- `max(a: f32, b: f32)` → `f32` — The larger of two numbers.
+- `min(a: f32, b: f32)` → `f32` — The smaller of two numbers.
+- `print(value: unknown)` → `unit` — Writes a message to the log, for checking what a script is doing. Accepts any value; combine text and values with `+`: `print("hp " + hp)`.
+- `round(value: f32)` → `f32` — Rounds to the nearest whole number: `round(2.5)` is `3` and `round(-2.5)` is `-3`.
+- `sign(value: f32)` → `f32` — Whether a number is negative, zero or positive, as -1, 0 or 1. Handy for "which way is this moving?".
+- `sin(angle: f32)` → `f32` — The sine of an angle in radians. Good for bobbing and waving motion: `sin(Time.elapsed)`.
+- `sqrt(value: f32)` → `f32` — The square root of a number.
 
 ## Vectors
 
@@ -108,260 +107,318 @@ Names in scope without qualification. Decay has no imports, so each of these is 
 
 ### `Aim`
 
-- `hit`: `bool`
-- `place_x`: `f32`
-- `place_y`: `f32`
-- `place_z`: `f32`
-- `x`: `f32`
-- `y`: `f32`
-- `z`: `f32`
+Which block in a 3D block world the mouse or finger is pointing at, for building and digging games.
+
+- `hit`: `bool` — Whether the pointer is over a block. Always check this first: when it is false, every other `Aim` value is 0, which is a real position.
+- `place_x`: `f32` — Where a new block would go if placed now: the column of the empty space next to the side being pointed at.
+- `place_y`: `f32` — The row where a new block would go.
+- `place_z`: `f32` — The height level where a new block would go.
+- `x`: `f32` — The column of the block being pointed at.
+- `y`: `f32` — The row of the block being pointed at.
+- `z`: `f32` — The height level of the block being pointed at.
 
 ### `Animation`
 
-- `clip(Entity)` → `String`
-- `frame(Entity)` → `f32`
-- `is_finished(Entity)` → `bool`
-- `play(Entity, String)` → `unit`
-- `restart(Entity)` → `unit`
-- `set_speed(Entity, f32)` → `unit`
-- `stop(Entity)` → `unit`
+Playing an object's animations, such as walk or jump, set up for it in the scene.
+
+- `clip(entity: Entity)` → `String` — The name of the animation an object is playing.
+- `frame(entity: Entity)` → `f32` — Which picture of its animation an object is showing, counting from the start of the animation.
+- `is_finished(entity: Entity)` → `bool` — Whether an animation that plays once, such as an attack, has finished.
+- `play(entity: Entity, clip: String)` → `unit` — Plays one of an object's animations by name, such as `"walk"`. Calling it again with the animation already playing does nothing, so it is safe to call every frame.
+- `restart(entity: Entity)` → `unit` — Starts an object's current animation again from the beginning.
+- `set_speed(entity: Entity, speed: f32)` → `unit` — How fast an object's animations play: 1 is normal speed, 2 is twice as fast.
+- `stop(entity: Entity)` → `unit` — Stops an object's animation.
 
 ### `Audio`
 
-- `loop(String, f32)` → `unit`
-- `pause_all()` → `unit`
-- `play(String, f32)` → `unit`
-- `resume_all()` → `unit`
-- `stop_all()` → `unit`
+Playing sound effects and music.
+
+- `loop(clip: String, volume: f32)` → `unit` — Plays a sound over and over until stopped, such as music, at a volume from 0 (silent) to 1 (full).
+- `pause_all()` → `unit` — Pauses every sound that is playing.
+- `play(clip: String, volume: f32)` → `unit` — Plays a sound once, at a volume from 0 (silent) to 1 (full).
+- `resume_all()` → `unit` — Continues every paused sound.
+- `stop_all()` → `unit` — Stops every sound that is playing.
 
 ### `Camera`
 
-- `add_trauma(f32)` → `unit`
-- `pan_x`: `f32`
-- `pan_y`: `f32`
-- `pan_z`: `f32`
+The game's camera: moving the view and shaking it.
+
+- `add_trauma(amount: f32)` → `unit` — Shakes the camera, for impacts and explosions. Bigger amounts shake harder, up to 1, and the shake fades by itself.
+- `pan_x`: `f32` — How far the camera view is moved sideways from where it was placed in the scene.
+- `pan_y`: `f32` — How far the camera view is moved up or down from where it was placed in the scene.
+- `pan_z`: `f32` — How far the camera view is moved forwards or backwards from where it was placed in the scene.
 
 ### `Effects`
 
-- `burst(Entity)` → `f32`
-- `burst_at(Entity, f32, f32)` → `f32`
-- `live()` → `f32`
+Particle effects, such as sparks and explosions. The particles are only drawn; they are not objects and nothing can touch them.
+
+- `burst(entity: Entity)` → `f32` — Plays the particle burst set up on an object, at that object's position. Gives back how many particles were made.
+- `burst_at(entity: Entity, x: f32, y: f32)` → `f32` — Plays the particle burst set up on an object at another position, such as where an enemy just died.
+- `live()` → `f32` — How many particles are currently on screen.
 
 ### `Entity`
 
-- `shape`: `Shape`
-- `sprite`: `Sprite`
-- `transform`: `Transform`
-- `ui_image`: `UiImage`
+An object in the game, such as a player, an enemy or a button. Scripts get these from calls like `World.find` and can store them, compare them and change their transform, sprite or shape.
+
+- `shape`: `Shape` — The object's drawn shape, if it has one.
+- `sprite`: `Sprite` — The object's image (sprite), if it has one.
+- `transform`: `Transform` — Where the object is, how it is turned and how big it is.
+- `ui_image`: `UiImage` — The object's on-screen interface image, if it has one.
 
 ### `Game`
 
-- `get(String, f32)` → `f32`
-- `set(String, f32)` → `unit`
+Numbers stored under names that every script can read and write, such as a score. Declaring them with `state` is safer, because a misspelt name then becomes an error.
+
+- `get(name: String, fallback: f32)` → `f32` — The number stored under a name, or `fallback` if nothing has been stored yet.
+- `set(name: String, value: f32)` → `unit` — Stores a number under a name for any script to read.
 
 ### `Gamepad`
 
-- `axis(f32, String)` → `f32`
-- `count()` → `f32`
-- `is_connected(f32)` → `bool`
-- `is_down(f32, String)` → `bool`
-- `joined()` → `f32`
-- `just_pressed(f32, String)` → `bool`
-- `just_released(f32, String)` → `bool`
-- `left()` → `f32`
+Game controllers. Each player gets a number from 1 to 8 when they press a button on their controller; 0 means any controller.
+
+- `axis(slot: f32, axis: String)` → `f32` — How far a stick or trigger is pushed. Sticks (`"left_x"`, `"left_y"`…) give -1 to 1, with right and down positive; triggers give 0 to 1.
+- `count()` → `f32` — How many players have joined with a controller.
+- `is_connected(slot: f32)` → `bool` — Whether a player number has a connected controller.
+- `is_down(slot: f32, button: String)` → `bool` — Whether a controller button is held. Buttons are named by position, so `"south"` is the bottom face button on every make of controller.
+- `joined()` → `f32` — The player number of a controller that joined this frame, or 0. Use it to add a player.
+- `just_pressed(slot: f32, button: String)` → `bool` — Whether a mouse button was pressed this frame.
+- `just_released(slot: f32, button: String)` → `bool` — Whether a controller button was let go this frame.
+- `left()` → `f32` — The player number of a controller that was unplugged this frame, or 0. Use it to remove a player.
 
 ### `Gesture`
 
-- `drag_x`: `f32`
-- `drag_y`: `f32`
-- `dragging`: `bool`
-- `held`: `bool`
-- `hold_x`: `f32`
-- `hold_y`: `f32`
-- `pinch`: `f32`
-- `pinching`: `bool`
-- `tap_x`: `f32`
-- `tap_y`: `f32`
-- `tapped`: `bool`
+What the player did with the mouse or a finger: a tap, a hold, a drag or a pinch. Works the same for both.
+
+- `drag_x`: `f32` — How far the drag moved sideways this frame. Add it to a camera's position to pan.
+- `drag_y`: `f32` — How far the drag moved up or down this frame.
+- `dragging`: `bool` — Whether the player is dragging.
+- `held`: `bool` — Whether the player has pressed and held still long enough to count as a long press.
+- `hold_x`: `f32` — Where the long press is, sideways.
+- `hold_y`: `f32` — Where the long press is, up or down.
+- `pinch`: `f32` — How much two fingers pinched this frame: above 1 when spreading apart, below 1 when closing, and 1 when not pinching. Multiply a zoom by it.
+- `pinching`: `bool` — Whether two fingers are pinching.
+- `tap_x`: `f32` — Where the tap was, sideways.
+- `tap_y`: `f32` — Where the tap was, up or down.
+- `tapped`: `bool` — Whether the player tapped (a quick press without moving) this frame. Check this before reading `tap_x` and `tap_y`.
 
 ### `Grid`
 
-- `block(Entity, f32, f32, f32)` → `String`
-- `can_reach(Entity, Entity, Entity)` → `bool`
-- `columns(Entity)` → `f32`
-- `place(Entity, Entity, f32, f32)` → `unit`
-- `position_x(Entity, Entity)` → `f32`
-- `position_y(Entity, Entity)` → `f32`
-- `rows(Entity)` → `f32`
-- `set_block(Entity, f32, f32, f32, String)` → `unit`
-- `set_tile(Entity, f32, f32, f32)` → `unit`
-- `step_toward(Entity, Entity, Entity)` → `bool`
-- `tagged(Entity, f32, f32, f32, String)` → `bool`
-- `tile(Entity, f32, f32)` → `f32`
-- `walkable(Entity, f32, f32)` → `bool`
+Grids of tiles, flat or stacked in layers like building blocks: what each cell holds, where objects stand on them, and paths across them.
+
+- `block(grid: Entity, column: f32, row: f32, level: f32)` → `String` — Which block is in a cell of a layered grid, by name, or `""` if the cell is empty.
+- `can_reach(mover: Entity, grid: Entity, target: Entity)` → `bool` — Whether a character on a grid can walk to where another object is.
+- `columns(grid: Entity)` → `f32` — How many columns a grid has.
+- `place(entity: Entity, grid: Entity, x: f32, y: f32)` → `unit` — Moves an object to a position on a grid, measured in cells. Fractions place it between cells.
+- `position_x(entity: Entity, grid: Entity)` → `f32` — Which column an object is at on a grid, with fractions between cells.
+- `position_y(entity: Entity, grid: Entity)` → `f32` — Which row an object is at on a grid, with fractions between cells.
+- `rows(grid: Entity)` → `f32` — How many rows a grid has.
+- `set_block(grid: Entity, column: f32, row: f32, level: f32, tile: String)` → `unit` — Places a block, by name, in a cell of a layered grid. `""` removes the block.
+- `set_tile(grid: Entity, column: f32, row: f32, index: f32)` → `unit` — Changes a flat tile map's cell to one of its tiles, by number. A negative number empties the cell.
+- `step_toward(mover: Entity, grid: Entity, target: Entity)` → `bool` — Moves a character one cell along the shortest walkable path towards a target. Gives back whether it moved.
+- `tagged(grid: Entity, column: f32, row: f32, level: f32, tag: String)` → `bool` — Whether the block in a cell has a label, such as `"hot"` on lava, given to it where the blocks are defined.
+- `tile(grid: Entity, column: f32, row: f32)` → `f32` — Which tile is in a flat tile map's cell, by number, or -1 if it is empty or outside the map.
+- `walkable(grid: Entity, x: f32, y: f32)` → `bool` — Whether a character could stand at a point on a grid. False for water, empty space or outside the grid.
 
 ### `Input`
 
-- `axis(String, String)` → `f32`
-- `is_down(String)` → `bool`
-- `just_pressed(String)` → `bool`
-- `just_released(String)` → `bool`
+The keyboard. Keys are named by position, such as `"W"`, `"ArrowLeft"` or `"Space"`, so controls work on any keyboard layout.
+
+- `axis(negative: String, positive: String)` → `f32` — -1, 0 or 1 from a pair of keys, for movement: `Input.axis("A", "D")` is -1 holding A, 1 holding D and 0 for neither or both.
+- `is_down(key: String)` → `bool` — Whether a key is being held down.
+- `just_pressed(key: String)` → `bool` — Whether a key was pressed this frame. True only once per press, however long it is held.
+- `just_released(key: String)` → `bool` — Whether a key was let go this frame.
 
 ### `Physics`
 
-- `apply_impulse(Entity, f32, f32)` → `unit`
-- `collision_started()` → `List<Entity>`
-- `collision_stopped()` → `List<Entity>`
-- `connect_distance(Entity, Entity, f32)` → `unit`
-- `sensor_entered()` → `List<Entity>`
-- `sensor_exited()` → `List<Entity>`
-- `set_velocity(Entity, f32, f32)` → `unit`
-- `velocity_x(Entity)` → `f32`
-- `velocity_y(Entity)` → `f32`
+2D physics: moving objects with speed and pushes, and finding out what this script's object bumped into.
+
+- `apply_impulse(entity: Entity, x: f32, y: f32)` → `unit` — Gives an object a sudden push in a direction. Heavier objects move less.
+- `collision_started()` → `List<Entity>` — The objects that started touching this script's object since the last frame, as a list.
+- `collision_stopped()` → `List<Entity>` — The objects that stopped touching this script's object since the last frame, as a list.
+- `connect_distance(first: Entity, second: Entity, max_distance: f32)` → `unit` — Ties two objects together like a rope: they can come closer, but never further apart than a distance.
+- `sensor_entered()` → `List<Entity>` — The objects that entered this script's trigger area since the last frame. A trigger area detects things without blocking them, like a pickup.
+- `sensor_exited()` → `List<Entity>` — The objects that left this script's trigger area since the last frame.
+- `set_velocity(entity: Entity, x: f32, y: f32)` → `unit` — Sets how fast, and which way, an object is moving.
+- `velocity_x(entity: Entity)` → `f32` — How fast an object is moving sideways.
+- `velocity_y(entity: Entity)` → `f32` — How fast an object is moving up or down.
 
 ### `Pointer`
 
-- `inside`: `bool`
-- `is_down(String)` → `bool`
-- `just_pressed(String)` → `bool`
-- `just_released(String)` → `bool`
-- `over_ui`: `bool`
-- `overlay`: `Vec2`
-- `overlay_x`: `f32`
-- `overlay_y`: `f32`
-- `position`: `Vec2`
-- `x`: `f32`
-- `y`: `f32`
+The mouse, or a finger on a touch screen, handled the same way so one game works on both.
+
+- `inside`: `bool` — Whether the mouse is over the game or a finger is on the screen. Check this before trusting a position.
+- `is_down(button: String)` → `bool` — Whether a mouse button, `"Left"`, `"Middle"` or `"Right"`, is held. A finger on the screen counts as `"Left"`.
+- `just_pressed(button: String)` → `bool` — Whether a mouse button was pressed this frame.
+- `just_released(button: String)` → `bool` — Whether a mouse button was let go this frame, or the last finger lifted.
+- `over_ui`: `bool` — Whether the pointer is over part of the interface, such as a button. Check it so clicking a button does not also shoot or move in the game.
+- `overlay`: `Vec2` — The pointer's position in screen units, where 0 is the centre of the screen and the screen is 2 units tall. The same on any screen size.
+- `overlay_x`: `f32` — The pointer's sideways position in screen units, where 0 is the centre.
+- `overlay_y`: `f32` — The pointer's up-down position in screen units, where 0 is the centre.
+- `position`: `Vec2` — The pointer's position in pixels, from the top-left corner of the game's view.
+- `x`: `f32` — The pointer's distance from the left edge of the game's view, in pixels.
+- `y`: `f32` — The pointer's distance from the top edge of the game's view, in pixels.
 
 ### `Profile`
+
+A profile: a data file of settings shared across a project. Chosen in the editor for a script's `@export` field and read with `Profiles`.
 
 The host names this type but has not described its members.
 
 ### `Profiles`
 
-- `count(Profile, String)` → `f32`
-- `flag(Profile, String, bool)` → `bool`
-- `flag_at(Profile, String, f32, String, bool)` → `bool`
-- `kind(Profile)` → `String`
-- `name(Profile)` → `String`
-- `number(Profile, String, f32)` → `f32`
-- `number_at(Profile, String, f32, String, f32)` → `f32`
-- `text(Profile, String, String)` → `String`
-- `text_at(Profile, String, f32, String, String)` → `String`
+Reading settings from a profile, a data file shared across a project, such as a weapon's damage and fire rate.
+
+- `count(profile: Profile, collection: String)` → `f32` — How many items a list in the profile has.
+- `flag(profile: Profile, key: String, fallback: bool)` → `bool` — A true/false setting from the profile, or `fallback` if it is missing.
+- `flag_at(profile: Profile, collection: String, index: f32, key: String, fallback: bool)` → `bool` — A true/false setting from one item in a list in the profile, or `fallback`.
+- `kind(profile: Profile)` → `String` — What kind of profile it is.
+- `name(profile: Profile)` → `String` — The profile's name.
+- `number(profile: Profile, key: String, fallback: f32)` → `f32` — A number setting from the profile, or `fallback` if it is missing: `Profiles.number(this.tuning, "damage", 1.0)`.
+- `number_at(profile: Profile, collection: String, index: f32, key: String, fallback: f32)` → `f32` — A number setting from one item in a list in the profile, or `fallback`.
+- `text(profile: Profile, key: String, fallback: String)` → `String` — A text setting from the profile, or `fallback` if it is missing.
+- `text_at(profile: Profile, collection: String, index: f32, key: String, fallback: String)` → `String` — A text setting from one item in a list in the profile, or `fallback`.
 
 ### `Random`
 
-- `int(f32, f32)` → `f32`
-- `pick(List<Entity>)` → `Entity`
-- `range(f32, f32)` → `f32`
-- `seed(f32)` → `unit`
-- `value()` → `f32`
+Random numbers. The same seed always gives the same numbers, so a run can be replayed.
+
+- `int(min: f32, max: f32)` → `f32` — A random whole number from `min` to `max`, both included: `Random.int(1.0, 6.0)` rolls a die.
+- `pick(group: List<Entity>)` → `Entity` — A random object from a list, such as a random enemy to target. The list must not be empty.
+- `range(min: f32, max: f32)` → `f32` — A random number from `min` up to, but not including, `max`.
+- `seed(value: f32)` → `unit` — Starts the random numbers from a seed. The same seed always gives the same numbers afterwards.
+- `value()` → `f32` — A random number from 0 up to, but not including, 1.
 
 ### `Rgba`
 
-- `a`: `f32`
-- `b`: `f32`
-- `g`: `f32`
-- `r`: `f32`
+A colour, made of red, green, blue and alpha (opacity), each from 0 to 1.
+
+- `a`: `f32` — Opacity: 0 is invisible, 1 is solid.
+- `b`: `f32` — How much blue, from 0 to 1.
+- `g`: `f32` — How much green, from 0 to 1.
+- `r`: `f32` — How much red, from 0 to 1.
 
 ### `Save`
 
-- `clear()` → `unit`
-- `flag(String, bool)` → `bool`
-- `has(String)` → `bool`
-- `is_damaged()` → `bool`
-- `is_from_newer()` → `bool`
-- `is_new()` → `bool`
-- `number(String, f32)` → `f32`
-- `set_flag(String, bool)` → `unit`
-- `set_number(String, f32)` → `unit`
+Saving progress between play sessions: numbers and true/false values stored under names, such as a best score.
+
+- `clear()` → `unit` — Deletes everything saved.
+- `flag(key: String, fallback: bool)` → `bool` — A saved true/false value, or `fallback` if nothing is saved under that name yet.
+- `has(key: String)` → `bool` — Whether anything is saved under a name.
+- `is_damaged()` → `bool` — Whether saved progress existed but could not be read, so the game can tell the player before overwriting it.
+- `is_from_newer()` → `bool` — Whether the save was made by a newer version of the game. Its values are not loaded.
+- `is_new()` → `bool` — Whether nothing has been saved yet, as on the first time the game is played.
+- `number(key: String, fallback: f32)` → `f32` — A saved number, or `fallback` if nothing is saved under that name yet: `Save.number("best", 0.0)`.
+- `set_flag(key: String, value: bool)` → `unit` — Saves a true/false value under a name.
+- `set_number(key: String, value: f32)` → `unit` — Saves a number under a name.
 
 ### `Scene`
 
-- `current()` → `String`
-- `go(String)` → `unit`
+Scenes are a game's separate places or screens, such as a menu, a level or a shop. This asks which one is playing and moves to another.
+
+- `current()` → `String` — The name of the scene being played.
+- `go(name: String)` → `unit` — Moves to another scene by name, at the end of this frame.
 
 ### `Shape`
 
-- `count`: `f32`
-- `dashes`: `f32`
-- `fill`: `Rgba`
-- `layer`: `f32`
-- `stroke`: `Rgba`
-- `stroke_width`: `f32`
-- `sweep_start`: `f32`
-- `sweep_turns`: `f32`
+A shape drawn in the game world, such as a circle, polygon or ring, with an inside colour and an outline.
+
+- `count`: `f32` — How many sides a polygon has (3 is a triangle, 6 a hexagon), or how many cells a grid shape is across.
+- `dashes`: `f32` — How many dashes the outline is broken into. 0 draws a solid line.
+- `fill`: `Rgba` — The colour inside the shape.
+- `layer`: `f32` — Drawing order: higher numbers are drawn in front of lower ones.
+- `stroke`: `Rgba` — The colour of the shape's outline.
+- `stroke_width`: `f32` — How thick the outline is, as a fraction of the shape's size.
+- `sweep_start`: `f32` — Where the outline starts, as a fraction of the way round from the top.
+- `sweep_turns`: `f32` — How much of the outline is drawn, from 0 to 1. Setting it to 0.5 draws half a ring, which makes cooldown and charge meters.
 
 ### `Sprite`
 
-- `color_multiply`: `Rgba`
-- `color_offset`: `Rgba`
-- `layer`: `f32`
-- `tint`: `Rgba`
+A 2D image drawn in the game world, and how it is coloured.
+
+- `color_multiply`: `Rgba` — Another colour the image is multiplied by, on top of `tint`.
+- `color_offset`: `Rgba` — A colour added on top of the image, which can make it brighter or flash white. Keep its `a` at 0, or the image's transparent edges become visible.
+- `layer`: `f32` — Drawing order: higher numbers are drawn in front of lower ones.
+- `tint`: `Rgba` — A colour the image is multiplied by. White leaves it unchanged; lowering `a` fades it out.
 
 ### `Stick`
 
-- `anchor_x`: `f32`
-- `anchor_y`: `f32`
-- `direction`: `Vec2`
-- `held`: `bool`
-- `x`: `f32`
-- `y`: `f32`
+A virtual joystick for touch screens: wherever a thumb lands becomes the centre, and dragging from there steers.
+
+- `anchor_x`: `f32` — Where the thumb first landed, sideways. Use it to draw the joystick.
+- `anchor_y`: `f32` — Where the thumb first landed, up or down.
+- `direction`: `Vec2` — Which way and how far the joystick is pushed, as a direction up to 1 long.
+- `held`: `bool` — Whether a thumb is on the joystick, even if it is not pushing.
+- `x`: `f32` — How far the joystick is pushed right, from -1 (fully left) to 1 (fully right).
+- `y`: `f32` — How far the joystick is pushed down, from -1 (fully up) to 1 (fully down).
 
 ### `Time`
 
-- `delta`: `f32`
-- `elapsed`: `f32`
+Time in the game. A game runs as a series of frames, many times a second.
+
+- `delta`: `f32` — How many seconds the last frame took. Multiply speeds by it so movement is the same at any frame rate. The same as `update`'s `dt`.
+- `elapsed`: `f32` — How many seconds this script has been running.
 
 ### `Touch`
 
-- `count`: `f32`
-- `x(f32)` → `f32`
-- `y(f32)` → `f32`
+Every finger on a touch screen, numbered from 0, for games that need more than one finger.
+
+- `count`: `f32` — How many fingers are on the screen.
+- `x(index: f32)` → `f32` — A finger's distance from the left edge of the game's view, in pixels.
+- `y(index: f32)` → `f32` — A finger's distance from the top edge of the game's view, in pixels.
 
 ### `Transform`
 
-- `position`: `Vec3`
-- `rotation_z`: `f32`
-- `scale`: `Vec3`
-- `world_position`: `Vec3`
+Where an object is, how it is turned and how big it is. For an object attached to another, these are measured from that parent.
+
+- `position`: `Vec3` — Where the object is. Change it to move the object: `this.transform.position.x += speed * dt`. Measured from the parent if it has one.
+- `rotation_z`: `f32` — How far the object is turned, in radians. A full turn is `TAU`.
+- `scale`: `Vec3` — How big the object is on each axis; 1 is its normal size.
+- `world_position`: `Vec3` — Where the object is in the world, even when it is attached to a parent. Use it to compare positions of objects in different places.
 
 ### `Ui`
 
-- `is_held(Entity)` → `bool`
-- `is_hovered(Entity)` → `bool`
-- `is_pressed(Entity)` → `bool`
-- `set_fill(Entity, f32)` → `unit`
-- `set_number(Entity, f32)` → `unit`
-- `set_numbers(Entity, f32, f32)` → `unit`
-- `set_slider_value(Entity, f32)` → `unit`
-- `set_text(Entity, String)` → `unit`
-- `slider_changed(Entity)` → `bool`
-- `slider_value(Entity)` → `f32`
+The interface drawn over the game: changing text and bars, and checking buttons and sliders.
+
+- `is_held(button: Entity)` → `bool` — Whether a button is being held down right now.
+- `is_hovered(button: Entity)` → `bool` — Whether the mouse or finger is over a button.
+- `is_pressed(button: Entity)` → `bool` — Whether a button was clicked this frame: pressed and let go while on it.
+- `set_fill(bar: Entity, amount: f32)` → `unit` — Shows part of an image, from 0 (none) to 1 (all). This is how health and progress bars work: `Ui.set_fill(bar, hp / max_hp)`.
+- `set_number(label: Entity, value: f32)` → `unit` — Puts a number into a text element. Its text is set up in the scene with a `{}` where the number goes, such as `"Score: {}"`.
+- `set_numbers(label: Entity, first: f32, second: f32)` → `unit` — Puts two numbers into a text element with two `{}` places, such as `"{}/{}"` for `45/100`.
+- `set_slider_value(slider: Entity, value: f32)` → `unit` — Moves a slider to a value, kept within the slider's range.
+- `set_text(label: Entity, text: String)` → `unit` — Changes the words a text element shows.
+- `slider_changed(slider: Entity)` → `bool` — Whether the player moved a slider this frame.
+- `slider_value(slider: Entity)` → `f32` — The value a slider is set to.
 
 ### `UiImage`
 
-- `layer`: `f32`
-- `tint`: `Rgba`
+An image in the interface drawn over the game, such as a health bar or an icon, rather than in the game world.
+
+- `layer`: `f32` — Drawing order: higher numbers are drawn in front of lower ones.
+- `tint`: `Rgba` — A colour the image is multiplied by. White leaves it unchanged; lowering `a` fades it out.
 
 ### `Viewport`
 
-- `aspect`: `f32`
+The area of the screen the game is drawn in.
+
+- `aspect`: `f32` — The game view's width divided by its height: above 1 for a wide screen, below 1 for a phone held upright.
 
 ### `World`
 
-- `despawn(Entity)` → `unit`
-- `exists(Entity)` → `bool`
-- `find(String)` → `Entity`
-- `has_tag(Entity, String)` → `bool`
-- `is_active(Entity)` → `bool`
-- `property_number(Entity, String, f32)` → `f32`
-- `send_signal(Entity, String, f32)` → `unit`
-- `set_active(Entity, bool)` → `unit`
-- `set_parent(Entity, Entity)` → `unit`
-- `set_property(Entity, String, unknown)` → `unit`
-- `set_shape_point(f32, f32, f32)` → `unit`
-- `spawn(Prefab)` → `Entity`
-- `spawn_child(Prefab, Entity)` → `Entity`
-- `take_signal(String)` → `f32`
-- `with_tag(String)` → `List<Entity>`
+Finding, creating and removing the objects in a game. Every object in a scene (a player, an enemy, a button) is an entity.
+
+- `despawn(entity: Entity)` → `unit` — Removes an object, and everything attached to it, from the game. Used when an enemy dies or a bullet hits something.
+- `exists(entity: Entity)` → `bool` — Whether an object still exists. Check before using an object you stored earlier, since it may have been removed since.
+- `find(name: String)` → `Entity` — Finds an object by the name it was given in the scene, such as `World.find("Player")`. Gives `null` if there is none.
+- `has_tag(entity: Entity, tag: String)` → `bool` — Whether an object has a tag, a label such as `"enemy"` given to it in the scene.
+- `is_active(entity: Entity)` → `bool` — Whether an object is switched on. An object switched off, or inside one that is, is hidden and does nothing.
+- `property_number(entity: Entity, name: String, fallback: f32)` → `f32` — Reads a number set up for another object's script, such as a bullet's damage, or gives `fallback` if there is none.
+- `send_signal(entity: Entity, name: String, value: f32)` → `unit` — Sends a number to another object under a name, for its script to collect with `take_signal`. Older style: events and calling another script's functions are clearer.
+- `set_active(entity: Entity, on: bool)` → `unit` — Switches an object, and everything inside it, on or off. This is how menus and screens are shown and hidden.
+- `set_parent(entity: Entity, parent: Entity)` → `unit` — Attaches an object to another, so it moves, turns and scales with it. `null` detaches it.
+- `set_property(entity: Entity, name: String, value: unknown)` → `unit` — Sets a starting value on a newly created object's script, before it starts. For example, a bullet's speed right after spawning it.
+- `set_shape_point(index: f32, x: f32, y: f32)` → `unit` — Moves one corner, numbered 0 to 7, of this object's custom polygon shape.
+- `spawn(prefab: Prefab)` → `Entity` — Creates a new object from a prefab, a reusable template such as a bullet or an enemy, and gives it back so you can position it.
+- `spawn_child(prefab: Prefab, parent: Entity)` → `Entity` — Creates a new object from a prefab, already attached to a parent object.
+- `take_signal(name: String)` → `f32` — Collects the numbers other scripts sent to this object under a name with `send_signal`, added together. Gives 0 when nothing arrived.
+- `with_tag(tag: String)` → `List<Entity>` — Every switched-on object with a tag, as a list: `for enemy in World.with_tag("enemy") { ... }`. Looks through the whole game, so call it once per frame, not in a loop.

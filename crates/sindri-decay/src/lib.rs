@@ -36,6 +36,7 @@ mod scenes;
 mod scripts;
 mod surface;
 
+pub mod reference;
 pub use audio_host::{AudioCommand, HostServices, WorldHost};
 pub use blackboard::Blackboard;
 pub use check::{CheckPhase, SourceCheck, SourceDiagnostic, check_source, check_source_in};

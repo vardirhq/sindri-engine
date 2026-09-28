@@ -5,14 +5,14 @@
 //! answers. So a call that appears here is a call that exists, and one that
 //! exists appears here — there is no third list to forget to update.
 //!
-//! What the environment does *not* carry is parameter names: a host function
-//! is registered as its parameter types and its return type, because that is
-//! all type-checking needs. Names for the arguments live in the prose of
-//! `docs/scripting.md`, and inventing them here would be a second source of
-//! truth for something this crate cannot actually know.
+//! What the environment does *not* carry is prose: what a name is for, and what
+//! a call's parameters are called. Those come from [`sindri_decay::reference`],
+//! which is checked against the environment here so that every name on the
+//! surface has a description and no description outlives its name.
 
-use decay_semantic::{Environment, ExternalSymbol, FunctionType, HostType, Type};
+use decay_semantic::{Environment, ExternalSymbol, FunctionType, Type};
 use serde_json::{Value, json};
+use sindri_decay::reference::{self, Entry};
 
 /// Everything a Decay script may name.
 pub(crate) struct DecayApi {
@@ -28,6 +28,7 @@ pub(crate) struct DecayApi {
 /// A named host type and what it offers.
 pub(crate) struct Namespace {
     pub(crate) name: String,
+    pub(crate) description: Option<&'static str>,
     pub(crate) members: Vec<Symbol>,
 }
 
@@ -36,11 +37,13 @@ pub(crate) enum Symbol {
     Value {
         name: String,
         type_name: String,
+        reference: Option<Entry>,
     },
     Function {
         name: String,
         params: Vec<String>,
         returns: String,
+        reference: Option<Entry>,
     },
 }
 
@@ -51,22 +54,35 @@ impl Symbol {
         }
     }
 
-    fn to_json(&self) -> Value {
+    pub(crate) fn reference(&self) -> Option<Entry> {
         match self {
-            Self::Value { name, type_name } => json!({
+            Self::Value { reference, .. } | Self::Function { reference, .. } => *reference,
+        }
+    }
+
+    fn to_json(&self) -> Value {
+        let description = self.reference().map(|entry| entry.text);
+        match self {
+            Self::Value {
+                name, type_name, ..
+            } => json!({
                 "name": name,
                 "kind": "value",
                 "type": type_name,
+                "description": description,
             }),
             Self::Function {
                 name,
                 params,
                 returns,
+                reference,
             } => json!({
                 "name": name,
                 "kind": "function",
                 "parameters": params,
+                "parameter_names": reference.map(|entry| entry.params),
                 "returns": returns,
+                "description": description,
             }),
         }
     }
@@ -79,8 +95,9 @@ impl DecayApi {
             "engine_version": env!("CARGO_PKG_VERSION"),
             "generated_by": crate::REGENERATE_COMMAND,
             "about": "Every namespace, call, and member a Decay script may name, \
-        derived from the host surface the analyzer and the runtime share. Parameter \
-        names are not recorded; see docs/scripting.md for what each argument means.",
+        derived from the host surface the analyzer and the runtime share, with a \
+        description of each and the names of each call's parameters. \
+        docs/scripting.md explains the design behind them.",
             "globals": symbols_json(&self.globals),
             "this": symbols_json(&self.this),
             "types": self
@@ -88,6 +105,7 @@ impl DecayApi {
                 .iter()
                 .map(|namespace| json!({
                     "name": namespace.name,
+                    "description": namespace.description,
                     "members": symbols_json(&namespace.members),
                 }))
                 .collect::<Vec<_>>(),
@@ -107,9 +125,13 @@ pub(crate) fn describe() -> DecayApi {
         globals: sorted(
             environment
                 .globals()
-                .map(|(name, symbol)| symbol_of(name, symbol)),
+                .map(|(name, symbol)| symbol_of(name, symbol, global_reference(name, symbol))),
         ),
-        this: members_of(environment.this()),
+        this: sorted(
+            environment.this().members().map(|(name, symbol)| {
+                symbol_of(name, symbol, reference::this_entry(name).copied())
+            }),
+        ),
         types: sorted_types(&environment),
     }
 }
@@ -119,19 +141,36 @@ fn sorted_types(environment: &Environment) -> Vec<Namespace> {
         .types()
         .map(|(name, host_type)| Namespace {
             name: name.to_owned(),
-            members: members_of(host_type),
+            description: reference::type_entry(name).map(|entry| entry.text),
+            members: sorted(host_type.members().map(|(member, symbol)| {
+                symbol_of(
+                    member,
+                    symbol,
+                    reference::member_entry(name, member).copied(),
+                )
+            })),
         })
         .collect();
     types.sort_by(|left, right| left.name.cmp(&right.name));
     types
 }
 
-fn members_of(host_type: &HostType) -> Vec<Symbol> {
-    sorted(
-        host_type
-            .members()
-            .map(|(name, symbol)| symbol_of(name, symbol)),
-    )
+/// A global's description: its own for a function or a number, its type's
+/// for a namespace such as `World`, whose global is only the way in.
+fn global_reference(name: &str, symbol: &ExternalSymbol) -> Option<Entry> {
+    if let Some(entry) = reference::global_entry(name) {
+        return Some(*entry);
+    }
+    match symbol {
+        ExternalSymbol::Value(Type::Named(ty)) if ty == name => {
+            reference::type_entry(name).map(|entry| Entry {
+                name: entry.name,
+                params: &[],
+                text: entry.text,
+            })
+        }
+        _ => None,
+    }
 }
 
 /// Sorted by name, because the environment holds these in hash maps and a
@@ -142,11 +181,12 @@ fn sorted(symbols: impl Iterator<Item = Symbol>) -> Vec<Symbol> {
     symbols
 }
 
-fn symbol_of(name: &str, symbol: &ExternalSymbol) -> Symbol {
+fn symbol_of(name: &str, symbol: &ExternalSymbol, reference: Option<Entry>) -> Symbol {
     match symbol {
         ExternalSymbol::Value(ty) => Symbol::Value {
             name: name.to_owned(),
             type_name: type_name(ty),
+            reference,
         },
         ExternalSymbol::Function(FunctionType {
             params,
@@ -155,6 +195,7 @@ fn symbol_of(name: &str, symbol: &ExternalSymbol) -> Symbol {
             name: name.to_owned(),
             params: params.iter().map(type_name).collect(),
             returns: type_name(return_type),
+            reference,
         },
     }
 }
@@ -232,6 +273,92 @@ mod tests {
         assert_eq!(
             type_name(&Type::Array(Box::new(Type::Named("Entity".to_owned())))),
             "List<Entity>"
+        );
+    }
+}
+
+#[cfg(test)]
+mod reference_tests {
+    use super::{Symbol, describe};
+    use sindri_decay::reference;
+
+    fn check(owner: &str, symbol: &Symbol, missing: &mut Vec<String>) {
+        let Some(entry) = symbol.reference() else {
+            missing.push(format!("{owner}{} has no description", symbol.name()));
+            return;
+        };
+        if let Symbol::Function { params, .. } = symbol
+            && params.len() != entry.params.len()
+        {
+            missing.push(format!(
+                "{owner}{} takes {} parameters but names {}",
+                symbol.name(),
+                params.len(),
+                entry.params.len()
+            ));
+        }
+    }
+
+    /// Every name a script can reach says what it is for, and every call names
+    /// each of its parameters.
+    #[test]
+    fn every_name_on_the_surface_is_described() {
+        let api = describe();
+        let mut missing = Vec::new();
+        for symbol in &api.globals {
+            check("", symbol, &mut missing);
+        }
+        for symbol in &api.this {
+            check("this.", symbol, &mut missing);
+        }
+        for namespace in &api.types {
+            if namespace.description.is_none() {
+                missing.push(format!("type {} has no description", namespace.name));
+            }
+            for symbol in &namespace.members {
+                check(&format!("{}.", namespace.name), symbol, &mut missing);
+            }
+        }
+        assert!(missing.is_empty(), "{}", missing.join("\n"));
+    }
+
+    /// No description outlives its name.
+    #[test]
+    fn every_description_names_something_on_the_surface() {
+        let api = describe();
+        let mut stale = Vec::new();
+        for entry in reference::GLOBALS {
+            if !api.globals.iter().any(|symbol| symbol.name() == entry.name) {
+                stale.push(entry.name.to_owned());
+            }
+        }
+        for entry in reference::THIS {
+            if !api.this.iter().any(|symbol| symbol.name() == entry.name) {
+                stale.push(format!("this.{}", entry.name));
+            }
+        }
+        for described in reference::TYPES.iter().flat_map(|types| types.iter()) {
+            let Some(namespace) = api
+                .types
+                .iter()
+                .find(|namespace| namespace.name == described.name)
+            else {
+                stale.push(format!("type {}", described.name));
+                continue;
+            };
+            for entry in described.members {
+                if !namespace
+                    .members
+                    .iter()
+                    .any(|symbol| symbol.name() == entry.name)
+                {
+                    stale.push(format!("{}.{}", described.name, entry.name));
+                }
+            }
+        }
+        assert!(
+            stale.is_empty(),
+            "described but not on the surface: {stale:?}"
         );
     }
 }
