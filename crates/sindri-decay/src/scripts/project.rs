@@ -129,6 +129,9 @@ impl Project {
                         read_state(&state, &mut states, &mut ambiguous_fields);
                         continue;
                     }
+                    // A plain top-level `fn` is its own file's; only a
+                    // `shared fn` is the project's.
+                    Item::Function(function) if !function.shared => continue,
                     Item::Function(function) => {
                         if let Some(text) = source.get(function.span.start..function.span.end) {
                             bodies.push_str(text);

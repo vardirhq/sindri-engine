@@ -98,7 +98,7 @@ impl ScriptSources {
                     .items
                     .into_iter()
                     .filter_map(|item| match item {
-                        Item::Function(function) => Some(function.name),
+                        Item::Function(function) if function.shared => Some(function.name),
                         _ => None,
                     })
                     .collect();
@@ -108,8 +108,16 @@ impl ScriptSources {
                 let lowered = lower_with_environment(source, self.environment());
                 match lowered.program {
                     Some(program) => {
-                        if let Some(functions) = program.shared() {
-                            shared.functions.extend(functions.functions.iter().cloned());
+                        // Only what it shares: its other top-level functions
+                        // are its own scripts' business.
+                        if let Some(functions) = program.functions() {
+                            shared.functions.extend(
+                                functions
+                                    .functions
+                                    .iter()
+                                    .filter(|function| declared.contains(&function.name))
+                                    .cloned(),
+                            );
                         }
                     }
                     None => shared.broken.push((

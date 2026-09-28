@@ -42,7 +42,7 @@ This is the most important Sindri/Decay distinction.
 | `Name.on(entity).message(args)` | Sends a typed message, delivered after the pass | During gameplay |
 | `Event.emit(args)` / `on Event(args) { }` | Emits a declared event to every script handling it, delivered after the pass | During gameplay |
 | `Timer(seconds)` in a field, read with `.done` / `.left` / `.progress` | A countdown that runs down on its own before each `update` | Any time |
-| A top-level `fn name(...)` in any `.decay` file | A helper every script calls by name, with no `this` | Any time |
+| `shared fn name(...)` at the top of any `.decay` file (a plain top-level `fn` is that file's only) | A helper every script calls by name, with no `this` | Any time |
 | `Game.field` (declared with `state Game { var field: f32 = 0.0; }`) | Reads or writes a value the whole game shares, checked | Any time |
 
 Prefer the typed forms in the last six rows: a misspelt name or a wrong value

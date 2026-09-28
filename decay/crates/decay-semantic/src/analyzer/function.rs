@@ -1,12 +1,11 @@
-//! Shared functions: declared outside any container, called by name from
-//! anywhere.
+//! Functions outside any container.
 //!
-//! `fn visible_half_x(view_size: f32) -> f32 { ... }` at the top of a file is
-//! one function for every script, where each script used to keep its own
-//! copy. It has no `this` — there is no script it belongs to — so what it
-//! needs, it is passed. A host may declare the ones other files hold, as
-//! Sindri declares every shared function in a project; a file's own are added
-//! to those when it is analysed.
+//! `fn half(size: f32) -> f32 { ... }` at the top of a file is a function the
+//! file's scripts call by name; `shared fn` makes it every script's in the
+//! project, where each used to keep its own copy. Neither has a `this` —
+//! there is no script it belongs to — so what it needs, it is passed. A host
+//! declares the shared ones other files hold, as Sindri does for a project; a
+//! file's own are added to those when it is analysed.
 
 use std::collections::{HashMap, HashSet};
 
@@ -44,7 +43,7 @@ impl Analyzer<'_, '_> {
             {
                 self.error(
                     function.span,
-                    format!("`{name}` is already a name; a shared function needs one of its own"),
+                    format!("`{name}` is already a name; a function needs one of its own"),
                 );
             }
             let signature = signature_of(function);

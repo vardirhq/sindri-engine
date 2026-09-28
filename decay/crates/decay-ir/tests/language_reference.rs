@@ -465,11 +465,16 @@ fn timers_do_what_the_reference_says() {
 fn shared_functions_do_what_the_reference_says() {
     accepted(
         "the shared functions example",
-        "fn half(size: f32) -> f32 { return size * 0.5; }
+        "fn third(size: f32) -> f32 { return size / 3.0; }
+         shared fn half(size: f32) -> f32 { return size * 0.5; }
          script Enemy {
              let view_size: f32 = 11.0;
-             fn update(dt: f32) { let edge = half(this.view_size); }
+             fn update(dt: f32) { let edge = half(this.view_size) + third(1.0); }
          }",
+    );
+    accepted(
+        "`shared` as an ordinary name elsewhere",
+        "script T { fn f() { let shared = 1.0; } }",
     );
     accepted(
         "a script's own function shadowing a shared one",

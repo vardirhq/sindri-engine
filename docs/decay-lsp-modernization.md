@@ -68,7 +68,7 @@ These are defects or sources of actively misleading tooling.
   - [x] Include the project's declared `state`, so `Game.` completes the
         fields any file declares alongside the namespace's own members; list
         a file's state blocks and their fields as document symbols.
-  - [x] Offer the project's shared functions (top-level `fn` in any file) as
+  - [x] Offer the project's shared functions (`shared fn` in any file) as
         completions with their signatures, and list a file's own as document
         symbols.
   - [ ] Keep project-index results deterministic.

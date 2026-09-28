@@ -1693,9 +1693,9 @@ its `update`, so an early return cannot stop the clock. Exercised in
 `crates/sindri-decay/tests/scripts_keep_time.rs`, and by Scorchball's banners,
 power-ups, burning, aftertouch and bot reaction times.
 
-A function written outside any script is shared by the project: every script
-calls it by name, checked across files, and links its own copy when it
-compiles. Exercised in `crates/sindri-decay/tests/scripts_share_functions.rs`
+A function written outside any script belongs to its file; declared `shared
+fn`, it belongs to the project, and every script calls it by name, checked
+across files, linking its own copy when it compiles. Exercised in `crates/sindri-decay/tests/scripts_share_functions.rs`
 and by both Orbital games, whose view helpers live in one `view.decay` each.
 
 **A script can speak in the tilemap's coordinates.** `Grid.position_x` and

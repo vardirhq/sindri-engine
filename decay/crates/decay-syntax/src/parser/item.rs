@@ -11,12 +11,13 @@ use crate::{
     },
 };
 
-/// The words that start an event declaration, a state declaration, and a
-/// handler. Contextual rather than keywords: each is only special where no
+/// The words that start an event declaration, a state declaration, a shared
+/// function, and a handler. Contextual rather than keywords: each is only special where no
 /// other identifier could stand, so a script that already calls something
 /// `event` or `state`, or reaches `Bolt.on(hit)`, keeps working.
 pub(super) const EVENT: &str = "event";
 pub(super) const STATE: &str = "state";
+pub(super) const SHARED: &str = "shared";
 pub(super) const ON: &str = "on";
 
 use super::Parser;
@@ -141,6 +142,7 @@ impl Parser<'_> {
         Some(FunctionDecl {
             name,
             handles: None,
+            shared: false,
             params,
             return_type,
             body,
@@ -166,6 +168,7 @@ impl Parser<'_> {
         Some(FunctionDecl {
             name: handler_name(&event),
             handles: Some((event, event_span)),
+            shared: false,
             params,
             return_type: None,
             body,

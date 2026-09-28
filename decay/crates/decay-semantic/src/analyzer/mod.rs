@@ -138,7 +138,8 @@ impl<'a, 'd> Analyzer<'a, 'd> {
         if self.in_shared_function && name == "this" && self.lookup(name).is_none() {
             self.error(
                 span,
-                "a shared function has no `this` -- pass what it needs as a parameter".to_owned(),
+                "a function outside any script has no `this` -- pass what it needs as a parameter"
+                    .to_owned(),
             );
             return Type::Unknown;
         }

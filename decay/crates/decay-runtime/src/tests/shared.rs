@@ -39,7 +39,7 @@ fn a_function_from_another_file_runs_once_linked() {
     )
     .program
     .expect("valid script");
-    program.link(helpers.shared().expect("helpers").functions.clone());
+    program.link(helpers.functions().expect("helpers").functions.clone());
     let mut runtime = Runtime::new(&program, EmptyHost);
     let mut enemy = runtime.instantiate("Enemy").expect("instance");
     assert_eq!(

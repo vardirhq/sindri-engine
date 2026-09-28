@@ -11,23 +11,24 @@ pub struct IrProgram {
     pub containers: Vec<IrContainer>,
 }
 
-/// The name of the container a program's shared functions are lowered into.
+/// The name of the container a program's top-level functions are lowered
+/// into: its own file's, and any `shared fn` a host linked in from another.
 /// Not a name a script can write, so it can never be a script's.
-pub const SHARED: &str = "(shared)";
+pub const FUNCTIONS: &str = "(functions)";
 
 impl IrProgram {
-    /// The shared functions this program can call: its own, and any a host
-    /// linked in from other files.
+    /// The top-level functions this program can call: its own file's, and
+    /// any `shared fn` a host linked in from other files.
     #[must_use]
-    pub fn shared(&self) -> Option<&IrContainer> {
+    pub fn functions(&self) -> Option<&IrContainer> {
         self.containers
             .iter()
             .find(|container| container.kind == ContainerKind::Functions)
     }
 
-    /// Adds shared functions another file declared, so this program can call
-    /// them. One this program already has is kept: its own declaration is the
-    /// one it was checked against.
+    /// Adds functions another file shares, so this program can call them.
+    /// One this program already has is kept: its own declaration is the one
+    /// it was checked against.
     pub fn link(&mut self, functions: impl IntoIterator<Item = IrFunction>) {
         let index = if let Some(index) = self
             .containers
@@ -38,7 +39,7 @@ impl IrProgram {
         } else {
             self.containers.push(IrContainer {
                 kind: ContainerKind::Functions,
-                name: SHARED.to_owned(),
+                name: FUNCTIONS.to_owned(),
                 fields: Vec::new(),
                 functions: Vec::new(),
             });
@@ -61,7 +62,7 @@ impl IrProgram {
 pub enum ContainerKind {
     Script,
     Component,
-    /// A program's shared functions: no fields, no `this`, called by name.
+    /// A program's top-level functions: no fields, no `this`, called by name.
     Functions,
 }
 

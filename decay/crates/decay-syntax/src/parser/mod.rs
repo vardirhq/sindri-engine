@@ -64,6 +64,14 @@ impl<'a> Parser<'a> {
                 self.parse_state()
             } else if self.at(&TokenKind::Fn) {
                 self.parse_function().map(Item::Function)
+            } else if self.at_shared_fn() {
+                self.advance();
+                self.parse_function().map(|function| {
+                    Item::Function(crate::ast::FunctionDecl {
+                        shared: true,
+                        ..function
+                    })
+                })
             } else {
                 self.error_here("expected `script`, `component`, `event`, `state`, or `fn`");
                 self.advance();
@@ -74,6 +82,15 @@ impl<'a> Parser<'a> {
             }
         }
         Program { items }
+    }
+
+    /// `shared fn`: `shared` is only a word with meaning right before `fn`.
+    fn at_shared_fn(&self) -> bool {
+        matches!(&self.current().kind, TokenKind::Identifier(name) if name == item::SHARED)
+            && matches!(
+                self.tokens.get(self.cursor + 1).map(|token| &token.kind),
+                Some(TokenKind::Fn)
+            )
     }
 
     pub(super) fn synchronize_member(&mut self) {

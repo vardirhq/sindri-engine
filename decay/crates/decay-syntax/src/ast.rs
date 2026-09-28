@@ -15,9 +15,9 @@ pub enum Item {
     /// `state Game { var score: f32 = 0.0; }`: values every script shares,
     /// reached as `Game.score`.
     State(StateDecl),
-    /// `fn visible_half_x(view_size: f32) -> f32 { ... }` outside any
-    /// container: a shared function every script may call by name. It has no
-    /// `this`; what it needs, it is passed.
+    /// `fn half(size: f32) -> f32 { ... }` outside any container: a function
+    /// the file's scripts call by name, with no `this`. Written `shared fn`,
+    /// every script in the project may call it.
     Function(FunctionDecl),
 }
 
@@ -107,6 +107,9 @@ pub struct FunctionDecl {
     /// For `on GoalScored(team: f32) { ... }`, the event it handles and where
     /// that was written. Its `name` is then [`handler_name`] of the event.
     pub handles: Option<(String, Span)>,
+    /// `shared fn`: a function outside any container that every file may
+    /// call, rather than only the one declaring it. Always false inside one.
+    pub shared: bool,
     pub params: Vec<Param>,
     pub return_type: Option<TypeRef>,
     pub body: Block,

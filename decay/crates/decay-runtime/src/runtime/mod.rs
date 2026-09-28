@@ -225,11 +225,12 @@ impl<'a, H: Host> Runtime<'a, H> {
         {
             return self.call_in_container(container, fields, &callee.0[0], args);
         }
-        // A shared function: after the script's own, which it may shadow, and
-        // before the host. It has no fields, so it is given none.
+        // A top-level function, the file's own or a shared one: after the
+        // script's own, which may shadow it, and before the host. It has no
+        // fields, so it is given none.
         let program = self.program;
         if let [name] = callee.0.as_slice()
-            && let Some(shared) = program.shared()
+            && let Some(shared) = program.functions()
             && shared
                 .functions
                 .iter()

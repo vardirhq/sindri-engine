@@ -8,8 +8,11 @@ use sindri_core::{
 use sindri_decay::{ScriptComponent, ScriptFailure, ScriptFrame, ScriptSources, Scripts};
 use sindri_platform::InputState;
 
-const VIEW: &str = "fn half(size: f32) -> f32 { return size * 0.5; }
-fn quarter(size: f32) -> f32 { return half(half(size)); }";
+/// Two shared functions, one calling the other, and one the file keeps to
+/// itself.
+const VIEW: &str = "shared fn half(size: f32) -> f32 { return size * 0.5; }
+shared fn quarter(size: f32) -> f32 { return half(half(size)); }
+fn private_third(size: f32) -> f32 { return size / 3.0; }";
 
 const SHOWS: &str = "script Shows {
     let view_size: f32 = 12.0;
@@ -86,8 +89,8 @@ fn changing_the_function_changes_what_its_callers_run() {
     // The caller's own text is unchanged; only the file it calls into is.
     sources.insert(
         "view.decay",
-        "fn half(size: f32) -> f32 { return size; }
-         fn quarter(size: f32) -> f32 { return half(half(size)); }",
+        "shared fn half(size: f32) -> f32 { return size; }
+         shared fn quarter(size: f32) -> f32 { return half(half(size)); }",
     );
     let failures = frame(&mut scripts, &mut world, &sources);
     assert!(failures.is_empty(), "{failures:?}");
@@ -106,8 +109,8 @@ fn a_broken_helper_file_fails_its_callers_and_no_one_else() {
     let mut sources = sources();
     sources.insert(
         "view.decay",
-        "fn half(size: f32) -> f32 { return size * nope; }
-         fn quarter(size: f32) -> f32 { return half(half(size)); }",
+        "shared fn half(size: f32) -> f32 { return size * nope; }
+         shared fn quarter(size: f32) -> f32 { return half(half(size)); }",
     );
     let mut scripts = Scripts::new();
     let failures = frame(&mut scripts, &mut world, &sources);
@@ -121,4 +124,34 @@ fn a_broken_helper_file_fails_its_callers_and_no_one_else() {
     );
     assert_eq!(failures.len(), 1, "only the caller fails: {failures:?}");
     assert!((x(&world, plain) - 7.0).abs() < 1e-6);
+}
+
+#[test]
+fn a_function_not_marked_shared_stays_in_its_own_file() {
+    let mut world = World::default();
+    let own = scripted(&mut world, "local.decay", "Local");
+    scripted(&mut world, "shows.decay", "Shows");
+    let mut sources = sources();
+    // Its own file's scripts call it; another file cannot.
+    sources.insert(
+        "local.decay",
+        "fn twice(size: f32) -> f32 { return size * 2.0; }
+         script Local { fn update(dt: f32) { this.transform.position.x = twice(4.0); } }",
+    );
+    sources.insert(
+        "shows.decay",
+        "script Shows { fn update(dt: f32) { this.transform.position.x = private_third(9.0); } }",
+    );
+    let mut scripts = Scripts::new();
+    let failures = frame(&mut scripts, &mut world, &sources);
+    assert!((x(&world, own) - 8.0).abs() < 1e-6);
+    assert!(
+        failures.iter().any(|failure| matches!(
+            failure,
+            ScriptFailure::Compile { asset, diagnostics }
+                if asset == "shows.decay"
+                    && diagnostics.iter().any(|d| d.contains("private_third"))
+        )),
+        "{failures:?}"
+    );
 }

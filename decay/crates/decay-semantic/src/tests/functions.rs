@@ -83,7 +83,7 @@ fn every_mistake_about_a_shared_function_is_refused() {
         &environment,
     );
     for expected in [
-        "a shared function has no `this`",
+        "a function outside any script has no `this`",
         "duplicate declaration `half`",
         "`sin` is already a name",
         "`Enemy` is already a name",
