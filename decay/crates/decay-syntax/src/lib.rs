@@ -5,6 +5,7 @@
 
 pub mod ast;
 mod parser;
+pub mod vocabulary;
 
 pub use ast::*;
 pub use parser::{Parsed, parse};
@@ -228,26 +229,13 @@ impl<'a> Lexer<'a> {
         }
 
         let text = &self.source[start..self.cursor];
-        let kind = match text {
-            "script" => TokenKind::Script,
-            "component" => TokenKind::Component,
-            "fn" => TokenKind::Fn,
-            "let" => TokenKind::Let,
-            "var" => TokenKind::Var,
-            "if" => TokenKind::If,
-            "else" => TokenKind::Else,
-            "while" => TokenKind::While,
-            "for" => TokenKind::For,
-            "in" => TokenKind::In,
-            "break" => TokenKind::Break,
-            "continue" => TokenKind::Continue,
-            "return" => TokenKind::Return,
-            "match" => TokenKind::Match,
-            "true" => TokenKind::True,
-            "false" => TokenKind::False,
-            "null" => TokenKind::Null,
-            _ => TokenKind::Identifier(text.to_owned()),
-        };
+        let kind = vocabulary::KEYWORDS
+            .iter()
+            .find(|(word, _)| *word == text)
+            .map_or_else(
+                || TokenKind::Identifier(text.to_owned()),
+                |(_, kind)| kind.clone(),
+            );
         self.push(kind, start);
     }
 

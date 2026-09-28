@@ -49,10 +49,7 @@ impl Analyzer<'_, '_> {
         };
         self.value_members
             .insert(span, ValueMember::Timer(property));
-        match property {
-            TimerProperty::Done => Type::Bool,
-            TimerProperty::Left | TimerProperty::Duration | TimerProperty::Progress => Type::F32,
-        }
+        crate::members::timer_property_type(property)
     }
 
     /// `timer.done()`, which is a property, or anything else called on one.

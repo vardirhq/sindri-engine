@@ -4,8 +4,12 @@
 
 use std::collections::BTreeMap;
 
+use decay_semantic::members::{
+    list_op_signature, string_op_signature, timer_property_type, vector_op_signature,
+};
 use decay_semantic::{
-    Analysis, Environment, ExternalSymbol, FunctionType, ListOp, StringOp, Type, VectorOp,
+    Analysis, COMPONENTS, Environment, ExternalSymbol, FunctionType, LENGTH, ListOp, StringOp,
+    TimerProperty, Type, VectorOp,
 };
 
 use crate::support::type_members;
@@ -49,78 +53,47 @@ fn value(ty: Type) -> ExternalSymbol {
     ExternalSymbol::Value(ty)
 }
 
-fn function(params: Vec<Type>, return_type: Type) -> ExternalSymbol {
-    ExternalSymbol::Function(FunctionType {
-        params,
-        return_type,
-    })
+/// A property as a value, anything with parameters as a function to call.
+fn member(signature: FunctionType) -> ExternalSymbol {
+    if signature.params.is_empty() {
+        value(signature.return_type)
+    } else {
+        ExternalSymbol::Function(signature)
+    }
 }
 
 /// What the language gives a value of this type, or `None` for a type whose
-/// members the host describes.
+/// members the host describes. Signatures come from
+/// `decay_semantic::members`, the table the analysis checks calls against.
 pub(crate) fn value_members(ty: &Type, structs: &Structs) -> Option<Vec<(String, ExternalSymbol)>> {
-    let named = |pairs: Vec<(&str, ExternalSymbol)>| {
-        pairs
-            .into_iter()
-            .map(|(name, symbol)| (name.to_owned(), symbol))
-            .collect()
-    };
     Some(match ty {
         Type::Vec2 | Type::Vec3 => {
             let dimensions = ty.dimensions().unwrap_or(2);
-            let mut members: Vec<(String, ExternalSymbol)> = ["x", "y", "z"][..dimensions]
+            let mut members: Vec<(String, ExternalSymbol)> = COMPONENTS[..dimensions]
                 .iter()
                 .map(|component| ((*component).to_owned(), value(Type::F32)))
                 .collect();
-            members.extend(VectorOp::ALL.iter().map(|(op, name, _)| {
-                let symbol = match op {
-                    VectorOp::Length => value(Type::F32),
-                    VectorOp::Normalized => value(ty.clone()),
-                    VectorOp::Dot | VectorOp::Distance => function(vec![ty.clone()], Type::F32),
-                    VectorOp::Lerp => function(vec![ty.clone(), Type::F32], ty.clone()),
-                };
-                ((*name).to_owned(), symbol)
-            }));
+            members.extend(
+                VectorOp::ALL.iter().map(|(op, name, _)| {
+                    ((*name).to_owned(), member(vector_op_signature(*op, ty)))
+                }),
+            );
             members
         }
-        Type::Timer => named(vec![
-            ("done", value(Type::Bool)),
-            ("left", value(Type::F32)),
-            ("duration", value(Type::F32)),
-            ("progress", value(Type::F32)),
-        ]),
+        Type::Timer => TimerProperty::ALL
+            .iter()
+            .map(|(property, name)| ((*name).to_owned(), value(timer_property_type(*property))))
+            .collect(),
         Type::String => StringOp::ALL
             .iter()
-            .map(|(op, name, _)| {
-                let symbol = match op {
-                    StringOp::Length => value(Type::F32),
-                    StringOp::Uppercase | StringOp::Lowercase | StringOp::Trimmed => {
-                        value(Type::String)
-                    }
-                    StringOp::Contains | StringOp::StartsWith | StringOp::EndsWith => {
-                        function(vec![Type::String], Type::Bool)
-                    }
-                    StringOp::Find => function(vec![Type::String], Type::F32),
-                    StringOp::Slice => function(vec![Type::F32, Type::F32], Type::String),
-                    StringOp::Replace => function(vec![Type::String, Type::String], Type::String),
-                };
-                ((*name).to_owned(), symbol)
-            })
+            .map(|(op, name, _)| ((*name).to_owned(), member(string_op_signature(*op))))
             .collect(),
         Type::Array(element) => {
-            let element = (**element).clone();
-            let mut members = vec![("length".to_owned(), value(Type::F32))];
+            let mut members = vec![(LENGTH.to_owned(), value(Type::F32))];
             members.extend(ListOp::ALL.iter().map(|(op, name, _)| {
-                let symbol = match op {
-                    ListOp::Push => function(vec![element.clone()], Type::Unit),
-                    ListOp::Pop => function(vec![], element.clone()),
-                    ListOp::Insert => function(vec![Type::F32, element.clone()], Type::Unit),
-                    ListOp::RemoveAt => function(vec![Type::F32], element.clone()),
-                    ListOp::Clear => function(vec![], Type::Unit),
-                    ListOp::Contains => function(vec![element.clone()], Type::Bool),
-                    ListOp::IndexOf | ListOp::SetAt => function(vec![element.clone()], Type::F32),
-                };
-                ((*name).to_owned(), symbol)
+                // Every list operation is a call, `pop()` included.
+                let signature = list_op_signature(*op, element);
+                ((*name).to_owned(), ExternalSymbol::Function(signature))
             }));
             members
         }

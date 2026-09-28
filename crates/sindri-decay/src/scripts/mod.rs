@@ -35,7 +35,7 @@ use crate::{
 
 pub use environment::{environment, referenced_sources};
 pub use frame::ScriptFrame;
-pub use sources::ScriptSources;
+pub use sources::{LIFECYCLE, LifecycleFunction, ScriptSources};
 
 /// How many times a pass will start what the previous round spawned.
 ///

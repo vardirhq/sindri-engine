@@ -64,10 +64,7 @@ impl Analyzer<'_, '_> {
         match VectorOp::named(field) {
             Some((op, 0)) => {
                 self.value_members.insert(span, ValueMember::Vector(op));
-                match op {
-                    VectorOp::Normalized => object_type.clone(),
-                    _ => Type::F32,
-                }
+                crate::members::vector_op_signature(op, object_type).return_type
             }
             Some(_) => {
                 self.error(
@@ -94,12 +91,9 @@ impl Analyzer<'_, '_> {
         args: &[Expr],
         span: Span,
     ) -> Type {
-        let (params, returns) = match VectorOp::named(field) {
-            Some((VectorOp::Dot | VectorOp::Distance, _)) => (vec![object_type.clone()], Type::F32),
-            Some((VectorOp::Lerp, _)) => {
-                (vec![object_type.clone(), Type::F32], object_type.clone())
-            }
-            Some((VectorOp::Length | VectorOp::Normalized, _)) => {
+        let op = match VectorOp::named(field) {
+            Some((op, arity)) if arity > 0 => op,
+            Some(_) => {
                 self.error(
                     span,
                     format!("`{field}` is a property, not a function -- write `.{field}`"),
@@ -121,19 +115,10 @@ impl Analyzer<'_, '_> {
                 return Type::Unknown;
             }
         };
-        let op = VectorOp::named(field).map(|(op, _)| op);
-        self.check_call(
-            &crate::types::FunctionType {
-                params,
-                return_type: returns.clone(),
-            },
-            args,
-            span,
-        );
-        if let Some(op) = op {
-            self.value_members.insert(span, ValueMember::Vector(op));
-        }
-        returns
+        let signature = crate::members::vector_op_signature(op, object_type);
+        self.check_call(&signature, args, span);
+        self.value_members.insert(span, ValueMember::Vector(op));
+        signature.return_type
     }
 
     fn check_arguments_only(&mut self, args: &[Expr]) {

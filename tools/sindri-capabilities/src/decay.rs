@@ -160,7 +160,7 @@ fn symbol_of(name: &str, symbol: &ExternalSymbol) -> Symbol {
 }
 
 /// How a type is written in Decay source, so a reader can copy it into a script.
-fn type_name(ty: &Type) -> String {
+pub(crate) fn type_name(ty: &Type) -> String {
     match ty {
         Type::F32 => "f32".to_owned(),
         Type::Bool => "bool".to_owned(),

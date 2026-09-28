@@ -52,6 +52,9 @@ pub use prefabs::PrefabSources;
 pub use profiles::ProfileSources;
 pub use report::{ScriptMessage, ScriptReport};
 pub use scenes::SceneChannel;
-pub use scripts::{ScriptFrame, ScriptSources, Scripts, environment, referenced_sources};
+pub use scripts::{
+    LIFECYCLE, LifecycleFunction, ScriptFrame, ScriptSources, Scripts, environment,
+    referenced_sources,
+};
 
 pub(crate) use scripts::SPAWN_LIMIT_PER_PASS;

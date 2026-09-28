@@ -77,9 +77,9 @@ impl<'a> Parser<'a> {
                     })
                 })
             } else {
-                self.error_here(
-                    "expected `script`, `component`, `enum`, `struct`, `event`, `state`, or `fn`",
-                );
+                let words = crate::vocabulary::ITEM_WORDS.map(|word| format!("`{word}`"));
+                let (last, rest) = words.split_last().expect("there are item words");
+                self.error_here(&format!("expected {}, or {last}", rest.join(", ")));
                 self.advance();
                 None
             };

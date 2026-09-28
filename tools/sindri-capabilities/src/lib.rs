@@ -21,6 +21,7 @@
 
 mod components;
 mod decay;
+mod decay_language;
 mod markdown;
 
 use std::fmt;
@@ -108,6 +109,10 @@ pub fn documents() -> Result<Vec<GeneratedDocument>, CapabilitiesError> {
         GeneratedDocument {
             path: "docs/generated/decay-api.md",
             contents: markdown::render(&decay_api),
+        },
+        GeneratedDocument {
+            path: "docs/generated/decay-language.json",
+            contents: to_json(&decay_language::describe())?,
         },
         GeneratedDocument {
             path: "docs/generated/sindri-capabilities.json",

@@ -7,7 +7,7 @@
 use decay_syntax::{Expr, ListOp, Span};
 
 use crate::diagnostic::ValueMember;
-use crate::types::{FunctionType, Type};
+use crate::types::Type;
 
 use super::Analyzer;
 
@@ -77,29 +77,13 @@ impl Analyzer<'_, '_> {
             }
             return Type::Unknown;
         };
-        let (params, returns) = match op {
-            ListOp::Push => (vec![element.clone()], Type::Unit),
-            ListOp::Pop => (vec![], element.clone()),
-            ListOp::Insert => (vec![Type::F32, element.clone()], Type::Unit),
-            ListOp::RemoveAt => (vec![Type::F32], element.clone()),
-            ListOp::Clear => (vec![], Type::Unit),
-            ListOp::Contains => (vec![element.clone()], Type::Bool),
-            ListOp::IndexOf => (vec![element.clone()], Type::F32),
-            ListOp::SetAt => unreachable!("not a name a script can call"),
-        };
+        let signature = crate::members::list_op_signature(op, element);
         if op.changes() {
             self.check_list_place(object, field);
         }
-        self.check_call(
-            &FunctionType {
-                params,
-                return_type: returns.clone(),
-            },
-            args,
-            span,
-        );
+        self.check_call(&signature, args, span);
         self.value_members.insert(span, ValueMember::List(op));
-        returns
+        signature.return_type
     }
 
     /// `list.push` read without calling it, or any other name on a list.

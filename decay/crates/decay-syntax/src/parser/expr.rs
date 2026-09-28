@@ -6,28 +6,16 @@
 
 use crate::{
     TokenKind,
-    ast::{AssignOp, BinaryOp, Expr, ExprKind, UnaryOp},
+    ast::{BinaryOp, Expr, ExprKind},
 };
 
 use super::Parser;
 
 pub(super) fn binary_operator(kind: &TokenKind) -> Option<(u8, BinaryOp)> {
-    match kind {
-        TokenKind::OrOr => Some((1, BinaryOp::Or)),
-        TokenKind::AndAnd => Some((2, BinaryOp::And)),
-        TokenKind::EqualEqual => Some((3, BinaryOp::Equal)),
-        TokenKind::BangEqual => Some((3, BinaryOp::NotEqual)),
-        TokenKind::Less => Some((4, BinaryOp::Less)),
-        TokenKind::LessEqual => Some((4, BinaryOp::LessEqual)),
-        TokenKind::Greater => Some((4, BinaryOp::Greater)),
-        TokenKind::GreaterEqual => Some((4, BinaryOp::GreaterEqual)),
-        TokenKind::Plus => Some((5, BinaryOp::Add)),
-        TokenKind::Minus => Some((5, BinaryOp::Subtract)),
-        TokenKind::Star => Some((6, BinaryOp::Multiply)),
-        TokenKind::Slash => Some((6, BinaryOp::Divide)),
-        TokenKind::Percent => Some((6, BinaryOp::Modulo)),
-        _ => None,
-    }
+    crate::vocabulary::BINARY_OPERATORS
+        .iter()
+        .find(|(token, _, _)| token == kind)
+        .map(|(_, precedence, op)| (*precedence, *op))
 }
 
 impl Parser<'_> {
@@ -37,14 +25,12 @@ impl Parser<'_> {
 
     pub(super) fn parse_assignment(&mut self) -> Option<Expr> {
         let target = self.parse_binary(0)?;
-        let op = match self.current().kind {
-            TokenKind::Equal => AssignOp::Assign,
-            TokenKind::PlusEqual => AssignOp::Add,
-            TokenKind::MinusEqual => AssignOp::Subtract,
-            TokenKind::StarEqual => AssignOp::Multiply,
-            TokenKind::SlashEqual => AssignOp::Divide,
-            TokenKind::PercentEqual => AssignOp::Modulo,
-            _ => return Some(target),
+        let Some(op) = crate::vocabulary::ASSIGNMENT_OPERATORS
+            .iter()
+            .find(|(token, _)| *token == self.current().kind)
+            .map(|(_, op)| *op)
+        else {
+            return Some(target);
         };
         self.advance();
         let value = self.parse_assignment()?;
@@ -81,11 +67,10 @@ impl Parser<'_> {
     }
 
     pub(super) fn parse_unary(&mut self) -> Option<Expr> {
-        let op = match self.current().kind {
-            TokenKind::Minus => Some(UnaryOp::Negate),
-            TokenKind::Bang => Some(UnaryOp::Not),
-            _ => None,
-        };
+        let op = crate::vocabulary::UNARY_OPERATORS
+            .iter()
+            .find(|(token, _)| *token == self.current().kind)
+            .map(|(_, op)| *op);
         if let Some(op) = op {
             let start = self.current().span;
             self.advance();
