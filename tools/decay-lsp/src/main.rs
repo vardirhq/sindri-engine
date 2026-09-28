@@ -4,6 +4,7 @@ mod project;
 mod protocol;
 mod support;
 mod symbols;
+mod values;
 
 use std::{
     collections::HashMap,
@@ -256,7 +257,7 @@ impl Server {
         let (chain, prefix) = completion_chain(before);
         if let Some(chain) = chain {
             return Value::Array(
-                self.members_for_chain(&source, &chain)
+                self.members_for_chain(&source, offset, &chain)
                     .into_iter()
                     .filter(|(name, _)| name.starts_with(&prefix))
                     .map(|(name, symbol)| symbol_completion(&name, &symbol))
@@ -309,6 +310,16 @@ impl Server {
         let Some(word) = word_at(&source, offset) else {
             return Value::Null;
         };
+        if let Some(ty) = values::local_type(
+            &decay_semantic::analyze_with_environment(&source, &self.environment),
+            word,
+            offset,
+        ) {
+            return json!({"contents":{"kind":"markdown","value":format!(
+                "```decay\n{word}: {}\n```",
+                ty.display_name()
+            )}});
+        }
         if let Some((_, symbol)) = self.environment.globals().find(|(name, _)| *name == word) {
             return hover_symbol(word, symbol);
         }
@@ -362,10 +373,18 @@ impl Server {
         Some((source, offset))
     }
 
-    fn members_for_chain(&self, source: &str, chain: &[String]) -> Vec<(String, ExternalSymbol)> {
+    fn members_for_chain(
+        &self,
+        source: &str,
+        offset: usize,
+        chain: &[String],
+    ) -> Vec<(String, ExternalSymbol)> {
         let Some(first) = chain.first() else {
             return Vec::new();
         };
+        if let Some(members) = values::held_members(&self.environment, source, offset, chain) {
+            return members;
+        }
         if chain.len() == 1
             && let Some((_, params)) = events(&self.environment, source)
                 .into_iter()

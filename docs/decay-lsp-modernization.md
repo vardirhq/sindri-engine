@@ -71,9 +71,12 @@ These are defects or sources of actively misleading tooling.
   - [x] Offer the project's shared functions (`shared fn` in any file) as
         completions with their signatures, and list a file's own as document
         symbols.
-  - [ ] Complete a value's own members — a vector's `x`/`dot`, a timer's
-        `done`, text's `length`/`contains` — which needs a local's type,
-        not only a host type's.
+  - [x] Complete a value's own members — a vector's `x`/`dot`, a timer's
+        `done`, text's `length`/`contains`, a list's `push`, a struct's
+        fields — from the type the analysis gave the local, parameter or
+        field at the cursor (`Analysis.bindings`), walking chains such as
+        `card.at.` through both the language's members and the host's;
+        hover on a local shows its type.
   - [x] Offer the project's structs as completions, show their fields on
         hover, and list a file's structs and fields as document symbols.
   - [x] Offer the project's enums as completions, complete `Enum.` with its

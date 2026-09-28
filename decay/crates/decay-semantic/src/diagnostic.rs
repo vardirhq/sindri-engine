@@ -78,6 +78,24 @@ pub struct Analysis {
     /// in order: what the lowering needs to build one whose fields were
     /// written in another, and what a host needs to author one.
     pub structs: std::collections::BTreeMap<String, Vec<(String, crate::types::Type)>>,
+    /// Every name the program binds, and its type; see [`Binding`].
+    pub bindings: Vec<Binding>,
+}
+
+/// A name bound somewhere in the program, with the type the analysis gave
+/// it: a script's field, a parameter, a local, a loop's binding.
+///
+/// For a tool that has to say what a name is at a place in the source — an
+/// editor completing `card.` — without analysing again. `scope` is the
+/// container or function it is visible in, and `declared` where it starts
+/// being visible; the nearest one before a place, in a scope around it, is
+/// the one a name there means.
+#[derive(Debug, Clone, PartialEq)]
+pub struct Binding {
+    pub name: String,
+    pub declared: usize,
+    pub scope: Span,
+    pub ty: crate::types::Type,
 }
 
 /// Decay has no methods, and the mistake of reaching for one is worth naming

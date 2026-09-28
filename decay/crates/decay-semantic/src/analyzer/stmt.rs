@@ -188,6 +188,7 @@ impl Analyzer<'_, '_> {
     }
 
     pub(super) fn define_local(&mut self, name: &str, symbol: Symbol, span: Span) {
+        self.record_binding(name, &symbol.ty, span);
         let Some(scope) = self.scopes.last_mut() else {
             return;
         };
