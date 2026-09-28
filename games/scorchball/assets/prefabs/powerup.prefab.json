@@ -35,7 +35,7 @@
           "source": "scripts/powerup.decay",
           "script": "PowerUp",
           "properties": {
-            "kind": 1.0,
+            "kind": "Grow",
             "sign": "prefabs/sign.prefab.json",
             "shadow": "prefabs/shadow.prefab.json"
           }

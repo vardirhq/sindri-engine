@@ -23,7 +23,7 @@ use analyzer::Analyzer;
 pub use decay_syntax::{TimerProperty, VectorOp};
 pub use diagnostic::{Analysis, Diagnostic, DiagnosticPhase, ValueMember, ValueMembers};
 pub use environment::{Environment, ExternalSymbol, StateField};
-pub use types::{COMPONENTS, EMIT, FunctionType, HostType, TIMER, Type, event_type};
+pub use types::{COMPONENTS, EMIT, FunctionType, HostType, TIMER, Type, enum_type, event_type};
 
 #[must_use]
 pub fn analyze(source: &str) -> Analysis {
@@ -50,10 +50,12 @@ pub fn analyze_with_environment(source: &str, environment: &Environment) -> Anal
     let mut value_members = ValueMembers::new();
     let mut analyzer = Analyzer::new(source, environment, &mut diagnostics, &mut value_members);
     analyzer.analyze_program(&parsed.program);
+    let enums = analyzer.known_enums();
 
     Analysis {
         program: parsed.program,
         diagnostics,
         value_members,
+        enums,
     }
 }

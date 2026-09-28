@@ -3,16 +3,16 @@
 // landed, whoever walks into it gets what the sign shows; left alone it goes
 // after a while.
 //
-// 1 Enlarger: the player grows, and reaches the ball from further away.
-// 2 Push Boost: the player's kicks go much further.
-// 3 Wind: the pitch tilts towards the other team's goal.
-// 4 Fireball: the ball catches fire, and sets alight any opponent it touches.
+// Grow (the Enlarger): the player grows, and reaches the ball from further away.
+// Boost (Push Boost): the player's kicks go much further.
+// Wind: the pitch tilts towards the other team's goal.
+// Fire (the Fireball): the ball catches fire, and sets alight any opponent it touches.
 //
 // This entity is the spot on the ground where the sign lands. The shadow and
 // the sign are its children, so they stand where it stands and go with it; the
 // sign only has to be told how high above the spot it still is.
 script PowerUp {
-    @export let kind: f32 = 1.0;
+    @export let kind = Power.Grow;
     @export let sign: Prefab;
     @export let shadow: Prefab;
     @export let drop_height: f32 = 12.0;
@@ -31,9 +31,12 @@ script PowerUp {
         this.ground = World.spawn_child(this.shadow, this.entity);
         let shown = World.spawn_child(this.sign, this.entity);
         var clip: String = "enlarger";
-        if this.kind == 2.0 { clip = "push"; }
-        if this.kind == 3.0 { clip = "wind"; }
-        if this.kind == 4.0 { clip = "fireball"; }
+        match this.kind {
+            Power.Grow => { clip = "enlarger"; }
+            Power.Boost => { clip = "push"; }
+            Power.Wind => { clip = "wind"; }
+            Power.Fire => { clip = "fireball"; }
+        }
         Animation.play(shown, clip);
         this.shown = shown;
         place();
@@ -93,15 +96,15 @@ script PowerUp {
         Audio.play("audio/run.wav", 0.8);
         let picker = Player.on(player);
         if picker == null { return; }
-        if this.kind == 1.0 || this.kind == 2.0 {
-            picker.power_up(this.kind);
-        } else if this.kind == 3.0 {
-            // Blue attack the right goal, so their wind blows right.
-            var blow: f32 = -1.0;
-            if picker.team == 1.0 { blow = 1.0; }
-            WindPicked.emit(blow);
-        } else {
-            FirePicked.emit(picker.team);
+        match this.kind {
+            Power.Grow | Power.Boost => { picker.power_up(this.kind); }
+            Power.Wind => {
+                // Blue attack the right goal, so their wind blows right.
+                var blow: f32 = -1.0;
+                if picker.team == 1.0 { blow = 1.0; }
+                WindPicked.emit(blow);
+            }
+            Power.Fire => { FirePicked.emit(picker.team); }
         }
     }
 }

@@ -45,6 +45,8 @@ pub enum TokenKind {
     Break,
     Continue,
     Return,
+    /// `match value { ... }`.
+    Match,
     True,
     False,
     Null,
@@ -83,6 +85,10 @@ pub enum TokenKind {
     AndAnd,
     OrOr,
     Arrow,
+    /// `=>`, between a `match` arm's patterns and its body.
+    FatArrow,
+    /// `|`, between the patterns one `match` arm accepts.
+    Pipe,
     Eof,
 }
 
@@ -165,12 +171,14 @@ impl<'a> Lexer<'a> {
                 '*' => self.push_if_equal(TokenKind::StarEqual, TokenKind::Star, start),
                 '/' => self.push_if_equal(TokenKind::SlashEqual, TokenKind::Slash, start),
                 '%' => self.push_if_equal(TokenKind::PercentEqual, TokenKind::Percent, start),
+                '=' if self.consume('>') => self.push(TokenKind::FatArrow, start),
                 '=' => self.push_if_equal(TokenKind::EqualEqual, TokenKind::Equal, start),
                 '!' => self.push_if_equal(TokenKind::BangEqual, TokenKind::Bang, start),
                 '<' => self.push_if_equal(TokenKind::LessEqual, TokenKind::Less, start),
                 '>' => self.push_if_equal(TokenKind::GreaterEqual, TokenKind::Greater, start),
                 '&' if self.consume('&') => self.push(TokenKind::AndAnd, start),
                 '|' if self.consume('|') => self.push(TokenKind::OrOr, start),
+                '|' => self.push(TokenKind::Pipe, start),
                 '"' => self.lex_string(start),
                 c if c.is_ascii_digit() => self.lex_number(start),
                 c if is_identifier_start(c) => self.lex_identifier(start),
@@ -231,6 +239,7 @@ impl<'a> Lexer<'a> {
             "break" => TokenKind::Break,
             "continue" => TokenKind::Continue,
             "return" => TokenKind::Return,
+            "match" => TokenKind::Match,
             "true" => TokenKind::True,
             "false" => TokenKind::False,
             "null" => TokenKind::Null,

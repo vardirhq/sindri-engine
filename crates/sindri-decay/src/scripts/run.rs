@@ -118,7 +118,7 @@ pub(super) fn tick(
             let mut instance = runtime.instantiate(&component.script).map_err(|error| {
                 ScriptFailure::runtime(entity, &component.script, START, &error)
             })?;
-            apply_properties(&mut instance, container, entity, component)?;
+            apply_properties(&mut instance, &program, container, entity, component)?;
             // Then what another script set on it before it started, which is
             // later than the scene and so wins.
             for (field, value) in starting_values.take().unwrap_or_default() {
@@ -372,6 +372,7 @@ fn calls(program: &decay_ir::IrProgram, name: &str) -> bool {
 
 pub(super) fn apply_properties(
     instance: &mut ScriptInstance,
+    program: &decay_ir::IrProgram,
     container: &IrContainer,
     entity: EntityId,
     component: &ScriptComponent,
@@ -390,17 +391,69 @@ pub(super) fn apply_properties(
         if !field.exported {
             return Err(refuse(name, "the field is not @export"));
         }
-        let value = to_value(value).ok_or_else(|| {
-            refuse(
-                name,
-                &format!("{value} is not a number, string, boolean or vector"),
-            )
-        })?;
+        let value = if let Some(enumeration) = field_enum(program, instance, field) {
+            authored_variant(program, &enumeration, value)
+                .map_err(|reason| refuse(name, &reason))?
+        } else {
+            to_value(value).ok_or_else(|| {
+                refuse(
+                    name,
+                    &format!("{value} is not a number, string, boolean or vector"),
+                )
+            })?
+        };
         instance
             .set_field(name, value)
             .map_err(|error| refuse(name, &format!("{error:?}")))?;
     }
     Ok(())
+}
+
+/// The enum a field holds, from its written type or, for a field written
+/// `var kind = Kind.Grow;`, from what it starts as.
+fn field_enum(
+    program: &decay_ir::IrProgram,
+    instance: &ScriptInstance,
+    field: &decay_ir::IrField,
+) -> Option<String> {
+    if let Some(written) = field.type_name.as_deref()
+        && program.variants(written).is_some()
+    {
+        return Some(written.to_owned());
+    }
+    match instance.field(&field.name) {
+        Some(Value::Variant(name)) => name.split('.').next().map(str::to_owned),
+        _ => None,
+    }
+}
+
+/// An enum field's authored value: a variant's name, `"Grow"`, or the full
+/// `"Kind.Grow"`. Anything else is refused with the variants it could be.
+fn authored_variant(
+    program: &decay_ir::IrProgram,
+    enumeration: &str,
+    value: &serde_json::Value,
+) -> Result<Value, String> {
+    let variants = program.variants(enumeration).unwrap_or_default();
+    let named = value.as_str().map(|text| {
+        text.strip_prefix(enumeration)
+            .and_then(|rest| rest.strip_prefix('.'))
+            .unwrap_or(text)
+    });
+    match named {
+        Some(variant) if variants.iter().any(|known| known == variant) => {
+            Ok(Value::Variant(format!("{enumeration}.{variant}").into()))
+        }
+        _ => Err(format!(
+            "{value} is not a `{enumeration}`; it is one of {}",
+            variants.join(", ")
+        )),
+    }
+}
+
+/// A variant's own name, without its enum's: `Grow` for `Kind.Grow`.
+pub(crate) fn variant_name(full: &str) -> &str {
+    full.split_once('.').map_or(full, |(_, variant)| variant)
 }
 
 pub(crate) fn to_value(value: &serde_json::Value) -> Option<Value> {

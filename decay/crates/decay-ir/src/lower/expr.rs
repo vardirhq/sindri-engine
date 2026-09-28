@@ -142,6 +142,11 @@ impl Lowerer<'_> {
                         self.lower_expr(object, instructions);
                         instructions.push(Instruction::Vector(op));
                     }
+                    Some(ValueMember::Variant) => {
+                        let variant = Self::path_from_expr(expr)
+                            .map_or_else(|| "<invalid-variant>".to_owned(), |path| path.dotted());
+                        instructions.push(Instruction::Push(Constant::Variant(variant)));
+                    }
                     Some(ValueMember::Timer(property)) => {
                         self.lower_expr(object, instructions);
                         instructions.push(Instruction::Timer(property));

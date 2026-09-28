@@ -1,8 +1,8 @@
 //! Statements and blocks, and the scopes a block opens.
 
-use decay_syntax::{Block, Stmt};
+use decay_syntax::{BinaryOp, Block, Pattern, Stmt};
 
-use crate::ir::{Constant, Instruction};
+use crate::ir::{Constant, Instruction, Path};
 
 use super::Lowerer;
 
@@ -245,6 +245,86 @@ impl Lowerer<'_> {
                 ..
             } => self.lower_for(name, iterable, body, instructions, loops),
             Stmt::Block(block) => self.lower_scoped_block(block, instructions, loops),
+            Stmt::Match { subject, arms, .. } => {
+                self.lower_match(subject, arms, instructions, loops);
+            }
         }
     }
+
+    /// `match subject { ... }`: the subject is evaluated once and held, and
+    /// each arm compares it with its patterns in turn; the first that equals
+    /// runs, and nothing else does.
+    ///
+    /// A subject that is none of the patterns — only `null` can be, since the
+    /// analysis refuses a `match` that misses a variant — runs no arm.
+    fn lower_match(
+        &self,
+        subject: &decay_syntax::Expr,
+        arms: &[decay_syntax::MatchArm],
+        instructions: &mut Vec<Instruction>,
+        loops: &mut Loops,
+    ) {
+        instructions.push(Instruction::ScopeEnter);
+        loops.depth += 1;
+        self.lower_expr(subject, instructions);
+        instructions.push(Instruction::Declare {
+            name: MATCHED.to_owned(),
+            mutable: false,
+        });
+        let mut to_end = Vec::new();
+        for arm in arms {
+            let mut to_body = Vec::new();
+            let mut to_next_pattern = None;
+            let mut always = false;
+            for pattern in &arm.patterns {
+                if let Some(site) = to_next_pattern.take() {
+                    instructions[site] = Instruction::JumpIfFalse(instructions.len());
+                }
+                match pattern {
+                    Pattern::Wildcard(_) => {
+                        always = true;
+                        break;
+                    }
+                    Pattern::Variant {
+                        enumeration,
+                        variant,
+                        ..
+                    } => {
+                        instructions.push(Instruction::Load(Path(vec![MATCHED.to_owned()])));
+                        instructions.push(Instruction::Push(Constant::Variant(format!(
+                            "{enumeration}.{variant}"
+                        ))));
+                        instructions.push(Instruction::Binary(BinaryOp::Equal));
+                        to_next_pattern = Some(instructions.len());
+                        instructions.push(Instruction::JumpIfFalse(usize::MAX));
+                        to_body.push(instructions.len());
+                        instructions.push(Instruction::Jump(usize::MAX));
+                    }
+                }
+            }
+            let body = instructions.len();
+            for site in to_body {
+                instructions[site] = Instruction::Jump(body);
+            }
+            self.lower_scoped_block(&arm.body, instructions, loops);
+            to_end.push(instructions.len());
+            instructions.push(Instruction::Jump(usize::MAX));
+            // The last pattern that did not match goes to the next arm.
+            if let Some(site) = to_next_pattern {
+                instructions[site] = Instruction::JumpIfFalse(instructions.len());
+            }
+            if always {
+                break;
+            }
+        }
+        let end = instructions.len();
+        for site in to_end {
+            instructions[site] = Instruction::Jump(end);
+        }
+        loops.depth -= 1;
+        instructions.push(Instruction::ScopeExit);
+    }
 }
+
+/// The local a `match` holds its subject in. Not a name a script can write.
+const MATCHED: &str = "(matched)";

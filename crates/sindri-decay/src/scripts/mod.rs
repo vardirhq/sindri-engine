@@ -13,7 +13,7 @@ mod project;
 
 pub use project::Project;
 pub(crate) use project::{ON, SharedField, board_key};
-pub(crate) use run::to_value;
+pub(crate) use run::{to_value, variant_name};
 mod run;
 mod sources;
 

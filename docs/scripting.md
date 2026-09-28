@@ -1727,8 +1727,10 @@ board.
 
 ```decay
 // game.decay — any file in the project.
+enum Phase { Lobby, Countdown, Play }
+
 state Game {
-    var phase: f32 = 0.0;
+    var phase = Phase.Lobby;
     var score_blue: f32 = 0.0;
     var won: bool = false;
     let target: f32 = 5.0;
@@ -1747,8 +1749,10 @@ fallback is — Orbital Last Stand reads `hp` with five different ones.
 - **Several files may add to one state**, as long as no field is declared
   twice; a field declared twice is refused where it is declared and wherever
   it is used, since the file declaring it may be one nothing runs.
-- **A field holds an `f32` or a `bool`** and starts from a literal, because it
-  exists before any script has run to compute it from. `let` makes one no
+- **A field holds an `f32`, a `bool` or an enum** and starts from a literal
+  or a variant, because it exists before any script has run to compute it
+  from. On the board an enum is kept as the variant's position, `0` for the
+  first, so `Game.get("phase", 0.0)` still reads a number. `let` makes one no
   script may change: a tuning value every script agrees on.
 - **`Game` fields live on the board, under their own names.** `Game.score`
   and `Game.get("score", 0.0)` read the same number, and a `true` is `1.0`, so
@@ -1761,6 +1765,41 @@ fallback is — Orbital Last Stand reads `hp` with five different ones.
 
 Like the board, state is runtime state and goes when a run does. Scorchball's
 and the platformer's shared values are declared this way.
+
+### Enums and `match`
+
+```decay
+// game.decay — any file in the project.
+enum Power { Grow, Boost, Wind, Fire }
+
+// powerup.decay
+script PowerUp {
+    @export let kind = Power.Grow;
+
+    fn give(player: Player) {
+        match this.kind {
+            Power.Grow | Power.Boost => { player.power_up(this.kind); }
+            Power.Wind => { WindPicked.emit(1.0); }
+            Power.Fire => { FirePicked.emit(player.team); }
+        }
+    }
+}
+```
+
+An `enum` names a fixed set of values, and every script in the project sees
+it, as it sees the others' types, events and state. A variant is written with
+its enum's name — `Power.Grow` — and is not a number: it is compared with
+`==` and `!=` and nothing else. `match` runs the arm its value names and must
+say what happens for every variant or end with `_`, so a variant added later
+is a compile error at every `match` that has not caught up.
+
+An enum `@export` is authored **by the variant's name**: the scene stores
+`"kind": "Grow"`, the inspector offers the variants as a dropdown, and a name
+the enum does not have is refused with the ones it does. A `state` field may
+hold one too. `print` shows a variant by its full name, `Power.Grow`.
+
+Scorchball's match phase and its four power-ups are enums, where they were
+`0`/`1`/`2` and `1`–`4` with a comment to decode them.
 
 ### Saying something
 

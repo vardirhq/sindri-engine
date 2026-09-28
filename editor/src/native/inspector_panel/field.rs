@@ -227,6 +227,34 @@ pub(crate) fn choice_row(
         .flatten()
 }
 
+/// One of a list of names known only when the editor runs: an enum field's
+/// variants, which the script declares. Shown as the script wrote them, since
+/// they are names in the author's own code rather than labels to prettify.
+pub(crate) fn named_choice_row(
+    ui: &mut egui::Ui,
+    at: &str,
+    key: &str,
+    current: &str,
+    options: &[String],
+) -> Option<String> {
+    let mut chosen = current.to_owned();
+    property::Property::new(&inspector::humanize(key)).show(ui, |ui| {
+        egui::ComboBox::from_id_salt(("named-choice", at))
+            .selected_text(
+                RichText::new(chosen.as_str())
+                    .size(text::LABEL)
+                    .color(color::TEXT_MUTED),
+            )
+            .width(property::picker_width(ui))
+            .show_ui(ui, |ui| {
+                for option in options {
+                    ui.selectable_value(&mut chosen, option.clone(), option.as_str());
+                }
+            });
+    });
+    (chosen != current).then_some(chosen)
+}
+
 /// A reference to something in the project, picked from what is there.
 ///
 /// The field stays typeable, because a reference the project cannot currently

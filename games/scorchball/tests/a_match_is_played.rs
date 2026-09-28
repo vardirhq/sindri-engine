@@ -232,17 +232,21 @@ fn power_ups_appear_during_play() {
     panic!("no power-up appeared within the longest wait");
 }
 
-/// The kind a sign was made with, as the match authored it.
+/// The kind a sign was made with, as the match authored it: its `Power`
+/// variant, numbered in the order the enum declares them, from 1.
 fn kind_of(run: &Run, sign: EntityId) -> u32 {
-    run.world
+    let authored = run
+        .world
         .get(sign)
         .and_then(|data| data.components.get("sindri.script"))
-        .and_then(|script| script["properties"]["kind"].as_f64())
-        .map_or(0, |kind| {
-            #[allow(clippy::cast_possible_truncation, clippy::cast_sign_loss)]
-            let kind = kind as u32;
-            kind
-        })
+        .and_then(|script| script["properties"]["kind"].as_str().map(str::to_owned));
+    match authored.as_deref() {
+        Some("Grow") => 1,
+        Some("Boost") => 2,
+        Some("Wind") => 3,
+        Some("Fire") => 4,
+        _ => 0,
+    }
 }
 
 /// Blue walks into sign after sign until it has had every power, and each

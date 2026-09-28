@@ -26,41 +26,55 @@ impl Analyzer<'_, '_> {
         }
     }
 
+    /// `let name: T = value;` and `var`: the value checked against the written
+    /// type, and the name bound to whichever of the two says more.
+    fn analyze_binding(
+        &mut self,
+        mutable: bool,
+        name: &str,
+        ty: Option<&decay_syntax::TypeRef>,
+        initializer: Option<&decay_syntax::Expr>,
+        span: decay_syntax::Span,
+    ) {
+        let initializer_type = initializer.map_or(Type::Unknown, |expr| self.expr_type(expr));
+        let declared_type = ty.map(|ty| self.resolve_type(ty));
+
+        if declared_type.is_none() && initializer.is_none() {
+            self.error(
+                span,
+                format!("binding `{name}` needs a type or initializer"),
+            );
+        }
+
+        if let Some(expected) = &declared_type {
+            self.check_assignable(expected, &initializer_type, span);
+        }
+
+        self.define_local(
+            name,
+            Symbol {
+                ty: declared_type.unwrap_or(initializer_type),
+                mutable,
+                function: None,
+            },
+            span,
+        );
+    }
+
     pub(super) fn analyze_stmt(&mut self, statement: &Stmt) {
         match statement {
+            Stmt::Match {
+                subject,
+                arms,
+                span,
+            } => self.analyze_match(subject, arms, *span),
             Stmt::Binding {
                 mutable,
                 name,
                 ty,
                 initializer,
                 span,
-            } => {
-                let initializer_type = initializer
-                    .as_ref()
-                    .map_or(Type::Unknown, |expr| self.expr_type(expr));
-                let declared_type = ty.as_ref().map(|ty| self.resolve_type(ty));
-
-                if declared_type.is_none() && initializer.is_none() {
-                    self.error(
-                        *span,
-                        format!("binding `{name}` needs a type or initializer"),
-                    );
-                }
-
-                if let Some(expected) = &declared_type {
-                    self.check_assignable(expected, &initializer_type, *span);
-                }
-
-                self.define_local(
-                    name,
-                    Symbol {
-                        ty: declared_type.unwrap_or(initializer_type),
-                        mutable: *mutable,
-                        function: None,
-                    },
-                    *span,
-                );
-            }
+            } => self.analyze_binding(*mutable, name, ty.as_ref(), initializer.as_ref(), *span),
             Stmt::Expr { expr, .. } => {
                 self.expr_type(expr);
             }

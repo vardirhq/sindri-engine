@@ -25,6 +25,13 @@ pub const VEC3: &str = "Vec3";
 /// The member an event offers: `GoalScored.emit(1.0)`.
 pub const EMIT: &str = "emit";
 
+/// The type an enum's name has in an expression — `Phase` in `Phase.Lobby` —
+/// as a diagnostic names it. Its values are of type `Named(name)`.
+#[must_use]
+pub fn enum_type(name: &str) -> String {
+    format!("enum {name}")
+}
+
 /// The type an event's name has in an expression, as a diagnostic names it.
 /// Not a name a script can write, so it can never be confused with one.
 #[must_use]

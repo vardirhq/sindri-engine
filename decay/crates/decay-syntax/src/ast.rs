@@ -15,10 +15,21 @@ pub enum Item {
     /// `state Game { var score: f32 = 0.0; }`: values every script shares,
     /// reached as `Game.score`.
     State(StateDecl),
+    /// `enum Phase { Lobby, Countdown, Play }`: a type whose values are the
+    /// variants it names, and nothing else.
+    Enum(EnumDecl),
     /// `fn half(size: f32) -> f32 { ... }` outside any container: a function
     /// the file's scripts call by name, with no `this`. Written `shared fn`,
     /// every script in the project may call it.
     Function(FunctionDecl),
+}
+
+/// A declared enum: its name, and its variants in order.
+#[derive(Debug, Clone, PartialEq)]
+pub struct EnumDecl {
+    pub name: String,
+    pub variants: Vec<(String, Span)>,
+    pub span: Span,
 }
 
 /// Shared, typed values under one name. Several declarations may add to the
@@ -176,7 +187,44 @@ pub enum Stmt {
     Continue {
         span: Span,
     },
+    /// `match subject { Phase.Lobby => { ... } _ => { ... } }`: the first arm
+    /// whose pattern the subject is runs.
+    Match {
+        subject: Expr,
+        arms: Vec<MatchArm>,
+        span: Span,
+    },
     Block(Block),
+}
+
+/// One arm of a `match`: the patterns it accepts, and what it runs.
+#[derive(Debug, Clone, PartialEq)]
+pub struct MatchArm {
+    pub patterns: Vec<Pattern>,
+    pub body: Block,
+    pub span: Span,
+}
+
+/// What a `match` arm accepts.
+#[derive(Debug, Clone, PartialEq)]
+pub enum Pattern {
+    /// `Phase.Lobby`: one variant, always written with its enum's name.
+    Variant {
+        enumeration: String,
+        variant: String,
+        span: Span,
+    },
+    /// `_`: anything the arms above did not take.
+    Wildcard(Span),
+}
+
+impl Pattern {
+    #[must_use]
+    pub const fn span(&self) -> Span {
+        match self {
+            Self::Variant { span, .. } | Self::Wildcard(span) => *span,
+        }
+    }
 }
 
 impl Stmt {
@@ -190,6 +238,7 @@ impl Stmt {
             | Self::If { span, .. }
             | Self::While { span, .. }
             | Self::For { span, .. }
+            | Self::Match { span, .. }
             | Self::Break { span }
             | Self::Continue { span } => *span,
             Self::Block(block) => block.span,

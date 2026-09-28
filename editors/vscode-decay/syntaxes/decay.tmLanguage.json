@@ -17,6 +17,7 @@
     "items": { "patterns": [
       { "match": "\\b(script|component)\\s+([A-Za-z_][A-Za-z0-9_]*)", "captures": { "1": { "name": "storage.type.decay" }, "2": { "name": "entity.name.type.decay" } } },
       { "match": "\\b(event)\\s+([A-Za-z_][A-Za-z0-9_]*)", "captures": { "1": { "name": "storage.type.event.decay" }, "2": { "name": "entity.name.type.event.decay" } } },
+      { "match": "\\b(enum)\\s+([A-Za-z_][A-Za-z0-9_]*)", "captures": { "1": { "name": "storage.type.enum.decay" }, "2": { "name": "entity.name.type.enum.decay" } } },
       { "match": "\\b(state)\\s+([A-Za-z_][A-Za-z0-9_]*)", "captures": { "1": { "name": "storage.type.state.decay" }, "2": { "name": "entity.name.type.state.decay" } } }
     ] },
     "members": { "patterns": [
@@ -25,7 +26,7 @@
       { "match": "\\b(on)\\s+([A-Za-z_][A-Za-z0-9_]*)", "captures": { "1": { "name": "storage.type.event.decay" }, "2": { "name": "entity.name.function.event.decay" } } }
     ] },
     "keywords": { "patterns": [
-      { "name": "keyword.control.decay", "match": "\\b(?:if|else|while|for|in|break|continue|return)\\b" },
+      { "name": "keyword.control.decay", "match": "\\b(?:if|else|while|for|in|break|continue|return|match)\\b" },
       { "name": "storage.type.decay", "match": "\\b(?:let|var)\\b" },
       { "name": "variable.language.this.decay", "match": "\\bthis\\b" }
     ] },
@@ -33,6 +34,6 @@
     "literals": { "patterns": [{ "name": "constant.language.decay", "match": "\\b(?:true|false|null)\\b" }, { "name": "constant.numeric.decay", "match": "\\b[0-9]+(?:\\.[0-9]+)?\\b" }] },
     "calls": { "patterns": [{ "name": "entity.name.function.call.decay", "match": "\\b[A-Za-z_][A-Za-z0-9_]*(?=\\s*\\()" }] },
     "member-access": { "patterns": [{ "name": "variable.other.member.decay", "match": "(?<=\\.)[A-Za-z_][A-Za-z0-9_]*\\b" }] },
-    "operators": { "patterns": [{ "name": "keyword.operator.decay", "match": "->|\\+=|-=|\\*=|/=|%=|==|!=|<=|>=|&&|\\|\\||[+*/%!=<>.@-]" }] }
+    "operators": { "patterns": [{ "name": "keyword.operator.decay", "match": "=>|->|\\+=|-=|\\*=|/=|%=|==|!=|<=|>=|&&|\\|\\||[+*/%!=<>.@-]" }] }
   }
 }

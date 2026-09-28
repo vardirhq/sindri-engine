@@ -46,6 +46,10 @@ pub enum ValueMember {
     StartTimer,
     /// A timer's property: `t.done`, `t.left`.
     Timer(decay_syntax::TimerProperty),
+    /// An enum's variant, `Phase.Lobby`: a value the language knows, pushed
+    /// as a constant rather than asked of the host. The names are the
+    /// expression's own.
+    Variant,
 }
 
 /// Which member read, call or construction the language performs itself, by
@@ -61,6 +65,10 @@ pub struct Analysis {
     /// Keyed by the member expression's span, which is unique per expression
     /// and is what the lowering walk has in hand when it reaches one.
     pub value_members: ValueMembers,
+    /// Every enum the program could name, with its variants in order: its
+    /// own and the host's. What a host needs to author one of its fields by a
+    /// variant's name, without reading the project again.
+    pub enums: std::collections::BTreeMap<String, Vec<String>>,
 }
 
 /// Decay has no methods, and the mistake of reaching for one is worth naming

@@ -30,6 +30,7 @@ to change. Nothing here is a compatibility promise.
 - [Events](#events)
 - [State](#state)
 - [Shared functions](#shared-functions)
+- [Enums](#enums)
 - [Statements](#statements)
 - [Expressions](#expressions)
 - [Scope](#scope)
@@ -109,13 +110,13 @@ identifiers, and no raw identifiers.
 
 ```text
 script  component  fn  let  var  if  else  while  for  in  break
-continue  return  true  false  null
+continue  return  true  false  null  match
 ```
 
-All sixteen are reserved. Four words are special only where no other name
-could stand: `event` and `state` at the start of an item, `shared` right before
+All seventeen are reserved. Five words are special only where no other name
+could stand: `event`, `state` and `enum` at the start of an item, `shared` right before
 `fn`, and `on` followed by a name at the start of a member (see
-[Events](#events), [State](#state) and [Shared functions](#shared-functions)). Elsewhere both are ordinary
+[Events](#events), [State](#state) and [Shared functions](#shared-functions)). Elsewhere they are ordinary
 identifiers, so `Bolt.on(hit)` and a local called `event` are unaffected.
 
 ### Number literals
@@ -147,6 +148,7 @@ multi-line strings, no interpolation, and no single-quoted characters.
 ==  !=  <   <=  >   >=
 &&  ||  !
 ->  @   .   ,   ;   :
+=>  |
 (   )   {   }   [   ]
 ```
 
@@ -162,6 +164,7 @@ program      = { item } ;
 item         = ( "script" | "component" ) IDENT "{" { member } "}"
              | "event" IDENT "(" [ params ] ")" ";"
              | "state" IDENT "{" { field } "}"
+             | "enum" IDENT "{" [ IDENT { "," IDENT } [ "," ] ] "}"
              | [ "shared" ] function ;
 member       = { attribute } ( field | function | handler ) ;
 attribute    = "@" IDENT ;
@@ -174,13 +177,16 @@ param        = IDENT [ ":" type ] ;
 type         = IDENT [ "<" type ">" ] ;
 
 block        = "{" { stmt } "}" ;
-stmt         = binding | return | if | while | for | break | continue
-             | block | expr ";" ;
+stmt         = binding | return | if | while | for | match | break
+             | continue | block | expr ";" ;
 binding      = ( "let" | "var" ) IDENT [ ":" type ] [ "=" expr ] ";" ;
 return       = "return" [ expr ] ";" ;
 if           = "if" expr block [ "else" ( block | if ) ] ;
 while        = "while" expr block ;
 for          = "for" IDENT "in" expr block ;
+match        = "match" expr "{" { arm } "}" ;
+arm          = pattern { "|" pattern } "=>" block ;
+pattern      = IDENT "." IDENT | "_" ;
 break        = "break" ";" ;
 continue     = "continue" ";" ;
 
@@ -614,9 +620,10 @@ script Body {
 }
 ```
 
-- **Fields only.** Each holds an `f32` or a `bool`, and its initializer is a
-  literal — a number, a negated number, `true` or `false` — since it is set up
-  before any script runs. A written type must match the literal.
+- **Fields only.** Each holds an `f32`, a `bool` or an enum, and its
+  initializer is a literal — a number, a negated number, `true`, `false` or a
+  variant such as `Phase.Lobby` — since it is set up before any script runs. A
+  written type must match the literal.
 - **`let` is fixed**: assigning to one is a diagnostic. `var` may be written
   from anywhere.
 - **Declared once per field.** Several declarations may add fields to the same
@@ -634,6 +641,55 @@ state to a file through the environment, as it does events.
 
 ---
 
+## Enums
+
+An `enum` names a fixed set of values, so a script says what it means where it
+would otherwise hold a number and a comment:
+
+```rust
+enum Phase { Lobby, Countdown, Play }
+
+script Match {
+    var phase = Phase.Lobby;
+    fn update(dt: f32) {
+        match this.phase {
+            Phase.Lobby => { if ready() { this.phase = Phase.Countdown; } }
+            Phase.Countdown | Phase.Play => { run(); }
+        }
+    }
+}
+```
+
+- **A variant is always written with its enum's name**: `Phase.Lobby`, never
+  `Lobby`. The enum's name is a type, so `let p: Phase = Phase.Play;` and
+  `fn go(p: Phase)` work, and an unannotated field takes its type from a
+  variant initializer.
+- **Only `==` and `!=`.** A variant is no number: it takes part in no
+  arithmetic and no ordering, and comparing variants of two different enums is
+  a diagnostic.
+- **Declared once.** A variant declared twice, an enum with no variants, and
+  an enum that takes a name something else already has are diagnostics.
+  Calling an enum like a function is a diagnostic that names a variant to
+  write instead.
+- A host may describe enums to a file through the environment, as it does
+  events and state; Sindri describes every enum in the project to every file.
+
+### `match`
+
+`match` takes a value of an enum and runs the one arm its value names. Each arm
+lists one or more variants separated by `|`, then `=>` and a block. It is a
+statement, not an expression: it produces no value.
+
+- **Exhaustive.** A `match` that says nothing for some variant is a
+  diagnostic, unless it ends with a `_` arm, which takes everything not named
+  above it.
+- A variant matched twice, a variant of another enum, and an arm after `_` are
+  diagnostics.
+- A `match` on anything but an enum is a diagnostic; compare numbers with
+  `if`.
+
+---
+
 ## Statements
 
 ```rust
@@ -644,6 +700,7 @@ return y;              // return
 return;                // return unit
 if y > 0.0 { } else if y < 0.0 { } else { }
 while y > 0.0 { y -= 1.0; }
+match phase { Phase.Play => { } _ => { } }
 { }                    // bare block, its own scope
 ```
 
@@ -839,11 +896,12 @@ Things that are true and that most readers — human or model — will guess wro
 Do not write these. They are not unimplemented corners; they are absent from the
 grammar, and every one of them is a parse error or a diagnostic.
 
-**Control flow:** `loop`, `match`, ternaries, labelled blocks, `break` or
+**Control flow:** `loop`, `match` as an expression or on anything but an enum, ternaries, labelled blocks, `break` or
 `continue` with a label or a value. `for … in` exists and walks a collection;
 there is nothing else to walk and no range to walk over.
 
-**Data:** array literals, lists, maps, dictionaries, tuples, structs, enums,
+**Data:** array literals, lists, maps, dictionaries, tuples, structs, enums
+with data (`Some(x)`),
 ranges (`0..3`), `Option`, `Result`, `?`. `Array<T>` exists and is indexable,
 but only the host makes one; see "Collections".
 
@@ -853,7 +911,7 @@ traits.
 
 **Types:** integers, `f64`, unsigned types, characters, type aliases, casts,
 inference beyond a binding's own initializer, nullable types, user-defined types
-beyond `script` and `component`.
+beyond `script`, `component` and `enum`.
 
 **Modules:** `import`, `use`, `mod`, `pub`, visibility of any kind, multiple
 files. One file is one compilation unit and cannot refer to another by itself;

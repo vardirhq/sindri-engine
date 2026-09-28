@@ -62,6 +62,8 @@ impl<'a> Parser<'a> {
                 self.parse_event()
             } else if self.at_word(item::STATE) {
                 self.parse_state()
+            } else if self.at_word(item::ENUM) {
+                self.parse_enum()
             } else if self.at(&TokenKind::Fn) {
                 self.parse_function().map(Item::Function)
             } else if self.at_shared_fn() {
@@ -73,7 +75,9 @@ impl<'a> Parser<'a> {
                     })
                 })
             } else {
-                self.error_here("expected `script`, `component`, `event`, `state`, or `fn`");
+                self.error_here(
+                    "expected `script`, `component`, `enum`, `event`, `state`, or `fn`",
+                );
                 self.advance();
                 None
             };

@@ -31,6 +31,9 @@ pub(crate) fn describe(value: &Value) -> String {
         Value::Vec2(_) => "a Vec2",
         Value::Vec3(_) => "a Vec3",
         Value::Timer { .. } => "a Timer",
+        Value::Variant(name) => {
+            return format!("a {}", name.split('.').next().unwrap_or("variant"));
+        }
         Value::Null => "null",
         Value::Unit => "nothing",
     }

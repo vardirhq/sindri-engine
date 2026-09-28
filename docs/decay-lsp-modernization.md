@@ -71,6 +71,9 @@ These are defects or sources of actively misleading tooling.
   - [x] Offer the project's shared functions (`shared fn` in any file) as
         completions with their signatures, and list a file's own as document
         symbols.
+  - [x] Offer the project's enums as completions, complete `Enum.` with its
+        variants, show them on hover, and list a file's enums and their
+        variants as document symbols.
   - [ ] Keep project-index results deterministic.
 - [ ] Fix completion insertion for functions.
   - [x] Generate zero placeholders for zero-argument functions.

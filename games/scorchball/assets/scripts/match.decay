@@ -2,8 +2,8 @@
 // it kicks off. It keeps the score, throws power-ups onto the pitch, and
 // holds the wind.
 //
-// The phase is on the board for everyone: 0 is the lobby, 1 the countdown,
-// 2 play. The title screen chooses local or bot play without owning gameplay.
+// The phase is on the board for everyone, as `Game.phase`. The title screen
+// chooses local or bot play without owning gameplay.
 script Match {
     @export let player: Prefab;
     @export let powerup: Prefab;
@@ -16,7 +16,7 @@ script Match {
     @export let sprint_fx_time: f32 = 0.12;
     @export let goal_fx_time: f32 = 0.1;
 
-    var phase: f32 = 0.0;
+    var phase = Phase.Lobby;
     var countdown: f32 = 0.0;
     var kickoff_banner = Timer(0.0);
     var goal_banner = Timer(0.0);
@@ -39,7 +39,7 @@ script Match {
         this.count_text = World.find("Countdown");
         this.kickoff_text = World.find("Kickoff");
         this.goal_text = World.find("Goal");
-        Game.phase = 0.0;
+        Game.phase = Phase.Lobby;
         Game.score_blue = 0.0;
         Game.score_red = 0.0;
         Game.wind = 0.0;
@@ -58,30 +58,30 @@ script Match {
             if player != null && player.ready { ready += 1.0; }
         }
         players();
-        if this.phase == 0.0 && ready >= 2.0 {
-            this.phase = 1.0;
-            this.countdown = this.countdown_time;
-        } else if this.phase == 1.0 && ready < 2.0 {
-            // Someone unreadied or left: back to waiting.
-            this.phase = 0.0;
-        }
-        if this.phase == 1.0 {
-            this.countdown -= dt;
-            Ui.set_number(this.count_text, this.countdown - this.countdown % 1.0 + 1.0);
-            if this.countdown <= 0.0 {
-                this.phase = 2.0;
-                this.kickoff_banner = Timer(2.0);
-                Audio.play("audio/hit.wav", 1.0);
+        match this.phase {
+            Phase.Lobby => {
+                if ready >= 2.0 {
+                    this.phase = Phase.Countdown;
+                    this.countdown = this.countdown_time;
+                }
+            }
+            Phase.Countdown => {
+                if ready < 2.0 {
+                    // Someone unreadied or left: back to waiting.
+                    this.phase = Phase.Lobby;
+                } else {
+                    count_down(dt);
+                }
+            }
+            Phase.Play => {
+                powerups(dt);
+                wind(dt);
+                match_fx(dt);
             }
         }
         Game.phase = this.phase;
-        if this.phase == 2.0 {
-            powerups(dt);
-            wind(dt);
-            match_fx(dt);
-        }
-        World.set_active(this.hint, this.phase == 0.0);
-        World.set_active(this.count_text, this.phase == 1.0);
+        World.set_active(this.hint, this.phase == Phase.Lobby);
+        World.set_active(this.count_text, this.phase == Phase.Countdown);
         World.set_active(this.kickoff_text, !this.kickoff_banner.done);
         World.set_active(this.goal_text, !this.goal_banner.done);
         digit(this.blue_digit, Game.score_blue);
@@ -107,7 +107,7 @@ script Match {
                 Game.versus_bot = false;
             }
         }
-        if this.phase == 0.0 && Gamepad.just_pressed(0.0, "select") {
+        if this.phase == Phase.Lobby && Gamepad.just_pressed(0.0, "select") {
             var blue: f32 = 0.0;
             var red: f32 = 0.0;
             var bot_blue: bool = false;
@@ -154,7 +154,7 @@ script Match {
     }
 
     on GoalScored(team) {
-        if this.phase != 2.0 { return; }
+        if this.phase != Phase.Play { return; }
         if team == 1.0 {
             Game.score_blue += 1.0;
         } else {
@@ -197,6 +197,17 @@ script Match {
 
     // Every few seconds a signpost drops somewhere on the pitch with one of
     // the four powers in it.
+    // Three, two, one: shown as it runs, and kickoff when it runs out.
+    fn count_down(dt: f32) {
+        this.countdown -= dt;
+        Ui.set_number(this.count_text, this.countdown - this.countdown % 1.0 + 1.0);
+        if this.countdown <= 0.0 {
+            this.phase = Phase.Play;
+            this.kickoff_banner = Timer(2.0);
+            Audio.play("audio/hit.wav", 1.0);
+        }
+    }
+
     fn powerups(dt: f32) {
         this.next_power -= dt;
         if this.next_power > 0.0 {
@@ -204,7 +215,12 @@ script Match {
         }
         this.next_power = Random.range(this.power_min, this.power_max);
         let made = World.spawn(this.powerup);
-        World.set_property(made, "kind", Random.int(1.0, 4.0));
+        let roll = Random.int(1.0, 4.0);
+        var power = Power.Grow;
+        if roll == 2.0 { power = Power.Boost; }
+        if roll == 3.0 { power = Power.Wind; }
+        if roll == 4.0 { power = Power.Fire; }
+        PowerUp.on(made).kind = power;
         made.transform.position.x = Random.range(-12.0, 12.0);
         made.transform.position.y = Random.range(-5.0, 4.5);
     }

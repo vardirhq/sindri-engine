@@ -1698,6 +1698,12 @@ fn`, it belongs to the project, and every script calls it by name, checked
 across files, linking its own copy when it compiles. Exercised in `crates/sindri-decay/tests/scripts_share_functions.rs`
 and by both Orbital games, whose view helpers live in one `view.decay` each.
 
+An `enum` in any file is a type every script holds, compares and passes, and
+`match` must cover every variant or end with `_`. An enum can be a `state`
+field and an `@export` authored by variant name, which the inspector offers as
+a dropdown. Exercised in `crates/sindri-decay/tests/scripts_use_enums.rs` and
+by Scorchball's match phase and power-up kinds.
+
 **A script can speak in the tilemap's coordinates.** `Grid.position_x` and
 `Grid.position_y` invert a tilemap's projection and full world-XY transform;
 `Grid.place` projects a continuous logical position back while preserving the

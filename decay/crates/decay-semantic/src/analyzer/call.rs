@@ -83,6 +83,17 @@ impl Analyzer<'_, '_> {
                 return function.return_type;
             }
 
+            if let Some(variants) = self.enums.get(name) {
+                let first = variants.first().map_or("Variant", String::as_str);
+                let message =
+                    format!("`{name}` is an enum: name a variant, as in `{name}.{first}`");
+                self.error(callee.span, message);
+                for arg in args {
+                    self.expr_type(arg);
+                }
+                return Type::Unknown;
+            }
+
             if self.events.contains_key(name) {
                 self.error(
                     callee.span,

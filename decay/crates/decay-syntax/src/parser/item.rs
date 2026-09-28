@@ -18,6 +18,7 @@ use crate::{
 pub(super) const EVENT: &str = "event";
 pub(super) const STATE: &str = "state";
 pub(super) const SHARED: &str = "shared";
+pub(super) const ENUM: &str = "enum";
 pub(super) const ON: &str = "on";
 
 use super::Parser;
@@ -187,6 +188,29 @@ impl Parser<'_> {
         Some(Item::Event(EventDecl {
             name,
             params,
+            span: start.join(end),
+        }))
+    }
+
+    /// `enum Phase { Lobby, Countdown, Play }`: names, comma-separated, and a
+    /// trailing comma if you like.
+    pub(super) fn parse_enum(&mut self) -> Option<Item> {
+        let start = self.current().span;
+        self.advance();
+        let (name, _) = self.expect_identifier("expected a name after `enum`")?;
+        self.expect_simple(&TokenKind::LeftBrace, "expected `{` after the enum's name")?;
+        let mut variants = Vec::new();
+        while !self.at(&TokenKind::RightBrace) && !self.at(&TokenKind::Eof) {
+            let (variant, span) = self.expect_identifier("expected a variant name")?;
+            variants.push((variant, span));
+            if self.consume_simple(&TokenKind::Comma).is_none() {
+                break;
+            }
+        }
+        let end = self.expect_simple(&TokenKind::RightBrace, "expected `}` after the variants")?;
+        Some(Item::Enum(crate::ast::EnumDecl {
+            name,
+            variants,
             span: start.join(end),
         }))
     }
