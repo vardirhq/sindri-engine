@@ -71,6 +71,9 @@ These are defects or sources of actively misleading tooling.
   - [x] Offer the project's shared functions (`shared fn` in any file) as
         completions with their signatures, and list a file's own as document
         symbols.
+  - [ ] Complete a value's own members — a vector's `x`/`dot`, a timer's
+        `done`, text's `length`/`contains` — which needs a local's type,
+        not only a host type's.
   - [x] Offer the project's enums as completions, complete `Enum.` with its
         variants, show them on hover, and list a file's enums and their
         variants as document symbols.

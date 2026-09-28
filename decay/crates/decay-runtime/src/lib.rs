@@ -11,6 +11,7 @@ mod error;
 mod host;
 mod instance;
 mod runtime;
+mod text;
 mod value;
 mod vector;
 
@@ -22,4 +23,5 @@ pub use error::RuntimeError;
 pub use host::{EmptyHost, Host};
 pub use instance::ScriptInstance;
 pub use runtime::{DEFAULT_CALL_DEPTH_LIMIT, Runtime};
+pub use text::{TEXT_LIMIT, spell_number};
 pub use value::Value;

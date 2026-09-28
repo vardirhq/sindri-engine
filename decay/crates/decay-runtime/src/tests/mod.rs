@@ -10,5 +10,6 @@ mod scope;
 mod shared;
 mod subjects;
 mod support;
+mod text;
 mod timers;
 mod vectors;

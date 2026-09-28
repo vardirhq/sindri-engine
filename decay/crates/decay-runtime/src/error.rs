@@ -31,6 +31,14 @@ pub enum RuntimeError {
     /// Something that is not a timer was read as one, or a timer was started
     /// from something that is not a number of seconds, named by what it was.
     NotATimer(String),
+    /// Something that is not text was asked a text question, or joined to
+    /// text when it has no spelling, named by what it was.
+    NotText(String),
+    /// Joining or replacing would make text longer than
+    /// [`crate::TEXT_LIMIT`] bytes.
+    TextTooLong {
+        limit: usize,
+    },
     /// An index that is not a number at all.
     IndexNotANumber(String),
     /// An index that is a number and not a position: fractional, negative, or

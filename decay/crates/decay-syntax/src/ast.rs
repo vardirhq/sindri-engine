@@ -332,6 +332,59 @@ impl VectorOp {
     }
 }
 
+/// What a piece of text can be asked. Like a vector's, one that takes no
+/// arguments is a property: `s.length`, `s.uppercase`.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub enum StringOp {
+    /// `s.length`: how many characters it has.
+    Length,
+    /// `s.uppercase`: the same text in capitals.
+    Uppercase,
+    /// `s.lowercase`: the same text in small letters.
+    Lowercase,
+    /// `s.trimmed`: without the spaces at either end.
+    Trimmed,
+    /// `s.contains(part)`.
+    Contains,
+    /// `s.starts_with(part)`.
+    StartsWith,
+    /// `s.ends_with(part)`.
+    EndsWith,
+    /// `s.find(part)`: where `part` first starts, in characters, or `-1`.
+    Find,
+    /// `s.slice(start, end)`: the characters from `start` up to, not
+    /// including, `end`.
+    Slice,
+    /// `s.replace(old, new)`: every `old` replaced with `new`.
+    Replace,
+}
+
+impl StringOp {
+    /// Every operation, with the name a script spells it by and how many
+    /// arguments it takes after the text itself. A property takes none.
+    pub const ALL: [(Self, &'static str, usize); 10] = [
+        (Self::Length, "length", 0),
+        (Self::Uppercase, "uppercase", 0),
+        (Self::Lowercase, "lowercase", 0),
+        (Self::Trimmed, "trimmed", 0),
+        (Self::Contains, "contains", 1),
+        (Self::StartsWith, "starts_with", 1),
+        (Self::EndsWith, "ends_with", 1),
+        (Self::Find, "find", 1),
+        (Self::Slice, "slice", 2),
+        (Self::Replace, "replace", 2),
+    ];
+
+    /// The operation a member name spells, and how many arguments it takes.
+    #[must_use]
+    pub fn named(name: &str) -> Option<(Self, usize)> {
+        Self::ALL
+            .into_iter()
+            .find(|(_, spelled, _)| *spelled == name)
+            .map(|(op, _, arity)| (op, arity))
+    }
+}
+
 /// What a timer can be asked. All are properties: a timer is read, and
 /// replaced with a new one to start it again.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]

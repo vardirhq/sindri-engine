@@ -113,10 +113,8 @@ These are real constraints, discovered the hard way:
 - **A Decay script cannot call another script.** Scripts communicate through
   the blackboard (`Game.set` / `Game.get`) or by an entity acting on itself.
   This is why a module applies its own effect.
-- **Decay has no string concatenation.** `+` does not join text. That is why
-  `stats.decay` writes out `"damage_add"` and `"damage_mul"` in full rather
-  than building them from `"damage"`. Do not add concatenation to the language
-  to save typing here.
+- **`+` joins text**, so `stats.decay` clears a stat's two keys from its one
+  name: `clear("damage")` sets `damage_add` and `damage_mul`.
 - **`@export let x: String` works**, and `Game.set` accepts a variable key. That
   combination is what makes a data-driven module possible at all.
 - **`World.with_tag` answers with active entities only.** A hidden card is not

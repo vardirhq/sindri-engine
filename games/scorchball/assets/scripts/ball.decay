@@ -224,13 +224,10 @@ script Ball {
     // The ring under the ball says whose it is.
     fn mark() {
         let slot = Game.holder;
-        var clip: String = "none";
-        if slot == 1.0 { clip = "p1"; }
-        if slot == 2.0 { clip = "p2"; }
-        if slot == 3.0 { clip = "p3"; }
-        if slot == 4.0 { clip = "p4"; }
-        if slot == 11.0 { clip = "p1"; }
-        if slot == 12.0 { clip = "p2"; }
+        // Pads 1-4 wear their own colour; bots 11 and 12 borrow pads 1 and 2's.
+        var clip = "none";
+        if slot >= 1.0 && slot <= 4.0 { clip = "p" + slot; }
+        if slot > 10.0 { clip = "p" + (slot - 10.0); }
         let zone = this.zone;
         if zone == null {
             return;

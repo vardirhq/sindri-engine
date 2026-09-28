@@ -24,6 +24,7 @@ to change. Nothing here is a compatibility promise.
 - [Grammar](#grammar)
 - [Types](#types)
 - [Vectors](#vectors)
+- [Text](#text)
 - [Containers](#containers)
 - [Fields](#fields)
 - [Functions](#functions)
@@ -220,7 +221,7 @@ handler is a diagnostic.
 | --- | --- |
 | `f32` | The only numeric type |
 | `bool` | `true` or `false` |
-| `String` or `string` | Text |
+| `String` or `string` | Text; see [Text](#text) |
 | `unit` or `void` | No value; the default return type |
 | `Vec2`, `Vec3` | Two or three numbers that travel together; see [Vectors](#vectors) |
 | `Array<T>` | Several `T`, in a fixed order |
@@ -385,6 +386,51 @@ is still the one path the host answers, exactly as before vectors existed.
 only calls the language answers itself rather than the host.
 
 ---
+
+### Text
+
+Text is joined with `+`, and asked questions with a dot:
+
+```rust
+let label = "Score " + score + " / " + target;   // "Score 3 / 5"
+if name.starts_with("enemy_") { }
+Game.set(stat + "_add", 0.0);
+```
+
+**`+` joins** when either side is text, and the other side may be anything
+with one obvious spelling: text, a number, a `bool`, a vector or an enum's
+variant. A whole number is written without a decimal point (`3`, not `3.0`);
+any other as briefly as reads back as the same number (`0.1`, `2.5`). A
+vector is `(1.5, -2)`. A variant is its own name, `Lobby`, without its
+enum's. A reference, a timer, a collection or `null` has no spelling, and
+joining one is a diagnostic. Nothing but `+` works on text: `-`, `*`, `/`,
+`%` and the orderings `<` `>` are diagnostics, and `+=` joins onto a text
+variable.
+
+Positions and lengths count characters, not bytes. Its properties and methods
+are all there is:
+
+| Written | Gives |
+| --- | --- |
+| `s.length` | `f32`, how many characters |
+| `s.uppercase`, `s.lowercase` | `String` |
+| `s.trimmed` | `String`, without spaces at either end |
+| `s.contains(part)`, `s.starts_with(part)`, `s.ends_with(part)` | `bool` |
+| `s.find(part)` | `f32`, where `part` first starts, or `-1` |
+| `s.slice(start, end)` | `String`, characters `start` up to, not including, `end` |
+| `s.replace(old, new)` | `String`, every `old` replaced |
+
+Like a vector's, one that takes no arguments is a property: `s.length()` is a
+diagnostic. A `slice` position is a whole number like an index — a fraction is
+refused when it runs — but one outside the text is held to it, so
+`s.slice(0, 3)` of a two-character `s` is all of it and a backwards range is
+empty. Replacing `""` changes nothing.
+
+Text is a value, and no longer than 64 KiB: joining past that fails with
+`TextTooLong`, because the operation budget counts a join as one step however
+long it is, and `s = s + s` in a loop doubles.
+
+A field whose initializer is a text literal is `String` without an annotation.
 
 ### Timers
 
@@ -759,8 +805,9 @@ Loosest to tightest:
 
 ### Operand rules
 
-- `+ - * / %` require `f32` on both sides and produce `f32`. **`+` does not
-  concatenate strings.**
+- `+ - * / %` require `f32` on both sides and produce `f32`, or vectors as
+  [Vectors](#vectors) says. **`+` with text on either side joins**; see
+  [Text](#text).
 - `%` is a **remainder**, not a floored modulo: its sign follows the left
   operand, so `-7.0 % 3.0` is `-1.0` rather than `2.0`.
 - `< <= > >=` require `f32` and produce `bool`.
@@ -845,6 +892,8 @@ Sindri-specific name, because the language does not have one.
 Decay calls may nest 64 deep by default, after which the script fails with
 `CallDepthExceeded`.
 
+Text is at most 64 KiB; making longer fails with `TextTooLong`.
+
 One call may execute 1,000,000 instructions by default, after which it fails
 with `OperationBudgetExceeded`. The budget is per outermost call, so a script is
 not charged for what the previous frame did, and a script cannot buy itself more
@@ -868,7 +917,9 @@ Things that are true and that most readers — human or model — will guess wro
    compile error telling you to call it by bare name. Host *types* may have
    methods, and those work.
 2. **There is no truthiness.** `if x` requires `x` to be `bool`.
-3. **`+` does not join strings.** It is numeric addition only.
+3. **`"d" + 3.0` is `"d3"`, and `"d" + 1.0 + 2.0` is `"d12"`.** `+` groups
+   left to right, so once text is on the left every `+` after it joins. Write
+   `"d" + (1.0 + 2.0)` for `"d3"`.
 4. **All numbers are floats.** `7 / 2` is `3.5`. There is no integer type and no
    integer division, and `%` is a remainder whose sign follows its left operand.
 5. **Member types are checked only where the host described them.**
@@ -919,8 +970,8 @@ a host may describe other files' scripts, events, state and shared functions
 to it, as Sindri does. There is no `import` line: in a Sindri project every
 file already sees the others.
 
-**Standard library:** `print`, `math.*`, string methods, formatting,
-interpolation, conversion functions, collection *operations* — no `push`,
+**Standard library:** `print`, `math.*`, number formatting (`{:.2}`),
+interpolation, parsing text into numbers, conversion functions, collection *operations* — no `push`,
 `map`, `filter`, `sort` — time, randomness.
 
 **Other:** operator overloading, macros, attributes other than `@export`, block

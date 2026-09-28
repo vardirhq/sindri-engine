@@ -439,7 +439,7 @@ impl WorldHost<'_> {
             if *name == PRINT {
                 self.printed.push(match args.first() {
                     Some(Value::String(text)) => text.clone(),
-                    Some(Value::Number(number)) => format!("{number}"),
+                    Some(Value::Number(number)) => decay_runtime::spell_number(*number),
                     Some(Value::Bool(value)) => format!("{value}"),
                     Some(Value::Null) | None => "null".to_owned(),
                     Some(Value::Unit) => "unit".to_owned(),
