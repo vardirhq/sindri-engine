@@ -1,11 +1,6 @@
 // What a run shares on the board, declared once: each value's name, and what
 // it reads as before anything has set it. `Game.kills` is checked when the
 // project compiles, where `Game.get("kils", 0.0)` read the fallback silently.
-//
-// A few values are still read with `Game.get` and a fallback, because their
-// callers disagree about what that fallback is: boss_hp, boss_max, hp, max_hp,
-// next_level, sector, target_x, target_y. Declaring one means choosing which
-// of those starts is right.
 state Game {
     var aegis_core_exposed: f32 = 0.0;
     var aegis_reservoir: f32 = 0.0;
@@ -14,7 +9,9 @@ state Game {
     var beam: f32 = 0.0;
     var black_modules_taken: f32 = 0.0;
     var boss_count: f32 = 0.0;
+    var boss_hp: f32 = 0.0;
     var boss_kind: f32 = 0.0;
+    var boss_max: f32 = 0.0;
     var boss_pool: f32 = 0.0;
     var bullet_size: f32 = 1.0;
     var bullet_speed: f32 = 9.0;
@@ -38,6 +35,7 @@ state Game {
     var fire_gap: f32 = 0.42;
     var fire_rate: f32 = 2.38;
     var grave_echo_time: f32 = 0.0;
+    var hp: f32 = 5.0;
     var kills: f32 = 0.0;
     var kills_since_repair: f32 = 0.0;
     var lab_active: f32 = 0.0;
@@ -53,6 +51,7 @@ state Game {
     var last_bulkhead_used: f32 = 0.0;
     var level: f32 = 1.0;
     var magnet: f32 = 2.2;
+    var max_hp: f32 = 5.0;
     var max_hp_add: f32 = 0.0;
     var mines: f32 = 0.0;
     var missile: f32 = 0.0;
@@ -60,6 +59,7 @@ state Game {
     var module_pool: f32 = 0.0;
     var modules_reset: f32 = 0.0;
     var move_speed: f32 = 5.2;
+    var next_level: f32 = 35.0;
     var nova: f32 = 0.0;
     var nullified: f32 = 0.0;
     var orbit_loom_dps: f32 = 0.0;
@@ -79,6 +79,7 @@ state Game {
     var rush_from: f32 = 0.0;
     var score: f32 = 0.0;
     var screen_trauma: f32 = 0.0;
+    var sector: f32 = 1.0;
     var shield_impact: f32 = 0.0;
     var shots: f32 = 1.0;
     var special_aegis_reservoir: f32 = 0.0;
@@ -122,6 +123,10 @@ state Game {
     var synergy_mass_driver: f32 = 0.0;
     var synergy_static_aegis: f32 = 0.0;
     var target_live: f32 = 0.0;
+    // Where the player's nearest target is; meaningful only while
+    // `target_live` is 1.
+    var target_x: f32 = 0.0;
+    var target_y: f32 = 0.0;
     var transform_critical_mass: f32 = 0.0;
     var transform_rail_prism: f32 = 0.0;
     var transform_recursive: f32 = 0.0;

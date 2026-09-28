@@ -32,7 +32,7 @@ script CombatLab {
         if Game.run_state != 1.0 { return; }
 
         if Game.lab_invulnerable > 0.0 {
-            Game.set("hp", max(Game.get("hp", 5.0), 5.0));
+            Game.hp = max(Game.hp, 5.0);
             Game.player_damage_taken = 0.0;
         }
 

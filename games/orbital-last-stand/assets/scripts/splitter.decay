@@ -29,7 +29,7 @@ script Hazards {
             return;
         }
 
-        let sector = Game.get("sector", 1.0);
+        let sector = Game.sector;
         if sector != this.was_sector {
             clear_hazards();
             setup_sector(sector);

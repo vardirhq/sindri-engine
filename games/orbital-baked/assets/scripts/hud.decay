@@ -90,14 +90,14 @@ script Hud {
         Ui.set_numbers(this.clock, minutes, elapsed % 60.0);
         update_sector();
 
-        let hp = max(Game.get("hp", 0.0), 0.0);
-        let max_hp = max(Game.get("max_hp", 1.0), 1.0);
+        let hp = max(Game.hp, 0.0);
+        let max_hp = max(Game.max_hp, 1.0);
         Ui.set_fill(this.health_bar, hp / max_hp);
         Ui.set_numbers(this.health_text, hp, max_hp);
         animate_player_health();
 
         let cores = Game.cores;
-        let needed = max(Game.get("next_level", 1.0), 1.0);
+        let needed = max(Game.next_level, 1.0);
         Ui.set_fill(this.cores_bar, min(cores / needed, 1.0));
         // The number is the part that always answers. A bar can only move by a
         // thirty-fifth of itself per core, and at the far left of the screen
@@ -135,8 +135,8 @@ script Hud {
     }
 
     fn update_boss(dt: f32) {
-        let boss_max = Game.get("boss_max", 0.0);
-        let boss_hp = max(0.0, Game.get("boss_hp", 0.0));
+        let boss_max = Game.boss_max;
+        let boss_hp = max(0.0, Game.boss_hp);
         let target = if_number(boss_max > 0.0);
         let blend = 1.0 - exp(-8.5 * max(0.0, dt));
         this.boss_presence += (target - this.boss_presence) * blend;
@@ -167,7 +167,7 @@ script Hud {
     }
 
     fn update_sector() {
-        let current = Game.get("sector", 1.0);
+        let current = Game.sector;
         if current == 1.0 { Ui.set_text(this.sector, "OUTER DRIFT"); }
         else if current == 2.0 { Ui.set_text(this.sector, "EMBER BELT"); }
         else if current == 3.0 { Ui.set_text(this.sector, "VIOLET WAKE"); }

@@ -43,7 +43,7 @@ script Module {
         else if operation == "multiply" { Game.set(key, Game.get(key, 1.0) * value); }
         else if operation == "set" { Game.set(key, value); }
         else if operation == "heal" {
-            Game.set(key, min(Game.get("max_hp", 5.0), Game.get(key, 5.0) + value));
+            Game.set(key, min(Game.max_hp, Game.get(key, 5.0) + value));
         }
     }
 }

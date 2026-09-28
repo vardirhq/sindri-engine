@@ -137,7 +137,7 @@ script Bullet {
     fn seek(dt: f32) {
         if Game.target_live <= 0.0 { return; }
         let here = this.transform.position;
-        let to = Vec2(Game.get("target_x", here.x), Game.get("target_y", here.y)) - Vec2(here.x, here.y);
+        let to = Vec2(Game.target_x, Game.target_y) - Vec2(here.x, here.y);
         if to.length <= 0.0001 { return; }
         let desired = to.normalized;
         var turn: f32 = 5.0;
@@ -274,8 +274,13 @@ script Bullet {
                     this.reservoir += 1.0;
                     if this.reservoir >= 3.0 {
                         this.reservoir = 0.0;
-                        let here = this.transform.position;
-                        let to = Vec2(Game.get("target_x", here.x + 1.0), Game.get("target_y", here.y)) - Vec2(here.x, here.y);
+                        // At the target while there is one, straight ahead
+                        // otherwise: `target_x`/`target_y` mean nothing then.
+                        var to = Vec2(1.0, 0.0);
+                        if Game.target_live > 0.0 {
+                            let here = this.transform.position;
+                            to = Vec2(Game.target_x, Game.target_y) - Vec2(here.x, here.y);
+                        }
                         let beam = to / max(0.001, to.length);
                         spawn_beam(beam.x, beam.y, this.damage * 2.0);
                     }

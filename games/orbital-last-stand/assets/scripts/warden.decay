@@ -38,8 +38,8 @@ script Warden {
         this.until_volley = 1.2;
         this.until_summon = 5.0;
         this.dash_timer = 1.4;
-        Game.set("boss_max", this.hp);
-        Game.set("boss_hp", this.hp);
+        Game.boss_max = this.hp;
+        Game.boss_hp = this.hp;
         Game.boss_kind = 0.0;
     }
 
@@ -51,7 +51,7 @@ script Warden {
         if this.hazard_damage > 0.0 {
             this.hp -= this.hazard_damage;
             this.hazard_damage = 0.0;
-            Game.set("boss_hp", max(this.hp, 0.0));
+            Game.boss_hp = max(this.hp, 0.0);
             if this.hp <= 0.0 {
                 die();
                 return;
@@ -62,7 +62,7 @@ script Warden {
             return;
         }
 
-        let share = this.hp / max(Game.get("boss_max", 1.0), 1.0);
+        let share = this.hp / max(Game.boss_max, 1.0);
         if share <= 0.30 {
             this.phase = 3.0;
         } else if share <= 0.65 {
@@ -144,7 +144,7 @@ script Warden {
                 }
             }
         }
-        Game.set("boss_hp", max(this.hp, 0.0));
+        Game.boss_hp = max(this.hp, 0.0);
         if this.hp <= 0.0 {
             die();
         }
@@ -280,8 +280,8 @@ script Warden {
         Audio.play("audio/kill.wav", 0.6);
         Game.kills = Game.kills + 1.0;
         Game.score = Game.score + this.worth * 10.0;
-        Game.set("boss_hp", 0.0);
-        Game.set("boss_max", 0.0);
+        Game.boss_hp = 0.0;
+        Game.boss_max = 0.0;
         Save.set_flag("beat_warden", true);
 
         var made: f32 = 0.0;

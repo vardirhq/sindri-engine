@@ -61,7 +61,7 @@ script HazardBeam {
 
         let player = World.find("Player");
         if player != null && abs(player.transform.position.y) > safe {
-            Game.set("hp", Game.get("hp", 0.0) - this.player_dps * 0.6 * dt);
+            Game.hp = Game.hp - this.player_dps * 0.6 * dt;
         }
         damage_enemies_flare(safe, dt);
     }
@@ -107,7 +107,7 @@ script HazardBeam {
     fn damage_line(dt: f32) {
         let player = World.find("Player");
         if player != null && line_distance(player) < 0.28 {
-            Game.set("hp", Game.get("hp", 0.0) - this.player_dps * dt);
+            Game.hp = Game.hp - this.player_dps * dt;
         }
         for enemy in World.with_tag("enemy") {
             if World.exists(enemy) && line_distance(enemy) < 0.28 {

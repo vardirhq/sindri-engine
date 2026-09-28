@@ -30,8 +30,8 @@ script Aegis {
         // real progress instead of revealing a second full health bar.
         this.hp = 150.0 * scale;
         this.offset = Random.range(0.0, 6.2831853);
-        Game.set("boss_max", this.hp);
-        Game.set("boss_hp", this.hp);
+        Game.boss_max = this.hp;
+        Game.boss_hp = this.hp;
         Game.boss_kind = 11.0;
         Game.aegis_core_exposed = 0.0;
         tint();
@@ -76,7 +76,7 @@ script Aegis {
         else { chase(dx, dy, far, 1.0); }
 
         receive_hits(player);
-        Game.set("boss_hp", max(this.hp, 0.0));
+        Game.boss_hp = max(this.hp, 0.0);
         if this.hp <= 0.0 { die(); }
     }
 
@@ -90,7 +90,7 @@ script Aegis {
 
     fn update_phase(dt: f32) {
         let shields = shield_count();
-        let share = this.hp / max(Game.get("boss_max", 1.0), 1.0);
+        let share = this.hp / max(Game.boss_max, 1.0);
         if shields <= 0.0 { this.phase = 3.0; }
         else if shields <= 4.0 || share <= 0.56 { this.phase = 2.0; }
         else { this.phase = 1.0; }
@@ -302,8 +302,8 @@ script Aegis {
         Audio.play("audio/kill.wav", 0.6);
         Game.kills = Game.kills + 1.0;
         Game.score = Game.score + 920.0;
-        Game.set("boss_hp", 0.0);
-        Game.set("boss_max", 0.0);
+        Game.boss_hp = 0.0;
+        Game.boss_max = 0.0;
         var made: f32 = 0.0;
         while made < 8.0 {
             let angle = made / 8.0 * 6.2831853;
