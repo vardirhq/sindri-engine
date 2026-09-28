@@ -1710,6 +1710,11 @@ and case and trimming, counted in characters and capped at 64 KiB. Exercised
 in `crates/sindri-decay/tests/scripts_use_text.rs`, by Scorchball's digit and
 ring clips, and by both Orbital games' stat keys.
 
+A list or struct `@export` is authored in the scene as JSON shaped like its
+type and drawn by the inspector as rows per item and per field. Exercised in
+`crates/sindri-decay/tests/scenes_author_lists_and_structs.rs` and by both
+Orbital games' card names.
+
 A `struct` in any file is a value type every script builds with named fields
 (`OfferCard(card: c, name: n, blurb: b)`), reads, writes through the `var`
 holding it, and keeps in lists; it is copied where it is assigned. Exercised
@@ -1763,8 +1768,7 @@ the README.
 
 - `while` and `for` are both bounded by the operation budget alongside the
   call-depth limit, and a script's list by 10,000 elements
-- No maps, sets, closures, or first-class functions; no scene-authored struct
-  `@export` yet
+- No maps, sets, closures, or first-class functions
 - No query by more than one tag at a time, and no measured cost for a query at
   combat density
 - The language has no built-in standard library. The Sindri host supplies

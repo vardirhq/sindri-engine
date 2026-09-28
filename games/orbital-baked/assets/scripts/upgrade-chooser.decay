@@ -7,6 +7,10 @@ struct OfferCard { card: Entity, name: Entity, blurb: Entity }
 script UpgradeChooser {
     @export let catalog: Profile;
     @export let offers: f32 = 3.0;
+    // The cards on screen, in offer order, by their entities' names: the scene
+    // says which cards there are, and each one's name and blurb are the
+    // entities named after it.
+    @export let card_names: List<String> = [];
 
     var cards: List<Entity> = [];
     var screen: Entity = null;
@@ -17,7 +21,7 @@ script UpgradeChooser {
     fn start() {
         this.cards = World.with_tag("upgrade");
         this.screen = World.find("Upgrades");
-        for card in ["Guidance Kernel", "Arc Imprint", "Nova Imprint", "Gravity Anchor"] {
+        for card in this.card_names {
             this.slots.push(OfferCard(
                 card: World.find(card),
                 name: World.find(card + " Name"),

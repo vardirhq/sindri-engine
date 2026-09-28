@@ -6,11 +6,13 @@
 //! runs, and if they were the component, watching a scene play would rewrite
 //! the file it was opened from.
 
+mod authored;
 mod environment;
 mod frame;
 mod person_surface;
 mod project;
 
+pub(crate) use authored::{blank, field_type, is_compound};
 pub use project::Project;
 pub(crate) use project::{ON, SharedField, board_key};
 pub(crate) use run::{to_value, variant_name};

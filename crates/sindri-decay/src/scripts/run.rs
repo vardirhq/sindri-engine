@@ -391,7 +391,12 @@ pub(super) fn apply_properties(
         if !field.exported {
             return Err(refuse(name, "the field is not @export"));
         }
-        let value = if let Some(enumeration) = field_enum(program, instance, field) {
+        let compound = super::authored::field_type(field.ty.as_ref(), instance.field(name))
+            .filter(|ty| super::authored::is_compound(program, ty));
+        let value = if let Some(ty) = compound {
+            super::authored::authored(program, &ty, value, instance.field(name))
+                .map_err(|reason| refuse(name, &reason))?
+        } else if let Some(enumeration) = field_enum(program, instance, field) {
             authored_variant(program, &enumeration, value)
                 .map_err(|reason| refuse(name, &reason))?
         } else {
@@ -429,7 +434,7 @@ fn field_enum(
 
 /// An enum field's authored value: a variant's name, `"Grow"`, or the full
 /// `"Kind.Grow"`. Anything else is refused with the variants it could be.
-fn authored_variant(
+pub(super) fn authored_variant(
     program: &decay_ir::IrProgram,
     enumeration: &str,
     value: &serde_json::Value,

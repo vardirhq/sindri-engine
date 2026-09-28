@@ -696,8 +696,10 @@ fires, and an item without a trigger is not ready to be planned.
   `clear`, `contains`, `index_of`, element assignment, and `for i in 0..n`
 - [x] Structs — declared in any file, built with named fields, read and
   written by field, copied where assigned
-- [ ] A struct `@export` a scene authors, and struct fields in `state`.
-  Trigger: a tuning value that is several numbers which belong together
+- [x] A struct or list `@export` a scene authors, edited field by field and
+  item by item in the inspector
+- [ ] Struct and list fields in `state`. Trigger: a shared value that is
+  several numbers which belong together
 - [ ] Maps, and sorting or filtering a list. Trigger: a script keeping two
   lists in step, or sorting one by hand
 - [ ] Number formatting (`{:.2}`) and interpolation in text. Trigger: a script

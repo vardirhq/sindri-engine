@@ -20,7 +20,7 @@ use crate::ir::{ContainerKind, Instruction, IrContainer, IrField, IrFunction, Ir
 #[allow(clippy::zero_sized_map_values)]
 pub(crate) struct Lowerer<'a> {
     value_members: &'a ValueMembers,
-    structs: &'a std::collections::BTreeMap<String, Vec<String>>,
+    structs: &'a std::collections::BTreeMap<String, Vec<(String, decay_semantic::Type)>>,
 }
 
 impl<'a> Lowerer<'a> {
@@ -53,6 +53,7 @@ impl<'a> Lowerer<'a> {
         let mut program = IrProgram {
             containers,
             enums: analysis.enums.clone(),
+            structs: analysis.structs.clone(),
         };
         let shared = analysis
             .program
@@ -72,7 +73,10 @@ impl<'a> Lowerer<'a> {
     /// A struct's fields in declared order; empty for a name the analysis
     /// already refused.
     pub(super) fn struct_fields(&self, name: &str) -> Vec<String> {
-        self.structs.get(name).cloned().unwrap_or_default()
+        self.structs
+            .get(name)
+            .map(|fields| fields.iter().map(|(field, _)| field.clone()).collect())
+            .unwrap_or_default()
     }
 
     /// What the analysis decided a member read at this span is, if anything.
@@ -104,6 +108,7 @@ impl<'a> Lowerer<'a> {
                             .iter()
                             .any(|attribute| attribute.name == "export"),
                         type_name: field.ty.as_ref().map(|ty| ty.name.clone()),
+                        ty: field.ty.as_ref().map(decay_semantic::Type::from_ref),
                         initializer,
                     });
                 }
