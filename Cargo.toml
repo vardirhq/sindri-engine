@@ -117,5 +117,14 @@ missing_panics_doc = "allow"
 #
 # Debug assertions and overflow checks are untouched, so this buys speed rather
 # than trading away what the tests are able to catch.
+#
+# Dependencies also build without debug information. Nobody steps through
+# wgpu or serde in a debugger here, and their line tables were half of the
+# target directory: a clean build of `sindri-decay`'s tests went from 3.6 GB to
+# 1.8 GB and got a little faster. CI restores that directory from its cache on
+# every job, so its size is paid again on every run -- unpacking it was over a
+# minute of the test job. Sindri's own crates keep their line tables, so a
+# panic's backtrace still names the line in the engine that raised it.
 [profile.dev.package."*"]
 opt-level = 2
+debug = false

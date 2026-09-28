@@ -58,8 +58,12 @@ jobs:
           npm install --prefix scripts/browser
           npx --prefix scripts/browser playwright install-deps chromium
           npx --prefix scripts/browser playwright install chromium
+      # The captures need the bundle to run, not to be small; the optimiser was
+      # most of this build, so a pull request skips it.
       - name: Build shared browser host
-        run: wasm-pack build game --target web --out-dir pkg
+        env:
+          WASM_OPT: ${{ github.event_name == 'pull_request' && '--no-opt' || '' }}
+        run: wasm-pack build game --target web --out-dir pkg $WASM_OPT
       - name: Export Graphics Lab
         run: |
           cargo run --quiet --package sindri-export --bin sindri-export -- \
