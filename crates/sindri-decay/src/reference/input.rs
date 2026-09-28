@@ -219,12 +219,57 @@ pub(super) const TYPES: &[TypeEntry] = &[
     },
     TypeEntry {
         name: "Camera",
-        text: "The game's camera: moving the view and shaking it.",
+        text: "The game's camera: moving the view and changing its engine-owned follow, confinement, and shake behavior.",
         members: &[
             call(
                 "add_trauma",
                 &["amount"],
-                "Shakes the camera, for impacts and explosions. Bigger amounts shake harder, up to 1, and the shake fades by itself.",
+                "Adds impact trauma to the authored behavior camera. Bigger amounts shake harder, up to 1, and the authored shake fades by itself.",
+            ),
+            call(
+                "follow",
+                &["target"],
+                "Makes the authored behavior camera follow an entity at runtime.",
+            ),
+            call(
+                "clear_follow",
+                &[],
+                "Stops the authored behavior camera following a target.",
+            ),
+            call(
+                "follow_offset",
+                &["x", "y", "z"],
+                "Sets the world-space offset from the follow target used by the authored behavior camera.",
+            ),
+            call(
+                "dead_zone",
+                &["x", "y"],
+                "Sets the follow dead-zone size for the authored behavior camera.",
+            ),
+            call(
+                "smoothing",
+                &["value"],
+                "Sets how strongly the authored behavior camera smooths its follow movement.",
+            ),
+            call(
+                "max_speed",
+                &["value"],
+                "Sets the maximum follow speed of the authored behavior camera.",
+            ),
+            call(
+                "bounds",
+                &["min_x", "min_y", "max_x", "max_y"],
+                "Confines the authored behavior camera to the given world-space rectangle.",
+            ),
+            call(
+                "clear_bounds",
+                &[],
+                "Removes runtime confinement from the authored behavior camera.",
+            ),
+            call(
+                "shake",
+                &["strength", "frequency", "decay"],
+                "Changes the authored behavior camera's shake strength, frequency, and trauma decay.",
             ),
             value(
                 "pan_x",
