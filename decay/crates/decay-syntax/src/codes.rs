@@ -20,11 +20,12 @@ pub enum SyntaxCode {
     StateFieldsOnly,
     HandlerReturnsValue,
     ConstructNeedsStructName,
+    FieldAfterMethod,
 }
 
 impl SyntaxCode {
     /// Every code, its stable name, and what it means.
-    pub const ALL: [(Self, &'static str, &'static str); 13] = [
+    pub const ALL: [(Self, &'static str, &'static str); 14] = [
         (
             Self::UnexpectedCharacter,
             "unexpected-character",
@@ -89,6 +90,11 @@ impl SyntaxCode {
             Self::ConstructNeedsStructName,
             "construct-needs-struct-name",
             "Named fields, `(name: value)`, after something that is not a struct's name.",
+        ),
+        (
+            Self::FieldAfterMethod,
+            "field-after-method",
+            "A struct's field written after one of its methods; fields come first.",
         ),
     ];
 

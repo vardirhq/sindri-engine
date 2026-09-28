@@ -31,7 +31,7 @@ pub use diagnostic::{
 pub use environment::{Environment, ExternalSymbol, StateField};
 pub use types::{
     BUILT_IN_TYPES, COMPONENTS, EMIT, FunctionType, HostType, LENGTH, LIST, OLD_LENGTH, TIMER,
-    Type, VEC2, VEC3, enum_type, event_type,
+    Type, VEC2, VEC3, enum_type, event_type, method_function,
 };
 
 #[must_use]
@@ -65,6 +65,8 @@ pub fn analyze_with_environment(source: &str, environment: &Environment) -> Anal
     let bindings = std::mem::take(&mut analyzer.bindings);
     let constant_uses = std::mem::take(&mut analyzer.constant_uses);
     let constants = std::mem::take(&mut analyzer.own_constants);
+    let method_calls = std::mem::take(&mut analyzer.method_calls);
+    let struct_methods = analyzer.known_methods();
 
     Analysis {
         program: parsed.program,
@@ -75,5 +77,7 @@ pub fn analyze_with_environment(source: &str, environment: &Environment) -> Anal
         bindings,
         constant_uses,
         constants,
+        method_calls,
+        struct_methods,
     }
 }

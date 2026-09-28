@@ -88,3 +88,87 @@ fn every_mistake_about_a_struct_is_refused() {
         );
     }
 }
+
+#[test]
+fn a_struct_method_is_checked_like_any_call() {
+    let found = messages(
+        r#"struct Card {
+             name: String,
+             weight: f32,
+             fn heavier(other: Card) -> bool { return this.weight > other.weight; }
+             fn label() -> String { return this.name + " " + this.weight; }
+         }
+         script S {
+             fn update(dt: f32) {
+                 let a = Card(name: "a", weight: 1.0);
+                 if a.heavier(Card(name: "b", weight: 2.0)) { }
+                 let text: String = a.label();
+             }
+         }"#,
+        &Environment::new(),
+    );
+    assert!(found.is_empty(), "{found:?}");
+}
+
+#[test]
+fn every_mistake_about_a_struct_method_is_refused() {
+    let found = messages(
+        r"struct Card {
+             weight: f32,
+             fn weight() -> f32 { return 1.0; }
+             fn grow() { this.weight = 2.0; }
+             fn bare() -> f32 { return weight; }
+             fn twice() {}
+             fn twice() {}
+             fn heavier(other: Card) -> bool { return this.weight > other.weight; }
+         }
+         script S {
+             fn update(dt: f32) {
+                 let a = Card(weight: 1.0);
+                 let b = a.heavier;
+                 let c = a.heavier(1.0);
+                 let d = a.lighter(a);
+             }
+         }",
+        &Environment::new(),
+    );
+    let all = found.join("\n");
+    for expected in [
+        "`Card.weight` is both a field and a method",
+        "a method cannot change the value it was asked of",
+        "unknown name `weight`",
+        "`Card.twice` is declared twice",
+        "`heavier` is a method of `Card` -- call it",
+        "cannot assign `f32` to `Card`",
+        "`Card` has no method `lighter`; it has `bare`, `grow`, `heavier`, `twice`",
+    ] {
+        assert!(all.contains(expected), "missing {expected:?} in:\n{all}");
+    }
+}
+
+#[test]
+fn a_method_from_another_file_is_known() {
+    let mut environment = Environment::new();
+    environment.add_struct("Offer", vec![("index".to_owned(), Type::F32)]);
+    environment.add_struct_method(
+        "Offer",
+        "next",
+        crate::FunctionType {
+            params: vec![Type::F32],
+            return_type: Type::F32,
+        },
+    );
+    let found = messages(
+        "script S { fn f() -> f32 { return Offer(index: 1.0).next(2.0); } }",
+        &environment,
+    );
+    assert!(found.is_empty(), "{found:?}");
+    let analysis = crate::analyze_with_environment(
+        "script S { fn f() -> f32 { return Offer(index: 1.0).next(2.0); } }",
+        &environment,
+    );
+    assert_eq!(
+        analysis.method_calls.values().collect::<Vec<_>>(),
+        vec!["Offer.next"]
+    );
+}

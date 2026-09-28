@@ -86,6 +86,16 @@ impl Analyzer<'_, '_> {
     /// and no `this`: only its parameters, the other shared functions, and
     /// what the host offers.
     pub(super) fn analyze_shared_function(&mut self, function: &FunctionDecl) {
+        self.analyze_free_function(function, None);
+    }
+
+    /// A function with no script around it: a top-level one, or a struct's
+    /// method, whose `receiver` is the struct `this` is a value of.
+    pub(super) fn analyze_free_function(
+        &mut self,
+        function: &FunctionDecl,
+        receiver: Option<&str>,
+    ) {
         self.binding_scope = function.span;
         self.current_return = function
             .return_type
@@ -93,6 +103,20 @@ impl Analyzer<'_, '_> {
             .map_or(Type::Unit, |ty| self.resolve_type(ty));
         self.scopes = vec![HashMap::new(), HashMap::new()];
         self.in_shared_function = true;
+        if let Some(structure) = receiver {
+            // The value it was asked of. Not to be changed: it is a copy, so a
+            // change would be lost, and a method says what it works out by
+            // returning it.
+            self.define_local(
+                "this",
+                Symbol {
+                    ty: Type::Named(structure.to_owned()),
+                    mutable: false,
+                    function: None,
+                },
+                function.span,
+            );
+        }
         for param in &function.params {
             let ty = param
                 .ty

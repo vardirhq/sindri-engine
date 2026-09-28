@@ -59,6 +59,8 @@ pub struct Environment {
     /// Structs declared somewhere the host can see, with their fields in
     /// order. A program's own are added to these when it is analysed.
     pub(crate) structs: HashMap<String, Vec<(String, Type)>>,
+    /// Each struct's methods, by struct and then method name.
+    pub(crate) struct_methods: HashMap<String, HashMap<String, FunctionType>>,
     /// Structs declared more than once, which nothing may use.
     pub(crate) ambiguous_structs: HashSet<String>,
 }
@@ -184,6 +186,19 @@ impl Environment {
     /// Declares a struct every script may name, with its fields in order.
     pub fn add_struct(&mut self, name: impl Into<String>, fields: Vec<(String, Type)>) {
         self.structs.insert(name.into(), fields);
+    }
+
+    /// A method another file declared on a struct: `card.heavier(best)`.
+    pub fn add_struct_method(
+        &mut self,
+        structure: impl Into<String>,
+        method: impl Into<String>,
+        signature: FunctionType,
+    ) {
+        self.struct_methods
+            .entry(structure.into())
+            .or_default()
+            .insert(method.into(), signature);
     }
 
     /// Says a struct was declared more than once, so that using it is refused

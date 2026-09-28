@@ -244,6 +244,16 @@ impl Analyzer<'_, '_> {
         let root = self.place_root(object);
         match root {
             Some((_, true)) => {}
+            // Only a struct's method has a `this` that is a local.
+            Some((name, false)) if name == "this" && self.in_shared_function => {
+                self.error(
+                    Code::Immutable,
+                    span,
+                    "a method cannot change the value it was asked of -- it works on a copy, \
+                     so return the changed value instead"
+                        .to_owned(),
+                );
+            }
             Some((name, false)) => {
                 self.error(
                     Code::Immutable,

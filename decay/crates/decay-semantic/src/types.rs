@@ -58,6 +58,14 @@ pub const BUILT_IN_TYPES: [(&str, Type); 9] = [
 /// The member an event offers: `GoalScored.emit(1.0)`.
 pub const EMIT: &str = "emit";
 
+/// The function a struct's method is lowered to: `Card.heavier`, which takes
+/// the value it is asked of first. Not a name a script can write as one, so it
+/// can never be confused with a function a script declares.
+#[must_use]
+pub fn method_function(structure: &str, method: &str) -> String {
+    format!("{structure}.{method}")
+}
+
 /// The type an enum's name has in an expression — `Phase` in `Phase.Lobby` —
 /// as a diagnostic names it. Its values are of type `Named(name)`.
 #[must_use]

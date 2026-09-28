@@ -17,11 +17,25 @@ pub(crate) struct Kinds {
     structs: BTreeMap<String, Vec<(String, Type)>>,
     /// Structs declared more than once, which nothing may name.
     ambiguous_structs: BTreeSet<String>,
+    /// Each struct's methods, by name, with their signatures.
+    methods: BTreeMap<String, BTreeMap<String, decay_semantic::FunctionType>>,
+    /// The text of every struct that has methods. A caller links a copy of
+    /// each method, as of each shared function, so it must recompile when a
+    /// method's body changes and not only its signature; this is part of the
+    /// project's key for that.
+    method_text: String,
 }
 
 impl Kinds {
-    /// Reads an `enum` or `struct` item; anything else is left alone.
-    pub(crate) fn read(&mut self, item: Item) {
+    /// Reads an `enum` or `struct` item from `source`; anything else is left
+    /// alone.
+    pub(crate) fn read(&mut self, item: Item, source: &str) {
+        if let Item::Struct(declared) = &item
+            && !declared.methods.is_empty()
+            && let Some(text) = source.get(declared.span.start..declared.span.end)
+        {
+            self.method_text.push_str(text);
+        }
         match item {
             Item::Enum(declared) => {
                 let variants = declared.variants.into_iter().map(|(name, _)| name);
@@ -39,6 +53,12 @@ impl Kinds {
                     .iter()
                     .map(|field| (field.name.clone(), Type::from_ref(&field.ty)))
                     .collect();
+                let methods = declared
+                    .methods
+                    .iter()
+                    .map(|method| (method.name.clone(), super::signature_of(method)))
+                    .collect();
+                self.methods.insert(declared.name.clone(), methods);
                 if self.structs.insert(declared.name.clone(), fields).is_some() {
                     self.ambiguous_structs.insert(declared.name);
                 }
@@ -70,6 +90,9 @@ impl Kinds {
         }
         for (name, fields) in &self.structs {
             environment.add_struct(name.clone(), fields.clone());
+            for (method, signature) in self.methods.get(name).into_iter().flatten() {
+                environment.add_struct_method(name.clone(), method.clone(), signature.clone());
+            }
         }
         for name in &self.ambiguous_structs {
             environment.add_ambiguous_struct(name.clone());

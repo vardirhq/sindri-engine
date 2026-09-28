@@ -55,6 +55,12 @@ pub(crate) fn outline(source: &str) -> Value {
                     .fields
                     .iter()
                     .map(|field| symbol(source, &field.name, 8, field.span, None))
+                    .chain(
+                        declared
+                            .methods
+                            .iter()
+                            .map(|method| symbol(source, &method.name, 6, method.span, None)),
+                    )
                     .collect();
                 symbol(source, &declared.name, 23, declared.span, Some(children))
             }

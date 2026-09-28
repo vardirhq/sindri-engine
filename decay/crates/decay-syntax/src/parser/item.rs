@@ -226,7 +226,8 @@ impl Parser<'_> {
     }
 
     /// `struct Card { root: Entity, name: String }`: typed fields,
-    /// comma-separated, and a trailing comma if you like.
+    /// comma-separated, and a trailing comma if you like; then its methods,
+    /// `fn`s asked of one value.
     pub(super) fn parse_struct(&mut self) -> Option<Item> {
         let start = self.current().span;
         self.advance();
@@ -236,7 +237,18 @@ impl Parser<'_> {
             "expected `{` after the struct's name",
         )?;
         let mut fields = Vec::new();
+        let mut methods = Vec::new();
         while !self.at(&TokenKind::RightBrace) && !self.at(&TokenKind::Eof) {
+            if self.at(&TokenKind::Fn) {
+                methods.push(self.parse_function()?);
+                continue;
+            }
+            if !methods.is_empty() {
+                self.error_here(
+                    crate::codes::SyntaxCode::FieldAfterMethod,
+                    "a struct's fields come before its methods",
+                );
+            }
             let (field, span) = self.expect_identifier("expected a field name")?;
             self.expect_simple(
                 &TokenKind::Colon,
@@ -248,7 +260,7 @@ impl Parser<'_> {
                 span: span.join(ty.span),
                 ty,
             });
-            if self.consume_simple(&TokenKind::Comma).is_none() {
+            if self.consume_simple(&TokenKind::Comma).is_none() && !self.at(&TokenKind::Fn) {
                 break;
             }
         }
@@ -256,6 +268,7 @@ impl Parser<'_> {
         Some(Item::Struct(crate::ast::StructDecl {
             name,
             fields,
+            methods,
             span: start.join(end),
         }))
     }

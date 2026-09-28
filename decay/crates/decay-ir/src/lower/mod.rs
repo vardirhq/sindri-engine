@@ -21,6 +21,7 @@ use crate::ir::{ContainerKind, Instruction, IrContainer, IrField, IrFunction, Ir
 pub(crate) struct Lowerer<'a> {
     value_members: &'a ValueMembers,
     constant_uses: &'a ConstantUses,
+    method_calls: &'a std::collections::HashMap<Span, String>,
     structs: &'a std::collections::BTreeMap<String, Vec<(String, decay_semantic::Type)>>,
 }
 
@@ -29,6 +30,7 @@ impl<'a> Lowerer<'a> {
         let lowerer = Self {
             value_members: &analysis.value_members,
             constant_uses: &analysis.constant_uses,
+            method_calls: &analysis.method_calls,
             structs: &analysis.structs,
         };
         let containers = analysis
@@ -62,9 +64,14 @@ impl<'a> Lowerer<'a> {
             .program
             .items
             .iter()
-            .filter_map(|item| match item {
-                Item::Function(function) => Some(lowerer.lower_function(function)),
-                _ => None,
+            .flat_map(|item| match item {
+                Item::Function(function) => vec![lowerer.lower_function(function)],
+                Item::Struct(declared) => declared
+                    .methods
+                    .iter()
+                    .map(|method| lowerer.lower_method(&declared.name, method))
+                    .collect(),
+                _ => Vec::new(),
             })
             .collect::<Vec<_>>();
         if !shared.is_empty() {
@@ -140,6 +147,19 @@ impl<'a> Lowerer<'a> {
             fields,
             functions,
         }
+    }
+
+    /// The function a struct's method is called as, `this` taken first.
+    pub(crate) fn lower_method(&self, structure: &str, method: &FunctionDecl) -> IrFunction {
+        let mut function = self.lower_function(method);
+        function.name = decay_semantic::method_function(structure, &method.name);
+        function.params.insert(0, "this".to_owned());
+        function
+    }
+
+    /// The function a call at this span is to a struct's method as, if it is.
+    pub(super) fn method_call(&self, span: Span) -> Option<&str> {
+        self.method_calls.get(&span).map(String::as_str)
     }
 
     pub(crate) fn lower_function(&self, function: &FunctionDecl) -> IrFunction {

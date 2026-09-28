@@ -188,6 +188,21 @@ impl Lowerer<'_> {
         args: &[Expr],
         instructions: &mut Vec<Instruction>,
     ) {
+        // A struct's method: the value it is asked of, then the arguments,
+        // to the function it was lowered to.
+        if let Some(function) = self.method_call(expr.span)
+            && let ExprKind::Member { object, .. } = &callee.kind
+        {
+            self.lower_expr(object, instructions);
+            for argument in args {
+                self.lower_expr(argument, instructions);
+            }
+            instructions.push(Instruction::Call {
+                callee: Path(vec![function.to_owned()]),
+                argument_count: args.len() + 1,
+            });
+            return;
+        }
         match self.value_member(expr.span) {
             Some(ValueMember::Construct(dimensions)) => {
                 for argument in args {

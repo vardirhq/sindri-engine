@@ -194,7 +194,7 @@ impl Project {
                         continue;
                     }
                     item @ (Item::Enum(_) | Item::Struct(_)) => {
-                        kinds.read(item);
+                        kinds.read(item, source);
                         continue;
                     }
                     Item::Const(constant) => {

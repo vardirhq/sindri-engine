@@ -18,6 +18,24 @@ use crate::support::type_members;
 /// The struct layouts a file may name: its own and the project's.
 pub(crate) type Structs = BTreeMap<String, Vec<(String, Type)>>;
 
+/// Each struct's methods, with their signatures, as the analysis gives them.
+pub(crate) type Methods = BTreeMap<String, Vec<(String, FunctionType)>>;
+
+/// What the program declares that gives a value members of its own.
+pub(crate) struct Declared<'a> {
+    pub structs: &'a Structs,
+    pub methods: &'a Methods,
+}
+
+impl<'a> Declared<'a> {
+    pub(crate) fn of(analysis: &'a Analysis) -> Self {
+        Self {
+            structs: &analysis.structs,
+            methods: &analysis.struct_methods,
+        }
+    }
+}
+
 /// The type the nearest binding of `name` before `offset` gave it: a local,
 /// a parameter, a loop's binding, or a field of the script around `offset`.
 pub(crate) fn local_type(analysis: &Analysis, name: &str, offset: usize) -> Option<Type> {
@@ -66,7 +84,10 @@ fn member(signature: FunctionType) -> ExternalSymbol {
 /// What the language gives a value of this type, or `None` for a type whose
 /// members the host describes. Signatures come from
 /// `decay_semantic::members`, the table the analysis checks calls against.
-pub(crate) fn value_members(ty: &Type, structs: &Structs) -> Option<Vec<(String, ExternalSymbol)>> {
+pub(crate) fn value_members(
+    ty: &Type,
+    declared: &Declared<'_>,
+) -> Option<Vec<(String, ExternalSymbol)>> {
     Some(match ty {
         Type::Vec2 | Type::Vec3 => {
             let dimensions = ty.dimensions().unwrap_or(2);
@@ -102,11 +123,19 @@ pub(crate) fn value_members(ty: &Type, structs: &Structs) -> Option<Vec<(String,
             }));
             members
         }
-        Type::Named(name) => structs
-            .get(name)?
-            .iter()
-            .map(|(field, ty)| (field.clone(), value(ty.clone())))
-            .collect(),
+        Type::Named(name) => {
+            let mut members: Vec<_> = declared
+                .structs
+                .get(name)?
+                .iter()
+                .map(|(field, ty)| (field.clone(), value(ty.clone())))
+                .collect();
+            // A method is always called, even one that takes nothing.
+            members.extend(declared.methods.get(name).into_iter().flatten().map(
+                |(method, signature)| (method.clone(), ExternalSymbol::Function(signature.clone())),
+            ));
+            members
+        }
         _ => return None,
     })
 }
@@ -116,9 +145,9 @@ pub(crate) fn value_members(ty: &Type, structs: &Structs) -> Option<Vec<(String,
 pub(crate) fn members(
     environment: &Environment,
     ty: &Type,
-    structs: &Structs,
+    declared: &Declared<'_>,
 ) -> Vec<(String, ExternalSymbol)> {
-    value_members(ty, structs).unwrap_or_else(|| {
+    value_members(ty, declared).unwrap_or_else(|| {
         type_members(environment, ty).map_or_else(Vec::new, |host| {
             host.members()
                 .map(|(name, symbol)| (name.to_owned(), symbol.clone()))
@@ -132,9 +161,9 @@ pub(crate) fn member_type(
     environment: &Environment,
     ty: &Type,
     name: &str,
-    structs: &Structs,
+    declared: &Declared<'_>,
 ) -> Option<Type> {
-    members(environment, ty, structs)
+    members(environment, ty, declared)
         .into_iter()
         .find(|(member, _)| member == name)
         .map(|(_, symbol)| match symbol {
@@ -160,13 +189,14 @@ pub(crate) fn held_members(
     } else {
         (local_type(&analysis, first, offset)?, 1)
     };
+    let declared = Declared::of(&analysis);
     for segment in &chain[from..] {
-        let Some(next) = member_type(environment, &ty, segment, &analysis.structs) else {
+        let Some(next) = member_type(environment, &ty, segment, &declared) else {
             return Some(Vec::new());
         };
         ty = next;
     }
-    Some(members(environment, &ty, &analysis.structs))
+    Some(members(environment, &ty, &declared))
 }
 
 #[cfg(test)]
@@ -175,7 +205,11 @@ mod tests {
 
     use super::held_members;
 
-    const SOURCE: &str = r#"struct Card { name: String, at: Vec2, tags: List<String> }
+    const SOURCE: &str = r#"struct Card {
+    name: String, at: Vec2, tags: List<String>,
+    fn heavier(other: Card) -> bool { return this.at.x > other.at.x; }
+    fn label() -> String { return this.name; }
+}
 script Dealer {
     var timer = Timer(1.0);
     fn deal(p: Vec3) {
@@ -197,7 +231,9 @@ script Dealer {
 
     #[test]
     fn a_held_value_offers_what_its_type_has() {
-        assert_eq!(names(&["card"]), ["name", "at", "tags"]);
+        assert_eq!(names(&["card"]), ["name", "at", "tags", "heavier", "label"]);
+        // Through a method's result, as through a field's.
+        assert!(names(&["card", "label"]).contains(&"starts_with".to_owned()));
         assert!(names(&["card", "at"]).starts_with(&["x".to_owned(), "y".to_owned()]));
         assert!(names(&["card", "at"]).contains(&"normalized".to_owned()));
         assert!(names(&["card", "name"]).contains(&"starts_with".to_owned()));
