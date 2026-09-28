@@ -22,6 +22,7 @@ pub(crate) fn render(api: &DecayApi) -> String {
     push_symbols(&mut page, &api.globals);
 
     page.push_str(&vectors());
+    page.push_str(&timers());
 
     page.push_str("\n## Types\n");
     for namespace in &api.types {
@@ -62,6 +63,26 @@ fn vectors() -> String {
     }
     section.truncate(section.trim_end().len());
     section.push('\n');
+    section
+}
+
+/// What a `Timer` offers: like a vector, the language's own value, read from
+/// the language's list.
+fn timers() -> String {
+    use decay_semantic::TimerProperty;
+
+    let mut section = String::from(
+        "\n## Timers\n\n`Timer(seconds)` starts one. A timer held in a script's field runs down \
+         by each frame before that script's `update`; one held in a local does not. It is read, \
+         never written into: start a new one to restart it.\n\n### `Timer`\n\n",
+    );
+    for (property, spelled) in TimerProperty::ALL {
+        let ty = match property {
+            TimerProperty::Done => "bool",
+            TimerProperty::Left | TimerProperty::Duration | TimerProperty::Progress => "f32",
+        };
+        let _ = writeln!(section, "- `{spelled}`: `{ty}`");
+    }
     section
 }
 

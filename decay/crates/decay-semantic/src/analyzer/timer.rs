@@ -43,21 +43,15 @@ impl Analyzer<'_, '_> {
 
     /// The type of `timer.property`, noting it for the lowering.
     pub(super) fn timer_member_type(&mut self, field: &str, span: Span) -> Type {
-        match TimerProperty::named(field) {
-            Some(property) => {
-                self.value_members
-                    .insert(span, ValueMember::Timer(property));
-                match property {
-                    TimerProperty::Done => Type::Bool,
-                    TimerProperty::Left | TimerProperty::Duration | TimerProperty::Progress => {
-                        Type::F32
-                    }
-                }
-            }
-            None => {
-                self.error(span, missing_member(field));
-                Type::Unknown
-            }
+        let Some(property) = TimerProperty::named(field) else {
+            self.error(span, missing_member(field));
+            return Type::Unknown;
+        };
+        self.value_members
+            .insert(span, ValueMember::Timer(property));
+        match property {
+            TimerProperty::Done => Type::Bool,
+            TimerProperty::Left | TimerProperty::Duration | TimerProperty::Progress => Type::F32,
         }
     }
 

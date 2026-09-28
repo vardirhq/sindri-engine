@@ -377,6 +377,40 @@ only calls the language answers itself rather than the host.
 
 ---
 
+### Timers
+
+A `Timer` is a countdown, and a value like a number:
+
+```rust
+script Mine {
+    var cooldown = Timer(0.0);          // already run out
+    fn update(dt: f32) {
+        if !cooldown.done { return; }
+        cooldown = Timer(2.4);          // start again
+    }
+}
+```
+
+`Timer(seconds)` starts one; a negative duration starts one that has already
+run out. It has four properties and nothing else: `done` (`bool`), `left`
+(seconds to go, never below zero), `duration` (the seconds it started with)
+and `progress` (from `0` when started to `1` when done). A timer is **read,
+never written into** — `t.left = 1.0` is a diagnostic — and restarted by
+assigning a new one. It takes part in no arithmetic.
+
+**When time passes is the host's decision**; the language has no clock. The
+runtime offers `ScriptInstance::advance_timers(seconds)`, which runs down
+every timer the instance's fields hold. A timer in a local lives for one call
+and is never run down. Against Sindri, a script's timers run down by each
+frame before its `update`, and not on the frame it starts; see
+`docs/scripting.md`.
+
+A field whose initializer is `Timer(...)`, `Vec2(...)` or `Vec3(...)` has that
+type without an annotation. Every other unannotated field is unknown, as
+before.
+
+---
+
 ## Containers
 
 A file holds any number of `script` and `component` declarations. Names must be

@@ -1686,6 +1686,13 @@ and a write to a `let` are compile errors across files. Exercised in
 `crates/sindri-decay/tests/scripts_share_state.rs`, and by Scorchball and the
 platformer, whose shared values are declared this way.
 
+A script keeps time with a `Timer` value: `var cooldown = Timer(0.0);`,
+restarted with `Timer(2.4)` and read through `done`, `left`, `duration` and
+`progress`. Every timer a script's fields hold runs down by each frame before
+its `update`, so an early return cannot stop the clock. Exercised in
+`crates/sindri-decay/tests/scripts_keep_time.rs`, and by Scorchball's banners,
+power-ups, burning, aftertouch and bot reaction times.
+
 **A script can speak in the tilemap's coordinates.** `Grid.position_x` and
 `Grid.position_y` invert a tilemap's projection and full world-XY transform;
 `Grid.place` projects a continuous logical position back while preserving the
