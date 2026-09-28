@@ -427,3 +427,35 @@ fn state_does_what_the_reference_says() {
         "state S { var x: f32 = 1.0; } script T { fn f() { S.y = 2.0; } }",
     );
 }
+
+/// "Timers".
+#[test]
+fn timers_do_what_the_reference_says() {
+    accepted(
+        "the timers example",
+        "script Mine {
+             var cooldown = Timer(0.0);
+             fn update(dt: f32) {
+                 if !cooldown.done { return; }
+                 cooldown = Timer(2.4);
+             }
+         }",
+    );
+    accepted(
+        "reading every property",
+        "script T { var t = Timer(1.0);
+             fn f() -> f32 { if t.done { return 0.0; } return t.left + t.duration + t.progress; } }",
+    );
+    rejected(
+        "writing into a timer",
+        "script T { var t = Timer(1.0); fn f() { t.left = 0.0; } }",
+    );
+    rejected(
+        "arithmetic on a timer",
+        "script T { var t = Timer(1.0); fn f() -> f32 { return t + 1.0; } }",
+    );
+    rejected(
+        "a property called as a function",
+        "script T { var t = Timer(1.0); fn f() -> bool { return t.done(); } }",
+    );
+}

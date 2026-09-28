@@ -8,4 +8,5 @@ mod loops;
 mod scope;
 mod subjects;
 mod support;
+mod timers;
 mod vectors;

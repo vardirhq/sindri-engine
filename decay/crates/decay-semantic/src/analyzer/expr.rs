@@ -171,6 +171,10 @@ impl Analyzer<'_, '_> {
                     self.check_component_target(object, target.span);
                 }
                 self.check_state_assignment(object, field, target.span);
+                if object_type == Type::Timer {
+                    self.refuse_timer_write(field, target.span);
+                    return Type::Unknown;
+                }
                 self.member_of(object, &object_type, field, target.span)
             }
             _ => {

@@ -276,6 +276,39 @@ impl VectorOp {
     }
 }
 
+/// What a timer can be asked. All are properties: a timer is read, and
+/// replaced with a new one to start it again.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub enum TimerProperty {
+    /// `t.done`: whether it has run out.
+    Done,
+    /// `t.left`: seconds to go, never below zero.
+    Left,
+    /// `t.duration`: the seconds it was started with.
+    Duration,
+    /// `t.progress`: how far through it is, from 0 when started to 1 when done.
+    Progress,
+}
+
+impl TimerProperty {
+    /// Every property, with the name a script spells it by.
+    pub const ALL: [(Self, &'static str); 4] = [
+        (Self::Done, "done"),
+        (Self::Left, "left"),
+        (Self::Duration, "duration"),
+        (Self::Progress, "progress"),
+    ];
+
+    /// The property a member name spells.
+    #[must_use]
+    pub fn named(name: &str) -> Option<Self> {
+        Self::ALL
+            .into_iter()
+            .find(|(_, spelled)| *spelled == name)
+            .map(|(property, _)| property)
+    }
+}
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum UnaryOp {
     Negate,

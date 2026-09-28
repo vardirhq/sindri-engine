@@ -11,6 +11,7 @@ mod item;
 mod member;
 mod state;
 mod stmt;
+mod timer;
 mod vector;
 
 use std::collections::{HashMap, HashSet};

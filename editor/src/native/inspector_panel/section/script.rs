@@ -173,7 +173,10 @@ pub(super) fn script_value_json(value: &ScriptValue) -> Value {
         // same vector row edits it.
         ScriptValue::Vec2(components) => Value::from(components.to_vec()),
         ScriptValue::Vec3(components) => Value::from(components.to_vec()),
+        // A timer is started by the script, not authored: it runs down in
+        // play, and a number in the inspector would be stale on the next frame.
         ScriptValue::Reference(_)
+        | ScriptValue::Timer { .. }
         | ScriptValue::Array(_)
         | ScriptValue::Null
         | ScriptValue::Unit => Value::Null,

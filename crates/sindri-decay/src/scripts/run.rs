@@ -144,6 +144,13 @@ pub(super) fn tick(
                     ScriptFailure::runtime(entity, &component.script, START, &error)
                 })?;
         }
+        // Time passes for a script that was already running: every timer its
+        // fields hold runs down by this frame, before it looks at any. One
+        // just started has not lived through the frame, so its timers start
+        // full.
+        if !fresh {
+            running.instance.advance_timers(f64::from(delta_seconds));
+        }
         if container.functions.iter().any(|f| f.name == UPDATE) {
             runtime
                 .call_instance(

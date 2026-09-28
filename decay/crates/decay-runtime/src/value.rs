@@ -41,6 +41,14 @@ pub enum Value {
     Vec2([f64; 2]),
     /// Three numbers, `x`, `y`, `z`.
     Vec3([f64; 3]),
+    /// A countdown: the seconds it has to go, never below zero, and the
+    /// seconds it was started with. Copied like a number, and run down only
+    /// by [`crate::ScriptInstance::advance_timers`] — the language has no
+    /// clock of its own.
+    Timer {
+        left: f64,
+        duration: f64,
+    },
     Null,
     Unit,
 }

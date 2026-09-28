@@ -18,8 +18,8 @@ script Match {
 
     var phase: f32 = 0.0;
     var countdown: f32 = 0.0;
-    var kickoff_shown: f32 = 0.0;
-    var goal_shown: f32 = 0.0;
+    var kickoff_banner = Timer(0.0);
+    var goal_banner = Timer(0.0);
     var sprint_fx_clock: f32 = 0.0;
     var goal_fx_clock: f32 = 0.0;
     var next_power: f32 = 5.0;
@@ -70,7 +70,7 @@ script Match {
             Ui.set_number(this.count_text, this.countdown - this.countdown % 1.0 + 1.0);
             if this.countdown <= 0.0 {
                 this.phase = 2.0;
-                this.kickoff_shown = 2.0;
+                this.kickoff_banner = Timer(2.0);
                 Audio.play("audio/hit.wav", 1.0);
             }
         }
@@ -80,12 +80,10 @@ script Match {
             wind(dt);
             match_fx(dt);
         }
-        this.kickoff_shown = max(0.0, this.kickoff_shown - dt);
-        this.goal_shown = max(0.0, this.goal_shown - dt);
         World.set_active(this.hint, this.phase == 0.0);
         World.set_active(this.count_text, this.phase == 1.0);
-        World.set_active(this.kickoff_text, this.kickoff_shown > 0.0);
-        World.set_active(this.goal_text, this.goal_shown > 0.0);
+        World.set_active(this.kickoff_text, !this.kickoff_banner.done);
+        World.set_active(this.goal_text, !this.goal_banner.done);
         digit(this.blue_digit, Game.score_blue);
         digit(this.red_digit, Game.score_red);
     }
@@ -162,7 +160,7 @@ script Match {
         } else {
             Game.score_red += 1.0;
         }
-        this.goal_shown = 2.0;
+        this.goal_banner = Timer(2.0);
         this.goal_fx_clock = 0.0;
         Camera.add_trauma(0.6);
         Audio.play("audio/hit.wav", 1.0);
@@ -185,7 +183,7 @@ script Match {
                 }
             }
         }
-        if this.goal_shown <= 0.0 {
+        if this.goal_banner.done {
             return;
         }
         this.goal_fx_clock -= dt;

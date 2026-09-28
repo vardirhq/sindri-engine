@@ -93,6 +93,17 @@ Names in scope without qualification. Decay has no imports, so each of these is 
 - `distance(Vec3)` → `f32`
 - `lerp(Vec3, f32)` → `Vec3`
 
+## Timers
+
+`Timer(seconds)` starts one. A timer held in a script's field runs down by each frame before that script's `update`; one held in a local does not. It is read, never written into: start a new one to restart it.
+
+### `Timer`
+
+- `done`: `bool`
+- `left`: `f32`
+- `duration`: `f32`
+- `progress`: `f32`
+
 ## Types
 
 ### `Aim`

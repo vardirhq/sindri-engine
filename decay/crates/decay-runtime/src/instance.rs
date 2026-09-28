@@ -28,6 +28,22 @@ impl ScriptInstance {
         self.fields.get(name).map(|slot| &slot.value)
     }
 
+    /// Runs down every timer this script's fields hold by `seconds`, stopping
+    /// each at zero.
+    ///
+    /// The host's to call, when it decides time has passed: the language has
+    /// no clock. A timer in a local is not run down — it lives for one call.
+    pub fn advance_timers(&mut self, seconds: f64) {
+        if seconds <= 0.0 || seconds.is_nan() {
+            return;
+        }
+        for slot in self.fields.values_mut() {
+            if let Value::Timer { left, .. } = &mut slot.value {
+                *left = (*left - seconds).max(0.0);
+            }
+        }
+    }
+
     /// Whether the script's own code may reassign this field: `var` rather
     /// than `let`. `None` for a field the script does not have.
     #[must_use]

@@ -30,6 +30,7 @@ pub(crate) fn describe(value: &Value) -> String {
         Value::Array(_) => "a collection",
         Value::Vec2(_) => "a Vec2",
         Value::Vec3(_) => "a Vec3",
+        Value::Timer { .. } => "a Timer",
         Value::Null => "null",
         Value::Unit => "nothing",
     }
@@ -293,6 +294,35 @@ impl<'a, H: Host> Runtime<'a, H> {
         Ok(None)
     }
 
+    /// The instructions that start a timer or read one.
+    fn step_timer(frame: &mut Frame, instruction: &Instruction) -> Result<(), RuntimeError> {
+        let value = frame.stack.pop().ok_or(RuntimeError::StackUnderflow)?;
+        let result = match (instruction, value) {
+            // A negative or NaN duration is a timer that has already run out,
+            // rather than one whose `progress` is nonsense.
+            (Instruction::StartTimer, Value::Number(seconds)) => {
+                let seconds = if seconds > 0.0 { seconds } else { 0.0 };
+                Value::Timer {
+                    left: seconds,
+                    duration: seconds,
+                }
+            }
+            (Instruction::Timer(property), Value::Timer { left, duration }) => match property {
+                decay_syntax::TimerProperty::Done => Value::Bool(left <= 0.0),
+                decay_syntax::TimerProperty::Left => Value::Number(left),
+                decay_syntax::TimerProperty::Duration => Value::Number(duration),
+                decay_syntax::TimerProperty::Progress => Value::Number(if duration > 0.0 {
+                    1.0 - left / duration
+                } else {
+                    1.0
+                }),
+            },
+            (_, other) => return Err(RuntimeError::NotATimer(describe(&other))),
+        };
+        frame.stack.push(result);
+        Ok(())
+    }
+
     /// The instructions that build a vector or work on one.
     fn step_vector(frame: &mut Frame, instruction: &Instruction) -> Result<(), RuntimeError> {
         let mut pop = || frame.stack.pop().ok_or(RuntimeError::StackUnderflow);
@@ -421,6 +451,9 @@ impl<'a, H: Host> Runtime<'a, H> {
                 | Instruction::Component(_)
                 | Instruction::WithComponent(_)
                 | Instruction::Vector(_) => Self::step_vector(frame, &instructions[ip])?,
+                Instruction::StartTimer | Instruction::Timer(_) => {
+                    Self::step_timer(frame, &instructions[ip])?;
+                }
                 Instruction::ScopeEnter => frame.scopes.push(HashMap::new()),
                 Instruction::ScopeExit => {
                     // The base scope holds the parameters, so it is never the

@@ -142,8 +142,12 @@ impl Lowerer<'_> {
                         self.lower_expr(object, instructions);
                         instructions.push(Instruction::Vector(op));
                     }
+                    Some(ValueMember::Timer(property)) => {
+                        self.lower_expr(object, instructions);
+                        instructions.push(Instruction::Timer(property));
+                    }
                     // Only a call is ever noted as a construction.
-                    Some(ValueMember::Construct(_)) | None => {
+                    Some(ValueMember::Construct(_) | ValueMember::StartTimer) | None => {
                         let (path, held) =
                             self.path_or_held(expr, "<invalid-member>", instructions);
                         instructions.push(Instruction::Load(path));
@@ -174,6 +178,13 @@ impl Lowerer<'_> {
                     self.lower_expr(argument, instructions);
                 }
                 instructions.push(Instruction::Construct(dimensions));
+                return;
+            }
+            Some(ValueMember::StartTimer) => {
+                for argument in args {
+                    self.lower_expr(argument, instructions);
+                }
+                instructions.push(Instruction::StartTimer);
                 return;
             }
             Some(ValueMember::Vector(op)) => {

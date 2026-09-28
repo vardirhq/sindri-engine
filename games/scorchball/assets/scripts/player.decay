@@ -37,9 +37,9 @@ script Player {
     var skin: f32 = 0.0;
     var ready: bool = false;
     var size: f32 = 1.75;
-    var grow_left: f32 = 0.0;
-    var boost_left: f32 = 0.0;
-    var burn_left: f32 = 0.0;
+    var grow_timer = Timer(0.0);
+    var boost_timer = Timer(0.0);
+    var burn_timer = Timer(0.0);
     var burn_turn: f32 = 0.0;
     var burn_x: f32 = 0.0;
     var burn_y: f32 = 0.0;
@@ -52,10 +52,10 @@ script Player {
     var sprinting: bool = false;
     var charge: f32 = 0.0;
     var charge_fx: f32 = 0.0;
-    var aftertouch_left: f32 = 0.0;
+    var aftertouch_timer = Timer(0.0);
     var ball: Ball = null;
     // A bot's plan: where it is heading, and a kick it has decided on.
-    var plan_left: f32 = 0.0;
+    var plan_timer = Timer(0.0);
     var want_x: f32 = 0.0;
     var want_y: f32 = 0.0;
     var kick_left: f32 = -1.0;
@@ -65,7 +65,7 @@ script Player {
     var seen_by: f32 = 0.0;
     var ball_vx: f32 = 0.0;
     var ball_vy: f32 = 0.0;
-    var bot_sprint_left: f32 = 0.0;
+    var sprint_timer = Timer(0.0);
     var bot_shot_charge: f32 = 0.0;
     var bot_curve: Vec2 = Vec2(0.0, 0.0);
 
@@ -105,14 +105,14 @@ script Player {
 
     // A power-up this player walked into: 1 grows them, 2 boosts their kicks.
     fn power_up(kind: f32) {
-        if kind == 1.0 { this.grow_left = this.power_time; }
-        if kind == 2.0 { this.boost_left = this.power_time; }
+        if kind == 1.0 { this.grow_timer = Timer(this.power_time); }
+        if kind == 2.0 { this.boost_timer = Timer(this.power_time); }
     }
 
     // The ball, on fire, touched this player from the other team.
     fn catch_fire() {
-        if this.burn_left <= 0.0 {
-            this.burn_left = this.burn_time;
+        if this.burn_timer.done {
+            this.burn_timer = Timer(this.burn_time);
             this.burn_turn = 0.0;
             Audio.play("audio/hit.wav", 0.8);
         }
@@ -136,12 +136,12 @@ script Player {
         var tx: f32 = 0.0;
         var ty: f32 = 0.0;
         this.sprinting = false;
-        if this.burn_left > 0.0 {
+        if !this.burn_timer.done {
             tx = this.burn_x * this.speed;
             ty = this.burn_y * this.speed;
         } else if this.bot && phase >= 2.0 {
             var pace: f32 = this.speed;
-            if this.bot_sprint_left > 0.0 && (abs(this.want_x) > 0.1 || abs(this.want_y) > 0.1) {
+            if !this.sprint_timer.done && (abs(this.want_x) > 0.1 || abs(this.want_y) > 0.1) {
                 pace = this.speed * this.sprint_speed;
                 this.sprinting = true;
             }
@@ -179,7 +179,7 @@ script Player {
     }
 
     fn try_kick(dt: f32, phase: f32) {
-        if phase < 2.0 || this.burn_left > 0.0 || Game.holder != this.slot {
+        if phase < 2.0 || !this.burn_timer.done || Game.holder != this.slot {
             this.charge = 0.0;
             this.charge_fx = 0.0;
             return;
@@ -216,12 +216,12 @@ script Player {
             aim = aim.normalized;
         }
         var force = this.kick_speed + (this.charged_kick - this.kick_speed) * shot_charge;
-        if this.boost_left > 0.0 {
+        if !this.boost_timer.done {
             force = this.boost_kick + (this.charged_boost_kick - this.boost_kick) * shot_charge;
         }
         let kick = aim * force;
         this.ball.kick(kick, this.slot);
-        this.aftertouch_left = this.aftertouch_time;
+        this.aftertouch_timer = Timer(this.aftertouch_time);
         Audio.play("audio/hit.wav", min(1.0, 0.72 + shot_charge * 0.28));
     }
 
@@ -229,35 +229,31 @@ script Player {
     // right-stick intent; a bot supplies the imperfect correction it chose
     // while planning the shot. The ball still owns the live velocity change.
     fn aftertouch(dt: f32, phase: f32) {
-        if this.aftertouch_left <= 0.0 || phase < 2.0 {
-            this.aftertouch_left = 0.0;
+        if this.aftertouch_timer.done || phase < 2.0 {
+            this.aftertouch_timer = Timer(0.0);
             return;
         }
-        this.aftertouch_left = max(0.0, this.aftertouch_left - dt);
         var pull = this.bot_curve;
         if !this.bot {
             pull = Vec2(Gamepad.axis(this.slot, "right_x"), -Gamepad.axis(this.slot, "right_y"));
         }
         if pull.length < 0.2 { return; }
-        let fade = this.aftertouch_left / this.aftertouch_time;
+        let fade = this.aftertouch_timer.left / this.aftertouch_time;
         let push = pull.normalized * this.aftertouch_strength * fade * dt;
         this.ball.nudge(push);
     }
 
     fn grow(dt: f32) {
-        this.grow_left = max(0.0, this.grow_left - dt);
-        this.boost_left = max(0.0, this.boost_left - dt);
         var target: f32 = 1.0;
         if !this.ready { target = this.big; }
-        else if this.grow_left > 0.0 { target = this.grown; }
+        else if !this.grow_timer.done { target = this.grown; }
         this.size += (target - this.size) * min(1.0, dt * 3.0);
         this.transform.scale.x = this.normal * this.size;
         this.transform.scale.y = this.normal * this.size;
     }
 
     fn burn(dt: f32) {
-        if this.burn_left <= 0.0 { return; }
-        this.burn_left -= dt;
+        if this.burn_timer.done { return; }
         this.burn_turn -= dt;
         if this.burn_turn <= 0.0 {
             this.burn_turn = 1.0;
@@ -325,15 +321,13 @@ script Player {
     // from that stale picture: when to sprint, how much to charge a shot, and
     // whether to add a little aftertouch. Physics and possession stay shared.
     fn think(dt: f32, phase: f32) {
-        this.bot_sprint_left = max(0.0, this.bot_sprint_left - dt);
         if this.kick_left >= 0.0 {
             this.kick_left -= dt;
             if this.kick_left < 0.0 { this.kick_now = true; }
         }
-        this.plan_left -= dt;
-        if phase < 2.0 || this.plan_left > 0.0 { return; }
+        if phase < 2.0 || !this.plan_timer.done { return; }
         let look = this.reaction * Random.range(0.7, 1.3);
-        this.plan_left = look;
+        this.plan_timer = Timer(look);
         let ball = this.ball;
         let bx = ball.transform.position.x;
         let by = ball.transform.position.y;
@@ -420,9 +414,9 @@ script Player {
     // Sprint is a burst decision, not a permanent AI speed multiplier. A bot
     // may choose it when there is real ground to cover, then has to reconsider.
     fn maybe_sprint(range: f32, chance: f32) {
-        if this.bot_sprint_left > 0.0 || range < 3.0 { return; }
+        if !this.sprint_timer.done || range < 3.0 { return; }
         if Random.range(0.0, 1.0) < chance {
-            this.bot_sprint_left = Random.range(0.35, 0.85);
+            this.sprint_timer = Timer(Random.range(0.35, 0.85));
         }
     }
 

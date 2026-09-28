@@ -1532,6 +1532,36 @@ is what the original objection was actually asking for.
 that is not `update` can reach it. `elapsed` is per script instance rather than
 per world: a script attached later has not been running as long.
 
+### Timers
+
+```decay
+script Mine {
+    var cooldown = Timer(0.0);
+    fn update(dt: f32) {
+        if !this.cooldown.done { return; }
+        this.cooldown = Timer(2.4);
+        drop();
+    }
+}
+```
+
+A `Timer` replaces the countdown a script used to keep by hand — a number, a
+`-= dt` every frame, and a check. **A timer a script's field holds runs down
+by each frame before that script's `update`**, whatever the update then does,
+so an early `return` above the countdown no longer stops the clock, which is
+the mistake the hand-written form invites. A timer started this frame is not
+run down until the next; one in a local is never run down.
+
+`done`, `left`, `duration` and `progress` read it; a new `Timer(seconds)`
+restarts it. Another script reads one through the script's type
+(`Mine.on(e).cooldown.left`). The inspector shows a timer field as empty: it
+is the running game's, not the author's.
+
+A countdown that should pause — Scorchball's kickoff countdown, which runs
+only while players are counting down — is still a number the script runs
+down itself. Scorchball's banners, power-ups, burning, aftertouch and bot
+reaction times are timers.
+
 ### Other scripts, by type
 
 Every `script` in a project is a type every other script can name, whichever
