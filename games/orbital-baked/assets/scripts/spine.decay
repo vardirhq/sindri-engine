@@ -25,8 +25,8 @@ script Spine {
         let elapsed = Game.elapsed;
         let scale = 1.0 + min(1.35, max(0.0, elapsed - 60.0) * 0.0025);
         this.hp = 118.0 * scale;
-        Game.set("boss_max", this.hp);
-        Game.set("boss_hp", this.hp);
+        Game.boss_max = this.hp;
+        Game.boss_hp = this.hp;
         Game.boss_kind = 8.0;
         let player = World.find("Player");
         if player != null { choose_initial_direction(player); }
@@ -106,7 +106,7 @@ script Spine {
         update_phase();
         grid_move(player, dt);
         receive_hits(player);
-        Game.set("boss_hp", max(this.hp, 0.0));
+        Game.boss_hp = max(this.hp, 0.0);
         if this.hp <= 0.0 { die(); }
     }
 
@@ -236,8 +236,8 @@ script Spine {
         Audio.play("audio/kill.wav", 0.65);
         Game.kills = Game.kills + 1.0;
         Game.score = Game.score + 900.0;
-        Game.set("boss_hp", 0.0);
-        Game.set("boss_max", 0.0);
+        Game.boss_hp = 0.0;
+        Game.boss_max = 0.0;
         var made: f32 = 0.0;
         while made < 8.0 {
             let angle = made / 8.0 * 6.2831853;

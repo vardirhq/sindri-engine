@@ -38,8 +38,8 @@ script Challenger {
         this.hp = this.health * scale;
         this.offset = Random.range(0.0, 6.2831853);
         this.attack = 0.75;
-        Game.set("boss_max", this.hp);
-        Game.set("boss_hp", this.hp);
+        Game.boss_max = this.hp;
+        Game.boss_hp = this.hp;
         Game.boss_kind = this.kind + 1.0;
     }
 
@@ -189,7 +189,7 @@ script Challenger {
         }
 
         receive_hits(player);
-        Game.set("boss_hp", max(this.hp, 0.0));
+        Game.boss_hp = max(this.hp, 0.0);
         if this.hp <= 0.0 { die(); }
     }
 
@@ -207,7 +207,7 @@ script Challenger {
     }
 
     fn update_phase(dt: f32) {
-        let share = this.hp / max(Game.get("boss_max", 1.0), 1.0);
+        let share = this.hp / max(Game.boss_max, 1.0);
         if share <= 0.56 { this.phase = 2.0; } else { this.phase = 1.0; }
         if this.phase != this.previous_phase {
             this.previous_phase = this.phase;
@@ -431,7 +431,7 @@ script Challenger {
     }
 
     fn update_spine_armor() {
-        let share = this.hp / max(Game.get("boss_max", 1.0), 1.0);
+        let share = this.hp / max(Game.boss_max, 1.0);
         if share > 0.8 { this.shape.count = 10.0; }
         else if share > 0.6 { this.shape.count = 9.0; }
         else if share > 0.4 { this.shape.count = 8.0; }
@@ -571,7 +571,7 @@ script Challenger {
                     damage *= 2.6;
                 }
                 if this.kind == 7.0 {
-                    let share = this.hp / max(Game.get("boss_max", 1.0), 1.0);
+                    let share = this.hp / max(Game.boss_max, 1.0);
                     if share > 0.6 { damage *= 0.72; }
                     else if share > 0.4 { damage *= 0.82; }
                     else if share > 0.2 { damage *= 0.92; }
@@ -596,8 +596,8 @@ script Challenger {
         Audio.play("audio/kill.wav", 0.6);
         Game.kills = Game.kills + 1.0;
         Game.score = Game.score + this.worth * 10.0;
-        Game.set("boss_hp", 0.0);
-        Game.set("boss_max", 0.0);
+        Game.boss_hp = 0.0;
+        Game.boss_max = 0.0;
 
         var made: f32 = 0.0;
         while made < 8.0 {

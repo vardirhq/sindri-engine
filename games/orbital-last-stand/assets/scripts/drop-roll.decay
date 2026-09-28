@@ -22,8 +22,8 @@ script DropRoll {
         let since_repair = Game.kills_since_repair + 1.0;
         Game.kills_since_repair = since_repair;
 
-        let max_hp = max(0.001, Game.get("max_hp", 5.0));
-        let health_ratio = max(0.0, min(1.0, Game.get("hp", max_hp) / max_hp));
+        let max_hp = max(0.001, Game.max_hp);
+        let health_ratio = max(0.0, min(1.0, Game.hp / max_hp));
         let missing = 1.0 - health_ratio;
         let pity = since_repair >= this.pity_kills;
         let wounded_boss = this.boss > 0.0 && health_ratio < 0.62;

@@ -73,13 +73,13 @@ script Director {
         Game.kills = 0.0;
         Game.cores = 0.0;
         Game.level = 1.0;
-        Game.set("next_level", 35.0);
+        Game.next_level = 35.0;
         Game.module_pool = 0.0;
         Game.elapsed = 0.0;
-        Game.set("sector", 1.0);
+        Game.sector = 1.0;
         Game.boss_count = 0.0;
-        Game.set("boss_hp", 0.0);
-        Game.set("boss_max", 0.0);
+        Game.boss_hp = 0.0;
+        Game.boss_max = 0.0;
         Game.boss_kind = -1.0;
         Game.victory = 0.0;
         Game.nullified = 0.0;
@@ -136,7 +136,7 @@ script Director {
             else if state == 3.0 { Game.run_state = 1.0; }
         }
         if state != 1.0 { return; }
-        if Game.get("hp", 1.0) <= 0.0 {
+        if Game.hp <= 0.0 {
             Game.victory = 0.0;
             end_run();
             return;
@@ -152,18 +152,18 @@ script Director {
             end_run();
             return;
         }
-        if Game.cores >= Game.get("next_level", 35.0) {
+        if Game.cores >= Game.next_level {
             let level = Game.level + 1.0;
-            let threshold = Game.get("next_level", 35.0);
+            let threshold = Game.next_level;
             Game.cores = Game.cores - threshold;
             Game.level = level;
-            Game.set("next_level", next_xp(threshold));
+            Game.next_level = next_xp(threshold);
             publish_module_pool(level);
             Game.run_state = 2.0;
             return;
         }
 
-        let boss_alive = Game.get("boss_hp", 0.0) > 0.0;
+        let boss_alive = Game.boss_hp > 0.0;
 
         // The gap between bosses is measured from the end of the last fight
         // rather than from when it was scheduled to start.
@@ -214,8 +214,8 @@ script Director {
 
     fn end_run() {
         Game.run_state = 4.0;
-        Game.set("boss_hp", 0.0);
-        Game.set("boss_max", 0.0);
+        Game.boss_hp = 0.0;
+        Game.boss_max = 0.0;
         Game.nullified = 0.0;
         let score = Game.score;
         if score > Save.number("best_score", 0.0) { Save.set_number("best_score", score); }
@@ -243,11 +243,11 @@ script Director {
     }
 
     fn publish_sector() {
-        if this.elapsed >= 480.0 { Game.set("sector", 5.0); }
-        else if this.elapsed >= 360.0 { Game.set("sector", 4.0); }
-        else if this.elapsed >= 240.0 { Game.set("sector", 3.0); }
-        else if this.elapsed >= 120.0 { Game.set("sector", 2.0); }
-        else { Game.set("sector", 1.0); }
+        if this.elapsed >= 480.0 { Game.sector = 5.0; }
+        else if this.elapsed >= 360.0 { Game.sector = 4.0; }
+        else if this.elapsed >= 240.0 { Game.sector = 3.0; }
+        else if this.elapsed >= 120.0 { Game.sector = 2.0; }
+        else { Game.sector = 1.0; }
     }
 
     fn spawn_one() {

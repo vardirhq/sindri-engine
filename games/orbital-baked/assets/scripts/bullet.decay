@@ -139,8 +139,8 @@ script Bullet {
 
     fn seek(dt: f32) {
         if Game.target_live <= 0.0 { return; }
-        let to_x = Game.get("target_x", this.transform.position.x) - this.transform.position.x;
-        let to_y = Game.get("target_y", this.transform.position.y) - this.transform.position.y;
+        let to_x = Game.target_x - this.transform.position.x;
+        let to_y = Game.target_y - this.transform.position.y;
         let far = sqrt(to_x * to_x + to_y * to_y);
         if far <= 0.0001 { return; }
         let desired_x = to_x / far;
@@ -282,8 +282,14 @@ script Bullet {
                     this.reservoir += 1.0;
                     if this.reservoir >= 3.0 {
                         this.reservoir = 0.0;
-                        let tx = Game.get("target_x", this.transform.position.x + 1.0) - this.transform.position.x;
-                        let ty = Game.get("target_y", this.transform.position.y) - this.transform.position.y;
+                        // At the target while there is one, straight ahead
+                        // otherwise: `target_x`/`target_y` mean nothing then.
+                        var tx: f32 = 1.0;
+                        var ty: f32 = 0.0;
+                        if Game.target_live > 0.0 {
+                            tx = Game.target_x - this.transform.position.x;
+                            ty = Game.target_y - this.transform.position.y;
+                        }
                         let far = max(0.001, sqrt(tx * tx + ty * ty));
                         spawn_beam(tx / far, ty / far, this.damage * 2.0);
                     }

@@ -7,8 +7,8 @@ script CombatLabPlayer {
 
     fn start() {
         Game.run_state = 1.0;
-        Game.set("hp", 10.0);
-        Game.set("max_hp", 10.0);
+        Game.hp = 10.0;
+        Game.max_hp = 10.0;
         Game.player_damage_taken = 0.0;
     }
 
@@ -19,11 +19,11 @@ script CombatLabPlayer {
         if raw > 0.0 {
             Game.player_damage_taken = 0.0;
             if Game.lab_invulnerable <= 0.0 && this.mercy <= 0.0 {
-                Game.set("hp", max(0.0, Game.get("hp", 10.0) - raw));
+                Game.hp = max(0.0, Game.hp - raw);
                 this.mercy = 0.28;
             }
         }
-        Game.lab_player_hp = Game.get("hp", 10.0);
+        Game.lab_player_hp = Game.hp;
     }
 
     fn move() {

@@ -54,8 +54,8 @@ script Powerup {
 
     fn collect() {
         if this.kind == 0.0 {
-            Game.set("hp", min(Game.get("max_hp", 5.0),
-                Game.get("hp", 5.0) + this.value));
+            Game.hp = min(Game.max_hp,
+                Game.hp + this.value);
         } else if this.kind == 1.0 {
             for shot in World.with_tag("hostile_shot") { World.despawn(shot); }
             let damage = max(4.0, Game.damage * 4.0);

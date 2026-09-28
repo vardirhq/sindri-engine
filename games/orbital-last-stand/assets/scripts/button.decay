@@ -21,7 +21,7 @@ script Button {
         } else if this.action == 2.0 {
             Game.run_state = 1.0;
         } else {
-            Game.set("hp", 0.0);
+            Game.hp = 0.0;
         }
     }
 }

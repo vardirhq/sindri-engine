@@ -32,7 +32,7 @@ script HazardAsteroid {
     }
 
     fn update(dt: f32) {
-        if Game.run_state != 1.0 || Game.get("sector", 0.0) != 1.0 {
+        if Game.run_state != 1.0 || Game.sector != 1.0 {
             // Preserve whatever momentum physics produced before freezing for an
             // overlay/sector transition. Resume from that momentum once play returns.
             if !this.suspended {

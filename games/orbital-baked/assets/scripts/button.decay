@@ -31,7 +31,7 @@ script Button {
             // you have to think about.
             Game.rush_from = (Game.rush_from + 1.0) % 12.0;
         } else {
-            Game.set("hp", 0.0);
+            Game.hp = 0.0;
         }
     }
 }

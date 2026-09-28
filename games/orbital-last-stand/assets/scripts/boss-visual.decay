@@ -18,8 +18,12 @@ script BossVisual {
         if boss == null || !World.exists(boss) { return; }
         if Game.run_state == 1.0 { this.clock += dt; }
 
-        let max_hp = max(1.0, Game.get("boss_max", 1.0));
-        let hp_share = max(0.0, Game.get("boss_hp", max_hp)) / max_hp;
+        // Full until the boss has put its health on the board, which is
+        // what `boss_max` of zero means.
+        var hp_share: f32 = 1.0;
+        if Game.boss_max > 0.0 {
+            hp_share = max(0.0, Game.boss_hp) / Game.boss_max;
+        }
         var phase: f32 = 1.0;
         if hp_share <= 0.30 { phase = 3.0; }
         else if hp_share <= 0.65 { phase = 2.0; }

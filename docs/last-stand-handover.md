@@ -113,8 +113,8 @@ These are real constraints, discovered the hard way:
 - **Shared values are declared.** `game-state.decay` declares the board values
   scripts share, read and written as `Game.kills`; a new one goes there, not
   into a fresh `Game.get("...", fallback)`. The board calls that remain are
-  keys built at runtime and the few values whose readers disagree about the
-  fallback (listed at the top of that file).
+  keys built at runtime, such as a stat's `stat + "_add"` or a module's
+  `owned_key`, which a declaration cannot name.
 - **`+` joins text**, so `stats.decay` clears a stat's two keys from its one
   name: `clear("damage")` sets `damage_add` and `damage_mul`.
 - **`@export let x: String` works**, and `Game.set` accepts a variable key. That
