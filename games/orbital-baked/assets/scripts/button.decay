@@ -16,20 +16,20 @@ script Button {
         }
         Audio.play("audio/click.wav", 0.3);
         if this.action == 0.0 {
-            Game.set("mode", 0.0);
-            Game.set("request_start", 1.0);
+            Game.mode = 0.0;
+            Game.request_start = 1.0;
         } else if this.action == 1.0 {
-            Game.set("run_state", 0.0);
+            Game.run_state = 0.0;
         } else if this.action == 2.0 {
-            Game.set("run_state", 1.0);
+            Game.run_state = 1.0;
         } else if this.action == 4.0 {
-            Game.set("mode", 1.0);
-            Game.set("request_start", 1.0);
+            Game.mode = 1.0;
+            Game.request_start = 1.0;
         } else if this.action == 5.0 {
             // Twelve bosses, each its own prefab, in the order a run meets
             // them. Wraps, because a picker that stops at the end is a picker
             // you have to think about.
-            Game.set("rush_from", (Game.get("rush_from", 0.0) + 1.0) % 12.0);
+            Game.rush_from = (Game.rush_from + 1.0) % 12.0;
         } else {
             Game.set("hp", 0.0);
         }

@@ -28,7 +28,7 @@ script Arc {
             World.despawn(this.entity);
             return;
         }
-        if Game.get("run_state", 0.0) != 1.0 {
+        if Game.run_state != 1.0 {
             Physics.set_velocity(this.entity, 0.0, 0.0);
             return;
         }
@@ -67,7 +67,7 @@ script Arc {
         World.set_property(flare, "style", 1.0);
         World.set_property(flare, "end_size", 1.25);
         World.set_property(flare, "duration", 0.22);
-        Game.set("screen_trauma", max(Game.get("screen_trauma", 0.0), 0.1));
+        Game.screen_trauma = max(Game.screen_trauma, 0.1);
     }
 
     fn retarget() {

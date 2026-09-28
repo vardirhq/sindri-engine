@@ -28,12 +28,12 @@ script UpgradeChooser {
     }
 
     fn update(dt: f32) {
-        if Game.get("modules_reset", 0.0) > 0.0 {
-            Game.set("modules_reset", 0.0);
+        if Game.modules_reset > 0.0 {
+            Game.modules_reset = 0.0;
             clear_owned();
-            Game.set("black_modules_taken", 0.0);
+            Game.black_modules_taken = 0.0;
         }
-        let choosing = Game.get("run_state", 0.0) == 2.0;
+        let choosing = Game.run_state == 2.0;
         if choosing == this.showing { return; }
         this.showing = choosing;
         if choosing { show(); }
@@ -56,7 +56,7 @@ script UpgradeChooser {
     fn show() {
         for card in this.cards { World.set_active(card, false); }
         World.set_active(this.screen, true);
-        let pool = Game.get("module_pool", 0.0);
+        let pool = Game.module_pool;
         var taken: List<f32> = [];
         for slot in 0..this.slots.length {
             var index = -1.0;
@@ -76,7 +76,7 @@ script UpgradeChooser {
     }
 
     fn offer_count() -> f32 {
-        if Game.get("special_second_opinion", 0.0) > 0.0 { return 4.0; }
+        if Game.special_second_opinion > 0.0 { return 4.0; }
         return this.offers;
     }
 

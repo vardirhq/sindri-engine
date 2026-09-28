@@ -6,24 +6,24 @@ script CombatLabPlayer {
     var mercy: f32 = 0.0;
 
     fn start() {
-        Game.set("run_state", 1.0);
+        Game.run_state = 1.0;
         Game.set("hp", 10.0);
         Game.set("max_hp", 10.0);
-        Game.set("player_damage_taken", 0.0);
+        Game.player_damage_taken = 0.0;
     }
 
     fn update(dt: f32) {
         move();
         if this.mercy > 0.0 { this.mercy -= dt; }
-        let raw = Game.get("player_damage_taken", 0.0);
+        let raw = Game.player_damage_taken;
         if raw > 0.0 {
-            Game.set("player_damage_taken", 0.0);
-            if Game.get("lab_invulnerable", 1.0) <= 0.0 && this.mercy <= 0.0 {
+            Game.player_damage_taken = 0.0;
+            if Game.lab_invulnerable <= 0.0 && this.mercy <= 0.0 {
                 Game.set("hp", max(0.0, Game.get("hp", 10.0) - raw));
                 this.mercy = 0.28;
             }
         }
-        Game.set("lab_player_hp", Game.get("hp", 10.0));
+        Game.lab_player_hp = Game.get("hp", 10.0);
     }
 
     fn move() {

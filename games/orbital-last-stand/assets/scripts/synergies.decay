@@ -14,8 +14,8 @@ script Synergies {
             if evaluate(index) { active_count += 1.0; }
             index += 1.0;
         }
-        Game.set("synergy_count", active_count);
-        if Game.get("run_state", 0.0) == 1.0 && active_count > this.previous_count {
+        Game.synergy_count = active_count;
+        if Game.run_state == 1.0 && active_count > this.previous_count {
             celebrate(active_count - this.previous_count);
         }
         this.previous_count = active_count;
@@ -36,7 +36,7 @@ script Synergies {
             World.set_property(flare, "spin", 3.0 + ring * 2.0);
             ring += 1.0;
         }
-        Game.set("screen_trauma", max(Game.get("screen_trauma", 0.0), 0.58));
+        Game.screen_trauma = max(Game.screen_trauma, 0.58);
     }
 
     fn evaluate(index: f32) -> bool {

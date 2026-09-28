@@ -47,8 +47,8 @@ script Director {
         this.pause_screen = World.find("Pause");
         this.result_screen = World.find("Result");
         this.hazards = World.spawn(this.splitter);
-        Game.set("run_state", 0.0);
-        Game.set("nullified", 0.0);
+        Game.run_state = 0.0;
+        Game.nullified = 0.0;
         show_only_title();
     }
 
@@ -69,28 +69,28 @@ script Director {
         this.boss_count = 0.0;
         this.last_boss = -1.0;
         this.previous_boss = -1.0;
-        Game.set("score", 0.0);
-        Game.set("kills", 0.0);
-        Game.set("cores", 0.0);
-        Game.set("level", 1.0);
+        Game.score = 0.0;
+        Game.kills = 0.0;
+        Game.cores = 0.0;
+        Game.level = 1.0;
         Game.set("next_level", 35.0);
-        Game.set("module_pool", 0.0);
-        Game.set("elapsed", 0.0);
+        Game.module_pool = 0.0;
+        Game.elapsed = 0.0;
         Game.set("sector", 1.0);
-        Game.set("boss_count", 0.0);
+        Game.boss_count = 0.0;
         Game.set("boss_hp", 0.0);
         Game.set("boss_max", 0.0);
-        Game.set("boss_kind", -1.0);
-        Game.set("victory", 0.0);
-        Game.set("nullified", 0.0);
-        Game.set("elite_bonus", 0.0);
-        Game.set("elite_spawned", 0.0);
-        Game.set("kills_since_repair", 0.0);
-        Game.set("powerups_dropped", 0.0);
-        Game.set("overdrive", 0.0);
-        Game.set("stats_reset", 1.0);
-        Game.set("player_reset", 1.0);
-        Game.set("modules_reset", 1.0);
+        Game.boss_kind = -1.0;
+        Game.victory = 0.0;
+        Game.nullified = 0.0;
+        Game.elite_bonus = 0.0;
+        Game.elite_spawned = 0.0;
+        Game.kills_since_repair = 0.0;
+        Game.powerups_dropped = 0.0;
+        Game.overdrive = 0.0;
+        Game.stats_reset = 1.0;
+        Game.player_reset = 1.0;
+        Game.modules_reset = 1.0;
         clear_tag("enemy");
         clear_tag("bullet");
         clear_tag("player_damage");
@@ -103,7 +103,7 @@ script Director {
         World.set_active(this.title, false);
         World.set_active(this.hud, true);
         World.set_active(this.result_screen, false);
-        Game.set("run_state", 1.0);
+        Game.run_state = 1.0;
     }
 
     fn clear_tag(tag: String) {
@@ -111,55 +111,55 @@ script Director {
     }
 
     fn update(dt: f32) {
-        let state = Game.get("run_state", 0.0);
+        let state = Game.run_state;
         if state != this.was_state {
             this.was_state = state;
             World.set_active(this.pause_screen, state == 3.0);
             World.set_active(this.result_screen, state == 4.0);
         }
         if state == 0.0 {
-            if Game.get("request_start", 0.0) > 0.0 {
-                Game.set("request_start", 0.0);
+            if Game.request_start > 0.0 {
+                Game.request_start = 0.0;
                 begin();
             }
             return;
         }
         if state == 4.0 {
-            if Game.get("request_start", 0.0) > 0.0 {
-                Game.set("request_start", 0.0);
+            if Game.request_start > 0.0 {
+                Game.request_start = 0.0;
                 begin();
             }
             return;
         }
         if Input.just_pressed("Escape") {
-            if state == 1.0 { Game.set("run_state", 3.0); }
-            else if state == 3.0 { Game.set("run_state", 1.0); }
+            if state == 1.0 { Game.run_state = 3.0; }
+            else if state == 3.0 { Game.run_state = 1.0; }
         }
         if state != 1.0 { return; }
         if Game.get("hp", 1.0) <= 0.0 {
-            Game.set("victory", 0.0);
+            Game.victory = 0.0;
             end_run();
             return;
         }
 
         this.elapsed += dt;
-        Game.set("elapsed", this.elapsed);
+        Game.elapsed = this.elapsed;
         publish_sector();
         if this.elapsed >= this.run_limit {
             this.elapsed = this.run_limit;
-            Game.set("elapsed", this.run_limit);
-            Game.set("victory", 1.0);
+            Game.elapsed = this.run_limit;
+            Game.victory = 1.0;
             end_run();
             return;
         }
-        if Game.get("cores", 0.0) >= Game.get("next_level", 35.0) {
-            let level = Game.get("level", 1.0) + 1.0;
+        if Game.cores >= Game.get("next_level", 35.0) {
+            let level = Game.level + 1.0;
             let threshold = Game.get("next_level", 35.0);
-            Game.set("cores", Game.get("cores", 0.0) - threshold);
-            Game.set("level", level);
+            Game.cores = Game.cores - threshold;
+            Game.level = level;
             Game.set("next_level", next_xp(threshold));
             publish_module_pool(level);
-            Game.set("run_state", 2.0);
+            Game.run_state = 2.0;
             return;
         }
 
@@ -182,7 +182,7 @@ script Director {
 
         if !boss_alive && this.elapsed >= this.next_boss {
             this.boss_count += 1.0;
-            Game.set("boss_count", this.boss_count);
+            Game.boss_count = this.boss_count;
             send_boss();
             return;
         }
@@ -207,19 +207,19 @@ script Director {
     fn publish_module_pool(level: f32) {
         // 0 salvage, 1 boss relic, 2 Foundry Signal. The chooser consumes this
         // without needing to know why a level belongs to a particular pool.
-        if level % 7.0 == 0.0 { Game.set("module_pool", 2.0); }
-        else if level % 5.0 == 0.0 { Game.set("module_pool", 1.0); }
-        else { Game.set("module_pool", 0.0); }
+        if level % 7.0 == 0.0 { Game.module_pool = 2.0; }
+        else if level % 5.0 == 0.0 { Game.module_pool = 1.0; }
+        else { Game.module_pool = 0.0; }
     }
 
     fn end_run() {
-        Game.set("run_state", 4.0);
+        Game.run_state = 4.0;
         Game.set("boss_hp", 0.0);
         Game.set("boss_max", 0.0);
-        Game.set("nullified", 0.0);
-        let score = Game.get("score", 0.0);
+        Game.nullified = 0.0;
+        let score = Game.score;
         if score > Save.number("best_score", 0.0) { Save.set_number("best_score", score); }
-        Save.set_number("total_kills", Save.number("total_kills", 0.0) + Game.get("kills", 0.0));
+        Save.set_number("total_kills", Save.number("total_kills", 0.0) + Game.kills);
         clear_tag("enemy");
         clear_tag("player_damage");
         clear_tag("mine");
@@ -310,7 +310,7 @@ script Director {
 
     fn make_elite(enemy: Entity, charger_enemy: bool) {
         if this.elapsed <= this.elite_after { return; }
-        let bonus = Game.get("elite_bonus", 0.0);
+        let bonus = Game.elite_bonus;
         let chance = min(this.elite_cap,
             this.elite_base + this.elapsed / this.elite_time_divisor +
             bonus * this.elite_bonus_scale);
@@ -349,7 +349,7 @@ script Director {
             World.set_property(enemy, "speed",
                 World.property_number(enemy, "speed", 1.0) * speed);
         }
-        Game.set("elite_spawned", Game.get("elite_spawned", 0.0) + 1.0);
+        Game.elite_spawned = Game.elite_spawned + 1.0;
     }
 
     fn send_boss() {
@@ -358,7 +358,7 @@ script Director {
         // The reference expands from four bosses to nine at 4:00 and all
         // eleven at 8:00. Avoid either of the two most recent eligible picks.
         let boss_pool = eligible_boss_count();
-        Game.set("boss_pool", boss_pool);
+        Game.boss_pool = boss_pool;
         var pick: f32 = Random.int(0.0, boss_pool - 1.0);
         var attempts: f32 = 0.0;
         while attempts < 8.0 && (pick == this.last_boss || pick == this.previous_boss) {

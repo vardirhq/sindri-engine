@@ -17,7 +17,7 @@ script Mine {
     }
 
     fn update(dt: f32) {
-        if Game.get("run_state", 0.0) != 1.0 { return; }
+        if Game.run_state != 1.0 { return; }
         this.age += dt;
         this.transform.rotation_z += dt * 1.8;
         this.shape.dashes = 6.0;
@@ -29,7 +29,7 @@ script Mine {
         }
         for enemy in Physics.sensor_entered() { this.tripped = true; }
         var arm: f32 = this.arm_after;
-        if Game.get("special_anchor_clock", 0.0) > 0.0 { arm *= 0.65; }
+        if Game.special_anchor_clock > 0.0 { arm *= 0.65; }
         if this.age < arm {
             this.shape.fill.a = 0.2 + this.age / arm * 0.6;
         } else {
@@ -51,13 +51,13 @@ script Mine {
         let wave = World.spawn(this.blast);
         wave.transform.position.x = this.transform.position.x;
         wave.transform.position.y = this.transform.position.y;
-        if Game.get("special_anchor_clock", 0.0) > 0.0 {
+        if Game.special_anchor_clock > 0.0 {
             wave.transform.scale.x *= 1.27;
             wave.transform.scale.y *= 1.27;
         }
         World.set_property(wave, "damage", this.damage);
         Effects.burst(this.entity);
-        Game.set("screen_trauma", max(Game.get("screen_trauma", 0.0), 0.42));
+        Game.screen_trauma = max(Game.screen_trauma, 0.42);
         World.despawn(this.entity);
     }
 }

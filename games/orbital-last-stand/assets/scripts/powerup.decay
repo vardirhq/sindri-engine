@@ -17,7 +17,7 @@ script Powerup {
     }
 
     fn update(dt: f32) {
-        if Game.get("run_state", 0.0) != 1.0 {
+        if Game.run_state != 1.0 {
             Physics.set_velocity(this.entity, 0.0, 0.0);
             return;
         }
@@ -58,14 +58,14 @@ script Powerup {
                 Game.get("hp", 5.0) + this.value));
         } else if this.kind == 1.0 {
             for shot in World.with_tag("hostile_shot") { World.despawn(shot); }
-            let damage = max(4.0, Game.get("damage", 1.0) * 4.0);
+            let damage = max(4.0, Game.damage * 4.0);
             let wave = World.spawn(this.pulse);
             let player = World.find("Player");
             wave.transform.position.x = player.transform.position.x;
             wave.transform.position.y = player.transform.position.y;
             World.set_property(wave, "damage", damage);
         } else {
-            Game.set("overdrive", max(Game.get("overdrive", 0.0), 8.0));
+            Game.overdrive = max(Game.overdrive, 8.0);
         }
         Effects.burst(this.entity);
         Audio.play("audio/upgrade.wav", 0.4);

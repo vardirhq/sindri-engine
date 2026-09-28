@@ -12,7 +12,7 @@ script HostileMine {
     var exploded: bool = false;
 
     fn update(dt: f32) {
-        if Game.get("run_state", 0.0) != 1.0 { return; }
+        if Game.run_state != 1.0 { return; }
         this.age += dt;
         this.transform.rotation_z += dt * 1.7;
 
@@ -51,7 +51,7 @@ script HostileMine {
             let dx = player.transform.position.x - this.transform.position.x;
             let dy = player.transform.position.y - this.transform.position.y;
             if dx * dx + dy * dy <= this.blast_radius * this.blast_radius {
-                Game.set("player_damage_taken", max(Game.get("player_damage_taken", 0.0), this.damage));
+                Game.player_damage_taken = max(Game.player_damage_taken, this.damage);
             }
         }
         damage_targets();
@@ -60,7 +60,7 @@ script HostileMine {
         this.transform.scale.x = this.blast_radius * 2.0;
         this.transform.scale.y = this.blast_radius * 2.0;
         Effects.burst(this.entity);
-        Game.set("screen_trauma", max(Game.get("screen_trauma", 0.0), 0.38));
+        Game.screen_trauma = max(Game.screen_trauma, 0.38);
         Audio.play("audio/boss.wav", 0.32);
         World.despawn(this.entity);
     }

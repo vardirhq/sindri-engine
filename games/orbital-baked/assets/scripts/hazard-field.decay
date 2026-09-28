@@ -27,17 +27,17 @@ script HazardField {
     }
 
     fn update(dt: f32) {
-        if Game.get("run_state", 0.0) != 1.0 {
+        if Game.run_state != 1.0 {
             return;
         }
         if this.kind == 1.0 {
             bend(dt);
             this.phase += dt * 0.45;
             this.transform.rotation_z = this.phase;
-            let pulse = 1.0 + sin(Game.get("elapsed", 0.0) * 2.0 + this.phase) * 0.035;
+            let pulse = 1.0 + sin(Game.elapsed * 2.0 + this.phase) * 0.035;
             this.transform.scale.x = this.radius * 2.0 * pulse;
             this.transform.scale.y = this.radius * 2.0 * pulse;
-            this.shape.stroke.a = 0.58 + sin(Game.get("elapsed", 0.0) * 2.0 + this.phase) * 0.16;
+            this.shape.stroke.a = 0.58 + sin(Game.elapsed * 2.0 + this.phase) * 0.16;
         } else {
             roam(dt);
             suppress();
@@ -68,8 +68,8 @@ script HazardField {
 
     fn roam(dt: f32) {
         this.phase += dt * 0.7;
-        this.vx += cos(this.phase) * sin(Game.get("elapsed", 0.0) * 0.38 + this.phase) * 0.08 * dt;
-        this.vy += sin(this.phase * 0.83) * sin(Game.get("elapsed", 0.0) * 0.38 + this.phase) * 0.08 * dt;
+        this.vx += cos(this.phase) * sin(Game.elapsed * 0.38 + this.phase) * 0.08 * dt;
+        this.vy += sin(this.phase * 0.83) * sin(Game.elapsed * 0.38 + this.phase) * 0.08 * dt;
         let speed = sqrt(this.vx * this.vx + this.vy * this.vy);
         let speed_cap = this.roam_speed * 1.13;
         if speed > speed_cap {
@@ -99,18 +99,18 @@ script HazardField {
     fn suppress() {
         let player = World.find("Player");
         if player == null {
-            Game.set("nullified", 0.0);
+            Game.nullified = 0.0;
             return;
         }
         let dx = player.transform.position.x - this.transform.position.x;
         let dy = player.transform.position.y - this.transform.position.y;
         let active = dx * dx + dy * dy < this.radius * this.radius;
         if active {
-            Game.set("nullified", 1.0);
+            Game.nullified = 1.0;
             this.shape.stroke.a = 1.0;
             this.shape.fill.a = 0.18;
         } else {
-            Game.set("nullified", 0.0);
+            Game.nullified = 0.0;
             this.shape.stroke.a = 0.65;
             this.shape.fill.a = 0.08;
         }

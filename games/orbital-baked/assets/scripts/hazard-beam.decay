@@ -27,7 +27,7 @@ script HazardBeam {
     }
 
     fn update(dt: f32) {
-        if Game.get("run_state", 0.0) != 1.0 {
+        if Game.run_state != 1.0 {
             return;
         }
         if this.mode == 1.0 {
@@ -38,7 +38,7 @@ script HazardBeam {
     }
 
     fn update_flare(dt: f32) {
-        let time = Game.get("elapsed", 0.0);
+        let time = Game.elapsed;
         let intensity = (sin(time * 0.72) + 1.0) * 0.5;
         let half_x = visible_half_x(this.view_size);
         let half_y = visible_half_y(this.view_size);

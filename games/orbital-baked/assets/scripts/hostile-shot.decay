@@ -16,7 +16,7 @@ script HostileShot {
     }
 
     fn update(dt: f32) {
-        if Game.get("run_state", 0.0) != 1.0 {
+        if Game.run_state != 1.0 {
             Physics.set_velocity(this.entity, 0.0, 0.0);
             return;
         }
@@ -35,8 +35,7 @@ script HostileShot {
             return;
         }
         for hit in Physics.sensor_entered() {
-            Game.set("player_damage_taken",
-                     max(Game.get("player_damage_taken", 0.0), this.damage));
+            Game.player_damage_taken = max(Game.player_damage_taken, this.damage);
             World.despawn(this.entity);
             return;
         }

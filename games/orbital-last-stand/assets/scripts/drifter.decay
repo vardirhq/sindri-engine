@@ -28,7 +28,7 @@ script Drifter {
     var burrow: f32 = 0.0;
 
     fn start() {
-        let late = max(0.0, Game.get("elapsed", 0.0) - 180.0);
+        let late = max(0.0, Game.elapsed - 180.0);
         this.hp = this.health * (1.0 + late * 0.0014);
         this.attack = Random.range(0.35, 1.1);
         this.clock = 0.0;
@@ -41,7 +41,7 @@ script Drifter {
     }
 
     fn update(dt: f32) {
-        if Game.get("run_state", 0.0) != 1.0 {
+        if Game.run_state != 1.0 {
             Physics.set_velocity(this.entity, 0.0, 0.0);
             return;
         }
@@ -216,8 +216,7 @@ script Drifter {
     fn receive_hits(player: Entity) {
         for hit in Physics.sensor_entered() {
             if hit == player {
-                Game.set("player_damage_taken",
-                    max(Game.get("player_damage_taken", 0.0), this.touch_damage));
+                Game.player_damage_taken = max(Game.player_damage_taken, this.touch_damage);
                 continue;
             }
             if !World.exists(hit) { continue; }
@@ -361,10 +360,10 @@ script Drifter {
         Effects.burst(this.entity);
         var trauma: f32 = 0.12;
         if this.elite > 0.0 { trauma = 0.28; }
-        Game.set("screen_trauma", max(Game.get("screen_trauma", 0.0), trauma));
+        Game.screen_trauma = max(Game.screen_trauma, trauma);
         Audio.play("audio/kill.wav", 0.3);
-        Game.set("kills", Game.get("kills", 0.0) + 1.0);
-        Game.set("score", Game.get("score", 0.0) + this.worth * 10.0);
+        Game.kills = Game.kills + 1.0;
+        Game.score = Game.score + this.worth * 10.0;
         let drop = World.spawn(this.core);
         drop.transform.position.x = this.transform.position.x;
         drop.transform.position.y = this.transform.position.y;

@@ -83,10 +83,10 @@ script Hud {
 
     fn update(dt: f32) {
         this.hud_clock += dt;
-        Ui.set_number(this.score, Game.get("score", 0.0));
-        Ui.set_number(this.level, Game.get("level", 1.0));
+        Ui.set_number(this.score, Game.score);
+        Ui.set_number(this.level, Game.level);
 
-        let elapsed = Game.get("elapsed", 0.0);
+        let elapsed = Game.elapsed;
         let minutes = (elapsed - elapsed % 60.0) / 60.0;
         Ui.set_numbers(this.clock, minutes, elapsed % 60.0);
         update_sector();
@@ -97,7 +97,7 @@ script Hud {
         Ui.set_numbers(this.health_text, hp, max_hp);
         animate_player_health();
 
-        let cores = Game.get("cores", 0.0);
+        let cores = Game.cores;
         let needed = max(Game.get("next_level", 1.0), 1.0);
         Ui.set_fill(this.cores_bar, min(cores / needed, 1.0));
 
@@ -121,7 +121,7 @@ script Hud {
     }
 
     fn animate_player_health() {
-        let impact = min(1.0, max(0.0, Game.get("shield_impact", 0.0)));
+        let impact = min(1.0, max(0.0, Game.shield_impact));
         let health_bar = this.health_bar;
         let health_text = this.health_text;
         health_bar.transform.scale.x = this.health_bar_scale_x;
@@ -172,7 +172,7 @@ script Hud {
     }
 
     fn update_boss_name() {
-        let kind = Game.get("boss_kind", 0.0);
+        let kind = Game.boss_kind;
         if kind == 0.0 { Ui.set_text(this.boss_name, "WARDEN"); }
         else if kind == 1.0 { Ui.set_text(this.boss_name, "HARROWER"); }
         else if kind == 2.0 { Ui.set_text(this.boss_name, "PRISM"); }

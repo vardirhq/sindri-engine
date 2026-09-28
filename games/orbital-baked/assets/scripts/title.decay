@@ -24,13 +24,13 @@ script Title {
         // button says otherwise, and the button sets this the moment it is
         // pressed. Clearing it here means quitting a rush and pressing START
         // gives you a game rather than another rush.
-        Game.set("mode", 0.0);
+        Game.mode = 0.0;
         World.set_active(this.notice, Save.is_damaged());
         Ui.set_text(this.hint, "Move with WASD, or drag anywhere to steer. Tap the logo for Combat Lab.");
     }
 
     fn update(dt: f32) {
-        if Game.get("run_state", 0.0) != 0.0 {
+        if Game.run_state != 0.0 {
             return;
         }
         Ui.set_number(this.best, Save.number("best_score", 0.0));
@@ -52,7 +52,7 @@ script Title {
 
         // Only when it changes: `Ui.set_text` every frame is work for nothing,
         // and the label is a button's worth of state rather than a readout.
-        let pick = Game.get("rush_from", 0.0);
+        let pick = Game.rush_from;
         if pick != this.shown_pick {
             this.shown_pick = pick;
             name_pick(pick);
