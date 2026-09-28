@@ -179,6 +179,13 @@ impl Analyzer<'_, '_> {
                         );
                     }
                     symbol.ty
+                } else if self.constants.contains_key(name) {
+                    self.error(
+                        Code::Immutable,
+                        target.span,
+                        format!("cannot assign to constant `{name}`"),
+                    );
+                    Type::Unknown
                 } else {
                     self.error(
                         Code::UnknownName,

@@ -10,7 +10,6 @@ script HazardBeam {
     @export let player_dps: f32 = 4.5;
     @export let enemy_dps: f32 = 3.4;
     @export let flare_enemy_dps: f32 = 1.2;
-    @export let view_size: f32 = 11.0;
 
     var warn_left: f32 = 0.0;
     var active_left: f32 = 0.0;
@@ -40,8 +39,8 @@ script HazardBeam {
     fn update_flare(dt: f32) {
         let time = Game.elapsed;
         let intensity = (sin(time * 0.72) + 1.0) * 0.5;
-        let half_x = visible_half_x(this.view_size);
-        let half_y = visible_half_y(this.view_size);
+        let half_x = visible_half_x(VIEW_SIZE);
+        let half_y = visible_half_y(VIEW_SIZE);
         let edge = half_y * 2.0 * (0.18 + 0.08 * sin(time * 0.21));
         let safe = half_y - edge;
         this.transform.position.y = this.side * (half_y - edge * 0.5);
@@ -87,9 +86,9 @@ script HazardBeam {
     fn size_pulse() {
         if this.axis == 1.0 {
             this.transform.scale.x = 0.56;
-            this.transform.scale.y = visible_half_y(this.view_size) * 2.0 + 2.0;
+            this.transform.scale.y = visible_half_y(VIEW_SIZE) * 2.0 + 2.0;
         } else {
-            this.transform.scale.x = visible_half_x(this.view_size) * 2.0 + 2.0;
+            this.transform.scale.x = visible_half_x(VIEW_SIZE) * 2.0 + 2.0;
             this.transform.scale.y = 0.56;
         }
     }
@@ -97,9 +96,9 @@ script HazardBeam {
     fn size_warning() {
         if this.axis == 1.0 {
             this.transform.scale.x = 0.10;
-            this.transform.scale.y = visible_half_y(this.view_size) * 2.0 + 2.0;
+            this.transform.scale.y = visible_half_y(VIEW_SIZE) * 2.0 + 2.0;
         } else {
-            this.transform.scale.x = visible_half_x(this.view_size) * 2.0 + 2.0;
+            this.transform.scale.x = visible_half_x(VIEW_SIZE) * 2.0 + 2.0;
             this.transform.scale.y = 0.10;
         }
     }

@@ -83,7 +83,16 @@ pub struct Analysis {
     pub structs: std::collections::BTreeMap<String, Vec<(String, crate::types::Type)>>,
     /// Every name the program binds, and its type; see [`Binding`].
     pub bindings: Vec<Binding>,
+    /// Where the program names a constant, and the value it means there.
+    /// Keyed like `value_members`, by the name's span; the lowering writes
+    /// the value in its place.
+    pub constant_uses: ConstantUses,
+    /// This file's own constants, worked out, by name.
+    pub constants: std::collections::BTreeMap<String, crate::constant::ConstValue>,
 }
+
+/// Where a program names a constant, by the name's span.
+pub type ConstantUses = HashMap<Span, crate::constant::ConstValue>;
 
 /// A name bound somewhere in the program, with the type the analysis gave
 /// it: a script's field, a parameter, a local, a loop's binding.

@@ -10,6 +10,7 @@
 
 mod analyzer;
 pub mod codes;
+mod constant;
 mod diagnostic;
 mod environment;
 pub mod members;
@@ -22,8 +23,11 @@ use decay_syntax::parse;
 
 use analyzer::Analyzer;
 
+pub use constant::{ConstValue, FoldError, fold_constants};
 pub use decay_syntax::{ListOp, StringOp, TimerProperty, VectorOp};
-pub use diagnostic::{Analysis, Binding, Diagnostic, DiagnosticPhase, ValueMember, ValueMembers};
+pub use diagnostic::{
+    Analysis, Binding, ConstantUses, Diagnostic, DiagnosticPhase, ValueMember, ValueMembers,
+};
 pub use environment::{Environment, ExternalSymbol, StateField};
 pub use types::{
     BUILT_IN_TYPES, COMPONENTS, EMIT, FunctionType, HostType, LENGTH, LIST, OLD_LENGTH, TIMER,
@@ -59,6 +63,8 @@ pub fn analyze_with_environment(source: &str, environment: &Environment) -> Anal
     let enums = analyzer.known_enums();
     let structs = analyzer.known_structs();
     let bindings = std::mem::take(&mut analyzer.bindings);
+    let constant_uses = std::mem::take(&mut analyzer.constant_uses);
+    let constants = std::mem::take(&mut analyzer.own_constants);
 
     Analysis {
         program: parsed.program,
@@ -67,5 +73,7 @@ pub fn analyze_with_environment(source: &str, environment: &Environment) -> Anal
         enums,
         structs,
         bindings,
+        constant_uses,
+        constants,
     }
 }

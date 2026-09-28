@@ -6,7 +6,6 @@ script HazardField {
     @export let radius: f32 = 1.8;
     @export let pull: f32 = 2.1;
     @export let roam_speed: f32 = 0.55;
-    @export let view_size: f32 = 11.0;
 
     var vx: f32 = 0.0;
     var vy: f32 = 0.0;
@@ -78,8 +77,8 @@ script HazardField {
         }
         this.transform.position.x += this.vx * dt;
         this.transform.position.y += this.vy * dt;
-        let edge_x = max(0.0, visible_half_x(this.view_size) - this.radius);
-        let edge_y = max(0.0, visible_half_y(this.view_size) - this.radius);
+        let edge_x = max(0.0, visible_half_x(VIEW_SIZE) - this.radius);
+        let edge_y = max(0.0, visible_half_y(VIEW_SIZE) - this.radius);
         if this.transform.position.x < -edge_x {
             this.transform.position.x = -edge_x;
             this.vx = abs(this.vx);

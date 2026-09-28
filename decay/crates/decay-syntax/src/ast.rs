@@ -25,6 +25,23 @@ pub enum Item {
     /// the file's scripts call by name, with no `this`. Written `shared fn`,
     /// every script in the project may call it.
     Function(FunctionDecl),
+    /// `const ARENA: f32 = 12.0;`: a name for a value worked out when the
+    /// file compiles. Written `shared const`, every file in the project may
+    /// use it.
+    Const(ConstDecl),
+}
+
+/// A declared constant: its name, its type, and the expression that gives its
+/// value, which may use only literals, operators and other constants.
+#[derive(Debug, Clone, PartialEq)]
+pub struct ConstDecl {
+    pub name: String,
+    pub shared: bool,
+    pub ty: TypeRef,
+    pub value: Expr,
+    /// Where the name was written, for a diagnostic about it.
+    pub name_span: Span,
+    pub span: Span,
 }
 
 /// A declared enum: its name, and its variants in order.

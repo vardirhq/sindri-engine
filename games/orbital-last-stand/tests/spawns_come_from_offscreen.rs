@@ -15,8 +15,8 @@ use sindri_core::{EntityId, TagsComponent};
 
 const STEP: f32 = 1.0 / 60.0;
 
-/// The scene camera's `sindri.camera.vertical_size`, which every gameplay
-/// script carries as its own `view_size` export.
+/// The scene camera's `sindri.camera.vertical_size`, which the scripts know as
+/// the shared constant `VIEW_SIZE` in `view.decay`.
 const VIEW_SIZE: f32 = 11.0;
 
 /// What the camera frames, worked out the way the extractor does: the authored

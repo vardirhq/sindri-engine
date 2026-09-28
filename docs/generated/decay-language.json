@@ -49,6 +49,10 @@
   ],
   "contextual_keywords": [
     {
+      "name": "const",
+      "special_at": "the start of an item, or right after `shared` at one"
+    },
+    {
       "name": "event",
       "special_at": "the start of an item"
     },
@@ -66,7 +70,7 @@
     },
     {
       "name": "shared",
-      "special_at": "right before `fn` at the start of an item"
+      "special_at": "right before `fn` or `const` at the start of an item"
     },
     {
       "name": "on",
@@ -371,6 +375,24 @@
       "id": "not-a-struct",
       "phase": "decay-semantic",
       "summary": "Named fields, `Name(field: value)`, after a name that is not a struct."
+    },
+    {
+      "code": "decay-semantic/constant-not-fixed",
+      "id": "constant-not-fixed",
+      "phase": "decay-semantic",
+      "summary": "A constant whose value cannot be worked out when the file compiles: it calls something, reads a field, or names something that is not a constant."
+    },
+    {
+      "code": "decay-semantic/constant-cycle",
+      "id": "constant-cycle",
+      "phase": "decay-semantic",
+      "summary": "Constants whose values need each other."
+    },
+    {
+      "code": "decay-semantic/constant-type",
+      "id": "constant-type",
+      "phase": "decay-semantic",
+      "summary": "A constant of a type a constant cannot hold: anything but `f32`, `bool`, `String` or an enum."
     }
   ],
   "generated_by": "cargo run -p sindri-capabilities -- --write",
@@ -381,6 +403,7 @@
     "struct",
     "event",
     "state",
+    "const",
     "fn"
   ],
   "keywords": [

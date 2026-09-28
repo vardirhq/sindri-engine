@@ -67,6 +67,11 @@ impl<'a> Parser<'a> {
                 self.parse_enum()
             } else if self.at_word(item::STRUCT) {
                 self.parse_struct()
+            } else if self.at_word(item::CONST) {
+                self.parse_const(false)
+            } else if self.at_shared_const() {
+                self.advance();
+                self.parse_const(true)
             } else if self.at(&TokenKind::Fn) {
                 self.parse_function().map(Item::Function)
             } else if self.at_shared_fn() {
@@ -100,6 +105,15 @@ impl<'a> Parser<'a> {
             && matches!(
                 self.tokens.get(self.cursor + 1).map(|token| &token.kind),
                 Some(TokenKind::Fn)
+            )
+    }
+
+    /// `shared const`, the same way.
+    fn at_shared_const(&self) -> bool {
+        matches!(&self.current().kind, TokenKind::Identifier(name) if name == item::SHARED)
+            && matches!(
+                self.tokens.get(self.cursor + 1).map(|token| &token.kind),
+                Some(TokenKind::Identifier(name)) if name == item::CONST
             )
     }
 

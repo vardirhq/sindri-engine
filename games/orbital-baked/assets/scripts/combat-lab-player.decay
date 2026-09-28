@@ -2,7 +2,6 @@
 // this ship is intentionally tiny so the lab does not boot the whole campaign.
 script CombatLabPlayer {
     @export let speed: f32 = 5.2;
-    @export let view_size: f32 = 11.0;
     var mercy: f32 = 0.0;
 
     fn start() {
@@ -38,8 +37,8 @@ script CombatLabPlayer {
         Physics.set_velocity(this.entity, dx * this.speed, dy * this.speed);
 
         let aspect = max(Viewport.aspect, 0.001);
-        var half_x = this.view_size * 0.5;
-        var half_y = this.view_size * 0.5;
+        var half_x = VIEW_SIZE * 0.5;
+        var half_y = VIEW_SIZE * 0.5;
         if aspect >= 1.0 { half_x *= aspect; } else { half_y /= aspect; }
         this.transform.position.x = max(-half_x + 0.3, min(half_x - 0.3, this.transform.position.x));
         this.transform.position.y = max(-half_y + 0.3, min(half_y - 0.3, this.transform.position.y));

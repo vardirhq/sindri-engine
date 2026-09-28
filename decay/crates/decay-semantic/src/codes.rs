@@ -44,11 +44,14 @@ pub enum Code {
     RangeOutsideFor,
     MissingFields,
     NotAStruct,
+    ConstantNotFixed,
+    ConstantCycle,
+    ConstantType,
 }
 
 impl Code {
     /// Every code, its stable name, and what it means.
-    pub const ALL: [(Self, &'static str, &'static str); 36] = [
+    pub const ALL: [(Self, &'static str, &'static str); 39] = [
         (
             Self::UnknownName,
             "unknown-name",
@@ -228,6 +231,21 @@ impl Code {
             Self::NotAStruct,
             "not-a-struct",
             "Named fields, `Name(field: value)`, after a name that is not a struct.",
+        ),
+        (
+            Self::ConstantNotFixed,
+            "constant-not-fixed",
+            "A constant whose value cannot be worked out when the file compiles: it calls something, reads a field, or names something that is not a constant.",
+        ),
+        (
+            Self::ConstantCycle,
+            "constant-cycle",
+            "Constants whose values need each other.",
+        ),
+        (
+            Self::ConstantType,
+            "constant-type",
+            "A constant of a type a constant cannot hold: anything but `f32`, `bool`, `String` or an enum.",
         ),
     ];
 

@@ -38,9 +38,12 @@ pub(crate) fn container_members(source: &str) -> Vec<(String, ExternalSymbol)> {
     let parsed = parse(source);
     let Some(container) = parsed.program.items.iter().find_map(|item| match item {
         Item::Script(container) | Item::Component(container) => Some(container),
-        Item::Event(_) | Item::State(_) | Item::Function(_) | Item::Enum(_) | Item::Struct(_) => {
-            None
-        }
+        Item::Event(_)
+        | Item::State(_)
+        | Item::Function(_)
+        | Item::Enum(_)
+        | Item::Struct(_)
+        | Item::Const(_) => None,
     }) else {
         return Vec::new();
     };

@@ -33,9 +33,6 @@ script Director {
     @export let elite_bonus_scale: f32 = 0.65;
     @export let elite_cap: f32 = 0.32;
     @export let arena: f32 = 7.5;
-    // What the camera frames, matching `sindri.camera.vertical_size` on the
-    // scene's camera and the same export every other script here carries.
-    @export let view_size: f32 = 11.0;
     // How far past the visible edge something arrives, so a body with a radius
     // is wholly outside the frame rather than clipping into it.
     @export let spawn_margin: f32 = 1.4;
@@ -482,11 +479,11 @@ script Director {
     }
 
     fn spawn_ring_x() -> f32 {
-        return max(visible_half_x(this.view_size) + this.spawn_margin, this.arena);
+        return max(visible_half_x(VIEW_SIZE) + this.spawn_margin, this.arena);
     }
 
     fn spawn_ring_y() -> f32 {
-        return max(visible_half_y(this.view_size) + this.spawn_margin, this.arena);
+        return max(visible_half_y(VIEW_SIZE) + this.spawn_margin, this.arena);
     }
 
 }

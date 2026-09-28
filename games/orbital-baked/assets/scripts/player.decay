@@ -5,7 +5,6 @@ script Player {
     @export let mine: Prefab;
     @export let muzzle_fx: Prefab;
     @export let invulnerable_for: f32 = 0.9;
-    @export let view_size: f32 = 11.0;
     @export let edge_padding: f32 = 0.28;
 
     var hurt: Entity = null;
@@ -103,8 +102,8 @@ script Player {
         this.transform.rotation_z = this.facing - 1.5707963;
         Game.player_facing = this.facing;
         Game.player_thrust = min(1.0, length);
-        let edge_x = max(0.0, visible_half_x(this.view_size) - this.edge_padding);
-        let edge_y = max(0.0, visible_half_y(this.view_size) - this.edge_padding);
+        let edge_x = max(0.0, visible_half_x(VIEW_SIZE) - this.edge_padding);
+        let edge_y = max(0.0, visible_half_y(VIEW_SIZE) - this.edge_padding);
         var velocity_x: f32 = dx * speed;
         var velocity_y: f32 = dy * speed;
         if this.transform.position.x <= -edge_x {
@@ -247,12 +246,12 @@ script Player {
             this.broadside -= dt;
             if this.broadside <= 0.0 {
                 this.broadside = 3.4;
-                let left = -visible_half_x(this.view_size) + 0.2;
-                let right = visible_half_x(this.view_size) - 0.2;
+                let left = -visible_half_x(VIEW_SIZE) + 0.2;
+                let right = visible_half_x(VIEW_SIZE) - 0.2;
                 var lane: f32 = -1.0;
                 while lane <= 1.0 {
-                    fire_one(left, lane * visible_half_y(this.view_size) * 0.55, 1.0, 0.0, Game.damage * 0.72, false, 0.9);
-                    fire_one(right, lane * visible_half_y(this.view_size) * 0.55, -1.0, 0.0, Game.damage * 0.72, false, 0.9);
+                    fire_one(left, lane * visible_half_y(VIEW_SIZE) * 0.55, 1.0, 0.0, Game.damage * 0.72, false, 0.9);
+                    fire_one(right, lane * visible_half_y(VIEW_SIZE) * 0.55, -1.0, 0.0, Game.damage * 0.72, false, 0.9);
                     lane += 1.0;
                 }
             }
@@ -342,7 +341,7 @@ script Player {
         var best: Entity = null;
         var best_distance: f32 = 0.0;
         for enemy in World.with_tag("enemy") {
-            if !World.exists(enemy) || !on_screen(enemy, this.view_size) { continue; }
+            if !World.exists(enemy) || !on_screen(enemy, VIEW_SIZE) { continue; }
             let dx = enemy.transform.position.x - this.transform.position.x;
             let dy = enemy.transform.position.y - this.transform.position.y;
             let distance = dx * dx + dy * dy;

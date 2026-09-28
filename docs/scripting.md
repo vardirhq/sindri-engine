@@ -1593,7 +1593,7 @@ shared fn visible_half_x(view_size: f32) -> f32 {
 }
 
 // Any script, in any file.
-let half = visible_half_x(this.view_size);
+let half = visible_half_x(VIEW_SIZE);
 ```
 
 A function written outside any script belongs to its file: the scripts in
@@ -1615,6 +1615,34 @@ script, event, state or engine function already has, is refused.
 Orbital Last Stand and Orbital Baked each keep `visible_half_x`,
 `visible_half_y` and `on_screen` as `shared fn` in `view.decay`, where
 twenty-five scripts used to carry identical copies.
+
+### Constants
+
+```decay
+// view.decay — any file in the project.
+shared const VIEW_SIZE: f32 = 11.0;
+
+// Any file. This one's own, worked out from the project's.
+const EDGE: f32 = VIEW_SIZE / 2.0 + 1.2;
+const OPENING: Phase = Phase.Lobby;
+```
+
+A constant is a name for a value worked out when the project compiles, so it
+never changes while the game runs and costs what the literal would. It holds
+a number, a flag, text or an enum's variant, and its value may use literals,
+operators, variants and other constants — in any file, for shared ones — but
+cannot call anything or read the world. Like a function, a plain `const` is
+its file's and a `shared const` the project's; assigning one, declaring one
+twice, or giving it a name something else already has is refused.
+
+Reach for one where a value must be the same everywhere and nothing should
+tune it per entity. Where a scene should be able to tune it — a speed, a
+cooldown — keep an `@export` field instead: the inspector shows fields, not
+constants.
+
+Orbital Last Stand and Orbital Baked each declare `VIEW_SIZE`, the camera's
+`vertical_size`, once in `view.decay`, where every enemy, hazard and the
+director used to carry the same `@export let view_size: f32 = 11.0;`.
 
 ### Other scripts, by type
 

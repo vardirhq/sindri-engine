@@ -6,7 +6,7 @@
 mod expr;
 mod stmt;
 
-use decay_semantic::{Analysis, ValueMember, ValueMembers};
+use decay_semantic::{Analysis, ConstValue, ConstantUses, ValueMember, ValueMembers};
 use decay_syntax::{FunctionDecl, Item, Member, Span};
 
 use crate::ir::{ContainerKind, Instruction, IrContainer, IrField, IrFunction, IrProgram};
@@ -20,6 +20,7 @@ use crate::ir::{ContainerKind, Instruction, IrContainer, IrField, IrFunction, Ir
 #[allow(clippy::zero_sized_map_values)]
 pub(crate) struct Lowerer<'a> {
     value_members: &'a ValueMembers,
+    constant_uses: &'a ConstantUses,
     structs: &'a std::collections::BTreeMap<String, Vec<(String, decay_semantic::Type)>>,
 }
 
@@ -27,6 +28,7 @@ impl<'a> Lowerer<'a> {
     pub(crate) fn lower_program(analysis: &'a Analysis) -> IrProgram {
         let lowerer = Self {
             value_members: &analysis.value_members,
+            constant_uses: &analysis.constant_uses,
             structs: &analysis.structs,
         };
         let containers = analysis
@@ -46,7 +48,8 @@ impl<'a> Lowerer<'a> {
                 | Item::State(_)
                 | Item::Function(_)
                 | Item::Enum(_)
-                | Item::Struct(_) => None,
+                | Item::Struct(_)
+                | Item::Const(_) => None,
             })
             .collect();
 
@@ -77,6 +80,21 @@ impl<'a> Lowerer<'a> {
             .get(name)
             .map(|fields| fields.iter().map(|(field, _)| field.clone()).collect())
             .unwrap_or_default()
+    }
+
+    /// The value a name at this span means, when the analysis found it names
+    /// a constant: written in the name's place, so nothing is looked up.
+    pub(super) fn constant_at(&self, span: Span) -> Option<crate::ir::Constant> {
+        use crate::ir::Constant;
+        Some(match self.constant_uses.get(&span)? {
+            ConstValue::Number(number) => Constant::Number(*number),
+            ConstValue::Bool(flag) => Constant::Bool(*flag),
+            ConstValue::Text(text) => Constant::String(text.clone()),
+            ConstValue::Variant {
+                enumeration,
+                variant,
+            } => Constant::Variant(format!("{enumeration}.{variant}")),
+        })
     }
 
     /// What the analysis decided a member read at this span is, if anything.
