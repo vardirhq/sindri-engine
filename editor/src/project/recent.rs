@@ -14,7 +14,7 @@
 //! would answer "where did my project go" with an empty row where it used to
 //! be, and the editor cannot tell an unmounted volume from a deletion.
 
-use std::path::Path;
+use std::path::{Path, PathBuf};
 
 use serde::{Deserialize, Serialize};
 
@@ -49,9 +49,49 @@ impl RecentProject {
 }
 
 /// Projects in the order they were last opened, most recent first.
+///
+/// Read through [`RecentProjects::from`], so a preferences file written before
+/// paths were normalized loses its duplicates the next time it is read.
 #[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
-#[serde(transparent)]
+#[serde(from = "Vec<RecentProject>", into = "Vec<RecentProject>")]
 pub struct RecentProjects(Vec<RecentProject>);
+
+impl From<Vec<RecentProject>> for RecentProjects {
+    fn from(entries: Vec<RecentProject>) -> Self {
+        let mut recent = Self::default();
+        for entry in entries {
+            let path = normalized(&entry.path);
+            if !recent.0.iter().any(|kept| kept.path == path) {
+                recent.0.push(RecentProject { path, ..entry });
+            }
+        }
+        recent.0.truncate(MAX_REMEMBERED);
+        recent
+    }
+}
+
+impl From<RecentProjects> for Vec<RecentProject> {
+    fn from(recent: RecentProjects) -> Self {
+        recent.0
+    }
+}
+
+/// One spelling per project.
+///
+/// A project opened as `games/orbital/` and again as `games/orbital` — or from
+/// another working directory — is the same project, and the welcome window
+/// listed it twice. Made absolute and rebuilt from its components, which drops
+/// trailing separators and `.` segments without touching the disk: a project
+/// on an unmounted drive still has to be remembered by where it was.
+fn normalized(path: &str) -> String {
+    let path = Path::new(path);
+    let absolute = std::path::absolute(path).unwrap_or_else(|_| path.to_path_buf());
+    absolute
+        .components()
+        .collect::<PathBuf>()
+        .display()
+        .to_string()
+}
 
 impl RecentProjects {
     /// Puts a project at the top of the list, where it was opened.
@@ -61,7 +101,7 @@ impl RecentProjects {
     /// show up in the welcome window the next time it is opened, not the next
     /// time the preferences file is deleted.
     pub fn remember(&mut self, project: &Project) {
-        let path = project.root().display().to_string();
+        let path = normalized(&project.root().display().to_string());
         self.0.retain(|remembered| remembered.path != path);
         self.0.insert(
             0,
@@ -77,6 +117,7 @@ impl RecentProjects {
     ///
     /// The only way a row leaves, and it is always something the user asked for.
     pub fn forget(&mut self, path: &str) {
+        let path = normalized(path);
         self.0.retain(|remembered| remembered.path != path);
     }
 
@@ -159,6 +200,43 @@ mod tests {
 
         assert_eq!(recent.entries().len(), 1);
         assert_eq!(recent.most_recent().expect("a first row").name, "Gather");
+    }
+
+    /// The welcome window listed every project twice: once as it was opened
+    /// from a path with a trailing separator, once without.
+    #[test]
+    fn one_project_is_one_row_however_its_path_was_written() {
+        let directory = tempfile::tempdir().expect("a temporary directory");
+        let root = directory.path().join("orbital");
+        project(&root, "Orbital");
+        let mut recent = RecentProjects::default();
+        for spelling in [
+            root.display().to_string(),
+            format!("{}/", root.display()),
+            format!("{}/.", root.display()),
+        ] {
+            recent.remember(&Project::open(Path::new(&spelling)).expect("the project opens"));
+        }
+        assert_eq!(recent.entries().len(), 1, "{:?}", recent.entries());
+    }
+
+    /// A preferences file written before paths were normalized already holds
+    /// both rows, and reading it keeps one.
+    #[test]
+    fn duplicates_already_saved_are_merged_when_read() {
+        let saved = r#"[
+            {"path": "/games/orbital/", "name": "Orbital"},
+            {"path": "/games/orbital", "name": "Orbital"},
+            {"path": "/games/platformer", "name": "Platformer"}
+        ]"#;
+        let recent: RecentProjects = serde_json::from_str(saved).expect("the list reads");
+        let paths: Vec<&str> = recent
+            .entries()
+            .iter()
+            .map(|entry| entry.path.as_str())
+            .collect();
+        assert_eq!(paths.len(), 2, "{paths:?}");
+        assert_eq!(recent.most_recent().expect("a first row").name, "Orbital");
     }
 
     #[test]
