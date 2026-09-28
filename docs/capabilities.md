@@ -1738,8 +1738,14 @@ the README.
   sprites, shapes, UI, physics, audio, effects, profiles, and grid behavior
 - No scroll wheel or gamepad surface. The platform tracks scroll; nothing has
   needed it from a script yet
-- The VS Code extension provides highlighting, completion, and diagnostics
-  through `decay-lsp`, but there is no formatter or debugger
+- The official VS Code extension registers `.decay`, highlights the current
+  language, and supplies comments, pairs and indentation. It starts the real
+  `decay-lsp` at the nearest Sindri project root, so diagnostics, completion,
+  hover and document symbols use the project's script types, events and shared
+  state. The Sindri project browser opens scripts in VS Code with that root;
+  saving uses the editor's existing watched compile/reload path. There is no
+  formatter, debugger, definition/references/rename, signature help, or
+  semantic highlighting yet
 - No script state migration across a reload: a changed file recompiles, and the
   running instance keeps whatever fields it had
 - Static exports fetch a manifest and content-hashed assets through the browser
@@ -1999,4 +2005,3 @@ to enter. Nothing new was added to the engine for either.
 ## World presentation
 
 Scenes can author `sindri.environment` as the scene-wide presentation contract. It owns background colour, ambient colour/intensity, contact depth, and world post-processing controls; the directional world light is a `sindri.light` entity drawn and aimed in the Scene view. Textured 3D geometry, including engine-owned voxel meshes, is shaded from the same ambient and directional settings in editor viewports and browser Voxel Lab; the default renderer lighting preserves the previous unlit appearance for scenes without an environment. Voxel Lab is the acceptance lab for the wider presentation track in `docs/world-presentation-plan.md`. Voxel meshes also carry deterministic corner AO controlled by the environment's contact-depth strength. Exposure, tone mapping, contrast, saturation, bloom, and vignette share one ordered world post path while overlay/UI remains crisp. Fog, sky, environment profiles/volumes, local lights, weather, water, screen-space AO for arbitrary geometry, and advanced cinematic effects remain future slices.
-

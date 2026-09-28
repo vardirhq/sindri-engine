@@ -4,6 +4,19 @@
   "description": "Decay language support for Sindri projects",
   "version": "0.1.0",
   "publisher": "vardir",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/vardirhq/sindri2.git",
+    "directory": "editors/vscode-decay"
+  },
+  "license": "MIT OR Apache-2.0",
+  "files": [
+    "extension.js",
+    "server.js",
+    "language-configuration.json",
+    "syntaxes/decay.tmLanguage.json",
+    "README.md"
+  ],
   "engines": {
     "vscode": "^1.90.0"
   },
@@ -42,12 +55,14 @@
     }
   },
   "scripts": {
-    "check": "node --check extension.js"
+    "check": "node --check extension.js && node --check server.js && node test.js",
+    "package": "npx --no-install @vscode/vsce package"
   },
   "dependencies": {
     "vscode-languageclient": "^9.0.1"
   },
   "devDependencies": {
-    "@types/vscode": "^1.90.0"
+    "@types/vscode": "^1.90.0",
+    "@vscode/vsce": "^3.6.2"
   }
 }

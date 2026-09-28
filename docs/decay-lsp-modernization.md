@@ -39,7 +39,7 @@ These are defects or sources of actively misleading tooling.
   - [ ] Add a test that fails when parser keywords and tooling keywords drift.
 - [ ] Bring the VS Code TextMate grammar up to the current Decay language.
   - [x] Highlight `for` and `in`.
-  - [ ] Audit every implemented keyword, literal, declaration, primitive type,
+  - [x] Audit every implemented keyword, literal, declaration, primitive type,
         attribute, and operator against `decay/LANGUAGE.md`.
   - [ ] Stop hard-coding Sindri host globals in the grammar where generated
         semantic highlighting can replace them.
@@ -287,14 +287,14 @@ Decay needs one formatter rather than editor-specific whitespace behavior.
 
 ## P2 — VS Code extension quality
 
-- [ ] Keep extension metadata/versioning aligned with supported server behavior.
-- [ ] Handle server-not-found/startup failure with an actionable user message.
+- [x] Keep extension metadata/versioning aligned with supported server behavior.
+- [x] Handle server-not-found/startup failure with an actionable user message.
 - [ ] Restart/reconnect cleanly after server failure where appropriate.
-- [ ] Ensure watcher patterns match actual Sindri project files.
-- [ ] Dispose watchers/client resources correctly.
-- [ ] Add extension packaging validation.
-- [ ] Add an install/run development path that does not require tribal knowledge.
-- [ ] Document how an external Sindri project locates `decay-lsp`.
+- [x] Ensure watcher patterns match actual Sindri project files.
+- [x] Dispose watchers/client resources correctly.
+- [x] Add extension packaging validation.
+- [x] Add an install/run development path that does not require tribal knowledge.
+- [x] Document how an external Sindri project locates `decay-lsp`.
 - [ ] Verify Windows, Linux, and macOS executable/path handling.
 
 ## P2 — agent and automation interface
@@ -350,7 +350,7 @@ building another Decay analyzer.
 - [ ] Update `docs/scripting.md` when Sindri host behavior changes.
 - [ ] Regenerate `docs/generated/decay-api.md` when the host surface changes.
 - [ ] Update `docs/decay-agent-guide.md` when preflight/agent commands change.
-- [ ] Update `editors/vscode-decay/README.md` as capabilities become real.
+- [x] Update `editors/vscode-decay/README.md` as capabilities become real.
 - [ ] Keep this checklist referenced by `AGENTS.md`, `CLAUDE.md`, and
       `docs/parity.md`.
 - [ ] Update the audit date/status in this document after each substantial
@@ -384,6 +384,12 @@ The modernization is complete only when all of the following are true:
 ## Audit record
 
 Initial deep audit: **2026-09-21**.
+
+VS Code v1 audit: **2026-09-27**. The lexical grammar now matches the language
+reference, the client discovers the nearest Sindri project, watches the project
+inputs consumed by the server, reports startup failures, and has repeatable
+validation/packaging instructions. Sindri opens scripts with their project in
+VS Code without making that editor mandatory.
 
 The audit found a sound core boundary but meaningful tooling drift: missing
 `for`/`in` keyword knowledge, stale VS Code host highlighting, incomplete

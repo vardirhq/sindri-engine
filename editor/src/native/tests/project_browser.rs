@@ -207,13 +207,13 @@ fn every_row_can_be_selected_even_with_nothing_to_open() {
     }
 }
 
-/// Selecting marks; only a scene opens.
+/// Selecting marks; scenes and scripts open through their own paths.
 ///
 /// The rule the row's sense used to enforce, asserted where the decision now
-/// lives. A script row that opened something would be offering a thing the
-/// editor cannot do: it lists `.decay` files and cannot open one.
+/// lives. A script is handed to the optional external editor rather than being
+/// mistaken for a scene or edited in Sindri's read-only preview.
 #[test]
-fn only_a_scene_opens_on_a_double_click() {
+fn scenes_and_scripts_open_on_a_double_click() {
     for kind in [
         AssetKind::Scene,
         AssetKind::Script,
@@ -230,6 +230,11 @@ fn only_a_scene_opens_on_a_double_click() {
             kind == AssetKind::Scene,
             "{kind:?} answered a double click with the wrong thing"
         );
+        let external = matches!(
+            driven_listing_row(kind, Reported::DoubleClicked),
+            Some(BrowserAction::OpenExternal(_))
+        );
+        assert_eq!(external, kind == AssetKind::Script);
         assert!(
             matches!(
                 driven_listing_row(kind, Reported::Clicked),

@@ -30,6 +30,8 @@ pub mod console;
 #[cfg(not(target_arch = "wasm32"))]
 pub mod dock;
 #[cfg(not(target_arch = "wasm32"))]
+pub mod external_editor;
+#[cfg(not(target_arch = "wasm32"))]
 pub mod fixture;
 /// Direct manipulation handles for Scene-view transforms.
 #[cfg(not(target_arch = "wasm32"))]
