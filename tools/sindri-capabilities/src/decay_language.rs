@@ -69,7 +69,30 @@ pub(crate) fn describe() -> Value {
             "text_bytes": decay_runtime::TEXT_LIMIT,
         },
         "diagnostic_phases": ["decay-syntax", "decay-semantic"],
+        "diagnostics": diagnostics(),
     })
+}
+
+/// Every compiler diagnostic by its stable code: the phase and the name
+/// joined, exactly as `decay-lsp` reports it, so a page can be keyed on it.
+fn diagnostics() -> Vec<Value> {
+    let syntax = decay_syntax::codes::SyntaxCode::ALL
+        .iter()
+        .map(|(_, id, summary)| ("decay-syntax", *id, *summary));
+    let semantic = decay_semantic::codes::Code::ALL
+        .iter()
+        .map(|(_, id, summary)| ("decay-semantic", *id, *summary));
+    syntax
+        .chain(semantic)
+        .map(|(phase, id, summary)| {
+            json!({
+                "code": format!("{phase}/{id}"),
+                "phase": phase,
+                "id": id,
+                "summary": summary,
+            })
+        })
+        .collect()
 }
 
 fn operators() -> Value {
@@ -232,6 +255,7 @@ mod tests {
             "constructors",
             "members",
             "lifecycle",
+            "diagnostics",
         ] {
             assert!(
                 language[table]

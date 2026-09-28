@@ -10,6 +10,7 @@
 //! declarations and every use, and lowers `Game.score` to the path the host
 //! answers, as it does for any host value.
 
+use crate::codes::Code;
 use std::collections::HashSet;
 
 use decay_syntax::{ExprKind, FieldDecl, Item, Program, StateDecl, UnaryOp};
@@ -32,6 +33,7 @@ impl Analyzer<'_, '_> {
             for field in &state.fields {
                 if !own.insert((state.name.clone(), field.name.clone())) {
                     self.error(
+                        Code::Duplicate,
                         field.span,
                         format!("duplicate state field `{}.{}`", state.name, field.name),
                     );
@@ -43,6 +45,7 @@ impl Analyzer<'_, '_> {
                     .contains(&(state.name.clone(), field.name.clone()))
                 {
                     self.error(
+                        Code::DeclaredInSeveralFiles,
                         field.span,
                         format!(
                             "`{}.{}` is declared more than once in the project; keep one",
@@ -74,6 +77,7 @@ impl Analyzer<'_, '_> {
             }
             Some(_) => {
                 self.error(
+                    Code::NameTaken,
                     state.span,
                     format!("`{name}` is already a name that is not a namespace"),
                 );
@@ -85,6 +89,7 @@ impl Analyzer<'_, '_> {
             || self.enums.contains_key(name)
         {
             self.error(
+                Code::NameTaken,
                 state.span,
                 format!("`{name}` is already a name; a state needs one of its own"),
             );
@@ -93,6 +98,7 @@ impl Analyzer<'_, '_> {
             for field in &state.fields {
                 if namespace.member(&field.name).is_some() {
                     self.error(
+                        Code::NameTaken,
                         field.span,
                         format!("`{name}` already has a `{}`", field.name),
                     );
@@ -127,6 +133,7 @@ impl Analyzer<'_, '_> {
             && !is_enum(written)
         {
             self.error(
+                Code::StateFieldType,
                 field.span,
                 format!(
                     "`{place}` is a `{}`; a state holds `f32`, `bool` and enums for now",
@@ -135,7 +142,7 @@ impl Analyzer<'_, '_> {
             );
         }
         let Some(literal) = literal else {
-            self.error(
+            self.error(Code::StateStartNotLiteral,
                 field.span,
                 format!(
                     "`{place}` needs a starting value written as a number, `true`/`false`, or a variant"
@@ -146,6 +153,7 @@ impl Analyzer<'_, '_> {
         match written {
             Some(written) if written != literal => {
                 self.error(
+                    Code::TypeMismatch,
                     field.span,
                     format!(
                         "`{place}` is a `{}` but starts as a `{}`",
@@ -203,6 +211,7 @@ impl Analyzer<'_, '_> {
             && self.is_ambiguous_state_field(state, field)
         {
             self.error(
+                Code::DeclaredInSeveralFiles,
                 span,
                 format!("`{state}.{field}` is declared more than once in the project; keep one"),
             );
@@ -226,6 +235,7 @@ impl Analyzer<'_, '_> {
             && !declared.mutable
         {
             self.error(
+                Code::Immutable,
                 span,
                 format!("`{state}.{field}` is a `let` and cannot be changed"),
             );

@@ -41,13 +41,15 @@ pub(crate) struct StructuredDiagnostic {
 
 impl StructuredDiagnostic {
     pub(crate) fn from_compiler(diagnostic: Diagnostic) -> Self {
-        let (source, code) = match diagnostic.phase {
-            DiagnosticPhase::Syntax => ("decay-syntax", "decay-syntax"),
-            DiagnosticPhase::Semantic => ("decay-semantic", "decay-semantic"),
+        let source = match diagnostic.phase {
+            DiagnosticPhase::Syntax => "decay-syntax",
+            DiagnosticPhase::Semantic => "decay-semantic",
         };
         Self {
             severity: Severity::Error,
-            code: code.to_owned(),
+            // The phase first, so a tool matching on `decay-semantic` still
+            // does; then the stable name of this particular diagnostic.
+            code: format!("{source}/{}", diagnostic.code),
             source,
             message: diagnostic.message,
             span: diagnostic.span,
@@ -113,13 +115,14 @@ mod tests {
     fn compiler_diagnostic_keeps_phase_identity() {
         let diagnostic = Diagnostic {
             phase: DiagnosticPhase::Semantic,
+            code: "unknown-name",
             message: "unknown name".to_owned(),
             span: Span { start: 4, end: 8 },
             line: 1,
             column: 5,
         };
         let structured = StructuredDiagnostic::from_compiler(diagnostic);
-        assert_eq!(structured.code, "decay-semantic");
+        assert_eq!(structured.code, "decay-semantic/unknown-name");
         assert_eq!(structured.source, "decay-semantic");
         assert_eq!(structured.severity, Severity::Error);
     }

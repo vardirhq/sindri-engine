@@ -1,5 +1,6 @@
 //! Calls: what is being called, and whether the arguments fit.
 
+use crate::codes::Code;
 use decay_syntax::{Expr, ExprKind, Span};
 
 use crate::diagnostic::container_function_message;
@@ -34,6 +35,7 @@ impl Analyzer<'_, '_> {
                 }
                 Some(MemberLookup::Found(ExternalSymbol::Value(_))) => {
                     self.error(
+                        Code::NotCallable,
                         callee.span,
                         format!(
                             "`{field}` on `{}` is a value, not a function",
@@ -43,12 +45,17 @@ impl Analyzer<'_, '_> {
                 }
                 Some(MemberLookup::Missing) => {
                     self.error(
+                        Code::UnknownMember,
                         callee.span,
                         format!("`{}` has no member `{field}`", object_type.display_name()),
                     );
                 }
                 Some(MemberLookup::ContainerFunction) => {
-                    self.error(callee.span, container_function_message(field));
+                    self.error(
+                        Code::NoMethods,
+                        callee.span,
+                        container_function_message(field),
+                    );
                 }
                 None => {}
             }
@@ -77,7 +84,11 @@ impl Analyzer<'_, '_> {
                     self.check_call(&function, args, span);
                     return function.return_type;
                 }
-                self.error(callee.span, format!("`{name}` is not callable"));
+                self.error(
+                    Code::NotCallable,
+                    callee.span,
+                    format!("`{name}` is not callable"),
+                );
                 for arg in args {
                     self.expr_type(arg);
                 }
@@ -97,7 +108,7 @@ impl Analyzer<'_, '_> {
                     .join(", ");
                 let message =
                     format!("`{name}` is a struct: name its fields, as in `{name}({example})`");
-                self.error(callee.span, message);
+                self.error(Code::NotCallable, callee.span, message);
                 for arg in args {
                     self.expr_type(arg);
                 }
@@ -108,7 +119,7 @@ impl Analyzer<'_, '_> {
                 let first = variants.first().map_or("Variant", String::as_str);
                 let message =
                     format!("`{name}` is an enum: name a variant, as in `{name}.{first}`");
-                self.error(callee.span, message);
+                self.error(Code::NotCallable, callee.span, message);
                 for arg in args {
                     self.expr_type(arg);
                 }
@@ -117,6 +128,7 @@ impl Analyzer<'_, '_> {
 
             if self.events.contains_key(name) {
                 self.error(
+                    Code::NotCallable,
                     callee.span,
                     format!("`{name}` is an event: send one with `{name}.emit(...)`"),
                 );
@@ -133,7 +145,11 @@ impl Analyzer<'_, '_> {
                         return function.return_type;
                     }
                     ExternalSymbol::Value(_) => {
-                        self.error(callee.span, format!("`{name}` is not callable"));
+                        self.error(
+                            Code::NotCallable,
+                            callee.span,
+                            format!("`{name}` is not callable"),
+                        );
                     }
                 }
                 for arg in args {
@@ -153,6 +169,7 @@ impl Analyzer<'_, '_> {
     pub(super) fn check_call(&mut self, function: &FunctionType, args: &[Expr], span: Span) {
         if function.params.len() != args.len() {
             self.error(
+                Code::ArgumentCount,
                 span,
                 format!(
                     "expected {} argument(s), found {}",

@@ -37,6 +37,7 @@ impl Parser<'_> {
             if self.at(&TokenKind::Fn) {
                 if !attributes.is_empty() {
                     self.error_span(
+                        crate::codes::SyntaxCode::AttributeNotAllowed,
                         attributes[0].span,
                         "attributes on functions are not supported yet",
                     );
@@ -49,6 +50,7 @@ impl Parser<'_> {
             } else if self.at_word(ON) {
                 if !attributes.is_empty() {
                     self.error_span(
+                        crate::codes::SyntaxCode::AttributeNotAllowed,
                         attributes[0].span,
                         "attributes on handlers are not supported yet",
                     );
@@ -65,7 +67,10 @@ impl Parser<'_> {
                     self.synchronize_member();
                 }
             } else {
-                self.error_here("expected a field, function, or `on` handler in declaration body");
+                self.error_here(
+                    crate::codes::SyntaxCode::ExpectedMember,
+                    "expected a field, function, or `on` handler in declaration body",
+                );
                 self.synchronize_member();
             }
         }
@@ -161,7 +166,10 @@ impl Parser<'_> {
         self.expect_simple(&TokenKind::LeftParen, "expected `(` after event name")?;
         let params = self.parse_params()?;
         if self.at(&TokenKind::Arrow) {
-            self.error_here("a handler returns nothing: nothing waits for it");
+            self.error_here(
+                crate::codes::SyntaxCode::HandlerReturnsValue,
+                "a handler returns nothing: nothing waits for it",
+            );
             self.advance();
             self.parse_type()?;
         }
@@ -262,6 +270,7 @@ impl Parser<'_> {
             let attributes = self.parse_attributes();
             if let Some(attribute) = attributes.first() {
                 self.error_span(
+                    crate::codes::SyntaxCode::AttributeNotAllowed,
                     attribute.span,
                     "attributes on state fields are not supported",
                 );
@@ -273,7 +282,10 @@ impl Parser<'_> {
                     self.synchronize_member();
                 }
             } else {
-                self.error_here("a state holds only fields: `var name: f32 = 0.0;`");
+                self.error_here(
+                    crate::codes::SyntaxCode::StateFieldsOnly,
+                    "a state holds only fields: `var name: f32 = 0.0;`",
+                );
                 // Past the offending token first: recovery stops at `fn`,
                 // which is exactly what a state cannot hold.
                 self.advance();

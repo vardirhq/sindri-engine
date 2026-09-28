@@ -1,5 +1,6 @@
 //! Containers and functions: their members, fields, and bodies.
 
+use crate::codes::Code;
 use std::collections::{HashMap, HashSet};
 
 use decay_syntax::{Expr, ExprKind, FieldDecl, FunctionDecl, Member, Span};
@@ -94,7 +95,7 @@ impl Analyzer<'_, '_> {
             self.record_binding(name, &symbol.ty, span);
         }
         if members.insert(name.to_owned(), symbol).is_some() {
-            self.error(span, format!("duplicate member `{name}`"));
+            self.error(Code::Duplicate, span, format!("duplicate member `{name}`"));
         }
     }
 
@@ -123,6 +124,7 @@ impl Analyzer<'_, '_> {
             }
             if name == field.name {
                 self.error(
+                    Code::FieldOrder,
                     span,
                     format!("field `{name}` cannot read itself in its own initializer"),
                 );
@@ -130,7 +132,7 @@ impl Analyzer<'_, '_> {
                 .get(&name)
                 .is_some_and(|symbol| symbol.function.is_none())
             {
-                self.error(
+                self.error(Code::FieldOrder,
                     span,
                     format!(
                         "field `{}` reads field `{name}`, which is declared below it;                          initializers run in declaration order",
@@ -200,6 +202,7 @@ impl Analyzer<'_, '_> {
         let Some(initializer) = &field.initializer else {
             if field.ty.is_none() {
                 self.error(
+                    Code::MissingType,
                     field.span,
                     format!("field `{}` needs a type or initializer", field.name),
                 );

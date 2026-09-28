@@ -25,6 +25,9 @@ pub enum CheckPhase {
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct SourceDiagnostic {
     pub phase: CheckPhase,
+    /// The diagnostic's stable name, such as `unknown-name`; unlike the
+    /// message, it is never reworded.
+    pub code: &'static str,
     pub message: String,
     /// One-based, as a person counts them.
     pub line: usize,
@@ -94,6 +97,7 @@ pub fn check_source_in(source: &str, environment: &decay_semantic::Environment) 
                 DiagnosticPhase::Syntax => CheckPhase::Syntax,
                 DiagnosticPhase::Semantic => CheckPhase::Semantic,
             },
+            code: diagnostic.code,
             message: diagnostic.message,
             line: diagnostic.line,
             column: diagnostic.column,
@@ -128,6 +132,7 @@ mod tests {
         assert!(!check.compiles());
         let first = check.diagnostics.first().expect("a diagnostic");
         assert_eq!(first.phase, CheckPhase::Semantic);
+        assert_eq!(first.code, "unknown-name");
         assert_eq!(first.line, 3);
         assert!(source[first.start..].starts_with("Wrold"), "{first:?}");
         // What it meant to declare survives the failure.

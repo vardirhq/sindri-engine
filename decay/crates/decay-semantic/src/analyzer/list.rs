@@ -4,6 +4,7 @@
 //! `push`, `pop`, `xs[i] = v` — is made to the list one variable or field
 //! holds, and needs that variable or field to be one the script may change.
 
+use crate::codes::Code;
 use decay_syntax::{Expr, ListOp, Span};
 
 use crate::diagnostic::ValueMember;
@@ -22,6 +23,7 @@ impl Analyzer<'_, '_> {
                 element = ty;
             } else if !self.compatible(&element, &ty) {
                 self.error(
+                    Code::MixedList,
                     item.span,
                     format!(
                         "a list holds one type: this is `{}`, and the first element is `{}`",
@@ -39,6 +41,7 @@ impl Analyzer<'_, '_> {
         self.expr_type(start);
         self.expr_type(end);
         self.error(
+            Code::RangeOutsideFor,
             span,
             "a range is only walked by `for`, as in `for i in 0..count { }`".to_owned(),
         );
@@ -66,11 +69,12 @@ impl Analyzer<'_, '_> {
         let Some((op, _)) = ListOp::named(field) else {
             if crate::types::is_length(field) {
                 self.error(
+                    Code::PropertyCalled,
                     span,
                     format!("`{field}` is a property, not a function -- write `.{field}`"),
                 );
             } else {
-                self.error(span, missing_member(element, field));
+                self.error(Code::UnknownMember, span, missing_member(element, field));
             }
             for argument in args {
                 self.expr_type(argument);
@@ -90,11 +94,12 @@ impl Analyzer<'_, '_> {
     pub(super) fn list_member_error(&mut self, element: &Type, field: &str, span: Span) {
         if ListOp::named(field).is_some() {
             self.error(
+                Code::FunctionNotCalled,
                 span,
                 format!("`{field}` on a list is a function -- call it: `.{field}(...)`"),
             );
         } else {
-            self.error(span, missing_member(element, field));
+            self.error(Code::UnknownMember, span, missing_member(element, field));
         }
     }
 
@@ -112,6 +117,7 @@ impl Analyzer<'_, '_> {
             Type::Unknown => Type::Unknown,
             other => {
                 self.error(
+                    Code::NotIndexable,
                     object.span,
                     format!("`{}` cannot be indexed", other.display_name()),
                 );
@@ -132,10 +138,12 @@ impl Analyzer<'_, '_> {
         match place {
             Some((_, true)) => {}
             Some((name, false)) => self.error(
+                Code::Immutable,
                 object.span,
                 format!("`{name}` is a `let`, so it cannot change -- declare it `var` if {doing}"),
             ),
             None => self.error(
+                Code::NotAPlace,
                 object.span,
                 format!(
                     "only a list in a variable or a field of this script can change, and this is \

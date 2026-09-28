@@ -1,5 +1,6 @@
 //! Reaching into a value: a container's field, or a host type's member.
 
+use crate::codes::Code;
 use decay_syntax::{Expr, Span};
 
 use crate::diagnostic::{ValueMember, container_function_message};
@@ -64,6 +65,7 @@ impl Analyzer<'_, '_> {
             // values, so there is nothing this could evaluate to.
             Some(MemberLookup::Found(ExternalSymbol::Function(_))) => {
                 self.error(
+                    Code::FunctionNotCalled,
                     span,
                     format!(
                         "`{}` is a function on `{}`, and Decay has no function values -- call it",
@@ -75,13 +77,14 @@ impl Analyzer<'_, '_> {
             }
             Some(MemberLookup::Missing) => {
                 self.error(
+                    Code::UnknownMember,
                     span,
                     format!("`{}` has no member `{field}`", object_type.display_name()),
                 );
                 Type::Unknown
             }
             Some(MemberLookup::ContainerFunction) => {
-                self.error(span, container_function_message(field));
+                self.error(Code::NoMethods, span, container_function_message(field));
                 Type::Unknown
             }
             None => Type::Unknown,

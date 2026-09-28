@@ -4,6 +4,7 @@
 //! here and noted in [`ValueMember`] for the lowering, rather than handed to
 //! the host as a path.
 
+use crate::codes::Code;
 use decay_syntax::{BinaryOp, Expr, Span, StringOp};
 
 use crate::diagnostic::ValueMember;
@@ -21,13 +22,14 @@ impl Analyzer<'_, '_> {
             }
             Some(_) => {
                 self.error(
+                    Code::FunctionNotCalled,
                     span,
                     format!("`{field}` on `String` needs arguments -- call it: `.{field}(...)`"),
                 );
                 Type::Unknown
             }
             None => {
-                self.error(span, missing_member(field));
+                self.error(Code::UnknownMember, span, missing_member(field));
                 Type::Unknown
             }
         }
@@ -39,6 +41,7 @@ impl Analyzer<'_, '_> {
             Some((op, arity)) if arity > 0 => op,
             Some(_) => {
                 self.error(
+                    Code::PropertyCalled,
                     span,
                     format!("`{field}` is a property, not a function -- write `.{field}`"),
                 );
@@ -46,7 +49,7 @@ impl Analyzer<'_, '_> {
                 return Type::Unknown;
             }
             None => {
-                self.error(span, missing_member(field));
+                self.error(Code::UnknownMember, span, missing_member(field));
                 self.check_text_arguments(args);
                 return Type::Unknown;
             }
@@ -88,6 +91,7 @@ impl Analyzer<'_, '_> {
                 right_span
             };
             self.error(
+                Code::InvalidOperand,
                 at,
                 format!(
                     "text is only joined, with `+`; found `{}` {} `{}`",
@@ -100,7 +104,7 @@ impl Analyzer<'_, '_> {
         }
         for (ty, span) in [left, right] {
             if !self.joinable(ty) {
-                self.error(
+                self.error(Code::InvalidOperand,
                     span,
                     format!(
                         "`{}` has no spelling to join to text; text joins with text, numbers, `bool`, vectors and enums",

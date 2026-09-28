@@ -6,6 +6,7 @@
 //! in [`ValueMember`] for each read or call the lowering has to perform itself
 //! rather than hand to the host as a path.
 
+use crate::codes::Code;
 use decay_syntax::{BinaryOp, Expr, ExprKind, Span, VectorOp};
 
 use crate::diagnostic::ValueMember;
@@ -28,6 +29,7 @@ impl Analyzer<'_, '_> {
         let dimensions = ty.dimensions().unwrap_or(0);
         if args.len() != dimensions {
             self.error(
+                Code::ArgumentCount,
                 span,
                 format!(
                     "`{name}` takes {dimensions} numbers ({}), found {}",
@@ -68,6 +70,7 @@ impl Analyzer<'_, '_> {
             }
             Some(_) => {
                 self.error(
+                    Code::FunctionNotCalled,
                     span,
                     format!(
                         "`{field}` on `{}` needs arguments -- call it: `.{field}(...)`",
@@ -77,7 +80,11 @@ impl Analyzer<'_, '_> {
                 Type::Unknown
             }
             None => {
-                self.error(span, missing_member(object_type, field));
+                self.error(
+                    Code::UnknownMember,
+                    span,
+                    missing_member(object_type, field),
+                );
                 Type::Unknown
             }
         }
@@ -95,6 +102,7 @@ impl Analyzer<'_, '_> {
             Some((op, arity)) if arity > 0 => op,
             Some(_) => {
                 self.error(
+                    Code::PropertyCalled,
                     span,
                     format!("`{field}` is a property, not a function -- write `.{field}`"),
                 );
@@ -105,11 +113,16 @@ impl Analyzer<'_, '_> {
                 let dimensions = object_type.dimensions().unwrap_or(0);
                 if COMPONENTS[..dimensions].contains(&field) {
                     self.error(
+                        Code::PropertyCalled,
                         span,
                         format!("`{field}` is a number, not a function -- write `.{field}`"),
                     );
                 } else {
-                    self.error(span, missing_member(object_type, field));
+                    self.error(
+                        Code::UnknownMember,
+                        span,
+                        missing_member(object_type, field),
+                    );
                 }
                 self.check_arguments_only(args);
                 return Type::Unknown;
@@ -188,7 +201,7 @@ impl Analyzer<'_, '_> {
             } else {
                 left_span
             };
-            self.error(at, message);
+            self.error(Code::InvalidOperand, at, message);
         }
         Some(vector)
     }
@@ -233,11 +246,13 @@ impl Analyzer<'_, '_> {
             Some((_, true)) => {}
             Some((name, false)) => {
                 self.error(
+                    Code::Immutable,
                     span,
                     format!("cannot assign to a component of immutable `{name}`"),
                 );
             }
             None => self.error(
+                Code::NotAPlace,
                 span,
                 "only a component of a variable or field can be assigned".to_owned(),
             ),

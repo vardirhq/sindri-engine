@@ -7,6 +7,7 @@
 //! variable or field that holds it, and the lowering reaches a field by its
 //! position exactly as it reaches a vector's component.
 
+use crate::codes::Code;
 use std::collections::{HashMap, HashSet};
 
 use decay_syntax::{Expr, Item, Program, Span, StructDecl};
@@ -36,6 +37,7 @@ impl Analyzer<'_, '_> {
             };
             if !seen.insert(declared.name.clone()) {
                 self.error(
+                    Code::Duplicate,
                     declared.span,
                     format!("duplicate declaration `{}`", declared.name),
                 );
@@ -50,6 +52,7 @@ impl Analyzer<'_, '_> {
         let name = &declared.name;
         if self.environment.ambiguous_structs.contains(name) {
             self.error(
+                Code::DeclaredInSeveralFiles,
                 declared.span,
                 format!("struct `{name}` is declared in more than one file; keep one"),
             );
@@ -60,12 +63,14 @@ impl Analyzer<'_, '_> {
             || self.environment.get_type(name).is_some()
         {
             self.error(
+                Code::NameTaken,
                 declared.span,
                 format!("`{name}` is already a name; a struct needs one of its own"),
             );
         }
         if declared.fields.is_empty() {
             self.error(
+                Code::EmptyDeclaration,
                 declared.span,
                 format!("struct `{name}` has no fields, so it could never hold anything"),
             );
@@ -75,6 +80,7 @@ impl Analyzer<'_, '_> {
         for field in &declared.fields {
             if !seen.insert(field.name.clone()) {
                 self.error(
+                    Code::Duplicate,
                     field.span,
                     format!("`{name}.{}` is declared twice", field.name),
                 );
@@ -141,12 +147,18 @@ impl Analyzer<'_, '_> {
             for (_, _, value) in fields {
                 self.expr_type(value);
             }
-            let message = if self.environment.ambiguous_structs.contains(name) {
-                format!("struct `{name}` is declared in more than one file; keep one")
+            let (code, message) = if self.environment.ambiguous_structs.contains(name) {
+                (
+                    Code::DeclaredInSeveralFiles,
+                    format!("struct `{name}` is declared in more than one file; keep one"),
+                )
             } else {
-                format!("`{name}` is not a struct, so it is not built with named fields")
+                (
+                    Code::NotAStruct,
+                    format!("`{name}` is not a struct, so it is not built with named fields"),
+                )
             };
-            self.error(span, message);
+            self.error(code, span, message);
             return Type::Unknown;
         };
         let expected: HashMap<&str, &Type> = declared
@@ -157,11 +169,19 @@ impl Analyzer<'_, '_> {
         for (field, field_span, value) in fields {
             let actual = self.expr_type(value);
             let Some(wanted) = expected.get(field.as_str()) else {
-                self.error(*field_span, missing_field(name, field, &declared));
+                self.error(
+                    Code::UnknownMember,
+                    *field_span,
+                    missing_field(name, field, &declared),
+                );
                 continue;
             };
             if !given.insert(field.as_str()) {
-                self.error(*field_span, format!("`{field}` is given twice"));
+                self.error(
+                    Code::Duplicate,
+                    *field_span,
+                    format!("`{field}` is given twice"),
+                );
                 continue;
             }
             self.check_assignable(wanted, &actual, value.span);
@@ -173,6 +193,7 @@ impl Analyzer<'_, '_> {
             .collect();
         if !missing.is_empty() {
             self.error(
+                Code::MissingFields,
                 span,
                 format!("`{name}` needs every field: missing {}", missing.join(", ")),
             );
@@ -199,7 +220,7 @@ impl Analyzer<'_, '_> {
             return Some(ty);
         }
         let message = missing_field(name, field, declared);
-        self.error(span, message);
+        self.error(Code::UnknownMember, span, message);
         Some(Type::Unknown)
     }
 }

@@ -52,9 +52,13 @@ decay-lsp's completion reads too), `sindri_decay::LIFECYCLE`, and the
 runtime's limit constants. Its first key is `"schema": "decay-language/1"`; a
 reader should refuse a schema it does not know rather than guess.
 
-What it does not yet carry is diagnostics by stable ID: the compiler reports
-an error by its phase (`decay-syntax`, `decay-semantic`), which is all the
-file lists. Stable IDs come next, generated from the same place.
+`diagnostics` lists every error the compiler can report by its stable code —
+the phase and a name joined, such as `decay-semantic/unknown-name` — with a
+one-line summary. The code is what `decay-lsp` reports, live and in
+`--check`, and it is never reworded or reused, so a page, a test or a fix can
+key on it where a message would drift. The tables are `SyntaxCode::ALL` in
+`decay_syntax::codes` and `Code::ALL` in `decay_semantic::codes`, and every
+diagnostic the parser or analyzer raises names one.
 
 ## What is deliberately not here
 
