@@ -280,7 +280,7 @@ struct EditorApp {
     /// An edit can point a mesh at a different texture, and the world is the
     /// only statement of what a scene references, so a change to it is the
     /// signal to ask again. The revision is what makes "changed" cheap to spot.
-    textured_revision: u64,
+    textured_revision: TexturedAt,
     scene_viewport: RuntimeViewport,
     game_viewport: RuntimeViewport,
     /// The physics Play steps, and the bodies a scene's colliders became.
@@ -527,7 +527,7 @@ impl EditorApp {
             render_state: state_for_textures,
             textures,
             thumbnails: thumbnails::Thumbnails::default(),
-            textured_revision: 0,
+            textured_revision: TexturedAt::default(),
             scene_viewport,
             game_viewport,
             game_view_rect: None,
@@ -583,4 +583,13 @@ impl EditorApp {
             Launch::Welcome => self.open_welcome(),
         }
     }
+}
+
+/// What the textures were last asked about: the history revision, since an
+/// edit can point a mesh at another texture, and the scripts' prefab
+/// revision, since a prefab arriving names textures no edit did.
+#[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
+struct TexturedAt {
+    history: u64,
+    prefabs: u64,
 }

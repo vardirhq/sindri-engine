@@ -96,6 +96,9 @@ pub struct SceneScripts {
     /// A document that will not parse is reported once, here, rather than on
     /// the frame a script spawns it.
     prefabs: PrefabSources,
+    /// Counts changes to `prefabs`, so the textures a prefab draws with can be
+    /// asked for when one arrives rather than on the next edit.
+    prefab_revision: u64,
     profiles: ProfileSources,
     scripts: Scripts,
 }
@@ -112,6 +115,7 @@ impl SceneScripts {
             project_scripts: root.as_deref().map_or_else(Vec::new, list_scripts),
             sources: ScriptSources::new(),
             prefabs: PrefabSources::new(),
+            prefab_revision: 0,
             profiles: ProfileSources::new(),
             scripts: Scripts::new(),
         }
@@ -142,6 +146,7 @@ impl SceneScripts {
             watch,
             sources,
             prefabs,
+            prefab_revision,
             profiles,
             ..
         } = self
@@ -159,7 +164,9 @@ impl SceneScripts {
         // the file it used to be.
         for released in loader.retain(&wanted) {
             sources.remove(released.as_str());
-            prefabs.remove(released.as_str());
+            if prefabs.remove(released.as_str()).is_some() {
+                *prefab_revision += 1;
+            }
             profiles.remove(released.as_str());
         }
         if let Some(watch) = watch.as_mut() {
@@ -233,6 +240,7 @@ impl SceneScripts {
             watch,
             sources,
             prefabs,
+            prefab_revision,
             profiles,
             ..
         } = self
@@ -250,7 +258,10 @@ impl SceneScripts {
                         || profiles.get(id.as_str()).is_some();
                     if is_prefab(id.as_str()) {
                         match PrefabDocument::from_json(text) {
-                            Ok(prefab) => prefabs.insert(id.as_str(), prefab),
+                            Ok(prefab) => {
+                                prefabs.insert(id.as_str(), prefab);
+                                *prefab_revision += 1;
+                            }
                             Err(error) => {
                                 notes.push(ScriptNote::Failed(format!("{id}: {error}")));
                                 continue;
@@ -401,6 +412,16 @@ impl SceneScripts {
     /// script in the project as a type another may name.
     pub fn environment(&self) -> &sindri_decay::ScriptEnvironment {
         self.sources.environment()
+    }
+
+    /// Every prefab loaded, for whatever else needs to know what one draws.
+    pub const fn prefabs(&self) -> &PrefabSources {
+        &self.prefabs
+    }
+
+    /// Changes whenever a prefab arrives, changes or goes.
+    pub const fn prefab_revision(&self) -> u64 {
+        self.prefab_revision
     }
 
     pub fn has_prefab(&self, id: &str) -> bool {
