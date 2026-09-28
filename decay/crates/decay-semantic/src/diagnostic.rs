@@ -32,6 +32,7 @@ pub enum ValueMember {
     /// How many elements a collection holds.
     Length,
     /// One component of a vector the script holds, by position: `x` is 0.
+    /// Also one field of a struct, by its position in the declaration.
     ///
     /// Only for a vector that is a value — a local, a parameter, a field, or
     /// the result of an expression. `this.transform.position.x` stays a path
@@ -73,6 +74,9 @@ pub struct Analysis {
     /// own and the host's. What a host needs to author one of its fields by a
     /// variant's name, without reading the project again.
     pub enums: std::collections::BTreeMap<String, Vec<String>>,
+    /// Every struct the program could name, with its fields in order: what
+    /// the lowering needs to build one whose fields were written in another.
+    pub structs: std::collections::BTreeMap<String, Vec<String>>,
 }
 
 /// Decay has no methods, and the mistake of reaching for one is worth naming

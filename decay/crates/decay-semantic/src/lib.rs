@@ -51,11 +51,13 @@ pub fn analyze_with_environment(source: &str, environment: &Environment) -> Anal
     let mut analyzer = Analyzer::new(source, environment, &mut diagnostics, &mut value_members);
     analyzer.analyze_program(&parsed.program);
     let enums = analyzer.known_enums();
+    let structs = analyzer.known_structs();
 
     Analysis {
         program: parsed.program,
         diagnostics,
         value_members,
         enums,
+        structs,
     }
 }

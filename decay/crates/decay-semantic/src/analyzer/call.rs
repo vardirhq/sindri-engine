@@ -89,6 +89,21 @@ impl Analyzer<'_, '_> {
                 return function.return_type;
             }
 
+            if let Some(fields) = self.structs.get(name) {
+                let example = fields
+                    .iter()
+                    .map(|(field, _)| format!("{field}: ..."))
+                    .collect::<Vec<_>>()
+                    .join(", ");
+                let message =
+                    format!("`{name}` is a struct: name its fields, as in `{name}({example})`");
+                self.error(callee.span, message);
+                for arg in args {
+                    self.expr_type(arg);
+                }
+                return Type::Unknown;
+            }
+
             if let Some(variants) = self.enums.get(name) {
                 let first = variants.first().map_or("Variant", String::as_str);
                 let message =

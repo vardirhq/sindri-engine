@@ -38,7 +38,9 @@ pub(crate) fn container_members(source: &str) -> Vec<(String, ExternalSymbol)> {
     let parsed = parse(source);
     let Some(container) = parsed.program.items.iter().find_map(|item| match item {
         Item::Script(container) | Item::Component(container) => Some(container),
-        Item::Event(_) | Item::State(_) | Item::Function(_) | Item::Enum(_) => None,
+        Item::Event(_) | Item::State(_) | Item::Function(_) | Item::Enum(_) | Item::Struct(_) => {
+            None
+        }
     }) else {
         return Vec::new();
     };
@@ -181,6 +183,56 @@ pub(crate) fn enum_hover(name: &str, variants: &[String]) -> Value {
     json!({"contents":{"kind":"markdown","value":format!(
         "```decay\nenum {name} {{ {} }}\n```",
         variants.join(", ")
+    )}})
+}
+
+/// Every struct the file may name, with its fields and their types: the
+/// project's, and its own, which win where both declare one.
+pub(crate) fn structs(
+    environment: &Environment,
+    source: &str,
+) -> Vec<(String, Vec<(String, String)>)> {
+    let mut found: Vec<(String, Vec<(String, String)>)> = parse(source)
+        .program
+        .items
+        .into_iter()
+        .filter_map(|item| match item {
+            Item::Struct(declared) => Some((
+                declared.name,
+                declared
+                    .fields
+                    .iter()
+                    .map(|field| {
+                        let ty = decay_semantic::Type::from_ref(&field.ty);
+                        (field.name.clone(), ty.display_name().into_owned())
+                    })
+                    .collect(),
+            )),
+            _ => None,
+        })
+        .collect();
+    for (name, fields) in environment.structs() {
+        if !found.iter().any(|(known, _)| known == name) {
+            let fields = fields
+                .iter()
+                .map(|(field, ty)| (field.clone(), ty.display_name().into_owned()))
+                .collect();
+            found.push((name.to_owned(), fields));
+        }
+    }
+    found.sort();
+    found
+}
+
+/// How a struct reads on hover: its declaration.
+pub(crate) fn struct_hover(name: &str, fields: &[(String, String)]) -> Value {
+    let fields = fields
+        .iter()
+        .map(|(field, ty)| format!("{field}: {ty}"))
+        .collect::<Vec<_>>()
+        .join(", ");
+    json!({"contents":{"kind":"markdown","value":format!(
+        "```decay\nstruct {name} {{ {fields} }}\n```"
     )}})
 }
 

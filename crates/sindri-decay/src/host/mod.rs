@@ -454,6 +454,7 @@ impl WorldHost<'_> {
                     Some(Value::Array(values)) => format!("{} entries", values.len()),
                     // Its variant, as the script wrote it: `Phase.Play`.
                     Some(Value::Variant(name)) => name.to_string(),
+                    Some(value @ Value::Struct { .. }) => decay_runtime::show_struct(value),
                     Some(Value::Timer { left, duration }) => {
                         format!("timer {left}s of {duration}s")
                     }

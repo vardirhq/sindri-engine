@@ -21,7 +21,7 @@ fn symbol(source: &str, name: &str, kind: u8, span: Span, children: Option<Vec<V
 }
 
 /// Every item the file declares, with a container's members, a state's
-/// fields and an enum's variants beneath it.
+/// fields, an enum's variants and a struct's fields beneath it.
 pub(crate) fn outline(source: &str) -> Value {
     let parsed = parse(source);
     let symbols = parsed
@@ -49,6 +49,14 @@ pub(crate) fn outline(source: &str) -> Value {
                     .map(|(variant, span)| symbol(source, variant, 22, *span, None))
                     .collect();
                 symbol(source, &declared.name, 10, declared.span, Some(children))
+            }
+            Item::Struct(declared) => {
+                let children = declared
+                    .fields
+                    .iter()
+                    .map(|field| symbol(source, &field.name, 8, field.span, None))
+                    .collect();
+                symbol(source, &declared.name, 23, declared.span, Some(children))
             }
             Item::Function(function) => symbol(source, &function.name, 12, function.span, None),
             Item::State(state) => {

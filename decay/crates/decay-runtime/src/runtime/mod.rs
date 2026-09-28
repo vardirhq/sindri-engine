@@ -31,6 +31,7 @@ pub(crate) fn describe(value: &Value) -> String {
         Value::Bool(_) => "a truth",
         Value::Reference(_) => "an entity",
         Value::Array(_) => "a collection",
+        Value::Struct { shape, .. } => return format!("a {}", shape.name),
         Value::Vec2(_) => "a Vec2",
         Value::Vec3(_) => "a Vec3",
         Value::Timer { .. } => "a Timer",
@@ -384,10 +385,38 @@ impl<'a, H: Host> Runtime<'a, H> {
                 Value::vector(&components)
                     .ok_or_else(|| RuntimeError::NotAVector(format!("{dimensions} numbers")))?
             }
-            Instruction::Component(index) => crate::vector::component(&pop()?, *index)?,
+            Instruction::Component(index) => match pop()? {
+                Value::Struct { fields, .. } => fields
+                    .get(*index)
+                    .cloned()
+                    .ok_or(RuntimeError::StackUnderflow)?,
+                other => crate::vector::component(&other, *index)?,
+            },
             Instruction::WithComponent(index) => {
                 let value = pop()?;
-                crate::vector::with_component(&pop()?, *index, &value)?
+                match pop()? {
+                    Value::Struct { shape, mut fields } => {
+                        let slot = std::rc::Rc::make_mut(&mut fields)
+                            .get_mut(*index)
+                            .ok_or(RuntimeError::StackUnderflow)?;
+                        *slot = value;
+                        Value::Struct { shape, fields }
+                    }
+                    other => crate::vector::with_component(&other, *index, &value)?,
+                }
+            }
+            Instruction::MakeStruct { shape, order } => {
+                let mut fields = vec![Value::Null; shape.fields.len()];
+                for position in order.iter().rev() {
+                    let value = pop()?;
+                    if let Some(slot) = fields.get_mut(*position) {
+                        *slot = value;
+                    }
+                }
+                Value::Struct {
+                    shape: shape.clone(),
+                    fields: std::rc::Rc::new(fields),
+                }
             }
             Instruction::Vector(op) => {
                 let arity = decay_syntax::VectorOp::ALL
@@ -402,6 +431,21 @@ impl<'a, H: Host> Runtime<'a, H> {
                 crate::vector::apply(*op, &pop()?, &args)?
             }
             _ => unreachable!("only the vector instructions reach here"),
+        };
+        frame.stack.push(result);
+        Ok(())
+    }
+
+    /// An operator: one operand popped, or two, the right one first.
+    fn step_operator(frame: &mut Frame, instruction: &Instruction) -> Result<(), RuntimeError> {
+        let mut pop = || frame.stack.pop().ok_or(RuntimeError::StackUnderflow);
+        let result = match instruction {
+            Instruction::Unary(op) => apply_unary(*op, pop()?)?,
+            Instruction::Binary(op) => {
+                let right = pop()?;
+                apply_binary(*op, pop()?, right)?
+            }
+            _ => unreachable!("only the operators reach here"),
         };
         frame.stack.push(result);
         Ok(())
@@ -455,14 +499,8 @@ impl<'a, H: Host> Runtime<'a, H> {
                         },
                     );
                 }
-                Instruction::Unary(op) => {
-                    let value = frame.stack.pop().ok_or(RuntimeError::StackUnderflow)?;
-                    frame.stack.push(apply_unary(*op, value)?);
-                }
-                Instruction::Binary(op) => {
-                    let right = frame.stack.pop().ok_or(RuntimeError::StackUnderflow)?;
-                    let left = frame.stack.pop().ok_or(RuntimeError::StackUnderflow)?;
-                    frame.stack.push(apply_binary(*op, left, right)?);
+                Instruction::Unary(_) | Instruction::Binary(_) => {
+                    Self::step_operator(frame, &instructions[ip])?;
                 }
                 Instruction::Call {
                     callee,
@@ -497,9 +535,9 @@ impl<'a, H: Host> Runtime<'a, H> {
                     ip = *target;
                     continue;
                 }
-                Instruction::MakeList(count) => list::make(frame, *count)?,
-                Instruction::ListRead(op) => list::read(frame, *op)?,
-                Instruction::ListChange { path, op } => list::change(fields, frame, path, *op)?,
+                Instruction::MakeList(_)
+                | Instruction::ListRead(_)
+                | Instruction::ListChange { .. } => list::step(fields, frame, &instructions[ip])?,
                 Instruction::Index
                 | Instruction::Length
                 | Instruction::IterBegin
@@ -514,6 +552,7 @@ impl<'a, H: Host> Runtime<'a, H> {
                     }
                 }
                 Instruction::Construct(_)
+                | Instruction::MakeStruct { .. }
                 | Instruction::Component(_)
                 | Instruction::WithComponent(_)
                 | Instruction::Vector(_) => Self::step_vector(frame, &instructions[ip])?,

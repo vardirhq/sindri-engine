@@ -196,6 +196,7 @@ pub(super) fn script_value_json(value: &ScriptValue) -> Value {
         ScriptValue::Reference(_)
         | ScriptValue::Timer { .. }
         | ScriptValue::Array(_)
+        | ScriptValue::Struct { .. }
         | ScriptValue::Null
         | ScriptValue::Unit => Value::Null,
     }

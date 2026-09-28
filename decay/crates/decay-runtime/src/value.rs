@@ -25,14 +25,18 @@ pub enum Value {
     /// An absent reference is [`Value::Null`], not a reserved number, for the
     /// same reason an empty tile is null: every number is a real reference.
     Reference(u64),
-    /// Several values, in a fixed order, that the host handed back.
+    /// A list: several values, in order.
     ///
-    /// Shared rather than copied, because a collection is passed around by
-    /// scripts that only ever read it: there is no literal for one, no way to
-    /// grow, shrink, or write into one, and nothing that mutates one after the
-    /// host built it. Immutability is what makes sharing safe, and sharing is
-    /// what keeps `for enemy in enemies` from copying the whole thing.
+    /// Shared until changed, so passing one around or walking it copies
+    /// nothing; a change to one that something else also holds copies it
+    /// first, which is what makes a list a value.
     Array(Rc<Vec<Value>>),
+    /// A struct: its shape, and its fields' values in declared order. Shared
+    /// until changed, like a list.
+    Struct {
+        shape: Rc<decay_ir::StructShape>,
+        fields: Rc<Vec<Value>>,
+    },
     /// Two numbers that travel together, `x` then `y`.
     ///
     /// A value like a number, copied rather than shared: `a = b; a.x = 1.0`

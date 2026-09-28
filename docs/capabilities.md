@@ -1710,6 +1710,12 @@ and case and trimming, counted in characters and capped at 64 KiB. Exercised
 in `crates/sindri-decay/tests/scripts_use_text.rs`, by Scorchball's digit and
 ring clips, and by both Orbital games' stat keys.
 
+A `struct` in any file is a value type every script builds with named fields
+(`OfferCard(card: c, name: n, blurb: b)`), reads, writes through the `var`
+holding it, and keeps in lists; it is copied where it is assigned. Exercised
+in `crates/sindri-decay/tests/scripts_use_structs.rs` and by both Orbital
+games' module chooser.
+
 Lists are written (`[a, b]`), changed in place where a `var` or field holds
 them (`push`, `pop`, `insert`, `remove_at`, `clear`, `xs[i] = v`), asked
 (`contains`, `index_of`, `length`) and walked, and `for i in 0..n` walks a
@@ -1757,7 +1763,8 @@ the README.
 
 - `while` and `for` are both bounded by the operation budget alongside the
   call-depth limit, and a script's list by 10,000 elements
-- No maps, sets, closures, or first-class functions
+- No maps, sets, closures, or first-class functions; no scene-authored struct
+  `@export` yet
 - No query by more than one tag at a time, and no measured cost for a query at
   combat density
 - The language has no built-in standard library. The Sindri host supplies

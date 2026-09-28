@@ -74,6 +74,8 @@ These are defects or sources of actively misleading tooling.
   - [ ] Complete a value's own members — a vector's `x`/`dot`, a timer's
         `done`, text's `length`/`contains` — which needs a local's type,
         not only a host type's.
+  - [x] Offer the project's structs as completions, show their fields on
+        hover, and list a file's structs and fields as document symbols.
   - [x] Offer the project's enums as completions, complete `Enum.` with its
         variants, show them on hover, and list a file's enums and their
         variants as document symbols.

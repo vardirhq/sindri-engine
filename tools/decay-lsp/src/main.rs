@@ -19,7 +19,7 @@ use serde_json::{Value, json};
 use support::{
     KEYWORDS, completion_chain, completion_item, container_members, emit_symbol, enum_hover, enums,
     event_hover, events, hover_symbol, initialization_root, offset_at, state_fields, states,
-    string_argument, symbol_completion, type_members, word_at,
+    string_argument, struct_hover, structs, symbol_completion, type_members, word_at,
 };
 
 #[derive(Clone)]
@@ -289,6 +289,11 @@ impl Server {
                 .map(|(name, _)| completion_item(&name, 13, Some("enum"))),
         );
         items.extend(
+            structs(&self.environment, &source)
+                .into_iter()
+                .map(|(name, _)| completion_item(&name, 22, Some("struct"))),
+        );
+        items.extend(
             states(&self.environment, &source)
                 .into_iter()
                 .filter(|name| self.environment.globals().all(|(global, _)| global != name))
@@ -312,6 +317,12 @@ impl Server {
             .find(|(name, _)| name == word)
         {
             return enum_hover(&name, &variants);
+        }
+        if let Some((name, fields)) = structs(&self.environment, &source)
+            .into_iter()
+            .find(|(name, _)| name == word)
+        {
+            return struct_hover(&name, &fields);
         }
         if let Some((name, params)) = events(&self.environment, &source)
             .into_iter()

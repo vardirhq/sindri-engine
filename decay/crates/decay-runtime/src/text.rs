@@ -73,6 +73,32 @@ fn spell(value: &Value) -> Result<String, RuntimeError> {
     })
 }
 
+/// A struct as `print` shows it: `Card(name: "Arc", weight: 1)`, a field
+/// that is itself a struct shown the same way.
+#[must_use]
+pub fn show_struct(value: &Value) -> String {
+    let Value::Struct { shape, fields } = value else {
+        return spell(value).unwrap_or_else(|_| describe(value));
+    };
+    let parts = shape
+        .fields
+        .iter()
+        .zip(fields.iter())
+        .map(|(name, field)| {
+            let shown = match field {
+                Value::String(text) => format!("{text:?}"),
+                Value::Struct { .. } => show_struct(field),
+                Value::Array(values) => format!("{} entries", values.len()),
+                Value::Reference(_) => "entity".to_owned(),
+                Value::Null => "null".to_owned(),
+                other => spell(other).unwrap_or_else(|_| describe(other)),
+            };
+            format!("{name}: {shown}")
+        })
+        .collect::<Vec<_>>();
+    format!("{}({})", shape.name, parts.join(", "))
+}
+
 /// `left + right` where either side is text.
 pub(crate) fn join(left: &Value, right: &Value) -> Result<Value, RuntimeError> {
     let mut joined = spell(left)?;

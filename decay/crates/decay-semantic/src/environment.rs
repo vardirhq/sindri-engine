@@ -51,6 +51,11 @@ pub struct Environment {
     pub(crate) enums: HashMap<String, Vec<String>>,
     /// Enums declared more than once, which nothing may use.
     pub(crate) ambiguous_enums: HashSet<String>,
+    /// Structs declared somewhere the host can see, with their fields in
+    /// order. A program's own are added to these when it is analysed.
+    pub(crate) structs: HashMap<String, Vec<(String, Type)>>,
+    /// Structs declared more than once, which nothing may use.
+    pub(crate) ambiguous_structs: HashSet<String>,
 }
 
 /// One field of a `state`: what it holds, and whether scripts may change it.
@@ -152,6 +157,26 @@ impl Environment {
         let name = name.into();
         self.enums.remove(&name);
         self.ambiguous_enums.insert(name);
+    }
+
+    /// Declares a struct every script may name, with its fields in order.
+    pub fn add_struct(&mut self, name: impl Into<String>, fields: Vec<(String, Type)>) {
+        self.structs.insert(name.into(), fields);
+    }
+
+    /// Says a struct was declared more than once, so that using it is refused
+    /// rather than resolved to one of them.
+    pub fn add_ambiguous_struct(&mut self, name: impl Into<String>) {
+        let name = name.into();
+        self.structs.remove(&name);
+        self.ambiguous_structs.insert(name);
+    }
+
+    /// Every declared struct with its fields, for a tool offering them.
+    pub fn structs(&self) -> impl Iterator<Item = (&str, &[(String, Type)])> {
+        self.structs
+            .iter()
+            .map(|(name, fields)| (name.as_str(), fields.as_slice()))
     }
 
     /// Every declared enum with its variants, for a tool offering them.

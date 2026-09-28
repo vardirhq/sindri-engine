@@ -14,6 +14,7 @@ mod list;
 mod member;
 mod state;
 mod stmt;
+mod structure;
 mod text;
 mod timer;
 mod vector;
@@ -69,6 +70,9 @@ pub(super) struct Analyzer<'a, 'd> {
     /// Every enum this program may name, with its variants in order: the
     /// host's, and its own.
     enums: HashMap<String, Vec<String>>,
+    /// Every struct this program may name, with its fields in order: the
+    /// host's, and its own.
+    structs: HashMap<String, Vec<(String, Type)>>,
     /// This file's own shared functions, by name.
     functions: HashMap<String, FunctionType>,
     /// Whether the function being analysed is a shared one, which has no
@@ -97,6 +101,7 @@ impl<'a, 'd> Analyzer<'a, 'd> {
             states: HashMap::new(),
             functions: HashMap::new(),
             enums: HashMap::new(),
+            structs: HashMap::new(),
             in_shared_function: false,
         }
     }
@@ -114,6 +119,7 @@ impl<'a, 'd> Analyzer<'a, 'd> {
         // And enums and events too, since a field or a handler anywhere may
         // name one declared further down.
         self.collect_enums(program);
+        self.collect_structs(program);
         self.collect_events(program);
         self.collect_states(program);
         self.collect_functions(program);
@@ -121,7 +127,7 @@ impl<'a, 'd> Analyzer<'a, 'd> {
         for item in &program.items {
             let container = match item {
                 Item::Script(container) | Item::Component(container) => container,
-                Item::Event(_) | Item::State(_) | Item::Enum(_) => continue,
+                Item::Event(_) | Item::State(_) | Item::Enum(_) | Item::Struct(_) => continue,
                 Item::Function(function) => {
                     self.analyze_shared_function(function);
                     continue;

@@ -19,7 +19,7 @@ use lower::Lowerer;
 
 pub use ir::{
     Constant, ContainerKind, FUNCTIONS, Instruction, IrContainer, IrField, IrFunction, IrProgram,
-    Path,
+    Path, StructShape,
 };
 
 #[derive(Debug, Clone, PartialEq)]

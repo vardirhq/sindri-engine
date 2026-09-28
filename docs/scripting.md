@@ -1846,10 +1846,36 @@ copies it, so a change never reaches a list somewhere else.
 list of them. A script's list holds at most 10,000 elements; growing one past
 that fails the script rather than the editor.
 
-Orbital's module chooser keeps its four cards, names and blurbs in three lists
-built from the cards' names, where it had twelve numbered fields, walks its
-catalogue with ranges, and passes the modules already on offer as one list
-rather than three parameters.
+Orbital's module chooser keeps its four offer slots in one list built from the
+cards' names, where it had twelve numbered fields, walks its catalogue with
+ranges, and passes the modules already on offer as one list rather than three
+parameters.
+
+### Structs
+
+```decay
+// Any file in the project.
+struct OfferCard { card: Entity, name: Entity, blurb: Entity }
+
+// Any script.
+var slots: List<OfferCard> = [];
+slots.push(OfferCard(card: World.find(n), name: World.find(n + " Name"), blurb: World.find(n + " Blurb")));
+let shown = slots[slot];
+Ui.set_text(shown.name, title);
+```
+
+A `struct` keeps values that belong together in one value, where a script kept
+parallel lists or numbered fields in step by hand. Every script in the project
+sees every struct, as it sees enums. One is built with every field named,
+read with `.field`, and written through the `var` that holds it; like a list
+it is a value, so assigning one copies it. `decay/LANGUAGE.md` has the rules.
+
+A struct lives in a script's fields and locals. A scene cannot author one yet,
+so an `@export` of one shows as empty in the inspector, and a `state` holds
+numbers, flags and enums only. `print` shows every field.
+
+Orbital's module chooser keeps each offer slot's card, name and blurb in one
+`OfferCard`, where it kept three lists in step.
 
 ### Saying something
 

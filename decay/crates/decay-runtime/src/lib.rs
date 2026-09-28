@@ -23,5 +23,5 @@ pub use error::RuntimeError;
 pub use host::{EmptyHost, Host};
 pub use instance::ScriptInstance;
 pub use runtime::{DEFAULT_CALL_DEPTH_LIMIT, LIST_LIMIT, Runtime};
-pub use text::{TEXT_LIMIT, spell_number};
+pub use text::{TEXT_LIMIT, show_struct, spell_number};
 pub use value::Value;

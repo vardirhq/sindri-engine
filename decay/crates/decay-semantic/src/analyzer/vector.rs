@@ -243,18 +243,7 @@ impl Analyzer<'_, '_> {
     /// only a component of something the script can store back into, and only
     /// when that thing is mutable.
     pub(super) fn check_component_target(&mut self, object: &Expr, span: Span) {
-        let root = match &object.kind {
-            ExprKind::Identifier(name) => self
-                .lookup(name)
-                .map(|symbol| (name.clone(), symbol.mutable)),
-            ExprKind::Member {
-                object: inner,
-                field,
-            } if matches!(&inner.kind, ExprKind::Identifier(root) if root == "this") => self
-                .own_field(field)
-                .map(|symbol| (format!("this.{field}"), symbol.mutable)),
-            _ => None,
-        };
+        let root = self.place_root(object);
         match root {
             Some((_, true)) => {}
             Some((name, false)) => {
