@@ -1,19 +1,13 @@
 //! The part of the environment that describes the person at the controls.
-//!
-//! Split from `environment.rs` for the reason `surface::person` is split from
-//! `surface::call`: a pointer, a thumb and the screen's shape are facts about
-//! whoever is playing, decided by the host before a script ran. The rest of the
-//! environment describes what a script may *do*.
 
 use decay_semantic::{Environment, FunctionType, HostType, Type};
 
 use crate::surface::{
-    AIM, AIM_VALUES, AimValue, CAMERA, CAMERA_CALLS, CAMERA_VALUES, GESTURE, GESTURE_VALUES,
-    GestureValue, POINTER, POINTER_QUERIES, POINTER_VALUES, PointerValue, STICK, STICK_VALUES,
-    StickValue, TOUCH, TOUCH_CALLS, TOUCH_COUNT, VIEWPORT, VIEWPORT_VALUES,
+    AIM, AIM_VALUES, AimValue, CAMERA, CAMERA_CALLS, CAMERA_VALUES, CameraCall, ENTITY, GESTURE,
+    GESTURE_VALUES, GestureValue, POINTER, POINTER_QUERIES, POINTER_VALUES, PointerValue, STICK,
+    STICK_VALUES, StickValue, TOUCH, TOUCH_CALLS, TOUCH_COUNT, VIEWPORT, VIEWPORT_VALUES,
 };
 
-/// The shape of the screen the host is drawing into.
 pub(super) fn add_viewport_surface(environment: &mut Environment) {
     let mut viewport = HostType::new();
     for (name, _) in VIEWPORT_VALUES {
@@ -23,15 +17,15 @@ pub(super) fn add_viewport_surface(environment: &mut Environment) {
     environment.add_value(VIEWPORT, Type::Named(VIEWPORT.to_owned()));
 }
 
-/// Which block the person is pointing at.
 pub(super) fn add_aim_surface(environment: &mut Environment) {
     let mut aim = HostType::new();
     for (name, value) in AIM_VALUES {
         aim = aim.with_value(
             *name,
-            match value {
-                AimValue::Hit => Type::Bool,
-                _ => Type::F32,
+            if matches!(value, AimValue::Hit) {
+                Type::Bool
+            } else {
+                Type::F32
             },
         );
     }
@@ -39,17 +33,24 @@ pub(super) fn add_aim_surface(environment: &mut Environment) {
     environment.add_value(AIM, Type::Named(AIM.to_owned()));
 }
 
-/// What a script reads about the camera it is seen through.
 pub(super) fn add_camera_surface(environment: &mut Environment) {
     let mut camera = HostType::new();
     for (name, _) in CAMERA_VALUES {
         camera = camera.with_value(*name, Type::F32);
     }
-    for (name, _) in CAMERA_CALLS {
+    for (name, call) in CAMERA_CALLS {
+        let params = match call {
+            CameraCall::AddTrauma | CameraCall::Smoothing | CameraCall::MaxSpeed => vec![Type::F32],
+            CameraCall::Follow => vec![Type::Named(ENTITY.to_owned())],
+            CameraCall::ClearFollow | CameraCall::ClearBounds => Vec::new(),
+            CameraCall::FollowOffset | CameraCall::Shake => vec![Type::F32, Type::F32, Type::F32],
+            CameraCall::DeadZone => vec![Type::F32, Type::F32],
+            CameraCall::Bounds => vec![Type::F32, Type::F32, Type::F32, Type::F32],
+        };
         camera = camera.with_function(
             *name,
             FunctionType {
-                params: vec![Type::F32],
+                params,
                 return_type: Type::Unit,
             },
         );
@@ -58,7 +59,6 @@ pub(super) fn add_camera_surface(environment: &mut Environment) {
     environment.add_value(CAMERA, Type::Named(CAMERA.to_owned()));
 }
 
-/// What the person just did, as an intention rather than as a button.
 pub(super) fn add_gesture_surface(environment: &mut Environment) {
     let mut gesture = HostType::new();
     for (name, value) in GESTURE_VALUES {
@@ -77,7 +77,6 @@ pub(super) fn add_gesture_surface(environment: &mut Environment) {
     environment.add_value(GESTURE, Type::Named(GESTURE.to_owned()));
 }
 
-/// Where the person is pointing, and the fingers behind it.
 pub(super) fn add_pointer_surface(environment: &mut Environment) {
     let mut pointer = HostType::new();
     for (name, value) in POINTER_VALUES {
@@ -125,9 +124,7 @@ pub(super) fn add_pointer_surface(environment: &mut Environment) {
             match value {
                 StickValue::Held => Type::Bool,
                 StickValue::Direction => Type::Vec2,
-                StickValue::X | StickValue::Y | StickValue::AnchorX | StickValue::AnchorY => {
-                    Type::F32
-                }
+                _ => Type::F32,
             },
         );
     }

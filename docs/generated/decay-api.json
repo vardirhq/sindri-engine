@@ -22,7 +22,7 @@
       "type": "Audio"
     },
     {
-      "description": "The game's camera: moving the view and shaking it.",
+      "description": "The game's camera: moving the view and changing its engine-owned follow, confinement, and shake behavior.",
       "kind": "value",
       "name": "Camera",
       "type": "Camera"
@@ -577,14 +577,102 @@
       "name": "Audio"
     },
     {
-      "description": "The game's camera: moving the view and shaking it.",
+      "description": "The game's camera: moving the view and changing its engine-owned follow, confinement, and shake behavior.",
       "members": [
         {
-          "description": "Shakes the camera, for impacts and explosions. Bigger amounts shake harder, up to 1, and the shake fades by itself.",
+          "description": "Adds impact trauma to the authored behavior camera. Bigger amounts shake harder, up to 1, and the authored shake fades by itself.",
           "kind": "function",
           "name": "add_trauma",
           "parameter_names": [
             "amount"
+          ],
+          "parameters": [
+            "f32"
+          ],
+          "returns": "unit"
+        },
+        {
+          "description": "Confines the authored behavior camera to the given world-space rectangle.",
+          "kind": "function",
+          "name": "bounds",
+          "parameter_names": [
+            "min_x",
+            "min_y",
+            "max_x",
+            "max_y"
+          ],
+          "parameters": [
+            "f32",
+            "f32",
+            "f32",
+            "f32"
+          ],
+          "returns": "unit"
+        },
+        {
+          "description": "Removes runtime confinement from the authored behavior camera.",
+          "kind": "function",
+          "name": "clear_bounds",
+          "parameter_names": [],
+          "parameters": [],
+          "returns": "unit"
+        },
+        {
+          "description": "Stops the authored behavior camera following a target.",
+          "kind": "function",
+          "name": "clear_follow",
+          "parameter_names": [],
+          "parameters": [],
+          "returns": "unit"
+        },
+        {
+          "description": "Sets the follow dead-zone size for the authored behavior camera.",
+          "kind": "function",
+          "name": "dead_zone",
+          "parameter_names": [
+            "x",
+            "y"
+          ],
+          "parameters": [
+            "f32",
+            "f32"
+          ],
+          "returns": "unit"
+        },
+        {
+          "description": "Makes the authored behavior camera follow an entity at runtime.",
+          "kind": "function",
+          "name": "follow",
+          "parameter_names": [
+            "target"
+          ],
+          "parameters": [
+            "Entity"
+          ],
+          "returns": "unit"
+        },
+        {
+          "description": "Sets the world-space offset from the follow target used by the authored behavior camera.",
+          "kind": "function",
+          "name": "follow_offset",
+          "parameter_names": [
+            "x",
+            "y",
+            "z"
+          ],
+          "parameters": [
+            "f32",
+            "f32",
+            "f32"
+          ],
+          "returns": "unit"
+        },
+        {
+          "description": "Sets the maximum follow speed of the authored behavior camera.",
+          "kind": "function",
+          "name": "max_speed",
+          "parameter_names": [
+            "value"
           ],
           "parameters": [
             "f32"
@@ -608,6 +696,34 @@
           "kind": "value",
           "name": "pan_z",
           "type": "f32"
+        },
+        {
+          "description": "Changes the authored behavior camera's shake strength, frequency, and trauma decay.",
+          "kind": "function",
+          "name": "shake",
+          "parameter_names": [
+            "strength",
+            "frequency",
+            "decay"
+          ],
+          "parameters": [
+            "f32",
+            "f32",
+            "f32"
+          ],
+          "returns": "unit"
+        },
+        {
+          "description": "Sets how strongly the authored behavior camera smooths its follow movement.",
+          "kind": "function",
+          "name": "smoothing",
+          "parameter_names": [
+            "value"
+          ],
+          "parameters": [
+            "f32"
+          ],
+          "returns": "unit"
         }
       ],
       "name": "Camera"

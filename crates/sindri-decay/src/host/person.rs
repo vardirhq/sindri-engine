@@ -1,9 +1,4 @@
-//! What the host tells a script about the person at the other end.
-//!
-//! The steering stick, the gestures, the block under the pointer, the pointer
-//! itself and the fingers behind it. Split out of the host because they are one
-//! subject and the host is not: everything here answers "what is the person
-//! doing", and none of it touches the world.
+//! Player-facing input values and gameplay control of the world camera.
 
 use decay_ir::Path;
 use decay_runtime::{RuntimeError, Value};
@@ -15,12 +10,6 @@ use crate::surface::{
 };
 
 impl WorldHost<'_> {
-    /// What the steering finger is asking for.
-    ///
-    /// The host computes it rather than the script, because anchoring, the
-    /// clamp past the radius and the dead zone are the same three decisions in
-    /// every game that has ever needed a stick -- and a script doing the
-    /// subtraction itself gets a slightly different feel and its own bugs.
     pub(super) fn stick_value(&self, value: StickValue) -> Value {
         let stick = self.context.input.stick();
         let pushed = stick.value();
@@ -29,8 +18,6 @@ impl WorldHost<'_> {
             StickValue::Y => Value::Number(f64::from(pushed[1])),
             StickValue::Held => Value::Bool(stick.is_engaged()),
             StickValue::Direction => Value::Vec2([f64::from(pushed[0]), f64::from(pushed[1])]),
-            // Zero when nothing is holding it, like a pointer position read
-            // from outside the window: a script that cares asks `held` first.
             StickValue::AnchorX => Value::Number(f64::from(
                 stick
                     .anchor(self.context.input.presses())
@@ -44,18 +31,6 @@ impl WorldHost<'_> {
         }
     }
 
-    /// What the person is pointing at, in a world made of blocks.
-    ///
-    /// Every cell reads zero when nothing was hit, which is why `hit` exists
-    /// and is not a convenience: zero is a real cell, and a script that
-    /// skipped the question would build a tower at the origin every time the
-    /// pointer left the world. Reporting it as an error instead would be
-    /// wrong -- pointing at the sky is an ordinary thing to do.
-    /// How far this frame's drag asks the camera to move.
-    ///
-    /// Zero when nothing is being dragged, and zero rather than an error when
-    /// the host runs no camera at all: a script adding a pan every frame is
-    /// doing the right thing, and adding nothing is the right answer.
     pub(super) fn camera_value(&self, value: CameraValue) -> Value {
         let pan = self.camera_pan.unwrap_or([0.0; 3]);
         Value::Number(f64::from(match value {
@@ -65,38 +40,66 @@ impl WorldHost<'_> {
         }))
     }
 
-    /// Applies gameplay intent to the authored world camera behavior.
     pub(super) fn camera_call(
         &mut self,
         call: CameraCall,
         path: &Path,
         args: &[Value],
     ) -> Result<Value, RuntimeError> {
-        let amount = number(path, args.first().unwrap_or(&Value::Null))?;
-        if !amount.is_finite() || amount < 0.0 {
-            return Err(RuntimeError::Host(format!(
-                "{} takes a finite, non-negative trauma amount",
-                path.dotted()
-            )));
-        }
-        match call {
+        let numeric = |index: usize| -> Result<f32, RuntimeError> {
+            let value = number(path, args.get(index).unwrap_or(&Value::Null))?;
+            if !value.is_finite() {
+                return Err(RuntimeError::Host(format!(
+                    "{} takes finite numbers",
+                    path.dotted()
+                )));
+            }
+            Ok(as_f32(value))
+        };
+        let changed = match call {
             CameraCall::AddTrauma => {
-                if !sindri_scene::add_camera_trauma(self.world, as_f32(amount)) {
+                let amount = numeric(0)?;
+                if amount < 0.0 {
                     return Err(RuntimeError::Host(format!(
-                        "{} needs exactly one authored camera with sindri.camera.behavior",
+                        "{} takes a non-negative trauma amount",
                         path.dotted()
                     )));
                 }
-                Ok(Value::Unit)
+                sindri_scene::add_camera_trauma(self.world, amount)
             }
+            CameraCall::Follow => {
+                let target = self.entity_argument(path, args, 0, "the follow target")?;
+                sindri_scene::set_camera_follow_target(self.world, target)
+            }
+            CameraCall::ClearFollow => sindri_scene::clear_camera_follow(self.world),
+            CameraCall::FollowOffset => sindri_scene::set_camera_follow_offset(
+                self.world,
+                [numeric(0)?, numeric(1)?, numeric(2)?],
+            ),
+            CameraCall::DeadZone => {
+                sindri_scene::set_camera_dead_zone(self.world, [numeric(0)?, numeric(1)?])
+            }
+            CameraCall::Smoothing => sindri_scene::set_camera_smoothing(self.world, numeric(0)?),
+            CameraCall::MaxSpeed => sindri_scene::set_camera_max_speed(self.world, numeric(0)?),
+            CameraCall::Bounds => sindri_scene::set_camera_bounds(
+                self.world,
+                [numeric(0)?, numeric(1)?],
+                [numeric(2)?, numeric(3)?],
+            ),
+            CameraCall::ClearBounds => sindri_scene::clear_camera_bounds(self.world),
+            CameraCall::Shake => {
+                sindri_scene::set_camera_shake(self.world, numeric(0)?, numeric(1)?, numeric(2)?)
+            }
+        };
+        if !changed {
+            return Err(RuntimeError::Host(format!(
+                "{} could not change the camera behavior; it needs exactly one authored behavior camera and valid settings",
+                path.dotted()
+            )));
         }
+        Ok(Value::Unit)
     }
 
-    /// What the person just did.
-    ///
-    /// Nothing is the common answer, and every coordinate reads zero then --
-    /// a real place on the screen -- so each gesture is guarded by its own
-    /// question the way `Aim.hit` guards a cell.
     pub(super) fn gesture_value(&self, value: GestureValue) -> Value {
         use GestureValue::{
             DragX, DragY, Dragging, Held, HoldX, HoldY, Pinch, Pinching, TapX, TapY, Tapped,
@@ -104,9 +107,6 @@ impl WorldHost<'_> {
         let Some(gestures) = self.gestures else {
             return match value {
                 Tapped | Held | Dragging | Pinching => Value::Bool(false),
-                // A pinch that did not happen is a scale of one, not of zero:
-                // zero would be a camera collapsing to a point the first frame
-                // a script multiplied by it without asking.
                 Pinch => Value::Number(1.0),
                 _ => Value::Number(0.0),
             };
@@ -131,9 +131,10 @@ impl WorldHost<'_> {
 
     pub(super) fn aim_value(&self, value: AimValue) -> Value {
         let Some(aim) = self.aim else {
-            return match value {
-                AimValue::Hit => Value::Bool(false),
-                _ => Value::Number(0.0),
+            return if matches!(value, AimValue::Hit) {
+                Value::Bool(false)
+            } else {
+                Value::Number(0.0)
             };
         };
         match value {
@@ -149,11 +150,13 @@ impl WorldHost<'_> {
 
     pub(super) fn pointer_value(&self, value: PointerValue) -> Value {
         let position = self.context.input.pointer_position();
+        let overlay = || {
+            self.screen_ui
+                .and_then(sindri_scene::ScreenUi::pointer_overlay)
+                .unwrap_or([0.0, 0.0])
+        };
         match value {
             PointerValue::Inside => Value::Bool(position.is_some()),
-            // False with no screen UI running, rather than an error: a host
-            // with no UI has no element to take the pointer, which is a true
-            // answer rather than a missing one.
             PointerValue::OverUi => Value::Bool(
                 self.screen_ui
                     .is_some_and(sindri_scene::ScreenUi::captures_pointer),
@@ -163,32 +166,16 @@ impl WorldHost<'_> {
                 Value::Vec2([f64::from(x), f64::from(y)])
             }
             PointerValue::Overlay => {
-                let [x, y] = self
-                    .screen_ui
-                    .and_then(sindri_scene::ScreenUi::pointer_overlay)
-                    .unwrap_or([0.0, 0.0]);
+                let [x, y] = overlay();
                 Value::Vec2([f64::from(x), f64::from(y)])
             }
             PointerValue::X => Value::Number(f64::from(position.unwrap_or([0.0, 0.0])[0])),
             PointerValue::Y => Value::Number(f64::from(position.unwrap_or([0.0, 0.0])[1])),
-            // Zero with no screen UI running, for the same reason a position
-            // read while the pointer is outside reads zero: the overlay is
-            // where the UI is laid out, and a host laying out none has no
-            // overlay to answer about. A script that cares asks `inside`.
-            PointerValue::OverlayX => Value::Number(f64::from(
-                self.screen_ui
-                    .and_then(sindri_scene::ScreenUi::pointer_overlay)
-                    .unwrap_or([0.0, 0.0])[0],
-            )),
-            PointerValue::OverlayY => Value::Number(f64::from(
-                self.screen_ui
-                    .and_then(sindri_scene::ScreenUi::pointer_overlay)
-                    .unwrap_or([0.0, 0.0])[1],
-            )),
+            PointerValue::OverlayX => Value::Number(f64::from(overlay()[0])),
+            PointerValue::OverlayY => Value::Number(f64::from(overlay()[1])),
         }
     }
 
-    /// Where one finger is.
     pub(super) fn touch_call(
         &self,
         call: TouchCall,
@@ -202,12 +189,8 @@ impl WorldHost<'_> {
                 path.dotted()
             )));
         }
-        // Guarded above: finite, non-negative, and whole.
         #[allow(clippy::cast_possible_truncation, clippy::cast_sign_loss)]
         let position = self.context.input.touch_at(index as usize).ok_or_else(|| {
-            // Named rather than answered with zero: a script reading finger
-            // three when two are down has a bound that is wrong, and a zero
-            // would read as a finger in the corner of the screen.
             RuntimeError::Host(format!(
                 "{} was asked for finger {index}, and {} are down",
                 path.dotted(),

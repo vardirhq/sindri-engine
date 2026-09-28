@@ -91,7 +91,7 @@ fn camera_trauma_without_one_behavior_camera_is_a_runtime_error() {
     );
     assert_eq!(report.failures.len(), 1, "{report:?}");
     assert!(
-        format!("{:?}", report.failures).contains("exactly one authored camera"),
+        format!("{:?}", report.failures).contains("exactly one authored behavior camera"),
         "{report:?}"
     );
 }
