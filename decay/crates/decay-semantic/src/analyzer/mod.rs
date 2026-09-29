@@ -6,6 +6,7 @@
 
 mod call;
 mod constant;
+mod defaults;
 mod enumeration;
 mod event;
 mod expr;
@@ -93,6 +94,11 @@ pub(super) struct Analyzer<'a, 'd> {
     pub(crate) own_constants: std::collections::BTreeMap<String, crate::constant::ConstValue>,
     /// This file's constants that could not be worked out.
     broken_constants: HashSet<String>,
+    /// Every struct's field defaults, worked out: the host's, and its own.
+    defaults: HashMap<String, HashMap<String, crate::constant::ConstValue>>,
+    /// This program's defaults that could not be worked out, as
+    /// `(struct, field)`.
+    broken_defaults: HashSet<(String, String)>,
     /// Every struct's methods this program may call: the host's, and its own.
     methods: HashMap<String, HashMap<String, FunctionType>>,
     /// Where a struct's method is called, for the lowering.
@@ -132,6 +138,8 @@ impl<'a, 'd> Analyzer<'a, 'd> {
             broken_constants: HashSet::new(),
             methods: HashMap::new(),
             method_calls: HashMap::new(),
+            defaults: HashMap::new(),
+            broken_defaults: HashSet::new(),
         }
     }
 
@@ -154,6 +162,7 @@ impl<'a, 'd> Analyzer<'a, 'd> {
         self.collect_states(program);
         self.collect_functions(program);
         self.collect_constants(program);
+        self.collect_struct_defaults(program);
 
         for item in &program.items {
             let container = match item {

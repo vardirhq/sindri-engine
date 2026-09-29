@@ -96,6 +96,12 @@ pub struct Analysis {
     /// one's signature after the value it is asked of: the host's and its own.
     pub struct_methods:
         std::collections::BTreeMap<String, Vec<(String, crate::types::FunctionType)>>,
+    /// Every struct field default the program could use, by struct and then
+    /// field: what the lowering writes for a field a construction leaves out.
+    pub struct_defaults: std::collections::BTreeMap<
+        String,
+        std::collections::BTreeMap<String, crate::constant::ConstValue>,
+    >,
     /// This file's own constants, worked out, by name.
     pub constants: std::collections::BTreeMap<String, crate::constant::ConstValue>,
 }

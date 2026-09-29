@@ -22,6 +22,8 @@ pub(crate) struct Lowerer<'a> {
     value_members: &'a ValueMembers,
     constant_uses: &'a ConstantUses,
     method_calls: &'a std::collections::HashMap<Span, String>,
+    struct_defaults:
+        &'a std::collections::BTreeMap<String, std::collections::BTreeMap<String, ConstValue>>,
     structs: &'a std::collections::BTreeMap<String, Vec<(String, decay_semantic::Type)>>,
 }
 
@@ -31,6 +33,7 @@ impl<'a> Lowerer<'a> {
             value_members: &analysis.value_members,
             constant_uses: &analysis.constant_uses,
             method_calls: &analysis.method_calls,
+            struct_defaults: &analysis.struct_defaults,
             structs: &analysis.structs,
         };
         let containers = analysis
@@ -92,8 +95,19 @@ impl<'a> Lowerer<'a> {
     /// The value a name at this span means, when the analysis found it names
     /// a constant: written in the name's place, so nothing is looked up.
     pub(super) fn constant_at(&self, span: Span) -> Option<crate::ir::Constant> {
+        Some(Self::constant(self.constant_uses.get(&span)?))
+    }
+
+    /// A struct field's default, as the constant written for it.
+    pub(super) fn default_of(&self, structure: &str, field: &str) -> Option<crate::ir::Constant> {
+        Some(Self::constant(
+            self.struct_defaults.get(structure)?.get(field)?,
+        ))
+    }
+
+    fn constant(value: &ConstValue) -> crate::ir::Constant {
         use crate::ir::Constant;
-        Some(match self.constant_uses.get(&span)? {
+        match value {
             ConstValue::Number(number) => Constant::Number(*number),
             ConstValue::Bool(flag) => Constant::Bool(*flag),
             ConstValue::Text(text) => Constant::String(text.clone()),
@@ -101,7 +115,7 @@ impl<'a> Lowerer<'a> {
                 enumeration,
                 variant,
             } => Constant::Variant(format!("{enumeration}.{variant}")),
-        })
+        }
     }
 
     /// What the analysis decided a member read at this span is, if anything.

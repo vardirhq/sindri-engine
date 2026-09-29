@@ -188,14 +188,17 @@ impl Analyzer<'_, '_> {
         }
         let missing: Vec<String> = declared
             .iter()
-            .filter(|(field, _)| !given.contains(field.as_str()))
+            .filter(|(field, _)| !given.contains(field.as_str()) && !self.has_default(name, field))
             .map(|(field, _)| format!("`{field}`"))
             .collect();
         if !missing.is_empty() {
             self.error(
                 Code::MissingFields,
                 span,
-                format!("`{name}` needs every field: missing {}", missing.join(", ")),
+                format!(
+                    "`{name}` needs every field without a default: missing {}",
+                    missing.join(", ")
+                ),
             );
         }
         Type::Named(name.to_owned())

@@ -169,10 +169,11 @@ item         = ( "script" | "component" ) IDENT "{" { member } "}"
              | "event" IDENT "(" [ params ] ")" ";"
              | "state" IDENT "{" { field } "}"
              | "enum" IDENT "{" [ IDENT { "," IDENT } [ "," ] ] "}"
-             | "struct" IDENT "{" [ IDENT ":" type { "," IDENT ":" type } [ "," ] ]
+             | "struct" IDENT "{" [ struct_field { "," struct_field } [ "," ] ]
                { function } "}"
              | [ "shared" ] function
              | [ "shared" ] "const" IDENT ":" type "=" expr ";" ;
+struct_field = IDENT ":" type [ "=" expr ] ;
 member       = { attribute } ( field | function | handler ) ;
 attribute    = "@" IDENT ;
 
@@ -876,8 +877,18 @@ script Chooser {
 
 - **Built with every field named**, in any order: `Offer(name: "a",
   index: 1.0, weight: 2.0)`. A field left out, named twice or not in the
-  struct is a diagnostic, and so is building one with positional arguments.
-  There is no default for a field.
+  struct is a diagnostic, and so is building one with positional arguments —
+  except a field with a **default**, which may be left out and then holds it:
+
+  ```rust
+  struct Offer { name: String, weight: f32 = BASE * 1.5, rarity: Rarity = Rarity.Common }
+  let o = Offer(name: "a");                // weight 3, rarity Common, with BASE 2
+  ```
+
+  A default is worked out when the file compiles, as a constant is: it holds
+  `f32`, `bool`, `String` or an enum, and may use literals, operators,
+  variants and constants, but not another field. Naming the field still
+  gives it whatever it is given.
 - **A struct is a value**, like a vector or a list: assigning one copies it,
   and `==` compares every field. A field is written through the variable,
   parameter or field of this script that holds the struct — `best.weight =
@@ -1151,7 +1162,8 @@ grammar, and every one of them is a parse error or a diagnostic.
 nothing else.
 
 **Data:** maps, dictionaries, sets, tuples, methods that change their struct,
-default field values, enums with data
+defaults for fields of a type a constant cannot hold (a vector, a list, an
+entity), enums with data
 (`Some(x)`), a range as a value outside `for`, a step (`0..10 by 2`), negative
 indices, slicing a list, `Option`, `Result`, `?`. `List<T>` exists; see
 "Lists".
