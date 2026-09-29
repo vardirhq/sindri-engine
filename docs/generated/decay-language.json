@@ -161,6 +161,12 @@
       "summary": "Named fields, `(name: value)`, after something that is not a struct's name."
     },
     {
+      "code": "decay-syntax/field-after-method",
+      "id": "field-after-method",
+      "phase": "decay-syntax",
+      "summary": "A struct's field written after one of its methods; fields come first."
+    },
+    {
       "code": "decay-semantic/unknown-name",
       "id": "unknown-name",
       "phase": "decay-semantic",

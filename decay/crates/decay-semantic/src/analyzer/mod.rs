@@ -13,6 +13,7 @@ mod function;
 mod item;
 mod list;
 mod member;
+mod method;
 mod number;
 mod state;
 mod stmt;
@@ -92,6 +93,10 @@ pub(super) struct Analyzer<'a, 'd> {
     pub(crate) own_constants: std::collections::BTreeMap<String, crate::constant::ConstValue>,
     /// This file's constants that could not be worked out.
     broken_constants: HashSet<String>,
+    /// Every struct's methods this program may call: the host's, and its own.
+    methods: HashMap<String, HashMap<String, FunctionType>>,
+    /// Where a struct's method is called, for the lowering.
+    pub(crate) method_calls: HashMap<Span, String>,
     /// Where a constant was named, for the lowering.
     pub(crate) constant_uses: crate::diagnostic::ConstantUses,
 }
@@ -125,6 +130,8 @@ impl<'a, 'd> Analyzer<'a, 'd> {
             own_constants: std::collections::BTreeMap::new(),
             constant_uses: HashMap::new(),
             broken_constants: HashSet::new(),
+            methods: HashMap::new(),
+            method_calls: HashMap::new(),
         }
     }
 
@@ -142,6 +149,7 @@ impl<'a, 'd> Analyzer<'a, 'd> {
         // name one declared further down.
         self.collect_enums(program);
         self.collect_structs(program);
+        self.collect_methods(program);
         self.collect_events(program);
         self.collect_states(program);
         self.collect_functions(program);
@@ -150,11 +158,11 @@ impl<'a, 'd> Analyzer<'a, 'd> {
         for item in &program.items {
             let container = match item {
                 Item::Script(container) | Item::Component(container) => container,
-                Item::Event(_)
-                | Item::State(_)
-                | Item::Enum(_)
-                | Item::Struct(_)
-                | Item::Const(_) => continue,
+                Item::Struct(declared) => {
+                    self.analyze_methods(declared);
+                    continue;
+                }
+                Item::Event(_) | Item::State(_) | Item::Enum(_) | Item::Const(_) => continue,
                 Item::Function(function) => {
                     self.analyze_shared_function(function);
                     continue;

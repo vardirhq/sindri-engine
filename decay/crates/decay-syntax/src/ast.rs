@@ -52,11 +52,14 @@ pub struct EnumDecl {
     pub span: Span,
 }
 
-/// A declared struct: its name, and its fields in order.
+/// A declared struct: its name, its fields in order, and its methods.
 #[derive(Debug, Clone, PartialEq)]
 pub struct StructDecl {
     pub name: String,
     pub fields: Vec<StructField>,
+    /// `fn heavier(other: Card) -> bool { ... }` after the fields: a function
+    /// asked of one value, `card.heavier(best)`, with `this` the value.
+    pub methods: Vec<FunctionDecl>,
     pub span: Span,
 }
 

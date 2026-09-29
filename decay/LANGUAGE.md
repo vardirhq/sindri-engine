@@ -169,7 +169,8 @@ item         = ( "script" | "component" ) IDENT "{" { member } "}"
              | "event" IDENT "(" [ params ] ")" ";"
              | "state" IDENT "{" { field } "}"
              | "enum" IDENT "{" [ IDENT { "," IDENT } [ "," ] ] "}"
-             | "struct" IDENT "{" [ IDENT ":" type { "," IDENT ":" type } [ "," ] ] "}"
+             | "struct" IDENT "{" [ IDENT ":" type { "," IDENT ":" type } [ "," ] ]
+               { function } "}"
              | [ "shared" ] function
              | [ "shared" ] "const" IDENT ":" type "=" expr ";" ;
 member       = { attribute } ( field | function | handler ) ;
@@ -878,6 +879,41 @@ script Chooser {
 - `print` shows one as `Offer(index: 1, weight: 2, name: "a")`. Text does not
   join with a struct. A timer inside a struct is not run down by the host.
 
+### Methods
+
+Functions written in a struct, after its fields, are asked of one value:
+
+```rust
+struct Offer {
+    index: f32,
+    weight: f32,
+    name: String,
+
+    fn heavier(other: Offer) -> bool { return this.weight > other.weight; }
+    fn doubled() -> Offer {
+        return Offer(index: this.index, weight: this.weight * 2.0, name: this.name);
+    }
+}
+
+if offer.heavier(best) { best = offer.doubled(); }
+```
+
+- **`this` is the value** the method was asked of, and its fields are read as
+  `this.weight`; a bare `weight` is not in scope. A method may call the
+  struct's other methods on `this`, and the engine, as any function can.
+- **`this` does not change.** The method works on a copy, so writing
+  `this.weight` is a diagnostic: return the changed value instead, as
+  `doubled` does, and assign it where it is wanted.
+- **Checked like any call**: `offer.heavier(1.0)` is a type mismatch, a
+  method the struct does not have is named with the ones it does, and
+  `offer.heavier` without its arguments is a diagnostic — a method is always
+  called, even one that takes nothing, `offer.label()`.
+- A method may not share a name with a field, and a struct's fields come
+  before its methods. There are no methods on anything but a struct, no
+  `impl` blocks, and no function that belongs to a struct without a value.
+- Like the struct, its methods are every file's: Sindri describes each one to
+  every file and links its code into every program that calls it.
+
 ---
 
 ## Statements
@@ -1058,9 +1094,10 @@ reports for one entity while every other script keeps running.
 
 Things that are true and that most readers — human or model — will guess wrong.
 
-1. **`this.method()` is not a method call.** A container has no methods; it is a
-   compile error telling you to call it by bare name. Host *types* may have
-   methods, and those work.
+1. **`this.method()` is not a method call in a script.** A container has no
+   methods; it is a compile error telling you to call it by bare name. Host
+   *types* and structs have methods, and those work — inside a struct's own
+   method, `this` is the struct's value and `this.other()` calls another.
 2. **There is no truthiness.** `if x` requires `x` to be `bool`.
 3. **`"d" + 3.0` is `"d3"`, and `"d" + 1.0 + 2.0` is `"d12"`.** `+` groups
    left to right, so once text is on the left every `+` after it joins. Write
@@ -1096,15 +1133,15 @@ grammar, and every one of them is a parse error or a diagnostic.
 `continue` with a label or a value. `for … in` walks a list or a range, and
 nothing else.
 
-**Data:** maps, dictionaries, sets, tuples, struct methods, default field
-values, enums with data
+**Data:** maps, dictionaries, sets, tuples, methods that change their struct,
+default field values, enums with data
 (`Some(x)`), a range as a value outside `for`, a step (`0..10 by 2`), negative
 indices, slicing a list, `Option`, `Result`, `?`. `List<T>` exists; see
 "Lists".
 
 **Functions:** closures, lambdas, function values, default arguments, named
-arguments, variadics, generics beyond `List<T>`, overloading, methods, `impl`,
-traits.
+arguments, variadics, generics beyond `List<T>`, overloading, methods on
+anything but a struct, `impl`, traits.
 
 **Types:** integers, `f64`, unsigned types, characters, type aliases, casts,
 inference beyond a binding's own initializer, nullable types, user-defined types

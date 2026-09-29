@@ -1947,8 +1947,29 @@ the inspector draws a row for each; a field the scene leaves out keeps the
 script's default for it. A `state` holds numbers, flags and enums only.
 `print` shows every field.
 
+A struct may have methods, written after its fields and asked of one value:
+
+```decay
+struct OfferCard {
+    card: Entity, name: Entity, blurb: Entity,
+
+    fn show(title: String, text: String) {
+        Ui.set_text(this.name, title);
+        Ui.set_text(this.blurb, text);
+        World.set_active(this.card, true);
+    }
+}
+
+this.slots[slot].show(title, blurb);
+```
+
+`this` in a method is the value, read as `this.card`; it is a copy, so a
+method that works something out returns it rather than changing `this`.
+Methods are checked like any call and, like the struct, reach every file.
+
 Orbital's module chooser keeps each offer slot's card, name and blurb in one
-`OfferCard`, where it kept three lists in step.
+`OfferCard`, where it kept three lists in step, and asks a slot to `show` a
+module or `hide`, where it set each of the three itself.
 
 ### Saying something
 

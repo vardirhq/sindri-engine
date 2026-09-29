@@ -31,6 +31,9 @@ impl Analyzer<'_, '_> {
             if let Type::Array(element) = &object_type {
                 return self.list_call_type(object, element, field, args, span);
             }
+            if let Some(result) = self.method_call_type(&object_type, field, args, span) {
+                return result;
+            }
             match self.member_symbol(&object_type, field, is_this(object)) {
                 Some(MemberLookup::Found(ExternalSymbol::Function(function))) => {
                     self.check_call(&function, args, span);

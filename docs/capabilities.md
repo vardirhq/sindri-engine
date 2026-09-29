@@ -1725,9 +1725,12 @@ games' `VIEW_SIZE`.
 
 A `struct` in any file is a value type every script builds with named fields
 (`OfferCard(card: c, name: n, blurb: b)`), reads, writes through the `var`
-holding it, and keeps in lists; it is copied where it is assigned. Exercised
-in `crates/sindri-decay/tests/scripts_use_structs.rs` and by both Orbital
-games' module chooser.
+holding it, and keeps in lists; it is copied where it is assigned. Functions
+written after its fields are its methods, asked of one value with `this` a
+read-only copy, and reach every file as the struct does. Exercised in
+`crates/sindri-decay/tests/scripts_use_structs.rs`,
+`crates/sindri-decay/tests/scripts_use_struct_methods.rs`, and by both
+Orbital games' module chooser.
 
 Lists are written (`[a, b]`), changed in place where a `var` or field holds
 them (`push`, `pop`, `insert`, `remove_at`, `clear`, `xs[i] = v`), asked

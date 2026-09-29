@@ -219,6 +219,14 @@ impl Analyzer<'_, '_> {
                 .insert(span, ValueMember::Component(index));
             return Some(ty);
         }
+        if self.has_method(name, field) {
+            self.error(
+                Code::FunctionNotCalled,
+                span,
+                format!("`{field}` is a method of `{name}` -- call it: `.{field}(...)`"),
+            );
+            return Some(Type::Unknown);
+        }
         let message = missing_field(name, field, declared);
         self.error(Code::UnknownMember, span, message);
         Some(Type::Unknown)

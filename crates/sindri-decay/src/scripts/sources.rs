@@ -121,9 +121,17 @@ impl ScriptSources {
                     .program
                     .items
                     .into_iter()
-                    .filter_map(|item| match item {
-                        Item::Function(function) if function.shared => Some(function.name),
-                        _ => None,
+                    .flat_map(|item| match item {
+                        Item::Function(function) if function.shared => vec![function.name],
+                        // A struct's methods are every file's, as the struct is.
+                        Item::Struct(declared) => declared
+                            .methods
+                            .iter()
+                            .map(|method| {
+                                decay_semantic::method_function(&declared.name, &method.name)
+                            })
+                            .collect(),
+                        _ => Vec::new(),
                     })
                     .collect();
                 if declared.is_empty() {

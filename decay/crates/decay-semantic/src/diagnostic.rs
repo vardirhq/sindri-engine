@@ -89,6 +89,13 @@ pub struct Analysis {
     /// Keyed like `value_members`, by the name's span; the lowering writes
     /// the value in its place.
     pub constant_uses: ConstantUses,
+    /// Where the program calls a struct's method, and the function it is
+    /// lowered to: `card.heavier(best)` calls `Card.heavier`.
+    pub method_calls: HashMap<Span, String>,
+    /// Every struct method the program could call, by struct, with each
+    /// one's signature after the value it is asked of: the host's and its own.
+    pub struct_methods:
+        std::collections::BTreeMap<String, Vec<(String, crate::types::FunctionType)>>,
     /// This file's own constants, worked out, by name.
     pub constants: std::collections::BTreeMap<String, crate::constant::ConstValue>,
 }

@@ -8,6 +8,7 @@ mod fields;
 mod lists;
 mod loops;
 mod matching;
+mod methods;
 mod numbers;
 mod scope;
 mod shared;
