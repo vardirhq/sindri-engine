@@ -1,0 +1,26 @@
+// Score, title, and game-over text.
+script Hud {
+    var score: Entity = null;
+    var hint: Entity = null;
+    var title: Entity = null;
+    var over: Entity = null;
+    var best: Entity = null;
+
+    fn start() {
+        this.score = World.find("ScoreLabel");
+        this.hint = World.find("Hint");
+        this.title = World.find("Title");
+        this.over = World.find("GameOver");
+        this.best = World.find("BestLabel");
+    }
+
+    fn update(dt: f32) {
+        Ui.set_number(this.score, Game.score);
+        Ui.set_number(this.best, Game.best);
+        World.set_active(this.score, Game.started);
+        World.set_active(this.title, !Game.started && !Game.dead);
+        World.set_active(this.hint, !Game.started || (Game.dead && Game.dead_time > 0.6));
+        World.set_active(this.over, Game.dead);
+        World.set_active(this.best, Game.dead);
+    }
+}

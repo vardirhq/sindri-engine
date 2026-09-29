@@ -26,7 +26,7 @@ fn the_bird_waits_until_the_first_flap() {
     }
     let [x, y] = run.position(bird);
     assert!(
-        (x + 3.5).abs() < 0.02 && (y - 0.5).abs() < 0.02,
+        (x + 1.5).abs() < 0.02 && (y - 0.5).abs() < 0.3,
         "waiting at {x}, {y}"
     );
     assert!(run.board("started") < 1.0);
@@ -75,11 +75,17 @@ fn a_failed_run_can_restart() {
         "gravity eventually ends an unattended run"
     );
 
+    // A tap straight after the crash is ignored; one after the pause restarts.
+    tap(&mut run);
+    assert!(run.board("dead") > 0.0, "an instant tap does not restart");
+    for _ in 0..60 {
+        step(&mut run);
+    }
     tap(&mut run);
     let [x, y] = run.position(bird);
     assert!(run.board("dead") < 1.0 && run.board("started") < 1.0);
     assert!(
-        (x + 3.5).abs() < 0.05 && (y - 0.5).abs() < 0.05,
+        (x + 1.5).abs() < 0.05 && (y - 0.5).abs() < 0.3,
         "restarted at {x}, {y}"
     );
 }

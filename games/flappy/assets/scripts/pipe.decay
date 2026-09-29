@@ -1,0 +1,41 @@
+// One piece of a pipe pair. Every piece of a pair shares a seed, so they agree
+// on where the gap is each lap without having to find one another.
+script Pipe {
+    @export let offset: f32 = 0.0;
+    @export let seed: f32 = 1.0;
+    @export let wrap_x: f32 = -11.5;
+    @export let span: f32 = 23.0;
+
+    var home_x: f32 = 0.0;
+    var lap: f32 = 0.0;
+    var run: f32 = -1.0;
+
+    fn start() {
+        this.home_x = this.transform.position.x;
+    }
+
+    fn update(dt: f32) {
+        if this.run != Game.run {
+            this.run = Game.run;
+            this.lap = 0.0;
+            this.transform.position.x = this.home_x;
+            place();
+        }
+        if !Game.started || Game.dead {
+            return;
+        }
+        this.transform.position.x -= Game.speed * dt;
+        if this.transform.position.x < this.wrap_x {
+            this.transform.position.x += this.span;
+            this.lap += 1.0;
+            place();
+        }
+    }
+
+    fn place() {
+        // A cheap deterministic hash: same seed and lap, same gap.
+        let h = sin(this.seed * 12.9898 + this.lap * 78.233 + Game.run * 3.71) * 43758.547;
+        let t = h - floor(h);
+        this.transform.position.y = -2.0 + t * 4.4 + this.offset;
+    }
+}

@@ -6,8 +6,10 @@ The game exists to prove a compact, readable Decay-first arcade loop rather than
 
 ## Controls
 
-- **Space / W / Arrow Up** — flap
-- **Space / W / Arrow Up after a crash** — restart
+- **Tap / click / Space / W / Arrow Up** — flap
+- **The same, a moment after a crash** — restart
+
+Gaps change height every lap, the course speeds up as the score climbs, and the sky, hills, and ground scroll in parallax.
 
 ## Scope
 

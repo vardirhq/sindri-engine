@@ -6,7 +6,9 @@
 use std::path::{Path, PathBuf};
 use std::time::Duration;
 
-use sindri_core::{ComponentSchemaRegistry, EntityId, SceneDocument, World};
+use sindri_core::{
+    ComponentSchemaRegistry, EntityId, SceneDocument, UnknownComponentPolicy, World,
+};
 use sindri_decay::{Physics2d, ScriptComponent, ScriptFrame, ScriptSources, Scripts};
 use sindri_platform::{InputEvent, InputState, Key};
 use sindri_scene::{SceneExtractor, ScenePhysics2d, SpriteAnimations};
@@ -35,10 +37,13 @@ impl Run {
             serde_json::from_str(&text).map_err(|error| error.to_string())?;
         document.validate().map_err(|error| error.to_string())?;
 
-        let mut components = SceneExtractor::new()
-            .map_err(|error| error.to_string())?
-            .components()
-            .clone();
+        // Check component data the way the renderer will, so a typo such as an
+        // unknown shape kind fails here instead of in the browser.
+        let extractor = SceneExtractor::new().map_err(|error| error.to_string())?;
+        extractor
+            .validate(&document, UnknownComponentPolicy::Preserve)
+            .map_err(|error| format!("{error}: {error:?}"))?;
+        let mut components = extractor.components().clone();
         components
             .register::<ScriptComponent>("Script")
             .map_err(|error| error.to_string())?;
