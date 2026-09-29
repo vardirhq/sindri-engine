@@ -45,13 +45,10 @@ jobs:
         include:
           - os: ubuntu-latest
             label: linux-x64
-            binary: decay-lsp
           - os: windows-latest
             label: windows-x64
-            binary: decay-lsp.exe
           - os: macos-14
             label: macos-arm64
-            binary: decay-lsp
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v7
@@ -83,7 +80,7 @@ jobs:
       - name: Package VSIX
         working-directory: editors/vscode-decay
         shell: bash
-        run: npx --no-install @vscode/vsce package --out sindri-decay-${{ matrix.label }}.vsix
+        run: npx --no-install @vscode/vsce package --allow-unused-files-pattern --out sindri-decay-${{ matrix.label }}.vsix
       - uses: actions/upload-artifact@v4
         with:
           name: sindri-decay-${{ matrix.label }}
