@@ -1980,6 +1980,11 @@ this.slots[slot].show(title, blurb);
 
 `this` in a method is the value, read as `this.card`; it is a copy, so a
 method that works something out returns it rather than changing `this`.
+
+A field may have a default, `weight: f32 = 1.0`, and building one may then
+leave that field out. A default is worked out when the project compiles, as a
+constant is, so it is a number, flag, text or variant, and may name a
+`shared const` from any file.
 Methods are checked like any call and, like the struct, reach every file.
 
 Orbital's module chooser keeps each offer slot's card, name and blurb in one

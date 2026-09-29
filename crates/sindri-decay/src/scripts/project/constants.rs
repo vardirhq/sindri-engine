@@ -30,15 +30,28 @@ impl SharedConstants {
     /// by something else, is left out; one that cannot be worked out is too, and the file
     /// declaring it is told why when it is compiled. Returns the constants and
     /// the names declared twice.
+    ///
+    /// Then works out every struct's field defaults, which may name these.
     pub(super) fn fold(
         self,
-        kinds: &super::kinds::Kinds,
+        kinds: &mut super::kinds::Kinds,
         reserved: &Environment,
         taken: impl Fn(&str) -> bool,
     ) -> (
         BTreeMap<String, decay_semantic::ConstValue>,
         BTreeSet<String>,
     ) {
+        let folded = self.fold_constants(kinds, reserved, taken);
+        kinds.fold_defaults(&folded, reserved);
+        (folded, self.ambiguous)
+    }
+
+    fn fold_constants(
+        &self,
+        kinds: &super::kinds::Kinds,
+        reserved: &Environment,
+        taken: impl Fn(&str) -> bool,
+    ) -> BTreeMap<String, decay_semantic::ConstValue> {
         let usable = self.declared.values().filter(|constant| {
             !self.ambiguous.contains(&constant.name)
                 && !kinds.enums.contains_key(&constant.name)
@@ -52,7 +65,6 @@ impl SharedConstants {
                 .or_else(|| reserved.enum_variants(name).map(<[String]>::to_vec))
         };
         let known = std::collections::HashMap::new();
-        let folded = decay_semantic::fold_constants(usable, &known, &variants).0;
-        (folded, self.ambiguous)
+        decay_semantic::fold_constants(usable, &known, &variants).0
     }
 }

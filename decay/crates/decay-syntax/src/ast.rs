@@ -72,6 +72,9 @@ pub struct StructDecl {
 pub struct StructField {
     pub name: String,
     pub ty: TypeRef,
+    /// `weight: f32 = 1.0`: what the field holds when a struct is built
+    /// without naming it. Worked out when the file compiles, like a constant.
+    pub default: Option<Expr>,
     pub span: Span,
 }
 

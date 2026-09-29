@@ -69,7 +69,7 @@ fn every_mistake_about_a_struct_is_refused() {
         &Environment::new(),
     );
     for expected in [
-        "`Card` needs every field: missing `weight`",
+        "`Card` needs every field without a default: missing `weight`",
         "cannot assign `String` to `f32`",
         "`Card` has no field `colour`; it has `name`, `weight`",
         "`name` is given twice",
@@ -171,4 +171,46 @@ fn a_method_from_another_file_is_known() {
         analysis.method_calls.values().collect::<Vec<_>>(),
         vec!["Offer.next"]
     );
+}
+
+#[test]
+fn a_field_with_a_default_may_be_left_out() {
+    let analysis = crate::analyze(
+        r#"const HEAVY: f32 = 3.0;
+         enum Rarity { Common, Rare }
+         struct Card { name: String, weight: f32 = HEAVY, rarity: Rarity = Rarity.Common }
+         script S { fn f() -> f32 { return Card(name: "a").weight + Card(name: "b", weight: 1.0).weight; } }"#,
+    );
+    assert!(
+        analysis.diagnostics.is_empty(),
+        "{:?}",
+        analysis.diagnostics
+    );
+    assert_eq!(
+        analysis.struct_defaults["Card"]["weight"],
+        crate::ConstValue::Number(3.0)
+    );
+}
+
+#[test]
+fn every_mistake_about_a_default_is_refused() {
+    let found = messages(
+        r"struct Card {
+             weight: f32 = true,
+             spot: Vec2 = Vec2(1.0, 2.0),
+             size: f32 = weight,
+             name: String,
+         }
+         script S { fn f() { let c = Card(weight: 1.0); } }",
+        &Environment::new(),
+    );
+    let all = found.join("\n");
+    for expected in [
+        "`Card.weight`: field `weight` is declared `f32` but its value is `bool`",
+        "`Card.spot`: a field's default must be worked out when the file compiles",
+        "`Card.size`: `weight` is not a constant",
+        "`Card` needs every field without a default: missing `name`",
+    ] {
+        assert!(all.contains(expected), "missing {expected:?} in:\n{all}");
+    }
 }

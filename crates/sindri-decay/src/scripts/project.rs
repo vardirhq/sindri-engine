@@ -229,7 +229,7 @@ impl Project {
                 && !states.contains_key(name)
                 && unreserved(reserved, name)
         });
-        let (constants, ambiguous_constants) = constants.fold(&kinds, reserved, |name| {
+        let (constants, ambiguous_constants) = constants.fold(&mut kinds, reserved, |name| {
             scripts.contains_key(name)
                 || events.contains_key(name)
                 || states.contains_key(name)

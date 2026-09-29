@@ -207,7 +207,14 @@ pub(crate) fn structs(
                     .iter()
                     .map(|field| {
                         let ty = decay_semantic::Type::from_ref(&field.ty);
-                        (field.name.clone(), ty.display_name().into_owned())
+                        let mut shown = ty.display_name().into_owned();
+                        // A default as it was written, after the type.
+                        if let Some(default) = &field.default
+                            && let Some(text) = source.get(default.span.start..default.span.end)
+                        {
+                            shown = format!("{shown} = {text}");
+                        }
+                        (field.name.clone(), shown)
                     })
                     .collect(),
             )),
@@ -416,6 +423,23 @@ pub(crate) fn word_at(source: &str, offset: usize) -> Option<&str> {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn a_struct_hovers_with_its_defaults_as_written() {
+        let found = structs(
+            &Environment::new(),
+            "const HEAVY: f32 = 3.0; struct Card { name: String, weight: f32 = HEAVY * 2.0 }",
+        );
+        let (_, fields) = found
+            .iter()
+            .find(|(name, _)| name == "Card")
+            .expect("Card is listed");
+        let hover = struct_hover("Card", fields);
+        assert_eq!(
+            hover.pointer("/contents/value").and_then(Value::as_str),
+            Some("```decay\nstruct Card { name: String, weight: f32 = HEAVY * 2.0 }\n```")
+        );
+    }
 
     #[test]
     fn current_loop_keywords_are_exposed() {

@@ -44,7 +44,7 @@ This is the most important Sindri/Decay distinction.
 | `Timer(seconds)` in a field, read with `.done` / `.left` / `.progress` | A countdown that runs down on its own before each `update` | Any time |
 | `shared fn name(...)` at the top of any `.decay` file (a plain top-level `fn` is that file's only) | A helper every script calls by name, with no `this` | Any time |
 | `const LIMIT: f32 = 3.0;` / `shared const VIEW_SIZE: f32 = 11.0;` at the top of a file | A value worked out when the project compiles, the same everywhere; a scene cannot tune it | Any time |
-| `struct Card { name: String, weight: f32 }`, `Card(name: "Arc", weight: 1.0)`, `card.weight` | Values that belong together, as one; copied where assigned | Any time |
+| `struct Card { name: String, weight: f32 = 1.0 }`, `Card(name: "Arc")`, `card.weight` | Values that belong together, as one; copied where assigned; a field with a default may be left out | Any time |
 | `fn heavier(other: Card) -> bool { return this.weight > other.weight; }` after a struct's fields, `card.heavier(best)` | A function asked of one value; `this` is a copy, so return a changed one rather than writing `this.x` | Any time |
 | `var xs: List<f32> = [];`, `xs.push(v)`, `for i in 0..n` | A list the script owns, changed in place; a range walked without building one | Any time |
 | `"Score " + score`, `s.contains("x")`, `s.slice(0, 3)` | Joins text with numbers, flags, vectors and variants; asks text by character | Any time |

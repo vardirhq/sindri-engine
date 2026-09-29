@@ -355,6 +355,16 @@ impl Lowerer<'_> {
                     .unwrap_or(0),
             );
         }
+        // Then each field left out, as its default.
+        for (position, field) in declared.iter().enumerate() {
+            if fields.iter().any(|(given, _, _)| given == field) {
+                continue;
+            }
+            if let Some(default) = self.default_of(name, field) {
+                instructions.push(Instruction::Push(default));
+                order.push(position);
+            }
+        }
         instructions.push(Instruction::MakeStruct {
             shape: std::rc::Rc::new(crate::ir::StructShape {
                 name: name.to_owned(),

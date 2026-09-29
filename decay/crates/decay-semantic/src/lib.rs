@@ -67,6 +67,7 @@ pub fn analyze_with_environment(source: &str, environment: &Environment) -> Anal
     let constants = std::mem::take(&mut analyzer.own_constants);
     let method_calls = std::mem::take(&mut analyzer.method_calls);
     let struct_methods = analyzer.known_methods();
+    let struct_defaults = analyzer.known_defaults();
 
     Analysis {
         program: parsed.program,
@@ -79,5 +80,6 @@ pub fn analyze_with_environment(source: &str, environment: &Environment) -> Anal
         constants,
         method_calls,
         struct_methods,
+        struct_defaults,
     }
 }

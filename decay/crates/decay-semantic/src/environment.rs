@@ -59,6 +59,8 @@ pub struct Environment {
     /// Structs declared somewhere the host can see, with their fields in
     /// order. A program's own are added to these when it is analysed.
     pub(crate) structs: HashMap<String, Vec<(String, Type)>>,
+    /// Each struct's field defaults, worked out, by struct and then field.
+    pub(crate) struct_defaults: HashMap<String, HashMap<String, crate::constant::ConstValue>>,
     /// Each struct's methods, by struct and then method name.
     pub(crate) struct_methods: HashMap<String, HashMap<String, FunctionType>>,
     /// Structs declared more than once, which nothing may use.
@@ -186,6 +188,20 @@ impl Environment {
     /// Declares a struct every script may name, with its fields in order.
     pub fn add_struct(&mut self, name: impl Into<String>, fields: Vec<(String, Type)>) {
         self.structs.insert(name.into(), fields);
+    }
+
+    /// A default another file declared for a struct's field, worked out: what
+    /// the field holds when a struct is built without naming it.
+    pub fn add_struct_default(
+        &mut self,
+        structure: impl Into<String>,
+        field: impl Into<String>,
+        value: crate::constant::ConstValue,
+    ) {
+        self.struct_defaults
+            .entry(structure.into())
+            .or_default()
+            .insert(field.into(), value);
     }
 
     /// A method another file declared on a struct: `card.heavier(best)`.

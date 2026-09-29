@@ -255,10 +255,17 @@ impl Parser<'_> {
                 "expected `:` and the field's type -- a struct's fields are always typed",
             )?;
             let ty = self.parse_type()?;
+            let default = if self.consume_simple(&TokenKind::Equal).is_some() {
+                Some(self.parse_expression()?)
+            } else {
+                None
+            };
+            let end = default.as_ref().map_or(ty.span, |value| value.span);
             fields.push(crate::ast::StructField {
                 name: field,
-                span: span.join(ty.span),
+                span: span.join(end),
                 ty,
+                default,
             });
             if self.consume_simple(&TokenKind::Comma).is_none() && !self.at(&TokenKind::Fn) {
                 break;
