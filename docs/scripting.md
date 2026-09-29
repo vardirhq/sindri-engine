@@ -1823,7 +1823,7 @@ fallback is — Orbital Last Stand reads `hp` with five different ones.
   the engine offers only as `Game` does: without redefining its members.
 
 Like the board, state is runtime state and goes when a run does. Scorchball's,
-the platformer's and both Orbital games' shared values are declared this way.
+the platformer's and Orbital's shared values are declared this way.
 Each Orbital game keeps its declarations in `game-state.decay` and still reads a
 few values with `Game.get`: keys built at runtime, and eight values whose
 callers disagree about the fallback, which need a starting value chosen before
@@ -1915,8 +1915,8 @@ scene file. Reach for `fixed` and `padded` where a script composes the text
 itself, or where a slot cannot say it: `{.2}` asks for decimals, not digits.
 
 Scorchball picks its score digit's and ball ring's clips by joining, where it
-had ten and six `if`s, and both Orbital games clear each stat's `_add` and
-`_mul` keys from its one name. Both Orbital games write their run clock and
+had ten and six `if`s, and Orbital clears each stat's `_add` and
+`_mul` keys from its one name. Orbital writes its run clock and
 the results screen's "Survived" time with `clock_text`, where the scene's
 `"{}:{.2}"` read 65.3 seconds as `1:5.30`.
 

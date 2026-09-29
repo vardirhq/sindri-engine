@@ -68,8 +68,9 @@ approximate.
 complete game built only through the editor and Decay, and its job is to find
 what the engine, editor, and language cannot do yet. Every gap it hits is closed
 as a *general* Sindri capability, never as something shaped around that game.
-A new gameplay capability is proven there first. See
-`docs/orbital-last-stand-plan.md`.
+A new gameplay capability is proven there first. It lives in
+`games/orbital-baked`; `docs/orbital-last-stand-plan.md` is its original plan,
+written against the vector version it replaced.
 
 **The platformer is the first genre showcase.** A side-view game with a
 painted, solid level, a hero who runs and jumps, coins and a flag, in

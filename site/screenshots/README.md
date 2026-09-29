@@ -51,11 +51,6 @@ cargo run -p orbital-baked --bin orbital-baked-capture -- \
 cargo run -p orbital-baked --bin orbital-baked-capture -- \
   site/screenshots/orbital-baked-aegis.png 1440 900 boss-11
 
-cargo run -p orbital-last-stand --bin orbital-capture -- \
-  site/screenshots/orbital-last-stand-combat.png 1440 900 combat
-cargo run -p orbital-last-stand --bin orbital-capture -- \
-  site/screenshots/orbital-last-stand-phone.png 390 844 title
-
 cargo run -p sindri-causeway --bin causeway-capture -- site/screenshots/causeway.png
 cargo run -p sindri-cube --bin capture -- site/screenshots/scene-frame-pipeline.png
 ```
