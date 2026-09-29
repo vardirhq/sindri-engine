@@ -71,6 +71,8 @@ struct Host<A: DesktopApp> {
     state: State<A>,
     failure: Option<DesktopError<A::Error>>,
     page_visible: bool,
+    /// Whether the page has been told the game is on screen.
+    announced_ready: bool,
     #[cfg(target_arch = "wasm32")]
     _visibility_listener: Option<VisibilityListener>,
     #[cfg(target_arch = "wasm32")]
@@ -98,6 +100,7 @@ impl<A: DesktopApp> Host<A> {
             state: State::Waiting,
             failure: None,
             page_visible,
+            announced_ready: false,
             #[cfg(target_arch = "wasm32")]
             _visibility_listener: visibility_listener,
             #[cfg(target_arch = "wasm32")]
@@ -279,7 +282,13 @@ impl<A: DesktopApp> Host<A> {
         if let Some(window) = &self.window {
             window.pre_present_notify();
         }
+        let ready = running.app.ready();
         running.gpu.queue.present(frame);
+        if ready && !self.announced_ready {
+            self.announced_ready = true;
+            #[cfg(target_arch = "wasm32")]
+            startup::announce_ready();
+        }
         Ok(flow)
     }
 }

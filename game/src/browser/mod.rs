@@ -290,6 +290,12 @@ impl DesktopApp for BrowserCausewayApp {
         self.sync_page_lifecycle()
     }
 
+    /// Ready once the project is installed: until then `render` draws only
+    /// the loading clear, and the page's loading screen should stay up.
+    fn ready(&self) -> bool {
+        self.engine.is_some()
+    }
+
     fn visibility_changed(&mut self, visible: bool) -> Result<(), Self::Error> {
         self.page_visible = visible;
         self.sync_page_lifecycle()

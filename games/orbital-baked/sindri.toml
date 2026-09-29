@@ -19,3 +19,9 @@ include = [
   "audio/upgrade.wav",
   "audio/boss.wav",
 ]
+
+# Shown after the Sindri loading screen while the game loads in a browser.
+[web.splash]
+image = "assets/textures/logo.png"
+background = "#05070d"
+seconds = 1.2

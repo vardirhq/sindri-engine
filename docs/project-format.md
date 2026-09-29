@@ -68,6 +68,12 @@ require it". The next field arrives with the feature that reads it.
 bytes and hashes, written by a build and verified by a loader; this is project
 metadata, written by a person or by the editor.
 
+### `[web.splash]`
+
+A browser build's own brand, shown after the Sindri loading screen while the
+game loads: `image`, `title`, `caption`, `background` and `seconds`.
+`docs/export.md` has what each means and how long it shows.
+
 ## What creating one makes
 
 New Project writes a directory holding the manifest, a scene, and the folders

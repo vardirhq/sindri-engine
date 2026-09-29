@@ -17,6 +17,23 @@ use super::app::{DesktopApp, DesktopError, WindowConfig};
 #[cfg(target_arch = "wasm32")]
 pub const FAILURE_EVENT: &str = "sindri:failed";
 
+/// The event name a browser host dispatches on `window` once, when it has
+/// presented the first frame the application says is really it — the moment
+/// a page's loading screen can give way to the game.
+#[cfg(target_arch = "wasm32")]
+pub const READY_EVENT: &str = "sindri:ready";
+
+/// Tells the page the game is on screen. Best effort, as a failure is.
+#[cfg(target_arch = "wasm32")]
+pub(super) fn announce_ready() {
+    let Some(window) = web_sys::window() else {
+        return;
+    };
+    if let Ok(event) = web_sys::Event::new(READY_EVENT) {
+        let _ = window.dispatch_event(&event);
+    }
+}
+
 /// Tells the page a failure happened, with the message that describes it.
 ///
 /// Best effort by design. Every step here can fail in a document that is being

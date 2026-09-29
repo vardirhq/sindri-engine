@@ -206,6 +206,21 @@ await page
     { timeout: 60000 },
   )
   .catch(() => {});
+// A page with a loading screen covers the canvas until the host announces
+// the game is on screen. Wait for it to give way before touching or reading
+// the canvas: a click on the loading screen reaches nothing, and a capture of
+// it measures the loading screen rather than the game. Bounded, and not an
+// error here, so a screen that never gives way fails below with its reason.
+const hasLoadingScreen = await readFile(join(ROOT, 'index.html'), 'utf8')
+  .then((page) => page.includes('id="sindri-loading"'))
+  .catch(() => false);
+if (hasLoadingScreen) {
+  await page
+    .waitForFunction(() => !document.querySelector('#sindri-loading'), null, { timeout: 60000 })
+    .catch(() => {});
+}
+const loadingStuck =
+  hasLoadingScreen && (await page.evaluate(() => Boolean(document.querySelector('#sindri-loading'))));
 // Then a moment to draw a frame or two into the canvas it just sized.
 await page.waitForTimeout(1500);
 
@@ -314,6 +329,13 @@ const blank =
   drawn !== null && (drawn.colours < BLANK_COLOURS || drawn.mean < BLANK_MEAN);
 
 console.log(`webgpu: ${webgpu ? 'yes' : 'no'}`);
+if (hasLoadingScreen) {
+  console.log(`loading screen: ${loadingStuck ? 'still up' : 'gave way to the game'}`);
+}
+if (loadingStuck) {
+  console.log('problem: the loading screen never gave way -- the host did not announce sindri:ready');
+  process.exitCode = 1;
+}
 console.log(`canvas: ${canvas ? `${canvas.width}x${canvas.height}` : 'none'}`);
 console.log(`base path: ${BASE}`);
 console.log(

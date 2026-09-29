@@ -7,6 +7,32 @@
 /// The page, with `{{name}}`, `{{base}}` and `{{build}}` still in it.
 pub const PAGE_TEMPLATE: &str = include_str!("page.html");
 
+/// A project's own brand, shown on the loading screen after the Sindri mark.
+#[derive(Clone, Debug, Default, PartialEq)]
+pub struct Splash {
+    /// The image's extension and bytes, written beside the page.
+    pub image: Option<(String, Vec<u8>)>,
+    pub title: Option<String>,
+    pub caption: Option<String>,
+    /// `#rrggbb`, already checked.
+    pub background: Option<String>,
+    /// How long it shows at least.
+    pub seconds: f64,
+}
+
+impl Splash {
+    /// The file the image is written as, named by what is in it so a new
+    /// image is never answered from a cache holding the old one.
+    #[must_use]
+    pub fn image_file(&self) -> Option<String> {
+        let (extension, bytes) = self.image.as_ref()?;
+        let hash = bytes.iter().fold(0xcbf2_9ce4_8422_2325_u64, |hash, byte| {
+            (hash ^ u64::from(*byte)).wrapping_mul(0x0100_0000_01b3)
+        });
+        Some(format!("splash-{hash:016x}.{extension}"))
+    }
+}
+
 /// The `wasm-pack` module the site's one host is built as.
 ///
 /// Named here rather than spelled at each call, because the page and the writer
@@ -41,6 +67,19 @@ pub fn page_for(name: &str, base_path: &str) -> String {
 /// content-addressed and fresh while the host beside them came from a cache.
 #[must_use]
 pub fn page_for_host(name: &str, base_path: &str, host_module: &str, build: &str) -> String {
+    page_with_splash(name, base_path, host_module, build, None)
+}
+
+/// The same page, with a project's brand following the Sindri mark on its
+/// loading screen.
+#[must_use]
+pub fn page_with_splash(
+    name: &str,
+    base_path: &str,
+    host_module: &str,
+    build: &str,
+    splash: Option<&Splash>,
+) -> String {
     let mut base = base_path.trim().to_owned();
     if base.is_empty() {
         base.push('/');
@@ -60,12 +99,52 @@ pub fn page_for_host(name: &str, base_path: &str, host_module: &str, build: &str
     } else {
         format!("?v={build}")
     };
+    let (brand, brand_attributes) = splash.map_or_else(
+        || (String::new(), String::new()),
+        |splash| brand_stage(name, splash),
+    );
     PAGE_TEMPLATE
+        .replace("{{brand}}", &brand)
+        .replace("{{brand_attributes}}", &brand_attributes)
         .replace("{{name}}", &escape(name))
         .replace("{{base}}", &escape(&base))
         .replace("{{host}}", &escape(host_module))
         .replace("{{cachebust}}", &cachebust)
         .replace("{{build}}", &build)
+}
+
+/// The brand's stage on the loading screen, and the attributes that tell the
+/// page about it.
+fn brand_stage(name: &str, splash: &Splash) -> (String, String) {
+    let mut parts = Vec::new();
+    if let Some(file) = splash.image_file() {
+        let alt = escape(splash.title.as_deref().unwrap_or(name));
+        parts.push(format!(r#"      <img src="{file}" alt="{alt}">"#));
+    }
+    if let Some(title) = &splash.title {
+        parts.push(format!(
+            r#"      <div class="brand-title">{}</div>"#,
+            escape(title)
+        ));
+    }
+    if let Some(caption) = &splash.caption {
+        parts.push(format!(
+            r#"      <div class="brand-caption">{}</div>"#,
+            escape(caption)
+        ));
+    }
+    let stage = format!(
+        "    <div class=\"stage brand\">\n{}\n    </div>",
+        parts.join("\n")
+    );
+    let mut attributes = format!(r#" data-brand-seconds="{}""#, splash.seconds);
+    if let Some(background) = &splash.background {
+        attributes.push_str(&format!(
+            r#" style="--brand-background: {}""#,
+            escape(background)
+        ));
+    }
+    (stage, attributes)
 }
 
 /// Text that cannot close a tag or an attribute.
@@ -185,5 +264,53 @@ mod build_stamp_tests {
             page.contains("#sindri-input {\n      display: none;"),
             "{page}"
         );
+    }
+
+    #[test]
+    fn the_sindri_loading_screen_is_on_every_page_until_the_game_is_ready() {
+        let page = page_for("Orbital", "/");
+        assert!(page.contains(r#"id="sindri-loading""#), "{page}");
+        assert!(page.contains(r#"aria-label="Sindri""#), "{page}");
+        // It gives way when the host says so, and to a failure.
+        assert!(
+            page.contains(r#"addEventListener("sindri:ready""#),
+            "{page}"
+        );
+        assert!(page.contains(r##"querySelector("#sindri-loading")?.remove()"##));
+        // No brand, and no placeholder left behind for one.
+        assert!(!page.contains("stage brand"), "{page}");
+        assert!(!page.contains("{{"), "{page}");
+    }
+
+    #[test]
+    fn a_brand_follows_the_sindri_mark_as_the_project_describes_it() {
+        let splash = super::Splash {
+            image: Some(("png".to_owned(), vec![1, 2, 3])),
+            title: Some("Vardir <Games>".to_owned()),
+            caption: Some("presents".to_owned()),
+            background: Some("#101820".to_owned()),
+            seconds: 2.5,
+        };
+        let file = splash.image_file().expect("an image names a file");
+        assert!(
+            file.starts_with("splash-") && file.ends_with(".png"),
+            "{file}"
+        );
+        let page = super::page_with_splash("Orbital", "/", "sindri_causeway", "", Some(&splash));
+        assert!(page.contains(r#"<div class="stage brand">"#), "{page}");
+        assert!(page.contains(&format!(r#"<img src="{file}" alt="Vardir &lt;Games&gt;">"#)));
+        assert!(page.contains("Vardir &lt;Games&gt;</div>"), "{page}");
+        assert!(page.contains(r#"data-brand-seconds="2.5""#), "{page}");
+        assert!(page.contains("--brand-background: #101820"), "{page}");
+        assert!(!page.contains("{{"), "{page}");
+    }
+
+    #[test]
+    fn a_different_image_is_a_different_file() {
+        let image = |bytes: Vec<u8>| super::Splash {
+            image: Some(("png".to_owned(), bytes)),
+            ..super::Splash::default()
+        };
+        assert_ne!(image(vec![1]).image_file(), image(vec![2]).image_file());
     }
 }
