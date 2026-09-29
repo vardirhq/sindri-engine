@@ -13,6 +13,7 @@ mod match_values;
 mod matching;
 mod methods;
 mod numbers;
+mod optionals;
 mod scope;
 mod shared;
 mod structs;

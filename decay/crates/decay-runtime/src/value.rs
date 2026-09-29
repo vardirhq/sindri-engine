@@ -159,6 +159,9 @@ pub(crate) fn apply_binary(op: BinaryOp, left: Value, right: Value) -> Result<Va
         // already evaluated, which is the one thing this can still mean.
         BinaryOp::And => booleans(left, right, |a, b| a && b),
         BinaryOp::Or => booleans(left, right, |a, b| a || b),
+        // Lowered as a branch too; over two values already worked out it is
+        // the left one unless that is `null`.
+        BinaryOp::Fallback => Ok(if left == Value::Null { right } else { left }),
         BinaryOp::Equal => Ok(Value::Bool(left == right)),
         BinaryOp::NotEqual => Ok(Value::Bool(left != right)),
     }

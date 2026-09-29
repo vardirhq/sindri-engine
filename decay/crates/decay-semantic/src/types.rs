@@ -118,12 +118,42 @@ pub enum Type {
     /// Values found by key: `Map<String, f32>`. Its keys are text, numbers,
     /// flags or an enum's variants, kept in the order they were first set.
     Map(Box<Type>, Box<Type>),
+    /// `f32?`: a value of the type, or `null`. Never an entity, struct or
+    /// enum, which may be `null` already, and never optional twice.
+    Optional(Box<Type>),
     Unknown,
 }
 
 impl Type {
     #[must_use]
     pub fn from_ref(reference: &TypeRef) -> Self {
+        let plain = Self::from_plain_ref(reference);
+        if reference.optional {
+            plain.or_null()
+        } else {
+            plain
+        }
+    }
+
+    /// This type, or `null`: itself for one that may be `null` already.
+    #[must_use]
+    pub fn or_null(self) -> Self {
+        match self {
+            Self::Named(_) | Self::Optional(_) | Self::Unknown | Self::Null => self,
+            other => Self::Optional(Box::new(other)),
+        }
+    }
+
+    /// The type a value of this one has once it is known not to be `null`.
+    #[must_use]
+    pub fn without_null(&self) -> &Self {
+        match self {
+            Self::Optional(inner) => inner,
+            other => other,
+        }
+    }
+
+    fn from_plain_ref(reference: &TypeRef) -> Self {
         if let Some((_, ty)) = BUILT_IN_TYPES
             .iter()
             .find(|(spelled, _)| *spelled == reference.name)
@@ -219,6 +249,7 @@ impl Type {
             Self::Vec3 => Cow::Borrowed(VEC3),
             Self::Timer => Cow::Borrowed(TIMER),
             Self::Array(element) => Cow::Owned(format!("{LIST}<{}>", element.display_name())),
+            Self::Optional(inner) => Cow::Owned(format!("{}?", inner.display_name())),
             Self::Map(key, value) => Cow::Owned(format!(
                 "{MAP}<{}, {}>",
                 key.display_name(),

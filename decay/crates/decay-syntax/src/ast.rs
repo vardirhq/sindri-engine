@@ -146,6 +146,8 @@ pub struct TypeRef {
     pub argument: Option<Box<TypeRef>>,
     /// A map's value type, the second in `Map<String, f32>`.
     pub second: Option<Box<TypeRef>>,
+    /// `f32?`: a value of the type, or `null`.
+    pub optional: bool,
     pub span: Span,
 }
 
@@ -157,6 +159,7 @@ impl TypeRef {
             name,
             argument: None,
             second: None,
+            optional: false,
             span,
         }
     }
@@ -392,6 +395,9 @@ pub enum BinaryOp {
     GreaterEqual,
     And,
     Or,
+    /// `value ?? fallback`: the value, or the fallback when it is `null`.
+    /// Short-circuits: the fallback is only worked out when it is needed.
+    Fallback,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]

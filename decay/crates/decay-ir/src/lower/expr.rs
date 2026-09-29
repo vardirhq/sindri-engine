@@ -34,6 +34,10 @@ impl Lowerer<'_> {
         right: &Expr,
         instructions: &mut Vec<Instruction>,
     ) {
+        if op == BinaryOp::Fallback {
+            self.lower_fallback(left, right, instructions);
+            return;
+        }
         // Filled with the sites that cannot know their target until the shared
         // tail below exists, and patched once it does.
         let mut to_false = Vec::new();
@@ -77,6 +81,30 @@ impl Lowerer<'_> {
         instructions[to_end] = Instruction::Jump(end);
     }
 
+    /// `value ?? fallback`: the value is worked out once and held; the
+    /// fallback is worked out only when the value is `null`.
+    fn lower_fallback(&self, value: &Expr, fallback: &Expr, instructions: &mut Vec<Instruction>) {
+        const VALUE: &str = "(value)";
+        instructions.push(Instruction::ScopeEnter);
+        self.lower_expr(value, instructions);
+        instructions.push(Instruction::Declare {
+            name: VALUE.to_owned(),
+            mutable: false,
+        });
+        instructions.push(Instruction::Load(Path(vec![VALUE.to_owned()])));
+        instructions.push(Instruction::Push(Constant::Null));
+        instructions.push(Instruction::Binary(BinaryOp::Equal));
+        let to_value = instructions.len();
+        instructions.push(Instruction::JumpIfFalse(usize::MAX));
+        self.lower_expr(fallback, instructions);
+        let to_end = instructions.len();
+        instructions.push(Instruction::Jump(usize::MAX));
+        instructions[to_value] = Instruction::JumpIfFalse(instructions.len());
+        instructions.push(Instruction::Load(Path(vec![VALUE.to_owned()])));
+        instructions[to_end] = Instruction::Jump(instructions.len());
+        instructions.push(Instruction::ScopeExit);
+    }
+
     pub(super) fn lower_expr(&self, expr: &Expr, instructions: &mut Vec<Instruction>) {
         match &expr.kind {
             ExprKind::Identifier(name) => {
@@ -108,7 +136,7 @@ impl Lowerer<'_> {
                 instructions.push(Instruction::Unary(*op));
             }
             ExprKind::Binary { left, op, right } => {
-                if matches!(op, BinaryOp::And | BinaryOp::Or) {
+                if matches!(op, BinaryOp::And | BinaryOp::Or | BinaryOp::Fallback) {
                     self.lower_short_circuit(left, *op, right, instructions);
                 } else {
                     self.lower_expr(left, instructions);

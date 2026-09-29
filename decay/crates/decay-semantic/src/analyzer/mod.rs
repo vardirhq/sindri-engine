@@ -17,6 +17,7 @@ mod map;
 mod member;
 mod method;
 mod number;
+mod optional;
 mod state;
 mod stmt;
 mod structure;
@@ -325,9 +326,10 @@ impl<'a, 'd> Analyzer<'a, 'd> {
                 Code::TypeMismatch,
                 span,
                 format!(
-                    "expected `{}`, found `{}`",
+                    "expected `{}`, found `{}`{}",
                     expected.display_name(),
-                    actual.display_name()
+                    actual.display_name(),
+                    optional::null_hint(actual, expected)
                 ),
             );
         }
@@ -339,9 +341,10 @@ impl<'a, 'd> Analyzer<'a, 'd> {
                 Code::TypeMismatch,
                 span,
                 format!(
-                    "cannot assign `{}` to `{}`",
+                    "cannot assign `{}` to `{}`{}",
                     actual.display_name(),
-                    expected.display_name()
+                    expected.display_name(),
+                    optional::null_hint(actual, expected)
                 ),
             );
         }
@@ -356,6 +359,10 @@ impl<'a, 'd> Analyzer<'a, 'd> {
             // adding an `Entity` to the copy cannot reach the `Bolt`s.
             || matches!((expected, actual), (Type::Array(wanted), Type::Array(given))
                 if self.compatible(wanted, given))
+            // An optional takes `null`, a value of its type, or another
+            // optional of its type.
+            || matches!(expected, Type::Optional(wanted)
+                if matches!(actual, Type::Null) || self.compatible(wanted, actual.without_null()))
             // An empty map, `[:]`, fits any map, as `[]` fits any list.
             || matches!((expected, actual), (Type::Map(wanted_key, wanted), Type::Map(key, given))
                 if self.compatible(wanted_key, key) && self.compatible(wanted, given))

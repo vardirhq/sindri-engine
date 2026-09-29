@@ -16,6 +16,12 @@ impl Analyzer<'_, '_> {
         // real signature rather than accepted because the callee was unknown.
         if let ExprKind::Member { object, field } = &callee.kind {
             let object_type = self.expr_type(object);
+            if self.refuse_optional(&object_type, object.span) {
+                for argument in args {
+                    self.expr_type(argument);
+                }
+                return Type::Unknown;
+            }
             if object_type.dimensions().is_some() {
                 return self.vector_call_type(&object_type, field, args, span);
             }

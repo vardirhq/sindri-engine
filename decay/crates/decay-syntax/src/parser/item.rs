@@ -390,6 +390,15 @@ impl Parser<'_> {
     }
 
     pub(super) fn parse_type(&mut self) -> Option<TypeRef> {
+        let mut ty = self.parse_type_name()?;
+        if let Some(mark) = self.consume_simple(&TokenKind::Question) {
+            ty.optional = true;
+            ty.span = ty.span.join(mark);
+        }
+        Some(ty)
+    }
+
+    fn parse_type_name(&mut self) -> Option<TypeRef> {
         let (name, span) = self.expect_identifier("expected type name")?;
         if self.consume_simple(&TokenKind::Less).is_none() {
             return Some(TypeRef::plain(name, span));
@@ -405,6 +414,7 @@ impl Parser<'_> {
             name,
             argument: Some(Box::new(argument)),
             second,
+            optional: false,
             span: span.join(end),
         })
     }

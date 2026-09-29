@@ -93,6 +93,10 @@ pub enum TokenKind {
     FatArrow,
     /// `|`, between the patterns one `match` arm accepts.
     Pipe,
+    /// `?` after a type: `f32?`, a value that may be missing.
+    Question,
+    /// `??`: a value, or a fallback when it is missing.
+    QuestionQuestion,
     Eof,
 }
 
@@ -186,6 +190,8 @@ impl<'a> Lexer<'a> {
                 '&' if self.consume('&') => self.push(TokenKind::AndAnd, start),
                 '|' if self.consume('|') => self.push(TokenKind::OrOr, start),
                 '|' => self.push(TokenKind::Pipe, start),
+                '?' if self.consume('?') => self.push(TokenKind::QuestionQuestion, start),
+                '?' => self.push(TokenKind::Question, start),
                 '"' => self.lex_string(start),
                 c if c.is_ascii_digit() => self.lex_number(start),
                 c if is_identifier_start(c) => self.lex_identifier(start),

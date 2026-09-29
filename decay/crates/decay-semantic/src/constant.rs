@@ -104,25 +104,6 @@ pub fn fold_constants<'a, S: std::hash::BuildHasher>(
     (folder.done, folder.errors)
 }
 
-/// An operator as it is written.
-fn symbol(op: BinaryOp) -> &'static str {
-    match op {
-        BinaryOp::Add => "+",
-        BinaryOp::Subtract => "-",
-        BinaryOp::Multiply => "*",
-        BinaryOp::Divide => "/",
-        BinaryOp::Modulo => "%",
-        BinaryOp::Equal => "==",
-        BinaryOp::NotEqual => "!=",
-        BinaryOp::Less => "<",
-        BinaryOp::LessEqual => "<=",
-        BinaryOp::Greater => ">",
-        BinaryOp::GreaterEqual => ">=",
-        BinaryOp::And => "&&",
-        BinaryOp::Or => "||",
-    }
-}
-
 struct Folder<'a, 'k> {
     declared: HashMap<String, &'a ConstDecl>,
     known: &'k HashMap<&'k str, &'k ConstValue>,
@@ -323,7 +304,7 @@ impl Folder<'_, '_> {
                 return None;
             }
             _ => {
-                return self.operand(span, symbol(op), left);
+                return self.operand(span, op.symbol(), left);
             }
         };
         Some(value)

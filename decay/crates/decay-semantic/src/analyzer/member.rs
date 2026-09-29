@@ -32,6 +32,9 @@ impl Analyzer<'_, '_> {
         field: &str,
         span: Span,
     ) -> Type {
+        if self.refuse_optional(object_type, object.span) {
+            return Type::Unknown;
+        }
         if object_type.dimensions().is_some() {
             return self.vector_member_type(object, object_type, field, span);
         }

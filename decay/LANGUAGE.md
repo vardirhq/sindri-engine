@@ -25,6 +25,7 @@ to change. Nothing here is a compatibility promise.
 - [Types](#types)
 - [Lists](#lists)
 - [Maps](#maps)
+- [Optional values](#optional-values)
 - [Vectors](#vectors)
 - [Text](#text)
 - [Containers](#containers)
@@ -183,7 +184,7 @@ function     = "fn" IDENT "(" [ params ] ")" [ "->" type ] block ;
 handler      = "on" IDENT "(" [ params ] ")" block ;
 params       = param { "," param } ;
 param        = IDENT [ ":" type ] ;
-type         = IDENT [ "<" type [ "," type ] ">" ] ;
+type         = IDENT [ "<" type [ "," type ] ">" ] [ "?" ] ;
 
 block        = "{" { stmt } "}" ;
 stmt         = binding | return | if | while | for | match | break
@@ -412,6 +413,41 @@ prices.clear();
   included; `length` is a property.
 - A script may put at most 10,000 keys in one map, as in a list. A `for`
   walks `keys()` or `values()`, not the map itself.
+
+### Optional values
+
+`T?` is a value of `T`, or `null`: a number that may not have been found, a
+name that may not be set. Any type but an entity, a struct or an enum may be
+written so; those three may be `null` already, and `Entity?` means `Entity`.
+
+```rust
+fn first_over(values: List<f32>, limit: f32) -> f32? {
+    for value in values { if value > limit { return value; } }
+    return null;
+}
+
+var best: f32? = null;
+let shown = best ?? 0.0;                 // the value, or the fallback
+let pick = first_over(scores, 10.0);
+if pick != null { total += pick; }       // `pick` is an `f32` in here
+if pick == null { return; }              // and after this, to the block's end
+```
+
+- **Never used as its type unchecked.** An `f32?` is not an `f32`: assigning
+  one to an `f32`, doing arithmetic on it, reading a member, indexing it or
+  calling one of its operations is a diagnostic that says it may be `null`.
+- **`value ?? fallback`** gives the value, or the fallback when it is `null`;
+  the fallback is only worked out when it is needed. Its type is the value's
+  without the `?`, unless the fallback may be `null` too. `??` on a value that
+  can never be `null` is a diagnostic.
+- **A check narrows a `let` or a parameter.** Inside `if x != null { }`, and in
+  the `else` of `if x == null { }`, `x` has its plain type; so does the rest of
+  the block after an `if x == null { ... }` whose last statement returns,
+  breaks or continues. `a != null && b != null` narrows both. A `var` is not
+  narrowed, since something in between could set it back to `null`; copy it
+  into a `let` first.
+- `T` and `null` both fit a `T?`, so an optional field, parameter or return
+  takes either. `==` and `!=` compare an optional with `null` or with a value.
 
 ### Vectors
 
@@ -1047,10 +1083,14 @@ Loosest to tightest:
 | 3 | `&&` | left |
 | 4 | `==` `!=` | left |
 | 5 | `<` `<=` `>` `>=` | left |
-| 6 | `+` `-` | left |
-| 7 | `*` `/` `%` | left |
-| 8 | `-` `!` (unary prefix) | right |
-| 9 | `.` `()` (postfix) | left |
+| 6 | `??` | left |
+| 7 | `+` `-` | left |
+| 8 | `*` `/` `%` | left |
+| 9 | `-` `!` (unary prefix) | right |
+| 10 | `.` `()` (postfix) | left |
+
+`??` sits between comparison and arithmetic: `best ?? 0.0 > 3.0` compares the
+value or its fallback, and `best ?? 0.0 + 1.0` falls back to `1.0`.
 
 ### Operand rules
 
@@ -1208,8 +1248,9 @@ authored by a scene, methods that change their struct,
 defaults for fields of a type a constant cannot hold (a vector, a list, an
 entity), enums with data
 (`Some(x)`), a range as a value outside `for`, a step (`0..10 by 2`), negative
-indices, slicing a list, `Option`, `Result`, `?`. `List<T>` exists; see
-"Lists".
+indices, slicing a list, `Result`, `?` as an operator that returns early.
+`List<T>` exists; see "Lists". A value that may be missing is `T?`; see
+"Optional values".
 
 **Functions:** closures, lambdas, function values, default arguments, named
 arguments, variadics, generics beyond `List<T>`, overloading, methods on

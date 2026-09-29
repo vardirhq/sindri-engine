@@ -98,7 +98,11 @@ pub const ATTRIBUTES: [&str; 1] = [EXPORT];
 
 /// Every binary operator: its token, its precedence (higher binds tighter;
 /// every one groups left to right) and what it does.
-pub const BINARY_OPERATORS: [(TokenKind, u8, BinaryOp); 13] = [
+///
+/// `??` binds tighter than a comparison and looser than arithmetic, so
+/// `best ?? 0.0 > 3.0` compares the value or its fallback, and
+/// `best ?? 0.0 + 1.0` falls back to `1.0`.
+pub const BINARY_OPERATORS: [(TokenKind, u8, BinaryOp); 14] = [
     (TokenKind::OrOr, 1, BinaryOp::Or),
     (TokenKind::AndAnd, 2, BinaryOp::And),
     (TokenKind::EqualEqual, 3, BinaryOp::Equal),
@@ -107,11 +111,12 @@ pub const BINARY_OPERATORS: [(TokenKind, u8, BinaryOp); 13] = [
     (TokenKind::LessEqual, 4, BinaryOp::LessEqual),
     (TokenKind::Greater, 4, BinaryOp::Greater),
     (TokenKind::GreaterEqual, 4, BinaryOp::GreaterEqual),
-    (TokenKind::Plus, 5, BinaryOp::Add),
-    (TokenKind::Minus, 5, BinaryOp::Subtract),
-    (TokenKind::Star, 6, BinaryOp::Multiply),
-    (TokenKind::Slash, 6, BinaryOp::Divide),
-    (TokenKind::Percent, 6, BinaryOp::Modulo),
+    (TokenKind::QuestionQuestion, 5, BinaryOp::Fallback),
+    (TokenKind::Plus, 6, BinaryOp::Add),
+    (TokenKind::Minus, 6, BinaryOp::Subtract),
+    (TokenKind::Star, 7, BinaryOp::Multiply),
+    (TokenKind::Slash, 7, BinaryOp::Divide),
+    (TokenKind::Percent, 7, BinaryOp::Modulo),
 ];
 
 /// Every assignment, plain and compound. Looser than any binary operator,
@@ -150,6 +155,7 @@ impl BinaryOp {
             Self::GreaterEqual => ">=",
             Self::And => "&&",
             Self::Or => "||",
+            Self::Fallback => "??",
         }
     }
 }

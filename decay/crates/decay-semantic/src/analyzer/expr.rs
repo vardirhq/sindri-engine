@@ -56,6 +56,10 @@ impl Analyzer<'_, '_> {
     /// when it runs, where the value is known.
     pub(super) fn index_type(&mut self, object: &Expr, index: &Expr) -> Type {
         let object_type = self.expr_type(object);
+        if self.refuse_optional(&object_type, object.span) {
+            self.expr_type(index);
+            return Type::Unknown;
+        }
         if let Type::Map(key, value) = &object_type {
             return self.map_index_type(key, value, index);
         }
@@ -91,6 +95,9 @@ impl Analyzer<'_, '_> {
                 self.require_type(&left_type, &Type::F32, left.span);
                 self.require_type(&right_type, &Type::F32, right.span);
                 Type::Bool
+            }
+            BinaryOp::Fallback => {
+                self.fallback_type((&left_type, left.span), (&right_type, right.span))
             }
             BinaryOp::And | BinaryOp::Or => {
                 self.require_type(&left_type, &Type::Bool, left.span);

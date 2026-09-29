@@ -897,32 +897,38 @@
       },
       {
         "associativity": "left",
-        "name": "Add",
+        "name": "Fallback",
         "precedence": 5,
+        "symbol": "??"
+      },
+      {
+        "associativity": "left",
+        "name": "Add",
+        "precedence": 6,
         "symbol": "+"
       },
       {
         "associativity": "left",
         "name": "Subtract",
-        "precedence": 5,
+        "precedence": 6,
         "symbol": "-"
       },
       {
         "associativity": "left",
         "name": "Multiply",
-        "precedence": 6,
+        "precedence": 7,
         "symbol": "*"
       },
       {
         "associativity": "left",
         "name": "Divide",
-        "precedence": 6,
+        "precedence": 7,
         "symbol": "/"
       },
       {
         "associativity": "left",
         "name": "Modulo",
-        "precedence": 6,
+        "precedence": 7,
         "symbol": "%"
       }
     ],
