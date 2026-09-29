@@ -22,7 +22,6 @@ members = [
     "examples/cube",
     "examples/camera",
     "game",
-    "games/orbital-last-stand",
     "games/orbital-baked",
     "games/platformer",
     "games/scorchball",

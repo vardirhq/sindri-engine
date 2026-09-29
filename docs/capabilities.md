@@ -208,7 +208,7 @@ floor is one box and a character cannot catch on the seams between tiles; the
 rectangles follow the entity's scale, and join any collider pieces the entity
 also carries. An isometric map is refused by name. `sindri.physics2d.world`
 carries the scene's gravity (straight down at 9.81 by default); a scene without
-one keeps its host's, which for the editor and both Orbital games is none.
+one keeps its host's, which for the editor and Orbital is none.
 
 `ScenePhysics2d` is what joins the two halves. It builds the simulation from
 those components, keeps it in step as entities are spawned, switched off, and
@@ -232,7 +232,7 @@ own rotated axis, and a whole drag is one undo step. The generic inspector
 also exposes the body and collider payloads — a compound's pieces are added, removed,
 reordered, and edited down to each piece's shape, though no game in this
 repository authors a compound yet — and editor Play steps them through the same
-fixed-update path as a build. `games/orbital-last-stand` is the end-to-end proof:
+fixed-update path as a build. `games/orbital-baked` is the end-to-end proof:
 player, enemies, projectiles, pickups, and effects use distinct masks and
 collision or sensor events continuously.
 
@@ -1673,7 +1673,7 @@ spawned script starts within the same pass, so a bullet fired during an update
 moves during that update. Both the cascade that allows and the number of
 entities one pass may create are bounded and reported rather than run.
 Exercised in `crates/sindri-decay/tests/a_script_makes_an_entity.rs` and as
-gameplay in `games/orbital-last-stand`.
+gameplay in `games/orbital-baked`.
 
 The board is still there and still earns its place, for facts that belong to the
 game rather than to an entity — the score, whether the game is won.
@@ -1696,7 +1696,7 @@ power-ups, burning, aftertouch and bot reaction times.
 A function written outside any script belongs to its file; declared `shared
 fn`, it belongs to the project, and every script calls it by name, checked
 across files, linking its own copy when it compiles. Exercised in `crates/sindri-decay/tests/scripts_share_functions.rs`
-and by both Orbital games, whose view helpers live in one `view.decay` each.
+and by Orbital, whose view helpers live in one `view.decay`.
 
 An `enum` in any file is a type every script holds, compares and passes, and
 `match` must cover every variant or end with `_`. An enum can be a `state`
@@ -1709,18 +1709,18 @@ Text joins with `+` — with numbers, flags, vectors and variants too — and ha
 and case and trimming, counted in characters and capped at 64 KiB. A number is written as text with
 `n.fixed(digits)` or `n.padded(width)`. Exercised in
 `crates/sindri-decay/tests/scripts_use_text.rs`, by Scorchball's digit and
-ring clips, and by both Orbital games' stat keys and run clock.
+ring clips, and by Orbital's stat keys and run clock.
 
 A list or struct `@export` is authored in the scene as JSON shaped like its
 type and drawn by the inspector as rows per item and per field. Exercised in
-`crates/sindri-decay/tests/scenes_author_lists_and_structs.rs` and by both
-Orbital games' card names.
+`crates/sindri-decay/tests/scenes_author_lists_and_structs.rs` and by
+Orbital's card names.
 
 A `const` at the top of a file names a value worked out when the project
 compiles — a number, flag, text or enum variant, from literals, operators and
 other constants — and `shared const` makes it every file's. Each use is the
 value written in place. Exercised in
-`crates/sindri-decay/tests/scripts_share_constants.rs` and by both Orbital
+`crates/sindri-decay/tests/scripts_share_constants.rs` and by Orbital
 games' `VIEW_SIZE`.
 
 A `struct` in any file is a value type every script builds with named fields
@@ -1729,8 +1729,8 @@ holding it, and keeps in lists; it is copied where it is assigned. Functions
 written after its fields are its methods, asked of one value with `this` a
 read-only copy, and reach every file as the struct does. Exercised in
 `crates/sindri-decay/tests/scripts_use_structs.rs`,
-`crates/sindri-decay/tests/scripts_use_struct_methods.rs`, and by both
-Orbital games' module chooser.
+`crates/sindri-decay/tests/scripts_use_struct_methods.rs`, and by
+Orbital's module chooser.
 
 Maps are written (`["a": 1.0]`, `[:]`), read by key (`m[k]`, `get`,
 `contains`, `keys()`, `values()`, `length`) and changed in place where a
@@ -1743,7 +1743,7 @@ them (`push`, `pop`, `insert`, `remove_at`, `clear`, `xs[i] = v`), asked
 (`contains`, `index_of`, `length`) and walked, and `for i in 0..n` walks a
 range without building one. `List<T>` is the type host queries return. A
 script's list is capped at 10,000 elements. Exercised by
-`decay/crates/decay-runtime/src/tests/lists.rs` and by both Orbital games'
+`decay/crates/decay-runtime/src/tests/lists.rs` and by Orbital's
 module chooser.
 
 **A script can speak in the tilemap's coordinates.** `Grid.position_x` and

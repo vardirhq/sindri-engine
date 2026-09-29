@@ -99,10 +99,12 @@ Current implementation status is maintained in:
 
 - [Reference parity](last-stand-reference-parity.md)
 - [Visual parity](last-stand-visual-parity.md)
-- [Game README](../games/orbital-last-stand/README.md)
+- [Game README](../games/orbital-baked/README.md)
 
-The following documents preserve the forcing-function plan, measurements, and
-handover context:
+The game is `games/orbital-baked`. It began as a baked-sprite copy of an
+original drawn with engine vector shapes, which has since been removed. The
+following documents preserve the forcing-function plan, measurements, and
+handover context written against that original:
 
 - [Recreation plan](orbital-last-stand-plan.md)
 - [Vertical-slice audit](orbital-last-stand-audit.md)

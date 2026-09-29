@@ -5,7 +5,7 @@ use sindri_export::ProjectExport;
 
 fn last_stand() -> PathBuf {
     Path::new(env!("CARGO_MANIFEST_DIR"))
-        .join("../../games/orbital-last-stand")
+        .join("../../games/orbital-baked")
         .canonicalize()
         .expect("Last Stand is beside the exporter")
 }

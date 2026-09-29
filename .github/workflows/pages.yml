@@ -70,7 +70,6 @@ jobs:
           # keeps Pages honest about exactly what desktop/browser exports ship.
           for project in \
             "game:causeway" \
-            "games/orbital-last-stand:orbital-last-stand" \
             "games/orbital-baked:orbital-baked" \
             "games/graphics-lab:graphics-lab" \
             "games/weave-poc:weave-poc" \
@@ -118,7 +117,7 @@ jobs:
           CHECK
           test -f target/pages/docs/scripting/index.html
           test -f target/pages/docs/language/index.html
-          for route in causeway orbital-last-stand orbital-baked graphics-lab weave-poc platformer scorchball; do
+          for route in causeway orbital-baked graphics-lab weave-poc platformer scorchball; do
             test -f "target/pages/examples/$route/index.html"
             test -f "target/pages/examples/$route/assets/sindri.manifest.json"
             test -f "target/pages/examples/$route/pkg/sindri_causeway.js"
@@ -129,7 +128,7 @@ jobs:
           test -f target/pages/examples/voxel-lab/pkg/voxel_lab.js
           test -f target/pages/examples/voxel-lab/pkg/voxel_lab_bg.wasm
           grep -q 'voxel-stats' target/pages/examples/voxel-lab/index.html
-          grep -q '"kind": "prefab"' target/pages/examples/orbital-last-stand/assets/sindri.manifest.json
+          grep -q '"kind": "prefab"' target/pages/examples/orbital-baked/assets/sindri.manifest.json
           # The baked variant ships sprite sheets rather than vector shapes, so
           # a route that exported without them is broken in the one way that
           # matters and still passes every check above.

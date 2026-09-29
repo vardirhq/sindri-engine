@@ -197,13 +197,13 @@ capabilities.
 ## Last Stand file map
 
 - Scene and presentation classes:
-  `games/orbital-last-stand/assets/orbital.scene.json`
+  `games/orbital-baked/assets/orbital.scene.json`
 - Stylesheet:
-  `games/orbital-last-stand/assets/ui.weave`
+  `games/orbital-baked/assets/ui.weave`
 - Asset registration:
-  `games/orbital-last-stand/sindri.toml`
+  `games/orbital-baked/sindri.toml`
 - Integration tests:
-  `crates/sindri-weave/tests/last_stand.rs`
+  `crates/sindri-weave/tests/orbital.rs`
 
 These files form the canonical real-game reference. The smaller
 `games/weave-poc` example remains useful for learning individual properties.

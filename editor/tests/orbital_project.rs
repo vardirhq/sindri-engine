@@ -28,7 +28,7 @@ const REQUIRED_PREFABS: [&str; 3] = [
 
 /// The acceptance project's scene, from this crate's own directory.
 fn scene_path() -> PathBuf {
-    game_scene("orbital-last-stand")
+    game_scene("orbital-baked")
 }
 
 /// A game's main scene under `games/`, from this crate's own directory.

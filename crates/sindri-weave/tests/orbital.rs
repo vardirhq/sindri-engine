@@ -4,13 +4,11 @@ use sindri_core::{SceneDocument, World};
 use sindri_weave::PresentationWorld;
 use weave::{Stylesheet, Viewport, compose};
 
-const SCENE: &str = include_str!("../../../games/orbital-last-stand/assets/orbital.scene.json");
-const STYLE_ENTRY: &str = include_str!("../../../games/orbital-last-stand/assets/ui.weave");
-const STYLE_HUD: &str = include_str!("../../../games/orbital-last-stand/assets/ui/hud.weave");
-const STYLE_OVERLAYS: &str =
-    include_str!("../../../games/orbital-last-stand/assets/ui/overlays.weave");
-const STYLE_SCREENS: &str =
-    include_str!("../../../games/orbital-last-stand/assets/ui/screens.weave");
+const SCENE: &str = include_str!("../../../games/orbital-baked/assets/orbital.scene.json");
+const STYLE_ENTRY: &str = include_str!("../../../games/orbital-baked/assets/ui.weave");
+const STYLE_HUD: &str = include_str!("../../../games/orbital-baked/assets/ui/hud.weave");
+const STYLE_OVERLAYS: &str = include_str!("../../../games/orbital-baked/assets/ui/overlays.weave");
+const STYLE_SCREENS: &str = include_str!("../../../games/orbital-baked/assets/ui/screens.weave");
 
 fn stylesheet() -> Stylesheet {
     let sources = BTreeMap::from([

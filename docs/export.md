@@ -70,9 +70,9 @@ the browser host in beside each one:
 
 ```bash
 cargo run -p sindri-export --bin sindri-export -- \
-  games/orbital-last-stand target/pages/examples/orbital-last-stand \
-  --base /sindri2/examples/orbital-last-stand/
-cp -R game/pkg/. target/pages/examples/orbital-last-stand/pkg/
+  games/orbital-baked target/pages/examples/orbital-baked \
+  --base /sindri2/examples/orbital-baked/
+cp -R game/pkg/. target/pages/examples/orbital-baked/pkg/
 ```
 
 One host serves every project, because it reads the manifest rather than

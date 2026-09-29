@@ -1,14 +1,13 @@
 # Orbital Last Stand — Baked
 
-Orbital Last Stand with its engine-drawn vector art replaced by baked 3D sprite
-sheets, produced by `tools/isometric-baker` from recipes that live beside the
-textures they make.
+Orbital Last Stand with baked 3D sprite sheets, produced by
+`tools/isometric-baker` from recipes that live beside the textures they make.
 
-It is a copy, deliberately. The original is the forcing function described in
-`AGENTS.md` — a game built only through the editor and Decay, whose job is to
-find what the engine cannot do yet. Nothing here is allowed to change that, so
-this variant sits alongside it rather than replacing it, and the original's
-assets and scripts are untouched.
+It is the forcing function described in `AGENTS.md` — a game built only through
+the editor and Decay, whose job is to find what the engine cannot do yet. It
+began as a copy of an original drawn with engine vector shapes; that original
+has since been removed, and this is the one Orbital. The plans, audits and
+evidence written against the original are kept in `docs/` as history.
 
 ## What is baked
 
