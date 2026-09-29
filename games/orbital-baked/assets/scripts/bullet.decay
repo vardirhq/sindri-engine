@@ -134,7 +134,7 @@ script Bullet {
         World.set_property(flash, "spin", 4.0 + this.visual_style);
         var trauma: f32 = 0.08;
         if this.crit_hit > 0.0 { trauma = 0.36; }
-        Game.screen_trauma = max(Game.screen_trauma, trauma);
+        Camera.impact(trauma);
     }
 
     fn seek(dt: f32) {

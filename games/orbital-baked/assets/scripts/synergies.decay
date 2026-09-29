@@ -36,7 +36,7 @@ script Synergies {
             World.set_property(flare, "spin", 3.0 + ring * 2.0);
             ring += 1.0;
         }
-        Game.screen_trauma = max(Game.screen_trauma, 0.58);
+        Camera.impact(0.58);
     }
 
     fn evaluate(index: f32) -> bool {

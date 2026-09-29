@@ -150,6 +150,7 @@ The game's camera: moving the view and changing its engine-owned follow, confine
 - `dead_zone(x: f32, y: f32)` → `unit` — Sets the follow dead-zone size for the authored behavior camera.
 - `follow(target: Entity)` → `unit` — Makes the authored behavior camera follow an entity at runtime.
 - `follow_offset(x: f32, y: f32, z: f32)` → `unit` — Sets the world-space offset from the follow target used by the authored behavior camera.
+- `impact(amount: f32)` → `unit` — Shakes the authored behavior camera at least this hard, up to 1: a smaller impact while a bigger one is still shaking changes nothing, so many small hits in a frame do not add up to the biggest shake.
 - `max_speed(value: f32)` → `unit` — Sets the maximum follow speed of the authored behavior camera.
 - `pan_x`: `f32` — How far the camera view is moved sideways from where it was placed in the scene.
 - `pan_y`: `f32` — How far the camera view is moved up or down from where it was placed in the scene.

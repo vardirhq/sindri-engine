@@ -95,6 +95,7 @@ pub(crate) const CAMERA_VALUES: &[(&str, CameraValue)] = &[
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub(crate) enum CameraCall {
     AddTrauma,
+    Impact,
     Follow,
     ClearFollow,
     FollowOffset,
@@ -107,6 +108,7 @@ pub(crate) enum CameraCall {
 }
 pub(crate) const CAMERA_CALLS: &[(&str, CameraCall)] = &[
     ("add_trauma", CameraCall::AddTrauma),
+    ("impact", CameraCall::Impact),
     ("follow", CameraCall::Follow),
     ("clear_follow", CameraCall::ClearFollow),
     ("follow_offset", CameraCall::FollowOffset),

@@ -131,6 +131,9 @@
           "vertical_size": 11.0,
           "fit": "shorter"
         },
+        "sindri.camera.behavior": {
+          "shake": { "strength": 0.12, "decay": 2.8, "frequency": 57.0 }
+        },
         "sindri.script": {
           "source": "scripts/camera-fx.decay",
           "script": "CameraFx",

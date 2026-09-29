@@ -157,6 +157,21 @@ pub fn clear_camera_bounds(world: &mut World) -> bool {
     })
 }
 
+/// Raises the authored camera's trauma to at least `amount`, up to 1.
+///
+/// An impact rather than an addition: a small hit while a bigger one is still
+/// shaking the camera changes nothing, so a burst of small hits in one frame
+/// does not add up to the biggest shake there is.
+pub fn raise_camera_trauma(world: &mut World, amount: f32) -> bool {
+    if !amount.is_finite() || amount < 0.0 {
+        return false;
+    }
+    edit_behavior(world, |behavior| {
+        behavior.shake.trauma = behavior.shake.trauma.max(amount.min(1.0));
+        true
+    })
+}
+
 /// Changes shake strength, decay and frequency without changing current trauma.
 pub fn set_camera_shake(world: &mut World, strength: f32, decay: f32, frequency: f32) -> bool {
     if [strength, decay, frequency]

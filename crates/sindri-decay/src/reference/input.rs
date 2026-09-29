@@ -227,6 +227,11 @@ pub(super) const TYPES: &[TypeEntry] = &[
                 "Adds impact trauma to the authored behavior camera. Bigger amounts shake harder, up to 1, and the authored shake fades by itself.",
             ),
             call(
+                "impact",
+                &["amount"],
+                "Shakes the authored behavior camera at least this hard, up to 1: a smaller impact while a bigger one is still shaking changes nothing, so many small hits in a frame do not add up to the biggest shake.",
+            ),
+            call(
                 "follow",
                 &["target"],
                 "Makes the authored behavior camera follow an entity at runtime.",

@@ -31,9 +31,9 @@ mod voxel_render;
 pub use animation::{AnimationClip, AnimationError, SpriteAnimationComponent, SpriteAnimations};
 pub use audio::AudioSourceComponent;
 pub use camera_control::{
-    clear_camera_bounds, clear_camera_follow, set_camera_bounds, set_camera_dead_zone,
-    set_camera_follow_offset, set_camera_follow_target, set_camera_max_speed, set_camera_shake,
-    set_camera_smoothing,
+    clear_camera_bounds, clear_camera_follow, raise_camera_trauma, set_camera_bounds,
+    set_camera_dead_zone, set_camera_follow_offset, set_camera_follow_target, set_camera_max_speed,
+    set_camera_shake, set_camera_smoothing,
 };
 pub use camera_math::camera_rotation_from_look_at;
 pub use collision_outline::{CollisionShapes, collision_shapes};

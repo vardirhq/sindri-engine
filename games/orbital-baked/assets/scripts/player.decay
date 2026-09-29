@@ -149,7 +149,7 @@ script Player {
             Game.overdrive = max(4.0, Game.overdrive);
         }
         Game.shield_impact = 1.0;
-        Game.screen_trauma = max(Game.screen_trauma, 0.72);
+        Camera.impact(0.72);
         Effects.burst(this.hurt);
         Audio.play("audio/hurt.wav", 0.5);
     }

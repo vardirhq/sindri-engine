@@ -101,7 +101,7 @@ script Aegis {
             this.special = 0.7;
             if this.phase == 3.0 {
                 Game.aegis_core_exposed = 1.0;
-                Game.screen_trauma = max(Game.screen_trauma, 0.75);
+                Camera.impact(0.75);
             }
             Effects.burst(this.entity);
             Audio.play("audio/boss.wav", 0.6);
@@ -297,7 +297,7 @@ script Aegis {
             World.set_property(wave, "damage", this.death_burst_damage);
         }
         Effects.burst(this.entity);
-        Game.screen_trauma = max(Game.screen_trauma, 0.9);
+        Camera.impact(0.9);
         Audio.play("audio/kill.wav", 0.6);
         Game.kills = Game.kills + 1.0;
         Game.score = Game.score + 920.0;
