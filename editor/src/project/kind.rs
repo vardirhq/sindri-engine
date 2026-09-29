@@ -13,23 +13,13 @@ pub enum AssetKind {
     Folder,
     Scene,
     Texture,
-    /// One named part of a sliced texture. Not a file of its own: it is a row
-    /// under the image it was cut from, which is where a person looks for it.
     Sprite,
-    /// The sidecar that slices a texture. Listed as its own kind rather than as
-    /// "File", because it is the thing a slicer edits.
     Sheet,
     Mesh,
-    /// A fragment of a scene that scripts spawn. Its own kind rather than
-    /// "File", because it is a thing the engine loads and the browser can say
-    /// so: listed as a plain file, the acceptance project's every enemy looked
-    /// like an unrecognised blob sitting in a folder.
     Prefab,
-    /// Reusable authored data, independent of scene entities.
     Profile,
     TileSet,
     Script,
-    /// Responsive screen-UI presentation authored in Weave.
     Stylesheet,
     Font,
     Audio,
@@ -37,7 +27,6 @@ pub enum AssetKind {
 }
 
 impl AssetKind {
-    /// What the browser calls this kind in its right-hand column.
     pub const fn label(self) -> &'static str {
         match self {
             Self::Folder => "Folder",
@@ -57,7 +46,6 @@ impl AssetKind {
         }
     }
 
-    /// What the file at this path is, judged by its name.
     #[must_use]
     pub fn of_path(path: &std::path::Path) -> Self {
         if path.is_dir() {
@@ -68,12 +56,14 @@ impl AssetKind {
 
     /// What a file of this name is, judged by its extension.
     ///
-    /// A scene is `*.scene.json` rather than any JSON, because the editor can
-    /// open one and not the other, and a row that offers to open a settings
-    /// file as a scene is the same class of lie this module exists to remove.
+    /// Native `.scene` files are canonical. `.scene.json` remains recognized so
+    /// projects authored by older Sindri versions do not turn into anonymous
+    /// JSON files in the browser.
     pub(crate) fn of_file(name: &str) -> Self {
         let lower = name.to_lowercase();
-        if lower.ends_with(".scene.json") {
+        if lower.ends_with(sindri_core::SCENE_SUFFIX)
+            || lower.ends_with(sindri_core::LEGACY_SCENE_SUFFIX)
+        {
             return Self::Scene;
         }
         if lower.ends_with(SHEET_SUFFIX) {
@@ -91,14 +81,28 @@ impl AssetKind {
         match lower.rsplit_once('.').map(|(_, extension)| extension) {
             Some("png" | "jpg" | "jpeg" | "webp" | "bmp" | "ktx2" | "dds") => Self::Texture,
             Some("gltf" | "glb" | "obj" | "fbx") => Self::Mesh,
-            // `decay` first because it is the engine's own: a `.decay` file is
-            // a script the editor can actually run, and the rest are scripts
-            // only in the sense that they are code sitting in a project.
             Some("decay" | "rs" | "ts" | "js" | "wgsl") => Self::Script,
             Some("weave") => Self::Stylesheet,
             Some("ttf" | "otf" | "woff" | "woff2") => Self::Font,
             Some("wav" | "ogg" | "mp3") => Self::Audio,
             _ => Self::Other,
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::AssetKind;
+
+    #[test]
+    fn native_and_legacy_scene_names_are_scenes() {
+        assert_eq!(AssetKind::of_file("level.scene"), AssetKind::Scene);
+        assert_eq!(AssetKind::of_file("level.scene.json"), AssetKind::Scene);
+        assert_eq!(AssetKind::of_file("LEVEL.SCENE"), AssetKind::Scene);
+    }
+
+    #[test]
+    fn arbitrary_json_is_not_a_scene() {
+        assert_eq!(AssetKind::of_file("settings.json"), AssetKind::Other);
     }
 }
