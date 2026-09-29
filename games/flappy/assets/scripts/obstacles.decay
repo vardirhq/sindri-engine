@@ -10,11 +10,9 @@ script Obstacles {
         }
 
         for obstacle in World.with_tag("scroll") {
-            let next = World.position_x(obstacle) - this.speed * dt;
-            if next < this.wrap_x {
-                World.set_position(obstacle, this.reset_x, World.position_y(obstacle));
-            } else {
-                World.set_position(obstacle, next, World.position_y(obstacle));
+            obstacle.transform.position.x -= this.speed * dt;
+            if obstacle.transform.position.x < this.wrap_x {
+                obstacle.transform.position.x += this.reset_x - this.wrap_x;
             }
         }
     }
