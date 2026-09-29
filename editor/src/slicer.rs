@@ -2,7 +2,7 @@
 //!
 //! The sheet is a property of the picture, so this is where a picture is shown
 //! and cut. What it edits is the sidecar beside the texture — `tiles.png` is
-//! sliced by `tiles.sheet.json` — and nothing else in the project has to be told
+//! sliced by `tiles.sheet` — and nothing else in the project has to be told
 //! about it, because a sheet's ID is derived from its texture's.
 //!
 //! The image is decoded on the CPU and handed to egui rather than going through
@@ -13,7 +13,10 @@ use std::path::{Path, PathBuf};
 
 use eframe::egui;
 use sindri_assets::{AssetBytes, AssetDecoder, TextureAssetDecoder};
-use sindri_core::{AssetId, SHEET_FORMAT_VERSION, SheetGrid, SpriteSheetDocument};
+use sindri_core::{
+    AssetId, LEGACY_SHEET_SUFFIX, SHEET_FORMAT_VERSION, SHEET_SUFFIX, SheetGrid,
+    SpriteSheetDocument,
+};
 
 #[cfg(test)]
 mod tests;
@@ -23,38 +26,21 @@ pub struct Slicer {
     path: PathBuf,
     /// The sheet's own path, which is where a save goes.
     sheet: PathBuf,
-    /// The decoded picture, held for egui to draw. `None` when the file is not
-    /// an image this build can read, which is a thing to say rather than an
-    /// empty panel.
     image: Option<egui::ColorImage>,
     texture: Option<egui::TextureHandle>,
-    /// The image's own size, so the grid can be drawn over it truthfully.
     size: (u32, u32),
     pub columns: u32,
     pub rows: u32,
-    /// Pixels of border around the whole grid.
     pub margin: [u32; 2],
-    /// Pixels between neighbouring cells, belonging to no sprite.
     pub spacing: [u32; 2],
-    /// The cell being named, picked on the image.
-    ///
-    /// One at a time, and that is what makes a large sheet workable: a field
-    /// per cell is fine at four and unusable at two hundred and fifty-six,
-    /// which is the same wall a list of forty-nine floor tiles hit.
     pub selected: u32,
-    /// One name per cell, row-major. Empty means "call it by its index", which
-    /// is what an unnamed cell resolves to anyway.
     pub names: Vec<String>,
-    /// What went wrong reading or writing, for the panel to show.
     pub problem: Option<String>,
 }
 
 impl Slicer {
-    /// Opens `texture` for slicing, reading the sheet beside it if there is one.
-    ///
-    /// A texture with no sheet starts as a one-by-one grid rather than as
-    /// nothing: the whole image is a legitimate slice, and it means pressing
-    /// Save on an untouched panel produces something valid.
+    /// Opens `texture` for slicing, preferring its native sidecar and falling
+    /// back to the legacy JSON-suffixed sidecar when an old project has one.
     pub fn open(texture: &Path) -> Self {
         let sheet = sheet_path(texture);
         let mut slicer = Self {
@@ -76,22 +62,16 @@ impl Slicer {
         slicer
     }
 
-    pub fn path(&self) -> &Path {
-        &self.path
-    }
+    pub fn path(&self) -> &Path { &self.path }
 
-    /// What the texture is called, which is the panel's heading.
     pub fn name(&self) -> String {
         self.path
             .file_name()
             .map_or_else(String::new, |name| name.to_string_lossy().into_owned())
     }
 
-    pub const fn size(&self) -> (u32, u32) {
-        self.size
-    }
+    pub const fn size(&self) -> (u32, u32) { self.size }
 
-    /// The picture, uploaded to egui on first sight and kept.
     pub fn texture(&mut self, context: &egui::Context) -> Option<&egui::TextureHandle> {
         if self.texture.is_none()
             && let Some(image) = self.image.take()
@@ -99,21 +79,14 @@ impl Slicer {
             self.texture = Some(context.load_texture(
                 self.path.to_string_lossy(),
                 image,
-                // Nearest, because a sheet is usually pixel art and a slicer
-                // that blurs the thing being cut is showing you the wrong
-                // picture of it.
                 egui::TextureOptions::NEAREST,
             ));
         }
         self.texture.as_ref()
     }
 
-    /// How many cells the current grid holds.
-    pub const fn cells(&self) -> u32 {
-        self.columns.saturating_mul(self.rows)
-    }
+    pub const fn cells(&self) -> u32 { self.columns.saturating_mul(self.rows) }
 
-    /// What cell `index` is called, falling back to its index.
     pub fn name_of(&self, index: u32) -> String {
         self.names
             .get(index as usize)
@@ -122,22 +95,14 @@ impl Slicer {
             .unwrap_or_else(|| index.to_string())
     }
 
-    /// Where each cell sits in the image, as fractions.
-    ///
-    /// Asked of the document rather than worked out again here, so the preview
-    /// draws exactly what a scene will read — a slicer whose picture and whose
-    /// output are computed separately is a slicer that can lie.
     pub fn cell_rects(&self) -> Vec<[f32; 4]> {
         let document = self.document();
-        let Some(grid) = document.grid.as_ref() else {
-            return Vec::new();
-        };
+        let Some(grid) = document.grid.as_ref() else { return Vec::new(); };
         (0..grid.cells())
             .map(|index| grid.rect_of(index).unwrap_or([0.0, 0.0, 0.0, 0.0]))
             .collect()
     }
 
-    /// Keeps the selection on a cell that exists.
     pub const fn clamp_selection(&mut self) {
         let cells = self.cells();
         if cells == 0 {
@@ -147,11 +112,6 @@ impl Slicer {
         }
     }
 
-    /// The cells that were given a name, as `(index, name)`.
-    ///
-    /// What the panel lists instead of every cell: a sheet of two hundred and
-    /// fifty-six is mostly cells nobody needed to name, and those already have
-    /// an answer.
     pub fn named(&self) -> Vec<(u32, &str)> {
         self.names
             .iter()
@@ -161,33 +121,17 @@ impl Slicer {
             .collect()
     }
 
-    /// Resizes the name list to the grid, keeping what was already typed.
-    ///
-    /// Changing the grid is how a slice is found, so names survive it: dropping
-    /// them on every drag of the columns field would make naming the last thing
-    /// anyone dares do.
-    pub fn fit_names(&mut self) {
-        self.names.resize(self.cells() as usize, String::new());
-    }
+    pub fn fit_names(&mut self) { self.names.resize(self.cells() as usize, String::new()); }
 
-    /// The document this slice would write.
     pub fn document(&self) -> SpriteSheetDocument {
-        // Trailing unnamed cells are not written: they resolve to their index
-        // either way, and a file full of empty strings is a file that looks
-        // like it means something.
         let mut names: Vec<String> = self.names.clone();
-        while names.last().is_some_and(String::is_empty) {
-            names.pop();
-        }
+        while names.last().is_some_and(String::is_empty) { names.pop(); }
         let measured = self.margin != [0, 0] || self.spacing != [0, 0];
         SpriteSheetDocument {
             format_version: SHEET_FORMAT_VERSION,
             grid: Some(SheetGrid {
                 columns: self.columns,
                 rows: self.rows,
-                // Recorded only when the grid is measured in pixels, so an
-                // edge-to-edge slice stays the same file it was before margins
-                // existed.
                 size: measured.then_some([self.size.0, self.size.1]),
                 margin: self.margin,
                 spacing: self.spacing,
@@ -197,10 +141,6 @@ impl Slicer {
         }
     }
 
-    /// Writes the sidecar, or says why it could not.
-    ///
-    /// Checked before writing, so a slice that would not load is refused here
-    /// rather than becoming a file that breaks every scene using it.
     pub fn save(&mut self) -> bool {
         let document = self.document();
         if let Err(error) = document.rects() {
@@ -226,19 +166,14 @@ impl Slicer {
         }
     }
 
-    /// Whether a sheet exists on disk for this texture.
-    pub fn is_sliced(&self) -> bool {
-        self.sheet.exists()
-    }
+    pub fn is_sliced(&self) -> bool { self.sheet.exists() }
 
     fn read_image(&mut self) {
         let Ok(bytes) = std::fs::read(&self.path) else {
             self.problem = Some(format!("{} could not be read", self.name()));
             return;
         };
-        let Ok(id) = AssetId::new(self.name()) else {
-            return;
-        };
+        let Ok(id) = AssetId::new(self.name()) else { return; };
         match TextureAssetDecoder.decode(AssetBytes::new(id, bytes)) {
             Ok(asset) => {
                 self.size = (asset.width(), asset.height());
@@ -267,9 +202,6 @@ impl Slicer {
                 }
                 self.fit_names();
             }
-            // A sheet that will not parse is shown as a problem with the grid
-            // left at its default, so the panel is a place to fix it rather
-            // than a place that refuses to open.
             Err(error) => {
                 self.problem = Some(error.to_string());
                 self.fit_names();
@@ -278,13 +210,24 @@ impl Slicer {
     }
 }
 
-/// Where the sheet for `texture` lives, by the same rule `sheet_id_for` applies
-/// to asset IDs.
-fn sheet_path(texture: &Path) -> PathBuf {
+fn sidecar_path(texture: &Path, suffix: &str) -> PathBuf {
     let stem = texture
         .file_stem()
         .map_or_else(String::new, |stem| stem.to_string_lossy().into_owned());
-    texture.with_file_name(format!("{stem}.sheet.json"))
+    texture.with_file_name(format!("{stem}{suffix}"))
+}
+
+/// Native sidecars win when both forms exist. An existing legacy sidecar is
+/// kept in place so merely opening and saving an old project does not create a
+/// duplicate asset beside it. A texture with no sidecar starts on the native
+/// path, so every newly authored sheet uses `.sheet`.
+fn sheet_path(texture: &Path) -> PathBuf {
+    let native = sidecar_path(texture, SHEET_SUFFIX);
+    if native.exists() {
+        return native;
+    }
+    let legacy = sidecar_path(texture, LEGACY_SHEET_SUFFIX);
+    if legacy.exists() { legacy } else { native }
 }
 
 #[cfg(test)]
@@ -300,26 +243,14 @@ mod packing_tests {
         (directory, slicer)
     }
 
-    /// A margin and a gutter are pixels, so the sheet has to record the image
-    /// they were measured against — and an edge-to-edge slice must not start
-    /// recording one, or every existing sheet would gain a field.
     #[test]
     fn a_measured_slice_records_the_image_it_was_cut_against() {
         let (_directory, mut slicer) = slicer();
-        assert!(
-            slicer.document().grid.expect("a grid").size.is_none(),
-            "an edge-to-edge slice is the same file it always was"
-        );
-
+        assert!(slicer.document().grid.expect("a grid").size.is_none());
         slicer.margin = [2, 2];
-        assert!(
-            slicer.document().grid.expect("a grid").size.is_some(),
-            "a measured slice cannot be read without the size"
-        );
+        assert!(slicer.document().grid.expect("a grid").size.is_some());
     }
 
-    /// The selection is a cell, so it cannot survive a grid that no longer has
-    /// it.
     #[test]
     fn the_selection_stays_on_a_cell_that_exists() {
         let (_directory, mut slicer) = slicer();
@@ -327,7 +258,6 @@ mod packing_tests {
         slicer.rows = 8;
         slicer.fit_names();
         slicer.selected = 63;
-
         slicer.columns = 2;
         slicer.rows = 2;
         slicer.fit_names();
@@ -335,8 +265,6 @@ mod packing_tests {
         assert_eq!(slicer.selected, 3, "the last cell of the smaller grid");
     }
 
-    /// The panel lists what was named rather than every cell, which is what
-    /// makes a sheet of two hundred and fifty-six workable.
     #[test]
     fn only_named_cells_are_listed() {
         let (_directory, mut slicer) = slicer();
@@ -345,30 +273,21 @@ mod packing_tests {
         slicer.fit_names();
         assert_eq!(slicer.cells(), 256);
         assert!(slicer.named().is_empty(), "nothing is named yet");
-
         slicer.names[7] = "coin".to_owned();
         slicer.names[200] = "door".to_owned();
         assert_eq!(slicer.named(), vec![(7, "coin"), (200, "door")]);
     }
 
-    /// The preview draws the rects the document produces, so what is shown and
-    /// what a scene reads cannot drift apart.
     #[test]
     fn the_preview_draws_what_the_document_produces() {
         let (_directory, mut slicer) = slicer();
         slicer.columns = 4;
         slicer.rows = 1;
         slicer.fit_names();
-
         let rects = slicer.cell_rects();
         assert_eq!(rects.len(), 4);
         let document = slicer.document();
-        let produced = document
-            .grid
-            .as_ref()
-            .expect("a grid")
-            .rect_of(2)
-            .expect("cell two is on the grid");
+        let produced = document.grid.as_ref().expect("a grid").rect_of(2).expect("cell two is on the grid");
         assert!(
             rects[2]
                 .iter()
