@@ -1,0 +1,5 @@
+format_version = 1
+
+[project]
+name = "Shapes Lab"
+main_scene = "assets/shapes-lab.scene.json"

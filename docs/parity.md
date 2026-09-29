@@ -57,7 +57,7 @@ which rows it was holding up. Gather's removal is why this rule exists: it left
 eight rows citing a game that no longer existed.
 
 The layout still lags the three kinds. `examples/` holds `camera`, `cube` and
-`triangle`, three feature demos — `voxel-lab`, `weave-poc` and `graphics-lab` —
+`triangle`, three feature demos — `voxel-lab`, `weave-poc` and `shapes-lab` —
 live under `games/`, and most of the feature examples `AGENTS.md` names (audio,
 Weave, Decay, tilemaps, isometric, voxels) do not exist as examples yet. Moving
 and filling them is follow-up work, not a change to any cell here.

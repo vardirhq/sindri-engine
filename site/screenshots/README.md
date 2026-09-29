@@ -57,18 +57,18 @@ cargo run -p sindri-cube --bin capture -- site/screenshots/scene-frame-pipeline.
 
 ## The two without a capture binary
 
-Graphics Lab is assets and tests with no crate of its own, and Weave POC's
+Shapes Lab is assets and tests with no crate of its own, and Weave POC's
 crate has no capture binary, so these two are photographed the way CI already
 runs a project in a browser. Export the project, then point the smoke at it:
 
 ```
 cargo run -p sindri-export --bin sindri-export -- \
-  games/graphics-lab target/dist/graphics-lab --base /sindri2/
-cp -R game/pkg/. target/dist/graphics-lab/pkg/
+  games/shapes-lab target/dist/shapes-lab --base /sindri2/
+cp -R game/pkg/. target/dist/shapes-lab/pkg/
 SINDRI_EXPECT_ASSETS=1 SINDRI_BASE_PATH=/sindri2/ \
   SINDRI_VIEWPORT_WIDTH=1440 SINDRI_VIEWPORT_HEIGHT=900 \
-  node scripts/browser/smoke.mjs target/dist/graphics-lab \
-  site/screenshots/graphics-lab.png
+  node scripts/browser/smoke.mjs target/dist/shapes-lab \
+  site/screenshots/shapes-lab.png
 ```
 
 The same two commands with `weave-poc` produce `weave-poc.png`. Both need

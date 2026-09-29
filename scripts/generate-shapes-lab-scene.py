@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Generate the texture-free Graphics Lab composition.
+"""Generate the texture-free Shapes Lab composition.
 
 This is intentionally deterministic. The lab is a visual stress/sample project,
 so keeping the authored scene reproducible makes screenshots useful in review.
@@ -12,7 +12,7 @@ import math
 import random
 from pathlib import Path
 
-OUT = Path("games/graphics-lab/assets/graphics-lab.scene.json")
+OUT = Path("games/shapes-lab/assets/shapes-lab.scene.json")
 ENTITIES: list[dict] = []
 
 
@@ -292,7 +292,7 @@ def write():
         tap_radius, tap_mode = interaction
         script_component["properties"]["tap_radius"] = tap_radius
         script_component["properties"]["tap_mode"] = tap_mode
-    lines = ["{", '  "format_version": 9,', '  "metadata": {"name": "Graphics Lab Overdrive"},', '  "entities": [']
+    lines = ["{", '  "format_version": 9,', '  "metadata": {"name": "Shapes Lab Overdrive"},', '  "entities": [']
     for index, entity in enumerate(ENTITIES):
         suffix = "," if index + 1 < len(ENTITIES) else ""
         lines.append("    " + json.dumps(entity, separators=(",", ":")) + suffix)

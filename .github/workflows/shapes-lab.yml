@@ -1,27 +1,27 @@
-name: Graphics Lab
+name: Shapes Lab
 
 on:
   pull_request:
     paths:
-      - "games/graphics-lab/**"
+      - "games/shapes-lab/**"
       - "crates/sindri-scene/**"
       - "crates/sindri-render/**"
       - "crates/sindri-decay/**"
       - "crates/sindri-export/**"
       - "game/**"
       - "scripts/browser/**"
-      - ".github/workflows/graphics-lab.yml"
+      - ".github/workflows/shapes-lab.yml"
   push:
     branches: [main]
     paths:
-      - "games/graphics-lab/**"
+      - "games/shapes-lab/**"
       - "crates/sindri-scene/**"
       - "crates/sindri-render/**"
       - "crates/sindri-decay/**"
       - "crates/sindri-export/**"
       - "game/**"
       - "scripts/browser/**"
-      - ".github/workflows/graphics-lab.yml"
+      - ".github/workflows/shapes-lab.yml"
   workflow_dispatch:
 
 permissions:
@@ -29,7 +29,7 @@ permissions:
 
 jobs:
   browser:
-    name: Render Graphics Lab
+    name: Render Shapes Lab
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
@@ -64,28 +64,28 @@ jobs:
         env:
           WASM_OPT: ${{ github.event_name == 'pull_request' && '--no-opt' || '' }}
         run: wasm-pack build game --target web --out-dir pkg $WASM_OPT
-      - name: Export Graphics Lab
+      - name: Export Shapes Lab
         run: |
           cargo run --quiet --package sindri-export --bin sindri-export -- \
-            games/graphics-lab target/dist/graphics-lab --base /sindri2/examples/graphics-lab/
-          mkdir -p target/dist/graphics-lab/pkg
-          cp -R game/pkg/. target/dist/graphics-lab/pkg/
-          test -f target/dist/graphics-lab/assets/sindri.manifest.json
-          grep -q '"kind": "scene"' target/dist/graphics-lab/assets/sindri.manifest.json
-          grep -q '"kind": "script"' target/dist/graphics-lab/assets/sindri.manifest.json
-      - name: Smoke Graphics Lab in Chromium
+            games/shapes-lab target/dist/shapes-lab --base /sindri2/examples/shapes-lab/
+          mkdir -p target/dist/shapes-lab/pkg
+          cp -R game/pkg/. target/dist/shapes-lab/pkg/
+          test -f target/dist/shapes-lab/assets/sindri.manifest.json
+          grep -q '"kind": "scene"' target/dist/shapes-lab/assets/sindri.manifest.json
+          grep -q '"kind": "script"' target/dist/shapes-lab/assets/sindri.manifest.json
+      - name: Smoke Shapes Lab in Chromium
         run: |
           mkdir -p target/render-artifacts
           SINDRI_EXPECT_ASSETS=1 \
           SINDRI_EXPECT_ASSET_KINDS=scene,script \
-          SINDRI_BASE_PATH=/sindri2/examples/graphics-lab/ \
-            node scripts/browser/smoke.mjs target/dist/graphics-lab \
-            target/render-artifacts/graphics-lab.png
-      - name: Upload Graphics Lab capture
+          SINDRI_BASE_PATH=/sindri2/examples/shapes-lab/ \
+            node scripts/browser/smoke.mjs target/dist/shapes-lab \
+            target/render-artifacts/shapes-lab.png
+      - name: Upload Shapes Lab capture
         if: always()
         uses: actions/upload-artifact@v7
         with:
-          name: graphics-lab-capture
-          path: target/render-artifacts/graphics-lab.png
+          name: shapes-lab-capture
+          path: target/render-artifacts/shapes-lab.png
           if-no-files-found: warn
           retention-days: 14
