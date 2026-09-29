@@ -321,6 +321,7 @@ fn authored_json(value: &Value) -> Option<serde_json::Value> {
         Value::String(text) => serde_json::Value::from(text.clone()),
         Value::Vec2(components) => serde_json::Value::from(components.to_vec()),
         Value::Vec3(components) => serde_json::Value::from(components.to_vec()),
+        Value::Color(channels) => serde_json::Value::from(channels.to_vec()),
         // As a scene authors one: the variant's own name.
         Value::Variant(name) => serde_json::Value::from(crate::scripts::variant_name(name)),
         _ => return None,

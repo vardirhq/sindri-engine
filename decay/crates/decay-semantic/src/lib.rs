@@ -24,14 +24,14 @@ use decay_syntax::parse;
 use analyzer::Analyzer;
 
 pub use constant::{ConstValue, FoldError, fold_constants};
-pub use decay_syntax::{ListOp, MapOp, NumberOp, StringOp, TimerProperty, VectorOp};
+pub use decay_syntax::{ColorOp, ListOp, MapOp, NumberOp, StringOp, TimerProperty, VectorOp};
 pub use diagnostic::{
     Analysis, Binding, ConstantUses, Diagnostic, DiagnosticPhase, ValueMember, ValueMembers,
 };
 pub use environment::{Environment, ExternalSymbol, StateField};
 pub use types::{
-    BUILT_IN_TYPES, COMPONENTS, EMIT, FunctionType, HostType, LENGTH, LIST, MAP, OLD_LENGTH, TIMER,
-    Type, VEC2, VEC3, enum_type, event_type, method_function,
+    BUILT_IN_TYPES, CHANNELS, COLOR, COMPONENTS, EMIT, FunctionType, HostType, LENGTH, LIST, MAP,
+    OLD_LENGTH, TIMER, Type, VEC2, VEC3, enum_type, event_type, method_function,
 };
 
 #[must_use]

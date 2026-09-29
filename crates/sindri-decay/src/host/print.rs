@@ -28,6 +28,14 @@ pub(super) fn printed(value: Option<&Value>) -> String {
         Some(Value::Timer { left, duration }) => {
             format!("timer {left}s of {duration}s")
         }
+        Some(Value::Color(channels)) => format!(
+            "Color({})",
+            channels
+                .iter()
+                .map(|c| decay_runtime::spell_number(*c))
+                .collect::<Vec<_>>()
+                .join(", ")
+        ),
         Some(vector @ (Value::Vec2(_) | Value::Vec3(_))) => format!(
             "({})",
             vector

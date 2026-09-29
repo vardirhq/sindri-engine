@@ -5,6 +5,7 @@
 //! arm in the matching leaf, not a change to this file.
 
 mod call;
+mod color;
 mod constant;
 mod defaults;
 mod enumeration;

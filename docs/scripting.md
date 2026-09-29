@@ -162,9 +162,15 @@ Screen UI is placed by the overlay's layout rather than this, and its
 
 | Path | Type | Read | Write |
 | --- | --- | --- | --- |
+| `this.sprite.{tint,color_multiply,color_offset}` | `Color` | yes | yes |
 | `this.sprite.tint.{r,g,b,a}` | `f32` | yes | yes |
 | `this.sprite.color_multiply.{r,g,b,a}` | `f32` | yes | yes |
 | `this.sprite.color_offset.{r,g,b,a}` | `f32` | yes | yes |
+
+**A colour is reached whole or one channel at a time**, as a vector is:
+`this.sprite.tint = Color("#ff8800")` writes all four channels, `let was =
+this.sprite.tint` holds them, and `this.sprite.tint.a = 0.5` is still one
+number.
 
 **`tint` multiplies; `color_offset` adds.** A tint can only scale a channel the
 art already has, so a sprite drawn nearly black stays nearly black whatever
@@ -183,8 +189,10 @@ lands outside zero to one is clipped by the render target, while one that is
 not a number at all is refused when the scene is extracted.
 
 | `this.sprite.layer` | `f32` | yes | yes |
+| `this.ui_image.tint` | `Color` | yes | yes |
 | `this.ui_image.tint.{r,g,b,a}` | `f32` | yes | yes |
 | `this.ui_image.layer` | `f32` | yes | yes |
+| `this.shape.{fill,stroke}` | `Color` | yes | yes |
 | `this.shape.fill.{r,g,b,a}` | `f32` | yes | yes |
 | `this.shape.stroke.{r,g,b,a}` | `f32` | yes | yes |
 | `this.shape.count` | `f32` | yes | yes |
@@ -258,12 +266,15 @@ table above lists, reaching the same numbers.
 | `this.entity.transform.world_position.{x,y,z}` | `f32` | yes | yes |
 | `this.entity.transform.scale.{x,y,z}` | `f32` | yes | yes |
 | `this.entity.transform.rotation_z` | `f32` | yes | yes |
+| `this.entity.sprite.{tint,color_multiply,color_offset}` | `Color` | yes | yes |
 | `this.entity.sprite.tint.{r,g,b,a}` | `f32` | yes | yes |
 | `this.entity.sprite.color_multiply.{r,g,b,a}` | `f32` | yes | yes |
 | `this.entity.sprite.color_offset.{r,g,b,a}` | `f32` | yes | yes |
 | `this.entity.sprite.layer` | `f32` | yes | yes |
+| `this.entity.ui_image.tint` | `Color` | yes | yes |
 | `this.entity.ui_image.tint.{r,g,b,a}` | `f32` | yes | yes |
 | `this.entity.ui_image.layer` | `f32` | yes | yes |
+| `this.entity.shape.{fill,stroke}` | `Color` | yes | yes |
 | `this.entity.shape.fill.{r,g,b,a}` | `f32` | yes | yes |
 | `this.entity.shape.stroke.{r,g,b,a}` | `f32` | yes | yes |
 | `this.entity.shape.count` | `f32` | yes | yes |
@@ -1956,6 +1967,21 @@ a list it is a value, copied where it is assigned, and holds at most 10,000
 keys. A scene cannot author one yet: an `@export` map starts as the script
 wrote it.
 
+### Colours
+
+```decay
+const HURT: Color = Color("#ff4060");
+this.sprite.tint = HURT.lerp(this.base, this.recovery);
+this.shape.stroke = Color(1.0, 0.9, 0.6).with_alpha(this.shape.stroke.a);
+```
+
+`Color` holds `r`, `g`, `b` and `a`, and the engine's colour fields are of
+that type, so a tint is read, held, blended and assigned whole — where a
+script used to write three or four channels one by one — while
+`this.sprite.tint.a` is still one number. Build one from three or four
+numbers or from `"#rrggbb"`; a palette is best written once as constants.
+Orbital's chargers colour their elite traits this way.
+
 ### Values that may be missing
 
 ```decay
@@ -2123,10 +2149,10 @@ imagined sample — and wrote down the whole surface it needed. That list is the
 acceptance criteria, and it is now met: authored properties, lifecycle,
 transform, sprite, input, and `print`.
 
-Two items on it are met differently. `vec2(x, y)` and
-`sprite:set_tint([f32; 4])` both pass a value around; Decay has no such value,
-so a tint is four typed numbers — `this.sprite.tint.r` — in the same shape as
-`position.x`. That is a better fit for a property panel than an array anyway.
+Both of its values are now the language's own: `vec2(x, y)` is `Vec2`, and
+`sprite:set_tint([f32; 4])` is `this.sprite.tint = Color(r, g, b, a)`, while
+`this.sprite.tint.r` still reaches one channel as `position.x` reaches one
+component.
 
 ## Failure is per script
 

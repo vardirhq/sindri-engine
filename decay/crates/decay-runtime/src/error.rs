@@ -55,6 +55,9 @@ pub enum RuntimeError {
     IndexNotWhole(f64),
     /// `map[key]` for a key the map does not have, named as written.
     MissingKey(String),
+    /// `Color(text)` for text that spells no colour: `#rrggbb` or
+    /// `#rrggbbaa`.
+    InvalidColor(String),
     /// `n.fixed(digits)` or `n.padded(width)` asked for a count of digits
     /// that is not whole, is negative, or is more than `most`.
     DigitsOutOfRange {

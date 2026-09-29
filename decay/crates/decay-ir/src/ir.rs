@@ -119,6 +119,8 @@ pub enum Constant {
     Null,
     /// An enum's variant, named with its enum: `Phase.Lobby`.
     Variant(String),
+    /// A colour's channels: a constant or a struct default that is one.
+    Color([f64; 4]),
 }
 
 /// A struct's name and its fields in declared order: what a built one
@@ -256,6 +258,9 @@ pub enum Instruction {
     /// A text property or method. Pops the arguments, then the text, and
     /// pushes the answer.
     Text(StringOp),
+    /// A colour operation: pops the arguments, then the colour (none for
+    /// `FromHex`, which pops its text), and pushes the answer.
+    Color(decay_syntax::ColorOp),
     /// A number written as text. Pops the argument, then the number, and
     /// pushes the text.
     Number(decay_syntax::NumberOp),

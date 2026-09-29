@@ -226,6 +226,40 @@ fn a_script_can_change_its_sprite() {
     assert_eq!(sprite["texture"], json!("procedural:checkerboard"));
 }
 
+/// A sprite's tint is a `Color`: read whole, blended, and written back whole,
+/// while one channel is still one number.
+#[test]
+fn a_script_sets_a_whole_colour() {
+    let (mut world, entity, sources) = world(
+        r##"script S { fn update(dt: f32) {
+            let was = this.sprite.tint;
+            this.sprite.tint = was.lerp(Color("#000000"), 0.5).with_alpha(0.75);
+            let fade = Color(0.1, 0.2, 0.3, 0.0);
+            this.sprite.tint.g = fade.b;
+        } }"##,
+    );
+    let report = Scripts::new().advance(
+        &mut world,
+        &registry(),
+        ScriptFrame::new(&sources, &InputState::default(), 0.5),
+    );
+    assert!(report.is_quiet(), "{report:?}");
+
+    let sprite = sprite(&world, entity);
+    let tint: Vec<f64> = sprite["tint"]
+        .as_array()
+        .expect("four channels")
+        .iter()
+        .filter_map(serde_json::Value::as_f64)
+        .collect();
+    let expected = [0.5, 0.3, 0.5, 0.75];
+    assert_eq!(tint.len(), 4, "{sprite}");
+    for (got, want) in tint.iter().zip(expected) {
+        assert!((got - want).abs() < 1e-6, "{sprite}");
+    }
+    assert_eq!(sprite["texture"], json!("procedural:checkerboard"));
+}
+
 /// Reaching for a component the entity does not have says so, rather than
 /// failing as an unknown path that looks like a typo.
 #[test]

@@ -1,6 +1,7 @@
 //! The analyser's tests.
 
 mod codes;
+mod colors;
 mod constants;
 mod enums;
 mod events;

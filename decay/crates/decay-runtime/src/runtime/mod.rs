@@ -6,6 +6,7 @@
 
 mod call;
 mod collection;
+mod color;
 mod list;
 mod map;
 
@@ -37,6 +38,7 @@ pub(crate) fn describe(value: &Value) -> String {
         Value::Struct { shape, .. } => return format!("a {}", shape.name),
         Value::Vec2(_) => "a Vec2",
         Value::Vec3(_) => "a Vec3",
+        Value::Color(_) => "a Color",
         Value::Timer { .. } => "a Timer",
         Value::Variant(name) => {
             return format!("a {}", name.split('.').next().unwrap_or("variant"));
@@ -465,6 +467,7 @@ impl<'a, H: Host> Runtime<'a, H> {
                 | Instruction::WithComponent(_)
                 | Instruction::Vector(_) => Self::step_vector(frame, &instructions[ip])?,
                 Instruction::Text(op) => Self::step_text(frame, *op)?,
+                Instruction::Color(op) => color::step(frame, *op)?,
                 Instruction::Number(op) => Self::step_number(frame, *op)?,
                 Instruction::StartTimer | Instruction::Timer(_) => {
                     Self::step_timer(frame, &instructions[ip])?;

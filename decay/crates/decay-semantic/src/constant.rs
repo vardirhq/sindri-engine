@@ -28,6 +28,8 @@ pub enum ConstValue {
         enumeration: String,
         variant: String,
     },
+    /// A colour: `Color(1.0, 0.5, 0.0)` or `Color("#ff8000")`.
+    Color([f64; 4]),
 }
 
 impl ConstValue {
@@ -39,6 +41,7 @@ impl ConstValue {
             Self::Bool(_) => Type::Bool,
             Self::Text(_) => Type::String,
             Self::Variant { enumeration, .. } => Type::Named(enumeration.clone()),
+            Self::Color(_) => Type::Color,
         }
     }
 
@@ -53,6 +56,14 @@ impl ConstValue {
                 enumeration,
                 variant,
             } => format!("{enumeration}.{variant}"),
+            Self::Color(channels) => format!(
+                "Color({})",
+                channels
+                    .iter()
+                    .map(ToString::to_string)
+                    .collect::<Vec<_>>()
+                    .join(", ")
+            ),
         }
     }
 }
@@ -153,14 +164,16 @@ impl Folder<'_, '_> {
             return None;
         };
         let declared = Type::from_ref(&declaration.ty);
-        let allowed = matches!(declared, Type::F32 | Type::Bool | Type::String)
-            || matches!(&declared, Type::Named(enumeration) if (self.variants)(enumeration).is_some());
+        let allowed = matches!(
+            declared,
+            Type::F32 | Type::Bool | Type::String | Type::Color
+        ) || matches!(&declared, Type::Named(enumeration) if (self.variants)(enumeration).is_some());
         if !allowed {
             self.error(
                 Code::ConstantType,
                 declaration.ty.span,
                 format!(
-                    "a constant holds `f32`, `bool`, `String` or an enum, not `{}`",
+                    "a constant holds `f32`, `bool`, `String`, `Color` or an enum, not `{}`",
                     declared.display_name()
                 ),
             );
@@ -208,6 +221,9 @@ impl Folder<'_, '_> {
                 let right_value = self.expr(right)?;
                 self.binary(*op, &left_value, &right_value, expr.span)
             }
+            ExprKind::Call { callee, args } if matches!(&callee.kind, ExprKind::Identifier(name) if name == crate::types::COLOR) => {
+                self.color(args, expr.span)
+            }
             _ => {
                 self.error(
                     Code::ConstantNotFixed,
@@ -219,6 +235,39 @@ impl Folder<'_, '_> {
                 None
             }
         }
+    }
+
+    /// `Color(r, g, b)`, `Color(r, g, b, a)` or `Color("#rrggbb")`, from
+    /// values that are themselves constant.
+    fn color(&mut self, args: &[Expr], span: Span) -> Option<ConstValue> {
+        let values = args
+            .iter()
+            .map(|argument| self.expr(argument))
+            .collect::<Option<Vec<_>>>()?;
+        let channels = match values.as_slice() {
+            [ConstValue::Text(text)] => decay_syntax::parse_hex(text),
+            [
+                ConstValue::Number(r),
+                ConstValue::Number(g),
+                ConstValue::Number(b),
+            ] => Some([*r, *g, *b, 1.0]),
+            [
+                ConstValue::Number(r),
+                ConstValue::Number(g),
+                ConstValue::Number(b),
+                ConstValue::Number(a),
+            ] => Some([*r, *g, *b, *a]),
+            _ => None,
+        };
+        if channels.is_none() {
+            self.error(
+                Code::ConstantNotFixed,
+                span,
+                "a constant colour is `Color(r, g, b)`, `Color(r, g, b, a)` or `Color(\"#rrggbb\")`"
+                    .to_owned(),
+            );
+        }
+        channels.map(ConstValue::Color)
     }
 
     fn name(&mut self, name: &str, span: Span) -> Option<ConstValue> {

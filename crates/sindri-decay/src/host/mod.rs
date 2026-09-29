@@ -539,9 +539,13 @@ impl WorldHost<'_> {
             .filter(|numbers| numbers.len() == components.len())
             .ok_or_else(|| {
                 RuntimeError::Host(format!(
-                    "{} takes a Vec{}, and the script gave {value:?}",
+                    "{} takes a {}, and the script gave {value:?}",
                     path.dotted(),
-                    components.len()
+                    if components.len() == 4 {
+                        "Color".to_owned()
+                    } else {
+                        format!("Vec{}", components.len())
+                    }
                 ))
             })?
             .to_vec();

@@ -5,12 +5,12 @@
 use std::collections::BTreeMap;
 
 use decay_semantic::members::{
-    list_op_signature, map_op_signature, number_op_signature, string_op_signature,
-    timer_property_type, vector_op_signature,
+    color_op_signature, list_op_signature, map_op_signature, number_op_signature,
+    string_op_signature, timer_property_type, vector_op_signature,
 };
 use decay_semantic::{
-    Analysis, COMPONENTS, Environment, ExternalSymbol, FunctionType, LENGTH, ListOp, MapOp,
-    NumberOp, StringOp, TimerProperty, Type, VectorOp,
+    Analysis, CHANNELS, COMPONENTS, ColorOp, Environment, ExternalSymbol, FunctionType, LENGTH,
+    ListOp, MapOp, NumberOp, StringOp, TimerProperty, Type, VectorOp,
 };
 
 use crate::support::type_members;
@@ -102,6 +102,16 @@ pub(crate) fn value_members(
             );
             members
         }
+        Type::Color => CHANNELS
+            .iter()
+            .map(|channel| ((*channel).to_owned(), value(Type::F32)))
+            .chain(ColorOp::ALL.iter().map(|(op, name, _)| {
+                (
+                    (*name).to_owned(),
+                    ExternalSymbol::Function(color_op_signature(*op)),
+                )
+            }))
+            .collect(),
         Type::Timer => TimerProperty::ALL
             .iter()
             .map(|(property, name)| ((*name).to_owned(), value(timer_property_type(*property))))

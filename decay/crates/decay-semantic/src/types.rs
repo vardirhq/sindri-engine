@@ -40,13 +40,19 @@ pub fn is_length(name: &str) -> bool {
 /// How the two vector types are spelled. Language types rather than host
 /// ones: a vector is a value a script builds, adds and keeps, which a host
 /// type — something the host owns and a script can only name — cannot be.
+/// The colour type's name, and how it is built: `Color(1.0, 0.5, 0.0)`.
+pub const COLOR: &str = "Color";
+
+/// A colour's channels, in the order it is built and stored.
+pub const CHANNELS: [&str; 4] = ["r", "g", "b", "a"];
+
 pub const VEC2: &str = "Vec2";
 pub const VEC3: &str = "Vec3";
 
 /// Every built-in type that takes no argument, by each spelling it is written
 /// with. `List<T>` (or `Array<T>`) is the one that takes an argument; every
 /// other name is a declared struct or enum, or a type the host names.
-pub const BUILT_IN_TYPES: [(&str, Type); 9] = [
+pub const BUILT_IN_TYPES: [(&str, Type); 10] = [
     ("f32", Type::F32),
     ("bool", Type::Bool),
     ("String", Type::String),
@@ -56,6 +62,7 @@ pub const BUILT_IN_TYPES: [(&str, Type); 9] = [
     (VEC2, Type::Vec2),
     (VEC3, Type::Vec3),
     (TIMER, Type::Timer),
+    (COLOR, Type::Color),
 ];
 
 /// The member an event offers: `GoalScored.emit(1.0)`.
@@ -108,6 +115,8 @@ pub enum Type {
     /// when time passes; Sindri runs down every timer a script's fields hold
     /// before each `update`.
     Timer,
+    /// A colour: `r`, `g`, `b` and `a`, each from 0 to 1.
+    Color,
     /// A fixed-length collection of one element type.
     ///
     /// The only generic type the language has, and it is not user-definable:
@@ -248,6 +257,7 @@ impl Type {
             Self::Vec2 => Cow::Borrowed(VEC2),
             Self::Vec3 => Cow::Borrowed(VEC3),
             Self::Timer => Cow::Borrowed(TIMER),
+            Self::Color => Cow::Borrowed(COLOR),
             Self::Array(element) => Cow::Owned(format!("{LIST}<{}>", element.display_name())),
             Self::Optional(inner) => Cow::Owned(format!("{}?", inner.display_name())),
             Self::Map(key, value) => Cow::Owned(format!(

@@ -184,6 +184,7 @@ impl Lowerer<'_> {
                         | ValueMember::StartTimer
                         | ValueMember::List(_)
                         | ValueMember::Map(_)
+                        | ValueMember::Color(_)
                         | ValueMember::Number(_),
                     )
                     | None => {
@@ -286,6 +287,10 @@ impl Lowerer<'_> {
                 for argument in args {
                     self.lower_expr(argument, instructions);
                 }
+                // `Color(r, g, b)`: opaque.
+                if dimensions == 4 && args.len() == 3 {
+                    instructions.push(Instruction::Push(Constant::Number(1.0)));
+                }
                 instructions.push(Instruction::Construct(dimensions));
                 return;
             }
@@ -312,24 +317,22 @@ impl Lowerer<'_> {
                 }
                 return;
             }
-            Some(ValueMember::Text(op)) => {
+            // The value asked, if the call is on one, then the arguments.
+            Some(
+                member @ (ValueMember::Text(_) | ValueMember::Number(_) | ValueMember::Color(_)),
+            ) => {
                 if let ExprKind::Member { object, .. } = &callee.kind {
                     self.lower_expr(object, instructions);
                 }
                 for argument in args {
                     self.lower_expr(argument, instructions);
                 }
-                instructions.push(Instruction::Text(op));
-                return;
-            }
-            Some(ValueMember::Number(op)) => {
-                if let ExprKind::Member { object, .. } = &callee.kind {
-                    self.lower_expr(object, instructions);
-                }
-                for argument in args {
-                    self.lower_expr(argument, instructions);
-                }
-                instructions.push(Instruction::Number(op));
+                instructions.push(match member {
+                    ValueMember::Text(op) => Instruction::Text(op),
+                    ValueMember::Number(op) => Instruction::Number(op),
+                    ValueMember::Color(op) => Instruction::Color(op),
+                    _ => return,
+                });
                 return;
             }
             _ => {}

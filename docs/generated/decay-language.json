@@ -567,6 +567,48 @@
       "members": [
         {
           "kind": "property",
+          "name": "r",
+          "type": "f32"
+        },
+        {
+          "kind": "property",
+          "name": "g",
+          "type": "f32"
+        },
+        {
+          "kind": "property",
+          "name": "b",
+          "type": "f32"
+        },
+        {
+          "kind": "property",
+          "name": "a",
+          "type": "f32"
+        },
+        {
+          "kind": "method",
+          "name": "lerp",
+          "params": [
+            "Color",
+            "f32"
+          ],
+          "returns": "Color"
+        },
+        {
+          "kind": "method",
+          "name": "with_alpha",
+          "params": [
+            "f32"
+          ],
+          "returns": "Color"
+        }
+      ],
+      "type": "Color"
+    },
+    {
+      "members": [
+        {
+          "kind": "property",
           "name": "done",
           "type": "bool"
         },
@@ -997,6 +1039,13 @@
       "name": "Timer",
       "spellings": [
         "Timer"
+      ],
+      "takes": []
+    },
+    {
+      "name": "Color",
+      "spellings": [
+        "Color"
       ],
       "takes": []
     },

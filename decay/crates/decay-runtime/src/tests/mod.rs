@@ -1,6 +1,7 @@
 //! The runtime's tests.
 
 mod collections;
+mod colors;
 mod constants;
 mod defaults;
 mod events;

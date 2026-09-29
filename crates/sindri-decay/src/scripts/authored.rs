@@ -37,6 +37,7 @@ fn type_of(value: &Value) -> Option<Type> {
         Value::String(_) => Type::String,
         Value::Vec2(_) => Type::Vec2,
         Value::Vec3(_) => Type::Vec3,
+        Value::Color(_) => Type::Color,
         Value::Variant(name) => Type::Named(name.split('.').next()?.to_owned()),
         _ => return None,
     })
@@ -153,6 +154,7 @@ fn blank_at(program: &IrProgram, ty: &Type, depth: usize) -> Value {
         Type::String => Value::String(String::new()),
         Type::Vec2 => Value::Vec2([0.0; 2]),
         Type::Vec3 => Value::Vec3([0.0; 3]),
+        Type::Color => Value::Color([1.0; 4]),
         Type::Array(_) => Value::array(Vec::new()),
         Type::Named(name) if depth < DEPTH => {
             if let Some(first) = program.variants(name).and_then(<[String]>::first) {

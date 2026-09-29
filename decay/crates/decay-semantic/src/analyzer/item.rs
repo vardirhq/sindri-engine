@@ -333,6 +333,7 @@ fn built_value_type(initializer: Option<&Expr>) -> Type {
             crate::types::VEC2 => Type::Vec2,
             crate::types::VEC3 => Type::Vec3,
             crate::types::TIMER => Type::Timer,
+            crate::types::COLOR => Type::Color,
             _ => Type::Unknown,
         },
         _ => Type::Unknown,

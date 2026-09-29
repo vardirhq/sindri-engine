@@ -513,6 +513,9 @@ pub(super) fn describe_node(node: &Node) -> Type {
         // The transform's position and scale are the language's own `Vec3`,
         // not a host type of that name: a script can hold, add and pass one.
         Node::Group(name, _) if *name == crate::surface::names::VEC3 => Type::Vec3,
+        // And a colour is the language's `Color`: held, blended and assigned
+        // whole, and still read channel by channel.
+        Node::Group(name, _) if *name == crate::surface::names::RGBA => Type::Color,
         Node::Group(name, _) => Type::Named((*name).to_owned()),
         Node::Leaf(_) => Type::F32,
         Node::Handle(_) => Type::Named(ENTITY.to_owned()),
@@ -529,7 +532,7 @@ pub(super) fn collect_types() -> Vec<(String, HostType)> {
             let Node::Group(name, nested) = node else {
                 continue;
             };
-            if *name == crate::surface::names::VEC3 {
+            if *name == crate::surface::names::VEC3 || *name == crate::surface::names::RGBA {
                 continue;
             }
             let mut ty = HostType::new();

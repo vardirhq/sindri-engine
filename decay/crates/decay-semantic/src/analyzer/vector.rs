@@ -21,6 +21,7 @@ impl Analyzer<'_, '_> {
         let ty = match name {
             VEC2 => Type::Vec2,
             VEC3 => Type::Vec3,
+            crate::types::COLOR => return self.color_construct_type(args, span),
             _ => return None,
         };
         if self.lookup(name).is_some() {
