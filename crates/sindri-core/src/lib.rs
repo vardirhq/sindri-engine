@@ -43,14 +43,17 @@ pub use input::{
 pub use lifecycle::{EngineLifecycle, EngineState, LifecycleError};
 pub use migration::{SceneMigrationError, SceneMigrationStep, SceneMigrator};
 pub use prefab::{
-    PREFAB_FORMAT_VERSION, PREFAB_SUFFIX, PrefabDocument, PrefabError, PrefabJsonError,
+    LEGACY_PREFAB_SUFFIX, PREFAB_FORMAT_VERSION, PREFAB_SUFFIX, PrefabDocument, PrefabError,
+    PrefabJsonError,
 };
-pub use profile::{PROFILE_FORMAT_VERSION, PROFILE_SUFFIX, ProfileDocument, ProfileError};
+pub use profile::{
+    LEGACY_PROFILE_SUFFIX, PROFILE_FORMAT_VERSION, PROFILE_SUFFIX, ProfileDocument, ProfileError,
+};
 pub use random::Rng;
 pub use save::{SAVE_FORMAT_VERSION, SaveDocument, SaveReadError, SaveState, SaveStore, SaveValue};
 pub use scene::{
-    LoadedScenes, SCENE_FORMAT_VERSION, SceneDocument, SceneEntity, SceneEntityId, SceneError,
-    SceneJsonError, SceneMetadata, SceneSwitchError,
+    LEGACY_SCENE_SUFFIX, LoadedScenes, SCENE_FORMAT_VERSION, SCENE_SUFFIX, SceneDocument,
+    SceneEntity, SceneEntityId, SceneError, SceneJsonError, SceneMetadata, SceneSwitchError,
 };
 pub use sheet::{
     SHEET_FORMAT_VERSION, SheetError, SheetGrid, SpriteAnchor, SpriteSheetDocument, sheet_id_for,
