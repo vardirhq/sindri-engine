@@ -1,12 +1,20 @@
 const vscode = require('vscode');
 const { LanguageClient } = require('vscode-languageclient/node');
-const { projectRoot, serverCommand, watchedFiles } = require('./server');
+const { ensureExecutable, projectRoot, serverCommand, watchedFiles } = require('./server');
 
 let client;
 
 async function activate(context) {
   const configured = vscode.workspace.getConfiguration('decay').get('server.path', 'decay-lsp');
   const command = serverCommand(configured, process.env, context.extensionPath);
+  try {
+    ensureExecutable(command);
+  } catch (error) {
+    const detail = error instanceof Error ? error.message : String(error);
+    vscode.window.showErrorMessage(`Decay language server is not executable (${command}): ${detail}`);
+    return;
+  }
+
   const activeFile = vscode.window.activeTextEditor?.document.fileName;
   const root = projectRoot(activeFile);
   const workspaceFolder = root

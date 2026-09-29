@@ -6,6 +6,7 @@ const {
   projectRoot,
   bundledServerName,
   bundledServerPath,
+  ensureExecutable,
   serverCommand,
   watchedFiles
 } = require('./server');
@@ -60,8 +61,14 @@ assert.strictEqual(bundledServerName('win32'), 'decay-lsp.exe');
 assert.strictEqual(bundledServerPath(extension, 'linux'), path.join(extension, 'bin', 'decay-lsp'));
 
 const linuxServer = bundledServerPath(extension, 'linux');
-fs.writeFileSync(linuxServer, 'test');
+fs.writeFileSync(linuxServer, 'test', { mode: 0o644 });
 assert.strictEqual(serverCommand('decay-lsp', {}, extension, 'linux'), linuxServer);
+let chmodCall;
+ensureExecutable(linuxServer, 'linux', (file, mode) => { chmodCall = { file, mode }; });
+assert.deepStrictEqual(chmodCall, { file: linuxServer, mode: 0o755 });
+chmodCall = undefined;
+ensureExecutable(linuxServer, 'win32', () => { throw new Error('Windows must not chmod'); });
+assert.strictEqual(chmodCall, undefined);
 assert.strictEqual(serverCommand('/custom/decay-lsp', {}, extension, 'linux'), '/custom/decay-lsp');
 assert.strictEqual(serverCommand('decay-lsp', { SINDRI_DECAY_LSP: '/env/decay-lsp' }, extension, 'linux'), '/env/decay-lsp');
 assert.strictEqual(serverCommand('decay-lsp', {}, '/missing', 'linux', () => false), 'decay-lsp');
