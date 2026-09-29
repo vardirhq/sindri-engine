@@ -4,9 +4,21 @@ Language support for `.decay` gameplay scripts.
 
 The extension supplies syntax highlighting and starts the repository's `decay-lsp` language server. The server uses the same `sindri-decay::environment()` as the runtime, so host members accepted by the game are the members offered by completion and checked by diagnostics.
 
-## Install a packaged extension
+## Sindri-managed installation
 
-Release packages are self-contained: each VSIX carries the `decay-lsp` executable for the platform it targets. Installing the VSIX is therefore enough to get syntax highlighting, diagnostics, completion and hover; Rust, Cargo and a separate PATH setup are not required.
+Sindri owns the normal installation path. When a `.decay` asset is opened in the external editor, Sindri asks VS Code whether `vardir.sindri-decay` is installed. If it is missing, Sindri installs the `sindri-decay.vsix` shipped with that Sindri build before opening the script. This keeps the editor, Decay grammar, and bundled language server on the same release instead of depending on whichever Marketplace version happens to be current.
+
+A packaged Sindri distribution should place `sindri-decay.vsix` beside the editor executable or under `share/sindri/`. Source/development launches can point at an otherwise located package with `SINDRI_DECAY_VSIX=/path/to/sindri-decay.vsix`. The Decay VS Code workflow deliberately gives every platform artifact that stable internal filename so native packaging can copy it without knowing the extension version.
+
+Sindri never needs Rust, Cargo, or a separately installed `decay-lsp` for this path: each platform VSIX carries its matching language-server executable.
+
+## Install a packaged extension manually
+
+The same VSIX can still be installed directly with **Extensions: Install from VSIX...** in VS Code, or with:
+
+```sh
+code --install-extension sindri-decay.vsix
+```
 
 For a locally built package, build `decay-lsp`, copy it into `bin/`, then package the extension:
 
@@ -20,9 +32,7 @@ npm run check
 npm run package
 ```
 
-Install the resulting `.vsix` with **Extensions: Install from VSIX...** in VS Code.
-
-`SINDRI_DECAY_LSP` remains the highest-priority override. An explicitly changed `decay.server.path` is next. Otherwise a packaged extension uses `bin/decay-lsp` (`bin/decay-lsp.exe` on Windows), falling back to `decay-lsp` on `PATH` for source-tree development.
+`SINDRI_DECAY_LSP` remains the highest-priority language-server override. An explicitly changed `decay.server.path` is next. Otherwise a packaged extension uses `bin/decay-lsp` (`bin/decay-lsp.exe` on Windows), falling back to `decay-lsp` on `PATH` for source-tree development.
 
 ## Development setup
 
@@ -45,7 +55,7 @@ Open `editors/vscode-decay` in VS Code, press **F5**, and open a `.decay` file i
 
 ## Opening from Sindri
 
-Double-click a `.decay` asset in Sindri's Project panel, or right-click it and choose **Open in External Editor**. Sindri looks for `code`, `code-insiders`, then `codium`, opens the project directory and focuses the script. Set `SINDRI_VSCODE` to an executable path when none of those commands names your VS Code installation. A missing external editor is reported in Sindri and does not prevent editing or playing the project there.
+Double-click a `.decay` asset in Sindri's Project panel, or right-click it and choose **Open in External Editor**. Sindri looks for `code`, `code-insiders`, then `codium`, ensures its matching Decay extension is installed, opens the project directory and focuses the script. Set `SINDRI_VSCODE` to an executable path when none of those commands names your VS Code installation. A missing external editor or companion VSIX is reported in Sindri and does not prevent editing or playing the project there.
 
 ## Current language features
 
