@@ -21,32 +21,23 @@ use std::{collections::BTreeMap, fmt, str::FromStr};
 
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
 use sha2::{Digest, Sha256};
-use sindri_core::{AssetId, AssetLoadError, AssetLoadErrorKind};
+use sindri_core::{
+    AssetId, AssetLoadError, AssetLoadErrorKind, LEGACY_PREFAB_SUFFIX, LEGACY_PROFILE_SUFFIX,
+    LEGACY_SCENE_SUFFIX, LEGACY_SHEET_SUFFIX, LEGACY_TILESET_SUFFIX, PREFAB_SUFFIX,
+    PROFILE_SUFFIX, SCENE_SUFFIX, SHEET_SUFFIX, TILESET_SUFFIX,
+};
 use thiserror::Error;
 
 #[cfg(test)]
 mod tests;
 
-/// The manifest format this build writes and understands.
-///
-/// Versioned for the same reason a scene is: a manifest outlives the build that
-/// wrote it, and a reader that guesses is a reader that is wrong once.
 pub const MANIFEST_FORMAT_VERSION: u32 = 1;
-
-/// The digest algorithm, named in every hash so the format can gain another
-/// without the version having to say which is which.
 const ALGORITHM: &str = "sha256";
 
-/// A SHA-256 of an asset's stored bytes.
-///
-/// Written as `sha256:` and sixty-four lowercase hex characters. Hex rather than
-/// base64 because a manifest is a file people read in review, and the twenty
-/// bytes base64 would save are not worth a reviewer squinting at it.
 #[derive(Clone, Copy, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub struct ContentHash([u8; 32]);
 
 impl ContentHash {
-    /// The hash of some bytes.
     pub fn of(bytes: &[u8]) -> Self {
         let mut hasher = Sha256::new();
         hasher.update(bytes);
@@ -104,47 +95,22 @@ impl<'de> Deserialize<'de> for ContentHash {
     }
 }
 
-/// What an asset is, so a host can load it without being told in advance.
-///
-/// The manifest carries this because the alternative is a list of asset IDs
-/// compiled into the host, one per kind, maintained by hand — which is exactly
-/// what stops a project being exported without someone editing Rust. A host
-/// that reads kinds from the manifest can open any project.
 #[derive(Clone, Copy, Debug, Deserialize, Eq, Ord, PartialEq, PartialOrd, Serialize)]
 #[serde(rename_all = "snake_case")]
 pub enum AssetKind {
-    /// The scene document itself.
     Scene,
-    /// A Decay source file.
     Script,
-    /// A reusable entity definition a script can spawn.
-    ///
-    /// Separate from `Scene` because a host does different things with the
-    /// two: a scene is opened, and a prefab is held so that a script asking
-    /// for one gets it. A build that carried prefabs as scenes would open
-    /// several worlds; one that carried them as `Other` could not tell which
-    /// bytes to parse.
     Prefab,
-    /// Reusable authored data that is not placed in the world.
     Profile,
     Texture,
-    /// A sprite sheet describing how a texture is cut up.
     Sheet,
-    /// Semantic tiles and their baked face sprite references.
     TileSet,
     Font,
     Audio,
-    /// Something the engine does not decode: read as bytes, or not at all.
-    ///
-    /// A project may ship a file for its own reasons, and a manifest that could
-    /// not describe one would force it to be lied about as some other kind.
     Other,
 }
 
 impl AssetKind {
-    /// Every kind, in the order a host should load them.
-    ///
-    /// The scene first, because everything else is referenced from it.
     pub const ALL: [Self; 10] = [
         Self::Scene,
         Self::Prefab,
@@ -158,17 +124,6 @@ impl AssetKind {
         Self::Other,
     ];
 
-    /// What a file is, from its name.
-    ///
-    /// The last resort, for the two callers that have nothing else to go on: a
-    /// directory scan, and an asset a project listed by hand. Everything found
-    /// by walking a scene already knows what it is, because the component that
-    /// named it says so — and that is the better answer wherever it is
-    /// available, since a texture called `notes.txt` is still a texture if a
-    /// sprite names it.
-    ///
-    /// An extension nobody recognises is `Other`, which is honest: the engine
-    /// will not decode it, and refusing to carry it would be worse.
     #[must_use]
     pub fn for_id(id: &str) -> Self {
         match id.rsplit_once('.').map(|(_, extension)| extension) {
@@ -176,17 +131,21 @@ impl AssetKind {
             Some("png" | "jpg" | "jpeg") => Self::Texture,
             Some("ttf" | "otf") => Self::Font,
             Some("decay") => Self::Script,
-            // Both end in `.json`, so the longer name is tested first.
-            _ if id.ends_with(sindri_core::PREFAB_SUFFIX) => Self::Prefab,
-            _ if id.ends_with(sindri_core::PROFILE_SUFFIX) => Self::Profile,
-            _ if id.ends_with(".sheet.json") => Self::Sheet,
-            _ if id.ends_with(sindri_core::TILESET_SUFFIX) => Self::TileSet,
-            _ if id.ends_with(".scene.json") => Self::Scene,
+            _ if id.ends_with(PREFAB_SUFFIX) || id.ends_with(LEGACY_PREFAB_SUFFIX) => {
+                Self::Prefab
+            }
+            _ if id.ends_with(PROFILE_SUFFIX) || id.ends_with(LEGACY_PROFILE_SUFFIX) => {
+                Self::Profile
+            }
+            _ if id.ends_with(SHEET_SUFFIX) || id.ends_with(LEGACY_SHEET_SUFFIX) => Self::Sheet,
+            _ if id.ends_with(TILESET_SUFFIX) || id.ends_with(LEGACY_TILESET_SUFFIX) => {
+                Self::TileSet
+            }
+            _ if id.ends_with(SCENE_SUFFIX) || id.ends_with(LEGACY_SCENE_SUFFIX) => Self::Scene,
             _ => Self::Other,
         }
     }
 
-    /// The name this kind is stored under.
     #[must_use]
     pub const fn as_str(self) -> &'static str {
         match self {
@@ -204,22 +163,10 @@ impl AssetKind {
     }
 }
 
-/// One asset, as the manifest records it.
 #[derive(Clone, Copy, Debug, Deserialize, Eq, PartialEq, Serialize)]
 pub struct ManifestEntry {
-    /// What kind of thing this is.
-    ///
-    /// Defaulted, and left out when it is `Other`, because `Other` is the
-    /// absence of a statement rather than one: a manifest written before kinds
-    /// existed says nothing about them, and one that has nothing to say should
-    /// read the same as it always did.
     #[serde(default = "other_kind", skip_serializing_if = "is_other")]
     pub kind: AssetKind,
-    /// How many bytes the asset is.
-    ///
-    /// Redundant against the hash, and worth carrying anyway: it is what a build
-    /// reports as a download size, and a length that disagrees identifies a
-    /// truncated response before anything hashes a megabyte to say the same.
     pub bytes: u64,
     pub hash: ContentHash,
 }
@@ -228,38 +175,16 @@ const fn other_kind() -> AssetKind {
     AssetKind::Other
 }
 
-// `serde` hands a reference to `skip_serializing_if`, and clippy would rather a
-// one-byte enum were copied. Both are satisfied by taking the reference and
-// immediately not keeping it.
 #[allow(clippy::trivially_copy_pass_by_ref)]
 fn is_other(kind: &AssetKind) -> bool {
     matches!(*kind, AssetKind::Other)
 }
 
-/// Every asset a project ships.
-///
-/// Ordered by ID, because the file is reviewed and diffed like any other source:
-/// a manifest whose lines moved when nothing changed would make every asset
-/// change unreadable.
 #[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
 pub struct AssetManifest {
     format_version: u32,
-    /// The directory the assets live in, relative to wherever the manifest is.
-    ///
-    /// Empty for a project whose assets sit beside it, which is what a
-    /// hand-written manifest and every existing one means. An export names a
-    /// directory here, and names it after what the assets hash to — so the
-    /// manifest is the one file that must never be cached and everything it
-    /// points at can be cached for ever.
     #[serde(default, skip_serializing_if = "String::is_empty")]
     content_root: String,
-    /// The first scene inserted by the project export.
-    ///
-    /// Project gathering deliberately visits the configured main scene before
-    /// any additional scenes. The asset map is sorted for stable manifests, so
-    /// without preserving that first scene separately a browser would open the
-    /// alphabetically first scene instead. Optional keeps older hand-written
-    /// manifests valid; they retain their historical sorted-scene fallback.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     entry_scene: Option<AssetId>,
     assets: BTreeMap<AssetId, ManifestEntry>,
@@ -285,29 +210,19 @@ impl AssetManifest {
         self.format_version
     }
 
-    /// Where the assets live, relative to the manifest.
     pub fn content_root(&self) -> &str {
         &self.content_root
     }
 
-    /// Says where the assets live.
     pub fn set_content_root(&mut self, root: impl Into<String>) {
         self.content_root = root.into();
     }
 
-    /// Records what an asset is, returning what it was recorded as before.
-    /// Records an asset, taking it for whatever its name says it is.
-    ///
-    /// It used to record every asset as `Other`, which was harmless while
-    /// nothing read kinds and became a trap the moment a host asked for its
-    /// assets by kind: a manifest of nothing but `Other` describes a project
-    /// with no scene, and the host that reads one loaded nothing at all.
     pub fn insert(&mut self, id: AssetId, bytes: &[u8]) -> Option<ManifestEntry> {
         let kind = AssetKind::for_id(id.as_str());
         self.insert_as(id, kind, bytes)
     }
 
-    /// Records what an asset is, and what kind of thing it is.
     pub fn insert_as(
         &mut self,
         id: AssetId,
@@ -343,12 +258,6 @@ impl AssetManifest {
         self.assets.iter()
     }
 
-    /// Every asset of one kind, in the order a host should consume it.
-    ///
-    /// Scenes are the one kind where order is semantic: the configured main
-    /// scene has to come first even though the manifest's asset map is sorted by
-    /// ID. Other kinds remain in stable manifest order. Older manifests without
-    /// an entry scene naturally keep the previous sorted behavior.
     pub fn ids_of(&self, kind: AssetKind) -> impl Iterator<Item = &AssetId> {
         let entry_scene = if kind == AssetKind::Scene {
             self.entry_scene.as_ref()
@@ -363,16 +272,6 @@ impl AssetManifest {
         )
     }
 
-    /// Checks bytes that arrived against what was promised.
-    ///
-    /// An asset the manifest does not mention passes. A manifest is a statement
-    /// about what it lists, not a claim that nothing else exists — a project
-    /// that loads something generated at runtime should not have to describe it
-    /// in advance to be allowed to load it.
-    ///
-    /// The length is checked first because it is free and it is what a truncated
-    /// response fails on, so the common failure names itself without hashing a
-    /// megabyte to say the same conclusion.
     pub fn verify(&self, id: &AssetId, bytes: &[u8]) -> Result<(), AssetLoadError> {
         let Some(entry) = self.assets.get(id) else {
             return Ok(());
@@ -402,11 +301,6 @@ impl AssetManifest {
         Ok(())
     }
 
-    /// The manifest as the file it is stored as.
-    ///
-    /// Canonical without needing a canonicaliser: the structure is flat and the
-    /// assets are in a sorted map, so pretty-printing it is already stable. The
-    /// trailing newline is there because every other text file has one.
     pub fn to_canonical_json(&self) -> Result<String, ManifestError> {
         let mut text = serde_json::to_string_pretty(self)
             .map_err(|error| ManifestError::Json(error.to_string()))?;
@@ -414,7 +308,6 @@ impl AssetManifest {
         Ok(text)
     }
 
-    /// Reads a manifest, rejecting a version this build does not understand.
     pub fn from_json(text: &str) -> Result<Self, ManifestError> {
         let manifest: Self =
             serde_json::from_str(text).map_err(|error| ManifestError::Json(error.to_string()))?;
@@ -424,13 +317,6 @@ impl AssetManifest {
         Ok(manifest)
     }
 
-    /// Builds a manifest by reading every asset under `root`.
-    ///
-    /// The IDs are the paths below the root, which is exactly what an asset
-    /// source resolves against it, so a manifest built here describes the same
-    /// names a scene writes. Dot files are the tooling's rather than the
-    /// project's and are skipped, and so is the manifest itself: a file cannot
-    /// contain its own hash.
     #[cfg(not(target_arch = "wasm32"))]
     pub fn of_directory(root: &std::path::Path) -> Result<Self, ManifestError> {
         let mut manifest = Self::new();
@@ -439,8 +325,6 @@ impl AssetManifest {
     }
 }
 
-/// What a manifest is normally called, so a build and a loader agree without
-/// being told.
 pub const MANIFEST_FILE_NAME: &str = "sindri.manifest.json";
 
 #[cfg(not(target_arch = "wasm32"))]
