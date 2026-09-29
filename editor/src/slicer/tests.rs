@@ -7,7 +7,7 @@ use std::{fs, path::Path};
 fn a_sheet_sits_beside_its_texture() {
     assert_eq!(
         sheet_path(Path::new("/a/textures/tiles.png")),
-        Path::new("/a/textures/tiles.sheet.json")
+        Path::new("/a/textures/tiles.sheet")
     );
 }
 
@@ -79,7 +79,7 @@ fn unnamed_cells_are_called_by_their_index() {
     assert!(slicer.save(), "the slice writes");
     assert_eq!(slicer.name_of(2), "2");
 
-    let written = fs::read_to_string(directory.path().join("tiles.sheet.json"))
+    let written = fs::read_to_string(directory.path().join("tiles.sheet"))
         .expect("the sheet is readable");
     assert!(
         written.matches("\"\"").count() <= 1,
@@ -103,7 +103,27 @@ fn a_slice_that_would_not_load_is_refused() {
     assert!(!slicer.save(), "two cells with one name is not a sheet");
     assert!(slicer.problem.is_some());
     assert!(
-        !directory.path().join("tiles.sheet.json").exists(),
+        !directory.path().join("tiles.sheet").exists(),
         "and nothing was written"
     );
+}
+
+/// Existing projects can still open a legacy JSON-suffixed sheet. New sheets
+/// are written with the native extension, but compatibility does not strand
+/// projects authored before the migration.
+#[test]
+fn a_legacy_sheet_is_still_read() {
+    let directory = tempfile::tempdir().expect("a temporary directory");
+    let texture = directory.path().join("tiles.png");
+    fs::write(&texture, []).expect("writable");
+    fs::write(
+        directory.path().join("tiles.sheet.json"),
+        r#"{ "format_version": 1, "grid": { "columns": 2, "rows": 1, "names": ["old", "project"] } }"#,
+    )
+    .expect("writable");
+
+    let slicer = Slicer::open(&texture);
+    assert!(slicer.is_sliced());
+    assert_eq!(slicer.name_of(0), "old");
+    assert_eq!(slicer.name_of(1), "project");
 }
