@@ -58,7 +58,11 @@ impl ExternalEditor {
     pub fn install_decay_support(&self) -> Result<(), ExternalEditorError> {
         let vsix = decay_vsix_path().ok_or(ExternalEditorError::DecayVsixNotFound)?;
         let status = Command::new(&self.program)
-            .args(["--install-extension", vsix.to_string_lossy().as_ref(), "--force"])
+            .args([
+                "--install-extension",
+                vsix.to_string_lossy().as_ref(),
+                "--force",
+            ])
             .status()?;
         if status.success() {
             Ok(())

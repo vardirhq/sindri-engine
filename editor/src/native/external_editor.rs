@@ -23,7 +23,9 @@ impl EditorApp {
             // authoring experience, not for a scavenger hunt through extension
             // artifacts. Keep the companion tooling matched to the editor by
             // installing the VSIX shipped with this Sindri build when needed.
-            if source.extension().is_some_and(|extension| extension == "decay")
+            if source
+                .extension()
+                .is_some_and(|extension| extension == "decay")
                 && !editor.has_decay_support()?
             {
                 editor.install_decay_support()?;
