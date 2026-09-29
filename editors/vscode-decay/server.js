@@ -45,7 +45,7 @@ function serverCommand(configured, environment = process.env, extensionPath, pla
 }
 
 function watchedFiles() {
-  return '**/*.{decay,scene.json,prefab.json,profile.json,ogg,wav,mp3}';
+  return '**/*.{decay,scene,scene.json,prefab.json,profile.json,ogg,wav,mp3}';
 }
 
 module.exports = {
