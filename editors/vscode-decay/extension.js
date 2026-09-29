@@ -6,7 +6,7 @@ let client;
 
 async function activate(context) {
   const configured = vscode.workspace.getConfiguration('decay').get('server.path', 'decay-lsp');
-  const command = serverCommand(configured);
+  const command = serverCommand(configured, process.env, context.extensionPath);
   const activeFile = vscode.window.activeTextEditor?.document.fileName;
   const root = projectRoot(activeFile);
   const workspaceFolder = root
@@ -35,7 +35,7 @@ async function activate(context) {
     const detail = error instanceof Error ? error.message : String(error);
     vscode.window.showErrorMessage(
       `Decay language server could not start (${command}): ${detail}. ` +
-      'Build decay-lsp or set decay.server.path.'
+      'Reinstall the Sindri Decay extension, or override the server with SINDRI_DECAY_LSP / decay.server.path.'
     );
   }
 }
