@@ -25,4 +25,19 @@ impl EditorApp {
             Err(error) => self.report(error.to_string()),
         }
     }
+
+    pub(super) fn install_decay_editor_support(&mut self) {
+        let result = ExternalEditor::detect().and_then(|editor| {
+            if editor.has_decay_support()? {
+                return Ok(false);
+            }
+            editor.install_decay_support()?;
+            Ok(true)
+        });
+        match result {
+            Ok(true) => self.console.info("Installed Sindri Decay support in VS Code"),
+            Ok(false) => self.console.info("Sindri Decay support is already installed in VS Code"),
+            Err(error) => self.report(error.to_string()),
+        }
+    }
 }
