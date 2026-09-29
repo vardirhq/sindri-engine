@@ -49,27 +49,16 @@ jobs:
         run: wasm-pack build games/voxel-lab --target web --release --out-dir pkg $WASM_OPT
       - name: Assemble Sindri site
         run: |
-          # Assemble into an empty directory. `target/` is restored by
-          # `rust-cache`, so `target/pages` can arrive already populated by an
-          # earlier run -- and then `cp -R site/screenshots
-          # target/pages/assets/screenshots` copies *into* the existing
-          # directory instead of creating it, leaving every screenshot one
-          # level too deep and the landing page pointing at nothing. A stale
-          # tree is the worse half of it: a deleted asset would keep being
-          # served because nothing here removes what it no longer copies.
           rm -rf target/pages
           mkdir -p target/pages/assets
           cp site/index.html target/pages/index.html
           cp site/site.css target/pages/assets/site.css
-          # The screenshots the site draws on. They are captured by the
-          # binaries in this repository rather than grabbed by hand, so the
-          # page shows what the engine draws today rather than what it drew
-          # whenever somebody last remembered to take a picture.
           cp -R site/screenshots target/pages/assets/screenshots
           # Every example is exported through the real project pipeline. This
           # keeps Pages honest about exactly what desktop/browser exports ship.
           for project in \
             "game:causeway" \
+            "games/flappy:flappy" \
             "games/orbital-baked:orbital-baked" \
             "games/shapes-lab:shapes-lab" \
             "games/weave-poc:weave-poc" \
@@ -77,18 +66,9 @@ jobs:
             "games/scorchball:scorchball"; do
             src="${project%%:*}"
             route="${project##*:}"
-            # The base path follows the repository's name, which is the path
-            # Pages serves it from: a hard-coded one broke every example's host
-            # import when the repository was renamed.
-            # The commit is the build id: it versions the host's URL, so a
-            # returning device cannot run a cached host against fresh assets,
-            # and it is printed in the corner of the page so a fault report can
-            # name the build it came from.
             cargo run --quiet --package sindri-export --bin sindri-export -- \
               "$src" "target/pages/examples/$route" --base "/${GITHUB_REPOSITORY#*/}/examples/$route/" \
               --build-id "${GITHUB_SHA:0:7}"
-            # One host serves every project: it reads the manifest rather than
-            # carrying a list of one game's assets.
             mkdir -p "target/pages/examples/$route/pkg"
             cp -R game/pkg/. "target/pages/examples/$route/pkg/"
           done
@@ -100,16 +80,12 @@ jobs:
       - name: Verify assembled routes
         run: |
           test -f target/pages/index.html
-          # Every internal reference the landing page makes, resolved against
-          # what was actually assembled. A renamed screenshot or a doc slug
-          # that moved leaves a broken image or a 404 that looks fine in the
-          # build log and only shows up to a visitor.
           python - <<'CHECK'
           import pathlib, re, sys
 
           root = pathlib.Path("target/pages")
           refs = sorted(set(re.findall(
-              r'(?:href|src)="\./([^"#]+)"', (root / "index.html").read_text())))
+              r'(?:href|src)="./([^"#]+)"', (root / "index.html").read_text())))
           missing = [
               ref for ref in refs
               if not (root / ref).is_file() and not (root / ref / "index.html").is_file()
@@ -120,7 +96,7 @@ jobs:
           CHECK
           test -f target/pages/docs/scripting/index.html
           test -f target/pages/docs/language/index.html
-          for route in causeway orbital-baked shapes-lab weave-poc platformer scorchball; do
+          for route in causeway flappy orbital-baked shapes-lab weave-poc platformer scorchball; do
             test -f "target/pages/examples/$route/index.html"
             test -f "target/pages/examples/$route/assets/sindri.manifest.json"
             test -f "target/pages/examples/$route/pkg/sindri_causeway.js"
@@ -132,9 +108,6 @@ jobs:
           test -f target/pages/examples/voxel-lab/pkg/voxel_lab_bg.wasm
           grep -q 'voxel-stats' target/pages/examples/voxel-lab/index.html
           grep -q '"kind": "prefab"' target/pages/examples/orbital-baked/assets/sindri.manifest.json
-          # The baked variant ships sprite sheets rather than vector shapes, so
-          # a route that exported without them is broken in the one way that
-          # matters and still passes every check above.
           grep -q 'player.sheet.json' target/pages/examples/orbital-baked/assets/sindri.manifest.json
           grep -q '"kind": "script"' target/pages/examples/shapes-lab/assets/sindri.manifest.json
           grep -q '"demo.weave"' target/pages/examples/weave-poc/assets/sindri.manifest.json
