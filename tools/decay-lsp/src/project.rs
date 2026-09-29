@@ -1,6 +1,7 @@
 use std::{collections::BTreeSet, fs, path::Path};
 
 use serde_json::Value;
+use sindri_core::{LEGACY_SCENE_SUFFIX, SCENE_SUFFIX};
 
 #[derive(Default)]
 pub(crate) struct ProjectIndex {
@@ -45,7 +46,7 @@ impl ProjectIndex {
             if matches!(extension.as_deref(), Some("wav" | "ogg" | "mp3" | "flac")) {
                 self.audio_assets.insert(relative.clone());
             }
-            if !relative.ends_with(".scene.json") {
+            if !relative.ends_with(SCENE_SUFFIX) && !relative.ends_with(LEGACY_SCENE_SUFFIX) {
                 continue;
             }
             let Ok(text) = fs::read_to_string(&path) else {
