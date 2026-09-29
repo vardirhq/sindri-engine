@@ -118,7 +118,7 @@ script Spine {
         if this.phase != this.previous_phase {
             this.previous_phase = this.phase;
             Effects.burst(this.entity);
-            Game.screen_trauma = max(Game.screen_trauma, 0.35);
+            Camera.impact(0.35);
             Audio.play("audio/boss.wav", 0.5);
             if this.phase == 2.0 { Animation.play(this.entity, "armour8"); }
             if this.phase == 3.0 { Animation.play(this.entity, "armour5"); }
@@ -231,7 +231,7 @@ script Spine {
             World.set_property(wave, "damage", this.death_burst_damage);
         }
         Effects.burst(this.entity);
-        Game.screen_trauma = max(Game.screen_trauma, 0.95);
+        Camera.impact(0.95);
         Audio.play("audio/kill.wav", 0.65);
         Game.kills = Game.kills + 1.0;
         Game.score = Game.score + 900.0;

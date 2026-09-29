@@ -68,7 +68,7 @@ script Charger {
             this.transform.scale.y = 0.38 * (1.0 + charge * 0.22);
             if this.timer <= 0.0 {
                 this.phase = 2.0; this.timer = 0.55;
-                Game.screen_trauma = max(Game.screen_trauma, 0.16);
+                Camera.impact(0.16);
                 if far > 0.001 { this.dash_x = dx / far; this.dash_y = dy / far; }
             }
         } else {
@@ -134,7 +134,7 @@ script Charger {
 
     fn die() {
         burst_on_death(); Effects.burst(this.entity); Audio.play("audio/kill.wav", 0.3);
-        Game.screen_trauma = max(Game.screen_trauma, 0.12);
+        Camera.impact(0.12);
         Game.kills = Game.kills + 1.0; Game.score = Game.score + this.worth * 10.0;
         let drop = World.spawn(this.core); drop.transform.position.x = this.transform.position.x; drop.transform.position.y = this.transform.position.y; World.set_property(drop, "worth", this.worth);
         let roll = World.spawn(this.drop_roll); roll.transform.position.x = this.transform.position.x; roll.transform.position.y = this.transform.position.y; World.set_property(roll, "elite", this.elite);

@@ -29,7 +29,7 @@ script Shockwave {
                 if crossed(distance, previous) {
                     this.hit_player = true;
                     Game.player_damage_taken = max(Game.player_damage_taken, this.damage);
-                    Game.screen_trauma = max(Game.screen_trauma, 0.28);
+                    Camera.impact(0.28);
                 }
             }
         }

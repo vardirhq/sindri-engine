@@ -65,7 +65,6 @@ state Game {
     var request_start: f32 = 0.0;
     var run_state: f32 = 0.0;
     var score: f32 = 0.0;
-    var screen_trauma: f32 = 0.0;
     var sector: f32 = 1.0;
     var shield_impact: f32 = 0.0;
     var shots: f32 = 1.0;

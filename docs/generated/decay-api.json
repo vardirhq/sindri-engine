@@ -668,6 +668,18 @@
           "returns": "unit"
         },
         {
+          "description": "Shakes the authored behavior camera at least this hard, up to 1: a smaller impact while a bigger one is still shaking changes nothing, so many small hits in a frame do not add up to the biggest shake.",
+          "kind": "function",
+          "name": "impact",
+          "parameter_names": [
+            "amount"
+          ],
+          "parameters": [
+            "f32"
+          ],
+          "returns": "unit"
+        },
+        {
           "description": "Sets the maximum follow speed of the authored behavior camera.",
           "kind": "function",
           "name": "max_speed",

@@ -99,6 +99,17 @@ fn a_projectile_leaves_visuals_outside_the_entity_graph() {
     );
 }
 
+/// How hard the engine's camera is shaking, from 0 to 1.
+fn camera_trauma(run: &orbital_last_stand::Run) -> f64 {
+    let camera = run.find("Camera").expect("the camera exists");
+    run.world
+        .get(camera)
+        .expect("the camera remains")
+        .components["sindri.camera.behavior"]["shake"]["trauma"]
+        .as_f64()
+        .expect("the camera has a shake")
+}
+
 #[test]
 fn camera_trauma_is_strong_then_gets_out_of_the_way() {
     let mut run = running();
@@ -106,7 +117,7 @@ fn camera_trauma_is_strong_then_gets_out_of_the_way() {
     disable(&mut run, "Player");
     let camera = run.find("Camera").expect("the camera exists");
 
-    run.set_board("screen_trauma", 0.8);
+    assert!(sindri_scene::raise_camera_trauma(&mut run.world, 0.8));
     step(&mut run);
     let shaken = run
         .world
@@ -126,7 +137,7 @@ fn camera_trauma_is_strong_then_gets_out_of_the_way() {
         .unwrap()
         .position;
     assert!(settled[0].abs() + settled[1].abs() < 0.001);
-    assert_eq!(run.board("screen_trauma"), 0.0);
+    assert_eq!(camera_trauma(&run), 0.0);
 }
 
 #[test]
@@ -141,5 +152,5 @@ fn unlocking_a_synergy_gets_a_three_ring_reveal() {
     step(&mut run);
 
     assert_eq!(spectacles(&run), before + 3);
-    assert!(run.board("screen_trauma") > 0.0);
+    assert!(camera_trauma(&run) > 0.0);
 }

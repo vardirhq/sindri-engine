@@ -141,6 +141,15 @@ pub struct CameraShake {
     pub frequency: f32,
     #[serde(default)]
     pub phase: f32,
+    /// The shake offset added to the camera's position last frame, which the
+    /// next frame takes off again before moving the camera.
+    ///
+    /// Kept rather than worked out again from `trauma` and `phase`, because
+    /// gameplay changes `trauma` between frames: working the old offset out
+    /// from the new trauma took off an offset that was never added, and every
+    /// impact left the camera that much further from where it belonged.
+    #[serde(default)]
+    pub offset: [f32; 2],
 }
 
 const fn default_shake_strength() -> f32 {
@@ -161,6 +170,7 @@ impl Default for CameraShake {
             decay: default_shake_decay(),
             frequency: default_shake_frequency(),
             phase: 0.0,
+            offset: [0.0; 2],
         }
     }
 }
@@ -236,7 +246,7 @@ fn update_camera_behavior(
     let Some(current) = world.get(entity).and_then(|data| data.transform_3d) else {
         return;
     };
-    let previous_shake = shake_offset(&behavior.shake);
+    let previous_shake = behavior.shake.offset;
     let mut position = current.position;
     position[0] -= previous_shake[0];
     position[1] -= previous_shake[1];
@@ -244,6 +254,7 @@ fn update_camera_behavior(
     apply_confine(behavior.confine, &mut position);
     advance_shake(&mut behavior.shake, dt);
     let shake = shake_offset(&behavior.shake);
+    behavior.shake.offset = shake;
     position[0] += shake[0];
     position[1] += shake[1];
 
@@ -379,6 +390,37 @@ mod behavior_tests {
         let position = data.transform_3d.unwrap().position;
         assert!((position[0] - (2.0 + expected[0])).abs() < TOLERANCE);
         assert!((position[1] - (-1.0 + expected[1])).abs() < TOLERANCE);
+    }
+
+    /// Gameplay raises trauma between frames. The camera must still come back
+    /// to exactly where it was once the shake has faded.
+    #[test]
+    fn trauma_raised_between_frames_leaves_no_drift() {
+        const TOLERANCE: f32 = 1.0e-6;
+
+        let mut world = World::default();
+        let mut camera = entity([2.0, -1.0, 5.0]);
+        camera.components.insert(
+            CameraComponent::TYPE_NAME.into(),
+            json!({ "projection": "orthographic", "vertical_size": 8.0, "near": 0.1, "far": 100.0 }),
+        );
+        camera.components.insert(
+            CameraBehaviorComponent::TYPE_NAME.into(),
+            json!({ "shake": { "strength": 0.5, "decay": 2.0, "frequency": 57.0 } }),
+        );
+        let camera = world.spawn(camera);
+        for frame in 0..120 {
+            if frame % 7 == 0 && frame < 60 {
+                assert!(crate::raise_camera_trauma(&mut world, 0.9));
+            }
+            if frame % 11 == 0 && frame < 60 {
+                assert!(add_camera_trauma(&mut world, 0.3));
+            }
+            update_camera_behaviors(&mut world, 1.0 / 60.0);
+        }
+        let position = world.get(camera).unwrap().transform_3d.unwrap().position;
+        assert!((position[0] - 2.0).abs() < TOLERANCE, "{position:?}");
+        assert!((position[1] + 1.0).abs() < TOLERANCE, "{position:?}");
     }
 
     #[test]

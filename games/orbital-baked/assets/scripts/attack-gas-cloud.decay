@@ -38,7 +38,7 @@ script GasCloud {
             let dy = player.transform.position.y - this.transform.position.y;
             if dx * dx + dy * dy <= this.current_radius * this.current_radius {
                 Game.player_damage_taken = max(Game.player_damage_taken, this.damage);
-                Game.screen_trauma = max(Game.screen_trauma, 0.12);
+                Camera.impact(0.12);
             }
             damage_targets(this.damage);
             this.tick = this.tick_gap;
@@ -73,7 +73,7 @@ script GasCloud {
         this.transform.scale.x = blast * 2.0;
         this.transform.scale.y = blast * 2.0;
         Effects.burst(this.entity);
-        Game.screen_trauma = max(Game.screen_trauma, 0.34);
+        Camera.impact(0.34);
         Audio.play("audio/boss.wav", 0.24);
         World.despawn(this.entity);
     }

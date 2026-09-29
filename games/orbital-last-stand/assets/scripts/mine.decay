@@ -57,7 +57,7 @@ script Mine {
         }
         World.set_property(wave, "damage", this.damage);
         Effects.burst(this.entity);
-        Game.screen_trauma = max(Game.screen_trauma, 0.42);
+        Camera.impact(0.42);
         World.despawn(this.entity);
     }
 }

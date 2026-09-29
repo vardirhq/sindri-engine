@@ -186,7 +186,7 @@ script Mirror {
             World.set_property(wave, "damage", this.death_burst_damage);
         }
         Effects.burst(this.entity);
-        Game.screen_trauma = max(Game.screen_trauma, 0.9);
+        Camera.impact(0.9);
         Audio.play("audio/kill.wav", 0.6);
         Game.kills = Game.kills + 1.0;
         Game.score = Game.score + 66.0 * 10.0;

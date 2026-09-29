@@ -244,6 +244,9 @@ impl Run {
             notes.push(error.to_string());
         }
         self.scripts.take_audio_commands();
+        // After the scripts, so an impact a script made this step shakes this
+        // step's frame.
+        sindri_scene::update_camera_behaviors(&mut self.world, delta);
         self.elapsed += delta;
         // At the end rather than the beginning, because an edge is delivered by
         // the step that follows the event: clearing at the top of a step would

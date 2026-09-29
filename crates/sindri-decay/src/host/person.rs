@@ -57,7 +57,7 @@ impl WorldHost<'_> {
             Ok(as_f32(value))
         };
         let changed = match call {
-            CameraCall::AddTrauma => {
+            CameraCall::AddTrauma | CameraCall::Impact => {
                 let amount = numeric(0)?;
                 if amount < 0.0 {
                     return Err(RuntimeError::Host(format!(
@@ -65,7 +65,11 @@ impl WorldHost<'_> {
                         path.dotted()
                     )));
                 }
-                sindri_scene::add_camera_trauma(self.world, amount)
+                if call == CameraCall::Impact {
+                    sindri_scene::raise_camera_trauma(self.world, amount)
+                } else {
+                    sindri_scene::add_camera_trauma(self.world, amount)
+                }
             }
             CameraCall::Follow => {
                 let target = self.entity_argument(path, args, 0, "the follow target")?;
@@ -87,8 +91,10 @@ impl WorldHost<'_> {
                 [numeric(2)?, numeric(3)?],
             ),
             CameraCall::ClearBounds => sindri_scene::clear_camera_bounds(self.world),
+            // Written `Camera.shake(strength, frequency, decay)`, as it is
+            // documented; the engine takes decay before frequency.
             CameraCall::Shake => {
-                sindri_scene::set_camera_shake(self.world, numeric(0)?, numeric(1)?, numeric(2)?)
+                sindri_scene::set_camera_shake(self.world, numeric(0)?, numeric(2)?, numeric(1)?)
             }
         };
         if !changed {

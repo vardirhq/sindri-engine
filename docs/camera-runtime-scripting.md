@@ -6,6 +6,7 @@ These calls operate on the single authored `sindri.camera` that carries `sindri.
 
 | Call | Returns |
 | --- | --- |
+| `Camera.impact(amount)` | unit |
 | `Camera.follow(target)` | unit |
 | `Camera.clear_follow()` | unit |
 | `Camera.follow_offset(x, y, z)` | unit |
@@ -22,6 +23,6 @@ These calls operate on the single authored `sindri.camera` that carries `sindri.
 
 `Camera.bounds(min_x, min_y, max_x, max_y)` changes the confinement rectangle and `Camera.clear_bounds()` removes confinement. Follow still runs before confinement, and shake still runs after confinement.
 
-`Camera.shake(strength, frequency, decay)` changes the authored shake behavior. `Camera.add_trauma(amount)`, documented in the main scripting contract, remains the event-style operation for triggering that shake.
+`Camera.shake(strength, frequency, decay)` changes the authored shake behavior. `Camera.add_trauma(amount)`, documented in the main scripting contract, remains the event-style operation for triggering that shake: each call adds, up to 1. `Camera.impact(amount)` raises trauma to at least `amount` instead, so a smaller hit while a bigger one is still shaking changes nothing. Use it where many hits can land in one frame — a spray of bullets, a chain of arcs — and adding would pin the camera at its hardest shake.
 
 The editor-authored values are the initial state. Runtime calls change the live camera behavior for the rest of play unless another script changes them again. Stopping play restores the authored scene in the normal editor lifecycle.

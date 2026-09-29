@@ -60,7 +60,7 @@ script HostileMine {
         this.transform.scale.x = this.blast_radius * 2.0;
         this.transform.scale.y = this.blast_radius * 2.0;
         Effects.burst(this.entity);
-        Game.screen_trauma = max(Game.screen_trauma, 0.38);
+        Camera.impact(0.38);
         Audio.play("audio/boss.wav", 0.32);
         World.despawn(this.entity);
     }

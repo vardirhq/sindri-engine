@@ -348,7 +348,7 @@ script SpineSegment {
         }
 
         Effects.burst(this.entity);
-        Game.screen_trauma = max(Game.screen_trauma, 0.22);
+        Camera.impact(0.22);
         Audio.play("audio/kill.wav", 0.25);
         World.despawn(this.entity);
     }
