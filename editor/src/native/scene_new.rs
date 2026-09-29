@@ -10,7 +10,7 @@
 use std::path::{Path, PathBuf};
 
 use sindri_core::SceneComponent;
-use sindri_core::{SceneDocument, SceneEntity, SceneEntityId, SceneMetadata, Transform3D};
+use sindri_core::{LEGACY_SCENE_SUFFIX, SCENE_SUFFIX, SceneDocument, SceneEntity, SceneEntityId, SceneMetadata, Transform3D};
 use sindri_scene::{LightComponent, SceneExtractor, default_sun_transform};
 
 use crate::scene_file::{SceneFile, scene_path};
@@ -20,17 +20,6 @@ use super::EditorApp;
 use super::hierarchy::row::humanize;
 use super::runtime::PLAYING_TIP;
 
-/// What a brand-new scene contains.
-///
-/// One world camera, a sun, and a name taken from the file. A scene with no camera is
-/// a legal scene and a black Game view — the extract draws the player's view
-/// through exactly one authored world camera — and "why is the game view empty"
-/// is not the first question a new project should raise. Its transform is the
-/// one every shipped scene uses: back along +Z far enough to see the origin.
-///
-/// The camera's payload comes from the registry rather than from a literal
-/// here, for the same reason every other component the editor creates does: a
-/// second copy of a default is a copy that drifts.
 pub(super) fn blank_scene(scene: &SceneExtractor, path: &Path) -> SceneDocument {
     let mut camera =
         SceneEntity::new(SceneEntityId::new("world-camera").expect("a literal ID is not empty"));
@@ -44,9 +33,6 @@ pub(super) fn blank_scene(scene: &SceneExtractor, path: &Path) -> SceneDocument 
             .components
             .insert(CAMERA_COMPONENT.to_owned(), payload.clone());
     }
-    // And a sun, as a new scene in most engines has: anything 3D put in the
-    // scene is lit from the first frame, and the light is an entity the author
-    // can see and turn rather than a setting they have to find.
     let mut sun = SceneEntity::new(SceneEntityId::new("sun").expect("a literal ID is not empty"));
     sun.name = Some("Sun".to_owned());
     sun.transform_3d = Some(default_sun_transform());
@@ -67,29 +53,24 @@ pub(super) fn blank_scene(scene: &SceneExtractor, path: &Path) -> SceneDocument 
     }
 }
 
-/// What a scene made at this path is called.
-///
-/// `SceneMetadata.name` is a real field that round-trips through a save — the
-/// shipped Gather scene is called "Gather" — and nothing in the editor shows or
-/// edits it yet. Deriving it from the file name is what stops a new scene being
-/// the one document that has none.
 fn scene_name(path: &Path) -> String {
     let file = path
         .file_name()
         .map_or_else(String::new, |name| name.to_string_lossy().into_owned());
-    let stem = file
-        .strip_suffix(".scene.json")
-        .or_else(|| file.strip_suffix(".json"))
-        .unwrap_or(&file);
+    let lower = file.to_lowercase();
+    let stem = if lower.ends_with(LEGACY_SCENE_SUFFIX) {
+        &file[..file.len() - LEGACY_SCENE_SUFFIX.len()]
+    } else if lower.ends_with(SCENE_SUFFIX) {
+        &file[..file.len() - SCENE_SUFFIX.len()]
+    } else if lower.ends_with(".json") {
+        &file[..file.len() - ".json".len()]
+    } else {
+        &file
+    };
     humanize(stem)
 }
 
 impl EditorApp {
-    /// Writes the world somewhere else, and works there from now on.
-    ///
-    /// The one way a detached scene becomes a file: started somewhere the
-    /// default scene is not, the editor opened on nothing with Save disabled
-    /// and no way to make it possible.
     pub(super) fn save_as(&mut self) {
         if !self.authoring_enabled() {
             self.report(format!("Not saved. {PLAYING_TIP}"));
@@ -105,27 +86,14 @@ impl EditorApp {
         self.saved_revision = self.history.revision();
         self.notice = None;
         self.console.info(format!("Saved {}", self.file.label()));
-        // The scene lives in a new directory, so what is beside it, what the
-        // editor reopens on, and what its assets resolve against all move with
-        // it. A fork saved into another project that then read the old one's
-        // textures would be a scene that looks right only in the editor.
         self.refresh_project();
         self.remember_open_scene();
         self.reload_textures();
         self.reload_scripts();
     }
 
-    /// Makes a scene file and opens it.
-    ///
-    /// A scene has to exist before the editor can do anything with it, so
-    /// until this the editor could only continue a project someone else had
-    /// started. It is written to disk and then opened through the ordinary
-    /// path rather than adopted in memory: a new scene proves it loads before
-    /// anyone starts working in it, and everything a scene brings with it —
-    /// the project beside it, the textures, the scripts — is arranged once, by
-    /// the code that already knows how.
     pub(super) fn new_scene(&mut self) {
-        let Some(path) = self.ask_for_scene_path("untitled.scene.json") else {
+        let Some(path) = self.ask_for_scene_path("untitled.scene") else {
             return;
         };
         let document = blank_scene(&self.scene, &path);
@@ -134,20 +102,15 @@ impl EditorApp {
             return;
         }
         self.open_path(&path);
-        // After the open, so the project this scene belongs to has been worked
-        // out by the code that already knows how rather than guessed at here.
         self.nominate_if_unclaimed(&path);
     }
 
-    /// Asks where a scene should go, starting where the open one is.
     fn ask_for_scene_path(&self, suggested: &str) -> Option<PathBuf> {
         rfd::FileDialog::new()
-            .add_filter("Sindri scene", &["json"])
+            .add_filter("Sindri scene", &["scene"])
             .set_directory(self.scene_directory())
             .set_file_name(suggested)
             .save_file()
-            // A save box takes a name rather than an extension, and a scene the
-            // browser can list is `*.scene.json`.
             .map(|chosen| scene_path(&chosen))
     }
 }
