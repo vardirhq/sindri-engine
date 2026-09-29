@@ -1,7 +1,7 @@
 # Exporting a project to the web
 
 ```bash
-cargo run -p sindri-export --bin sindri-export -- game dist --base /sindri2/
+cargo run -p sindri-export --bin sindri-export -- game dist --base /sindri-engine/
 wasm-pack build game --target web --out-dir pkg
 cp -R game/pkg/. dist/pkg/
 ```
@@ -71,7 +71,7 @@ the browser host in beside each one:
 ```bash
 cargo run -p sindri-export --bin sindri-export -- \
   games/orbital-baked target/pages/examples/orbital-baked \
-  --base /sindri2/examples/orbital-baked/
+  --base /sindri-engine/examples/orbital-baked/
 cp -R game/pkg/. target/pages/examples/orbital-baked/pkg/
 ```
 

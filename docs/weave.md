@@ -10,7 +10,7 @@ resolves a disposable presentation copy of an authored `World`; the source
 world is never mutated.
 
 The browser proof lives at `games/weave-poc` and is deployed to
-`/sindri2/examples/weave-poc/`.
+`/sindri-engine/examples/weave-poc/`.
 
 ## Documentation map
 

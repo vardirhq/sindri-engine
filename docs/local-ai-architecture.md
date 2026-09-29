@@ -92,14 +92,14 @@ the manifest schema being settled.
 
 Relevant current references:
 
-- [Sindri repository](https://github.com/vardirhq/sindri2)
-- [Roadmap](https://github.com/vardirhq/sindri2/blob/main/ROADMAP.md)
-- [Editor architecture](https://github.com/vardirhq/sindri2/blob/main/docs/editor-architecture.md)
-- [`WorldCommand`](https://github.com/vardirhq/sindri2/blob/main/crates/sindri-core/src/command/world_command.rs)
-- [`ComponentSchemaRegistry`](https://github.com/vardirhq/sindri2/blob/main/crates/sindri-core/src/component/mod.rs)
-- [Decay language reference](https://github.com/vardirhq/sindri2/blob/main/decay/LANGUAGE.md)
-- [Scripting contract](https://github.com/vardirhq/sindri2/blob/main/docs/scripting.md)
-- [Generated capability documents](https://github.com/vardirhq/sindri2/tree/main/docs/generated)
+- [Sindri repository](https://github.com/vardirhq/sindri-engine)
+- [Roadmap](https://github.com/vardirhq/sindri-engine/blob/main/ROADMAP.md)
+- [Editor architecture](https://github.com/vardirhq/sindri-engine/blob/main/docs/editor-architecture.md)
+- [`WorldCommand`](https://github.com/vardirhq/sindri-engine/blob/main/crates/sindri-core/src/command/world_command.rs)
+- [`ComponentSchemaRegistry`](https://github.com/vardirhq/sindri-engine/blob/main/crates/sindri-core/src/component/mod.rs)
+- [Decay language reference](https://github.com/vardirhq/sindri-engine/blob/main/decay/LANGUAGE.md)
+- [Scripting contract](https://github.com/vardirhq/sindri-engine/blob/main/docs/scripting.md)
+- [Generated capability documents](https://github.com/vardirhq/sindri-engine/tree/main/docs/generated)
 
 The order matters. Adding a chat panel before these foundations would recreate the legacy editor's strongest weakness: a model-facing description of Sindri that can silently drift away from what the editor and runtime actually support.
 

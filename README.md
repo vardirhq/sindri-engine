@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="https://github.com/vardirhq/sindri2/blob/main/docs%2Ffile_000000005bd882118094c913acb7257c.png" alt="Sindri Engine" width="680">
+  <img src="https://github.com/vardirhq/sindri-engine/blob/main/docs%2Ffile_000000005bd882118094c913acb7257c.png" alt="Sindri Engine" width="680">
 </p>
 
 <p align="center"><strong>A Rust-powered 2D + 3D game engine with a native visual editor, the Decay gameplay language, and responsive Weave UI.</strong></p>

@@ -146,7 +146,7 @@ requirement.
 - [x] Test missing canvas, WebGPU, and adapter messaging in the exported-page smoke suite
 - [ ] Test canvas selector/element validation
 - [ ] Test resize, device-pixel ratio, visibility pause, and teardown
-- [x] Test and deploy static hosting under GitHub Pages' non-root `/sindri2/` base path
+- [x] Test and deploy static hosting under GitHub Pages' non-root `/sindri-engine/` base path
 
 Exit gate: a Sindri project can be exported to static files, load its assets
 through the real pipeline, and run the same Decay gameplay and scene in a

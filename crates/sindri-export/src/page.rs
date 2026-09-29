@@ -227,7 +227,7 @@ mod build_stamp_tests {
         // Both, because the query on the module does not reach the file the
         // module fetches: versioning only the JavaScript leaves the actual code
         // cacheable, which is the whole fault this exists to close.
-        let page = page_for_host("Orbital", "/sindri2/", "sindri_causeway", "a1b2c3d");
+        let page = page_for_host("Orbital", "/sindri-engine/", "sindri_causeway", "a1b2c3d");
         assert!(
             page.contains("./pkg/sindri_causeway.js?v=a1b2c3d"),
             "{page}"

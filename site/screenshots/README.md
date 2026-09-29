@@ -63,9 +63,9 @@ runs a project in a browser. Export the project, then point the smoke at it:
 
 ```
 cargo run -p sindri-export --bin sindri-export -- \
-  games/shapes-lab target/dist/shapes-lab --base /sindri2/
+  games/shapes-lab target/dist/shapes-lab --base /sindri-engine/
 cp -R game/pkg/. target/dist/shapes-lab/pkg/
-SINDRI_EXPECT_ASSETS=1 SINDRI_BASE_PATH=/sindri2/ \
+SINDRI_EXPECT_ASSETS=1 SINDRI_BASE_PATH=/sindri-engine/ \
   SINDRI_VIEWPORT_WIDTH=1440 SINDRI_VIEWPORT_HEIGHT=900 \
   node scripts/browser/smoke.mjs target/dist/shapes-lab \
   site/screenshots/shapes-lab.png

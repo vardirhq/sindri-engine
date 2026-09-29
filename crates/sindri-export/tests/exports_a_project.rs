@@ -147,7 +147,7 @@ fn a_second_export_replaces_the_first() {
 /// A page served from a project subpath has to resolve its own host.
 #[test]
 fn the_page_carries_the_base_path_it_was_given() {
-    let (scratch, _) = exported("base", "/sindri2/");
+    let (scratch, _) = exported("base", "/sindri-engine/");
     let page = std::fs::read_to_string(scratch.0.join("index.html")).expect("a page");
-    assert!(page.contains(r#"<base href="/sindri2/">"#), "{page}");
+    assert!(page.contains(r#"<base href="/sindri-engine/">"#), "{page}");
 }
