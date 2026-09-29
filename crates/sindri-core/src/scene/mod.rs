@@ -18,7 +18,8 @@ mod loaded;
 mod tests;
 
 pub use document::{
-    SCENE_FORMAT_VERSION, SceneDocument, SceneEntity, SceneEntityId, SceneMetadata,
+    LEGACY_SCENE_SUFFIX, SCENE_FORMAT_VERSION, SCENE_SUFFIX, SceneDocument, SceneEntity,
+    SceneEntityId, SceneMetadata,
 };
 pub use error::{SceneError, SceneJsonError};
 pub use loaded::{LoadedScenes, SceneSwitchError};
