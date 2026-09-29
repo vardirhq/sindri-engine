@@ -46,6 +46,7 @@ This is the most important Sindri/Decay distinction.
 | `const LIMIT: f32 = 3.0;` / `shared const VIEW_SIZE: f32 = 11.0;` at the top of a file | A value worked out when the project compiles, the same everywhere; a scene cannot tune it | Any time |
 | `struct Card { name: String, weight: f32 = 1.0 }`, `Card(name: "Arc")`, `card.weight` | Values that belong together, as one; copied where assigned; a field with a default may be left out | Any time |
 | `fn heavier(other: Card) -> bool { return this.weight > other.weight; }` after a struct's fields, `card.heavier(best)` | A function asked of one value; `this` is a copy, so return a changed one rather than writing `this.x` | Any time |
+| `fn find() -> f32? { ... return null; }`, `x ?? 0.0`, `if x == null { return; }` | A value that may be missing, instead of `-1`; used as its type only after a fallback or a check on a `let`/parameter | Any time |
 | `var m: Map<String, f32> = [:];`, `m["arc"] = 1.0`, `m.get(k, 0.0)`, `for k in m.keys()` | Values found by key, in the order keys were first set; `m[k]` for a key it must have | Any time |
 | `var xs: List<f32> = [];`, `xs.push(v)`, `for i in 0..n` | A list the script owns, changed in place; a range walked without building one | Any time |
 | `"Score " + score`, `s.contains("x")`, `s.slice(0, 3)` | Joins text with numbers, flags, vectors and variants; asks text by character | Any time |
@@ -53,7 +54,7 @@ This is the most important Sindri/Decay distinction.
 | `enum Phase { Lobby, Play }` in any file, `match p { Phase.Lobby => { } _ => { } }`, `let s = match p { Phase.Lobby => "wait", _ => "go" };` | A named set of values in place of numbers; `match` must cover every variant or end with `_`, and gives a value where one goes | Any time |
 | `Game.field` (declared with `state Game { var field: f32 = 0.0; }`) | Reads or writes a value the whole game shares, checked | Any time |
 
-Prefer the typed forms in the last fourteen rows: a misspelt name or a wrong value
+Prefer the typed forms in the last fifteen rows: a misspelt name or a wrong value
 is a compile error rather than a silent fallback.
 
 Do not use `set_property` as a setter for a running script:

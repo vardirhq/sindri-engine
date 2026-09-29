@@ -77,17 +77,24 @@ script UpgradeChooser {
         let pool = Game.module_pool;
         var taken: List<f32> = [];
         for slot in 0..this.slots.length {
-            var index = -1.0;
-            if slot < 3.0 || offer_count() > 3.0 { index = choose(pool, taken); }
-            taken.push(index);
+            let index = pick(slot, pool, taken);
+            if index != null { taken.push(index); }
             offer(slot, index);
         }
     }
 
-    fn offer(slot: f32, index: f32) {
-        Game.set("offer_" + slot, index);
+    // The module for this slot, or none: the fourth slot is empty unless
+    // Second Opinion asks for it, and any slot is when nothing is left.
+    fn pick(slot: f32, pool: f32, taken: List<f32>) -> f32? {
+        if slot < 3.0 || offer_count() > 3.0 { return choose(pool, taken); }
+        return null;
+    }
+
+    fn offer(slot: f32, index: f32?) {
+        // The board keeps -1 for an empty slot, which module.decay reads.
+        Game.set("offer_" + slot, index ?? -1.0);
         let shown = this.slots[slot];
-        if index < 0.0 { shown.hide(); return; }
+        if index == null { shown.hide(); return; }
         shown.show(
             Profiles.text_at(this.catalog, "modules", index, "name", "Unknown Module"),
             Profiles.text_at(this.catalog, "modules", index, "description", "")
@@ -99,7 +106,7 @@ script UpgradeChooser {
         return this.offers;
     }
 
-    fn choose(pool: f32, taken: List<f32>) -> f32 {
+    fn choose(pool: f32, taken: List<f32>) -> f32? {
         var total: f32 = 0.0;
         let count = Profiles.count(this.catalog, "modules");
         for index in 0..count {
@@ -107,7 +114,7 @@ script UpgradeChooser {
                 total += Profiles.number_at(this.catalog, "modules", index, "weight", 1.0);
             }
         }
-        if total <= 0.0 { return -1.0; }
+        if total <= 0.0 { return null; }
         var cursor = Random.range(0.0, total);
         for index in 0..count {
             if available(index, pool, taken) {
@@ -118,11 +125,11 @@ script UpgradeChooser {
         return first_available(pool, taken);
     }
 
-    fn first_available(pool: f32, taken: List<f32>) -> f32 {
+    fn first_available(pool: f32, taken: List<f32>) -> f32? {
         for index in 0..Profiles.count(this.catalog, "modules") {
             if available(index, pool, taken) { return index; }
         }
-        return -1.0;
+        return null;
     }
 
     fn available(index: f32, pool: f32, taken: List<f32>) -> bool {

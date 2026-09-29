@@ -1956,6 +1956,27 @@ a list it is a value, copied where it is assigned, and holds at most 10,000
 keys. A scene cannot author one yet: an `@export` map starts as the script
 wrote it.
 
+### Values that may be missing
+
+```decay
+fn first_free(slots: List<bool>) -> f32? {
+    for i in 0..slots.length { if !slots[i] { return i; } }
+    return null;
+}
+
+let slot = first_free(this.taken);
+if slot == null { return; }          // full
+this.taken[slot] = true;             // `slot` is an `f32` from here on
+let shown = best_time ?? 0.0;        // or give a fallback
+```
+
+`f32?` — and `String?`, `Vec2?`, `List<T>?` — is a value or `null`, where a
+script used to return `-1` and hope every caller checked. It is never used as
+a number until `??` gives a fallback or a check says it is there: inside
+`if x != null { }`, or after `if x == null { return; }`, a `let` or parameter
+`x` is its plain type. Entities, structs and enums may be `null` already and
+need no `?`.
+
 ### Structs
 
 ```decay

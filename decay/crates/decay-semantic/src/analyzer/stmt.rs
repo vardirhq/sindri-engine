@@ -18,8 +18,17 @@ impl Analyzer<'_, '_> {
             self.scopes.push(HashMap::new());
         }
 
+        // Scopes that narrow an optional for the rest of the block, after an
+        // `if x == null { return; }`.
+        let mut narrowing = 0;
         for statement in &block.statements {
             self.analyze_stmt(statement);
+            if self.narrow_after(statement) {
+                narrowing += 1;
+            }
+        }
+        for _ in 0..narrowing {
+            self.scopes.pop();
         }
 
         if create_scope {
@@ -104,10 +113,7 @@ impl Analyzer<'_, '_> {
                         ),
                     );
                 }
-                self.analyze_block(then_branch, true);
-                if let Some(else_branch) = else_branch {
-                    self.analyze_block(else_branch, true);
-                }
+                self.analyze_if_branches(condition, then_branch, else_branch.as_ref());
             }
             Stmt::While {
                 condition, body, ..
