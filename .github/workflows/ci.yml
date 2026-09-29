@@ -558,12 +558,12 @@ jobs:
         id: browser_export
         run: |
           cargo run --quiet --package sindri-export --bin sindri-export -- \
-            game target/dist/causeway --base /sindri2/
+            game target/dist/causeway --base /sindri-engine/
           cp -R game/pkg/. target/dist/causeway/pkg/
           # Weave uses the same generic browser host, but adds an Other asset
           # that the host recognizes as a presentation stylesheet.
           cargo run --quiet --package sindri-export --bin sindri-export -- \
-            games/weave-poc target/dist/weave --base /sindri2/examples/weave-poc/
+            games/weave-poc target/dist/weave --base /sindri-engine/examples/weave-poc/
           cp -R game/pkg/. target/dist/weave/pkg/
           # Orbital, the one deployed to Pages that a person actually plays. It
           # is the project with prefabs -- including prefabs only another
@@ -572,29 +572,29 @@ jobs:
           # title screen is laid out by Weave rather than by its scene, and its
           # portrait rules are reached only in a browser at phone width.
           cargo run --quiet --package sindri-export --bin sindri-export -- \
-            games/orbital-baked target/dist/orbital-baked --base /sindri2/
+            games/orbital-baked target/dist/orbital-baked --base /sindri-engine/
           cp -R game/pkg/. target/dist/orbital-baked/pkg/
       - name: Smoke the rendered games
         id: browser_smoke
         run: |
           node scripts/browser/smoke.mjs examples/cube target/render-artifacts/browser-cube.png
-          SINDRI_EXPECT_ASSETS=1 SINDRI_BASE_PATH=/sindri2/ \
+          SINDRI_EXPECT_ASSETS=1 SINDRI_BASE_PATH=/sindri-engine/ \
             node scripts/browser/smoke.mjs target/dist/causeway target/render-artifacts/browser-causeway.png
           SINDRI_EXPECT_ASSETS=1 \
-            SINDRI_BASE_PATH=/sindri2/examples/weave-poc/ \
+            SINDRI_BASE_PATH=/sindri-engine/examples/weave-poc/ \
             SINDRI_VIEWPORT_WIDTH=390 SINDRI_VIEWPORT_HEIGHT=844 \
             node scripts/browser/smoke.mjs target/dist/weave target/render-artifacts/browser-weave-phone.png
-          SINDRI_EXPECT_ASSETS=1 SINDRI_BASE_PATH=/sindri2/ \
+          SINDRI_EXPECT_ASSETS=1 SINDRI_BASE_PATH=/sindri-engine/ \
             SINDRI_VIEWPORT_WIDTH=390 SINDRI_VIEWPORT_HEIGHT=844 \
             node scripts/browser/smoke.mjs target/dist/orbital-baked target/render-artifacts/browser-orbital-baked-phone.png
       - name: Smoke the startup failure paths
         id: browser_failures
         run: |
-          SINDRI_EXPECT_FAILURE=canvas SINDRI_BASE_PATH=/sindri2/ \
+          SINDRI_EXPECT_FAILURE=canvas SINDRI_BASE_PATH=/sindri-engine/ \
             node scripts/browser/smoke.mjs target/dist/causeway target/render-artifacts/browser-no-canvas.png
-          SINDRI_EXPECT_FAILURE=adapter SINDRI_BASE_PATH=/sindri2/ \
+          SINDRI_EXPECT_FAILURE=adapter SINDRI_BASE_PATH=/sindri-engine/ \
             node scripts/browser/smoke.mjs target/dist/causeway target/render-artifacts/browser-no-adapter.png
-          SINDRI_EXPECT_FAILURE=device SINDRI_BASE_PATH=/sindri2/ \
+          SINDRI_EXPECT_FAILURE=device SINDRI_BASE_PATH=/sindri-engine/ \
             node scripts/browser/smoke.mjs target/dist/causeway target/render-artifacts/browser-no-device.png
       - name: Upload browser captures
         if: always()

@@ -13,7 +13,7 @@ import markdown
 
 ROOT = Path(__file__).resolve().parents[1]
 OUT = Path(sys.argv[1]) if len(sys.argv) > 1 else ROOT / "target/pages"
-REPOSITORY = "https://github.com/vardirhq/sindri2/blob/main"
+REPOSITORY = "https://github.com/vardirhq/sindri-engine/blob/main"
 
 PAGES = [
     ("documentation", "Documentation map", "docs/README.md", "ALL DOCS"),
@@ -167,7 +167,7 @@ TEMPLATE = """<!doctype html>
 <a href="../scripting/">decay</a>
 <a href="../weave/">weave</a>
 <a href="../../examples/causeway/">causeway</a>
-<a class="ghost" href="https://github.com/vardirhq/sindri2">github ↗</a>
+<a class="ghost" href="https://github.com/vardirhq/sindri-engine">github ↗</a>
 </nav>
 </div>
 </header>
@@ -183,7 +183,7 @@ TEMPLATE = """<!doctype html>
 <span class="tagline"><span class="rule"></span><span class="chip">ENGINE</span></span>
 </span></div>
 <span>generated from the repository sources</span>
-<a href="https://github.com/vardirhq/sindri2">edit on github ↗</a>
+<a href="https://github.com/vardirhq/sindri-engine">edit on github ↗</a>
 </div>
 </footer>
 </body>

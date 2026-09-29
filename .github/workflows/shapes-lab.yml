@@ -67,7 +67,7 @@ jobs:
       - name: Export Shapes Lab
         run: |
           cargo run --quiet --package sindri-export --bin sindri-export -- \
-            games/shapes-lab target/dist/shapes-lab --base /sindri2/examples/shapes-lab/
+            games/shapes-lab target/dist/shapes-lab --base /sindri-engine/examples/shapes-lab/
           mkdir -p target/dist/shapes-lab/pkg
           cp -R game/pkg/. target/dist/shapes-lab/pkg/
           test -f target/dist/shapes-lab/assets/sindri.manifest.json
@@ -78,7 +78,7 @@ jobs:
           mkdir -p target/render-artifacts
           SINDRI_EXPECT_ASSETS=1 \
           SINDRI_EXPECT_ASSET_KINDS=scene,script \
-          SINDRI_BASE_PATH=/sindri2/examples/shapes-lab/ \
+          SINDRI_BASE_PATH=/sindri-engine/examples/shapes-lab/ \
             node scripts/browser/smoke.mjs target/dist/shapes-lab \
             target/render-artifacts/shapes-lab.png
       - name: Upload Shapes Lab capture

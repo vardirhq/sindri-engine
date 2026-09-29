@@ -46,10 +46,10 @@ pipeline renders a textured cube and five alpha-blended sprites.
 The companion game runs too, and is playable — see below.
 
 The production-shaped build is published at
-<https://vardirhq.github.io/sindri2/>. `.github/workflows/pages.yml` builds
+<https://vardirhq.github.io/sindri-engine/>. `.github/workflows/pages.yml` builds
 `game/` with wasm-pack, assembles only its static HTML/module/Wasm output, and
 deploys it through GitHub's Pages artifact flow whenever `main` changes. The
-page uses relative imports, so the repository's `/sindri2/` base path is part of
+page uses relative imports, so the repository's `/sindri-engine/` base path is part of
 the real delivery path rather than something development serving hides.
 
 `scripts/browser/smoke.mjs` is how that is checked, and it exits non-zero when

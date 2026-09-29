@@ -6,7 +6,7 @@
   "publisher": "vardir",
   "repository": {
     "type": "git",
-    "url": "https://github.com/vardirhq/sindri2.git",
+    "url": "https://github.com/vardirhq/sindri-engine.git",
     "directory": "editors/vscode-decay"
   },
   "license": "MIT OR Apache-2.0",
