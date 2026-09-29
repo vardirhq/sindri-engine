@@ -1845,6 +1845,21 @@ its enum's name — `Power.Grow` — and is not a number: it is compared with
 say what happens for every variant or end with `_`, so a variant added later
 is a compile error at every `match` that has not caught up.
 
+Where a value goes, `match` gives one — each arm `=>` a value, separated by
+commas, every arm the same type:
+
+```decay
+let clip = match this.kind {
+    Power.Grow => "enlarger",
+    Power.Boost => "push",
+    Power.Wind => "wind",
+    Power.Fire => "fireball",
+};
+```
+
+Scorchball picks each power-up's sign this way, where it declared a `var` and
+assigned it in every arm.
+
 An enum `@export` is authored **by the variant's name**: the scene stores
 `"kind": "Grow"`, the inspector offers the variants as a dropdown, and a name
 the enum does not have is refused with the ones it does. A `state` field may

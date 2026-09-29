@@ -1,5 +1,9 @@
 use crate::Span;
 
+mod value_ops;
+
+pub use value_ops::{ListOp, NumberOp, StringOp, TimerProperty, VectorOp};
+
 #[derive(Debug, Clone, PartialEq)]
 pub struct Program {
     pub items: Vec<Item>,
@@ -244,6 +248,15 @@ pub struct MatchArm {
     pub span: Span,
 }
 
+/// One arm of a `match` written as a value: the patterns it accepts, and the
+/// value it gives.
+#[derive(Debug, Clone, PartialEq)]
+pub struct MatchValueArm {
+    pub patterns: Vec<Pattern>,
+    pub value: Expr,
+    pub span: Span,
+}
+
 /// What a `match` arm accepts.
 #[derive(Debug, Clone, PartialEq)]
 pub enum Pattern {
@@ -339,229 +352,13 @@ pub enum ExprKind {
         start: Box<Expr>,
         end: Box<Expr>,
     },
-}
-
-/// What a list can be asked, or told to change.
-///
-/// A change — `push`, `pop`, `insert`, `remove_at`, `clear` — is always a
-/// call, never a property, and is made to the list a variable or field holds,
-/// in place.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-pub enum ListOp {
-    /// `xs.push(value)`: adds `value` at the end.
-    Push,
-    /// `xs.pop()`: takes the last element off and gives it back.
-    Pop,
-    /// `xs.insert(index, value)`: puts `value` at `index`, moving the rest
-    /// along.
-    Insert,
-    /// `xs.remove_at(index)`: takes the element at `index` out and gives it
-    /// back.
-    RemoveAt,
-    /// `xs.clear()`: empties it.
-    Clear,
-    /// `xs.contains(value)`: whether any element equals `value`.
-    Contains,
-    /// `xs.index_of(value)`: where `value` first is, or `-1`.
-    IndexOf,
-    /// `xs[index] = value`: what an element assignment lowers to. Not a name
-    /// a script can call.
-    SetAt,
-}
-
-impl ListOp {
-    /// Every operation a script can call by name, with that name and how
-    /// many arguments it takes after the list itself.
-    pub const ALL: [(Self, &'static str, usize); 7] = [
-        (Self::Push, "push", 1),
-        (Self::Pop, "pop", 0),
-        (Self::Insert, "insert", 2),
-        (Self::RemoveAt, "remove_at", 1),
-        (Self::Clear, "clear", 0),
-        (Self::Contains, "contains", 1),
-        (Self::IndexOf, "index_of", 1),
-    ];
-
-    /// The operation a member name spells, and how many arguments it takes.
-    #[must_use]
-    pub fn named(name: &str) -> Option<(Self, usize)> {
-        Self::ALL
-            .into_iter()
-            .find(|(_, spelled, _)| *spelled == name)
-            .map(|(op, _, arity)| (op, arity))
-    }
-
-    /// How many arguments it takes after the list.
-    #[must_use]
-    pub const fn arity(self) -> usize {
-        match self {
-            Self::Pop | Self::Clear => 0,
-            Self::Push | Self::RemoveAt | Self::Contains | Self::IndexOf => 1,
-            Self::Insert | Self::SetAt => 2,
-        }
-    }
-
-    /// Whether it changes the list rather than only reading it.
-    #[must_use]
-    pub const fn changes(self) -> bool {
-        !matches!(self, Self::Contains | Self::IndexOf)
-    }
-}
-
-/// What a vector can be asked beyond its components and arithmetic.
-///
-/// Here, beside the operators, because it is the same kind of thing: an
-/// operation the language owns over values it owns. The analyzer decides which
-/// member read or call is one of these, the IR carries it, and the runtime
-/// performs it, so all three need one spelling of the list.
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub enum VectorOp {
-    /// `v.length`: how long it is.
-    Length,
-    /// `v.normalized`: the same direction, one unit long, or zero for a zero
-    /// vector rather than a vector of NaN.
-    Normalized,
-    /// `a.dot(b)`.
-    Dot,
-    /// `a.distance(b)`: how far apart two points are.
-    Distance,
-    /// `a.lerp(b, t)`: the point `t` of the way from `a` to `b`.
-    Lerp,
-}
-
-impl VectorOp {
-    /// Every operation, with the name a script spells it by and how many
-    /// arguments it takes after the vector itself. A property is the one that
-    /// takes none.
-    pub const ALL: [(Self, &'static str, usize); 5] = [
-        (Self::Length, "length", 0),
-        (Self::Normalized, "normalized", 0),
-        (Self::Dot, "dot", 1),
-        (Self::Distance, "distance", 1),
-        (Self::Lerp, "lerp", 2),
-    ];
-
-    /// The operation a member name spells, and how many arguments it takes.
-    #[must_use]
-    pub fn named(name: &str) -> Option<(Self, usize)> {
-        Self::ALL
-            .into_iter()
-            .find(|(_, spelled, _)| *spelled == name)
-            .map(|(op, _, arity)| (op, arity))
-    }
-}
-
-/// What a piece of text can be asked. Like a vector's, one that takes no
-/// arguments is a property: `s.length`, `s.uppercase`.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-pub enum StringOp {
-    /// `s.length`: how many characters it has.
-    Length,
-    /// `s.uppercase`: the same text in capitals.
-    Uppercase,
-    /// `s.lowercase`: the same text in small letters.
-    Lowercase,
-    /// `s.trimmed`: without the spaces at either end.
-    Trimmed,
-    /// `s.contains(part)`.
-    Contains,
-    /// `s.starts_with(part)`.
-    StartsWith,
-    /// `s.ends_with(part)`.
-    EndsWith,
-    /// `s.find(part)`: where `part` first starts, in characters, or `-1`.
-    Find,
-    /// `s.slice(start, end)`: the characters from `start` up to, not
-    /// including, `end`.
-    Slice,
-    /// `s.replace(old, new)`: every `old` replaced with `new`.
-    Replace,
-}
-
-impl StringOp {
-    /// Every operation, with the name a script spells it by and how many
-    /// arguments it takes after the text itself. A property takes none.
-    pub const ALL: [(Self, &'static str, usize); 10] = [
-        (Self::Length, "length", 0),
-        (Self::Uppercase, "uppercase", 0),
-        (Self::Lowercase, "lowercase", 0),
-        (Self::Trimmed, "trimmed", 0),
-        (Self::Contains, "contains", 1),
-        (Self::StartsWith, "starts_with", 1),
-        (Self::EndsWith, "ends_with", 1),
-        (Self::Find, "find", 1),
-        (Self::Slice, "slice", 2),
-        (Self::Replace, "replace", 2),
-    ];
-
-    /// The operation a member name spells, and how many arguments it takes.
-    #[must_use]
-    pub fn named(name: &str) -> Option<(Self, usize)> {
-        Self::ALL
-            .into_iter()
-            .find(|(_, spelled, _)| *spelled == name)
-            .map(|(op, _, arity)| (op, arity))
-    }
-}
-
-/// What a number can be asked: how to write it as text.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-pub enum NumberOp {
-    /// `n.fixed(digits)`: with exactly `digits` decimals, `12.50` for
-    /// `12.5.fixed(2)`.
-    Fixed,
-    /// `n.padded(width)`: rounded to a whole number and led with zeros to at
-    /// least `width` digits, `007` for `7.0.padded(3)`.
-    Padded,
-}
-
-impl NumberOp {
-    /// Every operation, with the name a script spells it by and how many
-    /// arguments it takes after the number itself.
-    pub const ALL: [(Self, &'static str, usize); 2] =
-        [(Self::Fixed, "fixed", 1), (Self::Padded, "padded", 1)];
-
-    /// The operation a member name spells, and how many arguments it takes.
-    #[must_use]
-    pub fn named(name: &str) -> Option<(Self, usize)> {
-        Self::ALL
-            .into_iter()
-            .find(|(_, spelled, _)| *spelled == name)
-            .map(|(op, _, arity)| (op, arity))
-    }
-}
-
-/// What a timer can be asked. All are properties: a timer is read, and
-/// replaced with a new one to start it again.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-pub enum TimerProperty {
-    /// `t.done`: whether it has run out.
-    Done,
-    /// `t.left`: seconds to go, never below zero.
-    Left,
-    /// `t.duration`: the seconds it was started with.
-    Duration,
-    /// `t.progress`: how far through it is, from 0 when started to 1 when done.
-    Progress,
-}
-
-impl TimerProperty {
-    /// Every property, with the name a script spells it by.
-    pub const ALL: [(Self, &'static str); 4] = [
-        (Self::Done, "done"),
-        (Self::Left, "left"),
-        (Self::Duration, "duration"),
-        (Self::Progress, "progress"),
-    ];
-
-    /// The property a member name spells.
-    #[must_use]
-    pub fn named(name: &str) -> Option<Self> {
-        Self::ALL
-            .into_iter()
-            .find(|(_, spelled)| *spelled == name)
-            .map(|(property, _)| property)
-    }
+    /// `match phase { Phase.Lobby => "Waiting", _ => "Go" }`: the value of
+    /// the first arm whose pattern the subject is. Written where a value goes;
+    /// at the start of a statement, `match` runs blocks instead.
+    Match {
+        subject: Box<Expr>,
+        arms: Vec<MatchValueArm>,
+    },
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
