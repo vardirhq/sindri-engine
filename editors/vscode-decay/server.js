@@ -21,12 +21,21 @@ function bundledServerPath(extensionPath, platform = process.platform) {
   return path.join(extensionPath, 'bin', bundledServerName(platform));
 }
 
+function ensureExecutable(command, platform = process.platform, chmod = fs.chmodSync) {
+  if (!command || platform === 'win32') return;
+  // VSIX/ZIP extraction does not reliably preserve Unix executable bits. The
+  // bundled LSP is data until we restore that bit after installation.
+  try {
+    chmod(command, 0o755);
+  } catch (error) {
+    const code = error && typeof error === 'object' ? error.code : undefined;
+    if (code !== 'ENOENT') throw error;
+  }
+}
+
 function serverCommand(configured, environment = process.env, extensionPath, platform = process.platform, exists = fs.existsSync) {
   if (environment.SINDRI_DECAY_LSP) return environment.SINDRI_DECAY_LSP;
 
-  // An explicit non-default setting is an intentional override. The default
-  // remains `decay-lsp` for source-tree development, but a packaged extension
-  // should be zero-setup and prefer the binary shipped beside it.
   if (configured && configured !== 'decay-lsp') return configured;
 
   const bundled = bundledServerPath(extensionPath, platform);
@@ -43,6 +52,7 @@ module.exports = {
   projectRoot,
   bundledServerName,
   bundledServerPath,
+  ensureExecutable,
   serverCommand,
   watchedFiles
 };
