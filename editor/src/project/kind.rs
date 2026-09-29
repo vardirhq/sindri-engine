@@ -1,7 +1,5 @@
 //! What kind of thing a file in the project is, judged by its name.
 
-use super::sheet::SHEET_SUFFIX;
-
 /// What kind of thing an entry is, as far as the browser can tell.
 ///
 /// From the extension, because that is all a file offers before something opens
@@ -78,7 +76,9 @@ impl AssetKind {
         {
             return Self::Scene;
         }
-        if lower.ends_with(".sheet") || lower.ends_with(SHEET_SUFFIX) {
+        if lower.ends_with(sindri_core::SHEET_SUFFIX)
+            || lower.ends_with(sindri_core::LEGACY_SHEET_SUFFIX)
+        {
             return Self::Sheet;
         }
         if lower.ends_with(sindri_core::PREFAB_SUFFIX)
@@ -91,7 +91,9 @@ impl AssetKind {
         {
             return Self::Profile;
         }
-        if lower.ends_with(".tileset") || lower.ends_with(sindri_core::TILESET_SUFFIX) {
+        if lower.ends_with(sindri_core::TILESET_SUFFIX)
+            || lower.ends_with(sindri_core::LEGACY_TILESET_SUFFIX)
+        {
             return Self::TileSet;
         }
         match lower.rsplit_once('.').map(|(_, extension)| extension) {
