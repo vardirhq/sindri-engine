@@ -17,6 +17,7 @@
     "syntaxes/decay.tmLanguage.json",
     "bin/decay-lsp",
     "bin/decay-lsp.exe",
+    "node_modules/**",
     "README.md"
   ],
   "engines": {

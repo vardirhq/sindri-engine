@@ -317,6 +317,10 @@ Decay needs one formatter rather than editor-specific whitespace behavior.
 - [x] Ensure watcher patterns match actual Sindri project files.
 - [x] Dispose watchers/client resources correctly.
 - [x] Add extension packaging validation.
+  - [x] Load `extension.js` from the packaged VSIX in CI (`check-vsix.js`).
+        The v1 package omitted `node_modules`, so `vscode-languageclient`
+        was missing and activation failed before the server was launched,
+        while declarative TextMate highlighting kept working.
 - [x] Add an install/run development path that does not require tribal knowledge.
 - [x] Document how an external Sindri project locates `decay-lsp`.
 - [ ] Verify Windows, Linux, and macOS executable/path handling.
