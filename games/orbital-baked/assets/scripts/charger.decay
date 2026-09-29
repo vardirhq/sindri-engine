@@ -29,8 +29,8 @@ script Charger {
         let late = max(0.0, Game.elapsed - 180.0);
         this.hp = this.health * (1.0 + late * 0.0014);
         this.visual_phase = Random.range(0.0, 6.2831853);
-        this.transform.rotation_z = this.visual_phase; this.sprite.tint.a = 0.92;
-        this.sprite.tint.r = 1.0; this.sprite.tint.g = 0.88; this.sprite.tint.b = 0.53;
+        this.transform.rotation_z = this.visual_phase;
+        this.sprite.tint = Color(1.0, 0.88, 0.53, 0.92);
         tint_elite();
         spawn_elite_visuals();
     }
@@ -119,14 +119,17 @@ script Charger {
 
     fn tint_elite() {
         if this.elite <= 0.0 { return; }
-        if this.elite_trait == 0.0 { elite_color(1.0, 0.91, 0.58); }
-        else if this.elite_trait == 1.0 { elite_color(1.0, 0.42, 0.45); }
-        else if this.elite_trait == 2.0 { elite_color(1.0, 0.69, 0.31); }
-        else if this.elite_trait == 3.0 { elite_color(0.84, 0.49, 1.0); }
-        else { elite_color(0.45, 1.0, 0.82); }
+        if this.elite_trait == 0.0 { elite_color(Color(1.0, 0.91, 0.58)); }
+        else if this.elite_trait == 1.0 { elite_color(Color(1.0, 0.42, 0.45)); }
+        else if this.elite_trait == 2.0 { elite_color(Color(1.0, 0.69, 0.31)); }
+        else if this.elite_trait == 3.0 { elite_color(Color(0.84, 0.49, 1.0)); }
+        else { elite_color(Color(0.45, 1.0, 0.82)); }
     }
 
-    fn elite_color(r: f32, g: f32, b: f32) { this.sprite.tint.r = r; this.sprite.tint.g = g; this.sprite.tint.b = b; this.sprite.tint.a = max(this.sprite.tint.a, 0.24); }
+    // The trait's colour, keeping the body's fade but never fading below 0.24.
+    fn elite_color(colour: Color) {
+        this.sprite.tint = colour.with_alpha(max(this.sprite.tint.a, 0.24));
+    }
 
     fn die() {
         burst_on_death(); Effects.burst(this.entity); Audio.play("audio/kill.wav", 0.3);

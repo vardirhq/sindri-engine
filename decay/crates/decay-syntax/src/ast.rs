@@ -2,7 +2,9 @@ use crate::Span;
 
 mod value_ops;
 
-pub use value_ops::{ListOp, MapOp, NumberOp, StringOp, TimerProperty, VectorOp};
+pub use value_ops::{
+    ColorOp, ListOp, MapOp, NumberOp, StringOp, TimerProperty, VectorOp, parse_hex,
+};
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct Program {

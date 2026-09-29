@@ -35,6 +35,9 @@ impl Analyzer<'_, '_> {
         if self.refuse_optional(object_type, object.span) {
             return Type::Unknown;
         }
+        if *object_type == Type::Color {
+            return self.color_member_type(object, field, span);
+        }
         if object_type.dimensions().is_some() {
             return self.vector_member_type(object, object_type, field, span);
         }

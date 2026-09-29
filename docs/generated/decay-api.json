@@ -1712,36 +1712,6 @@
       "name": "Random"
     },
     {
-      "description": "A colour, made of red, green, blue and alpha (opacity), each from 0 to 1.",
-      "members": [
-        {
-          "description": "Opacity: 0 is invisible, 1 is solid.",
-          "kind": "value",
-          "name": "a",
-          "type": "f32"
-        },
-        {
-          "description": "How much blue, from 0 to 1.",
-          "kind": "value",
-          "name": "b",
-          "type": "f32"
-        },
-        {
-          "description": "How much green, from 0 to 1.",
-          "kind": "value",
-          "name": "g",
-          "type": "f32"
-        },
-        {
-          "description": "How much red, from 0 to 1.",
-          "kind": "value",
-          "name": "r",
-          "type": "f32"
-        }
-      ],
-      "name": "Rgba"
-    },
-    {
       "description": "Saving progress between play sessions: numbers and true/false values stored under names, such as a best score.",
       "members": [
         {
@@ -1898,7 +1868,7 @@
           "description": "The colour inside the shape.",
           "kind": "value",
           "name": "fill",
-          "type": "Rgba"
+          "type": "Color"
         },
         {
           "description": "Drawing order: higher numbers are drawn in front of lower ones.",
@@ -1910,7 +1880,7 @@
           "description": "The colour of the shape's outline.",
           "kind": "value",
           "name": "stroke",
-          "type": "Rgba"
+          "type": "Color"
         },
         {
           "description": "How thick the outline is, as a fraction of the shape's size.",
@@ -1940,13 +1910,13 @@
           "description": "Another colour the image is multiplied by, on top of `tint`.",
           "kind": "value",
           "name": "color_multiply",
-          "type": "Rgba"
+          "type": "Color"
         },
         {
           "description": "A colour added on top of the image, which can make it brighter or flash white. Keep its `a` at 0, or the image's transparent edges become visible.",
           "kind": "value",
           "name": "color_offset",
-          "type": "Rgba"
+          "type": "Color"
         },
         {
           "description": "Drawing order: higher numbers are drawn in front of lower ones.",
@@ -1958,7 +1928,7 @@
           "description": "A colour the image is multiplied by. White leaves it unchanged; lowering `a` fades it out.",
           "kind": "value",
           "name": "tint",
-          "type": "Rgba"
+          "type": "Color"
         }
       ],
       "name": "Sprite"
@@ -2240,7 +2210,7 @@
           "description": "A colour the image is multiplied by. White leaves it unchanged; lowering `a` fades it out.",
           "kind": "value",
           "name": "tint",
-          "type": "Rgba"
+          "type": "Color"
         }
       ],
       "name": "UiImage"

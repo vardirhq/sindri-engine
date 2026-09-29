@@ -129,6 +129,50 @@ impl MapOp {
     }
 }
 
+/// What a colour can be asked beyond its `r`, `g`, `b` and `a` channels.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub enum ColorOp {
+    /// `c.lerp(other, t)`: the colour `t` of the way from this one to
+    /// `other`, channel by channel, alpha included.
+    Lerp,
+    /// `c.with_alpha(a)`: the same colour at another opacity.
+    WithAlpha,
+    /// `Color("#ff8800")`: a colour from its hex spelling. Not a name a script
+    /// calls; what building one from text lowers to.
+    FromHex,
+}
+
+impl ColorOp {
+    /// Every operation a script can call by name, with that name and how
+    /// many arguments it takes after the colour itself.
+    pub const ALL: [(Self, &'static str, usize); 2] =
+        [(Self::Lerp, "lerp", 2), (Self::WithAlpha, "with_alpha", 1)];
+
+    /// The operation a member name spells, and how many arguments it takes.
+    #[must_use]
+    pub fn named(name: &str) -> Option<(Self, usize)> {
+        Self::ALL
+            .into_iter()
+            .find(|(_, spelled, _)| *spelled == name)
+            .map(|(op, _, arity)| (op, arity))
+    }
+}
+
+/// The channels `#rrggbb` or `#rrggbbaa` spells, from 0 to 1.
+#[must_use]
+pub fn parse_hex(text: &str) -> Option<[f64; 4]> {
+    let digits = text.strip_prefix('#')?;
+    if !matches!(digits.len(), 6 | 8) || !digits.is_ascii() {
+        return None;
+    }
+    let mut channels = [1.0; 4];
+    for (slot, pair) in channels.iter_mut().zip(digits.as_bytes().chunks(2)) {
+        let pair = std::str::from_utf8(pair).ok()?;
+        *slot = f64::from(u8::from_str_radix(pair, 16).ok()?) / 255.0;
+    }
+    Some(channels)
+}
+
 /// What a vector can be asked beyond its components and arithmetic.
 ///
 /// Here, beside the operators, because it is the same kind of thing: an

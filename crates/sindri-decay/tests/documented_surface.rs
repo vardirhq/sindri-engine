@@ -90,6 +90,13 @@ fn described_entity_paths(environment: &Environment) -> BTreeSet<String> {
             into.insert(prefix);
             return;
         }
+        if *ty == Type::Color {
+            for channel in decay_semantic::CHANNELS {
+                into.insert(format!("{prefix}.{channel}"));
+            }
+            into.insert(prefix);
+            return;
+        }
         let Type::Named(name) = ty else {
             into.insert(prefix);
             return;

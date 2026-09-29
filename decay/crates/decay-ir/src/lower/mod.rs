@@ -116,6 +116,7 @@ impl<'a> Lowerer<'a> {
                 enumeration,
                 variant,
             } => Constant::Variant(format!("{enumeration}.{variant}")),
+            ConstValue::Color(channels) => Constant::Color(*channels),
         }
     }
 

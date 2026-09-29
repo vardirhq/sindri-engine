@@ -5,7 +5,7 @@
 //! completions, and by the generator that documents them, so none of the
 //! three can say something the others do not.
 
-use decay_syntax::{ListOp, MapOp, NumberOp, StringOp, TimerProperty, VectorOp};
+use decay_syntax::{ColorOp, ListOp, MapOp, NumberOp, StringOp, TimerProperty, VectorOp};
 
 use crate::types::{FunctionType, Type};
 
@@ -65,6 +65,16 @@ pub fn list_op_signature(op: ListOp, element: &Type) -> FunctionType {
         ListOp::Contains => signature(vec![element.clone()], Type::Bool),
         ListOp::IndexOf => signature(vec![element.clone()], Type::F32),
         ListOp::SetAt => signature(vec![Type::F32, element.clone()], element.clone()),
+    }
+}
+
+/// A colour operation.
+#[must_use]
+pub fn color_op_signature(op: ColorOp) -> FunctionType {
+    match op {
+        ColorOp::Lerp => signature(vec![Type::Color, Type::F32], Type::Color),
+        ColorOp::WithAlpha => signature(vec![Type::F32], Type::Color),
+        ColorOp::FromHex => signature(vec![Type::String], Type::Color),
     }
 }
 

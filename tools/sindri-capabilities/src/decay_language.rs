@@ -12,17 +12,17 @@
 //! reports each error by its phase, not by a name a page can be kept for.
 
 use decay_semantic::members::{
-    list_op_signature, map_op_signature, number_op_signature, string_op_signature,
-    timer_property_type, vector_op_signature,
+    color_op_signature, list_op_signature, map_op_signature, number_op_signature,
+    string_op_signature, timer_property_type, vector_op_signature,
 };
 use decay_semantic::{
-    BUILT_IN_TYPES, COMPONENTS, FunctionType, LENGTH, OLD_LENGTH, TIMER, Type, VEC2, VEC3,
+    BUILT_IN_TYPES, CHANNELS, COMPONENTS, FunctionType, LENGTH, OLD_LENGTH, TIMER, Type, VEC2, VEC3,
 };
 use decay_syntax::vocabulary::{
     ASSIGNMENT_OPERATORS, ATTRIBUTES, BINARY_OPERATORS, CONTEXTUAL_KEYWORDS, ITEM_WORDS, KEYWORDS,
     UNARY_OPERATORS, VERSION,
 };
-use decay_syntax::{ListOp, MapOp, NumberOp, StringOp, TimerProperty, VectorOp};
+use decay_syntax::{ColorOp, ListOp, MapOp, NumberOp, StringOp, TimerProperty, VectorOp};
 use serde_json::{Value, json};
 
 use crate::decay::type_name;
@@ -228,6 +228,18 @@ fn members() -> Value {
     json!([
         vector(Type::Vec2),
         vector(Type::Vec3),
+        {
+            "type": type_name(&Type::Color),
+            "members": CHANNELS
+                .iter()
+                .map(|channel| property(channel, &Type::F32))
+                .chain(
+                    ColorOp::ALL
+                        .iter()
+                        .map(|(op, name, _)| member(name, &color_op_signature(*op), true)),
+                )
+                .collect::<Vec<_>>(),
+        },
         {
             "type": type_name(&Type::Timer),
             "members": TimerProperty::ALL

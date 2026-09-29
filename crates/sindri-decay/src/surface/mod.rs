@@ -214,7 +214,7 @@ pub(crate) fn vector_components(
         }
     }
     match &members.iter().find(|(name, _)| name == last)?.1 {
-        Node::Group(name, nested) if *name == names::VEC3 => Some(nested),
+        Node::Group(name, nested) if *name == names::VEC3 || *name == names::RGBA => Some(nested),
         _ => None,
     }
 }

@@ -28,6 +28,9 @@ impl Analyzer<'_, '_> {
             if object_type == Type::Timer {
                 return self.timer_call_type(field, args, span);
             }
+            if object_type == Type::Color {
+                return self.color_call_type(field, args, span);
+            }
             if object_type == Type::String {
                 return self.string_call_type(field, args, span);
             }

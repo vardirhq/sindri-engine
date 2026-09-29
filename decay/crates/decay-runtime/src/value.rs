@@ -53,6 +53,9 @@ pub enum Value {
     Vec2([f64; 2]),
     /// Three numbers, `x`, `y`, `z`.
     Vec3([f64; 3]),
+    /// A colour: `r`, `g`, `b`, `a`, each from 0 to 1. Built, read and
+    /// written channel by channel as a vector is by component.
+    Color([f64; 4]),
     /// A countdown: the seconds it has to go, never below zero, and the
     /// seconds it was started with. Copied like a number, and run down only
     /// by [`crate::ScriptInstance::advance_timers`] — the language has no
@@ -85,6 +88,7 @@ impl Value {
         match self {
             Self::Vec2(components) => Some(components),
             Self::Vec3(components) => Some(components),
+            Self::Color(channels) => Some(channels),
             _ => None,
         }
     }
@@ -95,6 +99,7 @@ impl Value {
         match *components {
             [x, y] => Some(Self::Vec2([x, y])),
             [x, y, z] => Some(Self::Vec3([x, y, z])),
+            [r, g, b, a] => Some(Self::Color([r, g, b, a])),
             _ => None,
         }
     }
@@ -114,6 +119,7 @@ impl From<&Constant> for Value {
             Constant::Bool(value) => Self::Bool(*value),
             Constant::Null => Self::Null,
             Constant::Variant(name) => Self::Variant(Rc::from(name.as_str())),
+            Constant::Color(channels) => Self::Color(*channels),
         }
     }
 }

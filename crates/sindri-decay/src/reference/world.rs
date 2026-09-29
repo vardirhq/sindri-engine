@@ -195,16 +195,6 @@ pub(super) const TYPES: &[TypeEntry] = &[
         ],
     },
     TypeEntry {
-        name: "Rgba",
-        text: "A colour, made of red, green, blue and alpha (opacity), each from 0 to 1.",
-        members: &[
-            value("a", "Opacity: 0 is invisible, 1 is solid."),
-            value("b", "How much blue, from 0 to 1."),
-            value("g", "How much green, from 0 to 1."),
-            value("r", "How much red, from 0 to 1."),
-        ],
-    },
-    TypeEntry {
         name: "Effects",
         text: "Particle effects, such as sparks and explosions. The particles are only drawn; they are not objects and nothing can touch them.",
         members: &[

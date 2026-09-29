@@ -209,7 +209,8 @@ impl Analyzer<'_, '_> {
             }
             ExprKind::Member { object, field } => {
                 let object_type = self.expr_type(object);
-                if (object_type.dimensions().is_some() && self.value_rooted(object))
+                if ((object_type.dimensions().is_some() || object_type == Type::Color)
+                    && self.value_rooted(object))
                     || self.is_struct(&object_type)
                 {
                     self.check_component_target(object, target.span);

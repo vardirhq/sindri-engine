@@ -123,14 +123,19 @@ script Charger {
 
     fn tint_elite() {
         if this.elite <= 0.0 { return; }
-        if this.elite_trait == 0.0 { elite_color(1.0, 0.91, 0.58); }
-        else if this.elite_trait == 1.0 { elite_color(1.0, 0.42, 0.45); }
-        else if this.elite_trait == 2.0 { elite_color(1.0, 0.69, 0.31); }
-        else if this.elite_trait == 3.0 { elite_color(0.84, 0.49, 1.0); }
-        else { elite_color(0.45, 1.0, 0.82); }
+        if this.elite_trait == 0.0 { elite_color(Color(1.0, 0.91, 0.58)); }
+        else if this.elite_trait == 1.0 { elite_color(Color(1.0, 0.42, 0.45)); }
+        else if this.elite_trait == 2.0 { elite_color(Color(1.0, 0.69, 0.31)); }
+        else if this.elite_trait == 3.0 { elite_color(Color(0.84, 0.49, 1.0)); }
+        else { elite_color(Color(0.45, 1.0, 0.82)); }
     }
 
-    fn elite_color(r: f32, g: f32, b: f32) { this.shape.stroke.r = r; this.shape.stroke.g = g; this.shape.stroke.b = b; this.shape.fill.r = r; this.shape.fill.g = g; this.shape.fill.b = b; this.shape.fill.a = max(this.shape.fill.a, 0.24); }
+    // The trait's colour on outline and body, each keeping its own fade; the
+    // body never fades below 0.24.
+    fn elite_color(colour: Color) {
+        this.shape.stroke = colour.with_alpha(this.shape.stroke.a);
+        this.shape.fill = colour.with_alpha(max(this.shape.fill.a, 0.24));
+    }
 
     fn die() {
         burst_on_death(); Effects.burst(this.entity); Audio.play("audio/kill.wav", 0.3);

@@ -45,6 +45,12 @@ pub(super) fn export_row(
         {
             *value = Value::String(chosen);
         }
+    } else if export.type_name.as_deref() == Some("Color") {
+        // A swatch and its channels, as a sprite's tint is edited.
+        if !value.is_array() {
+            *value = script_value_json(&export.default);
+        }
+        super::super::field::colour_row(ui, &export.name, value);
     } else if export.type_name.as_deref() == Some("Profile") {
         super::super::field::asset_row(ui, id, &export.name, value, profiles, None, indent);
     } else {
@@ -199,6 +205,8 @@ pub(super) fn script_value_json(value: &ScriptValue) -> Value {
         // same vector row edits it.
         ScriptValue::Vec2(components) => Value::from(components.to_vec()),
         ScriptValue::Vec3(components) => Value::from(components.to_vec()),
+        // As its channels, the way a sprite stores its tint.
+        ScriptValue::Color(channels) => Value::from(channels.to_vec()),
         // By the variant's own name, as a scene authors one.
         ScriptValue::Variant(name) => Value::String(
             name.split_once('.')

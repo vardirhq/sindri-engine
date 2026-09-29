@@ -26,6 +26,7 @@ to change. Nothing here is a compatibility promise.
 - [Lists](#lists)
 - [Maps](#maps)
 - [Optional values](#optional-values)
+- [Colours](#colours)
 - [Vectors](#vectors)
 - [Text](#text)
 - [Containers](#containers)
@@ -448,6 +449,37 @@ if pick == null { return; }              // and after this, to the block's end
   into a `let` first.
 - `T` and `null` both fit a `T?`, so an optional field, parameter or return
   takes either. `==` and `!=` compare an optional with `null` or with a value.
+
+### Colours
+
+`Color` is a colour: `r`, `g`, `b` and `a` (opacity), each from 0 to 1. It is a
+language value like a vector, and the engine's colours — a sprite's `tint`, a
+shape's `fill` and `stroke`, a UI image's `tint` — are of this type.
+
+```rust
+const ORANGE: Color = Color("#ff8800");      // hex: #rrggbb or #rrggbbaa
+var flash = Color(1.0, 1.0, 1.0);            // alpha 1 when left out
+let ghost = Color(0.5, 0.5, 1.0, 0.25);
+
+this.sprite.tint = ORANGE;                   // all four channels at once
+this.sprite.tint.a -= dt;                    // or one
+let mixed = ORANGE.lerp(flash, 0.5);         // part of the way, alpha too
+let faded = mixed.with_alpha(0.3);
+```
+
+- **Built** from three or four numbers, or from hex text. Text a literal that
+  is not a colour is a diagnostic; text worked out at runtime that is not one
+  fails with `InvalidColor`.
+- **A channel is read and written like a vector's component**: `c.r` reads
+  one, and `c.a = 0.5` writes one through the `var` or field holding it.
+  `this.sprite.tint.r` still reaches one channel of the engine's colour.
+- `lerp(other, t)` and `with_alpha(a)` are its operations; there is no
+  arithmetic on colours. `==` compares all four channels.
+- A constant, and a struct field's default, may be a colour, written as a
+  `Color(...)` of literals or constants. An `@export` colour is authored in
+  the scene as `[r, g, b, a]`, and the inspector shows a swatch.
+- Channels are not clamped: one outside 0 to 1 is kept, and clipped by
+  whatever draws it.
 
 ### Vectors
 

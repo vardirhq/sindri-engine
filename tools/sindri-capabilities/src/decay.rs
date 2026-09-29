@@ -209,7 +209,7 @@ pub(crate) fn type_name(ty: &Type) -> String {
         Type::Unit => "unit".to_owned(),
         Type::Null => "null".to_owned(),
         Type::Named(name) => name.clone(),
-        Type::Vec2 | Type::Vec3 | Type::Timer => ty.display_name().into_owned(),
+        Type::Vec2 | Type::Vec3 | Type::Timer | Type::Color => ty.display_name().into_owned(),
         Type::Array(element) => format!("List<{}>", type_name(element)),
         Type::Map(key, value) => format!("Map<{}, {}>", type_name(key), type_name(value)),
         Type::Optional(inner) => format!("{}?", type_name(inner)),

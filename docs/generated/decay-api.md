@@ -298,15 +298,6 @@ Random numbers. The same seed always gives the same numbers, so a run can be rep
 - `seed(value: f32)` → `unit` — Starts the random numbers from a seed. The same seed always gives the same numbers afterwards.
 - `value()` → `f32` — A random number from 0 up to, but not including, 1.
 
-### `Rgba`
-
-A colour, made of red, green, blue and alpha (opacity), each from 0 to 1.
-
-- `a`: `f32` — Opacity: 0 is invisible, 1 is solid.
-- `b`: `f32` — How much blue, from 0 to 1.
-- `g`: `f32` — How much green, from 0 to 1.
-- `r`: `f32` — How much red, from 0 to 1.
-
 ### `Save`
 
 Saving progress between play sessions: numbers and true/false values stored under names, such as a best score.
@@ -335,9 +326,9 @@ A shape drawn in the game world, such as a circle, polygon or ring, with an insi
 - `count`: `f32` — How many sides a polygon has (3 is a triangle, 6 a hexagon), or how many cells a grid shape is across.
 - `dash_duty`: `f32` — How much of each dash is drawn, from 0 to 1; the rest is the gap before the next. 0.5 draws dashes and gaps of equal length.
 - `dashes`: `f32` — How many dashes the outline is broken into. 0 draws a solid line.
-- `fill`: `Rgba` — The colour inside the shape.
+- `fill`: `Color` — The colour inside the shape.
 - `layer`: `f32` — Drawing order: higher numbers are drawn in front of lower ones.
-- `stroke`: `Rgba` — The colour of the shape's outline.
+- `stroke`: `Color` — The colour of the shape's outline.
 - `stroke_width`: `f32` — How thick the outline is, as a fraction of the shape's size.
 - `sweep_start`: `f32` — Where the outline starts, as a fraction of the way round from the top.
 - `sweep_turns`: `f32` — How much of the outline is drawn, from 0 to 1. Setting it to 0.5 draws half a ring, which makes cooldown and charge meters.
@@ -346,10 +337,10 @@ A shape drawn in the game world, such as a circle, polygon or ring, with an insi
 
 A 2D image drawn in the game world, and how it is coloured.
 
-- `color_multiply`: `Rgba` — Another colour the image is multiplied by, on top of `tint`.
-- `color_offset`: `Rgba` — A colour added on top of the image, which can make it brighter or flash white. Keep its `a` at 0, or the image's transparent edges become visible.
+- `color_multiply`: `Color` — Another colour the image is multiplied by, on top of `tint`.
+- `color_offset`: `Color` — A colour added on top of the image, which can make it brighter or flash white. Keep its `a` at 0, or the image's transparent edges become visible.
 - `layer`: `f32` — Drawing order: higher numbers are drawn in front of lower ones.
-- `tint`: `Rgba` — A colour the image is multiplied by. White leaves it unchanged; lowering `a` fades it out.
+- `tint`: `Color` — A colour the image is multiplied by. White leaves it unchanged; lowering `a` fades it out.
 
 ### `Stick`
 
@@ -406,7 +397,7 @@ The interface drawn over the game: changing text and bars, and checking buttons 
 An image in the interface drawn over the game, such as a health bar or an icon, rather than in the game world.
 
 - `layer`: `f32` — Drawing order: higher numbers are drawn in front of lower ones.
-- `tint`: `Rgba` — A colour the image is multiplied by. White leaves it unchanged; lowering `a` fades it out.
+- `tint`: `Color` — A colour the image is multiplied by. White leaves it unchanged; lowering `a` fades it out.
 
 ### `Viewport`
 
