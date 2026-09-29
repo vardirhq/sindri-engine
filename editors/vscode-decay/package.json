@@ -58,7 +58,7 @@
   },
   "scripts": {
     "check": "node --check extension.js && node --check server.js && node test.js",
-    "package": "npx --no-install @vscode/vsce package"
+    "package": "npx --no-install @vscode/vsce package --allow-unused-files-pattern"
   },
   "dependencies": {
     "vscode-languageclient": "^9.0.1"
