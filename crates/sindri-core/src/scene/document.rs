@@ -12,6 +12,8 @@ use super::error::{SceneError, SceneJsonError};
 use super::graph::validate_entities;
 
 pub const SCENE_FORMAT_VERSION: u32 = 10;
+pub const SCENE_SUFFIX: &str = ".scene";
+pub const LEGACY_SCENE_SUFFIX: &str = ".scene.json";
 
 /// A stable, project-authored entity identifier used only in serialized data.
 #[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, Deserialize)]
