@@ -20,5 +20,6 @@ mod document;
 mod tests;
 
 pub use document::{
-    PREFAB_FORMAT_VERSION, PREFAB_SUFFIX, PrefabDocument, PrefabError, PrefabJsonError,
+    LEGACY_PREFAB_SUFFIX, PREFAB_FORMAT_VERSION, PREFAB_SUFFIX, PrefabDocument, PrefabError,
+    PrefabJsonError,
 };
