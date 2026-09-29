@@ -66,26 +66,32 @@ impl AssetKind {
         Self::of_file(&path.to_string_lossy())
     }
 
-    /// What a file of this name is, judged by its extension.
+    /// What a file of this name is, judged by its authored asset extension.
     ///
-    /// A scene is `*.scene.json` rather than any JSON, because the editor can
-    /// open one and not the other, and a row that offers to open a settings
-    /// file as a scene is the same class of lie this module exists to remove.
+    /// Native Sindri documents have their own extension. The old JSON-suffixed
+    /// names remain readable during migration so existing projects do not turn
+    /// into a browser full of anonymous files overnight.
     pub(crate) fn of_file(name: &str) -> Self {
         let lower = name.to_lowercase();
-        if lower.ends_with(".scene.json") {
+        if lower.ends_with(sindri_core::SCENE_SUFFIX)
+            || lower.ends_with(sindri_core::LEGACY_SCENE_SUFFIX)
+        {
             return Self::Scene;
         }
-        if lower.ends_with(SHEET_SUFFIX) {
+        if lower.ends_with(".sheet") || lower.ends_with(SHEET_SUFFIX) {
             return Self::Sheet;
         }
-        if lower.ends_with(sindri_core::PREFAB_SUFFIX) {
+        if lower.ends_with(sindri_core::PREFAB_SUFFIX)
+            || lower.ends_with(sindri_core::LEGACY_PREFAB_SUFFIX)
+        {
             return Self::Prefab;
         }
-        if lower.ends_with(sindri_core::PROFILE_SUFFIX) {
+        if lower.ends_with(sindri_core::PROFILE_SUFFIX)
+            || lower.ends_with(sindri_core::LEGACY_PROFILE_SUFFIX)
+        {
             return Self::Profile;
         }
-        if lower.ends_with(sindri_core::TILESET_SUFFIX) {
+        if lower.ends_with(".tileset") || lower.ends_with(sindri_core::TILESET_SUFFIX) {
             return Self::TileSet;
         }
         match lower.rsplit_once('.').map(|(_, extension)| extension) {
