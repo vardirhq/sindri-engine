@@ -18,54 +18,52 @@ impl ProjectIndex {
     }
 
     fn scan_dir(&mut self, root: &Path, directory: &Path) {
-        let Ok(entries) = fs::read_dir(directory) else {
-            return;
-        };
+        let Ok(entries) = fs::read_dir(directory) else { return; };
         for entry in entries.flatten() {
             let path = entry.path();
             if path.is_dir() {
-                if !matches!(
-                    path.file_name().and_then(|name| name.to_str()),
-                    Some(".git" | "target" | "node_modules")
-                ) {
+                if !matches!(path.file_name().and_then(|name| name.to_str()), Some(".git" | "target" | "node_modules")) {
                     self.scan_dir(root, &path);
                 }
                 continue;
             }
 
-            let relative = path
-                .strip_prefix(root)
-                .unwrap_or(&path)
-                .to_string_lossy()
-                .replace('\\', "/");
-            let extension = path
-                .extension()
-                .and_then(|extension| extension.to_str())
-                .map(str::to_ascii_lowercase);
+            let relative = path.strip_prefix(root).unwrap_or(&path).to_string_lossy().replace('\\', "/");
+            let extension = path.extension().and_then(|extension| extension.to_str()).map(str::to_ascii_lowercase);
             if matches!(extension.as_deref(), Some("wav" | "ogg" | "mp3" | "flac")) {
                 self.audio_assets.insert(relative.clone());
             }
-            if !relative.ends_with(".scene.json") {
-                continue;
-            }
-            let Ok(text) = fs::read_to_string(&path) else {
-                continue;
-            };
-            let Ok(value) = serde_json::from_str::<Value>(&text) else {
-                continue;
-            };
+            if !is_scene_asset(&relative) { continue; }
+            let Ok(text) = fs::read_to_string(&path) else { continue; };
+            let Ok(value) = serde_json::from_str::<Value>(&text) else { continue; };
             collect_entity_names(&value, &mut self.entity_names);
         }
     }
 }
 
+fn is_scene_asset(path: &str) -> bool {
+    let path = path.to_ascii_lowercase();
+    path.ends_with(".scene") || path.ends_with(".scene.json")
+}
+
 fn collect_entity_names(scene: &Value, into: &mut BTreeSet<String>) {
-    let Some(entities) = scene.get("entities").and_then(Value::as_array) else {
-        return;
-    };
+    let Some(entities) = scene.get("entities").and_then(Value::as_array) else { return; };
     for entity in entities {
         if let Some(name) = entity.get("name").and_then(Value::as_str) {
             into.insert(name.to_owned());
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::is_scene_asset;
+
+    #[test]
+    fn native_and_legacy_scene_names_are_indexed() {
+        assert!(is_scene_asset("assets/main.scene"));
+        assert!(is_scene_asset("assets/main.scene.json"));
+        assert!(is_scene_asset("assets/Main.Scene"));
+        assert!(!is_scene_asset("assets/main.json"));
     }
 }
