@@ -94,3 +94,62 @@ fn every_mistake_about_an_enum_is_refused() {
     // Comparing two enums, and ordering one, are both refused too.
     assert!(found.len() >= 13, "{found:?}");
 }
+
+#[test]
+fn a_match_gives_a_value_where_one_goes() {
+    let found = messages(
+        r#"enum Phase { Lobby, Play, Over }
+         script S {
+             var phase: Phase = Phase.Lobby;
+             var label: String = match Phase.Play { Phase.Play => "go", _ => "wait" };
+             fn speed() -> f32 {
+                 let x: f32 = match phase { Phase.Play => 2.0, Phase.Lobby | Phase.Over => 0.5 };
+                 return x + match phase { _ => 1.0 };
+             }
+         }"#,
+        &Environment::new(),
+    );
+    assert!(found.is_empty(), "{found:?}");
+}
+
+#[test]
+fn every_mistake_in_a_match_value_is_refused() {
+    let found = messages(
+        r#"enum Phase { Lobby, Play, Over }
+         script S {
+             fn f(p: Phase, n: f32) {
+                 let missing = match p { Phase.Lobby => 1.0, Phase.Play => 2.0 };
+                 let mixed = match p { Phase.Lobby => 1.0, _ => "two" };
+                 let late = match p { _ => 1.0, Phase.Play => 2.0 };
+                 let number = match n { _ => 1.0 };
+                 let wrong: String = match p { _ => 1.0 };
+             }
+         }"#,
+        &Environment::new(),
+    );
+    let all = found.join("\n");
+    for expected in [
+        "does not say what happens for `Phase.Over`",
+        "every arm of a `match` gives the same type: the first gives `f32`, this one `String`",
+        "this can never be reached",
+        "`match` takes a value of an enum, found `f32`",
+        "cannot assign `f32` to `String`",
+    ] {
+        assert!(all.contains(expected), "missing {expected:?} in:\n{all}");
+    }
+}
+
+#[test]
+fn a_match_value_must_close_its_arms_with_commas() {
+    let found = messages(
+        r"enum Phase { Lobby, Play }
+         script S { fn f(p: Phase) -> f32 { return match p { Phase.Lobby => 1.0 Phase.Play => 2.0 }; } }",
+        &Environment::new(),
+    );
+    assert!(
+        found
+            .iter()
+            .any(|message| message.contains("an arm that gives a value ends with `,`")),
+        "{found:?}"
+    );
+}

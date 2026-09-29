@@ -237,6 +237,7 @@ impl Parser<'_> {
                     kind: ExprKind::List(elements),
                 });
             }
+            TokenKind::Match => return self.parse_match_value(),
             TokenKind::LeftParen => {
                 self.advance();
                 let inner = self.parse_expression()?;

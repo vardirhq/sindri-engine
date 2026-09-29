@@ -36,6 +36,7 @@ impl Analyzer<'_, '_> {
             ExprKind::Member { object, field } => self.member_type(object, field, expr.span),
             ExprKind::Call { callee, args } => self.call_type(callee, args, expr.span),
             ExprKind::Index { object, index } => self.index_type(object, index),
+            ExprKind::Match { subject, arms } => self.match_value_type(subject, arms, expr.span),
             ExprKind::List(elements) => self.list_literal_type(elements),
             ExprKind::Construct { name, fields } => {
                 self.construct_struct_type(name, fields, expr.span)

@@ -205,7 +205,9 @@ postfix      = primary { "." IDENT | "[" expr "]" | "(" [ args ] ")" }
              | IDENT "(" IDENT ":" expr { "," IDENT ":" expr } [ "," ] ")" ;
 args         = expr { "," expr } ;
 primary      = IDENT | NUMBER | STRING | "true" | "false" | "null"
-             | "(" expr ")" | "[" [ expr { "," expr } [ "," ] ] "]" ;
+             | "(" expr ")" | "[" [ expr { "," expr } [ "," ] ] "]"
+             | "match" expr "{" value_arm { "," value_arm } [ "," ] "}" ;
+value_arm    = pattern { "|" pattern } "=>" expr ;
 ```
 
 Note that `if` and `while` take a **block**, not a statement: `if x > 0.0 { }`,
@@ -820,8 +822,19 @@ script Match {
 ### `match`
 
 `match` takes a value of an enum and runs the one arm its value names. Each arm
-lists one or more variants separated by `|`, then `=>` and a block. It is a
-statement, not an expression: it produces no value.
+lists one or more variants separated by `|`, then `=>` and a block.
+
+Written where a value goes, it gives one instead: each arm is `=>` and an
+expression, and arms are separated by commas.
+
+```rust
+let label = match phase {
+    Phase.Lobby => "Waiting",
+    Phase.Countdown | Phase.Play => "Go",
+    Phase.Over => "Again?",
+};
+let speed = base * match size { Size.Small => 1.0, _ => 0.5 };
+```
 
 - **Exhaustive.** A `match` that says nothing for some variant is a
   diagnostic, unless it ends with a `_` arm, which takes everything not named
@@ -830,6 +843,10 @@ statement, not an expression: it produces no value.
   diagnostics.
 - A `match` on anything but an enum is a diagnostic; compare numbers with
   `if`.
+- **Every arm of a value gives the same type**, which is the match's. An arm
+  that gives a value is an expression, not a block: to run statements, use
+  the statement form. At the start of a statement, `match` is always the
+  statement form.
 
 ---
 
@@ -1129,7 +1146,7 @@ Things that are true and that most readers — human or model — will guess wro
 Do not write these. They are not unimplemented corners; they are absent from the
 grammar, and every one of them is a parse error or a diagnostic.
 
-**Control flow:** `loop`, `match` as an expression or on anything but an enum, ternaries, labelled blocks, `break` or
+**Control flow:** `loop`, `match` on anything but an enum, a block as a `match` arm's value, ternaries, labelled blocks, `break` or
 `continue` with a label or a value. `for … in` walks a list or a range, and
 nothing else.
 

@@ -184,6 +184,12 @@ impl Analyzer<'_, '_> {
                     Self::collect_field_reads(value, out);
                 }
             }
+            ExprKind::Match { subject, arms } => {
+                Self::collect_field_reads(subject, out);
+                for arm in arms {
+                    Self::collect_field_reads(&arm.value, out);
+                }
+            }
             ExprKind::Call { callee, args } => {
                 Self::collect_field_reads(callee, out);
                 for argument in args {

@@ -30,13 +30,12 @@ script PowerUp {
         this.height = this.drop_height;
         this.ground = World.spawn_child(this.shadow, this.entity);
         let shown = World.spawn_child(this.sign, this.entity);
-        var clip: String = "enlarger";
-        match this.kind {
-            Power.Grow => { clip = "enlarger"; }
-            Power.Boost => { clip = "push"; }
-            Power.Wind => { clip = "wind"; }
-            Power.Fire => { clip = "fireball"; }
-        }
+        let clip = match this.kind {
+            Power.Grow => "enlarger",
+            Power.Boost => "push",
+            Power.Wind => "wind",
+            Power.Fire => "fireball",
+        };
         Animation.play(shown, clip);
         this.shown = shown;
         place();

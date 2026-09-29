@@ -332,5 +332,78 @@ impl Lowerer<'_> {
     }
 }
 
+impl Lowerer<'_> {
+    /// `match subject { Phase.Lobby => "Waiting", _ => "Go" }` as a value: as
+    /// the statement, but each arm leaves its value on the stack and jumps to
+    /// the end. A subject no pattern takes — only `null` can be, since the
+    /// analysis refuses a `match` that misses a variant — gives `null`.
+    pub(super) fn lower_match_value(
+        &self,
+        subject: &decay_syntax::Expr,
+        arms: &[decay_syntax::MatchValueArm],
+        instructions: &mut Vec<Instruction>,
+    ) {
+        instructions.push(Instruction::ScopeEnter);
+        self.lower_expr(subject, instructions);
+        instructions.push(Instruction::Declare {
+            name: MATCHED.to_owned(),
+            mutable: false,
+        });
+        let mut to_end = Vec::new();
+        let mut always = false;
+        for arm in arms {
+            let mut to_value = Vec::new();
+            let mut to_next_pattern = None;
+            for pattern in &arm.patterns {
+                if let Some(site) = to_next_pattern.take() {
+                    instructions[site] = Instruction::JumpIfFalse(instructions.len());
+                }
+                match pattern {
+                    Pattern::Wildcard(_) => {
+                        always = true;
+                        break;
+                    }
+                    Pattern::Variant {
+                        enumeration,
+                        variant,
+                        ..
+                    } => {
+                        instructions.push(Instruction::Load(Path(vec![MATCHED.to_owned()])));
+                        instructions.push(Instruction::Push(Constant::Variant(format!(
+                            "{enumeration}.{variant}"
+                        ))));
+                        instructions.push(Instruction::Binary(BinaryOp::Equal));
+                        to_next_pattern = Some(instructions.len());
+                        instructions.push(Instruction::JumpIfFalse(usize::MAX));
+                        to_value.push(instructions.len());
+                        instructions.push(Instruction::Jump(usize::MAX));
+                    }
+                }
+            }
+            let value = instructions.len();
+            for site in to_value {
+                instructions[site] = Instruction::Jump(value);
+            }
+            self.lower_expr(&arm.value, instructions);
+            to_end.push(instructions.len());
+            instructions.push(Instruction::Jump(usize::MAX));
+            if let Some(site) = to_next_pattern {
+                instructions[site] = Instruction::JumpIfFalse(instructions.len());
+            }
+            if always {
+                break;
+            }
+        }
+        if !always {
+            instructions.push(Instruction::Push(Constant::Null));
+        }
+        let end = instructions.len();
+        for site in to_end {
+            instructions[site] = Instruction::Jump(end);
+        }
+        instructions.push(Instruction::ScopeExit);
+    }
+}
+
 /// The local a `match` holds its subject in. Not a name a script can write.
 const MATCHED: &str = "(matched)";

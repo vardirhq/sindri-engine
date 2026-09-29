@@ -169,6 +169,47 @@ impl Parser<'_> {
         })
     }
 
+    /// `match subject { Phase.Lobby => "Waiting", _ => "Go" }`: arms that give
+    /// a value, separated by commas.
+    pub(super) fn parse_match_value(&mut self) -> Option<crate::ast::Expr> {
+        let start = self.expect_simple(&TokenKind::Match, "expected `match`")?;
+        let subject = self.parse_expression()?;
+        self.expect_simple(
+            &TokenKind::LeftBrace,
+            "expected `{` after the value to match",
+        )?;
+        let mut arms = Vec::new();
+        while !self.at(&TokenKind::RightBrace) && !self.at(&TokenKind::Eof) {
+            let arm_start = self.current().span;
+            let mut patterns = vec![self.parse_pattern()?];
+            while self.consume_simple(&TokenKind::Pipe).is_some() {
+                patterns.push(self.parse_pattern()?);
+            }
+            self.expect_simple(&TokenKind::FatArrow, "expected `=>` after a match pattern")?;
+            let value = self.parse_expression()?;
+            let span = arm_start.join(value.span);
+            arms.push(crate::ast::MatchValueArm {
+                patterns,
+                value,
+                span,
+            });
+            if self.consume_simple(&TokenKind::Comma).is_none() {
+                break;
+            }
+        }
+        let end = self.expect_simple(
+            &TokenKind::RightBrace,
+            "expected `}` after the match arms -- an arm that gives a value ends with `,`",
+        )?;
+        Some(crate::ast::Expr {
+            kind: crate::ast::ExprKind::Match {
+                subject: Box::new(subject),
+                arms,
+            },
+            span: start.join(end),
+        })
+    }
+
     /// `Phase.Lobby`, or `_`.
     fn parse_pattern(&mut self) -> Option<crate::ast::Pattern> {
         let (first, first_span) =

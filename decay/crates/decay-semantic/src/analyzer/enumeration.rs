@@ -155,6 +155,47 @@ impl Analyzer<'_, '_> {
     /// one of its variants once, nothing follows `_`, and every variant is
     /// covered unless `_` is there.
     pub(super) fn analyze_match(&mut self, subject: &Expr, arms: &[MatchArm], span: Span) {
+        let patterns: Vec<&[Pattern]> = arms.iter().map(|arm| arm.patterns.as_slice()).collect();
+        self.check_match(subject, &patterns, span);
+        for arm in arms {
+            self.analyze_block(&arm.body, true);
+        }
+    }
+
+    /// `match phase { Phase.Lobby => "Waiting", _ => "Go" }`: checked as the
+    /// statement is, and every arm gives one type, which is the match's.
+    pub(super) fn match_value_type(
+        &mut self,
+        subject: &Expr,
+        arms: &[decay_syntax::MatchValueArm],
+        span: Span,
+    ) -> Type {
+        let patterns: Vec<&[Pattern]> = arms.iter().map(|arm| arm.patterns.as_slice()).collect();
+        self.check_match(subject, &patterns, span);
+        let mut result = Type::Unknown;
+        for arm in arms {
+            let ty = self.expr_type(&arm.value);
+            if result == Type::Unknown {
+                result = ty;
+            } else if ty != Type::Unknown && !self.compatible(&result, &ty) {
+                self.error(
+                    Code::TypeMismatch,
+                    arm.value.span,
+                    format!(
+                        "every arm of a `match` gives the same type: the first gives `{}`, this one `{}`",
+                        result.display_name(),
+                        ty.display_name()
+                    ),
+                );
+            }
+        }
+        result
+    }
+
+    /// The subject is an enum's value, every pattern names one of its
+    /// variants once, nothing follows `_`, and every variant is covered unless
+    /// `_` is there.
+    fn check_match(&mut self, subject: &Expr, arms: &[&[Pattern]], span: Span) {
         let subject_type = self.expr_type(subject);
         let enumeration = match &subject_type {
             Type::Named(name) if self.enums.contains_key(name) => Some(name.clone()),
@@ -177,8 +218,8 @@ impl Analyzer<'_, '_> {
             .unwrap_or_default();
         let mut covered = HashSet::new();
         let mut wildcard = false;
-        for arm in arms {
-            for pattern in &arm.patterns {
+        for patterns in arms {
+            for pattern in *patterns {
                 if wildcard {
                     self.error(
                         Code::UnreachableArm,
@@ -218,7 +259,6 @@ impl Analyzer<'_, '_> {
                     }
                 }
             }
-            self.analyze_block(&arm.body, true);
         }
         if let Some(name) = enumeration
             && !wildcard

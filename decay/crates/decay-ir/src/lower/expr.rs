@@ -100,6 +100,9 @@ impl Lowerer<'_> {
                 instructions.push(Instruction::Push(Constant::Null));
             }
             ExprKind::Group(inner) => self.lower_expr(inner, instructions),
+            ExprKind::Match { subject, arms } => {
+                self.lower_match_value(subject, arms, instructions);
+            }
             ExprKind::Unary { op, expr } => {
                 self.lower_expr(expr, instructions);
                 instructions.push(Instruction::Unary(*op));
