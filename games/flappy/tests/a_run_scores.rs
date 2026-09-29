@@ -25,7 +25,10 @@ fn the_bird_waits_until_the_first_flap() {
         step(&mut run);
     }
     let [x, y] = run.position(bird);
-    assert!((x + 3.5).abs() < 0.02 && (y - 0.5).abs() < 0.02, "waiting at {x}, {y}");
+    assert!(
+        (x + 3.5).abs() < 0.02 && (y - 0.5).abs() < 0.02,
+        "waiting at {x}, {y}"
+    );
     assert!(run.board("started") < 1.0);
 
     tap(&mut run);
@@ -50,7 +53,10 @@ fn the_course_scrolls_after_play_starts() {
         }
     }
     let after = run.position(pipe)[0];
-    assert!(after < before - 1.0, "the pipe moved from {before} to {after}");
+    assert!(
+        after < before - 1.0,
+        "the pipe moved from {before} to {after}"
+    );
 }
 
 #[test]
@@ -64,10 +70,16 @@ fn a_failed_run_can_restart() {
             break;
         }
     }
-    assert!(run.board("dead") > 0.0, "gravity eventually ends an unattended run");
+    assert!(
+        run.board("dead") > 0.0,
+        "gravity eventually ends an unattended run"
+    );
 
     tap(&mut run);
     let [x, y] = run.position(bird);
     assert!(run.board("dead") < 1.0 && run.board("started") < 1.0);
-    assert!((x + 3.5).abs() < 0.05 && (y - 0.5).abs() < 0.05, "restarted at {x}, {y}");
+    assert!(
+        (x + 3.5).abs() < 0.05 && (y - 0.5).abs() < 0.05,
+        "restarted at {x}, {y}"
+    );
 }

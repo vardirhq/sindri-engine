@@ -49,7 +49,10 @@ impl Run {
         let mut sources = ScriptSources::new();
         for entry in std::fs::read_dir(root.join("scripts")).map_err(|error| error.to_string())? {
             let path = entry.map_err(|error| error.to_string())?.path();
-            if path.extension().is_some_and(|extension| extension == "decay") {
+            if path
+                .extension()
+                .is_some_and(|extension| extension == "decay")
+            {
                 let name = path.file_name().unwrap_or_default().to_string_lossy();
                 let text = std::fs::read_to_string(&path).map_err(|error| error.to_string())?;
                 sources.insert(format!("scripts/{name}"), text);
@@ -78,11 +81,17 @@ impl Run {
             &mut self.world,
             &self.components,
             ScriptFrame::new(&self.sources, &self.input, delta)
-                .with_physics(Physics2d { world: physics, events })
+                .with_physics(Physics2d {
+                    world: physics,
+                    events,
+                })
                 .with_animations(&mut self.animations),
         );
         notes.extend(report.failures.iter().map(ToString::to_string));
-        if let Err(error) = self.animations.advance(&self.world, &self.components, delta) {
+        if let Err(error) = self
+            .animations
+            .advance(&self.world, &self.components, delta)
+        {
             notes.push(error.to_string());
         }
         self.input.begin_frame(step);
@@ -108,7 +117,11 @@ impl Run {
     pub fn entity(&self, id: &str) -> Option<EntityId> {
         self.world
             .entities()
-            .find(|(_, data)| data.source_id.as_ref().is_some_and(|source| source.as_str() == id))
+            .find(|(_, data)| {
+                data.source_id
+                    .as_ref()
+                    .is_some_and(|source| source.as_str() == id)
+            })
             .map(|(entity, _)| entity)
     }
 
