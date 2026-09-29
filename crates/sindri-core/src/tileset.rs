@@ -12,7 +12,8 @@ pub use shape::TileBox;
 use validate::validate_visual;
 
 pub const TILESET_FORMAT_VERSION: u32 = 1;
-pub const TILESET_SUFFIX: &str = ".tileset.json";
+pub const TILESET_SUFFIX: &str = ".tileset";
+pub const LEGACY_TILESET_SUFFIX: &str = ".tileset.json";
 
 /// The block set the engine ships: grass, dirt, stone, water, lava and the
 /// rest. Its bytes live in `sindri-assets`; the name lives here so a scene can
@@ -130,27 +131,6 @@ impl TileFaces {
     }
 
     /// What to draw on a face, falling back to the face opposite it.
-    ///
-    /// A block drawn for one fixed viewpoint only ever needed three sides.
-    /// Gather's tiles define `top`, `south` and `east` for exactly that reason:
-    /// no camera could see the others, so no art was drawn for them. A cube a
-    /// camera can go round needs all six, and redrawing every tile to say
-    /// "the north face looks like the south face" would be ceremony -- it is
-    /// what a block without a distinguished front means.
-    ///
-    /// So a missing face borrows the one opposite it: north from south, west
-    /// from east, bottom from top, and each the other way about for art drawn
-    /// from the other side. The visual is used as it is rather than mirrored,
-    /// which is right for the patterned-but-not-handed textures blocks
-    /// usually carry; a tile that needs handedness names both faces itself.
-    ///
-    /// Returns which face's art was borrowed as well as the art, because a
-    /// caller that does want to mirror needs to know it is looking at a
-    /// stand-in.
-    /// This face, from the buried look where it names one.
-    ///
-    /// Falls through to the ordinary faces rather than replacing them, so a
-    /// tile that loses only its fringe names only its sides.
     #[must_use]
     pub fn resolved_in<'a>(
         &'a self,
@@ -184,137 +164,45 @@ impl TileFaces {
     }
 }
 
-/// One more look a tile may have, and how often it should appear.
 #[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
 pub struct TileVariant {
     pub faces: TileFaces,
-    /// How often relative to the tile's own faces and its other variants.
-    ///
-    /// Four plain patches to one with a flower is a tile of weight four and a
-    /// variant of weight one. Zero is a look that is defined and never chosen,
-    /// which is a useful thing to be able to say while working.
     #[serde(default = "one_weight", skip_serializing_if = "is_one")]
     pub weight: u32,
 }
 
-/// What one stable tile ID means.
 #[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
 pub struct TileDefinition {
     pub faces: TileFaces,
-    /// What this tile looks like with something standing on it.
-    ///
-    /// Grass is the case that asks for it: a grass block under another block
-    /// has no grass any more, and a cliff whose every course wears a green
-    /// fringe reads as a stack of lawns rather than as a cut through soil.
-    ///
-    /// Only the faces named here change; the rest fall back to the ordinary
-    /// ones, so a tile that only loses its fringe says so in one line. A tile
-    /// that looks the same buried names nothing and is unaffected.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub covered: Option<TileFaces>,
-    /// How much of its cell this tile fills, from its floor upward.
-    ///
-    /// One is the whole cell and the default, so every tile written before
-    /// heights existed keeps meaning exactly what it did. A half fills the
-    /// bottom half: a slab. The value decides what this tile hides, how high
-    /// something standing on it stands, and nothing about the art — a tile's
-    /// faces are baked at its own height, the way a slab in a voxel game is a
-    /// different block rather than a squashed one.
-    ///
-    /// Bounded at one because a taller tile would reach into the cell above,
-    /// and every part of the system that asks what occupies a cell — occlusion,
-    /// collision, the surface a walker walks on — assumes a cell's contents
-    /// stay inside it. Something two blocks tall is two cells.
     #[serde(default = "full_height", skip_serializing_if = "is_full_height")]
     pub height: f32,
-    /// The part of its cell this tile fills, when a height cannot say it.
-    ///
-    /// Left out, the tile is the full footprint of its cell up to `height`,
-    /// which is what every tile written before boxes existed means. Set, it
-    /// replaces `height` entirely rather than combining with it -- a document
-    /// naming both is refused rather than having one of them quietly win.
-    ///
-    /// This is the shape the tile *is*, not the shape of its art. Its faces
-    /// are still six quads on the box's own sides, so a fence post is a thin
-    /// box wearing a fence texture rather than a full block whose picture
-    /// happens to be mostly transparent.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub extent: Option<TileBox>,
-    /// Whether this tile hides a neighbouring tile's shared face.
     #[serde(default = "yes", skip_serializing_if = "is_true")]
     pub occludes: bool,
-    /// Whether this tile's top holds anything up.
-    ///
-    /// Water supports and is not walkable, which is the distinction one flag
-    /// could not make. A pond and a hole are not the same place: a boat, a
-    /// pier or a lily floats on one and falls through the other, and before
-    /// this a pond had no surface at all, so three rocks standing off Gather's
-    /// shore had to be given a sandbar to stand on.
-    ///
-    /// False is decoration: something drawn in a cell that nothing rests on.
     #[serde(default = "yes", skip_serializing_if = "is_true")]
     pub supports: bool,
-    /// Other looks this tile may have, chosen by where the cell is.
-    ///
-    /// One tile ID with several looks, rather than several IDs that mean the
-    /// same thing. A scene then stores what a cell *is* and the renderer
-    /// decides what it looks like, which is the difference between a map that
-    /// says "grass" five hundred times and one where an author hand-scattered
-    /// five kinds of grass and has to keep doing it.
-    ///
-    /// Chosen per cell rather than per face, because a block whose top came
-    /// from one look and whose side came from another is not a block.
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub variants: Vec<TileVariant>,
-    /// How often this tile's own faces are chosen against its variants.
     #[serde(default = "one_weight", skip_serializing_if = "is_one")]
     pub weight: u32,
-    /// Whether a walker can stand on that top.
-    ///
-    /// The narrower question, and the one navigation asks. Implies `supports`,
-    /// because standing on something is resting on it; a tile that is walkable
-    /// and unsupporting is rejected rather than guessed at.
-    ///
-    /// `solid` was the old name for this and still reads, because renaming a
-    /// field is not the same as changing what a document meant.
     #[serde(default = "yes", alias = "solid", skip_serializing_if = "is_true")]
     pub walkable: bool,
-    /// Words a game gives this block, for its scripts to ask about: `hot`,
-    /// `slippery`, `harvestable`.
-    ///
-    /// The engine reads none of them. They are how a block carries what a
-    /// particular game means by it, without the engine growing a flag for
-    /// every game's idea of what ground can be.
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub tags: Vec<String>,
-    /// How much the block lights itself: lava glows in the dark and in
-    /// shadow. Zero, the default, is a block lit only by the scene.
     #[serde(default, skip_serializing_if = "is_zero")]
     pub glow: f32,
 }
 
 impl TileDefinition {
-    /// The part of its cell this tile fills.
-    ///
-    /// The one place `height` and `extent` are reconciled, so nothing else has
-    /// to know there were ever two ways to say it.
     #[must_use]
     pub fn bounds(&self) -> TileBox {
         self.extent
             .unwrap_or_else(|| TileBox::from_height(self.height))
     }
 
-    /// The faces to draw for a cell at this coordinate.
-    ///
-    /// The tile's own faces when it has no variants, which is every tile
-    /// written before variants existed. Otherwise a deterministic choice from
-    /// where the cell is, the tile's name and the volume's seed -- so the same
-    /// cell looks the same on every machine and after every reload, and two
-    /// different tiles in one cell do not vary in lockstep.
-    ///
-    /// Falls back to its own faces when every weight is zero. Something has to
-    /// be drawn, and refusing here would leave a hole in the map over a
-    /// tile-set mistake.
     #[must_use]
     pub fn faces_at(&self, seed: u64, coord: [i32; 3], tile: &str) -> &TileFaces {
         if self.variants.is_empty() {
@@ -339,36 +227,18 @@ impl TileDefinition {
         }
     }
 
-    /// Every face set this tile may draw, its own first.
-    ///
-    /// What a texture or sheet scan wants: a variant's sprites have to be
-    /// loaded whether or not this particular scene happens to choose them.
     pub fn all_faces(&self) -> impl Iterator<Item = &TileFaces> {
         std::iter::once(&self.faces).chain(self.variants.iter().map(|variant| &variant.faces))
     }
 
-    /// Whether this tile fills its cell all the way to the top.
-    ///
-    /// The question occlusion asks most often, and asking it here keeps the
-    /// float comparison in one place rather than in every caller.
     #[must_use]
     pub fn fills_cell(&self) -> bool {
         self.bounds().is_full()
     }
 
-    /// Whether this tile hides a face of something `height` tall beside it.
-    ///
-    /// A neighbour hides a side face only when it is at least as tall as the
-    /// face it would cover. A full block beside a slab hides the slab's side;
-    /// a slab beside a full block leaves the block's upper half showing, which
-    /// is the whole reason a slab reads as a slab.
     #[must_use]
     pub fn hides_side_of(&self, height: f32) -> bool {
         let shape = self.bounds();
-        // The projected path draws a cell as a flat picture, so it can only
-        // ask about heights. A tile that is a box rather than a slab is not a
-        // shape this path can reason about at all, and a box that does not
-        // fill its footprint must never be taken for a wall that hides one.
         self.occludes
             && shape.min == [0.0, 0.0, 0.0]
             && shape.max[0] >= 1.0
@@ -377,7 +247,6 @@ impl TileDefinition {
     }
 }
 
-/// A reusable project asset shared by scenes and tile volumes.
 #[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
 pub struct TileSetDocument {
     pub format_version: u32,
@@ -407,34 +276,19 @@ impl TileSetDocument {
             if tile.trim().is_empty() {
                 return Err(TileSetError::EmptyTileId);
             }
-
-            if !definition.height.is_finite() || definition.height <= 0.0 || definition.height > 1.0
-            {
-                return Err(TileSetError::InvalidHeight {
-                    tile: tile.clone(),
-                    height: definition.height,
-                });
+            if !definition.height.is_finite() || definition.height <= 0.0 || definition.height > 1.0 {
+                return Err(TileSetError::InvalidHeight { tile: tile.clone(), height: definition.height });
             }
-            // A height and a box are two answers to one question. Taking
-            // either silently would make a document mean something its author
-            // can only discover by looking at the picture.
             if definition.extent.is_some() && !is_full_height(&definition.height) {
                 return Err(TileSetError::HeightAndExtent(tile.clone()));
             }
             if let Some(extent) = definition.extent {
                 let sane = |axis: usize| {
                     let (low, high) = (extent.min[axis], extent.max[axis]);
-                    low.is_finite()
-                        && high.is_finite()
-                        && (0.0..=1.0).contains(&low)
-                        && (0.0..=1.0).contains(&high)
-                        && high > low
+                    low.is_finite() && high.is_finite() && (0.0..=1.0).contains(&low) && (0.0..=1.0).contains(&high) && high > low
                 };
                 if !(0..3).all(sane) {
-                    return Err(TileSetError::InvalidExtent {
-                        tile: tile.clone(),
-                        extent,
-                    });
+                    return Err(TileSetError::InvalidExtent { tile: tile.clone(), extent });
                 }
             }
             if !(definition.glow.is_finite() && definition.glow >= 0.0) {
@@ -443,9 +297,6 @@ impl TileSetDocument {
             if definition.walkable && !definition.supports {
                 return Err(TileSetError::WalkableWithoutSupport(tile.clone()));
             }
-            // Every look, not just the first: a variant with a broken sprite
-            // is a hole that appears in whichever cells happen to choose it,
-            // which is the worst kind of thing to find later.
             for faces in definition.all_faces() {
                 if faces.iter().next().is_none() {
                     return Err(TileSetError::TileWithoutFaces(tile.clone()));
@@ -464,8 +315,6 @@ impl TileSetDocument {
     }
 }
 
-// `PartialEq` without `Eq`: an invalid height is reported as the number that
-// was written, and a float has no total equality to offer.
 #[derive(Clone, Debug, Error, PartialEq)]
 pub enum TileSetError {
     #[error("tile set JSON is not valid: {message}")]
@@ -480,18 +329,12 @@ pub enum TileSetError {
     WalkableWithoutSupport(String),
     #[error("tile `{0}` sets both `height` and `extent`; a box already says how tall it is")]
     HeightAndExtent(String),
-    #[error(
-        "tile `{tile}` has an extent {extent:?} that is not inside its cell with a positive size"
-    )]
+    #[error("tile `{tile}` has an extent {extent:?} that is not inside its cell with a positive size")]
     InvalidExtent { tile: String, extent: TileBox },
     #[error("tile `{0}` does not define any face visuals")]
     TileWithoutFaces(String),
     #[error("tile `{tile}` has an invalid {face:?} sprite reference `{sprite}`")]
-    InvalidSprite {
-        tile: String,
-        face: TileFace,
-        sprite: String,
-    },
+    InvalidSprite { tile: String, face: TileFace, sprite: String },
     #[error("tile `{tile}` has a non-finite or non-positive {face:?} visual size")]
     InvalidSize { tile: String, face: TileFace },
     #[error("tile `{tile}` has a non-finite {face:?} visual offset")]
@@ -504,49 +347,19 @@ pub enum TileSetError {
     InvalidHeight { tile: String, height: f32 },
 }
 
-const fn yes() -> bool {
-    true
-}
-
-const fn one_weight() -> u32 {
-    1
-}
-
-// By reference because `skip_serializing_if` hands one over, the same reason
-// `is_true` beside it takes one.
+const fn yes() -> bool { true }
+const fn one_weight() -> u32 { 1 }
 #[allow(clippy::trivially_copy_pass_by_ref)]
-const fn is_one(weight: &u32) -> bool {
-    *weight == 1
-}
-
-const fn full_height() -> f32 {
-    1.0
-}
-
-/// Whether to leave `height` out of the serialized form.
-///
-/// Compared on the bits rather than within a margin: the question is whether
-/// this is the default that can be omitted and read back identically, and a
-/// height a hair under one is a real height that has to be written down.
+const fn is_one(weight: &u32) -> bool { *weight == 1 }
+const fn full_height() -> f32 { 1.0 }
 #[allow(clippy::trivially_copy_pass_by_ref)]
-fn is_full_height(value: &f32) -> bool {
-    value.to_bits() == full_height().to_bits()
-}
-
+fn is_full_height(value: &f32) -> bool { value.to_bits() == full_height().to_bits() }
 #[allow(clippy::trivially_copy_pass_by_ref)]
-const fn is_true(value: &bool) -> bool {
-    *value
-}
-
+const fn is_true(value: &bool) -> bool { *value }
 #[allow(clippy::trivially_copy_pass_by_ref)]
-fn is_zero(value: &f32) -> bool {
-    *value == 0.0
-}
-
+fn is_zero(value: &f32) -> bool { *value == 0.0 }
 #[allow(clippy::trivially_copy_pass_by_ref)]
-const fn is_zero_vec(value: &[f32; 2]) -> bool {
-    value[0] == 0.0 && value[1] == 0.0
-}
+const fn is_zero_vec(value: &[f32; 2]) -> bool { value[0] == 0.0 && value[1] == 0.0 }
 
 #[cfg(test)]
 mod tests;
