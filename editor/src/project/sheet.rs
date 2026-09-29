@@ -6,12 +6,14 @@ use sindri_core::SpriteSheetDocument;
 
 use super::kind::AssetKind;
 
-/// What a sheet's file is called, relative to the texture it slices.
-///
-/// The same rule `sheet_id_for` applies to asset IDs, spelled here in terms of
-/// paths on disk. Two spellings of one rule is a thing to watch, but the
-/// browser walks a directory and does not have asset IDs to hand.
-pub(super) const SHEET_SUFFIX: &str = ".sheet.json";
+/// Native and legacy sheet suffixes, relative to the texture they slice.
+const SHEET_SUFFIX: &str = ".sheet";
+const LEGACY_SHEET_SUFFIX: &str = ".sheet.json";
+
+fn sheet_stem(name: &str) -> Option<&str> {
+    name.strip_suffix(SHEET_SUFFIX)
+        .or_else(|| name.strip_suffix(LEGACY_SHEET_SUFFIX))
+}
 
 /// The texture a sheet slices, when one sits beside it.
 ///
@@ -19,7 +21,7 @@ pub(super) const SHEET_SUFFIX: &str = ".sheet.json";
 /// directory which image is there rather than guessing at `.png`.
 pub fn sliced_texture_beside(sheet: &Path) -> Option<PathBuf> {
     let name = sheet.file_name()?.to_str()?;
-    let stem = name.strip_suffix(SHEET_SUFFIX)?;
+    let stem = sheet_stem(name)?;
     let directory = sheet.parent()?;
     std::fs::read_dir(directory)
         .ok()?
@@ -34,15 +36,19 @@ pub fn sliced_texture_beside(sheet: &Path) -> Option<PathBuf> {
 
 /// The sprites the sheet beside `texture` names, or nothing.
 ///
-/// A sheet that will not parse yields no sprites rather than an error: the
-/// browser's job is to list a directory, and a broken sidecar is something the
-/// slicer shows and fixes, not something that should empty the panel.
+/// Prefer the native sidecar, but keep reading the old JSON-suffixed form while
+/// projects migrate. A sheet that will not parse yields no sprites rather than
+/// an error: the browser's job is to list a directory, and a broken sidecar is
+/// something the slicer shows and fixes, not something that should empty the panel.
 pub fn sprites_beside(texture: &Path) -> Vec<String> {
     let Some(stem) = texture.file_stem().and_then(|stem| stem.to_str()) else {
         return Vec::new();
     };
-    let sheet = texture.with_file_name(format!("{stem}{SHEET_SUFFIX}"));
-    let Ok(json) = std::fs::read_to_string(sheet) else {
+    let native = texture.with_file_name(format!("{stem}{SHEET_SUFFIX}"));
+    let legacy = texture.with_file_name(format!("{stem}{LEGACY_SHEET_SUFFIX}"));
+    let json = std::fs::read_to_string(&native)
+        .or_else(|_| std::fs::read_to_string(&legacy));
+    let Ok(json) = json else {
         return Vec::new();
     };
     SpriteSheetDocument::from_json(&json)
@@ -66,14 +72,14 @@ mod tests {
         let directory = tempfile::tempdir().expect("a temporary directory");
         fs::write(directory.path().join("tiles.png"), []).expect("writable");
         fs::write(
-            directory.path().join("tiles.sheet.json"),
+            directory.path().join("tiles.sheet"),
             r#"{ "format_version": 1,
                  "grid": { "columns": 2, "rows": 1, "names": ["light", "dark"] } }"#,
         )
         .expect("writable");
 
-        fs::write(directory.path().join("a.scene.json"), "{}").expect("writable");
-        let tree = ProjectTree::beside(Some(&directory.path().join("a.scene.json")));
+        fs::write(directory.path().join("a.scene"), "{}").expect("writable");
+        let tree = ProjectTree::beside(Some(&directory.path().join("a.scene")));
         let texture = tree
             .entries()
             .iter()
@@ -90,6 +96,23 @@ mod tests {
         );
     }
 
+    #[test]
+    fn a_legacy_sheet_still_slices_its_texture() {
+        let directory = tempfile::tempdir().expect("a temporary directory");
+        fs::write(directory.path().join("tiles.png"), []).expect("writable");
+        fs::write(
+            directory.path().join("tiles.sheet.json"),
+            r#"{ "format_version": 1,
+                 "grid": { "columns": 1, "rows": 1, "names": ["whole"] } }"#,
+        )
+        .expect("writable");
+        assert_eq!(sprites_beside(&directory.path().join("tiles.png")), vec!["whole"]);
+        assert_eq!(
+            sliced_texture_beside(&directory.path().join("tiles.sheet.json")),
+            Some(directory.path().join("tiles.png"))
+        );
+    }
+
     /// An orphaned sheet *is* listed, because a sidecar cutting up an image
     /// nobody can find is exactly what a browser that hides files would let you
     /// never notice.
@@ -97,17 +120,17 @@ mod tests {
     fn a_sheet_with_no_texture_is_still_listed() {
         let directory = tempfile::tempdir().expect("a temporary directory");
         fs::write(
-            directory.path().join("gone.sheet.json"),
+            directory.path().join("gone.sheet"),
             r#"{ "format_version": 1, "grid": { "columns": 1, "rows": 1 } }"#,
         )
         .expect("writable");
 
-        fs::write(directory.path().join("a.scene.json"), "{}").expect("writable");
-        let tree = ProjectTree::beside(Some(&directory.path().join("a.scene.json")));
+        fs::write(directory.path().join("a.scene"), "{}").expect("writable");
+        let tree = ProjectTree::beside(Some(&directory.path().join("a.scene")));
         assert!(
             tree.entries()
                 .iter()
-                .any(|entry| entry.kind == AssetKind::Sheet && entry.name == "gone.sheet.json"),
+                .any(|entry| entry.kind == AssetKind::Sheet && entry.name == "gone.sheet"),
             "a sheet slicing nothing is worth seeing"
         );
     }
@@ -119,10 +142,10 @@ mod tests {
     fn a_broken_sheet_leaves_its_texture_unsliced() {
         let directory = tempfile::tempdir().expect("a temporary directory");
         fs::write(directory.path().join("tiles.png"), []).expect("writable");
-        fs::write(directory.path().join("tiles.sheet.json"), "{ not json").expect("writable");
+        fs::write(directory.path().join("tiles.sheet"), "{ not json").expect("writable");
 
-        fs::write(directory.path().join("a.scene.json"), "{}").expect("writable");
-        let tree = ProjectTree::beside(Some(&directory.path().join("a.scene.json")));
+        fs::write(directory.path().join("a.scene"), "{}").expect("writable");
+        let tree = ProjectTree::beside(Some(&directory.path().join("a.scene")));
         let texture = tree
             .entries()
             .iter()
