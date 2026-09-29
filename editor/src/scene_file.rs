@@ -12,7 +12,7 @@ use std::{
     path::{Path, PathBuf},
 };
 
-use sindri_core::{SceneDocument, SceneJsonError, SceneMigrator, World, WorldError};
+use sindri_core::{LEGACY_SCENE_SUFFIX, SCENE_SUFFIX, SceneDocument, SceneJsonError, SceneMigrator, World, WorldError};
 use thiserror::Error;
 
 /// A scene document together with the file it belongs to.
@@ -55,9 +55,6 @@ impl SceneFile {
     }
 
     /// The document as last read from or written to disk.
-    ///
-    /// This is what "reset to authored" resets to, so it follows a save: after
-    /// saving, the file is what the scene was authored as.
     pub const fn document(&self) -> &SceneDocument {
         &self.document
     }
@@ -75,21 +72,11 @@ impl SceneFile {
         )
     }
 
-    /// Writes a world back to the file it was opened from.
-    ///
-    /// The bytes are canonical, so saving a scene nobody edited reproduces the
-    /// file exactly and a review sees only what changed.
     pub fn save(&mut self, world: &World) -> Result<(), SceneFileError> {
         let path = self.path.clone().ok_or(SceneFileError::NoPath)?;
         self.save_as(&path, world)
     }
 
-    /// Writes a world to a path, and adopts it.
-    ///
-    /// The adoption happens after the write rather than before it, so a save
-    /// that fails leaves the scene attached to the file it was attached to. A
-    /// detached scene — one the editor opened with no file behind it — becomes
-    /// a real file this way, which is the only way it ever could.
     pub fn save_as(&mut self, path: &Path, world: &World) -> Result<(), SceneFileError> {
         let document = world.to_scene()?;
         write_scene(path, &document)?;
@@ -98,26 +85,14 @@ impl SceneFile {
         Ok(())
     }
 
-    /// Writes a document to a path nothing is open on yet.
-    ///
-    /// What New Scene uses. The file is written and then opened through the
-    /// ordinary path rather than adopted in memory, so a new scene proves it
-    /// loads before anyone starts working in it.
     pub fn create(path: &Path, document: &SceneDocument) -> Result<(), SceneFileError> {
         write_scene(path, document)
     }
 
-    /// Follows the file to a new path without writing anything.
-    ///
-    /// What renaming the open scene in the project browser needs: the editor
-    /// holds the path it saves to, so a rename the editor was not told about
-    /// would have the next save write the scene back under its old name and
-    /// leave two of them on disk.
     pub fn adopt(&mut self, path: &Path) {
         self.path = Some(path.to_path_buf());
     }
 
-    /// Re-reads the file, discarding whatever the editor had in memory.
     pub fn reload(&mut self) -> Result<(), SceneFileError> {
         let path = self.path.clone().ok_or(SceneFileError::NoPath)?;
         *self = Self::open(path)?;
@@ -127,26 +102,27 @@ impl SceneFile {
 
 /// The path a scene chosen in a save dialog is actually written to.
 ///
-/// A scene is `*.scene.json` and nothing else: that is what the project browser
-/// recognises and what `SceneFile::open` is offered in a file dialog. Someone
-/// typing "level" into a save box means a scene called level, and writing that
-/// verbatim would produce one the browser lists as a plain file and cannot
-/// reopen.
+/// New scenes use Sindri's native `.scene` extension. Explicit legacy
+/// `.scene.json` names are normalized when creating a new file, while existing
+/// legacy files remain readable and save back to their original path.
 pub fn scene_path(chosen: &Path) -> PathBuf {
     let name = chosen
         .file_name()
         .map_or_else(String::new, |name| name.to_string_lossy().into_owned());
-    if name.to_lowercase().ends_with(SCENE_SUFFIX) {
+    let lower = name.to_lowercase();
+    if lower.ends_with(SCENE_SUFFIX) && !lower.ends_with(LEGACY_SCENE_SUFFIX) {
         return chosen.to_path_buf();
     }
-    let stem = name.strip_suffix(".json").unwrap_or(&name);
+    let stem = if lower.ends_with(LEGACY_SCENE_SUFFIX) {
+        &name[..name.len() - LEGACY_SCENE_SUFFIX.len()]
+    } else if lower.ends_with(".json") {
+        &name[..name.len() - ".json".len()]
+    } else {
+        &name
+    };
     chosen.with_file_name(format!("{stem}{SCENE_SUFFIX}"))
 }
 
-/// What a scene file is called, and what the browser reads a scene by.
-const SCENE_SUFFIX: &str = ".scene.json";
-
-/// Writes a document as canonical JSON.
 fn write_scene(path: &Path, document: &SceneDocument) -> Result<(), SceneFileError> {
     let text = document.to_canonical_json()?;
     std::fs::write(path, text).map_err(|source| SceneFileError::Write {
@@ -201,37 +177,37 @@ mod tests {
     }
 
     fn written(directory: &Path, text: &str) -> PathBuf {
-        let path = directory.join("scene.json");
+        let path = directory.join("scene.scene");
         std::fs::write(&path, text).unwrap();
         path
     }
 
-    /// A save dialog takes a name, not an extension, so the suffix is the
-    /// editor's business: a scene written as `level.json` would be listed by
-    /// the project browser as a plain file it cannot open.
     #[test]
-    fn a_chosen_name_becomes_a_scene_file_name() {
+    fn a_chosen_name_becomes_a_native_scene_file_name() {
         let cases = [
-            ("level", "level.scene.json"),
-            ("level.json", "level.scene.json"),
-            ("level.scene.json", "level.scene.json"),
-            // Already a scene, whatever case it was typed in.
-            ("Level.Scene.JSON", "Level.Scene.JSON"),
+            ("level", "level.scene"),
+            ("level.json", "level.scene"),
+            ("level.scene.json", "level.scene"),
+            ("level.scene", "level.scene"),
+            ("Level.Scene", "Level.Scene"),
         ];
         for (chosen, expected) in cases {
             assert_eq!(
                 scene_path(&PathBuf::from("/project").join(chosen)),
                 PathBuf::from("/project").join(expected),
-                "{chosen} was not turned into a scene file name"
+                "{chosen} was not turned into a native scene file name"
             );
         }
     }
 
-    /// A scene with no file behind it gains one, and what it writes reopens.
-    ///
-    /// The case the editor could not answer at all: started where the default
-    /// scene is not, it opened detached with Save disabled and no way to make
-    /// a file to save into.
+    #[test]
+    fn a_legacy_scene_still_opens() {
+        let directory = tempfile::tempdir().unwrap();
+        let path = directory.path().join("legacy.scene.json");
+        std::fs::write(&path, authored_json()).unwrap();
+        assert!(SceneFile::open(path).is_ok());
+    }
+
     #[test]
     fn a_detached_scene_can_be_saved_somewhere() {
         let directory = tempfile::tempdir().unwrap();
@@ -241,7 +217,7 @@ mod tests {
         let world = World::from_scene(&SceneDocument::from_json(&authored_json()).unwrap())
             .unwrap()
             .world;
-        let path = directory.path().join("forked.scene.json");
+        let path = directory.path().join("forked.scene");
         file.save_as(&path, &world).unwrap();
 
         assert_eq!(file.path(), Some(path.as_path()));
@@ -261,23 +237,13 @@ mod tests {
             ..Transform3D::default()
         });
         let edited = world.to_scene().unwrap();
-        assert_ne!(
-            &edited,
-            file.document(),
-            "the edit should have changed the document"
-        );
+        assert_ne!(&edited, file.document());
         file.save(&world).unwrap();
 
         let reopened = SceneFile::open(&path).unwrap();
-        assert_eq!(
-            reopened.document(),
-            &edited,
-            "the edit did not survive the round trip through the file"
-        );
+        assert_eq!(reopened.document(), &edited);
     }
 
-    /// Saving is only safe to offer if an untouched scene comes back unchanged.
-    /// Canonical output makes that true; this is what proves it stays true.
     #[test]
     fn saving_an_unedited_scene_leaves_the_file_byte_for_byte_identical() {
         let directory = tempfile::tempdir().unwrap();
@@ -303,11 +269,7 @@ mod tests {
 
         file.reload().unwrap();
         let reloaded = World::from_scene(file.document()).unwrap().world;
-        assert_eq!(
-            reloaded.len(),
-            1,
-            "reload should have dropped the new entity"
-        );
+        assert_eq!(reloaded.len(), 1);
     }
 
     #[test]
@@ -322,11 +284,8 @@ mod tests {
 
     #[test]
     fn a_missing_file_names_itself_in_the_error() {
-        let error = SceneFile::open("definitely/not/here.scene.json")
+        let error = SceneFile::open("definitely/not/here.scene")
             .expect_err("opening a missing scene fails");
-        assert!(
-            error.to_string().contains("definitely/not/here.scene.json"),
-            "{error}"
-        );
+        assert!(error.to_string().contains("definitely/not/here.scene"), "{error}");
     }
 }
