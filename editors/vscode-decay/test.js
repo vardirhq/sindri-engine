@@ -2,7 +2,13 @@ const assert = require('assert');
 const fs = require('fs');
 const os = require('os');
 const path = require('path');
-const { projectRoot, serverCommand, watchedFiles } = require('./server');
+const {
+  projectRoot,
+  bundledServerName,
+  bundledServerPath,
+  serverCommand,
+  watchedFiles
+} = require('./server');
 
 const manifest = require('./package.json');
 const language = require('./language-configuration.json');
@@ -42,13 +48,23 @@ for (const expected of ['annotation', 'shared', 'enum', 'struct', 'const', 'even
 const temporary = fs.mkdtempSync(path.join(os.tmpdir(), 'decay-vscode-'));
 const root = path.join(temporary, 'game');
 const script = path.join(root, 'assets', 'scripts', 'player.decay');
+const extension = path.join(temporary, 'extension');
 fs.mkdirSync(path.dirname(script), { recursive: true });
+fs.mkdirSync(path.join(extension, 'bin'), { recursive: true });
 fs.writeFileSync(path.join(root, 'sindri.toml'), '[project]\nname = "Test"\n');
 fs.writeFileSync(script, representative);
 assert.strictEqual(projectRoot(script), root);
 assert.strictEqual(projectRoot(path.join(temporary, 'outside.decay')), undefined);
-assert.strictEqual(serverCommand('configured', {}), 'configured');
-assert.strictEqual(serverCommand('configured', { SINDRI_DECAY_LSP: '/tmp/decay-lsp' }), '/tmp/decay-lsp');
+assert.strictEqual(bundledServerName('linux'), 'decay-lsp');
+assert.strictEqual(bundledServerName('win32'), 'decay-lsp.exe');
+assert.strictEqual(bundledServerPath(extension, 'linux'), path.join(extension, 'bin', 'decay-lsp'));
+
+const linuxServer = bundledServerPath(extension, 'linux');
+fs.writeFileSync(linuxServer, 'test');
+assert.strictEqual(serverCommand('decay-lsp', {}, extension, 'linux'), linuxServer);
+assert.strictEqual(serverCommand('/custom/decay-lsp', {}, extension, 'linux'), '/custom/decay-lsp');
+assert.strictEqual(serverCommand('decay-lsp', { SINDRI_DECAY_LSP: '/env/decay-lsp' }, extension, 'linux'), '/env/decay-lsp');
+assert.strictEqual(serverCommand('decay-lsp', {}, '/missing', 'linux', () => false), 'decay-lsp');
 assert.ok(watchedFiles().includes('decay'));
 fs.rmSync(temporary, { recursive: true, force: true });
 

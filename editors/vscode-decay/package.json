@@ -15,6 +15,8 @@
     "server.js",
     "language-configuration.json",
     "syntaxes/decay.tmLanguage.json",
+    "bin/decay-lsp",
+    "bin/decay-lsp.exe",
     "README.md"
   ],
   "engines": {
@@ -49,14 +51,14 @@
         "decay.server.path": {
           "type": "string",
           "default": "decay-lsp",
-          "description": "Path to the decay-lsp executable. The default uses PATH."
+          "description": "Optional path to a decay-lsp executable. Packaged extensions use their bundled server by default; changing this setting overrides it."
         }
       }
     }
   },
   "scripts": {
     "check": "node --check extension.js && node --check server.js && node test.js",
-    "package": "npx --no-install @vscode/vsce package"
+    "package": "npx --no-install @vscode/vsce package --allow-unused-files-pattern"
   },
   "dependencies": {
     "vscode-languageclient": "^9.0.1"

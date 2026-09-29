@@ -1,0 +1,88 @@
+name: Decay VS Code
+
+on:
+  pull_request:
+    paths:
+      - 'editors/vscode-decay/**'
+      - 'tools/decay-lsp/**'
+      - 'crates/sindri-decay/**'
+      - 'decay/**'
+      - '.github/workflows/decay-vscode.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'editors/vscode-decay/**'
+      - 'tools/decay-lsp/**'
+      - 'crates/sindri-decay/**'
+      - 'decay/**'
+      - '.github/workflows/decay-vscode.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  extension-checks:
+    name: Extension checks
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: editors/vscode-decay/package-lock.json
+      - working-directory: editors/vscode-decay
+        run: npm ci
+      - working-directory: editors/vscode-decay
+        run: npm run check
+
+  package:
+    name: Package ${{ matrix.label }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            label: linux-x64
+          - os: windows-latest
+            label: windows-x64
+          - os: macos-14
+            label: macos-arm64
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: dtolnay/rust-toolchain@1.95.0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: editors/vscode-decay/package-lock.json
+      - name: Build decay-lsp
+        run: cargo build --release --package decay-lsp
+      - name: Stage bundled server (Unix)
+        if: runner.os != 'Windows'
+        shell: bash
+        run: |
+          mkdir -p editors/vscode-decay/bin
+          cp target/release/decay-lsp editors/vscode-decay/bin/decay-lsp
+          chmod +x editors/vscode-decay/bin/decay-lsp
+      - name: Stage bundled server (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force editors/vscode-decay/bin | Out-Null
+          Copy-Item target/release/decay-lsp.exe editors/vscode-decay/bin/decay-lsp.exe
+      - working-directory: editors/vscode-decay
+        run: npm ci
+      - working-directory: editors/vscode-decay
+        run: npm run check
+      - name: Package VSIX
+        working-directory: editors/vscode-decay
+        shell: bash
+        run: npx --no-install @vscode/vsce package --allow-unused-files-pattern --out sindri-decay-${{ matrix.label }}.vsix
+      - uses: actions/upload-artifact@v4
+        with:
+          name: sindri-decay-${{ matrix.label }}
+          path: editors/vscode-decay/sindri-decay-${{ matrix.label }}.vsix
+          if-no-files-found: error
