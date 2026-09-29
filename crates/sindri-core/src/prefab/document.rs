@@ -10,12 +10,24 @@ use crate::scene::{collapse_scalar_arrays, roots, validate_entities};
 use crate::{SceneEntity, SceneEntityId, SceneError, SceneMetadata, SceneMigrationError};
 
 /// The prefab format's own version, which is not the scene's.
+///
+/// The two documents share an entity shape and will share its migrations, but
+/// they are separate files with separate histories: a prefab gaining a
+/// document-level field is not a reason to step every scene in a project.
 pub const PREFAB_FORMAT_VERSION: u32 = 1;
-/// Native suffix for prefab assets.
+/// What a prefab file is called.
+///
+/// A prefab and a scene are both JSON documents of entities, and a host asks
+/// what a file is before it parses it. The name is the answer — it lives here,
+/// beside the document it names, because the export, the editor, and every
+/// host need it and none of them can depend on the others.
 pub const PREFAB_SUFFIX: &str = ".prefab";
-/// Legacy suffix accepted while projects migrate to the native extension.
 pub const LEGACY_PREFAB_SUFFIX: &str = ".prefab.json";
 
+/// An authored reusable entity definition.
+///
+/// One root and everything under it. Written and read exactly as a scene is,
+/// because it is a fragment of one.
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct PrefabDocument {
     pub format_version: u32,
@@ -36,8 +48,12 @@ impl Default for PrefabDocument {
 }
 
 impl PrefabDocument {
+    /// A prefab holding one entity and nothing under it.
     pub fn single(entity: SceneEntity) -> Self {
-        Self { entities: vec![entity], ..Self::default() }
+        Self {
+            entities: vec![entity],
+            ..Self::default()
+        }
     }
 
     pub fn from_json(json: &str) -> Result<Self, PrefabJsonError> {
@@ -46,6 +62,10 @@ impl PrefabDocument {
         Ok(document)
     }
 
+    /// Serializes the canonical form of this document.
+    ///
+    /// The same fixed point a scene has, and the same reason: a diff on a
+    /// prefab file should be the edit and nothing else.
     pub fn to_canonical_json(&self) -> Result<String, PrefabJsonError> {
         let canonical = self.canonicalized();
         canonical.validate()?;
@@ -65,15 +85,22 @@ impl PrefabDocument {
         self.entities.sort_by(|left, right| left.id.cmp(&right.id));
     }
 
+    /// Removes every editor-only section from the document and its entities.
     pub fn strip_editor_metadata(&mut self) {
         self.metadata.editor.clear();
-        for entity in &mut self.entities { entity.editor.clear(); }
+        for entity in &mut self.entities {
+            entity.editor.clear();
+        }
     }
 
     pub fn entity(&self, id: &SceneEntityId) -> Option<&SceneEntity> {
         self.entities.iter().find(|entity| &entity.id == id)
     }
 
+    /// The one entity a spawn produces, and the one everything else hangs off.
+    ///
+    /// A prefab with no root or with several is refused when it is read, so
+    /// this answers for every document that exists.
     pub fn root(&self) -> Result<&SceneEntity, PrefabError> {
         let mut found = roots(&self.entities);
         let root = found.next().ok_or(PrefabError::NoRoot)?;
@@ -83,16 +110,29 @@ impl PrefabDocument {
         }
     }
 
+    /// The entities under `parent`, in document order.
     pub fn children_of(&self, parent: &SceneEntityId) -> impl Iterator<Item = &SceneEntity> {
-        self.entities.iter().filter(move |entity| entity.parent.as_ref() == Some(parent))
+        self.entities
+            .iter()
+            .filter(move |entity| entity.parent.as_ref() == Some(parent))
     }
 
     pub fn validate(&self) -> Result<(), PrefabError> {
         if self.format_version != PREFAB_FORMAT_VERSION {
-            return Err(PrefabError::UnsupportedVersion { found: self.format_version, supported: PREFAB_FORMAT_VERSION });
+            return Err(PrefabError::UnsupportedVersion {
+                found: self.format_version,
+                supported: PREFAB_FORMAT_VERSION,
+            });
         }
-        if self.entities.is_empty() { return Err(PrefabError::NoRoot); }
+        if self.entities.is_empty() {
+            return Err(PrefabError::NoRoot);
+        }
         validate_entities(&self.entities)?;
+
+        // Exactly one root, which is the only rule a prefab adds to a scene.
+        // Several roots would make `World.spawn` answer with one of them and
+        // leave the rest attached to nothing an author can name; none at all is
+        // impossible for a valid graph and is reported as the empty case.
         let count = roots(&self.entities).count();
         match count {
             1 => Ok(()),
@@ -101,14 +141,24 @@ impl PrefabDocument {
         }
     }
 
+    /// The names of the components anywhere in this prefab.
+    ///
+    /// What a tool asking "does this project's registry know everything this
+    /// prefab carries" walks.
     pub fn component_names(&self) -> impl Iterator<Item = &str> {
-        self.entities.iter().flat_map(|entity| entity.components.keys().map(String::as_str))
+        self.entities
+            .iter()
+            .flat_map(|entity| entity.components.keys().map(String::as_str))
     }
 }
 
+/// A prefab with one entity carrying the given components, for tests and for
+/// tools building one from scratch.
 impl FromIterator<(String, Value)> for PrefabDocument {
     fn from_iter<T: IntoIterator<Item = (String, Value)>>(components: T) -> Self {
-        let mut entity = SceneEntity::new(SceneEntityId::new("root").expect("a non-empty literal is a valid identity"));
+        let mut entity = SceneEntity::new(
+            SceneEntityId::new("root").expect("a non-empty literal is a valid identity"),
+        );
         entity.components = components.into_iter().collect::<BTreeMap<_, _>>();
         Self::single(entity)
     }
@@ -126,6 +176,7 @@ pub enum PrefabError {
     Entities(#[from] SceneError),
 }
 
+/// Failures raised while reading or writing serialized prefabs.
 #[derive(Debug, Error)]
 pub enum PrefabJsonError {
     #[error(transparent)]
