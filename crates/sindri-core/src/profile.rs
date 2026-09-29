@@ -14,8 +14,10 @@ use thiserror::Error;
 /// The version this runtime writes and understands.
 pub const PROFILE_FORMAT_VERSION: u32 = 1;
 
-/// The suffix that identifies a profile asset.
-pub const PROFILE_SUFFIX: &str = ".profile.json";
+/// The canonical suffix that identifies a profile asset.
+pub const PROFILE_SUFFIX: &str = ".profile";
+/// The legacy suffix accepted while projects migrate to [`PROFILE_SUFFIX`].
+pub const LEGACY_PROFILE_SUFFIX: &str = ".profile.json";
 
 #[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
 pub struct ProfileDocument {
