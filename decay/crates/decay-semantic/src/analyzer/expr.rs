@@ -38,6 +38,7 @@ impl Analyzer<'_, '_> {
             ExprKind::Index { object, index } => self.index_type(object, index),
             ExprKind::Match { subject, arms } => self.match_value_type(subject, arms, expr.span),
             ExprKind::List(elements) => self.list_literal_type(elements),
+            ExprKind::Map(entries) => self.map_literal_type(entries),
             ExprKind::Construct { name, fields } => {
                 self.construct_struct_type(name, fields, expr.span)
             }
@@ -55,6 +56,9 @@ impl Analyzer<'_, '_> {
     /// when it runs, where the value is known.
     pub(super) fn index_type(&mut self, object: &Expr, index: &Expr) -> Type {
         let object_type = self.expr_type(object);
+        if let Type::Map(key, value) = &object_type {
+            return self.map_index_type(key, value, index);
+        }
         let index_type = self.expr_type(index);
         self.require_type(&index_type, &Type::F32, index.span);
         match &object_type {
@@ -210,7 +214,9 @@ impl Analyzer<'_, '_> {
                 }
                 self.member_of(object, &object_type, field, target.span)
             }
-            ExprKind::Index { object, index } => self.list_element_target_type(object, index),
+            ExprKind::Index { object, index } => {
+                self.element_target_type(object, index, target.span)
+            }
             _ => {
                 self.error(
                     Code::NotAPlace,

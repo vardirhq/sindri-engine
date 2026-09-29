@@ -179,6 +179,12 @@ impl Analyzer<'_, '_> {
                     Self::collect_field_reads(element, out);
                 }
             }
+            ExprKind::Map(entries) => {
+                for (key, value) in entries {
+                    Self::collect_field_reads(key, out);
+                    Self::collect_field_reads(value, out);
+                }
+            }
             ExprKind::Construct { fields, .. } => {
                 for (_, _, value) in fields {
                     Self::collect_field_reads(value, out);

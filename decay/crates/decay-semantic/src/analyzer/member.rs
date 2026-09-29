@@ -44,6 +44,9 @@ impl Analyzer<'_, '_> {
         if *object_type == Type::F32 {
             return self.number_member_type(field, span);
         }
+        if let Type::Map(key, value) = object_type {
+            return self.map_member_type(key, value, field, span);
+        }
         if let Some(variant) = self.variant_type(object_type, field, span) {
             return variant;
         }

@@ -12,8 +12,8 @@
 //! reports each error by its phase, not by a name a page can be kept for.
 
 use decay_semantic::members::{
-    list_op_signature, number_op_signature, string_op_signature, timer_property_type,
-    vector_op_signature,
+    list_op_signature, map_op_signature, number_op_signature, string_op_signature,
+    timer_property_type, vector_op_signature,
 };
 use decay_semantic::{
     BUILT_IN_TYPES, COMPONENTS, FunctionType, LENGTH, OLD_LENGTH, TIMER, Type, VEC2, VEC3,
@@ -22,7 +22,7 @@ use decay_syntax::vocabulary::{
     ASSIGNMENT_OPERATORS, ATTRIBUTES, BINARY_OPERATORS, CONTEXTUAL_KEYWORDS, ITEM_WORDS, KEYWORDS,
     UNARY_OPERATORS, VERSION,
 };
-use decay_syntax::{ListOp, NumberOp, StringOp, TimerProperty, VectorOp};
+use decay_syntax::{ListOp, MapOp, NumberOp, StringOp, TimerProperty, VectorOp};
 use serde_json::{Value, json};
 
 use crate::decay::type_name;
@@ -216,6 +216,15 @@ fn members() -> Value {
             .iter()
             .map(|(op, name, _)| member(name, &list_op_signature(*op, &element), true)),
     );
+    // A map's key and value, named as the list's element is.
+    let (key, value) = (Type::Named("K".to_owned()), Type::Named("V".to_owned()));
+    let mut map = vec![property(LENGTH, &Type::F32)];
+    // Every map operation is a call, `keys()` included.
+    map.extend(
+        MapOp::ALL
+            .iter()
+            .map(|(op, name, _)| member(name, &map_op_signature(*op, &key, &value), true)),
+    );
     json!([
         vector(Type::Vec2),
         vector(Type::Vec3),
@@ -241,6 +250,7 @@ fn members() -> Value {
                 .collect::<Vec<_>>(),
         },
         { "type": type_name(&Type::array_of(element)), "members": list },
+        { "type": type_name(&Type::Map(Box::new(key), Box::new(value))), "members": map },
     ])
 }
 

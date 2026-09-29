@@ -50,6 +50,9 @@ pub enum ValueMember {
     List(decay_syntax::ListOp),
     /// A text property or method: `s.length`, `s.contains(part)`.
     Text(decay_syntax::StringOp),
+    /// A map question or change: `m.contains(k)`, `m.remove(k)`, and
+    /// `m[k] = v` as `Set`.
+    Map(decay_syntax::MapOp),
     /// A number written as text: `n.fixed(2)`, `n.padded(3)`.
     Number(decay_syntax::NumberOp),
     /// Starting a timer: `Timer(seconds)`.

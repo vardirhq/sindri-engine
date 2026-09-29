@@ -54,7 +54,7 @@ fn count(number: usize) -> Value {
     Value::Number(number as f64)
 }
 
-/// The instructions that build, ask or change a list.
+/// The instructions that build, ask or change a list or a map.
 pub(super) fn step(
     fields: &mut HashMap<String, Slot>,
     frame: &mut Frame,
@@ -68,7 +68,8 @@ pub(super) fn step(
             fields: inside,
             op,
         } => change(fields, frame, (path, inside), *op),
-        _ => unreachable!("only the list instructions reach here"),
+        // A map's are made alike, and kept beside it.
+        _ => super::map::step(fields, frame, instruction),
     }
 }
 
@@ -99,7 +100,7 @@ fn read(frame: &mut Frame, op: ListOp) -> Result<(), RuntimeError> {
 
 /// The value a variable, parameter or field of this script holds, to change
 /// in place: `xs` or `this.xs`.
-fn place<'v>(
+pub(super) fn place<'v>(
     fields: &'v mut HashMap<String, Slot>,
     frame: &'v mut Frame,
     path: &Path,
@@ -119,6 +120,26 @@ fn place<'v>(
     Ok(&mut slot.value)
 }
 
+/// The collection at `path`, down through the struct fields `inside` it, to
+/// change in place: each struct copied only if it is shared, as a list or map
+/// itself is.
+pub(super) fn held_at<'v>(
+    fields: &'v mut HashMap<String, Slot>,
+    frame: &'v mut Frame,
+    (path, inside): (&Path, &[usize]),
+) -> Result<&'v mut Value, RuntimeError> {
+    let mut held = place(fields, frame, path)?;
+    for index in inside {
+        let Value::Struct { fields, .. } = held else {
+            return Err(RuntimeError::NotACollection(describe(held)));
+        };
+        held = Rc::make_mut(fields)
+            .get_mut(*index)
+            .ok_or(RuntimeError::StackUnderflow)?;
+    }
+    Ok(held)
+}
+
 /// A change to the list at `path`: pops the arguments, and pushes what the
 /// change gives back.
 fn change(
@@ -132,17 +153,7 @@ fn change(
         args.push(frame.stack.pop().ok_or(RuntimeError::StackUnderflow)?);
     }
     args.reverse();
-    let mut held = place(fields, frame, path)?;
-    // Down through the struct fields to the list, each copied only if it is
-    // shared, as the list itself is.
-    for index in inside {
-        let Value::Struct { fields, .. } = held else {
-            return Err(RuntimeError::NotACollection(describe(held)));
-        };
-        held = Rc::make_mut(fields)
-            .get_mut(*index)
-            .ok_or(RuntimeError::StackUnderflow)?;
-    }
+    let held = held_at(fields, frame, (path, inside))?;
     let Value::Array(list) = held else {
         return Err(RuntimeError::NotACollection(describe(held)));
     };

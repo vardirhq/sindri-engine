@@ -155,6 +155,7 @@ pub fn show_struct(value: &Value) -> String {
                 Value::String(text) => format!("{text:?}"),
                 Value::Struct { .. } => show_struct(field),
                 Value::Array(values) => format!("{} entries", values.len()),
+                Value::Map(entries) => format!("{} keys", entries.len()),
                 Value::Reference(_) => "entity".to_owned(),
                 Value::Null => "null".to_owned(),
                 other => spell(other).unwrap_or_else(|_| describe(other)),

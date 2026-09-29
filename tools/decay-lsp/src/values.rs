@@ -5,12 +5,12 @@
 use std::collections::BTreeMap;
 
 use decay_semantic::members::{
-    list_op_signature, number_op_signature, string_op_signature, timer_property_type,
-    vector_op_signature,
+    list_op_signature, map_op_signature, number_op_signature, string_op_signature,
+    timer_property_type, vector_op_signature,
 };
 use decay_semantic::{
-    Analysis, COMPONENTS, Environment, ExternalSymbol, FunctionType, LENGTH, ListOp, NumberOp,
-    StringOp, TimerProperty, Type, VectorOp,
+    Analysis, COMPONENTS, Environment, ExternalSymbol, FunctionType, LENGTH, ListOp, MapOp,
+    NumberOp, StringOp, TimerProperty, Type, VectorOp,
 };
 
 use crate::support::type_members;
@@ -110,6 +110,15 @@ pub(crate) fn value_members(
             .iter()
             .map(|(op, name, _)| ((*name).to_owned(), member(string_op_signature(*op))))
             .collect(),
+        Type::Map(key, value) => {
+            let mut members = vec![(LENGTH.to_owned(), self::value(Type::F32))];
+            members.extend(MapOp::ALL.iter().map(|(op, name, _)| {
+                // Every map operation is a call, `keys()` included.
+                let signature = map_op_signature(*op, key, value);
+                ((*name).to_owned(), ExternalSymbol::Function(signature))
+            }));
+            members
+        }
         Type::F32 => NumberOp::ALL
             .iter()
             .map(|(op, name, _)| ((*name).to_owned(), member(number_op_signature(*op))))
@@ -245,6 +254,33 @@ script Dealer {
             ["done", "left", "duration", "progress"]
         );
         assert_eq!(names(&["timer"]), ["done", "left", "duration", "progress"]);
+    }
+
+    #[test]
+    fn a_held_map_offers_its_members() {
+        let source = "script S { fn f() { var m = [\"a\": 1.0];\n m.\n } }";
+        let offset = source.find("m.\n").expect("the cursor") + "m.".len();
+        let found: Vec<String> =
+            held_members(&Environment::new(), source, offset, &["m".to_owned()])
+                .unwrap_or_default()
+                .into_iter()
+                .map(|(name, _)| name)
+                .collect();
+        assert_eq!(
+            found,
+            [
+                "length", "get", "contains", "keys", "values", "remove", "clear"
+            ]
+        );
+        // Through what a member gives back: `keys()` is a list of the keys.
+        let keys = held_members(
+            &Environment::new(),
+            source,
+            offset,
+            &["m".to_owned(), "keys".to_owned()],
+        )
+        .unwrap_or_default();
+        assert!(keys.iter().any(|(name, _)| name == "push"), "{keys:?}");
     }
 
     #[test]

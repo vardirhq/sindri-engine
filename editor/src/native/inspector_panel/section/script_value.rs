@@ -216,8 +216,10 @@ pub(super) fn script_value_json(value: &ScriptValue) -> Value {
         ),
         // A timer is started by the script, not authored: it runs down in
         // play, and a number in the inspector would be stale on the next frame.
+        // A map is not authored by a scene yet, so it stores as empty too.
         ScriptValue::Reference(_)
         | ScriptValue::Timer { .. }
+        | ScriptValue::Map(_)
         | ScriptValue::Null
         | ScriptValue::Unit => Value::Null,
     }

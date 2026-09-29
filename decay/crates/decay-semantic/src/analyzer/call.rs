@@ -31,6 +31,9 @@ impl Analyzer<'_, '_> {
             if let Type::Array(element) = &object_type {
                 return self.list_call_type(object, element, field, args, span);
             }
+            if let Type::Map(key, value) = &object_type {
+                return self.map_call_type(object, (key, value), field, args, span);
+            }
             if let Some(result) = self.method_call_type(&object_type, field, args, span) {
                 return result;
             }

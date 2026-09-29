@@ -3,6 +3,7 @@
 //! A new statement or expression form is a function in the matching
 //! leaf and one arm in the match that dispatches to it.
 
+mod assign;
 mod expr;
 mod stmt;
 

@@ -13,6 +13,7 @@ mod expr;
 mod function;
 mod item;
 mod list;
+mod map;
 mod member;
 mod method;
 mod number;
@@ -245,36 +246,77 @@ impl<'a, 'd> Analyzer<'a, 'd> {
     ///
     /// `Type::from_ref` answers for any `TypeRef` because the IR and the host
     /// both need it to; this is where a *script* writing one is told it wrote
-    /// it wrong. `Array` is the only type that takes an argument and the only
-    /// one that needs one, so both halves of that are checked here rather than
-    /// discovered as an `unknown` element type three errors later.
+    /// it wrong. A list takes one type argument and a map two, and nothing
+    /// else takes any, so each is checked here rather than discovered as an
+    /// `unknown` element type three errors later.
     pub(super) fn resolve_type(&mut self, reference: &TypeRef) -> Type {
-        let is_array = crate::types::is_list(&reference.name);
-        match (&reference.argument, is_array) {
-            (None, true) => self.error(
-                Code::MissingType,
-                reference.span,
-                format!(
-                    "`{}` needs an element type, as in `{}<Entity>`",
-                    reference.name,
-                    crate::types::LIST
+        let wanted = if crate::types::is_list(&reference.name) {
+            1
+        } else if reference.name == crate::types::MAP {
+            2
+        } else {
+            0
+        };
+        let given =
+            usize::from(reference.argument.is_some()) + usize::from(reference.second.is_some());
+        if given != wanted {
+            let (code, message) = match wanted {
+                1 if given == 0 => (
+                    Code::MissingType,
+                    format!(
+                        "`{}` needs an element type, as in `{}<Entity>`",
+                        reference.name,
+                        crate::types::LIST
+                    ),
                 ),
-            ),
-            (Some(_), false) => self.error(
-                Code::UnexpectedTypeArgument,
-                reference.span,
-                format!(
-                    "`{}` takes no type argument; only `{}` does",
-                    reference.name,
-                    crate::types::LIST
+                1 => (
+                    Code::UnexpectedTypeArgument,
+                    format!(
+                        "`{}` takes one element type, as in `{}<Entity>`",
+                        reference.name,
+                        crate::types::LIST
+                    ),
                 ),
-            ),
-            _ => {}
+                2 => (
+                    Code::MissingType,
+                    format!(
+                        "`{}` takes a key type and a value type, as in `{}<String, f32>`",
+                        reference.name,
+                        crate::types::MAP
+                    ),
+                ),
+                _ => (
+                    Code::UnexpectedTypeArgument,
+                    format!(
+                        "`{}` takes no type argument; only `{}` and `{}` do",
+                        reference.name,
+                        crate::types::LIST,
+                        crate::types::MAP
+                    ),
+                ),
+            };
+            self.error(code, reference.span, message);
         }
         if let Some(argument) = &reference.argument {
             self.resolve_type(argument);
         }
-        Type::from_ref(reference)
+        if let Some(second) = &reference.second {
+            self.resolve_type(second);
+        }
+        let resolved = Type::from_ref(reference);
+        if let Type::Map(key, _) = &resolved
+            && !key.is_key()
+        {
+            self.error(
+                Code::TypeMismatch,
+                reference.span,
+                format!(
+                    "a map is keyed by text, numbers, flags, enum variants or entities, not `{}`",
+                    key.display_name()
+                ),
+            );
+        }
+        resolved
     }
 
     pub(super) fn require_type(&mut self, actual: &Type, expected: &Type, span: Span) {
@@ -314,6 +356,9 @@ impl<'a, 'd> Analyzer<'a, 'd> {
             // adding an `Entity` to the copy cannot reach the `Bolt`s.
             || matches!((expected, actual), (Type::Array(wanted), Type::Array(given))
                 if self.compatible(wanted, given))
+            // An empty map, `[:]`, fits any map, as `[]` fits any list.
+            || matches!((expected, actual), (Type::Map(wanted_key, wanted), Type::Map(key, given))
+                if self.compatible(wanted_key, key) && self.compatible(wanted, given))
             || matches!((expected, actual), (Type::Named(_), Type::Null))
             || matches!((expected, actual), (Type::Named(wanted), Type::Named(given))
                 if self.environment.is_a(given, wanted))

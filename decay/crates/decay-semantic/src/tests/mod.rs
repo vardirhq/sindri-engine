@@ -8,6 +8,7 @@ mod functions;
 mod host;
 mod language;
 mod lists;
+mod maps;
 mod states;
 mod structs;
 mod text;
