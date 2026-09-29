@@ -1,0 +1,5 @@
+format_version = 1
+
+[project]
+name = "Flappy"
+main_scene = "assets/flappy.scene.json"

@@ -1,0 +1,60 @@
+// One-button flight. Physics supplies gravity; the script supplies the flap.
+script Bird {
+    @export let flap_speed: f32 = 7.5;
+    @export let spawn_x: f32 = -3.5;
+    @export let spawn_y: f32 = 0.5;
+
+    fn start() {
+        reset();
+    }
+
+    fn update(dt: f32) {
+        let flap = Input.just_pressed("Space") || Input.just_pressed("W") || Input.just_pressed("ArrowUp");
+
+        if Game.dead {
+            if flap {
+                reset();
+            }
+            return;
+        }
+
+        if flap {
+            Game.started = true;
+            Physics.set_velocity(this.entity, 0.0, this.flap_speed);
+        }
+
+        if !Game.started {
+            Physics.set_velocity(this.entity, 0.0, 0.0);
+            this.transform.position.y = this.spawn_y;
+        }
+
+        for other in Physics.sensor_entered() {
+            if World.has_tag(other, "hazard") {
+                die();
+            } else if World.has_tag(other, "score") {
+                Game.score += 1.0;
+                if Game.score > Game.best {
+                    Game.best = Game.score;
+                }
+            }
+        }
+
+        if this.transform.position.y < -5.4 || this.transform.position.y > 5.4 {
+            die();
+        }
+    }
+
+    fn die() {
+        Game.dead = true;
+        Physics.set_velocity(this.entity, 0.0, 0.0);
+    }
+
+    fn reset() {
+        this.transform.position.x = this.spawn_x;
+        this.transform.position.y = this.spawn_y;
+        Physics.set_velocity(this.entity, 0.0, 0.0);
+        Game.score = 0.0;
+        Game.started = false;
+        Game.dead = false;
+    }
+}
