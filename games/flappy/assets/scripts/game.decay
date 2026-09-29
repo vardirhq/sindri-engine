@@ -4,4 +4,10 @@ state Game {
     var best: f32 = 0.0;
     var started: bool = false;
     var dead: bool = false;
+    // Seconds since the crash, so a panicked tap does not restart instantly.
+    var dead_time: f32 = 0.0;
+    // Bumped on every restart; scrolling pieces watch it to go home.
+    var run: f32 = 0.0;
+    // World units per second; ramps up with the score.
+    var speed: f32 = 3.2;
 }

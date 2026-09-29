@@ -1,0 +1,18 @@
+// Parallax scenery: slides left at a fraction of the course speed and wraps.
+script Drift {
+    @export let factor: f32 = 1.0;
+    @export let span: f32 = 32.0;
+    // Speed fraction while nobody is playing, so the sky still moves.
+    @export let idle: f32 = 0.0;
+
+    fn update(dt: f32) {
+        var rate = this.idle;
+        if Game.started && !Game.dead {
+            rate = this.factor;
+        }
+        this.transform.position.x -= Game.speed * rate * dt;
+        if this.transform.position.x < -this.span * 0.5 {
+            this.transform.position.x += this.span;
+        }
+    }
+}
