@@ -173,6 +173,17 @@ pub trait DesktopApp: Sized + 'static {
         Ok(())
     }
 
+    /// Whether what `render` draws is the application itself, rather than a
+    /// placeholder while something it needs is still loading.
+    ///
+    /// A browser page keeps its loading screen up until the first frame
+    /// presented while this is `true`, which the host announces as
+    /// `sindri:ready`. An application that draws itself from its first frame
+    /// leaves this as it is.
+    fn ready(&self) -> bool {
+        true
+    }
+
     /// Encodes and submits one frame. The host presents what this drew into.
     fn render(
         &mut self,

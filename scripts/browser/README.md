@@ -2,7 +2,7 @@
 
 > **Historical first-run note.** This records the cube proof that found the
 > original browser-host failures. Current static exports fetch manifests and
-> content-hashed assets, and Gather, Orbital Last Stand, Graphics Lab, and Weave
+> content-hashed assets, and Gather, Orbital, Shapes Lab, and Weave
 > run through the shared browser host; see `docs/export.md`.
 
 The engine compiled for `wasm32` for several releases, CI checked it every time,

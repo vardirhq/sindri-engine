@@ -136,8 +136,8 @@ and are not rolling capability lists:
 
 - [Textured cube and sprite overlay](../examples/cube/README.md)
 - [Shared triangle proof](../examples/triangle/README.md)
-- [Graphics Lab](../games/graphics-lab/README.md)
-- [Graphics Lab tests](../games/graphics-lab/tests/README.md)
+- [Shapes Lab](../games/shapes-lab/README.md)
+- [Shapes Lab tests](../games/shapes-lab/tests/README.md)
 - [Browser smoke tooling](../scripts/browser/README.md)
 
 ## Documentation maintenance rule

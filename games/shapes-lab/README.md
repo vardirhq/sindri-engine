@@ -1,6 +1,6 @@
-# Graphics Lab
+# Shapes Lab
 
-Graphics Lab is Sindri's zero-art visual proving ground. It is intentionally not a normal game: it exists to discover how far the engine's own primitives can be pushed before imported artwork enters the picture.
+Shapes Lab is Sindri's zero-art visual proving ground. It is intentionally not a normal game: it exists to discover how far the engine's own primitives can be pushed before imported artwork enters the picture.
 
 ## Rules
 
@@ -20,6 +20,6 @@ The shared `showcase.decay` script drives rotation and scale pulses so the scene
 
 After merge, the main Pages workflow exports this project through the same `sindri-export` path as Gather and Orbital Last Stand and serves it at:
 
-`/sindri2/examples/graphics-lab/`
+`/sindri2/examples/shapes-lab/`
 
-The dedicated Graphics Lab browser workflow also exports and smokes the project in Chromium and uploads a screenshot. That gives visual experiments a regression target instead of relying on somebody remembering to open the demo after every renderer change.
+The dedicated Shapes Lab browser workflow also exports and smokes the project in Chromium and uploads a screenshot. That gives visual experiments a regression target instead of relying on somebody remembering to open the demo after every renderer change.

@@ -24,7 +24,7 @@ mod page;
 mod write;
 
 pub use gather::{GatheredAsset, ProjectExport};
-pub use page::{HOST_MODULE, PAGE_TEMPLATE, page_for, page_for_host};
+pub use page::{HOST_MODULE, PAGE_TEMPLATE, Splash, page_for, page_for_host, page_with_splash};
 pub use write::{ExportError, WrittenExport};
 
 /// Where the page and the host go, relative to the export root.

@@ -61,25 +61,211 @@
       white-space: pre-wrap;
     }
     #sindri-input[data-visible="true"] { display: block; }
+    /* The loading screen: the Sindri mark from the moment the page opens,
+       then the project's own brand if it has one, until the host announces
+       the game is on screen. Plain CSS and SVG, so it shows before any script
+       or wasm has arrived -- which is the whole of the wait it covers. */
+    #sindri-loading {
+      --ink: #0d1117; --cream: #e6e1d4; --line: #2a3038; --muted: #8a8580;
+      --accent: #f0c050; --loop: 3s;
+      position: fixed;
+      inset: 0;
+      z-index: 10;
+      display: grid;
+      place-items: center;
+      overflow: hidden;
+      background: var(--ink);
+      color: var(--cream);
+      transition: opacity .45s ease, background-color .45s ease;
+    }
+    #sindri-loading[data-stage="brand"] { background: var(--brand-background, var(--ink)); }
+    #sindri-loading[data-done="true"] { opacity: 0; pointer-events: none; }
+    #sindri-loading .grid {
+      position: absolute;
+      inset: -90px;
+      background-image: linear-gradient(var(--line) 1px, transparent 1px),
+        linear-gradient(90deg, var(--line) 1px, transparent 1px);
+      background-size: 90px 90px;
+      opacity: .35;
+      animation: sindri-drift var(--loop) linear infinite;
+    }
+    #sindri-loading .glow {
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(60% 60% at 50% 46%, rgba(240, 192, 80, .07), rgba(13, 17, 23, 0) 70%);
+    }
+    #sindri-loading .stage {
+      grid-area: 1 / 1;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: min(4.8vmin, 52px);
+      width: min(74vw, 62vh, 760px);
+      transition: opacity .45s ease;
+    }
+    #sindri-loading .stage.brand { opacity: 0; gap: 1.2rem; text-align: center; }
+    #sindri-loading[data-stage="brand"] .stage.sindri,
+    #sindri-loading[data-stage="brand"] .grid,
+    #sindri-loading[data-stage="brand"] .glow { opacity: 0; }
+    #sindri-loading[data-stage="brand"] .stage.brand { opacity: 1; }
+    #sindri-loading .forge {
+      width: min(24.8vmin, 34vw, 268px);
+      overflow: visible;
+      animation: sindri-breathe var(--loop) ease-in-out infinite;
+    }
+    #sindri-loading .forge .chase { animation: sindri-chase var(--loop) linear infinite; }
+    #sindri-loading .forge .turn {
+      transform-box: view-box;
+      transform-origin: 16px 16px;
+      animation: sindri-turn var(--loop) linear infinite;
+    }
+    #sindri-loading .forge .inner-chase { animation: sindri-inner var(--loop) linear infinite; }
+    #sindri-loading .forge .core {
+      transform-box: view-box;
+      transform-origin: 16px 16px;
+      animation: sindri-core calc(var(--loop) / 2) ease-in-out infinite;
+    }
+    #sindri-loading .wordmark { width: 100%; overflow: visible; fill: var(--cream); }
+    #sindri-loading .wordmark .gold { fill: var(--accent); }
+    #sindri-loading .wordmark path { animation: sindri-sheen var(--loop) linear infinite; }
+    #sindri-loading .wordmark .l1 { animation-delay: calc(var(--loop) * 1 / 8); }
+    #sindri-loading .wordmark .l2 { animation-delay: calc(var(--loop) * 2 / 8); }
+    #sindri-loading .wordmark .l3 { animation-delay: calc(var(--loop) * 3 / 8); }
+    #sindri-loading .wordmark .l4 { animation-delay: calc(var(--loop) * 4 / 8); }
+    #sindri-loading .wordmark .l5 { animation-delay: calc(var(--loop) * 5 / 8); }
+    #sindri-loading .progress { width: 100%; display: flex; flex-direction: column; gap: min(1.5vmin, 16px); }
+    #sindri-loading .track { position: relative; height: 4px; overflow: hidden; background: #1b2028; }
+    #sindri-loading .sweep {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 25%;
+      height: 4px;
+      background: linear-gradient(90deg, rgba(240, 192, 80, 0), var(--accent), rgba(240, 192, 80, 0));
+      animation: sindri-sweep var(--loop) linear infinite;
+    }
+    #sindri-loading .label {
+      display: flex;
+      justify-content: space-between;
+      font: 500 min(1.7vmin, 18px)/1 ui-monospace, "JetBrains Mono", monospace;
+      letter-spacing: .24em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+    /* One, two, then three dots across a loop. */
+    #sindri-loading .dots span:nth-child(2) { animation: sindri-dot-two var(--loop) steps(1) infinite; }
+    #sindri-loading .dots span:nth-child(3) { animation: sindri-dot-three var(--loop) steps(1) infinite; }
+    #sindri-loading .brand img { max-width: 100%; max-height: 40vh; object-fit: contain; }
+    #sindri-loading .brand-title { font: 700 clamp(1.4rem, 5vmin, 3rem)/1.1 system-ui, sans-serif; }
+    #sindri-loading .brand-caption { font: 400 clamp(.85rem, 2vmin, 1.1rem)/1.4 system-ui, sans-serif; opacity: .75; }
+    @keyframes sindri-drift { to { transform: translate(90px, 90px); } }
+    @keyframes sindri-breathe { 50% { transform: scale(1.012); } }
+    @keyframes sindri-chase { from { stroke-dashoffset: 0; } to { stroke-dashoffset: -78; } }
+    @keyframes sindri-turn { to { transform: rotate(60deg); } }
+    @keyframes sindri-inner { from { stroke-dashoffset: 0; } to { stroke-dashoffset: 42; } }
+    @keyframes sindri-core {
+      0%, 100% { transform: scale(.88); opacity: .75; }
+      50% { transform: scale(1.1); opacity: 1; }
+    }
+    @keyframes sindri-sheen {
+      0% { filter: drop-shadow(0 0 18px var(--accent)); }
+      20%, 100% { filter: drop-shadow(0 0 0 rgba(240, 192, 80, 0)); }
+    }
+    @keyframes sindri-sweep { from { transform: translateX(-100%); } to { transform: translateX(400%); } }
+    @keyframes sindri-dot-two { 0% { opacity: 0; } 33.3% { opacity: 1; } }
+    @keyframes sindri-dot-three { 0% { opacity: 0; } 66.6% { opacity: 1; } }
+    @media (prefers-reduced-motion: reduce) {
+      #sindri-loading *, #sindri-loading *::before { animation: none !important; }
+    }
   </style>
 </head>
 <body>
   <canvas id="sindri-canvas"></canvas>
+  <div id="sindri-loading" role="status" aria-label="Loading {{name}}" data-stage="sindri"{{brand_attributes}}>
+    <div class="grid"></div>
+    <div class="glow"></div>
+    <div class="stage sindri">
+      <svg class="forge" viewBox="0 0 32 32" fill="none" aria-hidden="true">
+        <polygon points="16,3 27.26,9.5 27.26,22.5 16,29 4.74,22.5 4.74,9.5" stroke="#2a3038" stroke-width="1.6"/>
+        <polygon class="chase" points="16,3 27.26,9.5 27.26,22.5 16,29 4.74,22.5 4.74,9.5" stroke="#f0c050" stroke-width="4.4" opacity=".14" stroke-dasharray="22 56"/>
+        <polygon class="chase" points="16,3 27.26,9.5 27.26,22.5 16,29 4.74,22.5 4.74,9.5" stroke="#f0c050" stroke-width="1.6" stroke-dasharray="20 58"/>
+        <g class="turn">
+          <polygon points="16,9 22.06,12.5 22.06,19.5 16,23 9.94,19.5 9.94,12.5" stroke="#e6e1d4" stroke-width="1.2" opacity=".55"/>
+          <polygon class="inner-chase" points="16,9 22.06,12.5 22.06,19.5 16,23 9.94,19.5 9.94,12.5" stroke="#e6e1d4" stroke-width="1.2" stroke-dasharray="11 31"/>
+        </g>
+        <g class="core">
+          <polygon points="16,13.2 18.42,14.6 18.42,17.4 16,18.8 13.58,17.4 13.58,14.6" fill="#f0c050" opacity=".36"/>
+          <polygon points="16,13.2 18.42,14.6 18.42,17.4 16,18.8 13.58,17.4 13.58,14.6" fill="#f0c050"/>
+        </g>
+      </svg>
+      <svg class="wordmark" viewBox="0 -638 3964.0 649" role="img" aria-label="Sindri">
+          <path class="l0" d="M149 11V-74H61V-211H188V-125H414V-246H149V-331H61V-552H149V-638H453V-552H542V-416H414V-501H188V-381H453V-297H542V-74H453V11Z"/>
+          <path class="l1 gold" d="M804.0 11V-125H892.0V-501H804.0V-638H1108.0V-501H1019.0V-125H1108.0V11Z"/>
+          <path class="l2" d="M1370.0 11V-638H1497.0V-552H1585.0V-467H1674.0V-211H1723.0V-638H1851.0V11H1723.0V-74H1635.0V-160H1546.0V-416H1497.0V11Z"/>
+          <path class="l3" d="M2113.0 11V-638H2417.0V-552H2505.0V-467H2594.0V-160H2505.0V-74H2417.0V11ZM2240.0 -125H2378.0V-211H2466.0V-416H2378.0V-501H2240.0Z"/>
+          <path class="l4" d="M2856.0 11V-552H2944.0V-638H3248.0V-552H3337.0V-246H3248.0V-160H3205.0V-125H3292.0V11H3166.0V-74H3076.0V-160H2983.0V11ZM2983.0 -297H3209.0V-501H2983.0Z"/>
+          <path class="l5 gold" d="M3599.0 11V-125H3687.0V-501H3599.0V-638H3903.0V-501H3814.0V-125H3903.0V11Z"/>
+      </svg>
+      <div class="progress" aria-hidden="true">
+        <div class="track"><div class="sweep"></div></div>
+        <div class="label"><span>Loading<span class="dots"><span>.</span><span>.</span><span>.</span></span></span><span>Sindri runtime</span></div>
+      </div>
+    </div>
+{{brand}}
+  </div>
+  <script>
+    // Its own ordinary script, ahead of the module: if the host fails to load
+    // at all, this still runs, and the page still says what went wrong.
+    // The loading screen stays until the host says the game is on screen. The
+    // Sindri mark shows for at least a moment, so a fast load is not a flash;
+    // a project's brand, when it has one, follows it and shows for as long as
+    // the project asked, and the game is revealed after whichever is later.
+    const loading = document.querySelector("#sindri-loading");
+    const opened = performance.now();
+    const SINDRI_AT_LEAST = 900;
+    const brandFor = Number(loading?.dataset.brandSeconds ?? 0) * 1000;
+    const hasBrand = Boolean(loading?.querySelector(".stage.brand"));
+    let brandSince = null;
+    let ready = false;
+    const reveal = () => {
+      if (!loading || loading.dataset.done === "true") return;
+      loading.dataset.done = "true";
+      setTimeout(() => loading.remove(), 500);
+    };
+    const settle = () => {
+      if (!ready || !loading) return;
+      const now = performance.now();
+      if (hasBrand) {
+        if (brandSince === null) return;
+        const left = brandFor - (now - brandSince);
+        if (left > 0) return void setTimeout(settle, left);
+      } else if (now - opened < SINDRI_AT_LEAST) {
+        return void setTimeout(settle, SINDRI_AT_LEAST - (now - opened));
+      }
+      reveal();
+    };
+    if (hasBrand) {
+      setTimeout(() => {
+        loading.dataset.stage = "brand";
+        brandSince = performance.now();
+        settle();
+      }, SINDRI_AT_LEAST);
+    }
+    addEventListener("sindri:ready", () => {
+      ready = true;
+      settle();
+    }, { once: true });
+  </script>
   <div id="sindri-error" role="alert" aria-live="assertive"></div>
   <pre id="sindri-input"></pre>
   <div id="sindri-build">{{build}}</div>
   <script type="module">
-    // The host is versioned in its URL, and the wasm it loads is named
-    // explicitly so the query reaches that too. Without this the one file
-    // holding the game's code is the one file a returning device may serve from
-    // its cache: the assets are content-addressed and always fresh, so a stale
-    // host runs new content and every symptom looks like a live bug in code
-    // that was already fixed.
-    import init from "./pkg/{{host}}.js{{cachebust}}";
-
     const canvas = document.querySelector("#sindri-canvas");
     const errorBox = document.querySelector("#sindri-error");
+
     const fail = (title, detail) => {
+      document.querySelector("#sindri-loading")?.remove();
       canvas?.remove();
       errorBox.dataset.visible = "true";
       errorBox.innerHTML = `<strong>${title}</strong>${detail}`;
@@ -149,6 +335,17 @@
       fail("WebGPU is unavailable", WEBGPU_MISSING);
     } else {
       try {
+        // Imported here rather than at the top, so a host that is missing or
+        // broken is a failure this reports rather than a script that never
+        // ran and a loading screen that never ends.
+        //
+        // The host is versioned in its URL, and the wasm it loads is named
+        // explicitly so the query reaches that too. Without this the one file
+        // holding the game's code is the one file a returning device may serve
+        // from its cache: the assets are content-addressed and always fresh, so
+        // a stale host runs new content and every symptom looks like a live bug
+        // in code that was already fixed.
+        const { default: init } = await import("./pkg/{{host}}.js{{cachebust}}");
         await init({ module_or_path: "./pkg/{{host}}_bg.wasm{{cachebust}}" });
       } catch (error) {
         console.error(error);

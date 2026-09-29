@@ -1,6 +1,6 @@
 {
   "format_version": 10,
-  "metadata": {"name": "Graphics Lab Overdrive"},
+  "metadata": {"name": "Shapes Lab Overdrive"},
   "entities": [
     {"id":"backdrop","name":"Void","transform_3d":{"position":[0,0,0.0],"rotation":[0.0,0.0,0.0,1.0],"scale":[70,70,1.0]},"components":{"sindri.shape":{"kind":"rect","count":6.0,"fill":[0.001,0.002,0.008,1],"stroke":[0,0,0,0],"stroke_width":0.0,"corner_radius":0.0,"dashes":0.0,"dash_duty":0.5,"sweep_start":0.0,"sweep_turns":1.0,"blend":"over","layer":-120}}},
     {"id":"grid-major","name":"Major Grid","transform_3d":{"position":[0,0,0.0],"rotation":[0.0,0.0,0.0,1.0],"scale":[30,30,1.0]},"components":{"sindri.script":{"source":"scripts/showcase.decay","script":"Showcase","properties":{"spin":0.004,"pulse":0.0,"pulse_speed":2.5,"phase":0.0,"bob_x":0.0,"bob_y":0.0,"bob_speed":1.0,"orbit_radius":0.0,"orbit_speed":1.0}},"sindri.shape":{"kind":"grid","count":30.0,"fill":[0,0,0,0],"stroke":[0.02,0.17,0.25,0.32],"stroke_width":0.004,"corner_radius":0.0,"dashes":0.0,"dash_duty":0.5,"sweep_start":0.0,"sweep_turns":1.0,"blend":"add","layer":-110}}},

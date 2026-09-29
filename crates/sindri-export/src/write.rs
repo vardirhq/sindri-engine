@@ -7,7 +7,7 @@ use sindri_assets::{AssetManifest, ContentHash, MANIFEST_FILE_NAME};
 use sindri_core::AssetId;
 
 use crate::gather::ProjectExport;
-use crate::{HOST_DIRECTORY, HOST_MODULE, page_for_host};
+use crate::{HOST_DIRECTORY, HOST_MODULE};
 
 /// What an export produced.
 #[derive(Debug)]
@@ -83,7 +83,24 @@ impl ProjectExport {
         std::fs::write(&manifest_path, &document)
             .map_err(|error| ExportError::unwritable(&manifest_path, &error))?;
 
-        let page = page_for_host(&self.name, base_path, HOST_MODULE, build);
+        if let (Some(splash), Some(file)) = (
+            &self.splash,
+            self.splash
+                .as_ref()
+                .and_then(crate::page::Splash::image_file),
+        ) && let Some((_, image)) = &splash.image
+        {
+            let image_path = root.join(file);
+            std::fs::write(&image_path, image)
+                .map_err(|error| ExportError::unwritable(&image_path, &error))?;
+        }
+        let page = crate::page::page_with_splash(
+            &self.name,
+            base_path,
+            HOST_MODULE,
+            build,
+            self.splash.as_ref(),
+        );
         let page_path = root.join("index.html");
         std::fs::write(&page_path, page)
             .map_err(|error| ExportError::unwritable(&page_path, &error))?;

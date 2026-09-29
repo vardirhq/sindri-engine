@@ -17,6 +17,36 @@ struct ProjectFile {
     project: ProjectSection,
     #[serde(default)]
     assets: AssetsSection,
+    #[serde(default)]
+    web: WebSection,
+}
+
+/// How a browser build presents itself.
+#[derive(Debug, Default, Deserialize)]
+struct WebSection {
+    #[serde(default)]
+    splash: Option<SplashSection>,
+}
+
+/// The project's own brand, shown after the Sindri mark while the game loads.
+#[derive(Debug, Deserialize)]
+#[serde(deny_unknown_fields)]
+struct SplashSection {
+    /// An image, relative to the project: a logo or a title card.
+    image: Option<String>,
+    /// Text under the image, or in its place.
+    title: Option<String>,
+    /// A smaller line under the title.
+    caption: Option<String>,
+    /// The page behind it, as `#rrggbb`.
+    background: Option<String>,
+    /// How long it shows at least, even when the game is ready sooner.
+    #[serde(default = "default_splash_seconds")]
+    seconds: f64,
+}
+
+const fn default_splash_seconds() -> f64 {
+    1.5
 }
 
 /// What a project ships that its scene does not mention.
@@ -69,6 +99,63 @@ pub struct ProjectExport {
     /// Held rather than looked for: with more than one scene shipping, "the
     /// first scene asset" is whichever one happened to be gathered first.
     main_scene: String,
+    /// The project's brand for the browser's loading screen, if it has one.
+    pub splash: Option<crate::page::Splash>,
+}
+
+/// A splash as the page shows it, with its image read and its settings
+/// checked: a colour that is not one, or a time that is not a time, is a
+/// mistake to report now rather than a page that quietly ignores it.
+fn read_splash(project: &Path, splash: SplashSection) -> Result<crate::page::Splash, ExportError> {
+    let bad = |what: String| ExportError::Project(format!("[web.splash] {what}"));
+    if !(0.0..=10.0).contains(&splash.seconds) {
+        return Err(bad(format!(
+            "seconds is {}, and a splash shows for 0 to 10 seconds",
+            splash.seconds
+        )));
+    }
+    if let Some(background) = &splash.background {
+        let digits = background.strip_prefix('#').unwrap_or_default();
+        if digits.len() != 6 || !digits.chars().all(|c| c.is_ascii_hexdigit()) {
+            return Err(bad(format!(
+                "background {background:?} is not a `#rrggbb` colour"
+            )));
+        }
+    }
+    let image = match &splash.image {
+        Some(relative) => {
+            let path = project.join(relative);
+            let extension = path
+                .extension()
+                .and_then(|extension| extension.to_str())
+                .map(str::to_ascii_lowercase)
+                .filter(|extension| {
+                    matches!(
+                        extension.as_str(),
+                        "png" | "jpg" | "jpeg" | "webp" | "svg" | "gif"
+                    )
+                })
+                .ok_or_else(|| {
+                    bad(format!(
+                        "image {relative:?} is not a png, jpg, webp, svg or gif"
+                    ))
+                })?;
+            let bytes =
+                std::fs::read(&path).map_err(|error| ExportError::unreadable(&path, &error))?;
+            Some((extension, bytes))
+        }
+        None => None,
+    };
+    if image.is_none() && splash.title.is_none() {
+        return Err(bad("needs an image, a title, or both".to_owned()));
+    }
+    Ok(crate::page::Splash {
+        image,
+        title: splash.title,
+        caption: splash.caption,
+        background: splash.background,
+        seconds: splash.seconds,
+    })
 }
 
 impl ProjectExport {
@@ -285,10 +372,16 @@ impl ProjectExport {
             });
         }
 
+        let splash = file
+            .web
+            .splash
+            .map(|splash| read_splash(project, splash))
+            .transpose()?;
         Ok(Self {
             name: file.project.name,
             assets,
             main_scene: leaf(&file.project.main_scene),
+            splash,
         })
     }
 

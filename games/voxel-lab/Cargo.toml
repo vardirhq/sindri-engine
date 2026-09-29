@@ -7,7 +7,7 @@ rust-version.workspace = true
 license.workspace = true
 publish = false
 
-# No game code, in the way Graphics Lab is not a game: this is a proving ground
+# No game code, in the way Shapes Lab is not a game: this is a proving ground
 # for one question — whether a volume can be a shape rather than a picture of
 # one — and what lives here is the blocks to look at and the binary that
 # photographs them from four sides.
