@@ -18,7 +18,21 @@ impl EditorApp {
             self.report(format!("{} has no parent directory", source.display()));
             return;
         };
-        match ExternalEditor::detect().and_then(|editor| editor.open(&project, source)) {
+        let result = ExternalEditor::detect().and_then(|editor| {
+            // A Sindri user opening Decay in VS Code asked for the external
+            // authoring experience, not for a scavenger hunt through extension
+            // artifacts. Keep the companion tooling matched to the editor by
+            // installing the VSIX shipped with this Sindri build when needed.
+            if source
+                .extension()
+                .is_some_and(|extension| extension == "decay")
+                && !editor.has_decay_support()?
+            {
+                editor.install_decay_support()?;
+            }
+            editor.open(&project, source)
+        });
+        match result {
             Ok(()) => self
                 .console
                 .info(format!("Opened {} in VS Code", source.display())),

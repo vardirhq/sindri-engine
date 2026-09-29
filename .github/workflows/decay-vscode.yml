@@ -7,6 +7,8 @@ on:
       - 'tools/decay-lsp/**'
       - 'crates/sindri-decay/**'
       - 'decay/**'
+      - 'editor/src/external_editor.rs'
+      - 'editor/src/native/external_editor.rs'
       - '.github/workflows/decay-vscode.yml'
   push:
     branches: [main]
@@ -15,6 +17,8 @@ on:
       - 'tools/decay-lsp/**'
       - 'crates/sindri-decay/**'
       - 'decay/**'
+      - 'editor/src/external_editor.rs'
+      - 'editor/src/native/external_editor.rs'
       - '.github/workflows/decay-vscode.yml'
   workflow_dispatch:
 
@@ -77,12 +81,12 @@ jobs:
         run: npm ci
       - working-directory: editors/vscode-decay
         run: npm run check
-      - name: Package VSIX
+      - name: Package VSIX for Sindri
         working-directory: editors/vscode-decay
         shell: bash
-        run: npx --no-install @vscode/vsce package --allow-unused-files-pattern --out sindri-decay-${{ matrix.label }}.vsix
+        run: npx --no-install @vscode/vsce package --allow-unused-files-pattern --out sindri-decay.vsix
       - uses: actions/upload-artifact@v4
         with:
           name: sindri-decay-${{ matrix.label }}
-          path: editors/vscode-decay/sindri-decay-${{ matrix.label }}.vsix
+          path: editors/vscode-decay/sindri-decay.vsix
           if-no-files-found: error
