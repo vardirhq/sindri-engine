@@ -155,6 +155,7 @@ impl Lowerer<'_> {
                         ValueMember::Construct(_)
                         | ValueMember::StartTimer
                         | ValueMember::List(_)
+                        | ValueMember::Map(_)
                         | ValueMember::Number(_),
                     )
                     | None => {
@@ -180,7 +181,53 @@ impl Lowerer<'_> {
                 }
                 instructions.push(Instruction::MakeList(elements.len()));
             }
+            ExprKind::Map(entries) => self.lower_map(entries, instructions),
         }
+    }
+
+    /// `["a": 1.0]`: each key then its value, then the map of them.
+    fn lower_map(&self, entries: &[(Expr, Expr)], instructions: &mut Vec<Instruction>) {
+        for (key, value) in entries {
+            self.lower_expr(key, instructions);
+            self.lower_expr(value, instructions);
+        }
+        instructions.push(Instruction::MakeMap(entries.len()));
+    }
+
+    /// A list's or map's operation: a change is made in place to the one the
+    /// place holds, and a question is asked of the value.
+    fn lower_collection_call(
+        &self,
+        member: ValueMember,
+        object: &Expr,
+        args: &[Expr],
+        instructions: &mut Vec<Instruction>,
+    ) {
+        let changes = match member {
+            ValueMember::List(op) => op.changes(),
+            ValueMember::Map(op) => op.changes(),
+            _ => return,
+        };
+        let place = if changes {
+            Some(self.list_place(object))
+        } else {
+            self.lower_expr(object, instructions);
+            None
+        };
+        for argument in args {
+            self.lower_expr(argument, instructions);
+        }
+        instructions.push(match (member, place) {
+            (ValueMember::List(op), Some((path, fields))) => {
+                Instruction::ListChange { path, fields, op }
+            }
+            (ValueMember::Map(op), Some((path, fields))) => {
+                Instruction::MapChange { path, fields, op }
+            }
+            (ValueMember::List(op), None) => Instruction::ListRead(op),
+            (ValueMember::Map(op), None) => Instruction::MapRead(op),
+            _ => return,
+        });
     }
 
     /// A call: building a vector, a vector method, or a call by path.
@@ -231,22 +278,9 @@ impl Lowerer<'_> {
                 instructions.push(Instruction::Vector(op));
                 return;
             }
-            Some(ValueMember::List(op)) => {
-                let ExprKind::Member { object, .. } = &callee.kind else {
-                    return;
-                };
-                if op.changes() {
-                    let (path, fields) = self.list_place(object);
-                    for argument in args {
-                        self.lower_expr(argument, instructions);
-                    }
-                    instructions.push(Instruction::ListChange { path, fields, op });
-                } else {
-                    self.lower_expr(object, instructions);
-                    for argument in args {
-                        self.lower_expr(argument, instructions);
-                    }
-                    instructions.push(Instruction::ListRead(op));
+            Some(member @ (ValueMember::List(_) | ValueMember::Map(_))) => {
+                if let ExprKind::Member { object, .. } = &callee.kind {
+                    self.lower_collection_call(member, object, args, instructions);
                 }
                 return;
             }
@@ -292,7 +326,7 @@ impl Lowerer<'_> {
     /// can name, and the path starts there instead, so the runtime treats it
     /// as it treats any local holding a reference. `true` when a local was
     /// opened, which [`Self::release`] then closes.
-    fn path_or_held(
+    pub(super) fn path_or_held(
         &self,
         expr: &Expr,
         invalid: &str,
@@ -328,7 +362,7 @@ impl Lowerer<'_> {
     }
 
     /// Closes the local [`Self::path_or_held`] opened, if it opened one.
-    fn release(held: bool, instructions: &mut Vec<Instruction>) {
+    pub(super) fn release(held: bool, instructions: &mut Vec<Instruction>) {
         if held {
             instructions.push(Instruction::ScopeExit);
         }
@@ -374,163 +408,6 @@ impl Lowerer<'_> {
         });
     }
 
-    /// `target = value`, or a compound assignment: to a list's element, a
-    /// vector's component, or a path.
-    fn lower_assign(
-        &self,
-        target: &Expr,
-        op: AssignOp,
-        value: &Expr,
-        instructions: &mut Vec<Instruction>,
-    ) {
-        if let ExprKind::Index { object, index } = &target.kind {
-            self.lower_element_assign(object, index, op, value, instructions);
-            return;
-        }
-        if let ExprKind::Member { object, .. } = &target.kind
-            && let Some(ValueMember::Component(index)) = self.value_member(target.span)
-        {
-            self.lower_component_assign(object, index, op, value, instructions);
-            return;
-        }
-        let (path, held) = self.path_or_held(target, "<invalid>", instructions);
-        if matches!(op, AssignOp::Assign) {
-            self.lower_expr(value, instructions);
-        } else {
-            instructions.push(Instruction::Load(path.clone()));
-            self.lower_expr(value, instructions);
-            if let Some(binary) = binary_for(op) {
-                instructions.push(Instruction::Binary(binary));
-            }
-        }
-        instructions.push(Instruction::Store(path));
-        Self::release(held, instructions);
-    }
-
-    /// `list[index] = value`, or `list[index] += value`: set in place.
-    ///
-    /// A compound assignment reads the element before setting it, so the
-    /// index is evaluated once and held, as a `match` holds its subject.
-    fn lower_element_assign(
-        &self,
-        object: &Expr,
-        index: &Expr,
-        op: AssignOp,
-        value: &Expr,
-        instructions: &mut Vec<Instruction>,
-    ) {
-        const INDEX: &str = "(index)";
-        let (path, fields) = self.list_place(object);
-        let change = Instruction::ListChange {
-            path: path.clone(),
-            fields: fields.clone(),
-            op: decay_syntax::ListOp::SetAt,
-        };
-        let Some(binary) = binary_for(op) else {
-            self.lower_expr(index, instructions);
-            self.lower_expr(value, instructions);
-            instructions.push(change);
-            return;
-        };
-        let held = Path(vec![INDEX.to_owned()]);
-        instructions.push(Instruction::ScopeEnter);
-        self.lower_expr(index, instructions);
-        instructions.push(Instruction::Declare {
-            name: INDEX.to_owned(),
-            mutable: false,
-        });
-        instructions.push(Instruction::Load(held.clone()));
-        instructions.push(Instruction::Load(path));
-        for field in fields {
-            instructions.push(Instruction::Component(field));
-        }
-        instructions.push(Instruction::Load(held));
-        instructions.push(Instruction::Index);
-        self.lower_expr(value, instructions);
-        instructions.push(Instruction::Binary(binary));
-        instructions.push(change);
-        instructions.push(Instruction::ScopeExit);
-    }
-
-    /// `object.field = value`, where `field` is a vector's component or a
-    /// struct's field at `index`, and `object` is a place or a field or
-    /// component inside one: `v.x`, `card.weight`, `slot.offer.weight`.
-    ///
-    /// A value is changed by making the changed one and putting it back, so
-    /// each level from the place down is loaded, the innermost changed, and
-    /// each level rebuilt around it on the way back up before the place is
-    /// stored.
-    fn lower_component_assign(
-        &self,
-        object: &Expr,
-        index: usize,
-        op: AssignOp,
-        value: &Expr,
-        instructions: &mut Vec<Instruction>,
-    ) {
-        let (root, chain) = self.place_chain(object);
-        let (path, held) = self.path_or_held(root, "<invalid>", instructions);
-        let load_down_to = |depth: usize, instructions: &mut Vec<Instruction>| {
-            instructions.push(Instruction::Load(path.clone()));
-            for step in &chain[..depth] {
-                instructions.push(Instruction::Component(*step));
-            }
-        };
-        // The place, then each level inside it down to the one changed.
-        for depth in 0..=chain.len() {
-            load_down_to(depth, instructions);
-        }
-        if let Some(binary) = binary_for(op) {
-            load_down_to(chain.len(), instructions);
-            instructions.push(Instruction::Component(index));
-            self.lower_expr(value, instructions);
-            instructions.push(Instruction::Binary(binary));
-        } else {
-            self.lower_expr(value, instructions);
-        }
-        instructions.push(Instruction::WithComponent(index));
-        for step in chain.iter().rev() {
-            instructions.push(Instruction::WithComponent(*step));
-        }
-        instructions.push(Instruction::Store(path.clone()));
-        instructions.push(Instruction::Pop);
-        load_down_to(chain.len(), instructions);
-        instructions.push(Instruction::Component(index));
-        Self::release(held, instructions);
-    }
-
-    /// The place an expression is inside, and the fields or components that
-    /// lead from it down to the expression, outermost first: `slot.offer`
-    /// is `slot` and the position of `offer`.
-    pub(super) fn place_chain<'e>(&self, expr: &'e Expr) -> (&'e Expr, Vec<usize>) {
-        let mut chain = Vec::new();
-        let mut at = expr;
-        loop {
-            match &at.kind {
-                ExprKind::Group(inner) => at = inner,
-                ExprKind::Member { object, .. } => {
-                    let Some(ValueMember::Component(index)) = self.value_member(at.span) else {
-                        break;
-                    };
-                    chain.push(index);
-                    at = object;
-                }
-                _ => break,
-            }
-        }
-        chain.reverse();
-        (at, chain)
-    }
-
-    /// The place a list change is made to, and the fields that lead from it
-    /// down to the list.
-    fn list_place(&self, object: &Expr) -> (Path, Vec<usize>) {
-        let (root, fields) = self.place_chain(object);
-        let path =
-            Self::path_from_expr(root).unwrap_or_else(|| Path(vec!["<invalid-list>".to_owned()]));
-        (path, fields)
-    }
-
     pub(super) fn path_from_expr(expr: &Expr) -> Option<Path> {
         fn collect(expr: &Expr, parts: &mut Vec<String>) -> bool {
             match &expr.kind {
@@ -556,7 +433,7 @@ impl Lowerer<'_> {
 }
 
 /// The arithmetic a compound assignment performs; `None` for plain `=`.
-const fn binary_for(op: AssignOp) -> Option<BinaryOp> {
+pub(super) const fn binary_for(op: AssignOp) -> Option<BinaryOp> {
     match op {
         AssignOp::Assign => None,
         AssignOp::Add => Some(BinaryOp::Add),

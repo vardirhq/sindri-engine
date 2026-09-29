@@ -1732,6 +1732,12 @@ read-only copy, and reach every file as the struct does. Exercised in
 `crates/sindri-decay/tests/scripts_use_struct_methods.rs`, and by both
 Orbital games' module chooser.
 
+Maps are written (`["a": 1.0]`, `[:]`), read by key (`m[k]`, `get`,
+`contains`, `keys()`, `values()`, `length`) and changed in place where a
+`var` or field holds them (`m[k] = v`, `remove`, `clear`), keyed by text,
+numbers, flags, variants or entities in the order keys were first set.
+Exercised in `decay/crates/decay-runtime/src/tests/maps.rs`.
+
 Lists are written (`[a, b]`), changed in place where a `var` or field holds
 them (`push`, `pop`, `insert`, `remove_at`, `clear`, `xs[i] = v`), asked
 (`contains`, `index_of`, `length`) and walked, and `for i in 0..n` walks a

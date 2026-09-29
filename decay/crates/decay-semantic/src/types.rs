@@ -11,6 +11,9 @@ pub const LIST: &str = "List";
 /// The collection type's older spelling, which still means the same type.
 pub const ARRAY: &str = "Array";
 
+/// The map type's name: `Map<String, f32>`, keys then values.
+pub const MAP: &str = "Map";
+
 /// Whether a written type name is the collection type.
 #[must_use]
 pub fn is_list(name: &str) -> bool {
@@ -112,6 +115,9 @@ pub enum Type {
     /// grows, or shrinks one. That is what keeps a collection bounded without
     /// the language having to say anything about memory.
     Array(Box<Type>),
+    /// Values found by key: `Map<String, f32>`. Its keys are text, numbers,
+    /// flags or an enum's variants, kept in the order they were first set.
+    Map(Box<Type>, Box<Type>),
     Unknown,
 }
 
@@ -135,7 +141,29 @@ impl Type {
                     .as_ref()
                     .map_or(Self::Unknown, |argument| Self::from_ref(argument)),
             )),
+            MAP => {
+                let part = |argument: &Option<Box<TypeRef>>| {
+                    argument
+                        .as_ref()
+                        .map_or(Self::Unknown, |argument| Self::from_ref(argument))
+                };
+                Self::Map(
+                    Box::new(part(&reference.argument)),
+                    Box::new(part(&reference.second)),
+                )
+            }
             other => Self::Named(other.to_owned()),
+        }
+    }
+
+    /// Whether a map may be keyed by values of this type: ones that compare
+    /// by what they are, and have an obvious order to be listed in.
+    #[must_use]
+    pub fn is_key(&self) -> bool {
+        match self {
+            Self::F32 | Self::Bool | Self::String | Self::Unknown => true,
+            Self::Named(name) => !name.starts_with("enum ") && !name.starts_with("event "),
+            _ => false,
         }
     }
 
@@ -191,6 +219,11 @@ impl Type {
             Self::Vec3 => Cow::Borrowed(VEC3),
             Self::Timer => Cow::Borrowed(TIMER),
             Self::Array(element) => Cow::Owned(format!("{LIST}<{}>", element.display_name())),
+            Self::Map(key, value) => Cow::Owned(format!(
+                "{MAP}<{}, {}>",
+                key.display_name(),
+                value.display_name()
+            )),
             Self::Unknown => Cow::Borrowed("unknown"),
         }
     }

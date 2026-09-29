@@ -103,10 +103,18 @@ impl Analyzer<'_, '_> {
         }
     }
 
-    /// `list[index] = value`: the element's type, once the list is one the
-    /// script may change.
-    pub(super) fn list_element_target_type(&mut self, object: &Expr, index: &Expr) -> Type {
+    /// `list[index] = value` or `map[key] = value`: the element's or value's
+    /// type, once the collection is one the script may change.
+    pub(super) fn element_target_type(
+        &mut self,
+        object: &Expr,
+        index: &Expr,
+        target: Span,
+    ) -> Type {
         let object_type = self.expr_type(object);
+        if let Type::Map(key, value) = &object_type {
+            return self.map_entry_target_type(object, key, value, index, target);
+        }
         let index_type = self.expr_type(index);
         self.require_type(&index_type, &Type::F32, index.span);
         match &object_type {

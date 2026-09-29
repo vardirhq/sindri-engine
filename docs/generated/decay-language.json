@@ -752,6 +752,59 @@
         }
       ],
       "type": "List<T>"
+    },
+    {
+      "members": [
+        {
+          "kind": "property",
+          "name": "length",
+          "type": "f32"
+        },
+        {
+          "kind": "method",
+          "name": "get",
+          "params": [
+            "K",
+            "V"
+          ],
+          "returns": "V"
+        },
+        {
+          "kind": "method",
+          "name": "contains",
+          "params": [
+            "K"
+          ],
+          "returns": "bool"
+        },
+        {
+          "kind": "method",
+          "name": "keys",
+          "params": [],
+          "returns": "List<K>"
+        },
+        {
+          "kind": "method",
+          "name": "values",
+          "params": [],
+          "returns": "List<V>"
+        },
+        {
+          "kind": "method",
+          "name": "remove",
+          "params": [
+            "K"
+          ],
+          "returns": "bool"
+        },
+        {
+          "kind": "method",
+          "name": "clear",
+          "params": [],
+          "returns": "unit"
+        }
+      ],
+      "type": "Map<K, V>"
     }
   ],
   "operators": {

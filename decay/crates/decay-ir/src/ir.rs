@@ -204,6 +204,22 @@ pub enum Instruction {
         fields: Vec<usize>,
         op: ListOp,
     },
+    /// Pops this many key-then-value pairs and pushes the map of them, in the
+    /// order they were written.
+    MakeMap(usize),
+    /// A map question: pops the arguments, then the map, and pushes the
+    /// answer.
+    MapRead(decay_syntax::MapOp),
+    /// A map change, made in place to the map a variable or field holds, as
+    /// a list change is: pops the arguments and pushes what the change gives
+    /// back.
+    MapChange {
+        path: Path,
+        /// The struct fields, outermost first, that lead from the place at
+        /// `path` down to the map.
+        fields: Vec<usize>,
+        op: decay_syntax::MapOp,
+    },
     /// Pops a collection and opens a walk over it.
     ///
     /// A `for` loop is lowered to this rather than to an index and a counter,

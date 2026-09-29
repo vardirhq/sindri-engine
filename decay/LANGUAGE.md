@@ -24,6 +24,7 @@ to change. Nothing here is a compatibility promise.
 - [Grammar](#grammar)
 - [Types](#types)
 - [Lists](#lists)
+- [Maps](#maps)
 - [Vectors](#vectors)
 - [Text](#text)
 - [Containers](#containers)
@@ -182,7 +183,7 @@ function     = "fn" IDENT "(" [ params ] ")" [ "->" type ] block ;
 handler      = "on" IDENT "(" [ params ] ")" block ;
 params       = param { "," param } ;
 param        = IDENT [ ":" type ] ;
-type         = IDENT [ "<" type ">" ] ;
+type         = IDENT [ "<" type [ "," type ] ">" ] ;
 
 block        = "{" { stmt } "}" ;
 stmt         = binding | return | if | while | for | match | break
@@ -207,7 +208,9 @@ postfix      = primary { "." IDENT | "[" expr "]" | "(" [ args ] ")" }
 args         = expr { "," expr } ;
 primary      = IDENT | NUMBER | STRING | "true" | "false" | "null"
              | "(" expr ")" | "[" [ expr { "," expr } [ "," ] ] "]"
+             | "[" ":" "]" | "[" entry { "," entry } [ "," ] "]"
              | "match" expr "{" value_arm { "," value_arm } [ "," ] "}" ;
+entry        = expr ":" expr ;
 value_arm    = pattern { "|" pattern } "=>" expr ;
 ```
 
@@ -370,6 +373,45 @@ walks the numbers `start`, `start + 1`, … while they are below `end`, so
 `0..3` is `0, 1, 2` and `3..3` is nothing. Both ends are numbers and are
 evaluated once. A range is never made into a list, so `0..1000000` costs two
 numbers; walking it is bounded by the operation budget like any loop.
+
+### Maps
+
+`Map<K, V>` finds values of one type by keys of another. It is the one type
+that takes two type arguments.
+
+```rust
+var prices = ["arc": 3.0, "nova": 5.0];  // a Map<String, f32>
+var kills: Map<Kind, f32> = [:];         // an empty one needs its type
+
+kills[Kind.Drone] = 1.0;                 // set, adding the key if it is new
+kills[Kind.Drone] += 2.0;                // read and set in place
+let arc = prices["arc"];                 // a key it must have
+let rare = prices.get("rare", 0.0);      // or a fallback
+if prices.contains("nova") { }
+let removed: bool = prices.remove("arc"); // whether it was there
+for name in prices.keys() { }            // in the order keys were first set
+let total = prices.values().length + prices.length;
+prices.clear();
+```
+
+- **Keys** are text, numbers, flags, enum variants or entities: values that
+  compare by what they are. A map keyed by anything else is a diagnostic.
+- **A literal's types** are its first entry's, and every other entry must fit
+  them. `[:]` is an empty map and fits any map, so it is written where the
+  type is. A key written twice in a literal keeps its last value.
+- **In the order keys were first set**: `keys()` and `values()` list them so,
+  and setting a key that is already there keeps its place. That makes a
+  script's walk over a map the same every run.
+- **Reading a key the map does not have is an error when it runs**, naming the
+  key, as reading past a list's end is. `get(key, fallback)` is for a key that
+  may be missing.
+- **A map is a value, like a list.** Assigning one copies it, and a change —
+  `m[key] = v`, `remove`, `clear` — is made to the map a variable, parameter
+  or field of this script holds, which must be a `var`, including through a
+  struct: `stash.counts["cores"] += 1.0`. Every operation is a call, `keys()`
+  included; `length` is a property.
+- A script may put at most 10,000 keys in one map, as in a list. A `for`
+  walks `keys()` or `values()`, not the map itself.
 
 ### Vectors
 
@@ -1161,7 +1203,8 @@ grammar, and every one of them is a parse error or a diagnostic.
 `continue` with a label or a value. `for … in` walks a list or a range, and
 nothing else.
 
-**Data:** maps, dictionaries, sets, tuples, methods that change their struct,
+**Data:** sets, tuples, a map a `for` walks directly (walk `keys()`), a map
+authored by a scene, methods that change their struct,
 defaults for fields of a type a constant cannot hold (a vector, a list, an
 entity), enums with data
 (`Some(x)`), a range as a value outside `for`, a step (`0..10 by 2`), negative

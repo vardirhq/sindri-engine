@@ -31,6 +31,14 @@ pub enum Value {
     /// nothing; a change to one that something else also holds copies it
     /// first, which is what makes a list a value.
     Array(Rc<Vec<Value>>),
+    /// A map: values found by key, each key once, kept in the order the keys
+    /// were first set. Shared until changed, like a list.
+    ///
+    /// A list of pairs rather than a hash table: its keys are the few values
+    /// a script can compare — text, numbers, flags, variants, entities — and
+    /// a map a scene's scripts keep holds tens of entries, where a search is
+    /// as quick and the order is one a script can rely on.
+    Map(Rc<Vec<(Value, Value)>>),
     /// A struct: its shape, and its fields' values in declared order. Shared
     /// until changed, like a list.
     Struct {

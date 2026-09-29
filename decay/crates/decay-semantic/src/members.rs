@@ -5,7 +5,7 @@
 //! completions, and by the generator that documents them, so none of the
 //! three can say something the others do not.
 
-use decay_syntax::{ListOp, NumberOp, StringOp, TimerProperty, VectorOp};
+use decay_syntax::{ListOp, MapOp, NumberOp, StringOp, TimerProperty, VectorOp};
 
 use crate::types::{FunctionType, Type};
 
@@ -65,6 +65,19 @@ pub fn list_op_signature(op: ListOp, element: &Type) -> FunctionType {
         ListOp::Contains => signature(vec![element.clone()], Type::Bool),
         ListOp::IndexOf => signature(vec![element.clone()], Type::F32),
         ListOp::SetAt => signature(vec![Type::F32, element.clone()], element.clone()),
+    }
+}
+
+/// A map operation on a map from `key` to `value`.
+#[must_use]
+pub fn map_op_signature(op: MapOp, key: &Type, value: &Type) -> FunctionType {
+    match op {
+        // `get(key, fallback)`, and `m[key] = value`, which gives the value.
+        MapOp::Get | MapOp::Set => signature(vec![key.clone(), value.clone()], value.clone()),
+        MapOp::Contains | MapOp::Remove => signature(vec![key.clone()], Type::Bool),
+        MapOp::Keys => signature(vec![], Type::array_of(key.clone())),
+        MapOp::Values => signature(vec![], Type::array_of(value.clone())),
+        MapOp::Clear => signature(vec![], Type::Unit),
     }
 }
 

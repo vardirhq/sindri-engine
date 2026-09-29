@@ -211,6 +211,7 @@ pub(crate) fn type_name(ty: &Type) -> String {
         Type::Named(name) => name.clone(),
         Type::Vec2 | Type::Vec3 | Type::Timer => ty.display_name().into_owned(),
         Type::Array(element) => format!("List<{}>", type_name(element)),
+        Type::Map(key, value) => format!("Map<{}, {}>", type_name(key), type_name(value)),
         Type::Unknown => "unknown".to_owned(),
     }
 }

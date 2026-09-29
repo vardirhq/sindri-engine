@@ -1938,6 +1938,24 @@ cards' names, where it had twelve numbered fields, walks its catalogue with
 ranges, and passes the modules already on offer as one list rather than three
 parameters.
 
+### Maps
+
+```decay
+var kills: Map<Kind, f32> = [:];
+kills[kind] = kills.get(kind, 0.0) + 1.0;
+let prices = ["arc": 3.0, "nova": 5.0];
+for name in prices.keys() { print(name + " " + prices[name]); }
+```
+
+A map finds values by key: text, numbers, flags, enum variants or entities.
+`m[key] = v`, `remove` and `clear` change the one a `var` or field holds;
+`m[key]` reads a key it must have, `get(key, fallback)` one it may not, and
+`contains`, `keys()`, `values()` and `length` ask it. Its keys are listed in
+the order they were first set, so a walk over one is the same every run. Like
+a list it is a value, copied where it is assigned, and holds at most 10,000
+keys. A scene cannot author one yet: an `@export` map starts as the script
+wrote it.
+
 ### Structs
 
 ```decay

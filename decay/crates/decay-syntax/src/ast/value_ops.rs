@@ -68,6 +68,67 @@ impl ListOp {
     }
 }
 
+/// What a map can be asked, or told to change.
+///
+/// A change — `remove`, `clear`, and `m[key] = value` — is made to the map a
+/// variable or field holds, in place, as a list's is.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub enum MapOp {
+    /// `m.get(key, fallback)`: the value at `key`, or `fallback`.
+    Get,
+    /// `m.contains(key)`: whether `key` has a value.
+    Contains,
+    /// `m.keys()`: every key, in the order they were first set.
+    Keys,
+    /// `m.values()`: every value, in the same order.
+    Values,
+    /// `m.remove(key)`: takes `key` out, giving back whether it was there.
+    Remove,
+    /// `m.clear()`: empties it.
+    Clear,
+    /// `m[key] = value`: what an entry assignment lowers to. Not a name a
+    /// script can call.
+    Set,
+}
+
+impl MapOp {
+    /// Every operation a script can call by name, with that name and how
+    /// many arguments it takes after the map itself.
+    pub const ALL: [(Self, &'static str, usize); 6] = [
+        (Self::Get, "get", 2),
+        (Self::Contains, "contains", 1),
+        (Self::Keys, "keys", 0),
+        (Self::Values, "values", 0),
+        (Self::Remove, "remove", 1),
+        (Self::Clear, "clear", 0),
+    ];
+
+    /// The operation a member name spells, and how many arguments it takes.
+    #[must_use]
+    pub fn named(name: &str) -> Option<(Self, usize)> {
+        Self::ALL
+            .into_iter()
+            .find(|(_, spelled, _)| *spelled == name)
+            .map(|(op, _, arity)| (op, arity))
+    }
+
+    /// How many arguments it takes after the map.
+    #[must_use]
+    pub const fn arity(self) -> usize {
+        match self {
+            Self::Keys | Self::Values | Self::Clear => 0,
+            Self::Contains | Self::Remove => 1,
+            Self::Get | Self::Set => 2,
+        }
+    }
+
+    /// Whether it changes the map rather than only reading it.
+    #[must_use]
+    pub const fn changes(self) -> bool {
+        matches!(self, Self::Remove | Self::Clear | Self::Set)
+    }
+}
+
 /// What a vector can be asked beyond its components and arithmetic.
 ///
 /// Here, beside the operators, because it is the same kind of thing: an

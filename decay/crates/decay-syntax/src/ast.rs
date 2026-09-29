@@ -2,7 +2,7 @@ use crate::Span;
 
 mod value_ops;
 
-pub use value_ops::{ListOp, NumberOp, StringOp, TimerProperty, VectorOp};
+pub use value_ops::{ListOp, MapOp, NumberOp, StringOp, TimerProperty, VectorOp};
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct Program {
@@ -136,13 +136,16 @@ pub struct FieldDecl {
 #[derive(Debug, Clone, PartialEq)]
 pub struct TypeRef {
     pub name: String,
-    /// The one type argument a name may carry, as in `Array<Entity>`.
+    /// The type argument a name may carry, as in `Array<Entity>`, or a map's
+    /// key type in `Map<String, f32>`.
     ///
-    /// One rather than a list, and deliberately: the only generic type the
-    /// language has is the collection, and it takes exactly one element type.
-    /// A list would be a promise of user-defined generics, which
+    /// Named slots rather than a list, and deliberately: the only generic
+    /// types the language has are its collections, a list taking one type and
+    /// a map two. A list would be a promise of user-defined generics, which
     /// `LANGUAGE.md` says plainly the language does not have.
     pub argument: Option<Box<TypeRef>>,
+    /// A map's value type, the second in `Map<String, f32>`.
+    pub second: Option<Box<TypeRef>>,
     pub span: Span,
 }
 
@@ -153,6 +156,7 @@ impl TypeRef {
         Self {
             name,
             argument: None,
+            second: None,
             span,
         }
     }
@@ -362,6 +366,9 @@ pub enum ExprKind {
         subject: Box<Expr>,
         arms: Vec<MatchValueArm>,
     },
+    /// `["a": 1.0, "b": 2.0]`, or `[:]` for an empty one: a map's entries,
+    /// each key then its value, in the order written.
+    Map(Vec<(Expr, Expr)>),
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]

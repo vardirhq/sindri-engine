@@ -194,6 +194,25 @@ impl Parser<'_> {
         })
     }
 
+    /// The rest of `["a": 1.0, "b": 2.0]`, after the first key and its `:`.
+    fn parse_map_rest(&mut self, start: crate::Span, first: Expr) -> Option<Expr> {
+        let mut entries = vec![(first, self.parse_expression()?)];
+        while self.consume_simple(&TokenKind::Comma).is_some() && !self.at(&TokenKind::RightBracket)
+        {
+            let key = self.parse_expression()?;
+            self.expect_simple(
+                &TokenKind::Colon,
+                "expected `:` and a value -- every entry of a map is `key: value`",
+            )?;
+            entries.push((key, self.parse_expression()?));
+        }
+        let end = self.expect_simple(&TokenKind::RightBracket, "expected `]` after a map")?;
+        Some(Expr {
+            span: start.join(end),
+            kind: ExprKind::Map(entries),
+        })
+    }
+
     pub(super) fn parse_primary(&mut self) -> Option<Expr> {
         let token = self.current().clone();
         let kind = match token.kind {
@@ -223,6 +242,33 @@ impl Parser<'_> {
             }
             TokenKind::LeftBracket => {
                 self.advance();
+                // `[:]`: an empty map.
+                if self.consume_simple(&TokenKind::Colon).is_some() {
+                    let end =
+                        self.expect_simple(&TokenKind::RightBracket, "expected `]` after `[:`")?;
+                    return Some(Expr {
+                        span: token.span.join(end),
+                        kind: ExprKind::Map(Vec::new()),
+                    });
+                }
+                if !self.at(&TokenKind::RightBracket) {
+                    let first = self.parse_expression()?;
+                    if self.consume_simple(&TokenKind::Colon).is_some() {
+                        return self.parse_map_rest(token.span, first);
+                    }
+                    let mut elements = vec![first];
+                    while self.consume_simple(&TokenKind::Comma).is_some()
+                        && !self.at(&TokenKind::RightBracket)
+                    {
+                        elements.push(self.parse_expression()?);
+                    }
+                    let end =
+                        self.expect_simple(&TokenKind::RightBracket, "expected `]` after a list")?;
+                    return Some(Expr {
+                        span: token.span.join(end),
+                        kind: ExprKind::List(elements),
+                    });
+                }
                 let mut elements = Vec::new();
                 while !self.at(&TokenKind::RightBracket) {
                     elements.push(self.parse_expression()?);

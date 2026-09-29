@@ -395,10 +395,16 @@ impl Parser<'_> {
             return Some(TypeRef::plain(name, span));
         }
         let argument = self.parse_type()?;
+        let second = if self.consume_simple(&TokenKind::Comma).is_some() {
+            Some(Box::new(self.parse_type()?))
+        } else {
+            None
+        };
         let end = self.expect_simple(&TokenKind::Greater, "expected `>` after type argument")?;
         Some(TypeRef {
             name,
             argument: Some(Box::new(argument)),
+            second,
             span: span.join(end),
         })
     }

@@ -8,6 +8,7 @@ mod execution;
 mod fields;
 mod lists;
 mod loops;
+mod maps;
 mod match_values;
 mod matching;
 mod methods;
