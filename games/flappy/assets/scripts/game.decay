@@ -1,0 +1,7 @@
+// Shared run state for the Flappy showcase.
+state Game {
+    var score: f32 = 0.0;
+    var best: f32 = 0.0;
+    var started: bool = false;
+    var dead: bool = false;
+}
