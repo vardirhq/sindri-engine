@@ -1,0 +1,21 @@
+// Recycles three pipe pairs forever. Each pair keeps its authored gap height.
+script Obstacles {
+    @export let speed: f32 = 3.2;
+    @export let wrap_x: f32 = -7.0;
+    @export let reset_x: f32 = 13.0;
+
+    fn update(dt: f32) {
+        if !Game.started || Game.dead {
+            return;
+        }
+
+        for obstacle in World.with_tag("scroll") {
+            let next = World.position_x(obstacle) - this.speed * dt;
+            if next < this.wrap_x {
+                World.set_position(obstacle, this.reset_x, World.position_y(obstacle));
+            } else {
+                World.set_position(obstacle, next, World.position_y(obstacle));
+            }
+        }
+    }
+}
