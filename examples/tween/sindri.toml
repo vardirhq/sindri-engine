@@ -1,0 +1,6 @@
+format_version = 1
+[project]
+name = "Tween Lab"
+main_scene = "assets/tween.scene"
+[assets]
+include = ["fonts/Fonts-OFL.txt", "ui/tween.weave"]

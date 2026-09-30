@@ -502,3 +502,14 @@ When a button looks stretched or has malformed corners:
 2. Use an absolute border radius for a rounded rectangle.
 3. Avoid a radius near half the height unless a pill is intentional.
 4. Verify that responsive rules change both dimensions consistently.
+
+
+### Relationship to gameplay tweening
+
+Weave animation authoring follows CSS: computed-style changes trigger
+`transition`, and future authored animations should use CSS-style `@keyframes`
+and animation declarations. Decay gameplay uses managed `Tween` handles and
+playback controls, documented in [scripting](scripting.md#gameplay-tweens).
+Both use the engine's named easing curves. Sharing that math does not make UI
+stylesheets depend on gameplay or turn Decay tweens into CSS declarations.
+`@keyframes` remains unimplemented in this slice.

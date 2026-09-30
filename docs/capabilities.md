@@ -2094,3 +2094,26 @@ to enter. Nothing new was added to the engine for either.
 
 Scenes can author `sindri.environment` as the scene-wide presentation contract. It owns background colour, ambient colour/intensity, contact depth, and world post-processing controls; the directional world light is a `sindri.light` entity drawn and aimed in the Scene view. Textured 3D geometry, including engine-owned voxel meshes, is shaded from the same ambient and directional settings in editor viewports and browser Voxel Lab; the default renderer lighting preserves the previous unlit appearance for scenes without an environment. Voxel Lab is the acceptance lab for the wider presentation track in `docs/world-presentation-plan.md`. Voxel meshes also carry deterministic corner AO controlled by the environment's contact-depth strength. Exposure, tone mapping, contrast, saturation, bloom, and vignette share one ordered world post path while overlay/UI remains crisp. Fog, sky, environment profiles/volumes, local lights, weather, water, screen-space AO for arbitrary geometry, and advanced cinematic effects remain future slices.
 
+
+
+### Managed gameplay tweening
+
+`Tween.number`, `vec2`, `vec3` and `color` create typed handles, advanced once
+before their owner's subsequent script updates. Typed value reads, pause,
+resume, cancel, restart, progress/completion and disposal are exercised by
+`crates/sindri-decay/tests/scripts_tween.rs`; ownership, reclamation and the
+8192 retained-handle bound are covered by the runtime store tests. Orbital's
+powerups now appear with a short eased scale animation, pausing with the game's
+menu state; the original collider, attraction, collection and lifetime logic
+remain in Decay. `games/orbital-baked/tests/pickup_tween.rs` observes the real
+script and authored prefab through completion and pause.
+
+Named easing lives in `sindri-core` and is also used by Weave's existing CSS
+transitions. Weave remains CSS-inspired; gameplay uses managed playback controls.
+See [scripting](scripting.md#gameplay-tweens) for exact timing and lifetime
+semantics. The Pages feature example at `examples/tween` compares the five curves on
+movement, scale, rotation and colour, with mouse/touch buttons and keyboard
+playback controls. Its real browser smoke observes movement and pause on desktop
+and portrait viewports, and its project test compiles and plays the authored scene.
+No editor timeline, arbitrary component property binding, sequence,
+callback, loop/yoyo or CSS `@keyframes` surface is claimed complete.

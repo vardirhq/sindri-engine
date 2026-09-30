@@ -6,6 +6,7 @@
 mod asset;
 mod command;
 mod component;
+mod easing;
 mod engine;
 mod entity;
 mod input;
@@ -34,6 +35,7 @@ pub use component::{
     ApplyMode, AssetKind, ComponentMetadata, ComponentRegistryError, ComponentSchemaRegistry,
     FieldMeaning, SceneComponent, UnknownComponentPolicy,
 };
+pub use easing::Easing;
 pub use engine::{EngineCore, EngineError, EngineFrame};
 pub use entity::EntityId;
 pub use input::{

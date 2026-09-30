@@ -2254,3 +2254,76 @@ back does not change what undo means.
   reloaded. There is no state migration across a hot reload of the source: a
   changed file recompiles, and the running instance keeps its fields.
 
+
+
+### Gameplay tweens
+
+Gameplay tweening is a managed Decay API. Weave's UI animation surface remains
+CSS-inspired (`transition`, and future `@keyframes`); the two share named easing
+math in `sindri-core`, not authoring syntax.
+
+| Call | Return | Meaning |
+| --- | --- | --- |
+| `Tween.number(from, to, duration, easing)` | `NumberTween` | Start a number tween |
+| `Tween.vec2(from, to, duration, easing)` | `Vec2Tween` | Start a 2D vector tween |
+| `Tween.vec3(from, to, duration, easing)` | `Vec3Tween` | Start a 3D vector tween |
+| `Tween.color(from, to, duration, easing)` | `ColorTween` | Start an RGBA colour tween |
+| `Tween.number_value(tween)` | `f32` | Read a number tween's current value |
+| `Tween.vec2_value(tween)` | `Vec2` | Read a 2D vector tween's current value |
+| `Tween.vec3_value(tween)` | `Vec3` | Read a 3D vector tween's current value |
+| `Tween.color_value(tween)` | `Color` | Read a colour tween's current value |
+| `Tween.progress(tween)` | `f32` | Linear elapsed fraction in [0, 1] |
+| `Tween.is_done(tween)` | `bool` | Naturally completed; cancellation is not completion |
+| `Tween.is_paused(tween)` | `bool` | Paused playback |
+| `Tween.is_cancelled(tween)` | `bool` | Cancelled playback |
+| `Tween.pause(tween)` | unit | Hold the current value |
+| `Tween.resume(tween)` | unit | Resume paused playback; cancellation remains |
+| `Tween.cancel(tween)` | unit | Stop and retain the current value |
+| `Tween.restart(tween)` | unit | Replay the original endpoints; clear pause/cancellation |
+| `Tween.dispose(tween)` | unit | Release the handle and invalidate all aliases |
+
+Factories take two endpoints of the indicated type, a duration in seconds, and
+one of `"linear"`, `"ease"`, `"ease-in"`, `"ease-out"`, `"ease-in-out"`.
+Wrong types are compile errors. Unknown curves, non-finite endpoints, negative
+or non-finite durations, null and disposed handles produce named host errors.
+Zero duration is complete immediately, returning the exact target.
+
+A tween starts playing at its initial value. Its owner is the creating script;
+time advances once before each **subsequent** owner update, using the script
+runner's delta. A tween created during an update or delivered message starts at
+time zero and first advances on the next owner update. Reading it repeatedly
+does not advance it. Pause/resume affect future advancement; an early return in
+`update` does not pause it. Owners that do not tick do not advance tweens.
+Removal of a script instance (including disable/removal), script replacement,
+and `Scripts::clear` release its handles. Completed and cancelled handles remain
+readable until disposed or their owner is removed. Copies alias the same tween.
+At most **8192 retained handles** exist per script runner; creation beyond that
+fails rather than evicting a handle. Dispose replaced/unused tweens.
+
+```decay
+script Fade {
+    var tint: ColorTween = null;
+    fn start() {
+        this.tint = Tween.color(Color(1.0, 1.0, 1.0, 1.0),
+                                Color(1.0, 1.0, 1.0, 0.0), 0.3, "ease-out");
+    }
+    fn update(dt: f32) {
+        this.sprite.tint = Tween.color_value(this.tint);
+        if Tween.is_done(this.tint) { World.despawn(this.entity); }
+    }
+}
+```
+
+Vectors keep the coordinate space of their endpoints. Tweening world positions
+means supplying world positions and assigning `transform.world_position`;
+local positions go to `transform.position`. The ordinary setters still enforce
+hierarchy conversion and Z locks. Colours interpolate the supplied four channels,
+including alpha, without extra gamma conversion or channel clamping.
+
+For a smooth replacement, read the displayed value, cancel/dispose the old
+handle, then create a new tween from that value to the new target. The new
+handle starts at that value with a new duration; `restart` instead replays the
+original endpoints. Completion is polled, so a game can use its existing typed
+messages/events for follow-up actions. This slice does not add property-path
+binding, timelines, sequences, callbacks, loop/yoyo modes or CSS keyframes.
+Orbital's `powerup.decay` uses a managed vector tween for its pickup appearance.

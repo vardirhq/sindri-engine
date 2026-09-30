@@ -98,6 +98,11 @@ impl<'a> WorldHost<'a> {
         self
     }
 
+    pub(crate) fn with_tweens(mut self, tweens: &'a mut crate::tweens::Tweens) -> Self {
+        self.inner.tweens = Some(tweens);
+        self
+    }
+
     pub fn new(
         world: &'a mut sindri_core::World,
         entity: sindri_core::EntityId,

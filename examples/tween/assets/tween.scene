@@ -1,0 +1,1017 @@
+{
+  "format_version": 10,
+  "metadata": {
+    "name": "Tween Lab"
+  },
+  "entities": [
+    {
+      "id": "camera",
+      "name": "camera",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          10
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "sindri.camera": {
+          "projection": "orthographic",
+          "vertical_size": 8,
+          "near": 0.1,
+          "far": 100,
+          "fit": "height"
+        }
+      }
+    },
+    {
+      "id": "controls",
+      "name": "controls",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "sindri.script": {
+          "source": "scripts/tween-demo.decay",
+          "script": "TweenControls"
+        }
+      }
+    },
+    {
+      "id": "title",
+      "name": "title",
+      "transform_3d": {
+        "position": [
+          0,
+          0.85,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "sindri.ui.text": {
+          "text": "TWEEN LAB",
+          "font": "fonts/ChakraPetch-Regular.ttf",
+          "font_size": 0.085,
+          "bounds": [
+            1,
+            0.1
+          ],
+          "anchor": "center",
+          "layer": 20
+        }
+      }
+    },
+    {
+      "id": "subtitle",
+      "name": "subtitle",
+      "transform_3d": {
+        "position": [
+          0,
+          0.74,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "sindri.ui.text": {
+          "text": "MOVE / SCALE / COLOUR / ROTATE",
+          "font": "fonts/ChakraPetch-Regular.ttf",
+          "font_size": 0.04,
+          "bounds": [
+            1,
+            0.1
+          ],
+          "anchor": "center",
+          "layer": 20
+        }
+      }
+    },
+    {
+      "id": "track-linear",
+      "name": "track-linear",
+      "transform_3d": {
+        "position": [
+          0,
+          1.7,
+          -0.1
+        ],
+        "scale": [
+          5.5,
+          0.012,
+          1
+        ]
+      },
+      "components": {
+        "sindri.shape": {
+          "kind": "polygon",
+          "count": 4,
+          "fill": [
+            0.15,
+            0.22,
+            0.3,
+            1
+          ],
+          "stroke": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "layer": 0
+        }
+      }
+    },
+    {
+      "id": "sample-linear",
+      "name": "sample-linear",
+      "transform_3d": {
+        "position": [
+          0,
+          1.7,
+          0
+        ],
+        "scale": [
+          0.23,
+          0.23,
+          1
+        ]
+      },
+      "components": {
+        "sindri.shape": {
+          "kind": "polygon",
+          "count": 4,
+          "fill": [
+            0.18,
+            0.82,
+            1,
+            1
+          ],
+          "stroke": [
+            0.9,
+            0.96,
+            1,
+            1
+          ],
+          "stroke_width": 0.05,
+          "layer": 4
+        },
+        "sindri.script": {
+          "source": "scripts/tween-demo.decay",
+          "script": "TweenDemo",
+          "properties": {
+            "easing": "linear"
+          }
+        }
+      }
+    },
+    {
+      "id": "label-linear",
+      "name": "label-linear",
+      "transform_3d": {
+        "position": [
+          0.06,
+          0.49,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "sindri.ui.text": {
+          "text": "linear",
+          "font": "fonts/ChakraPetch-Regular.ttf",
+          "font_size": 0.055,
+          "bounds": [
+            0.7,
+            0.07
+          ],
+          "anchor": "left",
+          "layer": 20
+        }
+      }
+    },
+    {
+      "id": "track-ease",
+      "name": "track-ease",
+      "transform_3d": {
+        "position": [
+          0,
+          0.8999999999999999,
+          -0.1
+        ],
+        "scale": [
+          5.5,
+          0.012,
+          1
+        ]
+      },
+      "components": {
+        "sindri.shape": {
+          "kind": "polygon",
+          "count": 4,
+          "fill": [
+            0.15,
+            0.22,
+            0.3,
+            1
+          ],
+          "stroke": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "layer": 0
+        }
+      }
+    },
+    {
+      "id": "sample-ease",
+      "name": "sample-ease",
+      "transform_3d": {
+        "position": [
+          0,
+          0.8999999999999999,
+          0
+        ],
+        "scale": [
+          0.23,
+          0.23,
+          1
+        ]
+      },
+      "components": {
+        "sindri.shape": {
+          "kind": "polygon",
+          "count": 4,
+          "fill": [
+            0.18,
+            0.82,
+            1,
+            1
+          ],
+          "stroke": [
+            0.9,
+            0.96,
+            1,
+            1
+          ],
+          "stroke_width": 0.05,
+          "layer": 4
+        },
+        "sindri.script": {
+          "source": "scripts/tween-demo.decay",
+          "script": "TweenDemo",
+          "properties": {
+            "easing": "ease"
+          }
+        }
+      }
+    },
+    {
+      "id": "label-ease",
+      "name": "label-ease",
+      "transform_3d": {
+        "position": [
+          0.06,
+          0.29,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "sindri.ui.text": {
+          "text": "ease",
+          "font": "fonts/ChakraPetch-Regular.ttf",
+          "font_size": 0.055,
+          "bounds": [
+            0.7,
+            0.07
+          ],
+          "anchor": "left",
+          "layer": 20
+        }
+      }
+    },
+    {
+      "id": "track-ease-in",
+      "name": "track-ease-in",
+      "transform_3d": {
+        "position": [
+          0,
+          0.09999999999999987,
+          -0.1
+        ],
+        "scale": [
+          5.5,
+          0.012,
+          1
+        ]
+      },
+      "components": {
+        "sindri.shape": {
+          "kind": "polygon",
+          "count": 4,
+          "fill": [
+            0.15,
+            0.22,
+            0.3,
+            1
+          ],
+          "stroke": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "layer": 0
+        }
+      }
+    },
+    {
+      "id": "sample-ease-in",
+      "name": "sample-ease-in",
+      "transform_3d": {
+        "position": [
+          0,
+          0.09999999999999987,
+          0
+        ],
+        "scale": [
+          0.23,
+          0.23,
+          1
+        ]
+      },
+      "components": {
+        "sindri.shape": {
+          "kind": "polygon",
+          "count": 4,
+          "fill": [
+            0.18,
+            0.82,
+            1,
+            1
+          ],
+          "stroke": [
+            0.9,
+            0.96,
+            1,
+            1
+          ],
+          "stroke_width": 0.05,
+          "layer": 4
+        },
+        "sindri.script": {
+          "source": "scripts/tween-demo.decay",
+          "script": "TweenDemo",
+          "properties": {
+            "easing": "ease-in"
+          }
+        }
+      }
+    },
+    {
+      "id": "label-ease-in",
+      "name": "label-ease-in",
+      "transform_3d": {
+        "position": [
+          0.06,
+          0.08999999999999997,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "sindri.ui.text": {
+          "text": "ease-in",
+          "font": "fonts/ChakraPetch-Regular.ttf",
+          "font_size": 0.055,
+          "bounds": [
+            0.7,
+            0.07
+          ],
+          "anchor": "left",
+          "layer": 20
+        }
+      }
+    },
+    {
+      "id": "track-ease-out",
+      "name": "track-ease-out",
+      "transform_3d": {
+        "position": [
+          0,
+          -0.7000000000000004,
+          -0.1
+        ],
+        "scale": [
+          5.5,
+          0.012,
+          1
+        ]
+      },
+      "components": {
+        "sindri.shape": {
+          "kind": "polygon",
+          "count": 4,
+          "fill": [
+            0.15,
+            0.22,
+            0.3,
+            1
+          ],
+          "stroke": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "layer": 0
+        }
+      }
+    },
+    {
+      "id": "sample-ease-out",
+      "name": "sample-ease-out",
+      "transform_3d": {
+        "position": [
+          0,
+          -0.7000000000000004,
+          0
+        ],
+        "scale": [
+          0.23,
+          0.23,
+          1
+        ]
+      },
+      "components": {
+        "sindri.shape": {
+          "kind": "polygon",
+          "count": 4,
+          "fill": [
+            0.18,
+            0.82,
+            1,
+            1
+          ],
+          "stroke": [
+            0.9,
+            0.96,
+            1,
+            1
+          ],
+          "stroke_width": 0.05,
+          "layer": 4
+        },
+        "sindri.script": {
+          "source": "scripts/tween-demo.decay",
+          "script": "TweenDemo",
+          "properties": {
+            "easing": "ease-out"
+          }
+        }
+      }
+    },
+    {
+      "id": "label-ease-out",
+      "name": "label-ease-out",
+      "transform_3d": {
+        "position": [
+          0.06,
+          -0.1100000000000001,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "sindri.ui.text": {
+          "text": "ease-out",
+          "font": "fonts/ChakraPetch-Regular.ttf",
+          "font_size": 0.055,
+          "bounds": [
+            0.7,
+            0.07
+          ],
+          "anchor": "left",
+          "layer": 20
+        }
+      }
+    },
+    {
+      "id": "track-ease-in-out",
+      "name": "track-ease-in-out",
+      "transform_3d": {
+        "position": [
+          0,
+          -1.5000000000000002,
+          -0.1
+        ],
+        "scale": [
+          5.5,
+          0.012,
+          1
+        ]
+      },
+      "components": {
+        "sindri.shape": {
+          "kind": "polygon",
+          "count": 4,
+          "fill": [
+            0.15,
+            0.22,
+            0.3,
+            1
+          ],
+          "stroke": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "layer": 0
+        }
+      }
+    },
+    {
+      "id": "sample-ease-in-out",
+      "name": "sample-ease-in-out",
+      "transform_3d": {
+        "position": [
+          0,
+          -1.5000000000000002,
+          0
+        ],
+        "scale": [
+          0.23,
+          0.23,
+          1
+        ]
+      },
+      "components": {
+        "sindri.shape": {
+          "kind": "polygon",
+          "count": 4,
+          "fill": [
+            0.18,
+            0.82,
+            1,
+            1
+          ],
+          "stroke": [
+            0.9,
+            0.96,
+            1,
+            1
+          ],
+          "stroke_width": 0.05,
+          "layer": 4
+        },
+        "sindri.script": {
+          "source": "scripts/tween-demo.decay",
+          "script": "TweenDemo",
+          "properties": {
+            "easing": "ease-in-out"
+          }
+        }
+      }
+    },
+    {
+      "id": "label-ease-in-out",
+      "name": "label-ease-in-out",
+      "transform_3d": {
+        "position": [
+          0.06,
+          -0.31000000000000005,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "sindri.ui.text": {
+          "text": "ease-in-out",
+          "font": "fonts/ChakraPetch-Regular.ttf",
+          "font_size": 0.055,
+          "bounds": [
+            0.7,
+            0.07
+          ],
+          "anchor": "left",
+          "layer": 20
+        }
+      }
+    },
+    {
+      "id": "button-play",
+      "name": "button-play",
+      "transform_3d": {
+        "position": [
+          -0.3,
+          -0.64,
+          0
+        ],
+        "scale": [
+          0.27,
+          0.09,
+          1
+        ]
+      },
+      "components": {
+        "sindri.ui.shape": {
+          "kind": "rect",
+          "fill": [
+            0.15,
+            0.23,
+            0.33,
+            1
+          ],
+          "anchor": "center",
+          "layer": 10
+        },
+        "sindri.ui.button": {
+          "label": "PLAY"
+        },
+        "sindri.script": {
+          "source": "scripts/tween-demo.decay",
+          "script": "TweenButton",
+          "properties": {
+            "action": 1
+          }
+        }
+      }
+    },
+    {
+      "id": "button-play-label",
+      "name": "button-play-label",
+      "transform_3d": {
+        "position": [
+          -0.3,
+          -0.64,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "sindri.ui.text": {
+          "text": "PLAY",
+          "font": "fonts/ChakraPetch-Regular.ttf",
+          "font_size": 0.04,
+          "bounds": [
+            0.25,
+            0.08
+          ],
+          "anchor": "center",
+          "layer": 20
+        }
+      }
+    },
+    {
+      "id": "button-pause",
+      "name": "button-pause",
+      "transform_3d": {
+        "position": [
+          0,
+          -0.64,
+          0
+        ],
+        "scale": [
+          0.27,
+          0.09,
+          1
+        ]
+      },
+      "components": {
+        "sindri.ui.shape": {
+          "kind": "rect",
+          "fill": [
+            0.15,
+            0.23,
+            0.33,
+            1
+          ],
+          "anchor": "center",
+          "layer": 10
+        },
+        "sindri.ui.button": {
+          "label": "PAUSE"
+        },
+        "sindri.script": {
+          "source": "scripts/tween-demo.decay",
+          "script": "TweenButton",
+          "properties": {
+            "action": 2
+          }
+        }
+      }
+    },
+    {
+      "id": "button-pause-label",
+      "name": "button-pause-label",
+      "transform_3d": {
+        "position": [
+          0,
+          -0.64,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "sindri.ui.text": {
+          "text": "PAUSE",
+          "font": "fonts/ChakraPetch-Regular.ttf",
+          "font_size": 0.04,
+          "bounds": [
+            0.25,
+            0.08
+          ],
+          "anchor": "center",
+          "layer": 20
+        }
+      }
+    },
+    {
+      "id": "button-restart",
+      "name": "button-restart",
+      "transform_3d": {
+        "position": [
+          0.3,
+          -0.64,
+          0
+        ],
+        "scale": [
+          0.27,
+          0.09,
+          1
+        ]
+      },
+      "components": {
+        "sindri.ui.shape": {
+          "kind": "rect",
+          "fill": [
+            0.15,
+            0.23,
+            0.33,
+            1
+          ],
+          "anchor": "center",
+          "layer": 10
+        },
+        "sindri.ui.button": {
+          "label": "RESTART"
+        },
+        "sindri.script": {
+          "source": "scripts/tween-demo.decay",
+          "script": "TweenButton",
+          "properties": {
+            "action": 3
+          }
+        }
+      }
+    },
+    {
+      "id": "button-restart-label",
+      "name": "button-restart-label",
+      "transform_3d": {
+        "position": [
+          0.3,
+          -0.64,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "sindri.ui.text": {
+          "text": "RESTART",
+          "font": "fonts/ChakraPetch-Regular.ttf",
+          "font_size": 0.04,
+          "bounds": [
+            0.25,
+            0.08
+          ],
+          "anchor": "center",
+          "layer": 20
+        }
+      }
+    },
+    {
+      "id": "button-cancel",
+      "name": "button-cancel",
+      "transform_3d": {
+        "position": [
+          -0.15,
+          -0.77,
+          0
+        ],
+        "scale": [
+          0.27,
+          0.09,
+          1
+        ]
+      },
+      "components": {
+        "sindri.ui.shape": {
+          "kind": "rect",
+          "fill": [
+            0.15,
+            0.23,
+            0.33,
+            1
+          ],
+          "anchor": "center",
+          "layer": 10
+        },
+        "sindri.ui.button": {
+          "label": "CANCEL"
+        },
+        "sindri.script": {
+          "source": "scripts/tween-demo.decay",
+          "script": "TweenButton",
+          "properties": {
+            "action": 4
+          }
+        }
+      }
+    },
+    {
+      "id": "button-cancel-label",
+      "name": "button-cancel-label",
+      "transform_3d": {
+        "position": [
+          -0.15,
+          -0.77,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "sindri.ui.text": {
+          "text": "CANCEL",
+          "font": "fonts/ChakraPetch-Regular.ttf",
+          "font_size": 0.04,
+          "bounds": [
+            0.25,
+            0.08
+          ],
+          "anchor": "center",
+          "layer": 20
+        }
+      }
+    },
+    {
+      "id": "button-replace",
+      "name": "button-replace",
+      "transform_3d": {
+        "position": [
+          0.15,
+          -0.77,
+          0
+        ],
+        "scale": [
+          0.27,
+          0.09,
+          1
+        ]
+      },
+      "components": {
+        "sindri.ui.shape": {
+          "kind": "rect",
+          "fill": [
+            0.15,
+            0.23,
+            0.33,
+            1
+          ],
+          "anchor": "center",
+          "layer": 10
+        },
+        "sindri.ui.button": {
+          "label": "REPLACE"
+        },
+        "sindri.script": {
+          "source": "scripts/tween-demo.decay",
+          "script": "TweenButton",
+          "properties": {
+            "action": 5
+          }
+        }
+      }
+    },
+    {
+      "id": "button-replace-label",
+      "name": "button-replace-label",
+      "transform_3d": {
+        "position": [
+          0.15,
+          -0.77,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "sindri.ui.text": {
+          "text": "REPLACE",
+          "font": "fonts/ChakraPetch-Regular.ttf",
+          "font_size": 0.04,
+          "bounds": [
+            0.25,
+            0.08
+          ],
+          "anchor": "center",
+          "layer": 20
+        }
+      }
+    },
+    {
+      "id": "hint",
+      "name": "hint",
+      "transform_3d": {
+        "position": [
+          0,
+          -0.92,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "sindri.ui.text": {
+          "text": "SPACE: PLAY   P: PAUSE   R: RESTART   C: CANCEL   V: REPLACE",
+          "font": "fonts/ChakraPetch-Regular.ttf",
+          "font_size": 0.03,
+          "bounds": [
+            1.1,
+            0.08
+          ],
+          "anchor": "center",
+          "layer": 20
+        }
+      }
+    }
+  ]
+}

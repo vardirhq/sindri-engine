@@ -48,6 +48,7 @@ Names in scope without qualification. Decay has no imports, so each of these is 
 - `TAU`: `f32` — The number τ (6.28318…), which is 2π: one full turn when measuring angles in radians.
 - `Time`: `Time` — Time in the game. A game runs as a series of frames, many times a second.
 - `Touch`: `Touch` — Every finger on a touch screen, numbered from 0, for games that need more than one finger.
+- `Tween`: `Tween` — Creates automatically playing gameplay tweens owned by the calling script. Copies alias playback state. Advance occurs before the owner's subsequent updates using script delta. No automatic property binding. Curves: linear, ease, ease-in, ease-out, ease-in-out. Finite endpoints and finite non-negative duration are required; zero duration completes immediately. Maximum 8192 retained handles per runner; dispose unused handles.
 - `Ui`: `Ui` — The interface drawn over the game: changing text and bars, and checking buttons and sliders.
 - `Viewport`: `Viewport` — The area of the screen the game is drawn in.
 - `World`: `World` — Finding, creating and removing the objects in a game. Every object in a scene (a player, an enemy, a button) is an entity.
@@ -158,6 +159,12 @@ The game's camera: moving the view and changing its engine-owned follow, confine
 - `shake(strength: f32, frequency: f32, decay: f32)` → `unit` — Changes the authored behavior camera's shake strength, frequency, and trauma decay.
 - `smoothing(value: f32)` → `unit` — Sets how strongly the authored behavior camera smooths its follow movement.
 
+### `ColorTween`
+
+A managed Color tween; read with Tween.color_value.
+
+The host names this type but has not described its members.
+
 ### `Effects`
 
 Particle effects, such as sparks and explosions. The particles are only drawn; they are not objects and nothing can touch them.
@@ -237,6 +244,12 @@ The keyboard. Keys are named by position, such as `"W"`, `"ArrowLeft"` or `"Spac
 - `is_down(key: String)` → `bool` — Whether a key is being held down.
 - `just_pressed(key: String)` → `bool` — Whether a key was pressed this frame. True only once per press, however long it is held.
 - `just_released(key: String)` → `bool` — Whether a key was let go this frame.
+
+### `NumberTween`
+
+A managed number tween; read with Tween.number_value.
+
+The host names this type but has not described its members.
 
 ### `Physics`
 
@@ -377,6 +390,34 @@ Where an object is, how it is turned and how big it is. For an object attached t
 - `scale`: `Vec3` — How big the object is on each axis; 1 is its normal size.
 - `world_position`: `Vec3` — Where the object is in the world, even when it is attached to a parent. Use it to compare positions of objects in different places.
 
+### `Tween`
+
+Creates automatically playing gameplay tweens owned by the calling script. Copies alias playback state. Advance occurs before the owner's subsequent updates using script delta. No automatic property binding. Curves: linear, ease, ease-in, ease-out, ease-in-out. Finite endpoints and finite non-negative duration are required; zero duration completes immediately. Maximum 8192 retained handles per runner; dispose unused handles.
+
+- `cancel(tween: TweenHandle)` → `unit` — Stops at the current value; is_done is false. Restart can play it again.
+- `color(from: Color, to: Color, duration: f32, easing: String)` → `ColorTween` — Starts a ColorTween, blending all four channels without additional gamma conversion or channel clamping.
+- `color_value(tween: ColorTween)` → `Color` — Reads the eased Color including alpha.
+- `dispose(tween: TweenHandle)` → `unit` — Releases a tween; aliases become invalid. Owner removal, script replacement and runner reset also release it.
+- `is_cancelled(tween: TweenHandle)` → `bool` — Whether cancelled; its last value remains readable until disposed.
+- `is_done(tween: TweenHandle)` → `bool` — True on natural completion, including zero duration. Cancellation is not completion.
+- `is_paused(tween: TweenHandle)` → `bool` — Whether advancement is paused.
+- `number(from: f32, to: f32, duration: f32, easing: String)` → `NumberTween` — Starts a NumberTween; duration is seconds.
+- `number_value(tween: NumberTween)` → `f32` — Reads the eased number, held at the exact target after completion.
+- `pause(tween: TweenHandle)` → `unit` — Pauses at the current value.
+- `progress(tween: TweenHandle)` → `f32` — Linear elapsed fraction from 0 to 1; zero duration is 1.
+- `restart(tween: TweenHandle)` → `unit` — Resets to the original endpoints and begins again, clearing pause/cancellation.
+- `resume(tween: TweenHandle)` → `unit` — Resumes a paused tween. Does not undo cancellation.
+- `vec2(from: Vec2, to: Vec2, duration: f32, easing: String)` → `Vec2Tween` — Starts a Vec2Tween in the endpoints' coordinate space.
+- `vec2_value(tween: Vec2Tween)` → `Vec2` — Reads the eased Vec2.
+- `vec3(from: Vec3, to: Vec3, duration: f32, easing: String)` → `Vec3Tween` — Starts a Vec3Tween in the endpoints' coordinate space.
+- `vec3_value(tween: Vec3Tween)` → `Vec3` — Reads the eased Vec3. Apply through ordinary checked transform setters.
+
+### `TweenHandle`
+
+The common handle accepted by playback controls; only factories construct one.
+
+The host names this type but has not described its members.
+
 ### `Ui`
 
 The interface drawn over the game: changing text and bars, and checking buttons and sliders.
@@ -398,6 +439,18 @@ An image in the interface drawn over the game, such as a health bar or an icon, 
 
 - `layer`: `f32` — Drawing order: higher numbers are drawn in front of lower ones.
 - `tint`: `Color` — A colour the image is multiplied by. White leaves it unchanged; lowering `a` fades it out.
+
+### `Vec2Tween`
+
+A managed Vec2 tween; read with Tween.vec2_value.
+
+The host names this type but has not described its members.
+
+### `Vec3Tween`
+
+A managed Vec3 tween; read with Tween.vec3_value.
+
+The host names this type but has not described its members.
 
 ### `Viewport`
 

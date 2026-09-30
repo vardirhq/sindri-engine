@@ -15,6 +15,7 @@
 
 mod game;
 mod input;
+mod tween;
 mod world;
 
 /// One name: a value a script reads, or a call it makes.
@@ -151,7 +152,7 @@ pub const THIS: &[Entry] = &[
 ];
 
 /// Every host type, and each of its members.
-pub const TYPES: &[&[TypeEntry]] = &[world::TYPES, game::TYPES, input::TYPES];
+pub const TYPES: &[&[TypeEntry]] = &[world::TYPES, game::TYPES, input::TYPES, tween::TYPES];
 
 /// The entry for a host type, if it has one.
 #[must_use]

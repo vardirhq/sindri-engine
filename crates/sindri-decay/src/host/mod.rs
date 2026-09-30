@@ -34,6 +34,7 @@ mod scene;
 mod services;
 mod shared;
 mod tiles;
+mod tween;
 mod ui;
 
 pub use services::WorldServices;
@@ -154,6 +155,7 @@ pub struct WorldHost<'a> {
     printed: Vec<String>,
     /// The other scripts in the pass, for a host that runs several.
     peers: Option<peers::Peers<'a>>,
+    pub(crate) tweens: Option<&'a mut crate::tweens::Tweens>,
 }
 
 impl Host for WorldHost<'_> {

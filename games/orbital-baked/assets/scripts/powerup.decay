@@ -9,8 +9,12 @@ script Powerup {
     @export let attraction_speed: f32 = 4.2;
 
     var age: f32 = 0.0;
+    var appearance: Vec3Tween = null;
 
     fn start() {
+        let full_scale = this.transform.scale;
+        this.appearance = Tween.vec3(Vec3(full_scale.x * 0.35, full_scale.y * 0.35, full_scale.z), full_scale, 0.18, "ease-out");
+        this.transform.scale = Tween.vec3_value(this.appearance);
         if this.kind == 0.0 { tint(0.46, 1.0, 0.64); }
         else if this.kind == 1.0 { tint(0.34, 0.86, 1.0); }
         else { tint(1.0, 0.68, 0.24); }
@@ -18,9 +22,12 @@ script Powerup {
 
     fn update(dt: f32) {
         if Game.run_state != 1.0 {
+            Tween.pause(this.appearance);
             Physics.set_velocity(this.entity, 0.0, 0.0);
             return;
         }
+        Tween.resume(this.appearance);
+        this.transform.scale = Tween.vec3_value(this.appearance);
         this.age += dt;
         if this.age >= this.life {
             World.despawn(this.entity);
@@ -81,3 +88,4 @@ script Powerup {
         this.shape.fill.b = b;
     }
 }
+

@@ -231,7 +231,7 @@ events, blending, tweening, and animating anything that is not a sprite frame.
 | Clip authoring and preview | — | ✅ | — | ✅ | **Par** | — |
 | **Animation events (a frame fires a callback)** | ❌ | ❌ | ❌ | ❌ | **Absent** | Footsteps, hit frames, spawn-on-frame all need it |
 | **Property animation (animate any component field)** | ❌ | ❌ | ❌ | ❌ | **Absent** | Unity's Animation window animates any serialized property. We animate sprite frames and nothing else |
-| **Tweening / easing** | ❌ | ❌ | ❌ | ❌ | **Absent** | DOTween is the most-installed Unity asset in history. Every menu, pickup pop, and screen transition wants it |
+| **Tweening / easing** | ✅ | ❌ | ✅ | ✅ | **Behind** | Managed number/vector/colour tweens, pause/resume/cancel/restart, typed values, progress/completion and disposal. Orbital pickup appearance proves gameplay use; Weave shares named easing through CSS transitions. Editor timelines, property binding, sequences, callbacks and loop/yoyo remain |
 | **State machine / blending** | ❌ | ❌ | ❌ | ❌ | **Absent** | Animator controller, Godot AnimationTree. Transitions are hand-written today |
 | **Skeletal / cutout 2D animation** | ❌ | ❌ | ❌ | ❌ | **Absent** | Spine, Unity 2D Animation. Frame sheets only |
 | **Timeline / cutscenes** | ❌ | ❌ | ❌ | ❌ | **Absent** | — |
@@ -519,7 +519,7 @@ were native gaps. Treat these rows as close to automatic.
 | Package | What it fixes | Sindri |
 | --- | --- | --- |
 | **Odin Inspector** | Unity's inspector is not sufficient for real data | **Par** — components declare what their fields mean, so asset pickers, colours, choices, lists and variants need no plugin, which is the anti-goal met. Multi-select and bulk edit remain absent |
-| **DOTween** | Tweening and easing | **Absent** — the highest-value small feature in this file |
+| **DOTween** | Tweening and easing | **Behind** — managed Decay playback and Orbital pickup proof; property binding, sequences and loop/yoyo remain |
 | **A\* Pathfinding Project** | Real pathfinding | **Ahead** — ours is native |
 | **Behavior Designer** | Behaviour trees, AI authoring | **Absent** — AI is hand-written Decay |
 | **Rewired** | Input mapping and rebinding | **Behind** — as above |
@@ -533,7 +533,7 @@ were native gaps. Treat these rows as close to automatic.
 
 Read together, the two tiers say the same thing three times: **camera, tweening,
 and input mapping** are the features people reliably pay to add. Camera is now
-built and used; input mapping is built and still stranded; tweening is absent.
+built and used; input mapping is built and still stranded; managed tweening is now used in Orbital, with composition and property binding still absent.
 
 ---
 
@@ -581,8 +581,9 @@ output of the file; everything above is evidence.
 6. **Un-strand the input action layer.** The engine cost is paid, and pads are
    now read by player slot. Make it the input system, per the anti-goal.
 7. **Named collision layers instead of raw `u32` masks.** Cheap, daily friction.
-8. **Tweening and easing.** The most-installed Unity asset in history. Menus,
-   pickups, transitions.
+8. **Tween composition and authoring.** Managed Decay values and Orbital pickup
+   appearance have landed; property binding, sequences and editor timelines remain.
+   Weave animation authoring stays CSS-inspired, with keyframes still absent.
 9. ~~**Collider gizmos in the Scene view.**~~ **Done.** Every 2D collider is
    outlined from the pieces physics is given, and the selected one's edges,
    radius and height drag as one undo step. Offsets, rotations and 3D colliders
@@ -732,4 +733,5 @@ checklist nobody reads:
    candidate up requires the baseline to have grown it, not for us to have
    liked the idea. A candidate earns its place by naming what a game in this
    repository does by hand — and when no game wants it, the row says so.
+
 

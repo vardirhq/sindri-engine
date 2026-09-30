@@ -35,6 +35,7 @@ mod report;
 mod scenes;
 mod scripts;
 mod surface;
+mod tweens;
 
 pub mod reference;
 pub use audio_host::{AudioCommand, HostServices, WorldHost};

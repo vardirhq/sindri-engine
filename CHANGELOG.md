@@ -1,5 +1,7 @@
 # Changelog
 
+- Decay gains managed number, Vec2, Vec3 and Color tweens with typed value reads, pause/resume, cancellation, restart, completion/progress and disposal. Named CSS easing math is shared with Weave while its UI authoring remains CSS-inspired. Orbital pickups now use a short eased appearance animation. Zero duration completes immediately; invalid input fails explicitly; handles are bounded at 8192 and released with their owner. Property binding, sequences/timelines, callbacks, loops/yoyo and CSS keyframes remain deferred.
+
 - Decay adds `World.nearest(tag, position)` and `World.within_radius(tag, position, radius)`: active authored-tag queries over composed world-space `Vec3` positions. Radius results include the boundary, sort nearest first, retain world order for ties, and refuse more than 8192 results. Missing transforms are skipped; nearest returns `null` when none matches. Negative/NaN radii fail; positive infinity searches globally. Orbital player and Arc now use the sorted query while retaining their visibility and impact-point filters. Cone/box queries, physics casts and spatial indexing are deferred.
 
 - A prefab instance can do without some of its prefab's entities: deleting an entity inside an instance removes it from that instance (`"removed"` in the scene), the inspector lists what an instance does without with a way to bring each back, and Apply carries a removal into the prefab. A list component field that changed in a few places is overridden by index (`{ "$items": { "57": 3 } }`) rather than whole, so changing one tile no longer copies the tilemap. An instance's inner entities keep their editor state, such as sibling order. Apply and Make prefab are undone and redone with the scene, prefab files included, unless a file was changed on disk since. A scene whose prefab is missing opens with placeholders that save back unchanged, instead of refusing to open. Prefabs can be dragged from the project browser into the Scene view, Make prefab works on a multi-selection, and a prefab changed while the scene played is followed at Stop.
@@ -386,4 +388,5 @@ Keep entries release-oriented and readable:
 - When the first release is cut, rename `Unreleased` to that version and date,
   then add a fresh empty `Unreleased` section above it.
 - Added the authored `sindri.environment` presentation component and connected the existing bloom renderer to editor viewports and Voxel Lab, making bloom scene-controlled instead of a stranded renderer-only capability. Voxel Lab now serves as the acceptance lab for the world-presentation roadmap.
+
 

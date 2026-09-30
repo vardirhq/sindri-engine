@@ -1,0 +1,23 @@
+/* Presentation stays CSS-inspired; Decay owns gameplay tween playback. */
+#title { font-size: 28px; }
+#subtitle { font-size: 12px; }
+#label-linear, #label-ease, #label-ease-in, #label-ease-out, #label-ease-in-out {
+    font-size: 16px;
+}
+#button-play-label, #button-pause-label, #button-restart-label,
+#button-cancel-label, #button-replace-label {
+    font-size: 14px;
+}
+#hint { font-size: 10px; }
+
+@media (min-height: 700px) {
+    #title { font-size: 32px; }
+    #label-linear, #label-ease, #label-ease-in, #label-ease-out, #label-ease-in-out {
+        font-size: 18px;
+    }
+    #button-play-label, #button-pause-label, #button-restart-label,
+    #button-cancel-label, #button-replace-label {
+        font-size: 16px;
+    }
+    #hint { font-size: 11px; }
+}

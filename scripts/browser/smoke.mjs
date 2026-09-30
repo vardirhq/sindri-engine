@@ -133,6 +133,7 @@ await page.addInitScript(() => {
 });
 
 const problems = [];
+const tweenActions = new Set();
 const fetchedAssets = new Set();
 // A shader that fails to compile is reported by the GPU implementation as a
 // console *warning*, not an error, and the page carries on and presents empty
@@ -141,6 +142,8 @@ const fetchedAssets = new Set();
 const GPU_REJECTION = /error while parsing wgsl|is invalid|must only be called/i;
 page.on('console', (message) => {
   const text = message.text();
+  const tweenAction = text.match(/Tween demo action ([1-5])/);
+  if (tweenAction) tweenActions.add(Number(tweenAction[1]));
   if (message.type() === 'error') problems.push(text);
   else if (GPU_REJECTION.test(text)) problems.push(text.split('\n')[0]);
 });
@@ -223,6 +226,33 @@ const loadingStuck =
   hasLoadingScreen && (await page.evaluate(() => Boolean(document.querySelector('#sindri-loading'))));
 // Then a moment to draw a frame or two into the canvas it just sized.
 await page.waitForTimeout(1500);
+
+if (process.env.SINDRI_TWEEN_DEMO === '1') {
+  // Exercise Decay gameplay controls and observe the actual WebGPU output.
+  await page.mouse.click(VIEWPORT.width / 2, VIEWPORT.height / 2);
+  await page.keyboard.press('KeyR');
+  await page.waitForTimeout(250);
+  const first = await page.locator('canvas').screenshot();
+  await page.waitForTimeout(750);
+  const moving = await page.locator('canvas').screenshot();
+  if (first.equals(moving)) problems.push('tween demo did not animate after restart');
+  await page.keyboard.press('KeyP');
+  await page.waitForTimeout(750);
+  const paused = await page.locator('canvas').screenshot();
+  await page.waitForTimeout(750);
+  if (!paused.equals(await page.locator('canvas').screenshot())) {
+    problems.push('tween demo moved while paused');
+  }
+  await page.keyboard.press('Space');
+  await page.waitForTimeout(250);
+  await page.keyboard.press('KeyV');
+  await page.waitForTimeout(250);
+  await page.keyboard.press('KeyC');
+  await page.waitForTimeout(750);
+  for (const action of [1, 2, 3, 4, 5]) {
+    if (!tweenActions.has(action)) problems.push('tween demo missed control ' + action);
+  }
+}
 
 await page.mouse.click(480, 270);
 await page.keyboard.press('KeyD');
@@ -372,3 +402,4 @@ if (
   process.exit(1);
 }
 console.log('the engine ran in a browser');
+
