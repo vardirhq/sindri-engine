@@ -20,9 +20,10 @@ mod capture {
     use sindri_assets::{AssetBytes, AssetDecoder, FontAssetDecoder, TextureAssetDecoder};
     use sindri_causeway::{Session, extractor};
     use sindri_core::{
-        AssetId, LoadedScenes, PREFAB_SUFFIX, PrefabDocument, SceneDocument, SceneEntityId, World,
+        AssetId, LoadedScenes, PREFAB_SUFFIX, PROFILE_SUFFIX, PrefabDocument, ProfileDocument,
+        SceneDocument, SceneEntityId, SpriteSheetDocument, World, sheet_id_for,
     };
-    use sindri_decay::{PrefabSources, ScriptSources};
+    use sindri_decay::{PrefabSources, ProfileSources, ScriptSources};
     use sindri_gpu::{GpuContext, GpuRequestOptions};
     use sindri_platform::{InputEvent, InputState, Key, MouseButton};
     use sindri_render::{
@@ -186,10 +187,10 @@ mod capture {
         }
     }
 
-    fn open(
-        project: &Path,
-        size: [f32; 2],
-    ) -> Result<(Player, BTreeMap<String, Vec<u8>>), Box<dyn Error>> {
+    /// Everything opened: the player, and the images and sheets to bind.
+    type Opened = (Player, BTreeMap<String, Vec<u8>>, BTreeMap<String, Vec<u8>>);
+
+    fn open(project: &Path, size: [f32; 2]) -> Result<Opened, Box<dyn Error>> {
         let assets = project.join("assets");
         let (scene_id, sheet_ids) = manifest(project)?;
         let document = SceneDocument::from_json(&fs::read_to_string(assets.join(&scene_id))?)?;
@@ -205,6 +206,10 @@ mod capture {
         for (id, bytes) in files(&assets, PREFAB_SUFFIX) {
             prefabs.insert(id, PrefabDocument::from_json(&text(bytes)?)?);
         }
+        let mut profiles = ProfileSources::new();
+        for (id, bytes) in files(&assets, PROFILE_SUFFIX) {
+            profiles.insert(id, ProfileDocument::from_json(&text(bytes)?)?);
+        }
         let weave_sources: BTreeMap<String, String> = files(&assets, ".weave")
             .into_iter()
             .map(|(id, bytes)| Ok((id, text(bytes)?)))
@@ -217,6 +222,7 @@ mod capture {
         let scene = extractor()?;
         let mut session = Session::with_sources(scene.components().clone(), sources)
             .with_prefabs(prefabs)
+            .with_profiles(profiles)
             .with_scenes(vec![(scene_id, document)], loaded)
             .with_styles(sheets);
         let view = weave::Viewport {
@@ -237,7 +243,7 @@ mod capture {
             text,
             size,
         };
-        Ok((player, files(&assets, ".png")))
+        Ok((player, files(&assets, ".png"), files(&assets, ".sheet")))
     }
 
     pub(super) async fn run(args: Vec<String>) -> Result<(), Box<dyn Error>> {
@@ -251,7 +257,7 @@ mod capture {
         let (width, height): (u32, u32) = (width.parse()?, height.parse()?);
         #[allow(clippy::cast_precision_loss)]
         let size = [width as f32, height as f32];
-        let (mut player, pngs) = open(Path::new(project), size)?;
+        let (mut player, pngs, sheets) = open(Path::new(project), size)?;
         player.play(0.5)?;
         for step in steps {
             player.perform(step)?;
@@ -277,6 +283,14 @@ mod capture {
                 asset.rgba8(),
             )?;
             bindings.bind(&id, textures.insert(texture));
+            let sheet = id
+                .parse::<AssetId>()
+                .ok()
+                .and_then(|id| sheet_id_for(&id))
+                .and_then(|sheet| sheets.get(sheet.as_str()));
+            if let Some(json) = sheet {
+                bindings.bind_sheet(&id, &SpriteSheetDocument::from_json(&text(json.clone())?)?)?;
+            }
         }
         let target = OffscreenTarget::new(&gpu.device, width, height)?;
         let depth = DepthTarget::new(&gpu.device, width, height);
