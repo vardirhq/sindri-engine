@@ -25,7 +25,11 @@ impl Demo {
         extractor
             .validate(&document, sindri_core::UnknownComponentPolicy::Reject)
             .unwrap();
-        let world = World::from_scene(&document).unwrap().world;
+        // Match exported hosting: the opening scene lives under a loaded root.
+        let mut world = World::default();
+        sindri_core::LoadedScenes::new()
+            .enter_keeping_identities(&mut world, "spatial.scene", &document)
+            .unwrap();
         let mut sources = ScriptSources::new();
         sources.insert(
             "spatial.decay",
