@@ -171,6 +171,12 @@ pub enum PrefabError {
     NoRoot,
     #[error("a prefab needs exactly one root entity, and this one has {0}")]
     SeveralRoots(usize),
+    #[error("the prefab '{0}' is not loaded, so its instance cannot be made")]
+    Missing(String),
+    #[error("prefabs contain one another in a loop: {}", .0.join(" → "))]
+    Cycle(Vec<String>),
+    #[error("prefabs are nested more than {0} deep")]
+    TooDeep(usize),
     #[error(transparent)]
     Entities(#[from] SceneError),
 }

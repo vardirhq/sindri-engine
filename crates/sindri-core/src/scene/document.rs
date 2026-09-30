@@ -5,7 +5,7 @@ use std::collections::BTreeMap;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 
-use crate::{SceneMigrator, Transform3D};
+use crate::{PrefabInstance, SceneMigrator, Transform3D};
 
 use super::canonical::collapse_scalar_arrays;
 use super::error::{SceneError, SceneJsonError};
@@ -177,6 +177,13 @@ pub struct SceneEntity {
     /// Editor-only state that runtimes must ignore.
     #[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
     pub editor: BTreeMap<String, Value>,
+    /// The prefab this entity is an instance of, and what it overrides.
+    ///
+    /// An instance carries no components of its own: what it is made of is its
+    /// prefab's, changed by its overrides. Its name, transform and switch are
+    /// its root's. See `docs/prefabs.md`.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub prefab: Option<PrefabInstance>,
 }
 
 impl SceneEntity {
@@ -189,6 +196,15 @@ impl SceneEntity {
             components: BTreeMap::new(),
             disabled: false,
             editor: BTreeMap::new(),
+            prefab: None,
+        }
+    }
+
+    /// A new instance of the prefab at `source`.
+    pub fn instance(id: SceneEntityId, source: impl Into<String>) -> Self {
+        Self {
+            prefab: Some(PrefabInstance::new(source)),
+            ..Self::new(id)
         }
     }
 }

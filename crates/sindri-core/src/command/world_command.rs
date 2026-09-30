@@ -2,7 +2,7 @@
 
 use serde_json::Value;
 
-use crate::{EntityData, EntityId, SceneEntityId, Transform3D, World, WorldError};
+use crate::{EntityData, EntityId, PrefabLink, SceneEntityId, Transform3D, World, WorldError};
 
 /// A deferred mutation of a world.
 ///
@@ -87,6 +87,16 @@ pub enum WorldCommand {
         /// being there rather than to being `null`.
         value: Option<Value>,
     },
+    /// Makes an entity part of a prefab instance, or no longer part of one.
+    ///
+    /// Unpacking an instance clears the link on each of its entities, and
+    /// turning a selection into a prefab sets one; both are edits to the
+    /// document, because the link is what decides whether it saves as a
+    /// reference or as the entities themselves.
+    SetPrefabLink {
+        entity: EntityId,
+        link: Option<PrefabLink>,
+    },
     /// Creates an entity at an exact handle.
     ///
     /// The handle is chosen by the caller — from [`World::next_handle`] — rather
@@ -134,6 +144,7 @@ impl WorldCommand {
             | Self::RemoveComponent { entity, .. }
             | Self::SetDisabled { entity, .. }
             | Self::SetEditorEntry { entity, .. }
+            | Self::SetPrefabLink { entity, .. }
             | Self::Spawn { entity, .. }
             | Self::Despawn { entity }
             // The root of the subtree, which is the entity a label would name.
@@ -201,19 +212,11 @@ impl WorldCommand {
                     None => Ok(Self::RemoveComponent { entity, type_name }),
                 }
             }
-            Self::SetDisabled { entity, disabled } => {
-                let data = world
-                    .get_mut(entity)
-                    .ok_or(WorldError::InvalidEntity(entity))?;
-                let previous = std::mem::replace(&mut data.disabled, disabled);
-                Ok(Self::SetDisabled {
-                    entity,
-                    disabled: previous,
-                })
-            }
+            Self::SetDisabled { entity, disabled } => set_disabled(world, entity, disabled),
             Self::SetEditorEntry { entity, key, value } => {
                 set_editor_entry(world, entity, key, value)
             }
+            Self::SetPrefabLink { entity, link } => set_prefab_link(world, entity, link),
             Self::Spawn { entity, data } => {
                 world.spawn_at(entity, *data)?;
                 // Re-linked because the data carries the parent it belongs to,
@@ -308,6 +311,38 @@ fn set_editor_entry(
         entity,
         key,
         value: previous,
+    })
+}
+
+/// Switches an entity off or back on.
+fn set_disabled(
+    world: &mut World,
+    entity: EntityId,
+    disabled: bool,
+) -> Result<WorldCommand, WorldError> {
+    let data = world
+        .get_mut(entity)
+        .ok_or(WorldError::InvalidEntity(entity))?;
+    let previous = std::mem::replace(&mut data.disabled, disabled);
+    Ok(WorldCommand::SetDisabled {
+        entity,
+        disabled: previous,
+    })
+}
+
+/// Makes an entity part of an instance, or no longer part of one.
+fn set_prefab_link(
+    world: &mut World,
+    entity: EntityId,
+    link: Option<PrefabLink>,
+) -> Result<WorldCommand, WorldError> {
+    let data = world
+        .get_mut(entity)
+        .ok_or(WorldError::InvalidEntity(entity))?;
+    let previous = std::mem::replace(&mut data.prefab, link);
+    Ok(WorldCommand::SetPrefabLink {
+        entity,
+        link: previous,
     })
 }
 

@@ -37,12 +37,15 @@ pub(crate) fn validate_entities(entities: &[SceneEntity]) -> Result<(), SceneErr
         {
             return Err(SceneError::NonFiniteTransform(entity.id.clone()));
         }
+        if entity.prefab.is_some() && !entity.components.is_empty() {
+            return Err(SceneError::InstanceComponents(entity.id.clone()));
+        }
 
         if let Some(parent) = &entity.parent {
             if parent == &entity.id {
                 return Err(SceneError::HierarchyCycle(entity.id.clone()));
             }
-            if !ids.contains(parent) {
+            if !ids.contains(parent) && owning_instance(entities, parent).is_none() {
                 return Err(SceneError::MissingParent {
                     entity: entity.id.clone(),
                     parent: parent.clone(),
@@ -51,7 +54,27 @@ pub(crate) fn validate_entities(entities: &[SceneEntity]) -> Result<(), SceneErr
         }
     }
 
-    reject_hierarchy_cycles(entities)
+    reject_hierarchy_cycles(entities, &ids)
+}
+
+/// The instance a path like `coin-3/sparkle` names an entity inside, when it
+/// is not an entity of the list itself.
+///
+/// Such an entity exists only once the instance is expanded, so until then the
+/// instance answers for it: an entity may be authored under a prefab's child.
+fn owning_instance<'a>(
+    entities: &'a [SceneEntity],
+    path: &SceneEntityId,
+) -> Option<&'a SceneEntityId> {
+    entities
+        .iter()
+        .filter(|entity| entity.prefab.is_some())
+        .map(|entity| &entity.id)
+        .find(|instance| {
+            path.as_str()
+                .strip_prefix(instance.as_str())
+                .is_some_and(|rest| rest.starts_with('/'))
+        })
 }
 
 /// The entities that name no parent.
@@ -70,10 +93,24 @@ pub(crate) fn roots(entities: &[SceneEntity]) -> impl Iterator<Item = &SceneEnti
 /// Parents resolve through a map instead, and an entity proven to reach a
 /// root is remembered, so a chain shared by many entities is walked once
 /// rather than once per descendant.
-fn reject_hierarchy_cycles(entities: &[SceneEntity]) -> Result<(), SceneError> {
+fn reject_hierarchy_cycles(
+    entities: &[SceneEntity],
+    ids: &HashSet<&SceneEntityId>,
+) -> Result<(), SceneError> {
+    // A parent inside an instance is under the instance, as far as a cycle
+    // is concerned: its own ancestors are the instance's.
     let parents: HashMap<&SceneEntityId, Option<&SceneEntityId>> = entities
         .iter()
-        .map(|entity| (&entity.id, entity.parent.as_ref()))
+        .map(|entity| {
+            let parent = entity.parent.as_ref().map(|parent| {
+                if ids.contains(parent) {
+                    parent
+                } else {
+                    owning_instance(entities, parent).unwrap_or(parent)
+                }
+            });
+            (&entity.id, parent)
+        })
         .collect();
 
     let mut grounded: HashSet<&SceneEntityId> = HashSet::with_capacity(entities.len());

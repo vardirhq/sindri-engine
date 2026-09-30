@@ -2,6 +2,7 @@
 
 use std::collections::HashMap;
 
+use crate::prefab::{NoPrefabs, PrefabLibrary};
 use crate::{EntityId, PrefabDocument, PrefabError, SceneEntityId};
 
 use super::{EntityData, World, WorldError};
@@ -37,8 +38,30 @@ impl World {
     /// The prefab is validated first, so a document with several roots is
     /// refused rather than half-spawned. Nothing reaches the world until the
     /// whole document has been checked.
+    ///
+    /// # Errors
+    /// An invalid prefab, or one with a prefab nested in it, which needs the
+    /// library [`World::spawn_prefab_from`] is given.
     pub fn spawn_prefab(&mut self, prefab: &PrefabDocument) -> Result<SpawnedPrefab, WorldError> {
+        self.spawn_prefab_from(prefab, &NoPrefabs)
+    }
+
+    /// [`World::spawn_prefab`], making every prefab nested in it from
+    /// `prefabs`.
+    ///
+    /// A nested instance's entities are keyed in [`SpawnedPrefab::
+    /// by_source_id`] by their path in the prefab, `turret/barrel`.
+    ///
+    /// # Errors
+    /// An invalid prefab, or a nested one `prefabs` does not hold.
+    pub fn spawn_prefab_from(
+        &mut self,
+        prefab: &PrefabDocument,
+        prefabs: &dyn PrefabLibrary,
+    ) -> Result<SpawnedPrefab, WorldError> {
         prefab.validate()?;
+        let expanded = prefab.expanded(prefabs)?;
+        let prefab = &expanded;
         let root_id = prefab.root()?.id.clone();
 
         let mut by_source_id = HashMap::with_capacity(prefab.entities.len());

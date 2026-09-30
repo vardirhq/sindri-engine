@@ -62,6 +62,7 @@ fn copy_into(
         // subtree someone deliberately quietened.
         disabled: source.disabled,
         editor: source.editor.clone(),
+        prefab: source.prefab.clone(),
     };
     let handle = rehearsal.spawn(data.clone());
     // The rehearsal spawns, so the real command has a handle to name. Its own

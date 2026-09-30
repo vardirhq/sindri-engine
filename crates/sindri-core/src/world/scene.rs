@@ -2,7 +2,9 @@
 
 use std::collections::{HashMap, HashSet};
 
-use crate::{EntityId, SceneDocument, SceneEntity, SceneEntityId, SceneError, SceneMetadata};
+use crate::prefab::{ExpandedEntity, NoPrefabs, PrefabLibrary, expand_entities};
+use crate::scene::validate_entities;
+use crate::{EntityId, SceneDocument, SceneEntityId, SceneError, SceneMetadata};
 
 use super::{EntityData, World, WorldError};
 
@@ -30,15 +32,36 @@ pub struct AddedScene {
 }
 
 impl World {
+    /// Builds a world from a scene that places no prefab instances.
+    ///
+    /// # Errors
+    /// An invalid scene, or one that places an instance: that needs its
+    /// prefab, which [`World::from_scene_with`] is given.
     pub fn from_scene(scene: &SceneDocument) -> Result<LoadedScene, WorldError> {
+        Self::from_scene_with(scene, &NoPrefabs)
+    }
+
+    /// Builds a world from a scene, making each instance from its prefab.
+    ///
+    /// Every entity an instance becomes carries a [`crate::PrefabLink`] back to
+    /// it, which is what [`World::to_scene_with`] writes the instance back
+    /// from.
+    ///
+    /// # Errors
+    /// An invalid scene, or an instance whose prefab `prefabs` does not hold.
+    pub fn from_scene_with(
+        scene: &SceneDocument,
+        prefabs: &dyn PrefabLibrary,
+    ) -> Result<LoadedScene, WorldError> {
         scene.validate()?;
+        let expanded = expanded(scene, prefabs)?;
         let mut world = Self {
             metadata: scene.metadata.clone(),
             ..Self::default()
         };
         let mut entity_map = HashMap::new();
 
-        for entity in &scene.entities {
+        for ExpandedEntity { entity, link } in &expanded {
             let runtime = world.spawn(EntityData {
                 source_id: Some(entity.id.clone()),
                 name: entity.name.clone(),
@@ -46,12 +69,13 @@ impl World {
                 components: entity.components.clone(),
                 disabled: entity.disabled,
                 editor: entity.editor.clone(),
+                prefab: link.clone(),
                 ..EntityData::default()
             });
             entity_map.insert(entity.id.clone(), runtime);
         }
 
-        for entity in &scene.entities {
+        for ExpandedEntity { entity, .. } in &expanded {
             if let Some(parent) = &entity.parent {
                 world.set_parent(entity_map[&entity.id], Some(entity_map[parent]))?;
             }
@@ -101,7 +125,23 @@ impl World {
         namespace: &str,
         under: Option<EntityId>,
     ) -> Result<AddedScene, WorldError> {
+        self.add_scene_with(scene, namespace, under, &NoPrefabs)
+    }
+
+    /// [`World::add_scene`], making each instance from its prefab.
+    ///
+    /// # Errors
+    /// As [`World::add_scene`], and an instance whose prefab `prefabs` does not
+    /// hold.
+    pub fn add_scene_with(
+        &mut self,
+        scene: &SceneDocument,
+        namespace: &str,
+        under: Option<EntityId>,
+        prefabs: &dyn PrefabLibrary,
+    ) -> Result<AddedScene, WorldError> {
         scene.validate()?;
+        let expanded = expanded(scene, prefabs)?;
         if let Some(under) = under
             && self.get(under).is_none()
         {
@@ -115,8 +155,8 @@ impl World {
         // Every identity is resolved before anything is spawned, so a
         // collision leaves the world exactly as it was rather than half
         // holding a scene nobody asked for.
-        let mut namespaced = HashMap::with_capacity(scene.entities.len());
-        for entity in &scene.entities {
+        let mut namespaced = HashMap::with_capacity(expanded.len());
+        for ExpandedEntity { entity, .. } in &expanded {
             let id = if namespace.is_empty() {
                 entity.id.clone()
             } else {
@@ -128,8 +168,8 @@ impl World {
             namespaced.insert(entity.id.clone(), id);
         }
 
-        let mut entity_map = HashMap::with_capacity(scene.entities.len());
-        for entity in &scene.entities {
+        let mut entity_map = HashMap::with_capacity(expanded.len());
+        for ExpandedEntity { entity, link } in &expanded {
             let runtime = self.spawn(EntityData {
                 source_id: Some(namespaced[&entity.id].clone()),
                 name: entity.name.clone(),
@@ -137,13 +177,14 @@ impl World {
                 components: entity.components.clone(),
                 disabled: entity.disabled,
                 editor: entity.editor.clone(),
+                prefab: link.clone(),
                 ..EntityData::default()
             });
             entity_map.insert(entity.id.clone(), runtime);
         }
 
         let mut roots = Vec::new();
-        for entity in &scene.entities {
+        for ExpandedEntity { entity, .. } in &expanded {
             let child = entity_map[&entity.id];
             if let Some(parent) = &entity.parent {
                 self.set_parent(child, Some(entity_map[parent]))?;
@@ -169,49 +210,6 @@ impl World {
 
     pub fn set_metadata(&mut self, metadata: SceneMetadata) {
         self.metadata = metadata;
-    }
-
-    /// Serializes this world back into a canonical scene document.
-    ///
-    /// Stable IDs are preserved rather than regenerated, so saving a loaded
-    /// scene reproduces the authored identities. Entities spawned at runtime
-    /// have no stable ID and are reported instead of being silently dropped or
-    /// given an arbitrary one; call [`World::assign_missing_source_ids`] first
-    /// to give them persistent identities.
-    pub fn to_scene(&self) -> Result<SceneDocument, WorldError> {
-        let mut entities = Vec::with_capacity(self.len);
-        for (entity_id, data) in self.entities() {
-            let source_id = data
-                .source_id
-                .clone()
-                .ok_or(WorldError::UnstableEntity(entity_id))?;
-            let parent = match data.parent {
-                Some(parent) => Some(
-                    self.get(parent)
-                        .and_then(|parent_data| parent_data.source_id.clone())
-                        .ok_or(WorldError::UnstableEntity(parent))?,
-                ),
-                None => None,
-            };
-            entities.push(SceneEntity {
-                name: data.name.clone(),
-                parent,
-                transform_3d: data.transform_3d,
-                components: data.components.clone(),
-                disabled: data.disabled,
-                editor: data.editor.clone(),
-                ..SceneEntity::new(source_id)
-            });
-        }
-
-        let mut document = SceneDocument {
-            format_version: crate::SCENE_FORMAT_VERSION,
-            metadata: self.metadata.clone(),
-            entities,
-        };
-        document.canonicalize();
-        document.validate()?;
-        Ok(document)
     }
 
     /// The entity a scene's stable identity names, if the world still holds it.
@@ -287,4 +285,21 @@ impl World {
         }
         Ok(assigned)
     }
+}
+
+/// A scene's entities with every instance made from its prefab, checked as a
+/// whole now that entities placed under an instance's children have parents.
+fn expanded(
+    scene: &SceneDocument,
+    prefabs: &dyn PrefabLibrary,
+) -> Result<Vec<ExpandedEntity>, WorldError> {
+    let expanded = expand_entities(&scene.entities, prefabs)?;
+    if scene.entities.iter().any(|entity| entity.prefab.is_some()) {
+        let entities: Vec<_> = expanded
+            .iter()
+            .map(|expanded| expanded.entity.clone())
+            .collect();
+        validate_entities(&entities)?;
+    }
+    Ok(expanded)
 }

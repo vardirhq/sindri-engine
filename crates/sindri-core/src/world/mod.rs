@@ -6,6 +6,7 @@
 //! carries: `scene` is the seam between the two.
 
 mod hierarchy;
+mod instances;
 mod prefab;
 mod scene;
 mod space;
@@ -22,7 +23,9 @@ use std::sync::atomic::{AtomicU64, Ordering};
 use serde_json::Value;
 use thiserror::Error;
 
-use crate::{EntityId, PrefabError, SceneEntityId, SceneError, SceneMetadata, Transform3D};
+use crate::{
+    EntityId, PrefabError, PrefabLink, SceneEntityId, SceneError, SceneMetadata, Transform3D,
+};
 
 #[derive(Clone, Debug, Default, PartialEq)]
 pub struct EntityData {
@@ -46,6 +49,12 @@ pub struct EntityData {
     pub disabled: bool,
     /// Editor-only state that the runtime carries but never interprets.
     pub editor: BTreeMap<String, Value>,
+    /// The prefab instance this entity is part of, when a scene placed one.
+    ///
+    /// What lets a world be written back as instances rather than as copies
+    /// of what they expanded into. A runtime spawn leaves it empty, as it
+    /// leaves the stable ID empty: nothing spawned is saved.
+    pub prefab: Option<PrefabLink>,
 }
 
 #[derive(Clone, Debug)]
@@ -280,4 +289,13 @@ pub enum WorldError {
     InvalidScene(#[from] SceneError),
     #[error(transparent)]
     InvalidPrefab(PrefabError),
+    #[error(
+        "instance '{}' no longer has the shape of its prefab ({detail}); unpack it \
+         to change its structure",
+        .instance.as_str()
+    )]
+    InstanceReshaped {
+        instance: SceneEntityId,
+        detail: String,
+    },
 }

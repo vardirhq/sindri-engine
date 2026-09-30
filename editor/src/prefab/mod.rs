@@ -213,6 +213,7 @@ fn spawn_into(
         // Editor state describes the prefab as a document -- what was folded
         // open while somebody edited it -- and says nothing about an instance.
         editor: std::collections::BTreeMap::new(),
+        prefab: None,
     };
     let handle = rehearsal.spawn(data.clone());
     rehearsal

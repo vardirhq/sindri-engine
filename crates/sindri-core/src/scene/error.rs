@@ -23,6 +23,11 @@ pub enum SceneError {
     HierarchyCycle(SceneEntityId),
     #[error("entity {0:?} has a transform containing a non-finite value")]
     NonFiniteTransform(SceneEntityId),
+    #[error(
+        "entity {0:?} is a prefab instance and carries components of its own; an \
+         instance's components are its prefab's, changed through its overrides"
+    )]
+    InstanceComponents(SceneEntityId),
 }
 
 /// Failures raised while reading or writing serialized scenes.
