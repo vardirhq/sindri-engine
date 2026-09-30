@@ -245,7 +245,8 @@ events, blending, tweening, and animating anything that is not a sprite frame.
 | Masks, sensors, collision events | ✅ | 🟡 | ✅ | ✅ | **Par** | — |
 | **Named collision layers** | ❌ | ❌ | ❌ | — | **Behind** | Masks are raw `u32` bit values. Unity and Godot both name layers in project settings. Cheap to fix, daily friction |
 | Per-piece validation naming the failing index | ✅ | — | — | ✅ | **Ahead** | Neither baseline tells you *which* collider was wrong |
-| **Raycast / overlap / shape queries** | ❌ | ❌ | ❌ | ❌ | **Absent** | Line of sight, ground checks, click-to-select in-game, AI vision. Close to universal, and we have none. The platformer checks the ground with a foot sensor instead, which works for standing and cannot answer "how far to the ground" |
+| **2D closest-hit raycasts** | ✅ | — | ✅ | ✅ | **Par** | Finite world-space casts return entity/point/normal/distance or null; query membership masks, sensor opt-in and entity exclusion; deterministic ties. Platformer HUD measures ground clearance; Physics Playground exposes hits, normals, masks and triggers on Pages. Direct scans; no query index |
+| **Overlap / shape casts / 3D physics queries** | ❌ | ❌ | ❌ | ❌ | **Absent** | Area collision checks, swept shapes and 3D casts remain absent |
 | **Joints and constraints** | 🟡 | ❌ | ✅ | ❌ | **Behind** | One joint kind: `Physics.connect_distance(first, second, max_distance)` holds two bodies within a distance, queued when a chain is built in a single script pass and its bodies do not exist yet. No hinge, slider, spring, or motor, and nothing authors a joint in a scene — a joint exists only if a script makes one. Added for the spine boss, which ships without it: `games/orbital-baked/assets/scripts/spine-segment.decay` chains its segments by hand, each one reading its leader and steering toward a point `spacing` behind it. `crates/sindri-physics/tests/distance_joint.rs` is the only exercise |
 | **Physics materials as assets** | ❌ | ❌ | ❌ | — | **Behind** | Friction and restitution are per-collider literals |
 | **Character controller** | ❌ | ❌ | ❌ | ❌ | **Absent** | Every platformer and top-down game writes one. The platformer's hero is a dynamic body driven by velocity, with a foot sensor for standing and coyote time and a jump buffer in Decay: it works, and it is exactly the code a controller would own |
@@ -574,8 +575,8 @@ output of the file; everything above is evidence.
    typed field, and no inventory or long list can scroll. The slider is also
    the second capability in a row whose only user is outside this repository;
    see the proof note below.
-4. **Physics queries: raycast, overlap, shape cast.** Line of sight, ground
-   checks, AI vision, click-to-select. Close to universal.
+4. **Physics queries: overlap and shape cast.** Area checks and swept movement.
+   Closest-hit raycasts now cover ground-distance and line-of-sight queries.
 5. **Audio buses and a master volume.** A settings screen now has a music
    slider and nothing behind it: there is no bus to route a clip to and no
    master volume for the slider to move.
@@ -679,7 +680,7 @@ Spatial queries expose a framing error in this file's own physics section, which
 lists raycast and overlap as **physics** queries. Target selection in
 `player.decay` is not a physics problem — it is a gameplay query over tagged
 entities. The first slice now lives in `World.nearest` and `World.within_radius`,
-with Orbital proving the filtered targeting path. Physics casts, cone/box
+with Orbital proving the filtered targeting path. Physics overlap/shape casts, cone/box
 queries and spatial indexing remain separate follow-up work.
 
 Determinism also matters here in a way it does not for the baseline: a query

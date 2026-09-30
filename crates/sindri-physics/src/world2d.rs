@@ -4,6 +4,8 @@
 //! speak only in the types this crate defines, which is what makes the
 //! backend replaceable.
 
+mod query;
+
 use std::{collections::HashMap, sync::mpsc, time::Duration};
 
 use rapier2d::prelude as r2;

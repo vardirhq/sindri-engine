@@ -8,6 +8,12 @@ script Hud {
 
     fn update(dt: f32) {
         Ui.set_numbers(this.entity, Game.coins, Game.coins_total);
+        let probe = World.find("Ground clearance");
+        if Game.ground_found {
+            Ui.set_text(probe, "Ground: " + Game.ground_clearance.fixed(2) + " units below feet");
+        } else {
+            Ui.set_text(probe, "Ground: beyond 12-unit probe");
+        }
         if this.banner != null {
             World.set_active(this.banner, Game.won);
         }

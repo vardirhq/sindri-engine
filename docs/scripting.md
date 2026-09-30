@@ -956,6 +956,7 @@ a person who has not clicked yet.
 | `Physics.set_velocity(entity, x, y)` | nothing |
 | `Physics.apply_impulse(entity, x, y)` | nothing |
 | `Physics.connect_distance(first, second, max_distance)` | nothing |
+| `Physics.raycast(origin, direction, max_distance, mask, include_sensors, exclude)` | `RayHit2d` or `null` |
 | `Physics.collision_started()` | `List<Entity>` |
 | `Physics.collision_stopped()` | `List<Entity>` |
 | `Physics.sensor_entered()` | `List<Entity>` |
@@ -1018,10 +1019,38 @@ references.
 zero for a body that does not exist. A game whose bullets never move because
 nothing is stepping should hear about it on the first frame.
 
-**There is no ray cast, no overlap query, and no contact detail yet.**
-`docs/physics.md` lists them as first-slice-adjacent, and none has a demonstrated
-consumer; a query surface invented before something needs it is a shape chosen
-by guesswork.
+`Physics.raycast` casts a finite world-space segment through the simulated 2D
+collider pieces, including merged tilemap boxes. `origin` and `direction` are
+`Vec2`; direction must be nonzero and is normalized, so `max_distance` and the
+hit's `distance` are world units. Distance must be non-negative, all geometry
+arguments finite, and `mask` a whole number from 0 to 4294967295. Mask 0 misses;
+4294967295 selects every collider membership. This is a query mask, independent
+of a collider's physical interaction filter. `include_sensors` explicitly opts
+into trigger pieces. `exclude` skips all pieces of an entity, or is `null`.
+
+A hit is a copied `RayHit2d` struct with `entity: Entity`, `point: Vec2`,
+`normal: Vec2` and `distance: f32`. A miss is `null`; check before reading it.
+The maximum distance is inclusive. Starting inside/on a collider gives distance
+0, point equal to origin and normal (0, 0), because there is no entry surface.
+Other normals describe the world-space surface. Exact distance ties prefer the
+smaller generation-checked entity handle, then authored piece order.
+
+```decay
+let p = this.transform.world_position;
+let hit = Physics.raycast(Vec2(p.x, p.y), Vec2(0.0, -1.0), 12.0, 4294967295.0, false, this.entity);
+if hit != null { print("Ground distance: " + hit.distance); }
+```
+
+Queries see current physics body poses. A scene/script transform write, a new
+collider or a spawn is reflected at the next fixed-step synchronization;
+inactive/despawned entities are skipped immediately. A held result stays a
+snapshot after a later step or despawn; check `World.exists(hit.entity)` before
+acting on that entity. Queries currently scan collider pieces, with no separate
+spatial index. The platformer displays clearance below its hero, preserving its
+foot-sensor jump rules; Physics Playground makes masks, sensors, inside hits,
+misses, hit points and normals visible.
+
+**Overlap, shape casts and contact detail remain absent.**
 
 ### Grid position
 

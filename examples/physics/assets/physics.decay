@@ -1,0 +1,130 @@
+// All playground behavior uses public Decay physics calls.
+state Game {
+    var sensor_entries: f32 = 0.0;
+    var contacts: f32 = 0.0;
+}
+script PhysicsPlayground {
+    var angle: f32 = 0.0;
+    var distance: f32 = 7.0;
+    var sensors: bool = false;
+    var mask: f32 = 3.0;
+    var inside: bool = false;
+    var last: String = "";
+
+    fn update(dt: f32) {
+        controls();
+        this.angle += Input.axis("ArrowLeft", "ArrowRight") * dt;
+        let origin = Vec2(-3.0, 0.0);
+        var start = origin;
+        if this.inside { start = Vec2(1.0, 0.0); }
+        let direction = Vec2(cos(this.angle), sin(this.angle));
+        let hit: RayHit2d = Physics.raycast(start, direction, this.distance, this.mask, this.sensors, null);
+        var end = start + direction * this.distance;
+        var result = "miss";
+        let dot = World.find("hit-dot");
+        let normal = World.find("normal-line");
+        World.set_active(dot, hit != null);
+        World.set_active(normal, hit != null);
+        if hit != null {
+            end = hit.point;
+            dot.transform.position = Vec3(end.x, end.y, 0.2);
+            line(normal, end, end + hit.normal * 0.7, 0.035);
+            result = name(hit.entity) + " / d " + hit.distance.fixed(2) + " / n " + hit.normal.x.fixed(1) + "," + hit.normal.y.fixed(1);
+        }
+        line(World.find("ray-line"), start, end, 0.025);
+        let probe = World.find("origin-dot");
+        probe.transform.position = Vec3(start.x, start.y, 0.2);
+        Ui.set_text(World.find("result-label"), result);
+        Ui.set_text(World.find("query-label"), "length " + this.distance.fixed(1) + " / angle " + this.angle.fixed(2));
+        Ui.set_text(World.find("events-label"), "sensor entries " + Game.sensor_entries + " / contacts " + Game.contacts);
+        if result != this.last {
+            print("Physics ray " + result);
+            this.last = result;
+        }
+    }
+    fn line(entity: Entity, start: Vec2, end: Vec2, width: f32) {
+        let delta = end - start;
+        entity.transform.position = Vec3((start.x + end.x) * 0.5, (start.y + end.y) * 0.5, 0.1);
+        entity.transform.scale = Vec3(max(0.001, delta.length), width, 1.0);
+        entity.transform.rotation_z = atan2(delta.y, delta.x);
+    }
+    fn name(entity: Entity) -> String {
+        if entity == World.find("sensor") { return "Sensor"; }
+        if entity == World.find("target") { return "Solid"; }
+        if entity == World.find("ball") { return "Ball"; }
+        if entity == World.find("box") { return "Box"; }
+        return "Floor";
+    }
+    fn controls() {
+        var changed = false;
+        if Input.just_pressed("S") || Ui.is_pressed(World.find("sensors")) { this.sensors = !this.sensors; changed = true; }
+        if Input.just_pressed("T") || Ui.is_pressed(World.find("mask")) {
+            if this.mask == 3.0 { this.mask = 1.0; }
+            else if this.mask == 1.0 { this.mask = 2.0; }
+            else if this.mask == 2.0 { this.mask = 0.0; }
+            else { this.mask = 3.0; }
+            changed = true;
+        }
+        if Input.just_pressed("I") || Ui.is_pressed(World.find("inside")) { this.inside = !this.inside; changed = true; }
+        if Input.just_pressed("Q") || Ui.is_pressed(World.find("less")) { this.distance = max(0.0, this.distance - 1.0); changed = true; }
+        if Input.just_pressed("E") || Ui.is_pressed(World.find("more")) { this.distance = min(10.0, this.distance + 1.0); changed = true; }
+        if Ui.is_pressed(World.find("left")) { this.angle -= PI / 12.0; changed = true; }
+        if Ui.is_pressed(World.find("right")) { this.angle += PI / 12.0; changed = true; }
+        if Input.just_pressed("B") || Ui.is_pressed(World.find("drop")) { drop(); changed = true; }
+        if Input.just_pressed("R") || Ui.is_pressed(World.find("reset")) {
+            this.angle = 0.0; this.distance = 7.0; this.mask = 3.0; this.sensors = false; this.inside = false;
+            Game.contacts = 0.0; Game.sensor_entries = 0.0;
+            drop(); changed = true;
+        }
+        if changed {
+            Ui.set_text(World.find("sensors-label"), "SENSORS OFF");
+            if this.sensors { Ui.set_text(World.find("sensors-label"), "SENSORS ON"); }
+            var mask_name = "ALL";
+            if this.mask == 1.0 { mask_name = "SOLID"; }
+            else if this.mask == 2.0 { mask_name = "BODIES"; }
+            else if this.mask == 0.0 { mask_name = "NONE"; }
+            Ui.set_text(World.find("mask-label"), "MASK " + mask_name);
+            Ui.set_text(World.find("inside-label"), "ORIGIN OUTSIDE");
+            if this.inside { Ui.set_text(World.find("inside-label"), "ORIGIN INSIDE"); }
+            print("Physics controls " + mask_name);
+        }
+    }
+    fn drop() {
+        FallingBody.on(World.find("ball")).reset();
+        FallingBody.on(World.find("box")).reset();
+        print("Physics drop");
+    }
+}
+script FallingBody {
+    @export let x: f32 = -1.0;
+    @export let y: f32 = 2.0;
+    fn reset() {
+        this.transform.position = Vec3(this.x, this.y, 0.0);
+        Physics.set_velocity(this.entity, 0.0, 0.0);
+    }
+    fn update(dt: f32) {
+        for other in Physics.collision_started() { Game.contacts += 1.0; print("Physics contact"); }
+    }
+}
+script SensorArea {
+    var touching: f32 = 0.0;
+    fn update(dt: f32) {
+        for other in Physics.sensor_entered() {
+            this.touching += 1.0; Game.sensor_entries += 1.0;
+            print("Physics sensor entered");
+        }
+        for other in Physics.sensor_exited() { this.touching = max(0.0, this.touching - 1.0); }
+        this.shape.fill = Color(0.25, 0.6, 0.95, 0.18);
+        if this.touching > 0.0 { this.shape.fill = Color(1.0, 0.8, 0.2, 0.45); }
+    }
+}
+script PhysicsLayout {
+    @export let x: f32 = 0.0;
+    @export let width: f32 = 1.0;
+    @export let button: bool = false;
+    fn update(dt: f32) {
+        let span = min(1.0, Viewport.aspect);
+        this.transform.position.x = this.x * span;
+        if this.button { this.transform.scale.x = this.width * span; }
+    }
+}

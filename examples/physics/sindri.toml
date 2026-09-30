@@ -1,0 +1,6 @@
+format_version = 1
+[project]
+name = "Physics Playground"
+main_scene = "assets/physics.scene"
+[assets]
+include = ["fonts/Fonts-OFL.txt", "ui/physics.weave"]

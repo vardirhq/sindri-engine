@@ -4,10 +4,12 @@
 //! script may say and what the host will answer cannot drift apart.
 
 mod grid;
+mod physics;
 mod tween;
 mod world;
 
 use grid::add_grid_surface;
+use physics::add_physics_surface;
 use world::add_world_surface;
 
 use std::collections::BTreeSet;
@@ -21,8 +23,8 @@ use crate::{
     surface::{
         ANIMATION, ANIMATION_CALLS, AnimationCall, CONSTANTS, EFFECTS, EFFECTS_CALLS, ENTITY,
         EffectsCall, FUNCTIONS, GAME, GAME_CALLS, GAMEPAD, GameCall, HostFunction, INPUT,
-        INPUT_QUERIES, Node, PHYSICS, PHYSICS_CALLS, PRINT, PROFILE, PROFILE_CALLS, PROFILES,
-        PhysicsCall, ProfileCall, RANDOM, RANDOM_CALLS, RandomCall, SAVE, SAVE_CALLS, SCENE,
+        INPUT_QUERIES, Node, PRINT, PROFILE, PROFILE_CALLS, PROFILES,
+        ProfileCall, RANDOM, RANDOM_CALLS, RandomCall, SAVE, SAVE_CALLS, SCENE,
         SCENE_CALLS, SaveCall, SceneCall, THIS, THROUGH_REFERENCE, TIME, TIME_VALUES, UI, UI_CALLS,
         UiCall, gamepad_type,
     },
@@ -199,41 +201,7 @@ fn add_profile_surface(environment: &mut Environment) {
 }
 
 /// What a script can do to a body, and ask about what it touched.
-pub(super) fn add_physics_surface(environment: &mut Environment) {
-    let entity = || Type::Named(ENTITY.to_owned());
-    let mut physics = HostType::new();
-    for (name, call) in PHYSICS_CALLS {
-        physics = physics.with_function(
-            *name,
-            FunctionType {
-                params: match call {
-                    PhysicsCall::VelocityX | PhysicsCall::VelocityY => vec![entity()],
-                    PhysicsCall::SetVelocity | PhysicsCall::ApplyImpulse => {
-                        vec![entity(), Type::F32, Type::F32]
-                    }
-                    PhysicsCall::ConnectDistance => {
-                        vec![entity(), entity(), Type::F32]
-                    }
-                    // An event query is about the entity the script is on, so
-                    // it takes nothing: an event is about a pair, and the pair
-                    // a script cares about is the one it is half of.
-                    _ => Vec::new(),
-                },
-                return_type: match call {
-                    PhysicsCall::VelocityX | PhysicsCall::VelocityY => Type::F32,
-                    PhysicsCall::SetVelocity
-                    | PhysicsCall::ApplyImpulse
-                    | PhysicsCall::ConnectDistance => Type::Unit,
-                    _ => Type::array_of(entity()),
-                },
-            },
-        );
-    }
-    environment.add_type(PHYSICS, physics);
-    environment.add_value(PHYSICS, Type::Named(PHYSICS.to_owned()));
-}
-
-/// Which authored clip an entity plays, and where it has got to.
+pub(super) /// Which authored clip an entity plays, and where it has got to.
 ///
 /// A clip is named with text the same way an audio asset is: the scene authored
 /// it, and a script picks from what the scene holds. There is no way to build

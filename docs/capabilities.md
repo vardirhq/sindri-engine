@@ -209,6 +209,22 @@ render delta. Tests cover gravity, masks, sensor events, body operations, and
 removal/reuse through generation-checked `EntityId`s, and the crate passes the
 workspace's native and WASM checks.
 
+Closest-hit 2D raycasts return Sindri `RayHit2d` snapshots (entity, world-space
+point/normal, distance). Directions are normalized; maximum distance is
+inclusive; invalid finite/range inputs fail. Membership masks, sensor opt-in and
+whole-entity exclusion select pieces before choosing a hit. Inside hits have
+zero distance/normal; exact ties prefer entity handle then piece order. Direct
+scans work before the first step and after a body move. Decay returns `null` on
+a miss and skips inactive/despawned entities immediately, while scene geometry
+changes are synchronized at the next step. Engine and Decay regressions cover
+geometry, compounds, filtering, validation, copies and removal/reuse. The
+platformer displays ground clearance through jumps against painted tilemap
+colliders, and `examples/physics` exposes live rays, hit dots, normals, falling
+bodies, bounce and sensors with desktop/touch controls. Pages exports it under
+`examples/physics/`; native project regressions and desktop/phone browser smoke
+checks exercise its real Decay controls. Overlap/shape casts, 3D queries and an
+accelerated query index remain absent.
+
 A parallel Sindri-owned 3D body/collider data model already fixes the public
 shape of the later 3D slice, but no 3D runtime behavior is claimed yet.
 
@@ -1673,8 +1689,8 @@ closest enemy is visible, with a sorted unbounded-radius fallback otherwise.
 Arc selects from sorted radius results with its impact-point exclusion. Exercised in
 `crates/sindri-decay/src/host/query/tests.rs`,
 `crates/sindri-decay/tests/a_script_queries_spatial_entities.rs`, and
-`games/orbital-baked/tests/spatial_targeting.rs`. Cone/box queries and physics
-casts remain deferred.
+`games/orbital-baked/tests/spatial_targeting.rs`. Cone/box queries and physics overlap/shape casts
+remain deferred.
 
 **And a script can make one.** `World.spawn` takes a typed `Prefab` — an asset
 reference the scene authored into an `@export` field, not a string in the

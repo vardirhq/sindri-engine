@@ -29,6 +29,7 @@ mod print;
 mod profile;
 mod query;
 mod random;
+mod raycast;
 mod save;
 mod scene;
 mod services;

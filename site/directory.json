@@ -111,6 +111,21 @@
   },
   {
     "category": "demos",
+    "title": "Physics Playground",
+    "path": "examples/physics/",
+    "source": "examples/physics",
+    "description": "Cast rays through colliders and triggers while bodies fall and bounce.",
+    "tags": [
+      "physics",
+      "raycast",
+      "sensors",
+      "layers",
+      "decay",
+      "responsive"
+    ]
+  },
+  {
+    "category": "demos",
     "title": "Weave UI",
     "path": "examples/weave-poc/",
     "source": "games/weave-poc",

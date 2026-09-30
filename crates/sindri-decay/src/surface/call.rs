@@ -180,6 +180,8 @@ pub(crate) const GRID_CALLS: &[(&str, GridCall)] = &[
 /// asked for.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub(crate) enum PhysicsCall {
+    /// The closest 2D collider hit along a world-space segment.
+    Raycast,
     VelocityX,
     VelocityY,
     SetVelocity,
@@ -203,6 +205,7 @@ pub(crate) enum PhysicsCall {
 }
 
 pub(crate) const PHYSICS_CALLS: &[(&str, PhysicsCall)] = &[
+    ("raycast", PhysicsCall::Raycast),
     ("velocity_x", PhysicsCall::VelocityX),
     ("velocity_y", PhysicsCall::VelocityY),
     ("set_velocity", PhysicsCall::SetVelocity),
