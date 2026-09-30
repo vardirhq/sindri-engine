@@ -38,7 +38,7 @@ try {
     await page.goto(url);
     const shown = page.locator('.directory-entry:not([hidden])');
     assert.equal(await shown.count(), entries.length);
-    await page.locator('[data-category="demos"]').click();
+    await page.getByRole('button', { name: 'Demos', exact: true }).click();
     assert.equal(await shown.count(), entries.filter(entry => entry.category === 'demos').length);
     await page.locator('#directory-search').fill('Tween Lab');
     assert.equal(await shown.count(), 1);
@@ -51,11 +51,11 @@ try {
     assert.equal(await page.locator('#directory-empty').isVisible(), true);
     await page.locator('#directory-reset').click();
     assert.equal(await shown.count(), entries.length);
-    await page.locator('[data-category="docs"]').click();
+    await page.getByRole('button', { name: 'Documentation', exact: true }).click();
     await page.locator('#directory-search').fill('Weave');
     assert.equal(await shown.count(), 2);
     await page.locator('#directory-search').fill('');
-    await page.locator('[data-category="all"]').click();
+    await page.getByRole('button', { name: 'Everything', exact: true }).click();
     assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true);
     await page.screenshot({ path: join(captures, 'directory-' + viewport.width + '.png') });
     assert.deepEqual(errors, []);

@@ -1,6 +1,6 @@
 const controls = document.querySelector('.directory-controls');
 const search = document.querySelector('#directory-search');
-const buttons = [...document.querySelectorAll('[data-category]')];
+const buttons = [...document.querySelectorAll('.directory-filters button[data-category]')];
 const entries = [...document.querySelectorAll('.directory-entry')];
 const status = document.querySelector('#directory-status');
 const empty = document.querySelector('#directory-empty');
