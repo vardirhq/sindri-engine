@@ -47,7 +47,14 @@ jobs:
         env:
           WASM_OPT: ${{ github.event_name == 'pull_request' && '--no-opt' || '' }}
         run: wasm-pack build games/voxel-lab --target web --release --out-dir pkg $WASM_OPT
+      - uses: actions/configure-pages@v6
+        id: pages
+        if: github.event_name != 'pull_request'
+        with:
+          enablement: true
       - name: Assemble Sindri site
+        env:
+          PAGES_BASE_PATH: ${{ steps.pages.outputs.base_path }}
         run: |
           rm -rf target/pages
           mkdir -p target/pages/assets
@@ -68,7 +75,7 @@ jobs:
             src="${project%%:*}"
             route="${project##*:}"
             cargo run --quiet --package sindri-export --bin sindri-export -- \
-              "$src" "target/pages/examples/$route" --base "/${GITHUB_REPOSITORY#*/}/examples/$route/" \
+              "$src" "target/pages/examples/$route" --base "${PAGES_BASE_PATH}/examples/$route/" \
               --build-id "${GITHUB_SHA:0:7}"
             mkdir -p "target/pages/examples/$route/pkg"
             cp -R game/pkg/. "target/pages/examples/$route/pkg/"
@@ -79,10 +86,12 @@ jobs:
           python site/build_docs.py target/pages
           touch target/pages/.nojekyll
       - name: Verify assembled routes
+        env:
+          PAGES_BASE_PATH: ${{ steps.pages.outputs.base_path }}
         run: |
           test -f target/pages/index.html
           python - <<'CHECK'
-          import pathlib, re, sys
+          import os, pathlib, re, sys
 
           root = pathlib.Path("target/pages")
           refs = sorted(set(re.findall(
@@ -93,6 +102,13 @@ jobs:
           ]
           for ref in refs:
               print(("MISSING " if ref in missing else "ok      ") + ref)
+          base = os.environ.get("PAGES_BASE_PATH", "")
+          for page in (root / "examples").glob("*/index.html"):
+              if page.parent.name == "voxel-lab":
+                  continue
+              expected = f'<base href="{base}/examples/{page.parent.name}/">'
+              if expected not in page.read_text():
+                  missing.append(f"base path in {page}")
           sys.exit(1 if missing else 0)
           CHECK
           test -f target/pages/docs/scripting/index.html
@@ -116,10 +132,6 @@ jobs:
           grep -q 'prefabs/coin.prefab' target/pages/examples/platformer/assets/sindri.manifest
           grep -q 'players.sheet' target/pages/examples/scorchball/assets/sindri.manifest
           grep -q 'player.prefab' target/pages/examples/scorchball/assets/sindri.manifest
-      - uses: actions/configure-pages@v6
-        if: github.event_name != 'pull_request'
-        with:
-          enablement: true
       - uses: actions/upload-pages-artifact@v5
         if: github.event_name != 'pull_request'
         with:

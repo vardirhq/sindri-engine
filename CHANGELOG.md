@@ -1,5 +1,7 @@
 # Changelog
 
+- Pages exports use the configured site base path, so custom-domain routes load their browser modules and assets from `/examples/` instead of an assumed repository prefix. Browser smoke covers both custom-domain and project-subpath deployments.
+
 - Decay gains managed number, Vec2, Vec3 and Color tweens with typed value reads, pause/resume, cancellation, restart, completion/progress and disposal. Named CSS easing math is shared with Weave while its UI authoring remains CSS-inspired. Orbital pickups now use a short eased appearance animation. Zero duration completes immediately; invalid input fails explicitly; handles are bounded at 8192 and released with their owner. Property binding, sequences/timelines, callbacks, loops/yoyo and CSS keyframes remain deferred.
 
 - Decay adds `World.nearest(tag, position)` and `World.within_radius(tag, position, radius)`: active authored-tag queries over composed world-space `Vec3` positions. Radius results include the boundary, sort nearest first, retain world order for ties, and refuse more than 8192 results. Missing transforms are skipped; nearest returns `null` when none matches. Negative/NaN radii fail; positive infinity searches globally. Orbital player and Arc now use the sorted query while retaining their visibility and impact-point filters. Cone/box queries, physics casts and spatial indexing are deferred.

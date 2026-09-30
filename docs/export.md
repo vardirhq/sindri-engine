@@ -71,14 +71,19 @@ the browser host in beside each one:
 ```bash
 cargo run -p sindri-export --bin sindri-export -- \
   games/orbital-baked target/pages/examples/orbital-baked \
-  --base /sindri-engine/examples/orbital-baked/
+  --base "${PAGES_BASE_PATH}/examples/orbital-baked/"
 cp -R game/pkg/. target/pages/examples/orbital-baked/pkg/
 ```
 
 One host serves every project, because it reads the manifest rather than
 carrying a list of one game's assets. The `--base` is the route the project
 will be served from, which for a Pages project site includes the repository
-name.
+name. The workflow gets that prefix from `actions/configure-pages`'s
+`base_path` output before exporting: `/sindri-engine` for the default project
+site, and an empty prefix for the custom domain. Thus the current live route is
+`https://sindri.vardir.no/examples/orbital-baked/`, with
+`--base /examples/orbital-baked/`. Do not infer the prefix from the repository
+name: custom-domain Pages sites are served at the domain root.
 
 The site used to copy an asset directory and write its own manifest instead.
 That was a second answer to the question the export exists to answer, and the
@@ -97,12 +102,23 @@ The trailing slash is not optional and the export adds it: `<base href="/repo">`
 resolves `pkg/host.js` against the *site* root, and `<base href="/repo/">`
 resolves it inside the project. That is the whole GitHub Pages subpath problem.
 
-## The host is not project-specific
+## Shared browser host
 
 The browser host reads the manifest and asks for what it names, kind by kind. It
 used to carry a list of asset IDs per kind, compiled in — which meant adding a
 texture meant editing Rust, and a project the host crate had never heard of
 could not be exported at all. `AssetKind` in the manifest is what replaced that.
+
+The shared bundle is currently built from the historical `sindri-causeway`
+crate in `game/`, so its files are named `sindri_causeway.js` and
+`sindri_causeway_bg.wasm`. That name does not identify the project being
+loaded. Its manifest determines the scenes, assets and Decay scripts.
+
+The execution host still has Causeway coupling: it uses that crate's session
+and terrain setup and the fixed `sindri.causeway.save` browser storage key.
+Extracting a generic project host, keeping Causeway terrain setup in its own
+project, and isolating save storage per project remain follow-up work. Renaming
+the bundle alone would not complete that separation.
 
 Each kind has its own bounded asynchronous queue. The host sizes that queue from
 the manifest before requesting the kind, while keeping the number of concurrent
