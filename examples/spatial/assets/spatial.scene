@@ -1,374 +1,799 @@
 {
   "format_version": 10,
   "metadata": {
-    "name": "Camera Lab"
+    "name": "Spatial Query Lab"
   },
   "entities": [
     {
       "id": "camera",
-      "name": "Gameplay Camera",
+      "name": "camera",
+      "components": {
+        "sindri.camera": {
+          "projection": "orthographic",
+          "vertical_size": 12,
+          "near": 0.1,
+          "far": 100,
+          "fit": "shorter"
+        }
+      },
       "transform_3d": {
         "position": [
           0,
           0,
           10
         ],
-        "rotation": [
-          0,
-          0,
-          0,
-          1
-        ],
         "scale": [
           1,
           1,
           1
         ]
-      },
-      "components": {
-        "sindri.camera": {
-          "projection": "orthographic",
-          "vertical_size": 8,
-          "near": 0.1,
-          "far": 100,
-          "fit": "shorter"
-        },
-        "sindri.camera.behavior": {
-          "follow": {
-            "target": "target",
-            "offset": [
-              0,
-              0,
-              0
-            ],
-            "dead_zone": [
-              2.5,
-              1.5
-            ],
-            "smoothing": 5,
-            "max_speed": 8
-          },
-          "confine": {
-            "min": [
-              -8,
-              -4
-            ],
-            "max": [
-              8,
-              4
-            ]
-          },
-          "shake": {
-            "trauma": 0,
-            "strength": 0.3,
-            "decay": 1.6,
-            "frequency": 30,
-            "phase": 0
-          }
-        }
       }
     },
     {
-      "id": "target",
-      "name": "Moving Target",
+      "id": "probe",
+      "name": "probe",
+      "components": {
+        "sindri.script": {
+          "source": "spatial.decay",
+          "script": "SpatialDemo"
+        }
+      },
       "transform_3d": {
         "position": [
           0,
           0,
           0
         ],
-        "rotation": [
-          0,
-          0,
-          0,
-          1
-        ],
         "scale": [
-          0.65,
-          0.65,
+          1,
+          1,
           1
         ]
-      },
-      "components": {
-        "sindri.shape": {
-          "kind": "polygon",
-          "count": 4,
-          "fill": [
-            0.18,
-            0.82,
-            1,
-            1
-          ],
-          "stroke": [
-            0.8,
-            0.97,
-            1,
-            1
-          ],
-          "stroke_width": 0.08,
-          "layer": 4
-        },
-        "sindri.script": {
-          "source": "camera-demo.decay",
-          "script": "CameraDemo",
-          "properties": {
-            "speed": 5
-          }
-        }
       }
     },
     {
-      "id": "world-grid",
-      "name": "World Grid",
+      "id": "probe-dot",
+      "name": "probe-dot",
+      "components": {
+        "sindri.shape": {
+          "kind": "ellipse",
+          "fill": [
+            0.2,
+            0.9,
+            1,
+            1
+          ],
+          "layer": 5
+        }
+      },
       "transform_3d": {
         "position": [
           0,
           0,
-          -1
-        ],
-        "rotation": [
-          0,
-          0,
-          0,
-          1
+          0.1
         ],
         "scale": [
-          28,
-          16,
+          0.16,
+          0.16,
           1
         ]
       },
+      "parent": "probe"
+    },
+    {
+      "id": "radius-ring",
+      "name": "radius-ring",
+      "components": {
+        "sindri.shape": {
+          "kind": "ellipse",
+          "fill": [
+            0.1,
+            0.7,
+            1,
+            0.025
+          ],
+          "stroke": [
+            0.1,
+            0.65,
+            0.8,
+            0.8
+          ],
+          "stroke_width": 0.006,
+          "dashes": 48,
+          "layer": 1
+        }
+      },
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          -0.1
+        ],
+        "scale": [
+          4,
+          4,
+          1
+        ]
+      },
+      "parent": "probe"
+    },
+    {
+      "id": "grid",
+      "name": "grid",
       "components": {
         "sindri.shape": {
           "kind": "grid",
-          "count": 28,
-          "fill": [
-            0,
-            0,
-            0,
-            0
-          ],
+          "count": 8,
           "stroke": [
             0.035,
             0.06,
             0.09,
             0.7
           ],
-          "stroke_width": 0.001,
+          "stroke_width": 0.003,
           "layer": 0
         }
-      }
-    },
-    {
-      "id": "dead-zone",
-      "name": "dead-zone",
+      },
       "transform_3d": {
         "position": [
           0,
           0,
-          -9
+          -1
         ],
         "scale": [
-          2.5,
-          1.5,
+          8,
+          8,
           1
         ]
-      },
+      }
+    },
+    {
+      "id": "A",
+      "name": "A",
       "components": {
+        "sindri.tags": {
+          "tags": [
+            "enemy"
+          ]
+        },
         "sindri.shape": {
-          "kind": "rect",
-          "stroke": [
+          "kind": "ellipse",
+          "fill": [
+            1,
+            0.48,
             0.2,
-            0.9,
-            1,
             1
           ],
-          "stroke_width": 0.018,
-          "fill": [
-            0.1,
-            0.7,
-            1,
-            0.06
-          ],
-          "layer": 6
+          "layer": 3
         }
       },
-      "parent": "camera"
-    },
-    {
-      "id": "camera-bounds",
-      "name": "camera-bounds",
       "transform_3d": {
         "position": [
+          -1.5,
           0,
-          0,
-          -0.3
+          0
         ],
         "scale": [
-          16,
-          8,
+          0.45,
+          0.45,
+          1
+        ]
+      }
+    },
+    {
+      "id": "B",
+      "name": "B",
+      "components": {
+        "sindri.tags": {
+          "tags": [
+            "enemy"
+          ]
+        },
+        "sindri.shape": {
+          "kind": "ellipse",
+          "fill": [
+            1,
+            0.48,
+            0.2,
+            1
+          ],
+          "layer": 3
+        }
+      },
+      "transform_3d": {
+        "position": [
+          1.5,
+          0,
+          0
+        ],
+        "scale": [
+          0.45,
+          0.45,
+          1
+        ]
+      }
+    },
+    {
+      "id": "target-parent",
+      "name": "target-parent",
+      "components": {},
+      "transform_3d": {
+        "position": [
+          2,
+          0.5,
+          0
+        ],
+        "scale": [
+          2,
+          2,
+          1
+        ],
+        "rotation": [
+          0,
+          0,
+          0.70710678,
+          0.70710678
+        ]
+      }
+    },
+    {
+      "id": "C",
+      "name": "C",
+      "components": {
+        "sindri.tags": {
+          "tags": [
+            "enemy"
+          ]
+        },
+        "sindri.shape": {
+          "kind": "ellipse",
+          "fill": [
+            1,
+            0.48,
+            0.2,
+            1
+          ],
+          "layer": 3
+        }
+      },
+      "transform_3d": {
+        "position": [
+          -1,
+          0,
+          0
+        ],
+        "scale": [
+          0.225,
+          0.225,
           1
         ]
       },
+      "parent": "target-parent"
+    },
+    {
+      "id": "D",
+      "name": "D",
       "components": {
+        "sindri.tags": {
+          "tags": [
+            "enemy"
+          ]
+        },
         "sindri.shape": {
-          "kind": "rect",
-          "stroke": [
+          "kind": "ellipse",
+          "fill": [
             1,
-            0.63,
-            0.24,
+            0.48,
+            0.2,
             1
           ],
-          "stroke_width": 0.0015,
-          "dashes": 32,
-          "layer": 2
+          "layer": 3
+        }
+      },
+      "transform_3d": {
+        "position": [
+          0.5,
+          0.5,
+          0
+        ],
+        "scale": [
+          0.225,
+          0.225,
+          1
+        ]
+      },
+      "parent": "target-parent"
+    },
+    {
+      "id": "E",
+      "name": "E",
+      "components": {
+        "sindri.tags": {
+          "tags": [
+            "enemy"
+          ]
+        },
+        "sindri.shape": {
+          "kind": "ellipse",
+          "fill": [
+            1,
+            0.48,
+            0.2,
+            1
+          ],
+          "layer": 3
+        }
+      },
+      "transform_3d": {
+        "position": [
+          0,
+          -2,
+          0
+        ],
+        "scale": [
+          0.45,
+          0.45,
+          1
+        ]
+      }
+    },
+    {
+      "id": "F",
+      "name": "F",
+      "components": {
+        "sindri.tags": {
+          "tags": [
+            "ally"
+          ]
+        },
+        "sindri.shape": {
+          "kind": "ellipse",
+          "fill": [
+            0.3,
+            0.55,
+            1,
+            1
+          ],
+          "layer": 3
+        }
+      },
+      "transform_3d": {
+        "position": [
+          0,
+          2.2,
+          0
+        ],
+        "scale": [
+          0.45,
+          0.45,
+          1
+        ]
+      }
+    },
+    {
+      "id": "nonspatial",
+      "name": "nonspatial",
+      "components": {
+        "sindri.tags": {
+          "tags": [
+            "enemy"
+          ]
         }
       }
     },
     {
-      "id": "world-edge",
-      "name": "world-edge",
-      "transform_3d": {
-        "position": [
-          0,
-          0,
-          -0.5
-        ],
-        "scale": [
-          26,
-          14,
-          1
-        ]
-      },
+      "id": "A-ghost",
+      "name": "A-ghost",
       "components": {
         "sindri.shape": {
-          "kind": "rect",
+          "kind": "ellipse",
           "stroke": [
+            0.3,
+            0.35,
             0.4,
-            0.5,
-            0.65,
-            1
+            0.8
           ],
-          "stroke_width": 0.001,
-          "layer": 1
+          "stroke_width": 0.05,
+          "layer": 2
+        },
+        "sindri.script": {
+          "source": "spatial.decay",
+          "script": "SpatialMarker",
+          "properties": {
+            "target": "A"
+          }
         }
-      }
-    },
-    {
-      "id": "bound-marker-0",
-      "name": "bound-marker-0",
+      },
       "transform_3d": {
         "position": [
-          -8,
-          -4,
+          0,
+          0,
           0
         ],
         "scale": [
-          0.18,
-          0.18,
+          0.55,
+          0.55,
           1
         ]
-      },
-      "components": {
-        "sindri.shape": {
-          "kind": "ellipse",
-          "fill": [
-            1,
-            0.63,
-            0.24,
-            1
-          ],
-          "layer": 3
-        }
       }
     },
     {
-      "id": "bound-marker-1",
-      "name": "bound-marker-1",
+      "id": "A-label",
+      "name": "A-label",
+      "components": {
+        "sindri.ui.text": {
+          "text": "A",
+          "font": "fonts/ChakraPetch-Regular.ttf",
+          "font_size": 0.05,
+          "bounds": [
+            0.15,
+            0.08
+          ],
+          "anchor": "center",
+          "layer": 20
+        }
+      },
       "transform_3d": {
         "position": [
-          -8,
-          4,
+          0,
+          0,
           0
         ],
         "scale": [
-          0.18,
-          0.18,
+          1,
+          1,
           1
         ]
-      },
-      "components": {
-        "sindri.shape": {
-          "kind": "ellipse",
-          "fill": [
-            1,
-            0.63,
-            0.24,
-            1
-          ],
-          "layer": 3
-        }
       }
     },
     {
-      "id": "bound-marker-2",
-      "name": "bound-marker-2",
-      "transform_3d": {
-        "position": [
-          8,
-          -4,
-          0
-        ],
-        "scale": [
-          0.18,
-          0.18,
-          1
-        ]
-      },
+      "id": "B-ghost",
+      "name": "B-ghost",
       "components": {
         "sindri.shape": {
           "kind": "ellipse",
-          "fill": [
-            1,
-            0.63,
-            0.24,
-            1
+          "stroke": [
+            0.3,
+            0.35,
+            0.4,
+            0.8
           ],
-          "layer": 3
+          "stroke_width": 0.05,
+          "layer": 2
+        },
+        "sindri.script": {
+          "source": "spatial.decay",
+          "script": "SpatialMarker",
+          "properties": {
+            "target": "B"
+          }
         }
+      },
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "scale": [
+          0.55,
+          0.55,
+          1
+        ]
       }
     },
     {
-      "id": "bound-marker-3",
-      "name": "bound-marker-3",
+      "id": "B-label",
+      "name": "B-label",
+      "components": {
+        "sindri.ui.text": {
+          "text": "B",
+          "font": "fonts/ChakraPetch-Regular.ttf",
+          "font_size": 0.05,
+          "bounds": [
+            0.15,
+            0.08
+          ],
+          "anchor": "center",
+          "layer": 20
+        }
+      },
       "transform_3d": {
         "position": [
-          8,
-          4,
+          0,
+          0,
           0
         ],
         "scale": [
-          0.18,
-          0.18,
+          1,
+          1,
           1
         ]
-      },
+      }
+    },
+    {
+      "id": "C-ghost",
+      "name": "C-ghost",
       "components": {
         "sindri.shape": {
           "kind": "ellipse",
-          "fill": [
-            1,
-            0.63,
-            0.24,
-            1
+          "stroke": [
+            0.3,
+            0.35,
+            0.4,
+            0.8
           ],
-          "layer": 3
+          "stroke_width": 0.05,
+          "layer": 2
+        },
+        "sindri.script": {
+          "source": "spatial.decay",
+          "script": "SpatialMarker",
+          "properties": {
+            "target": "C"
+          }
         }
+      },
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "scale": [
+          0.55,
+          0.55,
+          1
+        ]
+      }
+    },
+    {
+      "id": "C-label",
+      "name": "C-label",
+      "components": {
+        "sindri.ui.text": {
+          "text": "C",
+          "font": "fonts/ChakraPetch-Regular.ttf",
+          "font_size": 0.05,
+          "bounds": [
+            0.15,
+            0.08
+          ],
+          "anchor": "center",
+          "layer": 20
+        }
+      },
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      }
+    },
+    {
+      "id": "D-ghost",
+      "name": "D-ghost",
+      "components": {
+        "sindri.shape": {
+          "kind": "ellipse",
+          "stroke": [
+            0.3,
+            0.35,
+            0.4,
+            0.8
+          ],
+          "stroke_width": 0.05,
+          "layer": 2
+        },
+        "sindri.script": {
+          "source": "spatial.decay",
+          "script": "SpatialMarker",
+          "properties": {
+            "target": "D"
+          }
+        }
+      },
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "scale": [
+          0.55,
+          0.55,
+          1
+        ]
+      }
+    },
+    {
+      "id": "D-label",
+      "name": "D-label",
+      "components": {
+        "sindri.ui.text": {
+          "text": "D",
+          "font": "fonts/ChakraPetch-Regular.ttf",
+          "font_size": 0.05,
+          "bounds": [
+            0.15,
+            0.08
+          ],
+          "anchor": "center",
+          "layer": 20
+        }
+      },
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      }
+    },
+    {
+      "id": "E-ghost",
+      "name": "E-ghost",
+      "components": {
+        "sindri.shape": {
+          "kind": "ellipse",
+          "stroke": [
+            0.3,
+            0.35,
+            0.4,
+            0.8
+          ],
+          "stroke_width": 0.05,
+          "layer": 2
+        },
+        "sindri.script": {
+          "source": "spatial.decay",
+          "script": "SpatialMarker",
+          "properties": {
+            "target": "E"
+          }
+        }
+      },
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "scale": [
+          0.55,
+          0.55,
+          1
+        ]
+      }
+    },
+    {
+      "id": "E-label",
+      "name": "E-label",
+      "components": {
+        "sindri.ui.text": {
+          "text": "E",
+          "font": "fonts/ChakraPetch-Regular.ttf",
+          "font_size": 0.05,
+          "bounds": [
+            0.15,
+            0.08
+          ],
+          "anchor": "center",
+          "layer": 20
+        }
+      },
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      }
+    },
+    {
+      "id": "F-ghost",
+      "name": "F-ghost",
+      "components": {
+        "sindri.shape": {
+          "kind": "ellipse",
+          "stroke": [
+            0.3,
+            0.35,
+            0.4,
+            0.8
+          ],
+          "stroke_width": 0.05,
+          "layer": 2
+        },
+        "sindri.script": {
+          "source": "spatial.decay",
+          "script": "SpatialMarker",
+          "properties": {
+            "target": "F"
+          }
+        }
+      },
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "scale": [
+          0.55,
+          0.55,
+          1
+        ]
+      }
+    },
+    {
+      "id": "F-label",
+      "name": "F-label",
+      "components": {
+        "sindri.ui.text": {
+          "text": "F",
+          "font": "fonts/ChakraPetch-Regular.ttf",
+          "font_size": 0.05,
+          "bounds": [
+            0.15,
+            0.08
+          ],
+          "anchor": "center",
+          "layer": 20
+        }
+      },
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
       }
     },
     {
       "id": "title",
       "name": "title",
+      "components": {
+        "sindri.ui.text": {
+          "text": "SPATIAL QUERY LAB",
+          "font": "fonts/ChakraPetch-Regular.ttf",
+          "font_size": 0.08,
+          "bounds": [
+            1.8,
+            0.08
+          ],
+          "anchor": "center",
+          "layer": 20
+        },
+        "sindri.script": {
+          "source": "spatial.decay",
+          "script": "SpatialLayout",
+          "properties": {
+            "x": 0
+          }
+        }
+      },
       "transform_3d": {
         "position": [
           0,
@@ -380,31 +805,31 @@
           1,
           1
         ]
-      },
+      }
+    },
+    {
+      "id": "subtitle",
+      "name": "subtitle",
       "components": {
         "sindri.ui.text": {
-          "text": "CAMERA LAB",
+          "text": "World.nearest / World.within_radius",
           "font": "fonts/ChakraPetch-Regular.ttf",
-          "font_size": 0.085,
+          "font_size": 0.035,
           "bounds": [
-            1.7,
+            1.75,
             0.08
           ],
           "anchor": "center",
           "layer": 20
         },
         "sindri.script": {
-          "source": "camera-demo.decay",
-          "script": "CameraLayout",
+          "source": "spatial.decay",
+          "script": "SpatialLayout",
           "properties": {
             "x": 0
           }
         }
-      }
-    },
-    {
-      "id": "subtitle",
-      "name": "subtitle",
+      },
       "transform_3d": {
         "position": [
           0,
@@ -416,71 +841,35 @@
           1,
           1
         ]
-      },
-      "components": {
-        "sindri.ui.text": {
-          "text": "FOLLOW / CONFINE / SHAKE",
-          "font": "fonts/ChakraPetch-Regular.ttf",
-          "font_size": 0.037,
-          "bounds": [
-            1.7,
-            0.08
-          ],
-          "anchor": "center",
-          "layer": 20
-        },
-        "sindri.script": {
-          "source": "camera-demo.decay",
-          "script": "CameraLayout",
-          "properties": {
-            "x": 0
-          }
-        }
       }
     },
     {
       "id": "legend",
       "name": "legend",
-      "transform_3d": {
-        "position": [
-          0,
-          0.7,
-          0
-        ],
-        "scale": [
-          1,
-          1,
-          1
-        ]
-      },
       "components": {
         "sindri.ui.text": {
-          "text": "CYAN: DEAD ZONE   AMBER: CAMERA LIMIT",
+          "text": "YELLOW nearest / GREEN inside / GRAY ghosts",
           "font": "fonts/ChakraPetch-Regular.ttf",
-          "font_size": 0.031,
+          "font_size": 0.029,
           "bounds": [
-            1.7,
+            1.8,
             0.08
           ],
           "anchor": "center",
           "layer": 20
         },
         "sindri.script": {
-          "source": "camera-demo.decay",
-          "script": "CameraLayout",
+          "source": "spatial.decay",
+          "script": "SpatialLayout",
           "properties": {
             "x": 0
           }
         }
-      }
-    },
-    {
-      "id": "values",
-      "name": "values",
+      },
       "transform_3d": {
         "position": [
           0,
-          0.62,
+          0.69,
           0
         ],
         "scale": [
@@ -488,35 +877,35 @@
           1,
           1
         ]
-      },
+      }
+    },
+    {
+      "id": "query-label",
+      "name": "query-label",
       "components": {
         "sindri.ui.text": {
-          "text": "ZONE 2.5 x 1.5  /  SPEED CAP 8",
+          "text": "enemy / radius 2.0 / 4 inside",
           "font": "fonts/ChakraPetch-Regular.ttf",
-          "font_size": 0.03,
+          "font_size": 0.033,
           "bounds": [
-            1.7,
+            1.8,
             0.08
           ],
           "anchor": "center",
           "layer": 20
         },
         "sindri.script": {
-          "source": "camera-demo.decay",
-          "script": "CameraLayout",
+          "source": "spatial.decay",
+          "script": "SpatialLayout",
           "properties": {
             "x": 0
           }
         }
-      }
-    },
-    {
-      "id": "position-label",
-      "name": "position-label",
+      },
       "transform_3d": {
         "position": [
           0,
-          -0.34,
+          0.6,
           0
         ],
         "scale": [
@@ -524,169 +913,35 @@
           1,
           1
         ]
-      },
-      "components": {
-        "sindri.ui.text": {
-          "text": "TARGET 0, 0   CAMERA 0, 0",
-          "font": "fonts/ChakraPetch-Regular.ttf",
-          "font_size": 0.032,
-          "bounds": [
-            1.7,
-            0.08
-          ],
-          "anchor": "center",
-          "layer": 20
-        },
-        "sindri.script": {
-          "source": "camera-demo.decay",
-          "script": "CameraLayout",
-          "properties": {
-            "x": 0
-          }
-        }
       }
     },
     {
-      "id": "tour",
-      "name": "tour",
-      "transform_3d": {
-        "position": [
-          -0.31,
-          0.48,
-          0
-        ],
-        "scale": [
-          0.56,
-          0.1,
-          1
-        ]
-      },
-      "components": {
-        "sindri.ui.shape": {
-          "kind": "rect",
-          "fill": [
-            0.035,
-            0.075,
-            0.12,
-            0.96
-          ],
-          "stroke": [
-            0.15,
-            0.35,
-            0.5,
-            1
-          ],
-          "stroke_width": 0.02,
-          "corner_radius": 0.12,
-          "anchor": "center",
-          "layer": 10
-        },
-        "sindri.ui.button": {
-          "label": "START TOUR"
-        },
-        "sindri.script": {
-          "source": "camera-demo.decay",
-          "script": "CameraLayout",
-          "properties": {
-            "x": -0.31,
-            "width": 0.56,
-            "button": true
-          }
-        }
-      }
-    },
-    {
-      "id": "tour-label",
-      "name": "tour-label",
-      "transform_3d": {
-        "position": [
-          -0.31,
-          0.48,
-          0
-        ],
-        "scale": [
-          1,
-          1,
-          1
-        ]
-      },
+      "id": "nearest-label",
+      "name": "nearest-label",
       "components": {
         "sindri.ui.text": {
-          "text": "START TOUR",
+          "text": "nearest: A",
           "font": "fonts/ChakraPetch-Regular.ttf",
           "font_size": 0.038,
           "bounds": [
-            0.56,
+            1.7,
             0.08
           ],
           "anchor": "center",
           "layer": 20
         },
         "sindri.script": {
-          "source": "camera-demo.decay",
-          "script": "CameraLayout",
+          "source": "spatial.decay",
+          "script": "SpatialLayout",
           "properties": {
-            "x": -0.31
+            "x": 0
           }
         }
-      }
-    },
-    {
-      "id": "impact",
-      "name": "impact",
-      "transform_3d": {
-        "position": [
-          0.31,
-          0.48,
-          0
-        ],
-        "scale": [
-          0.56,
-          0.1,
-          1
-        ]
       },
-      "components": {
-        "sindri.ui.shape": {
-          "kind": "rect",
-          "fill": [
-            0.035,
-            0.075,
-            0.12,
-            0.96
-          ],
-          "stroke": [
-            0.15,
-            0.35,
-            0.5,
-            1
-          ],
-          "stroke_width": 0.02,
-          "corner_radius": 0.12,
-          "anchor": "center",
-          "layer": 10
-        },
-        "sindri.ui.button": {
-          "label": "IMPACT"
-        },
-        "sindri.script": {
-          "source": "camera-demo.decay",
-          "script": "CameraLayout",
-          "properties": {
-            "x": 0.31,
-            "width": 0.56,
-            "button": true
-          }
-        }
-      }
-    },
-    {
-      "id": "impact-label",
-      "name": "impact-label",
       "transform_3d": {
         "position": [
-          0.31,
-          0.48,
+          0,
+          0.51,
           0
         ],
         "scale": [
@@ -694,43 +949,47 @@
           1,
           1
         ]
-      },
+      }
+    },
+    {
+      "id": "results-label",
+      "name": "results-label",
       "components": {
         "sindri.ui.text": {
-          "text": "IMPACT",
+          "text": "1:A  2:B  3:D  4:E",
           "font": "fonts/ChakraPetch-Regular.ttf",
-          "font_size": 0.038,
+          "font_size": 0.037,
           "bounds": [
-            0.56,
+            1.75,
             0.08
           ],
           "anchor": "center",
           "layer": 20
         },
         "sindri.script": {
-          "source": "camera-demo.decay",
-          "script": "CameraLayout",
+          "source": "spatial.decay",
+          "script": "SpatialLayout",
           "properties": {
-            "x": 0.31
+            "x": 0
           }
         }
-      }
-    },
-    {
-      "id": "follow",
-      "name": "follow",
+      },
       "transform_3d": {
         "position": [
-          -0.6,
-          -0.49,
+          0,
+          -0.42,
           0
         ],
         "scale": [
-          0.55,
-          0.1,
+          1,
+          1,
           1
         ]
-      },
+      }
+    },
+    {
+      "id": "less",
+      "name": "less",
       "components": {
         "sindri.ui.shape": {
           "kind": "rect",
@@ -752,37 +1011,37 @@
           "layer": 10
         },
         "sindri.ui.button": {
-          "label": "FOLLOW ON"
+          "label": "RADIUS -"
         },
         "sindri.script": {
-          "source": "camera-demo.decay",
-          "script": "CameraLayout",
+          "source": "spatial.decay",
+          "script": "SpatialLayout",
           "properties": {
             "x": -0.6,
             "width": 0.55,
             "button": true
           }
         }
-      }
-    },
-    {
-      "id": "follow-label",
-      "name": "follow-label",
+      },
       "transform_3d": {
         "position": [
           -0.6,
-          -0.49,
+          -0.54,
           0
         ],
         "scale": [
-          1,
-          1,
+          0.55,
+          0.1,
           1
         ]
-      },
+      }
+    },
+    {
+      "id": "less-label",
+      "name": "less-label",
       "components": {
         "sindri.ui.text": {
-          "text": "FOLLOW ON",
+          "text": "RADIUS -",
           "font": "fonts/ChakraPetch-Regular.ttf",
           "font_size": 0.038,
           "bounds": [
@@ -793,29 +1052,29 @@
           "layer": 20
         },
         "sindri.script": {
-          "source": "camera-demo.decay",
-          "script": "CameraLayout",
+          "source": "spatial.decay",
+          "script": "SpatialLayout",
           "properties": {
             "x": -0.6
           }
         }
-      }
-    },
-    {
-      "id": "bounds",
-      "name": "bounds",
+      },
       "transform_3d": {
         "position": [
-          0,
-          -0.49,
+          -0.6,
+          -0.54,
           0
         ],
         "scale": [
-          0.55,
-          0.1,
+          1,
+          1,
           1
         ]
-      },
+      }
+    },
+    {
+      "id": "tag",
+      "name": "tag",
       "components": {
         "sindri.ui.shape": {
           "kind": "rect",
@@ -837,37 +1096,37 @@
           "layer": 10
         },
         "sindri.ui.button": {
-          "label": "BOUNDS ON"
+          "label": "TAG enemy"
         },
         "sindri.script": {
-          "source": "camera-demo.decay",
-          "script": "CameraLayout",
+          "source": "spatial.decay",
+          "script": "SpatialLayout",
           "properties": {
             "x": 0,
             "width": 0.55,
             "button": true
           }
         }
-      }
-    },
-    {
-      "id": "bounds-label",
-      "name": "bounds-label",
+      },
       "transform_3d": {
         "position": [
           0,
-          -0.49,
+          -0.54,
           0
         ],
         "scale": [
-          1,
-          1,
+          0.55,
+          0.1,
           1
         ]
-      },
+      }
+    },
+    {
+      "id": "tag-label",
+      "name": "tag-label",
       "components": {
         "sindri.ui.text": {
-          "text": "BOUNDS ON",
+          "text": "TAG enemy",
           "font": "fonts/ChakraPetch-Regular.ttf",
           "font_size": 0.038,
           "bounds": [
@@ -878,29 +1137,29 @@
           "layer": 20
         },
         "sindri.script": {
-          "source": "camera-demo.decay",
-          "script": "CameraLayout",
+          "source": "spatial.decay",
+          "script": "SpatialLayout",
           "properties": {
             "x": 0
           }
         }
-      }
-    },
-    {
-      "id": "shake",
-      "name": "shake",
+      },
       "transform_3d": {
         "position": [
-          0.6,
-          -0.49,
+          0,
+          -0.54,
           0
         ],
         "scale": [
-          0.55,
-          0.1,
+          1,
+          1,
           1
         ]
-      },
+      }
+    },
+    {
+      "id": "more",
+      "name": "more",
       "components": {
         "sindri.ui.shape": {
           "kind": "rect",
@@ -922,37 +1181,37 @@
           "layer": 10
         },
         "sindri.ui.button": {
-          "label": "SHAKE ON"
+          "label": "RADIUS +"
         },
         "sindri.script": {
-          "source": "camera-demo.decay",
-          "script": "CameraLayout",
+          "source": "spatial.decay",
+          "script": "SpatialLayout",
           "properties": {
             "x": 0.6,
             "width": 0.55,
             "button": true
           }
         }
-      }
-    },
-    {
-      "id": "shake-label",
-      "name": "shake-label",
+      },
       "transform_3d": {
         "position": [
           0.6,
-          -0.49,
+          -0.54,
           0
         ],
         "scale": [
-          1,
-          1,
+          0.55,
+          0.1,
           1
         ]
-      },
+      }
+    },
+    {
+      "id": "more-label",
+      "name": "more-label",
       "components": {
         "sindri.ui.text": {
-          "text": "SHAKE ON",
+          "text": "RADIUS +",
           "font": "fonts/ChakraPetch-Regular.ttf",
           "font_size": 0.038,
           "bounds": [
@@ -963,29 +1222,29 @@
           "layer": 20
         },
         "sindri.script": {
-          "source": "camera-demo.decay",
-          "script": "CameraLayout",
+          "source": "spatial.decay",
+          "script": "SpatialLayout",
           "properties": {
             "x": 0.6
           }
         }
-      }
-    },
-    {
-      "id": "smooth",
-      "name": "smooth",
+      },
       "transform_3d": {
         "position": [
-          -0.6,
-          -0.64,
+          0.6,
+          -0.54,
           0
         ],
         "scale": [
-          0.55,
-          0.1,
+          1,
+          1,
           1
         ]
-      },
+      }
+    },
+    {
+      "id": "active",
+      "name": "active",
       "components": {
         "sindri.ui.shape": {
           "kind": "rect",
@@ -1007,37 +1266,37 @@
           "layer": 10
         },
         "sindri.ui.button": {
-          "label": "SMOOTH"
+          "label": "A ON"
         },
         "sindri.script": {
-          "source": "camera-demo.decay",
-          "script": "CameraLayout",
+          "source": "spatial.decay",
+          "script": "SpatialLayout",
           "properties": {
             "x": -0.6,
             "width": 0.55,
             "button": true
           }
         }
-      }
-    },
-    {
-      "id": "smooth-label",
-      "name": "smooth-label",
+      },
       "transform_3d": {
         "position": [
           -0.6,
-          -0.64,
+          -0.69,
           0
         ],
         "scale": [
-          1,
-          1,
+          0.55,
+          0.1,
           1
         ]
-      },
+      }
+    },
+    {
+      "id": "active-label",
+      "name": "active-label",
       "components": {
         "sindri.ui.text": {
-          "text": "SMOOTH",
+          "text": "A ON",
           "font": "fonts/ChakraPetch-Regular.ttf",
           "font_size": 0.038,
           "bounds": [
@@ -1048,29 +1307,29 @@
           "layer": 20
         },
         "sindri.script": {
-          "source": "camera-demo.decay",
-          "script": "CameraLayout",
+          "source": "spatial.decay",
+          "script": "SpatialLayout",
           "properties": {
             "x": -0.6
           }
         }
-      }
-    },
-    {
-      "id": "zone",
-      "name": "zone",
+      },
       "transform_3d": {
         "position": [
-          0,
-          -0.64,
+          -0.6,
+          -0.69,
           0
         ],
         "scale": [
-          0.55,
-          0.1,
+          1,
+          1,
           1
         ]
-      },
+      }
+    },
+    {
+      "id": "parent",
+      "name": "parent",
       "components": {
         "sindri.ui.shape": {
           "kind": "rect",
@@ -1092,37 +1351,37 @@
           "layer": 10
         },
         "sindri.ui.button": {
-          "label": "ZONE ON"
+          "label": "PARENT ON"
         },
         "sindri.script": {
-          "source": "camera-demo.decay",
-          "script": "CameraLayout",
+          "source": "spatial.decay",
+          "script": "SpatialLayout",
           "properties": {
             "x": 0,
             "width": 0.55,
             "button": true
           }
         }
-      }
-    },
-    {
-      "id": "zone-label",
-      "name": "zone-label",
+      },
       "transform_3d": {
         "position": [
           0,
-          -0.64,
+          -0.69,
           0
         ],
         "scale": [
-          1,
-          1,
+          0.55,
+          0.1,
           1
         ]
-      },
+      }
+    },
+    {
+      "id": "parent-label",
+      "name": "parent-label",
       "components": {
         "sindri.ui.text": {
-          "text": "ZONE ON",
+          "text": "PARENT ON",
           "font": "fonts/ChakraPetch-Regular.ttf",
           "font_size": 0.038,
           "bounds": [
@@ -1133,29 +1392,29 @@
           "layer": 20
         },
         "sindri.script": {
-          "source": "camera-demo.decay",
-          "script": "CameraLayout",
+          "source": "spatial.decay",
+          "script": "SpatialLayout",
           "properties": {
             "x": 0
           }
         }
-      }
-    },
-    {
-      "id": "reset",
-      "name": "reset",
+      },
       "transform_3d": {
         "position": [
-          0.6,
-          -0.64,
+          0,
+          -0.69,
           0
         ],
         "scale": [
-          0.55,
-          0.1,
+          1,
+          1,
           1
         ]
-      },
+      }
+    },
+    {
+      "id": "rotate",
+      "name": "rotate",
       "components": {
         "sindri.ui.shape": {
           "kind": "rect",
@@ -1177,37 +1436,37 @@
           "layer": 10
         },
         "sindri.ui.button": {
-          "label": "RESET"
+          "label": "ROTATE C/D"
         },
         "sindri.script": {
-          "source": "camera-demo.decay",
-          "script": "CameraLayout",
+          "source": "spatial.decay",
+          "script": "SpatialLayout",
           "properties": {
             "x": 0.6,
             "width": 0.55,
             "button": true
           }
         }
-      }
-    },
-    {
-      "id": "reset-label",
-      "name": "reset-label",
+      },
       "transform_3d": {
         "position": [
           0.6,
-          -0.64,
+          -0.69,
           0
         ],
         "scale": [
-          1,
-          1,
+          0.55,
+          0.1,
           1
         ]
-      },
+      }
+    },
+    {
+      "id": "rotate-label",
+      "name": "rotate-label",
       "components": {
         "sindri.ui.text": {
-          "text": "RESET",
+          "text": "ROTATE C/D",
           "font": "fonts/ChakraPetch-Regular.ttf",
           "font_size": 0.038,
           "bounds": [
@@ -1218,29 +1477,29 @@
           "layer": 20
         },
         "sindri.script": {
-          "source": "camera-demo.decay",
-          "script": "CameraLayout",
+          "source": "spatial.decay",
+          "script": "SpatialLayout",
           "properties": {
             "x": 0.6
           }
         }
+      },
+      "transform_3d": {
+        "position": [
+          0.6,
+          -0.69,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
       }
     },
     {
       "id": "left",
       "name": "left",
-      "transform_3d": {
-        "position": [
-          -0.66,
-          -0.8,
-          0
-        ],
-        "scale": [
-          0.4,
-          0.1,
-          1
-        ]
-      },
       "components": {
         "sindri.ui.shape": {
           "kind": "rect",
@@ -1265,67 +1524,67 @@
           "label": "LEFT"
         },
         "sindri.script": {
-          "source": "camera-demo.decay",
-          "script": "CameraLayout",
+          "source": "spatial.decay",
+          "script": "SpatialLayout",
           "properties": {
-            "x": -0.66,
-            "width": 0.4,
+            "x": -0.7,
+            "width": 0.31,
             "button": true
           }
         }
+      },
+      "transform_3d": {
+        "position": [
+          -0.7,
+          -0.84,
+          0
+        ],
+        "scale": [
+          0.31,
+          0.1,
+          1
+        ]
       }
     },
     {
       "id": "left-label",
       "name": "left-label",
-      "transform_3d": {
-        "position": [
-          -0.66,
-          -0.8,
-          0
-        ],
-        "scale": [
-          1,
-          1,
-          1
-        ]
-      },
       "components": {
         "sindri.ui.text": {
           "text": "LEFT",
           "font": "fonts/ChakraPetch-Regular.ttf",
           "font_size": 0.038,
           "bounds": [
-            0.4,
+            0.31,
             0.08
           ],
           "anchor": "center",
           "layer": 20
         },
         "sindri.script": {
-          "source": "camera-demo.decay",
-          "script": "CameraLayout",
+          "source": "spatial.decay",
+          "script": "SpatialLayout",
           "properties": {
-            "x": -0.66
+            "x": -0.7
           }
         }
+      },
+      "transform_3d": {
+        "position": [
+          -0.7,
+          -0.84,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
       }
     },
     {
       "id": "up",
       "name": "up",
-      "transform_3d": {
-        "position": [
-          -0.22,
-          -0.8,
-          0
-        ],
-        "scale": [
-          0.4,
-          0.1,
-          1
-        ]
-      },
       "components": {
         "sindri.ui.shape": {
           "kind": "rect",
@@ -1350,67 +1609,152 @@
           "label": "UP"
         },
         "sindri.script": {
-          "source": "camera-demo.decay",
-          "script": "CameraLayout",
+          "source": "spatial.decay",
+          "script": "SpatialLayout",
           "properties": {
-            "x": -0.22,
-            "width": 0.4,
+            "x": -0.35,
+            "width": 0.31,
             "button": true
           }
         }
+      },
+      "transform_3d": {
+        "position": [
+          -0.35,
+          -0.84,
+          0
+        ],
+        "scale": [
+          0.31,
+          0.1,
+          1
+        ]
       }
     },
     {
       "id": "up-label",
       "name": "up-label",
-      "transform_3d": {
-        "position": [
-          -0.22,
-          -0.8,
-          0
-        ],
-        "scale": [
-          1,
-          1,
-          1
-        ]
-      },
       "components": {
         "sindri.ui.text": {
           "text": "UP",
           "font": "fonts/ChakraPetch-Regular.ttf",
           "font_size": 0.038,
           "bounds": [
-            0.4,
+            0.31,
             0.08
           ],
           "anchor": "center",
           "layer": 20
         },
         "sindri.script": {
-          "source": "camera-demo.decay",
-          "script": "CameraLayout",
+          "source": "spatial.decay",
+          "script": "SpatialLayout",
           "properties": {
-            "x": -0.22
+            "x": -0.35
           }
         }
+      },
+      "transform_3d": {
+        "position": [
+          -0.35,
+          -0.84,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      }
+    },
+    {
+      "id": "reset",
+      "name": "reset",
+      "components": {
+        "sindri.ui.shape": {
+          "kind": "rect",
+          "fill": [
+            0.035,
+            0.075,
+            0.12,
+            0.96
+          ],
+          "stroke": [
+            0.15,
+            0.35,
+            0.5,
+            1
+          ],
+          "stroke_width": 0.02,
+          "corner_radius": 0.12,
+          "anchor": "center",
+          "layer": 10
+        },
+        "sindri.ui.button": {
+          "label": "RESET"
+        },
+        "sindri.script": {
+          "source": "spatial.decay",
+          "script": "SpatialLayout",
+          "properties": {
+            "x": 0,
+            "width": 0.31,
+            "button": true
+          }
+        }
+      },
+      "transform_3d": {
+        "position": [
+          0,
+          -0.84,
+          0
+        ],
+        "scale": [
+          0.31,
+          0.1,
+          1
+        ]
+      }
+    },
+    {
+      "id": "reset-label",
+      "name": "reset-label",
+      "components": {
+        "sindri.ui.text": {
+          "text": "RESET",
+          "font": "fonts/ChakraPetch-Regular.ttf",
+          "font_size": 0.038,
+          "bounds": [
+            0.31,
+            0.08
+          ],
+          "anchor": "center",
+          "layer": 20
+        },
+        "sindri.script": {
+          "source": "spatial.decay",
+          "script": "SpatialLayout",
+          "properties": {
+            "x": 0
+          }
+        }
+      },
+      "transform_3d": {
+        "position": [
+          0,
+          -0.84,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
       }
     },
     {
       "id": "down",
       "name": "down",
-      "transform_3d": {
-        "position": [
-          0.22,
-          -0.8,
-          0
-        ],
-        "scale": [
-          0.4,
-          0.1,
-          1
-        ]
-      },
       "components": {
         "sindri.ui.shape": {
           "kind": "rect",
@@ -1435,67 +1779,67 @@
           "label": "DOWN"
         },
         "sindri.script": {
-          "source": "camera-demo.decay",
-          "script": "CameraLayout",
+          "source": "spatial.decay",
+          "script": "SpatialLayout",
           "properties": {
-            "x": 0.22,
-            "width": 0.4,
+            "x": 0.35,
+            "width": 0.31,
             "button": true
           }
         }
+      },
+      "transform_3d": {
+        "position": [
+          0.35,
+          -0.84,
+          0
+        ],
+        "scale": [
+          0.31,
+          0.1,
+          1
+        ]
       }
     },
     {
       "id": "down-label",
       "name": "down-label",
-      "transform_3d": {
-        "position": [
-          0.22,
-          -0.8,
-          0
-        ],
-        "scale": [
-          1,
-          1,
-          1
-        ]
-      },
       "components": {
         "sindri.ui.text": {
           "text": "DOWN",
           "font": "fonts/ChakraPetch-Regular.ttf",
           "font_size": 0.038,
           "bounds": [
-            0.4,
+            0.31,
             0.08
           ],
           "anchor": "center",
           "layer": 20
         },
         "sindri.script": {
-          "source": "camera-demo.decay",
-          "script": "CameraLayout",
+          "source": "spatial.decay",
+          "script": "SpatialLayout",
           "properties": {
-            "x": 0.22
+            "x": 0.35
           }
         }
+      },
+      "transform_3d": {
+        "position": [
+          0.35,
+          -0.84,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
       }
     },
     {
       "id": "right",
       "name": "right",
-      "transform_3d": {
-        "position": [
-          0.66,
-          -0.8,
-          0
-        ],
-        "scale": [
-          0.4,
-          0.1,
-          1
-        ]
-      },
       "components": {
         "sindri.ui.shape": {
           "kind": "rect",
@@ -1520,59 +1864,55 @@
           "label": "RIGHT"
         },
         "sindri.script": {
-          "source": "camera-demo.decay",
-          "script": "CameraLayout",
+          "source": "spatial.decay",
+          "script": "SpatialLayout",
           "properties": {
-            "x": 0.66,
-            "width": 0.4,
+            "x": 0.7,
+            "width": 0.31,
             "button": true
           }
         }
+      },
+      "transform_3d": {
+        "position": [
+          0.7,
+          -0.84,
+          0
+        ],
+        "scale": [
+          0.31,
+          0.1,
+          1
+        ]
       }
     },
     {
       "id": "right-label",
       "name": "right-label",
-      "transform_3d": {
-        "position": [
-          0.66,
-          -0.8,
-          0
-        ],
-        "scale": [
-          1,
-          1,
-          1
-        ]
-      },
       "components": {
         "sindri.ui.text": {
           "text": "RIGHT",
           "font": "fonts/ChakraPetch-Regular.ttf",
           "font_size": 0.038,
           "bounds": [
-            0.4,
+            0.31,
             0.08
           ],
           "anchor": "center",
           "layer": 20
         },
         "sindri.script": {
-          "source": "camera-demo.decay",
-          "script": "CameraLayout",
+          "source": "spatial.decay",
+          "script": "SpatialLayout",
           "properties": {
-            "x": 0.66
+            "x": 0.7
           }
         }
-      }
-    },
-    {
-      "id": "hint",
-      "name": "hint",
+      },
       "transform_3d": {
         "position": [
-          0,
-          -0.93,
+          0.7,
+          -0.84,
           0
         ],
         "scale": [
@@ -1580,26 +1920,42 @@
           1,
           1
         ]
-      },
+      }
+    },
+    {
+      "id": "hint",
+      "name": "hint",
       "components": {
         "sindri.ui.text": {
-          "text": "ARROWS move / SPACE impact / R reset",
+          "text": "ARROWS move / R reset / C,D share a parent",
           "font": "fonts/ChakraPetch-Regular.ttf",
           "font_size": 0.03,
           "bounds": [
-            1.75,
+            1.8,
             0.08
           ],
           "anchor": "center",
           "layer": 20
         },
         "sindri.script": {
-          "source": "camera-demo.decay",
-          "script": "CameraLayout",
+          "source": "spatial.decay",
+          "script": "SpatialLayout",
           "properties": {
             "x": 0
           }
         }
+      },
+      "transform_3d": {
+        "position": [
+          0,
+          -0.96,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
       }
     }
   ]

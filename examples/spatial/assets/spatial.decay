@@ -1,0 +1,114 @@
+// The query APIs decide membership and order; Decay presents their snapshots.
+script SpatialDemo {
+    var radius: f32 = 2.0;
+    var tag: String = "enemy";
+    var a_active: bool = true;
+    var parent_active: bool = true;
+    var angle: f32 = 1.5707963;
+    var report: bool = true;
+
+    fn update(dt: f32) {
+        controls();
+        var x = Input.axis("ArrowLeft", "ArrowRight");
+        var y = Input.axis("ArrowDown", "ArrowUp");
+        if Ui.is_held(World.find("left")) { x -= 1.0; }
+        if Ui.is_held(World.find("right")) { x += 1.0; }
+        if Ui.is_held(World.find("up")) { y += 1.0; }
+        if Ui.is_held(World.find("down")) { y -= 1.0; }
+        this.transform.position.x = clamp(this.transform.position.x + x * 2.5 * dt, -3.2, 3.2);
+        this.transform.position.y = clamp(this.transform.position.y + y * 2.5 * dt, -2.2, 2.2);
+        let ring = World.find("radius-ring");
+        ring.transform.scale = Vec3(this.radius * 2.0, this.radius * 2.0, 1.0);
+        // Styling known drawn samples must not touch the transformless tagged sample.
+        let drawn: List<Entity> = [World.find("A"), World.find("B"), World.find("C"), World.find("D"), World.find("E")];
+        for target in drawn { target.shape.fill = Color(1.0, 0.48, 0.2, 1.0); }
+        let ally = World.find("F");
+        ally.shape.fill = Color(0.3, 0.55, 1.0, 1.0);
+        let origin = this.transform.world_position;
+        let closest: Entity = World.nearest(this.tag, origin);
+        let nearby: List<Entity> = World.within_radius(this.tag, origin, this.radius);
+        var ordered = "";
+        var rank: f32 = 1.0;
+        for target in nearby {
+            target.shape.fill = Color(0.4, 0.85, 0.4, 1.0);
+            ordered = ordered + rank + ":" + name(target) + "  ";
+            rank += 1.0;
+        }
+        var nearest_name = "null";
+        Ui.set_text(World.find("nearest-label"), "nearest: null");
+        if closest != null {
+            nearest_name = name(closest);
+            closest.shape.fill = Color(1.0, 0.85, 0.2, 1.0);
+            Ui.set_text(World.find("nearest-label"), "nearest: " + name(closest));
+        }
+        if nearby.length == 0.0 { ordered = "within_radius: []"; }
+        Ui.set_text(World.find("results-label"), ordered);
+        Ui.set_text(World.find("query-label"), this.tag + " / radius " + this.radius.fixed(1) + " / " + nearby.length + " inside");
+        if this.report {
+            print("Spatial demo nearest " + nearest_name + " / " + ordered);
+            this.report = false;
+        }
+    }
+    fn name(target: Entity) -> String {
+        if target == World.find("A") { return "A"; }
+        if target == World.find("B") { return "B"; }
+        if target == World.find("C") { return "C"; }
+        if target == World.find("D") { return "D"; }
+        if target == World.find("E") { return "E"; }
+        return "F";
+    }
+    fn controls() {
+        var changed = false;
+        if Input.just_pressed("Q") || Ui.is_pressed(World.find("less")) { this.radius = max(0.0, this.radius - 0.5); changed = true; }
+        if Input.just_pressed("E") || Ui.is_pressed(World.find("more")) { this.radius = min(3.5, this.radius + 0.5); changed = true; }
+        if Input.just_pressed("T") || Ui.is_pressed(World.find("tag")) {
+            if this.tag == "enemy" { this.tag = "ally"; }
+            else if this.tag == "ally" { this.tag = "missing"; }
+            else { this.tag = "enemy"; }
+            changed = true;
+        }
+        if Input.just_pressed("A") || Ui.is_pressed(World.find("active")) { this.a_active = !this.a_active; changed = true; }
+        if Input.just_pressed("P") || Ui.is_pressed(World.find("parent")) { this.parent_active = !this.parent_active; changed = true; }
+        if Input.just_pressed("O") || Ui.is_pressed(World.find("rotate")) { this.angle += 0.7853982; changed = true; }
+        if Input.just_pressed("R") || Ui.is_pressed(World.find("reset")) {
+            this.radius = 2.0; this.tag = "enemy"; this.a_active = true; this.parent_active = true;
+            this.angle = 1.5707963; this.transform.position = Vec3(0.0, 0.0, 0.0); changed = true;
+        }
+        if changed {
+            this.report = true;
+            World.set_active(World.find("A"), this.a_active);
+            let parent = World.find("target-parent");
+            World.set_active(parent, this.parent_active);
+            parent.transform.rotation_z = this.angle;
+            Ui.set_text(World.find("tag-label"), "TAG " + this.tag);
+            Ui.set_text(World.find("active-label"), "A OFF");
+            if this.a_active { Ui.set_text(World.find("active-label"), "A ON"); }
+            Ui.set_text(World.find("parent-label"), "PARENT OFF");
+            if this.parent_active { Ui.set_text(World.find("parent-label"), "PARENT ON"); }
+            print("Spatial demo controls changed");
+        }
+    }
+}
+// Ghosts remain visible when a query target (or its parent) is inactive.
+// Their labels use the same canonical world position as the queries.
+script SpatialMarker {
+    @export let target: String = "A";
+    fn update(dt: f32) {
+        let entity = World.find(this.target);
+        this.transform.position = entity.transform.world_position;
+        let label = World.find(this.target + "-label");
+        let p = entity.transform.world_position;
+        let scale = min(1.0, Viewport.aspect) / 6.0;
+        label.transform.position = Vec3(p.x * scale, p.y * scale + 0.06, 0.0);
+    }
+}
+script SpatialLayout {
+    @export let x: f32 = 0.0;
+    @export let width: f32 = 1.0;
+    @export let button: bool = false;
+    fn update(dt: f32) {
+        let span = min(1.0, Viewport.aspect);
+        this.transform.position.x = this.x * span;
+        if this.button { this.transform.scale.x = this.width * span; }
+    }
+}

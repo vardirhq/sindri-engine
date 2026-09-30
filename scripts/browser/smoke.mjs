@@ -136,6 +136,8 @@ const problems = [];
 const tweenActions = new Set();
 let cameraChanges = 0;
 let cameraImpacts = 0;
+const spatialResults = new Set();
+let spatialChanges = 0;
 const fetchedAssets = new Set();
 // A shader that fails to compile is reported by the GPU implementation as a
 // console *warning*, not an error, and the page carries on and presents empty
@@ -144,6 +146,9 @@ const fetchedAssets = new Set();
 const GPU_REJECTION = /error while parsing wgsl|is invalid|must only be called/i;
 page.on('console', (message) => {
   const text = message.text();
+  if (text.includes('Spatial demo controls changed')) spatialChanges += 1;
+  const result = text.match(/Spatial demo nearest (.+)/);
+  if (result) spatialResults.add(result[1]);
   if (text.includes('Camera demo modes changed')) cameraChanges += 1;
   if (text.includes('Camera demo impact')) cameraImpacts += 1;
   const tweenAction = text.match(/Tween demo action ([1-5])/);
@@ -288,6 +293,43 @@ if (process.env.SINDRI_CAMERA_DEMO === '1') {
   if (cameraImpacts !== 1) problems.push('camera impact fired with shake disabled');
   await page.keyboard.press('KeyR');
   await page.waitForTimeout(2000);
+}
+
+if (process.env.SINDRI_SPATIAL_DEMO === '1') {
+  const span = Math.min(1, VIEWPORT.width / VIEWPORT.height);
+  const click = async (x, y) => {
+    const px = VIEWPORT.width / 2 + x * span * VIEWPORT.height / 2;
+    const py = (1 - y) * VIEWPORT.height / 2;
+    if (VIEWPORT.width < 600) await page.touchscreen.tap(px, py);
+    else await page.mouse.click(px, py);
+    await page.waitForTimeout(300);
+  };
+  if (![...spatialResults].some(result => result.startsWith('A / 1:A  2:B  3:D  4:E'))) {
+    problems.push('spatial demo did not show the expected stable world-space order');
+  }
+  await click(0, -0.54); // ally
+  await click(0, -0.54); // missing
+  if (!spatialResults.has('null / within_radius: []')) {
+    problems.push('spatial demo did not expose an empty tag query');
+  }
+  await click(0, -0.54); // enemy
+  for (const [x, y] of [[-0.6, -0.69], [0, -0.69], [0.6, -0.69],
+    [-0.6, -0.54], [0.6, -0.54], [0, -0.84]]) {
+    await click(x, y);
+  }
+  if (spatialChanges < 9) problems.push('spatial demo missed a screen control');
+  if (![...spatialResults].some(result => result.startsWith('B / 1:B  2:E'))) {
+    problems.push('spatial demo did not exclude the inactive target and parent');
+  }
+  const still = await page.locator('canvas').screenshot();
+  await page.keyboard.down('ArrowRight');
+  await page.waitForTimeout(600);
+  await page.keyboard.up('ArrowRight');
+  if (still.equals(await page.locator('canvas').screenshot())) {
+    problems.push('spatial demo did not move its query origin');
+  }
+  await page.keyboard.press('KeyR');
+  await page.waitForTimeout(300);
 }
 
 await page.mouse.click(480, 270);

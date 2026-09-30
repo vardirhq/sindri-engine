@@ -66,6 +66,7 @@ jobs:
           for project in \
             "examples/tween:tween" \
             "examples/camera:camera" \
+            "examples/spatial:spatial" \
             "game:causeway" \
             "games/flappy:flappy" \
             "games/orbital-baked:orbital-baked" \
@@ -116,7 +117,7 @@ jobs:
           CHECK
           test -f target/pages/docs/scripting/index.html
           test -f target/pages/docs/language/index.html
-          for route in camera tween causeway flappy orbital-baked shapes-lab weave-poc platformer scorchball; do
+          for route in spatial camera tween causeway flappy orbital-baked shapes-lab weave-poc platformer scorchball; do
             test -f "target/pages/examples/$route/index.html"
             test -f "target/pages/examples/$route/assets/sindri.manifest"
             test -f "target/pages/examples/$route/pkg/sindri_causeway.js"

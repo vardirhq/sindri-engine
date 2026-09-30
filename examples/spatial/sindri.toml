@@ -1,0 +1,6 @@
+format_version = 1
+[project]
+name = "Spatial Query Lab"
+main_scene = "assets/spatial.scene"
+[assets]
+include = ["fonts/Fonts-OFL.txt", "ui/spatial.weave"]

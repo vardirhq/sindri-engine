@@ -1897,6 +1897,18 @@ other until one scores.
 - Played with real pads by nobody yet: CI has none, and neither did the
   session that ported it.
 
+## Spatial Query Lab
+
+`examples/spatial` is an authored feature project for `World.nearest` and
+`World.within_radius`. A movable origin and radius guide accompany the actual
+nearest result and ordered radius snapshot. Tag selection, equal-distance
+samples, an exact boundary target, active/parent toggles, rotating and scaled
+parent transforms, a transformless tagged entity and persistent gray markers
+make the query contract observable. Native regressions exercise these cases and
+phone touch; browser smoke exercises visible controls and captures desktop/phone
+project-subpath and custom-domain exports. This adds no query framework or
+acceleration structure; Orbital remains the gameplay proof of the APIs.
+
 ## Camera Lab
 
 `examples/camera` is an authored, exported feature project with Decay movement
