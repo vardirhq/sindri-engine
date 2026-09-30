@@ -1,5 +1,11 @@
 # Changelog
 
+- Weave leaves gameplay transforms unchanged when no sizing declaration applies, so typography no longer makes transformless tagged entities eligible for spatial queries or removes mirrored scales. Spatial Lab regressions cover loaded scenes and desktop/phone stylesheet settlement.
+
+- Spatial Query Lab is an authored Pages feature demo for `World.nearest` and `World.within_radius`, with live ordered results, radius/tag controls, active/parent toggles, composed-transform examples and touch movement. Native and desktop/phone browser regressions exercise the actual queries; homepage and directory entries make it discoverable.
+
+- Camera Lab becomes an exported Pages project with camera-relative dead-zone and camera-center bounds guides, independent follow/confinement/shake/smoothing/dead-zone controls, sampled coordinates, an automatic tour, touch movement and reset. Gameplay stays in Decay and uses the existing engine camera controls. Native and desktop/phone browser regressions exercise the demo; the homepage and directory link it.
+
 - The Pages directory lists every published game, feature demo and documentation route with search, category filters, shareable selections and source links. Route coverage is checked at build time; the full catalog remains accessible without JavaScript.
 
 - Pages exports use the configured site base path, so custom-domain routes load their browser modules and assets from `/examples/` instead of an assumed repository prefix. Browser smoke covers both custom-domain and project-subpath deployments.
@@ -392,5 +398,3 @@ Keep entries release-oriented and readable:
 - When the first release is cut, rename `Unreleased` to that version and date,
   then add a fresh empty `Unreleased` section above it.
 - Added the authored `sindri.environment` presentation component and connected the existing bloom renderer to editor viewports and Voxel Lab, making bloom scene-controlled instead of a stranded renderer-only capability. Voxel Lab now serves as the acceptance lab for the world-presentation roadmap.
-
-

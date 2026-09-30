@@ -29,5 +29,8 @@ console_error_panic_hook = "0.1"
 console_log = "1"
 wasm-bindgen.workspace = true
 
+[dev-dependencies]
+serde_json.workspace = true
+
 [lints]
 workspace = true

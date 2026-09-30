@@ -138,7 +138,7 @@ is why it earns a section rather than a footnote.
 | Entities and hierarchy | ✅ | ✅ | ✅ | ✅ | **Par** | Undo entries for script writes |
 | **Child transforms follow their parent** | ✅ | ✅ | ✅ | ✅ | **Par** | A child's transform is local to its parent for sprites, meshes, tiles, voxels, cameras, lights, physics, effects and the editor's handles, not only shapes. Scripts read `world_position`. Scorchball's markers, signposts and ball ring ride their parents. Scale composes per axis, so a rotated parent scaled unevenly does not shear its children |
 | Tags and queries | ✅ | ✅ | ✅ | ✅ | **Par** | Query by more than one tag |
-| Deterministic gameplay nearest / radius queries | ✅ | — | ✅ | ✅ | **Par** | Authored-tag queries use composed world positions; radius results are nearest-first with world-order ties. Orbital player and Arc retain their gameplay filters. Cone/box queries and indexing remain |
+| Deterministic gameplay nearest / radius queries | ✅ | — | ✅ | ✅ | **Par** | Authored-tag queries use composed world positions; radius results are nearest-first with world-order ties. Orbital player and Arc retain their gameplay filters. Spatial Query Lab exposes ordered results, tag/active controls and parent transforms on Pages. Cone/box queries and indexing remain |
 | Prefabs | ✅ | ✅ | ✅ | ✅ | **Par** | A scene places a prefab as an instance: the reference plus its overrides, each a JSON merge patch keyed by the prefab's own entity IDs, worked out on save as the difference from the prefab rather than tracked. An edit to the prefab reaches every instance, at once in an open editor as one undo step that keeps overrides and handles. The editor places an instance on a grid cell or in the middle of the Scene view, makes a prefab from a subtree, opens a prefab to edit it, and shows each instance's overrides with revert, apply and unpack; script `Prefab` fields have a picker. The platformer's ten coins are instances of one prefab. An instance can also do without its prefab's entities, patch a list by index, and keep its inner entities' editor state; a prefab is dragged from the browser into the view; Apply and Make prefab are undone with the scene, files included; and a scene whose prefab is missing opens with placeholders that save back unchanged. The editor's panels have no automated coverage; the operations under them do |
 | **Nested prefabs** | ✅ | ✅ | ✅ | ✅ | **Par** | A prefab places instances of others; a scene reaches inside one by path (`loot/sparkle`), a script's spawn makes the whole nest, and a loop is refused naming it. Apply writes an override into the outer prefab rather than changing the inner one. No variants, deliberately — see the anti-goals |
 | Reusable data profiles | ✅ | ✅ | ✅ | ✅ | **Ahead** | Unity has no native equivalent; ScriptableObject is close but needs code per asset. Optional schemas when a second catalog proves the shape |
@@ -201,7 +201,7 @@ The ordered work required to close these gaps is tracked in
 | **Nine-slice sprites** | ❌ | ❌ | — | — | **Absent** | Every UI panel that resizes needs it |
 | **Sprite masking / stencil** | ❌ | ❌ | ❌ | ❌ | **Absent** | — |
 | Sorting and draw order | ✅ | ✅ | 🟡 | ✅ | **Par** | Layers plus the ground anchor |
-| **Camera follow / confine / shake** | ✅ | 🟡 | 🟡 | ✅ | **Behind** | `sindri.camera.behavior` provides stable-target follow with offset/dead zone/smoothing/max speed, XY confinement, and deterministic trauma shake, and every gameplay host (editor Play, the browser host, the camera example) advances it after the scripts. The platformer follows its hero inside the level's bounds and a test holds it. `Camera.add_trauma` is the first typed behavior control. Broader Decay camera-mode controls and dedicated authoring UX/gizmos remain. |
+| **Camera follow / confine / shake** | ✅ | 🟡 | 🟡 | ✅ | **Behind** | `sindri.camera.behavior` provides stable-target follow with offset/dead zone/smoothing/max speed, XY confinement, and deterministic trauma shake, and every gameplay host (editor Play, the browser host, the camera example) advances it after the scripts. The platformer follows its hero inside the level's bounds and a test holds it. Decay exposes runtime follow/offset/dead-zone/smoothing/speed/bounds/shake controls and trauma/impact. Camera Lab exercises mode toggles, guides, tour and phone touch through the real behavior and is exported to Pages; Orbital uses impact shake. Dedicated authoring UX/gizmos remain. |
 
 ## 3D rendering
 
@@ -734,5 +734,3 @@ checklist nobody reads:
    candidate up requires the baseline to have grown it, not for us to have
    liked the idea. A candidate earns its place by naming what a game in this
    repository does by hand — and when no game wants it, the row says so.
-
-

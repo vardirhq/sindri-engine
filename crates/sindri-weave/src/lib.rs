@@ -185,6 +185,21 @@ fn apply_sizing(
     style: &ComputedStyle,
     viewport: Viewport,
 ) -> Result<(), ApplyError> {
+    // Styling text or an unrelated entity must not make it spatial or
+    // normalize its authored scale. Only sizing declarations own this pass.
+    if ![
+        "width",
+        "height",
+        "min-width",
+        "max-width",
+        "min-height",
+        "max-height",
+    ]
+    .iter()
+    .any(|property| style.get(property).is_some())
+    {
+        return Ok(());
+    }
     let viewport_size = [2.0 * viewport.width / viewport.height.max(1.0), 2.0];
     let parent = world.get(entity).and_then(|data| data.parent);
     let parent_size = parent

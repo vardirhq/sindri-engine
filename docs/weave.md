@@ -130,6 +130,12 @@ the complete rules.
 The bridge translates declarations into existing Sindri data. It does not add a
 second renderer or a parallel UI object model.
 
+Sizing runs only when a width, height, or min/max sizing declaration applies.
+Typography and unrelated rules preserve gameplay transforms, including absent
+transforms and mirrored scales. A transformless tagged entity therefore remains
+nonspatial after the demo's stylesheet settles; styling does not make it eligible
+for `World.nearest` or `World.within_radius`.
+
 | Weave property | Sindri target |
 | --- | --- |
 | `width`, `height` | entity transform scale |

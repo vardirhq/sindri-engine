@@ -81,6 +81,36 @@
   },
   {
     "category": "demos",
+    "title": "Camera Lab",
+    "path": "examples/camera/",
+    "source": "examples/camera",
+    "description": "Explore camera follow, dead zones, smoothing, confinement and impact shake.",
+    "tags": [
+      "camera",
+      "follow",
+      "shake",
+      "decay",
+      "responsive"
+    ]
+  },
+  {
+    "category": "demos",
+    "title": "Spatial Query Lab",
+    "path": "examples/spatial/",
+    "source": "examples/spatial",
+    "description": "Explore nearest targets and ordered radius results with tags, active state and parent transforms.",
+    "tags": [
+      "spatial",
+      "queries",
+      "tags",
+      "hierarchy",
+      "determinism",
+      "decay",
+      "responsive"
+    ]
+  },
+  {
+    "category": "demos",
     "title": "Weave UI",
     "path": "examples/weave-poc/",
     "source": "games/weave-poc",

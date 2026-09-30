@@ -1,0 +1,14 @@
+#title { font-size: 26px; }
+#subtitle, #legend, #query-label, #nearest-label, #results-label, #hint { font-size: 12px; }
+#less-label, #more-label, #tag-label, #active-label, #parent-label,
+#rotate-label, #reset-label, #left-label, #up-label, #down-label, #right-label {
+    font-size: 12px;
+}
+#A-label, #B-label, #C-label, #D-label, #E-label, #F-label { font-size: 16px; }
+@media (min-height: 700px) {
+    #title { font-size: 30px; }
+    #less-label, #more-label, #tag-label, #active-label, #parent-label,
+    #rotate-label, #reset-label, #left-label, #up-label, #down-label, #right-label {
+        font-size: 14px;
+    }
+}

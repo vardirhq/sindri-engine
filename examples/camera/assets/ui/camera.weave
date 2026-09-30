@@ -1,0 +1,12 @@
+#title { font-size: 26px; }
+#subtitle, #legend, #values, #position-label, #hint { font-size: 11px; }
+#follow-label, #bounds-label, #shake-label, #smooth-label, #zone-label,
+#reset-label, #tour-label, #impact-label,
+#left-label, #up-label, #down-label, #right-label { font-size: 12px; }
+@media (min-height: 700px) {
+    #title { font-size: 30px; }
+    #subtitle, #legend, #values, #position-label, #hint { font-size: 12px; }
+    #follow-label, #bounds-label, #shake-label, #smooth-label, #zone-label,
+    #reset-label, #tour-label, #impact-label,
+    #left-label, #up-label, #down-label, #right-label { font-size: 14px; }
+}

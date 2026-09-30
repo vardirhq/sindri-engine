@@ -352,3 +352,77 @@ fn negative_sizes_are_rejected_with_the_authored_property() {
         }
     );
 }
+
+#[test]
+fn spatial_demo_typography_preserves_gameplay_transforms() {
+    let document = SceneDocument::from_json(include_str!(
+        "../../../examples/spatial/assets/spatial.scene"
+    ))
+    .expect("demo scene parses");
+    let mut world = World::default();
+    sindri_core::LoadedScenes::new()
+        .enter_keeping_identities(&mut world, "spatial.scene", &document)
+        .expect("demo scene loads");
+    let transforms: Vec<_> = world
+        .entities()
+        .map(|(entity, data)| (entity, data.transform_3d))
+        .collect();
+    let sheet = parse(include_str!(
+        "../../../examples/spatial/assets/ui/spatial.weave"
+    ))
+    .expect("demo stylesheet parses");
+    let mut presenter = super::Presenter::new();
+    for viewport in [
+        Viewport {
+            width: 960.0,
+            height: 540.0,
+        },
+        Viewport {
+            width: 390.0,
+            height: 844.0,
+        },
+    ] {
+        presenter
+            .settle(&mut world, std::slice::from_ref(&sheet), viewport)
+            .expect("demo styles settle");
+        for (entity, transform) in &transforms {
+            assert_eq!(world.get(*entity).unwrap().transform_3d, *transform);
+        }
+        let nonspatial = world
+            .entities()
+            .find(|(_, data)| data.name.as_deref() == Some("nonspatial"))
+            .map(|(entity, _)| entity)
+            .expect("transformless sample exists");
+        assert!(world.world_transform(nonspatial).is_none());
+        let mut states = super::UiStates::new();
+        states.insert(nonspatial, weave::States::HOVER);
+        let undo = presenter
+            .present_over(&mut world, std::slice::from_ref(&sheet), viewport, &states)
+            .expect("pointer styles apply");
+        assert!(world.world_transform(nonspatial).is_none());
+        undo.undo(&mut world);
+    }
+}
+
+#[test]
+fn unrelated_styles_preserve_mirrored_scale() {
+    let mut world = World::default();
+    let entity = world.spawn(sindri_core::EntityData {
+        transform_3d: Some(sindri_core::Transform3D {
+            scale: [-2.0, -3.0, 1.0],
+            ..sindri_core::Transform3D::default()
+        }),
+        ..sindri_core::EntityData::default()
+    });
+    let before = world.get(entity).unwrap().transform_3d;
+    let styled = PresentationWorld::resolve(
+        &world,
+        &parse("text { font-size: 20px; }").unwrap(),
+        Viewport {
+            width: 960.0,
+            height: 540.0,
+        },
+    )
+    .unwrap();
+    assert_eq!(styled.world().get(entity).unwrap().transform_3d, before);
+}
