@@ -53,10 +53,13 @@ pub(super) fn add_world_surface(environment: &mut Environment) {
                     }
                 },
                 return_type: match call {
-                    WorldCall::Find | WorldCall::Spawn | WorldCall::SpawnChild | WorldCall::Nearest => {
-                        Type::Named(ENTITY.to_owned())
+                    WorldCall::Find
+                    | WorldCall::Spawn
+                    | WorldCall::SpawnChild
+                    | WorldCall::Nearest => Type::Named(ENTITY.to_owned()),
+                    WorldCall::WithTag | WorldCall::WithinRadius => {
+                        Type::array_of(Type::Named(ENTITY.to_owned()))
                     }
-                    WorldCall::WithTag | WorldCall::WithinRadius => Type::array_of(Type::Named(ENTITY.to_owned())),
                     WorldCall::Despawn
                     | WorldCall::SetParent
                     | WorldCall::SetShapePoint
@@ -72,4 +75,3 @@ pub(super) fn add_world_surface(environment: &mut Environment) {
     environment.add_type(WORLD, world);
     environment.add_value(WORLD, Type::Named(WORLD.to_owned()));
 }
-

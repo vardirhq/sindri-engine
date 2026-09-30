@@ -471,4 +471,3 @@ impl WorldHost<'_> {
         Ok(entity)
     }
 }
-

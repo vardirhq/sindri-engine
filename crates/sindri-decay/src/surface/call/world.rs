@@ -122,4 +122,3 @@ pub(crate) const WORLD_CALLS: &[(&str, WorldCall)] = &[
     ("set_active", WorldCall::SetActive),
     ("is_active", WorldCall::IsActive),
 ];
-

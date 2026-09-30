@@ -573,4 +573,3 @@ impl WorldHost<'_> {
         (parts.next()? == "this").then(|| parts.collect())
     }
 }
-

@@ -452,4 +452,3 @@ pub(crate) enum TimeValue {
 
 pub(crate) const TIME_VALUES: &[(&str, TimeValue)] =
     &[("delta", TimeValue::Delta), ("elapsed", TimeValue::Elapsed)];
-

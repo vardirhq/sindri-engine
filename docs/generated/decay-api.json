@@ -2293,6 +2293,20 @@
           "returns": "bool"
         },
         {
+          "description": "The closest active object with an authored tag to a world-space Vec3 position, including parent transforms. Gives null if none has a usable transform. Equal distances keep world order.",
+          "kind": "function",
+          "name": "nearest",
+          "parameter_names": [
+            "tag",
+            "position"
+          ],
+          "parameters": [
+            "String",
+            "Vec3"
+          ],
+          "returns": "Entity"
+        },
+        {
           "description": "Reads a number set up for another object's script, such as a bullet's damage, or gives `fallback` if there is none.",
           "kind": "function",
           "name": "property_number",
@@ -2431,6 +2445,22 @@
           ],
           "parameters": [
             "String"
+          ],
+          "returns": "List<Entity>"
+        },
+        {
+          "description": "A snapshot list of active tagged objects within an inclusive world-space radius of a Vec3 position, nearest first; ties keep world order. Skips unusable transforms. Empty when none match; over 8192 results is an error. Negative or NaN radii are errors; positive infinity searches the whole world.",
+          "kind": "function",
+          "name": "within_radius",
+          "parameter_names": [
+            "tag",
+            "position",
+            "radius"
+          ],
+          "parameters": [
+            "String",
+            "Vec3",
+            "f32"
           ],
           "returns": "List<Entity>"
         }

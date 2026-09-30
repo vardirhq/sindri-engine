@@ -15,10 +15,15 @@ fn step(run: &mut Run) {
 fn isolated_run(keep: Option<&str>) -> Run {
     let mut run = Run::open().expect("project opens");
     step(&mut run);
-    let disable: Vec<_> = run.world.entities().filter_map(|(id, data)| {
-        (data.components.contains_key(ScriptComponent::TYPE_NAME)
-            && (keep.is_none() || data.name.as_deref() != keep)).then_some(id)
-    }).collect();
+    let disable: Vec<_> = run
+        .world
+        .entities()
+        .filter_map(|(id, data)| {
+            (data.components.contains_key(ScriptComponent::TYPE_NAME)
+                && (keep.is_none() || data.name.as_deref() != keep))
+                .then_some(id)
+        })
+        .collect();
     for id in disable {
         run.world.get_mut(id).expect("entity").disabled = true;
     }
@@ -31,10 +36,16 @@ fn isolated_run(keep: Option<&str>) -> Run {
 fn enemy(run: &mut Run, position: [f32; 3]) -> EntityId {
     run.world.spawn(EntityData {
         transform_3d: Some(Transform3D {
-            position, scale: [0.2, 0.2, 1.0], ..Transform3D::default()
+            position,
+            scale: [0.2, 0.2, 1.0],
+            ..Transform3D::default()
         }),
-        components: [(TagsComponent::TYPE_NAME.to_owned(), json!({ "tags": ["enemy"] }))]
-            .into_iter().collect(),
+        components: [(
+            TagsComponent::TYPE_NAME.to_owned(),
+            json!({ "tags": ["enemy"] }),
+        )]
+        .into_iter()
+        .collect(),
         ..EntityData::default()
     })
 }
@@ -43,7 +54,12 @@ fn enemy(run: &mut Run, position: [f32; 3]) -> EntityId {
 fn player_picks_the_nearest_visible_enemy_even_when_offscreen_is_closer() {
     let mut run = isolated_run(Some("Player"));
     let player = run.find("Player").expect("player");
-    run.world.get_mut(player).expect("entity").transform_3d.as_mut().expect("transform")
+    run.world
+        .get_mut(player)
+        .expect("entity")
+        .transform_3d
+        .as_mut()
+        .expect("transform")
         .position = [9.0, 0.0, 0.0];
     enemy(&mut run, [10.5, 0.0, 0.0]);
     let visible = enemy(&mut run, [7.0, 0.0, 0.0]);
@@ -69,7 +85,17 @@ fn arc_skips_impact_targets_and_moves_toward_the_next_nearest_enemy() {
     let arc = run.world.spawn_prefab(&prefab).expect("spawn").root;
     step(&mut run);
     step(&mut run);
-    let position = run.world.world_transform(arc).expect("arc still alive").position;
-    assert!(position[0] > 0.0, "arc did not move to the next target: {position:?}");
-    assert!(position[1].abs() < 1.0e-5, "arc chose the farther target: {position:?}");
+    let position = run
+        .world
+        .world_transform(arc)
+        .expect("arc still alive")
+        .position;
+    assert!(
+        position[0] > 0.0,
+        "arc did not move to the next target: {position:?}"
+    );
+    assert!(
+        position[1].abs() < 1.0e-5,
+        "arc chose the farther target: {position:?}"
+    );
 }
