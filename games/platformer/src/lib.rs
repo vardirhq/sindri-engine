@@ -43,6 +43,11 @@ impl Run {
         let document: SceneDocument =
             serde_json::from_str(&text).map_err(|error| error.to_string())?;
         document.validate().map_err(|error| error.to_string())?;
+        // The coins are instances of one prefab, made here as every host
+        // makes them.
+        let document = document
+            .expanded(&prefabs_under(&root)?)
+            .map_err(|error| error.to_string())?;
 
         let mut components = SceneExtractor::new()
             .map_err(|error| error.to_string())?
@@ -147,4 +152,28 @@ impl Run {
             .and_then(|data| data.transform_3d)
             .map_or([0.0, 0.0], sindri_core::Transform3D::position_2d)
     }
+}
+
+/// Every prefab under the asset root, by the asset ID a scene names it with.
+fn prefabs_under(
+    root: &std::path::Path,
+) -> Result<std::collections::BTreeMap<String, sindri_core::PrefabDocument>, String> {
+    let mut prefabs = std::collections::BTreeMap::new();
+    let Ok(entries) = std::fs::read_dir(root.join("prefabs")) else {
+        return Ok(prefabs);
+    };
+    for entry in entries {
+        let path = entry.map_err(|error| error.to_string())?.path();
+        if path
+            .extension()
+            .is_some_and(|extension| extension == "prefab")
+        {
+            let text = std::fs::read_to_string(&path).map_err(|error| error.to_string())?;
+            let prefab = sindri_core::PrefabDocument::from_json(&text)
+                .map_err(|error| format!("{}: {error}", path.display()))?;
+            let name = path.file_name().unwrap_or_default().to_string_lossy();
+            prefabs.insert(format!("prefabs/{name}"), prefab);
+        }
+    }
+    Ok(prefabs)
 }

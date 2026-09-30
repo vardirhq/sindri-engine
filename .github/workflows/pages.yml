@@ -112,6 +112,7 @@ jobs:
           grep -q '"kind": "script"' target/pages/examples/shapes-lab/assets/sindri.manifest
           grep -q '"demo.weave"' target/pages/examples/weave-poc/assets/sindri.manifest
           grep -q 'hero.sheet' target/pages/examples/platformer/assets/sindri.manifest
+          grep -q 'prefabs/coin.prefab' target/pages/examples/platformer/assets/sindri.manifest
           grep -q 'players.sheet' target/pages/examples/scorchball/assets/sindri.manifest
           grep -q 'player.prefab' target/pages/examples/scorchball/assets/sindri.manifest
       - uses: actions/configure-pages@v6
