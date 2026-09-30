@@ -89,6 +89,12 @@ impl PrefabDocument {
         self.metadata.editor.clear();
         for entity in &mut self.entities {
             entity.editor.clear();
+            if let Some(instance) = &mut entity.prefab {
+                for changes in instance.overrides.values_mut() {
+                    changes.editor.clear();
+                }
+                instance.overrides.retain(|_, changes| !changes.is_empty());
+            }
         }
     }
 

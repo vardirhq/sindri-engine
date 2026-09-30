@@ -1,6 +1,6 @@
 //! Turning instances into the entities their prefabs describe, and back.
 
-use std::collections::BTreeMap;
+use std::collections::{BTreeMap, BTreeSet};
 
 use serde_json::Value;
 
@@ -81,8 +81,12 @@ fn expand_within(
                 instance_path(&entity.id, key)
             }
         };
+        let gone = removed_keys(&inner, &instance.removed, &root_key);
         for part in inner {
             let key = part.entity.id.clone();
+            if gone.contains(&key) {
+                continue;
+            }
             let is_root = key == root_key;
             let mut placed_entity = part.entity;
             placed_entity.id = placed(&key);
@@ -107,8 +111,13 @@ fn expand_within(
                 placed_entity.editor.clone_from(&entity.editor);
             } else {
                 // A prefab's editor state is about the prefab as a document,
-                // and says nothing about one of its instances.
-                placed_entity.editor.clear();
+                // and says nothing about one of its instances; the instance's
+                // own is in its override.
+                placed_entity.editor = instance
+                    .overrides
+                    .get(&key)
+                    .map(|changes| changes.editor.clone())
+                    .unwrap_or_default();
             }
             placed_entity.prefab = None;
             expanded.push(ExpandedEntity {
@@ -122,6 +131,41 @@ fn expand_within(
         }
     }
     Ok(expanded)
+}
+
+/// The keys an instance does without: the ones it names, and everything under
+/// them. The root is never among them.
+fn removed_keys(
+    inner: &[ExpandedEntity],
+    removed: &BTreeSet<SceneEntityId>,
+    root_key: &SceneEntityId,
+) -> BTreeSet<SceneEntityId> {
+    let mut gone: BTreeSet<SceneEntityId> = removed
+        .iter()
+        .filter(|key| *key != root_key)
+        .cloned()
+        .collect();
+    if gone.is_empty() {
+        return gone;
+    }
+    // Parents come before children in an expanded list only by accident, so
+    // this runs until nothing more is added.
+    loop {
+        let before = gone.len();
+        for part in inner {
+            if part
+                .entity
+                .parent
+                .as_ref()
+                .is_some_and(|parent| gone.contains(parent))
+            {
+                gone.insert(part.entity.id.clone());
+            }
+        }
+        if gone.len() == before {
+            return gone;
+        }
+    }
 }
 
 /// The ID an entity of an instance has in the document holding the instance.
@@ -257,5 +301,6 @@ pub fn override_between(base: &SceneEntity, current: &SceneEntity) -> EntityOver
             .flatten(),
         disabled: (current.disabled != base.disabled).then_some(current.disabled),
         components,
+        editor: BTreeMap::new(),
     }
 }

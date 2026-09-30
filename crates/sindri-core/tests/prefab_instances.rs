@@ -387,7 +387,7 @@ fn an_instance_carries_no_components_of_its_own() {
 }
 
 #[test]
-fn an_instance_missing_an_entity_cannot_be_written_as_a_reference() {
+fn an_entity_removed_from_an_instance_saves_as_removed_and_stays_gone() {
     let prefabs = library(&[("prefabs/coin.prefab", coin())]);
     let document = scene(vec![instance(
         "coin-1",
@@ -397,10 +397,80 @@ fn an_instance_missing_an_entity_cannot_be_written_as_a_reference() {
     let mut world = World::from_scene_with(&document, &prefabs).unwrap().world;
     let sparkle = world.entity_for_source_id(&id("coin-1/sparkle")).unwrap();
     world.despawn_recursive(sparkle).unwrap();
+
+    let saved = world.to_scene_with(&prefabs).unwrap();
+    let instance = saved.entities[0].prefab.as_ref().unwrap();
+    assert_eq!(
+        instance.removed.iter().collect::<Vec<_>>(),
+        [&id("sparkle")]
+    );
+    let reloaded = World::from_scene_with(&saved, &prefabs).unwrap().world;
+    assert_eq!(reloaded.len(), 1);
+    assert_eq!(reloaded.to_scene_with(&prefabs).unwrap(), saved);
+}
+
+#[test]
+fn an_entity_moved_out_from_under_a_removed_one_cannot_be_saved() {
+    let mut chain = coin();
+    chain.entities.push(SceneEntity {
+        parent: Some(id("sparkle")),
+        ..SceneEntity::new(id("glow"))
+    });
+    let prefabs = library(&[("prefabs/coin.prefab", chain)]);
+    let document = scene(vec![instance(
+        "coin-1",
+        "prefabs/coin.prefab",
+        at(0.0, 0.0),
+    )]);
+    let mut world = World::from_scene_with(&document, &prefabs).unwrap().world;
+    let root = world.entity_for_source_id(&id("coin-1")).unwrap();
+    let sparkle = world.entity_for_source_id(&id("coin-1/sparkle")).unwrap();
+    let glow = world
+        .entity_for_source_id(&id("coin-1/glow"))
+        .unwrap();
+    world.set_parent(glow, Some(root)).unwrap();
+    world.despawn_recursive(sparkle).unwrap();
     assert!(matches!(
         world.to_scene_with(&prefabs),
         Err(WorldError::InstanceReshaped { .. })
     ));
+}
+
+#[test]
+fn an_entity_of_an_instance_keeps_its_editor_state_through_a_save() {
+    let prefabs = library(&[("prefabs/coin.prefab", coin())]);
+    let document = scene(vec![instance(
+        "coin-1",
+        "prefabs/coin.prefab",
+        at(0.0, 0.0),
+    )]);
+    let mut world = World::from_scene_with(&document, &prefabs).unwrap().world;
+    let sparkle = world.entity_for_source_id(&id("coin-1/sparkle")).unwrap();
+    world
+        .get_mut(sparkle)
+        .unwrap()
+        .editor
+        .insert("sindri.editor.order".to_owned(), json!(3));
+    let saved = world.to_scene_with(&prefabs).unwrap();
+    let reloaded = World::from_scene_with(&saved, &prefabs).unwrap().world;
+    let sparkle = reloaded
+        .entity_for_source_id(&id("coin-1/sparkle"))
+        .unwrap();
+    assert_eq!(
+        reloaded.get(sparkle).unwrap().editor["sindri.editor.order"],
+        json!(3)
+    );
+
+    let mut shipped = saved.clone();
+    shipped.strip_editor_metadata();
+    assert!(
+        shipped.entities[0]
+            .prefab
+            .as_ref()
+            .unwrap()
+            .overrides
+            .is_empty()
+    );
 }
 
 #[test]
@@ -441,6 +511,7 @@ fn an_instance_reads_the_way_it_is_written() {
     assert_eq!(
         placed.prefab,
         Some(PrefabInstance {
+            removed: std::collections::BTreeSet::new(),
             source: "prefabs/coin.prefab".to_owned(),
             overrides: [(
                 id("sparkle"),

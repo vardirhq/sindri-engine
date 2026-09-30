@@ -1,6 +1,6 @@
 //! A prefab placed in a scene: the reference, and what the scene changed.
 
-use std::collections::{BTreeMap, HashMap};
+use std::collections::{BTreeMap, BTreeSet, HashMap};
 
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
@@ -25,6 +25,12 @@ pub struct PrefabInstance {
     /// dropped with the entity it named.
     #[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
     pub overrides: BTreeMap<SceneEntityId, EntityOverride>,
+    /// The prefab's entities this instance does without, by the same keys.
+    ///
+    /// Removing one removes everything under it too. The root cannot be
+    /// removed: an instance without its root is not an instance.
+    #[serde(default, skip_serializing_if = "BTreeSet::is_empty")]
+    pub removed: BTreeSet<SceneEntityId>,
 }
 
 impl PrefabInstance {
@@ -33,7 +39,14 @@ impl PrefabInstance {
         Self {
             source: source.into(),
             overrides: BTreeMap::new(),
+            removed: BTreeSet::new(),
         }
+    }
+
+    /// Whether this instance says nothing but which prefab it is.
+    #[must_use]
+    pub fn is_unchanged(&self) -> bool {
+        self.overrides.is_empty() && self.removed.is_empty()
     }
 }
 
@@ -52,6 +65,11 @@ pub struct EntityOverride {
     pub disabled: Option<bool>,
     #[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
     pub components: BTreeMap<String, Value>,
+    /// Editor-only state of this entity in this instance — where it sits
+    /// among its siblings, say — which runtimes ignore as they ignore an
+    /// entity's own. Written whole, and only when there is some.
+    #[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
+    pub editor: BTreeMap<String, Value>,
 }
 
 impl EntityOverride {
@@ -62,6 +80,7 @@ impl EntityOverride {
             && self.transform_3d.is_none()
             && self.disabled.is_none()
             && self.components.is_empty()
+            && self.editor.is_empty()
     }
 }
 
