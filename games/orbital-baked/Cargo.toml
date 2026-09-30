@@ -35,3 +35,5 @@ path = "src/bin/capture.rs"
 
 [dev-dependencies]
 sindri-export = { path = "../../crates/sindri-export" }
+sindri-weave = { path = "../../crates/sindri-weave" }
+weave = { path = "../../weave/crates/weave" }

@@ -16,6 +16,11 @@ script Hud {
     var boss_panel: Entity = null;
     var boss_bar: Entity = null;
     var boss_name: Entity = null;
+    var pilot: Entity = null;
+    var callsign: Entity = null;
+    var shown_pilot: String = "?";
+    // -1 until the first step, so the chrome is set once either way.
+    var shown_compact: f32 = -1.0;
 
     var health_bar_scale_x: f32 = 1.0;
     var health_bar_scale_y: f32 = 1.0;
@@ -47,6 +52,8 @@ script Hud {
         this.boss_panel = World.find("BossPanel");
         this.boss_bar = World.find("BossBar");
         this.boss_name = World.find("BossName");
+        this.pilot = World.find("HudPilot");
+        this.callsign = World.find("TitleCallsign");
 
         let health_bar = this.health_bar;
         let cores_bar = this.cores_bar;
@@ -73,16 +80,18 @@ script Hud {
         this.boss_panel_scale_x = boss_panel.transform.scale.x;
         this.boss_panel_scale_y = boss_panel.transform.scale.y;
 
-        Ui.set_text(this.health_text, "HP {}/{}");
+        Ui.set_text(this.health_text, "HULL  {}/{}");
         Ui.set_text(this.level, "LV {}");
-        Ui.set_text(this.cores_text, "XP {}/{}");
-        Ui.set_text(this.score, "SCORE {}");
+        Ui.set_text(this.cores_text, "XP  {}/{}");
+        Ui.set_text(this.score, "{}");
         World.set_active(this.sector, true);
         update_sector();
     }
 
     fn update(dt: f32) {
         this.hud_clock += dt;
+        show_pilot();
+        apply_compact();
         Ui.set_number(this.score, Game.score);
         Ui.set_number(this.level, Game.level);
 
@@ -167,6 +176,27 @@ script Hud {
             let breathe = sin(this.hud_clock * (3.0 + danger * 4.0)) * 0.012 * danger;
             boss_name.transform.scale.x = 1.0 + spawn_pulse + breathe;
             boss_name.transform.scale.y = 1.0 + spawn_pulse + breathe;
+        }
+    }
+
+    // The callsign typed on the title, which stays where it was typed.
+    fn show_pilot() {
+        let name = Ui.input_text(this.callsign);
+        if name == this.shown_pilot { return; }
+        this.shown_pilot = name;
+        if name == "" { Ui.set_text(this.pilot, "PILOT"); }
+        else { Ui.set_text(this.pilot, "PILOT  /  " + name); }
+    }
+
+    // Compact keeps the numbers and meters and drops the panels and captions
+    // around them, for a player who wants more of the field.
+    fn apply_compact() {
+        var compact: f32 = 0.0;
+        if Save.flag("compact_hud", false) { compact = 1.0; }
+        if compact == this.shown_compact { return; }
+        this.shown_compact = compact;
+        for part in World.with_tag("hud-chrome") {
+            World.set_active(part, compact == 0.0);
         }
     }
 

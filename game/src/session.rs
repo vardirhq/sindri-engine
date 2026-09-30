@@ -477,6 +477,14 @@ impl Session {
         Ok(())
     }
 
+    /// Sets a shared board value, as a script's `Game.name = value` would.
+    ///
+    /// For tools and tests that need a run in a given state -- a level about
+    /// to be gained, a boss about to appear -- without playing it there.
+    pub fn set_board(&mut self, name: &str, value: f32) {
+        self.scripts.blackboard_mut().set(name, f64::from(value));
+    }
+
     /// The screen UI as the last step read it: what is focused, where each
     /// element was laid out.
     #[must_use]

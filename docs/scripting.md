@@ -777,6 +777,28 @@ disqualifying for anything else.
 | `Ui.is_held(entity)` | `bool` |
 | `Ui.slider_value(entity)` | `f32` |
 | `Ui.slider_changed(entity)` | `bool` |
+| `Ui.is_checked(entity)` | `bool` |
+| `Ui.set_checked(entity, checked)` | nothing |
+| `Ui.input_text(entity)` | `String` |
+| `Ui.set_input_text(entity, "words")` | nothing |
+| `Ui.scroll_offset(entity)` | `f32` |
+| `Ui.set_scroll_offset(entity, offset)` | nothing |
+| `Ui.changed(entity)` | `bool` |
+| `Ui.submitted(entity)` | `bool` |
+| `Ui.is_focused(entity)` | `bool` |
+
+**Widgets.** A `sindri.ui.toggle` is a switch or checkbox, a
+`sindri.ui.text_input` a single-line field, and a `sindri.ui.scroll` a region
+whose children scroll vertically and are clipped to it. The person changes them
+by clicking, tapping, typing, the wheel or a drag; Tab and Shift+Tab move focus
+in the order the scene is written, and Space or Enter presses what has it.
+`Ui.changed` is true for the one step a person changed a widget's value, and
+`Ui.submitted` for the step Enter was pressed in a field. A script's own
+`set_*` call changes the value without reporting a change, so a script that
+answers `changed` never answers itself. While a field has the keyboard, the
+keys it uses are held back from `Input`, so typing a callsign does not steer
+the ship. Selection, a movable caret, clipboard, IME composition, software
+keyboards and gamepad focus are not supported yet: a field edits at its end.
 
 **The scene owns the words and the script owns the numbers.** A script can
 join text — `Ui.set_text(label, "Score: " + score)` works — but a HUD's words

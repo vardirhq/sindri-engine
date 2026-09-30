@@ -10,7 +10,8 @@
 //! Steps after the size run in order: `click:<entity>` presses and releases
 //! over an element, `wheel:<entity>:<pixels>` scrolls over one (positive is
 //! down the list), `key:<Key>` taps a key, `type:<text>` commits characters,
-//! and `wait:<seconds>` plays on. Each prints what it hit, so a picture of the
+//! `set:<name>=<value>` writes a shared board value, and `wait:<seconds>`
+//! plays on. Each prints what it hit, so a picture of the
 //! wrong thing says why.
 
 #[cfg(not(target_arch = "wasm32"))]
@@ -79,11 +80,19 @@ mod capture {
             .and_then(|line| quoted(line).into_iter().next())
             .ok_or("sindri.toml names no main_scene")?;
         let scene = scene.strip_prefix("assets/").unwrap_or(&scene).to_owned();
-        let sheets = toml
-            .lines()
-            .filter(|line| line.trim_start().starts_with("include"))
-            .flat_map(quoted)
-            .filter(|id| id.ends_with(".weave"))
+        // The include list may run over several lines, up to its `]`.
+        let include = toml
+            .find("include")
+            .map(|start| &toml[start..])
+            .and_then(|rest| rest.split_once(']').map(|(list, _)| list))
+            .unwrap_or_default();
+        let sheets = quoted(include)
+            .into_iter()
+            .filter(|id| {
+                Path::new(id)
+                    .extension()
+                    .is_some_and(|extension| extension.eq_ignore_ascii_case("weave"))
+            })
             .collect();
         Ok((scene, sheets))
     }
@@ -133,7 +142,9 @@ mod capture {
         }
 
         fn play(&mut self, seconds: f32) -> Result<(), Box<dyn Error>> {
-            for _ in 0..(seconds / STEP).ceil().max(1.0) as usize {
+            #[allow(clippy::cast_possible_truncation, clippy::cast_sign_loss)]
+            let steps = (seconds / STEP).ceil().max(1.0) as usize;
+            for _ in 0..steps {
                 self.step()?;
             }
             Ok(())
@@ -181,6 +192,11 @@ mod capture {
                     self.step()?;
                 }
                 "wait" => self.play(rest.parse()?)?,
+                "set" => {
+                    let (name, value) = rest.split_once('=').ok_or("set:<name>=<value>")?;
+                    self.session.set_board(name, value.parse()?);
+                    self.step()?;
+                }
                 _ => return Err(format!("unknown step {action}").into()),
             }
             Ok(())
@@ -263,12 +279,22 @@ mod capture {
             player.perform(step)?;
         }
         player.play(0.3)?;
+        photograph(&mut player, (width, height), &pngs, &sheets, Path::new(out)).await
+    }
 
+    /// Draws the player's world once, offscreen, and writes it to `path`.
+    async fn photograph(
+        player: &mut Player,
+        (width, height): (u32, u32),
+        pngs: &BTreeMap<String, Vec<u8>>,
+        sheets: &BTreeMap<String, Vec<u8>>,
+        path: &Path,
+    ) -> Result<(), Box<dyn Error>> {
         let instance = wgpu::Instance::default();
         let gpu = GpuContext::request(&instance, None, &GpuRequestOptions::default()).await?;
         let mut textures = TextureRegistry::new(&gpu.device, &gpu.queue);
         let mut bindings = TextureBindings::new();
-        for (id, bytes) in pngs {
+        for (id, bytes) in pngs.clone() {
             let Ok(asset) =
                 TextureAssetDecoder.decode(AssetBytes::new(id.parse::<AssetId>()?, bytes))
             else {
@@ -341,7 +367,6 @@ mod capture {
         let readback = target.copy_to_buffer(&gpu.device, &mut encoder)?;
         gpu.queue.submit([encoder.finish()]);
         let pixels = readback.read_rgba8(&gpu.device)?;
-        let path = Path::new(out);
         if let Some(parent) = path.parent() {
             fs::create_dir_all(parent)?;
         }
