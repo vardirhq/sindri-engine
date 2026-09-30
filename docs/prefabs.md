@@ -172,9 +172,20 @@ what that entity's instance changed:
 - `name`, `transform_3d`, `disabled` — written whole when they differ.
 - `components` — a JSON merge patch (RFC 7386) per component: an object merges
   field by field, `null` removes the component (or a field), and any other
-  value replaces it. A component the prefab lacks is added whole. A list is
-  replaced whole: an instance cannot change one tile of a prefab's tilemap
-  without owning the list.
+  value replaces it. A component the prefab lacks is added whole.
+- A list that changed in a few places is patched by index rather than
+  replaced, so an instance that changes one tile of its prefab's tilemap says
+  only that tile: `{ "$items": { "57": 3 }, "$length": 120 }`. `$items`
+  patches the elements it names (an object merges into an object element,
+  anything else replaces it) and `$length`, when present, cuts the list short
+  or pads it with `null` first. A list that changed in most places is written
+  whole. Keys beginning with `$` are reserved inside a patch for this.
+- `editor` — the entity's editor-only state in this instance, such as where it
+  sits among its siblings. Runtimes ignore it, and shipping strips it.
+
+`removed` lists the prefab's entities an instance does without, by the same
+keys; everything under a removed entity goes with it. The root cannot be
+removed.
 
 Overrides are never tracked as they are made. Saving works each one out as the
 difference between what the instance's entities are and what the prefab says,
@@ -183,10 +194,11 @@ having to say so, and an instance standing exactly where its prefab's root
 does writes no transform. A key the prefab no longer has is dropped the next
 time the scene is saved.
 
-An override can change what an entity carries but not whether it exists or
-where it hangs, so an instance's structure is its prefab's. The editor refuses
-to delete, move or rename an entity inside an instance, and a world in which
-one was changed anyway fails to save, naming the instance
+Saving works `removed` out the same way, from which of the prefab's entities
+are missing. An instance can do without an entity but cannot hang one
+somewhere else, so the editor refuses to move or rename an entity inside an
+instance, and a world where one was moved anyway — or where an entity survives
+under one that is gone — fails to save, naming the instance
 (`WorldError::InstanceReshaped`). Unpacking the instance is the way out.
 
 ### Nested prefabs
@@ -223,21 +235,31 @@ named in the coin's prefab, not in the scene.
 
 ## In the editor
 
-- **Placing.** Choosing a prefab in the project browser opens its panel. *Add
-  to scene* places an instance in the middle of the Scene view, at the prefab's
-  own depth; *Place on a cell* puts one on a grid cell. Both make a linked
-  instance as one undo step. A prefab outside the scene's folder cannot be
-  placed, because the scene would have no asset ID to name it by.
+- **Placing.** Drag a prefab from the project browser into the Scene view: it
+  lands on the grid cell under the pointer when there is one, and otherwise
+  where the pointer meets the plane a 2D scene is drawn in, at the prefab's own
+  depth. Choosing a prefab opens its panel, where *Add to scene* places one in
+  the middle of the view and *Place on a cell* arms clicking. Each makes a
+  linked instance as one undo step. A prefab outside the scene's folder cannot
+  be placed, because the scene would have no asset ID to name it by.
 - **Seeing it.** An entity of an instance shows *Instance of coin.prefab* at
   the top of the inspector, with what it overrides listed below and a way to
-  revert each row.
-- **Revert all** puts the instance back to exactly its prefab; **Apply** writes
-  what it overrides into the prefab file and brings every instance up to date;
-  **Unpack** keeps the entities and cuts the link. Apply writes the file at
-  once: Undo returns this scene's instances, not the file.
+  revert each row; the root also lists the entities the instance does without,
+  each with a way to bring it back.
+- **Deleting inside it** removes that entity from this instance only. Moving
+  or renaming one is refused.
+- **Revert all** puts the instance back to exactly its prefab, removed entities
+  included; **Apply** writes what it overrides and removes into the prefab file
+  and brings every instance up to date; **Unpack** keeps the entities and cuts
+  the link.
 - **Making one.** *Make prefab* on a hierarchy row writes that entity and
   everything under it to `prefabs/<name>.prefab` beside the scene — an
-  instance inside it stays one, nested — and replaces it with an instance.
+  instance inside it stays one, nested — and replaces it with an instance. On
+  a selection it makes a prefab of each, as one step.
+- **Undo reaches the files.** Apply and Make prefab write files, and Undo and
+  Redo write them back — or take away a file the edit made — as they step
+  across the edit, unless the file was changed on disk since, which is left
+  alone and said so.
 - **Editing one.** *Edit prefab* opens the prefab as the document being edited,
   in the same panels a scene uses. Its asset IDs resolve against the scene's
   folder, as they do when it is placed. Saving writes a prefab, and refuses a
@@ -246,19 +268,23 @@ named in the coin's prefab, not in the scene.
   writes one, every instance in the open scene is written down against the
   prefab it was made from and reconciled with what it now expands to. That is
   done with commands, so overrides survive, the entities keep their handles and
-  the selection, and the update is one undo step.
+  the selection, and the update is one undo step. A prefab changed while the
+  scene is playing is followed when it stops.
+- **A missing prefab.** A scene whose instance names a prefab that cannot be
+  read — deleted, renamed, broken, or nesting one that is — still opens. The
+  instance is a placeholder where it stood, entities the scene hung under its
+  children wait under the placeholder, and saving writes both back exactly as
+  they were. The console names the prefab and says why.
 - **Copying and renaming.** Duplicating an instance makes another instance;
   duplicating part of one makes plain entities. Renaming an instance's ID
   renames what is under it.
 - **Script fields.** A script's `@export` `Prefab` field, and any component
   field that names a prefab, is picked from the project's prefabs.
 
-## What is not here yet
+## What is deliberately not here
 
-- **No removing a prefab's entity from one instance.** Switching it off
-  (`"disabled": true`) is how an instance does without one today.
-- **No per-element list overrides.** A list component field is overridden
-  whole.
-- **Spawned instances are not linked.** `World.spawn` makes entities with no
-  `PrefabLink`, as it makes them with no stable ID: nothing spawned is saved.
-- **Apply is not undone with the scene.** It writes the prefab file.
+- **Spawned entities are not linked.** `World.spawn` makes entities with no
+  `PrefabLink`, as it makes them with no stable ID: nothing spawned is saved,
+  and a world saved on purpose after `assign_missing_source_ids` saves what it
+  holds rather than references to prefabs it was never placed from.
+- **No variants.** See [Nested prefabs](#nested-prefabs).

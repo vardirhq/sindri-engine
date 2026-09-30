@@ -68,7 +68,8 @@ ancestors: the flag is never written down through a subtree, so switching a
 parent back on brings back exactly the children that were on.
 
 An entity may be a prefab **instance**, declaring `prefab` — the prefab's asset
-ID and the overrides this instance made — and no `components` of its own. It is
+ID, the overrides this instance made and the prefab entities it removed — and
+no `components` of its own. It is
 omitted from every other entity, so no format version changed when it arrived,
 as none did for `disabled`. A saved instance is written as that reference
 rather than as the entities it expands to, and its overrides are the
