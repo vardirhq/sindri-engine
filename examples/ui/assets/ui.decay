@@ -27,6 +27,10 @@ script WidgetDemo {
             print("UI checkbox changed " + Ui.is_checked(this.telemetry));
             show_switches();
         }
+        // Locked, so this never fires; the browser smoke listens for it.
+        if Ui.changed(World.find("autopilot")) {
+            print("UI autopilot changed");
+        }
         if Ui.changed(this.callsign) {
             print("UI text changed " + Ui.input_text(this.callsign));
         }

@@ -12,6 +12,7 @@ import { readFile } from 'node:fs/promises';
 import { extname, join, normalize, resolve } from 'node:path';
 import { imageStatistics } from './png.mjs';
 import { physicsDemo } from './physics-demo.mjs';
+import { freshUiEvidence, uiDemo, uiDemoEvidence } from './ui-demo.mjs';
 
 const ROOT = resolve(process.argv[2] ?? 'examples/cube');
 const SHOT = process.argv[3];
@@ -138,6 +139,7 @@ const tweenActions = new Set();
 let cameraChanges = 0;
 let cameraImpacts = 0;
 const physicsEvidence = { results: new Set(), masks: new Set(), changes: 0, sensor: false, contact: false };
+const uiEvidence = freshUiEvidence();
 const spatialResults = new Set();
 let spatialChanges = 0;
 const fetchedAssets = new Set();
@@ -148,6 +150,7 @@ const fetchedAssets = new Set();
 const GPU_REJECTION = /error while parsing wgsl|is invalid|must only be called/i;
 page.on('console', (message) => {
   const text = message.text();
+  uiDemoEvidence(uiEvidence, text);
   const ray = text.match(/Physics ray (.+)$/);
   if (ray) physicsEvidence.results.add(ray[1]);
   const mask = text.match(/Physics controls (ALL|SOLID|BODIES|NONE)/);
@@ -246,6 +249,10 @@ await page.waitForTimeout(1500);
 
 if (process.env.SINDRI_PHYSICS_DEMO === '1') {
   await physicsDemo(page, VIEWPORT, physicsEvidence, problems);
+}
+
+if (process.env.SINDRI_UI_DEMO === '1') {
+  await uiDemo(page, VIEWPORT, uiEvidence, problems);
 }
 
 if (process.env.SINDRI_TWEEN_DEMO === '1') {
