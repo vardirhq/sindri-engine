@@ -4,4 +4,6 @@ state Game {
     var coins_total: f32 = 0.0;
     var falls: f32 = 0.0;
     var won: bool = false;
+    var ground_found: bool = false;
+    var ground_clearance: f32 = 0.0;
 }

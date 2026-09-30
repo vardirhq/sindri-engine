@@ -1,5 +1,7 @@
 # Changelog
 
+- 2D closest-hit raycasts in the engine and Decay: `Physics.raycast` returns a `RayHit2d` snapshot or null, with normalized directions, membership masks, explicit sensor inclusion and whole-entity exclusion. The platformer displays real ground clearance below its hero. Physics Playground visualizes rays, hit points and normals alongside falling/bouncing bodies and sensor events, with desktop/touch controls, directory listing, Pages export and browser checks. Overlap and shape casts remain deferred.
+
 - Weave leaves gameplay transforms unchanged when no sizing declaration applies, so typography no longer makes transformless tagged entities eligible for spatial queries or removes mirrored scales. Spatial Lab regressions cover loaded scenes and desktop/phone stylesheet settlement.
 
 - Spatial Query Lab is an authored Pages feature demo for `World.nearest` and `World.within_radius`, with live ordered results, radius/tag controls, active/parent toggles, composed-transform examples and touch movement. Native and desktop/phone browser regressions exercise the actual queries; homepage and directory entries make it discoverable.

@@ -122,3 +122,27 @@ fn the_camera_follows_the_hero() {
         "it followed the hero to {hero_x}: {furthest}"
     );
 }
+
+/// The ray sees the painted colliders while excluding the hero's compound and
+/// coin sensors. Standing, jumping and landing change the player's HUD probe.
+#[test]
+fn ground_clearance_probe_measures_the_real_floor_through_a_jump() {
+    let mut run = Run::open().unwrap();
+    for _ in 0..90 {
+        step(&mut run);
+    }
+    assert!(run.board("ground_clearance") < 0.03);
+    let label = run.entity("ground-clearance").unwrap();
+    let text = &run.world.get(label).unwrap().components["sindri.ui.text"]["text"];
+    assert!(text.as_str().unwrap().starts_with("Ground: 0.0"));
+    run.key(Key::Space, true);
+    for _ in 0..15 {
+        step(&mut run);
+    }
+    assert!(run.board("ground_clearance") > 1.0);
+    run.key(Key::Space, false);
+    for _ in 0..120 {
+        step(&mut run);
+    }
+    assert!(run.board("ground_clearance") < 0.03);
+}

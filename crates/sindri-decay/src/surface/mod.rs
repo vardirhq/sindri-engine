@@ -23,6 +23,7 @@ mod maths;
 mod member;
 pub(super) mod names;
 mod person;
+pub(crate) mod raycast;
 pub(crate) mod tween;
 
 #[cfg(test)]

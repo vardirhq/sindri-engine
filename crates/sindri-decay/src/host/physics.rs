@@ -29,6 +29,9 @@ impl WorldHost<'_> {
         path: &Path,
         args: &[Value],
     ) -> Result<Value, RuntimeError> {
+        if matches!(call, PhysicsCall::Raycast) {
+            return self.physics_raycast(path, args);
+        }
         if call.is_event() {
             return self.physics_events(call, path);
         }

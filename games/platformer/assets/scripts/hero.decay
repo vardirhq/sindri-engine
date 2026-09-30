@@ -38,6 +38,7 @@ script Hero {
 
     fn update(dt: f32) {
         touch();
+        probe_ground();
         if Game.won {
             Physics.set_velocity(this.entity, 0.0, Physics.velocity_y(this.entity));
             show(0.0);
@@ -125,6 +126,15 @@ script Hero {
         } else {
             show(3.0);
         }
+    }
+
+    // Read the same simulated colliders as the foot sensor, while ignoring all
+    // pieces of the hero and pickups. This is clearance, not jump permission.
+    fn probe_ground() {
+        let p = this.transform.world_position;
+        let hit = Physics.raycast(Vec2(p.x, p.y), Vec2(0.0, -1.0), 12.0, 4294967295.0, false, this.entity);
+        Game.ground_found = hit != null;
+        if hit != null { Game.ground_clearance = max(0.0, hit.distance - 0.5); }
     }
 
     // What the capsule and the foot sensor touched this step. A coin taken

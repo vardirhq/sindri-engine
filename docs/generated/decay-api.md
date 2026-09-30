@@ -259,6 +259,7 @@ The host names this type but has not described its members.
 - `collision_started()` → `List<Entity>` — The objects that started touching this script's object since the last frame, as a list.
 - `collision_stopped()` → `List<Entity>` — The objects that stopped touching this script's object since the last frame, as a list.
 - `connect_distance(first: Entity, second: Entity, max_distance: f32)` → `unit` — Ties two objects together like a rope: they can come closer, but never further apart than a distance.
+- `raycast(origin: Vec2, direction: Vec2, max_distance: f32, mask: f32, include_sensors: bool, exclude: Entity)` → `RayHit2d` — The closest 2D collider hit, as RayHit2d or null. Normalizes a nonzero Vec2 direction; returns world-space point, normal and distance. The mask selects collider memberships; include_sensors opts into triggers; exclude skips all pieces of one entity (or null). Origin, direction and distance must be finite; distance non-negative; mask a whole u32. Inside hits have distance 0 and normal Vec2(0, 0). Queries synchronized geometry; ignores inactive/despawned entities. Ties prefer entity handle then piece order.
 - `sensor_entered()` → `List<Entity>` — The objects that entered this script's trigger area since the last frame. A trigger area detects things without blocking them, like a pickup.
 - `sensor_exited()` → `List<Entity>` — The objects that left this script's trigger area since the last frame.
 - `set_velocity(entity: Entity, x: f32, y: f32)` → `unit` — Sets how fast, and which way, an object is moving.
@@ -310,6 +311,15 @@ Random numbers. The same seed always gives the same numbers, so a run can be rep
 - `range(min: f32, max: f32)` → `f32` — A random number from `min` up to, but not including, `max`.
 - `seed(value: f32)` → `unit` — Starts the random numbers from a seed. The same seed always gives the same numbers afterwards.
 - `value()` → `f32` — A random number from 0 up to, but not including, 1.
+
+### `RayHit2d`
+
+A copied 2D ray hit snapshot. Null means no hit. Holds entity, world-space point and normal, and distance in world units. Copying or editing a snapshot never changes physics.
+
+- `distance`: `f32` — Distance from the ray origin, in world units.
+- `entity`: `Entity` — The entity owning the hit collider piece.
+- `normal`: `Vec2` — The world-space surface normal, as Vec2. Zero for a hit at distance zero.
+- `point`: `Vec2` — The hit point in world coordinates, as Vec2.
 
 ### `Save`
 

@@ -246,6 +246,18 @@ pub(super) const TYPES: &[TypeEntry] = &[
                 "Ties two objects together like a rope: they can come closer, but never further apart than a distance.",
             ),
             call(
+                "raycast",
+                &[
+                    "origin",
+                    "direction",
+                    "max_distance",
+                    "mask",
+                    "include_sensors",
+                    "exclude",
+                ],
+                "The closest 2D collider hit, as RayHit2d or null. Normalizes a nonzero Vec2 direction; returns world-space point, normal and distance. The mask selects collider memberships; include_sensors opts into triggers; exclude skips all pieces of one entity (or null). Origin, direction and distance must be finite; distance non-negative; mask a whole u32. Inside hits have distance 0 and normal Vec2(0, 0). Queries synchronized geometry; ignores inactive/despawned entities. Ties prefer entity handle then piece order.",
+            ),
+            call(
                 "sensor_entered",
                 &[],
                 "The objects that entered this script's trigger area since the last frame. A trigger area detects things without blocking them, like a pickup.",
@@ -270,6 +282,19 @@ pub(super) const TYPES: &[TypeEntry] = &[
                 &["entity"],
                 "How fast an object is moving up or down.",
             ),
+        ],
+    },
+    TypeEntry {
+        name: "RayHit2d",
+        text: "A copied 2D ray hit snapshot. Null means no hit. Holds entity, world-space point and normal, and distance in world units. Copying or editing a snapshot never changes physics.",
+        members: &[
+            value("entity", "The entity owning the hit collider piece."),
+            value("point", "The hit point in world coordinates, as Vec2."),
+            value(
+                "normal",
+                "The world-space surface normal, as Vec2. Zero for a hit at distance zero.",
+            ),
+            value("distance", "Distance from the ray origin, in world units."),
         ],
     },
     TypeEntry {
