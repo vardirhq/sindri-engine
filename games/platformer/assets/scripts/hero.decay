@@ -34,6 +34,9 @@ script Hero {
         Game.coins_total = World.with_tag("coin").length;
         Game.won = false;
         Game.falls = 0.0;
+        // Screen-space shapes make the touch scheme discoverable without
+        // importing control artwork or teaching the host about this game.
+        World.spawn("prefabs/touch-controls.prefab.json");
     }
 
     fn update(dt: f32) {
