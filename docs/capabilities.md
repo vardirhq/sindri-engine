@@ -405,7 +405,8 @@ Weave is kept in its own workspace, while `sindri-weave` is the one-way bridge
 that knows the engine. Stylesheets compose through `@use`; the exporter follows
 that graph, and the browser host applies independent roots in deterministic asset
 order. `games/weave-poc` is the focused responsive showcase, while Orbital Last
-Stand uses four composed Weave files for its production-oriented screen UI.
+Stand uses five composed Weave files — a shared theme, then its HUD, overlays
+and screens — for its production-oriented screen UI.
 `docs/weave.md` and `docs/weave-reference.md` record the supported surface.
 
 The editor treats manifest-listed `.weave` roots as project assets, previews
@@ -489,7 +490,26 @@ offers it as **UI Slider** in Add Component with `orientation` drawn as a
 declared choice; `value` is still a plain number box, because no field yet
 carries a bounded-range meaning tying it to the `min` and `max` beside it.
 
-No game in this repository uses it. `games/weave-poc` demonstrates it, and
+The widgets beside it follow the same rule, that a person's change and a
+script's write pass through one check. `sindri.ui.toggle` is a boolean that a
+click, tap, Space or Enter flips; whether it looks like a switch or a checkbox
+is styling, through Weave's `:checked`. `sindri.ui.text_input` is a single-line
+field with a placeholder and a limit counted in characters: it takes committed
+Unicode text, Backspace, Enter to submit and Escape to let go, and while it has
+the keyboard its keys are held back from `Input`, so typing does not steer.
+Editing happens at the end; caret movement, selection, clipboard, IME
+composition and software keyboards are not built. `sindri.ui.scroll` scrolls
+its children vertically by wheel, drag or finger, clamped to how tall they are
+as laid out, and clips their drawing and hit-testing to itself; a drag that
+starts on a row never becomes a click on it. Tab and Shift+Tab walk every
+focusable element in the order the scene is written. Decay reads and writes
+them with `Ui.is_checked`, `Ui.input_text`, `Ui.scroll_offset` and their
+setters, and `Ui.changed`, `Ui.submitted` and `Ui.is_focused` answer for the
+step. `examples/ui` is the feature example; Orbital Last Stand proves them in a
+game with a saved compact-HUD switch, a pilot callsign carried onto the HUD and
+results, and a scrolling field manual on its pause screen.
+
+No game in this repository uses the slider. `games/weave-poc` demonstrates it, and
 Mujaffa Remaster — an external project — is what asked for it, so by the
 capability rule the slider is implemented and unproven: `docs/parity.md` records
 its proof column as ❌ until Gather or Orbital Last Stand adopts it.

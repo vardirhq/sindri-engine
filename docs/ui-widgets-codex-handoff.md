@@ -1,51 +1,16 @@
 # Codex handoff: UI widgets, demo, and Orbital redesign
 
-## User request and checkpoint status
+## Status
 
-Chris authorized implementing the missing UI widgets, creating a demo page for
-them, and making Orbital Last Stand's UI look substantially better. He then
-explicitly requested that the current work be pushed and instructions written
-for Codex to finish. This branch is that **unfinished checkpoint**, not a ready
-feature. Do not merge it or describe it as working until validation is complete.
+**Completed in PR #466.** The widgets were compiled and audited, `examples/ui`
+was finished and published with native and browser regressions, and Orbital
+Last Stand's UI was redesigned and proves the widgets in a game (a saved
+compact-HUD switch, a pilot callsign carried onto the HUD and results, and a
+scrolling field manual on pause). `docs/parity.md` records what is still
+absent: dropdown, radio group, tabs, caret and selection editing, IME,
+software keyboards, arrow-key and gamepad focus, and horizontal scrolling.
 
-Continue on `chatgpt/ui-widgets-checkpoint`, based on main at
-`d716c74e96bd55656ad01dbe6aed1a94a1dbce79`. Read AGENTS.md and CLAUDE.md first.
-Read docs/decay-agent-guide.md before editing Decay or its host APIs. No Rust
-toolchain was available in the originating connector workspace. Nothing here
-has been compiled or run. Only static inspection and JSON parsing were possible.
-
-## What is written
-
-- Scene widgets: `UiToggleComponent`, `UiTextInputComponent`,
-  `UiScrollComponent`, registered through `extract/widget_registry.rs` and
-  exported from sindri-scene. They use ordinary components and inspector fields.
-  Toggle and checkbox share boolean interaction semantics; their art is authored.
-- `ScreenUi::read_controls` and host-neutral `UiInput`: tab navigation, toggle
-  activation, end-of-line Unicode input/backspace, enter submission, wheel
-  scrolling, and press-identity tracking for scroll drags. Values are written
-  into the world's component payloads. `changed` and `submitted` are per-step.
-- `UiHierarchy` applies scroll offsets and intersects nested ancestor clip
-  rectangles. Hit testing and UI shape/text/image extraction share clips.
-- `FramePass::clip` adds a generic pixel scissor. The sprite, glyph and shape
-  renderers apply it. Batches break at clip boundaries; empty scissors skip draws.
-- InputState has a separate committed-character stream (TextInput(char)),
-  translated by the desktop/browser winit host and editor input adapter.
-  sindri-decay's `ui_input` converts keyboard/scroll input to scene UiInput.
-  Calls were added to the shared game Session, editor runtime, and Orbital Run.
-- Decay API: `Ui.is_checked`, `set_checked`, `input_text`, `set_input_text`,
-  `scroll_offset`, `set_scroll_offset`, `changed`, `submitted`, `is_focused`.
-  The typed environment, host dispatch and reference entries are updated.
-- Weave reads the input component's runtime `focused` flag for `:focus`.
-- Initial scene tests cover Unicode limits/backspace, tab ordering, disabled
-  toggles, change/submit lifetime, despawned focus, and a hidden scroll child.
-- `examples/ui` is a scene/Decay/Weave **scaffold** called Weave Control Room.
-  It has flight settings, a callsign input, and an 18-module scroll archive.
-  Font bytes are reused from the existing Chakra Petch asset; license copied.
-
-**Orbital's visual redesign has NOT been implemented.** Its existing Weave,
-scene and gameplay are unchanged except the host's widget input call.
-There is no demo export/Pages/browser wiring or demo runtime regression yet.
-Capability docs, changelog, generated API documents and final visual QA remain.
+The checklist below is kept as the record of what was asked.
 
 ## First: compile and audit the checkpoint
 

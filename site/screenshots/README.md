@@ -39,17 +39,23 @@ hour.
 
 ```
 cargo run -p orbital-baked --bin orbital-baked-capture -- \
-  site/screenshots/orbital-baked-combat.png 1440 900 combat
-cargo run -p orbital-baked --bin orbital-baked-capture -- \
   site/screenshots/orbital-baked-spectacle.png 1440 900 spectacle
-cargo run -p orbital-baked --bin orbital-baked-capture -- \
-  site/screenshots/orbital-baked-title.png 1440 900 title
-cargo run -p orbital-baked --bin orbital-baked-capture -- \
-  site/screenshots/orbital-baked-upgrade.png 1440 900 playing
-cargo run -p orbital-baked --bin orbital-baked-capture -- \
-  site/screenshots/orbital-baked-phone.png 390 844 combat
-cargo run -p orbital-baked --bin orbital-baked-capture -- \
-  site/screenshots/orbital-baked-aegis.png 1440 900 boss-11
+```
+
+The rest of Last Stand's pictures show its screen UI, which Weave styles, so
+they come from `project-capture`: the same session and stylesheets the browser
+runs, played through the steps that follow the size (`click:<entity>`,
+`key:<Key>`, `type:<text>`, `wheel:<entity>:<px>`, `set:<board>=<value>`,
+`wait:<seconds>`).
+
+```
+C="cargo run --release -p sindri-causeway --bin project-capture -- games/orbital-baked"
+$C site/screenshots/orbital-baked-title.png 1440 900
+$C site/screenshots/orbital-baked-combat.png 1440 900 click:title-start wait:5
+$C site/screenshots/orbital-baked-upgrade.png 1440 900 click:title-start wait:3 set:cores=40 wait:1
+$C site/screenshots/orbital-baked-phone.png 390 844 click:title-start wait:5
+$C site/screenshots/orbital-baked-aegis.png 1440 900 \
+  $(printf 'click:title-pick %.0s' $(seq 11)) click:title-rush wait:7
 
 cargo run -p sindri-causeway --bin causeway-capture -- site/screenshots/causeway.png
 cargo run -p sindri-cube --bin capture -- site/screenshots/scene-frame-pipeline.png
