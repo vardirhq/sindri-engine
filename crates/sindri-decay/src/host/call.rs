@@ -254,6 +254,12 @@ impl WorldHost<'_> {
                 path.dotted()
             )));
         };
+        // Expanded before it is counted: a prefab with prefabs nested in it
+        // makes all of their entities too, and the limit is on what is made.
+        let prefabs = self.spawning.prefabs;
+        let prefab = prefab
+            .expanded(prefabs)
+            .map_err(|error| RuntimeError::Host(format!("{}: {error}", path.dotted())))?;
         if self.spawning.spawned.len() + prefab.entities.len() > crate::SPAWN_LIMIT_PER_PASS {
             return Err(RuntimeError::Host(format!(
                 "{} would take this pass past {} spawned entities",
@@ -262,7 +268,6 @@ impl WorldHost<'_> {
             )));
         }
 
-        let prefab = prefab.clone();
         let created = self
             .world
             .spawn_prefab(&prefab)

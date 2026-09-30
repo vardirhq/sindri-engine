@@ -2,7 +2,7 @@
 
 use std::collections::BTreeMap;
 
-use sindri_core::PrefabDocument;
+use sindri_core::{PrefabDocument, PrefabLibrary};
 
 /// The prefab documents `World.spawn` can name.
 ///
@@ -58,5 +58,13 @@ impl PrefabSources {
     #[must_use]
     pub fn is_empty(&self) -> bool {
         self.prefabs.is_empty()
+    }
+}
+
+/// So a prefab nested inside another resolves against the same set a script's
+/// spawn does.
+impl PrefabLibrary for PrefabSources {
+    fn prefab(&self, source: &str) -> Option<&PrefabDocument> {
+        self.get(source)
     }
 }

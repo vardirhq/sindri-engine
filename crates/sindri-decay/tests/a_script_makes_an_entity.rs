@@ -547,3 +547,45 @@ fn a_typed_starting_value_is_what_an_untyped_read_sees() {
     let x = spawner[0].transform_3d.expect("a transform").position[0];
     assert!((x - 30.0).abs() < 1.0e-5, "{x}");
 }
+
+/// A prefab with another placed inside it spawns both, the inner one made from
+/// its own prefab.
+#[test]
+fn a_spawned_prefab_brings_the_prefabs_nested_in_it() {
+    let (mut world, sources, mut prefabs) = world(
+        r"
+        script Spawner {
+            @export let bullet: Prefab;
+            fn start() {
+                World.spawn(this.bullet);
+            }
+        }
+        ",
+        None,
+    );
+    let mut volley = PrefabDocument::single(SceneEntity {
+        name: Some("Volley".to_owned()),
+        ..SceneEntity::new(id("volley"))
+    });
+    volley.entities.push(SceneEntity {
+        parent: Some(id("volley")),
+        ..SceneEntity::instance(id("first"), BULLET)
+    });
+    prefabs.insert("prefabs/volley.prefab", volley);
+    let spawner = world
+        .entities()
+        .map(|(entity, _)| entity)
+        .next()
+        .expect("the spawner");
+    world
+        .get_mut(spawner)
+        .expect("the spawner is live")
+        .components
+        .get_mut(ScriptComponent::TYPE_NAME)
+        .expect("a script")["properties"]["bullet"] = json!("prefabs/volley.prefab");
+
+    let report = advance(&mut Scripts::new(), &mut world, &sources, &prefabs);
+    assert!(report.failures.is_empty(), "{:?}", report.failures);
+    assert_eq!(named(&world, "Volley").len(), 1);
+    assert_eq!(named(&world, "Bullet").len(), 1, "the bullet inside it too");
+}

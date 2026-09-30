@@ -4,7 +4,7 @@ use std::collections::BTreeMap;
 
 use serde_json::Value;
 
-use crate::{PrefabDocument, PrefabError, SceneEntity, SceneEntityId};
+use crate::{PrefabDocument, PrefabError, SceneDocument, SceneEntity, SceneEntityId};
 
 use super::instance::{EntityOverride, PrefabLibrary, PrefabLink};
 use super::patch::{apply_merge_patch, merge_patch_between};
@@ -162,6 +162,36 @@ impl PrefabDocument {
     #[must_use]
     pub fn has_instances(&self) -> bool {
         self.entities.iter().any(|entity| entity.prefab.is_some())
+    }
+}
+
+impl SceneDocument {
+    /// This scene with every instance made from its prefab, as plain entities.
+    ///
+    /// For a host that plays a scene and never saves it: what it loads is
+    /// what the instances expand to, and every loading path it already has
+    /// works unchanged. The editor keeps the links instead, through
+    /// [`crate::World::from_scene_with`], because it writes the scene back.
+    ///
+    /// # Errors
+    /// As [`expand_entities`], and a scene whose entities are invalid once
+    /// expanded — one parented under an instance's child it does not have.
+    pub fn expanded(&self, library: &dyn PrefabLibrary) -> Result<Self, PrefabError> {
+        if self.entities.iter().all(|entity| entity.prefab.is_none()) {
+            return Ok(self.clone());
+        }
+        let entities: Vec<SceneEntity> = expand_entities(&self.entities, library)?
+            .into_iter()
+            .map(|expanded| expanded.entity)
+            .collect();
+        crate::scene::validate_entities(&entities)?;
+        let mut document = Self {
+            format_version: self.format_version,
+            metadata: self.metadata.clone(),
+            entities,
+        };
+        document.canonicalize();
+        Ok(document)
     }
 }
 
