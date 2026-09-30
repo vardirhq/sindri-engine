@@ -436,6 +436,9 @@ impl EditorApp {
             camera_for(tab, EditorCamera::default())
         };
         let prefab_target = self.prefab_interaction(rect, response, camera, editing);
+        if editing {
+            self.prefab_drop(rect, response, camera);
+        }
         let volume_hover = (prefab_target.is_none() && editing)
             .then(|| self.tile_volume_hover(rect, response.hover_pos(), camera))
             .flatten();

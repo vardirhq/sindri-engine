@@ -43,6 +43,16 @@ impl EditorApp {
         if !brush.placing || brush.document().is_none() {
             return None;
         }
+        self.cell_under(rect, pointer, camera)
+    }
+
+    /// The frontmost grid cell under the pointer, whatever is being placed.
+    pub(super) fn cell_under(
+        &self,
+        rect: Rect,
+        pointer: Option<Pos2>,
+        camera: CameraView,
+    ) -> Option<PrefabTarget> {
         let pointer = pointer.filter(|pointer| rect.contains(*pointer))?;
         let normalized = [
             (pointer.x - rect.min.x) / rect.width().max(1.0),
@@ -172,18 +182,23 @@ impl EditorApp {
 
     /// Puts an instance of the chosen prefab in the middle of the Scene view,
     /// as one undoable step.
-    ///
-    /// Where the middle of the view meets the plane a 2D scene is drawn in,
-    /// keeping the prefab's own depth, so a prefab authored to sit in front
-    /// of the level still does.
     pub(super) fn place_prefab_in_view(&mut self) {
+        let centre = self.view_point(16.0 / 9.0, [0.0, 0.0]);
+        self.place_prefab_at(centre);
+    }
+
+    /// Puts an instance of the chosen prefab at `point` on the plane a 2D
+    /// scene is drawn in, as one undoable step.
+    ///
+    /// Keeping the prefab's own depth, so a prefab authored to sit in front
+    /// of the level still does.
+    pub(super) fn place_prefab_at(&mut self, point: [f32; 2]) {
         if !self.authoring_enabled() {
             return;
         }
         let Some(source) = self.brush_source() else {
             return;
         };
-        let centre = self.view_centre();
         let transform = self
             .file
             .prefabs()
@@ -192,7 +207,7 @@ impl EditorApp {
             .and_then(|root| root.transform_3d)
             .unwrap_or_default();
         let transform = Transform3D {
-            position: [centre[0], centre[1], transform.position[2]],
+            position: [point[0], point[1], transform.position[2]],
             ..transform
         };
         let mut rehearsal = self.world.clone();
@@ -223,29 +238,29 @@ impl EditorApp {
         self.select(Some(root));
     }
 
-    /// Where the middle of the Scene view meets the plane `z = 0`, or the
-    /// origin when it cannot be worked out.
-    fn view_centre(&self) -> [f32; 3] {
+    /// Where a point of the Scene view, in normalized device coordinates,
+    /// meets the plane `z = 0`, or the origin when it cannot be worked out.
+    pub(super) fn view_point(&self, aspect: f32, ndc: [f32; 2]) -> [f32; 2] {
         let camera = self
             .scene
-            .world_camera_for_viewport(&self.world, 16.0 / 9.0, self.scene_camera())
+            .world_camera_for_viewport(&self.world, aspect, self.scene_camera())
             .ok()
             .flatten();
         let Some(camera) = camera else {
-            return [0.0; 3];
+            return [0.0; 2];
         };
         let inverse = camera.view_projection.inverse();
-        let near = inverse.project_point3(Vec3::new(0.0, 0.0, 0.0));
-        let far = inverse.project_point3(Vec3::new(0.0, 0.0, 1.0));
+        let near = inverse.project_point3(Vec3::new(ndc[0], ndc[1], 0.0));
+        let far = inverse.project_point3(Vec3::new(ndc[0], ndc[1], 1.0));
         let direction = far - near;
         if direction.z.abs() < f32::EPSILON {
-            return [near.x, near.y, 0.0];
+            return [near.x, near.y];
         }
         let point = near + direction * (-near.z / direction.z);
         if point.is_finite() {
-            [point.x, point.y, 0.0]
+            [point.x, point.y]
         } else {
-            [0.0; 3]
+            [0.0; 2]
         }
     }
 

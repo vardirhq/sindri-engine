@@ -65,6 +65,7 @@ mod overlay;
 mod palette_view;
 mod pointer;
 mod prefab_authoring;
+pub(crate) mod prefab_drop;
 mod prefab_panel;
 mod prefab_pointer;
 mod prefab_writes;

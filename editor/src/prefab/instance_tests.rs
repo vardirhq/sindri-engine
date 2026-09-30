@@ -405,3 +405,49 @@ fn a_subtree_becomes_a_prefab_that_nests_the_instances_in_it() {
         "the coin is still an instance"
     );
 }
+
+/// A scene whose prefab has gone opens with a placeholder for the instance,
+/// and saves the instance back exactly as it was written.
+#[test]
+fn a_scene_with_a_missing_prefab_opens_and_saves_it_back_unchanged() {
+    let directory = std::env::temp_dir().join(format!("sindri-missing-{}", std::process::id()));
+    let _ = std::fs::remove_dir_all(&directory);
+    std::fs::create_dir_all(&directory).unwrap();
+    let mut changes = EntityOverride::default();
+    changes
+        .components
+        .insert("sindri.sprite".to_owned(), json!({ "layer": 9 }));
+    let placed = SceneEntity {
+        name: Some("Lucky".to_owned()),
+        transform_3d: Some(Transform3D {
+            position: [2.0, 0.0, 0.0],
+            ..Transform3D::default()
+        }),
+        prefab: Some(sindri_core::PrefabInstance {
+            overrides: BTreeMap::from([(id("coin"), changes)]),
+            ..sindri_core::PrefabInstance::new(COIN)
+        }),
+        ..SceneEntity::new(id("coin-1"))
+    };
+    let glint = SceneEntity {
+        parent: Some(id("coin-1/sparkle")),
+        ..SceneEntity::new(id("glint"))
+    };
+    let scene = SceneDocument {
+        entities: vec![placed, glint],
+        ..SceneDocument::default()
+    }
+    .canonicalized();
+    let path = directory.join("level.scene");
+    crate::scene_file::SceneFile::create(&path, &scene).unwrap();
+
+    let mut file = crate::scene_file::SceneFile::open(&path).expect("it opens");
+    assert_eq!(file.missing().len(), 1);
+    let world = crate::native::load_world(&crate::native::scene_extractor(), &file).unwrap();
+    assert_eq!(world.len(), 2, "a placeholder, and the entity under it");
+    file.save(&world).unwrap();
+    let saved =
+        SceneDocument::from_json(&std::fs::read_to_string(&path).unwrap()).expect("it reads");
+    assert_eq!(saved, scene);
+    let _ = std::fs::remove_dir_all(&directory);
+}

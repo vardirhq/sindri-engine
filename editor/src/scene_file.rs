@@ -8,6 +8,7 @@
 //! with disk, and the two operations that keep them in step.
 
 use std::{
+    collections::BTreeSet,
     fmt,
     path::{Path, PathBuf},
 };
@@ -17,6 +18,7 @@ use thiserror::Error;
 
 use crate::prefab::ScenePrefabs;
 use crate::prefab::document::{asset_root_for, is_prefab_path, prefab_text, read_as_scene};
+use crate::prefab::missing::{restore, stand_in};
 
 /// A scene document together with the file it belongs to.
 ///
@@ -31,6 +33,9 @@ pub struct SceneFile {
     /// A path whose folder is where this document's asset IDs resolve: the
     /// file itself for a scene, and its scene's folder for a prefab.
     anchor: Option<PathBuf>,
+    /// Prefabs this document places that could not be read, and why. Their
+    /// instances are placeholders until the scene is opened again.
+    missing: Vec<(String, String)>,
 }
 
 impl SceneFile {
@@ -54,15 +59,25 @@ impl SceneFile {
             (document, path.to_path_buf())
         };
         let mut prefabs = ScenePrefabs::beside(Some(&anchor));
-        prefabs
-            .read_placed_by(&document.entities)
-            .map_err(SceneFileError::Prefab)?;
+        let missing = prefabs.read_available(&document.entities);
+        let unusable = unusable(&prefabs, &missing);
+        let document = if unusable.is_empty() {
+            document
+        } else {
+            stand_in(&document, &unusable)
+        };
         Ok(Self {
             path: Some(path.to_path_buf()),
             document,
             prefabs,
             anchor: Some(anchor),
+            missing,
         })
+    }
+
+    /// Prefabs this document places that could not be read, and why.
+    pub fn missing(&self) -> &[(String, String)] {
+        &self.missing
     }
 
     /// Whether the open document is a prefab rather than a scene.
@@ -90,6 +105,7 @@ impl SceneFile {
             document,
             prefabs: ScenePrefabs::default(),
             anchor: None,
+            missing: Vec::new(),
         }
     }
 
@@ -145,14 +161,17 @@ impl SceneFile {
     /// a real file this way, which is the only way it ever could.
     pub fn save_as(&mut self, path: &Path, world: &World) -> Result<(), SceneFileError> {
         let document = world.to_scene_with(&self.prefabs)?;
+        // Placeholders go back to being the instances they stand in for.
+        let mut written = document.clone();
+        restore(&mut written);
         if is_prefab_path(path) {
-            let text = prefab_text(&document).map_err(SceneFileError::Prefab)?;
+            let text = prefab_text(&written).map_err(SceneFileError::Prefab)?;
             std::fs::write(path, text).map_err(|source| SceneFileError::Write {
                 path: path.display().to_string(),
                 source,
             })?;
         } else {
-            write_scene(path, &document)?;
+            write_scene(path, &written)?;
             self.anchor = Some(path.to_path_buf());
             self.prefabs.move_beside(path);
         }
@@ -192,6 +211,29 @@ impl SceneFile {
         let path = self.path.clone().ok_or(SceneFileError::NoPath)?;
         *self = Self::open(path)?;
         Ok(())
+    }
+}
+
+/// The prefabs whose instances cannot be made: the ones that could not be
+/// read, and every one that places one of those, however deep.
+fn unusable(prefabs: &ScenePrefabs, missing: &[(String, String)]) -> BTreeSet<String> {
+    let mut unusable: BTreeSet<String> = missing.iter().map(|(id, _)| id.clone()).collect();
+    loop {
+        let before = unusable.len();
+        for (id, prefab) in prefabs.iter() {
+            let places_one = prefab.entities.iter().any(|entity| {
+                entity
+                    .prefab
+                    .as_ref()
+                    .is_some_and(|instance| unusable.contains(&instance.source))
+            });
+            if places_one {
+                unusable.insert(id.to_owned());
+            }
+        }
+        if unusable.len() == before {
+            return unusable;
+        }
     }
 }
 

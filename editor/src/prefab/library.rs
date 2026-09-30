@@ -64,6 +64,26 @@ impl ScenePrefabs {
         Ok(())
     }
 
+    /// Reads every prefab `entities` place that can be read, answering with
+    /// each one that could not and why.
+    pub fn read_available(&mut self, entities: &[SceneEntity]) -> Vec<(String, String)> {
+        let mut failed: Vec<(String, String)> = Vec::new();
+        let mut pending: Vec<String> = placed_by(entities).collect();
+        while let Some(id) = pending.pop() {
+            if self.loaded.contains_key(&id) || failed.iter().any(|(gone, _)| *gone == id) {
+                continue;
+            }
+            match self.read(&id) {
+                Ok(prefab) => {
+                    pending.extend(placed_by(&prefab.entities));
+                    self.loaded.insert(id, prefab);
+                }
+                Err(reason) => failed.push((id, reason)),
+            }
+        }
+        failed
+    }
+
     /// Reads one prefab from disk, and the ones nested in it.
     ///
     /// # Errors
