@@ -229,9 +229,10 @@ fn a_scanned_manifest_says_what_its_assets_are() {
     }
 }
 
-/// A prefab and a sheet both end in `.json`, and so does a scene.
+/// Each authored format is known by its own extension, and a plain `.json`
+/// file is not mistaken for any of them.
 #[test]
-fn the_longer_name_wins_among_the_json_documents() {
+fn each_authored_format_is_known_by_its_extension() {
     assert_eq!(
         AssetKind::for_id("a/b.prefab"),
         AssetKind::Prefab,

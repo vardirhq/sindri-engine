@@ -176,12 +176,11 @@ impl AssetKind {
             Some("png" | "jpg" | "jpeg") => Self::Texture,
             Some("ttf" | "otf") => Self::Font,
             Some("decay") => Self::Script,
-            // Both end in `.json`, so the longer name is tested first.
-            _ if id.ends_with(sindri_core::PREFAB_SUFFIX) => Self::Prefab,
-            _ if id.ends_with(sindri_core::PROFILE_SUFFIX) => Self::Profile,
-            _ if id.ends_with(".sheet") => Self::Sheet,
-            _ if id.ends_with(sindri_core::TILESET_SUFFIX) => Self::TileSet,
-            _ if id.ends_with(".scene") => Self::Scene,
+            Some("scene") => Self::Scene,
+            Some("prefab") => Self::Prefab,
+            Some("profile") => Self::Profile,
+            Some("sheet") => Self::Sheet,
+            Some("tileset") => Self::TileSet,
             _ => Self::Other,
         }
     }

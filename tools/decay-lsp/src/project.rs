@@ -45,7 +45,7 @@ impl ProjectIndex {
             if matches!(extension.as_deref(), Some("wav" | "ogg" | "mp3" | "flac")) {
                 self.audio_assets.insert(relative.clone());
             }
-            if !relative.ends_with(".scene") {
+            if extension.as_deref() != Some("scene") {
                 continue;
             }
             let Ok(text) = fs::read_to_string(&path) else {
