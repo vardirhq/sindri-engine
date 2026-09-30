@@ -1129,10 +1129,12 @@
       "addable": true,
       "apply": {},
       "default_payload": {
+        "disabled": false,
         "label": ""
       },
       "display_name": "UI Button",
       "fields": {
+        "disabled": false,
         "label": ""
       },
       "meanings": {},
