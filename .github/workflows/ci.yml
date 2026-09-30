@@ -620,6 +620,8 @@ jobs:
             target/render-artifacts/browser-causeway.png
             target/render-artifacts/browser-weave-phone.png
             target/render-artifacts/browser-orbital-baked-phone.png
+            target/render-artifacts/browser-tween.png
+            target/render-artifacts/browser-tween-phone.png
             target/render-artifacts/browser-no-canvas.png
             target/render-artifacts/browser-no-adapter.png
             target/render-artifacts/browser-no-device.png
