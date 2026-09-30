@@ -9,7 +9,10 @@ use sindri_render::{
     SpriteBatchRenderer, TextRenderer, TextureRegistry, TexturedCubeRenderer, Viewport,
     encode_prepared_frame,
 };
-use sindri_scene::{SceneExtractError, SceneExtractor, ScreenExtent, ScreenUi, TextureBindings, update_camera_behaviors};
+use sindri_scene::{
+    SceneExtractError, SceneExtractor, ScreenExtent, ScreenUi, TextureBindings,
+    update_camera_behaviors,
+};
 use thiserror::Error;
 
 const SCENE_JSON: &str = include_str!("../assets/demo.scene");
@@ -43,7 +46,13 @@ impl Game for CameraGame {
         // Pixel dimensions fit f32 exactly for every supported viewport.
         #[allow(clippy::cast_precision_loss)]
         let extent = ScreenExtent::new(context.viewport[0] as f32, context.viewport[1] as f32);
-        self.screen.update(context.world, &self.components, extent, context.input.presses())
+        self.screen
+            .update(
+                context.world,
+                &self.components,
+                extent,
+                context.input.presses(),
+            )
             .map_err(|error| DemoError::Host(error.to_string()))?;
         let report = self.scripts.advance(
             context.world,
@@ -200,9 +209,7 @@ pub fn run() {
     #[cfg(not(target_arch = "wasm32"))]
     env_logger::init();
 
-    if let Err(error) =
-        sindri_desktop::run::<CameraApp>(WindowConfig::new("Sindri - Camera Lab"))
-    {
+    if let Err(error) = sindri_desktop::run::<CameraApp>(WindowConfig::new("Sindri - Camera Lab")) {
         log::error!("{error}");
     }
 }

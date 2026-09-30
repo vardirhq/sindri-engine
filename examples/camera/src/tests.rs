@@ -5,10 +5,14 @@ use sindri_scene::CameraBehaviorComponent;
 fn demo(width: u32, height: u32) -> EngineHost<CameraGame> {
     let document = SceneDocument::from_json(SCENE_JSON).unwrap();
     let extractor = demo_extractor().unwrap();
-    extractor.validate(&document, sindri_core::UnknownComponentPolicy::Reject).unwrap();
+    extractor
+        .validate(&document, sindri_core::UnknownComponentPolicy::Reject)
+        .unwrap();
     let mut engine = EngineHost::new(
-        CameraGame::new(extractor.components().clone()), FixedStepConfig::default(),
-    ).unwrap();
+        CameraGame::new(extractor.components().clone()),
+        FixedStepConfig::default(),
+    )
+    .unwrap();
     *engine.world_mut() = World::from_scene(&document).unwrap().world;
     engine.set_viewport(width, height);
     engine.start().unwrap();
@@ -21,10 +25,17 @@ fn frames(engine: &mut EngineHost<CameraGame>, count: u32) {
     }
 }
 fn entity(engine: &EngineHost<CameraGame>, id: &str) -> EntityId {
-    engine.world().entity_for_source_id(&SceneEntityId::new(id).unwrap()).unwrap()
+    engine
+        .world()
+        .entity_for_source_id(&SceneEntityId::new(id).unwrap())
+        .unwrap()
 }
 fn position(engine: &EngineHost<CameraGame>, id: &str) -> [f32; 3] {
-    engine.world().world_transform(entity(engine, id)).unwrap().position
+    engine
+        .world()
+        .world_transform(entity(engine, id))
+        .unwrap()
+        .position
 }
 fn press(engine: &mut EngineHost<CameraGame>, key: Key) {
     engine.queue_input(InputEvent::KeyPressed(key));
@@ -33,7 +44,11 @@ fn press(engine: &mut EngineHost<CameraGame>, key: Key) {
     frames(engine, 1);
 }
 fn behavior(engine: &EngineHost<CameraGame>) -> &serde_json::Value {
-    &engine.world().get(entity(engine, "camera")).unwrap().components[CameraBehaviorComponent::TYPE_NAME]
+    &engine
+        .world()
+        .get(entity(engine, "camera"))
+        .unwrap()
+        .components[CameraBehaviorComponent::TYPE_NAME]
 }
 
 #[test]
@@ -66,15 +81,25 @@ fn independent_modes_restore_settings_and_confinement_is_observable() {
     frames(&mut engine, 180);
     assert!(position(&engine, "camera")[0] > 10.0);
     press(&mut engine, Key::Z);
-    assert!(behavior(&engine)["follow"]["dead_zone"][0].as_f64().unwrap().abs() < f64::EPSILON);
+    assert!(
+        behavior(&engine)["follow"]["dead_zone"][0]
+            .as_f64()
+            .unwrap()
+            .abs()
+            < f64::EPSILON
+    );
     press(&mut engine, Key::S);
-    assert!((behavior(&engine)["follow"]["smoothing"].as_f64().unwrap() - 1000.0).abs() < f64::EPSILON);
+    assert!(
+        (behavior(&engine)["follow"]["smoothing"].as_f64().unwrap() - 1000.0).abs() < f64::EPSILON
+    );
     engine.queue_input(InputEvent::KeyReleased(Key::ArrowRight));
     press(&mut engine, Key::R);
     frames(&mut engine, 240);
     assert!(position(&engine, "target")[0].abs() < 0.00001);
     assert!(position(&engine, "camera")[0].abs() <= 1.251);
-    assert!((behavior(&engine)["follow"]["smoothing"].as_f64().unwrap() - 5.0).abs() < f64::EPSILON);
+    assert!(
+        (behavior(&engine)["follow"]["smoothing"].as_f64().unwrap() - 5.0).abs() < f64::EPSILON
+    );
     assert!(!behavior(&engine)["confine"].is_null());
 }
 
@@ -95,12 +120,20 @@ fn shake_can_be_disabled_and_impacts_decay_without_drift() {
 fn phone_touch_buttons_toggle_modes_and_move_the_target() {
     let mut engine = demo(390, 844);
     // Follow is at x=-0.6*aspect, y=-0.49 in the viewport overlay.
-    engine.queue_input(InputEvent::TouchStarted { id: 1, x: 78.0, y: 628.78 });
+    engine.queue_input(InputEvent::TouchStarted {
+        id: 1,
+        x: 78.0,
+        y: 628.78,
+    });
     frames(&mut engine, 1);
     engine.queue_input(InputEvent::TouchEnded { id: 1 });
     frames(&mut engine, 1);
     assert!(behavior(&engine)["follow"].is_null());
-    engine.queue_input(InputEvent::TouchStarted { id: 2, x: 323.7, y: 759.6 });
+    engine.queue_input(InputEvent::TouchStarted {
+        id: 2,
+        x: 323.7,
+        y: 759.6,
+    });
     frames(&mut engine, 30);
     assert!(position(&engine, "target")[0] > 2.0);
     engine.queue_input(InputEvent::TouchEnded { id: 2 });
@@ -117,6 +150,10 @@ fn automatic_tour_crosses_the_bounds_and_manual_input_stops_it() {
     assert!(position(&engine, "camera")[0] <= 8.00001);
     engine.queue_input(InputEvent::KeyPressed(Key::ArrowLeft));
     frames(&mut engine, 1);
-    let label = &engine.world().get(entity(&engine, "tour-label")).unwrap().components["sindri.ui.text"]["text"];
+    let label = &engine
+        .world()
+        .get(entity(&engine, "tour-label"))
+        .unwrap()
+        .components["sindri.ui.text"]["text"];
     assert_eq!(label.as_str(), Some("START TOUR"));
 }
