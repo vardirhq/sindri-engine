@@ -80,4 +80,3 @@ pub mod prelude {
         Transform3D, UnknownComponentPolicy, WeakAssetHandle, World, WorldCommand,
     };
 }
-

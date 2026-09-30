@@ -95,8 +95,11 @@ pub(super) fn tick(
     // instance either exists or is being built, and either way its authored
     // properties have been decided.
     at.started.insert(entity);
-    if fresh { at.tweens.remove_owner(entity); }
-    else { at.tweens.advance(entity, f64::from(delta_seconds)); }
+    if fresh {
+        at.tweens.remove_owner(entity);
+    } else {
+        at.tweens.advance(entity, f64::from(delta_seconds));
+    }
 
     // Taken out of the map for the call, so the host can lend every *other*
     // running script to this one, and put back whatever happens.
@@ -482,4 +485,3 @@ pub(crate) fn to_value(value: &serde_json::Value) -> Option<Value> {
         serde_json::Value::Object(_) => return None,
     })
 }
-

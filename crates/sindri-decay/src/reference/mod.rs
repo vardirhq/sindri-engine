@@ -15,8 +15,8 @@
 
 mod game;
 mod input;
-mod world;
 mod tween;
+mod world;
 
 /// One name: a value a script reads, or a call it makes.
 #[derive(Clone, Copy, Debug)]
@@ -183,4 +183,3 @@ pub fn member_entry(owner: &str, name: &str) -> Option<&'static Entry> {
         .iter()
         .find(|entry| entry.name == name)
 }
-

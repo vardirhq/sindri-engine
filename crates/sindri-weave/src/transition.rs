@@ -391,4 +391,3 @@ mod tests {
         assert!((timings["color"].delay - 0.05).abs() < 1.0e-6);
     }
 }
-

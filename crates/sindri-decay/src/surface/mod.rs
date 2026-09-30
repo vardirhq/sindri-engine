@@ -300,4 +300,3 @@ pub(crate) fn follow_mut<'a>(value: &'a mut Json, pointer: &[Seg]) -> Option<&'a
         Seg::Index(index) => value.get_mut(index),
     })
 }
-

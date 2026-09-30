@@ -418,4 +418,3 @@ mod tests {
         assert!(queue.is_empty());
     }
 }
-

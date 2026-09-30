@@ -3,9 +3,16 @@ use decay_runtime::Value;
 use sindri_core::{Easing, EntityData, World};
 
 fn track(owner: sindri_core::EntityId) -> Track {
-    Track { owner, from: Value::Number(0.0), to: Value::Number(1.0),
-        duration: 1.0, elapsed: 0.0, easing: Easing::Linear,
-        paused: false, cancelled: false }
+    Track {
+        owner,
+        from: Value::Number(0.0),
+        to: Value::Number(1.0),
+        duration: 1.0,
+        elapsed: 0.0,
+        easing: Easing::Linear,
+        paused: false,
+        cancelled: false,
+    }
 }
 
 #[test]
@@ -34,7 +41,9 @@ fn owners_advance_independently_and_reclamation_never_reuses_handles() {
 fn retained_handles_are_bounded_and_disposal_reclaims_capacity() {
     let owner = World::default().spawn(EntityData::default());
     let mut tweens = Tweens::default();
-    for _ in 0..LIMIT { tweens.insert(track(owner)).expect("within bound"); }
+    for _ in 0..LIMIT {
+        tweens.insert(track(owner)).expect("within bound");
+    }
     assert!(tweens.insert(track(owner)).is_err());
     tweens.dispose(1);
     assert!(tweens.insert(track(owner)).is_ok());

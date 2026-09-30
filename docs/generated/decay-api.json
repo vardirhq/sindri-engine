@@ -130,6 +130,12 @@
       "type": "Touch"
     },
     {
+      "description": "Creates automatically playing gameplay tweens owned by the calling script. Copies alias playback state. Advance occurs before the owner's subsequent updates using script delta. No automatic property binding. Curves: linear, ease, ease-in, ease-out, ease-in-out. Finite endpoints and finite non-negative duration are required; zero duration completes immediately. Maximum 8192 retained handles per runner; dispose unused handles.",
+      "kind": "value",
+      "name": "Tween",
+      "type": "Tween"
+    },
+    {
       "description": "The interface drawn over the game: changing text and bars, and checking buttons and sliders.",
       "kind": "value",
       "name": "Ui",
@@ -741,6 +747,11 @@
       "name": "Camera"
     },
     {
+      "description": "A managed Color tween; read with Tween.color_value.",
+      "members": [],
+      "name": "ColorTween"
+    },
+    {
       "description": "Particle effects, such as sparks and explosions. The particles are only drawn; they are not objects and nothing can touch them.",
       "members": [
         {
@@ -1287,6 +1298,11 @@
         }
       ],
       "name": "Input"
+    },
+    {
+      "description": "A managed number tween; read with Tween.number_value.",
+      "members": [],
+      "name": "NumberTween"
     },
     {
       "description": "2D physics: moving objects with speed and pushes, and finding out what this script's object bumped into.",
@@ -2060,6 +2076,245 @@
       "name": "Transform"
     },
     {
+      "description": "Creates automatically playing gameplay tweens owned by the calling script. Copies alias playback state. Advance occurs before the owner's subsequent updates using script delta. No automatic property binding. Curves: linear, ease, ease-in, ease-out, ease-in-out. Finite endpoints and finite non-negative duration are required; zero duration completes immediately. Maximum 8192 retained handles per runner; dispose unused handles.",
+      "members": [
+        {
+          "description": "Stops at the current value; is_done is false. Restart can play it again.",
+          "kind": "function",
+          "name": "cancel",
+          "parameter_names": [
+            "tween"
+          ],
+          "parameters": [
+            "TweenHandle"
+          ],
+          "returns": "unit"
+        },
+        {
+          "description": "Starts a ColorTween, blending all four channels without additional gamma conversion or channel clamping.",
+          "kind": "function",
+          "name": "color",
+          "parameter_names": [
+            "from",
+            "to",
+            "duration",
+            "easing"
+          ],
+          "parameters": [
+            "Color",
+            "Color",
+            "f32",
+            "String"
+          ],
+          "returns": "ColorTween"
+        },
+        {
+          "description": "Reads the eased Color including alpha.",
+          "kind": "function",
+          "name": "color_value",
+          "parameter_names": [
+            "tween"
+          ],
+          "parameters": [
+            "ColorTween"
+          ],
+          "returns": "Color"
+        },
+        {
+          "description": "Releases a tween; aliases become invalid. Owner removal, script replacement and runner reset also release it.",
+          "kind": "function",
+          "name": "dispose",
+          "parameter_names": [
+            "tween"
+          ],
+          "parameters": [
+            "TweenHandle"
+          ],
+          "returns": "unit"
+        },
+        {
+          "description": "Whether cancelled; its last value remains readable until disposed.",
+          "kind": "function",
+          "name": "is_cancelled",
+          "parameter_names": [
+            "tween"
+          ],
+          "parameters": [
+            "TweenHandle"
+          ],
+          "returns": "bool"
+        },
+        {
+          "description": "True on natural completion, including zero duration. Cancellation is not completion.",
+          "kind": "function",
+          "name": "is_done",
+          "parameter_names": [
+            "tween"
+          ],
+          "parameters": [
+            "TweenHandle"
+          ],
+          "returns": "bool"
+        },
+        {
+          "description": "Whether advancement is paused.",
+          "kind": "function",
+          "name": "is_paused",
+          "parameter_names": [
+            "tween"
+          ],
+          "parameters": [
+            "TweenHandle"
+          ],
+          "returns": "bool"
+        },
+        {
+          "description": "Starts a NumberTween; duration is seconds.",
+          "kind": "function",
+          "name": "number",
+          "parameter_names": [
+            "from",
+            "to",
+            "duration",
+            "easing"
+          ],
+          "parameters": [
+            "f32",
+            "f32",
+            "f32",
+            "String"
+          ],
+          "returns": "NumberTween"
+        },
+        {
+          "description": "Reads the eased number, held at the exact target after completion.",
+          "kind": "function",
+          "name": "number_value",
+          "parameter_names": [
+            "tween"
+          ],
+          "parameters": [
+            "NumberTween"
+          ],
+          "returns": "f32"
+        },
+        {
+          "description": "Pauses at the current value.",
+          "kind": "function",
+          "name": "pause",
+          "parameter_names": [
+            "tween"
+          ],
+          "parameters": [
+            "TweenHandle"
+          ],
+          "returns": "unit"
+        },
+        {
+          "description": "Linear elapsed fraction from 0 to 1; zero duration is 1.",
+          "kind": "function",
+          "name": "progress",
+          "parameter_names": [
+            "tween"
+          ],
+          "parameters": [
+            "TweenHandle"
+          ],
+          "returns": "f32"
+        },
+        {
+          "description": "Resets to the original endpoints and begins again, clearing pause/cancellation.",
+          "kind": "function",
+          "name": "restart",
+          "parameter_names": [
+            "tween"
+          ],
+          "parameters": [
+            "TweenHandle"
+          ],
+          "returns": "unit"
+        },
+        {
+          "description": "Resumes a paused tween. Does not undo cancellation.",
+          "kind": "function",
+          "name": "resume",
+          "parameter_names": [
+            "tween"
+          ],
+          "parameters": [
+            "TweenHandle"
+          ],
+          "returns": "unit"
+        },
+        {
+          "description": "Starts a Vec2Tween in the endpoints' coordinate space.",
+          "kind": "function",
+          "name": "vec2",
+          "parameter_names": [
+            "from",
+            "to",
+            "duration",
+            "easing"
+          ],
+          "parameters": [
+            "Vec2",
+            "Vec2",
+            "f32",
+            "String"
+          ],
+          "returns": "Vec2Tween"
+        },
+        {
+          "description": "Reads the eased Vec2.",
+          "kind": "function",
+          "name": "vec2_value",
+          "parameter_names": [
+            "tween"
+          ],
+          "parameters": [
+            "Vec2Tween"
+          ],
+          "returns": "Vec2"
+        },
+        {
+          "description": "Starts a Vec3Tween in the endpoints' coordinate space.",
+          "kind": "function",
+          "name": "vec3",
+          "parameter_names": [
+            "from",
+            "to",
+            "duration",
+            "easing"
+          ],
+          "parameters": [
+            "Vec3",
+            "Vec3",
+            "f32",
+            "String"
+          ],
+          "returns": "Vec3Tween"
+        },
+        {
+          "description": "Reads the eased Vec3. Apply through ordinary checked transform setters.",
+          "kind": "function",
+          "name": "vec3_value",
+          "parameter_names": [
+            "tween"
+          ],
+          "parameters": [
+            "Vec3Tween"
+          ],
+          "returns": "Vec3"
+        }
+      ],
+      "name": "Tween"
+    },
+    {
+      "description": "The common handle accepted by playback controls; only factories construct one.",
+      "members": [],
+      "name": "TweenHandle"
+    },
+    {
       "description": "The interface drawn over the game: changing text and bars, and checking buttons and sliders.",
       "members": [
         {
@@ -2214,6 +2469,16 @@
         }
       ],
       "name": "UiImage"
+    },
+    {
+      "description": "A managed Vec2 tween; read with Tween.vec2_value.",
+      "members": [],
+      "name": "Vec2Tween"
+    },
+    {
+      "description": "A managed Vec3 tween; read with Tween.vec3_value.",
+      "members": [],
+      "name": "Vec3Tween"
     },
     {
       "description": "The area of the screen the game is drawn in.",

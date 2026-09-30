@@ -4,8 +4,8 @@
 //! script may say and what the host will answer cannot drift apart.
 
 mod grid;
-mod world;
 mod tween;
+mod world;
 
 use grid::add_grid_surface;
 use world::add_world_surface;
@@ -499,4 +499,3 @@ pub fn referenced_sources(world: &World, components: &ComponentSchemaRegistry) -
         .map(|(_, component)| component.source)
         .collect()
 }
-

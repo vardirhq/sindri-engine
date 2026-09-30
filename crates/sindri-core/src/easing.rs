@@ -30,8 +30,12 @@ impl Easing {
     /// finished tween reaches its destination without residual error.
     #[must_use]
     pub fn apply(self, t: f32) -> f32 {
-        if t <= 0.0 { return 0.0; }
-        if t >= 1.0 { return 1.0; }
+        if t <= 0.0 {
+            return 0.0;
+        }
+        if t >= 1.0 {
+            return 1.0;
+        }
         let (x1, y1, x2, y2) = match self {
             Self::Linear => return t,
             Self::Ease => (0.25, 0.1, 0.25, 1.0),
@@ -46,8 +50,11 @@ impl Easing {
         let (mut low, mut high) = (0.0_f32, 1.0_f32);
         for _ in 0..20 {
             let middle = f32::midpoint(low, high);
-            if bezier(x1, x2, middle) < t { low = middle; }
-            else { high = middle; }
+            if bezier(x1, x2, middle) < t {
+                low = middle;
+            } else {
+                high = middle;
+            }
         }
         bezier(y1, y2, f32::midpoint(low, high))
     }

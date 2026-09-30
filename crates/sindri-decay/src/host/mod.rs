@@ -34,8 +34,8 @@ mod scene;
 mod services;
 mod shared;
 mod tiles;
-mod ui;
 mod tween;
+mod ui;
 
 pub use services::WorldServices;
 
@@ -575,4 +575,3 @@ impl WorldHost<'_> {
         (parts.next()? == "this").then(|| parts.collect())
     }
 }
-

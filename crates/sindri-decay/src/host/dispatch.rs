@@ -154,4 +154,3 @@ fn named<T: Copy>(table: &[(&str, T)], name: &str) -> Option<T> {
         .find(|(known, _)| *known == name)
         .map(|(_, call)| *call)
 }
-
