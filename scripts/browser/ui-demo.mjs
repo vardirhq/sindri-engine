@@ -24,7 +24,22 @@ export async function uiDemo(page, viewport, evidence, problems) {
   await press(at.checkbox);
   await press(at.autopilot); // locked: must report nothing
   await press(at.callsign);
-  await page.keyboard.type('Nøva 7');
+  // One key press per character, as a keyboard with those keys sends them:
+  // `keyboard.type` delivers a character that is not on a US layout through
+  // `insertText`, the IME and paste path, which the host does not read yet.
+  // Playwright names no such key, so those go through CDP as a real keydown.
+  const keys = await page.context().newCDPSession(page);
+  for (const key of 'Nøva 7') {
+    if (key.charCodeAt(0) < 128) {
+      await page.keyboard.press(key);
+      continue;
+    }
+    for (const type of ['keyDown', 'keyUp']) {
+      await keys.send('Input.dispatchKeyEvent', {
+        type, key, text: type === 'keyDown' ? key : undefined, unmodifiedText: key,
+      });
+    }
+  }
   await page.keyboard.press('Enter');
   await settle();
   await page.keyboard.press('Escape');
