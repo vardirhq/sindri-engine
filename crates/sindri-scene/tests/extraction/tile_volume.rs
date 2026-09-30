@@ -60,7 +60,7 @@ fn tile_sets_with_three_faces() -> TileSetBindings {
 fn bind(json: &str) -> TileSetBindings {
     let document = TileSetDocument::from_json(json).unwrap();
     let mut bindings = TileSetBindings::new();
-    bindings.bind("world.tileset.json", document).unwrap();
+    bindings.bind("world.tileset", document).unwrap();
     bindings
 }
 
@@ -94,7 +94,7 @@ fn volume_scene(cells: &str, projection: &str) -> sindri_core::World {
             "level_step": [0.0, 0.5], "projection": "{projection}"
           }},
           "sindri.tile_volume": {{
-            "tileset": "world.tileset.json",
+            "tileset": "world.tileset",
             "cells": [{cells}]
           }}
         }} }}"#
@@ -141,7 +141,7 @@ fn stacking_culls_the_shared_face_and_keeps_exposed_faces() {
             "level_step": [0.0, 0.5], "projection": "isometric"
           },
           "sindri.tile_volume": {
-            "tileset": "world.tileset.json",
+            "tileset": "world.tileset",
             "cells": [
               { "position": [0, 0, 0], "tile": "grass" },
               { "position": [0, 0, 1], "tile": "grass" }
@@ -182,7 +182,7 @@ fn a_volume_requires_its_reusable_tile_set_binding() {
         { "id": "blocks", "transform_3d": {}, "components": {
           "sindri.tile_grid": { "columns": 1, "rows": 1 },
           "sindri.tile_volume": {
-            "tileset": "missing.tileset.json",
+            "tileset": "missing.tileset",
             "cells": [{ "position": [0, 0, 0], "tile": "grass" }]
           }
         } }"#,
@@ -196,7 +196,7 @@ fn a_volume_requires_its_reusable_tile_set_binding() {
             &TextureBindings::new(),
         )
         .expect_err("an unbound tile set is not guessed");
-    assert!(error.to_string().contains("missing.tileset.json"));
+    assert!(error.to_string().contains("missing.tileset"));
 }
 
 #[test]
@@ -370,7 +370,7 @@ fn the_faces_of_one_cell_do_not_sort_against_each_other() {
             "columns": 4, "rows": 4, "cell_size": [1.0, 0.5],
             "level_step": [0.0, 0.5], "projection": "isometric"
           },
-          "sindri.tile_volume": { "tileset": "world.tileset.json", "cells": [
+          "sindri.tile_volume": { "tileset": "world.tileset", "cells": [
             { "position": [0, 0, 0], "tile": "grass" },
             { "position": [0, 0, 1], "tile": "grass" },
             { "position": [1, 1, 0], "tile": "grass" }
@@ -434,7 +434,7 @@ fn solid_scene(cells: &str) -> sindri_core::World {
             "cell_height": 1.0, "projection": "isometric", "space": "solid"
           }},
           "sindri.tile_volume": {{
-            "tileset": "world.tileset.json",
+            "tileset": "world.tileset",
             "cells": [{cells}]
           }}
         }} }}"#

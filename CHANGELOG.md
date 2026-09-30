@@ -1,5 +1,6 @@
 # Changelog
 
+- Sindri's own file formats have their own extensions instead of ending in `.json`: `.scene`, `.prefab`, `.profile`, `.sheet`, `.tileset`, `.actions` and `.isobake`, and a build's ledger is `sindri.manifest`. The editor's file dialogs, project browser, new-scene and duplicate commands, the exporter, decay-lsp, the VS Code extension and the isometric baker all use the new names, and every shipped game, example and fixture has been renamed. The old `*.scene.json`-style names are no longer recognised; rename a project's files and the paths that reference them to migrate (`docs/project-format.md`).
 - A browser build no longer opens on a blank page. The exported page shows the Sindri loading screen — the forge mark, wordmark and a moving bar, in plain CSS and SVG so it appears before any script or wasm has arrived — until the game is on screen, which the host now announces as `sindri:ready` (on the first frame presented while `DesktopApp::ready` is true; the browser game is ready once its project is installed). A project can follow it with its own brand: `[web.splash]` in `sindri.toml` takes an `image`, `title`, `caption`, `background` and a minimum `seconds`, checked at export. The host module is now imported when the page starts, so a missing or broken host is reported instead of leaving a loading screen up; and the CI browser smoke waits for the loading screen to give way, failing if it never does.
 - Decay has a `Color` type: `Color(r, g, b)`, `Color(r, g, b, a)` or `Color("#ff8800")`, with `r`, `g`, `b` and `a` read and written like a vector's components, `lerp(other, t)` and `with_alpha(a)`. The engine's colours — a sprite's `tint`, `color_multiply` and `color_offset`, a shape's `fill` and `stroke`, a UI image's `tint` — are now `Color` rather than a host `Rgba`, so a script reads, holds and assigns one whole (`this.sprite.tint = HURT.lerp(base, t)`); `this.sprite.tint.r` still reaches one channel. Constants and struct field defaults may be colours, an `@export` colour gets the inspector's swatch, `print` shows one, decay-lsp completes its members and VS Code highlights `Color`. Orbital's chargers colour their elite traits with it.
 - Decay has values that may be missing. `f32?`, `String?`, `Vec2?`, `List<T>?` and the like hold a value or `null`, and are never used as their type unchecked: `value ?? fallback` gives the value or the fallback (worked out only when needed), and inside `if x != null { }`, or after an `if x == null { return; }`, a `let` or parameter `x` is its plain type. Using an optional as its type anywhere else — assigning it, arithmetic, a member, an index — is a diagnostic that says it may be `null` and how to handle it. `??` binds between comparison and arithmetic. Entities, structs and enums may already be `null`, so `Entity?` is `Entity`.
@@ -67,7 +68,7 @@
 - Sunlight now lands on the side of the world its arrow points at. The textured shader worked out which way a surface faces with the sign backwards, so every face turned away from the sun was the one lit, and shadows (which were right) fell on the lit side. Scenes look lit from where their Sun is aimed, and slopes facing the sun are bright instead of nearly black.
 - Blocks can move and glow. The built-in water now ripples and lava churns and glows, drawn by shifting where each face reads rather than by rebuilding the world, and a block set can give any face an animation (frames on one texture, and a speed) and any block a glow. Leaves and other blocks that don't hide their neighbours are now cut out, holes and all, and a lake no longer has walls inside it. The block editor has a Glow field.
 - Blocks are premade and chosen by name. The engine ships a block set, `builtin:blocks` (grass, dirt, stone, sand, snow, ice, mud, moss, gravel, clay, planks, log, leaves, water, lava and more), and a voxel world can name a block set and have its generator say "grass" and "water" instead of material numbers. A new Voxel World is built from the built-in blocks, and Voxel Lab now is too. The inspector offers blocks as a menu of cubes.
-- Block sets are edited in the inspector: select a `.tileset.json` to see its blocks as cubes and edit each block's faces (with pictures), whether it hides its neighbours, supports, is walkable, its height and its tags. "New block set here" starts one as a copy of the built-in set.
+- Block sets are edited in the inspector: select a `.tileset` to see its blocks as cubes and edit each block's faces (with pictures), whether it hides its neighbours, supports, is walkable, its height and its tags. "New block set here" starts one as a copy of the built-in set.
 - Blocks can carry tags (`hot`, `liquid`, …) that scripts ask about with `Grid.tagged(volume, column, row, level, tag)`.
 - Exports no longer look for engine-provided `procedural:` and `builtin:` assets on disk.
 - Texture fields in the inspector show the picture they name beside the reference, and the reference picker shows each texture and sprite as a picture. A long reference is cut off before its sprite name, so fields naming different parts of one sheet no longer look identical.
@@ -239,11 +240,11 @@ requests, commit history, and subsystem documentation rather than this file.
   One tile ID replaces a family of near-identical ones, and the same field
   looks the same on every machine and after every reload.
 
-- Choosing a `.prefab.json` in the project browser arms it, and clicking a cell
+- Choosing a `.prefab` in the project browser arms it, and clicking a cell
   in the Scene view puts it there: one undoable step, standing on that cell of
   that grid, keeping whatever footprint the prefab declares.
 
-- The editor can read a `.prefab.json` and put it into the open scene as one
+- The editor can read a `.prefab` and put it into the open scene as one
   undoable step, with every entity given a stable identity nothing else is
   using. Distinct from the runtime's spawn, which deliberately gives none.
 

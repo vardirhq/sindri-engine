@@ -7,12 +7,12 @@ use super::*;
 fn project() -> tempfile::TempDir {
     let directory = tempfile::tempdir().unwrap();
     let root = directory.path();
-    fs::write(root.join("demo.scene.json"), "{}").unwrap();
+    fs::write(root.join("demo.scene"), "{}").unwrap();
     fs::write(root.join("settings.json"), "{}").unwrap();
     fs::write(root.join("ui.weave"), "").unwrap();
-    fs::write(root.join("drifter.prefab.json"), "{}").unwrap();
-    fs::write(root.join("weapon.profile.json"), "{}").unwrap();
-    fs::write(root.join("world.tileset.json"), "{}").unwrap();
+    fs::write(root.join("drifter.prefab"), "{}").unwrap();
+    fs::write(root.join("weapon.profile"), "{}").unwrap();
+    fs::write(root.join("world.tileset"), "{}").unwrap();
     fs::write(root.join(".hidden"), "").unwrap();
     fs::create_dir(root.join("textures")).unwrap();
     fs::write(root.join("textures/badge.png"), "").unwrap();
@@ -33,14 +33,14 @@ fn names(entries: &[&ProjectEntry]) -> Vec<String> {
 #[test]
 fn the_browser_reads_the_directory_the_scene_lives_in() {
     let directory = project();
-    let tree = ProjectTree::beside(Some(&directory.path().join("demo.scene.json")));
+    let tree = ProjectTree::beside(Some(&directory.path().join("demo.scene")));
 
     assert_eq!(tree.error(), None);
     assert_eq!(
         names(&tree.matching("")),
         [
-            "demo.scene.json",
-            "drifter.prefab.json",
+            "demo.scene",
+            "drifter.prefab",
             "fonts",
             "Inter.ttf",
             "scripts",
@@ -51,8 +51,8 @@ fn the_browser_reads_the_directory_the_scene_lives_in() {
             "badge.png",
             "tiles.png",
             "ui.weave",
-            "weapon.profile.json",
-            "world.tileset.json",
+            "weapon.profile",
+            "world.tileset",
         ],
         "children follow their parent, and each level is sorted by name"
     );
@@ -95,13 +95,13 @@ fn a_row_knows_what_kind_of_file_it_is() {
             .map(|entry| entry.kind)
     };
 
-    assert_eq!(kind("demo.scene.json"), Some(AssetKind::Scene));
+    assert_eq!(kind("demo.scene"), Some(AssetKind::Scene));
     // Its own kind, not "File". Listed as a plain file, a project's prefabs
     // look like blobs the editor does not understand -- which is how the
     // acceptance project's every enemy appeared.
-    assert_eq!(kind("drifter.prefab.json"), Some(AssetKind::Prefab));
-    assert_eq!(kind("weapon.profile.json"), Some(AssetKind::Profile));
-    assert_eq!(kind("world.tileset.json"), Some(AssetKind::TileSet));
+    assert_eq!(kind("drifter.prefab"), Some(AssetKind::Prefab));
+    assert_eq!(kind("weapon.profile"), Some(AssetKind::Profile));
+    assert_eq!(kind("world.tileset"), Some(AssetKind::TileSet));
     assert_eq!(
         kind("settings.json"),
         Some(AssetKind::Other),
@@ -140,7 +140,7 @@ fn nested_project() -> tempfile::TempDir {
     fs::create_dir(root.join("src")).unwrap();
     fs::write(root.join("src/main.rs"), "").unwrap();
     fs::create_dir(root.join("assets")).unwrap();
-    fs::write(root.join("assets/gather.scene.json"), "{}").unwrap();
+    fs::write(root.join("assets/gather.scene"), "{}").unwrap();
     fs::create_dir(root.join("assets/textures")).unwrap();
     fs::write(root.join("assets/textures/orb.png"), "").unwrap();
     fs::create_dir(root.join("assets/scripts")).unwrap();
@@ -284,7 +284,7 @@ fn the_folder_pane_follows_the_listing_it_belongs_to() {
 fn a_texture_exposes_the_sprites_named_by_its_sheet() {
     let directory = project();
     fs::write(
-        directory.path().join("textures/tiles.sheet.json"),
+        directory.path().join("textures/tiles.sheet"),
         r#"{
           "format_version": 1,
           "grid": { "columns": 2, "rows": 1, "names": ["idle", "walk"] }

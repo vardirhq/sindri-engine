@@ -11,7 +11,7 @@ use super::kind::AssetKind;
 /// The same rule `sheet_id_for` applies to asset IDs, spelled here in terms of
 /// paths on disk. Two spellings of one rule is a thing to watch, but the
 /// browser walks a directory and does not have asset IDs to hand.
-pub(super) const SHEET_SUFFIX: &str = ".sheet.json";
+pub(super) const SHEET_SUFFIX: &str = ".sheet";
 
 /// The texture a sheet slices, when one sits beside it.
 ///
@@ -66,14 +66,14 @@ mod tests {
         let directory = tempfile::tempdir().expect("a temporary directory");
         fs::write(directory.path().join("tiles.png"), []).expect("writable");
         fs::write(
-            directory.path().join("tiles.sheet.json"),
+            directory.path().join("tiles.sheet"),
             r#"{ "format_version": 1,
                  "grid": { "columns": 2, "rows": 1, "names": ["light", "dark"] } }"#,
         )
         .expect("writable");
 
-        fs::write(directory.path().join("a.scene.json"), "{}").expect("writable");
-        let tree = ProjectTree::beside(Some(&directory.path().join("a.scene.json")));
+        fs::write(directory.path().join("a.scene"), "{}").expect("writable");
+        let tree = ProjectTree::beside(Some(&directory.path().join("a.scene")));
         let texture = tree
             .entries()
             .iter()
@@ -97,17 +97,17 @@ mod tests {
     fn a_sheet_with_no_texture_is_still_listed() {
         let directory = tempfile::tempdir().expect("a temporary directory");
         fs::write(
-            directory.path().join("gone.sheet.json"),
+            directory.path().join("gone.sheet"),
             r#"{ "format_version": 1, "grid": { "columns": 1, "rows": 1 } }"#,
         )
         .expect("writable");
 
-        fs::write(directory.path().join("a.scene.json"), "{}").expect("writable");
-        let tree = ProjectTree::beside(Some(&directory.path().join("a.scene.json")));
+        fs::write(directory.path().join("a.scene"), "{}").expect("writable");
+        let tree = ProjectTree::beside(Some(&directory.path().join("a.scene")));
         assert!(
             tree.entries()
                 .iter()
-                .any(|entry| entry.kind == AssetKind::Sheet && entry.name == "gone.sheet.json"),
+                .any(|entry| entry.kind == AssetKind::Sheet && entry.name == "gone.sheet"),
             "a sheet slicing nothing is worth seeing"
         );
     }
@@ -119,10 +119,10 @@ mod tests {
     fn a_broken_sheet_leaves_its_texture_unsliced() {
         let directory = tempfile::tempdir().expect("a temporary directory");
         fs::write(directory.path().join("tiles.png"), []).expect("writable");
-        fs::write(directory.path().join("tiles.sheet.json"), "{ not json").expect("writable");
+        fs::write(directory.path().join("tiles.sheet"), "{ not json").expect("writable");
 
-        fs::write(directory.path().join("a.scene.json"), "{}").expect("writable");
-        let tree = ProjectTree::beside(Some(&directory.path().join("a.scene.json")));
+        fs::write(directory.path().join("a.scene"), "{}").expect("writable");
+        let tree = ProjectTree::beside(Some(&directory.path().join("a.scene")));
         let texture = tree
             .entries()
             .iter()

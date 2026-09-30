@@ -141,7 +141,7 @@ fn decodes_and_validates_profiles() {
     }"#
     .to_vec();
     let profile = ProfileAssetDecoder
-        .decode(AssetBytes::new(id("profiles/weapons.profile.json"), bytes))
+        .decode(AssetBytes::new(id("profiles/weapons.profile"), bytes))
         .unwrap();
     assert_eq!(profile.name, "Weapons");
     assert_eq!(profile.count("modules"), 1);
@@ -152,7 +152,7 @@ fn decodes_and_validates_profiles() {
     );
     let error = ProfileAssetDecoder
         .decode(AssetBytes::new(
-            id("profiles/future.profile.json"),
+            id("profiles/future.profile"),
             invalid.into_bytes(),
         ))
         .unwrap_err();

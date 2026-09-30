@@ -2,7 +2,7 @@ use sindri_core::{SceneDocument, World};
 use sindri_weave::PresentationWorld;
 use weave::{Viewport, parse};
 
-const SCENE: &str = include_str!("../assets/demo.scene.json");
+const SCENE: &str = include_str!("../assets/demo.scene");
 const STYLE: &str = include_str!("../assets/demo.weave");
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {

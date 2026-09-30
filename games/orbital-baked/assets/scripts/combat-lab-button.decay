@@ -29,7 +29,7 @@ script CombatLabButton {
             if Game.lab_invulnerable > 0.0 { Game.lab_invulnerable = 0.0; }
             else { Game.lab_invulnerable = 1.0; }
         } else if this.action == 9.0 {
-            Scene.go("orbital.scene.json");
+            Scene.go("orbital.scene");
         }
     }
 }

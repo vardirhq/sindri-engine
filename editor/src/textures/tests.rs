@@ -25,7 +25,7 @@ fn a_procedural_reference_cannot_be_mistaken_for_a_file() {
 #[test]
 fn references_resolve_against_the_scene_s_own_directory() {
     assert_eq!(
-        root_of(Some(Path::new("game/levels/one.scene.json"))),
+        root_of(Some(Path::new("game/levels/one.scene"))),
         Some(PathBuf::from("game/levels"))
     );
     assert_eq!(root_of(None), None);
@@ -50,7 +50,7 @@ fn a_tile_volume_keeps_the_sheet_that_cuts_its_blocks() {
                      "projection": "isometric"
                    },
                    "sindri.tile_volume": {
-                     "tileset": "blocks.tileset.json",
+                     "tileset": "blocks.tileset",
                      "cells": [{ "position": [0, 0, 0], "tile": "grass" }]
                    }
                  } }
@@ -63,7 +63,7 @@ fn a_tile_volume_keeps_the_sheet_that_cuts_its_blocks() {
     let mut tile_sets = TileSetBindings::new();
     tile_sets
         .bind(
-            "blocks.tileset.json",
+            "blocks.tileset",
             sindri_core::TileSetDocument::from_json(
                 r#"{ "format_version": 1, "tiles": { "grass": { "faces": {
                      "top": { "sprite": "textures/blocks.png#grass-top",
@@ -74,13 +74,13 @@ fn a_tile_volume_keeps_the_sheet_that_cuts_its_blocks() {
         )
         .expect("the tile set binds");
 
-    let wanted_tile_sets: BTreeSet<AssetId> = ["blocks.tileset.json"]
+    let wanted_tile_sets: BTreeSet<AssetId> = ["blocks.tileset"]
         .into_iter()
         .map(|id| AssetId::new(id.to_owned()).expect("a loadable id"))
         .collect();
 
     let sheets = super::request::wanted_sheets(&world, &tile_sets, &wanted_tile_sets);
-    let blocks = AssetId::new("textures/blocks.sheet.json".to_owned()).expect("a loadable id");
+    let blocks = AssetId::new("textures/blocks.sheet".to_owned()).expect("a loadable id");
     assert!(
         sheets.contains(&blocks),
         "the sheet cutting the volume's blocks was not wanted, so the next \

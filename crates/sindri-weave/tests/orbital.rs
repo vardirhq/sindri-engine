@@ -4,7 +4,7 @@ use sindri_core::{SceneDocument, World};
 use sindri_weave::PresentationWorld;
 use weave::{Stylesheet, Viewport, compose};
 
-const SCENE: &str = include_str!("../../../games/orbital-baked/assets/orbital.scene.json");
+const SCENE: &str = include_str!("../../../games/orbital-baked/assets/orbital.scene");
 const STYLE_ENTRY: &str = include_str!("../../../games/orbital-baked/assets/ui.weave");
 const STYLE_HUD: &str = include_str!("../../../games/orbital-baked/assets/ui/hud.weave");
 const STYLE_OVERLAYS: &str = include_str!("../../../games/orbital-baked/assets/ui/overlays.weave");

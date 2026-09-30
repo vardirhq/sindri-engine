@@ -62,7 +62,7 @@ def entities():
                 # before the first frame -- a hundred and sixty on a side is
                 # more world than a scene file should carry, and one that is
                 # written down is one island for ever.
-                "sindri.tile_volume": {"tileset": "causeway.tileset.json", "cells": []},
+                "sindri.tile_volume": {"tileset": "causeway.tileset", "cells": []},
                 # One block up and no more, which is what makes the pillar a
                 # thing to build a way up rather than a thing to walk up.
                 "sindri.grid.navigation": {"max_step": 1.0},
@@ -291,6 +291,6 @@ def entities():
 
 if __name__ == "__main__":
     document = {"format_version": 9, "metadata": {"name": "Causeway"}, "entities": entities()}
-    pathlib.Path('game/assets/causeway.scene.json').write_text(
+    pathlib.Path('game/assets/causeway.scene').write_text(
         json.dumps(document, indent=2) + "\n")
     print("wrote the level")

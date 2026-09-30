@@ -38,7 +38,7 @@ fn world_with(space: &str) -> (World, SceneExtractor) {
     floor.components.insert(
         "sindri.tile_volume".to_owned(),
         json!({
-            "tileset": "world.tileset.json",
+            "tileset": "world.tileset",
             "cells": [
                 { "position": [0, 0, 0], "tile": "block" },
                 { "position": [0, 0, 1], "tile": "block" }

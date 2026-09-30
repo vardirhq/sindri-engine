@@ -1,5 +1,5 @@
 /**
- * The bake recipe: `<name>.isobake.json`.
+ * The bake recipe: `<name>.isobake`.
  *
  * A recipe is the durable half of a baked asset. The PNG and its sheet are
  * derived and can be regenerated; the recipe is the source, and it is what a
@@ -230,8 +230,8 @@ function readPrefab(value: JsonValue, path: string): PrefabRequest {
   rejectUnknown(source, path, ['path', 'name', 'default_direction', 'layer', 'grid', 'recipe']);
 
   const target = required(source, 'path', path, asString);
-  if (!target.endsWith('.prefab.json')) {
-    fail(`${path}.path`, `a prefab is called <name>.prefab.json, got ${JSON.stringify(target)}`);
+  if (!target.endsWith('.prefab')) {
+    fail(`${path}.path`, `a prefab is called <name>.prefab, got ${JSON.stringify(target)}`);
   }
 
   const direction = optional(source, 'default_direction', path, asString);

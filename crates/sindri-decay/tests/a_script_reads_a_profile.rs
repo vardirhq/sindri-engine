@@ -16,7 +16,7 @@ fn a_typed_profile_export_reads_scalars_and_records() {
             json!({
                 "source": "reader.decay",
                 "script": "Reader",
-                "properties": {"catalog": "profiles/modules.profile.json"}
+                "properties": {"catalog": "profiles/modules.profile"}
             }),
         )]),
         ..EntityData::default()
@@ -59,7 +59,7 @@ fn a_typed_profile_export_reads_scalars_and_records() {
     )
     .unwrap();
     let mut profiles = ProfileSources::new();
-    profiles.insert("profiles/modules.profile.json", profile);
+    profiles.insert("profiles/modules.profile", profile);
     let mut scripts = Scripts::new();
     let report = scripts.advance(
         &mut world,

@@ -75,10 +75,10 @@ Walk into it for what the sign shows; left alone it goes after ten seconds.
 
 There is no game code. The game is `assets/`:
 
-- `scorchball.scene.json`: the pitch, goals, scoreboard, ball and on-screen text.
+- `scorchball.scene`: the pitch, goals, scoreboard, ball and on-screen text.
 - `ui.weave`: the responsive title presentation, including hover/active states
   and a compact narrow-screen composition.
-- `prefabs/title.prefab.json`: title structure and real UI button hit targets.
+- `prefabs/title.prefab`: title structure and real UI button hit targets.
 - `prefabs/`: players, the marker over their heads, power-ups, and the title UI.
 - `scripts/title.decay`: title choices and transition into the lobby.
 - `scripts/match.decay`: joining and leaving, ready-up, the countdown, the score,

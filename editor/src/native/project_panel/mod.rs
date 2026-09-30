@@ -58,7 +58,7 @@ pub(super) enum BrowserAction {
     NewFolder(PathBuf),
     /// Make a `.decay` script there.
     NewScript(PathBuf),
-    /// Make a reusable `.profile.json` data asset there.
+    /// Make a reusable `.profile` data asset there.
     NewProfile(PathBuf),
     NewBlockSet(PathBuf),
     /// Copy a file or folder beside itself.

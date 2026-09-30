@@ -16,7 +16,7 @@ by hand.
 ```text
 index.html                 the page, with the base path and the project's name
 pkg/                       the host, as wasm-pack built it
-assets/sindri.manifest.json       what the project is made of — never cache this
+assets/sindri.manifest     what the project is made of — never cache this
 assets/<content hash>/     every asset — cache this for ever
 ```
 
@@ -42,7 +42,7 @@ whatever was built from a variable, so a project says instead.
 
 ## Cache invalidation
 
-**`assets/sindri.manifest.json` must never be cached. Everything under
+**`assets/sindri.manifest` must never be cached. Everything under
 `assets/<hash>/` can be cached for ever.**
 
 The directory is named after what every asset in it hashes to, so a build
@@ -56,8 +56,8 @@ browser learns which directory to look in. It is small.
 For a static host, that is one rule each:
 
 ```
-/assets/sindri.manifest.json   Cache-Control: no-cache
-/assets/*               Cache-Control: public, max-age=31536000, immutable
+/assets/sindri.manifest   Cache-Control: no-cache
+/assets/*                 Cache-Control: public, max-age=31536000, immutable
 ```
 
 Exporting again removes the previous build's directory. Without that, every edit

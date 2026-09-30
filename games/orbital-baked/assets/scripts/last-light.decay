@@ -1,7 +1,7 @@
 // Borrows the others' attacks in turn. Knowing which one it is doing
 // is most of the fight.
 //
-// Its hull is baked from `textures/last-light.isobake.json`; everything this
+// Its hull is baked from `textures/last-light.isobake`; everything this
 // script does to it beyond that is motion.
 script LastLight {
     @export let shot: Prefab;

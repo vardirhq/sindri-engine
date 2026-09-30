@@ -1,7 +1,7 @@
 //! A block set opened for editing: the blocks a voxel world or a tile volume
 //! is built from, each a name, the art on its faces and what it does.
 //!
-//! A block set is a `.tileset.json`. Editing one by hand meant writing six
+//! A block set is a `.tileset`. Editing one by hand meant writing six
 //! sprite references and a size per face for every block; the editor offers
 //! the blocks as cubes and each face as the texture picker every other field
 //! uses.
@@ -190,7 +190,7 @@ mod tests {
 
     fn set_with(names: &[&str]) -> (tempfile::TempDir, BlockSetEditor) {
         let directory = tempfile::tempdir().unwrap();
-        let path = directory.path().join("terrain.tileset.json");
+        let path = directory.path().join("terrain.tileset");
         let mut document = TileSetDocument {
             format_version: sindri_core::TILESET_FORMAT_VERSION,
             tiles: std::collections::BTreeMap::new(),

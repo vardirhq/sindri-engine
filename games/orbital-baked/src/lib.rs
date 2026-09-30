@@ -62,7 +62,7 @@ impl Run {
     /// # Errors
     /// If the project will not read, will not parse, or will not load.
     pub fn open() -> Result<Self, String> {
-        Self::open_from(&project().join("assets"), "orbital.scene.json")
+        Self::open_from(&project().join("assets"), "orbital.scene")
     }
 
     /// Opens one of the project's authored scenes directly.
@@ -88,7 +88,7 @@ impl Run {
     /// # Errors
     /// If the build will not read, will not parse, or will not load.
     pub fn open_export(root: &Path) -> Result<Self, String> {
-        let text = std::fs::read_to_string(root.join("assets/sindri.manifest.json"))
+        let text = std::fs::read_to_string(root.join("assets/sindri.manifest"))
             .map_err(|error| format!("no manifest: {error}"))?;
         let manifest: serde_json::Value =
             serde_json::from_str(&text).map_err(|error| error.to_string())?;

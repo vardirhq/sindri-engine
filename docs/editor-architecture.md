@@ -279,7 +279,7 @@ The editor's unit of work is a project: a directory containing `sindri.toml`.
 Before that file existed, "the project" was a word for whichever folder the open
 scene happened to sit in — enough to browse assets beside a scene, and not enough
 to have a name, to be listed, or to be told apart from any other folder with a
-`.scene.json` in it.
+`.scene` in it.
 
 The welcome window is the front door and is its own window, with the editor's
 hidden until a project is open. `docs/project-format.md` is the contract: what

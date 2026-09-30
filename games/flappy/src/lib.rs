@@ -31,7 +31,7 @@ pub struct Run {
 impl Run {
     pub fn open() -> Result<Self, String> {
         let root = project().join("assets");
-        let text = std::fs::read_to_string(root.join("flappy.scene.json"))
+        let text = std::fs::read_to_string(root.join("flappy.scene"))
             .map_err(|error| error.to_string())?;
         let document: SceneDocument =
             serde_json::from_str(&text).map_err(|error| error.to_string())?;

@@ -127,7 +127,7 @@ impl SceneFile {
 
 /// The path a scene chosen in a save dialog is actually written to.
 ///
-/// A scene is `*.scene.json` and nothing else: that is what the project browser
+/// A scene is `*.scene` and nothing else: that is what the project browser
 /// recognises and what `SceneFile::open` is offered in a file dialog. Someone
 /// typing "level" into a save box means a scene called level, and writing that
 /// verbatim would produce one the browser lists as a plain file and cannot
@@ -144,7 +144,7 @@ pub fn scene_path(chosen: &Path) -> PathBuf {
 }
 
 /// What a scene file is called, and what the browser reads a scene by.
-const SCENE_SUFFIX: &str = ".scene.json";
+const SCENE_SUFFIX: &str = ".scene";
 
 /// Writes a document as canonical JSON.
 fn write_scene(path: &Path, document: &SceneDocument) -> Result<(), SceneFileError> {
@@ -201,7 +201,7 @@ mod tests {
     }
 
     fn written(directory: &Path, text: &str) -> PathBuf {
-        let path = directory.join("scene.json");
+        let path = directory.join("level.scene");
         std::fs::write(&path, text).unwrap();
         path
     }
@@ -212,11 +212,11 @@ mod tests {
     #[test]
     fn a_chosen_name_becomes_a_scene_file_name() {
         let cases = [
-            ("level", "level.scene.json"),
-            ("level.json", "level.scene.json"),
-            ("level.scene.json", "level.scene.json"),
+            ("level", "level.scene"),
+            ("level.json", "level.scene"),
+            ("level.scene", "level.scene"),
             // Already a scene, whatever case it was typed in.
-            ("Level.Scene.JSON", "Level.Scene.JSON"),
+            ("Level.SCENE", "Level.SCENE"),
         ];
         for (chosen, expected) in cases {
             assert_eq!(
@@ -241,7 +241,7 @@ mod tests {
         let world = World::from_scene(&SceneDocument::from_json(&authored_json()).unwrap())
             .unwrap()
             .world;
-        let path = directory.path().join("forked.scene.json");
+        let path = directory.path().join("forked.scene");
         file.save_as(&path, &world).unwrap();
 
         assert_eq!(file.path(), Some(path.as_path()));
@@ -322,10 +322,10 @@ mod tests {
 
     #[test]
     fn a_missing_file_names_itself_in_the_error() {
-        let error = SceneFile::open("definitely/not/here.scene.json")
+        let error = SceneFile::open("definitely/not/here.scene")
             .expect_err("opening a missing scene fails");
         assert!(
-            error.to_string().contains("definitely/not/here.scene.json"),
+            error.to_string().contains("definitely/not/here.scene"),
             "{error}"
         );
     }

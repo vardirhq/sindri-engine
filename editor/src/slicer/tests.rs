@@ -7,7 +7,7 @@ use std::{fs, path::Path};
 fn a_sheet_sits_beside_its_texture() {
     assert_eq!(
         sheet_path(Path::new("/a/textures/tiles.png")),
-        Path::new("/a/textures/tiles.sheet.json")
+        Path::new("/a/textures/tiles.sheet")
     );
 }
 
@@ -79,8 +79,8 @@ fn unnamed_cells_are_called_by_their_index() {
     assert!(slicer.save(), "the slice writes");
     assert_eq!(slicer.name_of(2), "2");
 
-    let written = fs::read_to_string(directory.path().join("tiles.sheet.json"))
-        .expect("the sheet is readable");
+    let written =
+        fs::read_to_string(directory.path().join("tiles.sheet")).expect("the sheet is readable");
     assert!(
         written.matches("\"\"").count() <= 1,
         "trailing unnamed cells are not written as empty strings: {written}"
@@ -103,7 +103,7 @@ fn a_slice_that_would_not_load_is_refused() {
     assert!(!slicer.save(), "two cells with one name is not a sheet");
     assert!(slicer.problem.is_some());
     assert!(
-        !directory.path().join("tiles.sheet.json").exists(),
+        !directory.path().join("tiles.sheet").exists(),
         "and nothing was written"
     );
 }

@@ -21,7 +21,7 @@ in.
 The test is deliberately concrete. Gather is the companion game, its scene is in
 the repository, and every capability the engine claims is exercised by it. So
 the question is not "what is missing in the abstract" but: open the editor on an
-empty project and try to arrive at `game/assets/gather.scene.json`. Everywhere
+empty project and try to arrive at `game/assets/gather.scene`. Everywhere
 that walk hits a wall is a finding.
 
 ## Method
@@ -210,7 +210,7 @@ that looks like navigation.
 
 **Selection is not shown, and the wrong row is highlighted.** A row's "current"
 flag is `open.is_some_and(|path| path == entry.path)` where `open` is *the open
-scene file* (`editor/src/native/project_panel/row.rs:118`). So `fixture.scene.json`
+scene file* (`editor/src/native/project_panel/row.rs:118`). So `fixture.scene`
 wears the selection band permanently, and selecting a texture — which does
 something real, it opens the slicer — marks nothing at all. Confirmed: with
 `spin.png` open in the slicer, the highlighted row is still the scene.
@@ -489,7 +489,7 @@ why.
   with it — the project beside it, its textures, its scripts — is arranged by
   the code that already knows how. A save box takes a name rather than an
   extension, so the suffix is the editor's: `level` becomes
-  `level.scene.json`, which is what the browser lists as a scene and what
+  `level.scene`, which is what the browser lists as a scene and what
   reopening it finds. It contains one world camera, because a scene with none
   is a legal scene and a black Game view, and "why is the game view empty" is
   not the first question a new project should raise.

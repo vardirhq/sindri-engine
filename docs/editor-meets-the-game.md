@@ -13,7 +13,7 @@ the tool that is supposed to make that unnecessary.
 
 ## What worked
 
-**It opens and it is the same picture.** `sindri-editor game/assets/gather.scene.json`
+**It opens and it is the same picture.** `sindri-editor game/assets/gather.scene`
 loads all 68 entities, resolves all five textures and all four scripts, and
 draws the game in both viewports — the scene view through the editor camera, the
 game view through the authored one. Nothing needed to be told about the game;

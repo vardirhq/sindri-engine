@@ -39,7 +39,7 @@ test('block faces are an explicit single-view tile-set output', () => {
   assert.throws(() => parse({ output: 'block_faces' }), /set "directions" to 1/);
   assert.throws(() => parse({ output: 'voxels' }), /sprite.*block_faces/);
   assert.throws(
-    () => parse({ output: 'block_faces', directions: 1, prefab: { path: 'prefabs/block.prefab.json' } }),
+    () => parse({ output: 'block_faces', directions: 1, prefab: { path: 'prefabs/block.prefab' } }),
     /tile-set atlas/,
   );
 });
@@ -176,7 +176,7 @@ test('a flat prefab cannot occupy a tilemap', () => {
       parse({
         view: 'top-down',
         pixels_per_unit: 32,
-        prefab: { path: 'prefabs/x.prefab.json', name: 'X', grid: 'Floor' },
+        prefab: { path: 'prefabs/x.prefab', name: 'X', grid: 'Floor' },
       }),
     /stands on none/,
   );

@@ -20,14 +20,14 @@ The rule is simple: a boss composes attack entities. It does not own their colli
 
 The attack prefabs are the same assets future bosses should spawn:
 
-- `prefabs/attack-gas-cloud.prefab.json`
-- `prefabs/attack-hostile-mine.prefab.json`
-- `prefabs/attack-shockwave.prefab.json`
-- `prefabs/attack-gravity-well.prefab.json`
+- `prefabs/attack-gas-cloud.prefab`
+- `prefabs/attack-hostile-mine.prefab`
+- `prefabs/attack-shockwave.prefab`
+- `prefabs/attack-gravity-well.prefab`
 
 ## Playground
 
-`assets/combat-lab.scene.json` is an alternate development scene. It intentionally does not replace the game's main scene.
+`assets/combat-lab.scene` is an alternate development scene. It intentionally does not replace the game's main scene.
 
 The offscreen capture can open it directly and stage the stress preset with
 `cargo run -p orbital-baked --bin orbital-baked-capture -- out.png 1000 700 lab`.

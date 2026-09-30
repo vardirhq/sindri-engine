@@ -24,7 +24,7 @@ fn solid_world_with(entities: Vec<SceneEntity>) -> (World, SceneExtractor) {
     floor.components.insert(
         "sindri.tile_volume".to_owned(),
         json!({
-            "tileset": "world.tileset.json",
+            "tileset": "world.tileset",
             "cells": (0..4).flat_map(|row| (0..4).map(move |column| {
                 json!({ "position": [column, row, -1], "tile": "block" })
             })).collect::<Vec<_>>()

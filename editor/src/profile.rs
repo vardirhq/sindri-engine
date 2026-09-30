@@ -67,7 +67,7 @@ mod tests {
     #[test]
     fn a_profile_edit_saves_back_to_its_own_asset() {
         let directory = tempfile::tempdir().unwrap();
-        let path = directory.path().join("ship.profile.json");
+        let path = directory.path().join("ship.profile");
         std::fs::write(
             &path,
             ProfileDocument::default().to_canonical_json().unwrap(),

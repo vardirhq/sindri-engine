@@ -2,4 +2,4 @@ format_version = 1
 
 [project]
 name = "Platformer"
-main_scene = "assets/platformer.scene.json"
+main_scene = "assets/platformer.scene"

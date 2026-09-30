@@ -33,7 +33,7 @@ const ROSTER: [&str; 12] = [
 fn prefab_json(run: &Run, ident: &str) -> serde_json::Value {
     let prefab = run
         .prefabs
-        .get(&format!("prefabs/{ident}.prefab.json"))
+        .get(&format!("prefabs/{ident}.prefab"))
         .unwrap_or_else(|| panic!("{ident} ships a prefab"));
     serde_json::to_value(prefab).expect("the prefab serialises")
 }
@@ -111,9 +111,9 @@ fn every_clip_names_frames_its_own_sheet_holds() {
             .expect("a sheet name");
 
         let text = std::fs::read_to_string(
-            orbital_baked::project().join(format!("assets/textures/{stem}.sheet.json")),
+            orbital_baked::project().join(format!("assets/textures/{stem}.sheet")),
         )
-        .unwrap_or_else(|_| panic!("{ident}: {stem}.sheet.json reads"));
+        .unwrap_or_else(|_| panic!("{ident}: {stem}.sheet reads"));
         let sheet: serde_json::Value = serde_json::from_str(&text).expect("the sheet parses");
         let held: Vec<&str> = sheet["grid"]["names"]
             .as_array()
@@ -132,7 +132,7 @@ fn every_clip_names_frames_its_own_sheet_holds() {
                 assert!(
                     held.contains(&frame),
                     "{ident}: clip {clip} names frame {frame}, \
-                     which {stem}.sheet.json does not hold"
+                     which {stem}.sheet does not hold"
                 );
             }
         }
@@ -143,7 +143,7 @@ fn every_clip_names_frames_its_own_sheet_holds() {
 /// fights is a boss that may as well not exist.
 #[test]
 fn the_director_can_send_every_boss() {
-    let text = std::fs::read_to_string(orbital_baked::project().join("assets/orbital.scene.json"))
+    let text = std::fs::read_to_string(orbital_baked::project().join("assets/orbital.scene"))
         .expect("the scene reads");
     let scene: serde_json::Value = serde_json::from_str(&text).expect("the scene parses");
     let director = scene["entities"]
@@ -162,7 +162,7 @@ fn the_director_can_send_every_boss() {
 
     for ident in ROSTER {
         let key = ident.replace('-', "_");
-        let wanted = format!("prefabs/{ident}.prefab.json");
+        let wanted = format!("prefabs/{ident}.prefab");
         assert_eq!(
             properties.get(&key).and_then(serde_json::Value::as_str),
             Some(wanted.as_str()),

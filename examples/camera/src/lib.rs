@@ -12,7 +12,7 @@ use sindri_render::{
 use sindri_scene::{SceneExtractError, SceneExtractor, TextureBindings, update_camera_behaviors};
 use thiserror::Error;
 
-const SCENE_JSON: &str = include_str!("../assets/demo.scene.json");
+const SCENE_JSON: &str = include_str!("../assets/demo.scene");
 const DEMO_SCRIPT: &str = include_str!("../assets/camera-demo.decay");
 
 struct CameraGame {

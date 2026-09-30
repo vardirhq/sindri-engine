@@ -4,7 +4,7 @@
 //! rest, each with its art. A voxel world that names `builtin:blocks` is built
 //! from them, which is what makes a new world look like a world before anyone
 //! has drawn a texture. A project that wants its own copies it into a
-//! `.tileset.json` of its own and edits that.
+//! `.tileset` of its own and edits that.
 //!
 //! Built-in references start with `builtin:`. A colon cannot appear in an
 //! `AssetId`, so no project file can be mistaken for one, and a loader asked
@@ -64,21 +64,21 @@ macro_rules! block_art {
 }
 
 const TEXTURES: [BuiltinTexture; 10] = [
-    block_art!("tops.png", "tops.sheet.json"),
-    block_art!("sides.png", "sides.sheet.json"),
-    block_art!("grass-top.png", "grass-top.sheet.json"),
+    block_art!("tops.png", "tops.sheet"),
+    block_art!("sides.png", "sides.sheet"),
+    block_art!("grass-top.png", "grass-top.sheet"),
     block_art!("grass-side.png"),
     block_art!("dirt.png"),
     block_art!("log-end.png"),
     block_art!("log-bark.png"),
     block_art!("leaves.png"),
-    block_art!("lava.png", "lava.sheet.json"),
-    block_art!("water.png", "water.sheet.json"),
+    block_art!("lava.png", "lava.sheet"),
+    block_art!("water.png", "water.sheet"),
 ];
 
 const TILE_SETS: [(&str, &str); 1] = [(
     BUILTIN_BLOCKS,
-    include_str!("../builtin/blocks/blocks.tileset.json"),
+    include_str!("../builtin/blocks/blocks.tileset"),
 )];
 
 /// Every texture the engine ships.

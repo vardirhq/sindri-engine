@@ -12,7 +12,7 @@ pub use shape::TileBox;
 use validate::validate_visual;
 
 pub const TILESET_FORMAT_VERSION: u32 = 1;
-pub const TILESET_SUFFIX: &str = ".tileset.json";
+pub const TILESET_SUFFIX: &str = ".tileset";
 
 /// The block set the engine ships: grass, dirt, stone, water, lava and the
 /// rest. Its bytes live in `sindri-assets`; the name lives here so a scene can

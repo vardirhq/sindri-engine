@@ -8,7 +8,7 @@ Re-run this, then re-bake:
 
     python3 tools/blocks.py
     cd tools/isometric-baker
-    for r in ../../game/recipes/blocks-*.isobake.json; do node src/cli.ts "$r" --out ../../game/assets; done
+    for r in ../../game/recipes/blocks-*.isobake; do node src/cli.ts "$r" --out ../../game/assets; done
 """
 import json
 import pathlib
@@ -201,14 +201,14 @@ def recipe(view, suffix, variants, ppu=48):
 def main():
     variants = palette()
     for view, suffix in (("top-down", "top"), ("side", "side")):
-        path = pathlib.Path(f"game/recipes/blocks-{suffix}.isobake.json")
+        path = pathlib.Path(f"game/recipes/blocks-{suffix}.isobake")
         path.write_text(json.dumps(recipe(view, suffix, variants), indent=2) + "\n")
     # The tile set as well as the art. It was written here and then left
     # uncalled, so the file this generates was in fact maintained by hand and
     # the comment below claiming otherwise was aspirational. A block that
     # exists in the palette and is unnameable in the tile set is exactly what
     # that was meant to prevent.
-    document = pathlib.Path("game/assets/causeway.tileset.json")
+    document = pathlib.Path("game/assets/causeway.tileset")
     document.write_text(json.dumps(tileset(), indent=2) + "\n")
     print(f"wrote {len(variants)} blocks and {len(tileset()['tiles'])} tiles")
 

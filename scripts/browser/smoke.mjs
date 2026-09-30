@@ -282,10 +282,10 @@ const refused = audio.filter(
 // broad delivery check. A focused demo can declare the kinds it is expected
 // to exercise without failing merely because its project also contains an
 // intentionally unused asset of some other kind.
-const requiredAssetKinds = [['manifest', 'sindri.manifest.json']];
+const requiredAssetKinds = [['manifest', 'sindri.manifest']];
 try {
   const manifest = JSON.parse(
-    await readFile(join(ROOT, 'assets', 'sindri.manifest.json'), 'utf8'),
+    await readFile(join(ROOT, 'assets', 'sindri.manifest'), 'utf8'),
   );
   const first = new Map();
   for (const [id, entry] of Object.entries(manifest.assets ?? {})) {

@@ -1,6 +1,6 @@
 //! The prefab the browser is pointing at, and the tool attached to it.
 //!
-//! Its own panel rather than a text preview, which is what a `.prefab.json` got
+//! Its own panel rather than a text preview, which is what a `.prefab` got
 //! before: readable, scrollable, and no use for the thing an author actually
 //! wants to do with a prefab, which is put one somewhere.
 

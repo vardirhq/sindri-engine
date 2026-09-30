@@ -169,7 +169,7 @@ mod tests {
 
     fn tree() -> Vec<ProjectEntry> {
         vec![
-            entry("level.scene.json", AssetKind::Scene),
+            entry("level.scene", AssetKind::Scene),
             entry("scripts", AssetKind::Folder),
             entry("scripts/spin.decay", AssetKind::Script),
             entry("textures", AssetKind::Folder),
@@ -203,7 +203,7 @@ mod tests {
         assert_eq!(
             shown(&BrowserState::default(), &tree),
             vec![
-                ("level.scene.json".to_owned(), 0),
+                ("level.scene".to_owned(), 0),
                 ("scripts".to_owned(), 0),
                 ("scripts/spin.decay".to_owned(), 1),
                 ("textures".to_owned(), 0),
@@ -222,7 +222,7 @@ mod tests {
         assert_eq!(
             shown(&state, &tree),
             vec![
-                ("level.scene.json".to_owned(), 0),
+                ("level.scene".to_owned(), 0),
                 ("scripts".to_owned(), 0),
                 ("textures".to_owned(), 0),
                 ("textures/tiles.png".to_owned(), 1),

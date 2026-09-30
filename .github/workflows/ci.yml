@@ -209,7 +209,7 @@ jobs:
         run: node --test test/*.test.ts
       - name: Check the fixture is still what its recipe bakes
         working-directory: tools/isometric-baker
-        run: node src/cli.ts fixtures/project/prefabs/standing-stone.isobake.json --out fixtures/project --check
+        run: node src/cli.ts fixtures/project/prefabs/standing-stone.isobake --out fixtures/project --check
       # Orbital Baked is a whole game's art rather than one asset, and it is the
       # reason this check matters more than it did: seven sheets are committed
       # here, and a recipe that stops producing what is checked in would show up
@@ -217,7 +217,7 @@ jobs:
       - name: Check the baked variant's art is still what its recipes bake
         working-directory: tools/isometric-baker
         run: |
-          for recipe in ../../games/orbital-baked/assets/textures/*.isobake.json; do
+          for recipe in ../../games/orbital-baked/assets/textures/*.isobake; do
             node src/cli.ts "$recipe" --out ../../games/orbital-baked/assets --check
           done
 
@@ -232,7 +232,7 @@ jobs:
       - name: Check the game's blocks are still what their recipes bake
         working-directory: tools/isometric-baker
         run: |
-          for recipe in ../../game/recipes/blocks-*.isobake.json; do
+          for recipe in ../../game/recipes/blocks-*.isobake; do
             node src/cli.ts "$recipe" --out ../../game/assets --check
           done
 
@@ -359,7 +359,7 @@ jobs:
           WGPU_BACKEND: vulkan
         run: |
           timeout 60s xvfb-run --auto-servernum --server-args="-screen 0 1600x1200x24" ./scripts/capture-editor.sh target/render-artifacts/editor-runtime-viewport.png
-          timeout 60s xvfb-run --auto-servernum --server-args="-screen 0 1600x1200x24" ./scripts/capture-editor.sh target/render-artifacts/editor-tile-volume.png game/assets/tile-volume-editor.scene.json Blocks
+          timeout 60s xvfb-run --auto-servernum --server-args="-screen 0 1600x1200x24" ./scripts/capture-editor.sh target/render-artifacts/editor-tile-volume.png game/assets/tile-volume-editor.scene Blocks
       - name: Capture scene-driven frame pipeline
         id: scene_capture
         env:

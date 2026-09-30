@@ -11,7 +11,7 @@
 //! composition — including one of each *kind of entity*, since a scene holds
 //! things in the world and things on the viewport and they are drawn through
 //! different cameras. Open it by hand with
-//! `cargo run -p sindri-editor -- editor/assets/fixture.scene.json`.
+//! `cargo run -p sindri-editor -- editor/assets/fixture.scene`.
 //!
 //! ## Camera semantics
 //!
@@ -42,7 +42,7 @@ use crate::scene_file::{SceneFile, SceneFileError};
 /// Where the fixture lives, relative to the repository root.
 ///
 /// This is the path a person types. [`path`] is the one code should use.
-pub const FIXTURE_SCENE_PATH: &str = "editor/assets/fixture.scene.json";
+pub const FIXTURE_SCENE_PATH: &str = "editor/assets/fixture.scene";
 
 /// The fixture's location on this machine.
 ///
@@ -51,7 +51,7 @@ pub const FIXTURE_SCENE_PATH: &str = "editor/assets/fixture.scene.json";
 pub fn path() -> PathBuf {
     PathBuf::from(env!("CARGO_MANIFEST_DIR"))
         .join("assets")
-        .join("fixture.scene.json")
+        .join("fixture.scene")
 }
 
 /// Opens the fixture through the same path the editor opens any scene.

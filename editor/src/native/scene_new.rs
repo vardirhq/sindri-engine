@@ -77,10 +77,7 @@ fn scene_name(path: &Path) -> String {
     let file = path
         .file_name()
         .map_or_else(String::new, |name| name.to_string_lossy().into_owned());
-    let stem = file
-        .strip_suffix(".scene.json")
-        .or_else(|| file.strip_suffix(".json"))
-        .unwrap_or(&file);
+    let stem = file.strip_suffix(".scene").unwrap_or(&file);
     humanize(stem)
 }
 
@@ -125,7 +122,7 @@ impl EditorApp {
     /// the project beside it, the textures, the scripts — is arranged once, by
     /// the code that already knows how.
     pub(super) fn new_scene(&mut self) {
-        let Some(path) = self.ask_for_scene_path("untitled.scene.json") else {
+        let Some(path) = self.ask_for_scene_path("untitled.scene") else {
             return;
         };
         let document = blank_scene(&self.scene, &path);
@@ -142,12 +139,12 @@ impl EditorApp {
     /// Asks where a scene should go, starting where the open one is.
     fn ask_for_scene_path(&self, suggested: &str) -> Option<PathBuf> {
         rfd::FileDialog::new()
-            .add_filter("Sindri scene", &["json"])
+            .add_filter("Sindri scene", &["scene"])
             .set_directory(self.scene_directory())
             .set_file_name(suggested)
             .save_file()
             // A save box takes a name rather than an extension, and a scene the
-            // browser can list is `*.scene.json`.
+            // browser can list is `*.scene`.
             .map(|chosen| scene_path(&chosen))
     }
 }

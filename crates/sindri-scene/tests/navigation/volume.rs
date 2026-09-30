@@ -19,7 +19,7 @@ fn volume_world(cells: &str, max_step: f32) -> (sindri_core::LoadedScene, TileSe
             ),
             (
                 "sindri.tile_volume",
-                json!({ "tileset": "world.tileset.json", "cells": serde_json::from_str::<Value>(cells).unwrap() }),
+                json!({ "tileset": "world.tileset", "cells": serde_json::from_str::<Value>(cells).unwrap() }),
             ),
             (
                 "sindri.grid.navigation",
@@ -48,7 +48,7 @@ fn volume_world(cells: &str, max_step: f32) -> (sindri_core::LoadedScene, TileSe
     )
     .expect("the tile set decodes");
     let mut tile_sets = TileSetBindings::new();
-    tile_sets.bind("world.tileset.json", document).unwrap();
+    tile_sets.bind("world.tileset", document).unwrap();
     (world(vec![floor, actor]), tile_sets)
 }
 
@@ -160,7 +160,7 @@ fn a_volume_beside_a_flat_map_does_not_close_the_floor() {
             ),
             (
                 "sindri.tile_volume",
-                json!({ "tileset": "world.tileset.json",
+                json!({ "tileset": "world.tileset",
                         "cells": [{ "position": [0, 0, 0], "tile": "block" }] }),
             ),
         ],
@@ -186,7 +186,7 @@ fn a_volume_beside_a_flat_map_does_not_close_the_floor() {
     )
     .unwrap();
     let mut tile_sets = TileSetBindings::new();
-    tile_sets.bind("world.tileset.json", document).unwrap();
+    tile_sets.bind("world.tileset", document).unwrap();
 
     let loaded = world(vec![floor, actor]);
     let floor_id = loaded.entity_map[&id("floor")];

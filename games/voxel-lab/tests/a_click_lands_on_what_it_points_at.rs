@@ -22,7 +22,7 @@ use voxel_lab::{CELL, REACH, camera, pixel_of, ray_through};
 
 fn volume() -> TileVolumeComponent {
     serde_json::from_str(
-        r#"{ "tileset": "b.tileset.json", "cells": [
+        r#"{ "tileset": "b.tileset", "cells": [
              { "position": [0, 0, 0], "tile": "stone" }
            ] }"#,
     )

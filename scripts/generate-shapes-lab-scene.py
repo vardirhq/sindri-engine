@@ -12,7 +12,7 @@ import math
 import random
 from pathlib import Path
 
-OUT = Path("games/shapes-lab/assets/shapes-lab.scene.json")
+OUT = Path("games/shapes-lab/assets/shapes-lab.scene")
 ENTITIES: list[dict] = []
 
 

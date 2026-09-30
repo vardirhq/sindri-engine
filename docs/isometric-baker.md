@@ -6,7 +6,7 @@ what the rest of the repository may assume about it.
 
 ## What it is
 
-An **asset tool**. A model goes in; a PNG and the `.sheet.json` beside it come
+An **asset tool**. A model goes in; a PNG and the `.sheet` beside it come
 out, in the formats `sindri-core` already reads and `sindri-render` already
 draws. It runs when someone runs it, and its output is checked in like any other
 art.
@@ -177,8 +177,8 @@ Baked: primitive models (`box`, `plate`, `cylinder`, `cone`, `sphere`), three
 cameras — isometric, top-down and side — banded palette-based materials, supersampling,
 alpha thresholding, palette snapping, an optional inner outline, 1/2/4/8
 directional frames, several named models on one sheet, uniform anchor-aligned
-frames packed with extruded gutters, deterministic PNG, `.sheet.json` and
-`.prefab.json` output, and a persistent `.isobake.json` recipe.
+frames packed with extruded gutters, deterministic PNG, `.sheet` and
+`.prefab` output, and a persistent `.isobake` recipe.
 
 Not baked, each its own change: model-file input (GLB/glTF/OBJ — refused
 explicitly rather than ignored), contact shadows, animation poses, layered

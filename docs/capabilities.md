@@ -618,7 +618,7 @@ conservative WebGPU limits. Orbital Last Stand exercises the capability with the
 Strider's exact six-point hull.
 
 **A sliced image says how it is cut, once.** A sheet document beside a texture —
-`textures/tiles.png` is sliced by `textures/tiles.sheet.json`, at a derived ID
+`textures/tiles.png` is sliced by `textures/tiles.sheet`, at a derived ID
 nothing has to declare — names the parts of it, either as a grid or as explicit
 rects. A scene then writes `textures/tiles.png#floor`, and the `#` that had
 always been rejected inside an asset ID is what carries the name, because it was
@@ -685,7 +685,7 @@ limited to world space until the Game view has an authoring-input contract.
 **A tile volume stacks cells instead of filling one plane.** `sindri.tile_grid`
 carries the geometry — columns, rows, cell size, projection, and the screen step
 one level costs — and `sindri.tile_volume` carries sparse cells at integer
-`(column, row, level)` coordinates naming tiles in a reusable `.tileset.json`
+`(column, row, level)` coordinates naming tiles in a reusable `.tileset`
 asset. Empty is absence rather than a reserved ID, so an empty sky costs nothing
 to store. A tile says what its faces look like, whether it hides a neighbour's
 shared face, whether it is solid, and how much of its cell it fills; the
@@ -959,7 +959,7 @@ text binds that project-owned face under the scene's logical asset reference,
 so native and browser builds never substitute different installed fonts.
 
 `ProfileDocument` is the reusable-data counterpart to a prefab: a versioned
-`.profile.json` asset with an author label, an optional game-defined type, and a
+`.profile` asset with an author label, an optional game-defined type, and a
 nested JSON-shaped value payload. `ProfileAssetDecoder` validates it through the
 same native/browser loading path, and the manifest records it as `profile`.
 Unlike a prefab it creates no entity; many script components can hold the same
@@ -1031,7 +1031,7 @@ frame.
   giving a detached scene one is the case that used to have no answer — and the
   project beside the scene, the remembered scene, the textures and the scripts
   all move with it. A save box takes a name rather than an extension, so
-  `level` is written as `level.scene.json`, which is what the browser lists as a
+  `level` is written as `level.scene`, which is what the browser lists as a
   scene and what reopening it finds
 - Shows the hierarchy from live runtime state as a Unity-style GameObject tree:
   every entity may own children, child-bearing rows fold with state remembered
@@ -1333,7 +1333,7 @@ frame.
   is there.
 
   Matching is a scored subsequence rather than a substring, so `oscn` finds
-  `orbital.scene.json`, and the query is split into terms matched in any order,
+  `orbital.scene`, and the query is split into terms matched in any order,
   so a file is reachable by its folder as well as its name. The ranking is the
   part that decides whether a palette is worth having, so it is a pure function
   in `palette/score.rs` tested against the orderings a person would expect
@@ -1393,7 +1393,7 @@ frame.
   rather than the scene's, so auditioning one needs no running world and cannot
   leave a voice behind in it
 - **Creates and edits reusable profiles.** A project-row menu makes a valid
-  `.profile.json`; selecting it opens a structured inspector for its name,
+  `.profile`; selecting it opens a structured inspector for its name,
   game-defined type, nested values, groups, and lists. List entries can be
   appended, duplicated, and removed, and Save writes canonical profile JSON.
   An exported Decay `Profile` field uses a project asset picker rather than a
@@ -1989,7 +1989,7 @@ as evidence of a capability.
 ### The isometric baker
 
 `tools/isometric-baker` bakes a 3D model into an ordinary sprite sheet and the
-`.sheet.json` beside it, offline. Its contract is `docs/isometric-baker.md`.
+`.sheet` beside it, offline. Its contract is `docs/isometric-baker.md`.
 
 It is emphatically **not** runtime 3D and does not imply any. The engine still
 has one mesh primitive, no glTF import, no material authoring and no lighting
@@ -2007,8 +2007,8 @@ diamond they do not draw, and each view refuses the other's fields.
 
 Gather uses it for its whole world. Its floor tiles, shrine, waystones, ridge
 wall segments, trees and stone outcrops are baked sprites drawn by the ordinary
-sprite path; the recipes are `game/assets/textures/*.isobake.json`, and the PNG
-and `.sheet.json` beside each are generated from them.
+sprite path; the recipes are `game/assets/textures/*.isobake`, and the PNG
+and `.sheet` beside each are generated from them.
 
 The floor is the part that mattered most. Gather's two tile tones differed by
 six values out of 255, so the authored regions were invisible and the island
@@ -2025,7 +2025,7 @@ out, so a player standing legally beside it was drawn sliced by a plinth it was
 not touching.
 
 Orbital Last Stand uses it for one thing, and the one thing is the point:
-`textures/detonation.isobake.json` bakes a five-frame blast, top-down, as
+`textures/detonation.isobake` bakes a five-frame blast, top-down, as
 `variants` of one sheet. That game draws itself with `sindri.shape` and script
 arithmetic, which is the right tool for a shield that breathes with your armour;
 an explosion is the other kind of thing — not a parameter of anything, over as

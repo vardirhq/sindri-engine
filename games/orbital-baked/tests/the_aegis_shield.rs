@@ -65,7 +65,7 @@ fn tagged(run: &Run, tag: &str) -> Vec<EntityId> {
 fn spawn_aegis(run: &mut Run) -> EntityId {
     let document = run
         .prefabs
-        .get("prefabs/aegis.prefab.json")
+        .get("prefabs/aegis.prefab")
         .expect("the Aegis prefab ships");
     let entity = run.world.spawn_prefab(document).expect("boss spawns").root;
     let data = run.world.get_mut(entity).expect("boss remains");
@@ -165,7 +165,7 @@ fn fire_lands_on_the_plates_rather_than_the_hull() {
 
     let bullet = run
         .prefabs
-        .get("prefabs/bullet.prefab.json")
+        .get("prefabs/bullet.prefab")
         .expect("the bullet prefab ships")
         .clone();
     let full = run.board("boss_hp");

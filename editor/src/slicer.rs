@@ -2,7 +2,7 @@
 //!
 //! The sheet is a property of the picture, so this is where a picture is shown
 //! and cut. What it edits is the sidecar beside the texture — `tiles.png` is
-//! sliced by `tiles.sheet.json` — and nothing else in the project has to be told
+//! sliced by `tiles.sheet` — and nothing else in the project has to be told
 //! about it, because a sheet's ID is derived from its texture's.
 //!
 //! The image is decoded on the CPU and handed to egui rather than going through
@@ -284,7 +284,7 @@ fn sheet_path(texture: &Path) -> PathBuf {
     let stem = texture
         .file_stem()
         .map_or_else(String::new, |stem| stem.to_string_lossy().into_owned());
-    texture.with_file_name(format!("{stem}.sheet.json"))
+    texture.with_file_name(format!("{stem}.sheet"))
 }
 
 #[cfg(test)]

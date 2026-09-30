@@ -1,7 +1,5 @@
 //! What kind of thing a file in the project is, judged by its name.
 
-use super::sheet::SHEET_SUFFIX;
-
 /// What kind of thing an entry is, as far as the browser can tell.
 ///
 /// From the extension, because that is all a file offers before something opens
@@ -68,27 +66,17 @@ impl AssetKind {
 
     /// What a file of this name is, judged by its extension.
     ///
-    /// A scene is `*.scene.json` rather than any JSON, because the editor can
-    /// open one and not the other, and a row that offers to open a settings
-    /// file as a scene is the same class of lie this module exists to remove.
+    /// Every authored engine format has an extension of its own, so a row
+    /// never has to guess from a file's contents what it is: a settings file
+    /// offered as a scene is the class of lie this module exists to remove.
     pub(crate) fn of_file(name: &str) -> Self {
         let lower = name.to_lowercase();
-        if lower.ends_with(".scene.json") {
-            return Self::Scene;
-        }
-        if lower.ends_with(SHEET_SUFFIX) {
-            return Self::Sheet;
-        }
-        if lower.ends_with(sindri_core::PREFAB_SUFFIX) {
-            return Self::Prefab;
-        }
-        if lower.ends_with(sindri_core::PROFILE_SUFFIX) {
-            return Self::Profile;
-        }
-        if lower.ends_with(sindri_core::TILESET_SUFFIX) {
-            return Self::TileSet;
-        }
         match lower.rsplit_once('.').map(|(_, extension)| extension) {
+            Some("scene") => Self::Scene,
+            Some("sheet") => Self::Sheet,
+            Some("prefab") => Self::Prefab,
+            Some("profile") => Self::Profile,
+            Some("tileset") => Self::TileSet,
             Some("png" | "jpg" | "jpeg" | "webp" | "bmp" | "ktx2" | "dds") => Self::Texture,
             Some("gltf" | "glb" | "obj" | "fbx") => Self::Mesh,
             // `decay` first because it is the engine's own: a `.decay` file is

@@ -27,7 +27,7 @@ import {
 export function sheetIdFor(texture: string): string {
   const dot = texture.lastIndexOf('.');
   const stem = dot < 0 ? texture : texture.slice(0, dot);
-  return `${stem}.sheet.json`;
+  return `${stem}.sheet`;
 }
 
 export interface BakeOutput {
