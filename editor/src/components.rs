@@ -160,6 +160,21 @@ const KNOWN: &[Known] = &[
         icon: icons::SLIDER,
     },
     Known {
+        type_name: "sindri.ui.toggle",
+        family: Family::Ui,
+        icon: icons::TOGGLE,
+    },
+    Known {
+        type_name: "sindri.ui.text_input",
+        family: Family::Ui,
+        icon: icons::TEXT_INPUT,
+    },
+    Known {
+        type_name: "sindri.ui.scroll",
+        family: Family::Ui,
+        icon: icons::SCROLL,
+    },
+    Known {
         type_name: "sindri.ui.layout",
         family: Family::Ui,
         icon: icons::LAYOUT,
