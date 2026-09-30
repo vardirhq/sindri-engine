@@ -7,6 +7,9 @@
 // after running off a ledge it still counts (coyote time).
 script Hero {
     @export let speed: f32 = 6.5;
+    @export let acceleration: f32 = 42.0;
+    @export let deceleration: f32 = 55.0;
+    @export let air_acceleration: f32 = 28.0;
     @export let jump_speed: f32 = 14.0;
     @export let coyote: f32 = 0.1;
     @export let buffer: f32 = 0.12;
@@ -64,7 +67,27 @@ script Hero {
         if released && rise > 0.0 {
             rise = rise * 0.45;
         }
-        Physics.set_velocity(this.entity, run * this.speed, rise);
+
+        // Build and shed horizontal speed instead of snapping straight to the
+        // target. Ground movement stays responsive while the lower air control
+        // makes a committed jump feel different from running on solid ground.
+        var horizontal: f32 = Physics.velocity_x(this.entity);
+        let target = run * this.speed;
+        var rate: f32 = this.air_acceleration;
+        if this.ground > 0.0 {
+            if run == 0.0 {
+                rate = this.deceleration;
+            } else {
+                rate = this.acceleration;
+            }
+        }
+        let step = rate * dt;
+        if horizontal < target {
+            horizontal = min(target, horizontal + step);
+        } else if horizontal > target {
+            horizontal = max(target, horizontal - step);
+        }
+        Physics.set_velocity(this.entity, horizontal, rise);
 
         if run != 0.0 {
             this.facing = run;
