@@ -338,17 +338,15 @@ script Player {
     }
 
     fn nearest() -> Entity {
-        var best: Entity = null;
-        var best_distance: f32 = 0.0;
-        for enemy in World.with_tag("enemy") {
+        // Infinity retains the old whole-world search. The host sorts, while
+        // gameplay still decides whether a target is visible.
+        for enemy in World.within_radius("enemy", this.transform.world_position, 1.0 / 0.0) {
             if !World.exists(enemy) || !on_screen(enemy, VIEW_SIZE) { continue; }
-            let dx = enemy.transform.position.x - this.transform.position.x;
-            let dy = enemy.transform.position.y - this.transform.position.y;
-            let distance = dx * dx + dy * dy;
-            if best == null || distance < best_distance { best = enemy; best_distance = distance; }
+            return enemy;
         }
-        return best;
+        return null;
     }
 
     fn if_number(value: bool) -> f32 { if value { return 1.0; } return 0.0; }
 }
+

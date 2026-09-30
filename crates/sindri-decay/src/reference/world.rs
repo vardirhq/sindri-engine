@@ -33,6 +33,11 @@ pub(super) const TYPES: &[TypeEntry] = &[
                 "Whether an object is switched on. An object switched off, or inside one that is, is hidden and does nothing.",
             ),
             call(
+                "nearest",
+                &["tag", "position"],
+                "The closest active object with an authored tag to a world-space Vec3 position, including parent transforms. Gives null if none has a usable transform. Equal distances keep world order.",
+            ),
+            call(
                 "property_number",
                 &["entity", "name", "fallback"],
                 "Reads a number set up for another object's script, such as a bullet's damage, or gives `fallback` if there is none.",
@@ -81,6 +86,11 @@ pub(super) const TYPES: &[TypeEntry] = &[
                 "with_tag",
                 &["tag"],
                 "Every switched-on object with a tag, as a list: `for enemy in World.with_tag(\"enemy\") { ... }`. Looks through the whole game, so call it once per frame, not in a loop.",
+            ),
+            call(
+                "within_radius",
+                &["tag", "position", "radius"],
+                "A snapshot list of active tagged objects within an inclusive world-space radius of a Vec3 position, nearest first; ties keep world order. Skips unusable transforms. Empty when none match; over 8192 results is an error. Negative or NaN radii are errors; positive infinity searches the whole world.",
             ),
         ],
     },

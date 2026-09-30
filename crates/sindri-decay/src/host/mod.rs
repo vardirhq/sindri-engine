@@ -27,6 +27,7 @@ mod person;
 mod physics;
 mod print;
 mod profile;
+mod query;
 mod random;
 mod save;
 mod scene;
@@ -572,3 +573,4 @@ impl WorldHost<'_> {
         (parts.next()? == "this").then(|| parts.collect())
     }
 }
+

@@ -4,8 +4,10 @@
 //! script may say and what the host will answer cannot drift apart.
 
 mod grid;
+mod world;
 
 use grid::add_grid_surface;
+use world::add_world_surface;
 
 use std::collections::BTreeSet;
 
@@ -18,10 +20,10 @@ use crate::{
     surface::{
         ANIMATION, ANIMATION_CALLS, AnimationCall, CONSTANTS, EFFECTS, EFFECTS_CALLS, ENTITY,
         EffectsCall, FUNCTIONS, GAME, GAME_CALLS, GAMEPAD, GameCall, HostFunction, INPUT,
-        INPUT_QUERIES, Node, PHYSICS, PHYSICS_CALLS, PREFAB, PRINT, PROFILE, PROFILE_CALLS,
+        INPUT_QUERIES, Node, PHYSICS, PHYSICS_CALLS, PRINT, PROFILE, PROFILE_CALLS,
         PROFILES, PhysicsCall, ProfileCall, RANDOM, RANDOM_CALLS, RandomCall, SAVE, SAVE_CALLS,
         SCENE, SCENE_CALLS, SaveCall, SceneCall, THIS, THROUGH_REFERENCE, TIME, TIME_VALUES, UI,
-        UI_CALLS, UiCall, WORLD, WORLD_CALLS, WorldCall, gamepad_type,
+        UI_CALLS, UiCall, gamepad_type,
     },
 };
 
@@ -192,73 +194,6 @@ fn add_profile_surface(environment: &mut Environment) {
     environment.add_type(PROFILE, HostType::new());
     environment.add_type(PROFILES, profiles);
     environment.add_value(PROFILES, Type::Named(PROFILES.to_owned()));
-}
-
-/// What a script can do to the world it is in: find, spawn, despawn, reparent,
-/// and write an exported field on another script.
-///
-/// Its own function like every other namespace, rather than inline in
-/// `environment`, so that adding a call does not grow one function towards the
-/// limit the others were split out to stay under.
-pub(super) fn add_world_surface(environment: &mut Environment) {
-    let mut world = HostType::new();
-    for (name, call) in WORLD_CALLS {
-        world = world.with_function(
-            *name,
-            FunctionType {
-                params: match call {
-                    WorldCall::Find | WorldCall::WithTag | WorldCall::TakeSignal => {
-                        vec![Type::String]
-                    }
-                    WorldCall::Spawn => vec![Type::Named(PREFAB.to_owned())],
-                    WorldCall::SpawnChild => vec![
-                        Type::Named(PREFAB.to_owned()),
-                        Type::Named(ENTITY.to_owned()),
-                    ],
-                    WorldCall::Despawn | WorldCall::Exists | WorldCall::IsActive => {
-                        vec![Type::Named(ENTITY.to_owned())]
-                    }
-                    WorldCall::SetActive => {
-                        vec![Type::Named(ENTITY.to_owned()), Type::Bool]
-                    }
-                    WorldCall::HasTag => {
-                        vec![Type::Named(ENTITY.to_owned()), Type::String]
-                    }
-                    WorldCall::SetParent => vec![
-                        Type::Named(ENTITY.to_owned()),
-                        Type::Named(ENTITY.to_owned()),
-                    ],
-                    WorldCall::SetShapePoint => vec![Type::F32, Type::F32, Type::F32],
-                    // The value is `Unknown` because an exported field may be a
-                    // number, a truth, or text, and Decay has no union. The
-                    // host checks what it was given, and the instance refuses a
-                    // value the field cannot hold when it is built.
-                    WorldCall::SetProperty => {
-                        vec![Type::Named(ENTITY.to_owned()), Type::String, Type::Unknown]
-                    }
-                    WorldCall::PropertyNumber | WorldCall::SendSignal => {
-                        vec![Type::Named(ENTITY.to_owned()), Type::String, Type::F32]
-                    }
-                },
-                return_type: match call {
-                    WorldCall::Find | WorldCall::Spawn | WorldCall::SpawnChild => {
-                        Type::Named(ENTITY.to_owned())
-                    }
-                    WorldCall::WithTag => Type::array_of(Type::Named(ENTITY.to_owned())),
-                    WorldCall::Despawn
-                    | WorldCall::SetParent
-                    | WorldCall::SetShapePoint
-                    | WorldCall::SetProperty
-                    | WorldCall::SendSignal
-                    | WorldCall::SetActive => Type::Unit,
-                    WorldCall::Exists | WorldCall::IsActive | WorldCall::HasTag => Type::Bool,
-                    WorldCall::PropertyNumber | WorldCall::TakeSignal => Type::F32,
-                },
-            },
-        );
-    }
-    environment.add_type(WORLD, world);
-    environment.add_value(WORLD, Type::Named(WORLD.to_owned()));
 }
 
 /// What a script can do to a body, and ask about what it touched.
@@ -562,3 +497,4 @@ pub fn referenced_sources(world: &World, components: &ComponentSchemaRegistry) -
         .map(|(_, component)| component.source)
         .collect()
 }
+

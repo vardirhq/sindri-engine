@@ -138,6 +138,7 @@ is why it earns a section rather than a footnote.
 | Entities and hierarchy | ✅ | ✅ | ✅ | ✅ | **Par** | Undo entries for script writes |
 | **Child transforms follow their parent** | ✅ | ✅ | ✅ | ✅ | **Par** | A child's transform is local to its parent for sprites, meshes, tiles, voxels, cameras, lights, physics, effects and the editor's handles, not only shapes. Scripts read `world_position`. Scorchball's markers, signposts and ball ring ride their parents. Scale composes per axis, so a rotated parent scaled unevenly does not shear its children |
 | Tags and queries | ✅ | ✅ | ✅ | ✅ | **Par** | Query by more than one tag |
+| Deterministic gameplay nearest / radius queries | ✅ | — | ✅ | ✅ | **Par** | Authored-tag queries use composed world positions; radius results are nearest-first with world-order ties. Orbital player and Arc retain their gameplay filters. Cone/box queries and indexing remain |
 | Prefabs | ✅ | ✅ | ✅ | ✅ | **Par** | A scene places a prefab as an instance: the reference plus its overrides, each a JSON merge patch keyed by the prefab's own entity IDs, worked out on save as the difference from the prefab rather than tracked. An edit to the prefab reaches every instance, at once in an open editor as one undo step that keeps overrides and handles. The editor places an instance on a grid cell or in the middle of the Scene view, makes a prefab from a subtree, opens a prefab to edit it, and shows each instance's overrides with revert, apply and unpack; script `Prefab` fields have a picker. The platformer's ten coins are instances of one prefab. An instance can also do without its prefab's entities, patch a list by index, and keep its inner entities' editor state; a prefab is dragged from the browser into the view; Apply and Make prefab are undone with the scene, files included; and a scene whose prefab is missing opens with placeholders that save back unchanged. The editor's panels have no automated coverage; the operations under them do |
 | **Nested prefabs** | ✅ | ✅ | ✅ | ✅ | **Par** | A prefab places instances of others; a scene reaches inside one by path (`loot/sparkle`), a script's spawn makes the whole nest, and a loop is refused naming it. Apply writes an override into the outer prefab rather than changing the inner one. No variants, deliberately — see the anti-goals |
 | Reusable data profiles | ✅ | ✅ | ✅ | ✅ | **Ahead** | Unity has no native equivalent; ScriptableObject is close but needs code per asset. Optional schemas when a second catalog proves the shape |
@@ -660,7 +661,7 @@ an idea that sounds good and nothing needs is the most expensive kind.
 
 | Candidate | What it would replace | Position |
 | --- | --- | --- |
-| **Gameplay spatial queries** — nearest, within radius, within cone, within box, over tagged entities and backed by an index | `player.decay` has a literal `fn nearest()` looping `World.with_tag` with a `best_distance`; `arc.decay` needs "the next two nearest targets" | **Strongest.** See below — this also corrects a framing error above |
+| **Gameplay spatial queries** — nearest, within radius, within cone, within box, over tagged entities and backed by an index | Orbital player and Arc now select from deterministic `World.within_radius` results, retaining visibility and impact-distance filters | **Partly taken.** `World.nearest` and inclusive radius scans use canonical world transforms and world-order ties. Cone/box queries and indexing remain deferred |
 | **Entity lifecycle policies** — despawn after a duration, off-camera, or on animation end | `World.despawn(this.entity)` and a hand-decremented countdown in `bullet`, `beam`, `arc`, `core`, `charger`, `drifter`, `challenger` | **Take.** Small, and seven scripts want it |
 | **Cooldowns and charges** — start, ready, remaining, normalised, recharge | `player.decay` hand-rolls `cooldown` and `mine_cooldown`; `director.decay` hand-rolls `spawn_timer` | **Partly taken.** Decay's `Timer` covers start, ready (`done`), remaining (`left`) and normalised (`progress`), and runs down on its own; charges and recharge are not built. Orbital's countdowns have not moved yet |
 | **Buffered actions** — a press remembered for a window and consumed exactly once | Nothing yet; the games are not platformers | **Take, but narrowed.** See below |
@@ -673,10 +674,11 @@ an idea that sounds good and nothing needs is the most expensive kind.
 ### The one that changes something above
 
 Spatial queries expose a framing error in this file's own physics section, which
-lists raycast and overlap as **physics** queries. `fn nearest()` in
+lists raycast and overlap as **physics** queries. Target selection in
 `player.decay` is not a physics problem — it is a gameplay query over tagged
-entities, and it is the one the games actually hand-roll. The physics casts are
-a subset, not the parent.
+entities. The first slice now lives in `World.nearest` and `World.within_radius`,
+with Orbital proving the filtered targeting path. Physics casts, cone/box
+queries and spatial indexing remain separate follow-up work.
 
 Determinism also matters here in a way it does not for the baseline: a query
 that answers in world order answers the same on every host, and a game built on
@@ -730,3 +732,4 @@ checklist nobody reads:
    candidate up requires the baseline to have grown it, not for us to have
    liked the idea. A candidate earns its place by naming what a game in this
    repository does by hand — and when no game wants it, the row says so.
+

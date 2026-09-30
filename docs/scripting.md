@@ -311,6 +311,8 @@ question from a lookup of one thing somebody already knows the name of.
 | `World.send_signal(entity, name, value)` | nothing |
 | `World.take_signal(name)` | `f32` |
 | `World.with_tag(tag)` | `List<Entity>` |
+| `World.nearest(tag, position)` | `Entity`, or `null` |
+| `World.within_radius(tag, position, radius)` | `List<Entity>` |
 | `World.has_tag(entity, tag)` | `bool` |
 | `World.set_active(entity, on)` | nothing |
 | `World.is_active(entity)` | `bool` |
@@ -505,6 +507,57 @@ of them.
 asks once per frame is fine; a script that asks once per bullet per frame is
 quadratic, and the operation budget will eventually say so in a way that names
 the script rather than the pattern. Ask once and hold the answer for the frame.
+
+### Spatial queries
+
+`World.nearest(tag: String, position: Vec3) -> Entity` returns the closest
+active entity with the authored tag, or `null` if none has a usable spatial
+transform. `World.within_radius(tag: String, position: Vec3, radius: f32) -> List<Entity>`
+returns a snapshot of every such entity at distance **less than or equal to**
+`radius`, or an empty list when none matches.
+
+Both compare full three-dimensional world positions from the engine's canonical
+`World::world_transform`, including parent translation, rotation and scale.
+Pass `this.transform.world_position` when querying from a parented entity;
+`this.transform.position` is local to its parent. Entities without transforms,
+or whose composed world positions are non-finite, are skipped. An entity
+switched off directly or through a parent is excluded, just as for `with_tag`.
+Malformed authored tags retain the existing host error rather than silently
+becoming an empty group.
+
+The position must be a `Vec3` with finite components within the engine's `f32`
+coordinate range. Wrong types, arity, or invalid positions produce a host error
+naming the call. Distances are squared in `f64`, without narrowing the query
+position or radius. A negative radius (including negative infinity) or NaN is
+an error. Zero includes coincident entities. **Positive infinity is an
+unbounded radius**, written `1.0 / 0.0` in Decay; it still skips unusable
+transforms and obeys the result bound.
+
+Radius results are **nearest first**, and equal distances retain deterministic
+world order. `nearest` uses the same tie rule. The order does not depend on
+hash-map iteration or entity-handle numbering. Radius snapshots share the
+8192-result limit of `with_tag`: more matching results are refused, never
+truncated. Out-of-radius entities do not count toward this bound. `nearest`
+returns one handle and can search groups larger than 8192.
+
+```decay
+let origin = this.transform.world_position;
+let target = World.nearest("enemy", origin);
+if target != null { print(target.transform.world_position); }
+for enemy in World.within_radius("enemy", origin, 5.0) {
+    print(enemy.transform.world_position);
+}
+```
+
+These are straightforward world scans, with a stable sort for radius results;
+there is no spatial index yet. Orbital Last Stand proves the new capability:
+its player takes the first radius result that passes the existing on-screen
+check, and Arc takes the first outside its impact-point exclusion. Both use an
+unbounded radius to retain their old global reach. Their enemies and projectiles
+are on the same Z plane, so the new 3D ordering preserves their former XY
+ordering. `nearest` alone cannot express either gameplay filter. Cone and box
+queries, physics casts, overlap queries and acceleration structures remain
+follow-up work.
 
 ### Flecks that are not entities
 
@@ -2199,3 +2252,4 @@ back does not change what undo means.
 - The script instance is created on first sight and lost when the world is
   reloaded. There is no state migration across a hot reload of the source: a
   changed file recompiles, and the running instance keeps its fields.
+
