@@ -1,0 +1,88 @@
+{
+  "format_version": 1,
+  "metadata": { "name": "Platformer Touch Controls" },
+  "entities": [
+    {
+      "id": "touch-controls",
+      "name": "Touch Controls"
+    },
+    {
+      "id": "move-pad",
+      "name": "Movement Pad",
+      "parent": "touch-controls",
+      "transform_3d": {
+        "position": [0.18, 0.18, 0.0],
+        "scale": [0.28, 0.28, 1.0]
+      },
+      "components": {
+        "sindri.ui.shape": {
+          "kind": "ellipse",
+          "fill": [0.05, 0.08, 0.12, 0.28],
+          "stroke": [1.0, 1.0, 1.0, 0.45],
+          "stroke_width": 0.035,
+          "anchor": "bottom_left",
+          "layer": 120
+        }
+      }
+    },
+    {
+      "id": "move-knob",
+      "name": "Movement Stick",
+      "parent": "touch-controls",
+      "transform_3d": {
+        "position": [0.18, 0.18, 0.0],
+        "scale": [0.11, 0.11, 1.0]
+      },
+      "components": {
+        "sindri.ui.shape": {
+          "kind": "ellipse",
+          "fill": [1.0, 1.0, 1.0, 0.32],
+          "stroke": [1.0, 1.0, 1.0, 0.58],
+          "stroke_width": 0.045,
+          "anchor": "bottom_left",
+          "layer": 121
+        }
+      }
+    },
+    {
+      "id": "jump-button",
+      "name": "Jump Button",
+      "parent": "touch-controls",
+      "transform_3d": {
+        "position": [-0.18, 0.18, 0.0],
+        "scale": [0.25, 0.25, 1.0]
+      },
+      "components": {
+        "sindri.ui.shape": {
+          "kind": "ellipse",
+          "fill": [0.12, 0.28, 0.48, 0.34],
+          "stroke": [1.0, 1.0, 1.0, 0.55],
+          "stroke_width": 0.04,
+          "anchor": "bottom_right",
+          "layer": 120
+        }
+      }
+    },
+    {
+      "id": "jump-label",
+      "name": "Jump Label",
+      "parent": "touch-controls",
+      "transform_3d": {
+        "position": [-0.18, 0.18, 0.0],
+        "scale": [1.0, 1.0, 1.0]
+      },
+      "components": {
+        "sindri.ui.text": {
+          "text": "JUMP",
+          "font": "fonts/Inter.ttf",
+          "font_size": 0.032,
+          "bounds": [0.22, 0.08],
+          "anchor": "bottom_right",
+          "layer": 121,
+          "color": [1.0, 1.0, 1.0, 0.78],
+          "bold": true
+        }
+      }
+    }
+  ]
+}
