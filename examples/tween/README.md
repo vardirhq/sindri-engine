@@ -2,7 +2,7 @@
 
 A feature example for managed Decay gameplay tweening. Open `sindri.toml` in
 the editor or run the exported project in a WebGPU browser. Pages publishes it
-at `/sindri-engine/examples/tween/` after the change merges.
+at `https://sindri.vardir.no/examples/tween/`.
 
 Five rows compare linear, ease, ease-in, ease-out and ease-in-out timing while
 moving, scaling, rotating and changing colour. Buttons work with mouse/touch;

@@ -459,6 +459,7 @@ file.
 | --- | :-: | :-: | :-: | :-: | --- | --- |
 | Static web export, base-path aware, content-hashed | ✅ | ❌ | — | ✅ | **Ahead** | Genuinely simple next to Unity's WebGL output |
 | Native desktop | ✅ | ✅ | — | ✅ | **Par** | — |
+| **Game-independent browser project host** | ❌ | — | — | ❌ | **Behind** | Exports load project manifests and scripts, but their shared browser runner is still built from Causeway, calls its terrain setup, and shares `sindri.causeway.save`. Extract a generic host and project-scoped persistence; a bundle rename does not close this gap. |
 | Browser / WASM | ✅ | — | — | ✅ | **Par** | — |
 | Versioned `sindri.toml`, validation | ✅ | 🟡 | — | ✅ | **Par** | — |
 | **Native packaging (installer, icon, splash)** | ❌ | ❌ | — | ❌ | **Absent** | A desktop build cannot be shipped to a player as-is |

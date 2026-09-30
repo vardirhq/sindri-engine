@@ -577,6 +577,9 @@ jobs:
           cargo run --quiet --package sindri-export --bin sindri-export -- \
             examples/tween target/dist/tween --base /sindri-engine/examples/tween/
           cp -R game/pkg/. target/dist/tween/pkg/
+          cargo run --quiet --package sindri-export --bin sindri-export -- \
+            examples/tween target/dist/tween-root --base /examples/tween/
+          cp -R game/pkg/. target/dist/tween-root/pkg/
       - name: Smoke the rendered games
         id: browser_smoke
         run: |
@@ -596,9 +599,9 @@ jobs:
             node scripts/browser/smoke.mjs target/dist/tween target/render-artifacts/browser-tween.png
           SINDRI_EXPECT_ASSETS=1 SINDRI_TWEEN_DEMO=1 \
             SINDRI_EXPECT_ASSET_KINDS=scene,script,font \
-            SINDRI_BASE_PATH=/sindri-engine/examples/tween/ \
+            SINDRI_BASE_PATH=/examples/tween/ \
             SINDRI_VIEWPORT_WIDTH=390 SINDRI_VIEWPORT_HEIGHT=844 \
-            node scripts/browser/smoke.mjs target/dist/tween target/render-artifacts/browser-tween-phone.png
+            node scripts/browser/smoke.mjs target/dist/tween-root target/render-artifacts/browser-tween-phone.png
       - name: Smoke the startup failure paths
         id: browser_failures
         run: |
