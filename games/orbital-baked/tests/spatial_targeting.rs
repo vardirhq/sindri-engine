@@ -99,3 +99,13 @@ fn arc_skips_impact_targets_and_moves_toward_the_next_nearest_enemy() {
         "arc chose the farther target: {position:?}"
     );
 }
+
+#[test]
+fn player_uses_the_nearest_enemy_when_it_is_visible() {
+    let mut run = isolated_run(Some("Player"));
+    enemy(&mut run, [3.0, 0.0, 0.0]);
+    enemy(&mut run, [1.0, 0.0, 0.0]);
+    step(&mut run);
+    assert!((run.board("target_live") - 1.0).abs() < 1.0e-5);
+    assert!((run.board("target_x") - 1.0).abs() < 1.0e-5);
+}

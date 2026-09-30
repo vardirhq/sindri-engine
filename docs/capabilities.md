@@ -1668,8 +1668,9 @@ sorted nearest first, with stable world order breaking ties. Both use
 refused above 8192; `nearest` has no list-result bound. Negative and NaN radii
 are errors, zero includes coincident entities, and positive infinity searches
 all spatial matches. These are O(n) scans without an index (radius results also
-need sorting). Orbital Last Stand's player and Arc use sorted unbounded-radius
-results while retaining visibility and impact-point exclusions. Exercised in
+need sorting). Orbital Last Stand's player uses `nearest` directly when the
+closest enemy is visible, with a sorted unbounded-radius fallback otherwise.
+Arc selects from sorted radius results with its impact-point exclusion. Exercised in
 `crates/sindri-decay/src/host/query/tests.rs`,
 `crates/sindri-decay/tests/a_script_queries_spatial_entities.rs`, and
 `games/orbital-baked/tests/spatial_targeting.rs`. Cone/box queries and physics

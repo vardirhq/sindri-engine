@@ -338,9 +338,13 @@ script Player {
     }
 
     fn nearest() -> Entity {
+        let origin = this.transform.world_position;
+        let closest = World.nearest("enemy", origin);
+        if closest == null { return null; }
+        if World.exists(closest) && on_screen(closest, VIEW_SIZE) { return closest; }
         // Infinity retains the old whole-world search. The host sorts, while
         // gameplay still decides whether a target is visible.
-        for enemy in World.within_radius("enemy", this.transform.world_position, 1.0 / 0.0) {
+        for enemy in World.within_radius("enemy", origin, 1.0 / 0.0) {
             if !World.exists(enemy) || !on_screen(enemy, VIEW_SIZE) { continue; }
             return enemy;
         }

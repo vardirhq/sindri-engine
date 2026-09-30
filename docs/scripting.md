@@ -551,9 +551,10 @@ for enemy in World.within_radius("enemy", origin, 5.0) {
 
 These are straightforward world scans, with a stable sort for radius results;
 there is no spatial index yet. Orbital Last Stand proves the new capability:
-its player takes the first radius result that passes the existing on-screen
-check, and Arc takes the first outside its impact-point exclusion. Both use an
-unbounded radius to retain their old global reach. Their enemies and projectiles
+its player uses `nearest` when that enemy passes the existing on-screen check,
+falling back to the first acceptable radius result otherwise. Arc takes the
+first radius result outside its impact-point exclusion. Their unbounded-radius
+searches retain their old global reach. Their enemies and projectiles
 are on the same Z plane, so the new 3D ordering preserves their former XY
 ordering. `nearest` alone cannot express either gameplay filter. Cone and box
 queries, physics casts, overlap queries and acceleration structures remain
