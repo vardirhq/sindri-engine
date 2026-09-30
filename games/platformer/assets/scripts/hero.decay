@@ -10,9 +10,9 @@
 // Sindri's virtual Stick for movement; a second finger is the jump button.
 script Hero {
     @export let speed: f32 = 6.5;
-    @export let acceleration: f32 = 42.0;
-    @export let deceleration: f32 = 55.0;
-    @export let air_acceleration: f32 = 28.0;
+    @export let acceleration: f32 = 120.0;
+    @export let deceleration: f32 = 90.0;
+    @export let air_acceleration: f32 = 90.0;
     @export let jump_speed: f32 = 14.0;
     @export let coyote: f32 = 0.1;
     @export let buffer: f32 = 0.12;
@@ -86,8 +86,8 @@ script Hero {
         this.jump_held = holding_jump;
 
         // Build and shed horizontal speed instead of snapping straight to the
-        // target. Ground movement stays responsive while the lower air control
-        // makes a committed jump feel different from running on solid ground.
+        // target. The short ramp preserves the showcase's established jump
+        // timing while still making starts, stops and reversals feel physical.
         var horizontal: f32 = Physics.velocity_x(this.entity);
         let target = run * this.speed;
         var rate: f32 = this.air_acceleration;
