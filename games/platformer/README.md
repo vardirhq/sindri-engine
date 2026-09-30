@@ -3,18 +3,21 @@
 The first genre showcase: a small side-view platformer. Run and jump across a
 painted level, pick up the coins and reach the flag.
 
-Arrow keys or A/D run; Space, W or Up jumps. A tap is a hop and a held press a
-full jump; a jump pressed just before landing, or just after running off a
-ledge, still counts. Horizontal movement accelerates and decelerates rather
-than snapping between stopped and full speed, with deliberately lighter air
-control after committing to a jump.
+Arrow keys or A/D run; Space, W or Up jumps. A controller can use the left
+stick or D-pad and the south face button. On a touch screen, the first finger
+makes Sindri's virtual stick and a second finger jumps. A tap is a hop and a
+held press a full jump; a jump pressed just before landing, or just after
+running off a ledge, still counts. Horizontal movement accelerates and
+decelerates rather than snapping between stopped and full speed, with
+deliberately lighter air control after committing to a jump.
 
 ## What it is made of
 
 There is no game code. The game is `assets/`:
 
 - `platformer.scene.json`: the level, the hero, the coins, the flag and the HUD.
-- `scripts/hero.decay`: running, jumping, coins, the flag and falling off.
+- `scripts/hero.decay`: keyboard, controller and touch movement, jumping, coins,
+  the flag and falling off.
 - `scripts/hud.decay`: the coin count and the banner.
 - `textures/`: pixel art drawn by `art/draw.py`, deterministic, so running it
   again changes nothing unless the drawing did.
@@ -27,6 +30,8 @@ It uses, with no Rust of its own:
 - a **dynamic body** with a capsule collider and a **foot sensor** that says
   when the hero is standing, so walls and ceilings never count as floor;
 - **sprite animation** clips for idle, run, jump and fall;
+- **keyboard, gamepad and touch input** through one movement path, including
+  Sindri's built-in touch stick;
 - a **camera** that follows the hero and stays inside the level;
 - **screen text** filled from Decay.
 
