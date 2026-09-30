@@ -16,6 +16,7 @@
 mod game;
 mod input;
 mod world;
+mod tween;
 
 /// One name: a value a script reads, or a call it makes.
 #[derive(Clone, Copy, Debug)]
@@ -151,7 +152,7 @@ pub const THIS: &[Entry] = &[
 ];
 
 /// Every host type, and each of its members.
-pub const TYPES: &[&[TypeEntry]] = &[world::TYPES, game::TYPES, input::TYPES];
+pub const TYPES: &[&[TypeEntry]] = &[world::TYPES, game::TYPES, input::TYPES, tween::TYPES];
 
 /// The entry for a host type, if it has one.
 #[must_use]
@@ -182,3 +183,4 @@ pub fn member_entry(owner: &str, name: &str) -> Option<&'static Entry> {
         .iter()
         .find(|entry| entry.name == name)
 }
+

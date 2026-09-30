@@ -13,7 +13,7 @@
 
 use std::collections::BTreeMap;
 
-use sindri_core::EntityId;
+use sindri_core::{Easing, EntityId};
 
 /// How one property, or `all`, eases when it changes.
 #[derive(Clone, Copy, Debug, PartialEq)]
@@ -23,51 +23,6 @@ struct Timing {
     easing: Easing,
 }
 
-#[derive(Clone, Copy, Debug, PartialEq)]
-enum Easing {
-    Linear,
-    /// A cubic Bézier through (0,0), (x1,y1), (x2,y2), (1,1), as CSS's
-    /// `cubic-bezier()` and its named curves are.
-    Bezier(f32, f32, f32, f32),
-}
-
-impl Easing {
-    fn named(name: &str) -> Option<Self> {
-        Some(match name {
-            "linear" => Self::Linear,
-            "ease" => Self::Bezier(0.25, 0.1, 0.25, 1.0),
-            "ease-in" => Self::Bezier(0.42, 0.0, 1.0, 1.0),
-            "ease-out" => Self::Bezier(0.0, 0.0, 0.58, 1.0),
-            "ease-in-out" => Self::Bezier(0.42, 0.0, 0.58, 1.0),
-            _ => return None,
-        })
-    }
-
-    /// Progress along the curve at time fraction `t`.
-    fn apply(self, t: f32) -> f32 {
-        let t = t.clamp(0.0, 1.0);
-        let Self::Bezier(x1, y1, x2, y2) = self else {
-            return t;
-        };
-        let bezier = |a: f32, b: f32, s: f32| {
-            let inverse = 1.0 - s;
-            3.0 * inverse * inverse * s * a + 3.0 * inverse * s * s * b + s * s * s
-        };
-        // Find the curve parameter whose x is `t` by bisection: always
-        // converges, and twenty steps is far below a pixel.
-        let (mut low, mut high) = (0.0_f32, 1.0_f32);
-        for _ in 0..20 {
-            let middle = f32::midpoint(low, high);
-            if bezier(x1, x2, middle) < t {
-                low = middle;
-            } else {
-                high = middle;
-            }
-        }
-        bezier(y1, y2, f32::midpoint(low, high))
-    }
-}
-
 /// Reads `transition: background 150ms ease-out, color 0.2s` into what each
 /// property does. A malformed item is skipped rather than failing the frame.
 fn parse_transitions(value: &str) -> BTreeMap<String, Timing> {
@@ -75,7 +30,7 @@ fn parse_transitions(value: &str) -> BTreeMap<String, Timing> {
     for item in value.split(',') {
         let mut property = None;
         let mut times = Vec::new();
-        let mut easing = Easing::Bezier(0.25, 0.1, 0.25, 1.0);
+        let mut easing = Easing::Ease;
         for word in item.split_whitespace() {
             if let Some(seconds) = time(word) {
                 times.push(seconds);
@@ -436,3 +391,4 @@ mod tests {
         assert!((timings["color"].delay - 0.05).abs() < 1.0e-6);
     }
 }
+

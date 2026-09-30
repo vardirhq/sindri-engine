@@ -87,6 +87,8 @@ impl<'a> WorldHost<'a> {
             walkable: None,
             printed: Vec::new(),
             peers: None,
+            tweens: None,
         }
     }
 }
+

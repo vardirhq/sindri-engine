@@ -23,6 +23,7 @@ mod maths;
 mod member;
 pub(super) mod names;
 mod person;
+pub(crate) mod tween;
 
 #[cfg(test)]
 mod tests;
@@ -299,3 +300,4 @@ pub(crate) fn follow_mut<'a>(value: &'a mut Json, pointer: &[Seg]) -> Option<&'a
         Seg::Index(index) => value.get_mut(index),
     })
 }
+

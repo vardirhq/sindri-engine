@@ -23,6 +23,7 @@ pub(super) struct TickWorld<'a> {
     pub(super) programs: &'a mut BTreeMap<String, Compiled>,
     pub(super) running: &'a mut BTreeMap<EntityId, Running>,
     pub(super) starting: &'a mut super::StartingValues,
+    pub(super) tweens: &'a mut crate::tweens::Tweens,
     pub(super) blackboard: &'a mut Blackboard,
     pub(super) audio: &'a mut Vec<AudioCommand>,
     pub(super) world: &'a mut World,
@@ -94,6 +95,8 @@ pub(super) fn tick(
     // instance either exists or is being built, and either way its authored
     // properties have been decided.
     at.started.insert(entity);
+    if fresh { at.tweens.remove_owner(entity); }
+    else { at.tweens.advance(entity, f64::from(delta_seconds)); }
 
     // Taken out of the map for the call, so the host can lend every *other*
     // running script to this one, and put back whatever happens.
@@ -274,6 +277,7 @@ fn host_for<'b>(
             scenes: at.scenes.as_deref_mut(),
         },
     )
+    .with_tweens(&mut *at.tweens)
     .with_peers(Peers {
         running: &mut *at.running,
         starting: &mut *at.starting,
@@ -478,3 +482,4 @@ pub(crate) fn to_value(value: &serde_json::Value) -> Option<Value> {
         serde_json::Value::Object(_) => return None,
     })
 }
+

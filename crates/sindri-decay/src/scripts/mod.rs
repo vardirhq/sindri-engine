@@ -114,6 +114,7 @@ pub struct Scripts {
     /// a running game has — an entity, most usefully.
     starting: StartingValues,
     blackboard: Blackboard,
+    tweens: crate::tweens::Tweens,
     /// What scripts asked to play, for whoever owns an audio device to perform.
     audio: Vec<AudioCommand>,
 }
@@ -222,6 +223,7 @@ impl Scripts {
             running,
             starting,
             blackboard,
+            tweens,
             audio,
         } = self;
         let mut at = TickWorld {
@@ -229,6 +231,7 @@ impl Scripts {
             running,
             starting,
             blackboard,
+            tweens,
             audio,
             world,
             sources,
@@ -277,6 +280,7 @@ impl Scripts {
         Self::start_spawned(&mut report, &mut live, &mut at, components, delta_seconds);
         Self::deliver_messages(&mut report, &mut live, &mut at, components, delta_seconds);
 
+        at.tweens.retain(|entity| live.contains(&entity));
         at.running.retain(|entity, _| live.contains(entity));
         // What was waiting for something that never started goes with it.
         let world = &*at.world;
@@ -482,6 +486,7 @@ impl Scripts {
         self.programs.clear();
         self.running.clear();
         self.blackboard.clear();
+        self.tweens.clear();
         // Requests from the run being cleared belong to it. Carrying them over
         // would play the previous session's sounds into the next one.
         self.audio.clear();
@@ -530,3 +535,4 @@ mod tests {
         );
     }
 }
+

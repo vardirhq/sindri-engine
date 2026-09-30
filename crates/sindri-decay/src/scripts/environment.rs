@@ -5,6 +5,7 @@
 
 mod grid;
 mod world;
+mod tween;
 
 use grid::add_grid_surface;
 use world::add_world_surface;
@@ -119,6 +120,7 @@ pub fn environment() -> Environment {
     environment.add_value(TIME, Type::Named(TIME.to_owned()));
 
     add_world_surface(&mut environment);
+    tween::add_tween_surface(&mut environment);
     add_profile_surface(&mut environment);
 
     super::person_surface::add_pointer_surface(&mut environment);
@@ -497,3 +499,4 @@ pub fn referenced_sources(world: &World, components: &ComponentSchemaRegistry) -
         .map(|(_, component)| component.source)
         .collect()
 }
+

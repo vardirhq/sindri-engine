@@ -38,6 +38,9 @@ impl WorldHost<'_> {
         path: &Path,
         args: &[Value],
     ) -> Option<Result<Value, RuntimeError>> {
+        if namespace == crate::surface::tween::TWEEN {
+            return Some(self.tween_call(name, path, args));
+        }
         match namespace {
             CAMERA => named(CAMERA_CALLS, name).map(|call| self.camera_call(call, path, args)),
             GAME => named(GAME_CALLS, name).map(|call| self.game_call(call, path, args)),
@@ -151,3 +154,4 @@ fn named<T: Copy>(table: &[(&str, T)], name: &str) -> Option<T> {
         .find(|(known, _)| *known == name)
         .map(|(_, call)| *call)
 }
+
