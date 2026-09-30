@@ -5,8 +5,14 @@
 // count as floor. A jump is forgiving in the two ways players expect: pressed
 // a moment before landing it still happens (the buffer), and pressed a moment
 // after running off a ledge it still counts (coyote time).
+//
+// Keyboard, gamepad and touch all feed the same run/jump path. Touch uses
+// Sindri's virtual Stick for movement; a second finger is the jump button.
 script Hero {
     @export let speed: f32 = 6.5;
+    @export let acceleration: f32 = 120.0;
+    @export let deceleration: f32 = 90.0;
+    @export let air_acceleration: f32 = 90.0;
     @export let jump_speed: f32 = 14.0;
     @export let coyote: f32 = 0.1;
     @export let buffer: f32 = 0.12;
@@ -19,6 +25,7 @@ script Hero {
     var since_ground: f32 = 1.0;
     var since_press: f32 = 1.0;
     var facing: f32 = 1.0;
+    var jump_held: bool = false;
     // 0 idle, 1 run, 2 jump, 3 fall: which clip is showing.
     var shown: f32 = 0.0;
 
@@ -41,8 +48,20 @@ script Hero {
             return;
         }
 
-        let run = max(-1.0, min(1.0, Input.axis("A", "D") + Input.axis("ArrowLeft", "ArrowRight")));
-        if Input.just_pressed("Space") || Input.just_pressed("W") || Input.just_pressed("ArrowUp") {
+        var run: f32 = Input.axis("A", "D") + Input.axis("ArrowLeft", "ArrowRight");
+        let stick = Gamepad.axis(0.0, "left_x");
+        if abs(stick) > abs(run) { run = stick; }
+        if Gamepad.is_down(0.0, "dpad_left") { run = -1.0; }
+        if Gamepad.is_down(0.0, "dpad_right") { run = 1.0; }
+        if Stick.held && abs(Stick.x) > abs(run) { run = Stick.x; }
+        run = max(-1.0, min(1.0, run));
+
+        let keyboard_jump = Input.is_down("Space") || Input.is_down("W") || Input.is_down("ArrowUp");
+        let pad_jump = Gamepad.is_down(0.0, "south");
+        let touch_jump = Touch.count > 1.0;
+        let holding_jump = keyboard_jump || pad_jump || touch_jump;
+        let pressed_jump = Input.just_pressed("Space") || Input.just_pressed("W") || Input.just_pressed("ArrowUp") || Gamepad.just_pressed(0.0, "south") || (touch_jump && !this.jump_held);
+        if pressed_jump {
             this.since_press = 0.0;
         } else {
             this.since_press += dt;
@@ -59,12 +78,33 @@ script Hero {
             this.since_press = 1.0;
             this.since_ground = 1.0;
         }
-        // Letting go early cuts the rise short, so a tap is a hop.
-        let released = Input.just_released("Space") || Input.just_released("W") || Input.just_released("ArrowUp");
-        if released && rise > 0.0 {
+        // Letting go early cuts the rise short, so a tap is a hop on every
+        // input device, including lifting the second touch finger.
+        if this.jump_held && !holding_jump && rise > 0.0 {
             rise = rise * 0.45;
         }
-        Physics.set_velocity(this.entity, run * this.speed, rise);
+        this.jump_held = holding_jump;
+
+        // Build and shed horizontal speed instead of snapping straight to the
+        // target. The short ramp preserves the showcase's established jump
+        // timing while still making starts, stops and reversals feel physical.
+        var horizontal: f32 = Physics.velocity_x(this.entity);
+        let target = run * this.speed;
+        var rate: f32 = this.air_acceleration;
+        if this.ground > 0.0 {
+            if run == 0.0 {
+                rate = this.deceleration;
+            } else {
+                rate = this.acceleration;
+            }
+        }
+        let step = rate * dt;
+        if horizontal < target {
+            horizontal = min(target, horizontal + step);
+        } else if horizontal > target {
+            horizontal = max(target, horizontal - step);
+        }
+        Physics.set_velocity(this.entity, horizontal, rise);
 
         if run != 0.0 {
             this.facing = run;
@@ -87,12 +127,16 @@ script Hero {
         }
     }
 
-    // What the capsule and the foot sensor touched this step.
+    // What the capsule and the foot sensor touched this step. A coin taken
+    // earlier in the step, or on an earlier one, can still be reported by the
+    // other sensor or as it leaves, so nothing is asked of one that is gone.
     fn touch() {
         for other in Physics.sensor_entered() {
-            if World.has_tag(other, "solid") {
+            if !World.exists(other) {
+                // Already taken.
+            } else if World.has_tag(other, "solid") {
                 this.ground += 1.0;
-            } else if World.has_tag(other, "coin") && World.exists(other) {
+            } else if World.has_tag(other, "coin") {
                 World.despawn(other);
                 Game.coins += 1.0;
             } else if World.has_tag(other, "goal") {
@@ -100,7 +144,7 @@ script Hero {
             }
         }
         for other in Physics.sensor_exited() {
-            if World.has_tag(other, "solid") {
+            if World.exists(other) && World.has_tag(other, "solid") {
                 this.ground = max(0.0, this.ground - 1.0);
             }
         }
