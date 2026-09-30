@@ -247,7 +247,14 @@ pub(super) const TYPES: &[TypeEntry] = &[
             ),
             call(
                 "raycast",
-                &["origin", "direction", "max_distance", "mask", "include_sensors", "exclude"],
+                &[
+                    "origin",
+                    "direction",
+                    "max_distance",
+                    "mask",
+                    "include_sensors",
+                    "exclude",
+                ],
                 "The closest 2D collider hit, as RayHit2d or null. Normalizes a nonzero Vec2 direction; returns world-space point, normal and distance. The mask selects collider memberships; include_sensors opts into triggers; exclude skips all pieces of one entity (or null). Origin, direction and distance must be finite; distance non-negative; mask a whole u32. Inside hits have distance 0 and normal Vec2(0, 0). Queries synchronized geometry; ignores inactive/despawned entities. Ties prefer entity handle then piece order.",
             ),
             call(
@@ -283,7 +290,10 @@ pub(super) const TYPES: &[TypeEntry] = &[
         members: &[
             value("entity", "The entity owning the hit collider piece."),
             value("point", "The hit point in world coordinates, as Vec2."),
-            value("normal", "The world-space surface normal, as Vec2. Zero for a hit at distance zero."),
+            value(
+                "normal",
+                "The world-space surface normal, as Vec2. Zero for a hit at distance zero.",
+            ),
             value("distance", "Distance from the ray origin, in world units."),
         ],
     },

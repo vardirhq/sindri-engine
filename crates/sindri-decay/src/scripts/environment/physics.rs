@@ -1,7 +1,7 @@
 //! The 2D physics calls and their hit snapshot type.
 
-use decay_semantic::{Environment, FunctionType, HostType, Type};
 use crate::surface::{ENTITY, PHYSICS, PHYSICS_CALLS, PhysicsCall};
+use decay_semantic::{Environment, FunctionType, HostType, Type};
 
 use crate::surface::raycast::{HIT_FIELDS, RAY_HIT};
 
@@ -15,7 +15,9 @@ pub(super) fn add_physics_surface(environment: &mut Environment) {
     ];
     environment.add_struct(RAY_HIT, fields.clone());
     let mut hit = HostType::new();
-    for (name, ty) in fields { hit = hit.with_value(name, ty); }
+    for (name, ty) in fields {
+        hit = hit.with_value(name, ty);
+    }
     environment.add_type(RAY_HIT, hit);
     let mut physics = HostType::new();
     for (name, call) in PHYSICS_CALLS {
@@ -23,7 +25,14 @@ pub(super) fn add_physics_surface(environment: &mut Environment) {
             *name,
             FunctionType {
                 params: match call {
-                    PhysicsCall::Raycast => vec![Type::Vec2, Type::Vec2, Type::F32, Type::F32, Type::Bool, entity()],
+                    PhysicsCall::Raycast => vec![
+                        Type::Vec2,
+                        Type::Vec2,
+                        Type::F32,
+                        Type::F32,
+                        Type::Bool,
+                        entity(),
+                    ],
                     PhysicsCall::VelocityX | PhysicsCall::VelocityY => vec![entity()],
                     PhysicsCall::SetVelocity | PhysicsCall::ApplyImpulse => {
                         vec![entity(), Type::F32, Type::F32]
@@ -50,4 +59,3 @@ pub(super) fn add_physics_surface(environment: &mut Environment) {
     environment.add_type(PHYSICS, physics);
     environment.add_value(PHYSICS, Type::Named(PHYSICS.to_owned()));
 }
-

@@ -60,20 +60,31 @@ impl PhysicsWorld2d {
                 {
                     continue;
                 }
-                let pose = collider.position_wrt_parent().map_or(*collider.position(), |local| {
-                    *body.position() * *local
-                });
-                let Some(hit) = collider.shape().cast_ray_and_get_normal(&pose, &ray, max_distance, true) else {
+                let pose = collider
+                    .position_wrt_parent()
+                    .map_or(*collider.position(), |local| *body.position() * *local);
+                let Some(hit) =
+                    collider
+                        .shape()
+                        .cast_ray_and_get_normal(&pose, &ray, max_distance, true)
+                else {
                     continue;
                 };
                 let distance = hit.time_of_impact;
                 if closest.as_ref().is_some_and(|old| {
-                    distance.total_cmp(&old.distance).then(entity.cmp(&old.entity)).is_ge()
+                    distance
+                        .total_cmp(&old.distance)
+                        .then(entity.cmp(&old.entity))
+                        .is_ge()
                 }) {
                     continue;
                 }
                 let point = ray.point_at(distance);
-                let normal = if distance <= 0.0 { r2::Vector::ZERO } else { hit.normal };
+                let normal = if distance <= 0.0 {
+                    r2::Vector::ZERO
+                } else {
+                    hit.normal
+                };
                 closest = Some(RayHit2d {
                     entity,
                     point: [point.x, point.y],
@@ -100,7 +111,10 @@ fn checked_ray(origin: [f32; 2], direction: [f32; 2], distance: f32) -> Result<R
         (f64::from(direction[0]) / length) as f32,
         (f64::from(direction[1]) / length) as f32,
     ];
-    let ray = Ray::new(r2::Vector::new(origin[0], origin[1]), r2::Vector::new(direction[0], direction[1]));
+    let ray = Ray::new(
+        r2::Vector::new(origin[0], origin[1]),
+        r2::Vector::new(direction[0], direction[1]),
+    );
     let end = ray.point_at(distance);
     finite2("ray_endpoint", [end.x, end.y])?;
     Ok(ray)

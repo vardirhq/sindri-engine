@@ -14,7 +14,11 @@ pub struct RaycastFilter2d {
 
 impl Default for RaycastFilter2d {
     fn default() -> Self {
-        Self { mask: u32::MAX, include_sensors: false, exclude: None }
+        Self {
+            mask: u32::MAX,
+            include_sensors: false,
+            exclude: None,
+        }
     }
 }
 

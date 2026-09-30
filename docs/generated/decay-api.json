@@ -1356,6 +1356,28 @@
           "returns": "unit"
         },
         {
+          "description": "The closest 2D collider hit, as RayHit2d or null. Normalizes a nonzero Vec2 direction; returns world-space point, normal and distance. The mask selects collider memberships; include_sensors opts into triggers; exclude skips all pieces of one entity (or null). Origin, direction and distance must be finite; distance non-negative; mask a whole u32. Inside hits have distance 0 and normal Vec2(0, 0). Queries synchronized geometry; ignores inactive/despawned entities. Ties prefer entity handle then piece order.",
+          "kind": "function",
+          "name": "raycast",
+          "parameter_names": [
+            "origin",
+            "direction",
+            "max_distance",
+            "mask",
+            "include_sensors",
+            "exclude"
+          ],
+          "parameters": [
+            "Vec2",
+            "Vec2",
+            "f32",
+            "f32",
+            "bool",
+            "Entity"
+          ],
+          "returns": "RayHit2d"
+        },
+        {
           "description": "The objects that entered this script's trigger area since the last frame. A trigger area detects things without blocking them, like a pickup.",
           "kind": "function",
           "name": "sensor_entered",
@@ -1726,6 +1748,36 @@
         }
       ],
       "name": "Random"
+    },
+    {
+      "description": "A copied 2D ray hit snapshot. Null means no hit. Holds entity, world-space point and normal, and distance in world units. Copying or editing a snapshot never changes physics.",
+      "members": [
+        {
+          "description": "Distance from the ray origin, in world units.",
+          "kind": "value",
+          "name": "distance",
+          "type": "f32"
+        },
+        {
+          "description": "The entity owning the hit collider piece.",
+          "kind": "value",
+          "name": "entity",
+          "type": "Entity"
+        },
+        {
+          "description": "The world-space surface normal, as Vec2. Zero for a hit at distance zero.",
+          "kind": "value",
+          "name": "normal",
+          "type": "Vec2"
+        },
+        {
+          "description": "The hit point in world coordinates, as Vec2.",
+          "kind": "value",
+          "name": "point",
+          "type": "Vec2"
+        }
+      ],
+      "name": "RayHit2d"
     },
     {
       "description": "Saving progress between play sessions: numbers and true/false values stored under names, such as a best score.",

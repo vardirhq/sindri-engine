@@ -23,10 +23,9 @@ use crate::{
     surface::{
         ANIMATION, ANIMATION_CALLS, AnimationCall, CONSTANTS, EFFECTS, EFFECTS_CALLS, ENTITY,
         EffectsCall, FUNCTIONS, GAME, GAME_CALLS, GAMEPAD, GameCall, HostFunction, INPUT,
-        INPUT_QUERIES, Node, PRINT, PROFILE, PROFILE_CALLS, PROFILES,
-        ProfileCall, RANDOM, RANDOM_CALLS, RandomCall, SAVE, SAVE_CALLS, SCENE,
-        SCENE_CALLS, SaveCall, SceneCall, THIS, THROUGH_REFERENCE, TIME, TIME_VALUES, UI, UI_CALLS,
-        UiCall, gamepad_type,
+        INPUT_QUERIES, Node, PRINT, PROFILE, PROFILE_CALLS, PROFILES, ProfileCall, RANDOM,
+        RANDOM_CALLS, RandomCall, SAVE, SAVE_CALLS, SCENE, SCENE_CALLS, SaveCall, SceneCall, THIS,
+        THROUGH_REFERENCE, TIME, TIME_VALUES, UI, UI_CALLS, UiCall, gamepad_type,
     },
 };
 

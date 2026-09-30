@@ -75,12 +75,23 @@ impl Demo {
                 self.input.presses(),
             )
             .unwrap();
-        self.physics.step(&mut self.world, self.extractor.components(), Duration::from_secs_f32(1.0 / 60.0)).unwrap();
+        self.physics
+            .step(
+                &mut self.world,
+                self.extractor.components(),
+                Duration::from_secs_f32(1.0 / 60.0),
+            )
+            .unwrap();
         let (physics, events) = self.physics.for_scripts();
         let report = self.scripts.advance(
             &mut self.world,
             self.extractor.components(),
-            ScriptFrame::new(&self.sources, &self.input, 1.0 / 60.0).with_screen_ui(&self.screen).with_physics(Physics2d { world: physics, events }),
+            ScriptFrame::new(&self.sources, &self.input, 1.0 / 60.0)
+                .with_screen_ui(&self.screen)
+                .with_physics(Physics2d {
+                    world: physics,
+                    events,
+                }),
         );
         assert!(report.failures.is_empty(), "{:?}", report.failures);
         self.input.begin_frame(Duration::from_millis(16));
@@ -101,12 +112,16 @@ fn the_project_shows_filtered_hits_inside_hits_and_misses() {
     assert!(demo.text("result-label").starts_with("Sensor / d 1.65"));
     demo.press(Key::I);
     assert_eq!(demo.text("result-label"), "Solid / d 0.00 / n 0.0,0.0");
-    demo.press(Key::T); demo.press(Key::T); demo.press(Key::T);
+    demo.press(Key::T);
+    demo.press(Key::T);
+    demo.press(Key::T);
     assert_eq!(demo.text("result-label"), "miss");
     assert!(!demo.world.is_active(demo.id("hit-dot")));
     demo.press(Key::R);
     assert!(demo.text("result-label").starts_with("Solid / d 3.40"));
-    for _ in 0..4 { demo.press(Key::Q); }
+    for _ in 0..4 {
+        demo.press(Key::Q);
+    }
     assert_eq!(demo.text("result-label"), "miss");
 }
 
@@ -131,11 +146,23 @@ fn falling_bodies_bounce_pass_through_sensors_and_can_be_dropped_again() {
 #[test]
 fn phone_touch_buttons_toggle_sensors_and_turn_the_visible_ray() {
     let mut demo = Demo::new(390.0, 844.0);
-    demo.input.apply(InputEvent::TouchStarted { id: 1, x: 78.0, y: 649.88 });
-    demo.step(); demo.input.apply(InputEvent::TouchEnded { id: 1 }); demo.step();
+    demo.input.apply(InputEvent::TouchStarted {
+        id: 1,
+        x: 78.0,
+        y: 649.88,
+    });
+    demo.step();
+    demo.input.apply(InputEvent::TouchEnded { id: 1 });
+    demo.step();
     assert_eq!(demo.text("sensors-label"), "SENSORS ON");
     assert!(demo.text("result-label").starts_with("Sensor / d 1.65"));
-    demo.input.apply(InputEvent::TouchStarted { id: 2, x: 312.0, y: 776.48 });
-    demo.step(); demo.input.apply(InputEvent::TouchEnded { id: 2 }); demo.step();
+    demo.input.apply(InputEvent::TouchStarted {
+        id: 2,
+        x: 312.0,
+        y: 776.48,
+    });
+    demo.step();
+    demo.input.apply(InputEvent::TouchEnded { id: 2 });
+    demo.step();
     assert!(demo.text("query-label").contains("angle 0.26"));
 }
