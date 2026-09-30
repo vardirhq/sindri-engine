@@ -11,6 +11,11 @@ running off a ledge, still counts. Horizontal movement accelerates and
 decelerates rather than snapping between stopped and full speed, with
 deliberately lighter air control after committing to a jump.
 
+The touch path is functional input, but the platformer does not yet draw its
+mobile controls. Visible on-screen affordances for the stick and jump action
+remain part of the mobile presentation work rather than being hidden behind a
+claim that two invisible fingers somehow constitute a finished mobile UI.
+
 ## What it is made of
 
 There is no game code. The game is `assets/`:
