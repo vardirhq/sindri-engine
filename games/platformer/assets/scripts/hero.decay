@@ -127,12 +127,16 @@ script Hero {
         }
     }
 
-    // What the capsule and the foot sensor touched this step.
+    // What the capsule and the foot sensor touched this step. A coin taken
+    // earlier in the step, or on an earlier one, can still be reported by the
+    // other sensor or as it leaves, so nothing is asked of one that is gone.
     fn touch() {
         for other in Physics.sensor_entered() {
-            if World.has_tag(other, "solid") {
+            if !World.exists(other) {
+                // Already taken.
+            } else if World.has_tag(other, "solid") {
                 this.ground += 1.0;
-            } else if World.has_tag(other, "coin") && World.exists(other) {
+            } else if World.has_tag(other, "coin") {
                 World.despawn(other);
                 Game.coins += 1.0;
             } else if World.has_tag(other, "goal") {
@@ -140,7 +144,7 @@ script Hero {
             }
         }
         for other in Physics.sensor_exited() {
-            if World.has_tag(other, "solid") {
+            if World.exists(other) && World.has_tag(other, "solid") {
                 this.ground = max(0.0, this.ground - 1.0);
             }
         }
