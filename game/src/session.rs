@@ -477,6 +477,13 @@ impl Session {
         Ok(())
     }
 
+    /// The screen UI as the last step read it: what is focused, where each
+    /// element was laid out.
+    #[must_use]
+    pub const fn screen_ui(&self) -> &ScreenUi {
+        &self.screen_ui
+    }
+
     #[must_use]
     pub const fn animations(&self) -> &SpriteAnimations {
         &self.animations

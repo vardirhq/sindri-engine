@@ -288,7 +288,7 @@ fn register_drawables(components: &mut ComponentSchemaRegistry) -> Result<(), Sc
     // pressable, and one on a bare entity is a hit area with no art.
     components.register_with_default::<UiButtonComponent>(
         "UI Button",
-        serde_json::json!({ "label": "" }),
+        serde_json::json!({ "label": "", "disabled": false }),
     )?;
     components.register_with_default::<UiSliderComponent>(
         "UI Slider",

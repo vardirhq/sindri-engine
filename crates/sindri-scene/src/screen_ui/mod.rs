@@ -38,6 +38,10 @@ pub use widgets::{UiInput, UiScrollComponent, UiTextInputComponent, UiToggleComp
 pub struct UiButtonComponent {
     #[serde(default)]
     pub label: String,
+    /// Shown but not pressable: no hover, no press, no focus, and Weave's
+    /// `:disabled` to say so.
+    #[serde(default)]
+    pub disabled: bool,
 }
 
 impl SceneComponent for UiButtonComponent {
@@ -67,6 +71,8 @@ struct Element {
     layer: i32,
     pressable: bool,
     clip: Option<ScreenRect>,
+    /// A scroll region's measured content height.
+    content: Option<f32>,
 }
 
 impl ScreenUi {
@@ -196,6 +202,12 @@ impl ScreenUi {
         self.rects.get(&entity).map(|element| element.rect)
     }
 
+    /// How tall a scroll region's content was when last laid out.
+    #[must_use]
+    pub fn scroll_content(&self, entity: EntityId) -> Option<f32> {
+        self.rects.get(&entity).and_then(|element| element.content)
+    }
+
     fn place(
         world: &World,
         components: &ComponentSchemaRegistry,
@@ -225,6 +237,7 @@ impl ScreenUi {
                     clip,
                     layer,
                     pressable,
+                    content: hierarchy.scroll_content(entity),
                 },
             );
         }
@@ -249,11 +262,13 @@ impl ScreenUi {
                 .entry(entity)
                 .or_insert((text.anchor, text.layer, false));
         }
-        for (entity, _) in components.query::<UiButtonComponent>(world)? {
-            found
-                .entry(entity)
-                .or_insert((UiAnchor::Center, 0, false))
-                .2 = true;
+        for (entity, button) in components.query::<UiButtonComponent>(world)? {
+            if !button.disabled {
+                found
+                    .entry(entity)
+                    .or_insert((UiAnchor::Center, 0, false))
+                    .2 = true;
+            }
         }
         for (entity, slider) in components.query::<UiSliderComponent>(world)? {
             if !slider.disabled {

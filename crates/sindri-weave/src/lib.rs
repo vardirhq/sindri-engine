@@ -217,6 +217,7 @@ fn apply_sizing(
         .unwrap_or_default()
         .scale_2d();
     let mut resolved = current;
+    let mut sized = [false; 2];
 
     for axis in 0..2 {
         let (size_name, min_name, max_name) = if axis == 0 {
@@ -255,12 +256,27 @@ fn apply_sizing(
             size = size.min(maximum.max(minimum.unwrap_or(0.0)));
         }
         resolved[axis] = size;
+        sized[axis] = preferred.is_some();
     }
 
     let data = world.get_mut(entity).expect("entity came from this world");
     let transform = data.transform_3d.get_or_insert_with(Transform3D::default);
     transform.scale[0] = resolved[0];
     transform.scale[1] = resolved[1];
+    // A text element's box is the element, as in CSS: the words wrap and
+    // align inside the width it is given, not inside what the scene wrote.
+    if let Some(bounds) = data
+        .components
+        .get_mut("sindri.ui.text")
+        .and_then(|text| text.get_mut("bounds"))
+        .and_then(serde_json::Value::as_array_mut)
+    {
+        for axis in (0..2).filter(|axis| sized[*axis]) {
+            if let Some(slot) = bounds.get_mut(axis) {
+                *slot = serde_json::json!(resolved[axis]);
+            }
+        }
+    }
     Ok(())
 }
 

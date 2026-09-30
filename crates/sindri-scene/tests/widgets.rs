@@ -337,3 +337,56 @@ fn widget_payloads_that_cannot_hold_are_refused() {
     assert!(!scroll(json!({"content_height":-1.0})));
     assert!(!scroll(json!({"content_height":1.0, "offset":-0.5})));
 }
+
+/// A laid-out list inside a scroll region keeps its rows' size, hangs from
+/// the region's top edge, and scrolls exactly as far as it is tall -- the
+/// region is measured, not told.
+#[test]
+fn a_scroll_region_measures_the_list_it_holds() {
+    let extractor = SceneExtractor::new().unwrap();
+    let mut world = World::default();
+    let region = widget(&mut world, "sindri.ui.scroll", json!({"offset":99.0}), 0.0);
+    world.get_mut(region).unwrap().components.insert(
+        "sindri.ui.layout".to_owned(),
+        json!({"direction":"column","spacing":0.0,"justify":"start"}),
+    );
+    let rows: Vec<EntityId> = (0..10)
+        .map(|_| {
+            let row = world.spawn(EntityData {
+                transform_3d: Some(Transform3D {
+                    scale: [0.8, 0.1, 1.0],
+                    ..Transform3D::default()
+                }),
+                components: [("sindri.ui.button".to_owned(), json!({"label":"row"}))]
+                    .into_iter()
+                    .collect(),
+                ..EntityData::default()
+            });
+            world.set_parent(row, Some(region)).unwrap();
+            row
+        })
+        .collect();
+    let hierarchy = UiHierarchy::of(&world, extractor.components()).unwrap();
+    let content = hierarchy.scroll_content(region).unwrap();
+    assert!((content - 1.0).abs() < 1.0e-5, "measured {content}");
+    // Scrolled to the end, clamped: 1.0 of rows in 0.3 of view.
+    let last = hierarchy.placement(rows[9]).unwrap();
+    assert!((last.offset.y - (-0.15 + 0.05)).abs() < 1.0e-5, "{last:?}");
+    assert!(
+        (last.size.unwrap().y - 0.1).abs() < 1.0e-6,
+        "rows keep their height rather than squeezing into the view"
+    );
+
+    world
+        .get_mut(region)
+        .unwrap()
+        .components
+        .get_mut("sindri.ui.scroll")
+        .unwrap()["offset"] = json!(0.0);
+    let hierarchy = UiHierarchy::of(&world, extractor.components()).unwrap();
+    let first = hierarchy.placement(rows[0]).unwrap();
+    assert!(
+        (first.offset.y - (0.15 - 0.05)).abs() < 1.0e-5,
+        "the first row starts at the top: {first:?}"
+    );
+}

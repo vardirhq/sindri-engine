@@ -108,7 +108,8 @@ impl SceneComponent for UiTextInputComponent {
 #[serde(try_from = "ScrollFields")]
 pub struct UiScrollComponent {
     pub label: String,
-    /// Vertical content height in overlay units, independent of viewport height.
+    /// The least height the content has, in overlay units. What is laid out
+    /// inside is measured, and a taller measure wins; zero leaves it at that.
     pub content_height: f32,
     /// Distance down from the content's initial position, in overlay units.
     pub offset: f32,
@@ -151,12 +152,18 @@ impl TryFrom<ScrollFields> for UiScrollComponent {
     }
 }
 impl UiScrollComponent {
+    /// `offset` kept to what a region `height` tall can scroll.
+    ///
+    /// The content is as tall as the larger of what is authored and what the
+    /// children `measured` as laid out, so a list that grows is never cut
+    /// short by a stale number and a list authored taller keeps its room.
     #[must_use]
-    pub fn coerce(&self, offset: f32, height: f32) -> f32 {
-        if !offset.is_finite() || !self.content_height.is_finite() {
+    pub fn coerce(&self, offset: f32, height: f32, measured: f32) -> f32 {
+        let content = self.content_height.max(measured);
+        if !offset.is_finite() || !content.is_finite() {
             return 0.0;
         }
-        offset.clamp(0.0, (self.content_height - height.abs()).max(0.0))
+        offset.clamp(0.0, (content - height.abs()).max(0.0))
     }
 }
 impl SceneComponent for UiScrollComponent {

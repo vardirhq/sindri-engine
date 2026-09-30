@@ -31,6 +31,10 @@ impl WorldHost<'_> {
             .screen_ui
             .and_then(|ui| ui.rect(entity))
             .map(|r| r.size[1]);
+        let measured = self
+            .screen_ui
+            .and_then(|ui| ui.scroll_content(entity))
+            .unwrap_or(0.0);
         let data = self.world.get_mut(entity).ok_or_else(|| {
             RuntimeError::Host(format!("{}: entity no longer exists", path.dotted()))
         })?;
@@ -85,8 +89,11 @@ impl WorldHost<'_> {
                 let requested = requested as f32;
                 let scroll = serde_json::from_value::<UiScrollComponent>(payload.clone())
                     .map_err(|e| RuntimeError::Host(e.to_string()))?;
-                payload[field] =
-                    serde_json::json!(scroll.coerce(requested, height.unwrap_or(own_height)));
+                payload[field] = serde_json::json!(scroll.coerce(
+                    requested,
+                    height.unwrap_or(own_height),
+                    measured,
+                ));
                 Ok(Value::Unit)
             }
             _ => unreachable!("widget value call"),

@@ -174,12 +174,11 @@ impl ScreenUi {
             .iter()
             .filter(|(e, _)| self.focusable(world, **e))
             .collect();
-        entities.sort_by(|(a, ar), (b, br)| {
-            br.rect.center[1]
-                .total_cmp(&ar.rect.center[1])
-                .then(ar.rect.center[0].total_cmp(&br.rect.center[0]))
-                .then(a.cmp(b))
-        });
+        // Document order, as a browser tabs: the order the scene is written
+        // in, parents before children. Reading the screen top to bottom
+        // instead zig-zags between side-by-side panels.
+        let order = document_order(world);
+        entities.sort_by_key(|(entity, _)| order.get(*entity).copied().unwrap_or(usize::MAX));
         let ids: Vec<_> = entities.into_iter().map(|(e, _)| *e).collect();
         if ids.is_empty() {
             self.focused = None;
@@ -242,12 +241,35 @@ impl ScreenUi {
         if scroll.disabled {
             return;
         }
-        let offset = scroll.coerce(scroll.offset + delta, rect.size[1]);
+        let measured = self.scroll_content(entity).unwrap_or(0.0);
+        let offset = scroll.coerce(scroll.offset + delta, rect.size[1], measured);
         if (offset - scroll.offset).abs() > f32::EPSILON {
             payload["offset"] = serde_json::json!(offset);
             self.changed.insert(entity);
         }
     }
+}
+
+/// Every entity's place in a depth-first walk of the hierarchy, roots and
+/// siblings in the order they were made.
+fn document_order(world: &World) -> std::collections::BTreeMap<EntityId, usize> {
+    let mut order = std::collections::BTreeMap::new();
+    let mut pending: Vec<EntityId> = world
+        .entities()
+        .filter(|(_, data)| data.parent.is_none())
+        .map(|(entity, _)| entity)
+        .collect();
+    pending.reverse();
+    while let Some(entity) = pending.pop() {
+        if order.contains_key(&entity) {
+            continue;
+        }
+        order.insert(entity, order.len());
+        if let Some(data) = world.get(entity) {
+            pending.extend(data.children.iter().rev().copied());
+        }
+    }
+    order
 }
 
 fn has(world: &World, entity: EntityId, component: &str) -> bool {
