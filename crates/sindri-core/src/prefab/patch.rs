@@ -2,13 +2,28 @@
 //!
 //! RFC 7386, because it is the smallest thing that says "these fields differ"
 //! in the same notation as the component it patches. An object merges key by
-//! key, `null` removes a key, and anything else replaces the value outright —
-//! so a list is overridden whole. That last rule is a real limit: an instance
-//! cannot change one tile of a prefab's tilemap without owning the whole list.
-//! It is also what keeps an override readable, and a per-index patch format is
-//! a second notation nobody would write by hand.
+//! key, `null` removes a key, and anything else replaces the value outright.
+//!
+//! RFC 7386 replaces a list outright too, which would make an instance that
+//! changed one tile of a prefab's tilemap own the whole map. So a list that
+//! changed in few places is patched by index instead, in one extension:
+//!
+//! ```json
+//! { "$items": { "57": 3, "58": { "solid": false } }, "$length": 120 }
+//! ```
+//!
+//! `$items` patches the elements it names — an object merges into an object
+//! element, anything else replaces it — and `$length`, when present, cuts the
+//! list short or pads it with `null` first. A list that changed in most places
+//! is still written whole, because that is shorter and easier to read. Keys
+//! beginning with `$` are reserved inside a patch for this reason.
 
 use serde_json::{Map, Value};
+
+/// The key that patches a list's elements by index.
+pub const LIST_ITEMS: &str = "$items";
+/// The key that sets a list's length.
+pub const LIST_LENGTH: &str = "$length";
 
 /// Applies `patch` to `target`.
 pub fn apply_merge_patch(target: &mut Value, patch: &Value) {
@@ -16,6 +31,10 @@ pub fn apply_merge_patch(target: &mut Value, patch: &Value) {
         *target = patch.clone();
         return;
     };
+    if is_list_patch(fields) {
+        apply_list_patch(target, fields);
+        return;
+    }
     if !target.is_object() {
         *target = Value::Object(Map::new());
     }
@@ -31,21 +50,67 @@ pub fn apply_merge_patch(target: &mut Value, patch: &Value) {
     }
 }
 
+fn is_list_patch(fields: &Map<String, Value>) -> bool {
+    !fields.is_empty()
+        && fields
+            .keys()
+            .all(|key| key == LIST_ITEMS || key == LIST_LENGTH)
+}
+
+fn apply_list_patch(target: &mut Value, fields: &Map<String, Value>) {
+    if !target.is_array() {
+        *target = Value::Array(Vec::new());
+    }
+    let Value::Array(items) = target else {
+        unreachable!("replaced with a list above");
+    };
+    if let Some(length) = fields
+        .get(LIST_LENGTH)
+        .and_then(Value::as_u64)
+        .and_then(|length| usize::try_from(length).ok())
+    {
+        items.resize(length, Value::Null);
+    }
+    let Some(Value::Object(changes)) = fields.get(LIST_ITEMS) else {
+        return;
+    };
+    for (index, change) in changes {
+        let Ok(index) = index.parse::<usize>() else {
+            continue;
+        };
+        if index >= items.len() {
+            items.resize(index + 1, Value::Null);
+        }
+        if change.is_object() && items[index].is_object() {
+            apply_merge_patch(&mut items[index], change);
+        } else {
+            items[index] = change.clone();
+        }
+    }
+}
+
 /// The patch that turns `base` into `modified`, or `None` when they are equal.
 ///
 /// The inverse of [`apply_merge_patch`] for every value it can express. The
-/// one it cannot is a `null` *inside* `modified`, which a patch would read as
-/// "remove"; component payloads do not store nulls, and one that did would
-/// come back without the key, which is how the rest of the engine reads it
-/// anyway.
+/// one it cannot is a `null` *inside* an object in `modified`, which a patch
+/// would read as "remove"; component payloads do not store nulls, and one that
+/// did would come back without the key, which is how the rest of the engine
+/// reads it anyway.
 #[must_use]
 pub fn merge_patch_between(base: &Value, modified: &Value) -> Option<Value> {
     if base == modified {
         return None;
     }
-    let (Value::Object(base), Value::Object(modified)) = (base, modified) else {
-        return Some(modified.clone());
-    };
+    match (base, modified) {
+        (Value::Object(base), Value::Object(modified)) => Some(object_patch(base, modified)),
+        (Value::Array(base), Value::Array(modified)) => {
+            Some(list_patch(base, modified).unwrap_or_else(|| Value::Array(modified.clone())))
+        }
+        _ => Some(modified.clone()),
+    }
+}
+
+fn object_patch(base: &Map<String, Value>, modified: &Map<String, Value>) -> Value {
     let mut patch = Map::new();
     for (key, before) in base {
         match modified.get(key) {
@@ -63,6 +128,33 @@ pub fn merge_patch_between(base: &Value, modified: &Value) -> Option<Value> {
         if !base.contains_key(key) {
             patch.insert(key.clone(), after.clone());
         }
+    }
+    Value::Object(patch)
+}
+
+/// The by-index patch between two lists, or `None` when the whole list is the
+/// shorter thing to write.
+fn list_patch(base: &[Value], modified: &[Value]) -> Option<Value> {
+    let mut items = Map::new();
+    for (index, after) in modified.iter().enumerate() {
+        let change = match base.get(index) {
+            Some(before) if before == after => continue,
+            Some(before) if before.is_object() && after.is_object() => {
+                merge_patch_between(before, after)?
+            }
+            _ => after.clone(),
+        };
+        items.insert(index.to_string(), change);
+    }
+    if base.is_empty() || items.len() * 2 > modified.len() {
+        return None;
+    }
+    let mut patch = Map::new();
+    if !items.is_empty() {
+        patch.insert(LIST_ITEMS.to_owned(), Value::Object(items));
+    }
+    if modified.len() != base.len() {
+        patch.insert(LIST_LENGTH.to_owned(), Value::from(modified.len()));
     }
     Some(Value::Object(patch))
 }
@@ -111,6 +203,37 @@ mod tests {
                 "{base} to {modified}"
             );
         }
+    }
+
+    #[test]
+    fn a_list_changed_in_one_place_is_patched_by_index() {
+        let base = json!({ "tiles": [0, 0, 0, 0, 0, 0, 0, 0] });
+        let modified = json!({ "tiles": [0, 0, 7, 0, 0, 0, 0, 0] });
+        let patch = merge_patch_between(&base, &modified).unwrap();
+        assert_eq!(patch, json!({ "tiles": { "$items": { "2": 7 } } }));
+        assert_eq!(applied(base, &patch), modified);
+    }
+
+    #[test]
+    fn a_list_patch_can_shorten_lengthen_and_merge_into_elements() {
+        let base = json!([{ "a": 1, "b": 2 }, 2, 3, 4, 5, 6]);
+        let cases = [
+            json!([{ "a": 1, "b": 9 }, 2, 3, 4, 5]),
+            json!([{ "a": 1, "b": 2 }, 2, 3, 4, 5, 6, 7]),
+            json!([{ "a": 1 }, 2, 3, 4, 5, 6]),
+        ];
+        for modified in cases {
+            let patch = merge_patch_between(&base, &modified).unwrap();
+            assert!(patch.is_object(), "patched by index: {patch}");
+            assert_eq!(applied(base.clone(), &patch), modified, "{patch}");
+        }
+    }
+
+    #[test]
+    fn a_list_changed_in_most_places_is_written_whole() {
+        let base = json!([1, 2, 3, 4]);
+        let modified = json!([9, 8, 7, 4]);
+        assert_eq!(merge_patch_between(&base, &modified), Some(modified));
     }
 
     #[test]

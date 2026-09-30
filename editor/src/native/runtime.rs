@@ -464,5 +464,9 @@ impl EditorApp {
             self.world = snapshot;
         }
         self.scripts.restart();
+        // A prefab edited while the scene was playing was left alone then,
+        // because the world being played is thrown away at Stop. The scene
+        // being edited follows it now.
+        self.follow_prefab_changes();
     }
 }

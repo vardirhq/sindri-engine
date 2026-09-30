@@ -182,7 +182,11 @@ fn applying_writes_an_instances_overrides_into_its_prefab() {
         .components
         .insert("sindri.sprite".to_owned(), json!({ "layer": 9 }));
     let overrides = BTreeMap::from([(id("coin"), changes)]);
-    let updated = applied(&prefab, &overrides, &library(prefab.clone()));
+    let instance = sindri_core::PrefabInstance {
+        overrides,
+        ..sindri_core::PrefabInstance::new(COIN)
+    };
+    let updated = applied(&prefab, &instance, &library(prefab.clone()));
     assert_eq!(
         updated.entities[0].components["sindri.sprite"],
         json!({ "texture": "gold.png", "layer": 9 })
@@ -210,13 +214,64 @@ fn applying_into_a_nested_instance_changes_the_outer_prefab_only() {
         ..EntityOverride::default()
     };
     let overrides = BTreeMap::from([(id("loot"), on_root), (id("loot/sparkle"), on_sparkle)]);
-    let updated = applied(&chest, &overrides, &library(coin("gold.png")));
+    let instance = sindri_core::PrefabInstance {
+        overrides,
+        removed: [id("loot/sparkle")].into(),
+        ..sindri_core::PrefabInstance::new("prefabs/chest.prefab")
+    };
+    let updated = applied(&chest, &instance, &library(coin("gold.png")));
     let nested = updated.entities[1].prefab.as_ref().unwrap();
     assert_eq!(
         nested.overrides[&id("coin")].components["sindri.sprite"],
         json!({ "layer": 5 })
     );
     assert_eq!(nested.overrides[&id("sparkle")].disabled, Some(true));
+    assert!(
+        nested.removed.contains(&id("sparkle")),
+        "removed inside the chest's coin"
+    );
+}
+
+#[test]
+fn applying_a_removal_takes_the_entity_out_of_the_prefab() {
+    let prefab = coin("gold.png");
+    let instance = sindri_core::PrefabInstance {
+        removed: [id("sparkle")].into(),
+        ..sindri_core::PrefabInstance::new(COIN)
+    };
+    let updated = applied(&prefab, &instance, &library(prefab.clone()));
+    assert_eq!(updated.entities.len(), 1);
+}
+
+#[test]
+fn deleting_inside_an_instance_is_undone_by_restoring_it() {
+    let prefabs = library(coin("gold.png"));
+    let mut world = World::default();
+    let mut history = CommandHistory::default();
+    let root = placed(&mut world, &mut history, &prefabs);
+    let sparkle = world.entity_for_source_id(&id("coin/sparkle")).unwrap();
+    let mut buffer = CommandBuffer::new();
+    buffer.push(sindri_core::WorldCommand::Despawn { entity: sparkle });
+    apply(&mut world, &mut history, buffer);
+
+    let mut reference = world.instance_entity(root, &prefabs).unwrap();
+    let instance = reference.prefab.as_mut().unwrap();
+    assert!(instance.removed.contains(&id("sparkle")));
+    instance.removed.clear();
+    let mut rehearsal = world.clone();
+    let mut buffer = CommandBuffer::new();
+    let members = world.instance_members(root);
+    reconcile(
+        &world,
+        &mut rehearsal,
+        &members,
+        &reference,
+        &prefabs,
+        &mut buffer,
+    )
+    .unwrap();
+    apply(&mut world, &mut history, buffer);
+    assert!(world.entity_for_source_id(&id("coin/sparkle")).is_some());
 }
 
 #[test]
@@ -349,4 +404,50 @@ fn a_subtree_becomes_a_prefab_that_nests_the_instances_in_it() {
         prefab.entities[1].prefab.is_some(),
         "the coin is still an instance"
     );
+}
+
+/// A scene whose prefab has gone opens with a placeholder for the instance,
+/// and saves the instance back exactly as it was written.
+#[test]
+fn a_scene_with_a_missing_prefab_opens_and_saves_it_back_unchanged() {
+    let directory = std::env::temp_dir().join(format!("sindri-missing-{}", std::process::id()));
+    let _ = std::fs::remove_dir_all(&directory);
+    std::fs::create_dir_all(&directory).unwrap();
+    let mut changes = EntityOverride::default();
+    changes
+        .components
+        .insert("sindri.sprite".to_owned(), json!({ "layer": 9 }));
+    let placed = SceneEntity {
+        name: Some("Lucky".to_owned()),
+        transform_3d: Some(Transform3D {
+            position: [2.0, 0.0, 0.0],
+            ..Transform3D::default()
+        }),
+        prefab: Some(sindri_core::PrefabInstance {
+            overrides: BTreeMap::from([(id("coin"), changes)]),
+            ..sindri_core::PrefabInstance::new(COIN)
+        }),
+        ..SceneEntity::new(id("coin-1"))
+    };
+    let glint = SceneEntity {
+        parent: Some(id("coin-1/sparkle")),
+        ..SceneEntity::new(id("glint"))
+    };
+    let scene = SceneDocument {
+        entities: vec![placed, glint],
+        ..SceneDocument::default()
+    }
+    .canonicalized();
+    let path = directory.join("level.scene");
+    crate::scene_file::SceneFile::create(&path, &scene).unwrap();
+
+    let mut file = crate::scene_file::SceneFile::open(&path).expect("it opens");
+    assert_eq!(file.missing().len(), 1);
+    let world = crate::native::load_world(&crate::native::scene_extractor(), &file).unwrap();
+    assert_eq!(world.len(), 2, "a placeholder, and the entity under it");
+    file.save(&world).unwrap();
+    let saved =
+        SceneDocument::from_json(&std::fs::read_to_string(&path).unwrap()).expect("it reads");
+    assert_eq!(saved, scene);
+    let _ = std::fs::remove_dir_all(&directory);
 }

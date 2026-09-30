@@ -192,8 +192,16 @@ pub(crate) fn asset_row(
             editing,
         },
     );
+    // A prefab can be dragged into the Scene view to place it there.
+    let response = if entry.kind == AssetKind::Prefab {
+        let response = row.response.interact(egui::Sense::click_and_drag());
+        response.dnd_set_drag_payload(crate::native::prefab_drop::PrefabDrag(entry.path.clone()));
+        response
+    } else {
+        row.response
+    };
     AssetRow {
-        response: row.response.on_hover_text(match entry.kind {
+        response: response.on_hover_text(match entry.kind {
             AssetKind::Scene if scenes.is_main(&entry.path) => {
                 "This is what the project opens. Double-click to open it now."
             }
@@ -204,6 +212,7 @@ pub(crate) fn asset_row(
                 "Click to read this file"
             }
             AssetKind::Profile => "Click to edit this reusable profile",
+            AssetKind::Prefab => "Click to place it, or drag it into the Scene view",
             AssetKind::Audio => "Click to hear this clip",
             AssetKind::Font => "Click to see this typeface",
             _ => entry.kind.label(),

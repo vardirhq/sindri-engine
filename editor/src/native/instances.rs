@@ -15,6 +15,8 @@ use sindri_core::{
 
 use crate::prefab;
 
+use super::prefab_writes::PendingWrite;
+
 use super::EditorApp;
 
 impl EditorApp {
@@ -46,9 +48,28 @@ impl EditorApp {
     }
 
     /// Makes each instance what its reference now expands to, as one step.
-    fn reconcile_instances(&mut self, placed: &[(EntityId, SceneEntity)], label: String) {
+    ///
+    /// `wrote`, when the step also wrote a prefab file, is that write and the
+    /// instance it was applied from. The step is recorded even when nothing in
+    /// the scene had to change, which is usual after an Apply, so that Undo
+    /// has a step to take the file back with.
+    fn reconcile_instances(
+        &mut self,
+        placed: &[(EntityId, SceneEntity)],
+        label: String,
+        wrote: Option<(EntityId, PendingWrite)>,
+    ) {
         let mut rehearsal = self.world.clone();
         let mut buffer = CommandBuffer::new();
+        let mut writes = Vec::new();
+        if let Some((anchor, write)) = wrote {
+            let link = self.world.get(anchor).and_then(|data| data.prefab.clone());
+            buffer.push(WorldCommand::SetPrefabLink {
+                entity: anchor,
+                link,
+            });
+            writes.push(write);
+        }
         for (root, entity) in placed {
             let members = self.world.instance_members(*root);
             if let Err(error) = prefab::reconcile(
@@ -67,12 +88,14 @@ impl EditorApp {
             return;
         }
         self.history.break_merge_run();
+        let before = self.history.revision();
         if let Err(error) = self
             .history
             .apply(buffer.into_transaction(label), &mut self.world)
         {
             self.report(error.to_string());
         }
+        self.record_prefab_writes(writes, before);
         self.selection.retain_live(&self.world);
     }
 
@@ -82,24 +105,28 @@ impl EditorApp {
     /// The instances are written down against the prefabs they were made
     /// from *before* those change, which is what makes an override survive:
     /// it is the difference from the old prefab, carried onto the new one.
+    /// `applied`, after an Apply, is the instance the change came from — whose
+    /// overrides are now the prefab's — and the file the Apply wrote.
     pub(super) fn update_instances(
         &mut self,
         changed: Vec<(String, PrefabDocument)>,
-        cleared: Option<EntityId>,
+        applied: Option<(EntityId, PendingWrite)>,
     ) {
         let Some(mut placed) = self.placed_instances() else {
             return;
         };
-        if let Some(cleared) = cleared {
+        if let Some((cleared, _)) = &applied {
             for (root, entity) in &mut placed {
-                if *root == cleared
+                if root == cleared
                     && let Some(instance) = &mut entity.prefab
                 {
                     instance.overrides.clear();
+                    instance.removed.clear();
                 }
             }
         }
         let label = match changed.as_slice() {
+            [(id, _)] if applied.is_some() => format!("Apply to {}", file_name(id)),
             [(id, _)] => format!("Update instances of {}", file_name(id)),
             _ => "Update prefab instances".to_owned(),
         };
@@ -110,7 +137,7 @@ impl EditorApp {
             }
             self.file.prefabs_mut().replace(&id, document);
         }
-        self.reconcile_instances(&placed, label);
+        self.reconcile_instances(&placed, label, applied);
     }
 
     /// Follows edits to prefab files made outside this scene, once the file
@@ -130,15 +157,10 @@ impl EditorApp {
         }
     }
 
-    /// Puts an instance back to exactly what its prefab says.
+    /// Puts an instance, or part of it, back to what its prefab says.
     ///
-    /// `only` narrows it to one entity of the instance, or one component of
-    /// that entity; its name, place and parent stay the instance's own.
-    pub(super) fn revert_instance(
-        &mut self,
-        root: EntityId,
-        only: Option<(SceneEntityId, Option<String>)>,
-    ) {
+    /// Its name, place and parent stay the instance's own whatever the scope.
+    pub(super) fn revert_instance(&mut self, root: EntityId, scope: Revert) {
         let mut placed = match self.world.instance_entity(root, self.file.prefabs()) {
             Ok(placed) => placed,
             Err(error) => {
@@ -149,30 +171,38 @@ impl EditorApp {
         let Some(instance) = placed.prefab.as_mut() else {
             return;
         };
-        match &only {
-            None => instance.overrides.clear(),
-            Some((path, None)) => {
-                instance.overrides.remove(path);
+        let label = match &scope {
+            Revert::Component(_, type_name) => format!("Revert {type_name}"),
+            Revert::Removed(path) => format!("Restore {}", path.as_str()),
+            Revert::All | Revert::Entity(_) => {
+                format!("Revert {} to its prefab", file_name(&instance.source))
             }
-            Some((path, Some(type_name))) => {
-                if let Some(changes) = instance.overrides.get_mut(path) {
-                    changes.components.remove(type_name);
+        };
+        match scope {
+            Revert::All => {
+                instance.overrides.clear();
+                instance.removed.clear();
+            }
+            Revert::Entity(path) => {
+                instance.overrides.remove(&path);
+            }
+            Revert::Component(path, type_name) => {
+                if let Some(changes) = instance.overrides.get_mut(&path) {
+                    changes.components.remove(&type_name);
                 }
             }
+            Revert::Removed(path) => {
+                instance.removed.remove(&path);
+            }
         }
-        let label = match only {
-            Some((_, Some(type_name))) => format!("Revert {type_name}"),
-            _ => format!("Revert {} to its prefab", file_name(&instance.source)),
-        };
-        self.reconcile_instances(&[(root, placed)], label);
+        self.reconcile_instances(&[(root, placed)], label, None);
     }
 
     /// Writes what an instance overrides into its prefab, and brings every
     /// instance of that prefab up to date with it.
     ///
-    /// The file is written straight away, and that write is not something
-    /// Undo takes back: Undo returns the instances in this scene to what they
-    /// were, and the prefab stays as applied.
+    /// The file is written straight away, and Undo takes it back with the
+    /// instances, unless the file has been changed since.
     pub(super) fn apply_instance(&mut self, root: EntityId) {
         let placed = match self.world.instance_entity(root, self.file.prefabs()) {
             Ok(placed) => placed,
@@ -187,21 +217,20 @@ impl EditorApp {
         let Some(current) = self.file.prefabs().prefab(&instance.source).cloned() else {
             return;
         };
-        let updated = prefab::applied(&current, &instance.overrides, self.file.prefabs());
+        let updated = prefab::applied(&current, &instance, self.file.prefabs());
         let Some(path) = self.file.prefabs().path_for(&instance.source) else {
             return;
         };
-        let written = updated
-            .to_canonical_json()
-            .map_err(|error| error.to_string())
-            .and_then(|json| std::fs::write(&path, json).map_err(|error| error.to_string()));
-        if let Err(error) = written {
-            self.report(format!("{} was not written: {error}", path.display()));
-            return;
-        }
+        let write = match PendingWrite::write(&path, &instance.source, &updated) {
+            Ok(write) => write,
+            Err(error) => {
+                self.report(error);
+                return;
+            }
+        };
         self.console
             .info(format!("Applied to {}", file_name(&instance.source)));
-        self.update_instances(vec![(instance.source, updated)], Some(root));
+        self.update_instances(vec![(instance.source, updated)], Some((root, write)));
     }
 
     /// Makes an instance's entities the scene's own, no longer linked to the
@@ -220,6 +249,18 @@ impl EditorApp {
             self.report(error.to_string());
         }
     }
+}
+
+/// How much of an instance to put back to its prefab.
+pub(super) enum Revert {
+    /// Everything: overrides and removals.
+    All,
+    /// What one of its entities overrides.
+    Entity(SceneEntityId),
+    /// One component of one of its entities.
+    Component(SceneEntityId, String),
+    /// One entity it removed, brought back.
+    Removed(SceneEntityId),
 }
 
 /// What to call a prefab in a label: its file's name.

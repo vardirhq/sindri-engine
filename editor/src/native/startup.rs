@@ -190,7 +190,7 @@ impl EditorApp {
             open_project_root: None,
             project_name: None,
             project_main_scene: None,
-            returning_to: None,
+            prefab_session: super::prefab_writes::PrefabSession::default(),
         };
         // Said after the field is built rather than during it, because what
         // there is to say is read off the world and the bindings.

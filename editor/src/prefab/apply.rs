@@ -4,7 +4,8 @@ use std::collections::BTreeMap;
 
 use serde_json::Value;
 use sindri_core::{
-    EntityOverride, PrefabDocument, PrefabLibrary, SceneEntity, SceneEntityId, apply_override,
+    EntityOverride, PrefabDocument, PrefabInstance, PrefabLibrary, SceneEntity, SceneEntityId,
+    apply_merge_patch, apply_override,
 };
 
 /// The prefab with `overrides` made part of it.
@@ -16,16 +17,31 @@ use sindri_core::{
 /// every coin. `prefabs` is where a nested instance's own root is looked up,
 /// because that is the key an override of it is written under.
 ///
-/// The instance's own name and place are not the prefab's to take, and are
-/// never in `overrides` for its root.
+/// An entity the instance removed is removed from the prefab, with everything
+/// under it — or, inside a nested instance, recorded as that instance's
+/// removal. The instance's own name and place are not the prefab's to take,
+/// and are never in its overrides for its root; neither is its editor state.
 #[must_use]
 pub fn applied(
     prefab: &PrefabDocument,
-    overrides: &BTreeMap<SceneEntityId, EntityOverride>,
+    instance: &PrefabInstance,
     prefabs: &dyn PrefabLibrary,
 ) -> PrefabDocument {
     let mut prefab = prefab.clone();
+    let overrides: BTreeMap<&SceneEntityId, EntityOverride> = instance
+        .overrides
+        .iter()
+        .map(|(path, changes)| {
+            let changes = EntityOverride {
+                editor: BTreeMap::new(),
+                ..changes.clone()
+            };
+            (path, changes)
+        })
+        .filter(|(_, changes)| !changes.is_empty())
+        .collect();
     for (path, changes) in overrides {
+        let changes = &changes;
         if let Some(entity) = prefab.entities.iter_mut().find(|entity| &entity.id == path) {
             if entity.prefab.is_some() {
                 apply_to_nested_root(entity, changes, prefabs);
@@ -47,7 +63,41 @@ pub fn applied(
             merge_into(nested.overrides.entry(key).or_default(), changes);
         }
     }
+    for path in &instance.removed {
+        remove_from(&mut prefab, path);
+    }
     prefab
+}
+
+/// Takes an entity, and what is under it, out of the prefab — or records it
+/// as removed from the nested instance it belongs to.
+fn remove_from(prefab: &mut PrefabDocument, path: &SceneEntityId) {
+    if prefab.entities.iter().any(|entity| &entity.id == path) {
+        let mut gone = vec![path.clone()];
+        let mut index = 0;
+        while let Some(parent) = gone.get(index).cloned() {
+            index += 1;
+            gone.extend(
+                prefab
+                    .entities
+                    .iter()
+                    .filter(|entity| entity.parent.as_ref() == Some(&parent))
+                    .map(|entity| entity.id.clone()),
+            );
+        }
+        prefab.entities.retain(|entity| !gone.contains(&entity.id));
+        return;
+    }
+    let owner = prefab.entities.iter_mut().find_map(|entity| {
+        let rest = path
+            .as_str()
+            .strip_prefix(entity.id.as_str())?
+            .strip_prefix('/')?;
+        Some((entity.prefab.as_mut()?, SceneEntityId::new(rest).ok()?))
+    });
+    if let Some((nested, key)) = owner {
+        nested.removed.insert(key);
+    }
 }
 
 /// A change to a nested instance's own root: its name, place and switch are
@@ -115,13 +165,42 @@ fn merge_into(existing: &mut EntityOverride, incoming: &EntityOverride) {
 }
 
 /// `first` then `second`, as one merge patch.
+///
+/// Two patches of an object compose key by key. A patch applied to a value
+/// the first one set outright — a whole list, say, patched by index — is
+/// applied to that value, since the value is what the first patch means.
 fn compose(first: &mut Value, second: &Value) {
-    match (first, second) {
-        (Value::Object(first), Value::Object(second)) => {
-            for (key, value) in second {
-                compose(first.entry(key.clone()).or_insert(Value::Null), value);
+    match (&mut *first, second) {
+        // Two patches of one list: the later one's elements and length win,
+        // each element composed with the earlier patch of it.
+        (Value::Object(earlier), Value::Object(later))
+            if is_list_patch(earlier) && is_list_patch(later) =>
+        {
+            for (key, value) in later {
+                if key == sindri_core::LIST_ITEMS
+                    && let (Some(Value::Object(items)), Value::Object(changes)) =
+                        (earlier.get_mut(key), value)
+                {
+                    for (index, change) in changes {
+                        compose(items.entry(index.clone()).or_insert(Value::Null), change);
+                    }
+                } else {
+                    earlier.insert(key.clone(), value.clone());
+                }
             }
         }
-        (first, second) => *first = second.clone(),
+        (Value::Object(earlier), Value::Object(later)) if !is_list_patch(earlier) => {
+            for (key, value) in later {
+                compose(earlier.entry(key.clone()).or_insert(Value::Null), value);
+            }
+        }
+        (Value::Null | Value::Object(_), _) => *first = second.clone(),
+        (_, _) => apply_merge_patch(first, second),
     }
+}
+
+fn is_list_patch(patch: &serde_json::Map<String, Value>) -> bool {
+    patch
+        .keys()
+        .any(|key| key == sindri_core::LIST_ITEMS || key == sindri_core::LIST_LENGTH)
 }

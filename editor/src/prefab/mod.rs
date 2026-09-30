@@ -20,6 +20,7 @@
 mod apply;
 pub mod document;
 mod library;
+pub mod missing;
 mod subtree;
 mod sync;
 

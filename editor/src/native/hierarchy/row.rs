@@ -183,8 +183,13 @@ fn row_menu(
                 });
                 ui.close();
             }
-            if !many && menu::item(ui, "Make prefab").clicked() {
-                *asked = Some(RowAction::MakePrefab(entity));
+            let make = if many { "Make prefabs" } else { "Make prefab" };
+            if menu::item(ui, make).clicked() {
+                *asked = Some(if many {
+                    RowAction::MakePrefabsOfSelection
+                } else {
+                    RowAction::MakePrefab(entity)
+                });
                 ui.close();
             }
             if !many && menu::item(ui, "Create child").clicked() {

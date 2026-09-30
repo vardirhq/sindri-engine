@@ -98,7 +98,9 @@ the prefab reaches each one as a single undoable reconciliation that keeps its
 overrides, and the inspector reverts, applies and unpacks them. Hosts that play
 a scene expand it once with `SceneDocument::expanded`; the exporter ships every
 prefab a scene places. The platformer's ten coins are instances of
-`prefabs/coin.prefab`.
+`prefabs/coin.prefab`. An instance can do without some of its prefab's
+entities (`removed`), patch a list by index, and keep its inner entities'
+editor state.
 
 ### Scenes
 
@@ -1469,10 +1471,8 @@ settings gear.
   policies/costs, and height authoring remain absent
 - No optional TypeScript embedding SDK; browser games currently expose narrow
   application entry points and run their gameplay in Decay
-- A prefab instance cannot remove one of its prefab's entities, only switch it
-  off, and overrides a list field whole rather than per element
-- An entity spawned at runtime is not linked to its prefab; only a scene's
-  instances are
+- An entity spawned at runtime is not linked to its prefab, by design; only a
+  scene's instances are
 - Hot reload covers assets, not the scene file: editing a scene on disk while it
   is open is not noticed
 - The fixed session pipeline has an explicit order, but there is no extensible
@@ -1491,8 +1491,6 @@ settings gear.
   component/property rows, the Scene view, and console lines still lack their
   natural context actions
 - No copy/paste of entities or components
-- Prefabs are placed from their panel, not dragged from the browser into the
-  Scene view, and *Make prefab* works on one entity at a time
 - No build/export controls; static web export is currently a CLI and CI workflow
 - No versioned editor protocol; the editor and runtime are one process
 - Decay source opens as a read-only text preview. The editor cannot modify it;

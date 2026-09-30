@@ -285,6 +285,12 @@ impl EditorApp {
             self.file.label(),
             self.world.len()
         ));
+        for (source, reason) in self.file.missing().to_vec() {
+            self.console.warning(format!(
+                "{reason}. Its instances are placeholders, and are saved back as \
+                 they were; restore {source} and reopen the scene to see them"
+            ));
+        }
         self.frame_scene_camera();
     }
 

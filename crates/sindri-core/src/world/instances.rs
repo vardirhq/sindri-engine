@@ -1,7 +1,7 @@
 //! Writing a world back as a scene, with each prefab instance written as the
 //! reference it was loaded from rather than as copies of its entities.
 
-use std::collections::{BTreeMap, HashMap};
+use std::collections::{BTreeMap, BTreeSet, HashMap};
 
 use crate::prefab::{
     NoPrefabs, PrefabError, PrefabInstance, PrefabLibrary, instance_path, override_between,
@@ -194,10 +194,16 @@ impl World {
             editor: current_root.editor.clone(),
             ..SceneEntity::new(current_root.id.clone())
         };
+        let removed = removed_from(&prefab.entities, &by_path, &root_key).map_err(|key| {
+            reshaped(format!(
+                "'{}' is under an entity removed from it",
+                key.as_str()
+            ))
+        })?;
         for base in &prefab.entities {
-            let current = by_path
-                .remove(&base.id)
-                .ok_or_else(|| reshaped(format!("'{}' was removed", base.id.as_str())))?;
+            let Some(current) = by_path.remove(&base.id) else {
+                continue;
+            };
             let mut changes = override_between(base, &current);
             if base.id == root_key {
                 // The instance's own name, place and switch are written on the
@@ -217,6 +223,9 @@ impl World {
                     changes.disabled = None;
                 }
             } else {
+                // Its editor state in this instance, which is the instance's
+                // own and not the prefab's.
+                changes.editor = current.editor;
                 let expected = base.parent.as_ref().map(|parent| {
                     if parent == &root_key {
                         written.id.clone()
@@ -241,7 +250,48 @@ impl World {
                 extra.as_str()
             )));
         }
-        written.prefab = Some(PrefabInstance { source, overrides });
+        written.prefab = Some(PrefabInstance {
+            source,
+            overrides,
+            removed,
+        });
         Ok(written)
     }
+}
+
+/// The topmost of the prefab's entities an instance no longer has.
+///
+/// An entity is missing only as part of a removed subtree: one missing while
+/// something under it is still there is not a removal an instance can say,
+/// and is answered with the entity still there.
+fn removed_from(
+    entities: &[SceneEntity],
+    present: &HashMap<SceneEntityId, SceneEntity>,
+    root_key: &SceneEntityId,
+) -> Result<BTreeSet<SceneEntityId>, SceneEntityId> {
+    let parents: HashMap<&SceneEntityId, Option<&SceneEntityId>> = entities
+        .iter()
+        .map(|entity| (&entity.id, entity.parent.as_ref()))
+        .collect();
+    let missing = |key: &SceneEntityId| !present.contains_key(key) && key != root_key;
+    let mut removed = BTreeSet::new();
+    for entity in entities {
+        let mut cursor = entity.parent.as_ref();
+        let mut under_missing = false;
+        while let Some(parent) = cursor {
+            if missing(parent) {
+                under_missing = true;
+                break;
+            }
+            cursor = parents.get(parent).copied().flatten();
+        }
+        match (missing(&entity.id), under_missing) {
+            (true, false) => {
+                removed.insert(entity.id.clone());
+            }
+            (false, true) => return Err(entity.id.clone()),
+            _ => {}
+        }
+    }
+    Ok(removed)
 }
