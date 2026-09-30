@@ -1659,6 +1659,23 @@ that `World.exists` answers false for. Exercised in
 world. Orbital Last Stand uses it on collision handles so dense projectile
 traffic does not become one full-world query per impact.
 
+**And a script can ask which is closest.** `World.nearest(tag, position)`
+returns the closest active tagged entity to a world-space `Vec3`, or `null`.
+`World.within_radius(tag, position, radius)` returns an inclusive-radius snapshot
+sorted nearest first, with stable world order breaking ties. Both use
+`World::world_transform`, skip missing/non-finite world positions, and share
+`with_tag`'s authored-tag and inherited-active semantics. Radius results are
+refused above 8192; `nearest` has no list-result bound. Negative and NaN radii
+are errors, zero includes coincident entities, and positive infinity searches
+all spatial matches. These are O(n) scans without an index (radius results also
+need sorting). Orbital Last Stand's player uses `nearest` directly when the
+closest enemy is visible, with a sorted unbounded-radius fallback otherwise.
+Arc selects from sorted radius results with its impact-point exclusion. Exercised in
+`crates/sindri-decay/src/host/query/tests.rs`,
+`crates/sindri-decay/tests/a_script_queries_spatial_entities.rs`, and
+`games/orbital-baked/tests/spatial_targeting.rs`. Cone/box queries and physics
+casts remain deferred.
+
 **And a script can make one.** `World.spawn` takes a typed `Prefab` — an asset
 reference the scene authored into an `@export` field, not a string in the
 source, which is what lets the editor resolve it and load the document before
@@ -2076,3 +2093,4 @@ to enter. Nothing new was added to the engine for either.
 ## World presentation
 
 Scenes can author `sindri.environment` as the scene-wide presentation contract. It owns background colour, ambient colour/intensity, contact depth, and world post-processing controls; the directional world light is a `sindri.light` entity drawn and aimed in the Scene view. Textured 3D geometry, including engine-owned voxel meshes, is shaded from the same ambient and directional settings in editor viewports and browser Voxel Lab; the default renderer lighting preserves the previous unlit appearance for scenes without an environment. Voxel Lab is the acceptance lab for the wider presentation track in `docs/world-presentation-plan.md`. Voxel meshes also carry deterministic corner AO controlled by the environment's contact-depth strength. Exposure, tone mapping, contrast, saturation, bloom, and vignette share one ordered world post path while overlay/UI remains crisp. Fog, sky, environment profiles/volumes, local lights, weather, water, screen-space AO for arbitrary geometry, and advanced cinematic effects remain future slices.
+

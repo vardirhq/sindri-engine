@@ -6,22 +6,12 @@
 
 use decay_ir::Path;
 use decay_runtime::{RuntimeError, Value};
-use sindri_core::{EntityId, SceneComponent, TagsComponent};
+use sindri_core::{EntityId, SceneComponent};
 use sindri_scene::ShapeComponent;
 
 use crate::ScriptComponent;
 use crate::surface::WorldCall;
 
-/// How many entities one query may answer with.
-///
-/// A query walks the world, so its cost is the world's size whatever the
-/// answer; this bounds what a script then holds and walks. It is far past a
-/// dense combat frame and far short of a number that would make a per-entity
-/// loop over the result a frame's worth of work on its own. Exceeding it is
-/// refused rather than truncated: a query that quietly returned the first
-/// eight thousand enemies would be a game that quietly stopped hitting some of
-/// them.
-const QUERY_LIMIT: usize = 8192;
 const SHAPE_POINT_LIMIT: usize = 8;
 
 use super::WorldHost;
@@ -118,6 +108,8 @@ impl WorldHost<'_> {
             WorldCall::SendSignal => self.send_signal_call(path, args),
             WorldCall::TakeSignal => self.take_signal_call(path, args),
             WorldCall::WithTag => self.with_tag_call(path, args),
+            WorldCall::Nearest => self.nearest_call(path, args),
+            WorldCall::WithinRadius => self.within_radius_call(path, args),
             WorldCall::HasTag => self.has_tag_call(path, args),
             WorldCall::SetActive => {
                 let entity = self.entity_argument(path, args, 0, "the entity to switch")?;
@@ -141,78 +133,6 @@ impl WorldHost<'_> {
                 Ok(Value::Bool(self.world.is_active(entity)))
             }
         }
-    }
-
-    /// Every active entity carrying `tag`, in world order.
-    fn with_tag_call(&mut self, path: &Path, args: &[Value]) -> Result<Value, RuntimeError> {
-        let Some(Value::String(tag)) = args.first() else {
-            return Err(RuntimeError::Host(format!(
-                "{} names a tag, as text",
-                path.dotted()
-            )));
-        };
-
-        let mut found = Vec::new();
-        for (entity, data) in self.world.entities() {
-            // Active is the filter every other walk of the world uses: an
-            // entity switched off — or whose parent is — takes no part in
-            // rendering, stepping, scripting or picking, and a query that
-            // answered with one would be the odd one out.
-            if !self.world.is_active(entity) {
-                continue;
-            }
-            let Some(payload) = data.components.get(TagsComponent::TYPE_NAME) else {
-                continue;
-            };
-            // Decoded rather than pattern-matched against the raw JSON: a
-            // payload that is not a set of tags is an authoring mistake worth
-            // naming, and reading it by hand would silently skip it.
-            let tags: TagsComponent = serde_json::from_value(payload.clone()).map_err(|error| {
-                RuntimeError::Host(format!(
-                    "{}: an entity's {} could not be read: {error}",
-                    path.dotted(),
-                    TagsComponent::TYPE_NAME
-                ))
-            })?;
-            if !tags.has(tag) {
-                continue;
-            }
-            if found.len() == QUERY_LIMIT {
-                return Err(RuntimeError::Host(format!(
-                    "{} found more than {QUERY_LIMIT} entities tagged '{tag}'",
-                    path.dotted()
-                )));
-            }
-            found.push(Value::Reference(entity.to_bits()));
-        }
-        Ok(Value::array(found))
-    }
-
-    fn has_tag_call(&mut self, path: &Path, args: &[Value]) -> Result<Value, RuntimeError> {
-        let entity = self.entity_argument(path, args, 0, "the entity to inspect")?;
-        let Some(Value::String(tag)) = args.get(1) else {
-            return Err(RuntimeError::Host(format!(
-                "{} names a tag, as text",
-                path.dotted()
-            )));
-        };
-        if !self.world.is_active(entity) {
-            return Ok(Value::Bool(false));
-        }
-        let Some(data) = self.world.get(entity) else {
-            return Ok(Value::Bool(false));
-        };
-        let Some(payload) = data.components.get(TagsComponent::TYPE_NAME) else {
-            return Ok(Value::Bool(false));
-        };
-        let tags: TagsComponent = serde_json::from_value(payload.clone()).map_err(|error| {
-            RuntimeError::Host(format!(
-                "{}: the entity's {} could not be read: {error}",
-                path.dotted(),
-                TagsComponent::TYPE_NAME
-            ))
-        })?;
-        Ok(Value::Bool(tags.has(tag)))
     }
 
     /// Creates what a prefab describes, optionally attaches its root, and

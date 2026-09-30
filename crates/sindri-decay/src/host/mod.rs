@@ -27,6 +27,7 @@ mod person;
 mod physics;
 mod print;
 mod profile;
+mod query;
 mod random;
 mod save;
 mod scene;

@@ -72,23 +72,23 @@ script Arc {
 
     fn retarget() {
         var target: Entity = null;
-        var best: f32 = 0.0;
-        for enemy in World.with_tag("enemy") {
-            let dx = enemy.transform.position.x - this.transform.position.x;
-            let dy = enemy.transform.position.y - this.transform.position.y;
-            let distance = dx * dx + dy * dy;
-            // The impact that made the arc is centred on its first target.
-            if distance > 0.16 && (target == null || distance < best) {
+        let origin = this.transform.world_position;
+        // Infinity preserves global retargeting; the first acceptable result
+        // is nearest, but the impact-point exclusion remains a gameplay rule.
+        for enemy in World.within_radius("enemy", origin, 1.0 / 0.0) {
+            let dx = enemy.transform.world_position.x - origin.x;
+            let dy = enemy.transform.world_position.y - origin.y;
+            if dx * dx + dy * dy > 0.16 {
                 target = enemy;
-                best = distance;
+                break;
             }
         }
         if target == null {
             retire();
             return;
         }
-        let dx = target.transform.position.x - this.transform.position.x;
-        let dy = target.transform.position.y - this.transform.position.y;
+        let dx = target.transform.world_position.x - origin.x;
+        let dy = target.transform.world_position.y - origin.y;
         let far = sqrt(dx * dx + dy * dy);
         Physics.set_velocity(this.entity, dx / far * this.speed, dy / far * this.speed);
         this.transform.rotation_z = atan2(dy, dx);
@@ -100,3 +100,4 @@ script Arc {
         Physics.set_velocity(this.entity, 0.0, 0.0);
     }
 }
+

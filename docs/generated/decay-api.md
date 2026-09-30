@@ -414,6 +414,7 @@ Finding, creating and removing the objects in a game. Every object in a scene (a
 - `find(name: String)` → `Entity` — Finds an object by the name it was given in the scene, such as `World.find("Player")`. Gives `null` if there is none.
 - `has_tag(entity: Entity, tag: String)` → `bool` — Whether an object has a tag, a label such as `"enemy"` given to it in the scene.
 - `is_active(entity: Entity)` → `bool` — Whether an object is switched on. An object switched off, or inside one that is, is hidden and does nothing.
+- `nearest(tag: String, position: Vec3)` → `Entity` — The closest active object with an authored tag to a world-space Vec3 position, including parent transforms. Gives null if none has a usable transform. Equal distances keep world order.
 - `property_number(entity: Entity, name: String, fallback: f32)` → `f32` — Reads a number set up for another object's script, such as a bullet's damage, or gives `fallback` if there is none.
 - `send_signal(entity: Entity, name: String, value: f32)` → `unit` — Sends a number to another object under a name, for its script to collect with `take_signal`. Older style: events and calling another script's functions are clearer.
 - `set_active(entity: Entity, on: bool)` → `unit` — Switches an object, and everything inside it, on or off. This is how menus and screens are shown and hidden.
@@ -424,3 +425,4 @@ Finding, creating and removing the objects in a game. Every object in a scene (a
 - `spawn_child(prefab: Prefab, parent: Entity)` → `Entity` — Creates a new object from a prefab, already attached to a parent object.
 - `take_signal(name: String)` → `f32` — Collects the numbers other scripts sent to this object under a name with `send_signal`, added together. Gives 0 when nothing arrived.
 - `with_tag(tag: String)` → `List<Entity>` — Every switched-on object with a tag, as a list: `for enemy in World.with_tag("enemy") { ... }`. Looks through the whole game, so call it once per frame, not in a loop.
+- `within_radius(tag: String, position: Vec3, radius: f32)` → `List<Entity>` — A snapshot list of active tagged objects within an inclusive world-space radius of a Vec3 position, nearest first; ties keep world order. Skips unusable transforms. Empty when none match; over 8192 results is an error. Negative or NaN radii are errors; positive infinity searches the whole world.
