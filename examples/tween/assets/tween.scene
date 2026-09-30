@@ -70,9 +70,9 @@
         "sindri.ui.text": {
           "text": "TWEEN LAB",
           "font": "fonts/ChakraPetch-Regular.ttf",
-          "font_size": 0.07,
+          "font_size": 0.085,
           "bounds": [
-            1.0,
+            1,
             0.1
           ],
           "anchor": "center",
@@ -99,9 +99,9 @@
         "sindri.ui.text": {
           "text": "MOVE / SCALE / COLOUR / ROTATE",
           "font": "fonts/ChakraPetch-Regular.ttf",
-          "font_size": 0.029,
+          "font_size": 0.04,
           "bounds": [
-            1.0,
+            1,
             0.1
           ],
           "anchor": "center",
@@ -206,7 +206,7 @@
         "sindri.ui.text": {
           "text": "linear",
           "font": "fonts/ChakraPetch-Regular.ttf",
-          "font_size": 0.029,
+          "font_size": 0.055,
           "bounds": [
             0.7,
             0.07
@@ -313,7 +313,7 @@
         "sindri.ui.text": {
           "text": "ease",
           "font": "fonts/ChakraPetch-Regular.ttf",
-          "font_size": 0.029,
+          "font_size": 0.055,
           "bounds": [
             0.7,
             0.07
@@ -420,7 +420,7 @@
         "sindri.ui.text": {
           "text": "ease-in",
           "font": "fonts/ChakraPetch-Regular.ttf",
-          "font_size": 0.029,
+          "font_size": 0.055,
           "bounds": [
             0.7,
             0.07
@@ -527,7 +527,7 @@
         "sindri.ui.text": {
           "text": "ease-out",
           "font": "fonts/ChakraPetch-Regular.ttf",
-          "font_size": 0.029,
+          "font_size": 0.055,
           "bounds": [
             0.7,
             0.07
@@ -634,7 +634,7 @@
         "sindri.ui.text": {
           "text": "ease-in-out",
           "font": "fonts/ChakraPetch-Regular.ttf",
-          "font_size": 0.029,
+          "font_size": 0.055,
           "bounds": [
             0.7,
             0.07
@@ -702,7 +702,7 @@
         "sindri.ui.text": {
           "text": "PLAY",
           "font": "fonts/ChakraPetch-Regular.ttf",
-          "font_size": 0.025,
+          "font_size": 0.04,
           "bounds": [
             0.25,
             0.08
@@ -717,7 +717,7 @@
       "name": "button-pause",
       "transform_3d": {
         "position": [
-          0.0,
+          0,
           -0.64,
           0
         ],
@@ -756,7 +756,7 @@
       "name": "button-pause-label",
       "transform_3d": {
         "position": [
-          0.0,
+          0,
           -0.64,
           0
         ],
@@ -770,7 +770,7 @@
         "sindri.ui.text": {
           "text": "PAUSE",
           "font": "fonts/ChakraPetch-Regular.ttf",
-          "font_size": 0.025,
+          "font_size": 0.04,
           "bounds": [
             0.25,
             0.08
@@ -838,7 +838,7 @@
         "sindri.ui.text": {
           "text": "RESTART",
           "font": "fonts/ChakraPetch-Regular.ttf",
-          "font_size": 0.025,
+          "font_size": 0.04,
           "bounds": [
             0.25,
             0.08
@@ -906,7 +906,7 @@
         "sindri.ui.text": {
           "text": "CANCEL",
           "font": "fonts/ChakraPetch-Regular.ttf",
-          "font_size": 0.025,
+          "font_size": 0.04,
           "bounds": [
             0.25,
             0.08
@@ -974,7 +974,7 @@
         "sindri.ui.text": {
           "text": "REPLACE",
           "font": "fonts/ChakraPetch-Regular.ttf",
-          "font_size": 0.025,
+          "font_size": 0.04,
           "bounds": [
             0.25,
             0.08
@@ -1003,7 +1003,7 @@
         "sindri.ui.text": {
           "text": "SPACE: PLAY   P: PAUSE   R: RESTART   C: CANCEL   V: REPLACE",
           "font": "fonts/ChakraPetch-Regular.ttf",
-          "font_size": 0.019,
+          "font_size": 0.03,
           "bounds": [
             1.1,
             0.08
