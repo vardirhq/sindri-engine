@@ -200,8 +200,7 @@ fn add_profile_surface(environment: &mut Environment) {
     environment.add_value(PROFILES, Type::Named(PROFILES.to_owned()));
 }
 
-/// What a script can do to a body, and ask about what it touched.
-pub(super) /// Which authored clip an entity plays, and where it has got to.
+/// Which authored clip an entity plays, and where it has got to.
 ///
 /// A clip is named with text the same way an audio asset is: the scene authored
 /// it, and a script picks from what the scene holds. There is no way to build
