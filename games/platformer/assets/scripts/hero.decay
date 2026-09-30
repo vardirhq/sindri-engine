@@ -5,6 +5,8 @@
 // count as floor. A jump is forgiving in the two ways players expect: pressed
 // a moment before landing it still happens (the buffer), and pressed a moment
 // after running off a ledge it still counts (coyote time).
+//
+// Keyboard, gamepad and the screen buttons all feed the same run/jump path.
 script Hero {
     @export let speed: f32 = 6.5;
     @export let acceleration: f32 = 42.0;
@@ -16,12 +18,16 @@ script Hero {
     @export let fall_limit: f32 = -3.0;
     @export let spawn_x: f32 = 2.5;
     @export let spawn_y: f32 = 4.0;
+    @export let left_button: Entity = null;
+    @export let right_button: Entity = null;
+    @export let jump_button: Entity = null;
 
     // Ground contacts the foot sensor is in, over every box it overlaps.
     var ground: f32 = 0.0;
     var since_ground: f32 = 1.0;
     var since_press: f32 = 1.0;
     var facing: f32 = 1.0;
+    var jump_held: bool = false;
     // 0 idle, 1 run, 2 jump, 3 fall: which clip is showing.
     var shown: f32 = 0.0;
 
@@ -44,8 +50,22 @@ script Hero {
             return;
         }
 
-        let run = max(-1.0, min(1.0, Input.axis("A", "D") + Input.axis("ArrowLeft", "ArrowRight")));
-        if Input.just_pressed("Space") || Input.just_pressed("W") || Input.just_pressed("ArrowUp") {
+        var run: f32 = Input.axis("A", "D") + Input.axis("ArrowLeft", "ArrowRight");
+        let stick = Gamepad.axis(0.0, "left_x");
+        if abs(stick) > abs(run) { run = stick; }
+        if Gamepad.is_down(0.0, "dpad_left") { run = -1.0; }
+        if Gamepad.is_down(0.0, "dpad_right") { run = 1.0; }
+        if this.left_button != null && Ui.is_held(this.left_button) { run = -1.0; }
+        if this.right_button != null && Ui.is_held(this.right_button) { run = 1.0; }
+        run = max(-1.0, min(1.0, run));
+
+        let keyboard_jump = Input.is_down("Space") || Input.is_down("W") || Input.is_down("ArrowUp");
+        let pad_jump = Gamepad.is_down(0.0, "south");
+        var screen_jump: bool = false;
+        if this.jump_button != null { screen_jump = Ui.is_held(this.jump_button); }
+        let holding_jump = keyboard_jump || pad_jump || screen_jump;
+        let pressed_jump = Input.just_pressed("Space") || Input.just_pressed("W") || Input.just_pressed("ArrowUp") || Gamepad.just_pressed(0.0, "south") || (this.jump_button != null && Ui.is_pressed(this.jump_button));
+        if pressed_jump {
             this.since_press = 0.0;
         } else {
             this.since_press += dt;
@@ -62,11 +82,12 @@ script Hero {
             this.since_press = 1.0;
             this.since_ground = 1.0;
         }
-        // Letting go early cuts the rise short, so a tap is a hop.
-        let released = Input.just_released("Space") || Input.just_released("W") || Input.just_released("ArrowUp");
-        if released && rise > 0.0 {
+        // Letting go early cuts the rise short, so a tap is a hop on every
+        // input device, including a finger lifting from the on-screen button.
+        if this.jump_held && !holding_jump && rise > 0.0 {
             rise = rise * 0.45;
         }
+        this.jump_held = holding_jump;
 
         // Build and shed horizontal speed instead of snapping straight to the
         // target. Ground movement stays responsive while the lower air control
