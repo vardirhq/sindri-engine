@@ -10,6 +10,10 @@ Space resumes, P pauses, R restarts, C cancels, and V replaces the destination
 from the displayed value. Cancellation holds the value; use Restart to replay.
 The first pass runs automatically and holds at completion.
 
+Labels and controls use `assets/ui/tween.weave`: pixel font sizes keep desktop
+text readable, and media rules increase them for taller screens. The scene
+provides the fallback presentation.
+
 The project uses the ordinary browser export host. All demo behaviour is in
 `assets/scripts/tween-demo.decay`; no bespoke Rust game loop or JavaScript
 animation implements its tweens. The source is small enough to copy into a game.

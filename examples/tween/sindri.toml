@@ -3,4 +3,4 @@ format_version = 1
 name = "Tween Lab"
 main_scene = "assets/tween.scene"
 [assets]
-include = ["fonts/Fonts-OFL.txt"]
+include = ["fonts/Fonts-OFL.txt", "ui/tween.weave"]
