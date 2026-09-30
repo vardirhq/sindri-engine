@@ -15,6 +15,7 @@ impl EditorApp {
     /// Whichever of its states the inspector is in — slicing an image, editing
     /// an entity, previewing a file, or empty.
     pub(in crate::native) fn inspector_body(&mut self, ui: &mut egui::Ui) {
+        self.prefab_banner(ui);
         if self.shown_font.is_none() {
             self.typeface.forget();
         }

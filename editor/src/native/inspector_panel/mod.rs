@@ -76,6 +76,7 @@ struct PanelContext {
     scripts: Vec<String>,
     audio: Vec<String>,
     profiles: Vec<String>,
+    prefabs: Vec<String>,
     tile_sets: Vec<String>,
     pictures: super::thumbnails::Pictures,
     block_sets: TileSetBindings,
@@ -124,6 +125,7 @@ impl PanelContext {
             scripts: &self.scripts,
             audio: &self.audio,
             profiles: &self.profiles,
+            prefabs: &self.prefabs,
             tile_sets: &self.tile_sets,
             pictures: &self.pictures,
             block_sets: Some(&self.block_sets),
@@ -372,6 +374,7 @@ impl EditorApp {
             scripts,
             audio: self.project.audio(),
             profiles: self.project.profiles(),
+            prefabs: self.project.prefabs(),
             // The engine's own block set is always there to choose, first,
             // beside whatever sets the project holds.
             tile_sets: std::iter::once(sindri_core::BUILTIN_BLOCKS.to_owned())

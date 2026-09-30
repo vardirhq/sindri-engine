@@ -16,14 +16,21 @@ use sindri_core::{SceneDocument, SceneJsonError, SceneMigrator, World, WorldErro
 use thiserror::Error;
 
 use crate::prefab::ScenePrefabs;
+use crate::prefab::document::{asset_root_for, is_prefab_path, prefab_text, read_as_scene};
 
 /// A scene document together with the file it belongs to.
+///
+/// The file may be a prefab instead, opened to be edited: it is worked on as a
+/// scene and written back as a prefab. See `prefab::document`.
 #[derive(Clone, Debug)]
 pub struct SceneFile {
     path: Option<PathBuf>,
     document: SceneDocument,
     /// The prefabs its instances are made from, and written back against.
     prefabs: ScenePrefabs,
+    /// A path whose folder is where this document's asset IDs resolve: the
+    /// file itself for a scene, and its scene's folder for a prefab.
+    anchor: Option<PathBuf>,
 }
 
 impl SceneFile {
@@ -34,10 +41,19 @@ impl SceneFile {
             path: path.display().to_string(),
             source,
         })?;
-        // Migrated rather than parsed strictly: an editor that cannot open a
-        // scene written by an older Sindri is an editor that loses work.
-        let document = SceneDocument::from_json_migrated(&text, &SceneMigrator::builtin())?;
-        let mut prefabs = ScenePrefabs::beside(Some(path));
+        let (document, anchor) = if is_prefab_path(path) {
+            let anchor = asset_root_for(path).join(path.file_name().unwrap_or_default());
+            (
+                read_as_scene(&text).map_err(SceneFileError::Prefab)?,
+                anchor,
+            )
+        } else {
+            // Migrated rather than parsed strictly: an editor that cannot open
+            // a scene written by an older Sindri is an editor that loses work.
+            let document = SceneDocument::from_json_migrated(&text, &SceneMigrator::builtin())?;
+            (document, path.to_path_buf())
+        };
+        let mut prefabs = ScenePrefabs::beside(Some(&anchor));
         prefabs
             .read_placed_by(&document.entities)
             .map_err(SceneFileError::Prefab)?;
@@ -45,7 +61,22 @@ impl SceneFile {
             path: Some(path.to_path_buf()),
             document,
             prefabs,
+            anchor: Some(anchor),
         })
+    }
+
+    /// Whether the open document is a prefab rather than a scene.
+    pub fn is_prefab(&self) -> bool {
+        self.path.as_deref().is_some_and(is_prefab_path)
+    }
+
+    /// A path in the folder this document's asset IDs resolve against.
+    ///
+    /// What textures, scripts and the project browser are rooted by. The
+    /// file's own path for a scene; for a prefab, one beside the scene it
+    /// would be placed in.
+    pub fn anchor(&self) -> Option<&Path> {
+        self.anchor.as_deref()
     }
 
     /// A scene with no file behind it.
@@ -58,6 +89,7 @@ impl SceneFile {
             path: None,
             document,
             prefabs: ScenePrefabs::default(),
+            anchor: None,
         }
     }
 
@@ -113,9 +145,18 @@ impl SceneFile {
     /// a real file this way, which is the only way it ever could.
     pub fn save_as(&mut self, path: &Path, world: &World) -> Result<(), SceneFileError> {
         let document = world.to_scene_with(&self.prefabs)?;
-        write_scene(path, &document)?;
+        if is_prefab_path(path) {
+            let text = prefab_text(&document).map_err(SceneFileError::Prefab)?;
+            std::fs::write(path, text).map_err(|source| SceneFileError::Write {
+                path: path.display().to_string(),
+                source,
+            })?;
+        } else {
+            write_scene(path, &document)?;
+            self.anchor = Some(path.to_path_buf());
+            self.prefabs.move_beside(path);
+        }
         self.path = Some(path.to_path_buf());
-        self.prefabs.move_beside(path);
         self.document = document;
         Ok(())
     }
@@ -137,7 +178,13 @@ impl SceneFile {
     /// leave two of them on disk.
     pub fn adopt(&mut self, path: &Path) {
         self.path = Some(path.to_path_buf());
-        self.prefabs.move_beside(path);
+        if let Some(anchor) = &mut self.anchor {
+            anchor.set_file_name(path.file_name().unwrap_or_default());
+        }
+        if !is_prefab_path(path) {
+            self.anchor = Some(path.to_path_buf());
+            self.prefabs.move_beside(path);
+        }
     }
 
     /// Re-reads the file, discarding whatever the editor had in memory.

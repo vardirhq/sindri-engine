@@ -64,6 +64,7 @@ mod occlusion_view;
 mod overlay;
 mod palette_view;
 mod pointer;
+mod prefab_authoring;
 mod prefab_panel;
 mod prefab_pointer;
 mod presentation;
@@ -394,6 +395,8 @@ struct EditorApp {
     /// draws, and a manifest read per frame is a file read at the rate a
     /// viewport redraws. The editor is the only thing that changes it.
     project_main_scene: Option<PathBuf>,
+    /// The scene a prefab was opened from to be edited, to go back to.
+    returning_to: Option<PathBuf>,
 }
 
 /// What the textures were last asked about: the history revision, since an

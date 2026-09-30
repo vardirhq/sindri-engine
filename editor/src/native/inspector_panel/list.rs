@@ -267,6 +267,7 @@ mod tests {
                         scripts: &[],
                         audio: &[],
                         profiles: &[],
+                        prefabs: &[],
                         tile_sets: &[],
                         pictures: &crate::native::thumbnails::NO_PICTURES,
                         block_sets: None,

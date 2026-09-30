@@ -365,6 +365,13 @@ impl ProjectTree {
             .collect()
     }
 
+    /// References to every prefab the browser can see.
+    pub fn prefabs(&self) -> Vec<String> {
+        self.referenced(AssetKind::Prefab)
+            .map(str::to_owned)
+            .collect()
+    }
+
     /// References to every reusable tile set the browser can see.
     pub fn tile_sets(&self) -> Vec<String> {
         self.referenced(AssetKind::TileSet)

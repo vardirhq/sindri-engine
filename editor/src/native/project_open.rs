@@ -118,9 +118,9 @@ impl EditorApp {
         match (&self.open_project_root, &self.project_name) {
             (Some(root), Some(name)) => ProjectTree::rooted_as(root, name),
             (Some(root), None) => ProjectTree::rooted(root),
-            _ => ProjectTree::beside(self.file.path()),
+            _ => ProjectTree::beside(self.file.anchor()),
         }
-        .resolving_at(self.file.path().and_then(Path::parent))
+        .resolving_at(self.file.anchor().and_then(Path::parent))
     }
 
     /// Follows a scene to whichever project it belongs to.

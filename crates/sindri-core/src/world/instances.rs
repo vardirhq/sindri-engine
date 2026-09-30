@@ -192,7 +192,6 @@ impl World {
         let mut written = SceneEntity {
             parent: current_root.parent.clone(),
             editor: current_root.editor.clone(),
-            transform_3d: current_root.transform_3d,
             ..SceneEntity::new(current_root.id.clone())
         };
         for base in &prefab.entities {
@@ -205,6 +204,11 @@ impl World {
                 // instance, which is where somebody reading the scene looks.
                 if current.name != base.name {
                     written.name = current.name;
+                }
+                // Where the instance stands, unless it stands where the prefab
+                // says, which is the one place that is not a difference.
+                if current.transform_3d != base.transform_3d {
+                    written.transform_3d = current.transform_3d;
                 }
                 written.disabled = current.disabled && !base.disabled;
                 changes.name = None;

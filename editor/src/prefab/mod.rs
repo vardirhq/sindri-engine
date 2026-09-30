@@ -18,7 +18,9 @@
 //! the world that hands out the handles the real one is about to.
 
 mod apply;
+pub mod document;
 mod library;
+mod subtree;
 mod sync;
 
 use std::path::{Path, PathBuf};
@@ -30,6 +32,7 @@ use sindri_core::{
 
 pub use apply::applied;
 pub use library::ScenePrefabs;
+pub use subtree::subtree_prefab;
 pub use sync::{reconcile, spawn_instance};
 
 /// What a placed prefab carries to say where it stands.

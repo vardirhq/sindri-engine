@@ -254,7 +254,7 @@ fn a_scene_can_hang_its_own_entities_under_an_instance() {
         ..SceneEntity::new(id("glint"))
     };
     let document = scene(vec![
-        instance("coin-1", "prefabs/coin.prefab", at(0.0, 0.0)),
+        instance("coin-1", "prefabs/coin.prefab", at(3.0, 0.0)),
         extra,
     ]);
     document.validate().unwrap();
@@ -346,6 +346,19 @@ fn a_prefab_that_contains_itself_is_refused() {
         World::from_scene_with(&document, &prefabs),
         Err(WorldError::InvalidPrefab(PrefabError::Cycle(_)))
     ));
+}
+
+#[test]
+fn an_instance_standing_where_its_prefab_says_writes_no_transform() {
+    let prefabs = library(&[("prefabs/coin.prefab", coin())]);
+    let document = scene(vec![SceneEntity::instance(
+        id("coin-1"),
+        "prefabs/coin.prefab",
+    )]);
+    let world = World::from_scene_with(&document, &prefabs).unwrap().world;
+    let root = world.entity_for_source_id(&id("coin-1")).unwrap();
+    assert_eq!(world.get(root).unwrap().transform_3d, Some(at(0.0, 0.0)));
+    assert_eq!(world.to_scene_with(&prefabs).unwrap(), document);
 }
 
 #[test]

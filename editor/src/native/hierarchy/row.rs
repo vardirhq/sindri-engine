@@ -183,6 +183,10 @@ fn row_menu(
                 });
                 ui.close();
             }
+            if !many && menu::item(ui, "Make prefab").clicked() {
+                *asked = Some(RowAction::MakePrefab(entity));
+                ui.close();
+            }
             if !many && menu::item(ui, "Create child").clicked() {
                 *asked = Some(RowAction::CreateChild(entity));
                 ui.close();

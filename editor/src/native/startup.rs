@@ -103,18 +103,14 @@ impl EditorApp {
         let scene = scene_extractor();
         let (decided, file, open_error) = Self::opening(&preferences);
         let (world, load_error) = Self::opening_world(&scene, &file);
-        // Nothing is selected until something is chosen. This used to name an
-        // entity from the demo scene, which selected the cube in that one scene
-        // and silently nothing in every other.
-        let selection = Selection::default();
         let Gpu {
             renderers,
             textures,
             state_for_textures,
             scene_viewport,
             game_viewport,
-        } = Self::gpu(context, file.path());
-        let project = ProjectTree::beside(file.path());
+        } = Self::gpu(context, file.anchor());
+        let project = ProjectTree::beside(file.anchor());
         let mut app = Self {
             scene,
             world,
@@ -122,7 +118,10 @@ impl EditorApp {
             saved_revision: 0,
             confirming: None,
             closing: false,
-            selection,
+            // Nothing is selected until something is chosen. This used to name
+            // an entity from the demo scene, which selected the cube in that
+            // one scene and silently nothing in every other.
+            selection: Selection::default(),
             gizmo_followers: Vec::new(),
             renaming: None,
             rename_draft: String::new(),
@@ -191,6 +190,7 @@ impl EditorApp {
             open_project_root: None,
             project_name: None,
             project_main_scene: None,
+            returning_to: None,
         };
         // Said after the field is built rather than during it, because what
         // there is to say is read off the world and the bindings.

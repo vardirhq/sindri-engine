@@ -34,6 +34,7 @@ impl EditorApp {
         );
 
         let mut add = false;
+        let mut edit = false;
         ui.horizontal(|ui| {
             add = button::labelled(
                 ui,
@@ -42,7 +43,15 @@ impl EditorApp {
                 "Place an instance in the middle of the Scene view",
             )
             .clicked();
+            edit = button::labelled(
+                ui,
+                "Edit prefab",
+                Intent::Normal,
+                "Open the prefab itself, to change every instance of it",
+            )
+            .clicked();
         });
+        let path = brush.path().to_owned();
         property::toggle(ui, "Place", &mut brush.placing, "On a cell", "Off");
         if brush.placing {
             panel::note(
@@ -55,6 +64,9 @@ impl EditorApp {
         }
         if add {
             self.place_prefab_in_view();
+        }
+        if edit {
+            self.edit_prefab(&path, ui.ctx());
         }
     }
 }

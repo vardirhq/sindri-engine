@@ -297,7 +297,7 @@ impl EditorApp {
     pub(super) fn reload_textures(&mut self) {
         let state = self.render_state.clone();
         self.renderers.text.clear_bindings();
-        self.textures = SceneTextures::for_scene(&state.device, &state.queue, self.file.path());
+        self.textures = SceneTextures::for_scene(&state.device, &state.queue, self.file.anchor());
         self.textured_revision = super::TexturedAt {
             history: self.history.revision(),
             prefabs: self.scripts.prefab_revision(),
@@ -359,7 +359,7 @@ impl EditorApp {
     /// new scene resolves its references somewhere else, and the previous
     /// scene's sources and running instances go when the old one drops.
     pub(super) fn reload_scripts(&mut self) {
-        self.scripts = SceneScripts::for_scene(self.file.path());
+        self.scripts = SceneScripts::for_scene(self.file.anchor());
         let notes = self.scripts.request(&self.world, self.scene.components());
         self.record_script_notes(notes);
     }
