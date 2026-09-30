@@ -1,0 +1,287 @@
+[
+  {
+    "category": "games",
+    "title": "Causeway",
+    "path": "examples/causeway/",
+    "source": "game",
+    "description": "Build a path through a voxel world and guide the wanderer.",
+    "tags": [
+      "voxels",
+      "construction",
+      "flagship"
+    ]
+  },
+  {
+    "category": "games",
+    "title": "Orbital Last Stand",
+    "path": "examples/orbital-baked/",
+    "source": "games/orbital-baked",
+    "description": "Survive waves and boss fights with a growing arsenal.",
+    "tags": [
+      "combat",
+      "targeting",
+      "prefabs",
+      "tweening",
+      "flagship"
+    ]
+  },
+  {
+    "category": "games",
+    "title": "Platformer",
+    "path": "examples/platformer/",
+    "source": "games/platformer",
+    "description": "Run, jump and collect coins on the way to the flag.",
+    "tags": [
+      "2d",
+      "tilemap",
+      "physics",
+      "camera",
+      "genre"
+    ]
+  },
+  {
+    "category": "games",
+    "title": "Scorchball",
+    "path": "examples/scorchball/",
+    "source": "games/scorchball",
+    "description": "Local multiplayer football for two to four controllers.",
+    "tags": [
+      "gamepads",
+      "multiplayer",
+      "prefabs",
+      "genre"
+    ]
+  },
+  {
+    "category": "games",
+    "title": "Flappy",
+    "path": "examples/flappy/",
+    "source": "games/flappy",
+    "description": "A small flapping arcade game.",
+    "tags": [
+      "2d",
+      "arcade",
+      "genre"
+    ]
+  },
+  {
+    "category": "demos",
+    "title": "Tween Lab",
+    "path": "examples/tween/",
+    "source": "examples/tween",
+    "description": "Compare five easing curves with managed Decay playback controls.",
+    "tags": [
+      "animation",
+      "easing",
+      "number",
+      "vector",
+      "colour",
+      "responsive"
+    ]
+  },
+  {
+    "category": "demos",
+    "title": "Weave UI",
+    "path": "examples/weave-poc/",
+    "source": "games/weave-poc",
+    "description": "Explore CSS-inspired responsive UI, layouts and presentation rules.",
+    "tags": [
+      "css",
+      "typography",
+      "media",
+      "queries",
+      "layout"
+    ]
+  },
+  {
+    "category": "demos",
+    "title": "Voxel Lab",
+    "path": "examples/voxel-lab/",
+    "source": "games/voxel-lab",
+    "description": "Inspect voxel terrain, meshing and rendering effects.",
+    "tags": [
+      "3d",
+      "terrain",
+      "lighting",
+      "bloom",
+      "geometry"
+    ]
+  },
+  {
+    "category": "demos",
+    "title": "Shapes Lab",
+    "path": "examples/shapes-lab/",
+    "source": "games/shapes-lab",
+    "description": "Procedural shapes and geometry in motion.",
+    "tags": [
+      "geometry",
+      "renderer",
+      "shapes"
+    ]
+  },
+  {
+    "category": "docs",
+    "title": "Documentation map",
+    "path": "docs/documentation/",
+    "source": "docs/README.md",
+    "description": "Find all repository documents and their purpose.",
+    "tags": [
+      "overview",
+      "navigation"
+    ]
+  },
+  {
+    "category": "docs",
+    "title": "Getting started",
+    "path": "docs/getting-started/",
+    "source": "README.md",
+    "description": "Build the engine, open the editor and run a project.",
+    "tags": [
+      "setup",
+      "editor"
+    ]
+  },
+  {
+    "category": "docs",
+    "title": "Projects",
+    "path": "docs/project/",
+    "source": "docs/project-format.md",
+    "description": "Project configuration, assets and entry scenes.",
+    "tags": [
+      "format",
+      "assets"
+    ]
+  },
+  {
+    "category": "docs",
+    "title": "Scenes & components",
+    "path": "docs/scenes/",
+    "source": "docs/scene-extraction.md",
+    "description": "Understand the shared scene and component model.",
+    "tags": [
+      "world",
+      "hierarchy",
+      "transforms"
+    ]
+  },
+  {
+    "category": "docs",
+    "title": "Cameras",
+    "path": "docs/cameras/",
+    "source": "docs/cameras.md",
+    "description": "Author views, follow behaviour, confinement and shake.",
+    "tags": [
+      "camera",
+      "follow"
+    ]
+  },
+  {
+    "category": "docs",
+    "title": "2D physics",
+    "path": "docs/physics/",
+    "source": "docs/physics.md",
+    "description": "Bodies, colliders, gravity and gameplay integration.",
+    "tags": [
+      "collision",
+      "gravity"
+    ]
+  },
+  {
+    "category": "docs",
+    "title": "Engine & editor capabilities",
+    "path": "docs/editor/",
+    "source": "docs/capabilities.md",
+    "description": "Evidence and limitations for implemented features.",
+    "tags": [
+      "status",
+      "capabilities"
+    ]
+  },
+  {
+    "category": "docs",
+    "title": "Decay scripting",
+    "path": "docs/scripting/",
+    "source": "docs/scripting.md",
+    "description": "The engine host API and gameplay contracts.",
+    "tags": [
+      "language",
+      "api",
+      "tween",
+      "spatial"
+    ]
+  },
+  {
+    "category": "docs",
+    "title": "Decay language reference",
+    "path": "docs/language/",
+    "source": "decay/LANGUAGE.md",
+    "description": "Syntax, types and the language itself.",
+    "tags": [
+      "syntax",
+      "types",
+      "reference"
+    ]
+  },
+  {
+    "category": "docs",
+    "title": "Weave guide",
+    "path": "docs/weave/",
+    "source": "docs/weave.md",
+    "description": "Responsive UI presentation and migration.",
+    "tags": [
+      "css",
+      "styles",
+      "layout"
+    ]
+  },
+  {
+    "category": "docs",
+    "title": "Weave reference",
+    "path": "docs/weave-reference/",
+    "source": "docs/weave-reference.md",
+    "description": "Supported selectors, properties, units and media rules.",
+    "tags": [
+      "css",
+      "font",
+      "typography",
+      "reference"
+    ]
+  },
+  {
+    "category": "docs",
+    "title": "Web export",
+    "path": "docs/export/",
+    "source": "docs/export.md",
+    "description": "Export a project and deploy its browser build.",
+    "tags": [
+      "shipping",
+      "pages",
+      "wasm",
+      "hosting"
+    ]
+  },
+  {
+    "category": "docs",
+    "title": "Engine parity",
+    "path": "docs/parity/",
+    "source": "docs/parity.md",
+    "description": "Compare implemented features with engine expectations.",
+    "tags": [
+      "status",
+      "gaps",
+      "roadmap"
+    ]
+  },
+  {
+    "category": "docs",
+    "title": "Architecture & direction",
+    "path": "docs/architecture/",
+    "source": "docs/FEASIBILITY.md",
+    "description": "The engine's architecture, boundaries and tradeoffs.",
+    "tags": [
+      "internals",
+      "rust",
+      "design"
+    ]
+  }
+]

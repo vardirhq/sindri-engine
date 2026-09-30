@@ -1,0 +1,48 @@
+/* Directory styles are scoped away from the landing page and docs. */
+[hidden] { display: none !important; }
+.directory { padding-block: clamp(32px, 6vw, 72px) 0; }
+.directory h1 { font-size: clamp(32px, 6vw, 58px); line-height: 1.12; margin: 12px 0 18px; }
+.directory .lede { max-width: 660px; font-size: 18px; }
+.directory-note { color: var(--dim); font: 12px/1.7 var(--mono); margin: 12px 0 30px; }
+.directory-controls { padding: 22px; background: var(--panel); border: 1px solid var(--line); }
+.directory-controls label { display: block; font: 12px var(--mono); margin-bottom: 10px; color: var(--muted); }
+#directory-search { width: 100%; min-height: 48px; padding: 12px; border: 1px solid var(--line); border-radius: 0; background: var(--bg); color: var(--text); font: 16px var(--mono); }
+#directory-search::placeholder { color: var(--dim); opacity: 1; }
+.directory-filters { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; }
+.directory button { min-height: 44px; padding: 10px 14px; border: 1px solid var(--line); background: var(--bg); color: var(--text); font: 12px var(--mono); cursor: pointer; }
+.directory button[aria-pressed="true"] { color: var(--bg); background: var(--gold); border-color: var(--gold); }
+.directory button:hover { border-color: var(--gold); }
+.directory :is(a, button, input):focus-visible { outline: 2px solid var(--gold); outline-offset: 4px; }
+#directory-status { font: 12px var(--mono); color: var(--muted); margin: 24px 0 16px; }
+.directory-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr)); gap: 16px; }
+.directory-entry { min-width: 0; padding: 22px; border: 1px solid var(--line); background: var(--panel); display: flex; flex-direction: column; }
+.directory-entry:hover { border-color: var(--dim); }
+.directory-entry .entry-category { color: var(--gold); font: 10px var(--mono); text-transform: uppercase; letter-spacing: .1em; }
+.directory-entry h2 { margin-top: 12px; font-size: 23px; line-height: 1.2; }
+.directory-entry p { font-size: 15px; line-height: 1.65; color: var(--muted); margin: 12px 0 18px; }
+.entry-tags { display: flex; flex-wrap: wrap; gap: 6px; padding: 0; margin: auto 0 18px; list-style: none; }
+.entry-tags li { font: 10px/1.5 var(--mono); color: var(--dim); border: 1px solid var(--line-soft); padding: 3px 6px; }
+.entry-actions { display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; align-items: center; font: 12px var(--mono); }
+.entry-actions a { min-height: 44px; display: inline-flex; align-items: center; }
+.entry-actions a:first-child { color: var(--gold); }
+.entry-actions a:hover { text-decoration: underline; text-underline-offset: 4px; }
+#directory-empty { padding: 36px 22px; background: var(--panel); border: 1px solid var(--line); }
+#directory-empty p { color: var(--muted); }
+@media (max-width: 480px) {
+ .directory-controls { padding: 16px; }
+ #directory-search { font-size: 14px; }
+ .directory-entry { padding: 18px; }
+}
+
+/* Keep each action's accessible name unique without repeating the card title. */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}

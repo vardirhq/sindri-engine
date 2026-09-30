@@ -1,5 +1,7 @@
 # Changelog
 
+- The Pages directory lists every published game, feature demo and documentation route with search, category filters, shareable selections and source links. Route coverage is checked at build time; the full catalog remains accessible without JavaScript.
+
 - Pages exports use the configured site base path, so custom-domain routes load their browser modules and assets from `/examples/` instead of an assumed repository prefix. Browser smoke covers both custom-domain and project-subpath deployments.
 
 - Decay gains managed number, Vec2, Vec3 and Color tweens with typed value reads, pause/resume, cancellation, restart, completion/progress and disposal. Named CSS easing math is shared with Weave while its UI authoring remains CSS-inspired. Orbital pickups now use a short eased appearance animation. Zero duration completes immediately; invalid input fails explicitly; handles are bounded at 8192 and released with their owner. Property binding, sequences/timelines, callbacks, loops/yoyo and CSS keyframes remain deferred.

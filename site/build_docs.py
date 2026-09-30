@@ -58,7 +58,7 @@ NAV = [
         "Ship",
         [
             ("export", "Web export"),
-            ("features", "Feature integration"),
+            ("parity", "Engine parity"),
             ("architecture", "Architecture"),
         ],
     ),
@@ -163,6 +163,7 @@ TEMPLATE = """<!doctype html>
 <span class="tagline"><span class="rule"></span><span class="chip">DOCS</span></span>
 </span></a>
 <nav>
+<a href="../../directory/">directory</a>
 <a href="../documentation/">docs</a>
 <a href="../scripting/">decay</a>
 <a href="../weave/">weave</a>
