@@ -4,6 +4,9 @@
 //! serialized. A host updates it once a frame before scripts run.
 
 mod box_model;
+mod controls;
+mod clip;
+mod widgets;
 mod flex;
 mod grid;
 mod hierarchy;
@@ -13,7 +16,7 @@ mod measure;
 mod rect;
 mod slider;
 
-use std::collections::BTreeMap;
+use std::collections::{BTreeMap, BTreeSet};
 
 use crate::{UiAnchor, UiImageComponent, UiShapeComponent, UiTextComponent};
 use serde::Deserialize;
@@ -28,6 +31,7 @@ pub use hierarchy::{UiHierarchy, UiPlaced};
 pub use layout::{UiAlign, UiDirection, UiJustify, UiLayoutBox, UiLayoutChild, UiLayoutComponent};
 pub use measure::{UiTextSizes, measure_ui_text};
 pub use rect::{SafeArea, ScreenExtent, ScreenRect};
+pub use widgets::{UiInput, UiScrollComponent, UiTextInputComponent, UiToggleComponent};
 pub use slider::{UiSliderComponent, UiSliderOrientation};
 
 #[derive(Clone, Debug, Deserialize, PartialEq)]
@@ -50,6 +54,11 @@ pub struct ScreenUi {
     pointer_overlay: Option<[f32; 2]>,
     slider_drag: Option<(EntityId, PressId)>,
     slider_changed: Option<EntityId>,
+    focused: Option<EntityId>,
+    changed: BTreeSet<EntityId>,
+    submitted: Option<EntityId>,
+    pointer_began: bool,
+    scroll_drag: Option<(EntityId, PressId, f32, f32, bool)>,
 }
 
 #[derive(Clone, Copy, Debug)]
@@ -57,6 +66,7 @@ struct Element {
     rect: ScreenRect,
     layer: i32,
     pressable: bool,
+    clip: Option<ScreenRect>,
 }
 
 impl ScreenUi {
@@ -200,6 +210,7 @@ impl ScreenUi {
             let placed = hierarchy.placement_or(entity, anchor);
             let origin = extent.anchor_origin(placed.anchor.unit_offset());
             let size = placed.size_or(data.transform_3d.unwrap_or_default().scale_2d());
+            let clip = hierarchy.clip_rect(world, entity, extent);
             placements.insert(
                 entity,
                 Element {
@@ -207,6 +218,7 @@ impl ScreenUi {
                         center: [origin[0] + placed.offset.x, origin[1] + placed.offset.y],
                         size,
                     },
+                    clip,
                     layer,
                     pressable,
                 },
@@ -247,6 +259,15 @@ impl ScreenUi {
                     .2 = true;
             }
         }
+        for name in [UiToggleComponent::TYPE_NAME, UiTextInputComponent::TYPE_NAME, UiScrollComponent::TYPE_NAME] {
+            for (entity, data) in world.entities() {
+                if let Some(payload) = data.components.get(name) {
+                    if payload.get("disabled").and_then(serde_json::Value::as_bool) != Some(true) {
+                        found.entry(entity).or_insert((UiAnchor::Center, 0, false)).2 = true;
+                    }
+                }
+            }
+        }
         Ok(found
             .into_iter()
             .map(|(entity, (anchor, layer, pressable))| (entity, anchor, layer, pressable))
@@ -254,6 +275,7 @@ impl ScreenUi {
     }
 
     fn read_presses(&mut self, world: &mut World, extent: ScreenExtent, presses: &Presses) {
+        self.pointer_began = presses.began().next().is_some();
         self.clicked = None;
         self.slider_changed = None;
         self.pointer_overlay = presses
@@ -262,6 +284,8 @@ impl ScreenUi {
         self.hovered = self
             .pointer_overlay
             .and_then(|point| self.topmost_at(point));
+
+        if self.read_scroll_drag(world, extent, presses) { self.pressing = None; return; }
 
         // A slider owns the exact press that began its drag. Follow that press
         // by identity rather than whichever press is currently primary, so a
@@ -383,7 +407,7 @@ impl ScreenUi {
     pub fn element_at(&self, point: [f32; 2]) -> Option<EntityId> {
         self.rects
             .iter()
-            .filter(|(_, element)| element.rect.contains(point))
+            .filter(|(_, element)| element.rect.contains(point) && element.clip.is_none_or(|clip| clip.size[0] > 0.0 && clip.size[1] > 0.0 && clip.contains(point)))
             .max_by_key(|(entity, element)| (element.layer, entity.index()))
             .map(|(entity, _)| *entity)
     }
@@ -391,7 +415,7 @@ impl ScreenUi {
     fn topmost_at(&self, point: [f32; 2]) -> Option<EntityId> {
         self.rects
             .iter()
-            .filter(|(_, element)| element.pressable && element.rect.contains(point))
+            .filter(|(_, element)| element.pressable && element.rect.contains(point) && element.clip.is_none_or(|clip| clip.size[0] > 0.0 && clip.size[1] > 0.0 && clip.contains(point)))
             .max_by_key(|(entity, element)| (element.layer, entity.index()))
             .map(|(entity, _)| *entity)
     }

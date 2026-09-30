@@ -88,6 +88,7 @@ impl SceneExtractor {
                     tile_submission_index(&tilemap, column, row),
                 )?;
                 batches.push(SpriteDraw {
+                    clip: None,
                     space: DrawSpace::World,
                     texture,
                     order,

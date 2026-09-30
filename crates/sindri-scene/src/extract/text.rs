@@ -43,9 +43,11 @@ impl SceneExtractor {
             .overlay_extent
             .expect("every resolved view includes screen-space extent");
         let placement = OverlayPlacement::new(extent);
-        let mut layers: BTreeMap<i32, Vec<TextInstance>> = BTreeMap::new();
+        let mut layers: BTreeMap<(i32, Option<[u32; 4]>), Vec<TextInstance>> = BTreeMap::new();
 
+        let viewport = frame.viewport();
         for (entity, text) in texts {
+            if !world.is_active(entity) { continue; }
             // Taller than the whole screen is not a size anyone wants; it is a
             // pixel count typed where a share of the screen goes, which is the
             // mistake this unit invites and the one worth naming.
@@ -61,12 +63,12 @@ impl SceneExtractor {
             // rest.
             let position = placement.origin(hierarchy.placement_or(entity, text.anchor));
             layers
-                .entry(text.layer)
+                .entry((text.layer, hierarchy.clip_pixels(world, entity, [viewport.width, viewport.height])))
                 .or_default()
                 .push(text.instance(position.to_array())?);
         }
 
-        for (layer, instances) in layers {
+        for ((layer, clip), instances) in layers {
             frame.push(FramePass::new(
                 RenderStage::Overlay,
                 RenderLayer(layer),
@@ -75,7 +77,7 @@ impl SceneExtractor {
                     position: glam::Vec3::ZERO,
                 },
                 FrameCommand::Text { instances },
-            ));
+            ).with_clip(clip));
         }
         Ok(())
     }

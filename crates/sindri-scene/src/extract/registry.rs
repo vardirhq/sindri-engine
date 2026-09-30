@@ -302,6 +302,7 @@ fn register_drawables(components: &mut ComponentSchemaRegistry) -> Result<(), Sc
             "disabled": false
         }),
     )?;
+    super::widget_registry::register(components)?;
     register_ui_layout(components)?;
     // A visible burst, because one that threw nothing would look like a
     // component that does not work.

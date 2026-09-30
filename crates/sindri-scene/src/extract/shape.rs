@@ -147,7 +147,8 @@ impl SceneExtractor {
         // Ordered so the frame's passes come out layer by layer, and within a
         // layer with paint before light: light added under paint would be
         // covered by it, which is the one order that makes a glow invisible.
-        let mut batches: BTreeMap<(i32, bool), Vec<ShapeInstance>> = BTreeMap::new();
+        let mut batches: BTreeMap<(i32, bool, Option<[u32; 4]>), Vec<ShapeInstance>> = BTreeMap::new();
+        let viewport = frame.viewport();
         for (entity, shape) in shapes {
             if !world.is_active(entity) {
                 continue;
@@ -157,17 +158,18 @@ impl SceneExtractor {
                 .and_then(|data| data.transform_3d)
                 .unwrap_or_default();
             let placed = hierarchy.placement_or(entity, shape.anchor);
+            let clip = hierarchy.clip_pixels(world, entity, [viewport.width, viewport.height]);
             if let Some(shadow) = shadow_instance(&shape, placed, transform, extent) {
                 // Paint, whatever the shape is, and ahead of it in its layer so
                 // the shape covers its own shadow.
                 batches
-                    .entry((shape.layer, false))
+                    .entry((shape.layer, false, clip))
                     .or_default()
                     .push(shadow);
             }
             let model = ui_matrix(placed, transform, extent);
             batches
-                .entry((shape.layer, shape.geometry.blend() == ShapeBlend::Add))
+                .entry((shape.layer, shape.geometry.blend() == ShapeBlend::Add, clip))
                 .or_default()
                 .push(shape_instance(
                     world,
@@ -178,7 +180,7 @@ impl SceneExtractor {
                 ));
         }
 
-        for ((layer, additive), instances) in batches {
+        for ((layer, additive, clip), instances) in batches {
             frame.push(FramePass::new(
                 RenderStage::Overlay,
                 RenderLayer(layer),
@@ -191,7 +193,7 @@ impl SceneExtractor {
                     },
                     instances,
                 },
-            ));
+            ).with_clip(clip));
         }
         Ok(())
     }

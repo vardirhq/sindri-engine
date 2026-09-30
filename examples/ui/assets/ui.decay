@@ -1,0 +1,37 @@
+script WidgetDemo {
+    var assist: Entity = null;
+    var telemetry: Entity = null;
+    var callsign: Entity = null;
+    var status: Entity = null;
+    fn start() {
+        this.assist = World.find("toggle");
+        this.telemetry = World.find("checkbox");
+        this.callsign = World.find("callsign");
+        this.status = World.find("status");
+        print("UI demo ready");
+    }
+    fn update(dt: f32) {
+        Ui.set_text(World.find("toggle-text"), if Ui.is_checked(this.assist) { "Flight assist   ON" } else { "Flight assist   OFF" });
+        Ui.set_text(World.find("checkbox-text"), if Ui.is_checked(this.telemetry) { "[x] Mission telemetry" } else { "[ ] Mission telemetry" });
+        let name = Ui.input_text(this.callsign);
+        Ui.set_text(World.find("callsign-text"), if name == "" { "Your callsign" } else { name });
+        if Ui.changed(this.assist) { print("UI toggle changed " + Ui.is_checked(this.assist)); }
+        if Ui.changed(this.telemetry) { print("UI checkbox changed " + Ui.is_checked(this.telemetry)); }
+        if Ui.changed(this.callsign) { print("UI text changed " + name); }
+        if Ui.submitted(this.callsign) {
+            Ui.set_text(this.status, "CALLSIGN / " + name);
+            print("UI submitted " + name);
+        }
+        if Ui.changed(World.find("archive")) { print("UI archive scrolled"); }
+    }
+}
+
+script ArchiveRow {
+    @export let module: String = "";
+    fn update(dt: f32) {
+        if Ui.is_pressed(this.entity) {
+            Ui.set_text(World.find("status"), "SELECTED / " + this.module);
+            print("UI selected " + this.module);
+        }
+    }
+}

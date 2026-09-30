@@ -37,6 +37,7 @@ mod shared;
 mod tiles;
 mod tween;
 mod ui;
+mod widgets;
 
 pub use services::WorldServices;
 

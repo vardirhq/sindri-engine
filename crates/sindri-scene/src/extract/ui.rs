@@ -48,6 +48,7 @@ impl SceneExtractor {
         world: &World,
         drawing: Drawing<'_>,
         batches: &mut SpriteBatches,
+        viewport: [u32; 2],
     ) -> Result<(), SceneExtractError> {
         let Drawing {
             cameras,
@@ -98,6 +99,7 @@ impl SceneExtractor {
                 entity.index(),
             )?;
             batches.push(SpriteDraw {
+                clip: hierarchy.clip_pixels(world, entity, viewport),
                 space: DrawSpace::Screen,
                 texture: textures.resolve(reference.texture()),
                 order,

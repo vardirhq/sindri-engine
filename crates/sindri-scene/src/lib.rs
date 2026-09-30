@@ -74,6 +74,7 @@ pub use placement::{
 pub use screen_ui::{
     SafeArea, ScreenExtent, ScreenRect, ScreenUi, UiAlignSelf, UiBoxComponent, UiButtonComponent,
     UiDirection, UiGridComponent, UiHierarchy, UiLayoutBox, UiLayoutChild, UiLayoutComponent,
+    UiInput, UiScrollComponent, UiTextInputComponent, UiToggleComponent,
     UiPlaced, UiSides, UiSliderComponent, UiSliderOrientation, UiTextSizes, UiTrack,
     measure_ui_text,
 };

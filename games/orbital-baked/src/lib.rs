@@ -212,6 +212,7 @@ impl Run {
         ) {
             notes.push(error.to_string());
         }
+        self.screen_ui.read_controls(&mut self.world, &sindri_decay::ui_input(&self.input, self.viewport.1));
         self.effects.advance(step);
 
         let (physics, events) = self.physics.for_scripts();

@@ -54,9 +54,12 @@ pub struct GlyphRenderer {
     mesh: MeshBuffers,
     batches: Vec<Batch>,
     next: usize,
+    clip: Option<[u32; 4]>,
 }
 
 impl GlyphRenderer {
+    pub fn set_clip(&mut self, clip: Option<[u32; 4]>) { self.clip = clip; }
+
     pub fn new(device: &wgpu::Device, target_format: wgpu::TextureFormat) -> Self {
         let bind_group_layout = create_bind_group_layout(device);
         let shader = device.create_shader_module(wgpu::ShaderModuleDescriptor {
@@ -113,6 +116,7 @@ impl GlyphRenderer {
             mesh: MeshBuffers::new(device, "Sindri glyph quad", &VERTICES, &INDICES),
             batches: Vec::new(),
             next: 0,
+            clip: None,
         }
     }
 
@@ -181,6 +185,7 @@ impl GlyphRenderer {
             occlusion_query_set: None,
             multiview_mask: None,
         });
+        if let Some([x,y,w,h]) = self.clip { pass.set_scissor_rect(x,y,w,h); }
         pass.set_pipeline(&self.pipeline);
         pass.set_bind_group(
             0,

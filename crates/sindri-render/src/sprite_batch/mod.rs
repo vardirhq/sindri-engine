@@ -70,11 +70,14 @@ pub struct SpriteBatchRenderer {
     batches: Vec<Batch>,
     /// Which slot the next batch of this frame takes.
     next: usize,
+    clip: Option<[u32; 4]>,
     blend_mode: SpriteBlendMode,
     stats: SpriteBatchStats,
 }
 
 impl SpriteBatchRenderer {
+    pub fn set_clip(&mut self, clip: Option<[u32; 4]>) { self.clip = clip; }
+
     pub fn new(device: &wgpu::Device, target_format: wgpu::TextureFormat) -> Self {
         Self::with_blend_mode(device, target_format, SpriteBlendMode::Alpha)
     }
@@ -159,6 +162,7 @@ impl SpriteBatchRenderer {
             mesh: MeshBuffers::new(device, "Sindri sprite batch quad", &VERTICES, &INDICES),
             batches: Vec::new(),
             next: 0,
+            clip: None,
             blend_mode,
             stats: SpriteBatchStats::default(),
         }
@@ -267,6 +271,7 @@ impl SpriteBatchRenderer {
             occlusion_query_set: None,
             multiview_mask: None,
         });
+        if let Some([x,y,w,h]) = self.clip { pass.set_scissor_rect(x,y,w,h); }
         pass.set_pipeline(match depth {
             SpriteDepth::Ignore => &self.over_the_world,
             SpriteDepth::Test => &self.within_the_world,

@@ -52,9 +52,12 @@ pub struct ShapeRenderer {
     mesh: MeshBuffers,
     batches: Vec<Batch>,
     next: usize,
+    clip: Option<[u32; 4]>,
 }
 
 impl ShapeRenderer {
+    pub fn set_clip(&mut self, clip: Option<[u32; 4]>) { self.clip = clip; }
+
     #[must_use]
     pub fn new(device: &wgpu::Device, target_format: wgpu::TextureFormat) -> Self {
         let bind_group_layout = create_bind_group_layout(device);
@@ -120,6 +123,7 @@ impl ShapeRenderer {
             mesh: MeshBuffers::new(device, "Sindri shape quad", &VERTICES, &INDICES),
             batches: Vec::new(),
             next: 0,
+            clip: None,
         }
     }
 
@@ -183,6 +187,7 @@ impl ShapeRenderer {
             occlusion_query_set: None,
             multiview_mask: None,
         });
+        if let Some([x,y,w,h]) = self.clip { pass.set_scissor_rect(x,y,w,h); }
         pass.set_pipeline(&self.pipelines[blend as usize]);
         pass.set_bind_group(0, &batch.bind_group, &[]);
         pass.set_vertex_buffer(1, batch.instances.slice(..));

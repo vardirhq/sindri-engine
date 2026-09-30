@@ -12,6 +12,7 @@ mod meanings;
 mod mesh;
 mod physics_registry;
 pub(crate) mod registry;
+mod widget_registry;
 mod shape;
 mod sprite;
 mod text;

@@ -36,6 +36,8 @@ mod scenes;
 mod scripts;
 mod surface;
 mod tweens;
+mod ui_input;
+pub use ui_input::ui_input;
 
 pub mod reference;
 pub use audio_host::{AudioCommand, HostServices, WorldHost};
