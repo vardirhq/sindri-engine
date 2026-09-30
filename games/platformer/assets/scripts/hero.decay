@@ -19,6 +19,7 @@ script Hero {
     @export let fall_limit: f32 = -3.0;
     @export let spawn_x: f32 = 2.5;
     @export let spawn_y: f32 = 4.0;
+    @export let touch_controls: Prefab;
 
     // Ground contacts the foot sensor is in, over every box it overlaps.
     var ground: f32 = 0.0;
@@ -36,7 +37,7 @@ script Hero {
         Game.falls = 0.0;
         // Screen-space shapes make the touch scheme discoverable without
         // importing control artwork or teaching the host about this game.
-        World.spawn("prefabs/touch-controls.prefab.json");
+        World.spawn(this.touch_controls);
     }
 
     fn update(dt: f32) {
