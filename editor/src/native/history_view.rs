@@ -122,6 +122,7 @@ impl EditorApp {
     pub(super) fn travel_history(&mut self, travel: Travel) {
         self.history.break_merge_run();
         for _ in 0..travel.unsigned_abs() {
+            let from = self.history.revision();
             let moved = if travel < 0 {
                 self.history.undo(&mut self.world)
             } else {
@@ -132,7 +133,7 @@ impl EditorApp {
                 // history that has since changed. Stopping is the answer, not
                 // reporting: nothing went wrong.
                 Ok(None) => break,
-                Ok(Some(_)) => {}
+                Ok(Some(_)) => self.replay_prefab_writes(from),
                 Err(error) => {
                     self.report(error.to_string());
                     break;

@@ -17,24 +17,38 @@ use crate::ui::widgets::button::{self, Intent};
 use crate::ui::widgets::{panel, section};
 
 use super::EditorApp;
+use super::prefab_writes::PendingWrite;
 use super::unsaved::Discarding;
 
 impl EditorApp {
-    /// Writes `entity` and everything under it as a prefab, and replaces it
-    /// with an instance of that prefab, as one undoable step.
+    /// Writes each of `entities`, and everything under it, as a prefab, and
+    /// replaces it with an instance of that prefab, all as one undoable step.
     ///
-    /// The file is written under `prefabs/` beside the scene and is not taken
-    /// back by Undo, which returns the entities as they were.
-    pub(super) fn make_prefab(&mut self, entity: EntityId) {
+    /// Each is written under `prefabs/` beside the scene, named after it.
+    /// Undo takes the files away again along with the instances, as long as
+    /// nobody has changed them since.
+    pub(super) fn make_prefabs(&mut self, entities: &[EntityId]) {
         if !self.authoring_enabled() {
             return;
         }
-        match self.prefab_of(entity) {
-            Ok((path, source, document)) => {
-                self.replace_with_instance(entity, &path, &source, document);
+        let entities = crate::selection::topmost(&self.world, entities);
+        let mut made = Vec::new();
+        for entity in entities {
+            // Written one at a time, so the next one's name sees this file and
+            // two entities called the same get two files.
+            let outcome = self.prefab_of(entity).and_then(|(path, source, document)| {
+                let write = PendingWrite::write(&path, &source, &document)?;
+                Ok((entity, source, document, write))
+            });
+            match outcome {
+                Ok(one) => made.push(one),
+                Err(error) => {
+                    self.report(format!("No prefab made: {error}"));
+                    return;
+                }
             }
-            Err(error) => self.report(format!("No prefab made: {error}")),
         }
+        self.replace_with_instances(made);
     }
 
     /// The prefab `entity` would become, and where it would be written.
@@ -63,51 +77,47 @@ impl EditorApp {
         Ok((path, source, document))
     }
 
-    /// Writes the prefab and swaps the subtree for an instance of it.
-    fn replace_with_instance(
+    /// Swaps each subtree for an instance of the prefab just written from it.
+    fn replace_with_instances(
         &mut self,
-        entity: EntityId,
-        path: &Path,
-        source: &str,
-        document: PrefabDocument,
+        made: Vec<(EntityId, String, PrefabDocument, PendingWrite)>,
     ) {
-        let written = document
-            .to_canonical_json()
-            .map_err(|error| error.to_string())
-            .and_then(|json| {
-                std::fs::create_dir_all(path.parent().unwrap_or(path))
-                    .and_then(|()| std::fs::write(path, json))
-                    .map_err(|error| error.to_string())
-            });
-        if let Err(error) = written {
-            self.report(format!("{} was not written: {error}", path.display()));
-            return;
-        }
-        self.file.prefabs_mut().replace(source, document);
-        let Some(data) = self.world.get(entity) else {
-            return;
-        };
-        let (parent, transform) = (data.parent, data.transform_3d);
         let mut rehearsal = self.world.clone();
-        let _ = rehearsal.despawn_recursive(entity);
         let mut buffer = CommandBuffer::new();
-        buffer.push(WorldCommand::Despawn { entity });
-        let root = match prefab::spawn_instance(
-            &mut rehearsal,
-            source,
-            self.file.prefabs(),
-            parent,
-            transform,
-            &mut buffer,
-        ) {
-            Ok(root) => root,
-            Err(error) => {
-                self.report(error);
-                return;
+        let mut roots = Vec::new();
+        let mut writes = Vec::new();
+        let mut label = "Make prefabs".to_owned();
+        for (entity, source, document, write) in made {
+            self.file.prefabs_mut().replace(&source, document);
+            let Some(data) = self.world.get(entity) else {
+                continue;
+            };
+            let (parent, transform) = (data.parent, data.transform_3d);
+            let _ = rehearsal.despawn_recursive(entity);
+            buffer.push(WorldCommand::Despawn { entity });
+            match prefab::spawn_instance(
+                &mut rehearsal,
+                &source,
+                self.file.prefabs(),
+                parent,
+                transform,
+                &mut buffer,
+            ) {
+                Ok(root) => roots.push(root),
+                Err(error) => {
+                    self.report(error);
+                    return;
+                }
             }
-        };
+            label = format!("Make {}", super::instances::file_name(&source));
+            self.console.info(format!("Made {source}"));
+            writes.push(write);
+        }
+        if writes.len() > 1 {
+            label = format!("Make {} prefabs", writes.len());
+        }
         self.history.break_merge_run();
-        let label = format!("Make {}", super::instances::file_name(source));
+        let before = self.history.revision();
         if let Err(error) = self
             .history
             .apply(buffer.into_transaction(label), &mut self.world)
@@ -115,16 +125,19 @@ impl EditorApp {
             self.report(error.to_string());
             return;
         }
-        self.console.info(format!("Made {source}"));
+        self.record_prefab_writes(writes, before);
         self.refresh_project();
-        self.select(Some(root));
+        self.selection.clear();
+        for root in roots {
+            self.selection.toggle(root);
+        }
     }
 
     /// Opens the prefab at `path` as the document being edited, remembering
     /// the scene to come back to.
     pub(super) fn edit_prefab(&mut self, path: &Path, context: &egui::Context) {
         if !self.file.is_prefab() {
-            self.returning_to = self.file.path().map(Path::to_path_buf);
+            self.prefab_session.returning_to = self.file.path().map(Path::to_path_buf);
         }
         self.discard_or_confirm(Discarding::OpenPath(path.to_path_buf()), context);
     }
@@ -141,7 +154,7 @@ impl EditorApp {
             "Saving writes the prefab. Every scene that places it picks the change up, \
              keeping what each instance overrides.",
         );
-        let back = self.returning_to.clone();
+        let back = self.prefab_session.returning_to.clone();
         if let Some(scene) = back {
             let label = scene.file_name().map_or_else(
                 || "the scene".to_owned(),
@@ -155,7 +168,7 @@ impl EditorApp {
             )
             .clicked()
             {
-                self.returning_to = None;
+                self.prefab_session.returning_to = None;
                 self.discard_or_confirm(Discarding::OpenPath(scene), ui.ctx());
             }
         }

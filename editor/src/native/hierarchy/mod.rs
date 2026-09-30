@@ -291,6 +291,8 @@ pub(super) enum RowAction {
     DuplicateSelection,
     /// Write this entity and what is under it as a prefab, and place that.
     MakePrefab(EntityId),
+    /// The same for everything selected, a prefab each.
+    MakePrefabsOfSelection,
     CreateChild(EntityId),
     Delete(EntityId),
     DeleteSelection,
@@ -321,7 +323,11 @@ impl EditorApp {
             }
             RowAction::Duplicate(entity) => self.duplicate_entity(entity),
             RowAction::DuplicateSelection => self.duplicate_selection(),
-            RowAction::MakePrefab(entity) => self.make_prefab(entity),
+            RowAction::MakePrefab(entity) => self.make_prefabs(&[entity]),
+            RowAction::MakePrefabsOfSelection => {
+                let selected = self.selection.clone();
+                self.make_prefabs(selected.all());
+            }
             RowAction::CreateChild(entity) => self.create_game_object(CreateGameObject::Empty {
                 parent: Some(entity),
             }),

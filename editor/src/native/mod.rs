@@ -67,6 +67,7 @@ mod pointer;
 mod prefab_authoring;
 mod prefab_panel;
 mod prefab_pointer;
+mod prefab_writes;
 mod presentation;
 mod preview_view;
 mod profile_view;
@@ -395,8 +396,8 @@ struct EditorApp {
     /// draws, and a manifest read per frame is a file read at the rate a
     /// viewport redraws. The editor is the only thing that changes it.
     project_main_scene: Option<PathBuf>,
-    /// The scene a prefab was opened from to be edited, to go back to.
-    returning_to: Option<PathBuf>,
+    /// The scene a prefab was opened from, and the prefab files edits wrote.
+    prefab_session: prefab_writes::PrefabSession,
 }
 
 /// What the textures were last asked about: the history revision, since an

@@ -182,7 +182,11 @@ fn applying_writes_an_instances_overrides_into_its_prefab() {
         .components
         .insert("sindri.sprite".to_owned(), json!({ "layer": 9 }));
     let overrides = BTreeMap::from([(id("coin"), changes)]);
-    let updated = applied(&prefab, &overrides, &library(prefab.clone()));
+    let instance = sindri_core::PrefabInstance {
+        overrides,
+        ..sindri_core::PrefabInstance::new(COIN)
+    };
+    let updated = applied(&prefab, &instance, &library(prefab.clone()));
     assert_eq!(
         updated.entities[0].components["sindri.sprite"],
         json!({ "texture": "gold.png", "layer": 9 })
@@ -210,13 +214,64 @@ fn applying_into_a_nested_instance_changes_the_outer_prefab_only() {
         ..EntityOverride::default()
     };
     let overrides = BTreeMap::from([(id("loot"), on_root), (id("loot/sparkle"), on_sparkle)]);
-    let updated = applied(&chest, &overrides, &library(coin("gold.png")));
+    let instance = sindri_core::PrefabInstance {
+        overrides,
+        removed: [id("loot/sparkle")].into(),
+        ..sindri_core::PrefabInstance::new("prefabs/chest.prefab")
+    };
+    let updated = applied(&chest, &instance, &library(coin("gold.png")));
     let nested = updated.entities[1].prefab.as_ref().unwrap();
     assert_eq!(
         nested.overrides[&id("coin")].components["sindri.sprite"],
         json!({ "layer": 5 })
     );
     assert_eq!(nested.overrides[&id("sparkle")].disabled, Some(true));
+    assert!(
+        nested.removed.contains(&id("sparkle")),
+        "removed inside the chest's coin"
+    );
+}
+
+#[test]
+fn applying_a_removal_takes_the_entity_out_of_the_prefab() {
+    let prefab = coin("gold.png");
+    let instance = sindri_core::PrefabInstance {
+        removed: [id("sparkle")].into(),
+        ..sindri_core::PrefabInstance::new(COIN)
+    };
+    let updated = applied(&prefab, &instance, &library(prefab.clone()));
+    assert_eq!(updated.entities.len(), 1);
+}
+
+#[test]
+fn deleting_inside_an_instance_is_undone_by_restoring_it() {
+    let prefabs = library(coin("gold.png"));
+    let mut world = World::default();
+    let mut history = CommandHistory::default();
+    let root = placed(&mut world, &mut history, &prefabs);
+    let sparkle = world.entity_for_source_id(&id("coin/sparkle")).unwrap();
+    let mut buffer = CommandBuffer::new();
+    buffer.push(sindri_core::WorldCommand::Despawn { entity: sparkle });
+    apply(&mut world, &mut history, buffer);
+
+    let mut reference = world.instance_entity(root, &prefabs).unwrap();
+    let instance = reference.prefab.as_mut().unwrap();
+    assert!(instance.removed.contains(&id("sparkle")));
+    instance.removed.clear();
+    let mut rehearsal = world.clone();
+    let mut buffer = CommandBuffer::new();
+    let members = world.instance_members(root);
+    reconcile(
+        &world,
+        &mut rehearsal,
+        &members,
+        &reference,
+        &prefabs,
+        &mut buffer,
+    )
+    .unwrap();
+    apply(&mut world, &mut history, buffer);
+    assert!(world.entity_for_source_id(&id("coin/sparkle")).is_some());
 }
 
 #[test]

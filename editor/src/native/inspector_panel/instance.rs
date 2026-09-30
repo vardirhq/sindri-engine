@@ -16,21 +16,13 @@ use crate::ui::widgets::button::{self, Intent};
 use crate::ui::widgets::{panel, section};
 
 use super::super::EditorApp;
-use super::super::instances::file_name;
-
-/// What a row of the override list takes back.
-enum Revert {
-    /// Everything this entity overrides.
-    Entity,
-    /// One component of it.
-    Component(String),
-}
+use super::super::instances::{Revert, file_name};
 
 /// What was pressed, done once the strip has finished drawing.
 enum Pressed {
     Open(String),
     Select(EntityId),
-    Revert(EntityId, Option<(SceneEntityId, Option<String>)>),
+    Revert(EntityId, Revert),
     Apply(EntityId),
     Unpack(EntityId),
 }
@@ -44,12 +36,24 @@ impl EditorApp {
         let Some(root) = self.world.instance_root(entity) else {
             return;
         };
-        let changes = self
+        let placed = self
             .world
             .instance_entity(root, self.file.prefabs())
             .ok()
-            .and_then(|placed| placed.prefab)
+            .and_then(|placed| placed.prefab);
+        let removed: Vec<SceneEntityId> = placed
+            .as_ref()
+            .filter(|_| link.root)
+            .map(|instance| instance.removed.iter().cloned().collect())
+            .unwrap_or_default();
+        // Editor state is the instance's own bookkeeping, not a difference
+        // anybody made on purpose, so it is not listed as one.
+        let changes = placed
             .and_then(|mut instance| instance.overrides.remove(&link.path))
+            .map(|changes| EntityOverride {
+                editor: std::collections::BTreeMap::new(),
+                ..changes
+            })
             .unwrap_or_default();
         let mut pressed = None;
         section::group(
@@ -88,7 +92,7 @@ impl EditorApp {
                     )
                     .clicked()
                     {
-                        pressed = Some(Pressed::Revert(root, None));
+                        pressed = Some(Pressed::Revert(root, Revert::All));
                     }
                     if button::labelled(
                         ui,
@@ -102,12 +106,16 @@ impl EditorApp {
                     }
                 }
             });
-            if let Some(revert) = overridden_rows(ui, &changes) {
-                let component = match revert {
-                    Revert::Entity => None,
-                    Revert::Component(type_name) => Some(type_name),
-                };
-                pressed = Some(Pressed::Revert(root, Some((link.path.clone(), component))));
+            if let Some(revert) = overridden_rows(ui, &link.path, &changes) {
+                pressed = Some(Pressed::Revert(root, revert));
+            }
+            for path in &removed {
+                ui.horizontal(|ui| {
+                    panel::note(ui, &format!("Does without {}", path.as_str()));
+                    if button::row_icon(ui, icons::UNDO, Intent::Quiet, "Bring it back").clicked() {
+                        pressed = Some(Pressed::Revert(root, Revert::Removed(path.clone())));
+                    }
+                });
             }
         });
         panel::rule(ui);
@@ -119,7 +127,7 @@ impl EditorApp {
                 }
             }
             Some(Pressed::Select(root)) => self.select(Some(root)),
-            Some(Pressed::Revert(root, only)) => self.revert_instance(root, only),
+            Some(Pressed::Revert(root, scope)) => self.revert_instance(root, scope),
             Some(Pressed::Apply(root)) => self.apply_instance(root),
             Some(Pressed::Unpack(root)) => self.unpack_instance(root),
         }
@@ -127,7 +135,11 @@ impl EditorApp {
 }
 
 /// A row per thing this entity overrides, each with a way to take it back.
-fn overridden_rows(ui: &mut egui::Ui, changes: &EntityOverride) -> Option<Revert> {
+fn overridden_rows(
+    ui: &mut egui::Ui,
+    path: &SceneEntityId,
+    changes: &EntityOverride,
+) -> Option<Revert> {
     if changes.is_empty() {
         panel::note(ui, "Nothing here differs from the prefab.");
         return None;
@@ -148,7 +160,7 @@ fn overridden_rows(ui: &mut egui::Ui, changes: &EntityOverride) -> Option<Revert
             panel::note(ui, &format!("Overrides its {}", fields.join(", ")));
             if button::row_icon(ui, icons::UNDO, Intent::Quiet, "Revert everything here").clicked()
             {
-                reverted = Some(Revert::Entity);
+                reverted = Some(Revert::Entity(path.clone()));
             }
         });
     }
@@ -162,7 +174,7 @@ fn overridden_rows(ui: &mut egui::Ui, changes: &EntityOverride) -> Option<Revert
             panel::note(ui, &what);
             if button::row_icon(ui, icons::UNDO, Intent::Quiet, "Revert to the prefab's").clicked()
             {
-                reverted = Some(Revert::Component(type_name.clone()));
+                reverted = Some(Revert::Component(path.clone(), type_name.clone()));
             }
         });
     }

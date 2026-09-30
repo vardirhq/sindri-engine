@@ -241,7 +241,7 @@ impl EditorApp {
     /// would fail the whole transaction.
     pub(super) fn delete_entities(&mut self, entities: &[EntityId]) {
         let roots = selection::topmost(&self.world, entities);
-        if roots.is_empty() || self.refuses_restructuring(&roots, "delete") {
+        if roots.is_empty() {
             return;
         }
         let mut buffer = CommandBuffer::new();
@@ -521,9 +521,11 @@ impl EditorApp {
 
     pub(super) fn undo(&mut self) {
         self.history.break_merge_run();
+        let from = self.history.revision();
         if let Err(error) = self.history.undo(&mut self.world) {
             self.report(error.to_string());
         }
+        self.replay_prefab_writes(from);
         // Undoing a Spawn despawns it, and a handle the world no longer holds
         // must not stay in the selection: the next verb would aim a command at
         // it, and the inspector would draw a panel about nothing.
@@ -532,9 +534,11 @@ impl EditorApp {
 
     pub(super) fn redo(&mut self) {
         self.history.break_merge_run();
+        let from = self.history.revision();
         if let Err(error) = self.history.redo(&mut self.world) {
             self.report(error.to_string());
         }
+        self.replay_prefab_writes(from);
         self.selection.retain_live(&self.world);
     }
 

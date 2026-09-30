@@ -35,4 +35,4 @@ pub use expand::{
     override_between,
 };
 pub use instance::{EntityOverride, NoPrefabs, PrefabInstance, PrefabLibrary, PrefabLink};
-pub use patch::{apply_merge_patch, merge_patch_between};
+pub use patch::{LIST_ITEMS, LIST_LENGTH, apply_merge_patch, merge_patch_between};

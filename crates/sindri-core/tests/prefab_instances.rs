@@ -425,9 +425,7 @@ fn an_entity_moved_out_from_under_a_removed_one_cannot_be_saved() {
     let mut world = World::from_scene_with(&document, &prefabs).unwrap().world;
     let root = world.entity_for_source_id(&id("coin-1")).unwrap();
     let sparkle = world.entity_for_source_id(&id("coin-1/sparkle")).unwrap();
-    let glow = world
-        .entity_for_source_id(&id("coin-1/glow"))
-        .unwrap();
+    let glow = world.entity_for_source_id(&id("coin-1/glow")).unwrap();
     world.set_parent(glow, Some(root)).unwrap();
     world.despawn_recursive(sparkle).unwrap();
     assert!(matches!(
