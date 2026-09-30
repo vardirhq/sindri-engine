@@ -439,12 +439,18 @@ impl<A: DesktopApp> ApplicationHandler<Startup> for Host<A> {
 
         if let State::Running(running) = &mut self.state {
             let text = match &event {
-                WindowEvent::KeyboardInput { event, .. } if event.state == winit::event::ElementState::Pressed => event.text.as_deref(),
+                WindowEvent::KeyboardInput { event, .. }
+                    if event.state == winit::event::ElementState::Pressed =>
+                {
+                    event.text.as_deref()
+                }
                 WindowEvent::Ime(winit::event::Ime::Commit(text)) => Some(text.as_str()),
                 _ => None,
             };
             if let Some(text) = text {
-                for c in text.chars().filter(|c| !c.is_control()) { running.app.input(InputEvent::TextInput(c)); }
+                for c in text.chars().filter(|c| !c.is_control()) {
+                    running.app.input(InputEvent::TextInput(c));
+                }
             }
         }
         match event {

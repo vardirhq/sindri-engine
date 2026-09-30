@@ -49,7 +49,15 @@ impl WorldHost<'_> {
                 _ => unreachable!("only boolean UI queries are handled here"),
             }));
         }
-        if matches!(call, UiCall::Checked | UiCall::SetChecked | UiCall::InputText | UiCall::SetInputText | UiCall::ScrollOffset | UiCall::SetScrollOffset) {
+        if matches!(
+            call,
+            UiCall::Checked
+                | UiCall::SetChecked
+                | UiCall::InputText
+                | UiCall::SetInputText
+                | UiCall::ScrollOffset
+                | UiCall::SetScrollOffset
+        ) {
             return self.widget_call(call, path, args, entity);
         }
         match call {
@@ -134,7 +142,19 @@ impl WorldHost<'_> {
                 Ok(Value::Unit)
             }
             // Answered above, before the entity was even resolved to a payload.
-            UiCall::Hovered | UiCall::Pressed | UiCall::Held | UiCall::SliderChanged | UiCall::Changed | UiCall::Submitted | UiCall::Focused | UiCall::Checked | UiCall::SetChecked | UiCall::InputText | UiCall::SetInputText | UiCall::ScrollOffset | UiCall::SetScrollOffset => {
+            UiCall::Hovered
+            | UiCall::Pressed
+            | UiCall::Held
+            | UiCall::SliderChanged
+            | UiCall::Changed
+            | UiCall::Submitted
+            | UiCall::Focused
+            | UiCall::Checked
+            | UiCall::SetChecked
+            | UiCall::InputText
+            | UiCall::SetInputText
+            | UiCall::ScrollOffset
+            | UiCall::SetScrollOffset => {
                 unreachable!("handled as a query")
             }
         }

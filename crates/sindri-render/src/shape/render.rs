@@ -56,7 +56,9 @@ pub struct ShapeRenderer {
 }
 
 impl ShapeRenderer {
-    pub fn set_clip(&mut self, clip: Option<[u32; 4]>) { self.clip = clip; }
+    pub fn set_clip(&mut self, clip: Option<[u32; 4]>) {
+        self.clip = clip;
+    }
 
     #[must_use]
     pub fn new(device: &wgpu::Device, target_format: wgpu::TextureFormat) -> Self {
@@ -187,7 +189,9 @@ impl ShapeRenderer {
             occlusion_query_set: None,
             multiview_mask: None,
         });
-        if let Some([x,y,w,h]) = self.clip { pass.set_scissor_rect(x,y,w,h); }
+        if let Some([x, y, w, h]) = self.clip {
+            pass.set_scissor_rect(x, y, w, h);
+        }
         pass.set_pipeline(&self.pipelines[blend as usize]);
         pass.set_bind_group(0, &batch.bind_group, &[]);
         pass.set_vertex_buffer(1, batch.instances.slice(..));

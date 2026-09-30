@@ -147,7 +147,8 @@ impl SceneExtractor {
         // Ordered so the frame's passes come out layer by layer, and within a
         // layer with paint before light: light added under paint would be
         // covered by it, which is the one order that makes a glow invisible.
-        let mut batches: BTreeMap<(i32, bool, Option<[u32; 4]>), Vec<ShapeInstance>> = BTreeMap::new();
+        let mut batches: BTreeMap<(i32, bool, Option<[u32; 4]>), Vec<ShapeInstance>> =
+            BTreeMap::new();
         let viewport = frame.viewport();
         for (entity, shape) in shapes {
             if !world.is_active(entity) {
@@ -181,19 +182,22 @@ impl SceneExtractor {
         }
 
         for ((layer, additive, clip), instances) in batches {
-            frame.push(FramePass::new(
-                RenderStage::Overlay,
-                RenderLayer(layer),
-                camera,
-                FrameCommand::Shapes {
-                    blend: if additive {
-                        ShapeBlend::Add
-                    } else {
-                        ShapeBlend::Over
+            frame.push(
+                FramePass::new(
+                    RenderStage::Overlay,
+                    RenderLayer(layer),
+                    camera,
+                    FrameCommand::Shapes {
+                        blend: if additive {
+                            ShapeBlend::Add
+                        } else {
+                            ShapeBlend::Over
+                        },
+                        instances,
                     },
-                    instances,
-                },
-            ).with_clip(clip));
+                )
+                .with_clip(clip),
+            );
         }
         Ok(())
     }

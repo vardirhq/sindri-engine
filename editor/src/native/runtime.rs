@@ -306,7 +306,10 @@ impl EditorApp {
         if let Err(error) = updated {
             self.console.error(format!("Screen UI: {error}"));
         }
-        self.screen_ui.read_controls(&mut self.world, &sindri_decay::ui_input(input_state, view_height));
+        self.screen_ui.read_controls(
+            &mut self.world,
+            &sindri_decay::ui_input(input_state, view_height),
+        );
         let (physics, events) = self.physics.for_scripts();
         let report = self.scripts.advance(
             &mut self.world,

@@ -28,12 +28,18 @@ pub struct UiTextInputComponent {
     #[serde(default)]
     pub disabled: bool,
 }
-const fn default_limit() -> usize { 128 }
+const fn default_limit() -> usize {
+    128
+}
 impl UiTextInputComponent {
     /// A single line, bounded by Unicode scalar count rather than byte count.
     #[must_use]
     pub fn coerce(&self, value: &str) -> String {
-        value.chars().filter(|c| !c.is_control()).take(self.max_length).collect()
+        value
+            .chars()
+            .filter(|c| !c.is_control())
+            .take(self.max_length)
+            .collect()
     }
 }
 impl SceneComponent for UiTextInputComponent {
@@ -56,7 +62,9 @@ pub struct UiScrollComponent {
 impl UiScrollComponent {
     #[must_use]
     pub fn coerce(&self, offset: f32, height: f32) -> f32 {
-        if !offset.is_finite() || !self.content_height.is_finite() { return 0.0; }
+        if !offset.is_finite() || !self.content_height.is_finite() {
+            return 0.0;
+        }
         offset.clamp(0.0, (self.content_height - height.abs()).max(0.0))
     }
 }

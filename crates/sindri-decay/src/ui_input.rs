@@ -14,6 +14,10 @@ pub fn ui_input(input: &InputState, viewport_height: f32) -> UiInput {
         backspace: input.key_pressed(Key::Backspace),
         escape: input.key_pressed(Key::Escape),
         blur: !input.is_focused(),
-        scroll: if viewport_height > 0.0 { input.scroll_delta()[1] * 2.0 / viewport_height } else { 0.0 },
+        scroll: if viewport_height > 0.0 {
+            input.scroll_delta()[1] * 2.0 / viewport_height
+        } else {
+            0.0
+        },
     }
 }

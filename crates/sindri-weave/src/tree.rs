@@ -79,7 +79,9 @@ fn component_states(data: &sindri_core::EntityData) -> States {
     if flag("disabled") {
         states = states.with(States::DISABLED);
     }
-    if flag("focused") { states = states.with(States::FOCUS); }
+    if flag("focused") {
+        states = states.with(States::FOCUS);
+    }
     if flag("checked") {
         states = states.with(States::CHECKED);
     }

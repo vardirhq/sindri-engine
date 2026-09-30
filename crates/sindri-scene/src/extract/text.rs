@@ -47,7 +47,9 @@ impl SceneExtractor {
 
         let viewport = frame.viewport();
         for (entity, text) in texts {
-            if !world.is_active(entity) { continue; }
+            if !world.is_active(entity) {
+                continue;
+            }
             // Taller than the whole screen is not a size anyone wants; it is a
             // pixel count typed where a share of the screen goes, which is the
             // mistake this unit invites and the one worth naming.
@@ -63,21 +65,27 @@ impl SceneExtractor {
             // rest.
             let position = placement.origin(hierarchy.placement_or(entity, text.anchor));
             layers
-                .entry((text.layer, hierarchy.clip_pixels(world, entity, [viewport.width, viewport.height])))
+                .entry((
+                    text.layer,
+                    hierarchy.clip_pixels(world, entity, [viewport.width, viewport.height]),
+                ))
                 .or_default()
                 .push(text.instance(position.to_array())?);
         }
 
         for ((layer, clip), instances) in layers {
-            frame.push(FramePass::new(
-                RenderStage::Overlay,
-                RenderLayer(layer),
-                FrameCamera {
-                    view_projection: overlay.view_projection,
-                    position: glam::Vec3::ZERO,
-                },
-                FrameCommand::Text { instances },
-            ).with_clip(clip));
+            frame.push(
+                FramePass::new(
+                    RenderStage::Overlay,
+                    RenderLayer(layer),
+                    FrameCamera {
+                        view_projection: overlay.view_projection,
+                        position: glam::Vec3::ZERO,
+                    },
+                    FrameCommand::Text { instances },
+                )
+                .with_clip(clip),
+            );
         }
         Ok(())
     }

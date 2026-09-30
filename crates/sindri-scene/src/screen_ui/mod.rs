@@ -4,9 +4,8 @@
 //! serialized. A host updates it once a frame before scripts run.
 
 mod box_model;
-mod controls;
 mod clip;
-mod widgets;
+mod controls;
 mod flex;
 mod grid;
 mod hierarchy;
@@ -15,6 +14,7 @@ mod layout_pass;
 mod measure;
 mod rect;
 mod slider;
+mod widgets;
 
 use std::collections::{BTreeMap, BTreeSet};
 
@@ -31,8 +31,8 @@ pub use hierarchy::{UiHierarchy, UiPlaced};
 pub use layout::{UiAlign, UiDirection, UiJustify, UiLayoutBox, UiLayoutChild, UiLayoutComponent};
 pub use measure::{UiTextSizes, measure_ui_text};
 pub use rect::{SafeArea, ScreenExtent, ScreenRect};
-pub use widgets::{UiInput, UiScrollComponent, UiTextInputComponent, UiToggleComponent};
 pub use slider::{UiSliderComponent, UiSliderOrientation};
+pub use widgets::{UiInput, UiScrollComponent, UiTextInputComponent, UiToggleComponent};
 
 #[derive(Clone, Debug, Deserialize, PartialEq)]
 pub struct UiButtonComponent {
@@ -259,11 +259,18 @@ impl ScreenUi {
                     .2 = true;
             }
         }
-        for name in [UiToggleComponent::TYPE_NAME, UiTextInputComponent::TYPE_NAME, UiScrollComponent::TYPE_NAME] {
+        for name in [
+            UiToggleComponent::TYPE_NAME,
+            UiTextInputComponent::TYPE_NAME,
+            UiScrollComponent::TYPE_NAME,
+        ] {
             for (entity, data) in world.entities() {
                 if let Some(payload) = data.components.get(name) {
                     if payload.get("disabled").and_then(serde_json::Value::as_bool) != Some(true) {
-                        found.entry(entity).or_insert((UiAnchor::Center, 0, false)).2 = true;
+                        found
+                            .entry(entity)
+                            .or_insert((UiAnchor::Center, 0, false))
+                            .2 = true;
                     }
                 }
             }
@@ -285,7 +292,10 @@ impl ScreenUi {
             .pointer_overlay
             .and_then(|point| self.topmost_at(point));
 
-        if self.read_scroll_drag(world, extent, presses) { self.pressing = None; return; }
+        if self.read_scroll_drag(world, extent, presses) {
+            self.pressing = None;
+            return;
+        }
 
         // A slider owns the exact press that began its drag. Follow that press
         // by identity rather than whichever press is currently primary, so a
@@ -407,7 +417,12 @@ impl ScreenUi {
     pub fn element_at(&self, point: [f32; 2]) -> Option<EntityId> {
         self.rects
             .iter()
-            .filter(|(_, element)| element.rect.contains(point) && element.clip.is_none_or(|clip| clip.size[0] > 0.0 && clip.size[1] > 0.0 && clip.contains(point)))
+            .filter(|(_, element)| {
+                element.rect.contains(point)
+                    && element.clip.is_none_or(|clip| {
+                        clip.size[0] > 0.0 && clip.size[1] > 0.0 && clip.contains(point)
+                    })
+            })
             .max_by_key(|(entity, element)| (element.layer, entity.index()))
             .map(|(entity, _)| *entity)
     }
@@ -415,7 +430,13 @@ impl ScreenUi {
     fn topmost_at(&self, point: [f32; 2]) -> Option<EntityId> {
         self.rects
             .iter()
-            .filter(|(_, element)| element.pressable && element.rect.contains(point) && element.clip.is_none_or(|clip| clip.size[0] > 0.0 && clip.size[1] > 0.0 && clip.contains(point)))
+            .filter(|(_, element)| {
+                element.pressable
+                    && element.rect.contains(point)
+                    && element.clip.is_none_or(|clip| {
+                        clip.size[0] > 0.0 && clip.size[1] > 0.0 && clip.contains(point)
+                    })
+            })
             .max_by_key(|(entity, element)| (element.layer, entity.index()))
             .map(|(entity, _)| *entity)
     }

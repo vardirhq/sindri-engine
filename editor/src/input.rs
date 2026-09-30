@@ -156,7 +156,9 @@ impl EditorInput {
         context.input(|input| {
             for event in &input.events {
                 if let egui::Event::Text(text) | egui::Event::Paste(text) = event {
-                    for c in text.chars() { self.state.apply(InputEvent::TextInput(c)); }
+                    for c in text.chars() {
+                        self.state.apply(InputEvent::TextInput(c));
+                    }
                 }
                 let egui::Event::Key {
                     key,
@@ -231,7 +233,10 @@ impl EditorInput {
 
         context.input(|input| {
             if input.pointer.latest_pos().is_some_and(|p| view.contains(p)) {
-                self.state.apply(InputEvent::Scrolled { x: input.raw_scroll_delta.x * scale, y: input.raw_scroll_delta.y * scale });
+                self.state.apply(InputEvent::Scrolled {
+                    x: input.raw_scroll_delta.x * scale,
+                    y: input.raw_scroll_delta.y * scale,
+                });
             }
             // A pointer over the inspector is not over the game. Reporting it
             // anyway would let a script aim at a panel, and clamping it to the

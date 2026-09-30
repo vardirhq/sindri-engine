@@ -324,7 +324,8 @@ impl Session {
                 .lay_out(world, &self.components, extent, &self.text_sizes)?;
         }
         self.screen_ui.read(world, extent, input.presses());
-        self.screen_ui.read_controls(world, &sindri_decay::ui_input(input, viewport.1));
+        self.screen_ui
+            .read_controls(world, &sindri_decay::ui_input(input, viewport.1));
         // Before the scripts, so a fleck thrown this frame is drawn where it
         // was thrown rather than one frame along.
         self.effects

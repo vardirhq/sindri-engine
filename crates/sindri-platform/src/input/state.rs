@@ -169,7 +169,9 @@ impl InputState {
         super::presses::apply(&mut self.presses, event, self.pointer);
         match event {
             InputEvent::TextInput(c) => {
-                if !c.is_control() && self.text_input.len() < 4096 { self.text_input.push(c); }
+                if !c.is_control() && self.text_input.len() < 4096 {
+                    self.text_input.push(c);
+                }
             }
             InputEvent::KeyPressed(key) => {
                 if self.keys_held.insert(key) {
@@ -419,7 +421,9 @@ impl InputState {
 
     /// Committed text accumulated until the host spends this frame.
     #[must_use]
-    pub fn text_input(&self) -> &str { &self.text_input }
+    pub fn text_input(&self) -> &str {
+        &self.text_input
+    }
 
     pub const fn scroll_delta(&self) -> [f32; 2] {
         self.scroll_delta

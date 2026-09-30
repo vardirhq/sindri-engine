@@ -193,11 +193,19 @@ fn resolve(
     }
     let mut parent = world.get(entity).and_then(|d| d.parent);
     for _ in 0..MAX_DEPTH {
-        let Some(e) = parent else { break; };
-        let Some(data) = world.get(e) else { break; };
+        let Some(e) = parent else {
+            break;
+        };
+        let Some(data) = world.get(e) else {
+            break;
+        };
         if let Some(payload) = data.components.get("sindri.ui.scroll") {
-            if let Ok(scroll) = serde_json::from_value::<super::UiScrollComponent>(payload.clone()) {
-                let height = laid.sizes.get(&e).map_or_else(|| data.transform_3d.unwrap_or_default().scale_2d()[1], |size| size[1]);
+            if let Ok(scroll) = serde_json::from_value::<super::UiScrollComponent>(payload.clone())
+            {
+                let height = laid.sizes.get(&e).map_or_else(
+                    || data.transform_3d.unwrap_or_default().scale_2d()[1],
+                    |size| size[1],
+                );
                 placed.offset.y += scroll.coerce(scroll.offset, height);
             }
         }
@@ -250,7 +258,15 @@ fn declared_anchors(
         anchors.entry(entity).or_insert(UiAnchor::Center);
     }
     for (entity, data) in world.entities() {
-        if ["sindri.ui.slider", "sindri.ui.toggle", "sindri.ui.text_input", "sindri.ui.scroll"].iter().any(|name| data.components.contains_key(*name)) {
+        if [
+            "sindri.ui.slider",
+            "sindri.ui.toggle",
+            "sindri.ui.text_input",
+            "sindri.ui.scroll",
+        ]
+        .iter()
+        .any(|name| data.components.contains_key(*name))
+        {
             anchors.entry(entity).or_insert(UiAnchor::Center);
         }
     }

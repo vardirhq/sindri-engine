@@ -140,7 +140,10 @@ pub struct FramePass {
 
 impl FramePass {
     #[must_use]
-    pub const fn with_clip(mut self, clip: Option<[u32; 4]>) -> Self { self.clip = clip; self }
+    pub const fn with_clip(mut self, clip: Option<[u32; 4]>) -> Self {
+        self.clip = clip;
+        self
+    }
 
     pub const fn new(
         stage: RenderStage,
@@ -175,7 +178,9 @@ impl ExtractedFrame {
         }
     }
 
-    pub const fn viewport(&self) -> Viewport { self.viewport }
+    pub const fn viewport(&self) -> Viewport {
+        self.viewport
+    }
 
     pub fn push(&mut self, mut pass: FramePass) {
         pass.insertion_order = self.passes.len();

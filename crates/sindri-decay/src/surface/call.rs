@@ -283,7 +283,13 @@ impl UiCall {
     pub(crate) const fn is_query(self) -> bool {
         matches!(
             self,
-            Self::Hovered | Self::Pressed | Self::Held | Self::SliderChanged | Self::Changed | Self::Submitted | Self::Focused
+            Self::Hovered
+                | Self::Pressed
+                | Self::Held
+                | Self::SliderChanged
+                | Self::Changed
+                | Self::Submitted
+                | Self::Focused
         )
     }
 }

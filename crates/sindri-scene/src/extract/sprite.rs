@@ -137,7 +137,12 @@ impl SceneExtractor {
             hierarchy,
         };
         self.push_world_sprites(world, drawing, &mut batches)?;
-        self.push_ui_images(world, drawing, &mut batches, [frame.viewport().width, frame.viewport().height])?;
+        self.push_ui_images(
+            world,
+            drawing,
+            &mut batches,
+            [frame.viewport().width, frame.viewport().height],
+        )?;
         self.push_tilemaps(world, cameras, textures, &mut batches)?;
         self.push_tile_volumes(world, cameras, textures, tile_sets, &mut batches)?;
         // Into the same ordered queue as everything else, so adjacent flecks
@@ -226,7 +231,10 @@ impl SceneExtractor {
             let clip = first.clip;
             let mut instances = vec![first.sprite];
             while draws.peek().is_some_and(|draw| {
-                draw.space == space && draw.order.layer() == layer && draw.texture == texture && draw.clip == clip
+                draw.space == space
+                    && draw.order.layer() == layer
+                    && draw.texture == texture
+                    && draw.clip == clip
             }) {
                 instances.push(
                     draws
@@ -254,19 +262,22 @@ impl SceneExtractor {
                     SpriteDepth::Write,
                 ),
             };
-            frame.push(FramePass::new(
-                stage,
-                RenderLayer(layer),
-                FrameCamera {
-                    view_projection: camera.view_projection,
-                    position: glam::Vec3::ZERO,
-                },
-                FrameCommand::SpriteBatch {
-                    texture,
-                    depth,
-                    instances,
-                },
-            ).with_clip(clip));
+            frame.push(
+                FramePass::new(
+                    stage,
+                    RenderLayer(layer),
+                    FrameCamera {
+                        view_projection: camera.view_projection,
+                        position: glam::Vec3::ZERO,
+                    },
+                    FrameCommand::SpriteBatch {
+                        texture,
+                        depth,
+                        instances,
+                    },
+                )
+                .with_clip(clip),
+            );
         }
         Ok(())
     }
