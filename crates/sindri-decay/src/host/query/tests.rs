@@ -223,8 +223,7 @@ fn malformed_tags_keep_the_existing_host_error_contract() {
         if name == "within_radius" {
             args.push(Value::Number(1.0));
         }
-        let error = query(&mut world, name, &args)
-            .expect_err("bad authored tags");
+        let error = query(&mut world, name, &args).expect_err("bad authored tags");
         assert!(error.contains("could not be read"), "{error}");
     }
 }
@@ -264,8 +263,7 @@ fn invalid_arguments_name_the_call_and_the_problem() {
             "f32 range",
         ),
     ] {
-        let error = query(&mut world, "nearest", &args)
-            .expect_err("bad arguments");
+        let error = query(&mut world, "nearest", &args).expect_err("bad arguments");
         assert!(
             error.contains("World.nearest") && error.contains(message),
             "{error}"
@@ -279,15 +277,13 @@ fn invalid_arguments_name_the_call_and_the_problem() {
     ] {
         let mut args = arguments();
         args.push(value);
-        let error = query(&mut world, "within_radius", &args)
-            .expect_err("bad radius");
+        let error = query(&mut world, "within_radius", &args).expect_err("bad radius");
         assert!(
             error.contains("World.within_radius") && error.contains("radius"),
             "{error}"
         );
     }
-    let error = query(&mut world, "within_radius", &arguments())
-        .expect_err("missing radius");
+    let error = query(&mut world, "within_radius", &arguments()).expect_err("missing radius");
     assert!(error.contains("exactly 3 arguments"), "{error}");
     let mut args = arguments();
     args.push(Value::Number(1.0));
@@ -310,8 +306,7 @@ fn result_limit_counts_only_results_and_nearest_has_no_list_limit() {
     assert!(matches!(nearest(&mut world), Value::Reference(_)));
     let mut args = arguments();
     args.push(Value::Number(2.0));
-    let error = query(&mut world, "within_radius", &args)
-        .expect_err("over limit");
+    let error = query(&mut world, "within_radius", &args).expect_err("over limit");
     assert!(
         error.contains("more than 8192") && error.contains("World.within_radius"),
         "{error}"
