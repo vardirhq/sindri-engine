@@ -373,8 +373,14 @@ fn spatial_demo_typography_preserves_gameplay_transforms() {
     .expect("demo stylesheet parses");
     let mut presenter = super::Presenter::new();
     for viewport in [
-        Viewport { width: 960.0, height: 540.0 },
-        Viewport { width: 390.0, height: 844.0 },
+        Viewport {
+            width: 960.0,
+            height: 540.0,
+        },
+        Viewport {
+            width: 390.0,
+            height: 844.0,
+        },
     ] {
         presenter
             .settle(&mut world, std::slice::from_ref(&sheet), viewport)
@@ -412,7 +418,10 @@ fn unrelated_styles_preserve_mirrored_scale() {
     let styled = PresentationWorld::resolve(
         &world,
         &parse("text { font-size: 20px; }").unwrap(),
-        Viewport { width: 960.0, height: 540.0 },
+        Viewport {
+            width: 960.0,
+            height: 540.0,
+        },
     )
     .unwrap();
     assert_eq!(styled.world().get(entity).unwrap().transform_3d, before);
