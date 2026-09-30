@@ -4,8 +4,8 @@
 //! past the file-size cap, and what is checked here is a policy -- what a frame
 //! reports as held, pressed and released -- that reads better as a list.
 
-use super::MouseButton;
 use super::state::{InputEvent, InputState};
+use super::{Key, MouseButton};
 use std::time::Duration;
 
 fn down(state: &mut InputState, id: u64, x: f32, y: f32) {
@@ -234,4 +234,30 @@ fn a_host_reporting_more_fingers_than_anyone_has_is_bounded() {
         down(&mut state, id, 0.0, 0.0);
     }
     assert_eq!(state.touch_count(), super::state::TOUCH_LIMIT);
+}
+
+#[test]
+fn typed_text_is_committed_characters_for_one_frame() {
+    let mut state = InputState::default();
+    for c in ['h', 'i', '\u{8}', '\n', 'é'] {
+        state.apply(InputEvent::TextInput(c));
+    }
+    assert_eq!(state.text_input(), "hié", "control characters are not text");
+    state.begin_frame(FRAME);
+    assert_eq!(state.text_input(), "", "text is an edge, read once");
+}
+
+#[test]
+fn held_back_keys_are_neither_held_nor_pressed_but_still_end() {
+    let mut state = InputState::default();
+    state.apply(InputEvent::KeyPressed(Key::W));
+    state.apply(InputEvent::TextInput('w'));
+    let quiet = state.without_keys();
+    assert!(!quiet.key_down(Key::W) && !quiet.key_pressed(Key::W));
+    assert_eq!(quiet.text_input(), "");
+    assert!(state.key_pressed(Key::W), "the original is untouched");
+
+    state.begin_frame(FRAME);
+    state.apply(InputEvent::KeyReleased(Key::W));
+    assert!(state.without_keys().key_released(Key::W));
 }

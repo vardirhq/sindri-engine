@@ -99,7 +99,13 @@ impl SceneExtractor {
                 entity.index(),
             )?;
             batches.push(SpriteDraw {
-                clip: hierarchy.clip_pixels(world, entity, viewport),
+                clip: hierarchy.clip_pixels_through(
+                    world,
+                    entity,
+                    crate::ScreenExtent::new(extent.half_extent.x, extent.half_extent.y),
+                    camera.view_projection,
+                    viewport,
+                ),
                 space: DrawSpace::Screen,
                 texture: textures.resolve(reference.texture()),
                 order,

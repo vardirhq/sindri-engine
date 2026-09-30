@@ -1,4 +1,9 @@
 //! Typed reads and checked writes of authored widget values.
+//!
+//! A setter writes the value inside what the widget can hold -- a field's
+//! `max_length`, the distance a region can scroll -- and does not report it
+//! through `Ui.changed`. That answers what the person did this step, and a
+//! script that heard its own writes back would answer itself for ever.
 use super::{WorldHost, convert::number};
 use crate::surface::UiCall;
 use decay_ir::Path;

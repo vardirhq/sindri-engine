@@ -68,7 +68,7 @@ fn element_names(component_types: impl Iterator<Item = String>) -> Vec<String> {
 }
 
 /// The states an element's own data puts it in: a component that says it is
-/// disabled, or checked.
+/// disabled, or checked. Focus is the host's, laid on by `with_focus`.
 fn component_states(data: &sindri_core::EntityData) -> States {
     let flag = |field: &str| {
         data.components
@@ -78,9 +78,6 @@ fn component_states(data: &sindri_core::EntityData) -> States {
     let mut states = States::NONE;
     if flag("disabled") {
         states = states.with(States::DISABLED);
-    }
-    if flag("focused") {
-        states = states.with(States::FOCUS);
     }
     if flag("checked") {
         states = states.with(States::CHECKED);

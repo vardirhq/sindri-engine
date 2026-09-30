@@ -27,7 +27,7 @@ use computed::{ComputedStyle, Length};
 use tree::elements;
 
 pub use inspect::{InspectedRule, Inspection, inspect};
-pub use presenter::{Presenter, pointer_states};
+pub use presenter::{Presenter, pointer_states, with_focus};
 pub use transition::Transitions;
 pub use undo::Undo;
 

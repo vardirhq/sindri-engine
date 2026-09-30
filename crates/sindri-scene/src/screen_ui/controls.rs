@@ -29,15 +29,21 @@ impl ScreenUi {
         if input.blur || input.escape {
             self.focused = None;
         }
+        // A press anywhere moves focus to what it landed on, and a press on
+        // nothing that takes focus -- a panel, the game behind -- lets go.
         if self.pointer_began {
-            self.focused = self.hovered;
+            self.focused = self.hovered.filter(|e| self.focusable(world, *e));
         }
         if input.next || input.previous {
             self.move_focus(world, input.previous);
         }
-        let activated = self
-            .clicked
-            .or_else(|| input.activate.then_some(self.focused).flatten());
+        // Space and Enter press a focused button or toggle. A focused text
+        // field keeps them: Space is a letter there and Enter submits, and a
+        // field that also reported a press would be answered twice.
+        let keyed = self
+            .focused
+            .filter(|e| input.activate && !has(world, *e, UiTextInputComponent::TYPE_NAME));
+        let activated = self.clicked.or(keyed);
         if let Some(entity) = activated.filter(|e| world.is_active(*e) && !disabled(world, *e)) {
             self.clicked = Some(entity);
             if let Some(payload) = world
@@ -55,43 +61,46 @@ impl ScreenUi {
         if let Some(entity) = self.focused {
             self.edit_text(world, entity, input);
         }
-        if input.scroll.is_finite() && input.scroll.abs() > f32::EPSILON {
-            if let Some(point) = self.pointer_overlay {
-                let region = self
-                    .rects
-                    .iter()
-                    .filter(|(e, element)| {
-                        element.rect.contains(point)
-                            && world.get(**e).is_some_and(|d| {
-                                d.components.contains_key(UiScrollComponent::TYPE_NAME)
-                            })
-                    })
-                    .max_by_key(|(e, element)| (element.layer, e.index()))
-                    .map(|(e, _)| *e);
-                if let Some(entity) = region {
-                    self.scroll_by(world, entity, -input.scroll);
-                }
-            }
-        }
-        for (entity, data) in world
-            .entities()
-            .map(|(e, d)| {
-                (
-                    e,
-                    d.components.contains_key(UiTextInputComponent::TYPE_NAME),
-                )
-            })
-            .collect::<Vec<_>>()
+        if input.scroll.is_finite()
+            && input.scroll.abs() > f32::EPSILON
+            && let Some(point) = self.pointer_overlay
+            && let Some(entity) = self.scroll_region_at(world, point)
         {
-            if data {
-                if let Some(payload) = world
-                    .get_mut(entity)
-                    .and_then(|d| d.components.get_mut(UiTextInputComponent::TYPE_NAME))
-                {
-                    payload["focused"] = serde_json::json!(self.focused == Some(entity));
-                }
-            }
+            self.scroll_by(world, entity, -input.scroll);
         }
+    }
+
+    /// Whether the focused element is a text input, which is where typed
+    /// keys go rather than to gameplay.
+    ///
+    /// A host asks this after [`Self::read_controls`] and holds keys back
+    /// from its scripts while it is true: typing a name that has a W in it
+    /// must not also walk the ship forward.
+    #[must_use]
+    pub fn editing_text(&self, world: &World) -> bool {
+        self.focused.is_some_and(|entity| {
+            world.get(entity).is_some_and(|data| {
+                data.components
+                    .contains_key(UiTextInputComponent::TYPE_NAME)
+            })
+        })
+    }
+
+    /// The frontmost scroll region under `point` that is not switched off:
+    /// where the wheel goes.
+    fn scroll_region_at(&self, world: &World, point: [f32; 2]) -> Option<EntityId> {
+        self.rects
+            .iter()
+            .filter(|(entity, element)| {
+                element.rect.contains(point)
+                    && element.clip.is_none_or(|clip| clip.contains(point))
+                    && !disabled(world, **entity)
+                    && world.get(**entity).is_some_and(|data| {
+                        data.components.contains_key(UiScrollComponent::TYPE_NAME)
+                    })
+            })
+            .max_by_key(|(entity, element)| (element.layer, entity.index()))
+            .map(|(entity, _)| *entity)
     }
 
     pub(super) fn read_scroll_drag(
@@ -144,13 +153,26 @@ impl ScreenUi {
         false
     }
 
+    /// Whether `entity` can hold focus: something pressable and seen, live
+    /// and switched on. A scroll region is moved through, not activated, and
+    /// a row scrolled out of its region's view is not somewhere the keyboard
+    /// should land.
+    fn focusable(&self, world: &World, entity: EntityId) -> bool {
+        self.rects.get(&entity).is_some_and(|element| {
+            element.pressable
+                && element.clip.is_none_or(|clip| {
+                    clip.size[0] > 0.0 && clip.size[1] > 0.0 && overlaps(clip, element.rect)
+                })
+        }) && world.is_active(entity)
+            && !disabled(world, entity)
+            && !has(world, entity, UiScrollComponent::TYPE_NAME)
+    }
+
     fn move_focus(&mut self, world: &World, backwards: bool) {
         let mut entities: Vec<_> = self
             .rects
             .iter()
-            .filter(|(e, element)| {
-                element.pressable && world.is_active(**e) && !disabled(world, **e)
-            })
+            .filter(|(e, _)| self.focusable(world, **e))
             .collect();
         entities.sort_by(|(a, ar), (b, br)| {
             br.rect.center[1]
@@ -228,10 +250,21 @@ impl ScreenUi {
     }
 }
 
+fn has(world: &World, entity: EntityId, component: &str) -> bool {
+    world
+        .get(entity)
+        .is_some_and(|data| data.components.contains_key(component))
+}
+
 fn disabled(world: &World, entity: EntityId) -> bool {
     world.get(entity).is_some_and(|d| {
         d.components
             .values()
             .any(|p| p.get("disabled").and_then(serde_json::Value::as_bool) == Some(true))
     })
+}
+
+/// Whether two rectangles share any area.
+fn overlaps(a: super::ScreenRect, b: super::ScreenRect) -> bool {
+    (0..2).all(|axis| (a.center[axis] - b.center[axis]).abs() * 2.0 < a.size[axis] + b.size[axis])
 }

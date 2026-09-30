@@ -199,15 +199,18 @@ fn resolve(
         let Some(data) = world.get(e) else {
             break;
         };
-        if let Some(payload) = data.components.get("sindri.ui.scroll") {
-            if let Ok(scroll) = serde_json::from_value::<super::UiScrollComponent>(payload.clone())
-            {
-                let height = laid.sizes.get(&e).map_or_else(
-                    || data.transform_3d.unwrap_or_default().scale_2d()[1],
-                    |size| size[1],
-                );
-                placed.offset.y += scroll.coerce(scroll.offset, height);
-            }
+        // Everything inside a scroll region moves with it: up by as far as
+        // the list has been scrolled, clamped to what it can scroll.
+        if let Some(payload) = data
+            .components
+            .get(<super::UiScrollComponent as sindri_core::SceneComponent>::TYPE_NAME)
+            && let Ok(scroll) = serde_json::from_value::<super::UiScrollComponent>(payload.clone())
+        {
+            let height = laid.sizes.get(&e).map_or_else(
+                || data.transform_3d.unwrap_or_default().scale_2d()[1],
+                |size| size[1],
+            );
+            placed.offset.y += scroll.coerce(scroll.offset, height);
         }
         parent = data.parent;
     }

@@ -344,8 +344,17 @@ impl Session {
         // neither. Zero when nothing is being dragged, so a camera script can
         // add it every frame without asking.
         let pan = Self::camera_pan(world, &self.components, &self.gestures, viewport);
+        // While a text field has the keyboard, the keys are the field's: a
+        // name typed with a W in it does not also walk anything forward.
+        let held_back;
+        let script_input = if self.screen_ui.editing_text(world) {
+            held_back = input.without_keys();
+            &held_back
+        } else {
+            input
+        };
         let (physics, events) = self.physics.for_scripts();
-        let mut frame = ScriptFrame::new(&self.sources, input, delta_seconds)
+        let mut frame = ScriptFrame::new(&self.sources, script_input, delta_seconds)
             .with_prefabs(&self.prefabs)
             .with_profiles(&self.profiles)
             .with_screen_ui(&self.screen_ui)

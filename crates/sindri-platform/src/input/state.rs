@@ -311,6 +311,21 @@ impl InputState {
         &self.presses
     }
 
+    /// This frame's input with the keyboard held back: nothing held, nothing
+    /// pressed. Releases stay, so a key held before the keyboard was taken
+    /// still ends.
+    ///
+    /// What gameplay is handed while a text field has the keyboard, so typing
+    /// a name with a W in it does not also walk the ship forward.
+    #[must_use]
+    pub fn without_keys(&self) -> Self {
+        let mut quiet = self.clone();
+        quiet.keys_held.clear();
+        quiet.keys_pressed.clear();
+        quiet.text_input.clear();
+        quiet
+    }
+
     pub fn key_down(&self, key: Key) -> bool {
         self.keys_held.contains(&key)
     }

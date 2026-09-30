@@ -23,10 +23,13 @@ impl EditorApp {
         // The Game view of a running game is live: the pointer's states and
         // transitions. Anything else is the authored presentation.
         let presented = if !editing && !self.authoring_enabled() {
-            let states = sindri_weave::pointer_states(
-                &self.world,
-                self.screen_ui.hovered(),
-                self.screen_ui.active(),
+            let states = sindri_weave::with_focus(
+                sindri_weave::pointer_states(
+                    &self.world,
+                    self.screen_ui.hovered(),
+                    self.screen_ui.active(),
+                ),
+                self.screen_ui.focused(),
             );
             self.styles.present_live(&self.world, viewport, &states)
         } else {

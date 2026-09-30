@@ -162,7 +162,11 @@ impl ScreenUi {
 
     #[must_use]
     pub const fn captures_pointer(&self) -> bool {
-        self.hovered.is_some() || self.slider_drag.is_some()
+        // A list being dragged keeps the pointer even once the finger has left
+        // it, as a slider does: the drag is the list's until it is let go.
+        self.hovered.is_some()
+            || self.slider_drag.is_some()
+            || matches!(self.scroll_drag, Some((_, _, _, _, true)))
     }
 
     #[must_use]
@@ -265,13 +269,13 @@ impl ScreenUi {
             UiScrollComponent::TYPE_NAME,
         ] {
             for (entity, data) in world.entities() {
-                if let Some(payload) = data.components.get(name) {
-                    if payload.get("disabled").and_then(serde_json::Value::as_bool) != Some(true) {
-                        found
-                            .entry(entity)
-                            .or_insert((UiAnchor::Center, 0, false))
-                            .2 = true;
-                    }
+                if let Some(payload) = data.components.get(name)
+                    && payload.get("disabled").and_then(serde_json::Value::as_bool) != Some(true)
+                {
+                    found
+                        .entry(entity)
+                        .or_insert((UiAnchor::Center, 0, false))
+                        .2 = true;
                 }
             }
         }

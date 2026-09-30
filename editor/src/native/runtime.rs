@@ -310,12 +310,17 @@ impl EditorApp {
             &mut self.world,
             &sindri_decay::ui_input(input_state, view_height),
         );
+        // A focused text field keeps the keys, as it does in the build.
+        let held_back = self
+            .screen_ui
+            .editing_text(&self.world)
+            .then(|| self.input.state().without_keys());
         let (physics, events) = self.physics.for_scripts();
         let report = self.scripts.advance(
             &mut self.world,
             components,
             crate::scripts::EditorFrame {
-                input: self.input.state(),
+                input: held_back.as_ref().unwrap_or(self.input.state()),
                 physics: Some(sindri_decay::Physics2d {
                     world: physics,
                     events,
