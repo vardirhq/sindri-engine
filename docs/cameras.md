@@ -42,31 +42,37 @@ Every host that runs gameplay advances it after the scripts, so the camera
 follows where that step left its target: the editor's Play, the browser host
 that runs exported games, the camera example and the platformer's test harness.
 
-### Camera demo acceptance surface
+### Camera Lab acceptance surface
 
-The first dedicated camera demo now lives in `examples/camera`. It is a shared
-native/browser proof that authors a real `sindri.camera.behavior` component and
-runs its gameplay through Decay. The demo script moves the stable-ID follow
-target from typed input and calls `Camera.add_trauma` when Space is pressed;
-the Rust host only advances scripts and the engine-owned
-`update_camera_behaviors` system. The world grid and moving target make
-follow, smoothing, confinement, and shake observable without replacing the
-engine behavior with demo-only camera math.
+The dedicated demo lives in `examples/camera`, now an authored project with
+a `sindri.toml`, packaged font and responsive Weave presentation, exported at
+`/examples/camera/` and listed in the Pages directory. Its native entry point
+uses the same scene and Decay scripts.
 
-That proves the runtime path, but it does not complete the intended acceptance
-surface. The demo still needs a visible camera-relative dead-zone rectangle,
-world-edge/boundary markers, independent follow/confinement/shake toggles, and
-an on-screen view of the important authored values. Those additions should keep
-using the same scene component and update path rather than becoming a second
-implementation.
+The cyan camera-relative rectangle visualizes the dead zone; amber boundary
+lines and corner markers visualize camera-center confinement. The outer gray
+frame marks the target's movement area. Follow, confinement, shake, smoothing
+and dead zone have independent on-screen and keyboard controls. A touch movement
+pad, impact button, automatic tour and reset make the behavior explorable
+without a keyboard. The interface shows settings and sampled coordinates.
 
-The remaining integration proof is Orbital Last Stand. Its current script-owned
-camera shake should migrate only when the engine behavior has the control surface
-the game needs. Decay now exposes the first camera-behavior gameplay operation,
-`Camera.add_trauma`, but follow targets, behavior toggles, and other camera-mode
-changes do not yet have a dedicated scripting surface. The editor still relies
-on generic component authoring rather than dedicated camera-behavior controls
-or gizmos.
+Decay changes the real behavior through the existing runtime Camera API
+([runtime control contract](camera-runtime-scripting.md)); it does not implement
+a second follow or shake algorithm. Rust advances scripts and then
+`update_camera_behaviors`. Turning follow back on restores the demo's selected
+dead zone, smoothing and speed cap. Reset restores modes and target position,
+then lets normal follow settle the view rather than overwriting transient shake.
+
+Native regressions exercise follow, confinement, independent modes, restoring
+settings, trauma decay, phone touch input and the tour. Browser smoke exercises
+the visible controls and captures desktop and phone output, with both Pages
+project-subpath and custom-domain exports.
+
+Runtime mode changes are already available through `Camera.follow`,
+`clear_follow`, `follow_offset`, `dead_zone`, `smoothing`, `max_speed`,
+`bounds`, `clear_bounds` and `shake`. Orbital uses `Camera.impact` for
+combat shake. Dedicated editor behavior controls and gizmos remain follow-up
+work.
 
 ## Screen-space UI and overlays
 

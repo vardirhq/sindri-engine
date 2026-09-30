@@ -81,6 +81,20 @@
   },
   {
     "category": "demos",
+    "title": "Camera Lab",
+    "path": "examples/camera/",
+    "source": "examples/camera",
+    "description": "Explore camera follow, dead zones, smoothing, confinement and impact shake.",
+    "tags": [
+      "camera",
+      "follow",
+      "shake",
+      "decay",
+      "responsive"
+    ]
+  },
+  {
+    "category": "demos",
     "title": "Weave UI",
     "path": "examples/weave-poc/",
     "source": "games/weave-poc",

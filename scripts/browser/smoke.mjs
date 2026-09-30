@@ -89,7 +89,7 @@ const browser = await chromium.launch({
     '--no-sandbox',
   ],
 });
-const page = await browser.newPage({ viewport: VIEWPORT });
+const page = await browser.newPage({ viewport: VIEWPORT, hasTouch: VIEWPORT.width < 600 });
 
 // The interface existing is not the same as WebGPU working. Chrome on Android
 // exposes `navigator.gpu` more widely than its drivers can serve, and a page
@@ -134,6 +134,8 @@ await page.addInitScript(() => {
 
 const problems = [];
 const tweenActions = new Set();
+let cameraChanges = 0;
+let cameraImpacts = 0;
 const fetchedAssets = new Set();
 // A shader that fails to compile is reported by the GPU implementation as a
 // console *warning*, not an error, and the page carries on and presents empty
@@ -142,6 +144,8 @@ const fetchedAssets = new Set();
 const GPU_REJECTION = /error while parsing wgsl|is invalid|must only be called/i;
 page.on('console', (message) => {
   const text = message.text();
+  if (text.includes('Camera demo modes changed')) cameraChanges += 1;
+  if (text.includes('Camera demo impact')) cameraImpacts += 1;
   const tweenAction = text.match(/Tween demo action ([1-5])/);
   if (tweenAction) tweenActions.add(Number(tweenAction[1]));
   if (message.type() === 'error') problems.push(text);
@@ -252,6 +256,38 @@ if (process.env.SINDRI_TWEEN_DEMO === '1') {
   for (const action of [1, 2, 3, 4, 5]) {
     if (!tweenActions.has(action)) problems.push('tween demo missed control ' + action);
   }
+}
+
+if (process.env.SINDRI_CAMERA_DEMO === '1') {
+  const span = Math.min(1, VIEWPORT.width / VIEWPORT.height);
+  const click = async (x, y) => {
+    const px = VIEWPORT.width / 2 + x * span * VIEWPORT.height / 2;
+    const py = (1 - y) * VIEWPORT.height / 2;
+    if (VIEWPORT.width < 600) await page.touchscreen.tap(px, py);
+    else await page.mouse.click(px, py);
+    await page.waitForTimeout(300);
+  };
+  // The automatic tour makes movement accessible without a keyboard.
+  await click(-0.31, 0.48);
+  const first = await page.locator('canvas').screenshot();
+  await page.waitForTimeout(1000);
+  if (first.equals(await page.locator('canvas').screenshot())) {
+    problems.push('camera tour did not move the rendered scene');
+  }
+  for (const [x, y] of [[-0.6, -0.49], [0, -0.49], [0.6, -0.49],
+    [-0.6, -0.64], [0, -0.64], [0.6, -0.64]]) {
+    await click(x, y);
+  }
+  if (cameraChanges < 7) problems.push('camera demo missed a screen control');
+  await click(0.31, 0.48);
+  if (cameraImpacts !== 1) problems.push('camera impact button did not reach Decay');
+  await page.keyboard.press('KeyK');
+  await page.waitForTimeout(300);
+  await page.keyboard.press('Space');
+  await page.waitForTimeout(300);
+  if (cameraImpacts !== 1) problems.push('camera impact fired with shake disabled');
+  await page.keyboard.press('KeyR');
+  await page.waitForTimeout(2000);
 }
 
 await page.mouse.click(480, 270);
@@ -402,4 +438,3 @@ if (
   process.exit(1);
 }
 console.log('the engine ran in a browser');
-

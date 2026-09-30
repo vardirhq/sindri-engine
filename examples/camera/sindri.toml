@@ -1,0 +1,6 @@
+format_version = 1
+[project]
+name = "Camera Lab"
+main_scene = "assets/demo.scene"
+[assets]
+include = ["fonts/Fonts-OFL.txt", "ui/camera.weave"]

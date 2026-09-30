@@ -9,7 +9,7 @@ use sindri_render::{
     SpriteBatchRenderer, TextRenderer, TextureRegistry, TexturedCubeRenderer, Viewport,
     encode_prepared_frame,
 };
-use sindri_scene::{SceneExtractError, SceneExtractor, TextureBindings, update_camera_behaviors};
+use sindri_scene::{SceneExtractError, SceneExtractor, ScreenExtent, ScreenUi, TextureBindings, update_camera_behaviors};
 use thiserror::Error;
 
 const SCENE_JSON: &str = include_str!("../assets/demo.scene");
@@ -19,6 +19,7 @@ struct CameraGame {
     scripts: Scripts,
     sources: ScriptSources,
     components: ComponentSchemaRegistry,
+    screen: ScreenUi,
 }
 
 impl CameraGame {
@@ -29,6 +30,7 @@ impl CameraGame {
             scripts: Scripts::new(),
             sources,
             components,
+            screen: ScreenUi::new(),
         }
     }
 }
@@ -38,10 +40,15 @@ impl Game for CameraGame {
 
     fn fixed_update(&mut self, context: &mut FrameContext<'_>) -> Result<(), Self::Error> {
         let dt = context.time.delta.as_secs_f32();
+        // Pixel dimensions fit f32 exactly for every supported viewport.
+        #[allow(clippy::cast_precision_loss)]
+        let extent = ScreenExtent::new(context.viewport[0] as f32, context.viewport[1] as f32);
+        self.screen.update(context.world, &self.components, extent, context.input.presses())
+            .map_err(|error| DemoError::Host(error.to_string()))?;
         let report = self.scripts.advance(
             context.world,
             &self.components,
-            ScriptFrame::new(&self.sources, context.input, dt),
+            ScriptFrame::new(&self.sources, context.input, dt).with_screen_ui(&self.screen),
         );
         if !report.failures.is_empty() {
             return Err(DemoError::Script(format!("{:?}", report.failures)));
@@ -80,16 +87,23 @@ impl DesktopApp for CameraApp {
         let mut engine = EngineHost::new(CameraGame::new(components), FixedStepConfig::default())
             .map_err(|error| DemoError::Host(error.to_string()))?;
         *engine.world_mut() = World::from_scene(&document)?.world;
+        engine.set_viewport(context.width(), context.height());
         engine
             .start()
             .map_err(|error| DemoError::Host(error.to_string()))?;
+        let mut text = TextRenderer::new();
+        text.bind_font(
+            "fonts/ChakraPetch-Regular.ttf",
+            "Chakra Petch",
+            include_bytes!("../assets/fonts/ChakraPetch-Regular.ttf").to_vec(),
+        );
         Ok(Self {
             engine,
             extractor,
             depth: DepthTarget::new(context.device(), context.width(), context.height()),
             cube: TexturedCubeRenderer::new(context.device(), context.format()),
             sprites: SpriteBatchRenderer::new(context.device(), context.format()),
-            text: TextRenderer::new(),
+            text,
             glyphs: GlyphRenderer::new(context.device(), context.format()),
             shapes: ShapeRenderer::new(context.device(), context.format()),
             textures: TextureRegistry::new(context.device(), context.queue()),
@@ -113,6 +127,7 @@ impl DesktopApp for CameraApp {
     fn resize(&mut self, context: &AppContext<'_>) -> Result<(), Self::Error> {
         self.depth
             .resize(context.device(), context.width(), context.height());
+        self.engine.set_viewport(context.width(), context.height());
         Ok(())
     }
 
@@ -186,71 +201,11 @@ pub fn run() {
     env_logger::init();
 
     if let Err(error) =
-        sindri_desktop::run::<CameraApp>(WindowConfig::new("Sindri - camera behavior demo"))
+        sindri_desktop::run::<CameraApp>(WindowConfig::new("Sindri - Camera Lab"))
     {
         log::error!("{error}");
     }
 }
 
 #[cfg(test)]
-mod tests {
-    use super::*;
-    use sindri_core::SceneComponent;
-    use sindri_scene::CameraBehaviorComponent;
-
-    #[test]
-    fn camera_follows_the_authored_target_on_the_fixed_step_path() {
-        let document = SceneDocument::from_json(SCENE_JSON).unwrap();
-        let extractor = demo_extractor().unwrap();
-        let mut engine = EngineHost::new(
-            CameraGame::new(extractor.components().clone()),
-            FixedStepConfig::default(),
-        )
-        .unwrap();
-        *engine.world_mut() = World::from_scene(&document).unwrap().world;
-        engine.start().unwrap();
-        engine.queue_input(InputEvent::KeyPressed(Key::ArrowRight));
-        for _ in 0..60 {
-            engine.advance(Duration::from_secs_f32(1.0 / 60.0)).unwrap();
-        }
-        let camera = engine
-            .world()
-            .entity_for_source_id(&sindri_core::SceneEntityId::new("camera").unwrap())
-            .unwrap();
-        let x = engine
-            .world()
-            .get(camera)
-            .unwrap()
-            .transform_3d
-            .unwrap()
-            .position[0];
-        assert!(x > 0.5, "camera should have followed right, got {x}");
-    }
-
-    #[test]
-    fn space_adds_trauma_through_decay_and_the_behavior_consumes_it() {
-        let document = SceneDocument::from_json(SCENE_JSON).unwrap();
-        let extractor = demo_extractor().unwrap();
-        let mut engine = EngineHost::new(
-            CameraGame::new(extractor.components().clone()),
-            FixedStepConfig::default(),
-        )
-        .unwrap();
-        *engine.world_mut() = World::from_scene(&document).unwrap().world;
-        engine.start().unwrap();
-        engine.queue_input(InputEvent::KeyPressed(Key::Space));
-        engine.advance(Duration::from_secs_f32(1.0 / 60.0)).unwrap();
-        let camera = engine
-            .world()
-            .entity_for_source_id(&sindri_core::SceneEntityId::new("camera").unwrap())
-            .unwrap();
-        let trauma = engine.world().get(camera).unwrap().components
-            [CameraBehaviorComponent::TYPE_NAME]["shake"]["trauma"]
-            .as_f64()
-            .unwrap();
-        assert!(
-            trauma > 0.0 && trauma < 1.0,
-            "Decay should add trauma before camera decay, got {trauma}"
-        );
-    }
-}
+mod tests;

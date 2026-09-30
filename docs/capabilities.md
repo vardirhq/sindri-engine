@@ -1897,6 +1897,18 @@ other until one scores.
 - Played with real pads by nobody yet: CI has none, and neither did the
   session that ported it.
 
+## Camera Lab
+
+`examples/camera` is an authored, exported feature project with Decay movement
+and runtime camera controls. Camera-relative dead-zone and world-space
+camera-center bounds guides, mode toggles, sampled coordinates, an automatic
+tour, impact button and touch movement pad make follow, confinement and shake
+observable. The native harness uses the same scene/scripts, binds the packaged
+font and supplies UI hit-testing; Pages uses the existing shared browser host.
+Runtime regressions exercise modes and phone touch; browser smoke covers desktop
+and phone controls and project/custom-domain routes. Dedicated editor behavior
+controls and gizmos remain absent. See `docs/cameras.md`.
+
 ## The platformer
 
 `games/platformer` is the first genre showcase: a side-view level painted as a

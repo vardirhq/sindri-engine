@@ -580,6 +580,12 @@ jobs:
           cargo run --quiet --package sindri-export --bin sindri-export -- \
             examples/tween target/dist/tween-root --base /examples/tween/
           cp -R game/pkg/. target/dist/tween-root/pkg/
+          cargo run --quiet --package sindri-export --bin sindri-export -- \
+            examples/camera target/dist/camera --base /sindri-engine/examples/camera/
+          cp -R game/pkg/. target/dist/camera/pkg/
+          cargo run --quiet --package sindri-export --bin sindri-export -- \
+            examples/camera target/dist/camera-root --base /examples/camera/
+          cp -R game/pkg/. target/dist/camera-root/pkg/
       - name: Smoke the rendered games
         id: browser_smoke
         run: |
@@ -602,6 +608,15 @@ jobs:
             SINDRI_BASE_PATH=/examples/tween/ \
             SINDRI_VIEWPORT_WIDTH=390 SINDRI_VIEWPORT_HEIGHT=844 \
             node scripts/browser/smoke.mjs target/dist/tween-root target/render-artifacts/browser-tween-phone.png
+          SINDRI_EXPECT_ASSETS=1 SINDRI_CAMERA_DEMO=1 \
+            SINDRI_EXPECT_ASSET_KINDS=scene,script,font \
+            SINDRI_BASE_PATH=/sindri-engine/examples/camera/ \
+            node scripts/browser/smoke.mjs target/dist/camera target/render-artifacts/browser-camera.png
+          SINDRI_EXPECT_ASSETS=1 SINDRI_CAMERA_DEMO=1 \
+            SINDRI_EXPECT_ASSET_KINDS=scene,script,font \
+            SINDRI_BASE_PATH=/examples/camera/ \
+            SINDRI_VIEWPORT_WIDTH=390 SINDRI_VIEWPORT_HEIGHT=844 \
+            node scripts/browser/smoke.mjs target/dist/camera-root target/render-artifacts/browser-camera-phone.png
       - name: Smoke the startup failure paths
         id: browser_failures
         run: |
@@ -623,6 +638,8 @@ jobs:
             target/render-artifacts/browser-causeway.png
             target/render-artifacts/browser-weave-phone.png
             target/render-artifacts/browser-orbital-baked-phone.png
+            target/render-artifacts/browser-camera.png
+            target/render-artifacts/browser-camera-phone.png
             target/render-artifacts/browser-tween.png
             target/render-artifacts/browser-tween-phone.png
             target/render-artifacts/browser-no-canvas.png
@@ -695,4 +712,3 @@ jobs:
           printf '%s\n' "${failures[@]}" | jq -s '.' | \
             cargo run --quiet --package sindri-diagnostics --bin sindri-diagnostics -- correlate \
             >>"$GITHUB_STEP_SUMMARY"
-

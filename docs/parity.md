@@ -201,7 +201,7 @@ The ordered work required to close these gaps is tracked in
 | **Nine-slice sprites** | ❌ | ❌ | — | — | **Absent** | Every UI panel that resizes needs it |
 | **Sprite masking / stencil** | ❌ | ❌ | ❌ | ❌ | **Absent** | — |
 | Sorting and draw order | ✅ | ✅ | 🟡 | ✅ | **Par** | Layers plus the ground anchor |
-| **Camera follow / confine / shake** | ✅ | 🟡 | 🟡 | ✅ | **Behind** | `sindri.camera.behavior` provides stable-target follow with offset/dead zone/smoothing/max speed, XY confinement, and deterministic trauma shake, and every gameplay host (editor Play, the browser host, the camera example) advances it after the scripts. The platformer follows its hero inside the level's bounds and a test holds it. `Camera.add_trauma` is the first typed behavior control. Broader Decay camera-mode controls and dedicated authoring UX/gizmos remain. |
+| **Camera follow / confine / shake** | ✅ | 🟡 | 🟡 | ✅ | **Behind** | `sindri.camera.behavior` provides stable-target follow with offset/dead zone/smoothing/max speed, XY confinement, and deterministic trauma shake, and every gameplay host (editor Play, the browser host, the camera example) advances it after the scripts. The platformer follows its hero inside the level's bounds and a test holds it. Decay exposes runtime follow/offset/dead-zone/smoothing/speed/bounds/shake controls and trauma/impact. Camera Lab exercises mode toggles, guides, tour and phone touch through the real behavior and is exported to Pages; Orbital uses impact shake. Dedicated authoring UX/gizmos remain. |
 
 ## 3D rendering
 
@@ -734,5 +734,3 @@ checklist nobody reads:
    candidate up requires the baseline to have grown it, not for us to have
    liked the idea. A candidate earns its place by naming what a game in this
    repository does by hand — and when no game wants it, the row says so.
-
-

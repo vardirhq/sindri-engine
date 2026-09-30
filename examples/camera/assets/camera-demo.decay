@@ -1,13 +1,107 @@
-// Gameplay for the camera acceptance demo. Rust supplies engine capabilities;
-// Decay decides what the player does and when an impact shakes the camera.
+// Decay selects modes; the engine performs camera motion and shake.
 script CameraDemo {
     @export let speed: f32 = 5.0;
+    var follow: bool = true;
+    var bounds: bool = true;
+    var shake: bool = true;
+    var smooth: bool = true;
+    var zone: bool = true;
+    var tour: bool = false;
+    var leg: f32 = 0.0;
 
+    fn start() { configure(); }
+    fn configure() {
+        if this.follow {
+            Camera.follow(this.entity);
+            Camera.dead_zone(0.0, 0.0);
+            if this.zone { Camera.dead_zone(2.5, 1.5); }
+            Camera.smoothing(1000.0);
+            if this.smooth { Camera.smoothing(5.0); }
+            Camera.max_speed(8.0);
+        } else { Camera.clear_follow(); }
+        if this.bounds { Camera.bounds(-8.0, -4.0, 8.0, 4.0); }
+        else { Camera.clear_bounds(); }
+        Camera.shake(0.0, 30.0, 1.6);
+        if this.shake { Camera.shake(0.3, 30.0, 1.6); }
+        World.set_active(World.find("dead-zone"), this.follow && this.zone);
+        World.set_active(World.find("camera-bounds"), this.bounds);
+        Ui.set_text(World.find("follow-label"), "FOLLOW OFF");
+        if this.follow { Ui.set_text(World.find("follow-label"), "FOLLOW ON"); }
+        Ui.set_text(World.find("bounds-label"), "BOUNDS OFF");
+        if this.bounds { Ui.set_text(World.find("bounds-label"), "BOUNDS ON"); }
+        Ui.set_text(World.find("shake-label"), "SHAKE OFF");
+        if this.shake { Ui.set_text(World.find("shake-label"), "SHAKE ON"); }
+        Ui.set_text(World.find("smooth-label"), "SNAPPY");
+        if this.smooth { Ui.set_text(World.find("smooth-label"), "SMOOTH"); }
+        Ui.set_text(World.find("zone-label"), "ZONE OFF");
+        if this.zone { Ui.set_text(World.find("zone-label"), "ZONE ON"); }
+        var smoothing = 1000.0;
+        if this.smooth { smoothing = 5.0; }
+        var zone = "0 x 0";
+        if this.zone { zone = "2.5 x 1.5"; }
+        Ui.set_text(World.find("values"), "SMOOTH " + smoothing + " / ZONE " + zone + " / CAP 8");
+        Ui.set_text(World.find("tour-label"), "START TOUR");
+        if this.tour { Ui.set_text(World.find("tour-label"), "STOP TOUR"); }
+    }
     fn update(dt: f32) {
-        this.transform.position.x += Input.axis("ArrowLeft", "ArrowRight") * speed * dt;
-        this.transform.position.y += Input.axis("ArrowDown", "ArrowUp") * speed * dt;
-        if Input.just_pressed("Space") {
-            Camera.add_trauma(1.0);
+        controls();
+        var x = Input.axis("ArrowLeft", "ArrowRight");
+        var y = Input.axis("ArrowDown", "ArrowUp");
+        if Ui.is_held(World.find("left")) { x -= 1.0; }
+        if Ui.is_held(World.find("right")) { x += 1.0; }
+        if Ui.is_held(World.find("up")) { y += 1.0; }
+        if Ui.is_held(World.find("down")) { y -= 1.0; }
+        if x != 0.0 || y != 0.0 {
+            if this.tour { this.tour = false; configure(); }
+        } else if this.tour {
+            if this.leg == 0.0 {
+                x = 1.0;
+                if this.transform.position.x >= 12.0 { this.leg = 1.0; }
+            } else if this.leg == 1.0 {
+                y = 1.0;
+                if this.transform.position.y >= 6.0 { this.leg = 2.0; }
+            } else if this.leg == 2.0 {
+                x = -1.0;
+                if this.transform.position.x <= -12.0 { this.leg = 3.0; }
+            } else {
+                y = -1.0;
+                if this.transform.position.y <= -6.0 { this.leg = 0.0; }
+            }
         }
+        this.transform.position.x = clamp(this.transform.position.x + x * speed * dt, -13.0, 13.0);
+        this.transform.position.y = clamp(this.transform.position.y + y * speed * dt, -7.0, 7.0);
+        let p = this.transform.world_position;
+        let camera = World.find("Gameplay Camera");
+        let c = camera.transform.world_position;
+        Ui.set_text(World.find("position-label"), "TARGET " + p.x.fixed(1) + ", " + p.y.fixed(1) + "   CAMERA " + c.x.fixed(1) + ", " + c.y.fixed(1));
+    }
+    fn controls() {
+        var changed = false;
+        if Input.just_pressed("F") || Ui.is_pressed(World.find("follow")) { this.follow = !this.follow; changed = true; }
+        if Input.just_pressed("B") || Ui.is_pressed(World.find("bounds")) { this.bounds = !this.bounds; changed = true; }
+        if Input.just_pressed("K") || Ui.is_pressed(World.find("shake")) { this.shake = !this.shake; changed = true; }
+        if Input.just_pressed("S") || Ui.is_pressed(World.find("smooth")) { this.smooth = !this.smooth; changed = true; }
+        if Input.just_pressed("Z") || Ui.is_pressed(World.find("zone")) { this.zone = !this.zone; changed = true; }
+        if Input.just_pressed("T") || Ui.is_pressed(World.find("tour")) { this.tour = !this.tour; this.leg = 0.0; changed = true; }
+        if Input.just_pressed("R") || Ui.is_pressed(World.find("reset")) {
+            this.follow = true; this.bounds = true; this.shake = true;
+            this.smooth = true; this.zone = true; this.tour = false; this.leg = 0.0;
+            this.transform.position = Vec3(0.0, 0.0, 0.0);
+            changed = true;
+        }
+        if changed { configure(); print("Camera demo modes changed"); }
+        if Input.just_pressed("Space") || Ui.is_pressed(World.find("impact")) {
+            if this.shake { Camera.add_trauma(1.0); print("Camera demo impact"); }
+        }
+    }
+}
+script CameraLayout {
+    @export let x: f32 = 0.0;
+    @export let width: f32 = 1.0;
+    @export let button: bool = false;
+    fn update(dt: f32) {
+        let span = min(1.0, Viewport.aspect);
+        this.transform.position.x = this.x * span;
+        if this.button { this.transform.scale.x = this.width * span; }
     }
 }
