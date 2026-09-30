@@ -28,7 +28,7 @@ fn tagged(world: &mut World, tag: &str, position: [f32; 3]) -> EntityId {
     })
 }
 
-fn query(world: &mut World, name: &str, args: &[Value]) -> Result<Value, RuntimeError> {
+fn query(world: &mut World, name: &str, args: &[Value]) -> Result<Value, String> {
     let input = InputState::default();
     let prefabs = PrefabSources::new();
     let profiles = ProfileSources::new();
@@ -68,6 +68,10 @@ fn query(world: &mut World, name: &str, args: &[Value]) -> Result<Value, Runtime
     );
     host.call(None, &Path(vec!["World".to_owned(), name.to_owned()]), args)
         .map(|answer| answer.expect("registered World call"))
+        .map_err(|error| match error {
+            RuntimeError::Host(message) => message,
+            other => panic!("unexpected runtime error: {other:?}"),
+        })
 }
 
 fn arguments() -> Vec<Value> {
@@ -220,8 +224,7 @@ fn malformed_tags_keep_the_existing_host_error_contract() {
             args.push(Value::Number(1.0));
         }
         let error = query(&mut world, name, &args)
-            .expect_err("bad authored tags")
-            .to_string();
+            .expect_err("bad authored tags");
         assert!(error.contains("could not be read"), "{error}");
     }
 }
@@ -262,8 +265,7 @@ fn invalid_arguments_name_the_call_and_the_problem() {
         ),
     ] {
         let error = query(&mut world, "nearest", &args)
-            .expect_err("bad arguments")
-            .to_string();
+            .expect_err("bad arguments");
         assert!(
             error.contains("World.nearest") && error.contains(message),
             "{error}"
@@ -278,23 +280,20 @@ fn invalid_arguments_name_the_call_and_the_problem() {
         let mut args = arguments();
         args.push(value);
         let error = query(&mut world, "within_radius", &args)
-            .expect_err("bad radius")
-            .to_string();
+            .expect_err("bad radius");
         assert!(
             error.contains("World.within_radius") && error.contains("radius"),
             "{error}"
         );
     }
     let error = query(&mut world, "within_radius", &arguments())
-        .expect_err("missing radius")
-        .to_string();
+        .expect_err("missing radius");
     assert!(error.contains("exactly 3 arguments"), "{error}");
     let mut args = arguments();
     args.push(Value::Number(1.0));
     assert!(
         query(&mut world, "nearest", &args)
             .expect_err("extra argument")
-            .to_string()
             .contains("exactly 2 arguments")
     );
 }
@@ -312,8 +311,7 @@ fn result_limit_counts_only_results_and_nearest_has_no_list_limit() {
     let mut args = arguments();
     args.push(Value::Number(2.0));
     let error = query(&mut world, "within_radius", &args)
-        .expect_err("over limit")
-        .to_string();
+        .expect_err("over limit");
     assert!(
         error.contains("more than 8192") && error.contains("World.within_radius"),
         "{error}"

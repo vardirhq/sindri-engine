@@ -81,7 +81,7 @@ fn a_script_uses_nearest_and_walks_a_radius_snapshot() {
 #[test]
 fn spatial_signatures_are_checked_before_runtime() {
     for call in [
-        r#"World.nearest(1.0, Vec3(0.0, 0.0, 0.0))"#,
+        r"World.nearest(1.0, Vec3(0.0, 0.0, 0.0))",
         r#"World.nearest("enemy", Vec2(0.0, 0.0))"#,
         r#"World.within_radius("enemy", Vec3(0.0, 0.0, 0.0), true)"#,
         r#"World.within_radius("enemy", Vec3(0.0, 0.0, 0.0))"#,
