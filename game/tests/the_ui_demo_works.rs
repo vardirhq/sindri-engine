@@ -322,6 +322,8 @@ fn the_archive_scrolls_exactly_as_far_as_its_rows_go_at_every_size() {
 fn a_finger_drags_the_archive_without_picking_the_row_it_started_on() {
     let mut demo = Demo::open(390.0, 844.0);
     let [x, y] = demo.pixel(demo.rect("row-2").center);
+    let archive = demo.id("archive");
+    let mut reported = false;
     demo.input.apply(InputEvent::TouchStarted { id: 1, x, y });
     demo.step();
     for travel in 1..=12 {
@@ -330,10 +332,14 @@ fn a_finger_drags_the_archive_without_picking_the_row_it_started_on() {
         demo.input
             .apply(InputEvent::TouchMoved { id: 1, x, y: moved });
         demo.step();
+        reported |= demo.session.screen_ui().changed(archive);
     }
     demo.input.apply(InputEvent::TouchEnded { id: 1 });
     demo.play(2);
     assert!(demo.offset() > 0.2, "dragged to {}", demo.offset());
+    // Scripts are told, as they are for the wheel: `Ui.changed` is true on
+    // the steps the finger moved the list.
+    assert!(reported, "a drag never reported the archive as changed");
     assert_eq!(demo.text("status"), "READY / Select a control");
 
     // A drag the window loses is let go of, not finished as a click.

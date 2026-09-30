@@ -63,6 +63,9 @@ pub struct ScreenUi {
     submitted: Option<EntityId>,
     pointer_began: bool,
     scroll_drag: Option<(EntityId, PressId, f32, f32, bool)>,
+    /// Whether this step's pointer pass has run, so `read_controls` after it
+    /// keeps what the pointer changed instead of starting the step again.
+    presses_read: bool,
 }
 
 #[derive(Clone, Copy, Debug)]
@@ -301,6 +304,10 @@ impl ScreenUi {
     }
 
     fn read_presses(&mut self, world: &mut World, extent: ScreenExtent, presses: &Presses) {
+        // The pointer pass is the first thing in a step, so the step's
+        // changes start here: a drag's change must survive to the scripts.
+        self.changed.clear();
+        self.presses_read = true;
         self.pointer_began = presses.began().next().is_some();
         self.clicked = None;
         self.slider_changed = None;

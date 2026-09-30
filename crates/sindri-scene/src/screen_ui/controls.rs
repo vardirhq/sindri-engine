@@ -18,7 +18,11 @@ impl ScreenUi {
 
     /// Call after reading pointer presses and before gameplay scripts.
     pub fn read_controls(&mut self, world: &mut World, input: &UiInput) {
-        self.changed.clear();
+        // Changes a pointer made this step (a scroll drag) were counted by
+        // the pointer pass, which already started the step's set.
+        if !std::mem::take(&mut self.presses_read) {
+            self.changed.clear();
+        }
         self.submitted = None;
         if self
             .focused
