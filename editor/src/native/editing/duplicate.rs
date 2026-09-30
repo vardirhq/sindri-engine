@@ -12,7 +12,11 @@
 //! will hand out. Cloning a world is what pressing Play already costs, and a
 //! duplicate is rarer than a frame.
 
-use sindri_core::{CommandBuffer, EntityData, EntityId, SceneEntityId, World, WorldCommand};
+use std::collections::HashMap;
+
+use sindri_core::{
+    CommandBuffer, EntityData, EntityId, SceneEntityId, World, WorldCommand, instance_path,
+};
 
 /// Adds the commands that copy `entity` and its descendants beside it, and
 /// answers with the handle the copy's root will land on.
@@ -33,24 +37,61 @@ pub(crate) fn duplicate_into(
     buffer: &mut CommandBuffer,
 ) -> Option<EntityId> {
     let parent = world.get(entity)?.parent;
-    Some(copy_into(rehearsal, world, entity, parent, buffer))
+    let mut copied_roots = HashMap::new();
+    Some(copy_into(
+        rehearsal,
+        world,
+        entity,
+        parent,
+        buffer,
+        &mut copied_roots,
+    ))
 }
 
 /// Copies one entity and then everything under it, depth first.
 ///
 /// Parents first, so a child's copy can name the handle its parent's copy was
 /// given rather than the one the original had.
+///
+/// A prefab instance copied whole is a new instance of the same prefab: its
+/// root gets a new ID and every entity under it the path under that ID the
+/// instance is saved by. Part of an instance copied without its root is no
+/// longer part of any instance, and is copied as plain entities.
+/// `copied_roots` is the ID each instance root copied so far was given.
 fn copy_into(
     rehearsal: &mut World,
     world: &World,
     entity: EntityId,
     parent: Option<EntityId>,
     buffer: &mut CommandBuffer,
+    copied_roots: &mut HashMap<EntityId, SceneEntityId>,
 ) -> EntityId {
     let source = world.get(entity).expect("the caller checked this handle");
+    let within = source
+        .prefab
+        .as_ref()
+        .filter(|link| !link.root)
+        .and_then(|link| {
+            let root_id = copied_roots.get(&world.instance_root(entity)?)?;
+            Some(instance_path(root_id, &link.path))
+        });
+    let is_member = within.is_some();
+    let source_id = within.unwrap_or_else(|| unused_id(rehearsal, source.source_id.as_ref()));
+    let link = source.prefab.clone().filter(|link| link.root || is_member);
+    if link.as_ref().is_some_and(|link| link.root) {
+        copied_roots.insert(entity, source_id.clone());
+    }
     let data = EntityData {
-        source_id: Some(unused_id(rehearsal, source.source_id.as_ref())),
-        name: source.name.as_ref().map(|name| format!("{name} copy")),
+        source_id: Some(source_id),
+        // A member keeps its name, which is its prefab's; renaming it would
+        // make every copy of an instance override the name it was given.
+        name: source.name.as_ref().map(|name| {
+            if is_member {
+                name.clone()
+            } else {
+                format!("{name} copy")
+            }
+        }),
         parent,
         // The copy's own children are spawned by the recursion below; taking
         // the original's list would name entities that are not under it.
@@ -62,7 +103,7 @@ fn copy_into(
         // subtree someone deliberately quietened.
         disabled: source.disabled,
         editor: source.editor.clone(),
-        prefab: source.prefab.clone(),
+        prefab: link,
     };
     let handle = rehearsal.spawn(data.clone());
     // The rehearsal spawns, so the real command has a handle to name. Its own
@@ -75,7 +116,7 @@ fn copy_into(
         data: Box::new(data),
     });
     for child in &source.children {
-        copy_into(rehearsal, world, *child, Some(handle), buffer);
+        copy_into(rehearsal, world, *child, Some(handle), buffer, copied_roots);
     }
     handle
 }

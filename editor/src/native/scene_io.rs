@@ -96,13 +96,29 @@ pub fn scene_extractor() -> SceneExtractor {
 /// never heard of, and the format exists to keep them through a load, an edit,
 /// and a save. Rejecting them is how the editor came to refuse — and from the
 /// command line, crash on — any project that defined a component of its own.
-pub fn load_world(extractor: &SceneExtractor, document: &SceneDocument) -> Result<World, String> {
-    extractor
-        .validate(document, UnknownComponentPolicy::Preserve)
+///
+/// Each instance is made from its prefab, and the components checked are what
+/// the instances expanded to: a prefab's components are as much the scene's as
+/// the ones written in it.
+pub fn load_world(extractor: &SceneExtractor, file: &SceneFile) -> Result<World, String> {
+    let expanded = file
+        .document()
+        .expanded(file.prefabs())
         .map_err(|error| error.to_string())?;
-    Ok(World::from_scene(document)
+    extractor
+        .validate(&expanded, UnknownComponentPolicy::Preserve)
+        .map_err(|error| error.to_string())?;
+    Ok(World::from_scene_with(file.document(), file.prefabs())
         .map_err(|error| error.to_string())?
         .world)
+}
+
+/// [`load_world`] for a document with no file behind it, and so no prefabs.
+pub fn load_document(
+    extractor: &SceneExtractor,
+    document: &SceneDocument,
+) -> Result<World, String> {
+    load_world(extractor, &SceneFile::detached(document.clone()))
 }
 
 impl EditorApp {
@@ -174,7 +190,7 @@ impl EditorApp {
                 return;
             }
         };
-        match load_world(&self.scene, opened.document()) {
+        match load_world(&self.scene, &opened) {
             Ok(world) => {
                 self.file = opened;
                 // A scene carries its project with it: one opened from inside a
@@ -304,6 +320,11 @@ impl EditorApp {
         // is polled, so there is nothing left for a frame to discover. Asking
         // anyway walked the whole world every frame: 2.5 ms idle and 6 ms while
         // Orbital Baked played, in a release build.
+        // A prefab the watcher read again may have changed under instances
+        // placed in this scene, which follow it before anything is redrawn.
+        if self.textured_revision.prefabs != self.scripts.prefab_revision() {
+            self.follow_prefab_changes();
+        }
         let now = super::TexturedAt {
             history: self.history.revision(),
             prefabs: self.scripts.prefab_revision(),

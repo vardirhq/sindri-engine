@@ -15,11 +15,15 @@ use std::{
 use sindri_core::{SceneDocument, SceneJsonError, SceneMigrator, World, WorldError};
 use thiserror::Error;
 
+use crate::prefab::ScenePrefabs;
+
 /// A scene document together with the file it belongs to.
 #[derive(Clone, Debug)]
 pub struct SceneFile {
     path: Option<PathBuf>,
     document: SceneDocument,
+    /// The prefabs its instances are made from, and written back against.
+    prefabs: ScenePrefabs,
 }
 
 impl SceneFile {
@@ -32,9 +36,15 @@ impl SceneFile {
         })?;
         // Migrated rather than parsed strictly: an editor that cannot open a
         // scene written by an older Sindri is an editor that loses work.
+        let document = SceneDocument::from_json_migrated(&text, &SceneMigrator::builtin())?;
+        let mut prefabs = ScenePrefabs::beside(Some(path));
+        prefabs
+            .read_placed_by(&document.entities)
+            .map_err(SceneFileError::Prefab)?;
         Ok(Self {
             path: Some(path.to_path_buf()),
-            document: SceneDocument::from_json_migrated(&text, &SceneMigrator::builtin())?,
+            document,
+            prefabs,
         })
     }
 
@@ -43,11 +53,22 @@ impl SceneFile {
     /// Used when the editor is started somewhere the default scene is not, so
     /// it still opens and says why rather than refusing to start. Saving is
     /// unavailable until a path exists, which the interface reflects.
-    pub const fn detached(document: SceneDocument) -> Self {
+    pub fn detached(document: SceneDocument) -> Self {
         Self {
             path: None,
             document,
+            prefabs: ScenePrefabs::default(),
         }
+    }
+
+    /// The prefabs this scene's instances are made from.
+    pub const fn prefabs(&self) -> &ScenePrefabs {
+        &self.prefabs
+    }
+
+    /// The same, to read another prefab into or bring one up to date.
+    pub const fn prefabs_mut(&mut self) -> &mut ScenePrefabs {
+        &mut self.prefabs
     }
 
     pub fn path(&self) -> Option<&Path> {
@@ -91,9 +112,10 @@ impl SceneFile {
     /// detached scene — one the editor opened with no file behind it — becomes
     /// a real file this way, which is the only way it ever could.
     pub fn save_as(&mut self, path: &Path, world: &World) -> Result<(), SceneFileError> {
-        let document = world.to_scene()?;
+        let document = world.to_scene_with(&self.prefabs)?;
         write_scene(path, &document)?;
         self.path = Some(path.to_path_buf());
+        self.prefabs.move_beside(path);
         self.document = document;
         Ok(())
     }
@@ -115,6 +137,7 @@ impl SceneFile {
     /// leave two of them on disk.
     pub fn adopt(&mut self, path: &Path) {
         self.path = Some(path.to_path_buf());
+        self.prefabs.move_beside(path);
     }
 
     /// Re-reads the file, discarding whatever the editor had in memory.
@@ -180,6 +203,8 @@ pub enum SceneFileError {
     },
     #[error("this scene has no file to save to")]
     NoPath,
+    #[error("{0}")]
+    Prefab(String),
     #[error(transparent)]
     Scene(#[from] SceneJsonError),
     #[error(transparent)]

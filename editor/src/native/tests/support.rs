@@ -8,7 +8,7 @@ use sindri_core::{SceneDocument, SceneEntity, SceneEntityId, World};
 use sindri_cube::DemoScene;
 use sindri_scene::SceneExtractor;
 
-use super::super::scene_io::{load_world, scene_extractor};
+use super::super::scene_io::{load_document, scene_extractor};
 
 /// The registry the editor actually runs with, rather than a second one.
 ///
@@ -23,7 +23,7 @@ pub(super) fn extractor() -> SceneExtractor {
 /// The scene the editor opens with no argument, loaded the way the editor
 /// loads it.
 pub(super) fn demo_world() -> World {
-    load_world(&extractor(), &DemoScene::authored_document().unwrap())
+    load_document(&extractor(), &DemoScene::authored_document().unwrap())
         .expect("the demo scene loads")
 }
 

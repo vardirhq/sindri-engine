@@ -19,6 +19,7 @@ use crate::space::space_of;
 
 pub(super) mod choosing;
 pub(super) mod duplicate;
+mod structure;
 
 use duplicate::duplicate_into;
 
@@ -240,7 +241,7 @@ impl EditorApp {
     /// would fail the whole transaction.
     pub(super) fn delete_entities(&mut self, entities: &[EntityId]) {
         let roots = selection::topmost(&self.world, entities);
-        if roots.is_empty() {
+        if roots.is_empty() || self.refuses_restructuring(&roots, "delete") {
             return;
         }
         let mut buffer = CommandBuffer::new();
@@ -459,6 +460,9 @@ impl EditorApp {
     /// teaches people it is unreliable.
     fn reparent_all(&mut self, entities: &[EntityId], parent: Option<EntityId>) {
         let moving = selection::topmost(&self.world, entities);
+        if self.refuses_restructuring(&moving, "move") {
+            return;
+        }
         let mut buffer = CommandBuffer::new();
         let mut moved = 0_usize;
         for entity in moving {
@@ -539,7 +543,7 @@ impl EditorApp {
     /// Every runtime handle is replaced, so recorded history is discarded
     /// rather than left pointing at entities that no longer exist.
     pub(super) fn reset_to_authored(&mut self) {
-        match load_world(&self.scene, self.file.document()) {
+        match load_world(&self.scene, &self.file) {
             Ok(world) => {
                 self.world = world;
                 self.history.clear();

@@ -58,7 +58,7 @@ fn a_tile_volume_keeps_the_sheet_that_cuts_its_blocks() {
     )
     .expect("the scene parses");
     let extractor = sindri_scene::SceneExtractor::new().expect("the schemas register");
-    let world = crate::native::load_world(&extractor, &document).expect("the world builds");
+    let world = crate::native::load_document(&extractor, &document).expect("the world builds");
 
     let mut tile_sets = TileSetBindings::new();
     tile_sets

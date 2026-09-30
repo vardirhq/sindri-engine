@@ -8,6 +8,7 @@ use eframe::egui;
 
 use super::EditorApp;
 use crate::ui::icons;
+use crate::ui::widgets::button::{self, Intent};
 use crate::ui::widgets::{panel, property, section};
 
 impl EditorApp {
@@ -32,6 +33,16 @@ impl EditorApp {
             },
         );
 
+        let mut add = false;
+        ui.horizontal(|ui| {
+            add = button::labelled(
+                ui,
+                "Add to scene",
+                Intent::Primary,
+                "Place an instance in the middle of the Scene view",
+            )
+            .clicked();
+        });
         property::toggle(ui, "Place", &mut brush.placing, "On a cell", "Off");
         if brush.placing {
             panel::note(
@@ -41,6 +52,9 @@ impl EditorApp {
             );
         } else {
             panel::note(ui, "Turn this on to build with it in the Scene view.");
+        }
+        if add {
+            self.place_prefab_in_view();
         }
     }
 }

@@ -42,27 +42,7 @@ impl World {
         let mut entities = Vec::with_capacity(self.len);
         let mut instances: BTreeMap<EntityId, Vec<(SceneEntityId, SceneEntity)>> = BTreeMap::new();
         for (entity_id, data) in self.entities() {
-            let source_id = data
-                .source_id
-                .clone()
-                .ok_or(WorldError::UnstableEntity(entity_id))?;
-            let parent = match data.parent {
-                Some(parent) => Some(
-                    self.get(parent)
-                        .and_then(|parent_data| parent_data.source_id.clone())
-                        .ok_or(WorldError::UnstableEntity(parent))?,
-                ),
-                None => None,
-            };
-            let written = SceneEntity {
-                name: data.name.clone(),
-                parent,
-                transform_3d: data.transform_3d,
-                components: data.components.clone(),
-                disabled: data.disabled,
-                editor: data.editor.clone(),
-                ..SceneEntity::new(source_id)
-            };
+            let written = self.written_entity(entity_id)?;
             match (self.instance_root(entity_id), &data.prefab) {
                 (Some(root), Some(link)) => instances
                     .entry(root)
@@ -83,6 +63,59 @@ impl World {
         document.canonicalize();
         document.validate()?;
         Ok(document)
+    }
+
+    /// One instance, as the scene entity a save would write it as.
+    ///
+    /// What the editor compares an instance's prefab against, reverts to, and
+    /// carries across when the prefab changes underneath it.
+    ///
+    /// # Errors
+    /// As [`World::to_scene_with`], for this instance alone.
+    pub fn instance_entity(
+        &self,
+        root: EntityId,
+        prefabs: &dyn PrefabLibrary,
+    ) -> Result<SceneEntity, WorldError> {
+        let members = self
+            .instance_members(root)
+            .into_iter()
+            .map(|member| {
+                let path = self
+                    .get(member)
+                    .and_then(|data| data.prefab.as_ref())
+                    .map(|link| link.path.clone())
+                    .ok_or(WorldError::InvalidEntity(member))?;
+                Ok((path, self.written_entity(member)?))
+            })
+            .collect::<Result<Vec<_>, WorldError>>()?;
+        self.collapse_instance(root, members, prefabs)
+    }
+
+    /// One entity as a scene writes it, before instances are collapsed.
+    fn written_entity(&self, entity: EntityId) -> Result<SceneEntity, WorldError> {
+        let data = self.get(entity).ok_or(WorldError::InvalidEntity(entity))?;
+        let source_id = data
+            .source_id
+            .clone()
+            .ok_or(WorldError::UnstableEntity(entity))?;
+        let parent = match data.parent {
+            Some(parent) => Some(
+                self.get(parent)
+                    .and_then(|parent_data| parent_data.source_id.clone())
+                    .ok_or(WorldError::UnstableEntity(parent))?,
+            ),
+            None => None,
+        };
+        Ok(SceneEntity {
+            name: data.name.clone(),
+            parent,
+            transform_3d: data.transform_3d,
+            components: data.components.clone(),
+            disabled: data.disabled,
+            editor: data.editor.clone(),
+            ..SceneEntity::new(source_id)
+        })
     }
 
     /// The root of the instance `entity` belongs to, itself included.

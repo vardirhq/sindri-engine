@@ -7,7 +7,7 @@ use sindri_cube::DemoScene;
 
 use super::super::editing::find_by_source_id;
 use super::super::inspector_panel::draft::{EntityDraft, draft_commands};
-use super::super::scene_io::{load_world, open_named_scene};
+use super::super::scene_io::{load_document, open_named_scene};
 use super::super::scene_new::blank_scene;
 use super::super::unsaved::Discarding;
 use super::support::*;
@@ -15,7 +15,7 @@ use super::support::*;
 #[test]
 fn the_embedded_scene_loads_into_a_runtime_world() {
     let document = DemoScene::authored_document().unwrap();
-    let world = load_world(&extractor(), &document).expect("the demo scene loads");
+    let world = load_document(&extractor(), &document).expect("the demo scene loads");
     assert_eq!(
         world.len(),
         document.entities.len(),
@@ -52,7 +52,7 @@ fn edits_survive_a_save_and_reload_of_the_real_scene() {
         .unwrap();
 
     let saved = world.to_scene().unwrap().to_canonical_json().unwrap();
-    let reopened = load_world(&extractor(), &SceneDocument::from_json(&saved).unwrap()).unwrap();
+    let reopened = load_document(&extractor(), &SceneDocument::from_json(&saved).unwrap()).unwrap();
     let reloaded = find_by_source_id(&reopened, "checker-cube").unwrap();
     assert_eq!(
         reopened.get(reloaded).unwrap().transform_3d,
@@ -159,7 +159,7 @@ fn a_new_scene_opens_with_a_camera_a_sun_and_a_name() {
     );
 
     assert_eq!(document.metadata.name.as_deref(), Some("First Level"));
-    let world = load_world(&extractor, &document).expect("a new scene loads");
+    let world = load_document(&extractor, &document).expect("a new scene loads");
     assert_eq!(world.len(), 2, "a camera and a sun, and nothing else");
     let carrying = |component: &str| {
         world

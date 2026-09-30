@@ -109,8 +109,7 @@ fn a_scene_with_an_unknown_component_opens_and_keeps_it() {
 
     let mut file = SceneFile::open(&path).expect("the scene opens");
     let extractor = SceneExtractor::new().expect("the built-in components register");
-    let mut world =
-        sindri_editor::native::load_world(&extractor, file.document()).expect("and loads");
+    let mut world = sindri_editor::native::load_world(&extractor, &file).expect("and loads");
 
     let player = entity(&world, "player");
     let mut buffer = CommandBuffer::new();
