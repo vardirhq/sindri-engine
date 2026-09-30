@@ -85,7 +85,7 @@ fn an_asset_the_manifest_does_not_mention_passes() {
 fn a_manifest_round_trips_through_its_file() {
     let mut manifest = AssetManifest::new();
     manifest.insert(id("textures/badge.png"), b"badge");
-    manifest.insert(id("demo.scene.json"), b"{}");
+    manifest.insert(id("demo.scene"), b"{}");
 
     let text = manifest.to_canonical_json().expect("a manifest serializes");
     assert!(text.ends_with('\n'));
@@ -114,15 +114,15 @@ fn the_file_is_ordered_by_asset_id() {
 #[test]
 fn the_first_inserted_scene_remains_the_entry_scene() {
     let mut manifest = AssetManifest::new();
-    manifest.insert(id("orbital.scene.json"), b"main");
-    manifest.insert(id("combat-lab.scene.json"), b"lab");
+    manifest.insert(id("orbital.scene"), b"main");
+    manifest.insert(id("combat-lab.scene"), b"lab");
 
     assert_eq!(
         manifest
             .assets()
             .map(|(asset, _)| asset.as_str())
             .collect::<Vec<_>>(),
-        ["combat-lab.scene.json", "orbital.scene.json"],
+        ["combat-lab.scene", "orbital.scene"],
         "the asset map should remain canonical and sorted"
     );
 
@@ -133,7 +133,7 @@ fn the_first_inserted_scene_remains_the_entry_scene() {
             .ids_of(AssetKind::Scene)
             .map(AssetId::as_str)
             .collect::<Vec<_>>(),
-        ["orbital.scene.json", "combat-lab.scene.json"]
+        ["orbital.scene", "combat-lab.scene"]
     );
 }
 
@@ -154,7 +154,7 @@ fn a_directory_becomes_the_names_a_scene_would_write() {
     let directory = tempfile::tempdir().unwrap();
     let root = directory.path();
     std::fs::create_dir(root.join("textures")).unwrap();
-    std::fs::write(root.join("demo.scene.json"), b"{}").unwrap();
+    std::fs::write(root.join("demo.scene"), b"{}").unwrap();
     std::fs::write(root.join("textures/badge.png"), b"badge bytes").unwrap();
     std::fs::write(root.join(".hidden"), b"tooling").unwrap();
     std::fs::write(root.join(MANIFEST_FILE_NAME), b"stale").unwrap();
@@ -165,7 +165,7 @@ fn a_directory_becomes_the_names_a_scene_would_write() {
             .assets()
             .map(|(id, _)| id.as_str())
             .collect::<Vec<_>>(),
-        ["demo.scene.json", "textures/badge.png"],
+        ["demo.scene", "textures/badge.png"],
         "a dot file is the tooling's, and a manifest cannot contain its own hash"
     );
     assert_eq!(
@@ -191,12 +191,12 @@ fn a_directory_becomes_the_names_a_scene_would_write() {
 fn a_scanned_manifest_says_what_its_assets_are() {
     let mut manifest = AssetManifest::new();
     for (id, expected) in [
-        ("demo.scene.json", AssetKind::Scene),
+        ("demo.scene", AssetKind::Scene),
         ("scripts/player.decay", AssetKind::Script),
-        ("prefabs/bullet.prefab.json", AssetKind::Prefab),
-        ("profiles/player.profile.json", AssetKind::Profile),
-        ("textures/player.sheet.json", AssetKind::Sheet),
-        ("tiles/world.tileset.json", AssetKind::TileSet),
+        ("prefabs/bullet.prefab", AssetKind::Prefab),
+        ("profiles/player.profile", AssetKind::Profile),
+        ("textures/player.sheet", AssetKind::Sheet),
+        ("tiles/world.tileset", AssetKind::TileSet),
         ("textures/player.png", AssetKind::Texture),
         ("fonts/Inter.ttf", AssetKind::Font),
         ("audio/theme.wav", AssetKind::Audio),
@@ -233,13 +233,13 @@ fn a_scanned_manifest_says_what_its_assets_are() {
 #[test]
 fn the_longer_name_wins_among_the_json_documents() {
     assert_eq!(
-        AssetKind::for_id("a/b.prefab.json"),
+        AssetKind::for_id("a/b.prefab"),
         AssetKind::Prefab,
         "a prefab read as a sheet is a prefab nothing can spawn"
     );
-    assert_eq!(AssetKind::for_id("a/b.sheet.json"), AssetKind::Sheet);
-    assert_eq!(AssetKind::for_id("a/b.tileset.json"), AssetKind::TileSet);
-    assert_eq!(AssetKind::for_id("a/b.profile.json"), AssetKind::Profile);
-    assert_eq!(AssetKind::for_id("a/b.scene.json"), AssetKind::Scene);
+    assert_eq!(AssetKind::for_id("a/b.sheet"), AssetKind::Sheet);
+    assert_eq!(AssetKind::for_id("a/b.tileset"), AssetKind::TileSet);
+    assert_eq!(AssetKind::for_id("a/b.profile"), AssetKind::Profile);
+    assert_eq!(AssetKind::for_id("a/b.scene"), AssetKind::Scene);
     assert_eq!(AssetKind::for_id("a/b.json"), AssetKind::Other);
 }

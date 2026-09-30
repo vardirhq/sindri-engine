@@ -22,7 +22,7 @@ use sindri_core::{
 use sindri_decay::{ScriptComponent, ScriptSources, Scripts};
 use sindri_scene::{SpriteComponent, UiAnchor, UiTextComponent};
 
-const SCENE: &str = include_str!("../assets/causeway.scene.json");
+const SCENE: &str = include_str!("../assets/causeway.scene");
 
 #[test]
 fn weave_reflows_the_hud_for_a_phone() {
@@ -236,7 +236,7 @@ const _: fn() = || {
 fn the_scene_file_is_canonical() {
     let path = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
         .join("assets")
-        .join("causeway.scene.json");
+        .join("causeway.scene");
     let stored = std::fs::read_to_string(&path).expect("the scene is readable");
     let canonical = SceneDocument::from_json(&stored)
         .expect("the scene parses")
@@ -248,6 +248,6 @@ fn the_scene_file_is_canonical() {
     }
     assert_eq!(
         stored, canonical,
-        "causeway.scene.json is not canonical; regenerate it with `python3 tools/level.py`"
+        "causeway.scene is not canonical; regenerate it with `python3 tools/level.py`"
     );
 }

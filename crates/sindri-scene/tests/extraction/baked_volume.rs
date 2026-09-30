@@ -26,7 +26,7 @@ fn tile_sets(size: f32) -> TileSetBindings {
     ))
     .expect("the tile set parses");
     let mut bindings = TileSetBindings::new();
-    bindings.bind("world.tileset.json", document).unwrap();
+    bindings.bind("world.tileset", document).unwrap();
     bindings
 }
 
@@ -51,7 +51,7 @@ fn volume_world(cells: &str) -> World {
             "level_step": [0.0, 0.5], "projection": "isometric"
           }},
           "sindri.tile_volume": {{
-            "tileset": "world.tileset.json",
+            "tileset": "world.tileset",
             "cells": [{cells}]
           }}
         }} }}"#,
@@ -69,7 +69,7 @@ fn parented_volume_world() -> World {
             "level_step": [0.0, 0.5], "projection": "isometric"
           }},
           "sindri.tile_volume": {{
-            "tileset": "world.tileset.json",
+            "tileset": "world.tileset",
             "cells": [{}]
           }}
         }} }}"#,

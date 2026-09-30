@@ -49,7 +49,7 @@ fn isolated_run() -> Run {
 fn spawn_spine(run: &mut Run) -> EntityId {
     let document = run
         .prefabs
-        .get("prefabs/spine.prefab.json")
+        .get("prefabs/spine.prefab")
         .expect("the Spine prefab ships");
     let entity = run.world.spawn_prefab(document).expect("boss spawns").root;
     let data = run.world.get_mut(entity).expect("boss remains");
@@ -349,10 +349,10 @@ fn every_armour_clip_names_frames_the_sheet_holds() {
     let run = Run::open().expect("the project opens");
     let prefab = run
         .prefabs
-        .get("prefabs/spine.prefab.json")
+        .get("prefabs/spine.prefab")
         .expect("the boss prefab ships");
     let text =
-        std::fs::read_to_string(orbital_baked::project().join("assets/textures/spine.sheet.json"))
+        std::fs::read_to_string(orbital_baked::project().join("assets/textures/spine.sheet"))
             .expect("the sheet reads");
     let sheet: serde_json::Value = serde_json::from_str(&text).expect("the sheet parses");
     let names: Vec<&str> = sheet["grid"]["names"]

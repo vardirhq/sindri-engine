@@ -14,8 +14,8 @@ format_version = 1
 
 [project]
 name = "Gather"
-main_scene = "assets/gather.scene.json"
-scenes = ["assets/house.scene.json"]
+main_scene = "assets/gather.scene"
+scenes = ["assets/house.scene"]
 ```
 
 Four fields, and each is read by something today.
@@ -64,7 +64,7 @@ asset root, a web canvas selector. None of that is here, and the sketch itself
 says why — "avoid designing an enormous configuration schema before features
 require it". The next field arrives with the feature that reads it.
 
-`sindri.toml` is not `sindri.manifest.json`. The manifest is an asset ledger of
+`sindri.toml` is not `sindri.manifest`. The manifest is an asset ledger of
 bytes and hashes, written by a build and verified by a loader; this is project
 metadata, written by a person or by the editor.
 
@@ -84,7 +84,7 @@ my-first-game/
 ├── fonts/
 ├── scripts/
 ├── textures/
-├── main.scene.json
+├── main.scene
 └── sindri.toml
 ```
 
@@ -104,6 +104,32 @@ A directory that already holds a `sindri.toml` is refused rather than
 overwritten. A directory holding other files is allowed, and the form says so
 before the button is pressed.
 
+## File extensions
+
+Every file the engine authors has an extension of its own, named for what it
+is rather than for the notation inside it:
+
+| Extension | What it is |
+| --- | --- |
+| `.scene` | a scene document |
+| `.prefab` | a prefab |
+| `.profile` | a data profile |
+| `.sheet` | the sprite sheet that slices the texture of the same stem |
+| `.tileset` | a tile set |
+| `.actions` | an input action map |
+| `.isobake` | an isometric baker recipe |
+| `.decay` | a Decay script |
+| `.weave` | a Weave stylesheet |
+| `sindri.manifest` | the asset ledger a build writes |
+
+Most of these hold JSON today, and their loaders still parse them as JSON, but
+the extension is the format's name: the project browser, the export gatherer,
+the asset manifest and decay-lsp all decide what a file is by it, and a plain
+`.json` in a project is just a file. There is no fallback to the old
+`*.scene.json`-style names; a project written before the change is migrated by
+renaming its files (`level.scene.json` to `level.scene`) and the references to
+them.
+
 ## The project root and the asset root are two directories
 
 A project is rooted at its `sindri.toml`. Asset references are not: a scene
@@ -117,7 +143,7 @@ never shows. For Gather they are two folders apart:
 ```text
 game/                       <- the project root: sindri.toml, Cargo.toml, src/
 └── assets/                 <- the asset root: where references resolve
-    ├── gather.scene.json
+    ├── gather.scene
     └── textures/orb.png    <- the scene names this "textures/orb.png"
 ```
 

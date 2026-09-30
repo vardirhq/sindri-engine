@@ -458,7 +458,7 @@ mod tests {
 
     fn volume(cells: Vec<TileCellDocument>) -> TileVolumeComponent {
         TileVolumeComponent {
-            tileset: "world.tileset.json".to_owned(),
+            tileset: "world.tileset".to_owned(),
             cells,
             layer: 0,
             variant_seed: 0,

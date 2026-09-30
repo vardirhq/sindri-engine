@@ -41,7 +41,7 @@ fn document() -> SceneDocument {
 /// open and loaded. The directory is returned because dropping it deletes it.
 fn scratch() -> (tempfile::TempDir, PathBuf, SceneFile, World) {
     let directory = tempfile::tempdir().expect("a scratch directory");
-    let path = directory.path().join("fixture.scene.json");
+    let path = directory.path().join("fixture.scene");
     fs::copy(fixture::path(), &path).expect("the fixture copies");
     let file = SceneFile::open(&path).expect("the copy opens");
     let world = World::from_scene(file.document())
@@ -90,7 +90,7 @@ fn move_cube(world: &mut World, history: &mut CommandHistory, position: [f32; 3]
 #[test]
 fn a_scene_with_an_unknown_component_opens_and_keeps_it() {
     let directory = tempfile::tempdir().expect("a scratch directory");
-    let path = directory.path().join("custom.scene.json");
+    let path = directory.path().join("custom.scene");
     fs::write(
         &path,
         r#"{
@@ -292,7 +292,7 @@ fn the_fixtures_animation_draws_a_different_frame_as_time_passes() {
         Path::new(env!("CARGO_MANIFEST_DIR"))
             .join("assets")
             .join("textures")
-            .join("spin.sheet.json"),
+            .join("spin.sheet"),
     )
     .expect("the fixture ships its sheet");
     textures

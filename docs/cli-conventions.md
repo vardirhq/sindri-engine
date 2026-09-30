@@ -32,8 +32,8 @@ Every command takes `--format`, with `human` the default at a terminal and
 `json` the contract:
 
 ```bash
-sindri scene validate assets/main.scene.json            # for a person
-sindri scene validate assets/main.scene.json --format json
+sindri scene validate assets/main.scene                # for a person
+sindri scene validate assets/main.scene --format json
 ```
 
 Write the JSON first and render the human form from it, never the reverse. A
@@ -52,7 +52,7 @@ A failure answers with a stable `code`, the thing it is about, and a message:
   "code": "SCENE_DUPLICATE_ENTITY_ID",
   "message": "Entity ID 'player' is already in use.",
   "entity": "player",
-  "path": "assets/main.scene.json"
+  "path": "assets/main.scene"
 }
 ```
 
@@ -72,7 +72,7 @@ Instead an edit is a batch, applied through the existing `WorldCommand` and
 it does:
 
 ```bash
-sindri scene edit assets/main.scene.json --ops changes.json
+sindri scene edit assets/main.scene --ops changes.json
 ```
 
 ```json

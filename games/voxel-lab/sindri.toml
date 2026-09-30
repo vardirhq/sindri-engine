@@ -2,4 +2,4 @@ format_version = 1
 
 [project]
 name = "Voxel Lab"
-main_scene = "assets/voxel-lab.scene.json"
+main_scene = "assets/voxel-lab.scene"

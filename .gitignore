@@ -15,4 +15,4 @@ pkg/
 # Generated from the asset bytes themselves, by the same step that serves them.
 # Committing it would be a second source of truth that goes stale the moment an
 # asset changes.
-game/assets/sindri.manifest.json
+game/assets/sindri.manifest

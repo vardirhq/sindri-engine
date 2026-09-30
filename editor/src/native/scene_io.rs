@@ -150,7 +150,7 @@ impl EditorApp {
     /// started on.
     pub(super) fn open_scene(&mut self) {
         let Some(path) = rfd::FileDialog::new()
-            .add_filter("Sindri scene", &["json"])
+            .add_filter("Sindri scene", &["scene"])
             .set_directory(self.scene_directory())
             .pick_file()
         else {

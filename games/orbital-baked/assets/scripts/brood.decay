@@ -1,6 +1,6 @@
 // Cannot be hurt while any of its children lives.
 //
-// Its hull is baked from `textures/brood.isobake.json`; everything this
+// Its hull is baked from `textures/brood.isobake`; everything this
 // script does to it beyond that is motion.
 script Brood {
     @export let shot: Prefab;

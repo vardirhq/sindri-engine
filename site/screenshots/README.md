@@ -16,7 +16,7 @@ xvfb-run --auto-servernum --server-args="-screen 0 1600x1200x24" \
 
 xvfb-run --auto-servernum --server-args="-screen 0 1600x1200x24" \
   ./scripts/capture-editor.sh site/screenshots/editor-orbital-scene.png \
-  games/orbital-baked/assets/orbital.scene.json
+  games/orbital-baked/assets/orbital.scene
 ```
 
 The second argument is the scene to open. `editor-orbital-scene.png` uses it to

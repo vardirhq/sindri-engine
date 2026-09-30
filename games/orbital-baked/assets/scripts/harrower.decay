@@ -1,7 +1,7 @@
 // Aggressive pentagonal ram. Charges, overshoots, and is worth hitting
 // exactly when it has just missed.
 //
-// Its hull is baked from `textures/harrower.isobake.json`; everything this
+// Its hull is baked from `textures/harrower.isobake`; everything this
 // script does to it beyond that is motion.
 script Harrower {
     @export let shot: Prefab;

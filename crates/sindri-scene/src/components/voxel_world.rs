@@ -103,7 +103,7 @@ pub struct VoxelWorldComponent {
     #[serde(default)]
     pub generator: VoxelGeneratorDocument,
     /// The tile set whose blocks this world is built from, such as
-    /// `builtin:blocks` or a project's `terrain.tileset.json`.
+    /// `builtin:blocks` or a project's `terrain.tileset`.
     ///
     /// Set, the generator names blocks from it and `materials` is not used.
     /// Left out, the generator names materials by number, as before block

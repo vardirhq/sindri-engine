@@ -28,7 +28,7 @@ fn project(name: &str) -> Scratch {
 
     std::fs::write(
         root.join("sindri.toml"),
-        "format_version = 1\n\n[project]\nname = \"Sheets\"\nmain_scene = \"main.scene.json\"\n",
+        "format_version = 1\n\n[project]\nname = \"Sheets\"\nmain_scene = \"main.scene\"\n",
     )
     .expect("the project file is written");
     // A 1x1 PNG is enough: the exporter carries bytes and never decodes them.
@@ -42,12 +42,12 @@ fn project(name: &str) -> Scratch {
     )
     .expect("the texture is written");
     std::fs::write(
-        art.join("walk.sheet.json"),
+        art.join("walk.sheet"),
         r#"{"format_version":1,"grid":{"columns":2,"rows":1,"names":["a","b"]}}"#,
     )
     .expect("the sheet is written");
     std::fs::write(
-        root.join("main.scene.json"),
+        root.join("main.scene"),
         r#"{
           "format_version": 10,
           "metadata": {"name": "Sheets"},
@@ -75,5 +75,5 @@ fn a_sheet_beside_a_texture_outside_assets_is_carried() {
         .filter(|asset| asset.kind == AssetKind::Sheet)
         .map(|asset| asset.id.as_str())
         .collect::<Vec<_>>();
-    assert_eq!(carried, ["generated/art/walk.sheet.json"]);
+    assert_eq!(carried, ["generated/art/walk.sheet"]);
 }

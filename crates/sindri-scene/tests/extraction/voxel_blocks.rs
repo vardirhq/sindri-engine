@@ -20,7 +20,7 @@ fn world(surface: &str) -> sindri_core::World {
               "surface_voxel": "__SURFACE__", "subsurface_voxel": "dirt",
               "deep_voxel": "stone", "subsurface_depth": 3
             },
-            "blocks": "terrain.tileset.json",
+            "blocks": "terrain.tileset",
             "focus": [0, 0, 0], "render_radius": 0,
             "vertical_radius": 0, "layer": 0
           }
@@ -49,7 +49,7 @@ fn blocks() -> TileSetBindings {
     .expect("the block set parses");
     let mut bindings = TileSetBindings::new();
     bindings
-        .bind("terrain.tileset.json", document)
+        .bind("terrain.tileset", document)
         .expect("the block set is valid");
     bindings
 }
@@ -118,6 +118,6 @@ fn a_block_set_still_loading_is_said_to_be() {
     let error = extract(&world("grass"), None).unwrap_err();
     assert_eq!(
         error.to_string(),
-        "tile set `terrain.tileset.json` has not been bound"
+        "tile set `terrain.tileset` has not been bound"
     );
 }

@@ -10,7 +10,7 @@
 //! ```text
 //! index.html                 the page, rewritten for the host's base path
 //! pkg/                       the WebAssembly host, as wasm-pack built it
-//! assets/sindri.manifest.json       small, and never cached
+//! assets/sindri.manifest     small, and never cached
 //! assets/<content hash>/     every asset, and cacheable for ever
 //! ```
 //!

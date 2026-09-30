@@ -68,12 +68,12 @@ impl AssetKind {
 
     /// What a file of this name is, judged by its extension.
     ///
-    /// A scene is `*.scene.json` rather than any JSON, because the editor can
-    /// open one and not the other, and a row that offers to open a settings
-    /// file as a scene is the same class of lie this module exists to remove.
+    /// Every authored engine format has an extension of its own, so a row
+    /// never has to guess from a file's contents what it is: a settings file
+    /// offered as a scene is the class of lie this module exists to remove.
     pub(crate) fn of_file(name: &str) -> Self {
         let lower = name.to_lowercase();
-        if lower.ends_with(".scene.json") {
+        if lower.ends_with(".scene") {
             return Self::Scene;
         }
         if lower.ends_with(SHEET_SUFFIX) {

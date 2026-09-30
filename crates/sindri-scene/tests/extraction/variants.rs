@@ -32,7 +32,7 @@ fn tile_sets(weights: [u32; 3]) -> TileSetBindings {
     ))
     .expect("the tile set decodes");
     let mut bindings = TileSetBindings::new();
-    bindings.bind("world.tileset.json", document).unwrap();
+    bindings.bind("world.tileset", document).unwrap();
     bindings
 }
 
@@ -77,7 +77,7 @@ fn field(seed: u64) -> sindri_core::World {
             "level_step": [0.0, 0.5], "projection": "isometric"
           }},
           "sindri.tile_volume": {{
-            "tileset": "world.tileset.json",
+            "tileset": "world.tileset",
             "variant_seed": {seed},
             "cells": [{cells}]
           }}
@@ -174,7 +174,7 @@ fn a_tile_without_variants_draws_its_own_faces() {
 #[test]
 fn every_looks_texture_is_collected() {
     let sets = tile_sets([1, 1, 1]);
-    let document = sets.get("world.tileset.json").expect("it is bound");
+    let document = sets.get("world.tileset").expect("it is bound");
     let textures = sindri_scene::tile_set_textures(document);
     assert!(
         textures.contains("plain.png")

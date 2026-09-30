@@ -1,7 +1,7 @@
 // Anchors, and builds slow walls across the arena until there is
 // nowhere left to stand.
 //
-// Its hull is baked from `textures/architect.isobake.json`; everything this
+// Its hull is baked from `textures/architect.isobake`; everything this
 // script does to it beyond that is motion.
 script Architect {
     @export let shot: Prefab;

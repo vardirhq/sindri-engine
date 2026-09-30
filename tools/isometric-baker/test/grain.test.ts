@@ -34,7 +34,7 @@ function recipe(grain: unknown): ReturnType<typeof parseRecipe> {
       },
     ],
   };
-  return parseRecipe(JSON.stringify(source), 'grain-probe.isobake.json');
+  return parseRecipe(JSON.stringify(source), 'grain-probe.isobake');
 }
 
 function pixels(grain: unknown): Uint8Array {

@@ -64,7 +64,7 @@ fn edits_survive_a_save_and_reload_of_the_real_scene() {
 #[test]
 fn the_named_scene_is_the_one_that_opens() {
     let directory = tempfile::tempdir().unwrap();
-    let path = directory.path().join("named.scene.json");
+    let path = directory.path().join("named.scene");
     std::fs::write(
         &path,
         DemoScene::authored_document()
@@ -76,7 +76,7 @@ fn the_named_scene_is_the_one_that_opens() {
 
     let (file, error) = open_named_scene(&path.display().to_string());
     assert_eq!(error, None);
-    assert_eq!(file.label(), "named.scene.json");
+    assert_eq!(file.label(), "named.scene");
 }
 
 /// Standing another scene in for the one somebody named would read as though
@@ -85,10 +85,10 @@ fn the_named_scene_is_the_one_that_opens() {
 #[test]
 fn a_named_scene_that_is_gone_says_so_rather_than_opening_another() {
     let directory = tempfile::tempdir().unwrap();
-    let missing = directory.path().join("gone.scene.json");
+    let missing = directory.path().join("gone.scene");
     let (file, error) = open_named_scene(&missing.display().to_string());
     let error = error.expect("a scene that is not there is worth saying");
-    assert!(error.contains("gone.scene.json"), "{error}");
+    assert!(error.contains("gone.scene"), "{error}");
     assert_eq!(file.path(), None, "and nothing else was opened instead");
 }
 
@@ -128,7 +128,7 @@ fn undoing_back_to_the_saved_state_is_not_unsaved_work() {
 fn each_discarding_action_says_what_it_is_about_to_do() {
     for action in [
         Discarding::OpenAnother,
-        Discarding::OpenPath(PathBuf::from("other.scene.json")),
+        Discarding::OpenPath(PathBuf::from("other.scene")),
         Discarding::Reload,
         Discarding::Reset,
         Discarding::Close,
@@ -155,7 +155,7 @@ fn a_new_scene_opens_with_a_camera_a_sun_and_a_name() {
     let extractor = extractor();
     let document = blank_scene(
         &extractor,
-        std::path::Path::new("/project/first-level.scene.json"),
+        std::path::Path::new("/project/first-level.scene"),
     );
 
     assert_eq!(document.metadata.name.as_deref(), Some("First Level"));

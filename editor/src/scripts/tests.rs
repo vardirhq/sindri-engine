@@ -44,7 +44,7 @@ fn project(script: &str, text: &str) -> TempDir {
 #[test]
 fn a_script_still_loading_is_not_an_error() {
     let directory = project("thing.decay", "script Thing {\n    fn update() {}\n}\n");
-    let scene = directory.path().join("thing.scene.json");
+    let scene = directory.path().join("thing.scene");
     let (world, components) = scripted("scripts/thing.decay");
 
     let mut scripts = SceneScripts::for_scene(Some(&scene));
@@ -76,7 +76,7 @@ fn a_script_still_loading_is_not_an_error() {
 #[test]
 fn a_script_that_will_never_arrive_is_an_error() {
     let directory = project("thing.decay", "script Thing {\n    fn update() {}\n}\n");
-    let scene = directory.path().join("thing.scene.json");
+    let scene = directory.path().join("thing.scene");
     let (world, components) = scripted("scripts/absent.decay");
 
     let mut scripts = SceneScripts::for_scene(Some(&scene));
@@ -130,12 +130,12 @@ fn a_large_project_loads_whole_before_anything_compiles() {
     let prefabs = directory.path().join("prefabs");
     fs::create_dir_all(&prefabs).expect("the prefabs directory is creatable");
     fs::write(
-        prefabs.join("drop.prefab.json"),
+        prefabs.join("drop.prefab"),
         r#"{"format_version":1,"entities":[{"id":"drop","name":"Drop"}]}"#,
     )
     .expect("the prefab is writable");
 
-    let scene = directory.path().join("thing.scene.json");
+    let scene = directory.path().join("thing.scene");
     let (world, components) = scripted("scripts/thing.decay");
     let mut scripts = SceneScripts::for_scene(Some(&scene));
     let notes = scripts.request(&world, &components);
@@ -155,7 +155,7 @@ fn a_large_project_loads_whole_before_anything_compiles() {
         );
         if !scripts.loading() && scripts.exports("scripts/thing.decay", "Thing").is_some() {
             assert!(
-                scripts.has_prefab("prefabs/drop.prefab.json"),
+                scripts.has_prefab("prefabs/drop.prefab"),
                 "a prefab only another prefab could name is loaded too"
             );
             return;

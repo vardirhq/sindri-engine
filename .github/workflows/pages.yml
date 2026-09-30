@@ -98,22 +98,22 @@ jobs:
           test -f target/pages/docs/language/index.html
           for route in causeway flappy orbital-baked shapes-lab weave-poc platformer scorchball; do
             test -f "target/pages/examples/$route/index.html"
-            test -f "target/pages/examples/$route/assets/sindri.manifest.json"
+            test -f "target/pages/examples/$route/assets/sindri.manifest"
             test -f "target/pages/examples/$route/pkg/sindri_causeway.js"
             test -f "target/pages/examples/$route/pkg/sindri_causeway_bg.wasm"
-            grep -q '"kind": "scene"' "target/pages/examples/$route/assets/sindri.manifest.json"
+            grep -q '"kind": "scene"' "target/pages/examples/$route/assets/sindri.manifest"
           done
           test -f target/pages/examples/voxel-lab/index.html
           test -f target/pages/examples/voxel-lab/pkg/voxel_lab.js
           test -f target/pages/examples/voxel-lab/pkg/voxel_lab_bg.wasm
           grep -q 'voxel-stats' target/pages/examples/voxel-lab/index.html
-          grep -q '"kind": "prefab"' target/pages/examples/orbital-baked/assets/sindri.manifest.json
-          grep -q 'player.sheet.json' target/pages/examples/orbital-baked/assets/sindri.manifest.json
-          grep -q '"kind": "script"' target/pages/examples/shapes-lab/assets/sindri.manifest.json
-          grep -q '"demo.weave"' target/pages/examples/weave-poc/assets/sindri.manifest.json
-          grep -q 'hero.sheet.json' target/pages/examples/platformer/assets/sindri.manifest.json
-          grep -q 'players.sheet.json' target/pages/examples/scorchball/assets/sindri.manifest.json
-          grep -q 'player.prefab.json' target/pages/examples/scorchball/assets/sindri.manifest.json
+          grep -q '"kind": "prefab"' target/pages/examples/orbital-baked/assets/sindri.manifest
+          grep -q 'player.sheet' target/pages/examples/orbital-baked/assets/sindri.manifest
+          grep -q '"kind": "script"' target/pages/examples/shapes-lab/assets/sindri.manifest
+          grep -q '"demo.weave"' target/pages/examples/weave-poc/assets/sindri.manifest
+          grep -q 'hero.sheet' target/pages/examples/platformer/assets/sindri.manifest
+          grep -q 'players.sheet' target/pages/examples/scorchball/assets/sindri.manifest
+          grep -q 'player.prefab' target/pages/examples/scorchball/assets/sindri.manifest
       - uses: actions/configure-pages@v6
         if: github.event_name != 'pull_request'
         with:

@@ -545,7 +545,7 @@ mod tests {
 
     #[test]
     fn generated_world_contains_block_built_trees() {
-        let volume = super::generate(super::WorldShape::default(), "causeway.tileset.json");
+        let volume = super::generate(super::WorldShape::default(), "causeway.tileset");
         let logs = volume
             .cells
             .iter()

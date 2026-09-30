@@ -16,7 +16,7 @@ use super::map::{ActionKind, ActionMap, ActionMapError};
 pub const ACTIONS_FORMAT_VERSION: u64 = 1;
 
 /// What a project's actions file is called.
-pub const ACTIONS_SUFFIX: &str = ".actions.json";
+pub const ACTIONS_SUFFIX: &str = ".actions";
 
 /// Why an actions file could not be read.
 ///

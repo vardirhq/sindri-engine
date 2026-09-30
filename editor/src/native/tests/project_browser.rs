@@ -27,10 +27,10 @@ fn listed<'a>() -> RowEdit<'a> {
 fn entry_of(kind: AssetKind) -> ProjectEntry {
     ProjectEntry {
         sprites: Vec::new(),
-        path: PathBuf::from("/project/level.scene.json"),
-        name: "level.scene.json".to_owned(),
-        relative: "level.scene.json".to_owned(),
-        reference: Some("level.scene.json".to_owned()),
+        path: PathBuf::from("/project/level.scene"),
+        name: "level.scene".to_owned(),
+        relative: "level.scene".to_owned(),
+        reference: Some("level.scene".to_owned()),
         kind,
         depth: 0,
     }
@@ -159,7 +159,7 @@ fn driven_row(kind: AssetKind, offset: Vec2, wanted: Reported) -> bool {
 /// The labels have to carry the row's sense: a widget inside a sensing
 /// scope takes precedence over the scope, and an ordinary egui label is
 /// selectable text, so it answered the double click by selecting the word
-/// "json" and the row never heard about it.
+/// "scene" and the row never heard about it.
 #[test]
 fn double_clicking_a_scene_row_opens_it() {
     for offset in [2.0_f32, 10.0, 20.0, 40.0, 80.0] {

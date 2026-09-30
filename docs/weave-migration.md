@@ -197,7 +197,7 @@ capabilities.
 ## Last Stand file map
 
 - Scene and presentation classes:
-  `games/orbital-baked/assets/orbital.scene.json`
+  `games/orbital-baked/assets/orbital.scene`
 - Stylesheet:
   `games/orbital-baked/assets/ui.weave`
 - Asset registration:

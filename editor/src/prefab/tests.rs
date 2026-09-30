@@ -182,9 +182,9 @@ fn a_prefab_without_one_root_is_refused() {
 
 #[test]
 fn a_missing_prefab_says_so_rather_than_panicking() {
-    let error = load(Path::new("/nonexistent/nothing.prefab.json"))
-        .expect_err("a missing file is an error");
-    assert!(error.contains("nothing.prefab.json"), "{error}");
+    let error =
+        load(Path::new("/nonexistent/nothing.prefab")).expect_err("a missing file is an error");
+    assert!(error.contains("nothing.prefab"), "{error}");
 }
 
 /// A prefab with a shape, so placing it has something to preserve.

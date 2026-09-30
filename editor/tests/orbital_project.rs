@@ -21,9 +21,9 @@ use sindri_editor::scene_file::SceneFile;
 use sindri_editor::scripts::SceneScripts;
 
 const REQUIRED_PREFABS: [&str; 3] = [
-    "prefabs/drifter.prefab.json",
-    "prefabs/charger.prefab.json",
-    "prefabs/splitter.prefab.json",
+    "prefabs/drifter.prefab",
+    "prefabs/charger.prefab",
+    "prefabs/splitter.prefab",
 ];
 
 /// The acceptance project's scene, from this crate's own directory.
@@ -38,7 +38,7 @@ fn game_scene(game: &str) -> PathBuf {
         .expect("the editor crate sits in the workspace")
         .join("games")
         .join(game)
-        .join("assets/orbital.scene.json")
+        .join("assets/orbital.scene")
 }
 
 /// Opens the scene and lets the loader settle, as an editor frame loop does.

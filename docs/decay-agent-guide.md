@@ -68,7 +68,7 @@ World.set_property(part, "leader_x", x);
 Configure a newly spawned entity before it is allowed to start:
 
 ```decay
-let part = World.spawn("prefabs/body-part.prefab.json");
+let part = World.spawn("prefabs/body-part.prefab");
 World.set_property(part, "group", group);
 World.set_property(part, "leader", this.entity);
 ```

@@ -208,7 +208,7 @@ A measured grid without one is an error rather than a sheet whose every cell
 comes out as nothing.
 
 **The sheet's ID is derived, not declared.** `textures/tiles.png` is sliced by
-`textures/tiles.sheet.json`. A scene naming its sheets would be a fourth place that can disagree, so
+`textures/tiles.sheet`. A scene naming its sheets would be a fourth place that can disagree, so
 no scene does; `sheet_id_for` is the one rule, and both the editor looking on disk and a game
 shipping bytes use it.
 

@@ -1,6 +1,6 @@
 // Anchors and sweeps one turning beam. The safe ground is behind it.
 //
-// Its hull is baked from `textures/leviathan.isobake.json`; everything this
+// Its hull is baked from `textures/leviathan.isobake`; everything this
 // script does to it beyond that is motion.
 script Leviathan {
     @export let shot: Prefab;

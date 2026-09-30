@@ -299,13 +299,13 @@ mod tests {
     fn the_same_message_after_another_is_counted_not_repeated() {
         let mut console = Console::default();
         console.error("Surface lost");
-        console.info("Opened demo.scene.json");
+        console.info("Opened demo.scene");
         console.error("Surface lost");
         assert_eq!(
             messages(&console),
             [
                 (Level::Error, "Surface lost".to_owned(), 2),
-                (Level::Info, "Opened demo.scene.json".to_owned(), 1),
+                (Level::Info, "Opened demo.scene".to_owned(), 1),
             ]
         );
     }
@@ -354,7 +354,7 @@ mod tests {
     #[test]
     fn a_filter_keeps_everything_at_or_above_its_level() {
         let mut console = Console::default();
-        console.info("Opened level.scene.json");
+        console.info("Opened level.scene");
         console.warning("badge.png is not bound");
         console.error("Could not save");
 

@@ -21,7 +21,7 @@ use sindri_decay::{
 };
 use sindri_platform::InputState;
 
-const BULLET: &str = "prefabs/bullet.prefab.json";
+const BULLET: &str = "prefabs/bullet.prefab";
 
 fn registry() -> ComponentSchemaRegistry {
     let mut registry = ComponentSchemaRegistry::default();
@@ -413,7 +413,7 @@ fn a_script_cannot_spawn_a_prefab_it_names_as_text() {
         r#"
         script Spawner {
             @export let bullet: Prefab;
-            fn start() { World.spawn("prefabs/bullet.prefab.json"); }
+            fn start() { World.spawn("prefabs/bullet.prefab"); }
         }
         "#,
         None,
@@ -456,7 +456,7 @@ fn a_spawn_cascade_that_does_not_settle_is_reported_rather_than_run() {
             @export let bullet: Prefab;
             fn start() {
                 let next = World.spawn(this.bullet);
-                World.set_property(next, "bullet", "prefabs/bullet.prefab.json");
+                World.set_property(next, "bullet", "prefabs/bullet.prefab");
             }
         }
         "#,

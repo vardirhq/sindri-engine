@@ -2,10 +2,10 @@
  * Packing baked frames into one texture, and describing it the way Sindri does.
  *
  * Sindri slices an image with a document beside it: `textures/shrine.png` is cut
- * by `textures/shrine.sheet.json`, and the rule lives in
+ * by `textures/shrine.sheet`, and the rule lives in
  * `crates/sindri-core/src/sheet.rs`. Note that the suffix *replaces* the
  * extension rather than following it — a sheet for `shrine.png` is
- * `shrine.sheet.json`, not `shrine.png.sheet.json`.
+ * `shrine.sheet`, not `shrine.png.sheet`.
  */
 
 import { type DirectionCount } from './directions.ts';

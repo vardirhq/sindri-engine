@@ -1,6 +1,6 @@
 // Returns what you fire at it. Fires very little of its own.
 //
-// Its hull is baked from `textures/mirror.isobake.json`; everything this
+// Its hull is baked from `textures/mirror.isobake`; everything this
 // script does to it beyond that is motion.
 script Mirror {
     @export let shot: Prefab;

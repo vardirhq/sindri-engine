@@ -13,8 +13,8 @@ fn a_script_is_something_the_editor_will_show() {
     for name in [
         "scripts/spin.decay",
         "ui/game.weave",
-        "level.scene.json",
-        "tiles.sheet.json",
+        "level.scene",
+        "tiles.sheet",
         "README",
         "Cargo.toml",
     ] {

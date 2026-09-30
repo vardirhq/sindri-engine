@@ -105,9 +105,9 @@ fn a_sheets_id_comes_from_its_textures() {
         sheet_id_for(&texture)
             .expect("a texture has a sheet id")
             .as_str(),
-        "textures/tiles.sheet.json"
+        "textures/tiles.sheet"
     );
-    let sheet = AssetId::new("textures/tiles.sheet.json").expect("a valid id");
+    let sheet = AssetId::new("textures/tiles.sheet").expect("a valid id");
     assert_eq!(
         sheet_id_for(&sheet),
         None,
@@ -127,7 +127,7 @@ fn a_reference_splits_into_a_path_and_a_name() {
             .sheet()
             .expect("a fragment needs a sheet")
             .as_str(),
-        "textures/tiles.sheet.json"
+        "textures/tiles.sheet"
     );
     assert_eq!(reference.to_string(), "textures/tiles.png#floor");
 

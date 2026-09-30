@@ -95,7 +95,7 @@ fn an_animated_sprite_asks_for_the_sheet_its_clips_read() {
           } }"#,
     ));
     assert!(
-        sindri_scene::referenced_sheets(&world).contains("textures/walk.sheet.json"),
+        sindri_scene::referenced_sheets(&world).contains("textures/walk.sheet"),
         "a sprite whose clips name parts of a sheet needs that sheet loaded, \
          even though its own reference names no part of one"
     );

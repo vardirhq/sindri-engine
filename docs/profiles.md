@@ -12,7 +12,7 @@ script.
 
 ## File format
 
-Profiles use the `.profile.json` suffix and carry their own format version:
+Profiles use the `.profile` suffix and carry their own format version:
 
 ```json
 {
