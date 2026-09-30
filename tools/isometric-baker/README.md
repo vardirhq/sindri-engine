@@ -1,7 +1,7 @@
 # Sindri isometric baker
 
 An **offline asset baker**. A 3D model goes in; ordinary Sindri sprites come
-out — a PNG and the `.sheet.json` beside it, in the formats the engine already
+out — a PNG and the `.sheet` beside it, in the formats the engine already
 reads.
 
 Isometric is what it was built for and is still the default, but it bakes three
@@ -17,8 +17,8 @@ model is an *authoring input* here, in the same way a `.ttf` is an authoring
 input to a font atlas.
 
 ```bash
-node src/cli.ts fixtures/project/prefabs/standing-stone.isobake.json --out fixtures/project
-node src/cli.ts fixtures/project/prefabs/standing-stone.isobake.json --out fixtures/project --check
+node src/cli.ts fixtures/project/prefabs/standing-stone.isobake --out fixtures/project
+node src/cli.ts fixtures/project/prefabs/standing-stone.isobake --out fixtures/project --check
 npm test
 ```
 
@@ -77,7 +77,7 @@ reinvention of it:
 | `src/directions.ts`              | `src/directions.ts`         | Ported. |
 | `src/render.ts`                  | `src/raster.ts`, `src/frames.ts` | A CPU rasteriser instead of a WebGL render target. |
 | `src/sheet.ts`, `src/factory.ts` | `src/sheet.ts`, `src/bake.ts`    | Sindri's sheet format instead of IsoGame's metadata. |
-| `src/catalog.ts`                 | `*.isobake.json`            | A document per asset instead of a TypeScript catalogue. |
+| `src/catalog.ts`                 | `*.isobake`            | A document per asset instead of a TypeScript catalogue. |
 | generated furniture definitions  | `src/prefab.ts`             | A Sindri prefab, without IsoGame's game-specific fields. |
 
 Two deliberate departures, both because Sindri wants different things from the
@@ -233,7 +233,7 @@ keeps a walk cycle from shimmering between shades as it plays.
 
 ## The recipe
 
-A bake is described by a `<name>.isobake.json` document, which is the durable
+A bake is described by a `<name>.isobake` document, which is the durable
 half of a baked asset: the PNG and its sheet are derived and can be regenerated,
 the recipe is the source.
 
@@ -249,9 +249,9 @@ the recipe is the source.
   "directions": 4,                           // 1, 2, 4 or 8 frames
   "footprint": { "width": 1, "height": 1 },  // tiles occupied
   "prefab": {                                // optional; omit for a sheet alone
-    "path": "prefabs/standing-stone.prefab.json",
+    "path": "prefabs/standing-stone.prefab",
     "name": "Standing Stone",
-    "recipe": "prefabs/standing-stone.isobake.json"
+    "recipe": "prefabs/standing-stone.isobake"
   },
   "render": {
     "supersample": 4,
@@ -364,12 +364,12 @@ For `"texture": "textures/standing-stone.png"` and a `prefab` block:
 
 ```text
 textures/standing-stone.png          the frames, packed as one horizontal strip
-textures/standing-stone.sheet.json   an edge-to-edge grid of one row, named by direction
-prefabs/standing-stone.prefab.json   a one-entity prefab that draws it at the right size
+textures/standing-stone.sheet        an edge-to-edge grid of one row, named by direction
+prefabs/standing-stone.prefab        a one-entity prefab that draws it at the right size
 ```
 
 Note the sheet's name: Sindri's suffix **replaces** the extension, so it is
-`standing-stone.sheet.json`, not `standing-stone.png.sheet.json`
+`standing-stone.sheet`, not `standing-stone.png.sheet`
 (`sheet_id_for` in `crates/sindri-core/src/sheet.rs`).
 
 ### Gutters

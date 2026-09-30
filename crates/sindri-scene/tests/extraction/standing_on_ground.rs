@@ -43,7 +43,7 @@ fn tile_sets() -> TileSetBindings {
     )
     .expect("the tile set decodes");
     let mut bindings = TileSetBindings::new();
-    bindings.bind("world.tileset.json", document).unwrap();
+    bindings.bind("world.tileset", document).unwrap();
     bindings
 }
 
@@ -93,7 +93,7 @@ fn scene_with(marked: &[[i32; 2]], extra: &str) -> World {
             "level_step": [0.0, 0.5], "projection": "isometric", "depth_step": 0.01
           }},
           "sindri.tile_volume": {{
-            "tileset": "world.tileset.json",
+            "tileset": "world.tileset",
             "cells": [{floor}{extra}]
           }}
         }} }},

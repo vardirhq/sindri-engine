@@ -13,8 +13,8 @@ from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parents[1]
-SCENE = ROOT / "game/assets/gather.scene.json"
-SHED = ROOT / "game/assets/shed.scene.json"
+SCENE = ROOT / "game/assets/gather.scene"
+SHED = ROOT / "game/assets/shed.scene"
 SIZE = 25
 CENTRE = 12
 FLOOR_Y = round(0.275 * (SIZE - 1), 4)

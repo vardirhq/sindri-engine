@@ -123,7 +123,7 @@ mod tests {
               "format_version": $VERSION,
               "entities": [{ "id": "world", "components": {
                 "sindri.tile_volume": {
-                  "tileset": "tiles/world.tileset.json", "cells": []
+                  "tileset": "tiles/world.tileset", "cells": []
                 }
               } }]
             }"#
@@ -132,7 +132,7 @@ mod tests {
         let world = World::from_scene(&scene).unwrap().world;
         assert_eq!(
             referenced_tile_sets(&world),
-            BTreeSet::from(["tiles/world.tileset.json".to_owned()])
+            BTreeSet::from(["tiles/world.tileset".to_owned()])
         );
     }
 }

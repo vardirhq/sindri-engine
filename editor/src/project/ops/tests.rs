@@ -7,7 +7,7 @@ use super::{AssetOpError, create_folder, delete, duplicate, import, rename, spli
 /// A project directory with a few files in it.
 fn project() -> tempfile::TempDir {
     let root = tempfile::tempdir().unwrap();
-    std::fs::write(root.path().join("level.scene.json"), "{}").unwrap();
+    std::fs::write(root.path().join("level.scene"), "{}").unwrap();
     std::fs::create_dir(root.path().join("textures")).unwrap();
     std::fs::write(root.path().join("textures/orb.png"), b"png").unwrap();
     root
@@ -43,7 +43,7 @@ fn a_name_something_already_has_is_refused() {
         rename(
             project.path(),
             &project.path().join("textures"),
-            "level.scene.json"
+            "level.scene"
         ),
         Err(AssetOpError::Exists(_))
     ));
@@ -99,30 +99,27 @@ fn renaming_keeps_the_file_in_its_own_folder() {
     assert_eq!(names(&project.path().join("textures")), vec!["pip.png"]);
 }
 
-/// A copy keeps the suffix that says what kind of asset it is.
-///
-/// `file_stem` stops at the last dot, so a scene duplicated through it would
-/// become `level.scene copy.json` — a file the browser no longer reads as a
-/// scene and the editor can no longer open from a row.
+/// A copy keeps the extension that says what kind of asset it is, so the
+/// browser still reads it as a scene and the editor can open it from a row.
 #[test]
 fn a_copy_is_still_the_same_kind_of_file() {
     let project = project();
-    let copy = duplicate(project.path(), &project.path().join("level.scene.json")).unwrap();
+    let copy = duplicate(project.path(), &project.path().join("level.scene")).unwrap();
     assert_eq!(
         copy.file_name().unwrap(),
-        "level copy.scene.json",
+        "level copy.scene",
         "a copied scene is still a scene"
     );
 
-    let again = duplicate(project.path(), &project.path().join("level.scene.json")).unwrap();
-    assert_eq!(again.file_name().unwrap(), "level copy 2.scene.json");
+    let again = duplicate(project.path(), &project.path().join("level.scene")).unwrap();
+    assert_eq!(again.file_name().unwrap(), "level copy 2.scene");
 }
 
 #[test]
 fn splitting_a_name_keeps_the_whole_suffix() {
     let cases = [
-        ("level.scene.json", ("level", ".scene.json")),
-        ("tiles.sheet.json", ("tiles", ".sheet.json")),
+        ("level.scene", ("level", ".scene")),
+        ("tiles.sheet", ("tiles", ".sheet")),
         ("orb.png", ("orb", ".png")),
         ("README", ("README", "")),
         (".gitignore", (".gitignore", "")),
@@ -150,7 +147,7 @@ fn duplicating_a_folder_takes_its_contents() {
 fn deleting_a_folder_removes_what_is_under_it() {
     let project = project();
     delete(project.path(), &project.path().join("textures")).unwrap();
-    assert_eq!(names(project.path()), vec!["level.scene.json"]);
+    assert_eq!(names(project.path()), vec!["level.scene"]);
 }
 
 /// An import that would overwrite is skipped and reported, rather than failing
@@ -161,7 +158,7 @@ fn an_import_brings_in_what_it_can_and_names_what_it_could_not() {
     let project = project();
     let elsewhere = tempfile::tempdir().unwrap();
     let fresh = elsewhere.path().join("pip.png");
-    let clashing = elsewhere.path().join("level.scene.json");
+    let clashing = elsewhere.path().join("level.scene");
     std::fs::write(&fresh, b"png").unwrap();
     std::fs::write(&clashing, "{}").unwrap();
 
@@ -175,7 +172,7 @@ fn an_import_brings_in_what_it_can_and_names_what_it_could_not() {
     assert_eq!(refused.len(), 1);
     assert!(matches!(refused[0], AssetOpError::Exists(_)));
     assert_eq!(
-        std::fs::read_to_string(project.path().join("level.scene.json")).unwrap(),
+        std::fs::read_to_string(project.path().join("level.scene")).unwrap(),
         "{}",
         "and the file it would have replaced is untouched"
     );

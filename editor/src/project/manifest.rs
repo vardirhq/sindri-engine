@@ -6,7 +6,7 @@
 //! the parent folder rather than for anything on disk. That is enough to edit
 //! one scene and not enough to *have* a project — there was nowhere to put a
 //! name, nothing to list on a welcome screen, and no way to tell a project
-//! apart from any other folder with a `.scene.json` in it.
+//! apart from any other folder with a `.scene` in it.
 //!
 //! So a project is a directory containing `sindri.toml`. The manifest grows only
 //! when a feature has a host-level setting to read. Its explicit asset include
@@ -47,7 +47,7 @@ pub const FORMAT_VERSION: u32 = 1;
 const NEW_PROJECT_DIRECTORIES: [&str; 3] = ["textures", "scripts", "fonts"];
 
 /// The scene a new project is created with.
-const NEW_PROJECT_SCENE: &str = "main.scene.json";
+const NEW_PROJECT_SCENE: &str = "main.scene";
 
 /// Why a project could not be opened or created.
 #[derive(Debug, Error)]

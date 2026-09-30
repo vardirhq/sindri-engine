@@ -8,7 +8,7 @@
 //! it, so it belongs beside the image and is said once.
 //!
 //! A sheet document sits at a derived ID: `textures/tiles.png` is sliced by
-//! `textures/tiles.sheet.json`. Derived rather than declared, because a scene
+//! `textures/tiles.sheet`. Derived rather than declared, because a scene
 //! naming its sheets would be a fourth place that can disagree.
 //!
 //! Nothing here knows what a `UvRect` is — that is `sindri-render`'s, and this
@@ -31,7 +31,7 @@ mod tests;
 pub const SHEET_FORMAT_VERSION: u32 = 1;
 
 /// The suffix that turns a texture's ID into its sheet's ID.
-const SHEET_SUFFIX: &str = ".sheet.json";
+const SHEET_SUFFIX: &str = ".sheet";
 
 /// Where a sprite meets the ground, as a fraction of its frame.
 ///
@@ -396,7 +396,7 @@ impl SpriteSheetDocument {
 
 /// The sheet that slices `texture`, by the one naming rule.
 ///
-/// `textures/tiles.png` is sliced by `textures/tiles.sheet.json`. A texture
+/// `textures/tiles.png` is sliced by `textures/tiles.sheet`. A texture
 /// whose ID already ends in the suffix is not a texture, and gets `None` rather
 /// than a sheet of a sheet.
 #[must_use]

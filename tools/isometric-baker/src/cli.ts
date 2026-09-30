@@ -2,7 +2,7 @@
 /**
  * The baker's command line.
  *
- *   node src/cli.ts <recipe.isobake.json> [--out DIR] [--check] [--quiet]
+ *   node src/cli.ts <recipe.isobake> [--out DIR] [--check] [--quiet]
  *
  * `--check` bakes without writing and fails if what is on disk differs, which is
  * how CI asserts that a checked-in asset is still what its recipe produces. It
@@ -40,7 +40,7 @@ function parseArgs(argv: string[]): Options {
     else options.recipe = arg;
   }
 
-  if (!options.recipe) throw new Error('usage: cli.ts <recipe.isobake.json> [--out DIR] [--check]');
+  if (!options.recipe) throw new Error('usage: cli.ts <recipe.isobake> [--out DIR] [--check]');
   const out = options.out;
   if (!out) throw new Error('--out DIR is required: it is where the assets are written');
   return { ...options, out };

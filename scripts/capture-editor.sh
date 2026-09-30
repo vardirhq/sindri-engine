@@ -11,7 +11,7 @@ mkdir -p "$output_dir"
 # a person and the wrong one for a screenshot. So the demo scene is named here
 # rather than left to a default: passing a second argument photographs whichever
 # scene is of interest, and passing none photographs the one this always did.
-scene=${2:-examples/cube/assets/demo.scene.json}
+scene=${2:-examples/cube/assets/demo.scene}
 entity_filter=${3:-}
 
 # Built before it is launched, so the wait below times the editor starting up
@@ -39,7 +39,7 @@ while [ "$attempt" -lt 120 ]; do
         exit 1
     fi
 
-    # The title carries the open scene now — "demo.scene.json - Sindri Editor" —
+    # The title carries the open scene now — "demo.scene - Sindri Editor" —
     # so this matches the program name at the end rather than the whole title.
     window_id=$(xdotool search --name 'Sindri Editor$' 2>/dev/null | head -n 1 || true)
     if [ -n "$window_id" ]; then

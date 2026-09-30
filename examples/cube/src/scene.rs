@@ -4,7 +4,7 @@ use sindri_render::{PreparedFrame, Viewport};
 use sindri_scene::{CameraView, SceneExtractError, SceneExtractor, TextureBindings};
 use thiserror::Error;
 
-const SCENE_JSON: &str = include_str!("../assets/demo.scene.json");
+const SCENE_JSON: &str = include_str!("../assets/demo.scene");
 
 /// The demo's component schemas, and the extraction they drive.
 ///
@@ -126,7 +126,7 @@ mod tests {
         if std::env::var_os("SINDRI_UPDATE_SCENE_FIXTURES").is_some() {
             let path = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
                 .join("assets")
-                .join("demo.scene.json");
+                .join("demo.scene");
             std::fs::write(path, &canonical).unwrap();
             return;
         }

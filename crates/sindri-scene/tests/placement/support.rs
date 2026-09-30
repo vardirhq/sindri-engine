@@ -27,7 +27,7 @@ pub(crate) fn world_with(entities: Vec<SceneEntity>, depth_step: f64) -> (World,
     floor.components.insert(
         "sindri.tile_volume".to_owned(),
         json!({
-            "tileset": "world.tileset.json",
+            "tileset": "world.tileset",
             "cells": (0..4).flat_map(|row| (0..4).map(move |column| {
                 json!({ "position": [column, row, -1], "tile": "block" })
             })).collect::<Vec<_>>()
@@ -58,7 +58,7 @@ pub(crate) fn tile_sets() -> TileSetBindings {
     )
     .expect("the tile set decodes");
     let mut bindings = TileSetBindings::new();
-    bindings.bind("world.tileset.json", document).unwrap();
+    bindings.bind("world.tileset", document).unwrap();
     bindings
 }
 

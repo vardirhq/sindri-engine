@@ -30,7 +30,7 @@ fn lab_run() -> Run {
 
     let document = run
         .prefabs
-        .get("prefabs/combat-lab.prefab.json")
+        .get("prefabs/combat-lab.prefab")
         .expect("the combat lab prefab ships")
         .clone();
     run.world.spawn_prefab(&document).expect("lab spawns");
@@ -43,9 +43,8 @@ fn lab_run() -> Run {
 
 #[test]
 fn the_standalone_lab_scene_is_a_real_scene() {
-    let text =
-        std::fs::read_to_string(orbital_baked::project().join("assets/combat-lab.scene.json"))
-            .expect("the lab scene reads");
+    let text = std::fs::read_to_string(orbital_baked::project().join("assets/combat-lab.scene"))
+        .expect("the lab scene reads");
     let scene: SceneDocument = serde_json::from_str(&text).expect("the lab scene parses");
     scene.validate().expect("the lab scene validates");
 }

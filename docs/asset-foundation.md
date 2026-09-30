@@ -86,7 +86,7 @@ Source completions remain encoded bytes until a runtime selects an `AssetDecoder
 ## Assets that describe other assets
 
 A sprite sheet is an asset *about* a texture, and its ID says so without anybody declaring it:
-`textures/tiles.png` is sliced by `textures/tiles.sheet.json`. Derived rather than declared, because
+`textures/tiles.png` is sliced by `textures/tiles.sheet`. Derived rather than declared, because
 a scene naming its sheets would be a place the pairing could be got wrong. `sheet_id_for` is that one
 rule, and both the editor looking on disk and a game shipping embedded bytes go through it.
 
@@ -162,9 +162,9 @@ A scene names `textures/badge.png`. On a developer's machine that resolves to a 
 
 The file is versioned like a scene, ordered by asset ID so a diff shows the asset that changed and nothing else, and canonical without needing a canonicaliser: the structure is flat and the assets sit in a sorted map, so pretty-printing is already stable. The hash is written as `sha256:` and sixty-four hex characters — hex rather than base64 because a manifest is read in review, and the bytes base64 would save are not worth squinting at.
 
-An asset the manifest does not mention loads normally. A manifest is a statement about what it lists, not a claim that nothing else exists, which is what keeps it a promise rather than a requirement. `AssetLoader::with_manifest` holds arriving bytes to it, checking the length first because that is free and is what a truncated response fails on. The editor picks up `sindri.manifest.json` from the directory a scene lives in if there is one, and treats a malformed one as absent rather than fatal — it describes the assets, and refusing to open a scene because a file beside it is broken would be refusing to let anyone fix it.
+An asset the manifest does not mention loads normally. A manifest is a statement about what it lists, not a claim that nothing else exists, which is what keeps it a promise rather than a requirement. `AssetLoader::with_manifest` holds arriving bytes to it, checking the length first because that is free and is what a truncated response fails on. The editor picks up `sindri.manifest` from the directory a scene lives in if there is one, and treats a malformed one as absent rather than fatal — it describes the assets, and refusing to open a scene because a file beside it is broken would be refusing to let anyone fix it.
 
-`examples/cube/assets/sindri.manifest.json` is committed rather than generated at deploy time, because a manifest built from whatever happened to be on the deploy machine is not a promise about anything. A test regenerates it and compares, so editing an asset without updating the manifest fails there rather than at somebody's browser.
+`examples/cube/assets/sindri.manifest` is committed rather than generated at deploy time, because a manifest built from whatever happened to be on the deploy machine is not a promise about anything. A test regenerates it and compares, so editing an asset without updating the manifest fails there rather than at somebody's browser.
 
 ## Deliberate boundaries
 

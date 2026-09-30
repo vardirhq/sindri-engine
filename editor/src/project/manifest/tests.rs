@@ -15,7 +15,7 @@ fn created(root: &Path, name: &str) -> Project {
 #[test]
 fn a_directory_without_a_manifest_is_not_a_project() {
     let directory = tempfile::tempdir().expect("a temporary directory");
-    std::fs::write(directory.path().join("level.scene.json"), "{}").expect("a scene file");
+    std::fs::write(directory.path().join("level.scene"), "{}").expect("a scene file");
     assert!(
         !is_project(directory.path()),
         "a folder with a scene in it is a folder, not a project"
@@ -37,7 +37,7 @@ fn creating_a_project_writes_a_manifest_a_scene_and_somewhere_to_put_assets() {
         "the manifest is written"
     );
     assert!(
-        root.join("main.scene.json").is_file(),
+        root.join("main.scene").is_file(),
         "a project with no scene is a project the editor opens on nothing"
     );
     for expected in ["textures", "scripts", "fonts"] {
@@ -57,7 +57,7 @@ fn a_created_project_opens_on_the_scene_it_made() {
     let project = created(&root, "My Game");
     assert_eq!(
         project.main_scene(),
-        Some(root.join("main.scene.json")),
+        Some(root.join("main.scene")),
         "creating a project nominates its scene, or opening it would ask which"
     );
 }
@@ -176,8 +176,8 @@ fn a_nominated_scene_that_is_gone_opens_nothing_rather_than_something_else() {
     let directory = tempfile::tempdir().expect("a temporary directory");
     let root = directory.path().join("my-game");
     let project = created(&root, "My Game");
-    std::fs::remove_file(root.join("main.scene.json")).expect("the scene is removed");
-    std::fs::write(root.join("other.scene.json"), "{}").expect("another scene");
+    std::fs::remove_file(root.join("main.scene")).expect("the scene is removed");
+    std::fs::write(root.join("other.scene"), "{}").expect("another scene");
     assert_eq!(
         project.main_scene(),
         None,
@@ -190,7 +190,7 @@ fn nominating_a_scene_stores_it_relative_to_the_project() {
     let directory = tempfile::tempdir().expect("a temporary directory");
     let root = directory.path().join("my-game");
     let mut project = created(&root, "My Game");
-    let scene = root.join("levels").join("two.scene.json");
+    let scene = root.join("levels").join("two.scene");
     std::fs::create_dir_all(scene.parent().expect("a parent")).expect("a levels folder");
     std::fs::write(&scene, "{}").expect("a scene");
 
@@ -200,7 +200,7 @@ fn nominating_a_scene_stores_it_relative_to_the_project() {
     assert_eq!(project.main_scene(), Some(scene));
     let text = std::fs::read_to_string(root.join(MANIFEST_NAME)).expect("the manifest");
     assert!(
-        text.contains("levels/two.scene.json"),
+        text.contains("levels/two.scene"),
         "the path is stored project-relative and with forward slashes, so a \
          project checked out on another platform still finds it: {text}"
     );
@@ -211,7 +211,7 @@ fn a_scene_outside_the_project_cannot_be_nominated() {
     let directory = tempfile::tempdir().expect("a temporary directory");
     let root = directory.path().join("my-game");
     let mut project = created(&root, "My Game");
-    let outside = directory.path().join("elsewhere.scene.json");
+    let outside = directory.path().join("elsewhere.scene");
     std::fs::write(&outside, "{}").expect("a scene");
     assert!(
         project.set_main_scene(&outside).is_err(),
@@ -224,7 +224,7 @@ fn a_scene_deep_inside_a_project_still_finds_it() {
     let directory = tempfile::tempdir().expect("a temporary directory");
     let root = directory.path().join("my-game");
     created(&root, "My Game");
-    let scene = root.join("levels").join("act-one").join("two.scene.json");
+    let scene = root.join("levels").join("act-one").join("two.scene");
     std::fs::create_dir_all(scene.parent().expect("a parent")).expect("the folders");
     std::fs::write(&scene, "{}").expect("a scene");
 
@@ -238,7 +238,7 @@ fn a_scene_deep_inside_a_project_still_finds_it() {
 #[test]
 fn a_scene_in_no_project_belongs_to_no_project() {
     let directory = tempfile::tempdir().expect("a temporary directory");
-    let scene = directory.path().join("loose.scene.json");
+    let scene = directory.path().join("loose.scene");
     std::fs::write(&scene, "{}").expect("a scene");
     assert_eq!(root_for(&scene), None);
 }
@@ -261,10 +261,7 @@ fn saving_a_project_keeps_the_scenes_it_did_not_open() {
     let text = std::fs::read_to_string(&manifest).expect("the manifest reads");
     std::fs::write(
         &manifest,
-        text.replace(
-            "[project]",
-            "[project]\nscenes = [\"assets/house.scene.json\"]",
-        ),
+        text.replace("[project]", "[project]\nscenes = [\"assets/house.scene\"]"),
     )
     .expect("the manifest writes");
     drop(project);
@@ -272,13 +269,13 @@ fn saving_a_project_keeps_the_scenes_it_did_not_open() {
     let mut project = Project::open(&root).expect("the project reopens");
     assert_eq!(
         project.manifest.project.scenes,
-        vec!["assets/house.scene.json".to_owned()],
+        vec!["assets/house.scene".to_owned()],
         "the field is read"
     );
 
     // Anything that rewrites the manifest, here the ordinary act of nominating
     // a different opening scene.
-    let other = root.join("other.scene.json");
+    let other = root.join("other.scene");
     SceneFile::create(&other, &SceneDocument::default()).expect("a second scene file");
     project
         .set_main_scene(&other)
@@ -286,7 +283,7 @@ fn saving_a_project_keeps_the_scenes_it_did_not_open() {
 
     let after = std::fs::read_to_string(&manifest).expect("the manifest still reads");
     assert!(
-        after.contains("assets/house.scene.json"),
+        after.contains("assets/house.scene"),
         "saving dropped the scenes the editor does not use:\n{after}"
     );
 }

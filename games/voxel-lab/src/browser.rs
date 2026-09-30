@@ -23,7 +23,7 @@ use crate::{
     camera_control::{CameraControls, LabCamera},
 };
 
-const SCENE_JSON: &str = include_str!("../assets/voxel-lab.scene.json");
+const SCENE_JSON: &str = include_str!("../assets/voxel-lab.scene");
 const USER_TOP: &[u8] = include_bytes!("../assets/textures/user-top.png");
 const USER_SIDE_A: &[u8] = include_bytes!("../assets/textures/user-side-a.png");
 const USER_DIRT: &[u8] = include_bytes!("../assets/textures/user-dirt.png");

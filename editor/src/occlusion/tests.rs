@@ -28,7 +28,7 @@ fn tile_sets() -> TileSetBindings {
     )
     .expect("the tile set decodes");
     let mut bindings = TileSetBindings::new();
-    bindings.bind("world.tileset.json", document).unwrap();
+    bindings.bind("world.tileset", document).unwrap();
     bindings
 }
 
@@ -53,7 +53,7 @@ fn world_with_raised(raised: bool) -> (World, SceneExtractor) {
     );
     floor.components.insert(
         "sindri.tile_volume".to_owned(),
-        json!({ "tileset": "world.tileset.json", "cells": cells }),
+        json!({ "tileset": "world.tileset", "cells": cells }),
     );
     let document = SceneDocument {
         format_version: SCENE_FORMAT_VERSION,

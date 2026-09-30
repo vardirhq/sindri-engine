@@ -26,7 +26,7 @@ fn tile_sets() -> TileSetBindings {
     )
     .expect("the tile set decodes");
     let mut bindings = TileSetBindings::new();
-    bindings.bind("world.tileset.json", document).unwrap();
+    bindings.bind("world.tileset", document).unwrap();
     bindings
 }
 
@@ -43,7 +43,7 @@ fn scripted_volume(script: &str, cells: &serde_json::Value) -> (World, EntityId,
             ),
             (
                 "sindri.tile_volume".to_owned(),
-                json!({ "tileset": "world.tileset.json", "cells": cells.clone() }),
+                json!({ "tileset": "world.tileset", "cells": cells.clone() }),
             ),
         ]
         .into_iter()
@@ -206,7 +206,7 @@ fn a_tile_the_set_does_not_define_is_refused_at_the_call() {
         .collect::<Vec<_>>()
         .join("\n");
     assert!(
-        reported.contains("cheese") && reported.contains("world.tileset.json"),
+        reported.contains("cheese") && reported.contains("world.tileset"),
         "the failure should name the tile and the set that does not define it: {reported}"
     );
     assert!(

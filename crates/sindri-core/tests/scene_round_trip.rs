@@ -31,7 +31,7 @@ fn fixtures() -> Vec<(PathBuf, String)> {
         .map(|entry| entry.expect("fixture entry is readable").path())
         .filter(|path| {
             path.extension()
-                .is_some_and(|extension| extension == "json")
+                .is_some_and(|extension| extension == "scene")
         })
         .collect();
     paths.sort();
@@ -143,7 +143,7 @@ fn stripping_editor_metadata_preserves_the_runtime_scene() {
 /// Unregistered component payloads survive a full load and save unchanged.
 #[test]
 fn unknown_component_payloads_survive_a_save() {
-    let name = "components.scene.json";
+    let name = "components.scene";
     let path = fixture_directory().join(name);
     let (document, _) = read_fixture(&path, name);
     let loaded = World::from_scene(&document).expect("fixture loads");
@@ -163,7 +163,7 @@ fn unknown_component_payloads_survive_a_save() {
 /// save, reopen, and get the edit back.
 #[test]
 fn an_edited_transform_survives_a_save_and_reopen() {
-    let name = "hierarchy.scene.json";
+    let name = "hierarchy.scene";
     let path = fixture_directory().join(name);
     let (document, original_text) = read_fixture(&path, name);
 
@@ -318,14 +318,14 @@ mod migration {
     #[test]
     fn an_older_scene_migrates_to_the_stored_current_fixture() {
         for (before, after) in [
-            ("hierarchy.v1.json", "hierarchy.scene.json"),
-            ("components.v1.json", "components.scene.json"),
-            ("hierarchy.v2.json", "hierarchy.scene.json"),
-            ("components.v2.json", "components.scene.json"),
-            ("minimal.v2.json", "minimal.scene.json"),
-            ("hierarchy.v3.json", "hierarchy.scene.json"),
-            ("components.v3.json", "components.scene.json"),
-            ("minimal.v3.json", "minimal.scene.json"),
+            ("hierarchy.v1.scene", "hierarchy.scene"),
+            ("components.v1.scene", "components.scene"),
+            ("hierarchy.v2.scene", "hierarchy.scene"),
+            ("components.v2.scene", "components.scene"),
+            ("minimal.v2.scene", "minimal.scene"),
+            ("hierarchy.v3.scene", "hierarchy.scene"),
+            ("components.v3.scene", "components.scene"),
+            ("minimal.v3.scene", "minimal.scene"),
         ] {
             let migrated = super::SceneDocument::from_json_migrated(
                 &legacy(before),

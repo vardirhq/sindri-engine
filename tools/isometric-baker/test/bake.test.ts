@@ -24,7 +24,7 @@ import { paletteFor } from '../src/frames.ts';
 const PROJECT = fileURLToPath(new URL('../fixtures/project/', import.meta.url));
 
 async function standingStone() {
-  const path = `${PROJECT}prefabs/standing-stone.isobake.json`;
+  const path = `${PROJECT}prefabs/standing-stone.isobake`;
   return parseRecipe(await readFile(path, 'utf8'), path);
 }
 
@@ -137,8 +137,8 @@ test('turning the model actually changes the picture', async () => {
 });
 
 test('a sheet id replaces the extension rather than following it', () => {
-  assert.equal(sheetIdFor('textures/shrine.png'), 'textures/shrine.sheet.json');
-  assert.equal(sheetIdFor('shrine'), 'shrine.sheet.json');
+  assert.equal(sheetIdFor('textures/shrine.png'), 'textures/shrine.sheet');
+  assert.equal(sheetIdFor('shrine'), 'shrine.sheet');
 });
 
 test('documents are written with a trailing newline', () => {

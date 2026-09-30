@@ -19,7 +19,7 @@ fn tile_set(extra: &str) -> TileSetDocument {
 
 fn volume(cells: &str) -> TileVolumeComponent {
     serde_json::from_str(&format!(
-        r#"{{ "tileset": "b.tileset.json", "cells": [{cells}] }}"#
+        r#"{{ "tileset": "b.tileset", "cells": [{cells}] }}"#
     ))
     .expect("the volume parses")
 }

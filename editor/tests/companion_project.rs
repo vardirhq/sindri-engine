@@ -55,7 +55,7 @@ fn named_in_scene(scene: &str, key: &str) -> Vec<String> {
 
 #[test]
 fn the_browser_offers_the_game_the_references_it_uses() {
-    let scene = companion().join("assets/causeway.scene.json");
+    let scene = companion().join("assets/causeway.scene");
     let text = std::fs::read_to_string(&scene).expect("the game's scene is there");
     let tree = browsing(&scene);
 
@@ -84,7 +84,7 @@ fn the_browser_offers_the_game_the_references_it_uses() {
 /// sprite disappear.
 #[test]
 fn nothing_offered_is_spelled_from_the_project_root() {
-    let scene = companion().join("assets/causeway.scene.json");
+    let scene = companion().join("assets/causeway.scene");
     let tree = browsing(&scene);
 
     let offered: Vec<String> =
@@ -103,7 +103,7 @@ fn nothing_offered_is_spelled_from_the_project_root() {
 /// control away rather than two thirds of the rows.
 #[test]
 fn the_listing_starts_at_the_assets_and_the_rest_is_still_there() {
-    let scene = companion().join("assets/causeway.scene.json");
+    let scene = companion().join("assets/causeway.scene");
     let tree = browsing(&scene);
 
     assert_eq!(

@@ -11,7 +11,7 @@ use super::{
 
 fn volume() -> serde_json::Value {
     json!({
-        "tileset": "world.tileset.json",
+        "tileset": "world.tileset",
         "cells": [{ "position": [1, 1, 0], "tile": "earth" }],
         "layer": 0
     })
@@ -200,7 +200,7 @@ fn a_pointer_over_a_block_finds_that_block_and_the_side_it_is_looking_at() {
     let grid = solid_grid();
     let cell_size = grid.solid_cell().expect("a solid grid gives a cell box");
     let volume: sindri_scene::TileVolumeComponent = serde_json::from_value(json!({
-        "tileset": "world.tileset.json",
+        "tileset": "world.tileset",
         "cells": [{ "position": [0, 0, 0], "tile": "earth" }]
     }))
     .expect("the volume parses");
@@ -229,7 +229,7 @@ fn a_pointer_off_the_blocks_finds_none_of_them() {
     let grid = solid_grid();
     let cell_size = grid.solid_cell().expect("a solid grid gives a cell box");
     let volume: sindri_scene::TileVolumeComponent = serde_json::from_value(json!({
-        "tileset": "world.tileset.json",
+        "tileset": "world.tileset",
         "cells": [{ "position": [0, 0, 0], "tile": "earth" }]
     }))
     .expect("the volume parses");

@@ -21,7 +21,7 @@ import { type Recipe, parseRecipe } from '../src/recipe.ts';
 const PROJECT = fileURLToPath(new URL('../fixtures/project/', import.meta.url));
 
 async function standingStone(): Promise<Recipe> {
-  const path = `${PROJECT}prefabs/standing-stone.isobake.json`;
+  const path = `${PROJECT}prefabs/standing-stone.isobake`;
   return parseRecipe(await readFile(path, 'utf8'), path);
 }
 
@@ -35,8 +35,8 @@ test('a bake writes the prefab its recipe asks for', async () => {
   const paths = result.files.map((file) => file.path);
   assert.deepEqual(paths, [
     'textures/standing-stone.png',
-    'textures/standing-stone.sheet.json',
-    'prefabs/standing-stone.prefab.json',
+    'textures/standing-stone.sheet',
+    'prefabs/standing-stone.prefab',
   ]);
 });
 
@@ -44,7 +44,7 @@ test('a recipe with no prefab block writes no prefab', async () => {
   const recipe = await standingStone();
   const { prefab: _dropped, ...rest } = recipe;
   const paths = bake(rest).files.map((file) => file.path);
-  assert.deepEqual(paths, ['textures/standing-stone.png', 'textures/standing-stone.sheet.json']);
+  assert.deepEqual(paths, ['textures/standing-stone.png', 'textures/standing-stone.sheet']);
 });
 
 test('the prefab scale is the canvas measured in world units', async () => {

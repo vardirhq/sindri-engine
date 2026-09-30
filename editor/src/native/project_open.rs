@@ -24,7 +24,7 @@ impl EditorApp {
     /// component registry's own default payload — rather than from a second
     /// copy of that answer living beside the project format.
     pub(super) fn create_project(&mut self, root: &Path, name: &str) {
-        let document = super::scene_new::blank_scene(&self.scene, &root.join("main.scene.json"));
+        let document = super::scene_new::blank_scene(&self.scene, &root.join("main.scene"));
         match Project::create(root, name, &document) {
             Ok(project) => {
                 self.console.info(format!(
@@ -239,7 +239,7 @@ mod tests {
         assert!(nominates(
             Some(Path::new("/games/mine")),
             None,
-            Path::new("/games/mine/main.scene.json")
+            Path::new("/games/mine/main.scene")
         ));
     }
 
@@ -248,8 +248,8 @@ mod tests {
         assert!(
             !nominates(
                 Some(Path::new("/games/mine")),
-                Some(Path::new("/games/mine/main.scene.json")),
-                Path::new("/games/mine/sketch.scene.json")
+                Some(Path::new("/games/mine/main.scene")),
+                Path::new("/games/mine/sketch.scene")
             ),
             "the author chose one, and making another is not changing their mind"
         );
@@ -260,12 +260,12 @@ mod tests {
         assert!(!nominates(
             Some(Path::new("/games/mine")),
             None,
-            Path::new("/elsewhere/loose.scene.json")
+            Path::new("/elsewhere/loose.scene")
         ));
     }
 
     #[test]
     fn with_no_project_open_there_is_nothing_to_nominate_in() {
-        assert!(!nominates(None, None, Path::new("/loose.scene.json")));
+        assert!(!nominates(None, None, Path::new("/loose.scene")));
     }
 }

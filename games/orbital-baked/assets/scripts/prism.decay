@@ -1,6 +1,6 @@
 // Seven-faceted sniper. Only soft while a facet is turned toward you.
 //
-// Its hull is baked from `textures/prism.isobake.json`; everything this
+// Its hull is baked from `textures/prism.isobake`; everything this
 // script does to it beyond that is motion.
 script Prism {
     @export let shot: Prefab;

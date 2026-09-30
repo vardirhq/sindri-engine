@@ -15,7 +15,7 @@ use thiserror::Error;
 pub const PROFILE_FORMAT_VERSION: u32 = 1;
 
 /// The suffix that identifies a profile asset.
-pub const PROFILE_SUFFIX: &str = ".profile.json";
+pub const PROFILE_SUFFIX: &str = ".profile";
 
 #[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
 pub struct ProfileDocument {

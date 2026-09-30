@@ -88,8 +88,8 @@ mod tests {
     #[test]
     fn a_scene_on_the_command_line_opens_without_asking() {
         assert_eq!(
-            decide(Some("levels/one.scene.json"), None, false),
-            Launch::Scene(PathBuf::from("levels/one.scene.json")),
+            decide(Some("levels/one.scene"), None, false),
+            Launch::Scene(PathBuf::from("levels/one.scene")),
             "the command line is the most deliberate thing anyone can say"
         );
     }
@@ -123,12 +123,8 @@ mod tests {
         let root = directory.path().join("game");
         Project::create(&root, "Game", &SceneDocument::default()).expect("a project");
         assert_eq!(
-            decide(
-                Some("levels/one.scene.json"),
-                Some(&remembered(&root)),
-                true
-            ),
-            Launch::Scene(PathBuf::from("levels/one.scene.json"))
+            decide(Some("levels/one.scene"), Some(&remembered(&root)), true),
+            Launch::Scene(PathBuf::from("levels/one.scene"))
         );
     }
 

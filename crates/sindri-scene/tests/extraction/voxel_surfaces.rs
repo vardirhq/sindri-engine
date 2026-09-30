@@ -21,7 +21,7 @@ fn world(surface: &str) -> sindri_core::World {
               "surface_voxel": "__SURFACE__", "subsurface_voxel": "dirt",
               "deep_voxel": "dirt", "subsurface_depth": 3
             },
-            "blocks": "surfaces.tileset.json",
+            "blocks": "surfaces.tileset",
             "focus": [0, 0, 0], "render_radius": 0,
             "vertical_radius": 0, "layer": 0
           }
@@ -62,7 +62,7 @@ fn blocks(broken: bool) -> TileSetBindings {
     .expect("the block set parses");
     let mut bindings = TileSetBindings::new();
     bindings
-        .bind("surfaces.tileset.json", document)
+        .bind("surfaces.tileset", document)
         .expect("the block set is valid");
     bindings
 }

@@ -103,7 +103,7 @@ all rather than leaving a partial subtree behind.
 
 ## Loading one
 
-`.prefab.json`, resolved against the scene's directory like every other asset,
+`.prefab`, resolved against the scene's directory like every other asset,
 and delivered by the same text pipeline the scripts use — a prefab is JSON, and
 the pipeline has no reason to know more than that. A document that will not
 parse is reported once, when it loads, rather than on the frame a script spawns

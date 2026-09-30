@@ -20,7 +20,7 @@ const VIEW_MARGIN: i32 = 1;
 const FLOOR: &str = "sindri.tile_grid";
 const VOLUME: &str = "sindri.tile_volume";
 const MESH: &str = "sindri.mesh";
-pub(crate) const TILE_SET: &str = "causeway.tileset.json";
+pub(crate) const TILE_SET: &str = "causeway.tileset";
 
 #[must_use]
 pub(crate) const fn world_shape() -> WorldShape {

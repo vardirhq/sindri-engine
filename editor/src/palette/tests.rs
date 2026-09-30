@@ -58,12 +58,12 @@ fn a_note_is_searched_as_well_as_a_label() {
         ..Palette::default()
     };
     let results = palette.rank(vec![
-        asset("drifter.prefab.json", "assets/prefabs"),
+        asset("drifter.prefab", "assets/prefabs"),
         asset("drifter.png", "assets/textures"),
     ]);
     assert_eq!(
         results.first().map(|r| r.label.as_str()),
-        Some("drifter.prefab.json")
+        Some("drifter.prefab")
     );
 }
 

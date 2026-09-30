@@ -1,6 +1,6 @@
 //! The demo's asset manifest, kept honest.
 //!
-//! `assets/sindri.manifest.json` says what this project ships and what each file
+//! `assets/sindri.manifest` says what this project ships and what each file
 //! is. It is committed, because a manifest generated at deploy time describes
 //! whatever happened to be on the machine that ran the deploy, which is not a
 //! promise about anything. Committing it makes the promise reviewable and makes
@@ -61,7 +61,7 @@ fn the_manifest_covers_what_the_scene_references() {
     let manifest = AssetManifest::from_json(&text).expect("the manifest parses");
     assert_eq!(manifest.format_version(), MANIFEST_FORMAT_VERSION);
 
-    for name in ["demo.scene.json", "textures/badge.png"] {
+    for name in ["demo.scene", "textures/badge.png"] {
         let id = AssetId::new(name).expect("a valid asset ID");
         let entry = manifest
             .get(&id)

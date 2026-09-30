@@ -50,7 +50,7 @@ impl Run {
     /// If the project will not read, will not parse, or will not load.
     pub fn open() -> Result<Self, String> {
         let root = project().join("assets");
-        let text = std::fs::read_to_string(root.join("scorchball.scene.json"))
+        let text = std::fs::read_to_string(root.join("scorchball.scene"))
             .map_err(|error| error.to_string())?;
         let document: SceneDocument =
             serde_json::from_str(&text).map_err(|error| error.to_string())?;

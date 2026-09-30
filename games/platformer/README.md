@@ -20,7 +20,7 @@ claim that two invisible fingers somehow constitute a finished mobile UI.
 
 There is no game code. The game is `assets/`:
 
-- `platformer.scene.json`: the level, the hero, the coins, the flag and the HUD.
+- `platformer.scene`: the level, the hero, the coins, the flag and the HUD.
 - `scripts/hero.decay`: keyboard, controller and touch movement, jumping, coins,
   the flag and falling off.
 - `scripts/hud.decay`: the coin count and the banner.
@@ -42,7 +42,7 @@ It uses, with no Rust of its own:
 
 ## Playing it
 
-Open `assets/platformer.scene.json` in the editor and press Play: the Scene view
+Open `assets/platformer.scene` in the editor and press Play: the Scene view
 opens in 2D, framed on the game's camera. It is also exported to the site at
 `examples/platformer/`.
 

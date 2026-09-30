@@ -72,10 +72,8 @@ pub const TEXTURE_IDS: &[&str] = &[
 /// A game with interiors reaches them by name, so all of them have to be here
 /// — a browser build fetches the same IDs through the real asset pipeline.
 #[cfg(not(target_arch = "wasm32"))]
-pub(crate) const SCENES: &[(&str, &str)] = &[(
-    "causeway.scene.json",
-    include_str!("../assets/causeway.scene.json"),
-)];
+pub(crate) const SCENES: &[(&str, &str)] =
+    &[("causeway.scene", include_str!("../assets/causeway.scene"))];
 
 #[cfg(not(target_arch = "wasm32"))]
 pub(crate) const SCRIPTS: &[(&str, &str)] = &[
@@ -198,32 +196,32 @@ pub fn bind_audio(audio: &mut dyn AudioBackend) -> Result<(), CausewayError> {
 #[cfg(not(target_arch = "wasm32"))]
 pub const SHEETS: &[(&str, &str)] = &[
     (
-        "textures/blocks-top.sheet.json",
-        include_str!("../assets/textures/blocks-top.sheet.json"),
+        "textures/blocks-top.sheet",
+        include_str!("../assets/textures/blocks-top.sheet"),
     ),
     (
-        "textures/blocks-side.sheet.json",
-        include_str!("../assets/textures/blocks-side.sheet.json"),
+        "textures/blocks-side.sheet",
+        include_str!("../assets/textures/blocks-side.sheet"),
     ),
     (
-        "textures/slabs-side.sheet.json",
-        include_str!("../assets/textures/slabs-side.sheet.json"),
+        "textures/slabs-side.sheet",
+        include_str!("../assets/textures/slabs-side.sheet"),
     ),
     (
-        "textures/wanderer.sheet.json",
-        include_str!("../assets/textures/wanderer.sheet.json"),
+        "textures/wanderer.sheet",
+        include_str!("../assets/textures/wanderer.sheet"),
     ),
     (
-        "textures/beacon.sheet.json",
-        include_str!("../assets/textures/beacon.sheet.json"),
+        "textures/beacon.sheet",
+        include_str!("../assets/textures/beacon.sheet"),
     ),
 ];
 
 /// Semantic block sets embedded by the native game.
 #[cfg(not(target_arch = "wasm32"))]
 pub const TILE_SETS: &[(&str, &str)] = &[(
-    "causeway.tileset.json",
-    include_str!("../assets/causeway.tileset.json"),
+    "causeway.tileset",
+    include_str!("../assets/causeway.tileset"),
 )];
 
 #[cfg(not(target_arch = "wasm32"))]

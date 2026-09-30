@@ -70,7 +70,7 @@ fn bind_textures(
             asset.rgba8(),
         )?;
         bindings.bind(&reference, registry.insert(texture));
-        let sheet = fs::read_to_string(root.join(format!("{name}.sheet.json")))?;
+        let sheet = fs::read_to_string(root.join(format!("{name}.sheet")))?;
         bindings.bind_sheet(&reference, &SpriteSheetDocument::from_json(&sheet)?)?;
     }
     Ok(bindings)
@@ -159,8 +159,8 @@ async fn preview(path: &Path, overview: bool) -> Result<(), Box<dyn Error>> {
 
     let mut tile_sets = TileSetBindings::new();
     tile_sets.bind(
-        "causeway.tileset.json",
-        TileSetDocument::from_json(&fs::read_to_string(root.join("causeway.tileset.json"))?)?,
+        "causeway.tileset",
+        TileSetDocument::from_json(&fs::read_to_string(root.join("causeway.tileset"))?)?,
     )?;
     // One pass, so nothing is kept: the cache exists for hosts that resolve
     // every frame.

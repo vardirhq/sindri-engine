@@ -94,13 +94,13 @@ fn two_scene_project(name: &str, extra: &str) -> Project {
 
 [project]
 name = "Two Places"
-main_scene = "assets/outside.scene.json"
+main_scene = "assets/outside.scene"
 scenes = {extra}
 "#
         ),
     );
-    project.scene("assets/outside.scene.json", "textures/outside.png");
-    project.scene("assets/inside.scene.json", "textures/inside.png");
+    project.scene("assets/outside.scene", "textures/outside.png");
+    project.scene("assets/inside.scene", "textures/inside.png");
     project.texture("assets/textures/outside.png");
     project.texture("assets/textures/inside.png");
     project
@@ -117,24 +117,18 @@ fn ids(export: &ProjectExport, kind: AssetKind) -> Vec<String> {
 
 #[test]
 fn every_declared_scene_ships() {
-    let project = two_scene_project("both", r#"["assets/inside.scene.json"]"#);
+    let project = two_scene_project("both", r#"["assets/inside.scene"]"#);
     let export = ProjectExport::gather(project.path()).expect("it gathers");
     let scenes = ids(&export, AssetKind::Scene);
-    assert!(
-        scenes.contains(&"outside.scene.json".to_owned()),
-        "{scenes:?}"
-    );
-    assert!(
-        scenes.contains(&"inside.scene.json".to_owned()),
-        "{scenes:?}"
-    );
+    assert!(scenes.contains(&"outside.scene".to_owned()), "{scenes:?}");
+    assert!(scenes.contains(&"inside.scene".to_owned()), "{scenes:?}");
 }
 
 /// The whole point. A scene that shipped without its own textures would draw
 /// nothing, and the export would have looked like it worked.
 #[test]
 fn a_second_scene_brings_its_own_assets() {
-    let project = two_scene_project("assets", r#"["assets/inside.scene.json"]"#);
+    let project = two_scene_project("assets", r#"["assets/inside.scene"]"#);
     let export = ProjectExport::gather(project.path()).expect("it gathers");
     let textures = ids(&export, AssetKind::Texture);
     assert!(
@@ -147,9 +141,9 @@ fn a_second_scene_brings_its_own_assets() {
 /// than one is shipping.
 #[test]
 fn the_main_scene_is_the_one_the_project_names() {
-    let project = two_scene_project("main", r#"["assets/inside.scene.json"]"#);
+    let project = two_scene_project("main", r#"["assets/inside.scene"]"#);
     let export = ProjectExport::gather(project.path()).expect("it gathers");
-    assert_eq!(export.scene_id(), Some("outside.scene.json"));
+    assert_eq!(export.scene_id(), Some("outside.scene"));
 }
 
 /// Listing the main scene among the others is someone being explicit, not a
@@ -158,15 +152,12 @@ fn the_main_scene_is_the_one_the_project_names() {
 fn a_scene_listed_twice_ships_once() {
     let project = two_scene_project(
         "twice",
-        r#"["assets/outside.scene.json", "assets/inside.scene.json"]"#,
+        r#"["assets/outside.scene", "assets/inside.scene"]"#,
     );
     let export = ProjectExport::gather(project.path()).expect("it gathers");
     let scenes = ids(&export, AssetKind::Scene);
     assert_eq!(
-        scenes
-            .iter()
-            .filter(|id| *id == "outside.scene.json")
-            .count(),
+        scenes.iter().filter(|id| *id == "outside.scene").count(),
         1,
         "{scenes:?}"
     );
@@ -178,7 +169,7 @@ fn a_scene_listed_twice_ships_once() {
 fn a_project_with_one_scene_is_unchanged() {
     let project = two_scene_project("one", "[]");
     let export = ProjectExport::gather(project.path()).expect("it gathers");
-    assert_eq!(ids(&export, AssetKind::Scene), vec!["outside.scene.json"]);
+    assert_eq!(ids(&export, AssetKind::Scene), vec!["outside.scene"]);
     let textures = ids(&export, AssetKind::Texture);
     assert!(
         !textures.contains(&"textures/inside.png".to_owned()),
@@ -188,7 +179,7 @@ fn a_project_with_one_scene_is_unchanged() {
 
 #[test]
 fn a_declared_scene_that_is_not_there_is_reported() {
-    let project = two_scene_project("missing", r#"["assets/attic.scene.json"]"#);
+    let project = two_scene_project("missing", r#"["assets/attic.scene"]"#);
     let error = ProjectExport::gather(project.path()).expect_err("it should refuse");
     assert!(
         format!("{error}").contains("attic"),

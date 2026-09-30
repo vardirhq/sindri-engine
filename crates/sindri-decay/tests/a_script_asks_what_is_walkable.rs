@@ -38,7 +38,7 @@ fn tile_sets() -> TileSetBindings {
     )
     .expect("the tile set decodes");
     let mut bindings = TileSetBindings::new();
-    bindings.bind("world.tileset.json", document).unwrap();
+    bindings.bind("world.tileset", document).unwrap();
     bindings
 }
 
@@ -54,7 +54,7 @@ fn scripted_volume(script: &str, cells: &serde_json::Value) -> (World, EntityId,
             ),
             (
                 "sindri.tile_volume".to_owned(),
-                json!({ "tileset": "world.tileset.json", "cells": cells.clone() }),
+                json!({ "tileset": "world.tileset", "cells": cells.clone() }),
             ),
         ]
         .into_iter()

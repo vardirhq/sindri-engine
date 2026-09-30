@@ -463,12 +463,8 @@ impl SceneScripts {
 fn list_scripts(root: &Path) -> Vec<String> {
     let source = FileSystemAssetSource::new(root);
     let mut assets = source.assets_with_extension("decay");
-    assets.extend(
-        source
-            .assets_with_extension("json")
-            .into_iter()
-            .filter(|asset| is_prefab(asset) || is_profile(asset)),
-    );
+    assets.extend(source.assets_with_extension("prefab"));
+    assets.extend(source.assets_with_extension("profile"));
     assets
 }
 

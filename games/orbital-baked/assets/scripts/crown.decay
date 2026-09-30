@@ -1,7 +1,7 @@
 // Regenerates unless it is being hurt now. Keeps a court to make that
 // hard.
 //
-// Its hull is baked from `textures/crown.isobake.json`; everything this
+// Its hull is baked from `textures/crown.isobake`; everything this
 // script does to it beyond that is motion.
 script Crown {
     @export let shot: Prefab;

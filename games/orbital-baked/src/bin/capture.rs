@@ -138,7 +138,7 @@ async fn capture(
     view: CameraView,
 ) -> Result<(), Box<dyn Error>> {
     let mut run = if what == "lab" {
-        Run::open_scene("combat-lab.scene.json")
+        Run::open_scene("combat-lab.scene")
     } else {
         Run::open()
     }

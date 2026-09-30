@@ -1,6 +1,6 @@
 // A gravity well. Drags the player in for the whole fight.
 //
-// Its hull is baked from `textures/singularity.isobake.json`; everything this
+// Its hull is baked from `textures/singularity.isobake`; everything this
 // script does to it beyond that is motion.
 script Singularity {
     @export let shot: Prefab;

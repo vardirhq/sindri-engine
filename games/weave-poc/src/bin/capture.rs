@@ -35,9 +35,8 @@ fn main() -> Result<(), Box<dyn Error>> {
 
 async fn capture(path: &Path, width: u32, height: u32, scene: &str) -> Result<(), Box<dyn Error>> {
     let root = Path::new(env!("CARGO_MANIFEST_DIR")).join("assets");
-    let document = SceneDocument::from_json(&fs::read_to_string(
-        root.join(format!("{scene}.scene.json")),
-    )?)?;
+    let document =
+        SceneDocument::from_json(&fs::read_to_string(root.join(format!("{scene}.scene")))?)?;
     let authored = World::from_scene(&document)?.world;
     let stylesheet = weave::parse(&fs::read_to_string(root.join(format!("{scene}.weave")))?)?;
     #[allow(clippy::cast_precision_loss)]

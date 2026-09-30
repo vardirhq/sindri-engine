@@ -40,9 +40,9 @@ Every layered draw in every scene checked into this repository:
 
 | Scene | Draws | Range | Distinct |
 | --- | --- | --- | --- |
-| `game/assets/gather.scene.json` | 89 | 0..120 | 45 |
-| `games/shapes-lab/assets/shapes-lab.scene.json` | 89 | -120..30 | 23 |
-| `games/orbital-baked/assets/orbital.scene.json` | 72 | -200..140 | 10 |
+| `game/assets/gather.scene` | 89 | 0..120 | 45 |
+| `games/shapes-lab/assets/shapes-lab.scene` | 89 | -120..30 | 23 |
+| `games/orbital-baked/assets/orbital.scene` | 72 | -200..140 | 10 |
 | everything else | 72 | 0..101 | ≤ 3 each |
 
 Orbital's ten layers across a wide range are *groups*: backdrop, play field,

@@ -11,7 +11,7 @@ evidence written against the original are kept in `docs/` as history.
 
 ## What is baked
 
-Each from a `.isobake.json` recipe in `assets/textures`:
+Each from a `.isobake` recipe in `assets/textures`:
 
 | sheet            | what it draws                      | frames |
 | ---------------- | ---------------------------------- | ------ |
@@ -43,7 +43,7 @@ Re-bake any of them with:
 
 ```
 cd tools/isometric-baker
-node src/cli.ts ../../games/orbital-baked/assets/textures/<id>.isobake.json \
+node src/cli.ts ../../games/orbital-baked/assets/textures/<id>.isobake \
   --out ../../games/orbital-baked/assets
 ```
 

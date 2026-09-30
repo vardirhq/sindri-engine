@@ -56,7 +56,7 @@ and generating one never depends on another.
 | `biomes[]` | `name`, climate point (`temperature`, `moisture`, 0–1), `surface_voxel`, `subsurface_voxel`, `subsurface_depth`, `trees` (0–1), `relief` (0–4, a multiple of the world's hills), and `terraces` (step height; 0 for none). |
 
 Every voxel field names a block. A world that sets `blocks` to a block set
-(`builtin:blocks`, or a project's own `.tileset.json`) names blocks from it by
+(`builtin:blocks`, or a project's own `.tileset`) names blocks from it by
 name — `"surface_voxel": "grass"` — and the engine numbers the set's blocks
 itself; each face draws with the block's art, a tile's south face being the
 voxel's front. A world with no block set names its own `materials` by number,

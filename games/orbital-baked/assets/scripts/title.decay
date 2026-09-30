@@ -45,7 +45,7 @@ script Title {
             if abs(dx) <= this.logo.transform.scale.x * 0.5 &&
                abs(dy) <= this.logo.transform.scale.y * 0.5 {
                 Audio.play("audio/click.wav", 0.3);
-                Scene.go("combat-lab.scene.json");
+                Scene.go("combat-lab.scene");
                 return;
             }
         }

@@ -21,7 +21,7 @@ pub const PREFAB_FORMAT_VERSION: u32 = 1;
 /// what a file is before it parses it. The name is the answer — it lives here,
 /// beside the document it names, because the export, the editor, and every
 /// host need it and none of them can depend on the others.
-pub const PREFAB_SUFFIX: &str = ".prefab.json";
+pub const PREFAB_SUFFIX: &str = ".prefab";
 
 /// An authored reusable entity definition.
 ///

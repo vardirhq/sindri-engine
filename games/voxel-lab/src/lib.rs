@@ -71,7 +71,7 @@ const PITCH: f32 = FRAC_PI_6;
 /// and the painter-order path draws it by arranging quads for one viewpoint —
 /// so if it survives being walked round, the geometry is real.
 const CELLS: &str = r#"{
-  "tileset": "blocks.tileset.json",
+  "tileset": "blocks.tileset",
   "cells": [
     { "position": [0, 0, 0], "tile": "grass" }, { "position": [1, 0, 0], "tile": "grass" },
     { "position": [2, 0, 0], "tile": "grass" }, { "position": [3, 0, 0], "tile": "grass" },
@@ -152,7 +152,7 @@ pub fn bind_textures(
         // Each file is one face, whole. A sheet would say which part of it to
         // use, and there is no part: the reference carries no fragment and
         // resolves to the entire texture.
-        let sheet_path = root.join(format!("{name}.sheet.json"));
+        let sheet_path = root.join(format!("{name}.sheet"));
         if sheet_path.exists() {
             let sheet = fs::read_to_string(sheet_path)?;
             bindings.bind_sheet(&reference, &SpriteSheetDocument::from_json(&sheet)?)?;

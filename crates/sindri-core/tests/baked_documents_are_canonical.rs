@@ -30,7 +30,7 @@ fn read(relative: &str) -> String {
         panic!(
             "{} is readable ({error}); re-bake it with \
              `node tools/isometric-baker/src/cli.ts \
-             tools/isometric-baker/fixtures/project/prefabs/standing-stone.isobake.json \
+             tools/isometric-baker/fixtures/project/prefabs/standing-stone.isobake \
              --out tools/isometric-baker/fixtures/project`",
             path.display()
         )
@@ -44,7 +44,7 @@ fn read(relative: &str) -> String {
 /// line, and the decimal an `f32` scale is spelled with.
 #[test]
 fn a_generated_prefab_is_written_the_way_sindri_writes_one() {
-    let source = read("prefabs/standing-stone.prefab.json");
+    let source = read("prefabs/standing-stone.prefab");
     let document = PrefabDocument::from_json(&source).expect("the generated prefab parses");
     let rewritten = document
         .to_canonical_json()
@@ -63,7 +63,7 @@ fn a_generated_prefab_is_written_the_way_sindri_writes_one() {
 /// what any renderer needs and nothing a particular game invented.
 #[test]
 fn a_generated_prefab_is_one_sprite_on_one_root() {
-    let source = read("prefabs/standing-stone.prefab.json");
+    let source = read("prefabs/standing-stone.prefab");
     let document = PrefabDocument::from_json(&source).expect("the generated prefab parses");
     let root = document.root().expect("a prefab has exactly one root");
 
@@ -94,7 +94,7 @@ fn a_generated_prefab_is_one_sprite_on_one_root() {
 /// The generated sheet is a sheet this runtime can actually cut.
 #[test]
 fn a_generated_sheet_slices_into_the_frames_it_names() {
-    let source = read("textures/standing-stone.sheet.json");
+    let source = read("textures/standing-stone.sheet");
     let document = SpriteSheetDocument::from_json(&source).expect("the generated sheet parses");
     let rects = document.rects().expect("the generated sheet slices");
 

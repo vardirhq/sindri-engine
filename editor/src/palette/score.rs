@@ -1,7 +1,7 @@
 //! Deciding which of several hundred things someone meant by four letters.
 //!
 //! Subsequence matching rather than substring: typing `oscn` should find
-//! `orbital.scene.json`, and a palette that only finds what you spelled
+//! `orbital.scene`, and a palette that only finds what you spelled
 //! contiguously is a filter box with a keyboard shortcut. Scored rather than
 //! merely matched, because every candidate matches something eventually — what
 //! decides a palette's usefulness is the order the matches come back in.
@@ -148,12 +148,12 @@ mod tests {
 
     #[test]
     fn letters_need_not_be_next_to_each_other() {
-        assert!(score("orbital.scene.json", "oscn").is_some());
+        assert!(score("orbital.scene", "oscn").is_some());
     }
 
     #[test]
     fn letters_in_the_wrong_order_do_not_match() {
-        assert!(score("orbital.scene.json", "nosc").is_none());
+        assert!(score("orbital.scene", "nosc").is_none());
     }
 
     #[test]
@@ -204,10 +204,10 @@ mod tests {
     /// reachable — ranked below a shallow hit, never excluded by it.
     #[test]
     fn a_deep_path_still_matches() {
-        assert!(score("assets/prefabs/enemies/drifter.prefab.json", "drifter").is_some());
+        assert!(score("assets/prefabs/enemies/drifter.prefab", "drifter").is_some());
         better(
-            "drifter.prefab.json",
-            "assets/prefabs/enemies/drifter.prefab.json",
+            "drifter.prefab",
+            "assets/prefabs/enemies/drifter.prefab",
             "drifter",
         );
     }
@@ -216,14 +216,14 @@ mod tests {
     /// the order the name is written in.
     #[test]
     fn terms_match_in_any_order() {
-        let path = "drifter.prefab.json assets/prefabs";
+        let path = "drifter.prefab assets/prefabs";
         assert!(score_terms(path, "prefabs drifter").is_some());
         assert!(score_terms(path, "drifter prefabs").is_some());
     }
 
     #[test]
     fn every_term_has_to_match() {
-        assert!(score_terms("drifter.prefab.json assets/prefabs", "drifter zzz").is_none());
+        assert!(score_terms("drifter.prefab assets/prefabs", "drifter zzz").is_none());
     }
 
     #[test]

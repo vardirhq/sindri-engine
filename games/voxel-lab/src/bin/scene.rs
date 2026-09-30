@@ -34,17 +34,14 @@ fn main() -> Result<(), Box<dyn Error>> {
 
 async fn run(out: &Path) -> Result<(), Box<dyn Error>> {
     let root = Path::new("games/voxel-lab/assets");
-    let document =
-        SceneDocument::from_json(&fs::read_to_string(root.join("voxel-lab.scene.json"))?)?;
+    let document = SceneDocument::from_json(&fs::read_to_string(root.join("voxel-lab.scene"))?)?;
     let extractor = SceneExtractor::new()?;
     let world = World::from_scene(&document)?.world;
 
     let mut tile_sets = TileSetBindings::new();
     tile_sets.bind(
-        "blocks.tileset.json",
-        sindri_core::TileSetDocument::from_json(&fs::read_to_string(
-            root.join("blocks.tileset.json"),
-        )?)?,
+        "blocks.tileset",
+        sindri_core::TileSetDocument::from_json(&fs::read_to_string(root.join("blocks.tileset"))?)?,
     )?;
 
     let instance = wgpu::Instance::default();

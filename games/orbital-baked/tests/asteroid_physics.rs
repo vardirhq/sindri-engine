@@ -17,9 +17,9 @@ fn step(run: &mut Run) {
 #[test]
 fn asteroids_are_solid_dynamic_bodies_that_accept_each_other() {
     for name in [
-        "hazard-asteroid-large.prefab.json",
-        "hazard-asteroid-medium.prefab.json",
-        "hazard-asteroid-small.prefab.json",
+        "hazard-asteroid-large.prefab",
+        "hazard-asteroid-medium.prefab",
+        "hazard-asteroid-small.prefab",
     ] {
         let prefab = asteroid_prefab(name);
         let entity = &prefab["entities"][0];
@@ -54,7 +54,7 @@ fn asteroids_are_solid_dynamic_bodies_that_accept_each_other() {
 
 #[test]
 fn two_asteroids_actually_bounce_in_the_game_runtime() {
-    let mut run = Run::open_scene("combat-lab.scene.json").expect("combat lab opens");
+    let mut run = Run::open_scene("combat-lab.scene").expect("combat lab opens");
     for _ in 0..3 {
         step(&mut run);
     }
@@ -64,7 +64,7 @@ fn two_asteroids_actually_bounce_in_the_game_runtime() {
 
     let prefab = run
         .prefabs
-        .get("prefabs/hazard-asteroid-large.prefab.json")
+        .get("prefabs/hazard-asteroid-large.prefab")
         .expect("large asteroid prefab ships")
         .clone();
     let left = run

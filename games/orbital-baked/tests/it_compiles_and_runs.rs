@@ -28,7 +28,7 @@ fn a_first_frame_reports_nothing() {
 /// positive number. The unit is one now, and this is what keeps it one.
 #[test]
 fn every_label_is_a_sensible_share_of_the_screen() {
-    let text = std::fs::read_to_string(orbital_baked::project().join("assets/orbital.scene.json"))
+    let text = std::fs::read_to_string(orbital_baked::project().join("assets/orbital.scene"))
         .expect("the scene reads");
     let scene: serde_json::Value = serde_json::from_str(&text).expect("the scene parses");
     let entities = scene["entities"].as_array().expect("entities");

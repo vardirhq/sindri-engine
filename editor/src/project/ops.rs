@@ -231,18 +231,12 @@ fn unused_beside(parent: &Path, path: &Path) -> PathBuf {
 
 /// A file's name split into the part to add to and the part to keep.
 ///
-/// Not `Path::file_stem`, which stops at the last dot: a scene is
-/// `level.scene.json` and a sheet is `tiles.sheet.json`, and a copy called
-/// `level.scene copy.json` is a file the browser no longer reads as a scene.
+/// The extension is what the browser reads a file's kind by, so a copy of
+/// `level.scene` is `level copy.scene`, never `level.scene copy`.
 fn split_name(path: &Path) -> (String, String) {
     let name = path
         .file_name()
         .map_or_else(String::new, |name| name.to_string_lossy().into_owned());
-    for suffix in [".scene.json", ".sheet.json"] {
-        if let Some(stem) = name.strip_suffix(suffix) {
-            return (stem.to_owned(), suffix.to_owned());
-        }
-    }
     match name.rsplit_once('.') {
         Some((stem, extension)) if !stem.is_empty() => (stem.to_owned(), format!(".{extension}")),
         _ => (name, String::new()),

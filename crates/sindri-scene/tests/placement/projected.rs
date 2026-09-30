@@ -257,7 +257,7 @@ fn standing_over_a_hole_is_refused() {
     floor.components.insert(
         "sindri.tile_volume".to_owned(),
         json!({
-            "tileset": "world.tileset.json",
+            "tileset": "world.tileset",
             "cells": (0..4).flat_map(|row| (0..4)
                 .filter(move |column| [*column, row] != [3, 3])
                 .map(move |column| json!({ "position": [column, row, -1], "tile": "block" })))
@@ -307,7 +307,7 @@ fn a_footprint_reaching_over_a_hole_is_refused() {
     floor.components.insert(
         "sindri.tile_volume".to_owned(),
         json!({
-            "tileset": "world.tileset.json",
+            "tileset": "world.tileset",
             "cells": (0..4).flat_map(|row| (0..4)
                 .filter(move |column| [*column, row] != [3, 2])
                 .map(move |column| json!({ "position": [column, row, -1], "tile": "block" })))

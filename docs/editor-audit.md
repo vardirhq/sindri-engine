@@ -96,7 +96,7 @@ all of it came from measuring.
 
 **Verified end to end.** In the running editor: clicking the row selects it, the
 inspector fills, typing `5` into Position X sets it to 5.00, and the status bar
-turns to `demo.scene.json (unsaved)`.
+turns to `demo.scene (unsaved)`.
 
 **How long.** `hierarchy_row` has returned the layout's response since
 `f0e8c41`, the first editor commit, so row clicking has never worked. Until
@@ -122,7 +122,7 @@ Starting the editor with a scene carrying a component the built-in schemas do
 not know **panics before the window opens**:
 
 ```
-$ cargo run -p sindri-editor -- custom.scene.json
+$ cargo run -p sindri-editor -- custom.scene
 thread 'main' panicked at editor/src/native.rs:280:14:
   the opened scene must satisfy the demo component schema
 ```

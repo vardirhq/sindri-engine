@@ -19,7 +19,7 @@ fn cell_key(cell: &sindri_scene::TileCellDocument) -> ([i32; 3], String, Option<
 }
 
 fn surfaces(shape: WorldShape) -> BTreeMap<String, usize> {
-    let volume = generate(shape, "causeway.tileset.json");
+    let volume = generate(shape, "causeway.tileset");
     // The top cell of each column is the one you see and walk on.
     let mut tops: BTreeMap<(i32, i32), (i32, String)> = BTreeMap::new();
     for cell in &volume.cells {
@@ -79,7 +79,7 @@ fn every_biome_the_palette_names_actually_appears() {
 
 #[test]
 fn the_land_rises_far_enough_to_be_worth_climbing() {
-    let volume = generate(WorldShape::default(), "causeway.tileset.json");
+    let volume = generate(WorldShape::default(), "causeway.tileset");
     let highest = volume
         .cells
         .iter()
@@ -127,7 +127,7 @@ fn chunks_reassemble_the_same_biomed_world() {
 
 /// The top tile of every column, by where the column is.
 fn tops(shape: WorldShape) -> BTreeMap<(i32, i32), String> {
-    let volume = generate(shape, "causeway.tileset.json");
+    let volume = generate(shape, "causeway.tileset");
     let mut highest: BTreeMap<(i32, i32), (i32, String)> = BTreeMap::new();
     for cell in &volume.cells {
         let [column, row, level] = cell.position;
