@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#0d1117">
+<title>Directory — Sindri Engine</title>
+<meta name="description" content="Find every published Sindri game, feature demo and documentation page.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/site.css">
+<link rel="stylesheet" href="../assets/directory.css">
+<script defer src="../assets/directory.js"></script>
+</head>
+<body>
+<header class="nav"><div class="shell">
+<a class="brand" href="../"><span class="wordmark">S<i>I</i>NDR<i>I</i></span></a>
+<nav aria-label="Main"><a href="../">engine</a><a href="../directory/" aria-current="page">directory</a><a href="../docs/documentation/">docs</a><a class="ghost" href="https://github.com/vardirhq/sindri-engine">github ↗</a></nav>
+</div></header>
+<main class="shell directory">
+<div class="kicker">play · explore · learn</div>
+<h1>The Sindri directory.</h1>
+<p class="lede">Every published game, feature demo and documentation page in one place.</p>
+<p class="directory-note">Games and demos run in a WebGPU browser. Documentation works in any browser.</p>
+<div class="directory-controls" hidden>
+<form role="search"><label for="directory-search">Find something</label>
+<input id="directory-search" type="search" placeholder="Try tween, camera, voxels or physics…" autocomplete="off">
+</form>
+<div class="directory-filters" role="group" aria-label="Filter entries">
+<button type="button" data-category="all" aria-pressed="true">Everything</button>
+<button type="button" data-category="games" aria-pressed="false">Games</button>
+<button type="button" data-category="demos" aria-pressed="false">Demos</button>
+<button type="button" data-category="docs" aria-pressed="false">Documentation</button>
+</div>
+</div>
+<p id="directory-status" role="status" aria-live="polite">23 entries</p>
+<div class="directory-grid">
+<!-- ENTRIES -->
+</div>
+<div id="directory-empty" hidden><h2>No matches</h2><p>Try a broader term or another category.</p><button type="button" id="directory-reset">Show everything</button></div>
+<noscript><p>All entries are listed above. Enable JavaScript to search and filter.</p></noscript>
+</main>
+<footer><div class="shell"><span>Built from the published site catalog</span><a href="https://github.com/vardirhq/sindri-engine">source on GitHub ↗</a></div></footer>
+</body>
+</html>

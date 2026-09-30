@@ -84,12 +84,14 @@ jobs:
           cp games/voxel-lab/web/index.html target/pages/examples/voxel-lab/index.html
           cp -R games/voxel-lab/pkg/. target/pages/examples/voxel-lab/pkg/
           python site/build_docs.py target/pages
+          python site/build_directory.py target/pages
           touch target/pages/.nojekyll
       - name: Verify assembled routes
         env:
           PAGES_BASE_PATH: ${{ steps.pages.outputs.base_path }}
         run: |
           test -f target/pages/index.html
+          test -f target/pages/directory/index.html
           python - <<'CHECK'
           import os, pathlib, re, sys
 
@@ -132,6 +134,19 @@ jobs:
           grep -q 'prefabs/coin.prefab' target/pages/examples/platformer/assets/sindri.manifest
           grep -q 'players.sheet' target/pages/examples/scorchball/assets/sindri.manifest
           grep -q 'player.prefab' target/pages/examples/scorchball/assets/sindri.manifest
+      - name: Check directory in desktop and mobile browsers
+        run: |
+          npm install --prefix scripts/browser
+          npx --prefix scripts/browser playwright install --with-deps chromium
+          node scripts/browser/directory.mjs target/pages target/directory-captures
+      - name: Upload directory captures
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: directory-captures
+          path: target/directory-captures
+          if-no-files-found: warn
+          retention-days: 14
       - uses: actions/upload-pages-artifact@v5
         if: github.event_name != 'pull_request'
         with:
