@@ -49,11 +49,13 @@ export async function uiDemo(page, viewport, evidence, problems) {
     await page.mouse.wheel(0, 240);
   }
   await settle();
-  await page.mouse.move(0, 0);
-  // Back to the top, then pick the second row.
-  if (!phone) await page.mouse.wheel(0, -2000);
-  await settle();
-  if (!phone) await press(at.row);
+  // Back to the top over the archive itself, then pick the second row.
+  if (!phone) {
+    await page.mouse.move(...at.archive);
+    await page.mouse.wheel(0, -2000);
+    await settle();
+    await press(at.row);
+  }
 
   const expect = (seen, what) => { if (!seen) problems.push(`ui demo: ${what}`); };
   expect(evidence.ready, 'the Decay script never started');
