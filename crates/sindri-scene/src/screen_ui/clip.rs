@@ -87,7 +87,10 @@ impl UiHierarchy {
                 0.0,
             );
             let ndc = view_projection.project_point3(point);
-            let pixel = Vec2::new(f32::midpoint(ndc.x, 1.0) * w, f32::midpoint(1.0, -ndc.y) * h);
+            let pixel = Vec2::new(
+                f32::midpoint(ndc.x, 1.0) * w,
+                f32::midpoint(1.0, -ndc.y) * h,
+            );
             low = low.min(pixel);
             high = high.max(pixel);
         }
