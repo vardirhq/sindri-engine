@@ -1,187 +1,91 @@
-.hud-text {
-    color: #dbeafe;
-    font-weight: 700;
-    text-transform: uppercase;
+/* The run's HUD: where you are and for how long across the top, your ship
+   along the bottom left, and a boss only when there is one. Pixel-sized on
+   a desktop, width-sized on a phone. Compact mode hides the panels and
+   captions (everything tagged hud-chrome) and keeps the readings. */
+
+.hud-text { color: var(--ink); text-transform: uppercase; }
+.hud-panel {
+    background: #06101ed9;
+    border-color: #1b2e45;
+    border-width: 1px;
+    border-radius: 10px;
+}
+.hud-kicker { height: 14px; font-size: 11px; line-height: 13px; letter-spacing: 2px; color: var(--muted); }
+
+/* Sector, top left. */
+.hud-sector-back { width: 240px; height: 58px; x: 136px; y: -45px; anchor: top_left; }
+.hud-sector-kicker { width: 210px; x: 30px; y: -25px; anchor: top_left; text-align: start; }
+.hud-sector {
+    width: 210px; height: 24px; x: 30px; y: -40px; anchor: top_left;
+    font-size: 18px; line-height: 22px; letter-spacing: 2px; color: var(--accent); text-align: start;
 }
 
+/* Survival clock, top centre. */
+.hud-clock-back { width: 170px; height: 58px; x: 0px; y: -45px; anchor: top; }
+.hud-clock-kicker { width: 150px; x: 0px; y: -25px; anchor: top; text-align: center; }
 .hud-clock {
-    width: 280px;
-    height: 52px;
-    x: 0px;
-    y: -34px;
-    anchor: top;
-    color: #f8fafc;
-    font-size: 40px;
-    line-height: 44px;
-    letter-spacing: 4px;
-    text-align: center;
+    width: 150px; height: 32px; x: 0px; y: -38px; anchor: top;
+    font-size: 28px; line-height: 30px; letter-spacing: 3px; color: var(--ink); text-align: center;
 }
 
-.hud-stat {
-    width: 220px;
-    height: 26px;
-    font-size: 18px;
-    line-height: 22px;
-    letter-spacing: 2px;
-}
-
-.hud-wave {
-    x: 28px;
-    y: -34px;
-    anchor: top_left;
-    color: #6ee7b7;
-    text-align: start;
-}
-
-.hud-level {
-    x: -28px;
-    y: -34px;
-    anchor: top_right;
-    color: #6ee7b7;
-    text-align: end;
-}
-
+/* Pilot, score and level, top right. */
+.hud-stats-back { width: 240px; height: 58px; x: -136px; y: -45px; anchor: top_right; }
+.hud-pilot { width: 150px; x: -96px; y: -25px; anchor: top_right; text-align: end; }
 .hud-score {
-    x: -28px;
-    y: -68px;
-    anchor: top_right;
-    color: #cbd5e1;
-    text-align: end;
+    width: 150px; height: 26px; x: -96px; y: -39px; anchor: top_right;
+    font-size: 22px; line-height: 24px; letter-spacing: 1px; color: var(--ink); text-align: end;
+}
+.hud-level {
+    width: 64px; height: 24px; x: -28px; y: -34px; anchor: top_right;
+    font-size: 16px; line-height: 20px; letter-spacing: 1px; color: var(--accent); text-align: end;
 }
 
-.hud-player-meter {
-    width: 360px;
-    x: 28px;
-    anchor: bottom_left;
+/* Hull and XP, bottom left: each label on its own line above its meter.
+   Panels and meters are placed by their centre; text by its anchor. */
+.hud-vitals-back { width: 380px; height: 96px; x: 206px; y: 64px; anchor: bottom_left; }
+.hud-meter-label {
+    width: 352px; height: 16px; x: 30px; anchor: bottom_left;
+    font-size: 13px; line-height: 15px; letter-spacing: 2px; text-align: start;
 }
+.hud-health-label { y: 78px; color: var(--ink); }
+.hud-xp-label { y: 40px; color: var(--cyan); }
+.hud-player-meter { width: 352px; x: 206px; anchor: bottom_left; }
+.health-meter { height: 16px; y: 66px; }
+.cores-meter { height: 8px; y: 30px; }
 
-.health-meter {
-    height: 22px;
-    y: 42px;
+/* Boss: a warm frame under the clock that no other reading uses. */
+.hud-boss-frame {
+    width: 560px; height: 74px; x: 0px; y: -123px; anchor: top;
+    background: #1a0710e6; border-color: #9f2c43; border-width: 1px; border-radius: 10px;
 }
-
-.cores-meter {
-    height: 9px;
-    y: 22px;
-}
-
-.hud-xp-label {
-    width: 360px;
-    height: 24px;
-    x: 210px;
-    y: 76px;
-    anchor: bottom_left;
-    color: #6bc7ff;
-    font-size: 16px;
-    line-height: 20px;
-    letter-spacing: 2px;
-    text-align: start;
-}
-
-.hud-health-label {
-    width: 360px;
-    height: 24px;
-    x: 28px;
-    y: 76px;
-    anchor: bottom_left;
-    color: #f8fafc;
-    font-size: 16px;
-    line-height: 20px;
-    letter-spacing: 2px;
-    text-align: start;
-}
-
+.hud-boss-kicker { width: 520px; x: 0px; y: -94px; color: #f59e0b; text-align: center; }
 .hud-boss-name {
-    width: 520px;
-    height: 26px;
-    x: 0px;
-    y: -108px;
-    anchor: top;
-    color: #fb7185;
-    font-size: 18px;
-    line-height: 22px;
-    letter-spacing: 5px;
-    text-align: center;
+    width: 520px; height: 22px; x: 0px; y: -109px; anchor: top;
+    font-size: 18px; line-height: 20px; letter-spacing: 5px; color: var(--danger); text-align: center;
 }
-
-.hud-boss-meter {
-    width: 520px;
-    height: 18px;
-    x: 0px;
-    y: -140px;
-    anchor: top;
-}
+.hud-boss-meter { width: 520px; height: 12px; x: 0px; y: -144px; anchor: top; }
 
 @media (max-width: 700px) {
-    .hud-clock {
-        width: 44vw;
-        height: 11vw;
-        y: -5vw;
-        font-size: 7vw;
-        line-height: 9vw;
-        letter-spacing: 0.8vw;
-    }
-
-    .hud-stat {
-        width: 38vw;
-        height: 6vw;
-        font-size: 3.4vw;
-        line-height: 4.5vw;
-        letter-spacing: 0.35vw;
-    }
-
-    .hud-wave {
-        x: 4vw;
-        y: -6vw;
-    }
-
-    .hud-level {
-        x: -4vw;
-        y: -6vw;
-    }
-
-    .hud-score {
-        x: -4vw;
-        y: -13vw;
-    }
-
-    .hud-player-meter {
-        width: 70vw;
-        x: 4vw;
-    }
-
-    .health-meter {
-        height: 4.5vw;
-        y: 8vw;
-    }
-
-    .cores-meter {
-        height: 2vw;
-        y: 4vw;
-    }
-
-    .hud-health-label {
-        width: 70vw;
-        height: 5vw;
-        x: 4vw;
-        y: 15vw;
-        font-size: 3.3vw;
-        line-height: 4.2vw;
-        letter-spacing: 0.35vw;
-    }
-
-    .hud-boss-name {
-        width: 82vw;
-        height: 6vw;
-        y: -19vw;
-        font-size: 3.6vw;
-        line-height: 4.8vw;
-        letter-spacing: 0.8vw;
-    }
-
-    .hud-boss-meter {
-        width: 82vw;
-        height: 3.5vw;
-        y: -26vw;
-    }
+    .hud-kicker { height: 3.2vw; font-size: 2.5vw; line-height: 3vw; letter-spacing: 0.4vw; }
+    .hud-sector-back { width: 45vw; height: 14vw; x: 25.5vw; y: -10vw; }
+    .hud-sector-kicker { width: 40vw; x: 5.5vw; y: -5vw; }
+    .hud-sector { width: 40vw; height: 5vw; x: 5.5vw; y: -8.6vw; font-size: 3.8vw; line-height: 4.6vw; letter-spacing: 0.4vw; }
+    .hud-stats-back { width: 45vw; height: 14vw; x: -25.5vw; y: -10vw; }
+    .hud-pilot { width: 36vw; x: -5vw; y: -5vw; }
+    .hud-score { width: 22vw; height: 5.4vw; x: -18vw; y: -8.4vw; font-size: 4.4vw; line-height: 5vw; }
+    .hud-level { width: 12vw; height: 4.6vw; x: -4vw; y: -7.6vw; font-size: 3.4vw; line-height: 4.2vw; }
+    .hud-clock-back { width: 34vw; height: 13vw; y: -25.5vw; }
+    .hud-clock-kicker { width: 30vw; y: -21vw; }
+    .hud-clock { width: 30vw; height: 7vw; y: -24vw; font-size: 6vw; line-height: 6.6vw; letter-spacing: 0.6vw; }
+    .hud-vitals-back { width: 94vw; height: 22vw; x: 50vw; y: 14vw; }
+    .hud-meter-label { width: 86vw; height: 3.8vw; x: 7vw; font-size: 3vw; line-height: 3.6vw; letter-spacing: 0.4vw; }
+    .hud-health-label { y: 18.4vw; }
+    .hud-xp-label { y: 9.4vw; }
+    .hud-player-meter { width: 86vw; x: 50vw; }
+    .health-meter { height: 3.8vw; y: 15.5vw; }
+    .cores-meter { height: 2vw; y: 7vw; }
+    .hud-boss-frame { width: 90vw; height: 17vw; y: -42.5vw; }
+    .hud-boss-kicker { width: 84vw; y: -36vw; }
+    .hud-boss-name { width: 84vw; height: 5vw; y: -39.6vw; font-size: 3.8vw; line-height: 4.6vw; letter-spacing: 0.8vw; }
+    .hud-boss-meter { width: 84vw; height: 3vw; y: -47.5vw; }
 }

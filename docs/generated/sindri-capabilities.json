@@ -1129,10 +1129,12 @@
       "addable": true,
       "apply": {},
       "default_payload": {
+        "disabled": false,
         "label": ""
       },
       "display_name": "UI Button",
       "fields": {
+        "disabled": false,
         "label": ""
       },
       "meanings": {},
@@ -1317,6 +1319,26 @@
       },
       "schema_version": 1,
       "type_name": "sindri.ui.layout"
+    },
+    {
+      "addable": true,
+      "apply": {},
+      "default_payload": {
+        "content_height": 2.0,
+        "disabled": false,
+        "label": "",
+        "offset": 0.0
+      },
+      "display_name": "UI Scroll",
+      "fields": {
+        "content_height": 2.0,
+        "disabled": false,
+        "label": "",
+        "offset": 0.0
+      },
+      "meanings": {},
+      "schema_version": 1,
+      "type_name": "sindri.ui.scroll"
     },
     {
       "addable": true,
@@ -1595,6 +1617,46 @@
       },
       "schema_version": 1,
       "type_name": "sindri.ui.text"
+    },
+    {
+      "addable": true,
+      "apply": {},
+      "default_payload": {
+        "disabled": false,
+        "label": "",
+        "max_length": 128,
+        "placeholder": "",
+        "value": ""
+      },
+      "display_name": "UI Text Input",
+      "fields": {
+        "disabled": false,
+        "label": "",
+        "max_length": 128,
+        "placeholder": "",
+        "value": ""
+      },
+      "meanings": {},
+      "schema_version": 1,
+      "type_name": "sindri.ui.text_input"
+    },
+    {
+      "addable": true,
+      "apply": {},
+      "default_payload": {
+        "checked": false,
+        "disabled": false,
+        "label": ""
+      },
+      "display_name": "UI Toggle",
+      "fields": {
+        "checked": false,
+        "disabled": false,
+        "label": ""
+      },
+      "meanings": {},
+      "schema_version": 1,
+      "type_name": "sindri.ui.toggle"
     },
     {
       "addable": true,

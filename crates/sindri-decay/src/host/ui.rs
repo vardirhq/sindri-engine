@@ -29,22 +29,18 @@ impl WorldHost<'_> {
     ) -> Result<Value, RuntimeError> {
         let entity = self.entity_argument(path, args, 0, "the element")?;
         if call.is_query() {
-            // A menu whose buttons never respond because nothing is laying them
-            // out should be heard about on the first frame, not mistaken for a
-            // person who has not clicked yet.
-            let Some(screen) = self.screen_ui else {
-                return Err(RuntimeError::Host(format!(
-                    "{}: this host is not laying out any screen UI",
-                    path.dotted()
-                )));
-            };
-            return Ok(Value::Bool(match call {
-                UiCall::Hovered => screen.is_hovered(entity),
-                UiCall::Pressed => screen.is_pressed(entity),
-                UiCall::Held => screen.is_held(entity),
-                UiCall::SliderChanged => screen.slider_changed(entity),
-                _ => unreachable!("only boolean UI queries are handled here"),
-            }));
+            return self.ui_query(call, path, entity);
+        }
+        if matches!(
+            call,
+            UiCall::Checked
+                | UiCall::SetChecked
+                | UiCall::InputText
+                | UiCall::SetInputText
+                | UiCall::ScrollOffset
+                | UiCall::SetScrollOffset
+        ) {
+            return self.widget_call(call, path, args, entity);
         }
         match call {
             UiCall::Text => {
@@ -89,6 +85,60 @@ impl WorldHost<'_> {
                 payload["fill"]["amount"] = json!(amount);
                 Ok(Value::Unit)
             }
+            UiCall::SliderValue | UiCall::SliderSetValue => {
+                self.slider_call(call, path, args, entity)
+            }
+            // Answered above, before the entity was even resolved to a payload.
+            UiCall::Hovered
+            | UiCall::Pressed
+            | UiCall::Held
+            | UiCall::SliderChanged
+            | UiCall::Changed
+            | UiCall::Submitted
+            | UiCall::Focused
+            | UiCall::Checked
+            | UiCall::SetChecked
+            | UiCall::InputText
+            | UiCall::SetInputText
+            | UiCall::ScrollOffset
+            | UiCall::SetScrollOffset => {
+                unreachable!("handled as a query")
+            }
+        }
+    }
+
+    /// Answers a boolean question about what the pointer and keyboard did.
+    fn ui_query(&self, call: UiCall, path: &Path, entity: EntityId) -> Result<Value, RuntimeError> {
+        // A menu whose buttons never respond because nothing is laying them
+        // out should be heard about on the first frame, not mistaken for a
+        // person who has not clicked yet.
+        let Some(screen) = self.screen_ui else {
+            return Err(RuntimeError::Host(format!(
+                "{}: this host is not laying out any screen UI",
+                path.dotted()
+            )));
+        };
+        Ok(Value::Bool(match call {
+            UiCall::Changed => screen.changed(entity),
+            UiCall::Submitted => screen.submitted(entity),
+            UiCall::Focused => screen.focused() == Some(entity),
+            UiCall::Hovered => screen.is_hovered(entity),
+            UiCall::Pressed => screen.is_pressed(entity),
+            UiCall::Held => screen.is_held(entity),
+            UiCall::SliderChanged => screen.slider_changed(entity),
+            _ => unreachable!("only boolean UI queries are handled here"),
+        }))
+    }
+
+    /// Reads or sets a slider's value, kept inside its range.
+    fn slider_call(
+        &mut self,
+        call: UiCall,
+        path: &Path,
+        args: &[Value],
+        entity: EntityId,
+    ) -> Result<Value, RuntimeError> {
+        match call {
             UiCall::SliderValue => {
                 let data = self.world.get(entity).ok_or_else(|| gone(path, entity))?;
                 let payload = data
@@ -127,10 +177,7 @@ impl WorldHost<'_> {
                 payload["value"] = json!(slider.coerce_value(requested));
                 Ok(Value::Unit)
             }
-            // Answered above, before the entity was even resolved to a payload.
-            UiCall::Hovered | UiCall::Pressed | UiCall::Held | UiCall::SliderChanged => {
-                unreachable!("handled as a query")
-            }
+            _ => unreachable!("only slider calls are handled here"),
         }
     }
 

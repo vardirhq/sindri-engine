@@ -9,6 +9,9 @@ script Result {
     var best: Entity = null;
     var kills: Entity = null;
     var survived: Entity = null;
+    var level: Entity = null;
+    var sector: Entity = null;
+    var pilot: Entity = null;
 
 
     var shown: bool = false;
@@ -18,6 +21,9 @@ script Result {
         this.best = World.find("ResultBest");
         this.kills = World.find("ResultKills");
         this.survived = World.find("ResultTime");
+        this.level = World.find("ResultLevel");
+        this.sector = World.find("ResultSector");
+        this.pilot = World.find("ResultPilot");
     }
 
     fn update(dt: f32) {
@@ -34,6 +40,19 @@ script Result {
         Ui.set_number(this.score, Game.score);
         Ui.set_number(this.kills, Game.kills);
         Ui.set_number(this.best, Save.number("best_score", 0.0));
-        Ui.set_text(this.survived, "Survived " + clock_text(Game.elapsed));
+        Ui.set_text(this.survived, clock_text(Game.elapsed));
+        Ui.set_number(this.level, Game.level);
+        Ui.set_text(this.sector, sector_name(Game.sector));
+        let name = Ui.input_text(World.find("TitleCallsign"));
+        if name == "" { Ui.set_text(this.pilot, "UNNAMED PILOT"); }
+        else { Ui.set_text(this.pilot, "PILOT  /  " + name); }
+    }
+
+    fn sector_name(sector: f32) -> String {
+        if sector <= 1.0 { return "OUTER DRIFT"; }
+        if sector == 2.0 { return "EMBER BELT"; }
+        if sector == 3.0 { return "VIOLET WAKE"; }
+        if sector == 4.0 { return "NULL LATTICE"; }
+        return "CORE APPROACH";
     }
 }

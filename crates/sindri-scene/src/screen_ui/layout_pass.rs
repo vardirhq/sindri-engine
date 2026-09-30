@@ -16,7 +16,10 @@ use glam::Vec2;
 use sindri_core::{ComponentRegistryError, ComponentSchemaRegistry, EntityId, World};
 
 use super::layout::UiLayoutBox;
-use super::{UiBoxComponent, UiGridComponent, UiLayoutChild, UiLayoutComponent, UiTextSizes};
+use super::{
+    UiBoxComponent, UiGridComponent, UiLayoutChild, UiLayoutComponent, UiScrollComponent,
+    UiTextSizes,
+};
 
 /// A parent that places its children: a flex line, or a grid.
 #[derive(Clone, Debug)]
@@ -62,6 +65,9 @@ const MAX_DEPTH: usize = 64;
 pub(super) struct Laid {
     pub offsets: BTreeMap<EntityId, Vec2>,
     pub sizes: BTreeMap<EntityId, [f32; 2]>,
+    /// How tall each scroll region's content is, measured from the region's
+    /// top edge down to the bottom of its lowest child.
+    pub content: BTreeMap<EntityId, f32>,
 }
 
 pub(super) fn lay_out(
@@ -131,18 +137,64 @@ pub(super) fn lay_out(
         laid.sizes.insert(*parent, size);
     }
 
+    let scrolls: Vec<EntityId> = components
+        .query::<UiScrollComponent>(world)?
+        .into_iter()
+        .map(|(entity, _)| entity)
+        .collect();
     for (parent, layout) in layouts.iter().rev() {
         let padding = boxes.get(parent).map_or([0.0; 4], |own| own.padding);
         let shown = shown_children(world, *parent);
         let children = scene.children_of(&laid.sizes, *parent);
         let parent_size = size_of(world, &laid.sizes, *parent);
-        let resolved = layout.resolve(parent_size, padding, &children);
+        // A scroll region's content is as tall as it is, not squeezed into
+        // the view: laid out in a box its own height and hung from the
+        // region's top edge, which is where scrolling starts.
+        let (room, drop) = if scrolls.contains(parent) {
+            let content = layout.content_size(padding, &children)[1];
+            laid.content.insert(*parent, content);
+            let tall = content.max(parent_size[1]);
+            ([parent_size[0], tall], (tall - parent_size[1]) / 2.0)
+        } else {
+            (parent_size, 0.0)
+        };
+        let resolved = layout.resolve(room, padding, &children);
         for (child, placed) in shown.into_iter().zip(resolved) {
-            laid.offsets.insert(child, Vec2::from_array(placed.offset));
+            let offset = Vec2::from_array(placed.offset) - Vec2::new(0.0, drop);
+            laid.offsets.insert(child, offset);
             laid.sizes.insert(child, placed.size);
         }
     }
+    for region in scrolls {
+        if laid.content.contains_key(&region) {
+            continue;
+        }
+        let content = placed_content(world, &laid, region);
+        laid.content.insert(region, content);
+    }
     Ok(laid)
+}
+
+/// How far below a region's top edge its lowest child reaches, for a region
+/// whose children are placed by hand rather than by a layout.
+fn placed_content(world: &World, laid: &Laid, region: EntityId) -> f32 {
+    let top = size_of(world, &laid.sizes, region)[1] / 2.0;
+    shown_children(world, region)
+        .into_iter()
+        .map(|child| {
+            let y = laid.offsets.get(&child).map_or_else(
+                || {
+                    world
+                        .get(child)
+                        .and_then(|data| data.transform_3d)
+                        .unwrap_or_default()
+                        .position[1]
+                },
+                |offset| offset.y,
+            );
+            top - (y - size_of(world, &laid.sizes, child)[1] / 2.0)
+        })
+        .fold(0.0, f32::max)
 }
 
 fn shown_children(world: &World, parent: EntityId) -> Vec<EntityId> {

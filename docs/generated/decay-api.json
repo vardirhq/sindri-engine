@@ -2370,6 +2370,54 @@
       "description": "The interface drawn over the game: changing text and bars, and checking buttons and sliders.",
       "members": [
         {
+          "description": "Whether user interaction changed a widget this step.",
+          "kind": "function",
+          "name": "changed",
+          "parameter_names": [
+            "element"
+          ],
+          "parameters": [
+            "Entity"
+          ],
+          "returns": "bool"
+        },
+        {
+          "description": "The committed text in a single-line input.",
+          "kind": "function",
+          "name": "input_text",
+          "parameter_names": [
+            "input"
+          ],
+          "parameters": [
+            "Entity"
+          ],
+          "returns": "String"
+        },
+        {
+          "description": "Whether a toggle is checked.",
+          "kind": "function",
+          "name": "is_checked",
+          "parameter_names": [
+            "toggle"
+          ],
+          "parameters": [
+            "Entity"
+          ],
+          "returns": "bool"
+        },
+        {
+          "description": "Whether this element has keyboard focus.",
+          "kind": "function",
+          "name": "is_focused",
+          "parameter_names": [
+            "element"
+          ],
+          "parameters": [
+            "Entity"
+          ],
+          "returns": "bool"
+        },
+        {
           "description": "Whether a button is being held down right now.",
           "kind": "function",
           "name": "is_held",
@@ -2406,6 +2454,32 @@
           "returns": "bool"
         },
         {
+          "description": "Vertical scroll distance in overlay units.",
+          "kind": "function",
+          "name": "scroll_offset",
+          "parameter_names": [
+            "scroll"
+          ],
+          "parameters": [
+            "Entity"
+          ],
+          "returns": "f32"
+        },
+        {
+          "description": "Sets a toggle without emitting a user-change event.",
+          "kind": "function",
+          "name": "set_checked",
+          "parameter_names": [
+            "toggle",
+            "checked"
+          ],
+          "parameters": [
+            "Entity",
+            "bool"
+          ],
+          "returns": "unit"
+        },
+        {
           "description": "Shows part of an image, from 0 (none) to 1 (all). This is how health and progress bars work: `Ui.set_fill(bar, hp / max_hp)`.",
           "kind": "function",
           "name": "set_fill",
@@ -2416,6 +2490,20 @@
           "parameters": [
             "Entity",
             "f32"
+          ],
+          "returns": "unit"
+        },
+        {
+          "description": "Writes text using the input's Unicode length limit.",
+          "kind": "function",
+          "name": "set_input_text",
+          "parameter_names": [
+            "input",
+            "text"
+          ],
+          "parameters": [
+            "Entity",
+            "String"
           ],
           "returns": "unit"
         },
@@ -2445,6 +2533,20 @@
           "parameters": [
             "Entity",
             "f32",
+            "f32"
+          ],
+          "returns": "unit"
+        },
+        {
+          "description": "Clamps the offset to the authored content height.",
+          "kind": "function",
+          "name": "set_scroll_offset",
+          "parameter_names": [
+            "scroll",
+            "offset"
+          ],
+          "parameters": [
+            "Entity",
             "f32"
           ],
           "returns": "unit"
@@ -2500,6 +2602,18 @@
             "Entity"
           ],
           "returns": "f32"
+        },
+        {
+          "description": "Whether Enter submitted the focused input this step.",
+          "kind": "function",
+          "name": "submitted",
+          "parameter_names": [
+            "input"
+          ],
+          "parameters": [
+            "Entity"
+          ],
+          "returns": "bool"
         }
       ],
       "name": "Ui"

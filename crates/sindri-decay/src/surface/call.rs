@@ -257,6 +257,15 @@ pub(crate) enum UiCall {
     SliderSetValue,
     /// Whether pointer interaction changed this slider during this frame.
     SliderChanged,
+    Checked,
+    SetChecked,
+    InputText,
+    SetInputText,
+    ScrollOffset,
+    SetScrollOffset,
+    Changed,
+    Submitted,
+    Focused,
     /// Whether the pointer is over this element.
     Hovered,
     /// Whether this element was clicked during this frame.
@@ -274,7 +283,13 @@ impl UiCall {
     pub(crate) const fn is_query(self) -> bool {
         matches!(
             self,
-            Self::Hovered | Self::Pressed | Self::Held | Self::SliderChanged
+            Self::Hovered
+                | Self::Pressed
+                | Self::Held
+                | Self::SliderChanged
+                | Self::Changed
+                | Self::Submitted
+                | Self::Focused
         )
     }
 }
@@ -284,6 +299,15 @@ pub(crate) const UI_CALLS: &[(&str, UiCall)] = &[
     ("set_number", UiCall::Number),
     ("set_numbers", UiCall::Numbers),
     ("set_fill", UiCall::Fill),
+    ("is_checked", UiCall::Checked),
+    ("set_checked", UiCall::SetChecked),
+    ("input_text", UiCall::InputText),
+    ("set_input_text", UiCall::SetInputText),
+    ("scroll_offset", UiCall::ScrollOffset),
+    ("set_scroll_offset", UiCall::SetScrollOffset),
+    ("changed", UiCall::Changed),
+    ("submitted", UiCall::Submitted),
+    ("is_focused", UiCall::Focused),
     ("slider_value", UiCall::SliderValue),
     ("set_slider_value", UiCall::SliderSetValue),
     ("slider_changed", UiCall::SliderChanged),

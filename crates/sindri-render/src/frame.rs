@@ -134,9 +134,17 @@ pub struct FramePass {
     pub camera: FrameCamera,
     pub command: FrameCommand,
     insertion_order: usize,
+    /// Optional physical pixel scissor rectangle (x, y, width, height).
+    pub clip: Option<[u32; 4]>,
 }
 
 impl FramePass {
+    #[must_use]
+    pub const fn with_clip(mut self, clip: Option<[u32; 4]>) -> Self {
+        self.clip = clip;
+        self
+    }
+
     pub const fn new(
         stage: RenderStage,
         layer: RenderLayer,
@@ -149,6 +157,7 @@ impl FramePass {
             camera,
             command,
             insertion_order: 0,
+            clip: None,
         }
     }
 }
@@ -167,6 +176,10 @@ impl ExtractedFrame {
             clear,
             passes: Vec::new(),
         }
+    }
+
+    pub const fn viewport(&self) -> Viewport {
+        self.viewport
     }
 
     pub fn push(&mut self, mut pass: FramePass) {

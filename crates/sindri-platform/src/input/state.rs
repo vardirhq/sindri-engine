@@ -25,6 +25,8 @@ pub(super) const TOUCH_LIMIT: usize = 10;
 pub enum InputEvent {
     KeyPressed(Key),
     KeyReleased(Key),
+    /// A committed Unicode scalar, independent of physical key bindings.
+    TextInput(char),
     ButtonPressed(MouseButton),
     ButtonReleased(MouseButton),
     /// Pointer position in logical pixels, with the origin at the top left.
@@ -109,6 +111,7 @@ pub struct InputState {
     touches_ended: BTreeMap<u64, [f32; 2]>,
     pointer_delta: [f32; 2],
     scroll_delta: [f32; 2],
+    text_input: String,
     focused: bool,
     /// The same interactions, as presses rather than as devices.
     ///
@@ -144,6 +147,7 @@ impl Default for InputState {
             touches_ended: BTreeMap::new(),
             pointer_delta: [0.0, 0.0],
             scroll_delta: [0.0, 0.0],
+            text_input: String::new(),
             focused: true,
             presses: Presses::default(),
             stick: VirtualStick::default(),
@@ -164,6 +168,11 @@ impl InputState {
         // event would otherwise have already shifted it.
         super::presses::apply(&mut self.presses, event, self.pointer);
         match event {
+            InputEvent::TextInput(c) => {
+                if !c.is_control() && self.text_input.len() < 4096 {
+                    self.text_input.push(c);
+                }
+            }
             InputEvent::KeyPressed(key) => {
                 if self.keys_held.insert(key) {
                     self.keys_pressed.insert(key);
@@ -243,6 +252,7 @@ impl InputState {
     /// press. Measured rather than counted so that a long press is the same
     /// length of time on a 60 Hz phone and a 144 Hz monitor.
     pub fn begin_frame(&mut self, delta: Duration) {
+        self.text_input.clear();
         self.keys_pressed.clear();
         self.keys_released.clear();
         self.buttons_pressed.clear();
@@ -299,6 +309,21 @@ impl InputState {
     #[must_use]
     pub const fn presses(&self) -> &Presses {
         &self.presses
+    }
+
+    /// This frame's input with the keyboard held back: nothing held, nothing
+    /// pressed. Releases stay, so a key held before the keyboard was taken
+    /// still ends.
+    ///
+    /// What gameplay is handed while a text field has the keyboard, so typing
+    /// a name with a W in it does not also walk the ship forward.
+    #[must_use]
+    pub fn without_keys(&self) -> Self {
+        let mut quiet = self.clone();
+        quiet.keys_held.clear();
+        quiet.keys_pressed.clear();
+        quiet.text_input.clear();
+        quiet
     }
 
     pub fn key_down(&self, key: Key) -> bool {
@@ -407,6 +432,12 @@ impl InputState {
 
     pub const fn pointer_delta(&self) -> [f32; 2] {
         self.pointer_delta
+    }
+
+    /// Committed text accumulated until the host spends this frame.
+    #[must_use]
+    pub fn text_input(&self) -> &str {
+        &self.text_input
     }
 
     pub const fn scroll_delta(&self) -> [f32; 2] {

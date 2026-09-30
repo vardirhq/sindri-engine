@@ -238,3 +238,62 @@ fn a_live_presentation_fades_on_hover_and_hover_reaches_containers() {
     );
     assert!(!presenter.animating());
 }
+
+/// `:focus` is where the host says keys go, on that element alone: the menu
+/// holding the focused button is not focused, and a stale `focused` flag in a
+/// payload focuses nothing.
+#[test]
+fn focus_comes_from_the_host_and_stays_on_the_focused_element() {
+    use sindri_weave::{Presenter, with_focus};
+
+    let sheet = parse(
+        "
+        .menu { background: #000000; }
+        .menu:focus { background: #ff0000; }
+        button { background: #000000; }
+        button:focus { background: #ffffff; }
+        ",
+    )
+    .expect("parses");
+    let mut world = menu();
+    let play = world
+        .entities()
+        .find(|(_, data)| {
+            data.source_id
+                .as_ref()
+                .is_some_and(|id| id.as_str() == "play")
+        })
+        .map(|(entity, _)| entity)
+        .expect("the button");
+    let mut presenter = Presenter::new();
+    let sheets = [sheet];
+
+    let focused = presenter
+        .present(
+            &world,
+            &sheets,
+            VIEW,
+            &with_focus(Default::default(), Some(play)),
+        )
+        .expect("presents");
+    assert_eq!(
+        colour(&focused, "play", "sindri.ui.shape", "fill"),
+        [1.0; 4]
+    );
+    assert_eq!(
+        colour(&focused, "menu", "sindri.ui.shape", "fill"),
+        [0.0, 0.0, 0.0, 1.0]
+    );
+
+    let data = world.get_mut(play).expect("the button");
+    for payload in data.components.values_mut() {
+        payload["focused"] = serde_json::json!(true);
+    }
+    let flagged = presenter
+        .present(&world, &sheets, VIEW, &with_focus(Default::default(), None))
+        .expect("presents");
+    assert_eq!(
+        colour(&flagged, "play", "sindri.ui.shape", "fill"),
+        [0.0, 0.0, 0.0, 1.0]
+    );
+}

@@ -21,6 +21,9 @@
 use eframe::egui;
 use sindri_platform::{GamepadReader, InputEvent, InputState, Key, MouseButton};
 
+/// Pixels one wheel line scrolls, as the desktop host counts them.
+const SCROLL_LINE_PIXELS: f32 = 50.0;
+
 /// egui's pointer button for each engine button.
 ///
 /// Exhaustive over what egui reports that a game can act on. `Extra1` and
@@ -155,6 +158,11 @@ impl EditorInput {
 
         context.input(|input| {
             for event in &input.events {
+                if let egui::Event::Text(text) | egui::Event::Paste(text) = event {
+                    for c in text.chars() {
+                        self.state.apply(InputEvent::TextInput(c));
+                    }
+                }
                 let egui::Event::Key {
                     key,
                     pressed,
@@ -227,6 +235,25 @@ impl EditorInput {
         };
 
         context.input(|input| {
+            // Wheel movement over the Game view, in the physical pixels every
+            // other position here is in. A notch is a line, which the desktop
+            // host counts as fifty pixels, so a scroll list moves as far in
+            // Play as it does in the build.
+            if input.pointer.latest_pos().is_some_and(|p| view.contains(p)) {
+                for event in &input.events {
+                    if let egui::Event::MouseWheel { unit, delta, .. } = event {
+                        let per = match unit {
+                            egui::MouseWheelUnit::Point => scale,
+                            egui::MouseWheelUnit::Line => SCROLL_LINE_PIXELS * scale,
+                            egui::MouseWheelUnit::Page => view.height() * scale,
+                        };
+                        self.state.apply(InputEvent::Scrolled {
+                            x: delta.x * per,
+                            y: delta.y * per,
+                        });
+                    }
+                }
+            }
             // A pointer over the inspector is not over the game. Reporting it
             // anyway would let a script aim at a panel, and clamping it to the
             // edge would be worse: the game would think the person is pointing

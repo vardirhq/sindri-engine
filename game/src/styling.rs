@@ -69,7 +69,10 @@ impl Styles {
         world: &mut World,
         screen_ui: &ScreenUi,
     ) -> Result<Undo, CausewayError> {
-        let states = sindri_weave::pointer_states(world, screen_ui.hovered(), screen_ui.active());
+        let states = sindri_weave::with_focus(
+            sindri_weave::pointer_states(world, screen_ui.hovered(), screen_ui.active()),
+            screen_ui.focused(),
+        );
         self.presenter
             .present_over(world, &self.stylesheets, self.viewport, &states)
             .map_err(|error| CausewayError::Weave(error.to_string()))

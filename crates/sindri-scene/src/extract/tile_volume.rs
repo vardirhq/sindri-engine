@@ -162,6 +162,7 @@ impl SceneExtractor {
                     }
                     for face in &chunk.faces {
                         batches.push(SpriteDraw {
+                            clip: None,
                             space: DrawSpace::Solid,
                             texture: face.texture,
                             // Every solid draw shares one order, so the stable
@@ -182,6 +183,7 @@ impl SceneExtractor {
                 for face in &cell.faces {
                     let order = TransparentOrder::new(volume.layer, depth, face.order)?;
                     batches.push(SpriteDraw {
+                        clip: None,
                         space: DrawSpace::World,
                         texture: face.texture,
                         order,

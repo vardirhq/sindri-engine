@@ -598,6 +598,12 @@ jobs:
           cargo run --quiet --package sindri-export --bin sindri-export -- \
             examples/physics target/dist/physics-root --base /examples/physics/
           cp -R game/pkg/. target/dist/physics-root/pkg/
+          cargo run --quiet --package sindri-export --bin sindri-export -- \
+            examples/ui target/dist/ui --base /sindri-engine/examples/ui/
+          cp -R game/pkg/. target/dist/ui/pkg/
+          cargo run --quiet --package sindri-export --bin sindri-export -- \
+            examples/ui target/dist/ui-root --base /examples/ui/
+          cp -R game/pkg/. target/dist/ui-root/pkg/
       - name: Smoke the rendered games
         id: browser_smoke
         run: |
@@ -647,6 +653,15 @@ jobs:
             SINDRI_BASE_PATH=/examples/physics/ \
             SINDRI_VIEWPORT_WIDTH=390 SINDRI_VIEWPORT_HEIGHT=844 \
             node scripts/browser/smoke.mjs target/dist/physics-root target/render-artifacts/browser-physics-phone.png
+          SINDRI_EXPECT_ASSETS=1 SINDRI_UI_DEMO=1 \
+            SINDRI_EXPECT_ASSET_KINDS=scene,script,font \
+            SINDRI_BASE_PATH=/sindri-engine/examples/ui/ \
+            node scripts/browser/smoke.mjs target/dist/ui target/render-artifacts/browser-ui.png
+          SINDRI_EXPECT_ASSETS=1 SINDRI_UI_DEMO=1 \
+            SINDRI_EXPECT_ASSET_KINDS=scene,script,font \
+            SINDRI_BASE_PATH=/examples/ui/ \
+            SINDRI_VIEWPORT_WIDTH=390 SINDRI_VIEWPORT_HEIGHT=844 \
+            node scripts/browser/smoke.mjs target/dist/ui-root target/render-artifacts/browser-ui-phone.png
       - name: Smoke the startup failure paths
         id: browser_failures
         run: |
@@ -670,6 +685,8 @@ jobs:
             target/render-artifacts/browser-orbital-baked-phone.png
             target/render-artifacts/browser-physics.png
             target/render-artifacts/browser-physics-phone.png
+            target/render-artifacts/browser-ui.png
+            target/render-artifacts/browser-ui-phone.png
             target/render-artifacts/browser-spatial.png
             target/render-artifacts/browser-spatial-phone.png
             target/render-artifacts/browser-camera.png

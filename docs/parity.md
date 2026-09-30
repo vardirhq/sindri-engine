@@ -123,7 +123,7 @@ written the row.
 | Capability | State | Why it is stranded |
 | --- | --- | --- |
 | **Input actions** | `crates/sindri-platform/src/input/action/` parses an action document, binds named actions to keys, pointer axes and scroll | No scene component, no editor surface, no Decay binding. Games poll raw keys instead. |
-| **Scroll input** | `Source::ScrollX/ScrollY` are bound and parsed | Never surfaced to Decay, so no game can use a wheel. |
+| **Scroll input** | `Source::ScrollX/ScrollY` are bound and parsed; the wheel now scrolls `sindri.ui.scroll` regions | Still not a Decay reading of its own, so a game cannot zoom or cycle with the wheel. |
 
 Stranded capability is the cheapest work in this file: the engine cost is
 already paid and only the reach is missing. It is also the most invisible, which
@@ -291,7 +291,7 @@ Sindri's strongest domain relative to the baseline.
 | Touch stick built from a finger | ✅ | — | ✅ | ✅ | **Ahead** | A considered solution to a problem most engines leave to the game |
 | **Action mapping (named actions, rebindable)** | 🟡 | ❌ | ❌ | ❌ | **Behind** | Exists and is stranded. This becomes the input system rather than growing beside it |
 | **Gamepad, by player slot** | ✅ | 🟡 | ✅ | ✅ | **Behind** | Pads on desktop and in the browser, read by player slot: a face button or Start joins, unplugging leaves, one join per frame. Scorchball is played by up to four pads and its tests press them. Play in the editor reads pads, not yet exercised with a real one in CI. No rumble or per-player action map |
-| **Scroll wheel** | 🟡 | — | ❌ | ❌ | **Behind** | Bound in the action layer, never surfaced |
+| **Scroll wheel** | 🟡 | — | 🟡 | ✅ | **Behind** | Scrolls UI scroll regions in every host (Orbital's pause manual, the Control Room archive); a script sees the region's offset, not the wheel itself |
 | **Rebinding UI** | ❌ | ❌ | ❌ | ❌ | **Absent** | Rewired sells on this |
 
 ## UI and presentation
@@ -303,13 +303,16 @@ Sindri's strongest domain relative to the baseline.
 | Weave responsive stylesheets | 🟡 | 🟡 | — | ✅ | **Ahead** | CSS selectors (element names, compounds, descendant and child combinators, lists) with CSS specificity, inheritance, custom properties with `var()`, and combined media queries. Neither baseline has stylesheets this close to CSS; `docs/ui-direction.md` is the plan to make it complete. `:hover` and `:active` follow the pointer in every host, and hit-testing uses the presented geometry. The editor's Styles section shows each element's box model, matched rules with `file:line` and overridden declarations, and computed values; a value edited there is written into the stylesheet, and an element can be picked by clicking it in the running game |
 | Project fonts | ✅ | ✅ | — | ✅ | **Par** | — |
 | **Slider** | ✅ | ✅ | ✅ | ❌ | **Par** | Horizontal or vertical, with `min`, `max`, `step`, `disabled` and a label; a drag and a scripted write pass through the same clamp-and-quantize contract, so a value cannot enter the component off-step. Weave styles it like any other node. `Ui.slider_value`, `Ui.set_slider_value` and `Ui.slider_changed` read, write and detect the change. The editor names it in Add Component with `orientation` as a declared choice — but no field carries a bounded-range meaning, so `value` is a free number box beside the range it is supposed to obey. No game in this repository proves it: `games/weave-poc` demonstrates it, as a feature demo rather than a game, and Mujaffa Remaster uses it externally |
-| **Toggle, dropdown, text input** | ❌ | ❌ | ❌ | ❌ | **Absent** | **A settings screen still cannot be built.** The slider arrived alone; a checkbox, a choice list and a typed name have nothing |
-| **Scroll region** | ❌ | ❌ | ❌ | ❌ | **Absent** | No inventory, no credits, no long list |
+| **Toggle and checkbox** | ✅ | 🟡 | ✅ | ✅ | **Par** | `sindri.ui.toggle`, one boolean component whose art is authored: a switch or a checkbox is a matter of styling, with Weave's `:checked`, `:disabled`, `:hover` and `:focus`. Click, tap, Space or Enter flips it; `Ui.is_checked`, `Ui.set_checked` and `Ui.changed` read, write and detect it. Orbital proves it with a compact-HUD switch that is saved and changes the HUD. The editor lists it in Add Component with plain fields; there is no dedicated authoring gizmo |
+| **Text input (single line)** | 🟡 | 🟡 | ✅ | ✅ | **Behind** | `sindri.ui.text_input` with a placeholder and a character limit counted in characters, not bytes. Committed Unicode text, Backspace, Enter to submit and Escape to let go, with the field's keys held back from gameplay while it has the keyboard. Orbital's pilot callsign follows the run onto the HUD and results. **Editing happens at the end only:** no caret movement, selection, clipboard, IME composition or mobile software keyboard, and no multi-line field. In a browser, text arrives from key presses; text inserted by an IME or a paste is not read |
+| **Scroll region** | 🟡 | 🟡 | ✅ | ✅ | **Behind** | `sindri.ui.scroll` scrolls vertically by wheel, drag or finger, clamps to its laid-out content, clips drawing and hit-testing to itself (nested clips intersect), and a drag never becomes a click on a row. `Ui.scroll_offset` and `Ui.set_scroll_offset`. Orbital's pause screen scrolls a field manual. Vertical only, no scrollbar or momentum, and a rotated region clips to its axis-aligned bounds |
+| **Dropdown, radio group, tabs** | ❌ | ❌ | ❌ | ❌ | **Absent** | A choice list still has to be built from buttons |
 | **Rich text** | ❌ | ❌ | ❌ | ❌ | **Absent** | No colour or emphasis inside a string. TextMeshPro was absorbed for exactly this |
 | **World-space text** | ❌ | ❌ | ❌ | ❌ | **Absent** | Damage numbers, name plates |
 | UI transitions | ✅ | ✅ | ✅ | ✅ | **Par** | CSS `transition` with named and `cubic-bezier` easings, delays and `all`, on colours, lengths and numbers; USS has the same. `@keyframes` is still absent |
 | UI devtools (computed style, which rule won) | — | ✅ | — | — | **Par** | Unity's UI Toolkit debugger was the bar. The editor's Styles section now meets it: box model, matched rules with `file:line`, overridden declarations and computed values, and an element picked by clicking the running game — see the Weave row |
-| **Keyboard/gamepad focus navigation** | ❌ | ❌ | ❌ | ❌ | **Absent** | A menu cannot be driven without a pointer |
+| **Keyboard focus navigation** | 🟡 | — | ✅ | ✅ | **Behind** | Tab and Shift+Tab walk buttons and widgets in the order the scene is written, skipping disabled and hidden ones; Space or Enter presses, Escape lets go; Weave's `:focus` shows it and `Ui.is_focused` reads it. Proven in the Control Room demo and Orbital's title. No directional (arrow) navigation and no focus scopes |
+| **Gamepad focus navigation** | ❌ | ❌ | ❌ | ❌ | **Absent** | A pad cannot drive a menu yet |
 | **Accessibility labels** | ❌ | ❌ | ❌ | ❌ | **Absent** | — |
 | **Drag and drop** | ❌ | ❌ | ❌ | ❌ | **Absent** | — |
 

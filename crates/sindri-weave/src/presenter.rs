@@ -211,3 +211,17 @@ pub fn pointer_states(
     }
     states
 }
+
+/// `states` with the element holding keyboard focus in `:focus`.
+///
+/// Only that element, as in CSS: focus is where keys go, and a container is
+/// not where they go because something inside it is. The host owns focus, so
+/// it comes from the host and not from a flag a script could leave behind.
+#[must_use]
+pub fn with_focus(mut states: UiStates, focused: Option<EntityId>) -> UiStates {
+    if let Some(entity) = focused {
+        let entry = states.entry(entity).or_insert(States::NONE);
+        *entry = entry.with(States::FOCUS);
+    }
+    states
+}

@@ -1,6 +1,6 @@
 //! `sindri.ui.text`, laid out into the frame.
 
-use std::collections::BTreeMap;
+use super::clip_runs::ClipRuns;
 
 use sindri_core::World;
 use sindri_render::{
@@ -43,9 +43,13 @@ impl SceneExtractor {
             .overlay_extent
             .expect("every resolved view includes screen-space extent");
         let placement = OverlayPlacement::new(extent);
-        let mut layers: BTreeMap<i32, Vec<TextInstance>> = BTreeMap::new();
+        let mut layers: ClipRuns<i32, TextInstance> = ClipRuns::new();
 
+        let viewport = frame.viewport();
         for (entity, text) in texts {
+            if !world.is_active(entity) {
+                continue;
+            }
             // Taller than the whole screen is not a size anyone wants; it is a
             // pixel count typed where a share of the screen goes, which is the
             // mistake this unit invites and the one worth naming.
@@ -60,22 +64,32 @@ impl SceneExtractor {
             // the same units the scene authored and the pass's camera does the
             // rest.
             let position = placement.origin(hierarchy.placement_or(entity, text.anchor));
-            layers
-                .entry(text.layer)
-                .or_default()
-                .push(text.instance(position.to_array())?);
+            layers.push(
+                text.layer,
+                hierarchy.clip_pixels_through(
+                    world,
+                    entity,
+                    crate::ScreenExtent::new(extent.half_extent.x, extent.half_extent.y),
+                    overlay.view_projection,
+                    [viewport.width, viewport.height],
+                ),
+                text.instance(position.to_array())?,
+            );
         }
 
-        for (layer, instances) in layers {
-            frame.push(FramePass::new(
-                RenderStage::Overlay,
-                RenderLayer(layer),
-                FrameCamera {
-                    view_projection: overlay.view_projection,
-                    position: glam::Vec3::ZERO,
-                },
-                FrameCommand::Text { instances },
-            ));
+        for (layer, clip, instances) in layers.into_runs() {
+            frame.push(
+                FramePass::new(
+                    RenderStage::Overlay,
+                    RenderLayer(layer),
+                    FrameCamera {
+                        view_projection: overlay.view_projection,
+                        position: glam::Vec3::ZERO,
+                    },
+                    FrameCommand::Text { instances },
+                )
+                .with_clip(clip),
+            );
         }
         Ok(())
     }

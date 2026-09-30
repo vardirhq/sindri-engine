@@ -67,6 +67,7 @@ pub(super) enum DrawSpace {
 pub(super) struct SpriteDraw {
     pub(super) space: DrawSpace,
     pub(super) texture: TextureId,
+    pub(super) clip: Option<[u32; 4]>,
     pub(super) order: TransparentOrder,
     pub(super) sprite: SpriteInstance,
 }
@@ -136,7 +137,12 @@ impl SceneExtractor {
             hierarchy,
         };
         self.push_world_sprites(world, drawing, &mut batches)?;
-        self.push_ui_images(world, drawing, &mut batches)?;
+        self.push_ui_images(
+            world,
+            drawing,
+            &mut batches,
+            [frame.viewport().width, frame.viewport().height],
+        )?;
         self.push_tilemaps(world, cameras, textures, &mut batches)?;
         self.push_tile_volumes(world, cameras, textures, tile_sets, &mut batches)?;
         // Into the same ordered queue as everything else, so adjacent flecks
@@ -194,6 +200,7 @@ impl SceneExtractor {
                 entity.index(),
             )?;
             batches.push(SpriteDraw {
+                clip: None,
                 space: DrawSpace::World,
                 texture: textures.resolve(reference.texture()),
                 order,
@@ -221,9 +228,13 @@ impl SceneExtractor {
             let space = first.space;
             let layer = first.order.layer();
             let texture = first.texture;
+            let clip = first.clip;
             let mut instances = vec![first.sprite];
             while draws.peek().is_some_and(|draw| {
-                draw.space == space && draw.order.layer() == layer && draw.texture == texture
+                draw.space == space
+                    && draw.order.layer() == layer
+                    && draw.texture == texture
+                    && draw.clip == clip
             }) {
                 instances.push(
                     draws
@@ -251,19 +262,22 @@ impl SceneExtractor {
                     SpriteDepth::Write,
                 ),
             };
-            frame.push(FramePass::new(
-                stage,
-                RenderLayer(layer),
-                FrameCamera {
-                    view_projection: camera.view_projection,
-                    position: glam::Vec3::ZERO,
-                },
-                FrameCommand::SpriteBatch {
-                    texture,
-                    depth,
-                    instances,
-                },
-            ));
+            frame.push(
+                FramePass::new(
+                    stage,
+                    RenderLayer(layer),
+                    FrameCamera {
+                        view_projection: camera.view_projection,
+                        position: glam::Vec3::ZERO,
+                    },
+                    FrameCommand::SpriteBatch {
+                        texture,
+                        depth,
+                        instances,
+                    },
+                )
+                .with_clip(clip),
+            );
         }
         Ok(())
     }

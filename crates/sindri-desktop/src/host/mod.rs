@@ -14,6 +14,7 @@
 mod app;
 mod page_size;
 mod startup;
+mod typing;
 mod visibility;
 
 use self::startup::{Startup, open_surface};
@@ -29,7 +30,7 @@ use self::visibility::VisibilityListener;
 use std::sync::Arc;
 
 use sindri_gpu::{GpuContext, WindowSurface};
-use sindri_platform::{FrameTimer, GamepadReader};
+use sindri_platform::{FrameTimer, GamepadReader, InputEvent};
 use winit::{
     application::ApplicationHandler,
     event::WindowEvent,
@@ -73,6 +74,8 @@ struct Host<A: DesktopApp> {
     page_visible: bool,
     /// Whether the page has been told the game is on screen.
     announced_ready: bool,
+    /// The modifiers held now, which decide whether a key press types.
+    modifiers: winit::keyboard::ModifiersState,
     #[cfg(target_arch = "wasm32")]
     _visibility_listener: Option<VisibilityListener>,
     #[cfg(target_arch = "wasm32")]
@@ -101,6 +104,7 @@ impl<A: DesktopApp> Host<A> {
             failure: None,
             page_visible,
             announced_ready: false,
+            modifiers: winit::keyboard::ModifiersState::empty(),
             #[cfg(target_arch = "wasm32")]
             _visibility_listener: visibility_listener,
             #[cfg(target_arch = "wasm32")]
@@ -437,6 +441,16 @@ impl<A: DesktopApp> ApplicationHandler<Startup> for Host<A> {
             running.app.input(input);
         }
 
+        if let WindowEvent::ModifiersChanged(modifiers) = &event {
+            self.modifiers = modifiers.state();
+        }
+        if let State::Running(running) = &mut self.state
+            && let Some(text) = typing::typed(&event, self.modifiers)
+        {
+            for c in text.chars().filter(|c| !c.is_control()) {
+                running.app.input(InputEvent::TextInput(c));
+            }
+        }
         match event {
             WindowEvent::CloseRequested => event_loop.exit(),
             WindowEvent::Resized(size) => {

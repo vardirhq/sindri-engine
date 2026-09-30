@@ -126,6 +126,20 @@
   },
   {
     "category": "demos",
+    "title": "Weave Control Room",
+    "path": "examples/ui/",
+    "source": "examples/ui",
+    "description": "Toggle, type and scroll through engine widgets styled by Weave.",
+    "tags": [
+      "ui",
+      "widgets",
+      "weave",
+      "decay",
+      "responsive"
+    ]
+  },
+  {
+    "category": "demos",
     "title": "Weave UI",
     "path": "examples/weave-poc/",
     "source": "games/weave-poc",

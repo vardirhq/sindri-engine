@@ -31,7 +31,10 @@ script Button {
             // you have to think about.
             Game.rush_from = (Game.rush_from + 1.0) % 12.0;
         } else {
+            // Giving up is a death, and the director only reads deaths while
+            // the run is playing, so it is let back into play to notice.
             Game.hp = 0.0;
+            Game.run_state = 1.0;
         }
     }
 }

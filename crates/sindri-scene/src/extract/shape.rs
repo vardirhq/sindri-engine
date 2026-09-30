@@ -5,6 +5,7 @@
 //! So a ring, a grid and a hexagon on one layer draw together, and paint and
 //! light do not.
 
+use super::clip_runs::ClipRuns;
 use std::collections::BTreeMap;
 
 use glam::{Mat4, Vec2};
@@ -147,7 +148,8 @@ impl SceneExtractor {
         // Ordered so the frame's passes come out layer by layer, and within a
         // layer with paint before light: light added under paint would be
         // covered by it, which is the one order that makes a glow invisible.
-        let mut batches: BTreeMap<(i32, bool), Vec<ShapeInstance>> = BTreeMap::new();
+        let mut batches: ClipRuns<(i32, bool), ShapeInstance> = ClipRuns::new();
+        let viewport = frame.viewport();
         for (entity, shape) in shapes {
             if !world.is_active(entity) {
                 continue;
@@ -157,41 +159,43 @@ impl SceneExtractor {
                 .and_then(|data| data.transform_3d)
                 .unwrap_or_default();
             let placed = hierarchy.placement_or(entity, shape.anchor);
+            let clip = hierarchy.clip_pixels_through(
+                world,
+                entity,
+                crate::ScreenExtent::new(extent.half_extent.x, extent.half_extent.y),
+                overlay.view_projection,
+                [viewport.width, viewport.height],
+            );
             if let Some(shadow) = shadow_instance(&shape, placed, transform, extent) {
                 // Paint, whatever the shape is, and ahead of it in its layer so
                 // the shape covers its own shadow.
-                batches
-                    .entry((shape.layer, false))
-                    .or_default()
-                    .push(shadow);
+                batches.push((shape.layer, false), clip, shadow);
             }
             let model = ui_matrix(placed, transform, extent);
-            batches
-                .entry((shape.layer, shape.geometry.blend() == ShapeBlend::Add))
-                .or_default()
-                .push(shape_instance(
-                    world,
-                    entity,
-                    "sindri.ui.shape",
-                    &shape.geometry,
-                    model,
-                ));
+            batches.push(
+                (shape.layer, shape.geometry.blend() == ShapeBlend::Add),
+                clip,
+                shape_instance(world, entity, "sindri.ui.shape", &shape.geometry, model),
+            );
         }
 
-        for ((layer, additive), instances) in batches {
-            frame.push(FramePass::new(
-                RenderStage::Overlay,
-                RenderLayer(layer),
-                camera,
-                FrameCommand::Shapes {
-                    blend: if additive {
-                        ShapeBlend::Add
-                    } else {
-                        ShapeBlend::Over
+        for ((layer, additive), clip, instances) in batches.into_runs() {
+            frame.push(
+                FramePass::new(
+                    RenderStage::Overlay,
+                    RenderLayer(layer),
+                    camera,
+                    FrameCommand::Shapes {
+                        blend: if additive {
+                            ShapeBlend::Add
+                        } else {
+                            ShapeBlend::Over
+                        },
+                        instances,
                     },
-                    instances,
-                },
-            ));
+                )
+                .with_clip(clip),
+            );
         }
         Ok(())
     }

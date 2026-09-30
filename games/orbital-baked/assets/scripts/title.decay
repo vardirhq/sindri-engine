@@ -11,6 +11,9 @@ script Title {
     var pick_label: Entity = null;
     var logo: Entity = null;
     var hint: Entity = null;
+    var callsign: Entity = null;
+    var callsign_text: Entity = null;
+    var compact: Entity = null;
     var shown_pick: f32 = -1.0;
 
 
@@ -20,13 +23,18 @@ script Title {
         this.pick_label = World.find("TitlePickText");
         this.logo = World.find("Logo");
         this.hint = World.find("TitleHint");
+        this.callsign = World.find("TitleCallsign");
+        this.callsign_text = World.find("TitleCallsignText");
+        this.compact = World.find("TitleCompact");
+        // Remembered between sessions, and read by the HUD when a run starts.
+        Ui.set_checked(this.compact, Save.flag("compact_hud", false));
         // A run started from the title is an ordinary run unless the rush
         // button says otherwise, and the button sets this the moment it is
         // pressed. Clearing it here means quitting a rush and pressing START
         // gives you a game rather than another rush.
         Game.mode = 0.0;
         World.set_active(this.notice, Save.is_damaged());
-        Ui.set_text(this.hint, "Move with WASD, or drag anywhere to steer. Tap the logo for Combat Lab.");
+        Ui.set_text(this.hint, "WASD or drag to steer. Firing is automatic. Esc pauses. Tap the logo for Combat Lab.");
     }
 
     fn update(dt: f32) {
@@ -34,6 +42,10 @@ script Title {
             return;
         }
         Ui.set_number(this.best, Save.number("best_score", 0.0));
+        if Ui.changed(this.compact) {
+            Save.set_flag("compact_hud", Ui.is_checked(this.compact));
+        }
+        show_callsign();
 
         // Images are laid out UI but intentionally are not pressable unless
         // they carry a button component. The title logo predates the lab, so
@@ -58,20 +70,33 @@ script Title {
             name_pick(pick);
         }
     }
+    /// The callsign as typed, with a caret while the field has the keyboard,
+    /// and the placeholder while it is empty and not being edited.
+    fn show_callsign() {
+        let name = Ui.input_text(this.callsign);
+        if Ui.is_focused(this.callsign) {
+            Ui.set_text(this.callsign_text, name + "_");
+        } else if name == "" {
+            Ui.set_text(this.callsign_text, "Unnamed pilot");
+        } else {
+            Ui.set_text(this.callsign_text, name);
+        }
+    }
+
     /// The roster, in the order a rush walks it: the Warden, then the eleven
     /// bosses, each of which is now its own prefab.
     fn name_pick(pick: f32) {
-        if pick == 0.0 { Ui.set_text(this.pick_label, "OPENS ON  WARDEN"); }
-        else if pick == 1.0 { Ui.set_text(this.pick_label, "OPENS ON  HARROWER"); }
-        else if pick == 2.0 { Ui.set_text(this.pick_label, "OPENS ON  PRISM"); }
-        else if pick == 3.0 { Ui.set_text(this.pick_label, "OPENS ON  SINGULARITY"); }
-        else if pick == 4.0 { Ui.set_text(this.pick_label, "OPENS ON  CROWN"); }
-        else if pick == 5.0 { Ui.set_text(this.pick_label, "OPENS ON  BROOD"); }
-        else if pick == 6.0 { Ui.set_text(this.pick_label, "OPENS ON  MIRROR"); }
-        else if pick == 7.0 { Ui.set_text(this.pick_label, "OPENS ON  ARCHITECT"); }
-        else if pick == 8.0 { Ui.set_text(this.pick_label, "OPENS ON  SPINE"); }
-        else if pick == 9.0 { Ui.set_text(this.pick_label, "OPENS ON  LEVIATHAN"); }
-        else if pick == 10.0 { Ui.set_text(this.pick_label, "OPENS ON  LAST LIGHT"); }
-        else { Ui.set_text(this.pick_label, "OPENS ON  AEGIS"); }
+        if pick == 0.0 { Ui.set_text(this.pick_label, "OPENS ON  /  WARDEN"); }
+        else if pick == 1.0 { Ui.set_text(this.pick_label, "OPENS ON  /  HARROWER"); }
+        else if pick == 2.0 { Ui.set_text(this.pick_label, "OPENS ON  /  PRISM"); }
+        else if pick == 3.0 { Ui.set_text(this.pick_label, "OPENS ON  /  SINGULARITY"); }
+        else if pick == 4.0 { Ui.set_text(this.pick_label, "OPENS ON  /  CROWN"); }
+        else if pick == 5.0 { Ui.set_text(this.pick_label, "OPENS ON  /  BROOD"); }
+        else if pick == 6.0 { Ui.set_text(this.pick_label, "OPENS ON  /  MIRROR"); }
+        else if pick == 7.0 { Ui.set_text(this.pick_label, "OPENS ON  /  ARCHITECT"); }
+        else if pick == 8.0 { Ui.set_text(this.pick_label, "OPENS ON  /  SPINE"); }
+        else if pick == 9.0 { Ui.set_text(this.pick_label, "OPENS ON  /  LEVIATHAN"); }
+        else if pick == 10.0 { Ui.set_text(this.pick_label, "OPENS ON  /  LAST LIGHT"); }
+        else { Ui.set_text(this.pick_label, "OPENS ON  /  AEGIS"); }
     }
 }

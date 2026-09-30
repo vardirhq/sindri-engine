@@ -1,0 +1,3047 @@
+{
+  "format_version": 10,
+  "metadata": {
+    "name": "Weave Control Room"
+  },
+  "entities": [
+    {
+      "id": "controller",
+      "name": "controller",
+      "components": {
+        "sindri.script": {
+          "source": "ui.decay",
+          "script": "WidgetDemo",
+          "properties": {}
+        }
+      }
+    },
+    {
+      "id": "environment",
+      "name": "environment",
+      "components": {
+        "sindri.environment": {
+          "background": [
+            0.004,
+            0.009,
+            0.018,
+            1.0
+          ]
+        }
+      }
+    },
+    {
+      "id": "room",
+      "name": "room",
+      "transform_3d": {
+        "scale": [
+          3.3,
+          1.9,
+          1.0
+        ]
+      },
+      "components": {
+        "weave.style": {
+          "classes": [
+            "room"
+          ]
+        },
+        "sindri.ui.layout": {
+          "direction": "column",
+          "spacing": 0.04,
+          "justify": "start",
+          "align": "center"
+        }
+      }
+    },
+    {
+      "id": "masthead",
+      "name": "masthead",
+      "parent": "room",
+      "transform_3d": {
+        "scale": [
+          3.2,
+          0.2,
+          1.0
+        ]
+      },
+      "components": {
+        "weave.style": {
+          "classes": [
+            "masthead"
+          ]
+        },
+        "sindri.ui.layout": {
+          "direction": "column",
+          "spacing": 0.0,
+          "justify": "center",
+          "align": "center"
+        }
+      }
+    },
+    {
+      "id": "heading",
+      "name": "heading",
+      "parent": "masthead",
+      "transform_3d": {
+        "scale": [
+          2.0,
+          0.1,
+          1.0
+        ]
+      },
+      "components": {
+        "weave.style": {
+          "classes": [
+            "heading"
+          ]
+        },
+        "sindri.ui.text": {
+          "text": "WEAVE / CONTROL ROOM",
+          "font": "fonts/ChakraPetch-Regular.ttf",
+          "font_size": 0.06,
+          "bounds": [
+            1.0,
+            0.08
+          ],
+          "anchor": "center",
+          "layer": 20,
+          "line_align": "center"
+        }
+      }
+    },
+    {
+      "id": "subtitle",
+      "name": "subtitle",
+      "parent": "masthead",
+      "transform_3d": {
+        "scale": [
+          2.0,
+          0.07,
+          1.0
+        ]
+      },
+      "components": {
+        "weave.style": {
+          "classes": [
+            "subtitle"
+          ]
+        },
+        "sindri.ui.text": {
+          "text": "Engine widgets, styled by Weave, driven by Decay.",
+          "font": "fonts/ChakraPetch-Regular.ttf",
+          "font_size": 0.035,
+          "bounds": [
+            1.0,
+            0.08
+          ],
+          "anchor": "center",
+          "layer": 20,
+          "line_align": "center"
+        }
+      }
+    },
+    {
+      "id": "deck",
+      "name": "deck",
+      "parent": "room",
+      "transform_3d": {
+        "scale": [
+          3.2,
+          1.3,
+          1.0
+        ]
+      },
+      "components": {
+        "weave.style": {
+          "classes": [
+            "deck"
+          ]
+        },
+        "sindri.ui.layout": {
+          "direction": "row",
+          "spacing": 0.08,
+          "justify": "center",
+          "align": "start"
+        }
+      }
+    },
+    {
+      "id": "settings",
+      "name": "settings",
+      "parent": "deck",
+      "transform_3d": {
+        "scale": [
+          1.4,
+          1.3,
+          1.0
+        ]
+      },
+      "components": {
+        "weave.style": {
+          "classes": [
+            "panel",
+            "settings"
+          ]
+        },
+        "sindri.ui.shape": {
+          "kind": "rect",
+          "fill": [
+            0.05,
+            0.09,
+            0.14,
+            1.0
+          ],
+          "anchor": "center",
+          "layer": 10
+        },
+        "sindri.ui.layout": {
+          "direction": "column",
+          "spacing": 0.03,
+          "justify": "start",
+          "align": "center"
+        }
+      }
+    },
+    {
+      "id": "settings-heading",
+      "name": "settings-heading",
+      "parent": "settings",
+      "transform_3d": {
+        "scale": [
+          1.3,
+          0.08,
+          1.0
+        ]
+      },
+      "components": {
+        "weave.style": {
+          "classes": [
+            "section-title"
+          ]
+        },
+        "sindri.ui.text": {
+          "text": "01 / FLIGHT SETTINGS",
+          "font": "fonts/ChakraPetch-Regular.ttf",
+          "font_size": 0.035,
+          "bounds": [
+            1.0,
+            0.08
+          ],
+          "anchor": "center",
+          "layer": 20,
+          "line_align": "center"
+        }
+      }
+    },
+    {
+      "id": "toggle",
+      "name": "toggle",
+      "parent": "settings",
+      "transform_3d": {
+        "scale": [
+          1.3,
+          0.14,
+          1.0
+        ]
+      },
+      "components": {
+        "weave.style": {
+          "classes": [
+            "control",
+            "switch"
+          ]
+        },
+        "sindri.ui.shape": {
+          "kind": "rect",
+          "fill": [
+            0.05,
+            0.09,
+            0.14,
+            1.0
+          ],
+          "anchor": "center",
+          "layer": 11
+        },
+        "sindri.ui.toggle": {
+          "label": "Flight assist",
+          "checked": true,
+          "disabled": false
+        },
+        "sindri.ui.layout": {
+          "direction": "row",
+          "spacing": 0.03,
+          "justify": "space_between",
+          "align": "center"
+        }
+      }
+    },
+    {
+      "id": "toggle-text",
+      "name": "toggle-text",
+      "parent": "toggle",
+      "transform_3d": {
+        "scale": [
+          0.9,
+          0.08,
+          1.0
+        ]
+      },
+      "components": {
+        "weave.style": {
+          "classes": [
+            "control-label"
+          ]
+        },
+        "sindri.ui.text": {
+          "text": "Flight assist",
+          "font": "fonts/ChakraPetch-Regular.ttf",
+          "font_size": 0.034,
+          "bounds": [
+            0.9,
+            0.08
+          ],
+          "anchor": "center",
+          "layer": 20,
+          "line_align": "left"
+        }
+      }
+    },
+    {
+      "id": "toggle-track",
+      "name": "toggle-track",
+      "parent": "toggle",
+      "transform_3d": {
+        "scale": [
+          0.16,
+          0.07,
+          1.0
+        ]
+      },
+      "components": {
+        "weave.style": {
+          "classes": [
+            "track"
+          ]
+        },
+        "sindri.ui.shape": {
+          "kind": "rect",
+          "fill": [
+            0.05,
+            0.09,
+            0.14,
+            1.0
+          ],
+          "anchor": "center",
+          "layer": 12
+        }
+      }
+    },
+    {
+      "id": "toggle-knob",
+      "name": "toggle-knob",
+      "parent": "toggle-track",
+      "transform_3d": {
+        "scale": [
+          0.055,
+          0.055,
+          1.0
+        ]
+      },
+      "components": {
+        "weave.style": {
+          "classes": [
+            "knob"
+          ]
+        },
+        "sindri.ui.shape": {
+          "kind": "rect",
+          "fill": [
+            0.05,
+            0.09,
+            0.14,
+            1.0
+          ],
+          "anchor": "center",
+          "layer": 13
+        }
+      }
+    },
+    {
+      "id": "checkbox",
+      "name": "checkbox",
+      "parent": "settings",
+      "transform_3d": {
+        "scale": [
+          1.3,
+          0.14,
+          1.0
+        ]
+      },
+      "components": {
+        "weave.style": {
+          "classes": [
+            "control",
+            "checkbox"
+          ]
+        },
+        "sindri.ui.shape": {
+          "kind": "rect",
+          "fill": [
+            0.05,
+            0.09,
+            0.14,
+            1.0
+          ],
+          "anchor": "center",
+          "layer": 11
+        },
+        "sindri.ui.toggle": {
+          "label": "Mission telemetry",
+          "checked": false,
+          "disabled": false
+        },
+        "sindri.ui.layout": {
+          "direction": "row",
+          "spacing": 0.03,
+          "justify": "space_between",
+          "align": "center"
+        }
+      }
+    },
+    {
+      "id": "checkbox-text",
+      "name": "checkbox-text",
+      "parent": "checkbox",
+      "transform_3d": {
+        "scale": [
+          0.9,
+          0.08,
+          1.0
+        ]
+      },
+      "components": {
+        "weave.style": {
+          "classes": [
+            "control-label"
+          ]
+        },
+        "sindri.ui.text": {
+          "text": "Mission telemetry",
+          "font": "fonts/ChakraPetch-Regular.ttf",
+          "font_size": 0.034,
+          "bounds": [
+            0.9,
+            0.08
+          ],
+          "anchor": "center",
+          "layer": 20,
+          "line_align": "left"
+        }
+      }
+    },
+    {
+      "id": "checkbox-box",
+      "name": "checkbox-box",
+      "parent": "checkbox",
+      "transform_3d": {
+        "scale": [
+          0.07,
+          0.07,
+          1.0
+        ]
+      },
+      "components": {
+        "weave.style": {
+          "classes": [
+            "box"
+          ]
+        },
+        "sindri.ui.shape": {
+          "kind": "rect",
+          "fill": [
+            0.05,
+            0.09,
+            0.14,
+            1.0
+          ],
+          "anchor": "center",
+          "layer": 12
+        }
+      }
+    },
+    {
+      "id": "checkbox-tick",
+      "name": "checkbox-tick",
+      "parent": "checkbox-box",
+      "transform_3d": {
+        "scale": [
+          0.035,
+          0.035,
+          1.0
+        ]
+      },
+      "components": {
+        "weave.style": {
+          "classes": [
+            "tick"
+          ]
+        },
+        "sindri.ui.shape": {
+          "kind": "rect",
+          "fill": [
+            0.05,
+            0.09,
+            0.14,
+            1.0
+          ],
+          "anchor": "center",
+          "layer": 13
+        }
+      }
+    },
+    {
+      "id": "autopilot",
+      "name": "autopilot",
+      "parent": "settings",
+      "transform_3d": {
+        "scale": [
+          1.3,
+          0.14,
+          1.0
+        ]
+      },
+      "components": {
+        "weave.style": {
+          "classes": [
+            "control",
+            "switch",
+            "locked"
+          ]
+        },
+        "sindri.ui.shape": {
+          "kind": "rect",
+          "fill": [
+            0.05,
+            0.09,
+            0.14,
+            1.0
+          ],
+          "anchor": "center",
+          "layer": 11
+        },
+        "sindri.ui.toggle": {
+          "label": "Autopilot",
+          "checked": false,
+          "disabled": true
+        },
+        "sindri.ui.layout": {
+          "direction": "row",
+          "spacing": 0.03,
+          "justify": "space_between",
+          "align": "center"
+        }
+      }
+    },
+    {
+      "id": "autopilot-text",
+      "name": "autopilot-text",
+      "parent": "autopilot",
+      "transform_3d": {
+        "scale": [
+          0.9,
+          0.08,
+          1.0
+        ]
+      },
+      "components": {
+        "weave.style": {
+          "classes": [
+            "control-label"
+          ]
+        },
+        "sindri.ui.text": {
+          "text": "Autopilot  / locked",
+          "font": "fonts/ChakraPetch-Regular.ttf",
+          "font_size": 0.034,
+          "bounds": [
+            0.9,
+            0.08
+          ],
+          "anchor": "center",
+          "layer": 20,
+          "line_align": "left"
+        }
+      }
+    },
+    {
+      "id": "autopilot-track",
+      "name": "autopilot-track",
+      "parent": "autopilot",
+      "transform_3d": {
+        "scale": [
+          0.16,
+          0.07,
+          1.0
+        ]
+      },
+      "components": {
+        "weave.style": {
+          "classes": [
+            "track"
+          ]
+        },
+        "sindri.ui.shape": {
+          "kind": "rect",
+          "fill": [
+            0.05,
+            0.09,
+            0.14,
+            1.0
+          ],
+          "anchor": "center",
+          "layer": 12
+        }
+      }
+    },
+    {
+      "id": "autopilot-knob",
+      "name": "autopilot-knob",
+      "parent": "autopilot-track",
+      "transform_3d": {
+        "scale": [
+          0.055,
+          0.055,
+          1.0
+        ]
+      },
+      "components": {
+        "weave.style": {
+          "classes": [
+            "knob"
+          ]
+        },
+        "sindri.ui.shape": {
+          "kind": "rect",
+          "fill": [
+            0.05,
+            0.09,
+            0.14,
+            1.0
+          ],
+          "anchor": "center",
+          "layer": 13
+        }
+      }
+    },
+    {
+      "id": "callsign",
+      "name": "callsign",
+      "parent": "settings",
+      "transform_3d": {
+        "scale": [
+          1.3,
+          0.14,
+          1.0
+        ]
+      },
+      "components": {
+        "weave.style": {
+          "classes": [
+            "control",
+            "input"
+          ]
+        },
+        "sindri.ui.shape": {
+          "kind": "rect",
+          "fill": [
+            0.05,
+            0.09,
+            0.14,
+            1.0
+          ],
+          "anchor": "center",
+          "layer": 11
+        },
+        "sindri.ui.text_input": {
+          "label": "Callsign",
+          "value": "",
+          "placeholder": "Your callsign",
+          "max_length": 18
+        },
+        "sindri.ui.layout": {
+          "direction": "row",
+          "spacing": 0.0,
+          "justify": "start",
+          "align": "center"
+        }
+      }
+    },
+    {
+      "id": "callsign-text",
+      "name": "callsign-text",
+      "parent": "callsign",
+      "transform_3d": {
+        "scale": [
+          1.2,
+          0.08,
+          1.0
+        ]
+      },
+      "components": {
+        "weave.style": {
+          "classes": [
+            "input-text"
+          ]
+        },
+        "sindri.ui.text": {
+          "text": "Your callsign",
+          "font": "fonts/ChakraPetch-Regular.ttf",
+          "font_size": 0.034,
+          "bounds": [
+            1.2,
+            0.08
+          ],
+          "anchor": "center",
+          "layer": 20,
+          "line_align": "left"
+        }
+      }
+    },
+    {
+      "id": "input-help",
+      "name": "input-help",
+      "parent": "settings",
+      "transform_3d": {
+        "scale": [
+          1.3,
+          0.06,
+          1.0
+        ]
+      },
+      "components": {
+        "weave.style": {
+          "classes": [
+            "small"
+          ]
+        },
+        "sindri.ui.text": {
+          "text": "Click the field and type. Enter submits.",
+          "font": "fonts/ChakraPetch-Regular.ttf",
+          "font_size": 0.028,
+          "bounds": [
+            1.0,
+            0.08
+          ],
+          "anchor": "center",
+          "layer": 20,
+          "line_align": "center"
+        }
+      }
+    },
+    {
+      "id": "focus-readout",
+      "name": "focus-readout",
+      "parent": "settings",
+      "transform_3d": {
+        "scale": [
+          1.3,
+          0.06,
+          1.0
+        ]
+      },
+      "components": {
+        "weave.style": {
+          "classes": [
+            "readout"
+          ]
+        },
+        "sindri.ui.text": {
+          "text": "FOCUS / none",
+          "font": "fonts/ChakraPetch-Regular.ttf",
+          "font_size": 0.03,
+          "bounds": [
+            1.0,
+            0.08
+          ],
+          "anchor": "center",
+          "layer": 20,
+          "line_align": "center"
+        }
+      }
+    },
+    {
+      "id": "inventory",
+      "name": "inventory",
+      "parent": "deck",
+      "transform_3d": {
+        "scale": [
+          1.4,
+          1.3,
+          1.0
+        ]
+      },
+      "components": {
+        "weave.style": {
+          "classes": [
+            "panel",
+            "inventory"
+          ]
+        },
+        "sindri.ui.shape": {
+          "kind": "rect",
+          "fill": [
+            0.05,
+            0.09,
+            0.14,
+            1.0
+          ],
+          "anchor": "center",
+          "layer": 10
+        },
+        "sindri.ui.layout": {
+          "direction": "column",
+          "spacing": 0.03,
+          "justify": "start",
+          "align": "center"
+        }
+      }
+    },
+    {
+      "id": "inventory-heading",
+      "name": "inventory-heading",
+      "parent": "inventory",
+      "transform_3d": {
+        "scale": [
+          1.3,
+          0.08,
+          1.0
+        ]
+      },
+      "components": {
+        "weave.style": {
+          "classes": [
+            "section-title"
+          ]
+        },
+        "sindri.ui.text": {
+          "text": "02 / MODULE ARCHIVE",
+          "font": "fonts/ChakraPetch-Regular.ttf",
+          "font_size": 0.035,
+          "bounds": [
+            1.0,
+            0.08
+          ],
+          "anchor": "center",
+          "layer": 20,
+          "line_align": "center"
+        }
+      }
+    },
+    {
+      "id": "archive",
+      "name": "archive",
+      "parent": "inventory",
+      "transform_3d": {
+        "scale": [
+          1.3,
+          0.9,
+          1.0
+        ]
+      },
+      "components": {
+        "weave.style": {
+          "classes": [
+            "scroll"
+          ]
+        },
+        "sindri.ui.shape": {
+          "kind": "rect",
+          "fill": [
+            0.05,
+            0.09,
+            0.14,
+            1.0
+          ],
+          "anchor": "center",
+          "layer": 11
+        },
+        "sindri.ui.scroll": {
+          "label": "Module archive",
+          "content_height": 0.0,
+          "offset": 0.0
+        },
+        "sindri.ui.layout": {
+          "direction": "column",
+          "spacing": 0.015,
+          "justify": "start",
+          "align": "center"
+        }
+      }
+    },
+    {
+      "id": "row-0",
+      "name": "row-0",
+      "parent": "archive",
+      "transform_3d": {
+        "scale": [
+          1.2,
+          0.11,
+          1.0
+        ]
+      },
+      "components": {
+        "weave.style": {
+          "classes": [
+            "archive-row"
+          ]
+        },
+        "sindri.ui.shape": {
+          "kind": "rect",
+          "fill": [
+            0.05,
+            0.09,
+            0.14,
+            1.0
+          ],
+          "anchor": "center",
+          "layer": 12
+        },
+        "sindri.ui.button": {
+          "label": "Guidance Kernel",
+          "disabled": false
+        },
+        "sindri.script": {
+          "source": "ui.decay",
+          "script": "ArchiveRow",
+          "properties": {
+            "module": "Guidance Kernel"
+          }
+        },
+        "sindri.ui.layout": {
+          "direction": "row",
+          "spacing": 0.04,
+          "justify": "start",
+          "align": "center"
+        }
+      }
+    },
+    {
+      "id": "row-number-0",
+      "name": "row-number-0",
+      "parent": "row-0",
+      "transform_3d": {
+        "scale": [
+          0.12,
+          0.07,
+          1.0
+        ]
+      },
+      "components": {
+        "weave.style": {
+          "classes": [
+            "row-number"
+          ]
+        },
+        "sindri.ui.text": {
+          "text": "01",
+          "font": "fonts/ChakraPetch-Regular.ttf",
+          "font_size": 0.03,
+          "bounds": [
+            0.12,
+            0.07
+          ],
+          "anchor": "center",
+          "layer": 20,
+          "line_align": "left"
+        }
+      }
+    },
+    {
+      "id": "row-text-0",
+      "name": "row-text-0",
+      "parent": "row-0",
+      "transform_3d": {
+        "scale": [
+          0.9,
+          0.07,
+          1.0
+        ]
+      },
+      "components": {
+        "weave.style": {
+          "classes": [
+            "row-label"
+          ]
+        },
+        "sindri.ui.text": {
+          "text": "Guidance Kernel",
+          "font": "fonts/ChakraPetch-Regular.ttf",
+          "font_size": 0.032,
+          "bounds": [
+            0.9,
+            0.07
+          ],
+          "anchor": "center",
+          "layer": 20,
+          "line_align": "left"
+        }
+      }
+    },
+    {
+      "id": "row-1",
+      "name": "row-1",
+      "parent": "archive",
+      "transform_3d": {
+        "scale": [
+          1.2,
+          0.11,
+          1.0
+        ]
+      },
+      "components": {
+        "weave.style": {
+          "classes": [
+            "archive-row"
+          ]
+        },
+        "sindri.ui.shape": {
+          "kind": "rect",
+          "fill": [
+            0.05,
+            0.09,
+            0.14,
+            1.0
+          ],
+          "anchor": "center",
+          "layer": 12
+        },
+        "sindri.ui.button": {
+          "label": "Arc Imprint",
+          "disabled": false
+        },
+        "sindri.script": {
+          "source": "ui.decay",
+          "script": "ArchiveRow",
+          "properties": {
+            "module": "Arc Imprint"
+          }
+        },
+        "sindri.ui.layout": {
+          "direction": "row",
+          "spacing": 0.04,
+          "justify": "start",
+          "align": "center"
+        }
+      }
+    },
+    {
+      "id": "row-number-1",
+      "name": "row-number-1",
+      "parent": "row-1",
+      "transform_3d": {
+        "scale": [
+          0.12,
+          0.07,
+          1.0
+        ]
+      },
+      "components": {
+        "weave.style": {
+          "classes": [
+            "row-number"
+          ]
+        },
+        "sindri.ui.text": {
+          "text": "02",
+          "font": "fonts/ChakraPetch-Regular.ttf",
+          "font_size": 0.03,
+          "bounds": [
+            0.12,
+            0.07
+          ],
+          "anchor": "center",
+          "layer": 20,
+          "line_align": "left"
+        }
+      }
+    },
+    {
+      "id": "row-text-1",
+      "name": "row-text-1",
+      "parent": "row-1",
+      "transform_3d": {
+        "scale": [
+          0.9,
+          0.07,
+          1.0
+        ]
+      },
+      "components": {
+        "weave.style": {
+          "classes": [
+            "row-label"
+          ]
+        },
+        "sindri.ui.text": {
+          "text": "Arc Imprint",
+          "font": "fonts/ChakraPetch-Regular.ttf",
+          "font_size": 0.032,
+          "bounds": [
+            0.9,
+            0.07
+          ],
+          "anchor": "center",
+          "layer": 20,
+          "line_align": "left"
+        }
+      }
+    },
+    {
+      "id": "row-2",
+      "name": "row-2",
+      "parent": "archive",
+      "transform_3d": {
+        "scale": [
+          1.2,
+          0.11,
+          1.0
+        ]
+      },
+      "components": {
+        "weave.style": {
+          "classes": [
+            "archive-row"
+          ]
+        },
+        "sindri.ui.shape": {
+          "kind": "rect",
+          "fill": [
+            0.05,
+            0.09,
+            0.14,
+            1.0
+          ],
+          "anchor": "center",
+          "layer": 12
+        },
+        "sindri.ui.button": {
+          "label": "Nova Imprint",
+          "disabled": false
+        },
+        "sindri.script": {
+          "source": "ui.decay",
+          "script": "ArchiveRow",
+          "properties": {
+            "module": "Nova Imprint"
+          }
+        },
+        "sindri.ui.layout": {
+          "direction": "row",
+          "spacing": 0.04,
+          "justify": "start",
+          "align": "center"
+        }
+      }
+    },
+    {
+      "id": "row-number-2",
+      "name": "row-number-2",
+      "parent": "row-2",
+      "transform_3d": {
+        "scale": [
+          0.12,
+          0.07,
+          1.0
+        ]
+      },
+      "components": {
+        "weave.style": {
+          "classes": [
+            "row-number"
+          ]
+        },
+        "sindri.ui.text": {
+          "text": "03",
+          "font": "fonts/ChakraPetch-Regular.ttf",
+          "font_size": 0.03,
+          "bounds": [
+            0.12,
+            0.07
+          ],
+          "anchor": "center",
+          "layer": 20,
+          "line_align": "left"
+        }
+      }
+    },
+    {
+      "id": "row-text-2",
+      "name": "row-text-2",
+      "parent": "row-2",
+      "transform_3d": {
+        "scale": [
+          0.9,
+          0.07,
+          1.0
+        ]
+      },
+      "components": {
+        "weave.style": {
+          "classes": [
+            "row-label"
+          ]
+        },
+        "sindri.ui.text": {
+          "text": "Nova Imprint",
+          "font": "fonts/ChakraPetch-Regular.ttf",
+          "font_size": 0.032,
+          "bounds": [
+            0.9,
+            0.07
+          ],
+          "anchor": "center",
+          "layer": 20,
+          "line_align": "left"
+        }
+      }
+    },
+    {
+      "id": "row-3",
+      "name": "row-3",
+      "parent": "archive",
+      "transform_3d": {
+        "scale": [
+          1.2,
+          0.11,
+          1.0
+        ]
+      },
+      "components": {
+        "weave.style": {
+          "classes": [
+            "archive-row"
+          ]
+        },
+        "sindri.ui.shape": {
+          "kind": "rect",
+          "fill": [
+            0.05,
+            0.09,
+            0.14,
+            1.0
+          ],
+          "anchor": "center",
+          "layer": 12
+        },
+        "sindri.ui.button": {
+          "label": "Gravity Anchor",
+          "disabled": false
+        },
+        "sindri.script": {
+          "source": "ui.decay",
+          "script": "ArchiveRow",
+          "properties": {
+            "module": "Gravity Anchor"
+          }
+        },
+        "sindri.ui.layout": {
+          "direction": "row",
+          "spacing": 0.04,
+          "justify": "start",
+          "align": "center"
+        }
+      }
+    },
+    {
+      "id": "row-number-3",
+      "name": "row-number-3",
+      "parent": "row-3",
+      "transform_3d": {
+        "scale": [
+          0.12,
+          0.07,
+          1.0
+        ]
+      },
+      "components": {
+        "weave.style": {
+          "classes": [
+            "row-number"
+          ]
+        },
+        "sindri.ui.text": {
+          "text": "04",
+          "font": "fonts/ChakraPetch-Regular.ttf",
+          "font_size": 0.03,
+          "bounds": [
+            0.12,
+            0.07
+          ],
+          "anchor": "center",
+          "layer": 20,
+          "line_align": "left"
+        }
+      }
+    },
+    {
+      "id": "row-text-3",
+      "name": "row-text-3",
+      "parent": "row-3",
+      "transform_3d": {
+        "scale": [
+          0.9,
+          0.07,
+          1.0
+        ]
+      },
+      "components": {
+        "weave.style": {
+          "classes": [
+            "row-label"
+          ]
+        },
+        "sindri.ui.text": {
+          "text": "Gravity Anchor",
+          "font": "fonts/ChakraPetch-Regular.ttf",
+          "font_size": 0.032,
+          "bounds": [
+            0.9,
+            0.07
+          ],
+          "anchor": "center",
+          "layer": 20,
+          "line_align": "left"
+        }
+      }
+    },
+    {
+      "id": "row-4",
+      "name": "row-4",
+      "parent": "archive",
+      "transform_3d": {
+        "scale": [
+          1.2,
+          0.11,
+          1.0
+        ]
+      },
+      "components": {
+        "weave.style": {
+          "classes": [
+            "archive-row"
+          ]
+        },
+        "sindri.ui.shape": {
+          "kind": "rect",
+          "fill": [
+            0.05,
+            0.09,
+            0.14,
+            1.0
+          ],
+          "anchor": "center",
+          "layer": 12
+        },
+        "sindri.ui.button": {
+          "label": "Prism Imprint",
+          "disabled": false
+        },
+        "sindri.script": {
+          "source": "ui.decay",
+          "script": "ArchiveRow",
+          "properties": {
+            "module": "Prism Imprint"
+          }
+        },
+        "sindri.ui.layout": {
+          "direction": "row",
+          "spacing": 0.04,
+          "justify": "start",
+          "align": "center"
+        }
+      }
+    },
+    {
+      "id": "row-number-4",
+      "name": "row-number-4",
+      "parent": "row-4",
+      "transform_3d": {
+        "scale": [
+          0.12,
+          0.07,
+          1.0
+        ]
+      },
+      "components": {
+        "weave.style": {
+          "classes": [
+            "row-number"
+          ]
+        },
+        "sindri.ui.text": {
+          "text": "05",
+          "font": "fonts/ChakraPetch-Regular.ttf",
+          "font_size": 0.03,
+          "bounds": [
+            0.12,
+            0.07
+          ],
+          "anchor": "center",
+          "layer": 20,
+          "line_align": "left"
+        }
+      }
+    },
+    {
+      "id": "row-text-4",
+      "name": "row-text-4",
+      "parent": "row-4",
+      "transform_3d": {
+        "scale": [
+          0.9,
+          0.07,
+          1.0
+        ]
+      },
+      "components": {
+        "weave.style": {
+          "classes": [
+            "row-label"
+          ]
+        },
+        "sindri.ui.text": {
+          "text": "Prism Imprint",
+          "font": "fonts/ChakraPetch-Regular.ttf",
+          "font_size": 0.032,
+          "bounds": [
+            0.9,
+            0.07
+          ],
+          "anchor": "center",
+          "layer": 20,
+          "line_align": "left"
+        }
+      }
+    },
+    {
+      "id": "row-5",
+      "name": "row-5",
+      "parent": "archive",
+      "transform_3d": {
+        "scale": [
+          1.2,
+          0.11,
+          1.0
+        ]
+      },
+      "components": {
+        "weave.style": {
+          "classes": [
+            "archive-row"
+          ]
+        },
+        "sindri.ui.shape": {
+          "kind": "rect",
+          "fill": [
+            0.05,
+            0.09,
+            0.14,
+            1.0
+          ],
+          "anchor": "center",
+          "layer": 12
+        },
+        "sindri.ui.button": {
+          "label": "Trimmed Hull",
+          "disabled": false
+        },
+        "sindri.script": {
+          "source": "ui.decay",
+          "script": "ArchiveRow",
+          "properties": {
+            "module": "Trimmed Hull"
+          }
+        },
+        "sindri.ui.layout": {
+          "direction": "row",
+          "spacing": 0.04,
+          "justify": "start",
+          "align": "center"
+        }
+      }
+    },
+    {
+      "id": "row-number-5",
+      "name": "row-number-5",
+      "parent": "row-5",
+      "transform_3d": {
+        "scale": [
+          0.12,
+          0.07,
+          1.0
+        ]
+      },
+      "components": {
+        "weave.style": {
+          "classes": [
+            "row-number"
+          ]
+        },
+        "sindri.ui.text": {
+          "text": "06",
+          "font": "fonts/ChakraPetch-Regular.ttf",
+          "font_size": 0.03,
+          "bounds": [
+            0.12,
+            0.07
+          ],
+          "anchor": "center",
+          "layer": 20,
+          "line_align": "left"
+        }
+      }
+    },
+    {
+      "id": "row-text-5",
+      "name": "row-text-5",
+      "parent": "row-5",
+      "transform_3d": {
+        "scale": [
+          0.9,
+          0.07,
+          1.0
+        ]
+      },
+      "components": {
+        "weave.style": {
+          "classes": [
+            "row-label"
+          ]
+        },
+        "sindri.ui.text": {
+          "text": "Trimmed Hull",
+          "font": "fonts/ChakraPetch-Regular.ttf",
+          "font_size": 0.032,
+          "bounds": [
+            0.9,
+            0.07
+          ],
+          "anchor": "center",
+          "layer": 20,
+          "line_align": "left"
+        }
+      }
+    },
+    {
+      "id": "row-6",
+      "name": "row-6",
+      "parent": "archive",
+      "transform_3d": {
+        "scale": [
+          1.2,
+          0.11,
+          1.0
+        ]
+      },
+      "components": {
+        "weave.style": {
+          "classes": [
+            "archive-row"
+          ]
+        },
+        "sindri.ui.shape": {
+          "kind": "rect",
+          "fill": [
+            0.05,
+            0.09,
+            0.14,
+            1.0
+          ],
+          "anchor": "center",
+          "layer": 12
+        },
+        "sindri.ui.button": {
+          "label": "Second Opinion",
+          "disabled": false
+        },
+        "sindri.script": {
+          "source": "ui.decay",
+          "script": "ArchiveRow",
+          "properties": {
+            "module": "Second Opinion"
+          }
+        },
+        "sindri.ui.layout": {
+          "direction": "row",
+          "spacing": 0.04,
+          "justify": "start",
+          "align": "center"
+        }
+      }
+    },
+    {
+      "id": "row-number-6",
+      "name": "row-number-6",
+      "parent": "row-6",
+      "transform_3d": {
+        "scale": [
+          0.12,
+          0.07,
+          1.0
+        ]
+      },
+      "components": {
+        "weave.style": {
+          "classes": [
+            "row-number"
+          ]
+        },
+        "sindri.ui.text": {
+          "text": "07",
+          "font": "fonts/ChakraPetch-Regular.ttf",
+          "font_size": 0.03,
+          "bounds": [
+            0.12,
+            0.07
+          ],
+          "anchor": "center",
+          "layer": 20,
+          "line_align": "left"
+        }
+      }
+    },
+    {
+      "id": "row-text-6",
+      "name": "row-text-6",
+      "parent": "row-6",
+      "transform_3d": {
+        "scale": [
+          0.9,
+          0.07,
+          1.0
+        ]
+      },
+      "components": {
+        "weave.style": {
+          "classes": [
+            "row-label"
+          ]
+        },
+        "sindri.ui.text": {
+          "text": "Second Opinion",
+          "font": "fonts/ChakraPetch-Regular.ttf",
+          "font_size": 0.032,
+          "bounds": [
+            0.9,
+            0.07
+          ],
+          "anchor": "center",
+          "layer": 20,
+          "line_align": "left"
+        }
+      }
+    },
+    {
+      "id": "row-7",
+      "name": "row-7",
+      "parent": "archive",
+      "transform_3d": {
+        "scale": [
+          1.2,
+          0.11,
+          1.0
+        ]
+      },
+      "components": {
+        "weave.style": {
+          "classes": [
+            "archive-row"
+          ]
+        },
+        "sindri.ui.shape": {
+          "kind": "rect",
+          "fill": [
+            0.05,
+            0.09,
+            0.14,
+            1.0
+          ],
+          "anchor": "center",
+          "layer": 12
+        },
+        "sindri.ui.button": {
+          "label": "Ion Lens",
+          "disabled": false
+        },
+        "sindri.script": {
+          "source": "ui.decay",
+          "script": "ArchiveRow",
+          "properties": {
+            "module": "Ion Lens"
+          }
+        },
+        "sindri.ui.layout": {
+          "direction": "row",
+          "spacing": 0.04,
+          "justify": "start",
+          "align": "center"
+        }
+      }
+    },
+    {
+      "id": "row-number-7",
+      "name": "row-number-7",
+      "parent": "row-7",
+      "transform_3d": {
+        "scale": [
+          0.12,
+          0.07,
+          1.0
+        ]
+      },
+      "components": {
+        "weave.style": {
+          "classes": [
+            "row-number"
+          ]
+        },
+        "sindri.ui.text": {
+          "text": "08",
+          "font": "fonts/ChakraPetch-Regular.ttf",
+          "font_size": 0.03,
+          "bounds": [
+            0.12,
+            0.07
+          ],
+          "anchor": "center",
+          "layer": 20,
+          "line_align": "left"
+        }
+      }
+    },
+    {
+      "id": "row-text-7",
+      "name": "row-text-7",
+      "parent": "row-7",
+      "transform_3d": {
+        "scale": [
+          0.9,
+          0.07,
+          1.0
+        ]
+      },
+      "components": {
+        "weave.style": {
+          "classes": [
+            "row-label"
+          ]
+        },
+        "sindri.ui.text": {
+          "text": "Ion Lens",
+          "font": "fonts/ChakraPetch-Regular.ttf",
+          "font_size": 0.032,
+          "bounds": [
+            0.9,
+            0.07
+          ],
+          "anchor": "center",
+          "layer": 20,
+          "line_align": "left"
+        }
+      }
+    },
+    {
+      "id": "row-8",
+      "name": "row-8",
+      "parent": "archive",
+      "transform_3d": {
+        "scale": [
+          1.2,
+          0.11,
+          1.0
+        ]
+      },
+      "components": {
+        "weave.style": {
+          "classes": [
+            "archive-row"
+          ]
+        },
+        "sindri.ui.shape": {
+          "kind": "rect",
+          "fill": [
+            0.05,
+            0.09,
+            0.14,
+            1.0
+          ],
+          "anchor": "center",
+          "layer": 12
+        },
+        "sindri.ui.button": {
+          "label": "Flux Capacitor",
+          "disabled": false
+        },
+        "sindri.script": {
+          "source": "ui.decay",
+          "script": "ArchiveRow",
+          "properties": {
+            "module": "Flux Capacitor"
+          }
+        },
+        "sindri.ui.layout": {
+          "direction": "row",
+          "spacing": 0.04,
+          "justify": "start",
+          "align": "center"
+        }
+      }
+    },
+    {
+      "id": "row-number-8",
+      "name": "row-number-8",
+      "parent": "row-8",
+      "transform_3d": {
+        "scale": [
+          0.12,
+          0.07,
+          1.0
+        ]
+      },
+      "components": {
+        "weave.style": {
+          "classes": [
+            "row-number"
+          ]
+        },
+        "sindri.ui.text": {
+          "text": "09",
+          "font": "fonts/ChakraPetch-Regular.ttf",
+          "font_size": 0.03,
+          "bounds": [
+            0.12,
+            0.07
+          ],
+          "anchor": "center",
+          "layer": 20,
+          "line_align": "left"
+        }
+      }
+    },
+    {
+      "id": "row-text-8",
+      "name": "row-text-8",
+      "parent": "row-8",
+      "transform_3d": {
+        "scale": [
+          0.9,
+          0.07,
+          1.0
+        ]
+      },
+      "components": {
+        "weave.style": {
+          "classes": [
+            "row-label"
+          ]
+        },
+        "sindri.ui.text": {
+          "text": "Flux Capacitor",
+          "font": "fonts/ChakraPetch-Regular.ttf",
+          "font_size": 0.032,
+          "bounds": [
+            0.9,
+            0.07
+          ],
+          "anchor": "center",
+          "layer": 20,
+          "line_align": "left"
+        }
+      }
+    },
+    {
+      "id": "row-9",
+      "name": "row-9",
+      "parent": "archive",
+      "transform_3d": {
+        "scale": [
+          1.2,
+          0.11,
+          1.0
+        ]
+      },
+      "components": {
+        "weave.style": {
+          "classes": [
+            "archive-row",
+            "locked"
+          ]
+        },
+        "sindri.ui.shape": {
+          "kind": "rect",
+          "fill": [
+            0.05,
+            0.09,
+            0.14,
+            1.0
+          ],
+          "anchor": "center",
+          "layer": 12
+        },
+        "sindri.ui.button": {
+          "label": "Classified",
+          "disabled": true
+        },
+        "sindri.script": {
+          "source": "ui.decay",
+          "script": "ArchiveRow",
+          "properties": {
+            "module": "Classified"
+          }
+        },
+        "sindri.ui.layout": {
+          "direction": "row",
+          "spacing": 0.04,
+          "justify": "start",
+          "align": "center"
+        }
+      }
+    },
+    {
+      "id": "row-number-9",
+      "name": "row-number-9",
+      "parent": "row-9",
+      "transform_3d": {
+        "scale": [
+          0.12,
+          0.07,
+          1.0
+        ]
+      },
+      "components": {
+        "weave.style": {
+          "classes": [
+            "row-number"
+          ]
+        },
+        "sindri.ui.text": {
+          "text": "10",
+          "font": "fonts/ChakraPetch-Regular.ttf",
+          "font_size": 0.03,
+          "bounds": [
+            0.12,
+            0.07
+          ],
+          "anchor": "center",
+          "layer": 20,
+          "line_align": "left"
+        }
+      }
+    },
+    {
+      "id": "row-text-9",
+      "name": "row-text-9",
+      "parent": "row-9",
+      "transform_3d": {
+        "scale": [
+          0.9,
+          0.07,
+          1.0
+        ]
+      },
+      "components": {
+        "weave.style": {
+          "classes": [
+            "row-label"
+          ]
+        },
+        "sindri.ui.text": {
+          "text": "Classified  / locked",
+          "font": "fonts/ChakraPetch-Regular.ttf",
+          "font_size": 0.032,
+          "bounds": [
+            0.9,
+            0.07
+          ],
+          "anchor": "center",
+          "layer": 20,
+          "line_align": "left"
+        }
+      }
+    },
+    {
+      "id": "row-10",
+      "name": "row-10",
+      "parent": "archive",
+      "transform_3d": {
+        "scale": [
+          1.2,
+          0.11,
+          1.0
+        ]
+      },
+      "components": {
+        "weave.style": {
+          "classes": [
+            "archive-row"
+          ]
+        },
+        "sindri.ui.shape": {
+          "kind": "rect",
+          "fill": [
+            0.05,
+            0.09,
+            0.14,
+            1.0
+          ],
+          "anchor": "center",
+          "layer": 12
+        },
+        "sindri.ui.button": {
+          "label": "Phase Shell",
+          "disabled": false
+        },
+        "sindri.script": {
+          "source": "ui.decay",
+          "script": "ArchiveRow",
+          "properties": {
+            "module": "Phase Shell"
+          }
+        },
+        "sindri.ui.layout": {
+          "direction": "row",
+          "spacing": 0.04,
+          "justify": "start",
+          "align": "center"
+        }
+      }
+    },
+    {
+      "id": "row-number-10",
+      "name": "row-number-10",
+      "parent": "row-10",
+      "transform_3d": {
+        "scale": [
+          0.12,
+          0.07,
+          1.0
+        ]
+      },
+      "components": {
+        "weave.style": {
+          "classes": [
+            "row-number"
+          ]
+        },
+        "sindri.ui.text": {
+          "text": "11",
+          "font": "fonts/ChakraPetch-Regular.ttf",
+          "font_size": 0.03,
+          "bounds": [
+            0.12,
+            0.07
+          ],
+          "anchor": "center",
+          "layer": 20,
+          "line_align": "left"
+        }
+      }
+    },
+    {
+      "id": "row-text-10",
+      "name": "row-text-10",
+      "parent": "row-10",
+      "transform_3d": {
+        "scale": [
+          0.9,
+          0.07,
+          1.0
+        ]
+      },
+      "components": {
+        "weave.style": {
+          "classes": [
+            "row-label"
+          ]
+        },
+        "sindri.ui.text": {
+          "text": "Phase Shell",
+          "font": "fonts/ChakraPetch-Regular.ttf",
+          "font_size": 0.032,
+          "bounds": [
+            0.9,
+            0.07
+          ],
+          "anchor": "center",
+          "layer": 20,
+          "line_align": "left"
+        }
+      }
+    },
+    {
+      "id": "row-11",
+      "name": "row-11",
+      "parent": "archive",
+      "transform_3d": {
+        "scale": [
+          1.2,
+          0.11,
+          1.0
+        ]
+      },
+      "components": {
+        "weave.style": {
+          "classes": [
+            "archive-row"
+          ]
+        },
+        "sindri.ui.shape": {
+          "kind": "rect",
+          "fill": [
+            0.05,
+            0.09,
+            0.14,
+            1.0
+          ],
+          "anchor": "center",
+          "layer": 12
+        },
+        "sindri.ui.button": {
+          "label": "Afterburner",
+          "disabled": false
+        },
+        "sindri.script": {
+          "source": "ui.decay",
+          "script": "ArchiveRow",
+          "properties": {
+            "module": "Afterburner"
+          }
+        },
+        "sindri.ui.layout": {
+          "direction": "row",
+          "spacing": 0.04,
+          "justify": "start",
+          "align": "center"
+        }
+      }
+    },
+    {
+      "id": "row-number-11",
+      "name": "row-number-11",
+      "parent": "row-11",
+      "transform_3d": {
+        "scale": [
+          0.12,
+          0.07,
+          1.0
+        ]
+      },
+      "components": {
+        "weave.style": {
+          "classes": [
+            "row-number"
+          ]
+        },
+        "sindri.ui.text": {
+          "text": "12",
+          "font": "fonts/ChakraPetch-Regular.ttf",
+          "font_size": 0.03,
+          "bounds": [
+            0.12,
+            0.07
+          ],
+          "anchor": "center",
+          "layer": 20,
+          "line_align": "left"
+        }
+      }
+    },
+    {
+      "id": "row-text-11",
+      "name": "row-text-11",
+      "parent": "row-11",
+      "transform_3d": {
+        "scale": [
+          0.9,
+          0.07,
+          1.0
+        ]
+      },
+      "components": {
+        "weave.style": {
+          "classes": [
+            "row-label"
+          ]
+        },
+        "sindri.ui.text": {
+          "text": "Afterburner",
+          "font": "fonts/ChakraPetch-Regular.ttf",
+          "font_size": 0.032,
+          "bounds": [
+            0.9,
+            0.07
+          ],
+          "anchor": "center",
+          "layer": 20,
+          "line_align": "left"
+        }
+      }
+    },
+    {
+      "id": "row-12",
+      "name": "row-12",
+      "parent": "archive",
+      "transform_3d": {
+        "scale": [
+          1.2,
+          0.11,
+          1.0
+        ]
+      },
+      "components": {
+        "weave.style": {
+          "classes": [
+            "archive-row"
+          ]
+        },
+        "sindri.ui.shape": {
+          "kind": "rect",
+          "fill": [
+            0.05,
+            0.09,
+            0.14,
+            1.0
+          ],
+          "anchor": "center",
+          "layer": 12
+        },
+        "sindri.ui.button": {
+          "label": "Pulse Coil",
+          "disabled": false
+        },
+        "sindri.script": {
+          "source": "ui.decay",
+          "script": "ArchiveRow",
+          "properties": {
+            "module": "Pulse Coil"
+          }
+        },
+        "sindri.ui.layout": {
+          "direction": "row",
+          "spacing": 0.04,
+          "justify": "start",
+          "align": "center"
+        }
+      }
+    },
+    {
+      "id": "row-number-12",
+      "name": "row-number-12",
+      "parent": "row-12",
+      "transform_3d": {
+        "scale": [
+          0.12,
+          0.07,
+          1.0
+        ]
+      },
+      "components": {
+        "weave.style": {
+          "classes": [
+            "row-number"
+          ]
+        },
+        "sindri.ui.text": {
+          "text": "13",
+          "font": "fonts/ChakraPetch-Regular.ttf",
+          "font_size": 0.03,
+          "bounds": [
+            0.12,
+            0.07
+          ],
+          "anchor": "center",
+          "layer": 20,
+          "line_align": "left"
+        }
+      }
+    },
+    {
+      "id": "row-text-12",
+      "name": "row-text-12",
+      "parent": "row-12",
+      "transform_3d": {
+        "scale": [
+          0.9,
+          0.07,
+          1.0
+        ]
+      },
+      "components": {
+        "weave.style": {
+          "classes": [
+            "row-label"
+          ]
+        },
+        "sindri.ui.text": {
+          "text": "Pulse Coil",
+          "font": "fonts/ChakraPetch-Regular.ttf",
+          "font_size": 0.032,
+          "bounds": [
+            0.9,
+            0.07
+          ],
+          "anchor": "center",
+          "layer": 20,
+          "line_align": "left"
+        }
+      }
+    },
+    {
+      "id": "row-13",
+      "name": "row-13",
+      "parent": "archive",
+      "transform_3d": {
+        "scale": [
+          1.2,
+          0.11,
+          1.0
+        ]
+      },
+      "components": {
+        "weave.style": {
+          "classes": [
+            "archive-row"
+          ]
+        },
+        "sindri.ui.shape": {
+          "kind": "rect",
+          "fill": [
+            0.05,
+            0.09,
+            0.14,
+            1.0
+          ],
+          "anchor": "center",
+          "layer": 12
+        },
+        "sindri.ui.button": {
+          "label": "Neutron Core",
+          "disabled": false
+        },
+        "sindri.script": {
+          "source": "ui.decay",
+          "script": "ArchiveRow",
+          "properties": {
+            "module": "Neutron Core"
+          }
+        },
+        "sindri.ui.layout": {
+          "direction": "row",
+          "spacing": 0.04,
+          "justify": "start",
+          "align": "center"
+        }
+      }
+    },
+    {
+      "id": "row-number-13",
+      "name": "row-number-13",
+      "parent": "row-13",
+      "transform_3d": {
+        "scale": [
+          0.12,
+          0.07,
+          1.0
+        ]
+      },
+      "components": {
+        "weave.style": {
+          "classes": [
+            "row-number"
+          ]
+        },
+        "sindri.ui.text": {
+          "text": "14",
+          "font": "fonts/ChakraPetch-Regular.ttf",
+          "font_size": 0.03,
+          "bounds": [
+            0.12,
+            0.07
+          ],
+          "anchor": "center",
+          "layer": 20,
+          "line_align": "left"
+        }
+      }
+    },
+    {
+      "id": "row-text-13",
+      "name": "row-text-13",
+      "parent": "row-13",
+      "transform_3d": {
+        "scale": [
+          0.9,
+          0.07,
+          1.0
+        ]
+      },
+      "components": {
+        "weave.style": {
+          "classes": [
+            "row-label"
+          ]
+        },
+        "sindri.ui.text": {
+          "text": "Neutron Core",
+          "font": "fonts/ChakraPetch-Regular.ttf",
+          "font_size": 0.032,
+          "bounds": [
+            0.9,
+            0.07
+          ],
+          "anchor": "center",
+          "layer": 20,
+          "line_align": "left"
+        }
+      }
+    },
+    {
+      "id": "row-14",
+      "name": "row-14",
+      "parent": "archive",
+      "transform_3d": {
+        "scale": [
+          1.2,
+          0.11,
+          1.0
+        ]
+      },
+      "components": {
+        "weave.style": {
+          "classes": [
+            "archive-row"
+          ]
+        },
+        "sindri.ui.shape": {
+          "kind": "rect",
+          "fill": [
+            0.05,
+            0.09,
+            0.14,
+            1.0
+          ],
+          "anchor": "center",
+          "layer": 12
+        },
+        "sindri.ui.button": {
+          "label": "Deflector",
+          "disabled": false
+        },
+        "sindri.script": {
+          "source": "ui.decay",
+          "script": "ArchiveRow",
+          "properties": {
+            "module": "Deflector"
+          }
+        },
+        "sindri.ui.layout": {
+          "direction": "row",
+          "spacing": 0.04,
+          "justify": "start",
+          "align": "center"
+        }
+      }
+    },
+    {
+      "id": "row-number-14",
+      "name": "row-number-14",
+      "parent": "row-14",
+      "transform_3d": {
+        "scale": [
+          0.12,
+          0.07,
+          1.0
+        ]
+      },
+      "components": {
+        "weave.style": {
+          "classes": [
+            "row-number"
+          ]
+        },
+        "sindri.ui.text": {
+          "text": "15",
+          "font": "fonts/ChakraPetch-Regular.ttf",
+          "font_size": 0.03,
+          "bounds": [
+            0.12,
+            0.07
+          ],
+          "anchor": "center",
+          "layer": 20,
+          "line_align": "left"
+        }
+      }
+    },
+    {
+      "id": "row-text-14",
+      "name": "row-text-14",
+      "parent": "row-14",
+      "transform_3d": {
+        "scale": [
+          0.9,
+          0.07,
+          1.0
+        ]
+      },
+      "components": {
+        "weave.style": {
+          "classes": [
+            "row-label"
+          ]
+        },
+        "sindri.ui.text": {
+          "text": "Deflector",
+          "font": "fonts/ChakraPetch-Regular.ttf",
+          "font_size": 0.032,
+          "bounds": [
+            0.9,
+            0.07
+          ],
+          "anchor": "center",
+          "layer": 20,
+          "line_align": "left"
+        }
+      }
+    },
+    {
+      "id": "row-15",
+      "name": "row-15",
+      "parent": "archive",
+      "transform_3d": {
+        "scale": [
+          1.2,
+          0.11,
+          1.0
+        ]
+      },
+      "components": {
+        "weave.style": {
+          "classes": [
+            "archive-row"
+          ]
+        },
+        "sindri.ui.shape": {
+          "kind": "rect",
+          "fill": [
+            0.05,
+            0.09,
+            0.14,
+            1.0
+          ],
+          "anchor": "center",
+          "layer": 12
+        },
+        "sindri.ui.button": {
+          "label": "Target Matrix",
+          "disabled": false
+        },
+        "sindri.script": {
+          "source": "ui.decay",
+          "script": "ArchiveRow",
+          "properties": {
+            "module": "Target Matrix"
+          }
+        },
+        "sindri.ui.layout": {
+          "direction": "row",
+          "spacing": 0.04,
+          "justify": "start",
+          "align": "center"
+        }
+      }
+    },
+    {
+      "id": "row-number-15",
+      "name": "row-number-15",
+      "parent": "row-15",
+      "transform_3d": {
+        "scale": [
+          0.12,
+          0.07,
+          1.0
+        ]
+      },
+      "components": {
+        "weave.style": {
+          "classes": [
+            "row-number"
+          ]
+        },
+        "sindri.ui.text": {
+          "text": "16",
+          "font": "fonts/ChakraPetch-Regular.ttf",
+          "font_size": 0.03,
+          "bounds": [
+            0.12,
+            0.07
+          ],
+          "anchor": "center",
+          "layer": 20,
+          "line_align": "left"
+        }
+      }
+    },
+    {
+      "id": "row-text-15",
+      "name": "row-text-15",
+      "parent": "row-15",
+      "transform_3d": {
+        "scale": [
+          0.9,
+          0.07,
+          1.0
+        ]
+      },
+      "components": {
+        "weave.style": {
+          "classes": [
+            "row-label"
+          ]
+        },
+        "sindri.ui.text": {
+          "text": "Target Matrix",
+          "font": "fonts/ChakraPetch-Regular.ttf",
+          "font_size": 0.032,
+          "bounds": [
+            0.9,
+            0.07
+          ],
+          "anchor": "center",
+          "layer": 20,
+          "line_align": "left"
+        }
+      }
+    },
+    {
+      "id": "row-16",
+      "name": "row-16",
+      "parent": "archive",
+      "transform_3d": {
+        "scale": [
+          1.2,
+          0.11,
+          1.0
+        ]
+      },
+      "components": {
+        "weave.style": {
+          "classes": [
+            "archive-row"
+          ]
+        },
+        "sindri.ui.shape": {
+          "kind": "rect",
+          "fill": [
+            0.05,
+            0.09,
+            0.14,
+            1.0
+          ],
+          "anchor": "center",
+          "layer": 12
+        },
+        "sindri.ui.button": {
+          "label": "Void Engine",
+          "disabled": false
+        },
+        "sindri.script": {
+          "source": "ui.decay",
+          "script": "ArchiveRow",
+          "properties": {
+            "module": "Void Engine"
+          }
+        },
+        "sindri.ui.layout": {
+          "direction": "row",
+          "spacing": 0.04,
+          "justify": "start",
+          "align": "center"
+        }
+      }
+    },
+    {
+      "id": "row-number-16",
+      "name": "row-number-16",
+      "parent": "row-16",
+      "transform_3d": {
+        "scale": [
+          0.12,
+          0.07,
+          1.0
+        ]
+      },
+      "components": {
+        "weave.style": {
+          "classes": [
+            "row-number"
+          ]
+        },
+        "sindri.ui.text": {
+          "text": "17",
+          "font": "fonts/ChakraPetch-Regular.ttf",
+          "font_size": 0.03,
+          "bounds": [
+            0.12,
+            0.07
+          ],
+          "anchor": "center",
+          "layer": 20,
+          "line_align": "left"
+        }
+      }
+    },
+    {
+      "id": "row-text-16",
+      "name": "row-text-16",
+      "parent": "row-16",
+      "transform_3d": {
+        "scale": [
+          0.9,
+          0.07,
+          1.0
+        ]
+      },
+      "components": {
+        "weave.style": {
+          "classes": [
+            "row-label"
+          ]
+        },
+        "sindri.ui.text": {
+          "text": "Void Engine",
+          "font": "fonts/ChakraPetch-Regular.ttf",
+          "font_size": 0.032,
+          "bounds": [
+            0.9,
+            0.07
+          ],
+          "anchor": "center",
+          "layer": 20,
+          "line_align": "left"
+        }
+      }
+    },
+    {
+      "id": "row-17",
+      "name": "row-17",
+      "parent": "archive",
+      "transform_3d": {
+        "scale": [
+          1.2,
+          0.11,
+          1.0
+        ]
+      },
+      "components": {
+        "weave.style": {
+          "classes": [
+            "archive-row"
+          ]
+        },
+        "sindri.ui.shape": {
+          "kind": "rect",
+          "fill": [
+            0.05,
+            0.09,
+            0.14,
+            1.0
+          ],
+          "anchor": "center",
+          "layer": 12
+        },
+        "sindri.ui.button": {
+          "label": "Last Light",
+          "disabled": false
+        },
+        "sindri.script": {
+          "source": "ui.decay",
+          "script": "ArchiveRow",
+          "properties": {
+            "module": "Last Light"
+          }
+        },
+        "sindri.ui.layout": {
+          "direction": "row",
+          "spacing": 0.04,
+          "justify": "start",
+          "align": "center"
+        }
+      }
+    },
+    {
+      "id": "row-number-17",
+      "name": "row-number-17",
+      "parent": "row-17",
+      "transform_3d": {
+        "scale": [
+          0.12,
+          0.07,
+          1.0
+        ]
+      },
+      "components": {
+        "weave.style": {
+          "classes": [
+            "row-number"
+          ]
+        },
+        "sindri.ui.text": {
+          "text": "18",
+          "font": "fonts/ChakraPetch-Regular.ttf",
+          "font_size": 0.03,
+          "bounds": [
+            0.12,
+            0.07
+          ],
+          "anchor": "center",
+          "layer": 20,
+          "line_align": "left"
+        }
+      }
+    },
+    {
+      "id": "row-text-17",
+      "name": "row-text-17",
+      "parent": "row-17",
+      "transform_3d": {
+        "scale": [
+          0.9,
+          0.07,
+          1.0
+        ]
+      },
+      "components": {
+        "weave.style": {
+          "classes": [
+            "row-label"
+          ]
+        },
+        "sindri.ui.text": {
+          "text": "Last Light",
+          "font": "fonts/ChakraPetch-Regular.ttf",
+          "font_size": 0.032,
+          "bounds": [
+            0.9,
+            0.07
+          ],
+          "anchor": "center",
+          "layer": 20,
+          "line_align": "left"
+        }
+      }
+    },
+    {
+      "id": "row-18",
+      "name": "row-18",
+      "parent": "archive",
+      "transform_3d": {
+        "scale": [
+          1.2,
+          0.11,
+          1.0
+        ]
+      },
+      "components": {
+        "weave.style": {
+          "classes": [
+            "archive-row"
+          ]
+        },
+        "sindri.ui.shape": {
+          "kind": "rect",
+          "fill": [
+            0.05,
+            0.09,
+            0.14,
+            1.0
+          ],
+          "anchor": "center",
+          "layer": 12
+        },
+        "sindri.ui.button": {
+          "label": "Aegis",
+          "disabled": false
+        },
+        "sindri.script": {
+          "source": "ui.decay",
+          "script": "ArchiveRow",
+          "properties": {
+            "module": "Aegis"
+          }
+        },
+        "sindri.ui.layout": {
+          "direction": "row",
+          "spacing": 0.04,
+          "justify": "start",
+          "align": "center"
+        }
+      }
+    },
+    {
+      "id": "row-number-18",
+      "name": "row-number-18",
+      "parent": "row-18",
+      "transform_3d": {
+        "scale": [
+          0.12,
+          0.07,
+          1.0
+        ]
+      },
+      "components": {
+        "weave.style": {
+          "classes": [
+            "row-number"
+          ]
+        },
+        "sindri.ui.text": {
+          "text": "19",
+          "font": "fonts/ChakraPetch-Regular.ttf",
+          "font_size": 0.03,
+          "bounds": [
+            0.12,
+            0.07
+          ],
+          "anchor": "center",
+          "layer": 20,
+          "line_align": "left"
+        }
+      }
+    },
+    {
+      "id": "row-text-18",
+      "name": "row-text-18",
+      "parent": "row-18",
+      "transform_3d": {
+        "scale": [
+          0.9,
+          0.07,
+          1.0
+        ]
+      },
+      "components": {
+        "weave.style": {
+          "classes": [
+            "row-label"
+          ]
+        },
+        "sindri.ui.text": {
+          "text": "Aegis",
+          "font": "fonts/ChakraPetch-Regular.ttf",
+          "font_size": 0.032,
+          "bounds": [
+            0.9,
+            0.07
+          ],
+          "anchor": "center",
+          "layer": 20,
+          "line_align": "left"
+        }
+      }
+    },
+    {
+      "id": "scroll-help",
+      "name": "scroll-help",
+      "parent": "inventory",
+      "transform_3d": {
+        "scale": [
+          1.3,
+          0.06,
+          1.0
+        ]
+      },
+      "components": {
+        "weave.style": {
+          "classes": [
+            "small"
+          ]
+        },
+        "sindri.ui.text": {
+          "text": "Wheel, drag or swipe through all 19 modules.",
+          "font": "fonts/ChakraPetch-Regular.ttf",
+          "font_size": 0.028,
+          "bounds": [
+            1.0,
+            0.08
+          ],
+          "anchor": "center",
+          "layer": 20,
+          "line_align": "center"
+        }
+      }
+    },
+    {
+      "id": "status",
+      "name": "status",
+      "parent": "room",
+      "transform_3d": {
+        "scale": [
+          3.0,
+          0.08,
+          1.0
+        ]
+      },
+      "components": {
+        "weave.style": {
+          "classes": [
+            "status"
+          ]
+        },
+        "sindri.ui.text": {
+          "text": "READY / Select a control",
+          "font": "fonts/ChakraPetch-Regular.ttf",
+          "font_size": 0.036,
+          "bounds": [
+            1.0,
+            0.08
+          ],
+          "anchor": "center",
+          "layer": 20,
+          "line_align": "center"
+        }
+      }
+    },
+    {
+      "id": "footer",
+      "name": "footer",
+      "parent": "room",
+      "transform_3d": {
+        "scale": [
+          3.0,
+          0.06,
+          1.0
+        ]
+      },
+      "components": {
+        "weave.style": {
+          "classes": [
+            "footer"
+          ]
+        },
+        "sindri.ui.text": {
+          "text": "TAB / focus    SPACE / toggle    ENTER / submit    ESC / release",
+          "font": "fonts/ChakraPetch-Regular.ttf",
+          "font_size": 0.026,
+          "bounds": [
+            1.0,
+            0.08
+          ],
+          "anchor": "center",
+          "layer": 20,
+          "line_align": "center"
+        }
+      }
+    }
+  ]
+}

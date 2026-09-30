@@ -212,24 +212,38 @@ impl Run {
         ) {
             notes.push(error.to_string());
         }
+        self.screen_ui.read_controls(
+            &mut self.world,
+            &sindri_decay::ui_input(&self.input, self.viewport.1),
+        );
         self.effects.advance(step);
 
+        // A focused text field keeps the keys: a callsign with a W in it
+        // does not also fly the ship.
+        let held_back = self
+            .screen_ui
+            .editing_text(&self.world)
+            .then(|| self.input.without_keys());
         let (physics, events) = self.physics.for_scripts();
         let report = self.scripts.advance(
             &mut self.world,
             &self.components,
-            ScriptFrame::new(&self.sources, &self.input, delta)
-                .with_prefabs(&self.prefabs)
-                .with_profiles(&self.profiles)
-                .with_screen_ui(&self.screen_ui)
-                .with_random(&mut self.random)
-                .with_saves(&mut self.saves)
-                .with_effects(&mut self.effects)
-                .with_physics(Physics2d {
-                    world: physics,
-                    events,
-                })
-                .with_animations(&mut self.animations),
+            ScriptFrame::new(
+                &self.sources,
+                held_back.as_ref().unwrap_or(&self.input),
+                delta,
+            )
+            .with_prefabs(&self.prefabs)
+            .with_profiles(&self.profiles)
+            .with_screen_ui(&self.screen_ui)
+            .with_random(&mut self.random)
+            .with_saves(&mut self.saves)
+            .with_effects(&mut self.effects)
+            .with_physics(Physics2d {
+                world: physics,
+                events,
+            })
+            .with_animations(&mut self.animations),
         );
         for failure in &report.failures {
             notes.push(failure.to_string());

@@ -117,6 +117,20 @@ requests, commit history, and subsystem documentation rather than this file.
 
 ### Changed
 
+- Orbital Last Stand's UI is redesigned: a title that separates the pilot's
+  identity and best score from the play actions, with START above Boss Rush
+  and the boss picker; a HUD whose sector, survival clock, score and level,
+  and hull and XP sit in their own backed panels, with a warm boss frame; a
+  module chooser of structured cards that fits four offers and portrait;
+  a pause screen with a scrolling field manual; and results with a score
+  breakdown. It is laid out for desktop, short landscape, phone and tablet.
+- Tab order follows the order a scene is written in, as a browser's does,
+  rather than reading the screen top to bottom.
+- A width or height Weave gives a text element is also the box its words
+  wrap and align in.
+- A scroll region measures its laid-out content, so a list is never squeezed
+  into the view or cut short by a stale `content_height`.
+
 - Voxel Lab's authored scene now uses the engine-owned `sindri.voxel_world`
   component in the editor, with deterministic layered terrain, bounded 3D
   section residency, neighbour-aware block meshing, and persistent cached GPU
@@ -141,6 +155,20 @@ requests, commit history, and subsystem documentation rather than this file.
 
 ### Added
 
+- UI widgets: `sindri.ui.toggle` (switch or checkbox), `sindri.ui.text_input`
+  (single line, Unicode, submit on Enter) and `sindri.ui.scroll` (vertical,
+  clipped, wheel, drag and touch), keyboard focus with Tab and Shift+Tab, and
+  Weave's `:focus` and `:checked`. Decay gains `Ui.is_checked`,
+  `Ui.set_checked`, `Ui.input_text`, `Ui.set_input_text`, `Ui.scroll_offset`,
+  `Ui.set_scroll_offset`, `Ui.changed`, `Ui.submitted` and `Ui.is_focused`.
+  Buttons can be `disabled`.
+- `examples/ui`, the Weave Control Room, published to Pages and smoked in a
+  browser on desktop and phone.
+- Orbital Last Stand has a pilot callsign carried onto the HUD and results,
+  and a saved compact-HUD switch.
+- `project-capture` photographs any project offscreen through the same
+  session and Weave styling the browser uses, after scripted clicks, keys,
+  typing and wheel steps.
 - Added an authored world post-processing stack with exposure, tone mapping,
   contrast, saturation, bloom, and vignette. World effects resolve before
   overlay/UI rendering so interface content remains crisp; Voxel Lab now uses
@@ -198,6 +226,9 @@ requests, commit history, and subsystem documentation rather than this file.
   its own player had no way to ask about terrain at all.
 
 ### Fixed
+
+- Giving up from Orbital Last Stand's pause screen ends the run; it used to
+  leave the game paused with no hull until it was resumed.
 
 - Causeway's Wanderer now crosses grid steps smoothly, and the Play camera
   holds a small dead zone before easing after it. The generated scene also keeps

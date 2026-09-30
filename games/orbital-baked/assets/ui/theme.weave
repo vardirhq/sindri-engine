@@ -1,0 +1,119 @@
+/* Last Stand's UI vocabulary: tokens, panels, captions and the three kinds of
+   action every screen uses. Screen files only place and size things. */
+
+:root {
+    --ink: #e8f1fb;
+    --muted: #8ea3bb;
+    --faint: #53667d;
+    --panel: #081222;
+    --panel-edge: #1d3149;
+    --well: #050b16;
+    --accent: #5eead4;
+    --accent-deep: #0c3a3a;
+    --cyan: #7dd3fc;
+    --danger: #fb7185;
+    --danger-deep: #3a0d18;
+    --amber: #fbbf24;
+}
+
+/* Every label wraps inside the box it is given, so `text-align` means
+   something, and nothing silently runs past its panel. */
+sindri.ui.text { color: var(--ink); text-wrap: word; }
+
+.screen-panel {
+    x: 0px;
+    anchor: center;
+    background: var(--panel);
+    border-color: var(--panel-edge);
+    border-width: 1px;
+    border-radius: 18px;
+    box-shadow: 0px 18px 48px #00000099;
+}
+
+.kicker {
+    font-weight: 700;
+    color: var(--accent);
+    font-size: 1.9vh;
+    line-height: 2.3vh;
+    letter-spacing: 0.45vh;
+    text-align: start;
+}
+.kicker-danger { color: var(--danger); }
+
+.screen-title {
+    font-weight: 700;
+    color: var(--ink);
+    font-size: 5.4vh;
+    line-height: 6vh;
+    letter-spacing: 0.4vh;
+    text-align: start;
+}
+
+/* Dims whatever is behind a pause, a result or a choice. */
+.scrim { width: 100vw; height: 100vh; x: 0px; y: 0px; background: #01040acc; }
+
+/* Actions: primary is solid and loud, secondary outlined, ghost quiet,
+   danger warm. Each lights on hover, darkens on press and rings on focus. */
+.action { anchor: center; border-width: 2px; border-radius: 12px; }
+.action-label {
+    font-weight: 700;
+    width: 100%;
+    height: 3.6vh;
+    font-size: 2.7vh;
+    line-height: 3.2vh;
+    letter-spacing: 0.35vh;
+    text-align: center;
+}
+.action-primary { background: var(--accent); border-color: #a7f3e6; }
+.action-primary:hover { background: #8ff5e4; border-color: #e6fffb; }
+.action-primary:active { background: #2fbfa8; }
+.action-primary-label { color: #04201d; }
+.action-secondary { background: #0b2030; border-color: #2c8a8a; }
+.action-secondary:hover { background: #10324a; border-color: var(--accent); }
+.action-secondary:active { background: var(--accent-deep); }
+.action-secondary-label { color: var(--accent); }
+.action-ghost { background: transparent; border-color: #22384f; border-width: 1px; }
+.action-ghost:hover { background: #0d1c2e; border-color: #3d5b78; }
+.action-ghost-label { color: var(--muted); font-size: 2vh; letter-spacing: 0.25vh; }
+.action-danger { background: transparent; border-color: #7a2536; }
+.action-danger:hover { background: var(--danger-deep); border-color: var(--danger); }
+.action-danger-label { color: #fda4af; }
+.action:focus { border-color: var(--cyan); border-width: 3px; }
+
+/* A text field and a switch, as the title's callsign and compact HUD use. */
+.field { anchor: center; background: var(--well); border-color: #28425c; border-width: 1px; border-radius: 10px; }
+.field:hover { border-color: #3f6384; }
+.field:focus { border-color: var(--accent); border-width: 2px; }
+.field-text { width: 92%; height: 3.4vh; font-size: 2.5vh; line-height: 3vh; color: var(--ink); text-align: start; }
+
+.switch {
+    anchor: center;
+    padding: 0px 1.6vh;
+    direction: row;
+    justify-content: space-between;
+    align-items: center;
+    background: #0a1726;
+    border-color: #1f3349;
+    border-width: 1px;
+    border-radius: 10px;
+}
+.switch:hover { border-color: #3f6384; }
+.switch:focus { border-color: var(--cyan); border-width: 2px; }
+.switch-label { width: 70%; height: 3vh; font-size: 2vh; letter-spacing: 0.3vh; color: var(--muted); text-align: start; }
+.switch:checked .switch-label { color: var(--ink); }
+.switch-track { width: 5.6vh; height: 3vh; background: #16263a; border-color: #2c4560; border-width: 1px; border-radius: 1.5vh; }
+.switch-knob { width: 2.2vh; height: 2.2vh; x: -1.3vh; background: var(--faint); border-radius: 1.1vh; }
+.switch:checked .switch-track { background: var(--accent-deep); border-color: var(--accent); }
+.switch:checked .switch-knob { x: 1.3vh; background: var(--accent); }
+
+/* Label and value on one backed line: results and the field manual. */
+.row-key { width: 50%; height: 2.6vh; font-size: 1.8vh; letter-spacing: 0.3vh; color: var(--muted); text-align: start; }
+.row-value { width: 48%; height: 2.8vh; font-size: 2.2vh; color: var(--ink); text-align: end; }
+
+@media (max-height: 600px) and (orientation: landscape) {
+    .kicker { font-size: 11px; line-height: 13px; letter-spacing: 2px; }
+    .action-ghost-label { font-size: 12px; }
+    .switch-label { font-size: 12px; }
+    .row-key { font-size: 12px; letter-spacing: 1px; }
+    .row-value { font-size: 12px; }
+}

@@ -1,0 +1,112 @@
+// The Control Room's behaviour: what each widget's value says, and what
+// happens when the person changes one. Weave owns every size, colour and
+// state; nothing here positions or paints anything.
+
+script WidgetDemo {
+    var assist: Entity = null;
+    var telemetry: Entity = null;
+    var callsign: Entity = null;
+    var archive: Entity = null;
+
+    fn start() {
+        this.assist = World.find("toggle");
+        this.telemetry = World.find("checkbox");
+        this.callsign = World.find("callsign");
+        this.archive = World.find("archive");
+        show_switches();
+        show_callsign();
+        print("UI demo ready");
+    }
+
+    fn update(dt: f32) {
+        if Ui.changed(this.assist) {
+            print("UI toggle changed " + Ui.is_checked(this.assist));
+            show_switches();
+        }
+        if Ui.changed(this.telemetry) {
+            print("UI checkbox changed " + Ui.is_checked(this.telemetry));
+            show_switches();
+        }
+        // Locked, so this never fires; the browser smoke listens for it.
+        if Ui.changed(World.find("autopilot")) {
+            print("UI autopilot changed");
+        }
+        if Ui.changed(this.callsign) {
+            print("UI text changed " + Ui.input_text(this.callsign));
+        }
+        if Ui.submitted(this.callsign) {
+            let name = Ui.input_text(this.callsign);
+            if name == "" {
+                status("CALLSIGN / type one first");
+            } else {
+                status("CALLSIGN / " + name + " confirmed");
+            }
+            print("UI submitted " + name);
+        }
+        if Ui.changed(this.archive) {
+            print("UI archive scrolled " + Ui.scroll_offset(this.archive).fixed(2));
+        }
+        // Every step, because focus comes and goes without a change event:
+        // the caret shows while the field has the keyboard.
+        show_callsign();
+        show_focus();
+    }
+
+    fn show_focus() {
+        var focused = "none";
+        if Ui.is_focused(this.assist) {
+            focused = "flight assist";
+        } else if Ui.is_focused(this.telemetry) {
+            focused = "mission telemetry";
+        } else if Ui.is_focused(this.callsign) {
+            focused = "callsign / typing";
+        } else {
+            for i in 0..19 {
+                if Ui.is_focused(World.find("row-" + i)) {
+                    focused = "archive row " + (i + 1);
+                }
+            }
+        }
+        Ui.set_text(World.find("focus-readout"), "FOCUS / " + focused);
+    }
+
+    fn show_switches() {
+        if Ui.is_checked(this.assist) {
+            Ui.set_text(World.find("toggle-text"), "Flight assist  / on");
+        } else {
+            Ui.set_text(World.find("toggle-text"), "Flight assist  / off");
+        }
+        if Ui.is_checked(this.telemetry) {
+            Ui.set_text(World.find("checkbox-text"), "Mission telemetry  / logging");
+        } else {
+            Ui.set_text(World.find("checkbox-text"), "Mission telemetry  / silent");
+        }
+    }
+
+    fn show_callsign() {
+        let name = Ui.input_text(this.callsign);
+        let editing = Ui.is_focused(this.callsign);
+        if name == "" && !editing {
+            Ui.set_text(World.find("callsign-text"), "Your callsign");
+        } else if editing {
+            Ui.set_text(World.find("callsign-text"), name + "_");
+        } else {
+            Ui.set_text(World.find("callsign-text"), name);
+        }
+    }
+
+    fn status(message: String) {
+        Ui.set_text(World.find("status"), message);
+    }
+}
+
+script ArchiveRow {
+    @export let module: String = "";
+
+    fn update(dt: f32) {
+        if Ui.is_pressed(this.entity) {
+            Ui.set_text(World.find("status"), "SELECTED / " + this.module);
+            print("UI selected " + this.module);
+        }
+    }
+}

@@ -246,18 +246,28 @@ pub(super) fn add_ui_surface(environment: &mut Environment) {
             *name,
             FunctionType {
                 params: match call {
-                    UiCall::Text => vec![entity(), Type::String],
+                    UiCall::Text | UiCall::SetInputText => vec![entity(), Type::String],
                     UiCall::Numbers => vec![entity(), Type::F32, Type::F32],
-                    UiCall::Number | UiCall::Fill | UiCall::SliderSetValue => {
+                    UiCall::Number
+                    | UiCall::Fill
+                    | UiCall::SliderSetValue
+                    | UiCall::SetScrollOffset => {
                         vec![entity(), Type::F32]
                     }
+                    UiCall::SetChecked => vec![entity(), Type::Bool],
                     _ => vec![entity()],
                 },
                 return_type: match call {
-                    UiCall::SliderValue => Type::F32,
-                    UiCall::Hovered | UiCall::Pressed | UiCall::Held | UiCall::SliderChanged => {
-                        Type::Bool
-                    }
+                    UiCall::SliderValue | UiCall::ScrollOffset => Type::F32,
+                    UiCall::InputText => Type::String,
+                    UiCall::Hovered
+                    | UiCall::Pressed
+                    | UiCall::Held
+                    | UiCall::SliderChanged
+                    | UiCall::Checked
+                    | UiCall::Changed
+                    | UiCall::Submitted
+                    | UiCall::Focused => Type::Bool,
                     _ => Type::Unit,
                 },
             },

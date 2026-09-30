@@ -106,9 +106,11 @@ no parent. `:nth-child()` takes CSS's `an+b`, `odd` and `even`. `:not()` and
 not specific at all, as in CSS.
 
 `:disabled` and `:checked` come from the entity's own data: a component with
-`"disabled": true` makes its entity `:disabled`. `:hover`, `:active` and
-`:focus` come from input, which a host passes in when it resolves
-presentation (`PresentationWorld::resolve_with_states`).
+`"disabled": true` makes its entity `:disabled`, and a toggle with
+`"checked": true` makes it `:checked`. `:hover`, `:active` and `:focus` come
+from input, which a host passes in when it resolves presentation
+(`PresentationWorld::resolve_with_states`). `:focus` is whichever button,
+toggle, text field or scroll region has the keyboard, by Tab or by a press.
 
 ## Cascade
 
@@ -207,7 +209,7 @@ or divide by plain numbers; `u` names the overlay's own unit inside one.
 | `gap`, `row-gap`, `column-gap` | length (`gap` takes a row and a column gap) | Space between grid tracks; a flex line takes the gap along it |
 | `justify-items` | `start`, `center`, `end`, `stretch` | Where grid items sit across their cells |
 | `grid-column`, `grid-row` | `2`, `span 2`, `2 / 4`, `2 / span 3`, `auto` | Where an item starts in a grid and how many tracks it spans |
-| `width`, `height` | `auto` | On a layout: size to its children, padding and gaps. On a text element: size to its measured words and padding |
+| `width`, `height` | `auto` | On a layout: size to its children, padding and gaps. On a text element: size to its measured words and padding. A width or height given on a text element is also the box its words wrap and align in, as in CSS |
 
 Layout is hierarchical. A child must be parented beneath the layout entity in
 the scene; visual overlap does not establish layout membership. Explicit child
@@ -392,8 +394,8 @@ and browser exports. `:hover` matches the element under the pointer and every
 container it is inside, and `:active` matches the pressed element while the
 pointer stays on it (and a slider for as long as it is dragged), as in CSS.
 Hit-testing uses what was drawn, so a button a media query moved or resized
-is clicked where it is drawn. `:disabled` and `:checked` come from the
-entity's own data.
+is clicked where it is drawn. `:focus` follows the keyboard in the same hosts.
+`:disabled` and `:checked` come from the entity's own data.
 
 A running game has two layers, as a page in a browser does. The stylesheet's
 rules are settled into the game's world when it starts and whenever the

@@ -6,6 +6,7 @@
 //! and one `push_` call here.
 
 mod camera;
+mod clip_runs;
 mod effects;
 mod frustum;
 mod meanings;
@@ -16,6 +17,7 @@ mod shape;
 mod sprite;
 mod text;
 mod tile_volume;
+mod widget_registry;
 pub(crate) use tile_volume::face_is_occluded;
 mod lighting;
 mod tilemap;

@@ -45,6 +45,7 @@ impl SceneExtractor {
                 u32::try_from(index).unwrap_or(u32::MAX),
             )?;
             batches.push(SpriteDraw {
+                clip: None,
                 space: DrawSpace::World,
                 texture: textures.resolve(texture),
                 order,

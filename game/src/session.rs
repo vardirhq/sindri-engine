@@ -324,6 +324,8 @@ impl Session {
                 .lay_out(world, &self.components, extent, &self.text_sizes)?;
         }
         self.screen_ui.read(world, extent, input.presses());
+        self.screen_ui
+            .read_controls(world, &sindri_decay::ui_input(input, viewport.1));
         // Before the scripts, so a fleck thrown this frame is drawn where it
         // was thrown rather than one frame along.
         self.effects
@@ -342,8 +344,17 @@ impl Session {
         // neither. Zero when nothing is being dragged, so a camera script can
         // add it every frame without asking.
         let pan = Self::camera_pan(world, &self.components, &self.gestures, viewport);
+        // While a text field has the keyboard, the keys are the field's: a
+        // name typed with a W in it does not also walk anything forward.
+        let held_back;
+        let script_input = if self.screen_ui.editing_text(world) {
+            held_back = input.without_keys();
+            &held_back
+        } else {
+            input
+        };
         let (physics, events) = self.physics.for_scripts();
-        let mut frame = ScriptFrame::new(&self.sources, input, delta_seconds)
+        let mut frame = ScriptFrame::new(&self.sources, script_input, delta_seconds)
             .with_prefabs(&self.prefabs)
             .with_profiles(&self.profiles)
             .with_screen_ui(&self.screen_ui)
@@ -464,6 +475,21 @@ impl Session {
             }
         }
         Ok(())
+    }
+
+    /// Sets a shared board value, as a script's `Game.name = value` would.
+    ///
+    /// For tools and tests that need a run in a given state -- a level about
+    /// to be gained, a boss about to appear -- without playing it there.
+    pub fn set_board(&mut self, name: &str, value: f32) {
+        self.scripts.blackboard_mut().set(name, f64::from(value));
+    }
+
+    /// The screen UI as the last step read it: what is focused, where each
+    /// element was laid out.
+    #[must_use]
+    pub const fn screen_ui(&self) -> &ScreenUi {
+        &self.screen_ui
     }
 
     #[must_use]

@@ -1,341 +1,108 @@
-.title-panel {
-    width: 780px;
-    height: 620px;
-    x: 0px;
-    y: 10px;
-    anchor: center;
-    background: #07101f;
-    border-color: #26364d;
-    border-width: 2px;
-    border-radius: 28px;
-}
+/* The title and the module chooser. Landscape is laid out in vh so a 540p
+   window and a 1440p one see the same composition; portrait stacks it. */
 
-.title-logo {
-    width: 620px;
-    height: 310px;
-    x: 0px;
-    y: 145px;
-    anchor: center;
+/* ---- Title: identity and progress on the left, play on the right. ---- */
+.title-panel { width: 124vh; max-width: 96vw; height: 80vh; y: 2vh; }
+.title-logo { width: 50vh; height: 25vh; x: -31vh; y: 22vh; anchor: center; }
+.title-best {
+    width: 50vh; height: 3.6vh; x: -31vh; y: 6vh;
+    font-size: 2.6vh; line-height: 3vh; letter-spacing: 0.5vh; color: var(--muted); text-align: center;
 }
-
-.title-meta {
-    width: 500px;
-    height: 28px;
-    x: 0px;
-    y: -22px;
-    anchor: center;
-    color: #94a3b8;
-    font-size: 18px;
-    line-height: 22px;
-    font-weight: 700;
-    text-align: center;
-    text-transform: uppercase;
-    letter-spacing: 3px;
+.title-pilot-label { width: 50vh; height: 2.6vh; x: -31vh; y: -3vh; }
+.title-callsign { width: 50vh; height: 8vh; x: -31vh; y: -9.5vh; }
+.title-divider { width: 1px; height: 64vh; x: 0px; y: 2vh; background: var(--panel-edge); }
+.title-launch-label { width: 50vh; height: 2.6vh; x: 31vh; y: 32vh; }
+.title-start { width: 50vh; height: 14vh; x: 31vh; y: 22vh; border-radius: 14px; }
+.title-start-label { height: 4.6vh; y: 2vh; font-size: 3.8vh; line-height: 4.4vh; letter-spacing: 0.6vh; }
+.title-start-sub { width: 100%; height: 2.6vh; y: -3.2vh; font-size: 1.8vh; line-height: 2.2vh; color: #0b4a43; text-align: center; }
+.title-rush { width: 50vh; height: 8vh; x: 31vh; y: 9vh; }
+.title-pick { width: 50vh; height: 6vh; x: 31vh; y: 0.5vh; }
+.title-compact { width: 50vh; height: 7vh; x: 31vh; y: -10.5vh; }
+.title-hint {
+    width: 50vh; height: 8vh; x: 31vh; y: -23vh;
+    font-size: 1.9vh; line-height: 2.6vh; color: var(--muted); text-align: start;
 }
-
-.title-action {
-    width: 520px;
-    height: 60px;
-    x: 0px;
-    y: -71px;
-    anchor: center;
-    border-width: 2px;
-    border-radius: 16px;
-}
-
-.title-action-label {
-    width: 480px;
-    height: 30px;
-    x: 0px;
-    y: -71px;
-    anchor: center;
-    font-size: 22px;
-    line-height: 26px;
-    font-weight: 700;
-    text-align: center;
-    text-transform: uppercase;
-    letter-spacing: 3px;
-}
-
-.title-rush {
-    width: 520px;
-    height: 54px;
-    x: 0px;
-    y: -134px;
-    anchor: center;
-    border-width: 2px;
-    border-radius: 16px;
-}
-
-.title-rush-label {
-    width: 480px;
-    height: 26px;
-    x: 0px;
-    y: -134px;
-    anchor: center;
-    font-size: 20px;
-    line-height: 24px;
-    font-weight: 700;
-    text-align: center;
-    text-transform: uppercase;
-    letter-spacing: 3px;
-}
-
-.title-pick {
-    width: 520px;
-    height: 48px;
-    x: 0px;
-    y: -193px;
-    anchor: center;
-    border-width: 2px;
-    border-radius: 14px;
-}
-
-.title-pick-label {
-    width: 480px;
-    height: 24px;
-    x: 0px;
-    y: -193px;
-    anchor: center;
-    font-size: 17px;
-    line-height: 21px;
-    text-align: center;
-    text-transform: uppercase;
-    letter-spacing: 2px;
-}
-
-.title-copy {
-    width: 620px;
-    height: 58px;
-    x: 0px;
-    y: -254px;
-    anchor: center;
-    color: #94a3b8;
-    font-size: 16px;
-    line-height: 22px;
-    text-align: center;
-    text-wrap: word;
-    text-transform: uppercase;
-    letter-spacing: 2px;
-}
-
 .title-notice {
-    y: -62px;
-    color: #fda4af;
+    width: 50vh; height: 7vh; x: -31vh; y: -23vh;
+    font-size: 1.9vh; line-height: 2.6vh; color: #fda4af; text-align: start;
 }
 
-.upgrade-panel {
-    width: 1080px;
-    height: 640px;
-    x: 0px;
-    y: 0px;
-    anchor: center;
-    background: #07101f;
-    border-color: #26364d;
-    border-width: 2px;
-    border-radius: 28px;
+/* ---- Module chooser: three or four cards in a row. ---- */
+.upgrade-panel { width: 152vh; max-width: 96vw; height: 86vh; y: 0vh; }
+.upgrade-kicker { width: 60vh; height: 2.6vh; x: 0px; y: 35vh; anchor: center; text-align: center; }
+.upgrade-heading { width: 100vh; height: 6.4vh; x: 0px; y: 29vh; anchor: center; text-align: center; }
+.upgrade-hint {
+    width: 100vh; height: 3vh; x: 0px; y: -37vh; anchor: center;
+    font-size: 1.9vh; line-height: 2.4vh; color: var(--muted); text-align: center;
 }
-
-.upgrade-heading {
-    width: 900px;
-    height: 58px;
-    x: 0px;
-    y: 250px;
-    anchor: center;
-    color: #f8fafc;
-    font-size: 38px;
-    line-height: 44px;
-    font-weight: 700;
-    text-align: center;
-    text-transform: uppercase;
-    letter-spacing: 4px;
-}
-
 .upgrade-grid {
-    width: 980px;
-    height: 360px;
-    x: 0px;
-    y: -20px;
-    direction: row;
-    gap: 20px;
-    justify-content: center;
-    align-items: center;
+    width: 142vh; max-width: 92vw; height: 56vh; x: 0px; y: -3vh;
+    direction: row; gap: 2.4vh; justify-content: center; align-items: center;
 }
-
 .upgrade-card {
-    width: 300px;
-    height: 290px;
-    background: #0d192a;
-    border-color: #3b4a63;
-    border-width: 2px;
-    border-radius: 20px;
+    width: 33vh; height: 52vh;
+    background: #0a1729; border-color: #22384f; border-width: 1px; border-radius: 14px;
 }
-
+.upgrade-card:hover { background: #0f2238; border-color: var(--accent); }
+.upgrade-card:active { background: var(--accent-deep); border-color: #a7f3e6; }
+.upgrade-card:focus { border-color: var(--cyan); border-width: 3px; }
+.upgrade-accent { width: 27vh; height: 0.6vh; x: 0px; y: 23vh; background: var(--accent); border-radius: 0.3vh; }
+.upgrade-card:hover .upgrade-accent { background: var(--cyan); }
+.upgrade-card-kicker { width: 27vh; height: 2.4vh; x: 0px; y: 18.6vh; color: var(--faint); }
 .upgrade-card-name {
-    width: 86%;
-    height: 64px;
-    x: 0px;
-    y: 46px;
-    anchor: center;
-    color: #f8fafc;
-    font-size: 22px;
-    line-height: 27px;
-    font-weight: 700;
-    text-align: center;
-    text-wrap: word;
-    letter-spacing: 1px;
+    width: 27vh; height: 8vh; x: 0px; y: 12vh;
+    font-size: 3.1vh; line-height: 3.6vh; letter-spacing: 0.1vh; color: var(--ink); text-align: start;
 }
-
 .upgrade-card-copy {
-    width: 82%;
-    height: 76px;
-    x: 0px;
-    y: -48px;
-    anchor: center;
-    color: #94a3b8;
-    font-size: 16px;
-    line-height: 22px;
-    text-align: center;
-    text-wrap: word;
-    text-transform: uppercase;
-    letter-spacing: 1px;
+    width: 27vh; height: 10vh; x: 0px; y: 1.5vh;
+    font-size: 2.1vh; line-height: 2.9vh; color: var(--muted); text-align: start;
+}
+.upgrade-card-cta {
+    width: 27vh; height: 2.6vh; x: 0px; y: -21.5vh;
+    font-size: 1.8vh; letter-spacing: 0.4vh; color: var(--accent); text-align: start;
+}
+.upgrade-card:hover .upgrade-card-cta { color: var(--cyan); }
+
+@media (max-height: 600px) and (orientation: landscape) {
+    .title-hint, .title-notice, .upgrade-hint { font-size: 11px; line-height: 14px; }
+    .title-start-sub { font-size: 9px; line-height: 11px; }
+    .title-start-label { y: 1.4vh; }
+    .upgrade-card-copy { font-size: 12px; line-height: 16px; }
+    .upgrade-card-cta, .upgrade-card-kicker { font-size: 10px; letter-spacing: 2px; }
 }
 
+/* ---- Portrait: one column, sized by height and held inside the width. ---- */
 @media (orientation: portrait) {
-    .title-panel {
-        width: 92vw;
-        height: 142vw;
-        border-radius: 5vw;
-    }
+    .title-panel { width: 48vh; max-width: 92vw; height: 90vh; y: 0vh; }
+    .title-logo { width: 40vh; max-width: 76vw; height: 17vh; max-height: 38vw; x: 0px; y: 34vh; }
+    .title-best { width: 44vh; max-width: 84vw; height: 3.4vh; x: 0px; y: 23.5vh; font-size: 2.3vh; }
+    .title-pilot-label { width: 44vh; max-width: 84vw; height: 2.4vh; x: 0px; y: 19.5vh; }
+    .title-callsign { width: 44vh; max-width: 84vw; height: 6.4vh; x: 0px; y: 14.6vh; }
+    .title-divider { width: 44vh; max-width: 84vw; height: 1px; x: 0px; y: 9.6vh; }
+    .title-launch-label { width: 44vh; max-width: 84vw; height: 2.4vh; x: 0px; y: 6.6vh; }
+    .title-start { width: 44vh; max-width: 84vw; height: 10vh; x: 0px; y: 0vh; }
+    .title-start-label { height: 3.8vh; y: 1.4vh; font-size: 3vh; }
+    .title-start-sub { y: -2.6vh; font-size: 1.5vh; }
+    .title-rush { width: 44vh; max-width: 84vw; height: 6.4vh; x: 0px; y: -9.4vh; }
+    .title-pick { width: 44vh; max-width: 84vw; height: 5.4vh; x: 0px; y: -16.2vh; }
+    .title-compact { width: 44vh; max-width: 84vw; height: 6vh; x: 0px; y: -23.2vh; }
+    .title-hint { width: 44vh; max-width: 84vw; height: 7vh; x: 0px; y: -31.6vh; font-size: 1.6vh; line-height: 2.2vh; }
+    .title-notice { width: 44vh; max-width: 84vw; height: 4vh; x: 0px; y: -38.6vh; font-size: 1.6vh; line-height: 2.1vh; }
+    .action-label { font-size: 2.3vh; }
+    .action-ghost-label { font-size: 1.7vh; }
+    .switch-label, .row-key { font-size: 1.6vh; }
+    .row-value { font-size: 1.8vh; }
+    .kicker { font-size: 1.6vh; }
 
-    .title-logo {
-        width: 82vw;
-        height: 41vw;
-        y: 34vw;
-    }
-
-    .title-meta {
-        width: 78vw;
-        height: 6vw;
-        y: 4vw;
-        font-size: 4vw;
-        line-height: 5vw;
-        letter-spacing: 0.6vw;
-    }
-
-    .title-action {
-        width: 78vw;
-        height: 14vw;
-        y: -24vw;
-        border-radius: 3.5vw;
-    }
-
-    .title-action-label {
-        width: 72vw;
-        height: 6vw;
-        y: -24vw;
-        font-size: 4.8vw;
-        line-height: 6vw;
-        letter-spacing: 0.6vw;
-    }
-
-    /* These four have to come after the portrait `.title-action` rules above.
-       Every button carries `title-action` as well as its own class, and Weave
-       settles a tie in specificity by source order -- so without these, the
-       portrait `.title-action { y: -24vw }` was the last word for all three
-       rows and they stacked on top of each other on a phone. */
-    .title-rush {
-        width: 78vw;
-        height: 12vw;
-        y: -38vw;
-        border-radius: 3.5vw;
-    }
-
-    .title-rush-label {
-        width: 72vw;
-        height: 5.5vw;
-        y: -38vw;
-        font-size: 4.3vw;
-        line-height: 5.5vw;
-        letter-spacing: 0.5vw;
-    }
-
-    .title-pick {
-        width: 78vw;
-        height: 10vw;
-        y: -50vw;
-        border-radius: 3vw;
-    }
-
-    .title-pick-label {
-        width: 72vw;
-        height: 5vw;
-        y: -50vw;
-        font-size: 3.6vw;
-        line-height: 4.6vw;
-        letter-spacing: 0.4vw;
-    }
-
-    .title-copy {
-        width: 78vw;
-        height: 14vw;
-        y: -64vw;
-        font-size: 3.3vw;
-        line-height: 4.6vw;
-        letter-spacing: 0.3vw;
-    }
-
-    .title-notice {
-        y: -10vw;
-        color: #fda4af;
-    }
-
-    .upgrade-panel {
-        width: 92vw;
-        height: 176vw;
-        border-radius: 5vw;
-    }
-
-    .upgrade-heading {
-        width: 80vw;
-        height: 12vw;
-        y: 74vw;
-        font-size: 7vw;
-        line-height: 9vw;
-        letter-spacing: 0.7vw;
-    }
-
-    .upgrade-grid {
-        width: 80vw;
-        height: 126vw;
-        y: -5vw;
-        direction: column;
-        gap: 3vw;
-        justify-content: center;
-        align-items: center;
-    }
-
-    .upgrade-card {
-        width: 100%;
-        height: 34vw;
-        border-radius: 4vw;
-    }
-
-    .upgrade-card-name {
-        width: 86%;
-        height: 9vw;
-        y: 7vw;
-        font-size: 4.8vw;
-        line-height: 6vw;
-        letter-spacing: 0.25vw;
-    }
-
-    .upgrade-card-copy {
-        width: 84%;
-        height: 11vw;
-        y: -7vw;
-        font-size: 3.3vw;
-        line-height: 4.5vw;
-        letter-spacing: 0.2vw;
-    }
+    .upgrade-panel { width: 50vh; max-width: 94vw; height: 94vh; }
+    .upgrade-kicker { width: 44vh; max-width: 84vw; y: 42vh; }
+    .upgrade-heading { width: 44vh; max-width: 84vw; height: 5vh; y: 37.5vh; font-size: 3.6vh; line-height: 4.2vh; }
+    .upgrade-hint { width: 44vh; max-width: 84vw; height: 2.6vh; y: -43vh; font-size: 1.5vh; }
+    .upgrade-grid { width: 46vh; max-width: 88vw; height: 72vh; y: -4.4vh; direction: column; gap: 1.2vh; }
+    .upgrade-card { width: 100%; height: 16.6vh; }
+    .upgrade-accent { width: 0.6vh; height: 13vh; x: -18.5vh; y: 0vh; }
+    .upgrade-card-kicker { width: 36vh; max-width: 70vw; height: 2vh; x: 1.5vh; y: 6vh; }
+    .upgrade-card-name { width: 36vh; max-width: 70vw; height: 3.6vh; x: 1.5vh; y: 2.8vh; font-size: 2.5vh; line-height: 3vh; }
+    .upgrade-card-copy { width: 36vh; max-width: 70vw; height: 5.4vh; x: 1.5vh; y: -2vh; font-size: 1.6vh; line-height: 2.2vh; }
+    .upgrade-card-cta { width: 36vh; max-width: 70vw; height: 2vh; x: 1.5vh; y: -6.6vh; font-size: 1.4vh; }
 }
