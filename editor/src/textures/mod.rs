@@ -138,7 +138,7 @@ pub fn prefab_world(prefabs: &sindri_decay::PrefabSources) -> World {
     let mut world = World::default();
     for id in prefabs.ids() {
         if let Some(prefab) = prefabs.get(id) {
-            let _ = world.spawn_prefab(prefab);
+            let _ = world.spawn_prefab_from(prefab, prefabs);
         }
     }
     world

@@ -3,6 +3,7 @@
 //! and removed, a struct whose fields each get a row — and anything else as
 //! the plain value it is.
 
+use crate::native::inspector_panel::FieldAssets;
 use eframe::egui::{self, RichText};
 use serde_json::Value;
 use sindri_decay::{ScriptExport, ScriptValue};
@@ -31,12 +32,12 @@ pub(super) fn export_row(
     value: &mut Value,
     indent: f32,
     authored: Authored,
-    profiles: &[String],
+    assets: FieldAssets<'_>,
 ) {
     if let Some(element) = &export.element {
-        list_rows(ui, id, export, element, value, indent, profiles);
+        list_rows(ui, id, export, element, value, indent, assets);
     } else if !export.fields.is_empty() {
-        struct_rows(ui, id, export, value, indent, profiles);
+        struct_rows(ui, id, export, value, indent, assets);
     } else if !export.choices.is_empty() {
         // An enum: its variants, by name, never a number.
         let current = value.as_str().unwrap_or_default().to_owned();
@@ -52,7 +53,12 @@ pub(super) fn export_row(
         }
         super::super::field::colour_row(ui, &export.name, value);
     } else if export.type_name.as_deref() == Some("Profile") {
-        super::super::field::asset_row(ui, id, &export.name, value, profiles, None, indent);
+        super::super::field::asset_row(ui, id, &export.name, value, assets.profiles, None, indent);
+    } else if export.type_name.as_deref() == Some("Prefab") {
+        // A prefab field is chosen from the project's prefabs, as a profile
+        // field is from its profiles: what a spawn makes is an asset, and a
+        // mistyped path in a text box is found only when the spawn happens.
+        super::super::field::asset_row(ui, id, &export.name, value, assets.prefabs, None, indent);
     } else {
         value_row(ui, At::loose(), &export.name, value, indent, authored);
     }
@@ -77,7 +83,7 @@ fn struct_rows(
     export: &ScriptExport,
     value: &mut Value,
     indent: f32,
-    profiles: &[String],
+    assets: FieldAssets<'_>,
 ) {
     if !export.name.is_empty() {
         heading(ui, &export.name, indent);
@@ -99,7 +105,7 @@ fn struct_rows(
             entry,
             indent + 10.0,
             Authored::Default,
-            profiles,
+            assets,
         );
     }
 }
@@ -113,7 +119,7 @@ fn list_rows(
     element: &ScriptExport,
     value: &mut Value,
     indent: f32,
-    profiles: &[String],
+    assets: FieldAssets<'_>,
 ) {
     if !value.is_array() {
         *value = script_value_json(&export.default);
@@ -165,7 +171,7 @@ fn list_rows(
             item,
             indent + 20.0,
             Authored::Default,
-            profiles,
+            assets,
         );
     }
     apply(script_value_json(&element.default), items, change);

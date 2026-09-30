@@ -1,3 +1,4 @@
+use std::collections::BTreeMap;
 use std::path::Path;
 
 use serde_json::json;
@@ -7,6 +8,13 @@ use sindri_core::{
 };
 
 use super::{instantiate_into, load};
+
+/// Where every prefab in these tests is placed from.
+const SOURCE: &str = "prefabs/test.prefab";
+
+fn library(prefab: &PrefabDocument) -> BTreeMap<String, PrefabDocument> {
+    BTreeMap::from([(SOURCE.to_owned(), prefab.clone())])
+}
 
 fn id(value: &str) -> SceneEntityId {
     SceneEntityId::new(value).expect("a valid ID")
@@ -34,7 +42,7 @@ fn oak() -> PrefabDocument {
 fn instantiate(world: &mut World, prefab: &PrefabDocument) -> sindri_core::EntityId {
     let mut rehearsal = world.clone();
     let mut buffer = CommandBuffer::new();
-    let root = instantiate_into(&mut rehearsal, prefab, None, &mut buffer)
+    let root = instantiate_into(&mut rehearsal, &library(prefab), SOURCE, None, &mut buffer)
         .expect("a single-rooted prefab instantiates");
     let mut history = CommandHistory::default();
     history
@@ -110,8 +118,10 @@ fn two_instances_in_one_transaction_land_apart() {
     let prefab = oak();
     let mut rehearsal = world.clone();
     let mut buffer = CommandBuffer::new();
-    let first = instantiate_into(&mut rehearsal, &prefab, None, &mut buffer).unwrap();
-    let second = instantiate_into(&mut rehearsal, &prefab, None, &mut buffer).unwrap();
+    let first =
+        instantiate_into(&mut rehearsal, &library(&prefab), SOURCE, None, &mut buffer).unwrap();
+    let second =
+        instantiate_into(&mut rehearsal, &library(&prefab), SOURCE, None, &mut buffer).unwrap();
     assert_ne!(first, second, "two instances are two entities");
 
     let mut history = CommandHistory::default();
@@ -128,7 +138,8 @@ fn undoing_takes_the_whole_prefab_back() {
     let prefab = oak();
     let mut rehearsal = world.clone();
     let mut buffer = CommandBuffer::new();
-    let root = instantiate_into(&mut rehearsal, &prefab, None, &mut buffer).unwrap();
+    let root =
+        instantiate_into(&mut rehearsal, &library(&prefab), SOURCE, None, &mut buffer).unwrap();
     let mut history = CommandHistory::default();
     history
         .apply(buffer.into_transaction("Add Oak"), &mut world)
@@ -154,7 +165,14 @@ fn a_prefab_can_arrive_under_a_parent() {
     let prefab = oak();
     let mut rehearsal = world.clone();
     let mut buffer = CommandBuffer::new();
-    let root = instantiate_into(&mut rehearsal, &prefab, Some(host), &mut buffer).unwrap();
+    let root = instantiate_into(
+        &mut rehearsal,
+        &library(&prefab),
+        SOURCE,
+        Some(host),
+        &mut buffer,
+    )
+    .unwrap();
     let mut history = CommandHistory::default();
     history
         .apply(buffer.into_transaction("Add Oak"), &mut world)
@@ -175,7 +193,7 @@ fn a_prefab_without_one_root_is_refused() {
     let mut rehearsal = World::default();
     let mut buffer = CommandBuffer::new();
     assert!(
-        instantiate_into(&mut rehearsal, &prefab, None, &mut buffer).is_err(),
+        instantiate_into(&mut rehearsal, &library(&prefab), SOURCE, None, &mut buffer).is_err(),
         "two roots is not a prefab"
     );
 }
@@ -210,8 +228,15 @@ fn house() -> PrefabDocument {
 fn place(world: &mut World, prefab: &PrefabDocument, cell: [i32; 2]) -> sindri_core::EntityId {
     let mut rehearsal = world.clone();
     let mut buffer = CommandBuffer::new();
-    let root = super::instantiate_on_cell(&mut rehearsal, prefab, &id("floor"), cell, &mut buffer)
-        .expect("it places");
+    let root = super::instantiate_on_cell(
+        &mut rehearsal,
+        &library(prefab),
+        SOURCE,
+        &id("floor"),
+        cell,
+        &mut buffer,
+    )
+    .expect("it places");
     let mut history = CommandHistory::default();
     history
         .apply(buffer.into_transaction("Place"), world)
@@ -270,9 +295,15 @@ fn undoing_a_placement_takes_the_whole_thing_back() {
     let prefab = oak();
     let mut rehearsal = world.clone();
     let mut buffer = CommandBuffer::new();
-    let root =
-        super::instantiate_on_cell(&mut rehearsal, &prefab, &id("floor"), [1, 1], &mut buffer)
-            .expect("it places");
+    let root = super::instantiate_on_cell(
+        &mut rehearsal,
+        &library(&prefab),
+        SOURCE,
+        &id("floor"),
+        [1, 1],
+        &mut buffer,
+    )
+    .expect("it places");
     let mut history = CommandHistory::default();
     history
         .apply(buffer.into_transaction("Place"), &mut world)

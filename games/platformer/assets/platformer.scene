@@ -1211,54 +1211,8 @@
           1
         ]
       },
-      "components": {
-        "sindri.sprite": {
-          "texture": "textures/coin.png#coin-0",
-          "layer": 4
-        },
-        "sindri.animation.sprite": {
-          "clips": {
-            "spin": {
-              "frames": [
-                "coin-0",
-                "coin-1",
-                "coin-2",
-                "coin-3"
-              ],
-              "seconds_per_frame": 0.12,
-              "looping": true
-            }
-          },
-          "playing": "spin",
-          "speed": 1.0
-        },
-        "sindri.physics2d.collider": {
-          "pieces": [
-            {
-              "shape": {
-                "shape": "circle",
-                "radius": 0.3
-              },
-              "offset": [
-                0,
-                0
-              ],
-              "rotation": 0,
-              "sensor": true,
-              "layers": {
-                "memberships": 4294967295,
-                "filter": 4294967295
-              },
-              "friction": 0.5,
-              "restitution": 0.0
-            }
-          ]
-        },
-        "sindri.tags": {
-          "tags": [
-            "coin"
-          ]
-        }
+      "prefab": {
+        "source": "prefabs/coin.prefab"
       }
     },
     {
@@ -1282,54 +1236,8 @@
           1
         ]
       },
-      "components": {
-        "sindri.sprite": {
-          "texture": "textures/coin.png#coin-0",
-          "layer": 4
-        },
-        "sindri.animation.sprite": {
-          "clips": {
-            "spin": {
-              "frames": [
-                "coin-0",
-                "coin-1",
-                "coin-2",
-                "coin-3"
-              ],
-              "seconds_per_frame": 0.12,
-              "looping": true
-            }
-          },
-          "playing": "spin",
-          "speed": 1.0
-        },
-        "sindri.physics2d.collider": {
-          "pieces": [
-            {
-              "shape": {
-                "shape": "circle",
-                "radius": 0.3
-              },
-              "offset": [
-                0,
-                0
-              ],
-              "rotation": 0,
-              "sensor": true,
-              "layers": {
-                "memberships": 4294967295,
-                "filter": 4294967295
-              },
-              "friction": 0.5,
-              "restitution": 0.0
-            }
-          ]
-        },
-        "sindri.tags": {
-          "tags": [
-            "coin"
-          ]
-        }
+      "prefab": {
+        "source": "prefabs/coin.prefab"
       }
     },
     {
@@ -1353,54 +1261,8 @@
           1
         ]
       },
-      "components": {
-        "sindri.sprite": {
-          "texture": "textures/coin.png#coin-0",
-          "layer": 4
-        },
-        "sindri.animation.sprite": {
-          "clips": {
-            "spin": {
-              "frames": [
-                "coin-0",
-                "coin-1",
-                "coin-2",
-                "coin-3"
-              ],
-              "seconds_per_frame": 0.12,
-              "looping": true
-            }
-          },
-          "playing": "spin",
-          "speed": 1.0
-        },
-        "sindri.physics2d.collider": {
-          "pieces": [
-            {
-              "shape": {
-                "shape": "circle",
-                "radius": 0.3
-              },
-              "offset": [
-                0,
-                0
-              ],
-              "rotation": 0,
-              "sensor": true,
-              "layers": {
-                "memberships": 4294967295,
-                "filter": 4294967295
-              },
-              "friction": 0.5,
-              "restitution": 0.0
-            }
-          ]
-        },
-        "sindri.tags": {
-          "tags": [
-            "coin"
-          ]
-        }
+      "prefab": {
+        "source": "prefabs/coin.prefab"
       }
     },
     {
@@ -1424,54 +1286,8 @@
           1
         ]
       },
-      "components": {
-        "sindri.sprite": {
-          "texture": "textures/coin.png#coin-0",
-          "layer": 4
-        },
-        "sindri.animation.sprite": {
-          "clips": {
-            "spin": {
-              "frames": [
-                "coin-0",
-                "coin-1",
-                "coin-2",
-                "coin-3"
-              ],
-              "seconds_per_frame": 0.12,
-              "looping": true
-            }
-          },
-          "playing": "spin",
-          "speed": 1.0
-        },
-        "sindri.physics2d.collider": {
-          "pieces": [
-            {
-              "shape": {
-                "shape": "circle",
-                "radius": 0.3
-              },
-              "offset": [
-                0,
-                0
-              ],
-              "rotation": 0,
-              "sensor": true,
-              "layers": {
-                "memberships": 4294967295,
-                "filter": 4294967295
-              },
-              "friction": 0.5,
-              "restitution": 0.0
-            }
-          ]
-        },
-        "sindri.tags": {
-          "tags": [
-            "coin"
-          ]
-        }
+      "prefab": {
+        "source": "prefabs/coin.prefab"
       }
     },
     {
@@ -1495,54 +1311,8 @@
           1
         ]
       },
-      "components": {
-        "sindri.sprite": {
-          "texture": "textures/coin.png#coin-0",
-          "layer": 4
-        },
-        "sindri.animation.sprite": {
-          "clips": {
-            "spin": {
-              "frames": [
-                "coin-0",
-                "coin-1",
-                "coin-2",
-                "coin-3"
-              ],
-              "seconds_per_frame": 0.12,
-              "looping": true
-            }
-          },
-          "playing": "spin",
-          "speed": 1.0
-        },
-        "sindri.physics2d.collider": {
-          "pieces": [
-            {
-              "shape": {
-                "shape": "circle",
-                "radius": 0.3
-              },
-              "offset": [
-                0,
-                0
-              ],
-              "rotation": 0,
-              "sensor": true,
-              "layers": {
-                "memberships": 4294967295,
-                "filter": 4294967295
-              },
-              "friction": 0.5,
-              "restitution": 0.0
-            }
-          ]
-        },
-        "sindri.tags": {
-          "tags": [
-            "coin"
-          ]
-        }
+      "prefab": {
+        "source": "prefabs/coin.prefab"
       }
     },
     {
@@ -1566,54 +1336,8 @@
           1
         ]
       },
-      "components": {
-        "sindri.sprite": {
-          "texture": "textures/coin.png#coin-0",
-          "layer": 4
-        },
-        "sindri.animation.sprite": {
-          "clips": {
-            "spin": {
-              "frames": [
-                "coin-0",
-                "coin-1",
-                "coin-2",
-                "coin-3"
-              ],
-              "seconds_per_frame": 0.12,
-              "looping": true
-            }
-          },
-          "playing": "spin",
-          "speed": 1.0
-        },
-        "sindri.physics2d.collider": {
-          "pieces": [
-            {
-              "shape": {
-                "shape": "circle",
-                "radius": 0.3
-              },
-              "offset": [
-                0,
-                0
-              ],
-              "rotation": 0,
-              "sensor": true,
-              "layers": {
-                "memberships": 4294967295,
-                "filter": 4294967295
-              },
-              "friction": 0.5,
-              "restitution": 0.0
-            }
-          ]
-        },
-        "sindri.tags": {
-          "tags": [
-            "coin"
-          ]
-        }
+      "prefab": {
+        "source": "prefabs/coin.prefab"
       }
     },
     {
@@ -1637,54 +1361,8 @@
           1
         ]
       },
-      "components": {
-        "sindri.sprite": {
-          "texture": "textures/coin.png#coin-0",
-          "layer": 4
-        },
-        "sindri.animation.sprite": {
-          "clips": {
-            "spin": {
-              "frames": [
-                "coin-0",
-                "coin-1",
-                "coin-2",
-                "coin-3"
-              ],
-              "seconds_per_frame": 0.12,
-              "looping": true
-            }
-          },
-          "playing": "spin",
-          "speed": 1.0
-        },
-        "sindri.physics2d.collider": {
-          "pieces": [
-            {
-              "shape": {
-                "shape": "circle",
-                "radius": 0.3
-              },
-              "offset": [
-                0,
-                0
-              ],
-              "rotation": 0,
-              "sensor": true,
-              "layers": {
-                "memberships": 4294967295,
-                "filter": 4294967295
-              },
-              "friction": 0.5,
-              "restitution": 0.0
-            }
-          ]
-        },
-        "sindri.tags": {
-          "tags": [
-            "coin"
-          ]
-        }
+      "prefab": {
+        "source": "prefabs/coin.prefab"
       }
     },
     {
@@ -1708,54 +1386,8 @@
           1
         ]
       },
-      "components": {
-        "sindri.sprite": {
-          "texture": "textures/coin.png#coin-0",
-          "layer": 4
-        },
-        "sindri.animation.sprite": {
-          "clips": {
-            "spin": {
-              "frames": [
-                "coin-0",
-                "coin-1",
-                "coin-2",
-                "coin-3"
-              ],
-              "seconds_per_frame": 0.12,
-              "looping": true
-            }
-          },
-          "playing": "spin",
-          "speed": 1.0
-        },
-        "sindri.physics2d.collider": {
-          "pieces": [
-            {
-              "shape": {
-                "shape": "circle",
-                "radius": 0.3
-              },
-              "offset": [
-                0,
-                0
-              ],
-              "rotation": 0,
-              "sensor": true,
-              "layers": {
-                "memberships": 4294967295,
-                "filter": 4294967295
-              },
-              "friction": 0.5,
-              "restitution": 0.0
-            }
-          ]
-        },
-        "sindri.tags": {
-          "tags": [
-            "coin"
-          ]
-        }
+      "prefab": {
+        "source": "prefabs/coin.prefab"
       }
     },
     {
@@ -1779,54 +1411,8 @@
           1
         ]
       },
-      "components": {
-        "sindri.sprite": {
-          "texture": "textures/coin.png#coin-0",
-          "layer": 4
-        },
-        "sindri.animation.sprite": {
-          "clips": {
-            "spin": {
-              "frames": [
-                "coin-0",
-                "coin-1",
-                "coin-2",
-                "coin-3"
-              ],
-              "seconds_per_frame": 0.12,
-              "looping": true
-            }
-          },
-          "playing": "spin",
-          "speed": 1.0
-        },
-        "sindri.physics2d.collider": {
-          "pieces": [
-            {
-              "shape": {
-                "shape": "circle",
-                "radius": 0.3
-              },
-              "offset": [
-                0,
-                0
-              ],
-              "rotation": 0,
-              "sensor": true,
-              "layers": {
-                "memberships": 4294967295,
-                "filter": 4294967295
-              },
-              "friction": 0.5,
-              "restitution": 0.0
-            }
-          ]
-        },
-        "sindri.tags": {
-          "tags": [
-            "coin"
-          ]
-        }
+      "prefab": {
+        "source": "prefabs/coin.prefab"
       }
     },
     {
@@ -1850,54 +1436,8 @@
           1
         ]
       },
-      "components": {
-        "sindri.sprite": {
-          "texture": "textures/coin.png#coin-0",
-          "layer": 4
-        },
-        "sindri.animation.sprite": {
-          "clips": {
-            "spin": {
-              "frames": [
-                "coin-0",
-                "coin-1",
-                "coin-2",
-                "coin-3"
-              ],
-              "seconds_per_frame": 0.12,
-              "looping": true
-            }
-          },
-          "playing": "spin",
-          "speed": 1.0
-        },
-        "sindri.physics2d.collider": {
-          "pieces": [
-            {
-              "shape": {
-                "shape": "circle",
-                "radius": 0.3
-              },
-              "offset": [
-                0,
-                0
-              ],
-              "rotation": 0,
-              "sensor": true,
-              "layers": {
-                "memberships": 4294967295,
-                "filter": 4294967295
-              },
-              "friction": 0.5,
-              "restitution": 0.0
-            }
-          ]
-        },
-        "sindri.tags": {
-          "tags": [
-            "coin"
-          ]
-        }
+      "prefab": {
+        "source": "prefabs/coin.prefab"
       }
     },
     {

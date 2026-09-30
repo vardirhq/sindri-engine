@@ -44,6 +44,7 @@ pub(crate) struct FieldAssets<'a> {
     pub(crate) scripts: &'a [String],
     pub(crate) audio: &'a [String],
     pub(crate) profiles: &'a [String],
+    pub(crate) prefabs: &'a [String],
     pub(crate) tile_sets: &'a [String],
     /// What each loaded texture reference looks like, for a field that can
     /// show one: a voxel material as a cube.
@@ -156,9 +157,9 @@ pub(crate) fn asset_list<'a>(
         AssetKind::Script => assets.scripts,
         AssetKind::Profile => assets.profiles,
         AssetKind::TileSet => assets.tile_sets,
-        // Neither is a list the inspector draws a field from today: a prefab is
-        // chosen by its own picker, and a stylesheet is not a component field.
-        AssetKind::Prefab | AssetKind::Weave => return None,
+        AssetKind::Prefab => assets.prefabs,
+        // A stylesheet is not something a component field names.
+        AssetKind::Weave => return None,
     })
 }
 

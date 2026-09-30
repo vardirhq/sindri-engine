@@ -13,8 +13,16 @@
 //! format for "a subtree of entities" would be a copy of the scene format that
 //! drifts from it, and a prefab that could not hold a component a scene can
 //! hold would be a trap discovered late.
+//!
+//! A scene places one as an *instance*: a reference to the prefab and the
+//! overrides that instance made. `expand` turns instances into the entities
+//! their prefabs describe, nested instances included, and computes an
+//! instance's overrides back from what it has become.
 
 mod document;
+mod expand;
+mod instance;
+mod patch;
 
 #[cfg(test)]
 mod tests;
@@ -22,3 +30,9 @@ mod tests;
 pub use document::{
     PREFAB_FORMAT_VERSION, PREFAB_SUFFIX, PrefabDocument, PrefabError, PrefabJsonError,
 };
+pub use expand::{
+    ExpandedEntity, MAX_PREFAB_NESTING, apply_override, expand_entities, instance_path,
+    override_between,
+};
+pub use instance::{EntityOverride, NoPrefabs, PrefabInstance, PrefabLibrary, PrefabLink};
+pub use patch::{apply_merge_patch, merge_patch_between};

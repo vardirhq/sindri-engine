@@ -9,9 +9,13 @@
 //! So every grid in the scene is asked, and the frontmost answer wins — the
 //! same tie-break the renderer uses, so the cell an author sees on top is the
 //! one they get.
+//!
+//! A scene with no grid — a platformer, a shooter — is placed into at the
+//! middle of the Scene view instead, where the author is looking.
 
 use eframe::egui::{self, Align2, FontId, Pos2, Rect, Shape, Stroke};
-use sindri_core::{CommandBuffer, EntityId, SceneEntityId};
+use glam::Vec3;
+use sindri_core::{CommandBuffer, EntityId, PrefabLibrary, SceneEntityId, Transform3D};
 use sindri_grid::GridCoord3;
 use sindri_scene::{CameraView, TileGridComponent};
 
@@ -130,11 +134,7 @@ impl EditorApp {
         if !self.authoring_enabled() {
             return;
         }
-        let Some(document) = self
-            .prefab_brush
-            .as_ref()
-            .and_then(|brush| brush.document().cloned())
-        else {
+        let Some(source) = self.brush_source() else {
             return;
         };
         let label = self
@@ -146,7 +146,8 @@ impl EditorApp {
         let mut buffer = CommandBuffer::new();
         let root = match prefab::instantiate_on_cell(
             &mut rehearsal,
-            &document,
+            self.file.prefabs(),
+            &source,
             &target.grid,
             [target.coord.x, target.coord.y],
             &mut buffer,
@@ -167,6 +168,107 @@ impl EditorApp {
         }
         self.select(Some(root));
         self.refresh_textures();
+    }
+
+    /// Puts an instance of the chosen prefab in the middle of the Scene view,
+    /// as one undoable step.
+    ///
+    /// Where the middle of the view meets the plane a 2D scene is drawn in,
+    /// keeping the prefab's own depth, so a prefab authored to sit in front
+    /// of the level still does.
+    pub(super) fn place_prefab_in_view(&mut self) {
+        if !self.authoring_enabled() {
+            return;
+        }
+        let Some(source) = self.brush_source() else {
+            return;
+        };
+        let centre = self.view_centre();
+        let transform = self
+            .file
+            .prefabs()
+            .prefab(&source)
+            .and_then(|prefab| prefab.root().ok())
+            .and_then(|root| root.transform_3d)
+            .unwrap_or_default();
+        let transform = Transform3D {
+            position: [centre[0], centre[1], transform.position[2]],
+            ..transform
+        };
+        let mut rehearsal = self.world.clone();
+        let mut buffer = CommandBuffer::new();
+        let root = match prefab::spawn_instance(
+            &mut rehearsal,
+            &source,
+            self.file.prefabs(),
+            None,
+            Some(transform),
+            &mut buffer,
+        ) {
+            Ok(root) => root,
+            Err(error) => {
+                self.console.warning(error);
+                return;
+            }
+        };
+        self.history.break_merge_run();
+        let label = format!("Add {}", super::instances::file_name(&source));
+        if let Err(error) = self
+            .history
+            .apply(buffer.into_transaction(label), &mut self.world)
+        {
+            self.report(error.to_string());
+            return;
+        }
+        self.select(Some(root));
+    }
+
+    /// Where the middle of the Scene view meets the plane `z = 0`, or the
+    /// origin when it cannot be worked out.
+    fn view_centre(&self) -> [f32; 3] {
+        let camera = self
+            .scene
+            .world_camera_for_viewport(&self.world, 16.0 / 9.0, self.scene_camera())
+            .ok()
+            .flatten();
+        let Some(camera) = camera else {
+            return [0.0; 3];
+        };
+        let inverse = camera.view_projection.inverse();
+        let near = inverse.project_point3(Vec3::new(0.0, 0.0, 0.0));
+        let far = inverse.project_point3(Vec3::new(0.0, 0.0, 1.0));
+        let direction = far - near;
+        if direction.z.abs() < f32::EPSILON {
+            return [near.x, near.y, 0.0];
+        }
+        let point = near + direction * (-near.z / direction.z);
+        if point.is_finite() {
+            [point.x, point.y, 0.0]
+        } else {
+            [0.0; 3]
+        }
+    }
+
+    /// The asset ID the chosen prefab is placed by, read into the scene's
+    /// prefabs so an instance of it can be made and saved.
+    ///
+    /// `None`, reported, for one that cannot be: a prefab outside the scene's
+    /// directory has no ID the scene could name it by, because every asset
+    /// reference resolves against that directory.
+    pub(super) fn brush_source(&mut self) -> Option<String> {
+        let path = self.prefab_brush.as_ref()?.path().to_owned();
+        let Some(source) = self.file.prefabs().id_for(&path) else {
+            self.console.warning(format!(
+                "{} is outside this scene's folder, so the scene cannot name it",
+                path.display()
+            ));
+            return None;
+        };
+        if let Err(error) = self.file.prefabs_mut().read_one(&source) {
+            self.console.warning(error);
+            return None;
+        }
+        Some(source)
     }
 }
 

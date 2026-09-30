@@ -21,6 +21,9 @@ claim that two invisible fingers somehow constitute a finished mobile UI.
 There is no game code. The game is `assets/`:
 
 - `platformer.scene`: the level, the hero, the coins, the flag and the HUD.
+- `prefabs/coin.prefab`: what a coin is — its spinning sprite, sensor and tag.
+  The scene places ten instances of it, each saying only where it stands, so
+  a change to the prefab is a change to every coin.
 - `scripts/hero.decay`: keyboard, controller and touch movement, jumping, coins,
   the flag and falling off.
 - `scripts/hud.decay`: the coin count and the banner.

@@ -45,7 +45,9 @@ impl ProjectIndex {
             if matches!(extension.as_deref(), Some("wav" | "ogg" | "mp3" | "flac")) {
                 self.audio_assets.insert(relative.clone());
             }
-            if extension.as_deref() != Some("scene") {
+            // A prefab's entities are named in the prefab, and every instance
+            // of it is an entity by that name in the running world.
+            if !matches!(extension.as_deref(), Some("scene" | "prefab")) {
                 continue;
             }
             let Ok(text) = fs::read_to_string(&path) else {
@@ -67,5 +69,13 @@ fn collect_entity_names(scene: &Value, into: &mut BTreeSet<String>) {
         if let Some(name) = entity.get("name").and_then(Value::as_str) {
             into.insert(name.to_owned());
         }
+        // An instance renamed in the scene is found by its new name.
+        let renamed = entity
+            .pointer("/prefab/overrides")
+            .and_then(Value::as_object)
+            .into_iter()
+            .flat_map(|overrides| overrides.values())
+            .filter_map(|changes| changes.get("name").and_then(Value::as_str));
+        into.extend(renamed.map(str::to_owned));
     }
 }

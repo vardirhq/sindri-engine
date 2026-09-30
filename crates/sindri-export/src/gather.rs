@@ -9,6 +9,7 @@ use sindri_core::{PrefabDocument, SceneDocument, World};
 use sindri_decay::{ScriptSources, Scripts};
 use sindri_scene::{SceneExtractor, referenced_fonts, referenced_textures};
 
+use crate::prefabs::DiskPrefabs;
 use crate::write::ExportError;
 
 /// A project's own description of itself.
@@ -187,6 +188,7 @@ impl ProjectExport {
         let mut assets = Vec::new();
         let mut worlds = Vec::new();
         let mut loaded: BTreeSet<String> = BTreeSet::new();
+        let mut placed = DiskPrefabs::default();
         for path in std::iter::once(&file.project.main_scene).chain(&file.project.scenes) {
             // A project that lists its own main scene is not an error; it is
             // someone being explicit, and shipping it twice would be.
@@ -197,7 +199,8 @@ impl ProjectExport {
             let document: SceneDocument = serde_json::from_slice(&bytes).map_err(|error| {
                 ExportError::Project(format!("scene {path} does not read: {error}"))
             })?;
-            let mut world = World::from_scene(&document)
+            placed.read_placed_by(project, &document.entities)?;
+            let mut world = World::from_scene_with(&document, &placed)
                 .map_err(|error| {
                     ExportError::Project(format!("scene {path} does not load: {error}"))
                 })?
@@ -216,6 +219,11 @@ impl ProjectExport {
         // Ordered and de-duplicated, because two entities naming one texture is
         // one download.
         let mut wanted: BTreeMap<String, AssetKind> = BTreeMap::new();
+        // The prefabs a scene places ship as prefabs: a host makes each
+        // instance from its prefab when the scene loads.
+        for id in placed.ids() {
+            wanted.insert(id.to_owned(), AssetKind::Prefab);
+        }
 
         // A queue of documents rather than one, because a prefab is a document
         // too and everything it names has to ship for the same reason the
@@ -291,12 +299,17 @@ impl ProjectExport {
                     .map_err(|error| ExportError::unreadable(&resolve(project, &id), &error))?;
                 let prefab = PrefabDocument::from_json(&text)
                     .map_err(|error| ExportError::Project(format!("{id}: {error}")))?;
+                // The prefabs nested in it ship too, and are made with it.
+                placed.read_placed_by(project, &prefab.entities)?;
+                for nested in placed.ids() {
+                    wanted.insert(nested.to_owned(), AssetKind::Prefab);
+                }
                 // Spawned into a world of its own so the same walkers answer
                 // for it. A prefab is a fragment of a scene, so what finds a
                 // scene's textures finds a prefab's.
                 let mut world = World::default();
                 world
-                    .spawn_prefab(&prefab)
+                    .spawn_prefab_from(&prefab, &placed)
                     .map_err(|error| ExportError::Project(format!("{id}: {error}")))?;
                 everything_on(&mut world);
                 pending.push(world);
@@ -461,7 +474,7 @@ fn everything_on(world: &mut World) {
 /// itself out differently — the same two places the byte-reading loop looks,
 /// because a script found one way and read the other would be found and then
 /// not shipped.
-fn resolve(project: &Path, id: &str) -> PathBuf {
+pub(crate) fn resolve(project: &Path, id: &str) -> PathBuf {
     let path = project.join("assets").join(id);
     if path.exists() {
         path

@@ -67,6 +67,14 @@ switching something off and deleting it. Omitted when false, for the same reason
 ancestors: the flag is never written down through a subtree, so switching a
 parent back on brings back exactly the children that were on.
 
+An entity may be a prefab **instance**, declaring `prefab` — the prefab's asset
+ID and the overrides this instance made — and no `components` of its own. It is
+omitted from every other entity, so no format version changed when it arrived,
+as none did for `disabled`. A saved instance is written as that reference
+rather than as the entities it expands to, and its overrides are the
+difference from the prefab, so saving an instance nobody edited reproduces it
+exactly. [Prefabs](prefabs.md#placing-one-in-a-scene) has the format.
+
 Scenes reject non-finite transform values. JSON has no `NaN` or `Infinity` literal, so a scene
 containing one could not be read back; validation catches it at the point it is introduced instead.
 

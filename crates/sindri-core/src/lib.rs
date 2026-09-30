@@ -43,7 +43,10 @@ pub use input::{
 pub use lifecycle::{EngineLifecycle, EngineState, LifecycleError};
 pub use migration::{SceneMigrationError, SceneMigrationStep, SceneMigrator};
 pub use prefab::{
-    PREFAB_FORMAT_VERSION, PREFAB_SUFFIX, PrefabDocument, PrefabError, PrefabJsonError,
+    EntityOverride, ExpandedEntity, MAX_PREFAB_NESTING, NoPrefabs, PREFAB_FORMAT_VERSION,
+    PREFAB_SUFFIX, PrefabDocument, PrefabError, PrefabInstance, PrefabJsonError, PrefabLibrary,
+    PrefabLink, apply_merge_patch, apply_override, expand_entities, instance_path,
+    merge_patch_between, override_between,
 };
 pub use profile::{PROFILE_FORMAT_VERSION, PROFILE_SUFFIX, ProfileDocument, ProfileError};
 pub use random::Rng;

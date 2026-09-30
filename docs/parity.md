@@ -100,7 +100,9 @@ by this list rather than discovered a year later.
 - **No second input system.** The action layer already in `sindri-platform`
   becomes *the* input system; it does not grow up beside the old one.
 - **No prefab variant hierarchy.** Prefabs plus overrides through the reference.
-  If nesting variants ever seems necessary, prove it with a game first.
+  Nesting a prefab inside another is not a variant and is supported; a prefab
+  that is "another prefab, but different" is not. If variants ever seem
+  necessary, prove it with a game first.
 - **No assembly-definition graph.** Crate boundaries in `dependency-policy.md`
   already do this job.
 - **No inspector that needs a plugin to be usable.** Odin exists because
@@ -136,7 +138,8 @@ is why it earns a section rather than a footnote.
 | Entities and hierarchy | ✅ | ✅ | ✅ | ✅ | **Par** | Undo entries for script writes |
 | **Child transforms follow their parent** | ✅ | ✅ | ✅ | ✅ | **Par** | A child's transform is local to its parent for sprites, meshes, tiles, voxels, cameras, lights, physics, effects and the editor's handles, not only shapes. Scripts read `world_position`. Scorchball's markers, signposts and ball ring ride their parents. Scale composes per axis, so a rotated parent scaled unevenly does not shear its children |
 | Tags and queries | ✅ | ✅ | ✅ | ✅ | **Par** | Query by more than one tag |
-| Prefabs | ✅ | 🟡 | ✅ | ✅ | **Behind** | The editor reads a prefab and instantiates it into the open scene as one undoable step, minting a stable identity per entity — which the runtime's spawn deliberately does not, because a prefab's identities are the prefab's and two instances would collide on all of them. Nothing makes a prefab from a selection; editing a prefab does not update its instances; and a prefab chosen in the browser is placed by clicking a cell in the Scene view, which names that grid and that cell and keeps the prefab's own footprint. The picking and the click path have no automated coverage — the instantiation under them does |
+| Prefabs | ✅ | ✅ | ✅ | ✅ | **Par** | A scene places a prefab as an instance: the reference plus its overrides, each a JSON merge patch keyed by the prefab's own entity IDs, worked out on save as the difference from the prefab rather than tracked. An edit to the prefab reaches every instance, at once in an open editor as one undo step that keeps overrides and handles. The editor places an instance on a grid cell or in the middle of the Scene view, makes a prefab from a subtree, opens a prefab to edit it, and shows each instance's overrides with revert, apply and unpack; script `Prefab` fields have a picker. The platformer's ten coins are instances of one prefab. Behind Unity in three places: an instance cannot remove one of its prefab's entities (it switches it off), a list field is overridden whole, and a prefab is placed from its panel rather than dragged into the view. The editor's panels have no automated coverage; the operations under them do |
+| **Nested prefabs** | ✅ | ✅ | ✅ | ✅ | **Par** | A prefab places instances of others; a scene reaches inside one by path (`loot/sparkle`), a script's spawn makes the whole nest, and a loop is refused naming it. Apply writes an override into the outer prefab rather than changing the inner one. No variants, deliberately — see the anti-goals |
 | Reusable data profiles | ✅ | ✅ | ✅ | ✅ | **Ahead** | Unity has no native equivalent; ScriptableObject is close but needs code per asset. Optional schemas when a second catalog proves the shape |
 | Transform | ✅ | ✅ | 🟡 | ✅ | **Par** | No structured vector or rotation value in Decay |
 | Scene save / load | ✅ | ✅ | — | ✅ | **Par** | Readable single file, which is **Ahead**; see the advantages table |
@@ -436,7 +439,7 @@ file.
 | **Search / filter in hierarchy or project** | ❌ | **Absent** | Painful past a few dozen entities |
 | **Project settings surface** | ❌ | **Absent** | `sindri.toml` is edited by hand |
 | **Build / export UI** | ❌ | **Absent** | Export is CLI-only |
-| **Prefab creation from a selection** | ❌ | **Absent** | — |
+| **Prefab creation from a selection** | ✅ | **Par** | *Make prefab* writes a subtree as a prefab beside the scene and puts an instance in its place, keeping instances inside it nested. One entity at a time, not a multi-selection |
 | **Save inspector** | ❌ | **Absent** | Persistence is play-testable but not viewable |
 | **Multi-select and bulk edit** | ❌ | **Absent** | — |
 | **Customisable layout** | ✅ | **Par** | Every panel is a tab, draggable into any of seven docks or four scene-anchored overlays — edges dock, corners float — with the arrangement and every size persisted. Three presets to start from. Behind Unity and Unreal only in that a panel cannot yet be torn off into a window of its own |

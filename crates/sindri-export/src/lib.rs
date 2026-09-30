@@ -21,6 +21,7 @@
 
 mod gather;
 mod page;
+mod prefabs;
 mod write;
 
 pub use gather::{GatheredAsset, ProjectExport};

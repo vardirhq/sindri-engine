@@ -7,6 +7,7 @@ mod hierarchy;
 mod hierarchy_input;
 mod inspector;
 mod inspector_add;
+mod instances;
 mod project_browser;
 mod runtime;
 mod scene;

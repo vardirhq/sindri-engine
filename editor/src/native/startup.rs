@@ -1,0 +1,225 @@
+//! How the editor starts: deciding what to open, building the window's GPU
+//! state, and assembling the app around the first scene.
+//!
+//! Its own file because the constructor is the one part of the app that runs
+//! once, and it had grown to a third of the module that defines the app.
+
+use glam::Vec2 as GlamVec2;
+use sindri_core::{CommandHistory, World};
+use sindri_scene::{SceneExtractor, ScenePhysics2d, ScreenUi, SpriteAnimations};
+
+use crate::audition::Audition;
+use crate::selection::Selection;
+use crate::typeface::Typeface;
+use crate::{
+    animation::AnimationTool,
+    console::Console,
+    gizmo::{GizmoMode, GizmoSpace},
+    input::EditorInput,
+    preferences::Preferences,
+    project::{Launch, ProjectTree, launch},
+    scene_file::SceneFile,
+    scripts::SceneScripts,
+    textures::SceneTextures,
+    tile_volume::TileVolumeTool,
+    tilemap::TilemapTool,
+    weave_styles::ProjectStyles,
+};
+
+use super::project_panel::state::BrowserState;
+use super::runtime::initialized_lifecycle;
+use super::scene_io::{load_world, open_named_scene, scene_extractor};
+use super::viewport::{RuntimeViewport, SceneRenderers};
+use super::{
+    EditorApp, Focus, Gpu, TexturedAt, assistant_view, device, inspector_panel, thumbnails,
+    workspace,
+};
+
+impl EditorApp {
+    /// What this launch opens, before anything else is built.
+    ///
+    /// Its own step because deciding is one thing and constructing is another,
+    /// and the constructor had grown past what a reader can hold.
+    fn opening(preferences: &Preferences) -> (Launch, SceneFile, Option<String>) {
+        // Only a scene opens a file here — opening a project needs the editor
+        // that this is building.
+        let decided = launch::decide(
+            std::env::args().nth(1).as_deref(),
+            preferences.recent_projects.most_recent(),
+            preferences.open_last_project,
+        );
+        let (file, open_error) = match &decided {
+            Launch::Scene(path) => open_named_scene(&path.display().to_string()),
+            Launch::Project(_) | Launch::Welcome => (
+                SceneFile::detached(sindri_core::SceneDocument::default()),
+                None,
+            ),
+        };
+        (decided, file, open_error)
+    }
+
+    /// Everything the GPU side of the editor needs, built together.
+    ///
+    /// One step because they are one concern and they share one device: two
+    /// viewports, the renderers they draw through, and the texture set they
+    /// resolve against all hang off the render state, and separating them in
+    /// the constructor only separated the lines, not the coupling.
+    fn gpu(context: &eframe::CreationContext<'_>, scene: Option<&std::path::Path>) -> Gpu {
+        let render_state = context
+            .wgpu_render_state
+            .clone()
+            .expect("the native editor requires eframe's WGPU renderer");
+        let renderers = SceneRenderers::new(&render_state);
+        let textures = SceneTextures::for_scene(&render_state.device, &render_state.queue, scene);
+        let state_for_textures = render_state.clone();
+        let scene_viewport = RuntimeViewport::new(render_state.clone(), "Sindri editor scene view");
+        let game_viewport = RuntimeViewport::new(render_state.clone(), "Sindri editor game view");
+        Gpu {
+            renderers,
+            textures,
+            state_for_textures,
+            scene_viewport,
+            game_viewport,
+        }
+    }
+
+    /// The world the editor starts with, and what went wrong reaching it.
+    ///
+    /// A scene that will not load must not take the editor down with it. This
+    /// used to unwrap inside the constructor, so a file that parsed and then
+    /// failed validation killed the process before the window existed — and the
+    /// failure it unwrapped was one the editor should not have had in the first
+    /// place.
+    fn opening_world(scene: &SceneExtractor, file: &SceneFile) -> (World, Option<String>) {
+        match load_world(scene, file) {
+            Ok(world) => (world, None),
+            Err(error) => (World::default(), Some(error)),
+        }
+    }
+
+    pub(super) fn new(context: &eframe::CreationContext<'_>) -> Self {
+        crate::ui::theme::install(&context.egui_ctx);
+        let preferences = Preferences::load(context.storage);
+        let scene = scene_extractor();
+        let (decided, file, open_error) = Self::opening(&preferences);
+        let (world, load_error) = Self::opening_world(&scene, &file);
+        let Gpu {
+            renderers,
+            textures,
+            state_for_textures,
+            scene_viewport,
+            game_viewport,
+        } = Self::gpu(context, file.anchor());
+        let project = ProjectTree::beside(file.anchor());
+        let mut app = Self {
+            scene,
+            world,
+            file,
+            saved_revision: 0,
+            confirming: None,
+            closing: false,
+            // Nothing is selected until something is chosen. This used to name
+            // an entity from the demo scene, which selected the cube in that
+            // one scene and silently nothing in every other.
+            selection: Selection::default(),
+            gizmo_followers: Vec::new(),
+            renaming: None,
+            rename_draft: String::new(),
+            edits: inspector_panel::HeldInspectorEdits::default(),
+            scene_name_edit: None,
+            preview: None,
+            profile: None,
+            block_set: None,
+            heard: None,
+            audition: Audition::default(),
+            shown_font: None,
+            typeface: Typeface::default(),
+            asset_rename: None,
+            focus: Focus::Hierarchy,
+            deleting: None,
+            history: CommandHistory::default(),
+            search: String::new(),
+            asset_search: String::new(),
+            slicer: None,
+            prefab_brush: None,
+            tilemap_tool: TilemapTool::default(),
+            tile_volume_tool: TileVolumeTool::default(),
+            occlusion: crate::occlusion::OcclusionOverlay::default(),
+            animation_tool: AnimationTool::default(),
+            browser: BrowserState::default(),
+            project,
+            styles: ProjectStyles::default(),
+            dock: workspace::DockLayout::default(),
+            palette: crate::palette::Palette::default(),
+            assistant: assistant_view::AssistantState::default(),
+            preferences,
+            lifecycle: initialized_lifecycle(),
+            viewport_yaw: 0.0,
+            viewport_pitch: 0.0,
+            viewport_zoom: 1.0,
+            viewport_pan: GlamVec2::ZERO,
+            gizmo_mode: GizmoMode::Select,
+            gizmo_space: GizmoSpace::Local,
+            gizmo_drag: None,
+            renderers,
+            render_state: state_for_textures,
+            textures,
+            thumbnails: thumbnails::Thumbnails::default(),
+            textured_revision: TexturedAt::default(),
+            scene_viewport,
+            game_viewport,
+            game_view_rect: None,
+            game_device: device::DevicePreview::default(),
+            physics: ScenePhysics2d::top_down().expect("zero gravity is finite"),
+            screen_ui: ScreenUi::default(),
+            random: sindri_core::Rng::default(),
+            saves: sindri_core::SaveStore::default(),
+            effects: sindri_scene::Effects2d::default(),
+            clock: sindri_core::FixedStepClock::new(sindri_core::FixedStepConfig::default())
+                .expect("the default fixed-step configuration is valid"),
+            animations: SpriteAnimations::new(),
+            scripts: SceneScripts::for_scene(None),
+            input: EditorInput::default(),
+            play_snapshot: None,
+            notice: open_error.or(load_error),
+            render_error: None,
+            console: Console::default(),
+            title: String::new(),
+            welcome: None,
+            window_shown: false,
+            open_project_root: None,
+            project_name: None,
+            project_main_scene: None,
+            returning_to: None,
+        };
+        // Said after the field is built rather than during it, because what
+        // there is to say is read off the world and the bindings.
+        if let Some(failure) = app.notice.clone() {
+            app.console.error(failure);
+        }
+        app.arrange_for(decided);
+        let notes = app.textures.request(&app.world, &mut app.renderers.text);
+        app.record_texture_notes(notes);
+        app.reload_scripts();
+        app.remember_open_scene();
+        app
+    }
+
+    /// Puts the editor where the launch said it should be.
+    ///
+    /// Only a scene has been opened by the time this runs. A project is opened
+    /// through the same path the welcome window opens one through, so a launch
+    /// and a click arrange the editor identically rather than in two places
+    /// that have to be kept agreeing.
+    fn arrange_for(&mut self, decided: Launch) {
+        match decided {
+            Launch::Scene(path) => {
+                self.announce_scene();
+                self.adopt_project_for(&path);
+                self.project = self.project_tree();
+            }
+            Launch::Project(root) => self.open_project_at(&root),
+            Launch::Welcome => self.open_welcome(),
+        }
+    }
+}

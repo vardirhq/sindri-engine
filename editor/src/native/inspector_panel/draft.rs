@@ -10,7 +10,7 @@ use std::collections::BTreeMap;
 use serde_json::Value;
 use sindri_core::{
     CommandBuffer, ComponentMetadata, ComponentSchemaRegistry, EntityData, EntityId, SceneEntityId,
-    Transform3D, World, WorldCommand,
+    Transform3D, World, WorldCommand, instance_path,
 };
 
 use crate::{
@@ -284,6 +284,7 @@ fn completed<'a>(
 pub(crate) enum IdentityRefusal {
     Empty,
     Taken,
+    InInstance,
 }
 
 impl IdentityRefusal {
@@ -291,6 +292,10 @@ impl IdentityRefusal {
         match self {
             Self::Empty => "Every entity needs a stable ID: it is what the file keys this one by",
             Self::Taken => "Another entity already has this ID, and two cannot share one",
+            Self::InInstance => {
+                "Inside a prefab instance an entity's ID is its instance's, followed by its \
+                 place in the prefab"
+            }
         }
     }
 }
@@ -328,10 +333,26 @@ pub(crate) fn identity_commands(
     {
         return Err(IdentityRefusal::Taken);
     }
+    let link = data.prefab.as_ref();
+    if link.is_some_and(|link| !link.root) && world.instance_root(entity).is_some() {
+        return Err(IdentityRefusal::InInstance);
+    }
     buffer.push(WorldCommand::SetSourceId {
         entity,
         source_id: Some(id.clone()),
     });
+    // An instance's entities are named by their place under its root, so they
+    // follow the root to its new name.
+    if link.is_some_and(|link| link.root) {
+        for member in world.instance_members(entity).into_iter().skip(1) {
+            if let Some(path) = world.get(member).and_then(|data| data.prefab.as_ref()) {
+                buffer.push(WorldCommand::SetSourceId {
+                    entity: member,
+                    source_id: Some(instance_path(&id, &path.path)),
+                });
+            }
+        }
+    }
     for (occupant, payload) in occupants_of(world, current) {
         let mut payload = payload;
         payload["grid"] = Value::from(id.as_str());

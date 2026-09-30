@@ -6,23 +6,34 @@
 //! would collide on every one of them. That is right for a bullet that exists
 //! for a second and is never saved.
 //!
-//! An editor is authoring a document. What it instantiates has to be saveable,
-//! so every entity needs a stable identity that nothing else in the scene is
-//! using, and the whole thing has to arrive as one undoable step. So this is
-//! not a wrapper around the runtime's spawn; it is the same idea answered for
-//! a file rather than a frame.
+//! An editor is authoring a document. What it places is an *instance*: every
+//! entity gets a stable identity nothing else in the scene is using, carries a
+//! link back to the prefab so the scene saves it as a reference, and arrives
+//! as one undoable step. `sync` brings an instance up to date when its prefab
+//! changes, and `library` holds the prefabs an open scene places.
 //!
 //! The handle problem, and its answer, are `duplicate.rs`'s: `WorldCommand::
 //! Spawn` names the handle it spawns at, and `World::next_handle` is a peek
 //! rather than an allocation, so the instantiation is rehearsed into a clone of
 //! the world that hands out the handles the real one is about to.
 
+mod apply;
+pub mod document;
+mod library;
+mod subtree;
+mod sync;
+
 use std::path::{Path, PathBuf};
 
 use sindri_core::{
-    CommandBuffer, EntityData, EntityId, PREFAB_SUFFIX, PrefabDocument, SceneEntity, SceneEntityId,
-    World, WorldCommand,
+    CommandBuffer, EntityId, PREFAB_SUFFIX, PrefabDocument, PrefabLibrary, SceneEntityId, World,
+    WorldCommand,
 };
+
+pub use apply::applied;
+pub use library::ScenePrefabs;
+pub use subtree::subtree_prefab;
+pub use sync::{reconcile, spawn_instance};
 
 /// What a placed prefab carries to say where it stands.
 pub const PLACEMENT_COMPONENT: &str = "sindri.grid.placement";
@@ -117,8 +128,11 @@ impl PrefabBrush {
     }
 }
 
-/// Adds the commands that put `prefab` into the scene under `parent`, and
-/// answers with the handle its root will land on.
+/// Adds the commands that put an instance of `source` into the scene under
+/// `parent`, and answers with the handle its root will land on.
+///
+/// An instance, not a copy: every entity it adds carries a link to the prefab,
+/// so it saves as a reference, and an edit to the prefab reaches it.
 ///
 /// `rehearsal` is a clone of the world that receives exactly the spawns the
 /// real one is about to, so it hands out the handles the real one will and
@@ -128,36 +142,37 @@ impl PrefabBrush {
 /// spawn the second thing on top of the first.
 pub fn instantiate_into(
     rehearsal: &mut World,
-    prefab: &PrefabDocument,
+    prefabs: &dyn PrefabLibrary,
+    source: &str,
     parent: Option<EntityId>,
     buffer: &mut CommandBuffer,
 ) -> Result<EntityId, String> {
-    let root = prefab
-        .root()
-        .map_err(|error| format!("this prefab has no single root: {error}"))?;
-    Ok(spawn_into(rehearsal, prefab, root, parent, buffer))
+    spawn_instance(rehearsal, source, prefabs, parent, None, buffer)
 }
 
-/// Puts `prefab` into the scene standing on one cell of a grid.
+/// Puts an instance of `source` into the scene standing on one cell of a grid.
 ///
 /// The click is the authored fact, so the cell it names replaces whatever the
 /// prefab said about where it stands -- but not what shape it is. A prefab that
 /// declares a three-by-four footprint is a three-by-four thing wherever it is
 /// put, and that survives; only the anchor and the grid are answered by where
-/// somebody clicked.
+/// somebody clicked. The placement is an override of the instance.
 ///
 /// Placement itself refuses a cell that holds nothing up, so this does not
 /// check: `resolve_grid_placements` is the one place that question is asked,
 /// and asking it twice is how two answers start disagreeing.
 pub fn instantiate_on_cell(
     rehearsal: &mut World,
-    prefab: &PrefabDocument,
+    prefabs: &dyn PrefabLibrary,
+    source: &str,
     grid: &SceneEntityId,
     cell: [i32; 2],
     buffer: &mut CommandBuffer,
 ) -> Result<EntityId, String> {
-    let footprint = authored_footprint(prefab);
-    let root = instantiate_into(rehearsal, prefab, None, buffer)?;
+    let footprint = prefabs
+        .prefab(source)
+        .map_or_else(|| vec![[0, 0]], authored_footprint);
+    let root = instantiate_into(rehearsal, prefabs, source, None, buffer)?;
     buffer.push(WorldCommand::SetComponent {
         entity: root,
         type_name: PLACEMENT_COMPONENT.to_owned(),
@@ -186,76 +201,7 @@ fn authored_footprint(prefab: &PrefabDocument) -> Vec<[i32; 2]> {
         .unwrap_or_else(|| vec![[0, 0]])
 }
 
-/// Spawns one authored entity and then everything under it, parents first.
-///
-/// Parents first so a child can name the handle its parent was given. The
-/// prefab's own parent links are authored identities, which mean nothing in
-/// this world; what a child is actually parented to is whatever its parent
-/// just became.
-fn spawn_into(
-    rehearsal: &mut World,
-    prefab: &PrefabDocument,
-    entity: &SceneEntity,
-    parent: Option<EntityId>,
-    buffer: &mut CommandBuffer,
-) -> EntityId {
-    let data = EntityData {
-        source_id: Some(unused_id(rehearsal, &entity.id)),
-        name: entity.name.clone(),
-        parent,
-        // Rebuilt by the recursion below. Taking the authored list would name
-        // identities that are the prefab's rather than entities in this world.
-        children: Vec::new(),
-        transform_3d: entity.transform_3d,
-        components: entity.components.clone(),
-        // A prefab that authored something switched off meant it.
-        disabled: entity.disabled,
-        // Editor state describes the prefab as a document -- what was folded
-        // open while somebody edited it -- and says nothing about an instance.
-        editor: std::collections::BTreeMap::new(),
-    };
-    let handle = rehearsal.spawn(data.clone());
-    rehearsal
-        .set_parent(handle, parent)
-        .expect("a fresh entity accepts the parent it was given");
-    buffer.push(WorldCommand::Spawn {
-        entity: handle,
-        data: Box::new(data),
-    });
-    for child in prefab.children_of(&entity.id) {
-        spawn_into(rehearsal, prefab, child, Some(handle), buffer);
-    }
-    handle
-}
-
-/// A stable ID like the prefab's that nothing in the scene is using.
-///
-/// Derived from the authored one rather than generated, because `oak-tree`
-/// says what it is and `game-object-7` does not. Instantiating the same prefab
-/// twice is the ordinary case, so the collision path is the common one rather
-/// than the exception.
-fn unused_id(world: &World, authored: &SceneEntityId) -> SceneEntityId {
-    let stem = authored.as_str();
-    if !taken(world, stem) {
-        return authored.clone();
-    }
-    let mut suffix = 2_u32;
-    loop {
-        let candidate = format!("{stem}-{suffix}");
-        if !taken(world, &candidate) {
-            return SceneEntityId::new(candidate).expect("a derived ID is never empty");
-        }
-        suffix += 1;
-    }
-}
-
-fn taken(world: &World, candidate: &str) -> bool {
-    world.entities().any(|(_, data)| {
-        data.source_id
-            .as_ref()
-            .is_some_and(|id| id.as_str() == candidate)
-    })
-}
-
+#[cfg(test)]
+mod instance_tests;
 #[cfg(test)]
 mod tests;

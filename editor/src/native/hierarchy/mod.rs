@@ -289,6 +289,8 @@ pub(super) enum RowAction {
     CancelRename,
     Duplicate(EntityId),
     DuplicateSelection,
+    /// Write this entity and what is under it as a prefab, and place that.
+    MakePrefab(EntityId),
     CreateChild(EntityId),
     Delete(EntityId),
     DeleteSelection,
@@ -319,6 +321,7 @@ impl EditorApp {
             }
             RowAction::Duplicate(entity) => self.duplicate_entity(entity),
             RowAction::DuplicateSelection => self.duplicate_selection(),
+            RowAction::MakePrefab(entity) => self.make_prefab(entity),
             RowAction::CreateChild(entity) => self.create_game_object(CreateGameObject::Empty {
                 parent: Some(entity),
             }),

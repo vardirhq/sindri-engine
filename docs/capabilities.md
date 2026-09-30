@@ -87,6 +87,19 @@ made, and which authored identity each became. Instances carry no `source_id`,
 because a prefab's identities name entities inside the prefab and two instances
 would collide on every one. `docs/prefabs.md` is the contract.
 
+A scene places a prefab as an **instance**: an entity naming the prefab, with
+its own ID, parent, name and transform and nothing else but its overrides — a
+JSON merge patch per component, keyed by the prefab's entity IDs. Loading
+expands it into the prefab's entities (`coin-3`, `coin-3/sparkle`), each
+carrying a `PrefabLink`; saving writes it back as the reference, working the
+overrides out as the difference from the prefab. Prefabs nest, and an
+override reaches inside by path. The editor keeps instances linked: an edit to
+the prefab reaches each one as a single undoable reconciliation that keeps its
+overrides, and the inspector reverts, applies and unpacks them. Hosts that play
+a scene expand it once with `SceneDocument::expanded`; the exporter ships every
+prefab a scene places. The platformer's ten coins are instances of
+`prefabs/coin.prefab`.
+
 ### Scenes
 
 Scenes are versioned JSON documents with stable authored IDs kept separate from
@@ -1456,10 +1469,10 @@ settings gear.
   policies/costs, and height authoring remain absent
 - No optional TypeScript embedding SDK; browser games currently expose narrow
   application entry points and run their gameplay in Decay
-- No editor authoring of prefabs. The format, spawn path, asset picker, and
-  Decay surface work, but creating a prefab still means writing its file
-- No prefab instance link. A spawned entity does not remember what it came
-  from, so editing a prefab does not update instances of it in an open scene
+- A prefab instance cannot remove one of its prefab's entities, only switch it
+  off, and overrides a list field whole rather than per element
+- An entity spawned at runtime is not linked to its prefab; only a scene's
+  instances are
 - Hot reload covers assets, not the scene file: editing a scene on disk while it
   is open is not noticed
 - The fixed session pipeline has an explicit order, but there is no extensible
@@ -1478,7 +1491,8 @@ settings gear.
   component/property rows, the Scene view, and console lines still lack their
   natural context actions
 - No copy/paste of entities or components
-- No prefab creation or instance editing
+- Prefabs are placed from their panel, not dragged from the browser into the
+  Scene view, and *Make prefab* works on one entity at a time
 - No build/export controls; static web export is currently a CLI and CI workflow
 - No versioned editor protocol; the editor and runtime are one process
 - Decay source opens as a read-only text preview. The editor cannot modify it;

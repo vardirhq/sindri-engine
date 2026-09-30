@@ -1,5 +1,6 @@
 //! `sindri.script`: the exports a script declares, typed.
 
+use crate::native::inspector_panel::FieldAssets;
 use eframe::egui::{self, RichText};
 use serde_json::Value;
 
@@ -69,7 +70,7 @@ pub(super) fn script_exports_section(
     ui: &mut egui::Ui,
     payload: &mut Value,
     scripts: &SceneScripts,
-    profiles: &[String],
+    assets: FieldAssets<'_>,
 ) {
     let source = payload.get("source").and_then(Value::as_str).unwrap_or("");
     let script = payload.get("script").and_then(Value::as_str).unwrap_or("");
@@ -115,7 +116,7 @@ pub(super) fn script_exports_section(
             &mut value,
             0.0,
             Authored::of(authored),
-            profiles,
+            assets,
         );
         if value != before {
             // Setting a property is what puts it in the scene: a field left
