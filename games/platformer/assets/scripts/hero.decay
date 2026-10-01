@@ -128,11 +128,13 @@ script Hero {
         }
     }
 
-    // Read the same simulated colliders as the foot sensor, while ignoring all
-    // pieces of the hero and pickups. This is clearance, not jump permission.
+    // Read the same simulated colliders as the foot sensor, but only the
+    // ground: the layer the level's physics world names, so nothing else on
+    // the way down -- a pickup, the flag -- is mistaken for a floor. This is
+    // clearance, not jump permission.
     fn probe_ground() {
         let p = this.transform.world_position;
-        let hit = Physics.raycast(Vec2(p.x, p.y), Vec2(0.0, -1.0), 12.0, 4294967295.0, false, this.entity);
+        let hit = Physics.raycast(Vec2(p.x, p.y), Vec2(0.0, -1.0), 12.0, Physics.layer("ground"), false, this.entity);
         Game.ground_found = hit != null;
         if hit != null { Game.ground_clearance = max(0.0, hit.distance - 0.5); }
     }

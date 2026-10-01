@@ -13,6 +13,46 @@ use super::{
 use crate::surface::PhysicsCall;
 
 impl WorldHost<'_> {
+    /// `Physics.layer(name)` and `Physics.mask(names)`: a mask made from the
+    /// names the scene's physics world gives its layers. A name it does not
+    /// give is an error, which is the point of naming them: a misspelt layer
+    /// is heard about rather than masking nothing.
+    pub(super) fn layer_mask(
+        &self,
+        call: PhysicsCall,
+        path: &Path,
+        args: &[Value],
+    ) -> Result<Value, RuntimeError> {
+        let layers = sindri_scene::collision_layers(self.world);
+        let names: Vec<&Value> = match (call, args.first()) {
+            (PhysicsCall::Layer, Some(name)) => vec![name],
+            (_, Some(Value::Array(names))) => names.iter().collect(),
+            _ => Vec::new(),
+        };
+        let mut mask = 0_u32;
+        for name in names {
+            let Value::String(name) = name else {
+                return Err(RuntimeError::Host(format!(
+                    "{} takes layer names as text",
+                    path.dotted()
+                )));
+            };
+            let bit = sindri_scene::layer_bit(&layers, name).ok_or_else(|| {
+                RuntimeError::Host(format!(
+                    "{}: no collision layer is called '{name}'; this scene's physics world names {}",
+                    path.dotted(),
+                    if layers.is_empty() {
+                        "none".to_owned()
+                    } else {
+                        layers.join(", ")
+                    }
+                ))
+            })?;
+            mask |= bit;
+        }
+        Ok(Value::Number(f64::from(mask)))
+    }
+
     pub(super) fn physics_shape_query(
         &self,
         call: PhysicsCall,

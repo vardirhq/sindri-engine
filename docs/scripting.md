@@ -1001,6 +1001,8 @@ a person who has not clicked yet.
 | `Physics.cast_box(origin, half_size, rotation, direction, max_distance, mask, include_sensors, exclude)` | `RayHit2d` or `null` |
 | `Physics.overlap_circle(center, radius, mask, include_sensors, exclude)` | `[Entity]` |
 | `Physics.overlap_box(center, half_size, rotation, mask, include_sensors, exclude)` | `[Entity]` |
+| `Physics.layer(name)` | `f32` |
+| `Physics.mask(names)` | `f32` |
 | `Physics.collision_started()` | `List<Entity>` |
 | `Physics.collision_stopped()` | `List<Entity>` |
 | `Physics.sensor_entered()` | `List<Entity>` |
@@ -1114,6 +1116,17 @@ for target in Physics.overlap_circle(centre, 1.75, 4294967295.0, true, this.enti
     World.send_signal(target, "hazard_damage", 1.0);
 }
 ```
+
+A scene's `sindri.physics2d.world` names its collision layers in `layers`,
+bit by bit: `["ground", "hero", "pickups"]` makes `ground` bit 0 (mask 1),
+`hero` bit 1 (mask 2) and `pickups` bit 2 (mask 4), up to 32. `Physics.layer`
+is the mask for one name and `Physics.mask` for several at once, for any
+query's `mask` argument; a name the world does not give is an error naming the
+ones it does, so a misspelt layer is heard about rather than masking nothing.
+Colliders still store their memberships and filters as masks, which is what
+physics reads, and the editor's inspector shows a mask as the layers it holds
+by name. The platformer names its layers, and its hero's ground probe asks for
+`Physics.layer("ground")`.
 
 **Contact detail (points, normals and impulses of a collision) remains absent.**
 

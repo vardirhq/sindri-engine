@@ -273,6 +273,16 @@ pub(super) const TYPES: &[TypeEntry] = &[
                 "Sweeps a circle from `origin` along `direction` and returns the first collider it would touch, as RayHit2d or null: a raycast with a size, for whether something fits through a gap. `point` is where they touch and `distance` how far the circle's centre travelled. Starting already overlapping gives distance 0 and normal Vec2(0, 0). The filter arguments are the raycast's.",
             ),
             call(
+                "layer",
+                &["name"],
+                "The mask for one collision layer the scene's physics world names, such as `\"ground\"`, for a query's `mask` argument. A name the world does not give is an error.",
+            ),
+            call(
+                "mask",
+                &["names"],
+                "The mask for several named collision layers at once, such as `[\"ground\", \"enemies\"]`.",
+            ),
+            call(
                 "overlap_box",
                 &[
                     "center",

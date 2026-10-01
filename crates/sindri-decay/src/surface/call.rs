@@ -197,6 +197,10 @@ pub(crate) enum PhysicsCall {
     /// raycast with a size, for whether a body fits through a gap.
     CastCircle,
     CastBox,
+    /// The mask bit a collision layer's name stands for, and the mask of
+    /// several, from the names the scene's physics world gives its layers.
+    Layer,
+    Mask,
     /// The entities this one started touching during the last step.
     ///
     /// A query rather than a callback, because Decay now has a value that can
@@ -223,6 +227,8 @@ pub(crate) const PHYSICS_CALLS: &[(&str, PhysicsCall)] = &[
     ("overlap_box", PhysicsCall::OverlapBox),
     ("cast_circle", PhysicsCall::CastCircle),
     ("cast_box", PhysicsCall::CastBox),
+    ("layer", PhysicsCall::Layer),
+    ("mask", PhysicsCall::Mask),
     ("collision_started", PhysicsCall::CollisionStarted),
     ("collision_stopped", PhysicsCall::CollisionStopped),
     ("sensor_entered", PhysicsCall::SensorEntered),

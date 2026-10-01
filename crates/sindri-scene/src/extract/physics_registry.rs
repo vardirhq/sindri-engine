@@ -58,7 +58,7 @@ pub(super) fn register(components: &mut ComponentSchemaRegistry) -> Result<(), S
     // a scene seen from above simply does not carry one.
     components.register_with_default::<PhysicsWorld2dComponent>(
         "Physics 2D World",
-        serde_json::json!({ "gravity": [0.0, -9.81] }),
+        serde_json::json!({ "gravity": [0.0, -9.81], "layers": [] }),
     )?;
     Ok(())
 }

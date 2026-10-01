@@ -156,7 +156,7 @@ fn a_swept_shape_stops_at_the_first_surface_its_edge_reaches() {
         .unwrap()
         .expect("starting inside");
     assert!(inside.distance.abs() < f32::EPSILON);
-    assert_eq!(inside.normal, [0.0, 0.0]);
+    assert!(inside.normal.iter().all(|n| n.abs() < f32::EPSILON));
 }
 
 #[test]

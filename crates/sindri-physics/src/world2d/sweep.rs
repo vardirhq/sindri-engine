@@ -106,7 +106,7 @@ impl PhysicsWorld2d {
         finite2("cast_direction", direction)?;
         non_negative("cast_distance", max_distance)?;
         let length = direction[0].hypot(direction[1]);
-        if !(length > 0.0) || !length.is_finite() {
+        if length <= 0.0 || !length.is_finite() {
             return Err(PhysicsError::NonPositive("cast_direction_length"));
         }
         let velocity = r2::Vector::new(direction[0] / length, direction[1] / length);

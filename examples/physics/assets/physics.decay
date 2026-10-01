@@ -90,10 +90,12 @@ script PhysicsPlayground {
         var changed = false;
         if Input.just_pressed("S") || Ui.is_pressed(World.find("sensors")) { this.sensors = !this.sensors; changed = true; }
         if Input.just_pressed("T") || Ui.is_pressed(World.find("mask")) {
-            if this.mask == 3.0 { this.mask = 1.0; }
-            else if this.mask == 1.0 { this.mask = 2.0; }
-            else if this.mask == 2.0 { this.mask = 0.0; }
-            else { this.mask = 3.0; }
+            // By the names the scene's physics world gives its layers, so a
+            // misspelt one is an error rather than a mask of nothing.
+            if this.mask == Physics.mask(["solid", "bodies"]) { this.mask = Physics.layer("solid"); }
+            else if this.mask == Physics.layer("solid") { this.mask = Physics.layer("bodies"); }
+            else if this.mask == Physics.layer("bodies") { this.mask = 0.0; }
+            else { this.mask = Physics.mask(["solid", "bodies"]); }
             changed = true;
         }
         if Input.just_pressed("C") || Ui.is_pressed(World.find("query")) {
@@ -116,8 +118,8 @@ script PhysicsPlayground {
             Ui.set_text(World.find("sensors-label"), "SENSORS OFF");
             if this.sensors { Ui.set_text(World.find("sensors-label"), "SENSORS ON"); }
             var mask_name = "ALL";
-            if this.mask == 1.0 { mask_name = "SOLID"; }
-            else if this.mask == 2.0 { mask_name = "BODIES"; }
+            if this.mask == Physics.layer("solid") { mask_name = "SOLID"; }
+            else if this.mask == Physics.layer("bodies") { mask_name = "BODIES"; }
             else if this.mask == 0.0 { mask_name = "NONE"; }
             Ui.set_text(World.find("mask-label"), "MASK " + mask_name);
             Ui.set_text(World.find("inside-label"), "ORIGIN OUTSIDE");

@@ -96,6 +96,11 @@
           "gravity": [
             0.0,
             -30.0
+          ],
+          "layers": [
+            "ground",
+            "hero",
+            "pickups"
           ]
         }
       }
@@ -1038,7 +1043,7 @@
             "tuft"
           ],
           "layers": {
-            "memberships": 4294967295,
+            "memberships": 1,
             "filter": 4294967295
           },
           "friction": 0.5,
@@ -1149,7 +1154,7 @@
               "rotation": 0.0,
               "sensor": false,
               "layers": {
-                "memberships": 4294967295,
+                "memberships": 2,
                 "filter": 4294967295
               },
               "friction": 0.0,
@@ -1170,7 +1175,7 @@
               "rotation": 0.0,
               "sensor": true,
               "layers": {
-                "memberships": 4294967295,
+                "memberships": 2,
                 "filter": 4294967295
               },
               "friction": 0.0,
@@ -1497,7 +1502,7 @@
               "rotation": 0,
               "sensor": true,
               "layers": {
-                "memberships": 4294967295,
+                "memberships": 4,
                 "filter": 4294967295
               },
               "friction": 0.5,

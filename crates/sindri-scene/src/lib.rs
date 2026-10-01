@@ -64,7 +64,8 @@ pub use occlusion::{
     OcclusionError, OcclusionFinding, OcclusionProbe, OcclusionReport, sweep_occlusion,
 };
 pub use physics::{
-    Collider2dComponent, PhysicsWorld2dComponent, RigidBody2dComponent, RigidBodyKind,
+    Collider2dComponent, LAYER_LIMIT, PhysicsWorld2dComponent, RigidBody2dComponent, RigidBodyKind,
+    collision_layers, layer_bit,
 };
 pub use physics_sync::{PhysicsSyncError, ScenePhysics2d};
 pub use placement::{
