@@ -1,0 +1,453 @@
+{
+  "format_version": 10,
+  "metadata": {
+    "name": "Input Actions"
+  },
+  "entities": [
+    {
+      "id": "camera",
+      "name": "camera",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          10
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "sindri.camera": {
+          "projection": "orthographic",
+          "vertical_size": 12,
+          "near": 0.1,
+          "far": 100,
+          "fit": "shorter"
+        }
+      }
+    },
+    {
+      "id": "environment",
+      "name": "environment",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "sindri.environment": {
+          "background": [
+            0.012,
+            0.025,
+            0.045,
+            1
+          ]
+        }
+      }
+    },
+    {
+      "id": "controls",
+      "name": "controls",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "sindri.input.actions": {
+          "actions": [
+            {
+              "name": "move",
+              "kind": "vector",
+              "bindings": [
+                {
+                  "vector": {
+                    "up": "key.W",
+                    "down": "key.S",
+                    "left": "key.A",
+                    "right": "key.D"
+                  }
+                },
+                {
+                  "vector": {
+                    "up": "key.ArrowUp",
+                    "down": "key.ArrowDown",
+                    "left": "key.ArrowLeft",
+                    "right": "key.ArrowRight"
+                  }
+                },
+                {
+                  "vector": {
+                    "up": "gamepad.dpad_up",
+                    "down": "gamepad.dpad_down",
+                    "left": "gamepad.dpad_left",
+                    "right": "gamepad.dpad_right"
+                  }
+                }
+              ]
+            },
+            {
+              "name": "boost",
+              "kind": "button",
+              "bindings": [
+                "key.Space",
+                "gamepad.south"
+              ]
+            }
+          ]
+        },
+        "sindri.script": {
+          "source": "input.decay",
+          "script": "InputDemo",
+          "properties": {}
+        }
+      }
+    },
+    {
+      "id": "arena",
+      "name": "arena",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          -0.5
+        ],
+        "scale": [
+          10,
+          6,
+          1
+        ]
+      },
+      "components": {
+        "sindri.shape": {
+          "kind": "rect",
+          "fill": [
+            0.03,
+            0.06,
+            0.1,
+            1
+          ],
+          "stroke": [
+            0.15,
+            0.35,
+            0.5,
+            1
+          ],
+          "stroke_width": 0.01,
+          "layer": 0
+        }
+      }
+    },
+    {
+      "id": "ship",
+      "name": "ship",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "scale": [
+          0.6,
+          0.6,
+          1
+        ]
+      },
+      "components": {
+        "sindri.shape": {
+          "kind": "ellipse",
+          "fill": [
+            0.18,
+            0.82,
+            1,
+            1
+          ],
+          "stroke": [
+            0.9,
+            0.96,
+            1,
+            1
+          ],
+          "stroke_width": 0.05,
+          "layer": 4
+        },
+        "sindri.script": {
+          "source": "input.decay",
+          "script": "Ship",
+          "properties": {}
+        }
+      }
+    },
+    {
+      "id": "title",
+      "name": "title",
+      "components": {
+        "sindri.ui.text": {
+          "text": "INPUT ACTIONS",
+          "font": "fonts/ChakraPetch-Regular.ttf",
+          "font_size": 0.05,
+          "bounds": [
+            1.8,
+            0.08
+          ],
+          "anchor": "center",
+          "layer": 20
+        }
+      },
+      "transform_3d": {
+        "position": [
+          0.0,
+          0.9,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      }
+    },
+    {
+      "id": "move-label",
+      "name": "move-label",
+      "components": {
+        "sindri.ui.text": {
+          "text": "move: ",
+          "font": "fonts/ChakraPetch-Regular.ttf",
+          "font_size": 0.035,
+          "bounds": [
+            1.8,
+            0.08
+          ],
+          "anchor": "center",
+          "layer": 20
+        }
+      },
+      "transform_3d": {
+        "position": [
+          0.0,
+          0.78,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      }
+    },
+    {
+      "id": "boost-label",
+      "name": "boost-label",
+      "components": {
+        "sindri.ui.text": {
+          "text": "boost: ",
+          "font": "fonts/ChakraPetch-Regular.ttf",
+          "font_size": 0.035,
+          "bounds": [
+            1.8,
+            0.08
+          ],
+          "anchor": "center",
+          "layer": 20
+        }
+      },
+      "transform_3d": {
+        "position": [
+          0.0,
+          0.7,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      }
+    },
+    {
+      "id": "status",
+      "name": "status",
+      "components": {
+        "sindri.ui.text": {
+          "text": "Move with WASD, the arrows or a pad. Boost to go faster.",
+          "font": "fonts/ChakraPetch-Regular.ttf",
+          "font_size": 0.035,
+          "bounds": [
+            1.8,
+            0.08
+          ],
+          "anchor": "center",
+          "layer": 20
+        }
+      },
+      "transform_3d": {
+        "position": [
+          0.0,
+          -0.72,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      }
+    },
+    {
+      "id": "rebind",
+      "name": "rebind",
+      "components": {
+        "sindri.ui.shape": {
+          "kind": "rect",
+          "fill": [
+            0.035,
+            0.075,
+            0.12,
+            0.96
+          ],
+          "stroke": [
+            0.15,
+            0.35,
+            0.5,
+            1
+          ],
+          "stroke_width": 0.02,
+          "corner_radius": 0.12,
+          "anchor": "center",
+          "layer": 10
+        },
+        "sindri.ui.button": {
+          "label": "REBIND BOOST"
+        }
+      },
+      "transform_3d": {
+        "position": [
+          -0.35,
+          -0.86,
+          0
+        ],
+        "scale": [
+          0.6,
+          0.1,
+          1
+        ]
+      }
+    },
+    {
+      "id": "rebind-label",
+      "name": "rebind-label",
+      "components": {
+        "sindri.ui.text": {
+          "text": "REBIND BOOST",
+          "font": "fonts/ChakraPetch-Regular.ttf",
+          "font_size": 0.032,
+          "bounds": [
+            0.6,
+            0.08
+          ],
+          "anchor": "center",
+          "layer": 20
+        }
+      },
+      "transform_3d": {
+        "position": [
+          -0.35,
+          -0.86,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      }
+    },
+    {
+      "id": "add",
+      "name": "add",
+      "components": {
+        "sindri.ui.shape": {
+          "kind": "rect",
+          "fill": [
+            0.035,
+            0.075,
+            0.12,
+            0.96
+          ],
+          "stroke": [
+            0.15,
+            0.35,
+            0.5,
+            1
+          ],
+          "stroke_width": 0.02,
+          "corner_radius": 0.12,
+          "anchor": "center",
+          "layer": 10
+        },
+        "sindri.ui.button": {
+          "label": "ADD BOOST KEY"
+        }
+      },
+      "transform_3d": {
+        "position": [
+          0.35,
+          -0.86,
+          0
+        ],
+        "scale": [
+          0.6,
+          0.1,
+          1
+        ]
+      }
+    },
+    {
+      "id": "add-label",
+      "name": "add-label",
+      "components": {
+        "sindri.ui.text": {
+          "text": "ADD BOOST KEY",
+          "font": "fonts/ChakraPetch-Regular.ttf",
+          "font_size": 0.032,
+          "bounds": [
+            0.6,
+            0.08
+          ],
+          "anchor": "center",
+          "layer": 20
+        }
+      },
+      "transform_3d": {
+        "position": [
+          0.35,
+          -0.86,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      }
+    }
+  ]
+}

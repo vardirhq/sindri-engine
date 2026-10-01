@@ -16,8 +16,8 @@ pub use audio::BrowserAudioBackend;
 #[cfg(all(not(target_arch = "wasm32"), feature = "audio"))]
 pub use audio::NativeAudioBackend;
 pub use audio::{
-    AudioBackend, AudioClip, AudioError, AudioEvent, AudioVoiceId, PlaybackMode, PlaybackSettings,
-    SilentAudioBackend,
+    AudioBackend, AudioClip, AudioError, AudioEvent, AudioMixer, AudioVoiceId, EFFECTS_BUS,
+    MASTER_BUS, MUSIC_BUS, PlaybackMode, PlaybackSettings, SilentAudioBackend,
 };
 #[cfg(not(target_arch = "wasm32"))]
 pub use clock::SystemClock;

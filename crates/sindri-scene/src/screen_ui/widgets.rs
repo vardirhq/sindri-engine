@@ -219,4 +219,7 @@ pub struct UiInput {
     pub select_all: bool,
     pub copy: bool,
     pub cut: bool,
+    /// A pad's left stick, right and up positive: pushed past halfway it moves
+    /// focus as the d-pad does, once per push.
+    pub stick: [f32; 2],
 }

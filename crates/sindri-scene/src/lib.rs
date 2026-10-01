@@ -15,6 +15,7 @@ mod components;
 pub(crate) mod effects;
 mod extract;
 mod generation;
+mod input_actions;
 mod navigation;
 mod occlusion;
 mod physics;
@@ -59,12 +60,14 @@ pub use extract::{
     SceneRuntime, UiCanvas, ViewCamera, WorldProjection, overlay_for_viewport, overlay_in_scene,
     pan_for_drag, world_camera_of,
 };
+pub use input_actions::InputActionsComponent;
 pub use navigation::{GridNavigationError, GridPlacement, WorldGridNavigation};
 pub use occlusion::{
     OcclusionError, OcclusionFinding, OcclusionProbe, OcclusionReport, sweep_occlusion,
 };
 pub use physics::{
-    Collider2dComponent, PhysicsWorld2dComponent, RigidBody2dComponent, RigidBodyKind,
+    Collider2dComponent, LAYER_LIMIT, PhysicsWorld2dComponent, RigidBody2dComponent, RigidBodyKind,
+    collision_layers, layer_bit,
 };
 pub use physics_sync::{PhysicsSyncError, ScenePhysics2d};
 pub use placement::{

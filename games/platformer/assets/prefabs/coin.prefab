@@ -30,7 +30,7 @@
               "friction": 0.5,
               "layers": {
                 "filter": 4294967295,
-                "memberships": 4294967295
+                "memberships": 4
               },
               "offset": [0, 0],
               "restitution": 0.0,

@@ -29,8 +29,20 @@ impl WorldHost<'_> {
         path: &Path,
         args: &[Value],
     ) -> Result<Value, RuntimeError> {
+        if matches!(call, PhysicsCall::Layer | PhysicsCall::Mask) {
+            return self.layer_mask(call, path, args);
+        }
         if matches!(call, PhysicsCall::Raycast) {
             return self.physics_raycast(path, args);
+        }
+        if matches!(
+            call,
+            PhysicsCall::OverlapCircle
+                | PhysicsCall::OverlapBox
+                | PhysicsCall::CastCircle
+                | PhysicsCall::CastBox
+        ) {
+            return self.physics_shape_query(call, path, args);
         }
         if call.is_event() {
             return self.physics_events(call, path);

@@ -23,55 +23,61 @@ impl WorldHost<'_> {
         let origin = vector(path, args.first())?;
         let direction = vector(path, args.get(1))?;
         let distance = as_f32(number(path, args.get(2).unwrap_or(&Value::Null))?);
-        let mask = number(path, args.get(3).unwrap_or(&Value::Null))?;
-        if !mask.is_finite()
-            || !(0.0..=f64::from(u32::MAX)).contains(&mask)
-            || mask.fract().abs() > 0.0
-        {
-            return Err(error("mask must be a whole number from 0 to 4294967295"));
-        }
-        #[allow(clippy::cast_possible_truncation, clippy::cast_sign_loss)]
-        let mask = mask as u32;
-        let Some(Value::Bool(include_sensors)) = args.get(4) else {
-            return Err(error("include_sensors must be bool"));
-        };
-        let exclude = match args.get(5) {
-            Some(Value::Null) => None,
-            Some(Value::Reference(bits)) => Some(EntityId::from_bits(*bits)),
-            _ => return Err(error("exclude must be an Entity or null")),
-        };
+        let filter = filter(path, args, 3)?;
         let Some(physics) = self.physics.as_ref() else {
             return Err(error("needs physics, and this host is not running any"));
         };
         let hit = physics
             .world
-            .raycast_where(
-                origin,
-                direction,
-                distance,
-                RaycastFilter2d {
-                    mask,
-                    include_sensors: *include_sensors,
-                    exclude,
-                },
-                |entity| self.world.is_active(entity),
-            )
+            .raycast_where(origin, direction, distance, filter, |entity| {
+                self.world.is_active(entity)
+            })
             .map_err(|failure| error(&failure.to_string()))?;
         Ok(hit.map_or(Value::Null, snapshot))
     }
 }
 
-fn vector(path: &Path, value: Option<&Value>) -> Result<[f32; 2], RuntimeError> {
+/// The mask, whether sensors count and the entity to skip, from `at` on:
+/// the last three arguments of every physics query.
+pub(super) fn filter(
+    path: &Path,
+    args: &[Value],
+    at: usize,
+) -> Result<RaycastFilter2d, RuntimeError> {
+    let error = |message: &str| RuntimeError::Host(format!("{}: {message}", path.dotted()));
+    let mask = number(path, args.get(at).unwrap_or(&Value::Null))?;
+    if !mask.is_finite() || !(0.0..=f64::from(u32::MAX)).contains(&mask) || mask.fract().abs() > 0.0
+    {
+        return Err(error("mask must be a whole number from 0 to 4294967295"));
+    }
+    #[allow(clippy::cast_possible_truncation, clippy::cast_sign_loss)]
+    let mask = mask as u32;
+    let Some(Value::Bool(include_sensors)) = args.get(at + 1) else {
+        return Err(error("include_sensors must be bool"));
+    };
+    let exclude = match args.get(at + 2) {
+        Some(Value::Null) => None,
+        Some(Value::Reference(bits)) => Some(EntityId::from_bits(*bits)),
+        _ => return Err(error("exclude must be an Entity or null")),
+    };
+    Ok(RaycastFilter2d {
+        mask,
+        include_sensors: *include_sensors,
+        exclude,
+    })
+}
+
+pub(super) fn vector(path: &Path, value: Option<&Value>) -> Result<[f32; 2], RuntimeError> {
     let Some(Value::Vec2([x, y])) = value else {
         return Err(RuntimeError::Host(format!(
-            "{} takes Vec2 origin and direction",
+            "{} takes a Vec2 for each position, size and direction",
             path.dotted()
         )));
     };
     Ok([as_f32(*x), as_f32(*y)])
 }
 
-fn snapshot(hit: RayHit2d) -> Value {
+pub(super) fn snapshot(hit: RayHit2d) -> Value {
     Value::Struct {
         shape: Rc::new(StructShape {
             name: RAY_HIT.to_owned(),

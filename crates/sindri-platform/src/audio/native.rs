@@ -67,6 +67,18 @@ impl AudioBackend for NativeAudioBackend {
         }
     }
 
+    fn set_volume(&mut self, voice: AudioVoiceId, volume: f32) {
+        if let Some(player) = self.voices.get(&voice) {
+            player.set_volume(volume.clamp(0.0, 1.0));
+        }
+    }
+
+    fn is_active(&self, voice: AudioVoiceId) -> bool {
+        self.voices
+            .get(&voice)
+            .is_some_and(|player| !player.empty())
+    }
+
     fn pause_all(&mut self) {
         for voice in self.voices.values() {
             voice.pause();

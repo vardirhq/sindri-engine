@@ -1,7 +1,7 @@
 //! Managed values; scripts apply them through ordinary checked write paths.
 use super::WorldHost;
 use crate::{
-    surface::tween::{CALLS, METHODS, TweenCall},
+    surface::tween::{CALLS, COMPOSE, METHODS, TweenCall},
     tweens::{Track, Tweens},
 };
 use decay_ir::Path;
@@ -58,16 +58,13 @@ impl WorldHost<'_> {
         let owner = self.entity;
         let id = self
             .tween_store(path)?
-            .insert(Track {
+            .insert(Track::new(
                 owner,
-                from: from.clone(),
-                to: to.clone(),
-                duration: *duration,
-                elapsed: 0.0,
+                from.clone(),
+                to.clone(),
+                *duration,
                 easing,
-                paused: false,
-                cancelled: false,
-            })
+            ))
             .map_err(|message| error(path, message))?;
         Ok(Value::Reference(id))
     }
@@ -80,6 +77,9 @@ impl WorldHost<'_> {
     ) -> Result<Value, RuntimeError> {
         if let Some((_, call)) = CALLS.iter().find(|(known, _)| *known == name) {
             return self.tween_create(*call, path, args);
+        }
+        if COMPOSE.contains(&name) {
+            return self.tween_compose(name, path, args);
         }
         let [Value::Reference(id)] = args else {
             return Err(error(path, "takes one valid tween handle"));
@@ -114,6 +114,7 @@ impl WorldHost<'_> {
                     }
                     "restart" => {
                         track.elapsed = 0.0;
+                        track.waited = 0.0;
                         track.cancelled = false;
                         track.paused = false;
                     }
@@ -125,5 +126,64 @@ impl WorldHost<'_> {
             _ => return Err(error(path, "unknown tween control")),
         };
         Ok(value)
+    }
+
+    /// `set_delay`, `set_loops`, `set_yoyo` and `after`: how a tween plays,
+    /// set on its handle, usually as it is made.
+    fn tween_compose(
+        &mut self,
+        name: &str,
+        path: &Path,
+        args: &[Value],
+    ) -> Result<Value, RuntimeError> {
+        let Some(Value::Reference(id)) = args.first() else {
+            return Err(error(path, "takes a valid tween handle first"));
+        };
+        let id = *id;
+        let store = self.tween_store(path)?;
+        // Checked before the track is borrowed: a sequence names a second one.
+        let before = match (name, args.get(1)) {
+            ("after", Some(Value::Reference(before))) => {
+                if *before == id {
+                    return Err(error(path, "a tween cannot wait for itself"));
+                }
+                if store.get_mut(*before).is_none() {
+                    return Err(error(path, "the tween to wait for has been disposed"));
+                }
+                Some(*before)
+            }
+            ("after", _) => return Err(error(path, "takes the tween to wait for")),
+            _ => None,
+        };
+        let track = store
+            .get_mut(id)
+            .ok_or_else(|| error(path, "tween has been disposed or its owner removed"))?;
+        match (name, args.get(1)) {
+            ("after", _) => track.after = before,
+            ("set_delay", Some(Value::Number(seconds)))
+                if seconds.is_finite() && *seconds >= 0.0 =>
+            {
+                track.delay = *seconds;
+            }
+            ("set_loops", Some(Value::Number(count)))
+                if count.is_finite() && *count >= 0.0 && count.fract() == 0.0 =>
+            {
+                #[allow(clippy::cast_possible_truncation, clippy::cast_sign_loss)]
+                let count = count.min(f64::from(u32::MAX)) as u32;
+                track.loops = count;
+            }
+            ("set_yoyo", Some(Value::Bool(on))) => track.yoyo = *on,
+            ("set_delay", _) => {
+                return Err(error(path, "delay must be finite, non-negative seconds"));
+            }
+            ("set_loops", _) => {
+                return Err(error(
+                    path,
+                    "loops must be a whole number; 0 plays for ever",
+                ));
+            }
+            _ => return Err(error(path, "takes a tween handle and a true/false")),
+        }
+        Ok(Value::Unit)
     }
 }

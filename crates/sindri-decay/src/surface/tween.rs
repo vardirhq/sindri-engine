@@ -15,6 +15,9 @@ pub(crate) const CALLS: &[(&str, TweenCall)] = &[
     ("color", TweenCall::Color),
 ];
 pub(crate) const METHODS: &[&str] = &["pause", "resume", "cancel", "restart", "dispose"];
+/// How a tween plays, set on its handle: a delay, a loop count, a yoyo and a
+/// tween it waits for.
+pub(crate) const COMPOSE: &[&str] = &["set_delay", "set_loops", "set_yoyo", "after"];
 impl TweenCall {
     pub(crate) fn ty(self) -> Type {
         match self {

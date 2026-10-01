@@ -96,6 +96,50 @@
           "gravity": [
             0.0,
             -30.0
+          ],
+          "layers": [
+            "ground",
+            "hero",
+            "pickups"
+          ]
+        },
+        "sindri.input.actions": {
+          "actions": [
+            {
+              "name": "run",
+              "kind": "axis",
+              "bindings": [
+                {
+                  "axis": {
+                    "negative": "key.A",
+                    "positive": "key.D"
+                  }
+                },
+                {
+                  "axis": {
+                    "negative": "key.ArrowLeft",
+                    "positive": "key.ArrowRight"
+                  }
+                },
+                "gamepad.axis.left_x",
+                {
+                  "axis": {
+                    "negative": "gamepad.dpad_left",
+                    "positive": "gamepad.dpad_right"
+                  }
+                }
+              ]
+            },
+            {
+              "name": "jump",
+              "kind": "button",
+              "bindings": [
+                "key.Space",
+                "key.W",
+                "key.ArrowUp",
+                "gamepad.south"
+              ]
+            }
           ]
         }
       }
@@ -1038,7 +1082,7 @@
             "tuft"
           ],
           "layers": {
-            "memberships": 4294967295,
+            "memberships": 1,
             "filter": 4294967295
           },
           "friction": 0.5,
@@ -1149,7 +1193,7 @@
               "rotation": 0.0,
               "sensor": false,
               "layers": {
-                "memberships": 4294967295,
+                "memberships": 2,
                 "filter": 4294967295
               },
               "friction": 0.0,
@@ -1170,7 +1214,7 @@
               "rotation": 0.0,
               "sensor": true,
               "layers": {
-                "memberships": 4294967295,
+                "memberships": 2,
                 "filter": 4294967295
               },
               "friction": 0.0,
@@ -1497,7 +1541,7 @@
               "rotation": 0,
               "sensor": true,
               "layers": {
-                "memberships": 4294967295,
+                "memberships": 4,
                 "filter": 4294967295
               },
               "friction": 0.5,

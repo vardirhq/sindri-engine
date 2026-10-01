@@ -126,6 +126,36 @@
   },
   {
     "category": "demos",
+    "title": "Input Actions",
+    "path": "examples/input/",
+    "source": "examples/input",
+    "description": "Steer by what you mean, not what you press, and rebind boost to any key or button while it runs.",
+    "tags": [
+      "input",
+      "actions",
+      "rebinding",
+      "gamepad",
+      "decay",
+      "responsive"
+    ]
+  },
+  {
+    "category": "demos",
+    "title": "Sound Mixer",
+    "path": "examples/audio/",
+    "source": "examples/audio",
+    "description": "Turn the master, music and effects buses up and down while the theme plays.",
+    "tags": [
+      "audio",
+      "buses",
+      "volume",
+      "sliders",
+      "decay",
+      "responsive"
+    ]
+  },
+  {
+    "category": "demos",
     "title": "Weave Control Room",
     "path": "examples/ui/",
     "source": "examples/ui",

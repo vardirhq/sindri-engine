@@ -1,0 +1,760 @@
+{
+  "format_version": 10,
+  "metadata": {
+    "name": "Sound Mixer"
+  },
+  "entities": [
+    {
+      "id": "camera",
+      "name": "camera",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          10
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "sindri.camera": {
+          "projection": "orthographic",
+          "vertical_size": 12,
+          "near": 0.1,
+          "far": 100,
+          "fit": "shorter"
+        }
+      }
+    },
+    {
+      "id": "environment",
+      "name": "environment",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "sindri.environment": {
+          "background": [
+            0.012,
+            0.025,
+            0.045,
+            1
+          ]
+        }
+      }
+    },
+    {
+      "id": "theme",
+      "name": "theme",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "sindri.audio.source": {
+          "clip": "audio/theme.wav",
+          "autoplay": true,
+          "looping": true,
+          "volume": 0.6
+        },
+        "sindri.script": {
+          "source": "mixer.decay",
+          "script": "Mixer",
+          "properties": {}
+        }
+      }
+    },
+    {
+      "id": "title",
+      "name": "title",
+      "components": {
+        "sindri.ui.text": {
+          "text": "SOUND MIXER",
+          "font": "fonts/ChakraPetch-Regular.ttf",
+          "font_size": 0.05,
+          "bounds": [
+            1.6,
+            0.08
+          ],
+          "anchor": "center",
+          "layer": 20
+        }
+      },
+      "transform_3d": {
+        "position": [
+          0,
+          0.82,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      }
+    },
+    {
+      "id": "subtitle",
+      "name": "subtitle",
+      "components": {
+        "sindri.ui.text": {
+          "text": "Every sound plays through a bus; every bus through master.",
+          "font": "fonts/ChakraPetch-Regular.ttf",
+          "font_size": 0.03,
+          "bounds": [
+            1.6,
+            0.08
+          ],
+          "anchor": "center",
+          "layer": 20
+        }
+      },
+      "transform_3d": {
+        "position": [
+          0,
+          0.72,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      }
+    },
+    {
+      "id": "master-label",
+      "name": "master-label",
+      "components": {
+        "sindri.ui.text": {
+          "text": "MASTER",
+          "font": "fonts/ChakraPetch-Regular.ttf",
+          "font_size": 0.034,
+          "bounds": [
+            0.3,
+            0.08
+          ],
+          "anchor": "center",
+          "layer": 20
+        }
+      },
+      "transform_3d": {
+        "position": [
+          -0.62,
+          0.4,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      }
+    },
+    {
+      "id": "master",
+      "name": "master",
+      "components": {
+        "sindri.ui.shape": {
+          "kind": "rect",
+          "fill": [
+            0.035,
+            0.075,
+            0.12,
+            0.96
+          ],
+          "stroke": [
+            0.15,
+            0.35,
+            0.5,
+            1
+          ],
+          "stroke_width": 0.02,
+          "corner_radius": 0.5,
+          "anchor": "center",
+          "layer": 10
+        },
+        "sindri.ui.slider": {
+          "label": "Master volume",
+          "min": 0.0,
+          "max": 1.0,
+          "step": 0.05,
+          "value": 1.0,
+          "autofocus": true
+        }
+      },
+      "transform_3d": {
+        "position": [
+          0.1,
+          0.4,
+          0
+        ],
+        "scale": [
+          0.9,
+          0.07,
+          1
+        ]
+      }
+    },
+    {
+      "id": "master-fill",
+      "name": "master-fill",
+      "components": {
+        "sindri.ui.shape": {
+          "kind": "rect",
+          "fill": [
+            0.37,
+            0.89,
+            0.81,
+            0.55
+          ],
+          "stroke": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "stroke_width": 0.02,
+          "corner_radius": 0.5,
+          "anchor": "center",
+          "layer": 12
+        }
+      },
+      "transform_3d": {
+        "position": [
+          0.1,
+          0.4,
+          0
+        ],
+        "scale": [
+          0.9,
+          0.07,
+          1
+        ]
+      }
+    },
+    {
+      "id": "master-value",
+      "name": "master-value",
+      "components": {
+        "sindri.ui.text": {
+          "text": "100%",
+          "font": "fonts/ChakraPetch-Regular.ttf",
+          "font_size": 0.034,
+          "bounds": [
+            0.2,
+            0.08
+          ],
+          "anchor": "center",
+          "layer": 20
+        }
+      },
+      "transform_3d": {
+        "position": [
+          0.7,
+          0.4,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      }
+    },
+    {
+      "id": "music-label",
+      "name": "music-label",
+      "components": {
+        "sindri.ui.text": {
+          "text": "MUSIC",
+          "font": "fonts/ChakraPetch-Regular.ttf",
+          "font_size": 0.034,
+          "bounds": [
+            0.3,
+            0.08
+          ],
+          "anchor": "center",
+          "layer": 20
+        }
+      },
+      "transform_3d": {
+        "position": [
+          -0.62,
+          0.22,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      }
+    },
+    {
+      "id": "music",
+      "name": "music",
+      "components": {
+        "sindri.ui.shape": {
+          "kind": "rect",
+          "fill": [
+            0.035,
+            0.075,
+            0.12,
+            0.96
+          ],
+          "stroke": [
+            0.15,
+            0.35,
+            0.5,
+            1
+          ],
+          "stroke_width": 0.02,
+          "corner_radius": 0.5,
+          "anchor": "center",
+          "layer": 10
+        },
+        "sindri.ui.slider": {
+          "label": "Music volume",
+          "min": 0.0,
+          "max": 1.0,
+          "step": 0.05,
+          "value": 1.0
+        }
+      },
+      "transform_3d": {
+        "position": [
+          0.1,
+          0.22,
+          0
+        ],
+        "scale": [
+          0.9,
+          0.07,
+          1
+        ]
+      }
+    },
+    {
+      "id": "music-fill",
+      "name": "music-fill",
+      "components": {
+        "sindri.ui.shape": {
+          "kind": "rect",
+          "fill": [
+            0.37,
+            0.89,
+            0.81,
+            0.55
+          ],
+          "stroke": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "stroke_width": 0.02,
+          "corner_radius": 0.5,
+          "anchor": "center",
+          "layer": 12
+        }
+      },
+      "transform_3d": {
+        "position": [
+          0.1,
+          0.22,
+          0
+        ],
+        "scale": [
+          0.9,
+          0.07,
+          1
+        ]
+      }
+    },
+    {
+      "id": "music-value",
+      "name": "music-value",
+      "components": {
+        "sindri.ui.text": {
+          "text": "100%",
+          "font": "fonts/ChakraPetch-Regular.ttf",
+          "font_size": 0.034,
+          "bounds": [
+            0.2,
+            0.08
+          ],
+          "anchor": "center",
+          "layer": 20
+        }
+      },
+      "transform_3d": {
+        "position": [
+          0.7,
+          0.22,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      }
+    },
+    {
+      "id": "effects-label",
+      "name": "effects-label",
+      "components": {
+        "sindri.ui.text": {
+          "text": "EFFECTS",
+          "font": "fonts/ChakraPetch-Regular.ttf",
+          "font_size": 0.034,
+          "bounds": [
+            0.3,
+            0.08
+          ],
+          "anchor": "center",
+          "layer": 20
+        }
+      },
+      "transform_3d": {
+        "position": [
+          -0.62,
+          0.04,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      }
+    },
+    {
+      "id": "effects",
+      "name": "effects",
+      "components": {
+        "sindri.ui.shape": {
+          "kind": "rect",
+          "fill": [
+            0.035,
+            0.075,
+            0.12,
+            0.96
+          ],
+          "stroke": [
+            0.15,
+            0.35,
+            0.5,
+            1
+          ],
+          "stroke_width": 0.02,
+          "corner_radius": 0.5,
+          "anchor": "center",
+          "layer": 10
+        },
+        "sindri.ui.slider": {
+          "label": "Effects volume",
+          "min": 0.0,
+          "max": 1.0,
+          "step": 0.05,
+          "value": 1.0
+        }
+      },
+      "transform_3d": {
+        "position": [
+          0.1,
+          0.04,
+          0
+        ],
+        "scale": [
+          0.9,
+          0.07,
+          1
+        ]
+      }
+    },
+    {
+      "id": "effects-fill",
+      "name": "effects-fill",
+      "components": {
+        "sindri.ui.shape": {
+          "kind": "rect",
+          "fill": [
+            0.37,
+            0.89,
+            0.81,
+            0.55
+          ],
+          "stroke": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "stroke_width": 0.02,
+          "corner_radius": 0.5,
+          "anchor": "center",
+          "layer": 12
+        }
+      },
+      "transform_3d": {
+        "position": [
+          0.1,
+          0.04,
+          0
+        ],
+        "scale": [
+          0.9,
+          0.07,
+          1
+        ]
+      }
+    },
+    {
+      "id": "effects-value",
+      "name": "effects-value",
+      "components": {
+        "sindri.ui.text": {
+          "text": "100%",
+          "font": "fonts/ChakraPetch-Regular.ttf",
+          "font_size": 0.034,
+          "bounds": [
+            0.2,
+            0.08
+          ],
+          "anchor": "center",
+          "layer": 20
+        }
+      },
+      "transform_3d": {
+        "position": [
+          0.7,
+          0.04,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      }
+    },
+    {
+      "id": "shot",
+      "name": "shot",
+      "components": {
+        "sindri.ui.shape": {
+          "kind": "rect",
+          "fill": [
+            0.035,
+            0.075,
+            0.12,
+            0.96
+          ],
+          "stroke": [
+            0.15,
+            0.35,
+            0.5,
+            1
+          ],
+          "stroke_width": 0.02,
+          "corner_radius": 0.12,
+          "anchor": "center",
+          "layer": 10
+        },
+        "sindri.ui.button": {
+          "label": "PLAY SHOT"
+        }
+      },
+      "transform_3d": {
+        "position": [
+          -0.3,
+          -0.25,
+          0
+        ],
+        "scale": [
+          0.5,
+          0.1,
+          1
+        ]
+      }
+    },
+    {
+      "id": "shot-label",
+      "name": "shot-label",
+      "components": {
+        "sindri.ui.text": {
+          "text": "PLAY SHOT",
+          "font": "fonts/ChakraPetch-Regular.ttf",
+          "font_size": 0.032,
+          "bounds": [
+            0.5,
+            0.08
+          ],
+          "anchor": "center",
+          "layer": 20
+        }
+      },
+      "transform_3d": {
+        "position": [
+          -0.3,
+          -0.25,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      }
+    },
+    {
+      "id": "boom",
+      "name": "boom",
+      "components": {
+        "sindri.ui.shape": {
+          "kind": "rect",
+          "fill": [
+            0.035,
+            0.075,
+            0.12,
+            0.96
+          ],
+          "stroke": [
+            0.15,
+            0.35,
+            0.5,
+            1
+          ],
+          "stroke_width": 0.02,
+          "corner_radius": 0.12,
+          "anchor": "center",
+          "layer": 10
+        },
+        "sindri.ui.button": {
+          "label": "PLAY BOOM"
+        }
+      },
+      "transform_3d": {
+        "position": [
+          0.3,
+          -0.25,
+          0
+        ],
+        "scale": [
+          0.5,
+          0.1,
+          1
+        ]
+      }
+    },
+    {
+      "id": "boom-label",
+      "name": "boom-label",
+      "components": {
+        "sindri.ui.text": {
+          "text": "PLAY BOOM",
+          "font": "fonts/ChakraPetch-Regular.ttf",
+          "font_size": 0.032,
+          "bounds": [
+            0.5,
+            0.08
+          ],
+          "anchor": "center",
+          "layer": 20
+        }
+      },
+      "transform_3d": {
+        "position": [
+          0.3,
+          -0.25,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      }
+    },
+    {
+      "id": "status",
+      "name": "status",
+      "components": {
+        "sindri.ui.text": {
+          "text": "Drag a slider, or use the arrows: up and down choose, left and right set.",
+          "font": "fonts/ChakraPetch-Regular.ttf",
+          "font_size": 0.03,
+          "bounds": [
+            1.6,
+            0.08
+          ],
+          "anchor": "center",
+          "layer": 20
+        }
+      },
+      "transform_3d": {
+        "position": [
+          0,
+          -0.55,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      }
+    },
+    {
+      "id": "hint",
+      "name": "hint",
+      "components": {
+        "sindri.ui.text": {
+          "text": "Music loops on the music bus. The buttons play effects.",
+          "font": "fonts/ChakraPetch-Regular.ttf",
+          "font_size": 0.028,
+          "bounds": [
+            1.6,
+            0.08
+          ],
+          "anchor": "center",
+          "layer": 20
+        }
+      },
+      "transform_3d": {
+        "position": [
+          0,
+          -0.65,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      }
+    }
+  ]
+}

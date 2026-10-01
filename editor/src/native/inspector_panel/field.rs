@@ -51,6 +51,8 @@ pub(crate) struct FieldAssets<'a> {
     pub(crate) pictures: &'a Pictures,
     /// The block set the component names, when it names one that is loaded.
     pub(crate) block_sets: Option<&'a TileSetBindings>,
+    /// What the scene's physics world calls its collision layers, bit by bit.
+    pub(crate) layers: &'a [String],
 }
 
 /// The rows of one payload, indented under its heading.

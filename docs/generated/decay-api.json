@@ -4,6 +4,12 @@
   "generated_by": "cargo run -p sindri-capabilities -- --write",
   "globals": [
     {
+      "description": "What the player means rather than what they pressed: the input actions the scene declares, such as `\"jump\"` or `\"move\"`, each bound to keys, buttons and sticks that can be changed while the game runs. A binding is written as text: `\"key.Space\"`, two sources for an axis (`\"key.A/key.D\"`), or four for a direction (`\"key.W/key.S/key.A/key.D\"`). A name the scene does not declare is an error.",
+      "kind": "value",
+      "name": "Action",
+      "type": "Action"
+    },
+    {
       "description": "Which block in a 3D block world the mouse or finger is pointing at, for building and digging games.",
       "kind": "value",
       "name": "Aim",
@@ -16,7 +22,7 @@
       "type": "Animation"
     },
     {
-      "description": "Playing sound effects and music.",
+      "description": "Playing sound effects and music. Every sound goes through a bus — `\"effects\"`, `\"music\"`, or any other name — and every bus through `\"master\"`, so a settings screen can turn each down.",
       "kind": "value",
       "name": "Audio",
       "type": "Audio"
@@ -383,6 +389,108 @@
   ],
   "types": [
     {
+      "description": "What the player means rather than what they pressed: the input actions the scene declares, such as `\"jump\"` or `\"move\"`, each bound to keys, buttons and sticks that can be changed while the game runs. A binding is written as text: `\"key.Space\"`, two sources for an axis (`\"key.A/key.D\"`), or four for a direction (`\"key.W/key.S/key.A/key.D\"`). A name the scene does not declare is an error.",
+      "members": [
+        {
+          "description": "An axis action's value, from -1 to 1.",
+          "kind": "function",
+          "name": "axis",
+          "parameter_names": [
+            "name"
+          ],
+          "parameters": [
+            "String"
+          ],
+          "returns": "f32"
+        },
+        {
+          "description": "What an action is bound to now, as a list of binding texts.",
+          "kind": "function",
+          "name": "bindings",
+          "parameter_names": [
+            "name"
+          ],
+          "parameters": [
+            "String"
+          ],
+          "returns": "List<String>"
+        },
+        {
+          "description": "Whether an action is being made now.",
+          "kind": "function",
+          "name": "held",
+          "parameter_names": [
+            "name"
+          ],
+          "parameters": [
+            "String"
+          ],
+          "returns": "bool"
+        },
+        {
+          "description": "The key, mouse button or controller button pressed this frame, as a source name such as `\"key.J\"`, or empty text: for a screen that waits for the key to rebind to.",
+          "kind": "function",
+          "name": "last_pressed",
+          "parameter_names": [],
+          "parameters": [],
+          "returns": "String"
+        },
+        {
+          "description": "Whether an action started this frame.",
+          "kind": "function",
+          "name": "pressed",
+          "parameter_names": [
+            "name"
+          ],
+          "parameters": [
+            "String"
+          ],
+          "returns": "bool"
+        },
+        {
+          "description": "Replaces an action's binding at `index` with a binding text, or adds one at the next index. A binding that cannot make the action's kind is refused.",
+          "kind": "function",
+          "name": "rebind",
+          "parameter_names": [
+            "name",
+            "index",
+            "binding"
+          ],
+          "parameters": [
+            "String",
+            "f32",
+            "String"
+          ],
+          "returns": "unit"
+        },
+        {
+          "description": "Whether an action stopped this frame.",
+          "kind": "function",
+          "name": "released",
+          "parameter_names": [
+            "name"
+          ],
+          "parameters": [
+            "String"
+          ],
+          "returns": "bool"
+        },
+        {
+          "description": "A direction action's value, as a Vec2 with right and up positive.",
+          "kind": "function",
+          "name": "vector",
+          "parameter_names": [
+            "name"
+          ],
+          "parameters": [
+            "String"
+          ],
+          "returns": "Vec2"
+        }
+      ],
+      "name": "Action"
+    },
+    {
       "description": "Which block in a 3D block world the mouse or finger is pointing at, for building and digging games.",
       "members": [
         {
@@ -525,10 +633,10 @@
       "name": "Animation"
     },
     {
-      "description": "Playing sound effects and music.",
+      "description": "Playing sound effects and music. Every sound goes through a bus — `\"effects\"`, `\"music\"`, or any other name — and every bus through `\"master\"`, so a settings screen can turn each down.",
       "members": [
         {
-          "description": "Plays a sound over and over until stopped, such as music, at a volume from 0 (silent) to 1 (full).",
+          "description": "Plays a sound over and over until stopped, such as music, at a volume from 0 (silent) to 1 (full), through the `\"music\"` bus.",
           "kind": "function",
           "name": "loop",
           "parameter_names": [
@@ -536,6 +644,22 @@
             "volume"
           ],
           "parameters": [
+            "String",
+            "f32"
+          ],
+          "returns": "unit"
+        },
+        {
+          "description": "Plays a sound over and over through a bus you name.",
+          "kind": "function",
+          "name": "loop_on",
+          "parameter_names": [
+            "bus",
+            "clip",
+            "volume"
+          ],
+          "parameters": [
+            "String",
             "String",
             "f32"
           ],
@@ -550,7 +674,7 @@
           "returns": "unit"
         },
         {
-          "description": "Plays a sound once, at a volume from 0 (silent) to 1 (full).",
+          "description": "Plays a sound once, at a volume from 0 (silent) to 1 (full), through the `\"effects\"` bus.",
           "kind": "function",
           "name": "play",
           "parameter_names": [
@@ -558,6 +682,22 @@
             "volume"
           ],
           "parameters": [
+            "String",
+            "f32"
+          ],
+          "returns": "unit"
+        },
+        {
+          "description": "Plays a sound once through a bus you name.",
+          "kind": "function",
+          "name": "play_on",
+          "parameter_names": [
+            "bus",
+            "clip",
+            "volume"
+          ],
+          "parameters": [
+            "String",
             "String",
             "f32"
           ],
@@ -572,12 +712,38 @@
           "returns": "unit"
         },
         {
+          "description": "Sets a bus's volume from 0 to 1, at once for every sound playing through it. `\"master\"` turns everything up or down.",
+          "kind": "function",
+          "name": "set_volume",
+          "parameter_names": [
+            "bus",
+            "volume"
+          ],
+          "parameters": [
+            "String",
+            "f32"
+          ],
+          "returns": "unit"
+        },
+        {
           "description": "Stops every sound that is playing.",
           "kind": "function",
           "name": "stop_all",
           "parameter_names": [],
           "parameters": [],
           "returns": "unit"
+        },
+        {
+          "description": "A bus's volume as last set, or 1 for one never set.",
+          "kind": "function",
+          "name": "volume",
+          "parameter_names": [
+            "bus"
+          ],
+          "parameters": [
+            "String"
+          ],
+          "returns": "f32"
         }
       ],
       "name": "Audio"
@@ -1324,6 +1490,56 @@
           "returns": "unit"
         },
         {
+          "description": "Like `cast_circle`, for a box `half_size` from its centre to each edge, turned by `rotation` radians.",
+          "kind": "function",
+          "name": "cast_box",
+          "parameter_names": [
+            "origin",
+            "half_size",
+            "rotation",
+            "direction",
+            "max_distance",
+            "mask",
+            "include_sensors",
+            "exclude"
+          ],
+          "parameters": [
+            "Vec2",
+            "Vec2",
+            "f32",
+            "Vec2",
+            "f32",
+            "f32",
+            "bool",
+            "Entity"
+          ],
+          "returns": "RayHit2d"
+        },
+        {
+          "description": "Sweeps a circle from `origin` along `direction` and returns the first collider it would touch, as RayHit2d or null: a raycast with a size, for whether something fits through a gap. `point` is where they touch and `distance` how far the circle's centre travelled. Starting already overlapping gives distance 0 and normal Vec2(0, 0). The filter arguments are the raycast's.",
+          "kind": "function",
+          "name": "cast_circle",
+          "parameter_names": [
+            "origin",
+            "radius",
+            "direction",
+            "max_distance",
+            "mask",
+            "include_sensors",
+            "exclude"
+          ],
+          "parameters": [
+            "Vec2",
+            "f32",
+            "Vec2",
+            "f32",
+            "f32",
+            "bool",
+            "Entity"
+          ],
+          "returns": "RayHit2d"
+        },
+        {
           "description": "The objects that started touching this script's object since the last frame, as a list.",
           "kind": "function",
           "name": "collision_started",
@@ -1354,6 +1570,72 @@
             "f32"
           ],
           "returns": "unit"
+        },
+        {
+          "description": "The mask for one collision layer the scene's physics world names, such as `\"ground\"`, for a query's `mask` argument. A name the world does not give is an error.",
+          "kind": "function",
+          "name": "layer",
+          "parameter_names": [
+            "name"
+          ],
+          "parameters": [
+            "String"
+          ],
+          "returns": "f32"
+        },
+        {
+          "description": "The mask for several named collision layers at once, such as `[\"ground\", \"enemies\"]`.",
+          "kind": "function",
+          "name": "mask",
+          "parameter_names": [
+            "names"
+          ],
+          "parameters": [
+            "List<String>"
+          ],
+          "returns": "f32"
+        },
+        {
+          "description": "Like `overlap_circle`, for a box `half_size` from its centre to each edge, turned by `rotation` radians.",
+          "kind": "function",
+          "name": "overlap_box",
+          "parameter_names": [
+            "center",
+            "half_size",
+            "rotation",
+            "mask",
+            "include_sensors",
+            "exclude"
+          ],
+          "parameters": [
+            "Vec2",
+            "Vec2",
+            "f32",
+            "f32",
+            "bool",
+            "Entity"
+          ],
+          "returns": "List<Entity>"
+        },
+        {
+          "description": "Every object with a collider inside a circle, as a list, each once: an area check for a blast, an aura or a pickup radius. The filter arguments are the raycast's: which layers, whether trigger areas count, and one object to leave out (or null). Ignores inactive objects.",
+          "kind": "function",
+          "name": "overlap_circle",
+          "parameter_names": [
+            "center",
+            "radius",
+            "mask",
+            "include_sensors",
+            "exclude"
+          ],
+          "parameters": [
+            "Vec2",
+            "f32",
+            "f32",
+            "bool",
+            "Entity"
+          ],
+          "returns": "List<Entity>"
         },
         {
           "description": "The closest 2D collider hit, as RayHit2d or null. Normalizes a nonzero Vec2 direction; returns world-space point, normal and distance. The mask selects collider memberships; include_sensors opts into triggers; exclude skips all pieces of one entity (or null). Origin, direction and distance must be finite; distance non-negative; mask a whole u32. Inside hits have distance 0 and normal Vec2(0, 0). Queries synchronized geometry; ignores inactive/despawned entities. Ties prefer entity handle then piece order.",
@@ -2131,6 +2413,20 @@
       "description": "Creates automatically playing gameplay tweens owned by the calling script. Copies alias playback state. Advance occurs before the owner's subsequent updates using script delta. No automatic property binding. Curves: linear, ease, ease-in, ease-out, ease-in-out. Finite endpoints and finite non-negative duration are required; zero duration completes immediately. Maximum 8192 retained handles per runner; dispose unused handles.",
       "members": [
         {
+          "description": "Holds a tween still until `previous` has finished, then plays it from the next step: tweens in sequence. One whose `previous` is disposed goes on without it.",
+          "kind": "function",
+          "name": "after",
+          "parameter_names": [
+            "tween",
+            "previous"
+          ],
+          "parameters": [
+            "TweenHandle",
+            "TweenHandle"
+          ],
+          "returns": "unit"
+        },
+        {
           "description": "Stops at the current value; is_done is false. Restart can play it again.",
           "kind": "function",
           "name": "cancel",
@@ -2263,7 +2559,7 @@
           "returns": "unit"
         },
         {
-          "description": "Linear elapsed fraction from 0 to 1; zero duration is 1.",
+          "description": "Linear fraction of the current play from 0 to 1, running back down on a yoyo's return; zero duration is 1.",
           "kind": "function",
           "name": "progress",
           "parameter_names": [
@@ -2295,6 +2591,48 @@
           ],
           "parameters": [
             "TweenHandle"
+          ],
+          "returns": "unit"
+        },
+        {
+          "description": "Holds the starting value for a number of seconds before playing.",
+          "kind": "function",
+          "name": "set_delay",
+          "parameter_names": [
+            "tween",
+            "seconds"
+          ],
+          "parameters": [
+            "TweenHandle",
+            "f32"
+          ],
+          "returns": "unit"
+        },
+        {
+          "description": "Plays it a whole number of times; 0 plays for ever and is never done.",
+          "kind": "function",
+          "name": "set_loops",
+          "parameter_names": [
+            "tween",
+            "count"
+          ],
+          "parameters": [
+            "TweenHandle",
+            "f32"
+          ],
+          "returns": "unit"
+        },
+        {
+          "description": "Whether every other play runs back from the end to the start, for a pulse or a bob.",
+          "kind": "function",
+          "name": "set_yoyo",
+          "parameter_names": [
+            "tween",
+            "on"
+          ],
+          "parameters": [
+            "TweenHandle",
+            "bool"
           ],
           "returns": "unit"
         },

@@ -28,7 +28,7 @@ use sindri_core::{ComponentSchemaRegistry, EntityId, World};
 use self::run::{TickWorld, ensure_compiled, tick};
 use crate::{
     Blackboard, ScriptComponent, ScriptExport, ScriptFailure, ScriptMessage, ScriptReport,
-    audio_host::AudioCommand,
+    audio_host::{AudioCommand, AudioQueue},
     exports::exports_of,
     surface::{PREFAB, PROFILE},
 };
@@ -116,7 +116,9 @@ pub struct Scripts {
     blackboard: Blackboard,
     tweens: crate::tweens::Tweens,
     /// What scripts asked to play, for whoever owns an audio device to perform.
-    audio: Vec<AudioCommand>,
+    audio: AudioQueue,
+    /// The scene's input actions and what each is worth this step.
+    actions: crate::actions::InputActions,
 }
 
 impl Scripts {
@@ -136,7 +138,13 @@ impl Scripts {
     /// never calls this, and the requests are dropped with the runner rather
     /// than accumulating somewhere global.
     pub fn take_audio_commands(&mut self) -> Vec<AudioCommand> {
-        std::mem::take(&mut self.audio)
+        self.audio.take()
+    }
+
+    /// A bus's volume as the scripts last set it, full for one never set.
+    #[must_use]
+    pub fn audio_volume(&self, bus: &str) -> f32 {
+        self.audio.volume(bus)
     }
 
     #[must_use]
@@ -218,6 +226,9 @@ impl Scripts {
             }
         };
 
+        if let Some(problem) = self.actions.update(world, input) {
+            report.failures.push(ScriptFailure::Actions(problem));
+        }
         let Self {
             programs,
             running,
@@ -225,6 +236,7 @@ impl Scripts {
             blackboard,
             tweens,
             audio,
+            actions,
         } = self;
         let mut at = TickWorld {
             programs,
@@ -233,6 +245,7 @@ impl Scripts {
             blackboard,
             tweens,
             audio,
+            actions,
             world,
             sources,
             prefabs,
@@ -521,6 +534,9 @@ mod tests {
                 fn start() {
                     Audio.play("audio/pickup.wav", 0.8);
                     Audio.loop("audio/music.ogg", 0.4);
+                    Audio.play_on("voice", "audio/line.wav", 1.0);
+                    Audio.loop_on("ambience", "audio/wind.ogg", 0.5);
+                    Audio.set_volume("master", Audio.volume("music") * 0.5);
                     Audio.pause_all();
                     Audio.resume_all();
                     Audio.stop_all();

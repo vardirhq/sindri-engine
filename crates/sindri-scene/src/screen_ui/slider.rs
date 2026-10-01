@@ -1,7 +1,10 @@
 //! Slider semantics and value mapping for screen UI.
 
 use serde::Deserialize;
-use sindri_core::SceneComponent;
+use sindri_core::{SceneComponent, World};
+
+use super::ScreenUi;
+use super::navigation::Toward;
 
 /// Direction a slider grows from minimum to maximum.
 #[derive(Clone, Copy, Debug, Default, Deserialize, PartialEq, Eq)]
@@ -45,6 +48,10 @@ pub struct UiSliderComponent {
     pub value: f32,
     #[serde(default)]
     pub disabled: bool,
+    /// Takes focus when it appears and nothing else has it, as a button's
+    /// `autofocus` does: a settings screen ready for a pad.
+    #[serde(default)]
+    pub autofocus: bool,
 }
 
 impl UiSliderComponent {
@@ -101,6 +108,47 @@ impl UiSliderComponent {
     }
 }
 
+impl ScreenUi {
+    /// The arrows or d-pad along a focused slider's axis move its value by one
+    /// step -- a twentieth of its range when it has none -- as a native range
+    /// input does. Whether they were used, so they do not also move focus.
+    pub(super) fn nudge_slider(&mut self, world: &mut World, toward: Toward) -> bool {
+        let Some(entity) = self.focused else {
+            return false;
+        };
+        let Some(payload) = world
+            .get_mut(entity)
+            .and_then(|data| data.components.get_mut(UiSliderComponent::TYPE_NAME))
+        else {
+            return false;
+        };
+        let Ok(slider) = serde_json::from_value::<UiSliderComponent>(payload.clone()) else {
+            return false;
+        };
+        let direction = match (slider.orientation, toward) {
+            (UiSliderOrientation::Horizontal, Toward::Right)
+            | (UiSliderOrientation::Vertical, Toward::Up) => 1.0,
+            (UiSliderOrientation::Horizontal, Toward::Left)
+            | (UiSliderOrientation::Vertical, Toward::Down) => -1.0,
+            _ => return false,
+        };
+        if slider.disabled {
+            return true;
+        }
+        let step = if slider.step.is_finite() && slider.step > 0.0 {
+            slider.step
+        } else {
+            (slider.max - slider.min) / 20.0
+        };
+        let value = slider.coerce_value(slider.value + step * direction);
+        if (value - slider.value).abs() > f32::EPSILON {
+            payload["value"] = serde_json::json!(value);
+            self.slider_changed = Some(entity);
+        }
+        true
+    }
+}
+
 impl SceneComponent for UiSliderComponent {
     const TYPE_NAME: &'static str = "sindri.ui.slider";
 }
@@ -118,6 +166,7 @@ mod tests {
             step: 2.0,
             value: 14.0,
             disabled: false,
+            autofocus: false,
         }
     }
 

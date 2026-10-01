@@ -299,7 +299,8 @@ fn register_drawables(components: &mut ComponentSchemaRegistry) -> Result<(), Sc
             "max": 1.0,
             "step": 0.0,
             "value": 0.0,
-            "disabled": false
+            "disabled": false,
+            "autofocus": false
         }),
     )?;
     super::widget_registry::register(components)?;
@@ -520,13 +521,18 @@ fn register_gameplay(components: &mut ComponentSchemaRegistry) -> Result<(), Sce
     // one would name the empty clip, and a button that adds a component the
     // engine then rejects is worse than no button. The editor's clip picker
     // supplies a project asset, as its font picker does for text.
+    components.register_with_default::<crate::InputActionsComponent>(
+        "Input Actions",
+        serde_json::json!({ "actions": [] }),
+    )?;
     components.register_with_fields::<AudioSourceComponent>(
         "Audio Source",
         serde_json::json!({
             "clip": "",
             "autoplay": false,
             "looping": false,
-            "volume": 1.0
+            "volume": 1.0,
+            "bus": ""
         }),
     )?;
     Ok(())

@@ -255,6 +255,11 @@ const KNOWN: &[Known] = &[
         icon: icons::AUDIO,
     },
     Known {
+        type_name: "sindri.input.actions",
+        family: Family::Behaviour,
+        icon: icons::BUTTON,
+    },
+    Known {
         type_name: "sindri.tags",
         family: Family::Behaviour,
         icon: icons::LABEL,

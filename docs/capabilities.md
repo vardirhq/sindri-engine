@@ -166,6 +166,18 @@ axes with a round dead zone taken out, and focus loss lets go of every button
 without dropping a player. Scripts read `Gamepad`; an action binding reads any
 pad as `gamepad.south` or `gamepad.axis.left_x`.
 
+Input actions are declared by a scene's `sindri.input.actions` component, in
+the actions-document shape `ActionMap` reads. The script runner reads the
+declaration when it changes and every action's value from the step's input
+before any script runs; `Action.held`, `pressed`, `released`, `axis` and
+`vector` answer by name, and `Action.bindings`, `Action.rebind` and
+`Action.last_pressed` rebind one while the game runs, written back into the
+component. The platformer's hero runs and jumps by actions
+(`games/platformer/tests/a_run_reaches_the_flag.rs`), and `examples/input`
+rebinds its boost (`crates/sindri-decay/tests/input_demo.rs`, and the browser
+smoke). Actions are per scene, not per project or per player, and a rebinding
+is not saved between sessions.
+
 ### Audio
 
 Audio is a platform service rather than simulation state. Encoded WAV, Ogg, and
@@ -184,6 +196,20 @@ emitting intent, so the language itself retains its no-I/O boundary. Gather
 exercises the path end to end with background, pickup, and victory sounds. The
 looping background music has been observed playing in a real browser through
 `scripts/browser/smoke.mjs`, which fails if a clip a page asked for did not play.
+
+Every voice plays through a named bus under `master`. `AudioMixer` in
+`sindri-platform` sits in front of any backend: it starts a voice at its own
+volume times its bus's times the master's, and `set_bus_volume` re-applies the
+gain to every live voice the bus reaches, which each backend now supports
+(`set_volume`, `is_active`). Decay's `Audio.play` routes to `effects`,
+`Audio.loop` to `music`, `play_on`/`loop_on` to any bus, and `Audio.set_volume`
+and `Audio.volume` move and read a bus; an authored source names its `bus` or
+follows its looping. The game session routes scripts' requests and autoplay
+through the mixer. Orbital's pause screen has Master, Music and Effects sliders,
+saved between sessions (`games/orbital-baked/tests/the_mixer.rs`), and
+`examples/audio` is the Sound Mixer feature example
+(`crates/sindri-decay/tests/mixer_demo.rs`). There are no bus effects, ducking
+or snapshots.
 
 What audio does not do yet: nothing gathers the clips a scene names, the way
 `referenced_textures` and `referenced_fonts` do, so dynamically named clips
@@ -266,6 +292,22 @@ repository authors a compound yet — and editor Play steps them through the sam
 fixed-update path as a build. `games/orbital-baked` is the end-to-end proof:
 player, enemies, projectiles, pickups, and effects use distinct masks and
 collision or sensor events continuously.
+
+Beside the raycast, `PhysicsWorld2d::overlap` lists every entity with a piece
+overlapping a circle, box or capsule placed in the world, and `shape_cast`
+sweeps one along a line to the first piece it touches, both from current body
+poses with the raycast's filter (`crates/sindri-physics/tests/overlap_and_shape_cast.rs`).
+Decay's `Physics.overlap_circle`, `overlap_box`, `cast_circle` and `cast_box`
+reach them. Orbital's hostile mine damages what its blast circle overlaps
+(`combat_lab.rs` proves a target caught by its edge), and Physics Playground
+switches its line between a ray, a swept circle and an area.
+
+A scene's `sindri.physics2d.world` names its collision layers bit by bit.
+`Physics.layer` and `Physics.mask` turn names into masks and refuse an unknown
+name (`crates/sindri-decay/tests/a_script_names_its_layers.rs`), and the
+editor's inspector draws every collision mask as a menu of the named layers,
+keeping unnamed bits. The platformer names ground, hero and pickups; its hero's
+ground probe asks for `ground`.
 
 ### Editor Play
 
@@ -2184,5 +2226,11 @@ semantics. The Pages feature example at `examples/tween` compares the five curve
 movement, scale, rotation and colour, with mouse/touch buttons and keyboard
 playback controls. Its real browser smoke observes movement and pause on desktop
 and portrait viewports, and its project test compiles and plays the authored scene.
-No editor timeline, arbitrary component property binding, sequence,
-callback, loop/yoyo or CSS `@keyframes` surface is claimed complete.
+A tween composes on its handle: `Tween.set_delay`, `Tween.set_loops` (0 for
+ever), `Tween.set_yoyo`, and `Tween.after` to hold one until another has
+finished (the runtime store tests cover each). Orbital's pickup breathes with an
+endless yoyo that starts after its appearance (`pickup_tween.rs`), and Tween
+Lab's sixth row crosses, waits and returns as a sequence while it breathes
+(`crates/sindri-decay/tests/tween_demo.rs`). No editor timeline, arbitrary
+component property binding, completion callback or CSS `@keyframes` surface is
+claimed complete.

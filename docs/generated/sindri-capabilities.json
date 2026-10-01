@@ -28,6 +28,7 @@
       "display_name": "Audio Source",
       "fields": {
         "autoplay": false,
+        "bus": "",
         "clip": "",
         "looping": false,
         "volume": 1.0
@@ -451,6 +452,20 @@
       "addable": true,
       "apply": {},
       "default_payload": {
+        "actions": []
+      },
+      "display_name": "Input Actions",
+      "fields": {
+        "actions": []
+      },
+      "meanings": {},
+      "schema_version": 1,
+      "type_name": "sindri.input.actions"
+    },
+    {
+      "addable": true,
+      "apply": {},
+      "default_payload": {
         "color": [
           1.0,
           0.949999988079071,
@@ -713,14 +728,16 @@
         "gravity": [
           0.0,
           -9.81
-        ]
+        ],
+        "layers": []
       },
       "display_name": "Physics 2D World",
       "fields": {
         "gravity": [
           0.0,
           -9.81
-        ]
+        ],
+        "layers": []
       },
       "meanings": {},
       "schema_version": 1,
@@ -1515,6 +1532,7 @@
       "addable": true,
       "apply": {},
       "default_payload": {
+        "autofocus": false,
         "disabled": false,
         "label": "",
         "max": 1.0,
@@ -1525,6 +1543,7 @@
       },
       "display_name": "UI Slider",
       "fields": {
+        "autofocus": false,
         "disabled": false,
         "label": "",
         "max": 1.0,

@@ -27,9 +27,10 @@ What the entity a script runs on offers, beyond the script's own fields.
 
 Names in scope without qualification. Decay has no imports, so each of these is a name a script cannot use for its own.
 
+- `Action`: `Action` — What the player means rather than what they pressed: the input actions the scene declares, such as `"jump"` or `"move"`, each bound to keys, buttons and sticks that can be changed while the game runs. A binding is written as text: `"key.Space"`, two sources for an axis (`"key.A/key.D"`), or four for a direction (`"key.W/key.S/key.A/key.D"`). A name the scene does not declare is an error.
 - `Aim`: `Aim` — Which block in a 3D block world the mouse or finger is pointing at, for building and digging games.
 - `Animation`: `Animation` — Playing an object's animations, such as walk or jump, set up for it in the scene.
-- `Audio`: `Audio` — Playing sound effects and music.
+- `Audio`: `Audio` — Playing sound effects and music. Every sound goes through a bus — `"effects"`, `"music"`, or any other name — and every bus through `"master"`, so a settings screen can turn each down.
 - `Camera`: `Camera` — The game's camera: moving the view and changing its engine-owned follow, confinement, and shake behavior.
 - `Effects`: `Effects` — Particle effects, such as sparks and explosions. The particles are only drawn; they are not objects and nothing can touch them.
 - `Game`: `Game` — Numbers stored under names that every script can read and write, such as a score. Declaring them with `state` is safer, because a misspelt name then becomes an error.
@@ -106,6 +107,19 @@ Names in scope without qualification. Decay has no imports, so each of these is 
 
 ## Types
 
+### `Action`
+
+What the player means rather than what they pressed: the input actions the scene declares, such as `"jump"` or `"move"`, each bound to keys, buttons and sticks that can be changed while the game runs. A binding is written as text: `"key.Space"`, two sources for an axis (`"key.A/key.D"`), or four for a direction (`"key.W/key.S/key.A/key.D"`). A name the scene does not declare is an error.
+
+- `axis(name: String)` → `f32` — An axis action's value, from -1 to 1.
+- `bindings(name: String)` → `List<String>` — What an action is bound to now, as a list of binding texts.
+- `held(name: String)` → `bool` — Whether an action is being made now.
+- `last_pressed()` → `String` — The key, mouse button or controller button pressed this frame, as a source name such as `"key.J"`, or empty text: for a screen that waits for the key to rebind to.
+- `pressed(name: String)` → `bool` — Whether an action started this frame.
+- `rebind(name: String, index: f32, binding: String)` → `unit` — Replaces an action's binding at `index` with a binding text, or adds one at the next index. A binding that cannot make the action's kind is refused.
+- `released(name: String)` → `bool` — Whether an action stopped this frame.
+- `vector(name: String)` → `Vec2` — A direction action's value, as a Vec2 with right and up positive.
+
 ### `Aim`
 
 Which block in a 3D block world the mouse or finger is pointing at, for building and digging games.
@@ -132,13 +146,17 @@ Playing an object's animations, such as walk or jump, set up for it in the scene
 
 ### `Audio`
 
-Playing sound effects and music.
+Playing sound effects and music. Every sound goes through a bus — `"effects"`, `"music"`, or any other name — and every bus through `"master"`, so a settings screen can turn each down.
 
-- `loop(clip: String, volume: f32)` → `unit` — Plays a sound over and over until stopped, such as music, at a volume from 0 (silent) to 1 (full).
+- `loop(clip: String, volume: f32)` → `unit` — Plays a sound over and over until stopped, such as music, at a volume from 0 (silent) to 1 (full), through the `"music"` bus.
+- `loop_on(bus: String, clip: String, volume: f32)` → `unit` — Plays a sound over and over through a bus you name.
 - `pause_all()` → `unit` — Pauses every sound that is playing.
-- `play(clip: String, volume: f32)` → `unit` — Plays a sound once, at a volume from 0 (silent) to 1 (full).
+- `play(clip: String, volume: f32)` → `unit` — Plays a sound once, at a volume from 0 (silent) to 1 (full), through the `"effects"` bus.
+- `play_on(bus: String, clip: String, volume: f32)` → `unit` — Plays a sound once through a bus you name.
 - `resume_all()` → `unit` — Continues every paused sound.
+- `set_volume(bus: String, volume: f32)` → `unit` — Sets a bus's volume from 0 to 1, at once for every sound playing through it. `"master"` turns everything up or down.
 - `stop_all()` → `unit` — Stops every sound that is playing.
+- `volume(bus: String)` → `f32` — A bus's volume as last set, or 1 for one never set.
 
 ### `Camera`
 
@@ -256,9 +274,15 @@ The host names this type but has not described its members.
 2D physics: moving objects with speed and pushes, and finding out what this script's object bumped into.
 
 - `apply_impulse(entity: Entity, x: f32, y: f32)` → `unit` — Gives an object a sudden push in a direction. Heavier objects move less.
+- `cast_box(origin: Vec2, half_size: Vec2, rotation: f32, direction: Vec2, max_distance: f32, mask: f32, include_sensors: bool, exclude: Entity)` → `RayHit2d` — Like `cast_circle`, for a box `half_size` from its centre to each edge, turned by `rotation` radians.
+- `cast_circle(origin: Vec2, radius: f32, direction: Vec2, max_distance: f32, mask: f32, include_sensors: bool, exclude: Entity)` → `RayHit2d` — Sweeps a circle from `origin` along `direction` and returns the first collider it would touch, as RayHit2d or null: a raycast with a size, for whether something fits through a gap. `point` is where they touch and `distance` how far the circle's centre travelled. Starting already overlapping gives distance 0 and normal Vec2(0, 0). The filter arguments are the raycast's.
 - `collision_started()` → `List<Entity>` — The objects that started touching this script's object since the last frame, as a list.
 - `collision_stopped()` → `List<Entity>` — The objects that stopped touching this script's object since the last frame, as a list.
 - `connect_distance(first: Entity, second: Entity, max_distance: f32)` → `unit` — Ties two objects together like a rope: they can come closer, but never further apart than a distance.
+- `layer(name: String)` → `f32` — The mask for one collision layer the scene's physics world names, such as `"ground"`, for a query's `mask` argument. A name the world does not give is an error.
+- `mask(names: List<String>)` → `f32` — The mask for several named collision layers at once, such as `["ground", "enemies"]`.
+- `overlap_box(center: Vec2, half_size: Vec2, rotation: f32, mask: f32, include_sensors: bool, exclude: Entity)` → `List<Entity>` — Like `overlap_circle`, for a box `half_size` from its centre to each edge, turned by `rotation` radians.
+- `overlap_circle(center: Vec2, radius: f32, mask: f32, include_sensors: bool, exclude: Entity)` → `List<Entity>` — Every object with a collider inside a circle, as a list, each once: an area check for a blast, an aura or a pickup radius. The filter arguments are the raycast's: which layers, whether trigger areas count, and one object to leave out (or null). Ignores inactive objects.
 - `raycast(origin: Vec2, direction: Vec2, max_distance: f32, mask: f32, include_sensors: bool, exclude: Entity)` → `RayHit2d` — The closest 2D collider hit, as RayHit2d or null. Normalizes a nonzero Vec2 direction; returns world-space point, normal and distance. The mask selects collider memberships; include_sensors opts into triggers; exclude skips all pieces of one entity (or null). Origin, direction and distance must be finite; distance non-negative; mask a whole u32. Inside hits have distance 0 and normal Vec2(0, 0). Queries synchronized geometry; ignores inactive/despawned entities. Ties prefer entity handle then piece order.
 - `sensor_entered()` → `List<Entity>` — The objects that entered this script's trigger area since the last frame. A trigger area detects things without blocking them, like a pickup.
 - `sensor_exited()` → `List<Entity>` — The objects that left this script's trigger area since the last frame.
@@ -404,6 +428,7 @@ Where an object is, how it is turned and how big it is. For an object attached t
 
 Creates automatically playing gameplay tweens owned by the calling script. Copies alias playback state. Advance occurs before the owner's subsequent updates using script delta. No automatic property binding. Curves: linear, ease, ease-in, ease-out, ease-in-out. Finite endpoints and finite non-negative duration are required; zero duration completes immediately. Maximum 8192 retained handles per runner; dispose unused handles.
 
+- `after(tween: TweenHandle, previous: TweenHandle)` → `unit` — Holds a tween still until `previous` has finished, then plays it from the next step: tweens in sequence. One whose `previous` is disposed goes on without it.
 - `cancel(tween: TweenHandle)` → `unit` — Stops at the current value; is_done is false. Restart can play it again.
 - `color(from: Color, to: Color, duration: f32, easing: String)` → `ColorTween` — Starts a ColorTween, blending all four channels without additional gamma conversion or channel clamping.
 - `color_value(tween: ColorTween)` → `Color` — Reads the eased Color including alpha.
@@ -414,9 +439,12 @@ Creates automatically playing gameplay tweens owned by the calling script. Copie
 - `number(from: f32, to: f32, duration: f32, easing: String)` → `NumberTween` — Starts a NumberTween; duration is seconds.
 - `number_value(tween: NumberTween)` → `f32` — Reads the eased number, held at the exact target after completion.
 - `pause(tween: TweenHandle)` → `unit` — Pauses at the current value.
-- `progress(tween: TweenHandle)` → `f32` — Linear elapsed fraction from 0 to 1; zero duration is 1.
+- `progress(tween: TweenHandle)` → `f32` — Linear fraction of the current play from 0 to 1, running back down on a yoyo's return; zero duration is 1.
 - `restart(tween: TweenHandle)` → `unit` — Resets to the original endpoints and begins again, clearing pause/cancellation.
 - `resume(tween: TweenHandle)` → `unit` — Resumes a paused tween. Does not undo cancellation.
+- `set_delay(tween: TweenHandle, seconds: f32)` → `unit` — Holds the starting value for a number of seconds before playing.
+- `set_loops(tween: TweenHandle, count: f32)` → `unit` — Plays it a whole number of times; 0 plays for ever and is never done.
+- `set_yoyo(tween: TweenHandle, on: bool)` → `unit` — Whether every other play runs back from the end to the start, for a pulse or a bob.
 - `vec2(from: Vec2, to: Vec2, duration: f32, easing: String)` → `Vec2Tween` — Starts a Vec2Tween in the endpoints' coordinate space.
 - `vec2_value(tween: Vec2Tween)` → `Vec2` — Reads the eased Vec2.
 - `vec3(from: Vec3, to: Vec3, duration: f32, easing: String)` → `Vec3Tween` — Starts a Vec3Tween in the endpoints' coordinate space.

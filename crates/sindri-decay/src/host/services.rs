@@ -88,6 +88,7 @@ impl<'a> WorldHost<'a> {
             printed: Vec::new(),
             peers: None,
             tweens: None,
+            actions: None,
         }
     }
 }

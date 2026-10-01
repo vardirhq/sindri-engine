@@ -64,19 +64,61 @@ impl SceneComponent for Collider2dComponent {
     const TYPE_NAME: &'static str = "sindri.physics2d.collider";
 }
 
-/// How the scene's 2D physics world behaves as a whole: for now, which way
-/// is down and how hard things fall.
+/// How the scene's 2D physics world behaves as a whole: which way is down
+/// and how hard things fall, and what its collision layers are called.
 ///
 /// A scene carries it rather than the host deciding, because it is a fact
 /// about the game: a platformer falls and a game seen from above does not,
 /// and the editor's Play has to run each the way its build will. One per
 /// scene, like the Environment; a scene without one keeps its host's gravity.
-#[derive(Clone, Copy, Debug, Deserialize, PartialEq)]
+#[derive(Clone, Debug, Deserialize, PartialEq)]
 pub struct PhysicsWorld2dComponent {
     /// Units per second squared. Straight down at Earth's pull by default,
     /// taking one unit as a metre.
     #[serde(default = "earth_gravity")]
     pub gravity: [f32; 2],
+    /// What each collision layer is called, bit by bit: the first name is
+    /// bit 0 (mask 1), the second bit 1 (mask 2), up to 32.
+    ///
+    /// Colliders still store their layers as masks, which is what physics
+    /// reads; the names are for the people and scripts choosing them, so
+    /// `Physics.mask(["ground"])` is a word that is checked rather than a 1
+    /// that is not.
+    #[serde(default)]
+    pub layers: Vec<String>,
+}
+
+/// The most layers a mask has bits for.
+pub const LAYER_LIMIT: usize = 32;
+
+/// The collision layer names the world's scene gave its physics world, in bit
+/// order, or none when it names none.
+#[must_use]
+pub fn collision_layers(world: &sindri_core::World) -> Vec<String> {
+    world
+        .entities()
+        .find_map(|(_, data)| data.components.get(PhysicsWorld2dComponent::TYPE_NAME))
+        .and_then(|payload| payload.get("layers"))
+        .and_then(serde_json::Value::as_array)
+        .map(|names| {
+            names
+                .iter()
+                .take(LAYER_LIMIT)
+                .map(|name| name.as_str().unwrap_or_default().to_owned())
+                .collect()
+        })
+        .unwrap_or_default()
+}
+
+/// The mask bit a layer name stands for among `layers`; the first of two
+/// layers given one name wins.
+#[must_use]
+pub fn layer_bit(layers: &[String], name: &str) -> Option<u32> {
+    layers
+        .iter()
+        .take(LAYER_LIMIT)
+        .position(|layer| !layer.is_empty() && layer == name)
+        .map(|index| 1_u32 << index)
 }
 
 const fn earth_gravity() -> [f32; 2] {

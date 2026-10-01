@@ -75,6 +75,8 @@ pub struct ScreenUi {
     /// Whether this step's pointer pass has run, so `read_controls` after it
     /// keeps what the pointer changed instead of starting the step again.
     presses_read: bool,
+    /// The way a pad's stick was pushed last step, so a push moves focus once.
+    stick: Option<navigation::Toward>,
     /// Each text field's caret and selection, once someone has edited it.
     carets: BTreeMap<EntityId, editing::UiCaret>,
     /// What a copy or cut put on the clipboard this step.

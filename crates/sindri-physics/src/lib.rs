@@ -23,4 +23,4 @@ pub use types2d::{
 };
 pub use types3d::{Collider3d, ColliderShape3d, RigidBody3d};
 pub use validate::PhysicsError;
-pub use world2d::PhysicsWorld2d;
+pub use world2d::{PhysicsWorld2d, ShapeHit2d};

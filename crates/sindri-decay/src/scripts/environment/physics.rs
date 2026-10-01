@@ -25,7 +25,9 @@ pub(super) fn add_physics_surface(environment: &mut Environment) {
             *name,
             FunctionType {
                 params: match call {
-                    PhysicsCall::Raycast => vec![
+                    // A ray's origin and direction, or a box's centre and half
+                    // size: two vectors and a number, then the filter.
+                    PhysicsCall::Raycast | PhysicsCall::OverlapBox => vec![
                         Type::Vec2,
                         Type::Vec2,
                         Type::F32,
@@ -33,6 +35,30 @@ pub(super) fn add_physics_surface(environment: &mut Environment) {
                         Type::Bool,
                         entity(),
                     ],
+                    PhysicsCall::OverlapCircle => {
+                        vec![Type::Vec2, Type::F32, Type::F32, Type::Bool, entity()]
+                    }
+                    PhysicsCall::CastCircle => vec![
+                        Type::Vec2,
+                        Type::F32,
+                        Type::Vec2,
+                        Type::F32,
+                        Type::F32,
+                        Type::Bool,
+                        entity(),
+                    ],
+                    PhysicsCall::CastBox => vec![
+                        Type::Vec2,
+                        Type::Vec2,
+                        Type::F32,
+                        Type::Vec2,
+                        Type::F32,
+                        Type::F32,
+                        Type::Bool,
+                        entity(),
+                    ],
+                    PhysicsCall::Layer => vec![Type::String],
+                    PhysicsCall::Mask => vec![Type::array_of(Type::String)],
                     PhysicsCall::VelocityX | PhysicsCall::VelocityY => vec![entity()],
                     PhysicsCall::SetVelocity | PhysicsCall::ApplyImpulse => {
                         vec![entity(), Type::F32, Type::F32]
@@ -46,8 +72,13 @@ pub(super) fn add_physics_surface(environment: &mut Environment) {
                     _ => Vec::new(),
                 },
                 return_type: match call {
-                    PhysicsCall::Raycast => Type::Named(RAY_HIT.to_owned()),
-                    PhysicsCall::VelocityX | PhysicsCall::VelocityY => Type::F32,
+                    PhysicsCall::Raycast | PhysicsCall::CastCircle | PhysicsCall::CastBox => {
+                        Type::Named(RAY_HIT.to_owned())
+                    }
+                    PhysicsCall::VelocityX
+                    | PhysicsCall::VelocityY
+                    | PhysicsCall::Layer
+                    | PhysicsCall::Mask => Type::F32,
                     PhysicsCall::SetVelocity
                     | PhysicsCall::ApplyImpulse
                     | PhysicsCall::ConnectDistance => Type::Unit,

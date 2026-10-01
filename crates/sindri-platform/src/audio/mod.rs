@@ -15,6 +15,7 @@ use thiserror::Error;
 // build without the feature still has something that satisfies the boundary.
 #[cfg(target_arch = "wasm32")]
 mod browser;
+mod mixer;
 #[cfg(all(not(target_arch = "wasm32"), feature = "audio"))]
 mod native;
 mod silent;
@@ -24,6 +25,7 @@ mod tests;
 
 #[cfg(target_arch = "wasm32")]
 pub use browser::BrowserAudioBackend;
+pub use mixer::{AudioMixer, EFFECTS_BUS, MASTER_BUS, MUSIC_BUS};
 #[cfg(all(not(target_arch = "wasm32"), feature = "audio"))]
 pub use native::NativeAudioBackend;
 pub use silent::SilentAudioBackend;
@@ -126,6 +128,11 @@ pub trait AudioBackend {
     fn register(&mut self, clip: AudioClip) -> Result<(), AudioError>;
     fn play(&mut self, clip: &str, settings: PlaybackSettings) -> Result<AudioVoiceId, AudioError>;
     fn stop(&mut self, voice: AudioVoiceId);
+    /// Changes how loud a voice already playing is, from 0 to 1.
+    fn set_volume(&mut self, voice: AudioVoiceId, volume: f32);
+    /// Whether a voice is still playing or paused, rather than finished,
+    /// stopped or refused: what a mixer keeps track of and what it forgets.
+    fn is_active(&self, voice: AudioVoiceId) -> bool;
     fn pause_all(&mut self);
     fn resume_all(&mut self);
     fn stop_all(&mut self);
@@ -146,6 +153,10 @@ pub enum AudioEvent {
         settings: PlaybackSettings,
     },
     Stopped(AudioVoiceId),
+    VolumeSet {
+        voice: AudioVoiceId,
+        volume: f32,
+    },
     PausedAll,
     ResumedAll,
     StoppedAll,

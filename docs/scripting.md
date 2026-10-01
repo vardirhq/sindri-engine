@@ -997,6 +997,12 @@ a person who has not clicked yet.
 | `Physics.apply_impulse(entity, x, y)` | nothing |
 | `Physics.connect_distance(first, second, max_distance)` | nothing |
 | `Physics.raycast(origin, direction, max_distance, mask, include_sensors, exclude)` | `RayHit2d` or `null` |
+| `Physics.cast_circle(origin, radius, direction, max_distance, mask, include_sensors, exclude)` | `RayHit2d` or `null` |
+| `Physics.cast_box(origin, half_size, rotation, direction, max_distance, mask, include_sensors, exclude)` | `RayHit2d` or `null` |
+| `Physics.overlap_circle(center, radius, mask, include_sensors, exclude)` | `[Entity]` |
+| `Physics.overlap_box(center, half_size, rotation, mask, include_sensors, exclude)` | `[Entity]` |
+| `Physics.layer(name)` | `f32` |
+| `Physics.mask(names)` | `f32` |
 | `Physics.collision_started()` | `List<Entity>` |
 | `Physics.collision_stopped()` | `List<Entity>` |
 | `Physics.sensor_entered()` | `List<Entity>` |
@@ -1090,7 +1096,39 @@ spatial index. The platformer displays clearance below its hero, preserving its
 foot-sensor jump rules; Physics Playground makes masks, sensors, inside hits,
 misses, hit points and normals visible.
 
-**Overlap, shape casts and contact detail remain absent.**
+`Physics.overlap_circle` and `Physics.overlap_box` are area checks: every
+entity with a piece overlapping a circle, or a box `half_size` from its centre
+to each edge and turned by `rotation` radians, as an array holding each entity
+once, in handle order. `Physics.cast_circle` and `Physics.cast_box` sweep the
+same shapes from `origin` along `direction`, without turning, and return the
+first piece touched as a `RayHit2d`: `point` is where the two touch, `normal`
+the touched surface's, and `distance` how far the shape's centre travelled.
+Starting already overlapping gives distance 0 and normal (0, 0). The mask,
+sensor and exclude arguments, the validation and the synchronization rules are
+the raycast's. A radius or half size must be positive. Orbital Last Stand's
+hostile mine damages what its blast circle overlaps, so a target whose edge the
+blast reaches is hit; Physics Playground shows a swept circle stopping short of
+the ray and an area naming what it holds.
+
+```decay
+let centre = Vec2(this.transform.position.x, this.transform.position.y);
+for target in Physics.overlap_circle(centre, 1.75, 4294967295.0, true, this.entity) {
+    World.send_signal(target, "hazard_damage", 1.0);
+}
+```
+
+A scene's `sindri.physics2d.world` names its collision layers in `layers`,
+bit by bit: `["ground", "hero", "pickups"]` makes `ground` bit 0 (mask 1),
+`hero` bit 1 (mask 2) and `pickups` bit 2 (mask 4), up to 32. `Physics.layer`
+is the mask for one name and `Physics.mask` for several at once, for any
+query's `mask` argument; a name the world does not give is an error naming the
+ones it does, so a misspelt layer is heard about rather than masking nothing.
+Colliders still store their memberships and filters as masks, which is what
+physics reads, and the editor's inspector shows a mask as the layers it holds
+by name. The platformer names its layers, and its hero's ground probe asks for
+`Physics.layer("ground")`.
+
+**Contact detail (points, normals and impulses of a collision) remains absent.**
 
 ### Grid position
 
@@ -1314,6 +1352,10 @@ hold is reported by the advance, the same way a broken clip authored by hand is.
 | --- | --- |
 | `Audio.play(clip, volume)` | nothing |
 | `Audio.loop(clip, volume)` | nothing |
+| `Audio.play_on(bus, clip, volume)` | nothing |
+| `Audio.loop_on(bus, clip, volume)` | nothing |
+| `Audio.set_volume(bus, volume)` | nothing |
+| `Audio.volume(bus)` | `f32` |
 | `Audio.stop_all()` | nothing |
 | `Audio.pause_all()` | nothing |
 | `Audio.resume_all()` | nothing |
@@ -1324,6 +1366,54 @@ only emits typed playback intent; it never owns or talks to an audio device.
 The host drains those requests through the platform audio boundary, which keeps
 headless tests silent and lets browser playback obey its user-interaction unlock
 without teaching the language about either platform.
+
+Every sound plays through a bus: `play` through `"effects"`, `loop` through
+`"music"`, and `play_on`/`loop_on` through any bus named. A bus exists once it
+is named, at full volume, and every bus is under `"master"`: a voice is heard
+at its own volume times its bus's times the master's. `set_volume` moves a bus
+at once for every voice playing through it and every voice started later;
+`volume` reads it back, 1 for a bus never set. Bus volumes outlive `stop_all`
+and a scene change: they are the player's settings, which a game saves with
+`Save.set_number` and restores at start. An authored `sindri.audio.source`
+names its bus with `bus`, or leaves it empty to follow `loop`/`play`. Orbital
+Last Stand's pause screen moves the master, music and effects buses with three
+sliders and remembers them.
+
+### Input actions
+
+| Call | Returns |
+| --- | --- |
+| `Action.held(name)` | `bool` |
+| `Action.pressed(name)` | `bool` |
+| `Action.released(name)` | `bool` |
+| `Action.axis(name)` | `f32` |
+| `Action.vector(name)` | `Vec2` |
+| `Action.bindings(name)` | `[String]` |
+| `Action.rebind(name, index, binding)` | nothing |
+| `Action.last_pressed()` | `String` |
+
+A scene declares its input actions in a `sindri.input.actions` component: a
+list of `{ "name", "kind", "bindings" }`, `kind` one of `button`, `axis` or
+`vector`, in the actions-document shape `sindri_platform::ActionMap` reads.
+A binding is a source name — `key.Space`, `mouse.Left`, `gamepad.South`,
+`gamepad.axis.left_x` — or a composite: `{"axis": {"negative", "positive"}}`
+or `{"vector": {"up", "down", "left", "right"}}`. Every action reads the
+strongest of its bindings, so one bound to a keyboard and a pad answers to
+whichever is being used. A declaration that does not read is reported once,
+when it changes, and leaves the scene with no actions.
+
+Scripts read actions by name; a name the scene does not declare is an error
+listing the ones it does. Every script in a pass reads the same step's values,
+worked out before any script runs. `bindings` and `rebind` speak one text form:
+one source, `negative/positive` for an axis, or `up/down/left/right` for a
+direction. `rebind` replaces the binding at `index`, or adds one at the next
+index, refuses one that cannot make the action's kind, and writes the change
+into the scene's component, so it is read on the next step and the editor's
+Play shows it. `last_pressed` names the key, mouse button or pad button pressed
+this step, for a screen that waits for the key to rebind to. A rebinding
+lasts as long as the scene: `Save` holds numbers and flags, not text, so
+keeping one between sessions is not yet possible. The platformer's hero runs and jumps by actions, and the Input
+example rebinds them.
 
 ### The keyboard
 
@@ -2341,7 +2431,7 @@ math in `sindri-core`, not authoring syntax.
 | `Tween.vec2_value(tween)` | `Vec2` | Read a 2D vector tween's current value |
 | `Tween.vec3_value(tween)` | `Vec3` | Read a 3D vector tween's current value |
 | `Tween.color_value(tween)` | `Color` | Read a colour tween's current value |
-| `Tween.progress(tween)` | `f32` | Linear elapsed fraction in [0, 1] |
+| `Tween.progress(tween)` | `f32` | Linear fraction of the current play in [0, 1] |
 | `Tween.is_done(tween)` | `bool` | Naturally completed; cancellation is not completion |
 | `Tween.is_paused(tween)` | `bool` | Paused playback |
 | `Tween.is_cancelled(tween)` | `bool` | Cancelled playback |
@@ -2350,6 +2440,10 @@ math in `sindri-core`, not authoring syntax.
 | `Tween.cancel(tween)` | unit | Stop and retain the current value |
 | `Tween.restart(tween)` | unit | Replay the original endpoints; clear pause/cancellation |
 | `Tween.dispose(tween)` | unit | Release the handle and invalidate all aliases |
+| `Tween.set_delay(tween, seconds)` | unit | Hold the start value before playing |
+| `Tween.set_loops(tween, count)` | unit | Play a whole number of times; 0 plays for ever |
+| `Tween.set_yoyo(tween, on)` | unit | Every other play runs back to the start |
+| `Tween.after(tween, previous)` | unit | Hold still until `previous` has finished: a sequence |
 
 Factories take two endpoints of the indicated type, a duration in seconds, and
 one of `"linear"`, `"ease"`, `"ease-in"`, `"ease-out"`, `"ease-in-out"`.
@@ -2381,6 +2475,26 @@ script Fade {
         if Tween.is_done(this.tint) { World.despawn(this.entity); }
     }
 }
+```
+
+A tween composes on its handle, usually as it is made. `set_delay` holds the
+starting value for some seconds first. `set_loops` plays it a whole number of
+times, and 0 plays it for ever, which is never done. `set_yoyo` makes every
+other play run back from `to` to `from`, so a pulse is one tween rather than a
+`sin` of a clock. `after` holds a tween still until another has finished and
+starts it on the next step, so a sequence is each tween after the one before;
+one whose predecessor is disposed goes on without it, and a tween cannot wait
+for itself. `progress` is the current play's fraction, running back down on a
+yoyo's return, and `restart` replays the delay too. Orbital Last Stand's
+pickup pulses with a looping yoyo that starts after its appearance tween; the
+tween example chains a move, a pause and a return, and bobs with a yoyo.
+
+```decay
+this.grow = Tween.number(0.0, 1.0, 0.2, "ease-out");
+this.glow = Tween.number(0.2, 0.6, 0.5, "ease-in-out");
+Tween.set_loops(this.glow, 0.0);
+Tween.set_yoyo(this.glow, true);
+Tween.after(this.glow, this.grow);
 ```
 
 Vectors keep the coordinate space of their endpoints. Tweening world positions

@@ -44,7 +44,7 @@ pub(super) const TYPES: &[TypeEntry] = &[
             call(
                 "progress",
                 &["tween"],
-                "Linear elapsed fraction from 0 to 1; zero duration is 1.",
+                "Linear fraction of the current play from 0 to 1, running back down on a yoyo's return; zero duration is 1.",
             ),
             call(
                 "is_done",
@@ -72,6 +72,26 @@ pub(super) const TYPES: &[TypeEntry] = &[
                 "restart",
                 &["tween"],
                 "Resets to the original endpoints and begins again, clearing pause/cancellation.",
+            ),
+            call(
+                "set_delay",
+                &["tween", "seconds"],
+                "Holds the starting value for a number of seconds before playing.",
+            ),
+            call(
+                "set_loops",
+                &["tween", "count"],
+                "Plays it a whole number of times; 0 plays for ever and is never done.",
+            ),
+            call(
+                "set_yoyo",
+                &["tween", "on"],
+                "Whether every other play runs back from the end to the start, for a pulse or a bob.",
+            ),
+            call(
+                "after",
+                &["tween", "previous"],
+                "Holds a tween still until `previous` has finished, then plays it from the next step: tweens in sequence. One whose `previous` is disposed goes on without it.",
             ),
             call(
                 "dispose",

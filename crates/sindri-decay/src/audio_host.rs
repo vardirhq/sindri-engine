@@ -28,13 +28,65 @@ fn enqueue(queue: &mut Vec<AudioCommand>, command: AudioCommand) {
     queue.push(command);
 }
 
+/// The bus `Audio.play` routes to: `sindri_platform::EFFECTS_BUS`.
+const EFFECTS: &str = "effects";
+/// The bus `Audio.loop` routes to: `sindri_platform::MUSIC_BUS`.
+const MUSIC: &str = "music";
+
 #[derive(Clone, Debug, PartialEq)]
 pub enum AudioCommand {
-    Play { clip: String, volume: f32 },
-    Loop { clip: String, volume: f32 },
+    Play {
+        clip: String,
+        volume: f32,
+        bus: String,
+    },
+    Loop {
+        clip: String,
+        volume: f32,
+        bus: String,
+    },
+    /// A bus's volume, for the host's mixer to apply to what it is playing.
+    SetVolume {
+        bus: String,
+        volume: f32,
+    },
     StopAll,
     PauseAll,
     ResumeAll,
+}
+
+/// What scripts asked to be played, and the bus volumes they have set.
+///
+/// The volumes are kept here as well as sent, so `Audio.volume` answers on
+/// the step it was set and in a host with no device at all; the host's mixer
+/// holds the same numbers for the voices it is playing.
+#[derive(Clone, Debug, Default)]
+pub struct AudioQueue {
+    commands: Vec<AudioCommand>,
+    buses: std::collections::BTreeMap<String, f32>,
+}
+
+impl AudioQueue {
+    /// Takes the requests made since the last call, oldest first.
+    pub fn take(&mut self) -> Vec<AudioCommand> {
+        std::mem::take(&mut self.commands)
+    }
+
+    /// Drops unperformed requests; bus volumes, a player's settings, stay.
+    pub fn clear(&mut self) {
+        self.commands.clear();
+    }
+
+    /// A bus's volume as scripts last set it: full for one never set.
+    #[must_use]
+    pub fn volume(&self, bus: &str) -> f32 {
+        self.buses.get(bus).copied().unwrap_or(1.0)
+    }
+
+    #[cfg(test)]
+    pub(crate) fn commands(&self) -> &[AudioCommand] {
+        &self.commands
+    }
 }
 
 /// The ordinary world host plus the `Audio.*` namespace.
@@ -46,7 +98,7 @@ pub enum AudioCommand {
 /// requests they produce.
 pub struct WorldHost<'a> {
     inner: crate::host::WorldHost<'a>,
-    audio: &'a mut Vec<AudioCommand>,
+    audio: &'a mut AudioQueue,
 }
 
 /// Everything a script can reach beyond the world and the frame.
@@ -79,8 +131,8 @@ pub struct HostServices<'a> {
     pub animations: Option<&'a mut sindri_scene::SpriteAnimations>,
     /// The tile sets a stacked volume's cells name, when the host binds any.
     pub tile_sets: Option<&'a sindri_scene::TileSetBindings>,
-    /// What the script asked to be played, in order.
-    pub audio: &'a mut Vec<AudioCommand>,
+    /// What the script asked to be played, in order, and the bus volumes.
+    pub audio: &'a mut AudioQueue,
     /// Which scene is being played, and which one a script asked for.
     ///
     /// `None` for a host that plays exactly one scene, and then `Scene.go`
@@ -100,6 +152,11 @@ impl<'a> WorldHost<'a> {
 
     pub(crate) fn with_tweens(mut self, tweens: &'a mut crate::tweens::Tweens) -> Self {
         self.inner.tweens = Some(tweens);
+        self
+    }
+
+    pub(crate) fn with_actions(mut self, actions: &'a crate::actions::InputActions) -> Self {
+        self.inner.actions = Some(actions);
         self
     }
 
@@ -211,49 +268,55 @@ fn normalized_volume(path: &Path, value: Option<&Value>) -> Result<f32, RuntimeE
     Ok(volume)
 }
 
+fn text_arg(path: &Path, args: &[Value], at: usize, what: &str) -> Result<String, RuntimeError> {
+    match args.get(at) {
+        Some(Value::String(text)) => Ok(text.clone()),
+        _ => Err(RuntimeError::Host(format!(
+            "{} takes {what} as text",
+            path.dotted()
+        ))),
+    }
+}
+
 fn audio_call(
-    queue: &mut Vec<AudioCommand>,
+    queue: &mut AudioQueue,
     name: &str,
     path: &Path,
     args: &[Value],
 ) -> Result<Value, RuntimeError> {
-    match name {
-        "play" | "loop" => {
-            let Some(Value::String(clip)) = args.first() else {
-                return Err(RuntimeError::Host(format!(
-                    "{} takes an audio asset id as text",
-                    path.dotted()
-                )));
+    let command = match name {
+        "play" | "loop" | "play_on" | "loop_on" => {
+            // `play_on` and `loop_on` name the bus first, as `set_volume` does.
+            let (bus, at) = match name {
+                "play" => (EFFECTS.to_owned(), 0),
+                "loop" => (MUSIC.to_owned(), 0),
+                _ => (text_arg(path, args, 0, "a bus name")?, 1),
             };
-            let volume = normalized_volume(path, args.get(1))?;
-            let command = if name == "play" {
-                AudioCommand::Play {
-                    clip: clip.clone(),
-                    volume,
-                }
+            let clip = text_arg(path, args, at, "an audio asset id")?;
+            let volume = normalized_volume(path, args.get(at + 1))?;
+            if name.starts_with("play") {
+                AudioCommand::Play { clip, volume, bus }
             } else {
-                AudioCommand::Loop {
-                    clip: clip.clone(),
-                    volume,
-                }
-            };
-            enqueue(queue, command);
-            Ok(Value::Unit)
+                AudioCommand::Loop { clip, volume, bus }
+            }
         }
-        "stop_all" => {
-            enqueue(queue, AudioCommand::StopAll);
-            Ok(Value::Unit)
+        "set_volume" => {
+            let bus = text_arg(path, args, 0, "a bus name")?;
+            let volume = normalized_volume(path, args.get(1))?;
+            queue.buses.insert(bus.clone(), volume);
+            AudioCommand::SetVolume { bus, volume }
         }
-        "pause_all" => {
-            enqueue(queue, AudioCommand::PauseAll);
-            Ok(Value::Unit)
+        "volume" => {
+            let bus = text_arg(path, args, 0, "a bus name")?;
+            return Ok(Value::Number(f64::from(queue.volume(&bus))));
         }
-        "resume_all" => {
-            enqueue(queue, AudioCommand::ResumeAll);
-            Ok(Value::Unit)
-        }
-        _ => Ok(Value::Null),
-    }
+        "stop_all" => AudioCommand::StopAll,
+        "pause_all" => AudioCommand::PauseAll,
+        "resume_all" => AudioCommand::ResumeAll,
+        _ => return Ok(Value::Null),
+    };
+    enqueue(&mut queue.commands, command);
+    Ok(Value::Unit)
 }
 
 #[cfg(test)]
@@ -263,7 +326,7 @@ mod tests {
     use sindri_core::{EntityData, World};
     use sindri_platform::InputState;
 
-    use super::{AudioCommand, WorldHost};
+    use super::{AudioCommand, AudioQueue, WorldHost};
     use crate::{Blackboard, ScriptContext, host::Spawning};
 
     /// A spawning context for a test that is not about spawning.
@@ -297,7 +360,7 @@ mod tests {
         let entity = world.spawn(EntityData::default());
         let input = InputState::default();
         let mut board = Blackboard::new();
-        let mut queue = Vec::new();
+        let mut queue = AudioQueue::default();
         let (prefabs, started, mut spawned) = nothing_to_spawn();
         let mut host = WorldHost::new(
             &mut world,
@@ -334,12 +397,34 @@ mod tests {
             ],
         )
         .expect("audio call");
+        host.call(
+            None,
+            &Path(vec!["Audio".to_owned(), "set_volume".to_owned()]),
+            &[Value::String("music".to_owned()), Value::Number(0.25)],
+        )
+        .expect("set a bus");
+        let heard = host
+            .call(
+                None,
+                &Path(vec!["Audio".to_owned(), "volume".to_owned()]),
+                &[Value::String("music".to_owned())],
+            )
+            .expect("read a bus");
+        assert_eq!(heard, Some(Value::Number(0.25)));
+        drop(host);
         assert_eq!(
-            queue,
-            [AudioCommand::Play {
-                clip: "audio/pickup.wav".to_owned(),
-                volume: 0.8,
-            }]
+            queue.take(),
+            [
+                AudioCommand::Play {
+                    clip: "audio/pickup.wav".to_owned(),
+                    volume: 0.8,
+                    bus: "effects".to_owned(),
+                },
+                AudioCommand::SetVolume {
+                    bus: "music".to_owned(),
+                    volume: 0.25,
+                },
+            ]
         );
     }
 
@@ -353,6 +438,7 @@ mod tests {
                 AudioCommand::Play {
                     clip: format!("audio/{index}.wav"),
                     volume: 1.0,
+                    bus: "effects".to_owned(),
                 },
             );
         }
@@ -362,6 +448,7 @@ mod tests {
             Some(&AudioCommand::Play {
                 clip: "audio/10.wav".to_owned(),
                 volume: 1.0,
+                bus: "effects".to_owned(),
             }),
             "the oldest requests are the ones dropped"
         );
@@ -373,7 +460,7 @@ mod tests {
         let entity = world.spawn(EntityData::default());
         let input = InputState::default();
         let mut board = Blackboard::new();
-        let mut queue = Vec::new();
+        let mut queue = AudioQueue::default();
         let (prefabs, started, mut spawned) = nothing_to_spawn();
         let mut host = WorldHost::new(
             &mut world,
@@ -415,6 +502,6 @@ mod tests {
             error,
             RuntimeError::Host(message) if message.contains("between 0 and 1")
         ));
-        assert!(queue.is_empty());
+        assert!(queue.commands().is_empty());
     }
 }

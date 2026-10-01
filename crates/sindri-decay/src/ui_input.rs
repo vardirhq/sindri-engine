@@ -1,10 +1,10 @@
 //! Window-independent input conversion for the shared scene UI runtime.
-use sindri_platform::{GamepadButton, InputState, Key};
+use sindri_platform::{GamepadAxis, GamepadButton, InputState, Key};
 use sindri_scene::UiInput;
 
 /// The step's keyboard and pads as the screen UI reads them.
 ///
-/// A pad drives a menu as a keyboard does: the d-pad moves focus, South
+/// A pad drives a menu as a keyboard does: the d-pad or the stick moves focus, South
 /// presses (or submits a field), and East backs out as Escape. Any pad
 /// counts, so a menu answers whichever one is picked up.
 #[must_use]
@@ -46,5 +46,10 @@ pub fn ui_input(input: &InputState, viewport_height: f32) -> UiInput {
         select_all: command && input.key_pressed(Key::A),
         copy: command && input.key_pressed(Key::C),
         cut: command && input.key_pressed(Key::X),
+        // A pad's Y grows downwards, as the screen's does; up is positive here.
+        stick: [
+            input.gamepads().axis(0, GamepadAxis::LeftX),
+            -input.gamepads().axis(0, GamepadAxis::LeftY),
+        ],
     }
 }

@@ -336,6 +336,9 @@ fn described_row(
             super::field::range_row(ui, label, value, (*min, *max), indent);
             true
         }
+        FieldMeaning::Mask => {
+            super::mask::mask_row(ui, at.path, label, value, described.assets.layers, indent)
+        }
         FieldMeaning::OneOf(options) if value.is_number() => {
             super::field::one_of_row(ui, at.path, label, value, options, indent);
             true

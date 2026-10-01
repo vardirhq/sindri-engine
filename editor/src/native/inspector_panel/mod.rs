@@ -19,6 +19,7 @@ mod held;
 mod instance;
 mod keys;
 pub(super) mod list;
+mod mask;
 pub(super) mod rows;
 mod scene;
 pub(super) mod section;
@@ -80,6 +81,8 @@ struct PanelContext {
     tile_sets: Vec<String>,
     pictures: super::thumbnails::Pictures,
     block_sets: TileSetBindings,
+    /// What the scene's physics world calls its collision layers.
+    layers: Vec<String>,
     /// The first `.decay` source the project holds that declares a script, and
     /// the first script it declares.
     ///
@@ -129,6 +132,7 @@ impl PanelContext {
             tile_sets: &self.tile_sets,
             pictures: &self.pictures,
             block_sets: Some(&self.block_sets),
+            layers: &self.layers,
         }
     }
 }
@@ -388,6 +392,7 @@ impl EditorApp {
                 .unwrap_or_default(),
             animation_texture,
             grids: grid_choices(&self.world),
+            layers: sindri_scene::collision_layers(&self.world),
             assets_root: self.project.assets_root().map(Path::to_path_buf),
             registry: self.scene.components().clone(),
         }

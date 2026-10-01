@@ -23,6 +23,7 @@ impl ScreenUi {
         // the pointer pass, which already started the step's set.
         if !std::mem::take(&mut self.presses_read) {
             self.changed.clear();
+            self.slider_changed = None;
         }
         self.submitted = None;
         if self
@@ -56,6 +57,11 @@ impl ScreenUi {
         let editing = self.editing_text(world);
         // In a field, left and right move the caret; up and down still move
         // focus, since a single line has nowhere else to go.
+        // A stick pushed past halfway is one press of the way it points, and
+        // is not pressed again until it has come back or turned.
+        let pushed = stick_toward(input.stick);
+        let stick = pushed.filter(|_| pushed != self.stick);
+        self.stick = pushed;
         let toward = [
             (input.up, Toward::Up),
             (input.down, Toward::Down),
@@ -63,8 +69,11 @@ impl ScreenUi {
             (input.right && !editing, Toward::Right),
         ]
         .into_iter()
-        .find_map(|(pressed, toward)| pressed.then_some(toward));
-        if let Some(toward) = toward {
+        .find_map(|(pressed, toward)| pressed.then_some(toward))
+        .or(stick.filter(|way| !editing || matches!(way, Toward::Up | Toward::Down)));
+        if let Some(toward) = toward
+            && !self.nudge_slider(world, toward)
+        {
             self.move_focus_toward(world, toward);
         }
         // Space and Enter press a focused button or toggle. A focused text
@@ -219,6 +228,21 @@ impl ScreenUi {
             self.changed.insert(entity);
         }
     }
+}
+
+/// The way a stick points, when it is pushed far enough to mean one.
+fn stick_toward(stick: [f32; 2]) -> Option<Toward> {
+    let [x, y] = stick;
+    if !x.is_finite() || !y.is_finite() || x.abs().max(y.abs()) < 0.5 {
+        return None;
+    }
+    Some(if x.abs() >= y.abs() {
+        if x > 0.0 { Toward::Right } else { Toward::Left }
+    } else if y > 0.0 {
+        Toward::Up
+    } else {
+        Toward::Down
+    })
 }
 
 fn has(world: &World, entity: EntityId, component: &str) -> bool {

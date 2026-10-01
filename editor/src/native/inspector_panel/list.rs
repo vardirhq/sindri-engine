@@ -271,6 +271,7 @@ mod tests {
                         tile_sets: &[],
                         pictures: &crate::native::thumbnails::NO_PICTURES,
                         block_sets: None,
+                        layers: &[],
                     },
                     whole: Some(whole),
                 }),

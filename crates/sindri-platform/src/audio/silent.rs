@@ -11,6 +11,9 @@ use super::{AudioBackend, AudioClip, AudioError, AudioEvent, AudioVoiceId, Playb
 #[derive(Clone, Debug, Default)]
 pub struct SilentAudioBackend {
     clips: BTreeSet<String>,
+    /// Voices started and not yet stopped. A silent clip has no length, so a
+    /// voice here lasts until it is stopped, as a looping one would.
+    playing: BTreeSet<AudioVoiceId>,
     events: Vec<AudioEvent>,
     next_voice: u64,
 }
@@ -39,6 +42,7 @@ impl AudioBackend for SilentAudioBackend {
         }
         let voice = AudioVoiceId(self.next_voice);
         self.next_voice = self.next_voice.wrapping_add(1);
+        self.playing.insert(voice);
         self.events.push(AudioEvent::Played {
             voice,
             clip: clip.to_owned(),
@@ -48,7 +52,18 @@ impl AudioBackend for SilentAudioBackend {
     }
 
     fn stop(&mut self, voice: AudioVoiceId) {
+        self.playing.remove(&voice);
         self.events.push(AudioEvent::Stopped(voice));
+    }
+
+    fn set_volume(&mut self, voice: AudioVoiceId, volume: f32) {
+        if self.playing.contains(&voice) {
+            self.events.push(AudioEvent::VolumeSet { voice, volume });
+        }
+    }
+
+    fn is_active(&self, voice: AudioVoiceId) -> bool {
+        self.playing.contains(&voice)
     }
 
     fn pause_all(&mut self) {
@@ -60,6 +75,7 @@ impl AudioBackend for SilentAudioBackend {
     }
 
     fn stop_all(&mut self) {
+        self.playing.clear();
         self.events.push(AudioEvent::StoppedAll);
     }
 

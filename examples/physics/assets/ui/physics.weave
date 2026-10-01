@@ -3,9 +3,9 @@
     font-size: 12px;
 }
 #sensors-label, #mask-label, #inside-label, #less-label, #more-label,
-#drop-label, #left-label, #reset-label, #right-label { font-size: 12px; }
+#drop-label, #left-label, #reset-label, #right-label, #query-mode-label { font-size: 12px; }
 @media (min-height: 700px) {
     #title { font-size: 28px; }
     #sensors-label, #mask-label, #inside-label, #less-label, #more-label,
-    #drop-label, #left-label, #reset-label, #right-label { font-size: 13px; }
+    #drop-label, #left-label, #reset-label, #right-label, #query-mode-label { font-size: 13px; }
 }

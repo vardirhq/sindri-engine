@@ -5,6 +5,9 @@
 //! backend replaceable.
 
 mod query;
+mod sweep;
+
+pub use sweep::ShapeHit2d;
 
 use std::{collections::HashMap, sync::mpsc, time::Duration};
 
