@@ -84,3 +84,53 @@ script TweenButton {
         }
     }
 }
+// Composition: across and back as a sequence, the return waiting half a
+// second after the crossing, while a yoyo makes the marker breathe for ever.
+script TweenSequence {
+    var across: Vec3Tween = null;
+    var back: Vec3Tween = null;
+    var breathe: Vec3Tween = null;
+    var revision: f32 = 0.0;
+    var span: f32 = 1.8;
+
+    fn start() {
+        this.span = min(2.6, Viewport.aspect * 2.6);
+        create();
+    }
+    fn create() {
+        let y = this.transform.position.y;
+        let left = Vec3(-this.span, y, 0.0);
+        let right = Vec3(this.span, y, 0.0);
+        this.across = Tween.vec3(left, right, 1.2, "ease-in-out");
+        this.back = Tween.vec3(right, left, 1.2, "ease-in-out");
+        Tween.set_delay(this.back, 0.5);
+        Tween.after(this.back, this.across);
+        this.breathe = Tween.vec3(Vec3(0.23, 0.23, 1.0), Vec3(0.34, 0.34, 1.0), 0.4, "ease-in-out");
+        Tween.set_loops(this.breathe, 0.0);
+        Tween.set_yoyo(this.breathe, true);
+    }
+    fn update(dt: f32) {
+        if this.revision != Demo.revision {
+            this.revision = Demo.revision;
+            control();
+        }
+        if Tween.is_done(this.across) {
+            this.transform.position = Tween.vec3_value(this.back);
+        } else {
+            this.transform.position = Tween.vec3_value(this.across);
+        }
+        this.transform.scale = Tween.vec3_value(this.breathe);
+    }
+    fn control() {
+        if Demo.action == 1.0 {
+            Tween.resume(this.across); Tween.resume(this.back); Tween.resume(this.breathe);
+        } else if Demo.action == 2.0 {
+            Tween.pause(this.across); Tween.pause(this.back); Tween.pause(this.breathe);
+        } else if Demo.action == 4.0 {
+            Tween.cancel(this.across); Tween.cancel(this.back); Tween.cancel(this.breathe);
+        } else {
+            // Restart and replace both play the sequence again from the left.
+            Tween.restart(this.across); Tween.restart(this.back); Tween.restart(this.breathe);
+        }
+    }
+}

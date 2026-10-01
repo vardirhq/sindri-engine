@@ -41,6 +41,18 @@ export async function physicsDemo(page, viewport, evidence, problems) {
   }
   if (evidence.changes < 11) problems.push('physics demo missed a screen control');
   if (!evidence.sensor || !evidence.contact) problems.push('physics demo missed sensor or collision events');
+  // The query button: a circle swept along the ray, then an area at its end.
+  await click(0, -0.41);
+  for (let i = 0; i < 10 && ![...evidence.results].some(r => r.startsWith('Solid / d 3.05')); i += 1) {
+    await page.waitForTimeout(500);
+  }
+  if (![...evidence.results].some(result => result.startsWith('Solid / d 3.05'))) {
+    problems.push('physics circle cast did not stop short of the ray');
+  }
+  await click(0, -0.41);
+  if (![...evidence.results].some(result => result.startsWith('area: '))) {
+    problems.push('physics area query reported nothing');
+  }
   await click(0, -0.84);
   await page.waitForTimeout(350);
 }

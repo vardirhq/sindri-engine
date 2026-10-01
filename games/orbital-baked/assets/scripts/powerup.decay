@@ -10,11 +10,18 @@ script Powerup {
 
     var age: f32 = 0.0;
     var appearance: Vec3Tween = null;
+    // The glow's breathing: up and back for as long as the pickup lasts, from
+    // the moment it has finished appearing.
+    var glow: NumberTween = null;
 
     fn start() {
         let full_scale = this.transform.scale;
         this.appearance = Tween.vec3(Vec3(full_scale.x * 0.35, full_scale.y * 0.35, full_scale.z), full_scale, 0.18, "ease-out");
         this.transform.scale = Tween.vec3_value(this.appearance);
+        this.glow = Tween.number(0.16, 0.32, 0.52, "ease-in-out");
+        Tween.set_loops(this.glow, 0.0);
+        Tween.set_yoyo(this.glow, true);
+        Tween.after(this.glow, this.appearance);
         if this.kind == 0.0 { tint(0.46, 1.0, 0.64); }
         else if this.kind == 1.0 { tint(0.34, 0.86, 1.0); }
         else { tint(1.0, 0.68, 0.24); }
@@ -23,10 +30,12 @@ script Powerup {
     fn update(dt: f32) {
         if Game.run_state != 1.0 {
             Tween.pause(this.appearance);
+            Tween.pause(this.glow);
             Physics.set_velocity(this.entity, 0.0, 0.0);
             return;
         }
         Tween.resume(this.appearance);
+        Tween.resume(this.glow);
         this.transform.scale = Tween.vec3_value(this.appearance);
         this.age += dt;
         if this.age >= this.life {
@@ -34,7 +43,7 @@ script Powerup {
             return;
         }
 
-        this.shape.fill.a = 0.16 + (sin(this.age * 6.0) + 1.0) * 0.08;
+        this.shape.fill.a = Tween.number_value(this.glow);
         let player = World.find("Player");
         if player == null { return; }
         attract(player);

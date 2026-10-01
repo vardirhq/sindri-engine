@@ -2395,7 +2395,7 @@ math in `sindri-core`, not authoring syntax.
 | `Tween.vec2_value(tween)` | `Vec2` | Read a 2D vector tween's current value |
 | `Tween.vec3_value(tween)` | `Vec3` | Read a 3D vector tween's current value |
 | `Tween.color_value(tween)` | `Color` | Read a colour tween's current value |
-| `Tween.progress(tween)` | `f32` | Linear elapsed fraction in [0, 1] |
+| `Tween.progress(tween)` | `f32` | Linear fraction of the current play in [0, 1] |
 | `Tween.is_done(tween)` | `bool` | Naturally completed; cancellation is not completion |
 | `Tween.is_paused(tween)` | `bool` | Paused playback |
 | `Tween.is_cancelled(tween)` | `bool` | Cancelled playback |
@@ -2404,6 +2404,10 @@ math in `sindri-core`, not authoring syntax.
 | `Tween.cancel(tween)` | unit | Stop and retain the current value |
 | `Tween.restart(tween)` | unit | Replay the original endpoints; clear pause/cancellation |
 | `Tween.dispose(tween)` | unit | Release the handle and invalidate all aliases |
+| `Tween.set_delay(tween, seconds)` | unit | Hold the start value before playing |
+| `Tween.set_loops(tween, count)` | unit | Play a whole number of times; 0 plays for ever |
+| `Tween.set_yoyo(tween, on)` | unit | Every other play runs back to the start |
+| `Tween.after(tween, previous)` | unit | Hold still until `previous` has finished: a sequence |
 
 Factories take two endpoints of the indicated type, a duration in seconds, and
 one of `"linear"`, `"ease"`, `"ease-in"`, `"ease-out"`, `"ease-in-out"`.
@@ -2435,6 +2439,26 @@ script Fade {
         if Tween.is_done(this.tint) { World.despawn(this.entity); }
     }
 }
+```
+
+A tween composes on its handle, usually as it is made. `set_delay` holds the
+starting value for some seconds first. `set_loops` plays it a whole number of
+times, and 0 plays it for ever, which is never done. `set_yoyo` makes every
+other play run back from `to` to `from`, so a pulse is one tween rather than a
+`sin` of a clock. `after` holds a tween still until another has finished and
+starts it on the next step, so a sequence is each tween after the one before;
+one whose predecessor is disposed goes on without it, and a tween cannot wait
+for itself. `progress` is the current play's fraction, running back down on a
+yoyo's return, and `restart` replays the delay too. Orbital Last Stand's
+pickup pulses with a looping yoyo that starts after its appearance tween; the
+tween example chains a move, a pause and a return, and bobs with a yoyo.
+
+```decay
+this.grow = Tween.number(0.0, 1.0, 0.2, "ease-out");
+this.glow = Tween.number(0.2, 0.6, 0.5, "ease-in-out");
+Tween.set_loops(this.glow, 0.0);
+Tween.set_yoyo(this.glow, true);
+Tween.after(this.glow, this.grow);
 ```
 
 Vectors keep the coordinate space of their endpoints. Tweening world positions

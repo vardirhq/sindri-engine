@@ -33,6 +33,21 @@ pub(super) fn add_tween_surface(environment: &mut Environment) {
             },
         );
     }
+    let handle = || Type::Named("TweenHandle".to_owned());
+    for (name, second) in [
+        ("set_delay", Type::F32),
+        ("set_loops", Type::F32),
+        ("set_yoyo", Type::Bool),
+        ("after", handle()),
+    ] {
+        tween = tween.with_function(
+            name,
+            FunctionType {
+                params: vec![handle(), second],
+                return_type: Type::Unit,
+            },
+        );
+    }
     for (name, ty) in [
         ("progress", Type::F32),
         ("is_done", Type::Bool),

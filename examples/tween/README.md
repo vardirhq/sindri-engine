@@ -10,6 +10,12 @@ Space resumes, P pauses, R restarts, C cancels, and V replaces the destination
 from the displayed value. Cancellation holds the value; use Restart to replay.
 The first pass runs automatically and holds at completion.
 
+The sixth row composes tweens: an orange marker crosses, waits half a second
+and comes back, because its return is `Tween.after` the crossing with a
+`Tween.set_delay`, while a `Tween.set_yoyo` scale that `Tween.set_loops` plays
+for ever makes it breathe. The same controls pause, resume, cancel and restart
+it.
+
 Labels and controls use `assets/ui/tween.weave`: pixel font sizes keep desktop
 text readable, and media rules increase them for taller screens. The scene
 provides the fallback presentation.

@@ -11,23 +11,87 @@ pub(crate) struct Track {
     pub(crate) from: Value,
     pub(crate) to: Value,
     pub(crate) duration: f64,
+    /// Time played, across every loop, not counting the delay.
     pub(crate) elapsed: f64,
     pub(crate) easing: Easing,
     pub(crate) paused: bool,
     pub(crate) cancelled: bool,
+    /// Seconds to hold the starting value before playing.
+    pub(crate) delay: f64,
+    /// How much of the delay has passed.
+    pub(crate) waited: f64,
+    /// How many times it plays; zero plays for ever.
+    pub(crate) loops: u32,
+    /// Whether every other play runs back from `to` to `from`.
+    pub(crate) yoyo: bool,
+    /// The tween this one waits to finish before its delay starts: a sequence.
+    pub(crate) after: Option<u64>,
 }
 
 impl Track {
-    pub(crate) fn done(&self) -> bool {
-        !self.cancelled && self.elapsed >= self.duration
+    pub(crate) fn new(
+        owner: EntityId,
+        from: Value,
+        to: Value,
+        duration: f64,
+        easing: Easing,
+    ) -> Self {
+        Self {
+            owner,
+            from,
+            to,
+            duration,
+            elapsed: 0.0,
+            easing,
+            paused: false,
+            cancelled: false,
+            delay: 0.0,
+            waited: 0.0,
+            loops: 1,
+            yoyo: false,
+            after: None,
+        }
     }
 
-    pub(crate) fn progress(&self) -> f64 {
+    /// How long every play together lasts: for ever for an endless loop.
+    fn total(&self) -> f64 {
         if self.duration <= 0.0 {
-            1.0
+            0.0
+        } else if self.loops == 0 {
+            f64::INFINITY
         } else {
-            (self.elapsed / self.duration).clamp(0.0, 1.0)
+            self.duration * f64::from(self.loops)
         }
+    }
+
+    pub(crate) fn done(&self) -> bool {
+        !self.cancelled && self.elapsed >= self.total()
+    }
+
+    /// The linear fraction of the current play, running back down on a
+    /// yoyo's return: where between `from` and `to` it is, before easing.
+    pub(crate) fn progress(&self) -> f64 {
+        let back = |play: f64| self.yoyo && play % 2.0 >= 1.0;
+        if self.duration <= 0.0 || self.elapsed >= self.total() {
+            // Finished: at `to`, unless a yoyo's last play ran back.
+            return if back(f64::from(self.loops.max(1)) - 1.0) {
+                0.0
+            } else {
+                1.0
+            };
+        }
+        let cycle = self.elapsed / self.duration;
+        let play = cycle.floor();
+        let along = (cycle - play).clamp(0.0, 1.0);
+        if back(play) { 1.0 - along } else { along }
+    }
+
+    /// Plays `seconds` forward: the delay first, then the plays, stopping at
+    /// the end of the last one.
+    fn play(&mut self, seconds: f64) {
+        let waiting = (self.delay - self.waited).max(0.0).min(seconds);
+        self.waited += waiting;
+        self.elapsed = (self.elapsed + seconds - waiting).min(self.total());
     }
 
     pub(crate) fn value(&self) -> Value {
@@ -119,12 +183,29 @@ impl Tweens {
         }
     }
     pub(crate) fn advance(&mut self, owner: EntityId, seconds: f64) {
-        for id in self.owners.get(&owner).into_iter().flatten() {
-            if let Some(track) = self.tracks.get_mut(id)
+        // A tween after another holds still until that one has finished, as
+        // it stood before this advance: the next one starts on the step after
+        // the last ends, whichever order they were made in. One whose
+        // predecessor was disposed has nothing left to wait for.
+        let ready: Vec<u64> = self
+            .owners
+            .get(&owner)
+            .into_iter()
+            .flatten()
+            .copied()
+            .filter(|id| {
+                self.tracks
+                    .get(id)
+                    .and_then(|track| track.after)
+                    .is_none_or(|before| self.tracks.get(&before).is_none_or(Track::done))
+            })
+            .collect();
+        for id in ready {
+            if let Some(track) = self.tracks.get_mut(&id)
                 && !track.paused
                 && !track.cancelled
             {
-                track.elapsed = (track.elapsed + seconds).min(track.duration);
+                track.play(seconds);
             }
         }
     }

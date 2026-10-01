@@ -60,4 +60,32 @@ fn pickup_appears_pauses_and_reaches_its_authored_scale() {
     for (actual, expected) in final_scale.into_iter().zip(full) {
         assert!((actual - expected).abs() < 0.00001);
     }
+
+    // The glow waited for the appearance, then breathes between its two ends
+    // for as long as the pickup lasts.
+    let alpha = |run: &Run| {
+        run.world.get(entity).expect("pickup").components["sindri.shape"]["fill"][3]
+            .as_f64()
+            .expect("an alpha")
+    };
+    let mut seen = Vec::new();
+    for _ in 0..90 {
+        step(&mut run, 1.0 / 60.0);
+        seen.push(alpha(&run));
+    }
+    let low = seen.iter().copied().fold(f64::INFINITY, f64::min);
+    let high = seen.iter().copied().fold(f64::NEG_INFINITY, f64::max);
+    assert!(
+        low >= 0.16 - 1.0e-4 && high <= 0.32 + 1.0e-4,
+        "{low}..{high}"
+    );
+    assert!(high - low > 0.12, "it breathes: {low}..{high}");
+    let peak = seen
+        .iter()
+        .position(|a| (*a - high).abs() < 1.0e-9)
+        .expect("a peak");
+    assert!(
+        seen[peak..].iter().any(|a| *a < high - 0.05),
+        "and comes back down"
+    );
 }
