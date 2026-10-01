@@ -1,4 +1,5 @@
 //! Shared widget interaction, independent of the window and input backend.
+use super::navigation::Toward;
 use super::{ScreenUi, UiInput, UiScrollComponent, UiTextInputComponent, UiToggleComponent};
 use sindri_core::{EntityId, SceneComponent, World};
 
@@ -30,16 +31,40 @@ impl ScreenUi {
         {
             self.focused = None;
         }
-        if input.blur || input.escape {
+        if input.blur {
+            self.focused = None;
+            self.close_dropdowns(world, None);
+        }
+        // Escape puts an open list away first, and only then lets go.
+        if input.escape && !self.close_dropdowns(world, None) {
             self.focused = None;
         }
         // A press anywhere moves focus to what it landed on, and a press on
         // nothing that takes focus -- a panel, the game behind -- lets go.
         if self.pointer_began {
-            self.focused = self.hovered.filter(|e| self.focusable(world, *e));
+            let landed = self.hovered.filter(|e| self.focusable(world, *e));
+            self.close_dropdowns(world, landed);
+            match landed {
+                Some(entity) => self.focus(world, entity),
+                None => self.focused = None,
+            }
         }
         if input.next || input.previous {
             self.move_focus(world, input.previous);
+        }
+        let editing = self.editing_text(world);
+        // In a field, left and right move the caret; up and down still move
+        // focus, since a single line has nowhere else to go.
+        let toward = [
+            (input.up, Toward::Up),
+            (input.down, Toward::Down),
+            (input.left && !editing, Toward::Left),
+            (input.right && !editing, Toward::Right),
+        ]
+        .into_iter()
+        .find_map(|(pressed, toward)| pressed.then_some(toward));
+        if let Some(toward) = toward {
+            self.move_focus_toward(world, toward);
         }
         // Space and Enter press a focused button or toggle. A focused text
         // field keeps them: Space is a letter there and Enter submits, and a
@@ -50,19 +75,16 @@ impl ScreenUi {
         let activated = self.clicked.or(keyed);
         if let Some(entity) = activated.filter(|e| world.is_active(*e) && !disabled(world, *e)) {
             self.clicked = Some(entity);
-            if let Some(payload) = world
-                .get_mut(entity)
-                .and_then(|d| d.components.get_mut(UiToggleComponent::TYPE_NAME))
-            {
-                let checked = payload
-                    .get("checked")
-                    .and_then(serde_json::Value::as_bool)
-                    .unwrap_or(false);
-                payload["checked"] = serde_json::json!(!checked);
-                self.changed.insert(entity);
+            if has(world, entity, UiToggleComponent::TYPE_NAME) {
+                self.press_toggle(world, entity);
+            } else {
+                self.press_choice(world, entity);
             }
         }
-        if let Some(entity) = self.focused {
+        if let Some(entity) = self
+            .focused
+            .filter(|e| has(world, *e, UiTextInputComponent::TYPE_NAME))
+        {
             self.edit_text(world, entity, input);
         }
         if input.scroll.is_finite()
@@ -72,6 +94,7 @@ impl ScreenUi {
         {
             self.scroll_by(world, entity, -input.scroll);
         }
+        Self::sync_dropdowns(world);
     }
 
     /// Whether the focused element is a text input, which is where typed
@@ -161,72 +184,15 @@ impl ScreenUi {
     /// and switched on. A scroll region is moved through, not activated, and
     /// a row scrolled out of its region's view is not somewhere the keyboard
     /// should land.
-    fn focusable(&self, world: &World, entity: EntityId) -> bool {
+    pub(super) fn focusable(&self, world: &World, entity: EntityId) -> bool {
         self.rects.get(&entity).is_some_and(|element| {
             element.pressable
-                && element.clip.is_none_or(|clip| {
-                    clip.size[0] > 0.0 && clip.size[1] > 0.0 && overlaps(clip, element.rect)
-                })
+                && element
+                    .clip
+                    .is_none_or(|clip| clip.size[0] > 0.0 && clip.size[1] > 0.0)
         }) && world.is_active(entity)
             && !disabled(world, entity)
             && !has(world, entity, UiScrollComponent::TYPE_NAME)
-    }
-
-    fn move_focus(&mut self, world: &World, backwards: bool) {
-        let mut entities: Vec<_> = self
-            .rects
-            .iter()
-            .filter(|(e, _)| self.focusable(world, **e))
-            .collect();
-        // Document order, as a browser tabs: the order the scene is written
-        // in, parents before children. Reading the screen top to bottom
-        // instead zig-zags between side-by-side panels.
-        let order = document_order(world);
-        entities.sort_by_key(|(entity, _)| order.get(*entity).copied().unwrap_or(usize::MAX));
-        let ids: Vec<_> = entities.into_iter().map(|(e, _)| *e).collect();
-        if ids.is_empty() {
-            self.focused = None;
-            return;
-        }
-        let current = self
-            .focused
-            .and_then(|e| ids.iter().position(|id| *id == e));
-        let at = current.map_or(if backwards { ids.len() - 1 } else { 0 }, |at| {
-            if backwards {
-                (at + ids.len() - 1) % ids.len()
-            } else {
-                (at + 1) % ids.len()
-            }
-        });
-        self.focused = Some(ids[at]);
-    }
-
-    fn edit_text(&mut self, world: &mut World, entity: EntityId, input: &UiInput) {
-        let Some(payload) = world
-            .get_mut(entity)
-            .and_then(|d| d.components.get_mut(UiTextInputComponent::TYPE_NAME))
-        else {
-            return;
-        };
-        let Ok(field) = serde_json::from_value::<UiTextInputComponent>(payload.clone()) else {
-            return;
-        };
-        if field.disabled {
-            return;
-        }
-        let mut value = field.value.clone();
-        if input.backspace {
-            value.pop();
-        }
-        value.push_str(&input.text);
-        let value = field.coerce(&value);
-        if value != field.value {
-            payload["value"] = serde_json::json!(value);
-            self.changed.insert(entity);
-        }
-        if input.submit {
-            self.submitted = Some(entity);
-        }
     }
 
     pub(super) fn scroll_by(&mut self, world: &mut World, entity: EntityId, delta: f32) {
@@ -254,28 +220,6 @@ impl ScreenUi {
     }
 }
 
-/// Every entity's place in a depth-first walk of the hierarchy, roots and
-/// siblings in the order they were made.
-fn document_order(world: &World) -> std::collections::BTreeMap<EntityId, usize> {
-    let mut order = std::collections::BTreeMap::new();
-    let mut pending: Vec<EntityId> = world
-        .entities()
-        .filter(|(_, data)| data.parent.is_none())
-        .map(|(entity, _)| entity)
-        .collect();
-    pending.reverse();
-    while let Some(entity) = pending.pop() {
-        if order.contains_key(&entity) {
-            continue;
-        }
-        order.insert(entity, order.len());
-        if let Some(data) = world.get(entity) {
-            pending.extend(data.children.iter().rev().copied());
-        }
-    }
-    order
-}
-
 fn has(world: &World, entity: EntityId, component: &str) -> bool {
     world
         .get(entity)
@@ -288,9 +232,4 @@ fn disabled(world: &World, entity: EntityId) -> bool {
             .values()
             .any(|p| p.get("disabled").and_then(serde_json::Value::as_bool) == Some(true))
     })
-}
-
-/// Whether two rectangles share any area.
-fn overlaps(a: super::ScreenRect, b: super::ScreenRect) -> bool {
-    (0..2).all(|axis| (a.center[axis] - b.center[axis]).abs() * 2.0 < a.size[axis] + b.size[axis])
 }

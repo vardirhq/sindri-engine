@@ -279,6 +279,8 @@ fn declared_anchors(
             "sindri.ui.toggle",
             "sindri.ui.text_input",
             "sindri.ui.scroll",
+            "sindri.ui.dropdown",
+            "sindri.ui.option",
         ]
         .iter()
         .any(|name| data.components.contains_key(*name))

@@ -81,7 +81,7 @@ pub enum ParseError {
     #[error("`{0}` is not a selector Weave understands")]
     InvalidSelector(String),
     #[error(
-        "`:{0}` is not a state Weave knows; it knows :hover, :active (or :pressed), :focus, :disabled and :checked"
+        "`:{0}` is not a state Weave knows; it knows :hover, :active (or :pressed), :focus, :disabled, :checked and :open"
     )]
     UnsupportedPseudoClass(String),
 }

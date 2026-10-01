@@ -59,6 +59,8 @@ pub struct Session {
     physics: ScenePhysics2d,
     /// Where the screen elements are and what the pointer is doing to them.
     pub(crate) screen_ui: ScreenUi,
+    /// Whether a text field had the keyboard after the last step.
+    editing_text: bool,
     /// The game's stylesheets, applied for each draw and each hit-test.
     /// `None` for a game that styles nothing.
     pub(crate) styles: Option<Styles>,
@@ -139,6 +141,7 @@ impl Session {
             animations: SpriteAnimations::new(),
             physics: ScenePhysics2d::top_down().expect("zero gravity is finite"),
             screen_ui: ScreenUi::default(),
+            editing_text: false,
             styles: None,
             text_sizes: sindri_scene::UiTextSizes::new(),
             random: sindri_core::Rng::default(),
@@ -347,7 +350,8 @@ impl Session {
         // While a text field has the keyboard, the keys are the field's: a
         // name typed with a W in it does not also walk anything forward.
         let held_back;
-        let script_input = if self.screen_ui.editing_text(world) {
+        self.editing_text = self.screen_ui.editing_text(world);
+        let script_input = if self.editing_text {
             held_back = input.without_keys();
             &held_back
         } else {
@@ -475,6 +479,19 @@ impl Session {
             }
         }
         Ok(())
+    }
+
+    /// Whether a text field had the keyboard after the last step, so the host
+    /// gives it the window's text entry: IME, paste, a phone's keyboard.
+    #[must_use]
+    pub const fn editing_text(&self) -> bool {
+        self.editing_text
+    }
+
+    /// Text copied or cut in a field since this was last asked, for the host
+    /// to put on the system clipboard.
+    pub fn take_copied(&mut self) -> Option<String> {
+        self.screen_ui.take_copied()
     }
 
     /// Sets a shared board value, as a script's `Game.name = value` would.

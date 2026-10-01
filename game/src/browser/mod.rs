@@ -226,6 +226,16 @@ impl DesktopApp for BrowserCausewayApp {
         })
     }
 
+    fn editing_text(&self) -> bool {
+        self.engine
+            .as_ref()
+            .is_some_and(|engine| engine.game().editing_text())
+    }
+
+    fn take_copied(&mut self) -> Option<String> {
+        self.engine.as_mut()?.game_mut().take_copied()
+    }
+
     fn input(&mut self, event: InputEvent) {
         if let Some(engine) = &mut self.engine {
             engine.queue_input(event);

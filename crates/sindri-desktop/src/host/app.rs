@@ -140,6 +140,19 @@ pub trait DesktopApp: Sized + 'static {
         let _ = event;
     }
 
+    /// Whether a text field has the keyboard, so the host gives the window's
+    /// text entry to it: IME composition on a desktop, and in a browser the
+    /// hidden field that brings a phone's keyboard and takes a paste.
+    fn editing_text(&self) -> bool {
+        false
+    }
+
+    /// Text a copy or cut put on the clipboard since the last frame, for the
+    /// host to hand to the system clipboard.
+    fn take_copied(&mut self) -> Option<String> {
+        None
+    }
+
     /// Advances by the real time since the previous frame.
     fn update(&mut self, delta: Duration) -> Result<Flow, Self::Error> {
         let _ = delta;

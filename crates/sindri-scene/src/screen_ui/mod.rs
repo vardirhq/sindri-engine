@@ -4,14 +4,17 @@
 //! serialized. A host updates it once a frame before scripts run.
 
 mod box_model;
+mod choice;
 mod clip;
 mod controls;
+mod editing;
 mod flex;
 mod grid;
 mod hierarchy;
 mod layout;
 mod layout_pass;
 mod measure;
+mod navigation;
 mod rect;
 mod slider;
 mod widgets;
@@ -26,6 +29,8 @@ use sindri_core::{
 };
 
 pub use box_model::{UiAlignSelf, UiBoxComponent, UiSides};
+pub use choice::{UiDropdownComponent, UiOptionComponent, dropdown_options};
+pub use editing::UiCaret;
 pub use grid::{UiGridComponent, UiTrack};
 pub use hierarchy::{UiHierarchy, UiPlaced};
 pub use layout::{UiAlign, UiDirection, UiJustify, UiLayoutBox, UiLayoutChild, UiLayoutComponent};
@@ -66,6 +71,10 @@ pub struct ScreenUi {
     /// Whether this step's pointer pass has run, so `read_controls` after it
     /// keeps what the pointer changed instead of starting the step again.
     presses_read: bool,
+    /// Each text field's caret and selection, once someone has edited it.
+    carets: BTreeMap<EntityId, editing::UiCaret>,
+    /// What a copy or cut put on the clipboard this step.
+    copied: Option<String>,
 }
 
 #[derive(Clone, Copy, Debug)]
@@ -219,6 +228,18 @@ impl ScreenUi {
     ) -> Result<BTreeMap<EntityId, Element>, ComponentRegistryError> {
         let mut placements = BTreeMap::new();
         let hierarchy = UiHierarchy::measured(world, components, text)?;
+        // Text that draws nothing else is drawn in its `bounds`, pivoted on
+        // its anchor rather than centred: the box a click should find.
+        let words: BTreeMap<EntityId, UiTextComponent> = components
+            .query::<UiTextComponent>(world)?
+            .into_iter()
+            .filter(|(entity, _)| {
+                world.get(*entity).is_some_and(|data| {
+                    !data.components.contains_key(UiShapeComponent::TYPE_NAME)
+                        && !data.components.contains_key(UiImageComponent::TYPE_NAME)
+                })
+            })
+            .collect();
         for (entity, anchor, layer, pressable) in Self::elements(world, components)? {
             if !world.is_active(entity) {
                 continue;
@@ -230,13 +251,26 @@ impl ScreenUi {
             let origin = extent.anchor_origin(placed.anchor.unit_offset());
             let size = placed.size_or(data.transform_3d.unwrap_or_default().scale_2d());
             let clip = hierarchy.clip_rect(world, entity, extent);
+            let mut rect = ScreenRect {
+                center: [origin[0] + placed.offset.x, origin[1] + placed.offset.y],
+                size,
+            };
+            if let Some(text) = words.get(&entity)
+                && text.bounds.iter().all(|side| *side > 0.0)
+            {
+                let unit = text.anchor.unit_offset();
+                rect = ScreenRect {
+                    center: [
+                        rect.center[0] - unit[0] * text.bounds[0] / 2.0,
+                        rect.center[1] - unit[1] * text.bounds[1] / 2.0,
+                    ],
+                    size: text.bounds,
+                };
+            }
             placements.insert(
                 entity,
                 Element {
-                    rect: ScreenRect {
-                        center: [origin[0] + placed.offset.x, origin[1] + placed.offset.y],
-                        size,
-                    },
+                    rect,
                     clip,
                     layer,
                     pressable,
@@ -285,6 +319,8 @@ impl ScreenUi {
             UiToggleComponent::TYPE_NAME,
             UiTextInputComponent::TYPE_NAME,
             UiScrollComponent::TYPE_NAME,
+            UiDropdownComponent::TYPE_NAME,
+            UiOptionComponent::TYPE_NAME,
         ] {
             for (entity, data) in world.entities() {
                 if let Some(payload) = data.components.get(name)

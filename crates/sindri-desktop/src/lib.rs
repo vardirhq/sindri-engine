@@ -204,6 +204,11 @@ pub fn key(physical: PhysicalKey) -> Option<Key> {
         KeyCode::ControlRight => Key::ControlRight,
         KeyCode::AltLeft => Key::AltLeft,
         KeyCode::AltRight => Key::AltRight,
+        KeyCode::Home => Key::Home,
+        KeyCode::End => Key::End,
+        KeyCode::Delete => Key::Delete,
+        KeyCode::SuperLeft => Key::SuperLeft,
+        KeyCode::SuperRight => Key::SuperRight,
         _ => return None,
     })
 }
@@ -292,6 +297,11 @@ mod tests {
             KeyCode::ControlRight,
             KeyCode::AltLeft,
             KeyCode::AltRight,
+            KeyCode::Home,
+            KeyCode::End,
+            KeyCode::Delete,
+            KeyCode::SuperLeft,
+            KeyCode::SuperRight,
         ];
         let mut mapped: Vec<Key> = codes
             .iter()

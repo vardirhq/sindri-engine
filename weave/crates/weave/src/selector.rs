@@ -27,6 +27,9 @@ impl States {
     pub const DISABLED: Self = Self(1 << 3);
     /// A toggle that is on, or the chosen option.
     pub const CHECKED: Self = Self(1 << 4);
+    /// A dropdown whose list is showing, as `:open` matches an open
+    /// `<details>` or `<select>`.
+    pub const OPEN: Self = Self(1 << 5);
 
     #[must_use]
     pub const fn contains(self, other: Self) -> bool {
@@ -373,6 +376,15 @@ mod tests {
     fn matches(selector: &str, node: usize) -> bool {
         let list = parse_list(selector).expect("selector parses");
         list.iter().any(|selector| selector.matches(&menu(), node))
+    }
+
+    #[test]
+    fn open_is_a_state_like_checked() {
+        let list = parse_list(".menu:open").expect(":open parses");
+        assert!(list.iter().all(|selector| selector.specificity().1 == 2));
+        // Nothing in the menu is open, so nothing matches.
+        assert!(!matches(".menu:open", 0));
+        assert!(States::NONE.with(States::OPEN).contains(States::OPEN));
     }
 
     #[test]

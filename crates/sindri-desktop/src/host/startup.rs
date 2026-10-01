@@ -117,4 +117,8 @@ pub(super) enum Startup {
     /// surface it deserves without anything here knowing what a phone is.
     #[cfg(target_arch = "wasm32")]
     PageResized(f64, f64),
+    /// Something the page's hidden text field heard: typed or composed text,
+    /// a paste, or a key that edits.
+    #[cfg(target_arch = "wasm32")]
+    Input(sindri_platform::InputEvent),
 }

@@ -156,6 +156,7 @@ fn pseudo_class(
         ("focus", None) => Some(States::FOCUS),
         ("disabled", None) => Some(States::DISABLED),
         ("checked", None) => Some(States::CHECKED),
+        ("open", None) => Some(States::OPEN),
         _ => None,
     };
     if let Some(state) = state {

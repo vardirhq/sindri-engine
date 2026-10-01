@@ -56,6 +56,12 @@ pub enum Key {
     ControlRight,
     AltLeft,
     AltRight,
+    Home,
+    End,
+    Delete,
+    /// Command on a Mac, the Windows key elsewhere.
+    SuperLeft,
+    SuperRight,
 }
 
 impl Key {
@@ -113,6 +119,11 @@ impl Key {
         Self::ControlRight,
         Self::AltLeft,
         Self::AltRight,
+        Self::Home,
+        Self::End,
+        Self::Delete,
+        Self::SuperLeft,
+        Self::SuperRight,
     ];
 
     /// The name a binding, a config file, or a script refers to this key by.
@@ -175,6 +186,11 @@ impl Key {
             Self::ControlRight => "ControlRight",
             Self::AltLeft => "AltLeft",
             Self::AltRight => "AltRight",
+            Self::Home => "Home",
+            Self::End => "End",
+            Self::Delete => "Delete",
+            Self::SuperLeft => "SuperLeft",
+            Self::SuperRight => "SuperRight",
         }
     }
 

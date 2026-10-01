@@ -783,22 +783,37 @@ disqualifying for anything else.
 | `Ui.set_input_text(entity, "words")` | nothing |
 | `Ui.scroll_offset(entity)` | `f32` |
 | `Ui.set_scroll_offset(entity, offset)` | nothing |
+| `Ui.selected(entity)` | `f32` |
+| `Ui.set_selected(entity, index)` | nothing |
+| `Ui.is_open(entity)` | `bool` |
+| `Ui.caret(entity)` | `f32` |
+| `Ui.selection_start(entity)` | `f32` |
+| `Ui.selection_end(entity)` | `f32` |
 | `Ui.changed(entity)` | `bool` |
 | `Ui.submitted(entity)` | `bool` |
 | `Ui.is_focused(entity)` | `bool` |
 
-**Widgets.** A `sindri.ui.toggle` is a switch or checkbox, a
-`sindri.ui.text_input` a single-line field, and a `sindri.ui.scroll` a region
-whose children scroll vertically and are clipped to it. The person changes them
-by clicking, tapping, typing, the wheel or a drag; Tab and Shift+Tab move focus
-in the order the scene is written, and Space or Enter presses what has it.
-`Ui.changed` is true for the one step a person changed a widget's value, and
-`Ui.submitted` for the step Enter was pressed in a field. A script's own
-`set_*` call changes the value without reporting a change, so a script that
-answers `changed` never answers itself. While a field has the keyboard, the
-keys it uses are held back from `Input`, so typing a callsign does not steer
-the ship. Selection, a movable caret, clipboard, IME composition, software
-keyboards and gamepad focus are not supported yet: a field edits at its end.
+**Widgets.** A `sindri.ui.toggle` is a switch or checkbox, and toggles that
+share a `group` are a radio group: choosing one unchecks the rest. A
+`sindri.ui.dropdown` opens a list of `sindri.ui.option` rows authored under it
+and remembers which is `selected`, counted from zero in scene order. A
+`sindri.ui.text_input` is a single-line field with a caret and a selection,
+and a `sindri.ui.scroll` a region whose children scroll vertically and are
+clipped to it. The person changes them by clicking, tapping, typing, pasting,
+the wheel or a drag. Tab and Shift+Tab move focus in the order the scene is
+written; the arrow keys and a pad's d-pad move it to the nearest control that
+way, scrolling a row into view; Space, Enter or a pad's South button presses
+what has it, and Escape or East backs out. In a field, Left, Right, Home and
+End move the caret, Shift selects, Backspace and Delete erase, and Ctrl or Cmd
+with A, C, X and V select all, copy, cut and paste. `Ui.changed` is true for
+the one step a person changed a widget's value, and `Ui.submitted` for the
+step Enter was pressed in a field. A script's own `set_*` call changes the
+value without reporting a change, so a script that answers `changed` never
+answers itself. While a field has the keyboard, the keys it uses are held back
+from `Input`, so typing a callsign does not steer the ship. A field draws what
+its script writes: `Ui.caret`, `Ui.selection_start` and `Ui.selection_end` say
+where to put a caret or a highlight. In a browser, a field also takes IME
+composition, a paste, and a phone's on-screen keyboard.
 
 **The scene owns the words and the script owns the numbers.** A script can
 join text — `Ui.set_text(label, "Score: " + score)` works — but a HUD's words

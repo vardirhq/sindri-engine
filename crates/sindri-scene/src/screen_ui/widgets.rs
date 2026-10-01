@@ -8,6 +8,12 @@
 use serde::Deserialize;
 use sindri_core::SceneComponent;
 
+/// A flag a person flips: a switch, a checkbox, or -- given a `group` -- one
+/// radio button of several.
+///
+/// Toggles that share a non-empty `group` are a radio group: pressing one
+/// checks it and unchecks the rest, and pressing a checked one leaves it
+/// checked, so the group always says which one was chosen.
 #[derive(Clone, Debug, Default, Deserialize, PartialEq)]
 pub struct UiToggleComponent {
     #[serde(default)]
@@ -16,6 +22,8 @@ pub struct UiToggleComponent {
     pub checked: bool,
     #[serde(default)]
     pub disabled: bool,
+    #[serde(default)]
+    pub group: String,
 }
 impl SceneComponent for UiToggleComponent {
     const TYPE_NAME: &'static str = "sindri.ui.toggle";
@@ -172,11 +180,13 @@ impl SceneComponent for UiScrollComponent {
 
 /// Host-neutral text and navigation input, supplied once per simulation step.
 ///
-/// Each flag is an edge a host reports on its own, from its own key, so they
-/// are kept as the separate facts they are rather than folded into a set.
+/// Each flag is an edge a host reports on its own, from its own key or pad
+/// button, so they are kept as the separate facts they are rather than folded
+/// into a set.
 #[derive(Clone, Debug, Default)]
 #[allow(clippy::struct_excessive_bools)]
 pub struct UiInput {
+    /// Text committed this step: typed, composed by an IME, or pasted.
     pub text: String,
     pub next: bool,
     pub previous: bool,
@@ -186,4 +196,19 @@ pub struct UiInput {
     pub escape: bool,
     pub blur: bool,
     pub scroll: f32,
+    /// Arrow keys or a pad's d-pad: in a text field left and right move the
+    /// caret, and everywhere else all four move focus to the nearest control
+    /// that way.
+    pub left: bool,
+    pub right: bool,
+    pub up: bool,
+    pub down: bool,
+    pub home: bool,
+    pub end: bool,
+    pub delete: bool,
+    /// Shift is held, so caret movement grows the selection.
+    pub extend: bool,
+    pub select_all: bool,
+    pub copy: bool,
+    pub cut: bool,
 }

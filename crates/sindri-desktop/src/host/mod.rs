@@ -14,6 +14,9 @@
 mod app;
 mod page_size;
 mod startup;
+#[cfg(target_arch = "wasm32")]
+mod text_entry;
+mod text_sync;
 mod typing;
 mod visibility;
 
@@ -76,10 +79,21 @@ struct Host<A: DesktopApp> {
     announced_ready: bool,
     /// The modifiers held now, which decide whether a key press types.
     modifiers: winit::keyboard::ModifiersState,
+    /// What a key press typed and whether an IME is composing, so composed
+    /// text is not committed twice.
+    typist: typing::Typist,
     #[cfg(target_arch = "wasm32")]
     _visibility_listener: Option<VisibilityListener>,
     #[cfg(target_arch = "wasm32")]
     _page_size_listener: Option<PageSizeListener>,
+    /// Whether the app was editing text at the end of the last frame.
+    editing_text: bool,
+    /// The page's hidden text field, made once the canvas exists.
+    #[cfg(target_arch = "wasm32")]
+    text_entry: Option<text_entry::TextEntry>,
+    /// The system clipboard, opened when first needed.
+    #[cfg(not(target_arch = "wasm32"))]
+    clipboard: Option<arboard::Clipboard>,
 }
 
 impl<A: DesktopApp> Host<A> {
@@ -105,10 +119,16 @@ impl<A: DesktopApp> Host<A> {
             page_visible,
             announced_ready: false,
             modifiers: winit::keyboard::ModifiersState::empty(),
+            typist: typing::Typist::default(),
             #[cfg(target_arch = "wasm32")]
             _visibility_listener: visibility_listener,
             #[cfg(target_arch = "wasm32")]
             _page_size_listener: page_size_listener,
+            editing_text: false,
+            #[cfg(target_arch = "wasm32")]
+            text_entry: None,
+            #[cfg(not(target_arch = "wasm32"))]
+            clipboard: None,
         }
     }
 
@@ -258,6 +278,10 @@ impl<A: DesktopApp> Host<A> {
         if flow == Flow::Exit {
             return Ok(flow);
         }
+        self.sync_text_entry();
+        let State::Running(running) = &mut self.state else {
+            return Ok(Flow::Continue);
+        };
 
         let Some(frame) = running.surface.acquire(&running.gpu.device)? else {
             // Skipped. The surface has already recovered if it needed to.
@@ -365,6 +389,12 @@ impl<A: DesktopApp> ApplicationHandler<Startup> for Host<A> {
                 }
                 return;
             }
+            Startup::Input(input) => {
+                if let State::Running(running) = &mut self.state {
+                    running.app.input(input);
+                }
+                return;
+            }
             Startup::Opened(opened) => opened,
         };
 
@@ -435,17 +465,30 @@ impl<A: DesktopApp> ApplicationHandler<Startup> for Host<A> {
             .window
             .as_ref()
             .map_or(1.0, |window| window.scale_factor());
+        // The canvas giving its focus to the page's text field is not the
+        // window losing focus; the field reports a real loss itself.
+        #[cfg(target_arch = "wasm32")]
+        let to_text_entry = matches!(event, WindowEvent::Focused(false))
+            && self
+                .text_entry
+                .as_ref()
+                .is_some_and(text_entry::TextEntry::has_focus);
+        #[cfg(not(target_arch = "wasm32"))]
+        let to_text_entry = false;
         if let Some(input) = input_event(&event, scale_factor)
+            && !to_text_entry
             && let State::Running(running) = &mut self.state
         {
             running.app.input(input);
         }
+        #[cfg(not(target_arch = "wasm32"))]
+        self.paste(&event);
 
         if let WindowEvent::ModifiersChanged(modifiers) = &event {
             self.modifiers = modifiers.state();
         }
-        if let State::Running(running) = &mut self.state
-            && let Some(text) = typing::typed(&event, self.modifiers)
+        if let Some(text) = self.typist.typed(&event, self.modifiers)
+            && let State::Running(running) = &mut self.state
         {
             for c in text.chars().filter(|c| !c.is_control()) {
                 running.app.input(InputEvent::TextInput(c));

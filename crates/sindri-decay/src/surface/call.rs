@@ -263,6 +263,17 @@ pub(crate) enum UiCall {
     SetInputText,
     ScrollOffset,
     SetScrollOffset,
+    /// Which option a dropdown has chosen, counted from zero.
+    Selected,
+    /// Chooses a dropdown's option, kept to the options it has.
+    SetSelected,
+    /// Whether a dropdown's list is open.
+    Open,
+    /// Where a text field's caret is, in characters.
+    Caret,
+    /// Where a text field's selection starts and ends, in characters.
+    SelectionStart,
+    SelectionEnd,
     Changed,
     Submitted,
     Focused,
@@ -305,6 +316,12 @@ pub(crate) const UI_CALLS: &[(&str, UiCall)] = &[
     ("set_input_text", UiCall::SetInputText),
     ("scroll_offset", UiCall::ScrollOffset),
     ("set_scroll_offset", UiCall::SetScrollOffset),
+    ("selected", UiCall::Selected),
+    ("set_selected", UiCall::SetSelected),
+    ("is_open", UiCall::Open),
+    ("caret", UiCall::Caret),
+    ("selection_start", UiCall::SelectionStart),
+    ("selection_end", UiCall::SelectionEnd),
     ("changed", UiCall::Changed),
     ("submitted", UiCall::Submitted),
     ("is_focused", UiCall::Focused),
