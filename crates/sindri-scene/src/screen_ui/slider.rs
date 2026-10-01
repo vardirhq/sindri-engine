@@ -1,7 +1,10 @@
 //! Slider semantics and value mapping for screen UI.
 
 use serde::Deserialize;
-use sindri_core::SceneComponent;
+use sindri_core::{SceneComponent, World};
+
+use super::ScreenUi;
+use super::navigation::Toward;
 
 /// Direction a slider grows from minimum to maximum.
 #[derive(Clone, Copy, Debug, Default, Deserialize, PartialEq, Eq)]
@@ -98,6 +101,47 @@ impl UiSliderComponent {
             clamped
         };
         stepped.clamp(self.min, self.max)
+    }
+}
+
+impl ScreenUi {
+    /// The arrows or d-pad along a focused slider's axis move its value by one
+    /// step -- a twentieth of its range when it has none -- as a native range
+    /// input does. Whether they were used, so they do not also move focus.
+    pub(super) fn nudge_slider(&mut self, world: &mut World, toward: Toward) -> bool {
+        let Some(entity) = self.focused else {
+            return false;
+        };
+        let Some(payload) = world
+            .get_mut(entity)
+            .and_then(|data| data.components.get_mut(UiSliderComponent::TYPE_NAME))
+        else {
+            return false;
+        };
+        let Ok(slider) = serde_json::from_value::<UiSliderComponent>(payload.clone()) else {
+            return false;
+        };
+        let direction = match (slider.orientation, toward) {
+            (UiSliderOrientation::Horizontal, Toward::Right)
+            | (UiSliderOrientation::Vertical, Toward::Up) => 1.0,
+            (UiSliderOrientation::Horizontal, Toward::Left)
+            | (UiSliderOrientation::Vertical, Toward::Down) => -1.0,
+            _ => return false,
+        };
+        if slider.disabled {
+            return true;
+        }
+        let step = if slider.step.is_finite() && slider.step > 0.0 {
+            slider.step
+        } else {
+            (slider.max - slider.min) / 20.0
+        };
+        let value = slider.coerce_value(slider.value + step * direction);
+        if (value - slider.value).abs() > f32::EPSILON {
+            payload["value"] = serde_json::json!(value);
+            self.slider_changed = Some(entity);
+        }
+        true
     }
 }
 

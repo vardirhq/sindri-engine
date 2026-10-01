@@ -9,7 +9,7 @@ use sindri_platform::InputState;
 
 use crate::{
     Blackboard, Physics2d, PrefabSources, ProfileSources, ScriptComponent, ScriptContext,
-    ScriptFailure, WorldHost, audio_host::AudioCommand, host::Peers, host::Spawning,
+    ScriptFailure, WorldHost, audio_host::AudioQueue, host::Peers, host::Spawning,
 };
 
 use super::sources::{START, ScriptSources, UPDATE};
@@ -25,7 +25,7 @@ pub(super) struct TickWorld<'a> {
     pub(super) starting: &'a mut super::StartingValues,
     pub(super) tweens: &'a mut crate::tweens::Tweens,
     pub(super) blackboard: &'a mut Blackboard,
-    pub(super) audio: &'a mut Vec<AudioCommand>,
+    pub(super) audio: &'a mut AudioQueue,
     pub(super) world: &'a mut World,
     pub(super) sources: &'a ScriptSources,
     pub(super) prefabs: &'a PrefabSources,

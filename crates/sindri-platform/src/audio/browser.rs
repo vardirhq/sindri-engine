@@ -136,6 +136,18 @@ impl AudioBackend for BrowserAudioBackend {
         }
     }
 
+    fn set_volume(&mut self, voice: AudioVoiceId, volume: f32) {
+        if let Some(voice) = self.voices.get(&voice) {
+            voice.element.set_volume(f64::from(volume.clamp(0.0, 1.0)));
+        }
+    }
+
+    fn is_active(&self, voice: AudioVoiceId) -> bool {
+        self.voices
+            .get(&voice)
+            .is_some_and(|voice| !voice.element.ended() && voice.element.error().is_none())
+    }
+
     fn pause_all(&mut self) {
         for voice in self.voices.values() {
             let _ = voice.element.pause();

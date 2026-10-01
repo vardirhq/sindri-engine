@@ -403,6 +403,34 @@ pub(super) fn add_audio_surface(environment: &mut Environment) {
             },
         )
         .with_function(
+            "play_on",
+            FunctionType {
+                params: vec![Type::String, Type::String, Type::F32],
+                return_type: Type::Unit,
+            },
+        )
+        .with_function(
+            "loop_on",
+            FunctionType {
+                params: vec![Type::String, Type::String, Type::F32],
+                return_type: Type::Unit,
+            },
+        )
+        .with_function(
+            "set_volume",
+            FunctionType {
+                params: vec![Type::String, Type::F32],
+                return_type: Type::Unit,
+            },
+        )
+        .with_function(
+            "volume",
+            FunctionType {
+                params: vec![Type::String],
+                return_type: Type::F32,
+            },
+        )
+        .with_function(
             "stop_all",
             FunctionType {
                 params: Vec::new(),

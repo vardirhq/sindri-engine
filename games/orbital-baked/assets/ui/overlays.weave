@@ -7,6 +7,23 @@
 .pause-resume { width: 44vh; height: 10vh; x: -31vh; y: 1vh; }
 .pause-quit { width: 44vh; height: 7.5vh; x: -31vh; y: -11vh; }
 .pause-manual-title { width: 52vh; height: 2.6vh; x: 31vh; y: 28vh; anchor: center; }
+/* The mixer: a label and a slider per bus, under the actions. The slider is
+   the track; its fill is an image the mixer script fills to the value. */
+.mix-label {
+    width: 10vh; height: 2.6vh; x: -46vh; anchor: center;
+    font-weight: 700; font-size: 1.8vh; line-height: 2.2vh; letter-spacing: 0.3vh;
+    color: var(--muted); text-align: start;
+}
+.mix-track {
+    width: 30vh; height: 3vh; x: -24vh; anchor: center;
+    background: #0a1726; border-color: #1f3349; border-width: 1px; border-radius: 0.6vh;
+}
+.mix-track:hover { border-color: #3f6384; }
+.mix-track:focus { border-color: var(--cyan); border-width: 2px; }
+.mix-fill { width: 30vh; height: 3vh; x: 0px; y: 0px; }
+.mix-master { y: -19vh; }
+.mix-music { y: -25vh; }
+.mix-effects { y: -31vh; }
 .manual {
     width: 52vh; height: 50vh; x: 31vh; y: -1vh;
     padding: 1vh; gap: 0.8vh;
@@ -51,8 +68,14 @@
     .pause-title { width: 44vh; max-width: 84vw; height: 5.6vh; x: 0px; y: 34vh; font-size: 4.4vh; }
     .pause-resume { width: 44vh; max-width: 84vw; height: 8vh; x: 0px; y: 25vh; }
     .pause-quit { width: 44vh; max-width: 84vw; height: 6.4vh; x: 0px; y: 16.4vh; }
-    .pause-manual-title { width: 44vh; max-width: 84vw; x: 0px; y: 10vh; }
-    .manual { width: 44vh; max-width: 84vw; height: 48vh; x: 0px; y: -16vh; }
+    .pause-manual-title { width: 44vh; max-width: 84vw; x: 0px; y: -3.6vh; }
+    .manual { width: 44vh; max-width: 84vw; height: 34vh; x: 0px; y: -22.5vh; }
+    .mix-label { x: -14vh; }
+    .mix-track, .mix-fill { width: 26vh; max-width: 50vw; }
+    .mix-track { x: 8vh; }
+    .mix-master { y: 10vh; }
+    .mix-music { y: 5.6vh; }
+    .mix-effects { y: 1.2vh; }
     .manual-row { height: 6vh; }
     .manual-row .row-value { font-size: 1.6vh; }
 

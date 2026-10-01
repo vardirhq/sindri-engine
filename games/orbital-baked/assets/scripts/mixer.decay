@@ -1,0 +1,52 @@
+// The pause screen's volume sliders: everything, the music and the effects,
+// each a bus every sound of its kind plays through, and each remembered
+// between sessions. Music is the looping track the scene starts; every
+// `Audio.play` in the game is an effect.
+script Mixer {
+    var master: Entity = null;
+    var music: Entity = null;
+    var effects: Entity = null;
+    var master_fill: Entity = null;
+    var music_fill: Entity = null;
+    var effects_fill: Entity = null;
+
+    fn start() {
+        this.master = World.find("PauseMaster");
+        this.music = World.find("PauseMusic");
+        this.effects = World.find("PauseEffects");
+        this.master_fill = World.find("PauseMasterFill");
+        this.music_fill = World.find("PauseMusicFill");
+        this.effects_fill = World.find("PauseEffectsFill");
+        restore(this.master, this.master_fill, "master");
+        restore(this.music, this.music_fill, "music");
+        restore(this.effects, this.effects_fill, "effects");
+    }
+
+    fn update(dt: f32) {
+        follow(this.master, this.master_fill, "master");
+        follow(this.music, this.music_fill, "music");
+        follow(this.effects, this.effects_fill, "effects");
+    }
+
+    // The saved volume, onto the bus and the slider that moves it.
+    fn restore(slider: Entity, fill: Entity, bus: String) {
+        let volume = Save.number("volume_" + bus, 1.0);
+        Audio.set_volume(bus, volume);
+        Ui.set_slider_value(slider, volume);
+        Ui.set_fill(fill, volume);
+    }
+
+    // A slider the player moved, by pointer, arrows or pad, sets its bus at
+    // once and is saved; the click is played through the bus it just set, so
+    // the player hears how loud effects now are.
+    fn follow(slider: Entity, fill: Entity, bus: String) {
+        if !Ui.slider_changed(slider) {
+            return;
+        }
+        let volume = Ui.slider_value(slider);
+        Audio.set_volume(bus, volume);
+        Save.set_number("volume_" + bus, volume);
+        Ui.set_fill(fill, volume);
+        Audio.play("audio/click.wav", 0.3);
+    }
+}

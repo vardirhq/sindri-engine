@@ -23,6 +23,7 @@ impl ScreenUi {
         // the pointer pass, which already started the step's set.
         if !std::mem::take(&mut self.presses_read) {
             self.changed.clear();
+            self.slider_changed = None;
         }
         self.submitted = None;
         if self
@@ -64,7 +65,9 @@ impl ScreenUi {
         ]
         .into_iter()
         .find_map(|(pressed, toward)| pressed.then_some(toward));
-        if let Some(toward) = toward {
+        if let Some(toward) = toward
+            && !self.nudge_slider(world, toward)
+        {
             self.move_focus_toward(world, toward);
         }
         // Space and Enter press a focused button or toggle. A focused text

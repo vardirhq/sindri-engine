@@ -165,21 +165,41 @@ pub(super) const TYPES: &[TypeEntry] = &[
     },
     TypeEntry {
         name: "Audio",
-        text: "Playing sound effects and music.",
+        text: "Playing sound effects and music. Every sound goes through a bus — `\"effects\"`, `\"music\"`, or any other name — and every bus through `\"master\"`, so a settings screen can turn each down.",
         members: &[
             call(
                 "loop",
                 &["clip", "volume"],
-                "Plays a sound over and over until stopped, such as music, at a volume from 0 (silent) to 1 (full).",
+                "Plays a sound over and over until stopped, such as music, at a volume from 0 (silent) to 1 (full), through the `\"music\"` bus.",
+            ),
+            call(
+                "loop_on",
+                &["bus", "clip", "volume"],
+                "Plays a sound over and over through a bus you name.",
             ),
             call("pause_all", &[], "Pauses every sound that is playing."),
             call(
                 "play",
                 &["clip", "volume"],
-                "Plays a sound once, at a volume from 0 (silent) to 1 (full).",
+                "Plays a sound once, at a volume from 0 (silent) to 1 (full), through the `\"effects\"` bus.",
+            ),
+            call(
+                "play_on",
+                &["bus", "clip", "volume"],
+                "Plays a sound once through a bus you name.",
             ),
             call("resume_all", &[], "Continues every paused sound."),
+            call(
+                "set_volume",
+                &["bus", "volume"],
+                "Sets a bus's volume from 0 to 1, at once for every sound playing through it. `\"master\"` turns everything up or down.",
+            ),
             call("stop_all", &[], "Stops every sound that is playing."),
+            call(
+                "volume",
+                &["bus"],
+                "A bus's volume as last set, or 1 for one never set.",
+            ),
         ],
     },
     TypeEntry {

@@ -526,7 +526,8 @@ fn register_gameplay(components: &mut ComponentSchemaRegistry) -> Result<(), Sce
             "clip": "",
             "autoplay": false,
             "looping": false,
-            "volume": 1.0
+            "volume": 1.0,
+            "bus": ""
         }),
     )?;
     Ok(())

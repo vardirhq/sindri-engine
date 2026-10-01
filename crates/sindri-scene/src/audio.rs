@@ -23,12 +23,26 @@ pub struct AudioSourceComponent {
     /// Linear gain in the inclusive 0..=1 range.
     #[serde(default = "default_volume")]
     pub volume: f32,
+    /// The bus it plays through. Left empty, a looping source is music and a
+    /// one-shot an effect, as `Audio.loop` and `Audio.play` route.
+    #[serde(default, skip_serializing_if = "String::is_empty")]
+    pub bus: String,
 }
 
 impl AudioSourceComponent {
     #[must_use]
     pub fn normalized_volume(&self) -> f32 {
         self.volume.clamp(0.0, 1.0)
+    }
+
+    /// The bus this source plays through, with the default filled in.
+    #[must_use]
+    pub fn bus(&self) -> &str {
+        match (self.bus.as_str(), self.looping) {
+            ("", true) => "music",
+            ("", false) => "effects",
+            (named, _) => named,
+        }
     }
 }
 
@@ -65,7 +79,9 @@ mod tests {
             autoplay: true,
             looping: true,
             volume: 4.0,
+            bus: String::new(),
         };
+        assert_eq!(source.bus(), "music");
         assert!((source.normalized_volume() - 1.0).abs() < f32::EPSILON);
 
         source.volume = -2.0;

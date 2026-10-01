@@ -40,7 +40,7 @@ mod ui_input;
 pub use ui_input::ui_input;
 
 pub mod reference;
-pub use audio_host::{AudioCommand, HostServices, WorldHost};
+pub use audio_host::{AudioCommand, AudioQueue, HostServices, WorldHost};
 pub use blackboard::Blackboard;
 pub use check::{CheckPhase, SourceCheck, SourceDiagnostic, check_source, check_source_in};
 pub use component::ScriptComponent;

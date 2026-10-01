@@ -104,6 +104,8 @@ pub struct Session {
     /// file; the browser host uses the page's own storage.
     save_backend: Box<dyn sindri_platform::SaveBackend>,
     pending_audio: Vec<AudioCommand>,
+    /// Bus volumes, and which bus each playing voice went through.
+    mixer: sindri_platform::AudioMixer,
     autoplay_started: bool,
     /// Every scene the project can reach, by the ID a script names.
     scenes: BTreeMap<String, sindri_core::SceneDocument>,
@@ -153,6 +155,7 @@ impl Session {
             since_written: 0.0,
             save_backend: Box::new(sindri_platform::MemorySaves::new()),
             pending_audio: Vec::new(),
+            mixer: sindri_platform::AudioMixer::new(),
             autoplay_started: false,
             scenes: BTreeMap::new(),
             loaded: sindri_core::LoadedScenes::new(),
@@ -442,7 +445,7 @@ impl Session {
             } else {
                 PlaybackSettings::once(source.normalized_volume())
             };
-            match audio.play(&source.clip, settings) {
+            match self.mixer.play(audio, &source.clip, settings, source.bus()) {
                 Ok(_) => {}
                 Err(AudioError::Locked) => return Ok(()),
                 Err(error) => return Err(error.into()),
@@ -458,24 +461,36 @@ impl Session {
         }
 
         for command in std::mem::take(&mut self.pending_audio) {
-            match command {
-                AudioCommand::Play { clip, volume } => {
-                    match audio.play(&clip, PlaybackSettings::once(volume)) {
-                        Ok(_) => {}
-                        Err(error) if survivable(&error) => log::warn!("{error}"),
-                        Err(error) => return Err(error.into()),
-                    }
+            let played = match command {
+                AudioCommand::Play { clip, volume, bus } => {
+                    self.mixer
+                        .play(audio, &clip, PlaybackSettings::once(volume), &bus)
                 }
-                AudioCommand::Loop { clip, volume } => {
-                    match audio.play(&clip, PlaybackSettings::looping(volume)) {
-                        Ok(_) => {}
-                        Err(error) if survivable(&error) => log::warn!("{error}"),
-                        Err(error) => return Err(error.into()),
-                    }
+                AudioCommand::Loop { clip, volume, bus } => {
+                    self.mixer
+                        .play(audio, &clip, PlaybackSettings::looping(volume), &bus)
                 }
-                AudioCommand::StopAll => audio.stop_all(),
-                AudioCommand::PauseAll => audio.pause_all(),
-                AudioCommand::ResumeAll => audio.resume_all(),
+                AudioCommand::SetVolume { bus, volume } => {
+                    self.mixer.set_bus_volume(audio, &bus, volume);
+                    continue;
+                }
+                AudioCommand::StopAll => {
+                    self.mixer.stop_all(audio);
+                    continue;
+                }
+                AudioCommand::PauseAll => {
+                    audio.pause_all();
+                    continue;
+                }
+                AudioCommand::ResumeAll => {
+                    audio.resume_all();
+                    continue;
+                }
+            };
+            match played {
+                Ok(_) => {}
+                Err(error) if survivable(&error) => log::warn!("{error}"),
+                Err(error) => return Err(error.into()),
             }
         }
         Ok(())
