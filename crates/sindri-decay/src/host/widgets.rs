@@ -49,33 +49,12 @@ impl WorldHost<'_> {
             RuntimeError::Host(format!("{}: element needs {component}", path.dotted()))
         })?;
         match call {
-            UiCall::Selected => Ok(Value::Number(
-                payload
-                    .get(field)
-                    .and_then(serde_json::Value::as_f64)
-                    .unwrap_or(0.0),
-            )),
-            UiCall::Open => Ok(Value::Bool(
-                payload
-                    .get(field)
-                    .and_then(serde_json::Value::as_bool)
-                    .unwrap_or(false),
-            )),
             UiCall::SetSelected => {
-                let requested = number(path, args.get(1).unwrap_or(&Value::Null))?;
-                if !requested.is_finite() || requested < 0.0 {
-                    return Err(RuntimeError::Host(format!(
-                        "{}: an option is counted from zero, not {requested}",
-                        path.dotted()
-                    )));
-                }
-                // Kept to the options there are, as a slider keeps to its range.
-                #[allow(clippy::cast_possible_truncation, clippy::cast_sign_loss)]
-                let index = (requested as usize).min(options.saturating_sub(1));
+                let index = option_index(path, args, options)?;
                 payload[field] = serde_json::json!(index);
                 Ok(Value::Unit)
             }
-            UiCall::Checked => Ok(Value::Bool(
+            UiCall::Checked | UiCall::Open => Ok(Value::Bool(
                 payload
                     .get(field)
                     .and_then(serde_json::Value::as_bool)
@@ -88,7 +67,7 @@ impl WorldHost<'_> {
                     .unwrap_or("")
                     .to_owned(),
             )),
-            UiCall::ScrollOffset => Ok(Value::Number(
+            UiCall::ScrollOffset | UiCall::Selected => Ok(Value::Number(
                 payload
                     .get(field)
                     .and_then(serde_json::Value::as_f64)
@@ -158,4 +137,18 @@ impl WorldHost<'_> {
         #[allow(clippy::cast_precision_loss)]
         Ok(Value::Number(at as f64))
     }
+}
+
+/// The option a `set_selected` asks for, kept to the options there are, as a
+/// slider keeps to its range.
+fn option_index(path: &Path, args: &[Value], options: usize) -> Result<usize, RuntimeError> {
+    let requested = number(path, args.get(1).unwrap_or(&Value::Null))?;
+    if !requested.is_finite() || requested < 0.0 {
+        return Err(RuntimeError::Host(format!(
+            "{}: an option is counted from zero, not {requested}",
+            path.dotted()
+        )));
+    }
+    #[allow(clippy::cast_possible_truncation, clippy::cast_sign_loss)]
+    Ok((requested as usize).min(options.saturating_sub(1)))
 }

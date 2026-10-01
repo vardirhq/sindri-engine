@@ -332,7 +332,7 @@ fn a_pad_drives_the_settings() {
     use sindri_platform::{GamepadButton, PadId};
     let mut demo = Demo::open(960.0, 540.0);
     demo.input.apply(InputEvent::GamepadConnected(PadId(1)));
-    let mut button = |demo: &mut Demo, button: GamepadButton| {
+    let button = |demo: &mut Demo, button: GamepadButton| {
         demo.input.apply(InputEvent::GamepadPressed {
             pad: PadId(1),
             button,

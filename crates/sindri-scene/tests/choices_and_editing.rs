@@ -63,6 +63,10 @@ impl Screen {
         self.ui.read_controls(&mut self.world, input);
     }
 
+    #[allow(
+        clippy::needless_pass_by_value,
+        reason = "each call builds its input in place"
+    )]
     fn keys(&mut self, input: UiInput) {
         self.step(&Presses::default(), &input);
     }

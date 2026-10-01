@@ -126,16 +126,15 @@ impl ScreenUi {
             .position(|o| *o == entity);
         if let (Some(index), Some(current)) =
             (index, component::<UiDropdownComponent>(world, dropdown))
+            && index != current.selected
         {
-            if index != current.selected {
-                if let Some(payload) = world
-                    .get_mut(dropdown)
-                    .and_then(|d| d.components.get_mut(UiDropdownComponent::TYPE_NAME))
-                {
-                    payload["selected"] = serde_json::json!(index);
-                }
-                self.changed.insert(dropdown);
+            if let Some(payload) = world
+                .get_mut(dropdown)
+                .and_then(|d| d.components.get_mut(UiDropdownComponent::TYPE_NAME))
+            {
+                payload["selected"] = serde_json::json!(index);
             }
+            self.changed.insert(dropdown);
         }
         set_flag(
             world,
@@ -222,7 +221,13 @@ impl ScreenUi {
                     .collect()
             });
             for popup in popups {
-                if let Some(data) = world.get_mut(popup) {
+                // Only on a change: a write is an edit to the entity, and a
+                // list left as it was is not one.
+                if world
+                    .get(popup)
+                    .is_some_and(|data| data.disabled == state.open)
+                    && let Some(data) = world.get_mut(popup)
+                {
                     data.disabled = !state.open;
                 }
             }
