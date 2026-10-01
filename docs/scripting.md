@@ -997,6 +997,10 @@ a person who has not clicked yet.
 | `Physics.apply_impulse(entity, x, y)` | nothing |
 | `Physics.connect_distance(first, second, max_distance)` | nothing |
 | `Physics.raycast(origin, direction, max_distance, mask, include_sensors, exclude)` | `RayHit2d` or `null` |
+| `Physics.cast_circle(origin, radius, direction, max_distance, mask, include_sensors, exclude)` | `RayHit2d` or `null` |
+| `Physics.cast_box(origin, half_size, rotation, direction, max_distance, mask, include_sensors, exclude)` | `RayHit2d` or `null` |
+| `Physics.overlap_circle(center, radius, mask, include_sensors, exclude)` | `[Entity]` |
+| `Physics.overlap_box(center, half_size, rotation, mask, include_sensors, exclude)` | `[Entity]` |
 | `Physics.collision_started()` | `List<Entity>` |
 | `Physics.collision_stopped()` | `List<Entity>` |
 | `Physics.sensor_entered()` | `List<Entity>` |
@@ -1090,7 +1094,28 @@ spatial index. The platformer displays clearance below its hero, preserving its
 foot-sensor jump rules; Physics Playground makes masks, sensors, inside hits,
 misses, hit points and normals visible.
 
-**Overlap, shape casts and contact detail remain absent.**
+`Physics.overlap_circle` and `Physics.overlap_box` are area checks: every
+entity with a piece overlapping a circle, or a box `half_size` from its centre
+to each edge and turned by `rotation` radians, as an array holding each entity
+once, in handle order. `Physics.cast_circle` and `Physics.cast_box` sweep the
+same shapes from `origin` along `direction`, without turning, and return the
+first piece touched as a `RayHit2d`: `point` is where the two touch, `normal`
+the touched surface's, and `distance` how far the shape's centre travelled.
+Starting already overlapping gives distance 0 and normal (0, 0). The mask,
+sensor and exclude arguments, the validation and the synchronization rules are
+the raycast's. A radius or half size must be positive. Orbital Last Stand's
+hostile mine damages what its blast circle overlaps, so a target whose edge the
+blast reaches is hit; Physics Playground shows a swept circle stopping short of
+the ray and an area naming what it holds.
+
+```decay
+let centre = Vec2(this.transform.position.x, this.transform.position.y);
+for target in Physics.overlap_circle(centre, 1.75, 4294967295.0, true, this.entity) {
+    World.send_signal(target, "hazard_damage", 1.0);
+}
+```
+
+**Contact detail (points, normals and impulses of a collision) remains absent.**
 
 ### Grid position
 
@@ -1314,6 +1339,10 @@ hold is reported by the advance, the same way a broken clip authored by hand is.
 | --- | --- |
 | `Audio.play(clip, volume)` | nothing |
 | `Audio.loop(clip, volume)` | nothing |
+| `Audio.play_on(bus, clip, volume)` | nothing |
+| `Audio.loop_on(bus, clip, volume)` | nothing |
+| `Audio.set_volume(bus, volume)` | nothing |
+| `Audio.volume(bus)` | `f32` |
 | `Audio.stop_all()` | nothing |
 | `Audio.pause_all()` | nothing |
 | `Audio.resume_all()` | nothing |
@@ -1324,6 +1353,18 @@ only emits typed playback intent; it never owns or talks to an audio device.
 The host drains those requests through the platform audio boundary, which keeps
 headless tests silent and lets browser playback obey its user-interaction unlock
 without teaching the language about either platform.
+
+Every sound plays through a bus: `play` through `"effects"`, `loop` through
+`"music"`, and `play_on`/`loop_on` through any bus named. A bus exists once it
+is named, at full volume, and every bus is under `"master"`: a voice is heard
+at its own volume times its bus's times the master's. `set_volume` moves a bus
+at once for every voice playing through it and every voice started later;
+`volume` reads it back, 1 for a bus never set. Bus volumes outlive `stop_all`
+and a scene change: they are the player's settings, which a game saves with
+`Save.set_number` and restores at start. An authored `sindri.audio.source`
+names its bus with `bus`, or leaves it empty to follow `loop`/`play`. Orbital
+Last Stand's pause screen moves the master, music and effects buses with three
+sliders and remembers them.
 
 ### The keyboard
 

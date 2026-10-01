@@ -32,6 +32,15 @@ impl WorldHost<'_> {
         if matches!(call, PhysicsCall::Raycast) {
             return self.physics_raycast(path, args);
         }
+        if matches!(
+            call,
+            PhysicsCall::OverlapCircle
+                | PhysicsCall::OverlapBox
+                | PhysicsCall::CastCircle
+                | PhysicsCall::CastBox
+        ) {
+            return self.physics_shape_query(call, path, args);
+        }
         if call.is_event() {
             return self.physics_events(call, path);
         }

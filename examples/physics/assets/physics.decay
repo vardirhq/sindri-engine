@@ -11,6 +11,9 @@ script PhysicsPlayground {
     var inside: bool = false;
     var last: String = "";
 
+    // 0 a ray, 1 a circle swept along it, 2 an area at its far end.
+    var mode: f32 = 0.0;
+
     fn update(dt: f32) {
         controls();
         this.angle += Input.axis("ArrowLeft", "ArrowRight") * dt;
@@ -18,18 +21,46 @@ script PhysicsPlayground {
         var start = origin;
         if this.inside { start = Vec2(1.0, 0.0); }
         let direction = Vec2(cos(this.angle), sin(this.angle));
-        let hit: RayHit2d = Physics.raycast(start, direction, this.distance, this.mask, this.sensors, null);
         var end = start + direction * this.distance;
         var result = "miss";
         let dot = World.find("hit-dot");
         let normal = World.find("normal-line");
-        World.set_active(dot, hit != null);
-        World.set_active(normal, hit != null);
-        if hit != null {
-            end = hit.point;
-            dot.transform.position = Vec3(end.x, end.y, 0.2);
-            line(normal, end, end + hit.normal * 0.7, 0.035);
-            result = name(hit.entity) + " / d " + hit.distance.fixed(2) + " / n " + hit.normal.x.fixed(1) + "," + hit.normal.y.fixed(1);
+        let ring = World.find("probe-ring");
+        World.set_active(ring, this.mode != 0.0);
+        if this.mode == 2.0 {
+            // Everything with a collider inside a circle of radius 1 at the
+            // ray's far end, each once.
+            World.set_active(dot, false);
+            World.set_active(normal, false);
+            ring.transform.position = Vec3(end.x, end.y, 0.2);
+            ring.transform.scale = Vec3(2.0, 2.0, 1.0);
+            var names = "";
+            for found in Physics.overlap_circle(end, 1.0, this.mask, this.sensors, null) {
+                if names != "" { names = names + ", "; }
+                names = names + name(found);
+            }
+            result = "area: nothing";
+            if names != "" { result = "area: " + names; }
+        } else {
+            // A ray, or a circle of radius 0.35 swept the same way: it stops
+            // where its edge first touches, which a ray can slip past.
+            var hit: RayHit2d = null;
+            if this.mode == 1.0 {
+                hit = Physics.cast_circle(start, 0.35, direction, this.distance, this.mask, this.sensors, null);
+            } else {
+                hit = Physics.raycast(start, direction, this.distance, this.mask, this.sensors, null);
+            }
+            World.set_active(dot, hit != null);
+            World.set_active(normal, hit != null);
+            if hit != null {
+                end = start + direction * hit.distance;
+                dot.transform.position = Vec3(hit.point.x, hit.point.y, 0.2);
+                line(normal, hit.point, hit.point + hit.normal * 0.7, 0.035);
+                result = name(hit.entity) + " / d " + hit.distance.fixed(2) + " / n " + hit.normal.x.fixed(1) + "," + hit.normal.y.fixed(1);
+                if this.mode == 0.0 { end = hit.point; }
+            }
+            ring.transform.position = Vec3(end.x, end.y, 0.2);
+            ring.transform.scale = Vec3(0.7, 0.7, 1.0);
         }
         line(World.find("ray-line"), start, end, 0.025);
         let probe = World.find("origin-dot");
@@ -65,6 +96,11 @@ script PhysicsPlayground {
             else { this.mask = 3.0; }
             changed = true;
         }
+        if Input.just_pressed("C") || Ui.is_pressed(World.find("query")) {
+            this.mode = this.mode + 1.0;
+            if this.mode > 2.0 { this.mode = 0.0; }
+            changed = true;
+        }
         if Input.just_pressed("I") || Ui.is_pressed(World.find("inside")) { this.inside = !this.inside; changed = true; }
         if Input.just_pressed("Q") || Ui.is_pressed(World.find("less")) { this.distance = max(0.0, this.distance - 1.0); changed = true; }
         if Input.just_pressed("E") || Ui.is_pressed(World.find("more")) { this.distance = min(10.0, this.distance + 1.0); changed = true; }
@@ -72,7 +108,7 @@ script PhysicsPlayground {
         if Ui.is_pressed(World.find("right")) { this.angle += PI / 12.0; changed = true; }
         if Input.just_pressed("B") || Ui.is_pressed(World.find("drop")) { drop(); changed = true; }
         if Input.just_pressed("R") || Ui.is_pressed(World.find("reset")) {
-            this.angle = 0.0; this.distance = 7.0; this.mask = 3.0; this.sensors = false; this.inside = false;
+            this.angle = 0.0; this.distance = 7.0; this.mask = 3.0; this.sensors = false; this.inside = false; this.mode = 0.0;
             Game.contacts = 0.0; Game.sensor_entries = 0.0;
             drop(); changed = true;
         }
@@ -86,6 +122,10 @@ script PhysicsPlayground {
             Ui.set_text(World.find("mask-label"), "MASK " + mask_name);
             Ui.set_text(World.find("inside-label"), "ORIGIN OUTSIDE");
             if this.inside { Ui.set_text(World.find("inside-label"), "ORIGIN INSIDE"); }
+            var mode_name = "QUERY RAY";
+            if this.mode == 1.0 { mode_name = "QUERY CIRCLE CAST"; }
+            else if this.mode == 2.0 { mode_name = "QUERY AREA"; }
+            Ui.set_text(World.find("query-mode-label"), mode_name);
             print("Physics controls " + mask_name);
         }
     }

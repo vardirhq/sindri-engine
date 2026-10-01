@@ -65,12 +65,12 @@ script HostileMine {
         World.despawn(this.entity);
     }
 
+    // What the blast's circle overlaps, by collider rather than by centre: a
+    // large target the edge of the blast catches is caught, as it looks.
     fn damage_targets() {
-        for target in World.with_tag("attack_damageable") {
-            if !World.exists(target) { continue; }
-            let dx = target.transform.position.x - this.transform.position.x;
-            let dy = target.transform.position.y - this.transform.position.y;
-            if dx * dx + dy * dy <= this.blast_radius * this.blast_radius {
+        let centre = Vec2(this.transform.position.x, this.transform.position.y);
+        for target in Physics.overlap_circle(centre, this.blast_radius, 4294967295.0, true, this.entity) {
+            if World.has_tag(target, "attack_damageable") {
                 World.send_signal(target, "hazard_damage", this.damage);
             }
         }

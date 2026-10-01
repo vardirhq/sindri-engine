@@ -166,3 +166,39 @@ fn phone_touch_buttons_toggle_sensors_and_turn_the_visible_ray() {
     demo.step();
     assert!(demo.text("query-label").contains("angle 0.26"));
 }
+
+#[test]
+fn a_swept_circle_stops_short_of_the_ray_and_an_area_lists_what_it_holds() {
+    let mut demo = Demo::new(960.0, 540.0);
+    demo.press(Key::C);
+    assert_eq!(demo.text("query-mode-label"), "QUERY CIRCLE CAST");
+    // The ray meets the solid circle's face at 3.40; a circle of radius 0.35
+    // swept the same way touches it that much sooner.
+    assert!(
+        demo.text("result-label").starts_with("Solid / d 3.05"),
+        "{}",
+        demo.text("result-label")
+    );
+    assert!(demo.world.is_active(demo.id("probe-ring")));
+
+    demo.press(Key::C);
+    assert_eq!(demo.text("query-mode-label"), "QUERY AREA");
+    for _ in 0..3 {
+        demo.press(Key::Q);
+    }
+    assert_eq!(demo.text("result-label"), "area: Solid");
+    for _ in 0..2 {
+        demo.press(Key::Q);
+    }
+    assert!(!demo.text("result-label").contains("Sensor"));
+    demo.press(Key::S);
+    assert!(
+        demo.text("result-label").contains("Sensor"),
+        "{}",
+        demo.text("result-label")
+    );
+
+    demo.press(Key::C);
+    assert_eq!(demo.text("query-mode-label"), "QUERY RAY");
+    assert!(!demo.world.is_active(demo.id("probe-ring")));
+}

@@ -246,6 +246,50 @@ pub(super) const TYPES: &[TypeEntry] = &[
                 "Ties two objects together like a rope: they can come closer, but never further apart than a distance.",
             ),
             call(
+                "cast_box",
+                &[
+                    "origin",
+                    "half_size",
+                    "rotation",
+                    "direction",
+                    "max_distance",
+                    "mask",
+                    "include_sensors",
+                    "exclude",
+                ],
+                "Like `cast_circle`, for a box `half_size` from its centre to each edge, turned by `rotation` radians.",
+            ),
+            call(
+                "cast_circle",
+                &[
+                    "origin",
+                    "radius",
+                    "direction",
+                    "max_distance",
+                    "mask",
+                    "include_sensors",
+                    "exclude",
+                ],
+                "Sweeps a circle from `origin` along `direction` and returns the first collider it would touch, as RayHit2d or null: a raycast with a size, for whether something fits through a gap. `point` is where they touch and `distance` how far the circle's centre travelled. Starting already overlapping gives distance 0 and normal Vec2(0, 0). The filter arguments are the raycast's.",
+            ),
+            call(
+                "overlap_box",
+                &[
+                    "center",
+                    "half_size",
+                    "rotation",
+                    "mask",
+                    "include_sensors",
+                    "exclude",
+                ],
+                "Like `overlap_circle`, for a box `half_size` from its centre to each edge, turned by `rotation` radians.",
+            ),
+            call(
+                "overlap_circle",
+                &["center", "radius", "mask", "include_sensors", "exclude"],
+                "Every object with a collider inside a circle, as a list, each once: an area check for a blast, an aura or a pickup radius. The filter arguments are the raycast's: which layers, whether trigger areas count, and one object to leave out (or null). Ignores inactive objects.",
+            ),
+            call(
                 "raycast",
                 &[
                     "origin",

@@ -33,6 +33,7 @@ mod raycast;
 mod save;
 mod scene;
 mod services;
+mod shape_query;
 mod shared;
 mod tiles;
 mod tween;

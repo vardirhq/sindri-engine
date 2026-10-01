@@ -150,3 +150,46 @@ fn the_stress_preset_has_real_cross_attack_reactions() {
         "clearing the lab did not restore its destructible targets"
     );
 }
+
+/// A mine's blast reaches what its circle overlaps, collider and all: a target
+/// whose centre is just outside the blast but whose body is inside it is hit.
+#[test]
+fn a_mine_blast_catches_a_target_by_its_edge() {
+    let mut run = lab_run();
+    let document = run
+        .prefabs
+        .get("prefabs/attack-hostile-mine.prefab")
+        .expect("the mine prefab ships")
+        .clone();
+    let spawned = run.world.spawn_prefab(&document).expect("mine spawns");
+    let mine = spawned.root;
+    let data = run.world.get_mut(mine).expect("the mine");
+    // 1.95 from the target at (-1.35, -0.25): outside a 1.75 blast by its
+    // centre, inside it by the target's 0.32 radius.
+    data.transform_3d.as_mut().expect("placed").position = [0.6, -0.25, 0.0];
+    data.components.get_mut("sindri.script").expect("scripted")["properties"]["lifetime"] =
+        serde_json::json!(0.0);
+
+    let target = run
+        .world
+        .entities()
+        .find(|(_, data)| {
+            data.transform_3d.is_some_and(|t| {
+                (t.position[0] + 1.35).abs() < 1.0e-3 && (t.position[1] + 0.25).abs() < 1.0e-3
+            })
+        })
+        .map(|(entity, _)| entity)
+        .expect("the near-left target");
+    step(&mut run);
+    step(&mut run);
+    step(&mut run);
+    let hp = run
+        .scripts
+        .field(target, "hp")
+        .and_then(|value| match value {
+            sindri_decay::ScriptValue::Number(hp) => Some(*hp),
+            _ => None,
+        })
+        .expect("a target with health");
+    assert!(hp < 2.4, "the blast's edge missed a target it overlapped");
+}

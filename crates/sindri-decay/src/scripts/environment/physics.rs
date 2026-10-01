@@ -33,6 +33,36 @@ pub(super) fn add_physics_surface(environment: &mut Environment) {
                         Type::Bool,
                         entity(),
                     ],
+                    PhysicsCall::OverlapCircle => {
+                        vec![Type::Vec2, Type::F32, Type::F32, Type::Bool, entity()]
+                    }
+                    PhysicsCall::OverlapBox => vec![
+                        Type::Vec2,
+                        Type::Vec2,
+                        Type::F32,
+                        Type::F32,
+                        Type::Bool,
+                        entity(),
+                    ],
+                    PhysicsCall::CastCircle => vec![
+                        Type::Vec2,
+                        Type::F32,
+                        Type::Vec2,
+                        Type::F32,
+                        Type::F32,
+                        Type::Bool,
+                        entity(),
+                    ],
+                    PhysicsCall::CastBox => vec![
+                        Type::Vec2,
+                        Type::Vec2,
+                        Type::F32,
+                        Type::Vec2,
+                        Type::F32,
+                        Type::F32,
+                        Type::Bool,
+                        entity(),
+                    ],
                     PhysicsCall::VelocityX | PhysicsCall::VelocityY => vec![entity()],
                     PhysicsCall::SetVelocity | PhysicsCall::ApplyImpulse => {
                         vec![entity(), Type::F32, Type::F32]
@@ -46,7 +76,9 @@ pub(super) fn add_physics_surface(environment: &mut Environment) {
                     _ => Vec::new(),
                 },
                 return_type: match call {
-                    PhysicsCall::Raycast => Type::Named(RAY_HIT.to_owned()),
+                    PhysicsCall::Raycast | PhysicsCall::CastCircle | PhysicsCall::CastBox => {
+                        Type::Named(RAY_HIT.to_owned())
+                    }
                     PhysicsCall::VelocityX | PhysicsCall::VelocityY => Type::F32,
                     PhysicsCall::SetVelocity
                     | PhysicsCall::ApplyImpulse
