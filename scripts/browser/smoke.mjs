@@ -143,6 +143,7 @@ const uiEvidence = freshUiEvidence();
 const spatialResults = new Set();
 let spatialChanges = 0;
 const inputEvidence = { boosts: 0, waiting: false, rebound: '' };
+const mixerSaid = [];
 const fetchedAssets = new Set();
 // A shader that fails to compile is reported by the GPU implementation as a
 // console *warning*, not an error, and the page carries on and presents empty
@@ -158,6 +159,8 @@ page.on('console', (message) => {
   if (mask) { physicsEvidence.masks.add(mask[1]); physicsEvidence.changes += 1; }
   if (text.includes('Physics sensor entered')) physicsEvidence.sensor = true;
   if (text.includes('Physics contact')) physicsEvidence.contact = true;
+  const mixer = text.match(/Mixer (.+)$/);
+  if (mixer) mixerSaid.push(mixer[1]);
   if (text.includes('Input boost')) inputEvidence.boosts += 1;
   if (text.includes('Input waiting')) inputEvidence.waiting = true;
   const rebound = text.match(/Input rebound (.+)$/);
@@ -284,6 +287,21 @@ if (process.env.SINDRI_TWEEN_DEMO === '1') {
   await page.waitForTimeout(750);
   for (const action of [1, 2, 3, 4, 5]) {
     if (!tweenActions.has(action)) problems.push('tween demo missed control ' + action);
+  }
+}
+
+if (process.env.SINDRI_MIXER_DEMO === '1') {
+  // A click on empty space unlocks audio and lets go of focus, so Tab brings
+  // it back to master, the first control; the arrows then move its bus.
+  await page.mouse.click(VIEWPORT.width / 2, VIEWPORT.height * 0.9);
+  await page.keyboard.press('Tab');
+  await page.waitForTimeout(250);
+  for (const _ of [0, 1]) {
+    await page.keyboard.press('ArrowLeft');
+    await page.waitForTimeout(250);
+  }
+  if (!mixerSaid.includes('master is at 90%.')) {
+    problems.push('mixer did not move the master bus: ' + JSON.stringify(mixerSaid));
   }
 }
 

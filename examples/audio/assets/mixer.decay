@@ -1,0 +1,55 @@
+// A volume per bus. The looping theme is authored on the music bus (a looping
+// source with no bus named is music); the buttons play effects. Each slider
+// sets its bus at once, for what is playing and for what plays next.
+script Mixer {
+    fn start() {
+        show("master");
+        show("music");
+        show("effects");
+    }
+
+    fn update(dt: f32) {
+        follow("master");
+        follow("music");
+        follow("effects");
+        if Ui.is_pressed(World.find("shot")) {
+            Audio.play("audio/shot.wav", 0.8);
+            say("A shot, on the effects bus at " + percent(Audio.volume("effects")) + ".");
+        }
+        if Ui.is_pressed(World.find("boom")) {
+            Audio.play_on("effects", "audio/boss.wav", 0.7);
+            say("A boom, on the effects bus at " + percent(Audio.volume("effects")) + ".");
+        }
+    }
+
+    // A slider the person moved sets its bus, and the click that answers is
+    // played through the effects bus, so turning effects down is heard.
+    fn follow(bus: String) {
+        let slider = World.find(bus);
+        if !Ui.slider_changed(slider) { return; }
+        Audio.set_volume(bus, Ui.slider_value(slider));
+        Audio.play("audio/click.wav", 0.4);
+        show(bus);
+        say(bus + " is at " + percent(Audio.volume(bus)) + ".");
+    }
+
+    // The fill and the readout follow the bus, as `Audio.volume` reads it.
+    fn show(bus: String) {
+        let volume = Audio.volume(bus);
+        let slider = World.find(bus);
+        let fill = World.find(bus + "-fill");
+        let width = slider.transform.scale.x;
+        fill.transform.scale.x = max(0.001, width * volume);
+        fill.transform.position.x = slider.transform.position.x - width * 0.5 + width * volume * 0.5;
+        Ui.set_text(World.find(bus + "-value"), percent(volume));
+    }
+
+    fn percent(volume: f32) -> String {
+        return (volume * 100.0).fixed(0) + "%";
+    }
+
+    fn say(text: String) {
+        Ui.set_text(World.find("status"), text);
+        print("Mixer " + text);
+    }
+}

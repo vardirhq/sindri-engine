@@ -299,7 +299,8 @@ fn register_drawables(components: &mut ComponentSchemaRegistry) -> Result<(), Sc
             "max": 1.0,
             "step": 0.0,
             "value": 0.0,
-            "disabled": false
+            "disabled": false,
+            "autofocus": false
         }),
     )?;
     super::widget_registry::register(components)?;

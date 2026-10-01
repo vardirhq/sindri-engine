@@ -1,0 +1,6 @@
+format_version = 1
+[project]
+name = "Sound Mixer"
+main_scene = "assets/mixer.scene"
+[assets]
+include = ["fonts/Fonts-OFL.txt", "audio/shot.wav", "audio/boss.wav", "audio/click.wav"]

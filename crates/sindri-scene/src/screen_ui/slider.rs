@@ -48,6 +48,10 @@ pub struct UiSliderComponent {
     pub value: f32,
     #[serde(default)]
     pub disabled: bool,
+    /// Takes focus when it appears and nothing else has it, as a button's
+    /// `autofocus` does: a settings screen ready for a pad.
+    #[serde(default)]
+    pub autofocus: bool,
 }
 
 impl UiSliderComponent {
@@ -162,6 +166,7 @@ mod tests {
             step: 2.0,
             value: 14.0,
             disabled: false,
+            autofocus: false,
         }
     }
 

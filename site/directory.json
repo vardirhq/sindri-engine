@@ -141,6 +141,21 @@
   },
   {
     "category": "demos",
+    "title": "Sound Mixer",
+    "path": "examples/audio/",
+    "source": "examples/audio",
+    "description": "Turn the master, music and effects buses up and down while the theme plays.",
+    "tags": [
+      "audio",
+      "buses",
+      "volume",
+      "sliders",
+      "decay",
+      "responsive"
+    ]
+  },
+  {
+    "category": "demos",
     "title": "Weave Control Room",
     "path": "examples/ui/",
     "source": "examples/ui",

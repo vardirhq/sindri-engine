@@ -69,6 +69,7 @@ jobs:
             "examples/spatial:spatial" \
             "examples/physics:physics" \
             "examples/input:input" \
+            "examples/audio:audio" \
             "examples/ui:ui" \
             "game:causeway" \
             "games/flappy:flappy" \
