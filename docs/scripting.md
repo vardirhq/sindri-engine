@@ -792,6 +792,17 @@ disqualifying for anything else.
 | `Ui.changed(entity)` | `bool` |
 | `Ui.submitted(entity)` | `bool` |
 | `Ui.is_focused(entity)` | `bool` |
+| `Ui.position(entity)` | `Vec2` |
+| `Ui.size(entity)` | `Vec2` |
+
+**Layout.** `Ui.position` and `Ui.size` read where an element was laid out and
+how big, in overlay units: 0 is the middle of the screen, one unit is half its
+height, and up is positive. They read the layout rather than the transform, so
+an element a stylesheet grows with `flex-grow` reports the room it was given;
+an element that is not laid out — a layout container with nothing drawn — is an
+error. A game fits something in the world to a gap in its UI with them: the
+Input example sizes its arena to the room between its bindings panel and its
+status line.
 
 **Widgets.** A `sindri.ui.toggle` is a switch or checkbox, and toggles that
 share a `group` are a radio group: choosing one unchecks the rest. A

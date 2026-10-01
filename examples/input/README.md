@@ -15,7 +15,12 @@ boost's first binding with `Action.rebind`; **ADD BOOST KEY** adds one beside
 the others. The labels list each action's bindings as `Action.bindings` reads
 them, so a rebinding shows up at once. Escape cancels.
 
-All behaviour is in `assets/input.decay`. `crates/sindri-decay/tests/input_demo.rs`
+The layout is `assets/ui/input.weave`: the bindings across the top and the
+controls along the bottom. The script reads where those were laid out with
+`Ui.position` and `Ui.size` and sizes the ship's arena to the room between
+them, so a phone held upright gets a tall arena and a desktop a wide one.
+
+All behaviour is in `assets/input.decay`. `game/tests/the_mixer_and_input_demos_work.rs`
 moves the ship, boosts it, rebinds boost to J and boosts with J; the browser
 smoke does the same through a page.
 

@@ -15,8 +15,28 @@ script InputDemo {
         } else {
             capture();
         }
-        Ui.set_text(World.find("move-label"), "move: " + listed("move"));
-        Ui.set_text(World.find("boost-label"), "boost: " + listed("boost"));
+        Ui.set_text(World.find("move-label"), "MOVE   " + listed("move"));
+        Ui.set_text(World.find("boost-label"), "BOOST   " + listed("boost"));
+        fit_arena();
+    }
+
+    // The arena fills the room the layout left between the bindings and the
+    // controls, read in overlay units (half the screen's height is one) and
+    // turned into the world's, so a phone held upright gets a tall arena and
+    // a desktop a wide one.
+    fn fit_arena() {
+        let bindings = World.find("bindings");
+        let status = World.find("status");
+        let upper = Ui.position(bindings).y - Ui.size(bindings).y * 0.5;
+        let lower = Ui.position(status).y + Ui.size(status).y * 0.5;
+        var high: f32 = 12.0;
+        if Viewport.aspect < 1.0 { high = 12.0 / Viewport.aspect; }
+        let unit = high * 0.5;
+        let gap = 0.04;
+        let wide = Ui.size(bindings).x;
+        let arena = World.find("arena");
+        arena.transform.scale = Vec3(wide * unit, max(0.5, (upper - lower - gap * 2.0) * unit), 1.0);
+        arena.transform.position = Vec3(0.0, (upper + lower) * 0.5 * unit, -0.5);
     }
 
     fn listen(index: f32) {
@@ -40,11 +60,13 @@ script InputDemo {
         this.waiting = -1.0;
     }
 
+    // Each binding as its text, short enough to read: `key.` is understood,
+    // and a pad is said as a pad.
     fn listed(action: String) -> String {
         var said = "";
         for binding in Action.bindings(action) {
-            if said != "" { said = said + ", "; }
-            said = said + binding;
+            if said != "" { said = said + "   "; }
+            said = said + binding.replace("key.", "").replace("gamepad.", "pad ");
         }
         return said;
     }
@@ -62,10 +84,15 @@ script Ship {
             this.shape.fill = Color(1.0, 0.52, 0.22, 1.0);
         }
         if Action.pressed("boost") { print("Input boost"); }
+        // Kept inside the arena, whatever shape the screen gave it.
+        let arena = World.find("arena");
+        let reach_x = arena.transform.scale.x * 0.5 - 0.3;
+        let reach_y = arena.transform.scale.y * 0.5 - 0.3;
+        let centre_y = arena.transform.position.y;
         let p = this.transform.position;
         this.transform.position = Vec3(
-            max(-4.7, min(4.7, p.x + way.x * pace * dt)),
-            max(-2.7, min(2.7, p.y + way.y * pace * dt)),
+            max(-reach_x, min(reach_x, p.x + way.x * pace * dt)),
+            max(centre_y - reach_y, min(centre_y + reach_y, p.y + way.y * pace * dt)),
             p.z
         );
     }

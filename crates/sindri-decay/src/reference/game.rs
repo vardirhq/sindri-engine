@@ -18,6 +18,16 @@ pub(super) const TYPES: &[TypeEntry] = &[
                 "Whether the mouse or finger is over a button.",
             ),
             call(
+                "position",
+                &["element"],
+                "Where an element was laid out on the screen, as a Vec2 in overlay units: 0 is the middle, and one unit is half the screen's height, up positive.",
+            ),
+            call(
+                "size",
+                &["element"],
+                "How wide and tall an element was laid out, in the same units as `position`, including room a stylesheet's `flex-grow` gave it.",
+            ),
+            call(
                 "is_pressed",
                 &["button"],
                 "Whether a button was clicked this frame: pressed and let go while on it.",

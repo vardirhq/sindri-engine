@@ -36,11 +36,7 @@ script Mixer {
     // The fill and the readout follow the bus, as `Audio.volume` reads it.
     fn show(bus: String) {
         let volume = Audio.volume(bus);
-        let slider = World.find(bus);
-        let fill = World.find(bus + "-fill");
-        let width = slider.transform.scale.x;
-        fill.transform.scale.x = max(0.001, width * volume);
-        fill.transform.position.x = slider.transform.position.x - width * 0.5 + width * volume * 0.5;
+        Ui.set_fill(World.find(bus + "-fill"), volume);
         Ui.set_text(World.find(bus + "-value"), percent(volume));
     }
 

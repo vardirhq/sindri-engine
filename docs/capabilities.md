@@ -174,7 +174,7 @@ before any script runs; `Action.held`, `pressed`, `released`, `axis` and
 `Action.last_pressed` rebind one while the game runs, written back into the
 component. The platformer's hero runs and jumps by actions
 (`games/platformer/tests/a_run_reaches_the_flag.rs`), and `examples/input`
-rebinds its boost (`crates/sindri-decay/tests/input_demo.rs`, and the browser
+rebinds its boost (`game/tests/the_mixer_and_input_demos_work.rs`, and the browser
 smoke). Actions are per scene, not per project or per player, and a rebinding
 is not saved between sessions.
 
@@ -208,7 +208,7 @@ follows its looping. The game session routes scripts' requests and autoplay
 through the mixer. Orbital's pause screen has Master, Music and Effects sliders,
 saved between sessions (`games/orbital-baked/tests/the_mixer.rs`), and
 `examples/audio` is the Sound Mixer feature example
-(`crates/sindri-decay/tests/mixer_demo.rs`). There are no bus effects, ducking
+(`game/tests/the_mixer_and_input_demos_work.rs`). There are no bus effects, ducking
 or snapshots.
 
 What audio does not do yet: nothing gathers the clips a scene names, the way

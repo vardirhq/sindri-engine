@@ -1,0 +1,69 @@
+/* Sound Mixer: one column, a panel of bus rows, sized for a desktop and
+   stacked tighter on a phone. Decay writes values; this decides the look. */
+:root {
+    --ink: #e6f0f7;
+    --muted: #8aa1b6;
+    --accent: #5fe3cf;
+    --panel: #0b1522;
+    --well: #07101b;
+    --line: #22384c;
+    --control: #0f1c2b;
+}
+
+sindri.ui.text { color: var(--ink); text-wrap: word; }
+
+.room { width: 100vw; height: 100vh; padding: 24px; gap: 18px; direction: column; justify-content: center; align-items: center; }
+.heading { width: 100%; height: 40px; font-size: 30px; letter-spacing: 4px; text-align: center; }
+.subtitle { width: 100%; max-width: 560px; height: 22px; font-size: 14px; color: var(--muted); text-align: center; }
+
+.panel {
+    width: 92vw; max-width: 560px; height: 272px; padding: 20px; gap: 14px;
+    direction: column; justify-content: start; align-items: center;
+    background: var(--panel); border-color: var(--line); border-width: 1px; border-radius: 14px;
+}
+.mix-row { width: 100%; height: 44px; direction: row; justify-content: space-between; align-items: center; }
+.row-label { width: 22%; height: 22px; font-size: 15px; letter-spacing: 2px; color: var(--muted); text-align: start; }
+.row-value { width: 14%; height: 22px; font-size: 15px; color: var(--accent); text-align: end; }
+.track {
+    width: 60%; height: 28px; padding: 3px;
+    direction: row; justify-content: start; align-items: center;
+    background: var(--well); border-color: var(--line); border-width: 1px; border-radius: 8px;
+}
+.track:hover { border-color: #3b5a73; }
+.track:focus { border-color: var(--accent); border-width: 2px; }
+.fill { width: 100%; height: 100%; }
+
+.buttons { width: 100%; height: 56px; direction: row; gap: 16px; justify-content: center; align-items: center; }
+.action {
+    width: 46%; height: 48px; direction: row; justify-content: center; align-items: center;
+    background: var(--control); border-color: var(--line); border-width: 1px; border-radius: 10px;
+}
+.action:hover { background: #142638; border-color: #3b5a73; }
+.action:active { background: #0f3b3a; border-color: var(--accent); }
+.action:focus { border-color: var(--accent); border-width: 2px; }
+.action-label { width: 100%; height: 20px; font-size: 15px; letter-spacing: 2px; text-align: center; }
+
+.status { width: 92vw; max-width: 560px; height: 40px; font-size: 15px; line-height: 20px; color: var(--accent); text-align: center; }
+.hint { width: 92vw; max-width: 560px; height: 36px; font-size: 12px; line-height: 18px; color: var(--muted); text-align: center; }
+
+@media (orientation: portrait) {
+    .room { padding: 16px; gap: 14px; }
+    .heading { height: 34px; font-size: 24px; letter-spacing: 3px; }
+    .subtitle { height: 36px; font-size: 13px; line-height: 18px; }
+    .panel { height: 256px; padding: 14px; gap: 12px; }
+    .row-label { width: 26%; font-size: 13px; letter-spacing: 1px; }
+    .track { width: 54%; height: 30px; }
+    .row-value { width: 16%; font-size: 13px; }
+    .action-label { font-size: 13px; letter-spacing: 1px; }
+}
+
+@media (orientation: landscape) and (max-height: 460px) {
+    .room { padding: 10px; gap: 8px; }
+    .heading { height: 30px; font-size: 22px; }
+    .panel { height: 212px; padding: 12px; gap: 8px; }
+    .mix-row { height: 36px; }
+    .buttons { height: 46px; }
+    .action { height: 40px; }
+    .status { height: 22px; font-size: 13px; }
+    .hint { height: 18px; font-size: 11px; }
+}

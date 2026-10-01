@@ -2816,6 +2816,18 @@
           "returns": "bool"
         },
         {
+          "description": "Where an element was laid out on the screen, as a Vec2 in overlay units: 0 is the middle, and one unit is half the screen's height, up positive.",
+          "kind": "function",
+          "name": "position",
+          "parameter_names": [
+            "element"
+          ],
+          "parameters": [
+            "Entity"
+          ],
+          "returns": "Vec2"
+        },
+        {
           "description": "Vertical scroll distance in overlay units.",
           "kind": "function",
           "name": "scroll_offset",
@@ -2990,6 +3002,18 @@
             "String"
           ],
           "returns": "unit"
+        },
+        {
+          "description": "How wide and tall an element was laid out, in the same units as `position`, including room a stylesheet's `flex-grow` gave it.",
+          "kind": "function",
+          "name": "size",
+          "parameter_names": [
+            "element"
+          ],
+          "parameters": [
+            "Entity"
+          ],
+          "returns": "Vec2"
         },
         {
           "description": "Whether the player moved a slider this frame.",
