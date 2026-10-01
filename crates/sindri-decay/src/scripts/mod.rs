@@ -117,6 +117,8 @@ pub struct Scripts {
     tweens: crate::tweens::Tweens,
     /// What scripts asked to play, for whoever owns an audio device to perform.
     audio: AudioQueue,
+    /// The scene's input actions and what each is worth this step.
+    actions: crate::actions::InputActions,
 }
 
 impl Scripts {
@@ -224,6 +226,9 @@ impl Scripts {
             }
         };
 
+        if let Some(problem) = self.actions.update(world, input) {
+            report.failures.push(ScriptFailure::Actions(problem));
+        }
         let Self {
             programs,
             running,
@@ -231,6 +236,7 @@ impl Scripts {
             blackboard,
             tweens,
             audio,
+            actions,
         } = self;
         let mut at = TickWorld {
             programs,
@@ -239,6 +245,7 @@ impl Scripts {
             blackboard,
             tweens,
             audio,
+            actions,
             world,
             sources,
             prefabs,

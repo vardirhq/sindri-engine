@@ -21,6 +21,7 @@
 //! a delta the caller decides — the editor's transport decides what a frame is
 //! worth, the same way it does for sprite animation.
 
+mod actions;
 mod audio_host;
 mod blackboard;
 mod check;

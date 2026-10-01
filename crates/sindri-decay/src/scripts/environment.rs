@@ -3,6 +3,7 @@
 //! Derived from [`crate::surface`] rather than written out, so what a
 //! script may say and what the host will answer cannot drift apart.
 
+mod action;
 mod grid;
 mod physics;
 mod tween;
@@ -122,6 +123,7 @@ pub fn environment() -> Environment {
 
     add_world_surface(&mut environment);
     tween::add_tween_surface(&mut environment);
+    action::add_action_surface(&mut environment);
     add_profile_surface(&mut environment);
 
     super::person_surface::add_pointer_surface(&mut environment);

@@ -155,6 +155,11 @@ impl<'a> WorldHost<'a> {
         self
     }
 
+    pub(crate) fn with_actions(mut self, actions: &'a crate::actions::InputActions) -> Self {
+        self.inner.actions = Some(actions);
+        self
+    }
+
     pub fn new(
         world: &'a mut sindri_core::World,
         entity: sindri_core::EntityId,

@@ -162,6 +162,14 @@ impl ActionMap {
             .map(|action| action.name.as_str())
     }
 
+    /// What an action is bound to now, for a rebinding interface to show.
+    #[must_use]
+    pub fn bindings(&self, id: ActionId) -> &[Binding] {
+        self.actions
+            .get(id.index())
+            .map_or(&[], |action| action.bindings.as_slice())
+    }
+
     pub(super) fn iter(&self) -> impl Iterator<Item = &Action> {
         self.actions.iter()
     }

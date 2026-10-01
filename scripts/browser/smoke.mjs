@@ -142,6 +142,7 @@ const physicsEvidence = { results: new Set(), masks: new Set(), changes: 0, sens
 const uiEvidence = freshUiEvidence();
 const spatialResults = new Set();
 let spatialChanges = 0;
+const inputEvidence = { boosts: 0, waiting: false, rebound: '' };
 const fetchedAssets = new Set();
 // A shader that fails to compile is reported by the GPU implementation as a
 // console *warning*, not an error, and the page carries on and presents empty
@@ -157,6 +158,10 @@ page.on('console', (message) => {
   if (mask) { physicsEvidence.masks.add(mask[1]); physicsEvidence.changes += 1; }
   if (text.includes('Physics sensor entered')) physicsEvidence.sensor = true;
   if (text.includes('Physics contact')) physicsEvidence.contact = true;
+  if (text.includes('Input boost')) inputEvidence.boosts += 1;
+  if (text.includes('Input waiting')) inputEvidence.waiting = true;
+  const rebound = text.match(/Input rebound (.+)$/);
+  if (rebound) inputEvidence.rebound = rebound[1];
   if (text.includes('Spatial demo controls changed')) spatialChanges += 1;
   const result = text.match(/Spatial demo nearest (.+)/);
   if (result) spatialResults.add(result[1]);
@@ -280,6 +285,29 @@ if (process.env.SINDRI_TWEEN_DEMO === '1') {
   for (const action of [1, 2, 3, 4, 5]) {
     if (!tweenActions.has(action)) problems.push('tween demo missed control ' + action);
   }
+}
+
+if (process.env.SINDRI_INPUT_DEMO === '1') {
+  // Boost by the declared action, rebind it to J through the page, and boost
+  // again by the new key: the action layer, end to end in a browser.
+  await page.mouse.click(VIEWPORT.width / 2, VIEWPORT.height / 2);
+  const tap = async (key) => {
+    await page.keyboard.down(key);
+    await page.waitForTimeout(250);
+    await page.keyboard.up(key);
+    await page.waitForTimeout(250);
+  };
+  await tap('Space');
+  if (inputEvidence.boosts < 1) problems.push('input demo did not boost on Space');
+  await tap('KeyK');
+  if (!inputEvidence.waiting) problems.push('input demo did not wait for a key');
+  await tap('KeyJ');
+  if (inputEvidence.rebound !== 'key.J') {
+    problems.push('input demo rebound boost to ' + JSON.stringify(inputEvidence.rebound));
+  }
+  const before = inputEvidence.boosts;
+  await tap('KeyJ');
+  if (inputEvidence.boosts <= before) problems.push('input demo did not boost on the new key');
 }
 
 if (process.env.SINDRI_CAMERA_DEMO === '1') {

@@ -27,6 +27,44 @@ pub(super) const TYPES: &[TypeEntry] = &[
         ],
     },
     TypeEntry {
+        name: "Action",
+        text: "What the player means rather than what they pressed: the input actions the scene declares, such as `\"jump\"` or `\"move\"`, each bound to keys, buttons and sticks that can be changed while the game runs. A binding is written as text: `\"key.Space\"`, two sources for an axis (`\"key.A/key.D\"`), or four for a direction (`\"key.W/key.S/key.A/key.D\"`). A name the scene does not declare is an error.",
+        members: &[
+            call("axis", &["name"], "An axis action's value, from -1 to 1."),
+            call(
+                "bindings",
+                &["name"],
+                "What an action is bound to now, as a list of binding texts.",
+            ),
+            call("held", &["name"], "Whether an action is being made now."),
+            call(
+                "last_pressed",
+                &[],
+                "The key, mouse button or controller button pressed this frame, as a source name such as `\"key.J\"`, or empty text: for a screen that waits for the key to rebind to.",
+            ),
+            call(
+                "pressed",
+                &["name"],
+                "Whether an action started this frame.",
+            ),
+            call(
+                "rebind",
+                &["name", "index", "binding"],
+                "Replaces an action's binding at `index` with a binding text, or adds one at the next index. A binding that cannot make the action's kind is refused.",
+            ),
+            call(
+                "released",
+                &["name"],
+                "Whether an action stopped this frame.",
+            ),
+            call(
+                "vector",
+                &["name"],
+                "A direction action's value, as a Vec2 with right and up positive.",
+            ),
+        ],
+    },
+    TypeEntry {
         name: "Gamepad",
         text: "Game controllers. Each player gets a number from 1 to 8 when they press a button on their controller; 0 means any controller.",
         members: &[

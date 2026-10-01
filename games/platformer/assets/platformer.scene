@@ -102,6 +102,45 @@
             "hero",
             "pickups"
           ]
+        },
+        "sindri.input.actions": {
+          "actions": [
+            {
+              "name": "run",
+              "kind": "axis",
+              "bindings": [
+                {
+                  "axis": {
+                    "negative": "key.A",
+                    "positive": "key.D"
+                  }
+                },
+                {
+                  "axis": {
+                    "negative": "key.ArrowLeft",
+                    "positive": "key.ArrowRight"
+                  }
+                },
+                "gamepad.axis.left_x",
+                {
+                  "axis": {
+                    "negative": "gamepad.dpad_left",
+                    "positive": "gamepad.dpad_right"
+                  }
+                }
+              ]
+            },
+            {
+              "name": "jump",
+              "kind": "button",
+              "bindings": [
+                "key.Space",
+                "key.W",
+                "key.ArrowUp",
+                "gamepad.south"
+              ]
+            }
+          ]
         }
       }
     },

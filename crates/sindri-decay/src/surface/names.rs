@@ -13,6 +13,9 @@ pub(crate) const RGBA: &str = "Rgba";
 
 pub(crate) const INPUT: &str = "Input";
 
+/// What the person means, from the scene's declared input actions.
+pub(crate) const ACTION: &str = "Action";
+
 /// The players' pads, read by player slot.
 pub(crate) const GAMEPAD: &str = "Gamepad";
 

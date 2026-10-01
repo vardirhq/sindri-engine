@@ -26,6 +26,7 @@ pub(super) struct TickWorld<'a> {
     pub(super) tweens: &'a mut crate::tweens::Tweens,
     pub(super) blackboard: &'a mut Blackboard,
     pub(super) audio: &'a mut AudioQueue,
+    pub(super) actions: &'a crate::actions::InputActions,
     pub(super) world: &'a mut World,
     pub(super) sources: &'a ScriptSources,
     pub(super) prefabs: &'a PrefabSources,
@@ -281,6 +282,7 @@ fn host_for<'b>(
         },
     )
     .with_tweens(&mut *at.tweens)
+    .with_actions(at.actions)
     .with_peers(Peers {
         running: &mut *at.running,
         starting: &mut *at.starting,

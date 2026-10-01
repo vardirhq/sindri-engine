@@ -96,3 +96,40 @@ fn the_arrows_move_a_focused_slider_by_its_step_and_focus_across_it() {
     step(&mut ui, &mut world, &extractor, &down);
     assert_eq!(ui.focused(), Some(done));
 }
+
+#[test]
+fn a_pushed_stick_moves_focus_once_per_push_and_nudges_a_slider() {
+    let mut world = World::default();
+    let top = element(
+        &mut world,
+        0.3,
+        ("sindri.ui.button", json!({"autofocus": true})),
+    );
+    let volume = element(
+        &mut world,
+        0.0,
+        (
+            "sindri.ui.slider",
+            json!({"min": 0.0, "max": 1.0, "step": 0.1, "value": 0.5}),
+        ),
+    );
+    let bottom = element(&mut world, -0.3, ("sindri.ui.button", json!({})));
+    let extractor = SceneExtractor::new().unwrap();
+    let mut ui = ScreenUi::new();
+    let stick = |x: f32, y: f32| UiInput {
+        stick: [x, y],
+        ..UiInput::default()
+    };
+    step(&mut ui, &mut world, &extractor, &UiInput::default());
+    assert_eq!(ui.focused(), Some(top));
+    // Held down for several steps: one move, not one per step.
+    for _ in 0..4 {
+        step(&mut ui, &mut world, &extractor, &stick(0.0, -0.9));
+    }
+    assert_eq!(ui.focused(), Some(volume));
+    step(&mut ui, &mut world, &extractor, &stick(0.9, 0.1));
+    assert!((value(&world, volume) - 0.6).abs() < 1.0e-5);
+    step(&mut ui, &mut world, &extractor, &stick(0.0, 0.0));
+    step(&mut ui, &mut world, &extractor, &stick(0.1, -0.8));
+    assert_eq!(ui.focused(), Some(bottom));
+}

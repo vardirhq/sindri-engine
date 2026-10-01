@@ -23,6 +23,7 @@ mod map;
 mod peers;
 
 pub(crate) use peers::Peers;
+mod actions;
 mod person;
 mod physics;
 mod print;
@@ -159,6 +160,7 @@ pub struct WorldHost<'a> {
     /// The other scripts in the pass, for a host that runs several.
     peers: Option<peers::Peers<'a>>,
     pub(crate) tweens: Option<&'a mut crate::tweens::Tweens>,
+    pub(crate) actions: Option<&'a crate::actions::InputActions>,
 }
 
 impl Host for WorldHost<'_> {

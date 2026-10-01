@@ -49,19 +49,16 @@ script Hero {
             return;
         }
 
-        var run: f32 = Input.axis("A", "D") + Input.axis("ArrowLeft", "ArrowRight");
-        let stick = Gamepad.axis(0.0, "left_x");
-        if abs(stick) > abs(run) { run = stick; }
-        if Gamepad.is_down(0.0, "dpad_left") { run = -1.0; }
-        if Gamepad.is_down(0.0, "dpad_right") { run = 1.0; }
+        // What the player means, from the scene's input actions: `run` is
+        // A/D, the arrows, the stick or the d-pad, and `jump` Space, W, Up or
+        // South, whichever is being used. A finger steers and jumps besides.
+        var run: f32 = Action.axis("run");
         if Stick.held && abs(Stick.x) > abs(run) { run = Stick.x; }
         run = max(-1.0, min(1.0, run));
 
-        let keyboard_jump = Input.is_down("Space") || Input.is_down("W") || Input.is_down("ArrowUp");
-        let pad_jump = Gamepad.is_down(0.0, "south");
         let touch_jump = Touch.count > 1.0;
-        let holding_jump = keyboard_jump || pad_jump || touch_jump;
-        let pressed_jump = Input.just_pressed("Space") || Input.just_pressed("W") || Input.just_pressed("ArrowUp") || Gamepad.just_pressed(0.0, "south") || (touch_jump && !this.jump_held);
+        let holding_jump = Action.held("jump") || touch_jump;
+        let pressed_jump = Action.pressed("jump") || (touch_jump && !this.jump_held);
         if pressed_jump {
             this.since_press = 0.0;
         } else {

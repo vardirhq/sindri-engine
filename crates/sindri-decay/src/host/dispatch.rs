@@ -41,6 +41,11 @@ impl WorldHost<'_> {
         if namespace == crate::surface::tween::TWEEN {
             return Some(self.tween_call(name, path, args));
         }
+        if namespace == crate::surface::ACTION {
+            return super::actions::ACTION_CALLS
+                .contains(&name)
+                .then(|| self.action_call(name, path, args));
+        }
         match namespace {
             CAMERA => named(CAMERA_CALLS, name).map(|call| self.camera_call(call, path, args)),
             GAME => named(GAME_CALLS, name).map(|call| self.game_call(call, path, args)),

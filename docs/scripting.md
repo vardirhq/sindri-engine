@@ -1379,6 +1379,42 @@ names its bus with `bus`, or leaves it empty to follow `loop`/`play`. Orbital
 Last Stand's pause screen moves the master, music and effects buses with three
 sliders and remembers them.
 
+### Input actions
+
+| Call | Returns |
+| --- | --- |
+| `Action.held(name)` | `bool` |
+| `Action.pressed(name)` | `bool` |
+| `Action.released(name)` | `bool` |
+| `Action.axis(name)` | `f32` |
+| `Action.vector(name)` | `Vec2` |
+| `Action.bindings(name)` | `[String]` |
+| `Action.rebind(name, index, binding)` | nothing |
+| `Action.last_pressed()` | `String` |
+
+A scene declares its input actions in a `sindri.input.actions` component: a
+list of `{ "name", "kind", "bindings" }`, `kind` one of `button`, `axis` or
+`vector`, in the actions-document shape `sindri_platform::ActionMap` reads.
+A binding is a source name — `key.Space`, `mouse.Left`, `gamepad.South`,
+`gamepad.axis.left_x` — or a composite: `{"axis": {"negative", "positive"}}`
+or `{"vector": {"up", "down", "left", "right"}}`. Every action reads the
+strongest of its bindings, so one bound to a keyboard and a pad answers to
+whichever is being used. A declaration that does not read is reported once,
+when it changes, and leaves the scene with no actions.
+
+Scripts read actions by name; a name the scene does not declare is an error
+listing the ones it does. Every script in a pass reads the same step's values,
+worked out before any script runs. `bindings` and `rebind` speak one text form:
+one source, `negative/positive` for an axis, or `up/down/left/right` for a
+direction. `rebind` replaces the binding at `index`, or adds one at the next
+index, refuses one that cannot make the action's kind, and writes the change
+into the scene's component, so it is read on the next step and the editor's
+Play shows it. `last_pressed` names the key, mouse button or pad button pressed
+this step, for a screen that waits for the key to rebind to. A rebinding
+lasts as long as the scene: `Save` holds numbers and flags, not text, so
+keeping one between sessions is not yet possible. The platformer's hero runs and jumps by actions, and the Input
+example rebinds them.
+
 ### The keyboard
 
 | Call | Returns |

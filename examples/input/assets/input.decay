@@ -1,0 +1,72 @@
+// Everything here reads what the player means -- `move` and `boost` -- rather
+// than which key they pressed. The scene's `sindri.input.actions` says what
+// each is bound to, and the buttons below rebind `boost` while it runs.
+script InputDemo {
+    // Which binding of `boost` the next key goes to, or -1 when not waiting.
+    var waiting: f32 = -1.0;
+
+    fn update(dt: f32) {
+        if this.waiting < 0.0 {
+            if Ui.is_pressed(World.find("rebind")) || Input.just_pressed("K") {
+                listen(0.0);
+            } else if Ui.is_pressed(World.find("add")) {
+                listen(Action.bindings("boost").length);
+            }
+        } else {
+            capture();
+        }
+        Ui.set_text(World.find("move-label"), "move: " + listed("move"));
+        Ui.set_text(World.find("boost-label"), "boost: " + listed("boost"));
+    }
+
+    fn listen(index: f32) {
+        this.waiting = index;
+        Ui.set_text(World.find("status"), "Press a key or a pad button for BOOST. Escape cancels.");
+        print("Input waiting");
+    }
+
+    // The next key, mouse button or pad button becomes the binding. The
+    // click that asked is not it, so the mouse is skipped.
+    fn capture() {
+        let pressed = Action.last_pressed();
+        if pressed == "" || pressed.starts_with("mouse.") { return; }
+        if pressed == "key.Escape" {
+            Ui.set_text(World.find("status"), "Rebinding cancelled.");
+        } else {
+            Action.rebind("boost", this.waiting, pressed);
+            Ui.set_text(World.find("status"), "BOOST is now on " + pressed + ".");
+            print("Input rebound " + pressed);
+        }
+        this.waiting = -1.0;
+    }
+
+    fn listed(action: String) -> String {
+        var said = "";
+        for binding in Action.bindings(action) {
+            if said != "" { said = said + ", "; }
+            said = said + binding;
+        }
+        return said;
+    }
+}
+
+script Ship {
+    @export let speed: f32 = 3.0;
+
+    fn update(dt: f32) {
+        let way = Action.vector("move");
+        var pace = this.speed;
+        this.shape.fill = Color(0.18, 0.82, 1.0, 1.0);
+        if Action.held("boost") {
+            pace = this.speed * 2.5;
+            this.shape.fill = Color(1.0, 0.52, 0.22, 1.0);
+        }
+        if Action.pressed("boost") { print("Input boost"); }
+        let p = this.transform.position;
+        this.transform.position = Vec3(
+            max(-4.7, min(4.7, p.x + way.x * pace * dt)),
+            max(-2.7, min(2.7, p.y + way.y * pace * dt)),
+            p.z
+        );
+    }
+}

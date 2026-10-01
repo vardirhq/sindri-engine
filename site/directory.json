@@ -126,6 +126,21 @@
   },
   {
     "category": "demos",
+    "title": "Input Actions",
+    "path": "examples/input/",
+    "source": "examples/input",
+    "description": "Steer by what you mean, not what you press, and rebind boost to any key or button while it runs.",
+    "tags": [
+      "input",
+      "actions",
+      "rebinding",
+      "gamepad",
+      "decay",
+      "responsive"
+    ]
+  },
+  {
+    "category": "demos",
     "title": "Weave Control Room",
     "path": "examples/ui/",
     "source": "examples/ui",

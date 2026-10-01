@@ -39,6 +39,9 @@ pub enum ScriptFailure {
          round made; {pending} entities were left unstarted"
     )]
     SpawnCascade { rounds: usize, pending: usize },
+    /// The scene's `sindri.input.actions` does not read as an actions document.
+    #[error("{0}")]
+    Actions(String),
     #[error(
         "scripts kept messaging each other after {rounds} rounds of delivering what the \
          last round sent; {waiting} messages were dropped"
@@ -65,6 +68,7 @@ impl ScriptFailure {
             Self::BadDelta(_)
             | Self::Registry(_)
             | Self::SpawnCascade { .. }
+            | Self::Actions(_)
             | Self::MessagesDidNotSettle { .. }
             | Self::Compile { .. } => None,
             Self::MissingSource { entity, .. }
