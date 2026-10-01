@@ -9,6 +9,7 @@ script Title {
     var best: Entity = null;
     var notice: Entity = null;
     var pick_label: Entity = null;
+    var pick: Entity = null;
     var logo: Entity = null;
     var hint: Entity = null;
     var callsign: Entity = null;
@@ -21,6 +22,7 @@ script Title {
         this.best = World.find("TitleBest");
         this.notice = World.find("TitleNotice");
         this.pick_label = World.find("TitlePickText");
+        this.pick = World.find("TitlePick");
         this.logo = World.find("Logo");
         this.hint = World.find("TitleHint");
         this.callsign = World.find("TitleCallsign");
@@ -62,11 +64,18 @@ script Title {
             }
         }
 
+        // The boss picker is a dropdown of the roster; choosing from it is
+        // where a rush opens.
+        if Ui.changed(this.pick) {
+            Audio.play("audio/click.wav", 0.3);
+            Game.rush_from = Ui.selected(this.pick);
+        }
         // Only when it changes: `Ui.set_text` every frame is work for nothing,
         // and the label is a button's worth of state rather than a readout.
         let pick = Game.rush_from;
         if pick != this.shown_pick {
             this.shown_pick = pick;
+            Ui.set_selected(this.pick, pick);
             name_pick(pick);
         }
     }
@@ -74,14 +83,23 @@ script Title {
     /// and the placeholder while it is empty and not being edited.
     fn show_callsign() {
         let name = Ui.input_text(this.callsign);
-        if Ui.is_focused(this.callsign) {
-            Ui.set_text(this.callsign_text, name + "_");
-        } else if name == "" {
-            Ui.set_text(this.callsign_text, "Unnamed pilot");
+        if !Ui.is_focused(this.callsign) {
+            if name == "" { Ui.set_text(this.callsign_text, "Unnamed pilot"); }
+            else { Ui.set_text(this.callsign_text, name); }
+            return;
+        }
+        // A caret where the pilot is typing, or the selection in brackets.
+        let start = Ui.selection_start(this.callsign);
+        let end = Ui.selection_end(this.callsign);
+        let before = name.slice(0, start);
+        let after = name.slice(end, name.length);
+        if start == end {
+            Ui.set_text(this.callsign_text, before + "|" + after);
         } else {
-            Ui.set_text(this.callsign_text, name);
+            Ui.set_text(this.callsign_text, before + "[" + name.slice(start, end) + "]" + after);
         }
     }
+
 
     /// The roster, in the order a rush walks it: the Warden, then the eleven
     /// bosses, each of which is now its own prefab.

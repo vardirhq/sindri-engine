@@ -33,7 +33,7 @@ fn the_callsign_reaches_the_hud_and_the_results() {
         run.input.apply(InputEvent::TextInput(c));
     }
     settle(&mut run, 2);
-    assert_eq!(text_of(&run, "TitleCallsignText"), "Nova-7_");
+    assert_eq!(text_of(&run, "TitleCallsignText"), "Nova-7|");
     // Letters typed into the field are not steering: WASD is held back.
     press(&mut run, Key::Escape);
     assert_eq!(text_of(&run, "TitleCallsignText"), "Nova-7");

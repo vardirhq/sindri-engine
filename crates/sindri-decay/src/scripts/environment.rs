@@ -251,14 +251,20 @@ pub(super) fn add_ui_surface(environment: &mut Environment) {
                     UiCall::Number
                     | UiCall::Fill
                     | UiCall::SliderSetValue
-                    | UiCall::SetScrollOffset => {
+                    | UiCall::SetScrollOffset
+                    | UiCall::SetSelected => {
                         vec![entity(), Type::F32]
                     }
                     UiCall::SetChecked => vec![entity(), Type::Bool],
                     _ => vec![entity()],
                 },
                 return_type: match call {
-                    UiCall::SliderValue | UiCall::ScrollOffset => Type::F32,
+                    UiCall::SliderValue
+                    | UiCall::ScrollOffset
+                    | UiCall::Selected
+                    | UiCall::Caret
+                    | UiCall::SelectionStart
+                    | UiCall::SelectionEnd => Type::F32,
                     UiCall::InputText => Type::String,
                     UiCall::Hovered
                     | UiCall::Pressed
@@ -267,7 +273,8 @@ pub(super) fn add_ui_surface(environment: &mut Environment) {
                     | UiCall::Checked
                     | UiCall::Changed
                     | UiCall::Submitted
-                    | UiCall::Focused => Type::Bool,
+                    | UiCall::Focused
+                    | UiCall::Open => Type::Bool,
                     _ => Type::Unit,
                 },
             },

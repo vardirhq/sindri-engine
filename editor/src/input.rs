@@ -87,6 +87,9 @@ const KEYS: &[(egui::Key, Key)] = &[
     (egui::Key::Escape, Key::Escape),
     (egui::Key::Tab, Key::Tab),
     (egui::Key::Backspace, Key::Backspace),
+    (egui::Key::Home, Key::Home),
+    (egui::Key::End, Key::End),
+    (egui::Key::Delete, Key::Delete),
 ];
 
 /// The keyboard a running script reads.
@@ -158,10 +161,24 @@ impl EditorInput {
 
         context.input(|input| {
             for event in &input.events {
-                if let egui::Event::Text(text) | egui::Event::Paste(text) = event {
+                if let egui::Event::Text(text)
+                | egui::Event::Paste(text)
+                | egui::Event::Ime(egui::ImeEvent::Commit(text)) = event
+                {
                     for c in text.chars() {
                         self.state.apply(InputEvent::TextInput(c));
                     }
+                }
+                // egui turns Ctrl+C and Ctrl+X into events of their own rather
+                // than key presses; a game's text field reads them as the keys.
+                let shortcut = match event {
+                    egui::Event::Copy => Some(Key::C),
+                    egui::Event::Cut => Some(Key::X),
+                    _ => None,
+                };
+                if let Some(key) = shortcut {
+                    self.state.apply(InputEvent::KeyPressed(key));
+                    self.state.apply(InputEvent::KeyReleased(key));
                 }
                 let egui::Event::Key {
                     key,
@@ -196,6 +213,7 @@ impl EditorInput {
                 (input.modifiers.shift, Key::ShiftLeft),
                 (input.modifiers.ctrl, Key::ControlLeft),
                 (input.modifiers.alt, Key::AltLeft),
+                (input.modifiers.mac_cmd, Key::SuperLeft),
             ] {
                 let was = self.state.key_down(key);
                 if held && !was {

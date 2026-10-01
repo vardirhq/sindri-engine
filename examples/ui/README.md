@@ -1,12 +1,16 @@
 # Weave Control Room
 
-Feature example for shared screen widgets: toggle/checkbox, a bounded Unicode
-single-line input, keyboard focus, and a clipped vertical scroll archive.
-Interaction and value presentation are Decay; styling is Weave. Open this
-project in the editor or export it with `sindri-export examples/ui`.
+Feature example for shared screen widgets: switches, a checkbox, a locked
+control, a difficulty radio group, a sector dropdown, a single-line callsign
+field with a caret and selection, keyboard and gamepad focus, and a clipped
+vertical scroll archive. Interaction and value presentation are Decay; styling
+is Weave. Open this project in the editor or export it with
+`sindri-export examples/ui`.
 
-Use Tab/Shift+Tab for focus, Space/Enter to activate, Backspace to erase, and
-Enter to submit. Scroll with a wheel/trackpad or drag the archive.
-Selection/clipboard, IME preedit and mobile software keyboard activation are
-not yet implemented; text typed on a keyboard is supported, including non-ASCII
-keys, but text inserted by an IME or pasted in a browser is not read yet.
+Use Tab/Shift+Tab or the arrow keys (or a pad's d-pad) to move focus,
+Space/Enter (or South) to press, and Escape (or East) to back out. In the
+callsign field, Left/Right/Home/End move the caret, Shift selects, Backspace
+and Delete erase, Ctrl or Cmd with A/C/X/V select all, copy, cut and paste,
+and Enter submits. In a browser the field also takes IME composition, a paste
+and a phone's on-screen keyboard. Scroll the archive with a wheel or trackpad,
+or drag it.

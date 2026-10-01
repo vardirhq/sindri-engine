@@ -7,12 +7,16 @@ script WidgetDemo {
     var telemetry: Entity = null;
     var callsign: Entity = null;
     var archive: Entity = null;
+    var sector: Entity = null;
+    var sectors: List<String> = ["Outer Drift", "Ember Belt", "Violet Wake", "Null Lattice", "Core Approach"];
+    var difficulties: List<String> = ["cadet", "pilot", "ace"];
 
     fn start() {
         this.assist = World.find("toggle");
         this.telemetry = World.find("checkbox");
         this.callsign = World.find("callsign");
         this.archive = World.find("archive");
+        this.sector = World.find("sector");
         show_switches();
         show_callsign();
         print("UI demo ready");
@@ -43,6 +47,17 @@ script WidgetDemo {
             }
             print("UI submitted " + name);
         }
+        if Ui.changed(this.sector) {
+            let name = this.sectors[Ui.selected(this.sector)];
+            Ui.set_text(World.find("sector-text"), "Sector  / " + name);
+            print("UI sector chosen " + name);
+        }
+        for d in this.difficulties {
+            let chip = World.find("difficulty-" + d);
+            if Ui.changed(chip) && Ui.is_checked(chip) {
+                print("UI difficulty " + d);
+            }
+        }
         if Ui.changed(this.archive) {
             print("UI archive scrolled " + Ui.scroll_offset(this.archive).fixed(2));
         }
@@ -60,6 +75,14 @@ script WidgetDemo {
             focused = "mission telemetry";
         } else if Ui.is_focused(this.callsign) {
             focused = "callsign / typing";
+        } else if Ui.is_focused(this.sector) {
+            focused = "sector";
+        } else if Ui.is_focused(World.find("difficulty-cadet")) {
+            focused = "difficulty / cadet";
+        } else if Ui.is_focused(World.find("difficulty-pilot")) {
+            focused = "difficulty / pilot";
+        } else if Ui.is_focused(World.find("difficulty-ace")) {
+            focused = "difficulty / ace";
         } else {
             for i in 0..19 {
                 if Ui.is_focused(World.find("row-" + i)) {
@@ -83,17 +106,27 @@ script WidgetDemo {
         }
     }
 
+    // The callsign as typed, with a caret where the person is typing, or
+    // the selection in brackets.
     fn show_callsign() {
         let name = Ui.input_text(this.callsign);
-        let editing = Ui.is_focused(this.callsign);
-        if name == "" && !editing {
-            Ui.set_text(World.find("callsign-text"), "Your callsign");
-        } else if editing {
-            Ui.set_text(World.find("callsign-text"), name + "_");
+        let label = World.find("callsign-text");
+        if !Ui.is_focused(this.callsign) {
+            if name == "" { Ui.set_text(label, "Your callsign"); }
+            else { Ui.set_text(label, name); }
+            return;
+        }
+        let start = Ui.selection_start(this.callsign);
+        let end = Ui.selection_end(this.callsign);
+        let before = name.slice(0, start);
+        let after = name.slice(end, name.length);
+        if start == end {
+            Ui.set_text(label, before + "|" + after);
         } else {
-            Ui.set_text(World.find("callsign-text"), name);
+            Ui.set_text(label, before + "[" + name.slice(start, end) + "]" + after);
         }
     }
+
 
     fn status(message: String) {
         Ui.set_text(World.find("status"), message);

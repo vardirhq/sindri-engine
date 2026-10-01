@@ -249,6 +249,9 @@ impl EditorApp {
             .advance(std::time::Duration::from_secs_f32(delta));
         for step in 0..steps.fixed_steps {
             self.fixed_step(&components, steps.fixed_delta, view_size);
+            if let Some(text) = self.screen_ui.take_copied() {
+                context.copy_text(text);
+            }
             if step == 0 {
                 // An edge belongs to one step. Spending it here rather than per
                 // rendered frame is what keeps a 30 Hz display from firing a

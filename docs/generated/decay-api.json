@@ -2370,6 +2370,18 @@
       "description": "The interface drawn over the game: changing text and bars, and checking buttons and sliders.",
       "members": [
         {
+          "description": "Where a text field's caret is, in characters.",
+          "kind": "function",
+          "name": "caret",
+          "parameter_names": [
+            "input"
+          ],
+          "parameters": [
+            "Entity"
+          ],
+          "returns": "f32"
+        },
+        {
           "description": "Whether user interaction changed a widget this step.",
           "kind": "function",
           "name": "changed",
@@ -2442,6 +2454,18 @@
           "returns": "bool"
         },
         {
+          "description": "Whether a dropdown's list is open.",
+          "kind": "function",
+          "name": "is_open",
+          "parameter_names": [
+            "dropdown"
+          ],
+          "parameters": [
+            "Entity"
+          ],
+          "returns": "bool"
+        },
+        {
           "description": "Whether a button was clicked this frame: pressed and let go while on it.",
           "kind": "function",
           "name": "is_pressed",
@@ -2459,6 +2483,42 @@
           "name": "scroll_offset",
           "parameter_names": [
             "scroll"
+          ],
+          "parameters": [
+            "Entity"
+          ],
+          "returns": "f32"
+        },
+        {
+          "description": "Which option a dropdown has chosen, counted from zero.",
+          "kind": "function",
+          "name": "selected",
+          "parameter_names": [
+            "dropdown"
+          ],
+          "parameters": [
+            "Entity"
+          ],
+          "returns": "f32"
+        },
+        {
+          "description": "Where a text field's selection ends, in characters; the caret when nothing is selected.",
+          "kind": "function",
+          "name": "selection_end",
+          "parameter_names": [
+            "input"
+          ],
+          "parameters": [
+            "Entity"
+          ],
+          "returns": "f32"
+        },
+        {
+          "description": "Where a text field's selection begins, in characters; the caret when nothing is selected.",
+          "kind": "function",
+          "name": "selection_start",
+          "parameter_names": [
+            "input"
           ],
           "parameters": [
             "Entity"
@@ -2544,6 +2604,20 @@
           "parameter_names": [
             "scroll",
             "offset"
+          ],
+          "parameters": [
+            "Entity",
+            "f32"
+          ],
+          "returns": "unit"
+        },
+        {
+          "description": "Chooses a dropdown's option without emitting a user-change event.",
+          "kind": "function",
+          "name": "set_selected",
+          "parameter_names": [
+            "dropdown",
+            "index"
           ],
           "parameters": [
             "Entity",

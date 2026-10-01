@@ -106,16 +106,20 @@ Each step is its own pull request. A step is checked here when it has landed.
    tabs, dialog, tooltip, progress, all styled by Weave and scriptable from
    Decay. Focus navigation by keyboard and gamepad.
    - [x] Toggle and checkbox (`sindri.ui.toggle`), with `:checked`.
-   - [x] Single-line text input (`sindri.ui.text_input`): committed Unicode,
-     Backspace, Enter to submit, Escape to let go, keys held back from
-     gameplay while editing. Caret movement, selection, clipboard, IME and
-     mobile software keyboards remain.
+   - [x] Single-line text input (`sindri.ui.text_input`): Unicode, a caret
+     and selection, clipboard, Enter to submit, Escape to let go, keys held
+     back from gameplay while editing; IME, paste and a phone's keyboard in a
+     browser through a hidden textarea. Multi-line and word-wise movement
+     remain.
    - [x] Vertical scroll region (`sindri.ui.scroll`): wheel, drag and finger,
      clamped to its laid-out content, clipping drawing and hit-testing.
      Horizontal scrolling, scrollbars and momentum remain.
-   - [x] Keyboard focus in document order (Tab, Shift+Tab, Space, Enter,
-     Escape), shown by `:focus`. Arrow-key and gamepad navigation remain.
-   - [ ] Radio group, dropdown, tabs, dialog, tooltip, progress.
+   - [x] Radio groups (toggles with a `group`) and dropdowns
+     (`sindri.ui.dropdown` with `sindri.ui.option` rows), with `:open`.
+   - [x] Focus by Tab in document order, by the arrows and a pad's d-pad
+     toward the nearest control, scrolled into view. The stick and
+     per-player focus remain.
+   - [ ] Tabs, dialog, tooltip, progress.
    `examples/ui` exercises each shipped widget on its own; Orbital Last
    Stand's callsign, compact-HUD switch and pause manual prove them in a
    game.

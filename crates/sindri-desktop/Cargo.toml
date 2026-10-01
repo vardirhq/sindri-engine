@@ -17,12 +17,16 @@ wgpu.workspace = true
 winit.workspace = true
 
 [target.'cfg(not(target_arch = "wasm32"))'.dependencies]
+# The system clipboard for copy and paste in text fields. Already in the tree
+# through the editor's egui; text only, so no image codecs come with it.
+arboard = { version = "3", default-features = false }
 pollster.workspace = true
 
 [target.'cfg(target_arch = "wasm32")'.dependencies]
+js-sys.workspace = true
 wasm-bindgen.workspace = true
 wasm-bindgen-futures.workspace = true
-web-sys = { workspace = true, features = ["CustomEvent", "CustomEventInit", "Document", "Event", "HtmlCanvasElement", "Window"] }
+web-sys = { workspace = true, features = ["CustomEvent", "CustomEventInit", "Document", "Element", "Event", "EventTarget", "FocusEvent", "HtmlCanvasElement", "HtmlElement", "HtmlTextAreaElement", "InputEvent", "KeyboardEvent", "Navigator", "Window"] }
 
 [lints]
 workspace = true

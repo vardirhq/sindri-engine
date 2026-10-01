@@ -74,6 +74,36 @@ pub(super) const TYPES: &[TypeEntry] = &[
                 "Vertical scroll distance in overlay units.",
             ),
             call(
+                "selected",
+                &["dropdown"],
+                "Which option a dropdown has chosen, counted from zero.",
+            ),
+            call(
+                "set_selected",
+                &["dropdown", "index"],
+                "Chooses a dropdown's option without emitting a user-change event.",
+            ),
+            call(
+                "is_open",
+                &["dropdown"],
+                "Whether a dropdown's list is open.",
+            ),
+            call(
+                "caret",
+                &["input"],
+                "Where a text field's caret is, in characters.",
+            ),
+            call(
+                "selection_start",
+                &["input"],
+                "Where a text field's selection begins, in characters; the caret when nothing is selected.",
+            ),
+            call(
+                "selection_end",
+                &["input"],
+                "Where a text field's selection ends, in characters; the caret when nothing is selected.",
+            ),
+            call(
                 "set_scroll_offset",
                 &["scroll", "offset"],
                 "Clamps the offset to the authored content height.",

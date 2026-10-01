@@ -175,6 +175,16 @@ const KNOWN: &[Known] = &[
         icon: icons::SCROLL,
     },
     Known {
+        type_name: "sindri.ui.dropdown",
+        family: Family::Ui,
+        icon: icons::DROPDOWN,
+    },
+    Known {
+        type_name: "sindri.ui.option",
+        family: Family::Ui,
+        icon: icons::OPTION,
+    },
+    Known {
         type_name: "sindri.ui.layout",
         family: Family::Ui,
         icon: icons::LAYOUT,

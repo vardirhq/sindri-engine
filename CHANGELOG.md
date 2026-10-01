@@ -117,6 +117,11 @@ requests, commit history, and subsystem documentation rather than this file.
 
 ### Changed
 
+- A text element that draws nothing else is pressed where it is drawn: its
+  `bounds`, pivoted on its anchor, rather than a box centred on its position.
+- Tab and the arrows can reach a row scrolled out of view inside a scroll
+  region, which then scrolls to show it, as a browser does.
+
 - Orbital Last Stand's UI is redesigned: a title that separates the pilot's
   identity and best score from the play actions, with START above Boss Rush
   and the boss picker; a HUD whose sector, survival clock, score and level,
@@ -154,6 +159,25 @@ requests, commit history, and subsystem documentation rather than this file.
   scene at all — is picked up on the next frame.
 
 ### Added
+
+- Radio groups (toggles sharing a `group`) and dropdowns (`sindri.ui.dropdown`
+  with `sindri.ui.option` rows the engine shows while open), with Weave's new
+  `:open` state. Decay gains `Ui.selected`, `Ui.set_selected` and
+  `Ui.is_open`.
+- Text fields edit at a caret with a selection: arrows, Home, End, Shift,
+  Delete, and Ctrl or Cmd with A, C, X and V through the system clipboard.
+  `Ui.caret`, `Ui.selection_start` and `Ui.selection_end` let a script draw
+  them.
+- In a browser a text field takes IME composition, a paste and a phone's
+  on-screen keyboard, through a hidden textarea that holds the page's focus
+  while the field edits. Natively, IME is allowed while a field edits and its
+  commits are not typed twice.
+- The arrow keys and any pad's d-pad move focus toward the nearest control,
+  South presses and East backs out, and a row reached inside a scroll region
+  is scrolled into view. A control marked `autofocus` takes focus when it
+  appears; with nothing focused and nothing asking, the arrows focus nothing.
+- Orbital Last Stand's boss picker is a scrolling dropdown of the twelve
+  bosses, and its callsign field draws its caret and selection.
 
 - UI widgets: `sindri.ui.toggle` (switch or checkbox), `sindri.ui.text_input`
   (single line, Unicode, submit on Enter) and `sindri.ui.scroll` (vertical,

@@ -9,6 +9,50 @@
 use winit::event::{ElementState, Ime, WindowEvent};
 use winit::keyboard::ModifiersState;
 
+/// What a window's key presses and IME have typed lately, so text is
+/// committed once.
+///
+/// With an IME allowed, some platforms report a key's character both on its
+/// press and as an IME commit; and while a composition is open, the keys
+/// building it are not text yet. A commit that repeats the press before it
+/// is dropped, and a press during a composition types nothing.
+#[derive(Debug, Default)]
+pub(super) struct Typist {
+    composing: bool,
+    pressed: Option<String>,
+}
+
+impl Typist {
+    /// The text `event` commits, if any, once.
+    pub(super) fn typed(
+        &mut self,
+        event: &WindowEvent,
+        modifiers: ModifiersState,
+    ) -> Option<String> {
+        match event {
+            WindowEvent::Ime(Ime::Preedit(text, _)) => {
+                self.composing = !text.is_empty();
+                None
+            }
+            WindowEvent::Ime(Ime::Commit(text)) => {
+                self.composing = false;
+                if self.pressed.take().as_deref() == Some(text.as_str()) {
+                    return None;
+                }
+                Some(text.clone())
+            }
+            WindowEvent::KeyboardInput { .. } if self.composing => None,
+            _ => {
+                let text = typed(event, modifiers).map(str::to_owned);
+                if text.is_some() {
+                    self.pressed.clone_from(&text);
+                }
+                text
+            }
+        }
+    }
+}
+
 /// The committed text `event` types, if it types any.
 pub(super) fn typed(event: &WindowEvent, modifiers: ModifiersState) -> Option<&str> {
     match event {
@@ -39,6 +83,23 @@ mod tests {
         assert!(!is_shortcut(ModifiersState::SHIFT));
         assert!(!is_shortcut(ModifiersState::ALT));
         assert!(!is_shortcut(ModifiersState::empty()));
+    }
+
+    #[test]
+    fn a_commit_repeating_the_key_press_before_it_types_once() {
+        use winit::event::Ime;
+        let mut typist = Typist::default();
+        let commit = WindowEvent::Ime(Ime::Commit("a".to_owned()));
+        typist.pressed = Some("a".to_owned());
+        assert_eq!(typist.typed(&commit, ModifiersState::empty()), None);
+        assert_eq!(
+            typist.typed(&commit, ModifiersState::empty()).as_deref(),
+            Some("a"),
+            "a commit with no press before it is text"
+        );
+        let preedit = WindowEvent::Ime(Ime::Preedit("に".to_owned(), None));
+        assert_eq!(typist.typed(&preedit, ModifiersState::empty()), None);
+        assert!(typist.composing);
     }
 
     #[test]

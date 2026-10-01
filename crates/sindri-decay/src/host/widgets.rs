@@ -9,7 +9,10 @@ use crate::surface::UiCall;
 use decay_ir::Path;
 use decay_runtime::{RuntimeError, Value};
 use sindri_core::{EntityId, SceneComponent};
-use sindri_scene::{UiScrollComponent, UiTextInputComponent, UiToggleComponent};
+use sindri_scene::{
+    UiDropdownComponent, UiScrollComponent, UiTextInputComponent, UiToggleComponent,
+    dropdown_options,
+};
 
 impl WorldHost<'_> {
     pub(super) fn widget_call(
@@ -25,8 +28,11 @@ impl WorldHost<'_> {
             UiCall::ScrollOffset | UiCall::SetScrollOffset => {
                 (UiScrollComponent::TYPE_NAME, "offset")
             }
+            UiCall::Selected | UiCall::SetSelected => (UiDropdownComponent::TYPE_NAME, "selected"),
+            UiCall::Open => (UiDropdownComponent::TYPE_NAME, "open"),
             _ => unreachable!("widget value call"),
         };
+        let options = dropdown_options(self.world, entity).len();
         let height = self
             .screen_ui
             .and_then(|ui| ui.rect(entity))
@@ -43,7 +49,12 @@ impl WorldHost<'_> {
             RuntimeError::Host(format!("{}: element needs {component}", path.dotted()))
         })?;
         match call {
-            UiCall::Checked => Ok(Value::Bool(
+            UiCall::SetSelected => {
+                let index = option_index(path, args, options)?;
+                payload[field] = serde_json::json!(index);
+                Ok(Value::Unit)
+            }
+            UiCall::Checked | UiCall::Open => Ok(Value::Bool(
                 payload
                     .get(field)
                     .and_then(serde_json::Value::as_bool)
@@ -56,7 +67,7 @@ impl WorldHost<'_> {
                     .unwrap_or("")
                     .to_owned(),
             )),
-            UiCall::ScrollOffset => Ok(Value::Number(
+            UiCall::ScrollOffset | UiCall::Selected => Ok(Value::Number(
                 payload
                     .get(field)
                     .and_then(serde_json::Value::as_f64)
@@ -99,4 +110,45 @@ impl WorldHost<'_> {
             _ => unreachable!("widget value call"),
         }
     }
+
+    /// Where a text field's caret and selection are, in characters.
+    pub(super) fn caret_call(
+        &self,
+        call: UiCall,
+        path: &Path,
+        entity: EntityId,
+    ) -> Result<Value, RuntimeError> {
+        let caret = self
+            .screen_ui
+            .and_then(|ui| ui.caret(self.world, entity))
+            .ok_or_else(|| {
+                RuntimeError::Host(format!(
+                    "{}: element needs {}",
+                    path.dotted(),
+                    UiTextInputComponent::TYPE_NAME
+                ))
+            })?;
+        let selected = caret.selection();
+        let at = match call {
+            UiCall::Caret => caret.caret,
+            UiCall::SelectionStart => selected.start,
+            _ => selected.end,
+        };
+        #[allow(clippy::cast_precision_loss)]
+        Ok(Value::Number(at as f64))
+    }
+}
+
+/// The option a `set_selected` asks for, kept to the options there are, as a
+/// slider keeps to its range.
+fn option_index(path: &Path, args: &[Value], options: usize) -> Result<usize, RuntimeError> {
+    let requested = number(path, args.get(1).unwrap_or(&Value::Null))?;
+    if !requested.is_finite() || requested < 0.0 {
+        return Err(RuntimeError::Host(format!(
+            "{}: an option is counted from zero, not {requested}",
+            path.dotted()
+        )));
+    }
+    #[allow(clippy::cast_possible_truncation, clippy::cast_sign_loss)]
+    Ok((requested as usize).min(options.saturating_sub(1)))
 }

@@ -83,7 +83,7 @@ Selectors are written as in CSS:
 | Entity ID | `#hud-score` | The stable scene entity ID |
 | Class | `.hud-value` | An entry in `weave.style.classes` |
 | Universal | `*` | Any entity |
-| State | `:hover`, `:active` (or `:pressed`), `:focus`, `:disabled`, `:checked` | An entity in that state |
+| State | `:hover`, `:active` (or `:pressed`), `:focus`, `:disabled`, `:checked`, `:open` | An entity in that state |
 | Compound | `button.primary:hover` | All of its parts at once |
 | Descendant | `.menu text` | The right-hand entity anywhere inside the left |
 | Child | `.menu > button` | The right-hand entity directly inside the left |
@@ -107,7 +107,8 @@ not specific at all, as in CSS.
 
 `:disabled` and `:checked` come from the entity's own data: a component with
 `"disabled": true` makes its entity `:disabled`, and a toggle with
-`"checked": true` makes it `:checked`. `:hover`, `:active` and `:focus` come
+`"checked": true` makes it `:checked` (as does a dropdown's selected option),
+and a dropdown whose list is showing is `:open`. `:hover`, `:active` and `:focus` come
 from input, which a host passes in when it resolves presentation
 (`PresentationWorld::resolve_with_states`). `:focus` is whichever button,
 toggle, text field or scroll region has the keyboard, by Tab or by a press.

@@ -67,6 +67,14 @@ impl CausewayApp {
 impl DesktopApp for CausewayApp {
     type Error = CausewayError;
 
+    fn editing_text(&self) -> bool {
+        self.engine.game().editing_text()
+    }
+
+    fn take_copied(&mut self) -> Option<String> {
+        self.engine.game_mut().take_copied()
+    }
+
     fn create(context: &AppContext<'_>) -> Result<Self, Self::Error> {
         let scene = extractor()?;
         let (textures, bindings) = bind_textures(context.device(), context.queue())?;

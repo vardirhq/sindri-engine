@@ -6,8 +6,8 @@
 // The places are where the demo's own stylesheet lays these out at the two
 // viewports CI runs; `project-capture` prints them for any other.
 const PLACES = {
-  wide: { toggle: [257, 181], checkbox: [257, 237], autopilot: [257, 293], callsign: [257, 349], archive: [703, 276], row: [703, 223] },
-  phone: { toggle: [195, 148], checkbox: [195, 200], autopilot: [195, 252], callsign: [195, 304], archive: [195, 584], row: [195, 518] },
+  wide: { toggle: [257, 163], checkbox: [257, 209], autopilot: [257, 255], ace: [411, 301], sector: [257, 347], sectorOption: [257, 491], callsign: [257, 393], archive: [703, 279], row: [703, 209] },
+  phone: { toggle: [195, 142], checkbox: [195, 186], autopilot: [195, 229], ace: [327, 273], sector: [195, 316], sectorOption: [195, 460], callsign: [195, 360], archive: [195, 586], row: [195, 534] },
 };
 
 export async function uiDemo(page, viewport, evidence, problems) {
@@ -23,23 +23,15 @@ export async function uiDemo(page, viewport, evidence, problems) {
   await press(at.toggle);
   await press(at.checkbox);
   await press(at.autopilot); // locked: must report nothing
+  await press(at.ace);
+  await press(at.sector);
+  await press(at.sectorOption);
   await press(at.callsign);
-  // One key press per character, as a keyboard with those keys sends them:
-  // `keyboard.type` delivers a character that is not on a US layout through
-  // `insertText`, the IME and paste path, which the host does not read yet.
-  // Playwright names no such key, so those go through CDP as a real keydown.
-  const keys = await page.context().newCDPSession(page);
-  for (const key of 'Nøva 7') {
-    if (key.charCodeAt(0) < 128) {
-      await page.keyboard.press(key);
-      continue;
-    }
-    for (const type of ['keyDown', 'keyUp']) {
-      await keys.send('Input.dispatchKeyEvent', {
-        type, key, text: type === 'keyDown' ? key : undefined, unmodifiedText: key,
-      });
-    }
-  }
+  // The field hands the page's focus to a hidden textarea, so text reaches
+  // it the way a page's own fields take it: typed (Playwright sends the ø
+  // through insertText, the IME and paste path), and composed by an IME.
+  await page.keyboard.type('Nøva 7');
+  await page.keyboard.insertText('日本');
   await page.keyboard.press('Enter');
   await settle();
   await page.keyboard.press('Escape');
@@ -76,8 +68,10 @@ export async function uiDemo(page, viewport, evidence, problems) {
   expect(evidence.ready, 'the Decay script never started');
   expect(evidence.toggle, 'the toggle did not change');
   expect(evidence.checkbox, 'the checkbox did not change');
-  expect(evidence.typed.includes('Nøva 7'), `typing did not reach the field (${evidence.typed.join(' | ')})`);
-  expect(evidence.submitted.includes('Nøva 7'), 'Enter did not submit the callsign');
+  expect(evidence.typed.includes('Nøva 7日本'), `typing did not reach the field (${evidence.typed.join(' | ')})`);
+  expect(evidence.submitted.includes('Nøva 7日本'), 'Enter did not submit the callsign');
+  expect(evidence.difficulty.includes('ace'), 'the difficulty radio was not chosen');
+  expect(evidence.sectors.includes('Null Lattice'), `the sector dropdown did not choose (${evidence.sectors.join(', ')})`);
   expect(evidence.submitted.length === 1, `the callsign was submitted ${evidence.submitted.length} times`);
   expect(evidence.scrolled, 'the archive did not scroll');
   if (!phone) expect(evidence.selected.includes('Arc Imprint'), `the row was not picked (${evidence.selected.join(', ')})`);
@@ -98,9 +92,13 @@ export function uiDemoEvidence(evidence, text) {
   if (text.includes('UI archive scrolled')) evidence.scrolled = true;
   const selected = text.match(/UI selected (.*)$/);
   if (selected) evidence.selected.push(selected[1]);
+  const difficulty = text.match(/UI difficulty (.*)$/);
+  if (difficulty) evidence.difficulty.push(difficulty[1]);
+  const sector = text.match(/UI sector chosen (.*)$/);
+  if (sector) evidence.sectors.push(sector[1]);
 }
 
 export const freshUiEvidence = () => ({
   ready: false, toggle: false, checkbox: false, autopilot: false,
-  typed: [], submitted: [], scrolled: false, selected: [],
+  typed: [], submitted: [], scrolled: false, selected: [], difficulty: [], sectors: [],
 });

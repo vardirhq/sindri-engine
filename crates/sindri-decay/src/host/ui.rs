@@ -39,8 +39,17 @@ impl WorldHost<'_> {
                 | UiCall::SetInputText
                 | UiCall::ScrollOffset
                 | UiCall::SetScrollOffset
+                | UiCall::Selected
+                | UiCall::SetSelected
+                | UiCall::Open
         ) {
             return self.widget_call(call, path, args, entity);
+        }
+        if matches!(
+            call,
+            UiCall::Caret | UiCall::SelectionStart | UiCall::SelectionEnd
+        ) {
+            return self.caret_call(call, path, entity);
         }
         match call {
             UiCall::Text => {
@@ -101,7 +110,13 @@ impl WorldHost<'_> {
             | UiCall::InputText
             | UiCall::SetInputText
             | UiCall::ScrollOffset
-            | UiCall::SetScrollOffset => {
+            | UiCall::SetScrollOffset
+            | UiCall::Selected
+            | UiCall::SetSelected
+            | UiCall::Open
+            | UiCall::Caret
+            | UiCall::SelectionStart
+            | UiCall::SelectionEnd => {
                 unreachable!("handled as a query")
             }
         }
