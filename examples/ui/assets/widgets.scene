@@ -265,7 +265,8 @@
         "sindri.ui.toggle": {
           "label": "Flight assist",
           "checked": true,
-          "disabled": false
+          "disabled": false,
+          "autofocus": true
         },
         "sindri.ui.layout": {
           "direction": "row",
@@ -398,7 +399,8 @@
         "sindri.ui.toggle": {
           "label": "Mission telemetry",
           "checked": false,
-          "disabled": false
+          "disabled": false,
+          "autofocus": false
         },
         "sindri.ui.layout": {
           "direction": "row",
@@ -532,7 +534,8 @@
         "sindri.ui.toggle": {
           "label": "Autopilot",
           "checked": false,
-          "disabled": true
+          "disabled": true,
+          "autofocus": false
         },
         "sindri.ui.layout": {
           "direction": "row",
@@ -634,6 +637,714 @@
       }
     },
     {
+      "id": "difficulty",
+      "name": "difficulty",
+      "parent": "settings",
+      "transform_3d": {
+        "scale": [
+          1.3,
+          0.14,
+          1.0
+        ]
+      },
+      "components": {
+        "weave.style": {
+          "classes": [
+            "radio-row"
+          ]
+        },
+        "sindri.ui.layout": {
+          "direction": "row",
+          "spacing": 0.02,
+          "justify": "space_between",
+          "align": "center"
+        }
+      }
+    },
+    {
+      "id": "difficulty-text",
+      "name": "difficulty-text",
+      "parent": "difficulty",
+      "transform_3d": {
+        "scale": [
+          0.4,
+          0.08,
+          1.0
+        ]
+      },
+      "components": {
+        "weave.style": {
+          "classes": [
+            "control-label",
+            "radio-label"
+          ]
+        },
+        "sindri.ui.text": {
+          "text": "Difficulty",
+          "font": "fonts/ChakraPetch-Regular.ttf",
+          "font_size": 0.034,
+          "bounds": [
+            0.4,
+            0.08
+          ],
+          "anchor": "center",
+          "layer": 20,
+          "line_align": "left"
+        }
+      }
+    },
+    {
+      "id": "difficulty-cadet",
+      "name": "difficulty-cadet",
+      "parent": "difficulty",
+      "transform_3d": {
+        "scale": [
+          0.27,
+          0.12,
+          1.0
+        ]
+      },
+      "components": {
+        "weave.style": {
+          "classes": [
+            "chip"
+          ]
+        },
+        "sindri.ui.shape": {
+          "kind": "rect",
+          "fill": [
+            0.05,
+            0.09,
+            0.14,
+            1.0
+          ],
+          "anchor": "center",
+          "layer": 11
+        },
+        "sindri.ui.toggle": {
+          "label": "Cadet",
+          "checked": false,
+          "group": "difficulty"
+        }
+      }
+    },
+    {
+      "id": "difficulty-cadet-text",
+      "name": "difficulty-cadet-text",
+      "parent": "difficulty-cadet",
+      "transform_3d": {
+        "scale": [
+          0.25,
+          0.07,
+          1.0
+        ]
+      },
+      "components": {
+        "weave.style": {
+          "classes": [
+            "chip-label"
+          ]
+        },
+        "sindri.ui.text": {
+          "text": "Cadet",
+          "font": "fonts/ChakraPetch-Regular.ttf",
+          "font_size": 0.032,
+          "bounds": [
+            0.25,
+            0.07
+          ],
+          "anchor": "center",
+          "layer": 20,
+          "line_align": "center"
+        }
+      }
+    },
+    {
+      "id": "difficulty-pilot",
+      "name": "difficulty-pilot",
+      "parent": "difficulty",
+      "transform_3d": {
+        "scale": [
+          0.27,
+          0.12,
+          1.0
+        ]
+      },
+      "components": {
+        "weave.style": {
+          "classes": [
+            "chip"
+          ]
+        },
+        "sindri.ui.shape": {
+          "kind": "rect",
+          "fill": [
+            0.05,
+            0.09,
+            0.14,
+            1.0
+          ],
+          "anchor": "center",
+          "layer": 11
+        },
+        "sindri.ui.toggle": {
+          "label": "Pilot",
+          "checked": true,
+          "group": "difficulty"
+        }
+      }
+    },
+    {
+      "id": "difficulty-pilot-text",
+      "name": "difficulty-pilot-text",
+      "parent": "difficulty-pilot",
+      "transform_3d": {
+        "scale": [
+          0.25,
+          0.07,
+          1.0
+        ]
+      },
+      "components": {
+        "weave.style": {
+          "classes": [
+            "chip-label"
+          ]
+        },
+        "sindri.ui.text": {
+          "text": "Pilot",
+          "font": "fonts/ChakraPetch-Regular.ttf",
+          "font_size": 0.032,
+          "bounds": [
+            0.25,
+            0.07
+          ],
+          "anchor": "center",
+          "layer": 20,
+          "line_align": "center"
+        }
+      }
+    },
+    {
+      "id": "difficulty-ace",
+      "name": "difficulty-ace",
+      "parent": "difficulty",
+      "transform_3d": {
+        "scale": [
+          0.27,
+          0.12,
+          1.0
+        ]
+      },
+      "components": {
+        "weave.style": {
+          "classes": [
+            "chip"
+          ]
+        },
+        "sindri.ui.shape": {
+          "kind": "rect",
+          "fill": [
+            0.05,
+            0.09,
+            0.14,
+            1.0
+          ],
+          "anchor": "center",
+          "layer": 11
+        },
+        "sindri.ui.toggle": {
+          "label": "Ace",
+          "checked": false,
+          "group": "difficulty"
+        }
+      }
+    },
+    {
+      "id": "difficulty-ace-text",
+      "name": "difficulty-ace-text",
+      "parent": "difficulty-ace",
+      "transform_3d": {
+        "scale": [
+          0.25,
+          0.07,
+          1.0
+        ]
+      },
+      "components": {
+        "weave.style": {
+          "classes": [
+            "chip-label"
+          ]
+        },
+        "sindri.ui.text": {
+          "text": "Ace",
+          "font": "fonts/ChakraPetch-Regular.ttf",
+          "font_size": 0.032,
+          "bounds": [
+            0.25,
+            0.07
+          ],
+          "anchor": "center",
+          "layer": 20,
+          "line_align": "center"
+        }
+      }
+    },
+    {
+      "id": "sector",
+      "name": "sector",
+      "parent": "settings",
+      "transform_3d": {
+        "scale": [
+          1.3,
+          0.14,
+          1.0
+        ]
+      },
+      "components": {
+        "weave.style": {
+          "classes": [
+            "control",
+            "dropdown"
+          ]
+        },
+        "sindri.ui.shape": {
+          "kind": "rect",
+          "fill": [
+            0.05,
+            0.09,
+            0.14,
+            1.0
+          ],
+          "anchor": "center",
+          "layer": 11
+        },
+        "sindri.ui.dropdown": {
+          "label": "Sector",
+          "selected": 0
+        }
+      }
+    },
+    {
+      "id": "sector-text",
+      "name": "sector-text",
+      "parent": "sector",
+      "transform_3d": {
+        "scale": [
+          1.0,
+          0.08,
+          1.0
+        ]
+      },
+      "components": {
+        "weave.style": {
+          "classes": [
+            "dropdown-label"
+          ]
+        },
+        "sindri.ui.text": {
+          "text": "Sector  / Outer Drift",
+          "font": "fonts/ChakraPetch-Regular.ttf",
+          "font_size": 0.034,
+          "bounds": [
+            1.0,
+            0.08
+          ],
+          "anchor": "center",
+          "layer": 20,
+          "line_align": "left"
+        }
+      }
+    },
+    {
+      "id": "sector-chevron",
+      "name": "sector-chevron",
+      "parent": "sector",
+      "transform_3d": {
+        "scale": [
+          0.08,
+          0.08,
+          1.0
+        ]
+      },
+      "components": {
+        "weave.style": {
+          "classes": [
+            "chevron"
+          ]
+        },
+        "sindri.ui.text": {
+          "text": "v",
+          "font": "fonts/ChakraPetch-Regular.ttf",
+          "font_size": 0.034,
+          "bounds": [
+            0.08,
+            0.08
+          ],
+          "anchor": "center",
+          "layer": 20,
+          "line_align": "center"
+        }
+      }
+    },
+    {
+      "id": "sector-list",
+      "name": "sector-list",
+      "parent": "sector",
+      "transform_3d": {
+        "scale": [
+          1.3,
+          0.62,
+          1.0
+        ]
+      },
+      "components": {
+        "weave.style": {
+          "classes": [
+            "dropdown-list"
+          ]
+        },
+        "sindri.ui.shape": {
+          "kind": "rect",
+          "fill": [
+            0.05,
+            0.09,
+            0.14,
+            1.0
+          ],
+          "anchor": "center",
+          "layer": 60
+        },
+        "sindri.ui.layout": {
+          "direction": "column",
+          "spacing": 0.01,
+          "justify": "start",
+          "align": "center"
+        }
+      }
+    },
+    {
+      "id": "sector-0",
+      "name": "sector-0",
+      "parent": "sector-list",
+      "transform_3d": {
+        "scale": [
+          1.24,
+          0.1,
+          1.0
+        ]
+      },
+      "components": {
+        "weave.style": {
+          "classes": [
+            "option"
+          ]
+        },
+        "sindri.ui.shape": {
+          "kind": "rect",
+          "fill": [
+            0.05,
+            0.09,
+            0.14,
+            1.0
+          ],
+          "anchor": "center",
+          "layer": 61
+        },
+        "sindri.ui.option": {
+          "label": "Outer Drift"
+        }
+      }
+    },
+    {
+      "id": "sector-0-text",
+      "name": "sector-0-text",
+      "parent": "sector-0",
+      "transform_3d": {
+        "scale": [
+          1.1,
+          0.07,
+          1.0
+        ]
+      },
+      "components": {
+        "weave.style": {
+          "classes": [
+            "option-label"
+          ]
+        },
+        "sindri.ui.text": {
+          "text": "Outer Drift",
+          "font": "fonts/ChakraPetch-Regular.ttf",
+          "font_size": 0.032,
+          "bounds": [
+            1.1,
+            0.07
+          ],
+          "anchor": "center",
+          "layer": 62,
+          "line_align": "left"
+        }
+      }
+    },
+    {
+      "id": "sector-1",
+      "name": "sector-1",
+      "parent": "sector-list",
+      "transform_3d": {
+        "scale": [
+          1.24,
+          0.1,
+          1.0
+        ]
+      },
+      "components": {
+        "weave.style": {
+          "classes": [
+            "option"
+          ]
+        },
+        "sindri.ui.shape": {
+          "kind": "rect",
+          "fill": [
+            0.05,
+            0.09,
+            0.14,
+            1.0
+          ],
+          "anchor": "center",
+          "layer": 61
+        },
+        "sindri.ui.option": {
+          "label": "Ember Belt"
+        }
+      }
+    },
+    {
+      "id": "sector-1-text",
+      "name": "sector-1-text",
+      "parent": "sector-1",
+      "transform_3d": {
+        "scale": [
+          1.1,
+          0.07,
+          1.0
+        ]
+      },
+      "components": {
+        "weave.style": {
+          "classes": [
+            "option-label"
+          ]
+        },
+        "sindri.ui.text": {
+          "text": "Ember Belt",
+          "font": "fonts/ChakraPetch-Regular.ttf",
+          "font_size": 0.032,
+          "bounds": [
+            1.1,
+            0.07
+          ],
+          "anchor": "center",
+          "layer": 62,
+          "line_align": "left"
+        }
+      }
+    },
+    {
+      "id": "sector-2",
+      "name": "sector-2",
+      "parent": "sector-list",
+      "transform_3d": {
+        "scale": [
+          1.24,
+          0.1,
+          1.0
+        ]
+      },
+      "components": {
+        "weave.style": {
+          "classes": [
+            "option"
+          ]
+        },
+        "sindri.ui.shape": {
+          "kind": "rect",
+          "fill": [
+            0.05,
+            0.09,
+            0.14,
+            1.0
+          ],
+          "anchor": "center",
+          "layer": 61
+        },
+        "sindri.ui.option": {
+          "label": "Violet Wake"
+        }
+      }
+    },
+    {
+      "id": "sector-2-text",
+      "name": "sector-2-text",
+      "parent": "sector-2",
+      "transform_3d": {
+        "scale": [
+          1.1,
+          0.07,
+          1.0
+        ]
+      },
+      "components": {
+        "weave.style": {
+          "classes": [
+            "option-label"
+          ]
+        },
+        "sindri.ui.text": {
+          "text": "Violet Wake",
+          "font": "fonts/ChakraPetch-Regular.ttf",
+          "font_size": 0.032,
+          "bounds": [
+            1.1,
+            0.07
+          ],
+          "anchor": "center",
+          "layer": 62,
+          "line_align": "left"
+        }
+      }
+    },
+    {
+      "id": "sector-3",
+      "name": "sector-3",
+      "parent": "sector-list",
+      "transform_3d": {
+        "scale": [
+          1.24,
+          0.1,
+          1.0
+        ]
+      },
+      "components": {
+        "weave.style": {
+          "classes": [
+            "option"
+          ]
+        },
+        "sindri.ui.shape": {
+          "kind": "rect",
+          "fill": [
+            0.05,
+            0.09,
+            0.14,
+            1.0
+          ],
+          "anchor": "center",
+          "layer": 61
+        },
+        "sindri.ui.option": {
+          "label": "Null Lattice"
+        }
+      }
+    },
+    {
+      "id": "sector-3-text",
+      "name": "sector-3-text",
+      "parent": "sector-3",
+      "transform_3d": {
+        "scale": [
+          1.1,
+          0.07,
+          1.0
+        ]
+      },
+      "components": {
+        "weave.style": {
+          "classes": [
+            "option-label"
+          ]
+        },
+        "sindri.ui.text": {
+          "text": "Null Lattice",
+          "font": "fonts/ChakraPetch-Regular.ttf",
+          "font_size": 0.032,
+          "bounds": [
+            1.1,
+            0.07
+          ],
+          "anchor": "center",
+          "layer": 62,
+          "line_align": "left"
+        }
+      }
+    },
+    {
+      "id": "sector-4",
+      "name": "sector-4",
+      "parent": "sector-list",
+      "transform_3d": {
+        "scale": [
+          1.24,
+          0.1,
+          1.0
+        ]
+      },
+      "components": {
+        "weave.style": {
+          "classes": [
+            "option"
+          ]
+        },
+        "sindri.ui.shape": {
+          "kind": "rect",
+          "fill": [
+            0.05,
+            0.09,
+            0.14,
+            1.0
+          ],
+          "anchor": "center",
+          "layer": 61
+        },
+        "sindri.ui.option": {
+          "label": "Core Approach"
+        }
+      }
+    },
+    {
+      "id": "sector-4-text",
+      "name": "sector-4-text",
+      "parent": "sector-4",
+      "transform_3d": {
+        "scale": [
+          1.1,
+          0.07,
+          1.0
+        ]
+      },
+      "components": {
+        "weave.style": {
+          "classes": [
+            "option-label"
+          ]
+        },
+        "sindri.ui.text": {
+          "text": "Core Approach",
+          "font": "fonts/ChakraPetch-Regular.ttf",
+          "font_size": 0.032,
+          "bounds": [
+            1.1,
+            0.07
+          ],
+          "anchor": "center",
+          "layer": 62,
+          "line_align": "left"
+        }
+      }
+    },
+    {
       "id": "callsign",
       "name": "callsign",
       "parent": "settings",
@@ -704,37 +1415,6 @@
           "anchor": "center",
           "layer": 20,
           "line_align": "left"
-        }
-      }
-    },
-    {
-      "id": "input-help",
-      "name": "input-help",
-      "parent": "settings",
-      "transform_3d": {
-        "scale": [
-          1.3,
-          0.06,
-          1.0
-        ]
-      },
-      "components": {
-        "weave.style": {
-          "classes": [
-            "small"
-          ]
-        },
-        "sindri.ui.text": {
-          "text": "Click the field and type. Enter submits.",
-          "font": "fonts/ChakraPetch-Regular.ttf",
-          "font_size": 0.028,
-          "bounds": [
-            1.0,
-            0.08
-          ],
-          "anchor": "center",
-          "layer": 20,
-          "line_align": "center"
         }
       }
     },
@@ -3030,7 +3710,7 @@
           ]
         },
         "sindri.ui.text": {
-          "text": "TAB / focus    SPACE / toggle    ENTER / submit    ESC / release",
+          "text": "TAB or ARROWS / focus    SPACE / press    ENTER / submit    ESC / back",
           "font": "fonts/ChakraPetch-Regular.ttf",
           "font_size": 0.026,
           "bounds": [

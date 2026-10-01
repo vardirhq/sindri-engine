@@ -25,6 +25,10 @@ pub struct UiDropdownComponent {
     pub open: bool,
     #[serde(default)]
     pub disabled: bool,
+    /// Takes focus when it appears and nothing else has it, so a menu is
+    /// ready for a pad or the arrows; as HTML's `autofocus`.
+    #[serde(default)]
+    pub autofocus: bool,
 }
 impl SceneComponent for UiDropdownComponent {
     const TYPE_NAME: &'static str = "sindri.ui.dropdown";
@@ -250,6 +254,11 @@ pub(super) fn options_of(world: &World, dropdown: EntityId) -> Vec<EntityId> {
         }
     }
     found
+}
+
+/// Whether a dropdown's list is showing.
+pub(super) fn is_open(world: &World, dropdown: EntityId) -> bool {
+    component::<UiDropdownComponent>(world, dropdown).is_some_and(|d| d.open)
 }
 
 /// The dropdown an option belongs to: its nearest ancestor that is one.

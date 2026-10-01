@@ -1962,7 +1962,8 @@
           "source": "scripts/button.decay"
         },
         "sindri.ui.button": {
-          "label": "pause-resume"
+          "label": "pause-resume",
+          "autofocus": true
         },
         "sindri.ui.shape": {
           "anchor": "center",
@@ -4793,7 +4794,8 @@
           "source": "scripts/button.decay"
         },
         "sindri.ui.button": {
-          "label": "result-again"
+          "label": "result-again",
+          "autofocus": true
         },
         "sindri.ui.shape": {
           "anchor": "center",
@@ -6549,7 +6551,8 @@
           "source": "scripts/button.decay"
         },
         "sindri.ui.button": {
-          "label": "title-start"
+          "label": "title-start",
+          "autofocus": true
         },
         "sindri.ui.shape": {
           "anchor": "center",
@@ -6853,18 +6856,9 @@
           "classes": [
             "action",
             "action-ghost",
-            "title-pick"
+            "title-pick",
+            "picker"
           ]
-        },
-        "sindri.script": {
-          "properties": {
-            "action": 5.0
-          },
-          "script": "Button",
-          "source": "scripts/button.decay"
-        },
-        "sindri.ui.button": {
-          "label": "title-start"
         },
         "sindri.ui.shape": {
           "anchor": "center",
@@ -6890,6 +6884,12 @@
           "stroke_width": 0.02315,
           "sweep_start": 0.0,
           "sweep_turns": 1.0
+        },
+        "sindri.ui.dropdown": {
+          "disabled": false,
+          "label": "Rush opens on",
+          "open": false,
+          "selected": 0
         }
       }
     },
@@ -6944,6 +6944,1485 @@
           "line_align": "center",
           "line_height": 0.064,
           "text": "OPENS ON  WARDEN",
+          "wrap": "word"
+        },
+        "sindri.ui.box": {
+          "fit_content": [
+            false,
+            false
+          ]
+        }
+      }
+    },
+    {
+      "id": "title-pick-list",
+      "name": "TitlePickList",
+      "parent": "title-pick",
+      "transform_3d": {
+        "position": [
+          0.0,
+          -0.372,
+          0.0
+        ],
+        "rotation": [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        "scale": [
+          1.0,
+          0.6,
+          1.0
+        ]
+      },
+      "components": {
+        "weave.style": {
+          "classes": [
+            "pick-list"
+          ]
+        },
+        "sindri.ui.shape": {
+          "anchor": "center",
+          "corner_radius": 0.0463,
+          "fill": [
+            0.00212,
+            0.00561,
+            0.01444,
+            1.0
+          ],
+          "kind": "rect",
+          "layer": 170,
+          "shadow": {
+            "blur": 0.08889,
+            "color": [
+              0.0,
+              0.0,
+              0.0,
+              0.75294
+            ],
+            "offset": [
+              0.0,
+              -0.03889
+            ],
+            "spread": 0.0
+          },
+          "stroke": [
+            0.11193,
+            0.82279,
+            0.65837,
+            1.0
+          ],
+          "stroke_width": 0.00463
+        },
+        "sindri.ui.scroll": {
+          "content_height": 0.0,
+          "disabled": false,
+          "label": "Bosses",
+          "offset": 0.0
+        },
+        "sindri.ui.layout": {
+          "align": "center",
+          "direction": "column",
+          "fit_content": [
+            false,
+            false
+          ],
+          "justify": "start",
+          "spacing": 0.008
+        },
+        "sindri.ui.box": {
+          "padding": [
+            0.012,
+            0.012,
+            0.012,
+            0.012
+          ]
+        }
+      }
+    },
+    {
+      "id": "title-pick-0",
+      "name": "TitlePick0",
+      "parent": "title-pick-list",
+      "transform_3d": {
+        "position": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "rotation": [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        "scale": [
+          0.976,
+          0.088,
+          1.0
+        ]
+      },
+      "components": {
+        "weave.style": {
+          "classes": [
+            "pick-option"
+          ]
+        },
+        "sindri.ui.shape": {
+          "anchor": "center",
+          "corner_radius": 0.18939,
+          "fill": [
+            0.00368,
+            0.04231,
+            0.04231,
+            1.0
+          ],
+          "kind": "rect",
+          "layer": 171,
+          "stroke": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "stroke_width": 0.0
+        },
+        "sindri.ui.option": {
+          "checked": true,
+          "disabled": false,
+          "label": "WARDEN"
+        },
+        "sindri.ui.box": {
+          "shrink": 0.0
+        }
+      }
+    },
+    {
+      "id": "title-pick-0-text",
+      "name": "TitlePick0Text",
+      "parent": "title-pick-0",
+      "transform_3d": {
+        "position": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "rotation": [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        "scale": [
+          0.8784,
+          0.052,
+          1.0
+        ]
+      },
+      "components": {
+        "weave.style": {
+          "classes": [
+            "pick-option-label"
+          ]
+        },
+        "sindri.ui.text": {
+          "anchor": "center",
+          "bold": false,
+          "bounds": [
+            0.8784,
+            0.052
+          ],
+          "case": "as_written",
+          "color": [
+            0.11193,
+            0.82279,
+            0.65837,
+            1.0
+          ],
+          "font": "fonts/ChakraPetch-Bold.ttf",
+          "font_size": 0.038,
+          "layer": 172,
+          "letter_spacing": 0.006,
+          "line_align": "left",
+          "line_height": 0.046,
+          "text": "WARDEN",
+          "wrap": "word"
+        },
+        "sindri.ui.box": {
+          "fit_content": [
+            false,
+            false
+          ]
+        }
+      }
+    },
+    {
+      "id": "title-pick-1",
+      "name": "TitlePick1",
+      "parent": "title-pick-list",
+      "transform_3d": {
+        "position": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "rotation": [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        "scale": [
+          0.976,
+          0.088,
+          1.0
+        ]
+      },
+      "components": {
+        "weave.style": {
+          "classes": [
+            "pick-option"
+          ]
+        },
+        "sindri.ui.shape": {
+          "anchor": "center",
+          "corner_radius": 0.18939,
+          "fill": [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "kind": "rect",
+          "layer": 171,
+          "stroke": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "stroke_width": 0.0
+        },
+        "sindri.ui.option": {
+          "checked": false,
+          "disabled": false,
+          "label": "HARROWER"
+        },
+        "sindri.ui.box": {
+          "shrink": 0.0
+        }
+      }
+    },
+    {
+      "id": "title-pick-1-text",
+      "name": "TitlePick1Text",
+      "parent": "title-pick-1",
+      "transform_3d": {
+        "position": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "rotation": [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        "scale": [
+          0.8784,
+          0.052,
+          1.0
+        ]
+      },
+      "components": {
+        "weave.style": {
+          "classes": [
+            "pick-option-label"
+          ]
+        },
+        "sindri.ui.text": {
+          "anchor": "center",
+          "bold": false,
+          "bounds": [
+            0.8784,
+            0.052
+          ],
+          "case": "as_written",
+          "color": [
+            0.2705,
+            0.36625,
+            0.49693,
+            1.0
+          ],
+          "font": "fonts/ChakraPetch-Bold.ttf",
+          "font_size": 0.038,
+          "layer": 172,
+          "letter_spacing": 0.006,
+          "line_align": "left",
+          "line_height": 0.046,
+          "text": "HARROWER",
+          "wrap": "word"
+        },
+        "sindri.ui.box": {
+          "fit_content": [
+            false,
+            false
+          ]
+        }
+      }
+    },
+    {
+      "id": "title-pick-2",
+      "name": "TitlePick2",
+      "parent": "title-pick-list",
+      "transform_3d": {
+        "position": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "rotation": [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        "scale": [
+          0.976,
+          0.088,
+          1.0
+        ]
+      },
+      "components": {
+        "weave.style": {
+          "classes": [
+            "pick-option"
+          ]
+        },
+        "sindri.ui.shape": {
+          "anchor": "center",
+          "corner_radius": 0.18939,
+          "fill": [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "kind": "rect",
+          "layer": 171,
+          "stroke": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "stroke_width": 0.0
+        },
+        "sindri.ui.option": {
+          "checked": false,
+          "disabled": false,
+          "label": "PRISM"
+        },
+        "sindri.ui.box": {
+          "shrink": 0.0
+        }
+      }
+    },
+    {
+      "id": "title-pick-2-text",
+      "name": "TitlePick2Text",
+      "parent": "title-pick-2",
+      "transform_3d": {
+        "position": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "rotation": [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        "scale": [
+          0.8784,
+          0.052,
+          1.0
+        ]
+      },
+      "components": {
+        "weave.style": {
+          "classes": [
+            "pick-option-label"
+          ]
+        },
+        "sindri.ui.text": {
+          "anchor": "center",
+          "bold": false,
+          "bounds": [
+            0.8784,
+            0.052
+          ],
+          "case": "as_written",
+          "color": [
+            0.2705,
+            0.36625,
+            0.49693,
+            1.0
+          ],
+          "font": "fonts/ChakraPetch-Bold.ttf",
+          "font_size": 0.038,
+          "layer": 172,
+          "letter_spacing": 0.006,
+          "line_align": "left",
+          "line_height": 0.046,
+          "text": "PRISM",
+          "wrap": "word"
+        },
+        "sindri.ui.box": {
+          "fit_content": [
+            false,
+            false
+          ]
+        }
+      }
+    },
+    {
+      "id": "title-pick-3",
+      "name": "TitlePick3",
+      "parent": "title-pick-list",
+      "transform_3d": {
+        "position": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "rotation": [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        "scale": [
+          0.976,
+          0.088,
+          1.0
+        ]
+      },
+      "components": {
+        "weave.style": {
+          "classes": [
+            "pick-option"
+          ]
+        },
+        "sindri.ui.shape": {
+          "anchor": "center",
+          "corner_radius": 0.18939,
+          "fill": [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "kind": "rect",
+          "layer": 171,
+          "stroke": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "stroke_width": 0.0
+        },
+        "sindri.ui.option": {
+          "checked": false,
+          "disabled": false,
+          "label": "SINGULARITY"
+        },
+        "sindri.ui.box": {
+          "shrink": 0.0
+        }
+      }
+    },
+    {
+      "id": "title-pick-3-text",
+      "name": "TitlePick3Text",
+      "parent": "title-pick-3",
+      "transform_3d": {
+        "position": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "rotation": [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        "scale": [
+          0.8784,
+          0.052,
+          1.0
+        ]
+      },
+      "components": {
+        "weave.style": {
+          "classes": [
+            "pick-option-label"
+          ]
+        },
+        "sindri.ui.text": {
+          "anchor": "center",
+          "bold": false,
+          "bounds": [
+            0.8784,
+            0.052
+          ],
+          "case": "as_written",
+          "color": [
+            0.2705,
+            0.36625,
+            0.49693,
+            1.0
+          ],
+          "font": "fonts/ChakraPetch-Bold.ttf",
+          "font_size": 0.038,
+          "layer": 172,
+          "letter_spacing": 0.006,
+          "line_align": "left",
+          "line_height": 0.046,
+          "text": "SINGULARITY",
+          "wrap": "word"
+        },
+        "sindri.ui.box": {
+          "fit_content": [
+            false,
+            false
+          ]
+        }
+      }
+    },
+    {
+      "id": "title-pick-4",
+      "name": "TitlePick4",
+      "parent": "title-pick-list",
+      "transform_3d": {
+        "position": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "rotation": [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        "scale": [
+          0.976,
+          0.088,
+          1.0
+        ]
+      },
+      "components": {
+        "weave.style": {
+          "classes": [
+            "pick-option"
+          ]
+        },
+        "sindri.ui.shape": {
+          "anchor": "center",
+          "corner_radius": 0.18939,
+          "fill": [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "kind": "rect",
+          "layer": 171,
+          "stroke": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "stroke_width": 0.0
+        },
+        "sindri.ui.option": {
+          "checked": false,
+          "disabled": false,
+          "label": "CROWN"
+        },
+        "sindri.ui.box": {
+          "shrink": 0.0
+        }
+      }
+    },
+    {
+      "id": "title-pick-4-text",
+      "name": "TitlePick4Text",
+      "parent": "title-pick-4",
+      "transform_3d": {
+        "position": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "rotation": [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        "scale": [
+          0.8784,
+          0.052,
+          1.0
+        ]
+      },
+      "components": {
+        "weave.style": {
+          "classes": [
+            "pick-option-label"
+          ]
+        },
+        "sindri.ui.text": {
+          "anchor": "center",
+          "bold": false,
+          "bounds": [
+            0.8784,
+            0.052
+          ],
+          "case": "as_written",
+          "color": [
+            0.2705,
+            0.36625,
+            0.49693,
+            1.0
+          ],
+          "font": "fonts/ChakraPetch-Bold.ttf",
+          "font_size": 0.038,
+          "layer": 172,
+          "letter_spacing": 0.006,
+          "line_align": "left",
+          "line_height": 0.046,
+          "text": "CROWN",
+          "wrap": "word"
+        },
+        "sindri.ui.box": {
+          "fit_content": [
+            false,
+            false
+          ]
+        }
+      }
+    },
+    {
+      "id": "title-pick-5",
+      "name": "TitlePick5",
+      "parent": "title-pick-list",
+      "transform_3d": {
+        "position": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "rotation": [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        "scale": [
+          0.976,
+          0.088,
+          1.0
+        ]
+      },
+      "components": {
+        "weave.style": {
+          "classes": [
+            "pick-option"
+          ]
+        },
+        "sindri.ui.shape": {
+          "anchor": "center",
+          "corner_radius": 0.18939,
+          "fill": [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "kind": "rect",
+          "layer": 171,
+          "stroke": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "stroke_width": 0.0
+        },
+        "sindri.ui.option": {
+          "checked": false,
+          "disabled": false,
+          "label": "BROOD"
+        },
+        "sindri.ui.box": {
+          "shrink": 0.0
+        }
+      }
+    },
+    {
+      "id": "title-pick-5-text",
+      "name": "TitlePick5Text",
+      "parent": "title-pick-5",
+      "transform_3d": {
+        "position": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "rotation": [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        "scale": [
+          0.8784,
+          0.052,
+          1.0
+        ]
+      },
+      "components": {
+        "weave.style": {
+          "classes": [
+            "pick-option-label"
+          ]
+        },
+        "sindri.ui.text": {
+          "anchor": "center",
+          "bold": false,
+          "bounds": [
+            0.8784,
+            0.052
+          ],
+          "case": "as_written",
+          "color": [
+            0.2705,
+            0.36625,
+            0.49693,
+            1.0
+          ],
+          "font": "fonts/ChakraPetch-Bold.ttf",
+          "font_size": 0.038,
+          "layer": 172,
+          "letter_spacing": 0.006,
+          "line_align": "left",
+          "line_height": 0.046,
+          "text": "BROOD",
+          "wrap": "word"
+        },
+        "sindri.ui.box": {
+          "fit_content": [
+            false,
+            false
+          ]
+        }
+      }
+    },
+    {
+      "id": "title-pick-6",
+      "name": "TitlePick6",
+      "parent": "title-pick-list",
+      "transform_3d": {
+        "position": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "rotation": [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        "scale": [
+          0.976,
+          0.088,
+          1.0
+        ]
+      },
+      "components": {
+        "weave.style": {
+          "classes": [
+            "pick-option"
+          ]
+        },
+        "sindri.ui.shape": {
+          "anchor": "center",
+          "corner_radius": 0.18939,
+          "fill": [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "kind": "rect",
+          "layer": 171,
+          "stroke": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "stroke_width": 0.0
+        },
+        "sindri.ui.option": {
+          "checked": false,
+          "disabled": false,
+          "label": "MIRROR"
+        },
+        "sindri.ui.box": {
+          "shrink": 0.0
+        }
+      }
+    },
+    {
+      "id": "title-pick-6-text",
+      "name": "TitlePick6Text",
+      "parent": "title-pick-6",
+      "transform_3d": {
+        "position": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "rotation": [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        "scale": [
+          0.8784,
+          0.052,
+          1.0
+        ]
+      },
+      "components": {
+        "weave.style": {
+          "classes": [
+            "pick-option-label"
+          ]
+        },
+        "sindri.ui.text": {
+          "anchor": "center",
+          "bold": false,
+          "bounds": [
+            0.8784,
+            0.052
+          ],
+          "case": "as_written",
+          "color": [
+            0.2705,
+            0.36625,
+            0.49693,
+            1.0
+          ],
+          "font": "fonts/ChakraPetch-Bold.ttf",
+          "font_size": 0.038,
+          "layer": 172,
+          "letter_spacing": 0.006,
+          "line_align": "left",
+          "line_height": 0.046,
+          "text": "MIRROR",
+          "wrap": "word"
+        },
+        "sindri.ui.box": {
+          "fit_content": [
+            false,
+            false
+          ]
+        }
+      }
+    },
+    {
+      "id": "title-pick-7",
+      "name": "TitlePick7",
+      "parent": "title-pick-list",
+      "transform_3d": {
+        "position": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "rotation": [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        "scale": [
+          0.976,
+          0.088,
+          1.0
+        ]
+      },
+      "components": {
+        "weave.style": {
+          "classes": [
+            "pick-option"
+          ]
+        },
+        "sindri.ui.shape": {
+          "anchor": "center",
+          "corner_radius": 0.18939,
+          "fill": [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "kind": "rect",
+          "layer": 171,
+          "stroke": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "stroke_width": 0.0
+        },
+        "sindri.ui.option": {
+          "checked": false,
+          "disabled": false,
+          "label": "ARCHITECT"
+        },
+        "sindri.ui.box": {
+          "shrink": 0.0
+        }
+      }
+    },
+    {
+      "id": "title-pick-7-text",
+      "name": "TitlePick7Text",
+      "parent": "title-pick-7",
+      "transform_3d": {
+        "position": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "rotation": [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        "scale": [
+          0.8784,
+          0.052,
+          1.0
+        ]
+      },
+      "components": {
+        "weave.style": {
+          "classes": [
+            "pick-option-label"
+          ]
+        },
+        "sindri.ui.text": {
+          "anchor": "center",
+          "bold": false,
+          "bounds": [
+            0.8784,
+            0.052
+          ],
+          "case": "as_written",
+          "color": [
+            0.2705,
+            0.36625,
+            0.49693,
+            1.0
+          ],
+          "font": "fonts/ChakraPetch-Bold.ttf",
+          "font_size": 0.038,
+          "layer": 172,
+          "letter_spacing": 0.006,
+          "line_align": "left",
+          "line_height": 0.046,
+          "text": "ARCHITECT",
+          "wrap": "word"
+        },
+        "sindri.ui.box": {
+          "fit_content": [
+            false,
+            false
+          ]
+        }
+      }
+    },
+    {
+      "id": "title-pick-8",
+      "name": "TitlePick8",
+      "parent": "title-pick-list",
+      "transform_3d": {
+        "position": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "rotation": [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        "scale": [
+          0.976,
+          0.088,
+          1.0
+        ]
+      },
+      "components": {
+        "weave.style": {
+          "classes": [
+            "pick-option"
+          ]
+        },
+        "sindri.ui.shape": {
+          "anchor": "center",
+          "corner_radius": 0.18939,
+          "fill": [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "kind": "rect",
+          "layer": 171,
+          "stroke": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "stroke_width": 0.0
+        },
+        "sindri.ui.option": {
+          "checked": false,
+          "disabled": false,
+          "label": "SPINE"
+        },
+        "sindri.ui.box": {
+          "shrink": 0.0
+        }
+      }
+    },
+    {
+      "id": "title-pick-8-text",
+      "name": "TitlePick8Text",
+      "parent": "title-pick-8",
+      "transform_3d": {
+        "position": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "rotation": [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        "scale": [
+          0.8784,
+          0.052,
+          1.0
+        ]
+      },
+      "components": {
+        "weave.style": {
+          "classes": [
+            "pick-option-label"
+          ]
+        },
+        "sindri.ui.text": {
+          "anchor": "center",
+          "bold": false,
+          "bounds": [
+            0.8784,
+            0.052
+          ],
+          "case": "as_written",
+          "color": [
+            0.2705,
+            0.36625,
+            0.49693,
+            1.0
+          ],
+          "font": "fonts/ChakraPetch-Bold.ttf",
+          "font_size": 0.038,
+          "layer": 172,
+          "letter_spacing": 0.006,
+          "line_align": "left",
+          "line_height": 0.046,
+          "text": "SPINE",
+          "wrap": "word"
+        },
+        "sindri.ui.box": {
+          "fit_content": [
+            false,
+            false
+          ]
+        }
+      }
+    },
+    {
+      "id": "title-pick-9",
+      "name": "TitlePick9",
+      "parent": "title-pick-list",
+      "transform_3d": {
+        "position": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "rotation": [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        "scale": [
+          0.976,
+          0.088,
+          1.0
+        ]
+      },
+      "components": {
+        "weave.style": {
+          "classes": [
+            "pick-option"
+          ]
+        },
+        "sindri.ui.shape": {
+          "anchor": "center",
+          "corner_radius": 0.18939,
+          "fill": [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "kind": "rect",
+          "layer": 171,
+          "stroke": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "stroke_width": 0.0
+        },
+        "sindri.ui.option": {
+          "checked": false,
+          "disabled": false,
+          "label": "LEVIATHAN"
+        },
+        "sindri.ui.box": {
+          "shrink": 0.0
+        }
+      }
+    },
+    {
+      "id": "title-pick-9-text",
+      "name": "TitlePick9Text",
+      "parent": "title-pick-9",
+      "transform_3d": {
+        "position": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "rotation": [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        "scale": [
+          0.8784,
+          0.052,
+          1.0
+        ]
+      },
+      "components": {
+        "weave.style": {
+          "classes": [
+            "pick-option-label"
+          ]
+        },
+        "sindri.ui.text": {
+          "anchor": "center",
+          "bold": false,
+          "bounds": [
+            0.8784,
+            0.052
+          ],
+          "case": "as_written",
+          "color": [
+            0.2705,
+            0.36625,
+            0.49693,
+            1.0
+          ],
+          "font": "fonts/ChakraPetch-Bold.ttf",
+          "font_size": 0.038,
+          "layer": 172,
+          "letter_spacing": 0.006,
+          "line_align": "left",
+          "line_height": 0.046,
+          "text": "LEVIATHAN",
+          "wrap": "word"
+        },
+        "sindri.ui.box": {
+          "fit_content": [
+            false,
+            false
+          ]
+        }
+      }
+    },
+    {
+      "id": "title-pick-10",
+      "name": "TitlePick10",
+      "parent": "title-pick-list",
+      "transform_3d": {
+        "position": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "rotation": [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        "scale": [
+          0.976,
+          0.088,
+          1.0
+        ]
+      },
+      "components": {
+        "weave.style": {
+          "classes": [
+            "pick-option"
+          ]
+        },
+        "sindri.ui.shape": {
+          "anchor": "center",
+          "corner_radius": 0.18939,
+          "fill": [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "kind": "rect",
+          "layer": 171,
+          "stroke": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "stroke_width": 0.0
+        },
+        "sindri.ui.option": {
+          "checked": false,
+          "disabled": false,
+          "label": "LAST LIGHT"
+        },
+        "sindri.ui.box": {
+          "shrink": 0.0
+        }
+      }
+    },
+    {
+      "id": "title-pick-10-text",
+      "name": "TitlePick10Text",
+      "parent": "title-pick-10",
+      "transform_3d": {
+        "position": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "rotation": [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        "scale": [
+          0.8784,
+          0.052,
+          1.0
+        ]
+      },
+      "components": {
+        "weave.style": {
+          "classes": [
+            "pick-option-label"
+          ]
+        },
+        "sindri.ui.text": {
+          "anchor": "center",
+          "bold": false,
+          "bounds": [
+            0.8784,
+            0.052
+          ],
+          "case": "as_written",
+          "color": [
+            0.2705,
+            0.36625,
+            0.49693,
+            1.0
+          ],
+          "font": "fonts/ChakraPetch-Bold.ttf",
+          "font_size": 0.038,
+          "layer": 172,
+          "letter_spacing": 0.006,
+          "line_align": "left",
+          "line_height": 0.046,
+          "text": "LAST LIGHT",
+          "wrap": "word"
+        },
+        "sindri.ui.box": {
+          "fit_content": [
+            false,
+            false
+          ]
+        }
+      }
+    },
+    {
+      "id": "title-pick-11",
+      "name": "TitlePick11",
+      "parent": "title-pick-list",
+      "transform_3d": {
+        "position": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "rotation": [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        "scale": [
+          0.976,
+          0.088,
+          1.0
+        ]
+      },
+      "components": {
+        "weave.style": {
+          "classes": [
+            "pick-option"
+          ]
+        },
+        "sindri.ui.shape": {
+          "anchor": "center",
+          "corner_radius": 0.18939,
+          "fill": [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "kind": "rect",
+          "layer": 171,
+          "stroke": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "stroke_width": 0.0
+        },
+        "sindri.ui.option": {
+          "checked": false,
+          "disabled": false,
+          "label": "AEGIS"
+        },
+        "sindri.ui.box": {
+          "shrink": 0.0
+        }
+      }
+    },
+    {
+      "id": "title-pick-11-text",
+      "name": "TitlePick11Text",
+      "parent": "title-pick-11",
+      "transform_3d": {
+        "position": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "rotation": [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        "scale": [
+          0.8784,
+          0.052,
+          1.0
+        ]
+      },
+      "components": {
+        "weave.style": {
+          "classes": [
+            "pick-option-label"
+          ]
+        },
+        "sindri.ui.text": {
+          "anchor": "center",
+          "bold": false,
+          "bounds": [
+            0.8784,
+            0.052
+          ],
+          "case": "as_written",
+          "color": [
+            0.2705,
+            0.36625,
+            0.49693,
+            1.0
+          ],
+          "font": "fonts/ChakraPetch-Bold.ttf",
+          "font_size": 0.038,
+          "layer": 172,
+          "letter_spacing": 0.006,
+          "line_align": "left",
+          "line_height": 0.046,
+          "text": "AEGIS",
           "wrap": "word"
         },
         "sindri.ui.box": {
@@ -7728,7 +9207,8 @@
           ]
         },
         "sindri.ui.button": {
-          "label": "Guidance Kernel"
+          "label": "Guidance Kernel",
+          "autofocus": true
         },
         "sindri.ui.shape": {
           "anchor": "center",
@@ -8085,7 +9565,8 @@
           ]
         },
         "sindri.ui.button": {
-          "label": "Arc Imprint"
+          "label": "Arc Imprint",
+          "autofocus": true
         },
         "sindri.ui.shape": {
           "anchor": "center",
@@ -8442,7 +9923,8 @@
           ]
         },
         "sindri.ui.button": {
-          "label": "Nova Imprint"
+          "label": "Nova Imprint",
+          "autofocus": true
         },
         "sindri.ui.shape": {
           "anchor": "center",
@@ -8799,7 +10281,8 @@
           ]
         },
         "sindri.ui.button": {
-          "label": "Gravity Anchor"
+          "label": "Gravity Anchor",
+          "autofocus": true
         },
         "sindri.ui.shape": {
           "anchor": "center",
@@ -9156,7 +10639,8 @@
           ]
         },
         "sindri.ui.button": {
-          "label": "Prism Imprint"
+          "label": "Prism Imprint",
+          "autofocus": true
         },
         "sindri.ui.shape": {
           "anchor": "center",
@@ -9513,7 +10997,8 @@
           ]
         },
         "sindri.ui.button": {
-          "label": "Trimmed Hull"
+          "label": "Trimmed Hull",
+          "autofocus": true
         },
         "sindri.ui.shape": {
           "anchor": "center",

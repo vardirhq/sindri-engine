@@ -39,8 +39,12 @@ fn shot_for(name: &str) -> Shot {
     if let Some(index) = name.strip_prefix("boss-")
         && let Ok(index) = index.parse::<usize>()
     {
-        let mut clicks = vec!["TitlePick".to_owned(); index];
-        clicks.push("TitleRush".to_owned());
+        // Open the roster, choose the boss, then start the rush.
+        let clicks = vec![
+            "TitlePick".to_owned(),
+            format!("TitlePick{index}"),
+            "TitleRush".to_owned(),
+        ];
         return Shot {
             // Long enough for the boss to descend into the frame and open with
             // whatever it opens with.

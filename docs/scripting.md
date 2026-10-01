@@ -802,7 +802,10 @@ and a `sindri.ui.scroll` a region whose children scroll vertically and are
 clipped to it. The person changes them by clicking, tapping, typing, pasting,
 the wheel or a drag. Tab and Shift+Tab move focus in the order the scene is
 written; the arrow keys and a pad's d-pad move it to the nearest control that
-way, scrolling a row into view; Space, Enter or a pad's South button presses
+way, scrolling a row into view. With nothing focused the arrows take focus only
+for a control marked `"autofocus": true`, which also takes focus when it
+appears, so a game that walks with the arrows never has its buttons focused by
+walking; Space, Enter or a pad's South button presses
 what has it, and Escape or East backs out. In a field, Left, Right, Home and
 End move the caret, Shift selects, Backspace and Delete erase, and Ctrl or Cmd
 with A, C, X and V select all, copy, cut and paste. `Ui.changed` is true for

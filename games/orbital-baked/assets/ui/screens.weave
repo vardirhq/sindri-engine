@@ -18,6 +18,23 @@
 .title-rush { width: 50vh; height: 8vh; x: 31vh; y: 9vh; }
 .title-pick { width: 50vh; height: 6vh; x: 31vh; y: 0.5vh; }
 .title-compact { width: 50vh; height: 7vh; x: 31vh; y: -10.5vh; }
+/* The boss picker opens a scrolling list of the roster under itself. */
+.picker:open { background: #0d1c2e; border-color: var(--accent); }
+.picker:open .action-ghost-label { color: var(--accent); }
+.pick-list {
+    width: 100%; height: 30vh; x: 0px; y: -18.6vh;
+    padding: 0.6vh; gap: 0.4vh;
+    background: #071120; border-color: var(--accent); border-width: 1px; border-radius: 10px;
+    box-shadow: 0px 14px 32px #000000c0;
+}
+.pick-option { width: 100%; height: 4.4vh; flex-shrink: 0; background: transparent; border-radius: 6px; }
+.pick-option:hover, .pick-option:focus { background: #14304a; }
+.pick-option:checked { background: var(--accent-deep); }
+.pick-option-label {
+    width: 90%; height: 2.6vh; font-size: 1.9vh; line-height: 2.3vh; letter-spacing: 0.3vh;
+    color: var(--muted); text-align: start;
+}
+.pick-option:checked .pick-option-label { color: var(--accent); }
 .title-hint {
     width: 50vh; height: 8vh; x: 31vh; y: -23vh;
     font-size: 1.9vh; line-height: 2.6vh; color: var(--muted); text-align: start;
@@ -65,6 +82,7 @@
 
 @media (max-height: 600px) and (orientation: landscape) {
     .title-hint, .title-notice, .upgrade-hint { font-size: 11px; line-height: 14px; }
+    .pick-option-label { font-size: 11px; }
     .title-start-sub { font-size: 9px; line-height: 11px; }
     .title-start-label { y: 1.4vh; }
     .upgrade-card-copy { font-size: 12px; line-height: 16px; }
@@ -86,6 +104,9 @@
     .title-rush { width: 44vh; max-width: 84vw; height: 6.4vh; x: 0px; y: -9.4vh; }
     .title-pick { width: 44vh; max-width: 84vw; height: 5.4vh; x: 0px; y: -16.2vh; }
     .title-compact { width: 44vh; max-width: 84vw; height: 6vh; x: 0px; y: -23.2vh; }
+    .pick-list { height: 26vh; y: -16.2vh; }
+    .pick-option { height: 3.8vh; }
+    .pick-option-label { font-size: 1.6vh; }
     .title-hint { width: 44vh; max-width: 84vw; height: 7vh; x: 0px; y: -31.6vh; font-size: 1.6vh; line-height: 2.2vh; }
     .title-notice { width: 44vh; max-width: 84vw; height: 4vh; x: 0px; y: -38.6vh; font-size: 1.6vh; line-height: 2.1vh; }
     .action-label { font-size: 2.3vh; }

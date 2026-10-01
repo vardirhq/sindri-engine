@@ -4,7 +4,7 @@
 //! Both land on a control a person could press, and a row inside a scroll
 //! region is scrolled into view when the keyboard reaches it, as a browser
 //! scrolls a focused element into view.
-use std::collections::BTreeMap;
+use std::collections::{BTreeMap, BTreeSet};
 
 use glam::Vec2;
 use sindri_core::{EntityId, SceneComponent, World};
@@ -63,6 +63,8 @@ impl ScreenUi {
             }
         });
         self.focus(world, ids[at]);
+        // Tabbing out of an open list puts it away.
+        self.close_dropdowns(world, Some(ids[at]));
     }
 
     /// The arrows and d-pad: the nearest control whose centre lies that way,
@@ -74,29 +76,76 @@ impl ScreenUi {
             .and_then(|e| self.rects.get(&e))
             .map(|e| e.rect)
         else {
-            if let Some(first) = self.focus_order(world).first().copied() {
+            // Nothing focused: only a screen that asked for focus takes it.
+            // A game that moves with the arrows and jumps with Space must not
+            // have its pause button focused, and then pressed, by walking.
+            if let Some(first) = self
+                .focus_order(world)
+                .into_iter()
+                .find(|e| autofocus(world, *e))
+            {
                 self.focus(world, first);
             }
             return;
         };
         let origin = Vec2::from_array(from.center);
         let unit = toward.unit();
+        // An open list keeps the arrows, as a native select does: whatever
+        // its popup happens to cover is not somewhere they go.
+        let open_list = self
+            .focused
+            .and_then(|f| super::choice::dropdown_of(world, f))
+            .filter(|dropdown| super::choice::is_open(world, *dropdown))
+            .map(|dropdown| super::choice::options_of(world, dropdown));
         let best = self
             .focus_order(world)
             .into_iter()
+            .filter(|e| open_list.as_ref().is_none_or(|options| options.contains(e)))
             .filter(|e| Some(*e) != self.focused)
             .filter_map(|e| {
-                let to = Vec2::from_array(self.rects.get(&e)?.rect.center) - origin;
+                let rect = self.rects.get(&e)?.rect;
+                let to = Vec2::from_array(rect.center) - origin;
                 let along = to.dot(unit);
                 // Ahead of the control, not merely beside it.
                 if along <= 1.0e-4 {
                     return None;
                 }
                 let across = (to - unit * along).length();
-                Some((e, along + across * 2.0))
+                // Anything in the focused control's beam -- overlapping it
+                // across the way focus moves -- comes before anything off to
+                // the side, nearest first, as a browser's spatial navigation
+                // does; off the beam, the nearer in line wins.
+                let in_beam = in_beam(from, rect, toward);
+                let score = if in_beam {
+                    along
+                } else {
+                    1.0e3 + along + across * 2.0
+                };
+                Some((e, score, across))
             })
-            .min_by(|a, b| a.1.total_cmp(&b.1));
-        if let Some((entity, _)) = best {
+            .min_by(|a, b| a.1.total_cmp(&b.1).then(a.2.total_cmp(&b.2)));
+        if let Some((entity, _, _)) = best {
+            self.focus(world, entity);
+        }
+    }
+
+    /// Focuses an `autofocus` control that has just come into view, when
+    /// nothing has focus: a menu that asks for it is ready for a pad or the
+    /// arrows the moment it appears, as a page's `autofocus` field is.
+    pub(super) fn apply_autofocus(&mut self, world: &mut World) {
+        let order = self.focus_order(world);
+        let wanting: BTreeSet<EntityId> = order
+            .iter()
+            .copied()
+            .filter(|e| autofocus(world, *e))
+            .collect();
+        let arrived = order
+            .into_iter()
+            .find(|e| wanting.contains(e) && !self.autofocused.contains(e));
+        self.autofocused = wanting;
+        if self.focused.is_none()
+            && let Some(entity) = arrived
+        {
             self.focus(world, entity);
         }
     }
@@ -135,6 +184,28 @@ impl ScreenUi {
             current = data.parent;
         }
     }
+}
+
+/// Whether a control asks for focus when it appears: `"autofocus": true`
+/// on any of its components.
+fn autofocus(world: &World, entity: EntityId) -> bool {
+    world.get(entity).is_some_and(|data| {
+        data.components.values().any(|payload| {
+            payload
+                .get("autofocus")
+                .and_then(serde_json::Value::as_bool)
+                == Some(true)
+        })
+    })
+}
+
+/// Whether `to` overlaps `from` across the direction focus is moving.
+fn in_beam(from: ScreenRect, to: ScreenRect, toward: Toward) -> bool {
+    let axis = match toward {
+        Toward::Left | Toward::Right => 1,
+        Toward::Up | Toward::Down => 0,
+    };
+    (from.center[axis] - to.center[axis]).abs() * 2.0 < from.size[axis] + to.size[axis]
 }
 
 /// How far to scroll a region so `element` is inside it: positive moves the

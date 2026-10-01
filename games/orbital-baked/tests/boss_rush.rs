@@ -79,42 +79,54 @@ fn a_rush_walks_the_roster_in_order() {
 }
 
 /// And it starts where the picker was left, so a particular boss can be asked
-/// for rather than waited for.
+/// for rather than waited for. The picker is a dropdown of the roster: open
+/// it and choose one.
 #[test]
 fn the_picker_chooses_where_the_rush_opens() {
     let mut run = at_the_title();
-    // Eleven presses from the Warden is the Aegis, the last of the roster.
-    for _ in 0..11 {
-        run.click("TitlePick");
-        step(&mut run);
-    }
-    assert_eq!(
-        run.board("rush_from"),
-        11.0,
-        "the picker walked to the Aegis"
-    );
+    run.click("TitlePick");
+    step(&mut run);
+    run.click("TitlePick4");
+    step(&mut run);
+    assert_eq!(run.board("rush_from"), 4.0, "the picker chose the Crown");
 
     run.click("TitleRush");
     run.set_board("hp", 100_000.0);
     assert_eq!(
         await_boss(&mut run),
-        11.0,
+        4.0,
         "the rush should open on the boss the title was showing"
     );
 }
 
-/// The picker wraps, so it is never a dead end.
+/// The roster is a list the keyboard or a pad walks: Tab to the picker,
+/// Enter opens it on the boss already chosen, Down walks the list (scrolling
+/// it), and Enter chooses.
 #[test]
-fn the_picker_wraps() {
+fn the_picker_is_driven_without_a_pointer() {
+    use sindri_platform::Key;
     let mut run = at_the_title();
-    for _ in 0..12 {
-        run.click("TitlePick");
-        step(&mut run);
+    let tap = |run: &mut orbital_baked::Run, key: Key| {
+        run.hold(key);
+        step(run);
+        run.let_go(key);
+        step(run);
+    };
+    // START has focus when the title appears; the rush and then the picker
+    // follow it in the order the title is written.
+    for _ in 0..2 {
+        tap(&mut run, Key::Tab);
     }
+    tap(&mut run, Key::Enter);
+    // Eleven down is the Aegis, below the list's fold: it scrolls into view.
+    for _ in 0..11 {
+        tap(&mut run, Key::ArrowDown);
+    }
+    tap(&mut run, Key::Enter);
     assert_eq!(
         run.board("rush_from"),
-        0.0,
-        "twelve presses is a full circle"
+        11.0,
+        "eleven down from the Warden is the Aegis"
     );
 }
 

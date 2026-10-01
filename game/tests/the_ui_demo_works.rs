@@ -231,7 +231,7 @@ fn a_callsign_is_typed_in_any_script_and_submitted_once() {
     demo.type_text("Nøva 猫 7");
     assert_eq!(
         demo.text("callsign-text"),
-        "Nøva 猫 7_",
+        "Nøva 猫 7|",
         "a caret while it has the keyboard"
     );
     // Space is a letter here, not a press of the field.
@@ -252,8 +252,8 @@ fn a_callsign_is_typed_in_any_script_and_submitted_once() {
 #[test]
 fn tab_walks_the_controls_in_the_order_they_are_written() {
     let mut demo = Demo::open(960.0, 540.0);
-    let mut seen = Vec::new();
-    for _ in 0..4 {
+    let mut seen = vec![demo.text("focus-readout")];
+    for _ in 0..7 {
         demo.key(Key::Tab);
         seen.push(demo.text("focus-readout"));
     }
@@ -262,12 +262,116 @@ fn tab_walks_the_controls_in_the_order_they_are_written() {
         [
             "FOCUS / flight assist",
             "FOCUS / mission telemetry",
+            "FOCUS / difficulty / cadet",
+            "FOCUS / difficulty / pilot",
+            "FOCUS / difficulty / ace",
+            "FOCUS / sector",
             "FOCUS / callsign / typing",
             "FOCUS / archive row 1",
         ]
     );
     demo.key(Key::Space);
     assert_eq!(demo.text("status"), "SELECTED / Guidance Kernel");
+}
+
+#[test]
+fn difficulty_is_one_of_three_and_the_sector_is_chosen_from_a_list() {
+    let mut demo = Demo::open(960.0, 540.0);
+    let checked = |demo: &Demo, name: &str| {
+        demo.field(name, "sindri.ui.toggle", "checked") == serde_json::json!(true)
+    };
+    assert!(checked(&demo, "difficulty-pilot"));
+    demo.click("difficulty-ace");
+    assert!(checked(&demo, "difficulty-ace"));
+    assert!(
+        !checked(&demo, "difficulty-pilot"),
+        "a radio group keeps one"
+    );
+
+    demo.click("sector");
+    assert!(
+        demo.world.is_active(demo.id("sector-list")),
+        "the list opens"
+    );
+    demo.click("sector-3");
+    assert_eq!(demo.text("sector-text"), "Sector  / Null Lattice");
+    assert!(
+        !demo.world.is_active(demo.id("sector-list")),
+        "and closes on a choice"
+    );
+}
+
+#[test]
+fn the_callsign_is_edited_at_its_caret() {
+    let mut demo = Demo::open(960.0, 540.0);
+    demo.click("callsign");
+    demo.type_text("Nova7");
+    demo.key(Key::ArrowLeft);
+    demo.type_text("-");
+    assert_eq!(
+        demo.text("callsign-text"),
+        "Nova-|7",
+        "the caret is drawn where it is"
+    );
+    demo.input.apply(InputEvent::KeyPressed(Key::ShiftLeft));
+    demo.key(Key::Home);
+    demo.input.apply(InputEvent::KeyReleased(Key::ShiftLeft));
+    assert_eq!(demo.text("callsign-text"), "[Nova-]7");
+    demo.type_text("X");
+    assert_eq!(
+        demo.text("callsign-text"),
+        "X|7",
+        "typing replaces the selection"
+    );
+}
+
+/// A pad drives the menu as the keyboard does: the d-pad moves, South
+/// presses, East backs out of an open list.
+#[test]
+fn a_pad_drives_the_settings() {
+    use sindri_platform::{GamepadButton, PadId};
+    let mut demo = Demo::open(960.0, 540.0);
+    demo.input.apply(InputEvent::GamepadConnected(PadId(1)));
+    let mut button = |demo: &mut Demo, button: GamepadButton| {
+        demo.input.apply(InputEvent::GamepadPressed {
+            pad: PadId(1),
+            button,
+        });
+        demo.step();
+        demo.input.apply(InputEvent::GamepadReleased {
+            pad: PadId(1),
+            button,
+        });
+        demo.play(2);
+    };
+    // The first switch asked for focus, so a pad starts there.
+    assert_eq!(demo.text("focus-readout"), "FOCUS / flight assist");
+    button(&mut demo, GamepadButton::South);
+    assert_eq!(demo.text("toggle-text"), "Flight assist  / off");
+    button(&mut demo, GamepadButton::DPadDown);
+    button(&mut demo, GamepadButton::DPadDown);
+    assert_eq!(
+        demo.text("focus-readout"),
+        "FOCUS / difficulty / cadet",
+        "down skips the locked autopilot"
+    );
+    button(&mut demo, GamepadButton::DPadRight);
+    button(&mut demo, GamepadButton::DPadRight);
+    button(&mut demo, GamepadButton::South);
+    assert_eq!(
+        demo.field("difficulty-ace", "sindri.ui.toggle", "checked"),
+        serde_json::json!(true)
+    );
+    button(&mut demo, GamepadButton::DPadDown);
+    assert_eq!(demo.text("focus-readout"), "FOCUS / sector");
+    button(&mut demo, GamepadButton::South);
+    assert!(demo.world.is_active(demo.id("sector-list")));
+    button(&mut demo, GamepadButton::East);
+    assert!(
+        !demo.world.is_active(demo.id("sector-list")),
+        "East closes the list"
+    );
+    assert_eq!(demo.text("focus-readout"), "FOCUS / sector");
 }
 
 /// The archive, at every shape it is drawn: its first row starts at its top,
@@ -298,12 +402,22 @@ fn the_archive_scrolls_exactly_as_far_as_its_rows_go_at_every_size() {
             (0.0..pad).contains(&tail),
             "{size:?}: the last row ends at the bottom, {tail} above it"
         );
-        // Where the first row was is now a later row; where it is now is
-        // above the region, clipped, and clicks there reach nothing.
+        // Where the first row is now is above the region, clipped, and a click
+        // there reaches nothing; where it was is now a later row, which a
+        // click picks unless that row is the locked one.
         demo.click_at(demo.pixel(demo.rect("row-0").center));
         assert_eq!(demo.text("status"), "READY / Select a control", "{size:?}");
+        // (Or the gap between two rows, where a click picks nothing.)
+        let there = (0..19)
+            .map(|i| format!("row-{i}"))
+            .find(|row| demo.rect(row).contains(first.center));
         demo.click_at(demo.pixel(first.center));
-        assert_ne!(demo.text("status"), "READY / Select a control", "{size:?}");
+        let picked = demo.text("status") != "READY / Select a control";
+        let pickable = there.as_deref().is_some_and(|row| row != "row-9");
+        assert_eq!(
+            picked, pickable,
+            "{size:?}: {there:?} under the old first row"
+        );
 
         demo.wheel("archive", -10_000.0);
         assert!(demo.offset().abs() < 1.0e-5, "{size:?}: back to the top");

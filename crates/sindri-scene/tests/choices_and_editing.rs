@@ -330,29 +330,25 @@ fn a_field_edits_at_its_caret_selects_and_copies() {
 fn the_arrows_move_focus_toward_the_nearest_control_that_way() {
     let mut world = World::default();
     let mut grid = Vec::new();
-    for (x, y) in [(-0.5, 0.5), (0.5, 0.5), (-0.5, -0.5), (0.5, -0.5)] {
+    for (i, (x, y)) in [(-0.5, 0.5), (0.5, 0.5), (-0.5, -0.5), (0.5, -0.5)]
+        .into_iter()
+        .enumerate()
+    {
         grid.push(element(
             &mut world,
             [x, y],
             [0.4, 0.3],
-            &[("sindri.ui.button", json!({}))],
+            &[("sindri.ui.button", json!({"autofocus": i == 0}))],
         ));
     }
     let mut screen = Screen::new(world);
-    let press = |screen: &mut Screen, input: UiInput| screen.keys(input);
-    press(
-        &mut screen,
-        UiInput {
-            down: true,
-            ..UiInput::default()
-        },
-    );
     assert_eq!(
         screen.ui.focused(),
         Some(grid[0]),
-        "nothing focused: start at the first"
+        "the autofocus button takes focus when it appears"
     );
-    press(
+    let arrow = |screen: &mut Screen, input: UiInput| screen.keys(input);
+    arrow(
         &mut screen,
         UiInput {
             down: true,
@@ -360,7 +356,7 @@ fn the_arrows_move_focus_toward_the_nearest_control_that_way() {
         },
     );
     assert_eq!(screen.ui.focused(), Some(grid[2]));
-    press(
+    arrow(
         &mut screen,
         UiInput {
             right: true,
@@ -368,7 +364,7 @@ fn the_arrows_move_focus_toward_the_nearest_control_that_way() {
         },
     );
     assert_eq!(screen.ui.focused(), Some(grid[3]));
-    press(
+    arrow(
         &mut screen,
         UiInput {
             up: true,
@@ -376,7 +372,7 @@ fn the_arrows_move_focus_toward_the_nearest_control_that_way() {
         },
     );
     assert_eq!(screen.ui.focused(), Some(grid[1]));
-    press(
+    arrow(
         &mut screen,
         UiInput {
             up: true,
@@ -388,6 +384,56 @@ fn the_arrows_move_focus_toward_the_nearest_control_that_way() {
         Some(grid[1]),
         "nothing further up stays put"
     );
+
+    // Let go, the arrows bring focus back only to the screen that asked.
+    arrow(
+        &mut screen,
+        UiInput {
+            escape: true,
+            ..UiInput::default()
+        },
+    );
+    arrow(
+        &mut screen,
+        UiInput {
+            left: true,
+            ..UiInput::default()
+        },
+    );
+    assert_eq!(screen.ui.focused(), Some(grid[0]));
+}
+
+/// A game that moves with the arrows and jumps with Space keeps its buttons
+/// out of it: with nothing focused and nothing asking, the arrows focus
+/// nothing, so Space presses nothing.
+#[test]
+fn the_arrows_do_not_take_focus_for_a_screen_that_did_not_ask() {
+    let mut world = World::default();
+    let pause = element(
+        &mut world,
+        [0.8, 0.8],
+        [0.2, 0.2],
+        &[("sindri.ui.button", json!({}))],
+    );
+    let mut screen = Screen::new(world);
+    for input in [
+        UiInput {
+            right: true,
+            ..UiInput::default()
+        },
+        UiInput {
+            down: true,
+            ..UiInput::default()
+        },
+        UiInput {
+            activate: true,
+            ..UiInput::default()
+        },
+    ] {
+        screen.keys(input);
+    }
+    assert_eq!(screen.ui.focused(), None);
+    assert!(!screen.ui.is_pressed(pause));
 }
 
 #[test]
@@ -406,19 +452,19 @@ fn a_row_reached_by_the_keyboard_is_scrolled_into_view() {
         ],
     );
     let rows: Vec<EntityId> = (0..8)
-        .map(|_| {
+        .map(|i| {
             let row = element(
                 &mut world,
                 [0.0, 0.0],
                 [0.8, 0.2],
-                &[("sindri.ui.button", json!({}))],
+                &[("sindri.ui.button", json!({"autofocus": i == 0}))],
             );
             world.set_parent(row, Some(region)).unwrap();
             row
         })
         .collect();
     let mut screen = Screen::new(world);
-    for _ in 0..6 {
+    for _ in 0..5 {
         screen.keys(UiInput {
             down: true,
             ..UiInput::default()

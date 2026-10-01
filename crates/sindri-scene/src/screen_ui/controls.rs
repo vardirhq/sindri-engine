@@ -39,6 +39,7 @@ impl ScreenUi {
         if input.escape && !self.close_dropdowns(world, None) {
             self.focused = None;
         }
+        self.apply_autofocus(world);
         // A press anywhere moves focus to what it landed on, and a press on
         // nothing that takes focus -- a panel, the game behind -- lets go.
         if self.pointer_began {

@@ -432,20 +432,26 @@ The host names this type but has not described its members.
 
 The interface drawn over the game: changing text and bars, and checking buttons and sliders.
 
+- `caret(input: Entity)` → `f32` — Where a text field's caret is, in characters.
 - `changed(element: Entity)` → `bool` — Whether user interaction changed a widget this step.
 - `input_text(input: Entity)` → `String` — The committed text in a single-line input.
 - `is_checked(toggle: Entity)` → `bool` — Whether a toggle is checked.
 - `is_focused(element: Entity)` → `bool` — Whether this element has keyboard focus.
 - `is_held(button: Entity)` → `bool` — Whether a button is being held down right now.
 - `is_hovered(button: Entity)` → `bool` — Whether the mouse or finger is over a button.
+- `is_open(dropdown: Entity)` → `bool` — Whether a dropdown's list is open.
 - `is_pressed(button: Entity)` → `bool` — Whether a button was clicked this frame: pressed and let go while on it.
 - `scroll_offset(scroll: Entity)` → `f32` — Vertical scroll distance in overlay units.
+- `selected(dropdown: Entity)` → `f32` — Which option a dropdown has chosen, counted from zero.
+- `selection_end(input: Entity)` → `f32` — Where a text field's selection ends, in characters; the caret when nothing is selected.
+- `selection_start(input: Entity)` → `f32` — Where a text field's selection begins, in characters; the caret when nothing is selected.
 - `set_checked(toggle: Entity, checked: bool)` → `unit` — Sets a toggle without emitting a user-change event.
 - `set_fill(bar: Entity, amount: f32)` → `unit` — Shows part of an image, from 0 (none) to 1 (all). This is how health and progress bars work: `Ui.set_fill(bar, hp / max_hp)`.
 - `set_input_text(input: Entity, text: String)` → `unit` — Writes text using the input's Unicode length limit.
 - `set_number(label: Entity, value: f32)` → `unit` — Puts a number into a text element. Its text is set up in the scene with a `{}` where the number goes, such as `"Score: {}"`.
 - `set_numbers(label: Entity, first: f32, second: f32)` → `unit` — Puts two numbers into a text element with two `{}` places, such as `"{}/{}"` for `45/100`.
 - `set_scroll_offset(scroll: Entity, offset: f32)` → `unit` — Clamps the offset to the authored content height.
+- `set_selected(dropdown: Entity, index: f32)` → `unit` — Chooses a dropdown's option without emitting a user-change event.
 - `set_slider_value(slider: Entity, value: f32)` → `unit` — Moves a slider to a value, kept within the slider's range.
 - `set_text(label: Entity, text: String)` → `unit` — Changes the words a text element shows.
 - `slider_changed(slider: Entity)` → `bool` — Whether the player moved a slider this frame.

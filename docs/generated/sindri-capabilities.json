@@ -1129,17 +1129,41 @@
       "addable": true,
       "apply": {},
       "default_payload": {
+        "autofocus": false,
         "disabled": false,
         "label": ""
       },
       "display_name": "UI Button",
       "fields": {
+        "autofocus": false,
         "disabled": false,
         "label": ""
       },
       "meanings": {},
       "schema_version": 1,
       "type_name": "sindri.ui.button"
+    },
+    {
+      "addable": true,
+      "apply": {},
+      "default_payload": {
+        "autofocus": false,
+        "disabled": false,
+        "label": "",
+        "open": false,
+        "selected": 0
+      },
+      "display_name": "UI Dropdown",
+      "fields": {
+        "autofocus": false,
+        "disabled": false,
+        "label": "",
+        "open": false,
+        "selected": 0
+      },
+      "meanings": {},
+      "schema_version": 1,
+      "type_name": "sindri.ui.dropdown"
     },
     {
       "addable": true,
@@ -1319,6 +1343,24 @@
       },
       "schema_version": 1,
       "type_name": "sindri.ui.layout"
+    },
+    {
+      "addable": true,
+      "apply": {},
+      "default_payload": {
+        "checked": false,
+        "disabled": false,
+        "label": ""
+      },
+      "display_name": "UI Option",
+      "fields": {
+        "checked": false,
+        "disabled": false,
+        "label": ""
+      },
+      "meanings": {},
+      "schema_version": 1,
+      "type_name": "sindri.ui.option"
     },
     {
       "addable": true,
@@ -1622,6 +1664,7 @@
       "addable": true,
       "apply": {},
       "default_payload": {
+        "autofocus": false,
         "disabled": false,
         "label": "",
         "max_length": 128,
@@ -1630,6 +1673,7 @@
       },
       "display_name": "UI Text Input",
       "fields": {
+        "autofocus": false,
         "disabled": false,
         "label": "",
         "max_length": 128,
@@ -1644,14 +1688,18 @@
       "addable": true,
       "apply": {},
       "default_payload": {
+        "autofocus": false,
         "checked": false,
         "disabled": false,
+        "group": "",
         "label": ""
       },
       "display_name": "UI Toggle",
       "fields": {
+        "autofocus": false,
         "checked": false,
         "disabled": false,
+        "group": "",
         "label": ""
       },
       "meanings": {},

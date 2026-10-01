@@ -24,6 +24,10 @@ pub struct UiToggleComponent {
     pub disabled: bool,
     #[serde(default)]
     pub group: String,
+    /// Takes focus when it appears and nothing else has it, so a menu is
+    /// ready for a pad or the arrows; as HTML's `autofocus`.
+    #[serde(default)]
+    pub autofocus: bool,
 }
 impl SceneComponent for UiToggleComponent {
     const TYPE_NAME: &'static str = "sindri.ui.toggle";
@@ -44,6 +48,7 @@ pub struct UiTextInputComponent {
     /// The most characters it holds, counted as Unicode scalars.
     pub max_length: usize,
     pub disabled: bool,
+    pub autofocus: bool,
 }
 
 /// The most a text input may be authored to hold.
@@ -62,6 +67,8 @@ struct TextInputFields {
     max_length: usize,
     #[serde(default)]
     disabled: bool,
+    #[serde(default)]
+    autofocus: bool,
 }
 
 const fn default_limit() -> usize {
@@ -90,6 +97,7 @@ impl TryFrom<TextInputFields> for UiTextInputComponent {
             placeholder: fields.placeholder,
             max_length: fields.max_length,
             disabled: fields.disabled,
+            autofocus: fields.autofocus,
         })
     }
 }

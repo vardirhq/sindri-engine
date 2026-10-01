@@ -47,6 +47,10 @@ pub struct UiButtonComponent {
     /// `:disabled` to say so.
     #[serde(default)]
     pub disabled: bool,
+    /// Takes focus when it appears and nothing else has it, so a menu is
+    /// ready for a pad or the arrows; as HTML's `autofocus`.
+    #[serde(default)]
+    pub autofocus: bool,
 }
 
 impl SceneComponent for UiButtonComponent {
@@ -75,6 +79,9 @@ pub struct ScreenUi {
     carets: BTreeMap<EntityId, editing::UiCaret>,
     /// What a copy or cut put on the clipboard this step.
     copied: Option<String>,
+    /// The `autofocus` controls that were on screen last step, so one that
+    /// arrives is noticed.
+    autofocused: BTreeSet<EntityId>,
 }
 
 #[derive(Clone, Copy, Debug)]

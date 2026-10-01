@@ -497,17 +497,26 @@ is styling, through Weave's `:checked`. `sindri.ui.text_input` is a single-line
 field with a placeholder and a limit counted in characters: it takes committed
 Unicode text, Backspace, Enter to submit and Escape to let go, and while it has
 the keyboard its keys are held back from `Input`, so typing does not steer.
-Editing happens at the end; caret movement, selection, clipboard, IME
-composition and software keyboards are not built. `sindri.ui.scroll` scrolls
+`sindri.ui.scroll` scrolls
 its children vertically by wheel, drag or finger, clamped to how tall they are
 as laid out, and clips their drawing and hit-testing to itself; a drag that
 starts on a row never becomes a click on it. Tab and Shift+Tab walk every
 focusable element in the order the scene is written. Decay reads and writes
 them with `Ui.is_checked`, `Ui.input_text`, `Ui.scroll_offset` and their
 setters, and `Ui.changed`, `Ui.submitted` and `Ui.is_focused` answer for the
-step. `examples/ui` is the feature example; Orbital Last Stand proves them in a
-game with a saved compact-HUD switch, a pilot callsign carried onto the HUD and
-results, and a scrolling field manual on its pause screen.
+step. Toggles that share a `group` are a radio group, and `sindri.ui.dropdown`
+opens a popup of authored `sindri.ui.option` rows that the engine shows only
+while it is open (Weave's `:open`), read with `Ui.selected`. A field edits at a
+caret with a selection and the system clipboard, and a script draws the caret
+from `Ui.caret` and the `Ui.selection_*` pair. In a browser a field being
+edited gives the page's focus to a hidden textarea, which is how IME
+composition, a paste and a phone's keyboard reach it. The arrows and any pad's
+d-pad move focus toward the nearest control, preferring those in line, and a
+row reached inside a scroll region is scrolled into view. `examples/ui` is the
+feature example; Orbital Last Stand proves them in a game with a saved
+compact-HUD switch, a pilot callsign carried onto the HUD and results, a
+scrolling dropdown of its twelve bosses, and a scrolling field manual on its
+pause screen.
 
 No game in this repository uses the slider. `games/weave-poc` demonstrates it, and
 Mujaffa Remaster — an external project — is what asked for it, so by the
