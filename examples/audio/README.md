@@ -13,7 +13,10 @@ well as what plays next, and its fill and percentage read the bus back with
 choose a slider, left and right move it a step. Browsers start audio on the
 first click or key.
 
-All behaviour is in `assets/mixer.decay`. `crates/sindri-decay/tests/mixer_demo.rs`
+The layout is `assets/ui/mixer.weave`: one centred column and a panel of bus
+rows, with rules for a phone held upright and a phone on its side.
+
+All behaviour is in `assets/mixer.decay`. `game/tests/the_mixer_and_input_demos_work.rs`
 moves the buses by keyboard and by touch and plays an effect through its bus;
 the platform's `AudioMixer` tests prove the volumes reach live voices.
 

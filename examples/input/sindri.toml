@@ -3,4 +3,4 @@ format_version = 1
 name = "Input Actions"
 main_scene = "assets/input.scene"
 [assets]
-include = ["fonts/Fonts-OFL.txt"]
+include = ["fonts/Fonts-OFL.txt", "ui/input.weave"]

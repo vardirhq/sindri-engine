@@ -1,0 +1,56 @@
+/* Input Actions: the bindings across the top, the controls along the bottom,
+   and the ship's arena between them in the world. Stacked on a phone. */
+:root {
+    --ink: #e6f0f7;
+    --muted: #8aa1b6;
+    --accent: #5fe3cf;
+    --panel: #0b1522cc;
+    --line: #22384c;
+    --control: #0f1c2b;
+}
+
+sindri.ui.text { color: var(--ink); text-wrap: word; }
+
+.room { width: 100vw; height: 100vh; padding: 18px; direction: column; justify-content: space-between; align-items: center; }
+.top { width: 100%; height: 150px; gap: 10px; direction: column; justify-content: start; align-items: center; }
+.heading { width: 100%; height: 40px; font-size: 30px; letter-spacing: 4px; text-align: center; }
+.bindings {
+    width: 92vw; max-width: 720px; height: 92px; padding: 10px 16px; gap: 6px;
+    direction: column; justify-content: center; align-items: start;
+    background: var(--panel); border-color: var(--line); border-width: 1px; border-radius: 12px;
+}
+.binding { width: 100%; height: 34px; font-size: 13px; line-height: 17px; color: var(--muted); text-align: start; }
+
+.bottom { width: 100%; height: 120px; gap: 10px; direction: column; justify-content: end; align-items: center; }
+.status { width: 92vw; max-width: 720px; height: 40px; font-size: 15px; line-height: 20px; color: var(--accent); text-align: center; }
+.buttons { width: 92vw; max-width: 520px; height: 56px; direction: row; gap: 16px; justify-content: center; align-items: center; }
+.action {
+    width: 48%; height: 48px; direction: row; justify-content: center; align-items: center;
+    background: var(--control); border-color: var(--line); border-width: 1px; border-radius: 10px;
+}
+.action:hover { background: #142638; border-color: #3b5a73; }
+.action:active { background: #0f3b3a; border-color: var(--accent); }
+.action:focus { border-color: var(--accent); border-width: 2px; }
+.action-label { width: 100%; height: 20px; font-size: 15px; letter-spacing: 2px; text-align: center; }
+
+@media (orientation: portrait) {
+    .room { padding: 14px; }
+    .top { height: 200px; }
+    .heading { height: 34px; font-size: 24px; letter-spacing: 3px; }
+    .bindings { height: 124px; padding: 10px 12px; }
+    .binding { height: 50px; font-size: 12px; line-height: 16px; }
+    .bottom { height: 130px; }
+    .action-label { font-size: 13px; letter-spacing: 1px; }
+}
+
+@media (orientation: landscape) and (max-height: 460px) {
+    .room { padding: 8px; }
+    .top { height: 110px; gap: 6px; }
+    .heading { height: 28px; font-size: 20px; }
+    .bindings { height: 72px; padding: 6px 12px; gap: 2px; }
+    .binding { height: 32px; font-size: 11px; line-height: 15px; }
+    .bottom { height: 88px; gap: 6px; }
+    .status { height: 22px; font-size: 13px; }
+    .buttons { height: 44px; }
+    .action { height: 40px; }
+}

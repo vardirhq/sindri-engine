@@ -469,6 +469,7 @@ The interface drawn over the game: changing text and bars, and checking buttons 
 - `is_hovered(button: Entity)` → `bool` — Whether the mouse or finger is over a button.
 - `is_open(dropdown: Entity)` → `bool` — Whether a dropdown's list is open.
 - `is_pressed(button: Entity)` → `bool` — Whether a button was clicked this frame: pressed and let go while on it.
+- `position(element: Entity)` → `Vec2` — Where an element was laid out on the screen, as a Vec2 in overlay units: 0 is the middle, and one unit is half the screen's height, up positive.
 - `scroll_offset(scroll: Entity)` → `f32` — Vertical scroll distance in overlay units.
 - `selected(dropdown: Entity)` → `f32` — Which option a dropdown has chosen, counted from zero.
 - `selection_end(input: Entity)` → `f32` — Where a text field's selection ends, in characters; the caret when nothing is selected.
@@ -482,6 +483,7 @@ The interface drawn over the game: changing text and bars, and checking buttons 
 - `set_selected(dropdown: Entity, index: f32)` → `unit` — Chooses a dropdown's option without emitting a user-change event.
 - `set_slider_value(slider: Entity, value: f32)` → `unit` — Moves a slider to a value, kept within the slider's range.
 - `set_text(label: Entity, text: String)` → `unit` — Changes the words a text element shows.
+- `size(element: Entity)` → `Vec2` — How wide and tall an element was laid out, in the same units as `position`, including room a stylesheet's `flex-grow` gave it.
 - `slider_changed(slider: Entity)` → `bool` — Whether the player moved a slider this frame.
 - `slider_value(slider: Entity)` → `f32` — The value a slider is set to.
 - `submitted(input: Entity)` → `bool` — Whether Enter submitted the focused input this step.

@@ -51,6 +51,9 @@ impl WorldHost<'_> {
         ) {
             return self.caret_call(call, path, entity);
         }
+        if matches!(call, UiCall::Position | UiCall::Size) {
+            return self.layout_read(call, path, entity);
+        }
         match call {
             UiCall::Text => {
                 let Some(Value::String(text)) = args.get(1) else {
@@ -116,7 +119,9 @@ impl WorldHost<'_> {
             | UiCall::Open
             | UiCall::Caret
             | UiCall::SelectionStart
-            | UiCall::SelectionEnd => {
+            | UiCall::SelectionEnd
+            | UiCall::Position
+            | UiCall::Size => {
                 unreachable!("handled as a query")
             }
         }
@@ -143,6 +148,32 @@ impl WorldHost<'_> {
             UiCall::SliderChanged => screen.slider_changed(entity),
             _ => unreachable!("only boolean UI queries are handled here"),
         }))
+    }
+
+    /// Where an element was laid out, or how big: read from the layout, which
+    /// is where a flex-grown element's size lives, while its transform keeps
+    /// what was authored or styled.
+    fn layout_read(
+        &self,
+        call: UiCall,
+        path: &Path,
+        entity: EntityId,
+    ) -> Result<Value, RuntimeError> {
+        let rect = self
+            .screen_ui
+            .and_then(|screen| screen.rect(entity))
+            .ok_or_else(|| {
+                RuntimeError::Host(format!(
+                    "{}: the element is not laid out on the screen",
+                    path.dotted()
+                ))
+            })?;
+        let [x, y] = if matches!(call, UiCall::Position) {
+            rect.center
+        } else {
+            rect.size
+        };
+        Ok(Value::Vec2([f64::from(x), f64::from(y)]))
     }
 
     /// Reads or sets a slider's value, kept inside its range.

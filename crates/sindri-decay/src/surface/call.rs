@@ -292,6 +292,10 @@ pub(crate) enum UiCall {
     /// Where a text field's selection starts and ends, in characters.
     SelectionStart,
     SelectionEnd,
+    /// Where an element was laid out, and how big, in overlay units: what a
+    /// script needs to fit something in the world to a gap in the UI.
+    Position,
+    Size,
     Changed,
     Submitted,
     Focused,
@@ -347,6 +351,8 @@ pub(crate) const UI_CALLS: &[(&str, UiCall)] = &[
     ("set_slider_value", UiCall::SliderSetValue),
     ("slider_changed", UiCall::SliderChanged),
     ("is_hovered", UiCall::Hovered),
+    ("position", UiCall::Position),
+    ("size", UiCall::Size),
     ("is_pressed", UiCall::Pressed),
     ("is_held", UiCall::Held),
 ];
