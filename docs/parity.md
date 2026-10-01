@@ -122,7 +122,6 @@ written the row.
 
 | Capability | State | Why it is stranded |
 | --- | --- | --- |
-| **Input actions** | `crates/sindri-platform/src/input/action/` parses an action document, binds named actions to keys, pointer axes and scroll | No scene component, no editor surface, no Decay binding. Games poll raw keys instead. |
 | **Scroll input** | `Source::ScrollX/ScrollY` are bound and parsed; the wheel now scrolls `sindri.ui.scroll` regions | Still not a Decay reading of its own, so a game cannot zoom or cycle with the wheel. |
 
 Stranded capability is the cheapest work in this file: the engine cost is
@@ -231,7 +230,7 @@ events, blending, tweening, and animating anything that is not a sprite frame.
 | Clip authoring and preview | — | ✅ | — | ✅ | **Par** | — |
 | **Animation events (a frame fires a callback)** | ❌ | ❌ | ❌ | ❌ | **Absent** | Footsteps, hit frames, spawn-on-frame all need it |
 | **Property animation (animate any component field)** | ❌ | ❌ | ❌ | ❌ | **Absent** | Unity's Animation window animates any serialized property. We animate sprite frames and nothing else |
-| **Tweening / easing** | ✅ | ❌ | ✅ | ✅ | **Behind** | Managed number/vector/colour tweens, pause/resume/cancel/restart, typed values, progress/completion and disposal. Orbital pickup appearance proves gameplay use; Weave shares named easing through CSS transitions. Editor timelines, property binding, sequences, callbacks and loop/yoyo remain |
+| **Tweening / easing** | ✅ | ❌ | ✅ | ✅ | **Behind** | Managed number/vector/colour tweens, pause/resume/cancel/restart, typed values, progress/completion and disposal, composed with a delay, a loop count (or for ever), yoyo and `Tween.after` sequences. Orbital's pickup appears and then breathes with an endless yoyo; Tween Lab chains a crossing, a wait and a return. Weave shares named easing through CSS transitions. Editor timelines, property binding and completion callbacks remain |
 | **State machine / blending** | ❌ | ❌ | ❌ | ❌ | **Absent** | Animator controller, Godot AnimationTree. Transitions are hand-written today |
 | **Skeletal / cutout 2D animation** | ❌ | ❌ | ❌ | ❌ | **Absent** | Spine, Unity 2D Animation. Frame sheets only |
 | **Timeline / cutscenes** | ❌ | ❌ | ❌ | ❌ | **Absent** | — |
@@ -243,10 +242,11 @@ events, blending, tweening, and animating anything that is not a sprite frame.
 | Bodies, fixed-step stepping, velocity, impulse | ✅ | 🟡 | ✅ | ✅ | **Par** | — |
 | Compound colliders (several pieces, one body) | ✅ | ✅ | — | ✅ | **Par** | Pieces are added, removed, reordered and fully edited, a piece's shape included. The platformer's hero is one body of two pieces, a capsule and a box |
 | Masks, sensors, collision events | ✅ | 🟡 | ✅ | ✅ | **Par** | — |
-| **Named collision layers** | ❌ | ❌ | ❌ | — | **Behind** | Masks are raw `u32` bit values. Unity and Godot both name layers in project settings. Cheap to fix, daily friction |
+| **Named collision layers** | ✅ | ✅ | ✅ | ✅ | **Par** | A scene's `sindri.physics2d.world` names its layers bit by bit; `Physics.layer`/`Physics.mask` turn names into masks and refuse a name the world does not give; the inspector shows every mask field as a menu of named layers, keeping unnamed bits. The platformer names ground, hero and pickups and probes for ground by name; Physics Playground's mask control asks for its layers by name. Named per scene rather than in project settings, and colliders still store masks |
 | Per-piece validation naming the failing index | ✅ | — | — | ✅ | **Ahead** | Neither baseline tells you *which* collider was wrong |
 | **2D closest-hit raycasts** | ✅ | — | ✅ | ✅ | **Par** | Finite world-space casts return entity/point/normal/distance or null; query membership masks, sensor opt-in and entity exclusion; deterministic ties. Platformer HUD measures ground clearance; Physics Playground exposes hits, normals, masks and triggers on Pages. Direct scans; no query index |
-| **Overlap / shape casts / 3D physics queries** | ❌ | ❌ | ❌ | ❌ | **Absent** | Area collision checks, swept shapes and 3D casts remain absent |
+| **Overlap and shape casts (2D)** | ✅ | — | ✅ | ✅ | **Par** | `PhysicsWorld2d::overlap` and `shape_cast` answer for circles, boxes and capsules from synchronized pieces with the raycast's mask/sensor/exclude filter; Decay has `Physics.overlap_circle`, `overlap_box`, `cast_circle` and `cast_box`. Orbital's hostile mine damages what its blast circle overlaps, by collider; Physics Playground shows a swept circle and an area. No contact manifolds |
+| **3D physics queries** | ❌ | ❌ | ❌ | ❌ | **Absent** | No 3D runtime, so no 3D casts |
 | **Joints and constraints** | 🟡 | ❌ | ✅ | ❌ | **Behind** | One joint kind: `Physics.connect_distance(first, second, max_distance)` holds two bodies within a distance, queued when a chain is built in a single script pass and its bodies do not exist yet. No hinge, slider, spring, or motor, and nothing authors a joint in a scene — a joint exists only if a script makes one. Added for the spine boss, which ships without it: `games/orbital-baked/assets/scripts/spine-segment.decay` chains its segments by hand, each one reading its leader and steering toward a point `spacing` behind it. `crates/sindri-physics/tests/distance_joint.rs` is the only exercise |
 | **Physics materials as assets** | ❌ | ❌ | ❌ | — | **Behind** | Friction and restitution are per-collider literals |
 | **Character controller** | ❌ | ❌ | ❌ | ❌ | **Absent** | Every platformer and top-down game writes one. The platformer's hero is a dynamic body driven by velocity, with a foot sensor for standing and coyote time and a jump buffer in Decay: it works, and it is exactly the code a controller would own |
@@ -277,7 +277,7 @@ Sindri's strongest domain relative to the baseline.
 | WAV / Ogg / MP3, native + browser + silent backends | ✅ | 🟡 | ✅ | ✅ | **Par** | Scene-source preview is not integrated |
 | Play, loop, pause, resume, stop | ✅ | 🟡 | ✅ | ✅ | **Par** | — |
 | Per-play volume | ✅ | — | 🟡 | ✅ | **Behind** | — |
-| **Buses / mixer / master volume** | ❌ | ❌ | ❌ | ❌ | **Absent** | **A settings screen has a music slider and nothing for it to move.** The UI control landed; there is no bus, no master volume, and no way for a script to set one. Near-universal shipping requirement |
+| **Buses / mixer / master volume** | ✅ | 🟡 | ✅ | ✅ | **Behind** | Every sound plays through a named bus under `master`; `AudioMixer` applies bus gain in front of every backend, changing live voices. Decay: `Audio.set_volume`, `Audio.volume`, `play_on`/`loop_on`; an authored source names its `bus`. Orbital's pause screen moves master, music and effects and saves them; Sound Mixer is the feature example. The editor's inspector edits a source's bus as text. No effects (reverb, ducking) or snapshot blending |
 | **Spatial audio / panning** | ❌ | ❌ | ❌ | ❌ | **Absent** | — |
 | **Per-voice handles** | ❌ | — | ❌ | — | **Behind** | A script cannot stop the specific sound it started |
 | **Music transitions / crossfade** | ❌ | ❌ | ❌ | ❌ | **Absent** | — |
@@ -289,10 +289,10 @@ Sindri's strongest domain relative to the baseline.
 | Keyboard, mouse, touch behind the platform boundary | ✅ | ✅ | ✅ | ✅ | **Par** | — |
 | Unified pointer, bounded fingers | ✅ | ✅ | ✅ | ✅ | **Par** | — |
 | Touch stick built from a finger | ✅ | — | ✅ | ✅ | **Ahead** | A considered solution to a problem most engines leave to the game |
-| **Action mapping (named actions, rebindable)** | 🟡 | ❌ | ❌ | ❌ | **Behind** | Exists and is stranded. This becomes the input system rather than growing beside it |
+| **Action mapping (named actions, rebindable)** | ✅ | 🟡 | ✅ | ✅ | **Behind** | A scene declares `sindri.input.actions`; scripts read `Action.held/pressed/released/axis/vector` and rebind with `Action.rebind`/`Action.last_pressed`, written back into the component. The platformer's hero runs and jumps by actions; the Input example rebinds boost. Declared per scene rather than per project, edited in the inspector as raw JSON, no per-player maps, and a rebinding is not saved between sessions |
 | **Gamepad, by player slot** | ✅ | 🟡 | ✅ | ✅ | **Behind** | Pads on desktop and in the browser, read by player slot: a face button or Start joins, unplugging leaves, one join per frame. Scorchball is played by up to four pads and its tests press them. Play in the editor reads pads, not yet exercised with a real one in CI. No rumble or per-player action map |
 | **Scroll wheel** | 🟡 | — | 🟡 | ✅ | **Behind** | Scrolls UI scroll regions in every host (Orbital's pause manual, the Control Room archive); a script sees the region's offset, not the wheel itself |
-| **Rebinding UI** | ❌ | ❌ | ❌ | ❌ | **Absent** | Rewired sells on this |
+| **Rebinding UI** | ❌ | ❌ | ✅ | ✅ | **Behind** | No engine widget; a game builds one from `Action.bindings`, `Action.last_pressed` and `Action.rebind`, as the Input example does. Rewired sells on this |
 
 ## UI and presentation
 
@@ -302,7 +302,7 @@ Sindri's strongest domain relative to the baseline.
 | Pointer hit-testing, hover/press/held | ✅ | ✅ | ✅ | ✅ | **Par** | — |
 | Weave responsive stylesheets | 🟡 | 🟡 | — | ✅ | **Ahead** | CSS selectors (element names, compounds, descendant and child combinators, lists) with CSS specificity, inheritance, custom properties with `var()`, and combined media queries. Neither baseline has stylesheets this close to CSS; `docs/ui-direction.md` is the plan to make it complete. `:hover` and `:active` follow the pointer in every host, and hit-testing uses the presented geometry. The editor's Styles section shows each element's box model, matched rules with `file:line` and overridden declarations, and computed values; a value edited there is written into the stylesheet, and an element can be picked by clicking it in the running game |
 | Project fonts | ✅ | ✅ | — | ✅ | **Par** | — |
-| **Slider** | ✅ | ✅ | ✅ | ❌ | **Par** | Horizontal or vertical, with `min`, `max`, `step`, `disabled` and a label; a drag and a scripted write pass through the same clamp-and-quantize contract, so a value cannot enter the component off-step. Weave styles it like any other node. `Ui.slider_value`, `Ui.set_slider_value` and `Ui.slider_changed` read, write and detect the change. The editor names it in Add Component with `orientation` as a declared choice — but no field carries a bounded-range meaning, so `value` is a free number box beside the range it is supposed to obey. No game in this repository proves it: `games/weave-poc` demonstrates it, as a feature demo rather than a game, and Mujaffa Remaster uses it externally |
+| **Slider** | ✅ | ✅ | ✅ | ✅ | **Par** | Horizontal or vertical, with `min`, `max`, `step`, `disabled` and a label; a drag and a scripted write pass through the same clamp-and-quantize contract, so a value cannot enter the component off-step. Weave styles it like any other node. `Ui.slider_value`, `Ui.set_slider_value` and `Ui.slider_changed` read, write and detect the change. The editor names it in Add Component with `orientation` as a declared choice — but no field carries a bounded-range meaning, so `value` is a free number box beside the range it is supposed to obey. A focused slider moves by its step under the arrows, the d-pad or the stick, and takes `autofocus`. Orbital's pause screen mixes its audio with three, saved between sessions, and Sound Mixer is the feature example |
 | **Toggle and checkbox** | ✅ | 🟡 | ✅ | ✅ | **Par** | `sindri.ui.toggle`, one boolean component whose art is authored: a switch or a checkbox is a matter of styling, with Weave's `:checked`, `:disabled`, `:hover` and `:focus`. Click, tap, Space or Enter flips it; `Ui.is_checked`, `Ui.set_checked` and `Ui.changed` read, write and detect it. Orbital proves it with a compact-HUD switch that is saved and changes the HUD. The editor lists it in Add Component with plain fields; there is no dedicated authoring gizmo |
 | **Text input (single line)** | ✅ | 🟡 | ✅ | ✅ | **Par** | `sindri.ui.text_input` with a placeholder and a limit counted in characters. Editing happens at a caret with a selection: Left, Right, Home, End, Shift to select, Backspace, Delete, and Ctrl or Cmd with A, C, X and V through the system clipboard; `Ui.caret`, `Ui.selection_start` and `Ui.selection_end` let a script draw the caret and highlight. IME composition is committed once on desktop; in a browser the field gives the page's focus to a hidden textarea, so composition, paste and a phone's on-screen keyboard reach it. Keys are held back from gameplay while it edits. Orbital's pilot callsign proves it. No multi-line field, no word-wise movement, and no caret placed by clicking inside the text (a click puts it at the end); iOS raises its keyboard only for a tap that lands while the game is already editing |
 | **Scroll region** | 🟡 | 🟡 | ✅ | ✅ | **Behind** | `sindri.ui.scroll` scrolls vertically by wheel, drag or finger, clamps to its laid-out content, clips drawing and hit-testing to itself (nested clips intersect), and a drag never becomes a click on a row. `Ui.scroll_offset` and `Ui.set_scroll_offset`. Orbital's pause screen scrolls a field manual. Vertical only, no scrollbar or momentum, and a rotated region clips to its axis-aligned bounds |
@@ -313,7 +313,7 @@ Sindri's strongest domain relative to the baseline.
 | UI transitions | ✅ | ✅ | ✅ | ✅ | **Par** | CSS `transition` with named and `cubic-bezier` easings, delays and `all`, on colours, lengths and numbers; USS has the same. `@keyframes` is still absent |
 | UI devtools (computed style, which rule won) | — | ✅ | — | — | **Par** | Unity's UI Toolkit debugger was the bar. The editor's Styles section now meets it: box model, matched rules with `file:line`, overridden declarations and computed values, and an element picked by clicking the running game — see the Weave row |
 | **Keyboard focus navigation** | ✅ | — | ✅ | ✅ | **Par** | Tab and Shift+Tab walk controls in the order the scene is written; the arrow keys move focus to the nearest control that way, preferring those in line, as browser spatial navigation does; a row reached inside a scroll region is scrolled into view; Space or Enter presses, Escape backs out. Weave's `:focus` shows it and `Ui.is_focused` reads it. No focus scopes beyond an open dropdown |
-| **Gamepad focus navigation** | 🟡 | — | ✅ | ✅ | **Behind** | Any pad's d-pad moves focus as the arrows do, South presses or submits and East backs out, in every host. A control marked `autofocus` takes focus when its screen appears, so a menu is ready for a pad; with nothing focused and nothing asking, the d-pad and arrows focus nothing, so gameplay that uses them never presses a button. The Control Room's regression drives its settings with a pad, and Orbital's title, chooser, pause and results all start focused. The stick does not navigate yet, and there is no per-player focus |
+| **Gamepad focus navigation** | 🟡 | — | ✅ | ✅ | **Behind** | Any pad's d-pad moves focus as the arrows do, South presses or submits and East backs out, in every host. A control marked `autofocus` takes focus when its screen appears, so a menu is ready for a pad; with nothing focused and nothing asking, the d-pad and arrows focus nothing, so gameplay that uses them never presses a button. The Control Room's regression drives its settings with a pad, and Orbital's title, chooser, pause and results all start focused. A pad's left stick moves focus as the d-pad does, once per push, and moves a focused slider. There is no per-player focus |
 | **Accessibility labels** | ❌ | ❌ | ❌ | ❌ | **Absent** | — |
 | **Drag and drop** | ❌ | ❌ | ❌ | ❌ | **Absent** | — |
 
@@ -516,7 +516,7 @@ were native gaps. Treat these rows as close to automatic.
 | **Cinemachine** | Camera follow, framing, confining, shake | **Behind** — `sindri.camera.behavior` follows, confines and shakes, and the platformer uses it; Decay camera-mode controls and authoring gizmos remain |
 | **Post Processing Stack** | Bloom, colour grading, vignette | **Behind** — an authored world stack now covers exposure, tone mapping, contrast, saturation, bloom, and vignette; LUT grading and advanced cinematic effects remain |
 | **Shader Graph** | Shader authoring without code | **Absent** — no materials at all |
-| **Input System** | Action mapping, rebinding, gamepad | **Behind** — action layer stranded; gamepads read by player slot, without rumble or per-player actions |
+| **Input System** | Action mapping, rebinding, gamepad | **Behind** — actions reach scripts and rebind at runtime; gamepads read by player slot, without rumble or per-player actions |
 | **Addressables** | Asset streaming and release | **Absent** — not urgent at our scale |
 | **ProBuilder** | In-editor geometry | **Won't** — 3D is not the product |
 
@@ -573,23 +573,28 @@ output of the file; everything above is evidence.
    proof — its walk cycle had run even while standing still, because nothing
    could tell it otherwise — and since Gather was removed the platformer's hero
    and Scorchball's players carry it.
-3. **UI widget set: toggle, text input, scroll region.** The slider landed —
-   authored, styled, scripted, and clamped on one contract — and the rest of
-   the set did not, so a settings screen is still missing its checkbox and its
-   typed field, and no inventory or long list can scroll. The slider is also
-   the second capability in a row whose only user is outside this repository;
-   see the proof note below.
-4. **Physics queries: overlap and shape cast.** Area checks and swept movement.
-   Closest-hit raycasts now cover ground-distance and line-of-sight queries.
-5. **Audio buses and a master volume.** A settings screen now has a music
-   slider and nothing behind it: there is no bus to route a clip to and no
-   master volume for the slider to move.
-6. **Un-strand the input action layer.** The engine cost is paid, and pads are
-   now read by player slot. Make it the input system, per the anti-goal.
-7. **Named collision layers instead of raw `u32` masks.** Cheap, daily friction.
-8. **Tween composition and authoring.** Managed Decay values and Orbital pickup
-   appearance have landed; property binding, sequences and editor timelines remain.
-   Weave animation authoring stays CSS-inspired, with keyframes still absent.
+3. ~~**UI widget set: toggle, text input, scroll region.**~~ **Done.** Toggles,
+   radio groups, text fields with a caret and the clipboard, dropdowns and
+   scroll regions are authored, styled by Weave, scripted, and driven by
+   pointer, keyboard and pad; the Control Room and Orbital use them, and the
+   slider now has users here: Orbital's pause mixer and Sound Mixer.
+4. ~~**Physics queries: overlap and shape cast.**~~ **Done.** Circles, boxes
+   and capsules are overlapped and swept from the same pieces as the raycast,
+   in Rust and Decay. Orbital's mine blast is an area check; Physics Playground
+   shows a swept circle and an area. 3D queries wait on 3D physics.
+5. ~~**Audio buses and a master volume.**~~ **Done.** Named buses under
+   master, applied to live voices on every backend and set from Decay.
+   Orbital's pause screen moves master, music and effects and saves them.
+   Effects on a bus and snapshot blending remain.
+6. ~~**Un-strand the input action layer.**~~ **Done.** A scene declares its
+   actions; scripts read and rebind them. The platformer runs and jumps by
+   actions and the Input example rebinds at runtime. Project-level actions,
+   per-player maps and saving a rebinding remain.
+7. ~~**Named collision layers instead of raw `u32` masks.**~~ **Done.** The
+   physics world names its layers; Decay and the inspector use the names.
+8. ~~**Tween composition.**~~ **Done** for composition: delay, loops, yoyo and
+   sequences, proved by Orbital's pickup and Tween Lab. Property binding and
+   editor timelines remain, and Weave keyframes are still absent.
 9. ~~**Collider gizmos in the Scene view.**~~ **Done.** Every 2D collider is
    outlined from the pieces physics is given, and the selected one's edges,
    radius and height drag as one undo step. Offsets, rotations and 3D colliders
@@ -606,15 +611,17 @@ output of the file; everything above is evidence.
 13. **Autotiling.** The daily cost of painting tilemaps by hand.
 14. **Profiler view.** Needed before performance work is anything but guessing.
 
-Of the open items, 3–6 are the ones that block a game today; 7, 8 and what is
-left of 10 are cheap relative to their daily cost; 13–14 are real but
-survivable.
+Of the open items, what is left of 10 is cheap relative to its daily cost and
+13–14 are real but survivable. The next queue is the gaps the done items left
+behind — per-player input, a saved rebinding, contact detail, bus effects — and
+the absent systems below.
 
 ### Proof that lives outside this repository
 
-Two capabilities now sit at ✅ ✅ ✅ ❌ — built on every surface, used by nobody
-here. The advanced sprite colour transform and the UI slider were both found by
-Mujaffa Remaster, an external project, and both are exercised only there.
+The advanced sprite colour transform still sits at ✅ ✅ ✅ ❌ — built on every
+surface, used by nobody here. It and the UI slider were both found by Mujaffa
+Remaster, an external project; the slider has since been picked up here, by
+Orbital's pause mixer and Sound Mixer.
 
 That is worth naming rather than tolerating quietly, for two reasons. The
 capability rule does not count an external user, so the Proof column is honest
