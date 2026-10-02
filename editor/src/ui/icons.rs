@@ -70,6 +70,8 @@ pub const HIERARCHY: MaterialIcon = icons::ICON_ACCOUNT_TREE;
 pub const INSPECTOR: MaterialIcon = icons::ICON_TUNE;
 pub const PROJECT: MaterialIcon = icons::ICON_FOLDER;
 pub const CONSOLE: MaterialIcon = icons::ICON_TERMINAL;
+/// What Play is playing, bus by bus.
+pub const AUDIO_MIXER: MaterialIcon = icons::ICON_TUNE;
 /// Where each frame of Play spent its time.
 pub const PROFILER: MaterialIcon = icons::ICON_MONITORING;
 /// The project's scenes laid out as a board.

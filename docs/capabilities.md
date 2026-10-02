@@ -1121,8 +1121,21 @@ frame.
   the project opens on, and a scene made in a project that nominates nothing
   claims the empty place rather than leaving the project opening on nothing.
   `docs/project-format.md` is the contract
-- **Profiles Play.** The Profiler panel (beside the inspector in the canvas
-  arrangement, in the right or bottom dock otherwise) keeps the last 300
+- **Plays a scene's audio in Play, and mixes it for the author.** Play starts
+  a scene's autoplay `sindri.audio.source`s and performs every request its
+  scripts make through `Audio`, through the same `AudioMixer` a build uses;
+  clips load from the scene's folder on first use and a missing one is a
+  console error. The Audio panel (the canvas arrangement's bottom-right
+  corner, beside the inspector when docked, the bottom dock when wide) lists
+  each bus the run names, master first, with a trim fader, mute and solo, and
+  every sound playing now with its bus, volume and whether it loops, each
+  stoppable. The monitor changes only what is heard: `Audio.volume` still
+  answers what the game set, and a new run starts from the game's own mix
+  while the monitor carries over. Pause holds every voice and Stop ends them.
+  Without an audio device Play carries on silently, listing one-shots for a
+  second. No level meters, and buses are not yet declared by the project
+- **Profiles Play.** The Profiler panel (beside the Audio panel in the canvas
+  arrangement's bottom-right corner, in the right or bottom dock otherwise) keeps the last 300
   frames of Play, each timed on the CPU by phase: effects, physics, screen UI,
   scripts, sprite animation, cameras, and the Scene and Game views drawn.
   They are drawn as stacked bars against the 60 fps budget; pointing at a bar

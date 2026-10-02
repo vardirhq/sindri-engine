@@ -43,6 +43,7 @@ use crate::{
 
 mod animated;
 mod assistant_view;
+mod audio_view;
 mod block_pointer;
 mod block_set_view;
 mod camera;
@@ -280,6 +281,8 @@ struct EditorApp {
     /// The textures the open scene draws with, loaded from its own directory.
     textures: SceneTextures,
     thumbnails: thumbnails::Thumbnails,
+    /// What Play sounds like, and the Audio panel's monitor.
+    play_audio: crate::play_audio::PlayAudio,
     /// Where Play's time went, for the Profiler panel.
     profiler: crate::profiler::Profiler,
     /// The Scenes panel's board, and the pictures its cards show.

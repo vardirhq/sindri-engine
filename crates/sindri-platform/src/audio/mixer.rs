@@ -30,8 +30,21 @@ pub struct AudioMixer {
 
 #[derive(Clone, Debug)]
 struct Routed {
+    clip: String,
     bus: String,
     volume: f32,
+    looping: bool,
+}
+
+/// A voice the mixer started that the backend is still playing.
+#[derive(Clone, Debug, PartialEq)]
+pub struct PlayingVoice {
+    pub voice: AudioVoiceId,
+    pub clip: String,
+    pub bus: String,
+    /// Its own volume, before its bus and the master scale it.
+    pub volume: f32,
+    pub looping: bool,
 }
 
 impl AudioMixer {
@@ -81,8 +94,10 @@ impl AudioMixer {
         self.voices.insert(
             voice,
             Routed {
+                clip: clip.to_owned(),
                 bus: bus.to_owned(),
                 volume,
+                looping: settings.mode == super::PlaybackMode::Loop,
             },
         );
         Ok(voice)
@@ -108,6 +123,28 @@ impl AudioMixer {
                 audio.set_volume(*voice, routed.volume * gain);
             }
         }
+    }
+
+    /// What is playing now, oldest first, forgetting voices that have ended.
+    pub fn playing(&mut self, audio: &dyn AudioBackend) -> Vec<PlayingVoice> {
+        self.voices.retain(|voice, _| audio.is_active(*voice));
+        self.voices
+            .iter()
+            .map(|(voice, routed)| PlayingVoice {
+                voice: *voice,
+                clip: routed.clip.clone(),
+                bus: routed.bus.clone(),
+                volume: routed.volume,
+                looping: routed.looping,
+            })
+            .collect()
+    }
+
+    /// Every bus given a volume, in name order.
+    pub fn buses(&self) -> impl Iterator<Item = (&str, f32)> {
+        self.buses
+            .iter()
+            .map(|(bus, volume)| (bus.as_str(), *volume))
     }
 
     /// Stops every voice, as `AudioBackend::stop_all` does, and forgets them.
@@ -226,5 +263,39 @@ mod tests {
         assert!(audio.take_events().is_empty());
         assert!((mixer.bus_volume(MUSIC_BUS) - 0.5).abs() < f32::EPSILON);
         assert!((mixer.bus_volume("unnamed") - 1.0).abs() < f32::EPSILON);
+    }
+
+    #[test]
+    fn what_is_playing_is_listed_with_its_bus_until_it_stops() {
+        let mut audio = backend();
+        let mut mixer = AudioMixer::new();
+        let music = mixer
+            .play(
+                &mut audio,
+                "music.ogg",
+                PlaybackSettings::looping(0.5),
+                MUSIC_BUS,
+            )
+            .expect("play");
+        mixer
+            .play(
+                &mut audio,
+                "shot.wav",
+                PlaybackSettings::once(1.0),
+                EFFECTS_BUS,
+            )
+            .expect("play");
+        let playing = mixer.playing(&audio);
+        assert_eq!(playing.len(), 2);
+        assert_eq!(playing[0].voice, music);
+        assert_eq!(playing[0].clip, "music.ogg");
+        assert_eq!(playing[0].bus, MUSIC_BUS);
+        assert!(playing[0].looping && !playing[1].looping);
+        audio.stop(music);
+        let left: Vec<String> = mixer.playing(&audio).into_iter().map(|p| p.clip).collect();
+        assert_eq!(left, ["shot.wav"]);
+        mixer.set_bus_volume(&mut audio, MUSIC_BUS, 0.25);
+        let buses: Vec<(&str, f32)> = mixer.buses().collect();
+        assert_eq!(buses, [(MUSIC_BUS, 0.25)]);
     }
 }

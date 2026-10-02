@@ -74,7 +74,7 @@ impl Audition {
 /// as audio by an extension nothing decodes is not offered a play button, for
 /// the reason a `.txt` is not offered a picture: a control that cannot do what
 /// it says is worse than no control.
-fn mime_of(path: &Path) -> Option<&'static str> {
+pub(crate) fn mime_of(path: &Path) -> Option<&'static str> {
     let extension = path
         .extension()
         .map(|extension| extension.to_string_lossy().to_lowercase());
