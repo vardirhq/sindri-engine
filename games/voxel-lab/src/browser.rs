@@ -21,6 +21,9 @@ use thiserror::Error;
 use crate::{
     VoxelLabRuntime, VoxelLabStats,
     camera_control::{CameraControls, LabCamera},
+    runtime::{
+        CLAY, DIRT, GRASS, GRAVEL, ICE, LEAVES, LOG, MOSS, MUD, ROCK, SAND, SNOW, STONE, WATER,
+    },
 };
 
 const SCENE_JSON: &str = include_str!("../assets/voxel-lab.scene");
@@ -68,8 +71,6 @@ struct VoxelLabApp {
     shapes: ShapeRenderer,
     bloom: Bloom,
     environment: EnvironmentComponent,
-    /// Ambient from the environment and the scene's sun, resolved once: the
-    /// embedded scene does not change while the page runs.
     lighting: sindri_render::WorldLighting,
     camera: CameraControls,
 }
@@ -304,21 +305,54 @@ fn atlas_rect(column: u32, width: u32) -> Result<UvRect, UvRectError> {
     )
 }
 
+fn world_material(textures: BrowserMaterials, column: u32, face: VoxelFace) -> VoxelTexture {
+    let (texture, width) = match face {
+        VoxelFace::Top | VoxelFace::Bottom => (textures.world_top, 1196),
+        _ => (textures.world_side, 1144),
+    };
+    let uv = atlas_rect(column, width).expect("Voxel Lab atlas column is valid");
+    VoxelTexture::new(texture, uv)
+}
+
 fn browser_texture(textures: BrowserMaterials, voxel: VoxelId, face: VoxelFace) -> VoxelTexture {
-    match (voxel.value(), face) {
-        (0, _) => unreachable!("air never produces block faces"),
-        (1, VoxelFace::Top) => VoxelTexture::new(textures.grass_top, UvRect::FULL),
-        (1, _) => VoxelTexture::new(textures.grass_side, UvRect::FULL),
-        (2, _) => VoxelTexture::new(textures.dirt, UvRect::FULL),
-        (_, VoxelFace::Top | VoxelFace::Bottom) => {
-            let uv = atlas_rect(6, 1196).expect("world top atlas stone column is valid");
-            VoxelTexture::new(textures.world_top, uv)
-        }
-        (_, _) => {
-            let uv = atlas_rect(6, 1144).expect("world side atlas stone column is valid");
-            VoxelTexture::new(textures.world_side, uv)
-        }
+    if voxel == GRASS {
+        return match face {
+            VoxelFace::Top => VoxelTexture::new(textures.grass_top, UvRect::FULL),
+            _ => VoxelTexture::new(textures.grass_side, UvRect::FULL),
+        };
     }
+    if voxel == DIRT {
+        return VoxelTexture::new(textures.dirt, UvRect::FULL);
+    }
+
+    let column = if voxel == STONE {
+        6
+    } else if voxel == ROCK {
+        8
+    } else if voxel == SAND {
+        10
+    } else if voxel == SNOW {
+        12
+    } else if voxel == ICE {
+        14
+    } else if voxel == MUD {
+        15
+    } else if voxel == MOSS {
+        17
+    } else if voxel == GRAVEL {
+        18
+    } else if voxel == CLAY {
+        19
+    } else if voxel == WATER {
+        20
+    } else if voxel == LOG {
+        21
+    } else if voxel == LEAVES {
+        17
+    } else {
+        6
+    };
+    world_material(textures, column, face)
 }
 
 #[allow(clippy::cast_precision_loss)]
@@ -353,14 +387,6 @@ fn update_stats(stats: VoxelLabStats, focus: SectionCoord) {
     };
     element.set_text_content(Some(&format!(
         "section [{}, {}, {}] · resident {} · meshes {} · remeshes {} · triangles {} · uploads {} · releases {}",
-        focus.x,
-        focus.y,
-        focus.z,
-        stats.resident_sections,
-        stats.mesh_jobs,
-        stats.remeshes,
-        stats.triangles,
-        stats.uploads,
-        stats.releases
+        focus.x, focus.y, focus.z, stats.resident_sections, stats.mesh_jobs, stats.remeshes, stats.triangles, stats.uploads, stats.releases
     )));
 }
