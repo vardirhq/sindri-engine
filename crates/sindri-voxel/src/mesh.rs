@@ -1,6 +1,6 @@
 use crate::{
-    DefaultVoxelMaterials, RenderClass, SECTION_EDGE, SectionCoord, VoxelCoord, VoxelId,
-    VoxelMaterialSource, VoxelSource,
+    DefaultVoxelMaterials, FaceOcclusion, RenderClass, SECTION_EDGE, SectionCoord, VOXEL_STEPS,
+    VoxelCoord, VoxelId, VoxelMaterialSource, VoxelShape, VoxelSource,
 };
 
 #[derive(Clone, Copy, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
@@ -45,10 +45,27 @@ impl VoxelFace {
         }
     }
 
-    const fn corners(self, [x, y, z]: [u8; 3]) -> [[u8; 3]; 4] {
-        let right = x + 1;
-        let top = y + 1;
-        let front = z + 1;
+    /// The axis this face looks along, and whether it looks along it
+    /// positively.
+    const fn axis(self) -> (usize, bool) {
+        match self {
+            Self::Left => (0, false),
+            Self::Right => (0, true),
+            Self::Bottom => (1, false),
+            Self::Top => (1, true),
+            Self::Back => (2, false),
+            Self::Front => (2, true),
+        }
+    }
+
+    /// The four corners of this face of `shape` in the voxel at `local`, in
+    /// sixteenths of a voxel from the section's corner.
+    fn corners(self, local: [u8; 3], shape: VoxelShape) -> [[u16; 3]; 4] {
+        let step = u16::from(VOXEL_STEPS);
+        let low = [0, 1, 2].map(|axis| u16::from(local[axis]) * step + u16::from(shape.min[axis]));
+        let high = [0, 1, 2].map(|axis| u16::from(local[axis]) * step + u16::from(shape.max[axis]));
+        let [x, y, z] = low;
+        let [right, top, front] = high;
         match self {
             Self::Left => [[x, y, z], [x, y, front], [x, top, front], [x, top, z]],
             Self::Right => [
@@ -75,19 +92,58 @@ impl VoxelFace {
     }
 }
 
+/// Whether `neighbour`, in the next voxel past this `face` of `shape`, hides
+/// that face.
+///
+/// It has to meet it -- this shape reaching the wall between the two voxels
+/// and the neighbour's reaching it from the other side -- and it has to cover
+/// all of it. A slab's top is in the middle of its voxel, so nothing above
+/// hides it; a post against a wall hides only a sliver of the wall, which is
+/// to say none of it can be dropped.
+fn hidden_by(face: VoxelFace, shape: VoxelShape, neighbour: VoxelShape) -> bool {
+    let (axis, positive) = face.axis();
+    let (mine, theirs) = if positive {
+        (shape.max[axis] == VOXEL_STEPS, neighbour.min[axis] == 0)
+    } else {
+        (shape.min[axis] == 0, neighbour.max[axis] == VOXEL_STEPS)
+    };
+    mine && theirs
+        && (0..3).filter(|other| *other != axis).all(|other| {
+            neighbour.min[other] <= shape.min[other] && neighbour.max[other] >= shape.max[other]
+        })
+}
+
 /// One renderer-consumable vertex using section-local coordinates.
 ///
 /// UV values are unit-square corners. A render bridge maps the semantic
 /// material and face identities to an atlas, array texture, or custom shader.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub struct BlockVertex {
-    pub position: [u8; 3],
+    /// Where the corner is, in sixteenths of a voxel ([`VOXEL_STEPS`]) from
+    /// the section's corner, so a block smaller than its voxel has corners
+    /// inside it.
+    pub position: [u16; 3],
     pub normal: [i8; 3],
     pub uv: [u8; 2],
     pub material: VoxelId,
     pub face: VoxelFace,
     /// 0..=3 open-neighbour samples around this corner, used for mesh-time AO.
     pub ambient_occlusion: u8,
+    /// Which voxel of the section the face belongs to, so its look can be
+    /// chosen by where it is.
+    pub cell: [u8; 3],
+    /// Whether something stands on the voxel: a block that hides faces is in
+    /// the voxel above it. Grass under a block is no longer grass.
+    pub covered: bool,
+}
+
+impl BlockVertex {
+    /// The corner's position in voxels from the section's corner.
+    #[must_use]
+    pub fn voxel_position(&self) -> [f32; 3] {
+        self.position
+            .map(|value| f32::from(value) / f32::from(VOXEL_STEPS))
+    }
 }
 
 /// Indexed geometry for one render class.
@@ -116,7 +172,7 @@ impl BlockMeshPart {
     fn push_face(
         &mut self,
         local: [u8; 3],
-        material: VoxelId,
+        placed: Placed,
         face: VoxelFace,
         ambient_occlusion: [u8; 4],
     ) {
@@ -126,7 +182,7 @@ impl BlockMeshPart {
         let base =
             u32::try_from(self.vertices.len()).expect("one section mesh fits in u32 indices");
         for ((position, uv), ambient_occlusion) in face
-            .corners(local)
+            .corners(local, placed.shape)
             .into_iter()
             .zip(UVS)
             .zip(ambient_occlusion)
@@ -135,9 +191,11 @@ impl BlockMeshPart {
                 position,
                 normal: face.normal(),
                 uv,
-                material,
+                material: placed.voxel,
                 face,
                 ambient_occlusion,
+                cell: local,
+                covered: placed.covered,
             });
         }
         if ambient_occlusion[0] + ambient_occlusion[2] > ambient_occlusion[1] + ambient_occlusion[3]
@@ -155,6 +213,14 @@ impl BlockMeshPart {
                 .extend_from_slice(&[base, base + 1, base + 2, base, base + 2, base + 3]);
         }
     }
+}
+
+/// What one voxel's faces are meshed as.
+#[derive(Clone, Copy)]
+struct Placed {
+    voxel: VoxelId,
+    shape: VoxelShape,
+    covered: bool,
 }
 
 /// World-space bounds of a compiled section.
@@ -259,20 +325,28 @@ pub fn mesh_block_section_with_materials(
                     u8::try_from(y).expect("section y fits in u8"),
                     u8::try_from(z).expect("section z fits in u8"),
                 ];
+                let above = source.voxel(VoxelCoord::new(voxel.x, voxel.y + 1, voxel.z));
+                let placed = Placed {
+                    voxel: voxel_id,
+                    shape: material.shape,
+                    covered: !above.is_air()
+                        && materials.material(above).face_occlusion != FaceOcclusion::None,
+                };
                 for face in VoxelFace::ALL {
                     let (dx, dy, dz) = face.offset();
                     let neighbour_coord = VoxelCoord::new(voxel.x + dx, voxel.y + dy, voxel.z + dz);
                     let neighbour = source.voxel(neighbour_coord);
-                    let visible = neighbour.is_air()
-                        || !materials
-                            .material(neighbour)
-                            .blocks_face(neighbour, voxel_id);
+                    let visible = neighbour.is_air() || {
+                        let beside = materials.material(neighbour);
+                        !(beside.blocks_face(neighbour, voxel_id)
+                            && hidden_by(face, material.shape, beside.shape))
+                    };
                     if visible {
                         let ambient_occlusion =
                             face_ambient_occlusion(source, materials, voxel, voxel_id, face, local);
                         mesh.part_mut(material.render_class).push_face(
                             local,
-                            voxel_id,
+                            placed,
                             face,
                             ambient_occlusion,
                         );
@@ -293,12 +367,17 @@ fn face_ambient_occlusion(
     local: [u8; 3],
 ) -> [u8; 4] {
     let normal = face.normal();
-    face.corners(local).map(|corner| {
+    let step = u16::from(VOXEL_STEPS);
+    face.corners(local, VoxelShape::FULL).map(|corner| {
         let mut tangents = [[0_i32; 3]; 2];
         let mut next = 0;
         for axis in 0..3 {
             if normal[axis] == 0 {
-                tangents[next][axis] = if corner[axis] == local[axis] { -1 } else { 1 };
+                tangents[next][axis] = if corner[axis] == u16::from(local[axis]) * step {
+                    -1
+                } else {
+                    1
+                };
                 next += 1;
             }
         }
@@ -313,10 +392,10 @@ fn face_ambient_occlusion(
                 base[1] + offset[1],
                 base[2] + offset[2],
             ));
-            !neighbour.is_air()
-                && materials
-                    .material(neighbour)
-                    .blocks_face(neighbour, voxel_id)
+            !neighbour.is_air() && {
+                let beside = materials.material(neighbour);
+                beside.blocks_face(neighbour, voxel_id) && beside.shape.is_full()
+            }
         };
         let side_a = occupied(tangents[0]);
         let side_b = occupied(tangents[1]);

@@ -1892,6 +1892,7 @@
           }
         ],
         "render_radius": 2,
+        "variant_seed": 0,
         "vertical_radius": 1
       },
       "display_name": "Voxel World",
@@ -2025,6 +2026,7 @@
           }
         ],
         "render_radius": 2,
+        "variant_seed": 0,
         "vertical_radius": 1
       },
       "meanings": {

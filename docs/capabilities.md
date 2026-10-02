@@ -677,6 +677,13 @@ resident sections retain their CPU cache without submitting draws or consuming
 their pending GPU upload. This first bridge supports opaque block batches;
 cutout/transparent pipelines and editor voxel picking/painting remain.
 
+A block from a block set is meshed as the box its tile describes -- a slab's
+top half way up, a post a thin column -- and a neighbour's face is dropped
+only where a block covers all of it. Each cell wears one of its block's
+variants, chosen by its position and the world's `variant_seed` exactly as a
+tile volume chooses them, and a block with something standing on it wears its
+`covered` look.
+
 A world may keep its resident window under the world camera
 (`follow_camera`): the window centres on where the middle of the picture meets
 the height of the `focus` section, and moving it loads the sections it reaches

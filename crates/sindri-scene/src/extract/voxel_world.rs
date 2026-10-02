@@ -10,7 +10,7 @@ use sindri_render::{
 };
 use sindri_voxel::{
     MeshingProfile, ResidencyConfig, SECTION_EDGE, SectionCoord, SectionMeshKey, VoxelCoord,
-    VoxelFace, VoxelId, VoxelSource, VoxelWorld, mesh_block_section_with_materials,
+    VoxelId, VoxelSource, VoxelWorld, mesh_block_section_with_materials,
 };
 
 use crate::{
@@ -142,9 +142,7 @@ impl ResidentVoxelWorld {
                     &self.materials,
                     job.key.section,
                 );
-                let compiled = compile_block_mesh(&mesh, &|voxel: VoxelId, face: VoxelFace| {
-                    resolved.faces[&(voxel.value(), face)]
-                })?;
+                let compiled = compile_block_mesh(&mesh, resolved)?;
                 self.render.finish(job, compiled)?;
             }
         }
@@ -256,7 +254,8 @@ impl SceneExtractor {
             frame,
         } = target;
         let refused = match definition(component, tile_sets).and_then(|definition| {
-            let resolved = resolve_appearance(&definition.appearance, textures)?;
+            let resolved = resolve_appearance(&definition.appearance, textures)?
+                .with_seed(component.variant_seed);
             Ok((definition, resolved))
         }) {
             Ok((definition, resolved)) => {

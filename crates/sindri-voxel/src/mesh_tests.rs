@@ -1,6 +1,6 @@
 use crate::{
     FaceOcclusion, RenderClass, SectionBounds, SectionCoord, VoxelCoord, VoxelFace, VoxelId,
-    VoxelMaterial, VoxelMaterialSource, VoxelSource, mesh_block_section,
+    VoxelMaterial, VoxelMaterialSource, VoxelShape, VoxelSource, mesh_block_section,
     mesh_block_section_with_materials,
 };
 
@@ -98,7 +98,7 @@ fn adjacent_sections_do_not_emit_internal_boundary_faces() {
             .opaque
             .vertices
             .iter()
-            .any(|vertex| { vertex.position[0] == 16 && vertex.face == VoxelFace::Right })
+            .any(|vertex| { vertex.position[0] == 16 * 16 && vertex.face == VoxelFace::Right })
     );
     assert!(
         !right
@@ -170,14 +170,14 @@ fn triangle_winding_matches_each_vertex_normal() {
 
     for quad in mesh.opaque.vertices.chunks_exact(4) {
         let edge_a = [
-            i16::from(quad[1].position[0]) - i16::from(quad[0].position[0]),
-            i16::from(quad[1].position[1]) - i16::from(quad[0].position[1]),
-            i16::from(quad[1].position[2]) - i16::from(quad[0].position[2]),
+            i32::from(quad[1].position[0]) - i32::from(quad[0].position[0]),
+            i32::from(quad[1].position[1]) - i32::from(quad[0].position[1]),
+            i32::from(quad[1].position[2]) - i32::from(quad[0].position[2]),
         ];
         let edge_b = [
-            i16::from(quad[2].position[0]) - i16::from(quad[0].position[0]),
-            i16::from(quad[2].position[1]) - i16::from(quad[0].position[1]),
-            i16::from(quad[2].position[2]) - i16::from(quad[0].position[2]),
+            i32::from(quad[2].position[0]) - i32::from(quad[0].position[0]),
+            i32::from(quad[2].position[1]) - i32::from(quad[0].position[1]),
+            i32::from(quad[2].position[2]) - i32::from(quad[0].position[2]),
         ];
         let cross = [
             edge_a[1] * edge_b[2] - edge_a[2] * edge_b[1],
@@ -185,8 +185,8 @@ fn triangle_winding_matches_each_vertex_normal() {
             edge_a[0] * edge_b[1] - edge_a[1] * edge_b[0],
         ];
         assert_eq!(
-            cross,
-            quad[0].normal.map(i16::from),
+            cross.map(i32::signum),
+            quad[0].normal.map(i32::from),
             "winding differs for {:?}",
             quad[0].face
         );
@@ -231,7 +231,7 @@ fn voxel_corner_ao_samples_neighbours_outside_the_exposed_face() {
         .opaque
         .vertices
         .iter()
-        .find(|vertex| vertex.face == VoxelFace::Top && vertex.position == [0, 1, 0])
+        .find(|vertex| vertex.face == VoxelFace::Top && vertex.position == [0, 16, 0])
         .expect("target top corner is emitted");
     assert_eq!(top.ambient_occlusion, 0);
 
@@ -239,7 +239,93 @@ fn voxel_corner_ao_samples_neighbours_outside_the_exposed_face() {
         .opaque
         .vertices
         .iter()
-        .find(|vertex| vertex.face == VoxelFace::Top && vertex.position == [1, 1, 1])
+        .find(|vertex| vertex.face == VoxelFace::Top && vertex.position == [16, 16, 16])
         .expect("opposite top corner is emitted");
     assert_eq!(open.ambient_occlusion, 3);
+}
+
+/// A slab (6) with a block (1) above it, and a post (7) beside the slab.
+struct Shapes;
+
+impl VoxelSource for Shapes {
+    fn voxel(&self, coord: VoxelCoord) -> VoxelId {
+        match (coord.x, coord.y, coord.z) {
+            (0, 0, 0) => VoxelId::new(6),
+            (0, 1, 0) => VoxelId::new(1),
+            (1, 0, 0) => VoxelId::new(7),
+            _ => VoxelId::AIR,
+        }
+    }
+}
+
+struct ShapedMaterials;
+
+impl VoxelMaterialSource for ShapedMaterials {
+    fn material(&self, voxel: VoxelId) -> VoxelMaterial {
+        match voxel.value() {
+            6 => VoxelMaterial::opaque()
+                .with_shape(VoxelShape::from_fractions([0.0; 3], [1.0, 0.5, 1.0])),
+            7 => VoxelMaterial::cutout()
+                .with_shape(VoxelShape::from_fractions([0.4, 0.0, 0.4], [0.6, 1.0, 0.6])),
+            _ => VoxelMaterial::opaque(),
+        }
+    }
+}
+
+fn faces_of(mesh: &crate::BlockMesh, cell: [u8; 3]) -> Vec<(VoxelFace, Vec<[u16; 3]>)> {
+    [&mesh.opaque, &mesh.cutout]
+        .into_iter()
+        .flat_map(|part| part.vertices.chunks_exact(4))
+        .filter(|quad| quad[0].cell == cell)
+        .map(|quad| {
+            (
+                quad[0].face,
+                quad.iter().map(|vertex| vertex.position).collect(),
+            )
+        })
+        .collect()
+}
+
+#[test]
+fn a_shape_smaller_than_its_voxel_is_meshed_as_itself() {
+    let mesh =
+        mesh_block_section_with_materials(&Shapes, &ShapedMaterials, SectionCoord::new(0, 0, 0));
+    let slab = faces_of(&mesh, [0, 0, 0]);
+    let top = slab
+        .iter()
+        .find(|(face, _)| *face == VoxelFace::Top)
+        .expect("a slab's top is half way up and nothing above meets it");
+    assert!(top.1.iter().all(|corner| corner[1] == 8), "{top:?}");
+    // The block above a slab shows its underside: the slab does not reach it.
+    assert!(
+        faces_of(&mesh, [0, 1, 0])
+            .iter()
+            .any(|(face, _)| *face == VoxelFace::Bottom)
+    );
+    // A post beside the slab hides none of the slab's side.
+    assert!(slab.iter().any(|(face, _)| *face == VoxelFace::Right));
+    let post = faces_of(&mesh, [1, 0, 0]);
+    assert_eq!(post.len(), 6, "a post has every side");
+    let side = post
+        .iter()
+        .find(|(face, _)| *face == VoxelFace::Right)
+        .expect("its east side");
+    assert!(side.1.iter().all(|corner| corner[0] == 16 + 10), "{side:?}");
+}
+
+#[test]
+fn a_voxel_under_a_block_is_marked_covered() {
+    let mesh =
+        mesh_block_section_with_materials(&Shapes, &ShapedMaterials, SectionCoord::new(0, 0, 0));
+    let covered = |cell: [u8; 3]| {
+        mesh.opaque
+            .vertices
+            .iter()
+            .chain(&mesh.cutout.vertices)
+            .find(|vertex| vertex.cell == cell)
+            .map(|vertex| vertex.covered)
+    };
+    assert_eq!(covered([0, 0, 0]), Some(true), "the slab has a block on it");
+    assert_eq!(covered([0, 1, 0]), Some(false), "nothing is on the block");
+    assert_eq!(covered([1, 0, 0]), Some(false));
 }
