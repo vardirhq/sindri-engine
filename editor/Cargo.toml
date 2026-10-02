@@ -27,6 +27,9 @@ serde_json.workspace = true
 thiserror.workspace = true
 rfd = { version = "0.17.2", default-features = false, features = ["xdg-portal"] }
 toml = "1.1"
+# Writes the manifest by editing it in place, so a comment or a table this
+# build does not model survives the editor saving.
+toml_edit = "0.25"
 
 [target.'cfg(not(target_arch = "wasm32"))'.dev-dependencies]
 # The demo scene, used only to give the tests a real world to work in. The

@@ -1121,6 +1121,20 @@ frame.
   the project opens on, and a scene made in a project that nominates nothing
   claims the empty place rather than leaving the project opening on nothing.
   `docs/project-format.md` is the contract
+- **Shows a project's scenes as a board.** The Scenes panel (a tab beside the
+  Scene view, or beside the Game view in the docked preset, and in the View
+  menu) has a card for the main scene and each scene in `[project] scenes`,
+  with the last frame either view drew of it, or its entity count until it has
+  been opened. Arrows are the doors between scenes: literal `Scene.go("…")`
+  calls in the scripts a scene's entities and placed prefabs run. A door to a scene the project does not
+  carry is marked on its card, with a menu entry to add that scene when the
+  file is in the project. Clicking a card opens its scene (asking first about
+  unsaved work); **Add scene**, **Remove from project**, **Move
+  earlier**/**later** and **Set as main scene** edit the manifest, which is
+  written in place so `[web.splash]` and comments survive. Orbital Last Stand
+  shows two cards with a door each way, and every shipped project's board is
+  checked to have no missing scene and no door to nowhere
+  (`editor/src/project/scene_board.rs`)
 - Opens a scene from a command-line argument or **File → Open scene**, saves it
   back canonically, reloads from disk, and discards changes — including a scene
   carrying components it has never heard of, which it keeps through a save and
@@ -1572,8 +1586,10 @@ settings gear.
 
 - Play mode is intentionally read-only. Stop restores the snapshot from Play;
   editing a running scene and keeping those changes is not supported
-- The project model and manifest exist, but the editor opens one scene at a time
-  and has no project settings or multi-scene workspace
+- The editor edits one scene at a time; the Scenes panel shows the rest but
+  does not edit them side by side. There are no project settings beyond the
+  scene list and main scene, and a door named at run time (`Scene.go(next)`)
+  is not drawn on the board
 - Context menus exist on hierarchy and project rows only. Empty panel space,
   component/property rows, the Scene view, and console lines still lack their
   natural context actions

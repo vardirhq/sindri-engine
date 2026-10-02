@@ -53,6 +53,8 @@ pub enum Panel {
     Inspector,
     /// The project's files.
     Project,
+    /// The project's scenes, and the doors between them.
+    Scenes,
     /// What the editor and the running game have said.
     Console,
     /// Every step taken, and the one we are standing on.
@@ -63,12 +65,13 @@ pub enum Panel {
 
 impl Panel {
     /// Every panel, in the order a menu should offer them.
-    pub const ALL: [Self; 8] = [
+    pub const ALL: [Self; 9] = [
         Self::Scene,
         Self::Game,
         Self::Hierarchy,
         Self::Inspector,
         Self::Project,
+        Self::Scenes,
         Self::Console,
         Self::History,
         Self::Assistant,
@@ -81,6 +84,7 @@ impl Panel {
             Self::Hierarchy => "Hierarchy",
             Self::Inspector => "Inspector",
             Self::Project => "Project",
+            Self::Scenes => "Scenes",
             Self::Console => "Console",
             Self::History => "History",
             Self::Assistant => "Assistant",
@@ -257,7 +261,10 @@ impl Workspace {
                 // gets wrong: a panel that jumps to whatever was last clicked
                 // forms no muscle memory and covers the neighbours a value is
                 // being judged against.
-                (Place::Dock(Main), &[Panel::Scene, Panel::Game]),
+                (
+                    Place::Dock(Main),
+                    &[Panel::Scene, Panel::Game, Panel::Scenes],
+                ),
                 (Place::Overlay(TopLeft), &[Panel::Hierarchy]),
                 (
                     Place::Overlay(BottomLeft),
@@ -271,13 +278,18 @@ impl Workspace {
             Preset::Docked => &[
                 (Place::Dock(Left), &[Panel::Hierarchy]),
                 (Place::Dock(Main), &[Panel::Scene, Panel::Console]),
-                (Place::Dock(MainBottom), &[Panel::Game]),
+                // Under the scene with the Game view rather than beside it: the
+                // board wants the width a side column does not have.
+                (Place::Dock(MainBottom), &[Panel::Game, Panel::Scenes]),
                 (Place::Dock(Right), &[Panel::Project, Panel::History]),
                 (Place::Dock(FarRight), &[Panel::Inspector, Panel::Assistant]),
             ],
             Preset::Wide => &[
                 (Place::Dock(Left), &[Panel::Hierarchy]),
-                (Place::Dock(Main), &[Panel::Scene, Panel::Game]),
+                (
+                    Place::Dock(Main),
+                    &[Panel::Scene, Panel::Game, Panel::Scenes],
+                ),
                 (
                     Place::Dock(Bottom),
                     &[Panel::Project, Panel::Console, Panel::History],

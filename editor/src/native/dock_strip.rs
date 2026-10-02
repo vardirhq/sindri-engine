@@ -25,6 +25,7 @@ pub(super) const fn panel_icon(panel: DockPanel) -> egui_material_icons::Materia
         DockPanel::Hierarchy => icons::HIERARCHY,
         DockPanel::Inspector => icons::INSPECTOR,
         DockPanel::Project => icons::PROJECT,
+        DockPanel::Scenes => icons::SCENES,
         DockPanel::Console => icons::CONSOLE,
         DockPanel::History => icons::UNDO,
         DockPanel::Assistant => icons::EFFECT,
@@ -167,7 +168,11 @@ impl EditorApp {
                 );
             }
             DockPanel::Assistant => self.assistant_actions(ui),
-            DockPanel::Scene | DockPanel::Project | DockPanel::Console | DockPanel::History => {}
+            DockPanel::Scene
+            | DockPanel::Project
+            | DockPanel::Scenes
+            | DockPanel::Console
+            | DockPanel::History => {}
         }
     }
 

@@ -77,6 +77,7 @@ mod project_panel;
 mod projection;
 mod repair_view;
 mod runtime;
+mod scene_board_view;
 mod scene_io;
 mod scene_lighting;
 mod scene_new;
@@ -278,6 +279,8 @@ struct EditorApp {
     /// The textures the open scene draws with, loaded from its own directory.
     textures: SceneTextures,
     thumbnails: thumbnails::Thumbnails,
+    /// The Scenes panel's board, and the pictures its cards show.
+    scene_board: scene_board_view::SceneBoardState,
     /// The history revision the textures were last asked about.
     ///
     /// An edit can point a mesh at a different texture, and the world is the

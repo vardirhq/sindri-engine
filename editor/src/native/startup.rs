@@ -31,8 +31,8 @@ use super::runtime::initialized_lifecycle;
 use super::scene_io::{load_world, open_named_scene, scene_extractor};
 use super::viewport::{RuntimeViewport, SceneRenderers};
 use super::{
-    EditorApp, Focus, Gpu, TexturedAt, assistant_view, device, inspector_panel, thumbnails,
-    workspace,
+    EditorApp, Focus, Gpu, TexturedAt, assistant_view, device, inspector_panel, scene_board_view,
+    thumbnails, workspace,
 };
 
 impl EditorApp {
@@ -165,6 +165,7 @@ impl EditorApp {
             render_state: state_for_textures,
             textures,
             thumbnails: thumbnails::Thumbnails::default(),
+            scene_board: scene_board_view::SceneBoardState::default(),
             textured_revision: TexturedAt::default(),
             scene_viewport,
             game_viewport,
@@ -175,8 +176,7 @@ impl EditorApp {
             random: sindri_core::Rng::default(),
             saves: sindri_core::SaveStore::default(),
             effects: sindri_scene::Effects2d::default(),
-            clock: sindri_core::FixedStepClock::new(sindri_core::FixedStepConfig::default())
-                .expect("the default fixed-step configuration is valid"),
+            clock: fixed_step_clock(),
             animations: SpriteAnimations::new(),
             scripts: SceneScripts::for_scene(None),
             input: EditorInput::default(),
@@ -222,4 +222,10 @@ impl EditorApp {
             Launch::Welcome => self.open_welcome(),
         }
     }
+}
+
+/// The clock Play steps by, at the engine's default rate.
+fn fixed_step_clock() -> sindri_core::FixedStepClock {
+    sindri_core::FixedStepClock::new(sindri_core::FixedStepConfig::default())
+        .expect("the default fixed-step configuration is valid")
 }

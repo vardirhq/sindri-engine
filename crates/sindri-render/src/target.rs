@@ -132,6 +132,11 @@ impl ViewportTarget {
         &self.sampled
     }
 
+    /// The colour texture itself, for copying a finished frame out of.
+    pub const fn color(&self) -> &wgpu::Texture {
+        &self.color
+    }
+
     pub const fn depth(&self) -> &DepthTarget {
         &self.depth
     }
@@ -163,7 +168,11 @@ fn create_color(
         sample_count: 1,
         dimension: wgpu::TextureDimension::D2,
         format: ViewportTarget::FORMAT,
-        usage: wgpu::TextureUsages::RENDER_ATTACHMENT | wgpu::TextureUsages::TEXTURE_BINDING,
+        // Copied from as well as sampled, so a host can keep a picture of a
+        // frame after the target has moved on to the next one.
+        usage: wgpu::TextureUsages::RENDER_ATTACHMENT
+            | wgpu::TextureUsages::TEXTURE_BINDING
+            | wgpu::TextureUsages::COPY_SRC,
         // Both formats have to be declared for the two views to be legal.
         view_formats: &[ViewportTarget::FORMAT, sampled_format],
     });

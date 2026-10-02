@@ -86,6 +86,10 @@ pub enum ProjectError {
         #[source]
         source: toml::ser::Error,
     },
+    #[error(
+        "{scene} is the scene the project opens on; nominate another before taking it off the list"
+    )]
+    RemovingMainScene { scene: String },
     #[error(transparent)]
     Scene(#[from] crate::scene_file::SceneFileError),
 }
@@ -128,11 +132,9 @@ pub struct ProjectSection {
     pub main_scene: Option<String>,
     /// Scenes the project can reach besides the one it opens on.
     ///
-    /// The editor does not use these yet; it carries them so that saving a
-    /// project does not delete them. This struct serializes by named field, so
-    /// a field it did not know about would be quietly dropped the first time
-    /// anything here rewrote the manifest — and a person would find their
-    /// interiors gone from a build with nothing to point at.
+    /// What the scene board lists after the main scene, and what an export
+    /// carries beside it: a scene left off this list is a door that opens onto
+    /// nothing in a build, however well it plays in the editor.
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub scenes: Vec<String>,
 }
@@ -237,10 +239,22 @@ impl Project {
     }
 
     /// Writes the manifest back.
+    ///
+    /// Into the file that is there, when there is one, changing only the
+    /// fields that moved. Serializing the struct afresh would write only what
+    /// it models: a `[web.splash]` table, or the comment that says why an
+    /// asset is included, would be gone the first time anybody nominated a
+    /// main scene, with nothing to say they had been there.
     pub fn write(&self) -> Result<(), ProjectError> {
         let path = manifest_path(&self.root);
-        let text = toml::to_string_pretty(&self.manifest)
-            .map_err(|source| ProjectError::Unserializable { source })?;
+        let fresh = || {
+            toml::to_string_pretty(&self.manifest)
+                .map_err(|source| ProjectError::Unserializable { source })
+        };
+        let text = match std::fs::read_to_string(&path) {
+            Ok(existing) => edited(&existing, &self.manifest).map_or_else(fresh, Ok)?,
+            Err(_) => fresh()?,
+        };
         std::fs::write(&path, text).map_err(|source| ProjectError::Unwritable {
             path: path.display().to_string(),
             source,
@@ -286,9 +300,158 @@ impl Project {
             .map_err(|_| ProjectError::NotAProject {
                 path: scene.display().to_string(),
             })?;
-        self.manifest.project.main_scene = Some(relative.to_string_lossy().replace('\\', "/"));
+        let named = relative.to_string_lossy().replace('\\', "/");
+        // The scene it opened on before is still one of its scenes: nominating
+        // another is choosing a different door in, not bricking up the old one.
+        let section = &mut self.manifest.project;
+        if let Some(previous) = section.main_scene.replace(named.clone())
+            && previous != named
+            && !section.scenes.contains(&previous)
+        {
+            section.scenes.insert(0, previous);
+        }
+        section.scenes.retain(|listed| *listed != named);
         self.write()
     }
+
+    /// Every scene the project declares, the one it opens on first, as paths
+    /// under its root. A declared scene whose file is missing is still listed:
+    /// the board shows it as missing rather than pretending it was never named.
+    pub fn scenes(&self) -> Vec<PathBuf> {
+        let section = &self.manifest.project;
+        let mut seen = Vec::new();
+        for named in section.main_scene.iter().chain(&section.scenes) {
+            let path = self.root.join(named);
+            if !seen.contains(&path) {
+                seen.push(path);
+            }
+        }
+        seen
+    }
+
+    /// The scene named as the one the project opens on, whether or not its
+    /// file is there. [`Self::main_scene`] is the one to open.
+    pub fn declared_main_scene(&self) -> Option<PathBuf> {
+        self.manifest
+            .project
+            .main_scene
+            .as_ref()
+            .map(|named| self.root.join(named))
+    }
+
+    /// Adds a scene to the project's list, and writes it back.
+    ///
+    /// A project with no main scene takes it as that instead, since a project
+    /// that opens on nothing is the one case where there is no choice to
+    /// respect. Adding a scene already declared changes nothing.
+    pub fn add_scene(&mut self, scene: &Path) -> Result<(), ProjectError> {
+        let named = self.relative(scene)?;
+        let section = &mut self.manifest.project;
+        if section.main_scene.as_ref() == Some(&named) || section.scenes.contains(&named) {
+            return Ok(());
+        }
+        if section.main_scene.is_none() {
+            section.main_scene = Some(named);
+        } else {
+            section.scenes.push(named);
+        }
+        self.write()
+    }
+
+    /// Takes a scene off the project's list, and writes it back. The file
+    /// stays on disk; only the project stops carrying it.
+    ///
+    /// The main scene is refused: a project has to open on something, and
+    /// which scene that becomes is a choice for the author, made by nominating
+    /// another one first.
+    pub fn remove_scene(&mut self, scene: &Path) -> Result<(), ProjectError> {
+        let named = self.relative(scene)?;
+        let section = &mut self.manifest.project;
+        if section.main_scene.as_ref() == Some(&named) {
+            return Err(ProjectError::RemovingMainScene { scene: named });
+        }
+        let before = section.scenes.len();
+        section.scenes.retain(|listed| *listed != named);
+        if section.scenes.len() == before {
+            return Ok(());
+        }
+        self.write()
+    }
+
+    /// Moves a listed scene to another place in the list, and writes it back.
+    /// The order is the order the board and an export list them in.
+    pub fn move_scene(&mut self, scene: &Path, to: usize) -> Result<(), ProjectError> {
+        let named = self.relative(scene)?;
+        let scenes = &mut self.manifest.project.scenes;
+        let Some(from) = scenes.iter().position(|listed| *listed == named) else {
+            return Ok(());
+        };
+        let moved = scenes.remove(from);
+        scenes.insert(to.min(scenes.len()), moved);
+        self.write()
+    }
+
+    /// A path as the manifest spells it: under the root, with forward slashes.
+    fn relative(&self, scene: &Path) -> Result<String, ProjectError> {
+        scene
+            .strip_prefix(&self.root)
+            .map(|relative| relative.to_string_lossy().replace('\\', "/"))
+            .map_err(|_| ProjectError::NotAProject {
+                path: scene.display().to_string(),
+            })
+    }
+}
+
+/// The manifest on disk with the modelled fields set to `manifest`'s, leaving
+/// everything else — tables this build does not know, comments, the order
+/// things were written in — as it was. `None` when the file on disk is not
+/// one this can edit, and a fresh one is written instead.
+fn edited(existing: &str, manifest: &ProjectManifest) -> Option<String> {
+    use toml_edit::{Array, DocumentMut, Item, Table, value};
+
+    let before: ProjectManifest = toml::from_str(existing).ok()?;
+    let mut document: DocumentMut = existing.parse().ok()?;
+    let strings = |list: &[String]| value(list.iter().map(String::as_str).collect::<Array>());
+
+    if before.format_version != manifest.format_version {
+        document["format_version"] = value(i64::from(manifest.format_version));
+    }
+    let project = document
+        .entry("project")
+        .or_insert_with(|| Item::Table(Table::new()))
+        .as_table_mut()?;
+    let (was, now) = (&before.project, &manifest.project);
+    if was.name != now.name {
+        project["name"] = value(now.name.as_str());
+    }
+    if was.main_scene != now.main_scene {
+        match &now.main_scene {
+            Some(scene) => project["main_scene"] = value(scene.as_str()),
+            None => {
+                project.remove("main_scene");
+            }
+        }
+    }
+    if was.scenes != now.scenes {
+        if now.scenes.is_empty() {
+            project.remove("scenes");
+        } else {
+            project["scenes"] = strings(&now.scenes);
+        }
+    }
+    if before.assets.include != manifest.assets.include {
+        if manifest.assets.include.is_empty() {
+            if let Some(assets) = document.get_mut("assets").and_then(Item::as_table_mut) {
+                assets.remove("include");
+            }
+        } else {
+            document
+                .entry("assets")
+                .or_insert_with(|| Item::Table(Table::new()))
+                .as_table_mut()?["include"] = strings(&manifest.assets.include);
+        }
+    }
+    Some(document.to_string())
 }
 
 /// Where a directory's manifest lives.

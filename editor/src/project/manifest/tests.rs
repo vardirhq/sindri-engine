@@ -299,3 +299,86 @@ fn a_project_with_no_extra_scenes_writes_no_list() {
     let text = std::fs::read_to_string(root.join(MANIFEST_NAME)).expect("the manifest reads");
     assert!(!text.contains("scenes"), "{text}");
 }
+
+/// A manifest written by hand keeps what this build does not model — a web
+/// splash, the comment saying why an asset is included — through the editor
+/// changing a field it does.
+#[test]
+fn saving_keeps_tables_and_comments_it_does_not_model() {
+    let directory = tempfile::tempdir().expect("a temporary directory");
+    let root = directory.path();
+    for scene in ["assets/title.scene", "assets/level.scene"] {
+        std::fs::create_dir_all(root.join("assets")).expect("a folder");
+        SceneFile::create(&root.join(scene), &SceneDocument::default()).expect("a scene");
+    }
+    let written = "format_version = 1\n\n[project]\nname = \"Doors\"\nmain_scene = \"assets/title.scene\"\n\n# Played by a script, so no scene names it.\n[assets]\ninclude = [\"audio/door.wav\"]\n\n[web.splash]\nimage = \"assets/logo.png\"\nseconds = 1.2\n";
+    std::fs::write(root.join(MANIFEST_NAME), written).expect("the manifest writes");
+
+    let mut project = Project::open(root).expect("the project opens");
+    project
+        .add_scene(&root.join("assets/level.scene"))
+        .expect("the scene is added");
+    let after = std::fs::read_to_string(root.join(MANIFEST_NAME)).expect("it reads");
+    assert!(
+        after.contains("[web.splash]") && after.contains("seconds = 1.2"),
+        "{after}"
+    );
+    assert!(after.contains("# Played by a script"), "{after}");
+    assert!(
+        after.contains("scenes = [\"assets/level.scene\"]"),
+        "{after}"
+    );
+    assert_eq!(
+        Project::open(root).expect("it reopens").scenes(),
+        vec![
+            root.join("assets/title.scene"),
+            root.join("assets/level.scene")
+        ]
+    );
+}
+
+/// Nominating a listed scene swaps it with the main one, so the scene the
+/// project opened on before is still one it carries; the main scene cannot
+/// be taken off the list, and a listed one can.
+#[test]
+fn the_scene_list_is_edited_without_losing_a_scene() {
+    let directory = tempfile::tempdir().expect("a temporary directory");
+    let root = directory.path().join("doors");
+    let mut project = created(&root, "Doors");
+    let main = root.join("main.scene");
+    let hall = root.join("hall.scene");
+    let yard = root.join("yard.scene");
+    for scene in [&hall, &yard] {
+        SceneFile::create(scene, &SceneDocument::default()).expect("a scene");
+    }
+    project.add_scene(&hall).expect("added");
+    project.add_scene(&yard).expect("added");
+    project.add_scene(&hall).expect("again changes nothing");
+    assert_eq!(
+        project.scenes(),
+        vec![main.clone(), hall.clone(), yard.clone()]
+    );
+
+    project.set_main_scene(&yard).expect("nominated");
+    assert_eq!(
+        project.scenes(),
+        vec![yard.clone(), main.clone(), hall.clone()]
+    );
+    assert!(matches!(
+        project.remove_scene(&yard),
+        Err(ProjectError::RemovingMainScene { .. })
+    ));
+    project.move_scene(&hall, 0).expect("moved");
+    assert_eq!(
+        project.scenes(),
+        vec![yard.clone(), hall.clone(), main.clone()]
+    );
+    project.remove_scene(&main).expect("removed");
+
+    let reopened = Project::open(&root).expect("it reopens");
+    assert_eq!(reopened.scenes(), vec![yard, hall]);
+    assert!(
+        main.is_file(),
+        "taking a scene off the list leaves its file"
+    );
+}
