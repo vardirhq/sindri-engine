@@ -172,6 +172,7 @@ impl EditorApp {
             profiler: crate::profiler::Profiler::default(),
             play_audio: crate::play_audio::PlayAudio::new(crate::play_audio::native()),
             sequences: sindri_scene::Sequences::new(),
+            sheet_camera: super::sprite_sheet_view::SheetCamera::default(),
             timeline: crate::timeline::TimelineState::default(),
             textured_revision: TexturedAt::default(),
             scene_viewport,

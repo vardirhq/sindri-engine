@@ -197,8 +197,13 @@ impl EditorApp {
                     // transport sits at the right end. Docked, the transport
                     // is the one centred, and both drawn at the centre
                     // printed "Ctrl K" over Pause and Step.
+                    // After the tabs, if the centre would put it over them: a
+                    // row of top tabs is allowed to be long.
+                    let tabs_end = ui.min_rect().right() + 16.0;
                     let hint_centre = if floating {
-                        base.center().x
+                        base.center()
+                            .x
+                            .max(tabs_end + super::palette_view::HINT_WIDTH / 2.0)
                     } else {
                         base.right() - 16.0 - super::palette_view::HINT_WIDTH / 2.0
                     };

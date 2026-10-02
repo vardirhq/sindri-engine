@@ -1,16 +1,13 @@
-//! The sprite slicer's panel and the preview it draws over a texture.
+//! The slicer's controls: how a sheet is divided, and what its cells are
+//! called. Drawn beside the image in the Sprite sheet tab.
 
-use eframe::egui::{self, Color32, RichText, Sense, Stroke, Vec2};
+use eframe::egui;
 
 use crate::slicer::Slicer;
 use crate::ui::icons;
-use crate::ui::theme::{color, metric, radius, text};
-use crate::ui::widgets::{
-    button::{self, Intent},
-    panel, property, section,
-};
+use crate::ui::theme::metric;
+use crate::ui::widgets::{panel, property, section};
 
-use super::EditorApp;
 use super::inspector_panel::rows::number_row;
 
 /// The heading above one section of the inspector.
@@ -19,15 +16,6 @@ use super::inspector_panel::rows::number_row;
 /// Neither was handled: nothing collapsed and nothing overflowed. Adding and
 /// removing a component is what the menu would hold, and that is a real build
 /// against the schema registry rather than a glyph.
-/// An image dimension as a length to lay out with.
-///
-/// No image this can draw is anywhere near the width an `f32` stops counting
-/// exactly, and one that were would not fit in a panel either.
-#[allow(clippy::cast_precision_loss)]
-fn pixels(value: u32) -> f32 {
-    value as f32
-}
-
 /// A pixel measurement, as a drag leaves it.
 ///
 /// Clamped to something an image could plausibly carry, for the reason a grid
@@ -52,7 +40,7 @@ pub(super) fn grid_side(value: f64) -> u32 {
 ///
 /// Six drags in one place rather than scattered through the panel: they are one
 /// idea — how the sheet is divided — and every one of them moves every cell.
-fn slice_grid(ui: &mut egui::Ui, slicer: &mut Slicer) {
+pub(super) fn slice_grid(ui: &mut egui::Ui, slicer: &mut Slicer) {
     section::group(ui, icons::TILEMAP, "Slice");
     let mut columns = f64::from(slicer.columns);
     let mut rows = f64::from(slicer.rows);
@@ -85,7 +73,7 @@ fn slice_grid(ui: &mut egui::Ui, slicer: &mut Slicer) {
 /// so the sheet is named the way it is looked at: pick a cell on the image, give
 /// it a name. Everything unnamed already has an answer — its index — so a list
 /// of the named ones is the whole of what there is to review.
-fn slice_names(ui: &mut egui::Ui, slicer: &mut Slicer) {
+pub(super) fn slice_names(ui: &mut egui::Ui, slicer: &mut Slicer) {
     section::group(ui, icons::LABEL, "Names");
     slicer.fit_names();
     slicer.clamp_selection();
@@ -132,189 +120,5 @@ fn slice_names(ui: &mut egui::Ui, slicer: &mut Slicer) {
     // The list is also how a cell is found again on a sheet too large to scan.
     if let Some(jump) = jump {
         slicer.selected = jump;
-    }
-}
-
-/// The image, with the slice drawn over it, and a click choosing a cell.
-///
-/// The whole point of doing this on the picture: a grid of numbers in a panel
-/// tells you nothing about whether the cells fall on the frames, and the cells
-/// falling on the frames is the entire job. The rects drawn are the ones the
-/// document produces, not a second calculation that could disagree with it.
-fn slice_preview(ui: &mut egui::Ui, slicer: &mut Slicer) {
-    let (width, height) = slicer.size();
-    let rects = slicer.cell_rects();
-    let selected = slicer.selected;
-    let Some(texture) = slicer.texture(ui.ctx()) else {
-        panel::note(ui, "No preview: this build cannot read the image");
-        return;
-    };
-    if width == 0 || height == 0 {
-        return;
-    }
-
-    // Fitted to the panel and never enlarged past a readable multiple: a 16x16
-    // sheet blown up to panel width is mostly interpolation artefacts, and a
-    // 2048px one has to come down.
-    let available = (ui.available_width() - 20.0).max(64.0);
-    let (wide, tall) = (pixels(width), pixels(height));
-    let scale = (available / wide).min(8.0);
-    let size = Vec2::new(wide * scale, tall * scale);
-    let texture = texture.id();
-
-    let mut picked = None;
-    ui.horizontal(|ui| {
-        ui.add_space(metric::GUTTER);
-        let (rect, response) = ui.allocate_exact_size(size, Sense::click());
-        let painter = ui.painter_at(rect);
-        // A flat ground behind the image, so a transparent sheet reads as
-        // transparent rather than as the panel's own background.
-        painter.rect_filled(rect, radius(), color::WELL);
-        painter.image(
-            texture,
-            rect,
-            egui::Rect::from_min_max(egui::pos2(0.0, 0.0), egui::pos2(1.0, 1.0)),
-            Color32::WHITE,
-        );
-
-        // Each cell as its own outline rather than lines across the image,
-        // because a cell inset by a margin is not on any dividing line and
-        // drawing one would say the gutters belong to a sprite.
-        let cell_rect = |[x, y, w, h]: [f32; 4]| {
-            egui::Rect::from_min_size(
-                egui::pos2(
-                    rect.left() + x * rect.width(),
-                    rect.top() + y * rect.height(),
-                ),
-                Vec2::new(w * rect.width(), h * rect.height()),
-            )
-        };
-        let faint = Stroke::new(1.0, color::FORGE.gamma_multiply(0.5));
-        for (index, cell) in rects.iter().enumerate() {
-            if u32::try_from(index).is_ok_and(|index| index == selected) {
-                continue;
-            }
-            painter.rect_stroke(cell_rect(*cell), 0.0, faint, egui::StrokeKind::Inside);
-        }
-        if let Some(cell) = rects.get(selected as usize) {
-            let bright = Stroke::new(2.0, color::FORGE_BRIGHT);
-            painter.rect_stroke(cell_rect(*cell), 0.0, bright, egui::StrokeKind::Inside);
-        }
-
-        // Picked by hit-testing the drawn rects rather than by dividing the
-        // pointer's position, so a click lands on the cell it looks like it
-        // landed on even when gutters mean the cells do not tile.
-        if let Some(pointer) = response.interact_pointer_pos()
-            && response.clicked()
-        {
-            picked = rects
-                .iter()
-                .position(|cell| cell_rect(*cell).contains(pointer))
-                .and_then(|index| u32::try_from(index).ok());
-        }
-    });
-    if let Some(picked) = picked {
-        slicer.selected = picked;
-    }
-}
-
-impl EditorApp {
-    /// The slicer, drawn on the image it is cutting.
-    pub(super) fn slicer_panel(&mut self, ui: &mut egui::Ui) {
-        let Some(slicer) = &mut self.slicer else {
-            return;
-        };
-        let mut save = false;
-        let mut close = false;
-        egui::ScrollArea::vertical()
-            .auto_shrink([false; 2])
-            .show(ui, |ui| {
-                let (width, height) = slicer.size();
-                // The image being cut is the subject of the panel while the slicer
-                // is open, so it gets the identity card an entity would.
-                egui::Frame::new()
-                    .fill(color::RAISED)
-                    .stroke(Stroke::new(1.0, color::LINE_SOFT))
-                    .corner_radius(radius())
-                    .inner_margin(egui::Margin::symmetric(8, 6))
-                    .outer_margin(egui::Margin::symmetric(metric::GUTTER_EDGE, 6))
-                    .show(ui, |ui| {
-                        ui.horizontal(|ui| {
-                            ui.label(
-                                icons::SPRITE
-                                    .outlined()
-                                    .rich_text()
-                                    .size(17.0)
-                                    .color(color::FORGE),
-                            );
-                            ui.vertical(|ui| {
-                                ui.label(
-                                    RichText::new(slicer.name())
-                                        .size(text::BODY)
-                                        .color(color::TEXT),
-                                );
-                                ui.label(
-                                    RichText::new(format!("{width} × {height} px"))
-                                        .size(text::NOTE)
-                                        .color(color::TEXT_FAINT),
-                                );
-                            });
-                            ui.with_layout(
-                                egui::Layout::right_to_left(egui::Align::Center),
-                                |ui| {
-                                    if button::row_icon(
-                                        ui,
-                                        icons::CLOSE,
-                                        Intent::Quiet,
-                                        "Stop slicing and go back to the entity inspector",
-                                    )
-                                    .clicked()
-                                    {
-                                        close = true;
-                                    }
-                                },
-                            );
-                        });
-                    });
-
-                slice_preview(ui, slicer);
-                ui.add_space(8.0);
-                slice_grid(ui, slicer);
-                ui.add_space(6.0);
-                slice_names(ui, slicer);
-                ui.add_space(10.0);
-                ui.horizontal(|ui| {
-                    ui.add_space(metric::GUTTER);
-                    if button::labelled(
-                        ui,
-                        "Save slice",
-                        Intent::Primary,
-                        "Write the sheet beside the image so the project can use its sprites",
-                    )
-                    .clicked()
-                    {
-                        save = true;
-                    }
-                });
-                if let Some(problem) = &slicer.problem {
-                    panel::problem(ui, problem);
-                }
-                ui.add_space(8.0);
-            });
-
-        if save {
-            let name = slicer.name();
-            if slicer.save() {
-                self.console.info(format!("Sliced {name}"));
-                // The browser lists a texture's sprites from the sidecar, so a
-                // save it did not notice would leave the new names invisible.
-                self.refresh_project();
-            } else if let Some(problem) = self.slicer.as_ref().and_then(|s| s.problem.clone()) {
-                self.console.error(problem);
-            }
-        }
-        if close {
-            self.slicer = None;
-        }
     }
 }

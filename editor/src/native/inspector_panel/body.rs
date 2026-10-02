@@ -20,7 +20,7 @@ impl EditorApp {
             self.typeface.forget();
         }
         if self.slicer.is_some() {
-            self.slicer_panel(ui);
+            self.slice_inspector(ui);
             return;
         }
         if self.profile.is_some() {
