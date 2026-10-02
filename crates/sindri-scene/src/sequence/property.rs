@@ -180,23 +180,58 @@ fn z_degrees(rotation: [f32; 4]) -> f32 {
     siny.atan2(cosy).to_degrees()
 }
 
-/// The entity a target path names, below `from`.
-pub fn resolve(world: &World, from: EntityId, target: &str) -> Result<EntityId, SequenceError> {
+/// The parent the scene's top-level entities share, as seen from `from`.
+///
+/// The outermost ancestor of `from`, when it has no scene ID, is the root a
+/// world wraps a loaded scene in rather than anything the scene authored:
+/// its children are the top level. Otherwise the scene is held loose and the
+/// top level has no parent.
+#[must_use]
+pub fn top_level(world: &World, from: EntityId) -> Option<EntityId> {
     let mut at = from;
-    for name in target.split('/').filter(|name| !name.is_empty()) {
-        let data = world
-            .get(at)
-            .ok_or_else(|| SequenceError::Target(target.to_owned()))?;
+    while let Some(parent) = world.get(at).and_then(|data| data.parent) {
+        at = parent;
+    }
+    (at != from && world.get(at).is_some_and(|data| data.source_id.is_none())).then_some(at)
+}
+
+/// The entity a target path names.
+///
+/// Empty is `from` itself; `Ship/Flame` walks child names down from `from`;
+/// a leading slash, `/Level/Door`, starts from the scene's top-level entities
+/// instead, so one director can drive anything in the scene. Names are
+/// matched in hierarchy order, so of two siblings sharing a name the first
+/// is meant.
+pub fn resolve(world: &World, from: EntityId, target: &str) -> Result<EntityId, SequenceError> {
+    let missing = || SequenceError::Target(target.to_owned());
+    let is_called = |entity: &EntityId, name: &str| {
+        world
+            .get(*entity)
+            .is_some_and(|data| data.name.as_deref() == Some(name))
+    };
+    let mut steps = target.split('/').filter(|step| !step.is_empty());
+    let mut at = if target.starts_with('/') {
+        let first = steps.next().ok_or_else(missing)?;
+        let level = top_level(world, from);
+        world
+            .entities()
+            .map(|(entity, _)| entity)
+            .find(|entity| {
+                world.get(*entity).is_some_and(|data| data.parent == level)
+                    && is_called(entity, first)
+            })
+            .ok_or_else(missing)?
+    } else {
+        from
+    };
+    for name in steps {
+        let data = world.get(at).ok_or_else(missing)?;
         at = data
             .children
             .iter()
             .copied()
-            .find(|child| {
-                world
-                    .get(*child)
-                    .is_some_and(|child| child.name.as_deref() == Some(name))
-            })
-            .ok_or_else(|| SequenceError::Target(target.to_owned()))?;
+            .find(|child| is_called(child, name))
+            .ok_or_else(missing)?;
     }
     Ok(at)
 }

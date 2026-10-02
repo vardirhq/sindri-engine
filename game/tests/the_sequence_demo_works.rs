@@ -78,6 +78,13 @@ impl Stage {
             .expect("a number")
     }
 
+    fn zoom(&self) -> f64 {
+        self.world.get(self.id("camera")).expect("there").components["sindri.camera"]
+            ["vertical_size"]
+            .as_f64()
+            .expect("a number")
+    }
+
     fn playing(&self) -> String {
         self.world
             .get(self.id("director"))
@@ -97,6 +104,11 @@ fn the_intro_plays_then_the_stage_idles_and_replays_on_a_press() {
     assert!(stage.x("ship").abs() < 1.0e-6);
     stage.play_for(STEP);
     assert!(stage.x("ship") < -6.0, "the ship starts off stage");
+    assert!(
+        stage.zoom() < 4.1,
+        "the camera, outside the director, starts close: {}",
+        stage.zoom()
+    );
     assert!(stage.alpha("title") < 1.0e-6, "the title starts hidden");
 
     stage.play_for(0.6);

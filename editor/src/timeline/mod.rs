@@ -297,10 +297,11 @@ pub fn current_value(world: &World, carrier: EntityId, track: &Track) -> Option<
 }
 
 /// Every target a track on `carrier` can name: itself, then each descendant
-/// by its path of names. Unnamed ones cannot be addressed and are left out.
+/// by its path of names, then every other entity in the scene by its path
+/// from the top. Unnamed ones cannot be addressed and are left out.
 #[must_use]
 pub fn targets(world: &World, carrier: EntityId) -> Vec<String> {
-    fn walk(world: &World, entity: EntityId, path: &str, into: &mut Vec<String>) {
+    fn walk(world: &World, entity: EntityId, path: &str, into: &mut Vec<(String, EntityId)>) {
         let Some(data) = world.get(entity) else {
             return;
         };
@@ -308,17 +309,36 @@ pub fn targets(world: &World, carrier: EntityId) -> Vec<String> {
             let Some(name) = world.get(*child).and_then(|child| child.name.clone()) else {
                 continue;
             };
-            let path = if path.is_empty() {
-                name
-            } else {
-                format!("{path}/{name}")
-            };
-            into.push(path.clone());
+            let path = format!("{path}/{name}");
+            into.push((path.clone(), *child));
             walk(world, *child, &path, into);
         }
     }
+    let mut below = Vec::new();
+    walk(world, carrier, "", &mut below);
     let mut targets = vec![String::new()];
-    walk(world, carrier, "", &mut targets);
+    targets.extend(below.iter().map(|(path, _)| path[1..].to_owned()));
+    let mut everywhere = Vec::new();
+    let level = sindri_scene::top_level(world, carrier);
+    for (entity, data) in world.entities() {
+        if data.parent != level {
+            continue;
+        }
+        let Some(name) = data.name.clone() else {
+            continue;
+        };
+        let path = format!("/{name}");
+        everywhere.push((path.clone(), entity));
+        walk(world, entity, &path, &mut everywhere);
+    }
+    // The carrier and what is under it are already named relatively, which
+    // keeps a prefab's sequence working wherever it is placed.
+    targets.extend(
+        everywhere
+            .into_iter()
+            .filter(|(_, entity)| *entity != carrier && !below.iter().any(|(_, b)| b == entity))
+            .map(|(path, _)| path),
+    );
     targets
 }
 

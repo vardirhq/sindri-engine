@@ -4,8 +4,11 @@ A feature example for sequences and the editor's Timeline. Open `sindri.toml`
 in the editor or run the exported project in a WebGPU browser.
 
 The Director entity carries a `sindri.sequence` with two sequences. **intro**
-plays when the scene starts: the ship flies in and swings upright, the ring
-blooms around it, and the title and hint fade up. Its cues play a launch
+plays when the scene starts: the camera starts close and pulls back as the
+ship flies in and swings upright, the ring blooms around it, and the title and
+hint fade up. The camera is not a child of the Director; its track names it
+from the top of the scene, `/camera`, which is how one director drives
+anything in a scene. Its cues play a launch
 sound, a landing click and mark the moment it is ready. **idle** loops after
 it: the ship bobs and the ring breathes. Space or a tap replays the intro.
 

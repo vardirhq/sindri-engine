@@ -1,5 +1,7 @@
 use serde_json::json;
-use sindri_core::{ComponentSchemaRegistry, EntityData, EntityId, SceneComponent, World};
+use sindri_core::{
+    ComponentSchemaRegistry, EntityData, EntityId, SceneComponent, SceneEntityId, World,
+};
 
 use super::{
     Cue, CueSound, Key, Property, Sequence, SequenceComponent, SequenceError, Sequences, Track,
@@ -26,6 +28,7 @@ fn registry() -> ComponentSchemaRegistry {
 fn stage(sequence: &Sequence, playing: bool) -> (World, EntityId, EntityId) {
     let mut world = World::default();
     let director = world.spawn(EntityData {
+        source_id: SceneEntityId::new("director").ok(),
         name: Some("Director".to_owned()),
         components: [(
             SequenceComponent::TYPE_NAME.to_owned(),
@@ -39,6 +42,7 @@ fn stage(sequence: &Sequence, playing: bool) -> (World, EntityId, EntityId) {
         ..EntityData::default()
     });
     let logo = world.spawn(EntityData {
+        source_id: SceneEntityId::new("logo").ok(),
         name: Some("Logo".to_owned()),
         components: [(
             "sindri.sprite".to_owned(),
@@ -250,4 +254,45 @@ fn pose_shows_any_moment_without_playing() {
     lost.tracks[0].target = "Nobody".to_owned();
     let problems = pose(&mut world, director, &lost, 0.25);
     assert_eq!(problems, [SequenceError::Target("Nobody".to_owned())]);
+}
+
+#[test]
+fn a_leading_slash_reaches_anything_in_the_scene() {
+    let (mut world, director, logo) = stage(&slide(), false);
+    let camera = world.spawn(EntityData {
+        source_id: SceneEntityId::new("camera").ok(),
+        name: Some("Camera".to_owned()),
+        ..EntityData::default()
+    });
+    assert_eq!(super::resolve(&world, director, "/Camera"), Ok(camera));
+
+    // A world that wraps the scene in a root of its own, as loading does:
+    // the top level is the root's children, not the root.
+    let root = world.spawn(EntityData {
+        name: Some("stage.scene".to_owned()),
+        ..EntityData::default()
+    });
+    for top in [director, camera] {
+        world.set_parent(top, Some(root)).expect("parent");
+    }
+    assert_eq!(super::resolve(&world, logo, "/Camera"), Ok(camera));
+    assert_eq!(super::resolve(&world, logo, "/Director/Logo"), Ok(logo));
+    assert_eq!(
+        super::resolve(&world, director, "/Logo"),
+        Err(SequenceError::Target("/Logo".to_owned())),
+        "Logo is a child, not at the top level"
+    );
+    let mut sequence = slide();
+    sequence.tracks.push(Track {
+        target: "/Camera".to_owned(),
+        property: "position.y".to_owned(),
+        keys: vec![key(0.0, 0.0), key(1.0, 4.0)],
+    });
+    assert!(pose(&mut world, director, &sequence, 0.5).is_empty());
+    let y = world
+        .get(camera)
+        .and_then(|data| data.transform_3d)
+        .expect("moved")
+        .position[1];
+    assert!((y - 2.0).abs() < 1e-5, "{y}");
 }

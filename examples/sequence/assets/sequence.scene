@@ -56,6 +56,22 @@
               "looping": false,
               "tracks": [
                 {
+                  "target": "/camera",
+                  "property": "sindri.camera/vertical_size",
+                  "keys": [
+                    {
+                      "time": 0.0,
+                      "value": 4.0,
+                      "ease": "ease-in-out"
+                    },
+                    {
+                      "time": 1.4,
+                      "value": 8.0,
+                      "ease": "linear"
+                    }
+                  ]
+                },
+                {
                   "target": "Ship",
                   "property": "position.x",
                   "keys": [

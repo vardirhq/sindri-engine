@@ -10,10 +10,12 @@
 //! beside the world in [`Sequences`], so watching one play never rewrites the
 //! file it came from.
 //!
-//! Tracks are addressed rather than bound: a target is a path of child names
-//! below the entity that carries the sequence, and a property is a word for a
-//! transform channel or a component and a path into it. A sequence on a
-//! prefab therefore moves the right children wherever the prefab is placed.
+//! Tracks are addressed rather than bound: a target is a path of names, and a
+//! property is a word for a transform channel or a component and a path into
+//! it. A relative path walks the children of the entity carrying the
+//! sequence, so one on a prefab moves the right children wherever the prefab
+//! is placed; a path starting with `/` starts from the scene's top level, so
+//! a director can choreograph the camera, the player and the UI together.
 
 use std::collections::BTreeMap;
 
@@ -24,7 +26,7 @@ use thiserror::Error;
 mod property;
 mod runtime;
 
-pub use property::{Axis, Property, Step, TRANSFORM_PROPERTIES, resolve};
+pub use property::{Axis, Property, Step, TRANSFORM_PROPERTIES, resolve, top_level};
 pub use runtime::{CueFired, SequenceStep, Sequences, pose};
 
 #[cfg(test)]
@@ -63,8 +65,9 @@ pub struct Sequence {
 /// One number moved through keyframes.
 #[derive(Clone, Debug, Default, Deserialize, Serialize, PartialEq)]
 pub struct Track {
-    /// Whose number: empty for the entity carrying the sequence, otherwise a
-    /// path of child names below it, such as `Ship/Flame`.
+    /// Whose number: empty for the entity carrying the sequence, a path of
+    /// child names below it such as `Ship/Flame`, or, with a leading slash, a
+    /// path from the scene's top level such as `/Camera`.
     #[serde(default)]
     pub target: String,
     /// Which number; see [`Property`].

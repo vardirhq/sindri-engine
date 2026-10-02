@@ -1371,8 +1371,9 @@ hold is reported by the advance, the same way a broken clip authored by hand is.
 | `Sequence.set_speed(entity, speed)` | nothing |
 
 A sequence is choreography authored in the editor's Timeline and held by the
-entity's `sindri.sequence`: tracks that move numbers on it and its named
-children through keys, and cues that mark moments. A script names one the
+entity's `sindri.sequence`: tracks that move numbers on it, its named
+children, or anything in the scene named by a path from the top (`/camera`),
+and cues that mark moments. A script names one the
 scene holds, exactly as it names an animation clip, and the same two halves
 apply: `play`, `stop` and `set_speed` write the component, and the playhead
 beside the world follows on the next advance. `play` is idempotent;

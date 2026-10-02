@@ -169,7 +169,17 @@ fn targets_are_the_carrier_and_its_named_descendants() {
     world.set_parent(ship, Some(carrier)).expect("parent");
     world.set_parent(flame, Some(ship)).expect("parent");
     world.set_parent(unnamed, Some(carrier)).expect("parent");
-    assert_eq!(targets(&world, carrier), ["", "Ship", "Ship/Flame"]);
+    let camera = world.spawn(EntityData {
+        name: Some("Camera".to_owned()),
+        ..EntityData::default()
+    });
+    world.get_mut(carrier).expect("carrier").name = Some("Director".to_owned());
+    assert_eq!(
+        targets(&world, carrier),
+        ["", "Ship", "Ship/Flame", "/Camera"],
+        "relative paths for its own, a scene path for the rest"
+    );
+    let _ = camera;
 
     let track = sindri_scene::Track {
         target: "Ship/Flame".to_owned(),

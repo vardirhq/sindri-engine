@@ -1125,7 +1125,9 @@ frame.
   component holds named sequences, which one is `playing`, and a `speed`, as
   a sprite animation holds clips. A sequence has a duration, may loop, and
   carries tracks and cues. A track names a target (empty for the entity,
-  otherwise a path of child names such as `Ship/Flame`), a property
+  a path of child names such as `Ship/Flame`, or, with a leading slash, a path
+  from the scene's top level such as `/camera`, so one director can drive
+  anything in the scene), a property
   (`position.x|y|z`, `rotation` in degrees about z, `scale`, `scale.x|y|z`,
   or a component and a path into it such as `sindri.shape/stroke.3`), and
   keys in time order, each with a CSS easing to the next. A cue names a moment
