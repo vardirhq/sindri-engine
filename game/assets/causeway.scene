@@ -453,13 +453,13 @@
       "id": "world-camera",
       "name": "World Camera",
       "transform_3d": {
-        "position": [32783.79, 18.3392, 32789.79],
+        "position": [32837.16, 67.3567, 32843.16],
         "rotation": [-0.262396, 0.366924, 0.108688, 0.885834],
         "scale": [1.0, 1.0, 1.0]
       },
       "components": {
         "sindri.camera": {
-          "far": 400.0,
+          "far": 600.0,
           "near": 0.1,
           "projection": "orthographic",
           "vertical_size": 22.0

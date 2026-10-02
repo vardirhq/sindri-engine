@@ -28,16 +28,19 @@ script CameraFollow {
     @export
     let height_dead_zone: f32 = 1.0;
 
-    // A thirty-unit arm at forty-five degrees round and thirty-three up, which
-    // is the isometric viewpoint this game is drawn from.
+    // A hundred-and-twenty-unit arm at forty-five degrees round and
+    // thirty-three up, which is the isometric viewpoint this game is drawn
+    // from. The length changes nothing in an orthographic picture except what
+    // the near plane cuts: a short arm put the camera inside the hills
+    // between it and the walker, and the ground nearest the viewer vanished.
     @export
-    let offset_x: f32 = 17.79;
+    let offset_x: f32 = 71.16;
 
     @export
-    let offset_y: f32 = 16.34;
+    let offset_y: f32 = 65.36;
 
     @export
-    let offset_z: f32 = 17.79;
+    let offset_z: f32 = 71.16;
 
     var framed: bool = false;
 

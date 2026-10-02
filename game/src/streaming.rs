@@ -56,21 +56,21 @@ impl TerrainStream {
         if viewport.0 <= 0.0 || viewport.1 <= 0.0 {
             return Ok(false);
         }
-        let Some((floor_entity, grid, transform, volume)) = world
+        // The volume itself is left undecoded until the window has moved: it
+        // is every resident cell, and decoding it each step to find nothing
+        // had changed cost most of a frame.
+        let Some((floor_entity, grid, transform)) = world
             .entities()
             .find(|(_, data)| data.components.contains_key(FLOOR))
             .map(|(entity, data)| {
                 let grid =
                     serde_json::from_value::<TileGridComponent>(data.components[FLOOR].clone());
-                let volume =
-                    serde_json::from_value::<TileVolumeComponent>(data.components[VOLUME].clone());
-                (entity, grid, data.transform_3d.unwrap_or_default(), volume)
+                (entity, grid, data.transform_3d.unwrap_or_default())
             })
         else {
             return Ok(false);
         };
         let grid = grid.map_err(|error| CausewayError::Generated(error.to_string()))?;
-        let volume = volume.map_err(|error| CausewayError::Generated(error.to_string()))?;
         let Some([across, into, _]) = grid.solid_cell() else {
             return Ok(false);
         };
@@ -86,6 +86,13 @@ impl TerrainStream {
         if self.window == Some(window) {
             return Ok(false);
         }
+        let payload = world
+            .get(floor_entity)
+            .and_then(|data| data.components.get(VOLUME))
+            .cloned()
+            .unwrap_or_default();
+        let volume = serde_json::from_value::<TileVolumeComponent>(payload)
+            .map_err(|error| CausewayError::Generated(error.to_string()))?;
 
         // Compare the live component with the last materialized residency
         // before replacing anything. Differences are player edits, not terrain
