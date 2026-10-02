@@ -3,30 +3,108 @@ use std::collections::BTreeSet;
 use sindri_render::FrameCommand;
 use sindri_scene::{VoxelRenderBridge, VoxelRenderError, VoxelTextureSource, compile_block_mesh};
 use sindri_voxel::{
-    MeshingProfile, ResidencyConfig, SectionCoord, SectionMeshKey, VoxelCoord, VoxelId,
-    VoxelSource, VoxelWorld, mesh_block_section,
+    MeshingProfile, NaturalTerrain, NaturalTerrainSettings, ResidencyConfig, SectionCoord,
+    SectionMeshKey, TerrainBiome, TerrainPalette, VoxelCoord, VoxelId, VoxelSource, VoxelWorld,
+    mesh_block_section,
 };
 
-const GRASS: VoxelId = VoxelId::new(1);
-const DIRT: VoxelId = VoxelId::new(2);
-const STONE: VoxelId = VoxelId::new(3);
+pub const GRASS: VoxelId = VoxelId::new(1);
+pub const DIRT: VoxelId = VoxelId::new(2);
+pub const STONE: VoxelId = VoxelId::new(3);
+pub const SAND: VoxelId = VoxelId::new(4);
+pub const ROCK: VoxelId = VoxelId::new(5);
+pub const SNOW: VoxelId = VoxelId::new(6);
+pub const WATER: VoxelId = VoxelId::new(7);
+pub const LOG: VoxelId = VoxelId::new(8);
+pub const LEAVES: VoxelId = VoxelId::new(9);
+pub const MUD: VoxelId = VoxelId::new(10);
+pub const MOSS: VoxelId = VoxelId::new(11);
+pub const GRAVEL: VoxelId = VoxelId::new(12);
+pub const CLAY: VoxelId = VoxelId::new(13);
+pub const ICE: VoxelId = VoxelId::new(14);
 
-/// Deterministic filled terrain used to exercise section residency and meshing.
-#[derive(Clone, Copy, Debug, Default)]
-pub struct LabTerrain;
+/// The engine's natural terrain generator, configured as a compact showcase.
+#[derive(Clone, Debug, PartialEq)]
+pub struct LabTerrain {
+    natural: NaturalTerrain,
+}
+
+impl Default for LabTerrain {
+    fn default() -> Self {
+        Self {
+            natural: NaturalTerrain::new(lab_terrain_settings()),
+        }
+    }
+}
+
+impl LabTerrain {
+    #[must_use]
+    pub fn ground(&self, x: i32, z: i32) -> i32 {
+        self.natural.ground(x, z)
+    }
+}
 
 impl VoxelSource for LabTerrain {
     fn voxel(&self, coord: VoxelCoord) -> VoxelId {
-        let height = terrain_height(coord.x, coord.z);
-        if coord.y > height {
-            VoxelId::AIR
-        } else if coord.y == height {
-            GRASS
-        } else if coord.y >= height - 3 {
-            DIRT
-        } else {
-            STONE
-        }
+        self.natural.voxel(coord)
+    }
+
+    fn generate_section(&self, section: SectionCoord) -> sindri_voxel::VoxelSection {
+        self.natural.generate_section(section)
+    }
+}
+
+fn biome(
+    temperature: f32,
+    moisture: f32,
+    surface: VoxelId,
+    subsurface: VoxelId,
+    trees: f32,
+    relief: f32,
+    terraces: u32,
+) -> TerrainBiome {
+    TerrainBiome {
+        temperature,
+        moisture,
+        surface,
+        subsurface,
+        subsurface_depth: 3,
+        trees,
+        relief,
+        terraces,
+    }
+}
+
+fn lab_terrain_settings() -> NaturalTerrainSettings {
+    NaturalTerrainSettings {
+        seed: 0x51_4E_44_52_49,
+        sea_level: 0,
+        relief: 28,
+        feature_size: 72,
+        tree_line: 18,
+        snow_line: 25,
+        caves: true,
+        rivers: true,
+        palette: TerrainPalette {
+            stone: STONE,
+            water: Some(WATER),
+            beach: Some(SAND),
+            sea_bed: Some(GRAVEL),
+            cliff: Some(ROCK),
+            snow: Some(SNOW),
+            ice: Some(ICE),
+            trunk: Some(LOG),
+            leaves: Some(LEAVES),
+        },
+        biomes: vec![
+            biome(0.55, 0.38, GRASS, DIRT, 0.06, 0.75, 0),
+            biome(0.55, 0.74, GRASS, DIRT, 0.48, 1.0, 0),
+            biome(0.78, 0.90, MUD, MUD, 0.16, 0.35, 0),
+            biome(0.92, 0.10, SAND, SAND, 0.0, 0.55, 0),
+            biome(0.84, 0.34, CLAY, CLAY, 0.0, 1.35, 3),
+            biome(0.28, 0.66, MOSS, DIRT, 0.38, 1.05, 0),
+            biome(0.10, 0.30, SNOW, DIRT, 0.02, 0.65, 0),
+        ],
     }
 }
 
@@ -55,6 +133,7 @@ pub struct VoxelLabFrame {
 /// Small synchronous driver for the same queue/cache flow an asynchronous host
 /// will drain later. Camera motion only queues newly entering sections.
 pub struct VoxelLabRuntime {
+    terrain: LabTerrain,
     world: VoxelWorld<LabTerrain>,
     render: VoxelRenderBridge,
     resident: BTreeSet<SectionCoord>,
@@ -69,13 +148,12 @@ impl Default for VoxelLabRuntime {
 impl VoxelLabRuntime {
     #[must_use]
     pub fn new() -> Self {
+        let terrain = LabTerrain::default();
         Self {
-            // Keep the residency boundary outside the camera and retain a
-            // section above and below the surface. Sampling a non-resident
-            // solid neighbour correctly removes shared faces, so presenting a
-            // tiny 3x3x1 window would expose that window's open outer edge as
-            // fake holes underneath the terrain.
-            world: VoxelWorld::new(LabTerrain, ResidencyConfig::new(2, 1, 0, 0)),
+            // Five-by-five horizontally, with enough vertical depth for the
+            // natural generator's caves, valleys, trees and modest peaks.
+            world: VoxelWorld::new(terrain.clone(), ResidencyConfig::new(2, 2, 0, 0)),
+            terrain,
             render: VoxelRenderBridge::default(),
             resident: BTreeSet::new(),
         }
@@ -89,7 +167,7 @@ impl VoxelLabRuntime {
 
     /// Removes the generated surface voxel at a world column.
     pub fn dig_surface(&mut self, x: i32, z: i32) -> bool {
-        self.set_voxel(VoxelCoord::new(x, terrain_height(x, z), z), VoxelId::AIR)
+        self.set_voxel(VoxelCoord::new(x, self.terrain.ground(x, z), z), VoxelId::AIR)
     }
 
     /// Moves residency to the camera section and drains the current CPU work.
@@ -120,7 +198,6 @@ impl VoxelLabRuntime {
         let releases = commands.len();
         for section in &self.resident {
             commands.extend(
-                // The lab's own terrain has no animated or glowing faces.
                 self.render.draw_commands(
                     SectionMeshKey::new(*section, MeshingProfile::Block),
                     &|_| sindri_render::MeshSurface::default(),
@@ -146,12 +223,6 @@ impl VoxelLabRuntime {
     }
 }
 
-fn terrain_height(x: i32, z: i32) -> i32 {
-    let broad = (x.div_euclid(7) + z.div_euclid(9)).rem_euclid(5);
-    let detail = (x.wrapping_mul(31) ^ z.wrapping_mul(17)).rem_euclid(3);
-    3 + broad + detail
-}
-
 #[cfg(test)]
 mod tests {
     use sindri_render::{TextureId, UvRect};
@@ -168,8 +239,8 @@ mod tests {
         let mut lab = VoxelLabRuntime::new();
         let focus = SectionCoord::new(0, 0, 0);
         let first = lab.frame(focus, &texture).unwrap();
-        assert_eq!(first.stats.entering_sections, 75);
-        assert_eq!(first.stats.mesh_jobs, 75);
+        assert_eq!(first.stats.entering_sections, 125);
+        assert!(first.stats.mesh_jobs > 0);
         assert!(first.stats.uploads > 0);
 
         let settled = lab.frame(focus, &texture).unwrap();
@@ -184,7 +255,7 @@ mod tests {
         let mut lab = VoxelLabRuntime::new();
         let focus = SectionCoord::new(0, 0, 0);
         lab.frame(focus, &texture).unwrap();
-        assert!(lab.set_voxel(VoxelCoord::new(15, 4, 4), VoxelId::AIR));
+        assert!(lab.set_voxel(VoxelCoord::new(15, -8, 4), VoxelId::AIR));
 
         let edited = lab.frame(focus, &texture).unwrap();
         assert_eq!(edited.stats.entering_sections, 0);
@@ -198,19 +269,24 @@ mod tests {
         lab.frame(SectionCoord::new(0, 0, 0), &texture).unwrap();
 
         let moved = lab.frame(SectionCoord::new(1, 0, 0), &texture).unwrap();
-        assert_eq!(moved.stats.entering_sections, 15);
-        assert_eq!(moved.stats.leaving_sections, 15);
-        assert_eq!(moved.stats.mesh_jobs, 15);
+        assert_eq!(moved.stats.entering_sections, 25);
+        assert_eq!(moved.stats.leaving_sections, 25);
+        assert_eq!(moved.stats.mesh_jobs, 25);
         assert_eq!(moved.stats.remeshes, 0);
         assert!(moved.stats.releases > 0);
     }
 
     #[test]
-    fn lab_residency_includes_real_depth_below_the_surface() {
-        let mut lab = VoxelLabRuntime::new();
-        let frame = lab.frame(SectionCoord::new(0, 0, 0), &texture).unwrap();
+    fn lab_uses_engine_natural_terrain_and_real_depth() {
+        let terrain = LabTerrain::default();
+        assert_eq!(terrain.voxel(VoxelCoord::new(0, -32, 0)), STONE);
 
-        assert_eq!(frame.stats.resident_sections, 75);
-        assert_eq!(LabTerrain.voxel(VoxelCoord::new(0, -16, 0)), STONE);
+        let mut biomes = BTreeSet::new();
+        for z in (-192..=192).step_by(24) {
+            for x in (-192..=192).step_by(24) {
+                biomes.insert(terrain.natural.biome(x, z));
+            }
+        }
+        assert!(biomes.len() > 1);
     }
 }
