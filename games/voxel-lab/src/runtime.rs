@@ -167,7 +167,10 @@ impl VoxelLabRuntime {
 
     /// Removes the generated surface voxel at a world column.
     pub fn dig_surface(&mut self, x: i32, z: i32) -> bool {
-        self.set_voxel(VoxelCoord::new(x, self.terrain.ground(x, z), z), VoxelId::AIR)
+        self.set_voxel(
+            VoxelCoord::new(x, self.terrain.ground(x, z), z),
+            VoxelId::AIR,
+        )
     }
 
     /// Moves residency to the camera section and drains the current CPU work.
@@ -197,12 +200,10 @@ impl VoxelLabRuntime {
         let mut commands = self.render.take_release_commands();
         let releases = commands.len();
         for section in &self.resident {
-            commands.extend(
-                self.render.draw_commands(
-                    SectionMeshKey::new(*section, MeshingProfile::Block),
-                    &|_| sindri_render::MeshSurface::default(),
-                ),
-            );
+            commands.extend(self.render.draw_commands(
+                SectionMeshKey::new(*section, MeshingProfile::Block),
+                &|_| sindri_render::MeshSurface::default(),
+            ));
         }
 
         Ok(VoxelLabFrame {
