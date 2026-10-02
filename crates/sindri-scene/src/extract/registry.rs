@@ -435,7 +435,9 @@ fn register_tiles(components: &mut ComponentSchemaRegistry) -> Result<(), SceneE
             "focus": [0, 0, 0],
             "render_radius": 2,
             "vertical_radius": 1,
-            "layer": 0
+            "layer": 0,
+            "follow_camera": false,
+            "edits": []
         }),
     )?;
     Ok(())

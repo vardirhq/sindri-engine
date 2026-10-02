@@ -121,6 +121,44 @@ pub struct VoxelWorldComponent {
     pub vertical_radius: u32,
     #[serde(default)]
     pub layer: i32,
+    /// Keep the resident window under the world camera rather than at
+    /// `focus`.
+    ///
+    /// `focus` still says which height the window is centred on: the camera
+    /// says where across the world, and terrain that rises and falls is what
+    /// `vertical_radius` is for.
+    #[serde(default)]
+    pub follow_camera: bool,
+    /// What has been changed from what the generator lays down, in the order
+    /// it was changed.
+    ///
+    /// Only the changes are stored: the world itself is the generator's
+    /// answer, which costs nothing to keep. A later edit of a cell replaces an
+    /// earlier one, and an edit back to what was generated is dropped.
+    #[serde(default)]
+    pub edits: Vec<VoxelEdit>,
+}
+
+/// One cell of a voxel world set to something other than what was generated.
+#[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
+pub struct VoxelEdit {
+    /// The voxel, as world X, up, and Z.
+    pub at: [i32; 3],
+    /// What is there now: a block or material, or `""` for air.
+    pub block: VoxelBlock,
+}
+
+impl VoxelBlock {
+    /// Air, which is how a removed block is written.
+    #[must_use]
+    pub fn air() -> Self {
+        Self::Named(String::new())
+    }
+
+    #[must_use]
+    pub fn is_air(&self) -> bool {
+        matches!(self, Self::Named(name) if name.is_empty()) || matches!(self, Self::Material(0))
+    }
 }
 
 impl SceneComponent for VoxelWorldComponent {

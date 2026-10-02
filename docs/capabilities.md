@@ -675,9 +675,29 @@ settled-remesh counters. Cached section bounds are tested conservatively against
 the current camera after the voxel world's entity transform, so offscreen
 resident sections retain their CPU cache without submitting draws or consuming
 their pending GPU upload. This first bridge supports opaque block batches;
-cutout/transparent pipelines, editor voxel picking/painting, and camera-driven
-scene residency remain. Causeway has not migrated to this path yet, so the proof
-is still narrower than a production game migration.
+cutout/transparent pipelines and editor voxel picking/painting remain.
+
+A world may keep its resident window under the world camera
+(`follow_camera`): the window centres on where the middle of the picture meets
+the height of the `focus` section, and moving it loads the sections it reaches
+and releases those it leaves. A world's `edits` list what has been changed
+from what was generated, cell by cell; only changes are stored, an edit back to
+the generated block is dropped, and an edit remeshes only the sections it
+touches. `VoxelGround` answers gameplay's questions from the same generator and
+edits -- the block in a cell, a column's surface, the first block a ray meets
+-- remembering generated sections between questions so edits never regenerate
+terrain. A voxel world on a grid of boxes (`sindri.tile_grid` with `space:
+"solid"`) is that grid's ground: its voxels are the grid's cells, centred on
+them as a volume's blocks are, and the grid's calls answer from it. Scripts
+read, build and remove blocks with `Grid.block`, `Grid.set_block` and
+`Grid.tagged`; `sindri.grid.placement` stands things on its surface;
+`Grid.can_reach` and `Grid.step_toward` path across it within the grid's
+`max_step`, reading the ground around the walker and its goal; and
+`voxel::aim_at_with` says which block and face the pointer is on.
+`crates/sindri-decay/tests/a_script_walks_and_builds_on_voxels.rs` builds,
+digs and walks round a wall on a generated world. Causeway has not migrated to
+this path yet, so the proof is still narrower than a production game
+migration.
 
 ### Hosts and platforms
 

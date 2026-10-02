@@ -54,8 +54,9 @@ materials can reproduce the useful parts of Causeway's current block look.
 
 ## 2. Complete the persistent runtime path
 
-- [ ] Drive scene residency from the active world camera or an explicit runtime
+- [x] Drive scene residency from the active world camera or an explicit runtime
   focus provider rather than a permanently authored section coordinate.
+  `follow_camera` keeps the window under what the world camera looks at.
 - [ ] Drain generation and meshing queues through bounded asynchronous workers
   with priorities, cancellation, and per-frame upload budgets.
 - [ ] Keep old geometry visible until a replacement has reached the GPU.
@@ -74,14 +75,16 @@ frame-time cliff on a phone-sized browser viewport.
 
 - [ ] Add editor picking, paint, erase, fill, and material selection for
   `sindri.voxel_world`, routed through undoable editor commands.
-- [ ] Add runtime/Decay APIs for voxel queries and edits without exposing
-  renderer or storage internals.
+- [x] Add runtime/Decay APIs for voxel queries and edits without exposing
+  renderer or storage internals. `VoxelGround` and the `Grid` block calls read
+  and edit a world on a grid of boxes; edits are stored on the component.
 - [ ] Define reusable voxel assets/prefabs for structures such as trees,
   buildings, props, and block-built items, with simple placement in a world.
 - [ ] Give voxel material and generation profiles inspectable project assets
   rather than burying a full world definition inside one scene component.
 - [ ] Derive collision and multi-level navigation only for entering or dirty
-  sections.
+  sections. Single-level navigation exists: a grid whose ground is a voxel
+  world paths across its column surfaces around the walker and its goal.
 
 Exit: an author can create, place, inspect, edit, undo, and script voxel content
 without hand-editing scene JSON.

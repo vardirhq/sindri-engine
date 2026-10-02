@@ -1764,11 +1764,13 @@
       },
       "default_payload": {
         "blocks": "builtin:blocks",
+        "edits": [],
         "focus": [
           0,
           0,
           0
         ],
+        "follow_camera": false,
         "generator": {
           "beach_voxel": "sand",
           "biomes": [
@@ -1895,11 +1897,13 @@
       "display_name": "Voxel World",
       "fields": {
         "blocks": "builtin:blocks",
+        "edits": [],
         "focus": [
           0,
           0,
           0
         ],
+        "follow_camera": false,
         "generator": {
           "beach_voxel": "sand",
           "biomes": [

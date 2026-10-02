@@ -200,13 +200,6 @@ impl WorldHost<'_> {
         // With tile sets, a stacked floor's holes and walls are part of the
         // answer; without them, only what the scene authored is. A host that
         // binds none is one where nothing could draw the volume either.
-        let navigation = match self.tile_sets {
-            Some(tile_sets) => {
-                WorldGridNavigation::from_world_with_tile_sets(self.world, map, tile_sets)
-            }
-            None => WorldGridNavigation::from_world(self.world, map),
-        }
-        .map_err(|error| RuntimeError::Host(format!("{}: {error}", path.dotted())))?;
         let target_world = self
             .transform_of(target)
             .ok_or_else(|| {
@@ -217,6 +210,15 @@ impl WorldHost<'_> {
             })?
             .position;
         let goal = grid.cell_at(path, target_world)?;
+        // Derived around the goal as well as the walker, so a world with no
+        // edge -- a voxel world -- knows the ground between them.
+        let navigation = match self.tile_sets {
+            Some(tile_sets) => {
+                WorldGridNavigation::from_world_around(self.world, map, tile_sets, &[goal])
+            }
+            None => WorldGridNavigation::from_world(self.world, map),
+        }
+        .map_err(|error| RuntimeError::Host(format!("{}: {error}", path.dotted())))?;
         navigation
             .find_path(GridPathfinder::default(), entity, goal)
             .map(|route| route.map(sindri_grid::GridPath::into_nodes))

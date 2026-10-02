@@ -16,6 +16,7 @@ use sindri_core::{ComponentSchemaRegistry, EntityId, TileFace, World};
 use sindri_grid::GridCoord3;
 
 use crate::components::{TileGridComponent, TileVolumeComponent};
+use crate::{TileSetBindings, VoxelGround, voxel_space};
 
 use super::{VoxelHit, pick, ray_at_viewport};
 
@@ -52,6 +53,21 @@ pub fn aim_at(
     view_projection: Mat4,
     viewport_point: [f32; 2],
 ) -> Option<VolumeAim> {
+    aim_at_with(world, components, None, view_projection, viewport_point)
+}
+
+/// The same, with the tile sets that say what a voxel world's blocks are.
+///
+/// A voxel world built from a block set can only be aimed at with them: which
+/// voxels are blocks and which are air is a question the set answers.
+#[must_use]
+pub fn aim_at_with(
+    world: &World,
+    components: &ComponentSchemaRegistry,
+    tile_sets: Option<&TileSetBindings>,
+    view_projection: Mat4,
+    viewport_point: [f32; 2],
+) -> Option<VolumeAim> {
     let grids = components.query::<TileGridComponent>(world).ok()?;
     for (entity, grid) in grids {
         // Only a grid of boxes has sides to click on. A projected one draws a
@@ -59,15 +75,36 @@ pub fn aim_at(
         let Some(cell_size) = grid.solid_cell() else {
             continue;
         };
+        let transform = world.world_transform(entity).unwrap_or_default();
+        let Some((origin, direction)) = ray_at_viewport(transform, view_projection, viewport_point)
+        else {
+            continue;
+        };
+        // A grid whose ground is a voxel world is aimed at through the world,
+        // whose cells are the grid's: a column, a row and a level are a
+        // voxel's X, Z and height.
+        if let Ok(Some(ground)) = VoxelGround::of_entity(world, components, entity, tile_sets) {
+            let into_voxels = voxel_space(world, components, entity).inverse();
+            let hit = ground.raycast(
+                into_voxels.transform_point3(origin),
+                into_voxels.transform_vector3(direction),
+                REACH,
+            );
+            if let Some(hit) = hit {
+                let cell = |at: [i32; 3]| GridCoord3::new(at[0], at[2], at[1]);
+                return Some(VolumeAim {
+                    grid: entity,
+                    cell: cell(hit.cell),
+                    face: face_of(hit.normal),
+                    against: cell(hit.before()),
+                });
+            }
+            continue;
+        }
         let Some(volume) = components
             .get::<TileVolumeComponent>(world, entity)
             .ok()
             .flatten()
-        else {
-            continue;
-        };
-        let transform = world.world_transform(entity).unwrap_or_default();
-        let Some((origin, direction)) = ray_at_viewport(transform, view_projection, viewport_point)
         else {
             continue;
         };
@@ -82,4 +119,17 @@ pub fn aim_at(
         }
     }
     None
+}
+
+/// The side of a block a ray came in through, from which way out of the
+/// block it came: a voxel's up is a grid's top, its +Z a grid's south.
+const fn face_of(normal: [i32; 3]) -> TileFace {
+    match normal {
+        [1, _, _] => TileFace::East,
+        [-1, _, _] => TileFace::West,
+        [_, -1, _] => TileFace::Bottom,
+        [_, _, 1] => TileFace::South,
+        [_, _, -1] => TileFace::North,
+        _ => TileFace::Top,
+    }
 }

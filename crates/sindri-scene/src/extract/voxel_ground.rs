@@ -1,0 +1,524 @@
+//! A voxel world as ground: what is in a cell, where a column's surface is,
+//! and what a ray through the world touches first.
+//!
+//! The renderer keeps its own resident sections, because it needs them meshed
+//! and on the GPU. Gameplay asks different questions -- one cell, one column,
+//! one ray -- often outside whatever the camera has loaded, and it asks them
+//! from places that cannot reach the renderer: a script, a placement, the
+//! pathfinder. So the answer is worked out here from the same two things the
+//! renderer uses, the generator and the world's edits, and agrees with it.
+//!
+//! Generated sections are remembered between questions, keyed by everything
+//! that decides them. Edits are not part of that key: they lie on top of what
+//! was generated, so a block placed or taken away costs a map entry rather
+//! than regenerating the terrain around it.
+
+use std::cell::RefCell;
+use std::collections::BTreeMap;
+use std::sync::{Arc, Mutex, PoisonError};
+
+use sindri_core::{TileDefinition, TileSetDocument};
+use sindri_grid::GridCoord3;
+use sindri_voxel::{SectionCoord, VoxelCoord, VoxelId, VoxelSection, VoxelSource};
+
+use crate::{TileSetBindings, TileSurfaces, VoxelBlock, VoxelEdit, VoxelWorldComponent};
+
+use super::SceneExtractError;
+use super::voxel_appearance::{Appearance, block_palette};
+use super::voxel_source::{Palette, SceneTerrain, terrain_source};
+
+/// How far above a column's ground anything generated may stand: the tallest
+/// tree, and the top of an overhang's band.
+const ABOVE_GROUND: i32 = 32;
+/// How many generated sections a terrain remembers before starting again.
+const REMEMBERED_SECTIONS: usize = 4_096;
+/// How many differently generated worlds are remembered at once.
+const REMEMBERED_TERRAINS: usize = 4;
+
+/// What decides a world's generated voxels: its generator and how its blocks
+/// are numbered. Two worlds that agree on both generate the same voxels.
+#[derive(Clone, Debug, PartialEq)]
+struct TerrainKey {
+    source: SceneTerrain,
+    palette: Palette,
+}
+
+/// A generator, and the sections it has been asked for so far.
+struct GeneratedTerrain {
+    key: TerrainKey,
+    sections: Mutex<BTreeMap<SectionCoord, VoxelSection>>,
+}
+
+impl GeneratedTerrain {
+    fn voxel(&self, coord: VoxelCoord) -> VoxelId {
+        let section = coord.section();
+        let mut sections = self.sections.lock().unwrap_or_else(PoisonError::into_inner);
+        if let Some(generated) = sections.get(&section) {
+            return generated.get(coord.local());
+        }
+        let generated = self.key.source.generate_section(section);
+        let voxel = generated.get(coord.local());
+        if sections.len() >= REMEMBERED_SECTIONS {
+            sections.clear();
+        }
+        sections.insert(section, generated);
+        voxel
+    }
+}
+
+thread_local! {
+    static TERRAINS: RefCell<Vec<Arc<GeneratedTerrain>>> = const { RefCell::new(Vec::new()) };
+}
+
+/// The remembered terrain for `key`, most recently used first.
+fn terrain_for(key: TerrainKey) -> Arc<GeneratedTerrain> {
+    TERRAINS.with(|terrains| {
+        let mut terrains = terrains.borrow_mut();
+        if let Some(index) = terrains.iter().position(|terrain| terrain.key == key) {
+            let terrain = terrains.remove(index);
+            terrains.insert(0, Arc::clone(&terrain));
+            return terrain;
+        }
+        let terrain = Arc::new(GeneratedTerrain {
+            key,
+            sections: Mutex::new(BTreeMap::new()),
+        });
+        terrains.insert(0, Arc::clone(&terrain));
+        terrains.truncate(REMEMBERED_TERRAINS);
+        terrain
+    })
+}
+
+/// What a block is to something standing on it.
+#[derive(Clone, Copy, Debug, PartialEq)]
+struct Footing {
+    /// Holds something up. Water does; a flower does not.
+    supports: bool,
+    /// Something can walk on it. Water holds a boat up and not a walker.
+    walkable: bool,
+    /// How much of its cell it fills from the bottom: one for a block, a half
+    /// for a slab.
+    top: f32,
+}
+
+/// One voxel world's cells, as gameplay sees them.
+#[derive(Clone)]
+pub struct VoxelGround {
+    terrain: Arc<GeneratedTerrain>,
+    edits: BTreeMap<VoxelCoord, VoxelId>,
+    names: BTreeMap<u16, String>,
+    footing: BTreeMap<u16, Footing>,
+    /// Kept for asking what a block is tagged with.
+    tile_set: Option<TileSetDocument>,
+}
+
+impl std::fmt::Debug for VoxelGround {
+    fn fmt(&self, formatter: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        formatter
+            .debug_struct("VoxelGround")
+            .field("edits", &self.edits.len())
+            .field("blocks", &self.names.len())
+            .finish_non_exhaustive()
+    }
+}
+
+/// Where a ray met a voxel world.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub struct VoxelWorldHit {
+    /// The voxel it met, as world X, up, and Z.
+    pub cell: [i32; 3],
+    /// Which way out of that voxel it came from: one axis, plus or minus one.
+    /// Zero when the ray started inside a solid voxel.
+    pub normal: [i32; 3],
+}
+
+impl VoxelWorldHit {
+    /// The empty voxel the ray was in just before, which is where a block
+    /// built against the face goes.
+    #[must_use]
+    pub const fn before(self) -> [i32; 3] {
+        [
+            self.cell[0] + self.normal[0],
+            self.cell[1] + self.normal[1],
+            self.cell[2] + self.normal[2],
+        ]
+    }
+}
+
+impl VoxelGround {
+    /// The ground a world component describes, with its edits on top.
+    ///
+    /// # Errors
+    /// The same refusals that keep the world from drawing: a block set that is
+    /// not bound, a generator naming a block the set does not define, and an
+    /// edit naming one.
+    pub fn of(
+        component: &VoxelWorldComponent,
+        tile_sets: Option<&TileSetBindings>,
+    ) -> Result<Self, SceneExtractError> {
+        let (palette, appearance, tile_set) = match component.blocks.as_deref() {
+            Some(set) if !set.trim().is_empty() => {
+                let tile_set = tile_sets
+                    .and_then(|bindings| bindings.get(set))
+                    .ok_or_else(|| SceneExtractError::UnboundTileSet(set.to_owned()))?;
+                let (palette, appearance) = block_palette(set, tile_set)?;
+                (palette, appearance, Some(tile_set.clone()))
+            }
+            _ => (
+                Palette::of_materials(component.materials.iter().map(|material| material.voxel)),
+                Appearance::Materials(component.materials.clone()),
+                None,
+            ),
+        };
+        let source = terrain_source(&component.generator, &palette)?;
+        let (names, footing) = match &appearance {
+            Appearance::Blocks(blocks) => (
+                blocks
+                    .iter()
+                    .map(|(voxel, name, _)| (*voxel, name.clone()))
+                    .collect(),
+                blocks
+                    .iter()
+                    .map(|(voxel, _, definition)| (*voxel, footing_of(definition)))
+                    .collect(),
+            ),
+            Appearance::Materials(materials) => (
+                materials
+                    .iter()
+                    .map(|material| (material.voxel, material.voxel.to_string()))
+                    .collect(),
+                materials
+                    .iter()
+                    .map(|material| {
+                        (
+                            material.voxel,
+                            Footing {
+                                supports: true,
+                                walkable: true,
+                                top: 1.0,
+                            },
+                        )
+                    })
+                    .collect(),
+            ),
+        };
+        let mut ground = Self {
+            terrain: terrain_for(TerrainKey {
+                source,
+                palette: palette.clone(),
+            }),
+            edits: BTreeMap::new(),
+            names,
+            footing,
+            tile_set,
+        };
+        for edit in &component.edits {
+            let voxel = ground.id_of(&edit.block)?;
+            ground
+                .edits
+                .insert(VoxelCoord::new(edit.at[0], edit.at[1], edit.at[2]), voxel);
+        }
+        Ok(ground)
+    }
+
+    /// The ground of the voxel world on `entity`, if it carries one.
+    ///
+    /// # Errors
+    /// A world component that does not decode, or one [`VoxelGround::of`]
+    /// refuses.
+    pub fn of_entity(
+        world: &sindri_core::World,
+        components: &sindri_core::ComponentSchemaRegistry,
+        entity: sindri_core::EntityId,
+        tile_sets: Option<&TileSetBindings>,
+    ) -> Result<Option<Self>, SceneExtractError> {
+        components
+            .get::<VoxelWorldComponent>(world, entity)?
+            .map(|component| Self::of(&component, tile_sets))
+            .transpose()
+    }
+
+    /// The stored voxel for a block, by name or number; air for `""`.
+    fn id_of(&self, block: &VoxelBlock) -> Result<VoxelId, SceneExtractError> {
+        if block.is_air() {
+            return Ok(VoxelId::AIR);
+        }
+        match block {
+            VoxelBlock::Named(name) => self
+                .names
+                .iter()
+                .find(|(_, known)| *known == name)
+                .map(|(voxel, _)| VoxelId::new(*voxel))
+                .ok_or_else(|| SceneExtractError::UnknownVoxelBlock(name.clone())),
+            VoxelBlock::Material(voxel) if self.names.contains_key(voxel) => {
+                Ok(VoxelId::new(*voxel))
+            }
+            VoxelBlock::Material(voxel) => Err(SceneExtractError::MissingVoxelMaterial(*voxel)),
+        }
+    }
+
+    /// Every edited voxel, by where it is.
+    pub(super) const fn edit_voxels(&self) -> &BTreeMap<VoxelCoord, VoxelId> {
+        &self.edits
+    }
+
+    /// The voxel at a cell, edits included.
+    #[must_use]
+    pub fn voxel(&self, at: [i32; 3]) -> VoxelId {
+        let coord = VoxelCoord::new(at[0], at[1], at[2]);
+        self.edits
+            .get(&coord)
+            .copied()
+            .unwrap_or_else(|| self.terrain.voxel(coord))
+    }
+
+    /// What generation alone put at a cell.
+    #[must_use]
+    pub fn generated(&self, at: [i32; 3]) -> VoxelId {
+        self.terrain.voxel(VoxelCoord::new(at[0], at[1], at[2]))
+    }
+
+    /// The block at a cell by name, or `""` for air.
+    ///
+    /// A world of numbered materials names each by its number.
+    #[must_use]
+    pub fn block(&self, at: [i32; 3]) -> String {
+        let voxel = self.voxel(at);
+        if voxel.is_air() {
+            return String::new();
+        }
+        self.names.get(&voxel.value()).cloned().unwrap_or_default()
+    }
+
+    /// Whether the block at a cell carries a tag where its block set defines
+    /// it. Always false in a world of numbered materials, which have none.
+    #[must_use]
+    pub fn tagged(&self, at: [i32; 3], tag: &str) -> bool {
+        let name = self.block(at);
+        self.tile_set
+            .as_ref()
+            .and_then(|set| set.tile(&name))
+            .is_some_and(|block| block.tags.iter().any(|carried| carried == tag))
+    }
+
+    /// The edit list a component should carry once `at` holds `block`.
+    ///
+    /// An edit back to what was generated is not kept, so building and then
+    /// taking a block away leaves the world exactly as it was written.
+    ///
+    /// # Errors
+    /// A block the world does not define.
+    pub fn edited(
+        &self,
+        edits: &[VoxelEdit],
+        at: [i32; 3],
+        block: &VoxelBlock,
+    ) -> Result<Vec<VoxelEdit>, SceneExtractError> {
+        let voxel = self.id_of(block)?;
+        let mut kept: Vec<VoxelEdit> = edits.iter().filter(|edit| edit.at != at).cloned().collect();
+        if voxel != self.generated(at) {
+            kept.push(VoxelEdit {
+                at,
+                block: if voxel.is_air() {
+                    VoxelBlock::air()
+                } else {
+                    block.clone()
+                },
+            });
+        }
+        Ok(kept)
+    }
+
+    fn footing(&self, voxel: VoxelId) -> Option<Footing> {
+        (!voxel.is_air())
+            .then(|| self.footing.get(&voxel.value()).copied())
+            .flatten()
+    }
+
+    /// The highest voxel anything could be in at a column.
+    fn ceiling(&self, x: i32, z: i32) -> i32 {
+        let generated = match &self.terrain.key.source {
+            SceneTerrain::Layered(terrain) => terrain.highest(),
+            SceneTerrain::Natural(terrain) => {
+                terrain.ground(x, z).max(terrain.settings().sea_level) + ABOVE_GROUND
+            }
+        };
+        self.edits
+            .keys()
+            .filter(|coord| coord.x == x && coord.z == z)
+            .map(|coord| coord.y)
+            .fold(generated, i32::max)
+    }
+
+    /// The lowest voxel a column's surface is looked for in.
+    fn floor(&self, x: i32, z: i32) -> i32 {
+        match &self.terrain.key.source {
+            SceneTerrain::Layered(_) => 0,
+            SceneTerrain::Natural(terrain) => {
+                terrain.ground(x, z).min(terrain.settings().sea_level) - ABOVE_GROUND
+            }
+        }
+    }
+
+    /// The highest block in a column that holds something up: its level, the
+    /// height of its top, and whether a walker can stand on it. `None` where
+    /// nothing in the column does.
+    #[must_use]
+    pub fn surface(&self, x: i32, z: i32) -> Option<(i32, f32, bool)> {
+        let floor = self.floor(x, z);
+        let mut y = self.ceiling(x, z);
+        while y >= floor {
+            if let Some(footing) = self.footing(self.voxel([x, y, z]))
+                && footing.supports
+            {
+                #[allow(clippy::cast_precision_loss)]
+                let height = y as f32 + footing.top;
+                return Some((y, height, footing.walkable));
+            }
+            y -= 1;
+        }
+        None
+    }
+
+    /// Every column's surface between two corners, inclusive, as the surfaces
+    /// a tile grid's navigation and placement read.
+    ///
+    /// A column is its X and Z: the grid's column and row. Its height is the
+    /// top of its surface block.
+    #[must_use]
+    pub fn surfaces(&self, min: [i32; 2], max: [i32; 2]) -> TileSurfaces {
+        let mut columns = Vec::new();
+        for z in min[1]..=max[1] {
+            for x in min[0]..=max[0] {
+                if let Some((top, height, walkable)) = self.surface(x, z) {
+                    columns.push((GridCoord3::new(x, z, top), height, walkable));
+                }
+            }
+        }
+        TileSurfaces::from_tops(columns)
+    }
+
+    /// The first solid voxel a ray meets, and the face it came in through.
+    ///
+    /// `origin` and `direction` are in the world's own voxel space, where a
+    /// voxel spans one unit from its coordinate. Walks voxel by voxel, so the
+    /// answer is exact at edges and corners, and gives up after `reach` units.
+    #[must_use]
+    pub fn raycast(
+        &self,
+        origin: glam::Vec3,
+        direction: glam::Vec3,
+        reach: f32,
+    ) -> Option<VoxelWorldHit> {
+        let length = direction.length();
+        if !length.is_finite() || length <= f32::EPSILON || !origin.is_finite() {
+            return None;
+        }
+        let direction = direction / length;
+        let cell = origin.floor();
+        #[allow(clippy::cast_possible_truncation)]
+        let mut at = [cell.x as i32, cell.y as i32, cell.z as i32];
+        let step = [
+            step_of(direction.x),
+            step_of(direction.y),
+            step_of(direction.z),
+        ];
+        let delta = [
+            crossing(direction.x),
+            crossing(direction.y),
+            crossing(direction.z),
+        ];
+        let mut next = [
+            first_crossing(origin.x, direction.x),
+            first_crossing(origin.y, direction.y),
+            first_crossing(origin.z, direction.z),
+        ];
+        let mut normal = [0; 3];
+        let mut travelled = 0.0;
+        while travelled <= reach {
+            if self.footing(self.voxel(at)).is_some() {
+                return Some(VoxelWorldHit { cell: at, normal });
+            }
+            let axis = if next[0] <= next[1] && next[0] <= next[2] {
+                0
+            } else if next[1] <= next[2] {
+                1
+            } else {
+                2
+            };
+            travelled = next[axis];
+            next[axis] += delta[axis];
+            at[axis] += step[axis];
+            normal = [0; 3];
+            normal[axis] = -step[axis];
+        }
+        None
+    }
+}
+
+/// From a voxel world's own space, where a voxel is the unit cube from its
+/// coordinate, to the space of the entity carrying it.
+///
+/// The identity on its own. Beside a grid of boxes the voxels become that
+/// grid's cells: as wide, deep and tall as a cell, and centred on the cell's
+/// column and row as every box on such a grid is, so a block a script names
+/// by its grid cell is the block drawn there.
+#[must_use]
+pub fn voxel_space(
+    world: &sindri_core::World,
+    components: &sindri_core::ComponentSchemaRegistry,
+    entity: sindri_core::EntityId,
+) -> glam::Mat4 {
+    let Some([across, into, up]) = components
+        .get::<crate::TileGridComponent>(world, entity)
+        .ok()
+        .flatten()
+        .and_then(|grid| grid.solid_cell())
+    else {
+        return glam::Mat4::IDENTITY;
+    };
+    glam::Mat4::from_scale(glam::Vec3::new(across, up, into))
+        * glam::Mat4::from_translation(glam::Vec3::new(-0.5, 0.0, -0.5))
+}
+
+fn footing_of(definition: &TileDefinition) -> Footing {
+    Footing {
+        supports: definition.supports,
+        walkable: definition.walkable,
+        top: definition.bounds().top(),
+    }
+}
+
+const fn step_of(direction: f32) -> i32 {
+    if direction > 0.0 {
+        1
+    } else if direction < 0.0 {
+        -1
+    } else {
+        0
+    }
+}
+
+/// How far along the ray one whole voxel is on an axis.
+fn crossing(direction: f32) -> f32 {
+    if direction == 0.0 {
+        f32::INFINITY
+    } else {
+        (1.0 / direction).abs()
+    }
+}
+
+/// How far along the ray the first voxel boundary on an axis is.
+fn first_crossing(origin: f32, direction: f32) -> f32 {
+    if direction > 0.0 {
+        (origin.floor() + 1.0 - origin) / direction
+    } else if direction < 0.0 {
+        (origin - origin.floor()) / -direction
+    } else {
+        f32::INFINITY
+    }
+}
+
+#[cfg(test)]
+#[path = "voxel_ground_tests.rs"]
+mod tests;
