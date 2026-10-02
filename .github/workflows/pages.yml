@@ -70,6 +70,7 @@ jobs:
             "examples/physics:physics" \
             "examples/input:input" \
             "examples/audio:audio" \
+            "examples/sequence:sequence" \
             "examples/ui:ui" \
             "game:causeway" \
             "games/flappy:flappy" \

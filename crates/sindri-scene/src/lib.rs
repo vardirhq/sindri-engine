@@ -22,6 +22,7 @@ mod physics;
 mod physics_sync;
 mod placement;
 pub(crate) mod screen_ui;
+mod sequence;
 mod textures;
 mod tile_chunk;
 mod tile_surface;
@@ -80,6 +81,11 @@ pub use screen_ui::{
     UiLayoutChild, UiLayoutComponent, UiOptionComponent, UiPlaced, UiScrollComponent, UiSides,
     UiSliderComponent, UiSliderOrientation, UiTextInputComponent, UiTextSizes, UiToggleComponent,
     UiTrack, dropdown_options, measure_ui_text,
+};
+pub use sequence::{
+    Axis, Cue, CueFired, CueSound, EASINGS, Key, Property, Sequence, SequenceComponent,
+    SequenceError, SequenceStep, Sequences, Step, TRANSFORM_PROPERTIES, Track, easing, pose,
+    resolve,
 };
 /// The shapes a collider is made of, which the editor draws and resizes.
 pub use sindri_physics::{Collider2d, ColliderShape2d};

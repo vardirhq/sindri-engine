@@ -747,6 +747,38 @@
       "addable": true,
       "apply": {},
       "default_payload": {
+        "playing": null,
+        "sequences": {
+          "intro": {
+            "cues": [],
+            "duration": 2.0,
+            "looping": false,
+            "tracks": []
+          }
+        },
+        "speed": 1.0
+      },
+      "display_name": "Sequence",
+      "fields": {
+        "playing": null,
+        "sequences": {
+          "intro": {
+            "cues": [],
+            "duration": 2.0,
+            "looping": false,
+            "tracks": []
+          }
+        },
+        "speed": 1.0
+      },
+      "meanings": {},
+      "schema_version": 1,
+      "type_name": "sindri.sequence"
+    },
+    {
+      "addable": true,
+      "apply": {},
+      "default_payload": {
         "blend": "over",
         "corner_radius": 0.0,
         "count": 6.0,

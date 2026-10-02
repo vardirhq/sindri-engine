@@ -160,6 +160,14 @@ impl<'a> WorldHost<'a> {
         self
     }
 
+    pub(crate) fn with_sequences(
+        mut self,
+        sequences: Option<&'a mut sindri_scene::Sequences>,
+    ) -> Self {
+        self.inner.sequences = sequences;
+        self
+    }
+
     pub fn new(
         world: &'a mut sindri_core::World,
         entity: sindri_core::EntityId,

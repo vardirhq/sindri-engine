@@ -99,6 +99,9 @@ pub(crate) const UI: &str = "Ui";
 /// list the single record of what an entity can do — a script that could invent
 /// a clip would make the animation panel a partial view of the truth.
 pub(crate) const ANIMATION: &str = "Animation";
+/// Which authored sequence an entity is playing, where it has got to, and
+/// which of its cues it has just reached. Authored, never built, as clips are.
+pub(crate) const SEQUENCE: &str = "Sequence";
 pub(crate) const RANDOM: &str = "Random";
 pub(crate) const SAVE: &str = "Save";
 pub(crate) const EFFECTS: &str = "Effects";

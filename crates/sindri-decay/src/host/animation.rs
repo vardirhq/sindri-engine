@@ -63,7 +63,13 @@ impl WorldHost<'_> {
                         RuntimeError::Host(format!("{} wants more arguments", path.dotted()))
                     })?,
                 )?;
-                self.write_field(target, SPEED, serde_json::Value::from(speed), path)
+                self.write_field(
+                    target,
+                    COMPONENT,
+                    SPEED,
+                    serde_json::Value::from(speed),
+                    path,
+                )
             }
             AnimationCall::Finished => Ok(Value::Bool(
                 self.animations
@@ -109,7 +115,7 @@ impl WorldHost<'_> {
         clip: serde_json::Value,
         path: &Path,
     ) -> Result<Value, RuntimeError> {
-        self.write_field(target, PLAYING, clip, path)
+        self.write_field(target, COMPONENT, PLAYING, clip, path)
     }
 
     /// Writes one field of the animation component, or says why it could not.
@@ -118,9 +124,10 @@ impl WorldHost<'_> {
     /// nothing, for the reason the rest of this surface gives: a script telling
     /// something to play a clip it cannot hold is a mistake worth hearing about
     /// on the frame it happens.
-    fn write_field(
+    pub(super) fn write_field(
         &mut self,
         target: EntityId,
+        component: &str,
         field: &str,
         value: serde_json::Value,
         path: &Path,
@@ -128,15 +135,15 @@ impl WorldHost<'_> {
         let Some(data) = self.world.get_mut(target) else {
             return Ok(Value::Unit);
         };
-        let Some(payload) = data.components.get_mut(COMPONENT) else {
+        let Some(payload) = data.components.get_mut(component) else {
             return Err(RuntimeError::Host(format!(
-                "{} needs a {COMPONENT} on that entity, and it has none",
+                "{} needs a {component} on that entity, and it has none",
                 path.dotted()
             )));
         };
         let Some(fields) = payload.as_object_mut() else {
             return Err(RuntimeError::Host(format!(
-                "{}'s {COMPONENT} is not an object",
+                "{}'s {component} is not an object",
                 path.dotted()
             )));
         };

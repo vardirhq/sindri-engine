@@ -1121,6 +1121,34 @@ frame.
   the project opens on, and a scene made in a project that nominates nothing
   claims the empty place rather than leaving the project opening on nothing.
   `docs/project-format.md` is the contract
+- **Choreographs with sequences, edited in a Timeline.** A `sindri.sequence`
+  component holds named sequences, which one is `playing`, and a `speed`, as
+  a sprite animation holds clips. A sequence has a duration, may loop, and
+  carries tracks and cues. A track names a target (empty for the entity,
+  otherwise a path of child names such as `Ship/Flame`), a property
+  (`position.x|y|z`, `rotation` in degrees about z, `scale`, `scale.x|y|z`,
+  or a component and a path into it such as `sindri.shape/stroke.3`), and
+  keys in time order, each with a CSS easing to the next. A cue names a moment
+  and may play a sound on a bus. `Sequences` advances every playing sequence
+  after scripts, holding each track's first key before it and last key after
+  it, wrapping a loop and reaching every cue crossed, the start's on the first
+  step and the end's as a one-shot finishes; a finished sequence lets go of
+  what it moved. Problems are reported once per start. The shared game session
+  (every desktop and browser export) and the editor's Play advance them and
+  play cue sounds; Decay reads them through `Sequence.play`, `stop`,
+  `restart`, `is_finished`, `time`, `cued`, `playing` and `set_speed`, a cue
+  being answered on the step after it is reached. The editor's Timeline panel
+  shows the selected entity's sequences as a ruler, a cue lane and one lane
+  per track; clicking the ruler moves the playhead, and with preview on the
+  Scene view shows the sequence posed there without touching the document.
+  Keys and cues are picked, dragged on a 0.05 s grid and edited (time, value,
+  easing; name, time, sound); a track is added for any target and property
+  and keyed at the playhead from the value the scene holds. Sequences are
+  added, lengthened, looped and set to autoplay from its toolbar; every edit
+  is one undoable step. `examples/sequence` (Sequence Stage) is the feature
+  example and `game/tests/the_sequence_demo_works.rs` plays it. No game uses
+  sequences yet; Orbital's and Scorchball's own hosts do not advance them; no
+  curve editor, blending, or tracks beyond numbers and cues
 - **Plays a scene's audio in Play, and mixes it for the author.** Play starts
   a scene's autoplay `sindri.audio.source`s and performs every request its
   scripts make through `Audio`, through the same `AudioMixer` a build uses;
@@ -1134,8 +1162,8 @@ frame.
   while the monitor carries over. Pause holds every voice and Stop ends them.
   Without an audio device Play carries on silently, listing one-shots for a
   second. No level meters, and buses are not yet declared by the project
-- **Profiles Play.** The Profiler panel (beside the Audio panel in the canvas
-  arrangement's bottom-right corner, in the right or bottom dock otherwise) keeps the last 300
+- **Profiles Play.** The Profiler panel (a top tab beside the Game view,
+  under the Scene view beside the Game view when docked) keeps the last 300
   frames of Play, each timed on the CPU by phase: effects, physics, screen UI,
   scripts, sprite animation, cameras, and the Scene and Game views drawn.
   They are drawn as stacked bars against the 60 fps budget; pointing at a bar

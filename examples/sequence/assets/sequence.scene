@@ -1,0 +1,406 @@
+{
+  "format_version": 10,
+  "metadata": {
+    "name": "Sequence Stage"
+  },
+  "entities": [
+    {
+      "id": "camera",
+      "name": "camera",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          10
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "sindri.camera": {
+          "projection": "orthographic",
+          "vertical_size": 8,
+          "near": 0.1,
+          "far": 100,
+          "fit": "height"
+        }
+      }
+    },
+    {
+      "id": "director",
+      "name": "Director",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "sindri.script": {
+          "source": "scripts/director.decay",
+          "script": "Director"
+        },
+        "sindri.sequence": {
+          "sequences": {
+            "intro": {
+              "duration": 2.4,
+              "looping": false,
+              "tracks": [
+                {
+                  "target": "Ship",
+                  "property": "position.x",
+                  "keys": [
+                    {
+                      "time": 0,
+                      "value": -7,
+                      "ease": "ease-out"
+                    },
+                    {
+                      "time": 1.2,
+                      "value": 0,
+                      "ease": "linear"
+                    }
+                  ]
+                },
+                {
+                  "target": "Ship",
+                  "property": "rotation",
+                  "keys": [
+                    {
+                      "time": 0,
+                      "value": -90,
+                      "ease": "ease-out"
+                    },
+                    {
+                      "time": 1.2,
+                      "value": 0,
+                      "ease": "linear"
+                    }
+                  ]
+                },
+                {
+                  "target": "Ring",
+                  "property": "scale",
+                  "keys": [
+                    {
+                      "time": 1.2,
+                      "value": 0.0,
+                      "ease": "ease-out"
+                    },
+                    {
+                      "time": 1.6,
+                      "value": 2.6,
+                      "ease": "ease-in-out"
+                    },
+                    {
+                      "time": 2.0,
+                      "value": 2.2,
+                      "ease": "linear"
+                    }
+                  ]
+                },
+                {
+                  "target": "Ring",
+                  "property": "sindri.shape/stroke.3",
+                  "keys": [
+                    {
+                      "time": 1.2,
+                      "value": 1.0,
+                      "ease": "linear"
+                    },
+                    {
+                      "time": 2.0,
+                      "value": 0.35,
+                      "ease": "linear"
+                    }
+                  ]
+                },
+                {
+                  "target": "Title",
+                  "property": "sindri.ui.text/color.3",
+                  "keys": [
+                    {
+                      "time": 0.6,
+                      "value": 0.0,
+                      "ease": "ease-in"
+                    },
+                    {
+                      "time": 1.4,
+                      "value": 1.0,
+                      "ease": "linear"
+                    }
+                  ]
+                },
+                {
+                  "target": "Title",
+                  "property": "position.y",
+                  "keys": [
+                    {
+                      "time": 0.6,
+                      "value": 0.95,
+                      "ease": "ease-out"
+                    },
+                    {
+                      "time": 1.4,
+                      "value": 0.85,
+                      "ease": "linear"
+                    }
+                  ]
+                },
+                {
+                  "target": "Hint",
+                  "property": "sindri.ui.text/color.3",
+                  "keys": [
+                    {
+                      "time": 2.0,
+                      "value": 0.0,
+                      "ease": "linear"
+                    },
+                    {
+                      "time": 2.4,
+                      "value": 0.8,
+                      "ease": "linear"
+                    }
+                  ]
+                }
+              ],
+              "cues": [
+                {
+                  "time": 0.0,
+                  "name": "launch",
+                  "sound": {
+                    "clip": "audio/shot.wav",
+                    "volume": 0.6
+                  }
+                },
+                {
+                  "time": 1.2,
+                  "name": "landed",
+                  "sound": {
+                    "clip": "audio/click.wav",
+                    "volume": 0.9
+                  }
+                },
+                {
+                  "time": 2.4,
+                  "name": "ready"
+                }
+              ]
+            },
+            "idle": {
+              "duration": 2.0,
+              "looping": true,
+              "tracks": [
+                {
+                  "target": "Ship",
+                  "property": "position.y",
+                  "keys": [
+                    {
+                      "time": 0,
+                      "value": 0,
+                      "ease": "ease-in-out"
+                    },
+                    {
+                      "time": 1.0,
+                      "value": 0.25,
+                      "ease": "ease-in-out"
+                    },
+                    {
+                      "time": 2.0,
+                      "value": 0,
+                      "ease": "linear"
+                    }
+                  ]
+                },
+                {
+                  "target": "Ring",
+                  "property": "scale",
+                  "keys": [
+                    {
+                      "time": 0,
+                      "value": 2.2,
+                      "ease": "ease-in-out"
+                    },
+                    {
+                      "time": 1.0,
+                      "value": 2.4,
+                      "ease": "ease-in-out"
+                    },
+                    {
+                      "time": 2.0,
+                      "value": 2.2,
+                      "ease": "linear"
+                    }
+                  ]
+                }
+              ],
+              "cues": [
+                {
+                  "time": 0.0,
+                  "name": "beat"
+                }
+              ]
+            }
+          },
+          "playing": "intro",
+          "speed": 1.0
+        }
+      }
+    },
+    {
+      "id": "ring",
+      "name": "Ring",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          -0.1
+        ],
+        "scale": [
+          2.2,
+          2.2,
+          1
+        ]
+      },
+      "components": {
+        "sindri.shape": {
+          "kind": "polygon",
+          "count": 24,
+          "fill": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "stroke": [
+            0.32,
+            0.86,
+            0.78,
+            1
+          ],
+          "stroke_width": 0.06,
+          "layer": 2
+        }
+      },
+      "parent": "director"
+    },
+    {
+      "id": "ship",
+      "name": "Ship",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "scale": [
+          0.9,
+          0.9,
+          1
+        ]
+      },
+      "components": {
+        "sindri.shape": {
+          "kind": "polygon",
+          "count": 3,
+          "fill": [
+            0.95,
+            0.64,
+            0.24,
+            1
+          ],
+          "stroke": [
+            1,
+            0.92,
+            0.78,
+            1
+          ],
+          "stroke_width": 0.06,
+          "layer": 6
+        }
+      },
+      "parent": "director"
+    },
+    {
+      "id": "title",
+      "name": "Title",
+      "transform_3d": {
+        "position": [
+          0,
+          0.95,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "sindri.ui.text": {
+          "text": "SEQUENCE STAGE",
+          "font": "fonts/ChakraPetch-Regular.ttf",
+          "font_size": 0.085,
+          "bounds": [
+            1,
+            0.12
+          ],
+          "anchor": "center",
+          "color": [
+            0.93,
+            0.92,
+            0.88,
+            1.0
+          ],
+          "layer": 20
+        }
+      },
+      "parent": "director"
+    },
+    {
+      "id": "hint",
+      "name": "Hint",
+      "transform_3d": {
+        "position": [
+          0,
+          0.12,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "sindri.ui.text": {
+          "text": "SPACE OR TAP TO REPLAY",
+          "font": "fonts/ChakraPetch-Regular.ttf",
+          "font_size": 0.04,
+          "bounds": [
+            1,
+            0.12
+          ],
+          "anchor": "center",
+          "color": [
+            0.6,
+            0.66,
+            0.7,
+            0.8
+          ],
+          "layer": 20
+        }
+      },
+      "parent": "director"
+    }
+  ]
+}

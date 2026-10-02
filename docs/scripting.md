@@ -1357,6 +1357,47 @@ nothing: a script telling something to play a clip it cannot hold is a mistake
 worth hearing about on the frame it happens. A clip name the component does not
 hold is reported by the advance, the same way a broken clip authored by hand is.
 
+### Sequence
+
+| Call | Returns |
+| --- | --- |
+| `Sequence.play(entity, sequence)` | nothing |
+| `Sequence.stop(entity)` | nothing |
+| `Sequence.restart(entity)` | nothing |
+| `Sequence.is_finished(entity)` | `bool` |
+| `Sequence.time(entity)` | `f32` |
+| `Sequence.cued(entity, cue)` | `bool` |
+| `Sequence.playing(entity)` | `String` |
+| `Sequence.set_speed(entity, speed)` | nothing |
+
+A sequence is choreography authored in the editor's Timeline and held by the
+entity's `sindri.sequence`: tracks that move numbers on it and its named
+children through keys, and cues that mark moments. A script names one the
+scene holds, exactly as it names an animation clip, and the same two halves
+apply: `play`, `stop` and `set_speed` write the component, and the playhead
+beside the world follows on the next advance. `play` is idempotent;
+`restart` starts the current one again.
+
+Sequences advance after scripts, so `play` takes effect on the step that
+calls it, and a cue reached by that advance is answered by `cued` on the next
+step — for that one step only. `is_finished` is true once a sequence that does
+not loop has reached its end; it then lets go of what it moved, so a script
+can take over. A cue may also play a sound, which needs no script at all.
+
+```decay
+script Director {
+    fn update(dt: f32) {
+        if Sequence.cued(this.entity, "landed") { print("touchdown"); }
+        if Sequence.playing(this.entity) == "intro" && Sequence.is_finished(this.entity) {
+            Sequence.play(this.entity, "idle");
+        }
+    }
+}
+```
+
+Sequence Stage (`examples/sequence`) plays an intro, hears its cues and moves
+on to an idle loop this way.
+
 ### Audio
 
 | Call | Returns |

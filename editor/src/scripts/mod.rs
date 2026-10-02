@@ -48,6 +48,8 @@ pub struct EditorFrame<'a> {
     /// Where each animated sprite has got to, so a script can ask whether a
     /// clip has finished and play one again from its start.
     pub animations: &'a mut sindri_scene::SpriteAnimations,
+    /// Where each playing sequence has got to, so a script can wait on a cue.
+    pub sequences: &'a mut sindri_scene::Sequences,
     pub delta_seconds: f32,
 }
 
@@ -369,6 +371,7 @@ impl SceneScripts {
             saves,
             effects,
             animations,
+            sequences,
             delta_seconds,
         } = frame;
         let mut frame = ScriptFrame::new(&self.sources, input, delta_seconds)
@@ -378,7 +381,8 @@ impl SceneScripts {
             .with_random(random)
             .with_saves(saves)
             .with_effects(effects)
-            .with_animations(animations);
+            .with_animations(animations)
+            .with_sequences(sequences);
         if let Some(physics) = physics {
             frame = frame.with_physics(physics);
         }

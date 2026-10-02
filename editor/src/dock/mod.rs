@@ -63,13 +63,15 @@ pub enum Panel {
     Profiler,
     /// What Play is playing, bus by bus.
     Audio,
+    /// The selected entity's sequences, as keys against time.
+    Timeline,
     /// The local assistant: its setup while it has one, and itself after.
     Assistant,
 }
 
 impl Panel {
     /// Every panel, in the order a menu should offer them.
-    pub const ALL: [Self; 11] = [
+    pub const ALL: [Self; 12] = [
         Self::Scene,
         Self::Game,
         Self::Hierarchy,
@@ -80,6 +82,7 @@ impl Panel {
         Self::History,
         Self::Profiler,
         Self::Audio,
+        Self::Timeline,
         Self::Assistant,
     ];
 
@@ -95,6 +98,7 @@ impl Panel {
             Self::History => "History",
             Self::Profiler => "Profiler",
             Self::Audio => "Audio",
+            Self::Timeline => "Timeline",
             Self::Assistant => "Assistant",
         }
     }
@@ -269,9 +273,11 @@ impl Workspace {
                 // gets wrong: a panel that jumps to whatever was last clicked
                 // forms no muscle memory and covers the neighbours a value is
                 // being judged against.
+                // A large surface you work in or watch earns a top tab; the
+                // Profiler sits beside the Game view it measures.
                 (
                     Place::Dock(Main),
-                    &[Panel::Scene, Panel::Game, Panel::Scenes],
+                    &[Panel::Scene, Panel::Game, Panel::Scenes, Panel::Profiler],
                 ),
                 (Place::Overlay(TopLeft), &[Panel::Hierarchy]),
                 (
@@ -286,7 +292,7 @@ impl Workspace {
                 // watched while the Game view runs, so never over it.
                 (
                     Place::Overlay(BottomRight),
-                    &[Panel::Audio, Panel::Profiler],
+                    &[Panel::Audio, Panel::Timeline],
                 ),
             ],
             Preset::Docked => &[
@@ -294,11 +300,11 @@ impl Workspace {
                 (Place::Dock(Main), &[Panel::Scene, Panel::Console]),
                 // Under the scene with the Game view rather than beside it: the
                 // board wants the width a side column does not have.
-                (Place::Dock(MainBottom), &[Panel::Game, Panel::Scenes]),
                 (
-                    Place::Dock(Right),
-                    &[Panel::Project, Panel::History, Panel::Profiler],
+                    Place::Dock(MainBottom),
+                    &[Panel::Game, Panel::Scenes, Panel::Profiler, Panel::Timeline],
                 ),
+                (Place::Dock(Right), &[Panel::Project, Panel::History]),
                 (
                     Place::Dock(FarRight),
                     &[Panel::Inspector, Panel::Assistant, Panel::Audio],
@@ -306,9 +312,11 @@ impl Workspace {
             ],
             Preset::Wide => &[
                 (Place::Dock(Left), &[Panel::Hierarchy]),
+                // A large surface you work in or watch earns a top tab; the
+                // Profiler sits beside the Game view it measures.
                 (
                     Place::Dock(Main),
-                    &[Panel::Scene, Panel::Game, Panel::Scenes],
+                    &[Panel::Scene, Panel::Game, Panel::Scenes, Panel::Profiler],
                 ),
                 (
                     Place::Dock(Bottom),
@@ -317,7 +325,7 @@ impl Workspace {
                         Panel::Console,
                         Panel::History,
                         Panel::Audio,
-                        Panel::Profiler,
+                        Panel::Timeline,
                     ],
                 ),
                 // The assistant shares the inspector's column rather than
@@ -348,7 +356,8 @@ impl Workspace {
             inspector.height = 2_000.0;
             // Room for the mixer's buses and what is playing below them.
             let play = workspace.group_mut(Place::Overlay(BottomRight));
-            play.size = 320.0;
+            // Wide enough for a timeline's lanes as well.
+            play.size = 520.0;
             play.height = 420.0;
         }
         workspace

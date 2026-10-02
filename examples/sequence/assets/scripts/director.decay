@@ -1,0 +1,24 @@
+// A feature example: choreography authored in the Timeline, driven by a
+// script that only says which sequence plays and listens for its cues.
+script Director {
+    var beats: f32 = 0.0;
+
+    fn update(dt: f32) {
+        if Sequence.cued(this.entity, "launch") { print("Sequence cue launch"); }
+        if Sequence.cued(this.entity, "landed") { print("Sequence cue landed"); }
+        if Sequence.cued(this.entity, "ready") { print("Sequence cue ready"); }
+        if Sequence.cued(this.entity, "beat") {
+            this.beats += 1.0;
+            print("Sequence idle beat " + this.beats);
+        }
+        // Once the intro has played out, the stage idles on a loop.
+        if Sequence.playing(this.entity) == "intro" && Sequence.is_finished(this.entity) {
+            Sequence.play(this.entity, "idle");
+        }
+        if Input.just_pressed("Space") || Pointer.just_pressed("Left") {
+            Sequence.play(this.entity, "intro");
+            Sequence.restart(this.entity);
+            print("Sequence replay");
+        }
+    }
+}

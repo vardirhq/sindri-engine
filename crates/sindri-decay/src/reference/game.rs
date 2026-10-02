@@ -174,6 +174,52 @@ pub(super) const TYPES: &[TypeEntry] = &[
         ],
     },
     TypeEntry {
+        name: "Sequence",
+        text: "Playing an object's sequences: choreography set up for it in the scene's Timeline, such as a title sliding in or a door opening, with named cues along the way.",
+        members: &[
+            call(
+                "cued",
+                &["entity", "cue"],
+                "Whether an object's sequence reached the named cue on the last step, such as `\"landed\"`. True for one step only.",
+            ),
+            call(
+                "is_finished",
+                &["entity"],
+                "Whether a sequence that does not loop has reached its end.",
+            ),
+            call(
+                "play",
+                &["entity", "sequence"],
+                "Plays one of an object's sequences by name. Calling it again with the sequence already playing does nothing, so it is safe to call every frame.",
+            ),
+            call(
+                "playing",
+                &["entity"],
+                "The name of the sequence an object is playing, or empty text.",
+            ),
+            call(
+                "restart",
+                &["entity"],
+                "Starts an object's current sequence again from the beginning.",
+            ),
+            call(
+                "set_speed",
+                &["entity", "speed"],
+                "How fast an object's sequences play: 1 is normal speed, 0 holds it where it is.",
+            ),
+            call(
+                "stop",
+                &["entity"],
+                "Stops an object's sequence where it is.",
+            ),
+            call(
+                "time",
+                &["entity"],
+                "How far into its sequence an object has got, in seconds.",
+            ),
+        ],
+    },
+    TypeEntry {
         name: "Audio",
         text: "Playing sound effects and music. Every sound goes through a bus — `\"effects\"`, `\"music\"`, or any other name — and every bus through `\"master\"`, so a settings screen can turn each down.",
         members: &[

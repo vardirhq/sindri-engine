@@ -407,6 +407,38 @@ pub(crate) const ANIMATION_CALLS: &[(&str, AnimationCall)] = &[
     ("set_speed", AnimationCall::Speed),
 ];
 
+/// Playing an authored sequence and waiting on its cues.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub(crate) enum SequenceCall {
+    /// Makes a sequence the entity holds be the one playing. Idempotent, as
+    /// `Animation.play` is: naming the one already playing does nothing.
+    Play,
+    /// Plays the current sequence again from its start.
+    Restart,
+    Stop,
+    /// Whether a sequence that does not loop has reached its end.
+    Finished,
+    /// How far into the sequence it has got, in seconds.
+    Time,
+    /// Whether the named cue was reached on the last step.
+    Cued,
+    /// The sequence playing, or an empty string.
+    Name,
+    /// A multiplier on time. Zero holds the playhead.
+    Speed,
+}
+
+pub(crate) const SEQUENCE_CALLS: &[(&str, SequenceCall)] = &[
+    ("play", SequenceCall::Play),
+    ("restart", SequenceCall::Restart),
+    ("stop", SequenceCall::Stop),
+    ("is_finished", SequenceCall::Finished),
+    ("time", SequenceCall::Time),
+    ("cued", SequenceCall::Cued),
+    ("playing", SequenceCall::Name),
+    ("set_speed", SequenceCall::Speed),
+];
+
 /// What a script can draw from the run's stream.
 ///
 /// One stream, shared by every script, owned by the host. Same seed and same

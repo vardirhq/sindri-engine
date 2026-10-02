@@ -25,8 +25,9 @@ use crate::{
         ANIMATION, ANIMATION_CALLS, AnimationCall, CONSTANTS, EFFECTS, EFFECTS_CALLS, ENTITY,
         EffectsCall, FUNCTIONS, GAME, GAME_CALLS, GAMEPAD, GameCall, HostFunction, INPUT,
         INPUT_QUERIES, Node, PRINT, PROFILE, PROFILE_CALLS, PROFILES, ProfileCall, RANDOM,
-        RANDOM_CALLS, RandomCall, SAVE, SAVE_CALLS, SCENE, SCENE_CALLS, SaveCall, SceneCall, THIS,
-        THROUGH_REFERENCE, TIME, TIME_VALUES, UI, UI_CALLS, UiCall, gamepad_type,
+        RANDOM_CALLS, RandomCall, SAVE, SAVE_CALLS, SCENE, SCENE_CALLS, SEQUENCE, SEQUENCE_CALLS,
+        SaveCall, SceneCall, SequenceCall, THIS, THROUGH_REFERENCE, TIME, TIME_VALUES, UI,
+        UI_CALLS, UiCall, gamepad_type,
     },
 };
 
@@ -134,6 +135,7 @@ pub fn environment() -> Environment {
     add_physics_surface(&mut environment);
     add_ui_surface(&mut environment);
     add_animation_surface(&mut environment);
+    add_sequence_surface(&mut environment);
     add_random_surface(&mut environment);
     add_save_surface(&mut environment);
     add_effects_surface(&mut environment);
@@ -233,6 +235,35 @@ pub(super) fn add_animation_surface(environment: &mut Environment) {
     }
     environment.add_type(ANIMATION, animation);
     environment.add_value(ANIMATION, Type::Named(ANIMATION.to_owned()));
+}
+
+/// Playing an authored sequence, as `Animation` plays an authored clip.
+pub(super) fn add_sequence_surface(environment: &mut Environment) {
+    let entity = || Type::Named(ENTITY.to_owned());
+    let mut sequence = HostType::new();
+    for (name, call) in SEQUENCE_CALLS {
+        sequence = sequence.with_function(
+            *name,
+            FunctionType {
+                params: match call {
+                    SequenceCall::Play | SequenceCall::Cued => vec![entity(), Type::String],
+                    SequenceCall::Speed => vec![entity(), Type::F32],
+                    _ => vec![entity()],
+                },
+                return_type: match call {
+                    SequenceCall::Finished | SequenceCall::Cued => Type::Bool,
+                    SequenceCall::Time => Type::F32,
+                    SequenceCall::Name => Type::String,
+                    SequenceCall::Play
+                    | SequenceCall::Restart
+                    | SequenceCall::Stop
+                    | SequenceCall::Speed => Type::Unit,
+                },
+            },
+        );
+    }
+    environment.add_type(SEQUENCE, sequence);
+    environment.add_value(SEQUENCE, Type::Named(SEQUENCE.to_owned()));
 }
 
 /// What a script can change about a screen element.

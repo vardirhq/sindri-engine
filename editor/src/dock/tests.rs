@@ -88,7 +88,7 @@ fn a_panel_dropped_between_two_tabs_lands_between_them() {
             Panel::Console,
             Panel::History,
             Panel::Audio,
-            Panel::Profiler
+            Panel::Timeline
         ]
     );
 }
@@ -109,7 +109,7 @@ fn a_dropped_panel_is_the_one_showing() {
 fn closing_the_selected_tab_shows_a_neighbour() {
     let mut workspace = Workspace::preset(Preset::Wide);
     workspace.select(Place::Dock(Slot::Bottom), 4);
-    assert!(workspace.take(Panel::Profiler));
+    assert!(workspace.take(Panel::Timeline));
     let group = workspace
         .group(Place::Dock(Slot::Bottom))
         .expect("four tabs are left");

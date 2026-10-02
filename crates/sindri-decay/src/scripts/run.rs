@@ -62,6 +62,7 @@ pub(super) struct TickWorld<'a> {
     pub(super) effects: Option<&'a mut sindri_scene::Effects2d>,
     /// Where each animated sprite has got to, when the host advances any.
     pub(super) animations: Option<&'a mut sindri_scene::SpriteAnimations>,
+    pub(super) sequences: Option<&'a mut sindri_scene::Sequences>,
     /// What a stacked volume's cells mean, when the host has loaded any.
     pub(super) tile_sets: Option<&'a sindri_scene::TileSetBindings>,
 }
@@ -283,6 +284,7 @@ fn host_for<'b>(
     )
     .with_tweens(&mut *at.tweens)
     .with_actions(at.actions)
+    .with_sequences(at.sequences.as_deref_mut())
     .with_peers(Peers {
         running: &mut *at.running,
         starting: &mut *at.starting,

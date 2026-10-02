@@ -51,6 +51,8 @@ pub struct Session {
     profiles: ProfileSources,
     pub(crate) components: ComponentSchemaRegistry,
     animations: SpriteAnimations,
+    /// Where each playing sequence has got to.
+    sequences: sindri_scene::Sequences,
     /// The physics the scripts may drive.
     ///
     /// Stepped every fixed update whether or not the scene authors a collider,
@@ -141,6 +143,7 @@ impl Session {
             profiles: ProfileSources::new(),
             components,
             animations: SpriteAnimations::new(),
+            sequences: sindri_scene::Sequences::new(),
             physics: ScenePhysics2d::top_down().expect("zero gravity is finite"),
             screen_ui: ScreenUi::default(),
             editing_text: false,
@@ -372,7 +375,8 @@ impl Session {
                 world: physics,
                 events,
             })
-            .with_animations(&mut self.animations);
+            .with_animations(&mut self.animations)
+            .with_sequences(&mut self.sequences);
         frame = frame.with_gestures(&self.gestures).with_camera_pan(pan);
         if let Some(aim) = aim {
             frame = frame.with_aim(aim);
@@ -403,6 +407,20 @@ impl Session {
         }
         self.animations
             .advance(world, &self.components, delta_seconds)?;
+        // After the scripts, so a sequence a script named this step starts
+        // now, and before the cameras, so one that moves a camera is followed.
+        let played = self
+            .sequences
+            .advance(world, &self.components, delta_seconds)?;
+        for (_, problem) in &played.problems {
+            log::error!("Sequence: {problem}");
+        }
+        self.pending_audio
+            .extend(played.sounds.into_iter().map(|sound| AudioCommand::Play {
+                bus: sound.bus().to_owned(),
+                clip: sound.clip,
+                volume: sound.volume,
+            }));
         // After the scripts, so a camera following the player follows where
         // this step left it, and before the terrain asks where the camera is.
         sindri_scene::update_camera_behaviors(world, delta_seconds);
@@ -527,6 +545,12 @@ impl Session {
     #[must_use]
     pub const fn animations(&self) -> &SpriteAnimations {
         &self.animations
+    }
+
+    /// Where each playing sequence has got to.
+    #[must_use]
+    pub const fn sequences(&self) -> &sindri_scene::Sequences {
+        &self.sequences
     }
 
     /// The live flecks, for whatever draws the frame.
