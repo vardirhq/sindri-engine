@@ -45,6 +45,7 @@ Names in scope without qualification. Decay has no imports, so each of these is 
 - `Random`: `Random` — Random numbers. The same seed always gives the same numbers, so a run can be replayed.
 - `Save`: `Save` — Saving progress between play sessions: numbers and true/false values stored under names, such as a best score.
 - `Scene`: `Scene` — Scenes are a game's separate places or screens, such as a menu, a level or a shop. This asks which one is playing and moves to another.
+- `Sequence`: `Sequence` — Playing an object's sequences: choreography set up for it in the scene's Timeline, such as a title sliding in or a door opening, with named cues along the way.
 - `Stick`: `Stick` — A virtual joystick for touch screens: wherever a thumb lands becomes the centre, and dragging from there steers.
 - `TAU`: `f32` — The number τ (6.28318…), which is 2π: one full turn when measuring angles in radians.
 - `Time`: `Time` — Time in the game. A game runs as a series of frames, many times a second.
@@ -365,6 +366,19 @@ Scenes are a game's separate places or screens, such as a menu, a level or a sho
 
 - `current()` → `String` — The name of the scene being played.
 - `go(name: String)` → `unit` — Moves to another scene by name, at the end of this frame.
+
+### `Sequence`
+
+Playing an object's sequences: choreography set up for it in the scene's Timeline, such as a title sliding in or a door opening, with named cues along the way.
+
+- `cued(entity: Entity, cue: String)` → `bool` — Whether an object's sequence reached the named cue on the last step, such as `"landed"`. True for one step only.
+- `is_finished(entity: Entity)` → `bool` — Whether a sequence that does not loop has reached its end.
+- `play(entity: Entity, sequence: String)` → `unit` — Plays one of an object's sequences by name. Calling it again with the sequence already playing does nothing, so it is safe to call every frame.
+- `playing(entity: Entity)` → `String` — The name of the sequence an object is playing, or empty text.
+- `restart(entity: Entity)` → `unit` — Starts an object's current sequence again from the beginning.
+- `set_speed(entity: Entity, speed: f32)` → `unit` — How fast an object's sequences play: 1 is normal speed, 0 holds it where it is.
+- `stop(entity: Entity)` → `unit` — Stops an object's sequence where it is.
+- `time(entity: Entity)` → `f32` — How far into its sequence an object has got, in seconds.
 
 ### `Shape`
 

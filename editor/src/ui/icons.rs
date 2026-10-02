@@ -70,6 +70,8 @@ pub const HIERARCHY: MaterialIcon = icons::ICON_ACCOUNT_TREE;
 pub const INSPECTOR: MaterialIcon = icons::ICON_TUNE;
 pub const PROJECT: MaterialIcon = icons::ICON_FOLDER;
 pub const CONSOLE: MaterialIcon = icons::ICON_TERMINAL;
+/// The selected entity's sequences, as keys against time.
+pub const TIMELINE: MaterialIcon = icons::ICON_VIEW_TIMELINE;
 /// What Play is playing, bus by bus.
 pub const AUDIO_MIXER: MaterialIcon = icons::ICON_TUNE;
 /// Where each frame of Play spent its time.

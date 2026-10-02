@@ -87,6 +87,7 @@ mod shortcuts;
 mod slicer_view;
 mod startup;
 mod thumbnails;
+mod timeline_view;
 mod tools;
 mod unsaved;
 mod view_interaction;
@@ -281,6 +282,10 @@ struct EditorApp {
     /// The textures the open scene draws with, loaded from its own directory.
     textures: SceneTextures,
     thumbnails: thumbnails::Thumbnails,
+    /// The Timeline panel's playhead, choice and preview.
+    timeline: crate::timeline::TimelineState,
+    /// Where each sequence Play is running has got to.
+    sequences: sindri_scene::Sequences,
     /// What Play sounds like, and the Audio panel's monitor.
     play_audio: crate::play_audio::PlayAudio,
     /// Where Play's time went, for the Profiler panel.

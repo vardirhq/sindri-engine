@@ -33,6 +33,7 @@ mod random;
 mod raycast;
 mod save;
 mod scene;
+mod sequence;
 mod services;
 mod shape_query;
 mod shared;
@@ -149,6 +150,9 @@ pub struct WorldHost<'a> {
     /// cursor, because naming it again is not a change to the world and nothing
     /// else would notice. Everything else here is read.
     animations: Option<&'a mut sindri_scene::SpriteAnimations>,
+    /// Where each playing sequence has got to, when the host advances any.
+    /// Mutable for `Sequence.restart`; everything else here is read.
+    pub(crate) sequences: Option<&'a mut sindri_scene::Sequences>,
     /// Which scene is being played, and where a script asked to go.
     ///
     /// Mutable because asking is a write: `Scene.go` records an intention the

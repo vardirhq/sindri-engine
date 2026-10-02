@@ -112,6 +112,12 @@
       "type": "Scene"
     },
     {
+      "description": "Playing an object's sequences: choreography set up for it in the scene's Timeline, such as a title sliding in or a door opening, with named cues along the way.",
+      "kind": "value",
+      "name": "Sequence",
+      "type": "Sequence"
+    },
+    {
       "description": "A virtual joystick for touch screens: wherever a thumb lands becomes the centre, and dragging from there steers.",
       "kind": "value",
       "name": "Stick",
@@ -2192,6 +2198,114 @@
         }
       ],
       "name": "Scene"
+    },
+    {
+      "description": "Playing an object's sequences: choreography set up for it in the scene's Timeline, such as a title sliding in or a door opening, with named cues along the way.",
+      "members": [
+        {
+          "description": "Whether an object's sequence reached the named cue on the last step, such as `\"landed\"`. True for one step only.",
+          "kind": "function",
+          "name": "cued",
+          "parameter_names": [
+            "entity",
+            "cue"
+          ],
+          "parameters": [
+            "Entity",
+            "String"
+          ],
+          "returns": "bool"
+        },
+        {
+          "description": "Whether a sequence that does not loop has reached its end.",
+          "kind": "function",
+          "name": "is_finished",
+          "parameter_names": [
+            "entity"
+          ],
+          "parameters": [
+            "Entity"
+          ],
+          "returns": "bool"
+        },
+        {
+          "description": "Plays one of an object's sequences by name. Calling it again with the sequence already playing does nothing, so it is safe to call every frame.",
+          "kind": "function",
+          "name": "play",
+          "parameter_names": [
+            "entity",
+            "sequence"
+          ],
+          "parameters": [
+            "Entity",
+            "String"
+          ],
+          "returns": "unit"
+        },
+        {
+          "description": "The name of the sequence an object is playing, or empty text.",
+          "kind": "function",
+          "name": "playing",
+          "parameter_names": [
+            "entity"
+          ],
+          "parameters": [
+            "Entity"
+          ],
+          "returns": "String"
+        },
+        {
+          "description": "Starts an object's current sequence again from the beginning.",
+          "kind": "function",
+          "name": "restart",
+          "parameter_names": [
+            "entity"
+          ],
+          "parameters": [
+            "Entity"
+          ],
+          "returns": "unit"
+        },
+        {
+          "description": "How fast an object's sequences play: 1 is normal speed, 0 holds it where it is.",
+          "kind": "function",
+          "name": "set_speed",
+          "parameter_names": [
+            "entity",
+            "speed"
+          ],
+          "parameters": [
+            "Entity",
+            "f32"
+          ],
+          "returns": "unit"
+        },
+        {
+          "description": "Stops an object's sequence where it is.",
+          "kind": "function",
+          "name": "stop",
+          "parameter_names": [
+            "entity"
+          ],
+          "parameters": [
+            "Entity"
+          ],
+          "returns": "unit"
+        },
+        {
+          "description": "How far into its sequence an object has got, in seconds.",
+          "kind": "function",
+          "name": "time",
+          "parameter_names": [
+            "entity"
+          ],
+          "parameters": [
+            "Entity"
+          ],
+          "returns": "f32"
+        }
+      ],
+      "name": "Sequence"
     },
     {
       "description": "A shape drawn in the game world, such as a circle, polygon or ring, with an inside colour and an outline.",

@@ -81,6 +81,11 @@ pub struct ScriptFrame<'a> {
     /// clip plays is authored state and is the scene's whether or not anything
     /// is drawing it.
     pub animations: Option<&'a mut sindri_scene::SpriteAnimations>,
+    /// Where each playing sequence has got to, when the host advances any.
+    ///
+    /// `None` for a host that advances none, and then `Sequence.time` is zero
+    /// and no cue is ever reached. Naming a sequence still writes the world.
+    pub sequences: Option<&'a mut sindri_scene::Sequences>,
     /// The tile sets a stacked volume's cells name, when the host has loaded
     /// any.
     ///
@@ -112,6 +117,7 @@ impl<'a> ScriptFrame<'a> {
             saves: None,
             effects: None,
             animations: None,
+            sequences: None,
             tile_sets: None,
             delta_seconds,
         }
@@ -212,6 +218,13 @@ impl<'a> ScriptFrame<'a> {
     #[must_use]
     pub fn with_animations(mut self, animations: &'a mut sindri_scene::SpriteAnimations) -> Self {
         self.animations = Some(animations);
+        self
+    }
+
+    /// The same frame, with the sequence playheads a script may read and reset.
+    #[must_use]
+    pub fn with_sequences(mut self, sequences: &'a mut sindri_scene::Sequences) -> Self {
+        self.sequences = Some(sequences);
         self
     }
 }

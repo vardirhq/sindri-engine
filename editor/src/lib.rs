@@ -76,6 +76,9 @@ pub mod scene_file;
 /// Which of a scene's two spaces an entity belongs to.
 #[cfg(not(target_arch = "wasm32"))]
 pub mod space;
+/// Editing a sequence, without the panel that draws it.
+#[cfg(not(target_arch = "wasm32"))]
+pub mod timeline;
 
 /// Where the ground draws over what stands on it.
 #[cfg(not(target_arch = "wasm32"))]

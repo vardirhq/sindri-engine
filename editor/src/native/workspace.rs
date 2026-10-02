@@ -349,6 +349,7 @@ impl EditorApp {
             DockPanel::History => self.history_body(ui),
             DockPanel::Profiler => self.profiler_body(ui),
             DockPanel::Audio => self.audio_body(ui),
+            DockPanel::Timeline => self.timeline_body(ui),
             DockPanel::Assistant => self.assistant_body(ui),
         }
     }

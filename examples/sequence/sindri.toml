@@ -1,0 +1,6 @@
+format_version = 1
+[project]
+name = "Sequence Stage"
+main_scene = "assets/sequence.scene"
+[assets]
+include = ["fonts/Fonts-OFL.txt", "audio/shot.wav", "audio/click.wav"]

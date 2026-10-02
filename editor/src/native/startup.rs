@@ -97,6 +97,9 @@ impl EditorApp {
         }
     }
 
+    // Long because it names every field the editor holds, once; the work it
+    // does is the handful of calls after the literal.
+    #[allow(clippy::too_many_lines)]
     pub(super) fn new(context: &eframe::CreationContext<'_>) -> Self {
         crate::ui::theme::install(&context.egui_ctx);
         let preferences = Preferences::load(context.storage);
@@ -168,6 +171,8 @@ impl EditorApp {
             scene_board: scene_board_view::SceneBoardState::default(),
             profiler: crate::profiler::Profiler::default(),
             play_audio: crate::play_audio::PlayAudio::new(crate::play_audio::native()),
+            sequences: sindri_scene::Sequences::new(),
+            timeline: crate::timeline::TimelineState::default(),
             textured_revision: TexturedAt::default(),
             scene_viewport,
             game_viewport,

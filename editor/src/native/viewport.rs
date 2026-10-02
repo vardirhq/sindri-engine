@@ -289,6 +289,14 @@ impl EditorApp {
         }
     }
 
+    /// The world a view draws when it is not the document itself: the
+    /// Timeline's playhead posed on it, Weave's presentation of it, or both.
+    fn shown_world(&mut self, editing: bool, rect: Rect, frame: u64) -> Option<sindri_core::World> {
+        let presented = self.resolve_presentation(editing, rect);
+        self.timeline_posed(presented.as_ref().unwrap_or(&self.world), frame)
+            .or(presented)
+    }
+
     /// Draws one view of the world into whatever space `ui` has left.
     ///
     /// The Scene view takes camera input and wears editor chrome; the Game view
@@ -315,8 +323,8 @@ impl EditorApp {
         // viewport are facts about the project's screen, not about the GPU
         // surface being drawn into.
         let canvas = self.canvas_for(editing);
-        let presented = self.resolve_presentation(editing, rect);
-        let source_world = presented.as_ref().unwrap_or(&self.world);
+        let shown = self.shown_world(editing, rect, context.cumulative_frame_nr());
+        let source_world = shown.as_ref().unwrap_or(&self.world);
         let viewport_size = (
             physical_viewport_dimension(rect.width(), scale),
             physical_viewport_dimension(rect.height(), scale),

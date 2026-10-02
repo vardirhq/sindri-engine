@@ -341,6 +341,7 @@ impl EditorApp {
                 saves: &mut self.saves,
                 effects: &mut self.effects,
                 animations: &mut self.animations,
+                sequences: &mut self.sequences,
                 delta_seconds: delta,
             },
         );
@@ -356,6 +357,7 @@ impl EditorApp {
         if let Err(error) = self.animations.advance(&self.world, components, delta) {
             self.console.error(format!("Sprite animation: {error}"));
         }
+        self.advance_sequences(components, delta);
         clock.lap(&mut self.profiler, Phase::Animation);
         // After the scripts, so a camera following the player follows where
         // this step left it.
@@ -377,6 +379,36 @@ impl EditorApp {
             // that fails does it sixty times a second, and one line with a
             // count says more than sixty that scroll.
             self.record_script_failure(&failure);
+        }
+    }
+
+    /// Moves every sequence on one step and plays the sounds its cues ask for.
+    ///
+    /// After the scripts, as in a build, so a sequence named this step starts
+    /// now; its cue sounds are heard on the step they are reached.
+    fn advance_sequences(&mut self, components: &ComponentSchemaRegistry, delta: f32) {
+        match self.sequences.advance(&mut self.world, components, delta) {
+            Ok(played) => {
+                for (entity, problem) in played.problems {
+                    self.console.error(format!(
+                        "{}: Sequence: {problem}",
+                        self.entity_label(entity)
+                    ));
+                }
+                let sounds = played
+                    .sounds
+                    .into_iter()
+                    .map(|sound| sindri_decay::AudioCommand::Play {
+                        bus: sound.bus().to_owned(),
+                        clip: sound.clip,
+                        volume: sound.volume,
+                    })
+                    .collect();
+                for problem in self.play_audio.perform(sounds) {
+                    self.console.error(problem);
+                }
+            }
+            Err(error) => self.console.error(format!("Sequence: {error}")),
         }
     }
 
@@ -500,6 +532,7 @@ impl EditorApp {
             self.report(error.to_string());
         }
         self.animations = SpriteAnimations::new();
+        self.sequences.clear();
         // Entity handles survive, because this is the same world restored
         // rather than one reloaded from a document — so the selection and the
         // history keep pointing at the things they named.

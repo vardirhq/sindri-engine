@@ -32,15 +32,15 @@ mod tests;
 pub(crate) use call::{
     ANIMATION_CALLS, AnimationCall, EFFECTS_CALLS, EffectsCall, GAME_CALLS, GRID_CALLS, GameCall,
     GridCall, PHYSICS_CALLS, PRINT, PROFILE_CALLS, PhysicsCall, ProfileCall, RANDOM_CALLS,
-    RandomCall, SAVE_CALLS, SCENE_CALLS, SaveCall, SceneCall, TIME_VALUES, TimeValue, UI_CALLS,
-    UiCall, WORLD_CALLS, WorldCall,
+    RandomCall, SAVE_CALLS, SCENE_CALLS, SEQUENCE_CALLS, SaveCall, SceneCall, SequenceCall,
+    TIME_VALUES, TimeValue, UI_CALLS, UiCall, WORLD_CALLS, WorldCall,
 };
 pub(crate) use gamepad::{GAMEPAD_QUERIES, GamepadQuery, gamepad_type};
 pub(crate) use maths::{CONSTANTS, FUNCTIONS, HostFunction};
 pub(crate) use member::{SHAPE_MEMBERS, SPRITE_MEMBERS, TRANSFORM_MEMBERS, UI_IMAGE_MEMBERS};
 pub(crate) use names::{
     ACTION, AIM, ANIMATION, CAMERA, EFFECTS, ENTITY, GAME, GAMEPAD, GESTURE, GRID, INPUT, PHYSICS,
-    POINTER, PREFAB, PROFILE, PROFILES, RANDOM, SAVE, SCENE, SHAPE, SPRITE, STICK,
+    POINTER, PREFAB, PROFILE, PROFILES, RANDOM, SAVE, SCENE, SEQUENCE, SHAPE, SPRITE, STICK,
     TILE_GRID_COMPONENT, TILEMAP_COMPONENT, TIME, TOUCH, TRANSFORM, UI, UI_IMAGE, VIEWPORT, WORLD,
 };
 pub(crate) use person::{

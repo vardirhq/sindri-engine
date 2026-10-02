@@ -330,6 +330,18 @@ fn register_drawables(components: &mut ComponentSchemaRegistry) -> Result<(), Sc
         "Sprite Animation",
         serde_json::json!({ "clips": {}, "playing": null, "speed": 1.0 }),
     )?;
+    // One short sequence that moves nothing yet: something to add tracks
+    // and cues to, rather than an empty map with nowhere to begin.
+    components.register_with_default::<crate::SequenceComponent>(
+        "Sequence",
+        serde_json::json!({
+            "sequences": {
+                "intro": { "duration": 2.0, "looping": false, "tracks": [], "cues": [] }
+            },
+            "playing": null,
+            "speed": 1.0
+        }),
+    )?;
     register_ui_text(components)?;
     // A shape is drawn rather than painted, so its "art" is the numbers below
     // and the blank has to be a shape you can see: a mint outlined rectangle,

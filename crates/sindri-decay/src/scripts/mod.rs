@@ -217,21 +217,15 @@ impl Scripts {
             saves,
             effects,
             animations,
+            sequences,
             tile_sets,
             delta_seconds,
         } = frame;
         let mut report = ScriptReport::default();
-        if !delta_seconds.is_finite() || delta_seconds < 0.0 {
-            report.failures.push(ScriptFailure::BadDelta(delta_seconds));
-            return report;
-        }
-
-        let scripted = match components.query::<ScriptComponent>(world) {
+        let scripted = match Self::scripted(world, components, delta_seconds) {
             Ok(scripted) => scripted,
-            Err(error) => {
-                report
-                    .failures
-                    .push(ScriptFailure::Registry(error.to_string()));
+            Err(failure) => {
+                report.failures.push(failure);
                 return report;
             }
         };
@@ -273,6 +267,7 @@ impl Scripts {
             saves,
             effects,
             animations,
+            sequences,
             tile_sets,
             started: BTreeSet::new(),
             spawned: Vec::new(),
@@ -313,6 +308,20 @@ impl Scripts {
         at.blackboard
             .retain_signals(|bits| world.get(EntityId::from_bits(bits)).is_some());
         report
+    }
+
+    /// The scripted entities a pass walks, or why there is no pass.
+    fn scripted(
+        world: &World,
+        components: &ComponentSchemaRegistry,
+        delta_seconds: f32,
+    ) -> Result<Vec<(EntityId, ScriptComponent)>, ScriptFailure> {
+        if !delta_seconds.is_finite() || delta_seconds < 0.0 {
+            return Err(ScriptFailure::BadDelta(delta_seconds));
+        }
+        components
+            .query::<ScriptComponent>(world)
+            .map_err(|error| ScriptFailure::Registry(error.to_string()))
     }
 
     /// Delivers the calls scripts made on each other this pass, and the events

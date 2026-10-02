@@ -250,6 +250,11 @@ const KNOWN: &[Known] = &[
         icon: icons::ANIMATION,
     },
     Known {
+        type_name: "sindri.sequence",
+        family: Family::Behaviour,
+        icon: icons::TIMELINE,
+    },
+    Known {
         type_name: "sindri.audio.source",
         family: Family::Behaviour,
         icon: icons::AUDIO,
