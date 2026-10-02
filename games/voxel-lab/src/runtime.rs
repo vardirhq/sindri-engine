@@ -280,7 +280,16 @@ mod tests {
     #[test]
     fn lab_uses_engine_natural_terrain_and_real_depth() {
         let terrain = LabTerrain::default();
-        assert_eq!(terrain.voxel(VoxelCoord::new(0, -32, 0)), STONE);
+
+        // Caves are enabled, so no individual deep coordinate is guaranteed
+        // to remain solid. Verify depth across a representative area instead
+        // of accidentally asserting that one deterministic cave cannot exist.
+        let has_deep_stone = (-32..=32).step_by(8).any(|z| {
+            (-32..=32)
+                .step_by(8)
+                .any(|x| terrain.voxel(VoxelCoord::new(x, -32, z)) == STONE)
+        });
+        assert!(has_deep_stone);
 
         let mut biomes = BTreeSet::new();
         for z in (-192..=192).step_by(24) {
