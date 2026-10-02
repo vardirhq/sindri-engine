@@ -1153,9 +1153,13 @@ frame.
   and keyed at the playhead from the value the scene holds. Sequences are
   added, lengthened, looped and set to autoplay from its toolbar; every edit
   is one undoable step. `examples/sequence` (Sequence Stage) is the feature
-  example and `game/tests/the_sequence_demo_works.rs` plays it. No game uses
-  sequences yet; Orbital's and Scorchball's own hosts do not advance them; no
-  curve editor, blending, or tracks beyond numbers and cues
+  example and `game/tests/the_sequence_demo_works.rs` plays it. Causeway's
+  beacon lights by its own sequences: arriving plays `arrive`, a swell whose
+  first cue sounds the chime, and the script moves it on to the looping `glow`
+  when that finishes (`game/tests/the_beacon_lights.rs`). A cue's sound is
+  found by the export's walk of the scene, so a project need not list it. The
+  test harnesses of the platformer, Flappy, Scorchball and Orbital advance
+  sequences too. No curve editor, blending, or tracks beyond numbers and cues
 - **Plays a scene's audio in Play, and mixes it for the author.** Play starts
   a scene's autoplay `sindri.audio.source`s and performs every request its
   scripts make through `Audio`, through the same `AudioMixer` a build uses;

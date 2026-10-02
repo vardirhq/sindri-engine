@@ -46,6 +46,8 @@ pub struct Run {
     /// dirty the scene it came from — which is also what lets a capture step
     /// the run forward without rewriting the project it opened.
     pub animations: SpriteAnimations,
+    /// Where each playing sequence has got to.
+    pub sequences: sindri_scene::Sequences,
     pub random: Rng,
     pub saves: SaveStore,
     pub input: InputState,
@@ -185,6 +187,7 @@ impl Run {
             screen_ui: ScreenUi::default(),
             effects: Effects2d::default(),
             animations: SpriteAnimations::new(),
+            sequences: sindri_scene::Sequences::new(),
             random: Rng::default(),
             saves: SaveStore::default(),
             input: InputState::default(),
@@ -243,7 +246,8 @@ impl Run {
                 world: physics,
                 events,
             })
-            .with_animations(&mut self.animations),
+            .with_animations(&mut self.animations)
+            .with_sequences(&mut self.sequences),
         );
         for failure in &report.failures {
             notes.push(failure.to_string());
@@ -256,6 +260,20 @@ impl Run {
             .advance(&self.world, &self.components, delta)
         {
             notes.push(error.to_string());
+        }
+        // After the scripts too, so a sequence a script named this step starts
+        // now. Its cue sounds are dropped: a harness plays no audio.
+        match self
+            .sequences
+            .advance(&mut self.world, &self.components, delta)
+        {
+            Ok(played) => notes.extend(
+                played
+                    .problems
+                    .iter()
+                    .map(|(_, problem)| format!("Sequence: {problem}")),
+            ),
+            Err(error) => notes.push(error.to_string()),
         }
         self.scripts.take_audio_commands();
         // After the scripts, so an impact a script made this step shakes this

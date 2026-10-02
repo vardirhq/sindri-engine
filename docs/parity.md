@@ -221,19 +221,20 @@ the gap is legible, not because it is scheduled.
 Still the weakest major system relative to the baseline, but no longer the one
 where nothing connects. Sprite clips exist, play, and are now *chosen by
 gameplay*: a script plays, stops, restarts and times a clip, and is told when a
-one-shot has ended. What remains absent is everything above a single clip —
-events, blending, tweening, and animating anything that is not a sprite frame.
+one-shot has ended. Sequences now animate any numeric field and tweens move
+values from scripts; what remains absent is frame events, blending and
+skeletal animation.
 
 | Feature | Engine | Editor | Decay | Proof | vs. baseline | Gap that matters |
 | --- | :-: | :-: | :-: | :-: | --- | --- |
 | Sprite frame clips, timing, loop state | ✅ | ✅ | ✅ | ✅ | **Par** | `Animation.play`/`stop`/`restart`/`is_finished`/`frame`/`clip`/`set_speed`. The platformer's hero switches between idle, run, jump and fall; Scorchball's players choose a clip and its speed from how they move; Orbital's mine blast plays once and despawns itself when it ends |
 | Clip authoring and preview | — | ✅ | — | ✅ | **Par** | — |
 | **Animation events (a frame fires a callback)** | ❌ | ❌ | ❌ | ❌ | **Absent** | Footsteps, hit frames, spawn-on-frame all need it |
-| **Property animation (animate any component field)** | ❌ | ❌ | ❌ | ❌ | **Absent** | Unity's Animation window animates any serialized property. We animate sprite frames and nothing else |
+| Property animation (animate any component field) | ✅ | ✅ | ✅ | ✅ | **Behind** | A sequence track keys any numeric component field, by component and a path into it (`sindri.sprite/tint.3`), or a transform channel, edited in the Timeline; Causeway's beacon swells and breathes this way. Unity's Animation window also keys colours, vectors, booleans and references as one value; a track here holds a single number, so a colour is four tracks and nothing non-numeric animates |
 | **Tweening / easing** | ✅ | 🟡 | ✅ | ✅ | **Behind** | Managed number/vector/colour tweens, pause/resume/cancel/restart, typed values, progress/completion and disposal, composed with a delay, a loop count (or for ever), yoyo and `Tween.after` sequences. Orbital's pickup appears and then breathes with an endless yoyo; Tween Lab chains a crossing, a wait and a return. Weave shares named easing through CSS transitions. Authored choreography is a sequence edited in the Timeline (see Timeline / cutscenes); scripted tweens have no editor view, and property binding and completion callbacks remain |
 | **State machine / blending** | ❌ | ❌ | ❌ | ❌ | **Absent** | Animator controller, Godot AnimationTree. Transitions are hand-written today |
 | **Skeletal / cutout 2D animation** | ❌ | ❌ | ❌ | ❌ | **Absent** | Spine, Unity 2D Animation. Frame sheets only |
-| Timeline / cutscenes | ✅ | ✅ | ✅ | 🟡 | **Behind** | A `sindri.sequence` component holds named sequences: keyframed tracks that move a transform channel or any numeric component field on the entity, a named child, or, with a path starting `/`, anything in the scene, each key with a CSS easing, and cues that a script waits on with `Sequence.cued` and that may play a sound. The runtime advances them after scripts in the shared game session and the editor's Play. The editor's Timeline panel draws keys and cues against time, scrubs a preview into the Scene view without touching the document, and adds, keys, moves, retimes and removes tracks, keys and cues as undoable edits. Sequence Stage is the feature example; no game uses sequences yet, and Orbital's and Scorchball's own hosts do not advance them. No curve editor, no sprite-clip, enable or event tracks beyond cues, no blending between sequences, and keys hold a single number |
+| Timeline / cutscenes | ✅ | ✅ | ✅ | ✅ | **Behind** | A `sindri.sequence` component holds named sequences: keyframed tracks that move a transform channel or any numeric component field on the entity, a named child, or, with a path starting `/`, anything in the scene, each key with a CSS easing, and cues that a script waits on with `Sequence.cued` and that may play a sound. The runtime advances them after scripts in the shared game session and the editor's Play. The editor's Timeline panel draws keys and cues against time, scrubs a preview into the Scene view without touching the document, and adds, keys, moves, retimes and removes tracks, keys and cues as undoable edits. Sequence Stage is the feature example, and Causeway's beacon lights by an authored swell whose cue sounds the chime, then breathes on a loop; an export carries a cue's sound without the project listing it. No curve editor, no sprite-clip, enable or event tracks beyond cues, no blending between sequences, and keys hold a single number |
 
 ## Physics and collision
 

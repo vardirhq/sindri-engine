@@ -39,6 +39,8 @@ pub struct Run {
     pub screen_ui: ScreenUi,
     pub effects: Effects2d,
     pub animations: SpriteAnimations,
+    /// Where each playing sequence has got to.
+    pub sequences: sindri_scene::Sequences,
     pub random: Rng,
     pub input: InputState,
 }
@@ -88,6 +90,7 @@ impl Run {
             screen_ui: ScreenUi::default(),
             effects: Effects2d::default(),
             animations: SpriteAnimations::new(),
+            sequences: sindri_scene::Sequences::new(),
             random: Rng::default(),
             input: InputState::default(),
         })
@@ -122,7 +125,8 @@ impl Run {
                     world: physics,
                     events,
                 })
-                .with_animations(&mut self.animations),
+                .with_animations(&mut self.animations)
+                .with_sequences(&mut self.sequences),
         );
         notes.extend(report.failures.iter().map(ToString::to_string));
         if let Err(error) = self
@@ -130,6 +134,20 @@ impl Run {
             .advance(&self.world, &self.components, delta)
         {
             notes.push(error.to_string());
+        }
+        // After the scripts too, so a sequence a script named this step starts
+        // now. Its cue sounds are dropped: a harness plays no audio.
+        match self
+            .sequences
+            .advance(&mut self.world, &self.components, delta)
+        {
+            Ok(played) => notes.extend(
+                played
+                    .problems
+                    .iter()
+                    .map(|(_, problem)| format!("Sequence: {problem}")),
+            ),
+            Err(error) => notes.push(error.to_string()),
         }
         self.scripts.take_audio_commands();
         sindri_scene::update_camera_behaviors(&mut self.world, delta);

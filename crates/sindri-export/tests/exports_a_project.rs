@@ -61,11 +61,24 @@ fn every_kind_of_asset_the_project_uses_is_carried() {
     }
 }
 
-/// A script names its sounds at run time, and no walk of a scene can see a
-/// string inside a program.
+/// The host composes its screen UI from a stylesheet by name, and no walk of a
+/// scene can see a string inside a program, so the project says to carry it.
 #[test]
-fn an_asset_only_a_script_names_is_carried_because_the_project_said_so() {
+fn an_asset_only_the_host_names_is_carried_because_the_project_said_so() {
     let (_scratch, manifest) = exported("include", "/");
+    assert!(
+        manifest
+            .ids_of(AssetKind::Other)
+            .any(|id| id.as_str() == "ui/causeway.weave"),
+        "the included stylesheet ships"
+    );
+}
+
+/// The chime the beacon sounds is named by a cue in its arrival sequence, and
+/// the project no longer lists it: the walk of the scene finds it.
+#[test]
+fn a_sound_a_sequence_cue_plays_is_carried() {
+    let (_scratch, manifest) = exported("cue", "/");
     let audio: Vec<&str> = manifest
         .ids_of(AssetKind::Audio)
         .map(sindri_core::AssetId::as_str)
