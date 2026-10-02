@@ -156,6 +156,20 @@
   },
   {
     "category": "demos",
+    "title": "Sequence Stage",
+    "path": "examples/sequence/",
+    "source": "examples/sequence",
+    "description": "A ship flies in on a sequence authored in the Timeline, with sound cues, then the stage idles on a loop. Space or tap replays it.",
+    "tags": [
+      "sequences",
+      "timeline",
+      "choreography",
+      "cues",
+      "decay"
+    ]
+  },
+  {
+    "category": "demos",
     "title": "Weave Control Room",
     "path": "examples/ui/",
     "source": "examples/ui",
