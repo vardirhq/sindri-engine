@@ -56,8 +56,20 @@ Four fields, and each is read by something today.
   nothing.
 
   Listing the main scene here as well is allowed and changes nothing; it ships
-  once. The editor does not use this field yet but carries it through a save, so
-  writing one by hand is safe.
+  once.
+
+  The editor's **Scenes** panel is this list as a board: a card for the main
+  scene and one for each scene here, in order, with the doors between them
+  drawn as arrows from the `Scene.go("…")` calls in the scripts each scene
+  runs. Its **Add scene** menu, and a card's **Remove from project**, **Move
+  earlier**/**later** and **Set as main scene**, write this field. Setting a
+  listed scene as main puts the old main scene at the head of the list, so no
+  scene stops shipping because another one was chosen. A script that goes to a
+  scene this list does not carry is marked on its card, because a build would
+  have nowhere to go.
+
+  The editor writes the manifest by editing the file in place: a table it does
+  not model, such as `[web.splash]`, and comments survive any of these.
 
 `PROJECT_OVERVIEW.md` sketches a larger file: window size, feature flags, an
 asset root, a web canvas selector. None of that is here, and the sketch itself
@@ -254,8 +266,8 @@ Two consequences worth knowing:
 
 ## What this does not do yet
 
-- One scene at a time. The roadmap's "manage more than one scene at a time" is
-  untouched: a project can hold many scenes and the editor opens one of them.
+- One scene at a time. A project can hold many scenes and the Scenes panel
+  shows them all, but the editor edits one of them at a time.
 - Only half a settings surface. **Set as main scene** in the project browser
   nominates what a project opens on, and a scene made inside a project that
   nominates nothing claims the empty place. The project's *name* still cannot

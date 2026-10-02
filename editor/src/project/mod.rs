@@ -19,6 +19,8 @@ pub mod manifest;
 pub mod ops;
 /// The projects the welcome window offers.
 pub mod recent;
+/// The project's scenes, and the doors scripts open between them.
+pub mod scene_board;
 mod sheet;
 
 #[cfg(test)]
@@ -28,6 +30,7 @@ pub use kind::AssetKind;
 pub use launch::Launch;
 pub use manifest::{MANIFEST_NAME, Project, ProjectError};
 pub use recent::{RecentProject, RecentProjects};
+pub use scene_board::{SceneBoard, SceneCard, SceneLink};
 pub use sheet::{sliced_texture_beside, sprites_beside};
 
 use std::path::{Path, PathBuf};

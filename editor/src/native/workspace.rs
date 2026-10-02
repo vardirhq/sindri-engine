@@ -327,6 +327,7 @@ impl EditorApp {
             DockPanel::Hierarchy => self.hierarchy_body(ui),
             DockPanel::Inspector => self.inspector_body(ui),
             DockPanel::Project => self.project_body(ui),
+            DockPanel::Scenes => self.scene_board_body(ui),
             DockPanel::Console => self.console_body(ui),
             DockPanel::History => self.history_body(ui),
             DockPanel::Assistant => self.assistant_body(ui),

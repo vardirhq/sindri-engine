@@ -148,7 +148,7 @@ impl EditorApp {
     /// Project identity and presentation are read together. Keeping the parsed
     /// styles here means a viewport resolves an already-composed stylesheet;
     /// it never walks the file system or reparses Weave at frame rate.
-    fn adopt(&mut self, project: &Project) {
+    pub(super) fn adopt(&mut self, project: &Project) {
         self.styles = match ProjectStyles::load(project) {
             Ok(styles) => styles,
             Err(error) => {

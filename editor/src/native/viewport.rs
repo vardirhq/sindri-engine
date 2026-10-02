@@ -321,6 +321,7 @@ impl EditorApp {
             physical_viewport_dimension(rect.width(), scale),
             physical_viewport_dimension(rect.height(), scale),
         );
+        let pictured = self.authoring_enabled();
         let viewport = if editing {
             &mut self.scene_viewport
         } else {
@@ -353,6 +354,20 @@ impl EditorApp {
             &mut self.console,
             &mut self.render_error,
         );
+        // The Scenes panel's picture of this scene: the frame just drawn, while
+        // it is the scene being edited, never a run in progress that a stop is
+        // about to put back.
+        if failure.is_none()
+            && pictured
+            && let Some(scene) = self.file.path()
+        {
+            self.scene_board.pictures_mut().take(
+                &viewport.render_state,
+                &viewport.target,
+                scene,
+                tab == WorkspaceTab::Game,
+            );
+        }
         // Two views can be live at once, and the first thing to go wrong is the
         // thing worth reading, so a later success does not erase it.
         if let Some(failure) = failure {

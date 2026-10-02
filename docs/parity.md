@@ -143,7 +143,7 @@ is why it earns a section rather than a footnote.
 | Reusable data profiles | ✅ | ✅ | ✅ | ✅ | **Ahead** | Unity has no native equivalent; ScriptableObject is close but needs code per asset. Optional schemas when a second catalog proves the shape |
 | Transform | ✅ | ✅ | 🟡 | ✅ | **Par** | No structured vector or rotation value in Decay |
 | Scene save / load | ✅ | ✅ | — | ✅ | **Par** | Readable single file, which is **Ahead**; see the advantages table |
-| **Multiple scenes / additive loading** | ✅ | 🟡 | ✅ | ✅ | **Behind** | `World::add_scene` loads a scene beside the ones a world already holds; `LoadedScenes` keeps which one is played and switches between them, leaving everything a scene holds as the player left it. `Scene.go`/`Scene.current` let a script ask, `[project] scenes` declares them and the exporter walks each one for its own assets. `Scene.go` now switches scenes in the browser as well as natively, so a title screen reaches its game on both targets. The editor carries the list through a save but offers no way to edit it, and a world holding several scenes does not round-trip through `to_scene` |
+| **Multiple scenes / additive loading** | ✅ | 🟡 | ✅ | ✅ | **Behind** | `World::add_scene` loads a scene beside the ones a world already holds; `LoadedScenes` keeps which one is played and switches between them, leaving everything a scene holds as the player left it. `Scene.go`/`Scene.current` let a script ask, `[project] scenes` declares them and the exporter walks each one for its own assets. `Scene.go` now switches scenes in the browser as well as natively, so a title screen reaches its game on both targets. The editor's Scenes panel shows the project's scenes as a board — a card each, with the last frame drawn of it, arrows for each literal `Scene.go` door, and a warning on a door to a scene the project does not carry — and adds, removes, orders and nominates them. A world holding several scenes does not round-trip through `to_scene` |
 | Scene streaming / Addressables | ❌ | ❌ | ❌ | ❌ | **Absent** | Terrain chunks now stream inside one scene, but scene/asset streaming remains absent |
 | Undo / redo | ✅ | ✅ | — | — | **Par** | Command-backed; script writes are outside it |
 
@@ -601,8 +601,9 @@ output of the file; everything above is evidence.
    remain.
 10. **Multiple scenes and additive loading.** **Mostly done.** Scenes load
     beside each other and `Scene.go` switches between them natively and in the
-    browser. What remains is editing the scene list in the editor and
-    round-tripping a world that holds several scenes through `to_scene`.
+    browser, and the editor's Scenes panel edits the project's scene list as a
+    board of cards with the doors between them. What remains is round-tripping
+    a world that holds several scenes through `to_scene`.
 11. ~~**Un-strand bloom.**~~ **Done.** Bloom now lives inside the authored world post stack used by editor and browser rendering.
 12. ~~**Camera follow, confine, and shake.**~~ **Done.** `sindri.camera.behavior`
     follows, confines and shakes in every gameplay host, and the platformer
