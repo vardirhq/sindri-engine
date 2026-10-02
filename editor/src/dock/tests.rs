@@ -85,7 +85,8 @@ fn a_panel_dropped_between_two_tabs_lands_between_them() {
             Panel::Project,
             Panel::Inspector,
             Panel::Console,
-            Panel::History
+            Panel::History,
+            Panel::Profiler
         ]
     );
 }
@@ -105,12 +106,12 @@ fn a_dropped_panel_is_the_one_showing() {
 #[test]
 fn closing_the_selected_tab_shows_a_neighbour() {
     let mut workspace = Workspace::preset(Preset::Wide);
-    workspace.select(Place::Dock(Slot::Bottom), 2);
-    assert!(workspace.take(Panel::History));
+    workspace.select(Place::Dock(Slot::Bottom), 3);
+    assert!(workspace.take(Panel::Profiler));
     let group = workspace
         .group(Place::Dock(Slot::Bottom))
-        .expect("two tabs are left");
-    assert_eq!(group.selected(), Some(Panel::Console));
+        .expect("three tabs are left");
+    assert_eq!(group.selected(), Some(Panel::History));
 }
 
 /// The centre is what every other slot is measured against. An editor with a

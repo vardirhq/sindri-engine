@@ -12,6 +12,20 @@ pub struct ScriptMessage {
     pub message: String,
 }
 
+/// How long one script took in a pass, over every entity that runs it.
+///
+/// Named by its source and container rather than by entity, because the
+/// question a profiler answers is "which script is slow", and six wisps
+/// running one script are one answer.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct ScriptTiming {
+    pub source: String,
+    pub script: String,
+    /// How many entities ran it.
+    pub runs: u32,
+    pub time: std::time::Duration,
+}
+
 /// What a frame of scripts produced.
 ///
 /// One value rather than two channels: what was printed and what went wrong are
@@ -23,6 +37,9 @@ pub struct ScriptReport {
     pub printed: Vec<ScriptMessage>,
     /// What went wrong, per script. One failing script does not stop the rest.
     pub failures: Vec<ScriptFailure>,
+    /// How long each script's tick took, when the host asked for timings
+    /// with [`crate::Scripts::set_measuring`]. Empty otherwise.
+    pub timings: Vec<ScriptTiming>,
 }
 
 impl ScriptReport {

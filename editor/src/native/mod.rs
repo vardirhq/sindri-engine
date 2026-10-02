@@ -72,6 +72,7 @@ mod prefab_writes;
 mod presentation;
 mod preview_view;
 mod profile_view;
+mod profiler_view;
 mod project_open;
 mod project_panel;
 mod projection;
@@ -279,6 +280,8 @@ struct EditorApp {
     /// The textures the open scene draws with, loaded from its own directory.
     textures: SceneTextures,
     thumbnails: thumbnails::Thumbnails,
+    /// Where Play's time went, for the Profiler panel.
+    profiler: crate::profiler::Profiler,
     /// The Scenes panel's board, and the pictures its cards show.
     scene_board: scene_board_view::SceneBoardState,
     /// The history revision the textures were last asked about.

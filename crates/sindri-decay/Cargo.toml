@@ -22,6 +22,8 @@ sindri-physics = { path = "../sindri-physics" }
 # depends on `sindri-platform` itself and turns it back on.
 sindri-platform = { path = "../sindri-platform", default-features = false }
 sindri-scene = { path = "../sindri-scene" }
+# A clock that also runs in a browser, for timing scripts when a host asks.
+web-time.workspace = true
 decay-ir = { path = "../../decay/crates/decay-ir" }
 decay-runtime = { path = "../../decay/crates/decay-runtime" }
 decay-semantic = { path = "../../decay/crates/decay-semantic" }

@@ -59,13 +59,15 @@ pub enum Panel {
     Console,
     /// Every step taken, and the one we are standing on.
     History,
+    /// Where each frame of Play spent its time.
+    Profiler,
     /// The local assistant: its setup while it has one, and itself after.
     Assistant,
 }
 
 impl Panel {
     /// Every panel, in the order a menu should offer them.
-    pub const ALL: [Self; 9] = [
+    pub const ALL: [Self; 10] = [
         Self::Scene,
         Self::Game,
         Self::Hierarchy,
@@ -74,6 +76,7 @@ impl Panel {
         Self::Scenes,
         Self::Console,
         Self::History,
+        Self::Profiler,
         Self::Assistant,
     ];
 
@@ -87,6 +90,7 @@ impl Panel {
             Self::Scenes => "Scenes",
             Self::Console => "Console",
             Self::History => "History",
+            Self::Profiler => "Profiler",
             Self::Assistant => "Assistant",
         }
     }
@@ -270,9 +274,11 @@ impl Workspace {
                     Place::Overlay(BottomLeft),
                     &[Panel::Project, Panel::Console, Panel::History],
                 ),
+                // Beside the inspector, whose overlay has room for a third
+                // tab where the bottom-left one does not.
                 (
                     Place::Overlay(TopRight),
-                    &[Panel::Inspector, Panel::Assistant],
+                    &[Panel::Inspector, Panel::Assistant, Panel::Profiler],
                 ),
             ],
             Preset::Docked => &[
@@ -281,7 +287,10 @@ impl Workspace {
                 // Under the scene with the Game view rather than beside it: the
                 // board wants the width a side column does not have.
                 (Place::Dock(MainBottom), &[Panel::Game, Panel::Scenes]),
-                (Place::Dock(Right), &[Panel::Project, Panel::History]),
+                (
+                    Place::Dock(Right),
+                    &[Panel::Project, Panel::History, Panel::Profiler],
+                ),
                 (Place::Dock(FarRight), &[Panel::Inspector, Panel::Assistant]),
             ],
             Preset::Wide => &[
@@ -292,7 +301,12 @@ impl Workspace {
                 ),
                 (
                     Place::Dock(Bottom),
-                    &[Panel::Project, Panel::Console, Panel::History],
+                    &[
+                        Panel::Project,
+                        Panel::Console,
+                        Panel::History,
+                        Panel::Profiler,
+                    ],
                 ),
                 // The assistant shares the inspector's column rather than
                 // taking one of its own: a third column left the scene about

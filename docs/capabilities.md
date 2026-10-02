@@ -1121,6 +1121,16 @@ frame.
   the project opens on, and a scene made in a project that nominates nothing
   claims the empty place rather than leaving the project opening on nothing.
   `docs/project-format.md` is the contract
+- **Profiles Play.** The Profiler panel (beside the inspector in the canvas
+  arrangement, in the right or bottom dock otherwise) keeps the last 300
+  frames of Play, each timed on the CPU by phase: effects, physics, screen UI,
+  scripts, sprite animation, cameras, and the Scene and Game views drawn.
+  They are drawn as stacked bars against the 60 fps budget; pointing at a bar
+  shows that frame and a click pins it, and otherwise the panel shows the
+  average frame. Each script's time and runs per frame are listed slowest
+  first, summed over every entity running it (`Scripts::set_measuring`
+  reports them). Starting Play clears it. GPU time, a breakdown inside a
+  script, and timing a shipped build are not measured
 - **Shows a project's scenes as a board.** The Scenes panel (a tab beside the
   Scene view, or beside the Game view in the docked preset, and in the View
   menu) has a card for the main scene and each scene in `[project] scenes`,

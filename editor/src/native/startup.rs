@@ -166,6 +166,7 @@ impl EditorApp {
             textures,
             thumbnails: thumbnails::Thumbnails::default(),
             scene_board: scene_board_view::SceneBoardState::default(),
+            profiler: crate::profiler::Profiler::default(),
             textured_revision: TexturedAt::default(),
             scene_viewport,
             game_viewport,
@@ -198,8 +199,7 @@ impl EditorApp {
             app.console.error(failure);
         }
         app.arrange_for(decided);
-        let notes = app.textures.request(&app.world, &mut app.renderers.text);
-        app.record_texture_notes(notes);
+        app.request_first_textures();
         app.reload_scripts();
         app.remember_open_scene();
         app
@@ -221,6 +221,14 @@ impl EditorApp {
             Launch::Project(root) => self.open_project_at(&root),
             Launch::Welcome => self.open_welcome(),
         }
+    }
+}
+
+impl EditorApp {
+    /// Asks for the opening scene's textures, and says what is missing.
+    fn request_first_textures(&mut self) {
+        let notes = self.textures.request(&self.world, &mut self.renderers.text);
+        self.record_texture_notes(notes);
     }
 }
 

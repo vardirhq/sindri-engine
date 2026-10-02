@@ -70,6 +70,8 @@ pub const HIERARCHY: MaterialIcon = icons::ICON_ACCOUNT_TREE;
 pub const INSPECTOR: MaterialIcon = icons::ICON_TUNE;
 pub const PROJECT: MaterialIcon = icons::ICON_FOLDER;
 pub const CONSOLE: MaterialIcon = icons::ICON_TERMINAL;
+/// Where each frame of Play spent its time.
+pub const PROFILER: MaterialIcon = icons::ICON_MONITORING;
 /// The project's scenes laid out as a board.
 pub const SCENES: MaterialIcon = icons::ICON_VIEW_QUILT;
 /// The scene a project opens on.
