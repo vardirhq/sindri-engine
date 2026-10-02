@@ -25,6 +25,8 @@ pub struct Run {
     pub sources: ScriptSources,
     pub physics: ScenePhysics2d,
     pub animations: SpriteAnimations,
+    /// Where each playing sequence has got to.
+    pub sequences: sindri_scene::Sequences,
     pub input: InputState,
 }
 
@@ -71,6 +73,7 @@ impl Run {
             sources,
             physics: ScenePhysics2d::top_down().map_err(|error| error.to_string())?,
             animations: SpriteAnimations::new(),
+            sequences: sindri_scene::Sequences::new(),
             input: InputState::default(),
         })
     }
@@ -90,7 +93,8 @@ impl Run {
                     world: physics,
                     events,
                 })
-                .with_animations(&mut self.animations),
+                .with_animations(&mut self.animations)
+                .with_sequences(&mut self.sequences),
         );
         notes.extend(report.failures.iter().map(ToString::to_string));
         if let Err(error) = self
@@ -98,6 +102,20 @@ impl Run {
             .advance(&self.world, &self.components, delta)
         {
             notes.push(error.to_string());
+        }
+        // After the scripts too, so a sequence a script named this step starts
+        // now. Its cue sounds are dropped: a harness plays no audio.
+        match self
+            .sequences
+            .advance(&mut self.world, &self.components, delta)
+        {
+            Ok(played) => notes.extend(
+                played
+                    .problems
+                    .iter()
+                    .map(|(_, problem)| format!("Sequence: {problem}")),
+            ),
+            Err(error) => notes.push(error.to_string()),
         }
         self.input.begin_frame(step);
         notes

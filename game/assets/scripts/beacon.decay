@@ -4,30 +4,20 @@
 // is the whole of its job: a goal that moved, or that had rules, would be a
 // second thing to understand in a game whose one idea is that you build the
 // way to it.
+//
+// How it lights is authored rather than written here: the beacon's "arrive"
+// sequence swells it and sounds the chime on its first cue, and "glow" is the
+// breathing it settles into. This only says when each plays.
 script Beacon {
-    @export
-    let lit_scale: f32 = 1.25;
-
-    var base: f32 = 1.0;
-    var measured: bool = false;
-    var sounded: bool = false;
+    var lit: bool = false;
 
     fn update(dt: f32) {
-        if !measured {
-            base = this.transform.scale.x;
-            measured = true;
+        if !lit && Game.get("arrived", 0.0) > 0.0 {
+            Sequence.play(this.entity, "arrive");
+            lit = true;
         }
-        if Game.get("arrived", 0.0) > 0.0 {
-            // Named here rather than in the scene, which is why the project
-            // has to carry it explicitly: no walk of a scene can see a string
-            // inside a program.
-            if !sounded {
-                Audio.play("audio/victory.wav", 1.0);
-                sounded = true;
-            }
-            let pulse = 1.0 + sin(Time.elapsed * 3.0) * 0.06;
-            this.transform.scale.x = base * lit_scale * pulse;
-            this.transform.scale.y = base * lit_scale * pulse;
+        if Sequence.playing(this.entity) == "arrive" && Sequence.is_finished(this.entity) {
+            Sequence.play(this.entity, "glow");
         }
     }
 }

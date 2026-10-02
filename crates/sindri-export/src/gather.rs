@@ -269,6 +269,11 @@ impl ProjectExport {
                     wanted.insert(clip.to_owned(), AssetKind::Audio);
                 }
             }
+            // A sequence's cues name theirs too, in the scene where a walk
+            // can see them rather than in a script where it cannot.
+            for clip in sindri_scene::referenced_sounds(&world) {
+                wanted.insert(clip, AssetKind::Audio);
+            }
 
             // The scripts are read before they are asked about, because which
             // prefabs a world can spawn is the *declared type* of a script's

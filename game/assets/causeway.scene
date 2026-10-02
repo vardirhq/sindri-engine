@@ -18,11 +18,122 @@
           "grid": "floor"
         },
         "sindri.script": {
-          "properties": {
-            "lit_scale": 1.25
-          },
           "script": "Beacon",
           "source": "scripts/beacon.decay"
+        },
+        "sindri.sequence": {
+          "playing": null,
+          "sequences": {
+            "arrive": {
+              "cues": [
+                {
+                  "name": "lit",
+                  "sound": {
+                    "bus": "",
+                    "clip": "audio/victory.wav",
+                    "volume": 1.0
+                  },
+                  "time": 0.0
+                }
+              ],
+              "duration": 1.2,
+              "looping": false,
+              "tracks": [
+                {
+                  "keys": [
+                    {
+                      "ease": "ease-out",
+                      "time": 0.0,
+                      "value": 0.68
+                    },
+                    {
+                      "ease": "ease-in-out",
+                      "time": 0.45,
+                      "value": 0.952
+                    },
+                    {
+                      "ease": "linear",
+                      "time": 1.2,
+                      "value": 0.85
+                    }
+                  ],
+                  "property": "scale.x",
+                  "target": ""
+                },
+                {
+                  "keys": [
+                    {
+                      "ease": "ease-out",
+                      "time": 0.0,
+                      "value": 1.79
+                    },
+                    {
+                      "ease": "ease-in-out",
+                      "time": 0.45,
+                      "value": 2.506
+                    },
+                    {
+                      "ease": "linear",
+                      "time": 1.2,
+                      "value": 2.2375
+                    }
+                  ],
+                  "property": "scale.y",
+                  "target": ""
+                }
+              ]
+            },
+            "glow": {
+              "cues": [],
+              "duration": 2.1,
+              "looping": true,
+              "tracks": [
+                {
+                  "keys": [
+                    {
+                      "ease": "ease-in-out",
+                      "time": 0.0,
+                      "value": 0.85
+                    },
+                    {
+                      "ease": "ease-in-out",
+                      "time": 1.05,
+                      "value": 0.901
+                    },
+                    {
+                      "ease": "linear",
+                      "time": 2.1,
+                      "value": 0.85
+                    }
+                  ],
+                  "property": "scale.x",
+                  "target": ""
+                },
+                {
+                  "keys": [
+                    {
+                      "ease": "ease-in-out",
+                      "time": 0.0,
+                      "value": 2.2375
+                    },
+                    {
+                      "ease": "ease-in-out",
+                      "time": 1.05,
+                      "value": 2.3718
+                    },
+                    {
+                      "ease": "linear",
+                      "time": 2.1,
+                      "value": 2.2375
+                    }
+                  ],
+                  "property": "scale.y",
+                  "target": ""
+                }
+              ]
+            }
+          },
+          "speed": 1.0
         },
         "sindri.sprite": {
           "billboard": true,

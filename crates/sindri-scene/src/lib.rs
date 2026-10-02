@@ -85,7 +85,7 @@ pub use screen_ui::{
 pub use sequence::{
     Axis, Cue, CueFired, CueSound, EASINGS, Key, Property, Sequence, SequenceComponent,
     SequenceError, SequenceStep, Sequences, Step, TRANSFORM_PROPERTIES, Track, easing, pose,
-    resolve, top_level,
+    referenced_sounds, resolve, top_level,
 };
 /// The shapes a collider is made of, which the editor draws and resizes.
 pub use sindri_physics::{Collider2d, ColliderShape2d};

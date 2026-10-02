@@ -16,6 +16,43 @@ WANDERER = (32_766, 32_772)
 BEACON = (32_770, 32_764)
 
 
+def keys(*points):
+    """Keys as (time, value[, ease]); between two keys the earlier's ease runs."""
+    return [{"time": t, "value": v, "ease": rest[0] if rest else "ease-in-out"}
+            for t, v, *rest in points]
+
+
+def beacon_sequences():
+    """How the beacon lights: a swell with the chime, then a slow breath.
+
+    Scaled from its own 0.68 by 1.79, so each axis is a track of its own.
+    """
+    def scaled(x_keys, y_keys):
+        return [{"target": "", "property": "scale.x", "keys": keys(*x_keys)},
+                {"target": "", "property": "scale.y", "keys": keys(*y_keys)}]
+    return {
+        "sequences": {
+            "arrive": {
+                "duration": 1.2, "looping": False,
+                "tracks": scaled(
+                    [(0.0, 0.68, "ease-out"), (0.45, 0.952), (1.2, 0.85, "linear")],
+                    [(0.0, 1.79, "ease-out"), (0.45, 2.506), (1.2, 2.2375, "linear")]),
+                "cues": [{"time": 0.0, "name": "lit",
+                          "sound": {"clip": "audio/victory.wav", "bus": "", "volume": 1.0}}],
+            },
+            "glow": {
+                "duration": 2.1, "looping": True,
+                "tracks": scaled(
+                    [(0.0, 0.85), (1.05, 0.901), (2.1, 0.85, "linear")],
+                    [(0.0, 2.2375), (1.05, 2.3718), (2.1, 2.2375, "linear")]),
+                "cues": [],
+            },
+        },
+        "playing": None,
+        "speed": 1.0,
+    }
+
+
 def transform(position, rotation=None, scale=(1.0, 1.0, 1.0)):
     return {
         "position": [float(v) for v in position],
@@ -110,8 +147,8 @@ def entities():
                 # into an occupied square, so marking the beacon would make the
                 # whole game unwinnable in a way nothing else would report.
                 "sindri.grid.placement": {"grid": "floor", "cell": list(BEACON)},
-                "sindri.script": {"source": "scripts/beacon.decay", "script": "Beacon",
-                                  "properties": {"lit_scale": 1.25}},
+                "sindri.script": {"source": "scripts/beacon.decay", "script": "Beacon"},
+                "sindri.sequence": beacon_sequences(),
             },
         },
         {

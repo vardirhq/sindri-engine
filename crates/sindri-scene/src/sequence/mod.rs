@@ -17,10 +17,10 @@
 //! is placed; a path starting with `/` starts from the scene's top level, so
 //! a director can choreograph the camera, the player and the UI together.
 
-use std::collections::BTreeMap;
+use std::collections::{BTreeMap, BTreeSet};
 
 use serde::{Deserialize, Serialize};
-use sindri_core::{Easing, SceneComponent};
+use sindri_core::{Easing, SceneComponent, World};
 use thiserror::Error;
 
 mod property;
@@ -202,6 +202,24 @@ impl Track {
         }
         self.keys.last().map(|key| key.value)
     }
+}
+
+/// Every sound a cue in `world` plays, so an export carries it.
+///
+/// Read from the stored payloads rather than through the registry: a sequence
+/// that does not parse plays nothing, and names nothing to carry either.
+#[must_use]
+pub fn referenced_sounds(world: &World) -> BTreeSet<String> {
+    world
+        .entities()
+        .filter_map(|(_, data)| data.components.get(SequenceComponent::TYPE_NAME))
+        .filter_map(|payload| serde_json::from_value::<SequenceComponent>(payload.clone()).ok())
+        .flat_map(|component| component.sequences.into_values())
+        .flat_map(|sequence| sequence.cues)
+        .filter_map(|cue| cue.sound)
+        .map(|sound| sound.clip)
+        .filter(|clip| !clip.is_empty())
+        .collect()
 }
 
 /// Reads a curve name.
