@@ -14,6 +14,12 @@ export async function uiDemo(page, viewport, evidence, problems) {
   const phone = viewport.width < 600;
   const at = PLACES[phone ? 'phone' : 'wide'];
   const settle = () => page.waitForTimeout(400);
+  // Waits, up to a few seconds, for something the game reports.
+  const until = async (seen) => {
+    for (let waited = 0; waited < 5000 && !seen(); waited += 100) {
+      await page.waitForTimeout(100);
+    }
+  };
   const press = async ([x, y]) => {
     if (phone) await page.touchscreen.tap(x, y);
     else await page.mouse.click(x, y);
@@ -33,8 +39,12 @@ export async function uiDemo(page, viewport, evidence, problems) {
   await page.keyboard.type('Nøva 7');
   await page.keyboard.insertText('日本');
   await page.keyboard.press('Enter');
+  // Waits for the game to say it happened rather than for a fixed time: a
+  // slow runner may not have reached the step that reports it yet.
+  await until(() => evidence.submitted.length > 0);
   await settle();
   await page.keyboard.press('Escape');
+  await settle();
 
   if (phone) {
     // A finger dragged up the archive, through CDP because Playwright's
@@ -55,6 +65,7 @@ export async function uiDemo(page, viewport, evidence, problems) {
     await page.mouse.move(...at.archive);
     await page.mouse.wheel(0, 240);
   }
+  await until(() => evidence.scrolled);
   await settle();
   // Back to the top over the archive itself, then pick the second row.
   if (!phone) {

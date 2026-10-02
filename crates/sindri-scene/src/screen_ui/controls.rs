@@ -146,29 +146,48 @@ impl ScreenUi {
         extent: super::ScreenExtent,
         presses: &sindri_core::Presses,
     ) -> bool {
-        if let Some((entity, id, last, origin, mut dragging)) = self.scroll_drag {
-            let Some(press) = presses.get(id) else {
-                self.scroll_drag = None;
-                return false;
-            };
-            if press.phase() == sindri_core::PressPhase::Cancelled {
-                self.scroll_drag = None;
-                return false;
-            }
-            if let Some(point) = extent.pointer(press.position()) {
-                dragging |= (point[1] - origin).abs() > 0.025;
-                if dragging {
-                    self.scroll_by(world, entity, point[1] - last);
-                }
-                self.scroll_drag = Some((entity, id, point[1], origin, dragging));
-            }
-            if press.phase() == sindri_core::PressPhase::Ended {
-                self.scroll_drag = None;
-            }
-            return dragging;
+        if self.scroll_drag.is_none() {
+            self.begin_scroll_drag(world, extent, presses);
         }
+        let Some((entity, id, last, origin, mut dragging)) = self.scroll_drag else {
+            return false;
+        };
+        let Some(press) = presses.get(id) else {
+            self.scroll_drag = None;
+            return false;
+        };
+        if press.phase() == sindri_core::PressPhase::Cancelled {
+            self.scroll_drag = None;
+            return false;
+        }
+        if let Some(point) = extent.pointer(press.position()) {
+            dragging |= (point[1] - origin).abs() > 0.025;
+            if dragging {
+                self.scroll_by(world, entity, point[1] - last);
+            }
+            self.scroll_drag = Some((entity, id, point[1], origin, dragging));
+        }
+        if press.phase() == sindri_core::PressPhase::Ended {
+            self.scroll_drag = None;
+        }
+        dragging
+    }
+
+    /// Takes up a press that began this step over a scroll region.
+    ///
+    /// From where the press *began*, not where it is now: on a slow frame a
+    /// whole flick -- down, across and even up -- can arrive between two
+    /// steps, and measuring from where the finger had already got to would
+    /// throw its travel away. The step that takes it up then scrolls by all
+    /// of it.
+    fn begin_scroll_drag(
+        &mut self,
+        world: &World,
+        extent: super::ScreenExtent,
+        presses: &sindri_core::Presses,
+    ) {
         for press in presses.began() {
-            let Some(point) = extent.pointer(press.position()) else {
+            let Some(point) = extent.pointer(press.origin()) else {
                 continue;
             };
             let mut current = self.topmost_at(point);
@@ -182,12 +201,11 @@ impl ScreenUi {
                 if data.components.contains_key(UiScrollComponent::TYPE_NAME) && !disabled(world, e)
                 {
                     self.scroll_drag = Some((e, press.id(), point[1], point[1], false));
-                    break;
+                    return;
                 }
                 current = data.parent;
             }
         }
-        false
     }
 
     /// Whether `entity` can hold focus: something pressable and seen, live

@@ -12,7 +12,7 @@ use std::time::Duration;
 
 use sindri_core::{AssetId, EngineState, LoadedScenes, World, sheet_id_for};
 use sindri_desktop::{AppContext, DesktopApp, Flow};
-use sindri_platform::{AudioBackend, AudioClip, BrowserAudioBackend, EngineHost, InputEvent, Key};
+use sindri_platform::{AudioBackend, AudioClip, BrowserAudioBackend, EngineHost, InputEvent};
 use sindri_render::{
     DepthTarget, FrameRenderers, FrameTarget, GlyphRenderer, ShapeRenderer, SpriteBatchRenderer,
     TextRenderer, Texture2D, TextureRegistry, TexturedCubeRenderer, Viewport,
@@ -264,10 +264,11 @@ impl DesktopApp for BrowserCausewayApp {
             return Ok(Flow::Continue);
         }
 
+        // Escape is the game's: a back, a pause, closing a list. It never
+        // ends a page, and treating it as Exit stopped the whole engine
+        // whenever a slow frame fell between its going down and coming up --
+        // a pause on Orbital, or Back in a menu, froze the game on a phone.
         let engine = self.engine.as_mut().expect("checked above");
-        if engine.input().key_down(Key::Escape) {
-            return Ok(Flow::Exit);
-        }
         engine.advance(delta)?;
         Ok(Flow::Continue)
     }
