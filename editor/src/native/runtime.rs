@@ -344,6 +344,10 @@ impl EditorApp {
                 delta_seconds: delta,
             },
         );
+        // Heard on the step that asked, as a build plays it.
+        for problem in self.play_audio.perform(self.scripts.take_audio_commands()) {
+            self.console.error(problem);
+        }
         clock.lap(&mut self.profiler, Phase::Scripts);
         let timings = std::mem::take(&mut report.timings);
         // Animations move with gameplay rather than with the display, because a
@@ -423,6 +427,14 @@ impl EditorApp {
         if let Err(error) = self.lifecycle.start() {
             self.report(error.to_string());
         }
+        // Authored sources start with the run, as they do in a build.
+        let components = self.scene.components().clone();
+        for problem in self
+            .play_audio
+            .start(self.file.anchor(), &self.world, &components)
+        {
+            self.console.error(problem);
+        }
     }
 
     /// Holds a running scene where it is, or lets a held one carry on.
@@ -439,6 +451,8 @@ impl EditorApp {
         if let Err(error) = result {
             self.report(error.to_string());
         }
+        self.play_audio
+            .set_paused(self.lifecycle.state() == EngineState::Paused);
     }
 
     /// Runs exactly one fixed step of a held scene.
@@ -481,6 +495,7 @@ impl EditorApp {
         // A fleck outliving the run that threw it would be a scene at rest that
         // is still moving.
         self.effects.clear();
+        self.play_audio.stop();
         if let Err(error) = self.lifecycle.stop() {
             self.report(error.to_string());
         }

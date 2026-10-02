@@ -345,6 +345,11 @@ impl SceneScripts {
         )
     }
 
+    /// What scripts asked to hear since this was last asked, oldest first.
+    pub fn take_audio_commands(&mut self) -> Vec<sindri_decay::AudioCommand> {
+        self.scripts.take_audio_commands()
+    }
+
     /// Moves every script in the world on by one frame.
     pub fn advance(
         &mut self,

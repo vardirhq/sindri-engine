@@ -274,10 +274,10 @@ Sindri's strongest domain relative to the baseline.
 
 | Feature | Engine | Editor | Decay | Proof | vs. baseline | Gap that matters |
 | --- | :-: | :-: | :-: | :-: | --- | --- |
-| WAV / Ogg / MP3, native + browser + silent backends | ✅ | 🟡 | ✅ | ✅ | **Par** | Scene-source preview is not integrated |
+| WAV / Ogg / MP3, native + browser + silent backends | ✅ | ✅ | ✅ | ✅ | **Par** | The editor's Play now plays what a build plays: autoplay sources and every scripted `Audio` request, through the same mixer. With no device it plays silently and still lists what is playing |
 | Play, loop, pause, resume, stop | ✅ | 🟡 | ✅ | ✅ | **Par** | — |
 | Per-play volume | ✅ | — | 🟡 | ✅ | **Behind** | — |
-| **Buses / mixer / master volume** | ✅ | 🟡 | ✅ | ✅ | **Behind** | Every sound plays through a named bus under `master`; `AudioMixer` applies bus gain in front of every backend, changing live voices. Decay: `Audio.set_volume`, `Audio.volume`, `play_on`/`loop_on`; an authored source names its `bus`. Orbital's pause screen moves master, music and effects and saves them; Sound Mixer is the feature example. The editor's inspector edits a source's bus as text. No effects (reverb, ducking) or snapshot blending |
+| **Buses / mixer / master volume** | ✅ | 🟡 | ✅ | ✅ | **Behind** | Every sound plays through a named bus under `master`; `AudioMixer` applies bus gain in front of every backend, changing live voices. Decay: `Audio.set_volume`, `Audio.volume`, `play_on`/`loop_on`; an authored source names its `bus`. Orbital's pause screen moves master, music and effects and saves them; Sound Mixer is the feature example. The editor's inspector edits a source's bus as text. The editor's Audio panel lists every bus Play uses and every sound playing, and monitors them with a trim, mute and solo per bus that change only what the author hears, never `Audio.volume`. No level meters, and a project cannot yet declare its buses and their starting volumes. No effects (reverb, ducking) or snapshot blending |
 | **Spatial audio / panning** | ❌ | ❌ | ❌ | ❌ | **Absent** | — |
 | **Per-voice handles** | ❌ | — | ❌ | — | **Behind** | A script cannot stop the specific sound it started |
 | **Music transitions / crossfade** | ❌ | ❌ | ❌ | ❌ | **Absent** | — |

@@ -65,10 +65,11 @@ fn moving_a_panel_takes_it_out_of_where_it_was() {
 fn a_slot_whose_last_panel_leaves_is_no_longer_drawn() {
     let mut workspace = Workspace::preset(Preset::Docked);
     workspace.place(Panel::Assistant, Place::Dock(Slot::Left), 0);
+    workspace.place(Panel::Audio, Place::Dock(Slot::Left), 0);
     workspace.place(Panel::Inspector, Place::Dock(Slot::Left), 0);
     assert!(
         workspace.group(Place::Dock(Slot::FarRight)).is_none(),
-        "both of its panels left, so it is empty and undrawn"
+        "all of its panels left, so it is empty and undrawn"
     );
 }
 
@@ -86,6 +87,7 @@ fn a_panel_dropped_between_two_tabs_lands_between_them() {
             Panel::Inspector,
             Panel::Console,
             Panel::History,
+            Panel::Audio,
             Panel::Profiler
         ]
     );
@@ -106,12 +108,12 @@ fn a_dropped_panel_is_the_one_showing() {
 #[test]
 fn closing_the_selected_tab_shows_a_neighbour() {
     let mut workspace = Workspace::preset(Preset::Wide);
-    workspace.select(Place::Dock(Slot::Bottom), 3);
+    workspace.select(Place::Dock(Slot::Bottom), 4);
     assert!(workspace.take(Panel::Profiler));
     let group = workspace
         .group(Place::Dock(Slot::Bottom))
-        .expect("three tabs are left");
-    assert_eq!(group.selected(), Some(Panel::History));
+        .expect("four tabs are left");
+    assert_eq!(group.selected(), Some(Panel::Audio));
 }
 
 /// The centre is what every other slot is measured against. An editor with a

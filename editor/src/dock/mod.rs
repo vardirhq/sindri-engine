@@ -61,13 +61,15 @@ pub enum Panel {
     History,
     /// Where each frame of Play spent its time.
     Profiler,
+    /// What Play is playing, bus by bus.
+    Audio,
     /// The local assistant: its setup while it has one, and itself after.
     Assistant,
 }
 
 impl Panel {
     /// Every panel, in the order a menu should offer them.
-    pub const ALL: [Self; 10] = [
+    pub const ALL: [Self; 11] = [
         Self::Scene,
         Self::Game,
         Self::Hierarchy,
@@ -77,6 +79,7 @@ impl Panel {
         Self::Console,
         Self::History,
         Self::Profiler,
+        Self::Audio,
         Self::Assistant,
     ];
 
@@ -91,6 +94,7 @@ impl Panel {
             Self::Console => "Console",
             Self::History => "History",
             Self::Profiler => "Profiler",
+            Self::Audio => "Audio",
             Self::Assistant => "Assistant",
         }
     }
@@ -251,7 +255,7 @@ impl Workspace {
 
     /// One of the arrangements the editor ships with.
     pub fn preset(preset: Preset) -> Self {
-        use Corner::{BottomLeft, TopLeft, TopRight};
+        use Corner::{BottomLeft, BottomRight, TopLeft, TopRight};
         use Slot::{Bottom, FarRight, Left, Main, MainBottom, Right};
         let places: &[(Place, &[Panel])] = match preset {
             Preset::Canvas => &[
@@ -274,11 +278,15 @@ impl Workspace {
                     Place::Overlay(BottomLeft),
                     &[Panel::Project, Panel::Console, Panel::History],
                 ),
-                // Beside the inspector, whose overlay has room for a third
-                // tab where the bottom-left one does not.
                 (
                     Place::Overlay(TopRight),
-                    &[Panel::Inspector, Panel::Assistant, Panel::Profiler],
+                    &[Panel::Inspector, Panel::Assistant],
+                ),
+                // What Play is doing, in the corner the scene leaves free:
+                // watched while the Game view runs, so never over it.
+                (
+                    Place::Overlay(BottomRight),
+                    &[Panel::Audio, Panel::Profiler],
                 ),
             ],
             Preset::Docked => &[
@@ -291,7 +299,10 @@ impl Workspace {
                     Place::Dock(Right),
                     &[Panel::Project, Panel::History, Panel::Profiler],
                 ),
-                (Place::Dock(FarRight), &[Panel::Inspector, Panel::Assistant]),
+                (
+                    Place::Dock(FarRight),
+                    &[Panel::Inspector, Panel::Assistant, Panel::Audio],
+                ),
             ],
             Preset::Wide => &[
                 (Place::Dock(Left), &[Panel::Hierarchy]),
@@ -305,6 +316,7 @@ impl Workspace {
                         Panel::Project,
                         Panel::Console,
                         Panel::History,
+                        Panel::Audio,
                         Panel::Profiler,
                     ],
                 ),
@@ -334,6 +346,10 @@ impl Workspace {
             let inspector = workspace.group_mut(Place::Overlay(TopRight));
             inspector.size = 320.0;
             inspector.height = 2_000.0;
+            // Room for the mixer's buses and what is playing below them.
+            let play = workspace.group_mut(Place::Overlay(BottomRight));
+            play.size = 320.0;
+            play.height = 420.0;
         }
         workspace
     }

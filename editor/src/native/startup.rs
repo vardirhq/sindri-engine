@@ -167,6 +167,7 @@ impl EditorApp {
             thumbnails: thumbnails::Thumbnails::default(),
             scene_board: scene_board_view::SceneBoardState::default(),
             profiler: crate::profiler::Profiler::default(),
+            play_audio: crate::play_audio::PlayAudio::new(crate::play_audio::native()),
             textured_revision: TexturedAt::default(),
             scene_viewport,
             game_viewport,
@@ -199,8 +200,7 @@ impl EditorApp {
             app.console.error(failure);
         }
         app.arrange_for(decided);
-        app.request_first_textures();
-        app.reload_scripts();
+        app.request_first_assets();
         app.remember_open_scene();
         app
     }
@@ -225,10 +225,12 @@ impl EditorApp {
 }
 
 impl EditorApp {
-    /// Asks for the opening scene's textures, and says what is missing.
-    fn request_first_textures(&mut self) {
+    /// Asks for the opening scene's textures and scripts, and says what is
+    /// missing.
+    fn request_first_assets(&mut self) {
         let notes = self.textures.request(&self.world, &mut self.renderers.text);
         self.record_texture_notes(notes);
+        self.reload_scripts();
     }
 }
 

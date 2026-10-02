@@ -25,7 +25,7 @@ mod tests;
 
 #[cfg(target_arch = "wasm32")]
 pub use browser::BrowserAudioBackend;
-pub use mixer::{AudioMixer, EFFECTS_BUS, MASTER_BUS, MUSIC_BUS};
+pub use mixer::{AudioMixer, EFFECTS_BUS, MASTER_BUS, MUSIC_BUS, PlayingVoice};
 #[cfg(all(not(target_arch = "wasm32"), feature = "audio"))]
 pub use native::NativeAudioBackend;
 pub use silent::SilentAudioBackend;

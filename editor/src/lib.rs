@@ -50,6 +50,9 @@ pub mod native;
 pub mod palette;
 #[cfg(not(target_arch = "wasm32"))]
 pub mod picking;
+/// What a scene sounds like while it plays in the editor.
+#[cfg(not(target_arch = "wasm32"))]
+pub mod play_audio;
 /// Putting an authored prefab into the open scene.
 #[cfg(not(target_arch = "wasm32"))]
 pub mod prefab;
