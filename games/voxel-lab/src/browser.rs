@@ -19,9 +19,9 @@ use sindri_voxel::{SectionCoord, VoxelCoord, VoxelFace, VoxelId};
 use thiserror::Error;
 
 use crate::{
-    CLAY, DIRT, GRASS, GRAVEL, ICE, LEAVES, LOG, MOSS, MUD, ROCK, SAND, SNOW, STONE, WATER,
     VoxelLabRuntime, VoxelLabStats,
     camera_control::{CameraControls, LabCamera},
+    runtime::{CLAY, DIRT, GRASS, GRAVEL, ICE, LEAVES, LOG, MOSS, MUD, ROCK, SAND, SNOW, STONE, WATER},
 };
 
 const SCENE_JSON: &str = include_str!("../assets/voxel-lab.scene");
@@ -79,11 +79,8 @@ impl DesktopApp for VoxelLabApp {
     fn create(context: &AppContext<'_>) -> Result<Self, Self::Error> {
         let mut textures = TextureRegistry::new(context.device(), context.queue());
         let material_textures = load_authored_materials(context, &mut textures)?;
-        let document =
-            SceneDocument::from_json(SCENE_JSON).expect("embedded Voxel Lab scene parses");
-        let world = World::from_scene(&document)
-            .expect("embedded Voxel Lab scene loads")
-            .world;
+        let document = SceneDocument::from_json(SCENE_JSON).expect("embedded Voxel Lab scene parses");
+        let world = World::from_scene(&document).expect("embedded Voxel Lab scene loads").world;
         let environment = environment_of(&world)
             .expect("Voxel Lab environment is valid")
             .expect("Voxel Lab authors an environment");
@@ -120,72 +117,38 @@ impl DesktopApp for VoxelLabApp {
         }
     }
 
-    fn update(&mut self, _delta: Duration) -> Result<Flow, Self::Error> {
-        Ok(Flow::Continue)
-    }
+    fn update(&mut self, _delta: Duration) -> Result<Flow, Self::Error> { Ok(Flow::Continue) }
 
     fn resize(&mut self, context: &AppContext<'_>) -> Result<(), Self::Error> {
         self.camera.set_viewport_height(context.height());
-        self.depth
-            .resize(context.device(), context.width(), context.height());
-        self.bloom
-            .resize(context.device(), context.width(), context.height());
+        self.depth.resize(context.device(), context.width(), context.height());
+        self.bloom.resize(context.device(), context.width(), context.height());
         Ok(())
     }
 
-    fn render(
-        &mut self,
-        context: &AppContext<'_>,
-        view: &wgpu::TextureView,
-    ) -> Result<(), Self::Error> {
+    fn render(&mut self, context: &AppContext<'_>, view: &wgpu::TextureView) -> Result<(), Self::Error> {
         self.camera.set_viewport_height(context.height());
         let camera_view = self.camera.camera();
         #[allow(clippy::cast_possible_truncation)]
-        let focus = VoxelCoord::new(
-            camera_view.focus.x.floor() as i32,
-            0,
-            camera_view.focus.z.floor() as i32,
-        )
-        .section();
+        let focus = VoxelCoord::new(camera_view.focus.x.floor() as i32, 0, camera_view.focus.z.floor() as i32).section();
         let material_textures = self.material_textures;
-        let lab = self.lab.frame(focus, &move |voxel, face| {
-            browser_texture(material_textures, voxel, face)
-        })?;
+        let lab = self.lab.frame(focus, &move |voxel, face| browser_texture(material_textures, voxel, face))?;
         update_stats(lab.stats, focus);
 
         let camera = camera(context, camera_view);
         let mut extracted = ExtractedFrame::new(
             Viewport::new(context.width(), context.height()),
-            ClearOperations {
-                color: self.environment.background.map(f64::from),
-                depth: 1.0,
-            },
+            ClearOperations { color: self.environment.background.map(f64::from), depth: 1.0 },
         );
         for command in lab.commands {
-            extracted.push(FramePass::new(
-                RenderStage::Opaque3d,
-                RenderLayer::WORLD,
-                camera,
-                command,
-            ));
+            extracted.push(FramePass::new(RenderStage::Opaque3d, RenderLayer::WORLD, camera, command));
         }
         let prepared = extracted.prepare()?;
-        let mut encoder =
-            context
-                .device()
-                .create_command_encoder(&wgpu::CommandEncoderDescriptor {
-                    label: Some("Voxel Lab browser encoder"),
-                });
+        let mut encoder = context.device().create_command_encoder(&wgpu::CommandEncoderDescriptor { label: Some("Voxel Lab browser encoder") });
         self.cubes.set_lighting(self.lighting);
         self.cubes.set_fog(self.environment.fog_settings());
-        self.cubes
-            .set_shadows(context.device(), self.environment.shadow_settings());
-        self.cubes
-            .set_ambient_occlusion(if self.environment.ambient_occlusion.enabled {
-                self.environment.ambient_occlusion.strength
-            } else {
-                0.0
-            });
+        self.cubes.set_shadows(context.device(), self.environment.shadow_settings());
+        self.cubes.set_ambient_occlusion(if self.environment.ambient_occlusion.enabled { self.environment.ambient_occlusion.strength } else { 0.0 });
         let renderers = FrameRenderers {
             cube: &mut self.cubes,
             sprites: &mut self.sprites,
@@ -194,33 +157,12 @@ impl DesktopApp for VoxelLabApp {
             shapes: &mut self.shapes,
             textures: &self.textures,
         };
-        let target = FrameTarget {
-            color: view,
-            depth: &self.depth,
-        };
+        let target = FrameTarget { color: view, depth: &self.depth };
         let post_process = self.environment.post_process_settings();
         if post_process.is_active() {
-            encode_lit_frame(
-                renderers,
-                context.device(),
-                context.queue(),
-                &mut encoder,
-                target,
-                &prepared,
-                Lighting {
-                    bloom: &mut self.bloom,
-                    settings: post_process,
-                },
-            )?;
+            encode_lit_frame(renderers, context.device(), context.queue(), &mut encoder, target, &prepared, Lighting { bloom: &mut self.bloom, settings: post_process })?;
         } else {
-            encode_prepared_frame(
-                renderers,
-                context.device(),
-                context.queue(),
-                &mut encoder,
-                target,
-                &prepared,
-            )?;
+            encode_prepared_frame(renderers, context.device(), context.queue(), &mut encoder, target, &prepared)?;
         }
         context.queue().submit([encoder.finish()]);
         Ok(())
@@ -229,9 +171,7 @@ impl DesktopApp for VoxelLabApp {
 
 impl VoxelLabApp {
     fn key_pressed(&mut self, key: Key) {
-        if key == Key::Space {
-            self.dig_centre();
-        }
+        if key == Key::Space { self.dig_centre(); }
     }
 
     fn dig_centre(&mut self) {
@@ -251,56 +191,26 @@ struct BrowserMaterials {
     world_side: TextureId,
 }
 
-fn load_authored_materials(
-    context: &AppContext<'_>,
-    textures: &mut TextureRegistry,
-) -> Result<BrowserMaterials, VoxelLabError> {
+fn load_authored_materials(context: &AppContext<'_>, textures: &mut TextureRegistry) -> Result<BrowserMaterials, VoxelLabError> {
     Ok(BrowserMaterials {
         grass_top: load_texture(context, textures, "textures/user-top.png", USER_TOP)?,
         grass_side: load_texture(context, textures, "textures/user-side-a.png", USER_SIDE_A)?,
         dirt: load_texture(context, textures, "textures/user-dirt.png", USER_DIRT)?,
-        world_top: load_texture(
-            context,
-            textures,
-            "textures/world-blocks-top.png",
-            WORLD_TOPS,
-        )?,
-        world_side: load_texture(
-            context,
-            textures,
-            "textures/world-blocks-side.png",
-            WORLD_SIDES,
-        )?,
+        world_top: load_texture(context, textures, "textures/world-blocks-top.png", WORLD_TOPS)?,
+        world_side: load_texture(context, textures, "textures/world-blocks-side.png", WORLD_SIDES)?,
     })
 }
 
-fn load_texture(
-    context: &AppContext<'_>,
-    textures: &mut TextureRegistry,
-    label: &str,
-    bytes: &[u8],
-) -> Result<TextureId, VoxelLabError> {
+fn load_texture(context: &AppContext<'_>, textures: &mut TextureRegistry, label: &str, bytes: &[u8]) -> Result<TextureId, VoxelLabError> {
     let id = label.parse::<AssetId>()?;
     let asset = TextureAssetDecoder.decode(AssetBytes::new(id, bytes.to_vec()))?;
-    Ok(textures.insert(Texture2D::from_rgba8(
-        context.device(),
-        context.queue(),
-        label,
-        asset.width(),
-        asset.height(),
-        asset.rgba8(),
-    )?))
+    Ok(textures.insert(Texture2D::from_rgba8(context.device(), context.queue(), label, asset.width(), asset.height(), asset.rgba8())?))
 }
 
 #[allow(clippy::cast_precision_loss)]
 fn atlas_rect(column: u32, width: u32) -> Result<UvRect, UvRectError> {
     let x = 2 + column * 52;
-    UvRect::new(
-        x as f32 / width as f32,
-        2.0 / 52.0,
-        48.0 / width as f32,
-        48.0 / 52.0,
-    )
+    UvRect::new(x as f32 / width as f32, 2.0 / 52.0, 48.0 / width as f32, 48.0 / 52.0)
 }
 
 fn world_material(textures: BrowserMaterials, column: u32, face: VoxelFace) -> VoxelTexture {
@@ -319,80 +229,40 @@ fn browser_texture(textures: BrowserMaterials, voxel: VoxelId, face: VoxelFace) 
             _ => VoxelTexture::new(textures.grass_side, UvRect::FULL),
         };
     }
-    if voxel == DIRT {
-        return VoxelTexture::new(textures.dirt, UvRect::FULL);
-    }
+    if voxel == DIRT { return VoxelTexture::new(textures.dirt, UvRect::FULL); }
 
-    let column = if voxel == STONE {
-        6
-    } else if voxel == ROCK {
-        8
-    } else if voxel == SAND {
-        10
-    } else if voxel == SNOW {
-        12
-    } else if voxel == ICE {
-        14
-    } else if voxel == MUD {
-        15
-    } else if voxel == MOSS {
-        17
-    } else if voxel == GRAVEL {
-        18
-    } else if voxel == CLAY {
-        19
-    } else if voxel == WATER {
-        20
-    } else if voxel == LOG {
-        21
-    } else if voxel == LEAVES {
-        17
-    } else {
-        6
-    };
+    let column = if voxel == STONE { 6 }
+        else if voxel == ROCK { 8 }
+        else if voxel == SAND { 10 }
+        else if voxel == SNOW { 12 }
+        else if voxel == ICE { 14 }
+        else if voxel == MUD { 15 }
+        else if voxel == MOSS { 17 }
+        else if voxel == GRAVEL { 18 }
+        else if voxel == CLAY { 19 }
+        else if voxel == WATER { 20 }
+        else if voxel == LOG { 21 }
+        else if voxel == LEAVES { 17 }
+        else { 6 };
     world_material(textures, column, face)
 }
 
 #[allow(clippy::cast_precision_loss)]
 fn camera(context: &AppContext<'_>, camera: LabCamera) -> FrameCamera {
-    let eye = camera.focus
-        + Vec3::new(
-            camera.yaw.cos() * camera.pitch.cos(),
-            camera.pitch.sin(),
-            camera.yaw.sin() * camera.pitch.cos(),
-        ) * 52.0;
+    let eye = camera.focus + Vec3::new(camera.yaw.cos() * camera.pitch.cos(), camera.pitch.sin(), camera.yaw.sin() * camera.pitch.cos()) * 52.0;
     let aspect = context.width() as f32 / context.height().max(1) as f32;
     let zoom = camera.half_height;
     FrameCamera {
         position: eye,
-        view_projection: orthographic_projection(
-            -zoom * aspect,
-            zoom * aspect,
-            -zoom,
-            zoom,
-            0.1,
-            160.0,
-        ) * look_at(eye, camera.focus, Vec3::Y),
+        view_projection: orthographic_projection(-zoom * aspect, zoom * aspect, -zoom, zoom, 0.1, 160.0) * look_at(eye, camera.focus, Vec3::Y),
     }
 }
 
 fn update_stats(stats: VoxelLabStats, focus: SectionCoord) {
-    let Some(document) = web_sys::window().and_then(|window| window.document()) else {
-        return;
-    };
-    let Some(element) = document.get_element_by_id("voxel-stats") else {
-        return;
-    };
+    let Some(document) = web_sys::window().and_then(|window| window.document()) else { return; };
+    let Some(element) = document.get_element_by_id("voxel-stats") else { return; };
     element.set_text_content(Some(&format!(
         "section [{}, {}, {}] · resident {} · meshes {} · remeshes {} · triangles {} · uploads {} · releases {}",
-        focus.x,
-        focus.y,
-        focus.z,
-        stats.resident_sections,
-        stats.mesh_jobs,
-        stats.remeshes,
-        stats.triangles,
-        stats.uploads,
-        stats.releases
+        focus.x, focus.y, focus.z, stats.resident_sections, stats.mesh_jobs, stats.remeshes, stats.triangles, stats.uploads, stats.releases
     )));
 }
