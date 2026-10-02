@@ -50,7 +50,7 @@ pub use components::{
     TileVolumeComponent, TileVolumeError, TileVolumeIndex, TilemapComponent, TilemapError,
     UiAnchor, UiFill, UiFillEdge, UiImageComponent, UiShapeBlend, UiShapeComponent, UiShapeKind,
     UiShapeShadow, UiTextAutoSize, UiTextCase, UiTextComponent, UiTextLineAlign, UiTextOutline,
-    UiTextShadow, UiTextWrap, VoxelBlock, VoxelGeneratorDocument, VoxelMaterialDocument,
+    UiTextShadow, UiTextWrap, VoxelBlock, VoxelEdit, VoxelGeneratorDocument, VoxelMaterialDocument,
     VoxelWorldComponent, add_camera_trauma, cell_to_local_in, default_sun_transform,
     environment_of, environments_in, light_direction, lights_in, sun_in, ui_text_template,
     update_camera_behaviors,
@@ -58,8 +58,8 @@ pub use components::{
 pub use effects::{EffectBurstComponent, Effects2d, Fleck};
 pub use extract::{
     CameraView, ExtractProblem, OverlayPlacement, OverlayView, SceneExtractError, SceneExtractor,
-    SceneRuntime, UiCanvas, ViewCamera, WorldProjection, overlay_for_viewport, overlay_in_scene,
-    pan_for_drag, world_camera_of,
+    SceneRuntime, UiCanvas, ViewCamera, VoxelGround, VoxelWorldHit, WorldProjection,
+    overlay_for_viewport, overlay_in_scene, pan_for_drag, voxel_space, world_camera_of,
 };
 pub use input_actions::InputActionsComponent;
 pub use navigation::{GridNavigationError, GridPlacement, WorldGridNavigation};

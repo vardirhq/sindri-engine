@@ -18,7 +18,7 @@ use decay_ir::Path;
 use decay_runtime::{RuntimeError, Value};
 use serde_json::{Value as Json, json};
 use sindri_core::{EntityId, SceneComponent};
-use sindri_scene::TileVolumeComponent;
+use sindri_scene::{TileVolumeComponent, VoxelBlock, VoxelEdit, VoxelGround, VoxelWorldComponent};
 
 use crate::surface::GridCall;
 
@@ -35,6 +35,9 @@ impl WorldHost<'_> {
     ) -> Result<Value, RuntimeError> {
         let map = self.entity_argument(path, args, 0, "the tile volume")?;
         let position = Self::block_position(path, args)?;
+        if let Some(ground) = self.voxel_ground(path, map)? {
+            return self.voxel_block_call(call, path, args, map, &ground, position);
+        }
         match call {
             GridCall::Block => Ok(Value::String(self.read_block(path, map, position)?)),
             GridCall::SetBlock => {
@@ -65,6 +68,91 @@ impl WorldHost<'_> {
                 Ok(Value::Bool(tile_set.tile(&tile).is_some_and(|block| {
                     block.tags.iter().any(|carried| carried == tag)
                 })))
+            }
+            _ => unreachable!("dispatched to the flat-map calls instead"),
+        }
+    }
+
+    /// The voxel world on `map`, read with this host's tile sets, if it has one.
+    fn voxel_ground(
+        &self,
+        path: &Path,
+        map: EntityId,
+    ) -> Result<Option<VoxelGround>, RuntimeError> {
+        let Some(payload) = self
+            .world
+            .get(map)
+            .and_then(|data| data.components.get(VoxelWorldComponent::TYPE_NAME))
+        else {
+            return Ok(None);
+        };
+        let component: VoxelWorldComponent = serde_json::from_value(payload.clone())
+            .map_err(|error| RuntimeError::Host(format!("{}: {error}", path.dotted())))?;
+        VoxelGround::of(&component, self.tile_sets)
+            .map(Some)
+            .map_err(|error| RuntimeError::Host(format!("{}: {error}", path.dotted())))
+    }
+
+    /// `Grid.block`, `Grid.set_block` and `Grid.tagged` on a voxel world.
+    ///
+    /// The cell is a grid's, so a column, a row and a level are a voxel's X,
+    /// Z and height. A change is kept as an edit on the world rather than as
+    /// a cell list: what was generated is not stored, and an edit back to it
+    /// leaves nothing behind.
+    fn voxel_block_call(
+        &mut self,
+        call: GridCall,
+        path: &Path,
+        args: &[Value],
+        map: EntityId,
+        ground: &VoxelGround,
+        [column, row, level]: [i32; 3],
+    ) -> Result<Value, RuntimeError> {
+        let at = [column, level, row];
+        match call {
+            GridCall::Block => Ok(Value::String(ground.block(at))),
+            GridCall::Tagged => {
+                let Some(Value::String(tag)) = args.get(4) else {
+                    return Err(RuntimeError::Host(format!(
+                        "{} needs the tag to ask about",
+                        path.dotted()
+                    )));
+                };
+                Ok(Value::Bool(ground.tagged(at, tag)))
+            }
+            GridCall::SetBlock => {
+                let Some(Value::String(tile)) = args.get(4) else {
+                    return Err(RuntimeError::Host(format!(
+                        "{} needs the name of a tile, or \"\" to clear the cell",
+                        path.dotted()
+                    )));
+                };
+                let payload = self
+                    .world
+                    .get_mut(map)
+                    .and_then(|data| data.components.get_mut(VoxelWorldComponent::TYPE_NAME))
+                    .expect("the voxel world was read above");
+                let edits: Vec<VoxelEdit> = payload
+                    .get("edits")
+                    .cloned()
+                    .map(serde_json::from_value)
+                    .transpose()
+                    .map_err(|error| RuntimeError::Host(format!("{}: {error}", path.dotted())))?
+                    .unwrap_or_default();
+                let edited = ground
+                    .edited(&edits, at, &VoxelBlock::Named(tile.clone()))
+                    .map_err(|error| {
+                        RuntimeError::Host(format!(
+                            "{} was given tile `{tile}`: {error}",
+                            path.dotted()
+                        ))
+                    })?;
+                if edited != edits {
+                    payload["edits"] = serde_json::to_value(edited).map_err(|error| {
+                        RuntimeError::Host(format!("{}: {error}", path.dotted()))
+                    })?;
+                }
+                Ok(Value::Unit)
             }
             _ => unreachable!("dispatched to the flat-map calls instead"),
         }

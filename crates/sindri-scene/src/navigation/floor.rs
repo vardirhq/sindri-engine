@@ -12,8 +12,11 @@
 use sindri_core::{EntityData, EntityId, SceneComponent};
 use sindri_grid::{GridBounds, GridSpace, GridWalls};
 
+use sindri_grid::GridCoord;
+
 use crate::{
     TileGridComponent, TileSetBindings, TileSurfaces, TileVolumeComponent, TilemapComponent,
+    VoxelGround, VoxelWorldComponent,
 };
 
 use super::GridNavigationError;
@@ -61,6 +64,78 @@ pub(super) fn block_unwalkable_steps(
             walls
                 .block(from, to)
                 .map_err(|source| GridNavigationError::DerivedWall { grid, source })?;
+        }
+    }
+    Ok(())
+}
+
+/// How far around the cells it is asked about a voxel world's ground is read.
+const VOXEL_REACH: i32 = 24;
+/// The widest neighbourhood that is read, so far-apart cells cost a bounded
+/// amount rather than everything between them.
+const VOXEL_SPAN: i32 = 160;
+
+/// The same walls, for a grid whose ground is a voxel world.
+///
+/// A generated world has no list of cells to walk, so its surfaces are read
+/// over the neighbourhood of `cells` and that neighbourhood is walled in:
+/// beyond it is ground nobody asked about, which a path must not wander into
+/// as though it were flat.
+pub(super) fn block_unwalkable_voxels(
+    grid: EntityId,
+    data: &EntityData,
+    tile_sets: &TileSetBindings,
+    bounds: GridBounds,
+    max_step: f32,
+    cells: impl Iterator<Item = GridCoord>,
+    walls: &mut GridWalls,
+) -> Result<(), GridNavigationError> {
+    let Some(payload) = data.components.get(VoxelWorldComponent::TYPE_NAME) else {
+        return Ok(());
+    };
+    let component: VoxelWorldComponent = serde_json::from_value(payload.clone())
+        .map_err(|source| GridNavigationError::InvalidVoxelWorldPayload { grid, source })?;
+    let ground = VoxelGround::of(&component, Some(tile_sets)).map_err(|source| {
+        GridNavigationError::InvalidVoxelWorld {
+            grid,
+            reason: source.to_string(),
+        }
+    })?;
+    let mut min = [i32::MAX; 2];
+    let mut max = [i32::MIN; 2];
+    for cell in cells {
+        min = [min[0].min(cell.x), min[1].min(cell.y)];
+        max = [max[0].max(cell.x), max[1].max(cell.y)];
+    }
+    if min[0] > max[0] {
+        return Ok(());
+    }
+    for axis in 0..2 {
+        let middle = min[axis] + (max[axis] - min[axis]) / 2;
+        let half = ((max[axis] - min[axis]) / 2 + VOXEL_REACH).min(VOXEL_SPAN / 2);
+        min[axis] = middle - half;
+        max[axis] = middle + half;
+    }
+    let surfaces = ground.surfaces(min, max);
+    let inside = |cell: GridCoord| {
+        (min[0]..=max[0]).contains(&cell.x) && (min[1]..=max[1]).contains(&cell.y)
+    };
+    for z in min[1]..=max[1] {
+        for x in min[0]..=max[0] {
+            let from = GridCoord::new(x, z);
+            if !bounds.contains(from) {
+                continue;
+            }
+            for to in from.cardinal_neighbours() {
+                if !bounds.contains(to)
+                    || (inside(to) && surfaces.step_is_walkable(from, to, max_step))
+                {
+                    continue;
+                }
+                walls
+                    .block(from, to)
+                    .map_err(|source| GridNavigationError::DerivedWall { grid, source })?;
+            }
         }
     }
     Ok(())

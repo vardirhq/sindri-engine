@@ -239,6 +239,12 @@ pub(super) struct LayeredTerrain {
 }
 
 impl LayeredTerrain {
+    /// The highest voxel this terrain can generate.
+    pub(super) fn highest(&self) -> i32 {
+        self.base_height
+            .saturating_add(i32::try_from(self.height_variation).unwrap_or(i32::MAX))
+    }
+
     fn height(&self, x: i32, z: i32) -> i32 {
         if self.height_variation == 0 {
             return self.base_height;

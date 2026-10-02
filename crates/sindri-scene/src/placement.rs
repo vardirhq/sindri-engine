@@ -16,13 +16,13 @@
 
 use std::collections::BTreeMap;
 
-use sindri_core::{ComponentSchemaRegistry, EntityId, Transform3D, World};
+use sindri_core::{ComponentSchemaRegistry, EntityId, SceneComponent, Transform3D, World};
 use sindri_grid::GridCoord;
 use thiserror::Error;
 
 use crate::{
     GridPlacementComponent, TileGridComponent, TileSetBindings, TileSurfaceError, TileSurfaces,
-    TileVolumeComponent,
+    TileVolumeComponent, VoxelGround, VoxelWorldComponent,
 };
 
 /// The surfaces of each grid, kept between the frames that did not change it.
@@ -41,6 +41,10 @@ use crate::{
 pub struct GridSurfaces {
     /// What was derived, and what it was derived from.
     derived: BTreeMap<EntityId, (u64, u64, Option<TileSurfaces>)>,
+    /// The voxel worlds that are some grids' ground, and what they were read
+    /// from. Their surfaces are asked a column at a time rather than derived
+    /// whole, because a generated world has no edge to derive to.
+    voxels: BTreeMap<EntityId, (u64, u64, VoxelGround)>,
     /// How many times a surface was actually worked out.
     ///
     /// The saving is not visible in the result -- a cached answer and a fresh
@@ -53,6 +57,7 @@ impl GridSurfaces {
     /// Forgets everything, so the next resolve derives again.
     pub fn clear(&mut self) {
         self.derived.clear();
+        self.voxels.clear();
     }
 
     /// How many derivations this cache has paid for.
@@ -104,11 +109,19 @@ pub fn resolve_grid_placements(
                 grid: placement.grid.as_str().to_owned(),
             });
         };
-        let derived = surfaces_of(world, components, grid_entity, tile_sets, surfaces)?;
         let origin = world
             .world_transform(grid_entity)
             .unwrap_or_default()
             .position;
+        if let Some(ground) = voxels_of(world, components, grid_entity, tile_sets, surfaces)? {
+            // Only the columns this placement can stand on are asked about.
+            let around = placement_columns(world, entity, &placement, &grid, origin);
+            let local = around.map(|(min, max)| ground.surfaces(min, max));
+            place(world, entity, &placement, &grid, local.as_ref(), origin)?;
+            resolved += 1;
+            continue;
+        }
+        let derived = surfaces_of(world, components, grid_entity, tile_sets, surfaces)?;
 
         place(world, entity, &placement, &grid, derived, origin)?;
         resolved += 1;
@@ -150,6 +163,74 @@ fn surfaces_of<'a>(
             .insert(grid_entity, (revision, generation, derived));
     }
     Ok(cache.derived[&grid_entity].2.as_ref())
+}
+
+/// The voxel world that is a grid's ground, if it has one, kept until the
+/// world or the tile sets change.
+fn voxels_of<'a>(
+    world: &World,
+    components: &ComponentSchemaRegistry,
+    grid_entity: EntityId,
+    tile_sets: Option<&TileSetBindings>,
+    cache: &'a mut GridSurfaces,
+) -> Result<Option<&'a VoxelGround>, GridPlacementError> {
+    if !world
+        .get(grid_entity)
+        .is_some_and(|data| data.components.contains_key(VoxelWorldComponent::TYPE_NAME))
+    {
+        return Ok(None);
+    }
+    let revision = world.revision(grid_entity).unwrap_or_default();
+    let generation = tile_sets.map_or(0, TileSetBindings::generation);
+    let fresh = cache
+        .voxels
+        .get(&grid_entity)
+        .is_some_and(|&(was_revision, was_generation, _)| {
+            was_revision == revision && was_generation == generation
+        });
+    if !fresh {
+        let ground = VoxelGround::of_entity(world, components, grid_entity, tile_sets).map_err(
+            |source| GridPlacementError::InvalidVoxels {
+                source: Box::new(source),
+            },
+        )?;
+        let Some(ground) = ground else {
+            return Ok(None);
+        };
+        cache.derivations = cache.derivations.saturating_add(1);
+        cache
+            .voxels
+            .insert(grid_entity, (revision, generation, ground));
+    }
+    Ok(cache.voxels.get(&grid_entity).map(|(_, _, ground)| ground))
+}
+
+/// The columns a placement on a grid of boxes can stand on or cover, with one
+/// either side for what is ahead of it, as two inclusive corners.
+fn placement_columns(
+    world: &World,
+    entity: EntityId,
+    placement: &GridPlacementComponent,
+    grid: &TileGridComponent,
+    origin: [f32; 3],
+) -> Option<([i32; 2], [i32; 2])> {
+    let [across, into, _] = grid.solid_cell()?;
+    let anchor = if let Some([column, row]) = placement.cell {
+        GridCoord::new(column, row)
+    } else {
+        let position = world.get(entity)?.transform_3d?.position;
+        nearest_cell(
+            f64::from((position[0] - origin[0]) / across),
+            f64::from((position[2] - origin[2]) / into),
+        )
+    };
+    let mut min = [anchor.x - 1, anchor.y - 1];
+    let mut max = [anchor.x + 1, anchor.y + 1];
+    for cell in footprint(placement, anchor) {
+        min = [min[0].min(cell.x), min[1].min(cell.y)];
+        max = [max[0].max(cell.x), max[1].max(cell.y)];
+    }
+    Some((min, max))
 }
 
 /// The derivation itself, with nothing remembered.
@@ -487,5 +568,10 @@ pub enum GridPlacementError {
     InvalidSurface {
         #[source]
         source: TileSurfaceError,
+    },
+    #[error("a placed grid's voxel world cannot be read: {source}")]
+    InvalidVoxels {
+        #[source]
+        source: Box<crate::SceneExtractError>,
     },
 }

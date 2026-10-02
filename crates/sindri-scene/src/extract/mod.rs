@@ -24,11 +24,13 @@ mod tilemap;
 mod tolerance;
 mod ui;
 mod voxel_appearance;
+mod voxel_ground;
 mod voxel_source;
 mod voxel_world;
 mod world_meanings;
 
 pub use tolerance::ExtractProblem;
+pub use voxel_ground::{VoxelGround, VoxelWorldHit, voxel_space};
 
 pub use camera::view::UiCanvas;
 

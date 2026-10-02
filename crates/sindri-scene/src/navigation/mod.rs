@@ -15,7 +15,9 @@ use crate::{
     TileSurfaceError, TilemapError, placement::nearest_cell,
 };
 
-use self::floor::{GridFloor, GridGeometry, block_unwalkable_steps, grid_geometry};
+use self::floor::{
+    GridFloor, GridGeometry, block_unwalkable_steps, block_unwalkable_voxels, grid_geometry,
+};
 
 /// One entity's derived placement on a world grid.
 #[derive(Clone, Debug, Eq, PartialEq)]
@@ -49,7 +51,7 @@ impl WorldGridNavigation {
     /// cell is solid and full height would quietly disagree with the volume a
     /// caller holding the asset derives.
     pub fn from_world(world: &World, grid_entity: EntityId) -> Result<Self, GridNavigationError> {
-        Self::derive(world, grid_entity, None)
+        Self::derive(world, grid_entity, None, &[])
     }
 
     /// The same, with the tile sets that say what a volume's cells are.
@@ -62,13 +64,29 @@ impl WorldGridNavigation {
         grid_entity: EntityId,
         tile_sets: &TileSetBindings,
     ) -> Result<Self, GridNavigationError> {
-        Self::derive(world, grid_entity, Some(tile_sets))
+        Self::derive(world, grid_entity, Some(tile_sets), &[])
+    }
+
+    /// The same, making sure the ground around `cells` is known.
+    ///
+    /// A grid whose ground is a voxel world has no edge to derive its walls
+    /// to, so it is derived over the neighbourhood of its occupants and of
+    /// these cells -- a path's goal, say -- and walled in there. A route that
+    /// would need to leave that neighbourhood is not found.
+    pub fn from_world_around(
+        world: &World,
+        grid_entity: EntityId,
+        tile_sets: &TileSetBindings,
+        cells: &[GridCoord],
+    ) -> Result<Self, GridNavigationError> {
+        Self::derive(world, grid_entity, Some(tile_sets), cells)
     }
 
     fn derive(
         world: &World,
         grid_entity: EntityId,
         tile_sets: Option<&TileSetBindings>,
+        around: &[GridCoord],
     ) -> Result<Self, GridNavigationError> {
         let grid_data = world
             .get(grid_entity)
@@ -88,36 +106,7 @@ impl WorldGridNavigation {
             validate_planar_grid(grid_entity, grid_transform)?;
         }
 
-        let authored = grid_data
-            .components
-            .get(GridNavigationComponent::TYPE_NAME)
-            .map(|payload| {
-                serde_json::from_value::<GridNavigationComponent>(payload.clone()).map_err(
-                    |source| GridNavigationError::InvalidNavigationPayload {
-                        grid: grid_entity,
-                        source,
-                    },
-                )
-            })
-            .transpose()?
-            .unwrap_or_default();
-        if !authored.max_step.is_finite() || authored.max_step < 0.0 {
-            return Err(GridNavigationError::InvalidStepLimit {
-                grid: grid_entity,
-                max_step: authored.max_step,
-            });
-        }
-
-        let mut walls = GridWalls::new(bounds);
-        for (index, wall) in authored.walls.iter().enumerate() {
-            walls
-                .block(coord(wall.first), coord(wall.second))
-                .map_err(|source| GridNavigationError::InvalidWall {
-                    grid: grid_entity,
-                    index,
-                    source,
-                })?;
-        }
+        let (authored, mut walls) = authored_walls(grid_entity, grid_data, bounds)?;
 
         // A volume only decides where a walker may go once it *is* the floor.
         // While the flat map is still there the scene is mid-migration, and a
@@ -180,6 +169,22 @@ impl WorldGridNavigation {
                 .place(entity, anchor, &footprint)
                 .map_err(|source| GridNavigationError::InvalidPlacement { entity, source })?;
             placements.insert(entity, GridPlacement { anchor, footprint });
+        }
+
+        if floor == GridFloor::Volume
+            && let Some(tile_sets) = tile_sets
+            && solid.is_some()
+        {
+            let anchors = placements.values().map(|placement| placement.anchor);
+            block_unwalkable_voxels(
+                grid_entity,
+                grid_data,
+                tile_sets,
+                bounds,
+                authored.max_step,
+                anchors.chain(around.iter().copied()),
+                &mut walls,
+            )?;
         }
 
         Ok(Self {
@@ -267,6 +272,46 @@ impl WorldGridNavigation {
             )
             .map_err(GridNavigationError::Path)
     }
+}
+
+/// What the grid's author said about walking on it: the step limit, and the
+/// walls placed by hand, already checked.
+fn authored_walls(
+    grid_entity: EntityId,
+    grid_data: &EntityData,
+    bounds: GridBounds,
+) -> Result<(GridNavigationComponent, GridWalls), GridNavigationError> {
+    let authored = grid_data
+        .components
+        .get(GridNavigationComponent::TYPE_NAME)
+        .map(|payload| {
+            serde_json::from_value::<GridNavigationComponent>(payload.clone()).map_err(|source| {
+                GridNavigationError::InvalidNavigationPayload {
+                    grid: grid_entity,
+                    source,
+                }
+            })
+        })
+        .transpose()?
+        .unwrap_or_default();
+    if !authored.max_step.is_finite() || authored.max_step < 0.0 {
+        return Err(GridNavigationError::InvalidStepLimit {
+            grid: grid_entity,
+            max_step: authored.max_step,
+        });
+    }
+
+    let mut walls = GridWalls::new(bounds);
+    for (index, wall) in authored.walls.iter().enumerate() {
+        walls
+            .block(coord(wall.first), coord(wall.second))
+            .map_err(|source| GridNavigationError::InvalidWall {
+                grid: grid_entity,
+                index,
+                source,
+            })?;
+    }
+    Ok((authored, walls))
 }
 
 const fn coord(value: [i32; 2]) -> GridCoord {
@@ -371,6 +416,14 @@ pub enum GridNavigationError {
         #[source]
         source: serde_json::Error,
     },
+    #[error("grid entity {grid:?} has an invalid voxel world payload: {source}")]
+    InvalidVoxelWorldPayload {
+        grid: EntityId,
+        #[source]
+        source: serde_json::Error,
+    },
+    #[error("grid entity {grid:?} has a voxel world that cannot be read: {reason}")]
+    InvalidVoxelWorld { grid: EntityId, reason: String },
     #[error("grid entity {grid:?} names tile set `{tile_set}`, which is not bound")]
     UnboundTileSet { grid: EntityId, tile_set: String },
     #[error("grid entity {grid:?} has a volume navigation cannot read: {source}")]

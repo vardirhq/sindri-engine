@@ -6,5 +6,6 @@
 
 mod caching;
 mod on_a_solid_grid;
+mod on_voxel_ground;
 mod projected;
 mod support;

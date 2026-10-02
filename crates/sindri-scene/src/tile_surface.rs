@@ -91,6 +91,25 @@ impl TileSurfaces {
         })
     }
 
+    /// Surfaces already worked out elsewhere: each column's top cell, the
+    /// height of its top, and whether a walker can stand there.
+    ///
+    /// What a voxel world gives, which answers the same question as a volume
+    /// from the generator rather than from a list of cells.
+    #[must_use]
+    pub fn from_tops(columns: impl IntoIterator<Item = (GridCoord3, f32, bool)>) -> Self {
+        let mut surfaces = Self::default();
+        for (top, height, walkable) in columns {
+            let column = (top.x, top.y);
+            surfaces.tops.insert(column, top.z);
+            surfaces.heights.insert(column, height);
+            if walkable {
+                surfaces.walkable.insert(column);
+            }
+        }
+        surfaces
+    }
+
     /// The highest solid cell of a column, which is the one you stand on.
     ///
     /// The height says how far up the ground is; this says which cell made it,

@@ -1203,7 +1203,7 @@
       "description": "Grids of tiles, flat or stacked in layers like building blocks: what each cell holds, where objects stand on them, and paths across them.",
       "members": [
         {
-          "description": "Which block is in a cell of a layered grid, by name, or `\"\"` if the cell is empty.",
+          "description": "Which block is in a cell of a layered grid or a grid whose ground is a voxel world, by name, or `\"\"` if the cell is empty.",
           "kind": "function",
           "name": "block",
           "parameter_names": [
@@ -1307,7 +1307,7 @@
           "returns": "f32"
         },
         {
-          "description": "Places a block, by name, in a cell of a layered grid. `\"\"` removes the block.",
+          "description": "Places a block, by name, in a cell of a layered grid or a grid whose ground is a voxel world. `\"\"` removes the block.",
           "kind": "function",
           "name": "set_block",
           "parameter_names": [

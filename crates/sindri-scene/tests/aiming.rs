@@ -137,3 +137,69 @@ fn the_grid_has_to_be_where_the_scene_put_it() {
     .expect("the pointer is on the moved tower");
     assert_eq!((aim.cell.x, aim.cell.y, aim.cell.z), (0, 0, 1));
 }
+
+/// A flat voxel world of numbered materials four levels deep, as a grid of
+/// boxes' ground, with one block built on it at the origin.
+fn voxel_world() -> (World, SceneExtractor) {
+    let mut floor = SceneEntity::new(id("floor"));
+    floor.transform_3d = Some(Transform3D::default());
+    floor.components.insert(
+        "sindri.tile_grid".to_owned(),
+        json!({
+            "columns": 16, "rows": 16, "cell_size": [1.0, 1.0],
+            "cell_height": 1.0, "space": "solid"
+        }),
+    );
+    floor.components.insert(
+        "sindri.voxel_world".to_owned(),
+        json!({
+            "generator": {
+                "kind": "layered_terrain", "base_height": -1, "height_variation": 0
+            },
+            "edits": [{ "at": [0, 0, 0], "block": 2 }]
+        }),
+    );
+    let document = SceneDocument {
+        format_version: SCENE_FORMAT_VERSION,
+        metadata: sindri_core::SceneMetadata::default(),
+        entities: vec![floor],
+    };
+    let extractor = SceneExtractor::new().expect("the schemas register");
+    let mut world = World::default();
+    sindri_core::LoadedScenes::new()
+        .enter_keeping_identities(&mut world, "test", &document)
+        .expect("the scene loads");
+    (world, extractor)
+}
+
+#[test]
+fn a_voxel_world_is_aimed_at_by_the_grid_cell_it_draws_in() {
+    // The voxels on a grid of boxes are its cells: the block built at column
+    // 0, row 0 is centred on the origin, as a volume's block would be, and
+    // is answered as the grid's cell rather than the voxel's coordinate.
+    let (world, extractor) = voxel_world();
+    let aim = voxel::aim_at(&world, extractor.components(), overhead(), [0.5, 0.5])
+        .expect("the pointer is on the built block");
+    assert_eq!((aim.cell.x, aim.cell.y, aim.cell.z), (0, 0, 0));
+    assert_eq!(aim.face, TileFace::Top);
+    assert_eq!((aim.against.x, aim.against.y, aim.against.z), (0, 0, 1));
+
+    // A little off centre is still the same block: its cell reaches half a
+    // cell either way from the origin.
+    let near_edge = voxel::aim_at(&world, extractor.components(), overhead(), [0.55, 0.45])
+        .expect("still on the block");
+    assert_eq!(
+        (near_edge.cell.x, near_edge.cell.y, near_edge.cell.z),
+        (0, 0, 0)
+    );
+
+    // A cell further over is the generated ground below.
+    let beside = voxel::aim_at(
+        &world,
+        extractor.components(),
+        overhead(),
+        [0.5 + 1.5 / 8.0, 0.5],
+    )
+    .expect("the ground is there");
+    assert_eq!((beside.cell.x, beside.cell.z), (2, -1));
+}

@@ -9,8 +9,8 @@ use sindri_render::{
     ExtractedFrame, FrameCamera, FrameCommand, FramePass, RenderLayer, RenderStage,
 };
 use sindri_voxel::{
-    MeshingProfile, ResidencyConfig, SectionCoord, SectionMeshKey, VoxelFace, VoxelId, VoxelWorld,
-    mesh_block_section_with_materials,
+    MeshingProfile, ResidencyConfig, SECTION_EDGE, SectionCoord, SectionMeshKey, VoxelCoord,
+    VoxelFace, VoxelId, VoxelSource, VoxelWorld, mesh_block_section_with_materials,
 };
 
 use crate::{
@@ -22,6 +22,7 @@ use super::frustum::aabb_in_view;
 use super::voxel_appearance::{
     Appearance, BlockMaterials, Resolved, block_palette, resolve_appearance,
 };
+use super::voxel_ground::{VoxelGround, voxel_space};
 use super::voxel_source::{Palette, SceneTerrain, terrain_source};
 use super::{SceneExtractError, SceneExtractor, transform_matrix};
 
@@ -49,6 +50,10 @@ struct ResidentVoxelWorld {
     world: VoxelWorld<SceneTerrain>,
     render: VoxelRenderBridge,
     resident: BTreeSet<SectionCoord>,
+    /// The component's edits as last applied, and the revision they were
+    /// read at. Asked again only when the entity changes.
+    edits: BTreeMap<VoxelCoord, VoxelId>,
+    edits_revision: Option<u64>,
 }
 
 #[derive(Default)]
@@ -93,7 +98,27 @@ impl ResidentVoxelWorld {
             resolved,
             render: VoxelRenderBridge::default(),
             resident: BTreeSet::new(),
+            edits: BTreeMap::new(),
+            edits_revision: None,
         }
+    }
+
+    /// Brings the world's voxels in line with `wanted`: what changed is set,
+    /// and what is no longer edited goes back to what was generated. Each
+    /// changed voxel remeshes only the sections it touches.
+    fn apply_edits(&mut self, wanted: BTreeMap<VoxelCoord, VoxelId>) {
+        for coord in self.edits.keys() {
+            if !wanted.contains_key(coord) {
+                let generated = self.definition.source.voxel(*coord);
+                self.world.set_voxel(*coord, generated);
+            }
+        }
+        for (coord, voxel) in &wanted {
+            if self.edits.get(coord) != Some(voxel) {
+                self.world.set_voxel(*coord, *voxel);
+            }
+        }
+        self.edits = wanted;
     }
 
     fn commands(
@@ -249,13 +274,29 @@ impl SceneExtractor {
             Err(error) if self.tolerant() && runtimes.contains_key(&entity) => Some(error),
             Err(error) => return Err(error),
         };
-        let focus = SectionCoord::new(component.focus[0], component.focus[1], component.focus[2]);
         let transform = world.world_transform(entity).unwrap_or_default();
-        let root = transform_matrix(transform);
-        let mut commands = runtimes
+        let root = transform_matrix(transform) * voxel_space(world, &self.components, entity);
+        let focus = if component.follow_camera {
+            focus_under_camera(camera, root, component.focus[1])
+        } else {
+            SectionCoord::new(component.focus[0], component.focus[1], component.focus[2])
+        };
+        let runtime = runtimes
             .get_mut(&entity)
-            .expect("the voxel runtime was inserted or kept above")
-            .commands(focus, camera.view_projection * root, seconds)?;
+            .expect("the voxel runtime was inserted or kept above");
+        let revision = world.revision(entity);
+        if runtime.edits_revision != revision {
+            // Read with the same rules the world was built by, so an edit
+            // naming a block the set lacks is refused the same way.
+            let wanted = if component.edits.is_empty() {
+                BTreeMap::new()
+            } else {
+                VoxelGround::of(component, tile_sets)?.edit_voxels().clone()
+            };
+            runtime.apply_edits(wanted);
+            runtime.edits_revision = revision;
+        }
+        let mut commands = runtime.commands(focus, camera.view_projection * root, seconds)?;
         for command in &mut commands {
             if let FrameCommand::CachedTexturedMesh { model, .. } = command {
                 *model = root * *model;
@@ -264,6 +305,30 @@ impl SceneExtractor {
         push_commands(commands, component.layer, camera, frame);
         refused.map_or(Ok(()), Err)
     }
+}
+
+/// The section the world camera looks at, at the height of section `level`.
+///
+/// Where the middle of the picture meets a level plane through the middle of
+/// that section, in the world's own space. A camera looking level never meets
+/// it, and then the point under the camera stands in.
+#[allow(clippy::cast_precision_loss, clippy::cast_possible_truncation)]
+fn focus_under_camera(camera: ResolvedCamera, root: glam::Mat4, level: i32) -> SectionCoord {
+    let local = root.inverse() * camera.view.inverse();
+    let eye = local.transform_point3(glam::Vec3::ZERO);
+    let forward = local.transform_vector3(glam::Vec3::NEG_Z);
+    let plane = (level * SECTION_EDGE) as f32 + SECTION_EDGE as f32 * 0.5;
+    let point = if forward.y.abs() > f32::EPSILON {
+        let along = (plane - eye.y) / forward.y;
+        eye + forward * along
+    } else {
+        eye
+    };
+    if !point.is_finite() {
+        return SectionCoord::new(0, level, 0);
+    }
+    let section = |value: f32| (value.floor() as i32).div_euclid(SECTION_EDGE);
+    SectionCoord::new(section(point.x), level, section(point.z))
 }
 
 #[allow(clippy::cast_precision_loss)]

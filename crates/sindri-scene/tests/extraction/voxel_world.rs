@@ -174,3 +174,146 @@ fn a_texture_the_world_draws_with_rebuilds_it() {
         "the surface is drawn with the new texture"
     );
 }
+
+fn edited(world: &mut sindri_core::World, edits: serde_json::Value) {
+    let terrain = world
+        .entities()
+        .find(|(_, data)| data.components.contains_key("sindri.voxel_world"))
+        .map(|(entity, _)| entity)
+        .expect("the terrain exists");
+    world
+        .get_mut(terrain)
+        .unwrap()
+        .components
+        .get_mut("sindri.voxel_world")
+        .unwrap()["edits"] = edits;
+}
+
+/// How many sections were compiled again: a section uploads one batch per
+/// texture it draws with, so batches are counted by where they are drawn.
+fn sections_uploaded(frame: &sindri_render::PreparedFrame) -> usize {
+    frame
+        .passes()
+        .iter()
+        .filter_map(|pass| match &pass.command {
+            FrameCommand::CachedTexturedMesh {
+                model,
+                replacement: Some(_),
+                ..
+            } => Some(model.w_axis.to_array().map(f32::to_bits)),
+            _ => None,
+        })
+        .collect::<std::collections::BTreeSet<_>>()
+        .len()
+}
+
+fn releases(frame: &sindri_render::PreparedFrame) -> usize {
+    frame
+        .passes()
+        .iter()
+        .filter(|pass| matches!(pass.command, FrameCommand::ReleaseCachedTexturedMesh { .. }))
+        .count()
+}
+
+/// An edit remeshes the one section it is in, and taking it back does the
+/// same; the rest of the resident world is left as it was compiled.
+#[test]
+fn an_edit_rebuilds_only_the_section_it_touches() {
+    let extractor = SceneExtractor::new().unwrap();
+    let mut world = voxel_world_with_radius(1);
+    let textures = textures();
+    let first = extractor
+        .extract(&world, VIEWPORT, CameraView::default(), &textures)
+        .expect("the voxel world extracts");
+    assert!(uploads(&first) > 1, "the whole window is compiled once");
+
+    // In the middle of the centre section, so no neighbour shares the face.
+    edited(
+        &mut world,
+        serde_json::json!([{ "at": [8, 1, 8], "block": 3 }]),
+    );
+    let built = extractor
+        .extract(&world, VIEWPORT, CameraView::default(), &textures)
+        .expect("the edited world extracts");
+    assert_eq!(
+        sections_uploaded(&built),
+        1,
+        "only the edited section is compiled again"
+    );
+    assert_eq!(releases(&built), 0);
+
+    edited(&mut world, serde_json::json!([]));
+    let undone = extractor
+        .extract(&world, VIEWPORT, CameraView::default(), &textures)
+        .expect("the restored world extracts");
+    assert_eq!(
+        sections_uploaded(&undone),
+        1,
+        "taking it back rebuilds the same one"
+    );
+
+    let settled = extractor
+        .extract(&world, VIEWPORT, CameraView::default(), &textures)
+        .expect("the settled world extracts");
+    assert_eq!(uploads(&settled), 0);
+}
+
+/// A world that follows the camera keeps its window under what the camera is
+/// looking at, so looking somewhere else loads the ground there and lets go
+/// of what was left behind.
+#[test]
+fn a_world_following_the_camera_moves_its_window_with_the_view() {
+    let extractor = SceneExtractor::new().unwrap();
+    let mut world = voxel_world();
+    let terrain = world
+        .entities()
+        .find(|(_, data)| data.components.contains_key("sindri.voxel_world"))
+        .map(|(entity, _)| entity)
+        .unwrap();
+    world
+        .get_mut(terrain)
+        .unwrap()
+        .components
+        .get_mut("sindri.voxel_world")
+        .unwrap()["follow_camera"] = serde_json::json!(true);
+    let textures = textures();
+    let looking_at = |x: f32| {
+        let target = glam::Vec3::new(x, 0.0, -4.0);
+        let view = glam::camera::rh::view::look_at_mat4(
+            target + glam::Vec3::new(30.0, 30.0, 30.0),
+            target,
+            glam::Vec3::Y,
+        );
+        let projection =
+            glam::camera::rh::proj::directx::orthographic(-20.0, 20.0, -20.0, 20.0, 0.1, 200.0);
+        ViewCamera {
+            view,
+            view_projection: projection * view,
+            framed_half_height: 20.0,
+        }
+    };
+    let extract = |camera| {
+        extractor
+            .extract_animated_with_world_camera(
+                &world,
+                VIEWPORT,
+                camera,
+                &textures,
+                SceneRuntime::default(),
+            )
+            .expect("the voxel world extracts")
+    };
+    // The view meets the middle of the section's height eight across from
+    // where it looks on the ground, so these look inside one section.
+    let here = extract(looking_at(-4.0));
+    assert_eq!(
+        sections_uploaded(&here),
+        1,
+        "one resident section, under the view"
+    );
+    let still = extract(looking_at(-3.0));
+    assert_eq!(uploads(&still), 0, "a small look inside it changes nothing");
+    let away = extract(looking_at(200.0));
+    assert_eq!(sections_uploaded(&away), 1, "the ground there is loaded");
+    assert!(releases(&away) > 0, "and the ground left behind let go");
+}

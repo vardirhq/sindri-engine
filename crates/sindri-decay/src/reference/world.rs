@@ -358,7 +358,7 @@ pub(super) const TYPES: &[TypeEntry] = &[
             call(
                 "block",
                 &["grid", "column", "row", "level"],
-                "Which block is in a cell of a layered grid, by name, or `\"\"` if the cell is empty.",
+                "Which block is in a cell of a layered grid or a grid whose ground is a voxel world, by name, or `\"\"` if the cell is empty.",
             ),
             call(
                 "can_reach",
@@ -385,7 +385,7 @@ pub(super) const TYPES: &[TypeEntry] = &[
             call(
                 "set_block",
                 &["grid", "column", "row", "level", "tile"],
-                "Places a block, by name, in a cell of a layered grid. `\"\"` removes the block.",
+                "Places a block, by name, in a cell of a layered grid or a grid whose ground is a voxel world. `\"\"` removes the block.",
             ),
             call(
                 "set_tile",
