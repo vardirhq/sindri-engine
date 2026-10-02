@@ -60,6 +60,9 @@ pub mod preferences;
 pub mod preview;
 #[cfg(not(target_arch = "wasm32"))]
 pub mod profile;
+/// Where Play's time goes, frame by frame.
+#[cfg(not(target_arch = "wasm32"))]
+pub mod profiler;
 #[cfg(not(target_arch = "wasm32"))]
 pub mod project;
 /// The editor-only camera used by the Scene view.

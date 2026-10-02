@@ -18,6 +18,7 @@ pub(crate) use project::{ON, SharedField, board_key};
 pub(crate) use run::{to_value, variant_name};
 mod run;
 mod sources;
+mod timing;
 
 use std::collections::{BTreeMap, BTreeSet};
 
@@ -26,6 +27,7 @@ use decay_runtime::{ScriptInstance, Value};
 use sindri_core::{ComponentSchemaRegistry, EntityId, World};
 
 use self::run::{TickWorld, ensure_compiled, tick};
+use self::timing::timed;
 use crate::{
     Blackboard, ScriptComponent, ScriptExport, ScriptFailure, ScriptMessage, ScriptReport,
     audio_host::{AudioCommand, AudioQueue},
@@ -119,12 +121,20 @@ pub struct Scripts {
     audio: AudioQueue,
     /// The scene's input actions and what each is worth this step.
     actions: crate::actions::InputActions,
+    /// Whether each script's tick is timed into the report.
+    measuring: bool,
 }
 
 impl Scripts {
     #[must_use]
     pub fn new() -> Self {
         Self::default()
+    }
+
+    /// Times each script's tick into [`ScriptReport::timings`] from the next
+    /// pass on. Off unless asked for: a shipped game has nobody to show them.
+    pub const fn set_measuring(&mut self, measuring: bool) {
+        self.measuring = measuring;
     }
 
     #[must_use]
@@ -237,7 +247,9 @@ impl Scripts {
             tweens,
             audio,
             actions,
+            measuring,
         } = self;
+        let measuring = *measuring;
         let mut at = TickWorld {
             programs,
             running,
@@ -283,11 +295,10 @@ impl Scripts {
                 continue;
             }
             live.insert(entity);
-            collect(
-                &mut report,
-                entity,
-                tick(&mut at, entity, &component, delta_seconds),
-            );
+            let outcome = timed(measuring.then_some(&mut report), &component, || {
+                tick(&mut at, entity, &component, delta_seconds)
+            });
+            collect(&mut report, entity, outcome);
         }
 
         Self::start_spawned(&mut report, &mut live, &mut at, components, delta_seconds);

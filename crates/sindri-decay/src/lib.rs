@@ -55,7 +55,7 @@ pub use host::{ScriptContext, Spawning};
 pub use physics::Physics2d;
 pub use prefabs::PrefabSources;
 pub use profiles::ProfileSources;
-pub use report::{ScriptMessage, ScriptReport};
+pub use report::{ScriptMessage, ScriptReport, ScriptTiming};
 pub use scenes::{SceneChannel, scene_links};
 pub use scripts::{
     LIFECYCLE, LifecycleFunction, ScriptFrame, ScriptSources, Scripts, environment,

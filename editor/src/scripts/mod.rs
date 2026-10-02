@@ -377,6 +377,9 @@ impl SceneScripts {
         if let Some(physics) = physics {
             frame = frame.with_physics(physics);
         }
+        // Always timed: the Profiler is the editor's, and a tick's timing is
+        // two clock reads beside a script's own work.
+        self.scripts.set_measuring(true);
         self.scripts.advance(world, components, frame)
     }
 

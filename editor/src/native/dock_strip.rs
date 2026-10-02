@@ -28,6 +28,7 @@ pub(super) const fn panel_icon(panel: DockPanel) -> egui_material_icons::Materia
         DockPanel::Scenes => icons::SCENES,
         DockPanel::Console => icons::CONSOLE,
         DockPanel::History => icons::UNDO,
+        DockPanel::Profiler => icons::PROFILER,
         DockPanel::Assistant => icons::EFFECT,
     }
 }
@@ -172,7 +173,8 @@ impl EditorApp {
             | DockPanel::Project
             | DockPanel::Scenes
             | DockPanel::Console
-            | DockPanel::History => {}
+            | DockPanel::History
+            | DockPanel::Profiler => {}
         }
     }
 

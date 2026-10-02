@@ -7,6 +7,7 @@ use sindri_decay::ScriptFailure;
 use sindri_scene::SpriteAnimations;
 
 use crate::console::Level;
+use crate::profiler::Phase;
 use crate::ui::theme::{color, metric, radius, text};
 
 use super::EditorApp;
@@ -192,6 +193,9 @@ impl EditorApp {
     /// than waiting for someone to press Play. What the transport changes is
     /// how much time a frame is worth, so a scene at rest runs nothing.
     pub(super) fn advance_play(&mut self, context: &egui::Context) {
+        // The frame before this one is over: its steps ran last time through
+        // here and its views have been drawn since.
+        self.profiler.finish();
         if self.lifecycle.state() == EngineState::Running {
             // Nothing else asks for a frame while the pointer is still, so
             // without this a played scene runs only as fast as the mouse moves.
@@ -274,15 +278,18 @@ impl EditorApp {
         view_size: Option<(f32, f32)>,
     ) {
         let delta = fixed_delta.as_secs_f32();
+        let mut clock = PhaseClock::start();
         // Flecks move before scripts, so one thrown this step is drawn where it
         // was thrown rather than one step along.
         self.effects.advance(fixed_delta);
+        clock.lap(&mut self.profiler, Phase::Effects);
         // Physics next, so a script observes the events of the step that just
         // happened and its writes take effect on the next one. `docs/physics.md`
         // fixes that order: consumers run after the step publishes.
         if let Err(error) = self.physics.step(&mut self.world, components, fixed_delta) {
             self.console.error(format!("Physics: {error}"));
         }
+        clock.lap(&mut self.profiler, Phase::Physics);
         // No safe area: a desktop window has no notch. A host that has one — a
         // browser on a phone — reports it, and the same scene moves its
         // anchored elements in without being edited.
@@ -313,13 +320,14 @@ impl EditorApp {
             &mut self.world,
             &sindri_decay::ui_input(input_state, view_height),
         );
+        clock.lap(&mut self.profiler, Phase::ScreenUi);
         // A focused text field keeps the keys, as it does in the build.
         let held_back = self
             .screen_ui
             .editing_text(&self.world)
             .then(|| self.input.state().without_keys());
         let (physics, events) = self.physics.for_scripts();
-        let report = self.scripts.advance(
+        let mut report = self.scripts.advance(
             &mut self.world,
             components,
             crate::scripts::EditorFrame {
@@ -336,15 +344,20 @@ impl EditorApp {
                 delta_seconds: delta,
             },
         );
+        clock.lap(&mut self.profiler, Phase::Scripts);
+        let timings = std::mem::take(&mut report.timings);
         // Animations move with gameplay rather than with the display, because a
         // clip that advanced per rendered frame would play at a different speed
         // in the editor than in the build.
         if let Err(error) = self.animations.advance(&self.world, components, delta) {
             self.console.error(format!("Sprite animation: {error}"));
         }
+        clock.lap(&mut self.profiler, Phase::Animation);
         // After the scripts, so a camera following the player follows where
         // this step left it.
         sindri_scene::update_camera_behaviors(&mut self.world, delta);
+        clock.lap(&mut self.profiler, Phase::Cameras);
+        self.profiler.step(timings);
 
         for message in report.printed {
             // Named by entity, because "moving" is not something an author can
@@ -404,6 +417,9 @@ impl EditorApp {
         // scene has already acted on.
         self.random = sindri_core::Rng::default();
         self.input.forget_players();
+        // A fresh run is profiled from its first frame, not after the last
+        // run's.
+        self.profiler.clear();
         if let Err(error) = self.lifecycle.start() {
             self.report(error.to_string());
         }
@@ -480,5 +496,21 @@ impl EditorApp {
         // because the world being played is thrown away at Stop. The scene
         // being edited follows it now.
         self.follow_prefab_changes();
+    }
+}
+
+/// Times consecutive phases of a step, each lap ending one and starting the
+/// next.
+struct PhaseClock(std::time::Instant);
+
+impl PhaseClock {
+    fn start() -> Self {
+        Self(std::time::Instant::now())
+    }
+
+    fn lap(&mut self, profiler: &mut crate::profiler::Profiler, phase: Phase) {
+        let now = std::time::Instant::now();
+        profiler.add(phase, now - self.0);
+        self.0 = now;
     }
 }
