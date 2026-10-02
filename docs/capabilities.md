@@ -753,9 +753,14 @@ pinning it to frame one; `restart` is the separate thing to want. Gather's
 player is the proof: its walk cycle had played since the sheet was sliced,
 including while standing still, and now runs only while it is walking.
 
-**A sheet is sliced in the editor, on the image.** Selecting a texture shows it
-in the inspector with each cell outlined on the picture; columns, rows, margin
-and spacing are drags, so a packed sheet with gutters can be cut and not only one
+**A sheet is sliced in the editor, on the image.** Selecting a texture opens it
+in the Sprite sheet tab, a top-row tab beside the Scene and Game views, where
+the image fills the canvas pixel-sharp on a checkerboard, zooms about the
+pointer with the wheel (5% to 6400%), pans with the middle or right button, and
+fits back with Fit. Each cell is outlined on the picture, named cells are
+labelled once there is room, and with nothing open the tab lists every image in
+the project. The slice itself is the inspector's while an image is open:
+columns, rows, margin and spacing are drags, so a packed sheet with gutters can be cut and not only one
 that divides edge to edge. A cell is named by clicking it, and the panel lists
 the cells that have names rather than a field per cell, so a 16x16 atlas is as
 workable as a four-frame strip. Saving writes the sidecar, and the browser then

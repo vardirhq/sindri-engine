@@ -321,6 +321,37 @@ fn the_wheel_scrolls_the_region_under_the_pointer_and_tab_skips_it() {
     assert!((offset - 0.7).abs() < 1.0e-5, "clamped to {offset}");
 }
 
+/// A flick that begins, travels and lifts all between two steps -- what a
+/// slow frame on a phone delivers -- still scrolls by its whole travel. The
+/// drag used to be measured from where the finger had already got to.
+#[test]
+fn a_flick_that_arrives_in_one_step_still_scrolls() {
+    use sindri_core::{PointerDevice, PressId, PressPhase};
+    let mut world = World::default();
+    let scroll = widget(
+        &mut world,
+        "sindri.ui.scroll",
+        json!({"content_height":1.0,"offset":0.0}),
+        0.0,
+    );
+    let mut ui = ScreenUi::new();
+    lay_out(&mut ui, &mut world, &Presses::default());
+    let id = PressId::new(PointerDevice::Touch, 7);
+    let mut presses = Presses::default();
+    presses.begin(id, [400.0, 330.0]);
+    presses.move_to(id, [400.0, 270.0]);
+    presses.finish(id, PressPhase::Ended);
+    lay_out(&mut ui, &mut world, &presses);
+    let offset = world.get(scroll).unwrap().components["sindri.ui.scroll"]["offset"]
+        .as_f64()
+        .unwrap();
+    assert!(
+        offset > 0.1,
+        "the flick's travel scrolled the region: {offset}"
+    );
+    assert!(ui.changed(scroll));
+}
+
 #[test]
 fn widget_payloads_that_cannot_hold_are_refused() {
     use sindri_scene::{UiScrollComponent, UiTextInputComponent};

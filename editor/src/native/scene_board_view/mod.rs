@@ -130,6 +130,14 @@ impl EditorApp {
     /// keeps to the columns between the overlays on either side, unless that
     /// leaves no room for a card.
     fn board_room(&self, panel: egui::Rect) -> egui::Rect {
+        self.room_between_overlays(panel, cards::CARD_MIN_WIDTH)
+    }
+
+    /// The columns of a centre panel between the overlays on either side, in
+    /// the canvas arrangement; the whole panel when docked, or when the gap
+    /// would be narrower than `narrowest`. Shared by every centre tab that
+    /// lays out content rather than drawing a world beneath the overlays.
+    pub(super) fn room_between_overlays(&self, panel: egui::Rect, narrowest: f32) -> egui::Rect {
         if !self.preferences.workspace.chrome().floats() || !self.dock.drawing_main {
             return panel;
         }
@@ -146,7 +154,7 @@ impl EditorApp {
                 room.max.x = room.max.x.min(overlay.left() - metric::GUTTER);
             }
         }
-        if room.width() < cards::CARD_MIN_WIDTH {
+        if room.width() < narrowest {
             field
         } else {
             room

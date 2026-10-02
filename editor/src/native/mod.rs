@@ -85,6 +85,7 @@ mod scene_lighting;
 mod scene_new;
 mod shortcuts;
 mod slicer_view;
+mod sprite_sheet_view;
 mod startup;
 mod thumbnails;
 mod timeline_view;
@@ -282,6 +283,8 @@ struct EditorApp {
     /// The textures the open scene draws with, loaded from its own directory.
     textures: SceneTextures,
     thumbnails: thumbnails::Thumbnails,
+    /// Where the Sprite sheet tab's picture is zoomed and panned to.
+    sheet_camera: sprite_sheet_view::SheetCamera,
     /// The Timeline panel's playhead, choice and preview.
     timeline: crate::timeline::TimelineState,
     /// Where each sequence Play is running has got to.

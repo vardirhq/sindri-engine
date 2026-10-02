@@ -136,6 +136,10 @@ impl EditorApp {
             self.prefab_brush = Some(crate::prefab::PrefabBrush::open(path));
         } else if is_sliceable(path) {
             self.slicer = Some(Slicer::open(path));
+            // Cut on its own canvas, which is where an image has the room.
+            self.preferences
+                .workspace
+                .reveal(crate::dock::Panel::SpriteSheet);
         } else if preview::is_readable(path) {
             self.preview = Some(TextPreview::open(path));
         } else if audition::is_audible(path) {
