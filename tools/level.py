@@ -65,10 +65,12 @@ def camera():
 
     A board small enough to see at once can be framed once; a world this size
     cannot, so the camera sits a fixed distance from where the game starts and
-    a script keeps that offset as the walker moves.
+    a script keeps that offset as the walker moves. The arm is long because
+    the projection is orthographic: its length changes nothing in the picture
+    but what the near plane cuts, and the relief rises well above a short one.
     """
     centre = [WANDERER[0] * CELL, 2.0, WANDERER[1] * CELL]
-    distance, pitch, yaw = 30.0, math.radians(33.0), math.radians(45.0)
+    distance, pitch, yaw = 120.0, math.radians(33.0), math.radians(45.0)
     eye = [
         round(centre[0] + distance * math.cos(pitch) * math.sin(yaw), 4),
         round(centre[1] + distance * math.sin(pitch), 4),
@@ -316,7 +318,7 @@ def entities():
             "components": {
                 "sindri.camera": {
                     "projection": "orthographic", "vertical_size": 22.0,
-                    "near": 0.1, "far": 400.0,
+                    "near": 0.1, "far": 600.0,
                 },
                 "sindri.script": {"source": "scripts/camera-follow.decay",
                                   "script": "CameraFollow",
