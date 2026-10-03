@@ -138,3 +138,27 @@ fn a_crawler_driven_north_outruns_the_tide_to_the_rise() {
         pilot.crawler_world()
     );
 }
+
+#[test]
+fn stepping_off_a_moving_crawler_drops_its_anchor() {
+    let mut pilot = Pilot::new();
+    pilot.take_the_helm();
+    pilot.set_throttle(1.0);
+    pilot.use_it();
+    pilot.walk_deck(&[
+        [5.5, -3.5],
+        [5.5, -4.5],
+        [7.5, -4.5],
+        [7.5, -6.5],
+        [12.0, -6.5],
+    ]);
+    assert!(!pilot.flag("aboard"), "stepped off while it was moving");
+    assert!(
+        pilot.board("throttle").abs() < f32::EPSILON,
+        "the anchor drops"
+    );
+    pilot.wait(5.0);
+    assert!(pilot.board("speed") < 0.01, "and it rolls to a stop");
+    let gap = distance(pilot.crew_world(), pilot.crawler_world());
+    assert!(gap < 12.0, "close enough to walk back to: {gap}");
+}

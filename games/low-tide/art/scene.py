@@ -259,6 +259,14 @@ def entities():
             "components": {"sindri.shape": shape([0.75, 0.95, 0.92, 0.9], 21)},
         },
         {
+            # A pale card behind the status lines, so they read over the deck
+            # as well as over the salt.
+            "id": "status-back", "name": "Status back",
+            "transform_3d": transform(0.29, -0.09, 0.0, 0.0, (0.56, 0.16)),
+            "components": {"sindri.ui.shape": ui_shape("rect", "top_left", [0.93, 0.9, 0.82, 0.78],
+                                                       [0, 0, 0, 0], 0.0, 50, 0.12)},
+        },
+        {
             "id": "status", "name": "Status",
             "transform_3d": transform(0.03, -0.03),
             "components": {

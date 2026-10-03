@@ -144,6 +144,10 @@ script Crew {
         World.set_parent(this.entity, null);
         this.transform.position = Vec3(at.x, at.y, 0.3);
         Game.aboard = false;
+        // Nobody is left aboard to drive, so stepping off drops the anchor:
+        // the throttle comes back to nothing and the crawler rolls to a stop
+        // rather than leaving without you.
+        Game.throttle = 0.0;
     }
 
     fn come_aboard(local: Vec2) {

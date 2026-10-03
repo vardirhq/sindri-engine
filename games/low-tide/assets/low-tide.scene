@@ -737,6 +737,55 @@
    }
   },
   {
+   "id": "status-back",
+   "name": "Status back",
+   "transform_3d": {
+    "position": [
+     0.29,
+     -0.09,
+     0.0
+    ],
+    "rotation": [
+     0,
+     0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     0.56,
+     0.16,
+     1
+    ]
+   },
+   "components": {
+    "sindri.ui.shape": {
+     "kind": "rect",
+     "count": 48.0,
+     "fill": [
+      0.93,
+      0.9,
+      0.82,
+      0.78
+     ],
+     "stroke": [
+      0,
+      0,
+      0,
+      0
+     ],
+     "stroke_width": 0.0,
+     "corner_radius": 0.12,
+     "dashes": 0.0,
+     "dash_duty": 0.5,
+     "sweep_start": 0.0,
+     "sweep_turns": 1.0,
+     "blend": "over",
+     "anchor": "top_left",
+     "layer": 50
+    }
+   }
+  },
+  {
    "id": "status",
    "name": "Status",
    "transform_3d": {
