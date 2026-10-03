@@ -33,7 +33,7 @@ fn travel(pilot: &mut Pilot, at: [f32; 2]) {
 
 fn exploring() -> Pilot {
     let mut pilot = Pilot::new();
-    pilot.walk_deck(&[[7.5, -6.5], [12.0, -6.5]]);
+    pilot.walk_deck(&[[6.5, -7.5], [10.0, -7.5]]);
     assert!(!pilot.flag("aboard"));
     travel(&mut pilot, [400.5, 400.5]);
     pilot

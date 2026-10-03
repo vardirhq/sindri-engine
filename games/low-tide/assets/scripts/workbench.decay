@@ -1,0 +1,51 @@
+// Fixed blueprints keep the central passage and boarding ramp clear.
+script Workbench {
+    var crawler: Entity = null;
+    var panel: Entity = null;
+    var words: Entity = null;
+    var next_button: Entity = null;
+
+    fn start() {
+        this.crawler = World.find("Crawler");
+        this.panel = World.find("Build panel");
+        this.words = World.find("Build words");
+        this.next_button = World.find("Next button");
+        Game.building = false;
+    }
+
+    fn open() {
+        Game.building = true;
+        Game.blueprint = Blueprint.Extension;
+        Game.build_result = BuildResult.None;
+    }
+
+    fn craft() { Crawler.on(this.crawler).build(Game.blueprint); }
+
+    fn update(dt: f32) {
+        if Game.building && Action.pressed("cancel") { Game.building = false; }
+        if Game.building && (Action.pressed("next_plan") || Ui.is_pressed(this.next_button)) {
+            Game.blueprint = match Game.blueprint {
+                Blueprint.Extension => Blueprint.Bunk,
+                Blueprint.Bunk => Blueprint.Engine,
+                Blueprint.Engine => Blueprint.Extension,
+            };
+            Game.build_result = BuildResult.None;
+        }
+        World.set_active(this.panel, Game.building);
+        World.set_active(this.words, Game.building);
+        World.set_active(this.next_button, Game.building);
+        let plan = match Game.blueprint {
+            Blueprint.Extension => "Stern extension\n2 wood + 2 scrap\nTwo rows, four cargo slots\nPermanent weight: +18",
+            Blueprint.Bunk => "A bunk of your own\n2 wood + 2 fibre\nA bed beside the workbench\nPermanent weight: +4",
+            Blueprint.Engine => "Stronger engine\n2 ore + 2 scrap\nEngine power: +35%\nPermanent weight: +12",
+        };
+        let result = match Game.build_result {
+            BuildResult.Built => "Built! Choose your next plan",
+            BuildResult.Missing => "Bring the required cargo aboard",
+            BuildResult.Limit => "This chassis is fully extended",
+            BuildResult.Already => "Already installed",
+            _ => "Use the cargo stored in your hold",
+        };
+        Ui.set_text(this.words, "WORKBENCH\n" + plan + "\n" + result);
+    }
+}

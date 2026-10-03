@@ -6,11 +6,14 @@
 // floor(-y). `Grid.surface` and `Grid.height` say what is on top there.
 
 // What the hint line should say, decided by the crew, worded by the HUD.
-enum Hint { None, TakeHelm, AtHelm, Salvage, Harvest, Empty, HoldFull, Carrying, Jettison, Ashore, LeftBehind, Brine }
+enum Hint { None, TakeHelm, AtHelm, Salvage, Harvest, Empty, HoldFull, Carrying, Jettison, Ashore, LeftBehind, Brine, Workbench, Building }
 
 // The kinds of ground the Basin is made of, by what the crawler and the HUD
 // make of them.
 enum Ground { Salt, Crust, Mud, Sand, Reef, Kelp, Rock, Island, Brine, Nothing }
+
+enum Blueprint { Extension, Bunk, Engine }
+enum BuildResult { None, Built, Missing, Limit, Already }
 
 enum Resource { None, Wood, Stone, Ore, Scrap, Fibre, Salt }
 
@@ -34,6 +37,17 @@ state Game {
     var rudder: f32 = 0.0;
     var crates: f32 = 0.0;
     var capacity: f32 = 0.0;
+    var hull_left: f32 = 2.0;
+    var hull_right: f32 = 9.0;
+    var hull_top: f32 = 3.0;
+    var hull_bottom: f32 = 12.0;
+    var structure_mass: f32 = 0.0;
+    var extensions: f32 = 0.0;
+    var building: bool = false;
+    var blueprint: Blueprint = Blueprint.Extension;
+    var build_result: BuildResult = BuildResult.None;
+    var has_bunk: bool = false;
+    var engine_level: f32 = 0.0;
     // What the crawler is driving on, and how much it holds it back: one is
     // a clear run, less is soft or rough going.
     var ground: Ground = Ground.Salt;

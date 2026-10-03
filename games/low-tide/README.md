@@ -9,7 +9,9 @@ deeps. It goes on in every direction. You crew a *crawler*, a house on treads,
 and drive it wherever you like. Soft and rough ground slow it, and brine and
 cliffs stop it. Gather wood from island trees, fibre from leaves and kelp, stone and ore from
 rock and reef, salt from the flats, and scrap from wrecks. Carry each bundle
-aboard: the hold has twenty slots, and every bundle makes the crawler heavier.
+aboard: the starter has four cargo slots, and every bundle makes it heavier.
+You begin with a narrow seven-by-nine crawler: helm, one engine, a ramp and
+a basic workbench. Larger rooms and storage are earned through construction.
 
 The Tide returns as a repeating flood season. Low water lasts three minutes,
 then the brine rises for 90 seconds, holds high for 45 and recedes for 90.
@@ -93,8 +95,9 @@ instrument panel stays compact until flood notices need more room. Two animated
 tread belts read actual speed and steering through `scripts/tread.decay`; they
 carry their visible upper run toward the bow in forward travel, pivot in
 opposite directions, pause in a flood and resume after the ebb. The
-starboard belt has a transparent gap at the boarding ramp. The belts are visual
-children of the deck, while its original tread cells still block walking.
+starboard belt leaves a gap at the boarding ramp. Belts are built from one-tile
+segments so construction can extend them without stretching the cleats. They
+are visual children of the deck; logical tread cells still block walking.
 All art comes from the deterministic Python sources in `art/`.
 
 ## The Basin
@@ -160,10 +163,9 @@ press.
 
 ## Not yet
 
-Next: gathering across the Basin, then building onto the crawler. Ashore, the
-crew walks over the crawler's hull rather than round it, wrecks are placed by
-hand near the start rather than across the world, and the tuning (`@export`
-fields on the crawler and the crew) is a first guess.
+Construction uses fixed blueprints rather than free placement; the bunk is
+cosmetic and there is no save/load persistence yet. Ashore, the crew walks over the crawler's hull rather than round it, and the tuning
+(`@export` fields on the crawler and the crew) is a first guess.
 
 `tests/a_flood_season.rs` checks the rise, high water, ebb and next season,
 cargo washed out once, driving again after the ebb, caught crew escaping with
@@ -179,3 +181,28 @@ have a deterministic one-in-four chance of ore; other rock and reef yield
 stone. Leaves yield fibre and expose the wood underneath. Resources do not
 regrow during a voyage. `tests/gathering_fills_the_hold.rs` plays harvesting,
 stowing and jettisoning with keys and phone touch.
+
+## Build your home
+
+Walk beside the workbench and press E (or Workbench on a phone). Q / Next
+cycles plans, E / Build constructs, and X / Close or Escape returns to walking.
+Gamepads use south to open/build, east to cycle and west to close. The crawler
+continues at its existing throttle while you build.
+
+| Blueprint | Cargo cost | Result | Permanent mass |
+| --- | --- | --- | --- |
+| Stern extension | 2 wood + 2 scrap | Two walkable rows, four cargo slots; maximum three extensions | +18 |
+| Bunk | 2 wood + 2 fibre | One bed beside the bench | +4 |
+| Stronger engine | 2 ore + 2 scrap | +35% engine speed and acceleration before weight and terrain | +12 |
+
+Only bundles physically stowed in the hold pay for construction. Missing cargo,
+a duplicate installation or the chassis limit consumes nothing. The centre
+passage and boarding ramp remain clear; the deck origin stays fixed as the
+stern, segmented treads, camera centre and shadow grow. Extra structure is
+permanent weight, so more room has a movement cost. The starter grows from four
+to sixteen cargo slots. `tests/a_home_grows.rs` plays gathering, salvage,
+construction while driving and walking into the new space with keys and phone
+touch; it also checks upgrades, duplicate refusal and the chassis limit.
+
+These are Decay game rules using existing tile, UI and animation APIs; no new
+engine host API or general construction editor is introduced.

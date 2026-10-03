@@ -19,14 +19,14 @@ fn the_crew_walks_to_the_helm_and_drives_away() {
 
     // The lever stays where it was left, so the crawler drives on while the
     // crew walks back down the deck.
-    pilot.walk_deck(&[[5.5, -3.5], [5.5, -4.5], [7.5, -4.5], [7.5, -6.0]]);
+    pilot.walk_deck(&[[5.5, -7.5], [6.5, -7.5]]);
     pilot.wait(2.0);
     let moved = distance(start, pilot.crawler_world());
     assert!(moved > 8.0, "the crawler drove {moved} units");
     assert!(pilot.flag("aboard"), "and the crew is still aboard");
     let deck = pilot.on_deck();
     assert!(
-        (deck[0] - 7.5).abs() < 0.2 && (deck[1] + 6.0).abs() < 0.2,
+        (deck[0] - 6.5).abs() < 0.2 && (deck[1] + 7.5).abs() < 0.2,
         "standing where they walked to on the deck: {deck:?}"
     );
     // Full speed for the ground it is on, which may be soft.
@@ -151,13 +151,7 @@ fn stepping_off_a_moving_crawler_drops_its_anchor() {
     pilot.take_the_helm();
     pilot.set_throttle(1.0);
     pilot.use_it();
-    pilot.walk_deck(&[
-        [5.5, -3.5],
-        [5.5, -4.5],
-        [7.5, -4.5],
-        [7.5, -6.5],
-        [12.0, -6.5],
-    ]);
+    pilot.walk_deck(&[[5.5, -7.5], [6.5, -7.5], [10.0, -7.5]]);
     assert!(!pilot.flag("aboard"), "stepped off while it was moving");
     assert!(
         pilot.board("throttle").abs() < f32::EPSILON,
@@ -174,18 +168,18 @@ fn stepping_off_a_moving_crawler_drops_its_anchor() {
 #[test]
 fn the_crew_can_walk_on_after_boarding_at_the_edge_of_the_ramp() {
     let mut pilot = Pilot::new();
-    pilot.walk_deck(&[[7.5, -6.5], [12.0, -6.5]]);
+    pilot.walk_deck(&[[6.5, -7.5], [10.0, -7.5]]);
     assert!(!pilot.flag("aboard"), "ashore");
-    let beside = pilot.deck_to_world([12.5, -6.06]);
+    let beside = pilot.deck_to_world([10.5, -7.06]);
     pilot.walk_ashore(beside, 0.1);
-    let edge = pilot.deck_to_world([10.6, -6.06]);
+    let edge = pilot.deck_to_world([8.6, -7.06]);
     pilot.walk_ashore(edge, 0.1);
     pilot.wait(0.1);
     assert!(pilot.flag("aboard"), "back aboard at the ramp's edge");
-    pilot.walk_deck(&[[7.5, -6.5], [5.5, -6.5]]);
+    pilot.walk_deck(&[[6.5, -7.5], [5.5, -7.5]]);
     let deck = pilot.on_deck();
     assert!(
-        (deck[0] - 5.5).abs() < 0.2 && (deck[1] + 6.5).abs() < 0.2,
+        (deck[0] - 5.5).abs() < 0.2 && (deck[1] + 7.5).abs() < 0.2,
         "and walked inside: {deck:?}"
     );
 }

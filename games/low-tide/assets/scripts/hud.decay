@@ -71,6 +71,8 @@ script Hud {
 
     fn key_words() -> String {
         return match Game.hint {
+            Hint.Workbench => "E  open the workbench",
+            Hint.Building => "Q  next plan     E  build     X / Esc  close",
             Hint.TakeHelm => "E  take the helm",
             Hint.AtHelm => "W/S  throttle     A/D  steer     E  leave the helm",
             Hint.Salvage => "E  salvage a crate of scrap",
@@ -82,6 +84,8 @@ script Hud {
 
     fn touch_words() -> String {
         return match Game.hint {
+            Hint.Workbench => "Workbench to build onto your crawler",
+            Hint.Building => "Next chooses a plan; Build makes it; Close returns",
             Hint.TakeHelm => "Helm to take the wheel",
             Hint.AtHelm => "Push up for throttle, sideways to steer",
             Hint.Salvage => "Salvage to take a crate",

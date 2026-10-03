@@ -4,6 +4,7 @@
 // Shared by more than one test binary, each using only some of it.
 #![allow(dead_code)]
 
+pub mod construction;
 pub mod salvage;
 
 use std::f32::consts::{PI, TAU};
@@ -299,7 +300,7 @@ impl Pilot {
 
     /// From where the crew starts to the helm, round the mess table.
     pub fn take_the_helm(&mut self) {
-        self.walk_deck(&[[4.4, -6.5], [4.4, -4.5], [5.5, -4.5], [5.5, -1.8]]);
+        self.walk_deck(&[[5.5, -4.8]]);
         self.use_it();
         assert!(self.flag("at_helm"), "at the helm");
     }

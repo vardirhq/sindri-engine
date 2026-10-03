@@ -25,23 +25,31 @@ script Crawler {
     // The highest step up the treads can climb, in levels.
     @export let climb: f32 = 2.0;
     // How far ahead of the middle the bow looks, in units.
-    @export let reach: f32 = 7.5;
+    @export let reach: f32 = 4.5;
 
     var last_wash: f32 = -1.0;
     var speed: f32 = 0.0;
     var deck: Entity = null;
+    var floors: Entity = null;
     var basin: Entity = null;
     var shadow: Entity = null;
 
     // Where crates go in the hold, filled from the stern forward and from the
     // walls inward, so the walkway down the middle stays clear.
-    var hold_columns = [2.0, 3.0, 7.0, 8.0, 3.0, 7.0, 4.0, 6.0, 2.0, 3.0, 7.0, 8.0, 2.0, 3.0, 7.0, 8.0, 4.0, 6.0, 4.0, 6.0];
-    var hold_rows = [12.0, 12.0, 12.0, 12.0, 11.0, 11.0, 12.0, 12.0, 10.0, 10.0, 10.0, 10.0, 9.0, 9.0, 9.0, 9.0, 11.0, 11.0, 10.0, 10.0];
+    var hold_columns = [4.0, 6.0, 4.0, 6.0];
+    var hold_rows = [10.0, 10.0, 8.0, 8.0];
 
     fn start() {
         this.deck = World.find("Deck");
+        this.floors = World.find("Room floors");
         this.basin = World.find("Basin");
         this.shadow = World.find("Crawler shadow");
+        Game.hull_left = 2.0;
+        Game.hull_right = 9.0;
+        Game.hull_top = 3.0;
+        Game.hull_bottom = 12.0;
+        Game.structure_mass = 0.0;
+        Game.extensions = 0.0;
         Game.capacity = this.hold_columns.length;
         Game.crates = 0.0;
         Game.throttle = 0.0;
@@ -49,7 +57,7 @@ script Crawler {
     }
 
     fn update(dt: f32) {
-        let mass = this.base_mass + Game.crates * this.crate_mass;
+        let mass = this.base_mass + Game.structure_mass + Game.crates * this.crate_mass;
         let lightness = this.base_mass / mass;
         let heading = this.transform.rotation_z;
         let middle = Vec2(this.transform.position.x, this.transform.position.y);
@@ -62,11 +70,11 @@ script Crawler {
         }
         Game.ground = ground_of(surface_at(this.basin, middle));
         Game.going = going_at(middle);
-        let most = this.top_speed * lightness;
+        let most = this.top_speed * (1.0 + Game.engine_level * 0.35) * lightness;
         Game.top_speed = most * Game.going;
 
         let target = Game.throttle * Game.top_speed;
-        let rate = this.acceleration * lightness;
+        let rate = this.acceleration * (1.0 + Game.engine_level * 0.35) * lightness;
         if this.speed < target {
             this.speed = min(target, this.speed + rate * dt);
         } else {
@@ -92,7 +100,9 @@ script Crawler {
         // The shadow falls the same way whichever way the crawler faces, which
         // is half of what makes the turning read.
         if this.shadow != null {
-            this.shadow.transform.position = Vec3(at.x + 0.4, at.y - 0.4, 0.08);
+            let centre = turned(Vec2(0.0, 7.0 - (Game.hull_top + Game.hull_bottom) * 0.5), this.transform.rotation_z);
+            this.shadow.transform.position = Vec3(at.x + centre.x + 0.4, at.y + centre.y - 0.4, 0.08);
+            this.shadow.transform.scale.y = Game.hull_bottom - Game.hull_top - 0.6;
             this.shadow.transform.rotation_z = this.transform.rotation_z;
         }
 
@@ -158,5 +168,96 @@ script Crawler {
             Game.crates -= 1.0;
             cargo_change(kind, -1.0);
         }
+    }
+
+    // Count actual cargo tiles, not potentially stale display totals.
+    fn bundles(kind: Resource) -> f32 {
+        var count = 0.0;
+        for i in 0..this.hold_columns.length {
+            if tile_cargo(Grid.tile(this.deck, this.hold_columns[i], this.hold_rows[i])) == kind {
+                count += 1.0;
+            }
+        }
+        return count;
+    }
+
+    fn spend(kind: Resource, amount: f32) {
+        var left = amount;
+        for i in 0..this.hold_columns.length {
+            let column = this.hold_columns[i];
+            let row = this.hold_rows[i];
+            if left > 0.0 && tile_cargo(Grid.tile(this.deck, column, row)) == kind {
+                jettison(column, row);
+                left -= 1.0;
+            }
+        }
+    }
+
+    fn build(plan: Blueprint) {
+        match plan {
+            Blueprint.Extension => { extend(); }
+            Blueprint.Bunk => {
+                if Game.has_bunk { Game.build_result = BuildResult.Already; return; }
+                if bundles(Resource.Wood) < 2.0 || bundles(Resource.Fibre) < 2.0 {
+                    Game.build_result = BuildResult.Missing; return;
+                }
+                spend(Resource.Wood, 2.0);
+                spend(Resource.Fibre, 2.0);
+                Grid.set_tile(this.deck, 4.0, 5.0, 7.0);
+                Game.has_bunk = true;
+                Game.structure_mass += 4.0;
+                Game.build_result = BuildResult.Built;
+            }
+            Blueprint.Engine => {
+                if Game.engine_level > 0.0 { Game.build_result = BuildResult.Already; return; }
+                if bundles(Resource.Ore) < 2.0 || bundles(Resource.Scrap) < 2.0 {
+                    Game.build_result = BuildResult.Missing; return;
+                }
+                spend(Resource.Ore, 2.0);
+                spend(Resource.Scrap, 2.0);
+                Grid.set_tile(this.deck, 6.0, 9.0, 22.0);
+                Game.engine_level = 1.0;
+                Game.structure_mass += 12.0;
+                Game.build_result = BuildResult.Built;
+            }
+        }
+    }
+
+    fn extend() {
+        if Game.hull_bottom + 2.0 > Grid.rows(this.deck) {
+            Game.build_result = BuildResult.Limit; return;
+        }
+        if bundles(Resource.Wood) < 2.0 || bundles(Resource.Scrap) < 2.0 {
+            Game.build_result = BuildResult.Missing; return;
+        }
+        spend(Resource.Wood, 2.0);
+        spend(Resource.Scrap, 2.0);
+        let first = Game.hull_bottom - 1.0;
+        let last = Game.hull_bottom + 1.0;
+        for row in first..last + 1.0 {
+            for column in 3..8 {
+                var tile = 0.0;
+                if column == 3.0 || column == 7.0 || row == last { tile = 1.0; }
+                Grid.set_tile(this.deck, column, row, tile);
+                Grid.set_tile(this.floors, column, row, 15.0);
+            }
+            if row < last {
+                Grid.set_tile(this.deck, 2.0, row, 9.0);
+                Grid.set_tile(this.deck, 8.0, row, 9.0);
+                Grid.set_tile(this.floors, 2.0, row, 15.0);
+                Grid.set_tile(this.floors, 8.0, row, 15.0);
+                World.set_active(World.find("Port tread " + row), true);
+                World.set_active(World.find("Starboard tread " + row), true);
+                this.hold_columns.push(4.0);
+                this.hold_rows.push(row);
+                this.hold_columns.push(6.0);
+                this.hold_rows.push(row);
+            }
+        }
+        Game.hull_bottom += 2.0;
+        Game.extensions += 1.0;
+        Game.capacity = this.hold_columns.length;
+        Game.structure_mass += 18.0;
+        Game.build_result = BuildResult.Built;
     }
 }

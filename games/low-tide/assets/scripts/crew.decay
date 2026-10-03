@@ -15,7 +15,7 @@
 const DECK_COLUMNS: f32 = 11.0;
 const DECK_ROWS: f32 = 14.0;
 const HELM_X: f32 = 5.5;
-const HELM_Y: f32 = -1.5;
+const HELM_Y: f32 = -4.5;
 const RAMP: f32 = 10.0;
 
 script Crew {
@@ -27,6 +27,7 @@ script Crew {
     var crawler: Entity = null;
     var carried: Entity = null;
     var basin: Entity = null;
+    var workbench: Entity = null;
     var wading: bool = false;
     var use_button: Entity = null;
     var drop_button: Entity = null;
@@ -39,6 +40,7 @@ script Crew {
         this.crawler = World.find("Crawler");
         this.carried = World.find("Carried");
         this.basin = World.find("Basin");
+        this.workbench = World.find("Workbench");
         this.use_button = World.find("Use button");
         this.drop_button = World.find("Drop button");
         Game.aboard = true;
@@ -52,6 +54,11 @@ script Crew {
         }
         if Action.pressed("drop") || Ui.is_pressed(this.drop_button) {
             drop();
+        }
+        if Game.building {
+            pose(Vec2(0.0, 0.0));
+            Game.hint = Hint.Building;
+            return;
         }
         if Game.at_helm {
             Game.throttle = clamp(Game.throttle + stick.y * 0.5 * dt, 0.0, 1.0);
@@ -76,12 +83,15 @@ script Crew {
     // E: the helm when standing at it, salvage when standing by a wreck.
     fn use() {
         if Game.aboard {
+            if Game.building { Workbench.on(this.workbench).craft(); return; }
             if Game.at_helm {
                 Game.at_helm = false;
                 Game.rudder = 0.0;
             } else if near_helm() {
                 Game.at_helm = true;
                 this.transform.position = Vec3(HELM_X, HELM_Y, 0.1);
+            } else if near_workbench() {
+                Workbench.on(this.workbench).open();
             }
             return;
         }
@@ -115,6 +125,7 @@ script Crew {
 
     // X: throw the nearest crate in the hold over the side.
     fn drop() {
+        if Game.building { Game.building = false; return; }
         if !Game.aboard || Game.at_helm {
             return;
         }
@@ -138,7 +149,7 @@ script Crew {
             at.y += way.y;
         }
         this.transform.position = at;
-        if at.x < 0.0 || at.x > DECK_COLUMNS || at.y > 0.0 || at.y < -DECK_ROWS {
+        if at.x >= Game.hull_right {
             go_ashore();
         }
     }
@@ -187,7 +198,7 @@ script Crew {
         // Onto the middle of the ramp, whichever corner of it was stepped on:
         // its edges touch the treads, which nobody can stand in.
         let row = floor(-local.y);
-        let across = min(local.x, DECK_COLUMNS - 1.0 + this.radius + 0.05);
+        let across = min(local.x, Game.hull_right - 1.0 + this.radius + 0.05);
         this.transform.position = Vec3(across, -row - 0.5, 0.1);
         Game.aboard = true;
         if this.carrying {
@@ -216,10 +227,15 @@ script Crew {
     // which only the ramp reaches.
     fn walkable(x: f32, y: f32) -> bool {
         let tile = Grid.tile(this.deck, floor(x), floor(-y));
-        if x < 0.0 || x >= DECK_COLUMNS || y > 0.0 || y <= -DECK_ROWS {
+        if x >= Game.hull_right && floor(-y) == 7.0 {
             return true;
         }
         return tile == 0.0 || tile == 3.0 || tile == 4.0 || tile == 5.0 || tile == 10.0;
+    }
+
+    fn near_workbench() -> bool {
+        let at = this.transform.position;
+        return Vec2(at.x, at.y).distance(Vec2(4.5, -6.5)) < 1.15;
     }
 
     fn near_helm() -> bool {
@@ -284,6 +300,8 @@ script Crew {
             }
         } else if near_helm() {
             Game.hint = Hint.TakeHelm;
+        } else if near_workbench() {
+            Game.hint = Hint.Workbench;
         } else if nearby_crate() != null {
             Game.hint = Hint.Jettison;
         } else {

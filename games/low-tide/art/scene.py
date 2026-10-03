@@ -20,32 +20,39 @@ ROOT = pathlib.Path(__file__).resolve().parent.parent / "assets"
 #   H helm   G table    b bunk   E engine (space) nothing
 #
 # The hatch and ramp on the starboard side are the only way on or off.
+# A fixed construction canvas keeps the deck's origin stable as it grows.
+# Only the starter's seven-by-nine footprint is populated at first.
 CRAWLER = [
-    "  WWwwwWW  ",
-    " WW..H..WW ",
-    "TW.......WT",
-    "TWWWW-WWWWT",
-    "TWb.....bWT",
-    "Tw...G...wT",
-    "TW.......hR",
-    "TWb.....bWT",
-    "TWWWW-WWWWT",
-    "TW.......WT",
-    "TW.......WT",
-    "TWE.....EWT",
-    "TW.......WT",
-    " WWWWWWWWW ",
+    "           ",
+    "           ",
+    "           ",
+    "   WWwWW   ",
+    "  TW.H.WT  ",
+    "  TW...WT  ",
+    "  TWB..WT  ",
+    "  TW...hR  ",
+    "  TW...WT  ",
+    "  TW..EWT  ",
+    "  TW...WT  ",
+    "   WWWWW   ",
+    "           ",
+    "           ",
+    "           ",
+    "           ",
+    "           ",
+    "           ",
 ]
+
 SHIP_TILES = [
     "deck", "wall", "window", "door", "hatch", "helm", "table",
     "bunk", "engine", "tread", "ramp", "crate", "mast",
     "floor-home", "floor-bridge", "floor-hold",
-    "crate-wood", "crate-stone", "crate-ore", "crate-fibre", "crate-salt",
+    "crate-wood", "crate-stone", "crate-ore", "crate-fibre", "crate-salt", "workbench", "engine-upgraded",
 ]
 SYMBOL = {
     ".": "deck", "W": "wall", "w": "window", "-": "door", "h": "hatch",
     "H": "helm", "G": "table", "b": "bunk", "E": "engine", "T": "tread",
-    "R": "ramp",
+    "R": "ramp", "B": "workbench",
 }
 
 # The Basin: an old sea floor, generated rather than painted, by the engine's
@@ -179,6 +186,9 @@ def entities():
                      "bindings": ["key.E", "key.Space", "gamepad.south"]},
                     {"name": "drop", "kind": "button",
                      "bindings": ["key.X", "gamepad.west"]},
+                    {"name": "next_plan", "kind": "button",
+                     "bindings": ["key.Q", "gamepad.east"]},
+                    {"name": "cancel", "kind": "button", "bindings": ["key.Escape"]},
                     {"name": "view", "kind": "button",
                      "bindings": ["key.Tab", "key.V", "gamepad.north"]},
                 ]},
@@ -212,7 +222,7 @@ def entities():
         {
             "id": "shadow", "name": "Crawler shadow",
             "transform_3d": transform(START[0] + 0.4, START[1] - 0.4, 0.08, 0.0,
-                                      (width - 0.6, height - 0.6)),
+                                      (6.4, 8.4)),
             "components": {"sindri.shape": shape([0.0, 0.0, 0.0, 0.22], 2, 0.06)},
         },
         {
@@ -222,7 +232,7 @@ def entities():
         },
         {
             "id": "deck", "name": "Deck", "parent": "crawler",
-            "transform_3d": transform(-width / 2, height / 2),
+            "transform_3d": transform(-5.5, 7.0),
             "components": {"sindri.tilemap": {
                 "texture": "textures/ship.png", "palette": SHIP_TILES,
                 "columns": width, "rows": height, "tiles": crawler_tiles(), "layer": 4,
@@ -234,13 +244,13 @@ def entities():
             "components": {"sindri.tilemap": {
                 "texture": "textures/ship.png", "palette": SHIP_TILES,
                 "columns": width, "rows": height, "layer": 3,
-                "tiles": [None if ch == " " else (14 if row < 4 else 13 if row < 9 else 15)
+                "tiles": [None if ch == " " else (14 if row < 6 else 13 if row < 8 else 15)
                           for row, line in enumerate(CRAWLER) for ch in line],
             }},
         },
         {
             "id": "crew", "name": "Crew", "parent": "deck",
-            "transform_3d": transform(5.5, -6.5, 0.1, 0.0, (1.1, 1.1)),
+            "transform_3d": transform(5.5, -7.5, 0.1, 0.0, (1.1, 1.1)),
             "components": {
                 "sindri.sprite": {"texture": "textures/crew.png#down-0", "layer": 6},
                 "sindri.animation.sprite": {
@@ -284,7 +294,7 @@ def entities():
             "transform_3d": transform(0.0, 0.06),
             "components": {"sindri.ui.text": text("bottom", 0.029, "")},
         },
-    ] + crawler_motion() + cabin_details() + instrument_panel() + touch_controls() + [
+    ] + crawler_motion() + cabin_details() + instrument_panel() + touch_controls() + workbench() + [
     ]
     return found
 
@@ -305,39 +315,32 @@ def crawler_motion():
     The logical tread cells still block walking.
     """
     found = []
-    for side, column, direction in (("port", 0.5, -1), ("starboard", 10.5, 1)):
-        found.append({
-            "id": f"{side}-tread", "name": f"{side.title()} tread", "parent": "deck",
-            "transform_3d": transform(column, -7.5, 0.02, 0, (1, 11)),
-            "components": {
-                "sindri.sprite": {"texture": f"textures/treads.png#{side}-0", "layer": 5},
-                "sindri.animation.sprite": {
-                    "clips": {
-                        "forward": {"frames": [f"{side}-{i}" for i in reversed(range(8))],
-                                    "seconds_per_frame": 0.055, "looping": True},
-                        "reverse": {"frames": [f"{side}-{i}" for i in range(8)],
-                                    "seconds_per_frame": 0.055, "looping": True},
-                    }, "playing": "forward", "speed": 0.0,
+    for side, column, direction in (("port", 2.5, -1), ("starboard", 8.5, 1)):
+        for row in range(4, 17):
+            found.append({
+                "id": f"{side}-tread" if row == 4 else f"{side}-tread-{row}",
+                "name": f"{side.title()} tread {row}", "parent": "deck",
+                "transform_3d": transform(column, -row - 0.5, 0.02, 0, (1, 1)),
+                "components": {
+                    "sindri.sprite": {"texture": f"textures/treads.png#{side}-0", "layer": 5},
+                    "sindri.animation.sprite": {
+                        "clips": {
+                            "forward": {"frames": [f"{side}-{i}" for i in reversed(range(8))],
+                                        "seconds_per_frame": 0.055, "looping": True},
+                            "reverse": {"frames": [f"{side}-{i}" for i in range(8)],
+                                        "seconds_per_frame": 0.055, "looping": True},
+                        }, "playing": "forward", "speed": 0.0,
+                    },
+                    "sindri.script": script("scripts/tread.decay", "Tread", {"side": direction}),
                 },
-                "sindri.script": script("scripts/tread.decay", "Tread", {"side": direction}),
-            },
-        })
+                "disabled": row > 10 or (side == "starboard" and row == 7),
+            })
     return found
 
 
 def cabin_details():
-    found = [{
-        "id": "cabin-rug", "name": "Cabin runner", "parent": "deck",
-        "transform_3d": transform(5.5, -6.5, 0.01, 0, (3, 4)),
-        "components": {"sindri.sprite": {"texture": "textures/runner.png", "layer": 3}},
-    }]
-    for side, x in (("port", 1.75), ("starboard", 9.25)):
-        found.append({
-            "id": f"{side}-pipe", "name": f"{side.title()} heating pipe", "parent": "deck",
-            "transform_3d": transform(x, -10.5, 0.01, 0, (0.5, 4)),
-            "components": {"sindri.sprite": {"texture": "textures/pipe.png", "layer": 5}},
-        })
-    return found
+    # Furnishings are earned through construction instead of provided at start.
+    return []
 
 
 def instrument_panel():
@@ -411,6 +414,27 @@ def touch_controls():
         },
     ] + touch_button("use", "Use", -0.2, 0.2) + touch_button("drop", "Drop", -0.2, 0.37) \
       + touch_button("view", "View", -0.14, -0.15, 0.2, 0.1, "top_right")
+
+
+def workbench():
+    return [
+        {
+            "id": "workbench", "name": "Workbench", "parent": "deck",
+            "transform_3d": transform(4.5, -6.5),
+            "components": {"sindri.script": script("scripts/workbench.decay", "Workbench")},
+        },
+        {
+            "id": "build-panel", "name": "Build panel", "disabled": True,
+            "transform_3d": transform(0, 0.05, 0, 0, (0.86, 0.4)),
+            "components": {"sindri.ui.shape": ui_shape("rect", "center",
+                [0.025, 0.033, 0.028, 0.96], [0.55, 0.48, 0.33, 0.8], 0.005, 90, 0.025)},
+        },
+        {
+            "id": "build-words", "name": "Build words", "disabled": True,
+            "transform_3d": transform(0, 0.08),
+            "components": {"sindri.ui.text": text("center", 0.027, "WORKBENCH")},
+        },
+    ] + touch_button("next", "Next", 0, -0.13, 0.24, 0.08, "center")
 
 
 def main():
