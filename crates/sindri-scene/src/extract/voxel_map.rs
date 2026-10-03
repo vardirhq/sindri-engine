@@ -118,7 +118,9 @@ impl SceneExtractor {
             .components
             .query::<VoxelWorldComponent>(world)?
             .into_iter()
-            .filter(|(entity, component)| component.view == VoxelView::Map && world.is_active(*entity))
+            .filter(|(entity, component)| {
+                component.view == VoxelView::Map && world.is_active(*entity)
+            })
             .collect();
         let mut cache = self.voxel_maps.0.borrow_mut();
         cache.retain(|entity, _| maps.iter().any(|(kept, _)| kept == entity));
@@ -168,8 +170,8 @@ fn refresh(
         return Ok(());
     }
     let definition = definition(component, tile_sets)?;
-    let resolved = resolve_appearance(&definition.appearance, textures)?
-        .with_seed(component.variant_seed);
+    let resolved =
+        resolve_appearance(&definition.appearance, textures)?.with_seed(component.variant_seed);
     let ground = VoxelGround::of(component, tile_sets)?;
     cache.insert(
         entity,
@@ -271,11 +273,14 @@ fn square(map: &MapWorld, column: i32, row: i32) -> Option<MapSquare> {
         false,
     );
     let shade = match map.ground.surface(column - 1, row - 1) {
-        Some((_, beside, _)) => ((height - beside) * SLOPE_LIGHT).clamp(-MOST_SLOPE_LIGHT, MOST_SLOPE_LIGHT),
+        Some((_, beside, _)) => {
+            ((height - beside) * SLOPE_LIGHT).clamp(-MOST_SLOPE_LIGHT, MOST_SLOPE_LIGHT)
+        }
         None => 0.0,
     };
     #[allow(clippy::cast_precision_loss)]
-    let raised = ((level - map.reference) as f32 * HEIGHT_LIGHT).clamp(-MOST_HEIGHT_LIGHT, MOST_HEIGHT_LIGHT);
+    let raised = ((level - map.reference) as f32 * HEIGHT_LIGHT)
+        .clamp(-MOST_HEIGHT_LIGHT, MOST_HEIGHT_LIGHT);
     let depth = depth_below(map, column, level, row);
     #[allow(clippy::cast_precision_loss)]
     let light = (1.0 + shade + raised - depth as f32 * DEPTH_DARK).max(0.2);
@@ -339,7 +344,7 @@ fn visible_columns(root: Mat4, camera: ResolvedCamera) -> Option<([i32; 2], [i32
     let most = MOST_CHUNKS_ACROSS * CHUNK;
     for axis in 0..2 {
         if max[axis] - min[axis] > most {
-            let middle = (min[axis] + max[axis]) / 2;
+            let middle = i32::midpoint(min[axis], max[axis]);
             min[axis] = middle - most / 2;
             max[axis] = middle + most / 2;
         }

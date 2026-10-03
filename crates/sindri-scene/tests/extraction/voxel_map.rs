@@ -1,7 +1,7 @@
 //! A voxel world viewed as a map: the same world, drawn from straight above
 //! as one square per column with the top face of its highest block.
 
-use glam::{Mat4, Vec3};
+use glam::Vec3;
 use sindri_core::TileSetDocument;
 use sindri_render::{FrameCommand, PreparedFrame, SpriteInstance, TextureId};
 use sindri_scene::{SceneExtractor, SceneRuntime, TextureBindings, TileSetBindings, ViewCamera};
@@ -64,8 +64,10 @@ fn textures() -> TextureBindings {
 /// A camera looking straight down at the map's plane, framing `half` units
 /// either side of `(x, y)`.
 fn above(x: f32, y: f32, half: f32) -> ViewCamera {
-    let view = Mat4::look_at_rh(Vec3::new(x, y, 10.0), Vec3::new(x, y, 0.0), Vec3::Y);
-    let projection = Mat4::orthographic_rh(-half, half, -half, half, 0.1, 100.0);
+    let view =
+        glam::camera::rh::view::look_at_mat4(Vec3::new(x, y, 10.0), Vec3::new(x, y, 0.0), Vec3::Y);
+    let projection =
+        glam::camera::rh::proj::directx::orthographic(-half, half, -half, half, 0.1, 100.0);
     ViewCamera {
         view,
         view_projection: projection * view,
@@ -117,7 +119,9 @@ fn a_map_draws_each_column_it_can_see_as_its_top_block() {
         drawn.len()
     );
     assert!(
-        drawn.iter().all(|(texture, _)| *texture == TextureId::new(1)),
+        drawn
+            .iter()
+            .all(|(texture, _)| *texture == TextureId::new(1)),
         "a flat world of grass is all grass from above"
     );
     // Column 2, row 5 is the unit square from (2, -5) to (3, -6).
@@ -147,13 +151,23 @@ fn the_same_world_viewed_as_blocks_draws_no_map() {
 fn relief_is_drawn_as_light() {
     let flat = squares(&extract(&world("map", 0, ""), above(8.0, -8.0, 8.0)));
     assert!(
-        flat.iter().all(|(_, square)| (square.tint()[0] - 1.0).abs() < 1.0e-6),
+        flat.iter()
+            .all(|(_, square)| (square.tint()[0] - 1.0).abs() < 1.0e-6),
         "flat ground at the reference height is drawn as it is"
     );
     let rolling = squares(&extract(&world("map", 6, ""), above(8.0, -8.0, 8.0)));
-    let lit = rolling.iter().filter(|(_, square)| square.tint()[0] > 1.0).count();
-    let shaded = rolling.iter().filter(|(_, square)| square.tint()[0] < 1.0).count();
-    assert!(lit > 0 && shaded > 0, "slopes catch the light and fall into shadow: {lit} lit, {shaded} shaded");
+    let lit = rolling
+        .iter()
+        .filter(|(_, square)| square.tint()[0] > 1.0)
+        .count();
+    let shaded = rolling
+        .iter()
+        .filter(|(_, square)| square.tint()[0] < 1.0)
+        .count();
+    assert!(
+        lit > 0 && shaded > 0,
+        "slopes catch the light and fall into shadow: {lit} lit, {shaded} shaded"
+    );
 }
 
 #[test]

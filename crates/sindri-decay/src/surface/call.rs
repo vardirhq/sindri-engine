@@ -122,6 +122,15 @@ pub(crate) enum GridCall {
     /// An empty cell carries nothing, so it answers false rather than failing:
     /// a script asking what is underfoot asks about air as often as ground.
     Tagged,
+    /// What a voxel world's column has on top, by name, seen from above: the
+    /// block a map view draws there, and what a top-down game stands on.
+    ///
+    /// A column and a row and no level, because the level is the question:
+    /// `Grid.block` needs a script to know where the ground is before it can
+    /// ask what it is made of.
+    Surface,
+    /// How high the top of that block is, or `null` where nothing stands.
+    Height,
 }
 
 impl GridCall {
@@ -140,6 +149,8 @@ impl GridCall {
                 | Self::SetBlock
                 | Self::Walkable
                 | Self::Tagged
+                | Self::Surface
+                | Self::Height
         )
     }
 }
@@ -170,6 +181,8 @@ pub(crate) const GRID_CALLS: &[(&str, GridCall)] = &[
     ("set_block", GridCall::SetBlock),
     ("walkable", GridCall::Walkable),
     ("tagged", GridCall::Tagged),
+    ("surface", GridCall::Surface),
+    ("height", GridCall::Height),
 ];
 
 /// What a script can do to a body, connect bodies with, and ask about what it touched.

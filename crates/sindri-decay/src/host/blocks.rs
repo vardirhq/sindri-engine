@@ -163,9 +163,46 @@ impl WorldHost<'_> {
     /// Whole numbers, because a cell between two levels is not a cell. Refused
     /// rather than rounded: a script computing a level from a float it got
     /// wrong should hear about it where the mistake is.
+    /// `Grid.surface` and `Grid.height`: what a voxel world's column has on
+    /// top, and how high it is.
+    pub(super) fn surface_call(
+        &mut self,
+        call: GridCall,
+        path: &Path,
+        args: &[Value],
+    ) -> Result<Value, RuntimeError> {
+        let map = self.entity_argument(path, args, 0, "the voxel world")?;
+        let [column, row, _] = Self::cell_argument(path, args, 2)?;
+        let ground = self.voxel_ground(path, map)?.ok_or_else(|| {
+            RuntimeError::Host(format!(
+                "{} needs a voxel world; it is the top of a column of blocks",
+                path.dotted()
+            ))
+        })?;
+        let surface = ground.surface(column, row);
+        Ok(match (call, surface) {
+            (GridCall::Surface, Some((level, _, _))) => {
+                Value::String(ground.block([column, level, row]))
+            }
+            (GridCall::Surface, None) => Value::String(String::new()),
+            (GridCall::Height, Some((_, height, _))) => Value::Number(f64::from(height)),
+            (GridCall::Height, None) => Value::Null,
+            _ => unreachable!("only the surface calls are sent here"),
+        })
+    }
+
     fn block_position(path: &Path, args: &[Value]) -> Result<[i32; 3], RuntimeError> {
+        Self::cell_argument(path, args, 3)
+    }
+
+    /// A cell's column, row and, when `count` is three, level, each a whole
+    /// number; a level not asked for is zero.
+    fn cell_argument(path: &Path, args: &[Value], count: usize) -> Result<[i32; 3], RuntimeError> {
         let mut position = [0_i32; 3];
-        for (index, which) in [(1, "a column"), (2, "a row"), (3, "a level")] {
+        for (index, which) in [(1, "a column"), (2, "a row"), (3, "a level")]
+            .into_iter()
+            .take(count)
+        {
             let value = number(
                 path,
                 args.get(index).ok_or_else(|| {

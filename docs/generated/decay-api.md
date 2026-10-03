@@ -244,6 +244,7 @@ Grids of tiles, flat or stacked in layers like building blocks: what each cell h
 - `block(grid: Entity, column: f32, row: f32, level: f32)` → `String` — Which block is in a cell of a layered grid or a grid whose ground is a voxel world, by name, or `""` if the cell is empty.
 - `can_reach(mover: Entity, grid: Entity, target: Entity)` → `bool` — Whether a character on a grid can walk to where another object is.
 - `columns(grid: Entity)` → `f32` — How many columns a grid has.
+- `height(grid: Entity, column: f32, row: f32)` → `f32?` — How high the top of a voxel world's column is, as `Grid.surface` sees it, or `null` where nothing stands.
 - `place(entity: Entity, grid: Entity, x: f32, y: f32)` → `unit` — Moves an object to a position on a grid, measured in cells. Fractions place it between cells.
 - `position_x(entity: Entity, grid: Entity)` → `f32` — Which column an object is at on a grid, with fractions between cells.
 - `position_y(entity: Entity, grid: Entity)` → `f32` — Which row an object is at on a grid, with fractions between cells.
@@ -251,6 +252,7 @@ Grids of tiles, flat or stacked in layers like building blocks: what each cell h
 - `set_block(grid: Entity, column: f32, row: f32, level: f32, tile: String)` → `unit` — Places a block, by name, in a cell of a layered grid or a grid whose ground is a voxel world. `""` removes the block.
 - `set_tile(grid: Entity, column: f32, row: f32, index: f32)` → `unit` — Changes a flat tile map's cell to one of its tiles, by number. A negative number empties the cell.
 - `step_toward(mover: Entity, grid: Entity, target: Entity)` → `bool` — Moves a character one cell along the shortest walkable path towards a target. Gives back whether it moved.
+- `surface(grid: Entity, column: f32, row: f32)` → `String` — Which block is on top of a voxel world's column, by name, seen from straight above, or `""` where nothing stands. What a map view of the world draws there.
 - `tagged(grid: Entity, column: f32, row: f32, level: f32, tag: String)` → `bool` — Whether the block in a cell has a label, such as `"hot"` on lava, given to it where the blocks are defined.
 - `tile(grid: Entity, column: f32, row: f32)` → `f32` — Which tile is in a flat tile map's cell, by number, or -1 if it is empty or outside the map.
 - `walkable(grid: Entity, x: f32, y: f32)` → `bool` — Whether a character could stand at a point on a grid. False for water, empty space or outside the grid.
