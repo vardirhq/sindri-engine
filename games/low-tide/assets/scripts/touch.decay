@@ -49,6 +49,7 @@ script TouchControls {
             Hint.TakeHelm => "Helm",
             Hint.AtHelm => "Leave",
             Hint.Salvage => "Salvage",
+            Hint.Harvest => "Gather",
             _ => "Use",
         };
     }

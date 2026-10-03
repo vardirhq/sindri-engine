@@ -380,6 +380,29 @@ def crate(c):
     c.rect(12, 13, 20, 19, RUST, 1)
 
 
+def resource_crate(c, kind):
+    c.rect(3, 3, 29, 29, WOOD_DARK, 2)
+    c.rect(5, 5, 27, 27, WOOD, 1)
+    c.rect(7, 7, 25, 25, INK, 1)
+    if kind == "wood":
+        for y in (11, 17, 23):
+            c.line(9, y, 23, y - 2, 4, WOOD)
+            c.ellipse(9, y, 2, 2, WOOD_DARK)
+    elif kind in ("stone", "ore"):
+        for x, y in ((11, 12), (20, 11), (16, 21)):
+            c.ellipse(x, y, 4, 4, IRON)
+            c.ellipse(x - 1, y - 1, 2, 2, RUST if kind == "ore" else IRON_DARK)
+    elif kind == "fibre":
+        for x in (10, 14, 18, 22):
+            c.line(x, 9, x - 2, 23, 3, WOOD)
+        c.line(7, 16, 25, 16, 2, RUST)
+    else:
+        for x, y in ((12, 13), (20, 20)):
+            c.ellipse(x, y, 5, 6, SALT)
+            c.line(x - 3, y - 3, x + 3, y - 3, 1, WOOD_DARK)
+    c.rect(4, 25, 28, 28, WOOD_DARK)
+
+
 def mast(c):
     deck(c, 7)
     c.ellipse(16, 16, 9, 9, WOOD_DARK)
@@ -551,6 +574,8 @@ def main():
             ("floor-home", deck),
             ("floor-bridge", steel),
             ("floor-hold", lambda c: steel(c, True)),
+            *[(f"crate-{kind}", lambda c, k=kind: resource_crate(c, k))
+              for kind in ("wood", "stone", "ore", "fibre", "salt")],
         ],
         4,
         CELL,

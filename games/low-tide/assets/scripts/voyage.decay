@@ -6,11 +6,13 @@
 // floor(-y). `Grid.surface` and `Grid.height` say what is on top there.
 
 // What the hint line should say, decided by the crew, worded by the HUD.
-enum Hint { None, TakeHelm, AtHelm, Salvage, Empty, HoldFull, Carrying, Jettison, Ashore, LeftBehind, Brine }
+enum Hint { None, TakeHelm, AtHelm, Salvage, Harvest, Empty, HoldFull, Carrying, Jettison, Ashore, LeftBehind, Brine }
 
 // The kinds of ground the Basin is made of, by what the crawler and the HUD
 // make of them.
 enum Ground { Salt, Crust, Mud, Sand, Reef, Kelp, Rock, Island, Brine, Nothing }
+
+enum Resource { None, Wood, Stone, Ore, Scrap, Fibre, Salt }
 
 enum TidePhase { Low, Rising, High, Falling }
 
@@ -45,6 +47,13 @@ state Game {
     var crew_y: f32 = 0.0;
     var hint: Hint = Hint.None;
     // Scrap hauled aboard over the voyage, and how much is still aboard.
+    var wood: f32 = 0.0;
+    var stone: f32 = 0.0;
+    var ore: f32 = 0.0;
+    var fibre: f32 = 0.0;
+    var salt: f32 = 0.0;
+    var carried_kind: Resource = Resource.None;
+    var gather_kind: Resource = Resource.None;
     var scrap: f32 = 0.0;
     var salvaged: f32 = 0.0;
     // The view: how far the camera is rolled, and whether the player asked

@@ -289,192 +289,15 @@
    }
   },
   {
-   "id": "wreck-2",
-   "name": "Wreck 2",
-   "transform_3d": {
-    "position": [
-     -161.5,
-     31.5,
-     0.05
-    ],
-    "rotation": [
-     0,
-     0,
-     -0.342898,
-     0.939373
-    ],
-    "scale": [
-     7.0,
-     4.5,
-     1
-    ]
-   },
+   "id": "wreck-field",
+   "name": "Basin wrecks",
    "components": {
-    "sindri.sprite": {
-     "texture": "textures/wreck.png",
-     "layer": 1
-    },
-    "sindri.tags": {
-     "tags": [
-      "wreck"
-     ]
-    },
     "sindri.script": {
-     "source": "scripts/wreck.decay",
-     "script": "Wreck",
-     "properties": {}
-    }
-   }
-  },
-  {
-   "id": "wreck-3",
-   "name": "Wreck 3",
-   "transform_3d": {
-    "position": [
-     -138.5,
-     -6.5,
-     0.05
-    ],
-    "rotation": [
-     0,
-     0,
-     0.564642,
-     0.825336
-    ],
-    "scale": [
-     7.0,
-     4.5,
-     1
-    ]
-   },
-   "components": {
-    "sindri.sprite": {
-     "texture": "textures/wreck.png",
-     "layer": 1
-    },
-    "sindri.tags": {
-     "tags": [
-      "wreck"
-     ]
-    },
-    "sindri.script": {
-     "source": "scripts/wreck.decay",
-     "script": "Wreck",
-     "properties": {}
-    }
-   }
-  },
-  {
-   "id": "wreck-4",
-   "name": "Wreck 4",
-   "transform_3d": {
-    "position": [
-     -120.5,
-     -26.5,
-     0.05
-    ],
-    "rotation": [
-     0,
-     0,
-     0.099833,
-     0.995004
-    ],
-    "scale": [
-     7.0,
-     4.5,
-     1
-    ]
-   },
-   "components": {
-    "sindri.sprite": {
-     "texture": "textures/wreck.png",
-     "layer": 1
-    },
-    "sindri.tags": {
-     "tags": [
-      "wreck"
-     ]
-    },
-    "sindri.script": {
-     "source": "scripts/wreck.decay",
-     "script": "Wreck",
-     "properties": {}
-    }
-   }
-  },
-  {
-   "id": "wreck-5",
-   "name": "Wreck 5",
-   "transform_3d": {
-    "position": [
-     -233.5,
-     144.5,
-     0.05
-    ],
-    "rotation": [
-     0,
-     0,
-     -0.149438,
-     0.988771
-    ],
-    "scale": [
-     7.0,
-     4.5,
-     1
-    ]
-   },
-   "components": {
-    "sindri.sprite": {
-     "texture": "textures/wreck.png",
-     "layer": 1
-    },
-    "sindri.tags": {
-     "tags": [
-      "wreck"
-     ]
-    },
-    "sindri.script": {
-     "source": "scripts/wreck.decay",
-     "script": "Wreck",
-     "properties": {}
-    }
-   }
-  },
-  {
-   "id": "wreck-6",
-   "name": "Wreck 6",
-   "transform_3d": {
-    "position": [
-     -287.5,
-     110.5,
-     0.05
-    ],
-    "rotation": [
-     0,
-     0,
-     0.434966,
-     0.900447
-    ],
-    "scale": [
-     7.0,
-     4.5,
-     1
-    ]
-   },
-   "components": {
-    "sindri.sprite": {
-     "texture": "textures/wreck.png",
-     "layer": 1
-    },
-    "sindri.tags": {
-     "tags": [
-      "wreck"
-     ]
-    },
-    "sindri.script": {
-     "source": "scripts/wreck.decay",
-     "script": "Wreck",
-     "properties": {}
+     "source": "scripts/wreck-field.decay",
+     "script": "WreckField",
+     "properties": {
+      "template": "prefabs/wreck.prefab"
+     }
     }
    }
   },
@@ -596,7 +419,12 @@
       "mast",
       "floor-home",
       "floor-bridge",
-      "floor-hold"
+      "floor-hold",
+      "crate-wood",
+      "crate-stone",
+      "crate-ore",
+      "crate-fibre",
+      "crate-salt"
      ],
      "columns": 11,
      "rows": 14,
@@ -646,7 +474,12 @@
       "mast",
       "floor-home",
       "floor-bridge",
-      "floor-hold"
+      "floor-hold",
+      "crate-wood",
+      "crate-stone",
+      "crate-ore",
+      "crate-fibre",
+      "crate-salt"
      ],
      "columns": 11,
      "rows": 14,
@@ -766,6 +599,54 @@
     "sindri.sprite": {
      "texture": "textures/ship.png#crate",
      "layer": 7
+    },
+    "sindri.animation.sprite": {
+     "clips": {
+      "scrap": {
+       "frames": [
+        "crate"
+       ],
+       "seconds_per_frame": 1.0,
+       "looping": false
+      },
+      "wood": {
+       "frames": [
+        "crate-wood"
+       ],
+       "seconds_per_frame": 1.0,
+       "looping": false
+      },
+      "stone": {
+       "frames": [
+        "crate-stone"
+       ],
+       "seconds_per_frame": 1.0,
+       "looping": false
+      },
+      "ore": {
+       "frames": [
+        "crate-ore"
+       ],
+       "seconds_per_frame": 1.0,
+       "looping": false
+      },
+      "fibre": {
+       "frames": [
+        "crate-fibre"
+       ],
+       "seconds_per_frame": 1.0,
+       "looping": false
+      },
+      "salt": {
+       "frames": [
+        "crate-salt"
+       ],
+       "seconds_per_frame": 1.0,
+       "looping": false
+      }
+     },
+     "playing": "scrap",
+     "speed": 1.0
     }
    },
    "disabled": true

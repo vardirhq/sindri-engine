@@ -16,7 +16,6 @@ const DECK_COLUMNS: f32 = 11.0;
 const DECK_ROWS: f32 = 14.0;
 const HELM_X: f32 = 5.5;
 const HELM_Y: f32 = -1.5;
-const CRATE: f32 = 11.0;
 const RAMP: f32 = 10.0;
 
 script Crew {
@@ -86,18 +85,32 @@ script Crew {
             }
             return;
         }
-        let wreck = nearby_wreck();
         let at = this.transform.world_position;
-        if wreck == null || this.carrying || wet_at(this.basin, Vec2(at.x, at.y)) {
+        if this.carrying || Game.crates >= Game.capacity || wet_at(this.basin, Vec2(at.x, at.y)) {
             return;
         }
-        let wreck_at = wreck.transform.world_position;
-        if wet_at(this.basin, Vec2(wreck_at.x, wreck_at.y)) { return; }
-        if Wreck.on(wreck).scrap > 0.0 && Game.crates < Game.capacity {
-            Wreck.on(wreck).take();
-            this.carrying = true;
-            show_carried();
+        let wreck = nearby_wreck();
+        if wreck != null && Wreck.on(wreck).scrap > 0.0 {
+            let wreck_at = wreck.transform.world_position;
+            if !wet_at(this.basin, Vec2(wreck_at.x, wreck_at.y)) {
+                Wreck.on(wreck).take();
+                carry(Resource.Scrap);
+                return;
+            }
         }
+        let target = harvest_target(this.basin, Vec2(at.x, at.y));
+        if target == null { return; }
+        let top = Grid.height(this.basin, target.x, target.y);
+        if top == null { return; }
+        let kind = resource_at(this.basin, target.x, target.y);
+        Grid.set_block(this.basin, target.x, target.y, ceil(top) - 1.0, "");
+        carry(kind);
+    }
+
+    fn carry(kind: Resource) {
+        this.carrying = true;
+        Game.carried_kind = kind;
+        show_carried();
     }
 
     // X: throw the nearest crate in the hold over the side.
@@ -135,6 +148,7 @@ script Crew {
         let caught = wet_at(this.basin, Vec2(at.x, at.y));
         if caught && this.carrying {
             this.carrying = false;
+            Game.carried_kind = Resource.None;
             Game.washed += 1.0;
             show_carried();
         }
@@ -177,8 +191,9 @@ script Crew {
         this.transform.position = Vec3(across, -row - 0.5, 0.1);
         Game.aboard = true;
         if this.carrying {
-            Crawler.on(this.crawler).stow();
+            Crawler.on(this.crawler).stow(Game.carried_kind);
             this.carrying = false;
+            Game.carried_kind = Resource.None;
             show_carried();
         }
     }
@@ -233,7 +248,7 @@ script Crew {
             for dx in 0..3 {
                 let c = column + dx - 1.0;
                 let r = row + dy - 1.0;
-                if Grid.tile(this.deck, c, r) == CRATE {
+                if tile_cargo(Grid.tile(this.deck, c, r)) != Resource.None {
                     return Vec2(c, r);
                 }
             }
@@ -245,16 +260,21 @@ script Crew {
         if !Game.aboard {
             let wreck = nearby_wreck();
             let at = this.transform.world_position;
+            let target = harvest_target(this.basin, Vec2(at.x, at.y));
+            Game.gather_kind = Resource.None;
+            if target != null { Game.gather_kind = resource_at(this.basin, target.x, target.y); }
             if wet_at(this.basin, Vec2(at.x, at.y)) {
                 Game.hint = Hint.Brine;
             } else if this.carrying {
                 Game.hint = Hint.Carrying;
-            } else if wreck != null && Wreck.on(wreck).scrap <= 0.0 {
+            } else if wreck != null && Wreck.on(wreck).scrap <= 0.0 && target == null {
                 Game.hint = Hint.Empty;
-            } else if wreck != null && Game.crates >= Game.capacity {
+            } else if (wreck != null || target != null) && Game.crates >= Game.capacity {
                 Game.hint = Hint.HoldFull;
-            } else if wreck != null {
+            } else if wreck != null && Wreck.on(wreck).scrap > 0.0 && !wet_at(this.basin, Vec2(wreck.transform.world_position.x, wreck.transform.world_position.y)) {
                 Game.hint = Hint.Salvage;
+            } else if target != null {
+                Game.hint = Hint.Harvest;
             } else if this.wading {
                 Game.hint = Hint.Brine;
             } else if Vec2(Game.crew_x, Game.crew_y).distance(Vec2(Game.crawler_x, Game.crawler_y)) > 12.0 {
@@ -303,6 +323,7 @@ script Crew {
     fn show_carried() {
         if this.carried != null {
             World.set_active(this.carried, this.carrying);
+            if this.carrying { Animation.play(this.carried, cargo_name(Game.carried_kind)); }
         }
     }
 }

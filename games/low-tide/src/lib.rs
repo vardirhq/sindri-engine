@@ -8,9 +8,10 @@ use std::path::{Path, PathBuf};
 use std::time::Duration;
 
 use sindri_core::{
-    ComponentSchemaRegistry, EntityId, SceneDocument, TileSetDocument, Transform3D, World,
+    ComponentSchemaRegistry, EntityId, PrefabDocument, SceneDocument, TileSetDocument, Transform3D,
+    World,
 };
-use sindri_decay::{ScriptComponent, ScriptFrame, ScriptSources, Scripts};
+use sindri_decay::{PrefabSources, ScriptComponent, ScriptFrame, ScriptSources, Scripts};
 use sindri_platform::{InputEvent, InputState, Key};
 use sindri_scene::{SceneExtractor, ScreenExtent, ScreenUi, SpriteAnimations, TileSetBindings};
 
@@ -35,6 +36,7 @@ pub struct Run {
     pub scripts: Scripts,
     pub sources: ScriptSources,
     pub animations: SpriteAnimations,
+    pub prefabs: PrefabSources,
     pub input: InputState,
     /// The phone's buttons are screen UI, so the harness lays it out and
     /// hit-tests it as a host does.
@@ -82,6 +84,12 @@ impl Run {
             }
         }
 
+        let mut prefabs = PrefabSources::new();
+        let text = std::fs::read_to_string(root.join("prefabs/wreck.prefab"))
+            .map_err(|error| error.to_string())?;
+        let prefab = PrefabDocument::from_json(&text).map_err(|error| error.to_string())?;
+        prefabs.insert("prefabs/wreck.prefab", prefab);
+
         let mut tile_sets = TileSetBindings::new();
         let basin = std::fs::read_to_string(root.join("basin.tileset"))
             .map_err(|error| error.to_string())?;
@@ -97,6 +105,7 @@ impl Run {
             components,
             scripts: Scripts::new(),
             sources,
+            prefabs,
             animations: SpriteAnimations::new(),
             input: InputState::default(),
             screen_ui: ScreenUi::default(),
@@ -120,6 +129,7 @@ impl Run {
             &mut self.world,
             &self.components,
             ScriptFrame::new(&self.sources, &self.input, delta)
+                .with_prefabs(&self.prefabs)
                 .with_screen_ui(&self.screen_ui)
                 .with_tile_sets(&self.tile_sets)
                 .with_animations(&mut self.animations),

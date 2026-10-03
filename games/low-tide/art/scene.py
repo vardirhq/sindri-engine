@@ -40,6 +40,7 @@ SHIP_TILES = [
     "deck", "wall", "window", "door", "hatch", "helm", "table",
     "bunk", "engine", "tread", "ramp", "crate", "mast",
     "floor-home", "floor-bridge", "floor-hold",
+    "crate-wood", "crate-stone", "crate-ore", "crate-fibre", "crate-salt",
 ]
 SYMBOL = {
     ".": "deck", "W": "wall", "w": "window", "-": "door", "h": "hatch",
@@ -96,10 +97,8 @@ BASIN = {
 # Z runs down the map, so the column at (-129, -53) is centred at
 # (-128.5, 52.5). Found by searching the generated world for flat dry ground.
 START = (-128.5, 52.5)
-# Wrecks on flat dry ground around the start, found the same way. Gathering
-# across the whole Basin is the next step; these keep salvage until then.
-WRECKS = [(-116.5, 72.5, 0.4), (-161.5, 31.5, -0.7), (-138.5, -6.5, 1.2),
-          (-120.5, -26.5, 0.2), (-233.5, 144.5, -0.3), (-287.5, 110.5, 0.9)]
+# One introductory wreck; the rest are streamed by Decay across the Basin.
+WRECKS = [(-116.5, 72.5, 0.4)]
 
 
 def transform(x, y, z=0.0, rotation=0.0, scale=(1.0, 1.0)):
@@ -206,6 +205,11 @@ def entities():
         })
     found += [
         {
+            "id": "wreck-field", "name": "Basin wrecks",
+            "components": {"sindri.script": script("scripts/wreck-field.decay", "WreckField",
+                                                  {"template": "prefabs/wreck.prefab"})},
+        },
+        {
             "id": "shadow", "name": "Crawler shadow",
             "transform_3d": transform(START[0] + 0.4, START[1] - 0.4, 0.08, 0.0,
                                       (width - 0.6, height - 0.6)),
@@ -256,7 +260,15 @@ def entities():
         {
             "id": "carried", "name": "Carried", "parent": "crew",
             "transform_3d": transform(0.0, 0.42, 0.01, 0.0, (0.5, 0.5)),
-            "components": {"sindri.sprite": {"texture": "textures/ship.png#crate", "layer": 7}},
+            "components": {
+                "sindri.sprite": {"texture": "textures/ship.png#crate", "layer": 7},
+                "sindri.animation.sprite": {
+                    "clips": {kind: {"frames": ["crate" if kind == "scrap" else f"crate-{kind}"],
+                                     "seconds_per_frame": 1.0, "looping": False}
+                              for kind in ("scrap", "wood", "stone", "ore", "fibre", "salt")},
+                    "playing": "scrap", "speed": 1.0,
+                },
+            },
             "disabled": True,
         },
         {
@@ -415,6 +427,20 @@ def main():
         written,
     )
     (ROOT / "low-tide.scene").write_text(written + "\n")
+    prefab = {
+        "format_version": 1, "metadata": {"name": "Basin wreck"},
+        "entities": [{
+            "id": "wreck", "name": "Basin wreck",
+            "transform_3d": transform(0.0, 0.0, 0.05, 0.0, (7.0, 4.5)),
+            "components": {
+                "sindri.sprite": {"texture": "textures/wreck.png", "layer": 1},
+                "sindri.tags": {"tags": ["wreck"]},
+                "sindri.script": script("scripts/wreck.decay", "Wreck"),
+            },
+        }],
+    }
+    (ROOT / "prefabs").mkdir(exist_ok=True)
+    (ROOT / "prefabs/wreck.prefab").write_text(json.dumps(prefab, indent=1) + "\n")
 
 
 if __name__ == "__main__":

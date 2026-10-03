@@ -3,7 +3,7 @@
   "anchor": "center",
   "grid": {
     "columns": 4,
-    "rows": 4,
+    "rows": 6,
     "names": [
       "deck",
       "wall",
@@ -20,7 +20,12 @@
       "mast",
       "floor-home",
       "floor-bridge",
-      "floor-hold"
+      "floor-hold",
+      "crate-wood",
+      "crate-stone",
+      "crate-ore",
+      "crate-fibre",
+      "crate-salt"
     ]
   }
 }
