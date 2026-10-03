@@ -3,6 +3,10 @@
 script Wreck {
     @export var scrap: f32 = 3.0;
 
+    fn start() {
+        if this.scrap <= 0.0 { this.sprite.tint = Color("#9a948a"); }
+    }
+
     fn take() {
         this.scrap = max(0.0, this.scrap - 1.0);
         if this.scrap <= 0.0 {

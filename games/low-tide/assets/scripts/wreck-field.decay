@@ -1,0 +1,70 @@
+// One wreck per 48-unit region, placed on stable dry, reasonably level ground.
+// Only nearby prefabs exist; visited wrecks remember their remaining scrap.
+script WreckField {
+    @export let template: Prefab;
+    var basin: Entity = null;
+    var crew: Entity = null;
+    var active: Map<String, Entity> = [:];
+    var remaining: Map<String, f32> = [:];
+    var clock: f32 = 1.0;
+
+    fn start() {
+        this.basin = World.find("Basin");
+        this.crew = World.find("Crew");
+    }
+
+    fn update(dt: f32) {
+        this.clock += dt;
+        if this.clock < 1.0 { return; }
+        this.clock = 0.0;
+        let at = this.crew.transform.world_position;
+        let centre = Vec2(at.x, at.y);
+        for key in this.active.keys() {
+            let wreck = this.active[key];
+            let position = wreck.transform.world_position;
+            if Vec2(position.x, position.y).distance(centre) > 120.0 {
+                this.remaining[key] = Wreck.on(wreck).scrap;
+                World.despawn(wreck);
+                this.active.remove(key);
+            }
+        }
+        let cx = floor(centre.x / 48.0);
+        let cy = floor(centre.y / 48.0);
+        for dy in 0..3 {
+            for dx in 0..3 {
+                let column = cx + dx - 1.0;
+                let row = cy + dy - 1.0;
+                let key = column + ":" + row;
+                if !this.active.contains(key) {
+                    let site = wreck_site(this.basin, column, row);
+                    if site == null { continue; }
+                    if site.distance(centre) < 110.0 {
+                        let wreck = World.spawn(this.template);
+                        wreck.transform.position = Vec3(site.x, site.y, 0.05);
+                        wreck.transform.rotation_z = basin_scatter(column, row, 9.0) * 6.283185;
+                        // Authored only before the newly spawned script starts.
+                        World.set_property(wreck, "scrap", this.remaining.get(key, 3.0));
+                        this.active[key] = wreck;
+                    }
+                }
+            }
+        }
+    }
+}
+
+shared fn wreck_site(basin: Entity, column: f32, row: f32) -> Vec2? {
+    for attempt in 0..4 {
+        let x = column * 48.0 + 8.0 + basin_scatter(column, row, 11.0 + attempt) * 32.0;
+        let y = row * 48.0 + 8.0 + basin_scatter(column, row, 21.0 + attempt) * 32.0;
+        let site = Vec2(floor(x) + 0.5, floor(y) + 0.5);
+        // Keep the introductory wreck and the crawler's starting patch clear.
+        // Seasonal flooding does not reroll sites or move wrecks.
+        if site.distance(Vec2(-116.5, 72.5)) > 12.0 && site.distance(Vec2(-128.5, 52.5)) > 24.0 && surface_at(basin, site) != "" && !tagged_at(basin, site, "liquid") {
+            let h = height_at(basin, site);
+            if abs(height_at(basin, site + Vec2(3.5, 2.5)) - h) <= 2.0 && abs(height_at(basin, site - Vec2(3.5, 2.5)) - h) <= 2.0 {
+                return site;
+            }
+        }
+    }
+    return null;
+}

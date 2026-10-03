@@ -1,0 +1,78 @@
+// Bundles use one hold slot and the same mass, with their kind kept in the
+// logical deck tile. Harvesting changes the actual Basin, never a loot copy.
+shared fn cargo_name(kind: Resource) -> String {
+    return match kind {
+        Resource.Wood => "wood", Resource.Stone => "stone",
+        Resource.Ore => "ore", Resource.Scrap => "scrap",
+        Resource.Fibre => "fibre", Resource.Salt => "salt", _ => "nothing",
+    };
+}
+
+shared fn cargo_tile(kind: Resource) -> f32 {
+    return match kind {
+        Resource.Scrap => 11.0, Resource.Wood => 16.0, Resource.Stone => 17.0,
+        Resource.Ore => 18.0, Resource.Fibre => 19.0, Resource.Salt => 20.0, _ => 0.0,
+    };
+}
+
+shared fn tile_cargo(tile: f32) -> Resource {
+    if tile == 11.0 { return Resource.Scrap; }
+    if tile == 16.0 { return Resource.Wood; }
+    if tile == 17.0 { return Resource.Stone; }
+    if tile == 18.0 { return Resource.Ore; }
+    if tile == 19.0 { return Resource.Fibre; }
+    if tile == 20.0 { return Resource.Salt; }
+    return Resource.None;
+}
+
+shared fn cargo_change(kind: Resource, amount: f32) {
+    match kind {
+        Resource.Wood => { Game.wood += amount; }
+        Resource.Stone => { Game.stone += amount; }
+        Resource.Ore => { Game.ore += amount; }
+        Resource.Scrap => { Game.scrap += amount; }
+        Resource.Fibre => { Game.fibre += amount; }
+        Resource.Salt => { Game.salt += amount; }
+        _ => { }
+    }
+}
+
+// Stable scatter in world coordinates; travelling away does not reroll loot.
+shared fn basin_scatter(column: f32, row: f32, seed: f32) -> f32 {
+    let n = sin(column * 12.9898 + row * 78.233 + seed * 17.31) * 43758.5453;
+    return n - floor(n);
+}
+
+shared fn resource_at(basin: Entity, column: f32, row: f32) -> Resource {
+    let block = Grid.surface(basin, column, row);
+    if block == "trunk" { return Resource.Wood; }
+    if block == "leaves" || block == "kelp" { return Resource.Fibre; }
+    if block == "salt" || block == "crust" { return Resource.Salt; }
+    if block == "reef" { return Resource.Stone; }
+    if block == "rock" {
+        if basin_scatter(column, row, 3.0) < 0.25 { return Resource.Ore; }
+        return Resource.Stone;
+    }
+    return Resource.None;
+}
+
+// A nearby dry column, closest first. The centre must be within arm's reach.
+shared fn harvest_target(basin: Entity, at: Vec2) -> Vec2? {
+    let column = floor(at.x);
+    let row = floor(-at.y);
+    var best: Vec2? = null;
+    var closest = 1.6;
+    for dy in 0..3 {
+        for dx in 0..3 {
+            let c = column + dx - 1.0;
+            let r = row + dy - 1.0;
+            let centre = Vec2(c + 0.5, -r - 0.5);
+            let far = centre.distance(at);
+            if far < closest && !wet_at(basin, centre) && resource_at(basin, c, r) != Resource.None {
+                best = Vec2(c, r);
+                closest = far;
+            }
+        }
+    }
+    return best;
+}

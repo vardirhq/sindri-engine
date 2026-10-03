@@ -689,7 +689,12 @@ side, and remembered until the entity, its textures or its block set change;
 switching a world to a map releases its meshed sections. `Grid.surface` and
 `Grid.height` read a column's top from Decay (the latter `f32?`, `null` where
 nothing stands). Extraction tests cover the squares, row direction, relief,
-edits and the absence of meshes; Low Tide's Basin is the proof in a game. Not
+edits and the absence of meshes; Low Tide's Basin is the proof in a game.
+Low Tide also exercises existing sparse `Grid.set_block` edits for biome
+harvesting, typed shared state and deck tiles for its six-resource hold,
+and prefab spawning for deterministic wrecks across the Basin. Keyboard and
+phone-touch runtime tests harvest, carry, stow and jettison actual blocks;
+these are Decay gameplay rules, without a new engine host surface. Not
 drawn: decoration that holds nothing up, and a face's animation or glow.
 
 A block from a block set is meshed as the box its tile describes -- a slab's

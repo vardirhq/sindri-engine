@@ -1,5 +1,8 @@
 # Changelog
 
+- Low Tide gains biome gathering and a twenty-slot resource hold: wood, stone, ore, scrap, fibre and salt. Harvests remove actual Basin blocks; carrying, stowing, jettisoning and flood loss preserve resource kinds and cargo weight. The phone's contextual button offers Gather. Wreck prefabs stream at deterministic sites across the Basin and remember depleted scrap when revisited; one introductory wreck stays near the start.
+
+
 - Low Tide's visible upper tread belts now move toward the bow during forward travel. Their animation frame order was reversed; pivoting still sends the two sides in opposite directions.
 
 - Low Tide gains distinct bridge, living-quarter and hold materials, richer furniture and worn metal fittings, authored in its deterministic art generators. The Basin gains quieter, more varied salt, kelp, dunes, reef and brine textures. A compact instrument panel, cabin runner and exposed heating pipes dress the moving home; tread belts roll with driving and pivoting, and freeze while flooded. The floor plan and cargo rules are unchanged.

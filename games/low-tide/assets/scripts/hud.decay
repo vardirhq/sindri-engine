@@ -13,8 +13,10 @@ script Hud {
     }
 
     fn update(dt: f32) {
-        var status = "Scrap " + Game.scrap + "/" + Game.capacity;
+        var status = "Hold " + Game.crates + "/" + Game.capacity;
         status = status + "   Throttle " + round(Game.throttle * 100.0) + "%";
+        status = status + "\nWood " + Game.wood + "  Stone " + Game.stone + "  Ore " + Game.ore;
+        status = status + "\nScrap " + Game.scrap + "  Fibre " + Game.fibre + "  Salt " + Game.salt;
         status = status + "\nSpeed " + Game.speed.fixed(1) + " of " + Game.top_speed.fixed(1);
         if Game.blocked {
             status = status + "  (aground)";
@@ -31,7 +33,7 @@ script Hud {
         if Game.washed > 0.0 { status = status + "\nWashed away: " + Game.washed; }
         Ui.set_text(this.entity, status);
         // Keep the panel's top edge fixed as flood notices add lines.
-        var height = 0.225;
+        var height = 0.305;
         if Game.flooded { height += 0.04; }
         if Game.washed > 0.0 { height += 0.04; }
         this.panel.transform.scale.y = height;
@@ -72,6 +74,7 @@ script Hud {
             Hint.TakeHelm => "E  take the helm",
             Hint.AtHelm => "W/S  throttle     A/D  steer     E  leave the helm",
             Hint.Salvage => "E  salvage a crate of scrap",
+            Hint.Harvest => "E  gather " + cargo_name(Game.gather_kind),
             Hint.Jettison => "X  throw this crate over the side",
             _ => shared_words("WASD  walk     Tab  keep the map north-up"),
         };
@@ -82,6 +85,7 @@ script Hud {
             Hint.TakeHelm => "Helm to take the wheel",
             Hint.AtHelm => "Push up for throttle, sideways to steer",
             Hint.Salvage => "Salvage to take a crate",
+            Hint.Harvest => "Gather to take " + cargo_name(Game.gather_kind),
             Hint.Jettison => "Drop throws this crate overboard",
             _ => shared_words("Drag anywhere to walk"),
         };
@@ -92,8 +96,8 @@ script Hud {
         return match Game.hint {
             Hint.Empty => "This wreck is picked clean",
             Hint.HoldFull => "The hold is full: drop a crate first",
-            Hint.Carrying => "Carry it back aboard up the ramp",
-            Hint.Ashore => "Walk to a wreck, or back up the ramp",
+            Hint.Carrying => "Carry " + cargo_name(Game.carried_kind) + " aboard up the ramp",
+            Hint.Ashore => "Gather nearby, or back up the ramp",
             Hint.LeftBehind => "The crawler is a long way off",
             Hint.Brine => "Brine: stay dry or wade out slowly",
             _ => idle,
