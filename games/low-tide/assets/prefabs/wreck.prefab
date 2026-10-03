@@ -28,7 +28,13 @@
    "components": {
     "sindri.sprite": {
      "texture": "textures/wreck.png",
-     "layer": 1
+     "layer": 1,
+     "tint": [
+      1,
+      1,
+      1,
+      1
+     ]
     },
     "sindri.tags": {
      "tags": [
@@ -38,7 +44,9 @@
     "sindri.script": {
      "source": "scripts/wreck.decay",
      "script": "Wreck",
-     "properties": {}
+     "properties": {
+      "template": "prefabs/cargo.prefab"
+     }
     }
    }
   }

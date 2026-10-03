@@ -703,6 +703,13 @@ Its viewport-sized workbench exposes three directly selectable blueprints,
 current cargo versus cost, installed/chassis-limit states and explicit actions.
 Keyboard and phone menu tests exercise selection, rejection and closing;
 phone/desktop captures exercise the compact HUD and responsive menu.
+Its wrecks also spawn six resource-specific cargo prefabs as hull children;
+Decay selects the nearby physical crate and retains a per-slot mask across
+wreck streaming. Carried cargo can be set down as a world prefab and picked
+up again before stowing. Keyboard/phone regression tests exercise choice,
+recoverable drop and inventory accounting; flood tests exercise one-time loss
+of loose ground cargo. This uses existing prefab, parenting, animation and
+script APIs; the history remains session-only.
 Its instrument HUD uses authored atlas icons, real hold segments and
 speed/phase-time meters. A deck-parented outline identifies the crate named
 in a contextual action panel; discard confirmation is tied to that cell and

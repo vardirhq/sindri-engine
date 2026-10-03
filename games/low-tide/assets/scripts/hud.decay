@@ -110,12 +110,13 @@ script Hud {
         else if Game.hint == Hint.TakeHelm { title = "CRAWLER HELM"; detail = "Take the wheel and explore the seabed"; }
         else if Game.hint == Hint.AtHelm { title = "AT THE HELM"; detail = "Throttle " + round(Game.throttle * 100.0) + "% / steer left or right"; }
         else if Game.hint == Hint.Harvest { title = cargo_name(Game.gather_kind).uppercase; detail = "Gather a bundle and carry it aboard"; }
-        else if Game.hint == Hint.Salvage { title = "WRECK SALVAGE"; detail = "Recover scrap for the crawler"; }
+        else if Game.hint == Hint.Salvage { title = cargo_name(Game.focus_kind).uppercase + " CRATE"; detail = "Pick up this crate and carry it aboard"; }
+        else if Game.hint == Hint.Carrying { title = "CARRYING " + cargo_name(Game.carried_kind).uppercase; detail = "Drop sets it down; pick it up again later"; }
         else if Game.hint == Hint.DiveStart { title = "DIVE LINE"; detail = "Explore a nearby submerged wreck"; }
         else if Game.diving { title = "UNDERWATER"; detail = "Follow the yellow line back to the crawler"; }
         let visible = title != "" && !Game.building;
         for name in ["Context panel", "Context title", "Context detail", "context-icon"] { World.set_active(World.find(name), visible); }
-        World.set_active(World.find("context-icon"), visible && Game.hint == Hint.Jettison);
+        World.set_active(World.find("context-icon"), visible && (Game.hint == Hint.Jettison || Game.hint == Hint.Salvage || Game.hint == Hint.Carrying));
         var height = 0.20;
         var centre = 0.40;
         if Game.touch { height = 0.34; centre = 0.335; }
@@ -158,7 +159,8 @@ script Hud {
             Hint.Building => "Q  next plan     E  build     X / Esc  close",
             Hint.TakeHelm => "E  take the helm",
             Hint.AtHelm => "W/S  throttle     A/D  steer     E  leave the helm",
-            Hint.Salvage => "E  salvage a crate of scrap",
+            Hint.Salvage => "E  pick up " + cargo_name(Game.focus_kind) + " crate",
+            Hint.Carrying => "Carry aboard / X  set down",
             Hint.Harvest => "E  gather " + cargo_name(Game.gather_kind),
             Hint.Jettison => "X twice  discard crate / Esc cancel",
             _ => shared_words("WASD  walk     Tab  keep the map north-up"),
@@ -175,7 +177,8 @@ script Hud {
             Hint.Building => "Choose a blueprint, then Build; Close returns",
             Hint.TakeHelm => "Helm to take the wheel",
             Hint.AtHelm => "Push up for throttle, sideways to steer",
-            Hint.Salvage => "Salvage to take a crate",
+            Hint.Salvage => "Pick up the highlighted " + cargo_name(Game.focus_kind) + " crate",
+            Hint.Carrying => "Carry aboard; Drop sets the crate down",
             Hint.Harvest => "Gather to take " + cargo_name(Game.gather_kind),
             Hint.Jettison => "Drop, then Discard confirms; moving away cancels",
             _ => shared_words("Drag anywhere to walk"),

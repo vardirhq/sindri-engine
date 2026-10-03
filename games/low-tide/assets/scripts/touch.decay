@@ -47,7 +47,7 @@ script TouchControls {
         this.drop_button.transform.scale.x = width;
         World.set_active(this.use_button, playing && has_use_action());
         World.set_active(this.view_button, playing && !Game.diving);
-        World.set_active(this.drop_button, playing && (Game.hint == Hint.Jettison || Game.building || Game.diving));
+        World.set_active(this.drop_button, playing && (Game.hint == Hint.Jettison || Game.carried_kind != Resource.None || Game.building || Game.diving));
         Ui.set_text(this.use_label, use_words());
         Ui.set_text(World.find("View label"), "North");
         if Game.prefer_north { Ui.set_text(World.find("View label"), "Follow"); }
@@ -80,7 +80,7 @@ script TouchControls {
             Hint.Building => "Build",
             Hint.TakeHelm => "Helm",
             Hint.AtHelm => "Leave",
-            Hint.Salvage => "Salvage",
+            Hint.Salvage => "Pick up",
             Hint.Harvest => "Gather",
             _ => "Use",
         };

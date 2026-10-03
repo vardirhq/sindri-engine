@@ -1,0 +1,34 @@
+// A crate in a wreck or set down ashore. Only stowing changes hold counts.
+script LooseCargo {
+    var kind: Resource = Resource.Scrap;
+    var owner: Entity = null;
+    var slot: f32 = -1.0;
+    var claimed: bool = false;
+    var clock: f32 = 0.2;
+    var submerged: bool = false;
+
+    fn start() { Animation.play(this.entity, cargo_name(this.kind)); }
+
+    fn update(dt: f32) {
+        if this.claimed { World.despawn(this.entity); return; }
+        this.clock += dt;
+        if this.clock < 0.2 { return; }
+        this.clock = 0.0;
+        let at = this.transform.world_position;
+        let wet = wet_at(World.find("Basin"), Vec2(at.x, at.y));
+        if wet != this.submerged {
+            this.submerged = wet;
+            this.sprite.tint.a = 1.0;
+            if wet { this.sprite.tint.a = 0.0; }
+        }
+        if wet {
+            if this.owner == null { Game.washed += 1.0; World.despawn(this.entity); }
+        }
+    }
+
+    fn take() {
+        if this.claimed { return; }
+        this.claimed = true;
+        if this.owner != null { Wreck.on(this.owner).take_slot(this.slot); }
+    }
+}

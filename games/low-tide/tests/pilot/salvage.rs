@@ -33,9 +33,26 @@ pub fn pick_up_at_first_wreck(pilot: &mut Pilot) {
     // Round the bow, not back over the ramp, which would be going aboard.
     let off_the_bow = pilot.deck_to_world([13.0, 2.5]);
     pilot.walk_ashore(off_the_bow, 0.5);
-    pilot.walk_ashore(wreck_at, 1.6);
+    let cargo = pilot
+        .run
+        .world
+        .entities()
+        .find(|(entity, data)| {
+            data.parent == Some(wreck)
+                && data.name.as_deref() == Some("Loose cargo")
+                && pilot.run.scripts.field(*entity, "kind")
+                    == Some(&sindri_decay::ScriptValue::Variant("Resource.Scrap".into()))
+        })
+        .map(|(entity, _)| entity)
+        .expect("a remaining scrap crate");
+    let crate_at = pilot.run.position(cargo);
+    pilot.walk_ashore(crate_at, 0.4);
     assert!(!pilot.flag("aboard"), "at the wreck");
     pilot.use_it();
+    assert!(
+        (pilot.board("carried_kind") - 4.0).abs() < 0.01,
+        "chose scrap"
+    );
     let carried = pilot.run.entity("carried").expect("the carried crate");
     assert!(
         pilot.run.world.is_active(carried),

@@ -85,10 +85,12 @@ impl Run {
         }
 
         let mut prefabs = PrefabSources::new();
-        let text = std::fs::read_to_string(root.join("prefabs/wreck.prefab"))
-            .map_err(|error| error.to_string())?;
-        let prefab = PrefabDocument::from_json(&text).map_err(|error| error.to_string())?;
-        prefabs.insert("prefabs/wreck.prefab", prefab);
+        for name in ["prefabs/wreck.prefab", "prefabs/cargo.prefab"] {
+            let text =
+                std::fs::read_to_string(root.join(name)).map_err(|error| error.to_string())?;
+            let prefab = PrefabDocument::from_json(&text).map_err(|error| error.to_string())?;
+            prefabs.insert(name, prefab);
+        }
 
         let mut tile_sets = TileSetBindings::new();
         let basin = std::fs::read_to_string(root.join("basin.tileset"))
