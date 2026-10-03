@@ -19,11 +19,72 @@ pub enum FaceOcclusion {
     None,
 }
 
+/// How many steps a voxel is divided into along each axis when it describes
+/// a shape smaller than itself.
+pub const VOXEL_STEPS: u8 = 16;
+
+/// The part of its voxel a block fills, as a box in sixteenths: X across, Y
+/// up, Z toward the front, each from zero to [`VOXEL_STEPS`].
+///
+/// A slab is the bottom half; a post is a thin column in the middle. Most
+/// blocks are [`VoxelShape::FULL`].
+#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
+pub struct VoxelShape {
+    pub min: [u8; 3],
+    pub max: [u8; 3],
+}
+
+impl VoxelShape {
+    pub const FULL: Self = Self {
+        min: [0; 3],
+        max: [VOXEL_STEPS; 3],
+    };
+
+    /// A box from fractions of a voxel, rounded to the nearest step and kept
+    /// at least a step thick.
+    #[must_use]
+    pub fn from_fractions(min: [f32; 3], max: [f32; 3]) -> Self {
+        let step = |value: f32| {
+            let scaled = (value.clamp(0.0, 1.0) * f32::from(VOXEL_STEPS)).round();
+            // Clamped to 0..=16 above, so it fits.
+            #[allow(clippy::cast_possible_truncation, clippy::cast_sign_loss)]
+            let whole = scaled as u8;
+            whole
+        };
+        let mut shape = Self {
+            min: min.map(step),
+            max: max.map(step),
+        };
+        for axis in 0..3 {
+            if shape.max[axis] <= shape.min[axis] {
+                if shape.min[axis] >= VOXEL_STEPS {
+                    shape.min[axis] = VOXEL_STEPS - 1;
+                }
+                shape.max[axis] = shape.min[axis] + 1;
+            }
+        }
+        shape
+    }
+
+    #[must_use]
+    pub fn is_full(self) -> bool {
+        self == Self::FULL
+    }
+}
+
+impl Default for VoxelShape {
+    fn default() -> Self {
+        Self::FULL
+    }
+}
+
 /// Renderer-independent description of one voxel material.
 #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
 pub struct VoxelMaterial {
     pub render_class: RenderClass,
     pub face_occlusion: FaceOcclusion,
+    /// The part of the voxel the block fills.
+    pub shape: VoxelShape,
 }
 
 impl VoxelMaterial {
@@ -32,7 +93,14 @@ impl VoxelMaterial {
         Self {
             render_class,
             face_occlusion,
+            shape: VoxelShape::FULL,
         }
+    }
+
+    #[must_use]
+    pub const fn with_shape(mut self, shape: VoxelShape) -> Self {
+        self.shape = shape;
+        self
     }
 
     #[must_use]

@@ -34,9 +34,13 @@ performance baseline for every later presentation profile.
   hand-written Causeway-atlas mapping.
 - [ ] Complete cutout and transparent section rendering, including stable cache
   identities, depth/blend policy, and correct release on eviction.
-- [ ] Expand voxel materials beyond one fixed top/side/bottom lookup:
+- [x] Expand voxel materials beyond one fixed top/side/bottom lookup:
   deterministic variants, covered/buried appearances, render class, occlusion
-  policy, and optional face-specific rules.
+  policy, and optional face-specific rules. A block from a block set wears its
+  variants by cell (seeded by `variant_seed`, chosen exactly as a tile volume
+  chooses them), its `covered` look under a block that hides faces, and its
+  box: slabs, posts and rails mesh as themselves, hide a neighbour's face only
+  where they cover all of it, and darken corners only when full.
 - [ ] Carry the data required for renderer-owned directional face lighting and
   neighbour-aware corner ambient occlusion through compiled geometry. Do not
   bake a fixed camera or world-light direction into generic voxel textures.

@@ -121,3 +121,105 @@ fn a_block_set_still_loading_is_said_to_be() {
         "tile set `terrain.tileset` has not been bound"
     );
 }
+
+/// Grass that has a second look for some cells, and a buried look for the
+/// cells with something standing on them.
+fn grass_with_looks() -> TileSetBindings {
+    let face = |sprite: &str| format!(r#"{{ "sprite": "{sprite}", "size": [1.0, 1.0] }}"#);
+    let document = TileSetDocument::from_json(&format!(
+        r#"{{ "format_version": 1, "tiles": {{
+             "grass": {{
+               "faces": {{ "top": {grass}, "south": {dirt}, "east": {dirt} }},
+               "variants": [{{ "faces": {{ "top": {flower}, "south": {dirt}, "east": {dirt} }} }}],
+               "covered": {{ "top": {buried}, "south": {buried}, "east": {buried} }}
+             }},
+             "dirt": {{ "faces": {{ "top": {dirt}, "south": {dirt}, "east": {dirt} }} }},
+             "stone": {{ "faces": {{ "top": {stone}, "south": {stone}, "east": {stone} }} }},
+             "slab": {{ "height": 0.5,
+                        "faces": {{ "top": {stone}, "south": {stone}, "east": {stone} }} }}
+           }} }}"#,
+        grass = face("grass.png"),
+        dirt = face("dirt.png"),
+        stone = face("stone.png"),
+        flower = face("flower.png"),
+        buried = face("buried.png"),
+    ))
+    .expect("the block set parses");
+    let mut bindings = TileSetBindings::new();
+    bindings
+        .bind("terrain.tileset", document)
+        .expect("the block set is valid");
+    bindings
+}
+
+fn drawn_with(frame: &sindri_render::PreparedFrame) -> std::collections::BTreeSet<TextureId> {
+    frame
+        .passes()
+        .iter()
+        .filter_map(|pass| match &pass.command {
+            FrameCommand::CachedTexturedMesh { texture, .. } => Some(*texture),
+            _ => None,
+        })
+        .collect()
+}
+
+fn extract_looks(world: &sindri_core::World) -> sindri_render::PreparedFrame {
+    let mut textures = textures();
+    textures.bind("flower.png", TextureId::new(4));
+    textures.bind("buried.png", TextureId::new(5));
+    let tile_sets = grass_with_looks();
+    SceneExtractor::new()
+        .unwrap()
+        .extract_animated_with_world_camera(
+            world,
+            VIEWPORT,
+            ViewCamera {
+                view: Mat4::IDENTITY,
+                view_projection: Mat4::IDENTITY,
+                framed_half_height: 1.0,
+            },
+            &textures,
+            SceneRuntime {
+                tile_sets: Some(&tile_sets),
+                ..SceneRuntime::default()
+            },
+        )
+        .expect("the world extracts")
+}
+
+#[test]
+fn a_block_wears_its_variants_across_cells_and_its_buried_look_under_another() {
+    let plain = extract_looks(&world("grass"));
+    let drawn = drawn_with(&plain);
+    assert!(drawn.contains(&TextureId::new(1)), "plain grass: {drawn:?}");
+    assert!(
+        drawn.contains(&TextureId::new(4)),
+        "some cells flower: {drawn:?}"
+    );
+    assert!(
+        !drawn.contains(&TextureId::new(5)),
+        "nothing is buried yet: {drawn:?}"
+    );
+
+    let mut built = world("grass");
+    let terrain = built
+        .entities()
+        .find(|(_, data)| data.components.contains_key("sindri.voxel_world"))
+        .map(|(entity, _)| entity)
+        .unwrap();
+    built
+        .get_mut(terrain)
+        .unwrap()
+        .components
+        .get_mut("sindri.voxel_world")
+        .unwrap()["edits"] = serde_json::json!([
+        { "at": [5, 1, 5], "block": "slab" },
+        // Dug out beside it, so the buried block has a side to show.
+        { "at": [6, 0, 5], "block": "" }
+    ]);
+    let drawn = drawn_with(&extract_looks(&built));
+    assert!(
+        drawn.contains(&TextureId::new(5)),
+        "the grass under the slab shows its buried sides: {drawn:?}"
+    );
+}

@@ -129,6 +129,10 @@ pub struct VoxelWorldComponent {
     /// `vertical_radius` is for.
     #[serde(default)]
     pub follow_camera: bool,
+    /// Which arrangement of its blocks' variants this world wears: the same
+    /// seed lays the same look on the same cell every time.
+    #[serde(default)]
+    pub variant_seed: u64,
     /// What has been changed from what the generator lays down, in the order
     /// it was changed.
     ///

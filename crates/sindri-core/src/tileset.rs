@@ -317,8 +317,18 @@ impl TileDefinition {
     /// tile-set mistake.
     #[must_use]
     pub fn faces_at(&self, seed: u64, coord: [i32; 3], tile: &str) -> &TileFaces {
+        self.faces_of_variant(self.variant_at(seed, coord, tile))
+    }
+
+    /// Which of a tile's looks a cell wears: zero for its own faces, and one
+    /// past each variant's index for a variant.
+    ///
+    /// The same choice `faces_at` makes, by number, for a caller that resolves
+    /// every look ahead of time and picks between them per cell.
+    #[must_use]
+    pub fn variant_at(&self, seed: u64, coord: [i32; 3], tile: &str) -> usize {
         if self.variants.is_empty() {
-            return &self.faces;
+            return 0;
         }
         let mut weights = Vec::with_capacity(self.variants.len() + 1);
         weights.push(self.weight);
@@ -333,10 +343,17 @@ impl TileDefinition {
             ],
             tile,
         );
-        match crate::weighted_index(hash, &weights) {
-            Some(0) | None => &self.faces,
-            Some(index) => &self.variants[index - 1].faces,
-        }
+        crate::weighted_index(hash, &weights).unwrap_or(0)
+    }
+
+    /// The faces of look `index`, as `variant_at` numbers them; the tile's own
+    /// faces for zero or a number past its variants.
+    #[must_use]
+    pub fn faces_of_variant(&self, index: usize) -> &TileFaces {
+        index
+            .checked_sub(1)
+            .and_then(|variant| self.variants.get(variant))
+            .map_or(&self.faces, |variant| &variant.faces)
     }
 
     /// Every face set this tile may draw, its own first.

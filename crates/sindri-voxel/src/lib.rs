@@ -22,7 +22,8 @@ pub use cache::{
 };
 pub use coord::{LocalVoxelCoord, SECTION_EDGE, SECTION_VOLUME, SectionCoord, VoxelCoord};
 pub use material::{
-    DefaultVoxelMaterials, FaceOcclusion, RenderClass, VoxelMaterial, VoxelMaterialSource,
+    DefaultVoxelMaterials, FaceOcclusion, RenderClass, VOXEL_STEPS, VoxelMaterial,
+    VoxelMaterialSource, VoxelShape,
 };
 pub use mesh::{
     BlockMesh, BlockMeshPart, BlockVertex, SectionBounds, VoxelFace, mesh_block_section,

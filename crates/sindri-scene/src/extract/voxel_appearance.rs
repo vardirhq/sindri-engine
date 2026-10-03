@@ -10,9 +10,11 @@ use std::collections::BTreeMap;
 
 use sindri_core::{SpriteRef, TileDefinition, TileFace, TileSetDocument};
 use sindri_render::MeshSurface;
-use sindri_voxel::{VoxelFace, VoxelId, VoxelMaterial, VoxelMaterialSource};
+use sindri_voxel::{
+    VoxelCoord, VoxelFace, VoxelId, VoxelMaterial, VoxelMaterialSource, VoxelShape,
+};
 
-use crate::{TextureBindings, VoxelMaterialDocument, VoxelTexture};
+use crate::{TextureBindings, VoxelMaterialDocument, VoxelTexture, VoxelTextureSource};
 
 use super::SceneExtractError;
 use super::voxel_source::Palette;
@@ -30,9 +32,58 @@ pub(super) enum Appearance {
 #[derive(Clone, Debug, Default, PartialEq)]
 pub(super) struct Resolved {
     pub(super) faces: BTreeMap<(u16, VoxelFace), VoxelTexture>,
+    /// The faces a block wears where it is not its plain self: one of its
+    /// variants, or buried under another block. Keyed by block, which look
+    /// (zero for its own faces), whether it is buried, and the face.
+    alternates: BTreeMap<(u16, usize, bool, VoxelFace), VoxelTexture>,
+    /// The blocks that look different from cell to cell, with what decides
+    /// which look a cell wears.
+    choosers: BTreeMap<u16, Chooser>,
+    /// Which arrangement of variants this world wears.
+    seed: u64,
     /// Indexed by a face's look, less one: look zero is plain and has no
     /// entry.
     pub(super) looks: Vec<Look>,
+}
+
+/// What decides which of a block's looks one cell wears.
+#[derive(Clone, Debug, PartialEq)]
+struct Chooser {
+    name: String,
+    block: TileDefinition,
+    buried: bool,
+}
+
+impl VoxelTextureSource for Resolved {
+    fn texture(&self, voxel: VoxelId, face: VoxelFace) -> VoxelTexture {
+        self.faces[&(voxel.value(), face)]
+    }
+
+    fn texture_at(
+        &self,
+        voxel: VoxelId,
+        face: VoxelFace,
+        at: VoxelCoord,
+        covered: bool,
+    ) -> VoxelTexture {
+        let Some(chooser) = self.choosers.get(&voxel.value()) else {
+            return self.texture(voxel, face);
+        };
+        // A tile names a cell by column, row and level; a voxel by X, height
+        // and Z. Asked the tile's way, so a block wears the look the same
+        // block would on a tile grid.
+        let variant = chooser
+            .block
+            .variant_at(self.seed, [at.x, at.z, at.y], &chooser.name);
+        let buried = covered && chooser.buried;
+        if variant == 0 && !buried {
+            return self.texture(voxel, face);
+        }
+        self.alternates
+            .get(&(voxel.value(), variant, buried, face))
+            .copied()
+            .unwrap_or_else(|| self.texture(voxel, face))
+    }
 }
 
 /// How a batch of faces is drawn beyond its texture.
@@ -166,33 +217,44 @@ pub(super) fn resolve_appearance(
         }
         Appearance::Blocks(blocks) => {
             for (voxel, name, block) in blocks {
-                for face in VOXEL_FACES {
-                    let tile = tile_face(face);
-                    let (_, visual) = block.faces.resolved(tile).ok_or_else(|| {
-                        SceneExtractError::VoxelBlockWithoutFace {
-                            block: name.clone(),
-                            face: face_name(tile),
+                let buried_looks = if block.covered.is_some() {
+                    &[false, true][..]
+                } else {
+                    &[false][..]
+                };
+                for variant in 0..=block.variants.len() {
+                    for &buried in buried_looks {
+                        let faces = block.faces_of_variant(variant);
+                        let covering = block.covered.as_ref().filter(|_| buried);
+                        for face in VOXEL_FACES {
+                            let tile = tile_face(face);
+                            let (_, visual) =
+                                faces.resolved_in(tile, covering).ok_or_else(|| {
+                                    SceneExtractError::VoxelBlockWithoutFace {
+                                        block: name.clone(),
+                                        face: face_name(tile),
+                                    }
+                                })?;
+                            let texture = resolved.face_texture(name, block, visual, &lookup)?;
+                            if variant == 0 && !buried {
+                                resolved.faces.insert((*voxel, face), texture);
+                            } else {
+                                resolved
+                                    .alternates
+                                    .insert((*voxel, variant, buried, face), texture);
+                            }
                         }
-                    })?;
-                    let first = lookup(&visual.sprite)?;
-                    let frames = match &visual.animation {
-                        Some(animation) => frame_offsets(name, first, &animation.frames, lookup)?,
-                        None => vec![[0.0, 0.0]],
-                    };
-                    let fps = visual
-                        .animation
-                        .as_ref()
-                        .map_or(0.0, |animation| animation.fps);
-                    let mut texture = first;
-                    if block.glow > 0.0 || frames.len() > 1 {
-                        let look = Look {
-                            glow: block.glow,
-                            frames,
-                            fps,
-                        };
-                        texture = texture.with_look(resolved.look_for(look));
                     }
-                    resolved.faces.insert((*voxel, face), texture);
+                }
+                if !block.variants.is_empty() || block.covered.is_some() {
+                    resolved.choosers.insert(
+                        *voxel,
+                        Chooser {
+                            name: name.clone(),
+                            block: block.clone(),
+                            buried: block.covered.is_some(),
+                        },
+                    );
                 }
             }
         }
@@ -201,6 +263,41 @@ pub(super) fn resolve_appearance(
 }
 
 impl Resolved {
+    /// Which arrangement of variants this world wears.
+    pub(super) const fn with_seed(mut self, seed: u64) -> Self {
+        self.seed = seed;
+        self
+    }
+
+    /// One face's texture and look, from the art a block names for it.
+    fn face_texture(
+        &mut self,
+        name: &str,
+        block: &TileDefinition,
+        visual: &sindri_core::TileFaceVisual,
+        lookup: &impl Fn(&str) -> Result<VoxelTexture, SceneExtractError>,
+    ) -> Result<VoxelTexture, SceneExtractError> {
+        let first = lookup(&visual.sprite)?;
+        let frames = match &visual.animation {
+            Some(animation) => frame_offsets(name, first, &animation.frames, lookup)?,
+            None => vec![[0.0, 0.0]],
+        };
+        let fps = visual
+            .animation
+            .as_ref()
+            .map_or(0.0, |animation| animation.fps);
+        let mut texture = first;
+        if block.glow > 0.0 || frames.len() > 1 {
+            let look = Look {
+                glow: block.glow,
+                frames,
+                fps,
+            };
+            texture = texture.with_look(self.look_for(look));
+        }
+        Ok(texture)
+    }
+
     /// The number of this look, adding it if no face has used it yet, so a
     /// lake's six faces share one batch per texture rather than six.
     fn look_for(&mut self, look: Look) -> u16 {
@@ -225,7 +322,7 @@ fn frame_offsets(
     block: &str,
     first: VoxelTexture,
     frames: &[String],
-    lookup: impl Fn(&str) -> Result<VoxelTexture, SceneExtractError>,
+    lookup: &impl Fn(&str) -> Result<VoxelTexture, SceneExtractError>,
 ) -> Result<Vec<[f32; 2]>, SceneExtractError> {
     let mut offsets = vec![[0.0, 0.0]];
     for frame in frames {
@@ -261,10 +358,11 @@ impl BlockMaterials {
         };
         let by_voxel = blocks
             .iter()
-            .filter(|(_, _, block)| !block.occludes)
             .map(|(voxel, _, block)| {
                 let liquid = block.tags.iter().any(|tag| tag == "liquid");
-                let material = if liquid {
+                let material = if block.occludes {
+                    VoxelMaterial::opaque()
+                } else if liquid {
                     VoxelMaterial::new(
                         sindri_voxel::RenderClass::Opaque,
                         sindri_voxel::FaceOcclusion::MatchingVoxel,
@@ -272,7 +370,13 @@ impl BlockMaterials {
                 } else {
                     VoxelMaterial::cutout()
                 };
-                (*voxel, material)
+                // A tile's box is across, up and into its cell, which is a
+                // voxel's X, Y and Z.
+                let bounds = block.bounds();
+                (
+                    *voxel,
+                    material.with_shape(VoxelShape::from_fractions(bounds.min, bounds.max)),
+                )
             })
             .collect();
         Self { by_voxel }

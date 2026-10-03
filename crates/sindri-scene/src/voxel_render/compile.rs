@@ -2,7 +2,8 @@ use std::collections::BTreeMap;
 
 use sindri_render::{CachedTexturedMeshUpload, TextureId, TexturedVertex, UvRect};
 use sindri_voxel::{
-    BlockMesh, BlockMeshPart, RenderClass, SectionBounds, SectionCoord, VoxelFace, VoxelId,
+    BlockMesh, BlockMeshPart, RenderClass, SectionBounds, SectionCoord, VoxelCoord, VoxelFace,
+    VoxelId,
 };
 use thiserror::Error;
 
@@ -38,6 +39,19 @@ impl VoxelTexture {
 /// Resolves semantic voxel and face identities at the scene/render boundary.
 pub trait VoxelTextureSource {
     fn texture(&self, voxel: VoxelId, face: VoxelFace) -> VoxelTexture;
+
+    /// The same, for one particular voxel: where it is, and whether something
+    /// stands on it. A source whose blocks look different from cell to cell
+    /// -- variants, a buried look -- answers here; the rest need not.
+    fn texture_at(
+        &self,
+        voxel: VoxelId,
+        face: VoxelFace,
+        _at: VoxelCoord,
+        _covered: bool,
+    ) -> VoxelTexture {
+        self.texture(voxel, face)
+    }
 }
 
 impl<F> VoxelTextureSource for F
@@ -97,6 +111,7 @@ pub fn compile_block_mesh(
         batches.extend(compile_part(
             mesh.part(render_class),
             render_class,
+            mesh.section.min_voxel(),
             textures,
         )?);
     }
@@ -110,8 +125,17 @@ pub fn compile_block_mesh(
 fn compile_part(
     part: &BlockMeshPart,
     render_class: RenderClass,
+    origin: VoxelCoord,
     textures: &impl VoxelTextureSource,
 ) -> Result<Vec<CompiledVoxelBatch>, VoxelRenderError> {
+    let texture_of = |vertex: &sindri_voxel::BlockVertex| {
+        let at = VoxelCoord::new(
+            origin.x + i32::from(vertex.cell[0]),
+            origin.y + i32::from(vertex.cell[1]),
+            origin.z + i32::from(vertex.cell[2]),
+        );
+        textures.texture_at(vertex.material, vertex.face, at, vertex.covered)
+    };
     if !part.indices.len().is_multiple_of(6) {
         return Err(VoxelRenderError::IncompleteFace {
             render_class,
@@ -121,7 +145,7 @@ fn compile_part(
     let mut uploads: BTreeMap<(TextureId, u16), CachedTexturedMeshUpload> = BTreeMap::new();
     for face_indices in part.indices.chunks_exact(6) {
         let first = vertex(part, face_indices[0], render_class)?;
-        let mapping = textures.texture(first.material, first.face);
+        let mapping = texture_of(first);
         let upload = uploads.entry((mapping.texture, mapping.look)).or_default();
         let mut remapped = BTreeMap::new();
         for source_index in face_indices {
@@ -129,14 +153,14 @@ fn compile_part(
                 *index
             } else {
                 let source = vertex(part, *source_index, render_class)?;
-                if textures.texture(source.material, source.face) != mapping {
+                if texture_of(source) != mapping {
                     return Err(VoxelRenderError::FaceSpansTextures { render_class });
                 }
                 let index = u32::try_from(upload.vertices.len())
                     .expect("one section's renderer vertices fit in u32");
                 upload.vertices.push(
                     TexturedVertex::new(
-                        source.position.map(f32::from),
+                        source.voxel_position(),
                         [
                             mapping
                                 .uv
