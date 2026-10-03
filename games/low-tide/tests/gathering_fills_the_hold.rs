@@ -39,14 +39,14 @@ fn patch(pilot: &mut Pilot, block: &str, level: i32) -> [i32; 3] {
 }
 
 fn ashore(pilot: &mut Pilot) {
-    pilot.walk_deck(&[[7.5, -6.5], [12.0, -6.5]]);
+    pilot.walk_deck(&[[6.5, -7.5], [10.0, -7.5]]);
     assert!(!pilot.flag("aboard"));
 }
 
 fn bring_home(pilot: &mut Pilot) {
-    let foot = pilot.deck_to_world([12.5, -6.5]);
+    let foot = pilot.deck_to_world([10.5, -7.5]);
     pilot.walk_ashore(foot, 0.3);
-    let ramp = pilot.deck_to_world([10.4, -6.5]);
+    let ramp = pilot.deck_to_world([8.4, -7.5]);
     pilot.walk_ashore(ramp, 0.2);
     pilot.wait(0.2);
     assert!(pilot.flag("aboard"));
@@ -76,7 +76,7 @@ fn harvest(mut pilot: Pilot, block: &str, kind: &str, tile: u32) {
         .get::<TilemapComponent>(&pilot.run.world, deck)
         .unwrap()
         .unwrap();
-    assert_eq!(hold.tile(2, 12), Some(tile));
+    assert_eq!(hold.tile(4, 10), Some(tile));
     assert!(
         pilot.board("top_speed") < 4.2 * pilot.board("going") - 0.2,
         "cargo has weight"
@@ -118,7 +118,7 @@ fn full_holds_and_flooded_resources_refuse_harvesting() {
     ashore(&mut pilot);
     let at = patch(&mut pilot, "salt", 10);
     assert_eq!(pilot.surface_under(pilot.crew_world()), "salt");
-    pilot.run.scripts.blackboard_mut().set("crates", 20.0);
+    pilot.run.scripts.blackboard_mut().set("crates", 4.0);
     pilot.use_it();
     assert_eq!(pilot.ground().block(at), "salt");
     let carried = pilot.run.entity("carried").unwrap();
@@ -159,7 +159,7 @@ fn rock_can_supply_ore_with_keys_and_touch() {
             .get::<TilemapComponent>(&pilot.run.world, deck)
             .unwrap()
             .unwrap();
-        assert_eq!(hold.tile(2, 12), Some(18));
+        assert_eq!(hold.tile(4, 10), Some(18));
     }
 }
 

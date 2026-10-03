@@ -691,7 +691,8 @@ switching a world to a map releases its meshed sections. `Grid.surface` and
 nothing stands). Extraction tests cover the squares, row direction, relief,
 edits and the absence of meshes; Low Tide's Basin is the proof in a game.
 Low Tide also exercises existing sparse `Grid.set_block` edits for biome
-harvesting, typed shared state and deck tiles for its six-resource hold,
+harvesting, typed shared state and deck tiles for its six-resource hold
+(four slots on the small starter crawler),
 and prefab spawning for deterministic wrecks across the Basin. Keyboard and
 phone-touch runtime tests harvest, carry, stow and jettison actual blocks;
 these are Decay gameplay rules, without a new engine host surface. Not

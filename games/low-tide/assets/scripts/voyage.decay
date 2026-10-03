@@ -34,6 +34,12 @@ state Game {
     var rudder: f32 = 0.0;
     var crates: f32 = 0.0;
     var capacity: f32 = 0.0;
+    var hull_left: f32 = 2.0;
+    var hull_right: f32 = 9.0;
+    var hull_top: f32 = 3.0;
+    var hull_bottom: f32 = 12.0;
+    var structure_mass: f32 = 0.0;
+    var extensions: f32 = 0.0;
     // What the crawler is driving on, and how much it holds it back: one is
     // a clear run, less is soft or rough going.
     var ground: Ground = Ground.Salt;

@@ -28,13 +28,7 @@ pub fn pick_up_at_first_wreck(pilot: &mut Pilot) {
     pilot.use_it();
 
     // Down the deck, out of the hatch and down the ramp.
-    pilot.walk_deck(&[
-        [5.5, -3.5],
-        [5.5, -4.5],
-        [7.5, -4.5],
-        [7.5, -6.5],
-        [12.0, -6.5],
-    ]);
+    pilot.walk_deck(&[[5.5, -7.5], [6.5, -7.5], [10.0, -7.5]]);
     assert!(!pilot.flag("aboard"), "ashore");
     // Round the bow, not back over the ramp, which would be going aboard.
     let off_the_bow = pilot.deck_to_world([13.0, 2.5]);
@@ -56,9 +50,9 @@ pub fn salvage_the_first_wreck(pilot: &mut Pilot) {
     let empty_speed = 4.2;
 
     // Back to the foot of the ramp, then up it.
-    let foot = pilot.deck_to_world([12.5, -6.5]);
+    let foot = pilot.deck_to_world([10.5, -7.5]);
     pilot.walk_ashore(foot, 0.3);
-    let ramp = pilot.deck_to_world([10.4, -6.5]);
+    let ramp = pilot.deck_to_world([8.4, -7.5]);
     pilot.walk_ashore(ramp, 0.2);
     pilot.wait(0.2);
     assert!(pilot.flag("aboard"), "back aboard");
@@ -82,7 +76,7 @@ pub fn salvage_the_first_wreck(pilot: &mut Pilot) {
         .expect("a readable deck")
         .expect("the deck is a tilemap");
     assert_eq!(
-        hold.tile(2, 12),
+        hold.tile(4, 10),
         Some(11),
         "the first crate sits in the stern"
     );
@@ -96,13 +90,7 @@ pub fn salvage_the_first_wreck(pilot: &mut Pilot) {
 
 /// Walks down to the hold and throws the crate over the side.
 pub fn jettison_it(pilot: &mut Pilot) {
-    pilot.walk_deck(&[
-        [7.5, -6.5],
-        [5.5, -6.5],
-        [5.5, -9.5],
-        [3.5, -9.5],
-        [3.5, -11.5],
-    ]);
+    pilot.walk_deck(&[[6.5, -7.5], [5.5, -7.5], [5.5, -9.5], [4.5, -9.5]]);
     assert!(pilot.flag("aboard"), "still aboard, in the hold");
     if pilot.touch() {
         let drop = pilot.run.entity("drop-button").expect("the Drop button");

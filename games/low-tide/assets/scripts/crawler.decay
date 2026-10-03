@@ -25,7 +25,7 @@ script Crawler {
     // The highest step up the treads can climb, in levels.
     @export let climb: f32 = 2.0;
     // How far ahead of the middle the bow looks, in units.
-    @export let reach: f32 = 7.5;
+    @export let reach: f32 = 4.5;
 
     var last_wash: f32 = -1.0;
     var speed: f32 = 0.0;
@@ -35,13 +35,19 @@ script Crawler {
 
     // Where crates go in the hold, filled from the stern forward and from the
     // walls inward, so the walkway down the middle stays clear.
-    var hold_columns = [2.0, 3.0, 7.0, 8.0, 3.0, 7.0, 4.0, 6.0, 2.0, 3.0, 7.0, 8.0, 2.0, 3.0, 7.0, 8.0, 4.0, 6.0, 4.0, 6.0];
-    var hold_rows = [12.0, 12.0, 12.0, 12.0, 11.0, 11.0, 12.0, 12.0, 10.0, 10.0, 10.0, 10.0, 9.0, 9.0, 9.0, 9.0, 11.0, 11.0, 10.0, 10.0];
+    var hold_columns = [4.0, 6.0, 4.0, 6.0];
+    var hold_rows = [10.0, 10.0, 8.0, 8.0];
 
     fn start() {
         this.deck = World.find("Deck");
         this.basin = World.find("Basin");
         this.shadow = World.find("Crawler shadow");
+        Game.hull_left = 2.0;
+        Game.hull_right = 9.0;
+        Game.hull_top = 3.0;
+        Game.hull_bottom = 12.0;
+        Game.structure_mass = 0.0;
+        Game.extensions = 0.0;
         Game.capacity = this.hold_columns.length;
         Game.crates = 0.0;
         Game.throttle = 0.0;
@@ -49,7 +55,7 @@ script Crawler {
     }
 
     fn update(dt: f32) {
-        let mass = this.base_mass + Game.crates * this.crate_mass;
+        let mass = this.base_mass + Game.structure_mass + Game.crates * this.crate_mass;
         let lightness = this.base_mass / mass;
         let heading = this.transform.rotation_z;
         let middle = Vec2(this.transform.position.x, this.transform.position.y);

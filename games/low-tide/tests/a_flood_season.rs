@@ -81,7 +81,7 @@ fn flooding_washes_one_crate_per_season_and_the_crawler_can_drive_after_the_ebb(
 }
 
 fn caught_ashore(mut pilot: Pilot) {
-    pilot.walk_deck(&[[7.5, -6.5], [12.0, -6.5]]);
+    pilot.walk_deck(&[[6.5, -7.5], [10.0, -7.5]]);
     assert!(!pilot.flag("aboard"));
     let from = pilot.crew_world();
     time(&mut pilot, 280.0);
@@ -93,9 +93,9 @@ fn caught_ashore(mut pilot: Pilot) {
     let moved = distance(from, pilot.crew_world());
     assert!(moved > 0.5 && moved < 2.0, "can wade slowly out: {moved}");
     time(&mut pilot, 405.0);
-    let foot = pilot.deck_to_world([12.5, -6.5]);
+    let foot = pilot.deck_to_world([10.5, -7.5]);
     pilot.walk_ashore(foot, 0.3);
-    let ramp = pilot.deck_to_world([10.4, -6.5]);
+    let ramp = pilot.deck_to_world([8.4, -7.5]);
     pilot.walk_ashore(ramp, 0.2);
     assert!(pilot.flag("aboard"), "can come home after the flood");
 }

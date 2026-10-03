@@ -317,8 +317,8 @@
      1.0
     ],
     "scale": [
-     10.4,
-     13.4,
+     6.4,
+     8.4,
      1
     ]
    },
@@ -424,11 +424,12 @@
       "crate-stone",
       "crate-ore",
       "crate-fibre",
-      "crate-salt"
+      "crate-salt",
+      "workbench"
      ],
      "columns": 11,
-     "rows": 14,
-     "tiles": [null,null,1,1,2,2,2,1,1,null,null,null,1,1,0,0,5,0,0,1,1,null,9,1,0,0,0,0,0,0,0,1,9,9,1,1,1,1,3,1,1,1,1,9,9,1,7,0,0,0,0,0,7,1,9,9,2,0,0,0,6,0,0,0,2,9,9,1,0,0,0,0,0,0,0,4,10,9,1,7,0,0,0,0,0,7,1,9,9,1,1,1,1,3,1,1,1,1,9,9,1,0,0,0,0,0,0,0,1,9,9,1,0,0,0,0,0,0,0,1,9,9,1,8,0,0,0,0,0,8,1,9,9,1,0,0,0,0,0,0,0,1,9,null,1,1,1,1,1,1,1,1,1,null],
+     "rows": 18,
+     "tiles": [null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,1,1,2,1,1,null,null,null,null,null,9,1,0,5,0,1,9,null,null,null,null,9,1,0,0,0,1,9,null,null,null,null,9,1,21,0,0,1,9,null,null,null,null,9,1,0,0,0,4,10,null,null,null,null,9,1,0,0,0,1,9,null,null,null,null,9,1,0,0,8,1,9,null,null,null,null,9,1,0,0,0,1,9,null,null,null,null,null,1,1,1,1,1,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],
      "layer": 4
     }
    }
@@ -479,12 +480,13 @@
       "crate-stone",
       "crate-ore",
       "crate-fibre",
-      "crate-salt"
+      "crate-salt",
+      "workbench"
      ],
      "columns": 11,
-     "rows": 14,
+     "rows": 18,
      "layer": 3,
-     "tiles": [null,null,14,14,14,14,14,14,14,null,null,null,14,14,14,14,14,14,14,14,14,null,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,null,15,15,15,15,15,15,15,15,15,null]
+     "tiles": [null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,14,14,14,14,14,null,null,null,null,null,14,14,14,14,14,14,14,null,null,null,null,14,14,14,14,14,14,14,null,null,null,null,13,13,13,13,13,13,13,null,null,null,null,13,13,13,13,13,13,13,null,null,null,null,15,15,15,15,15,15,15,null,null,null,null,15,15,15,15,15,15,15,null,null,null,null,15,15,15,15,15,15,15,null,null,null,null,null,15,15,15,15,15,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null]
     }
    }
   },
@@ -495,7 +497,7 @@
    "transform_3d": {
     "position": [
      5.5,
-     -6.5,
+     -7.5,
      0.1
     ],
     "rotation": [
@@ -780,12 +782,12 @@
   },
   {
    "id": "port-tread",
-   "name": "Port tread",
+   "name": "Port tread 4",
    "parent": "deck",
    "transform_3d": {
     "position": [
-     0.5,
-     -7.5,
+     2.5,
+     -4.5,
      0.02
     ],
     "rotation": [
@@ -796,7 +798,7 @@
     ],
     "scale": [
      1,
-     11,
+     1,
      1
     ]
    },
@@ -846,15 +848,158 @@
       "side": -1
      }
     }
-   }
+   },
+   "disabled": false
   },
   {
-   "id": "starboard-tread",
-   "name": "Starboard tread",
+   "id": "port-tread-5",
+   "name": "Port tread 5",
    "parent": "deck",
    "transform_3d": {
     "position": [
-     10.5,
+     2.5,
+     -5.5,
+     0.02
+    ],
+    "rotation": [
+     0,
+     0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     1,
+     1,
+     1
+    ]
+   },
+   "components": {
+    "sindri.sprite": {
+     "texture": "textures/treads.png#port-0",
+     "layer": 5
+    },
+    "sindri.animation.sprite": {
+     "clips": {
+      "forward": {
+       "frames": [
+        "port-7",
+        "port-6",
+        "port-5",
+        "port-4",
+        "port-3",
+        "port-2",
+        "port-1",
+        "port-0"
+       ],
+       "seconds_per_frame": 0.055,
+       "looping": true
+      },
+      "reverse": {
+       "frames": [
+        "port-0",
+        "port-1",
+        "port-2",
+        "port-3",
+        "port-4",
+        "port-5",
+        "port-6",
+        "port-7"
+       ],
+       "seconds_per_frame": 0.055,
+       "looping": true
+      }
+     },
+     "playing": "forward",
+     "speed": 0.0
+    },
+    "sindri.script": {
+     "source": "scripts/tread.decay",
+     "script": "Tread",
+     "properties": {
+      "side": -1
+     }
+    }
+   },
+   "disabled": false
+  },
+  {
+   "id": "port-tread-6",
+   "name": "Port tread 6",
+   "parent": "deck",
+   "transform_3d": {
+    "position": [
+     2.5,
+     -6.5,
+     0.02
+    ],
+    "rotation": [
+     0,
+     0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     1,
+     1,
+     1
+    ]
+   },
+   "components": {
+    "sindri.sprite": {
+     "texture": "textures/treads.png#port-0",
+     "layer": 5
+    },
+    "sindri.animation.sprite": {
+     "clips": {
+      "forward": {
+       "frames": [
+        "port-7",
+        "port-6",
+        "port-5",
+        "port-4",
+        "port-3",
+        "port-2",
+        "port-1",
+        "port-0"
+       ],
+       "seconds_per_frame": 0.055,
+       "looping": true
+      },
+      "reverse": {
+       "frames": [
+        "port-0",
+        "port-1",
+        "port-2",
+        "port-3",
+        "port-4",
+        "port-5",
+        "port-6",
+        "port-7"
+       ],
+       "seconds_per_frame": 0.055,
+       "looping": true
+      }
+     },
+     "playing": "forward",
+     "speed": 0.0
+    },
+    "sindri.script": {
+     "source": "scripts/tread.decay",
+     "script": "Tread",
+     "properties": {
+      "side": -1
+     }
+    }
+   },
+   "disabled": false
+  },
+  {
+   "id": "port-tread-7",
+   "name": "Port tread 7",
+   "parent": "deck",
+   "transform_3d": {
+    "position": [
+     2.5,
      -7.5,
      0.02
     ],
@@ -866,7 +1011,717 @@
     ],
     "scale": [
      1,
-     11,
+     1,
+     1
+    ]
+   },
+   "components": {
+    "sindri.sprite": {
+     "texture": "textures/treads.png#port-0",
+     "layer": 5
+    },
+    "sindri.animation.sprite": {
+     "clips": {
+      "forward": {
+       "frames": [
+        "port-7",
+        "port-6",
+        "port-5",
+        "port-4",
+        "port-3",
+        "port-2",
+        "port-1",
+        "port-0"
+       ],
+       "seconds_per_frame": 0.055,
+       "looping": true
+      },
+      "reverse": {
+       "frames": [
+        "port-0",
+        "port-1",
+        "port-2",
+        "port-3",
+        "port-4",
+        "port-5",
+        "port-6",
+        "port-7"
+       ],
+       "seconds_per_frame": 0.055,
+       "looping": true
+      }
+     },
+     "playing": "forward",
+     "speed": 0.0
+    },
+    "sindri.script": {
+     "source": "scripts/tread.decay",
+     "script": "Tread",
+     "properties": {
+      "side": -1
+     }
+    }
+   },
+   "disabled": false
+  },
+  {
+   "id": "port-tread-8",
+   "name": "Port tread 8",
+   "parent": "deck",
+   "transform_3d": {
+    "position": [
+     2.5,
+     -8.5,
+     0.02
+    ],
+    "rotation": [
+     0,
+     0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     1,
+     1,
+     1
+    ]
+   },
+   "components": {
+    "sindri.sprite": {
+     "texture": "textures/treads.png#port-0",
+     "layer": 5
+    },
+    "sindri.animation.sprite": {
+     "clips": {
+      "forward": {
+       "frames": [
+        "port-7",
+        "port-6",
+        "port-5",
+        "port-4",
+        "port-3",
+        "port-2",
+        "port-1",
+        "port-0"
+       ],
+       "seconds_per_frame": 0.055,
+       "looping": true
+      },
+      "reverse": {
+       "frames": [
+        "port-0",
+        "port-1",
+        "port-2",
+        "port-3",
+        "port-4",
+        "port-5",
+        "port-6",
+        "port-7"
+       ],
+       "seconds_per_frame": 0.055,
+       "looping": true
+      }
+     },
+     "playing": "forward",
+     "speed": 0.0
+    },
+    "sindri.script": {
+     "source": "scripts/tread.decay",
+     "script": "Tread",
+     "properties": {
+      "side": -1
+     }
+    }
+   },
+   "disabled": false
+  },
+  {
+   "id": "port-tread-9",
+   "name": "Port tread 9",
+   "parent": "deck",
+   "transform_3d": {
+    "position": [
+     2.5,
+     -9.5,
+     0.02
+    ],
+    "rotation": [
+     0,
+     0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     1,
+     1,
+     1
+    ]
+   },
+   "components": {
+    "sindri.sprite": {
+     "texture": "textures/treads.png#port-0",
+     "layer": 5
+    },
+    "sindri.animation.sprite": {
+     "clips": {
+      "forward": {
+       "frames": [
+        "port-7",
+        "port-6",
+        "port-5",
+        "port-4",
+        "port-3",
+        "port-2",
+        "port-1",
+        "port-0"
+       ],
+       "seconds_per_frame": 0.055,
+       "looping": true
+      },
+      "reverse": {
+       "frames": [
+        "port-0",
+        "port-1",
+        "port-2",
+        "port-3",
+        "port-4",
+        "port-5",
+        "port-6",
+        "port-7"
+       ],
+       "seconds_per_frame": 0.055,
+       "looping": true
+      }
+     },
+     "playing": "forward",
+     "speed": 0.0
+    },
+    "sindri.script": {
+     "source": "scripts/tread.decay",
+     "script": "Tread",
+     "properties": {
+      "side": -1
+     }
+    }
+   },
+   "disabled": false
+  },
+  {
+   "id": "port-tread-10",
+   "name": "Port tread 10",
+   "parent": "deck",
+   "transform_3d": {
+    "position": [
+     2.5,
+     -10.5,
+     0.02
+    ],
+    "rotation": [
+     0,
+     0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     1,
+     1,
+     1
+    ]
+   },
+   "components": {
+    "sindri.sprite": {
+     "texture": "textures/treads.png#port-0",
+     "layer": 5
+    },
+    "sindri.animation.sprite": {
+     "clips": {
+      "forward": {
+       "frames": [
+        "port-7",
+        "port-6",
+        "port-5",
+        "port-4",
+        "port-3",
+        "port-2",
+        "port-1",
+        "port-0"
+       ],
+       "seconds_per_frame": 0.055,
+       "looping": true
+      },
+      "reverse": {
+       "frames": [
+        "port-0",
+        "port-1",
+        "port-2",
+        "port-3",
+        "port-4",
+        "port-5",
+        "port-6",
+        "port-7"
+       ],
+       "seconds_per_frame": 0.055,
+       "looping": true
+      }
+     },
+     "playing": "forward",
+     "speed": 0.0
+    },
+    "sindri.script": {
+     "source": "scripts/tread.decay",
+     "script": "Tread",
+     "properties": {
+      "side": -1
+     }
+    }
+   },
+   "disabled": false
+  },
+  {
+   "id": "port-tread-11",
+   "name": "Port tread 11",
+   "parent": "deck",
+   "transform_3d": {
+    "position": [
+     2.5,
+     -11.5,
+     0.02
+    ],
+    "rotation": [
+     0,
+     0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     1,
+     1,
+     1
+    ]
+   },
+   "components": {
+    "sindri.sprite": {
+     "texture": "textures/treads.png#port-0",
+     "layer": 5
+    },
+    "sindri.animation.sprite": {
+     "clips": {
+      "forward": {
+       "frames": [
+        "port-7",
+        "port-6",
+        "port-5",
+        "port-4",
+        "port-3",
+        "port-2",
+        "port-1",
+        "port-0"
+       ],
+       "seconds_per_frame": 0.055,
+       "looping": true
+      },
+      "reverse": {
+       "frames": [
+        "port-0",
+        "port-1",
+        "port-2",
+        "port-3",
+        "port-4",
+        "port-5",
+        "port-6",
+        "port-7"
+       ],
+       "seconds_per_frame": 0.055,
+       "looping": true
+      }
+     },
+     "playing": "forward",
+     "speed": 0.0
+    },
+    "sindri.script": {
+     "source": "scripts/tread.decay",
+     "script": "Tread",
+     "properties": {
+      "side": -1
+     }
+    }
+   },
+   "disabled": true
+  },
+  {
+   "id": "port-tread-12",
+   "name": "Port tread 12",
+   "parent": "deck",
+   "transform_3d": {
+    "position": [
+     2.5,
+     -12.5,
+     0.02
+    ],
+    "rotation": [
+     0,
+     0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     1,
+     1,
+     1
+    ]
+   },
+   "components": {
+    "sindri.sprite": {
+     "texture": "textures/treads.png#port-0",
+     "layer": 5
+    },
+    "sindri.animation.sprite": {
+     "clips": {
+      "forward": {
+       "frames": [
+        "port-7",
+        "port-6",
+        "port-5",
+        "port-4",
+        "port-3",
+        "port-2",
+        "port-1",
+        "port-0"
+       ],
+       "seconds_per_frame": 0.055,
+       "looping": true
+      },
+      "reverse": {
+       "frames": [
+        "port-0",
+        "port-1",
+        "port-2",
+        "port-3",
+        "port-4",
+        "port-5",
+        "port-6",
+        "port-7"
+       ],
+       "seconds_per_frame": 0.055,
+       "looping": true
+      }
+     },
+     "playing": "forward",
+     "speed": 0.0
+    },
+    "sindri.script": {
+     "source": "scripts/tread.decay",
+     "script": "Tread",
+     "properties": {
+      "side": -1
+     }
+    }
+   },
+   "disabled": true
+  },
+  {
+   "id": "port-tread-13",
+   "name": "Port tread 13",
+   "parent": "deck",
+   "transform_3d": {
+    "position": [
+     2.5,
+     -13.5,
+     0.02
+    ],
+    "rotation": [
+     0,
+     0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     1,
+     1,
+     1
+    ]
+   },
+   "components": {
+    "sindri.sprite": {
+     "texture": "textures/treads.png#port-0",
+     "layer": 5
+    },
+    "sindri.animation.sprite": {
+     "clips": {
+      "forward": {
+       "frames": [
+        "port-7",
+        "port-6",
+        "port-5",
+        "port-4",
+        "port-3",
+        "port-2",
+        "port-1",
+        "port-0"
+       ],
+       "seconds_per_frame": 0.055,
+       "looping": true
+      },
+      "reverse": {
+       "frames": [
+        "port-0",
+        "port-1",
+        "port-2",
+        "port-3",
+        "port-4",
+        "port-5",
+        "port-6",
+        "port-7"
+       ],
+       "seconds_per_frame": 0.055,
+       "looping": true
+      }
+     },
+     "playing": "forward",
+     "speed": 0.0
+    },
+    "sindri.script": {
+     "source": "scripts/tread.decay",
+     "script": "Tread",
+     "properties": {
+      "side": -1
+     }
+    }
+   },
+   "disabled": true
+  },
+  {
+   "id": "port-tread-14",
+   "name": "Port tread 14",
+   "parent": "deck",
+   "transform_3d": {
+    "position": [
+     2.5,
+     -14.5,
+     0.02
+    ],
+    "rotation": [
+     0,
+     0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     1,
+     1,
+     1
+    ]
+   },
+   "components": {
+    "sindri.sprite": {
+     "texture": "textures/treads.png#port-0",
+     "layer": 5
+    },
+    "sindri.animation.sprite": {
+     "clips": {
+      "forward": {
+       "frames": [
+        "port-7",
+        "port-6",
+        "port-5",
+        "port-4",
+        "port-3",
+        "port-2",
+        "port-1",
+        "port-0"
+       ],
+       "seconds_per_frame": 0.055,
+       "looping": true
+      },
+      "reverse": {
+       "frames": [
+        "port-0",
+        "port-1",
+        "port-2",
+        "port-3",
+        "port-4",
+        "port-5",
+        "port-6",
+        "port-7"
+       ],
+       "seconds_per_frame": 0.055,
+       "looping": true
+      }
+     },
+     "playing": "forward",
+     "speed": 0.0
+    },
+    "sindri.script": {
+     "source": "scripts/tread.decay",
+     "script": "Tread",
+     "properties": {
+      "side": -1
+     }
+    }
+   },
+   "disabled": true
+  },
+  {
+   "id": "port-tread-15",
+   "name": "Port tread 15",
+   "parent": "deck",
+   "transform_3d": {
+    "position": [
+     2.5,
+     -15.5,
+     0.02
+    ],
+    "rotation": [
+     0,
+     0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     1,
+     1,
+     1
+    ]
+   },
+   "components": {
+    "sindri.sprite": {
+     "texture": "textures/treads.png#port-0",
+     "layer": 5
+    },
+    "sindri.animation.sprite": {
+     "clips": {
+      "forward": {
+       "frames": [
+        "port-7",
+        "port-6",
+        "port-5",
+        "port-4",
+        "port-3",
+        "port-2",
+        "port-1",
+        "port-0"
+       ],
+       "seconds_per_frame": 0.055,
+       "looping": true
+      },
+      "reverse": {
+       "frames": [
+        "port-0",
+        "port-1",
+        "port-2",
+        "port-3",
+        "port-4",
+        "port-5",
+        "port-6",
+        "port-7"
+       ],
+       "seconds_per_frame": 0.055,
+       "looping": true
+      }
+     },
+     "playing": "forward",
+     "speed": 0.0
+    },
+    "sindri.script": {
+     "source": "scripts/tread.decay",
+     "script": "Tread",
+     "properties": {
+      "side": -1
+     }
+    }
+   },
+   "disabled": true
+  },
+  {
+   "id": "port-tread-16",
+   "name": "Port tread 16",
+   "parent": "deck",
+   "transform_3d": {
+    "position": [
+     2.5,
+     -16.5,
+     0.02
+    ],
+    "rotation": [
+     0,
+     0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     1,
+     1,
+     1
+    ]
+   },
+   "components": {
+    "sindri.sprite": {
+     "texture": "textures/treads.png#port-0",
+     "layer": 5
+    },
+    "sindri.animation.sprite": {
+     "clips": {
+      "forward": {
+       "frames": [
+        "port-7",
+        "port-6",
+        "port-5",
+        "port-4",
+        "port-3",
+        "port-2",
+        "port-1",
+        "port-0"
+       ],
+       "seconds_per_frame": 0.055,
+       "looping": true
+      },
+      "reverse": {
+       "frames": [
+        "port-0",
+        "port-1",
+        "port-2",
+        "port-3",
+        "port-4",
+        "port-5",
+        "port-6",
+        "port-7"
+       ],
+       "seconds_per_frame": 0.055,
+       "looping": true
+      }
+     },
+     "playing": "forward",
+     "speed": 0.0
+    },
+    "sindri.script": {
+     "source": "scripts/tread.decay",
+     "script": "Tread",
+     "properties": {
+      "side": -1
+     }
+    }
+   },
+   "disabled": true
+  },
+  {
+   "id": "starboard-tread",
+   "name": "Starboard tread 4",
+   "parent": "deck",
+   "transform_3d": {
+    "position": [
+     8.5,
+     -4.5,
+     0.02
+    ],
+    "rotation": [
+     0,
+     0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     1,
+     1,
      1
     ]
    },
@@ -916,17 +1771,89 @@
       "side": 1
      }
     }
-   }
+   },
+   "disabled": false
   },
   {
-   "id": "cabin-rug",
-   "name": "Cabin runner",
+   "id": "starboard-tread-5",
+   "name": "Starboard tread 5",
    "parent": "deck",
    "transform_3d": {
     "position": [
-     5.5,
+     8.5,
+     -5.5,
+     0.02
+    ],
+    "rotation": [
+     0,
+     0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     1,
+     1,
+     1
+    ]
+   },
+   "components": {
+    "sindri.sprite": {
+     "texture": "textures/treads.png#starboard-0",
+     "layer": 5
+    },
+    "sindri.animation.sprite": {
+     "clips": {
+      "forward": {
+       "frames": [
+        "starboard-7",
+        "starboard-6",
+        "starboard-5",
+        "starboard-4",
+        "starboard-3",
+        "starboard-2",
+        "starboard-1",
+        "starboard-0"
+       ],
+       "seconds_per_frame": 0.055,
+       "looping": true
+      },
+      "reverse": {
+       "frames": [
+        "starboard-0",
+        "starboard-1",
+        "starboard-2",
+        "starboard-3",
+        "starboard-4",
+        "starboard-5",
+        "starboard-6",
+        "starboard-7"
+       ],
+       "seconds_per_frame": 0.055,
+       "looping": true
+      }
+     },
+     "playing": "forward",
+     "speed": 0.0
+    },
+    "sindri.script": {
+     "source": "scripts/tread.decay",
+     "script": "Tread",
+     "properties": {
+      "side": 1
+     }
+    }
+   },
+   "disabled": false
+  },
+  {
+   "id": "starboard-tread-6",
+   "name": "Starboard tread 6",
+   "parent": "deck",
+   "transform_3d": {
+    "position": [
+     8.5,
      -6.5,
-     0.01
+     0.02
     ],
     "rotation": [
      0,
@@ -935,27 +1862,69 @@
      1.0
     ],
     "scale": [
-     3,
-     4,
+     1,
+     1,
      1
     ]
    },
    "components": {
     "sindri.sprite": {
-     "texture": "textures/runner.png",
-     "layer": 3
+     "texture": "textures/treads.png#starboard-0",
+     "layer": 5
+    },
+    "sindri.animation.sprite": {
+     "clips": {
+      "forward": {
+       "frames": [
+        "starboard-7",
+        "starboard-6",
+        "starboard-5",
+        "starboard-4",
+        "starboard-3",
+        "starboard-2",
+        "starboard-1",
+        "starboard-0"
+       ],
+       "seconds_per_frame": 0.055,
+       "looping": true
+      },
+      "reverse": {
+       "frames": [
+        "starboard-0",
+        "starboard-1",
+        "starboard-2",
+        "starboard-3",
+        "starboard-4",
+        "starboard-5",
+        "starboard-6",
+        "starboard-7"
+       ],
+       "seconds_per_frame": 0.055,
+       "looping": true
+      }
+     },
+     "playing": "forward",
+     "speed": 0.0
+    },
+    "sindri.script": {
+     "source": "scripts/tread.decay",
+     "script": "Tread",
+     "properties": {
+      "side": 1
+     }
     }
-   }
+   },
+   "disabled": false
   },
   {
-   "id": "port-pipe",
-   "name": "Port heating pipe",
+   "id": "starboard-tread-7",
+   "name": "Starboard tread 7",
    "parent": "deck",
    "transform_3d": {
     "position": [
-     1.75,
-     -10.5,
-     0.01
+     8.5,
+     -7.5,
+     0.02
     ],
     "rotation": [
      0,
@@ -964,27 +1933,69 @@
      1.0
     ],
     "scale": [
-     0.5,
-     4,
+     1,
+     1,
      1
     ]
    },
    "components": {
     "sindri.sprite": {
-     "texture": "textures/pipe.png",
+     "texture": "textures/treads.png#starboard-0",
      "layer": 5
+    },
+    "sindri.animation.sprite": {
+     "clips": {
+      "forward": {
+       "frames": [
+        "starboard-7",
+        "starboard-6",
+        "starboard-5",
+        "starboard-4",
+        "starboard-3",
+        "starboard-2",
+        "starboard-1",
+        "starboard-0"
+       ],
+       "seconds_per_frame": 0.055,
+       "looping": true
+      },
+      "reverse": {
+       "frames": [
+        "starboard-0",
+        "starboard-1",
+        "starboard-2",
+        "starboard-3",
+        "starboard-4",
+        "starboard-5",
+        "starboard-6",
+        "starboard-7"
+       ],
+       "seconds_per_frame": 0.055,
+       "looping": true
+      }
+     },
+     "playing": "forward",
+     "speed": 0.0
+    },
+    "sindri.script": {
+     "source": "scripts/tread.decay",
+     "script": "Tread",
+     "properties": {
+      "side": 1
+     }
     }
-   }
+   },
+   "disabled": true
   },
   {
-   "id": "starboard-pipe",
-   "name": "Starboard heating pipe",
+   "id": "starboard-tread-8",
+   "name": "Starboard tread 8",
    "parent": "deck",
    "transform_3d": {
     "position": [
-     9.25,
-     -10.5,
-     0.01
+     8.5,
+     -8.5,
+     0.02
     ],
     "rotation": [
      0,
@@ -993,17 +2004,627 @@
      1.0
     ],
     "scale": [
-     0.5,
-     4,
+     1,
+     1,
      1
     ]
    },
    "components": {
     "sindri.sprite": {
-     "texture": "textures/pipe.png",
+     "texture": "textures/treads.png#starboard-0",
      "layer": 5
+    },
+    "sindri.animation.sprite": {
+     "clips": {
+      "forward": {
+       "frames": [
+        "starboard-7",
+        "starboard-6",
+        "starboard-5",
+        "starboard-4",
+        "starboard-3",
+        "starboard-2",
+        "starboard-1",
+        "starboard-0"
+       ],
+       "seconds_per_frame": 0.055,
+       "looping": true
+      },
+      "reverse": {
+       "frames": [
+        "starboard-0",
+        "starboard-1",
+        "starboard-2",
+        "starboard-3",
+        "starboard-4",
+        "starboard-5",
+        "starboard-6",
+        "starboard-7"
+       ],
+       "seconds_per_frame": 0.055,
+       "looping": true
+      }
+     },
+     "playing": "forward",
+     "speed": 0.0
+    },
+    "sindri.script": {
+     "source": "scripts/tread.decay",
+     "script": "Tread",
+     "properties": {
+      "side": 1
+     }
     }
-   }
+   },
+   "disabled": false
+  },
+  {
+   "id": "starboard-tread-9",
+   "name": "Starboard tread 9",
+   "parent": "deck",
+   "transform_3d": {
+    "position": [
+     8.5,
+     -9.5,
+     0.02
+    ],
+    "rotation": [
+     0,
+     0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     1,
+     1,
+     1
+    ]
+   },
+   "components": {
+    "sindri.sprite": {
+     "texture": "textures/treads.png#starboard-0",
+     "layer": 5
+    },
+    "sindri.animation.sprite": {
+     "clips": {
+      "forward": {
+       "frames": [
+        "starboard-7",
+        "starboard-6",
+        "starboard-5",
+        "starboard-4",
+        "starboard-3",
+        "starboard-2",
+        "starboard-1",
+        "starboard-0"
+       ],
+       "seconds_per_frame": 0.055,
+       "looping": true
+      },
+      "reverse": {
+       "frames": [
+        "starboard-0",
+        "starboard-1",
+        "starboard-2",
+        "starboard-3",
+        "starboard-4",
+        "starboard-5",
+        "starboard-6",
+        "starboard-7"
+       ],
+       "seconds_per_frame": 0.055,
+       "looping": true
+      }
+     },
+     "playing": "forward",
+     "speed": 0.0
+    },
+    "sindri.script": {
+     "source": "scripts/tread.decay",
+     "script": "Tread",
+     "properties": {
+      "side": 1
+     }
+    }
+   },
+   "disabled": false
+  },
+  {
+   "id": "starboard-tread-10",
+   "name": "Starboard tread 10",
+   "parent": "deck",
+   "transform_3d": {
+    "position": [
+     8.5,
+     -10.5,
+     0.02
+    ],
+    "rotation": [
+     0,
+     0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     1,
+     1,
+     1
+    ]
+   },
+   "components": {
+    "sindri.sprite": {
+     "texture": "textures/treads.png#starboard-0",
+     "layer": 5
+    },
+    "sindri.animation.sprite": {
+     "clips": {
+      "forward": {
+       "frames": [
+        "starboard-7",
+        "starboard-6",
+        "starboard-5",
+        "starboard-4",
+        "starboard-3",
+        "starboard-2",
+        "starboard-1",
+        "starboard-0"
+       ],
+       "seconds_per_frame": 0.055,
+       "looping": true
+      },
+      "reverse": {
+       "frames": [
+        "starboard-0",
+        "starboard-1",
+        "starboard-2",
+        "starboard-3",
+        "starboard-4",
+        "starboard-5",
+        "starboard-6",
+        "starboard-7"
+       ],
+       "seconds_per_frame": 0.055,
+       "looping": true
+      }
+     },
+     "playing": "forward",
+     "speed": 0.0
+    },
+    "sindri.script": {
+     "source": "scripts/tread.decay",
+     "script": "Tread",
+     "properties": {
+      "side": 1
+     }
+    }
+   },
+   "disabled": false
+  },
+  {
+   "id": "starboard-tread-11",
+   "name": "Starboard tread 11",
+   "parent": "deck",
+   "transform_3d": {
+    "position": [
+     8.5,
+     -11.5,
+     0.02
+    ],
+    "rotation": [
+     0,
+     0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     1,
+     1,
+     1
+    ]
+   },
+   "components": {
+    "sindri.sprite": {
+     "texture": "textures/treads.png#starboard-0",
+     "layer": 5
+    },
+    "sindri.animation.sprite": {
+     "clips": {
+      "forward": {
+       "frames": [
+        "starboard-7",
+        "starboard-6",
+        "starboard-5",
+        "starboard-4",
+        "starboard-3",
+        "starboard-2",
+        "starboard-1",
+        "starboard-0"
+       ],
+       "seconds_per_frame": 0.055,
+       "looping": true
+      },
+      "reverse": {
+       "frames": [
+        "starboard-0",
+        "starboard-1",
+        "starboard-2",
+        "starboard-3",
+        "starboard-4",
+        "starboard-5",
+        "starboard-6",
+        "starboard-7"
+       ],
+       "seconds_per_frame": 0.055,
+       "looping": true
+      }
+     },
+     "playing": "forward",
+     "speed": 0.0
+    },
+    "sindri.script": {
+     "source": "scripts/tread.decay",
+     "script": "Tread",
+     "properties": {
+      "side": 1
+     }
+    }
+   },
+   "disabled": true
+  },
+  {
+   "id": "starboard-tread-12",
+   "name": "Starboard tread 12",
+   "parent": "deck",
+   "transform_3d": {
+    "position": [
+     8.5,
+     -12.5,
+     0.02
+    ],
+    "rotation": [
+     0,
+     0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     1,
+     1,
+     1
+    ]
+   },
+   "components": {
+    "sindri.sprite": {
+     "texture": "textures/treads.png#starboard-0",
+     "layer": 5
+    },
+    "sindri.animation.sprite": {
+     "clips": {
+      "forward": {
+       "frames": [
+        "starboard-7",
+        "starboard-6",
+        "starboard-5",
+        "starboard-4",
+        "starboard-3",
+        "starboard-2",
+        "starboard-1",
+        "starboard-0"
+       ],
+       "seconds_per_frame": 0.055,
+       "looping": true
+      },
+      "reverse": {
+       "frames": [
+        "starboard-0",
+        "starboard-1",
+        "starboard-2",
+        "starboard-3",
+        "starboard-4",
+        "starboard-5",
+        "starboard-6",
+        "starboard-7"
+       ],
+       "seconds_per_frame": 0.055,
+       "looping": true
+      }
+     },
+     "playing": "forward",
+     "speed": 0.0
+    },
+    "sindri.script": {
+     "source": "scripts/tread.decay",
+     "script": "Tread",
+     "properties": {
+      "side": 1
+     }
+    }
+   },
+   "disabled": true
+  },
+  {
+   "id": "starboard-tread-13",
+   "name": "Starboard tread 13",
+   "parent": "deck",
+   "transform_3d": {
+    "position": [
+     8.5,
+     -13.5,
+     0.02
+    ],
+    "rotation": [
+     0,
+     0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     1,
+     1,
+     1
+    ]
+   },
+   "components": {
+    "sindri.sprite": {
+     "texture": "textures/treads.png#starboard-0",
+     "layer": 5
+    },
+    "sindri.animation.sprite": {
+     "clips": {
+      "forward": {
+       "frames": [
+        "starboard-7",
+        "starboard-6",
+        "starboard-5",
+        "starboard-4",
+        "starboard-3",
+        "starboard-2",
+        "starboard-1",
+        "starboard-0"
+       ],
+       "seconds_per_frame": 0.055,
+       "looping": true
+      },
+      "reverse": {
+       "frames": [
+        "starboard-0",
+        "starboard-1",
+        "starboard-2",
+        "starboard-3",
+        "starboard-4",
+        "starboard-5",
+        "starboard-6",
+        "starboard-7"
+       ],
+       "seconds_per_frame": 0.055,
+       "looping": true
+      }
+     },
+     "playing": "forward",
+     "speed": 0.0
+    },
+    "sindri.script": {
+     "source": "scripts/tread.decay",
+     "script": "Tread",
+     "properties": {
+      "side": 1
+     }
+    }
+   },
+   "disabled": true
+  },
+  {
+   "id": "starboard-tread-14",
+   "name": "Starboard tread 14",
+   "parent": "deck",
+   "transform_3d": {
+    "position": [
+     8.5,
+     -14.5,
+     0.02
+    ],
+    "rotation": [
+     0,
+     0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     1,
+     1,
+     1
+    ]
+   },
+   "components": {
+    "sindri.sprite": {
+     "texture": "textures/treads.png#starboard-0",
+     "layer": 5
+    },
+    "sindri.animation.sprite": {
+     "clips": {
+      "forward": {
+       "frames": [
+        "starboard-7",
+        "starboard-6",
+        "starboard-5",
+        "starboard-4",
+        "starboard-3",
+        "starboard-2",
+        "starboard-1",
+        "starboard-0"
+       ],
+       "seconds_per_frame": 0.055,
+       "looping": true
+      },
+      "reverse": {
+       "frames": [
+        "starboard-0",
+        "starboard-1",
+        "starboard-2",
+        "starboard-3",
+        "starboard-4",
+        "starboard-5",
+        "starboard-6",
+        "starboard-7"
+       ],
+       "seconds_per_frame": 0.055,
+       "looping": true
+      }
+     },
+     "playing": "forward",
+     "speed": 0.0
+    },
+    "sindri.script": {
+     "source": "scripts/tread.decay",
+     "script": "Tread",
+     "properties": {
+      "side": 1
+     }
+    }
+   },
+   "disabled": true
+  },
+  {
+   "id": "starboard-tread-15",
+   "name": "Starboard tread 15",
+   "parent": "deck",
+   "transform_3d": {
+    "position": [
+     8.5,
+     -15.5,
+     0.02
+    ],
+    "rotation": [
+     0,
+     0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     1,
+     1,
+     1
+    ]
+   },
+   "components": {
+    "sindri.sprite": {
+     "texture": "textures/treads.png#starboard-0",
+     "layer": 5
+    },
+    "sindri.animation.sprite": {
+     "clips": {
+      "forward": {
+       "frames": [
+        "starboard-7",
+        "starboard-6",
+        "starboard-5",
+        "starboard-4",
+        "starboard-3",
+        "starboard-2",
+        "starboard-1",
+        "starboard-0"
+       ],
+       "seconds_per_frame": 0.055,
+       "looping": true
+      },
+      "reverse": {
+       "frames": [
+        "starboard-0",
+        "starboard-1",
+        "starboard-2",
+        "starboard-3",
+        "starboard-4",
+        "starboard-5",
+        "starboard-6",
+        "starboard-7"
+       ],
+       "seconds_per_frame": 0.055,
+       "looping": true
+      }
+     },
+     "playing": "forward",
+     "speed": 0.0
+    },
+    "sindri.script": {
+     "source": "scripts/tread.decay",
+     "script": "Tread",
+     "properties": {
+      "side": 1
+     }
+    }
+   },
+   "disabled": true
+  },
+  {
+   "id": "starboard-tread-16",
+   "name": "Starboard tread 16",
+   "parent": "deck",
+   "transform_3d": {
+    "position": [
+     8.5,
+     -16.5,
+     0.02
+    ],
+    "rotation": [
+     0,
+     0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     1,
+     1,
+     1
+    ]
+   },
+   "components": {
+    "sindri.sprite": {
+     "texture": "textures/treads.png#starboard-0",
+     "layer": 5
+    },
+    "sindri.animation.sprite": {
+     "clips": {
+      "forward": {
+       "frames": [
+        "starboard-7",
+        "starboard-6",
+        "starboard-5",
+        "starboard-4",
+        "starboard-3",
+        "starboard-2",
+        "starboard-1",
+        "starboard-0"
+       ],
+       "seconds_per_frame": 0.055,
+       "looping": true
+      },
+      "reverse": {
+       "frames": [
+        "starboard-0",
+        "starboard-1",
+        "starboard-2",
+        "starboard-3",
+        "starboard-4",
+        "starboard-5",
+        "starboard-6",
+        "starboard-7"
+       ],
+       "seconds_per_frame": 0.055,
+       "looping": true
+      }
+     },
+     "playing": "forward",
+     "speed": 0.0
+    },
+    "sindri.script": {
+     "source": "scripts/tread.decay",
+     "script": "Tread",
+     "properties": {
+      "side": 1
+     }
+    }
+   },
+   "disabled": true
   },
   {
    "id": "instruments",

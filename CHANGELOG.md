@@ -1,5 +1,7 @@
 # Changelog
 
+- Low Tide starts with a small seven-by-nine crawler, one engine, a helm, a basic workbench and four cargo slots. The deck keeps a stable construction origin and segmented tread belts, ready to grow without shifting the crew or stretching its cleats. Movement, ramp boarding, gathering and flood tests now play the starter layout.
+
 - Low Tide gains biome gathering and a twenty-slot resource hold: wood, stone, ore, scrap, fibre and salt. Harvests remove actual Basin blocks; carrying, stowing, jettisoning and flood loss preserve resource kinds and cargo weight. The phone's contextual button offers Gather. Wreck prefabs stream at deterministic sites across the Basin and remember depleted scrap when revisited; one introductory wreck stays near the start.
 
 

@@ -403,6 +403,19 @@ def resource_crate(c, kind):
     c.rect(4, 25, 28, 28, WOOD_DARK)
 
 
+def workbench(c):
+    c.rect(3, 3, 29, 29, WOOD_DARK, 2)
+    c.rect(4, 4, 28, 25, WOOD, 1)
+    for y in (10, 17, 23):
+        c.line(5, y, 27, y, 0.8, WOOD_DARK)
+    c.rect(7, 7, 17, 19, LINEN, 0.5)
+    c.line(9, 10, 15, 10, 0.7, IRON_DARK)
+    c.line(9, 13, 14, 13, 0.7, IRON_DARK)
+    c.line(21, 10, 21, 22, 2.5, WOOD_DARK)
+    c.rect(17, 8, 25, 12, IRON, 1)
+    c.ellipse(23, 23, 2.5, 2.5, RUST)
+
+
 def mast(c):
     deck(c, 7)
     c.ellipse(16, 16, 9, 9, WOOD_DARK)
@@ -576,14 +589,15 @@ def main():
             ("floor-hold", lambda c: steel(c, True)),
             *[(f"crate-{kind}", lambda c, k=kind: resource_crate(c, k))
               for kind in ("wood", "stone", "ore", "fibre", "salt")],
+            ("workbench", workbench),
         ],
         4,
         CELL,
         CELL,
     )
-    sheet("treads", [(f"{side}-{i}", lambda c, phase=i, gap=side == "starboard": tread(c, phase, gap))
+    sheet("treads", [(f"{side}-{i}", lambda c, phase=i, gap=False: tread(c, phase, gap))
                      for side in ("port", "starboard") for i in range(8)],
-          8, CELL, CELL * 11)
+          8, CELL, CELL)
     sheet(
         "ground",
         [

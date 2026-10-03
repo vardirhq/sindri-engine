@@ -25,7 +25,8 @@
       "crate-stone",
       "crate-ore",
       "crate-fibre",
-      "crate-salt"
+      "crate-salt",
+      "workbench"
     ]
   }
 }
