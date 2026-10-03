@@ -1249,10 +1249,14 @@
           "returns": "f32"
         },
         {
-          "description": null,
+          "description": "Whether a map column's existing surface is strictly below its flood level. Reads the same threshold the map draws; terrain and edits stay unchanged.",
           "kind": "function",
           "name": "flooded",
-          "parameter_names": null,
+          "parameter_names": [
+            "map",
+            "column",
+            "row"
+          ],
           "parameters": [
             "Entity",
             "f32",
@@ -1355,10 +1359,14 @@
           "returns": "unit"
         },
         {
-          "description": null,
+          "description": "Sets a reversible water overlay on a voxel world viewed as a map, using a finite height and a block's top face. An empty block name clears it. Refused on block views.",
           "kind": "function",
           "name": "set_flood",
-          "parameter_names": null,
+          "parameter_names": [
+            "map",
+            "level",
+            "block"
+          ],
           "parameters": [
             "Entity",
             "f32",

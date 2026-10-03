@@ -382,6 +382,16 @@ pub(super) const TYPES: &[TypeEntry] = &[
                 "Which row an object is at on a grid, with fractions between cells.",
             ),
             call(
+                "flooded",
+                &["map", "column", "row"],
+                "Whether a map column's existing surface is strictly below its flood level. Reads the same threshold the map draws; terrain and edits stay unchanged.",
+            ),
+            call(
+                "set_flood",
+                &["map", "level", "block"],
+                "Sets a reversible water overlay on a voxel world viewed as a map, using a finite height and a block's top face. An empty block name clears it. Refused on block views.",
+            ),
+            call(
                 "height",
                 &["grid", "column", "row"],
                 "How high the top of a voxel world's column is, as `Grid.surface` sees it, or `null` where nothing stands.",
