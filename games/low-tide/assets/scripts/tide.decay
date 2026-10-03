@@ -1,0 +1,48 @@
+// The returning sea is a season, never a deadline or a game over.
+// Its level is an overlay: generator, biomes and harvested blocks stay put.
+script Tide {
+    @export let low_seconds: f32 = 180.0;
+    @export let rise_seconds: f32 = 90.0;
+    @export let high_seconds: f32 = 45.0;
+    @export let fall_seconds: f32 = 90.0;
+    @export let low_level: f32 = -17.0;
+    @export let high_level: f32 = -4.0;
+
+    fn update(dt: f32) {
+        let low = max(1.0, this.low_seconds);
+        let rise = max(1.0, this.rise_seconds);
+        let high = max(1.0, this.high_seconds);
+        let fall = max(1.0, this.fall_seconds);
+        let cycle = low + rise + high + fall;
+        Game.tide_time += dt;
+        Game.season = floor(Game.tide_time / cycle);
+        let time = Game.tide_time - Game.season * cycle;
+        var amount = 0.0;
+        if time < low {
+            Game.tide_phase = TidePhase.Low;
+            Game.tide_left = low - time;
+        } else if time < low + rise {
+            Game.tide_phase = TidePhase.Rising;
+            Game.tide_left = low + rise - time;
+            amount = (time - low) / rise;
+        } else if time < low + rise + high {
+            Game.tide_phase = TidePhase.High;
+            Game.tide_left = low + rise + high - time;
+            amount = 1.0;
+        } else {
+            Game.tide_phase = TidePhase.Falling;
+            Game.tide_left = cycle - time;
+            amount = Game.tide_left / fall;
+        }
+        Game.tide_level = this.low_level + (this.high_level - this.low_level) * amount;
+        Grid.set_flood(this.entity, Game.tide_level, "brine");
+    }
+}
+
+shared fn flooded_at(basin: Entity, at: Vec2) -> bool {
+    return Grid.flooded(basin, floor(at.x), floor(-at.y));
+}
+
+shared fn wet_at(basin: Entity, at: Vec2) -> bool {
+    return flooded_at(basin, at) || tagged_at(basin, at, "liquid");
+}

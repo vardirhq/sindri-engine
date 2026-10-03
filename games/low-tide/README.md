@@ -10,8 +10,13 @@ and drive it wherever you like. Soft and rough ground slow it, and brine and
 cliffs stop it. Stop at wrecks for scrap, but every crate in the hold makes the
 crawler heavier, and heavier is slower.
 
-The Tide is coming back, in the next step, as something that floods the
-lowlands and pushes you uphill rather than something that kills you.
+The Tide returns as a repeating flood season. Low water lasts three minutes,
+then the brine rises for 90 seconds, holds high for 45 and recedes for 90.
+The HUD gives a countdown: head uphill before the lowlands flood. A caught
+crawler waits for the ebb and loses one unsecured crate per season. Caught
+ashore, you lose carried salvage and wade at reduced speed, but can still
+escape or board the ramp. Flooded wrecks cannot be salvaged. Nothing kills
+you or ends the voyage, and the crawler can drive again when its ground dries.
 
 ## Playing it
 
@@ -47,6 +52,7 @@ There is no game code. The game is `assets/`:
 - `basin.tileset`: the Basin's blocks, each tagged with what it is to the
   game: `soft`, `rough`, `liquid`.
 - `scripts/voyage.decay`: the shared state, and how the Basin is read.
+- `scripts/tide.decay`: the season and its reversible water level, tunable in the scene.
 - `scripts/crawler.decay`: throttle, rudder, weight, the ground's going,
   running aground, and the hold.
 - `scripts/crew.decay`: walking the deck in its own coordinates, the helm,
@@ -126,8 +132,13 @@ press.
 
 ## Not yet
 
-Next: the Tide as a flood season that raises the brine and pushes you uphill,
-then gathering across the Basin, then building onto the crawler. Ashore, the
+Next: gathering across the Basin, then building onto the crawler. Ashore, the
 crew walks over the crawler's hull rather than round it, wrecks are placed by
 hand near the start rather than across the world, and the tuning (`@export`
 fields on the crawler and the crew) is a first guess.
+
+`tests/a_flood_season.rs` checks the rise, high water, ebb and next season,
+cargo washed out once, driving again after the ebb, caught crew escaping with
+keys and at 390×844 by touch, and unchanged terrain with builtin overland blocks.
+The map extractor separately checks water at height boundaries and retention
+of column chunks across flood changes (while block edits still invalidate them).

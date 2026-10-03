@@ -49,6 +49,9 @@ impl WorldHost<'_> {
         path: &Path,
         args: &[Value],
     ) -> Result<Value, RuntimeError> {
+        if matches!(call, GridCall::SetFlood | GridCall::Flooded) {
+            return self.flood_call(call, path, args);
+        }
         // A volume's cells are named and stacked rather than indexed and flat,
         // so they never reach the shape a flat map describes.
         if matches!(
@@ -112,7 +115,9 @@ impl WorldHost<'_> {
             | GridCall::Walkable
             | GridCall::Tagged
             | GridCall::Surface
-            | GridCall::Height => {
+            | GridCall::Height
+            | GridCall::SetFlood
+            | GridCall::Flooded => {
                 unreachable!("answered above, before a flat map was looked for")
             }
         }

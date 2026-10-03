@@ -134,3 +134,21 @@ renderer does not have yet. A block's variants are not yet read by the voxel
 mesher, and tile volumes do not yet animate or glow. There are no strata, ores
 or structures, and water does not flow. Causeway's world is this generator with
 its own blocks.
+
+## Map flood overlay
+
+A voxel world with `view: map` may carry `map_flood: {"level": -4.0,
+"block": "brine"}` (or `null`). Below that continuous voxel height, the map
+draws the chosen block's top face shaded by water depth; equal height remains
+dry. `Grid.set_flood` changes it and `Grid.flooded` reads the same threshold.
+This is a map presentation capability found by Low Tide, not hydrodynamics or
+3D water: blocks views and all terrain/block queries stay unchanged. It works
+with custom Basin blocks and builtin overland blocks.
+
+Changing the generator's sea level would change generation and biome shorelines
+and regenerate visible columns. The overlay instead retains generated sections,
+sparse edits and map column chunks, changing the face chosen during submission.
+Terrain edits, texture reloads and tile-set reloads still invalidate the map.
+Flooded empty columns draw nothing. Decorations and animated/glowing water retain
+the map view's existing limitations. The editor's Scene/Play surface remains
+unverified for this capability; there is no dedicated flood tool.

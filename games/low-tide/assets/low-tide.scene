@@ -242,6 +242,11 @@
      "variant_seed": 5,
      "layer": -10,
      "edits": []
+    },
+    "sindri.script": {
+     "source": "scripts/tide.decay",
+     "script": "Tide",
+     "properties": {}
     }
    }
   },

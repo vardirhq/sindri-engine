@@ -2358,3 +2358,17 @@ Lab's sixth row crosses, waits and returns as a sequence while it breathes
 (`crates/sindri-decay/tests/tween_demo.rs`). No editor timeline, arbitrary
 component property binding, completion callback or CSS `@keyframes` surface is
 claimed complete.
+
+### Reversible floods over voxel maps
+
+Low Tide exercises a map-only `map_flood` overlay with `Grid.set_flood` and
+`Grid.flooded`: one continuous water height, strict submersion against the
+column's existing surface, a block palette top face and depth shading. Flood
+changes reuse cached map columns; terrain edits still invalidate them. Terrain,
+biomes, 3D block meshes and sparse edits are untouched, including builtin
+natural overland terrain. This capability was found by the moving-home genre
+showcase. Its season, cargo loss, waiting and escape rules are Decay gameplay.
+Native headless tests exercise keys and phone touch; extraction tests exercise
+the rendered faces and cache retention. Editor Scene view remains unverified;
+no fluid simulation, 3D flood mesh, decoration or animated/glowing map face is
+claimed. See `voxel-terrain.md` for the contract.

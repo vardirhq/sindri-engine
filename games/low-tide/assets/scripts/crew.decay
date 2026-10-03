@@ -87,9 +87,12 @@ script Crew {
             return;
         }
         let wreck = nearby_wreck();
-        if wreck == null || this.carrying {
+        let at = this.transform.world_position;
+        if wreck == null || this.carrying || wet_at(this.basin, Vec2(at.x, at.y)) {
             return;
         }
+        let wreck_at = wreck.transform.world_position;
+        if wet_at(this.basin, Vec2(wreck_at.x, wreck_at.y)) { return; }
         if Wreck.on(wreck).scrap > 0.0 && Game.crates < Game.capacity {
             Wreck.on(wreck).take();
             this.carrying = true;
@@ -128,13 +131,21 @@ script Crew {
     }
 
     fn walk_ashore(stick: Vec2, dt: f32) {
-        let way = turned(stick, Game.view_rot) * this.walk_speed * dt;
         var at = this.transform.position;
-        // On foot the crew climbs anything, but brine is deep and salt-burnt:
-        // they will not wade into it.
+        let caught = wet_at(this.basin, Vec2(at.x, at.y));
+        if caught && this.carrying {
+            this.carrying = false;
+            Game.washed += 1.0;
+            show_carried();
+        }
+        var pace = this.walk_speed;
+        if caught { pace *= 0.35; }
+        let way = turned(stick, Game.view_rot) * pace * dt;
         let next = Vec2(at.x + way.x, at.y + way.y);
-        this.wading = tagged_at(this.basin, next, "liquid");
-        if !this.wading {
+        this.wading = wet_at(this.basin, next);
+        // Dry feet will not enter brine. Caught feet can always wade out,
+        // including across a flat flooded shelf: no invisible prison or death.
+        if caught || !this.wading {
             at.x = next.x;
             at.y = next.y;
         }
@@ -233,7 +244,10 @@ script Crew {
     fn decide_hint() {
         if !Game.aboard {
             let wreck = nearby_wreck();
-            if this.carrying {
+            let at = this.transform.world_position;
+            if wet_at(this.basin, Vec2(at.x, at.y)) {
+                Game.hint = Hint.Brine;
+            } else if this.carrying {
                 Game.hint = Hint.Carrying;
             } else if wreck != null && Wreck.on(wreck).scrap <= 0.0 {
                 Game.hint = Hint.Empty;

@@ -5,10 +5,9 @@ use super::{Pilot, distance, frames};
 
 /// Drives to the first wreck, salvages a crate and carries it aboard,
 /// checking each step on the way as the player would see it.
-pub fn salvage_the_first_wreck(pilot: &mut Pilot) {
+pub fn pick_up_at_first_wreck(pilot: &mut Pilot) {
     let wreck = pilot.run.entity("wreck-1").expect("the first wreck");
     let wreck_at = pilot.run.position(wreck);
-    let empty_speed = 4.2;
 
     // Drive at the wreck, and stop short of it: a crawler takes a while to
     // lose its way.
@@ -48,6 +47,13 @@ pub fn salvage_the_first_wreck(pilot: &mut Pilot) {
         pilot.run.world.is_active(carried),
         "carrying a crate of scrap"
     );
+}
+
+/// Brings the carried crate aboard and observes its weight.
+pub fn salvage_the_first_wreck(pilot: &mut Pilot) {
+    pick_up_at_first_wreck(pilot);
+    let carried = pilot.run.entity("carried").expect("the carried crate");
+    let empty_speed = 4.2;
 
     // Back to the foot of the ramp, then up it.
     let foot = pilot.deck_to_world([12.5, -6.5]);

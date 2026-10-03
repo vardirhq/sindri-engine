@@ -74,7 +74,7 @@ impl WorldHost<'_> {
     }
 
     /// The voxel world on `map`, read with this host's tile sets, if it has one.
-    fn voxel_ground(
+    pub(super) fn voxel_ground(
         &self,
         path: &Path,
         map: EntityId,
@@ -197,7 +197,11 @@ impl WorldHost<'_> {
 
     /// A cell's column, row and, when `count` is three, level, each a whole
     /// number; a level not asked for is zero.
-    fn cell_argument(path: &Path, args: &[Value], count: usize) -> Result<[i32; 3], RuntimeError> {
+    pub(super) fn cell_argument(
+        path: &Path,
+        args: &[Value],
+        count: usize,
+    ) -> Result<[i32; 3], RuntimeError> {
         let mut position = [0_i32; 3];
         for (index, which) in [(1, "a column"), (2, "a row"), (3, "a level")]
             .into_iter()

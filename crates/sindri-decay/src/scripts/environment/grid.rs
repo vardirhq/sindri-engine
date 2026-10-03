@@ -34,7 +34,11 @@ pub(crate) fn add_grid_surface(environment: &mut Environment) {
                     // A grid and a point on it. `Walkable` takes the same
                     // pair as `Tile` and answers about the ground rather than
                     // about the picture.
-                    GridCall::Tile | GridCall::Walkable | GridCall::Surface | GridCall::Height => {
+                    GridCall::Tile
+                    | GridCall::Walkable
+                    | GridCall::Surface
+                    | GridCall::Height
+                    | GridCall::Flooded => {
                         vec![Type::Named(ENTITY.to_owned()), Type::F32, Type::F32]
                     }
                     // A flat cell and a palette index, and a stacked cell and
@@ -45,6 +49,9 @@ pub(crate) fn add_grid_surface(environment: &mut Environment) {
                         Type::F32,
                         Type::F32,
                     ],
+                    GridCall::SetFlood => {
+                        vec![Type::Named(ENTITY.to_owned()), Type::F32, Type::String]
+                    }
                     GridCall::Columns | GridCall::Rows => {
                         vec![Type::Named(ENTITY.to_owned())]
                     }
@@ -66,11 +73,15 @@ pub(crate) fn add_grid_surface(environment: &mut Environment) {
                     | GridCall::Rows => Type::F32,
                     GridCall::Block | GridCall::Surface => Type::String,
                     GridCall::Height => Type::Optional(Box::new(Type::F32)),
-                    GridCall::Place | GridCall::SetTile | GridCall::SetBlock => Type::Unit,
+                    GridCall::Place
+                    | GridCall::SetTile
+                    | GridCall::SetBlock
+                    | GridCall::SetFlood => Type::Unit,
                     GridCall::CanReach
                     | GridCall::StepToward
                     | GridCall::Walkable
-                    | GridCall::Tagged => Type::Bool,
+                    | GridCall::Tagged
+                    | GridCall::Flooded => Type::Bool,
                 },
             },
         );

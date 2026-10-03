@@ -183,6 +183,9 @@ When a capability changes, update the relevant documentation in the same commit:
 - The relevant subsystem contract in `docs/` when behaviour changes.
 - `docs/generated/` when the Decay host surface or a component registration
   changes — regenerate with `cargo run -p sindri-capabilities -- --write`.
+  When a host call is added or renamed, also update `crates/sindri-decay/src/reference/`
+  and run `cargo test -p sindri-capabilities`: regeneration can succeed with an
+  undescribed call, but the catalogue's completeness test rejects it.
   These files are never hand-edited, and a stale one fails the workspace
   tests. On a pull request from this repository, the autofix workflow
   regenerates and commits them when they are stale.

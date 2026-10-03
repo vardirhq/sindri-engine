@@ -27,6 +27,7 @@ script Crawler {
     // How far ahead of the middle the bow looks, in units.
     @export let reach: f32 = 7.5;
 
+    var last_wash: f32 = -1.0;
     var speed: f32 = 0.0;
     var deck: Entity = null;
     var basin: Entity = null;
@@ -54,6 +55,11 @@ script Crawler {
         let middle = Vec2(this.transform.position.x, this.transform.position.y);
         let forward = Vec2(-sin(heading), cos(heading));
 
+        Game.flooded = flooded_at(this.basin, middle);
+        if Game.flooded && this.last_wash != Game.season {
+            this.last_wash = Game.season;
+            wash_crate();
+        }
         Game.ground = ground_of(surface_at(this.basin, middle));
         Game.going = going_at(middle);
         let most = this.top_speed * lightness;
@@ -75,7 +81,7 @@ script Crawler {
         // Run aground at brine or a cliff: the bow will not go there, so the
         // crawler stops where it is.
         let next = middle + forward * (this.speed * dt);
-        Game.blocked = !passable(middle, next + forward * this.reach);
+        Game.blocked = Game.flooded || !passable(middle, next + forward * this.reach);
         if Game.blocked {
             this.speed = 0.0;
         } else {
@@ -109,7 +115,7 @@ script Crawler {
 
     // Whether the bow may go to `bow` from a crawler standing at `middle`.
     fn passable(middle: Vec2, bow: Vec2) -> bool {
-        if tagged_at(this.basin, bow, "liquid") || surface_at(this.basin, bow) == "" {
+        if wet_at(this.basin, bow) || surface_at(this.basin, bow) == "" {
             return false;
         }
         return height_at(this.basin, bow) - height_at(this.basin, middle) <= this.climb;
@@ -126,6 +132,19 @@ script Crawler {
                 Game.crates += 1.0;
                 Game.scrap += 1.0;
                 Game.salvaged += 1.0;
+                return;
+            }
+        }
+    }
+
+    // One unsecured crate per flood season, even if the crawler stays trapped.
+    fn wash_crate() {
+        for i in 0..this.hold_columns.length {
+            let column = this.hold_columns[i];
+            let row = this.hold_rows[i];
+            if Grid.tile(this.deck, column, row) == 11.0 {
+                jettison(column, row);
+                Game.washed += 1.0;
                 return;
             }
         }
