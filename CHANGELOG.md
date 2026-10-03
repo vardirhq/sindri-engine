@@ -1,6 +1,6 @@
 # Changelog
 
-- Low Tide gains distinct bridge, living-quarter and hold materials, richer furniture and worn metal fittings, authored in its deterministic art generators. The floor plan and cargo rules are unchanged.
+- Low Tide gains distinct bridge, living-quarter and hold materials, richer furniture and worn metal fittings, authored in its deterministic art generators. The Basin gains quieter, more varied salt, kelp, dunes, reef and brine textures. The floor plan and cargo rules are unchanged.
 
 - Low Tide now has a repeating flood season: three minutes of low water, a gradual rise, high water and an ebb. Lowlands turn to brine, flooded crawlers wait for the ebb and lose one unsecured crate per season, and caught crew lose carried salvage but can wade out slowly. No game over. The HUD names the phase and its countdown. A general map-only voxel flood overlay and `Grid.set_flood`/`Grid.flooded` make the drawing and gameplay agree without changing generated terrain, sparse edits or cached map columns.
 

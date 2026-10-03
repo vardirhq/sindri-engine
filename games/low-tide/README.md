@@ -77,6 +77,8 @@ has a grated floor. A cosmetic tilemap under the deck gives each room its
 material without changing the logical tiles used for walking or stowing cargo.
 Furniture and metal fittings use small contact shadows and highlights that
 rotate with the crawler; no directional world lighting is baked into them.
+Terrain materials have eight seeded variants each: fine salt grains and
+fractures, wind-shaped sand, coral remains, curled kelp and quiet brine ripples.
 All art comes from the deterministic Python sources in `art/`.
 
 ## The Basin
