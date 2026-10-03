@@ -37,15 +37,35 @@ script TouchControls {
             Game.touch = true;
         }
         let playing = Game.touch && !Game.building;
-        World.set_active(this.use_button, playing);
+        let span = min(1.7, Viewport.aspect * 1.85);
+        let width = min(0.44, span * 0.40);
+        let action_x = span * 0.28;
+        this.use_button.transform.position.x = action_x;
+        this.drop_button.transform.position.x = action_x;
+        if Game.diving { this.drop_button.transform.position.x = -action_x; }
+        this.use_button.transform.scale.x = width;
+        this.drop_button.transform.scale.x = width;
+        World.set_active(this.use_button, playing && has_use_action());
         World.set_active(this.view_button, playing && !Game.diving);
         World.set_active(this.drop_button, playing && (Game.hint == Hint.Jettison || Game.building || Game.diving));
         Ui.set_text(this.use_label, use_words());
+        Ui.set_text(World.find("View label"), "North");
+        if Game.prefer_north { Ui.set_text(World.find("View label"), "Follow"); }
         var drop_words = "Drop";
         if Game.building { drop_words = "Close"; }
         if Game.diving { drop_words = "Recall"; }
+        else if Game.discard_armed { drop_words = "Discard!"; }
         Ui.set_text(this.drop_label, drop_words);
         draw_stick(playing);
+    }
+
+    fn has_use_action() -> bool {
+        return match Game.hint {
+            Hint.TakeHelm => true, Hint.AtHelm => true, Hint.Workbench => true,
+            Hint.Salvage => true, Hint.Harvest => true, Hint.DiveStart => true,
+            Hint.DiveReturn => true, Hint.DiveSalvage => true,
+            _ => false,
+        };
     }
 
     // What Use would do here, so the one button can be the helm, salvage

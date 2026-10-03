@@ -1,5 +1,7 @@
 # Changelog
 
+- Low Tide adopts dark instrument panels, brass details and authored icons, with live hold segments, speed and tide meters. Nearby cargo is highlighted and named in a contextual action panel; empty Use actions are hidden. Discarding a crate now requires a second press, cancelled by movement, Escape or a timeout. Crawler frames gain metal detailing, pipe fittings and painted lamp glows.
+
 - Low Tide gets a responsive workbench with directly selectable blueprints, live cargo costs, installed/limited states and explicit build/close actions. A compact tide/status HUD and consistent touch controls leave more room for the world.
 
 - Low Tide gains high-tide diving from the flooded crawler ramp into a side-view cutaway of a nearby submerged wreck. Swim through a broken hull, manage air, recover a heavy sealed cache and return up the boarding line for real ore and scrap. The tide continues while diving; air loss, Recall and the ebb return crew safely without the loot. Recovered wreck caches remain empty during the voyage. Keyboard and phone touch share the same controls.

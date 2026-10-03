@@ -252,7 +252,13 @@ def wall(c):
     c.rect(1, 1, CELL - 1, CELL - 1, (119, 99, 76), 1)
     c.rect(3, 3, CELL - 3, CELL - 3, (68, 62, 51), 1)
     c.rect(5, 5, CELL - 5, CELL - 5, (76, 68, 54), 1)
-    c.line(5, 5, 27, 5, 0.8, (99, 87, 68))
+    c.line(4, 4, 28, 4, 1.4, (183, 145, 91))
+    c.line(4, 4, 4, 28, 1.1, (147, 117, 77))
+    c.line(5, 28, 28, 28, 2, (29, 32, 31))
+    c.line(28, 5, 28, 28, 2, (29, 32, 31))
+    c.rect(7, 8, 25, 24, (55, 57, 51), 1)
+    c.line(9, 11, 22, 11, 0.5, (89, 83, 65))
+    c.line(10, 24, 15, 23, 0.6, (118, 79, 46))
     for x, y in ((3, 3), (29, 3), (3, 29), (29, 29)):
         c.ellipse(x, y, 0.8, 0.8, (179, 151, 111))
 
@@ -384,6 +390,10 @@ def crate(c):
     c.rect(5, 5, CELL - 5, CELL - 5, WOOD, 1)
     c.line(6, 6, CELL - 6, CELL - 6, 2.5, WOOD_DARK)
     c.line(CELL - 6, 6, 6, CELL - 6, 2.5, WOOD_DARK)
+    for x, y in [(6, 6), (26, 6), (6, 26), (26, 26)]:
+        c.ellipse(x, y, 1, 1, LINEN)
+    c.line(5, 4, 27, 4, 1, (229, 173, 108))
+    c.line(27, 6, 27, 28, 2, (65, 43, 31))
     c.rect(12, 13, 20, 19, RUST, 1)
 
 
@@ -599,9 +609,72 @@ def diving_art():
                    ("salvage", salvage), ("diver", diver)], 4, CELL, CELL)
 
 
+def cabin_lamp():
+    c = Canvas(48, 48)
+    for radius in range(23, 6, -1):
+        c.ellipse(24, 24, radius, radius, (238, 168, 62, 4))
+    c.ellipse(24, 24, 6, 6, (35, 31, 24))
+    c.ring(24, 24, 5.5, 3.5, (166, 115, 51))
+    c.ellipse(24, 24, 3.5, 3.5, (248, 208, 114))
+    c.ellipse(23.5, 23.5, 2, 2, (255, 238, 171))
+    png(OUT / "lamp.png", 48, 48, c.pixels())
+
+
+def instrument_icons():
+    ivory = (225, 224, 202)
+    brass = (226, 183, 100)
+    def icon(c, kind):
+        if kind == "sun":
+            c.ring(16, 15, 9, 6.5, brass)
+            c.rect(0, 16, 32, 32, (0, 0, 0, 0))
+            for x in (4, 13, 22):
+                c.line(x, 22, x+4, 20, 2, ivory)
+                c.line(x+4, 20, x+8, 22, 2, ivory)
+            for angle in range(195, 350, 30):
+                r = math.radians(angle)
+                c.line(16+11*math.cos(r), 15+11*math.sin(r), 16+14*math.cos(r), 15+14*math.sin(r), 2, brass)
+        elif kind == "hold":
+            c.rect(5, 7, 27, 27, ivory, 2)
+            c.rect(8, 10, 24, 24, (18, 29, 32), 1)
+            c.line(8, 10, 24, 24, 2, brass)
+            c.line(24, 10, 8, 24, 2, brass)
+        elif kind == "speed":
+            c.ring(16, 18, 12, 9, ivory)
+            c.rect(0, 24, 32, 32, (0, 0, 0, 0))
+            c.line(16, 19, 22, 11, 2, brass)
+            c.ellipse(16, 19, 3, 3, ivory)
+        elif kind == "tide":
+            for y in (11, 20):
+                for x in (2, 12, 22):
+                    c.line(x, y, x+4, y-3, 2.5, ivory)
+                    c.line(x+4, y-3, x+8, y, 2.5, ivory)
+        elif kind == "pin":
+            c.ring(16, 11, 8, 4, ivory)
+            c.line(10, 17, 16, 27, 3, ivory)
+            c.line(22, 17, 16, 27, 3, ivory)
+        elif kind == "compass":
+            c.ring(16, 16, 12, 10, ivory)
+            c.line(16, 5, 10, 22, 2, brass)
+            c.line(16, 5, 22, 22, 2, brass)
+            c.line(10, 22, 16, 18, 2, brass)
+            c.line(22, 22, 16, 18, 2, brass)
+        elif kind == "hand":
+            c.rect(10, 12, 25, 26, ivory, 4)
+            for x, y in [(10, 7), (14, 4), (18, 5), (22, 8)]:
+                c.line(x, y, x, 20, 3, ivory)
+            c.line(10, 21, 5, 15, 4, ivory)
+        elif kind == "tool":
+            c.line(8, 25, 23, 9, 4, brass)
+            c.line(16, 7, 27, 17, 5, ivory)
+    sheet("instruments", [(name, lambda c, k=name: icon(c, k))
+          for name in ["sun", "hold", "speed", "tide", "pin", "compass", "hand", "tool"]], 8, 32, 32)
+
+
 def main():
     OUT.mkdir(parents=True, exist_ok=True)
     cabin_art()
+    instrument_icons()
+    cabin_lamp()
     diving_art()
     sheet(
         "ship",

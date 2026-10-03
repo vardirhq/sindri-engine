@@ -22,6 +22,12 @@ enum Resource { None, Wood, Stone, Ore, Scrap, Fibre, Salt }
 enum TidePhase { Low, Rising, High, Falling }
 
 state Game {
+    var discard_armed: bool = false;
+    var discard_left: f32 = 0.0;
+    var focus_kind: Resource = Resource.None;
+    var focus_x: f32 = -1.0;
+    var focus_y: f32 = -1.0;
+    var tide_duration: f32 = 180.0;
     var diving: bool = false;
     var dive_air: f32 = 30.0;
     var dive_x: f32 = -1.5;

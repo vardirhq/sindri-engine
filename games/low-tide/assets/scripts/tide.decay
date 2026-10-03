@@ -20,17 +20,21 @@ script Tide {
         var amount = 0.0;
         if time < low {
             Game.tide_phase = TidePhase.Low;
+            Game.tide_duration = low;
             Game.tide_left = low - time;
         } else if time < low + rise {
             Game.tide_phase = TidePhase.Rising;
+            Game.tide_duration = rise;
             Game.tide_left = low + rise - time;
             amount = (time - low) / rise;
         } else if time < low + rise + high {
             Game.tide_phase = TidePhase.High;
+            Game.tide_duration = high;
             Game.tide_left = low + rise + high - time;
             amount = 1.0;
         } else {
             Game.tide_phase = TidePhase.Falling;
+            Game.tide_duration = fall;
             Game.tide_left = cycle - time;
             amount = Game.tide_left / fall;
         }

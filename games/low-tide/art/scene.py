@@ -283,9 +283,9 @@ def entities():
         },
         {
             "id": "status", "name": "Status",
-            "transform_3d": transform(0.04, -0.085),
+            "transform_3d": transform(0.12, -0.33),
             "components": {
-                "sindri.ui.text": text("top_left", 0.037, "Hold 0/4"),
+                "sindri.ui.text": text("top_left", 0.031, "Salt flats"),
                 "sindri.script": script("scripts/hud.decay", "Hud"),
             },
         },
@@ -339,41 +339,70 @@ def crawler_motion():
 
 
 def cabin_details():
-    # Furnishings are earned through construction instead of provided at start.
-    return []
+    # Fixed fittings decorate the frame; furniture still comes from upgrades.
+    found = []
+    for i, (x, y) in enumerate([(3.5, -4.5), (7.5, -4.5), (3.5, -10.5), (7.5, -10.5)]):
+        found.append({"id": f"cabin-lamp-{i}", "name": f"Frame lamp {i}", "parent": "deck",
+            "transform_3d": transform(x, y, 0.2, 0, (1.4, 1.4)),
+            "components": {"sindri.sprite": {"texture": "textures/lamp.png", "layer": 9}}})
+    for side, x in [("port", 3.3), ("starboard", 7.7)]:
+        found.append({"id": "pipe-"+side, "name": "Frame pipe "+side, "parent": "deck",
+            "transform_3d": transform(x, -7.2, 0.1, 0, (0.25, 4.0)),
+            "components": {"sindri.sprite": {"texture": "textures/pipe.png", "layer": 5}}})
+    return found
 
 
 def instrument_panel():
-    return [
-        {
-            "id": "instruments", "name": "Instrument panel",
-            "transform_3d": transform(0.345, -0.1325, 0, 0, (0.65, 0.225)),
-            "components": {"sindri.ui.shape": ui_shape("rect", "top_left",
-                [0.035, 0.065, 0.062, 0.96], [0.55, 0.48, 0.33, 0.8], 0.005, 90, 0.025)},
-        },
-        {
-            "id": "instrument-title", "name": "Instrument title",
-            "transform_3d": transform(0.04, -0.038),
-            "components": {"sindri.ui.text": text("top_left", 0.029,
-                "LOW TIDE  /  CRAWLER 01", (0.72, 0.82, 0.72, 1))},
-        },
-        {
-            "id": "hint-panel", "name": "Hint panel",
-            "transform_3d": transform(0, 0.065, 0, 0, (0.87, 0.095)),
-            "components": {"sindri.ui.shape": ui_shape("rect", "bottom",
-                [0.025, 0.033, 0.028, 0.95], [0.55, 0.48, 0.33, 0.6], 0.005, 90, 0.02)},
-        },
-    ]
+    found = []
+    def panel(key, name, x, y, w, h, fill, anchor="top_left", layer=90):
+        found.append({"id": key, "name": name, "transform_3d": transform(x, y, 0, 0, (w, h)),
+            "components": {"sindri.ui.shape": ui_shape("rect", anchor, fill,
+                [0.65, 0.55, 0.34, 0.9], 0.008, layer, 0.06)}})
+    def words(key, name, x, y, size, content, anchor="top_left"):
+        found.append({"id": key, "name": name, "transform_3d": transform(x, y),
+            "components": {"sindri.ui.text": text(anchor, size, content)}})
+    def icon(key, frame, x, y, size, anchor="top_left"):
+        found.append({"id": key, "name": key, "transform_3d": transform(x, y, 0, 0, (size, size)),
+            "components": {"sindri.ui.image": {"anchor": anchor, "texture": "textures/instruments.png#"+frame, "layer": 101}}})
+    panel("instruments", "Instrument panel", 0.34, -0.21, 0.64, 0.38, [0.008, 0.018, 0.022, 0.98])
+    icon("brand-icon", "sun", 0.07, -0.064, 0.072)
+    words("instrument-title", "Instrument title", 0.12, -0.030, 0.047, "LOW TIDE")
+    words("instrument-subtitle", "Instrument subtitle", 0.12, -0.092, 0.024, "CRAWLER 01")
+    for key, frame, y in [("hold-icon", "hold", -0.14), ("speed-icon", "speed", -0.195), ("tide-icon", "tide", -0.25), ("terrain-icon", "pin", -0.33)]:
+        icon(key, frame, 0.07, y - 0.016, 0.043)
+    words("hold-readout", "Hold readout", 0.12, -0.14, 0.034, "Hold 0/4")
+    words("speed-readout", "Speed readout", 0.12, -0.195, 0.034, "Speed 0.0")
+    words("tide-readout", "Tide readout", 0.12, -0.25, 0.032, "LOW TIDE / 180s")
+    panel("speed-track", "Speed track", 0.49, -0.195, 0.19, 0.013, [0.05, 0.065, 0.07, 1], layer=96)
+    panel("speed-fill", "Speed fill", 0.49, -0.195, 0.19, 0.013, [0.61, 0.48, 0.22, 1], layer=97)
+    panel("tide-track", "Tide track", 0.35, -0.288, 0.5, 0.014, [0.05, 0.065, 0.07, 1], layer=96)
+    panel("tide-fill", "Tide fill", 0.35, -0.288, 0.5, 0.014, [0.05, 0.37, 0.52, 1], layer=97)
+    for i in range(16):
+        panel(f"cargo-empty-{i}", f"Cargo empty {i}", 0.45, -0.14, 0.04, 0.018, [0.05, 0.065, 0.07, 1], layer=96)
+        panel(f"cargo-fill-{i}", f"Cargo fill {i}", 0.45, -0.14, 0.04, 0.018, [0.59, 0.45, 0.19, 1], layer=97)
+        panel(f"cargo-full-{i}", f"Cargo full {i}", 0.45, -0.14, 0.04, 0.018, [0.64, 0.06, 0.065, 1], layer=98)
+    panel("hint-panel", "Hint panel", 0, 0.065, 0.87, 0.095, [0.008, 0.018, 0.022, 0.98], "bottom")
+    panel("context-panel", "Context panel", 0, 0.335, 0.86, 0.34, [0.008, 0.018, 0.022, 0.98], "bottom")
+    icon("context-icon", "hold", -0.31, 0.40, 0.075, "bottom")
+    words("context-title", "Context title", 0, 0.445, 0.035, "CARGO", "bottom")
+    words("context-detail", "Context detail", 0, 0.38, 0.028, "", "bottom")
+    panel("notice-panel", "Notice panel", 0, 0.55, 0.86, 0.09, [0.09, 0.027, 0.019, 0.98], "bottom")
+    words("notice", "Notice", 0, 0.55, 0.027, "", "bottom")
+    found.append({"id": "crate-focus", "name": "Crate focus", "parent": "deck", "disabled": True,
+        "transform_3d": transform(0, 0, 0.2, 0, (1.04, 1.04)),
+        "components": {"sindri.shape": shape([0,0,0,0], 8, 0.03) | {"stroke": [0.95,0.68,0.18,1], "stroke_width": 0.055}}})
+    return found
 
 
 def touch_button(key, words, x, y, width=0.3, height=0.13, anchor="bottom_right"):
     """A button for a thumb, anchored to a corner on the right."""
+    fill = [0.15, 0.018, 0.025, 0.98] if key == "drop" else [0.008, 0.018, 0.022, 0.98]
     return [
         {
             "id": f"{key}-button", "name": f"{words} button",
             "transform_3d": transform(x, y, 0.0, 0.0, (width, height)),
             "components": {
-                "sindri.ui.shape": ui_shape("rect", anchor, [0.045, 0.09, 0.085, 0.96],
+                "sindri.ui.shape": ui_shape("rect", anchor, fill,
                                             [1.0, 0.86, 0.55, 0.9], 0.015, 90, 0.10),
                 "sindri.ui.button": {"label": words},
             },
@@ -381,9 +410,15 @@ def touch_button(key, words, x, y, width=0.3, height=0.13, anchor="bottom_right"
         },
         {
             "id": f"{key}-label", "name": f"{words} label", "parent": f"{key}-button",
-            "transform_3d": transform(0.0, 0.0, 0.0, 0.0, (width, 0.05)),
-            "components": {"sindri.ui.text": text("center", 0.04, words, (1.0, 0.95, 0.85, 1.0)) | {
+            "transform_3d": transform(0.0 if key == "view" else 0.035, -0.035 if key == "view" else 0.0, 0.0, 0.0, (width, 0.05)),
+            "components": {"sindri.ui.text": text("center", 0.032 if key == "view" else 0.036, words, (1.0, 0.95, 0.85, 1.0)) | {
                 "layer": 95, "shadow": {"offset": [0.0, 0.0], "color": [0, 0, 0, 0], "softness": 0.0}}},
+        },
+        {
+            "id": f"{key}-icon", "name": f"{words} icon", "parent": f"{key}-button",
+            "transform_3d": transform(0 if key == "view" else -0.10, 0.025 if key == "view" else 0, 0, 0, (0.052, 0.052)),
+            "components": {"sindri.ui.image": {"anchor": "center", "layer": 96,
+                "texture": "textures/instruments.png#" + ("compass" if key == "view" else "hand" if key == "drop" else "tool")}},
         },
     ]
 
@@ -412,8 +447,8 @@ def touch_controls():
                                                        [1.0, 0.86, 0.55, 0.9], 0.08, 81)},
             "disabled": True,
         },
-    ] + touch_button("use", "Use", -0.2, 0.2) + touch_button("drop", "Drop", -0.2, 0.37) \
-      + touch_button("view", "View", 0.15, 0.2, 0.22, 0.13, "bottom_left")
+    ] + touch_button("use", "Use", 0.24, 0.245, 0.34, 0.13, "bottom") + touch_button("drop", "Drop", 0.24, 0.245, 0.34, 0.13, "bottom") \
+      + touch_button("view", "View", -0.105, -0.085, 0.15, 0.13, "top_right")
 
 
 def workbench():
@@ -433,11 +468,11 @@ def workbench():
             "transform_3d": transform(0, y),
             "components": {"sindri.ui.text": text("center", size, words) | {"layer": 130}}})
     panel("build-shade", "Build shade", 0, 8, 4, [0.01, 0.02, 0.02, 0.8])
-    panel("build-panel", "Build panel", 0, 1.9, 1.66, [0.035, 0.065, 0.062, 1])
+    panel("build-panel", "Build panel", 0, 1.9, 1.66, [0.008, 0.018, 0.022, 1])
     label("build-title", "Build title", 0.68, 0.055, "CRAWLER WORKBENCH")
     label("build-stock", "Build stock", 0.57, 0.031, "Cargo aboard")
     for key, name, y in [("extension", "Extension", 0.40), ("bunk", "Bunk", 0.18), ("engine", "Engine", -0.04)]:
-        panel("plan-"+key, "Plan "+name, y, 1.74, 0.19, [0.09, 0.13, 0.12, 1], True)
+        panel("plan-"+key, "Plan "+name, y, 1.74, 0.19, [0.018, 0.031, 0.035, 1], True)
         panel("plan-"+key+"-selected", "Plan "+name+" selected", y, 1.74, 0.19, [0.10, 0.23, 0.20, 1])
         found[-1]["components"]["sindri.ui.shape"]["layer"] = 121
         found[-1]["components"]["sindri.ui.shape"]["stroke"] = [0.9, 0.76, 0.42, 1]
@@ -447,7 +482,7 @@ def workbench():
     for key, name, x, width in [("next", "Next", -0.55, 0.38),
                                ("build-confirm", "Build confirm", 0, 0.58),
                                ("build-close", "Build close", 0.55, 0.38)]:
-        panel(key+"-button", name+" button", -0.65, width, 0.13, [0.22, 0.19, 0.12, 1], True)
+        panel(key+"-button", name+" button", -0.65, width, 0.13, [0.07, 0.06, 0.035, 1], True)
         found[-1]["transform_3d"]["position"][0] = x
         label(key+"-label", name+" label", -0.65, 0.043, name)
         found[-1]["transform_3d"]["position"][0] = x

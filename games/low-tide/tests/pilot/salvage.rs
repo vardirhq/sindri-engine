@@ -97,7 +97,15 @@ pub fn jettison_it(pilot: &mut Pilot) {
         pilot.step();
         assert!(pilot.run.world.is_active(drop), "Drop shows by a crate");
         pilot.press("drop-button");
+        assert!(
+            pilot.flag("discard_armed"),
+            "first press asks for confirmation"
+        );
+        assert!(pilot.board("crates") > 0.5);
+        pilot.press("drop-button");
     } else {
+        pilot.tap(sindri_platform::Key::X);
+        assert!(pilot.flag("discard_armed"));
         pilot.tap(sindri_platform::Key::X);
     }
     pilot.wait(0.2);

@@ -16,30 +16,14 @@ script Hud {
 
     fn update(dt: f32) {
         this.washed_notice = max(0.0, this.washed_notice - dt);
-        if Game.washed > this.seen_washed {
-            this.seen_washed = Game.washed;
-            this.washed_notice = 5.0;
-        }
-        var status = "Hold " + Game.crates + "/" + Game.capacity + "   Speed " + Game.speed.fixed(1);
-        if Game.at_helm { status += "   " + round(Game.throttle * 100.0) + "%"; }
-        status += "\n" + match Game.tide_phase {
-            TidePhase.Low => "LOW TIDE  /  rises in ",
-            TidePhase.Rising => "RISING  /  high in ",
-            TidePhase.High => "HIGH TIDE  /  ebb in ",
-            TidePhase.Falling => "RECEDING  /  low in ",
-        } + ceil(Game.tide_left) + "s";
-        status += "\n" + ground_words();
-        if Game.blocked { status += "  /  AGROUND"; }
-        if Game.flooded { status += "\nDive from aboard at the ramp"; }
-        if this.washed_notice > 0.0 { status += "\nCargo washed away by the tide"; }
-        if Game.diving {
-            status = "LOW TIDE / DIVING\nAir " + ceil(Game.dive_air) + "s\nDepth " + max(0.0, -Game.dive_y).fixed(1);
-            if Game.dive_loot { status += "\nCarrying ore + scrap\nHeavy salvage: swim slower"; }
-            else if Game.dive_empty { status += "\nThis wreck cache is empty"; }
-            else { status += "\nFind the sealed salvage"; }
-            status += "\nReturn up the yellow line";
-        } else if Game.dive_notice > 0.0 {
-            status += "\n" + match Game.dive_report {
+        if Game.washed > this.seen_washed { this.seen_washed = Game.washed; this.washed_notice = 5.0; }
+        instruments();
+        context();
+        var notice = "";
+        if this.washed_notice > 0.0 { notice = "Cargo washed away by the tide"; }
+        if Game.flooded && !Game.diving { notice = "Flooded: dive from aboard at the ramp"; }
+        if Game.dive_notice > 0.0 {
+            notice = match Game.dive_report {
                 DiveReport.Recovered => "Recovered: 1 ore + 1 scrap",
                 DiveReport.Rescued => "Recalled safely; salvage left below",
                 DiveReport.Full => "Diving needs two free cargo slots",
@@ -47,23 +31,98 @@ script Hud {
                 _ => "Back aboard",
             };
         }
-        Ui.set_text(this.entity, status);
-        // Width follows the viewport so the header stays readable on phones.
-        let width = min(1.5, Viewport.aspect * 1.8);
-        var height = 0.24;
-        if Game.flooded { height += 0.05; }
-        if Game.dive_notice > 0.0 { height += 0.05; }
-        if this.washed_notice > 0.0 { height += 0.05; }
-        if Game.diving { height = 0.39; }
-        this.panel.transform.scale = Vec3(width, height, 1.0);
-        this.panel.transform.position = Vec3(0.04 + width * 0.5, -0.02 - height * 0.5, 0.0);
-        World.find("Hint panel").transform.scale.x = min(2.4, Viewport.aspect * 1.8);
+        World.set_active(World.find("Notice panel"), notice != "" && !Game.building);
+        World.set_active(World.find("Notice"), notice != "" && !Game.building);
+        Ui.set_text(World.find("Notice"), notice);
+        Ui.set_text(this.hint, key_words());
+        if Game.touch { Ui.set_text(this.hint, touch_words()); }
+        let width = min(2.4, Viewport.aspect * 1.85);
+        World.find("Hint panel").transform.scale.x = width;
+        World.find("Context panel").transform.scale.x = min(1.7, width);
+        World.find("Notice panel").transform.scale.x = min(1.7, width);
+    }
 
-        if Game.touch {
-            Ui.set_text(this.hint, touch_words());
-        } else {
-            Ui.set_text(this.hint, key_words());
+    fn instruments() {
+        let width = min(1.45, Viewport.aspect * 1.45);
+        this.panel.transform.scale = Vec3(width, 0.38, 1.0);
+        this.panel.transform.position = Vec3(0.02 + width * 0.5, -0.21, 0.0);
+        Ui.set_text(World.find("Hold readout"), "Hold " + Game.crates + "/" + Game.capacity);
+        Ui.set_text(World.find("Speed readout"), "Speed " + Game.speed.fixed(1));
+        let tide = match Game.tide_phase {
+            TidePhase.Low => "LOW / rises ", TidePhase.Rising => "RISING / high ",
+            TidePhase.High => "HIGH / ebb ", TidePhase.Falling => "EBB / low ",
+        };
+        Ui.set_text(World.find("Tide readout"), tide + ceil(Game.tide_left) + "s");
+        var status = ground_words();
+        if Game.blocked { status += " / aground"; }
+        this.transform.position = Vec3(0.12, -0.33, 0.0);
+        if Game.diving {
+            status = "Air " + ceil(Game.dive_air) + "s / Depth " + max(0.0, -Game.dive_y).fixed(1);
+            this.transform.position.y = -0.14;
+            if Game.dive_loot { status += "\nHeavy salvage aboard"; }
+            else if Game.dive_empty { status += "\nWreck cache empty"; }
+            else { status += "\nFind the sealed salvage"; }
+            status += "\nReturn up the yellow line";
+            this.panel.transform.scale.y = 0.32;
+            this.panel.transform.position.y = -0.18;
         }
+        Ui.set_text(this.entity, status);
+        for name in ["hold-icon", "speed-icon", "tide-icon", "terrain-icon", "Hold readout", "Speed readout", "Tide readout", "Speed track", "Speed fill", "Tide track", "Tide fill"] {
+            World.set_active(World.find(name), !Game.diving);
+        }
+        meter("Speed track", "Speed fill", width * 0.60, -0.211, width * 0.30, Game.speed / max(0.01, Game.top_speed));
+        meter("Tide track", "Tide fill", 0.12, -0.302, width - 0.18, Game.tide_left / max(1.0, Game.tide_duration));
+        for i in 0..16 {
+            let span = width * 0.30;
+            let gap = 0.004;
+            let size = max(0.001, span / max(1.0, Game.capacity) - gap);
+            let x = width * 0.60 + i * (size + gap) + size * 0.5;
+            for prefix in ["Cargo empty ", "Cargo fill ", "Cargo full "] {
+                let cell = World.find(prefix + i);
+                cell.transform.position = Vec3(x, -0.156, 0.0);
+                cell.transform.scale.x = size;
+                var show = i < Game.capacity && !Game.diving;
+                if prefix != "Cargo empty " { show = show && i < Game.crates; }
+                if prefix == "Cargo full " { show = show && Game.crates >= Game.capacity; }
+                World.set_active(cell, show);
+            }
+        }
+    }
+
+    fn meter(track: String, fill: String, x: f32, y: f32, width: f32, fraction: f32) {
+        let back = World.find(track);
+        let bar = World.find(fill);
+        let amount = clamp(fraction, 0.0, 1.0);
+        back.transform.scale.x = width;
+        back.transform.position = Vec3(x + width * 0.5, y, 0.0);
+        bar.transform.scale.x = max(0.0001, width * amount);
+        bar.transform.position = Vec3(x + width * amount * 0.5, y, 0.0);
+    }
+
+    fn context() {
+        var title = "";
+        var detail = "";
+        if Game.hint == Hint.Jettison {
+            title = cargo_name(Game.focus_kind).uppercase + " CRATE";
+            detail = "Stored aboard / takes one hold slot";
+            if Game.discard_armed { detail = "Discard this crate? Press again to confirm"; }
+        } else if Game.hint == Hint.Workbench { title = "WORKBENCH"; detail = "Expand the deck or install an upgrade"; }
+        else if Game.hint == Hint.TakeHelm { title = "CRAWLER HELM"; detail = "Take the wheel and explore the seabed"; }
+        else if Game.hint == Hint.AtHelm { title = "AT THE HELM"; detail = "Throttle " + round(Game.throttle * 100.0) + "% / steer left or right"; }
+        else if Game.hint == Hint.Harvest { title = cargo_name(Game.gather_kind).uppercase; detail = "Gather a bundle and carry it aboard"; }
+        else if Game.hint == Hint.Salvage { title = "WRECK SALVAGE"; detail = "Recover scrap for the crawler"; }
+        else if Game.hint == Hint.DiveStart { title = "DIVE LINE"; detail = "Explore a nearby submerged wreck"; }
+        else if Game.diving { title = "UNDERWATER"; detail = "Follow the yellow line back to the crawler"; }
+        let visible = title != "" && !Game.building;
+        for name in ["Context panel", "Context title", "Context detail", "context-icon"] { World.set_active(World.find(name), visible); }
+        World.set_active(World.find("context-icon"), visible && Game.hint == Hint.Jettison);
+        var height = 0.20;
+        var centre = 0.40;
+        if Game.touch { height = 0.34; centre = 0.335; }
+        World.find("Context panel").transform.scale.y = height;
+        World.find("Context panel").transform.position.y = centre;
+        Ui.set_text(World.find("Context title"), title);
+        Ui.set_text(World.find("Context detail"), detail);
     }
 
     // What the crawler is driving on, and what it costs.
@@ -101,7 +160,7 @@ script Hud {
             Hint.AtHelm => "W/S  throttle     A/D  steer     E  leave the helm",
             Hint.Salvage => "E  salvage a crate of scrap",
             Hint.Harvest => "E  gather " + cargo_name(Game.gather_kind),
-            Hint.Jettison => "X  throw this crate over the side",
+            Hint.Jettison => "X twice  discard crate / Esc cancel",
             _ => shared_words("WASD  walk     Tab  keep the map north-up"),
         };
     }
@@ -118,7 +177,7 @@ script Hud {
             Hint.AtHelm => "Push up for throttle, sideways to steer",
             Hint.Salvage => "Salvage to take a crate",
             Hint.Harvest => "Gather to take " + cargo_name(Game.gather_kind),
-            Hint.Jettison => "Drop throws this crate overboard",
+            Hint.Jettison => "Drop, then Discard confirms; moving away cancels",
             _ => shared_words("Drag anywhere to walk"),
         };
     }

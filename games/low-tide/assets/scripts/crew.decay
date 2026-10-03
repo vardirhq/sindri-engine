@@ -49,6 +49,8 @@ script Crew {
 
     fn update(dt: f32) {
         if Game.diving { return; }
+        Game.discard_left = max(0.0, Game.discard_left - dt);
+        if Game.discard_left <= 0.0 || Action.pressed("cancel") { Game.discard_armed = false; }
         let stick = steering();
         if Action.pressed("use") || Ui.is_pressed(this.use_button) {
             use();
@@ -134,7 +136,15 @@ script Crew {
         }
         let cell = nearby_crate();
         if cell != null {
-            Crawler.on(this.crawler).jettison(cell.x, cell.y);
+            if Game.discard_armed && cell.x == Game.focus_x && cell.y == Game.focus_y {
+                Crawler.on(this.crawler).jettison(cell.x, cell.y);
+                Game.discard_armed = false;
+            } else {
+                Game.focus_x = cell.x;
+                Game.focus_y = cell.y;
+                Game.discard_armed = true;
+                Game.discard_left = 4.0;
+            }
         }
     }
 
@@ -316,6 +326,26 @@ script Crew {
             Game.hint = Hint.Jettison;
         } else {
             Game.hint = Hint.None;
+        }
+        sync_focus();
+    }
+
+    fn sync_focus() {
+        let marker = World.find("Crate focus");
+        let visible = Game.hint == Hint.Jettison && Game.aboard;
+        World.set_active(marker, visible);
+        if visible {
+            let cell = nearby_crate();
+            if cell != null {
+                if cell.x != Game.focus_x || cell.y != Game.focus_y { Game.discard_armed = false; }
+                Game.focus_x = cell.x;
+                Game.focus_y = cell.y;
+                Game.focus_kind = tile_cargo(Grid.tile(this.deck, cell.x, cell.y));
+                marker.transform.position = Vec3(cell.x + 0.5, -cell.y - 0.5, 0.2);
+            }
+        } else {
+            Game.focus_kind = Resource.None;
+            Game.discard_armed = false;
         }
     }
 
