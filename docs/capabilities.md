@@ -699,6 +699,10 @@ phone-touch runtime tests harvest, carry, stow and jettison actual blocks;
 the workbench also consumes physical cargo for deck expansion, a bunk and an
 engine upgrade, preserving the crew and deck origin while driving. Structure
 adds permanent weight; duplicate and unaffordable builds spend nothing.
+Its viewport-sized workbench exposes three directly selectable blueprints,
+current cargo versus cost, installed/chassis-limit states and explicit actions.
+Keyboard and phone menu tests exercise selection, rejection and closing;
+phone/desktop captures exercise the compact HUD and responsive menu.
 Low Tide also exercises a side-view high-tide dive: a second authored camera
 frames a wreck tilemap, Decay swims against hull cells, manages air and a heavy
 cache, then deposits ore and scrap in the original hold only after returning.

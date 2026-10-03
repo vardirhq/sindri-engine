@@ -67,7 +67,7 @@ pub fn next(pilot: &mut Pilot) {
 
 pub fn close(pilot: &mut Pilot) {
     if pilot.touch() {
-        pilot.press("drop-button");
+        pilot.press("build-close-button");
     } else {
         pilot.tap(sindri_platform::Key::X);
     }

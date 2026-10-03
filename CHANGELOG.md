@@ -1,5 +1,7 @@
 # Changelog
 
+- Low Tide gets a responsive workbench with directly selectable blueprints, live cargo costs, installed/limited states and explicit build/close actions. A compact tide/status HUD and consistent touch controls leave more room for the world.
+
 - Low Tide gains high-tide diving from the flooded crawler ramp into a side-view cutaway of a nearby submerged wreck. Swim through a broken hull, manage air, recover a heavy sealed cache and return up the boarding line for real ore and scrap. The tide continues while diving; air loss, Recall and the ebb return crew safely without the loot. Recovered wreck caches remain empty during the voyage. Keyboard and phone touch share the same controls.
 
 - Low Tide gains a working construction bench: spend physical cargo on stern extensions (two rows and four slots, up to three extensions), a bunk, and a stronger engine. Construction keeps the deck origin and crew fixed while driving, grows the treads and shadow, and adds permanent weight. Keyboard, gamepad bindings and phone buttons share the blueprint flow.

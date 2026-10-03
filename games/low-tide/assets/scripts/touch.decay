@@ -36,7 +36,7 @@ script TouchControls {
         if Touch.count > 0.0 {
             Game.touch = true;
         }
-        let playing = Game.touch;
+        let playing = Game.touch && !Game.building;
         World.set_active(this.use_button, playing);
         World.set_active(this.view_button, playing && !Game.diving);
         World.set_active(this.drop_button, playing && (Game.hint == Hint.Jettison || Game.building || Game.diving));

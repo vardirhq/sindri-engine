@@ -90,7 +90,11 @@ impl Pilot {
     /// E, or the Use button.
     pub fn use_it(&mut self) {
         if self.touch {
-            self.press("use-button");
+            self.press(if self.flag("building") {
+                "build-confirm-button"
+            } else {
+                "use-button"
+            });
         } else {
             self.tap(Key::E);
         }

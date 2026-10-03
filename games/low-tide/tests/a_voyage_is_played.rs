@@ -142,7 +142,10 @@ fn the_crawler_runs_aground_at_brine_rather_than_into_it() {
         .as_str()
         .unwrap()
         .to_owned();
-    assert!(text.contains("aground"), "the HUD says so: {text}");
+    assert!(
+        text.to_lowercase().contains("aground"),
+        "the HUD says so: {text}"
+    );
 }
 
 #[test]
