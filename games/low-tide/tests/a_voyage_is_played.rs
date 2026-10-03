@@ -168,3 +168,24 @@ fn stepping_off_a_moving_crawler_drops_its_anchor() {
     let gap = distance(pilot.crew_world(), pilot.crawler_world());
     assert!(gap < 12.0, "close enough to walk back to: {gap}");
 }
+
+/// Coming aboard at the very edge of the ramp, where it meets the tread, used
+/// to leave the crew overlapping the tread and unable to take a step.
+#[test]
+fn the_crew_can_walk_on_after_boarding_at_the_edge_of_the_ramp() {
+    let mut pilot = Pilot::new();
+    pilot.walk_deck(&[[7.5, -6.5], [12.0, -6.5]]);
+    assert!(!pilot.flag("aboard"), "ashore");
+    let beside = pilot.deck_to_world([12.5, -6.06]);
+    pilot.walk_ashore(beside, 0.1);
+    let edge = pilot.deck_to_world([10.6, -6.06]);
+    pilot.walk_ashore(edge, 0.1);
+    pilot.wait(0.1);
+    assert!(pilot.flag("aboard"), "back aboard at the ramp's edge");
+    pilot.walk_deck(&[[7.5, -6.5], [5.5, -6.5]]);
+    let deck = pilot.on_deck();
+    assert!(
+        (deck[0] - 5.5).abs() < 0.2 && (deck[1] + 6.5).abs() < 0.2,
+        "and walked inside: {deck:?}"
+    );
+}

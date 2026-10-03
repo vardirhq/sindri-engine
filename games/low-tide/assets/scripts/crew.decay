@@ -112,10 +112,13 @@ script Crew {
         // Screen up, turned into the floor plan's frame.
         let way = turned(stick, Game.view_rot - Game.heading) * this.walk_speed * dt;
         var at = this.transform.position;
-        if open_at(at.x + way.x, at.y) {
+        // Somebody already overlapping a wall may always move: refusing every
+        // step that does not end in the clear would leave them stuck there.
+        let stuck = !open_at(at.x, at.y);
+        if stuck || open_at(at.x + way.x, at.y) {
             at.x += way.x;
         }
-        if open_at(at.x, at.y + way.y) {
+        if stuck || open_at(at.x, at.y + way.y) {
             at.y += way.y;
         }
         this.transform.position = at;
@@ -156,7 +159,11 @@ script Crew {
 
     fn come_aboard(local: Vec2) {
         World.set_parent(this.entity, this.deck);
-        this.transform.position = Vec3(local.x, local.y, 0.1);
+        // Onto the middle of the ramp, whichever corner of it was stepped on:
+        // its edges touch the treads, which nobody can stand in.
+        let row = floor(-local.y);
+        let across = min(local.x, DECK_COLUMNS - 1.0 + this.radius + 0.05);
+        this.transform.position = Vec3(across, -row - 0.5, 0.1);
         Game.aboard = true;
         if this.carrying {
             Crawler.on(this.crawler).stow();
