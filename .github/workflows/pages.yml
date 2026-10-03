@@ -78,7 +78,8 @@ jobs:
             "games/shapes-lab:shapes-lab" \
             "games/weave-poc:weave-poc" \
             "games/platformer:platformer" \
-            "games/scorchball:scorchball"; do
+            "games/scorchball:scorchball" \
+            "games/low-tide:low-tide"; do
             src="${project%%:*}"
             route="${project##*:}"
             cargo run --quiet --package sindri-export --bin sindri-export -- \
@@ -122,7 +123,7 @@ jobs:
           CHECK
           test -f target/pages/docs/scripting/index.html
           test -f target/pages/docs/language/index.html
-          for route in physics ui spatial camera tween causeway flappy orbital-baked shapes-lab weave-poc platformer scorchball; do
+          for route in physics ui spatial camera tween causeway flappy orbital-baked shapes-lab weave-poc platformer scorchball low-tide; do
             test -f "target/pages/examples/$route/index.html"
             test -f "target/pages/examples/$route/assets/sindri.manifest"
             test -f "target/pages/examples/$route/pkg/sindri_causeway.js"

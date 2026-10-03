@@ -1,0 +1,12 @@
+// A wreck surfaced from the salt, with scrap in it until somebody takes it.
+
+script Wreck {
+    @export var scrap: f32 = 3.0;
+
+    fn take() {
+        this.scrap = max(0.0, this.scrap - 1.0);
+        if this.scrap <= 0.0 {
+            this.sprite.tint = Color("#9a948a");
+        }
+    }
+}
