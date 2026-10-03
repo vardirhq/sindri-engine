@@ -344,6 +344,13 @@ def engine(c):
     c.rect(4, 3, 8, 6, (52, 54, 48))
 
 
+def upgraded_engine(c):
+    engine(c)
+    c.rect(9, 6, 23, 24, (91, 133, 107), 2)
+    for y in (10, 15, 20):
+        c.ellipse(16, y, 2, 2, LAMP)
+
+
 def tread(c, phase=0, ramp_gap=False):
     c.rect(0, 0, CELL, c.height, (42, 43, 38))
     c.rect(2, 0, CELL - 2, c.height, (65, 66, 58))
@@ -590,6 +597,7 @@ def main():
             *[(f"crate-{kind}", lambda c, k=kind: resource_crate(c, k))
               for kind in ("wood", "stone", "ore", "fibre", "salt")],
             ("workbench", workbench),
+            ("engine-upgraded", upgraded_engine),
         ],
         4,
         CELL,

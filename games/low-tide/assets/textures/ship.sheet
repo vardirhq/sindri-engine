@@ -26,7 +26,8 @@
       "crate-ore",
       "crate-fibre",
       "crate-salt",
-      "workbench"
+      "workbench",
+      "engine-upgraded"
     ]
   }
 }

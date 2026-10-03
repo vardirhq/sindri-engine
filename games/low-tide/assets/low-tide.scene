@@ -114,6 +114,21 @@
        ]
       },
       {
+       "name": "next_plan",
+       "kind": "button",
+       "bindings": [
+        "key.Q",
+        "gamepad.east"
+       ]
+      },
+      {
+       "name": "cancel",
+       "kind": "button",
+       "bindings": [
+        "key.Escape"
+       ]
+      },
+      {
        "name": "view",
        "kind": "button",
        "bindings": [
@@ -425,7 +440,8 @@
       "crate-ore",
       "crate-fibre",
       "crate-salt",
-      "workbench"
+      "workbench",
+      "engine-upgraded"
      ],
      "columns": 11,
      "rows": 18,
@@ -481,7 +497,8 @@
       "crate-ore",
       "crate-fibre",
       "crate-salt",
-      "workbench"
+      "workbench",
+      "engine-upgraded"
      ],
      "columns": 11,
      "rows": 18,
@@ -3215,6 +3232,263 @@
      "line_height": 0.05,
      "layer": 95,
      "text": "View",
+     "bold": true,
+     "outline": {
+      "width": 0.0,
+      "color": [
+       0.12,
+       0.08,
+       0.06,
+       0.95
+      ]
+     },
+     "shadow": {
+      "offset": [
+       0.0,
+       0.0
+      ],
+      "color": [
+       0,
+       0,
+       0,
+       0
+      ],
+      "softness": 0.0
+     }
+    }
+   }
+  },
+  {
+   "id": "workbench",
+   "name": "Workbench",
+   "parent": "deck",
+   "transform_3d": {
+    "position": [
+     4.5,
+     -6.5,
+     0.0
+    ],
+    "rotation": [
+     0,
+     0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     1.0,
+     1.0,
+     1
+    ]
+   },
+   "components": {
+    "sindri.script": {
+     "source": "scripts/workbench.decay",
+     "script": "Workbench",
+     "properties": {}
+    }
+   }
+  },
+  {
+   "id": "build-panel",
+   "name": "Build panel",
+   "disabled": true,
+   "transform_3d": {
+    "position": [
+     0,
+     0.05,
+     0
+    ],
+    "rotation": [
+     0,
+     0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     0.86,
+     0.4,
+     1
+    ]
+   },
+   "components": {
+    "sindri.ui.shape": {
+     "kind": "rect",
+     "count": 48.0,
+     "fill": [
+      0.025,
+      0.033,
+      0.028,
+      0.96
+     ],
+     "stroke": [
+      0.55,
+      0.48,
+      0.33,
+      0.8
+     ],
+     "stroke_width": 0.005,
+     "corner_radius": 0.025,
+     "dashes": 0.0,
+     "dash_duty": 0.5,
+     "sweep_start": 0.0,
+     "sweep_turns": 1.0,
+     "blend": "over",
+     "anchor": "center",
+     "layer": 90
+    }
+   }
+  },
+  {
+   "id": "build-words",
+   "name": "Build words",
+   "disabled": true,
+   "transform_3d": {
+    "position": [
+     0,
+     0.08,
+     0.0
+    ],
+    "rotation": [
+     0,
+     0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     1.0,
+     1.0,
+     1
+    ]
+   },
+   "components": {
+    "sindri.ui.text": {
+     "anchor": "center",
+     "color": [
+      1.0,
+      0.96,
+      0.88,
+      1.0
+     ],
+     "font": "fonts/Inter.ttf",
+     "font_size": 0.027,
+     "line_height": 0.03375,
+     "layer": 100,
+     "text": "WORKBENCH",
+     "bold": true,
+     "outline": {
+      "width": 0.0,
+      "color": [
+       0.12,
+       0.08,
+       0.06,
+       0.95
+      ]
+     },
+     "shadow": {
+      "offset": [
+       0.0,
+       -0.003
+      ],
+      "color": [
+       0.0,
+       0.0,
+       0.0,
+       0.35
+      ],
+      "softness": 0.004
+     }
+    }
+   }
+  },
+  {
+   "id": "next-button",
+   "name": "Next button",
+   "transform_3d": {
+    "position": [
+     0,
+     -0.13,
+     0.0
+    ],
+    "rotation": [
+     0,
+     0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     0.24,
+     0.08,
+     1
+    ]
+   },
+   "components": {
+    "sindri.ui.shape": {
+     "kind": "rect",
+     "count": 48.0,
+     "fill": [
+      0.16,
+      0.1,
+      0.08,
+      0.78
+     ],
+     "stroke": [
+      1.0,
+      0.86,
+      0.55,
+      0.9
+     ],
+     "stroke_width": 0.03,
+     "corner_radius": 0.3,
+     "dashes": 0.0,
+     "dash_duty": 0.5,
+     "sweep_start": 0.0,
+     "sweep_turns": 1.0,
+     "blend": "over",
+     "anchor": "center",
+     "layer": 90
+    },
+    "sindri.ui.button": {
+     "label": "Next"
+    }
+   },
+   "disabled": true
+  },
+  {
+   "id": "next-label",
+   "name": "Next label",
+   "parent": "next-button",
+   "transform_3d": {
+    "position": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "rotation": [
+     0,
+     0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     0.24,
+     0.05,
+     1
+    ]
+   },
+   "components": {
+    "sindri.ui.text": {
+     "anchor": "center",
+     "color": [
+      1.0,
+      0.95,
+      0.85,
+      1.0
+     ],
+     "font": "fonts/Inter.ttf",
+     "font_size": 0.04,
+     "line_height": 0.05,
+     "layer": 95,
+     "text": "Next",
      "bold": true,
      "outline": {
       "width": 0.0,

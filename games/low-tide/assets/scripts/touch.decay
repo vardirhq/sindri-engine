@@ -14,6 +14,7 @@ script TouchControls {
     var use_button: Entity = null;
     var use_label: Entity = null;
     var drop_button: Entity = null;
+    var drop_label: Entity = null;
     var view_button: Entity = null;
     var ring: Entity = null;
     var knob: Entity = null;
@@ -24,6 +25,7 @@ script TouchControls {
         this.use_button = World.find("Use button");
         this.use_label = World.find("Use label");
         this.drop_button = World.find("Drop button");
+        this.drop_label = World.find("Drop label");
         this.view_button = World.find("View button");
         this.ring = World.find("Stick ring");
         this.knob = World.find("Stick knob");
@@ -37,8 +39,11 @@ script TouchControls {
         let playing = Game.touch;
         World.set_active(this.use_button, playing);
         World.set_active(this.view_button, playing);
-        World.set_active(this.drop_button, playing && Game.hint == Hint.Jettison);
+        World.set_active(this.drop_button, playing && (Game.hint == Hint.Jettison || Game.building));
         Ui.set_text(this.use_label, use_words());
+        var drop_words = "Drop";
+        if Game.building { drop_words = "Close"; }
+        Ui.set_text(this.drop_label, drop_words);
         draw_stick(playing);
     }
 
@@ -46,6 +51,8 @@ script TouchControls {
     // and leaving the helm.
     fn use_words() -> String {
         return match Game.hint {
+            Hint.Workbench => "Workbench",
+            Hint.Building => "Build",
             Hint.TakeHelm => "Helm",
             Hint.AtHelm => "Leave",
             Hint.Salvage => "Salvage",

@@ -47,7 +47,7 @@ SHIP_TILES = [
     "deck", "wall", "window", "door", "hatch", "helm", "table",
     "bunk", "engine", "tread", "ramp", "crate", "mast",
     "floor-home", "floor-bridge", "floor-hold",
-    "crate-wood", "crate-stone", "crate-ore", "crate-fibre", "crate-salt", "workbench",
+    "crate-wood", "crate-stone", "crate-ore", "crate-fibre", "crate-salt", "workbench", "engine-upgraded",
 ]
 SYMBOL = {
     ".": "deck", "W": "wall", "w": "window", "-": "door", "h": "hatch",
@@ -186,6 +186,9 @@ def entities():
                      "bindings": ["key.E", "key.Space", "gamepad.south"]},
                     {"name": "drop", "kind": "button",
                      "bindings": ["key.X", "gamepad.west"]},
+                    {"name": "next_plan", "kind": "button",
+                     "bindings": ["key.Q", "gamepad.east"]},
+                    {"name": "cancel", "kind": "button", "bindings": ["key.Escape"]},
                     {"name": "view", "kind": "button",
                      "bindings": ["key.Tab", "key.V", "gamepad.north"]},
                 ]},
@@ -291,7 +294,7 @@ def entities():
             "transform_3d": transform(0.0, 0.06),
             "components": {"sindri.ui.text": text("bottom", 0.029, "")},
         },
-    ] + crawler_motion() + cabin_details() + instrument_panel() + touch_controls() + [
+    ] + crawler_motion() + cabin_details() + instrument_panel() + touch_controls() + workbench() + [
     ]
     return found
 
@@ -411,6 +414,27 @@ def touch_controls():
         },
     ] + touch_button("use", "Use", -0.2, 0.2) + touch_button("drop", "Drop", -0.2, 0.37) \
       + touch_button("view", "View", -0.14, -0.15, 0.2, 0.1, "top_right")
+
+
+def workbench():
+    return [
+        {
+            "id": "workbench", "name": "Workbench", "parent": "deck",
+            "transform_3d": transform(4.5, -6.5),
+            "components": {"sindri.script": script("scripts/workbench.decay", "Workbench")},
+        },
+        {
+            "id": "build-panel", "name": "Build panel", "disabled": True,
+            "transform_3d": transform(0, 0.05, 0, 0, (0.86, 0.4)),
+            "components": {"sindri.ui.shape": ui_shape("rect", "center",
+                [0.025, 0.033, 0.028, 0.96], [0.55, 0.48, 0.33, 0.8], 0.005, 90, 0.025)},
+        },
+        {
+            "id": "build-words", "name": "Build words", "disabled": True,
+            "transform_3d": transform(0, 0.08),
+            "components": {"sindri.ui.text": text("center", 0.027, "WORKBENCH")},
+        },
+    ] + touch_button("next", "Next", 0, -0.13, 0.24, 0.08, "center")
 
 
 def main():

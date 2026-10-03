@@ -4,6 +4,7 @@
 // Shared by more than one test binary, each using only some of it.
 #![allow(dead_code)]
 
+pub mod construction;
 pub mod salvage;
 
 use std::f32::consts::{PI, TAU};

@@ -37,6 +37,8 @@ script View {
         // Aboard, look a little ahead of the crawler, the faster the further.
         var target = Vec2(Game.crawler_x, Game.crawler_y);
         if Game.aboard {
+            let centre = Vec2(0.0, 7.0 - (Game.hull_top + Game.hull_bottom) * 0.5);
+            target += turned(centre, Game.heading);
             let ahead = min(Game.speed, 3.0) * this.lead;
             target += Vec2(-sin(Game.heading), cos(Game.heading)) * ahead;
         } else {

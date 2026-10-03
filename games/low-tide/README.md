@@ -163,8 +163,8 @@ press.
 
 ## Not yet
 
-Next: resource-funded construction at the starter workbench. Ashore, the
-crew walks over the crawler's hull rather than round it, and the tuning
+Construction uses fixed blueprints rather than free placement; the bunk is
+cosmetic and there is no save/load persistence yet. Ashore, the crew walks over the crawler's hull rather than round it, and the tuning
 (`@export` fields on the crawler and the crew) is a first guess.
 
 `tests/a_flood_season.rs` checks the rise, high water, ebb and next season,
@@ -181,3 +181,28 @@ have a deterministic one-in-four chance of ore; other rock and reef yield
 stone. Leaves yield fibre and expose the wood underneath. Resources do not
 regrow during a voyage. `tests/gathering_fills_the_hold.rs` plays harvesting,
 stowing and jettisoning with keys and phone touch.
+
+## Build your home
+
+Walk beside the workbench and press E (or Workbench on a phone). Q / Next
+cycles plans, E / Build constructs, and X / Close or Escape returns to walking.
+Gamepads use south to open/build, east to cycle and west to close. The crawler
+continues at its existing throttle while you build.
+
+| Blueprint | Cargo cost | Result | Permanent mass |
+| --- | --- | --- | --- |
+| Stern extension | 2 wood + 2 scrap | Two walkable rows, four cargo slots; maximum three extensions | +18 |
+| Bunk | 2 wood + 2 fibre | One bed beside the bench | +4 |
+| Stronger engine | 2 ore + 2 scrap | +35% engine speed and acceleration before weight and terrain | +12 |
+
+Only bundles physically stowed in the hold pay for construction. Missing cargo,
+a duplicate installation or the chassis limit consumes nothing. The centre
+passage and boarding ramp remain clear; the deck origin stays fixed as the
+stern, segmented treads, camera centre and shadow grow. Extra structure is
+permanent weight, so more room has a movement cost. The starter grows from four
+to sixteen cargo slots. `tests/a_home_grows.rs` plays gathering, salvage,
+construction while driving and walking into the new space with keys and phone
+touch; it also checks upgrades, duplicate refusal and the chassis limit.
+
+These are Decay game rules using existing tile, UI and animation APIs; no new
+engine host API or general construction editor is introduced.
