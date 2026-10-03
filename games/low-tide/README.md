@@ -82,7 +82,8 @@ fractures, wind-shaped sand, coral remains, curled kelp and quiet brine ripples.
 A worn runner and exposed heating pipes make the cabin feel inhabited. The
 instrument panel stays compact until flood notices need more room. Two animated
 tread belts read actual speed and steering through `scripts/tread.decay`; they
-pivot in opposite directions, pause in a flood and resume after the ebb. The
+carry their visible upper run toward the bow in forward travel, pivot in
+opposite directions, pause in a flood and resume after the ebb. The
 starboard belt has a transparent gap at the boarding ramp. The belts are visual
 children of the deck, while its original tread cells still block walking.
 All art comes from the deterministic Python sources in `art/`.
