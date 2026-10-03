@@ -119,13 +119,15 @@ def shape(fill, layer, corner=0.0):
     }
 
 
-def text(anchor, size, words, colour=(0.16, 0.1, 0.08, 1.0)):
+def text(anchor, size, words, colour=(1.0, 0.96, 0.88, 1.0)):
     return {
         "anchor": anchor, "color": list(colour), "font": "fonts/Inter.ttf",
         "font_size": size, "line_height": size * 1.25, "layer": 100,
         "text": words, "bold": True,
-        "shadow": {"offset": [0.0, -0.002], "color": [1.0, 0.98, 0.92, 0.7],
-                   "softness": 0.003},
+        # Light words with a dark edge read over salt, kelp and deck alike.
+        "outline": {"width": 0.0035, "color": [0.12, 0.08, 0.06, 0.95]},
+        "shadow": {"offset": [0.0, -0.003], "color": [0.0, 0.0, 0.0, 0.35],
+                   "softness": 0.004},
     }
 
 
@@ -247,26 +249,12 @@ def entities():
             "disabled": True,
         },
         {
-            # A pale card behind the status lines, so they read over the deck
-            # as well as over the salt.
-            "id": "status-back", "name": "Status back",
-            "transform_3d": transform(0.29, -0.09, 0.0, 0.0, (0.56, 0.16)),
-            "components": {"sindri.ui.shape": ui_shape("rect", "top_left", [0.93, 0.9, 0.82, 0.78],
-                                                       [0, 0, 0, 0], 0.0, 50, 0.12)},
-        },
-        {
             "id": "status", "name": "Status",
             "transform_3d": transform(0.03, -0.03),
             "components": {
                 "sindri.ui.text": text("top_left", 0.032, "Scrap 0"),
                 "sindri.script": script("scripts/hud.decay", "Hud"),
             },
-        },
-        {
-            "id": "ground-label", "name": "Ground label",
-            "transform_3d": transform(-0.03, -0.03),
-            "components": {"sindri.ui.text": text("top_right", 0.032, "",
-                                                  (0.02, 0.3, 0.32, 1.0))},
         },
         {
             "id": "hint", "name": "Hint",

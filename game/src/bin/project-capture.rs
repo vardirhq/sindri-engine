@@ -22,7 +22,7 @@ mod capture {
     use sindri_causeway::{Session, extractor};
     use sindri_core::{
         AssetId, LoadedScenes, PREFAB_SUFFIX, PROFILE_SUFFIX, PrefabDocument, ProfileDocument,
-        SceneDocument, SceneEntityId, SpriteSheetDocument, World, sheet_id_for,
+        SceneDocument, SceneEntityId, SpriteSheetDocument, TileSetDocument, World, sheet_id_for,
     };
     use sindri_decay::{PrefabSources, ProfileSources, ScriptSources};
     use sindri_gpu::{GpuContext, GpuRequestOptions};
@@ -33,7 +33,7 @@ mod capture {
         Viewport, encode_prepared_frame,
     };
     use sindri_scene::{
-        CameraView, SceneExtractor, SceneRuntime, TextureBindings, measure_ui_text,
+        CameraView, SceneExtractor, SceneRuntime, TextureBindings, TileSetBindings, measure_ui_text,
     };
 
     const STEP: f32 = 1.0 / 60.0;
@@ -115,6 +115,9 @@ mod capture {
         scene: SceneExtractor,
         text: TextRenderer,
         size: [f32; 2],
+        /// The project's block and tile sets, which the browser host binds
+        /// from the export manifest and the scripts and world read.
+        tile_sets: TileSetBindings,
     }
 
     impl Player {
@@ -226,6 +229,10 @@ mod capture {
         for (id, bytes) in files(&assets, PROFILE_SUFFIX) {
             profiles.insert(id, ProfileDocument::from_json(&text(bytes)?)?);
         }
+        let mut tile_sets = TileSetBindings::new();
+        for (id, bytes) in files(&assets, ".tileset") {
+            tile_sets.bind(&id, TileSetDocument::from_json(&text(bytes)?)?)?;
+        }
         let weave_sources: BTreeMap<String, String> = files(&assets, ".weave")
             .into_iter()
             .map(|(id, bytes)| Ok((id, text(bytes)?)))
@@ -239,6 +246,7 @@ mod capture {
         let mut session = Session::with_sources(scene.components().clone(), sources)
             .with_prefabs(prefabs)
             .with_profiles(profiles)
+            .with_tile_sets(tile_sets.clone())
             .with_scenes(vec![(scene_id, document)], loaded)
             .with_styles(sheets);
         let view = weave::Viewport {
@@ -258,6 +266,7 @@ mod capture {
             scene,
             text,
             size,
+            tile_sets,
         };
         Ok((player, files(&assets, ".png"), files(&assets, ".sheet")))
     }
@@ -336,7 +345,8 @@ mod capture {
             SceneRuntime::default()
                 .with_animations(player.session.animations())
                 .with_effects(player.session.effects())
-                .with_text_sizes(&sizes),
+                .with_text_sizes(&sizes)
+                .with_tile_sets(&player.tile_sets),
         )?;
         if let Some(undo) = undo {
             undo.undo(&mut player.world);

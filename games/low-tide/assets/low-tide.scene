@@ -712,55 +712,6 @@
    "disabled": true
   },
   {
-   "id": "status-back",
-   "name": "Status back",
-   "transform_3d": {
-    "position": [
-     0.29,
-     -0.09,
-     0.0
-    ],
-    "rotation": [
-     0,
-     0,
-     0.0,
-     1.0
-    ],
-    "scale": [
-     0.56,
-     0.16,
-     1
-    ]
-   },
-   "components": {
-    "sindri.ui.shape": {
-     "kind": "rect",
-     "count": 48.0,
-     "fill": [
-      0.93,
-      0.9,
-      0.82,
-      0.78
-     ],
-     "stroke": [
-      0,
-      0,
-      0,
-      0
-     ],
-     "stroke_width": 0.0,
-     "corner_radius": 0.12,
-     "dashes": 0.0,
-     "dash_duty": 0.5,
-     "sweep_start": 0.0,
-     "sweep_turns": 1.0,
-     "blend": "over",
-     "anchor": "top_left",
-     "layer": 50
-    }
-   }
-  },
-  {
    "id": "status",
    "name": "Status",
    "transform_3d": {
@@ -785,9 +736,9 @@
     "sindri.ui.text": {
      "anchor": "top_left",
      "color": [
-      0.16,
-      0.1,
-      0.08,
+      1.0,
+      0.96,
+      0.88,
       1.0
      ],
      "font": "fonts/Inter.ttf",
@@ -796,76 +747,33 @@
      "layer": 100,
      "text": "Scrap 0",
      "bold": true,
+     "outline": {
+      "width": 0.0035,
+      "color": [
+       0.12,
+       0.08,
+       0.06,
+       0.95
+      ]
+     },
      "shadow": {
       "offset": [
        0.0,
-       -0.002
+       -0.003
       ],
       "color": [
-       1.0,
-       0.98,
-       0.92,
-       0.7
+       0.0,
+       0.0,
+       0.0,
+       0.35
       ],
-      "softness": 0.003
+      "softness": 0.004
      }
     },
     "sindri.script": {
      "source": "scripts/hud.decay",
      "script": "Hud",
      "properties": {}
-    }
-   }
-  },
-  {
-   "id": "ground-label",
-   "name": "Ground label",
-   "transform_3d": {
-    "position": [
-     -0.03,
-     -0.03,
-     0.0
-    ],
-    "rotation": [
-     0,
-     0,
-     0.0,
-     1.0
-    ],
-    "scale": [
-     1.0,
-     1.0,
-     1
-    ]
-   },
-   "components": {
-    "sindri.ui.text": {
-     "anchor": "top_right",
-     "color": [
-      0.02,
-      0.3,
-      0.32,
-      1.0
-     ],
-     "font": "fonts/Inter.ttf",
-     "font_size": 0.032,
-     "line_height": 0.04,
-     "layer": 100,
-     "text": "",
-     "bold": true,
-     "shadow": {
-      "offset": [
-       0.0,
-       -0.002
-      ],
-      "color": [
-       1.0,
-       0.98,
-       0.92,
-       0.7
-      ],
-      "softness": 0.003
-     }
     }
    }
   },
@@ -894,9 +802,9 @@
     "sindri.ui.text": {
      "anchor": "bottom",
      "color": [
-      0.16,
-      0.1,
-      0.08,
+      1.0,
+      0.96,
+      0.88,
       1.0
      ],
      "font": "fonts/Inter.ttf",
@@ -905,18 +813,27 @@
      "layer": 100,
      "text": "",
      "bold": true,
+     "outline": {
+      "width": 0.0035,
+      "color": [
+       0.12,
+       0.08,
+       0.06,
+       0.95
+      ]
+     },
      "shadow": {
       "offset": [
        0.0,
-       -0.002
+       -0.003
       ],
       "color": [
-       1.0,
-       0.98,
-       0.92,
-       0.7
+       0.0,
+       0.0,
+       0.0,
+       0.35
       ],
-      "softness": 0.003
+      "softness": 0.004
      }
     }
    }
@@ -1122,6 +1039,15 @@
      "layer": 95,
      "text": "Use",
      "bold": true,
+     "outline": {
+      "width": 0.0035,
+      "color": [
+       0.12,
+       0.08,
+       0.06,
+       0.95
+      ]
+     },
      "shadow": {
       "offset": [
        0.0,
@@ -1228,6 +1154,15 @@
      "layer": 95,
      "text": "Drop",
      "bold": true,
+     "outline": {
+      "width": 0.0035,
+      "color": [
+       0.12,
+       0.08,
+       0.06,
+       0.95
+      ]
+     },
      "shadow": {
       "offset": [
        0.0,
@@ -1334,6 +1269,15 @@
      "layer": 95,
      "text": "View",
      "bold": true,
+     "outline": {
+      "width": 0.0035,
+      "color": [
+       0.12,
+       0.08,
+       0.06,
+       0.95
+      ]
+     },
      "shadow": {
       "offset": [
        0.0,

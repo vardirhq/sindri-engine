@@ -4,11 +4,9 @@
 // player is using.
 
 script Hud {
-    var ground: Entity = null;
     var hint: Entity = null;
 
     fn start() {
-        this.ground = World.find("Ground label");
         this.hint = World.find("Hint");
     }
 
@@ -19,8 +17,8 @@ script Hud {
         if Game.blocked {
             status = status + "  (aground)";
         }
+        status = status + "\n" + ground_words();
         Ui.set_text(this.entity, status);
-        Ui.set_text(this.ground, ground_words());
 
         if Game.touch {
             Ui.set_text(this.hint, touch_words());

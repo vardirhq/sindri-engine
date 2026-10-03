@@ -17,7 +17,7 @@ from draw import CELL, OUT, Canvas, noise, sheet
 
 SALT = (234, 230, 218)
 SALT_SHADE = (218, 212, 196)
-SALT_PINK = (232, 204, 196)
+SALT_PINK = (238, 224, 214)
 CRACK = (170, 160, 142)
 MUD = (122, 104, 84)
 MUD_WET = (104, 88, 70)

@@ -106,9 +106,9 @@ fn the_basin_is_generated_around_the_start() {
     let ground = pilot.ground();
     let start = pilot.crawler_world();
     let mut kinds = std::collections::BTreeSet::new();
-    for z in (-120..120).step_by(4) {
-        for x in (-120..120).step_by(4) {
-            let (column, row) = column_row([start[0] + x as f32, start[1] + z as f32]);
+    for z in (-120_i16..120).step_by(4) {
+        for x in (-120_i16..120).step_by(4) {
+            let (column, row) = column_row([start[0] + f32::from(x), start[1] + f32::from(z)]);
             let (level, _, _) = ground.surface(column, row).expect("ground everywhere");
             kinds.insert(ground.block([column, level, row]));
         }
