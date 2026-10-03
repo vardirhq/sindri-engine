@@ -25,6 +25,7 @@ mod tolerance;
 mod ui;
 mod voxel_appearance;
 mod voxel_ground;
+mod voxel_map;
 mod voxel_source;
 mod voxel_world;
 mod world_meanings;
@@ -96,6 +97,8 @@ pub struct SceneExtractor {
     baked_volumes: RefCell<BTreeMap<EntityId, BakedVolume>>,
     /// Persistent section worlds and their compiled renderer bridges.
     voxel_worlds: voxel_world::VoxelWorldCache,
+    /// The squares of voxel worlds viewed as maps, chunk by chunk.
+    voxel_maps: voxel_map::VoxelMapCache,
     /// Whether an invalid environment or voxel world is drawn around rather
     /// than failing the frame. See `tolerance.rs`.
     tolerant: bool,
@@ -202,6 +205,7 @@ impl SceneExtractor {
             components: builtin_components()?,
             baked_volumes: RefCell::default(),
             voxel_worlds: voxel_world::VoxelWorldCache::default(),
+            voxel_maps: voxel_map::VoxelMapCache::default(),
             tolerant: false,
             problems: RefCell::default(),
             last_environment: RefCell::default(),

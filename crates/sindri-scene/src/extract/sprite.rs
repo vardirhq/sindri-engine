@@ -145,6 +145,7 @@ impl SceneExtractor {
         )?;
         self.push_tilemaps(world, cameras, textures, &mut batches)?;
         self.push_tile_volumes(world, cameras, textures, tile_sets, &mut batches)?;
+        self.push_voxel_maps(world, cameras.world, textures, tile_sets, &mut batches)?;
         // Into the same ordered queue as everything else, so adjacent flecks
         // can still share a draw with sprites using the same texture.
         Self::push_effects(effects, cameras, textures, &mut batches)?;

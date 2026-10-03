@@ -96,6 +96,29 @@ pub struct VoxelMaterialDocument {
     pub bottom: String,
 }
 
+/// How a voxel world is drawn.
+///
+/// The same world either way: the generator, the blocks, the edits and what
+/// a script reads are untouched by the choice, so a world authored for one
+/// is the other's world too.
+#[derive(Clone, Copy, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
+#[serde(rename_all = "snake_case")]
+pub enum VoxelView {
+    /// Blocks, meshed in three dimensions.
+    #[default]
+    Blocks,
+    /// A flat map seen from straight above: each column drawn as the top
+    /// face of its highest block, one unit square per column, shaded by
+    /// height so that relief and water depth still read. Column X runs across
+    /// and row Z runs down the screen, as a tilemap's rows do.
+    Map,
+}
+
+impl VoxelView {
+    /// Every spelling, in the order a picker offers them.
+    pub const KINDS: [&'static str; 2] = ["blocks", "map"];
+}
+
 /// A persistent, section-streamed voxel world rendered through the block
 /// mesher and GPU section cache.
 #[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
@@ -121,6 +144,9 @@ pub struct VoxelWorldComponent {
     pub vertical_radius: u32,
     #[serde(default)]
     pub layer: i32,
+    /// Blocks in three dimensions, or a flat map from above.
+    #[serde(default)]
+    pub view: VoxelView,
     /// Keep the resident window under the world camera rather than at
     /// `focus`.
     ///
@@ -224,5 +250,14 @@ mod tests {
         assert_eq!(component.vertical_radius, 1);
         assert_eq!(component.generator, VoxelGeneratorDocument::default());
         assert_eq!(component.materials.len(), 3);
+    }
+
+    #[test]
+    fn a_world_is_drawn_as_blocks_unless_it_asks_for_a_map() {
+        let blocks: VoxelWorldComponent = serde_json::from_str("{}").unwrap();
+        assert_eq!(blocks.view, VoxelView::Blocks);
+        let map: VoxelWorldComponent = serde_json::from_str(r#"{"view": "map"}"#).unwrap();
+        assert_eq!(map.view, VoxelView::Map);
+        assert_eq!(serde_json::to_value(VoxelView::Map).unwrap(), "map");
     }
 }

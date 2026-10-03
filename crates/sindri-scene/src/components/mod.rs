@@ -58,7 +58,8 @@ pub use ui_text_options::{
 };
 pub use voxel_terrain::{BiomeDocument, NaturalTerrainDocument};
 pub use voxel_world::{
-    VoxelBlock, VoxelEdit, VoxelGeneratorDocument, VoxelMaterialDocument, VoxelWorldComponent,
+    VoxelBlock, VoxelEdit, VoxelGeneratorDocument, VoxelMaterialDocument, VoxelView,
+    VoxelWorldComponent,
 };
 
 /// The tint a component that does not name one draws with.
