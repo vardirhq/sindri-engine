@@ -14,7 +14,8 @@ use sindri_voxel::{
 };
 
 use crate::{
-    TextureBindings, TileSetBindings, VoxelRenderBridge, VoxelWorldComponent, compile_block_mesh,
+    TextureBindings, TileSetBindings, VoxelRenderBridge, VoxelView, VoxelWorldComponent,
+    compile_block_mesh,
 };
 
 use super::camera::{ResolvedCamera, ResolvedCameras};
@@ -29,9 +30,9 @@ use super::{SceneExtractError, SceneExtractor, transform_matrix};
 pub(super) const MAX_RESIDENCY_RADIUS: u32 = 8;
 
 #[derive(Clone, Debug, PartialEq)]
-struct VoxelWorldDefinition {
+pub(super) struct VoxelWorldDefinition {
     source: SceneTerrain,
-    appearance: Appearance,
+    pub(super) appearance: Appearance,
     render_radius: u32,
     vertical_radius: u32,
 }
@@ -192,8 +193,17 @@ impl SceneExtractor {
         seconds: f32,
         frame: &mut ExtractedFrame,
     ) -> Result<(), SceneExtractError> {
-        let components = self.components.query::<VoxelWorldComponent>(world)?;
-        if components.is_empty() {
+        // A world viewed as a map is drawn with the sprites instead
+        // (`voxel_map.rs`); leaving it out here releases any blocks it had.
+        let components: Vec<_> = self
+            .components
+            .query::<VoxelWorldComponent>(world)?
+            .into_iter()
+            .filter(|(_, component)| component.view == VoxelView::Blocks)
+            .collect();
+        // Nothing to draw and nothing to let go of. A world just switched to
+        // a map still has blocks resident, released below.
+        if components.is_empty() && self.voxel_worlds.borrow_mut().is_empty() {
             return Ok(());
         }
         let camera = cameras.world.ok_or(SceneExtractError::MissingWorldCamera)?;
@@ -360,7 +370,7 @@ fn push_commands(
     }
 }
 
-fn definition(
+pub(super) fn definition(
     component: &VoxelWorldComponent,
     tile_sets: Option<&TileSetBindings>,
 ) -> Result<VoxelWorldDefinition, SceneExtractError> {

@@ -1249,6 +1249,22 @@
           "returns": "f32"
         },
         {
+          "description": "How high the top of a voxel world's column is, as `Grid.surface` sees it, or `null` where nothing stands.",
+          "kind": "function",
+          "name": "height",
+          "parameter_names": [
+            "grid",
+            "column",
+            "row"
+          ],
+          "parameters": [
+            "Entity",
+            "f32",
+            "f32"
+          ],
+          "returns": "f32?"
+        },
+        {
           "description": "Moves an object to a position on a grid, measured in cells. Fractions place it between cells.",
           "kind": "function",
           "name": "place",
@@ -1359,6 +1375,22 @@
             "Entity"
           ],
           "returns": "bool"
+        },
+        {
+          "description": "Which block is on top of a voxel world's column, by name, seen from straight above, or `\"\"` where nothing stands. What a map view of the world draws there.",
+          "kind": "function",
+          "name": "surface",
+          "parameter_names": [
+            "grid",
+            "column",
+            "row"
+          ],
+          "parameters": [
+            "Entity",
+            "f32",
+            "f32"
+          ],
+          "returns": "String"
         },
         {
           "description": "Whether the block in a cell has a label, such as `\"hot\"` on lava, given to it where the blocks are defined.",

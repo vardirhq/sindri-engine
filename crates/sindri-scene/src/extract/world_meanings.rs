@@ -17,7 +17,7 @@ use super::voxel_source::{
 use super::voxel_world::MAX_RESIDENCY_RADIUS;
 use crate::components::{
     EnvironmentComponent, EnvironmentToneMapping, LightComponent, LightKind,
-    NaturalTerrainDocument, VoxelGeneratorDocument, VoxelWorldComponent,
+    NaturalTerrainDocument, VoxelGeneratorDocument, VoxelView, VoxelWorldComponent,
 };
 
 const COLOUR: FieldMeaning = FieldMeaning::Colour;
@@ -104,6 +104,7 @@ fn describe_voxel_world(components: &mut ComponentSchemaRegistry) -> Result<(), 
             FieldMeaning::choice(VoxelGeneratorDocument::KINDS),
         ),
         ("generator.seed", at_least(0.0)),
+        ("view", FieldMeaning::choice(VoxelView::KINDS)),
         ("render_radius", range(0.0, f64::from(MAX_RESIDENCY_RADIUS))),
         (
             "vertical_radius",

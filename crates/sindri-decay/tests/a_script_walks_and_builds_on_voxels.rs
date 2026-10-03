@@ -331,3 +331,96 @@ fn a_walker_crosses_generated_ground_and_respects_its_steps() {
         "it never climbs the two-block wall: {visited:?}"
     );
 }
+
+/// A game seen from above knows a column and a row, not a level: it asks
+/// what is on top, and how high that is, and digging changes both.
+#[test]
+fn a_script_reads_the_top_of_a_column_and_digging_changes_it() {
+    let mut world = World::default();
+    floor(&mut world);
+    let sources = scripted(
+        &mut world,
+        &format!(
+            r#"
+            script Actor {{
+                var dug: bool = false;
+                fn update(dt: f32) {{
+                    let floor = World.find("Floor");
+                    let height = Grid.height(floor, 3.0, 5.0) ?? -1.0;
+                    if !this.dug {{
+                        if Grid.surface(floor, 3.0, 5.0) == "grass" {{
+                            this.transform.scale.x = height;
+                        }}
+                        Grid.set_block(floor, 3.0, 5.0, {GROUND}.0, "");
+                        this.dug = true;
+                    }} else {{
+                        if Grid.surface(floor, 3.0, 5.0) == "stone" {{
+                            this.transform.scale.y = height;
+                        }}
+                    }}
+                }}
+            }}
+            "#
+        ),
+    );
+    assert!(run_twice(&mut world, &sources).is_empty());
+    let actor = world
+        .entities()
+        .find(|(_, data)| data.name.as_deref() == Some("Actor"))
+        .map(|(entity, _)| entity)
+        .unwrap();
+    let scale = world.get(actor).unwrap().transform_3d.unwrap().scale;
+    #[allow(clippy::cast_precision_loss)]
+    let top = GROUND as f32 + 1.0;
+    assert!(
+        (scale[0] - top).abs() < 1.0e-6,
+        "grass on top, its top at {top}: {scale:?}"
+    );
+    assert!(
+        (scale[1] - (top - 1.0)).abs() < 1.0e-6,
+        "dug away, the stone under it is the top: {scale:?}"
+    );
+}
+
+/// Both frames through one set of scripts, so the second sees the first's
+/// fields and its edit.
+fn run_twice(world: &mut World, sources: &ScriptSources) -> Vec<ScriptFailure> {
+    let sets = tile_sets();
+    let input = InputState::default();
+    let mut scripts = Scripts::new();
+    let registry = registry();
+    let mut failures = Vec::new();
+    for _ in 0..2 {
+        let frame = ScriptFrame::new(sources, &input, 1.0 / 60.0).with_tile_sets(&sets);
+        failures.extend(scripts.advance(world, &registry, frame).failures);
+    }
+    failures
+}
+
+#[test]
+fn the_top_of_a_column_is_only_a_voxel_worlds_question() {
+    let mut world = World::default();
+    spawn(
+        &mut world,
+        "map",
+        "Map",
+        &json!({ "sindri.tilemap": { "texture": "t.png", "palette": ["a"], "columns": 1, "rows": 1, "tiles": [0] } }),
+    );
+    let sources = scripted(
+        &mut world,
+        r#"
+        script Actor {
+            fn update(dt: f32) {
+                let top = Grid.surface(World.find("Map"), 0.0, 0.0);
+            }
+        }
+        "#,
+    );
+    let failures = run(&mut world, &sources);
+    assert_eq!(failures.len(), 1, "{failures:?}");
+    assert!(
+        failures[0].to_string().contains("needs a voxel world"),
+        "{}",
+        failures[0]
+    );
+}

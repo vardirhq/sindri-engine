@@ -34,7 +34,7 @@ pub(crate) fn add_grid_surface(environment: &mut Environment) {
                     // A grid and a point on it. `Walkable` takes the same
                     // pair as `Tile` and answers about the ground rather than
                     // about the picture.
-                    GridCall::Tile | GridCall::Walkable => {
+                    GridCall::Tile | GridCall::Walkable | GridCall::Surface | GridCall::Height => {
                         vec![Type::Named(ENTITY.to_owned()), Type::F32, Type::F32]
                     }
                     // A flat cell and a palette index, and a stacked cell and
@@ -64,7 +64,8 @@ pub(crate) fn add_grid_surface(environment: &mut Environment) {
                     | GridCall::Tile
                     | GridCall::Columns
                     | GridCall::Rows => Type::F32,
-                    GridCall::Block => Type::String,
+                    GridCall::Block | GridCall::Surface => Type::String,
+                    GridCall::Height => Type::Optional(Box::new(Type::F32)),
                     GridCall::Place | GridCall::SetTile | GridCall::SetBlock => Type::Unit,
                     GridCall::CanReach
                     | GridCall::StepToward

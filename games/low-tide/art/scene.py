@@ -46,29 +46,59 @@ SYMBOL = {
     "R": "ramp",
 }
 
-GROUND_TILES = ["salt", "salt-dim", "salt-fleck", "crack", "dune", "rise"]
-# The Basin is wider than the part the crawler may drive in, so a turned
-# view never shows past its edge.
-MARGIN = 14
-COLUMNS, ROWS = 44 + 2 * MARGIN, 270
-RISE_Y = 250.0
-START = (MARGIN + 22.0, 14.0)
-
-# Wrecks, each a detour from the straight line north.
-WRECKS = [(MARGIN + x, y, turn) for x, y, turn in [
-    (12.0, 34.0, 0.4), (33.0, 62.0, -0.7), (9.0, 98.0, 1.2),
-    (32.0, 134.0, 0.2), (13.0, 170.0, -0.3), (31.0, 208.0, 0.9)]]
-# Dune fields: centre x, centre y, radius x, radius y. Soft sand halves the
-# crawler's speed, so these are what the route bends around.
-DUNES = [(MARGIN + x, y, rx, ry) for x, y, rx, ry in [(24.0, 46.0, 7.0, 3.5), (8.0, 70.0, 6.0, 5.0), (30.0, 84.0, 9.0, 4.0),
-         (18.0, 118.0, 10.0, 3.0), (36.0, 150.0, 7.0, 6.0), (10.0, 140.0, 5.0, 8.0),
-         (22.0, 188.0, 12.0, 3.5), (34.0, 228.0, 6.0, 4.0), (12.0, 222.0, 7.0, 3.0)]]
-
-
-def noise(x, y, salt):
-    value = (x * 374761393 + y * 668265263 + salt * 2246822519) & 0xFFFFFFFF
-    value = ((value ^ (value >> 13)) * 1274126177) & 0xFFFFFFFF
-    return ((value ^ (value >> 16)) & 0xFFFF) / 65536.0
+# The Basin: an old sea floor, generated rather than painted, by the engine's
+# natural terrain viewed as a map. The same settings with the engine's own
+# blocks and land biomes make an ordinary overland world; this is the
+# drained one.
+#
+# The sea is set far below the old floor, so brine is left only in the
+# deepest trenches, ringed with salt crust. Warmth falls with height, so the
+# biomes sort themselves by it: the cold high ground is the old islands,
+# grassed and wooded, and the warm basin floor is salt where it is dry, mud
+# where it is wet, dead reef between, and dried kelp where it is cool.
+BASIN = {
+    "kind": "natural_terrain",
+    "seed": 11,
+    "sea_level": -18,
+    "relief": 40,
+    "feature_size": 64,
+    "tree_line": 400,
+    "snow_line": 500,
+    "caves": False,
+    "rivers": False,
+    "stone_voxel": "rock",
+    "water_voxel": "brine",
+    "beach_voxel": "crust",
+    "sea_bed_voxel": "mud",
+    "cliff_voxel": "rock",
+    "snow_voxel": None,
+    "ice_voxel": None,
+    "trunk_voxel": "trunk",
+    "leaves_voxel": "leaves",
+    "biomes": [
+        {"name": "Salt flats", "temperature": 0.85, "moisture": 0.15, "surface_voxel": "salt",
+         "subsurface_voxel": "salt", "subsurface_depth": 3, "trees": 0.0, "relief": 0.25, "terraces": 0},
+        {"name": "Dunes", "temperature": 0.95, "moisture": 0.4, "surface_voxel": "sand",
+         "subsurface_voxel": "sand", "subsurface_depth": 4, "trees": 0.0, "relief": 0.9, "terraces": 0},
+        {"name": "Mud flats", "temperature": 0.7, "moisture": 0.9, "surface_voxel": "mud",
+         "subsurface_voxel": "mud", "subsurface_depth": 3, "trees": 0.0, "relief": 0.2, "terraces": 0},
+        {"name": "Dead reef", "temperature": 0.65, "moisture": 0.55, "surface_voxel": "reef",
+         "subsurface_voxel": "rock", "subsurface_depth": 2, "trees": 0.0, "relief": 1.4, "terraces": 2},
+        {"name": "Kelp beds", "temperature": 0.45, "moisture": 0.75, "surface_voxel": "kelp",
+         "subsurface_voxel": "mud", "subsurface_depth": 2, "trees": 0.0, "relief": 0.5, "terraces": 0},
+        {"name": "Old islands", "temperature": 0.0, "moisture": 0.5, "surface_voxel": "grass",
+         "subsurface_voxel": "dirt", "subsurface_depth": 3, "trees": 0.35, "relief": 1.2, "terraces": 0},
+    ],
+}
+# Where the crawler starts, in the scene's plane: on a salt-crust shore with
+# a brine lake, kelp beds and an island in reach. Column X is scene X, and row
+# Z runs down the map, so the column at (-129, -53) is centred at
+# (-128.5, 52.5). Found by searching the generated world for flat dry ground.
+START = (-128.5, 52.5)
+# Wrecks on flat dry ground around the start, found the same way. Gathering
+# across the whole Basin is the next step; these keep salvage until then.
+WRECKS = [(-116.5, 72.5, 0.4), (-161.5, 31.5, -0.7), (-138.5, -6.5, 1.2),
+          (-120.5, -26.5, 0.2), (-233.5, 144.5, -0.3), (-287.5, 110.5, 0.9)]
 
 
 def transform(x, y, z=0.0, rotation=0.0, scale=(1.0, 1.0)):
@@ -89,46 +119,20 @@ def shape(fill, layer, corner=0.0):
     }
 
 
-def text(anchor, size, words, colour=(0.16, 0.1, 0.08, 1.0)):
+def text(anchor, size, words, colour=(1.0, 0.96, 0.88, 1.0)):
     return {
         "anchor": anchor, "color": list(colour), "font": "fonts/Inter.ttf",
         "font_size": size, "line_height": size * 1.25, "layer": 100,
         "text": words, "bold": True,
-        "shadow": {"offset": [0.0, -0.002], "color": [1.0, 0.98, 0.92, 0.7],
-                   "softness": 0.003},
+        # Light words with a dark edge read over salt, kelp and deck alike.
+        "outline": {"width": 0.0035, "color": [0.12, 0.08, 0.06, 0.95]},
+        "shadow": {"offset": [0.0, -0.003], "color": [0.0, 0.0, 0.0, 0.35],
+                   "softness": 0.004},
     }
 
 
 def script(source, name, properties=None):
     return {"source": source, "script": name, "properties": properties or {}}
-
-
-def ground_tiles():
-    tiles = []
-    for row in range(ROWS):
-        y = ROWS - row - 0.5
-        edge = RISE_Y + math.sin(row * 0.9) * 0.8
-        for column in range(COLUMNS):
-            x = column + 0.5
-            ragged = (noise(column, row, 5) - 0.5) * 2.0
-            if y >= edge + ragged:
-                tiles.append(5)
-                continue
-            if any(((x - cx) / rx) ** 2 + ((y - cy) / ry) ** 2
-                   <= 1.0 + (noise(column, row, 6) - 0.5) * 0.5
-                   for cx, cy, rx, ry in DUNES):
-                tiles.append(4)
-                continue
-            roll = noise(column, row, 7)
-            if roll < 0.05:
-                tiles.append(3)
-            elif roll < 0.25:
-                tiles.append(1)
-            elif roll < 0.35:
-                tiles.append(2)
-            else:
-                tiles.append(0)
-    return tiles
 
 
 def crawler_tiles():
@@ -178,15 +182,14 @@ def entities():
                     {"name": "view", "kind": "button",
                      "bindings": ["key.Tab", "key.V", "gamepad.north"]},
                 ]},
-                "sindri.script": script("scripts/voyage.decay", "Voyage"),
             },
         },
         {
             "id": "basin", "name": "Basin",
-            "transform_3d": transform(0.0, float(ROWS)),
-            "components": {"sindri.tilemap": {
-                "texture": "textures/ground.png", "palette": GROUND_TILES,
-                "columns": COLUMNS, "rows": ROWS, "tiles": ground_tiles(),
+            "transform_3d": transform(0.0, 0.0, -0.05),
+            "components": {"sindri.voxel_world": {
+                "generator": BASIN, "blocks": "basin.tileset", "view": "map",
+                "variant_seed": 5, "layer": -10, "edits": [],
             }},
         },
     ]
@@ -246,19 +249,6 @@ def entities():
             "disabled": True,
         },
         {
-            "id": "tide", "name": "Tide",
-            "transform_3d": transform(COLUMNS / 2, -4.0 - 150.0, 0.4, 0.0, (COLUMNS + 40.0, 300.0)),
-            "components": {
-                "sindri.shape": shape([0.05, 0.42, 0.42, 0.86], 20),
-                "sindri.script": script("scripts/tide.decay", "Tide"),
-            },
-        },
-        {
-            "id": "foam", "name": "Foam",
-            "transform_3d": transform(COLUMNS / 2, -4.0, 0.41, 0.0, (COLUMNS + 40.0, 0.5)),
-            "components": {"sindri.shape": shape([0.75, 0.95, 0.92, 0.9], 21)},
-        },
-        {
             "id": "status", "name": "Status",
             "transform_3d": transform(0.03, -0.03),
             "components": {
@@ -267,24 +257,11 @@ def entities():
             },
         },
         {
-            "id": "tide-gap", "name": "Tide gap",
-            "transform_3d": transform(-0.03, -0.03),
-            "components": {"sindri.ui.text": text("top_right", 0.032, "Tide 18 m",
-                                                  (0.02, 0.3, 0.32, 1.0))},
-        },
-        {
             "id": "hint", "name": "Hint",
             "transform_3d": transform(0.0, 0.04),
             "components": {"sindri.ui.text": text("bottom", 0.032, "")},
         },
     ] + touch_controls() + [
-        {
-            "id": "banner", "name": "Banner",
-            "transform_3d": transform(0.0, 0.05),
-            "components": {"sindri.ui.text": text("center", 0.07, "", (1.0, 0.97, 0.9, 1.0)) | {
-                "shadow": {"offset": [0.0, -0.004], "color": [0.1, 0.06, 0.04, 0.8], "softness": 0.004}}},
-            "disabled": True,
-        },
     ]
     return found
 

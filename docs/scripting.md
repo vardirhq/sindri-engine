@@ -1239,6 +1239,28 @@ Column, row and level must be whole. A cell between two levels is not a cell,
 and a script computing one from a float it got wrong should hear about it where
 the mistake is rather than land somewhere plausible.
 
+### The top of a voxel world
+
+| Call | Returns |
+| --- | --- |
+| `Grid.surface(world, column, row)` | `String` |
+| `Grid.height(world, column, row)` | `f32?` |
+
+What a voxel world's column has on top, and how high the top of it is: the
+block a map view draws there (`"view": "map"`), and what a top-down game is
+standing on. `Grid.block` already answers about a cell, but a game seen from
+above knows a column and a row, not a level, and asking for the level first
+is the question it cannot answer.
+
+The top is the highest block that holds anything up, so water counts and a
+flower does not, as for placement. Edits count: a tree cut down leaves its
+column's top as whatever it stood on. Nothing in the column is `""` and
+`null`, a value a script has to handle rather than a sentinel number that
+looks like a height. Column X runs across and row Z runs down, which is how a
+map view lays the world out and how `Grid.block` names its cells.
+
+Either is refused on anything that is not a voxel world, naming what it needs.
+
 ### Standing on the ground
 
 | Call | Returns |

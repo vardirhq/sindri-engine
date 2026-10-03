@@ -381,6 +381,11 @@ pub(super) const TYPES: &[TypeEntry] = &[
                 &["entity", "grid"],
                 "Which row an object is at on a grid, with fractions between cells.",
             ),
+            call(
+                "height",
+                &["grid", "column", "row"],
+                "How high the top of a voxel world's column is, as `Grid.surface` sees it, or `null` where nothing stands.",
+            ),
             call("rows", &["grid"], "How many rows a grid has."),
             call(
                 "set_block",
@@ -396,6 +401,11 @@ pub(super) const TYPES: &[TypeEntry] = &[
                 "step_toward",
                 &["mover", "grid", "target"],
                 "Moves a character one cell along the shortest walkable path towards a target. Gives back whether it moved.",
+            ),
+            call(
+                "surface",
+                &["grid", "column", "row"],
+                "Which block is on top of a voxel world's column, by name, seen from straight above, or `\"\"` where nothing stands. What a map view of the world draws there.",
             ),
             call(
                 "tagged",

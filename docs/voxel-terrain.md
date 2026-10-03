@@ -68,6 +68,26 @@ arriving generator's fields and drops the other's. A new Voxel World component
 starts as a natural terrain built from `builtin:blocks`: seven biomes, water,
 beaches, cliffs, snow, ice and trees.
 
+## Viewed as a map
+
+A voxel world with `"view": "map"` is drawn flat, from straight above, as a
+map rather than as blocks: one unit square per column, wearing the top face of
+the column's highest block that holds anything up (so water and leaves show,
+a flower does not). Column X runs across the map and row Z runs down it, the
+way a tilemap's rows run and the way `Grid.block` names cells.
+
+Height is drawn as light, from a sun low in the north-west: a column above its
+north-western neighbour is lighter, one below it darker, and a cliff a hard
+line; higher ground is a little paler, and water darkens with its depth. Only
+the columns the world camera can see are worked out, sixteen square at a time,
+and remembered until the world, its textures or its block set change.
+
+Everything else is the blocks view's: the generator, the block set and its
+variants, the edits, and the ground scripts read. `Grid.surface` and
+`Grid.height` answer what is on top of a column and how high it is, which is
+what a top-down game needs. Low Tide's Basin is the worked example: a drained
+sea floor from these same settings, with its own blocks and biomes.
+
 ## Blocks
 
 `builtin:blocks` is the block set the engine ships, with its art compiled into

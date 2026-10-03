@@ -81,9 +81,9 @@ pub fn salvage_the_first_wreck(pilot: &mut Pilot) {
         "the first crate sits in the stern"
     );
     let laden = pilot.board("top_speed");
-    let on_dunes = pilot.flag("on_dunes");
+    let going = pilot.board("going");
     assert!(
-        on_dunes || laden < empty_speed - 0.3,
+        laden < empty_speed * going - 0.2,
         "a heavier crawler is slower: {laden}"
     );
 }

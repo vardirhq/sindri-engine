@@ -1893,7 +1893,8 @@
         ],
         "render_radius": 2,
         "variant_seed": 0,
-        "vertical_radius": 1
+        "vertical_radius": 1,
+        "view": "blocks"
       },
       "display_name": "Voxel World",
       "fields": {
@@ -2027,7 +2028,8 @@
         ],
         "render_radius": 2,
         "variant_seed": 0,
-        "vertical_radius": 1
+        "vertical_radius": 1,
+        "view": "blocks"
       },
       "meanings": {
         "blocks": {
@@ -2233,6 +2235,13 @@
           "kind": "range",
           "max": 8.0,
           "min": 0.0
+        },
+        "view": {
+          "kind": "choice",
+          "options": [
+            "blocks",
+            "map"
+          ]
         }
       },
       "schema_version": 1,

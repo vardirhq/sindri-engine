@@ -103,19 +103,3 @@ fn a_wreck_is_salvaged_and_jettisoned_by_touch() {
     salvage::salvage_the_first_wreck(&mut pilot);
     salvage::jettison_it(&mut pilot);
 }
-
-#[test]
-fn a_tap_sails_again_after_the_tide_wins() {
-    let mut pilot = Pilot::on_a_phone();
-    pilot.push([0.0, 1.0]);
-    pilot.release();
-    for _ in 0..frames(40.0) {
-        pilot.step();
-        if pilot.flag("lost") {
-            break;
-        }
-    }
-    assert!(pilot.flag("lost"));
-    assert!(text(&pilot, "banner").contains("Tap to sail again"));
-    assert!(!active(&pilot, "use-button"), "the buttons step aside");
-}

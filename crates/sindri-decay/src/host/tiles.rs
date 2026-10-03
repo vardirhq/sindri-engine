@@ -62,6 +62,10 @@ impl WorldHost<'_> {
         if matches!(call, GridCall::Walkable) {
             return self.walkable_call(path, args);
         }
+        // A voxel world's top, which has no flat map's shape either.
+        if matches!(call, GridCall::Surface | GridCall::Height) {
+            return self.surface_call(call, path, args);
+        }
         let map = self.entity_argument(path, args, 0, "the tilemap")?;
         let shape = self.map_shape(path, map)?;
 
@@ -103,7 +107,12 @@ impl WorldHost<'_> {
             | GridCall::StepToward => {
                 unreachable!("dispatched to the entity-and-grid calls instead")
             }
-            GridCall::Block | GridCall::SetBlock | GridCall::Walkable | GridCall::Tagged => {
+            GridCall::Block
+            | GridCall::SetBlock
+            | GridCall::Walkable
+            | GridCall::Tagged
+            | GridCall::Surface
+            | GridCall::Height => {
                 unreachable!("answered above, before a flat map was looked for")
             }
         }

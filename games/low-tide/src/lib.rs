@@ -7,10 +7,12 @@
 use std::path::{Path, PathBuf};
 use std::time::Duration;
 
-use sindri_core::{ComponentSchemaRegistry, EntityId, SceneDocument, Transform3D, World};
+use sindri_core::{
+    ComponentSchemaRegistry, EntityId, SceneDocument, TileSetDocument, Transform3D, World,
+};
 use sindri_decay::{ScriptComponent, ScriptFrame, ScriptSources, Scripts};
 use sindri_platform::{InputEvent, InputState, Key};
-use sindri_scene::{SceneExtractor, ScreenExtent, ScreenUi, SpriteAnimations};
+use sindri_scene::{SceneExtractor, ScreenExtent, ScreenUi, SpriteAnimations, TileSetBindings};
 
 /// Where the project is, from wherever the harness is being run.
 #[must_use]
@@ -39,6 +41,8 @@ pub struct Run {
     pub screen_ui: ScreenUi,
     /// The screen being played on, in pixels.
     pub screen: [f32; 2],
+    /// The Basin's block set, which scripts read the world through.
+    pub tile_sets: TileSetBindings,
 }
 
 impl Run {
@@ -78,6 +82,16 @@ impl Run {
             }
         }
 
+        let mut tile_sets = TileSetBindings::new();
+        let basin = std::fs::read_to_string(root.join("basin.tileset"))
+            .map_err(|error| error.to_string())?;
+        tile_sets
+            .bind(
+                "basin.tileset",
+                TileSetDocument::from_json(&basin).map_err(|error| error.to_string())?,
+            )
+            .map_err(|error| error.to_string())?;
+
         Ok(Self {
             world,
             components,
@@ -87,6 +101,7 @@ impl Run {
             input: InputState::default(),
             screen_ui: ScreenUi::default(),
             screen: [1280.0, 720.0],
+            tile_sets,
         })
     }
 
@@ -106,6 +121,7 @@ impl Run {
             &self.components,
             ScriptFrame::new(&self.sources, &self.input, delta)
                 .with_screen_ui(&self.screen_ui)
+                .with_tile_sets(&self.tile_sets)
                 .with_animations(&mut self.animations),
         );
         notes.extend(report.failures.iter().map(ToString::to_string));

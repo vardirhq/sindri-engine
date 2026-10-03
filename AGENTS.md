@@ -89,7 +89,9 @@ that travels: a crawler laid out room by room like Prison Architect, driven
 across a drained seabed ahead of the returning sea, in `games/low-tide`. It is
 where a walkable world riding a moving, turning parent is proven: a crew in a
 tilemap deck's own coordinates, re-parented at the ramp, and a camera that
-turns with the deck. It finds gaps by being a home you live in while it moves.
+turns with the deck. Its world is a voxel world viewed as a map, so it is also
+where a top-down game on the engine's generated terrain is proven. It finds
+gaps by being a home you live in while it moves.
 
 So: a capability the engine already had is not complete until a game uses it;
 a capability found by recreating a known game is proven in Orbital Last Stand;
