@@ -1,5 +1,5 @@
 // One wreck per 48-unit region, placed on stable dry, reasonably level ground.
-// Only nearby prefabs exist; visited wrecks remember their remaining scrap.
+// Only nearby prefabs exist; visited wrecks remember their individual crates.
 script WreckField {
     @export let template: Prefab;
     var basin: Entity = null;
@@ -24,7 +24,7 @@ script WreckField {
             let wreck = this.active[key];
             let position = wreck.transform.world_position;
             if Vec2(position.x, position.y).distance(centre) > 120.0 {
-                this.remaining[key] = Wreck.on(wreck).scrap;
+                this.remaining[key] = Wreck.on(wreck).cargo_mask;
                 World.despawn(wreck);
                 this.active.remove(key);
             }
@@ -44,7 +44,7 @@ script WreckField {
                         wreck.transform.position = Vec3(site.x, site.y, 0.05);
                         wreck.transform.rotation_z = basin_scatter(column, row, 9.0) * 6.283185;
                         // Authored only before the newly spawned script starts.
-                        World.set_property(wreck, "scrap", this.remaining.get(key, 3.0));
+                        World.set_property(wreck, "cargo_mask", this.remaining.get(key, 63.0));
                         this.active[key] = wreck;
                     }
                 }

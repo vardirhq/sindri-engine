@@ -1,16 +1,51 @@
-// A wreck surfaced from the salt, with scrap in it until somebody takes it.
+// Six physical crates, with a mask retained when the wreck streams out.
 
 script Wreck {
-    @export var scrap: f32 = 3.0;
+    @export let template: Prefab;
+    @export var cargo_mask: f32 = 63.0;
+    var scrap: f32 = 3.0;
 
     fn start() {
-        if this.scrap <= 0.0 { this.sprite.tint = Color("#9a948a"); }
+        this.scrap = 0.0;
+        for slot in 0..6 {
+            if !has_slot(slot) { continue; }
+            let kind = wreck_cargo(slot);
+            if kind == Resource.Scrap { this.scrap += 1.0; }
+            let crate = World.spawn_child(this.template, this.entity);
+            let at = wreck_slot(slot);
+            crate.transform.position = Vec3(at.x / 7.0, at.y / 4.5, 0.15);
+            crate.transform.scale = Vec3(0.9 / 7.0, 0.9 / 4.5, 1.0);
+            LooseCargo.on(crate).claimed = false;
+            LooseCargo.on(crate).kind = kind;
+            LooseCargo.on(crate).owner = this.entity;
+            LooseCargo.on(crate).slot = slot;
+        }
+        if this.cargo_mask <= 0.0 { this.sprite.tint = Color("#9a948a"); }
     }
 
-    fn take() {
-        this.scrap = max(0.0, this.scrap - 1.0);
-        if this.scrap <= 0.0 {
+    fn has_slot(slot: f32) -> bool {
+        let bit = [1.0, 2.0, 4.0, 8.0, 16.0, 32.0][slot];
+        return this.cargo_mask % (bit * 2.0) >= bit;
+    }
+
+    fn take_slot(slot: f32) {
+        if !has_slot(slot) { return; }
+        this.cargo_mask -= [1.0, 2.0, 4.0, 8.0, 16.0, 32.0][slot];
+        if wreck_cargo(slot) == Resource.Scrap { this.scrap -= 1.0; }
+        if this.cargo_mask <= 0.0 {
             this.sprite.tint = Color("#9a948a");
         }
     }
+}
+
+shared fn wreck_cargo(slot: f32) -> Resource {
+    if slot == 3.0 { return Resource.Wood; }
+    if slot == 4.0 { return Resource.Ore; }
+    if slot == 5.0 { return Resource.Fibre; }
+    return Resource.Scrap;
+}
+
+shared fn wreck_slot(slot: f32) -> Vec2 {
+    return [Vec2(0.0, 0.0), Vec2(-2.0, 0.0), Vec2(2.0, 0.0),
+            Vec2(-2.0, 1.5), Vec2(0.0, 1.5), Vec2(2.0, 1.5)][slot];
 }

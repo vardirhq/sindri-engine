@@ -117,4 +117,27 @@ fn returning_to_a_streamed_wreck_does_not_refill_scrap() {
         Some(&ScriptValue::Number(2.0)),
         "no free refill"
     );
+    assert_eq!(
+        pilot.run.scripts.field(returned, "cargo_mask"),
+        Some(&ScriptValue::Number(62.0))
+    );
+    let slots: Vec<_> = pilot
+        .run
+        .world
+        .entities()
+        .filter(|(_, data)| {
+            data.parent == Some(returned) && data.name.as_deref() == Some("Loose cargo")
+        })
+        .map(|(entity, _)| pilot.run.scripts.field(entity, "slot").cloned())
+        .collect();
+    assert_eq!(
+        slots.len(),
+        5,
+        "only the five remaining physical crates return"
+    );
+    assert!(!slots.contains(&Some(ScriptValue::Number(0.0))));
+    assert!(
+        slots.contains(&Some(ScriptValue::Number(3.0))),
+        "unselected wood stays"
+    );
 }

@@ -1,5 +1,7 @@
 # Changelog
 
+- Low Tide wrecks contain six visible, individually selectable crates: three scrap, wood, ore and fibre. Set carried cargo down with X / Drop and pick it up again; only boarding stows it. Wreck streaming retains each taken crate, while loose ground cargo washes away in a flood.
+
 - Low Tide adopts dark instrument panels, brass details and authored icons, with live hold segments, speed and tide meters. Nearby cargo is highlighted and named in a contextual action panel; empty Use actions are hidden. Discarding a crate now requires a second press, cancelled by movement, Escape or a timeout. Crawler frames gain metal detailing, pipe fittings and painted lamp glows.
 
 - Low Tide gets a responsive workbench with directly selectable blueprints, live cargo costs, installed/limited states and explicit build/close actions. A compact tide/status HUD and consistent touch controls leave more room for the world.

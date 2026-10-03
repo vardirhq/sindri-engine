@@ -208,9 +208,9 @@ def entities():
             "id": f"wreck-{index}", "name": f"Wreck {index}",
             "transform_3d": transform(x, y, 0.05, turn, (7.0, 4.5)),
             "components": {
-                "sindri.sprite": {"texture": "textures/wreck.png", "layer": 1},
+                "sindri.sprite": {"texture": "textures/wreck.png", "layer": 1, "tint": [1, 1, 1, 1]},
                 "sindri.tags": {"tags": ["wreck"]},
-                "sindri.script": script("scripts/wreck.decay", "Wreck"),
+                "sindri.script": script("scripts/wreck.decay", "Wreck", {"template": "prefabs/cargo.prefab"}),
             },
         })
     found += [
@@ -264,14 +264,14 @@ def entities():
                     },
                     "playing": "down-still", "speed": 1.0,
                 },
-                "sindri.script": script("scripts/crew.decay", "Crew"),
+                "sindri.script": script("scripts/crew.decay", "Crew", {"cargo_template": "prefabs/cargo.prefab"}),
             },
         },
         {
             "id": "carried", "name": "Carried", "parent": "crew",
             "transform_3d": transform(0.0, 0.42, 0.01, 0.0, (0.5, 0.5)),
             "components": {
-                "sindri.sprite": {"texture": "textures/ship.png#crate", "layer": 7},
+                "sindri.sprite": {"texture": "textures/ship.png#crate", "layer": 7, "tint": [1, 1, 1, 1]},
                 "sindri.animation.sprite": {
                     "clips": {kind: {"frames": ["crate" if kind == "scrap" else f"crate-{kind}"],
                                      "seconds_per_frame": 1.0, "looping": False}
@@ -564,14 +564,30 @@ def main():
             "id": "wreck", "name": "Basin wreck",
             "transform_3d": transform(0.0, 0.0, 0.05, 0.0, (7.0, 4.5)),
             "components": {
-                "sindri.sprite": {"texture": "textures/wreck.png", "layer": 1},
+                "sindri.sprite": {"texture": "textures/wreck.png", "layer": 1, "tint": [1, 1, 1, 1]},
                 "sindri.tags": {"tags": ["wreck"]},
-                "sindri.script": script("scripts/wreck.decay", "Wreck"),
+                "sindri.script": script("scripts/wreck.decay", "Wreck", {"template": "prefabs/cargo.prefab"}),
             },
         }],
     }
     (ROOT / "prefabs").mkdir(exist_ok=True)
     (ROOT / "prefabs/wreck.prefab").write_text(json.dumps(prefab, indent=1) + "\n")
+    cargo = {"format_version": 1, "metadata": {"name": "Loose cargo"}, "entities": [{
+        "id": "loose-cargo", "name": "Loose cargo",
+        "transform_3d": transform(0, 0, 0.2, 0, (0.9, 0.9)),
+        "components": {
+            "sindri.tags": {"tags": ["loose-cargo"]},
+            "sindri.sprite": {"texture": "textures/ship.png#crate", "layer": 4, "tint": [1, 1, 1, 1]},
+            "sindri.animation.sprite": {
+                "clips": {kind: {"frames": ["crate" if kind == "scrap" else f"crate-{kind}"],
+                                 "seconds_per_frame": 1.0, "looping": False}
+                          for kind in ("scrap", "wood", "stone", "ore", "fibre", "salt")},
+                "playing": "scrap", "speed": 1.0,
+            },
+            "sindri.script": script("scripts/loose-cargo.decay", "LooseCargo"),
+        },
+    }]}
+    (ROOT / "prefabs/cargo.prefab").write_text(json.dumps(cargo, indent=1) + "\n")
 
 
 if __name__ == "__main__":
