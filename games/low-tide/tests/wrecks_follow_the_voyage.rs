@@ -1,9 +1,10 @@
 //! Streaming creates deterministic wrecks and preserves salvage on revisits.
 mod pilot;
 
-use pilot::{Pilot, distance};
+use pilot::{Pilot, column_row, distance};
 use sindri_core::EntityId;
 use sindri_decay::ScriptValue;
+use sindri_scene::{VoxelBlock, VoxelEdit, VoxelWorldComponent};
 
 fn wrecks(pilot: &Pilot) -> Vec<EntityId> {
     pilot
@@ -89,6 +90,23 @@ fn returning_to_a_streamed_wreck_does_not_refill_scrap() {
     assert!(pilot.run.world.is_active(carried));
     travel(&mut pilot, [site[0] + 300.0, site[1]]);
     assert!(pilot.run.world.get(wreck).is_none(), "unloaded");
+    // Harvesting/building edits must not reroll a visited region's wreck site.
+    let basin = pilot.run.entity("basin").unwrap();
+    let mut terrain = pilot
+        .run
+        .components
+        .get::<VoxelWorldComponent>(&pilot.run.world, basin)
+        .unwrap()
+        .unwrap();
+    let (column, row) = column_row(site);
+    terrain.edits.push(VoxelEdit {
+        at: [column, 100, row],
+        block: VoxelBlock::Named("rock".into()),
+    });
+    pilot.run.world.get_mut(basin).unwrap().components.insert(
+        "sindri.voxel_world".into(),
+        serde_json::to_value(terrain).unwrap(),
+    );
     travel(&mut pilot, site);
     let returned = wrecks(&pilot)
         .into_iter()

@@ -6,6 +6,7 @@ script WreckField {
     var crew: Entity = null;
     var active: Map<String, Entity> = [:];
     var remaining: Map<String, f32> = [:];
+    var sites: Map<String, Vec2> = [:];
     var clock: f32 = 1.0;
 
     fn start() {
@@ -36,7 +37,7 @@ script WreckField {
                 let row = cy + dy - 1.0;
                 let key = column + ":" + row;
                 if !this.active.contains(key) {
-                    let site = wreck_site(this.basin, column, row);
+                    let site = remembered_site(key, column, row);
                     if site == null { continue; }
                     if site.distance(centre) < 110.0 {
                         let wreck = World.spawn(this.template);
@@ -50,6 +51,14 @@ script WreckField {
             }
         }
     }
+
+    fn remembered_site(key: String, column: f32, row: f32) -> Vec2? {
+        if this.sites.contains(key) { return this.sites[key]; }
+        let site = wreck_site(this.basin, column, row);
+        if site != null { this.sites[key] = site; }
+        return site;
+    }
+
 }
 
 shared fn wreck_site(basin: Entity, column: f32, row: f32) -> Vec2? {

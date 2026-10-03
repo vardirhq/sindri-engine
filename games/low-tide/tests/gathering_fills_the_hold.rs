@@ -104,8 +104,20 @@ fn biome_resources_are_harvested_stowed_and_jettisoned_with_keys_and_touch() {
 #[test]
 fn full_holds_and_flooded_resources_refuse_harvesting() {
     let mut pilot = Pilot::new();
+    // Raise this fixture's high-water mark above the authored resource patch.
+    // Configure before Tide starts, as an editor-authored export would.
+    let basin = pilot.run.entity("basin").unwrap();
+    pilot
+        .run
+        .world
+        .get_mut(basin)
+        .unwrap()
+        .components
+        .get_mut("sindri.script")
+        .unwrap()["properties"]["high_level"] = serde_json::json!(50.0);
     ashore(&mut pilot);
-    let at = patch(&mut pilot, "salt", -12);
+    let at = patch(&mut pilot, "salt", 10);
+    assert_eq!(pilot.surface_under(pilot.crew_world()), "salt");
     pilot.run.scripts.blackboard_mut().set("crates", 20.0);
     pilot.use_it();
     assert_eq!(pilot.ground().block(at), "salt");
@@ -117,4 +129,53 @@ fn full_holds_and_flooded_resources_refuse_harvesting() {
     pilot.use_it();
     assert_eq!(pilot.ground().block(at), "salt");
     assert!(!pilot.run.world.is_active(carried));
+}
+
+#[test]
+fn rock_can_supply_ore_with_keys_and_touch() {
+    for mut pilot in [Pilot::new(), Pilot::on_a_phone()] {
+        ashore(&mut pilot);
+        let mut found = false;
+        for _ in 0..16 {
+            patch(&mut pilot, "rock", 10);
+            // Resource.Ore is the third declared variant; observe the game,
+            // rather than duplicate the script's procedural resource formula.
+            if (pilot.board("gather_kind") - 3.0).abs() < 0.01 {
+                found = true;
+                break;
+            }
+            let at = pilot.crew_world();
+            pilot.walk_ashore([at[0] + 1.0, at[1]], 0.05);
+        }
+        assert!(found, "an ore-bearing column is reachable");
+        pilot.use_it();
+        bring_home(&mut pilot);
+        assert!((pilot.board("ore") - 1.0).abs() < 0.01);
+        assert!(pilot.board("stone").abs() < 0.01);
+        let deck = pilot.run.entity("deck").unwrap();
+        let hold = pilot
+            .run
+            .components
+            .get::<TilemapComponent>(&pilot.run.world, deck)
+            .unwrap()
+            .unwrap();
+        assert_eq!(hold.tile(2, 12), Some(18));
+    }
+}
+
+#[test]
+fn a_flood_washes_the_resource_that_was_stowed() {
+    let mut pilot = Pilot::new();
+    ashore(&mut pilot);
+    patch(&mut pilot, "trunk", 10);
+    pilot.use_it();
+    bring_home(&mut pilot);
+    assert!((pilot.board("wood") - 1.0).abs() < 0.01);
+    pilot.run.scripts.blackboard_mut().set("tide_time", 280.0);
+    pilot.wait(0.2);
+    assert!(pilot.flag("flooded"));
+    assert!(pilot.board("wood").abs() < 0.01);
+    assert!(pilot.board("crates").abs() < 0.01);
+    assert!((pilot.board("washed") - 1.0).abs() < 0.01);
+    assert!(pilot.board("scrap").abs() < 0.01);
 }
