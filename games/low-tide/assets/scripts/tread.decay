@@ -1,0 +1,20 @@
+// Cosmetic belts read the crawler's actual movement. Zero speed freezes the
+// current frame; a pivot sends the two sides in opposite directions.
+script Tread {
+    @export let side: f32 = 1.0;
+
+    fn update(dt: f32) {
+        var pace = Game.speed + Game.rudder * this.side * 1.2;
+        if Game.flooded { pace = 0.0; }
+        if abs(pace) < 0.01 {
+            Animation.set_speed(this.entity, 0.0);
+            return;
+        }
+        if pace < 0.0 {
+            Animation.play(this.entity, "reverse");
+        } else {
+            Animation.play(this.entity, "forward");
+        }
+        Animation.set_speed(this.entity, abs(pace) * 0.8);
+    }
+}

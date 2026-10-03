@@ -54,101 +54,150 @@ def speckle(c, base, spots, count, salt, size=(0.8, 2.2)):
         c.ellipse(x, y, r, r * (0.6 + noise(i, salt, 45) * 0.6), colour)
 
 
+def dust(c, base, variant, seed):
+    """Low contrast grains; the ground is a material, not a field of dots."""
+    c.rect(0, 0, CELL, CELL, base)
+    for i in range(38):
+        x = noise(i, seed + variant, 41) * CELL
+        y = noise(i, seed + variant, 42) * CELL
+        r = 0.2 + noise(i, seed + variant, 43) * 0.6
+        shift = int(noise(i, seed + variant, 44) * 16) - 8
+        colour = tuple(max(0, min(255, channel + shift)) for channel in base)
+        c.ellipse(x, y, r, r * 0.65, colour)
+
+
+def fissure(c, variant, colour):
+    points = [(0, 12), (7, 15 + variant % 3), (16, 11), (23, 17), (32, 12)]
+    for (ax, ay), (bx, by) in zip(points, points[1:]):
+        c.line(ax, ay, bx, by, 0.7, colour)
+        c.line(ax, ay - 0.8, bx, by - 0.8, 0.45, (248, 242, 220))
+    c.line(16, 11, 18, 4, 0.55, colour)
+    c.line(23, 17, 20, 24, 0.5, colour)
+
+
 def salt(variant):
     def draw(c):
-        speckle(c, SALT, [SALT_SHADE], 6 + variant * 2, 100 + variant)
-        if variant == 2:
-            points = [(0, 10), (8, 14), (13, 8), (21, 17), (CELL, 13)]
-            for (ax, ay), (bx, by) in zip(points, points[1:]):
-                c.line(ax, ay, bx, by, 1.3, CRACK)
-            c.line(13, 8, 16, 0, 1.0, CRACK)
-
+        dust(c, SALT, variant, 100)
+        if variant in (2, 5):
+            fissure(c, variant, (199, 192, 173))
+        if variant == 7:
+            c.ellipse(20, 9, 2.2, 1.2, (218, 211, 192))
+            c.line(18, 8, 21, 8, 0.6, (250, 245, 230))
     return draw
 
 
 def crust(variant):
     def draw(c):
-        speckle(c, SALT_PINK, [SALT, SALT_SHADE], 14, 110 + variant, (1.0, 3.0))
-
+        dust(c, (230, 222, 204), variant, 110)
+        for i in range(5):
+            x = noise(i, 110 + variant, 51) * CELL
+            y = noise(i, 110 + variant, 52) * CELL
+            c.ellipse(x, y, 2.5, 1.5, (240, 232, 213, 100))
+            c.line(x - 1, y, x + 1, y - 0.5, 0.5, (207, 195, 169))
+        if variant in (1, 4, 7):
+            fissure(c, variant, (182, 168, 141))
     return draw
 
 
 def mud(variant):
     def draw(c):
-        speckle(c, MUD, [MUD_WET, MUD_SHINE], 10, 120 + variant, (1.2, 3.4))
-        if variant == 1:
-            c.line(4, 20, 28, 16, 1.2, MUD_WET)
-
+        dust(c, MUD, variant, 120)
+        for i in range(4):
+            x = noise(i, 120 + variant, 51) * CELL
+            y = noise(i, 120 + variant, 52) * CELL
+            c.ellipse(x, y, 4, 1.5, (97, 84, 69, 100))
+            c.line(x - 2, y - 1, x + 2, y - 1, 0.6, (149, 131, 106, 120))
+        if variant == 3:
+            fissure(c, variant, (85, 76, 65))
     return draw
 
 
 def sand(variant):
     def draw(c):
-        c.rect(0, 0, CELL, CELL, SAND)
-        for i in range(4):
-            y = i * 8 + 3 + variant * 2
-            for x in range(0, CELL, 2):
-                wave = math.sin((x + i * 7 + variant * 5) / CELL * math.tau) * 1.6
-                c.ellipse(x + 1, y + wave, 1.1, 0.8, SAND_RIPPLE)
-
+        dust(c, SAND, variant, 130)
+        # A periodic wave meets at both sides; its phase changes the ridges
+        # without changing the base colour at a tile boundary.
+        for i in range(-1, 5):
+            y = i * 9 + variant * 0.35
+            for x in range(CELL):
+                wave = math.sin(x / CELL * math.tau) * 1.4
+                c.line(x, y + wave, x + 1, y + math.sin((x + 1) / CELL * math.tau) * 1.4,
+                       0.65, (196, 177, 139, 160))
+                c.ellipse(x + 0.5, y + wave - 1.2, 0.55, 0.3, (236, 217, 178, 150))
     return draw
 
 
 def reef(variant):
     def draw(c):
-        c.rect(0, 0, CELL, CELL, REEF_DEEP)
-        for i in range(7):
-            x = noise(i, 130 + variant, 51) * CELL
-            y = noise(i, 130 + variant, 52) * CELL
-            r = 3 + noise(i, 130 + variant, 53) * 4
-            c.ellipse(x, y, r, r, REEF)
-            c.ring(x, y, r, r - 1.2, REEF_DEEP)
-        x = noise(9, 130 + variant, 54) * CELL
-        y = noise(9, 130 + variant, 55) * CELL
-        c.ellipse(x, y, 2.5, 2.5, REEF_PINK)
-
+        dust(c, (188, 176, 155), variant, 140)
+        for i in range(5):
+            x = noise(i, 140 + variant, 51) * CELL
+            y = noise(i, 140 + variant, 52) * CELL
+            r = 2 + noise(i, 140 + variant, 53) * 4
+            c.ellipse(x, y + 0.8, r + 0.5, r * 0.8, (136, 122, 104, 110))
+            c.ellipse(x, y, r, r * 0.8, (224, 210, 186))
+            c.ring(x, y, r * 0.65, r * 0.45, (178, 159, 136))
+            c.ellipse(x - r * 0.3, y - r * 0.2, 1, 0.6, (242, 229, 205))
     return draw
 
 
 def kelp(variant):
     def draw(c):
-        c.rect(0, 0, CELL, CELL, KELP_DARK)
-        for i in range(9):
-            x = noise(i, 140 + variant, 61) * CELL
-            y = noise(i, 140 + variant, 62) * CELL
-            a = noise(i, 140 + variant, 63) * math.tau
-            colour = KELP_DRY if i % 3 == 0 else KELP
-            c.line(x, y, x + math.cos(a) * 9, y + math.sin(a) * 9, 2.2, colour)
-
+        dust(c, (112, 112, 77), variant, 150)
+        for i in range(3 + variant % 3):
+            x = noise(i, 150 + variant, 61) * CELL
+            y = noise(i, 150 + variant, 62) * CELL
+            a = noise(i, 150 + variant, 63) * math.tau
+            colour = (86, 91, 59) if i % 2 else (145, 133, 86)
+            for j in range(5):
+                bend = a + math.sin(j * 0.8) * 0.45
+                nx, ny = x + math.cos(bend) * 2.5, y + math.sin(bend) * 2.5
+                c.line(x, y, nx, ny, 0.85, colour)
+                if j % 2:
+                    c.ellipse(nx + math.sin(bend) * 1.2, ny - math.cos(bend) * 1.2, 1.6, 0.8, colour)
+                x, y = nx, ny
+        if variant == 6:
+            c.ellipse(8, 23, 1.8, 1, (184, 169, 124))
     return draw
 
 
 def rock(variant):
     def draw(c):
-        speckle(c, ROCK, [ROCK_DARK], 8, 150 + variant, (2.0, 5.0))
-
+        dust(c, ROCK, variant, 160)
+        for i in range(4):
+            x = noise(i, 160 + variant, 51) * CELL
+            y = noise(i, 160 + variant, 52) * CELL
+            r = 2 + noise(i, 160 + variant, 53) * 3
+            c.ellipse(x, y + 1, r, r * 0.7, (86, 78, 69, 100))
+            c.ellipse(x, y, r, r * 0.7, (160, 145, 125))
+            c.line(x - r * 0.6, y - r * 0.3, x + r * 0.5, y - r * 0.3, 0.7, (185, 170, 146))
     return draw
 
 
 def grass(variant):
     def draw(c):
-        speckle(c, GRASS, [GRASS_DARK, GRASS_LIGHT], 16, 160 + variant, (0.8, 2.0))
-
+        dust(c, GRASS, variant, 170)
+        for i in range(10):
+            x = noise(i, 170 + variant, 61) * CELL
+            y = noise(i, 170 + variant, 62) * CELL
+            c.line(x, y, x - 1.3, y - 2, 0.6, GRASS_LIGHT)
+            c.line(x, y, x + 1, y - 2.5, 0.6, GRASS_DARK)
     return draw
 
 
 def dirt(c):
-    speckle(c, DIRT, [MUD], 8, 170)
+    dust(c, DIRT, 0, 180)
 
 
 def brine(variant):
     def draw(c):
-        c.rect(0, 0, CELL, CELL, BRINE)
+        dust(c, (57, 125, 119), variant, 190)
         for i in range(3):
-            y = 6 + i * 10 + variant * 3
-            x = noise(i, 180 + variant, 71) * 16
-            c.line(x, y, x + 10, y, 1.3, BRINE_LIGHT)
-
+            x = noise(i, 190 + variant, 71) * 28
+            y = noise(i, 190 + variant, 72) * 32
+            length = 3 + noise(i, 190 + variant, 73) * 6
+            c.line(x, y, x + length, y - 0.7, 0.5, (107, 169, 156, 100))
+            c.line(x + 1, y + 1, x + length - 1, y + 0.5, 0.5, (30, 101, 96, 80))
     return draw
 
 
@@ -174,16 +223,16 @@ def leaves(variant):
 # what it is to the game. `soft` slows the crawler, `rough` slows it more and
 # wears it; `liquid` stops it; `salvage` is worth stopping for.
 BLOCKS = {
-    "salt": ([salt(0), salt(1), salt(2)], {}),
-    "crust": ([crust(0), crust(1)], {"tags": ["soft"]}),
-    "mud": ([mud(0), mud(1)], {"tags": ["soft", "wet"]}),
-    "sand": ([sand(0), sand(1)], {"tags": ["soft"]}),
-    "reef": ([reef(0), reef(1)], {"tags": ["rough"]}),
-    "kelp": ([kelp(0), kelp(1)], {"tags": ["soft"]}),
-    "rock": ([rock(0), rock(1)], {"tags": ["rough"]}),
-    "grass": ([grass(0), grass(1)], {}),
+    "salt": ([salt(i) for i in range(8)], {}),
+    "crust": ([crust(i) for i in range(8)], {"tags": ["soft"]}),
+    "mud": ([mud(i) for i in range(8)], {"tags": ["soft", "wet"]}),
+    "sand": ([sand(i) for i in range(8)], {"tags": ["soft"]}),
+    "reef": ([reef(i) for i in range(8)], {"tags": ["rough"]}),
+    "kelp": ([kelp(i) for i in range(8)], {"tags": ["soft"]}),
+    "rock": ([rock(i) for i in range(8)], {"tags": ["rough"]}),
+    "grass": ([grass(i) for i in range(8)], {}),
     "dirt": ([dirt], {}),
-    "brine": ([brine(0), brine(1)], {"occludes": False, "walkable": False, "tags": ["liquid", "wet"]}),
+    "brine": ([brine(i) for i in range(8)], {"occludes": False, "walkable": False, "tags": ["liquid", "wet"]}),
     "trunk": ([trunk], {"tags": ["rough"]}),
     "leaves": ([leaves(0), leaves(1)], {"occludes": False, "tags": ["rough"]}),
 }

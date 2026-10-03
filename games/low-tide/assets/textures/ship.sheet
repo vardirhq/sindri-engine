@@ -17,7 +17,10 @@
       "tread",
       "ramp",
       "crate",
-      "mast"
+      "mast",
+      "floor-home",
+      "floor-bridge",
+      "floor-hold"
     ]
   }
 }

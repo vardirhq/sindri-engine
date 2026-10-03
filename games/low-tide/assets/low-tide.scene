@@ -593,11 +593,65 @@
       "tread",
       "ramp",
       "crate",
-      "mast"
+      "mast",
+      "floor-home",
+      "floor-bridge",
+      "floor-hold"
      ],
      "columns": 11,
      "rows": 14,
-     "tiles": [null,null,1,1,2,2,2,1,1,null,null,null,1,1,0,0,5,0,0,1,1,null,9,1,0,0,0,0,0,0,0,1,9,9,1,1,1,1,3,1,1,1,1,9,9,1,7,0,0,0,0,0,7,1,9,9,2,0,0,0,6,0,0,0,2,9,9,1,0,0,0,0,0,0,0,4,10,9,1,7,0,0,0,0,0,7,1,9,9,1,1,1,1,3,1,1,1,1,9,9,1,0,0,0,0,0,0,0,1,9,9,1,0,0,0,0,0,0,0,1,9,9,1,8,0,0,0,0,0,8,1,9,9,1,0,0,0,0,0,0,0,1,9,null,1,1,1,1,1,1,1,1,1,null]
+     "tiles": [null,null,1,1,2,2,2,1,1,null,null,null,1,1,0,0,5,0,0,1,1,null,9,1,0,0,0,0,0,0,0,1,9,9,1,1,1,1,3,1,1,1,1,9,9,1,7,0,0,0,0,0,7,1,9,9,2,0,0,0,6,0,0,0,2,9,9,1,0,0,0,0,0,0,0,4,10,9,1,7,0,0,0,0,0,7,1,9,9,1,1,1,1,3,1,1,1,1,9,9,1,0,0,0,0,0,0,0,1,9,9,1,0,0,0,0,0,0,0,1,9,9,1,8,0,0,0,0,0,8,1,9,9,1,0,0,0,0,0,0,0,1,9,null,1,1,1,1,1,1,1,1,1,null],
+     "layer": 4
+    }
+   }
+  },
+  {
+   "id": "floors",
+   "name": "Room floors",
+   "parent": "deck",
+   "transform_3d": {
+    "position": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "rotation": [
+     0,
+     0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     1.0,
+     1.0,
+     1
+    ]
+   },
+   "components": {
+    "sindri.tilemap": {
+     "texture": "textures/ship.png",
+     "palette": [
+      "deck",
+      "wall",
+      "window",
+      "door",
+      "hatch",
+      "helm",
+      "table",
+      "bunk",
+      "engine",
+      "tread",
+      "ramp",
+      "crate",
+      "mast",
+      "floor-home",
+      "floor-bridge",
+      "floor-hold"
+     ],
+     "columns": 11,
+     "rows": 14,
+     "layer": 3,
+     "tiles": [null,null,14,14,14,14,14,14,14,null,null,null,14,14,14,14,14,14,14,14,14,null,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,null,15,15,15,15,15,15,15,15,15,null]
     }
    }
   },
@@ -721,8 +775,8 @@
    "name": "Status",
    "transform_3d": {
     "position": [
-     0.03,
-     -0.03,
+     0.04,
+     -0.085,
      0.0
     ],
     "rotation": [
@@ -747,13 +801,13 @@
       1.0
      ],
      "font": "fonts/Inter.ttf",
-     "font_size": 0.032,
-     "line_height": 0.04,
+     "font_size": 0.028,
+     "line_height": 0.035,
      "layer": 100,
      "text": "Scrap 0",
      "bold": true,
      "outline": {
-      "width": 0.0035,
+      "width": 0.0,
       "color": [
        0.12,
        0.08,
@@ -788,7 +842,7 @@
    "transform_3d": {
     "position": [
      0.0,
-     0.04,
+     0.06,
      0.0
     ],
     "rotation": [
@@ -813,13 +867,13 @@
       1.0
      ],
      "font": "fonts/Inter.ttf",
-     "font_size": 0.032,
-     "line_height": 0.04,
+     "font_size": 0.029,
+     "line_height": 0.036250000000000004,
      "layer": 100,
      "text": "",
      "bold": true,
      "outline": {
-      "width": 0.0035,
+      "width": 0.0,
       "color": [
        0.12,
        0.08,
@@ -840,6 +894,392 @@
       ],
       "softness": 0.004
      }
+    }
+   }
+  },
+  {
+   "id": "port-tread",
+   "name": "Port tread",
+   "parent": "deck",
+   "transform_3d": {
+    "position": [
+     0.5,
+     -7.5,
+     0.02
+    ],
+    "rotation": [
+     0,
+     0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     1,
+     11,
+     1
+    ]
+   },
+   "components": {
+    "sindri.sprite": {
+     "texture": "textures/treads.png#port-0",
+     "layer": 5
+    },
+    "sindri.animation.sprite": {
+     "clips": {
+      "forward": {
+       "frames": [
+        "port-0",
+        "port-1",
+        "port-2",
+        "port-3",
+        "port-4",
+        "port-5",
+        "port-6",
+        "port-7"
+       ],
+       "seconds_per_frame": 0.055,
+       "looping": true
+      },
+      "reverse": {
+       "frames": [
+        "port-7",
+        "port-6",
+        "port-5",
+        "port-4",
+        "port-3",
+        "port-2",
+        "port-1",
+        "port-0"
+       ],
+       "seconds_per_frame": 0.055,
+       "looping": true
+      }
+     },
+     "playing": "forward",
+     "speed": 0.0
+    },
+    "sindri.script": {
+     "source": "scripts/tread.decay",
+     "script": "Tread",
+     "properties": {
+      "side": -1
+     }
+    }
+   }
+  },
+  {
+   "id": "starboard-tread",
+   "name": "Starboard tread",
+   "parent": "deck",
+   "transform_3d": {
+    "position": [
+     10.5,
+     -7.5,
+     0.02
+    ],
+    "rotation": [
+     0,
+     0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     1,
+     11,
+     1
+    ]
+   },
+   "components": {
+    "sindri.sprite": {
+     "texture": "textures/treads.png#starboard-0",
+     "layer": 5
+    },
+    "sindri.animation.sprite": {
+     "clips": {
+      "forward": {
+       "frames": [
+        "starboard-0",
+        "starboard-1",
+        "starboard-2",
+        "starboard-3",
+        "starboard-4",
+        "starboard-5",
+        "starboard-6",
+        "starboard-7"
+       ],
+       "seconds_per_frame": 0.055,
+       "looping": true
+      },
+      "reverse": {
+       "frames": [
+        "starboard-7",
+        "starboard-6",
+        "starboard-5",
+        "starboard-4",
+        "starboard-3",
+        "starboard-2",
+        "starboard-1",
+        "starboard-0"
+       ],
+       "seconds_per_frame": 0.055,
+       "looping": true
+      }
+     },
+     "playing": "forward",
+     "speed": 0.0
+    },
+    "sindri.script": {
+     "source": "scripts/tread.decay",
+     "script": "Tread",
+     "properties": {
+      "side": 1
+     }
+    }
+   }
+  },
+  {
+   "id": "cabin-rug",
+   "name": "Cabin runner",
+   "parent": "deck",
+   "transform_3d": {
+    "position": [
+     5.5,
+     -6.5,
+     0.01
+    ],
+    "rotation": [
+     0,
+     0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     3,
+     4,
+     1
+    ]
+   },
+   "components": {
+    "sindri.sprite": {
+     "texture": "textures/runner.png",
+     "layer": 3
+    }
+   }
+  },
+  {
+   "id": "port-pipe",
+   "name": "Port heating pipe",
+   "parent": "deck",
+   "transform_3d": {
+    "position": [
+     1.75,
+     -10.5,
+     0.01
+    ],
+    "rotation": [
+     0,
+     0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     0.5,
+     4,
+     1
+    ]
+   },
+   "components": {
+    "sindri.sprite": {
+     "texture": "textures/pipe.png",
+     "layer": 5
+    }
+   }
+  },
+  {
+   "id": "starboard-pipe",
+   "name": "Starboard heating pipe",
+   "parent": "deck",
+   "transform_3d": {
+    "position": [
+     9.25,
+     -10.5,
+     0.01
+    ],
+    "rotation": [
+     0,
+     0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     0.5,
+     4,
+     1
+    ]
+   },
+   "components": {
+    "sindri.sprite": {
+     "texture": "textures/pipe.png",
+     "layer": 5
+    }
+   }
+  },
+  {
+   "id": "instruments",
+   "name": "Instrument panel",
+   "transform_3d": {
+    "position": [
+     0.345,
+     -0.1325,
+     0
+    ],
+    "rotation": [
+     0,
+     0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     0.65,
+     0.225,
+     1
+    ]
+   },
+   "components": {
+    "sindri.ui.shape": {
+     "kind": "rect",
+     "count": 48.0,
+     "fill": [
+      0.025,
+      0.033,
+      0.028,
+      0.96
+     ],
+     "stroke": [
+      0.55,
+      0.48,
+      0.33,
+      0.8
+     ],
+     "stroke_width": 0.005,
+     "corner_radius": 0.025,
+     "dashes": 0.0,
+     "dash_duty": 0.5,
+     "sweep_start": 0.0,
+     "sweep_turns": 1.0,
+     "blend": "over",
+     "anchor": "top_left",
+     "layer": 90
+    }
+   }
+  },
+  {
+   "id": "instrument-title",
+   "name": "Instrument title",
+   "transform_3d": {
+    "position": [
+     0.04,
+     -0.038,
+     0.0
+    ],
+    "rotation": [
+     0,
+     0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     1.0,
+     1.0,
+     1
+    ]
+   },
+   "components": {
+    "sindri.ui.text": {
+     "anchor": "top_left",
+     "color": [
+      0.83,
+      0.73,
+      0.51,
+      1
+     ],
+     "font": "fonts/Inter.ttf",
+     "font_size": 0.022,
+     "line_height": 0.027499999999999997,
+     "layer": 100,
+     "text": "LOW TIDE  /  CRAWLER 01",
+     "bold": true,
+     "outline": {
+      "width": 0.0,
+      "color": [
+       0.12,
+       0.08,
+       0.06,
+       0.95
+      ]
+     },
+     "shadow": {
+      "offset": [
+       0.0,
+       -0.003
+      ],
+      "color": [
+       0.0,
+       0.0,
+       0.0,
+       0.35
+      ],
+      "softness": 0.004
+     }
+    }
+   }
+  },
+  {
+   "id": "hint-panel",
+   "name": "Hint panel",
+   "transform_3d": {
+    "position": [
+     0,
+     0.065,
+     0
+    ],
+    "rotation": [
+     0,
+     0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     0.87,
+     0.095,
+     1
+    ]
+   },
+   "components": {
+    "sindri.ui.shape": {
+     "kind": "rect",
+     "count": 48.0,
+     "fill": [
+      0.025,
+      0.033,
+      0.028,
+      0.95
+     ],
+     "stroke": [
+      0.55,
+      0.48,
+      0.33,
+      0.6
+     ],
+     "stroke_width": 0.005,
+     "corner_radius": 0.02,
+     "dashes": 0.0,
+     "dash_duty": 0.5,
+     "sweep_start": 0.0,
+     "sweep_turns": 1.0,
+     "blend": "over",
+     "anchor": "bottom",
+     "layer": 90
     }
    }
   },
@@ -1045,7 +1485,7 @@
      "text": "Use",
      "bold": true,
      "outline": {
-      "width": 0.0035,
+      "width": 0.0,
       "color": [
        0.12,
        0.08,
@@ -1160,7 +1600,7 @@
      "text": "Drop",
      "bold": true,
      "outline": {
-      "width": 0.0035,
+      "width": 0.0,
       "color": [
        0.12,
        0.08,
@@ -1275,7 +1715,7 @@
      "text": "View",
      "bold": true,
      "outline": {
-      "width": 0.0035,
+      "width": 0.0,
       "color": [
        0.12,
        0.08,

@@ -69,6 +69,24 @@ There is no game code. The game is `assets/`:
 the top of that file. The scripts are pure Python and deterministic, so
 running them again changes nothing unless they changed.
 
+## Visual style
+
+The crawler stays a straight-down floor plan. Its bridge has worn metal plates,
+the living quarters have warm boards and stitched bunks, and the machinery hold
+has a grated floor. A cosmetic tilemap under the deck gives each room its
+material without changing the logical tiles used for walking or stowing cargo.
+Furniture and metal fittings use small contact shadows and highlights that
+rotate with the crawler; no directional world lighting is baked into them.
+Terrain materials have eight seeded variants each: fine salt grains and
+fractures, wind-shaped sand, coral remains, curled kelp and quiet brine ripples.
+A worn runner and exposed heating pipes make the cabin feel inhabited. The
+instrument panel stays compact until flood notices need more room. Two animated
+tread belts read actual speed and steering through `scripts/tread.decay`; they
+pivot in opposite directions, pause in a flood and resume after the ebb. The
+starboard belt has a transparent gap at the boarding ramp. The belts are visual
+children of the deck, while its original tread cells still block walking.
+All art comes from the deterministic Python sources in `art/`.
+
 ## The Basin
 
 The Basin is a **voxel world viewed as a map**: the engine's natural terrain,
