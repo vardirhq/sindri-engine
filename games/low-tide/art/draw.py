@@ -477,6 +477,10 @@ def main():
     wreck(canvas)
     png(OUT / "wreck.png", 112, 72, canvas.pixels())
 
+    import terrain
+
+    terrain.main()
+
 
 if __name__ == "__main__":
     main()

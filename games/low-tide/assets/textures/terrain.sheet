@@ -1,0 +1,33 @@
+{
+  "format_version": 1,
+  "anchor": "center",
+  "grid": {
+    "columns": 6,
+    "rows": 4,
+    "names": [
+      "salt-0",
+      "salt-1",
+      "salt-2",
+      "crust-0",
+      "crust-1",
+      "mud-0",
+      "mud-1",
+      "sand-0",
+      "sand-1",
+      "reef-0",
+      "reef-1",
+      "kelp-0",
+      "kelp-1",
+      "rock-0",
+      "rock-1",
+      "grass-0",
+      "grass-1",
+      "dirt-0",
+      "brine-0",
+      "brine-1",
+      "trunk-0",
+      "leaves-0",
+      "leaves-1"
+    ]
+  }
+}
