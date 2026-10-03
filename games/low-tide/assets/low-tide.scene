@@ -28,7 +28,7 @@
    "components": {
     "sindri.camera": {
      "projection": "orthographic",
-     "vertical_size": 28.0,
+     "vertical_size": 30.0,
      "near": 0.1,
      "far": 100.0,
      "fit": "height"
@@ -767,8 +767,8 @@
       1.0
      ],
      "font": "fonts/Inter.ttf",
-     "font_size": 0.036,
-     "line_height": 0.045,
+     "font_size": 0.032,
+     "line_height": 0.04,
      "layer": 100,
      "text": "Scrap 0",
      "bold": true,
@@ -824,10 +824,10 @@
       1.0
      ],
      "font": "fonts/Inter.ttf",
-     "font_size": 0.036,
-     "line_height": 0.045,
+     "font_size": 0.032,
+     "line_height": 0.04,
      "layer": 100,
-     "text": "Tide 18 m behind",
+     "text": "Tide 18 m",
      "bold": true,
      "shadow": {
       "offset": [
@@ -893,6 +893,435 @@
        0.7
       ],
       "softness": 0.003
+     }
+    }
+   }
+  },
+  {
+   "id": "touch",
+   "name": "Touch controls",
+   "components": {
+    "sindri.script": {
+     "source": "scripts/touch.decay",
+     "script": "TouchControls",
+     "properties": {}
+    }
+   }
+  },
+  {
+   "id": "stick-ring",
+   "name": "Stick ring",
+   "transform_3d": {
+    "position": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "rotation": [
+     0,
+     0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     0.3,
+     0.3,
+     1
+    ]
+   },
+   "components": {
+    "sindri.ui.shape": {
+     "kind": "ellipse",
+     "count": 48.0,
+     "fill": [
+      0.16,
+      0.1,
+      0.08,
+      0.18
+     ],
+     "stroke": [
+      0.16,
+      0.1,
+      0.08,
+      0.6
+     ],
+     "stroke_width": 0.04,
+     "corner_radius": 0.0,
+     "dashes": 0.0,
+     "dash_duty": 0.5,
+     "sweep_start": 0.0,
+     "sweep_turns": 1.0,
+     "blend": "over",
+     "anchor": "center",
+     "layer": 80
+    }
+   },
+   "disabled": true
+  },
+  {
+   "id": "stick-knob",
+   "name": "Stick knob",
+   "transform_3d": {
+    "position": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "rotation": [
+     0,
+     0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     0.12,
+     0.12,
+     1
+    ]
+   },
+   "components": {
+    "sindri.ui.shape": {
+     "kind": "ellipse",
+     "count": 48.0,
+     "fill": [
+      0.16,
+      0.1,
+      0.08,
+      0.7
+     ],
+     "stroke": [
+      1.0,
+      0.86,
+      0.55,
+      0.9
+     ],
+     "stroke_width": 0.08,
+     "corner_radius": 0.0,
+     "dashes": 0.0,
+     "dash_duty": 0.5,
+     "sweep_start": 0.0,
+     "sweep_turns": 1.0,
+     "blend": "over",
+     "anchor": "center",
+     "layer": 81
+    }
+   },
+   "disabled": true
+  },
+  {
+   "id": "use-button",
+   "name": "Use button",
+   "transform_3d": {
+    "position": [
+     -0.2,
+     0.2,
+     0.0
+    ],
+    "rotation": [
+     0,
+     0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     0.3,
+     0.13,
+     1
+    ]
+   },
+   "components": {
+    "sindri.ui.shape": {
+     "kind": "rect",
+     "count": 48.0,
+     "fill": [
+      0.16,
+      0.1,
+      0.08,
+      0.78
+     ],
+     "stroke": [
+      1.0,
+      0.86,
+      0.55,
+      0.9
+     ],
+     "stroke_width": 0.03,
+     "corner_radius": 0.3,
+     "dashes": 0.0,
+     "dash_duty": 0.5,
+     "sweep_start": 0.0,
+     "sweep_turns": 1.0,
+     "blend": "over",
+     "anchor": "bottom_right",
+     "layer": 90
+    },
+    "sindri.ui.button": {
+     "label": "Use"
+    }
+   },
+   "disabled": true
+  },
+  {
+   "id": "use-label",
+   "name": "Use label",
+   "parent": "use-button",
+   "transform_3d": {
+    "position": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "rotation": [
+     0,
+     0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     0.3,
+     0.05,
+     1
+    ]
+   },
+   "components": {
+    "sindri.ui.text": {
+     "anchor": "center",
+     "color": [
+      1.0,
+      0.95,
+      0.85,
+      1.0
+     ],
+     "font": "fonts/Inter.ttf",
+     "font_size": 0.04,
+     "line_height": 0.05,
+     "layer": 95,
+     "text": "Use",
+     "bold": true,
+     "shadow": {
+      "offset": [
+       0.0,
+       0.0
+      ],
+      "color": [
+       0,
+       0,
+       0,
+       0
+      ],
+      "softness": 0.0
+     }
+    }
+   }
+  },
+  {
+   "id": "drop-button",
+   "name": "Drop button",
+   "transform_3d": {
+    "position": [
+     -0.2,
+     0.37,
+     0.0
+    ],
+    "rotation": [
+     0,
+     0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     0.3,
+     0.13,
+     1
+    ]
+   },
+   "components": {
+    "sindri.ui.shape": {
+     "kind": "rect",
+     "count": 48.0,
+     "fill": [
+      0.16,
+      0.1,
+      0.08,
+      0.78
+     ],
+     "stroke": [
+      1.0,
+      0.86,
+      0.55,
+      0.9
+     ],
+     "stroke_width": 0.03,
+     "corner_radius": 0.3,
+     "dashes": 0.0,
+     "dash_duty": 0.5,
+     "sweep_start": 0.0,
+     "sweep_turns": 1.0,
+     "blend": "over",
+     "anchor": "bottom_right",
+     "layer": 90
+    },
+    "sindri.ui.button": {
+     "label": "Drop"
+    }
+   },
+   "disabled": true
+  },
+  {
+   "id": "drop-label",
+   "name": "Drop label",
+   "parent": "drop-button",
+   "transform_3d": {
+    "position": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "rotation": [
+     0,
+     0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     0.3,
+     0.05,
+     1
+    ]
+   },
+   "components": {
+    "sindri.ui.text": {
+     "anchor": "center",
+     "color": [
+      1.0,
+      0.95,
+      0.85,
+      1.0
+     ],
+     "font": "fonts/Inter.ttf",
+     "font_size": 0.04,
+     "line_height": 0.05,
+     "layer": 95,
+     "text": "Drop",
+     "bold": true,
+     "shadow": {
+      "offset": [
+       0.0,
+       0.0
+      ],
+      "color": [
+       0,
+       0,
+       0,
+       0
+      ],
+      "softness": 0.0
+     }
+    }
+   }
+  },
+  {
+   "id": "view-button",
+   "name": "View button",
+   "transform_3d": {
+    "position": [
+     -0.14,
+     -0.15,
+     0.0
+    ],
+    "rotation": [
+     0,
+     0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     0.2,
+     0.1,
+     1
+    ]
+   },
+   "components": {
+    "sindri.ui.shape": {
+     "kind": "rect",
+     "count": 48.0,
+     "fill": [
+      0.16,
+      0.1,
+      0.08,
+      0.78
+     ],
+     "stroke": [
+      1.0,
+      0.86,
+      0.55,
+      0.9
+     ],
+     "stroke_width": 0.03,
+     "corner_radius": 0.3,
+     "dashes": 0.0,
+     "dash_duty": 0.5,
+     "sweep_start": 0.0,
+     "sweep_turns": 1.0,
+     "blend": "over",
+     "anchor": "top_right",
+     "layer": 90
+    },
+    "sindri.ui.button": {
+     "label": "View"
+    }
+   },
+   "disabled": true
+  },
+  {
+   "id": "view-label",
+   "name": "View label",
+   "parent": "view-button",
+   "transform_3d": {
+    "position": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "rotation": [
+     0,
+     0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     0.2,
+     0.05,
+     1
+    ]
+   },
+   "components": {
+    "sindri.ui.text": {
+     "anchor": "center",
+     "color": [
+      1.0,
+      0.95,
+      0.85,
+      1.0
+     ],
+     "font": "fonts/Inter.ttf",
+     "font_size": 0.04,
+     "line_height": 0.05,
+     "layer": 95,
+     "text": "View",
+     "bold": true,
+     "shadow": {
+      "offset": [
+       0.0,
+       0.0
+      ],
+      "color": [
+       0,
+       0,
+       0,
+       0
+      ],
+      "softness": 0.0
      }
     }
    }

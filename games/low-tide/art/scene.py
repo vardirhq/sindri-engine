@@ -146,7 +146,7 @@ def entities():
             "id": "camera", "name": "Camera",
             "transform_3d": transform(START[0], START[1], 10.0),
             "components": {
-                "sindri.camera": {"projection": "orthographic", "vertical_size": 28.0,
+                "sindri.camera": {"projection": "orthographic", "vertical_size": 30.0,
                                   "near": 0.1, "far": 100.0, "fit": "height"},
                 "sindri.script": script("scripts/view.decay", "View"),
             },
@@ -262,14 +262,14 @@ def entities():
             "id": "status", "name": "Status",
             "transform_3d": transform(0.03, -0.03),
             "components": {
-                "sindri.ui.text": text("top_left", 0.036, "Scrap 0"),
+                "sindri.ui.text": text("top_left", 0.032, "Scrap 0"),
                 "sindri.script": script("scripts/hud.decay", "Hud"),
             },
         },
         {
             "id": "tide-gap", "name": "Tide gap",
             "transform_3d": transform(-0.03, -0.03),
-            "components": {"sindri.ui.text": text("top_right", 0.036, "Tide 18 m behind",
+            "components": {"sindri.ui.text": text("top_right", 0.032, "Tide 18 m",
                                                   (0.02, 0.3, 0.32, 1.0))},
         },
         {
@@ -277,6 +277,7 @@ def entities():
             "transform_3d": transform(0.0, 0.04),
             "components": {"sindri.ui.text": text("bottom", 0.032, "")},
         },
+    ] + touch_controls() + [
         {
             "id": "banner", "name": "Banner",
             "transform_3d": transform(0.0, 0.05),
@@ -286,6 +287,65 @@ def entities():
         },
     ]
     return found
+
+
+def ui_shape(kind, anchor, fill, stroke, stroke_width, layer, corner=0.0):
+    return {
+        "kind": kind, "count": 48.0, "fill": fill, "stroke": stroke,
+        "stroke_width": stroke_width, "corner_radius": corner, "dashes": 0.0,
+        "dash_duty": 0.5, "sweep_start": 0.0, "sweep_turns": 1.0,
+        "blend": "over", "anchor": anchor, "layer": layer,
+    }
+
+
+def touch_button(key, words, x, y, width=0.3, height=0.13, anchor="bottom_right"):
+    """A button for a thumb, anchored to a corner on the right."""
+    return [
+        {
+            "id": f"{key}-button", "name": f"{words} button",
+            "transform_3d": transform(x, y, 0.0, 0.0, (width, height)),
+            "components": {
+                "sindri.ui.shape": ui_shape("rect", anchor, [0.16, 0.1, 0.08, 0.78],
+                                            [1.0, 0.86, 0.55, 0.9], 0.03, 90, 0.3),
+                "sindri.ui.button": {"label": words},
+            },
+            "disabled": True,
+        },
+        {
+            "id": f"{key}-label", "name": f"{words} label", "parent": f"{key}-button",
+            "transform_3d": transform(0.0, 0.0, 0.0, 0.0, (width, 0.05)),
+            "components": {"sindri.ui.text": text("center", 0.04, words, (1.0, 0.95, 0.85, 1.0)) | {
+                "layer": 95, "shadow": {"offset": [0.0, 0.0], "color": [0, 0, 0, 0], "softness": 0.0}}},
+        },
+    ]
+
+
+def touch_controls():
+    """The phone's controls, hidden until the first finger touches the screen.
+
+    A thumb anywhere off the buttons is Sindri's virtual stick, drawn as a ring
+    where it landed; the buttons stand in for E, X and Tab."""
+    return [
+        {
+            "id": "touch", "name": "Touch controls",
+            "components": {"sindri.script": script("scripts/touch.decay", "TouchControls")},
+        },
+        {
+            "id": "stick-ring", "name": "Stick ring",
+            "transform_3d": transform(0.0, 0.0, 0.0, 0.0, (0.3, 0.3)),
+            "components": {"sindri.ui.shape": ui_shape("ellipse", "center", [0.16, 0.1, 0.08, 0.18],
+                                                       [0.16, 0.1, 0.08, 0.6], 0.04, 80)},
+            "disabled": True,
+        },
+        {
+            "id": "stick-knob", "name": "Stick knob",
+            "transform_3d": transform(0.0, 0.0, 0.0, 0.0, (0.12, 0.12)),
+            "components": {"sindri.ui.shape": ui_shape("ellipse", "center", [0.16, 0.1, 0.08, 0.7],
+                                                       [1.0, 0.86, 0.55, 0.9], 0.08, 81)},
+            "disabled": True,
+        },
+    ] + touch_button("use", "Use", -0.2, 0.2) + touch_button("drop", "Drop", -0.2, 0.37) \
+      + touch_button("view", "View", -0.14, -0.15, 0.2, 0.1, "top_right")
 
 
 def main():

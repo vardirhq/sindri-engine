@@ -1,9 +1,14 @@
 //! A player for the tests: walks the crew and steers the crawler with the
 //! keys a person would press, reading only what the screen shows them.
 
+// Shared by more than one test binary, each using only some of it.
+#![allow(dead_code)]
+
+pub mod salvage;
+
 use std::f32::consts::{PI, TAU};
 
-use low_tide::Run;
+use low_tide::{Finger, Run};
 use sindri_core::EntityId;
 use sindri_platform::Key;
 
@@ -18,7 +23,19 @@ pub struct Pilot {
     pub crew: EntityId,
     pub crawler: EntityId,
     held: [bool; 4],
+    /// Playing on a phone: a thumb on the stick instead of the movement keys,
+    /// and the buttons instead of E.
+    touch: bool,
+    thumb_down: bool,
+    /// Every press is a new finger to the input system, as on a real screen.
+    next_finger: u64,
+    steering: u64,
 }
+
+/// Where the steering thumb lands, and how far it pulls for a full push,
+/// in pixels on a phone held upright.
+const THUMB: [f32; 2] = [110.0, 560.0];
+const THUMB_REACH: f32 = 130.0;
 
 const KEYS: [Key; 4] = [Key::W, Key::A, Key::S, Key::D];
 
@@ -32,6 +49,48 @@ impl Pilot {
             crew,
             crawler,
             held: [false; 4],
+            touch: false,
+            thumb_down: false,
+            next_finger: 1,
+            steering: 0,
+        }
+    }
+
+    /// The same voyage on a phone held upright, played by touch.
+    pub fn on_a_phone() -> Self {
+        let mut pilot = Self::new();
+        pilot.run.screen = [390.0, 844.0];
+        pilot.touch = true;
+        pilot
+    }
+
+    /// Taps a screen element with a second finger.
+    pub fn press(&mut self, id: &str) {
+        let element = self.run.entity(id).expect("the element");
+        // Laid out on the step before, as a host lays out what it drew.
+        self.step();
+        let at = self
+            .run
+            .on_screen(element)
+            .unwrap_or_else(|| panic!("{id} is on screen"));
+        let finger = self.new_finger();
+        self.run.finger(finger, Finger::Down, at);
+        self.step();
+        self.run.finger(finger, Finger::Up, at);
+        self.step();
+    }
+
+    /// Whether this pilot plays by touch.
+    pub const fn touch(&self) -> bool {
+        self.touch
+    }
+
+    /// E, or the Use button.
+    pub fn use_it(&mut self) {
+        if self.touch {
+            self.press("use-button");
+        } else {
+            self.tap(Key::E);
         }
     }
 
@@ -65,6 +124,10 @@ impl Pilot {
 
     /// Holds the movement keys that push toward a direction on screen.
     pub fn push(&mut self, screen: [f32; 2]) {
+        if self.touch {
+            self.thumb(screen);
+            return;
+        }
         let want = [
             screen[1] > 0.25,
             screen[0] < -0.25,
@@ -81,6 +144,35 @@ impl Pilot {
 
     pub fn release(&mut self) {
         self.push([0.0, 0.0]);
+    }
+
+    /// Drags the steering thumb toward a direction on screen, up positive,
+    /// or lifts it.
+    fn thumb(&mut self, screen: [f32; 2]) {
+        if length(screen) < 0.01 {
+            if self.thumb_down {
+                self.run.finger(self.steering, Finger::Up, THUMB);
+                self.thumb_down = false;
+            }
+            return;
+        }
+        if !self.thumb_down {
+            self.steering = self.new_finger();
+            self.run.finger(self.steering, Finger::Down, THUMB);
+            self.thumb_down = true;
+            self.step();
+        }
+        let way = unit(screen);
+        let at = [
+            THUMB[0] + way[0] * THUMB_REACH,
+            THUMB[1] - way[1] * THUMB_REACH,
+        ];
+        self.run.finger(self.steering, Finger::Move, at);
+    }
+
+    fn new_finger(&mut self) -> u64 {
+        self.next_finger += 1;
+        self.next_finger
     }
 
     /// The crew's position in the deck's floor plan, while aboard.
@@ -158,7 +250,7 @@ impl Pilot {
     /// From where the crew starts to the helm, round the mess table.
     pub fn take_the_helm(&mut self) {
         self.walk_deck(&[[4.4, -6.5], [4.4, -4.5], [5.5, -4.5], [5.5, -1.8]]);
-        self.tap(Key::E);
+        self.use_it();
         assert!(self.flag("at_helm"), "at the helm");
     }
 
