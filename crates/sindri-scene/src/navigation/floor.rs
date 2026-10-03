@@ -70,7 +70,12 @@ pub(super) fn block_unwalkable_steps(
 }
 
 /// How far around the cells it is asked about a voxel world's ground is read.
-const VOXEL_REACH: i32 = 24;
+///
+/// A path may wander this far out of the box between a walker and its goal to
+/// get round something. Every column inside is read on every question, and a
+/// walker asks every step, so it is kept to a detour's width rather than a
+/// landscape's.
+const VOXEL_REACH: i32 = 10;
 /// The widest neighbourhood that is read, so far-apart cells cost a bounded
 /// amount rather than everything between them.
 const VOXEL_SPAN: i32 = 160;

@@ -30,7 +30,7 @@ use sindri_render::{
 #[cfg(not(target_arch = "wasm32"))]
 use sindri_scene::{
     CameraView, SceneExtractor, SceneRuntime, TextureBindings, TileSetBindings,
-    TileVolumeComponent, resolve_grid_placements,
+    VoxelWorldComponent, resolve_grid_placements,
 };
 
 #[cfg(not(target_arch = "wasm32"))]
@@ -77,46 +77,34 @@ fn bind_textures(
 }
 
 #[cfg(not(target_arch = "wasm32"))]
-/// Pulls the authored camera back until every loaded chunk is in the picture.
+/// Pulls the authored camera back until the voxel world's resident window is
+/// in the picture.
 ///
 /// The game's camera is framed on the walker, which is right for playing and
-/// useless for judging a generated world. A streamed world has no finite whole
-/// to frame, so the overview judges the bounded opening window.
+/// useless for judging a generated world. A generated world has no finite
+/// whole to frame, so the overview frames the sections the world keeps loaded
+/// around where the game starts.
 #[cfg(not(target_arch = "wasm32"))]
 fn frame_the_whole_world(world: &mut sindri_core::World) {
-    let Some(volume) = world
+    let Some(radius) = world
         .entities()
-        .find_map(|(_, data)| data.components.get("sindri.tile_volume"))
-        .and_then(|payload| serde_json::from_value::<TileVolumeComponent>(payload.clone()).ok())
+        .find_map(|(_, data)| data.components.get("sindri.voxel_world"))
+        .and_then(|payload| serde_json::from_value::<VoxelWorldComponent>(payload.clone()).ok())
+        .map(|component| component.render_radius)
     else {
         return;
     };
-    let Some(min_x) = volume.cells.iter().map(|cell| cell.position[0]).min() else {
+    let Some(start) = world
+        .entities()
+        .find(|(_, data)| data.name.as_deref() == Some("Wanderer"))
+        .and_then(|(_, data)| data.transform_3d)
+    else {
         return;
     };
-    let Some(max_x) = volume.cells.iter().map(|cell| cell.position[0]).max() else {
-        return;
-    };
-    let min_y = volume
-        .cells
-        .iter()
-        .map(|cell| cell.position[1])
-        .min()
-        .expect("a volume with an X extent has a Y extent");
-    let max_y = volume
-        .cells
-        .iter()
-        .map(|cell| cell.position[1])
-        .max()
-        .expect("a volume with an X extent has a Y extent");
     #[allow(clippy::cast_precision_loss)]
-    let (columns, rows) = ((max_x - min_x + 1) as f32, (max_y - min_y + 1) as f32);
-    #[allow(clippy::cast_precision_loss)]
-    let centre = Vec3::new(
-        (min_x + max_x) as f32 * 0.5,
-        0.0,
-        (min_y + max_y) as f32 * 0.5,
-    );
+    let across = ((radius * 2 + 1) * 16) as f32;
+    let (columns, rows) = (across, across);
+    let centre = Vec3::new(start.position[0], 0.0, start.position[2]);
     let pitch = 33.0_f32.to_radians();
     let yaw = 45.0_f32.to_radians();
     let eye = centre

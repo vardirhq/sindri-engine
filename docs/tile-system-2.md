@@ -50,16 +50,10 @@ Sparse 3D cell storage attached to a grid:
 Empty is absence, not a reserved tile ID. The serialized form stays a readable
 sparse cell list. Runtime code shares a 16×16 `TileChunkCoord` and
 `TileChunkStore`, so generators and render culling use the same seams while a
-scene or save needs no second chunk-shaped file format. Causeway exercises the
-first streaming slice: its camera materializes deterministic terrain chunks as
-Build pans or Play follows, and sparse navigation derives frontier walls from
-loaded walkable columns rather than scanning the enormous declared envelope.
-
-This is not complete residency management yet. Loaded Causeway chunks remain
-resident for the run; eviction, persisted player deltas, asynchronous generation,
-and budgets for generation/rebuild work are the next layer. The current slice
-fixes the finite-map camera failure and establishes the engine unit those
-systems will manage without pretending an ever-growing resident set is endless.
+scene or save needs no second chunk-shaped file format. Causeway used them to
+stream its terrain until it moved its ground onto the engine's voxel world
+(`sindri.voxel_world`), which reads the same tile sets and owns residency,
+edits and meshing itself.
 
 A surface is a derived view of a volume, not its storage model. Terrain tools
 usually edit the highest occupied level in a column and may fill supporting

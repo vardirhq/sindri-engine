@@ -21,7 +21,6 @@ use sindri_scene::{
 #[cfg(not(target_arch = "wasm32"))]
 use crate::assets::sources;
 use crate::error::CausewayError;
-use crate::streaming::TerrainStream;
 
 use crate::styling::Styles;
 
@@ -100,8 +99,6 @@ pub struct Session {
     /// a generated landscape has enough of them that doing it per frame costs
     /// more than everything else in a frame put together.
     surfaces: sindri_scene::GridSurfaces,
-    /// Generated terrain materialized around the camera.
-    terrain: TerrainStream,
     since_written: f32,
     /// Where the save actually goes.
     ///
@@ -158,7 +155,6 @@ impl Session {
             effects: sindri_scene::Effects2d::default(),
             gestures: sindri_core::Gestures::new(sindri_core::GestureLimits::default()),
             surfaces: sindri_scene::GridSurfaces::default(),
-            terrain: TerrainStream::default(),
             since_written: 0.0,
             save_backend: Box::new(sindri_platform::MemorySaves::new()),
             pending_audio: Vec::new(),
@@ -288,6 +284,7 @@ impl Session {
     fn aim(
         world: &World,
         components: &ComponentSchemaRegistry,
+        tile_sets: &TileSetBindings,
         input: &InputState,
         viewport: (f32, f32),
     ) -> Option<sindri_scene::voxel::VolumeAim> {
@@ -298,9 +295,12 @@ impl Session {
         let camera = sindri_scene::world_camera_of(world, components, viewport.0 / viewport.1)
             .ok()
             .flatten()?;
-        sindri_scene::voxel::aim_at(
+        // With the tile sets, because the ground is a voxel world built from
+        // them, and which of its voxels are blocks is theirs to say.
+        sindri_scene::voxel::aim_at_with(
             world,
             components,
+            (!tile_sets.is_empty()).then_some(tile_sets),
             camera.view_projection,
             [position[0] / viewport.0, position[1] / viewport.1],
         )
@@ -351,7 +351,7 @@ impl Session {
         // so that what a script is told the person did and where the pointer
         // is are the same instant.
         self.gestures.update(input.presses());
-        let aim = Self::aim(world, &self.components, input, viewport);
+        let aim = Self::aim(world, &self.components, &self.tile_sets, input, viewport);
         // Worked out here rather than by the scripts, for the same reason the
         // aim is: it needs the view matrix and the viewport, and a script has
         // neither. Zero when nothing is being dragged, so a camera script can
@@ -426,12 +426,8 @@ impl Session {
                 volume: sound.volume,
             }));
         // After the scripts, so a camera following the player follows where
-        // this step left it, and before the terrain asks where the camera is.
+        // this step left it. The voxel world keeps its own window under it.
         sindri_scene::update_camera_behaviors(world, delta_seconds);
-        // The camera may have moved in Build or Play this frame. Materialize
-        // its new neighbourhood before placement/navigation and rendering ask
-        // about it; the renderer itself remains mode-agnostic.
-        self.terrain.update(world, &self.components, viewport)?;
         // After the scripts, because a walker's depth is a consequence of where
         // this step left it, and before anything draws. Props settle on the
         // first pass and never move again; only what moved costs anything.
