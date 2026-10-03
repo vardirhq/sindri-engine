@@ -38,7 +38,15 @@ fn the_belts_hold_at_rest_pivot_oppositely_and_resume_after_the_ebb() {
     );
     assert!(belt(&pilot, "port-tread").speed > 0.0);
 
+    let starboard = pilot.run.entity("starboard-tread").unwrap();
+    let reverse = pilot.run.animations.frame(starboard);
     pilot.release();
+    pilot.wait(0.2);
+    assert_eq!(
+        reverse,
+        pilot.run.animations.frame(starboard),
+        "stopping a reverse pivot holds its frame"
+    );
     pilot.set_throttle(1.0);
     let mut shown = std::collections::BTreeSet::new();
     for _ in 0..frames(0.5) {

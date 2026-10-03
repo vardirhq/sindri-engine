@@ -125,7 +125,7 @@ def text(anchor, size, words, colour=(1.0, 0.96, 0.88, 1.0)):
         "anchor": anchor, "color": list(colour), "font": "fonts/Inter.ttf",
         "font_size": size, "line_height": size * 1.25, "layer": 100,
         "text": words, "bold": True,
-        # Light words with a dark edge read over salt, kelp and deck alike.
+        # Light text reads against the instrument and hint panels.
         "outline": {"width": 0.0, "color": [0.12, 0.08, 0.06, 0.95]},
         "shadow": {"offset": [0.0, -0.003], "color": [0.0, 0.0, 0.0, 0.35],
                    "softness": 0.004},

@@ -6,6 +6,10 @@ script Tread {
     fn update(dt: f32) {
         var pace = Game.speed + Game.rudder * this.side * 1.2;
         if Game.flooded { pace = 0.0; }
+        if abs(pace) < 0.01 {
+            Animation.set_speed(this.entity, 0.0);
+            return;
+        }
         if pace < 0.0 {
             Animation.play(this.entity, "reverse");
         } else {
