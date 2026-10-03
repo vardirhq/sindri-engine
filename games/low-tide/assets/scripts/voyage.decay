@@ -1,23 +1,21 @@
-// The voyage: what every script shares, and how it ends.
+// What every script shares about the voyage, and how the Basin is read.
 //
-// The crawler, the crew, the Tide and the view each keep their own part of
-// `Game`; this script only reads it, decides whether the voyage is won or
-// lost, and offers another one once it is over.
-
-shared const RISE_Y: f32 = 250.0;
-// The part of the Basin the crawler may drive in; the rest is margin, so a
-// turned view never shows past the edge of the map.
-shared const PLAY_LEFT: f32 = 14.0;
-shared const PLAY_RIGHT: f32 = 58.0;
-shared const BASIN_ROWS: f32 = 270.0;
+// The crawler, the crew and the view each keep their own part of `Game`.
+// The Basin is a voxel world viewed as a map: a column's X is the plane's X,
+// and its row runs down the map, so a point (x, y) is column floor(x), row
+// floor(-y). `Grid.surface` and `Grid.height` say what is on top there.
 
 // What the hint line should say, decided by the crew, worded by the HUD.
-enum Hint { None, TakeHelm, AtHelm, Salvage, Empty, HoldFull, Carrying, Jettison, Ashore, LeftBehind }
+enum Hint { None, TakeHelm, AtHelm, Salvage, Empty, HoldFull, Carrying, Jettison, Ashore, LeftBehind, Brine }
+
+// The kinds of ground the Basin is made of, by what the crawler and the HUD
+// make of them.
+enum Ground { Salt, Crust, Mud, Sand, Reef, Kelp, Rock, Island, Brine, Nothing }
 
 state Game {
     // The crawler.
-    var crawler_x: f32 = 36.0;
-    var crawler_y: f32 = 14.0;
+    var crawler_x: f32 = 0.0;
+    var crawler_y: f32 = 0.0;
     var heading: f32 = 0.0;
     var speed: f32 = 0.0;
     var top_speed: f32 = 0.0;
@@ -25,18 +23,21 @@ state Game {
     var rudder: f32 = 0.0;
     var crates: f32 = 0.0;
     var capacity: f32 = 0.0;
-    var on_dunes: bool = false;
+    // What the crawler is driving on, and how much it holds it back: one is
+    // a clear run, less is soft or rough going.
+    var ground: Ground = Ground.Salt;
+    var going: f32 = 1.0;
+    // Whether the last move was refused: brine or a cliff ahead.
+    var blocked: bool = false;
     // The crew.
     var aboard: bool = true;
     var at_helm: bool = false;
-    var crew_x: f32 = 36.0;
-    var crew_y: f32 = 14.0;
+    var crew_x: f32 = 0.0;
+    var crew_y: f32 = 0.0;
     var hint: Hint = Hint.None;
     // Scrap hauled aboard over the voyage, and how much is still aboard.
     var scrap: f32 = 0.0;
     var salvaged: f32 = 0.0;
-    // The Tide's leading edge.
-    var tide_y: f32 = -4.0;
     // The view: how far the camera is rolled, and whether the player asked
     // for the map to stay north-up.
     var view_rot: f32 = 0.0;
@@ -44,37 +45,39 @@ state Game {
     // Whether a finger has touched the screen: the phone's controls show
     // from then on, and the hints talk about them instead of keys.
     var touch: bool = false;
-    // How it ended.
-    var won: bool = false;
-    var lost: bool = false;
 }
 
-script Voyage {
-    fn start() {
-        Game.won = false;
-        Game.lost = false;
-        Game.scrap = 0.0;
-        Game.salvaged = 0.0;
-    }
+// The Basin's block on top at a point in the plane.
+shared fn surface_at(basin: Entity, at: Vec2) -> String {
+    return Grid.surface(basin, floor(at.x), floor(-at.y));
+}
 
-    fn update(dt: f32) {
-        if Game.won || Game.lost {
-            if Action.pressed("use") || (Game.touch && Pointer.just_pressed("Left")) {
-                Scene.go(Scene.current());
-            }
-            return;
-        }
-        if Game.crawler_y >= RISE_Y {
-            Game.won = true;
-            return;
-        }
-        // The water has the crawler once it is past the middle of the deck,
-        // and has a crew member left on the salt as soon as it reaches them.
-        if Game.tide_y >= Game.crawler_y {
-            Game.lost = true;
-        }
-        if !Game.aboard && Game.tide_y >= Game.crew_y {
-            Game.lost = true;
-        }
+// How high the top is at a point, or very low where nothing stands.
+shared fn height_at(basin: Entity, at: Vec2) -> f32 {
+    return Grid.height(basin, floor(at.x), floor(-at.y)) ?? -1000.0;
+}
+
+// Whether the top at a point carries one of the block set's tags.
+shared fn tagged_at(basin: Entity, at: Vec2, tag: String) -> bool {
+    let column = floor(at.x);
+    let row = floor(-at.y);
+    let top = Grid.height(basin, column, row);
+    if top == null {
+        return false;
     }
+    return Grid.tagged(basin, column, row, ceil(top) - 1.0, tag);
+}
+
+// What kind of ground a block is.
+shared fn ground_of(block: String) -> Ground {
+    if block == "salt" { return Ground.Salt; }
+    if block == "crust" { return Ground.Crust; }
+    if block == "mud" { return Ground.Mud; }
+    if block == "sand" { return Ground.Sand; }
+    if block == "reef" { return Ground.Reef; }
+    if block == "kelp" { return Ground.Kelp; }
+    if block == "rock" { return Ground.Rock; }
+    if block == "brine" { return Ground.Brine; }
+    if block == "" { return Ground.Nothing; }
+    return Ground.Island;
 }

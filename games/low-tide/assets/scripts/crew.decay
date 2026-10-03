@@ -27,6 +27,8 @@ script Crew {
     var deck: Entity = null;
     var crawler: Entity = null;
     var carried: Entity = null;
+    var basin: Entity = null;
+    var wading: bool = false;
     var use_button: Entity = null;
     var drop_button: Entity = null;
     var carrying: bool = false;
@@ -37,6 +39,7 @@ script Crew {
         this.deck = World.find("Deck");
         this.crawler = World.find("Crawler");
         this.carried = World.find("Carried");
+        this.basin = World.find("Basin");
         this.use_button = World.find("Use button");
         this.drop_button = World.find("Drop button");
         Game.aboard = true;
@@ -44,11 +47,6 @@ script Crew {
     }
 
     fn update(dt: f32) {
-        if Game.won || Game.lost {
-            Game.rudder = 0.0;
-            pose(Vec2(0.0, 0.0));
-            return;
-        }
         let stick = steering();
         if Action.pressed("use") || Ui.is_pressed(this.use_button) {
             use();
@@ -129,8 +127,14 @@ script Crew {
     fn walk_ashore(stick: Vec2, dt: f32) {
         let way = turned(stick, Game.view_rot) * this.walk_speed * dt;
         var at = this.transform.position;
-        at.x = clamp(at.x + way.x, PLAY_LEFT, PLAY_RIGHT);
-        at.y = clamp(at.y + way.y, 0.5, BASIN_ROWS - 0.5);
+        // On foot the crew climbs anything, but brine is deep and salt-burnt:
+        // they will not wade into it.
+        let next = Vec2(at.x + way.x, at.y + way.y);
+        this.wading = tagged_at(this.basin, next, "liquid");
+        if !this.wading {
+            at.x = next.x;
+            at.y = next.y;
+        }
         this.transform.position = at;
         // The only way aboard is up the ramp.
         let local = on_deck(Vec2(at.x, at.y));
@@ -230,6 +234,8 @@ script Crew {
                 Game.hint = Hint.HoldFull;
             } else if wreck != null {
                 Game.hint = Hint.Salvage;
+            } else if this.wading {
+                Game.hint = Hint.Brine;
             } else if Vec2(Game.crew_x, Game.crew_y).distance(Vec2(Game.crawler_x, Game.crawler_y)) > 12.0 {
                 Game.hint = Hint.LeftBehind;
             } else {

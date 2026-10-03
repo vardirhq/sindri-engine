@@ -11,6 +11,7 @@ use std::f32::consts::{PI, TAU};
 use low_tide::{Finger, Run};
 use sindri_core::EntityId;
 use sindri_platform::Key;
+use sindri_scene::VoxelGround;
 
 pub const STEP: f32 = 1.0 / 60.0;
 
@@ -175,6 +176,55 @@ impl Pilot {
         self.next_finger
     }
 
+    /// The Basin as gameplay reads it.
+    pub fn ground(&self) -> VoxelGround {
+        let basin = self.run.entity("basin").expect("the Basin");
+        VoxelGround::of_entity(
+            &self.run.world,
+            &self.run.components,
+            basin,
+            Some(&self.run.tile_sets),
+        )
+        .expect("the Basin reads")
+        .expect("the Basin is a voxel world")
+    }
+
+    /// The block on top under a point in the plane.
+    pub fn surface_under(&self, at: [f32; 2]) -> String {
+        let ground = self.ground();
+        let (column, row) = column_row(at);
+        ground
+            .surface(column, row)
+            .map(|(level, _, _)| ground.block([column, level, row]))
+            .unwrap_or_default()
+    }
+
+    /// The middle of the nearest column topped with `block` to the crawler,
+    /// within sixty units.
+    pub fn nearest(&self, block: &str) -> Option<[f32; 2]> {
+        let ground = self.ground();
+        let start = self.crawler_world();
+        let (cx, cz) = column_row(start);
+        let mut best: Option<([f32; 2], f32)> = None;
+        for z in cz - 60..=cz + 60 {
+            for x in cx - 60..=cx + 60 {
+                let Some((level, _, _)) = ground.surface(x, z) else {
+                    continue;
+                };
+                if ground.block([x, level, z]) != block {
+                    continue;
+                }
+                #[allow(clippy::cast_precision_loss)]
+                let at = [x as f32 + 0.5, -(z as f32) - 0.5];
+                let far = distance(at, start);
+                if best.is_none_or(|(_, known)| far < known) {
+                    best = Some((at, far));
+                }
+            }
+        }
+        best.map(|(at, _)| at)
+    }
+
     /// The crew's position in the deck's floor plan, while aboard.
     pub fn on_deck(&self) -> [f32; 2] {
         self.run.local(self.crew)
@@ -288,6 +338,13 @@ impl Pilot {
         self.push([turn, if throttle < 1.0 { 1.0 } else { 0.0 }]);
         self.step();
     }
+}
+
+/// The Basin's column and row under a point in the plane.
+pub fn column_row(at: [f32; 2]) -> (i32, i32) {
+    #[allow(clippy::cast_possible_truncation)]
+    let found = (at[0].floor() as i32, (-at[1]).floor() as i32);
+    found
 }
 
 pub fn frames(seconds: f32) -> u32 {

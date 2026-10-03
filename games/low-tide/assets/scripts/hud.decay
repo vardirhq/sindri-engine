@@ -1,52 +1,55 @@
-// What the player needs at a glance: scrap, speed, the Rise and the Tide,
-// one line of what to do here, and the ending. Narrow enough for a phone
+// What the player needs at a glance: scrap, speed, the ground underfoot,
+// and one line of what to do here. Narrow enough for a phone
 // held upright, and worded for keys or for the touch buttons, whichever the
 // player is using.
 
 script Hud {
-    var tide: Entity = null;
+    var ground: Entity = null;
     var hint: Entity = null;
-    var banner: Entity = null;
 
     fn start() {
-        this.tide = World.find("Tide gap");
+        this.ground = World.find("Ground label");
         this.hint = World.find("Hint");
-        this.banner = World.find("Banner");
     }
 
     fn update(dt: f32) {
         var status = "Scrap " + Game.scrap + "/" + Game.capacity;
         status = status + "   Throttle " + round(Game.throttle * 100.0) + "%";
         status = status + "\nSpeed " + Game.speed.fixed(1) + " of " + Game.top_speed.fixed(1);
-        if Game.on_dunes {
-            status = status + "  (soft sand)";
+        if Game.blocked {
+            status = status + "  (aground)";
         }
-        status = status + "\nThe Rise " + max(0.0, RISE_Y - Game.crawler_y).fixed(0) + " m ahead";
         Ui.set_text(this.entity, status);
-
-        let gap = Game.crawler_y - Game.tide_y;
-        if gap < 10.0 {
-            Ui.set_text(this.tide, "Tide " + max(0.0, gap).fixed(0) + " m!");
-        } else {
-            Ui.set_text(this.tide, "Tide " + gap.fixed(0) + " m");
-        }
+        Ui.set_text(this.ground, ground_words());
 
         if Game.touch {
             Ui.set_text(this.hint, touch_words());
         } else {
             Ui.set_text(this.hint, key_words());
         }
+    }
 
-        World.set_active(this.banner, Game.won || Game.lost);
-        var again = "E to sail again";
-        if Game.touch {
-            again = "Tap to sail again";
+    // What the crawler is driving on, and what it costs.
+    fn ground_words() -> String {
+        let name = match Game.ground {
+            Ground.Salt => "Salt flats",
+            Ground.Crust => "Salt crust",
+            Ground.Mud => "Mud flats",
+            Ground.Sand => "Dunes",
+            Ground.Reef => "Dead reef",
+            Ground.Kelp => "Kelp beds",
+            Ground.Rock => "Bare rock",
+            Ground.Island => "Old island",
+            Ground.Brine => "Brine",
+            _ => "",
+        };
+        if Game.going < 0.5 {
+            return name + " (rough)";
         }
-        if Game.won {
-            Ui.set_text(this.banner, "You reached the Rise\nwith " + Game.scrap + " scrap\n" + again);
-        } else if Game.lost {
-            Ui.set_text(this.banner, "The Tide took\nthe crawler\n" + again);
+        if Game.going < 1.0 {
+            return name + " (soft)";
         }
+        return name;
     }
 
     fn key_words() -> String {
@@ -76,7 +79,8 @@ script Hud {
             Hint.HoldFull => "The hold is full: drop a crate first",
             Hint.Carrying => "Carry it back aboard up the ramp",
             Hint.Ashore => "Walk to a wreck, or back up the ramp",
-            Hint.LeftBehind => "The crawler is leaving without you!",
+            Hint.LeftBehind => "The crawler is a long way off",
+            Hint.Brine => "Too deep and salt-burnt to wade",
             _ => idle,
         };
     }

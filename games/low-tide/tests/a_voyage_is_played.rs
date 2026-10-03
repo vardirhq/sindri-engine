@@ -5,7 +5,7 @@
 
 mod pilot;
 
-use pilot::{Pilot, distance, frames, salvage};
+use pilot::{Pilot, column_row, distance, frames, salvage};
 use sindri_platform::Key;
 
 #[test]
@@ -29,10 +29,12 @@ fn the_crew_walks_to_the_helm_and_drives_away() {
         (deck[0] - 7.5).abs() < 0.2 && (deck[1] + 6.0).abs() < 0.2,
         "standing where they walked to on the deck: {deck:?}"
     );
+    // Full speed for the ground it is on, which may be soft.
     assert!(
-        pilot.board("speed") > 3.0,
-        "at speed: {}",
-        pilot.board("speed")
+        pilot.board("speed") > pilot.board("top_speed") * 0.9,
+        "at speed: {} of {}",
+        pilot.board("speed"),
+        pilot.board("top_speed")
     );
 }
 
@@ -99,44 +101,48 @@ fn a_wreck_is_salvaged_and_its_scrap_weighs_the_crawler_down() {
 }
 
 #[test]
-fn a_crawler_that_waits_is_taken_by_the_tide() {
-    let mut pilot = Pilot::new();
-    for _ in 0..frames(40.0) {
-        pilot.step();
-        if pilot.flag("lost") {
-            break;
+fn the_basin_is_generated_around_the_start() {
+    let pilot = Pilot::new();
+    let ground = pilot.ground();
+    let start = pilot.crawler_world();
+    let mut kinds = std::collections::BTreeSet::new();
+    for z in (-120..120).step_by(4) {
+        for x in (-120..120).step_by(4) {
+            let (column, row) = column_row([start[0] + x as f32, start[1] + z as f32]);
+            let (level, _, _) = ground.surface(column, row).expect("ground everywhere");
+            kinds.insert(ground.block([column, level, row]));
         }
     }
-    assert!(pilot.flag("lost"), "the Tide reached it");
-    assert!(!pilot.flag("won"));
-    let banner = pilot.run.entity("banner").expect("the banner");
-    assert!(pilot.run.world.is_active(banner), "and says so");
+    assert!(kinds.len() >= 5, "a varied old sea floor: {kinds:?}");
+    assert!(
+        kinds.contains("brine"),
+        "with brine left in the deeps: {kinds:?}"
+    );
 }
 
 #[test]
-fn a_crawler_driven_north_outruns_the_tide_to_the_rise() {
+fn the_crawler_runs_aground_at_brine_rather_than_into_it() {
     let mut pilot = Pilot::new();
+    let brine = pilot.nearest("brine").expect("brine near the start");
     pilot.take_the_helm();
-    let start = pilot.crawler_world();
-    let mut closest = f32::MAX;
-    for frame in 0..frames(150.0) {
-        let at = pilot.crawler_world();
-        pilot.steer_toward([start[0], at[1] + 30.0]);
-        closest = closest.min(pilot.board("crawler_y") - pilot.board("tide_y"));
-        if pilot.flag("won") {
-            eprintln!(
-                "reached the Rise after {:.1} s; the Tide came within {closest:.1} m",
-                f64::from(frame) / 60.0
-            );
-            assert!(!pilot.flag("lost"));
-            return;
+    let mut aground = false;
+    for _ in 0..frames(60.0) {
+        pilot.steer_toward(brine);
+        let under = pilot.surface_under(pilot.crawler_world());
+        assert_ne!(under, "brine", "it never drives into the brine");
+        if pilot.flag("blocked") {
+            aground = true;
+            break;
         }
-        assert!(!pilot.flag("lost"), "the Tide caught it at {at:?}");
     }
-    panic!(
-        "never reached the Rise; the crawler is at {:?}",
-        pilot.crawler_world()
-    );
+    assert!(aground, "it ran aground on the way to {brine:?}");
+    assert!(pilot.board("speed") < f32::EPSILON, "and stopped dead");
+    let hud = pilot.run.entity("status").expect("the status");
+    let text = pilot.run.world.get(hud).unwrap().components["sindri.ui.text"]["text"]
+        .as_str()
+        .unwrap()
+        .to_owned();
+    assert!(text.contains("aground"), "the HUD says so: {text}");
 }
 
 #[test]

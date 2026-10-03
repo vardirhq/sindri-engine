@@ -180,7 +180,6 @@ def entities():
                     {"name": "view", "kind": "button",
                      "bindings": ["key.Tab", "key.V", "gamepad.north"]},
                 ]},
-                "sindri.script": script("scripts/voyage.decay", "Voyage"),
             },
         },
         {
@@ -275,13 +274,6 @@ def entities():
             "components": {"sindri.ui.text": text("bottom", 0.032, "")},
         },
     ] + touch_controls() + [
-        {
-            "id": "banner", "name": "Banner",
-            "transform_3d": transform(0.0, 0.05),
-            "components": {"sindri.ui.text": text("center", 0.07, "", (1.0, 0.97, 0.9, 1.0)) | {
-                "shadow": {"offset": [0.0, -0.004], "color": [0.1, 0.06, 0.04, 0.8], "softness": 0.004}}},
-            "disabled": True,
-        },
     ]
     return found
 

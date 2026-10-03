@@ -4,7 +4,12 @@
 // where it was left, so the crawler keeps going while the crew walks away from
 // the helm; the rudder only turns it while somebody is holding it. Every crate
 // of scrap in the hold is weight, and weight costs both top speed and how
-// quickly it gets there. Soft dunes halve what is left.
+// quickly it gets there.
+//
+// The Basin decides the rest. Soft ground (sand, mud, kelp, salt crust) and
+// rough ground (reef, rock) hold it back. Brine stops it at the water's edge,
+// and so does a cliff: ground ahead standing more than a step above the
+// ground under it. A crawler stopped there can still turn on the spot.
 //
 // Turning is turning the whole floor plan: the deck tilemap and everybody on
 // it are children of this entity, so they come along with no help from here.
@@ -15,7 +20,12 @@ script Crawler {
     @export let top_speed: f32 = 4.2;
     @export let acceleration: f32 = 0.8;
     @export let turn_rate: f32 = 0.55;
-    @export let dune_drag: f32 = 0.5;
+    @export let soft_going: f32 = 0.6;
+    @export let rough_going: f32 = 0.4;
+    // The highest step up the treads can climb, in levels.
+    @export let climb: f32 = 2.0;
+    // How far ahead of the middle the bow looks, in units.
+    @export let reach: f32 = 7.5;
 
     var speed: f32 = 0.0;
     var deck: Entity = null;
@@ -40,18 +50,16 @@ script Crawler {
     fn update(dt: f32) {
         let mass = this.base_mass + Game.crates * this.crate_mass;
         let lightness = this.base_mass / mass;
-        var drag: f32 = 1.0;
-        Game.on_dunes = ground() == 4.0;
-        if Game.on_dunes {
-            drag = this.dune_drag;
-        }
-        let most = this.top_speed * lightness;
-        Game.top_speed = most * drag;
+        let heading = this.transform.rotation_z;
+        let middle = Vec2(this.transform.position.x, this.transform.position.y);
+        let forward = Vec2(-sin(heading), cos(heading));
 
-        var target: f32 = Game.throttle * most * drag;
-        if Game.won || Game.lost {
-            target = 0.0;
-        }
+        Game.ground = ground_of(surface_at(this.basin, middle));
+        Game.going = going_at(middle);
+        let most = this.top_speed * lightness;
+        Game.top_speed = most * Game.going;
+
+        let target = Game.throttle * Game.top_speed;
         let rate = this.acceleration * lightness;
         if this.speed < target {
             this.speed = min(target, this.speed + rate * dt);
@@ -64,31 +72,47 @@ script Crawler {
         let grip = 0.35 + 0.65 * min(1.0, this.speed / 1.5);
         this.transform.rotation_z += Game.rudder * this.turn_rate * grip * dt;
 
-        let heading = this.transform.rotation_z;
-        var at = this.transform.position;
-        at.x += -sin(heading) * this.speed * dt;
-        at.y += cos(heading) * this.speed * dt;
-        at.x = clamp(at.x, PLAY_LEFT + 7.0, PLAY_RIGHT - 7.0);
-        at.y = max(at.y, 7.0);
-        this.transform.position = at;
+        // Run aground at brine or a cliff: the bow will not go there, so the
+        // crawler stops where it is.
+        let next = middle + forward * (this.speed * dt);
+        Game.blocked = !passable(middle, next + forward * this.reach);
+        if Game.blocked {
+            this.speed = 0.0;
+        } else {
+            this.transform.position = Vec3(next.x, next.y, this.transform.position.z);
+        }
+        let at = this.transform.position;
 
         // The shadow falls the same way whichever way the crawler faces, which
         // is half of what makes the turning read.
         if this.shadow != null {
             this.shadow.transform.position = Vec3(at.x + 0.4, at.y - 0.4, 0.08);
-            this.shadow.transform.rotation_z = heading;
+            this.shadow.transform.rotation_z = this.transform.rotation_z;
         }
 
         Game.crawler_x = at.x;
         Game.crawler_y = at.y;
-        Game.heading = heading;
+        Game.heading = this.transform.rotation_z;
         Game.speed = this.speed;
     }
 
-    // The Basin tile under the middle of the crawler.
-    fn ground() -> f32 {
-        let at = this.transform.position;
-        return Grid.tile(this.basin, floor(at.x), floor(BASIN_ROWS - at.y));
+    // How much the ground under a point holds the crawler back.
+    fn going_at(at: Vec2) -> f32 {
+        if tagged_at(this.basin, at, "rough") {
+            return this.rough_going;
+        }
+        if tagged_at(this.basin, at, "soft") {
+            return this.soft_going;
+        }
+        return 1.0;
+    }
+
+    // Whether the bow may go to `bow` from a crawler standing at `middle`.
+    fn passable(middle: Vec2, bow: Vec2) -> bool {
+        if tagged_at(this.basin, bow, "liquid") || surface_at(this.basin, bow) == "" {
+            return false;
+        }
+        return height_at(this.basin, bow) - height_at(this.basin, middle) <= this.climb;
     }
 
     // A crate of scrap carried aboard goes into the first free place in the
