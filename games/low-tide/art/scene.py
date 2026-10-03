@@ -39,6 +39,7 @@ CRAWLER = [
 SHIP_TILES = [
     "deck", "wall", "window", "door", "hatch", "helm", "table",
     "bunk", "engine", "tread", "ramp", "crate", "mast",
+    "floor-home", "floor-bridge", "floor-hold",
 ]
 SYMBOL = {
     ".": "deck", "W": "wall", "w": "window", "-": "door", "h": "hatch",
@@ -220,7 +221,17 @@ def entities():
             "transform_3d": transform(-width / 2, height / 2),
             "components": {"sindri.tilemap": {
                 "texture": "textures/ship.png", "palette": SHIP_TILES,
-                "columns": width, "rows": height, "tiles": crawler_tiles(),
+                "columns": width, "rows": height, "tiles": crawler_tiles(), "layer": 4,
+            }},
+        },
+        {
+            "id": "floors", "name": "Room floors", "parent": "deck",
+            "transform_3d": transform(0.0, 0.0),
+            "components": {"sindri.tilemap": {
+                "texture": "textures/ship.png", "palette": SHIP_TILES,
+                "columns": width, "rows": height, "layer": 3,
+                "tiles": [None if ch == " " else (14 if row < 4 else 13 if row < 9 else 15)
+                          for row, line in enumerate(CRAWLER) for ch in line],
             }},
         },
         {

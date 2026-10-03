@@ -215,81 +215,147 @@ def sheet(name, cells, columns, cell_w, cell_h):
 
 
 def deck(c, salt=0):
-    c.rect(0, 0, CELL, CELL, DECK)
+    """Warm, worn boards. Grain stays quiet at phone scale."""
+    c.rect(0, 0, CELL, CELL, (157, 119, 85))
     for i in range(4):
         y = i * 8
-        c.rect(0, y, CELL, y + 1, DECK_LINE)
-        offset = 6 + int(noise(i, salt, 3) * 18)
-        c.rect(offset, y, offset + 1, y + 8, DECK_LINE)
+        tone = 145 + int(noise(i, salt, 3) * 18)
+        c.rect(0, y + 1, CELL, y + 8, (tone, tone - 37, tone - 68))
+        c.line(0, y + 1, CELL, y + 1, 0.6, (188, 148, 107))
+        c.line(0, y, CELL, y, 0.8, (105, 77, 55))
+        offset = 6 + int(noise(i, salt, 4) * 18)
+        c.line(offset, y + 1, offset, y + 8, 0.7, DECK_LINE)
+        c.line(2, y + 5, offset - 2, y + 4.5, 0.35, (132, 97, 67))
+        c.ellipse(offset + 2, y + 3, 0.5, 0.5, WOOD_DARK)
+
+
+def steel(c, hold=False):
+    base = (97, 109, 104) if not hold else (84, 86, 77)
+    c.rect(0, 0, CELL, CELL, base)
+    c.line(0, 0.7, CELL, 0.7, 1.0, (132, 141, 129))
+    c.line(0.7, 0, 0.7, CELL, 1.0, (132, 141, 129))
+    c.line(31, 0, 31, CELL, 0.9, (57, 63, 57))
+    c.line(0, 31, CELL, 31, 0.9, (57, 63, 57))
+    for x in (3, 29):
+        for y in (3, 29):
+            c.ellipse(x, y, 0.8, 0.8, (55, 60, 54))
+    if hold:
+        for y in range(7, 29, 7):
+            for x in range(6, 30, 7):
+                c.line(x, y, x + 2, y - 2, 0.65, (112, 114, 99))
+    else:
+        c.line(8, 24, 21, 24, 0.5, (83, 96, 88))
 
 
 def wall(c):
-    c.rect(0, 0, CELL, CELL, WALL)
-    c.rect(2, 2, CELL - 2, CELL - 2, WALL_EDGE)
-    c.rect(4, 4, CELL - 4, CELL - 4, WALL)
+    c.rect(0, 0, CELL, CELL, (45, 42, 37))
+    c.rect(1, 1, CELL - 1, CELL - 1, (119, 99, 76), 1)
+    c.rect(3, 3, CELL - 3, CELL - 3, (68, 62, 51), 1)
+    c.rect(5, 5, CELL - 5, CELL - 5, (76, 68, 54), 1)
+    c.line(5, 5, 27, 5, 0.8, (99, 87, 68))
+    for x, y in ((3, 3), (29, 3), (3, 29), (29, 29)):
+        c.ellipse(x, y, 0.8, 0.8, (179, 151, 111))
 
 
 def window(c):
     wall(c)
-    c.rect(5, 12, CELL - 5, 20, GLASS)
-    c.rect(5, 15.5, CELL - 5, 16.5, WALL_EDGE)
+    c.rect(3, 10, CELL - 3, 22, INK, 1)
+    c.rect(5, 12, CELL - 5, 20, (187, 169, 124))
+    c.rect(6, 12, 26, 14, LAMP)
+    c.line(7, 18, 14, 14, 1.2, GLASS)
+    c.line(19, 18, 24, 15, 0.8, GLASS)
+    c.rect(15, 11, 17, 21, WALL_EDGE)
 
 
 def door(c):
     deck(c, 1)
     c.rect(0, 0, 4, CELL, WALL)
     c.rect(CELL - 4, 0, CELL, CELL, WALL)
-    c.rect(4, 14, CELL - 4, 18, DECK_LINE)
+    c.line(4, 14, CELL - 4, 14, 1.2, (193, 153, 97))
+    c.line(4, 17, CELL - 4, 17, 1.2, WOOD_DARK)
 
 
 def hatch(c):
-    c.rect(0, 0, CELL, CELL, IRON)
+    steel(c, True)
     for i in range(-2, 6):
         x = i * 8
         c.line(x, CELL, x + CELL / 2, 0, 3.0, STRIPE)
-    c.rect(4, 4, CELL - 4, CELL - 4, IRON_DARK)
-    c.rect(6, 6, CELL - 6, CELL - 6, IRON)
+    c.rect(4, 4, CELL - 4, CELL - 4, IRON_DARK, 1)
+    c.rect(6, 6, CELL - 6, CELL - 6, IRON, 1)
+    c.line(11, 13, 11, 20, 2, LINEN)
+    c.line(11, 20, 20, 20, 2, LINEN)
 
 
 def helm(c):
-    deck(c, 2)
-    c.ring(16, 18, 11, 8, WOOD_DARK)
-    for angle in range(0, 360, 45):
+    steel(c)
+    c.rect(3, 1, 29, 10, INK, 2)
+    c.rect(4, 2, 28, 9, (110, 94, 63), 1)
+    for x in (8, 16, 24):
+        c.ellipse(x, 5.5, 2.5, 2.5, LINEN)
+        c.line(x, 5.5, x + 1, 4, 0.7, INK)
+    c.ellipse(16, 20, 10.5, 10.5, (36, 36, 30, 100))
+    c.ring(16, 19, 10, 7.5, (201, 151, 84))
+    for angle in range(0, 360, 60):
         a = math.radians(angle)
-        c.line(16, 18, 16 + 12.5 * math.cos(a), 18 + 12.5 * math.sin(a), 2.0, WOOD_DARK)
-    c.ellipse(16, 18, 3, 3, RUST)
-    c.rect(10, 2, 22, 6, WALL_EDGE, 1.5)
+        c.line(16, 19, 16 + 11 * math.cos(a), 19 + 11 * math.sin(a), 1.5, WOOD_DARK)
+    c.ellipse(16, 19, 3, 3, (198, 172, 109))
 
 
 def table(c):
     deck(c, 3)
-    c.rect(3, 6, CELL - 3, CELL - 6, WOOD_DARK, 4)
-    c.rect(5, 8, CELL - 5, CELL - 8, WOOD, 3)
-    c.ellipse(11, 16, 3, 3, LINEN)
-    c.ellipse(21, 16, 3, 3, LINEN)
+    c.rect(2, 5, 30, 29, (38, 29, 23, 90), 3)
+    c.rect(3, 4, CELL - 3, CELL - 5, WOOD_DARK, 3)
+    c.rect(4, 5, CELL - 4, CELL - 7, (194, 150, 97), 2)
+    c.line(5, 8, 27, 8, 0.7, (225, 183, 127))
+    c.rect(7, 10, 23, 22, LINEN, 0.6)
+    c.line(12, 11, 14, 17, 0.7, (152, 133, 93))
+    c.line(14, 17, 21, 19, 0.7, (152, 133, 93))
+    c.ellipse(24, 10, 2.4, 2.4, INK)
+    c.ellipse(24, 10, 1.6, 1.6, LINEN)
+    c.ellipse(24, 10, 1, 1, (85, 58, 38))
+    c.rect(6, 24, 11, 27, (132, 76, 52), 0.5)
 
 
 def bunk(c):
     deck(c, 4)
-    c.rect(3, 2, CELL - 3, CELL - 2, WOOD_DARK, 3)
-    c.rect(5, 4, CELL - 5, CELL - 4, CLOTH, 2)
-    c.rect(6, 5, CELL - 6, 11, LINEN, 2)
+    c.rect(2, 2, 30, 31, (45, 30, 22, 100), 2)
+    c.rect(3, 1, CELL - 3, CELL - 2, WOOD_DARK, 2)
+    c.rect(5, 3, CELL - 5, CELL - 4, (155, 73, 51), 1)
+    c.rect(6, 4, CELL - 6, 11, LINEN, 2)
+    c.line(8, 6, 24, 6, 0.6, (255, 241, 205))
+    c.rect(6, 14, 26, 17, (190, 108, 66))
+    c.line(8, 18, 8, 26, 0.5, (208, 135, 86))
+    c.line(24, 18, 24, 26, 0.5, (208, 135, 86))
+    c.rect(6, 26, 26, 28, (110, 56, 41))
 
 
 def engine(c):
-    deck(c, 5)
-    c.rect(3, 3, CELL - 3, CELL - 3, IRON_DARK, 4)
-    c.ellipse(16, 16, 10, 10, IRON)
-    c.ring(16, 16, 10, 7, IRON_DARK)
-    c.ellipse(16, 16, 4, 4, RUST)
-    c.rect(24, 5, 28, 9, LAMP, 1)
+    steel(c, True)
+    c.rect(2, 3, 30, 30, (26, 29, 26, 130), 3)
+    c.rect(3, 2, CELL - 3, CELL - 4, IRON_DARK, 3)
+    c.rect(6, 3, 26, 26, (118, 122, 103), 2)
+    for y in range(7, 23, 3):
+        c.line(7, y, 25, y, 1.1, (59, 66, 59))
+    c.rect(11, 7, 21, 23, (168, 84, 48), 2)
+    for y in (10, 15, 20):
+        c.ellipse(16, y, 2, 2, (202, 129, 67))
+    c.line(3, 26, 27, 26, 2, (168, 145, 100))
+    c.rect(24, 3, 27, 6, LAMP, 0.7)
+    c.rect(4, 3, 8, 6, (52, 54, 48))
 
 
-def tread(c):
-    c.rect(0, 0, CELL, CELL, IRON_DARK)
-    for i in range(4):
-        y = i * 8 + 2
-        c.rect(3, y, CELL - 3, y + 4, IRON, 1)
+def tread(c, phase=0):
+    c.rect(0, 0, CELL, CELL, (42, 43, 38))
+    c.rect(2, 0, CELL - 2, CELL, (65, 66, 58))
+    for i in range(-1, 5):
+        y = i * 8 + 2 + phase
+        c.rect(3, y, CELL - 3, y + 5, (96, 98, 84), 0.5)
+        c.line(4, y + 1, 28, y + 1, 0.7, (129, 130, 109))
+        c.line(4, y + 4, 28, y + 4, 0.7, (53, 56, 49))
+        c.ellipse(8, y + 2.5, 1, 1, IRON_DARK)
+        c.ellipse(24, y + 2.5, 1, 1, IRON_DARK)
+    c.line(1, 0, 1, CELL, 1, (148, 124, 85))
+    c.line(31, 0, 31, CELL, 1, (30, 33, 29))
 
 
 def ramp(c):
@@ -430,7 +496,7 @@ def main():
     sheet(
         "ship",
         [
-            ("deck", lambda c: deck(c)),
+            ("deck", lambda c: None),
             ("wall", wall),
             ("window", window),
             ("door", door),
@@ -443,6 +509,9 @@ def main():
             ("ramp", ramp),
             ("crate", crate),
             ("mast", mast),
+            ("floor-home", deck),
+            ("floor-bridge", steel),
+            ("floor-hold", lambda c: steel(c, True)),
         ],
         4,
         CELL,

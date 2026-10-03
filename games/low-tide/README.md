@@ -69,6 +69,16 @@ There is no game code. The game is `assets/`:
 the top of that file. The scripts are pure Python and deterministic, so
 running them again changes nothing unless they changed.
 
+## Visual style
+
+The crawler stays a straight-down floor plan. Its bridge has worn metal plates,
+the living quarters have warm boards and stitched bunks, and the machinery hold
+has a grated floor. A cosmetic tilemap under the deck gives each room its
+material without changing the logical tiles used for walking or stowing cargo.
+Furniture and metal fittings use small contact shadows and highlights that
+rotate with the crawler; no directional world lighting is baked into them.
+All art comes from the deterministic Python sources in `art/`.
+
 ## The Basin
 
 The Basin is a **voxel world viewed as a map**: the engine's natural terrain,
