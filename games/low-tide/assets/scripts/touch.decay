@@ -38,11 +38,12 @@ script TouchControls {
         }
         let playing = Game.touch;
         World.set_active(this.use_button, playing);
-        World.set_active(this.view_button, playing);
-        World.set_active(this.drop_button, playing && (Game.hint == Hint.Jettison || Game.building));
+        World.set_active(this.view_button, playing && !Game.diving);
+        World.set_active(this.drop_button, playing && (Game.hint == Hint.Jettison || Game.building || Game.diving));
         Ui.set_text(this.use_label, use_words());
         var drop_words = "Drop";
         if Game.building { drop_words = "Close"; }
+        if Game.diving { drop_words = "Recall"; }
         Ui.set_text(this.drop_label, drop_words);
         draw_stick(playing);
     }
@@ -51,6 +52,10 @@ script TouchControls {
     // and leaving the helm.
     fn use_words() -> String {
         return match Game.hint {
+            Hint.DiveStart => "Dive",
+            Hint.DiveReturn => "Climb",
+            Hint.DiveSalvage => "Recover",
+            Hint.DiveSwim => "Swim",
             Hint.Workbench => "Workbench",
             Hint.Building => "Build",
             Hint.TakeHelm => "Helm",

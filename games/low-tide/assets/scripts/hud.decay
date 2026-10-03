@@ -29,13 +29,30 @@ script Hud {
             TidePhase.Falling => "Receding: low in ",
         };
         status = status + "\n" + tide + ceil(Game.tide_left) + "s";
-        if Game.flooded { status = status + "\nFlooded: wait for the ebb"; }
+        if Game.flooded { status = status + "\nFlooded: dive from the ramp"; }
         if Game.washed > 0.0 { status = status + "\nWashed away: " + Game.washed; }
+        if Game.diving {
+            status = "LOW TIDE / DIVING\nAir " + ceil(Game.dive_air) + "s\nDepth " + max(0.0, -Game.dive_y).fixed(1);
+            if Game.dive_loot { status += "\nCarrying ore + scrap\nHeavy salvage: swim slower"; }
+            else if Game.dive_empty { status += "\nThis wreck cache is empty"; }
+            else { status += "\nFind the sealed salvage"; }
+            status += "\nReturn up the yellow line";
+        } else if Game.dive_notice > 0.0 {
+            status += "\n" + match Game.dive_report {
+                DiveReport.Recovered => "Recovered: 1 ore + 1 scrap",
+                DiveReport.Rescued => "Recalled safely; salvage left below",
+                DiveReport.Full => "Diving needs two free cargo slots",
+                DiveReport.NoSite => "Park near a flooded wreck to dive",
+                _ => "Back aboard",
+            };
+        }
         Ui.set_text(this.entity, status);
         // Keep the panel's top edge fixed as flood notices add lines.
         var height = 0.305;
         if Game.flooded { height += 0.04; }
         if Game.washed > 0.0 { height += 0.04; }
+        if Game.dive_notice > 0.0 { height += 0.04; }
+        if Game.diving { height = 0.305; }
         this.panel.transform.scale.y = height;
         this.panel.transform.position.y = -0.02 - height * 0.5;
 
@@ -71,6 +88,10 @@ script Hud {
 
     fn key_words() -> String {
         return match Game.hint {
+            Hint.DiveStart => "E  dive from the ramp",
+            Hint.DiveReturn => "E  climb aboard     X / Esc  recall",
+            Hint.DiveSalvage => "E  recover salvage     X / Esc  recall",
+            Hint.DiveSwim => "WASD  swim     X / Esc  recall",
             Hint.Workbench => "E  open the workbench",
             Hint.Building => "Q  next plan     E  build     X / Esc  close",
             Hint.TakeHelm => "E  take the helm",
@@ -84,6 +105,10 @@ script Hud {
 
     fn touch_words() -> String {
         return match Game.hint {
+            Hint.DiveStart => "Dive from the ramp into a nearby wreck",
+            Hint.DiveReturn => "Climb brings your salvage aboard",
+            Hint.DiveSalvage => "Recover the sealed salvage",
+            Hint.DiveSwim => "Drag to swim; Recall leaves salvage below",
             Hint.Workbench => "Workbench to build onto your crawler",
             Hint.Building => "Next chooses a plan; Build makes it; Close returns",
             Hint.TakeHelm => "Helm to take the wheel",

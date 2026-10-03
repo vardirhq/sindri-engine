@@ -1,0 +1,121 @@
+// An authored side-view cutaway of a nearby submerged wreck. The top-down
+// voyage keeps running: the crew stays aboard, the tide keeps turning, and
+// cargo only enters the real hold after a successful climb back up the line.
+script Dive {
+    @export let air_seconds: f32 = 30.0;
+    @export let swim_speed: f32 = 3.0;
+    var stage: Entity = null;
+    var camera: Entity = null;
+    var map_camera: Entity = null;
+    var diver: Entity = null;
+    var hull: Entity = null;
+    var cache: Entity = null;
+    var use_button: Entity = null;
+    var drop_button: Entity = null;
+    var recovered: Map<String, bool> = [:];
+    var site: String = "";
+
+    fn start() {
+        this.stage = World.find("Dive cutaway");
+        this.camera = World.find("Dive camera");
+        this.map_camera = World.find("Camera");
+        this.diver = World.find("Diver");
+        this.hull = World.find("Sunken hull");
+        this.cache = World.find("Sealed salvage");
+        this.use_button = World.find("Use button");
+        this.drop_button = World.find("Drop button");
+    }
+
+    fn enter() {
+        if Game.diving || !Game.aboard || Game.at_helm || Game.building || !Game.flooded || Game.tide_phase != TidePhase.High { return; }
+        let wreck = nearby_dive_wreck();
+        if wreck == null { Game.dive_notice = 4.0; Game.dive_report = DiveReport.NoSite; return; }
+        if Game.crates + 2.0 > Game.capacity { Game.dive_notice = 4.0; Game.dive_report = DiveReport.Full; return; }
+        let at = wreck.transform.world_position;
+        this.site = at.x + ":" + at.y;
+        Game.dive_empty = this.recovered.get(this.site, false);
+        Game.dive_loot = false;
+        Game.dive_air = this.air_seconds;
+        Game.diving = true;
+        Game.throttle = 0.0;
+        Game.rudder = 0.0;
+        this.diver.transform.position = Vec3(-1.5, 0.0, 0.2);
+        World.set_active(this.stage, true);
+        World.set_active(this.map_camera, false);
+        World.set_active(this.camera, true);
+        World.set_active(this.cache, !Game.dive_empty);
+    }
+
+    fn update(dt: f32) {
+        Game.dive_notice = max(0.0, Game.dive_notice - dt);
+        if !Game.diving { return; }
+        if !Game.flooded || Action.pressed("cancel") || Action.pressed("drop") || Ui.is_pressed(this.drop_button) {
+            finish(false); return;
+        }
+        let stick = steering();
+        let movement = stick.normalized * min(1.0, stick.length);
+        var speed = this.swim_speed;
+        if Game.dive_loot { speed *= 0.7; }
+        var at = this.diver.transform.position;
+        let dx = movement.x * speed * dt;
+        let dy = movement.y * speed * dt;
+        if open_at(at.x + dx, at.y) { at.x += dx; }
+        if open_at(at.x, at.y + dy) { at.y += dy; }
+        at.x = clamp(at.x, -6.0, 6.0);
+        at.y = clamp(at.y, -10.0, 0.2);
+        this.diver.transform.position = at;
+        if abs(stick.x) > 0.1 { this.diver.transform.scale.x = sign(stick.x) * 0.9; }
+        Game.dive_x = at.x;
+        Game.dive_y = at.y;
+        if at.y < -0.6 { Game.dive_air = max(0.0, Game.dive_air - dt); }
+        else { Game.dive_air = min(this.air_seconds, Game.dive_air + dt * 8.0); }
+        if Game.dive_air <= 0.0 { finish(false); return; }
+        let near_line = Vec2(at.x, at.y).distance(Vec2(-1.5, 0.0)) < 1.0;
+        let near_cache = Vec2(at.x, at.y).distance(Vec2(2.5, -7.5)) < 1.1;
+        if near_line { Game.hint = Hint.DiveReturn; }
+        else if near_cache && !Game.dive_empty && !Game.dive_loot { Game.hint = Hint.DiveSalvage; }
+        else { Game.hint = Hint.DiveSwim; }
+        if Action.pressed("use") || Ui.is_pressed(this.use_button) {
+            if near_line { finish(true); }
+            else if near_cache && !Game.dive_empty && !Game.dive_loot {
+                Game.dive_loot = true;
+                World.set_active(this.cache, false);
+            }
+        }
+    }
+
+    fn open_at(x: f32, y: f32) -> bool {
+        for dx in [-0.22, 0.22] {
+            for dy in [-0.22, 0.22] {
+                if Grid.tile(this.hull, floor(x + dx + 7.0), floor(1.0 - y - dy)) == 1.0 { return false; }
+            }
+        }
+        return true;
+    }
+
+    fn finish(safe: bool) {
+        if safe && Game.dive_loot && Game.crates + 2.0 <= Game.capacity {
+            Crawler.on(World.find("Crawler")).stow(Resource.Ore);
+            Crawler.on(World.find("Crawler")).stow(Resource.Scrap);
+            this.recovered[this.site] = true;
+            Game.dive_report = DiveReport.Recovered;
+        } else if !safe { Game.dive_report = DiveReport.Rescued; }
+        else { Game.dive_report = DiveReport.Returned; }
+        Game.dive_notice = 6.0;
+        Game.diving = false;
+        Game.dive_loot = false;
+        World.set_active(this.stage, false);
+        World.set_active(this.camera, false);
+        World.set_active(this.map_camera, true);
+    }
+}
+
+shared fn nearby_dive_wreck() -> Entity {
+    let at = World.find("Crawler").transform.world_position;
+    let wreck = World.nearest("wreck", at);
+    if wreck == null { return null; }
+    if wreck.transform.world_position.distance(at) > 32.0 { return null; }
+    let position = wreck.transform.world_position;
+    if !wet_at(World.find("Basin"), Vec2(position.x, position.y)) { return null; }
+    return wreck;
+}

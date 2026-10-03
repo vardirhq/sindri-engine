@@ -206,3 +206,39 @@ touch; it also checks upgrades, duplicate refusal and the chassis limit.
 
 These are Decay game rules using existing tile, UI and animation APIs; no new
 engine host API or general construction editor is introduced.
+
+## High-tide diving
+
+At high tide, walk beside the starboard ramp and press E / Dive. The crawler
+must be flooded, a flooded wreck must lie within 32 units, and the hold needs
+two free slots. Park near a wreck before the water rises to prepare a dive.
+
+The view switches to an authored side-view wreck interior. WASD, the d-pad or
+the touch stick swims; hull panels block movement. The yellow line leads back
+to the crawler. Air lasts thirty seconds underwater and refills at the surface.
+Use E / Recover beside the sealed cache, then return up the line and press
+E / Climb: one ore and one scrap enter the actual hold. Carrying the cache
+slows swimming by thirty percent. Nothing is paid into the hold while below.
+
+X / Recall, Escape, empty air or the receding water returns you safely to the
+same place aboard and leaves unreturned salvage below. The top-down tide
+continues during the trip. A successfully recovered cache stays empty for that
+wreck for the rest of the voyage, including after streaming it out and back.
+Surface scrap and underwater caches are separate.
+
+This first slice uses the same authored wreck interior for each nearby site;
+it is not a cross-section of generated voxel terrain. Diving bells, air tanks,
+fins, lamps, different interiors and boat upgrades remain future progression.
+`tests/a_high_tide_dive.rs` plays the full trip on keyboard and phone touch and
+checks hull collision, air loss, ebb recovery and duplicate loot prevention.
+
+## Persistence
+
+There is no Low Tide autosave or load yet, on desktop or the web. Cargo,
+construction, harvested terrain and depleted wrecks are remembered only while
+the current session runs. Closing or reloading the game starts a new voyage.
+The engine offers a versioned number/flag Save API, but Low Tide does not use
+it. Full autosave needs a versioned voyage snapshot (including sparse terrain
+edits and wreck history), project-specific host storage and reload tests. The
+shared browser host currently uses a common save key; it must be isolated per
+project before calling Low Tide's web progression persistent.
