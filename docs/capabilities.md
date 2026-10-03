@@ -703,6 +703,12 @@ Its viewport-sized workbench exposes three directly selectable blueprints,
 current cargo versus cost, installed/chassis-limit states and explicit actions.
 Keyboard and phone menu tests exercise selection, rejection and closing;
 phone/desktop captures exercise the compact HUD and responsive menu.
+Its instrument HUD uses authored atlas icons, real hold segments and
+speed/phase-time meters. A deck-parented outline identifies the crate named
+in a contextual action panel; discard confirmation is tied to that cell and
+cancels on movement, Escape or timeout. Keyboard and phone runtime tests
+exercise these decisions. Frame lamps use painted sprite glows, not a new
+engine lighting capability.
 Low Tide also exercises a side-view high-tide dive: a second authored camera
 frames a wreck tilemap, Decay swims against hull cells, manages air and a heavy
 cache, then deposits ore and scrap in the original hold only after returning.

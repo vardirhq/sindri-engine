@@ -46,7 +46,7 @@ fn a_thumb_walks_the_crew_to_the_helm_and_drives() {
     pilot.push([0.0, 1.0]);
     pilot.step();
     assert!(pilot.flag("touch"), "a finger was seen");
-    assert!(active(&pilot, "use-button"), "the Use button is up");
+    assert!(!active(&pilot, "use-button"), "no empty Use action");
     assert!(active(&pilot, "stick-ring"), "the stick is drawn");
     assert!(!active(&pilot, "drop-button"), "Drop only shows by a crate");
     pilot.release();

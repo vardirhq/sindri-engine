@@ -1,0 +1,18 @@
+{
+  "format_version": 1,
+  "anchor": "center",
+  "grid": {
+    "columns": 8,
+    "rows": 1,
+    "names": [
+      "sun",
+      "hold",
+      "speed",
+      "tide",
+      "pin",
+      "compass",
+      "hand",
+      "tool"
+    ]
+  }
+}

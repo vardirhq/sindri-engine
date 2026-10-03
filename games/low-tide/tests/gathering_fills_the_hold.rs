@@ -63,7 +63,16 @@ fn harvest(mut pilot: Pilot, block: &str, kind: &str, tile: u32) {
     assert!(pilot.board(kind).abs() < 0.01, "not yet stowed");
     // Holding a bundle refuses a second harvest rather than erasing extra terrain.
     let after = pilot.ground().surface(at[0], at[2]);
-    pilot.use_it();
+    if pilot.touch() {
+        pilot.step();
+        let button = pilot.run.entity("use-button").unwrap();
+        assert!(
+            pilot.run.on_screen(button).is_none(),
+            "no empty action while carrying"
+        );
+    } else {
+        pilot.use_it();
+    }
     assert_eq!(pilot.ground().surface(at[0], at[2]), after);
     bring_home(&mut pilot);
     assert!(!pilot.run.world.is_active(carried));

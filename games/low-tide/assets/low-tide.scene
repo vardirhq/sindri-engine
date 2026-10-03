@@ -675,8 +675,8 @@
    "name": "Status",
    "transform_3d": {
     "position": [
-     0.04,
-     -0.085,
+     0.12,
+     -0.33,
      0.0
     ],
     "rotation": [
@@ -701,10 +701,10 @@
       1.0
      ],
      "font": "fonts/Inter.ttf",
-     "font_size": 0.037,
-     "line_height": 0.04625,
+     "font_size": 0.031,
+     "line_height": 0.03875,
      "layer": 100,
-     "text": "Hold 0/4",
+     "text": "Salt flats",
      "bold": true,
      "outline": {
       "width": 0.0,
@@ -2644,12 +2644,186 @@
    "disabled": true
   },
   {
+   "id": "cabin-lamp-0",
+   "name": "Frame lamp 0",
+   "parent": "deck",
+   "transform_3d": {
+    "position": [
+     3.5,
+     -4.5,
+     0.2
+    ],
+    "rotation": [
+     0,
+     0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     1.4,
+     1.4,
+     1
+    ]
+   },
+   "components": {
+    "sindri.sprite": {
+     "texture": "textures/lamp.png",
+     "layer": 9
+    }
+   }
+  },
+  {
+   "id": "cabin-lamp-1",
+   "name": "Frame lamp 1",
+   "parent": "deck",
+   "transform_3d": {
+    "position": [
+     7.5,
+     -4.5,
+     0.2
+    ],
+    "rotation": [
+     0,
+     0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     1.4,
+     1.4,
+     1
+    ]
+   },
+   "components": {
+    "sindri.sprite": {
+     "texture": "textures/lamp.png",
+     "layer": 9
+    }
+   }
+  },
+  {
+   "id": "cabin-lamp-2",
+   "name": "Frame lamp 2",
+   "parent": "deck",
+   "transform_3d": {
+    "position": [
+     3.5,
+     -10.5,
+     0.2
+    ],
+    "rotation": [
+     0,
+     0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     1.4,
+     1.4,
+     1
+    ]
+   },
+   "components": {
+    "sindri.sprite": {
+     "texture": "textures/lamp.png",
+     "layer": 9
+    }
+   }
+  },
+  {
+   "id": "cabin-lamp-3",
+   "name": "Frame lamp 3",
+   "parent": "deck",
+   "transform_3d": {
+    "position": [
+     7.5,
+     -10.5,
+     0.2
+    ],
+    "rotation": [
+     0,
+     0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     1.4,
+     1.4,
+     1
+    ]
+   },
+   "components": {
+    "sindri.sprite": {
+     "texture": "textures/lamp.png",
+     "layer": 9
+    }
+   }
+  },
+  {
+   "id": "pipe-port",
+   "name": "Frame pipe port",
+   "parent": "deck",
+   "transform_3d": {
+    "position": [
+     3.3,
+     -7.2,
+     0.1
+    ],
+    "rotation": [
+     0,
+     0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     0.25,
+     4.0,
+     1
+    ]
+   },
+   "components": {
+    "sindri.sprite": {
+     "texture": "textures/pipe.png",
+     "layer": 5
+    }
+   }
+  },
+  {
+   "id": "pipe-starboard",
+   "name": "Frame pipe starboard",
+   "parent": "deck",
+   "transform_3d": {
+    "position": [
+     7.7,
+     -7.2,
+     0.1
+    ],
+    "rotation": [
+     0,
+     0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     0.25,
+     4.0,
+     1
+    ]
+   },
+   "components": {
+    "sindri.sprite": {
+     "texture": "textures/pipe.png",
+     "layer": 5
+    }
+   }
+  },
+  {
    "id": "instruments",
    "name": "Instrument panel",
    "transform_3d": {
     "position": [
-     0.345,
-     -0.1325,
+     0.34,
+     -0.21,
      0
     ],
     "rotation": [
@@ -2659,8 +2833,8 @@
      1.0
     ],
     "scale": [
-     0.65,
-     0.225,
+     0.64,
+     0.38,
      1
     ]
    },
@@ -2669,19 +2843,19 @@
      "kind": "rect",
      "count": 48.0,
      "fill": [
-      0.035,
-      0.065,
-      0.062,
-      0.96
+      0.008,
+      0.018,
+      0.022,
+      0.98
      ],
      "stroke": [
+      0.65,
       0.55,
-      0.48,
-      0.33,
-      0.8
+      0.34,
+      0.9
      ],
-     "stroke_width": 0.005,
-     "corner_radius": 0.025,
+     "stroke_width": 0.008,
+     "corner_radius": 0.06,
      "dashes": 0.0,
      "dash_duty": 0.5,
      "sweep_start": 0.0,
@@ -2693,12 +2867,41 @@
    }
   },
   {
+   "id": "brand-icon",
+   "name": "brand-icon",
+   "transform_3d": {
+    "position": [
+     0.07,
+     -0.064,
+     0
+    ],
+    "rotation": [
+     0,
+     0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     0.072,
+     0.072,
+     1
+    ]
+   },
+   "components": {
+    "sindri.ui.image": {
+     "anchor": "top_left",
+     "texture": "textures/instruments.png#sun",
+     "layer": 101
+    }
+   }
+  },
+  {
    "id": "instrument-title",
    "name": "Instrument title",
    "transform_3d": {
     "position": [
-     0.04,
-     -0.038,
+     0.12,
+     -0.03,
      0.0
     ],
     "rotation": [
@@ -2717,16 +2920,16 @@
     "sindri.ui.text": {
      "anchor": "top_left",
      "color": [
-      0.72,
-      0.82,
-      0.72,
-      1
+      1.0,
+      0.96,
+      0.88,
+      1.0
      ],
      "font": "fonts/Inter.ttf",
-     "font_size": 0.029,
-     "line_height": 0.036250000000000004,
+     "font_size": 0.047,
+     "line_height": 0.05875,
      "layer": 100,
-     "text": "LOW TIDE  /  CRAWLER 01",
+     "text": "LOW TIDE",
      "bold": true,
      "outline": {
       "width": 0.0,
@@ -2750,6 +2953,2914 @@
       ],
       "softness": 0.004
      }
+    }
+   }
+  },
+  {
+   "id": "instrument-subtitle",
+   "name": "Instrument subtitle",
+   "transform_3d": {
+    "position": [
+     0.12,
+     -0.092,
+     0.0
+    ],
+    "rotation": [
+     0,
+     0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     1.0,
+     1.0,
+     1
+    ]
+   },
+   "components": {
+    "sindri.ui.text": {
+     "anchor": "top_left",
+     "color": [
+      1.0,
+      0.96,
+      0.88,
+      1.0
+     ],
+     "font": "fonts/Inter.ttf",
+     "font_size": 0.024,
+     "line_height": 0.03,
+     "layer": 100,
+     "text": "CRAWLER 01",
+     "bold": true,
+     "outline": {
+      "width": 0.0,
+      "color": [
+       0.12,
+       0.08,
+       0.06,
+       0.95
+      ]
+     },
+     "shadow": {
+      "offset": [
+       0.0,
+       -0.003
+      ],
+      "color": [
+       0.0,
+       0.0,
+       0.0,
+       0.35
+      ],
+      "softness": 0.004
+     }
+    }
+   }
+  },
+  {
+   "id": "hold-icon",
+   "name": "hold-icon",
+   "transform_3d": {
+    "position": [
+     0.07,
+     -0.156,
+     0
+    ],
+    "rotation": [
+     0,
+     0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     0.043,
+     0.043,
+     1
+    ]
+   },
+   "components": {
+    "sindri.ui.image": {
+     "anchor": "top_left",
+     "texture": "textures/instruments.png#hold",
+     "layer": 101
+    }
+   }
+  },
+  {
+   "id": "speed-icon",
+   "name": "speed-icon",
+   "transform_3d": {
+    "position": [
+     0.07,
+     -0.211,
+     0
+    ],
+    "rotation": [
+     0,
+     0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     0.043,
+     0.043,
+     1
+    ]
+   },
+   "components": {
+    "sindri.ui.image": {
+     "anchor": "top_left",
+     "texture": "textures/instruments.png#speed",
+     "layer": 101
+    }
+   }
+  },
+  {
+   "id": "tide-icon",
+   "name": "tide-icon",
+   "transform_3d": {
+    "position": [
+     0.07,
+     -0.266,
+     0
+    ],
+    "rotation": [
+     0,
+     0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     0.043,
+     0.043,
+     1
+    ]
+   },
+   "components": {
+    "sindri.ui.image": {
+     "anchor": "top_left",
+     "texture": "textures/instruments.png#tide",
+     "layer": 101
+    }
+   }
+  },
+  {
+   "id": "terrain-icon",
+   "name": "terrain-icon",
+   "transform_3d": {
+    "position": [
+     0.07,
+     -0.346,
+     0
+    ],
+    "rotation": [
+     0,
+     0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     0.043,
+     0.043,
+     1
+    ]
+   },
+   "components": {
+    "sindri.ui.image": {
+     "anchor": "top_left",
+     "texture": "textures/instruments.png#pin",
+     "layer": 101
+    }
+   }
+  },
+  {
+   "id": "hold-readout",
+   "name": "Hold readout",
+   "transform_3d": {
+    "position": [
+     0.12,
+     -0.14,
+     0.0
+    ],
+    "rotation": [
+     0,
+     0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     1.0,
+     1.0,
+     1
+    ]
+   },
+   "components": {
+    "sindri.ui.text": {
+     "anchor": "top_left",
+     "color": [
+      1.0,
+      0.96,
+      0.88,
+      1.0
+     ],
+     "font": "fonts/Inter.ttf",
+     "font_size": 0.034,
+     "line_height": 0.0425,
+     "layer": 100,
+     "text": "Hold 0/4",
+     "bold": true,
+     "outline": {
+      "width": 0.0,
+      "color": [
+       0.12,
+       0.08,
+       0.06,
+       0.95
+      ]
+     },
+     "shadow": {
+      "offset": [
+       0.0,
+       -0.003
+      ],
+      "color": [
+       0.0,
+       0.0,
+       0.0,
+       0.35
+      ],
+      "softness": 0.004
+     }
+    }
+   }
+  },
+  {
+   "id": "speed-readout",
+   "name": "Speed readout",
+   "transform_3d": {
+    "position": [
+     0.12,
+     -0.195,
+     0.0
+    ],
+    "rotation": [
+     0,
+     0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     1.0,
+     1.0,
+     1
+    ]
+   },
+   "components": {
+    "sindri.ui.text": {
+     "anchor": "top_left",
+     "color": [
+      1.0,
+      0.96,
+      0.88,
+      1.0
+     ],
+     "font": "fonts/Inter.ttf",
+     "font_size": 0.034,
+     "line_height": 0.0425,
+     "layer": 100,
+     "text": "Speed 0.0",
+     "bold": true,
+     "outline": {
+      "width": 0.0,
+      "color": [
+       0.12,
+       0.08,
+       0.06,
+       0.95
+      ]
+     },
+     "shadow": {
+      "offset": [
+       0.0,
+       -0.003
+      ],
+      "color": [
+       0.0,
+       0.0,
+       0.0,
+       0.35
+      ],
+      "softness": 0.004
+     }
+    }
+   }
+  },
+  {
+   "id": "tide-readout",
+   "name": "Tide readout",
+   "transform_3d": {
+    "position": [
+     0.12,
+     -0.25,
+     0.0
+    ],
+    "rotation": [
+     0,
+     0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     1.0,
+     1.0,
+     1
+    ]
+   },
+   "components": {
+    "sindri.ui.text": {
+     "anchor": "top_left",
+     "color": [
+      1.0,
+      0.96,
+      0.88,
+      1.0
+     ],
+     "font": "fonts/Inter.ttf",
+     "font_size": 0.032,
+     "line_height": 0.04,
+     "layer": 100,
+     "text": "LOW TIDE / 180s",
+     "bold": true,
+     "outline": {
+      "width": 0.0,
+      "color": [
+       0.12,
+       0.08,
+       0.06,
+       0.95
+      ]
+     },
+     "shadow": {
+      "offset": [
+       0.0,
+       -0.003
+      ],
+      "color": [
+       0.0,
+       0.0,
+       0.0,
+       0.35
+      ],
+      "softness": 0.004
+     }
+    }
+   }
+  },
+  {
+   "id": "speed-track",
+   "name": "Speed track",
+   "transform_3d": {
+    "position": [
+     0.49,
+     -0.195,
+     0
+    ],
+    "rotation": [
+     0,
+     0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     0.19,
+     0.013,
+     1
+    ]
+   },
+   "components": {
+    "sindri.ui.shape": {
+     "kind": "rect",
+     "count": 48.0,
+     "fill": [
+      0.05,
+      0.065,
+      0.07,
+      1
+     ],
+     "stroke": [
+      0.65,
+      0.55,
+      0.34,
+      0.9
+     ],
+     "stroke_width": 0.008,
+     "corner_radius": 0.06,
+     "dashes": 0.0,
+     "dash_duty": 0.5,
+     "sweep_start": 0.0,
+     "sweep_turns": 1.0,
+     "blend": "over",
+     "anchor": "top_left",
+     "layer": 96
+    }
+   }
+  },
+  {
+   "id": "speed-fill",
+   "name": "Speed fill",
+   "transform_3d": {
+    "position": [
+     0.49,
+     -0.195,
+     0
+    ],
+    "rotation": [
+     0,
+     0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     0.19,
+     0.013,
+     1
+    ]
+   },
+   "components": {
+    "sindri.ui.shape": {
+     "kind": "rect",
+     "count": 48.0,
+     "fill": [
+      0.61,
+      0.48,
+      0.22,
+      1
+     ],
+     "stroke": [
+      0.65,
+      0.55,
+      0.34,
+      0.9
+     ],
+     "stroke_width": 0.008,
+     "corner_radius": 0.06,
+     "dashes": 0.0,
+     "dash_duty": 0.5,
+     "sweep_start": 0.0,
+     "sweep_turns": 1.0,
+     "blend": "over",
+     "anchor": "top_left",
+     "layer": 97
+    }
+   }
+  },
+  {
+   "id": "tide-track",
+   "name": "Tide track",
+   "transform_3d": {
+    "position": [
+     0.35,
+     -0.288,
+     0
+    ],
+    "rotation": [
+     0,
+     0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     0.5,
+     0.014,
+     1
+    ]
+   },
+   "components": {
+    "sindri.ui.shape": {
+     "kind": "rect",
+     "count": 48.0,
+     "fill": [
+      0.05,
+      0.065,
+      0.07,
+      1
+     ],
+     "stroke": [
+      0.65,
+      0.55,
+      0.34,
+      0.9
+     ],
+     "stroke_width": 0.008,
+     "corner_radius": 0.06,
+     "dashes": 0.0,
+     "dash_duty": 0.5,
+     "sweep_start": 0.0,
+     "sweep_turns": 1.0,
+     "blend": "over",
+     "anchor": "top_left",
+     "layer": 96
+    }
+   }
+  },
+  {
+   "id": "tide-fill",
+   "name": "Tide fill",
+   "transform_3d": {
+    "position": [
+     0.35,
+     -0.288,
+     0
+    ],
+    "rotation": [
+     0,
+     0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     0.5,
+     0.014,
+     1
+    ]
+   },
+   "components": {
+    "sindri.ui.shape": {
+     "kind": "rect",
+     "count": 48.0,
+     "fill": [
+      0.05,
+      0.37,
+      0.52,
+      1
+     ],
+     "stroke": [
+      0.65,
+      0.55,
+      0.34,
+      0.9
+     ],
+     "stroke_width": 0.008,
+     "corner_radius": 0.06,
+     "dashes": 0.0,
+     "dash_duty": 0.5,
+     "sweep_start": 0.0,
+     "sweep_turns": 1.0,
+     "blend": "over",
+     "anchor": "top_left",
+     "layer": 97
+    }
+   }
+  },
+  {
+   "id": "cargo-empty-0",
+   "name": "Cargo empty 0",
+   "transform_3d": {
+    "position": [
+     0.45,
+     -0.14,
+     0
+    ],
+    "rotation": [
+     0,
+     0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     0.04,
+     0.018,
+     1
+    ]
+   },
+   "components": {
+    "sindri.ui.shape": {
+     "kind": "rect",
+     "count": 48.0,
+     "fill": [
+      0.05,
+      0.065,
+      0.07,
+      1
+     ],
+     "stroke": [
+      0.65,
+      0.55,
+      0.34,
+      0.9
+     ],
+     "stroke_width": 0.008,
+     "corner_radius": 0.06,
+     "dashes": 0.0,
+     "dash_duty": 0.5,
+     "sweep_start": 0.0,
+     "sweep_turns": 1.0,
+     "blend": "over",
+     "anchor": "top_left",
+     "layer": 96
+    }
+   }
+  },
+  {
+   "id": "cargo-fill-0",
+   "name": "Cargo fill 0",
+   "transform_3d": {
+    "position": [
+     0.45,
+     -0.14,
+     0
+    ],
+    "rotation": [
+     0,
+     0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     0.04,
+     0.018,
+     1
+    ]
+   },
+   "components": {
+    "sindri.ui.shape": {
+     "kind": "rect",
+     "count": 48.0,
+     "fill": [
+      0.59,
+      0.45,
+      0.19,
+      1
+     ],
+     "stroke": [
+      0.65,
+      0.55,
+      0.34,
+      0.9
+     ],
+     "stroke_width": 0.008,
+     "corner_radius": 0.06,
+     "dashes": 0.0,
+     "dash_duty": 0.5,
+     "sweep_start": 0.0,
+     "sweep_turns": 1.0,
+     "blend": "over",
+     "anchor": "top_left",
+     "layer": 97
+    }
+   }
+  },
+  {
+   "id": "cargo-full-0",
+   "name": "Cargo full 0",
+   "transform_3d": {
+    "position": [
+     0.45,
+     -0.14,
+     0
+    ],
+    "rotation": [
+     0,
+     0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     0.04,
+     0.018,
+     1
+    ]
+   },
+   "components": {
+    "sindri.ui.shape": {
+     "kind": "rect",
+     "count": 48.0,
+     "fill": [
+      0.64,
+      0.06,
+      0.065,
+      1
+     ],
+     "stroke": [
+      0.65,
+      0.55,
+      0.34,
+      0.9
+     ],
+     "stroke_width": 0.008,
+     "corner_radius": 0.06,
+     "dashes": 0.0,
+     "dash_duty": 0.5,
+     "sweep_start": 0.0,
+     "sweep_turns": 1.0,
+     "blend": "over",
+     "anchor": "top_left",
+     "layer": 98
+    }
+   }
+  },
+  {
+   "id": "cargo-empty-1",
+   "name": "Cargo empty 1",
+   "transform_3d": {
+    "position": [
+     0.45,
+     -0.14,
+     0
+    ],
+    "rotation": [
+     0,
+     0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     0.04,
+     0.018,
+     1
+    ]
+   },
+   "components": {
+    "sindri.ui.shape": {
+     "kind": "rect",
+     "count": 48.0,
+     "fill": [
+      0.05,
+      0.065,
+      0.07,
+      1
+     ],
+     "stroke": [
+      0.65,
+      0.55,
+      0.34,
+      0.9
+     ],
+     "stroke_width": 0.008,
+     "corner_radius": 0.06,
+     "dashes": 0.0,
+     "dash_duty": 0.5,
+     "sweep_start": 0.0,
+     "sweep_turns": 1.0,
+     "blend": "over",
+     "anchor": "top_left",
+     "layer": 96
+    }
+   }
+  },
+  {
+   "id": "cargo-fill-1",
+   "name": "Cargo fill 1",
+   "transform_3d": {
+    "position": [
+     0.45,
+     -0.14,
+     0
+    ],
+    "rotation": [
+     0,
+     0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     0.04,
+     0.018,
+     1
+    ]
+   },
+   "components": {
+    "sindri.ui.shape": {
+     "kind": "rect",
+     "count": 48.0,
+     "fill": [
+      0.59,
+      0.45,
+      0.19,
+      1
+     ],
+     "stroke": [
+      0.65,
+      0.55,
+      0.34,
+      0.9
+     ],
+     "stroke_width": 0.008,
+     "corner_radius": 0.06,
+     "dashes": 0.0,
+     "dash_duty": 0.5,
+     "sweep_start": 0.0,
+     "sweep_turns": 1.0,
+     "blend": "over",
+     "anchor": "top_left",
+     "layer": 97
+    }
+   }
+  },
+  {
+   "id": "cargo-full-1",
+   "name": "Cargo full 1",
+   "transform_3d": {
+    "position": [
+     0.45,
+     -0.14,
+     0
+    ],
+    "rotation": [
+     0,
+     0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     0.04,
+     0.018,
+     1
+    ]
+   },
+   "components": {
+    "sindri.ui.shape": {
+     "kind": "rect",
+     "count": 48.0,
+     "fill": [
+      0.64,
+      0.06,
+      0.065,
+      1
+     ],
+     "stroke": [
+      0.65,
+      0.55,
+      0.34,
+      0.9
+     ],
+     "stroke_width": 0.008,
+     "corner_radius": 0.06,
+     "dashes": 0.0,
+     "dash_duty": 0.5,
+     "sweep_start": 0.0,
+     "sweep_turns": 1.0,
+     "blend": "over",
+     "anchor": "top_left",
+     "layer": 98
+    }
+   }
+  },
+  {
+   "id": "cargo-empty-2",
+   "name": "Cargo empty 2",
+   "transform_3d": {
+    "position": [
+     0.45,
+     -0.14,
+     0
+    ],
+    "rotation": [
+     0,
+     0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     0.04,
+     0.018,
+     1
+    ]
+   },
+   "components": {
+    "sindri.ui.shape": {
+     "kind": "rect",
+     "count": 48.0,
+     "fill": [
+      0.05,
+      0.065,
+      0.07,
+      1
+     ],
+     "stroke": [
+      0.65,
+      0.55,
+      0.34,
+      0.9
+     ],
+     "stroke_width": 0.008,
+     "corner_radius": 0.06,
+     "dashes": 0.0,
+     "dash_duty": 0.5,
+     "sweep_start": 0.0,
+     "sweep_turns": 1.0,
+     "blend": "over",
+     "anchor": "top_left",
+     "layer": 96
+    }
+   }
+  },
+  {
+   "id": "cargo-fill-2",
+   "name": "Cargo fill 2",
+   "transform_3d": {
+    "position": [
+     0.45,
+     -0.14,
+     0
+    ],
+    "rotation": [
+     0,
+     0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     0.04,
+     0.018,
+     1
+    ]
+   },
+   "components": {
+    "sindri.ui.shape": {
+     "kind": "rect",
+     "count": 48.0,
+     "fill": [
+      0.59,
+      0.45,
+      0.19,
+      1
+     ],
+     "stroke": [
+      0.65,
+      0.55,
+      0.34,
+      0.9
+     ],
+     "stroke_width": 0.008,
+     "corner_radius": 0.06,
+     "dashes": 0.0,
+     "dash_duty": 0.5,
+     "sweep_start": 0.0,
+     "sweep_turns": 1.0,
+     "blend": "over",
+     "anchor": "top_left",
+     "layer": 97
+    }
+   }
+  },
+  {
+   "id": "cargo-full-2",
+   "name": "Cargo full 2",
+   "transform_3d": {
+    "position": [
+     0.45,
+     -0.14,
+     0
+    ],
+    "rotation": [
+     0,
+     0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     0.04,
+     0.018,
+     1
+    ]
+   },
+   "components": {
+    "sindri.ui.shape": {
+     "kind": "rect",
+     "count": 48.0,
+     "fill": [
+      0.64,
+      0.06,
+      0.065,
+      1
+     ],
+     "stroke": [
+      0.65,
+      0.55,
+      0.34,
+      0.9
+     ],
+     "stroke_width": 0.008,
+     "corner_radius": 0.06,
+     "dashes": 0.0,
+     "dash_duty": 0.5,
+     "sweep_start": 0.0,
+     "sweep_turns": 1.0,
+     "blend": "over",
+     "anchor": "top_left",
+     "layer": 98
+    }
+   }
+  },
+  {
+   "id": "cargo-empty-3",
+   "name": "Cargo empty 3",
+   "transform_3d": {
+    "position": [
+     0.45,
+     -0.14,
+     0
+    ],
+    "rotation": [
+     0,
+     0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     0.04,
+     0.018,
+     1
+    ]
+   },
+   "components": {
+    "sindri.ui.shape": {
+     "kind": "rect",
+     "count": 48.0,
+     "fill": [
+      0.05,
+      0.065,
+      0.07,
+      1
+     ],
+     "stroke": [
+      0.65,
+      0.55,
+      0.34,
+      0.9
+     ],
+     "stroke_width": 0.008,
+     "corner_radius": 0.06,
+     "dashes": 0.0,
+     "dash_duty": 0.5,
+     "sweep_start": 0.0,
+     "sweep_turns": 1.0,
+     "blend": "over",
+     "anchor": "top_left",
+     "layer": 96
+    }
+   }
+  },
+  {
+   "id": "cargo-fill-3",
+   "name": "Cargo fill 3",
+   "transform_3d": {
+    "position": [
+     0.45,
+     -0.14,
+     0
+    ],
+    "rotation": [
+     0,
+     0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     0.04,
+     0.018,
+     1
+    ]
+   },
+   "components": {
+    "sindri.ui.shape": {
+     "kind": "rect",
+     "count": 48.0,
+     "fill": [
+      0.59,
+      0.45,
+      0.19,
+      1
+     ],
+     "stroke": [
+      0.65,
+      0.55,
+      0.34,
+      0.9
+     ],
+     "stroke_width": 0.008,
+     "corner_radius": 0.06,
+     "dashes": 0.0,
+     "dash_duty": 0.5,
+     "sweep_start": 0.0,
+     "sweep_turns": 1.0,
+     "blend": "over",
+     "anchor": "top_left",
+     "layer": 97
+    }
+   }
+  },
+  {
+   "id": "cargo-full-3",
+   "name": "Cargo full 3",
+   "transform_3d": {
+    "position": [
+     0.45,
+     -0.14,
+     0
+    ],
+    "rotation": [
+     0,
+     0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     0.04,
+     0.018,
+     1
+    ]
+   },
+   "components": {
+    "sindri.ui.shape": {
+     "kind": "rect",
+     "count": 48.0,
+     "fill": [
+      0.64,
+      0.06,
+      0.065,
+      1
+     ],
+     "stroke": [
+      0.65,
+      0.55,
+      0.34,
+      0.9
+     ],
+     "stroke_width": 0.008,
+     "corner_radius": 0.06,
+     "dashes": 0.0,
+     "dash_duty": 0.5,
+     "sweep_start": 0.0,
+     "sweep_turns": 1.0,
+     "blend": "over",
+     "anchor": "top_left",
+     "layer": 98
+    }
+   }
+  },
+  {
+   "id": "cargo-empty-4",
+   "name": "Cargo empty 4",
+   "transform_3d": {
+    "position": [
+     0.45,
+     -0.14,
+     0
+    ],
+    "rotation": [
+     0,
+     0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     0.04,
+     0.018,
+     1
+    ]
+   },
+   "components": {
+    "sindri.ui.shape": {
+     "kind": "rect",
+     "count": 48.0,
+     "fill": [
+      0.05,
+      0.065,
+      0.07,
+      1
+     ],
+     "stroke": [
+      0.65,
+      0.55,
+      0.34,
+      0.9
+     ],
+     "stroke_width": 0.008,
+     "corner_radius": 0.06,
+     "dashes": 0.0,
+     "dash_duty": 0.5,
+     "sweep_start": 0.0,
+     "sweep_turns": 1.0,
+     "blend": "over",
+     "anchor": "top_left",
+     "layer": 96
+    }
+   }
+  },
+  {
+   "id": "cargo-fill-4",
+   "name": "Cargo fill 4",
+   "transform_3d": {
+    "position": [
+     0.45,
+     -0.14,
+     0
+    ],
+    "rotation": [
+     0,
+     0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     0.04,
+     0.018,
+     1
+    ]
+   },
+   "components": {
+    "sindri.ui.shape": {
+     "kind": "rect",
+     "count": 48.0,
+     "fill": [
+      0.59,
+      0.45,
+      0.19,
+      1
+     ],
+     "stroke": [
+      0.65,
+      0.55,
+      0.34,
+      0.9
+     ],
+     "stroke_width": 0.008,
+     "corner_radius": 0.06,
+     "dashes": 0.0,
+     "dash_duty": 0.5,
+     "sweep_start": 0.0,
+     "sweep_turns": 1.0,
+     "blend": "over",
+     "anchor": "top_left",
+     "layer": 97
+    }
+   }
+  },
+  {
+   "id": "cargo-full-4",
+   "name": "Cargo full 4",
+   "transform_3d": {
+    "position": [
+     0.45,
+     -0.14,
+     0
+    ],
+    "rotation": [
+     0,
+     0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     0.04,
+     0.018,
+     1
+    ]
+   },
+   "components": {
+    "sindri.ui.shape": {
+     "kind": "rect",
+     "count": 48.0,
+     "fill": [
+      0.64,
+      0.06,
+      0.065,
+      1
+     ],
+     "stroke": [
+      0.65,
+      0.55,
+      0.34,
+      0.9
+     ],
+     "stroke_width": 0.008,
+     "corner_radius": 0.06,
+     "dashes": 0.0,
+     "dash_duty": 0.5,
+     "sweep_start": 0.0,
+     "sweep_turns": 1.0,
+     "blend": "over",
+     "anchor": "top_left",
+     "layer": 98
+    }
+   }
+  },
+  {
+   "id": "cargo-empty-5",
+   "name": "Cargo empty 5",
+   "transform_3d": {
+    "position": [
+     0.45,
+     -0.14,
+     0
+    ],
+    "rotation": [
+     0,
+     0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     0.04,
+     0.018,
+     1
+    ]
+   },
+   "components": {
+    "sindri.ui.shape": {
+     "kind": "rect",
+     "count": 48.0,
+     "fill": [
+      0.05,
+      0.065,
+      0.07,
+      1
+     ],
+     "stroke": [
+      0.65,
+      0.55,
+      0.34,
+      0.9
+     ],
+     "stroke_width": 0.008,
+     "corner_radius": 0.06,
+     "dashes": 0.0,
+     "dash_duty": 0.5,
+     "sweep_start": 0.0,
+     "sweep_turns": 1.0,
+     "blend": "over",
+     "anchor": "top_left",
+     "layer": 96
+    }
+   }
+  },
+  {
+   "id": "cargo-fill-5",
+   "name": "Cargo fill 5",
+   "transform_3d": {
+    "position": [
+     0.45,
+     -0.14,
+     0
+    ],
+    "rotation": [
+     0,
+     0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     0.04,
+     0.018,
+     1
+    ]
+   },
+   "components": {
+    "sindri.ui.shape": {
+     "kind": "rect",
+     "count": 48.0,
+     "fill": [
+      0.59,
+      0.45,
+      0.19,
+      1
+     ],
+     "stroke": [
+      0.65,
+      0.55,
+      0.34,
+      0.9
+     ],
+     "stroke_width": 0.008,
+     "corner_radius": 0.06,
+     "dashes": 0.0,
+     "dash_duty": 0.5,
+     "sweep_start": 0.0,
+     "sweep_turns": 1.0,
+     "blend": "over",
+     "anchor": "top_left",
+     "layer": 97
+    }
+   }
+  },
+  {
+   "id": "cargo-full-5",
+   "name": "Cargo full 5",
+   "transform_3d": {
+    "position": [
+     0.45,
+     -0.14,
+     0
+    ],
+    "rotation": [
+     0,
+     0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     0.04,
+     0.018,
+     1
+    ]
+   },
+   "components": {
+    "sindri.ui.shape": {
+     "kind": "rect",
+     "count": 48.0,
+     "fill": [
+      0.64,
+      0.06,
+      0.065,
+      1
+     ],
+     "stroke": [
+      0.65,
+      0.55,
+      0.34,
+      0.9
+     ],
+     "stroke_width": 0.008,
+     "corner_radius": 0.06,
+     "dashes": 0.0,
+     "dash_duty": 0.5,
+     "sweep_start": 0.0,
+     "sweep_turns": 1.0,
+     "blend": "over",
+     "anchor": "top_left",
+     "layer": 98
+    }
+   }
+  },
+  {
+   "id": "cargo-empty-6",
+   "name": "Cargo empty 6",
+   "transform_3d": {
+    "position": [
+     0.45,
+     -0.14,
+     0
+    ],
+    "rotation": [
+     0,
+     0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     0.04,
+     0.018,
+     1
+    ]
+   },
+   "components": {
+    "sindri.ui.shape": {
+     "kind": "rect",
+     "count": 48.0,
+     "fill": [
+      0.05,
+      0.065,
+      0.07,
+      1
+     ],
+     "stroke": [
+      0.65,
+      0.55,
+      0.34,
+      0.9
+     ],
+     "stroke_width": 0.008,
+     "corner_radius": 0.06,
+     "dashes": 0.0,
+     "dash_duty": 0.5,
+     "sweep_start": 0.0,
+     "sweep_turns": 1.0,
+     "blend": "over",
+     "anchor": "top_left",
+     "layer": 96
+    }
+   }
+  },
+  {
+   "id": "cargo-fill-6",
+   "name": "Cargo fill 6",
+   "transform_3d": {
+    "position": [
+     0.45,
+     -0.14,
+     0
+    ],
+    "rotation": [
+     0,
+     0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     0.04,
+     0.018,
+     1
+    ]
+   },
+   "components": {
+    "sindri.ui.shape": {
+     "kind": "rect",
+     "count": 48.0,
+     "fill": [
+      0.59,
+      0.45,
+      0.19,
+      1
+     ],
+     "stroke": [
+      0.65,
+      0.55,
+      0.34,
+      0.9
+     ],
+     "stroke_width": 0.008,
+     "corner_radius": 0.06,
+     "dashes": 0.0,
+     "dash_duty": 0.5,
+     "sweep_start": 0.0,
+     "sweep_turns": 1.0,
+     "blend": "over",
+     "anchor": "top_left",
+     "layer": 97
+    }
+   }
+  },
+  {
+   "id": "cargo-full-6",
+   "name": "Cargo full 6",
+   "transform_3d": {
+    "position": [
+     0.45,
+     -0.14,
+     0
+    ],
+    "rotation": [
+     0,
+     0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     0.04,
+     0.018,
+     1
+    ]
+   },
+   "components": {
+    "sindri.ui.shape": {
+     "kind": "rect",
+     "count": 48.0,
+     "fill": [
+      0.64,
+      0.06,
+      0.065,
+      1
+     ],
+     "stroke": [
+      0.65,
+      0.55,
+      0.34,
+      0.9
+     ],
+     "stroke_width": 0.008,
+     "corner_radius": 0.06,
+     "dashes": 0.0,
+     "dash_duty": 0.5,
+     "sweep_start": 0.0,
+     "sweep_turns": 1.0,
+     "blend": "over",
+     "anchor": "top_left",
+     "layer": 98
+    }
+   }
+  },
+  {
+   "id": "cargo-empty-7",
+   "name": "Cargo empty 7",
+   "transform_3d": {
+    "position": [
+     0.45,
+     -0.14,
+     0
+    ],
+    "rotation": [
+     0,
+     0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     0.04,
+     0.018,
+     1
+    ]
+   },
+   "components": {
+    "sindri.ui.shape": {
+     "kind": "rect",
+     "count": 48.0,
+     "fill": [
+      0.05,
+      0.065,
+      0.07,
+      1
+     ],
+     "stroke": [
+      0.65,
+      0.55,
+      0.34,
+      0.9
+     ],
+     "stroke_width": 0.008,
+     "corner_radius": 0.06,
+     "dashes": 0.0,
+     "dash_duty": 0.5,
+     "sweep_start": 0.0,
+     "sweep_turns": 1.0,
+     "blend": "over",
+     "anchor": "top_left",
+     "layer": 96
+    }
+   }
+  },
+  {
+   "id": "cargo-fill-7",
+   "name": "Cargo fill 7",
+   "transform_3d": {
+    "position": [
+     0.45,
+     -0.14,
+     0
+    ],
+    "rotation": [
+     0,
+     0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     0.04,
+     0.018,
+     1
+    ]
+   },
+   "components": {
+    "sindri.ui.shape": {
+     "kind": "rect",
+     "count": 48.0,
+     "fill": [
+      0.59,
+      0.45,
+      0.19,
+      1
+     ],
+     "stroke": [
+      0.65,
+      0.55,
+      0.34,
+      0.9
+     ],
+     "stroke_width": 0.008,
+     "corner_radius": 0.06,
+     "dashes": 0.0,
+     "dash_duty": 0.5,
+     "sweep_start": 0.0,
+     "sweep_turns": 1.0,
+     "blend": "over",
+     "anchor": "top_left",
+     "layer": 97
+    }
+   }
+  },
+  {
+   "id": "cargo-full-7",
+   "name": "Cargo full 7",
+   "transform_3d": {
+    "position": [
+     0.45,
+     -0.14,
+     0
+    ],
+    "rotation": [
+     0,
+     0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     0.04,
+     0.018,
+     1
+    ]
+   },
+   "components": {
+    "sindri.ui.shape": {
+     "kind": "rect",
+     "count": 48.0,
+     "fill": [
+      0.64,
+      0.06,
+      0.065,
+      1
+     ],
+     "stroke": [
+      0.65,
+      0.55,
+      0.34,
+      0.9
+     ],
+     "stroke_width": 0.008,
+     "corner_radius": 0.06,
+     "dashes": 0.0,
+     "dash_duty": 0.5,
+     "sweep_start": 0.0,
+     "sweep_turns": 1.0,
+     "blend": "over",
+     "anchor": "top_left",
+     "layer": 98
+    }
+   }
+  },
+  {
+   "id": "cargo-empty-8",
+   "name": "Cargo empty 8",
+   "transform_3d": {
+    "position": [
+     0.45,
+     -0.14,
+     0
+    ],
+    "rotation": [
+     0,
+     0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     0.04,
+     0.018,
+     1
+    ]
+   },
+   "components": {
+    "sindri.ui.shape": {
+     "kind": "rect",
+     "count": 48.0,
+     "fill": [
+      0.05,
+      0.065,
+      0.07,
+      1
+     ],
+     "stroke": [
+      0.65,
+      0.55,
+      0.34,
+      0.9
+     ],
+     "stroke_width": 0.008,
+     "corner_radius": 0.06,
+     "dashes": 0.0,
+     "dash_duty": 0.5,
+     "sweep_start": 0.0,
+     "sweep_turns": 1.0,
+     "blend": "over",
+     "anchor": "top_left",
+     "layer": 96
+    }
+   }
+  },
+  {
+   "id": "cargo-fill-8",
+   "name": "Cargo fill 8",
+   "transform_3d": {
+    "position": [
+     0.45,
+     -0.14,
+     0
+    ],
+    "rotation": [
+     0,
+     0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     0.04,
+     0.018,
+     1
+    ]
+   },
+   "components": {
+    "sindri.ui.shape": {
+     "kind": "rect",
+     "count": 48.0,
+     "fill": [
+      0.59,
+      0.45,
+      0.19,
+      1
+     ],
+     "stroke": [
+      0.65,
+      0.55,
+      0.34,
+      0.9
+     ],
+     "stroke_width": 0.008,
+     "corner_radius": 0.06,
+     "dashes": 0.0,
+     "dash_duty": 0.5,
+     "sweep_start": 0.0,
+     "sweep_turns": 1.0,
+     "blend": "over",
+     "anchor": "top_left",
+     "layer": 97
+    }
+   }
+  },
+  {
+   "id": "cargo-full-8",
+   "name": "Cargo full 8",
+   "transform_3d": {
+    "position": [
+     0.45,
+     -0.14,
+     0
+    ],
+    "rotation": [
+     0,
+     0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     0.04,
+     0.018,
+     1
+    ]
+   },
+   "components": {
+    "sindri.ui.shape": {
+     "kind": "rect",
+     "count": 48.0,
+     "fill": [
+      0.64,
+      0.06,
+      0.065,
+      1
+     ],
+     "stroke": [
+      0.65,
+      0.55,
+      0.34,
+      0.9
+     ],
+     "stroke_width": 0.008,
+     "corner_radius": 0.06,
+     "dashes": 0.0,
+     "dash_duty": 0.5,
+     "sweep_start": 0.0,
+     "sweep_turns": 1.0,
+     "blend": "over",
+     "anchor": "top_left",
+     "layer": 98
+    }
+   }
+  },
+  {
+   "id": "cargo-empty-9",
+   "name": "Cargo empty 9",
+   "transform_3d": {
+    "position": [
+     0.45,
+     -0.14,
+     0
+    ],
+    "rotation": [
+     0,
+     0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     0.04,
+     0.018,
+     1
+    ]
+   },
+   "components": {
+    "sindri.ui.shape": {
+     "kind": "rect",
+     "count": 48.0,
+     "fill": [
+      0.05,
+      0.065,
+      0.07,
+      1
+     ],
+     "stroke": [
+      0.65,
+      0.55,
+      0.34,
+      0.9
+     ],
+     "stroke_width": 0.008,
+     "corner_radius": 0.06,
+     "dashes": 0.0,
+     "dash_duty": 0.5,
+     "sweep_start": 0.0,
+     "sweep_turns": 1.0,
+     "blend": "over",
+     "anchor": "top_left",
+     "layer": 96
+    }
+   }
+  },
+  {
+   "id": "cargo-fill-9",
+   "name": "Cargo fill 9",
+   "transform_3d": {
+    "position": [
+     0.45,
+     -0.14,
+     0
+    ],
+    "rotation": [
+     0,
+     0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     0.04,
+     0.018,
+     1
+    ]
+   },
+   "components": {
+    "sindri.ui.shape": {
+     "kind": "rect",
+     "count": 48.0,
+     "fill": [
+      0.59,
+      0.45,
+      0.19,
+      1
+     ],
+     "stroke": [
+      0.65,
+      0.55,
+      0.34,
+      0.9
+     ],
+     "stroke_width": 0.008,
+     "corner_radius": 0.06,
+     "dashes": 0.0,
+     "dash_duty": 0.5,
+     "sweep_start": 0.0,
+     "sweep_turns": 1.0,
+     "blend": "over",
+     "anchor": "top_left",
+     "layer": 97
+    }
+   }
+  },
+  {
+   "id": "cargo-full-9",
+   "name": "Cargo full 9",
+   "transform_3d": {
+    "position": [
+     0.45,
+     -0.14,
+     0
+    ],
+    "rotation": [
+     0,
+     0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     0.04,
+     0.018,
+     1
+    ]
+   },
+   "components": {
+    "sindri.ui.shape": {
+     "kind": "rect",
+     "count": 48.0,
+     "fill": [
+      0.64,
+      0.06,
+      0.065,
+      1
+     ],
+     "stroke": [
+      0.65,
+      0.55,
+      0.34,
+      0.9
+     ],
+     "stroke_width": 0.008,
+     "corner_radius": 0.06,
+     "dashes": 0.0,
+     "dash_duty": 0.5,
+     "sweep_start": 0.0,
+     "sweep_turns": 1.0,
+     "blend": "over",
+     "anchor": "top_left",
+     "layer": 98
+    }
+   }
+  },
+  {
+   "id": "cargo-empty-10",
+   "name": "Cargo empty 10",
+   "transform_3d": {
+    "position": [
+     0.45,
+     -0.14,
+     0
+    ],
+    "rotation": [
+     0,
+     0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     0.04,
+     0.018,
+     1
+    ]
+   },
+   "components": {
+    "sindri.ui.shape": {
+     "kind": "rect",
+     "count": 48.0,
+     "fill": [
+      0.05,
+      0.065,
+      0.07,
+      1
+     ],
+     "stroke": [
+      0.65,
+      0.55,
+      0.34,
+      0.9
+     ],
+     "stroke_width": 0.008,
+     "corner_radius": 0.06,
+     "dashes": 0.0,
+     "dash_duty": 0.5,
+     "sweep_start": 0.0,
+     "sweep_turns": 1.0,
+     "blend": "over",
+     "anchor": "top_left",
+     "layer": 96
+    }
+   }
+  },
+  {
+   "id": "cargo-fill-10",
+   "name": "Cargo fill 10",
+   "transform_3d": {
+    "position": [
+     0.45,
+     -0.14,
+     0
+    ],
+    "rotation": [
+     0,
+     0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     0.04,
+     0.018,
+     1
+    ]
+   },
+   "components": {
+    "sindri.ui.shape": {
+     "kind": "rect",
+     "count": 48.0,
+     "fill": [
+      0.59,
+      0.45,
+      0.19,
+      1
+     ],
+     "stroke": [
+      0.65,
+      0.55,
+      0.34,
+      0.9
+     ],
+     "stroke_width": 0.008,
+     "corner_radius": 0.06,
+     "dashes": 0.0,
+     "dash_duty": 0.5,
+     "sweep_start": 0.0,
+     "sweep_turns": 1.0,
+     "blend": "over",
+     "anchor": "top_left",
+     "layer": 97
+    }
+   }
+  },
+  {
+   "id": "cargo-full-10",
+   "name": "Cargo full 10",
+   "transform_3d": {
+    "position": [
+     0.45,
+     -0.14,
+     0
+    ],
+    "rotation": [
+     0,
+     0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     0.04,
+     0.018,
+     1
+    ]
+   },
+   "components": {
+    "sindri.ui.shape": {
+     "kind": "rect",
+     "count": 48.0,
+     "fill": [
+      0.64,
+      0.06,
+      0.065,
+      1
+     ],
+     "stroke": [
+      0.65,
+      0.55,
+      0.34,
+      0.9
+     ],
+     "stroke_width": 0.008,
+     "corner_radius": 0.06,
+     "dashes": 0.0,
+     "dash_duty": 0.5,
+     "sweep_start": 0.0,
+     "sweep_turns": 1.0,
+     "blend": "over",
+     "anchor": "top_left",
+     "layer": 98
+    }
+   }
+  },
+  {
+   "id": "cargo-empty-11",
+   "name": "Cargo empty 11",
+   "transform_3d": {
+    "position": [
+     0.45,
+     -0.14,
+     0
+    ],
+    "rotation": [
+     0,
+     0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     0.04,
+     0.018,
+     1
+    ]
+   },
+   "components": {
+    "sindri.ui.shape": {
+     "kind": "rect",
+     "count": 48.0,
+     "fill": [
+      0.05,
+      0.065,
+      0.07,
+      1
+     ],
+     "stroke": [
+      0.65,
+      0.55,
+      0.34,
+      0.9
+     ],
+     "stroke_width": 0.008,
+     "corner_radius": 0.06,
+     "dashes": 0.0,
+     "dash_duty": 0.5,
+     "sweep_start": 0.0,
+     "sweep_turns": 1.0,
+     "blend": "over",
+     "anchor": "top_left",
+     "layer": 96
+    }
+   }
+  },
+  {
+   "id": "cargo-fill-11",
+   "name": "Cargo fill 11",
+   "transform_3d": {
+    "position": [
+     0.45,
+     -0.14,
+     0
+    ],
+    "rotation": [
+     0,
+     0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     0.04,
+     0.018,
+     1
+    ]
+   },
+   "components": {
+    "sindri.ui.shape": {
+     "kind": "rect",
+     "count": 48.0,
+     "fill": [
+      0.59,
+      0.45,
+      0.19,
+      1
+     ],
+     "stroke": [
+      0.65,
+      0.55,
+      0.34,
+      0.9
+     ],
+     "stroke_width": 0.008,
+     "corner_radius": 0.06,
+     "dashes": 0.0,
+     "dash_duty": 0.5,
+     "sweep_start": 0.0,
+     "sweep_turns": 1.0,
+     "blend": "over",
+     "anchor": "top_left",
+     "layer": 97
+    }
+   }
+  },
+  {
+   "id": "cargo-full-11",
+   "name": "Cargo full 11",
+   "transform_3d": {
+    "position": [
+     0.45,
+     -0.14,
+     0
+    ],
+    "rotation": [
+     0,
+     0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     0.04,
+     0.018,
+     1
+    ]
+   },
+   "components": {
+    "sindri.ui.shape": {
+     "kind": "rect",
+     "count": 48.0,
+     "fill": [
+      0.64,
+      0.06,
+      0.065,
+      1
+     ],
+     "stroke": [
+      0.65,
+      0.55,
+      0.34,
+      0.9
+     ],
+     "stroke_width": 0.008,
+     "corner_radius": 0.06,
+     "dashes": 0.0,
+     "dash_duty": 0.5,
+     "sweep_start": 0.0,
+     "sweep_turns": 1.0,
+     "blend": "over",
+     "anchor": "top_left",
+     "layer": 98
+    }
+   }
+  },
+  {
+   "id": "cargo-empty-12",
+   "name": "Cargo empty 12",
+   "transform_3d": {
+    "position": [
+     0.45,
+     -0.14,
+     0
+    ],
+    "rotation": [
+     0,
+     0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     0.04,
+     0.018,
+     1
+    ]
+   },
+   "components": {
+    "sindri.ui.shape": {
+     "kind": "rect",
+     "count": 48.0,
+     "fill": [
+      0.05,
+      0.065,
+      0.07,
+      1
+     ],
+     "stroke": [
+      0.65,
+      0.55,
+      0.34,
+      0.9
+     ],
+     "stroke_width": 0.008,
+     "corner_radius": 0.06,
+     "dashes": 0.0,
+     "dash_duty": 0.5,
+     "sweep_start": 0.0,
+     "sweep_turns": 1.0,
+     "blend": "over",
+     "anchor": "top_left",
+     "layer": 96
+    }
+   }
+  },
+  {
+   "id": "cargo-fill-12",
+   "name": "Cargo fill 12",
+   "transform_3d": {
+    "position": [
+     0.45,
+     -0.14,
+     0
+    ],
+    "rotation": [
+     0,
+     0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     0.04,
+     0.018,
+     1
+    ]
+   },
+   "components": {
+    "sindri.ui.shape": {
+     "kind": "rect",
+     "count": 48.0,
+     "fill": [
+      0.59,
+      0.45,
+      0.19,
+      1
+     ],
+     "stroke": [
+      0.65,
+      0.55,
+      0.34,
+      0.9
+     ],
+     "stroke_width": 0.008,
+     "corner_radius": 0.06,
+     "dashes": 0.0,
+     "dash_duty": 0.5,
+     "sweep_start": 0.0,
+     "sweep_turns": 1.0,
+     "blend": "over",
+     "anchor": "top_left",
+     "layer": 97
+    }
+   }
+  },
+  {
+   "id": "cargo-full-12",
+   "name": "Cargo full 12",
+   "transform_3d": {
+    "position": [
+     0.45,
+     -0.14,
+     0
+    ],
+    "rotation": [
+     0,
+     0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     0.04,
+     0.018,
+     1
+    ]
+   },
+   "components": {
+    "sindri.ui.shape": {
+     "kind": "rect",
+     "count": 48.0,
+     "fill": [
+      0.64,
+      0.06,
+      0.065,
+      1
+     ],
+     "stroke": [
+      0.65,
+      0.55,
+      0.34,
+      0.9
+     ],
+     "stroke_width": 0.008,
+     "corner_radius": 0.06,
+     "dashes": 0.0,
+     "dash_duty": 0.5,
+     "sweep_start": 0.0,
+     "sweep_turns": 1.0,
+     "blend": "over",
+     "anchor": "top_left",
+     "layer": 98
+    }
+   }
+  },
+  {
+   "id": "cargo-empty-13",
+   "name": "Cargo empty 13",
+   "transform_3d": {
+    "position": [
+     0.45,
+     -0.14,
+     0
+    ],
+    "rotation": [
+     0,
+     0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     0.04,
+     0.018,
+     1
+    ]
+   },
+   "components": {
+    "sindri.ui.shape": {
+     "kind": "rect",
+     "count": 48.0,
+     "fill": [
+      0.05,
+      0.065,
+      0.07,
+      1
+     ],
+     "stroke": [
+      0.65,
+      0.55,
+      0.34,
+      0.9
+     ],
+     "stroke_width": 0.008,
+     "corner_radius": 0.06,
+     "dashes": 0.0,
+     "dash_duty": 0.5,
+     "sweep_start": 0.0,
+     "sweep_turns": 1.0,
+     "blend": "over",
+     "anchor": "top_left",
+     "layer": 96
+    }
+   }
+  },
+  {
+   "id": "cargo-fill-13",
+   "name": "Cargo fill 13",
+   "transform_3d": {
+    "position": [
+     0.45,
+     -0.14,
+     0
+    ],
+    "rotation": [
+     0,
+     0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     0.04,
+     0.018,
+     1
+    ]
+   },
+   "components": {
+    "sindri.ui.shape": {
+     "kind": "rect",
+     "count": 48.0,
+     "fill": [
+      0.59,
+      0.45,
+      0.19,
+      1
+     ],
+     "stroke": [
+      0.65,
+      0.55,
+      0.34,
+      0.9
+     ],
+     "stroke_width": 0.008,
+     "corner_radius": 0.06,
+     "dashes": 0.0,
+     "dash_duty": 0.5,
+     "sweep_start": 0.0,
+     "sweep_turns": 1.0,
+     "blend": "over",
+     "anchor": "top_left",
+     "layer": 97
+    }
+   }
+  },
+  {
+   "id": "cargo-full-13",
+   "name": "Cargo full 13",
+   "transform_3d": {
+    "position": [
+     0.45,
+     -0.14,
+     0
+    ],
+    "rotation": [
+     0,
+     0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     0.04,
+     0.018,
+     1
+    ]
+   },
+   "components": {
+    "sindri.ui.shape": {
+     "kind": "rect",
+     "count": 48.0,
+     "fill": [
+      0.64,
+      0.06,
+      0.065,
+      1
+     ],
+     "stroke": [
+      0.65,
+      0.55,
+      0.34,
+      0.9
+     ],
+     "stroke_width": 0.008,
+     "corner_radius": 0.06,
+     "dashes": 0.0,
+     "dash_duty": 0.5,
+     "sweep_start": 0.0,
+     "sweep_turns": 1.0,
+     "blend": "over",
+     "anchor": "top_left",
+     "layer": 98
+    }
+   }
+  },
+  {
+   "id": "cargo-empty-14",
+   "name": "Cargo empty 14",
+   "transform_3d": {
+    "position": [
+     0.45,
+     -0.14,
+     0
+    ],
+    "rotation": [
+     0,
+     0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     0.04,
+     0.018,
+     1
+    ]
+   },
+   "components": {
+    "sindri.ui.shape": {
+     "kind": "rect",
+     "count": 48.0,
+     "fill": [
+      0.05,
+      0.065,
+      0.07,
+      1
+     ],
+     "stroke": [
+      0.65,
+      0.55,
+      0.34,
+      0.9
+     ],
+     "stroke_width": 0.008,
+     "corner_radius": 0.06,
+     "dashes": 0.0,
+     "dash_duty": 0.5,
+     "sweep_start": 0.0,
+     "sweep_turns": 1.0,
+     "blend": "over",
+     "anchor": "top_left",
+     "layer": 96
+    }
+   }
+  },
+  {
+   "id": "cargo-fill-14",
+   "name": "Cargo fill 14",
+   "transform_3d": {
+    "position": [
+     0.45,
+     -0.14,
+     0
+    ],
+    "rotation": [
+     0,
+     0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     0.04,
+     0.018,
+     1
+    ]
+   },
+   "components": {
+    "sindri.ui.shape": {
+     "kind": "rect",
+     "count": 48.0,
+     "fill": [
+      0.59,
+      0.45,
+      0.19,
+      1
+     ],
+     "stroke": [
+      0.65,
+      0.55,
+      0.34,
+      0.9
+     ],
+     "stroke_width": 0.008,
+     "corner_radius": 0.06,
+     "dashes": 0.0,
+     "dash_duty": 0.5,
+     "sweep_start": 0.0,
+     "sweep_turns": 1.0,
+     "blend": "over",
+     "anchor": "top_left",
+     "layer": 97
+    }
+   }
+  },
+  {
+   "id": "cargo-full-14",
+   "name": "Cargo full 14",
+   "transform_3d": {
+    "position": [
+     0.45,
+     -0.14,
+     0
+    ],
+    "rotation": [
+     0,
+     0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     0.04,
+     0.018,
+     1
+    ]
+   },
+   "components": {
+    "sindri.ui.shape": {
+     "kind": "rect",
+     "count": 48.0,
+     "fill": [
+      0.64,
+      0.06,
+      0.065,
+      1
+     ],
+     "stroke": [
+      0.65,
+      0.55,
+      0.34,
+      0.9
+     ],
+     "stroke_width": 0.008,
+     "corner_radius": 0.06,
+     "dashes": 0.0,
+     "dash_duty": 0.5,
+     "sweep_start": 0.0,
+     "sweep_turns": 1.0,
+     "blend": "over",
+     "anchor": "top_left",
+     "layer": 98
+    }
+   }
+  },
+  {
+   "id": "cargo-empty-15",
+   "name": "Cargo empty 15",
+   "transform_3d": {
+    "position": [
+     0.45,
+     -0.14,
+     0
+    ],
+    "rotation": [
+     0,
+     0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     0.04,
+     0.018,
+     1
+    ]
+   },
+   "components": {
+    "sindri.ui.shape": {
+     "kind": "rect",
+     "count": 48.0,
+     "fill": [
+      0.05,
+      0.065,
+      0.07,
+      1
+     ],
+     "stroke": [
+      0.65,
+      0.55,
+      0.34,
+      0.9
+     ],
+     "stroke_width": 0.008,
+     "corner_radius": 0.06,
+     "dashes": 0.0,
+     "dash_duty": 0.5,
+     "sweep_start": 0.0,
+     "sweep_turns": 1.0,
+     "blend": "over",
+     "anchor": "top_left",
+     "layer": 96
+    }
+   }
+  },
+  {
+   "id": "cargo-fill-15",
+   "name": "Cargo fill 15",
+   "transform_3d": {
+    "position": [
+     0.45,
+     -0.14,
+     0
+    ],
+    "rotation": [
+     0,
+     0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     0.04,
+     0.018,
+     1
+    ]
+   },
+   "components": {
+    "sindri.ui.shape": {
+     "kind": "rect",
+     "count": 48.0,
+     "fill": [
+      0.59,
+      0.45,
+      0.19,
+      1
+     ],
+     "stroke": [
+      0.65,
+      0.55,
+      0.34,
+      0.9
+     ],
+     "stroke_width": 0.008,
+     "corner_radius": 0.06,
+     "dashes": 0.0,
+     "dash_duty": 0.5,
+     "sweep_start": 0.0,
+     "sweep_turns": 1.0,
+     "blend": "over",
+     "anchor": "top_left",
+     "layer": 97
+    }
+   }
+  },
+  {
+   "id": "cargo-full-15",
+   "name": "Cargo full 15",
+   "transform_3d": {
+    "position": [
+     0.45,
+     -0.14,
+     0
+    ],
+    "rotation": [
+     0,
+     0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     0.04,
+     0.018,
+     1
+    ]
+   },
+   "components": {
+    "sindri.ui.shape": {
+     "kind": "rect",
+     "count": 48.0,
+     "fill": [
+      0.64,
+      0.06,
+      0.065,
+      1
+     ],
+     "stroke": [
+      0.65,
+      0.55,
+      0.34,
+      0.9
+     ],
+     "stroke_width": 0.008,
+     "corner_radius": 0.06,
+     "dashes": 0.0,
+     "dash_duty": 0.5,
+     "sweep_start": 0.0,
+     "sweep_turns": 1.0,
+     "blend": "over",
+     "anchor": "top_left",
+     "layer": 98
     }
    }
   },
@@ -2779,19 +5890,19 @@
      "kind": "rect",
      "count": 48.0,
      "fill": [
-      0.025,
-      0.033,
-      0.028,
-      0.95
+      0.008,
+      0.018,
+      0.022,
+      0.98
      ],
      "stroke": [
+      0.65,
       0.55,
-      0.48,
-      0.33,
-      0.6
+      0.34,
+      0.9
      ],
-     "stroke_width": 0.005,
-     "corner_radius": 0.02,
+     "stroke_width": 0.008,
+     "corner_radius": 0.06,
      "dashes": 0.0,
      "dash_duty": 0.5,
      "sweep_start": 0.0,
@@ -2799,6 +5910,366 @@
      "blend": "over",
      "anchor": "bottom",
      "layer": 90
+    }
+   }
+  },
+  {
+   "id": "context-panel",
+   "name": "Context panel",
+   "transform_3d": {
+    "position": [
+     0,
+     0.335,
+     0
+    ],
+    "rotation": [
+     0,
+     0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     0.86,
+     0.34,
+     1
+    ]
+   },
+   "components": {
+    "sindri.ui.shape": {
+     "kind": "rect",
+     "count": 48.0,
+     "fill": [
+      0.008,
+      0.018,
+      0.022,
+      0.98
+     ],
+     "stroke": [
+      0.65,
+      0.55,
+      0.34,
+      0.9
+     ],
+     "stroke_width": 0.008,
+     "corner_radius": 0.06,
+     "dashes": 0.0,
+     "dash_duty": 0.5,
+     "sweep_start": 0.0,
+     "sweep_turns": 1.0,
+     "blend": "over",
+     "anchor": "bottom",
+     "layer": 90
+    }
+   }
+  },
+  {
+   "id": "context-icon",
+   "name": "context-icon",
+   "transform_3d": {
+    "position": [
+     -0.31,
+     0.4,
+     0
+    ],
+    "rotation": [
+     0,
+     0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     0.075,
+     0.075,
+     1
+    ]
+   },
+   "components": {
+    "sindri.ui.image": {
+     "anchor": "bottom",
+     "texture": "textures/instruments.png#hold",
+     "layer": 101
+    }
+   }
+  },
+  {
+   "id": "context-title",
+   "name": "Context title",
+   "transform_3d": {
+    "position": [
+     0,
+     0.445,
+     0.0
+    ],
+    "rotation": [
+     0,
+     0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     1.0,
+     1.0,
+     1
+    ]
+   },
+   "components": {
+    "sindri.ui.text": {
+     "anchor": "bottom",
+     "color": [
+      1.0,
+      0.96,
+      0.88,
+      1.0
+     ],
+     "font": "fonts/Inter.ttf",
+     "font_size": 0.035,
+     "line_height": 0.043750000000000004,
+     "layer": 100,
+     "text": "CARGO",
+     "bold": true,
+     "outline": {
+      "width": 0.0,
+      "color": [
+       0.12,
+       0.08,
+       0.06,
+       0.95
+      ]
+     },
+     "shadow": {
+      "offset": [
+       0.0,
+       -0.003
+      ],
+      "color": [
+       0.0,
+       0.0,
+       0.0,
+       0.35
+      ],
+      "softness": 0.004
+     }
+    }
+   }
+  },
+  {
+   "id": "context-detail",
+   "name": "Context detail",
+   "transform_3d": {
+    "position": [
+     0,
+     0.38,
+     0.0
+    ],
+    "rotation": [
+     0,
+     0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     1.0,
+     1.0,
+     1
+    ]
+   },
+   "components": {
+    "sindri.ui.text": {
+     "anchor": "bottom",
+     "color": [
+      1.0,
+      0.96,
+      0.88,
+      1.0
+     ],
+     "font": "fonts/Inter.ttf",
+     "font_size": 0.028,
+     "line_height": 0.035,
+     "layer": 100,
+     "text": "",
+     "bold": true,
+     "outline": {
+      "width": 0.0,
+      "color": [
+       0.12,
+       0.08,
+       0.06,
+       0.95
+      ]
+     },
+     "shadow": {
+      "offset": [
+       0.0,
+       -0.003
+      ],
+      "color": [
+       0.0,
+       0.0,
+       0.0,
+       0.35
+      ],
+      "softness": 0.004
+     }
+    }
+   }
+  },
+  {
+   "id": "notice-panel",
+   "name": "Notice panel",
+   "transform_3d": {
+    "position": [
+     0,
+     0.55,
+     0
+    ],
+    "rotation": [
+     0,
+     0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     0.86,
+     0.09,
+     1
+    ]
+   },
+   "components": {
+    "sindri.ui.shape": {
+     "kind": "rect",
+     "count": 48.0,
+     "fill": [
+      0.09,
+      0.027,
+      0.019,
+      0.98
+     ],
+     "stroke": [
+      0.65,
+      0.55,
+      0.34,
+      0.9
+     ],
+     "stroke_width": 0.008,
+     "corner_radius": 0.06,
+     "dashes": 0.0,
+     "dash_duty": 0.5,
+     "sweep_start": 0.0,
+     "sweep_turns": 1.0,
+     "blend": "over",
+     "anchor": "bottom",
+     "layer": 90
+    }
+   }
+  },
+  {
+   "id": "notice",
+   "name": "Notice",
+   "transform_3d": {
+    "position": [
+     0,
+     0.55,
+     0.0
+    ],
+    "rotation": [
+     0,
+     0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     1.0,
+     1.0,
+     1
+    ]
+   },
+   "components": {
+    "sindri.ui.text": {
+     "anchor": "bottom",
+     "color": [
+      1.0,
+      0.96,
+      0.88,
+      1.0
+     ],
+     "font": "fonts/Inter.ttf",
+     "font_size": 0.027,
+     "line_height": 0.03375,
+     "layer": 100,
+     "text": "",
+     "bold": true,
+     "outline": {
+      "width": 0.0,
+      "color": [
+       0.12,
+       0.08,
+       0.06,
+       0.95
+      ]
+     },
+     "shadow": {
+      "offset": [
+       0.0,
+       -0.003
+      ],
+      "color": [
+       0.0,
+       0.0,
+       0.0,
+       0.35
+      ],
+      "softness": 0.004
+     }
+    }
+   }
+  },
+  {
+   "id": "crate-focus",
+   "name": "Crate focus",
+   "parent": "deck",
+   "disabled": true,
+   "transform_3d": {
+    "position": [
+     0,
+     0,
+     0.2
+    ],
+    "rotation": [
+     0,
+     0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     1.04,
+     1.04,
+     1
+    ]
+   },
+   "components": {
+    "sindri.shape": {
+     "kind": "rect",
+     "count": 4.0,
+     "fill": [
+      0,
+      0,
+      0,
+      0
+     ],
+     "stroke": [
+      0.95,
+      0.68,
+      0.18,
+      1
+     ],
+     "stroke_width": 0.055,
+     "corner_radius": 0.03,
+     "dashes": 0.0,
+     "dash_duty": 0.5,
+     "sweep_start": 0.0,
+     "sweep_turns": 1.0,
+     "blend": "over",
+     "layer": 8
     }
    }
   },
@@ -2918,8 +6389,8 @@
    "name": "Use button",
    "transform_3d": {
     "position": [
-     -0.2,
-     0.2,
+     0.24,
+     0.245,
      0.0
     ],
     "rotation": [
@@ -2929,7 +6400,7 @@
      1.0
     ],
     "scale": [
-     0.3,
+     0.34,
      0.13,
      1
     ]
@@ -2939,10 +6410,10 @@
      "kind": "rect",
      "count": 48.0,
      "fill": [
-      0.045,
-      0.09,
-      0.085,
-      0.96
+      0.008,
+      0.018,
+      0.022,
+      0.98
      ],
      "stroke": [
       1.0,
@@ -2957,7 +6428,7 @@
      "sweep_start": 0.0,
      "sweep_turns": 1.0,
      "blend": "over",
-     "anchor": "bottom_right",
+     "anchor": "bottom",
      "layer": 90
     },
     "sindri.ui.button": {
@@ -2972,7 +6443,7 @@
    "parent": "use-button",
    "transform_3d": {
     "position": [
-     0.0,
+     0.035,
      0.0,
      0.0
     ],
@@ -2983,7 +6454,7 @@
      1.0
     ],
     "scale": [
-     0.3,
+     0.34,
      0.05,
      1
     ]
@@ -2998,8 +6469,8 @@
       1.0
      ],
      "font": "fonts/Inter.ttf",
-     "font_size": 0.04,
-     "line_height": 0.05,
+     "font_size": 0.036,
+     "line_height": 0.045,
      "layer": 95,
      "text": "Use",
      "bold": true,
@@ -3029,12 +6500,42 @@
    }
   },
   {
+   "id": "use-icon",
+   "name": "Use icon",
+   "parent": "use-button",
+   "transform_3d": {
+    "position": [
+     -0.1,
+     0,
+     0
+    ],
+    "rotation": [
+     0,
+     0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     0.052,
+     0.052,
+     1
+    ]
+   },
+   "components": {
+    "sindri.ui.image": {
+     "anchor": "center",
+     "layer": 96,
+     "texture": "textures/instruments.png#tool"
+    }
+   }
+  },
+  {
    "id": "drop-button",
    "name": "Drop button",
    "transform_3d": {
     "position": [
-     -0.2,
-     0.37,
+     0.24,
+     0.245,
      0.0
     ],
     "rotation": [
@@ -3044,7 +6545,7 @@
      1.0
     ],
     "scale": [
-     0.3,
+     0.34,
      0.13,
      1
     ]
@@ -3054,10 +6555,10 @@
      "kind": "rect",
      "count": 48.0,
      "fill": [
-      0.045,
-      0.09,
-      0.085,
-      0.96
+      0.15,
+      0.018,
+      0.025,
+      0.98
      ],
      "stroke": [
       1.0,
@@ -3072,7 +6573,7 @@
      "sweep_start": 0.0,
      "sweep_turns": 1.0,
      "blend": "over",
-     "anchor": "bottom_right",
+     "anchor": "bottom",
      "layer": 90
     },
     "sindri.ui.button": {
@@ -3087,7 +6588,7 @@
    "parent": "drop-button",
    "transform_3d": {
     "position": [
-     0.0,
+     0.035,
      0.0,
      0.0
     ],
@@ -3098,7 +6599,7 @@
      1.0
     ],
     "scale": [
-     0.3,
+     0.34,
      0.05,
      1
     ]
@@ -3113,8 +6614,8 @@
       1.0
      ],
      "font": "fonts/Inter.ttf",
-     "font_size": 0.04,
-     "line_height": 0.05,
+     "font_size": 0.036,
+     "line_height": 0.045,
      "layer": 95,
      "text": "Drop",
      "bold": true,
@@ -3144,12 +6645,42 @@
    }
   },
   {
+   "id": "drop-icon",
+   "name": "Drop icon",
+   "parent": "drop-button",
+   "transform_3d": {
+    "position": [
+     -0.1,
+     0,
+     0
+    ],
+    "rotation": [
+     0,
+     0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     0.052,
+     0.052,
+     1
+    ]
+   },
+   "components": {
+    "sindri.ui.image": {
+     "anchor": "center",
+     "layer": 96,
+     "texture": "textures/instruments.png#hand"
+    }
+   }
+  },
+  {
    "id": "view-button",
    "name": "View button",
    "transform_3d": {
     "position": [
-     0.15,
-     0.2,
+     -0.105,
+     -0.085,
      0.0
     ],
     "rotation": [
@@ -3159,7 +6690,7 @@
      1.0
     ],
     "scale": [
-     0.22,
+     0.15,
      0.13,
      1
     ]
@@ -3169,10 +6700,10 @@
      "kind": "rect",
      "count": 48.0,
      "fill": [
-      0.045,
-      0.09,
-      0.085,
-      0.96
+      0.008,
+      0.018,
+      0.022,
+      0.98
      ],
      "stroke": [
       1.0,
@@ -3187,7 +6718,7 @@
      "sweep_start": 0.0,
      "sweep_turns": 1.0,
      "blend": "over",
-     "anchor": "bottom_left",
+     "anchor": "top_right",
      "layer": 90
     },
     "sindri.ui.button": {
@@ -3203,7 +6734,7 @@
    "transform_3d": {
     "position": [
      0.0,
-     0.0,
+     -0.035,
      0.0
     ],
     "rotation": [
@@ -3213,7 +6744,7 @@
      1.0
     ],
     "scale": [
-     0.22,
+     0.15,
      0.05,
      1
     ]
@@ -3228,8 +6759,8 @@
       1.0
      ],
      "font": "fonts/Inter.ttf",
-     "font_size": 0.04,
-     "line_height": 0.05,
+     "font_size": 0.032,
+     "line_height": 0.04,
      "layer": 95,
      "text": "View",
      "bold": true,
@@ -3255,6 +6786,36 @@
       ],
       "softness": 0.0
      }
+    }
+   }
+  },
+  {
+   "id": "view-icon",
+   "name": "View icon",
+   "parent": "view-button",
+   "transform_3d": {
+    "position": [
+     0,
+     0.025,
+     0
+    ],
+    "rotation": [
+     0,
+     0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     0.052,
+     0.052,
+     1
+    ]
+   },
+   "components": {
+    "sindri.ui.image": {
+     "anchor": "center",
+     "layer": 96,
+     "texture": "textures/instruments.png#compass"
     }
    }
   },
@@ -3365,9 +6926,9 @@
      "kind": "rect",
      "count": 48.0,
      "fill": [
-      0.035,
-      0.065,
-      0.062,
+      0.008,
+      0.018,
+      0.022,
       1
      ],
      "stroke": [
@@ -3539,9 +7100,9 @@
      "kind": "rect",
      "count": 48.0,
      "fill": [
-      0.09,
-      0.13,
-      0.12,
+      0.018,
+      0.031,
+      0.035,
       1
      ],
      "stroke": [
@@ -3704,9 +7265,9 @@
      "kind": "rect",
      "count": 48.0,
      "fill": [
-      0.09,
-      0.13,
-      0.12,
+      0.018,
+      0.031,
+      0.035,
       1
      ],
      "stroke": [
@@ -3869,9 +7430,9 @@
      "kind": "rect",
      "count": 48.0,
      "fill": [
-      0.09,
-      0.13,
-      0.12,
+      0.018,
+      0.031,
+      0.035,
       1
      ],
      "stroke": [
@@ -4158,9 +7719,9 @@
      "kind": "rect",
      "count": 48.0,
      "fill": [
-      0.22,
-      0.19,
-      0.12,
+      0.07,
+      0.06,
+      0.035,
       1
      ],
      "stroke": [
@@ -4273,9 +7834,9 @@
      "kind": "rect",
      "count": 48.0,
      "fill": [
-      0.22,
-      0.19,
-      0.12,
+      0.07,
+      0.06,
+      0.035,
       1
      ],
      "stroke": [
@@ -4388,9 +7949,9 @@
      "kind": "rect",
      "count": 48.0,
      "fill": [
-      0.22,
-      0.19,
-      0.12,
+      0.07,
+      0.06,
+      0.035,
       1
      ],
      "stroke": [

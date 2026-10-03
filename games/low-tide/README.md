@@ -256,5 +256,24 @@ closes. Dedicated menu buttons also work with a mouse or phone touch.
 While the menu is open, movement stops and the gameplay touch controls are
 hidden; the voyage and tide continue. Closing restores them. The normal HUD
 prioritizes hold space, speed, tide countdown, terrain and immediate danger;
-the workbench carries the full material inventory. View sits at the bottom
-left, away from the status header. The menu and header fit the viewport width.
+the workbench carries the full material inventory. The North / Follow compass button sits beside the narrower status header. The menu and header fit the viewport width.
+
+### Instrument and interaction styling
+
+The opaque dark panels, brass accents and icon sheet share the crawler's
+metal-and-wood palette. Hold segments represent actual occupied slots and
+turn red when full; the speed meter shows speed relative to the current
+maximum. The tide bar is the time remaining in the current phase, using its
+authored duration. It does not predict water depth. Keyboard and phone layouts
+use the same data; action buttons are centered inside the phone's context panel.
+
+Near cargo, a gold outline marks the exact bundle the action targets and
+the panel names its resource. Drop / X first asks for confirmation; a second
+press within four seconds discards that same crate. Walking away, switching
+targets, Escape or the timeout cancels. Diving Recall remains immediate.
+Use appears only when a real interaction is available. North / Follow describes
+the camera-mode action instead of a generic View label.
+
+The frame fittings and lamp glows are authored decorative sprites, not new
+dynamic lighting or additional furniture. The reference-inspired pass does
+not add a minimap, arbitrary object movement or per-crate inventory screens.
