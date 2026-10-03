@@ -572,9 +572,37 @@ def cabin_art():
     png(OUT / "pipe.png", 32, 128, pipe.pixels())
 
 
+def diving_art():
+    def hull(c):
+        c.rect(0, 0, 32, 32, (57, 65, 61))
+        c.rect(2, 2, 30, 30, (112, 80, 54), 2)
+        c.rect(5, 5, 27, 27, (73, 72, 58), 1)
+        for x, y in ((4, 4), (28, 4), (4, 28), (28, 28)):
+            c.ellipse(x, y, 1, 1, (170, 131, 80))
+        c.line(7, 11, 22, 14, 1, (133, 93, 57))
+        c.line(10, 25, 25, 22, 0.7, (47, 60, 53))
+    def diver(c):
+        c.ellipse(17, 17, 9, 4, (32, 40, 38))
+        c.line(6, 18, 12, 16, 4, (176, 112, 55))
+        c.line(4, 12, 11, 16, 3, (200, 151, 73))
+        c.rect(12, 9, 22, 13, (127, 143, 132), 2)
+        c.ellipse(25, 16, 5, 5, (195, 153, 91))
+        c.rect(24, 13, 31, 17, (164, 208, 193), 1)
+        c.line(20, 19, 25, 21, 2, (176, 112, 55))
+    def salvage(c):
+        c.rect(3, 6, 29, 28, (52, 52, 42), 2)
+        c.rect(5, 7, 27, 25, (184, 139, 61), 2)
+        c.line(7, 12, 25, 12, 2, (227, 191, 104))
+        c.rect(13, 12, 19, 20, (83, 103, 84), 1)
+        c.line(9, 24, 23, 24, 2, (109, 78, 41))
+    sheet("dive", [("water", lambda c: None), ("hull", hull),
+                   ("salvage", salvage), ("diver", diver)], 4, CELL, CELL)
+
+
 def main():
     OUT.mkdir(parents=True, exist_ok=True)
     cabin_art()
+    diving_art()
     sheet(
         "ship",
         [

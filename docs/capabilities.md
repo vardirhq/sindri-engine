@@ -699,6 +699,13 @@ phone-touch runtime tests harvest, carry, stow and jettison actual blocks;
 the workbench also consumes physical cargo for deck expansion, a bunk and an
 engine upgrade, preserving the crew and deck origin while driving. Structure
 adds permanent weight; duplicate and unaffordable builds spend nothing.
+Low Tide also exercises a side-view high-tide dive: a second authored camera
+frames a wreck tilemap, Decay swims against hull cells, manages air and a heavy
+cache, then deposits ore and scrap in the original hold only after returning.
+The map tide continues; recall, empty air and ebb recover crew without loot.
+Per-site cache history survives wreck streaming during the current session.
+The interior is an authored activity, not a generated terrain cross-section;
+there is no Low Tide session persistence on desktop or web yet.
 These are Decay gameplay rules, without a new engine host surface. Not
 drawn: decoration that holds nothing up, and a face's animation or glow.
 

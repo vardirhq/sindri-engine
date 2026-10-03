@@ -6,11 +6,13 @@
 // floor(-y). `Grid.surface` and `Grid.height` say what is on top there.
 
 // What the hint line should say, decided by the crew, worded by the HUD.
-enum Hint { None, TakeHelm, AtHelm, Salvage, Harvest, Empty, HoldFull, Carrying, Jettison, Ashore, LeftBehind, Brine, Workbench, Building }
+enum Hint { None, TakeHelm, AtHelm, Salvage, Harvest, Empty, HoldFull, Carrying, Jettison, Ashore, LeftBehind, Brine, Workbench, Building, DiveStart, DiveReturn, DiveSalvage, DiveSwim }
 
 // The kinds of ground the Basin is made of, by what the crawler and the HUD
 // make of them.
 enum Ground { Salt, Crust, Mud, Sand, Reef, Kelp, Rock, Island, Brine, Nothing }
+
+enum DiveReport { None, Recovered, Returned, Rescued, Full, NoSite }
 
 enum Blueprint { Extension, Bunk, Engine }
 enum BuildResult { None, Built, Missing, Limit, Already }
@@ -20,6 +22,14 @@ enum Resource { None, Wood, Stone, Ore, Scrap, Fibre, Salt }
 enum TidePhase { Low, Rising, High, Falling }
 
 state Game {
+    var diving: bool = false;
+    var dive_air: f32 = 30.0;
+    var dive_x: f32 = -1.5;
+    var dive_y: f32 = 0.0;
+    var dive_loot: bool = false;
+    var dive_empty: bool = false;
+    var dive_notice: f32 = 0.0;
+    var dive_report: DiveReport = DiveReport.None;
     var tide_time: f32 = 0.0;
     var tide_level: f32 = -17.0;
     var tide_phase: TidePhase = TidePhase.Low;

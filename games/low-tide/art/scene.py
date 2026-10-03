@@ -294,7 +294,7 @@ def entities():
             "transform_3d": transform(0.0, 0.06),
             "components": {"sindri.ui.text": text("bottom", 0.029, "")},
         },
-    ] + crawler_motion() + cabin_details() + instrument_panel() + touch_controls() + workbench() + [
+    ] + crawler_motion() + cabin_details() + instrument_panel() + touch_controls() + workbench() + dive_cutaway() + [
     ]
     return found
 
@@ -435,6 +435,60 @@ def workbench():
             "components": {"sindri.ui.text": text("center", 0.027, "WORKBENCH")},
         },
     ] + touch_button("next", "Next", 0, -0.13, 0.24, 0.08, "center")
+
+
+def dive_cutaway():
+    # One authored wreck interior, selected from a nearby flooded map wreck.
+    # This is a cutaway activity, not a slice of the voxel volume.
+    root = {"id": "dive-stage", "name": "Dive cutaway", "disabled": True,
+            "transform_3d": transform(10000, 10000)}
+    found = [root, {"id": "dive-camera", "name": "Dive camera", "disabled": True,
+             "transform_3d": transform(10000, 9996, 10),
+             "components": {"sindri.camera": {"projection": "orthographic",
+                 "vertical_size": 20.0, "near": 0.1, "far": 100.0, "fit": "height"}}},
+             {"id": "dive-controller", "name": "Dive controller",
+             "components": {"sindri.script": script("scripts/dive.decay", "Dive")}}]
+    def rect(key, x, y, w, h, colour, layer, corner=0):
+        found.append({"id": key, "name": key, "parent": "dive-stage",
+            "transform_3d": transform(x, y, 0.1, 0, (w, h)),
+            "components": {"sindri.shape": shape(colour, layer, corner)}})
+    rect("deep-water", 0, -5, 80, 60, [0.025, 0.105, 0.14, 1], 20)
+    for i in range(12):
+        shade = 0.18 - i * 0.01
+        rect(f"water-band-{i}", 0, 1-i*1.4, 70, 1.42,
+             [0.035, shade, shade+0.05, 1], 21)
+    rect("water-surface", 0, 0.35, 70, 0.13, [0.47, 0.71, 0.65, 1], 23)
+    rect("sea-bed", 0, -11, 70, 2.5, [0.105, 0.16, 0.16, 1], 23)
+    for i in range(9):
+        rect(f"sea-bed-stone-{i}", -6+i*1.5, -9.8+(i%3)*0.12, 1.1, 0.4,
+             [0.18, 0.23, 0.21, 1], 24, 0.15)
+    # A side silhouette of the crawler and its boarding line stay visible above.
+    rect("dive-crawler-tread", -1.5, 0.85, 6.2, 0.65, [0.13, 0.15, 0.13, 1], 25, 0.1)
+    rect("dive-crawler-home", -1.5, 1.7, 5.6, 1.25, [0.40, 0.34, 0.25, 1], 26, 0.1)
+    for i in range(3):
+        rect(f"dive-crawler-window-{i}", -3+i*1.5, 1.8, 0.65, 0.4,
+             [0.80, 0.70, 0.45, 1], 27, 0.02)
+    rect("boarding-line", -1.5, -4.5, 0.045, 9, [0.80, 0.68, 0.36, 0.55], 29)
+    rect("wreck-interior", 0, -6.5, 8, 5, [0.06, 0.10, 0.11, 1], 24)
+    tiles = [None] * (14 * 12)
+    for row in range(5, 11):
+        for column in range(3, 11):
+            wall = (row in (5, 10) or column in (3, 10)
+                    or (column == 6 and row in (7, 9)))
+            if row == 5 and column in (5, 6): wall = False
+            if wall: tiles[row * 14 + column] = 1
+    found.append({"id": "dive-hull", "name": "Sunken hull", "parent": "dive-stage",
+        "transform_3d": transform(-7, 1),
+        "components": {"sindri.tilemap": {"texture": "textures/dive.png",
+            "palette": ["water", "hull"], "columns": 14, "rows": 12,
+            "tiles": tiles, "layer": 26}}})
+    found.append({"id": "dive-cache", "name": "Sealed salvage", "parent": "dive-stage",
+        "transform_3d": transform(2.5, -7.5, 0.1, 0, (0.8, 0.7)),
+        "components": {"sindri.sprite": {"texture": "textures/dive.png#salvage", "layer": 28}}})
+    found.append({"id": "diver", "name": "Diver", "parent": "dive-stage",
+        "transform_3d": transform(-1.5, 0, 0.2, 0, (0.9, 0.9)),
+        "components": {"sindri.sprite": {"texture": "textures/dive.png#diver", "layer": 30}}})
+    return found
 
 
 def main():
