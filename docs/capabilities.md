@@ -677,6 +677,21 @@ resident sections retain their CPU cache without submitting draws or consuming
 their pending GPU upload. This first bridge supports opaque block batches;
 cutout/transparent pipelines and editor voxel picking/painting remain.
 
+A world with `"view": "map"` is drawn instead as a flat map from straight
+above (`extract/voxel_map.rs`): each column one unit square wearing the top
+face of its highest supporting block, read through the same `VoxelGround`
+scripts use, so edits show and agree with gameplay. Squares are lit by height
+(a slope against a north-western sun, paler high ground, water darker by
+depth) and go into the ordinary sprite batches, so a map sorts and shares
+draws with sprites and tilemaps. Only the columns under the world camera's
+four corners are worked out, sixteen square at a time, capped at 48 chunks a
+side, and remembered until the entity, its textures or its block set change;
+switching a world to a map releases its meshed sections. `Grid.surface` and
+`Grid.height` read a column's top from Decay (the latter `f32?`, `null` where
+nothing stands). Extraction tests cover the squares, row direction, relief,
+edits and the absence of meshes; Low Tide's Basin is the proof in a game. Not
+drawn: decoration that holds nothing up, and a face's animation or glow.
+
 A block from a block set is meshed as the box its tile describes -- a slab's
 top half way up, a post a thin column -- and a neighbour's face is dropped
 only where a block covers all of it. Each cell wears one of its block's
