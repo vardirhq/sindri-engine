@@ -1,0 +1,33 @@
+// The Tide: the sea coming back, one slow edge crossing the Basin.
+//
+// It never stops and it slowly gathers pace, so a stop that cost nothing
+// early on costs more later. Its edge is the one number the rest of the game
+// is measured against.
+
+script Tide {
+    @export let start_speed: f32 = 1.0;
+    @export let gathering: f32 = 0.004;
+    @export let most_speed: f32 = 1.7;
+
+    var edge: f32 = -4.0;
+    var foam: Entity = null;
+
+    fn start() {
+        this.foam = World.find("Foam");
+        this.edge = this.transform.position.y + this.transform.scale.y / 2.0;
+        Game.tide_y = this.edge;
+    }
+
+    fn update(dt: f32) {
+        if Game.won || Game.lost {
+            return;
+        }
+        let speed = min(this.most_speed, this.start_speed + this.gathering * Time.elapsed);
+        this.edge += speed * dt;
+        this.transform.position.y = this.edge - this.transform.scale.y / 2.0;
+        if this.foam != null {
+            this.foam.transform.position.y = this.edge + sin(Time.elapsed * 2.2) * 0.12;
+        }
+        Game.tide_y = this.edge;
+    }
+}

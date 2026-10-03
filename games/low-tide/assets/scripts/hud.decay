@@ -1,0 +1,56 @@
+// What the player needs at a glance: scrap, speed, the Rise and the Tide,
+// one line of what E or X would do here, and the ending.
+
+script Hud {
+    var tide: Entity = null;
+    var hint: Entity = null;
+    var banner: Entity = null;
+
+    fn start() {
+        this.tide = World.find("Tide gap");
+        this.hint = World.find("Hint");
+        this.banner = World.find("Banner");
+    }
+
+    fn update(dt: f32) {
+        var status = "Scrap " + Game.scrap + "/" + Game.capacity;
+        status = status + "   Speed " + Game.speed.fixed(1) + " of " + Game.top_speed.fixed(1);
+        status = status + "   Throttle " + round(Game.throttle * 100.0) + "%";
+        if Game.on_dunes {
+            status = status + "   Soft sand";
+        }
+        status = status + "\nThe Rise " + max(0.0, RISE_Y - Game.crawler_y).fixed(0) + " m ahead";
+        Ui.set_text(this.entity, status);
+
+        let gap = Game.crawler_y - Game.tide_y;
+        if gap < 10.0 {
+            Ui.set_text(this.tide, "The Tide is " + max(0.0, gap).fixed(0) + " m behind!");
+        } else {
+            Ui.set_text(this.tide, "Tide " + gap.fixed(0) + " m behind");
+        }
+
+        Ui.set_text(this.hint, hint_words());
+
+        World.set_active(this.banner, Game.won || Game.lost);
+        if Game.won {
+            Ui.set_text(this.banner, "You reached the Rise with " + Game.scrap + " scrap\nE to sail again");
+        } else if Game.lost {
+            Ui.set_text(this.banner, "The Tide took the crawler\nE to sail again");
+        }
+    }
+
+    fn hint_words() -> String {
+        return match Game.hint {
+            Hint.TakeHelm => "E  take the helm",
+            Hint.AtHelm => "W/S  throttle     A/D  steer     E  leave the helm",
+            Hint.Salvage => "E  salvage a crate of scrap",
+            Hint.Empty => "This wreck is picked clean",
+            Hint.HoldFull => "The hold is full: throw a crate over the side first",
+            Hint.Carrying => "Carry it back aboard up the ramp",
+            Hint.Jettison => "X  throw this crate over the side",
+            Hint.Ashore => "Walk to a wreck, or back up the ramp",
+            Hint.LeftBehind => "The crawler is leaving without you!",
+            _ => "WASD  walk     Tab  keep the map north-up",
+        };
+    }
+}

@@ -1,0 +1,43 @@
+// The camera: follows the crawler, and decides which way is up.
+//
+// Walking the deck, the view turns with the crawler so its floor plan stays
+// upright on screen and the salt turns past it: deck view. At the helm and
+// ashore it stays north-up, the way a map does, so steering and finding a
+// wreck read plainly: helm view. Tab keeps it north-up everywhere. The turn
+// between the two is eased rather than snapped.
+
+script View {
+    @export let follow: f32 = 5.0;
+    @export let turn: f32 = 3.0;
+    @export let lead: f32 = 1.4;
+
+    var roll: f32 = 0.0;
+
+    fn update(dt: f32) {
+        if Action.pressed("view") {
+            Game.prefer_north = !Game.prefer_north;
+        }
+        var wanted: f32 = 0.0;
+        if Game.aboard && !Game.at_helm && !Game.prefer_north {
+            wanted = Game.heading;
+        }
+        var gap: f32 = wanted - this.roll;
+        while gap > PI { gap -= TAU; }
+        while gap < -PI { gap += TAU; }
+        this.roll += gap * (1.0 - exp(-this.turn * dt));
+        this.transform.rotation_z = this.roll;
+        Game.view_rot = this.roll;
+
+        // Aboard, look a little ahead of the crawler, the faster the further.
+        var target = Vec2(Game.crawler_x, Game.crawler_y);
+        if Game.aboard {
+            let ahead = min(Game.speed, 3.0) * this.lead;
+            target += Vec2(-sin(Game.heading), cos(Game.heading)) * ahead;
+        } else {
+            target = Vec2(Game.crew_x, Game.crew_y);
+        }
+        let at = this.transform.position;
+        let eased = Vec2(at.x, at.y).lerp(target, 1.0 - exp(-this.follow * dt));
+        this.transform.position = Vec3(eased.x, eased.y, at.z);
+    }
+}

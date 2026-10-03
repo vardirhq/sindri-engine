@@ -1,0 +1,279 @@
+// The crew member you play: walks the deck while it moves, takes the helm,
+// goes ashore to salvage and carries scrap home.
+//
+// Aboard, the crew is a child of the deck tilemap, so their position is
+// measured in the crawler's own floor plan: one unit a tile, x across from the
+// port side and y down from the bow. Walking and walls are worked out there as
+// if the crawler never moved, and the parent does the rest. Stepping off the
+// ramp re-parents them to the world; stepping back on re-parents them to the
+// deck. Those two moments are the only places the crawler's motion matters.
+//
+// Controls are screen-relative: up is up on screen whichever way the view is
+// turned, so the stick is turned into the frame it is walking in.
+
+const DECK_COLUMNS: f32 = 11.0;
+const DECK_ROWS: f32 = 14.0;
+const HELM_X: f32 = 5.5;
+const HELM_Y: f32 = -1.5;
+const CRATE: f32 = 11.0;
+const RAMP: f32 = 10.0;
+
+script Crew {
+    @export let walk_speed: f32 = 3.4;
+    @export let radius: f32 = 0.3;
+    @export let reach: f32 = 3.8;
+
+    var deck: Entity = null;
+    var crawler: Entity = null;
+    var carried: Entity = null;
+    var carrying: bool = false;
+    var view: String = "down";
+    var flip: f32 = 1.0;
+
+    fn start() {
+        this.deck = World.find("Deck");
+        this.crawler = World.find("Crawler");
+        this.carried = World.find("Carried");
+        Game.aboard = true;
+        Game.at_helm = false;
+    }
+
+    fn update(dt: f32) {
+        if Game.won || Game.lost {
+            Game.rudder = 0.0;
+            pose(Vec2(0.0, 0.0));
+            return;
+        }
+        let stick = Action.vector("move");
+        if Action.pressed("use") {
+            use();
+        }
+        if Action.pressed("drop") {
+            drop();
+        }
+        if Game.at_helm {
+            Game.throttle = clamp(Game.throttle + stick.y * 0.5 * dt, 0.0, 1.0);
+            Game.rudder = -stick.x;
+            this.view = "up";
+            pose(Vec2(0.0, 0.0));
+            Game.hint = Hint.AtHelm;
+            return;
+        }
+        if Game.aboard {
+            walk_aboard(stick, dt);
+        } else {
+            walk_ashore(stick, dt);
+        }
+        pose(stick);
+        let at = this.transform.world_position;
+        Game.crew_x = at.x;
+        Game.crew_y = at.y;
+        decide_hint();
+    }
+
+    // E: the helm when standing at it, salvage when standing by a wreck.
+    fn use() {
+        if Game.aboard {
+            if Game.at_helm {
+                Game.at_helm = false;
+                Game.rudder = 0.0;
+            } else if near_helm() {
+                Game.at_helm = true;
+                this.transform.position = Vec3(HELM_X, HELM_Y, 0.1);
+            }
+            return;
+        }
+        let wreck = nearby_wreck();
+        if wreck == null || this.carrying {
+            return;
+        }
+        if Wreck.on(wreck).scrap > 0.0 && Game.crates < Game.capacity {
+            Wreck.on(wreck).take();
+            this.carrying = true;
+            show_carried();
+        }
+    }
+
+    // X: throw the nearest crate in the hold over the side.
+    fn drop() {
+        if !Game.aboard || Game.at_helm {
+            return;
+        }
+        let cell = nearby_crate();
+        if cell != null {
+            Crawler.on(this.crawler).jettison(cell.x, cell.y);
+        }
+    }
+
+    fn walk_aboard(stick: Vec2, dt: f32) {
+        // Screen up, turned into the floor plan's frame.
+        let way = turned(stick, Game.view_rot - Game.heading) * this.walk_speed * dt;
+        var at = this.transform.position;
+        if open_at(at.x + way.x, at.y) {
+            at.x += way.x;
+        }
+        if open_at(at.x, at.y + way.y) {
+            at.y += way.y;
+        }
+        this.transform.position = at;
+        if at.x < 0.0 || at.x > DECK_COLUMNS || at.y > 0.0 || at.y < -DECK_ROWS {
+            go_ashore();
+        }
+    }
+
+    fn walk_ashore(stick: Vec2, dt: f32) {
+        let way = turned(stick, Game.view_rot) * this.walk_speed * dt;
+        var at = this.transform.position;
+        at.x = clamp(at.x + way.x, PLAY_LEFT, PLAY_RIGHT);
+        at.y = clamp(at.y + way.y, 0.5, BASIN_ROWS - 0.5);
+        this.transform.position = at;
+        // The only way aboard is up the ramp.
+        let local = on_deck(Vec2(at.x, at.y));
+        if Grid.tile(this.deck, floor(local.x), floor(-local.y)) == RAMP {
+            come_aboard(local);
+        }
+    }
+
+    fn go_ashore() {
+        let at = this.transform.world_position;
+        World.set_parent(this.entity, null);
+        this.transform.position = Vec3(at.x, at.y, 0.3);
+        Game.aboard = false;
+    }
+
+    fn come_aboard(local: Vec2) {
+        World.set_parent(this.entity, this.deck);
+        this.transform.position = Vec3(local.x, local.y, 0.1);
+        Game.aboard = true;
+        if this.carrying {
+            Crawler.on(this.crawler).stow();
+            this.carrying = false;
+            show_carried();
+        }
+    }
+
+    // A point in the world, in the deck's floor plan.
+    fn on_deck(world: Vec2) -> Vec2 {
+        let from_middle = world - Vec2(Game.crawler_x, Game.crawler_y);
+        let local = turned(from_middle, -Game.heading);
+        return Vec2(local.x + DECK_COLUMNS / 2.0, local.y - DECK_ROWS / 2.0);
+    }
+
+    // Whether the crew, centred here, fits between the walls.
+    fn open_at(x: f32, y: f32) -> bool {
+        let r = this.radius;
+        return walkable(x - r, y - r) && walkable(x + r, y - r) && walkable(x - r, y + r) && walkable(x + r, y + r);
+    }
+
+    // Deck, doors, the hatch, the helm and the ramp can be walked on; walls,
+    // treads, furniture and crates cannot. Off the plan is the open salt,
+    // which only the ramp reaches.
+    fn walkable(x: f32, y: f32) -> bool {
+        let tile = Grid.tile(this.deck, floor(x), floor(-y));
+        if x < 0.0 || x >= DECK_COLUMNS || y > 0.0 || y <= -DECK_ROWS {
+            return true;
+        }
+        return tile == 0.0 || tile == 3.0 || tile == 4.0 || tile == 5.0 || tile == 10.0;
+    }
+
+    fn near_helm() -> bool {
+        let at = this.transform.position;
+        return Vec2(at.x, at.y).distance(Vec2(HELM_X, HELM_Y)) < 1.1;
+    }
+
+    fn nearby_wreck() -> Entity {
+        let at = this.transform.world_position;
+        let wreck = World.nearest("wreck", at);
+        if wreck == null {
+            return null;
+        }
+        if wreck.transform.world_position.distance(at) > this.reach {
+            return null;
+        }
+        return wreck;
+    }
+
+    // The crate cell next to the crew, if there is one.
+    fn nearby_crate() -> Vec2? {
+        let at = this.transform.position;
+        let column = floor(at.x);
+        let row = floor(-at.y);
+        for dy in 0..3 {
+            for dx in 0..3 {
+                let c = column + dx - 1.0;
+                let r = row + dy - 1.0;
+                if Grid.tile(this.deck, c, r) == CRATE {
+                    return Vec2(c, r);
+                }
+            }
+        }
+        return null;
+    }
+
+    fn decide_hint() {
+        if !Game.aboard {
+            let wreck = nearby_wreck();
+            if this.carrying {
+                Game.hint = Hint.Carrying;
+            } else if wreck != null && Wreck.on(wreck).scrap <= 0.0 {
+                Game.hint = Hint.Empty;
+            } else if wreck != null && Game.crates >= Game.capacity {
+                Game.hint = Hint.HoldFull;
+            } else if wreck != null {
+                Game.hint = Hint.Salvage;
+            } else if Vec2(Game.crew_x, Game.crew_y).distance(Vec2(Game.crawler_x, Game.crawler_y)) > 12.0 {
+                Game.hint = Hint.LeftBehind;
+            } else {
+                Game.hint = Hint.Ashore;
+            }
+        } else if near_helm() {
+            Game.hint = Hint.TakeHelm;
+        } else if nearby_crate() != null {
+            Game.hint = Hint.Jettison;
+        } else {
+            Game.hint = Hint.None;
+        }
+    }
+
+    // Paper-doll facing, chosen from the way the crew moves on screen, and
+    // turned against the crawler and the camera so it always stands upright.
+    fn pose(stick: Vec2) {
+        let moving = stick.length > 0.1;
+        if moving {
+            if abs(stick.x) > abs(stick.y) {
+                this.view = "side";
+                this.flip = sign(stick.x);
+            } else if stick.y > 0.0 {
+                this.view = "up";
+            } else {
+                this.view = "down";
+            }
+            Animation.play(this.entity, this.view);
+        } else {
+            Animation.play(this.entity, this.view + "-still");
+        }
+        if this.view == "side" {
+            this.transform.scale.x = 1.1 * this.flip;
+        } else {
+            this.transform.scale.x = 1.1;
+        }
+        if Game.aboard {
+            this.transform.rotation_z = Game.view_rot - Game.heading;
+        } else {
+            this.transform.rotation_z = Game.view_rot;
+        }
+    }
+
+    fn show_carried() {
+        if this.carried != null {
+            World.set_active(this.carried, this.carrying);
+        }
+    }
+}
+
+// A vector turned anticlockwise by an angle in radians.
+shared fn turned(v: Vec2, angle: f32) -> Vec2 {
+    let c = cos(angle);
+    let s = sin(angle);
+    return Vec2(v.x * c - v.y * s, v.x * s + v.y * c);
+}

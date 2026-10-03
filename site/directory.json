@@ -54,6 +54,19 @@
   },
   {
     "category": "games",
+    "title": "Low Tide",
+    "path": "examples/low-tide/",
+    "source": "games/low-tide",
+    "description": "Drive your home across a drained sea ahead of the returning Tide.",
+    "tags": [
+      "2d",
+      "tilemap",
+      "camera",
+      "genre"
+    ]
+  },
+  {
+    "category": "games",
     "title": "Flappy",
     "path": "examples/flappy/",
     "source": "games/flappy",

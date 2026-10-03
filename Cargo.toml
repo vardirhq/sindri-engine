@@ -23,6 +23,7 @@ members = [
     "examples/camera",
     "game",
     "games/flappy",
+    "games/low-tide",
     "games/orbital-baked",
     "games/platformer",
     "games/scorchball",

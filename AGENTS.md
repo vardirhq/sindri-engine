@@ -84,6 +84,13 @@ together on one screen is proven: pads read by player slot, joining and
 leaving mid-game, and players made from prefabs, and it finds gaps by being a
 game several people play at once.
 
+**Low Tide is the moving-home genre showcase.** A top-down game about a base
+that travels: a crawler laid out room by room like Prison Architect, driven
+across a drained seabed ahead of the returning sea, in `games/low-tide`. It is
+where a walkable world riding a moving, turning parent is proven: a crew in a
+tilemap deck's own coordinates, re-parented at the ramp, and a camera that
+turns with the deck. It finds gaps by being a home you live in while it moves.
+
 So: a capability the engine already had is not complete until a game uses it;
 a capability found by recreating a known game is proven in Orbital Last Stand;
 a capability found by making Causeway or a genre showcase good is added for

@@ -1,0 +1,118 @@
+// The crawler: a house on treads, driven from its helm.
+//
+// It is heavy and it is slow to answer. The throttle is a lever that stays
+// where it was left, so the crawler keeps going while the crew walks away from
+// the helm; the rudder only turns it while somebody is holding it. Every crate
+// of scrap in the hold is weight, and weight costs both top speed and how
+// quickly it gets there. Soft dunes halve what is left.
+//
+// Turning is turning the whole floor plan: the deck tilemap and everybody on
+// it are children of this entity, so they come along with no help from here.
+
+script Crawler {
+    @export let base_mass: f32 = 60.0;
+    @export let crate_mass: f32 = 6.0;
+    @export let top_speed: f32 = 4.2;
+    @export let acceleration: f32 = 0.8;
+    @export let turn_rate: f32 = 0.55;
+    @export let dune_drag: f32 = 0.5;
+
+    var speed: f32 = 0.0;
+    var deck: Entity = null;
+    var basin: Entity = null;
+    var shadow: Entity = null;
+
+    // Where crates go in the hold, filled from the stern forward and from the
+    // walls inward, so the walkway down the middle stays clear.
+    var hold_columns = [2.0, 3.0, 7.0, 8.0, 3.0, 7.0, 4.0, 6.0, 2.0, 3.0, 7.0, 8.0, 2.0, 3.0, 7.0, 8.0, 4.0, 6.0, 4.0, 6.0];
+    var hold_rows = [12.0, 12.0, 12.0, 12.0, 11.0, 11.0, 12.0, 12.0, 10.0, 10.0, 10.0, 10.0, 9.0, 9.0, 9.0, 9.0, 11.0, 11.0, 10.0, 10.0];
+
+    fn start() {
+        this.deck = World.find("Deck");
+        this.basin = World.find("Basin");
+        this.shadow = World.find("Crawler shadow");
+        Game.capacity = this.hold_columns.length;
+        Game.crates = 0.0;
+        Game.throttle = 0.0;
+        Game.rudder = 0.0;
+    }
+
+    fn update(dt: f32) {
+        let mass = this.base_mass + Game.crates * this.crate_mass;
+        let lightness = this.base_mass / mass;
+        var drag: f32 = 1.0;
+        Game.on_dunes = ground() == 4.0;
+        if Game.on_dunes {
+            drag = this.dune_drag;
+        }
+        let most = this.top_speed * lightness;
+        Game.top_speed = most * drag;
+
+        var target: f32 = Game.throttle * most * drag;
+        if Game.won || Game.lost {
+            target = 0.0;
+        }
+        let rate = this.acceleration * lightness;
+        if this.speed < target {
+            this.speed = min(target, this.speed + rate * dt);
+        } else {
+            this.speed = max(target, this.speed - rate * 1.5 * dt);
+        }
+
+        // Treads bite harder the faster they turn, but a crawler can still
+        // pivot slowly on the spot.
+        let grip = 0.35 + 0.65 * min(1.0, this.speed / 1.5);
+        this.transform.rotation_z += Game.rudder * this.turn_rate * grip * dt;
+
+        let heading = this.transform.rotation_z;
+        var at = this.transform.position;
+        at.x += -sin(heading) * this.speed * dt;
+        at.y += cos(heading) * this.speed * dt;
+        at.x = clamp(at.x, PLAY_LEFT + 7.0, PLAY_RIGHT - 7.0);
+        at.y = max(at.y, 7.0);
+        this.transform.position = at;
+
+        // The shadow falls the same way whichever way the crawler faces, which
+        // is half of what makes the turning read.
+        if this.shadow != null {
+            this.shadow.transform.position = Vec3(at.x + 0.4, at.y - 0.4, 0.08);
+            this.shadow.transform.rotation_z = heading;
+        }
+
+        Game.crawler_x = at.x;
+        Game.crawler_y = at.y;
+        Game.heading = heading;
+        Game.speed = this.speed;
+    }
+
+    // The Basin tile under the middle of the crawler.
+    fn ground() -> f32 {
+        let at = this.transform.position;
+        return Grid.tile(this.basin, floor(at.x), floor(BASIN_ROWS - at.y));
+    }
+
+    // A crate of scrap carried aboard goes into the first free place in the
+    // hold. The crew does not bring one when the hold is full.
+    fn stow() {
+        for i in 0..this.hold_columns.length {
+            let column = this.hold_columns[i];
+            let row = this.hold_rows[i];
+            if Grid.tile(this.deck, column, row) == 0.0 {
+                Grid.set_tile(this.deck, column, row, 11.0);
+                Game.crates += 1.0;
+                Game.scrap += 1.0;
+                Game.salvaged += 1.0;
+                return;
+            }
+        }
+    }
+
+    // Over the side with it: lighter, and poorer.
+    fn jettison(column: f32, row: f32) {
+        if Grid.tile(this.deck, column, row) == 11.0 {
+            Grid.set_tile(this.deck, column, row, 0.0);
+            Game.crates -= 1.0;
+            Game.scrap -= 1.0;
+        }
+    }
+}
