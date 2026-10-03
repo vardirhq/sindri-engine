@@ -1,7 +1,7 @@
 //! Low Tide played by a test, with the keys a person would press: the crew
 //! walks a deck that drives and turns under them, goes ashore to a wreck and
-//! carries its scrap home, and the voyage is won by outrunning the Tide to
-//! the Rise and lost by waiting for it.
+//! carries its scrap home. Flood seasons and recovery are played separately
+//! in `a_flood_season.rs`.
 
 mod pilot;
 

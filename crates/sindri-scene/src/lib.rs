@@ -50,10 +50,10 @@ pub use components::{
     TileVolumeComponent, TileVolumeError, TileVolumeIndex, TilemapComponent, TilemapError,
     UiAnchor, UiFill, UiFillEdge, UiImageComponent, UiShapeBlend, UiShapeComponent, UiShapeKind,
     UiShapeShadow, UiTextAutoSize, UiTextCase, UiTextComponent, UiTextLineAlign, UiTextOutline,
-    UiTextShadow, UiTextWrap, VoxelBlock, VoxelEdit, VoxelGeneratorDocument, VoxelMaterialDocument,
-    VoxelView, VoxelWorldComponent, add_camera_trauma, cell_to_local_in, default_sun_transform,
-    environment_of, environments_in, light_direction, lights_in, sun_in, ui_text_template,
-    update_camera_behaviors,
+    UiTextShadow, UiTextWrap, VoxelBlock, VoxelEdit, VoxelGeneratorDocument, VoxelMapFlood,
+    VoxelMaterialDocument, VoxelView, VoxelWorldComponent, add_camera_trauma, cell_to_local_in,
+    default_sun_transform, environment_of, environments_in, light_direction, lights_in, sun_in,
+    ui_text_template, update_camera_behaviors,
 };
 pub use effects::{EffectBurstComponent, Effects2d, Fleck};
 pub use extract::{

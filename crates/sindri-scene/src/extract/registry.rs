@@ -437,6 +437,7 @@ fn register_tiles(components: &mut ComponentSchemaRegistry) -> Result<(), SceneE
             "vertical_radius": 1,
             "layer": 0,
             "view": "blocks",
+            "map_flood": null,
             "follow_camera": false,
             "variant_seed": 0,
             "edits": []

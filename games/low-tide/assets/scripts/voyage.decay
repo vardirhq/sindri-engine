@@ -12,7 +12,16 @@ enum Hint { None, TakeHelm, AtHelm, Salvage, Empty, HoldFull, Carrying, Jettison
 // make of them.
 enum Ground { Salt, Crust, Mud, Sand, Reef, Kelp, Rock, Island, Brine, Nothing }
 
+enum TidePhase { Low, Rising, High, Falling }
+
 state Game {
+    var tide_time: f32 = 0.0;
+    var tide_level: f32 = -17.0;
+    var tide_phase: TidePhase = TidePhase.Low;
+    var tide_left: f32 = 180.0;
+    var season: f32 = 0.0;
+    var flooded: bool = false;
+    var washed: f32 = 0.0;
     // The crawler.
     var crawler_x: f32 = 0.0;
     var crawler_y: f32 = 0.0;

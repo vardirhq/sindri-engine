@@ -190,7 +190,7 @@ def entities():
             "components": {"sindri.voxel_world": {
                 "generator": BASIN, "blocks": "basin.tileset", "view": "map",
                 "variant_seed": 5, "layer": -10, "edits": [],
-            }},
+            }, "sindri.script": script("scripts/tide.decay", "Tide")},
         },
     ]
     for index, (x, y, turn) in enumerate(WRECKS, start=1):

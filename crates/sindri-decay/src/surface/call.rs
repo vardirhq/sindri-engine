@@ -131,6 +131,10 @@ pub(crate) enum GridCall {
     Surface,
     /// How high the top of that block is, or `null` where nothing stands.
     Height,
+    /// Set a map-only flood height and water block, or clear it with "".
+    SetFlood,
+    /// Whether the column's surface is submerged by the map flood.
+    Flooded,
 }
 
 impl GridCall {
@@ -151,6 +155,8 @@ impl GridCall {
                 | Self::Tagged
                 | Self::Surface
                 | Self::Height
+                | Self::SetFlood
+                | Self::Flooded
         )
     }
 }
@@ -183,6 +189,8 @@ pub(crate) const GRID_CALLS: &[(&str, GridCall)] = &[
     ("tagged", GridCall::Tagged),
     ("surface", GridCall::Surface),
     ("height", GridCall::Height),
+    ("set_flood", GridCall::SetFlood),
+    ("flooded", GridCall::Flooded),
 ];
 
 /// What a script can do to a body, connect bodies with, and ask about what it touched.

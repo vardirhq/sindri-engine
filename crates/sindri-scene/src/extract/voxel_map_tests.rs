@@ -50,3 +50,87 @@ fn a_camera_pulled_far_back_sees_a_bounded_map() {
         assert!(max[axis] - min[axis] <= MOST_CHUNKS_ACROSS * CHUNK);
     }
 }
+
+#[test]
+fn a_flood_draws_below_its_level_and_reuses_the_dry_map_chunks() {
+    let mut world = World::default();
+    let mut component: VoxelWorldComponent = serde_json::from_str(
+        r#"{
+        "view":"map", "generator": {"kind":"layered_terrain", "base_height":4,
+        "height_variation":0}, "materials":[
+        {"voxel":1,"top":"dry","side":"dry","bottom":"dry"},
+        {"voxel":2,"top":"water","side":"water","bottom":"water"},
+        {"voxel":3,"top":"rock","side":"rock","bottom":"rock"}]
+    }"#,
+    )
+    .unwrap();
+    let entity = world.spawn(sindri_core::EntityData {
+        components: [(
+            "sindri.voxel_world".into(),
+            serde_json::to_value(&component).unwrap(),
+        )]
+        .into(),
+        ..sindri_core::EntityData::default()
+    });
+    let mut textures = TextureBindings::new();
+    textures.bind("dry", TextureId::new(1));
+    textures.bind("water", TextureId::new(2));
+    textures.bind("rock", TextureId::new(3));
+    let mut cache = BTreeMap::new();
+    refresh(&mut cache, &world, entity, &component, &textures, None).unwrap();
+    let map = cache.get_mut(&entity).unwrap();
+    let before = chunk(map, 0, 0);
+    let height = before[0].height;
+    let draw = |map: &mut MapWorld, level| {
+        let mut batches = Vec::new();
+        push_map(
+            map,
+            Mat4::IDENTITY,
+            above(0.5, -0.5, 1.0, 0.0),
+            0,
+            Some((level, TextureId::new(2), UvRect::FULL)),
+            &mut batches,
+        )
+        .unwrap();
+        batches
+    };
+    assert!(
+        draw(map, height)
+            .iter()
+            .all(|square| square.texture == TextureId::new(1)),
+        "equal height stays dry"
+    );
+    assert!(
+        draw(map, height + 1.0)
+            .iter()
+            .all(|square| square.texture == TextureId::new(2)),
+        "below water draws water"
+    );
+    component.map_flood = Some(crate::VoxelMapFlood {
+        level: height + 1.0,
+        block: crate::VoxelBlock::Material(2),
+    });
+    world.get_mut(entity).unwrap().components.insert(
+        "sindri.voxel_world".into(),
+        serde_json::to_value(&component).unwrap(),
+    );
+    refresh(&mut cache, &world, entity, &component, &textures, None).unwrap();
+    assert!(
+        Rc::ptr_eq(&before, &chunk(cache.get_mut(&entity).unwrap(), 0, 0)),
+        "flood does not rebuild terrain"
+    );
+    component.map_flood = None;
+    component.edits.push(crate::VoxelEdit {
+        at: [0, 10, 0],
+        block: crate::VoxelBlock::Material(3),
+    });
+    world.get_mut(entity).unwrap().components.insert(
+        "sindri.voxel_world".into(),
+        serde_json::to_value(&component).unwrap(),
+    );
+    refresh(&mut cache, &world, entity, &component, &textures, None).unwrap();
+    assert!(
+        !Rc::ptr_eq(&before, &chunk(cache.get_mut(&entity).unwrap(), 0, 0)),
+        "block edits still rebuild terrain"
+    );
+}

@@ -1261,6 +1261,25 @@ map view lays the world out and how `Grid.block` names its cells.
 
 Either is refused on anything that is not a voxel world, naming what it needs.
 
+### A reversible flood on a voxel map
+
+| Call | Returns |
+| --- | --- |
+| `Grid.set_flood(map, level, block)` | nothing |
+| `Grid.flooded(map, column, row)` | `bool` |
+
+`Grid.set_flood(map, level, block)` sets a water overlay on a voxel world with
+`view: map`. `level` is a finite continuous voxel height; `block` names a block
+in that world's palette whose top face draws the water. `""` clears the overlay.
+`Grid.flooded(map, column, row)` is true exactly where the existing surface is
+strictly below the flood level. Integer columns and rows use the same coordinates
+as `Grid.surface`. Both calls reject a world viewed as blocks.
+
+`Grid.height`, `Grid.surface`, `Grid.block` and `Grid.tagged` still read the
+underlying terrain: flood water is not an edit. Scripts decide how submersion
+affects movement or gathering. Low Tide's `tide.decay` drives the season and its
+crew and crawler read `Grid.flooded`; no game rules live in the engine.
+
 ### Standing on the ground
 
 | Call | Returns |

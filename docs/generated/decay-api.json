@@ -1249,6 +1249,18 @@
           "returns": "f32"
         },
         {
+          "description": null,
+          "kind": "function",
+          "name": "flooded",
+          "parameter_names": null,
+          "parameters": [
+            "Entity",
+            "f32",
+            "f32"
+          ],
+          "returns": "bool"
+        },
+        {
           "description": "How high the top of a voxel world's column is, as `Grid.surface` sees it, or `null` where nothing stands.",
           "kind": "function",
           "name": "height",
@@ -1337,6 +1349,18 @@
             "Entity",
             "f32",
             "f32",
+            "f32",
+            "String"
+          ],
+          "returns": "unit"
+        },
+        {
+          "description": null,
+          "kind": "function",
+          "name": "set_flood",
+          "parameter_names": null,
+          "parameters": [
+            "Entity",
             "f32",
             "String"
           ],

@@ -123,6 +123,10 @@ impl VoxelView {
 /// mesher and GPU section cache.
 #[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
 pub struct VoxelWorldComponent {
+    /// A reversible flood over the map. It never changes generated blocks or edits.
+    /// Only `view: map` draws this overlay; block meshes are unchanged.
+    #[serde(default)]
+    pub map_flood: Option<VoxelMapFlood>,
     #[serde(default)]
     pub generator: VoxelGeneratorDocument,
     /// The tile set whose blocks this world is built from, such as
@@ -167,6 +171,15 @@ pub struct VoxelWorldComponent {
     /// earlier one, and an edit back to what was generated is dropped.
     #[serde(default)]
     pub edits: Vec<VoxelEdit>,
+}
+
+/// A map-only water surface in voxel height coordinates.
+#[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
+pub struct VoxelMapFlood {
+    /// Columns with a surface strictly below this height are flooded.
+    pub level: f32,
+    /// The block whose top face draws the water, from this world's palette.
+    pub block: VoxelBlock,
 }
 
 /// One cell of a voxel world set to something other than what was generated.

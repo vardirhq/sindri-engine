@@ -1871,6 +1871,7 @@
           "water_voxel": "water"
         },
         "layer": 0,
+        "map_flood": null,
         "materials": [
           {
             "bottom": "procedural:checkerboard",
@@ -2006,6 +2007,7 @@
           "water_voxel": "water"
         },
         "layer": 0,
+        "map_flood": null,
         "materials": [
           {
             "bottom": "procedural:checkerboard",

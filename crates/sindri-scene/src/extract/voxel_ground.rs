@@ -316,7 +316,11 @@ impl VoxelGround {
     }
 
     /// The stored voxel for a block, by name or number; air for `""`.
-    fn id_of(&self, block: &VoxelBlock) -> Result<VoxelId, SceneExtractError> {
+    /// Resolves a block in this world's palette without changing the terrain.
+    ///
+    /// # Errors
+    /// A block or material this world does not define.
+    pub fn id_of(&self, block: &VoxelBlock) -> Result<VoxelId, SceneExtractError> {
         if block.is_air() {
             return Ok(VoxelId::AIR);
         }

@@ -18,6 +18,15 @@ script Hud {
             status = status + "  (aground)";
         }
         status = status + "\n" + ground_words();
+        let tide = match Game.tide_phase {
+            TidePhase.Low => "Low tide: rises in ",
+            TidePhase.Rising => "Rising: seek high ground ",
+            TidePhase.High => "High tide: ebb in ",
+            TidePhase.Falling => "Receding: low in ",
+        };
+        status = status + "\n" + tide + ceil(Game.tide_left) + "s";
+        if Game.flooded { status = status + "\nFlooded: wait for the ebb"; }
+        if Game.washed > 0.0 { status = status + "\nWashed away: " + Game.washed; }
         Ui.set_text(this.entity, status);
 
         if Game.touch {
@@ -78,7 +87,7 @@ script Hud {
             Hint.Carrying => "Carry it back aboard up the ramp",
             Hint.Ashore => "Walk to a wreck, or back up the ramp",
             Hint.LeftBehind => "The crawler is a long way off",
-            Hint.Brine => "Too deep and salt-burnt to wade",
+            Hint.Brine => "Brine: stay dry or wade out slowly",
             _ => idle,
         };
     }

@@ -68,6 +68,7 @@ const DEEPEST: i32 = 8;
 struct MapSquare {
     column: i32,
     row: i32,
+    height: f32,
     texture: TextureId,
     rect: UvRect,
     tint: [f32; 4],
@@ -76,6 +77,7 @@ struct MapSquare {
 /// One map's remembered squares, and what they were worked out from.
 struct MapWorld {
     revision: Option<u64>,
+    component: VoxelWorldComponent,
     textures: u64,
     tile_sets: u64,
     ground: VoxelGround,
@@ -142,7 +144,21 @@ impl SceneExtractor {
             }
             let map = cache.get_mut(&entity).expect("refreshed or kept above");
             let root = transform_matrix(world.world_transform(entity).unwrap_or_default());
-            push_map(map, root, camera, component.layer, batches)?;
+            let flood = component
+                .map_flood
+                .as_ref()
+                .map(|flood| {
+                    let voxel = map.ground.id_of(&flood.block)?;
+                    let face = map.resolved.texture_at(
+                        voxel,
+                        VoxelFace::Top,
+                        VoxelCoord::new(0, 0, 0),
+                        false,
+                    );
+                    Ok::<_, SceneExtractError>((flood.level, face.texture, face.uv))
+                })
+                .transpose()?;
+            push_map(map, root, camera, component.layer, flood, batches)?;
         }
         Ok(())
     }
@@ -161,12 +177,16 @@ fn refresh(
     let revision = world.revision(entity);
     let textures_generation = textures.generation();
     let tile_sets_generation = tile_sets.map_or(0, TileSetBindings::generation);
+    let mut terrain_component = component.clone();
+    terrain_component.map_flood = None;
     let fresh = cache.get(&entity).is_some_and(|map| {
-        map.revision == revision
+        (map.revision == revision || map.component == terrain_component)
             && map.textures == textures_generation
             && map.tile_sets == tile_sets_generation
     });
     if fresh {
+        let map = cache.get_mut(&entity).expect("found above");
+        map.revision = revision;
         return Ok(());
     }
     let definition = definition(component, tile_sets)?;
@@ -177,6 +197,7 @@ fn refresh(
         entity,
         MapWorld {
             revision,
+            component: terrain_component,
             textures: textures_generation,
             tile_sets: tile_sets_generation,
             ground,
@@ -201,6 +222,7 @@ fn push_map(
     root: Mat4,
     camera: ResolvedCamera,
     layer: i32,
+    flood: Option<(f32, TextureId, UvRect)>,
     batches: &mut SpriteBatches,
 ) -> Result<(), SceneExtractError> {
     let Some((min, max)) = visible_columns(root, camera) else {
@@ -225,13 +247,20 @@ fn push_map(
                     -(square.row as f32) - 0.5,
                     0.0,
                 ));
+                let (texture, rect, tint) =
+                    flood.filter(|(level, _, _)| square.height < *level).map_or(
+                        (square.texture, square.rect, square.tint),
+                        |(level, texture, rect)| {
+                            let light = (1.0 - (level - square.height) * DEPTH_DARK).max(0.35);
+                            (texture, rect, [light, light, light, 1.0])
+                        },
+                    );
                 batches.push(SpriteDraw {
                     clip: None,
                     space: DrawSpace::World,
-                    texture: square.texture,
+                    texture,
                     order: TransparentOrder::new(layer, distance, index)?,
-                    sprite: SpriteInstance::new(root * local, square.tint)
-                        .with_uv_rect(square.rect),
+                    sprite: SpriteInstance::new(root * local, tint).with_uv_rect(rect),
                 });
                 index = index.saturating_add(1);
             }
@@ -287,6 +316,7 @@ fn square(map: &MapWorld, column: i32, row: i32) -> Option<MapSquare> {
     Some(MapSquare {
         column,
         row,
+        height,
         texture: face.texture,
         rect: face.uv,
         tint: [light, light, light, 1.0],
