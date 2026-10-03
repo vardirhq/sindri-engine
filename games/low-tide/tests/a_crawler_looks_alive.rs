@@ -75,3 +75,57 @@ fn the_belts_hold_at_rest_pivot_oppositely_and_resume_after_the_ebb() {
         "the ebb frees the crawler"
     );
 }
+
+// The art generator shifts each cleat DOWN the image by its numbered phase.
+// Decreasing phase therefore moves the visible upper belt toward the bow.
+fn phase(pilot: &Pilot, id: &str) -> u8 {
+    let entity = pilot.run.entity(id).unwrap();
+    pilot
+        .run
+        .animations
+        .sprite(entity)
+        .unwrap()
+        .rsplit('-')
+        .next()
+        .unwrap()
+        .parse()
+        .unwrap()
+}
+
+fn marks_travel(pilot: &mut Pilot, id: &str, toward_bow: bool) {
+    pilot.step(); // Let a direction change select its clip before sampling.
+    let mut previous = phase(pilot, id);
+    let mut changes = 0;
+    for _ in 0..frames(0.5) {
+        pilot.step();
+        let next = phase(pilot, id);
+        if next != previous {
+            let movement = (next + 8 - previous) % 8;
+            assert_eq!(
+                movement,
+                if toward_bow { 7 } else { 1 },
+                "{id} cleats travel toward the correct end, including the loop seam"
+            );
+            changes += 1;
+            previous = next;
+        }
+    }
+    assert!(changes > 3, "enough cleats moved to judge their direction");
+}
+
+#[test]
+fn visible_upper_belts_travel_toward_the_bow_when_driving_forward() {
+    let mut pilot = Pilot::new();
+    pilot.take_the_helm();
+    pilot.set_throttle(1.0);
+    marks_travel(&mut pilot, "port-tread", true);
+    marks_travel(&mut pilot, "starboard-tread", true);
+    pilot.set_throttle(0.0);
+    pilot.wait(2.0);
+    pilot.push([1.0, 0.0]);
+    marks_travel(&mut pilot, "port-tread", true);
+    marks_travel(&mut pilot, "starboard-tread", false);
+    pilot.push([-1.0, 0.0]);
+    marks_travel(&mut pilot, "port-tread", false);
+    marks_travel(&mut pilot, "starboard-tread", true);
+}

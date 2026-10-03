@@ -287,7 +287,11 @@ def ui_shape(kind, anchor, fill, stroke, stroke_width, layer, corner=0.0):
 
 
 def crawler_motion():
-    """Two visual belts; the logical tread cells still block walking."""
+    """Two upper belts: forward carries the visible cleats toward the bow.
+
+    Image Y runs down toward the stern, so forward decreases the art phase.
+    The logical tread cells still block walking.
+    """
     found = []
     for side, column, direction in (("port", 0.5, -1), ("starboard", 10.5, 1)):
         found.append({
@@ -297,9 +301,9 @@ def crawler_motion():
                 "sindri.sprite": {"texture": f"textures/treads.png#{side}-0", "layer": 5},
                 "sindri.animation.sprite": {
                     "clips": {
-                        "forward": {"frames": [f"{side}-{i}" for i in range(8)],
+                        "forward": {"frames": [f"{side}-{i}" for i in reversed(range(8))],
                                     "seconds_per_frame": 0.055, "looping": True},
-                        "reverse": {"frames": [f"{side}-{i}" for i in reversed(range(8))],
+                        "reverse": {"frames": [f"{side}-{i}" for i in range(8)],
                                     "seconds_per_frame": 0.055, "looping": True},
                     }, "playing": "forward", "speed": 0.0,
                 },

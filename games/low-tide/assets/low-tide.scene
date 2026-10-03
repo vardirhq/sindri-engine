@@ -928,20 +928,6 @@
      "clips": {
       "forward": {
        "frames": [
-        "port-0",
-        "port-1",
-        "port-2",
-        "port-3",
-        "port-4",
-        "port-5",
-        "port-6",
-        "port-7"
-       ],
-       "seconds_per_frame": 0.055,
-       "looping": true
-      },
-      "reverse": {
-       "frames": [
         "port-7",
         "port-6",
         "port-5",
@@ -950,6 +936,20 @@
         "port-2",
         "port-1",
         "port-0"
+       ],
+       "seconds_per_frame": 0.055,
+       "looping": true
+      },
+      "reverse": {
+       "frames": [
+        "port-0",
+        "port-1",
+        "port-2",
+        "port-3",
+        "port-4",
+        "port-5",
+        "port-6",
+        "port-7"
        ],
        "seconds_per_frame": 0.055,
        "looping": true
@@ -998,20 +998,6 @@
      "clips": {
       "forward": {
        "frames": [
-        "starboard-0",
-        "starboard-1",
-        "starboard-2",
-        "starboard-3",
-        "starboard-4",
-        "starboard-5",
-        "starboard-6",
-        "starboard-7"
-       ],
-       "seconds_per_frame": 0.055,
-       "looping": true
-      },
-      "reverse": {
-       "frames": [
         "starboard-7",
         "starboard-6",
         "starboard-5",
@@ -1020,6 +1006,20 @@
         "starboard-2",
         "starboard-1",
         "starboard-0"
+       ],
+       "seconds_per_frame": 0.055,
+       "looping": true
+      },
+      "reverse": {
+       "frames": [
+        "starboard-0",
+        "starboard-1",
+        "starboard-2",
+        "starboard-3",
+        "starboard-4",
+        "starboard-5",
+        "starboard-6",
+        "starboard-7"
        ],
        "seconds_per_frame": 0.055,
        "looping": true
