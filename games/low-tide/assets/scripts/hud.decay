@@ -6,6 +6,8 @@
 script Hud {
     var hint: Entity = null;
     var panel: Entity = null;
+    var seen_washed: f32 = 0.0;
+    var washed_notice: f32 = 0.0;
 
     fn start() {
         this.hint = World.find("Hint");
@@ -13,24 +15,23 @@ script Hud {
     }
 
     fn update(dt: f32) {
-        var status = "Hold " + Game.crates + "/" + Game.capacity;
-        status = status + "   Throttle " + round(Game.throttle * 100.0) + "%";
-        status = status + "\nWood " + Game.wood + "  Stone " + Game.stone + "  Ore " + Game.ore;
-        status = status + "\nScrap " + Game.scrap + "  Fibre " + Game.fibre + "  Salt " + Game.salt;
-        status = status + "\nSpeed " + Game.speed.fixed(1) + " of " + Game.top_speed.fixed(1);
-        if Game.blocked {
-            status = status + "  (aground)";
+        this.washed_notice = max(0.0, this.washed_notice - dt);
+        if Game.washed > this.seen_washed {
+            this.seen_washed = Game.washed;
+            this.washed_notice = 5.0;
         }
-        status = status + "\n" + ground_words();
-        let tide = match Game.tide_phase {
-            TidePhase.Low => "Low tide: rises in ",
-            TidePhase.Rising => "Rising: seek high ground ",
-            TidePhase.High => "High tide: ebb in ",
-            TidePhase.Falling => "Receding: low in ",
-        };
-        status = status + "\n" + tide + ceil(Game.tide_left) + "s";
-        if Game.flooded { status = status + "\nFlooded: dive from the ramp"; }
-        if Game.washed > 0.0 { status = status + "\nWashed away: " + Game.washed; }
+        var status = "Hold " + Game.crates + "/" + Game.capacity + "   Speed " + Game.speed.fixed(1);
+        if Game.at_helm { status += "   " + round(Game.throttle * 100.0) + "%"; }
+        status += "\n" + match Game.tide_phase {
+            TidePhase.Low => "LOW TIDE  /  rises in ",
+            TidePhase.Rising => "RISING  /  high in ",
+            TidePhase.High => "HIGH TIDE  /  ebb in ",
+            TidePhase.Falling => "RECEDING  /  low in ",
+        } + ceil(Game.tide_left) + "s";
+        status += "\n" + ground_words();
+        if Game.blocked { status += "  /  AGROUND"; }
+        if Game.flooded { status += "\nDive from aboard at the ramp"; }
+        if this.washed_notice > 0.0 { status += "\nCargo washed away by the tide"; }
         if Game.diving {
             status = "LOW TIDE / DIVING\nAir " + ceil(Game.dive_air) + "s\nDepth " + max(0.0, -Game.dive_y).fixed(1);
             if Game.dive_loot { status += "\nCarrying ore + scrap\nHeavy salvage: swim slower"; }
@@ -47,14 +48,16 @@ script Hud {
             };
         }
         Ui.set_text(this.entity, status);
-        // Keep the panel's top edge fixed as flood notices add lines.
-        var height = 0.305;
-        if Game.flooded { height += 0.04; }
-        if Game.washed > 0.0 { height += 0.04; }
-        if Game.dive_notice > 0.0 { height += 0.04; }
-        if Game.diving { height = 0.305; }
-        this.panel.transform.scale.y = height;
-        this.panel.transform.position.y = -0.02 - height * 0.5;
+        // Width follows the viewport so the header stays readable on phones.
+        let width = min(1.5, Viewport.aspect * 1.8);
+        var height = 0.24;
+        if Game.flooded { height += 0.05; }
+        if Game.dive_notice > 0.0 { height += 0.05; }
+        if this.washed_notice > 0.0 { height += 0.05; }
+        if Game.diving { height = 0.39; }
+        this.panel.transform.scale = Vec3(width, height, 1.0);
+        this.panel.transform.position = Vec3(0.04 + width * 0.5, -0.02 - height * 0.5, 0.0);
+        World.find("Hint panel").transform.scale.x = min(2.4, Viewport.aspect * 1.8);
 
         if Game.touch {
             Ui.set_text(this.hint, touch_words());
@@ -110,7 +113,7 @@ script Hud {
             Hint.DiveSalvage => "Recover the sealed salvage",
             Hint.DiveSwim => "Drag to swim; Recall leaves salvage below",
             Hint.Workbench => "Workbench to build onto your crawler",
-            Hint.Building => "Next chooses a plan; Build makes it; Close returns",
+            Hint.Building => "Choose a blueprint, then Build; Close returns",
             Hint.TakeHelm => "Helm to take the wheel",
             Hint.AtHelm => "Push up for throttle, sideways to steer",
             Hint.Salvage => "Salvage to take a crate",

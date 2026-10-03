@@ -701,10 +701,10 @@
       1.0
      ],
      "font": "fonts/Inter.ttf",
-     "font_size": 0.028,
-     "line_height": 0.035,
+     "font_size": 0.037,
+     "line_height": 0.04625,
      "layer": 100,
-     "text": "Scrap 0",
+     "text": "Hold 0/4",
      "bold": true,
      "outline": {
       "width": 0.0,
@@ -2669,9 +2669,9 @@
      "kind": "rect",
      "count": 48.0,
      "fill": [
-      0.025,
-      0.033,
-      0.028,
+      0.035,
+      0.065,
+      0.062,
       0.96
      ],
      "stroke": [
@@ -2717,14 +2717,14 @@
     "sindri.ui.text": {
      "anchor": "top_left",
      "color": [
-      0.83,
-      0.73,
-      0.51,
+      0.72,
+      0.82,
+      0.72,
       1
      ],
      "font": "fonts/Inter.ttf",
-     "font_size": 0.022,
-     "line_height": 0.027499999999999997,
+     "font_size": 0.029,
+     "line_height": 0.036250000000000004,
      "layer": 100,
      "text": "LOW TIDE  /  CRAWLER 01",
      "bold": true,
@@ -2939,10 +2939,10 @@
      "kind": "rect",
      "count": 48.0,
      "fill": [
-      0.16,
-      0.1,
-      0.08,
-      0.78
+      0.045,
+      0.09,
+      0.085,
+      0.96
      ],
      "stroke": [
       1.0,
@@ -2950,8 +2950,8 @@
       0.55,
       0.9
      ],
-     "stroke_width": 0.03,
-     "corner_radius": 0.3,
+     "stroke_width": 0.015,
+     "corner_radius": 0.1,
      "dashes": 0.0,
      "dash_duty": 0.5,
      "sweep_start": 0.0,
@@ -3054,10 +3054,10 @@
      "kind": "rect",
      "count": 48.0,
      "fill": [
-      0.16,
-      0.1,
-      0.08,
-      0.78
+      0.045,
+      0.09,
+      0.085,
+      0.96
      ],
      "stroke": [
       1.0,
@@ -3065,8 +3065,8 @@
       0.55,
       0.9
      ],
-     "stroke_width": 0.03,
-     "corner_radius": 0.3,
+     "stroke_width": 0.015,
+     "corner_radius": 0.1,
      "dashes": 0.0,
      "dash_duty": 0.5,
      "sweep_start": 0.0,
@@ -3148,8 +3148,8 @@
    "name": "View button",
    "transform_3d": {
     "position": [
-     -0.14,
-     -0.15,
+     0.15,
+     0.2,
      0.0
     ],
     "rotation": [
@@ -3159,8 +3159,8 @@
      1.0
     ],
     "scale": [
-     0.2,
-     0.1,
+     0.22,
+     0.13,
      1
     ]
    },
@@ -3169,10 +3169,10 @@
      "kind": "rect",
      "count": 48.0,
      "fill": [
-      0.16,
-      0.1,
-      0.08,
-      0.78
+      0.045,
+      0.09,
+      0.085,
+      0.96
      ],
      "stroke": [
       1.0,
@@ -3180,14 +3180,14 @@
       0.55,
       0.9
      ],
-     "stroke_width": 0.03,
-     "corner_radius": 0.3,
+     "stroke_width": 0.015,
+     "corner_radius": 0.1,
      "dashes": 0.0,
      "dash_duty": 0.5,
      "sweep_start": 0.0,
      "sweep_turns": 1.0,
      "blend": "over",
-     "anchor": "top_right",
+     "anchor": "bottom_left",
      "layer": 90
     },
     "sindri.ui.button": {
@@ -3213,7 +3213,7 @@
      1.0
     ],
     "scale": [
-     0.2,
+     0.22,
      0.05,
      1
     ]
@@ -3289,13 +3289,13 @@
    }
   },
   {
-   "id": "build-panel",
-   "name": "Build panel",
+   "id": "build-shade",
+   "name": "Build shade",
    "disabled": true,
    "transform_3d": {
     "position": [
      0,
-     0.05,
+     0,
      0
     ],
     "rotation": [
@@ -3305,8 +3305,8 @@
      1.0
     ],
     "scale": [
-     0.86,
-     0.4,
+     8,
+     4,
      1
     ]
    },
@@ -3315,18 +3315,18 @@
      "kind": "rect",
      "count": 48.0,
      "fill": [
-      0.025,
-      0.033,
-      0.028,
-      0.96
+      0.01,
+      0.02,
+      0.02,
+      0.8
      ],
      "stroke": [
       0.55,
       0.48,
       0.33,
-      0.8
+      0.9
      ],
-     "stroke_width": 0.005,
+     "stroke_width": 0.006,
      "corner_radius": 0.025,
      "dashes": 0.0,
      "dash_duty": 0.5,
@@ -3334,18 +3334,68 @@
      "sweep_turns": 1.0,
      "blend": "over",
      "anchor": "center",
-     "layer": 90
+     "layer": 120
     }
    }
   },
   {
-   "id": "build-words",
-   "name": "Build words",
+   "id": "build-panel",
+   "name": "Build panel",
    "disabled": true,
    "transform_3d": {
     "position": [
      0,
-     0.08,
+     0,
+     0
+    ],
+    "rotation": [
+     0,
+     0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     1.9,
+     1.66,
+     1
+    ]
+   },
+   "components": {
+    "sindri.ui.shape": {
+     "kind": "rect",
+     "count": 48.0,
+     "fill": [
+      0.035,
+      0.065,
+      0.062,
+      1
+     ],
+     "stroke": [
+      0.55,
+      0.48,
+      0.33,
+      0.9
+     ],
+     "stroke_width": 0.006,
+     "corner_radius": 0.025,
+     "dashes": 0.0,
+     "dash_duty": 0.5,
+     "sweep_start": 0.0,
+     "sweep_turns": 1.0,
+     "blend": "over",
+     "anchor": "center",
+     "layer": 120
+    }
+   }
+  },
+  {
+   "id": "build-title",
+   "name": "Build title",
+   "disabled": true,
+   "transform_3d": {
+    "position": [
+     0,
+     0.68,
      0.0
     ],
     "rotation": [
@@ -3370,10 +3420,691 @@
       1.0
      ],
      "font": "fonts/Inter.ttf",
-     "font_size": 0.027,
-     "line_height": 0.03375,
-     "layer": 100,
-     "text": "WORKBENCH",
+     "font_size": 0.055,
+     "line_height": 0.06875,
+     "layer": 130,
+     "text": "CRAWLER WORKBENCH",
+     "bold": true,
+     "outline": {
+      "width": 0.0,
+      "color": [
+       0.12,
+       0.08,
+       0.06,
+       0.95
+      ]
+     },
+     "shadow": {
+      "offset": [
+       0.0,
+       -0.003
+      ],
+      "color": [
+       0.0,
+       0.0,
+       0.0,
+       0.35
+      ],
+      "softness": 0.004
+     }
+    }
+   }
+  },
+  {
+   "id": "build-stock",
+   "name": "Build stock",
+   "disabled": true,
+   "transform_3d": {
+    "position": [
+     0,
+     0.57,
+     0.0
+    ],
+    "rotation": [
+     0,
+     0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     1.0,
+     1.0,
+     1
+    ]
+   },
+   "components": {
+    "sindri.ui.text": {
+     "anchor": "center",
+     "color": [
+      1.0,
+      0.96,
+      0.88,
+      1.0
+     ],
+     "font": "fonts/Inter.ttf",
+     "font_size": 0.031,
+     "line_height": 0.03875,
+     "layer": 130,
+     "text": "Cargo aboard",
+     "bold": true,
+     "outline": {
+      "width": 0.0,
+      "color": [
+       0.12,
+       0.08,
+       0.06,
+       0.95
+      ]
+     },
+     "shadow": {
+      "offset": [
+       0.0,
+       -0.003
+      ],
+      "color": [
+       0.0,
+       0.0,
+       0.0,
+       0.35
+      ],
+      "softness": 0.004
+     }
+    }
+   }
+  },
+  {
+   "id": "plan-extension",
+   "name": "Plan Extension",
+   "disabled": true,
+   "transform_3d": {
+    "position": [
+     0,
+     0.4,
+     0
+    ],
+    "rotation": [
+     0,
+     0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     1.74,
+     0.19,
+     1
+    ]
+   },
+   "components": {
+    "sindri.ui.shape": {
+     "kind": "rect",
+     "count": 48.0,
+     "fill": [
+      0.09,
+      0.13,
+      0.12,
+      1
+     ],
+     "stroke": [
+      0.55,
+      0.48,
+      0.33,
+      0.9
+     ],
+     "stroke_width": 0.006,
+     "corner_radius": 0.025,
+     "dashes": 0.0,
+     "dash_duty": 0.5,
+     "sweep_start": 0.0,
+     "sweep_turns": 1.0,
+     "blend": "over",
+     "anchor": "center",
+     "layer": 120
+    },
+    "sindri.ui.button": {
+     "label": "Plan Extension"
+    }
+   }
+  },
+  {
+   "id": "plan-extension-selected",
+   "name": "Plan Extension selected",
+   "disabled": true,
+   "transform_3d": {
+    "position": [
+     0,
+     0.4,
+     0
+    ],
+    "rotation": [
+     0,
+     0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     1.74,
+     0.19,
+     1
+    ]
+   },
+   "components": {
+    "sindri.ui.shape": {
+     "kind": "rect",
+     "count": 48.0,
+     "fill": [
+      0.1,
+      0.23,
+      0.2,
+      1
+     ],
+     "stroke": [
+      0.9,
+      0.76,
+      0.42,
+      1
+     ],
+     "stroke_width": 0.006,
+     "corner_radius": 0.025,
+     "dashes": 0.0,
+     "dash_duty": 0.5,
+     "sweep_start": 0.0,
+     "sweep_turns": 1.0,
+     "blend": "over",
+     "anchor": "center",
+     "layer": 121
+    }
+   }
+  },
+  {
+   "id": "plan-extension-words",
+   "name": "Plan Extension words",
+   "disabled": true,
+   "transform_3d": {
+    "position": [
+     0,
+     0.4,
+     0.0
+    ],
+    "rotation": [
+     0,
+     0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     1.0,
+     1.0,
+     1
+    ]
+   },
+   "components": {
+    "sindri.ui.text": {
+     "anchor": "center",
+     "color": [
+      1.0,
+      0.96,
+      0.88,
+      1.0
+     ],
+     "font": "fonts/Inter.ttf",
+     "font_size": 0.043,
+     "line_height": 0.05374999999999999,
+     "layer": 130,
+     "text": "Extension",
+     "bold": true,
+     "outline": {
+      "width": 0.0,
+      "color": [
+       0.12,
+       0.08,
+       0.06,
+       0.95
+      ]
+     },
+     "shadow": {
+      "offset": [
+       0.0,
+       -0.003
+      ],
+      "color": [
+       0.0,
+       0.0,
+       0.0,
+       0.35
+      ],
+      "softness": 0.004
+     }
+    }
+   }
+  },
+  {
+   "id": "plan-bunk",
+   "name": "Plan Bunk",
+   "disabled": true,
+   "transform_3d": {
+    "position": [
+     0,
+     0.18,
+     0
+    ],
+    "rotation": [
+     0,
+     0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     1.74,
+     0.19,
+     1
+    ]
+   },
+   "components": {
+    "sindri.ui.shape": {
+     "kind": "rect",
+     "count": 48.0,
+     "fill": [
+      0.09,
+      0.13,
+      0.12,
+      1
+     ],
+     "stroke": [
+      0.55,
+      0.48,
+      0.33,
+      0.9
+     ],
+     "stroke_width": 0.006,
+     "corner_radius": 0.025,
+     "dashes": 0.0,
+     "dash_duty": 0.5,
+     "sweep_start": 0.0,
+     "sweep_turns": 1.0,
+     "blend": "over",
+     "anchor": "center",
+     "layer": 120
+    },
+    "sindri.ui.button": {
+     "label": "Plan Bunk"
+    }
+   }
+  },
+  {
+   "id": "plan-bunk-selected",
+   "name": "Plan Bunk selected",
+   "disabled": true,
+   "transform_3d": {
+    "position": [
+     0,
+     0.18,
+     0
+    ],
+    "rotation": [
+     0,
+     0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     1.74,
+     0.19,
+     1
+    ]
+   },
+   "components": {
+    "sindri.ui.shape": {
+     "kind": "rect",
+     "count": 48.0,
+     "fill": [
+      0.1,
+      0.23,
+      0.2,
+      1
+     ],
+     "stroke": [
+      0.9,
+      0.76,
+      0.42,
+      1
+     ],
+     "stroke_width": 0.006,
+     "corner_radius": 0.025,
+     "dashes": 0.0,
+     "dash_duty": 0.5,
+     "sweep_start": 0.0,
+     "sweep_turns": 1.0,
+     "blend": "over",
+     "anchor": "center",
+     "layer": 121
+    }
+   }
+  },
+  {
+   "id": "plan-bunk-words",
+   "name": "Plan Bunk words",
+   "disabled": true,
+   "transform_3d": {
+    "position": [
+     0,
+     0.18,
+     0.0
+    ],
+    "rotation": [
+     0,
+     0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     1.0,
+     1.0,
+     1
+    ]
+   },
+   "components": {
+    "sindri.ui.text": {
+     "anchor": "center",
+     "color": [
+      1.0,
+      0.96,
+      0.88,
+      1.0
+     ],
+     "font": "fonts/Inter.ttf",
+     "font_size": 0.043,
+     "line_height": 0.05374999999999999,
+     "layer": 130,
+     "text": "Bunk",
+     "bold": true,
+     "outline": {
+      "width": 0.0,
+      "color": [
+       0.12,
+       0.08,
+       0.06,
+       0.95
+      ]
+     },
+     "shadow": {
+      "offset": [
+       0.0,
+       -0.003
+      ],
+      "color": [
+       0.0,
+       0.0,
+       0.0,
+       0.35
+      ],
+      "softness": 0.004
+     }
+    }
+   }
+  },
+  {
+   "id": "plan-engine",
+   "name": "Plan Engine",
+   "disabled": true,
+   "transform_3d": {
+    "position": [
+     0,
+     -0.04,
+     0
+    ],
+    "rotation": [
+     0,
+     0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     1.74,
+     0.19,
+     1
+    ]
+   },
+   "components": {
+    "sindri.ui.shape": {
+     "kind": "rect",
+     "count": 48.0,
+     "fill": [
+      0.09,
+      0.13,
+      0.12,
+      1
+     ],
+     "stroke": [
+      0.55,
+      0.48,
+      0.33,
+      0.9
+     ],
+     "stroke_width": 0.006,
+     "corner_radius": 0.025,
+     "dashes": 0.0,
+     "dash_duty": 0.5,
+     "sweep_start": 0.0,
+     "sweep_turns": 1.0,
+     "blend": "over",
+     "anchor": "center",
+     "layer": 120
+    },
+    "sindri.ui.button": {
+     "label": "Plan Engine"
+    }
+   }
+  },
+  {
+   "id": "plan-engine-selected",
+   "name": "Plan Engine selected",
+   "disabled": true,
+   "transform_3d": {
+    "position": [
+     0,
+     -0.04,
+     0
+    ],
+    "rotation": [
+     0,
+     0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     1.74,
+     0.19,
+     1
+    ]
+   },
+   "components": {
+    "sindri.ui.shape": {
+     "kind": "rect",
+     "count": 48.0,
+     "fill": [
+      0.1,
+      0.23,
+      0.2,
+      1
+     ],
+     "stroke": [
+      0.9,
+      0.76,
+      0.42,
+      1
+     ],
+     "stroke_width": 0.006,
+     "corner_radius": 0.025,
+     "dashes": 0.0,
+     "dash_duty": 0.5,
+     "sweep_start": 0.0,
+     "sweep_turns": 1.0,
+     "blend": "over",
+     "anchor": "center",
+     "layer": 121
+    }
+   }
+  },
+  {
+   "id": "plan-engine-words",
+   "name": "Plan Engine words",
+   "disabled": true,
+   "transform_3d": {
+    "position": [
+     0,
+     -0.04,
+     0.0
+    ],
+    "rotation": [
+     0,
+     0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     1.0,
+     1.0,
+     1
+    ]
+   },
+   "components": {
+    "sindri.ui.text": {
+     "anchor": "center",
+     "color": [
+      1.0,
+      0.96,
+      0.88,
+      1.0
+     ],
+     "font": "fonts/Inter.ttf",
+     "font_size": 0.043,
+     "line_height": 0.05374999999999999,
+     "layer": 130,
+     "text": "Engine",
+     "bold": true,
+     "outline": {
+      "width": 0.0,
+      "color": [
+       0.12,
+       0.08,
+       0.06,
+       0.95
+      ]
+     },
+     "shadow": {
+      "offset": [
+       0.0,
+       -0.003
+      ],
+      "color": [
+       0.0,
+       0.0,
+       0.0,
+       0.35
+      ],
+      "softness": 0.004
+     }
+    }
+   }
+  },
+  {
+   "id": "build-words",
+   "name": "Build words",
+   "disabled": true,
+   "transform_3d": {
+    "position": [
+     0,
+     -0.29,
+     0.0
+    ],
+    "rotation": [
+     0,
+     0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     1.0,
+     1.0,
+     1
+    ]
+   },
+   "components": {
+    "sindri.ui.text": {
+     "anchor": "center",
+     "color": [
+      1.0,
+      0.96,
+      0.88,
+      1.0
+     ],
+     "font": "fonts/Inter.ttf",
+     "font_size": 0.043,
+     "line_height": 0.05374999999999999,
+     "layer": 130,
+     "text": "Select a blueprint",
+     "bold": true,
+     "outline": {
+      "width": 0.0,
+      "color": [
+       0.12,
+       0.08,
+       0.06,
+       0.95
+      ]
+     },
+     "shadow": {
+      "offset": [
+       0.0,
+       -0.003
+      ],
+      "color": [
+       0.0,
+       0.0,
+       0.0,
+       0.35
+      ],
+      "softness": 0.004
+     }
+    }
+   }
+  },
+  {
+   "id": "build-status",
+   "name": "Build status",
+   "disabled": true,
+   "transform_3d": {
+    "position": [
+     0,
+     -0.48,
+     0.0
+    ],
+    "rotation": [
+     0,
+     0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     1.0,
+     1.0,
+     1
+    ]
+   },
+   "components": {
+    "sindri.ui.text": {
+     "anchor": "center",
+     "color": [
+      1.0,
+      0.96,
+      0.88,
+      1.0
+     ],
+     "font": "fonts/Inter.ttf",
+     "font_size": 0.038,
+     "line_height": 0.0475,
+     "layer": 130,
+     "text": "Materials needed",
      "bold": true,
      "outline": {
       "width": 0.0,
@@ -3403,11 +4134,12 @@
   {
    "id": "next-button",
    "name": "Next button",
+   "disabled": true,
    "transform_3d": {
     "position": [
-     0,
-     -0.13,
-     0.0
+     -0.55,
+     -0.65,
+     0
     ],
     "rotation": [
      0,
@@ -3416,8 +4148,8 @@
      1.0
     ],
     "scale": [
-     0.24,
-     0.08,
+     0.38,
+     0.13,
      1
     ]
    },
@@ -3426,41 +4158,40 @@
      "kind": "rect",
      "count": 48.0,
      "fill": [
-      0.16,
-      0.1,
-      0.08,
-      0.78
+      0.22,
+      0.19,
+      0.12,
+      1
      ],
      "stroke": [
-      1.0,
-      0.86,
       0.55,
+      0.48,
+      0.33,
       0.9
      ],
-     "stroke_width": 0.03,
-     "corner_radius": 0.3,
+     "stroke_width": 0.006,
+     "corner_radius": 0.025,
      "dashes": 0.0,
      "dash_duty": 0.5,
      "sweep_start": 0.0,
      "sweep_turns": 1.0,
      "blend": "over",
      "anchor": "center",
-     "layer": 90
+     "layer": 120
     },
     "sindri.ui.button": {
-     "label": "Next"
+     "label": "Next button"
     }
-   },
-   "disabled": true
+   }
   },
   {
    "id": "next-label",
    "name": "Next label",
-   "parent": "next-button",
+   "disabled": true,
    "transform_3d": {
     "position": [
-     0.0,
-     0.0,
+     -0.55,
+     -0.65,
      0.0
     ],
     "rotation": [
@@ -3470,8 +4201,8 @@
      1.0
     ],
     "scale": [
-     0.24,
-     0.05,
+     1.0,
+     1.0,
      1
     ]
    },
@@ -3480,14 +4211,14 @@
      "anchor": "center",
      "color": [
       1.0,
-      0.95,
-      0.85,
+      0.96,
+      0.88,
       1.0
      ],
      "font": "fonts/Inter.ttf",
-     "font_size": 0.04,
-     "line_height": 0.05,
-     "layer": 95,
+     "font_size": 0.043,
+     "line_height": 0.05374999999999999,
+     "layer": 130,
      "text": "Next",
      "bold": true,
      "outline": {
@@ -3502,15 +4233,307 @@
      "shadow": {
       "offset": [
        0.0,
-       0.0
+       -0.003
       ],
       "color": [
-       0,
-       0,
-       0,
-       0
+       0.0,
+       0.0,
+       0.0,
+       0.35
       ],
-      "softness": 0.0
+      "softness": 0.004
+     }
+    }
+   }
+  },
+  {
+   "id": "build-confirm-button",
+   "name": "Build confirm button",
+   "disabled": true,
+   "transform_3d": {
+    "position": [
+     0,
+     -0.65,
+     0
+    ],
+    "rotation": [
+     0,
+     0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     0.58,
+     0.13,
+     1
+    ]
+   },
+   "components": {
+    "sindri.ui.shape": {
+     "kind": "rect",
+     "count": 48.0,
+     "fill": [
+      0.22,
+      0.19,
+      0.12,
+      1
+     ],
+     "stroke": [
+      0.55,
+      0.48,
+      0.33,
+      0.9
+     ],
+     "stroke_width": 0.006,
+     "corner_radius": 0.025,
+     "dashes": 0.0,
+     "dash_duty": 0.5,
+     "sweep_start": 0.0,
+     "sweep_turns": 1.0,
+     "blend": "over",
+     "anchor": "center",
+     "layer": 120
+    },
+    "sindri.ui.button": {
+     "label": "Build confirm button"
+    }
+   }
+  },
+  {
+   "id": "build-confirm-label",
+   "name": "Build confirm label",
+   "disabled": true,
+   "transform_3d": {
+    "position": [
+     0,
+     -0.65,
+     0.0
+    ],
+    "rotation": [
+     0,
+     0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     1.0,
+     1.0,
+     1
+    ]
+   },
+   "components": {
+    "sindri.ui.text": {
+     "anchor": "center",
+     "color": [
+      1.0,
+      0.96,
+      0.88,
+      1.0
+     ],
+     "font": "fonts/Inter.ttf",
+     "font_size": 0.043,
+     "line_height": 0.05374999999999999,
+     "layer": 130,
+     "text": "Build confirm",
+     "bold": true,
+     "outline": {
+      "width": 0.0,
+      "color": [
+       0.12,
+       0.08,
+       0.06,
+       0.95
+      ]
+     },
+     "shadow": {
+      "offset": [
+       0.0,
+       -0.003
+      ],
+      "color": [
+       0.0,
+       0.0,
+       0.0,
+       0.35
+      ],
+      "softness": 0.004
+     }
+    }
+   }
+  },
+  {
+   "id": "build-close-button",
+   "name": "Build close button",
+   "disabled": true,
+   "transform_3d": {
+    "position": [
+     0.55,
+     -0.65,
+     0
+    ],
+    "rotation": [
+     0,
+     0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     0.38,
+     0.13,
+     1
+    ]
+   },
+   "components": {
+    "sindri.ui.shape": {
+     "kind": "rect",
+     "count": 48.0,
+     "fill": [
+      0.22,
+      0.19,
+      0.12,
+      1
+     ],
+     "stroke": [
+      0.55,
+      0.48,
+      0.33,
+      0.9
+     ],
+     "stroke_width": 0.006,
+     "corner_radius": 0.025,
+     "dashes": 0.0,
+     "dash_duty": 0.5,
+     "sweep_start": 0.0,
+     "sweep_turns": 1.0,
+     "blend": "over",
+     "anchor": "center",
+     "layer": 120
+    },
+    "sindri.ui.button": {
+     "label": "Build close button"
+    }
+   }
+  },
+  {
+   "id": "build-close-label",
+   "name": "Build close label",
+   "disabled": true,
+   "transform_3d": {
+    "position": [
+     0.55,
+     -0.65,
+     0.0
+    ],
+    "rotation": [
+     0,
+     0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     1.0,
+     1.0,
+     1
+    ]
+   },
+   "components": {
+    "sindri.ui.text": {
+     "anchor": "center",
+     "color": [
+      1.0,
+      0.96,
+      0.88,
+      1.0
+     ],
+     "font": "fonts/Inter.ttf",
+     "font_size": 0.043,
+     "line_height": 0.05374999999999999,
+     "layer": 130,
+     "text": "Build close",
+     "bold": true,
+     "outline": {
+      "width": 0.0,
+      "color": [
+       0.12,
+       0.08,
+       0.06,
+       0.95
+      ]
+     },
+     "shadow": {
+      "offset": [
+       0.0,
+       -0.003
+      ],
+      "color": [
+       0.0,
+       0.0,
+       0.0,
+       0.35
+      ],
+      "softness": 0.004
+     }
+    }
+   }
+  },
+  {
+   "id": "build-help",
+   "name": "Build help",
+   "disabled": true,
+   "transform_3d": {
+    "position": [
+     0,
+     -0.77,
+     0.0
+    ],
+    "rotation": [
+     0,
+     0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     1.0,
+     1.0,
+     1
+    ]
+   },
+   "components": {
+    "sindri.ui.text": {
+     "anchor": "center",
+     "color": [
+      1.0,
+      0.96,
+      0.88,
+      1.0
+     ],
+     "font": "fonts/Inter.ttf",
+     "font_size": 0.026,
+     "line_height": 0.0325,
+     "layer": 130,
+     "text": "Q next  /  E build  /  Esc close",
+     "bold": true,
+     "outline": {
+      "width": 0.0,
+      "color": [
+       0.12,
+       0.08,
+       0.06,
+       0.95
+      ]
+     },
+     "shadow": {
+      "offset": [
+       0.0,
+       -0.003
+      ],
+      "color": [
+       0.0,
+       0.0,
+       0.0,
+       0.35
+      ],
+      "softness": 0.004
      }
     }
    }

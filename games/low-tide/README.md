@@ -242,3 +242,19 @@ it. Full autosave needs a versioned voyage snapshot (including sparse terrain
 edits and wreck history), project-specific host storage and reload tests. The
 shared browser host currently uses a common save key; it must be isolated per
 project before calling Low Tide's web progression persistent.
+
+## Interface
+
+The workbench shows all three blueprints together. Click or tap a row to
+select it; the highlighted row shows availability before spending anything.
+The details show what the upgrade adds, its permanent weight and how much
+required cargo is aboard. Installed upgrades and a fully extended chassis
+are marked explicitly. Build consumes actual hold bundles; missing materials
+and duplicates still spend nothing. Q cycles plans, E builds and X / Escape
+closes. Dedicated menu buttons also work with a mouse or phone touch.
+
+While the menu is open, movement stops and the gameplay touch controls are
+hidden; the voyage and tide continue. Closing restores them. The normal HUD
+prioritizes hold space, speed, tide countdown, terrain and immediate danger;
+the workbench carries the full material inventory. View sits at the bottom
+left, away from the status header. The menu and header fit the viewport width.

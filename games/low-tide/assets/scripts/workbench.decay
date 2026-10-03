@@ -1,15 +1,26 @@
-// Fixed blueprints keep the central passage and boarding ramp clear.
+// Blueprint selection and honest costs; the crawler owns the actual transaction.
 script Workbench {
     var crawler: Entity = null;
-    var panel: Entity = null;
-    var words: Entity = null;
+    var elements: List<Entity> = [];
     var next_button: Entity = null;
+    var confirm: Entity = null;
+    var close_button: Entity = null;
+    var plans: List<Entity> = [];
 
     fn start() {
         this.crawler = World.find("Crawler");
-        this.panel = World.find("Build panel");
-        this.words = World.find("Build words");
         this.next_button = World.find("Next button");
+        this.confirm = World.find("Build confirm button");
+        this.close_button = World.find("Build close button");
+        for name in ["Build shade", "Build panel", "Build title", "Build stock",
+            "Plan Extension", "Plan Extension words", "Plan Bunk", "Plan Bunk words",
+            "Plan Engine", "Plan Engine words", "Plan Extension selected", "Plan Bunk selected",
+            "Plan Engine selected", "Build words", "Build status",
+            "Next button", "Next label", "Build confirm button", "Build confirm label",
+            "Build close button", "Build close label", "Build help"] {
+            this.elements.push(World.find(name));
+        }
+        this.plans = [World.find("Plan Extension"), World.find("Plan Bunk"), World.find("Plan Engine")];
         Game.building = false;
     }
 
@@ -21,31 +32,100 @@ script Workbench {
 
     fn craft() { Crawler.on(this.crawler).build(Game.blueprint); }
 
+    fn choose(plan: Blueprint) {
+        Game.blueprint = plan;
+        Game.build_result = BuildResult.None;
+    }
+
     fn update(dt: f32) {
-        if Game.building && Action.pressed("cancel") { Game.building = false; }
-        if Game.building && (Action.pressed("next_plan") || Ui.is_pressed(this.next_button)) {
-            Game.blueprint = match Game.blueprint {
-                Blueprint.Extension => Blueprint.Bunk,
-                Blueprint.Bunk => Blueprint.Engine,
-                Blueprint.Engine => Blueprint.Extension,
-            };
-            Game.build_result = BuildResult.None;
+        if Game.building {
+            if Action.pressed("cancel") || Ui.is_pressed(this.close_button) { Game.building = false; }
+            else {
+                if Action.pressed("next_plan") || Ui.is_pressed(this.next_button) {
+                    choose(match Game.blueprint {
+                        Blueprint.Extension => Blueprint.Bunk,
+                        Blueprint.Bunk => Blueprint.Engine,
+                        Blueprint.Engine => Blueprint.Extension,
+                    });
+                }
+                if Ui.is_pressed(this.plans[0]) { choose(Blueprint.Extension); }
+                if Ui.is_pressed(this.plans[1]) { choose(Blueprint.Bunk); }
+                if Ui.is_pressed(this.plans[2]) { choose(Blueprint.Engine); }
+                if Ui.is_pressed(this.confirm) { craft(); }
+            }
         }
-        World.set_active(this.panel, Game.building);
-        World.set_active(this.words, Game.building);
-        World.set_active(this.next_button, Game.building);
-        let plan = match Game.blueprint {
-            Blueprint.Extension => "Stern extension\n2 wood + 2 scrap\nTwo rows, four cargo slots\nPermanent weight: +18",
-            Blueprint.Bunk => "A bunk of your own\n2 wood + 2 fibre\nA bed beside the workbench\nPermanent weight: +4",
-            Blueprint.Engine => "Stronger engine\n2 ore + 2 scrap\nEngine power: +35%\nPermanent weight: +12",
+        for element in this.elements { World.set_active(element, Game.building); }
+        if !Game.building { return; }
+        layout();
+        describe();
+    }
+
+    fn layout() {
+        let width = min(1.9, Viewport.aspect * 1.8);
+        let ratio = width / 1.9;
+        World.find("Build panel").transform.scale.x = width;
+        for plan in this.plans { plan.transform.scale.x = width - 0.12; }
+        for name in ["Next button", "Next label"] {
+            World.find(name).transform.position.x = -0.55 * ratio;
+        }
+        for name in ["Build close button", "Build close label"] {
+            World.find(name).transform.position.x = 0.55 * ratio;
+        }
+        this.next_button.transform.scale.x = 0.38 * ratio;
+        this.close_button.transform.scale.x = 0.38 * ratio;
+        this.confirm.transform.scale.x = 0.58 * ratio;
+    }
+
+    fn describe() {
+        Ui.set_text(World.find("Build stock"), "Wood " + Game.wood + "  Scrap " + Game.scrap + "  Ore " + Game.ore + "\nFibre " + Game.fibre + "  Stone " + Game.stone + "  Salt " + Game.salt);
+        for i in 0..3 {
+            var plan = Blueprint.Extension;
+            if i == 1.0 { plan = Blueprint.Bunk; }
+            if i == 2.0 { plan = Blueprint.Engine; }
+            let name = match plan { Blueprint.Extension => "Stern extension", Blueprint.Bunk => "Personal bunk", Blueprint.Engine => "Engine upgrade" };
+            var marker = "";
+            if plan == Game.blueprint { marker = "> "; }
+            var label = "Plan Extension words";
+            if i == 1.0 { label = "Plan Bunk words"; }
+            if i == 2.0 { label = "Plan Engine words"; }
+            Ui.set_text(World.find(label), marker + name + "\n" + availability(plan));
+            let selected = World.find("Plan " + match plan { Blueprint.Extension => "Extension", Blueprint.Bunk => "Bunk", Blueprint.Engine => "Engine" } + " selected");
+            World.set_active(selected, plan == Game.blueprint);
+            selected.transform.scale.x = min(1.9, Viewport.aspect * 1.8) - 0.12;
+        }
+        let detail = match Game.blueprint {
+            Blueprint.Extension => "+2 deck rows / +4 cargo slots\nWeight +18  |  Extensions " + Game.extensions + "/3\nWood " + Game.wood + "/2   Scrap " + Game.scrap + "/2",
+            Blueprint.Bunk => "A bed beside the workbench\nWeight +4  |  One per crawler\nWood " + Game.wood + "/2   Fibre " + Game.fibre + "/2",
+            Blueprint.Engine => "Engine power +35%\nWeight +12  |  One per crawler\nOre " + Game.ore + "/2   Scrap " + Game.scrap + "/2",
         };
-        let result = match Game.build_result {
-            BuildResult.Built => "Built! Choose your next plan",
-            BuildResult.Missing => "Bring the required cargo aboard",
-            BuildResult.Limit => "This chassis is fully extended",
-            BuildResult.Already => "Already installed",
-            _ => "Use the cargo stored in your hold",
-        };
-        Ui.set_text(this.words, "WORKBENCH\n" + plan + "\n" + result);
+        Ui.set_text(World.find("Build words"), detail);
+        var status = availability(Game.blueprint);
+        if Game.build_result == BuildResult.Built { status = "Built! Your crawler is upgraded."; }
+        else if Game.build_result == BuildResult.Missing { status = "Missing cargo: gather and return aboard."; }
+        Ui.set_text(World.find("Build status"), status);
+        var action = "Build";
+        if availability(Game.blueprint) != "Ready to build" { action = "Locked"; }
+        Ui.set_text(World.find("Build confirm label"), action);
+        Ui.set_text(World.find("Next label"), "Next");
+        Ui.set_text(World.find("Build close label"), "Close");
+        var help = "Q next / E build / X or Esc close";
+        if Game.touch { help = "Tap a blueprint, then Build"; }
+        Ui.set_text(World.find("Build help"), help);
+    }
+
+    fn availability(plan: Blueprint) -> String {
+        if plan == Blueprint.Extension {
+            if Game.extensions >= 3.0 { return "Chassis fully extended"; }
+            if Game.wood >= 2.0 && Game.scrap >= 2.0 { return "Ready to build"; }
+            return "Needs 2 wood + 2 scrap";
+        }
+        if plan == Blueprint.Bunk {
+            if Game.has_bunk { return "Installed"; }
+            if Game.wood >= 2.0 && Game.fibre >= 2.0 { return "Ready to build"; }
+            return "Needs 2 wood + 2 fibre";
+        }
+        if Game.engine_level > 0.0 { return "Installed"; }
+        if Game.ore >= 2.0 && Game.scrap >= 2.0 { return "Ready to build"; }
+        return "Needs 2 ore + 2 scrap";
     }
 }
