@@ -14,7 +14,7 @@
       },
       "components": {
         "sindri.grid.placement": {
-          "cell": [32770, 32764],
+          "cell": [32642, 32552],
           "grid": "floor"
         },
         "sindri.script": {
@@ -180,9 +180,82 @@
           "rows": 65536,
           "space": "solid"
         },
-        "sindri.tile_volume": {
-          "cells": [],
-          "tileset": "causeway.tileset"
+        "sindri.voxel_world": {
+          "blocks": "causeway.tileset",
+          "edits": [],
+          "focus": [0, 0, 0],
+          "follow_camera": true,
+          "generator": {
+            "beach_voxel": "sand",
+            "biomes": [
+              {
+                "moisture": 0.3,
+                "name": "Meadow",
+                "relief": 0.8,
+                "subsurface_depth": 3,
+                "subsurface_voxel": "earth",
+                "surface_voxel": "ground",
+                "temperature": 0.6,
+                "terraces": 0,
+                "trees": 0.08
+              },
+              {
+                "moisture": 0.72,
+                "name": "Forest",
+                "relief": 1.0,
+                "subsurface_depth": 3,
+                "subsurface_voxel": "earth",
+                "surface_voxel": "ground",
+                "temperature": 0.55,
+                "terraces": 0,
+                "trees": 0.5
+              },
+              {
+                "moisture": 0.92,
+                "name": "Swamp",
+                "relief": 0.3,
+                "subsurface_depth": 3,
+                "subsurface_voxel": "mud",
+                "surface_voxel": "mud",
+                "temperature": 0.75,
+                "terraces": 0,
+                "trees": 0.2
+              },
+              {
+                "moisture": 0.65,
+                "name": "Taiga",
+                "relief": 1.1,
+                "subsurface_depth": 3,
+                "subsurface_voxel": "earth",
+                "surface_voxel": "moss",
+                "temperature": 0.15,
+                "terraces": 0,
+                "trees": 0.4
+              }
+            ],
+            "caves": false,
+            "cliff_voxel": "rock",
+            "feature_size": 64,
+            "ice_voxel": "ice",
+            "kind": "natural_terrain",
+            "leaves_voxel": "leaves",
+            "relief": 40,
+            "rivers": true,
+            "sea_bed_voxel": "gravel",
+            "sea_level": 0,
+            "seed": 1,
+            "snow_line": 18,
+            "snow_voxel": "snow",
+            "stone_voxel": "stone",
+            "tree_line": 12,
+            "trunk_voxel": "log",
+            "water_voxel": "water"
+          },
+          "layer": 0,
+          "materials": [],
+          "render_radius": 3,
+          "variant_seed": 0,
+          "vertical_radius": 2
         }
       }
     },
@@ -372,7 +445,7 @@
       "id": "target",
       "name": "Target",
       "transform_3d": {
-        "position": [32766.0, 0.0, 32772.0],
+        "position": [32656.0, 0.0, 32552.0],
         "rotation": [0.0, 0.0, 0.0, 1.0],
         "scale": [0.38, 0.38, 1.0]
       },
@@ -411,7 +484,7 @@
       "id": "wanderer",
       "name": "Wanderer",
       "transform_3d": {
-        "position": [32766.0, 0.0, 32772.0],
+        "position": [32656.0, 0.0, 32552.0],
         "rotation": [0.0, 0.0, 0.0, 1.0],
         "scale": [0.6, 2.95, 1.0]
       },
@@ -453,7 +526,7 @@
       "id": "world-camera",
       "name": "World Camera",
       "transform_3d": {
-        "position": [32837.16, 67.3567, 32843.16],
+        "position": [32727.16, 67.3567, 32623.16],
         "rotation": [-0.262396, 0.366924, 0.108688, 0.885834],
         "scale": [1.0, 1.0, 1.0]
       },

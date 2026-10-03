@@ -112,4 +112,5 @@ Water is drawn opaque: a liquid hides only its own inner faces, but light does
 not pass through it, because blended rendering needs a sorted pass the voxel
 renderer does not have yet. A block's variants are not yet read by the voxel
 mesher, and tile volumes do not yet animate or glow. There are no strata, ores
-or structures, and water does not flow. Causeway still uses its own generator.
+or structures, and water does not flow. Causeway's world is this generator with
+its own blocks.

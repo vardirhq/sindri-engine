@@ -702,9 +702,8 @@ read, build and remove blocks with `Grid.block`, `Grid.set_block` and
 `max_step`, reading the ground around the walker and its goal; and
 `voxel::aim_at_with` says which block and face the pointer is on.
 `crates/sindri-decay/tests/a_script_walks_and_builds_on_voxels.rs` builds,
-digs and walks round a wall on a generated world. Causeway has not migrated to
-this path yet, so the proof is still narrower than a production game
-migration.
+digs and walks round a wall on a generated world, and Causeway is played on
+it.
 
 ### Hosts and platforms
 
@@ -830,12 +829,17 @@ cliff case and removing a lower block opens a real hole.
 **Runtime tile volumes have one engine-owned chunk unit.** A chunk is 16×16
 columns, addressed with Euclidean coordinates and held sparsely by
 `TileChunkStore`; materializing it produces the existing scene component rather
-than introducing a second cell format. Causeway proves the first vertical slice:
-the initial world contains only a bounded window, moving either the free Build
-camera or the Play follow camera generates adjacent chunks from the same seed,
-and biome and tree decisions meet identically across their seams. Navigation
-derives walls from loaded walkable columns, so a 65,536×65,536 coordinate
-envelope does not mean visiting four billion empty cells. Residency is bounded to the current camera window and player-edited chunks are remembered separately; generation is still synchronous.\n\n**The same voxel terrain can drive a second visual representation.** Causeway now overlays one 16×16 generated chunk with a smoothed textured triangle surface while the voxel cells remain authoritative for picking, building, navigation, and world generation. The renderer accepts explicit textured triangles through the existing opaque 3D path, and a surface mesh may sample one sprite-sheet region rather than requiring a standalone texture. This is deliberately a prototype: only the camera-centre chunk is meshed, biome materials are not blended, the block surface still renders underneath it, and the prototype uploads inline mesh buffers when drawn. Those limitations are the evidence needed before chunk meshing and GPU residency become an engine-owned voxel capability.
+than introducing a second cell format. Causeway used it to stream its terrain
+until it moved onto `sindri.voxel_world`.
+
+**Causeway's ground is the engine's voxel world.** Its floor is a grid of boxes
+whose ground is a `sindri.voxel_world`: the engine's natural terrain from seed
+1, drawn with Causeway's own blocks -- grass with its variants and buried
+look, earth, sand, mud, moss, rock, snow, water, trees -- and following the
+camera. Nothing in `game/` generates, streams or meshes terrain any more. The
+walker starts on a bank with the beacon across a river; clicks on the water lay
+planks as edits on the world, and the walker crosses them to the beacon
+(`game/tests/the_game_is_played.rs`).
 
 **A tile can be shorter than its cell.** `height` is a fraction of a cell
 measured from its floor, defaulting to one, so every tile written before heights

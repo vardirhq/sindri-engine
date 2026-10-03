@@ -117,9 +117,6 @@ impl BrowserCausewayApp {
         let mut world = World::default();
         let mut loaded_scenes = LoadedScenes::new();
         loaded_scenes.enter_keeping_identities(&mut world, entry_name, entry_document)?;
-        // The same ground the native host builds. The scene carries an empty
-        // grid on purpose, so without this the browser opens onto nothing.
-        crate::assets::fill_the_world(&mut world)?;
 
         let mut session = Session::with_sources(self.scene.components().clone(), project.scripts)
             .with_prefabs(project.prefabs)

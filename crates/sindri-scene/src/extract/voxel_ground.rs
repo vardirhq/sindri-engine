@@ -14,7 +14,7 @@
 //! than regenerating the terrain around it.
 
 use std::cell::RefCell;
-use std::collections::BTreeMap;
+use std::collections::{BTreeMap, HashMap};
 use std::sync::{Arc, Mutex, PoisonError};
 
 use sindri_core::{TileDefinition, TileSetDocument};
@@ -32,24 +32,91 @@ use super::voxel_source::{Palette, SceneTerrain, terrain_source};
 const ABOVE_GROUND: i32 = 32;
 /// How many generated sections a terrain remembers before starting again.
 const REMEMBERED_SECTIONS: usize = 4_096;
+/// How many columns' generated surfaces a terrain remembers.
+const REMEMBERED_COLUMNS: usize = 262_144;
 /// How many differently generated worlds are remembered at once.
 const REMEMBERED_TERRAINS: usize = 4;
 
-/// What decides a world's generated voxels: its generator and how its blocks
-/// are numbered. Two worlds that agree on both generate the same voxels.
+/// What decides a world's generated voxels and where its ground is: its
+/// generator, how its blocks are numbered, and what each block is to stand
+/// on. Two worlds that agree on all three have the same ground.
 #[derive(Clone, Debug, PartialEq)]
 struct TerrainKey {
     source: SceneTerrain,
     palette: Palette,
+    footing: BTreeMap<u16, Footing>,
 }
 
-/// A generator, and the sections it has been asked for so far.
+/// A generator, and what it has been asked so far: the sections it made, and
+/// where each column's generated surface is.
 struct GeneratedTerrain {
     key: TerrainKey,
     sections: Mutex<BTreeMap<SectionCoord, VoxelSection>>,
+    /// Each column's highest generated block that holds something up, or
+    /// `None` where none does. A column's surface is asked far more often than
+    /// it changes -- every placement, and every column a path is looked for
+    /// across -- and finding it is a walk down the column.
+    tops: Mutex<HashMap<(i32, i32), Option<i32>>>,
 }
 
 impl GeneratedTerrain {
+    fn footing(&self, voxel: VoxelId) -> Option<Footing> {
+        (!voxel.is_air())
+            .then(|| self.key.footing.get(&voxel.value()).copied())
+            .flatten()
+    }
+
+    /// The highest voxel generation can put anything in at a column.
+    fn ceiling(&self, x: i32, z: i32) -> i32 {
+        match &self.key.source {
+            SceneTerrain::Layered(terrain) => terrain.highest(),
+            SceneTerrain::Natural(terrain) => {
+                terrain.ground(x, z).max(terrain.settings().sea_level) + ABOVE_GROUND
+            }
+        }
+    }
+
+    /// The lowest voxel a column's surface is looked for in.
+    fn floor(&self, x: i32, z: i32) -> i32 {
+        match &self.key.source {
+            SceneTerrain::Layered(_) => 0,
+            SceneTerrain::Natural(terrain) => {
+                terrain.ground(x, z).min(terrain.settings().sea_level) - ABOVE_GROUND
+            }
+        }
+    }
+
+    /// The highest generated block in a column that holds something up.
+    fn top(&self, x: i32, z: i32) -> Option<i32> {
+        if let Some(known) = self
+            .tops
+            .lock()
+            .unwrap_or_else(PoisonError::into_inner)
+            .get(&(x, z))
+        {
+            return *known;
+        }
+        let floor = self.floor(x, z);
+        let mut y = self.ceiling(x, z);
+        let mut found = None;
+        while y >= floor {
+            if self
+                .footing(self.voxel(VoxelCoord::new(x, y, z)))
+                .is_some_and(|footing| footing.supports)
+            {
+                found = Some(y);
+                break;
+            }
+            y -= 1;
+        }
+        let mut tops = self.tops.lock().unwrap_or_else(PoisonError::into_inner);
+        if tops.len() >= REMEMBERED_COLUMNS {
+            tops.clear();
+        }
+        tops.insert((x, z), found);
+        found
+    }
+
     fn voxel(&self, coord: VoxelCoord) -> VoxelId {
         let section = coord.section();
         let mut sections = self.sections.lock().unwrap_or_else(PoisonError::into_inner);
@@ -82,6 +149,7 @@ fn terrain_for(key: TerrainKey) -> Arc<GeneratedTerrain> {
         let terrain = Arc::new(GeneratedTerrain {
             key,
             sections: Mutex::new(BTreeMap::new()),
+            tops: Mutex::new(HashMap::new()),
         });
         terrains.insert(0, Arc::clone(&terrain));
         terrains.truncate(REMEMBERED_TERRAINS);
@@ -106,6 +174,8 @@ struct Footing {
 pub struct VoxelGround {
     terrain: Arc<GeneratedTerrain>,
     edits: BTreeMap<VoxelCoord, VoxelId>,
+    /// The highest edited voxel in each column that has any.
+    edited_columns: HashMap<(i32, i32), i32>,
     names: BTreeMap<u16, String>,
     footing: BTreeMap<u16, Footing>,
     /// Kept for asking what a block is tagged with.
@@ -171,7 +241,7 @@ impl VoxelGround {
             ),
         };
         let source = terrain_source(&component.generator, &palette)?;
-        let (names, footing) = match &appearance {
+        let (names, footing): (BTreeMap<u16, String>, BTreeMap<u16, Footing>) = match &appearance {
             Appearance::Blocks(blocks) => (
                 blocks
                     .iter()
@@ -206,8 +276,10 @@ impl VoxelGround {
             terrain: terrain_for(TerrainKey {
                 source,
                 palette: palette.clone(),
+                footing: footing.clone(),
             }),
             edits: BTreeMap::new(),
+            edited_columns: HashMap::new(),
             names,
             footing,
             tile_set,
@@ -217,6 +289,11 @@ impl VoxelGround {
             ground
                 .edits
                 .insert(VoxelCoord::new(edit.at[0], edit.at[1], edit.at[2]), voxel);
+            let highest = ground
+                .edited_columns
+                .entry((edit.at[0], edit.at[2]))
+                .or_insert(edit.at[1]);
+            *highest = (*highest).max(edit.at[1]);
         }
         Ok(ground)
     }
@@ -335,49 +412,38 @@ impl VoxelGround {
             .flatten()
     }
 
-    /// The highest voxel anything could be in at a column.
-    fn ceiling(&self, x: i32, z: i32) -> i32 {
-        let generated = match &self.terrain.key.source {
-            SceneTerrain::Layered(terrain) => terrain.highest(),
-            SceneTerrain::Natural(terrain) => {
-                terrain.ground(x, z).max(terrain.settings().sea_level) + ABOVE_GROUND
-            }
-        };
-        self.edits
-            .keys()
-            .filter(|coord| coord.x == x && coord.z == z)
-            .map(|coord| coord.y)
-            .fold(generated, i32::max)
-    }
-
-    /// The lowest voxel a column's surface is looked for in.
-    fn floor(&self, x: i32, z: i32) -> i32 {
-        match &self.terrain.key.source {
-            SceneTerrain::Layered(_) => 0,
-            SceneTerrain::Natural(terrain) => {
-                terrain.ground(x, z).min(terrain.settings().sea_level) - ABOVE_GROUND
-            }
-        }
-    }
-
     /// The highest block in a column that holds something up: its level, the
     /// height of its top, and whether a walker can stand on it. `None` where
     /// nothing in the column does.
+    ///
+    /// A column nobody has edited is the generator's, and its answer is
+    /// remembered; an edited one is walked, from whichever is higher of its
+    /// highest edit and the generator's ceiling.
     #[must_use]
     pub fn surface(&self, x: i32, z: i32) -> Option<(i32, f32, bool)> {
-        let floor = self.floor(x, z);
-        let mut y = self.ceiling(x, z);
-        while y >= floor {
-            if let Some(footing) = self.footing(self.voxel([x, y, z]))
-                && footing.supports
-            {
-                #[allow(clippy::cast_precision_loss)]
-                let height = y as f32 + footing.top;
-                return Some((y, height, footing.walkable));
+        let level = match self.edited_columns.get(&(x, z)) {
+            None => self.terrain.top(x, z)?,
+            Some(&highest_edit) => {
+                let floor = self.terrain.floor(x, z);
+                let mut y = self.terrain.ceiling(x, z).max(highest_edit);
+                loop {
+                    if y < floor {
+                        return None;
+                    }
+                    if self
+                        .footing(self.voxel([x, y, z]))
+                        .is_some_and(|footing| footing.supports)
+                    {
+                        break y;
+                    }
+                    y -= 1;
+                }
             }
-            y -= 1;
-        }
-        None
+        };
+        let footing = self.footing(self.voxel([x, level, z]))?;
+        #[allow(clippy::cast_precision_loss)]
+        let height = level as f32 + footing.top;
+        Some((level, height, footing.walkable))
     }
 
     /// Every column's surface between two corners, inclusive, as the surfaces

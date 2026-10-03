@@ -308,7 +308,7 @@ fn covers(face: TileFace, shape: TileBox, neighbour: Option<TileBox>) -> bool {
 mod aim;
 mod picking;
 
-pub use aim::{REACH, VolumeAim, aim_at};
+pub use aim::{REACH, VolumeAim, aim_at, aim_at_with};
 pub use picking::{VoxelHit, face_quad, model_of, pick, ray_at_viewport};
 
 #[cfg(test)]

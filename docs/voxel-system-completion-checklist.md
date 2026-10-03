@@ -95,20 +95,25 @@ without hand-editing scene JSON.
 
 ## 4. Migrate Causeway without losing its strengths
 
-- [ ] Adapt Causeway's seed, biome, strata, decoration, and structure policy to
+- [x] Adapt Causeway's seed, biome, strata, decoration, and structure policy to
   engine generator interfaces while preserving a recognizable opening world.
   The engine's `natural_terrain` generator now covers Causeway's landform,
   climate, frayed-threshold and tree policy and goes further (warped
   coastlines, rivers, blended biome relief and terraces, steep-slope rock,
   caves, overhangs, ice); see [`voxel-terrain.md`](voxel-terrain.md). Causeway
-  itself has not moved onto it.
-- [ ] Move generic streaming/residency code out of `game/`.
-- [ ] Translate Causeway tile semantics—variants, buried looks, shapes,
+  now uses it with its own blocks and a temperate set of biomes (meadow,
+  forest, swamp, taiga), opening on a river crossing chosen from seed 1.
+  Strata, ores and structures are still absent.
+- [x] Move generic streaming/residency code out of `game/`. `game/` no longer
+  generates, streams or meshes terrain: `follow_camera` keeps the window.
+- [x] Translate Causeway tile semantics—variants, buried looks, shapes,
   occlusion, face treatment, and material identity—rather than merely pointing
   engine voxels at the old atlas.
-- [ ] Preserve block placement/removal, picking, Build/Play cameras, Wanderer
-  movement, navigation, and edits across unload/reload.
-- [ ] Remove `MAX_SKIRT`, the thin surface-shell workaround, and the
+- [x] Preserve block placement/removal, picking, Build/Play cameras, Wanderer
+  movement, navigation, and edits across unload/reload. Edits live on the
+  component, so leaving an area and returning finds them; navigation reads the
+  ground around the walker and its goal.
+- [x] Remove `MAX_SKIRT`, the thin surface-shell workaround, and the
   one-centre-chunk smooth overlay.
 - [ ] Add desktop and phone captures that cross section boundaries, rotate the
   camera, dig, build, unload, and return.

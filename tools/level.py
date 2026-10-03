@@ -9,11 +9,53 @@ sys.path.insert(0, '/tmp')
 from look import look_at
 
 COLUMNS, ROWS, CELL = 65_536, 65_536, 1.0
-# The finite coordinate envelope is deliberately enormous while runtime cells
-# stay sparse. Starting in its middle leaves thousands of chunks in every
-# direction without paying to generate or store them.
-WANDERER = (32_766, 32_772)
-BEACON = (32_770, 32_764)
+# The grid is the voxel world's ground, so a cell is a voxel column. These two
+# are where seed 1 puts a sandy bank with the beacon across a river from it:
+# eight blocks of water, and no way round within reach, so the way over is
+# built.
+WANDERER = (32_656, 32_552)
+BEACON = (32_642, 32_552)
+
+
+def biome(name, temperature, moisture, surface, subsurface, trees, relief):
+    return {"name": name, "temperature": temperature, "moisture": moisture,
+            "surface_voxel": surface, "subsurface_voxel": subsurface,
+            "subsurface_depth": 3, "trees": trees, "relief": relief,
+            "terraces": 0}
+
+
+def voxel_world():
+    """The engine's natural terrain, drawn with Causeway's blocks.
+
+    Temperate on purpose: no tundra or desert biome, so snow is what lies
+    above the snow line and sand is what lies along the water.
+    """
+    return {
+        "blocks": "causeway.tileset",
+        "edits": [],
+        "focus": [0, 0, 0],
+        "follow_camera": True,
+        "generator": {
+            "kind": "natural_terrain", "seed": 1, "sea_level": 0,
+            "relief": 40, "feature_size": 64, "tree_line": 12,
+            "snow_line": 18, "caves": False, "rivers": True,
+            "stone_voxel": "stone", "water_voxel": "water",
+            "beach_voxel": "sand", "sea_bed_voxel": "gravel",
+            "cliff_voxel": "rock", "snow_voxel": "snow", "ice_voxel": "ice",
+            "trunk_voxel": "log", "leaves_voxel": "leaves",
+            "biomes": [
+                biome("Meadow", 0.6, 0.3, "ground", "earth", 0.08, 0.8),
+                biome("Forest", 0.55, 0.72, "ground", "earth", 0.5, 1.0),
+                biome("Swamp", 0.75, 0.92, "mud", "mud", 0.2, 0.3),
+                biome("Taiga", 0.15, 0.65, "moss", "earth", 0.4, 1.1),
+            ],
+        },
+        "layer": 0,
+        "materials": [],
+        "render_radius": 3,
+        "variant_seed": 0,
+        "vertical_radius": 2,
+    }
 
 
 def keys(*points):
@@ -97,11 +139,9 @@ def entities():
                     "cell_size": [CELL, CELL], "cell_height": CELL,
                     "projection": "isometric", "space": "solid",
                 },
-                # Left empty on purpose. The cells are generated from a seed
-                # before the first frame -- a hundred and sixty on a side is
-                # more world than a scene file should carry, and one that is
-                # written down is one island for ever.
-                "sindri.tile_volume": {"tileset": "causeway.tileset", "cells": []},
+                # The ground: generated from a seed as the camera looks
+                # around, with only what the player changes written down.
+                "sindri.voxel_world": voxel_world(),
                 # One block up and no more, which is what makes the pillar a
                 # thing to build a way up rather than a thing to walk up.
                 "sindri.grid.navigation": {"max_step": 1.0},

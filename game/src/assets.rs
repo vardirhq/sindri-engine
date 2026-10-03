@@ -304,56 +304,8 @@ pub fn world() -> Result<(World, sindri_core::LoadedScenes), CausewayError> {
     // names an entity by stable ID -- a test, an editor showing a running
     // world, an authoring proposal -- was written against those.
     loaded.enter_keeping_identities(&mut world, name, document)?;
-    fill_the_world(&mut world)?;
     Ok((world, loaded))
 }
-
-/// Builds the ground the scene left empty.
-///
-/// The scene authors the *grid* -- how big a cell is, how many of them, where
-/// the floor stands -- and leaves the cells to this. Only the opening window
-/// is materialized; the session adds deterministic chunks as its camera moves.
-///
-/// Done here rather than in a script because it has to be true before anything
-/// else looks: placement asks how high the ground is on the first pass, and a
-/// script filling the volume afterwards would have put every prop at the
-/// height of a world that did not exist yet.
-///
-/// Both hosts call it, and they have to. The browser does not load the scene
-/// through `world` -- it fetches the project through the real asset pipeline,
-/// which is the point of that path -- so a generator reachable only from the
-/// native loader is a browser build that opens onto an empty grid, with
-/// nothing anywhere reporting it.
-pub(crate) fn fill_the_world(world: &mut World) -> Result<(), CausewayError> {
-    let Some(entity) = world
-        .entities()
-        .find(|(_, data)| data.components.contains_key(TILE_GRID))
-        .map(|(entity, _)| entity)
-    else {
-        return Ok(());
-    };
-    let focus = world
-        .entities()
-        .find(|(_, data)| data.name.as_deref() == Some("Wanderer"))
-        .and_then(|(_, data)| data.transform_3d)
-        .map_or([crate::streaming::WORLD_CENTRE; 2], |transform| {
-            #[allow(clippy::cast_possible_truncation)]
-            [
-                transform.position[0].round() as i32,
-                transform.position[2].round() as i32,
-            ]
-        });
-    let volume = crate::streaming::initial_volume(focus);
-    let payload = serde_json::to_value(&volume)
-        .map_err(|error| CausewayError::Generated(error.to_string()))?;
-    if let Some(data) = world.get_mut(entity) {
-        data.components.insert(TILE_VOLUME.to_owned(), payload);
-    }
-    Ok(())
-}
-
-const TILE_GRID: &str = "sindri.tile_grid";
-const TILE_VOLUME: &str = "sindri.tile_volume";
 
 /// The native equivalent of the stylesheet graph the browser fetches.
 #[cfg(not(target_arch = "wasm32"))]

@@ -967,6 +967,7 @@
           ]
         }
       },
+      "occludes": false,
       "walkable": false,
       "supports": false
     }
