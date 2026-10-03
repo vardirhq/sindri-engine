@@ -1,0 +1,86 @@
+// The phone's controls: Sindri's virtual stick, drawn where the thumb landed,
+// and three buttons standing in for E, X and Tab.
+//
+// None of it shows until a finger touches the screen, so a keyboard player
+// never sees it. The buttons are read where they are needed: the crew asks
+// whether Use or Drop was pressed and the view asks about View, in the same
+// breath as they ask about the keys. This script only shows, hides and
+// labels them, and draws the stick.
+
+// How far the knob travels from the middle of the ring, in screen units.
+const KNOB_TRAVEL: f32 = 0.11;
+
+script TouchControls {
+    var use_button: Entity = null;
+    var use_label: Entity = null;
+    var drop_button: Entity = null;
+    var view_button: Entity = null;
+    var ring: Entity = null;
+    var knob: Entity = null;
+    var drawing: bool = false;
+    var anchor: Vec2 = Vec2(0.0, 0.0);
+
+    fn start() {
+        this.use_button = World.find("Use button");
+        this.use_label = World.find("Use label");
+        this.drop_button = World.find("Drop button");
+        this.view_button = World.find("View button");
+        this.ring = World.find("Stick ring");
+        this.knob = World.find("Stick knob");
+        Game.touch = false;
+    }
+
+    fn update(dt: f32) {
+        if Touch.count > 0.0 {
+            Game.touch = true;
+        }
+        let playing = Game.touch && !Game.won && !Game.lost;
+        World.set_active(this.use_button, playing);
+        World.set_active(this.view_button, playing);
+        World.set_active(this.drop_button, playing && Game.hint == Hint.Jettison);
+        Ui.set_text(this.use_label, use_words());
+        draw_stick(playing);
+    }
+
+    // What Use would do here, so the one button can be the helm, salvage
+    // and leaving the helm.
+    fn use_words() -> String {
+        return match Game.hint {
+            Hint.TakeHelm => "Helm",
+            Hint.AtHelm => "Leave",
+            Hint.Salvage => "Salvage",
+            _ => "Use",
+        };
+    }
+
+    // The ring sits where the steering thumb landed, and the knob shows how
+    // far it is pushed. A press that lands on a button is not steering.
+    fn draw_stick(playing: bool) {
+        let steering = playing && Stick.held;
+        if steering && !this.drawing {
+            this.drawing = !Pointer.over_ui;
+            this.anchor = Pointer.overlay;
+        }
+        if !steering {
+            this.drawing = false;
+        }
+        World.set_active(this.ring, this.drawing);
+        World.set_active(this.knob, this.drawing);
+        if this.drawing {
+            this.ring.transform.position = Vec3(this.anchor.x, this.anchor.y, 0.0);
+            let push = Vec2(Stick.x, -Stick.y) * KNOB_TRAVEL;
+            this.knob.transform.position = Vec3(this.anchor.x + push.x, this.anchor.y + push.y, 0.0);
+        }
+    }
+}
+
+// Which way the player is pushing, on screen with up positive: the keys, the
+// d-pad, or a thumb on the stick, whichever is pushing hardest.
+shared fn steering() -> Vec2 {
+    let keys = Action.vector("move");
+    let thumb = Vec2(Stick.x, -Stick.y);
+    if Stick.held && thumb.length > keys.length {
+        return thumb;
+    }
+    return keys;
+}

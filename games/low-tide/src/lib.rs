@@ -10,12 +10,20 @@ use std::time::Duration;
 use sindri_core::{ComponentSchemaRegistry, EntityId, SceneDocument, Transform3D, World};
 use sindri_decay::{ScriptComponent, ScriptFrame, ScriptSources, Scripts};
 use sindri_platform::{InputEvent, InputState, Key};
-use sindri_scene::{SceneExtractor, SpriteAnimations};
+use sindri_scene::{SceneExtractor, ScreenExtent, ScreenUi, SpriteAnimations};
 
 /// Where the project is, from wherever the harness is being run.
 #[must_use]
 pub fn project() -> PathBuf {
     Path::new(env!("CARGO_MANIFEST_DIR")).to_path_buf()
+}
+
+/// What a finger does.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum Finger {
+    Down,
+    Move,
+    Up,
 }
 
 /// One voyage, held together as a host holds it.
@@ -26,6 +34,11 @@ pub struct Run {
     pub sources: ScriptSources,
     pub animations: SpriteAnimations,
     pub input: InputState,
+    /// The phone's buttons are screen UI, so the harness lays it out and
+    /// hit-tests it as a host does.
+    pub screen_ui: ScreenUi,
+    /// The screen being played on, in pixels.
+    pub screen: [f32; 2],
 }
 
 impl Run {
@@ -72,18 +85,30 @@ impl Run {
             sources,
             animations: SpriteAnimations::new(),
             input: InputState::default(),
+            screen_ui: ScreenUi::default(),
+            screen: [1280.0, 720.0],
         })
     }
 
     /// One fixed step, returning every failure it reported.
     pub fn step(&mut self, delta: f32) -> Vec<String> {
+        let mut notes = Vec::new();
+        if let Err(error) = self.screen_ui.update(
+            &mut self.world,
+            &self.components,
+            ScreenExtent::new(self.screen[0], self.screen[1]),
+            self.input.presses(),
+        ) {
+            notes.push(error.to_string());
+        }
         let report = self.scripts.advance(
             &mut self.world,
             &self.components,
             ScriptFrame::new(&self.sources, &self.input, delta)
+                .with_screen_ui(&self.screen_ui)
                 .with_animations(&mut self.animations),
         );
-        let mut notes: Vec<String> = report.failures.iter().map(ToString::to_string).collect();
+        notes.extend(report.failures.iter().map(ToString::to_string));
         if let Err(error) = self
             .animations
             .advance(&self.world, &self.components, delta)
@@ -101,6 +126,29 @@ impl Run {
         } else {
             InputEvent::KeyReleased(key)
         });
+    }
+
+    /// Puts a finger down, moves it or lifts it, at a point in pixels from
+    /// the top left of the screen, as a touch screen would report it.
+    pub fn finger(&mut self, id: u64, phase: Finger, at: [f32; 2]) {
+        let [x, y] = at;
+        self.input.apply(match phase {
+            Finger::Down => InputEvent::TouchStarted { id, x, y },
+            Finger::Move => InputEvent::TouchMoved { id, x, y },
+            Finger::Up => InputEvent::TouchEnded { id },
+        });
+    }
+
+    /// Where the middle of a screen element was laid out, in pixels from the
+    /// top left, for a finger to press it.
+    #[must_use]
+    pub fn on_screen(&self, entity: EntityId) -> Option<[f32; 2]> {
+        let rect = self.screen_ui.rect(entity)?;
+        let half_height = self.screen[1] / 2.0;
+        Some([
+            self.screen[0] / 2.0 + rect.center[0] * half_height,
+            half_height - rect.center[1] * half_height,
+        ])
     }
 
     /// What a script left on the shared board: a number, or 1 for true.

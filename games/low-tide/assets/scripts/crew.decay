@@ -9,7 +9,8 @@
 // deck. Those two moments are the only places the crawler's motion matters.
 //
 // Controls are screen-relative: up is up on screen whichever way the view is
-// turned, so the stick is turned into the frame it is walking in.
+// turned, so the stick is turned into the frame it is walking in. Keys, the
+// d-pad and a thumb on the touch stick all arrive through `steering()`.
 
 const DECK_COLUMNS: f32 = 11.0;
 const DECK_ROWS: f32 = 14.0;
@@ -26,6 +27,8 @@ script Crew {
     var deck: Entity = null;
     var crawler: Entity = null;
     var carried: Entity = null;
+    var use_button: Entity = null;
+    var drop_button: Entity = null;
     var carrying: bool = false;
     var view: String = "down";
     var flip: f32 = 1.0;
@@ -34,6 +37,8 @@ script Crew {
         this.deck = World.find("Deck");
         this.crawler = World.find("Crawler");
         this.carried = World.find("Carried");
+        this.use_button = World.find("Use button");
+        this.drop_button = World.find("Drop button");
         Game.aboard = true;
         Game.at_helm = false;
     }
@@ -44,11 +49,11 @@ script Crew {
             pose(Vec2(0.0, 0.0));
             return;
         }
-        let stick = Action.vector("move");
-        if Action.pressed("use") {
+        let stick = steering();
+        if Action.pressed("use") || Ui.is_pressed(this.use_button) {
             use();
         }
-        if Action.pressed("drop") {
+        if Action.pressed("drop") || Ui.is_pressed(this.drop_button) {
             drop();
         }
         if Game.at_helm {

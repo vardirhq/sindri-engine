@@ -41,6 +41,9 @@ state Game {
     // for the map to stay north-up.
     var view_rot: f32 = 0.0;
     var prefer_north: bool = false;
+    // Whether a finger has touched the screen: the phone's controls show
+    // from then on, and the hints talk about them instead of keys.
+    var touch: bool = false;
     // How it ended.
     var won: bool = false;
     var lost: bool = false;
@@ -56,7 +59,7 @@ script Voyage {
 
     fn update(dt: f32) {
         if Game.won || Game.lost {
-            if Action.pressed("use") {
+            if Action.pressed("use") || (Game.touch && Pointer.just_pressed("Left")) {
                 Scene.go(Scene.current());
             }
             return;

@@ -3,7 +3,8 @@
 // Walking the deck, the view turns with the crawler so its floor plan stays
 // upright on screen and the salt turns past it: deck view. At the helm and
 // ashore it stays north-up, the way a map does, so steering and finding a
-// wreck read plainly: helm view. Tab keeps it north-up everywhere. The turn
+// wreck read plainly: helm view. Tab, or the View button on a phone, keeps
+// it north-up everywhere. The turn
 // between the two is eased rather than snapped.
 
 script View {
@@ -12,9 +13,14 @@ script View {
     @export let lead: f32 = 1.4;
 
     var roll: f32 = 0.0;
+    var view_button: Entity = null;
+
+    fn start() {
+        this.view_button = World.find("View button");
+    }
 
     fn update(dt: f32) {
-        if Action.pressed("view") {
+        if Action.pressed("view") || Ui.is_pressed(this.view_button) {
             Game.prefer_north = !Game.prefer_north;
         }
         var wanted: f32 = 0.0;

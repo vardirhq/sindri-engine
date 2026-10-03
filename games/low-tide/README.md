@@ -21,6 +21,13 @@ the crawler heavier, and heavier is slower.
   poorer.
 - **Tab** keeps the map north-up everywhere.
 
+On a phone, the controls appear with the first touch. Drag anywhere off the
+buttons to walk (a ring shows where your thumb landed), and the same drag
+works the throttle and rudder at the helm. **Use** takes the helm, leaves it
+and salvages, and is labelled for whichever it would do. **Drop** appears
+beside a crate in the hold, and **View** keeps the map north-up. After a
+voyage ends, tap to sail again.
+
 Walking the deck, the view turns with the crawler so its floor plan stays
 upright and the salt turns past it. At the helm and ashore it stays north-up,
 like a map. You win by reaching the Rise, and lose if the Tide reaches the
@@ -40,6 +47,8 @@ There is no game code. The game is `assets/`:
   going ashore and coming back aboard, salvage and jettison.
 - `scripts/view.decay`: the camera's follow and its turn between deck view and
   helm view.
+- `scripts/touch.decay`: the phone's controls, shown from the first touch:
+  the stick's ring and the Use, Drop and View buttons.
 - `scripts/tide.decay`, `scripts/wreck.decay`, `scripts/hud.decay`.
 - `textures/`: drawn by `art/draw.py`.
 
@@ -57,6 +66,7 @@ It uses, with no Rust of its own:
 - **`Grid.tile` and `Grid.set_tile`** from Decay: the deck's walls and
   furniture, the Basin's soft sand, crates stowed and thrown overboard;
 - a **camera roll** from a script, eased between two views;
+- **Sindri's virtual stick** and **screen UI buttons** for touch;
 - **input actions**, **paper-doll sprite animation** chosen by on-screen
   direction, **typed messages** between scripts, **shared state** and an
   **enum**.
@@ -79,8 +89,17 @@ deck while it moves. A hard turn checks that the view turns with the deck and
 that "down" on screen is still down the deck. The crew stops by a wreck, goes
 ashore round the bow, salvages a crate, carries it up the ramp, and finds it in
 the hold with the crawler slower for it. A crawler that waits is taken by the
-Tide, and one driven north outruns it to the Rise. `src/lib.rs` is the harness
-that plays it without a window.
+Tide, and one driven north outruns it to the Rise.
+
+`tests/played_on_a_phone.rs` plays it on a phone-sized screen with fingers
+only: a thumb on the stick walks to the helm and drives, the buttons take and
+leave the helm, View turns the map north-up, the whole salvage run is played
+again by touch and ends with Drop, and a tap sails again after the Tide wins.
+It also checks that a keyboard player never sees the touch controls.
+
+`src/lib.rs` is the harness that plays it without a window. It lays out and
+hit-tests screen UI as a host does, so a finger pressing a button is a real
+press.
 
 ## Not yet
 
