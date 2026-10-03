@@ -5,9 +5,11 @@
 
 script Hud {
     var hint: Entity = null;
+    var panel: Entity = null;
 
     fn start() {
         this.hint = World.find("Hint");
+        this.panel = World.find("Instrument panel");
     }
 
     fn update(dt: f32) {
@@ -28,6 +30,12 @@ script Hud {
         if Game.flooded { status = status + "\nFlooded: wait for the ebb"; }
         if Game.washed > 0.0 { status = status + "\nWashed away: " + Game.washed; }
         Ui.set_text(this.entity, status);
+        // Keep the panel's top edge fixed as flood notices add lines.
+        var height = 0.225;
+        if Game.flooded { height += 0.04; }
+        if Game.washed > 0.0 { height += 0.04; }
+        this.panel.transform.scale.y = height;
+        this.panel.transform.position.y = -0.02 - height * 0.5;
 
         if Game.touch {
             Ui.set_text(this.hint, touch_words());

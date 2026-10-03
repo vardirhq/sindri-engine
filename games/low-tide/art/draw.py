@@ -344,18 +344,23 @@ def engine(c):
     c.rect(4, 3, 8, 6, (52, 54, 48))
 
 
-def tread(c, phase=0):
-    c.rect(0, 0, CELL, CELL, (42, 43, 38))
-    c.rect(2, 0, CELL - 2, CELL, (65, 66, 58))
-    for i in range(-1, 5):
+def tread(c, phase=0, ramp_gap=False):
+    c.rect(0, 0, CELL, c.height, (42, 43, 38))
+    c.rect(2, 0, CELL - 2, c.height, (65, 66, 58))
+    for i in range(-1, c.height // 8 + 1):
         y = i * 8 + 2 + phase
         c.rect(3, y, CELL - 3, y + 5, (96, 98, 84), 0.5)
         c.line(4, y + 1, 28, y + 1, 0.7, (129, 130, 109))
         c.line(4, y + 4, 28, y + 4, 0.7, (53, 56, 49))
         c.ellipse(8, y + 2.5, 1, 1, IRON_DARK)
         c.ellipse(24, y + 2.5, 1, 1, IRON_DARK)
-    c.line(1, 0, 1, CELL, 1, (148, 124, 85))
-    c.line(31, 0, 31, CELL, 1, (30, 33, 29))
+    c.line(1, 0, 1, c.height, 1, (148, 124, 85))
+    c.line(31, 0, 31, c.height, 1, (30, 33, 29))
+    if ramp_gap:
+        # The starboard belt is interrupted by the physical boarding ramp.
+        for y in range(CELL * 4 * SS, CELL * 5 * SS):
+            for x in range(c.w):
+                c.px[y * c.w + x] = [0, 0, 0, 0]
 
 
 def ramp(c):
@@ -491,8 +496,42 @@ def wreck(c):
     c.rect(36, 28, 52, 40, (200, 180, 120), 2)
 
 
+def cabin_art():
+    rug = Canvas(96, 128)
+    rug.rect(3, 3, 93, 125, (60, 38, 26, 55), 1)
+    rug.rect(4, 2, 92, 124, (125, 67, 48), 1)
+    rug.rect(8, 6, 88, 120, (173, 109, 70))
+    rug.rect(12, 10, 84, 116, (139, 82, 55))
+    for y in range(16, 116, 20):
+        rug.line(20, y, 48, y + 7, 1.5, (202, 153, 94))
+        rug.line(48, y + 7, 76, y, 1.5, (202, 153, 94))
+        rug.line(20, y + 1, 48, y + 9, 0.5, (95, 57, 39))
+    for x in range(8, 90, 4):
+        rug.line(x, 0, x, 3, 0.7, LINEN)
+        rug.line(x, 123, x, 127, 0.7, LINEN)
+    for i in range(160):
+        x = noise(i, 76, 11) * 80 + 8
+        y = noise(i, 76, 12) * 110 + 6
+        rug.line(x, y, x + 2, y, 0.4, (214, 165, 107, 65))
+    png(OUT / "runner.png", 96, 128, rug.pixels())
+    pipe = Canvas(32, 128)
+    pipe.rect(11, 0, 23, 128, (22, 22, 18, 70))
+    pipe.rect(11, 0, 20, 128, (86, 65, 42))
+    pipe.rect(12, 0, 19, 128, (153, 115, 66))
+    pipe.rect(13, 0, 15, 128, (202, 160, 95))
+    for y in (12, 46, 82, 116):
+        pipe.rect(8, y, 23, y + 4, (64, 68, 56), 0.5)
+        pipe.ellipse(10, y + 2, 1, 1, (188, 172, 121))
+        pipe.ellipse(21, y + 2, 1, 1, (188, 172, 121))
+    pipe.ring(16, 66, 7, 5, (162, 77, 41))
+    pipe.line(10, 66, 22, 66, 1, (112, 59, 35))
+    pipe.ellipse(16, 66, 2, 2, (194, 142, 75))
+    png(OUT / "pipe.png", 32, 128, pipe.pixels())
+
+
 def main():
     OUT.mkdir(parents=True, exist_ok=True)
+    cabin_art()
     sheet(
         "ship",
         [
@@ -505,7 +544,7 @@ def main():
             ("table", table),
             ("bunk", bunk),
             ("engine", engine),
-            ("tread", tread),
+            ("tread", lambda c: None),
             ("ramp", ramp),
             ("crate", crate),
             ("mast", mast),
@@ -517,6 +556,9 @@ def main():
         CELL,
         CELL,
     )
+    sheet("treads", [(f"{side}-{i}", lambda c, phase=i, gap=side == "starboard": tread(c, phase, gap))
+                     for side in ("port", "starboard") for i in range(8)],
+          8, CELL, CELL * 11)
     sheet(
         "ground",
         [

@@ -1,0 +1,26 @@
+{
+  "format_version": 1,
+  "anchor": "center",
+  "grid": {
+    "columns": 8,
+    "rows": 2,
+    "names": [
+      "port-0",
+      "port-1",
+      "port-2",
+      "port-3",
+      "port-4",
+      "port-5",
+      "port-6",
+      "port-7",
+      "starboard-0",
+      "starboard-1",
+      "starboard-2",
+      "starboard-3",
+      "starboard-4",
+      "starboard-5",
+      "starboard-6",
+      "starboard-7"
+    ]
+  }
+}

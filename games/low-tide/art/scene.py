@@ -126,7 +126,7 @@ def text(anchor, size, words, colour=(1.0, 0.96, 0.88, 1.0)):
         "font_size": size, "line_height": size * 1.25, "layer": 100,
         "text": words, "bold": True,
         # Light words with a dark edge read over salt, kelp and deck alike.
-        "outline": {"width": 0.0035, "color": [0.12, 0.08, 0.06, 0.95]},
+        "outline": {"width": 0.0, "color": [0.12, 0.08, 0.06, 0.95]},
         "shadow": {"offset": [0.0, -0.003], "color": [0.0, 0.0, 0.0, 0.35],
                    "softness": 0.004},
     }
@@ -261,18 +261,18 @@ def entities():
         },
         {
             "id": "status", "name": "Status",
-            "transform_3d": transform(0.03, -0.03),
+            "transform_3d": transform(0.04, -0.085),
             "components": {
-                "sindri.ui.text": text("top_left", 0.032, "Scrap 0"),
+                "sindri.ui.text": text("top_left", 0.028, "Scrap 0"),
                 "sindri.script": script("scripts/hud.decay", "Hud"),
             },
         },
         {
             "id": "hint", "name": "Hint",
-            "transform_3d": transform(0.0, 0.04),
-            "components": {"sindri.ui.text": text("bottom", 0.032, "")},
+            "transform_3d": transform(0.0, 0.06),
+            "components": {"sindri.ui.text": text("bottom", 0.029, "")},
         },
-    ] + touch_controls() + [
+    ] + crawler_motion() + cabin_details() + instrument_panel() + touch_controls() + [
     ]
     return found
 
@@ -284,6 +284,67 @@ def ui_shape(kind, anchor, fill, stroke, stroke_width, layer, corner=0.0):
         "dash_duty": 0.5, "sweep_start": 0.0, "sweep_turns": 1.0,
         "blend": "over", "anchor": anchor, "layer": layer,
     }
+
+
+def crawler_motion():
+    """Two visual belts; the logical tread cells still block walking."""
+    found = []
+    for side, column, direction in (("port", 0.5, -1), ("starboard", 10.5, 1)):
+        found.append({
+            "id": f"{side}-tread", "name": f"{side.title()} tread", "parent": "deck",
+            "transform_3d": transform(column, -7.5, 0.02, 0, (1, 11)),
+            "components": {
+                "sindri.sprite": {"texture": f"textures/treads.png#{side}-0", "layer": 5},
+                "sindri.animation.sprite": {
+                    "clips": {
+                        "forward": {"frames": [f"{side}-{i}" for i in range(8)],
+                                    "seconds_per_frame": 0.055, "looping": True},
+                        "reverse": {"frames": [f"{side}-{i}" for i in reversed(range(8))],
+                                    "seconds_per_frame": 0.055, "looping": True},
+                    }, "playing": "forward", "speed": 0.0,
+                },
+                "sindri.script": script("scripts/tread.decay", "Tread", {"side": direction}),
+            },
+        })
+    return found
+
+
+def cabin_details():
+    found = [{
+        "id": "cabin-rug", "name": "Cabin runner", "parent": "deck",
+        "transform_3d": transform(5.5, -6.5, 0.01, 0, (3, 4)),
+        "components": {"sindri.sprite": {"texture": "textures/runner.png", "layer": 3}},
+    }]
+    for side, x in (("port", 1.75), ("starboard", 9.25)):
+        found.append({
+            "id": f"{side}-pipe", "name": f"{side.title()} heating pipe", "parent": "deck",
+            "transform_3d": transform(x, -10.5, 0.01, 0, (0.5, 4)),
+            "components": {"sindri.sprite": {"texture": "textures/pipe.png", "layer": 5}},
+        })
+    return found
+
+
+def instrument_panel():
+    return [
+        {
+            "id": "instruments", "name": "Instrument panel",
+            "transform_3d": transform(0.345, -0.1325, 0, 0, (0.65, 0.225)),
+            "components": {"sindri.ui.shape": ui_shape("rect", "top_left",
+                [0.025, 0.033, 0.028, 0.96], [0.55, 0.48, 0.33, 0.8], 0.005, 90, 0.025)},
+        },
+        {
+            "id": "instrument-title", "name": "Instrument title",
+            "transform_3d": transform(0.04, -0.038),
+            "components": {"sindri.ui.text": text("top_left", 0.022,
+                "LOW TIDE  /  CRAWLER 01", (0.83, 0.73, 0.51, 1))},
+        },
+        {
+            "id": "hint-panel", "name": "Hint panel",
+            "transform_3d": transform(0, 0.065, 0, 0, (0.87, 0.095)),
+            "components": {"sindri.ui.shape": ui_shape("rect", "bottom",
+                [0.025, 0.033, 0.028, 0.95], [0.55, 0.48, 0.33, 0.6], 0.005, 90, 0.02)},
+        },
+    ]
 
 
 def touch_button(key, words, x, y, width=0.3, height=0.13, anchor="bottom_right"):

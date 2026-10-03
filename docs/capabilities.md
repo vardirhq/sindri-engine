@@ -781,6 +781,10 @@ names and which one plays, `SpriteAnimations` holds where each sprite has got to
 and the cursor holds a name rather than a rect so playback does not depend on
 where anything sits in an image. Playback is runtime state, so watching an
 animation run does not rewrite the scene it came from.
+Low Tide also exercises speed-controlled clips on children of a moving deck:
+its two tread belts roll with actual movement, pivot in opposite directions,
+hold their frame while flooded and resume after the ebb. The project regression
+observes playback through rest, driving, pivoting and flood recovery.
 
 **A script chooses the clip.** `Animation.play`, `stop` and `restart` name one
 of the clips the scene authored; `is_finished`, `frame` and `clip` read where

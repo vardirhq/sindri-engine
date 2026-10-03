@@ -229,7 +229,7 @@ skeletal animation.
 
 | Feature | Engine | Editor | Decay | Proof | vs. baseline | Gap that matters |
 | --- | :-: | :-: | :-: | :-: | --- | --- |
-| Sprite frame clips, timing, loop state | ✅ | ✅ | ✅ | ✅ | **Par** | `Animation.play`/`stop`/`restart`/`is_finished`/`frame`/`clip`/`set_speed`. The platformer's hero switches between idle, run, jump and fall; Scorchball's players choose a clip and its speed from how they move; Orbital's mine blast plays once and despawns itself when it ends |
+| Sprite frame clips, timing, loop state | ✅ | ✅ | ✅ | ✅ | **Par** | `Animation.play`/`stop`/`restart`/`is_finished`/`frame`/`clip`/`set_speed`. The platformer's hero switches between idle, run, jump and fall; Scorchball's players choose a clip and its speed from how they move; Orbital's mine blast plays once and despawns itself when it ends; Low Tide's deck-child tread belts change clip and speed while driving/pivoting, hold their frame in a flood and resume after ebb |
 | Clip authoring and preview | — | ✅ | — | ✅ | **Par** | — |
 | **Animation events (a frame fires a callback)** | ❌ | ❌ | ❌ | ❌ | **Absent** | Footsteps, hit frames, spawn-on-frame all need it |
 | Property animation (animate any component field) | ✅ | ✅ | ✅ | ✅ | **Behind** | A sequence track keys any numeric component field, by component and a path into it (`sindri.sprite/tint.3`), or a transform channel, edited in the Timeline; Causeway's beacon swells and breathes this way. Unity's Animation window also keys colours, vectors, booleans and references as one value; a track here holds a single number, so a colour is four tracks and nothing non-numeric animates |
