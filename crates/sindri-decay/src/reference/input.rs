@@ -257,7 +257,7 @@ pub(super) const TYPES: &[TypeEntry] = &[
     },
     TypeEntry {
         name: "Camera",
-        text: "The game's camera: moving the view and changing its engine-owned follow, confinement, and shake behavior.",
+        text: "The game's camera: sizing an orthographic view and changing engine-owned follow, confinement, and shake behavior.",
         members: &[
             call(
                 "add_trauma",
@@ -293,6 +293,11 @@ pub(super) const TYPES: &[TypeEntry] = &[
                 "smoothing",
                 &["value"],
                 "Sets how strongly the authored behavior camera smooths its follow movement.",
+            ),
+            call(
+                "orthographic_size",
+                &["camera", "size"],
+                "Sets an explicitly selected orthographic camera's view size to a positive finite number. Works without camera behavior and preserves clipping, fit and unknown camera fields.",
             ),
             call(
                 "max_speed",

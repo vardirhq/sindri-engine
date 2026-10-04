@@ -21,14 +21,14 @@ script Hud {
         context();
         var notice = "";
         if this.washed_notice > 0.0 { notice = "Cargo washed away by the tide"; }
-        if Game.flooded && !Game.diving { notice = "Flooded: dive from aboard at the ramp"; }
+        if Game.flooded && !Game.diving { notice = "Flooded flats: swim out or wait for the ebb"; }
         if Game.dive_notice > 0.0 {
             notice = match Game.dive_report {
-                DiveReport.Recovered => "Recovered: 1 ore + 1 scrap",
-                DiveReport.Rescued => "Recalled safely; salvage left below",
-                DiveReport.Full => "Diving needs two free cargo slots",
-                DiveReport.NoSite => "Park near a flooded wreck to dive",
-                _ => "Back aboard",
+                DiveReport.Recovered => "Ore on a float: swim it back up the ramp",
+                DiveReport.Rescued => "Surfaced safely; salvage left below",
+                DiveReport.Full => "Make one free cargo slot before diving",
+                DiveReport.NoSite => "Swim to a golden float in permanent water",
+                _ => "Back at the surface",
             };
         }
         World.set_active(World.find("Notice panel"), notice != "" && !Game.building);
@@ -55,14 +55,21 @@ script Hud {
         Ui.set_text(World.find("Tide readout"), tide + ceil(Game.tide_left) + "s");
         var status = ground_words();
         if Game.blocked { status += " / aground"; }
+        if !Game.aboard {
+            status = "On foot";
+            if Game.carried_kind != Resource.None { status += " / carrying " + cargo_name(Game.carried_kind); }
+            if Game.hint == Hint.Brine || Game.hint == Hint.WaterCargo { status = "Shallow water / wading"; }
+            if Game.swimming { status = "Swimming"; }
+            if Game.hint == Hint.DiveStart { status += " / submerged wreck"; }
+        }
         this.transform.position = Vec3(0.12, -0.33, 0.0);
         if Game.diving {
             status = "Air " + ceil(Game.dive_air) + "s / Depth " + max(0.0, -Game.dive_y).fixed(1);
             this.transform.position.y = -0.14;
-            if Game.dive_loot { status += "\nHeavy salvage aboard"; }
+            if Game.dive_loot { status += "\nOre secured to your float"; }
             else if Game.dive_empty { status += "\nWreck cache empty"; }
             else { status += "\nFind the sealed salvage"; }
-            status += "\nReturn up the yellow line";
+            status += "\nSurface up the yellow line";
             this.panel.transform.scale.y = 0.32;
             this.panel.transform.position.y = -0.18;
         }
@@ -112,8 +119,9 @@ script Hud {
         else if Game.hint == Hint.Harvest { title = cargo_name(Game.gather_kind).uppercase; detail = "Gather a bundle and carry it aboard"; }
         else if Game.hint == Hint.Salvage { title = cargo_name(Game.focus_kind).uppercase + " CRATE"; detail = "Pick up this crate and carry it aboard"; }
         else if Game.hint == Hint.Carrying { title = "CARRYING " + cargo_name(Game.carried_kind).uppercase; detail = "Drop sets it down; pick it up again later"; }
-        else if Game.hint == Hint.DiveStart { title = "DIVE LINE"; detail = "Explore a nearby submerged wreck"; }
-        else if Game.diving { title = "UNDERWATER"; detail = "Follow the yellow line back to the crawler"; }
+        else if Game.hint == Hint.DiveStart { title = "SUBMERGED WRECK"; detail = "Shallow dive / ore cache below the float"; }
+        else if Game.hint == Hint.Swimming && Game.carried_kind != Resource.None { title = "ORE ON A FLOAT"; detail = "Swim back up the ramp to stow it"; }
+        else if Game.diving { title = "UNDERWATER"; detail = "Follow the yellow line back to the surface"; }
         let visible = title != "" && !Game.building;
         for name in ["Context panel", "Context title", "Context detail", "context-icon"] { World.set_active(World.find(name), visible); }
         World.set_active(World.find("context-icon"), visible && (Game.hint == Hint.Jettison || Game.hint == Hint.Salvage || Game.hint == Hint.Carrying));
@@ -151,10 +159,10 @@ script Hud {
 
     fn key_words() -> String {
         return match Game.hint {
-            Hint.DiveStart => "E  dive from the ramp",
-            Hint.DiveReturn => "E  climb aboard     X / Esc  recall",
-            Hint.DiveSalvage => "E  recover salvage     X / Esc  recall",
-            Hint.DiveSwim => "WASD  swim     X / Esc  recall",
+            Hint.DiveStart => "E  dive beneath the wreck float",
+            Hint.DiveReturn => "E  surface with salvage     X / Esc  abandon dive",
+            Hint.DiveSalvage => "E  recover ore     X / Esc  abandon dive",
+            Hint.DiveSwim => "WASD  swim     X / Esc  surface without salvage",
             Hint.Workbench => "E  open the workbench",
             Hint.Building => "Q  next plan     E  build     X / Esc  close",
             Hint.TakeHelm => "E  take the helm",
@@ -169,10 +177,10 @@ script Hud {
 
     fn touch_words() -> String {
         return match Game.hint {
-            Hint.DiveStart => "Dive from the ramp into a nearby wreck",
-            Hint.DiveReturn => "Climb brings your salvage aboard",
-            Hint.DiveSalvage => "Recover the sealed salvage",
-            Hint.DiveSwim => "Drag to swim; Recall leaves salvage below",
+            Hint.DiveStart => "Dive beneath the float into the submerged wreck",
+            Hint.DiveReturn => "Surface brings ore onto your float; swim home",
+            Hint.DiveSalvage => "Recover the sealed ore bundle",
+            Hint.DiveSwim => "Drag to swim; Abort leaves salvage below",
             Hint.Workbench => "Workbench to build onto your crawler",
             Hint.Building => "Choose a blueprint, then Build; Close returns",
             Hint.TakeHelm => "Helm to take the wheel",
@@ -187,13 +195,16 @@ script Hud {
 
     // What reads the same on keys and on glass.
     fn shared_words(idle: String) -> String {
+        if Game.swimming && Game.carried_kind != Resource.None { return "Float the ore home; Drop leaves it in the water"; }
         return match Game.hint {
             Hint.Empty => "This wreck is picked clean",
             Hint.HoldFull => "The hold is full: drop a crate first",
             Hint.Carrying => "Carry " + cargo_name(Game.carried_kind) + " aboard up the ramp",
             Hint.Ashore => "Gather nearby, or back up the ramp",
             Hint.LeftBehind => "The crawler is a long way off",
-            Hint.Brine => "Brine: stay dry or wade out slowly",
+            Hint.Swimming => "Swimming: look for golden wreck floats, or swim home",
+            Hint.WaterCargo => "Crates are too bulky to swim with; wade out or Drop",
+            Hint.Brine => "Shallow water: wade toward dry ground",
             _ => idle,
         };
     }

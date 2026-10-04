@@ -1,6 +1,5 @@
-// An authored side-view cutaway of a nearby submerged wreck. The top-down
-// voyage keeps running: the crew stays aboard, the tide keeps turning, and
-// cargo only enters the real hold after a successful climb back up the line.
+// A shallow cutaway entered from swimming at a permanent submerged wreck.
+// Surfacing returns to the same water; floated salvage still needs hauling home.
 script Dive {
     @export let air_seconds: f32 = 30.0;
     @export let swim_speed: f32 = 3.0;
@@ -27,10 +26,10 @@ script Dive {
     }
 
     fn enter() {
-        if Game.diving || !Game.aboard || Game.at_helm || Game.building || !Game.flooded || Game.tide_phase != TidePhase.High { return; }
+        if Game.diving || Game.aboard || !Game.swimming || Game.carried_kind != Resource.None || Game.building { return; }
         let wreck = nearby_dive_wreck();
         if wreck == null { Game.dive_notice = 4.0; Game.dive_report = DiveReport.NoSite; return; }
-        if Game.crates + 2.0 > Game.capacity { Game.dive_notice = 4.0; Game.dive_report = DiveReport.Full; return; }
+        if Game.crates >= Game.capacity { Game.dive_notice = 4.0; Game.dive_report = DiveReport.Full; return; }
         let at = wreck.transform.world_position;
         this.site = at.x + ":" + at.y;
         Game.dive_empty = this.recovered.get(this.site, false);
@@ -49,7 +48,7 @@ script Dive {
     fn update(dt: f32) {
         Game.dive_notice = max(0.0, Game.dive_notice - dt);
         if !Game.diving { return; }
-        if !Game.flooded || Action.pressed("cancel") || Action.pressed("drop") || Ui.is_pressed(this.drop_button) {
+        if Action.pressed("cancel") || Action.pressed("drop") || Ui.is_pressed(this.drop_button) {
             finish(false); return;
         }
         let stick = steering();
@@ -94,9 +93,8 @@ script Dive {
     }
 
     fn finish(safe: bool) {
-        if safe && Game.dive_loot && Game.crates + 2.0 <= Game.capacity {
-            Crawler.on(World.find("Crawler")).stow(Resource.Ore);
-            Crawler.on(World.find("Crawler")).stow(Resource.Scrap);
+        if safe && Game.dive_loot {
+            Crew.on(World.find("Crew")).carry_from_dive();
             this.recovered[this.site] = true;
             Game.dive_report = DiveReport.Recovered;
         } else if !safe { Game.dive_report = DiveReport.Rescued; }
@@ -111,11 +109,12 @@ script Dive {
 }
 
 shared fn nearby_dive_wreck() -> Entity {
-    let at = World.find("Crawler").transform.world_position;
-    let wreck = World.nearest("wreck", at);
+    let at = World.find("Crew").transform.world_position;
+    if !tagged_at(World.find("Basin"), Vec2(at.x, at.y), "liquid") { return null; }
+    let wreck = World.nearest("sunken-wreck", at);
     if wreck == null { return null; }
-    if wreck.transform.world_position.distance(at) > 32.0 { return null; }
+    if wreck.transform.world_position.distance(at) > 4.0 { return null; }
     let position = wreck.transform.world_position;
-    if !wet_at(World.find("Basin"), Vec2(position.x, position.y)) { return null; }
+    if !tagged_at(World.find("Basin"), Vec2(position.x, position.y), "liquid") { return null; }
     return wreck;
 }

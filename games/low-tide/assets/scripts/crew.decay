@@ -33,6 +33,7 @@ script Crew {
     var use_button: Entity = null;
     var drop_button: Entity = null;
     var carrying: bool = false;
+    var floating_cargo: bool = false;
     var view: String = "down";
     var flip: f32 = 1.0;
 
@@ -94,14 +95,16 @@ script Crew {
             } else if near_helm() {
                 Game.at_helm = true;
                 this.transform.position = Vec3(HELM_X, HELM_Y, 0.1);
-            } else if near_dive_ramp() {
-                Dive.on(World.find("Dive controller")).enter();
             } else if near_workbench() {
                 Workbench.on(this.workbench).open();
             }
             return;
         }
         let at = this.transform.world_position;
+        if Game.swimming && !this.carrying {
+            Dive.on(World.find("Dive controller")).enter();
+            return;
+        }
         if this.carrying || Game.crates >= Game.capacity || wet_at(this.basin, Vec2(at.x, at.y)) {
             return;
         }
@@ -127,6 +130,11 @@ script Crew {
         show_carried();
     }
 
+    fn carry_from_dive() {
+        this.floating_cargo = true;
+        carry(Resource.Ore);
+    }
+
     // X sets carried cargo down; stored hold cargo requires confirmation.
     fn drop() {
         if Game.building { Game.building = false; return; }
@@ -137,6 +145,7 @@ script Crew {
             LooseCargo.on(crate).claimed = false;
             LooseCargo.on(crate).kind = Game.carried_kind;
             this.carrying = false;
+            this.floating_cargo = false;
             Game.carried_kind = Resource.None;
             show_carried();
             return;
@@ -179,23 +188,25 @@ script Crew {
 
     fn walk_ashore(stick: Vec2, dt: f32) {
         var at = this.transform.position;
-        let caught = wet_at(this.basin, Vec2(at.x, at.y));
-        if caught && this.carrying {
-            this.carrying = false;
-            Game.carried_kind = Resource.None;
-            Game.washed += 1.0;
-            show_carried();
-        }
+        let current = Vec2(at.x, at.y);
+        let caught = wet_at(this.basin, current);
+        let deep = swimming_at(this.basin, current);
+        Game.swimming = deep && (!this.carrying || this.floating_cargo);
         var pace = this.walk_speed;
         if caught { pace *= 0.35; }
+        if Game.swimming { pace = this.walk_speed * 0.65; }
+        if this.floating_cargo { pace *= 0.7; }
         let way = turned(stick, Game.view_rot) * pace * dt;
         let next = Vec2(at.x + way.x, at.y + way.y);
         this.wading = wet_at(this.basin, next);
-        // Dry feet will not enter brine. Caught feet can always wade out,
-        // including across a flat flooded shelf: no invisible prison or death.
-        if caught || !this.wading {
+        let next_deep = swimming_at(this.basin, next);
+        // Empty hands can swim. Cargo caught by a rising tide can wade out,
+        // but ordinary crates cannot be carried voluntarily into deeper water.
+        let can_move = !this.carrying || this.floating_cargo || !next_deep || deep;
+        if can_move {
             at.x = next.x;
             at.y = next.y;
+            Game.swimming = next_deep && (!this.carrying || this.floating_cargo);
         }
         this.transform.position = at;
         // The only way aboard is up the ramp.
@@ -224,9 +235,11 @@ script Crew {
         let across = min(local.x, Game.hull_right - 1.0 + this.radius + 0.05);
         this.transform.position = Vec3(across, -row - 0.5, 0.1);
         Game.aboard = true;
+        Game.swimming = false;
         if this.carrying {
             Crawler.on(this.crawler).stow(Game.carried_kind);
             this.carrying = false;
+            this.floating_cargo = false;
             Game.carried_kind = Resource.None;
             show_carried();
         }
@@ -254,11 +267,6 @@ script Crew {
             return true;
         }
         return tile == 0.0 || tile == 3.0 || tile == 4.0 || tile == 5.0 || tile == 10.0;
-    }
-
-    fn near_dive_ramp() -> bool {
-        let at = this.transform.position;
-        return Game.flooded && Game.tide_phase == TidePhase.High && Vec2(at.x, at.y).distance(Vec2(7.5, -7.5)) < 1.3;
     }
 
     fn near_workbench() -> bool {
@@ -312,15 +320,24 @@ script Crew {
 
     fn decide_hint() {
         if !Game.aboard {
+            let at = this.transform.world_position;
+            if Game.swimming || wet_at(this.basin, Vec2(at.x, at.y)) || (this.carrying && this.wading) {
+                Game.gather_kind = Resource.None;
+                Game.hint = Hint.Brine;
+                if this.carrying && !Game.swimming { Game.hint = Hint.WaterCargo; }
+                if Game.swimming {
+                    Game.hint = Hint.Swimming;
+                    if !this.carrying && nearby_dive_wreck() != null { Game.hint = Hint.DiveStart; }
+                }
+                sync_focus();
+                return;
+            }
             let wreck = nearby_wreck();
             let crate = nearby_loose_cargo();
-            let at = this.transform.world_position;
             let target = harvest_target(this.basin, Vec2(at.x, at.y));
             Game.gather_kind = Resource.None;
             if target != null { Game.gather_kind = resource_at(this.basin, target.x, target.y); }
-            if wet_at(this.basin, Vec2(at.x, at.y)) {
-                Game.hint = Hint.Brine;
-            } else if this.carrying {
+            if this.carrying {
                 Game.hint = Hint.Carrying;
             } else if crate == null && wreck != null && Wreck.on(wreck).cargo_mask <= 0.0 && target == null {
                 Game.hint = Hint.Empty;
@@ -339,8 +356,6 @@ script Crew {
             }
         } else if near_helm() {
             Game.hint = Hint.TakeHelm;
-        } else if near_dive_ramp() {
-            Game.hint = Hint.DiveStart;
         } else if near_workbench() {
             Game.hint = Hint.Workbench;
         } else if nearby_crate() != null {
@@ -384,6 +399,11 @@ script Crew {
     // Paper-doll facing, chosen from the way the crew moves on screen, and
     // turned against the crawler and the camera so it always stands upright.
     fn pose(stick: Vec2) {
+        World.set_active(World.find("Swim wake"), Game.swimming && !Game.diving);
+        if this.carrying {
+            this.carried.transform.position = Vec3(0.0, 0.42, 0.01);
+            if this.floating_cargo && Game.swimming { this.carried.transform.position = Vec3(0.65, -0.25, 0.01); }
+        }
         let moving = stick.length > 0.1;
         if moving {
             if abs(stick.x) > abs(stick.y) {

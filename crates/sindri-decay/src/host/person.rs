@@ -71,6 +71,10 @@ impl WorldHost<'_> {
                     sindri_scene::add_camera_trauma(self.world, amount)
                 }
             }
+            CameraCall::OrthographicSize => {
+                let camera = self.entity_argument(path, args, 0, "the camera")?;
+                sindri_scene::set_camera_orthographic_size(self.world, camera, numeric(1)?)
+            }
             CameraCall::Follow => {
                 let target = self.entity_argument(path, args, 0, "the follow target")?;
                 sindri_scene::set_camera_follow_target(self.world, target)
@@ -97,6 +101,12 @@ impl WorldHost<'_> {
                 sindri_scene::set_camera_shake(self.world, numeric(0)?, numeric(2)?, numeric(1)?)
             }
         };
+        if !changed && call == CameraCall::OrthographicSize {
+            return Err(RuntimeError::Host(format!(
+                "{} needs an orthographic camera and a positive finite size",
+                path.dotted()
+            )));
+        }
         if !changed {
             return Err(RuntimeError::Host(format!(
                 "{} could not change the camera behavior; it needs exactly one authored behavior camera and valid settings",

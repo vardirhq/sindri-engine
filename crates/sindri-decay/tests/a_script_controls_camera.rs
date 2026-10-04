@@ -201,3 +201,69 @@ fn camera_trauma_without_one_behavior_camera_is_a_runtime_error() {
         "{report:?}"
     );
 }
+
+#[test]
+fn orthographic_size_targets_one_camera_and_preserves_its_other_fields() {
+    let mut world = World::default();
+    let payload = json!({"projection": "orthographic", "vertical_size": 30.0,
+        "near": 0.1, "far": 100.0, "fit": "shorter", "future": {"keep": true}});
+    let camera = world.spawn(EntityData {
+        name: Some("Close view".into()),
+        components: [
+            ("sindri.camera".into(), payload.clone()),
+            (
+                ScriptComponent::TYPE_NAME.into(),
+                json!({"source": "zoom.decay", "script": "Zoom"}),
+            ),
+        ]
+        .into_iter()
+        .collect(),
+        ..EntityData::default()
+    });
+    let other = world.spawn(EntityData {
+        components: [("sindri.camera".into(), payload.clone())]
+            .into_iter()
+            .collect(),
+        ..EntityData::default()
+    });
+    let mut sources = ScriptSources::new();
+    sources.insert(
+        "zoom.decay",
+        "script Zoom { fn start() { Camera.orthographic_size(this.entity, 15.0); } }",
+    );
+    let report = Scripts::new().advance(
+        &mut world,
+        &registry(),
+        ScriptFrame::new(&sources, &InputState::default(), 1.0 / 60.0),
+    );
+    assert!(report.is_quiet(), "{report:?}");
+    let mut expected = payload.clone();
+    expected["vertical_size"] = json!(15.0);
+    assert_eq!(
+        world.get(camera).unwrap().components["sindri.camera"],
+        expected
+    );
+    assert_eq!(
+        world.get(other).unwrap().components["sindri.camera"],
+        payload
+    );
+    for size in [0.0, -1.0, f32::INFINITY, f32::NAN] {
+        assert!(!sindri_scene::set_camera_orthographic_size(
+            &mut world, camera, size
+        ));
+    }
+    let perspective = json!({"projection": "perspective", "vertical_fov_degrees": 60.0,
+        "near": 0.1, "far": 100.0});
+    world
+        .get_mut(other)
+        .unwrap()
+        .components
+        .insert("sindri.camera".into(), perspective.clone());
+    assert!(!sindri_scene::set_camera_orthographic_size(
+        &mut world, other, 10.0
+    ));
+    assert_eq!(
+        world.get(other).unwrap().components["sindri.camera"],
+        perspective
+    );
+}

@@ -85,7 +85,11 @@ impl Run {
         }
 
         let mut prefabs = PrefabSources::new();
-        for name in ["prefabs/wreck.prefab", "prefabs/cargo.prefab"] {
+        for name in [
+            "prefabs/wreck.prefab",
+            "prefabs/cargo.prefab",
+            "prefabs/sunken-wreck.prefab",
+        ] {
             let text =
                 std::fs::read_to_string(root.join(name)).map_err(|error| error.to_string())?;
             let prefab = PrefabDocument::from_json(&text).map_err(|error| error.to_string())?;

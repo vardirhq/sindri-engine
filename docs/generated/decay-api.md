@@ -31,7 +31,7 @@ Names in scope without qualification. Decay has no imports, so each of these is 
 - `Aim`: `Aim` — Which block in a 3D block world the mouse or finger is pointing at, for building and digging games.
 - `Animation`: `Animation` — Playing an object's animations, such as walk or jump, set up for it in the scene.
 - `Audio`: `Audio` — Playing sound effects and music. Every sound goes through a bus — `"effects"`, `"music"`, or any other name — and every bus through `"master"`, so a settings screen can turn each down.
-- `Camera`: `Camera` — The game's camera: moving the view and changing its engine-owned follow, confinement, and shake behavior.
+- `Camera`: `Camera` — The game's camera: sizing an orthographic view and changing engine-owned follow, confinement, and shake behavior.
 - `Effects`: `Effects` — Particle effects, such as sparks and explosions. The particles are only drawn; they are not objects and nothing can touch them.
 - `Game`: `Game` — Numbers stored under names that every script can read and write, such as a score. Declaring them with `state` is safer, because a misspelt name then becomes an error.
 - `Gamepad`: `Gamepad` — Game controllers. Each player gets a number from 1 to 8 when they press a button on their controller; 0 means any controller.
@@ -161,7 +161,7 @@ Playing sound effects and music. Every sound goes through a bus — `"effects"`,
 
 ### `Camera`
 
-The game's camera: moving the view and changing its engine-owned follow, confinement, and shake behavior.
+The game's camera: sizing an orthographic view and changing engine-owned follow, confinement, and shake behavior.
 
 - `add_trauma(amount: f32)` → `unit` — Adds impact trauma to the authored behavior camera. Bigger amounts shake harder, up to 1, and the authored shake fades by itself.
 - `bounds(min_x: f32, min_y: f32, max_x: f32, max_y: f32)` → `unit` — Confines the authored behavior camera to the given world-space rectangle.
@@ -172,6 +172,7 @@ The game's camera: moving the view and changing its engine-owned follow, confine
 - `follow_offset(x: f32, y: f32, z: f32)` → `unit` — Sets the world-space offset from the follow target used by the authored behavior camera.
 - `impact(amount: f32)` → `unit` — Shakes the authored behavior camera at least this hard, up to 1: a smaller impact while a bigger one is still shaking changes nothing, so many small hits in a frame do not add up to the biggest shake.
 - `max_speed(value: f32)` → `unit` — Sets the maximum follow speed of the authored behavior camera.
+- `orthographic_size(camera: Entity, size: f32)` → `unit` — Sets an explicitly selected orthographic camera's view size to a positive finite number. Works without camera behavior and preserves clipping, fit and unknown camera fields.
 - `pan_x`: `f32` — How far the camera view is moved sideways from where it was placed in the scene.
 - `pan_y`: `f32` — How far the camera view is moved up or down from where it was placed in the scene.
 - `pan_z`: `f32` — How far the camera view is moved forwards or backwards from where it was placed in the scene.

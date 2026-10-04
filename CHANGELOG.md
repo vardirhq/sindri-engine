@@ -1,5 +1,7 @@
 # Changelog
 
+- Low Tide separates flooded flats from permanent water: empty-handed crew can swim, ordinary crates can be waded out without automatic loss, and golden floats mark submerged wrecks. Shallow dives start while swimming and surface in the same water; one floated ore bundle must be hauled back up the ramp. The ebb no longer recalls divers from permanent water. Walking uses a closer, smoothly eased camera, with whole-crawler framing restored aboard. `Camera.orthographic_size(camera, size)` adds explicit, validated runtime projection sizing.
+
 - Low Tide wrecks contain six visible, individually selectable crates: three scrap, wood, ore and fibre. Set carried cargo down with X / Drop and pick it up again; only boarding stows it. Wreck streaming retains each taken crate, while loose ground cargo washes away in a flood.
 
 - Low Tide adopts dark instrument panels, brass details and authored icons, with live hold segments, speed and tide meters. Nearby cargo is highlighted and named in a contextual action panel; empty Use actions are hidden. Discarding a crate now requires a second press, cancelled by movement, Escape or a timeout. Crawler frames gain metal detailing, pipe fittings and painted lamp glows.

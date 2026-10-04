@@ -53,7 +53,7 @@ script TouchControls {
         if Game.prefer_north { Ui.set_text(World.find("View label"), "Follow"); }
         var drop_words = "Drop";
         if Game.building { drop_words = "Close"; }
-        if Game.diving { drop_words = "Recall"; }
+        if Game.diving { drop_words = "Abort"; }
         else if Game.discard_armed { drop_words = "Discard!"; }
         Ui.set_text(this.drop_label, drop_words);
         draw_stick(playing);
@@ -73,7 +73,7 @@ script TouchControls {
     fn use_words() -> String {
         return match Game.hint {
             Hint.DiveStart => "Dive",
-            Hint.DiveReturn => "Climb",
+            Hint.DiveReturn => "Surface",
             Hint.DiveSalvage => "Recover",
             Hint.DiveSwim => "Swim",
             Hint.Workbench => "Workbench",

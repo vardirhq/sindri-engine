@@ -12,6 +12,8 @@ A `sindri.camera` component is a world/game camera. It is an ordinary scene enti
 - local `+Y` is up.
 - scale is still part of the normal transform, but does not change projection.
 
+Decay can change an explicitly selected orthographic camera’s view size with `Camera.orthographic_size(camera, size)`; see the [runtime camera contract](camera-runtime-scripting.md). Transform scale still does not zoom a camera.
+
 Perspective and orthographic are projection choices for the same world-camera concept. Perspective projection uses vertical FOV, near and far planes. Orthographic projection uses vertical size, near and far planes. Orthographic cameras are not a special UI or overlay role.
 
 The current renderer supports exactly one authored world camera for a game frame. A scene with world-rendered content and no authored camera reports `MissingWorldCamera`. A scene with more than one authored world camera reports `MultipleWorldCameras`. Sindri does not choose a winner from entity iteration order.

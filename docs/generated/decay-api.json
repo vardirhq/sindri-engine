@@ -28,7 +28,7 @@
       "type": "Audio"
     },
     {
-      "description": "The game's camera: moving the view and changing its engine-owned follow, confinement, and shake behavior.",
+      "description": "The game's camera: sizing an orthographic view and changing engine-owned follow, confinement, and shake behavior.",
       "kind": "value",
       "name": "Camera",
       "type": "Camera"
@@ -755,7 +755,7 @@
       "name": "Audio"
     },
     {
-      "description": "The game's camera: moving the view and changing its engine-owned follow, confinement, and shake behavior.",
+      "description": "The game's camera: sizing an orthographic view and changing engine-owned follow, confinement, and shake behavior.",
       "members": [
         {
           "description": "Adds impact trauma to the authored behavior camera. Bigger amounts shake harder, up to 1, and the authored shake fades by itself.",
@@ -865,6 +865,20 @@
             "value"
           ],
           "parameters": [
+            "f32"
+          ],
+          "returns": "unit"
+        },
+        {
+          "description": "Sets an explicitly selected orthographic camera's view size to a positive finite number. Works without camera behavior and preserves clipping, fit and unknown camera fields.",
+          "kind": "function",
+          "name": "orthographic_size",
+          "parameter_names": [
+            "camera",
+            "size"
+          ],
+          "parameters": [
+            "Entity",
             "f32"
           ],
           "returns": "unit"

@@ -187,3 +187,25 @@ pub fn set_camera_shake(world: &mut World, strength: f32, decay: f32, frequency:
         true
     })
 }
+
+/// Changes an explicitly selected orthographic camera's authored view size.
+/// Preserves clipping, fit and unknown fields; rejects invalid sizes and cameras.
+pub fn set_camera_orthographic_size(world: &mut World, camera: EntityId, size: f32) -> bool {
+    if !size.is_finite() || size <= 0.0 {
+        return false;
+    }
+    let Some(payload) = world
+        .get_mut(camera)
+        .and_then(|data| data.components.get_mut(CameraComponent::TYPE_NAME))
+    else {
+        return false;
+    };
+    if !matches!(
+        serde_json::from_value::<CameraComponent>(payload.clone()),
+        Ok(CameraComponent::Orthographic { .. })
+    ) {
+        return false;
+    }
+    payload["vertical_size"] = Value::from(size);
+    true
+}

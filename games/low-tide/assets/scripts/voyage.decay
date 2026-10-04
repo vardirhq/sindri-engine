@@ -6,7 +6,7 @@
 // floor(-y). `Grid.surface` and `Grid.height` say what is on top there.
 
 // What the hint line should say, decided by the crew, worded by the HUD.
-enum Hint { None, TakeHelm, AtHelm, Salvage, Harvest, Empty, HoldFull, Carrying, Jettison, Ashore, LeftBehind, Brine, Workbench, Building, DiveStart, DiveReturn, DiveSalvage, DiveSwim }
+enum Hint { None, TakeHelm, AtHelm, Salvage, Harvest, Empty, HoldFull, Carrying, Jettison, Ashore, LeftBehind, Brine, Swimming, WaterCargo, Workbench, Building, DiveStart, DiveReturn, DiveSalvage, DiveSwim }
 
 // The kinds of ground the Basin is made of, by what the crawler and the HUD
 // make of them.
@@ -71,6 +71,7 @@ state Game {
     // Whether the last move was refused: brine or a cliff ahead.
     var blocked: bool = false;
     // The crew.
+    var swimming: bool = false;
     var aboard: bool = true;
     var at_helm: bool = false;
     var crew_x: f32 = 0.0;
@@ -128,4 +129,10 @@ shared fn ground_of(block: String) -> Ground {
     if block == "brine" { return Ground.Brine; }
     if block == "" { return Ground.Nothing; }
     return Ground.Island;
+}
+
+// Flooded flats are shallow until there is enough water above the ground.
+// Authored liquid columns remain water throughout the tide cycle.
+shared fn swimming_at(basin: Entity, at: Vec2) -> bool {
+    return tagged_at(basin, at, "liquid") || (flooded_at(basin, at) && Game.tide_level - height_at(basin, at) > 0.8);
 }
