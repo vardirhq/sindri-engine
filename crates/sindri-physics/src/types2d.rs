@@ -21,6 +21,9 @@ pub struct RigidBody2d {
     pub linear_damping: f32,
     pub angular_damping: f32,
     pub lock_rotation: bool,
+    /// Opt-in swept collision for fast dynamic bodies. Sensors remain discrete.
+    #[serde(default)]
+    pub continuous_collision: bool,
 }
 
 impl Default for RigidBody2d {
@@ -34,6 +37,7 @@ impl Default for RigidBody2d {
             linear_damping: 0.0,
             angular_damping: 0.0,
             lock_rotation: false,
+            continuous_collision: false,
         }
     }
 }

@@ -4,6 +4,7 @@
 //! speak only in the types this crate defines, which is what makes the
 //! backend replaceable.
 
+mod controls;
 mod query;
 mod sweep;
 
@@ -19,9 +20,7 @@ use crate::types2d::{
     Collider2d, ColliderShape2d, DistanceJoint2d, PhysicsEvent2d, PhysicsEventKind, PhysicsPose2d,
     RigidBody2d,
 };
-use crate::validate::{
-    PhysicsError, finite2, positive, validate_body2d, validate_colliders2d, validate_pose2d,
-};
+use crate::validate::{PhysicsError, finite2, positive, validate_body2d, validate_colliders2d};
 
 #[derive(Clone)]
 struct BodyRecord2d {
@@ -302,100 +301,6 @@ impl PhysicsWorld2d {
         Ok(self.backend.bodies[self.record(entity)?.body].mass())
     }
 
-    pub fn linear_velocity(&self, entity: EntityId) -> Result<[f32; 2], PhysicsError> {
-        if let Some(record) = self.bodies.get(&entity) {
-            let velocity = self.backend.bodies[record.body].linvel();
-            return Ok([velocity.x, velocity.y]);
-        }
-        if let Some(velocity) = self.pending_velocity.get(&entity) {
-            return Ok(*velocity);
-        }
-        Err(PhysicsError::MissingEntity(entity))
-    }
-
-    pub fn set_linear_velocity(
-        &mut self,
-        entity: EntityId,
-        velocity: [f32; 2],
-    ) -> Result<(), PhysicsError> {
-        finite2("linear_velocity", velocity)?;
-        let record = self.record(entity)?.clone();
-        if !matches!(
-            record.kind,
-            RigidBodyKind::Dynamic | RigidBodyKind::KinematicVelocity
-        ) {
-            return Err(PhysicsError::WrongBodyKind(
-                entity,
-                "set linear velocity",
-                record.kind,
-            ));
-        }
-        self.backend.bodies[record.body]
-            .set_linvel(r2::Vector::new(velocity[0], velocity[1]), true);
-        Ok(())
-    }
-
-    pub fn apply_impulse(
-        &mut self,
-        entity: EntityId,
-        impulse: [f32; 2],
-    ) -> Result<(), PhysicsError> {
-        finite2("impulse", impulse)?;
-        let record = self.record(entity)?.clone();
-        if record.kind != RigidBodyKind::Dynamic {
-            return Err(PhysicsError::WrongBodyKind(
-                entity,
-                "apply impulse",
-                record.kind,
-            ));
-        }
-        self.backend.bodies[record.body]
-            .apply_impulse(r2::Vector::new(impulse[0], impulse[1]), true);
-        Ok(())
-    }
-
-    pub fn set_kinematic_target(
-        &mut self,
-        entity: EntityId,
-        pose: PhysicsPose2d,
-    ) -> Result<(), PhysicsError> {
-        validate_pose2d(pose)?;
-        let record = self.record(entity)?.clone();
-        if record.kind != RigidBodyKind::KinematicPosition {
-            return Err(PhysicsError::WrongBodyKind(
-                entity,
-                "set kinematic target",
-                record.kind,
-            ));
-        }
-        self.backend.bodies[record.body].set_next_kinematic_position(r2::Pose::new(
-            r2::Vector::new(pose.position[0], pose.position[1]),
-            pose.rotation,
-        ));
-        Ok(())
-    }
-
-    /// Puts a body somewhere else, as a teleport rather than a movement: it
-    /// does not sweep through what lies between, and its velocity is kept.
-    ///
-    /// For a position-kinematic body the move is its next target instead, so
-    /// a platform moved this way carries what stands on it.
-    pub fn move_to(&mut self, entity: EntityId, pose: PhysicsPose2d) -> Result<(), PhysicsError> {
-        validate_pose2d(pose)?;
-        let record = self.record(entity)?.clone();
-        let target = r2::Pose::new(
-            r2::Vector::new(pose.position[0], pose.position[1]),
-            pose.rotation,
-        );
-        let body = &mut self.backend.bodies[record.body];
-        if record.kind == RigidBodyKind::KinematicPosition {
-            body.set_next_kinematic_position(target);
-        } else {
-            body.set_position(target, true);
-        }
-        Ok(())
-    }
-
     /// Advances exactly one engine fixed step and returns normalized Sindri
     /// collision/sensor events generated during that step.
     pub fn step(&mut self, delta: Duration) -> Result<Vec<PhysicsEvent2d>, PhysicsError> {
@@ -471,6 +376,7 @@ fn body_builder(body: RigidBody2d) -> r2::RigidBodyBuilder {
         body.linear_velocity[0],
         body.linear_velocity[1],
     ))
+    .ccd_enabled(body.continuous_collision)
     .angvel(body.angular_velocity)
     .gravity_scale(body.gravity_scale)
     .linear_damping(body.linear_damping)

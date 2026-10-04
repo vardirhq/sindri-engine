@@ -30,6 +30,7 @@ script Hero {
     var shown: f32 = 0.0;
 
     fn start() {
+        Physics.set_continuous_collision(this.entity, true);
         Game.coins = 0.0;
         Game.coins_total = World.with_tag("coin").length;
         Game.won = false;

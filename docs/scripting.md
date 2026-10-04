@@ -1002,6 +1002,8 @@ a person who has not clicked yet.
 
 | Call | Returns |
 | --- | --- |
+| `Physics.continuous_collision(entity)` | `bool` |
+| `Physics.set_continuous_collision(entity, enabled)` | nothing |
 | `Physics.velocity_x(entity)` | `f32` |
 | `Physics.velocity_y(entity)` | `f32` |
 | `Physics.set_velocity(entity, x, y)` | nothing |
@@ -1018,6 +1020,14 @@ a person who has not clicked yet.
 | `Physics.collision_stopped()` | `List<Entity>` |
 | `Physics.sensor_entered()` | `List<Entity>` |
 | `Physics.sensor_exited()` | `List<Entity>` |
+
+`Physics.continuous_collision(entity) -> bool` reads the live 2D body setting,
+or its authored setting before a newly spawned body is synchronized.
+`Physics.set_continuous_collision(entity, enabled) -> unit` requires an authored
+dynamic body and updates its live state and runtime payload without replacing
+it. Velocity, joints and contacts survive CCD-only edits. Hosts without physics
+and missing authored bodies report errors. The platformer hero uses this control.
+Sensors stay discrete; swept bullet-versus-bullet collision is not guaranteed.
 
 This is **Sindri physics, never Rapier**. `docs/physics.md` makes the backend a
 private implementation detail, and a namespace that leaked its vocabulary would

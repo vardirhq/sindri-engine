@@ -14,7 +14,23 @@ one push or less, with smaller checkpoints preferred when useful. The user
 explicitly stopped the previous session because it was freezing and asked for
 a pushed handoff. Do not ask them to authorize the scope again.
 
-## Authoritative saved state
+## Current continuation checkpoint
+
+CCD has been rebuilt in this PR. It includes the default-off body flag,
+backend live controls, schema default, state-preserving scene synchronization,
+typed Decay getter/setter, spawn-window and undo regressions, and platformer
+hero use. The scoped native preflight (762 tests), typed hero preflight,
+warning-denied Clippy, WASM checks and generated catalogue checks passed.
+Full workspace/browser verification remains part of final integration.
+
+Continue with **one-way platforms**, then the remaining checklist. The historical
+recovery notes below describe the original loss, not the current implementation.
+The build environment needed single-unit code generation for both normal and
+build dependencies to avoid empty dependency object files. Keep profile/flags
+consistent. Linux all-features checks also require pkg-config, ALSA and udev
+build dependencies. Local test libraries must have valid development symlinks.
+
+## Historical saved state
 
 At handoff preparation, the branch head was
 `23cac712d0f9d6f17206a53de110780e8bf5442d`, based on main
@@ -33,8 +49,8 @@ compound-game-proof claims, and parented-body limitations in
 `docs/physics.md` and `docs/capabilities.md`. It added
 `docs/physics-update.md`. Its GitHub CI was observed green before the reset.
 
-All nine implementation checkboxes remain unchecked. Keep them unchecked until
-their implementation and applicable proof exist on the branch.
+At the original handoff all nine implementation checkboxes were unchecked.
+The current checklist in `physics-update.md` supersedes this historical state.
 
 ## First task: rebuild CCD in small slices
 

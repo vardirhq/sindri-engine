@@ -81,6 +81,27 @@ They carry Sindri-owned configuration such as body kind, gravity scale, damping,
 and whether rotation is locked. They never serialize Rapier handles, activation
 state, solver state, or backend-specific flags.
 
+### Continuous collision
+
+`RigidBody2d.continuous_collision` defaults to false, including old payloads
+that omit it. It opts a dynamic body into swept solid collision. The live
+`continuous_collision` getter and `set_continuous_collision` setter preserve
+velocity, attached joints and body identity. The setter rejects non-dynamic or
+missing bodies before mutation.
+
+The backend automatically sweeps dynamic bodies against fixed geometry; the
+opt-in regression therefore uses a thin velocity-kinematic wall. Sensors remain
+discrete, and bullet-versus-bullet collision is not guaranteed. The generic command-backed inspector authors the flag on the body. CCD-only
+payload edits toggle the live backend without rebuilding its body, contacts or
+joints; ordinary collider/kind edits retain their existing rebuild lifecycle.
+`Physics.continuous_collision(entity)` and
+`Physics.set_continuous_collision(entity, enabled)` expose the same control in
+Decay. The setter requires an authored dynamic body, updates both the live
+backend and runtime payload, and works before a spawned body is synchronized.
+The getter uses live state when present and authored state during that window.
+Missing authored bodies and hosts without physics report errors. The platformer
+hero opts in, with its existing run-to-flag regression exercising the setting.
+
 ### Colliders
 
 The scene components are distinct:

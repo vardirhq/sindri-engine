@@ -285,6 +285,7 @@ The host names this type but has not described its members.
 - `collision_started()` → `List<Entity>` — The objects that started touching this script's object since the last frame, as a list.
 - `collision_stopped()` → `List<Entity>` — The objects that stopped touching this script's object since the last frame, as a list.
 - `connect_distance(first: Entity, second: Entity, max_distance: f32)` → `unit` — Ties two objects together like a rope: they can come closer, but never further apart than a distance.
+- `continuous_collision(entity: Entity)` → `bool` — Whether this authored 2D body uses swept solid collision. Sensors remain discrete.
 - `layer(name: String)` → `f32` — The mask for one collision layer the scene's physics world names, such as `"ground"`, for a query's `mask` argument. A name the world does not give is an error.
 - `mask(names: List<String>)` → `f32` — The mask for several named collision layers at once, such as `["ground", "enemies"]`.
 - `overlap_box(center: Vec2, half_size: Vec2, rotation: f32, mask: f32, include_sensors: bool, exclude: Entity)` → `List<Entity>` — Like `overlap_circle`, for a box `half_size` from its centre to each edge, turned by `rotation` radians.
@@ -292,6 +293,7 @@ The host names this type but has not described its members.
 - `raycast(origin: Vec2, direction: Vec2, max_distance: f32, mask: f32, include_sensors: bool, exclude: Entity)` → `RayHit2d` — The closest 2D collider hit, as RayHit2d or null. Normalizes a nonzero Vec2 direction; returns world-space point, normal and distance. The mask selects collider memberships; include_sensors opts into triggers; exclude skips all pieces of one entity (or null). Origin, direction and distance must be finite; distance non-negative; mask a whole u32. Inside hits have distance 0 and normal Vec2(0, 0). Queries synchronized geometry; ignores inactive/despawned entities. Ties prefer entity handle then piece order.
 - `sensor_entered()` → `List<Entity>` — The objects that entered this script's trigger area since the last frame. A trigger area detects things without blocking them, like a pickup.
 - `sensor_exited()` → `List<Entity>` — The objects that left this script's trigger area since the last frame.
+- `set_continuous_collision(entity: Entity, enabled: bool)` → `unit` — Enables swept solid collision on a dynamic 2D body, including before a spawned body is built. Keeps velocity and joints.
 - `set_velocity(entity: Entity, x: f32, y: f32)` → `unit` — Sets how fast, and which way, an object is moving.
 - `velocity_x(entity: Entity)` → `f32` — How fast an object is moving sideways.
 - `velocity_y(entity: Entity)` → `f32` — How fast an object is moving up or down.

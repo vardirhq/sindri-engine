@@ -22,7 +22,8 @@ pub(super) fn register(components: &mut ComponentSchemaRegistry) -> Result<(), S
             "gravity_scale": 1.0,
             "linear_damping": 0.0,
             "angular_damping": 0.0,
-            "lock_rotation": false
+            "lock_rotation": false,
+            "continuous_collision": false
         }),
     )?;
     // The default is written as a compound of one rather than as a bare

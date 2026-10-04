@@ -6,13 +6,12 @@ are permitted. Gameplay and demonstrations remain in Decay. Runtime, scene,
 editor, scripting, proof and documentation move together.
 
 For a new implementation session, read [the recovery handoff](physics-update-handoff.md).
-Only the documentation reconciliation has been pushed; all physics implementation
-items below still require work.
+CCD is implemented and checked. The remaining items below are the active scope.
 
 ## Acceptance checklist
 
 - [x] Reconcile outdated overlap/cast, compound and parented-body documentation.
-- [ ] Continuous collision detection: opt-in authored body setting, runtime and
+- [x] Continuous collision detection: opt-in authored body setting, runtime and
   Decay control; fast solid-body regression and game use. Sensor sweep limitations
   must be explicit rather than promising CCD trigger events.
 - [ ] One-way platforms: collision from the supporting side, configurable local
@@ -41,3 +40,16 @@ Follow `AGENTS.md`'s pre-push gate for every code push. Record actual results in
 the PR; checkmarks reflect exercised behavior, not merely an exposed type.
 `docs/physics.md` is the subsystem contract and `docs/parity.md` records the
 surface-specific completeness. This checklist does not mark those surfaces done.
+
+### CCD checkpoint
+
+- Scoped preflight: 762 native tests passed across platformer, sindri-decay,
+  sindri-physics and sindri-scene; all-target/all-feature checks passed.
+- Typed platformer hero preflight: zero errors and runtime reminders.
+- Warning-denied Clippy passed for all four affected crates.
+- WASM all-feature check passed for all four affected crates.
+- Generated catalogue write/currentness/completeness checks passed.
+- Fast bullet comparison, old payload omission, live toggle/kind rejection,
+  spawn-window control, undo and velocity/joint preservation are exercised.
+- Platformer run-to-flag and existing ground/camera regressions passed.
+- Full workspace and real browser verification remain in final integration.

@@ -189,19 +189,8 @@ impl ScenePhysics2d {
                 collider,
                 kind: body.map_or(RigidBodyKind::Static, |body| body.kind),
             };
-            match self.registered.get(&entity) {
-                // Unchanged: leave the body alone. Rebuilding it would discard
-                // the velocity and contacts the simulation owns, which is every
-                // frame's worth of physics. Unless its transform was moved by
-                // something else, which moves the body with it.
-                Some(previous) if *previous == authored => {
-                    self.follow_transform(world, entity, authored.body)?;
-                    continue;
-                }
-                Some(_) => {
-                    self.world.remove(entity);
-                }
-                None => {}
+            if self.update_registered(world, entity, &authored)? {
+                continue;
             }
             // The authored pose comes from the entity's transform, which is the
             // one place a position is written down. A body's own pose field is
@@ -246,6 +235,37 @@ impl ScenePhysics2d {
             self.agreed.remove(&entity);
         }
         Ok(())
+    }
+
+    /// CCD is a live control: changing only that flag must preserve solver state.
+    fn update_registered(
+        &mut self,
+        world: &World,
+        entity: EntityId,
+        authored: &Authored,
+    ) -> Result<bool, PhysicsSyncError> {
+        let Some(previous) = self.registered.get(&entity) else {
+            return Ok(false);
+        };
+        if previous == authored {
+            self.follow_transform(world, entity, authored.body)?;
+            return Ok(true);
+        }
+        let mut comparable = previous.clone();
+        if let (Some(before), Some(after)) = (&mut comparable.body, authored.body) {
+            before.continuous_collision = after.continuous_collision;
+        }
+        if comparable == *authored && authored.kind == RigidBodyKind::Dynamic {
+            self.world.set_continuous_collision(
+                entity,
+                authored.body.is_some_and(|body| body.continuous_collision),
+            )?;
+            self.registered.insert(entity, authored.clone());
+            self.follow_transform(world, entity, authored.body)?;
+            return Ok(true);
+        }
+        self.world.remove(entity);
+        Ok(false)
     }
 
     /// Moves a registered body to where its transform now is, when something

@@ -43,6 +43,7 @@ fn the_hero_stands_on_the_painted_ground() {
     for _ in 0..90 {
         step(&mut run);
     }
+    assert!(run.physics.world().continuous_collision(hero).unwrap());
     let [x, y] = run.position(hero);
     // The first field's surface is at y = 3, and the hero's feet are half a
     // unit below its middle.

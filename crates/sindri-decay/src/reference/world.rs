@@ -226,6 +226,16 @@ pub(super) const TYPES: &[TypeEntry] = &[
         text: "2D physics: moving objects with speed and pushes, and finding out what this script's object bumped into.",
         members: &[
             call(
+                "continuous_collision",
+                &["entity"],
+                "Whether this authored 2D body uses swept solid collision. Sensors remain discrete.",
+            ),
+            call(
+                "set_continuous_collision",
+                &["entity", "enabled"],
+                "Enables swept solid collision on a dynamic 2D body, including before a spawned body is built. Keeps velocity and joints.",
+            ),
+            call(
                 "apply_impulse",
                 &["entity", "x", "y"],
                 "Gives an object a sudden push in a direction. Heavier objects move less.",

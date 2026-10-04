@@ -1884,6 +1884,17 @@ from inside the answer is safe. A host running no physics refuses the call
 rather than reporting a velocity of zero for a body that does not exist.
 Exercised in `crates/sindri-decay/tests/a_script_drives_a_body.rs`.
 
+**2D continuous collision is opt-in.** `RigidBody2d.continuous_collision` defaults
+false, including old payloads. Live dynamic-body toggles preserve velocity and
+joints; scene synchronization does not rebuild a body for CCD-only edits.
+Typed Decay controls support newly spawned bodies before synchronization.
+`crates/sindri-physics/tests/continuous_collision.rs` compares a fast bullet
+against a thin kinematic wall with a discrete control; the bridge regression
+exercises the spawn window and undo. The platformer hero opts in and its native
+run-to-flag passes. Scoped native, Clippy, WASM and catalogue checks passed.
+Visual inspector and real browser verification remain in final integration.
+Sensors stay discrete; bullet-versus-bullet CCD is not guaranteed.
+
 **And a script can tell where the person is pointing.** `Pointer.x`,
 `Pointer.y` and `Pointer.inside` read the position and whether there is one;
 `Pointer.is_down`, `just_pressed` and `just_released` take a button name.

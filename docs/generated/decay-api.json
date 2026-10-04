@@ -1656,6 +1656,18 @@
           "returns": "unit"
         },
         {
+          "description": "Whether this authored 2D body uses swept solid collision. Sensors remain discrete.",
+          "kind": "function",
+          "name": "continuous_collision",
+          "parameter_names": [
+            "entity"
+          ],
+          "parameters": [
+            "Entity"
+          ],
+          "returns": "bool"
+        },
+        {
           "description": "The mask for one collision layer the scene's physics world names, such as `\"ground\"`, for a query's `mask` argument. A name the world does not give is an error.",
           "kind": "function",
           "name": "layer",
@@ -1758,6 +1770,20 @@
           "parameter_names": [],
           "parameters": [],
           "returns": "List<Entity>"
+        },
+        {
+          "description": "Enables swept solid collision on a dynamic 2D body, including before a spawned body is built. Keeps velocity and joints.",
+          "kind": "function",
+          "name": "set_continuous_collision",
+          "parameter_names": [
+            "entity",
+            "enabled"
+          ],
+          "parameters": [
+            "Entity",
+            "bool"
+          ],
+          "returns": "unit"
         },
         {
           "description": "Sets how fast, and which way, an object is moving.",

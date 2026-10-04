@@ -50,6 +50,12 @@ impl WorldHost<'_> {
         if matches!(call, PhysicsCall::ConnectDistance) {
             return self.connect_distance(path, args);
         }
+        if matches!(
+            call,
+            PhysicsCall::ContinuousCollision | PhysicsCall::SetContinuousCollision
+        ) {
+            return self.continuous_collision_call(call, path, args);
+        }
         let entity = self.entity_argument(path, args, 0, "the body")?;
         // Whether the entity authored physics at all, asked before the physics
         // world is borrowed. A body that is authored but not yet built is the
