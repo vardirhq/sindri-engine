@@ -1,6 +1,6 @@
 // The hero: runs, jumps, picks up coins and reaches the flag.
 //
-// A downward support ray grants standing only above a surface while descending.
+// Solved support contacts grant standing only above a surface while descending.
 // The foot sensor handles pickups; overlapping a plank from below never grants
 // a jump. Coyote time and a jump buffer keep jumps forgiving.
 // Down/S/d-pad down drops through one-way planks onto the painted floor.
@@ -136,10 +136,8 @@ script Hero {
         }
     }
 
-    // Read the same simulated colliders as the foot sensor, but only the
-    // ground: the layer the level's physics world names, so nothing else on
-    // the way down -- a pickup, the flag -- is mistaken for a floor. This is
-    // clearance and support-side jump permission.
+    // The ray measures clearance; actual solved contacts grant jump permission.
+    // Sleeping support remains present, and sensors never become solid ground.
     fn probe_ground() {
         let p = this.transform.world_position;
         let hit = Physics.raycast(Vec2(p.x, p.y), Vec2(0.0, -1.0), 12.0, Physics.layer("ground"), false, this.entity);
@@ -148,9 +146,11 @@ script Hero {
         this.on_one_way = false;
         if hit != null {
             Game.ground_clearance = max(0.0, hit.distance - 0.5);
-            this.on_one_way = World.has_tag(hit.entity, "one-way");
-            if hit.normal.y > 0.5 && hit.distance >= 0.45 && hit.distance <= 0.58 && Physics.velocity_y(this.entity) <= 0.1 && this.drop_left <= 0.0 {
+        }
+        for contact in Physics.contacts(this.entity) {
+            if contact.normal.y > 0.5 && contact.point.y < p.y && Physics.velocity_y(this.entity) <= 0.1 && this.drop_left <= 0.0 {
                 this.ground = 1.0;
+                if World.has_tag(contact.entity, "one-way") { this.on_one_way = true; }
             }
         }
     }

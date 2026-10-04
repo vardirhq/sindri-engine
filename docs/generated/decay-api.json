@@ -938,6 +938,48 @@
       "name": "ColorTween"
     },
     {
+      "description": "A copied solid solver contact from the last fixed step, relative to the queried body. Sensors are excluded. Multiple points/pieces may name one entity. Sleeping contacts retain support geometry and report zero new impulses/force. Editing a snapshot does not change physics.",
+      "members": [
+        {
+          "description": "The other entity touching the queried body.",
+          "kind": "value",
+          "name": "entity",
+          "type": "Entity"
+        },
+        {
+          "description": "Total world impulse divided by the fixed step's seconds, as Vec2.",
+          "kind": "value",
+          "name": "force",
+          "type": "Vec2"
+        },
+        {
+          "description": "World-space unit push direction towards the queried body, as Vec2.",
+          "kind": "value",
+          "name": "normal",
+          "type": "Vec2"
+        },
+        {
+          "description": "Nonnegative normal impulse from the last solve.",
+          "kind": "value",
+          "name": "normal_impulse",
+          "type": "f32"
+        },
+        {
+          "description": "World-space midpoint of the two surface anchors, as Vec2.",
+          "kind": "value",
+          "name": "point",
+          "type": "Vec2"
+        },
+        {
+          "description": "Signed friction impulse along Vec2(-normal.y, normal.x).",
+          "kind": "value",
+          "name": "tangent_impulse",
+          "type": "f32"
+        }
+      ],
+      "name": "Contact2d"
+    },
+    {
       "description": "Particle effects, such as sparks and explosions. The particles are only drawn; they are not objects and nothing can touch them.",
       "members": [
         {
@@ -1724,6 +1766,18 @@
             "f32"
           ],
           "returns": "unit"
+        },
+        {
+          "description": "Copied Contact2d solid solver contacts from the last fixed step, ordered by other entity, point, normal and impulse. Normal points towards the queried body. Sensors are excluded; sleeping contacts report zero new impulses/force. Empty before simulation/spawn synchronization. Missing bodies/physics fail. Inactive/despawned others are omitted; removal and teleports invalidate affected snapshots.",
+          "kind": "function",
+          "name": "contacts",
+          "parameter_names": [
+            "entity"
+          ],
+          "parameters": [
+            "Entity"
+          ],
+          "returns": "List<Contact2d>"
         },
         {
           "description": "Whether this authored 2D body uses swept solid collision. Sensors remain discrete.",

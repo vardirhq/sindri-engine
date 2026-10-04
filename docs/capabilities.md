@@ -260,8 +260,22 @@ turn a body. Dynamic/velocity-kinematic rules, finite values and rotation locks
 are validated; spawn-window requests replay after collider mass is known and
 expire if never materialized. The platformer's wind crate exercises force,
 torque, angular velocity and impulses through its real kick input, with scene
-rotation writeback. Native/WASM CI verification is pending; browser input and
+rotation writeback. Native, WASM and browser CI passed on the forces/rotation head; browser input and
 visual inspector review remain in final integration. See `docs/physics.md`.
+
+`PhysicsWorld2d::contacts` and typed `Physics.contacts(entity)` expose copied
+solid solver snapshots: other entity, world point, push normal towards the
+queried body, normal and signed friction impulses, and world force over the last
+fixed dt. Solver manifolds supply solved impulses. Ordering is deterministic
+by entity, point, normal and impulses. Sensors are excluded; sleeping support
+remains with zero new impulse/force. Runtime teleports and removals invalidate
+contacts, and Decay filters inactive/despawned others. Spawn-window queries are
+empty; missing bodies/physics fail. Platformer's hero grounds from support
+contacts, keeping its ray for clearance, and the crate flashes on a hard landing.
+This is a general capability added for that genre showcase. Native regressions
+cover momentum/force balance, compound pieces, snapshot copies, lifecycle,
+ordering and sleeping support. Browser interaction/editor Play inspection remain
+in final integration.
 
 One-way support is authored with `sindri.physics2d.one_way`: a validated local
 normal and contact cone, applied to solid collider and tilemap pieces. Pair
@@ -270,8 +284,8 @@ fixed simulation time, preserves ordinary floors/sensors and works in the spawn
 window. Policy edits and undo keep live velocity/joints. Platformer's visible
 planks prove ascent, landing, input-driven dropping to painted ground and landing
 again; native regressions cover rotated normals, kinematic geometry and timer
-cancellation. Queries remain geometric, so its Decay grounding checks support
-normal, clearance and descent rather than foot-sensor overlap. Chromium export/load
+cancellation. Queries remain geometric, so its Decay grounding uses solved support
+contacts and descent rather than foot-sensor overlap. Chromium export/load
 smoke passed; visual inspector and full browser interactions remain in final
 physics integration.
 
@@ -2206,12 +2220,12 @@ controls and gizmos remain absent. See `docs/cameras.md`.
 `games/platformer` is the first genre showcase: a side-view level painted as a
 tilemap and made solid by a Tilemap Collider 2D, a hero who runs and jumps, ten
 coins and a flag, a HUD, and a camera that follows. It has no Rust of its own;
-the scene and two Decay scripts are the game, and it exports to the site.
+the scene and its Decay scripts are the game, and it exports to the site.
 
 **Its hero is a dynamic body driven by velocity.** A capsule collider with
-zero friction and a foot sensor under it: the sensor touches the ground and
-nothing else, so walls and ceilings never count as floor. Decay counts the
-ground contacts from `Physics.sensor_entered`/`sensor_exited`, and gives the
+zero friction and a foot sensor under it for pickups. Decay grants standing
+from solved solid contacts with upward push normals below the hero, so walls,
+ceilings and one-way undersides never count as floor. It gives the
 jump the two forgivenesses players expect, a buffer for a press just before
 landing and coyote time for one just after running off a ledge. Letting go
 early cuts the rise short.

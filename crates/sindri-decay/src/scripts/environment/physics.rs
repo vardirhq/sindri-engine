@@ -3,22 +3,12 @@
 use crate::surface::{ENTITY, PHYSICS, PHYSICS_CALLS, PhysicsCall};
 use decay_semantic::{Environment, FunctionType, HostType, Type};
 
+use crate::surface::contact::{CONTACT, CONTACT_FIELDS};
 use crate::surface::raycast::{HIT_FIELDS, RAY_HIT};
 
 pub(super) fn add_physics_surface(environment: &mut Environment) {
     let entity = || Type::Named(ENTITY.to_owned());
-    let fields = vec![
-        (HIT_FIELDS[0].to_owned(), entity()),
-        (HIT_FIELDS[1].to_owned(), Type::Vec2),
-        (HIT_FIELDS[2].to_owned(), Type::Vec2),
-        (HIT_FIELDS[3].to_owned(), Type::F32),
-    ];
-    environment.add_struct(RAY_HIT, fields.clone());
-    let mut hit = HostType::new();
-    for (name, ty) in fields {
-        hit = hit.with_value(name, ty);
-    }
-    environment.add_type(RAY_HIT, hit);
+    add_snapshots(environment);
     let mut physics = HostType::new();
     for (name, call) in PHYSICS_CALLS {
         physics = physics.with_function(
@@ -67,6 +57,7 @@ pub(super) fn add_physics_surface(environment: &mut Environment) {
                     PhysicsCall::Layer => vec![Type::String],
                     PhysicsCall::Mask => vec![Type::array_of(Type::String)],
                     PhysicsCall::ContinuousCollision
+                    | PhysicsCall::Contacts
                     | PhysicsCall::VelocityX
                     | PhysicsCall::VelocityY
                     | PhysicsCall::AngularVelocity => vec![entity()],
@@ -82,6 +73,7 @@ pub(super) fn add_physics_surface(environment: &mut Environment) {
                     _ => Vec::new(),
                 },
                 return_type: match call {
+                    PhysicsCall::Contacts => Type::array_of(Type::Named(CONTACT.to_owned())),
                     PhysicsCall::Raycast | PhysicsCall::CastCircle | PhysicsCall::CastBox => {
                         Type::Named(RAY_HIT.to_owned())
                     }
@@ -108,4 +100,34 @@ pub(super) fn add_physics_surface(environment: &mut Environment) {
     }
     environment.add_type(PHYSICS, physics);
     environment.add_value(PHYSICS, Type::Named(PHYSICS.to_owned()));
+}
+
+fn add_snapshots(environment: &mut Environment) {
+    let entity = || Type::Named(ENTITY.to_owned());
+    let fields = vec![
+        (HIT_FIELDS[0].to_owned(), entity()),
+        (HIT_FIELDS[1].to_owned(), Type::Vec2),
+        (HIT_FIELDS[2].to_owned(), Type::Vec2),
+        (HIT_FIELDS[3].to_owned(), Type::F32),
+    ];
+    environment.add_struct(RAY_HIT, fields.clone());
+    let mut hit = HostType::new();
+    for (name, ty) in fields {
+        hit = hit.with_value(name, ty);
+    }
+    environment.add_type(RAY_HIT, hit);
+    let fields = vec![
+        (CONTACT_FIELDS[0].to_owned(), entity()),
+        (CONTACT_FIELDS[1].to_owned(), Type::Vec2),
+        (CONTACT_FIELDS[2].to_owned(), Type::Vec2),
+        (CONTACT_FIELDS[3].to_owned(), Type::F32),
+        (CONTACT_FIELDS[4].to_owned(), Type::F32),
+        (CONTACT_FIELDS[5].to_owned(), Type::Vec2),
+    ];
+    environment.add_struct(CONTACT, fields.clone());
+    let mut contact = HostType::new();
+    for (name, ty) in fields {
+        contact = contact.with_value(name, ty);
+    }
+    environment.add_type(CONTACT, contact);
 }

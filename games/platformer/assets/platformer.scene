@@ -1265,6 +1265,23 @@
       }
     },
     {
+      "id": "crate-impact-flash",
+      "name": "Crate impact flash",
+      "parent": "wind-crate",
+      "transform_3d": {
+        "position": [1, 1, 0.05],
+        "rotation": [0, 0, 0, 1],
+        "scale": [2, 2, 1]
+      },
+      "components": {
+        "sindri.shape": {
+          "kind": "rect",
+          "fill": [1, 0.7, 0.3, 0],
+          "layer": 4
+        }
+      }
+    },
+    {
       "id": "hero",
       "name": "Hero",
       "transform_3d": {

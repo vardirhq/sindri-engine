@@ -6,7 +6,7 @@ are permitted. Gameplay and demonstrations remain in Decay. Runtime, scene,
 editor, scripting, proof and documentation move together.
 
 For a new implementation session, read [the recovery handoff](physics-update-handoff.md).
-CCD and one-way platforms are implemented and checked. The remaining items below are the active scope.
+CCD, one-way platforms, forces/rotation and contact snapshots are implemented and checked. The remaining items below are the active scope.
 
 ## Acceptance checklist
 
@@ -16,9 +16,9 @@ CCD and one-way platforms are implemented and checked. The remaining items below
   must be explicit rather than promising CCD trigger events.
 - [x] One-way platforms: collision from the supporting side, configurable local
   normal, safe drop-through, platformer proof including ascent and descent.
-- [ ] Forces and rotation: force, torque, angular velocity, angular impulse and
+- [x] Forces and rotation: force, torque, angular velocity, angular impulse and
   off-centre impulses, with explicit accumulation/reset semantics and game use.
-- [ ] Contacts: entity-based world contact points, normals and force/impulse
+- [x] Contacts: entity-based world contact points, normals and force/impulse
   information, deterministic snapshots and grounded/impact proof.
 - [ ] Physics materials: reusable project assets, shared validation and explicit
   literal override rules, asset loading in editor and exported games.
@@ -72,4 +72,38 @@ surface-specific completeness. This checklist does not mark those surfaces done.
 - Real Chromium export/load smoke passed under `/examples/platformer/`: WebGPU
   configured, project assets fetched, Decay ran and visible planks rendered.
 - Full browser interaction, visual inspector and workspace verification remain
-  in final integration. Next implementation slice: forces and rotation.
+  in final integration. The next slice after this checkpoint was forces and rotation.
+
+### Forces and rotation checkpoint
+
+- Runtime and typed Decay force/torque, angular velocity, angular impulse and
+  world-point impulses are implemented, with one-step accumulation/reset and
+  ordered spawn-window controls after mass calculation.
+- Platformer's wind crate proves wind, torque and input-driven launch/rotation.
+- CI passed on `2426d98e` (the automatic formatting/regeneration head following
+  the runtime-host compatibility and crate-collision fix), including workspace
+  Clippy/tests, WASM, project preflight and real browser smoke.
+- Full browser gameplay interaction and visual inspector review remain in final
+  integration. Contact snapshots are the next implementation slice.
+
+### Contact snapshot checkpoint
+
+- Entity-based copied solid solver contacts include world anchor midpoints,
+  push normals relative to the queried body, normal/friction impulses and
+  total force divided by the last fixed dt. Ordered deterministically; sensor
+  contacts excluded, sleeping support retained with zero new impulses/force.
+- Teleports/removal/rebuilds invalidate affected contacts; invalid steps retain
+  the previous snapshot. Typed Decay returns empty in the spawn window and
+  filters inactive/despawned others; live hosts need no authored components.
+- Platformer grounds from contacts while keeping its clearance ray; the crate
+  flashes an authored child shape on hard landings, with gameplay in Decay.
+- Scoped native preflight passed 355 tests and all-target/all-feature checks.
+  Typed preflight passed all three changed scripts with zero errors/reminders.
+  Warning-denied Clippy passed physics, scene, Decay and platformer on Rust 1.95.
+- Scene and catalogue tests/currentness/completeness passed; catalogue regenerated.
+  All-feature WASM checks passed for physics, scene, Decay and platformer.
+- The rebuilt generic browser host loaded the platformer export in Chromium at
+  `/examples/platformer/`, configured WebGPU, fetched assets, ran Decay without
+  runtime errors and drew the level. Full browser gameplay interaction and editor
+  Play inspection remain in final integration. New-head CI is pending.
+- Next slice: reusable physics material assets.

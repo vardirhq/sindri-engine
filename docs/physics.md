@@ -170,7 +170,45 @@ controller button. Decay reapplies force each update, applies torque while it is
 airborne, bounds its angular velocity and gives kicks an off-centre and angular
 impulse. The native input regression checks its launch and scene rotation
 writeback. Browser interaction and visual inspector review remain in final
-integration; CI verification of this slice is pending.
+integration. Native, WASM and browser CI passed on the forces/rotation head.
+
+### Contact snapshots
+
+`PhysicsWorld2d::contacts(entity)` returns copied `Contact2d` values from the
+last valid fixed step. Each value names the other entity and a world-space
+surface-anchor midpoint, with a unit normal pointing towards the queried body
+(the direction it is pushed). `normal_impulse` is nonnegative; signed
+`tangent_impulse` acts along `[-normal.y, normal.x]`. `force` is their total
+world impulse divided by that step's seconds. The adapter reads the manifolds
+actually solved rather than cached geometric-point impulses. Rapier currently
+disables clustering in 2D; the adapter uses its solver-manifold accessor, which
+also selects clusters if the backend enables them in the future. Predictive
+contacts within the solver's contact reach may be present.
+
+Contacts are ordered by other entity, point, normal, normal impulse and tangent
+impulse using total float ordering. Multiple points/pieces can name the same
+entity; they are not deduplicated. Sensors are absent. Sleeping support remains
+present with zero new impulses/force, so resting geometry can grant grounding
+without replaying an old impact. Snapshots are empty before the first step;
+missing bodies fail. Invalid steps retain the previous snapshot. Teleports,
+removal and structural rebuilds invalidate affected contacts immediately.
+Setting a kinematic target takes effect at the next step. Pausing retains the
+last snapshot; copies held by a caller survive later changes.
+
+Typed `Physics.contacts(entity) -> List<Contact2d>` exposes the same values in
+Decay and omits inactive/despawned other entities immediately. Inactive queried
+entities and authored colliders awaiting spawn synchronization return an empty
+list. Active entities with no collider/body and hosts without physics fail.
+Hosts driving their own physics need no authored component for live bodies.
+Script updates observe the preceding fixed solve, as they do collision events.
+Scene transforms synchronize at the next step, so a script teleport is reflected
+in snapshots after synchronization, not midway through a script pass.
+
+This capability is added for the platformer genre showcase: the hero uses solved
+support normals for jump permission, keeping its geometric ray for HUD clearance;
+the wind crate flashes amber on a hard landing based on normal impulse. Gameplay
+policy and thresholds remain in Decay. Browser interaction and editor Play
+inspection remain in final integration.
 
 ### Colliders
 
@@ -475,7 +513,7 @@ physics must compile WASM; the Gather slice must run the real browser smoke test
 - richer joints (a runtime maximum-distance joint now exists)
 - continuous-character-controller abstraction
 - further collider shapes (authored 2D compound colliders now exist)
-- contact-manifold scripting
+- persistent contact IDs and mutable contact-manifold scripting
 - physics-driven visual scale
 - platformer navigation
 - backend selection/plugin API

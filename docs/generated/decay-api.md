@@ -185,6 +185,17 @@ A managed Color tween; read with Tween.color_value.
 
 The host names this type but has not described its members.
 
+### `Contact2d`
+
+A copied solid solver contact from the last fixed step, relative to the queried body. Sensors are excluded. Multiple points/pieces may name one entity. Sleeping contacts retain support geometry and report zero new impulses/force. Editing a snapshot does not change physics.
+
+- `entity`: `Entity` — The other entity touching the queried body.
+- `force`: `Vec2` — Total world impulse divided by the fixed step's seconds, as Vec2.
+- `normal`: `Vec2` — World-space unit push direction towards the queried body, as Vec2.
+- `normal_impulse`: `f32` — Nonnegative normal impulse from the last solve.
+- `point`: `Vec2` — World-space midpoint of the two surface anchors, as Vec2.
+- `tangent_impulse`: `f32` — Signed friction impulse along Vec2(-normal.y, normal.x).
+
 ### `Effects`
 
 Particle effects, such as sparks and explosions. The particles are only drawn; they are not objects and nothing can touch them.
@@ -290,6 +301,7 @@ The host names this type but has not described its members.
 - `collision_started()` → `List<Entity>` — The objects that started touching this script's object since the last frame, as a list.
 - `collision_stopped()` → `List<Entity>` — The objects that stopped touching this script's object since the last frame, as a list.
 - `connect_distance(first: Entity, second: Entity, max_distance: f32)` → `unit` — Ties two objects together like a rope: they can come closer, but never further apart than a distance.
+- `contacts(entity: Entity)` → `List<Contact2d>` — Copied Contact2d solid solver contacts from the last fixed step, ordered by other entity, point, normal and impulse. Normal points towards the queried body. Sensors are excluded; sleeping contacts report zero new impulses/force. Empty before simulation/spawn synchronization. Missing bodies/physics fail. Inactive/despawned others are omitted; removal and teleports invalidate affected snapshots.
 - `continuous_collision(entity: Entity)` → `bool` — Whether this authored 2D body uses swept solid collision. Sensors remain discrete.
 - `drop_through(entity: Entity, seconds: f32)` → `unit` — Ignores only one-way solid platforms for a duration in fixed simulation time. Zero cancels; a new request replaces it. Requires a dynamic body and works before a spawned body is built.
 - `layer(name: String)` → `f32` — The mask for one collision layer the scene's physics world names, such as `"ground"`, for a query's `mask` argument. A name the world does not give is an error.

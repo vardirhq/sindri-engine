@@ -27,6 +27,7 @@ pub(crate) use peers::Peers;
 mod actions;
 mod person;
 mod physics;
+mod physics_contacts;
 mod physics_controls;
 mod physics_motion;
 mod print;

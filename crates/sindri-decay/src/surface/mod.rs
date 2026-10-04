@@ -18,6 +18,7 @@
 //! name in `names` and a root here.
 
 mod call;
+pub(crate) mod contact;
 mod gamepad;
 mod maths;
 mod member;

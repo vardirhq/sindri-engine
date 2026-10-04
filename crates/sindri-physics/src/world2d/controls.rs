@@ -122,6 +122,7 @@ impl PhysicsWorld2d {
             body.set_next_kinematic_position(target);
         } else {
             body.set_position(target, true);
+            self.invalidate_contacts(entity);
         }
         Ok(())
     }

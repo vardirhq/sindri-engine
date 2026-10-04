@@ -226,6 +226,11 @@ pub(super) const TYPES: &[TypeEntry] = &[
         text: "2D physics: moving objects with speed and pushes, and finding out what this script's object bumped into.",
         members: &[
             call(
+                "contacts",
+                &["entity"],
+                "Copied Contact2d solid solver contacts from the last fixed step, ordered by other entity, point, normal and impulse. Normal points towards the queried body. Sensors are excluded; sleeping contacts report zero new impulses/force. Empty before simulation/spawn synchronization. Missing bodies/physics fail. Inactive/despawned others are omitted; removal and teleports invalidate affected snapshots.",
+            ),
+            call(
                 "drop_through",
                 &["entity", "seconds"],
                 "Ignores only one-way solid platforms for a duration in fixed simulation time. Zero cancels; a new request replaces it. Requires a dynamic body and works before a spawned body is built.",
@@ -394,6 +399,33 @@ pub(super) const TYPES: &[TypeEntry] = &[
                 "The world-space surface normal, as Vec2. Zero for a hit at distance zero.",
             ),
             value("distance", "Distance from the ray origin, in world units."),
+        ],
+    },
+    TypeEntry {
+        name: "Contact2d",
+        text: "A copied solid solver contact from the last fixed step, relative to the queried body. Sensors are excluded. Multiple points/pieces may name one entity. Sleeping contacts retain support geometry and report zero new impulses/force. Editing a snapshot does not change physics.",
+        members: &[
+            value("entity", "The other entity touching the queried body."),
+            value(
+                "point",
+                "World-space midpoint of the two surface anchors, as Vec2.",
+            ),
+            value(
+                "normal",
+                "World-space unit push direction towards the queried body, as Vec2.",
+            ),
+            value(
+                "normal_impulse",
+                "Nonnegative normal impulse from the last solve.",
+            ),
+            value(
+                "tangent_impulse",
+                "Signed friction impulse along Vec2(-normal.y, normal.x).",
+            ),
+            value(
+                "force",
+                "Total world impulse divided by the fixed step's seconds, as Vec2.",
+            ),
         ],
     },
     TypeEntry {

@@ -1,5 +1,7 @@
 # Changelog
 
+- Add copied 2D solid contact snapshots to runtime and typed Decay: world points, support normals, normal/friction impulses and force. Sleeping contacts keep support geometry; sensors stay separate. Platformer jumps use solved support and its crate flashes on hard landings.
+
 - Add 2D force, torque, angular velocity and angular/world-point impulse controls in runtime and typed Decay. Forces accumulate for one fixed step; spawn requests preserve call order. The platformer has a wind-driven wooden crate that K or the west controller button tosses and spins.
 
 - Add authored 2D one-way platforms with configurable local support normals and timed Decay drop-through. The platformer has visible planks and Down/S/d-pad down drops through them; support-side grounding prevents jumping from underside sensor overlaps. Ordinary floors and sensors remain active.

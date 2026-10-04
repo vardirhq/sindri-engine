@@ -40,8 +40,8 @@ It uses, with no Rust of its own:
 - a **tilemap** painted in the editor, made solid by a **Tilemap Collider 2D**,
   with grass tufts left passable;
 - the scene's own **gravity**, from a **Physics 2D World**;
-- a **dynamic body** with a capsule collider and a **foot sensor** for pickups, plus a
-  downward **support ray** for standing so plank undersides never grant a jump;
+- a **dynamic body** with a capsule collider and a **foot sensor** for pickups, plus
+  **solid support contacts** for standing so plank undersides never grant a jump;
 - visible **one-way planks** with local support normals and timed drop-through;
 - **sprite animation** clips for idle, run, jump and fall;
 - **keyboard, gamepad and touch input** through one movement path, including
@@ -65,3 +65,8 @@ that plays it without a window, built from the same public pieces a host uses.
 `tests/one_way_platforms.rs` jumps through the authored planks, lands on top,
 drops through using the real input action, stops on the ordinary painted floor
 and lands on the planks again after the drop timer expires.
+
+The hero now grants jump permission from solved solid contact normals, retaining
+its ray for the ground-clearance display. The wind crate flashes amber on hard
+landings from contact impulse. Both policies live in Decay and exercise the
+general contact snapshot API added for this genre showcase.

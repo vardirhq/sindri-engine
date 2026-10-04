@@ -5,6 +5,7 @@
 //! slice is 2D; the parallel 3D data model exists so the 2D API cannot quietly
 //! become the dimension-neutral contract.
 
+mod contact2d;
 mod one_way2d;
 mod query2d;
 mod shared;
@@ -16,6 +17,7 @@ mod world2d;
 #[cfg(test)]
 mod tests;
 
+pub use contact2d::Contact2d;
 pub use one_way2d::OneWay2d;
 pub use query2d::{RayHit2d, RaycastFilter2d};
 pub use shared::{CollisionLayers, RigidBodyKind};

@@ -35,6 +35,9 @@ impl WorldHost<'_> {
         if matches!(call, PhysicsCall::Raycast) {
             return self.physics_raycast(path, args);
         }
+        if matches!(call, PhysicsCall::Contacts) {
+            return self.physics_contacts(path, args);
+        }
         if matches!(
             call,
             PhysicsCall::OverlapCircle

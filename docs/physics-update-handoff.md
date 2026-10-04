@@ -16,31 +16,46 @@ a pushed handoff. Do not ask them to authorize the scope again.
 
 ## Current continuation checkpoint
 
-CCD and **one-way platforms** are implemented in this PR. CCD includes the
-default-off body flag, live controls, schema default, state-preserving scene
-synchronization, typed Decay getter/setter and platformer hero use.
+CCD, one-way platforms, **forces and rotation**, and **contact snapshots** are
+implemented in this PR. The checklist in `physics-update.md` is current.
 
-One-way support is an entity component applied to all solid pieces, including
-tilemaps, with validated local normal/cone and CCD pair filtering. Timed typed
-`Physics.drop_through` preserves ordinary floors/sensors, supports the spawn
-window, and expires in fixed simulation time. Policy edits/undo preserve
-velocity/joints and wake sleeping riders. The platformer has visible plank tiles
-and Down/S/d-pad drop input; its support ray refuses underside overlap grounding.
+Forces/rotation add world force and torque, angular velocity/impulse and impulses
+at world points. Forces accumulate for one step; spawn-window requests replay in
+order after mass calculation. Existing hosts with their own physics driver are
+supported. Platformer's wind crate proves force/torque and input-driven launch
+and rotation. CI was green on `2426d98e`, the previous branch head.
 
-Scoped native preflight passed **772 tests**, typed hero preflight had zero
-errors/reminders, and warning-denied Clippy/formatting and WASM checks passed on
-Rust 1.95. Catalogue regeneration/currentness/completeness passed. Real Chromium
-export/load smoke passed under `/examples/platformer/`, fetching project assets,
-running Decay and drawing the planks. Full browser interaction, visual inspector
-and workspace verification remain in final integration.
+Contacts expose copied solid solver points, push normals towards the queried
+body, normal/friction impulses and world force over the last fixed dt, ordered
+deterministically. Sensors are excluded; sleeping support has zero new impulse.
+Teleports/removal/rebuilds invalidate affected snapshots. Typed Decay filters
+inactive/despawned others and returns empty before spawn synchronization.
+Platformer grounds from solved support and flashes a child shape on crate
+landings. The crate is a **tilemap**, so do not use `this.sprite.tint` on it.
+Rapier disables contact clustering in 2D; read `solver_manifolds()` for impulses,
+not a fixture that assumes clusters must be generated.
 
-Continue with **forces and rotation**, then the remaining checklist. Historical
+Contact validation: scoped native preflight passed 355 tests; all-target/all-
+feature checks, typed checks for all three changed scripts, warning-denied
+Clippy, scene and catalogue tests/currentness/completeness, and all-feature WASM
+checks passed. Chromium export/load smoke passed on the rebuilt browser runtime,
+fetching assets, running Decay without runtime errors and drawing the level.
+New-head CI is pending. Full browser gameplay interaction/editor Play inspection
+and workspace integration remain at the end of the checklist.
+
+Continue with **reusable physics material assets**, then joints, character
+movement, accelerated queries, 3D/voxel physics and final integration. Historical
 recovery notes below describe the original loss, not the current implementation.
-Use pinned Rust 1.95: the local system Rust 1.97 Clippy introduces a lint in an
-unchanged scene test. Builds used debug = 0 and incremental = 0; keep warning
-flags/profile settings consistent to reuse artifacts. The original recovery
-environment needed single-unit code generation to avoid empty dependency objects.
-Linux all-features checks require pkg-config, ALSA and udev build dependencies.
+
+Use pinned Rust 1.95. This local checkout has the toolchain at
+`/tmp/sindri-physics-rustup`, with rustup shims under
+`/tmp/sindri-physics-cargo/bin`; use `RUSTUP_HOME` and prepend the shims to PATH.
+The local system Rust is 1.97 and adds a lint to an unchanged scene test. Keep
+build debug = 0, incremental = false and warning flags consistent to reuse
+artifacts. Native artifacts are in `target/`; browser artifacts are in
+`/tmp/sindri-physics-wasm`. Never clean a directory while a build uses it.
+Linux all-features checks need pkg-config, ALSA and udev build dependencies.
+Invoke `python3 scripts/preflight.py` (the script has no executable bit here).
 
 ## Historical saved state
 
@@ -142,7 +157,8 @@ These apply only to the lost local version and must be rerun on rebuilt code:
 ## Remaining feature guidance
 
 The acceptance checklist in `docs/physics-update.md` is the scope authority.
-The following decisions were explored but not implemented or pushed.
+These are original implementation notes. The current checkpoint and acceptance
+checklist above supersede their historical status.
 
 ### One-way platforms
 
@@ -278,8 +294,8 @@ Continue the physics update in vardirhq/sindri-engine, draft PR #497,
 branch codex/physics-update. Read AGENTS.md, CLAUDE.md,
 docs/physics-update-handoff.md and docs/physics-update.md first.
 Implement every remaining acceptance item, including docs, in this one PR.
-CCD and one-way platforms are checked and saved on the branch. Continue with
-forces and rotation, then the remaining checklist.
+CCD, one-way platforms, forces/rotation and contacts are checked and saved on
+the branch. Continue with reusable material assets, then the remaining checklist.
 Push checked small slices regularly, each feature in one push or less.
 Keep gameplay in Decay, prove editor/runtime/script/game behavior, and do
 not mark the PR ready until final applicable checks and CI are green.

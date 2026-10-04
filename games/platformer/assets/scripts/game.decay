@@ -6,4 +6,5 @@ state Game {
     var won: bool = false;
     var ground_found: bool = false;
     var ground_clearance: f32 = 0.0;
+    var crate_impacts: f32 = 0.0;
 }

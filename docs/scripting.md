@@ -1002,6 +1002,7 @@ a person who has not clicked yet.
 
 | Call | Returns |
 | --- | --- |
+| `Physics.contacts(entity)` | `List<Contact2d>` |
 | `Physics.apply_force(entity, force: Vec2)` | nothing |
 | `Physics.apply_torque(entity, torque)` | nothing |
 | `Physics.angular_velocity(entity)` | `f32` |
@@ -1027,6 +1028,20 @@ a person who has not clicked yet.
 | `Physics.collision_stopped()` | `List<Entity>` |
 | `Physics.sensor_entered()` | `List<Entity>` |
 | `Physics.sensor_exited()` | `List<Entity>` |
+
+`Physics.contacts(entity)` copies solid solver contacts from the last fixed
+step. A `Contact2d` contains `entity` (the other body), world `point` and
+`normal` as Vec2, `normal_impulse`, signed `tangent_impulse`, and world `force`
+as Vec2. The normal points towards the queried body; the tangent is
+`Vec2(-normal.y, normal.x)`. Force is total impulse divided by fixed-step seconds.
+Points are ordered by entity, point, normal and impulse, including multiple
+points/pieces on one entity. Sensors are excluded. Sleeping contacts keep their
+support geometry but report zero new impulses/force. Copies can be edited without
+changing physics. Before the first step or spawn synchronization the list is
+empty; absent physics and active entities without bodies fail. Inactive and
+despawned others are filtered immediately. Runtime teleports/removal invalidate
+contacts; scene transform writes reach physics at the next synchronization.
+Platformer uses this for support grounding and the crate's hard-landing flash.
 
 Forces and torques add together for the next fixed step, then clear. Impulses
 act immediately and do not scale with dt. All points/vectors are world-space;

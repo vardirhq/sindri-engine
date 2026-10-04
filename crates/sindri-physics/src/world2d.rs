@@ -4,6 +4,7 @@
 //! speak only in the types this crate defines, which is what makes the
 //! backend replaceable.
 
+mod contacts;
 mod controls;
 mod motion;
 mod one_way;
@@ -42,6 +43,7 @@ struct BodyRecord2d {
 /// The first runtime physics world. It owns Rapier completely and exposes only
 /// Sindri entities, values, events, and joints.
 pub struct PhysicsWorld2d {
+    contacts: HashMap<EntityId, Vec<crate::Contact2d>>,
     backend: r2::PhysicsWorld,
     one_way: one_way::OneWayHooks,
     pending_drop: HashMap<EntityId, f32>,
@@ -74,6 +76,7 @@ impl PhysicsWorld2d {
         let mut backend = r2::PhysicsWorld::new();
         backend.gravity = r2::Vector::new(gravity[0], gravity[1]);
         Ok(Self {
+            contacts: HashMap::new(),
             backend,
             one_way: one_way::OneWayHooks::default(),
             pending_drop: HashMap::new(),
@@ -282,6 +285,7 @@ impl PhysicsWorld2d {
     }
 
     pub fn remove(&mut self, entity: EntityId) -> bool {
+        self.invalidate_contacts(entity);
         self.pending_controls.remove(&entity);
         self.pending_drop.remove(&entity);
         self.pending_velocity.remove(&entity);
@@ -360,6 +364,7 @@ impl PhysicsWorld2d {
         let (tear_send, _tear_recv) = mpsc::channel();
         let events = r2::ChannelEventCollector::new(collision_send, force_send, tear_send);
         self.backend.step_with_events(&self.one_way, &events);
+        self.snapshot_contacts(dt);
         self.clear_step_forces();
         self.one_way.dropping.retain(|_, seconds| {
             *seconds -= dt;
