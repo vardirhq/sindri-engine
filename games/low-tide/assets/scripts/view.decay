@@ -13,6 +13,7 @@ script View {
     @export let lead: f32 = 1.4;
 
     var roll: f32 = 0.0;
+    var size: f32 = 30.0;
     var view_button: Entity = null;
 
     fn start() {
@@ -44,6 +45,13 @@ script View {
         } else {
             target = Vec2(Game.crew_x, Game.crew_y);
         }
+        // Frame the whole expanded crawler at the helm; follow close on foot.
+        var wanted_size = 15.0;
+        if Game.aboard { wanted_size = max(22.0, Game.hull_bottom - Game.hull_top + 12.0); }
+        if Game.at_helm { wanted_size = max(30.0, wanted_size + 6.0); }
+        if Game.aboard { wanted_size = max(wanted_size, 12.5 / max(0.3, Viewport.aspect)); }
+        this.size += (wanted_size - this.size) * (1.0 - exp(-this.turn * dt));
+        Camera.orthographic_size(this.entity, this.size);
         let at = this.transform.position;
         let eased = Vec2(at.x, at.y).lerp(target, 1.0 - exp(-this.follow * dt));
         this.transform.position = Vec3(eased.x, eased.y, at.z);

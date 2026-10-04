@@ -91,7 +91,7 @@ fn caught_ashore(mut pilot: Pilot) {
     }
     pilot.release();
     let moved = distance(from, pilot.crew_world());
-    assert!(moved > 0.5 && moved < 2.0, "can wade slowly out: {moved}");
+    assert!(moved > 0.5 && moved < 2.5, "can swim out: {moved}");
     time(&mut pilot, 405.0);
     let foot = pilot.deck_to_world([10.5, -7.5]);
     pilot.walk_ashore(foot, 0.3);
@@ -138,31 +138,26 @@ fn the_same_overlay_leaves_builtin_overland_blocks_intact() {
 }
 
 #[test]
-fn carried_salvage_washes_away_and_flooded_wrecks_cannot_be_harvested() {
+fn carried_salvage_survives_rising_water_and_can_be_dropped_explicitly() {
     let mut pilot = Pilot::new();
     pilot::salvage::pick_up_at_first_wreck(&mut pilot);
     let carried = pilot.run.entity("carried").unwrap();
     assert!(pilot.run.world.is_active(carried));
     time(&mut pilot, 280.0);
     assert!(
-        !pilot.run.world.is_active(carried),
-        "caught salvage washes away"
-    );
-    assert!((pilot.board("washed") - 1.0).abs() < 0.01);
-    pilot.use_it();
-    assert!(
-        !pilot.run.world.is_active(carried),
-        "no harvesting underwater"
-    );
-    pilot.wait(1.0);
-    assert!(
-        (pilot.board("washed") - 1.0).abs() < 0.01,
-        "only the carried crate lost"
-    );
-    time(&mut pilot, 405.0);
-    pilot.use_it();
-    assert!(
         pilot.run.world.is_active(carried),
-        "harvesting returns with low tide"
+        "water does not delete held cargo"
     );
+    assert!(
+        !pilot.flag("swimming"),
+        "ordinary cargo can only be waded out"
+    );
+    assert!(pilot.board("washed").abs() < 0.01);
+    pilot.use_it();
+    assert!(pilot.run.world.is_active(carried));
+    pilot.tap(sindri_platform::Key::X);
+    pilot.wait(0.1);
+    assert!(!pilot.run.world.is_active(carried));
+    assert!(pilot.flag("swimming"), "empty hands can now swim");
+    assert!(pilot.board("carried_kind").abs() < 0.01);
 }

@@ -1,0 +1,64 @@
+// Stable submerged wreck sites, marked by a float above permanent brine.
+// Streaming changes visibility, never cache identity or the terrain beneath it.
+script DiveSites {
+    @export let template: Prefab;
+    var basin: Entity = null;
+    var active: Map<String, Entity> = [:];
+    var sites: Map<String, Vec2> = [:];
+    var checked: Map<String, bool> = [:];
+    var clock: f32 = 1.0;
+
+    fn start() { this.basin = World.find("Basin"); }
+
+    fn update(dt: f32) {
+        this.clock += dt;
+        if this.clock < 1.0 { return; }
+        this.clock = 0.0;
+        let at = World.find("Crew").transform.world_position;
+        let centre = Vec2(at.x, at.y);
+        for key in this.active.keys() {
+            let wreck = this.active[key];
+            let position = wreck.transform.world_position;
+            if Vec2(position.x, position.y).distance(centre) > 120.0 {
+                World.despawn(wreck);
+                this.active.remove(key);
+            }
+        }
+        let cx = floor(centre.x / 48.0);
+        let cy = floor(centre.y / 48.0);
+        for dy in 0..3 {
+            for dx in 0..3 {
+                let column = cx + dx - 1.0;
+                let row = cy + dy - 1.0;
+                let key = column + ":" + row;
+                if this.active.contains(key) { continue; }
+                let site = remembered_site(key, column, row);
+                if site == null { continue; }
+                if site.distance(centre) >= 110.0 { continue; }
+                let wreck = World.spawn(this.template);
+                wreck.transform.position = Vec3(site.x, site.y, 0.05);
+                this.active[key] = wreck;
+            }
+        }
+    }
+    fn remembered_site(key: String, column: f32, row: f32) -> Vec2? {
+        if this.sites.contains(key) { return this.sites[key]; }
+        if this.checked.get(key, false) { return null; }
+        this.checked[key] = true;
+        let site = submerged_site(this.basin, column, row);
+        if site != null { this.sites[key] = site; }
+        return site;
+    }
+}
+
+shared fn submerged_site(basin: Entity, column: f32, row: f32) -> Vec2? {
+    for attempt in 0..16 {
+        let x = column * 48.0 + 4.0 + basin_scatter(column, row, 41.0 + attempt) * 40.0;
+        let y = row * 48.0 + 4.0 + basin_scatter(column, row, 61.0 + attempt) * 40.0;
+        let site = Vec2(floor(x) + 0.5, floor(y) + 0.5);
+        if tagged_at(basin, site, "liquid") && tagged_at(basin, site + Vec2(2.0, 2.0), "liquid") && tagged_at(basin, site - Vec2(2.0, 2.0), "liquid") {
+            return site;
+        }
+    }
+    return null;
+}

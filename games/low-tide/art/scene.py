@@ -268,6 +268,17 @@ def entities():
             },
         },
         {
+            "id": "swim-wake", "name": "Swim wake", "parent": "crew", "disabled": True,
+            "transform_3d": transform(0, -0.15, 0.05, 0, (1.55, 0.6)),
+            "components": {"sindri.shape": shape([0, 0, 0, 0], 5, 0.3) |
+                {"stroke": [0.56, 0.82, 0.76, 0.65], "stroke_width": 0.04}},
+        },
+        {
+            "id": "dive-sites", "name": "Submerged wrecks",
+            "components": {"sindri.script": script("scripts/dive-sites.decay", "DiveSites",
+                {"template": "prefabs/sunken-wreck.prefab"})},
+        },
+        {
             "id": "carried", "name": "Carried", "parent": "crew",
             "transform_3d": transform(0.0, 0.42, 0.01, 0.0, (0.5, 0.5)),
             "components": {
@@ -491,7 +502,7 @@ def workbench():
 
 
 def dive_cutaway():
-    # One authored wreck interior, selected from a nearby flooded map wreck.
+    # One authored wreck interior, selected from a marked permanent-water wreck.
     # This is a cutaway activity, not a slice of the voxel volume.
     root = {"id": "dive-stage", "name": "Dive cutaway", "disabled": True,
             "transform_3d": transform(10000, 10000)}
@@ -515,13 +526,10 @@ def dive_cutaway():
     for i in range(9):
         rect(f"sea-bed-stone-{i}", -6+i*1.5, -9.8+(i%3)*0.12, 1.1, 0.4,
              [0.18, 0.23, 0.21, 1], 24, 0.15)
-    # A side silhouette of the crawler and its boarding line stay visible above.
-    rect("dive-crawler-tread", -1.5, 0.85, 6.2, 0.65, [0.13, 0.15, 0.13, 1], 25, 0.1)
-    rect("dive-crawler-home", -1.5, 1.7, 5.6, 1.25, [0.40, 0.34, 0.25, 1], 26, 0.1)
-    for i in range(3):
-        rect(f"dive-crawler-window-{i}", -3+i*1.5, 1.8, 0.65, 0.4,
-             [0.80, 0.70, 0.45, 1], 27, 0.02)
-    rect("boarding-line", -1.5, -4.5, 0.045, 9, [0.80, 0.68, 0.36, 0.55], 29)
+    # The surface float marks the same submerged wreck seen on the map.
+    rect("surface-float", -1.5, 0.5, 0.65, 0.35, [0.86, 0.65, 0.28, 1], 27, 0.1)
+    rect("float-mast", -1.5, 1.0, 0.06, 0.8, [0.65, 0.55, 0.38, 1], 27)
+    rect("surface-guide", -1.5, -4.5, 0.045, 9, [0.80, 0.68, 0.36, 0.55], 29)
     rect("wreck-interior", 0, -6.5, 8, 5, [0.06, 0.10, 0.11, 1], 24)
     tiles = [None] * (14 * 12)
     for row in range(5, 11):
@@ -588,6 +596,19 @@ def main():
         },
     }]}
     (ROOT / "prefabs/cargo.prefab").write_text(json.dumps(cargo, indent=1) + "\n")
+    sunken = {"format_version": 1, "metadata": {"name": "Submerged wreck"}, "entities": [
+        {"id": "sunken-wreck", "name": "Submerged wreck", "transform_3d": transform(0, 0, 0.05, 0, (6, 4)),
+         "components": {"sindri.sprite": {"texture": "textures/wreck.png", "layer": 1,
+                            "tint": [0.22, 0.50, 0.48, 0.6]},
+                        "sindri.tags": {"tags": ["sunken-wreck"]}}},
+        {"id": "wreck-float", "name": "Wreck float", "parent": "sunken-wreck",
+         "transform_3d": transform(0.25, 0.25, 0.1, 0, (0.1, 0.15)),
+         "components": {"sindri.shape": shape([0.9, 0.68, 0.3, 1], 7, 0.1)}},
+        {"id": "float-light", "name": "Float light", "parent": "wreck-float",
+         "transform_3d": transform(0, 0, 0.1, 0, (0.3, 0.3)),
+         "components": {"sindri.shape": shape([1, 0.91, 0.6, 1], 8, 0.1)}}
+    ]}
+    (ROOT / "prefabs/sunken-wreck.prefab").write_text(json.dumps(sunken, indent=1) + "\n")
 
 
 if __name__ == "__main__":
