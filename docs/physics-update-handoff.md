@@ -243,3 +243,15 @@ Prove native/browser behavior in a real project.
   unrelated work accumulates.
 - Finish with full applicable workspace/native/WASM/browser checks, final diff
   and documentation review, and green CI on the final head before marking ready.
+
+## Copyable new-session request
+
+Continue the physics update in vardirhq/sindri-engine, draft PR #497,
+branch codex/physics-update. Read AGENTS.md, CLAUDE.md,
+docs/physics-update-handoff.md and docs/physics-update.md first.
+Implement every remaining acceptance item, including docs, in this one PR.
+The previous unpushed physics code was lost in a workspace reset; only docs
+and this handoff are saved. Rebuild CCD first, then continue the checklist.
+Push checked small slices regularly, each feature in one push or less.
+Keep gameplay in Decay, prove editor/runtime/script/game behavior, and do
+not mark the PR ready until final applicable checks and CI are green.
