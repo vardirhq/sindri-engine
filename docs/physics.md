@@ -52,6 +52,11 @@ window, browser, editor, or Decay-language dependency.
 Both `rapier2d` and `rapier3d` must satisfy the repository MSRV, licence policy,
 `cargo deny`, native builds, and `wasm32-unknown-unknown` before either is merged.
 
+The adapters use Rapier 0.36. The 2D overlap adapter reads the backend
+intersection flag while keeping sub-shape IDs private. The event collector
+also owns a soft-body tear channel; Sindri currently authors only rigid bodies
+and continues to publish collision and sensor events only.
+
 ## Public model
 
 The concepts are intentionally parallel rather than generic over dimensionality.

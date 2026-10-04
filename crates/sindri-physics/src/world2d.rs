@@ -407,7 +407,9 @@ impl PhysicsWorld2d {
 
         let (collision_send, collision_recv) = mpsc::channel();
         let (force_send, _force_recv) = mpsc::channel();
-        let events = r2::ChannelEventCollector::new(collision_send, force_send);
+        // Sindri currently creates only rigid bodies, so tear events stay private.
+        let (tear_send, _tear_recv) = mpsc::channel();
+        let events = r2::ChannelEventCollector::new(collision_send, force_send, tear_send);
         self.backend.step_with_events(&(), &events);
 
         Ok(collision_recv

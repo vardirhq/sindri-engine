@@ -75,7 +75,7 @@ impl PhysicsWorld2d {
             // overlapping piece of the same entity is always the last found.
             if found.last() != Some(&entity)
                 && query::intersection_test(&at, probe.as_ref(), &piece_pose, piece)
-                    .unwrap_or(false)
+                    .is_ok_and(|intersection| intersection.intersecting)
             {
                 found.push(entity);
             }
