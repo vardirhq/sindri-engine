@@ -28,6 +28,7 @@ mod actions;
 mod person;
 mod physics;
 mod physics_controls;
+mod physics_motion;
 mod print;
 mod profile;
 mod query;

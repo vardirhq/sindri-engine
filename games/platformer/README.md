@@ -3,6 +3,10 @@
 The first genre showcase: a small side-view platformer. Run and jump across a
 painted level, pick up the coins and reach the flag.
 
+K or the west controller button tosses the wooden crate when nearby. Wind
+pushes it along the ground; an off-centre kick makes it tumble. Its forces and
+rotation are driven in Decay, with physics writing the resulting pose back.
+
 Arrow keys or A/D run; Space, W or Up jumps. A controller can use the left
 stick or D-pad and the south face button. Down/S or D-pad down drops through
 the raised one-way planks. On a touch screen, the first finger

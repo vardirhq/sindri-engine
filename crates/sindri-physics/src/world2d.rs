@@ -5,10 +5,12 @@
 //! backend replaceable.
 
 mod controls;
+mod motion;
 mod one_way;
 mod query;
 mod sweep;
 
+pub use motion::BodyControl2d;
 pub use sweep::ShapeHit2d;
 
 use std::{collections::HashMap, sync::mpsc, time::Duration};
@@ -43,6 +45,7 @@ pub struct PhysicsWorld2d {
     backend: r2::PhysicsWorld,
     one_way: one_way::OneWayHooks,
     pending_drop: HashMap<EntityId, f32>,
+    pending_controls: HashMap<EntityId, Vec<BodyControl2d>>,
     bodies: HashMap<EntityId, BodyRecord2d>,
     collider_entities: HashMap<r2::ColliderHandle, EntityId>,
     /// Velocities set on a body that does not exist yet.
@@ -74,6 +77,7 @@ impl PhysicsWorld2d {
             backend,
             one_way: one_way::OneWayHooks::default(),
             pending_drop: HashMap::new(),
+            pending_controls: HashMap::new(),
             bodies: HashMap::new(),
             collider_entities: HashMap::new(),
             pending_velocity: HashMap::new(),
@@ -120,6 +124,12 @@ impl PhysicsWorld2d {
             ));
         }
 
+        if let Some(controls) = self.pending_controls.get(&entity) {
+            for control in controls {
+                control.validate(entity, body.kind)?;
+            }
+        }
+
         let body_handle = self.backend.insert_body(body_builder(body));
         let handles: Vec<r2::ColliderHandle> = colliders
             .iter()
@@ -128,6 +138,8 @@ impl PhysicsWorld2d {
                     .insert_collider(collider_builder(entity, *collider), Some(body_handle))
             })
             .collect();
+        self.backend.bodies[body_handle]
+            .recompute_mass_properties_from_colliders(&self.backend.colliders);
         for handle in &handles {
             self.collider_entities.insert(*handle, entity);
         }
@@ -152,6 +164,11 @@ impl PhysicsWorld2d {
             self.backend.bodies[body_handle]
                 .set_linvel(r2::Vector::new(velocity[0], velocity[1]), true);
         }
+        if let Some(controls) = self.pending_controls.remove(&entity) {
+            for control in controls {
+                self.apply_control(entity, control)?;
+            }
+        }
         Ok(())
     }
 
@@ -169,6 +186,7 @@ impl PhysicsWorld2d {
     ) -> Result<(), PhysicsError> {
         finite2("linear_velocity", velocity)?;
         self.pending_velocity.insert(entity, velocity);
+        self.pending_controls.entry(entity).or_default().push(BodyControl2d::LinearVelocity(velocity));
         Ok(())
     }
 
@@ -224,6 +242,7 @@ impl PhysicsWorld2d {
                 self.connect_distance(joint.first, joint.second, joint.max_distance)?;
             }
         }
+        self.pending_controls.clear();
         self.pending_drop.clear();
         self.pending_velocity.clear();
         Ok(())
@@ -233,6 +252,7 @@ impl PhysicsWorld2d {
     ///
     /// Kept for callers that deliberately abandon a synchronization pass.
     pub fn forget_pending(&mut self) {
+        self.pending_controls.clear();
         self.pending_drop.clear();
         self.pending_velocity.clear();
         self.pending_distance_joints.clear();
@@ -259,6 +279,7 @@ impl PhysicsWorld2d {
     }
 
     pub fn remove(&mut self, entity: EntityId) -> bool {
+        self.pending_controls.remove(&entity);
         self.pending_drop.remove(&entity);
         self.pending_velocity.remove(&entity);
         self.pending_distance_joints
@@ -336,6 +357,7 @@ impl PhysicsWorld2d {
         let (tear_send, _tear_recv) = mpsc::channel();
         let events = r2::ChannelEventCollector::new(collision_send, force_send, tear_send);
         self.backend.step_with_events(&self.one_way, &events);
+        self.clear_step_forces();
         self.one_way.dropping.retain(|_, seconds| {
             *seconds -= dt;
             *seconds > 0.0

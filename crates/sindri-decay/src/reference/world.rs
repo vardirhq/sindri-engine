@@ -241,6 +241,36 @@ pub(super) const TYPES: &[TypeEntry] = &[
                 "Enables swept solid collision on a dynamic 2D body, including before a spawned body is built. Keeps velocity and joints.",
             ),
             call(
+                "apply_force",
+                &["entity", "force"],
+                "Adds a world-space Vec2 force for the next fixed step, then clears it. Repeated calls add; requires a dynamic body.",
+            ),
+            call(
+                "apply_torque",
+                &["entity", "torque"],
+                "Adds torque for the next fixed step, then clears it. Positive turns counterclockwise; requires a dynamic body.",
+            ),
+            call(
+                "angular_velocity",
+                &["entity"],
+                "Radians per second. Before a spawned body is built, reads its authored value or latest queued setter.",
+            ),
+            call(
+                "set_angular_velocity",
+                &["entity", "velocity"],
+                "Sets radians per second on a dynamic or velocity-kinematic body, respecting rotation locks.",
+            ),
+            call(
+                "apply_angular_impulse",
+                &["entity", "impulse"],
+                "Applies an immediate angular impulse to a dynamic body, independent of timestep.",
+            ),
+            call(
+                "apply_impulse_at_point",
+                &["entity", "impulse", "point"],
+                "Applies a world-space Vec2 impulse at a world-space Vec2 point, translating and turning a dynamic body. All motion controls support the spawn window.",
+            ),
+            call(
                 "apply_impulse",
                 &["entity", "x", "y"],
                 "Gives an object a sudden push in a direction. Heavier objects move less.",

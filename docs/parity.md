@@ -243,6 +243,7 @@ skeletal animation.
 | Feature | Engine | Editor | Decay | Proof | vs. baseline | Gap that matters |
 | --- | :-: | :-: | :-: | :-: | --- | --- |
 | Bodies, fixed-step stepping, velocity, impulse | ✅ | 🟡 | ✅ | ✅ | **Par** | — |
+| **Forces and rotation (2D)** | 🟡 | 🟡 | 🟡 | 🟡 | **Partial** | Runtime and typed Decay force/torque, angular velocity/impulse and world-point impulses; one-step accumulation/reset, validated body kinds and spawn requests. Platformer wind crate and input-driven launch/rotation regressions are added. Native/WASM CI verification is pending; browser interaction and visual inspector remain in final integration |
 | Compound colliders (several pieces, one body) | ✅ | ✅ | — | ✅ | **Par** | Pieces are added, removed, reordered and fully edited, a piece's shape included. The platformer's hero is one body of two pieces, a capsule and a box |
 | Masks, sensors, collision events | ✅ | 🟡 | ✅ | ✅ | **Par** | — |
 | **Named collision layers** | ✅ | ✅ | ✅ | ✅ | **Par** | A scene's `sindri.physics2d.world` names its layers bit by bit; `Physics.layer`/`Physics.mask` turn names into masks and refuse a name the world does not give; the inspector shows every mask field as a menu of named layers, keeping unnamed bits. The platformer names ground, hero and pickups and probes for ground by name; Physics Playground's mask control asks for its layers by name. Named per scene rather than in project settings, and colliders still store masks |

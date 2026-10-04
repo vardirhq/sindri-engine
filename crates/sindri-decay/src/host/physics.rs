@@ -59,6 +59,12 @@ impl WorldHost<'_> {
         if matches!(call, PhysicsCall::DropThrough) {
             return self.drop_through_call(path, args);
         }
+        if matches!(call, PhysicsCall::ApplyForce | PhysicsCall::ApplyTorque
+            | PhysicsCall::AngularVelocity | PhysicsCall::SetAngularVelocity
+            | PhysicsCall::ApplyAngularImpulse | PhysicsCall::ApplyImpulseAtPoint
+            | PhysicsCall::ApplyImpulse) {
+            return self.physics_motion_call(call, path, args);
+        }
         let entity = self.entity_argument(path, args, 0, "the body")?;
         // Whether the entity authored physics at all, asked before the physics
         // world is borrowed. A body that is authored but not yet built is the
@@ -94,28 +100,18 @@ impl WorldHost<'_> {
                     },
                 )))
             }
-            PhysicsCall::SetVelocity | PhysicsCall::ApplyImpulse => {
+            PhysicsCall::SetVelocity => {
                 let x = number(path, args.get(1).unwrap_or(&Value::Null))?;
                 let y = number(path, args.get(2).unwrap_or(&Value::Null))?;
                 // Narrowed here for the reason every number crossing into the
                 // engine is: Decay holds an `f64` and a transform is `f32`.
                 #[allow(clippy::cast_possible_truncation)]
                 let value = [x as f32, y as f32];
-                let outcome = if matches!(call, PhysicsCall::SetVelocity) {
-                    match physics.world.set_linear_velocity(entity, value) {
-                        // Spawned this pass: the body is built when the scene
-                        // next synchronizes, and this is what it starts with.
-                        // Without this a bullet could not be aimed on the frame
-                        // it was fired, which is the shape `docs/scripting.md`
-                        // documents and the reason a spawned script starts in
-                        // the pass that made it.
-                        Err(sindri_physics::PhysicsError::MissingEntity(_)) if authored => {
-                            physics.world.remember_linear_velocity(entity, value)
-                        }
-                        other => other,
+                let outcome = match physics.world.set_linear_velocity(entity, value) {
+                    Err(sindri_physics::PhysicsError::MissingEntity(_)) if authored => {
+                        physics.world.remember_linear_velocity(entity, value)
                     }
-                } else {
-                    physics.world.apply_impulse(entity, value)
+                    other => other,
                 };
                 outcome.map_err(|error| body_error(path, &error))?;
                 Ok(Value::Unit)

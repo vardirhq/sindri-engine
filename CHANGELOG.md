@@ -1,5 +1,7 @@
 # Changelog
 
+- Add 2D force, torque, angular velocity and angular/world-point impulse controls in runtime and typed Decay. Forces accumulate for one fixed step; spawn requests preserve call order. The platformer has a wind-driven wooden crate that K or the west controller button tosses and spins.
+
 - Add authored 2D one-way platforms with configurable local support normals and timed Decay drop-through. The platformer has visible planks and Down/S/d-pad down drops through them; support-side grounding prevents jumping from underside sensor overlaps. Ordinary floors and sensors remain active.
 
 - Add opt-in continuous collision to the 2D physics engine and live dynamic-body controls. Old body payloads default to discrete collision; sensors remain discrete. Scene authoring and typed Decay controls preserve velocity and joints through live toggles and the spawn window; the platformer hero opts in.

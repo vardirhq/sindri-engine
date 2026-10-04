@@ -136,6 +136,40 @@ visible plank tilemap exercises ascent, landing, Down/S/d-pad drop to an ordinar
 floor, and another landing after expiration. Engine regressions also exercise
 rotated support normals, kinematic platforms, fast CCD ascent and cancellation.
 
+### Forces and rotation
+
+`PhysicsWorld2d` adds world-space force and torque, angular velocity in radians
+per second, angular impulses and impulses at world points. Positive torque and
+angular velocity turn counterclockwise. Forces and torques accumulate for the
+next valid fixed step and are cleared immediately after it, even when a host
+runs several fixed steps per frame. Invalid timesteps do not consume them.
+Pause keeps them pending. Impulses change velocity immediately, without a dt
+factor; off-centre impulses also turn the body according to its mass/inertia.
+
+Forces and impulses require dynamic bodies. Velocity setters also support
+velocity-kinematic bodies. Every request validates finite values and body kind
+before mutation; rotation locks prevent angular motion while retaining linear
+impulses. Collider mass properties are available immediately after insertion,
+so impulses work before the first step. Existing velocity/impulse APIs remain.
+
+Typed Decay adds `Physics.apply_force(entity, Vec2)`, `apply_torque(entity, f32)`,
+`angular_velocity(entity)`, `set_angular_velocity(entity, f32)`,
+`apply_angular_impulse(entity, f32)` and
+`apply_impulse_at_point(entity, Vec2, Vec2)`. The point is in world space.
+An authored body can receive these requests between spawning and synchronization:
+requests replay in call order when the body materializes, after its collider
+mass is known. The angular getter in that window returns the latest queued
+setter or the authored initial value; queued impulses affect it at materialization.
+Removal, abandoned synchronization and structural rebuilds discard pending work.
+Missing authored bodies and hosts without physics fail explicitly.
+
+The platformer's wooden crate is pushed by wind and tossed by K or the west
+controller button. Decay reapplies force each update, applies torque while it is
+airborne, bounds its angular velocity and gives kicks an off-centre and angular
+impulse. The native input regression checks its launch and scene rotation
+writeback. Browser interaction and visual inspector review remain in final
+integration; CI verification of this slice is pending.
+
 ### Colliders
 
 The scene components are distinct:

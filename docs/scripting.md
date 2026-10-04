@@ -1002,6 +1002,12 @@ a person who has not clicked yet.
 
 | Call | Returns |
 | --- | --- |
+| `Physics.apply_force(entity, force: Vec2)` | nothing |
+| `Physics.apply_torque(entity, torque)` | nothing |
+| `Physics.angular_velocity(entity)` | `f32` |
+| `Physics.set_angular_velocity(entity, velocity)` | nothing |
+| `Physics.apply_angular_impulse(entity, impulse)` | nothing |
+| `Physics.apply_impulse_at_point(entity, impulse: Vec2, point: Vec2)` | nothing |
 | `Physics.drop_through(entity, seconds)` | nothing |
 | `Physics.continuous_collision(entity)` | `bool` |
 | `Physics.set_continuous_collision(entity, enabled)` | nothing |
@@ -1021,6 +1027,16 @@ a person who has not clicked yet.
 | `Physics.collision_stopped()` | `List<Entity>` |
 | `Physics.sensor_entered()` | `List<Entity>` |
 | `Physics.sensor_exited()` | `List<Entity>` |
+
+Forces and torques add together for the next fixed step, then clear. Impulses
+act immediately and do not scale with dt. All points/vectors are world-space;
+angles are radians and positive angular motion is counterclockwise. Dynamic
+bodies accept forces/impulses; angular setters also accept velocity-kinematic
+bodies. Rotation locks suppress turning. Nonfinite values, missing authored
+bodies and absent physics hosts report errors. Spawn-window requests replay in
+call order after collider mass is known; the angular getter before that returns
+the latest queued setter or authored initial value. Removal/abandonment discards
+pending work. Platformer's wind crate is the gameplay proof.
 
 `Physics.drop_through(entity, seconds) -> unit` ignores only one-way solid
 platforms for an authored dynamic body. The duration is finite and nonnegative;

@@ -58,12 +58,16 @@ pub(super) fn add_physics_surface(environment: &mut Environment) {
                         entity(),
                     ],
                     PhysicsCall::SetContinuousCollision => vec![entity(), Type::Bool],
-                    PhysicsCall::DropThrough => vec![entity(), Type::F32],
+                    PhysicsCall::DropThrough | PhysicsCall::ApplyTorque
+                    | PhysicsCall::SetAngularVelocity | PhysicsCall::ApplyAngularImpulse => vec![entity(), Type::F32],
+                    PhysicsCall::ApplyForce => vec![entity(), Type::Vec2],
+                    PhysicsCall::ApplyImpulseAtPoint => vec![entity(), Type::Vec2, Type::Vec2],
                     PhysicsCall::Layer => vec![Type::String],
                     PhysicsCall::Mask => vec![Type::array_of(Type::String)],
                     PhysicsCall::ContinuousCollision
                     | PhysicsCall::VelocityX
-                    | PhysicsCall::VelocityY => vec![entity()],
+                    | PhysicsCall::VelocityY
+                    | PhysicsCall::AngularVelocity => vec![entity()],
                     PhysicsCall::SetVelocity | PhysicsCall::ApplyImpulse => {
                         vec![entity(), Type::F32, Type::F32]
                     }
@@ -82,13 +86,17 @@ pub(super) fn add_physics_surface(environment: &mut Environment) {
                     PhysicsCall::VelocityX
                     | PhysicsCall::VelocityY
                     | PhysicsCall::Layer
-                    | PhysicsCall::Mask => Type::F32,
+                    | PhysicsCall::Mask
+                    | PhysicsCall::AngularVelocity => Type::F32,
                     PhysicsCall::ContinuousCollision => Type::Bool,
                     PhysicsCall::SetVelocity
                     | PhysicsCall::ApplyImpulse
                     | PhysicsCall::ConnectDistance
                     | PhysicsCall::SetContinuousCollision
-                    | PhysicsCall::DropThrough => Type::Unit,
+                    | PhysicsCall::DropThrough
+                    | PhysicsCall::ApplyForce | PhysicsCall::ApplyTorque
+                    | PhysicsCall::SetAngularVelocity | PhysicsCall::ApplyAngularImpulse
+                    | PhysicsCall::ApplyImpulseAtPoint => Type::Unit,
                     _ => Type::array_of(entity()),
                 },
             },

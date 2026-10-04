@@ -254,6 +254,15 @@ overlaps and shape casts are described below.
 A parallel Sindri-owned 3D body/collider data model already fixes the public
 shape of the later 3D slice, but no 3D runtime behavior is claimed yet.
 
+Forces and rotation have runtime and typed Decay controls: additive world force
+and torque last one fixed step, impulses act immediately and off-centre kicks
+turn a body. Dynamic/velocity-kinematic rules, finite values and rotation locks
+are validated; spawn-window requests replay after collider mass is known and
+expire if never materialized. The platformer's wind crate exercises force,
+torque, angular velocity and impulses through its real kick input, with scene
+rotation writeback. Native/WASM CI verification is pending; browser input and
+visual inspector review remain in final integration. See `docs/physics.md`.
+
 One-way support is authored with `sindri.physics2d.one_way`: a validated local
 normal and contact cone, applied to solid collider and tilemap pieces. Pair
 filtering also covers CCD ascent. `Physics.drop_through(entity, seconds)` uses
