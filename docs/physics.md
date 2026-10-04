@@ -219,11 +219,11 @@ authored frictionless is frictionless against everything: a platformer's hero
 pressed into a wall slides down it rather than clinging with half the wall's
 friction. Two equal frictions combine to that value, as an average would.
 
-Parented dynamic rigid bodies are rejected initially. A physics body has a world
-pose while a child transform is parent-relative, and silently mixing those
-models produces surprising motion. Static and kinematic authored children may be
-supported only once their synchronization semantics are tested. The first slice
-keeps the rule narrow and explicit.
+Parented 2D bodies are supported. Synchronization reads the composed world pose
+and converts the simulated answer back into the parent's local space. Moving a
+parent carries its bodies through the authored-pose change rule. This is exercised
+by scene hierarchy regressions and Low Tide's moving deck; it does not create a
+physical joint between parent and child.
 
 ## Runtime ownership and stepping
 
@@ -283,7 +283,11 @@ at the next synchronization. Decay skips inactive/despawned entities even during
 a script pass. The platformer proves ground clearance against tilemap geometry;
 `examples/physics` visualizes filtering, hits, normals and trigger events.
 
-2D overlap/shape casts and all 3D runtime queries remain future work.
+2D overlaps and shape casts are implemented for circles, boxes and capsules.
+Decay exposes `Physics.overlap_circle`, `overlap_box`, `cast_circle` and
+`cast_box`; Orbital's mine blast and Physics Playground exercise them.
+All 3D runtime queries remain future work. Queries currently scan collider pieces;
+the incremental physics update is tracked in `docs/physics-update.md`.
 
 Results contain Sindri entity IDs, hit position/normal in the appropriate vector
 dimension, and distance. They never expose Rapier collider handles.
@@ -377,9 +381,9 @@ physics must compile WASM; the Gather slice must run the real browser smoke test
 
 ## Non-goals for the first 2D slice
 
-- joints
+- richer joints (a runtime maximum-distance joint now exists)
 - continuous-character-controller abstraction
-- compound/multiple authored colliders
+- further collider shapes (authored 2D compound colliders now exist)
 - contact-manifold scripting
 - physics-driven visual scale
 - platformer navigation

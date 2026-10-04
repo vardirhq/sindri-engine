@@ -248,8 +248,8 @@ platformer displays ground clearance through jumps against painted tilemap
 colliders, and `examples/physics` exposes live rays, hit dots, normals, falling
 bodies, bounce and sensors with desktop/touch controls. Pages exports it under
 `examples/physics/`; native project regressions and desktop/phone browser smoke
-checks exercise its real Decay controls. Overlap/shape casts, 3D queries and an
-accelerated query index remain absent.
+checks exercise its real Decay controls. 3D queries and an accelerated query index remain absent; implemented 2D
+overlaps and shape casts are described below.
 
 A parallel Sindri-owned 3D body/collider data model already fixes the public
 shape of the later 3D slice, but no 3D runtime behavior is claimed yet.
@@ -287,8 +287,7 @@ carry handles: a box's four edges, a circle's radius, a capsule's radius and
 height. Dragging an edge keeps the opposite edge where it was, along the piece's
 own rotated axis, and a whole drag is one undo step. The generic inspector
 also exposes the body and collider payloads — a compound's pieces are added, removed,
-reordered, and edited down to each piece's shape, though no game in this
-repository authors a compound yet — and editor Play steps them through the same
+reordered, and edited down to each piece's shape, with a two-piece compound used by the platformer — and editor Play steps them through the same
 fixed-update path as a build. `games/orbital-baked` is the end-to-end proof:
 player, enemies, projectiles, pickups, and effects use distinct masks and
 collision or sensor events continuously.
