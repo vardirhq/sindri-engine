@@ -161,7 +161,9 @@ requests replay in call order when the body materializes, after its collider
 mass is known. The angular getter in that window returns the latest queued
 setter or the authored initial value; queued impulses affect it at materialization.
 Removal, abandoned synchronization and structural rebuilds discard pending work.
-Missing authored bodies and hosts without physics fail explicitly.
+A host with its own physics driver can control live bodies without scene body
+components. An authored body is required only to validate requests before
+materialization. Missing bodies and hosts without physics fail explicitly.
 
 The platformer's wooden crate is pushed by wind and tossed by K or the west
 controller button. Decay reapplies force each update, applies torque while it is

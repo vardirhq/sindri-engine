@@ -20,15 +20,14 @@ impl WorldHost<'_> {
     ) -> Result<Value, RuntimeError> {
         let entity = self.entity_argument(path, args, 0, "the body")?;
         let error = |message: &str| RuntimeError::Host(format!("{}: {message}", path.dotted()));
-        let authored: RigidBody2d = self
+        let authored: Option<RigidBody2d> = self
             .world
             .get(entity)
             .and_then(|data| data.components.get("sindri.physics2d.rigid_body"))
-            .ok_or_else(|| error("entity has no authored 2D rigid body"))
-            .and_then(|payload| {
+            .map(|payload| {
                 serde_json::from_value(payload.clone())
                     .map_err(|failure| error(&format!("invalid rigid body: {failure}")))
-            })?;
+            }).transpose()?;
         let scalar = || number(path, args.get(1).unwrap_or(&Value::Null)).map(as_f32);
         let control = match call {
             PhysicsCall::ApplyForce => BodyControl2d::Force(vector(path, args.get(1))?),
@@ -38,7 +37,7 @@ impl WorldHost<'_> {
                 if !velocity.is_finite() {
                     return Err(error("angular velocity must be finite"));
                 }
-                if authored.lock_rotation {
+                if authored.is_some_and(|body| body.lock_rotation) {
                     0.0
                 } else {
                     velocity
@@ -62,6 +61,7 @@ impl WorldHost<'_> {
                     Err(sindri_physics::PhysicsError::MissingEntity(_))
                         if !physics.world.contains(entity) =>
                     {
+                        let authored = authored.ok_or_else(|| error("entity has no authored 2D rigid body"))?;
                         if authored.lock_rotation {
                             0.0
                         } else {
@@ -80,9 +80,8 @@ impl WorldHost<'_> {
         let outcome = if physics.world.contains(entity) {
             physics.world.apply_control(entity, control)
         } else {
-            physics
-                .world
-                .remember_control(entity, authored.kind, control)
+            let authored = authored.ok_or_else(|| error("entity has no authored 2D rigid body"))?;
+            physics.world.remember_control(entity, authored.kind, control)
         };
         outcome.map_err(|failure| error(&failure.to_string()))?;
         Ok(Value::Unit)

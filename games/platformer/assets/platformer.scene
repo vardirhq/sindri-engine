@@ -100,7 +100,8 @@
           "layers": [
             "ground",
             "hero",
-            "pickups"
+            "pickups",
+            "crate"
           ]
         },
         "sindri.input.actions": {
@@ -1151,7 +1152,7 @@
           "passable": [],
           "layers": {
             "memberships": 1,
-            "filter": 2
+            "filter": 10
           },
           "friction": 0.5,
           "restitution": 0.0
@@ -1232,13 +1233,13 @@
               "shape": {
                 "shape": "box",
                 "half_extents": [
-                  1,
-                  1
+                  0.3,
+                  0.3
                 ]
               },
               "offset": [
-                1,
-                1
+                0.3,
+                0.3
               ],
               "rotation": 0,
               "sensor": false,

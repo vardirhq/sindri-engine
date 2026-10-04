@@ -6,6 +6,7 @@ use serde_json::json;
 use sindri_core::{EntityData, SceneComponent, Transform3D, World};
 use sindri_decay::{Physics2d, ScriptComponent, ScriptFrame, ScriptSources, Scripts};
 use sindri_platform::InputState;
+use sindri_physics::{Collider2d, PhysicsWorld2d, RigidBody2d};
 use sindri_scene::{SceneExtractor, ScenePhysics2d};
 
 fn authored() -> (SceneExtractor, World, sindri_core::EntityId) {
@@ -40,6 +41,35 @@ fn authored() -> (SceneExtractor, World, sindri_core::EntityId) {
         ..EntityData::default()
     });
     (extractor, world, entity)
+}
+
+#[test]
+fn a_host_with_its_own_driver_needs_no_authored_body_component() {
+    let (extractor, mut world, entity) = authored();
+    world.get_mut(entity).unwrap().components.remove("sindri.physics2d.rigid_body");
+    world.get_mut(entity).unwrap().components.remove("sindri.physics2d.collider");
+    let mut physics = PhysicsWorld2d::new([0.0; 2]).unwrap();
+    physics.insert_body(entity, RigidBody2d::default(), &[Collider2d::rectangle([0.5; 2])]).unwrap();
+    let mut sources = ScriptSources::new();
+    sources.insert("motion.decay", r"
+    script Motion {
+        fn start() {
+            Physics.set_angular_velocity(this.entity, 2.0);
+            if Physics.angular_velocity(this.entity) != 2.0 { this.transform.position.y = 99.0; }
+            Physics.apply_force(this.entity, Vec2(2.0, 0.0));
+            Physics.apply_torque(this.entity, 1.0);
+            Physics.apply_angular_impulse(this.entity, 0.5);
+            Physics.apply_impulse_at_point(this.entity, Vec2(1.0, 0.0), Vec2(0.0, 0.5));
+        }
+    }");
+    let input = InputState::default();
+    let report = Scripts::new().advance(&mut world, extractor.components(),
+        ScriptFrame::new(&sources, &input, 0.1).with_physics(Physics2d { world: &mut physics, events: &[] }));
+    assert!(report.failures.is_empty(), "{:?}", report.failures);
+    assert!(world.get(entity).unwrap().transform_3d.unwrap().position[1].abs() < f32::EPSILON);
+    physics.step(Duration::from_millis(100)).unwrap();
+    assert!((physics.linear_velocity(entity).unwrap()[0] - 1.2).abs() < 1.0e-4);
+    assert!((physics.angular_velocity(entity).unwrap() - 2.6).abs() < 1.0e-4);
 }
 
 #[test]
