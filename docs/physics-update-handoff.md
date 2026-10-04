@@ -1,0 +1,245 @@
+# Physics update: recovery handoff
+
+## Start here
+
+Continue **PR #497**, https://github.com/vardirhq/sindri-engine/pull/497,
+on branch `codex/physics-update` in `vardirhq/sindri-engine`.
+Keep all work in this one draft PR. Do not merge it or replace it with multiple
+PRs. Read `AGENTS.md` and `CLAUDE.md` freshly before editing, then the relevant
+subsystem and Decay guidance.
+
+The user authorized every item in `docs/physics-update.md`, including the
+documentation issues. Deliver checked incremental pushes: each feature is
+one push or less, with smaller checkpoints preferred when useful. The user
+explicitly stopped the previous session because it was freezing and asked for
+a pushed handoff. Do not ask them to authorize the scope again.
+
+## Authoritative saved state
+
+At handoff preparation, the branch head was
+`23cac712d0f9d6f17206a53de110780e8bf5442d`, based on main
+`dae1b14df254413d24679556e88156a907e5909c`.
+This handoff is a subsequent documentation commit.
+
+**Only the documentation reconciliation and acceptance checklist were saved
+to GitHub. No new physics implementation was pushed.** The workspace reset
+before the local CCD implementation was committed/pushed. That checkout,
+toolchain bootstrap, build cache, staged one-way/force files, and running
+preflight disappeared. A fresh clone confirmed the remote state. Do not claim
+to have recovered code that is absent from the branch.
+
+The saved docs checkpoint corrected outdated overlap/shape-cast claims,
+compound-game-proof claims, and parented-body limitations in
+`docs/physics.md` and `docs/capabilities.md`. It added
+`docs/physics-update.md`. Its GitHub CI was observed green before the reset.
+
+All nine implementation checkboxes remain unchecked. Keep them unchecked until
+their implementation and applicable proof exist on the branch.
+
+## First task: rebuild CCD in small slices
+
+The following is a reconstruction guide for the lost implementation, not
+committed code or a guarantee about the current checkout.
+
+1. Add `continuous_collision: bool` to public `RigidBody2d` in
+   `crates/sindri-physics/src/types2d.rs`, with `#[serde(default)]` and
+   default false. Older scenes must still deserialize.
+2. Pass the value to Rapier's `.ccd_enabled(...)` in the body builder.
+   Add backend-private controls in `world2d/controls.rs`:
+   getter `continuous_collision(entity)`, and dynamic-body-only setter
+   `set_continuous_collision(entity, enabled)`; verify Rapier's actual
+   current `enable_ccd` signature before writing.
+3. Add the false default to the registered rigid-body schema in
+   `crates/sindri-scene/src/extract/physics_registry.rs`.
+   Exercise authoring through the generic command-backed inspector.
+4. In `ScenePhysics2d` synchronization, a CCD-only payload change must toggle
+   the live body without rebuilding it. Compare an authored snapshot with
+   the previous CCD value replaced; preserve live velocity, joints and
+   contacts. Normal collider/kind edits keep their existing lifecycle.
+5. Add typed Decay getter `Physics.continuous_collision(entity) -> bool`
+   and setter `Physics.set_continuous_collision(entity, bool) -> unit`.
+   Update operation catalogue, environment, host dispatcher and reference.
+   The host setter validates an authored dynamic body and updates both the
+   live backend (if built) and the runtime authored payload.
+   Before a freshly spawned body is synchronized, the payload keeps the
+   requested setting. Getter uses the live backend when present, payload
+   otherwise. Fail clearly for a host without physics or a missing body.
+6. `surface/call.rs` approached 580 lines. Split the PhysicsCall enum,
+   PHYSICS_CALLS table and is_event implementation to
+   `surface/call/physics.rs`, re-exporting crate-private names. Place the
+   module declaration after the parent's inner module documentation.
+7. Enable CCD in the platformer hero's rigid-body payload and its Decay
+   start function. Its movement is a real dynamic body. Scorchball's ball
+   uses manual Decay movement and is not a valid rigid-body CCD proof.
+8. Update changelog, physics contract, scripting docs, capabilities and
+   parity; regenerate the catalogue and run its completeness tests.
+   Do not hand-edit generated files.
+
+### CCD regression design and limitations
+
+The lost regression used zero gravity; a thin **velocity-kinematic** wall at
+x = 1 with half extents [0.025, 2]; and a radius-0.05 dynamic bullet moving
+240 units/s from x = 0 over a 1/60 second step. Discrete control crossed x = 2;
+the CCD body stopped before x = 1. Test old payload omission and live toggles.
+
+Rapier 0.36 automatically sweeps dynamic bodies against fixed colliders.
+A fixed-wall-only test therefore cannot distinguish the opt-in setting.
+The researched backend also allowed two enabled CCD bullets to tunnel through
+each other. Sensors remain discrete. Document these limits; do not promise
+swept trigger events or reliable bullet-versus-bullet CCD.
+
+A lost Decay integration test started a script before its authored body
+existed, enabled CCD, set velocity to [7, 0], checked the getter, then
+synchronized and checked the live setting/velocity. It next changed the runtime
+payload's CCD setting and stepped again: velocity had to remain 7, proving
+the toggle did not rebuild the body.
+
+### Results observed before reset
+
+These apply only to the lost local version and must be rerun on rebuilt code:
+
+- Focused native CCD tests passed.
+- Decay spawn-window/velocity-preservation integration test passed.
+- Typed hero script preflight passed with zero errors/reminders.
+- Platformer native check and all six end-to-end tests passed.
+- Full sindri-decay tests passed during the final preflight.
+- WASM check for sindri-decay, sindri-scene and platformer passed.
+- Generated catalogue validation/completeness tests passed.
+- Clippy found one `match_same_arms` error: the setter unit return arm
+  needed merging with other unit-returning PhysicsCall variants. That was
+  fixed locally, but a clean complete subsequent Clippy result was not observed.
+- The complete preflight result was never recovered. It was last observed
+  compiling/testing the physics crate. Do not infer success.
+
+## Remaining feature guidance
+
+The acceptance checklist in `docs/physics-update.md` is the scope authority.
+The following decisions were explored but not implemented or pushed.
+
+### One-way platforms
+
+- Public serializable per-piece optional OneWay2d policy, omitted = ordinary
+  solid. Default local normal [0, 1], configurable support cone/angle.
+  Validate finite nonzero normals and a bounded angle.
+- An entity-level `sindri.physics2d.one_way` component with a useful default
+  can expose ordinary authoring in the generic inspector and apply to all
+  solid pieces, including tilemap pieces. Keep sensors unchanged.
+- Use backend-private PhysicsHooks maps from collider handles to policies
+  and entity handles to timed drop-through requests. Clean these on removal.
+  Transform support normals through collider rotation.
+- **Filter contact pairs as well as modifying solver contacts.** The
+  researched Rapier CCD sweep calls FILTER_CONTACT_PAIRS; solver-only
+  one-way contacts can block a fast ascending CCD character.
+- Verify Rapier 0.36 APIs locally: ContactModificationContext used
+  `rigid_mut()` and `update_as_oneway_platform`, unlike older tutorials.
+- Timed `Physics.drop_through(entity, seconds)` should ignore only one-way
+  solid contacts, not ordinary floors or sensors. Define cancellation,
+  expiration, missing-body and spawn-window behavior explicitly.
+- Native proof: rise through from below, descend/land, drop to an ordinary
+  floor, expire and land again, rotated normals, kinematic platforms, removal.
+- Platformer proof needs actual visible one-way planks and a drop input.
+  The existing foot sensor can overlap a plank from below: revise grounding
+  so that overlap alone does not grant a jump. Keep gameplay policy in Decay.
+  Preserve the existing run-to-flag and ground-clearance regressions.
+
+### Forces and rotation
+
+- General API: additive world force, torque, angular velocity setter/getter,
+  angular impulse and impulse at world point.
+- Proposed semantics: forces/torques accumulate for the next fixed step and
+  are reset immediately after it; impulses act immediately, independent of dt.
+  State these rules explicitly and handle valid newly spawned entities.
+- Verify current Rapier methods: add_force, add_torque, reset_forces,
+  reset_torques, apply_impulse_at_point, apply_torque_impulse, set_angvel, angvel.
+- Dynamic-only forces/impulses; setter supports dynamic/velocity-kinematic.
+  Reject nonfinite values and wrong kind before mutation.
+- Tests should measure force/mass * dt, accumulation and expiration,
+  off-centre translation/rotation, torque and rotation-lock behavior.
+  Add typed Vec2 Decay controls and real gameplay proof.
+
+### Contact snapshots
+
+Expose copied, deterministic entity-based contacts with world points,
+normals, normal/tangent impulses and force over the last fixed dt.
+Orient normals consistently relative to the queried entity; keep Rapier
+handles private. Exercise grounding and impacts through Decay.
+
+Rapier 0.36 contact pairs use rigid/manifold accessors. Actual solved impulses
+may be in solver_clusters when clustering is enabled. Inspect current source
+instead of assuming old contact fields are the solved values. Specify empty,
+sensor-only, multi-piece, removal and sleeping-contact behavior.
+
+### Reusable physics materials
+
+Do not stop at a runtime material struct. Require reusable project assets,
+validation, explicit literal override rules, editor loading/hot reload,
+exported native/browser loading, reference collection and real game proof.
+
+Existing `.profile` assets and ProfileDocument/ProfileSources were explored
+as reuse options, not accepted architecture. Scene cannot depend on Decay.
+Runtime Collider2d is Copy; adding asset strings there affects callers.
+Keep asset resolution at the scene/host seam and backend material values
+engine-owned. Audit export and async browser loading.
+
+### Complete joints
+
+Preserve existing connect_distance behavior. Add scene-authored distance,
+hinge, slider and spring joints plus motors, typed Decay control, stable
+serialized scene references resolved to runtime entities, removal/rebuild
+lifecycle, undoable editor authoring and gameplay proof. Split world2d
+responsibilities before growing a file past the repository limit.
+
+### Character movement
+
+A reusable engine sweep/slide primitive with slopes, steps, ground state
+and moving-platform support. Gameplay policy remains Decay. Define and test
+initial overlap, skin, iteration budget, downhill/uphill, ceilings, step height,
+platform displacement, one-way collision and drop-through interactions.
+
+### Accelerated queries
+
+Current queries are in world2d/query.rs and world2d/sweep.rs.
+Preserve mask, sensor inclusion, whole-entity exclusion, inactive filtering,
+inside-hit zero normal and deterministic ties (entity then piece order).
+Index must see inserts before first step, immediate teleports/removals, collider
+edits and current synchronized poses. Supply meaningful scaling evidence.
+
+### 3D runtime and voxel proof
+
+The public 3D body/collider data model exists, but it is not a working world.
+Implement fixed-step simulation, events, queries, scene lifecycle/writeback,
+editor authoring and typed Vec3 Decay access. Inspect both editor and exported
+game host plumbing so they share semantics. Transform3D uses quaternion [x,y,z,w].
+
+Voxel-world proof must collide with actual voxel terrain. Do not use an
+invisible plane and claim dynamic voxel collision. Address section residency,
+collision updates on edits, budgeting and removal at the engine seam.
+Prove native/browser behavior in a real project.
+
+## Execution and checkpoint discipline
+
+- Use an isolated checkout; do not edit unrelated dirty checkouts.
+- Avoid recreating the old absolute paths or assuming old sessions are alive.
+  The previous toolchain and cache were lost. Check what is installed first.
+- Rust is 1.95. Avoid overlapping Cargo builds in one target directory.
+  Prior default debug/incremental builds filled the disk and caused avoidable
+  cache corruption. Use debug = 0, incremental = 0, modest build jobs when
+  appropriate; never clean a target directory while a build is running.
+- Use terminal output/logs that remain inspectable; distinguish a running
+  process from stale redirected output. Keep user updates frequent.
+- Follow the mandatory per-push gate. Use
+  `scripts/preflight.py --base origin/codex/physics-update` for narrow slices.
+  Keep warning flags consistent to avoid rebuilding the same graph repeatedly.
+- Regenerate with `cargo run -p sindri-capabilities -- --write` and
+  `cargo test -p sindri-capabilities` for host/schema changes.
+- Run typed Decay preflight for every changed script, plus runtime regressions.
+- Use `scripts/browser/README.md` and actual browser smoke tests; WASM
+  compilation alone does not prove browser behavior.
+- GitHub connector tree/commit/ref updates worked when shell push had no
+  credentials. Never force-push over a moved branch; reconcile fresh remote
+  state and any autofix commits before editing.
+- Push completed smaller slices immediately. Keep remaining acceptance items
+  visible in the PR body. Do not let an implementation wait unpushed while
+  unrelated work accumulates.
+- Finish with full applicable workspace/native/WASM/browser checks, final diff
+  and documentation review, and green CI on the final head before marking ready.

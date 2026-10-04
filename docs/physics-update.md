@@ -5,6 +5,10 @@ is committed and pushed before work proceeds to the next; smaller checkpoints
 are permitted. Gameplay and demonstrations remain in Decay. Runtime, scene,
 editor, scripting, proof and documentation move together.
 
+For a new implementation session, read [the recovery handoff](physics-update-handoff.md).
+Only the documentation reconciliation has been pushed; all physics implementation
+items below still require work.
+
 ## Acceptance checklist
 
 - [x] Reconcile outdated overlap/cast, compound and parented-body documentation.
