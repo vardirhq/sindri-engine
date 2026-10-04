@@ -220,6 +220,11 @@ const KNOWN: &[Known] = &[
         icon: icons::COLLIDER,
     },
     Known {
+        type_name: "sindri.physics2d.one_way",
+        family: Family::Physics,
+        icon: icons::COLLIDER,
+    },
+    Known {
         type_name: "sindri.physics2d.world",
         family: Family::Physics,
         icon: icons::PHYSICS,
