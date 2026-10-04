@@ -2,7 +2,9 @@
 
 use sindri_core::ComponentSchemaRegistry;
 
-use crate::physics::{Collider2dComponent, PhysicsWorld2dComponent, RigidBody2dComponent};
+use crate::physics::{
+    Collider2dComponent, OneWay2dComponent, PhysicsWorld2dComponent, RigidBody2dComponent,
+};
 use crate::tilemap_collision::TilemapCollider2dComponent;
 
 use super::SceneExtractError;
@@ -60,6 +62,10 @@ pub(super) fn register(components: &mut ComponentSchemaRegistry) -> Result<(), S
     components.register_with_default::<PhysicsWorld2dComponent>(
         "Physics 2D World",
         serde_json::json!({ "gravity": [0.0, -9.81], "layers": [] }),
+    )?;
+    components.register_with_default::<OneWay2dComponent>(
+        "One-Way Platform 2D",
+        serde_json::json!({ "normal": [0.0, 1.0], "angle": std::f32::consts::FRAC_PI_4 }),
     )?;
     Ok(())
 }

@@ -16,19 +16,31 @@ a pushed handoff. Do not ask them to authorize the scope again.
 
 ## Current continuation checkpoint
 
-CCD has been rebuilt in this PR. It includes the default-off body flag,
-backend live controls, schema default, state-preserving scene synchronization,
-typed Decay getter/setter, spawn-window and undo regressions, and platformer
-hero use. The scoped native preflight (762 tests), typed hero preflight,
-warning-denied Clippy, WASM checks and generated catalogue checks passed.
-Full workspace/browser verification remains part of final integration.
+CCD and **one-way platforms** are implemented in this PR. CCD includes the
+default-off body flag, live controls, schema default, state-preserving scene
+synchronization, typed Decay getter/setter and platformer hero use.
 
-Continue with **one-way platforms**, then the remaining checklist. The historical
+One-way support is an entity component applied to all solid pieces, including
+tilemaps, with validated local normal/cone and CCD pair filtering. Timed typed
+`Physics.drop_through` preserves ordinary floors/sensors, supports the spawn
+window, and expires in fixed simulation time. Policy edits/undo preserve
+velocity/joints and wake sleeping riders. The platformer has visible plank tiles
+and Down/S/d-pad drop input; its support ray refuses underside overlap grounding.
+
+Scoped native preflight passed **772 tests**, typed hero preflight had zero
+errors/reminders, and warning-denied Clippy/formatting and WASM checks passed on
+Rust 1.95. Catalogue regeneration/currentness/completeness passed. Real Chromium
+export/load smoke passed under `/examples/platformer/`, fetching project assets,
+running Decay and drawing the planks. Full browser interaction, visual inspector
+and workspace verification remain in final integration.
+
+Continue with **forces and rotation**, then the remaining checklist. Historical
 recovery notes below describe the original loss, not the current implementation.
-The build environment needed single-unit code generation for both normal and
-build dependencies to avoid empty dependency object files. Keep profile/flags
-consistent. Linux all-features checks also require pkg-config, ALSA and udev
-build dependencies. Local test libraries must have valid development symlinks.
+Use pinned Rust 1.95: the local system Rust 1.97 Clippy introduces a lint in an
+unchanged scene test. Builds used debug = 0 and incremental = 0; keep warning
+flags/profile settings consistent to reuse artifacts. The original recovery
+environment needed single-unit code generation to avoid empty dependency objects.
+Linux all-features checks require pkg-config, ALSA and udev build dependencies.
 
 ## Historical saved state
 
@@ -266,8 +278,8 @@ Continue the physics update in vardirhq/sindri-engine, draft PR #497,
 branch codex/physics-update. Read AGENTS.md, CLAUDE.md,
 docs/physics-update-handoff.md and docs/physics-update.md first.
 Implement every remaining acceptance item, including docs, in this one PR.
-The previous unpushed physics code was lost in a workspace reset; only docs
-and this handoff are saved. Rebuild CCD first, then continue the checklist.
+CCD and one-way platforms are checked and saved on the branch. Continue with
+forces and rotation, then the remaining checklist.
 Push checked small slices regularly, each feature in one push or less.
 Keep gameplay in Decay, prove editor/runtime/script/game behavior, and do
 not mark the PR ready until final applicable checks and CI are green.

@@ -628,6 +628,28 @@
       "addable": true,
       "apply": {},
       "default_payload": {
+        "angle": 0.7853981852531433,
+        "normal": [
+          0.0,
+          1.0
+        ]
+      },
+      "display_name": "One-Way Platform 2D",
+      "fields": {
+        "angle": 0.7853981852531433,
+        "normal": [
+          0.0,
+          1.0
+        ]
+      },
+      "meanings": {},
+      "schema_version": 1,
+      "type_name": "sindri.physics2d.one_way"
+    },
+    {
+      "addable": true,
+      "apply": {},
+      "default_payload": {
         "angular_damping": 0.0,
         "angular_velocity": 0.0,
         "continuous_collision": false,

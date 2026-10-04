@@ -286,6 +286,7 @@ The host names this type but has not described its members.
 - `collision_stopped()` → `List<Entity>` — The objects that stopped touching this script's object since the last frame, as a list.
 - `connect_distance(first: Entity, second: Entity, max_distance: f32)` → `unit` — Ties two objects together like a rope: they can come closer, but never further apart than a distance.
 - `continuous_collision(entity: Entity)` → `bool` — Whether this authored 2D body uses swept solid collision. Sensors remain discrete.
+- `drop_through(entity: Entity, seconds: f32)` → `unit` — Ignores only one-way solid platforms for a duration in fixed simulation time. Zero cancels; a new request replaces it. Requires a dynamic body and works before a spawned body is built.
 - `layer(name: String)` → `f32` — The mask for one collision layer the scene's physics world names, such as `"ground"`, for a query's `mask` argument. A name the world does not give is an error.
 - `mask(names: List<String>)` → `f32` — The mask for several named collision layers at once, such as `["ground", "enemies"]`.
 - `overlap_box(center: Vec2, half_size: Vec2, rotation: f32, mask: f32, include_sensors: bool, exclude: Entity)` → `List<Entity>` — Like `overlap_circle`, for a box `half_size` from its centre to each edge, turned by `rotation` radians.

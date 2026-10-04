@@ -56,6 +56,9 @@ impl WorldHost<'_> {
         ) {
             return self.continuous_collision_call(call, path, args);
         }
+        if matches!(call, PhysicsCall::DropThrough) {
+            return self.drop_through_call(path, args);
+        }
         let entity = self.entity_argument(path, args, 0, "the body")?;
         // Whether the entity authored physics at all, asked before the physics
         // world is borrowed. A body that is authored but not yet built is the

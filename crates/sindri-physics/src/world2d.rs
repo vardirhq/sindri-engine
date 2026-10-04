@@ -5,6 +5,7 @@
 //! backend replaceable.
 
 mod controls;
+mod one_way;
 mod query;
 mod sweep;
 
@@ -40,6 +41,8 @@ struct BodyRecord2d {
 /// Sindri entities, values, events, and joints.
 pub struct PhysicsWorld2d {
     backend: r2::PhysicsWorld,
+    one_way: one_way::OneWayHooks,
+    pending_drop: HashMap<EntityId, f32>,
     bodies: HashMap<EntityId, BodyRecord2d>,
     collider_entities: HashMap<r2::ColliderHandle, EntityId>,
     /// Velocities set on a body that does not exist yet.
@@ -69,6 +72,8 @@ impl PhysicsWorld2d {
         backend.gravity = r2::Vector::new(gravity[0], gravity[1]);
         Ok(Self {
             backend,
+            one_way: one_way::OneWayHooks::default(),
+            pending_drop: HashMap::new(),
             bodies: HashMap::new(),
             collider_entities: HashMap::new(),
             pending_velocity: HashMap::new(),
@@ -107,6 +112,13 @@ impl PhysicsWorld2d {
         }
         validate_body2d(&body)?;
         validate_colliders2d(colliders)?;
+        if self.pending_drop.contains_key(&entity) && body.kind != RigidBodyKind::Dynamic {
+            return Err(PhysicsError::WrongBodyKind(
+                entity,
+                "drop through",
+                body.kind,
+            ));
+        }
 
         let body_handle = self.backend.insert_body(body_builder(body));
         let handles: Vec<r2::ColliderHandle> = colliders
@@ -127,6 +139,9 @@ impl PhysicsWorld2d {
                 kind: body.kind,
             },
         );
+        if let Some(seconds) = self.pending_drop.remove(&entity) {
+            self.drop_through(entity, seconds)?;
+        }
         // What a script asked for before this existed.
         if let Some(velocity) = self.pending_velocity.remove(&entity)
             && matches!(
@@ -209,6 +224,7 @@ impl PhysicsWorld2d {
                 self.connect_distance(joint.first, joint.second, joint.max_distance)?;
             }
         }
+        self.pending_drop.clear();
         self.pending_velocity.clear();
         Ok(())
     }
@@ -217,6 +233,7 @@ impl PhysicsWorld2d {
     ///
     /// Kept for callers that deliberately abandon a synchronization pass.
     pub fn forget_pending(&mut self) {
+        self.pending_drop.clear();
         self.pending_velocity.clear();
         self.pending_distance_joints.clear();
     }
@@ -242,6 +259,7 @@ impl PhysicsWorld2d {
     }
 
     pub fn remove(&mut self, entity: EntityId) -> bool {
+        self.pending_drop.remove(&entity);
         self.pending_velocity.remove(&entity);
         self.pending_distance_joints
             .retain(|joint| joint.first != entity && joint.second != entity);
@@ -249,11 +267,13 @@ impl PhysicsWorld2d {
             return false;
         };
         for handle in &record.colliders {
+            self.one_way.policies.remove(handle);
             self.collider_entities.remove(handle);
         }
         // Rapier drops a body's colliders and attached joints with it. That is
         // important for breakable chains: removing one link severs both sides
         // without a stale constraint surviving on behalf of a dead entity.
+        self.one_way.dropping.remove(&record.body);
         let _ = self.backend.remove_body(record.body);
         true
     }
@@ -315,7 +335,11 @@ impl PhysicsWorld2d {
         // Sindri currently creates only rigid bodies, so tear events stay private.
         let (tear_send, _tear_recv) = mpsc::channel();
         let events = r2::ChannelEventCollector::new(collision_send, force_send, tear_send);
-        self.backend.step_with_events(&(), &events);
+        self.backend.step_with_events(&self.one_way, &events);
+        self.one_way.dropping.retain(|_, seconds| {
+            *seconds -= dt;
+            *seconds > 0.0
+        });
 
         Ok(collision_recv
             .try_iter()

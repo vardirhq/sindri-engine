@@ -58,6 +58,7 @@ pub(super) fn add_physics_surface(environment: &mut Environment) {
                         entity(),
                     ],
                     PhysicsCall::SetContinuousCollision => vec![entity(), Type::Bool],
+                    PhysicsCall::DropThrough => vec![entity(), Type::F32],
                     PhysicsCall::Layer => vec![Type::String],
                     PhysicsCall::Mask => vec![Type::array_of(Type::String)],
                     PhysicsCall::ContinuousCollision
@@ -86,7 +87,8 @@ pub(super) fn add_physics_surface(environment: &mut Environment) {
                     PhysicsCall::SetVelocity
                     | PhysicsCall::ApplyImpulse
                     | PhysicsCall::ConnectDistance
-                    | PhysicsCall::SetContinuousCollision => Type::Unit,
+                    | PhysicsCall::SetContinuousCollision
+                    | PhysicsCall::DropThrough => Type::Unit,
                     _ => Type::array_of(entity()),
                 },
             },

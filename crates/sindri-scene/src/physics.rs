@@ -20,6 +20,15 @@ impl SceneComponent for RigidBody2dComponent {
     const TYPE_NAME: &'static str = "sindri.physics2d.rigid_body";
 }
 
+/// Support-side collision on every solid piece, including generated tilemap pieces.
+#[derive(Clone, Copy, Debug, Deserialize, PartialEq)]
+#[serde(transparent)]
+pub struct OneWay2dComponent(pub sindri_physics::OneWay2d);
+
+impl SceneComponent for OneWay2dComponent {
+    const TYPE_NAME: &'static str = "sindri.physics2d.one_way";
+}
+
 /// An authored 2D collider, in one or more pieces.
 ///
 /// Kept separate from the rigid body because static collision geometry does not

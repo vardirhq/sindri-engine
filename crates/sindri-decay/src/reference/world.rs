@@ -226,6 +226,11 @@ pub(super) const TYPES: &[TypeEntry] = &[
         text: "2D physics: moving objects with speed and pushes, and finding out what this script's object bumped into.",
         members: &[
             call(
+                "drop_through",
+                &["entity", "seconds"],
+                "Ignores only one-way solid platforms for a duration in fixed simulation time. Zero cancels; a new request replaces it. Requires a dynamic body and works before a spawned body is built.",
+            ),
+            call(
                 "continuous_collision",
                 &["entity"],
                 "Whether this authored 2D body uses swept solid collision. Sensors remain discrete.",

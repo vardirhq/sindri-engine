@@ -139,6 +139,11 @@
                 "key.ArrowUp",
                 "gamepad.south"
               ]
+            },
+            {
+              "name": "drop",
+              "kind": "button",
+              "bindings": ["key.S", "key.ArrowDown", "gamepad.dpad_down"]
             }
           ]
         }
@@ -1092,6 +1097,66 @@
           "tags": [
             "solid"
           ]
+        }
+      }
+    },
+    {
+      "id": "one-way-planks",
+      "name": "One-way planks",
+      "transform_3d": {
+        "position": [
+          6,
+          5.5,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1,
+          0.2,
+          1
+        ]
+      },
+      "components": {
+        "sindri.tags": { "tags": ["solid", "one-way"] },
+        "sindri.tilemap": {
+          "texture": "textures/tiles.png",
+          "palette": [
+            "grass",
+            "dirt",
+            "stone",
+            "plank",
+            "tuft"
+          ],
+          "columns": 4,
+          "rows": 1,
+          "tiles": [
+            3,
+            3,
+            3,
+            3
+          ],
+          "layer": 0
+        },
+        "sindri.physics2d.tilemap_collider": {
+          "passable": [],
+          "layers": {
+            "memberships": 1,
+            "filter": 2
+          },
+          "friction": 0.5,
+          "restitution": 0.0
+        },
+        "sindri.physics2d.one_way": {
+          "normal": [
+            0,
+            1
+          ],
+          "angle": 0.7853982
         }
       }
     },

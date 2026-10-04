@@ -102,6 +102,40 @@ The getter uses live state when present and authored state during that window.
 Missing authored bodies and hosts without physics report errors. The platformer
 hero opts in, with its existing run-to-flag regression exercising the setting.
 
+### One-way platforms
+
+`OneWay2d` is a validated support-side policy: local `normal` defaults to
+`[0, 1]`, `angle` defaults to pi/4 radians and is bounded to 0..=pi/2. Normals
+must have finite, nonzero length. `sindri.physics2d.one_way` applies it to every
+solid piece on the entity, including generated tilemap boxes. The normal follows
+each piece's rotation and the body's rotation. Sensors retain ordinary overlap
+and enter/exit behavior. Omitting the component means ordinary solid collision.
+
+The backend filters contact pairs, including CCD sweeps, to reject relative
+ascent above 0.1 units/s and bodies not yet above the support plane. Supporting contacts must
+face the configured cone. Projection uses each convex piece's actual geometry;
+a 0.05 world-unit penetration allowance stabilizes resting contacts. A body
+starting deeply inside must clear the supporting face before it can land.
+Fast descent still requires CCD to avoid discrete tunneling. Policies are live
+controls: editing or undoing only the policy preserves velocity and joints.
+
+`PhysicsWorld2d::drop_through(entity, seconds)` and typed
+`Physics.drop_through(entity, seconds)` ignore only one-way solid contacts for
+a dynamic body. Durations are finite and nonnegative: zero cancels, a new
+request replaces the remaining time. Timers advance after each fixed step,
+so any positive remainder covers the whole next step. Pause does not expire
+them. Removal and structural body/collider rebuilds clear policy/timer state. The host validates the authored body;
+requests before synchronization start when the spawned body materializes.
+Abandoned requests are discarded at the end of synchronization.
+
+Geometric rays/overlaps/casts still see the pieces from either side and during
+drop-through. They do not themselves grant grounding. The platformer uses a
+downward support normal, clearance and descending velocity in Decay, suppresses
+jump permission while dropping, and keeps sensors for coins/the flag. Its
+visible plank tilemap exercises ascent, landing, Down/S/d-pad drop to an ordinary
+floor, and another landing after expiration. Engine regressions also exercise
+rotated support normals, kinematic platforms, fast CCD ascent and cancellation.
+
 ### Colliders
 
 The scene components are distinct:

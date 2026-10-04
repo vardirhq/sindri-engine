@@ -10,6 +10,42 @@ use crate::surface::PhysicsCall;
 const BODY: &str = "sindri.physics2d.rigid_body";
 
 impl WorldHost<'_> {
+    pub(super) fn drop_through_call(
+        &mut self,
+        path: &Path,
+        args: &[Value],
+    ) -> Result<Value, RuntimeError> {
+        let entity = self.entity_argument(path, args, 0, "the body")?;
+        let error = |message: &str| RuntimeError::Host(format!("{}: {message}", path.dotted()));
+        let seconds = args.get(1).ok_or_else(|| error("needs a duration"))?;
+        let seconds = super::convert::number(path, seconds)?;
+        #[allow(clippy::cast_possible_truncation)]
+        // Backend units are f32; overflow is validated below.
+        let seconds = seconds as f32;
+        let body: RigidBody2d = self
+            .world
+            .get(entity)
+            .and_then(|data| data.components.get(BODY))
+            .ok_or_else(|| error("entity has no authored 2D rigid body"))
+            .and_then(|payload| {
+                serde_json::from_value(payload.clone())
+                    .map_err(|failure| error(&format!("invalid rigid body: {failure}")))
+            })?;
+        if body.kind != RigidBodyKind::Dynamic {
+            return Err(error("drop-through requires a dynamic body"));
+        }
+        let Some(physics) = self.physics.as_mut() else {
+            return Err(error("needs physics, and this host is not running any"));
+        };
+        let outcome = if physics.world.contains(entity) {
+            physics.world.drop_through(entity, seconds)
+        } else {
+            physics.world.remember_drop_through(entity, seconds)
+        };
+        outcome.map_err(|failure| error(&failure.to_string()))?;
+        Ok(Value::Unit)
+    }
+
     pub(super) fn continuous_collision_call(
         &mut self,
         call: PhysicsCall,

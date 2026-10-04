@@ -26,6 +26,8 @@ pub enum PhysicsError {
     NotNormalized(&'static str),
     #[error("physics timestep must be finite and greater than zero")]
     InvalidTimestep,
+    #[error("one-way support angle must be between zero and pi/2 radians")]
+    InvalidOneWayAngle,
     #[error("collider piece {index} is invalid: {reason}")]
     ColliderPiece {
         index: usize,

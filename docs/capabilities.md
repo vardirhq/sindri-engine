@@ -254,6 +254,18 @@ overlaps and shape casts are described below.
 A parallel Sindri-owned 3D body/collider data model already fixes the public
 shape of the later 3D slice, but no 3D runtime behavior is claimed yet.
 
+One-way support is authored with `sindri.physics2d.one_way`: a validated local
+normal and contact cone, applied to solid collider and tilemap pieces. Pair
+filtering also covers CCD ascent. `Physics.drop_through(entity, seconds)` uses
+fixed simulation time, preserves ordinary floors/sensors and works in the spawn
+window. Policy edits and undo keep live velocity/joints. Platformer's visible
+planks prove ascent, landing, input-driven dropping to painted ground and landing
+again; native regressions cover rotated normals, kinematic geometry and timer
+cancellation. Queries remain geometric, so its Decay grounding checks support
+normal, clearance and descent rather than foot-sensor overlap. Chromium export/load
+smoke passed; visual inspector and full browser interactions remain in final
+physics integration.
+
 `sindri.physics2d.rigid_body` and `sindri.physics2d.collider` are registered
 scene components with defaults the engine accepts, so a scene authors bodies and
 colliders and the editor's generic component inspector adds and edits them.

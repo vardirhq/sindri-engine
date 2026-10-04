@@ -6,7 +6,7 @@ are permitted. Gameplay and demonstrations remain in Decay. Runtime, scene,
 editor, scripting, proof and documentation move together.
 
 For a new implementation session, read [the recovery handoff](physics-update-handoff.md).
-CCD is implemented and checked. The remaining items below are the active scope.
+CCD and one-way platforms are implemented and checked. The remaining items below are the active scope.
 
 ## Acceptance checklist
 
@@ -14,7 +14,7 @@ CCD is implemented and checked. The remaining items below are the active scope.
 - [x] Continuous collision detection: opt-in authored body setting, runtime and
   Decay control; fast solid-body regression and game use. Sensor sweep limitations
   must be explicit rather than promising CCD trigger events.
-- [ ] One-way platforms: collision from the supporting side, configurable local
+- [x] One-way platforms: collision from the supporting side, configurable local
   normal, safe drop-through, platformer proof including ascent and descent.
 - [ ] Forces and rotation: force, torque, angular velocity, angular impulse and
   off-centre impulses, with explicit accumulation/reset semantics and game use.
@@ -53,3 +53,23 @@ surface-specific completeness. This checklist does not mark those surfaces done.
   spawn-window control, undo and velocity/joint preservation are exercised.
 - Platformer run-to-flag and existing ground/camera regressions passed.
 - Full workspace and real browser verification remain in final integration.
+
+### One-way platform checkpoint
+
+- Scoped preflight: 772 native tests passed across platformer, sindri-decay,
+  sindri-physics and sindri-scene; all-target/all-feature checks passed.
+- Typed hero preflight: zero errors and runtime reminders.
+- Warning-denied native Clippy and formatting passed on pinned Rust 1.95.
+- All-feature WASM checks passed on Rust 1.95 for all four affected crates.
+- Generated catalogue write/currentness/completeness checks passed.
+- Native regressions exercise ascent, fast CCD ascent/descent, landing, timed
+  dropping to an ordinary floor, expiration/cancellation, rotated normals,
+  kinematic platforms, active sensors, spawn-window timers and removal.
+- Command-backed policy edits/undo preserve live velocity and joints; changing
+  a static platform's support side wakes sleeping riders.
+- Platformer input-driven plank ascent/landing/drop/landing and underside-sensor
+  jump rejection passed alongside its existing run-to-flag/camera/clearance tests.
+- Real Chromium export/load smoke passed under `/examples/platformer/`: WebGPU
+  configured, project assets fetched, Decay ran and visible planks rendered.
+- Full browser interaction, visual inspector and workspace verification remain
+  in final integration. Next implementation slice: forces and rotation.

@@ -4,7 +4,8 @@ The first genre showcase: a small side-view platformer. Run and jump across a
 painted level, pick up the coins and reach the flag.
 
 Arrow keys or A/D run; Space, W or Up jumps. A controller can use the left
-stick or D-pad and the south face button. On a touch screen, the first finger
+stick or D-pad and the south face button. Down/S or D-pad down drops through
+the raised one-way planks. On a touch screen, the first finger
 makes Sindri's virtual stick and a second finger jumps. A tap is a hop and a
 held press a full jump; a jump pressed just before landing, or just after
 running off a ledge, still counts. Horizontal movement accelerates and
@@ -35,8 +36,9 @@ It uses, with no Rust of its own:
 - a **tilemap** painted in the editor, made solid by a **Tilemap Collider 2D**,
   with grass tufts left passable;
 - the scene's own **gravity**, from a **Physics 2D World**;
-- a **dynamic body** with a capsule collider and a **foot sensor** that says
-  when the hero is standing, so walls and ceilings never count as floor;
+- a **dynamic body** with a capsule collider and a **foot sensor** for pickups, plus a
+  downward **support ray** for standing so plank undersides never grant a jump;
+- visible **one-way planks** with local support normals and timed drop-through;
 - **sprite animation** clips for idle, run, jump and fall;
 - **keyboard, gamepad and touch input** through one movement path, including
   Sindri's built-in touch stick;
@@ -55,3 +57,7 @@ opens in 2D, framed on the game's camera. It is also exported to the site at
 player hold right and jump at every gap and wall until it reaches the flag
 without falling, and checks the camera follows. `src/lib.rs` is the harness
 that plays it without a window, built from the same public pieces a host uses.
+
+`tests/one_way_platforms.rs` jumps through the authored planks, lands on top,
+drops through using the real input action, stops on the ordinary painted floor
+and lands on the planks again after the drop timer expires.

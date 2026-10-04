@@ -132,3 +132,40 @@ fn authored_bodies() -> (SceneExtractor, World, EntityId, EntityId) {
     });
     (extractor, world, entity, anchor)
 }
+
+#[test]
+fn drop_through_accepts_spawn_window_and_reports_bad_requests() {
+    for (call, succeeds) in [
+        ("Physics.drop_through(this.entity, 0.3);", true),
+        (
+            "Physics.drop_through(this.entity, 0.3); Physics.drop_through(this.entity, 0.0);",
+            true,
+        ),
+        ("Physics.drop_through(this.entity, -1.0);", false),
+    ] {
+        let (extractor, mut world, _, _) = authored_bodies();
+        let mut physics = ScenePhysics2d::top_down().unwrap();
+        let mut scripts = Scripts::new();
+        let mut sources = ScriptSources::new();
+        sources.insert(
+            "ccd.decay",
+            format!("script Bullet {{ fn start() {{ {call} }} }}"),
+        );
+        let input = InputState::default();
+        let (backend, events) = physics.for_scripts();
+        let report = scripts.advance(
+            &mut world,
+            extractor.components(),
+            ScriptFrame::new(&sources, &input, 1.0 / 60.0).with_physics(Physics2d {
+                world: backend,
+                events,
+            }),
+        );
+        assert_eq!(
+            report.failures.is_empty(),
+            succeeds,
+            "{:?}",
+            report.failures
+        );
+    }
+}

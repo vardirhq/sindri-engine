@@ -1002,6 +1002,7 @@ a person who has not clicked yet.
 
 | Call | Returns |
 | --- | --- |
+| `Physics.drop_through(entity, seconds)` | nothing |
 | `Physics.continuous_collision(entity)` | `bool` |
 | `Physics.set_continuous_collision(entity, enabled)` | nothing |
 | `Physics.velocity_x(entity)` | `f32` |
@@ -1020,6 +1021,14 @@ a person who has not clicked yet.
 | `Physics.collision_stopped()` | `List<Entity>` |
 | `Physics.sensor_entered()` | `List<Entity>` |
 | `Physics.sensor_exited()` | `List<Entity>` |
+
+`Physics.drop_through(entity, seconds) -> unit` ignores only one-way solid
+platforms for an authored dynamic body. The duration is finite and nonnegative;
+zero cancels, repeated requests replace the timer. Time advances only on fixed
+physics steps and starts at materialization for a newly spawned body. Ordinary
+floors and sensors stay active. Missing authored bodies, wrong body kinds and
+hosts without physics report errors. Geometric queries still see one-way pieces
+while dropping; gameplay must decide when a query grants jump permission.
 
 `Physics.continuous_collision(entity) -> bool` reads the live 2D body setting,
 or its authored setting before a newly spawned body is synchronized.

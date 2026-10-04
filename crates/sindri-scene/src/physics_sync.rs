@@ -22,7 +22,9 @@ use sindri_physics::{
 use thiserror::Error;
 
 use crate::components::TilemapComponent;
-use crate::physics::{Collider2dComponent, PhysicsWorld2dComponent, RigidBody2dComponent};
+use crate::physics::{
+    Collider2dComponent, OneWay2dComponent, PhysicsWorld2dComponent, RigidBody2dComponent,
+};
 use crate::tilemap_collision::{TilemapCollider2dComponent, TilemapCollisionError};
 
 #[cfg(test)]
@@ -82,6 +84,7 @@ struct Authored {
     body: Option<RigidBody2d>,
     collider: Vec<sindri_physics::Collider2d>,
     kind: RigidBodyKind,
+    one_way: Option<sindri_physics::OneWay2d>,
 }
 
 impl ScenePhysics2d {
@@ -187,6 +190,9 @@ impl ScenePhysics2d {
             let authored = Authored {
                 body,
                 collider,
+                one_way: components
+                    .get::<OneWay2dComponent>(world, entity)?
+                    .map(|policy| policy.0),
                 kind: body.map_or(RigidBodyKind::Static, |body| body.kind),
             };
             if self.update_registered(world, entity, &authored)? {
@@ -207,6 +213,7 @@ impl ScenePhysics2d {
             };
             match outcome {
                 Ok(()) => {
+                    self.world.set_one_way(entity, authored.one_way)?;
                     self.registered.insert(entity, authored);
                     self.agreed.insert(entity, pose);
                 }
@@ -237,7 +244,7 @@ impl ScenePhysics2d {
         Ok(())
     }
 
-    /// CCD is a live control: changing only that flag must preserve solver state.
+    /// Support policy and CCD edits are live controls that preserve solver state.
     fn update_registered(
         &mut self,
         world: &World,
@@ -252,14 +259,20 @@ impl ScenePhysics2d {
             return Ok(true);
         }
         let mut comparable = previous.clone();
-        if let (Some(before), Some(after)) = (&mut comparable.body, authored.body) {
+        comparable.one_way = authored.one_way;
+        if let (Some(before), Some(after)) = (&mut comparable.body, authored.body)
+            && authored.kind == RigidBodyKind::Dynamic
+        {
             before.continuous_collision = after.continuous_collision;
         }
-        if comparable == *authored && authored.kind == RigidBodyKind::Dynamic {
-            self.world.set_continuous_collision(
-                entity,
-                authored.body.is_some_and(|body| body.continuous_collision),
-            )?;
+        if comparable == *authored {
+            self.world.set_one_way(entity, authored.one_way)?;
+            if authored.kind == RigidBodyKind::Dynamic {
+                self.world.set_continuous_collision(
+                    entity,
+                    authored.body.is_some_and(|body| body.continuous_collision),
+                )?;
+            }
             self.registered.insert(entity, authored.clone());
             self.follow_transform(world, entity, authored.body)?;
             return Ok(true);
