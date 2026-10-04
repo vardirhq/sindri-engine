@@ -19,7 +19,10 @@ fn kicking_the_wind_crate_launches_and_rotates_it() {
     assert!(notes.is_empty(), "{notes:?}");
     run.key(Key::K, false);
     let velocity = run.physics.world().linear_velocity(crate_entity).unwrap();
-    assert!(velocity[1] > 3.0, "kick velocity: {velocity:?}, position: {before:?}");
+    assert!(
+        velocity[1] > 3.0,
+        "kick velocity: {velocity:?}, position: {before:?}"
+    );
     assert!(
         run.physics
             .world()

@@ -5,8 +5,8 @@ use std::time::Duration;
 use serde_json::json;
 use sindri_core::{EntityData, SceneComponent, Transform3D, World};
 use sindri_decay::{Physics2d, ScriptComponent, ScriptFrame, ScriptSources, Scripts};
-use sindri_platform::InputState;
 use sindri_physics::{Collider2d, PhysicsWorld2d, RigidBody2d};
+use sindri_platform::InputState;
 use sindri_scene::{SceneExtractor, ScenePhysics2d};
 
 fn authored() -> (SceneExtractor, World, sindri_core::EntityId) {
@@ -46,12 +46,28 @@ fn authored() -> (SceneExtractor, World, sindri_core::EntityId) {
 #[test]
 fn a_host_with_its_own_driver_needs_no_authored_body_component() {
     let (extractor, mut world, entity) = authored();
-    world.get_mut(entity).unwrap().components.remove("sindri.physics2d.rigid_body");
-    world.get_mut(entity).unwrap().components.remove("sindri.physics2d.collider");
+    world
+        .get_mut(entity)
+        .unwrap()
+        .components
+        .remove("sindri.physics2d.rigid_body");
+    world
+        .get_mut(entity)
+        .unwrap()
+        .components
+        .remove("sindri.physics2d.collider");
     let mut physics = PhysicsWorld2d::new([0.0; 2]).unwrap();
-    physics.insert_body(entity, RigidBody2d::default(), &[Collider2d::rectangle([0.5; 2])]).unwrap();
+    physics
+        .insert_body(
+            entity,
+            RigidBody2d::default(),
+            &[Collider2d::rectangle([0.5; 2])],
+        )
+        .unwrap();
     let mut sources = ScriptSources::new();
-    sources.insert("motion.decay", r"
+    sources.insert(
+        "motion.decay",
+        r"
     script Motion {
         fn start() {
             Physics.set_angular_velocity(this.entity, 2.0);
@@ -61,10 +77,17 @@ fn a_host_with_its_own_driver_needs_no_authored_body_component() {
             Physics.apply_angular_impulse(this.entity, 0.5);
             Physics.apply_impulse_at_point(this.entity, Vec2(1.0, 0.0), Vec2(0.0, 0.5));
         }
-    }");
+    }",
+    );
     let input = InputState::default();
-    let report = Scripts::new().advance(&mut world, extractor.components(),
-        ScriptFrame::new(&sources, &input, 0.1).with_physics(Physics2d { world: &mut physics, events: &[] }));
+    let report = Scripts::new().advance(
+        &mut world,
+        extractor.components(),
+        ScriptFrame::new(&sources, &input, 0.1).with_physics(Physics2d {
+            world: &mut physics,
+            events: &[],
+        }),
+    );
     assert!(report.failures.is_empty(), "{:?}", report.failures);
     assert!(world.get(entity).unwrap().transform_3d.unwrap().position[1].abs() < f32::EPSILON);
     physics.step(Duration::from_millis(100)).unwrap();

@@ -27,7 +27,8 @@ impl WorldHost<'_> {
             .map(|payload| {
                 serde_json::from_value(payload.clone())
                     .map_err(|failure| error(&format!("invalid rigid body: {failure}")))
-            }).transpose()?;
+            })
+            .transpose()?;
         let scalar = || number(path, args.get(1).unwrap_or(&Value::Null)).map(as_f32);
         let control = match call {
             PhysicsCall::ApplyForce => BodyControl2d::Force(vector(path, args.get(1))?),
@@ -61,7 +62,8 @@ impl WorldHost<'_> {
                     Err(sindri_physics::PhysicsError::MissingEntity(_))
                         if !physics.world.contains(entity) =>
                     {
-                        let authored = authored.ok_or_else(|| error("entity has no authored 2D rigid body"))?;
+                        let authored = authored
+                            .ok_or_else(|| error("entity has no authored 2D rigid body"))?;
                         if authored.lock_rotation {
                             0.0
                         } else {
@@ -81,7 +83,9 @@ impl WorldHost<'_> {
             physics.world.apply_control(entity, control)
         } else {
             let authored = authored.ok_or_else(|| error("entity has no authored 2D rigid body"))?;
-            physics.world.remember_control(entity, authored.kind, control)
+            physics
+                .world
+                .remember_control(entity, authored.kind, control)
         };
         outcome.map_err(|failure| error(&failure.to_string()))?;
         Ok(Value::Unit)
