@@ -1558,6 +1558,46 @@
       "description": "2D physics: moving objects with speed and pushes, and finding out what this script's object bumped into.",
       "members": [
         {
+          "description": "Radians per second. Before a spawned body is built, reads its authored value or latest queued setter.",
+          "kind": "function",
+          "name": "angular_velocity",
+          "parameter_names": [
+            "entity"
+          ],
+          "parameters": [
+            "Entity"
+          ],
+          "returns": "f32"
+        },
+        {
+          "description": "Applies an immediate angular impulse to a dynamic body, independent of timestep.",
+          "kind": "function",
+          "name": "apply_angular_impulse",
+          "parameter_names": [
+            "entity",
+            "impulse"
+          ],
+          "parameters": [
+            "Entity",
+            "f32"
+          ],
+          "returns": "unit"
+        },
+        {
+          "description": "Adds a world-space Vec2 force for the next fixed step, then clears it. Repeated calls add; requires a dynamic body.",
+          "kind": "function",
+          "name": "apply_force",
+          "parameter_names": [
+            "entity",
+            "force"
+          ],
+          "parameters": [
+            "Entity",
+            "Vec2"
+          ],
+          "returns": "unit"
+        },
+        {
           "description": "Gives an object a sudden push in a direction. Heavier objects move less.",
           "kind": "function",
           "name": "apply_impulse",
@@ -1569,6 +1609,36 @@
           "parameters": [
             "Entity",
             "f32",
+            "f32"
+          ],
+          "returns": "unit"
+        },
+        {
+          "description": "Applies a world-space Vec2 impulse at a world-space Vec2 point, translating and turning a dynamic body. All motion controls support the spawn window.",
+          "kind": "function",
+          "name": "apply_impulse_at_point",
+          "parameter_names": [
+            "entity",
+            "impulse",
+            "point"
+          ],
+          "parameters": [
+            "Entity",
+            "Vec2",
+            "Vec2"
+          ],
+          "returns": "unit"
+        },
+        {
+          "description": "Adds torque for the next fixed step, then clears it. Positive turns counterclockwise; requires a dynamic body.",
+          "kind": "function",
+          "name": "apply_torque",
+          "parameter_names": [
+            "entity",
+            "torque"
+          ],
+          "parameters": [
+            "Entity",
             "f32"
           ],
           "returns": "unit"
@@ -1784,6 +1854,20 @@
           "parameter_names": [],
           "parameters": [],
           "returns": "List<Entity>"
+        },
+        {
+          "description": "Sets radians per second on a dynamic or velocity-kinematic body, respecting rotation locks.",
+          "kind": "function",
+          "name": "set_angular_velocity",
+          "parameter_names": [
+            "entity",
+            "velocity"
+          ],
+          "parameters": [
+            "Entity",
+            "f32"
+          ],
+          "returns": "unit"
         },
         {
           "description": "Enables swept solid collision on a dynamic 2D body, including before a spawned body is built. Keeps velocity and joints.",

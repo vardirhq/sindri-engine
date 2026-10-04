@@ -21,7 +21,11 @@ pub enum BodyControl2d {
 }
 
 impl BodyControl2d {
-    pub(super) fn validate(self, entity: EntityId, kind: RigidBodyKind) -> Result<(), PhysicsError> {
+    pub(super) fn validate(
+        self,
+        entity: EntityId,
+        kind: RigidBodyKind,
+    ) -> Result<(), PhysicsError> {
         match self {
             Self::Force(value) => finite2("force", value)?,
             Self::Torque(value) => finite("torque", value)?,
@@ -35,7 +39,8 @@ impl BodyControl2d {
             }
         }
         let velocity = matches!(self, Self::LinearVelocity(_) | Self::AngularVelocity(_));
-        if kind != RigidBodyKind::Dynamic && !(velocity && kind == RigidBodyKind::KinematicVelocity) {
+        if kind != RigidBodyKind::Dynamic && !(velocity && kind == RigidBodyKind::KinematicVelocity)
+        {
             return Err(PhysicsError::WrongBodyKind(entity, "motion control", kind));
         }
         Ok(())
@@ -44,7 +49,11 @@ impl BodyControl2d {
 
 impl PhysicsWorld2d {
     /// Validates the complete request before changing a live body.
-    pub fn apply_control(&mut self, entity: EntityId, control: BodyControl2d) -> Result<(), PhysicsError> {
+    pub fn apply_control(
+        &mut self,
+        entity: EntityId,
+        control: BodyControl2d,
+    ) -> Result<(), PhysicsError> {
         let record = self.record(entity)?.clone();
         control.validate(entity, record.kind)?;
         let body = &mut self.backend.bodies[record.body];
@@ -53,11 +62,21 @@ impl PhysicsWorld2d {
             BodyControl2d::Torque(value) => body.add_torque(value, true),
             BodyControl2d::LinearVelocity([x, y]) => body.set_linvel(r2::Vector::new(x, y), true),
             BodyControl2d::AngularVelocity(value) => {
-                body.set_angvel(if body.is_rotation_locked() { 0.0 } else { value }, true);
+                body.set_angvel(
+                    if body.is_rotation_locked() {
+                        0.0
+                    } else {
+                        value
+                    },
+                    true,
+                );
             }
             BodyControl2d::Impulse([x, y]) => body.apply_impulse(r2::Vector::new(x, y), true),
             BodyControl2d::AngularImpulse(value) => body.apply_torque_impulse(value, true),
-            BodyControl2d::ImpulseAtPoint { impulse: [x, y], point: [px, py] } => {
+            BodyControl2d::ImpulseAtPoint {
+                impulse: [x, y],
+                point: [px, py],
+            } => {
                 body.apply_impulse_at_point(r2::Vector::new(x, y), r2::Vector::new(px, py), true);
             }
         }
@@ -66,9 +85,17 @@ impl PhysicsWorld2d {
 
     /// For callers that have validated an authored, not-yet-built body.
     /// Requests expire at the end of synchronization if it never materializes.
-    pub fn remember_control(&mut self, entity: EntityId, kind: RigidBodyKind, control: BodyControl2d) -> Result<(), PhysicsError> {
+    pub fn remember_control(
+        &mut self,
+        entity: EntityId,
+        kind: RigidBodyKind,
+        control: BodyControl2d,
+    ) -> Result<(), PhysicsError> {
         control.validate(entity, kind)?;
-        self.pending_controls.entry(entity).or_default().push(control);
+        self.pending_controls
+            .entry(entity)
+            .or_default()
+            .push(control);
         Ok(())
     }
 
@@ -78,12 +105,15 @@ impl PhysicsWorld2d {
         if let Some(record) = self.bodies.get(&entity) {
             return Ok(self.backend.bodies[record.body].angvel());
         }
-        self.pending_controls.get(&entity).and_then(|controls| {
-            controls.iter().rev().find_map(|control| match control {
-                BodyControl2d::AngularVelocity(value) => Some(*value),
-                _ => None,
+        self.pending_controls
+            .get(&entity)
+            .and_then(|controls| {
+                controls.iter().rev().find_map(|control| match control {
+                    BodyControl2d::AngularVelocity(value) => Some(*value),
+                    _ => None,
+                })
             })
-        }).ok_or(PhysicsError::MissingEntity(entity))
+            .ok_or(PhysicsError::MissingEntity(entity))
     }
 
     /// Adds a world-space force for the next fixed step, then it clears.
@@ -97,17 +127,30 @@ impl PhysicsWorld2d {
     }
 
     /// Sets radians per second on a dynamic or velocity-kinematic body.
-    pub fn set_angular_velocity(&mut self, entity: EntityId, velocity: f32) -> Result<(), PhysicsError> {
+    pub fn set_angular_velocity(
+        &mut self,
+        entity: EntityId,
+        velocity: f32,
+    ) -> Result<(), PhysicsError> {
         self.apply_control(entity, BodyControl2d::AngularVelocity(velocity))
     }
 
     /// Applies an immediate angular impulse, independent of fixed-step duration.
-    pub fn apply_angular_impulse(&mut self, entity: EntityId, impulse: f32) -> Result<(), PhysicsError> {
+    pub fn apply_angular_impulse(
+        &mut self,
+        entity: EntityId,
+        impulse: f32,
+    ) -> Result<(), PhysicsError> {
         self.apply_control(entity, BodyControl2d::AngularImpulse(impulse))
     }
 
     /// Applies an immediate impulse at a world point, including its turning effect.
-    pub fn apply_impulse_at_point(&mut self, entity: EntityId, impulse: [f32; 2], point: [f32; 2]) -> Result<(), PhysicsError> {
+    pub fn apply_impulse_at_point(
+        &mut self,
+        entity: EntityId,
+        impulse: [f32; 2],
+        point: [f32; 2],
+    ) -> Result<(), PhysicsError> {
         self.apply_control(entity, BodyControl2d::ImpulseAtPoint { impulse, point })
     }
 

@@ -186,7 +186,10 @@ impl PhysicsWorld2d {
     ) -> Result<(), PhysicsError> {
         finite2("linear_velocity", velocity)?;
         self.pending_velocity.insert(entity, velocity);
-        self.pending_controls.entry(entity).or_default().push(BodyControl2d::LinearVelocity(velocity));
+        self.pending_controls
+            .entry(entity)
+            .or_default()
+            .push(BodyControl2d::LinearVelocity(velocity));
         Ok(())
     }
 

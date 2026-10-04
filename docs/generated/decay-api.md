@@ -279,7 +279,12 @@ The host names this type but has not described its members.
 
 2D physics: moving objects with speed and pushes, and finding out what this script's object bumped into.
 
+- `angular_velocity(entity: Entity)` → `f32` — Radians per second. Before a spawned body is built, reads its authored value or latest queued setter.
+- `apply_angular_impulse(entity: Entity, impulse: f32)` → `unit` — Applies an immediate angular impulse to a dynamic body, independent of timestep.
+- `apply_force(entity: Entity, force: Vec2)` → `unit` — Adds a world-space Vec2 force for the next fixed step, then clears it. Repeated calls add; requires a dynamic body.
 - `apply_impulse(entity: Entity, x: f32, y: f32)` → `unit` — Gives an object a sudden push in a direction. Heavier objects move less.
+- `apply_impulse_at_point(entity: Entity, impulse: Vec2, point: Vec2)` → `unit` — Applies a world-space Vec2 impulse at a world-space Vec2 point, translating and turning a dynamic body. All motion controls support the spawn window.
+- `apply_torque(entity: Entity, torque: f32)` → `unit` — Adds torque for the next fixed step, then clears it. Positive turns counterclockwise; requires a dynamic body.
 - `cast_box(origin: Vec2, half_size: Vec2, rotation: f32, direction: Vec2, max_distance: f32, mask: f32, include_sensors: bool, exclude: Entity)` → `RayHit2d` — Like `cast_circle`, for a box `half_size` from its centre to each edge, turned by `rotation` radians.
 - `cast_circle(origin: Vec2, radius: f32, direction: Vec2, max_distance: f32, mask: f32, include_sensors: bool, exclude: Entity)` → `RayHit2d` — Sweeps a circle from `origin` along `direction` and returns the first collider it would touch, as RayHit2d or null: a raycast with a size, for whether something fits through a gap. `point` is where they touch and `distance` how far the circle's centre travelled. Starting already overlapping gives distance 0 and normal Vec2(0, 0). The filter arguments are the raycast's.
 - `collision_started()` → `List<Entity>` — The objects that started touching this script's object since the last frame, as a list.
@@ -294,6 +299,7 @@ The host names this type but has not described its members.
 - `raycast(origin: Vec2, direction: Vec2, max_distance: f32, mask: f32, include_sensors: bool, exclude: Entity)` → `RayHit2d` — The closest 2D collider hit, as RayHit2d or null. Normalizes a nonzero Vec2 direction; returns world-space point, normal and distance. The mask selects collider memberships; include_sensors opts into triggers; exclude skips all pieces of one entity (or null). Origin, direction and distance must be finite; distance non-negative; mask a whole u32. Inside hits have distance 0 and normal Vec2(0, 0). Queries synchronized geometry; ignores inactive/despawned entities. Ties prefer entity handle then piece order.
 - `sensor_entered()` → `List<Entity>` — The objects that entered this script's trigger area since the last frame. A trigger area detects things without blocking them, like a pickup.
 - `sensor_exited()` → `List<Entity>` — The objects that left this script's trigger area since the last frame.
+- `set_angular_velocity(entity: Entity, velocity: f32)` → `unit` — Sets radians per second on a dynamic or velocity-kinematic body, respecting rotation locks.
 - `set_continuous_collision(entity: Entity, enabled: bool)` → `unit` — Enables swept solid collision on a dynamic 2D body, including before a spawned body is built. Keeps velocity and joints.
 - `set_velocity(entity: Entity, x: f32, y: f32)` → `unit` — Sets how fast, and which way, an object is moving.
 - `velocity_x(entity: Entity)` → `f32` — How fast an object is moving sideways.

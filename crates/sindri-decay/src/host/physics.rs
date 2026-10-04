@@ -59,10 +59,16 @@ impl WorldHost<'_> {
         if matches!(call, PhysicsCall::DropThrough) {
             return self.drop_through_call(path, args);
         }
-        if matches!(call, PhysicsCall::ApplyForce | PhysicsCall::ApplyTorque
-            | PhysicsCall::AngularVelocity | PhysicsCall::SetAngularVelocity
-            | PhysicsCall::ApplyAngularImpulse | PhysicsCall::ApplyImpulseAtPoint
-            | PhysicsCall::ApplyImpulse) {
+        if matches!(
+            call,
+            PhysicsCall::ApplyForce
+                | PhysicsCall::ApplyTorque
+                | PhysicsCall::AngularVelocity
+                | PhysicsCall::SetAngularVelocity
+                | PhysicsCall::ApplyAngularImpulse
+                | PhysicsCall::ApplyImpulseAtPoint
+                | PhysicsCall::ApplyImpulse
+        ) {
             return self.physics_motion_call(call, path, args);
         }
         let entity = self.entity_argument(path, args, 0, "the body")?;

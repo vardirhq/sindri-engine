@@ -58,8 +58,10 @@ pub(super) fn add_physics_surface(environment: &mut Environment) {
                         entity(),
                     ],
                     PhysicsCall::SetContinuousCollision => vec![entity(), Type::Bool],
-                    PhysicsCall::DropThrough | PhysicsCall::ApplyTorque
-                    | PhysicsCall::SetAngularVelocity | PhysicsCall::ApplyAngularImpulse => vec![entity(), Type::F32],
+                    PhysicsCall::DropThrough
+                    | PhysicsCall::ApplyTorque
+                    | PhysicsCall::SetAngularVelocity
+                    | PhysicsCall::ApplyAngularImpulse => vec![entity(), Type::F32],
                     PhysicsCall::ApplyForce => vec![entity(), Type::Vec2],
                     PhysicsCall::ApplyImpulseAtPoint => vec![entity(), Type::Vec2, Type::Vec2],
                     PhysicsCall::Layer => vec![Type::String],
@@ -94,8 +96,10 @@ pub(super) fn add_physics_surface(environment: &mut Environment) {
                     | PhysicsCall::ConnectDistance
                     | PhysicsCall::SetContinuousCollision
                     | PhysicsCall::DropThrough
-                    | PhysicsCall::ApplyForce | PhysicsCall::ApplyTorque
-                    | PhysicsCall::SetAngularVelocity | PhysicsCall::ApplyAngularImpulse
+                    | PhysicsCall::ApplyForce
+                    | PhysicsCall::ApplyTorque
+                    | PhysicsCall::SetAngularVelocity
+                    | PhysicsCall::ApplyAngularImpulse
                     | PhysicsCall::ApplyImpulseAtPoint => Type::Unit,
                     _ => Type::array_of(entity()),
                 },
