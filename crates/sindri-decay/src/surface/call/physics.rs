@@ -25,6 +25,7 @@ pub(crate) enum PhysicsCall {
     /// Keeps two bodies no farther apart than a world-space distance while
     /// leaving their rotation and closer motion unconstrained.
     ConnectDistance,
+    SetHingeMotor,
     /// Every entity with a collider inside a circle or a box placed in the
     /// world: an area check, for a blast, an aura or a pickup radius.
     OverlapCircle,
@@ -72,6 +73,7 @@ pub(crate) const PHYSICS_CALLS: &[(&str, PhysicsCall)] = &[
     ("set_velocity", PhysicsCall::SetVelocity),
     ("apply_impulse", PhysicsCall::ApplyImpulse),
     ("connect_distance", PhysicsCall::ConnectDistance),
+    ("set_hinge_motor", PhysicsCall::SetHingeMotor),
     ("overlap_circle", PhysicsCall::OverlapCircle),
     ("overlap_box", PhysicsCall::OverlapBox),
     ("cast_circle", PhysicsCall::CastCircle),

@@ -37,6 +37,8 @@ const MOVED: f32 = 1.0e-4;
 
 #[derive(Debug, Error)]
 pub enum PhysicsSyncError {
+    #[error("joint entity {0:?} has more than one joint component")]
+    ConflictingJointComponents(EntityId),
     #[error("a fixed step cannot be {0:?} long")]
     BadStep(Duration),
     #[error(transparent)]

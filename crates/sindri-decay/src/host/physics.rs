@@ -50,6 +50,9 @@ impl WorldHost<'_> {
         if call.is_event() {
             return self.physics_events(call, path);
         }
+        if matches!(call, PhysicsCall::SetHingeMotor) {
+            return self.hinge_motor_call(path, args);
+        }
         if matches!(call, PhysicsCall::ConnectDistance) {
             return self.connect_distance(path, args);
         }

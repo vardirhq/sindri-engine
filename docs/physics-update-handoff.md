@@ -68,10 +68,22 @@ bounded movement and removal; its visible cord is authored by Decay.
 Scoped preflight passed 1,115 native tests, all-target/all-feature checks and
 zero-error/reminder typed script preflight. Four-crate Clippy, 11 catalogue tests,
 WASM checks and rebuilt native/Chromium captures passed. See the checkpoint in
-`physics-update.md` for limits and evidence; pushed-head CI is still required.
+`physics-update.md` for limits and evidence. Engine CI passed on `e4554125`;
+the site job was cancelled because GitHub could not acquire a hosted runner.
 
-Joint acceptance stays open. Add hinges, sliders, springs and motors, typed
-owned controls and dedicated reference authoring/diagnostics. Fix stable local
+A checked **hinge and velocity-motor slice** now joins body-local anchors,
+bounds relative angles and drives with capped torque. Settings edits preserve
+body motion; unchanged frames keep solver ownership. Typed
+`Physics.set_hinge_motor` writes the runtime component for next synchronization,
+including before endpoints are built, preserving unknown fields. Platformer's
+windmill uses Decay to reverse its physical axle every two seconds.
+Scoped preflight passed 1,421 native tests, all-target/all-feature checks and
+zero-error/reminder typed preflight. Five-crate Clippy, 11 catalogue tests,
+WASM checks and rebuilt native/Chromium captures passed. CI still must verify
+the pushed hinge head.
+
+Joint acceptance stays open. Add sliders, springs, remaining motor modes, typed
+structural controls and dedicated reference authoring/diagnostics. Fix stable local
 references for runtime-spawned prefabs and preserve root-alias semantics through
 export pre-expansion; the gap is explicitly recorded in parity.
 

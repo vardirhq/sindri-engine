@@ -313,6 +313,7 @@ The host names this type but has not described its members.
 - `sensor_exited()` → `List<Entity>` — The objects that left this script's trigger area since the last frame.
 - `set_angular_velocity(entity: Entity, velocity: f32)` → `unit` — Sets radians per second on a dynamic or velocity-kinematic body, respecting rotation locks.
 - `set_continuous_collision(entity: Entity, enabled: bool)` → `unit` — Enables swept solid collision on a dynamic 2D body, including before a spawned body is built. Keeps velocity and joints.
+- `set_hinge_motor(joint: Entity, velocity: f32, max_torque: f32)` → `unit` — Sets an authored 2D hinge owner's relative angular velocity target in radians/second and finite non-negative torque cap. Positive turns the second body counterclockwise relative to the first. Zero torque disables the motor (it coasts rather than brakes). Applied at the next fixed synchronization, including before endpoints are built; persists through rebuilds. Invalid values leave the component unchanged. Needs physics and a hinge component on the owner.
 - `set_velocity(entity: Entity, x: f32, y: f32)` → `unit` — Sets how fast, and which way, an object is moving.
 - `velocity_x(entity: Entity)` → `f32` — How fast an object is moving sideways.
 - `velocity_y(entity: Entity)` → `f32` — How fast an object is moving up or down.

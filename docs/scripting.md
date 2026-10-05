@@ -1017,6 +1017,7 @@ a person who has not clicked yet.
 | `Physics.set_velocity(entity, x, y)` | nothing |
 | `Physics.apply_impulse(entity, x, y)` | nothing |
 | `Physics.connect_distance(first, second, max_distance)` | nothing |
+| `Physics.set_hinge_motor(joint, velocity, max_torque)` | nothing |
 | `Physics.raycast(origin, direction, max_distance, mask, include_sensors, exclude)` | `RayHit2d` or `null` |
 | `Physics.cast_circle(origin, radius, direction, max_distance, mask, include_sensors, exclude)` | `RayHit2d` or `null` |
 | `Physics.cast_box(origin, half_size, rotation, direction, max_distance, mask, include_sensors, exclude)` | `RayHit2d` or `null` |
@@ -1079,6 +1080,18 @@ A body is authored, not created here: an entity carries `sindri.physics2d.collid
 and optionally `sindri.physics2d.rigid_body`, and `ScenePhysics2d` keeps the
 simulation in step with what the scene says. A prefab carrying those components
 spawns with them, which is how a bullet gets a body.
+
+`Physics.set_hinge_motor(joint, velocity, max_torque)` takes a hinge-owner entity,
+a relative angular speed in radians/second and a finite non-negative torque cap.
+Positive speed turns its second endpoint counterclockwise relative to the first.
+Zero torque disables the drive (coasting); zero speed with positive torque brakes.
+The call validates and updates the runtime hinge component, preserving unknown
+fields, and physics applies it at the next fixed synchronization. This also
+works before newly spawned endpoints are built, and survives their rebuilds.
+It needs a physics host and an authored `sindri.physics2d.hinge_joint` component;
+invalid requests leave the payload unchanged. Full prefab endpoint references
+remain incomplete; see [the physics contract](physics.md).
+Platformer's windmill uses this typed control to reverse its powered axle.
 
 `Physics.connect_distance` creates a maximum-distance connection between two
 authored 2D bodies. They may move closer and rotate freely, but their centres

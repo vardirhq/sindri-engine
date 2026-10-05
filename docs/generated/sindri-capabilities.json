@@ -653,6 +653,57 @@
       "addable": true,
       "apply": {},
       "default_payload": {
+        "first": "",
+        "first_anchor": [
+          0.0,
+          0.0
+        ],
+        "limits_enabled": false,
+        "lower_angle": 0.0,
+        "motor_enabled": false,
+        "motor_max_torque": 0.0,
+        "motor_velocity": 0.0,
+        "second": "",
+        "second_anchor": [
+          0.0,
+          0.0
+        ],
+        "upper_angle": 0.0
+      },
+      "display_name": "Hinge Joint 2D",
+      "fields": {
+        "first": "",
+        "first_anchor": [
+          0.0,
+          0.0
+        ],
+        "limits_enabled": false,
+        "lower_angle": 0.0,
+        "motor_enabled": false,
+        "motor_max_torque": 0.0,
+        "motor_velocity": 0.0,
+        "second": "",
+        "second_anchor": [
+          0.0,
+          0.0
+        ],
+        "upper_angle": 0.0
+      },
+      "meanings": {
+        "first": {
+          "kind": "entity"
+        },
+        "second": {
+          "kind": "entity"
+        }
+      },
+      "schema_version": 1,
+      "type_name": "sindri.physics2d.hinge_joint"
+    },
+    {
+      "addable": true,
+      "apply": {},
+      "default_payload": {
         "friction": 0.5,
         "override_friction": false,
         "override_restitution": false,

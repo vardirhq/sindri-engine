@@ -29,6 +29,7 @@ mod person;
 mod physics;
 mod physics_contacts;
 mod physics_controls;
+mod physics_joints;
 mod physics_motion;
 mod print;
 mod profile;

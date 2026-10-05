@@ -82,3 +82,8 @@ A lantern hangs from a scene-authored distance joint near the raised planks.
 Decay applies the wind and draws the cord from the solved body positions;
 `tests/distance_joints.rs` verifies motion, the distance bound and releasing the
 tether. The separate tether entity is the pattern to copy for a distance joint.
+
+The windmill has a separate hinge entity connecting its fixed axle and physical
+rotor. Decay reverses its torque-capped motor every two seconds with
+`Physics.set_hinge_motor`; `tests/hinge_motor.rs` observes both directions,
+a fixed axle and removal. Copy this scene pattern for a powered rotating part.

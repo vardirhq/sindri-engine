@@ -222,8 +222,10 @@ impl PhysicsWorld2d {
 
     pub fn remove(&mut self, entity: EntityId) -> bool {
         self.remove_owned_joint(entity);
-        self.owned_joints
-            .retain(|_, record| record.joint.first != entity && record.joint.second != entity);
+        self.owned_joints.retain(|_, record| {
+            let (first, second) = record.joint.endpoints();
+            first != entity && second != entity
+        });
         self.invalidate_contacts(entity);
         self.pending_controls.remove(&entity);
         self.pending_drop.remove(&entity);

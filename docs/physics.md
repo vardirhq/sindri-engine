@@ -449,8 +449,59 @@ reference selection/diagnostics and visual inspector review remain unverified.
 This foundation is added for the platformer: a physical lantern hangs from an
 anchor while Decay wind drives it and Decay stretches/turns its visible cord.
 The game regression observes movement, bounded distance and tether removal.
-Hinges, sliders, springs, motors and typed owned-joint controls remain incomplete;
+Sliders, springs and additional typed owned-joint controls remain incomplete;
 the existing typed `Physics.connect_distance` keeps its previous semantics.
+
+## Scene-authored hinges and velocity motors
+
+`sindri.physics2d.hinge_joint` uses the same separate owner entity, stable endpoint
+reference resolution and suspend/remove/rebuild lifecycle as distance joints.
+One entity owns one kind of constraint; active distance and hinge components on
+one owner fail synchronization rather than silently replacing each other.
+
+```json
+{
+  "first": "windmill-anchor", "second": "windmill-rotor",
+  "first_anchor": [0.0, 0.0], "second_anchor": [0.0, 0.0],
+  "limits_enabled": false, "lower_angle": 0.0, "upper_angle": 0.0,
+  "motor_enabled": true, "motor_velocity": 2.0, "motor_max_torque": 1.0
+}
+```
+
+Each anchor is measured in world units in its body's translated/rotated local
+frame, without transform scaling. Anchors coincide while the bodies may rotate
+relative to one another. The default anchors are the centres; default limits
+and motor are disabled. Connected bodies do not collide with each other.
+Enabled limits bound the second body's angle relative to the first, in radians;
+finite bounds must satisfy `-pi <= lower_angle <= upper_angle <= pi`.
+They describe relative orientation, not accumulated revolutions.
+
+A velocity motor targets relative angular speed in radians/second; positive
+turns the second body counterclockwise relative to the first. Its force-based
+velocity drive has a finite non-negative torque cap, so target speed is not a
+promise under load. A disabled motor coasts; an enabled zero-speed motor brakes
+within its torque cap. All numeric fields, including disabled settings, must be
+finite. Negative torque and invalid enabled limits fail before backend mutation.
+Settings edits between the same endpoints update the existing solver constraint
+and wake both bodies without resetting their velocity. Unchanged synchronization
+retains it; ordinary low-motion sleeping behavior remains applicable.
+
+Typed `Physics.set_hinge_motor(joint, velocity, max_torque)` controls the hinge
+**owner**, not a body. It requires a hinge component and a physics host, validates
+before changing its runtime component, preserves unknown fields and applies at
+the next fixed synchronization. Its values persist through endpoint rebuilds and
+the valid spawn-to-synchronization window. Zero torque disables the motor rather
+than braking; to brake, set zero velocity with positive torque. Removal and other
+structural controls are not yet exposed through typed joint calls.
+
+The generic checked inspector authors hinge settings and command undo reverses
+motor edits. Dedicated reference selection/diagnostics and visual editor review
+remain open. This general capability is added for the platformer: Decay reverses
+its powered windmill axle every two seconds while physics keeps the rotor on its
+anchor. Native tests exercise offset anchors, limits, torque caps, coast/reverse,
+invalid atomic edits, command undo, endpoint rebuilds and gameplay removal.
+Sliders, springs, other motor modes and complete prefab references remain in the
+joint track; its acceptance checkbox remains open.
 
 ## Runtime ownership and stepping
 

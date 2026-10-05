@@ -61,7 +61,9 @@ pub(super) fn add_physics_surface(environment: &mut Environment) {
                     | PhysicsCall::VelocityX
                     | PhysicsCall::VelocityY
                     | PhysicsCall::AngularVelocity => vec![entity()],
-                    PhysicsCall::SetVelocity | PhysicsCall::ApplyImpulse => {
+                    PhysicsCall::SetVelocity
+                    | PhysicsCall::ApplyImpulse
+                    | PhysicsCall::SetHingeMotor => {
                         vec![entity(), Type::F32, Type::F32]
                     }
                     PhysicsCall::ConnectDistance => {
@@ -86,6 +88,7 @@ pub(super) fn add_physics_surface(environment: &mut Environment) {
                     PhysicsCall::SetVelocity
                     | PhysicsCall::ApplyImpulse
                     | PhysicsCall::ConnectDistance
+                    | PhysicsCall::SetHingeMotor
                     | PhysicsCall::SetContinuousCollision
                     | PhysicsCall::DropThrough
                     | PhysicsCall::ApplyForce

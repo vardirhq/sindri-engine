@@ -131,3 +131,86 @@ fn references_prefer_the_local_namespace_and_cannot_cross_loaded_scene_roots() {
     assert_eq!(resolve(&world, owner, "missing"), None);
     assert_eq!(resolve(&world, owner, ""), None);
 }
+
+#[test]
+fn hinge_motor_edits_undo_and_rebuild_preserve_ownership() {
+    let registry = SceneExtractor::new().unwrap().components().clone();
+    let mut world = World::default();
+    body(&mut world, "anchor", [0.0, 0.0], RigidBodyKind::Static);
+    let moving = body(&mut world, "body", [0.0, 0.0], RigidBodyKind::Dynamic);
+    let component = HingeJoint2dComponent {
+        first: "anchor".into(),
+        second: "body".into(),
+        settings: HingeSettings2d {
+            motor_enabled: true,
+            motor_velocity: 2.0,
+            motor_max_torque: 1.0,
+            ..HingeSettings2d::default()
+        },
+    };
+    let payload = serde_json::to_value(&component).unwrap();
+    registry
+        .validate_payload(HingeJoint2dComponent::TYPE_NAME, &payload)
+        .unwrap();
+    let owner = world.spawn(EntityData {
+        source_id: SceneEntityId::new("hinge").ok(),
+        components: [(HingeJoint2dComponent::TYPE_NAME.into(), payload.clone())].into(),
+        ..EntityData::default()
+    });
+    let mut physics = ScenePhysics2d::top_down().unwrap();
+    for _ in 0..60 {
+        physics.step(&mut world, &registry, STEP).unwrap();
+    }
+    assert!(physics.world().angular_velocity(moving).unwrap() > 1.5);
+    let mut edited = payload;
+    edited["motor_velocity"] = json!(-2.0);
+    let mut commands = CommandBuffer::new();
+    commands.push(WorldCommand::SetComponent {
+        entity: owner,
+        type_name: HingeJoint2dComponent::TYPE_NAME.into(),
+        payload: edited,
+    });
+    let mut history = CommandHistory::default();
+    history
+        .apply(commands.into_transaction("Reverse hinge"), &mut world)
+        .unwrap();
+    for _ in 0..60 {
+        physics.step(&mut world, &registry, STEP).unwrap();
+    }
+    assert!(physics.world().angular_velocity(moving).unwrap() < -1.5);
+    history.undo(&mut world).unwrap();
+    for _ in 0..60 {
+        physics.step(&mut world, &registry, STEP).unwrap();
+    }
+    assert!(physics.world().angular_velocity(moving).unwrap() > 1.5);
+    world.get_mut(moving).unwrap().components.insert(
+        Collider2dComponent::TYPE_NAME.into(),
+        json!({"pieces": [Collider2d::circle(0.2)]}),
+    );
+    physics.step(&mut world, &registry, STEP).unwrap();
+    assert_eq!(physics.world().joint_count(), 1);
+    world.get_mut(owner).unwrap().disabled = true;
+    physics.step(&mut world, &registry, STEP).unwrap();
+    assert_eq!(physics.world().joint_count(), 0);
+    world.get_mut(owner).unwrap().disabled = false;
+    physics.step(&mut world, &registry, STEP).unwrap();
+    assert_eq!(physics.world().joint_count(), 1);
+    world.get_mut(owner).unwrap().components.insert(
+        DistanceJoint2dComponent::TYPE_NAME.into(),
+        json!({"first": "anchor", "second": "body", "max_distance": 2.0}),
+    );
+    assert!(matches!(physics.step(&mut world, &registry, STEP),
+        Err(PhysicsSyncError::ConflictingJointComponents(entity)) if entity == owner));
+    assert_eq!(physics.world().joint_count(), 1);
+    world
+        .get_mut(owner)
+        .unwrap()
+        .components
+        .remove(HingeJoint2dComponent::TYPE_NAME);
+    physics.step(&mut world, &registry, STEP).unwrap();
+    assert_eq!(
+        physics.world().joint_count(),
+        1,
+        "switching kinds replaces ownership"
+    );
+}

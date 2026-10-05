@@ -8,6 +8,7 @@ editor, scripting, proof and documentation move together.
 For a new implementation session, read [the recovery handoff](physics-update-handoff.md).
 CCD, one-way platforms, forces/rotation, contacts and materials are implemented
 and checked. Scene-authored distance constraints form a checked joint foundation.
+Hinges and velocity motors form the next checked joint slice.
 The remaining items below are the active scope.
 
 ## Acceptance checklist
@@ -164,4 +165,32 @@ surface-specific completeness. This checklist does not mark those surfaces done.
   and full prefab references remain. Runtime-spawned prefabs lack stable local
   IDs; prefab-root aliases depend on metadata absent from pre-expanded exports.
   The reference gap is recorded in parity. Visual editor interaction and full
-  browser gameplay remain in final integration. CI must verify the pushed head.
+  browser gameplay remain in final integration. Engine CI passed on `e4554125`;
+  the site job was cancelled because GitHub could not allocate its hosted runner.
+
+### Hinge and velocity-motor checkpoint
+
+- Scene-authored hinges join body-local anchors, with optional bounded relative
+  angles and force-based velocity motors capped by torque. Validate settings
+  before mutation; unchanged frames keep the constraint and settings edits wake
+  bodies without resetting their motion. Mixed joint kinds on one owner fail
+  explicitly rather than silently replacing one another.
+- Typed `Physics.set_hinge_motor(owner, velocity, max_torque)` updates the runtime
+  component for the next fixed synchronization, preserving unknown fields and
+  surviving endpoint rebuilds. Zero torque coasts; zero velocity with positive
+  torque brakes. Invalid calls, wrong component/type and missing physics fail.
+- Platformer's Decay-driven windmill reverses its axle every two seconds. Its
+  regression observes both directions, a fixed axle and removal. Native runtime
+  tests exercise offset anchors, bounded angles, torque caps, coasting, reversal
+  and atomic rejection; command-backed scene edits/undo and rebuilds are covered.
+- Final scoped preflight passed 1,421 native tests and warning-denied all-target/
+  all-feature checks for physics, scene, Decay, editor and platformer. Typed
+  windmill preflight passed with zero errors/reminders. Warning-denied Clippy
+  passed all five crates; catalogue currentness/completeness passed 11 tests.
+- All-feature WASM checks passed physics, scene, Decay and platformer. Rebuilt
+  native Vulkan and Chromium WebGPU project delivery/captures passed, including
+  exported scripts/assets; both captures were visually reviewed.
+- Joint acceptance remains open for sliders, springs, additional motor modes,
+  typed structural controls, dedicated reference authoring/diagnostics and full
+  prefab references. Visual editor interaction, full browser gameplay and final
+  workspace integration remain open. CI must verify the pushed hinge head.

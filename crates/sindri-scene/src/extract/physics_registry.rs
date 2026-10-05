@@ -83,5 +83,23 @@ pub(super) fn register(components: &mut ComponentSchemaRegistry) -> Result<(), S
         ("first", FieldMeaning::Entity),
         ("second", FieldMeaning::Entity),
     ])?;
+    register_hinge(components)?;
+    Ok(())
+}
+
+fn register_hinge(components: &mut ComponentSchemaRegistry) -> Result<(), SceneExtractError> {
+    components.register_with_default::<crate::HingeJoint2dComponent>(
+        "Hinge Joint 2D",
+        serde_json::json!({
+            "first": "", "second": "", "first_anchor": [0.0, 0.0],
+            "second_anchor": [0.0, 0.0], "limits_enabled": false,
+            "lower_angle": 0.0, "upper_angle": 0.0, "motor_enabled": false,
+            "motor_velocity": 0.0, "motor_max_torque": 0.0
+        }),
+    )?;
+    components.describe::<crate::HingeJoint2dComponent>([
+        ("first", FieldMeaning::Entity),
+        ("second", FieldMeaning::Entity),
+    ])?;
     Ok(())
 }

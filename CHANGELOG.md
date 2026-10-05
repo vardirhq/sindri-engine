@@ -1,5 +1,7 @@
 # Changelog
 
+- Add scene-authored 2D hinges with local anchors, angle limits and torque-capped velocity motors. Typed `Physics.set_hinge_motor` controls their next synchronized drive without resetting body motion. Platformer adds a reversing windmill. Sliders, springs and full prefab reference integration remain in progress.
+
 - Add scene-authored 2D distance joints with stable scene endpoint IDs, explicit ownership, edit/undo support and reconnection after endpoint rebuilds. Platformer has a wind-driven hanging lantern. Other joint kinds, typed ownership controls and spawned-prefab references remain in progress.
 
 - Add reusable 2D physics material profiles with shared coefficient validation and explicit local overrides. The editor can create, select and hot reload them while preserving body motion; exported games collect and load their references. Platformer’s crate and planks share a wood material. Native project capture now expands placed prefabs before scene entry, matching browser delivery.

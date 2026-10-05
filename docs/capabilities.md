@@ -310,7 +310,14 @@ preserve body motion, and endpoint rebuilds reconnect after body synchronization
 Inactive/missing endpoints suspend the constraint; removing its entity/component
 releases it independently of legacy script-created joints. Platformer's lantern
 sways under Decay wind within its authored tether and renders its cord in Decay.
-Hinge/slider/spring/motor kinds and typed owned-joint controls are still absent.
+`sindri.physics2d.hinge_joint` adds body-local anchors, bounded relative angles
+and torque-capped velocity motors. Unchanged frames keep the constraint; setting
+edits wake its endpoints without resetting body motion. Typed
+`Physics.set_hinge_motor` updates the runtime component for the next synchronization,
+including before endpoints are built. Platformer's Decay-driven windmill reverses
+its axle motor; native tests exercise limits, caps, coasting, atomic validation,
+undo and rebuilds. Slider/spring kinds, other motor modes and remaining typed
+ownership controls are still absent.
 Runtime-spawned prefab local references and exported prefab-root aliases remain
 gaps; dedicated picker/diagnostics and visual inspector review are unverified.
 

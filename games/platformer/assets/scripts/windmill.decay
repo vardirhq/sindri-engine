@@ -1,0 +1,16 @@
+// A powered axle reverses every two seconds. Physics turns the rotor.
+script Windmill {
+    var age: f32 = 0.0;
+    var direction: f32 = 1.0;
+    fn start() {
+        Physics.set_hinge_motor(this.entity, this.direction * 2.0, 1.0);
+    }
+    fn update(dt: f32) {
+        this.age += dt;
+        if this.age >= 2.0 {
+            this.age = 0.0;
+            this.direction = -this.direction;
+            Physics.set_hinge_motor(this.entity, this.direction * 2.0, 1.0);
+        }
+    }
+}

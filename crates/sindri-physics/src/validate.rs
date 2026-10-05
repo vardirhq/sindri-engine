@@ -14,8 +14,10 @@ pub enum PhysicsError {
     MissingEntity(EntityId),
     #[error("entity {0:?} cannot perform {1} with a {2:?} body")]
     WrongBodyKind(EntityId, &'static str, RigidBodyKind),
-    #[error("a distance joint cannot connect entity {0:?} to itself")]
+    #[error("a joint cannot connect entity {0:?} to itself")]
     JointToSelf(EntityId),
+    #[error("hinge limits must be ordered and within [-pi, pi] radians")]
+    InvalidJointLimits,
     #[error("physics value '{0}' must be finite")]
     NonFinite(&'static str),
     #[error("physics value '{0}' must be positive")]

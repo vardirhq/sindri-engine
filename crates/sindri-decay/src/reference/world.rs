@@ -291,6 +291,11 @@ pub(super) const TYPES: &[TypeEntry] = &[
                 "The objects that stopped touching this script's object since the last frame, as a list.",
             ),
             call(
+                "set_hinge_motor",
+                &["joint", "velocity", "max_torque"],
+                "Sets an authored 2D hinge owner's relative angular velocity target in radians/second and finite non-negative torque cap. Positive turns the second body counterclockwise relative to the first. Zero torque disables the motor (it coasts rather than brakes). Applied at the next fixed synchronization, including before endpoints are built; persists through rebuilds. Invalid values leave the component unchanged. Needs physics and a hinge component on the owner.",
+            ),
+            call(
                 "connect_distance",
                 &["first", "second", "max_distance"],
                 "Ties two objects together like a rope: they can come closer, but never further apart than a distance.",
