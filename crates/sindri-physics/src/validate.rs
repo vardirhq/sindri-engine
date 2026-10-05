@@ -28,6 +28,8 @@ pub enum PhysicsError {
     InvalidTimestep,
     #[error("one-way support angle must be between zero and pi/2 radians")]
     InvalidOneWayAngle,
+    #[error("material update needs {expected} collider pieces, got {actual}")]
+    MaterialPieceCount { expected: usize, actual: usize },
     #[error("collider piece {index} is invalid: {reason}")]
     ColliderPiece {
         index: usize,

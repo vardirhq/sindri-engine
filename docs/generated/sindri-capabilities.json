@@ -628,6 +628,33 @@
       "addable": true,
       "apply": {},
       "default_payload": {
+        "friction": 0.5,
+        "override_friction": false,
+        "override_restitution": false,
+        "profile": "",
+        "restitution": 0.0
+      },
+      "display_name": "Physics Material 2D",
+      "fields": {
+        "friction": 0.5,
+        "override_friction": false,
+        "override_restitution": false,
+        "profile": "",
+        "restitution": 0.0
+      },
+      "meanings": {
+        "profile": {
+          "asset": "profile",
+          "kind": "asset"
+        }
+      },
+      "schema_version": 1,
+      "type_name": "sindri.physics2d.material"
+    },
+    {
+      "addable": true,
+      "apply": {},
+      "default_payload": {
         "angle": 0.7853981852531433,
         "normal": [
           0.0,

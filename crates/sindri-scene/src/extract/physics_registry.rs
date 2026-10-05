@@ -1,6 +1,6 @@
 //! The physics components, and what a fresh one of each is.
 
-use sindri_core::ComponentSchemaRegistry;
+use sindri_core::{AssetKind, ComponentSchemaRegistry, FieldMeaning};
 
 use crate::physics::{
     Collider2dComponent, OneWay2dComponent, PhysicsWorld2dComponent, RigidBody2dComponent,
@@ -67,5 +67,13 @@ pub(super) fn register(components: &mut ComponentSchemaRegistry) -> Result<(), S
         "One-Way Platform 2D",
         serde_json::json!({ "normal": [0.0, 1.0], "angle": std::f32::consts::FRAC_PI_4 }),
     )?;
+    components.register_with_default::<crate::PhysicsMaterial2dComponent>(
+        "Physics Material 2D",
+        serde_json::json!({"profile": "", "override_friction": false, "friction": 0.5, "override_restitution": false, "restitution": 0.0}),
+    )?;
+    components.describe::<crate::PhysicsMaterial2dComponent>([(
+        "profile",
+        FieldMeaning::Asset(AssetKind::Profile),
+    )])?;
     Ok(())
 }

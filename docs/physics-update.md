@@ -20,7 +20,7 @@ CCD, one-way platforms, forces/rotation and contact snapshots are implemented an
   off-centre impulses, with explicit accumulation/reset semantics and game use.
 - [x] Contacts: entity-based world contact points, normals and force/impulse
   information, deterministic snapshots and grounded/impact proof.
-- [ ] Physics materials: reusable project assets, shared validation and explicit
+- [x] Physics materials: reusable project assets, shared validation and explicit
   literal override rules, asset loading in editor and exported games.
 - [ ] Joints: scene-authored distance, hinge, slider, spring and motor controls;
   stable entity references, lifecycle/removal, editor undo, Decay access and proof.
@@ -105,5 +105,35 @@ surface-specific completeness. This checklist does not mark those surfaces done.
 - The rebuilt generic browser host loaded the platformer export in Chromium at
   `/examples/platformer/`, configured WebGPU, fetched assets, ran Decay without
   runtime errors and drew the level. Full browser gameplay interaction and editor
-  Play inspection remain in final integration. New-head CI is pending.
-- Next slice: reusable physics material assets.
+  Play inspection remain in final integration. CI is green on `404b27ad`.
+- Next slice after this checkpoint: reusable physics material assets.
+
+### Reusable material checkpoint
+
+- Reuse `.profile` assets with type `physics_material`; core/assets remain
+  physics-independent. Scene resolution and all hosts share coefficient
+  validation. Friction is finite/non-negative and restitution finite in `[0, 1]`;
+  missing coefficients, unknown keys and wrong profile types fail explicitly.
+- Entity material components apply to ordinary/compound and generated tilemap
+  pieces. Explicit override flags win over the profile; an empty reference
+  keeps literals. Coefficient edits preserve motion, forces and joints.
+- Editor creation/selection uses existing profile tools and checked component
+  commands. Async loading/hot reload retains the last valid edit on errors;
+  profile save validates before overwriting. Play waits for initial delivery.
+- Export collects scene/prefab references and validates before writing. Native
+  and browser hosts use the same resolver. Native project capture now expands
+  placed prefabs before scene entry, matching browser delivery.
+- Platformer crate/planks share wood, with an explicit zero-bounce plank override.
+  Regressions check coefficient use and a changed crate rebound, invalid/atomic
+  updates, preserved motion/joints, editor reload/save and export rejection.
+- Final scoped preflight passed 1,175 native tests and warning-denied all-target/
+  all-feature checks for physics, scene, export, game host, editor and platformer.
+  Warning-denied Clippy passed all six. Catalogue currentness/completeness passed
+  11 tests; generated metadata was regenerated.
+- All-feature WASM checks passed physics, scene, export, game host and platformer.
+  A rebuilt Chromium export at `/examples/platformer/` fetched the material
+  profile, configured WebGPU, ran scripts and drew the game without runtime
+  errors. Native project delivery/play regression and Vulkan capture passed.
+- Visual editor interaction review, full browser gameplay and workspace checks
+  remain in final integration. CI on the material commit is pending.
+- Next slice: scene-authored joints and their typed controls/lifecycle.

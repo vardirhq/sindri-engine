@@ -138,6 +138,10 @@ impl SceneScripts {
         referenced.extend(self.project_scripts.iter().cloned());
         referenced.extend(self.scripts.referenced_prefabs(world, components));
         referenced.extend(self.scripts.referenced_profiles(world, components));
+        match sindri_scene::referenced_physics_materials(world, components) {
+            Ok(materials) => referenced.extend(materials),
+            Err(error) => notes.push(ScriptNote::Failed(error.to_string())),
+        }
         let wanted: BTreeSet<AssetId> = referenced
             .iter()
             .filter_map(|reference| AssetId::new(reference.clone()).ok())
@@ -195,6 +199,17 @@ impl SceneScripts {
             }
         }
         notes
+    }
+
+    /// Resolved materials come from the same asynchronous loader as profiles.
+    pub fn physics_materials(
+        &self,
+    ) -> Result<sindri_scene::PhysicsMaterialSources, sindri_scene::PhysicsMaterialError> {
+        sindri_scene::PhysicsMaterialSources::from_profiles(
+            self.profiles
+                .ids()
+                .filter_map(|id| self.profiles.get(id).map(|profile| (id, profile))),
+        )
     }
 
     /// Whether any of the project is still on its way.
@@ -255,6 +270,9 @@ impl SceneScripts {
                     let Some(text) = loader.get(&id) else {
                         continue;
                     };
+                    if let Some(watch) = watch.as_mut() {
+                        watch.watch(&id);
+                    }
                     let again = sources.get(id.as_str()).is_some()
                         || prefabs.get(id.as_str()).is_some()
                         || profiles.get(id.as_str()).is_some();
@@ -271,7 +289,15 @@ impl SceneScripts {
                         }
                     } else if is_profile(id.as_str()) {
                         match ProfileDocument::from_json(text) {
-                            Ok(profile) => profiles.insert(id.as_str(), profile),
+                            Ok(profile) => {
+                                if let Err(error) =
+                                    sindri_scene::physics_material_profile(id.as_str(), &profile)
+                                {
+                                    notes.push(ScriptNote::Failed(error.to_string()));
+                                    continue;
+                                }
+                                profiles.insert(id.as_str(), profile);
+                            }
                             Err(error) => {
                                 notes.push(ScriptNote::Failed(format!("{id}: {error}")));
                                 continue;
@@ -285,9 +311,6 @@ impl SceneScripts {
                     } else {
                         ScriptNote::Loaded(format!("Loaded {id}"))
                     });
-                    if let Some(watch) = watch.as_mut() {
-                        watch.watch(&id);
-                    }
                 }
                 AssetLoadOutcome::Failed(error) => notes.push(ScriptNote::Failed(format!(
                     "{}: {}",

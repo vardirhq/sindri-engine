@@ -1,5 +1,7 @@
 # Changelog
 
+- Add reusable 2D physics material profiles with shared coefficient validation and explicit local overrides. The editor can create, select and hot reload them while preserving body motion; exported games collect and load their references. Platformer’s crate and planks share a wood material. Native project capture now expands placed prefabs before scene entry, matching browser delivery.
+
 - Add copied 2D solid contact snapshots to runtime and typed Decay: world points, support normals, normal/friction impulses and force. Sleeping contacts keep support geometry; sensors stay separate. Platformer jumps use solved support and its crate flashes on hard landings.
 
 - Add 2D force, torque, angular velocity and angular/world-point impulse controls in runtime and typed Decay. Forces accumulate for one fixed step; spawn requests preserve call order. The platformer has a wind-driven wooden crate that K or the west controller button tosses and spins.

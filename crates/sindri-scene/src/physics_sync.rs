@@ -45,6 +45,8 @@ pub enum PhysicsSyncError {
     Physics(#[from] PhysicsError),
     #[error(transparent)]
     Tilemap(#[from] TilemapCollisionError),
+    #[error(transparent)]
+    Material(#[from] crate::PhysicsMaterialError),
 }
 
 /// The physics world a scene's authored bodies and colliders drive.
@@ -72,13 +74,14 @@ pub struct ScenePhysics2d {
     /// What the host asked for, which a scene naming no gravity of its own
     /// keeps.
     host_gravity: [f32; 2],
+    materials: crate::PhysicsMaterialSources,
 }
 
 /// What a scene said about one entity, as far as physics is concerned.
 ///
-/// Compared rather than the whole component, because a change to *anything*
-/// physics reads means the body has to be rebuilt, and a change to anything
-/// else must not.
+/// Compared rather than the whole component: structural changes rebuild the
+/// body, while live control and coefficient edits preserve its solver state.
+/// Fields physics does not read cannot cause a rebuild.
 #[derive(Clone, PartialEq)]
 struct Authored {
     body: Option<RigidBody2d>,
@@ -100,6 +103,7 @@ impl ScenePhysics2d {
             agreed: BTreeMap::new(),
             events: Vec::new(),
             host_gravity: gravity,
+            materials: crate::PhysicsMaterialSources::default(),
         })
     }
 
@@ -116,6 +120,12 @@ impl ScenePhysics2d {
 
     pub const fn world_mut(&mut self) -> &mut PhysicsWorld2d {
         &mut self.world
+    }
+
+    /// Replaces resolved material assets. Changes reach existing colliders at
+    /// the next fixed step without replacing their bodies.
+    pub fn set_materials(&mut self, materials: crate::PhysicsMaterialSources) {
+        self.materials = materials;
     }
 
     /// What collided during the last step, in the order the backend reported.
@@ -182,7 +192,12 @@ impl ScenePhysics2d {
         components: &ComponentSchemaRegistry,
     ) -> Result<(), PhysicsSyncError> {
         let mut live = BTreeSet::new();
-        for (entity, collider) in collider_pieces(world, components)? {
+        for (entity, mut collider) in collider_pieces(world, components)? {
+            if let Some(material) =
+                components.get::<crate::PhysicsMaterial2dComponent>(world, entity)?
+            {
+                self.materials.apply(&material, &mut collider)?;
+            }
             live.insert(entity);
             let body = components
                 .get::<RigidBody2dComponent>(world, entity)?
@@ -244,7 +259,7 @@ impl ScenePhysics2d {
         Ok(())
     }
 
-    /// Support policy and CCD edits are live controls that preserve solver state.
+    /// Support policy, CCD and coefficient edits preserve solver state.
     fn update_registered(
         &mut self,
         world: &World,
@@ -260,12 +275,27 @@ impl ScenePhysics2d {
         }
         let mut comparable = previous.clone();
         comparable.one_way = authored.one_way;
+        for (before, after) in comparable.collider.iter_mut().zip(&authored.collider) {
+            before.friction = after.friction;
+            before.restitution = after.restitution;
+        }
         if let (Some(before), Some(after)) = (&mut comparable.body, authored.body)
             && authored.kind == RigidBodyKind::Dynamic
         {
             before.continuous_collision = after.continuous_collision;
         }
         if comparable == *authored {
+            if previous.collider != authored.collider {
+                let materials: Vec<_> = authored
+                    .collider
+                    .iter()
+                    .map(|piece| sindri_physics::PhysicsMaterial {
+                        friction: piece.friction,
+                        restitution: piece.restitution,
+                    })
+                    .collect();
+                self.world.set_materials(entity, &materials)?;
+            }
             self.world.set_one_way(entity, authored.one_way)?;
             if authored.kind == RigidBodyKind::Dynamic {
                 self.world.set_continuous_collision(

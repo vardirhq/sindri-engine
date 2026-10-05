@@ -12,6 +12,8 @@ use crate::ui::theme::{color, metric, radius, text};
 
 use super::EditorApp;
 
+mod physics;
+
 pub(super) fn transport_icon(
     ui: &mut egui::Ui,
     icon: MaterialIcon,
@@ -286,8 +288,8 @@ impl EditorApp {
         // Physics next, so a script observes the events of the step that just
         // happened and its writes take effect on the next one. `docs/physics.md`
         // fixes that order: consumers run after the step publishes.
-        if let Err(error) = self.physics.step(&mut self.world, components, fixed_delta) {
-            self.console.error(format!("Physics: {error}"));
+        if !self.step_physics(components, fixed_delta) {
+            return;
         }
         clock.lap(&mut self.profiler, Phase::Physics);
         // No safe area: a desktop window has no notch. A host that has one — a

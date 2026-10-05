@@ -1163,6 +1163,13 @@
             1
           ],
           "angle": 0.7853982
+        },
+        "sindri.physics2d.material": {
+          "profile": "materials/wood.profile",
+          "override_friction": false,
+          "friction": 0.5,
+          "override_restitution": true,
+          "restitution": 0.0
         }
       }
     },
@@ -1261,6 +1268,13 @@
           "tags": [
             "kickable"
           ]
+        },
+        "sindri.physics2d.material": {
+          "profile": "materials/wood.profile",
+          "override_friction": false,
+          "friction": 0.5,
+          "override_restitution": false,
+          "restitution": 0.0
         }
       }
     },

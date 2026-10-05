@@ -16,8 +16,8 @@ a pushed handoff. Do not ask them to authorize the scope again.
 
 ## Current continuation checkpoint
 
-CCD, one-way platforms, **forces and rotation**, and **contact snapshots** are
-implemented in this PR. The checklist in `physics-update.md` is current.
+CCD, one-way platforms, **forces and rotation**, **contact snapshots**, and
+**reusable physics materials** are implemented in this PR. The checklist in `physics-update.md` is current.
 
 Forces/rotation add world force and torque, angular velocity/impulse and impulses
 at world points. Forces accumulate for one step; spawn-window requests replay in
@@ -40,12 +40,30 @@ feature checks, typed checks for all three changed scripts, warning-denied
 Clippy, scene and catalogue tests/currentness/completeness, and all-feature WASM
 checks passed. Chromium export/load smoke passed on the rebuilt browser runtime,
 fetching assets, running Decay without runtime errors and drawing the level.
-New-head CI is pending. Full browser gameplay interaction/editor Play inspection
+CI is green on contact head `404b27ad`. Full browser gameplay interaction/editor Play inspection
 and workspace integration remain at the end of the checklist.
 
-Continue with **reusable physics material assets**, then joints, character
-movement, accelerated queries, 3D/voxel physics and final integration. Historical
-recovery notes below describe the original loss, not the current implementation.
+Materials reuse `.profile` assets with type `physics_material`. Scene-side
+resolution keeps strings out of backend colliders and validates coefficients
+across hosts. `sindri.physics2d.material` applies to all an entity's pieces;
+explicit override flags win, and empty profiles keep literals. Coefficient
+updates preserve velocity/forces/joints. Editor async reload retains last-valid
+profiles, save rejects invalid values, and export gathers/validates references.
+Platformer's crate/planks share wood, with a plank restitution override and
+rebound proof. Native project capture now expands prefabs before scene entry.
+
+Material validation: final scoped preflight passed 1,175 native tests and checks;
+warning-denied Clippy passed all six affected crates. Catalogue checks passed
+11 tests and metadata was regenerated. All-feature WASM checks passed physics,
+scene, export, game host and platformer. Chromium fetched the exported material
+and drew the game; native delivery/play and Vulkan capture passed. Visual editor
+interaction/full browser gameplay/workspace checks remain in final integration.
+CI on the material commit is pending.
+
+Continue with **scene-authored joints and typed controls/lifecycle**, then
+character movement, accelerated queries, 3D/voxel physics and final integration.
+Historical recovery notes below describe the original loss, not the current
+implementation.
 
 Use pinned Rust 1.95. This local checkout has the toolchain at
 `/tmp/sindri-physics-rustup`, with rustup shims under

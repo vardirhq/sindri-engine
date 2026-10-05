@@ -289,6 +289,20 @@ contacts and descent rather than foot-sensor overlap. Chromium export/load
 smoke passed; visual inspector and full browser interactions remain in final
 physics integration.
 
+Reusable physics coefficients are project `.profile` assets with type
+`physics_material`, resolved at the scene boundary using shared validation.
+`sindri.physics2d.material` applies them to all an entity's collider pieces,
+including tilemap collision; explicit override flags win over profile values,
+and entities without the component retain their literals. Editor creation,
+profile selection, asynchronous delivery and hot reload use the existing profile
+pipeline. Invalid reloads retain the previous valid edit; coefficient changes
+preserve solver bodies, velocities and joints. Export discovers material
+references and validates profiles, and the shared native/browser host resolves
+them before stepping. Platformer reuses wood for its wind crate and planks,
+explicitly disables plank bounce, and tests the effect of changed restitution.
+Editor loader/reload regression coverage is present; visual inspector review and
+browser gameplay interaction remain in final physics integration.
+
 `sindri.physics2d.rigid_body` and `sindri.physics2d.collider` are registered
 scene components with defaults the engine accepts, so a scene authors bodies and
 colliders and the editor's generic component inspector adds and edits them.

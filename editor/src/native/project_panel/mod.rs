@@ -60,6 +60,7 @@ pub(super) enum BrowserAction {
     NewScript(PathBuf),
     /// Make a reusable `.profile` data asset there.
     NewProfile(PathBuf),
+    NewPhysicsMaterial(PathBuf),
     NewBlockSet(PathBuf),
     /// Copy a file or folder beside itself.
     Duplicate(PathBuf),
@@ -452,7 +453,8 @@ impl EditorApp {
             BrowserAction::CancelRename => self.asset_rename = None,
             BrowserAction::NewFolder(beside) => self.new_folder(&beside),
             BrowserAction::NewScript(beside) => self.new_script(&beside),
-            BrowserAction::NewProfile(beside) => self.new_profile(&beside),
+            BrowserAction::NewProfile(beside) => self.new_profile(&beside, false),
+            BrowserAction::NewPhysicsMaterial(beside) => self.new_profile(&beside, true),
             BrowserAction::NewBlockSet(beside) => self.new_block_set(&beside),
             BrowserAction::Duplicate(path) => self.duplicate_asset(&path),
             BrowserAction::ConfirmDelete(path) => self.deleting = Some(path),

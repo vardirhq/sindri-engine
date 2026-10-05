@@ -75,12 +75,14 @@ impl Run {
             }
         }
 
+        let mut physics = ScenePhysics2d::top_down().map_err(|error| error.to_string())?;
+        physics.set_materials(materials_under(&root)?);
         Ok(Self {
             world,
             components,
             scripts: Scripts::new(),
             sources,
-            physics: ScenePhysics2d::top_down().map_err(|error| error.to_string())?,
+            physics,
             animations: SpriteAnimations::new(),
             sequences: sindri_scene::Sequences::new(),
             input: InputState::default(),
@@ -194,4 +196,21 @@ fn prefabs_under(
         }
     }
     Ok(prefabs)
+}
+
+/// Host plumbing: authored profiles resolve before physics takes its first step.
+fn materials_under(root: &Path) -> Result<sindri_scene::PhysicsMaterialSources, String> {
+    let mut profiles = std::collections::BTreeMap::new();
+    for entry in std::fs::read_dir(root.join("materials")).map_err(|error| error.to_string())? {
+        let path = entry.map_err(|error| error.to_string())?.path();
+        let text = std::fs::read_to_string(&path).map_err(|error| error.to_string())?;
+        let profile =
+            sindri_core::ProfileDocument::from_json(&text).map_err(|error| error.to_string())?;
+        let name = path.file_name().unwrap_or_default().to_string_lossy();
+        profiles.insert(format!("materials/{name}"), profile);
+    }
+    sindri_scene::PhysicsMaterialSources::from_profiles(
+        profiles.iter().map(|(id, profile)| (id.as_str(), profile)),
+    )
+    .map_err(|error| error.to_string())
 }

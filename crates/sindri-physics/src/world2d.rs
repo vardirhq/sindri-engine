@@ -6,6 +6,7 @@
 
 mod contacts;
 mod controls;
+mod materials;
 mod motion;
 mod one_way;
 mod query;

@@ -70,3 +70,10 @@ The hero now grants jump permission from solved solid contact normals, retaining
 its ray for the ground-clearance display. The wind crate flashes amber on hard
 landings from contact impulse. Both policies live in Decay and exercise the
 general contact snapshot API added for this genre showcase.
+
+The crate and planks share `assets/materials/wood.profile`, a reusable physics
+material added for this showcase. The planks explicitly override restitution
+to zero; the crate keeps the shared bounce. `tests/physics_materials.rs` checks
+that both use the asset and that changing its restitution changes the crate's
+rebound. Copy the profile and material component with the scene when using this
+project as a starting point.

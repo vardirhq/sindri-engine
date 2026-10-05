@@ -354,6 +354,62 @@ parent carries its bodies through the authored-pose change rule. This is exercis
 by scene hierarchy regressions and Low Tide's moving deck; it does not create a
 physical joint between parent and child.
 
+## Reusable collision materials
+
+Physics coefficients can be reused as project `.profile` assets with type
+`physics_material`. They use the existing asynchronous profile pipeline, not a
+new asset kind or backend resource. For example:
+
+```json
+{
+  "format_version": 1,
+  "name": "Wood",
+  "type": "physics_material",
+  "values": { "friction": 0.3, "restitution": 0.1 }
+}
+```
+
+Both coefficients are required numbers. Friction must be finite and non-negative;
+restitution must be finite in `[0, 1]`. Unknown coefficient keys are rejected.
+Other profile types remain unrestricted game data. `physics_material_profile`
+at the scene boundary uses the engine-owned `PhysicsMaterial::validate` rules;
+asset decoders and core profile documents stay independent of physics.
+
+An entity's `sindri.physics2d.material` names `profile` and applies it to every
+ordinary and generated tilemap collider piece, sensors included. Without a
+material component, existing per-piece literals are unchanged. An empty profile
+keeps those literals. A non-empty reference must resolve to a loaded physics
+profile; a missing or differently typed profile fails the fixed step. The profile
+replaces both piece coefficients, then explicit `override_friction` and
+`override_restitution` flags select the component's local `friction` and
+`restitution` values. Disabled override values are ignored. A missing reference
+is still an error even when both overrides are enabled. Friction combines by
+minimum; restitution retains the existing average rule.
+
+Hosts build `PhysicsMaterialSources` from their loaded profile documents before
+stepping. Reloaded coefficients update registered colliders in place, preserving
+velocity, forces, mass and joints, and waking affected contacts. Changes to shapes
+or body kinds still use the normal rebuild path. Invalid source sets cannot
+partly replace a valid source set; backend piece updates validate all values
+before changing any collider.
+
+The editor offers “New physics material here”, a structured profile editor,
+profile selection and explicit override controls through checked component
+commands and undo/redo. Its asynchronous loader watches valid and invalid files;
+a failed edit reports the asset and retains the previous valid profile. Invalid
+coefficient edits cannot overwrite the file through the profile editor. Play
+waits for initial delivery before physics runs. Export walks scene and prefab
+material references, including inactive entities, and validates physics profiles
+before producing output; native and browser hosts use the same scene resolver.
+
+Added for the platformer: its wind crate and one-way planks share
+`materials/wood.profile`, with an explicit zero-bounce override on the planks.
+Native project delivery expands placed prefabs before entering the scene, as
+browser delivery does. Native regressions verify sharing, precedence and a changed crate rebound when
+the shared restitution changes. Editor loader/reload tests exercise delivery and
+last-valid retention. Visual inspector review and full browser gameplay remain
+part of final physics integration.
+
 ## Runtime ownership and stepping
 
 `PhysicsWorld` is runtime state beside `World`, not serialized state inside it.

@@ -24,6 +24,7 @@ use crate::error::CausewayError;
 
 use crate::styling::Styles;
 
+mod profiles;
 /// Where a session's save is kept, and when it is written out.
 mod saves;
 
@@ -166,24 +167,6 @@ impl Session {
         }
     }
 
-    /// The prefabs this project's scripts can spawn.
-    ///
-    /// A build had no way to be given any, so `World.spawn` in a shipped game
-    /// answered that the prefab was missing while the same scene spawned
-    /// correctly in the editor. A project whose enemies are prefabs is every
-    /// project that spawns anything.
-    #[must_use]
-    pub fn with_prefabs(mut self, prefabs: PrefabSources) -> Self {
-        self.prefabs = prefabs;
-        self
-    }
-
-    #[must_use]
-    pub fn with_profiles(mut self, profiles: ProfileSources) -> Self {
-        self.profiles = profiles;
-        self
-    }
-
     /// The tile sets the scenes' volumes name.
     ///
     /// Without these a script's pathfinding cannot tell a pond from a lawn:
@@ -317,6 +300,7 @@ impl Session {
         // Physics first, so a script observes the events of the step that just
         // happened and its writes take effect on the next one, which is the
         // order `docs/physics.md` fixes.
+        self.sync_physics_materials()?;
         self.physics.step(
             world,
             &self.components,

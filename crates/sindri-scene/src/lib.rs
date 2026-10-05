@@ -19,6 +19,7 @@ mod input_actions;
 mod navigation;
 mod occlusion;
 mod physics;
+mod physics_material;
 mod physics_sync;
 mod placement;
 pub(crate) mod screen_ui;
@@ -69,6 +70,10 @@ pub use occlusion::{
 pub use physics::{
     Collider2dComponent, LAYER_LIMIT, OneWay2dComponent, PhysicsWorld2dComponent,
     RigidBody2dComponent, RigidBodyKind, collision_layers, layer_bit,
+};
+pub use physics_material::{
+    PhysicsMaterial2dComponent, PhysicsMaterialError, PhysicsMaterialSources,
+    physics_material_profile, referenced_physics_materials,
 };
 pub use physics_sync::{PhysicsSyncError, ScenePhysics2d};
 pub use placement::{
