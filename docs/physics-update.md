@@ -6,7 +6,9 @@ are permitted. Gameplay and demonstrations remain in Decay. Runtime, scene,
 editor, scripting, proof and documentation move together.
 
 For a new implementation session, read [the recovery handoff](physics-update-handoff.md).
-CCD, one-way platforms, forces/rotation and contact snapshots are implemented and checked. The remaining items below are the active scope.
+CCD, one-way platforms, forces/rotation, contacts and materials are implemented
+and checked. Scene-authored distance constraints form a checked joint foundation.
+The remaining items below are the active scope.
 
 ## Acceptance checklist
 
@@ -135,5 +137,31 @@ surface-specific completeness. This checklist does not mark those surfaces done.
   profile, configured WebGPU, ran scripts and drew the game without runtime
   errors. Native project delivery/play regression and Vulkan capture passed.
 - Visual editor interaction review, full browser gameplay and workspace checks
-  remain in final integration. CI on the material commit is pending.
+  remain in final integration. CI is green on material commit `936d1a95`.
 - Next slice: scene-authored joints and their typed controls/lifecycle.
+
+### Scene-authored distance checkpoint
+
+- Separate joint entities own maximum-distance constraints, using stable scene
+  IDs resolved after all endpoint bodies. Unchanged frames keep the solver joint;
+  edits replace only the constraint. Rebuilds reconnect in the same fixed step;
+  inactive/missing endpoints suspend it and owner/component removal releases it.
+- Existing `connect_distance` and deferred spawn-window behavior are preserved.
+  Generic checked inspector edits and command undo preserve motion and ownership.
+- Platformer's hanging lantern is driven by Decay wind and a scene tether;
+  Decay aligns its visible cord. Its regression checks movement, bounded distance
+  over 300 steps and removal, alongside the existing level-goal regressions.
+- Final scoped preflight passed 1,115 native tests and warning-denied all-target/
+  all-feature checks for physics, scene, editor and platformer. Typed preflight
+  passed the lantern script with zero errors/reminders. Warning-denied Clippy
+  passed those four crates; catalogue currentness/completeness passed 11 tests.
+- All-feature WASM checks passed physics, scene and platformer. The rebuilt
+  generic browser host loaded the export at `/examples/platformer/`, fetched
+  assets, configured WebGPU and drew the swinging lantern without runtime errors.
+  Native Vulkan capture passed and both captures were visually reviewed.
+- This is a foundation, not joint acceptance completion. Hinges, sliders, springs,
+  motors, typed owned-joint controls, dedicated reference diagnostics/selection
+  and full prefab references remain. Runtime-spawned prefabs lack stable local
+  IDs; prefab-root aliases depend on metadata absent from pre-expanded exports.
+  The reference gap is recorded in parity. Visual editor interaction and full
+  browser gameplay remain in final integration. CI must verify the pushed head.

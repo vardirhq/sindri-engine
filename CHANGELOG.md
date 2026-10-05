@@ -1,5 +1,7 @@
 # Changelog
 
+- Add scene-authored 2D distance joints with stable scene endpoint IDs, explicit ownership, edit/undo support and reconnection after endpoint rebuilds. Platformer has a wind-driven hanging lantern. Other joint kinds, typed ownership controls and spawned-prefab references remain in progress.
+
 - Add reusable 2D physics material profiles with shared coefficient validation and explicit local overrides. The editor can create, select and hot reload them while preserving body motion; exported games collect and load their references. Platformer’s crate and planks share a wood material. Native project capture now expands placed prefabs before scene entry, matching browser delivery.
 
 - Add copied 2D solid contact snapshots to runtime and typed Decay: world points, support normals, normal/friction impulses and force. Sleeping contacts keep support geometry; sensors stay separate. Platformer jumps use solved support and its crate flashes on hard landings.

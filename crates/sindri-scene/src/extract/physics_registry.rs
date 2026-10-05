@@ -75,5 +75,13 @@ pub(super) fn register(components: &mut ComponentSchemaRegistry) -> Result<(), S
         "profile",
         FieldMeaning::Asset(AssetKind::Profile),
     )])?;
+    components.register_with_default::<crate::DistanceJoint2dComponent>(
+        "Distance Joint 2D",
+        serde_json::json!({"first": "", "second": "", "max_distance": 1.0}),
+    )?;
+    components.describe::<crate::DistanceJoint2dComponent>([
+        ("first", FieldMeaning::Entity),
+        ("second", FieldMeaning::Entity),
+    ])?;
     Ok(())
 }

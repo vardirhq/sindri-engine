@@ -6,6 +6,7 @@
 
 mod contacts;
 mod controls;
+mod joints;
 mod materials;
 mod motion;
 mod one_way;
@@ -25,7 +26,7 @@ use crate::types2d::{
     Collider2d, ColliderShape2d, DistanceJoint2d, PhysicsEvent2d, PhysicsEventKind, PhysicsPose2d,
     RigidBody2d,
 };
-use crate::validate::{PhysicsError, finite2, positive, validate_body2d, validate_colliders2d};
+use crate::validate::{PhysicsError, finite2, validate_body2d, validate_colliders2d};
 
 #[derive(Clone)]
 struct BodyRecord2d {
@@ -69,6 +70,7 @@ pub struct PhysicsWorld2d {
     /// not reached the physics world yet. They are resolved after the scene has
     /// synchronized every body for the frame.
     pending_distance_joints: Vec<DistanceJoint2d>,
+    owned_joints: HashMap<EntityId, joints::OwnedJoint>,
 }
 
 impl PhysicsWorld2d {
@@ -86,6 +88,7 @@ impl PhysicsWorld2d {
             collider_entities: HashMap::new(),
             pending_velocity: HashMap::new(),
             pending_distance_joints: Vec::new(),
+            owned_joints: HashMap::new(),
         })
     }
 
@@ -197,74 +200,6 @@ impl PhysicsWorld2d {
         Ok(())
     }
 
-    /// Connects two bodies with a hard maximum-distance joint.
-    ///
-    /// The bodies may move closer and rotate freely, but the solver will not
-    /// allow their centres to separate beyond `max_distance`. The backend uses
-    /// Rapier's rope joint today; callers see only Sindri entities and units.
-    pub fn connect_distance(
-        &mut self,
-        first: EntityId,
-        second: EntityId,
-        max_distance: f32,
-    ) -> Result<(), PhysicsError> {
-        validate_distance_joint(first, second, max_distance)?;
-        let first_body = self.record(first)?.body;
-        let second_body = self.record(second)?.body;
-        self.backend.impulse_joints.insert(
-            first_body,
-            second_body,
-            r2::RopeJointBuilder::new(max_distance).contacts_enabled(false),
-            true,
-        );
-        Ok(())
-    }
-
-    /// Queues a distance joint whose bodies are authored but not both built yet.
-    ///
-    /// This is the joint equivalent of `remember_linear_velocity`: a prefab may
-    /// spawn a chain and connect it in one script pass, while physics materializes
-    /// all those bodies at the next scene synchronization.
-    pub fn remember_distance_joint(
-        &mut self,
-        first: EntityId,
-        second: EntityId,
-        max_distance: f32,
-    ) -> Result<(), PhysicsError> {
-        validate_distance_joint(first, second, max_distance)?;
-        self.pending_distance_joints
-            .push(DistanceJoint2d::new(first, second, max_distance));
-        Ok(())
-    }
-
-    /// Finishes the lifecycle window opened by scripts before synchronization.
-    ///
-    /// Every body has now had a chance to materialize. Pending joints whose two
-    /// endpoints exist are created; requests whose endpoint vanished are simply
-    /// discarded because there is no longer anything useful to connect.
-    pub fn finish_synchronize(&mut self) -> Result<(), PhysicsError> {
-        let pending = std::mem::take(&mut self.pending_distance_joints);
-        for joint in pending {
-            if self.contains(joint.first) && self.contains(joint.second) {
-                self.connect_distance(joint.first, joint.second, joint.max_distance)?;
-            }
-        }
-        self.pending_controls.clear();
-        self.pending_drop.clear();
-        self.pending_velocity.clear();
-        Ok(())
-    }
-
-    /// Drops remembered work without resolving it.
-    ///
-    /// Kept for callers that deliberately abandon a synchronization pass.
-    pub fn forget_pending(&mut self) {
-        self.pending_controls.clear();
-        self.pending_drop.clear();
-        self.pending_velocity.clear();
-        self.pending_distance_joints.clear();
-    }
-
     /// Inserts an entity with no authored rigid-body as static collision
     /// geometry. The hidden backend may synthesize a fixed body; that choice is
     /// intentionally not observable through the Sindri API.
@@ -286,6 +221,9 @@ impl PhysicsWorld2d {
     }
 
     pub fn remove(&mut self, entity: EntityId) -> bool {
+        self.remove_owned_joint(entity);
+        self.owned_joints
+            .retain(|_, record| record.joint.first != entity && record.joint.second != entity);
         self.invalidate_contacts(entity);
         self.pending_controls.remove(&entity);
         self.pending_drop.remove(&entity);
@@ -402,17 +340,6 @@ impl PhysicsWorld2d {
             kind,
         })
     }
-}
-
-fn validate_distance_joint(
-    first: EntityId,
-    second: EntityId,
-    max_distance: f32,
-) -> Result<(), PhysicsError> {
-    if first == second {
-        return Err(PhysicsError::JointToSelf(first));
-    }
-    positive("distance_joint_max_distance", max_distance)
 }
 
 fn body_builder(body: RigidBody2d) -> r2::RigidBodyBuilder {

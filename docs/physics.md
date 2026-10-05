@@ -410,6 +410,48 @@ the shared restitution changes. Editor loader/reload tests exercise delivery and
 last-valid retention. Visual inspector review and full browser gameplay remain
 part of final physics integration.
 
+## Scene-authored distance constraints
+
+`sindri.physics2d.distance_joint` lives on a separate joint entity:
+
+```json
+{ "first": "lantern-anchor", "second": "wind-lantern", "max_distance": 2.0 }
+```
+
+The endpoint strings are stable scene entity IDs, not runtime handles. Resolution
+tries the joint owner's ID namespace before the containing scene and never binds
+across loaded scene roots. An inactive local match does not fall through to an
+external entity with the same name. Placed-prefab sibling IDs resolve within their
+instance namespace; prefab-root aliases require preserved prefab metadata.
+Runtime-spawned prefabs currently have no stable local IDs and are not supported
+by this authored reference path. Full prefab reference integration remains part
+of the joint track.
+
+Constraints synchronize after all bodies, so endpoint collider/body rebuilds
+reconnect the owned joint in the same fixed step. Missing, empty, inactive or
+collider-less endpoints suspend it without failing a step; they reconnect when
+available. This also means a misspelled but valid ID waits rather than producing
+a runtime diagnostic. Removing/disabling the joint entity or its component drops
+its constraint. Removing an endpoint clears backend ownership; reappearance can
+reconnect the authored constraint. Several joint entities may connect one body.
+
+`PhysicsWorld2d::set_distance_joint(owner, DistanceJoint2d)` validates before
+replacing an owned constraint; unchanged requests retain the solver joint.
+Changing endpoints/distance replaces only that constraint, preserving body
+motion. `remove_owned_joint(owner)` releases it independently of legacy
+`connect_distance` connections. Both distance paths use the existing positive,
+finite maximum centre distance, free rotation/closer motion and disabled mutual
+endpoint contacts. Runtime owner IDs are never serialized.
+
+The generic checked component inspector authors the endpoint IDs and distance;
+command/undo regressions preserve body velocity and joint count. Dedicated
+reference selection/diagnostics and visual inspector review remain unverified.
+This foundation is added for the platformer: a physical lantern hangs from an
+anchor while Decay wind drives it and Decay stretches/turns its visible cord.
+The game regression observes movement, bounded distance and tether removal.
+Hinges, sliders, springs, motors and typed owned-joint controls remain incomplete;
+the existing typed `Physics.connect_distance` keeps its previous semantics.
+
 ## Runtime ownership and stepping
 
 `PhysicsWorld` is runtime state beside `World`, not serialized state inside it.

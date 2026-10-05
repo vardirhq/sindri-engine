@@ -303,6 +303,17 @@ explicitly disables plank bounce, and tests the effect of changed restitution.
 Editor loader/reload regression coverage is present; visual inspector review and
 browser gameplay interaction remain in final physics integration.
 
+`sindri.physics2d.distance_joint` adds a scene-authored maximum-distance
+constraint owned by a separate entity. Endpoint strings resolve to stable IDs
+inside the containing scene; unchanged frames retain one constraint, edits/undo
+preserve body motion, and endpoint rebuilds reconnect after body synchronization.
+Inactive/missing endpoints suspend the constraint; removing its entity/component
+releases it independently of legacy script-created joints. Platformer's lantern
+sways under Decay wind within its authored tether and renders its cord in Decay.
+Hinge/slider/spring/motor kinds and typed owned-joint controls are still absent.
+Runtime-spawned prefab local references and exported prefab-root aliases remain
+gaps; dedicated picker/diagnostics and visual inspector review are unverified.
+
 `sindri.physics2d.rigid_body` and `sindri.physics2d.collider` are registered
 scene components with defaults the engine accepts, so a scene authors bodies and
 colliders and the editor's generic component inspector adds and edits them.

@@ -628,6 +628,31 @@
       "addable": true,
       "apply": {},
       "default_payload": {
+        "first": "",
+        "max_distance": 1.0,
+        "second": ""
+      },
+      "display_name": "Distance Joint 2D",
+      "fields": {
+        "first": "",
+        "max_distance": 1.0,
+        "second": ""
+      },
+      "meanings": {
+        "first": {
+          "kind": "entity"
+        },
+        "second": {
+          "kind": "entity"
+        }
+      },
+      "schema_version": 1,
+      "type_name": "sindri.physics2d.distance_joint"
+    },
+    {
+      "addable": true,
+      "apply": {},
+      "default_payload": {
         "friction": 0.5,
         "override_friction": false,
         "override_restitution": false,

@@ -77,3 +77,8 @@ to zero; the crate keeps the shared bounce. `tests/physics_materials.rs` checks
 that both use the asset and that changing its restitution changes the crate's
 rebound. Copy the profile and material component with the scene when using this
 project as a starting point.
+
+A lantern hangs from a scene-authored distance joint near the raised planks.
+Decay applies the wind and draws the cord from the solved body positions;
+`tests/distance_joints.rs` verifies motion, the distance bound and releasing the
+tether. The separate tether entity is the pattern to copy for a distance joint.

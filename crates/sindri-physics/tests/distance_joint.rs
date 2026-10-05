@@ -79,3 +79,52 @@ fn a_distance_joint_cannot_connect_a_body_to_itself() {
         .expect_err("self-joint must be rejected before backend lookup");
     assert!(error.to_string().contains("to itself"));
 }
+
+#[test]
+fn owned_constraints_replace_idempotently_and_leave_legacy_connections_intact() {
+    let mut world = PhysicsWorld2d::new([0.0, 0.0]).unwrap();
+    let first = entity(1);
+    let second = entity(2);
+    let owner = entity(3);
+    for body in [first, second] {
+        world
+            .insert_body(body, RigidBody2d::default(), &[Collider2d::circle(0.2)])
+            .unwrap();
+    }
+    world.connect_distance(first, second, 3.0).unwrap();
+    let joint = sindri_physics::DistanceJoint2d::new(first, second, 2.0);
+    world.set_distance_joint(owner, joint).unwrap();
+    world.set_distance_joint(owner, joint).unwrap();
+    assert_eq!(world.joint_count(), 2);
+    assert!(
+        world
+            .set_distance_joint(
+                owner,
+                sindri_physics::DistanceJoint2d::new(first, second, -1.0)
+            )
+            .is_err()
+    );
+    assert_eq!(
+        world.joint_count(),
+        2,
+        "invalid edits retain the previous constraint"
+    );
+    world.set_linear_velocity(second, [4.0, 0.0]).unwrap();
+    world
+        .set_distance_joint(
+            owner,
+            sindri_physics::DistanceJoint2d::new(first, second, 4.0),
+        )
+        .unwrap();
+    assert!((world.linear_velocity(second).unwrap()[0] - 4.0).abs() < f32::EPSILON);
+    assert!(world.remove_owned_joint(owner));
+    assert_eq!(world.joint_count(), 1);
+    assert!(!world.remove_owned_joint(owner));
+    world.set_distance_joint(owner, joint).unwrap();
+    world.remove(second);
+    assert_eq!(world.joint_count(), 0);
+    assert!(
+        !world.remove_owned_joint(owner),
+        "body removal clears ownership records"
+    );
+}

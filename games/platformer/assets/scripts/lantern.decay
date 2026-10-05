@@ -1,0 +1,21 @@
+// Wind moves the body; the authored constraint keeps it attached to the hook.
+script Lantern {
+    var age: f32 = 0.0;
+    var hook: Entity = null;
+    var cord: Entity = null;
+    fn start() {
+        this.hook = World.find("Lantern hook");
+        this.cord = World.find("Lantern cord");
+    }
+    fn update(dt: f32) {
+        this.age += dt;
+        Physics.apply_force(this.entity, Vec2(sin(this.age * 1.8) * 0.6, 0.0));
+        let p = this.transform.world_position;
+        let h = this.hook.transform.world_position;
+        let dx = p.x - h.x;
+        let dy = p.y - h.y;
+        this.cord.transform.position = Vec3((p.x + h.x) * 0.5, (p.y + h.y) * 0.5, 0.35);
+        this.cord.transform.scale = Vec3(sqrt(dx * dx + dy * dy), 0.025, 1.0);
+        this.cord.transform.rotation_z = atan2(dy, dx);
+    }
+}

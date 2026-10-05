@@ -75,6 +75,7 @@ pub struct ScenePhysics2d {
     /// keeps.
     host_gravity: [f32; 2],
     materials: crate::PhysicsMaterialSources,
+    joints: crate::physics_joints::SceneJoints2d,
 }
 
 /// What a scene said about one entity, as far as physics is concerned.
@@ -104,6 +105,7 @@ impl ScenePhysics2d {
             events: Vec::new(),
             host_gravity: gravity,
             materials: crate::PhysicsMaterialSources::default(),
+            joints: crate::physics_joints::SceneJoints2d::default(),
         })
     }
 
@@ -169,6 +171,8 @@ impl ScenePhysics2d {
             self.world.set_gravity(gravity)?;
         }
         self.synchronize(world, components)?;
+        self.joints
+            .synchronize(world, components, &mut self.world)?;
         // Scripts may set velocity or connect two freshly spawned bodies before
         // either backend body exists. Synchronization above gave every authored
         // body its chance to materialize; resolve those deferred operations now

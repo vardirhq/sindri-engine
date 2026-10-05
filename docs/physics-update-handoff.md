@@ -58,9 +58,24 @@ warning-denied Clippy passed all six affected crates. Catalogue checks passed
 scene, export, game host and platformer. Chromium fetched the exported material
 and drew the game; native delivery/play and Vulkan capture passed. Visual editor
 interaction/full browser gameplay/workspace checks remain in final integration.
-CI on the material commit is pending.
+CI is green on material commit `936d1a95`.
 
-Continue with **scene-authored joints and typed controls/lifecycle**, then
+A checked **scene-authored distance-joint foundation** now adds separate owner
+entities, stable scene references, idempotent synchronization, constraint-only
+edits, same-step endpoint rebuilds and removal/inactivity handling. Existing
+`connect_distance` is preserved. Platformer's wind-driven hanging lantern proves
+bounded movement and removal; its visible cord is authored by Decay.
+Scoped preflight passed 1,115 native tests, all-target/all-feature checks and
+zero-error/reminder typed script preflight. Four-crate Clippy, 11 catalogue tests,
+WASM checks and rebuilt native/Chromium captures passed. See the checkpoint in
+`physics-update.md` for limits and evidence; pushed-head CI is still required.
+
+Joint acceptance stays open. Add hinges, sliders, springs and motors, typed
+owned controls and dedicated reference authoring/diagnostics. Fix stable local
+references for runtime-spawned prefabs and preserve root-alias semantics through
+export pre-expansion; the gap is explicitly recorded in parity.
+
+Continue with **the remaining joints and typed controls/lifecycle**, then
 character movement, accelerated queries, 3D/voxel physics and final integration.
 Historical recovery notes below describe the original loss, not the current
 implementation.
@@ -313,7 +328,8 @@ branch codex/physics-update. Read AGENTS.md, CLAUDE.md,
 docs/physics-update-handoff.md and docs/physics-update.md first.
 Implement every remaining acceptance item, including docs, in this one PR.
 CCD, one-way platforms, forces/rotation and contacts are checked and saved on
-the branch. Continue with reusable material assets, then the remaining checklist.
+the branch. Continue with the remaining joint kinds, controls and prefab references, then
+the remaining checklist.
 Push checked small slices regularly, each feature in one push or less.
 Keep gameplay in Decay, prove editor/runtime/script/game behavior, and do
 not mark the PR ready until final applicable checks and CI are green.
