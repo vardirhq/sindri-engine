@@ -464,6 +464,34 @@ surface-specific completeness. This checklist does not mark those surfaces done.
   25 assets and exercised repeated cutting/repair, retarget/release/reconnect and
   prefab spawning without runtime errors. Native/browser captures were visually
   reviewed, including the repaired lantern after recovery from free fall.
-- CI must verify this slice; all checks passed on prior head `5973c8f5`.
+- CI passed on typed distance creation head `a2c54306`.
 - Typed hinge/slider/spring creation, additional motor modes, automatic save-path
   integration and final joint/workspace acceptance remain open.
+
+
+### Typed hinge creation checkpoint
+
+- Added `Physics.create_hinge_joint` with finite body-local `Vec2` anchors,
+  without transform scale. The enabled hinge starts with angular limits and
+  motor disabled; existing motor controls can tune it before synchronization.
+- Creation shares empty-owner validation with distance creation and scoped
+  endpoint validation with retargeting. Next fixed synchronization owns solver
+  allocation, preserving other components, bodies/motion and legacy constraints.
+- Tests cover pre-sync creation, repeated recreation, local anchor geometry,
+  subsequent motor drive, conflicting owners, invalid anchors, missing physics,
+  null/inactive targets and runtime prefab isolation for both constructors.
+- Platformer H rebuilds its placed windmill hinge and restarts its motor. A
+  repeated-rebuild run keeps the rotor at its axle and observes reversal while
+  the separately spawned windmill remains independently owned.
+- Final scoped preflight passed 342 native tests and warning-denied all-target/
+  all-feature checks for Decay and platformer. Typed setup-script preflight had
+  zero errors/reminders. Two-crate Clippy, 11 regenerated catalogue tests and
+  the 1,104-file size gate passed.
+- All-target/all-feature WASM checks passed both crates; the generic browser host
+  was rebuilt. Export and native Vulkan capture passed. Chromium WebGPU fetched
+  25 assets and exercised two H rebuilds with a spawned windmill, plus existing
+  tether cut/repair/retarget/release controls, without runtime errors.
+  Native/browser captures were visually reviewed.
+- CI must verify this slice; all checks passed on prior head `a2c54306`. Typed
+  slider/spring creation, remaining motor modes, automatic save integration and
+  final joint/workspace acceptance remain open.

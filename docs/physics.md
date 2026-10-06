@@ -519,7 +519,7 @@ bodies need not be synchronized yet. Next fixed synchronization creates the
 constraint, preserving other owner components, bodies/motion and legacy connections.
 Existing joints, invalid handles/references and invalid lengths fail before mutation.
 Platformer C repairs the cut cord using its selected hook and length. Typed creation
-for other joint kinds and automatic saved-spawn reference integration remain open
+for slider/spring joints and automatic saved-spawn reference integration remain open
 in the joint track.
 
 ## Scene-authored hinges and velocity motors
@@ -563,7 +563,18 @@ the next fixed synchronization. Its values persist through endpoint rebuilds and
 the valid spawn-to-synchronization window. Zero torque disables the motor rather
 than braking; to brake, set zero velocity with positive torque. Typed
 `Physics.remove_joint` releases the authored hinge at next synchronization;
-creation controls remain absent.
+typed slider/spring creation remains absent.
+
+`Physics.create_hinge_joint(owner, first, second, first_anchor, second_anchor)`
+authors an enabled hinge on an existing owner with no authored 2D joint of any
+kind. The scoped endpoint/physics contract matches distance creation, including
+null/unbound or inactive targets and pre-body synchronization. Finite `Vec2`
+anchors use body-local world units without transform scale; angular limits and
+motor start disabled. All validation precedes mutation. The next fixed step
+creates the owned constraint while retaining other owner components and bodies.
+`set_hinge_motor` can configure drive immediately after creation. Platformer H
+rebuilds its placed windmill hinge and restarts its motor while the spawned
+windmill remains independently owned.
 
 The generic checked inspector authors hinge settings and command undo reverses
 motor edits. Visual editor review and automatic save integration

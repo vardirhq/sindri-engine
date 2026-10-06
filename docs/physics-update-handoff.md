@@ -245,11 +245,29 @@ errors/reminders. Two-crate Clippy, 11 regenerated catalogue tests and the
 was rebuilt. Export and native Vulkan capture passed. Chromium WebGPU fetched
 25 assets and exercised repeated cutting/repair, retarget/release/reconnect and
 prefab spawning without runtime errors. Native/browser captures were visually
-reviewed, including the repaired lantern after recovery from free fall. CI must
-verify this slice; all checks passed on prior head `5973c8f5`.
+reviewed, including the repaired lantern after recovery from free fall. CI passed
+on typed distance creation head `a2c54306`.
 
-Joint acceptance stays open. Add remaining motor modes and typed hinge/slider/
-spring creation controls. Automatic editor/script save integration remains open; the reference gap remains partial in parity.
+A **typed hinge creation slice** adds `Physics.create_hinge_joint` with finite
+body-local `Vec2` anchors, angular limits/motor initially disabled and existing
+motor controls available before body synchronization. Shared owner/scope checks
+validate before mutation. Tests exercise pre-sync and repeated creation, local
+anchors, motor drive, owner/anchor rejection, missing physics, unbound/inactive
+endpoints and runtime prefab isolation. Platformer H rebuilds its placed hinge;
+a repeated-rebuild run observes fixed axle and reversal while a second windmill
+remains independently owned. Final scoped preflight passed 342 native tests and
+warning-denied all-target/all-feature checks for Decay and platformer. Typed
+setup-script preflight had zero errors/reminders. Two-crate Clippy, 11 regenerated
+catalogue tests and the 1,104-file size gate passed. All-target/all-feature WASM
+checks passed both crates; the generic browser host was rebuilt. Export and
+native Vulkan capture passed. Chromium WebGPU fetched 25 assets and exercised
+two H rebuilds with a spawned windmill, plus tether cut/repair/retarget/release,
+without runtime errors. Native/browser captures were visually reviewed. CI must
+verify this slice; all checks passed on prior head `a2c54306`.
+
+Joint acceptance stays open. Add remaining motor modes and typed slider/spring
+creation controls. Automatic editor/script save integration remains open; the
+reference gap remains partial in parity.
 
 Continue with **the remaining joints and typed controls/lifecycle**, then
 character movement, accelerated queries, 3D/voxel physics and final integration.
@@ -504,7 +522,7 @@ branch codex/physics-update. Read AGENTS.md, CLAUDE.md,
 docs/physics-update-handoff.md and docs/physics-update.md first.
 Implement every remaining acceptance item, including docs, in this one PR.
 CCD, one-way platforms, forces/rotation and contacts are checked and saved on
-the branch. Continue with typed hinge/slider/spring creation controls, remaining
+the branch. Continue with typed slider/spring creation controls, remaining
 motor modes and automatic save-reference integration, then the remaining checklist.
 Push checked small slices regularly, each feature in one push or less.
 Keep gameplay in Decay, prove editor/runtime/script/game behavior, and do

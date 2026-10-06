@@ -61,6 +61,7 @@ impl WorldHost<'_> {
                 | PhysicsCall::SetJointEndpoints
                 | PhysicsCall::RemoveJoint
                 | PhysicsCall::CreateDistanceJoint
+                | PhysicsCall::CreateHingeJoint
         ) {
             return self.physics_joint_call(call, path, args);
         }

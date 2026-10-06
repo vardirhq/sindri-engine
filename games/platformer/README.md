@@ -13,6 +13,9 @@ Z cuts the cord; later tether controls do nothing until C repairs it.
 C creates a fresh owned distance joint at the selected hook and tether length.
 The cord disappears while the constraint is suspended.
 
+H rebuilds the placed windmill hinge and restarts its motor, keeping the axle
+fixed and the separately spawned mechanism independent.
+
 V places or removes a second powered windmill from a reusable prefab. Its hinge
 references its own root axle and rotor, and Decay reverses the motor.
 
@@ -119,3 +122,6 @@ reconnects it and returns to the original length through keyboard-driven Decay.
 `tests/saved_joints.rs` saves and reopens a Decay-spawned nested windmill through
 registry-based reference remapping, then checks both motor directions, its fixed
 world-space axle and independent constraint ownership.
+
+`tests/hinge_motor.rs` also rebuilds the placed hinge twice with H while a second
+windmill is present, checking scoped endpoints, fixed axle and continued reversal.

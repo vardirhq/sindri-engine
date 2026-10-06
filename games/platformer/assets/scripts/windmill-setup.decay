@@ -3,6 +3,14 @@ script WindmillSetup {
     @export let template: Prefab;
     var made: Entity = null;
     fn update(dt: f32) {
+        if Input.just_pressed("H") {
+            let owner = World.find("Windmill hinge");
+            let axle = World.find("Windmill axle");
+            let rotor = World.find("Windmill rotor");
+            Physics.remove_joint(owner);
+            Physics.create_hinge_joint(owner, axle, rotor, Vec2(0.0, 0.0), Vec2(0.0, 0.0));
+            Physics.set_hinge_motor(owner, 2.0, 1.0);
+        }
         if Input.just_pressed("V") {
             if this.made != null {
                 World.despawn(this.made);

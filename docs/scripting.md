@@ -1026,6 +1026,7 @@ a person who has not clicked yet.
 | `Physics.set_joint_endpoints(joint, first, second)` | nothing |
 | `Physics.remove_joint(joint)` | nothing |
 | `Physics.create_distance_joint(joint, first, second, max_distance)` | nothing |
+| `Physics.create_hinge_joint(joint, first, second, first_anchor, second_anchor)` | nothing |
 | `Physics.raycast(origin, direction, max_distance, mask, include_sensors, exclude)` | `RayHit2d` or `null` |
 | `Physics.cast_circle(origin, radius, direction, max_distance, mask, include_sensors, exclude)` | `RayHit2d` or `null` |
 | `Physics.cast_box(origin, half_size, rotation, direction, max_distance, mask, include_sensors, exclude)` | `RayHit2d` or `null` |
@@ -1110,7 +1111,15 @@ including owner conflicts, stale/unstable/out-of-scope and identical endpoints.
 It works before bodies exist; the next fixed synchronization creates the owned
 constraint without replacing bodies or legacy connections. Other owner components
 are retained. Platformer C repairs its cut cord at the selected hook and length.
-Typed hinge, slider and spring creation remain absent.
+
+`Physics.create_hinge_joint(joint, first, second, first_anchor, second_anchor)`
+uses the same owner, physics and scoped endpoint contract. Its finite `Vec2`
+anchors are body-local world units without transform scale. The enabled hinge
+starts with angular limits and motor disabled; `set_hinge_motor` drives it after
+creation, even before initial body synchronization. Invalid anchors fail before
+mutation. Platformer H rebuilds the placed windmill hinge and restarts its motor,
+without affecting the separately spawned windmill. Typed slider and spring
+creation remain absent.
 
 `Physics.remove_joint(joint)` removes exactly one valid authored distance, hinge,
 slider or spring component, releasing its solver constraint at the next fixed

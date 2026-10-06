@@ -3,7 +3,7 @@ use super::*;
 
 const CREATE: &str = r#"Physics.create_distance_joint(this.entity, World.find("Anchor"), World.find("Body"), 10.0);"#;
 
-fn empty_fixture() -> (SceneExtractor, World, EntityId, EntityId) {
+pub(super) fn empty_fixture() -> (SceneExtractor, World, EntityId, EntityId) {
     let (extractor, mut world, owner, body) = fixture(KINDS[0]);
     world.get_mut(owner).unwrap().components.remove(KINDS[0]);
     world.get_mut(body).unwrap().name = Some("Body".into());
@@ -14,7 +14,7 @@ fn empty_fixture() -> (SceneExtractor, World, EntityId, EntityId) {
     (extractor, world, owner, body)
 }
 
-fn run_call(
+pub(super) fn run_call(
     world: &mut World,
     extractor: &SceneExtractor,
     physics: &mut ScenePhysics2d,
@@ -192,50 +192,55 @@ fn unstable_and_out_of_scope_references_are_rejected_atomically() {
 
 #[test]
 fn runtime_prefab_creation_keeps_local_paths_and_rejects_other_instances() {
-    let (extractor, mut template, owner, body) = empty_fixture();
-    let root = template
-        .entity_for_source_id(&SceneEntityId::new("anchor").unwrap())
-        .unwrap();
-    template.set_parent(owner, Some(root)).unwrap();
-    template.set_parent(body, Some(root)).unwrap();
-    let prefab = sindri_core::PrefabDocument {
-        entities: template.to_scene().unwrap().entities,
-        ..sindri_core::PrefabDocument::default()
-    };
-    let mut world = World::default();
-    let first = world.spawn_prefab(&prefab).unwrap();
-    let second = world.spawn_prefab(&prefab).unwrap();
-    let key = SceneEntityId::new("joint").unwrap();
-    let first_owner = first.by_source_id[&key];
-    let second_owner = second.by_source_id[&key];
-    world
-        .get_mut(second_owner)
-        .unwrap()
-        .components
-        .remove(ScriptComponent::TYPE_NAME);
-    let mut physics = ScenePhysics2d::top_down().unwrap();
-    run_call(&mut world, &extractor, &mut physics, CREATE, true);
-    assert_eq!(
-        world.get(first_owner).unwrap().components[KINDS[0]]["second"],
-        "body"
-    );
-    physics
-        .step(&mut world, extractor.components(), STEP)
-        .unwrap();
-    assert_eq!(physics.world().joint_count(), 1);
-    let script = world
-        .get_mut(first_owner)
-        .unwrap()
-        .components
-        .remove(ScriptComponent::TYPE_NAME)
-        .unwrap();
-    world
-        .get_mut(second_owner)
-        .unwrap()
-        .components
-        .insert(ScriptComponent::TYPE_NAME.into(), script);
-    let before = world.get(second_owner).unwrap().components.clone();
-    run_call(&mut world, &extractor, &mut physics, CREATE, false);
-    assert_eq!(world.get(second_owner).unwrap().components, before);
-    assert_eq!(physics.world().joint_count(), 1);
+    for (kind, call) in [
+        (KINDS[0], CREATE),
+        (KINDS[1], super::hinge_creation::CREATE),
+    ] {
+        let (extractor, mut template, owner, body) = empty_fixture();
+        let root = template
+            .entity_for_source_id(&SceneEntityId::new("anchor").unwrap())
+            .unwrap();
+        template.set_parent(owner, Some(root)).unwrap();
+        template.set_parent(body, Some(root)).unwrap();
+        let prefab = sindri_core::PrefabDocument {
+            entities: template.to_scene().unwrap().entities,
+            ..sindri_core::PrefabDocument::default()
+        };
+        let mut world = World::default();
+        let first = world.spawn_prefab(&prefab).unwrap();
+        let second = world.spawn_prefab(&prefab).unwrap();
+        let key = SceneEntityId::new("joint").unwrap();
+        let first_owner = first.by_source_id[&key];
+        let second_owner = second.by_source_id[&key];
+        world
+            .get_mut(second_owner)
+            .unwrap()
+            .components
+            .remove(ScriptComponent::TYPE_NAME);
+        let mut physics = ScenePhysics2d::top_down().unwrap();
+        run_call(&mut world, &extractor, &mut physics, call, true);
+        assert_eq!(
+            world.get(first_owner).unwrap().components[kind]["second"],
+            "body"
+        );
+        physics
+            .step(&mut world, extractor.components(), STEP)
+            .unwrap();
+        assert_eq!(physics.world().joint_count(), 1);
+        let script = world
+            .get_mut(first_owner)
+            .unwrap()
+            .components
+            .remove(ScriptComponent::TYPE_NAME)
+            .unwrap();
+        world
+            .get_mut(second_owner)
+            .unwrap()
+            .components
+            .insert(ScriptComponent::TYPE_NAME.into(), script);
+        let before = world.get(second_owner).unwrap().components.clone();
+        run_call(&mut world, &extractor, &mut physics, call, false);
+        assert_eq!(world.get(second_owner).unwrap().components, before);
+        assert_eq!(physics.world().joint_count(), 1);
+    }
 }

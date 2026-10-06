@@ -341,3 +341,6 @@ mod removal;
 
 #[path = "joint_state_controls/creation.rs"]
 mod creation;
+
+#[path = "joint_state_controls/hinge_creation.rs"]
+mod hinge_creation;

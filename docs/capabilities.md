@@ -354,7 +354,7 @@ while suspended. Validation rejects missing/conflicting/invalid owners, wrong
 kinds/types, missing physics and non-positive/non-finite lengths before mutation.
 Unknown payload fields survive. Scene command undo/redo covers all four kinds;
 platformer Decay reels its lantern tether with T and releases/reconnects it with L.
-Typed hinge/slider/spring creation and other motor modes remain.
+Typed slider/spring creation and other motor modes remain.
 Runtime-spawned prefab references now use a separate runtime identity, retaining
 local sibling paths and the original top-level root ID without assigning saved
 scene IDs. The platformer spawns/removes a reusable motor-driven windmill through
@@ -389,6 +389,13 @@ creates the owned constraint, retaining other components, bodies and legacy
 connections. Tests cover pre-sync creation, repeated removal/recreation, invalid
 owners/references/lengths, inactive targets and isolated runtime prefabs.
 Platformer C repairs its cut cord at the selected hook and length.
+Typed `Physics.create_hinge_joint` uses the same empty-owner/scoped-endpoint
+contract with finite body-local `Vec2` anchors. Limits and motor start disabled;
+existing motor controls configure the new component before synchronization.
+Pre-sync creation, repeated recreation, local anchors, motor behavior, owner/
+anchor rejection, inactive/unbound targets and runtime prefab isolation are tested.
+Platformer H rebuilds its placed windmill hinge; the rotor remains at its axle
+and reverses through Decay while the separate spawned windmill stays intact.
 
 `sindri.physics2d.rigid_body` and `sindri.physics2d.collider` are registered
 scene components with defaults the engine accepts, so a scene authors bodies and
