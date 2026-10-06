@@ -20,6 +20,9 @@
 //! while the author is still looking at the field.
 
 pub mod choices;
+pub mod entities;
+#[cfg(test)]
+mod entities_tests;
 pub mod fields;
 pub mod held;
 

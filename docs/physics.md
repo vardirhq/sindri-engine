@@ -455,9 +455,12 @@ motion. `remove_owned_joint(owner)` releases it independently of legacy
 finite maximum centre distance, free rotation/closer motion and disabled mutual
 endpoint contacts. Runtime owner IDs are never serialized.
 
-The generic checked component inspector authors the endpoint IDs and distance;
-command/undo regressions preserve body velocity and joint count. Dedicated
-reference selection/diagnostics and visual inspector review remain unverified.
+The checked component inspector authors endpoint IDs with a typeable entity
+picker, including names and an explicit None choice. Missing references and
+inactive targets are marked; unresolved text remains editable. Choices obey the
+same scene/prefab scope as runtime resolution. Real picker-click regressions
+retarget/clear all four joint kinds through commands, then undo restores each
+constraint and its unknown fields. Visual editor review remains in final integration.
 This foundation is added for the platformer: a physical lantern hangs from an
 anchor while Decay wind drives it and Decay stretches/turns its visible cord.
 The game regression observes movement, bounded distance and tether removal.
@@ -492,8 +495,8 @@ Platformer adds these capabilities to let the player reel the hanging lantern
 in/out with T and release/reconnect it with L. Decay hides the cord while
 suspended or after its owner is removed. Runtime regressions observe length,
 free fall, reconnection and return to the original length.
-Endpoint retargeting, structural creation/removal, dedicated reference authoring
-and full reference integration remain open in the joint track.
+Typed endpoint retargeting, structural creation/removal and automatic saved-spawn
+reference integration remain open in the joint track.
 
 ## Scene-authored hinges and velocity motors
 
@@ -538,7 +541,7 @@ than braking; to brake, set zero velocity with positive torque. Removal and othe
 structural controls are not yet exposed through typed joint calls.
 
 The generic checked inspector authors hinge settings and command undo reverses
-motor edits. Dedicated reference selection/diagnostics and visual editor review
+motor edits. Visual editor review and automatic save integration
 remain open. This general capability is added for the platformer: Decay reverses
 its powered windmill axle every two seconds while physics keeps the rotor on its
 anchor. Native tests exercise offset anchors, limits, torque caps, coast/reverse,
@@ -594,7 +597,7 @@ one constraint. Settings edits on unchanged endpoints update it in place and
 wake the bodies without resetting their motion. Owner/component removal drops
 it; inactive or missing endpoints suspend it; endpoint rebuilds reconnect in the
 same fixed step. The generic checked inspector and command undo author these
-settings; dedicated reference picking/diagnostics and visual editor review remain
+settings; visual editor review and automatic save integration remain
 open. All numeric fields are validated even when their toggle is disabled.
 
 Typed `Physics.set_slider_motor(owner, velocity, max_force)` and

@@ -5,6 +5,7 @@
 //! generation-checked [`EntityId`], which is not the [`SceneEntityId`] a file
 //! carries: `scene` is the seam between the two.
 
+mod entity_references;
 mod hierarchy;
 mod instances;
 mod prefab;

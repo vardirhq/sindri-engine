@@ -320,6 +320,13 @@ fn described_row(
         return false;
     };
     match meaning {
+        FieldMeaning::Entity if value.is_string() => {
+            let Some(entities) = described.assets.entities else {
+                return false;
+            };
+            let _ = super::entity::entity_row(ui, at.path, label, value, entities, indent);
+            true
+        }
         FieldMeaning::Asset(_) => {
             let Some(list) = asset_list(Some(meaning), described.assets) else {
                 return false;

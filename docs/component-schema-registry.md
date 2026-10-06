@@ -87,3 +87,15 @@ entity fields explicitly: unknown components and undescribed strings are preserv
 verbatim. The method leaves the live world unchanged and rejects nonempty missing
 or unstable targets and malformed reference fields; empty text stays unbound.
 Ordinary world serializers retain their verbatim contract.
+
+## Authoring entity references
+
+Fields described as `FieldMeaning::Entity` get a typeable entity picker at every
+object/list depth in the native inspector. Choices include stable IDs and names
+within the owner's scene, or canonical local paths within one runtime prefab.
+An explicit None choice clears the field. Missing targets and inactive targets
+are distinguished visibly; unresolved text is retained for later repair.
+`World::resolve_entity_reference` supplies the same canonical/alias, namespace
+and prefab-scope rules used by authored physics joints. It resolves inactive
+entities for diagnostics; physics separately requires active endpoints.
+Edits remain schema-checked component commands with undo/redo.

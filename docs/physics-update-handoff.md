@@ -178,11 +178,27 @@ Four-crate Clippy, 11 catalogue tests and the 1,093-file size gate passed.
 All-target/all-feature WASM checks passed core, scene and platformer, and the
 generic browser host was rebuilt. Export passed; Chromium WebGPU fetched 25
 assets from the saved/reopened fixture without runtime errors. Native Vulkan
-capture passed; both final captures were visually reviewed. CI must verify this
-new slice; all checks passed on prior head `41073354`.
+capture passed; both final captures were visually reviewed. CI passed on saved-
+reference head `9a1f1a07`.
 
-Joint acceptance stays open. Add remaining motor modes, typed structural
-controls and dedicated reference authoring/diagnostics. Automatic editor/script save
+An **entity-reference authoring slice** shares the engine resolver with native
+inspector entity fields. Typeable scoped choices include names/IDs, explicit None
+and visible missing/inactive diagnostics. Runtime prefabs keep local paths;
+loaded-scene roots and other spawn instances remain isolated. Real picker-click
+regressions retarget/clear all four joint kinds through checked commands and undo,
+preserving unknown fields and constraints. Final scoped preflight passed 1,383
+native tests and warning-denied all-target/all-feature checks for core, scene and
+editor. All 18 platformer tests, three-crate Clippy, 11 catalogue tests and the
+1,098-file size gate passed. All-target/all-feature WASM checks passed core and
+scene; the generic browser host was rebuilt. Chromium WebGPU fetched 25 assets
+without runtime errors and native Vulkan capture passed; both game captures were
+visually reviewed. The native editor built and opened the platformer, but
+interactive desktop picker inspection remains unverified. Actual widget pointer
+interactions are covered in egui tests. CI must verify this slice; all checks
+passed on prior head `9a1f1a07`.
+
+Joint acceptance stays open. Add remaining motor modes and typed endpoint/
+structural controls. Automatic editor/script save
 integration remains open; the reference gap remains partial in parity.
 
 Continue with **the remaining joints and typed controls/lifecycle**, then
@@ -438,8 +454,8 @@ branch codex/physics-update. Read AGENTS.md, CLAUDE.md,
 docs/physics-update-handoff.md and docs/physics-update.md first.
 Implement every remaining acceptance item, including docs, in this one PR.
 CCD, one-way platforms, forces/rotation and contacts are checked and saved on
-the branch. Continue with joint structural controls, reference authoring and full prefab
-references, then
+the branch. Continue with typed joint endpoint/structural controls, remaining
+motor modes and automatic save-reference integration, then
 the remaining checklist.
 Push checked small slices regularly, each feature in one push or less.
 Keep gameplay in Decay, prove editor/runtime/script/game behavior, and do

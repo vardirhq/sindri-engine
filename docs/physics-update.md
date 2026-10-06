@@ -366,3 +366,28 @@ surface-specific completeness. This checklist does not mark those surfaces done.
 - CI must verify this slice; all checks passed on prior head `41073354`. Existing
   serializers remain verbatim; automatic editor/script save-path integration,
   other joint controls and final acceptance remain open.
+
+
+### Entity-reference authoring checkpoint
+
+- Shared `World::resolve_entity_reference` with physics and native authoring;
+  resolution retains inactive targets for diagnostics while physics requires
+  active endpoints. Canonical IDs, prefab aliases and loaded-scene isolation keep
+  their existing precedence.
+- Registered entity fields get typeable scoped choices, explicit None, and
+  visible missing/inactive diagnostics at object/list depth. Runtime prefabs show
+  their local paths even after assigning saved IDs; unrelated instances/scenes
+  never enter the choices.
+- Real picker-click tests retarget and clear all four joint kinds, applying
+  checked commands and undo while preserving unknown fields and solver ownership.
+- Final scoped preflight passed 1,383 native tests and warning-denied all-target/
+  all-feature checks for core, scene and editor. All 18 platformer gameplay tests,
+  three-crate Clippy, 11 catalogue tests and the 1,098-file size gate passed.
+- All-target/all-feature WASM checks passed core and scene; the generic browser
+  host was rebuilt. Chromium WebGPU fetched 25 assets without runtime errors;
+  native Vulkan capture passed. Both game captures were visually reviewed.
+- The native editor built and opened the platformer. Interactive desktop picker
+  inspection remains unverified; pointer-driven egui tests cover the actual widget.
+- CI must verify this slice; all checks passed on prior head `9a1f1a07`. Typed
+  endpoint/structural controls, additional motor modes, save-path integration and
+  final joint/workspace acceptance remain open.

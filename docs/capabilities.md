@@ -361,8 +361,11 @@ scene IDs. The platformer spawns/removes a reusable motor-driven windmill throug
 Decay. Repeated instances, inactivity, root removal, reparenting and command undo
 are covered. Nested runtime aliases and placed roots survive library-based delivery;
 registry-based save remapping is opt-in. Automatic save-path integration remains
-open; dedicated picker/diagnostics and
-visual inspector review are unverified.
+open. Registered entity fields now have scoped native inspector choices, explicit
+clearing and visible missing/inactive diagnostics through the runtime's shared
+resolver. Real picker-click edits retarget/clear all four constraint kinds, and
+command undo restores their constraints/unknown payloads. Visual inspector review
+remains in final integration.
 
 `sindri.physics2d.rigid_body` and `sindri.physics2d.collider` are registered
 scene components with defaults the engine accepts, so a scene authors bodies and
