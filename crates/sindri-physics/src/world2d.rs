@@ -12,6 +12,7 @@ mod joints;
 mod materials;
 mod motion;
 mod one_way;
+mod platforms;
 mod query;
 mod slide;
 mod slope;

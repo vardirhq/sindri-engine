@@ -23,6 +23,20 @@ pub(super) struct SlideRequest2d {
     pub filter: RaycastFilter2d,
 }
 
+impl SlideRequest2d {
+    pub(super) fn checked(self) -> Result<(r2::SharedShape, r2::Pose, r2::Vector), PhysicsError> {
+        let probe = query_shape(self.shape)?;
+        let at = query_pose(self.pose)?;
+        self.options.validate()?;
+        finite2("slide_displacement", self.displacement)?;
+        let wanted = r2::Vector::from_array(self.displacement);
+        let destination = at.translation + wanted;
+        finite2("slide_destination", destination.to_array())?;
+        crate::validate::finite("slide_distance", wanted.length())?;
+        Ok((probe, at, wanted))
+    }
+}
+
 impl PhysicsWorld2d {
     /// Computes swept movement, removing only motion into each touched surface.
     ///
@@ -80,21 +94,13 @@ impl PhysicsWorld2d {
         slope: Option<SlopeLimit2d>,
         mut include: impl FnMut(EntityId) -> bool,
     ) -> Result<SlideMotion2d, PhysicsError> {
+        let (probe, mut at, wanted) = request.checked()?;
         let SlideRequest2d {
-            shape,
-            pose,
             displacement,
             options,
             filter,
+            ..
         } = request;
-        let probe = query_shape(shape)?;
-        let mut at = query_pose(pose)?;
-        options.validate()?;
-        finite2("slide_displacement", displacement)?;
-        let wanted = r2::Vector::new(displacement[0], displacement[1]);
-        let destination = at.translation + wanted;
-        finite2("slide_destination", [destination.x, destination.y])?;
-        crate::validate::finite("slide_distance", wanted.length())?;
         let mut result = SlideMotion2d {
             translation: [0.0; 2],
             remaining: displacement,

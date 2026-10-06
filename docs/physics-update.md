@@ -790,3 +790,31 @@ surface-specific completeness. This checklist does not mark those surfaces done.
   calls, scripts or component registrations change. Existing gameplay/browser/
   editor rendering paths do not use these primitives yet; CI must verify the
   pushed step head. Prior slope head `6de2dcc8` has completed CI successfully.
+
+### Synchronized platform carry checkpoint
+
+- Added opt-in `platform_support` snapshots of runtime entity/previous body pose.
+  Current local collider pieces verify old walkable support with the same filters.
+  Removed, inactive/filtered, unsupported, steep or penetrating old support skips
+  carry. Inputs and derived points/destinations validate before movement.
+- Previous/current synchronized poses produce probe-origin displacement, including
+  translation and rotation about the support origin. A separate geometric carry
+  sweep excludes only the support; character slide/step/ground then includes it
+  again. Total translation includes actual carry once; no velocity is added.
+- Carry results retain entity/current pose, requested translation and collision/
+  budget outcome. Hosts own/advance support snapshots even when clipped, switch
+  them to the final grounded hit and clear them on teleport or structural edits.
+- Native regressions exercise all shapes, vertical motion, rotation, repeated
+  snapshots, wall clipping/ceiling crush, jumps/ledges, sensor/mask/predicate/removal,
+  stale/steep support, compound local geometry, carry-step accounting, validation
+  and actual position/velocity-kinematic ordering.
+- Rotation follows a chord with fixed probe orientation. Continuous arc and
+  rotating-probe sweeps are absent, now explicit parity gaps. Added generally for
+  platformer adoption; one-way controller policy and scene/editor/Decay/native/
+  browser game proof remain open. Character acceptance stays unchecked.
+- Scoped preflight passed 132 native physics tests and warning-denied all-target/
+  all-feature checks. Physics Clippy, all-target/all-feature WASM compilation,
+  11 catalogue tests and the 1,133-file size gate passed. No dependencies, host
+  calls, scripts or component registrations change. Existing game/editor/browser
+  paths have not adopted the controller yet. Prior step head `75ab9215` is green
+  in CI; CI must verify the pushed carry head.

@@ -108,6 +108,7 @@ impl PhysicsWorld2d {
             ground,
             snap_translation: landing.to_array(),
             step_translation: lift.to_array(),
+            platform: None,
             grounded: true,
         }))
     }

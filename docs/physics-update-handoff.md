@@ -30,7 +30,11 @@ and downhill snapping accepts only walkable support. Gameplay retains prior stat
 Optional steps now require starting support, clear lift/forward sweeps, better
 progress and a walkable landing, with exact fallback. Movement normals are refined
 from impact contacts to avoid flat-box hops; ordinary shape casts are unchanged.
-Continue with moving platforms and one-way movement policies,
+Opt-in platform snapshots now verify old support and add swept synchronized
+translation/rotation-point carry before character movement. Wall clipping and
+ceiling crush are explicit; hosts must advance snapshots once and avoid extra
+parent/solver carry. Rotation follows a chord with fixed probe orientation.
+Continue with one-way/drop-through controller policy,
 then scene/editor/Decay/platformer integration and native/browser proof.
 Character acceptance remains unchecked. Accelerated queries, 3D/voxel physics
 and final integration follow; gameplay world snapshots remain a separate gap.

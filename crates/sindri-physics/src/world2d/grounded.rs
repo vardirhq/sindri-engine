@@ -17,7 +17,7 @@ impl PhysicsWorld2d {
     /// Snapping defaults off. Requested upward motion suppresses snapping and
     /// grounded state, even if a ceiling blocks ascent. Steep support never
     /// snaps. Does not mutate a body, store prior grounded state, depenetrate,
-    /// carry platforms or apply one-way policy. Steps require starting support
+    /// apply one-way policy. Opt-in support snapshots add swept carry first. Steps require starting support
     /// and clear lift/forward/landing sweeps. Steep contacts cannot
     /// create upward motion beyond the remaining request's positive rise;
     /// downhill sliding and explicit jumps remain possible.
@@ -51,6 +51,56 @@ impl PhysicsWorld2d {
         mut include: impl FnMut(EntityId) -> bool,
     ) -> Result<GroundedSlideMotion2d, PhysicsError> {
         options.validate()?;
+        let request = SlideRequest2d {
+            shape,
+            pose,
+            displacement,
+            options: options.slide,
+            filter,
+        };
+        let platform = self.carry_platform(request, options, &mut include)?;
+        let carry = platform
+            .as_ref()
+            .map_or([0.0; 2], |carry| carry.motion.translation);
+        let carried_pose = PhysicsPose2d {
+            position: [pose.position[0] + carry[0], pose.position[1] + carry[1]],
+            rotation: pose.rotation,
+        };
+        let mut result = self.grounded_slide(
+            SlideRequest2d {
+                pose: carried_pose,
+                ..request
+            },
+            options,
+            &mut include,
+        )?;
+        result.translation[0] += carry[0];
+        result.translation[1] += carry[1];
+        finite2("platform_total_translation", result.translation)?;
+        finite2(
+            "platform_total_destination",
+            [
+                pose.position[0] + result.translation[0],
+                pose.position[1] + result.translation[1],
+            ],
+        )?;
+        result.platform = platform;
+        Ok(result)
+    }
+
+    fn grounded_slide(
+        &self,
+        request: SlideRequest2d,
+        options: GroundedSlideOptions2d,
+        mut include: impl FnMut(EntityId) -> bool,
+    ) -> Result<GroundedSlideMotion2d, PhysicsError> {
+        let SlideRequest2d {
+            shape,
+            pose,
+            displacement,
+            filter,
+            ..
+        } = request;
         let up = r2::Vector::new(options.up[0], options.up[1]).normalize();
         let slide = self.slide_with_policy(
             SlideRequest2d {
@@ -98,6 +148,7 @@ impl PhysicsWorld2d {
             ground,
             snap_translation: [snap.x, snap.y],
             step_translation: [0.0; 2],
+            platform: None,
             grounded,
         };
         Ok(self

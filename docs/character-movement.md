@@ -1,10 +1,8 @@
 # Character movement
 
 Status: geometric sweep/slide, ground probing, grounded snapping, slope
-limits and optional steps implemented; full character movement acceptance
-remains open in
-`physics-update.md`. Added for the platformer genre
-showcase, which has not yet adopted it. No game proof is claimed for this slice.
+limits, optional steps and synchronized platform carry implemented; acceptance
+remains open in `physics-update.md`. Added for the platformer genre showcase, which has not yet adopted it. No game proof is claimed for this slice.
 
 ## Ownership
 
@@ -120,11 +118,11 @@ is still visible. Initial penetration likewise blocks snapping and grounding.
 
 `GroundedSlideMotion2d.translation` is the full proposal to apply once.
 `slide` retains the selected slope-limited sweep result, including its unsatisfied
-movement and budget flags. For ordinary movement it starts at the supplied pose;
+movement and budget flags. It starts after any carry, otherwise at the supplied pose;
 for an accepted step it is the forward sweep from the lifted pose.
 `step_translation` is the accepted lift (zero for ordinary movement), and
 `snap_translation` is the additional downward landing/snap motion. Their sum
-with `slide.translation` is total translation. `ground` is the support query at
+with `slide.translation` and any `platform.motion.translation` is total translation. `ground` is the support query at
 the selected slide endpoint before landing/snapping; its distance describes that
 extra downward travel. `grounded` means the proposed endpoint
 has walkable support and the request was not ascending or initially penetrating.
@@ -163,7 +161,7 @@ acceleration is applied. Up is world-space and independent of probe rotation.
 
 This is a general geometric policy added for the platformer, which has not yet
 adopted the controller. It does not make the engine/editor/Decay/game acceptance
-complete. One-way support and moving-platform behavior remain open.
+complete. One-way controller support and vertical integration remain open.
 
 ## Implemented steps and clearance
 
@@ -198,16 +196,68 @@ very small movement requests do not step. These limitations remain visible for
 future game integration. Stepping, like slope limits, is added generally for
 platformer adoption and has engine evidence only.
 
+## Implemented moving-platform carry
+
+`GroundedSlideOptions2d.platform_support` defaults to `None`. A supplied
+`PlatformSupport2d` identifies the previous ground body's runtime entity and its
+previous synchronized pose. Before carrying, the engine verifies walkable contact
+at that pose with the current local collider shapes/offsets/rotations and the same
+filter/predicate. Removed, filtered, unsupported, previously penetrating or steep
+support is ignored. Previous pose and character request validate before queries.
+Support verification uses skin contact tolerance and authored compound order.
+
+The previous inverse pose maps the probe origin into the support body's local
+coordinates. Its current synchronized pose maps that point back into world space;
+the difference is carry displacement, including translation and rotation about
+the body origin. This displacement is swept first, against all filtered entities
+except the carrying body. The character retains its own rotation. Grounded
+movement, steps and snapping then run against the whole current world from the
+carried pose; the support body is included again. A platform moving upward is not
+mistaken for a character jump. Explicit jump requests still lose grounding after
+carry. Carry does not add platform velocity or choose jump velocity inheritance.
+
+`GroundedSlideMotion2d.platform` is a `PlatformCarry2d` when old support verifies.
+It reports the entity, current pose, requested point displacement and
+`motion` clipped by collisions. Carry collisions, penetration and exhausted iterations are
+separate from the selected character slide. The actual carry translation is
+included once in total translation. Wall clipping may leave support under the
+character; a rising platform obstructed by a ceiling can leave initial penetration
+in the following slide/ground result. Recovery, crush damage and respawn are
+ordinary Decay gameplay decisions; the query never pushes through obstacles.
+
+Hosts capture support from the final grounded hit, synchronize bodies, and supply
+its prior pose on the next movement pass. Pending kinematic targets or velocities
+produce no carry until the actual physics pose advances. Advance the snapshot on
+every pass, even when carry is clipped, so old motion is not retried. Reuse the
+returned current pose only if the final ground hit still identifies that entity;
+otherwise capture the new support or clear the snapshot when airborne. Clear it
+on teleport, parenting changes or collider/body rebuilds. Current local shapes
+are used for verification, so the query cannot reconstruct previous geometry
+across structural edits.
+
+Do not also add support displacement via transform parenting, solver movement,
+velocity or the character's requested displacement. This read-only API does not
+store or consume snapshots; submitting the same old pose again can repeat motion.
+The scene/host integration must enforce one application per movement pass.
+
+Rotation carry sweeps a straight chord between the old and new point positions;
+it does not sweep the circular arc or rotate the probe. Large rotations can miss
+obstacles on that arc or leave a non-circular probe intersecting the support.
+Use smaller synchronized steps and inspect the returned penetration/support
+state. Continuous arc carry and rotating-probe sweeps remain absent and have
+explicit parity gaps. This is engine evidence for platformer adoption, not yet
+scene/editor/Decay or game proof.
+
 ## Remaining slices
 
 The foundation sees one-way geometry on both sides, just like geometric queries.
 The full controller must incorporate support-side policy and timed drop-through,
 not interpret this primitive as a finished one-way movement API.
 
-Remaining engine work includes moving-platform displacement and one-way
-controller policy. Platform riding must use synchronized
-poses and avoid counting platform movement twice. Tests must exercise the
-one-way/drop-through interactions and initial-overlap/budget outcomes together.
+Remaining engine work includes one-way/drop-through controller policy. Scene
+platform integration must capture synchronized support poses and apply motion
+once, including support changes, teleports and structural edits. Tests must
+exercise the one-way/drop-through interactions and initial-overlap/budget outcomes together.
 
 Scene authoring, checked editor commands/undo, typed Decay access and a real
 platformer scripted run then prove the capability vertically. The platformer's
@@ -246,3 +296,9 @@ and forward overhangs, airborne/jump/overlap rejection, no or steep landing,
 box/circle/capsule extents, rotated up/probe, filters/predicates, exact fallback,
 read-only state, motion accounting and invalid heights. A repeated flat-floor
 regression covers contact-normal refinement for all three probe shapes.
+
+Platform tests cover translation for all probe shapes, upward/downward support,
+rotation-point displacement, snapshot advancement, wall clipping and ceiling
+crush reporting, jumps/ledges, filters/sensors/host predicates/removal, stale or
+steep support, compound offsets/rotation, carry plus step accounting, invalid
+input and actual position/velocity-kinematic simulation ordering.

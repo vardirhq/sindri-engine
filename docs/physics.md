@@ -926,8 +926,8 @@ accepted only for walkable support. Upward requests and initial penetration
 suppress snapping and grounded state. The result separates slide motion, support,
 snap and total translation; gameplay applies total translation once and owns
 prior support state. Native tests exercise landing, ledges, blocked ascent,
-repeated support and downhill snapping. Platforms,
-one-way policy and scene/editor/Decay/platformer proof remain open.
+repeated support and downhill snapping.
+One-way controller policy and scene/editor/Decay/platformer proof remain open.
 
 Grounded sliding also enforces `max_slope_angle`: upward-facing steep contacts
 cannot create rise beyond the positive remaining request. Horizontal approaches
@@ -946,3 +946,15 @@ apply their total translation once. Full-height clearance and skin-sized minimum
 progress are conservative limits. Impact contact geometry now refines movement
 cast normals, preventing large artificial hops on flat box faces. Ordinary
 ray/overlap/shape-cast contracts are unchanged; see the character contract/tests.
+
+Opt-in `platform_support` captures the previous synchronized support entity/pose.
+Grounded movement verifies old walkable contact using current local pieces, derives
+the origin's displacement through previous/current body poses and sweeps carry
+before character motion. The support alone is excluded during carry, then restored
+for ordinary slide/step/ground queries. `platform` reports requested and actual
+carry plus collisions/current pose; total translation includes it once. No velocity
+inheritance or persistent snapshot state is supplied. Hosts advance/clear snapshots
+for grounding changes, teleports or structural edits and avoid additional parent/
+solver motion. Wall clipping and ceiling crush remain explicit. Rotation follows
+a chord with fixed probe orientation, not an arc/orientation sweep. See the
+character contract for ordering, limitations and native kinematic/geometry tests.

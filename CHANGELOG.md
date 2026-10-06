@@ -1,5 +1,6 @@
 # Changelog
 
+- Add opt-in synchronized platform carry to grounded 2D movement. Previous support is verified, translation and rotation-point motion are swept before character movement, and carry collisions/current pose are returned separately. Hosts retain snapshot ownership; one-way controller and editor/Decay/game integration remain in progress.
 - Add opt-in grounded 2D steps with lift/forward/landing clearance, walkable support and exact fallback on rejection. Refine movement cast normals to prevent artificial hops on flat box faces. Moving platforms, one-way controller policy and editor/Decay/game integration remain in progress.
 - Enforce slope limits during grounded 2D sliding: steep surfaces cannot create unrequested upward motion, explicit jumps retain bounded rise, and steep descent remains ungrounded. Geometric sliding stays unrestricted; full character integration remains in progress.
 - Add read-only grounded 2D sweep/slide results with optional downward snapping, post-move support and ascent suppression. Snapping defaults off; slope movement, steps, platforms and editor/Decay/game integration remain in progress.
