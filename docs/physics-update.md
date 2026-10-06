@@ -495,3 +495,31 @@ surface-specific completeness. This checklist does not mark those surfaces done.
 - CI must verify this slice; all checks passed on prior head `a2c54306`. Typed
   slider/spring creation, remaining motor modes, automatic save integration and
   final joint/workspace acceptance remain open.
+
+
+### Typed spring creation checkpoint
+
+- Added `Physics.create_spring_joint` with finite body-local `Vec2` anchors,
+  positive rest length and non-negative stiffness/damping, including zero.
+  Shared owner/scope validation precedes mutation; synchronization creates the
+  enabled constraint while retaining other components, bodies/motion and legacy
+  connections. Existing tuning can change the new component before body sync.
+- Tests cover pre-sync and repeated recreation, local-anchor force response,
+  retuning, body-motion/legacy preservation, invalid owners/settings, missing
+  physics, null/inactive endpoints and isolated runtime prefab creation.
+- Platformer B rebuilds its light's spring at the current rest length. A scripted
+  run rebuilds in both tuning phases, keeps the independent trolley on its rail
+  and observes continued physical short/long suspension.
+- Final scoped preflight passed 346 native tests and warning-denied all-target/
+  all-feature checks for Decay and platformer. Typed spring-script preflight had
+  zero errors/reminders. Two-crate Clippy, 11 regenerated catalogue tests and
+  the 1,105-file size gate passed. Joint-call classification is extracted from
+  the main dispatcher to keep functions within the repository size limit.
+- All-target/all-feature WASM checks passed both crates; the generic browser host
+  was rebuilt. Export and native Vulkan capture passed. Chromium WebGPU fetched
+  25 assets and exercised two B rebuilds alongside hinge recreation, prefab
+  spawning and existing tether controls without runtime errors. Native/browser
+  captures were visually reviewed.
+- CI must verify this slice. Prior hinge-head CI had no reported failures; its
+  test/render job was still running. Typed slider creation, remaining motor
+  modes, automatic save integration and final joint/workspace acceptance remain open.

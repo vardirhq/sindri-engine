@@ -1830,6 +1830,32 @@
           "returns": "unit"
         },
         {
+          "description": "Authors an enabled spring on an existing owner with no authored 2D joint of any kind. Finite Vec2 anchors use body-local world units without transform scale; rest length must be finite and positive, stiffness/damping finite and non-negative. Scoped handles become stable IDs or local prefab paths; null leaves an endpoint unbound and inactive targets suspend until active. Requires physics, works before bodies are built and creates its constraint at next fixed synchronization. Invalid arguments or existing joints fail before mutation. Keeps other owner components and body motion; legacy connections remain separate. Existing set_spring controls can retune the new joint before synchronization.",
+          "kind": "function",
+          "name": "create_spring_joint",
+          "parameter_names": [
+            "joint",
+            "first",
+            "second",
+            "first_anchor",
+            "second_anchor",
+            "rest_length",
+            "stiffness",
+            "damping"
+          ],
+          "parameters": [
+            "Entity",
+            "Entity",
+            "Entity",
+            "Vec2",
+            "Vec2",
+            "f32",
+            "f32",
+            "f32"
+          ],
+          "returns": "unit"
+        },
+        {
           "description": "Ignores only one-way solid platforms for a duration in fixed simulation time. Zero cancels; a new request replaces it. Requires a dynamic body and works before a spawned body is built.",
           "kind": "function",
           "name": "drop_through",

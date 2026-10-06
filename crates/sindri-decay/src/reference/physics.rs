@@ -6,6 +6,20 @@ pub(super) const PHYSICS: TypeEntry = TypeEntry {
     text: "2D physics: moving objects with speed and pushes, and finding out what this script's object bumped into.",
     members: &[
         call(
+            "create_spring_joint",
+            &[
+                "joint",
+                "first",
+                "second",
+                "first_anchor",
+                "second_anchor",
+                "rest_length",
+                "stiffness",
+                "damping",
+            ],
+            "Authors an enabled spring on an existing owner with no authored 2D joint of any kind. Finite Vec2 anchors use body-local world units without transform scale; rest length must be finite and positive, stiffness/damping finite and non-negative. Scoped handles become stable IDs or local prefab paths; null leaves an endpoint unbound and inactive targets suspend until active. Requires physics, works before bodies are built and creates its constraint at next fixed synchronization. Invalid arguments or existing joints fail before mutation. Keeps other owner components and body motion; legacy connections remain separate. Existing set_spring controls can retune the new joint before synchronization.",
+        ),
+        call(
             "create_hinge_joint",
             &["joint", "first", "second", "first_anchor", "second_anchor"],
             "Authors an enabled hinge on an existing owner with no authored 2D joint of any kind. Anchors are finite body-local Vec2 distances without transform scale. Angular limits and motor start disabled; set_hinge_motor can drive the new joint. Scoped handles become stable IDs or local prefab paths; null leaves an endpoint unbound and inactive targets suspend until active. Requires physics, works before bodies are built and creates its constraint at next fixed synchronization. Invalid owners, references, identical endpoints, anchors or existing joints fail before mutation. Keeps other owner components and body motion; legacy connections remain separate.",

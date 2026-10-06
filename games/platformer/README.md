@@ -13,6 +13,9 @@ Z cuts the cord; later tether controls do nothing until C repairs it.
 C creates a fresh owned distance joint at the selected hook and tether length.
 The cord disappears while the constraint is suspended.
 
+B rebuilds the trolley light's spring at its current rest length; Decay continues
+tuning it while the trolley remains on its independent rail.
+
 H rebuilds the placed windmill hinge and restarts its motor, keeping the axle
 fixed and the separately spawned mechanism independent.
 
@@ -125,3 +128,6 @@ world-space axle and independent constraint ownership.
 
 `tests/hinge_motor.rs` also rebuilds the placed hinge twice with H while a second
 windmill is present, checking scoped endpoints, fixed axle and continued reversal.
+
+`tests/slider_spring.rs` also rebuilds the spring with B in both rest-length
+phases, checking stable ownership, bounded trolley motion and continued tuning.

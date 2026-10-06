@@ -1027,6 +1027,7 @@ a person who has not clicked yet.
 | `Physics.remove_joint(joint)` | nothing |
 | `Physics.create_distance_joint(joint, first, second, max_distance)` | nothing |
 | `Physics.create_hinge_joint(joint, first, second, first_anchor, second_anchor)` | nothing |
+| `Physics.create_spring_joint(joint, first, second, first_anchor, second_anchor, rest_length, stiffness, damping)` | nothing |
 | `Physics.raycast(origin, direction, max_distance, mask, include_sensors, exclude)` | `RayHit2d` or `null` |
 | `Physics.cast_circle(origin, radius, direction, max_distance, mask, include_sensors, exclude)` | `RayHit2d` or `null` |
 | `Physics.cast_box(origin, half_size, rotation, direction, max_distance, mask, include_sensors, exclude)` | `RayHit2d` or `null` |
@@ -1118,8 +1119,17 @@ anchors are body-local world units without transform scale. The enabled hinge
 starts with angular limits and motor disabled; `set_hinge_motor` drives it after
 creation, even before initial body synchronization. Invalid anchors fail before
 mutation. Platformer H rebuilds the placed windmill hinge and restarts its motor,
-without affecting the separately spawned windmill. Typed slider and spring
-creation remain absent.
+without affecting the separately spawned windmill.
+
+`Physics.create_spring_joint(joint, first, second, first_anchor, second_anchor,
+rest_length, stiffness, damping)` uses the same owner/endpoint/physics contract.
+Finite `Vec2` anchors use body-local world units without transform scale. Rest
+length must be finite and positive; stiffness and damping finite and non-negative,
+including zero. Validation precedes mutation; next fixed synchronization creates
+the enabled spring, preserving other components, body motion and legacy constraints.
+`set_spring` can retune it before synchronization. Platformer B rebuilds the light's
+spring while retaining its current rest-length phase and subsequent tuning.
+Typed slider creation remains absent.
 
 `Physics.remove_joint(joint)` removes exactly one valid authored distance, hinge,
 slider or spring component, releasing its solver constraint at the next fixed

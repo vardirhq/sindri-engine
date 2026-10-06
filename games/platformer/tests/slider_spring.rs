@@ -1,5 +1,6 @@
 //! A powered rail carries a spring light; Decay controls both mechanisms.
 use platformer::Run;
+use sindri_platform::Key;
 #[test]
 fn trolley_reverses_inside_its_rail_and_spring_retuning_changes_light_height() {
     let mut run = Run::open().unwrap();
@@ -46,4 +47,40 @@ fn trolley_reverses_inside_its_rail_and_spring_retuning_changes_light_height() {
     run.world.despawn_recursive(slider).unwrap();
     assert!(run.step(1.0 / 60.0).is_empty());
     assert_eq!(run.physics.world().joint_count(), 2);
+}
+
+#[test]
+fn rebuilding_the_spring_keeps_the_trolley_and_breathing_motion() {
+    let mut run = Run::open().unwrap();
+    let spring = run.entity("lantern-spring").unwrap();
+    let trolley = run.entity("trolley-body").unwrap();
+    let light = run.entity("spring-lantern").unwrap();
+    let mut short = false;
+    let mut long = false;
+    for frame in 0..480 {
+        let rebuild = frame == 100 || frame == 250;
+        run.key(Key::B, rebuild);
+        let notes = run.step(1.0 / 60.0);
+        assert!(notes.is_empty(), "{notes:?}");
+        assert_eq!(run.physics.world().joint_count(), 4);
+        if rebuild {
+            let joint = &run.world.get(spring).unwrap().components["sindri.physics2d.spring_joint"];
+            assert_eq!(joint["first"], "trolley-body");
+            assert_eq!(joint["second"], "spring-lantern");
+            assert_eq!(joint["rest_length"], if frame == 100 { 1.0 } else { 1.5 });
+        }
+        let [x, y] = run.position(trolley);
+        let [lx, ly] = run.position(light);
+        assert!((8.47..=10.53).contains(&x));
+        assert!((y - 8.1).abs() < 0.03);
+        let length = (x - lx).hypot(y - ly);
+        assert!(length < 1.9);
+        if (90..180).contains(&frame) {
+            short |= length < 1.15;
+        }
+        if (270..360).contains(&frame) {
+            long |= length > 1.4;
+        }
+    }
+    assert!(short && long);
 }

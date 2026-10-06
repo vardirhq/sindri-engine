@@ -265,7 +265,27 @@ two H rebuilds with a spawned windmill, plus tether cut/repair/retarget/release,
 without runtime errors. Native/browser captures were visually reviewed. CI must
 verify this slice; all checks passed on prior head `a2c54306`.
 
-Joint acceptance stays open. Add remaining motor modes and typed slider/spring
+A **typed spring creation slice** adds `Physics.create_spring_joint` with finite
+body-local `Vec2` anchors, positive rest length and non-negative stiffness/damping.
+It shares owner/scope validation and fixed synchronization with other creation
+calls, retaining other components, bodies/motion and legacy connections. Tests
+exercise pre-sync/repeated creation, local-anchor force response, retuning,
+owner/settings rejection, missing physics, unbound/inactive targets and runtime
+prefab isolation. Platformer B rebuilds at its current rest length and continues
+short/long tuning while its independent trolley remains on the rail. Final
+scoped preflight passed 346 native tests and warning-denied all-target/all-feature
+checks for Decay and platformer. Typed spring-script preflight had zero errors/
+reminders. Two-crate Clippy, 11 regenerated catalogue tests and the 1,105-file
+size gate passed. Joint-call classification is extracted to keep the main
+physics dispatcher within its function limit. All-target/all-feature WASM checks
+passed both crates; the generic browser host was rebuilt. Export and native
+Vulkan capture passed. Chromium WebGPU fetched 25 assets and exercised two B
+rebuilds alongside hinge recreation, prefab spawning and tether controls without
+runtime errors. Native/browser captures were visually reviewed. CI must verify
+this slice; prior hinge-head CI had no reported failures and its test/render job
+was still running.
+
+Joint acceptance stays open. Add remaining motor modes and typed slider
 creation controls. Automatic editor/script save integration remains open; the
 reference gap remains partial in parity.
 
@@ -522,7 +542,7 @@ branch codex/physics-update. Read AGENTS.md, CLAUDE.md,
 docs/physics-update-handoff.md and docs/physics-update.md first.
 Implement every remaining acceptance item, including docs, in this one PR.
 CCD, one-way platforms, forces/rotation and contacts are checked and saved on
-the branch. Continue with typed slider/spring creation controls, remaining
+the branch. Continue with typed slider creation controls, remaining
 motor modes and automatic save-reference integration, then the remaining checklist.
 Push checked small slices regularly, each feature in one push or less.
 Keep gameplay in Decay, prove editor/runtime/script/game behavior, and do

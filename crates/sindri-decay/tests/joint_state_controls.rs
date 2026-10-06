@@ -344,3 +344,6 @@ mod creation;
 
 #[path = "joint_state_controls/hinge_creation.rs"]
 mod hinge_creation;
+
+#[path = "joint_state_controls/spring_creation.rs"]
+mod spring_creation;

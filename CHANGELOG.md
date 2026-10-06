@@ -1,5 +1,7 @@
 # Changelog
 
+- Add typed `Physics.create_spring_joint` with finite local Vec2 anchors, positive rest length and non-negative stiffness/damping. Empty owners and scoped endpoints validate before mutation; creation preserves body motion and legacy constraints. Platformer B rebuilds its lantern spring without resetting the tuning phase or affecting the trolley rail.
+
 - Add typed `Physics.create_hinge_joint` with finite body-local Vec2 anchors, validated empty owners and scoped endpoints. The new hinge starts with limits/motor disabled and accepts existing motor controls before fixed synchronization. Platformer H rebuilds its placed windmill hinge independently of the spawned mechanism.
 
 - Add typed `Physics.create_distance_joint` to author a maximum-distance constraint on an existing owner with no joint. Scoped references and positive lengths validate atomically; creation keeps body motion and takes effect at next fixed synchronization. Platformer C repairs its cut lantern cord using the selected hook and length.

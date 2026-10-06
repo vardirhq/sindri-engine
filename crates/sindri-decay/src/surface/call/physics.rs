@@ -35,6 +35,7 @@ pub(crate) enum PhysicsCall {
     RemoveJoint,
     CreateDistanceJoint,
     CreateHingeJoint,
+    CreateSpringJoint,
     /// Every entity with a collider inside a circle or a box placed in the
     /// world: an area check, for a blast, an aura or a pickup radius.
     OverlapCircle,
@@ -92,6 +93,7 @@ pub(crate) const PHYSICS_CALLS: &[(&str, PhysicsCall)] = &[
     ("remove_joint", PhysicsCall::RemoveJoint),
     ("create_distance_joint", PhysicsCall::CreateDistanceJoint),
     ("create_hinge_joint", PhysicsCall::CreateHingeJoint),
+    ("create_spring_joint", PhysicsCall::CreateSpringJoint),
     ("overlap_circle", PhysicsCall::OverlapCircle),
     ("overlap_box", PhysicsCall::OverlapBox),
     ("cast_circle", PhysicsCall::CastCircle),

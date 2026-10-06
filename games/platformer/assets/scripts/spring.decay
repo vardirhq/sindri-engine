@@ -6,6 +6,14 @@ script BreathingSpring {
         Physics.set_spring(this.entity, 1.0, 20.0, 1.2);
     }
     fn update(dt: f32) {
+        if Input.just_pressed("B") {
+            let hook = World.find("Lantern trolley");
+            let light = World.find("Spring lantern");
+            var length: f32 = 1.0;
+            if this.long { length = 1.5; }
+            Physics.remove_joint(this.entity);
+            Physics.create_spring_joint(this.entity, hook, light, Vec2(0.0, 0.0), Vec2(0.0, 0.0), length, 20.0, 1.2);
+        }
         this.age += dt;
         if this.age >= 3.0 {
             this.age = 0.0;

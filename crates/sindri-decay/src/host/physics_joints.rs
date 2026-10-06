@@ -9,6 +9,23 @@ use super::WorldHost;
 use super::convert::number;
 use crate::surface::PhysicsCall;
 
+pub(super) const fn is_joint_control(call: PhysicsCall) -> bool {
+    matches!(
+        call,
+        PhysicsCall::SetHingeMotor
+            | PhysicsCall::SetSliderMotor
+            | PhysicsCall::SetSpring
+            | PhysicsCall::JointEnabled
+            | PhysicsCall::SetJointEnabled
+            | PhysicsCall::SetDistance
+            | PhysicsCall::SetJointEndpoints
+            | PhysicsCall::RemoveJoint
+            | PhysicsCall::CreateDistanceJoint
+            | PhysicsCall::CreateHingeJoint
+            | PhysicsCall::CreateSpringJoint
+    )
+}
+
 impl WorldHost<'_> {
     pub(super) fn physics_joint_call(
         &mut self,
@@ -19,6 +36,7 @@ impl WorldHost<'_> {
         match call {
             PhysicsCall::CreateDistanceJoint => self.create_distance_joint_call(path, args),
             PhysicsCall::CreateHingeJoint => self.create_hinge_joint_call(path, args),
+            PhysicsCall::CreateSpringJoint => self.create_spring_joint_call(path, args),
             PhysicsCall::SetJointEndpoints => self.joint_endpoints_call(path, args),
             PhysicsCall::SetHingeMotor => self.hinge_motor_call(path, args),
             PhysicsCall::SetSliderMotor => self.slider_motor_call(path, args),

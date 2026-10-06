@@ -519,7 +519,7 @@ bodies need not be synchronized yet. Next fixed synchronization creates the
 constraint, preserving other owner components, bodies/motion and legacy connections.
 Existing joints, invalid handles/references and invalid lengths fail before mutation.
 Platformer C repairs the cut cord using its selected hook and length. Typed creation
-for slider/spring joints and automatic saved-spawn reference integration remain open
+for slider joints and automatic saved-spawn reference integration remain open
 in the joint track.
 
 ## Scene-authored hinges and velocity motors
@@ -563,7 +563,7 @@ the next fixed synchronization. Its values persist through endpoint rebuilds and
 the valid spawn-to-synchronization window. Zero torque disables the motor rather
 than braking; to brake, set zero velocity with positive torque. Typed
 `Physics.remove_joint` releases the authored hinge at next synchronization;
-typed slider/spring creation remains absent.
+typed slider creation remains absent.
 
 `Physics.create_hinge_joint(owner, first, second, first_anchor, second_anchor)`
 authors an enabled hinge on an existing owner with no authored 2D joint of any
@@ -642,8 +642,19 @@ only their fields in the runtime component, preserving unknown payload fields.
 They require the appropriate component and a physics host. Values apply at the
 next fixed synchronization, including before endpoints are built, and survive
 rebuilds. Zero force in the slider call disables its motor rather than braking.
-These calls tune existing authored constraints; structural creation and
-reference diagnostics are not yet exposed through typed joint calls.
+
+`Physics.create_spring_joint(owner, first, second, first_anchor, second_anchor,
+rest_length, stiffness, damping)` authors an enabled spring on an empty
+owner under the same scoped endpoint and physics contract as distance/hinge creation. Finite
+`Vec2` anchors use body-local world units without transform scale; rest length
+must be finite and positive, stiffness/damping finite and non-negative (zero is
+valid). All validation precedes mutation. Next fixed synchronization creates the
+owned constraint, preserving other components, body motion and legacy connections.
+`set_spring` can retune the new component before synchronization. Platformer B
+rebuilds its light's spring at its current rest length and continues tuning while
+the trolley remains on its independent rail.
+
+Typed slider creation and reference diagnostics remain absent.
 
 These general capabilities are added for the platformer: Decay reverses a
 powered lantern trolley near its rail ends, retunes its suspended light's spring
