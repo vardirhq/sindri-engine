@@ -230,6 +230,11 @@ const KNOWN: &[Known] = &[
         icon: icons::COLLIDER,
     },
     Known {
+        type_name: "sindri.physics2d.character",
+        family: Family::Physics,
+        icon: icons::PHYSICS,
+    },
+    Known {
         type_name: "sindri.physics2d.slider_joint",
         family: Family::Physics,
         icon: icons::PHYSICS,
