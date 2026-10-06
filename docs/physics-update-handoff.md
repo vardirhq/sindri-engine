@@ -53,7 +53,15 @@ Scene ownership validation passed 475 native scene tests (24 controller
 regressions), warning-denied Clippy, all-target/all-feature WASM, eleven catalogue
 tests and regenerated component metadata. Prior one-way head `5597ce44` is green
 in CI; the new pushed checkpoint requires CI verification.
-Continue with checked editor/typed Decay/platformer integration and native/browser proof.
+The character editor metadata checkpoint `ccda1971` passed all CI checks.
+Before adding the typed controller hosts, the Decay host boundary was split by
+responsibility: `host/mod.rs` owns context/services and `host/access.rs` owns
+runtime loading, storing, calling and entity/vector addressing. Both implementation
+blocks moved unchanged; the parent is now 168 lines, leaving room for controller
+context. Scoped preflight, warning-denied Clippy and all-target/all-feature WASM
+checks passed. This is a refactoring checkpoint, not a new controller API or proof.
+Continue with typed Decay requests/results, editor/runtime context wiring,
+platformer integration and native/browser proof.
 Character acceptance remains unchecked. Accelerated queries, 3D/voxel physics
 and final integration follow; gameplay world snapshots remain a separate gap.
 
