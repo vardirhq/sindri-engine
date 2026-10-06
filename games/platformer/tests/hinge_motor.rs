@@ -18,7 +18,7 @@ fn the_authored_windmill_turns_and_reverses_through_typed_decay() {
         let [x, y] = run.position(rotor);
         let [ax, ay] = run.position(anchor);
         assert!((x - ax).hypot(y - ay) < 0.02);
-        assert_eq!(run.physics.world().joint_count(), 2);
+        assert_eq!(run.physics.world().joint_count(), 4);
     }
     assert!(
         forwards && backwards,
@@ -27,5 +27,5 @@ fn the_authored_windmill_turns_and_reverses_through_typed_decay() {
     let hinge = run.entity("windmill-hinge").unwrap();
     run.world.despawn_recursive(hinge).unwrap();
     assert!(run.step(1.0 / 60.0).is_empty());
-    assert_eq!(run.physics.world().joint_count(), 1);
+    assert_eq!(run.physics.world().joint_count(), 3);
 }

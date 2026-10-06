@@ -814,6 +814,118 @@
       "addable": true,
       "apply": {},
       "default_payload": {
+        "first": "",
+        "first_anchor": [
+          0.0,
+          0.0
+        ],
+        "first_axis": [
+          1.0,
+          0.0
+        ],
+        "limits_enabled": false,
+        "lower_distance": 0.0,
+        "motor_enabled": false,
+        "motor_max_force": 0.0,
+        "motor_velocity": 0.0,
+        "second": "",
+        "second_anchor": [
+          0.0,
+          0.0
+        ],
+        "second_axis": [
+          1.0,
+          0.0
+        ],
+        "upper_distance": 0.0
+      },
+      "display_name": "Slider Joint 2D",
+      "fields": {
+        "first": "",
+        "first_anchor": [
+          0.0,
+          0.0
+        ],
+        "first_axis": [
+          1.0,
+          0.0
+        ],
+        "limits_enabled": false,
+        "lower_distance": 0.0,
+        "motor_enabled": false,
+        "motor_max_force": 0.0,
+        "motor_velocity": 0.0,
+        "second": "",
+        "second_anchor": [
+          0.0,
+          0.0
+        ],
+        "second_axis": [
+          1.0,
+          0.0
+        ],
+        "upper_distance": 0.0
+      },
+      "meanings": {
+        "first": {
+          "kind": "entity"
+        },
+        "second": {
+          "kind": "entity"
+        }
+      },
+      "schema_version": 1,
+      "type_name": "sindri.physics2d.slider_joint"
+    },
+    {
+      "addable": true,
+      "apply": {},
+      "default_payload": {
+        "damping": 1.0,
+        "first": "",
+        "first_anchor": [
+          0.0,
+          0.0
+        ],
+        "rest_length": 1.0,
+        "second": "",
+        "second_anchor": [
+          0.0,
+          0.0
+        ],
+        "stiffness": 10.0
+      },
+      "display_name": "Spring Joint 2D",
+      "fields": {
+        "damping": 1.0,
+        "first": "",
+        "first_anchor": [
+          0.0,
+          0.0
+        ],
+        "rest_length": 1.0,
+        "second": "",
+        "second_anchor": [
+          0.0,
+          0.0
+        ],
+        "stiffness": 10.0
+      },
+      "meanings": {
+        "first": {
+          "kind": "entity"
+        },
+        "second": {
+          "kind": "entity"
+        }
+      },
+      "schema_version": 1,
+      "type_name": "sindri.physics2d.spring_joint"
+    },
+    {
+      "addable": true,
+      "apply": {},
+      "default_payload": {
         "friction": 0.5,
         "layers": {
           "filter": 4294967295,

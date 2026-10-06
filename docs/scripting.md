@@ -1018,6 +1018,8 @@ a person who has not clicked yet.
 | `Physics.apply_impulse(entity, x, y)` | nothing |
 | `Physics.connect_distance(first, second, max_distance)` | nothing |
 | `Physics.set_hinge_motor(joint, velocity, max_torque)` | nothing |
+| `Physics.set_slider_motor(joint, velocity, max_force)` | nothing |
+| `Physics.set_spring(joint, rest_length, stiffness, damping)` | nothing |
 | `Physics.raycast(origin, direction, max_distance, mask, include_sensors, exclude)` | `RayHit2d` or `null` |
 | `Physics.cast_circle(origin, radius, direction, max_distance, mask, include_sensors, exclude)` | `RayHit2d` or `null` |
 | `Physics.cast_box(origin, half_size, rotation, direction, max_distance, mask, include_sensors, exclude)` | `RayHit2d` or `null` |
@@ -1092,6 +1094,18 @@ It needs a physics host and an authored `sindri.physics2d.hinge_joint` component
 invalid requests leave the payload unchanged. Full prefab endpoint references
 remain incomplete; see [the physics contract](physics.md).
 Platformer's windmill uses this typed control to reverse its powered axle.
+
+`Physics.set_slider_motor(joint, velocity, max_force)` tunes an authored slider
+owner's relative translation speed in world units/second along the first local
+axis, with a finite non-negative force cap. Zero force coasts; zero speed with
+positive force brakes. `Physics.set_spring(joint, rest_length, stiffness, damping)`
+tunes a spring owner with positive rest length and non-negative stiffness/damping.
+All values must be finite. Both validate before modifying runtime component
+fields, preserve unknown fields, apply at the next fixed synchronization and
+survive endpoint rebuilds, including calls before the bodies are built. Wrong
+components or missing physics fail; invalid values leave the payload unchanged.
+Platformer's lantern trolley reverses and retunes its suspended light with these
+calls. Joint creation/removal and full prefab references remain incomplete.
 
 `Physics.connect_distance` creates a maximum-distance connection between two
 authored 2D bodies. They may move closer and rotate freely, but their centres

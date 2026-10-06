@@ -291,6 +291,16 @@ pub(super) const TYPES: &[TypeEntry] = &[
                 "The objects that stopped touching this script's object since the last frame, as a list.",
             ),
             call(
+                "set_slider_motor",
+                &["joint", "velocity", "max_force"],
+                "Sets an authored 2D slider owner's relative translation speed in world units/second along the first local axis, with a finite non-negative force cap. Zero force disables the drive; zero speed with positive force brakes. Validates before modifying the runtime component; applies at next fixed synchronization and survives endpoint rebuilds. Needs physics and a slider component; preserves unknown fields.",
+            ),
+            call(
+                "set_spring",
+                &["joint", "rest_length", "stiffness", "damping"],
+                "Tunes an authored 2D spring owner's positive rest length and non-negative force-based stiffness/damping. All values must be finite. Invalid calls leave the component unchanged; valid changes apply at the next fixed synchronization, including before endpoints are built, and survive rebuilds. Needs physics and a spring component; preserves unknown fields.",
+            ),
+            call(
                 "set_hinge_motor",
                 &["joint", "velocity", "max_torque"],
                 "Sets an authored 2D hinge owner's relative angular velocity target in radians/second and finite non-negative torque cap. Positive turns the second body counterclockwise relative to the first. Zero torque disables the motor (it coasts rather than brakes). Applied at the next fixed synchronization, including before endpoints are built; persists through rebuilds. Invalid values leave the component unchanged. Needs physics and a hinge component on the owner.",

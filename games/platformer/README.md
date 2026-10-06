@@ -87,3 +87,10 @@ The windmill has a separate hinge entity connecting its fixed axle and physical
 rotor. Decay reverses its torque-capped motor every two seconds with
 `Physics.set_hinge_motor`; `tests/hinge_motor.rs` observes both directions,
 a fixed axle and removal. Copy this scene pattern for a powered rotating part.
+
+The lantern trolley travels along an authored slider rail and reverses through
+`Physics.set_slider_motor`. Its hanging light uses a force-based spring; Decay
+changes its rest length with `Physics.set_spring` and draws the cord from solved
+positions. `tests/slider_spring.rs` checks bounded reversal, the changed light
+height and independent joint removal. Copy these separate owner entities for a
+linear mechanism or a damped suspension; keep motion rules in Decay.

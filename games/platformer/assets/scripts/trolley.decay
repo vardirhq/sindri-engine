@@ -1,0 +1,19 @@
+// A powered lantern trolley reverses near either end of its authored rail.
+script Trolley {
+    var slider: Entity = null;
+    var direction: f32 = 1.0;
+    fn start() {
+        this.slider = World.find("Trolley slider");
+        Physics.set_slider_motor(this.slider, 0.8, 4.0);
+    }
+    fn update(dt: f32) {
+        let p = this.transform.world_position;
+        if p.x > 10.35 && this.direction > 0.0 {
+            this.direction = -1.0;
+            Physics.set_slider_motor(this.slider, -0.8, 4.0);
+        } else if p.x < 8.65 && this.direction < 0.0 {
+            this.direction = 1.0;
+            Physics.set_slider_motor(this.slider, 0.8, 4.0);
+        }
+    }
+}

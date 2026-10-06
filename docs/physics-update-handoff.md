@@ -80,10 +80,22 @@ windmill uses Decay to reverse its physical axle every two seconds.
 Scoped preflight passed 1,421 native tests, all-target/all-feature checks and
 zero-error/reminder typed preflight. Five-crate Clippy, 11 catalogue tests,
 WASM checks and rebuilt native/Chromium captures passed. CI still must verify
-the pushed hinge head.
+the pushed hinge head; CI is now green on `fd9916e7`.
 
-Joint acceptance stays open. Add sliders, springs, remaining motor modes, typed
-structural controls and dedicated reference authoring/diagnostics. Fix stable local
+A checked **slider and spring slice** now adds aligned local axes, signed travel
+limits and force-capped linear drive, plus radial force-based springs/damping.
+`Physics.set_slider_motor` and `Physics.set_spring` tune validated runtime payloads
+for next synchronization, preserving unknown fields and rebuild behavior. The
+platformer's bounded lantern trolley reverses through Decay and carries a light
+whose spring rest length Decay retunes. Joint builders and scene synchronization
+are split by responsibility; legacy distance and hinge behavior remains covered.
+Final scoped preflight passed 1,432 native tests, all-target/all-feature checks
+and typed preflight for all three scripts with zero errors/reminders. Five-crate
+Clippy, 11 catalogue tests, WASM checks and rebuilt native/Chromium delivery and
+captures passed. The slider/spring head still requires CI verification.
+
+Joint acceptance stays open. Add remaining motor modes, typed structural
+controls and dedicated reference authoring/diagnostics. Fix stable local
 references for runtime-spawned prefabs and preserve root-alias semantics through
 export pre-expansion; the gap is explicitly recorded in parity.
 
@@ -340,7 +352,8 @@ branch codex/physics-update. Read AGENTS.md, CLAUDE.md,
 docs/physics-update-handoff.md and docs/physics-update.md first.
 Implement every remaining acceptance item, including docs, in this one PR.
 CCD, one-way platforms, forces/rotation and contacts are checked and saved on
-the branch. Continue with the remaining joint kinds, controls and prefab references, then
+the branch. Continue with joint structural controls, reference authoring and full prefab
+references, then
 the remaining checklist.
 Push checked small slices regularly, each feature in one push or less.
 Keep gameplay in Decay, prove editor/runtime/script/game behavior, and do

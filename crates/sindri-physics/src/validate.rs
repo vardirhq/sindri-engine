@@ -18,6 +18,10 @@ pub enum PhysicsError {
     JointToSelf(EntityId),
     #[error("hinge limits must be ordered and within [-pi, pi] radians")]
     InvalidJointLimits,
+    #[error("slider axes must have unit length")]
+    InvalidJointAxis,
+    #[error("slider lower distance must not exceed its upper distance")]
+    InvalidSliderLimits,
     #[error("physics value '{0}' must be finite")]
     NonFinite(&'static str),
     #[error("physics value '{0}' must be positive")]

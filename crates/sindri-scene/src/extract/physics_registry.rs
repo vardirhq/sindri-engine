@@ -84,6 +84,7 @@ pub(super) fn register(components: &mut ComponentSchemaRegistry) -> Result<(), S
         ("second", FieldMeaning::Entity),
     ])?;
     register_hinge(components)?;
+    register_linear_joints(components)?;
     Ok(())
 }
 
@@ -98,6 +99,32 @@ fn register_hinge(components: &mut ComponentSchemaRegistry) -> Result<(), SceneE
         }),
     )?;
     components.describe::<crate::HingeJoint2dComponent>([
+        ("first", FieldMeaning::Entity),
+        ("second", FieldMeaning::Entity),
+    ])?;
+    Ok(())
+}
+
+fn register_linear_joints(
+    components: &mut ComponentSchemaRegistry,
+) -> Result<(), SceneExtractError> {
+    components.register_with_default::<crate::SliderJoint2dComponent>(
+        "Slider Joint 2D",
+        serde_json::json!({"first": "", "second": "", "first_anchor": [0.0, 0.0],
+            "second_anchor": [0.0, 0.0], "first_axis": [1.0, 0.0], "second_axis": [1.0, 0.0],
+            "limits_enabled": false, "lower_distance": 0.0, "upper_distance": 0.0,
+            "motor_enabled": false, "motor_velocity": 0.0, "motor_max_force": 0.0}),
+    )?;
+    components.describe::<crate::SliderJoint2dComponent>([
+        ("first", FieldMeaning::Entity),
+        ("second", FieldMeaning::Entity),
+    ])?;
+    components.register_with_default::<crate::SpringJoint2dComponent>(
+        "Spring Joint 2D",
+        serde_json::json!({"first": "", "second": "", "first_anchor": [0.0, 0.0],
+            "second_anchor": [0.0, 0.0], "rest_length": 1.0, "stiffness": 10.0, "damping": 1.0}),
+    )?;
+    components.describe::<crate::SpringJoint2dComponent>([
         ("first", FieldMeaning::Entity),
         ("second", FieldMeaning::Entity),
     ])?;

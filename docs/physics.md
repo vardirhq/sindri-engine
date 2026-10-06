@@ -449,7 +449,7 @@ reference selection/diagnostics and visual inspector review remain unverified.
 This foundation is added for the platformer: a physical lantern hangs from an
 anchor while Decay wind drives it and Decay stretches/turns its visible cord.
 The game regression observes movement, bounded distance and tether removal.
-Sliders, springs and additional typed owned-joint controls remain incomplete;
+Additional typed owned-joint controls and complete prefab references remain incomplete;
 the existing typed `Physics.connect_distance` keeps its previous semantics.
 
 ## Scene-authored hinges and velocity motors
@@ -500,8 +500,77 @@ remain open. This general capability is added for the platformer: Decay reverses
 its powered windmill axle every two seconds while physics keeps the rotor on its
 anchor. Native tests exercise offset anchors, limits, torque caps, coast/reverse,
 invalid atomic edits, command undo, endpoint rebuilds and gameplay removal.
-Sliders, springs, other motor modes and complete prefab references remain in the
+Other motor modes and complete prefab references remain in the
 joint track; its acceptance checkbox remains open.
+
+## Scene-authored sliders and springs
+
+`sindri.physics2d.slider_joint` constrains perpendicular translation and aligns
+two body-local axes; it permits signed translation along the first axis. Anchors
+use the same unscaled local world units as hinges. `first_axis` and `second_axis`
+are finite unit vectors (length tolerance `1e-4`), defaulting to `[1, 0]`. They
+set the relative orientation the slider maintains, so a rotated first body makes
+a rotated rail. The defaults have zero anchors, disabled limits and disabled drive.
+Enabled travel limits require finite `lower_distance <= upper_distance`; negative
+travel is allowed. `motor_velocity` is relative speed in world units/second along
+the first axis; `motor_max_force` is a finite non-negative force cap. The drive is
+force-based: it approaches its target subject to the cap and load. Disabling it
+coasts; enabled zero speed brakes within the cap.
+
+```json
+{
+  "first": "trolley-rail", "second": "trolley-body",
+  "first_axis": [1.0, 0.0], "second_axis": [1.0, 0.0],
+  "limits_enabled": true, "lower_distance": -1.0, "upper_distance": 1.0,
+  "motor_enabled": true, "motor_velocity": 0.8, "motor_max_force": 4.0
+}
+```
+
+`sindri.physics2d.spring_joint` applies radial, force-based spring and damping
+between two freely rotating local anchors. It pulls extended anchors together
+and pushes compressed anchors apart; it does not enforce a hard maximum length.
+`rest_length` is finite and strictly positive; `stiffness` and `damping` are finite
+and non-negative. Defaults are length `1`, stiffness `10`, damping `1` and zero
+anchors. Stiffness is force per unit of extension; damping is force per unit
+of relative radial speed. Zero stiffness permits damping alone; zero damping
+permits oscillation.
+Under gravity the supported weight stretches the spring beyond its rest length;
+a regression measures this against `mass * gravity / stiffness`.
+
+```json
+{
+  "first": "trolley-body", "second": "spring-lantern",
+  "rest_length": 1.0, "stiffness": 20.0, "damping": 1.2
+}
+```
+
+Both kinds share the joint owner, stable reference resolver and post-body
+synchronization lifecycle. Connected endpoints do not collide with each other.
+Invalid settings fail before backend edits; unchanged synchronization retains
+one constraint. Settings edits on unchanged endpoints update it in place and
+wake the bodies without resetting their motion. Owner/component removal drops
+it; inactive or missing endpoints suspend it; endpoint rebuilds reconnect in the
+same fixed step. The generic checked inspector and command undo author these
+settings; dedicated reference picking/diagnostics and visual editor review remain
+open. All numeric fields are validated even when their toggle is disabled.
+
+Typed `Physics.set_slider_motor(owner, velocity, max_force)` and
+`Physics.set_spring(owner, rest_length, stiffness, damping)` validate and patch
+only their fields in the runtime component, preserving unknown payload fields.
+They require the appropriate component and a physics host. Values apply at the
+next fixed synchronization, including before endpoints are built, and survive
+rebuilds. Zero force in the slider call disables its motor rather than braking.
+These calls tune existing authored constraints; structural creation/removal and
+reference diagnostics are not yet exposed through typed joint calls.
+
+These general capabilities are added for the platformer: Decay reverses a
+powered lantern trolley near its rail ends, retunes its suspended light's spring
+and draws the cord from solved positions. Its regression observes both travel
+directions, bounded rail motion, changed light height and independent removal.
+Runtime regressions exercise rotated rails, travel limits, force caps, coast/brake,
+spring extension/compression, damping, weight support and atomic invalid edits.
+Full prefab endpoint references, additional motor modes and final editor/browser
+interaction verification remain open; joint acceptance is not yet complete.
 
 ## Runtime ownership and stepping
 

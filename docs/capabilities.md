@@ -316,8 +316,18 @@ edits wake its endpoints without resetting body motion. Typed
 `Physics.set_hinge_motor` updates the runtime component for the next synchronization,
 including before endpoints are built. Platformer's Decay-driven windmill reverses
 its axle motor; native tests exercise limits, caps, coasting, atomic validation,
-undo and rebuilds. Slider/spring kinds, other motor modes and remaining typed
-ownership controls are still absent.
+undo and rebuilds.
+
+`sindri.physics2d.slider_joint` adds aligned local axes, signed travel limits and
+force-capped velocity drive; `sindri.physics2d.spring_joint` adds radial
+force-based stiffness/damping.
+Typed `Physics.set_slider_motor` and `Physics.set_spring` validate atomic runtime
+component edits for next synchronization, preserving unknown fields and rebuild
+behavior. Platformer's powered lantern trolley reverses along its rail while
+Decay retunes the hanging light's rest length. Native tests measure rotated rail
+motion/limits, force caps, coasting/braking, spring damping and weight support;
+scene edits/undo, suspension, rebuilds and game removal are exercised. Other motor
+modes and remaining typed ownership controls are still absent.
 Runtime-spawned prefab local references and exported prefab-root aliases remain
 gaps; dedicated picker/diagnostics and visual inspector review are unverified.
 

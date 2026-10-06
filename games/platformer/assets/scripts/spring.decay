@@ -1,0 +1,20 @@
+// Tuning rest length changes where the light settles, without teleporting it.
+script BreathingSpring {
+    var age: f32 = 0.0;
+    var long: bool = false;
+    fn start() {
+        Physics.set_spring(this.entity, 1.0, 20.0, 1.2);
+    }
+    fn update(dt: f32) {
+        this.age += dt;
+        if this.age >= 3.0 {
+            this.age = 0.0;
+            this.long = !this.long;
+            if this.long {
+                Physics.set_spring(this.entity, 1.5, 20.0, 1.2);
+            } else {
+                Physics.set_spring(this.entity, 1.0, 20.0, 1.2);
+            }
+        }
+    }
+}

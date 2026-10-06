@@ -5,7 +5,11 @@ use sindri_core::EntityId;
 
 use super::PhysicsWorld2d;
 use crate::validate::positive;
-use crate::{DistanceJoint2d, HingeJoint2d, PhysicsError};
+use crate::{DistanceJoint2d, HingeJoint2d, PhysicsError, SliderJoint2d, SpringJoint2d};
+
+mod hinge;
+mod slider;
+mod spring;
 
 pub(super) struct OwnedJoint {
     pub(super) handle: r2::ImpulseJointHandle,
@@ -16,6 +20,8 @@ pub(super) struct OwnedJoint {
 pub(super) enum OwnedJointSpec {
     Distance(DistanceJoint2d),
     Hinge(HingeJoint2d),
+    Slider(SliderJoint2d),
+    Spring(SpringJoint2d),
 }
 
 impl OwnedJointSpec {
@@ -23,6 +29,8 @@ impl OwnedJointSpec {
         match self {
             Self::Distance(joint) => (joint.first, joint.second),
             Self::Hinge(joint) => (joint.first, joint.second),
+            Self::Slider(joint) => (joint.first, joint.second),
+            Self::Spring(joint) => (joint.first, joint.second),
         }
     }
 }
@@ -108,80 +116,40 @@ impl PhysicsWorld2d {
         joint: DistanceJoint2d,
     ) -> Result<(), PhysicsError> {
         validate_distance_joint(joint.first, joint.second, joint.max_distance)?;
-        let first = self.record(joint.first)?.body;
-        let second = self.record(joint.second)?.body;
-        if self.owned_joints.get(&owner).is_some_and(|record| {
-            record.joint == OwnedJointSpec::Distance(joint)
-                && self.backend.impulse_joints.get(record.handle).is_some()
-        }) {
-            return Ok(());
-        }
-        self.remove_owned_joint(owner);
-        let handle = self.backend.impulse_joints.insert(
-            first,
-            second,
-            r2::RopeJointBuilder::new(joint.max_distance).contacts_enabled(false),
-            true,
-        );
-        self.owned_joints.insert(
+        self.set_owned_joint(
             owner,
-            OwnedJoint {
-                handle,
-                joint: OwnedJointSpec::Distance(joint),
-            },
-        );
-        Ok(())
+            OwnedJointSpec::Distance(joint),
+            r2::RopeJointBuilder::new(joint.max_distance)
+                .contacts_enabled(false)
+                .into(),
+        )
     }
 
-    /// Creates or edits an owned hinge without resetting either body's motion.
-    /// Settings edits between the same endpoints update the existing constraint
-    /// and wake both bodies. Endpoints may be static or dynamic.
-    ///
-    /// # Errors
-    /// Rejects self-connections, missing bodies or invalid settings before mutation.
-    pub fn set_hinge_joint(
+    /// The kind-specific caller validates settings before entering this seam.
+    fn set_owned_joint(
         &mut self,
         owner: EntityId,
-        joint: HingeJoint2d,
+        spec: OwnedJointSpec,
+        data: r2::GenericJoint,
     ) -> Result<(), PhysicsError> {
-        if joint.first == joint.second {
-            return Err(PhysicsError::JointToSelf(joint.first));
+        let (first, second) = spec.endpoints();
+        if first == second {
+            return Err(PhysicsError::JointToSelf(first));
         }
-        joint.settings.validate()?;
-        let first = self.record(joint.first)?.body;
-        let second = self.record(joint.second)?.body;
-        let spec = OwnedJointSpec::Hinge(joint);
+        let first_body = self.record(first)?.body;
+        let second_body = self.record(second)?.body;
         if self.owned_joints.get(&owner).is_some_and(|record| {
             record.joint == spec && self.backend.impulse_joints.get(record.handle).is_some()
         }) {
             return Ok(());
         }
-        let settings = joint.settings;
-        let mut builder = r2::RevoluteJointBuilder::new()
-            .local_anchor1(r2::Vector::new(
-                settings.first_anchor[0],
-                settings.first_anchor[1],
-            ))
-            .local_anchor2(r2::Vector::new(
-                settings.second_anchor[0],
-                settings.second_anchor[1],
-            ))
-            .contacts_enabled(false);
-        if settings.limits_enabled {
-            builder = builder.limits([settings.lower_angle, settings.upper_angle]);
-        }
-        if settings.motor_enabled {
-            builder = builder
-                .motor_model(r2::MotorModel::ForceBased)
-                .motor_velocity(settings.motor_velocity, 1.0)
-                .motor_max_force(settings.motor_max_torque);
-        }
         if let Some(record) = self.owned_joints.get_mut(&owner)
-            && matches!(record.joint, OwnedJointSpec::Hinge(_))
-            && record.joint.endpoints() == (joint.first, joint.second)
+            && !matches!(spec, OwnedJointSpec::Distance(_))
+            && std::mem::discriminant(&record.joint) == std::mem::discriminant(&spec)
+            && record.joint.endpoints() == (first, second)
             && let Some(constraint) = self.backend.impulse_joints.get_mut(record.handle, true)
         {
-            constraint.data = builder.into();
+            constraint.data = data;
             record.joint = spec;
             return Ok(());
         }
@@ -189,7 +157,7 @@ impl PhysicsWorld2d {
         let handle = self
             .backend
             .impulse_joints
-            .insert(first, second, builder, true);
+            .insert(first_body, second_body, data, true);
         self.owned_joints.insert(
             owner,
             OwnedJoint {

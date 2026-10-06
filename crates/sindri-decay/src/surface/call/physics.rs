@@ -26,6 +26,8 @@ pub(crate) enum PhysicsCall {
     /// leaving their rotation and closer motion unconstrained.
     ConnectDistance,
     SetHingeMotor,
+    SetSliderMotor,
+    SetSpring,
     /// Every entity with a collider inside a circle or a box placed in the
     /// world: an area check, for a blast, an aura or a pickup radius.
     OverlapCircle,
@@ -74,6 +76,8 @@ pub(crate) const PHYSICS_CALLS: &[(&str, PhysicsCall)] = &[
     ("apply_impulse", PhysicsCall::ApplyImpulse),
     ("connect_distance", PhysicsCall::ConnectDistance),
     ("set_hinge_motor", PhysicsCall::SetHingeMotor),
+    ("set_slider_motor", PhysicsCall::SetSliderMotor),
+    ("set_spring", PhysicsCall::SetSpring),
     ("overlap_circle", PhysicsCall::OverlapCircle),
     ("overlap_box", PhysicsCall::OverlapBox),
     ("cast_circle", PhysicsCall::CastCircle),

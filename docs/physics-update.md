@@ -8,7 +8,7 @@ editor, scripting, proof and documentation move together.
 For a new implementation session, read [the recovery handoff](physics-update-handoff.md).
 CCD, one-way platforms, forces/rotation, contacts and materials are implemented
 and checked. Scene-authored distance constraints form a checked joint foundation.
-Hinges and velocity motors form the next checked joint slice.
+Hinges, sliders, springs and velocity motors now form checked joint slices.
 The remaining items below are the active scope.
 
 ## Acceptance checklist
@@ -193,4 +193,38 @@ surface-specific completeness. This checklist does not mark those surfaces done.
 - Joint acceptance remains open for sliders, springs, additional motor modes,
   typed structural controls, dedicated reference authoring/diagnostics and full
   prefab references. Visual editor interaction, full browser gameplay and final
-  workspace integration remain open. CI must verify the pushed hinge head.
+  workspace integration remain open. CI is green on hinge commit `fd9916e7`.
+
+### Slider and spring checkpoint
+
+- Scene-authored sliders align body-local unit axes, constrain perpendicular
+  motion/relative orientation, bound signed travel and drive with a force cap.
+  Springs apply radial, force-based stiffness/damping between freely rotating
+  local anchors. Finite values, valid axes/limits, positive spring rest length
+  and non-negative force coefficients are validated before backend mutation.
+- Kind-specific backend builders and shared ownership preserve distance/hinge
+  semantics. Settings edits on the same endpoints retain the constraint and
+  wake bodies without resetting motion; all kinds share suspend/remove/rebuild
+  handling. Scene components, reference resolution and synchronization are split
+  by responsibility rather than growing a single joint module.
+- Typed `Physics.set_slider_motor` and `Physics.set_spring` patch validated runtime
+  component fields for next fixed synchronization, preserving unknown fields and
+  supporting calls before endpoints are built. They survive endpoint rebuilds;
+  missing physics, wrong component/type and invalid values fail atomically.
+- Platformer's lantern trolley reverses along a bounded rail, while Decay changes
+  its suspended light's rest length and draws the solved cord. Its run observes
+  both directions, changed light height and independent constraint removal.
+- Final scoped preflight passed 1,432 native tests and warning-denied all-target/
+  all-feature checks for physics, scene, Decay, editor and platformer. Typed checks
+  passed all three new scripts with zero errors/reminders. Five-crate Clippy and
+  11 catalogue currentness/completeness tests passed; catalogue regenerated.
+- Regressions measure rotated/distinct local axes, travel and force caps,
+  coast/brake, spring extension/compression, damping and weight support. Scene
+  command edits/undo, inactivity, endpoint rebuilds and existing game goals pass.
+- All-feature WASM checks passed physics, scene, Decay and platformer. Rebuilt
+  native Vulkan and Chromium WebGPU delivery/captures passed, fetching exported
+  assets and running scripts without runtime errors. Both captures were reviewed.
+- Joint acceptance remains open for complete prefab references, typed structural
+  controls, dedicated reference authoring/diagnostics and remaining motor modes.
+  Visual editor interaction, full browser gameplay and final workspace checks
+  remain open. CI must verify the pushed slider/spring head.

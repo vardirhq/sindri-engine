@@ -2300,6 +2300,278 @@
           ]
         }
       }
+    },
+    {
+      "id": "trolley-rail",
+      "name": "Lantern rail",
+      "transform_3d": {
+        "position": [
+          9.5,
+          8.1,
+          0.35
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          2.2,
+          0.04,
+          1
+        ]
+      },
+      "components": {
+        "sindri.shape": {
+          "kind": "rect",
+          "fill": [
+            0.2,
+            0.15,
+            0.1,
+            1
+          ]
+        },
+        "sindri.physics2d.collider": {
+          "shape": {
+            "shape": "circle",
+            "radius": 0.05
+          },
+          "offset": [
+            0,
+            0
+          ],
+          "rotation": 0,
+          "sensor": false,
+          "layers": {
+            "memberships": 0,
+            "filter": 0
+          },
+          "friction": 0.5,
+          "restitution": 0
+        }
+      }
+    },
+    {
+      "id": "trolley-body",
+      "name": "Lantern trolley",
+      "transform_3d": {
+        "position": [
+          9.5,
+          8.1,
+          0.4
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          0.25,
+          0.25,
+          1
+        ]
+      },
+      "components": {
+        "sindri.shape": {
+          "kind": "rect",
+          "fill": [
+            1,
+            0.8,
+            0.25,
+            1
+          ]
+        },
+        "sindri.physics2d.collider": {
+          "shape": {
+            "shape": "circle",
+            "radius": 0.18
+          },
+          "offset": [
+            0,
+            0
+          ],
+          "rotation": 0,
+          "sensor": false,
+          "layers": {
+            "memberships": 0,
+            "filter": 0
+          },
+          "friction": 0.5,
+          "restitution": 0
+        },
+        "sindri.physics2d.rigid_body": {
+          "kind": "dynamic",
+          "pose": {
+            "position": [
+              0,
+              0
+            ],
+            "rotation": 0
+          },
+          "linear_velocity": [
+            0,
+            0
+          ],
+          "angular_velocity": 0,
+          "gravity_scale": 0.0,
+          "linear_damping": 0.0,
+          "angular_damping": 0.15,
+          "lock_rotation": false,
+          "continuous_collision": true
+        },
+        "sindri.script": {
+          "source": "scripts/trolley.decay",
+          "script": "Trolley"
+        }
+      }
+    },
+    {
+      "id": "spring-lantern",
+      "name": "Spring lantern",
+      "transform_3d": {
+        "position": [
+          9.5,
+          6.7,
+          0.4
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          0.32,
+          0.32,
+          1
+        ]
+      },
+      "components": {
+        "sindri.shape": {
+          "kind": "ellipse",
+          "fill": [
+            1,
+            0.8,
+            0.25,
+            1
+          ]
+        },
+        "sindri.physics2d.collider": {
+          "shape": {
+            "shape": "circle",
+            "radius": 0.16
+          },
+          "offset": [
+            0,
+            0
+          ],
+          "rotation": 0,
+          "sensor": false,
+          "layers": {
+            "memberships": 0,
+            "filter": 0
+          },
+          "friction": 0.5,
+          "restitution": 0
+        },
+        "sindri.physics2d.rigid_body": {
+          "kind": "dynamic",
+          "pose": {
+            "position": [
+              0,
+              0
+            ],
+            "rotation": 0
+          },
+          "linear_velocity": [
+            0,
+            0
+          ],
+          "angular_velocity": 0,
+          "gravity_scale": 1.0,
+          "linear_damping": 0.15,
+          "angular_damping": 0.15,
+          "lock_rotation": false,
+          "continuous_collision": true
+        },
+        "sindri.script": {
+          "source": "scripts/spring_lantern.decay",
+          "script": "SpringLantern"
+        }
+      }
+    },
+    {
+      "id": "spring-cord",
+      "name": "Spring lantern cord",
+      "transform_3d": {
+        "position": [
+          9.5,
+          7.4,
+          0.35
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          0.025,
+          1.4,
+          1
+        ]
+      },
+      "components": {
+        "sindri.shape": {
+          "kind": "rect",
+          "fill": [
+            0.25,
+            0.18,
+            0.1,
+            1
+          ]
+        }
+      }
+    },
+    {
+      "id": "trolley-slider",
+      "name": "Trolley slider",
+      "components": {
+        "sindri.physics2d.slider_joint": {
+          "first": "trolley-rail",
+          "second": "trolley-body",
+          "first_axis": [
+            1.0,
+            0.0
+          ],
+          "second_axis": [
+            1.0,
+            0.0
+          ],
+          "limits_enabled": true,
+          "lower_distance": -1.0,
+          "upper_distance": 1.0
+        }
+      }
+    },
+    {
+      "id": "lantern-spring",
+      "name": "Lantern spring",
+      "components": {
+        "sindri.physics2d.spring_joint": {
+          "first": "trolley-body",
+          "second": "spring-lantern",
+          "rest_length": 1.0,
+          "stiffness": 20.0,
+          "damping": 1.2
+        },
+        "sindri.script": {
+          "source": "scripts/spring.decay",
+          "script": "BreathingSpring"
+        }
+      }
     }
   ]
 }

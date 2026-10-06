@@ -1,5 +1,7 @@
 # Changelog
 
+- Add scene-authored 2D sliders with travel limits and force-capped velocity motors, plus damped force-based springs. Typed Decay controls tune their runtime components through synchronization and rebuilds. Platformer adds a reversing lantern trolley with a retuned spring suspension. Structural controls and full prefab references remain in progress.
+
 - Add scene-authored 2D hinges with local anchors, angle limits and torque-capped velocity motors. Typed `Physics.set_hinge_motor` controls their next synchronized drive without resetting body motion. Platformer adds a reversing windmill. Sliders, springs and full prefab reference integration remain in progress.
 
 - Add scene-authored 2D distance joints with stable scene endpoint IDs, explicit ownership, edit/undo support and reconnection after endpoint rebuilds. Platformer has a wind-driven hanging lantern. Other joint kinds, typed ownership controls and spawned-prefab references remain in progress.
