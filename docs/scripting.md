@@ -1020,6 +1020,9 @@ a person who has not clicked yet.
 | `Physics.set_hinge_motor(joint, velocity, max_torque)` | nothing |
 | `Physics.set_slider_motor(joint, velocity, max_force)` | nothing |
 | `Physics.set_spring(joint, rest_length, stiffness, damping)` | nothing |
+| `Physics.joint_enabled(joint)` | `bool` |
+| `Physics.set_joint_enabled(joint, enabled)` | nothing |
+| `Physics.set_distance(joint, max_distance)` | nothing |
 | `Physics.raycast(origin, direction, max_distance, mask, include_sensors, exclude)` | `RayHit2d` or `null` |
 | `Physics.cast_circle(origin, radius, direction, max_distance, mask, include_sensors, exclude)` | `RayHit2d` or `null` |
 | `Physics.cast_box(origin, half_size, rotation, direction, max_distance, mask, include_sensors, exclude)` | `RayHit2d` or `null` |
@@ -1082,6 +1085,18 @@ A body is authored, not created here: an entity carries `sindri.physics2d.collid
 and optionally `sindri.physics2d.rigid_body`, and `ScenePhysics2d` keeps the
 simulation in step with what the scene says. A prefab carrying those components
 spawns with them, which is how a bullet gets a body.
+
+`Physics.joint_enabled(joint)` reads an authored constraint's enabled flag,
+including before synchronization. It does not report whether the backend has
+connected valid active endpoints. `Physics.set_joint_enabled(joint, enabled)`
+releases or reconnects the constraint at the next fixed synchronization, keeping
+its owner, endpoints and settings. Bodies retain their motion; reconnection may
+change that motion through the ordinary solver. `Physics.set_distance(joint,
+max_distance)` tunes an authored maximum-distance constraint, including while
+suspended or before endpoints are built. The length must be finite and positive.
+These calls require physics and exactly one valid authored joint; distance tuning
+requires the distance kind. They reject invalid calls before mutation and preserve
+unknown payload fields. Omitting `enabled` in old scenes means true.
 
 `Physics.set_hinge_motor(joint, velocity, max_torque)` takes a hinge-owner entity,
 a relative angular speed in radians/second and a finite non-negative torque cap.

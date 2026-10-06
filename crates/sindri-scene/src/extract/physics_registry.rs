@@ -77,7 +77,7 @@ pub(super) fn register(components: &mut ComponentSchemaRegistry) -> Result<(), S
     )])?;
     components.register_with_default::<crate::DistanceJoint2dComponent>(
         "Distance Joint 2D",
-        serde_json::json!({"first": "", "second": "", "max_distance": 1.0}),
+        serde_json::json!({"first": "", "second": "", "enabled": true, "max_distance": 1.0}),
     )?;
     components.describe::<crate::DistanceJoint2dComponent>([
         ("first", FieldMeaning::Entity),
@@ -92,7 +92,7 @@ fn register_hinge(components: &mut ComponentSchemaRegistry) -> Result<(), SceneE
     components.register_with_default::<crate::HingeJoint2dComponent>(
         "Hinge Joint 2D",
         serde_json::json!({
-            "first": "", "second": "", "first_anchor": [0.0, 0.0],
+            "first": "", "second": "", "enabled": true, "first_anchor": [0.0, 0.0],
             "second_anchor": [0.0, 0.0], "limits_enabled": false,
             "lower_angle": 0.0, "upper_angle": 0.0, "motor_enabled": false,
             "motor_velocity": 0.0, "motor_max_torque": 0.0
@@ -110,7 +110,7 @@ fn register_linear_joints(
 ) -> Result<(), SceneExtractError> {
     components.register_with_default::<crate::SliderJoint2dComponent>(
         "Slider Joint 2D",
-        serde_json::json!({"first": "", "second": "", "first_anchor": [0.0, 0.0],
+        serde_json::json!({"first": "", "second": "", "enabled": true, "first_anchor": [0.0, 0.0],
             "second_anchor": [0.0, 0.0], "first_axis": [1.0, 0.0], "second_axis": [1.0, 0.0],
             "limits_enabled": false, "lower_distance": 0.0, "upper_distance": 0.0,
             "motor_enabled": false, "motor_velocity": 0.0, "motor_max_force": 0.0}),
@@ -121,7 +121,7 @@ fn register_linear_joints(
     ])?;
     components.register_with_default::<crate::SpringJoint2dComponent>(
         "Spring Joint 2D",
-        serde_json::json!({"first": "", "second": "", "first_anchor": [0.0, 0.0],
+        serde_json::json!({"first": "", "second": "", "enabled": true, "first_anchor": [0.0, 0.0],
             "second_anchor": [0.0, 0.0], "rest_length": 1.0, "stiffness": 10.0, "damping": 1.0}),
     )?;
     components.describe::<crate::SpringJoint2dComponent>([

@@ -254,5 +254,39 @@ surface-specific completeness. This checklist does not mark those surfaces done.
 - Nested renamed-root aliases, exported placed-root aliases and saved-spawn
   reference remapping remain incomplete. Typed structural controls, dedicated
   reference authoring/diagnostics, other motor modes and final editor/browser/
-  workspace integration remain open. Joint acceptance stays unchecked. CI must
-  verify this pushed checkpoint.
+  workspace integration remain open. Joint acceptance stays unchecked. CI is
+  green on spawned-prefab commit `acbed858`.
+
+### Joint suspension and distance tuning checkpoint
+
+- All four authored joint components accept `enabled`, defaulting true for old
+  payloads. False releases only the constraint at next fixed synchronization;
+  true reconnects available active endpoints with retained settings. Endpoint
+  bodies and their motion are retained. Ordinary collision/constraint solving
+  may change motion after release/reconnection.
+- Typed `Physics.joint_enabled` reads the authored flag;
+  `Physics.set_joint_enabled` patches it, and `Physics.set_distance` tunes owned
+  maximum-distance constraints. Calls support initial synchronization and
+  suspended owners, preserve unknown fields and reject missing/conflicting/
+  invalid owners, wrong types/kinds, missing physics and invalid lengths before
+  mutation. Active owners' settings, including suspended distances with missing
+  endpoints, are validated before ownership changes.
+- Scene command suspension, undo/redo and endpoint rebuilds cover all four kinds.
+  Platformer Decay reels the lantern tether with T and releases/reconnects it
+  with L. Its regression observes short/long lengths, free fall, hidden cord and
+  reconnection; owner-removal and existing level-goal regressions remain covered.
+- Physics signature construction and reference prose are split by responsibility
+  to keep growth within the function/file limits. Catalogue regenerated.
+- Final scoped preflight passed 768 native tests and warning-denied all-target/
+  all-feature checks for scene, Decay and platformer. Typed lantern preflight
+  passed with zero errors/reminders. Three-crate Clippy and 11 catalogue
+  currentness/completeness tests passed; all 1,086 Rust files pass the size gate.
+- All-target/all-feature WASM checks passed those three crates, and the generic
+  browser host was rebuilt. Chromium WebGPU fetched 24 assets and exercised T/L
+  shortening, release, reconnection and restored length, plus the spawned windmill,
+  without runtime errors. Native Vulkan capture passed. Native and browser
+  short/released/reconnected captures were visually reviewed.
+- Joint acceptance stays open for endpoint retargeting, structural creation/
+  removal, additional motor modes, dedicated reference authoring/diagnostics and
+  remaining prefab reference integration. Final editor/browser/workspace checks
+  and CI on this pushed checkpoint remain open.

@@ -327,7 +327,17 @@ behavior. Platformer's powered lantern trolley reverses along its rail while
 Decay retunes the hanging light's rest length. Native tests measure rotated rail
 motion/limits, force caps, coasting/braking, spring damping and weight support;
 scene edits/undo, suspension, rebuilds and game removal are exercised. Other motor
-modes and remaining typed ownership controls are still absent.
+modes and remaining typed ownership controls are still incomplete.
+All four authored constraints now accept an enabled flag, defaulting true for
+old payloads. Typed `Physics.joint_enabled` reads the authored flag and
+`Physics.set_joint_enabled` suspends/reconnects the constraint at next fixed
+synchronization without rebuilding endpoint bodies. `Physics.set_distance`
+tunes owned maximum-distance constraints, including before initial sync and
+while suspended. Validation rejects missing/conflicting/invalid owners, wrong
+kinds/types, missing physics and non-positive/non-finite lengths before mutation.
+Unknown payload fields survive. Scene command undo/redo covers all four kinds;
+platformer Decay reels its lantern tether with T and releases/reconnects it with L.
+Endpoint retargeting, structural creation/removal and other motor modes remain.
 Runtime-spawned prefab references now use a separate runtime identity, retaining
 local sibling paths and the original top-level root ID without assigning saved
 scene IDs. The platformer spawns/removes a reusable motor-driven windmill through

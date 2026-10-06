@@ -15,6 +15,7 @@
 
 mod game;
 mod input;
+mod physics;
 mod tween;
 mod world;
 

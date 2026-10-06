@@ -7,6 +7,9 @@ K or the west controller button tosses the wooden crate when nearby. Wind
 pushes it along the ground; an off-centre kick makes it tumble. Its forces and
 rotation are driven in Decay, with physics writing the resulting pose back.
 
+L releases or reconnects the hanging lantern; T reels its tether in or out.
+The cord disappears while the constraint is suspended.
+
 V places or removes a second powered windmill from a reusable prefab. Its hinge
 references its own root axle and rotor, and Decay reverses the motor.
 
@@ -100,3 +103,6 @@ linear mechanism or a damped suspension; keep motion rules in Decay.
 
 `tests/spawned_joints.rs` places, reverses and removes the reusable windmill twice
 through Decay, checking its fixed axle, isolated joint and fresh spawn lifecycle.
+
+`tests/joint_controls.rs` retunes the lantern tether, releases it into free fall,
+reconnects it and returns to the original length through keyboard-driven Decay.

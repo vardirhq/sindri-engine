@@ -1806,6 +1806,18 @@
           "returns": "unit"
         },
         {
+          "description": "Reads the authored enabled flag of one 2D joint owner, including before synchronization. True does not guarantee live endpoints; inactive or missing endpoints still suspend the constraint. Requires physics and exactly one valid authored joint.",
+          "kind": "function",
+          "name": "joint_enabled",
+          "parameter_names": [
+            "joint"
+          ],
+          "parameters": [
+            "Entity"
+          ],
+          "returns": "bool"
+        },
+        {
           "description": "The mask for one collision layer the scene's physics world names, such as `\"ground\"`, for a query's `mask` argument. A name the world does not give is an error.",
           "kind": "function",
           "name": "layer",
@@ -1938,6 +1950,20 @@
           "returns": "unit"
         },
         {
+          "description": "Tunes an authored 2D maximum-distance constraint for the next fixed synchronization. Distance must be finite and positive. Works while suspended or before endpoints are built; preserves unknown fields and body motion. Requires physics and an authored distance joint.",
+          "kind": "function",
+          "name": "set_distance",
+          "parameter_names": [
+            "joint",
+            "max_distance"
+          ],
+          "parameters": [
+            "Entity",
+            "f32"
+          ],
+          "returns": "unit"
+        },
+        {
           "description": "Sets an authored 2D hinge owner's relative angular velocity target in radians/second and finite non-negative torque cap. Positive turns the second body counterclockwise relative to the first. Zero torque disables the motor (it coasts rather than brakes). Applied at the next fixed synchronization, including before endpoints are built; persists through rebuilds. Invalid values leave the component unchanged. Needs physics and a hinge component on the owner.",
           "kind": "function",
           "name": "set_hinge_motor",
@@ -1950,6 +1976,20 @@
             "Entity",
             "f32",
             "f32"
+          ],
+          "returns": "unit"
+        },
+        {
+          "description": "Suspends or reconnects an authored distance, hinge, slider or spring at the next fixed synchronization. Keeps the owner, endpoints, settings and body motion; preserves unknown fields. Validates before mutation, including in the spawn window. Requires physics and exactly one valid authored joint.",
+          "kind": "function",
+          "name": "set_joint_enabled",
+          "parameter_names": [
+            "joint",
+            "enabled"
+          ],
+          "parameters": [
+            "Entity",
+            "bool"
           ],
           "returns": "unit"
         },

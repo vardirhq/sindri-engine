@@ -52,7 +52,12 @@ impl WorldHost<'_> {
         }
         if matches!(
             call,
-            PhysicsCall::SetHingeMotor | PhysicsCall::SetSliderMotor | PhysicsCall::SetSpring
+            PhysicsCall::SetHingeMotor
+                | PhysicsCall::SetSliderMotor
+                | PhysicsCall::SetSpring
+                | PhysicsCall::JointEnabled
+                | PhysicsCall::SetJointEnabled
+                | PhysicsCall::SetDistance
         ) {
             return self.physics_joint_call(call, path, args);
         }

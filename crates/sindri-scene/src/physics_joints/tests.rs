@@ -48,6 +48,88 @@ fn payload(distance: f32) -> serde_json::Value {
 }
 
 #[test]
+fn joint_suspension_is_undoable_and_keeps_endpoint_motion() {
+    let registry = SceneExtractor::new().unwrap().components().clone();
+    for kind in [
+        DistanceJoint2dComponent::TYPE_NAME,
+        HingeJoint2dComponent::TYPE_NAME,
+        SliderJoint2dComponent::TYPE_NAME,
+        SpringJoint2dComponent::TYPE_NAME,
+    ] {
+        let mut world = World::default();
+        body(&mut world, "anchor", [0.0, 0.0], RigidBodyKind::Static);
+        let moving = body(&mut world, "body", [1.0, 0.0], RigidBodyKind::Dynamic);
+        let mut original = registry.default_payload(kind).unwrap().clone();
+        assert_eq!(original["enabled"], json!(true));
+        original["first"] = json!("anchor");
+        original["second"] = json!("body");
+        let owner = world.spawn(EntityData {
+            source_id: SceneEntityId::new("joint").ok(),
+            components: [(kind.into(), original.clone())].into(),
+            ..EntityData::default()
+        });
+        let mut physics = ScenePhysics2d::top_down().unwrap();
+        physics.step(&mut world, &registry, STEP).unwrap();
+        physics
+            .world_mut()
+            .set_linear_velocity(moving, [3.0, 0.0])
+            .unwrap();
+        let mut paused = original;
+        paused["enabled"] = json!(false);
+        let mut commands = CommandBuffer::new();
+        commands.push(WorldCommand::SetComponent {
+            entity: owner,
+            type_name: kind.into(),
+            payload: paused,
+        });
+        let mut history = CommandHistory::default();
+        history
+            .apply(commands.into_transaction("Suspend joint"), &mut world)
+            .unwrap();
+        physics.step(&mut world, &registry, STEP).unwrap();
+        assert_eq!(physics.world().joint_count(), 0);
+        assert!(physics.world().linear_velocity(moving).unwrap()[0] > 2.9);
+        history.undo(&mut world).unwrap();
+        physics.step(&mut world, &registry, STEP).unwrap();
+        assert_eq!(physics.world().joint_count(), 1);
+        world.get_mut(moving).unwrap().components.insert(
+            Collider2dComponent::TYPE_NAME.into(),
+            json!({"pieces": [Collider2d::circle(0.2)]}),
+        );
+        physics.step(&mut world, &registry, STEP).unwrap();
+        assert_eq!(physics.world().joint_count(), 1);
+        history.redo(&mut world).unwrap();
+        physics.step(&mut world, &registry, STEP).unwrap();
+        assert_eq!(physics.world().joint_count(), 0);
+    }
+}
+
+#[test]
+fn invalid_suspended_distance_is_rejected_before_ownership_changes() {
+    let registry = SceneExtractor::new().unwrap().components().clone();
+    let mut world = World::default();
+    body(&mut world, "anchor", [0.0, 0.0], RigidBodyKind::Static);
+    body(&mut world, "body", [1.0, 0.0], RigidBodyKind::Dynamic);
+    world.spawn(EntityData {
+        source_id: SceneEntityId::new("joint").ok(),
+        components: [(DistanceJoint2dComponent::TYPE_NAME.into(), payload(2.0))].into(),
+        ..EntityData::default()
+    });
+    let mut physics = ScenePhysics2d::top_down().unwrap();
+    physics.step(&mut world, &registry, STEP).unwrap();
+    world.spawn(EntityData {
+        components: [(
+            DistanceJoint2dComponent::TYPE_NAME.into(),
+            json!({"enabled": false, "max_distance": 0.0}),
+        )]
+        .into(),
+        ..EntityData::default()
+    });
+    assert!(physics.step(&mut world, &registry, STEP).is_err());
+    assert_eq!(physics.world().joint_count(), 1);
+}
+
+#[test]
 fn edits_undo_rebuild_and_inactivity_preserve_joint_ownership() {
     let registry = SceneExtractor::new().unwrap().components().clone();
     let mut world = World::default();
@@ -147,6 +229,7 @@ fn hinge_motor_edits_undo_and_rebuild_preserve_ownership() {
     body(&mut world, "anchor", [0.0, 0.0], RigidBodyKind::Static);
     let moving = body(&mut world, "body", [0.0, 0.0], RigidBodyKind::Dynamic);
     let component = HingeJoint2dComponent {
+        enabled: true,
         first: "anchor".into(),
         second: "body".into(),
         settings: HingeSettings2d {

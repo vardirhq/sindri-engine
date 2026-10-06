@@ -455,6 +455,37 @@ The game regression observes movement, bounded distance and tether removal.
 Additional typed owned-joint controls and complete prefab references remain incomplete;
 the existing typed `Physics.connect_distance` keeps its previous semantics.
 
+## Reversible authored joint suspension and distance tuning
+
+All four joint components accept `enabled`, defaulting to true when omitted.
+False releases the solver constraint at the next fixed synchronization while
+retaining its owner, endpoint references and settings. Re-enabling reconnects
+available active endpoints; missing endpoints continue to suspend the constraint.
+Bodies are not rebuilt, and their motion is not reset. Reconnection and restoring
+mutual endpoint collision can change motion through the ordinary physics solver.
+Multiple joint kinds on one active owner remain an error even when suspended.
+All active owners' settings are validated before ownership changes, including
+suspended constraints and distance settings whose endpoints are unavailable.
+
+The generic checked inspector exposes the flag. Command suspension, undo/redo,
+endpoint rebuilds and all four constraint kinds are exercised.
+`Physics.joint_enabled(owner)` reads the authored flag, including before the next
+synchronization; it does not report whether a live constraint currently exists.
+`Physics.set_joint_enabled(owner, enabled)` patches that flag.
+`Physics.set_distance(owner, max_distance)` tunes an owned maximum-distance
+constraint, including while suspended or before endpoints materialize.
+These typed calls require physics and exactly one valid authored joint;
+distance tuning requires the distance kind and a finite positive maximum.
+Invalid, missing, conflicting or wrong-kind calls leave payloads unchanged.
+Unknown fields are preserved. Legacy `Physics.connect_distance` is unchanged.
+
+Platformer adds these capabilities to let the player reel the hanging lantern
+in/out with T and release/reconnect it with L. Decay hides the cord while
+suspended or after its owner is removed. Runtime regressions observe length,
+free fall, reconnection and return to the original length.
+Endpoint retargeting, structural creation/removal, dedicated reference authoring
+and full reference integration remain open in the joint track.
+
 ## Scene-authored hinges and velocity motors
 
 `sindri.physics2d.hinge_joint` uses the same separate owner entity, stable endpoint

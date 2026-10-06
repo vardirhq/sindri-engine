@@ -628,12 +628,14 @@
       "addable": true,
       "apply": {},
       "default_payload": {
+        "enabled": true,
         "first": "",
         "max_distance": 1.0,
         "second": ""
       },
       "display_name": "Distance Joint 2D",
       "fields": {
+        "enabled": true,
         "first": "",
         "max_distance": 1.0,
         "second": ""
@@ -653,6 +655,7 @@
       "addable": true,
       "apply": {},
       "default_payload": {
+        "enabled": true,
         "first": "",
         "first_anchor": [
           0.0,
@@ -672,6 +675,7 @@
       },
       "display_name": "Hinge Joint 2D",
       "fields": {
+        "enabled": true,
         "first": "",
         "first_anchor": [
           0.0,
@@ -814,6 +818,7 @@
       "addable": true,
       "apply": {},
       "default_payload": {
+        "enabled": true,
         "first": "",
         "first_anchor": [
           0.0,
@@ -841,6 +846,7 @@
       },
       "display_name": "Slider Joint 2D",
       "fields": {
+        "enabled": true,
         "first": "",
         "first_anchor": [
           0.0,
@@ -882,6 +888,7 @@
       "apply": {},
       "default_payload": {
         "damping": 1.0,
+        "enabled": true,
         "first": "",
         "first_anchor": [
           0.0,
@@ -898,6 +905,7 @@
       "display_name": "Spring Joint 2D",
       "fields": {
         "damping": 1.0,
+        "enabled": true,
         "first": "",
         "first_anchor": [
           0.0,

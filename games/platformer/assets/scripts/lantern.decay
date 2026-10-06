@@ -3,12 +3,30 @@ script Lantern {
     var age: f32 = 0.0;
     var hook: Entity = null;
     var cord: Entity = null;
+    var tether: Entity = null;
+    var short: bool = false;
     fn start() {
         this.hook = World.find("Lantern hook");
         this.cord = World.find("Lantern cord");
+        this.tether = World.find("Lantern tether");
     }
     fn update(dt: f32) {
         this.age += dt;
+        var enabled: bool = false;
+        if World.exists(this.tether) {
+            if Input.just_pressed("L") {
+                Physics.set_joint_enabled(this.tether, !Physics.joint_enabled(this.tether));
+            }
+            if Input.just_pressed("T") {
+                this.short = !this.short;
+                if this.short {
+                    Physics.set_distance(this.tether, 1.25);
+                } else {
+                    Physics.set_distance(this.tether, 2.0);
+                }
+            }
+            enabled = Physics.joint_enabled(this.tether);
+        }
         Physics.apply_force(this.entity, Vec2(sin(this.age * 1.8) * 0.6, 0.0));
         let p = this.transform.world_position;
         let h = this.hook.transform.world_position;
@@ -17,5 +35,8 @@ script Lantern {
         this.cord.transform.position = Vec3((p.x + h.x) * 0.5, (p.y + h.y) * 0.5, 0.35);
         this.cord.transform.scale = Vec3(sqrt(dx * dx + dy * dy), 0.025, 1.0);
         this.cord.transform.rotation_z = atan2(dy, dx);
+        if !enabled {
+            this.cord.transform.scale = Vec3(0.0, 0.0, 1.0);
+        }
     }
 }

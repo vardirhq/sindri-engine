@@ -108,7 +108,26 @@ for core, scene, editor and platformer. Four-crate warning-denied Clippy, typed
 setup-script preflight (zero errors/reminders), 11 catalogue tests and WASM checks
 passed. Rebuilt Chromium export/load plus V placement/removal/replacement fetched
 24 assets without runtime errors; native Vulkan capture passed. Both captures
-were visually reviewed. CI must verify this pushed checkpoint.
+were visually reviewed. CI is green on spawned-prefab commit `acbed858`.
+
+A checked **joint suspension and distance tuning slice** now adds an enabled
+flag to all four authored constraint kinds (omission means true). Typed
+`Physics.joint_enabled`, `Physics.set_joint_enabled` and `Physics.set_distance`
+read/patch validated runtime state for next fixed synchronization, retaining
+endpoint bodies, settings and unknown fields. Suspended distance settings now
+validate even before endpoints are available. Scene command undo/redo and
+rebuilds cover all kinds. Platformer Decay reels with T and releases/reconnects
+with L, hiding the cord while suspended or after owner removal. Its new run checks
+free fall, reconnection and short/long lengths alongside existing goal regressions.
+Physics signatures/reference prose are split for repository function/file limits.
+Final scoped preflight passed 768 native tests and all-target/all-feature checks
+for scene, Decay and platformer; typed lantern preflight had zero errors/reminders.
+Three-crate warning-denied Clippy, 11 regenerated-catalogue checks and WASM checks
+passed. Rebuilt Chromium delivery fetched 24 assets and exercised T/L plus the
+spawned windmill without runtime errors; native Vulkan capture passed. Captures
+of short/released/reconnected states and the native run were visually reviewed.
+CI must verify the pushed slice. CI is green on prior spawned-prefab head
+`acbed858`.
 
 Joint acceptance stays open. Add remaining motor modes, typed structural
 controls and dedicated reference authoring/diagnostics. Nested renamed-root

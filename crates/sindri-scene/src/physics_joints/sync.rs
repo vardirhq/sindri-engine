@@ -31,9 +31,17 @@ impl AuthoredJoint {
             Self::Spring(joint) => (&joint.first, &joint.second),
         }
     }
+    fn enabled(&self) -> bool {
+        match self {
+            Self::Distance(joint) => joint.enabled,
+            Self::Hinge(joint) => joint.enabled,
+            Self::Slider(joint) => joint.enabled,
+            Self::Spring(joint) => joint.enabled,
+        }
+    }
     fn validate(&self) -> Result<(), PhysicsError> {
         match self {
-            Self::Distance(_) => Ok(()),
+            Self::Distance(joint) => joint.validate(),
             Self::Hinge(joint) => joint.settings.validate(),
             Self::Slider(joint) => joint.settings.validate(),
             Self::Spring(joint) => joint.settings.validate(),
@@ -121,6 +129,10 @@ impl SceneJoints2d {
         }
         self.owners = live;
         for (owner, joint) in authored {
+            if !joint.enabled() {
+                physics.remove_owned_joint(owner);
+                continue;
+            }
             let (first, second) = joint.references();
             let endpoints = resolve(world, owner, first).zip(resolve(world, owner, second));
             if let Some((first, second)) = endpoints
