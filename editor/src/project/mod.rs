@@ -29,7 +29,7 @@ mod tests;
 pub use kind::AssetKind;
 pub use launch::Launch;
 pub use manifest::{MANIFEST_NAME, Project, ProjectError};
-pub use recent::{RecentProject, RecentProjects};
+pub use recent::{RecentProject, RecentProjects, ago, now};
 pub use scene_board::{SceneBoard, SceneCard, SceneLink};
 pub use sheet::{sliced_texture_beside, sprites_beside};
 

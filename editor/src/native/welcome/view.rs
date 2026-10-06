@@ -158,13 +158,15 @@ impl Welcome {
                                 .strong()
                                 .color(color::TEXT),
                         );
-                        ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
-                            ui.label(
-                                RichText::new("Pick up where you left off")
-                                    .size(text::NOTE)
-                                    .color(color::TEXT_FAINT),
-                            );
-                        });
+                        if !self.recent.is_empty() {
+                            ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
+                                ui.add(
+                                    egui::TextEdit::singleline(&mut self.search)
+                                        .hint_text("Search projects…")
+                                        .desired_width(240.0),
+                                );
+                            });
+                        }
                     });
                     ui.add_space(metric::GROUP_GAP);
                     self.project_list(ui);
@@ -174,6 +176,15 @@ impl Welcome {
 
     fn project_list(&mut self, ui: &mut egui::Ui) {
         let rows = self.rows();
+        if rows.is_empty() && !self.recent.is_empty() {
+            panel::empty_state(
+                ui,
+                icons::SEARCH,
+                "No projects match",
+                "Search looks at each project's name and folder.",
+            );
+            return;
+        }
         if rows.is_empty() {
             panel::empty_state(
                 ui,
@@ -186,8 +197,9 @@ impl Welcome {
         egui::ScrollArea::vertical()
             .auto_shrink([false, false])
             .show(ui, |ui| {
+                let now = crate::project::now();
                 for row in &rows {
-                    match project_card(ui, row) {
+                    match project_card(ui, row, now) {
                         Some(Clicked::Open) if row.present => {
                             self.request = Some(Request::Open(row.root.clone()));
                         }
@@ -345,7 +357,7 @@ fn paint_monogram(painter: &egui::Painter, tile: egui::Rect, name: &str) {
     );
 }
 
-fn project_card(ui: &mut egui::Ui, listing: &Listing) -> Option<Clicked> {
+fn project_card(ui: &mut egui::Ui, listing: &Listing, now: Option<u64>) -> Option<Clicked> {
     let (rect, response) = button::row_sense(ui, CARD_HEIGHT);
     let fill = if response.hovered() {
         color::EMBER_FAINT
@@ -369,7 +381,12 @@ fn project_card(ui: &mut egui::Ui, listing: &Listing) -> Option<Clicked> {
         color::TEXT_FAINT
     };
     let painter = ui.painter_at(rect);
-    let left = rect.left() + 14.0;
+    let tile = egui::Rect::from_min_size(
+        Pos2::new(rect.left() + 8.0, rect.top() + 8.0),
+        Vec2::new(56.0, CARD_HEIGHT - 16.0),
+    );
+    paint_monogram(&painter, tile, &listing.name);
+    let left = tile.right() + 12.0;
     let name = painter.layout_no_wrap(
         listing.name.clone(),
         egui::FontId::proportional(13.0),
@@ -392,6 +409,16 @@ fn project_card(ui: &mut egui::Ui, listing: &Listing) -> Option<Clicked> {
         egui::FontId::proportional(text::NOTE),
         color::TEXT_FAINT,
     );
+
+    if let (Some(opened), Some(now)) = (listing.opened, now) {
+        painter.text(
+            Pos2::new(rect.right() - 44.0, rect.center().y),
+            Align2::RIGHT_CENTER,
+            crate::project::ago(opened, now),
+            egui::FontId::proportional(text::NOTE),
+            color::TEXT_FAINT,
+        );
+    }
 
     let corner = egui::Rect::from_min_size(
         Pos2::new(rect.right() - 32.0, rect.center().y - 9.0),

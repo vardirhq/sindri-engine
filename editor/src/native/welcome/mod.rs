@@ -85,6 +85,8 @@ pub(super) struct Listing {
     pub(super) root: PathBuf,
     /// Whether the project is still where it was remembered from.
     pub(super) present: bool,
+    /// When it was last opened, in seconds since the Unix epoch.
+    pub(super) opened: Option<u64>,
 }
 
 /// What the user asked the editor for, waiting to be acted on.
@@ -111,6 +113,8 @@ pub(super) struct Welcome {
     samples: Vec<Sample>,
     /// Whether the next launch should skip this window.
     open_last: bool,
+    /// What the recent list is filtered by.
+    search: String,
     /// The new-project form, while it is open.
     creating: Option<NewProject>,
     /// What went wrong with the last thing the window was asked to do.
@@ -130,6 +134,7 @@ impl Welcome {
             recent: preferences.recent_projects.clone(),
             samples: shipped_samples(),
             open_last: preferences.open_last_project,
+            search: String::new(),
             creating: None,
             problem: None,
             request: None,
@@ -149,14 +154,25 @@ impl Welcome {
     /// move, be deleted, or sit on a volume that is not mounted this morning.
     /// The window redraws only when something happens to it, so this is a
     /// directory check per row per interaction rather than per frame.
+    ///
+    /// Filtered by the search box, matching the name or the path without
+    /// regard to case, so "orbital" finds a project called "Orbital" and
+    /// "games/" finds everything under that folder.
     fn rows(&self) -> Vec<Listing> {
+        let needle = self.search.trim().to_lowercase();
         self.recent
             .entries()
             .iter()
+            .filter(|entry| {
+                needle.is_empty()
+                    || entry.name.to_lowercase().contains(&needle)
+                    || entry.path.to_lowercase().contains(&needle)
+            })
             .map(|entry| Listing {
                 name: entry.name.clone(),
                 root: PathBuf::from(&entry.path),
                 present: entry.is_present(),
+                opened: entry.opened,
             })
             .collect()
     }
