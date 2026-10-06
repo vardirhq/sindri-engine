@@ -471,7 +471,7 @@ impl EditorApp {
                 ui.close();
             }
             ui.separator();
-            // Drawn in the colour the editor uses for anything that throws work
+            // Drawn in the color the editor uses for anything that throws work
             // away, so it does not read as one more neutral menu entry.
             if ui
                 .add_enabled(

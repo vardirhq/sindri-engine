@@ -262,17 +262,17 @@ fn an_anchored_sheet_stands_its_sprite_on_the_entity() {
     );
 }
 
-/// An authored colour transform reaches the instance the shader reads.
+/// An authored color transform reaches the instance the shader reads.
 ///
 /// The multiply and offset are per instance rather than per batch so that two
-/// sprites recoloured differently still share one draw call when they share a
+/// sprites recolored differently still share one draw call when they share a
 /// texture and a layer — which is the whole reason the values travel here
 /// rather than in the batch key.
 #[test]
-fn an_authored_colour_transform_reaches_the_instance() {
+fn an_authored_color_transform_reaches_the_instance() {
     let world = world_from(&scene(
         r#",
-        { "id": "recoloured", "transform_3d": { "position": [0.0, 0.0, 0.0] },
+        { "id": "recolored", "transform_3d": { "position": [0.0, 0.0, 0.0] },
           "components": { "sindri.sprite": {
             "texture": "b",
             "color_transform": {
@@ -311,14 +311,14 @@ fn an_authored_colour_transform_reaches_the_instance() {
     );
 }
 
-/// A sprite that says nothing about colour draws exactly as it did before the
+/// A sprite that says nothing about color draws exactly as it did before the
 /// transform existed.
 ///
 /// This is what makes the feature safe to add to a scene format that is
 /// already in use: every sprite authored before it carries the identity, and
 /// `sample * tint * 1 + 0` is the old `sample * tint`.
 #[test]
-fn a_sprite_without_a_colour_transform_carries_the_identity() {
+fn a_sprite_without_a_color_transform_carries_the_identity() {
     let world = world_from(&scene(
         r#",
         { "id": "plain", "transform_3d": { "position": [0.0, 0.0, 0.0] },
@@ -350,7 +350,7 @@ fn a_sprite_without_a_colour_transform_carries_the_identity() {
     );
 }
 
-/// A colour transform that is not a number is refused rather than drawn.
+/// A color transform that is not a number is refused rather than drawn.
 ///
 /// JSON has no way to spell a NaN and `serde_json` refuses a literal too large
 /// for an `f64`, so the way one actually arrives is narrowing: `1e39` is an
@@ -360,7 +360,7 @@ fn a_sprite_without_a_colour_transform_carries_the_identity() {
 /// a different matter and are left alone: an offset is signed by definition,
 /// and the render target clips what it cannot show.
 #[test]
-fn a_colour_transform_that_is_not_finite_is_refused() {
+fn a_color_transform_that_is_not_finite_is_refused() {
     let world = world_from(&scene(
         r#",
         { "id": "broken", "transform_3d": { "position": [0.0, 0.0, 0.0] },

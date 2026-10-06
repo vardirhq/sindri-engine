@@ -21,7 +21,7 @@ import {
   RecipeError,
   asArray,
   asBoolean,
-  asColour,
+  asColor,
   asNumber,
   asObject,
   asString,
@@ -99,7 +99,7 @@ export interface Recipe {
 export const DEFAULT_RENDER: FrameConfig = {
   supersample: 4,
   padding: 2,
-  outline: { enabled: true, colour: '#241d2b' },
+  outline: { enabled: true, color: '#241d2b' },
   paletteSnap: true,
   extraPalette: [],
   alphaCutoff: 128,
@@ -186,11 +186,11 @@ function readRender(value: JsonValue, path: string): FrameConfig {
 
   const outlineSource = optional(source, 'outline', path, asObject);
   const outline = outlineSource
-    ? (rejectUnknown(outlineSource, `${path}.outline`, ['enabled', 'colour']),
+    ? (rejectUnknown(outlineSource, `${path}.outline`, ['enabled', 'color']),
       {
         enabled: optional(outlineSource, 'enabled', `${path}.outline`, asBoolean) ?? true,
-        colour:
-          optional(outlineSource, 'colour', `${path}.outline`, asColour) ?? DEFAULT_RENDER.outline.colour,
+        color:
+          optional(outlineSource, 'color', `${path}.outline`, asColor) ?? DEFAULT_RENDER.outline.color,
       })
     : DEFAULT_RENDER.outline;
 
@@ -202,7 +202,7 @@ function readRender(value: JsonValue, path: string): FrameConfig {
     outline,
     paletteSnap: optional(source, 'palette_snap', path, asBoolean) ?? DEFAULT_RENDER.paletteSnap,
     extraPalette: extra
-      ? extra.map((entry, index) => asColour(entry, `${path}.extra_palette[${index}]`))
+      ? extra.map((entry, index) => asColor(entry, `${path}.extra_palette[${index}]`))
       : [],
     alphaCutoff,
     shading: optional(source, 'shading', path, readShading) ?? DEFAULT_RENDER.shading,

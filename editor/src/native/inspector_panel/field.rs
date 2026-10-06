@@ -3,7 +3,7 @@
 //! `rows` draws a value by what it is — a number, a string, four numbers. That
 //! is the floor, and for a lot of fields it is also wrong: a projection is one
 //! of two words rather than any word, a texture is a file in the project rather
-//! than free text, and a tint is a colour rather than four drags between zero
+//! than free text, and a tint is a color rather than four drags between zero
 //! and one that an author has to imagine.
 //!
 //! Everything here is a control that knows what the field means. Each answers
@@ -13,7 +13,7 @@
 //!
 //! What a field means is asked of the schema registry rather than guessed from
 //! its name. The guess used to live here as a table: `texture` meant the
-//! texture list, `clip` meant the audio list, a colour had to be spelled
+//! texture list, `clip` meant the audio list, a color had to be spelled
 //! `tint`. It was wrong in both directions — the bare-key rules matched any
 //! component, so a game's own with a `clip` field was offered the project's
 //! audio, while a field the table had never heard of was a text box in
@@ -122,8 +122,8 @@ pub(crate) fn object_rows(
             );
             continue;
         }
-        if is_colour(meaning, value) {
-            colour_row(ui, &key, value);
+        if is_color(meaning, value) {
+            color_row(ui, &key, value);
             continue;
         }
         let at = At {
@@ -176,11 +176,11 @@ pub(crate) fn pictures_for<'a>(
 
 /// Whether to draw a swatch.
 ///
-/// The shape is still checked. A component may call a field a colour, but a
+/// The shape is still checked. A component may call a field a color, but a
 /// payload that is not four numbers cannot be edited as one, and refusing here
 /// leaves it visible as what it is rather than clamped into what it is not.
-pub(crate) fn is_colour(meaning: Option<&FieldMeaning>, value: &Value) -> bool {
-    matches!(meaning, Some(FieldMeaning::Colour))
+pub(crate) fn is_color(meaning: Option<&FieldMeaning>, value: &Value) -> bool {
+    matches!(meaning, Some(FieldMeaning::Color))
         && matches!(
             inspector::value_kind(value),
             inspector::ValueKind::Numbers(3 | 4)
@@ -266,7 +266,7 @@ pub(crate) fn named_choice_row(
 /// the files sitting beside the scene — no longer means typing a path exactly.
 ///
 /// A reference the project cannot see is marked rather than silently accepted:
-/// the field turns to the editor's warning colour and says why on hover, which
+/// the field turns to the editor's warning color and says why on hover, which
 /// is the difference between a typo found here and a scene that will not load.
 ///
 /// `at` identifies the picker, for the same reason a choice needs it: a list
@@ -359,19 +359,19 @@ pub(crate) fn asset_row(
     }
 }
 
-/// A colour, as a colour.
+/// A color, as a color.
 ///
 /// Four drags between zero and one are the numbers a tint is stored as, and
-/// nobody reads a colour that way. The swatch opens egui's own picker; the
+/// nobody reads a color that way. The swatch opens egui's own picker; the
 /// numbers stay beside it, because a tint is also a number someone may want to
 /// type exactly.
-pub(crate) fn colour_row(ui: &mut egui::Ui, key: &str, value: &mut Value) {
-    // Three channels is a colour with no alpha, such as a light's: it gets the
+pub(crate) fn color_row(ui: &mut egui::Ui, key: &str, value: &mut Value) {
+    // Three channels is a color with no alpha, such as a light's: it gets the
     // same swatch, opaque, and three numbers rather than four.
     let channels = value.as_array().map_or(4, Vec::len).clamp(3, 4);
     let mut rgba = [0.0_f32; 4];
     for (index, channel) in rgba.iter_mut().enumerate() {
-        // A channel outside 0..1 is not a colour anything can show, and the
+        // A channel outside 0..1 is not a color anything can show, and the
         // picker would clamp it silently on the way in. Clamping here means the
         // numbers beside the swatch agree with it.
         #[allow(clippy::cast_possible_truncation)]
@@ -385,7 +385,7 @@ pub(crate) fn colour_row(ui: &mut egui::Ui, key: &str, value: &mut Value) {
     }
     let mut changed = false;
     property::Property::new(&inspector::humanize(key)).show(ui, |ui| {
-        let mut colour = Color32::from_rgba_unmultiplied(
+        let mut color = Color32::from_rgba_unmultiplied(
             to_byte(rgba[0]),
             to_byte(rgba[1]),
             to_byte(rgba[2]),
@@ -399,8 +399,8 @@ pub(crate) fn colour_row(ui: &mut egui::Ui, key: &str, value: &mut Value) {
                 rgba[..3].copy_from_slice(&rgb);
                 changed = true;
             }
-        } else if ui.color_edit_button_srgba(&mut colour).changed() {
-            let [r, g, b, a] = colour.to_srgba_unmultiplied();
+        } else if ui.color_edit_button_srgba(&mut color).changed() {
+            let [r, g, b, a] = color.to_srgba_unmultiplied();
             rgba = [
                 f32::from(r) / 255.0,
                 f32::from(g) / 255.0,
@@ -410,7 +410,7 @@ pub(crate) fn colour_row(ui: &mut egui::Ui, key: &str, value: &mut Value) {
             changed = true;
         }
         // Sized from what is left after the swatch, with no floor above what
-        // fits: a floor made a four-channel colour wider than a narrow
+        // fits: a floor made a four-channel color wider than a narrow
         // inspector, which pushed every row of the panel sideways and cut off
         // the start of every label.
         //

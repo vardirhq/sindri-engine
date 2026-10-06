@@ -2,7 +2,7 @@
 //! voxel world.
 //!
 //! Both were declared with no meanings at all, so the inspector drew every
-//! field by shape. A colour was three or four unlabelled numbers, a shadow map
+//! field by shape. A color was three or four unlabelled numbers, a shadow map
 //! size was a drag through every integer, and a value the engine refuses was
 //! one careless drag away. Each range here is the one the component's own
 //! validation enforces; the tests below hold the two together.
@@ -20,7 +20,7 @@ use crate::components::{
     NaturalTerrainDocument, VoxelGeneratorDocument, VoxelView, VoxelWorldComponent,
 };
 
-const COLOUR: FieldMeaning = FieldMeaning::Colour;
+const COLOR: FieldMeaning = FieldMeaning::Color;
 
 const fn range(min: f64, max: f64) -> FieldMeaning {
     FieldMeaning::Range { min, max }
@@ -41,7 +41,7 @@ pub(super) fn describe_world(
     describe_environment(components)?;
     components.describe::<LightComponent>([
         ("kind", FieldMeaning::choice(LightKind::NAMES)),
-        ("color", COLOUR),
+        ("color", COLOR),
         ("intensity", at_least(0.0)),
     ])?;
     describe_voxel_world(components)
@@ -53,8 +53,8 @@ pub(super) fn describe_world(
 /// engine accepts.
 fn describe_environment(components: &mut ComponentSchemaRegistry) -> Result<(), SceneExtractError> {
     components.describe::<EnvironmentComponent>([
-        ("background", COLOUR),
-        ("ambient_color", COLOUR),
+        ("background", COLOR),
+        ("ambient_color", COLOR),
         ("ambient_intensity", at_least(0.0)),
         ("shadows.distance", at_least(1.0)),
         (
@@ -63,7 +63,7 @@ fn describe_environment(components: &mut ComponentSchemaRegistry) -> Result<(), 
         ),
         ("shadows.bias", range(0.0, 0.05)),
         ("ambient_occlusion.strength", UNIT),
-        ("fog.color", COLOUR),
+        ("fog.color", COLOR),
         ("fog.start", at_least(0.0)),
         ("fog.distance", at_least(0.01)),
         ("fog.density", UNIT),

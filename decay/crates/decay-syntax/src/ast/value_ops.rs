@@ -129,22 +129,22 @@ impl MapOp {
     }
 }
 
-/// What a colour can be asked beyond its `r`, `g`, `b` and `a` channels.
+/// What a color can be asked beyond its `r`, `g`, `b` and `a` channels.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum ColorOp {
-    /// `c.lerp(other, t)`: the colour `t` of the way from this one to
+    /// `c.lerp(other, t)`: the color `t` of the way from this one to
     /// `other`, channel by channel, alpha included.
     Lerp,
-    /// `c.with_alpha(a)`: the same colour at another opacity.
+    /// `c.with_alpha(a)`: the same color at another opacity.
     WithAlpha,
-    /// `Color("#ff8800")`: a colour from its hex spelling. Not a name a script
+    /// `Color("#ff8800")`: a color from its hex spelling. Not a name a script
     /// calls; what building one from text lowers to.
     FromHex,
 }
 
 impl ColorOp {
     /// Every operation a script can call by name, with that name and how
-    /// many arguments it takes after the colour itself.
+    /// many arguments it takes after the color itself.
     pub const ALL: [(Self, &'static str, usize); 2] =
         [(Self::Lerp, "lerp", 2), (Self::WithAlpha, "with_alpha", 1)];
 

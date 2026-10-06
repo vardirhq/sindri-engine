@@ -1,7 +1,7 @@
 //! Bloom: the light a bright thing throws into the dark around it.
 //!
 //! The one effect that decides whether neon strokes on black read as light or as
-//! clip art. Without it a bright ring is a coloured line; with it the ring is a
+//! clip art. Without it a bright ring is a colored line; with it the ring is a
 //! source and the black around it is lit, which is the whole difference between
 //! a vector drawing and a game that looks like it is glowing.
 //!
@@ -33,15 +33,15 @@ use chain::Chain;
 pub struct BloomSettings {
     /// Whether the bloom stages run at all.
     pub enabled: bool,
-    /// How bright a colour has to be before it glows at all, on the linear 0-1
+    /// How bright a color has to be before it glows at all, on the linear 0-1
     /// scale the shader works in.
     ///
-    /// Below one, so ordinary bright colours glow. Neon on black is the case
+    /// Below one, so ordinary bright colors glow. Neon on black is the case
     /// this exists for and none of it is over-bright: a mint stroke is about
     /// `0.9` at its brightest channel, so a threshold at or above one would
     /// leave the whole picture matte.
     pub threshold: f32,
-    /// The band either side of the threshold over which a colour ramps into
+    /// The band either side of the threshold over which a color ramps into
     /// glowing, rather than starting to at a stroke.
     ///
     /// A hard cutoff makes the glow switch on and off as something pulses or
@@ -61,7 +61,7 @@ impl Default for BloomSettings {
         // Tuned by shooting the shape specimen at a spread of settings and
         // looking at them. Higher intensity than this washes a saturated stroke
         // out towards white — the coral pentagon loses its coral first, which
-        // is the tell — because a colour already near the top of the 0-1 range
+        // is the tell — because a color already near the top of the 0-1 range
         // has nowhere to go but grey when light is added to it.
         Self {
             enabled: true,
@@ -96,7 +96,7 @@ impl BloomSettings {
 /// Tone curve applied to the world before bloom and vignette.
 #[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
 pub enum ToneMapping {
-    /// Preserve the scene's linear colour without a tone curve.
+    /// Preserve the scene's linear color without a tone curve.
     #[default]
     None,
     /// A cheap, gentle shoulder suitable for ordinary scenes.
@@ -122,7 +122,7 @@ pub struct PostProcessSettings {
     pub exposure: f32,
     /// Mid-grey contrast where 1.0 preserves the source.
     pub contrast: f32,
-    /// Colour saturation where 0.0 is greyscale and 1.0 preserves the source.
+    /// Color saturation where 0.0 is greyscale and 1.0 preserves the source.
     pub saturation: f32,
     pub tone_mapping: ToneMapping,
     /// Edge darkening strength from 0.0 to 1.0.
@@ -203,7 +203,7 @@ impl Bloom {
     /// The format the scene is drawn in, and so the format the frame's
     /// renderers must be built for.
     ///
-    /// sRGB, like every other colour target here: the scene is a picture, and a
+    /// sRGB, like every other color target here: the scene is a picture, and a
     /// picture is stored encoded. The chain's own targets are not — see
     /// [`chain::Chain::FORMAT`].
     pub const SCENE_FORMAT: wgpu::TextureFormat = crate::COLOR_TARGET_FORMAT;
@@ -349,7 +349,7 @@ impl Bloom {
 
         if settings.bloom.enabled {
             // Bright pass: grading is applied before thresholding, so bloom
-            // responds to the same world colour that reaches the player.
+            // responds to the same world color that reaches the player.
             chain.run(
                 device,
                 queue,
@@ -488,14 +488,14 @@ mod tests {
         assert!(excessive.knee <= 1.0);
     }
 
-    /// The default glows on the colours this exists for.
+    /// The default glows on the colors this exists for.
     ///
     /// Neon on black is not over-bright — a mint stroke peaks around 0.9 on its
     /// brightest channel — so a threshold at or above one would leave the whole
     /// picture matte, which is the failure that looks like bloom is broken
     /// rather than off.
     #[test]
-    fn the_default_threshold_is_below_an_ordinary_bright_colour() {
+    fn the_default_threshold_is_below_an_ordinary_bright_color() {
         let settings = BloomSettings::default();
         assert!(settings.threshold < 0.9, "{settings:?}");
         assert!(settings.passes >= 1);

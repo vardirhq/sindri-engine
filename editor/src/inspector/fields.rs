@@ -97,7 +97,7 @@ fn rank(key: &str) -> u8 {
         "projection" | "kind" | "shape" | "primitive" | "texture" | "font" | "text" | "source"
         | "script" | "clip" | "grid" => 0,
         // How it is drawn, once everything about what it is has been said.
-        "anchor" | "tint" | "color" | "colour" | "layer" | "opacity" => 2,
+        "anchor" | "tint" | "color" | "color" | "layer" | "opacity" => 2,
         _ => 1,
     }
 }

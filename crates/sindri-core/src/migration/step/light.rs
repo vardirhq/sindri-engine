@@ -1,7 +1,7 @@
 //! Format 10: the sun leaves the environment and becomes a light entity.
 //!
 //! Format 9 stored the sun as `sindri.environment.directional`: a direction
-//! vector, a colour and an intensity. Nothing drew it and nothing said which
+//! vector, a color and an intensity. Nothing drew it and nothing said which
 //! way it pointed, so a vector with a positive Y lit the world from below and
 //! put shadows on hilltops without anyone being able to see why. Format 10
 //! makes it an entity carrying `sindri.light`, aimed by its rotation along
@@ -19,7 +19,7 @@ use super::camera::camera_rotation_from_legacy_look_at;
 const ENVIRONMENT: &str = "sindri.environment";
 const LIGHT: &str = "sindri.light";
 
-/// The direction and colour a format-9 sun had when it did not say.
+/// The direction and color a format-9 sun had when it did not say.
 const DEFAULT_DIRECTION: [f64; 3] = [-0.45, -1.0, -0.35];
 const DEFAULT_COLOR: [f64; 3] = [1.0, 0.95, 0.86];
 

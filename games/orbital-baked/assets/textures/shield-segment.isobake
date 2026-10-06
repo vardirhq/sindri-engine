@@ -12,7 +12,7 @@
     "alpha_cutoff": 128,
     "outline": {
       "enabled": true,
-      "colour": "#08131c"
+      "color": "#08131c"
     },
     "shading": {
       "light": [
@@ -34,25 +34,25 @@
         "kind": "primitives",
         "materials": {
           "frame": {
-            "colour": "#2b6f8c"
+            "color": "#2b6f8c"
           },
           "lit": {
-            "colour": "#57dbff"
+            "color": "#57dbff"
           },
           "deep": {
-            "colour": "#0e3347"
+            "color": "#0e3347"
           },
           "field": {
-            "colour": "#9beeff"
+            "color": "#9beeff"
           },
           "hot": {
-            "colour": "#e8fdff"
+            "color": "#e8fdff"
           },
           "char": {
-            "colour": "#3a2430"
+            "color": "#3a2430"
           },
           "ember": {
-            "colour": "#ff7a45"
+            "color": "#ff7a45"
           }
         },
         "parts": [
@@ -232,25 +232,25 @@
         "kind": "primitives",
         "materials": {
           "frame": {
-            "colour": "#2b6f8c"
+            "color": "#2b6f8c"
           },
           "lit": {
-            "colour": "#57dbff"
+            "color": "#57dbff"
           },
           "deep": {
-            "colour": "#0e3347"
+            "color": "#0e3347"
           },
           "field": {
-            "colour": "#9beeff"
+            "color": "#9beeff"
           },
           "hot": {
-            "colour": "#e8fdff"
+            "color": "#e8fdff"
           },
           "char": {
-            "colour": "#3a2430"
+            "color": "#3a2430"
           },
           "ember": {
-            "colour": "#ff7a45"
+            "color": "#ff7a45"
           }
         },
         "parts": [
@@ -430,25 +430,25 @@
         "kind": "primitives",
         "materials": {
           "frame": {
-            "colour": "#2b6f8c"
+            "color": "#2b6f8c"
           },
           "lit": {
-            "colour": "#57dbff"
+            "color": "#57dbff"
           },
           "deep": {
-            "colour": "#0e3347"
+            "color": "#0e3347"
           },
           "field": {
-            "colour": "#9beeff"
+            "color": "#9beeff"
           },
           "hot": {
-            "colour": "#e8fdff"
+            "color": "#e8fdff"
           },
           "char": {
-            "colour": "#3a2430"
+            "color": "#3a2430"
           },
           "ember": {
-            "colour": "#ff7a45"
+            "color": "#ff7a45"
           }
         },
         "parts": [
@@ -628,25 +628,25 @@
         "kind": "primitives",
         "materials": {
           "frame": {
-            "colour": "#2b6f8c"
+            "color": "#2b6f8c"
           },
           "lit": {
-            "colour": "#57dbff"
+            "color": "#57dbff"
           },
           "deep": {
-            "colour": "#0e3347"
+            "color": "#0e3347"
           },
           "field": {
-            "colour": "#9beeff"
+            "color": "#9beeff"
           },
           "hot": {
-            "colour": "#e8fdff"
+            "color": "#e8fdff"
           },
           "char": {
-            "colour": "#3a2430"
+            "color": "#3a2430"
           },
           "ember": {
-            "colour": "#ff7a45"
+            "color": "#ff7a45"
           }
         },
         "parts": [
@@ -813,25 +813,25 @@
         "kind": "primitives",
         "materials": {
           "frame": {
-            "colour": "#2b6f8c"
+            "color": "#2b6f8c"
           },
           "lit": {
-            "colour": "#57dbff"
+            "color": "#57dbff"
           },
           "deep": {
-            "colour": "#0e3347"
+            "color": "#0e3347"
           },
           "field": {
-            "colour": "#9beeff"
+            "color": "#9beeff"
           },
           "hot": {
-            "colour": "#e8fdff"
+            "color": "#e8fdff"
           },
           "char": {
-            "colour": "#3a2430"
+            "color": "#3a2430"
           },
           "ember": {
-            "colour": "#ff7a45"
+            "color": "#ff7a45"
           }
         },
         "parts": [
@@ -998,25 +998,25 @@
         "kind": "primitives",
         "materials": {
           "frame": {
-            "colour": "#2b6f8c"
+            "color": "#2b6f8c"
           },
           "lit": {
-            "colour": "#57dbff"
+            "color": "#57dbff"
           },
           "deep": {
-            "colour": "#0e3347"
+            "color": "#0e3347"
           },
           "field": {
-            "colour": "#9beeff"
+            "color": "#9beeff"
           },
           "hot": {
-            "colour": "#e8fdff"
+            "color": "#e8fdff"
           },
           "char": {
-            "colour": "#3a2430"
+            "color": "#3a2430"
           },
           "ember": {
-            "colour": "#ff7a45"
+            "color": "#ff7a45"
           }
         },
         "parts": [
@@ -1183,25 +1183,25 @@
         "kind": "primitives",
         "materials": {
           "frame": {
-            "colour": "#2b6f8c"
+            "color": "#2b6f8c"
           },
           "lit": {
-            "colour": "#57dbff"
+            "color": "#57dbff"
           },
           "deep": {
-            "colour": "#0e3347"
+            "color": "#0e3347"
           },
           "field": {
-            "colour": "#9beeff"
+            "color": "#9beeff"
           },
           "hot": {
-            "colour": "#e8fdff"
+            "color": "#e8fdff"
           },
           "char": {
-            "colour": "#3a2430"
+            "color": "#3a2430"
           },
           "ember": {
-            "colour": "#ff7a45"
+            "color": "#ff7a45"
           }
         },
         "parts": [
@@ -1340,25 +1340,25 @@
         "kind": "primitives",
         "materials": {
           "frame": {
-            "colour": "#2b6f8c"
+            "color": "#2b6f8c"
           },
           "lit": {
-            "colour": "#57dbff"
+            "color": "#57dbff"
           },
           "deep": {
-            "colour": "#0e3347"
+            "color": "#0e3347"
           },
           "field": {
-            "colour": "#9beeff"
+            "color": "#9beeff"
           },
           "hot": {
-            "colour": "#e8fdff"
+            "color": "#e8fdff"
           },
           "char": {
-            "colour": "#3a2430"
+            "color": "#3a2430"
           },
           "ember": {
-            "colour": "#ff7a45"
+            "color": "#ff7a45"
           }
         },
         "parts": [
@@ -1497,25 +1497,25 @@
         "kind": "primitives",
         "materials": {
           "frame": {
-            "colour": "#2b6f8c"
+            "color": "#2b6f8c"
           },
           "lit": {
-            "colour": "#57dbff"
+            "color": "#57dbff"
           },
           "deep": {
-            "colour": "#0e3347"
+            "color": "#0e3347"
           },
           "field": {
-            "colour": "#9beeff"
+            "color": "#9beeff"
           },
           "hot": {
-            "colour": "#e8fdff"
+            "color": "#e8fdff"
           },
           "char": {
-            "colour": "#3a2430"
+            "color": "#3a2430"
           },
           "ember": {
-            "colour": "#ff7a45"
+            "color": "#ff7a45"
           }
         },
         "parts": [

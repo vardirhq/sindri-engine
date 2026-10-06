@@ -17,7 +17,7 @@ use crate::inspector;
 use crate::ui::theme::{color, metric, text};
 use crate::ui::widgets::{property, vector};
 
-use super::field::{FieldAssets, asset_list, colour_row};
+use super::field::{FieldAssets, asset_list, color_row};
 use super::list;
 
 /// What the schema says about the component being drawn, where there is one.
@@ -104,7 +104,7 @@ impl Authored {
 /// One field, drawn as whatever it means, or failing that as whatever it is.
 ///
 /// Meaning is asked for first and at every depth, which is the whole of what
-/// `at` adds: a colour inside a text component's outline is a colour, and so is
+/// `at` adds: a color inside a text component's outline is a color, and so is
 /// the one inside the third piece of a collider.
 pub(crate) fn value_row(
     ui: &mut egui::Ui,
@@ -328,8 +328,8 @@ fn described_row(
             super::field::asset_row(ui, at.path, key, value, list, pictures, indent);
             true
         }
-        FieldMeaning::Colour if super::field::is_colour(Some(meaning), value) => {
-            colour_row(ui, key, value);
+        FieldMeaning::Color if super::field::is_color(Some(meaning), value) => {
+            color_row(ui, key, value);
             true
         }
         FieldMeaning::Range { min, max } if value.is_number() => {

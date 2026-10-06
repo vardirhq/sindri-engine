@@ -1,7 +1,7 @@
 //! What the inspector is told about a field, now that it stops guessing.
 //!
 //! The panel used to work out a control from a field's *name*: `texture` meant
-//! the texture list, `clip` meant the audio list, a colour had to be spelled
+//! the texture list, `clip` meant the audio list, a color had to be spelled
 //! `tint`. Those tables are gone, so this is the guard that nothing they got
 //! right was lost with them — and that the two things they got wrong stay
 //! fixed.
@@ -76,27 +76,27 @@ fn a_field_name_alone_no_longer_claims_an_asset() {
     assert_eq!(components.meaning("game.unregistered", "texture"), None);
 }
 
-/// The second thing it got wrong: a colour had to be spelled a certain way.
+/// The second thing it got wrong: a color had to be spelled a certain way.
 ///
-/// `sindri.ui.text` stores its colour as `color` and its outline's as
+/// `sindri.ui.text` stores its color as `color` and its outline's as
 /// `outline.color`; the old check saw the first and never the second, because
 /// it only ever looked at top-level keys.
 #[test]
-fn a_colour_is_named_by_the_component_not_by_its_spelling() {
+fn a_color_is_named_by_the_component_not_by_its_spelling() {
     let scene = scene_extractor();
     let components = scene.components();
     assert_eq!(
         components.meaning("sindri.ui.text", "color"),
-        Some(&FieldMeaning::Colour)
+        Some(&FieldMeaning::Color)
     );
     assert_eq!(
         components.meaning("sindri.ui.text", "outline.color"),
-        Some(&FieldMeaning::Colour)
+        Some(&FieldMeaning::Color)
     );
     assert_eq!(
         components.meaning("sindri.shape", "stroke"),
-        Some(&FieldMeaning::Colour),
-        "a shape's stroke is a colour that the old spelling rule never matched"
+        Some(&FieldMeaning::Color),
+        "a shape's stroke is a color that the old spelling rule never matched"
     );
 }
 

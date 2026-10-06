@@ -38,7 +38,7 @@ use crate::tilemap_collision::TilemapCollider2dComponent;
 
 use super::SceneExtractError;
 
-const COLOUR: FieldMeaning = FieldMeaning::Colour;
+const COLOR: FieldMeaning = FieldMeaning::Color;
 
 fn texture() -> FieldMeaning {
     FieldMeaning::Asset(AssetKind::Texture)
@@ -71,16 +71,16 @@ fn describe_drawables(components: &mut ComponentSchemaRegistry) -> Result<(), Sc
     )])?;
     describe_projections(components)?;
     components.describe::<MeshComponent>([("texture", texture())])?;
-    components.describe::<SpriteComponent>([("texture", texture()), ("tint", COLOUR)])?;
+    components.describe::<SpriteComponent>([("texture", texture()), ("tint", COLOR)])?;
     components.describe::<UiImageComponent>([
         ("texture", texture()),
-        ("tint", COLOUR),
+        ("tint", COLOR),
         ("anchor", anchors()),
     ])?;
-    components.describe::<EffectBurstComponent>([("texture", texture()), ("tint", COLOUR)])?;
+    components.describe::<EffectBurstComponent>([("texture", texture()), ("tint", COLOR)])?;
     components.describe::<TilemapComponent>([
         ("texture", texture()),
-        ("tint", COLOUR),
+        ("tint", COLOR),
         (
             "projection",
             FieldMeaning::choice(TileProjection::ALL.into_iter().map(TileProjection::as_str)),
@@ -96,17 +96,17 @@ fn describe_drawables(components: &mut ComponentSchemaRegistry) -> Result<(), Sc
     components.describe::<ShapeComponent>([
         ("kind", shape_kinds()),
         ("blend", shape_blends()),
-        ("fill", COLOUR),
-        ("stroke", COLOUR),
+        ("fill", COLOR),
+        ("stroke", COLOR),
         ("sweep_start", FieldMeaning::Angle),
     ])?;
     components.describe::<UiShapeComponent>([
         ("kind", shape_kinds()),
         ("blend", shape_blends()),
         ("anchor", anchors()),
-        ("fill", COLOUR),
-        ("stroke", COLOUR),
-        ("shadow.color", COLOUR),
+        ("fill", COLOR),
+        ("stroke", COLOR),
+        ("shadow.color", COLOR),
         ("sweep_start", FieldMeaning::Angle),
     ])?;
     components.describe::<UiSliderComponent>([(
@@ -173,7 +173,7 @@ fn describe_projections(components: &mut ComponentSchemaRegistry) -> Result<(), 
 fn describe_text(components: &mut ComponentSchemaRegistry) -> Result<(), SceneExtractError> {
     components.describe::<UiTextComponent>([
         ("font", FieldMeaning::Asset(AssetKind::Font)),
-        ("color", COLOUR),
+        ("color", COLOR),
         ("anchor", anchors()),
         (
             "wrap",
@@ -191,8 +191,8 @@ fn describe_text(components: &mut ComponentSchemaRegistry) -> Result<(), SceneEx
             "case",
             FieldMeaning::choice(UiTextCase::ALL.into_iter().map(UiTextCase::as_str)),
         ),
-        ("outline.color", COLOUR),
-        ("shadow.color", COLOUR),
+        ("outline.color", COLOR),
+        ("shadow.color", COLOR),
     ])?;
     Ok(())
 }
@@ -289,7 +289,7 @@ mod tests {
         let components = builtin_components().expect("the built-ins register");
         assert_eq!(
             components.meaning("sindri.ui.text", "outline.color"),
-            Some(&FieldMeaning::Colour)
+            Some(&FieldMeaning::Color)
         );
         assert_eq!(
             components.meaning("sindri.physics2d.collider", "pieces.2.rotation"),

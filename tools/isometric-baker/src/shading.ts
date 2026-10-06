@@ -5,7 +5,7 @@
  * is a GLSL fragment shader; here it is the same expression in TypeScript,
  * because this baker rasterises without a GPU. The band arithmetic is
  * deliberately identical, down to the half-lambert remap and the `step` order,
- * so a material bakes to the same four colours either way.
+ * so a material bakes to the same four colors either way.
  *
  * A physically-shaded render downsampled to 64 pixels looks like mud. Instead
  * each material gets a four-entry ramp and the shading snaps the lambert term
@@ -14,7 +14,7 @@
  * With the default rig a box lands on three predictable bands:
  *
  *   top face (+Y)   -> shade 3, highlight
- *   left face (+Z)  -> shade 2, base colour
+ *   left face (+Z)  -> shade 2, base color
  *   right face (+X) -> shade 1, shadow
  *
  * Curved geometry gets the same four bands, which is exactly the terracing you
@@ -27,8 +27,8 @@ import { type Vec3, dot, normalize } from './vec.ts';
 export type { RampOptions };
 
 export interface MaterialSpec {
-  /** Base colour. The ramp is derived from this. */
-  colour: string;
+  /** Base color. The ramp is derived from this. */
+  color: string;
   /** Per-material ramp tweaks. */
   ramp?: Partial<RampOptions>;
   /** Ignore lighting and always emit the brightest shade: lamps, screens, glow. */
@@ -41,14 +41,14 @@ export interface MaterialSpec {
  * Surface texture, made of the ramp a material already has.
  *
  * A flat-shaded box gives three flat faces. That reads as a *shape*, and the
- * blocks it makes look like coloured cardboard: a face of grass and a face of
+ * blocks it makes look like colored cardboard: a face of grass and a face of
  * stone differ only in hue. What tells them apart in the voxel games this art
  * is copying is not the lighting — it is that each face is a small grid of
- * texels that disagree slightly about their colour.
+ * texels that disagree slightly about their color.
  *
  * So rather than a texture map the baker has no way to author, a material may
  * say its surface is grainy, and the rasteriser shifts each texel a band along
- * the ramp the material already has. The result stays inside the four colours
+ * the ramp the material already has. The result stays inside the four colors
  * the palette promised, which is what keeps a grainy material honest about
  * `palette_snap` and the bake report.
  */
@@ -88,7 +88,7 @@ export const DEFAULT_SHADING: ShadingConfig = {
   thresholds: [0.25, 0.5, 0.8],
 };
 
-/** A material resolved to the only four colours it can emit. */
+/** A material resolved to the only four colors it can emit. */
 export interface BandedMaterial {
   /** Ramp entries, darkest first. */
   ramp: string[];
@@ -99,7 +99,7 @@ export interface BandedMaterial {
 }
 
 export function bandMaterial(spec: MaterialSpec): BandedMaterial {
-  const ramp = makeRamp(spec.colour, spec.ramp);
+  const ramp = makeRamp(spec.color, spec.ramp);
   return {
     ramp,
     shades: ramp.map(hexToRgb),

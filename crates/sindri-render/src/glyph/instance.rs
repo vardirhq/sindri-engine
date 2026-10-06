@@ -4,7 +4,7 @@ use glam::Mat4;
 
 use crate::UvRect;
 
-/// A single glyph quad: where it is, what colour it is, and how its field is
+/// A single glyph quad: where it is, what color it is, and how its field is
 /// read.
 ///
 /// Deliberately not a `SpriteInstance` with extra fields. A sprite is a picture
@@ -33,7 +33,7 @@ impl GlyphInstance {
         9 => Float32x4
     ];
 
-    /// A glyph drawn from `uv` in the atlas, in the colour `face`.
+    /// A glyph drawn from `uv` in the atlas, in the color `face`.
     ///
     /// `outline_width` and `softness` are in the field's own stored units,
     /// which is what the shader compares against — see
@@ -70,7 +70,7 @@ impl GlyphInstance {
         self
     }
 
-    /// Says the atlas holds this glyph's own colours rather than a field, so it
+    /// Says the atlas holds this glyph's own colors rather than a field, so it
     /// is drawn as the picture it is. An emoji face.
     #[must_use]
     pub const fn colored(mut self) -> Self {
@@ -84,7 +84,7 @@ impl GlyphInstance {
         Mat4::from_cols_array_2d(&self.model)
     }
 
-    /// The colour the glyph's own body is drawn in.
+    /// The color the glyph's own body is drawn in.
     #[must_use]
     pub const fn face(self) -> [f32; 4] {
         self.face

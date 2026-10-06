@@ -4,7 +4,7 @@
 //! It cannot say that the string names a texture in the project, so a tool
 //! drawing the component has to guess — and the editor did, from a table of
 //! field names: `texture` meant the texture list, `clip` meant the audio list,
-//! a colour had to be spelled `tint`.
+//! a color had to be spelled `tint`.
 //!
 //! Guessing from a name fails in both directions. The bare-key rules matched
 //! *any* component, so a game's own component with a `clip` field was offered
@@ -67,12 +67,12 @@ pub enum FieldMeaning {
     /// never retyped: a choice that has drifted from the enum it names is a
     /// scene that will not load.
     Choice(Vec<&'static str>),
-    /// A colour as RGBA, each channel from zero to one.
+    /// A color as RGBA, each channel from zero to one.
     ///
     /// Worth naming rather than inferring: the old check was "four numbers
     /// under a key called `tint`", and four numbers is also a UV rect and a
     /// quaternion.
-    Colour,
+    Color,
     /// An angle in radians, however a tool chooses to show it.
     Angle,
     /// A number with both ends bounded, the same bounds the engine validates.
@@ -131,7 +131,7 @@ impl FieldMeaning {
         match self {
             Self::Asset(_) => "asset",
             Self::Choice(_) => "choice",
-            Self::Colour => "colour",
+            Self::Color => "color",
             Self::Angle => "angle",
             Self::Range { .. } => "range",
             Self::OneOf(_) => "one_of",

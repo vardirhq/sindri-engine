@@ -31,7 +31,7 @@
 //! open the editor into, so a test holds the fixture to naming only textures
 //! that resolve.
 //!
-//! `spin.png` is a two-by-two sheet whose four cells put a coloured dot at each
+//! `spin.png` is a two-by-two sheet whose four cells put a colored dot at each
 //! quarter of a turn, so pressing Play visibly spins it and a still of the sheet
 //! says which cell is which.
 

@@ -50,8 +50,8 @@ def speckle(c, base, spots, count, salt, size=(0.8, 2.2)):
         x = noise(i, salt, 41) * CELL
         y = noise(i, salt, 42) * CELL
         r = size[0] + noise(i, salt, 43) * (size[1] - size[0])
-        colour = spots[int(noise(i, salt, 44) * len(spots)) % len(spots)]
-        c.ellipse(x, y, r, r * (0.6 + noise(i, salt, 45) * 0.6), colour)
+        color = spots[int(noise(i, salt, 44) * len(spots)) % len(spots)]
+        c.ellipse(x, y, r, r * (0.6 + noise(i, salt, 45) * 0.6), color)
 
 
 def dust(c, base, variant, seed):
@@ -62,17 +62,17 @@ def dust(c, base, variant, seed):
         y = noise(i, seed + variant, 42) * CELL
         r = 0.2 + noise(i, seed + variant, 43) * 0.6
         shift = int(noise(i, seed + variant, 44) * 16) - 8
-        colour = tuple(max(0, min(255, channel + shift)) for channel in base)
-        c.ellipse(x, y, r, r * 0.65, colour)
+        color = tuple(max(0, min(255, channel + shift)) for channel in base)
+        c.ellipse(x, y, r, r * 0.65, color)
 
 
-def fissure(c, variant, colour):
+def fissure(c, variant, color):
     points = [(0, 12), (7, 15 + variant % 3), (16, 11), (23, 17), (32, 12)]
     for (ax, ay), (bx, by) in zip(points, points[1:]):
-        c.line(ax, ay, bx, by, 0.7, colour)
+        c.line(ax, ay, bx, by, 0.7, color)
         c.line(ax, ay - 0.8, bx, by - 0.8, 0.45, (248, 242, 220))
-    c.line(16, 11, 18, 4, 0.55, colour)
-    c.line(23, 17, 20, 24, 0.5, colour)
+    c.line(16, 11, 18, 4, 0.55, color)
+    c.line(23, 17, 20, 24, 0.5, color)
 
 
 def salt(variant):
@@ -116,7 +116,7 @@ def sand(variant):
     def draw(c):
         dust(c, SAND, variant, 130)
         # A periodic wave meets at both sides; its phase changes the ridges
-        # without changing the base colour at a tile boundary.
+        # without changing the base color at a tile boundary.
         for i in range(-1, 5):
             y = i * 9 + variant * 0.35
             for x in range(CELL):
@@ -148,13 +148,13 @@ def kelp(variant):
             x = noise(i, 150 + variant, 61) * CELL
             y = noise(i, 150 + variant, 62) * CELL
             a = noise(i, 150 + variant, 63) * math.tau
-            colour = (86, 91, 59) if i % 2 else (145, 133, 86)
+            color = (86, 91, 59) if i % 2 else (145, 133, 86)
             for j in range(5):
                 bend = a + math.sin(j * 0.8) * 0.45
                 nx, ny = x + math.cos(bend) * 2.5, y + math.sin(bend) * 2.5
-                c.line(x, y, nx, ny, 0.85, colour)
+                c.line(x, y, nx, ny, 0.85, color)
                 if j % 2:
-                    c.ellipse(nx + math.sin(bend) * 1.2, ny - math.cos(bend) * 1.2, 1.6, 0.8, colour)
+                    c.ellipse(nx + math.sin(bend) * 1.2, ny - math.cos(bend) * 1.2, 1.6, 0.8, color)
                 x, y = nx, ny
         if variant == 6:
             c.ellipse(8, 23, 1.8, 1, (184, 169, 124))
@@ -213,8 +213,8 @@ def leaves(variant):
             x = noise(i, 190 + variant, 81) * CELL
             y = noise(i, 190 + variant, 82) * CELL
             r = 3 + noise(i, 190 + variant, 83) * 4
-            colour = LEAVES_LIGHT if i % 2 else LEAVES_DARK
-            c.ellipse(x, y, r, r, colour)
+            color = LEAVES_LIGHT if i % 2 else LEAVES_DARK
+            c.ellipse(x, y, r, r, color)
 
     return draw
 

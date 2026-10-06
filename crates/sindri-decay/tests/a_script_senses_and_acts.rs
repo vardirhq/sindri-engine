@@ -229,7 +229,7 @@ fn a_script_can_change_its_sprite() {
 /// A sprite's tint is a `Color`: read whole, blended, and written back whole,
 /// while one channel is still one number.
 #[test]
-fn a_script_sets_a_whole_colour() {
+fn a_script_sets_a_whole_color() {
     let (mut world, entity, sources) = world(
         r##"script S { fn update(dt: f32) {
             let was = this.sprite.tint;

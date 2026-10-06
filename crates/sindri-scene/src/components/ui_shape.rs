@@ -106,7 +106,7 @@ pub struct ShapeGeometry {
     /// wrong most of the time.
     #[serde(default = "default_count")]
     pub count: f32,
-    /// The colour inside. Transparent by default, because most of what this
+    /// The color inside. Transparent by default, because most of what this
     /// draws is an outline and a filled panel is the exception.
     #[serde(default = "transparent")]
     pub fill: [f32; 4],

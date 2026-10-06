@@ -10,7 +10,7 @@
     "padding": 4,
     "palette_snap": true,
     "alpha_cutoff": 128,
-    "outline": { "enabled": true, "colour": "#120b12" },
+    "outline": { "enabled": true, "color": "#120b12" },
     "shading": {
       "light": [-0.42, 0.8, 0.43],
       "thresholds": [0.26, 0.52, 0.8]
@@ -21,11 +21,11 @@
     "model": {
       "kind": "primitives",
       "materials": {
-        "shell": { "colour": "#7a1825" },
-        "edge": { "colour": "#d43b35" },
-        "dark": { "colour": "#2c1018" },
-        "hot": { "colour": "#ff7a3d" },
-        "core": { "colour": "#ffd46a" }
+        "shell": { "color": "#7a1825" },
+        "edge": { "color": "#d43b35" },
+        "dark": { "color": "#2c1018" },
+        "hot": { "color": "#ff7a3d" },
+        "core": { "color": "#ffd46a" }
       },
       "parts": [
         { "type": "cylinder", "material": "dark", "position": [0, 0.08, 0], "radius": 0.34, "height": 0.16, "segments": 12 },

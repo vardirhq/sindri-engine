@@ -1,12 +1,12 @@
 /**
- * Colour handling.
+ * Color handling.
  *
  * Ported from IsoGame's `tools/sprite-factory/src/palette.ts` (MIT), with the
  * hex/HSL conversions kept identical so a model authored against the Sprite
- * Factory bakes to the same colours here.
+ * Factory bakes to the same colors here.
  *
- * The pipeline never asks a renderer to invent a colour. Every material
- * declares one base colour, from which a four-entry shade ramp is derived; the
+ * The pipeline never asks a renderer to invent a color. Every material
+ * declares one base color, from which a four-entry shade ramp is derived; the
  * shading step can only ever emit one of those entries. Supersampling blends
  * them at edges, so after downsampling every pixel is snapped back onto the
  * ramp set. What comes out has a palette that can be stated exactly, up front.
@@ -19,7 +19,7 @@ export interface Rgb {
 }
 
 export interface RampOptions {
-  /** Lightness deltas applied to the base colour, darkest shade first. */
+  /** Lightness deltas applied to the base color, darkest shade first. */
   lightness: [number, number, number, number];
   /** Saturation deltas, darkest first. Shadows gain a little. */
   saturation: [number, number, number, number];
@@ -36,7 +36,7 @@ export const DEFAULT_RAMP: RampOptions = {
 export function hexToRgb(hex: string): Rgb {
   let h = hex.trim().replace('#', '');
   if (h.length === 3) h = h[0] + h[0] + h[1] + h[1] + h[2] + h[2];
-  if (!/^[0-9a-fA-F]{6}$/.test(h)) throw new Error(`not a hex colour: ${JSON.stringify(hex)}`);
+  if (!/^[0-9a-fA-F]{6}$/.test(h)) throw new Error(`not a hex color: ${JSON.stringify(hex)}`);
   const n = Number.parseInt(h, 16);
   return { r: (n >> 16) & 255, g: (n >> 8) & 255, b: n & 255 };
 }
@@ -97,11 +97,11 @@ function clamp01(value: number): number {
 }
 
 /**
- * Derive a four-shade ramp from a base colour, darkest first.
+ * Derive a four-shade ramp from a base color, darkest first.
  *
  * Shadows are pushed slightly toward blue and gain saturation; highlights lose
  * a little. That is the pixel-art trick that stops shaded geometry from reading
- * as "the same colour, but greyer".
+ * as "the same color, but greyer".
  */
 export function makeRamp(baseHex: string, options: Partial<RampOptions> = {}): string[] {
   const opts: RampOptions = { ...DEFAULT_RAMP, ...options };
@@ -112,7 +112,7 @@ export function makeRamp(baseHex: string, options: Partial<RampOptions> = {}): s
 }
 
 /** Squared distance in a cheap perceptual weighting: green counts most. */
-function colourDistance(a: Rgb, b: Rgb): number {
+function colorDistance(a: Rgb, b: Rgb): number {
   const dr = a.r - b.r;
   const dg = a.g - b.g;
   const db = a.b - b.b;
@@ -120,17 +120,17 @@ function colourDistance(a: Rgb, b: Rgb): number {
 }
 
 /**
- * The palette entry nearest `colour`.
+ * The palette entry nearest `color`.
  *
  * Ties go to the earlier entry, which is what makes a snap reproducible: the
  * palette is built in a stated order, so two equally distant shades cannot come
  * out differently on two runs.
  */
-export function nearestColour(colour: Rgb, palette: Rgb[]): Rgb {
+export function nearestColor(color: Rgb, palette: Rgb[]): Rgb {
   let best = palette[0];
   let bestDistance = Number.POSITIVE_INFINITY;
   for (const entry of palette) {
-    const d = colourDistance(colour, entry);
+    const d = colorDistance(color, entry);
     if (d < bestDistance) {
       bestDistance = d;
       best = entry;
@@ -139,8 +139,8 @@ export function nearestColour(colour: Rgb, palette: Rgb[]): Rgb {
   return best;
 }
 
-/** Deduplicate hex colours, preserving order. */
-export function uniqueColours(hexes: string[]): string[] {
+/** Deduplicate hex colors, preserving order. */
+export function uniqueColors(hexes: string[]): string[] {
   const seen = new Set<string>();
   const out: string[] = [];
   for (const hex of hexes) {

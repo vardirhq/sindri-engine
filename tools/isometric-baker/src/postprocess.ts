@@ -20,13 +20,13 @@
  */
 
 import { type RgbaImage } from './image.ts';
-import { type Rgb, hexToRgb, nearestColour } from './palette.ts';
+import { type Rgb, hexToRgb, nearestColor } from './palette.ts';
 
 /**
  * Box-filter downsample.
  *
- * Colour is averaged weighted by alpha, so fully transparent background pixels
- * cannot drag an edge colour toward black.
+ * Color is averaged weighted by alpha, so fully transparent background pixels
+ * cannot drag an edge color toward black.
  */
 export function downsample(image: RgbaImage, factor: number): RgbaImage {
   if (factor === 1) return image;
@@ -96,7 +96,7 @@ export function snapToPalette(image: RgbaImage, palette: string[]): RgbaImage {
     const key = (data[i] << 16) | (data[i + 1] << 8) | data[i + 2];
     let snapped = memo.get(key);
     if (!snapped) {
-      snapped = nearestColour({ r: data[i], g: data[i + 1], b: data[i + 2] }, entries);
+      snapped = nearestColor({ r: data[i], g: data[i + 1], b: data[i + 2] }, entries);
       memo.set(key, snapped);
     }
     data[i] = snapped.r;
@@ -108,14 +108,14 @@ export function snapToPalette(image: RgbaImage, palette: string[]): RgbaImage {
 }
 
 /**
- * Recolour the outermost ring of opaque pixels.
+ * Recolor the outermost ring of opaque pixels.
  *
  * Drawn inward rather than outward so the silhouette — and therefore the
  * footprint and the anchor — stay exactly where the rasteriser put them.
  */
-export function addInnerOutline(image: RgbaImage, colour: string): RgbaImage {
+export function addInnerOutline(image: RgbaImage, color: string): RgbaImage {
   const { width, height } = image;
-  const { r, g, b } = hexToRgb(colour);
+  const { r, g, b } = hexToRgb(color);
   const data = new Uint8ClampedArray(image.data);
 
   const transparentAt = (x: number, y: number) => {
@@ -179,8 +179,8 @@ export function contentBounds(image: RgbaImage): ContentBounds | null {
   return { x: minX, y: minY, width: maxX - minX + 1, height: maxY - minY + 1 };
 }
 
-/** Every distinct opaque colour in an image, most used first. */
-export function usedColours(image: RgbaImage): string[] {
+/** Every distinct opaque color in an image, most used first. */
+export function usedColors(image: RgbaImage): string[] {
   const counts = new Map<number, number>();
   for (let i = 0; i < image.data.length; i += 4) {
     if (image.data[i + 3] === 0) continue;

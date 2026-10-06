@@ -28,7 +28,7 @@ use crate::components::TileVolumeComponent;
 
 /// How much light a face gets for facing the way it does.
 ///
-/// A cube of one flat colour reads as a hexagon, not a block: the eye takes
+/// A cube of one flat color reads as a hexagon, not a block: the eye takes
 /// the shading, not the silhouette, as the evidence of a third dimension. So
 /// the top is lit fully, the two pairs of sides progressively less, and the
 /// underside least.

@@ -8,7 +8,7 @@
 //!
 //! As in CSS, a transition starts when a property's computed value changes,
 //! and starts from whatever is showing at that moment, so a hover that ends
-//! halfway through its fade turns round smoothly. Colours, lengths and plain
+//! halfway through its fade turns round smoothly. Colors, lengths and plain
 //! numbers ease; anything else changes at once.
 
 use std::collections::BTreeMap;
@@ -68,7 +68,7 @@ fn time(word: &str) -> Option<f32> {
 #[derive(Clone, Copy, Debug, PartialEq)]
 enum Mixable {
     /// sRGB channels and alpha, 0 to 1, as written.
-    Colour([f32; 4]),
+    Color([f32; 4]),
     /// A number and the unit it was written in.
     Length(f32, Unit),
 }
@@ -85,8 +85,8 @@ enum Unit {
 impl Mixable {
     fn parse(value: &str) -> Option<Self> {
         let value = value.trim();
-        if let Some(colour) = colour(value) {
-            return Some(Self::Colour(colour));
+        if let Some(color) = color(value) {
+            return Some(Self::Color(color));
         }
         for (suffix, unit) in [
             ("px", Unit::Pixels),
@@ -104,7 +104,7 @@ impl Mixable {
     fn mix(self, other: Self, t: f32) -> Option<Self> {
         let lerp = |a: f32, b: f32| a + (b - a) * t;
         match (self, other) {
-            (Self::Colour(a), Self::Colour(b)) => Some(Self::Colour([
+            (Self::Color(a), Self::Color(b)) => Some(Self::Color([
                 lerp(a[0], b[0]),
                 lerp(a[1], b[1]),
                 lerp(a[2], b[2]),
@@ -119,7 +119,7 @@ impl Mixable {
 
     fn write(self) -> String {
         match self {
-            Self::Colour(channels) => {
+            Self::Color(channels) => {
                 let byte = |channel: f32| {
                     // Channels are clamped to 0..=1 first, so the product fits.
                     #[allow(clippy::cast_possible_truncation, clippy::cast_sign_loss)]
@@ -148,8 +148,8 @@ impl Mixable {
     }
 }
 
-/// The sRGB colours Weave accepts, as channels from 0 to 1.
-fn colour(value: &str) -> Option<[f32; 4]> {
+/// The sRGB colors Weave accepts, as channels from 0 to 1.
+fn color(value: &str) -> Option<[f32; 4]> {
     match value {
         "transparent" => return Some([0.0; 4]),
         "black" => return Some([0.0, 0.0, 0.0, 1.0]),
@@ -307,7 +307,7 @@ mod tests {
     }
 
     #[test]
-    fn a_changed_colour_eases_to_its_new_value() {
+    fn a_changed_color_eases_to_its_new_value() {
         let mut transitions = Transitions::default();
         let button = entity();
         assert_eq!(frame(&mut transitions, button, "#000000"), "#000000");

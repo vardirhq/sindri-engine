@@ -154,8 +154,8 @@ pub fn wide(
         egui::StrokeKind::Inside,
     );
     let foreground = intent.foreground(false);
-    // Laid out with the placeholder colour so the tint below is the one that
-    // takes effect: a galley built with a real colour keeps it.
+    // Laid out with the placeholder color so the tint below is the one that
+    // takes effect: a galley built with a real color keeps it.
     let galley = ui.painter().layout_no_wrap(
         label.to_owned(),
         egui::FontId::proportional(text::BODY),
@@ -229,9 +229,9 @@ impl<'a, T: Copy + PartialEq> Segmented<'a, T> {
         let galleys: Vec<_> = options
             .iter()
             .map(|(_, label, _)| {
-                // Laid out with the placeholder colour so that the tint
+                // Laid out with the placeholder color so that the tint
                 // handed to `Painter::galley` is the one that takes effect: a
-                // galley built with a real colour keeps it, and every segment
+                // galley built with a real color keeps it, and every segment
                 // was drawn in the selected segment's white.
                 ui.painter()
                     .layout_no_wrap((*label).to_owned(), font.clone(), Color32::PLACEHOLDER)

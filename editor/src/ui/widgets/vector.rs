@@ -48,7 +48,7 @@ pub fn axis(
             ui.spacing_mut().item_spacing.x = 3.0;
             ui.horizontal(|ui| {
                 // The letter sits on a tinted spine rather than being a
-                // coloured character: a tinted glyph beside a number reads as
+                // colored character: a tinted glyph beside a number reads as
                 // an alarm, and a spine reads as a label.
                 let (rect, _) = ui.allocate_exact_size(
                     Vec2::new(3.0, metric::CONTROL_HEIGHT - 4.0),

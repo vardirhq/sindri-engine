@@ -175,7 +175,7 @@ fn capitalized(message: &str) -> String {
     })
 }
 
-/// The colour a line is written in, which is the only thing that distinguishes
+/// The color a line is written in, which is the only thing that distinguishes
 /// three kinds of message in a list of forty.
 const fn level_tint(level: Level) -> Color32 {
     match level {

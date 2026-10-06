@@ -10,7 +10,7 @@ import {
   type JsonValue,
   asArray,
   asBoolean,
-  asColour,
+  asColor,
   asNumber,
   asObject,
   asString,
@@ -56,11 +56,11 @@ function readGrain(value: JsonValue, path: string): GrainSpec {
 }
 
 export function readMaterial(value: JsonValue, path: string): MaterialSpec {
-  if (typeof value === 'string') return { colour: asColour(value, path) };
+  if (typeof value === 'string') return { color: asColor(value, path) };
   const source = asObject(value, path);
-  rejectUnknown(source, path, ['colour', 'ramp', 'unlit', 'grain']);
+  rejectUnknown(source, path, ['color', 'ramp', 'unlit', 'grain']);
   return {
-    colour: required(source, 'colour', path, asColour),
+    color: required(source, 'color', path, asColor),
     ramp: optional(source, 'ramp', path, readRamp),
     unlit: optional(source, 'unlit', path, asBoolean),
     grain: optional(source, 'grain', path, readGrain),
@@ -69,7 +69,7 @@ export function readMaterial(value: JsonValue, path: string): MaterialSpec {
 
 function readMaterialRef(value: JsonValue, path: string): string | MaterialSpec {
   // A bare string is a name in the model's table; anything else is an inline
-  // material, which is what a one-off colour should be rather than a table
+  // material, which is what a one-off color should be rather than a table
   // entry used once.
   return typeof value === 'string' ? value : readMaterial(value, path);
 }

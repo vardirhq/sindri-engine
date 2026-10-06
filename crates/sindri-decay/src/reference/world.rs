@@ -134,15 +134,15 @@ pub(super) const TYPES: &[TypeEntry] = &[
     },
     TypeEntry {
         name: "Sprite",
-        text: "A 2D image drawn in the game world, and how it is coloured.",
+        text: "A 2D image drawn in the game world, and how it is colored.",
         members: &[
             value(
                 "color_multiply",
-                "Another colour the image is multiplied by, on top of `tint`.",
+                "Another color the image is multiplied by, on top of `tint`.",
             ),
             value(
                 "color_offset",
-                "A colour added on top of the image, which can make it brighter or flash white. Keep its `a` at 0, or the image's transparent edges become visible.",
+                "A color added on top of the image, which can make it brighter or flash white. Keep its `a` at 0, or the image's transparent edges become visible.",
             ),
             value(
                 "layer",
@@ -150,13 +150,13 @@ pub(super) const TYPES: &[TypeEntry] = &[
             ),
             value(
                 "tint",
-                "A colour the image is multiplied by. White leaves it unchanged; lowering `a` fades it out.",
+                "A color the image is multiplied by. White leaves it unchanged; lowering `a` fades it out.",
             ),
         ],
     },
     TypeEntry {
         name: "Shape",
-        text: "A shape drawn in the game world, such as a circle, polygon or ring, with an inside colour and an outline.",
+        text: "A shape drawn in the game world, such as a circle, polygon or ring, with an inside color and an outline.",
         members: &[
             value(
                 "count",
@@ -170,12 +170,12 @@ pub(super) const TYPES: &[TypeEntry] = &[
                 "dashes",
                 "How many dashes the outline is broken into. 0 draws a solid line.",
             ),
-            value("fill", "The colour inside the shape."),
+            value("fill", "The color inside the shape."),
             value(
                 "layer",
                 "Drawing order: higher numbers are drawn in front of lower ones.",
             ),
-            value("stroke", "The colour of the shape's outline."),
+            value("stroke", "The color of the shape's outline."),
             value(
                 "stroke_width",
                 "How thick the outline is, as a fraction of the shape's size.",
@@ -200,7 +200,7 @@ pub(super) const TYPES: &[TypeEntry] = &[
             ),
             value(
                 "tint",
-                "A colour the image is multiplied by. White leaves it unchanged; lowering `a` fades it out.",
+                "A color the image is multiplied by. White leaves it unchanged; lowering `a` fades it out.",
             ),
         ],
     },

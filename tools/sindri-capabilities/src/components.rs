@@ -57,7 +57,7 @@ pub(crate) fn describe() -> Result<Value, CapabilitiesError> {
     type with no honest blank — one naming an asset the engine cannot invent. \
     `addable` says whether a tool can add one without being given anything else. \
     `meanings` says what a field is *for* where the shape alone cannot: which \
-    asset kind it names, which spellings it accepts, that it is a colour, an \
+    asset kind it names, which spellings it accepts, that it is a color, an \
     angle, a bounded number, a collision mask, or another entity. A path is \
     dotted, and `[]` descends into a list, so `pieces[].friction` describes \
     every piece. A choice that also carries `variants` decides the shape of what \
@@ -118,7 +118,7 @@ fn meanings(registry: &ComponentSchemaRegistry, type_name: &str) -> Value {
                     described["set"] = json!(set);
                     described["key_of"] = json!(or_key_of);
                 }
-                FieldMeaning::Colour
+                FieldMeaning::Color
                 | FieldMeaning::Angle
                 | FieldMeaning::Mask
                 | FieldMeaning::Entity

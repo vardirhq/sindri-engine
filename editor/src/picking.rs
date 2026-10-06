@@ -269,7 +269,7 @@ fn plane_hit_model(ray: RaySegment, model: Mat4, half_extent: f32) -> Option<(f3
 /// this way is still selectable from the hierarchy, which is where an invisible
 /// entity is reachable at all.
 ///
-/// Public because a string's colour is the same question, and it is asked
+/// Public because a string's color is the same question, and it is asked
 /// where strings are measured rather than here.
 pub fn is_drawn(tint: [f32; 4]) -> bool {
     tint[3] > 0.0

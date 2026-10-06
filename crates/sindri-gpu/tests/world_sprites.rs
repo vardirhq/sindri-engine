@@ -23,7 +23,7 @@ use sindri_render::{
 const REQUIRE_GPU: &str = "SINDRI_REQUIRE_GPU";
 
 const SIZE: u32 = 64;
-/// How far a channel may drift before the colour is a different one. Rounding
+/// How far a channel may drift before the color is a different one. Rounding
 /// through an sRGB target moves a byte or so; a wrong sprite moves all of them.
 const CHANNEL_TOLERANCE: i32 = 3;
 const MESH_COLOR: [u8; 4] = [18, 34, 55, 255];
@@ -33,7 +33,7 @@ const SPRITE_COLOR: [u8; 4] = [40, 200, 90, 255];
 ///
 /// The sprite sits at `sprite_z`: positive is between the camera and the mesh,
 /// negative is behind it. Both are centred, so the answer is only ever one of
-/// the two colours, or the cleared background, and which one is the question.
+/// the two colors, or the cleared background, and which one is the question.
 fn center_pixel(mesh: bool, sprite_z: f32, depth: SpriteDepth) -> Option<[u8; 4]> {
     let instance = wgpu::Instance::default();
     let gpu = match pollster::block_on(GpuContext::request(

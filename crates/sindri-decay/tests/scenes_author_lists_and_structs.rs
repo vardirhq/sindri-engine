@@ -93,8 +93,8 @@ fn a_wrong_authored_list_or_struct_is_refused_with_why() {
     for (properties, expected) in [
         (json!({ "loot": { "name": "coin" } }), "is not a list"),
         (
-            json!({ "loot": [{ "name": "coin", "colour": 1 }] }),
-            "item 0: `Drop` has no field `colour`; it has name, weight, kind",
+            json!({ "loot": [{ "name": "coin", "color": 1 }] }),
+            "item 0: `Drop` has no field `color`; it has name, weight, kind",
         ),
         (
             json!({ "loot": [{ "kind": "Ruby" }] }),

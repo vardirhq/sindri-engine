@@ -97,7 +97,7 @@
       },
       "components": {
         "sindri.ui.text": {
-          "text": "MOVE / SCALE / COLOUR / ROTATE",
+          "text": "MOVE / SCALE / COLOR / ROTATE",
           "font": "fonts/ChakraPetch-Regular.ttf",
           "font_size": 0.04,
           "bounds": [

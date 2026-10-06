@@ -12,7 +12,7 @@
     "alpha_cutoff": 128,
     "outline": {
       "enabled": true,
-      "colour": "#0d1420"
+      "color": "#0d1420"
     },
     "shading": {
       "light": [
@@ -34,16 +34,16 @@
         "kind": "primitives",
         "materials": {
           "rock": {
-            "colour": "#3a4a56"
+            "color": "#3a4a56"
           },
           "dark": {
-            "colour": "#151d24"
+            "color": "#151d24"
           },
           "lit": {
-            "colour": "#6b8c9e"
+            "color": "#6b8c9e"
           },
           "ice": {
-            "colour": "#8ca8b8"
+            "color": "#8ca8b8"
           }
         },
         "parts": [
@@ -184,16 +184,16 @@
         "kind": "primitives",
         "materials": {
           "rock": {
-            "colour": "#3a4a56"
+            "color": "#3a4a56"
           },
           "dark": {
-            "colour": "#151d24"
+            "color": "#151d24"
           },
           "lit": {
-            "colour": "#6b8c9e"
+            "color": "#6b8c9e"
           },
           "ice": {
-            "colour": "#8ca8b8"
+            "color": "#8ca8b8"
           }
         },
         "parts": [
@@ -318,16 +318,16 @@
         "kind": "primitives",
         "materials": {
           "rock": {
-            "colour": "#3a4a56"
+            "color": "#3a4a56"
           },
           "dark": {
-            "colour": "#151d24"
+            "color": "#151d24"
           },
           "lit": {
-            "colour": "#6b8c9e"
+            "color": "#6b8c9e"
           },
           "ice": {
-            "colour": "#8ca8b8"
+            "color": "#8ca8b8"
           }
         },
         "parts": [

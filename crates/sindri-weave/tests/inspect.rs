@@ -52,7 +52,7 @@ fn inspecting_an_element_lists_its_rules_strongest_first_and_what_applies() {
     // The theme's rule first, then the base sheet's, class before element.
     assert_eq!(listed, [(1, "text", 1), (0, ".title", 4), (0, "text", 3)]);
     // The theme's font size wins over the base's class rule, as a later
-    // stylesheet does; the base `text` colour applies, since the card's is
+    // stylesheet does; the base `text` color applies, since the card's is
     // only inherited.
     let applies = |index: usize, property: &str| {
         inspection.rules[index]

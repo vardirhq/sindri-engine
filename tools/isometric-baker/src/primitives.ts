@@ -63,7 +63,7 @@ function pushQuad(geometry: Geometry, a: Vec3, b: Vec3, c: Vec3, d: Vec3, normal
  * A floor tile is not a box, and modelling one as a box of zero height is worse
  * than wrong: the top and bottom faces then occupy exactly the same plane, and
  * which of them wins a pixel comes down to the last bit of a barycentric
- * interpolation — so a tile that should be one flat colour comes out dithered
+ * interpolation — so a tile that should be one flat color comes out dithered
  * between its brightest and darkest shade. One quad has no second face to
  * argue with.
  */

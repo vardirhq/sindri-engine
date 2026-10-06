@@ -50,7 +50,7 @@ fn registry_of(gpu: &GpuContext, color: [u8; 4]) -> (TextureRegistry, TextureId)
     (registry, id)
 }
 
-/// Draws one full-frame sprite and returns the colour in the middle.
+/// Draws one full-frame sprite and returns the color in the middle.
 fn draw(
     gpu: &GpuContext,
     sprites: &mut SpriteBatchRenderer,

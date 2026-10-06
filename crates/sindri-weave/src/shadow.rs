@@ -50,7 +50,7 @@ fn parse(value: &str, viewport: Viewport) -> Option<serde_json::Value> {
     if blur < 0.0 {
         return None;
     }
-    // CSS's default shadow colour is the text colour; black at the opacity
+    // CSS's default shadow color is the text color; black at the opacity
     // most shadows are written at is the nearer thing a shape has.
     let tint = tint.unwrap_or([0.0, 0.0, 0.0, 0.5]);
     Some(serde_json::json!({
@@ -73,7 +73,7 @@ mod tests {
     };
 
     #[test]
-    fn offsets_blur_spread_and_colour_read_as_in_css() {
+    fn offsets_blur_spread_and_color_read_as_in_css() {
         // 800 pixels high is two overlay units, so 40px is 0.1.
         let shadow = parse("0 40px 80px 4px #000000", SCREEN).expect("a shadow");
         let offset = shadow["offset"].as_array().expect("an offset");

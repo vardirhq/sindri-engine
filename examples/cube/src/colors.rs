@@ -1,8 +1,8 @@
-//! What the demo scene's colours must look like once they reach an image.
+//! What the demo scene's colors must look like once they reach an image.
 //!
 //! Two images render this scene: the headless capture, and the editor's viewport
 //! inside a screenshot of the whole window. They have to agree, and the only way
-//! to know they do is to look at the pixels — a colour-space mistake compiles,
+//! to know they do is to look at the pixels — a color-space mistake compiles,
 //! lints, validates, renders, and passes every other test while producing the
 //! wrong picture.
 //!
@@ -11,18 +11,18 @@
 
 use std::collections::BTreeMap;
 
-/// Colours the demo scene authors that must survive the round trip to an image.
+/// Colors the demo scene authors that must survive the round trip to an image.
 pub const AUTHORED_COLORS: [(&str, [u8; 3]); 2] = [
     ("checkerboard orange", [240, 114, 43]),
     ("checkerboard navy", [18, 34, 55]),
 ];
 
 /// Per-channel slack, generous enough for texture filtering, a software
-/// rasteriser, and window compositing, but far tighter than a colour-space
+/// rasteriser, and window compositing, but far tighter than a color-space
 /// mistake, which moves channels by 40 to 70.
 pub const CHANNEL_TOLERANCE: i32 = 16;
 
-/// Each colour must cover at least this many pixels per thousand.
+/// Each color must cover at least this many pixels per thousand.
 ///
 /// Low enough that a scene occupying part of a window still passes, high enough
 /// that a stray antialiased edge cannot stand in for a whole surface.
@@ -38,7 +38,7 @@ fn is_near(pixel: &[u8], expected: [u8; 3]) -> bool {
         })
 }
 
-/// Reports the most common colours in the image, to make a mismatch diagnosable.
+/// Reports the most common colors in the image, to make a mismatch diagnosable.
 fn dominant_colors(pixels: &[u8]) -> Vec<([u8; 3], usize)> {
     let mut counts: BTreeMap<[u8; 3], usize> = BTreeMap::new();
     for pixel in pixels.chunks_exact(4) {
@@ -52,7 +52,7 @@ fn dominant_colors(pixels: &[u8]) -> Vec<([u8; 3], usize)> {
     ranked
 }
 
-/// Fails when an image is not the colour the scene authored.
+/// Fails when an image is not the color the scene authored.
 ///
 /// `pixels` is tightly packed RGBA8.
 pub fn verify_authored_colors(pixels: &[u8]) -> Result<(), String> {
@@ -68,10 +68,10 @@ pub fn verify_authored_colors(pixels: &[u8]) -> Result<(), String> {
                 "expected {name} {expected:?} to cover at least \
                  {MINIMUM_SHARE_PER_THOUSAND} pixels per thousand, but only {found} of {total} \
                  pixels are within {CHANNEL_TOLERANCE} per channel.\n\
-                 The most common colours were {dominant:?}.\n\
-                 A whole-image shift like this usually means a colour target is \
+                 The most common colors were {dominant:?}.\n\
+                 A whole-image shift like this usually means a color target is \
                  not sRGB, or that a texture is sampled through a view whose \
-                 colour space disagrees with whoever reads it."
+                 color space disagrees with whoever reads it."
             ));
         }
     }
@@ -97,7 +97,7 @@ mod tests {
     }
 
     #[test]
-    fn an_image_holding_the_authored_colours_passes() {
+    fn an_image_holding_the_authored_colors_passes() {
         assert_eq!(
             verify_authored_colors(&scene_of([240, 114, 43], [18, 34, 55])),
             Ok(())
@@ -110,12 +110,12 @@ mod tests {
     #[test]
     fn a_missing_srgb_encode_is_caught() {
         let error = verify_authored_colors(&scene_of([221, 43, 6], [4, 6, 11]))
-            .expect_err("a doubly decoded image is not the authored colour");
+            .expect_err("a doubly decoded image is not the authored color");
         assert!(error.contains("checkerboard orange"), "{error}");
     }
 
     #[test]
-    fn a_colour_present_only_as_a_thin_edge_does_not_count() {
+    fn a_color_present_only_as_a_thin_edge_does_not_count() {
         // 1 pixel in 1000 is below the required share, so an antialiased sliver
         // cannot stand in for a surface that should be there.
         let mut pixels = filled([240, 114, 43], 1);

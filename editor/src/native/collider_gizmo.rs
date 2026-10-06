@@ -22,7 +22,7 @@ use super::projection::{project_point, project_segment, unproject_to_plane};
 const COLLIDER_LAYER: &str = "sindri-collider-overlay";
 const COLLIDER_DRAG: &str = "sindri-collider-drag";
 
-/// Unity's collider green, so the colour means what an author expects.
+/// Unity's collider green, so the color means what an author expects.
 const COLLIDER_GREEN: Color32 = Color32::from_rgb(140, 250, 140);
 
 /// How near a press has to land to take a handle, in points.
@@ -145,14 +145,14 @@ fn resized(before: Collider2d, grip: Grip, to: [f32; 2]) -> Collider2d {
 }
 
 fn tone(kind: RigidBodyKind, selected: bool) -> Stroke {
-    let colour = if selected {
+    let color = if selected {
         COLLIDER_GREEN
     } else if kind == RigidBodyKind::Static {
         COLLIDER_GREEN.gamma_multiply(0.45)
     } else {
         COLLIDER_GREEN.gamma_multiply(0.7)
     };
-    Stroke::new(if selected { 1.75 } else { 1.0 }, colour)
+    Stroke::new(if selected { 1.75 } else { 1.0 }, color)
 }
 
 fn paint_outline(

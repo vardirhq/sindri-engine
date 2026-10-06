@@ -69,9 +69,9 @@ fn every_mistake_in_a_brand_is_refused_with_its_reason() {
     assert!(
         refused(
             "[web.splash]\ntitle = \"x\"\nbackground = \"teal\"",
-            "colour"
+            "color"
         )
-        .contains("\"teal\" is not a `#rrggbb` colour")
+        .contains("\"teal\" is not a `#rrggbb` color")
     );
     assert!(
         refused("[web.splash]\ntitle = \"x\"\nseconds = 60.0", "long")

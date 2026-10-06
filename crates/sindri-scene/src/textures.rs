@@ -243,14 +243,14 @@ pub struct ProceduralTexture {
     pub size: u32,
     /// Cells along each edge.
     pub cells: u32,
-    /// The two colours it alternates, as non-premultiplied sRGB with alpha.
+    /// The two colors it alternates, as non-premultiplied sRGB with alpha.
     pub colors: [[u8; 4]; 2],
 }
 
 /// Every texture the engine generates, in the form a renderer needs to make one.
 ///
 /// One table rather than a copy per host: the demo capture verifies these exact
-/// colours in a rendered image, and the editor draws the same scene, so two
+/// colors in a rendered image, and the editor draws the same scene, so two
 /// hosts choosing their own navy would be a difference nothing would catch until
 /// a screenshot looked wrong.
 pub const PROCEDURAL_TEXTURES: [ProceduralTexture; 1] = [ProceduralTexture {

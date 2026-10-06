@@ -40,7 +40,7 @@ def noise(x, y, salt):
     return ((value ^ (value >> 16)) & 0xFFFF) / 65536.0
 
 
-def hex_colour(text):
+def hex_color(text):
     text = text.lstrip("#")
     return tuple(int(text[i : i + 2], 16) for i in (0, 2, 4)) + (255,)
 
@@ -67,10 +67,10 @@ def from_art(art, palette):
 
 # --- Tiles ------------------------------------------------------------------
 
-EARTH = [hex_colour(c) for c in ("#8a5a36", "#7a4e2f", "#9c6a42", "#6b4329")]
-GRASS = [hex_colour(c) for c in ("#5fbf4a", "#4ea83c", "#79d25c")]
-STONE = [hex_colour(c) for c in ("#8d8f99", "#7a7c86", "#a2a4ad", "#63656e")]
-PLANK = [hex_colour(c) for c in ("#c08a4f", "#a8733d", "#d59e60", "#7d5328")]
+EARTH = [hex_color(c) for c in ("#8a5a36", "#7a4e2f", "#9c6a42", "#6b4329")]
+GRASS = [hex_color(c) for c in ("#5fbf4a", "#4ea83c", "#79d25c")]
+STONE = [hex_color(c) for c in ("#8d8f99", "#7a7c86", "#a2a4ad", "#63656e")]
+PLANK = [hex_color(c) for c in ("#c08a4f", "#a8733d", "#d59e60", "#7d5328")]
 
 
 def dirt_cell(salt):
@@ -134,14 +134,14 @@ def draw_tiles():
 # --- The hero ---------------------------------------------------------------
 
 HERO = {
-    "o": hex_colour("#2a1d3a"),  # outline
-    "h": hex_colour("#e8563f"),  # hat
-    "s": hex_colour("#f2c29b"),  # skin
-    "e": hex_colour("#2a1d3a"),  # eye
-    "b": hex_colour("#3f7fd9"),  # body
-    "d": hex_colour("#2c5ea8"),  # body shade
-    "l": hex_colour("#4a3b5c"),  # legs
-    "f": hex_colour("#1d1528"),  # feet
+    "o": hex_color("#2a1d3a"),  # outline
+    "h": hex_color("#e8563f"),  # hat
+    "s": hex_color("#f2c29b"),  # skin
+    "e": hex_color("#2a1d3a"),  # eye
+    "b": hex_color("#3f7fd9"),  # body
+    "d": hex_color("#2c5ea8"),  # body shade
+    "l": hex_color("#4a3b5c"),  # legs
+    "f": hex_color("#1d1528"),  # feet
 }
 
 HEAD = [
@@ -197,7 +197,7 @@ def draw_hero():
 
 # --- Coin and flag ----------------------------------------------------------
 
-GOLD = [hex_colour(c) for c in ("#f7c948", "#e0a82e", "#fff1a8", "#9c6b13")]
+GOLD = [hex_color(c) for c in ("#f7c948", "#e0a82e", "#fff1a8", "#9c6b13")]
 
 
 def coin_cell(half_width):
@@ -223,8 +223,8 @@ def draw_coin():
     png(OUT / "coin.png", CELL * len(frames), CELL, sheet(frames))
 
 
-POLE = hex_colour("#d9d9e0")
-CLOTH = [hex_colour("#ffd23f"), hex_colour("#e8a91c")]
+POLE = hex_color("#d9d9e0")
+CLOTH = [hex_color("#ffd23f"), hex_color("#e8a91c")]
 
 
 def flag_cell(wave):

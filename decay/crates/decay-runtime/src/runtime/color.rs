@@ -1,4 +1,4 @@
-//! A colour's operations: blending, changing its opacity, and reading one
+//! A color's operations: blending, changing its opacity, and reading one
 //! from its hex spelling.
 
 use decay_syntax::ColorOp;
