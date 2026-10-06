@@ -232,10 +232,7 @@ fn a_live_presentation_fades_on_hover_and_hover_reaches_containers() {
 
     presenter.advance(0.1);
     let arrived = frame(&mut presenter, Some(play));
-    assert_eq!(
-        color(&arrived, "play", "sindri.ui.shape", "fill"),
-        [1.0; 4]
-    );
+    assert_eq!(color(&arrived, "play", "sindri.ui.shape", "fill"), [1.0; 4]);
     assert!(!presenter.animating());
 }
 
@@ -276,10 +273,7 @@ fn focus_comes_from_the_host_and_stays_on_the_focused_element() {
             &with_focus(Default::default(), Some(play)),
         )
         .expect("presents");
-    assert_eq!(
-        color(&focused, "play", "sindri.ui.shape", "fill"),
-        [1.0; 4]
-    );
+    assert_eq!(color(&focused, "play", "sindri.ui.shape", "fill"), [1.0; 4]);
     assert_eq!(
         color(&focused, "menu", "sindri.ui.shape", "fill"),
         [0.0, 0.0, 0.0, 1.0]
