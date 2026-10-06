@@ -11,3 +11,17 @@ pub enum MotorMode2d {
     /// Drive towards a target position using stiffness and damping.
     Position,
 }
+
+impl MotorMode2d {
+    /// Supported modes, in authoring order.
+    pub const ALL: [Self; 2] = [Self::Velocity, Self::Position];
+
+    /// The spelling used by scene payloads and authoring choices.
+    #[must_use]
+    pub const fn as_str(self) -> &'static str {
+        match self {
+            Self::Velocity => "velocity",
+            Self::Position => "position",
+        }
+    }
+}

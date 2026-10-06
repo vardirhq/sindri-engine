@@ -1,6 +1,7 @@
 //! The physics components, and what a fresh one of each is.
 
 use sindri_core::{AssetKind, ComponentSchemaRegistry, FieldMeaning};
+use sindri_physics::MotorMode2d;
 
 use crate::physics::{
     Collider2dComponent, OneWay2dComponent, PhysicsWorld2dComponent, RigidBody2dComponent,
@@ -102,6 +103,7 @@ fn register_hinge(components: &mut ComponentSchemaRegistry) -> Result<(), SceneE
     components.describe::<crate::HingeJoint2dComponent>([
         ("first", FieldMeaning::Entity),
         ("second", FieldMeaning::Entity),
+        ("motor_mode", motor_modes()),
     ])?;
     Ok(())
 }
@@ -121,6 +123,7 @@ fn register_linear_joints(
     components.describe::<crate::SliderJoint2dComponent>([
         ("first", FieldMeaning::Entity),
         ("second", FieldMeaning::Entity),
+        ("motor_mode", motor_modes()),
     ])?;
     components.register_with_default::<crate::SpringJoint2dComponent>(
         "Spring Joint 2D",
@@ -132,4 +135,8 @@ fn register_linear_joints(
         ("second", FieldMeaning::Entity),
     ])?;
     Ok(())
+}
+
+fn motor_modes() -> FieldMeaning {
+    FieldMeaning::choice(MotorMode2d::ALL.into_iter().map(MotorMode2d::as_str))
 }

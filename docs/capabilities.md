@@ -2608,3 +2608,11 @@ Native headless tests exercise keys and phone touch; extraction tests exercise
 the rendered faces and cache retention. Editor Scene view remains unverified;
 no fluid simulation, 3D flood mesh, decoration or animated/glowing map face is
 claimed. See `voxel-terrain.md` for the contract.
+
+Hinge and slider motor authoring uses registered velocity/position choices
+from the engine enum, rather than a free-text mode field. Old joint payloads
+inherit the default choice. Native editor review of a scratch platformer scene
+exercised the endpoint picker, clearing, Save and undo. Rebuilt editor clicks
+selected Position for the nested windmill hinge and trolley slider; saved
+payloads retain other settings, and slider undo/redo restores omitted defaults
+and the selected mode. Full joint visual review and Play inspection remain open.

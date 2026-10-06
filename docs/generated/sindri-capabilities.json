@@ -705,6 +705,13 @@
         "first": {
           "kind": "entity"
         },
+        "motor_mode": {
+          "kind": "choice",
+          "options": [
+            "velocity",
+            "position"
+          ]
+        },
         "second": {
           "kind": "entity"
         }
@@ -891,6 +898,13 @@
       "meanings": {
         "first": {
           "kind": "entity"
+        },
+        "motor_mode": {
+          "kind": "choice",
+          "options": [
+            "velocity",
+            "position"
+          ]
         },
         "second": {
           "kind": "entity"

@@ -892,3 +892,12 @@ physics must compile WASM; the Gather slice must run the real browser smoke test
 
 Those are not forbidden forever. They are deliberately absent until a real game
 needs them.
+
+### Joint motor authoring choices
+
+Hinge and slider `motor_mode` fields are registered choices derived from
+`MotorMode2d`: `velocity` and `position`. The generic inspector offers these
+choices through its existing checked-command path, including the default
+velocity mode for old payloads that omit the field. Selecting a mode preserves
+other settings; it does not enable the motor or reset its target or gains.
+This closes an authoring gap found while reviewing the platformer mechanisms.

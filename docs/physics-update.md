@@ -643,3 +643,25 @@ surface-specific completeness. This checklist does not mark those surfaces done.
 - CI must verify this slice; all checks passed on prior slider head `e92487ec`.
   Native visual editor review, the separate gameplay snapshot gap and final
   joint/workspace acceptance remain open.
+
+### Joint motor authoring checkpoint
+
+- Native editor review on an isolated X display opened a scratch copy of the
+  platformer, rendered the level and inspected the trolley joint. Its endpoint
+  picker displayed scoped choices and inactive labels; clearing, Save and undo
+  were confirmed by inspecting the saved payload. Typing a missing endpoint
+  displayed the inline resolver diagnostic. No shipped scene was edited.
+- The review found free-text motor modes. Hinges and sliders now register
+  velocity/position choices from `MotorMode2d`, using the existing generic
+  inspector and checked-command path. Older payloads inherit velocity mode;
+  changing mode retains the other settings. A schema test checks the offered
+  spellings against enum serialization. Added for platformer authoring.
+- Full review of all joint kinds, numeric edits, save/reopen and editor Play
+  remains open, as do character movement, accelerated queries, 3D/voxel physics
+  and final integration. The joint checklist is deliberately still unchecked.
+- Rebuilt native editor review selected Position for the nested windmill hinge
+  and trolley slider, then saved and inspected both payloads. Trolley undo
+  restored the omitted default mode; redo restored Position, with endpoints and
+  travel limits retained. Scoped preflight passed 515 tests and warning-denied
+  checks; two-crate Clippy, 11 catalogue tests, formatting/file-size gates and
+  all-target/all-feature WASM checks passed. CI must verify the new head.

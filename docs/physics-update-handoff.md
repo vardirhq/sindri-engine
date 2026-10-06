@@ -16,6 +16,14 @@ a pushed handoff. Do not ask them to authorize the scope again.
 
 ## Current continuation checkpoint
 
+Native joint review has begun using an isolated X display and scratch platformer
+copy. Endpoint picker/clearing, Save and undo were inspected on the trolley.
+The discovered free-text motor mode gap is closed with enum-derived inspector
+choices for hinges/sliders. Rebuilt editor clicks saved both modes; slider
+undo/redo and retained settings were confirmed on disk. Scoped preflight passed
+515 tests, two-crate Clippy, 11 catalogue tests and WASM checks passed. Complete the remaining all-joint numeric/reference,
+save/reopen and Play visual review before checking joint acceptance.
+
 CCD, one-way platforms, **forces and rotation**, **contact snapshots**, and
 **reusable physics materials** are implemented in this PR. The checklist in `physics-update.md` is current.
 

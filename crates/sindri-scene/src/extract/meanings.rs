@@ -314,6 +314,28 @@ mod tests {
     }
 
     #[test]
+    fn joint_motor_choices_match_serialized_engine_modes() {
+        let components = builtin_components().unwrap();
+        let modes: Vec<_> = sindri_physics::MotorMode2d::ALL
+            .into_iter()
+            .map(|mode| {
+                let serialized = serde_json::to_value(mode).unwrap();
+                assert_eq!(serialized.as_str(), Some(mode.as_str()));
+                mode.as_str()
+            })
+            .collect();
+        for kind in [
+            "sindri.physics2d.hinge_joint",
+            "sindri.physics2d.slider_joint",
+        ] {
+            assert_eq!(
+                components.meaning(kind, "motor_mode"),
+                Some(&FieldMeaning::Choice(modes.clone()))
+            );
+        }
+    }
+
+    #[test]
     fn an_undescribed_field_has_no_meaning() {
         let components = builtin_components().expect("the built-ins register");
         assert_eq!(components.meaning("sindri.sprite", "layer"), None);
