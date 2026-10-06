@@ -14,7 +14,7 @@ use crate::ui::widgets::{
 };
 use crate::ui::{icons, widgets::button::outline};
 
-use super::{Listing, NewProject, Request, Sample, Welcome};
+use super::{Listing, NewProject, Request, Sample, Welcome, learn};
 
 const CARD_HEIGHT: f32 = 54.0;
 const SIDE_WIDTH: f32 = 320.0;
@@ -117,21 +117,13 @@ impl Welcome {
                             }
 
                             ui.add_space(22.0);
-                            section_title(ui, "WHAT YOU BUILD WITH");
-                            ui.add_space(metric::GROUP_GAP);
-                            capability(
-                                ui,
-                                icons::SCENE,
-                                "Editor",
-                                "Author scenes and projects visually.",
-                            );
-                            capability(ui, icons::SCRIPT, "Decay", "Write typed gameplay logic.");
-                            capability(
-                                ui,
-                                icons::UI_ELEMENT,
-                                "Weave",
-                                "Build responsive game interfaces.",
-                            );
+                            section_title(ui, "LEARN");
+                            ui.add_space(metric::GAP);
+                            for guide in &learn::GUIDES {
+                                if learn::guide_row(ui, guide) {
+                                    self.problem = learn::open(guide.page).err();
+                                }
+                            }
 
                             if !self.samples.is_empty() {
                                 ui.add_space(22.0);
@@ -291,34 +283,6 @@ fn section_title(ui: &mut egui::Ui, label: &str) {
             .strong()
             .color(color::TEXT_FAINT),
     );
-}
-
-fn capability(
-    ui: &mut egui::Ui,
-    glyph: egui_material_icons::MaterialIcon,
-    name: &str,
-    detail: &str,
-) {
-    ui.horizontal(|ui| {
-        ui.add_sized(
-            [28.0, 28.0],
-            egui::Label::new(glyph.outlined().rich_text().size(18.0).color(color::FORGE)),
-        );
-        ui.vertical(|ui| {
-            ui.label(
-                RichText::new(name)
-                    .size(text::BODY)
-                    .strong()
-                    .color(color::TEXT),
-            );
-            ui.label(
-                RichText::new(detail)
-                    .size(text::NOTE)
-                    .color(color::TEXT_FAINT),
-            );
-        });
-    });
-    ui.add_space(metric::GROUP_GAP);
 }
 
 fn example_row(ui: &mut egui::Ui, sample: &Sample) -> bool {

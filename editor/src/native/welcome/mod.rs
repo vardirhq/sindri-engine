@@ -31,6 +31,7 @@ use super::EditorApp;
 use super::unsaved::Discarding;
 
 mod create;
+mod learn;
 mod view;
 
 use create::NewProject;
