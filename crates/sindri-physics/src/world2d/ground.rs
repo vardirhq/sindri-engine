@@ -4,6 +4,7 @@ use rapier2d::parry::query::{self, ShapeCastOptions};
 use rapier2d::parry::shape::Shape;
 use sindri_core::EntityId;
 
+use super::slope::SlopeLimit2d;
 use super::sweep::{query_pose, query_shape};
 use super::{PhysicsWorld2d, r2};
 use crate::validate::finite2;
@@ -76,12 +77,9 @@ impl PhysicsWorld2d {
                     &mut include,
                 )
             });
-        // Narrow-phase normals approximate curved/rotated geometry. A small
-        // cosine tolerance keeps an authored boundary angle classifiable.
-        let walkable = hit.is_some_and(|hit| {
-            let normal = r2::Vector::new(hit.normal[0], hit.normal[1]);
-            normal.dot(up) + 0.0001 >= options.max_slope_angle.cos().max(0.0)
-        });
+        let slope = SlopeLimit2d::new(up, options.max_slope_angle);
+        let walkable =
+            hit.is_some_and(|hit| slope.walkable(r2::Vector::new(hit.normal[0], hit.normal[1])));
         Ok(GroundProbe2d {
             hit,
             walkable,

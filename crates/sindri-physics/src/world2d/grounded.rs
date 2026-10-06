@@ -2,6 +2,8 @@
 
 use sindri_core::EntityId;
 
+use super::slide::SlideRequest2d;
+use super::slope::SlopeLimit2d;
 use super::{PhysicsWorld2d, r2};
 use crate::validate::finite2;
 use crate::{
@@ -15,7 +17,9 @@ impl PhysicsWorld2d {
     /// Snapping defaults off. Requested upward motion suppresses snapping and
     /// grounded state, even if a ceiling blocks ascent. Steep support never
     /// snaps. Does not mutate a body, store prior grounded state, depenetrate,
-    /// limit slope motion, step, carry platforms or apply one-way policy.
+    /// step, carry platforms or apply one-way policy. Steep contacts cannot
+    /// create upward motion beyond the remaining request's positive rise;
+    /// downhill sliding and explicit jumps remain possible.
     ///
     /// # Errors
     /// Rejects invalid shape, pose, displacement, options or query destination.
@@ -46,12 +50,16 @@ impl PhysicsWorld2d {
         mut include: impl FnMut(EntityId) -> bool,
     ) -> Result<GroundedSlideMotion2d, PhysicsError> {
         options.validate()?;
-        let slide = self.move_and_slide_where(
-            shape,
-            pose,
-            displacement,
-            options.slide,
-            filter,
+        let up = r2::Vector::new(options.up[0], options.up[1]).normalize();
+        let slide = self.slide_with_policy(
+            SlideRequest2d {
+                shape,
+                pose,
+                displacement,
+                options: options.slide,
+                filter,
+            },
+            Some(SlopeLimit2d::new(up, options.max_slope_angle)),
             &mut include,
         )?;
         let endpoint = PhysicsPose2d {
@@ -61,7 +69,6 @@ impl PhysicsWorld2d {
             ],
             rotation: pose.rotation,
         };
-        let up = r2::Vector::new(options.up[0], options.up[1]).normalize();
         let ascending = r2::Vector::new(displacement[0], displacement[1]).dot(up) > 0.0;
         let mut ground_options = options.ground_options();
         if ascending || slide.started_penetrating {

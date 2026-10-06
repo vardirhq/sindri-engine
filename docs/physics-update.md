@@ -743,3 +743,24 @@ surface-specific completeness. This checklist does not mark those surfaces done.
   11 catalogue tests and the 1,126-file size gate passed. No dependencies, scripts,
   host calls or component registrations change. Existing runtime/editor/render/
   browser behavior is unchanged until integration; CI must verify this slice.
+
+### Grounded slope movement checkpoint
+
+- Grounded movement now enforces the same slope angle/tolerance as support.
+  Upward-facing steep contacts cannot generate rise beyond the positive remaining
+  request. Horizontal/downward approaches cannot become uphill climbs; explicit
+  jumps can still slide with bounded rise and steep descent stays ungrounded.
+- Geometric `move_and_slide` retains unrestricted projection. Both paths share
+  one sweep implementation with an internal slope policy; no new dependency,
+  component, host call or script. Snap still accepts only walkable support.
+- Native regressions exercise configured/boundary angles, ascent/jump/descent,
+  downhill following, walls/ceilings, mirrored capsule, rotated box/up, filters,
+  read-only state and unchanged geometric movement.
+- Added for platformer adoption, still engine-only. Steps/clearance, moving
+  platforms, one-way/drop-through and scene/editor/Decay/native/browser game proof
+  remain open; character acceptance remains unchecked.
+- Scoped preflight passed 105 native physics tests and warning-denied all-target/
+  all-feature checks. Physics Clippy, all-target/all-feature WASM compilation,
+  11 catalogue tests and the 1,128-file size gate passed. No existing game,
+  editor, render or browser behavior changes until this primitive is integrated.
+  CI must verify the pushed slope head; full acceptance remains open.

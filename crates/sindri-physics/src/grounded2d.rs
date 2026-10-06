@@ -10,6 +10,7 @@ pub struct GroundedSlideOptions2d {
     /// Unit world-space up direction, checked within 0.0001 of unit length.
     pub up: [f32; 2],
     /// Maximum walkable deviation from up, in radians, within 0..=pi/2.
+    /// Steeper support cannot introduce upward sliding beyond requested rise.
     pub max_slope_angle: f32,
     /// Optional downward travel to retain support. Zero disables snapping.
     /// Gameplay can enable this while previously grounded and disable it in air.
@@ -51,7 +52,7 @@ impl GroundedSlideOptions2d {
 pub struct GroundedSlideMotion2d {
     /// Complete displacement, including any accepted downward snap.
     pub translation: [f32; 2],
-    /// Unmodified geometric slide result; its translation excludes the snap.
+    /// Slope-limited slide result; its translation excludes the snap.
     pub slide: SlideMotion2d,
     /// Downward support query at the slide endpoint, before any snap.
     /// Steep hits remain visible even though they never cause snapping.

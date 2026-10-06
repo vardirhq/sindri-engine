@@ -926,5 +926,13 @@ accepted only for walkable support. Upward requests and initial penetration
 suppress snapping and grounded state. The result separates slide motion, support,
 snap and total translation; gameplay applies total translation once and owns
 prior support state. Native tests exercise landing, ledges, blocked ascent,
-repeated support and downhill snapping. Slope motion limits, steps, platforms,
+repeated support and downhill snapping. Steps, platforms,
 one-way policy and scene/editor/Decay/platformer proof remain open.
+
+Grounded sliding also enforces `max_slope_angle`: upward-facing steep contacts
+cannot create rise beyond the positive remaining request. Horizontal approaches
+stop at steep slopes; explicit jumps can slide with bounded rise and steep descent
+remains possible without support or snap. Walkable slopes, vertical walls and
+ceilings keep geometric projection. Motion and support share the slope tolerance;
+ordinary `move_and_slide` remains unrestricted. No gameplay gravity or constant
+slope speed is supplied. See the character contract and native slope regressions.

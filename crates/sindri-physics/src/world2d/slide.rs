@@ -4,6 +4,7 @@ use rapier2d::parry::query::{self, ShapeCastOptions};
 use rapier2d::parry::shape::Shape;
 use sindri_core::EntityId;
 
+use super::slope::SlopeLimit2d;
 use super::sweep::{query_pose, query_shape};
 use super::{PhysicsWorld2d, r2};
 use crate::validate::finite2;
@@ -11,6 +12,16 @@ use crate::{
     ColliderShape2d, PhysicsError, PhysicsPose2d, RaycastFilter2d, ShapeHit2d, SlideMotion2d,
     SlideOptions2d,
 };
+
+/// Shared inputs keep geometric and grounded movement on one sweep path.
+#[derive(Clone, Copy)]
+pub(super) struct SlideRequest2d {
+    pub shape: ColliderShape2d,
+    pub pose: PhysicsPose2d,
+    pub displacement: [f32; 2],
+    pub options: SlideOptions2d,
+    pub filter: RaycastFilter2d,
+}
 
 impl PhysicsWorld2d {
     /// Computes swept movement, removing only motion into each touched surface.
@@ -48,8 +59,34 @@ impl PhysicsWorld2d {
         displacement: [f32; 2],
         options: SlideOptions2d,
         filter: RaycastFilter2d,
+        include: impl FnMut(EntityId) -> bool,
+    ) -> Result<SlideMotion2d, PhysicsError> {
+        self.slide_with_policy(
+            SlideRequest2d {
+                shape,
+                pose,
+                displacement,
+                options,
+                filter,
+            },
+            None,
+            include,
+        )
+    }
+
+    pub(super) fn slide_with_policy(
+        &self,
+        request: SlideRequest2d,
+        slope: Option<SlopeLimit2d>,
         mut include: impl FnMut(EntityId) -> bool,
     ) -> Result<SlideMotion2d, PhysicsError> {
+        let SlideRequest2d {
+            shape,
+            pose,
+            displacement,
+            options,
+            filter,
+        } = request;
         let probe = query_shape(shape)?;
         let mut at = query_pose(pose)?;
         options.validate()?;
@@ -100,7 +137,11 @@ impl PhysicsWorld2d {
             at.translation += direction * hit.distance;
             remaining -= direction * hit.distance;
             let normal = r2::Vector::new(hit.normal[0], hit.normal[1]);
-            remaining -= normal * remaining.dot(normal).min(0.0);
+            remaining = if let Some(slope) = slope {
+                slope.project(remaining, normal)
+            } else {
+                remaining - normal * remaining.dot(normal).min(0.0)
+            };
             result.collisions.push(hit);
         }
         let translation = at.translation - start;

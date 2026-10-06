@@ -1,7 +1,8 @@
 # Character movement
 
-Status: geometric sweep/slide, ground probing and optional grounded snapping
-implemented; full character movement acceptance remains open in `physics-update.md`. Added for the platformer genre
+Status: geometric sweep/slide, ground probing, grounded snapping and slope
+limits implemented; full character movement acceptance remains open in
+`physics-update.md`. Added for the platformer genre
 showcase, which has not yet adopted it. No game proof is claimed for this slice.
 
 ## Ownership
@@ -113,7 +114,7 @@ snap and reports ungrounded, even if a ceiling blocks ascent or touching support
 is still visible. Initial penetration likewise blocks snapping and grounding.
 
 `GroundedSlideMotion2d.translation` is the full proposal to apply once.
-`slide` retains the unmodified geometric result, including its unsatisfied
+`slide` retains the slope-limited sweep result, including its unsatisfied
 movement and budget flags. `snap_translation` is the additional downward motion;
 `ground` is the support query at the slide endpoint before snapping, so its hit
 distance describes that extra travel. `grounded` means the proposed endpoint
@@ -128,14 +129,41 @@ supply coyote time, jump buffering or persistent state. Arbitrary up and fixed
 probe rotation are supported. Ordinary shape casts and one-way geometry retain
 their existing contracts; this is not yet the full controller.
 
+## Implemented slope movement limits
+
+Grounded movement uses `max_slope_angle` for both support and sliding. The
+geometric `move_and_slide` query retains its unrestricted tangent projection;
+both paths share one sweep implementation. Slope classification shares the same
+0.0001 cosine tolerance with ground probing, including the configured boundary.
+
+On an upward-facing, unwalkable contact, the remaining tangent cannot gain rise
+beyond the positive upward component of the remaining request. A horizontal or
+downward request cannot turn into an uphill climb. An explicit jump can still
+slide along the incline, with its rise capped to what was requested. Scaling the
+tangent preserves separation from the surface; removing just its upward component
+would point back into the slope. Motion blocked by this policy is discarded, like
+blocked normal motion, and does not count as exhausted iterations.
+
+Walkable inclines use the geometric projection, which reduces displacement when
+approaching a surface; this API does not maintain constant speed along slopes.
+Downward sliding on a steep incline remains possible, but the surface cannot grant
+grounding or snap. Downhill following of walkable support uses the caller's
+optional snap distance; requests that leave its reach become airborne. Vertical
+walls and ceilings retain ordinary sliding. No autonomous gravity or downhill
+acceleration is applied. Up is world-space and independent of probe rotation.
+
+This is a general geometric policy added for the platformer, which has not yet
+adopted the controller. It does not make the engine/editor/Decay/game acceptance
+complete. One-way support, steps and moving-platform behavior remain open.
+
 ## Remaining slices
 
 The foundation sees one-way geometry on both sides, just like geometric queries.
 The full controller must incorporate support-side policy and timed drop-through,
 not interpret this primitive as a finished one-way movement API.
 
-Remaining engine work includes uphill/downhill movement limits, step height
-and clearance, ceilings and moving-platform displacement. Platform riding must use synchronized
+Remaining engine work includes step height and clearance, ceiling/step
+interactions and moving-platform displacement. Platform riding must use synchronized
 poses and avoid counting platform movement twice. Tests must exercise the
 one-way/drop-through interactions and initial-overlap/budget outcomes together.
 
@@ -165,3 +193,8 @@ ceiling requests, descending walkable slopes, steep rejection, initial overlap,
 arbitrary up with a rotated capsule, shared filters/predicates, immediate pose
 changes/removal, budget exhaustion, read-only results and invalid/overflowing
 inputs. Zero-travel support tests bound the numerical skin allowance.
+
+Slope movement tests cover walkable and steep ascent, the configured angle
+boundary and changed limits, explicit jump rise, negative vertical requests,
+steep descent and walkable downhill snap, walls/ceilings, mirrored capsule and
+rotated box/up, filtering, read-only state and unchanged geometric sliding.
