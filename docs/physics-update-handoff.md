@@ -84,10 +84,27 @@ observation from `game/tests/character_controller.decay`. Browser log/capture:
 `/tmp/sindri-character-api-browser.log` and `-browser.png`; fixture/export:
 `/tmp/sindri-character-api-project` and `-export`. The prior refactoring head
 `3842bac5` passed all CI; the newly pushed API head requires verification.
-Continue with checked editor component authoring/undo/Play, platformer controller
-adoption and native/browser game proof. The platformer's dynamic hero is unchanged.
-Character acceptance remains unchecked. Accelerated queries, 3D/voxel physics
-and final integration follow; gameplay world snapshots remain a separate gap.
+The platformer adoption checkpoint now replaces its dynamic hero with authored
+Character 2D and a ground-filtered capsule probe. Separate capsule/foot sensors
+preserve pickups; the dynamic crate retains authored and typed CCD plus contact
+impulse proof. Hero owns velocity/gravity in Decay and uses queued displacement
+and cached support; respawn cancels movement/drop state. Three new gameplay tests
+cover variable jump height, acceleration/braking and respawn, while the existing
+flag/coin/no-fall, one-way and joint/material/crate tests remain passing.
+Scoped preflight passed all 29 platformer tests and both changed scripts with
+zero errors/reminders. Native warning-denied check/Clippy, all-target/all-feature
+WASM, formatting and file-size gates passed. Chromium fetched 25 assets and drew
+the exported game; keyboard right/jump standing/airborne captures were reviewed.
+Artifacts: `/tmp/sindri-platformer-controller-{preflight,clippy,wasm,browser}.log`,
+`/tmp/sindri-platformer-controller-{standing,jump,browser}.png`, export directory
+`/tmp/sindri-platformer-controller-export`. The browser host binaries are from
+`ce493275` (this checkpoint changes only game assets/tests/docs).
+Continue with checked editor component authoring/undo/Play and authored game
+slope/step/platform-carry proof. Browser delivery/input passed; a browser run to
+the goal remains open. Character acceptance stays unchecked. Accelerated queries,
+3D/voxel physics and final integration follow. Gameplay snapshots remain absent.
+The API head's checks have no failures; test/render CI was still running at the
+last inspection. Inspect every failed job if either head later fails.
 
 CCD, one-way platforms, **forces and rotation**, **contact snapshots**, and
 **reusable physics materials** are implemented in this PR. The checklist in `physics-update.md` is current.

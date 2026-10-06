@@ -901,3 +901,31 @@ surface-specific completeness. This checklist does not mark those surfaces done.
   editor authoring/undo/Play and real platformer/native/browser proof remain.
   Character acceptance is still unchecked; the platformer retains its dynamic
   hero. Prior refactoring head `3842bac5` is green in CI; the new head is pending.
+
+
+### Platformer controller-adoption checkpoint
+
+- The real Hero script now integrates velocity/gravity, queues character
+  displacement and reads walkable support instead of solver velocity/contacts.
+  Input, coyote time, jump buffering, variable jump height and drop policy remain
+  in Decay. Respawn clears script velocity and pending movement/drop state.
+- The authored hero has Character 2D and one ground-filtered capsule probe.
+  Separate body/foot sensors preserve the previous coin/flag pickup volume;
+  the ground mask preserves passage past the dynamic crate. The crate retains
+  authored/typed CCD and contact-impulse gameplay proof.
+- Scoped preflight passed 29 native platformer tests, including the existing
+  no-fall run to the flag with coins, one-way jump/drop/underside and every joint,
+  material and crate regression. Three new tests cover short/held jumps,
+  acceleration/braking and respawn. Both changed scripts passed typed preflight
+  with zero errors/runtime-contract reminders. Warning-denied native checks,
+  Clippy, all-target/all-feature WASM, formatting and file-size gates passed.
+- Real Chromium loaded the exported game under `/examples/platformer/`, fetched
+  25 assets, configured a 960×540 WebGPU canvas and drew the level. Keyboard
+  right/jump captures show the hero moving and rising from the starting floor;
+  no browser/script/GPU errors occurred. Native project capture also passed
+  and its rendered level was reviewed. This is delivery/input evidence, not
+  a browser run to the goal.
+- Added for the platformer genre showcase. Checked editor authoring/undo/Play,
+  authored game slope/step/platform-carry proof and browser goal proof remain
+  open; character acceptance stays unchecked. No dependencies, host API or
+  generated catalogue changes. Final-head CI must verify this checkpoint.

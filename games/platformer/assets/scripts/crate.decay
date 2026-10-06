@@ -4,6 +4,7 @@ script Crate {
     var impact_flash: f32 = 0.0;
     var flash: Entity = null;
     fn start() {
+        Physics.set_continuous_collision(this.entity, true);
         this.flash = World.find("Crate impact flash");
         Physics.set_angular_velocity(this.entity, 0.0);
     }

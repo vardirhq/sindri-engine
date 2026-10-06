@@ -1389,26 +1389,6 @@
           "playing": "idle",
           "speed": 1.0
         },
-        "sindri.physics2d.rigid_body": {
-          "kind": "dynamic",
-          "pose": {
-            "position": [
-              0,
-              0
-            ],
-            "rotation": 0
-          },
-          "linear_velocity": [
-            0,
-            0
-          ],
-          "angular_velocity": 0,
-          "gravity_scale": 1.0,
-          "linear_damping": 0,
-          "angular_damping": 0,
-          "lock_rotation": true,
-          "continuous_collision": true
-        },
         "sindri.physics2d.collider": {
           "pieces": [
             {
@@ -1425,7 +1405,7 @@
               "sensor": false,
               "layers": {
                 "memberships": 2,
-                "filter": 4294967295
+                "filter": 1
               },
               "friction": 0.0,
               "restitution": 0.0
@@ -1450,6 +1430,25 @@
               },
               "friction": 0.0,
               "restitution": 0.0
+            },
+            {
+              "shape": {
+                "shape": "capsule",
+                "half_height": 0.16,
+                "radius": 0.3
+              },
+              "offset": [
+                0.0,
+                -0.04
+              ],
+              "rotation": 0.0,
+              "sensor": true,
+              "layers": {
+                "memberships": 2,
+                "filter": 4294967295
+              },
+              "friction": 0.0,
+              "restitution": 0.0
             }
           ]
         },
@@ -1462,6 +1461,18 @@
           "source": "scripts/hero.decay",
           "script": "Hero",
           "properties": {}
+        },
+        "sindri.physics2d.character": {
+          "skin": 0.01,
+          "max_iterations": 8,
+          "up": [
+            0.0,
+            1.0
+          ],
+          "max_slope_angle": 0.7853982,
+          "snap_distance": 0.2,
+          "step_height": 0.3,
+          "carry_platforms": true
         }
       }
     },

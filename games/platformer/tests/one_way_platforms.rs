@@ -77,10 +77,11 @@ fn underside_sensor_overlap_does_not_grant_a_jump() {
             .iter()
             .any(|event| (event.first == hero && event.second == planks)
                 || (event.first == planks && event.second == hero)),
-        "the foot sensor really overlaps the plank"
+        "a pickup sensor really overlaps the plank"
     );
+    step(&mut run);
     assert!(
-        run.physics.world().linear_velocity(hero).unwrap()[1] < 0.0,
+        run.position(hero)[1] < 5.8,
         "overlapping the underside never grants jump permission"
     );
 }

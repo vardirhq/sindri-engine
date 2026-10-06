@@ -43,7 +43,14 @@ fn the_hero_stands_on_the_painted_ground() {
     for _ in 0..90 {
         step(&mut run);
     }
-    assert!(run.physics.world().continuous_collision(hero).unwrap());
+    assert!(run.physics.character_motion(hero).unwrap().grounded);
+    let crate_entity = run.entity("wind-crate").unwrap();
+    assert!(
+        run.physics
+            .world()
+            .continuous_collision(crate_entity)
+            .unwrap()
+    );
     let [x, y] = run.position(hero);
     // The first field's surface is at y = 3, and the hero's feet are half a
     // unit below its middle.
@@ -76,9 +83,8 @@ fn a_player_running_and_jumping_reaches_the_flag() {
         let [x, y] = run.position(hero);
         let settled = run
             .physics
-            .world()
-            .linear_velocity(hero)
-            .is_ok_and(|velocity| velocity[1].abs() < 0.05);
+            .character_motion(hero)
+            .is_some_and(|motion| motion.grounded);
         #[allow(clippy::cast_possible_truncation)]
         let column = (x - corner[0]).floor() as i32;
         let feet = y - 0.5;

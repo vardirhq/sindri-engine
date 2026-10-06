@@ -270,8 +270,9 @@ fixed dt. Solver manifolds supply solved impulses. Ordering is deterministic
 by entity, point, normal and impulses. Sensors are excluded; sleeping support
 remains with zero new impulse/force. Runtime teleports and removals invalidate
 contacts, and Decay filters inactive/despawned others. Spawn-window queries are
-empty; missing bodies/physics fail. Platformer's hero grounds from support
-contacts, keeping its ray for clearance, and the crate flashes on a hard landing.
+empty; missing bodies/physics fail. The platformer's crate flashes on a hard
+landing; its hero now grounds from controller results while keeping its ray
+for clearance.
 This is a general capability added for that genre showcase. Native regressions
 cover momentum/force balance, compound pieces, snapshot copies, lifecycle,
 ordering and sleeping support. Browser interaction/editor Play inspection remain
@@ -2077,8 +2078,9 @@ joints; scene synchronization does not rebuild a body for CCD-only edits.
 Typed Decay controls support newly spawned bodies before synchronization.
 `crates/sindri-physics/tests/continuous_collision.rs` compares a fast bullet
 against a thin kinematic wall with a discrete control; the bridge regression
-exercises the spawn window and undo. The platformer hero opts in and its native
-run-to-flag passes. Scoped native, Clippy, WASM and catalogue checks passed.
+exercises the spawn window and undo. The platformer wind crate opts in through
+its authored body and Decay start control; its launch/rotation and the native
+run-to-flag remain checked. Scoped native, Clippy, WASM and catalogue checks passed.
 Visual inspector and real browser verification remain in final integration.
 Sensors stay discrete; bullet-versus-bullet CCD is not guaranteed.
 
@@ -2374,11 +2376,12 @@ tilemap and made solid by a Tilemap Collider 2D, a hero who runs and jumps, ten
 coins and a flag, a HUD, and a camera that follows. It has no Rust of its own;
 the scene and its Decay scripts are the game, and it exports to the site.
 
-**Its hero is a dynamic body driven by velocity.** A capsule collider with
-zero friction and a foot sensor under it for pickups. Decay grants standing
-from solved solid contacts with upward push normals below the hero, so walls,
-ceilings and one-way undersides never count as floor. It gives the
-jump the two forgivenesses players expect, a buffer for a press just before
+**Its hero uses the scene-owned Character 2D controller.** Decay integrates
+velocity and gravity, queues displacement and reads cached walkable support.
+One capsule probe checks ground obstacles; body and foot sensors preserve
+pickups independently. Walls, ceilings and one-way undersides never grant
+standing. It gives the jump the two forgivenesses players expect, a buffer
+for a press just before
 landing and coyote time for one just after running off a ledge. Letting go
 early cuts the rise short.
 
@@ -2395,7 +2398,7 @@ holds the camera to following it inside the level.
 
 ### Not yet
 
-- No enemies, hazards or one-way platforms; the plank tile waits on the last.
+- No enemies or hazards; raised one-way planks support jumping and timed drop-through.
 - No level after the first, no pause and no restart without Stop.
 - No site card or captured screenshot yet; the showcase library adds them.
 
@@ -2685,6 +2688,9 @@ and shared-session regressions exercise previous-pass reads, replacement, copied
 fields/lists, platform carry, filtering, drop/cancellation and physics-only hosts.
 A rebuilt Chromium export of the shared-session fixture runs queued movement,
 observes grounded/copied results and renders the controller above its floor.
-Editor interaction and real platformer adoption/native/browser game proof remain
-open; the platformer still uses its dynamic-body hero. This is the scene foundation for
-that showcase, not completed character acceptance.
+The platformer now adopts the controller through its real Hero script: native
+regressions reach the flag with coins and no falls, traverse/drop through planks,
+and exercise variable jump height, acceleration/braking and respawn. The dynamic
+crate retains CCD and contact-impulse proof. Checked editor authoring/undo/Play
+and game slope/step/platform-carry proof remain open; character acceptance stays
+partial. Browser delivery evidence is recorded in the physics checkpoint.

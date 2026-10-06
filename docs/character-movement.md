@@ -393,18 +393,21 @@ session regression exercises the same context the exported game uses. A rebuilt
 Chromium export at `/examples/character-api/` runs that fixture script, observes
 queued movement and grounded results, verifies snapshot edits leave the cache
 intact and renders the controller above its solid floor. This API
-is added generally for platformer adoption; its dynamic-body hero has not yet
-been migrated and full game acceptance remains open.
+is added generally for platformer adoption. Its Hero script now integrates
+gravity and velocity, queues movement and grounds from cached support. One
+ground-filtered solid capsule supplies the probe, while separate body/foot
+sensors preserve pickups. Native runs reach the flag with coins and no falls,
+traverse/drop through one-way planks, and check variable jump height, braking
+and respawn. The dynamic crate retains CCD and contact-impulse proof.
 
 ## Remaining slices
 
-Checked editor authoring/undo and a real platformer scripted run must prove
-the capability vertically. Typed requests/results and shared host context are
-implemented; editor Play interaction and game/browser adoption remain open.
-The platformer's
-current dynamic-body hero is retained until that integration is ready; coyote
-time, jump buffering and player input remain gameplay policy in Decay.
-Native and real browser proof are required before checking character acceptance.
+Checked editor authoring/undo/Play and real-game slope, step and moving-platform
+carry proof remain open. Typed requests/results, shared host context and native
+platformer adoption are implemented; coyote time, jump buffering and player input
+remain gameplay policy in Decay. Browser delivery checks exercise the exported
+game, but a browser run to the goal is still required alongside these remaining
+slices before checking character acceptance.
 
 ## Foundation evidence
 

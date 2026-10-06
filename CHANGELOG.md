@@ -1,5 +1,7 @@
 # Changelog
 
+- Move the platformer hero to the scene-owned Character 2D controller. Decay retains movement, gravity and jump policy; separate sensors preserve coin/flag pickups and timed drop-through still reaches ordinary floors. The dynamic crate retains CCD and contact-impulse proof. Editor interaction and game slope/step/platform-carry acceptance remain open.
+
 - Add typed Decay character displacement requests and copied optional motion/support/carry snapshots. Shared runtime/editor Play offer scene controller context; character drop-through uses the scene timer while dynamic-body hosts retain their solver API. Invalid input preserves queued requests. Platformer controller adoption and editor/game proof remain open.
 
 - Add scene-owned 2D controllers with validated settings, queued displacement/snap input, timed drop-through and synchronized platform snapshots. Movement applies once after the solve; collider response and discrete sensors observe it at the next solve. Editor/Decay/platformer proof remains open.

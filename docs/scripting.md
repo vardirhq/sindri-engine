@@ -1087,7 +1087,7 @@ or its authored setting before a newly spawned body is synchronized.
 `Physics.set_continuous_collision(entity, enabled) -> unit` requires an authored
 dynamic body and updates its live state and runtime payload without replacing
 it. Velocity, joints and contacts survive CCD-only edits. Hosts without physics
-and missing authored bodies report errors. The platformer hero uses this control.
+and missing authored bodies report errors. The platformer wind crate uses this control.
 Sensors stay discrete; swept bullet-versus-bullet collision is not guaranteed.
 
 This is **Sindri physics, never Rapier**. `docs/physics.md` makes the backend a

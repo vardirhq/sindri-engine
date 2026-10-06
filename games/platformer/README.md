@@ -59,9 +59,10 @@ It uses, with no Rust of its own:
 
 - a **tilemap** painted in the editor, made solid by a **Tilemap Collider 2D**,
   with grass tufts left passable;
-- the scene's own **gravity**, from a **Physics 2D World**;
-- a **dynamic body** with a capsule collider and a **foot sensor** for pickups, plus
-  **solid support contacts** for standing so plank undersides never grant a jump;
+- the scene's own **gravity**, from a **Physics 2D World**, for the dynamic crate;
+- a **Character 2D** controller with one ground-filtered capsule probe and
+  separate body/foot pickup sensors; **controller support** grants standing so
+  plank undersides never grant a jump; Decay owns velocity, gravity and jump policy;
 - visible **one-way planks** with local support normals and timed drop-through;
 - **sprite animation** clips for idle, run, jump and fall;
 - **keyboard, gamepad and touch input** through one movement path, including

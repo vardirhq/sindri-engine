@@ -204,10 +204,10 @@ Script updates observe the preceding fixed solve, as they do collision events.
 Scene transforms synchronize at the next step, so a script teleport is reflected
 in snapshots after synchronization, not midway through a script pass.
 
-This capability is added for the platformer genre showcase: the hero uses solved
-support normals for jump permission, keeping its geometric ray for HUD clearance;
-the wind crate flashes amber on a hard landing based on normal impulse. Gameplay
-policy and thresholds remain in Decay. Browser interaction and editor Play
+This capability is added for the platformer genre showcase: the wind crate
+flashes amber on a hard landing based on normal impulse. The hero now uses
+controller support for jump permission and a geometric ray for HUD clearance.
+Gameplay policy and thresholds remain in Decay. Browser interaction and editor Play
 inspection remain in final integration.
 
 ### Colliders
