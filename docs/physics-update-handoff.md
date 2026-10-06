@@ -41,7 +41,19 @@ dynamic-body drop timers retain their separate contracts.
 One-way checkpoint validation passed 146 native physics tests, warning-denied
 Clippy, all-target/all-feature WASM, eleven catalogue tests and size/format gates.
 Prior carry head `c4309a77` is green in CI; the next pushed head needs verification.
-Continue with scene/editor/Decay/platformer integration and native/browser proof.
+Scene ownership now derives stationary kinematic controller bodies from a
+validated Character 2D component and one solid collider, plus optional sensors.
+Runtime requests queue displacement/snap and timed drop-through. Fresh support
+is seeded before solving; controller movement uses current solved platform poses
+and writes back once, with cache invalidation on lifecycle/parent/structural edits.
+`for_scripts_with_characters` supplies disjoint queue/result borrows for the next
+host slice. Controller motion reaches solver response/sensors at the next solve;
+compound probes and swept triggers remain explicit gaps.
+Scene ownership validation passed 475 native scene tests (24 controller
+regressions), warning-denied Clippy, all-target/all-feature WASM, eleven catalogue
+tests and regenerated component metadata. Prior one-way head `5597ce44` is green
+in CI; the new pushed checkpoint requires CI verification.
+Continue with checked editor/typed Decay/platformer integration and native/browser proof.
 Character acceptance remains unchecked. Accelerated queries, 3D/voxel physics
 and final integration follow; gameplay world snapshots remain a separate gap.
 

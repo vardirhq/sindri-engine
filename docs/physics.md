@@ -744,9 +744,16 @@ The fixed-update order for the first slice is:
 1. apply deferred/checkable gameplay writes;
 2. synchronize static/kinematic authored state into physics;
 3. step physics with the engine fixed `dt`;
-4. synchronize dynamic/velocity-driven results back to `World`;
-5. publish normalized collision/sensor events;
-6. run consumers that are defined to observe post-physics events.
+4. apply queued controller sweep/slide against current solved poses;
+5. synchronize dynamic/velocity-driven/controller results back to `World`;
+6. publish normalized collision/sensor events;
+7. run consumers that are defined to observe post-physics events.
+
+Controller velocity is held at zero and fresh support is seeded after
+synchronization, before the solve. Controller movement updates its collider
+pose after the solve, so solid response and discrete sensor events observe that
+move at the following solve; same-step response and swept controller triggers
+remain absent. Scenes without controllers retain their existing behavior.
 
 The exact system-ordering API is still an open roadmap item, so physics must not
 quietly invent a general scheduler. Its ordering is documented as part of the
@@ -927,7 +934,8 @@ suppress snapping and grounded state. The result separates slide motion, support
 snap and total translation; gameplay applies total translation once and owns
 prior support state. Native tests exercise landing, ledges, blocked ascent,
 repeated support and downhill snapping.
-One-way controller policy and scene/editor/Decay/platformer proof remain open.
+One-way controller policy and scene ownership are now implemented; checked
+editor/Decay/platformer proof remain open.
 
 Grounded sliding also enforces `max_slope_angle`: upward-facing steep contacts
 cannot create rise beyond the positive remaining request. Horizontal approaches
@@ -958,3 +966,20 @@ for grounding changes, teleports or structural edits and avoid additional parent
 solver motion. Wall clipping and ceiling crush remain explicit. Rotation follows
 a chord with fixed probe orientation, not an arc/orientation sweep. See the
 character contract for ordering, limitations and native kinematic/geometry tests.
+
+
+Grounded controller phases now respect per-piece one-way support sides/cones;
+request-scoped `drop_through` ignores only one-way solids while ordinary geometric
+queries remain two-sided. Scene-authored `sindri.physics2d.character` owns one
+solid collider probe (additional sensors allowed) and derives a stationary
+kinematic body, rejecting simultaneous rigid-body ownership. Runtime
+`CharacterRequests2d` queues displacement/snap permission and timed drop-through;
+`ScenePhysics2d` seeds fresh support, captures synchronized poses, applies movement
+once and exposes cached results through `character_motion`/`CharacterMotions2d`.
+Settings, parenting, teleports, removal and structural edits clear old state;
+positive drop remainders cover a whole pass and decrement afterward. Saved
+component data contains settings, never input queues or runtime support handles.
+No game rules are supplied. See the character contract for frame ordering,
+query masks, transform semantics, sensor timing and remaining editor/Decay/game
+integration. Compound character probes, same-step solver response and swept
+controller triggers remain absent.

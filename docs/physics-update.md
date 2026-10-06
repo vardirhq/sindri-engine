@@ -842,3 +842,34 @@ surface-specific completeness. This checklist does not mark those surfaces done.
   Character acceptance stays unchecked: scene/editor/Decay/platformer integration
   with native and real-browser game proof remains open. Prior carry head
   `c4309a77` is green in CI; CI must verify this checkpoint after pushing.
+
+### Scene character ownership checkpoint
+
+- Added validated `sindri.physics2d.character` settings using one solid authored
+  collider probe, plus optional sensors. Scene synchronization derives a
+  stationary kinematic body and rejects competing rigid-body ownership, missing
+  transforms and compound solids. No game input/gravity/jump rules are added.
+- Runtime requests replace displacement/snap input per fixed step and maintain
+  simulation-time drop-through. Missing/inactive requests are discarded;
+  spawning, pause, invalid timesteps, cancellation and lifecycle resets have
+  explicit contracts. Saved settings retain unknown fields without runtime
+  requests, timers, support handles or cached results.
+- Fresh support is seeded before the solve; controllers use actual current
+  platform poses afterward, apply motion once and write back in parent space.
+  Teleports, settings/parent changes, removal and structural edits clear old
+  snapshots. Fresh support after rebuilds carries only the new step's motion.
+  `character_motion` and disjoint script borrows expose cached results and the
+  queue for the forthcoming typed host surface.
+- Twenty-four native regressions cover first-step vertical carry, current
+  translation/rotation, parented riders, body/probe offsets, request replacement,
+  snapping/ascent, timed drop to ordinary floors, lifecycle/slot reuse, direct
+  teleports, saved data and next-solve sensor processing.
+- Scoped preflight passed 475 native scene tests, warning-denied all-target/
+  all-feature checks and formatting/file-size gates (1,142 Rust files). Scene
+  Clippy, all-target/all-feature WASM and eleven catalogue tests passed; generated
+  component metadata was regenerated. No dependencies or Decay host calls change.
+- Controller motion reaches solver response and discrete sensors at the next
+  solve. Same-step response, compound solid probes and swept controller triggers
+  remain absent and have explicit parity rows. Added for platformer adoption;
+  checked editor/Decay/game/native/browser proof and character acceptance remain
+  open. Prior one-way head `5597ce44` is green in CI; CI must verify the new head.

@@ -1,5 +1,6 @@
 # Changelog
 
+- Add scene-owned 2D controllers with validated settings, queued displacement/snap input, timed drop-through and synchronized platform snapshots. Movement applies once after the solve; collider response and discrete sensors observe it at the next solve. Editor/Decay/platformer proof remains open.
 - Grounded 2D movement now respects one-way support sides and cones across sliding, snapping, steps and platform carry. Request-scoped drop-through ignores only one-way solids; the host owns duration. Ordinary geometric queries stay two-sided; editor/Decay/platformer integration remains open.
 - Add opt-in synchronized platform carry to grounded 2D movement. Previous support is verified, translation and rotation-point motion are swept before character movement, and carry collisions/current pose are returned separately. Hosts retain snapshot ownership; one-way controller and editor/Decay/game integration remain in progress.
 - Add opt-in grounded 2D steps with lift/forward/landing clearance, walkable support and exact fallback on rejection. Refine movement cast normals to prevent artificial hops on flat box faces. Moving platforms, one-way controller policy and editor/Decay/game integration remain in progress.

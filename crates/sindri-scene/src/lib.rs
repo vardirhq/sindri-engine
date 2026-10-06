@@ -10,6 +10,7 @@ mod animation;
 mod audio;
 mod camera_control;
 mod camera_math;
+mod characters;
 mod collision_outline;
 mod components;
 pub(crate) mod effects;
@@ -40,6 +41,7 @@ pub use camera_control::{
     set_camera_orthographic_size, set_camera_shake, set_camera_smoothing,
 };
 pub use camera_math::camera_rotation_from_look_at;
+pub use characters::{Character2dComponent, CharacterMotions2d, CharacterRequests2d};
 pub use collision_outline::{CollisionShapes, collision_shapes};
 pub use components::{
     BiomeDocument, CameraBehaviorComponent, CameraBounds, CameraComponent, CameraFit, CameraFollow,

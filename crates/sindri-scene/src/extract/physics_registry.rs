@@ -84,6 +84,12 @@ pub(super) fn register(components: &mut ComponentSchemaRegistry) -> Result<(), S
         ("first", FieldMeaning::Entity),
         ("second", FieldMeaning::Entity),
     ])?;
+    components.register_with_default::<crate::Character2dComponent>(
+        "Character 2D",
+        serde_json::json!({"skin": 0.01, "max_iterations": 8, "up": [0.0, 1.0],
+            "max_slope_angle": std::f32::consts::FRAC_PI_4, "snap_distance": 0.0,
+            "step_height": 0.0, "carry_platforms": true}),
+    )?;
     register_hinge(components)?;
     register_linear_joints(components)?;
     Ok(())

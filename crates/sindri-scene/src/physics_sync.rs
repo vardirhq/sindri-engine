@@ -37,6 +37,8 @@ const MOVED: f32 = 1.0e-4;
 
 #[derive(Debug, Error)]
 pub enum PhysicsSyncError {
+    #[error("character entity {0:?}: {1}")]
+    InvalidCharacter(EntityId, &'static str),
     #[error("joint entity {0:?} has more than one joint component")]
     ConflictingJointComponents(EntityId),
     #[error("a fixed step cannot be {0:?} long")]
@@ -78,6 +80,7 @@ pub struct ScenePhysics2d {
     host_gravity: [f32; 2],
     materials: crate::PhysicsMaterialSources,
     joints: crate::physics_joints::SceneJoints2d,
+    characters: crate::characters::SceneCharacters2d,
 }
 
 /// What a scene said about one entity, as far as physics is concerned.
@@ -108,6 +111,7 @@ impl ScenePhysics2d {
             host_gravity: gravity,
             materials: crate::PhysicsMaterialSources::default(),
             joints: crate::physics_joints::SceneJoints2d::default(),
+            characters: crate::characters::SceneCharacters2d::default(),
         })
     }
 
@@ -132,6 +136,19 @@ impl ScenePhysics2d {
         self.materials = materials;
     }
 
+    /// Runtime controller input queue; requests are consumed by the next fixed step.
+    pub fn character_requests(&mut self) -> &mut crate::CharacterRequests2d {
+        &mut self.characters.requests
+    }
+
+    /// Last applied controller proposal, absent before synchronization or after invalidation.
+    pub fn character_motion(
+        &self,
+        entity: EntityId,
+    ) -> Option<&sindri_physics::GroundedSlideMotion2d> {
+        self.characters.motion(entity)
+    }
+
     /// What collided during the last step, in the order the backend reported.
     pub fn events(&self) -> &[PhysicsEvent2d] {
         &self.events
@@ -145,6 +162,20 @@ impl ScenePhysics2d {
     /// have to work around.
     pub const fn for_scripts(&mut self) -> (&mut PhysicsWorld2d, &[PhysicsEvent2d]) {
         (&mut self.world, self.events.as_slice())
+    }
+
+    /// Disjoint script borrows for physics and the scene-owned controller runtime.
+    /// Existing hosts can retain [`Self::for_scripts`] until they expose controllers.
+    pub fn for_scripts_with_characters(
+        &mut self,
+    ) -> (
+        &mut PhysicsWorld2d,
+        &[PhysicsEvent2d],
+        &mut crate::CharacterRequests2d,
+        crate::CharacterMotions2d<'_>,
+    ) {
+        let (requests, motions) = self.characters.for_scripts();
+        (&mut self.world, &self.events, requests, motions)
     }
 
     /// One fixed update: author state in, step, results out.
@@ -181,7 +212,9 @@ impl ScenePhysics2d {
         // so the coming fixed step sees the intended chain rather than one frame
         // of independent pieces.
         self.world.finish_synchronize()?;
+        self.characters.hold(world, &mut self.world)?;
         self.events = self.world.step(delta)?;
+        self.characters.apply(world, &mut self.world, delta)?;
         self.write_back(world);
         Ok(())
     }
@@ -198,7 +231,9 @@ impl ScenePhysics2d {
         components: &ComponentSchemaRegistry,
     ) -> Result<(), PhysicsSyncError> {
         let mut live = BTreeSet::new();
-        for (entity, mut collider) in collider_pieces(world, components)? {
+        let pieces = collider_pieces(world, components)?;
+        self.characters.prepare(world, components, &pieces)?;
+        for (entity, mut collider) in pieces {
             if let Some(material) =
                 components.get::<crate::PhysicsMaterial2dComponent>(world, entity)?
             {
@@ -208,6 +243,16 @@ impl ScenePhysics2d {
             let body = components
                 .get::<RigidBody2dComponent>(world, entity)?
                 .map(|authored| authored.0);
+            let body = if self.characters.contains(entity) {
+                Some(RigidBody2d {
+                    kind: RigidBodyKind::KinematicVelocity,
+                    gravity_scale: 0.0,
+                    lock_rotation: true,
+                    ..RigidBody2d::default()
+                })
+            } else {
+                body
+            };
             let authored = Authored {
                 body,
                 collider,
@@ -259,6 +304,7 @@ impl ScenePhysics2d {
             .collect();
         for entity in gone {
             self.world.remove(entity);
+            self.characters.invalidate(entity);
             self.registered.remove(&entity);
             self.agreed.remove(&entity);
         }
@@ -314,6 +360,7 @@ impl ScenePhysics2d {
             return Ok(true);
         }
         self.world.remove(entity);
+        self.characters.invalidate(entity);
         Ok(false)
     }
 
@@ -332,6 +379,7 @@ impl ScenePhysics2d {
                 || (agreed.rotation - now.rotation).abs() > MOVED
         });
         if moved {
+            self.characters.invalidate(entity);
             self.world.move_to(entity, now)?;
             self.agreed.insert(entity, now);
         }

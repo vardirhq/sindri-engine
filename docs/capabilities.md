@@ -2659,3 +2659,21 @@ exercise ascent/descent, rotated normals, deep/shallow overlap, snap, step landi
 and carry/drop interactions. Editor/Decay/game proof remain open. Rotation follows a chord with fixed probe
 orientation; continuous arc and rotating-probe sweeps remain absent.
 No platformer adoption is claimed.
+
+
+Scene controller ownership now registers validated `sindri.physics2d.character`
+settings beside the existing Collider 2D. It derives a stationary kinematic body,
+requires one solid probe and rejects a simultaneous rigid body; extra sensors,
+probe offsets/rotation and query masks are exercised. Runtime movement requests
+replace per-step input and specify snap permission; timed controller drop-through
+uses fixed simulation duration. Fresh support is seeded before the solve and
+current platform motion is carried afterward, with motion applied once and
+parent-relative writeback. Scene native tests cover spawning, first-step vertical
+carry, rotation, parented riders, teleports/rebuilds/inactivity/slot reuse, timers,
+request validation, cached script borrows and saved authored data.
+Controller queries/render transforms see the new pose immediately; solid response
+and discrete sensors process it at the next solve. Same-step response, physical
+push impulses, compound solid probes and swept controller triggers remain absent.
+Editor, typed Decay and real platformer/native/browser proof remain open; the
+platformer still uses its dynamic-body hero. This is the scene foundation for
+that showcase, not completed character acceptance.

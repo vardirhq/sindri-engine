@@ -1,8 +1,10 @@
 # Character movement
 
 Status: geometric sweep/slide, ground probing, grounded snapping, slope
-limits, optional steps, synchronized platform carry and one-way controller policy implemented; acceptance
-remains open in `physics-update.md`. Added for the platformer genre showcase, which has not yet adopted it. No game proof is claimed for this slice.
+limits, optional steps, synchronized platform carry, one-way controller policy
+and scene runtime ownership implemented; acceptance remains open in
+`physics-update.md`. Added for the platformer genre showcase, which has not yet
+adopted it. No game proof is claimed for this slice.
 
 ## Ownership
 
@@ -281,14 +283,73 @@ snap/drop to an ordinary floor, request cancellation, mixed solid/sensor pieces,
 step landing and carry interactions. This remains engine evidence for platformer
 adoption, with no editor/Decay/game proof yet.
 
+## Implemented scene ownership
+
+`sindri.physics2d.character` configures skin, iteration budget, up, slope angle,
+snap/step distances and `carry_platforms` (default true). Omitted settings use
+engine defaults and deserialize through the same validation. Add an ordinary
+Collider 2D with exactly one solid box/circle/capsule piece; additional sensors
+are allowed. The controller uses that piece's offset, rotation and filter mask,
+excludes its own whole entity and ignores inactive entities. Shape dimensions
+retain existing world-unit collider semantics; transform scale is not a second
+shape-size authoring path. Compound solid probes remain absent.
+
+The scene derives a stationary velocity-kinematic body for the controller.
+An authored rigid body on the same entity is a configuration error, as are a
+missing transform or an absent/multiple solid probe. Gameplay owns displacement,
+velocity, gravity and jumps; solver linear/angular velocity is zeroed before
+stepping so it cannot add a second movement. Input and runtime state are held
+beside `World`, never in serialized component fields. Saved settings and unknown
+payload fields survive reopening; pending motion, support handles, drop timers
+and result caches do not.
+
+`ScenePhysics2d::character_requests()` returns `CharacterRequests2d`:
+
+- `move_character(entity, displacement, snap)` queues world displacement for the
+  next fixed update; a later request replaces it. `snap` permits authored snap
+  for this request, while upward displacement always suppresses it.
+- `drop_through(entity, seconds)` replaces the controller's remaining simulation
+  duration; zero cancels. Any positive remainder covers the entire movement
+  pass and decrements afterward. Pause retains requests/timers; spawning starts
+  them when synchronized. Nonfinite, overflowing or negative request values are rejected
+  before replacing valid input. Missing, inactive and non-controller requests
+  are discarded at synchronization. An invalid timestep consumes nothing.
+
+No-request frames use zero displacement and enable snap only if the last result
+was grounded. Carry and support queries still run each fixed step. Settings,
+parenting, collider/body rebuilds and actor teleports invalidate cached state;
+support rebuilds/teleports also clear riders' old snapshots. Fresh support is
+probed at zero travel before the solve, so a newly spawned/rebuilt actor can ride
+that step's moving platform without inheriting older motion. Drop requests are
+consumed after synchronization, keeping same-step input valid across rebuilds.
+
+The scene then advances the physics solve, runs controllers against those current
+poses in entity order, applies total motion once to each controller's backend
+body and writes world poses into local scene transforms. Z, scale and the probe's
+fixed rotation use the existing physics writeback contract. Final walkable
+support captures the current platform pose for the next pass; departures/jumps
+clear it. Parenting to a simulated support does not add a second carry.
+
+`character_motion(entity)` exposes the last applied `GroundedSlideMotion2d`.
+`for_scripts_with_characters()` returns disjoint physics/event/request/result
+borrows; `CharacterMotions2d::get(entity)` reads a shared cached result. Scripts
+must check activity when reading during a pass, just as with other snapshots.
+Existing `for_scripts()` remains available for hosts without controller APIs.
+The Decay hosts have not yet adopted the controller borrows.
+
+**Solver timing limit:** controller motion occurs after the solve so carry uses
+actual current platform motion. Queries and render transforms see the applied
+pose immediately; solid response and discrete sensor enter/exit processing see
+it at the following solve. Moving a controller invalidates its prior solved
+contact snapshot, so grounding must use controller results. Controllers do not
+apply physical push impulses or swept trigger events. A fast controller can
+cross a small sensor between solves without entering it. These limits are
+explicit parity gaps; this is not a same-step solver-response implementation.
+
 ## Remaining slices
 
-Scene platform integration must capture synchronized support poses and apply motion
-once, including support changes, teleports and structural edits. Tests must
-exercise the one-way/drop-through interactions and initial-overlap/budget outcomes together.
-
-Scene authoring, checked editor commands/undo, typed Decay access and a real
-platformer scripted run then prove the capability vertically. The platformer's
+Checked editor authoring/undo, typed Decay requests/result snapshots and a real
+platformer scripted run must prove the capability vertically. The platformer's
 current dynamic-body hero is retained until that integration is ready; coyote
 time, jump buffering and player input remain gameplay policy in Decay.
 Native and real browser proof are required before checking character acceptance.

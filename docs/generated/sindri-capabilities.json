@@ -532,6 +532,38 @@
       "addable": true,
       "apply": {},
       "default_payload": {
+        "carry_platforms": true,
+        "max_iterations": 8,
+        "max_slope_angle": 0.7853981852531433,
+        "skin": 0.01,
+        "snap_distance": 0.0,
+        "step_height": 0.0,
+        "up": [
+          0.0,
+          1.0
+        ]
+      },
+      "display_name": "Character 2D",
+      "fields": {
+        "carry_platforms": true,
+        "max_iterations": 8,
+        "max_slope_angle": 0.7853981852531433,
+        "skin": 0.01,
+        "snap_distance": 0.0,
+        "step_height": 0.0,
+        "up": [
+          0.0,
+          1.0
+        ]
+      },
+      "meanings": {},
+      "schema_version": 1,
+      "type_name": "sindri.physics2d.character"
+    },
+    {
+      "addable": true,
+      "apply": {},
+      "default_payload": {
         "pieces": [
           {
             "friction": 0.5,
