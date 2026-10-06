@@ -522,7 +522,7 @@ Platformer C repairs the cut cord using its selected hook and length. Automatic
 saved-spawn reference integration and remaining motor modes stay open in the
 joint track.
 
-## Scene-authored hinges and velocity motors
+## Scene-authored hinges and motors
 
 `sindri.physics2d.hinge_joint` uses the same separate owner entity, stable endpoint
 reference resolution and suspend/remove/rebuild lifecycle as distance joints.
@@ -555,6 +555,27 @@ finite. Negative torque and invalid enabled limits fail before backend mutation.
 Settings edits between the same endpoints update the existing solver constraint
 and wake both bodies without resetting their velocity. Unchanged synchronization
 retains it; ordinary low-motion sleeping behavior remains applicable.
+
+`motor_mode` defaults to `"velocity"`, including old payloads that omit it.
+`"position"` selects a force-based damped angular target: `motor_target_angle`
+is the second body's relative orientation in radians within `[-pi, pi]`,
+`motor_stiffness` is torque per radian of error and `motor_damping` is torque
+per radian/second. Gains default to zero and must be finite and non-negative,
+even when disabled. The existing torque cap and enabled angular limits apply;
+a target beyond enabled limits cannot override them. Targets represent principal
+relative angles, not accumulated revolutions. Edits retain body motion and
+solver ownership; suspension and endpoint rebuilds retain the authored mode.
+
+`Physics.set_hinge_position_motor(joint, target_angle, stiffness, damping, max_torque)`
+selects position mode, validates the complete settings before mutation and
+preserves unknown fields. Zero torque disables drive. The next synchronization
+applies it, including calls before endpoint bodies exist. `set_hinge_motor`
+explicitly selects velocity mode again. Platformer P switches both placed and
+spawned windmills between holding 0.6 radians and their reversing drive; H
+recreates the placed hinge and asks its script to restore its current mode.
+Checked command edits, undo/redo and scene serialization exercise the new fields;
+native backend tests prove holding, retargeting, caps, limits and atomic rejection.
+Slider position motors and automatic save-path integration remain open.
 
 Typed `Physics.set_hinge_motor(joint, velocity, max_torque)` controls the hinge
 **owner**, not a body. It requires a hinge component and a physics host, validates

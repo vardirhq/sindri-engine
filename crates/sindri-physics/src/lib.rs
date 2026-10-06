@@ -8,6 +8,7 @@
 mod contact2d;
 mod hinge2d;
 mod material;
+mod motor2d;
 mod one_way2d;
 mod query2d;
 mod shared;
@@ -24,6 +25,7 @@ mod tests;
 pub use contact2d::Contact2d;
 pub use hinge2d::{HingeJoint2d, HingeSettings2d};
 pub use material::PhysicsMaterial;
+pub use motor2d::MotorMode2d;
 pub use one_way2d::OneWay2d;
 pub use query2d::{RayHit2d, RaycastFilter2d};
 pub use shared::{CollisionLayers, RigidBodyKind};

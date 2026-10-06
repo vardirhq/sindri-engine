@@ -95,7 +95,8 @@ fn register_hinge(components: &mut ComponentSchemaRegistry) -> Result<(), SceneE
             "first": "", "second": "", "enabled": true, "first_anchor": [0.0, 0.0],
             "second_anchor": [0.0, 0.0], "limits_enabled": false,
             "lower_angle": 0.0, "upper_angle": 0.0, "motor_enabled": false,
-            "motor_velocity": 0.0, "motor_max_torque": 0.0
+            "motor_velocity": 0.0, "motor_max_torque": 0.0, "motor_mode": "velocity",
+            "motor_target_angle": 0.0, "motor_stiffness": 0.0, "motor_damping": 0.0
         }),
     )?;
     components.describe::<crate::HingeJoint2dComponent>([

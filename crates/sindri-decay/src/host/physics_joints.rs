@@ -13,6 +13,7 @@ pub(super) const fn is_joint_control(call: PhysicsCall) -> bool {
     matches!(
         call,
         PhysicsCall::SetHingeMotor
+            | PhysicsCall::SetHingePositionMotor
             | PhysicsCall::SetSliderMotor
             | PhysicsCall::SetSpring
             | PhysicsCall::JointEnabled
@@ -41,6 +42,7 @@ impl WorldHost<'_> {
             PhysicsCall::CreateSliderJoint => self.create_slider_joint_call(path, args),
             PhysicsCall::SetJointEndpoints => self.joint_endpoints_call(path, args),
             PhysicsCall::SetHingeMotor => self.hinge_motor_call(path, args),
+            PhysicsCall::SetHingePositionMotor => self.hinge_position_motor_call(path, args),
             PhysicsCall::SetSliderMotor => self.slider_motor_call(path, args),
             PhysicsCall::SetSpring => self.spring_call(path, args),
             PhysicsCall::JointEnabled
@@ -73,6 +75,7 @@ impl WorldHost<'_> {
         #[allow(clippy::cast_possible_truncation)]
         // Physics uses f32; finite/overflow validation happens before mutation.
         let (velocity, torque) = (velocity as f32, torque as f32);
+        hinge.settings.motor_mode = sindri_physics::MotorMode2d::Velocity;
         hinge.settings.motor_velocity = velocity;
         hinge.settings.motor_max_torque = torque;
         hinge.settings.motor_enabled = torque > 0.0;
@@ -87,6 +90,7 @@ impl WorldHost<'_> {
             .get_mut(owner)
             .and_then(|data| data.components.get_mut(HingeJoint2dComponent::TYPE_NAME))
             .ok_or_else(|| error("entity has no authored 2D hinge joint"))?;
+        payload["motor_mode"] = serde_json::json!("velocity");
         payload["motor_velocity"] = serde_json::json!(velocity);
         payload["motor_max_torque"] = serde_json::json!(torque);
         payload["motor_enabled"] = serde_json::json!(torque > 0.0);

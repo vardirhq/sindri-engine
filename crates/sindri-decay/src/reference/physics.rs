@@ -6,6 +6,17 @@ pub(super) const PHYSICS: TypeEntry = TypeEntry {
     text: "2D physics: moving objects with speed and pushes, and finding out what this script's object bumped into.",
     members: &[
         call(
+            "set_hinge_position_motor",
+            &[
+                "joint",
+                "target_angle",
+                "stiffness",
+                "damping",
+                "max_torque",
+            ],
+            "Selects a force-based position motor on an authored hinge owner. Target is relative radians within [-pi, pi]; stiffness, damping and torque cap must be finite and non-negative. Zero torque disables drive. Requires physics; validates before mutation, preserves unknown fields and body motion, and applies at next synchronization even before bodies exist. Settings survive suspension and endpoint rebuilds. set_hinge_motor selects velocity mode again. Enabled angular limits still bound motion.",
+        ),
+        call(
             "create_slider_joint",
             &[
                 "joint",
@@ -148,7 +159,7 @@ pub(super) const PHYSICS: TypeEntry = TypeEntry {
         call(
             "set_hinge_motor",
             &["joint", "velocity", "max_torque"],
-            "Sets an authored 2D hinge owner's relative angular velocity target in radians/second and finite non-negative torque cap. Positive turns the second body counterclockwise relative to the first. Zero torque disables the motor (it coasts rather than brakes). Applied at the next fixed synchronization, including before endpoints are built; persists through rebuilds. Invalid values leave the component unchanged. Needs physics and a hinge component on the owner.",
+            "Selects velocity mode on an authored 2D hinge owner and sets its relative angular velocity target in radians/second and finite non-negative torque cap. Positive turns the second body counterclockwise relative to the first. Zero torque disables the motor (it coasts rather than brakes). Applied at the next fixed synchronization, including before endpoints are built; persists through rebuilds. Invalid values leave the component unchanged. Needs physics and a hinge component on the owner.",
         ),
         call(
             "connect_distance",

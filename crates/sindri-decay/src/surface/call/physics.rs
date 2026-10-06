@@ -26,6 +26,7 @@ pub(crate) enum PhysicsCall {
     /// leaving their rotation and closer motion unconstrained.
     ConnectDistance,
     SetHingeMotor,
+    SetHingePositionMotor,
     SetSliderMotor,
     SetSpring,
     JointEnabled,
@@ -85,6 +86,10 @@ pub(crate) const PHYSICS_CALLS: &[(&str, PhysicsCall)] = &[
     ("apply_impulse", PhysicsCall::ApplyImpulse),
     ("connect_distance", PhysicsCall::ConnectDistance),
     ("set_hinge_motor", PhysicsCall::SetHingeMotor),
+    (
+        "set_hinge_position_motor",
+        PhysicsCall::SetHingePositionMotor,
+    ),
     ("set_slider_motor", PhysicsCall::SetSliderMotor),
     ("set_spring", PhysicsCall::SetSpring),
     ("joint_enabled", PhysicsCall::JointEnabled),

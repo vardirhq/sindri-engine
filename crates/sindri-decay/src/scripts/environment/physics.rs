@@ -82,7 +82,28 @@ fn physics_params(call: PhysicsCall) -> Vec<Type> {
         | PhysicsCall::SetSliderMotor => {
             vec![entity(), Type::F32, Type::F32]
         }
+        PhysicsCall::SetHingePositionMotor => {
+            vec![entity(), Type::F32, Type::F32, Type::F32, Type::F32]
+        }
         PhysicsCall::SetSpring => vec![entity(), Type::F32, Type::F32, Type::F32],
+        PhysicsCall::CreateSliderJoint
+        | PhysicsCall::CreateSpringJoint
+        | PhysicsCall::CreateHingeJoint => joint_creation_params(call),
+        PhysicsCall::CreateDistanceJoint => vec![entity(), entity(), entity(), Type::F32],
+        PhysicsCall::SetJointEndpoints => vec![entity(), entity(), entity()],
+        PhysicsCall::ConnectDistance => {
+            vec![entity(), entity(), Type::F32]
+        }
+        // An event query is about the entity the script is on, so
+        // it takes nothing: an event is about a pair, and the pair
+        // a script cares about is the one it is half of.
+        _ => Vec::new(),
+    }
+}
+
+fn joint_creation_params(call: PhysicsCall) -> Vec<Type> {
+    let entity = || Type::Named(ENTITY.to_owned());
+    match call {
         PhysicsCall::CreateSliderJoint => vec![
             entity(),
             entity(),
@@ -108,15 +129,7 @@ fn physics_params(call: PhysicsCall) -> Vec<Type> {
         PhysicsCall::CreateHingeJoint => {
             vec![entity(), entity(), entity(), Type::Vec2, Type::Vec2]
         }
-        PhysicsCall::CreateDistanceJoint => vec![entity(), entity(), entity(), Type::F32],
-        PhysicsCall::SetJointEndpoints => vec![entity(), entity(), entity()],
-        PhysicsCall::ConnectDistance => {
-            vec![entity(), entity(), Type::F32]
-        }
-        // An event query is about the entity the script is on, so
-        // it takes nothing: an event is about a pair, and the pair
-        // a script cares about is the one it is half of.
-        _ => Vec::new(),
+        _ => unreachable!("only joint creation calls are forwarded"),
     }
 }
 
@@ -137,6 +150,7 @@ fn physics_return_type(call: PhysicsCall) -> Type {
         | PhysicsCall::ApplyImpulse
         | PhysicsCall::ConnectDistance
         | PhysicsCall::SetHingeMotor
+        | PhysicsCall::SetHingePositionMotor
         | PhysicsCall::SetSliderMotor
         | PhysicsCall::SetSpring
         | PhysicsCall::SetJointEnabled

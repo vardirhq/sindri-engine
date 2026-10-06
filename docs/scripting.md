@@ -1018,6 +1018,7 @@ a person who has not clicked yet.
 | `Physics.apply_impulse(entity, x, y)` | nothing |
 | `Physics.connect_distance(first, second, max_distance)` | nothing |
 | `Physics.set_hinge_motor(joint, velocity, max_torque)` | nothing |
+| `Physics.set_hinge_position_motor(joint, target_angle, stiffness, damping, max_torque)` | nothing |
 | `Physics.set_slider_motor(joint, velocity, max_force)` | nothing |
 | `Physics.set_spring(joint, rest_length, stiffness, damping)` | nothing |
 | `Physics.joint_enabled(joint)` | `bool` |
@@ -1161,6 +1162,7 @@ required. A name lookup that returns null explicitly clears that endpoint.
 
 `Physics.set_hinge_motor(joint, velocity, max_torque)` takes a hinge-owner entity,
 a relative angular speed in radians/second and a finite non-negative torque cap.
+It explicitly selects velocity mode, including after position drive.
 Positive speed turns its second endpoint counterclockwise relative to the first.
 Zero torque disables the drive (coasting); zero speed with positive torque brakes.
 The call validates and updates the runtime hinge component, preserving unknown
@@ -1170,6 +1172,16 @@ It needs a physics host and an authored `sindri.physics2d.hinge_joint` component
 invalid requests leave the payload unchanged. Full prefab endpoint references
 remain incomplete; see [the physics contract](physics.md).
 Platformer's windmill uses this typed control to reverse its powered axle.
+
+`Physics.set_hinge_position_motor(joint, target_angle, stiffness, damping, max_torque)`
+selects a damped force-based position drive on the authored hinge owner. The
+relative target is finite radians within `[-pi, pi]`; gains and torque cap are
+finite and non-negative. Enabled angular limits still bound motion. Zero torque
+coasts. Validation is atomic, unknown fields and body motion are preserved, and
+settings apply at next synchronization, including before bodies exist and after
+suspension/rebuild. Platformer P holds both windmills at 0.6 radians or resumes
+velocity reversal. H recreation restores the selected drive through a typed
+`Windmill` message. Slider position drive remains open.
 
 `Physics.set_slider_motor(joint, velocity, max_force)` tunes an authored slider
 owner's relative translation speed in world units/second along the first local

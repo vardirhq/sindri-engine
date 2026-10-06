@@ -18,6 +18,8 @@ pub enum PhysicsError {
     JointToSelf(EntityId),
     #[error("hinge limits must be ordered and within [-pi, pi] radians")]
     InvalidJointLimits,
+    #[error("hinge motor target must be within [-pi, pi] radians")]
+    InvalidHingeMotorTarget,
     #[error("slider axes must have unit length")]
     InvalidJointAxis,
     #[error("slider lower distance must not exceed its upper distance")]

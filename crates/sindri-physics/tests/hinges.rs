@@ -186,3 +186,6 @@ fn invalid_hinge_edits_leave_the_existing_constraint_untouched() {
     }
     assert!(world.angular_velocity(joint.second).unwrap() > 1.5);
 }
+
+#[path = "hinges/position.rs"]
+mod position;

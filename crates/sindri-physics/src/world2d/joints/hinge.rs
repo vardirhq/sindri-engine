@@ -1,6 +1,6 @@
 //! Building hinges; ownership and body lifetime stay in the parent module.
 use super::{OwnedJointSpec, PhysicsWorld2d};
-use crate::{HingeJoint2d, PhysicsError};
+use crate::{HingeJoint2d, MotorMode2d, PhysicsError};
 use rapier2d::prelude as r2;
 
 impl PhysicsWorld2d {
@@ -36,8 +36,15 @@ impl PhysicsWorld2d {
         if settings.motor_enabled {
             builder = builder
                 .motor_model(r2::MotorModel::ForceBased)
-                .motor_velocity(settings.motor_velocity, 1.0)
                 .motor_max_force(settings.motor_max_torque);
+            builder = match settings.motor_mode {
+                MotorMode2d::Velocity => builder.motor_velocity(settings.motor_velocity, 1.0),
+                MotorMode2d::Position => builder.motor_position(
+                    settings.motor_target_angle,
+                    settings.motor_stiffness,
+                    settings.motor_damping,
+                ),
+            };
         }
         self.set_owned_joint(owner, OwnedJointSpec::Hinge(joint), builder.into())
     }

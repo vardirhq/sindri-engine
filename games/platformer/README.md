@@ -19,7 +19,8 @@ its travel limits and independently owned spring.
 B rebuilds the trolley light's spring at its current rest length; Decay continues
 tuning it while the trolley remains on its independent rail.
 
-H rebuilds the placed windmill hinge and restarts its motor, keeping the axle
+P toggles both windmills between holding an angle and reversing.
+H rebuilds the placed windmill hinge and restores its selected drive, keeping the axle
 fixed and the separately spawned mechanism independent.
 
 V places or removes a second powered windmill from a reusable prefab. Its hinge
@@ -104,7 +105,10 @@ tether. The separate tether entity is the pattern to copy for a distance joint.
 The windmill has a separate hinge entity connecting its fixed axle and physical
 rotor. Decay reverses its torque-capped motor every two seconds with
 `Physics.set_hinge_motor`; `tests/hinge_motor.rs` observes both directions,
-a fixed axle and removal. The level places `windmill-kit.prefab`, which nests
+a fixed axle and removal. P toggles both windmills between holding 0.6 radians
+through `Physics.set_hinge_position_motor` and their reversing velocity drive.
+H recreation restores the selected mode through the windmill script. Tests
+exercise both modes and a rebuild while holding. The level places `windmill-kit.prefab`, which nests
 `windmill.prefab`; V spawns that same assembly. Copy these prefabs with the script
 for a powered rotating part. The authored hinge keeps its original local root
 reference through placement, export and runtime spawning.

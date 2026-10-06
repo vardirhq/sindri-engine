@@ -350,3 +350,6 @@ mod spring_creation;
 
 #[path = "joint_state_controls/slider_creation.rs"]
 mod slider_creation;
+
+#[path = "joint_state_controls/hinge_position.rs"]
+mod hinge_position;

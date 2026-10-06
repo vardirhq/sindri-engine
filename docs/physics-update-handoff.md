@@ -300,10 +300,32 @@ tests and the 1,106-file size gate passed. All-target/all-feature WASM checks
 passed both crates; the generic browser host was rebuilt. Export and native
 Vulkan capture passed. Chromium WebGPU fetched 25 assets and exercised two J
 rebuilds alongside spring/hinge recreation, prefab spawning and tether controls
-without runtime errors. Native/browser captures were visually reviewed. CI must
-verify this slice; all checks passed on prior head `d7b64c78`.
+without runtime errors. Native/browser captures were visually reviewed. CI passed
+on typed slider creation head `04ef2587`.
 
-Joint acceptance stays open. Add remaining motor modes. Automatic editor/script
+A **hinge position motor slice** adds Sindri-owned `MotorMode2d` with velocity
+as the backward-compatible default. Position drive uses a relative angle within
+`[-pi, pi]`, non-negative finite stiffness/damping and the existing torque cap;
+enabled limits still apply. Typed `Physics.set_hinge_position_motor` validates
+atomically, retains unknown fields/body motion and works before bodies exist.
+The velocity setter switches back explicitly; zero torque coasts. Suspension
+and collider rebuilds retain settings. Platformer P switches both windmills
+between holding 0.6 radians and reversing. H sends a typed `Windmill` message to
+restore the selected drive after recreation, retaining direction.
+
+Validation: scoped preflight passed 865 native tests and warning-denied
+all-target/all-feature checks for physics, scene, Decay and platformer. Two
+scripts passed typed checking with zero errors/reminders. Four-crate Clippy,
+11 catalogue tests/regeneration, the 1,111-file size gate and all-target/all-feature
+WASM checks passed. Native tests cover targets, caps/limits, atomic rejection,
+coasting, missing physics, suspension/rebuild, undo/redo and canonical save/reopen.
+The rebuilt generic browser host/export and native Vulkan capture passed.
+Chromium WebGPU fetched 25 assets and exercised P hold/H recreation/P resume,
+prefab spawning and tether controls without runtime errors. Visually reviewed
+captures showed both windmills hold the same angle through recreation and resume
+motion. CI must verify the new position slice; prior head `04ef2587` is green.
+
+Joint acceptance stays open. Add slider position motors. Automatic editor/script
 save integration remains open; the reference gap remains partial in parity.
 
 Continue with **the remaining joints and typed controls/lifecycle**, then

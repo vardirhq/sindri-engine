@@ -9,6 +9,7 @@ For a new implementation session, read [the recovery handoff](physics-update-han
 CCD, one-way platforms, forces/rotation, contacts and materials are implemented
 and checked. Scene-authored distance constraints form a checked joint foundation.
 Hinges, sliders, springs and velocity motors now form checked joint slices.
+Hinges also support a checked damped position motor.
 The remaining items below are the active scope.
 
 ## Acceptance checklist
@@ -547,6 +548,38 @@ surface-specific completeness. This checklist does not mark those surfaces done.
   25 assets and exercised two J rebuilds alongside spring/hinge recreation,
   prefab spawning and tether controls without runtime errors. Native/browser
   captures were visually reviewed.
-- CI must verify this slice; all checks passed on prior head `d7b64c78`.
+- CI passed on typed slider creation head `04ef2587`.
   Remaining motor modes, automatic save integration and final joint/workspace
   acceptance remain open.
+
+
+### Hinge position motor checkpoint
+
+- Added Sindri-owned `MotorMode2d` and a force-based hinge position motor with a
+  relative angular target in `[-pi, pi]`, finite non-negative stiffness/damping
+  and the existing torque cap. Enabled angular limits still bound motion.
+  Old payloads default to velocity mode; no backend types enter scene data.
+- Typed `Physics.set_hinge_position_motor` validates all settings before changing
+  the component, preserves unknown fields/body motion and works before bodies
+  exist. `set_hinge_motor` explicitly restores velocity mode. Zero torque coasts;
+  settings survive suspension and collider rebuilds.
+- Added for the platformer: P switches both placed and spawned windmills between
+  holding 0.6 radians and reversing. H recreates the placed hinge and a typed
+  `Windmill` message restores its selected drive and current direction.
+- Native tests prove holding/retargeting, offset anchors, torque caps, enabled
+  limits, invalid-call atomicity, zero-torque coasting, missing physics/wrong kind,
+  suspension/rebuild and mode switching. Checked scene commands exercise undo,
+  redo and canonical save/reopen with the position drive retained.
+- Final scoped preflight passed 865 native tests and warning-denied all-target/
+  all-feature checks for physics, scene, Decay and platformer. Both changed scripts
+  passed typed preflight with zero errors/reminders. Four-crate Clippy, 11 generated
+  catalogue tests and the 1,111-file size gate passed.
+- All-target/all-feature WASM checks passed all four crates; the generic browser
+  host was rebuilt. Export and native Vulkan capture passed. Chromium WebGPU
+  fetched 25 assets, exercised P hold/H recreation/P resume alongside prefab
+  spawning and tether controls, and reported no runtime errors. Native/browser
+  captures were visually reviewed; both browser windmills held the same angle
+  through recreation and resumed motion.
+- CI must verify this slice; prior head `04ef2587` passed all checks. Slider
+  position motors, automatic save integration, visual editor review and final
+  joint/workspace acceptance remain open.

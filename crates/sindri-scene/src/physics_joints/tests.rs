@@ -377,3 +377,6 @@ fn linear_lifecycle(kind: &str, original: serde_json::Value, edited: serde_json:
     physics.step(&mut world, &registry, STEP).unwrap();
     assert_eq!(physics.world().joint_count(), 0);
 }
+
+#[path = "position_tests.rs"]
+mod position;

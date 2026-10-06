@@ -9,7 +9,7 @@ script WindmillSetup {
             let rotor = World.find("Windmill rotor");
             Physics.remove_joint(owner);
             Physics.create_hinge_joint(owner, axle, rotor, Vec2(0.0, 0.0), Vec2(0.0, 0.0));
-            Physics.set_hinge_motor(owner, 2.0, 1.0);
+            Windmill.on(owner).restore_motor();
         }
         if Input.just_pressed("V") {
             if this.made != null {

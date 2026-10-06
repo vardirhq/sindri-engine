@@ -73,3 +73,56 @@ fn rebuilding_the_placed_hinge_keeps_both_windmills_independent() {
         assert!(forward && backward);
     }
 }
+
+#[test]
+fn both_windmills_hold_an_angle_rebuild_and_resume_reversing() {
+    let mut run = Run::open().unwrap();
+    assert!(run.step(1.0 / 60.0).is_empty());
+    run.key(Key::V, true);
+    assert!(run.step(1.0 / 60.0).is_empty());
+    run.key(Key::V, false);
+    assert!(run.step(1.0 / 60.0).is_empty());
+    run.key(Key::P, true);
+    assert!(run.step(1.0 / 60.0).is_empty());
+    run.key(Key::P, false);
+    let rotor = run
+        .entity("windmill-anchor/mechanism/windmill-rotor")
+        .unwrap();
+    let spawned = run
+        .world
+        .entities()
+        .find_map(|(entity, data)| {
+            (data.name.as_deref() == Some("Spawned windmill rotor")).then_some(entity)
+        })
+        .unwrap();
+    for rebuild in [false, true] {
+        run.key(Key::H, rebuild);
+        assert!(run.step(1.0 / 60.0).is_empty());
+        run.key(Key::H, false);
+        for _ in 0..600 {
+            let notes = run.step(1.0 / 60.0);
+            assert!(notes.is_empty(), "{notes:?}");
+            assert_eq!(run.physics.world().joint_count(), 5);
+        }
+        for entity in [rotor, spawned] {
+            assert!((run.physics.world().pose(entity).unwrap().rotation - 0.6).abs() < 0.03);
+            assert!(run.physics.world().angular_velocity(entity).unwrap().abs() < 0.03);
+        }
+    }
+    run.key(Key::P, true);
+    assert!(run.step(1.0 / 60.0).is_empty());
+    run.key(Key::P, false);
+    let mut forwards = [false; 2];
+    let mut backwards = [false; 2];
+    for _ in 0..360 {
+        let notes = run.step(1.0 / 60.0);
+        assert!(notes.is_empty(), "{notes:?}");
+        for (index, entity) in [rotor, spawned].into_iter().enumerate() {
+            let speed = run.physics.world().angular_velocity(entity).unwrap();
+            forwards[index] |= speed > 1.0;
+            backwards[index] |= speed < -1.0;
+        }
+    }
+    assert!(forwards.into_iter().all(|value| value));
+    assert!(backwards.into_iter().all(|value| value));
+}

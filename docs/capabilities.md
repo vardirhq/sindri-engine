@@ -403,6 +403,17 @@ local-anchor force response, repeated recreation, retained body motion/legacy
 ownership, invalid arguments, inactive/unbound targets and prefab isolation.
 Platformer B rebuilds the light's spring without resetting its tuning phase or
 replacing the trolley's independently owned slider.
+Hinges also support a damped force-based position motor. Old payloads default
+to velocity mode; typed `Physics.set_hinge_position_motor` selects a relative
+angle within `[-pi, pi]`, finite non-negative stiffness/damping and a torque cap.
+The velocity setter switches back explicitly. Native tests exercise holding,
+retargeting, caps, enabled limits, atomic rejection, command undo/redo, scene
+round trips, suspension and collider rebuilds. Platformer P holds both placed
+and spawned windmills, resumes their reversal, and retains the selected drive
+when H recreates the placed hinge. This capability was added for that showcase.
+Slider position drive, automatic save integration and visual editor review
+remain open.
+
 Typed `Physics.create_slider_joint` adds finite local anchors, unit local axes
 and optional finite ordered travel bounds under the same owner/scope contract.
 The new motor starts disabled; existing motor controls work before body sync.
