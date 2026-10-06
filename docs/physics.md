@@ -912,3 +912,10 @@ their zero-normal initial-overlap contract. See [character movement](character-m
 for the result semantics, validation, ownership and remaining vertical slices.
 This is not yet a grounded/stepping controller; one-way geometry is two-sided
 in this primitive. No editor, Decay or platformer integration is claimed.
+
+Ground probes now report nearest support and classify world-space normals
+against configurable up and slope limits, including zero-travel contacts at the
+skin. Steep surfaces are reported, not skipped; initial penetration is unwalkable.
+The [character movement contract](character-movement.md) defines tolerances
+and remaining grounded-state/snap and movement policy. Ordinary geometric
+queries are unchanged; this is not yet controller or game proof.

@@ -701,3 +701,21 @@ surface-specific completeness. This checklist does not mark those surfaces done.
   catalogue currentness/completeness tests and the 1,119-file size gate passed.
   Runtime/editor/browser behavior is unchanged until this API is integrated.
   CI must verify the pushed foundation head.
+
+### Ground classification foundation checkpoint
+
+- Added read-only `probe_ground`/`probe_ground_where` with configurable unit up,
+  slope angle, travel and skin. Results retain the nearest steep hit rather than
+  probing through it, and mark initial penetration unwalkable.
+- Contact probing before the sweep closes a zero-time shape-cast edge case at
+  the skin boundary. Tests exercise stationary support, shape extents, rotated
+  up/surfaces, slope boundaries, steep obstruction, filtering, lifecycle and
+  validation. Shared movement test fixtures now live in one support module.
+- Added for the platformer, not yet adopted. Grounded state/snap and uphill/
+  downhill/step/platform/one-way movement policy, authoring, Decay and native/
+  browser game proof remain open. Character acceptance is still unchecked.
+- Scoped preflight passed 83 native physics tests and warning-denied all-target/
+  all-feature checks; Clippy, all-target/all-feature WASM compilation, 11
+  catalogue tests and the 1,123-file size gate passed. No component registration,
+  script/host API, dependency or existing runtime/render/browser behavior changes.
+  CI must verify this slice.

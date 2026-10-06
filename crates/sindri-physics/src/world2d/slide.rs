@@ -112,7 +112,7 @@ impl PhysicsWorld2d {
         Ok(result)
     }
 
-    fn penetration(
+    pub(super) fn penetration(
         &self,
         probe: &dyn Shape,
         at: r2::Pose,
@@ -136,7 +136,7 @@ impl PhysicsWorld2d {
         first
     }
 
-    fn slide_cast(
+    pub(super) fn slide_cast(
         &self,
         probe: &dyn Shape,
         at: r2::Pose,

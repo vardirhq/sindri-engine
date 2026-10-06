@@ -8,6 +8,10 @@ use crate::types2d::{Collider2d, ColliderShape2d, PhysicsPose2d, RigidBody2d};
 
 #[derive(Debug, Error, Eq, PartialEq)]
 pub enum PhysicsError {
+    #[error("ground up direction must have unit length")]
+    InvalidGroundUp,
+    #[error("ground slope angle must be between zero and pi/2 radians")]
+    InvalidGroundSlopeAngle,
     #[error("slide iteration budget must be between 1 and 32")]
     InvalidSlideIterations,
     #[error("entity {0:?} is already registered with physics")]

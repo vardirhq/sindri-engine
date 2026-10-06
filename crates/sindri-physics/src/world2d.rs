@@ -6,6 +6,7 @@
 
 mod contacts;
 mod controls;
+mod ground;
 mod joints;
 mod materials;
 mod motion;

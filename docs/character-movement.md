@@ -1,6 +1,6 @@
 # Character movement
 
-Status: geometric sweep/slide foundation implemented; full character movement
+Status: geometric sweep/slide and ground-probe foundations implemented; full character movement
 acceptance remains open in `physics-update.md`. Added for the platformer genre
 showcase, which has not yet adopted it. No game proof is claimed for this slice.
 
@@ -56,14 +56,46 @@ shape casts still return a zero normal at zero-distance overlap. The movement
 sweep privately requests impact geometry at the skin and ignores tangent or
 separating contacts so they cannot hide a blocking obstacle farther ahead.
 
+## Implemented ground classification
+
+`PhysicsWorld2d::probe_ground(shape, pose, options, filter)` and
+`probe_ground_where(..., include)` share the movement narrow-phase helpers and
+current-pose filtering. They are read-only and cast along negative world-space
+up without changing probe rotation.
+
+`GroundOptions2d` defaults to up `[0, 1]`, maximum slope angle pi/4 radians,
+maximum travel 0.1 and skin 0.01 world units. Up must be finite and within 0.0001
+of unit length; accepted up vectors are normalized before use. The angle must
+be finite and within 0..=pi/2, travel finite/non-negative and skin finite/positive.
+An overflowing probe destination fails before any query.
+
+`GroundProbe2d` reports the nearest hit, `walkable` classification and initial
+penetration. Distance is downward travel to the skin, not to the bare surface.
+Steep hits are returned as unwalkable, never skipped in favor of a floor below.
+A surface is walkable when its world normal is within the configured angle of
+up, with a 0.0001 cosine tolerance for narrow-phase approximation. A nearby
+walkable hit does not itself mean the caller is standing on it.
+
+Initial penetration returns the usual zero-normal hit and is never walkable.
+Exact touching/inside-skin support can be detected with zero travel: a contact
+query, using one f32 epsilon of prediction allowance at the skin boundary,
+precedes the sweep. Blocking contacts at zero travel tie by entity then original
+piece order. A surface tangent to the probe direction is not support. No hit
+means unwalkable, not penetrating.
+
+This API does not snap, choose jump behavior, carry platforms, limit uphill
+movement or implement one-way support/drop-through. Grounded-state and motion
+policy must be added in the following controller slices; one-way geometry still
+has the ordinary two-sided geometric query semantics here.
+
 ## Remaining slices
 
 The foundation sees one-way geometry on both sides, just like geometric queries.
 The full controller must incorporate support-side policy and timed drop-through,
 not interpret this primitive as a finished one-way movement API.
 
-Remaining engine work includes an explicit up direction, walkable slope limits,
-uphill/downhill behavior, ground classification/snap, step height and clearance,
+Remaining engine work includes uphill/downhill movement limits, grounded-state
+and snap behavior, step height and clearance,
 ceilings and moving-platform displacement. Platform riding must use synchronized
 poses and avoid counting platform movement twice. Tests must exercise the
 one-way/drop-through interactions and initial-overlap/budget outcomes together.
@@ -82,3 +114,8 @@ iterations, rotated surfaces, filter/predicate behavior, immediate teleports and
 removal, deterministic ties, one-way geometry's two-sided query behavior and
 invalid input rejection. This is engine evidence only; Editor, Decay and game
 proof remain absent.
+
+Ground-probe tests cover separation/touching and zero travel, box/circle/rotated
+capsule extents, slope boundaries and steep obstruction, arbitrary up, ceiling
+orientation, initial penetration, masks/sensors/whole-entity exclusion, host
+predicates, current poses/removal, deterministic ties and invalid options.

@@ -1,28 +1,13 @@
 //! Geometric movement keeps policy out of the solver and does not mutate bodies.
-use sindri_core::EntityId;
+#[path = "movement/support.rs"]
+mod support;
 use sindri_physics::{
     Collider2d, ColliderShape2d, CollisionLayers, PhysicsError, PhysicsPose2d, PhysicsWorld2d,
     RaycastFilter2d, SlideMotion2d, SlideOptions2d,
 };
+use support::{entity, insert, near, pose};
 
 const PROBE: ColliderShape2d = ColliderShape2d::Circle { radius: 0.5 };
-
-fn entity(index: u32) -> EntityId {
-    EntityId::from_bits(u64::from(index) << 32)
-}
-
-fn pose(x: f32, y: f32) -> PhysicsPose2d {
-    PhysicsPose2d {
-        position: [x, y],
-        rotation: 0.0,
-    }
-}
-
-fn insert(world: &mut PhysicsWorld2d, id: u32, at: PhysicsPose2d, pieces: &[Collider2d]) {
-    world
-        .insert_static_collider(entity(id), at, pieces)
-        .unwrap();
-}
 
 fn slide(world: &PhysicsWorld2d, start: PhysicsPose2d, movement: [f32; 2]) -> SlideMotion2d {
     world
@@ -34,10 +19,6 @@ fn slide(world: &PhysicsWorld2d, start: PhysicsPose2d, movement: [f32; 2]) -> Sl
             RaycastFilter2d::default(),
         )
         .unwrap()
-}
-
-fn near(actual: f32, expected: f32) {
-    assert!((actual - expected).abs() < 0.002, "{actual} != {expected}");
 }
 
 #[test]

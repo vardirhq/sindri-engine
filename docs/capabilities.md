@@ -2629,3 +2629,9 @@ initial penetration, filters and deterministic ties have native engine tests.
 Grounding, slope/step/platform and one-way movement policies, editor/Decay access
 and platformer proof remain open; see [the contract](character-movement.md).
 Added for platformer integration, not yet adopted by that showcase.
+
+Read-only 2D ground probing adds configurable unit up, bounded slope angles,
+travel and skin. Tests exercise zero-travel support, rotated shapes, slope
+boundaries, steep obstruction, penetration, filters, current poses and invalid
+inputs. The nearest hit remains visible when unwalkable. Grounded-state/snap
+and controller motion policy, editor/Decay/game proof remain open.
