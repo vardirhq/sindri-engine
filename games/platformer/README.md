@@ -13,7 +13,8 @@ Z cuts the cord; later tether controls do nothing until C repairs it.
 C creates a fresh owned distance joint at the selected hook and tether length.
 The cord disappears while the constraint is suspended.
 
-J rebuilds the trolley slider and restores its current motor direction, retaining
+O parks the trolley at a fixed place along its rail or releases it to reverse.
+J rebuilds the trolley slider and restores its selected drive, retaining
 its travel limits and independently owned spring.
 
 B rebuilds the trolley light's spring at its current rest length; Decay continues
@@ -114,7 +115,10 @@ for a powered rotating part. The authored hinge keeps its original local root
 reference through placement, export and runtime spawning.
 
 The lantern trolley travels along an authored slider rail and reverses through
-`Physics.set_slider_motor`. Its hanging light uses a force-based spring; Decay
+`Physics.set_slider_motor`. O holds it at a signed offset of 0.5 world units
+using `Physics.set_slider_position_motor`; J retains the selected mode.
+`tests/slider_spring.rs` also proves parking, rebuilding and resumed reversal
+while retaining the independent light. Its hanging light uses a force-based spring; Decay
 changes its rest length with `Physics.set_spring` and draws the cord from solved
 positions. `tests/slider_spring.rs` checks bounded reversal, the changed light
 height and independent joint removal. Copy these separate owner entities for a

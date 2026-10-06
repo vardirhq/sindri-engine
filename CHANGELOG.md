@@ -1,5 +1,7 @@
 # Changelog
 
+- Add damped slider position motors with signed local-axis distance targets, stiffness/damping and force caps. Typed Decay controls select position or velocity drive while retaining body motion and rebuild semantics; old scenes keep velocity mode. Platformer O parks or releases its lantern trolley, and J restores the selected drive after rebuilding its rail joint.
+
 - Add force-based hinge position motors with validated relative angular targets, stiffness/damping and torque caps. Typed Decay controls switch between position and velocity drive without resetting body motion; old payloads retain velocity behavior. Platformer P holds both windmills or resumes reversal, and H rebuilds the placed hinge while preserving its selected drive.
 
 - Add typed `Physics.create_slider_joint` with finite local anchors, unit local axes and optional travel limits. Empty owners, scoped endpoints and settings validate atomically; motor controls work before synchronization. Platformer J rebuilds its bounded trolley slider while retaining its current direction and independently owned spring.

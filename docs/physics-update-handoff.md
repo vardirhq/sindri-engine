@@ -323,9 +323,32 @@ The rebuilt generic browser host/export and native Vulkan capture passed.
 Chromium WebGPU fetched 25 assets and exercised P hold/H recreation/P resume,
 prefab spawning and tether controls without runtime errors. Visually reviewed
 captures showed both windmills hold the same angle through recreation and resume
-motion. CI must verify the new position slice; prior head `04ef2587` is green.
+motion. CI passed on hinge position head `adb632e5`.
 
-Joint acceptance stays open. Add slider position motors. Automatic editor/script
+A **slider position motor slice** reuses `MotorMode2d` for signed local-anchor
+separation along the first body's axis, in unscaled world units. Position drive
+uses finite non-negative stiffness/damping and the existing force cap; enabled
+travel limits still apply to targets outside them. Old scenes keep velocity mode.
+Typed `Physics.set_slider_position_motor` validates atomically, preserves unknown
+fields/body motion and works before bodies exist. The velocity setter switches
+back; zero force coasts. Suspension and collider rebuilds retain the drive.
+Platformer O parks/releases its trolley at signed distance 0.5, and J restores
+the selected drive and direction after recreation while its spring keeps tuning.
+Native tests cover rotated rails/offset anchors, signed retargeting, caps/limits,
+invalid calls, coasting, missing physics, lifecycle, undo/redo and save/reopen.
+
+Scoped preflight passed 874 native tests and warning-denied all-target/all-feature
+checks for physics, scene, Decay and platformer. Typed trolley preflight had zero
+errors/reminders. Four-crate Clippy, 11 catalogue tests/regeneration, the 1,115-file
+size gate and all-target/all-feature WASM checks passed. The generic browser host
+was rebuilt; export and native Vulkan capture passed. Chromium WebGPU fetched
+25 assets and exercised O parking/J recreation/O release, prefab spawning and
+tether controls without runtime errors. Visually reviewed native/browser captures
+show retained parking through recreation and resumed travel with the spring
+attached. CI passed on prior hinge head `adb632e5`; it must verify the new slider
+slice.
+
+Joint acceptance stays open. Add automatic editor/script save integration. Automatic editor/script
 save integration remains open; the reference gap remains partial in parity.
 
 Continue with **the remaining joints and typed controls/lifecycle**, then

@@ -15,6 +15,7 @@ pub(super) const fn is_joint_control(call: PhysicsCall) -> bool {
         PhysicsCall::SetHingeMotor
             | PhysicsCall::SetHingePositionMotor
             | PhysicsCall::SetSliderMotor
+            | PhysicsCall::SetSliderPositionMotor
             | PhysicsCall::SetSpring
             | PhysicsCall::JointEnabled
             | PhysicsCall::SetJointEnabled
@@ -44,6 +45,7 @@ impl WorldHost<'_> {
             PhysicsCall::SetHingeMotor => self.hinge_motor_call(path, args),
             PhysicsCall::SetHingePositionMotor => self.hinge_position_motor_call(path, args),
             PhysicsCall::SetSliderMotor => self.slider_motor_call(path, args),
+            PhysicsCall::SetSliderPositionMotor => self.slider_position_motor_call(path, args),
             PhysicsCall::SetSpring => self.spring_call(path, args),
             PhysicsCall::JointEnabled
             | PhysicsCall::SetJointEnabled
@@ -118,6 +120,7 @@ impl WorldHost<'_> {
         #[allow(clippy::cast_possible_truncation)]
         // Backend units are f32; validate overflow before mutation.
         let (velocity, force) = (velocity as f32, force as f32);
+        slider.settings.motor_mode = sindri_physics::MotorMode2d::Velocity;
         slider.settings.motor_velocity = velocity;
         slider.settings.motor_max_force = force;
         slider.settings.motor_enabled = force > 0.0;
@@ -130,6 +133,7 @@ impl WorldHost<'_> {
             .get_mut(owner)
             .and_then(|data| data.components.get_mut(SliderJoint2dComponent::TYPE_NAME))
             .ok_or_else(|| error("entity has no authored 2D slider joint"))?;
+        payload["motor_mode"] = serde_json::json!("velocity");
         payload["motor_velocity"] = serde_json::json!(velocity);
         payload["motor_max_force"] = serde_json::json!(force);
         payload["motor_enabled"] = serde_json::json!(force > 0.0);

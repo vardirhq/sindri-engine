@@ -1,6 +1,6 @@
 //! A slider aligns local axes, constraining rotation and perpendicular motion.
 use super::{OwnedJointSpec, PhysicsWorld2d};
-use crate::{PhysicsError, SliderJoint2d};
+use crate::{MotorMode2d, PhysicsError, SliderJoint2d};
 use rapier2d::prelude as r2;
 
 impl PhysicsWorld2d {
@@ -27,8 +27,15 @@ impl PhysicsWorld2d {
         if s.motor_enabled {
             builder = builder
                 .motor_model(r2::MotorModel::ForceBased)
-                .motor_velocity(s.motor_velocity, 1.0)
                 .motor_max_force(s.motor_max_force);
+            builder = match s.motor_mode {
+                MotorMode2d::Velocity => builder.motor_velocity(s.motor_velocity, 1.0),
+                MotorMode2d::Position => builder.motor_position(
+                    s.motor_target_distance,
+                    s.motor_stiffness,
+                    s.motor_damping,
+                ),
+            };
         }
         self.set_owned_joint(owner, OwnedJointSpec::Slider(joint), builder.into())
     }

@@ -380,3 +380,6 @@ fn linear_lifecycle(kind: &str, original: serde_json::Value, edited: serde_json:
 
 #[path = "position_tests.rs"]
 mod position;
+
+#[path = "slider_position_tests.rs"]
+mod slider_position;

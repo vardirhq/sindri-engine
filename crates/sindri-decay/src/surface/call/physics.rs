@@ -28,6 +28,7 @@ pub(crate) enum PhysicsCall {
     SetHingeMotor,
     SetHingePositionMotor,
     SetSliderMotor,
+    SetSliderPositionMotor,
     SetSpring,
     JointEnabled,
     SetJointEnabled,
@@ -91,6 +92,10 @@ pub(crate) const PHYSICS_CALLS: &[(&str, PhysicsCall)] = &[
         PhysicsCall::SetHingePositionMotor,
     ),
     ("set_slider_motor", PhysicsCall::SetSliderMotor),
+    (
+        "set_slider_position_motor",
+        PhysicsCall::SetSliderPositionMotor,
+    ),
     ("set_spring", PhysicsCall::SetSpring),
     ("joint_enabled", PhysicsCall::JointEnabled),
     ("set_joint_enabled", PhysicsCall::SetJointEnabled),

@@ -1020,6 +1020,7 @@ a person who has not clicked yet.
 | `Physics.set_hinge_motor(joint, velocity, max_torque)` | nothing |
 | `Physics.set_hinge_position_motor(joint, target_angle, stiffness, damping, max_torque)` | nothing |
 | `Physics.set_slider_motor(joint, velocity, max_force)` | nothing |
+| `Physics.set_slider_position_motor(joint, target_distance, stiffness, damping, max_force)` | nothing |
 | `Physics.set_spring(joint, rest_length, stiffness, damping)` | nothing |
 | `Physics.joint_enabled(joint)` | `bool` |
 | `Physics.set_joint_enabled(joint, enabled)` | nothing |
@@ -1181,11 +1182,21 @@ coasts. Validation is atomic, unknown fields and body motion are preserved, and
 settings apply at next synchronization, including before bodies exist and after
 suspension/rebuild. Platformer P holds both windmills at 0.6 radians or resumes
 velocity reversal. H recreation restores the selected drive through a typed
-`Windmill` message. Slider position drive remains open.
+`Windmill` message. Slider position drive follows the same mode-switching contract below.
+
+`Physics.set_slider_position_motor(joint, target_distance, stiffness, damping, max_force)`
+selects a damped force-based position motor on an authored slider owner. The
+finite target is signed local-anchor separation along the first body's local
+axis in unscaled world units; gains and force cap are finite and non-negative.
+Enabled travel limits still bound motion, including targets outside their range.
+Zero force coasts. Validation is atomic, unknown fields and body motion remain,
+and the next synchronization applies settings even before bodies exist or after
+suspension/rebuild. The velocity setter switches back explicitly. Platformer O
+parks/releases its trolley and J retains its selected drive through recreation.
 
 `Physics.set_slider_motor(joint, velocity, max_force)` tunes an authored slider
 owner's relative translation speed in world units/second along the first local
-axis, with a finite non-negative force cap. Zero force coasts; zero speed with
+axis, explicitly selecting velocity mode, with a finite non-negative force cap. Zero force coasts; zero speed with
 positive force brakes. `Physics.set_spring(joint, rest_length, stiffness, damping)`
 tunes a spring owner with positive rest length and non-negative stiffness/damping.
 All values must be finite. Both validate before modifying runtime component

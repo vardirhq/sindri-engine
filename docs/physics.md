@@ -519,7 +519,7 @@ bodies need not be synchronized yet. Next fixed synchronization creates the
 constraint, preserving other owner components, bodies/motion and legacy connections.
 Existing joints, invalid handles/references and invalid lengths fail before mutation.
 Platformer C repairs the cut cord using its selected hook and length. Automatic
-saved-spawn reference integration and remaining motor modes stay open in the
+automatic save-path integration and visual editor review stay open in the
 joint track.
 
 ## Scene-authored hinges and motors
@@ -575,7 +575,7 @@ spawned windmills between holding 0.6 radians and their reversing drive; H
 recreates the placed hinge and asks its script to restore its current mode.
 Checked command edits, undo/redo and scene serialization exercise the new fields;
 native backend tests prove holding, retargeting, caps, limits and atomic rejection.
-Slider position motors and automatic save-path integration remain open.
+Automatic save-path integration and visual editor review remain open.
 
 Typed `Physics.set_hinge_motor(joint, velocity, max_torque)` controls the hinge
 **owner**, not a body. It requires a hinge component and a physics host, validates
@@ -593,7 +593,7 @@ anchors use body-local world units without transform scale; angular limits and
 motor start disabled. All validation precedes mutation. The next fixed step
 creates the owned constraint while retaining other owner components and bodies.
 `set_hinge_motor` can configure drive immediately after creation. Platformer H
-rebuilds its placed windmill hinge and restarts its motor while the spawned
+rebuilds its placed windmill hinge and restores its selected drive while the spawned
 windmill remains independently owned.
 
 The generic checked inspector authors hinge settings and command undo reverses
@@ -602,7 +602,7 @@ remain open. This general capability is added for the platformer: Decay reverses
 its powered windmill axle every two seconds while physics keeps the rotor on its
 anchor. Native tests exercise offset anchors, limits, torque caps, coast/reverse,
 invalid atomic edits, command undo, endpoint rebuilds and gameplay removal.
-Other motor modes and complete prefab references remain in the
+Automatic save integration and visual editor review remain in the
 joint track; its acceptance checkbox remains open.
 
 ## Scene-authored sliders and springs
@@ -627,6 +627,25 @@ coasts; enabled zero speed brakes within the cap.
   "motor_enabled": true, "motor_velocity": 0.8, "motor_max_force": 4.0
 }
 ```
+
+Slider `motor_mode` defaults to `"velocity"`, including old payloads. `"position"`
+uses `motor_target_distance`: finite signed separation of the two local anchors
+along the first body's axis, in world units without transform scale. Stiffness
+is force per unit of position error; damping is force per unit/second. Both
+fields default to zero and must be finite and non-negative, even when disabled.
+The existing force cap and enabled travel limits apply. A target outside enabled
+limits remains valid but cannot override them. Settings preserve body motion and
+solver ownership, including suspension/rebuild.
+
+`Physics.set_slider_position_motor(owner, target_distance, stiffness, damping, max_force)`
+selects position mode and validates before patching the runtime component,
+retaining unknown fields. Zero force disables drive. It applies at next fixed
+synchronization, including before bodies exist. `set_slider_motor` explicitly
+returns to velocity mode. Platformer O parks its trolley at signed distance 0.5
+or resumes reversal; J recreation restores the selected drive and direction.
+This general capability is added for the platformer. Tests exercise rotated rails
+with offset anchors, signed retargeting, caps, enabled limits, coasting, atomic
+rejection, lifecycle, checked command undo/redo and canonical save/reopen.
 
 `sindri.physics2d.spring_joint` applies radial, force-based spring and damping
 between two freely rotating local anchors. It pulls extended anchors together
@@ -683,9 +702,9 @@ enabled lower distance cannot exceed upper distance. Its motor starts disabled;
 `set_slider_motor` can configure the new component before synchronization.
 Invalid settings fail before mutation. Next fixed synchronization creates the
 owned constraint while retaining other components, body motion and legacy
-connections. Platformer J rebuilds its trolley slider, restores its current motor
-direction and keeps the separately owned spring attached. Typed reference
-diagnostics and remaining motor modes stay open.
+connections. Platformer J rebuilds its trolley slider, restores its selected
+drive and keeps the separately owned spring attached. Native
+visual editor review and automatic save integration stay open.
 
 These general capabilities are added for the platformer: Decay reverses a
 powered lantern trolley near its rail ends, retunes its suspended light's spring

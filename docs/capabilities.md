@@ -326,8 +326,8 @@ component edits for next synchronization, preserving unknown fields and rebuild
 behavior. Platformer's powered lantern trolley reverses along its rail while
 Decay retunes the hanging light's rest length. Native tests measure rotated rail
 motion/limits, force caps, coasting/braking, spring damping and weight support;
-scene edits/undo, suspension, rebuilds and game removal are exercised. Other motor
-modes and remaining typed ownership controls are still incomplete.
+scene edits/undo, suspension, rebuilds and game removal are exercised. Automatic save
+integration and visual editor review are still incomplete.
 Runtime-spawned nested mechanisms retain original root aliases independently of
 serialized component payloads. The Decay spawn host passes the original prefab
 library into expansion; all four joint kinds reconnect only their own nested
@@ -354,7 +354,7 @@ while suspended. Validation rejects missing/conflicting/invalid owners, wrong
 kinds/types, missing physics and non-positive/non-finite lengths before mutation.
 Unknown payload fields survive. Scene command undo/redo covers all four kinds;
 platformer Decay reels its lantern tether with T and releases/reconnects it with L.
-Additional motor modes and automatic save integration remain.
+Automatic save integration and visual editor review remain.
 Runtime-spawned prefab references now use a separate runtime identity, retaining
 local sibling paths and the original top-level root ID without assigning saved
 scene IDs. The platformer spawns/removes a reusable motor-driven windmill through
@@ -411,8 +411,17 @@ retargeting, caps, enabled limits, atomic rejection, command undo/redo, scene
 round trips, suspension and collider rebuilds. Platformer P holds both placed
 and spawned windmills, resumes their reversal, and retains the selected drive
 when H recreates the placed hinge. This capability was added for that showcase.
-Slider position drive, automatic save integration and visual editor review
-remain open.
+Automatic save integration and visual editor review remain open.
+
+Sliders also support damped force-based position drive through the shared motor
+mode; omitted modes keep velocity behavior. Typed `Physics.set_slider_position_motor`
+sets finite signed anchor separation along the first local axis, non-negative
+stiffness/damping and a force cap. The velocity setter switches back; travel
+limits still apply. Native tests prove rotated rails/offset anchors, signed
+retargeting, caps, limits, invalid atomic calls, coasting, suspension/rebuild,
+checked command undo/redo and save/reopen. Platformer O parks/releases its trolley
+and J retains the selected drive and independent spring. Added for that showcase;
+automatic save-path integration and visual editor review remain open.
 
 Typed `Physics.create_slider_joint` adds finite local anchors, unit local axes
 and optional finite ordered travel bounds under the same owner/scope contract.

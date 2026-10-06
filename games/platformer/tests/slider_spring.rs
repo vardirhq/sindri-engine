@@ -125,3 +125,50 @@ fn rebuilding_the_slider_keeps_bounded_reversal_and_its_spring() {
     }
     assert!(forward && backward);
 }
+
+#[test]
+fn parking_rebuilding_and_releasing_the_trolley_keeps_its_spring() {
+    let mut run = Run::open().unwrap();
+    let trolley = run.entity("trolley-body").unwrap();
+    let light = run.entity("spring-lantern").unwrap();
+    let slider = run.entity("trolley-slider").unwrap();
+    assert!(run.step(1.0 / 60.0).is_empty());
+    run.key(Key::O, true);
+    assert!(run.step(1.0 / 60.0).is_empty());
+    run.key(Key::O, false);
+    for rebuild in [false, true] {
+        run.key(Key::J, rebuild);
+        assert!(run.step(1.0 / 60.0).is_empty());
+        run.key(Key::J, false);
+        for _ in 0..600 {
+            let notes = run.step(1.0 / 60.0);
+            assert!(notes.is_empty(), "{notes:?}");
+            assert_eq!(run.physics.world().joint_count(), 4);
+            let [x, y] = run.position(trolley);
+            let [lx, ly] = run.position(light);
+            assert!((y - 8.1).abs() < 0.03);
+            assert!((x - lx).hypot(y - ly) < 1.9);
+        }
+        let x = run.position(trolley)[0];
+        assert!((x - 10.0).abs() < 0.04, "parked at {x}");
+        assert_eq!(
+            run.world.get(slider).unwrap().components["sindri.physics2d.slider_joint"]["motor_mode"],
+            "position"
+        );
+    }
+    run.key(Key::O, true);
+    assert!(run.step(1.0 / 60.0).is_empty());
+    run.key(Key::O, false);
+    let mut forward = false;
+    let mut backward = false;
+    for _ in 0..480 {
+        let notes = run.step(1.0 / 60.0);
+        assert!(notes.is_empty(), "{notes:?}");
+        assert!((8.47..=10.53).contains(&run.position(trolley)[0]));
+        assert_eq!(run.physics.world().joint_count(), 4);
+        let speed = run.physics.world().linear_velocity(trolley).unwrap()[0];
+        forward |= speed > 0.4;
+        backward |= speed < -0.4;
+    }
+    assert!(forward && backward);
+}

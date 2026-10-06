@@ -168,3 +168,6 @@ fn distinct_local_axes_define_the_locked_relative_orientation() {
     assert!((pose.rotation + std::f32::consts::FRAC_PI_2).abs() < 0.03);
     assert!(pose.position[1].abs() < 0.02);
 }
+
+#[path = "sliders/position.rs"]
+mod position;

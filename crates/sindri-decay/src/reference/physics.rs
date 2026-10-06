@@ -6,6 +6,17 @@ pub(super) const PHYSICS: TypeEntry = TypeEntry {
     text: "2D physics: moving objects with speed and pushes, and finding out what this script's object bumped into.",
     members: &[
         call(
+            "set_slider_position_motor",
+            &[
+                "joint",
+                "target_distance",
+                "stiffness",
+                "damping",
+                "max_force",
+            ],
+            "Selects a damped force-based position motor on an authored slider owner. Target is finite signed anchor separation along the first body's local axis in world units without transform scale. Stiffness, damping and force cap must be finite and non-negative. Enabled travel limits still bound motion; zero force disables drive. Requires physics; validates before mutation, preserves unknown fields/body motion and applies at next synchronization even before bodies exist. Settings survive suspension/rebuilds. set_slider_motor selects velocity mode again.",
+        ),
+        call(
             "set_hinge_position_motor",
             &[
                 "joint",
@@ -149,7 +160,7 @@ pub(super) const PHYSICS: TypeEntry = TypeEntry {
         call(
             "set_slider_motor",
             &["joint", "velocity", "max_force"],
-            "Sets an authored 2D slider owner's relative translation speed in world units/second along the first local axis, with a finite non-negative force cap. Zero force disables the drive; zero speed with positive force brakes. Validates before modifying the runtime component; applies at next fixed synchronization and survives endpoint rebuilds. Needs physics and a slider component; preserves unknown fields.",
+            "Selects velocity mode on an authored 2D slider owner and sets its relative translation speed in world units/second along the first local axis, with a finite non-negative force cap. Zero force disables the drive; zero speed with positive force brakes. Validates before modifying the runtime component; applies at next fixed synchronization and survives endpoint rebuilds. Needs physics and a slider component; preserves unknown fields.",
         ),
         call(
             "set_spring",

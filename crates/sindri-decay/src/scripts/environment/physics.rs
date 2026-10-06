@@ -82,7 +82,7 @@ fn physics_params(call: PhysicsCall) -> Vec<Type> {
         | PhysicsCall::SetSliderMotor => {
             vec![entity(), Type::F32, Type::F32]
         }
-        PhysicsCall::SetHingePositionMotor => {
+        PhysicsCall::SetHingePositionMotor | PhysicsCall::SetSliderPositionMotor => {
             vec![entity(), Type::F32, Type::F32, Type::F32, Type::F32]
         }
         PhysicsCall::SetSpring => vec![entity(), Type::F32, Type::F32, Type::F32],
@@ -152,6 +152,7 @@ fn physics_return_type(call: PhysicsCall) -> Type {
         | PhysicsCall::SetHingeMotor
         | PhysicsCall::SetHingePositionMotor
         | PhysicsCall::SetSliderMotor
+        | PhysicsCall::SetSliderPositionMotor
         | PhysicsCall::SetSpring
         | PhysicsCall::SetJointEnabled
         | PhysicsCall::SetDistance

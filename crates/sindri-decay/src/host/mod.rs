@@ -35,6 +35,7 @@ mod physics_joint_endpoints;
 mod physics_joint_state;
 mod physics_joints;
 mod physics_motion;
+mod physics_slider_position;
 mod print;
 mod profile;
 mod query;

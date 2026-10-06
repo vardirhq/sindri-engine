@@ -9,7 +9,7 @@ For a new implementation session, read [the recovery handoff](physics-update-han
 CCD, one-way platforms, forces/rotation, contacts and materials are implemented
 and checked. Scene-authored distance constraints form a checked joint foundation.
 Hinges, sliders, springs and velocity motors now form checked joint slices.
-Hinges also support a checked damped position motor.
+Hinges and sliders also support checked damped position motors.
 The remaining items below are the active scope.
 
 ## Acceptance checklist
@@ -580,6 +580,38 @@ surface-specific completeness. This checklist does not mark those surfaces done.
   spawning and tether controls, and reported no runtime errors. Native/browser
   captures were visually reviewed; both browser windmills held the same angle
   through recreation and resumed motion.
-- CI must verify this slice; prior head `04ef2587` passed all checks. Slider
-  position motors, automatic save integration, visual editor review and final
+- CI passed on hinge position head `adb632e5`. Slider position motors, automatic save integration, visual editor review and final
   joint/workspace acceptance remain open.
+
+
+### Slider position motor checkpoint
+
+- Reused Sindri-owned `MotorMode2d` for damped force-based slider position drive.
+  Old payloads default to velocity mode. The finite signed target is anchor
+  separation along the first body's local axis, in unscaled world units;
+  stiffness/damping are finite and non-negative. The force cap and enabled
+  travel limits still apply, including targets outside the limits.
+- Typed `Physics.set_slider_position_motor` validates before mutation, retains
+  unknown fields/body motion and works before bodies exist. The velocity setter
+  explicitly switches back. Zero force coasts; suspension and collider rebuilds
+  retain settings.
+- Added for the platformer: O parks/releases the trolley at signed distance 0.5;
+  J recreates its slider and restores the selected drive and current direction.
+  The independent spring remains attached and continues its tuning.
+- Native tests prove signed retargeting on rotated rails with offset anchors,
+  force caps, travel limits, invalid settings/calls, coasting, missing physics,
+  pre-sync drive and suspension/rebuild. Checked scene commands exercise
+  undo/redo and canonical save/reopen; gameplay parks, rebuilds and resumes
+  bounded reversal while retaining its spring.
+- Scoped preflight passed 874 native tests and warning-denied all-target/
+  all-feature checks for physics, scene, Decay and platformer. Typed trolley
+  preflight had zero errors/reminders. Four-crate Clippy, 11 regenerated catalogue
+  tests and the 1,115-file size gate passed. All-target/all-feature WASM checks
+  passed all four crates; the generic browser host was rebuilt.
+- Export and native Vulkan capture passed. Chromium WebGPU fetched 25 assets
+  and exercised O parking/J recreation/O release alongside prefab spawning and
+  tether controls without runtime errors. Visually reviewed native/browser
+  captures show the trolley retain its parked position through recreation and
+  resume travel while its spring stays attached.
+- CI must verify this slice; all checks passed on prior hinge head `adb632e5`. Automatic save-path integration, native
+  visual editor review and final joint/workspace acceptance remain open.

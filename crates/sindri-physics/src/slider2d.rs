@@ -3,8 +3,8 @@
 use serde::{Deserialize, Serialize};
 use sindri_core::EntityId;
 
-use crate::PhysicsError;
 use crate::validate::{finite, finite2, non_negative};
+use crate::{MotorMode2d, PhysicsError};
 
 #[derive(Clone, Copy, Debug, PartialEq, Serialize, Deserialize)]
 #[serde(default)]
@@ -17,6 +17,13 @@ pub struct SliderSettings2d {
     pub lower_distance: f32,
     pub upper_distance: f32,
     pub motor_enabled: bool,
+    pub motor_mode: MotorMode2d,
+    /// Signed anchor separation along the first body's local axis, in world units.
+    pub motor_target_distance: f32,
+    /// Force per world unit of position error.
+    pub motor_stiffness: f32,
+    /// Damping force per world unit per second.
+    pub motor_damping: f32,
     /// Relative translation speed in world units per second.
     pub motor_velocity: f32,
     pub motor_max_force: f32,
@@ -33,6 +40,10 @@ impl Default for SliderSettings2d {
             lower_distance: 0.0,
             upper_distance: 0.0,
             motor_enabled: false,
+            motor_mode: MotorMode2d::Velocity,
+            motor_target_distance: 0.0,
+            motor_stiffness: 0.0,
+            motor_damping: 0.0,
             motor_velocity: 0.0,
             motor_max_force: 0.0,
         }
@@ -43,7 +54,7 @@ impl SliderSettings2d {
     /// Validates all numeric fields, including disabled settings.
     ///
     /// # Errors
-    /// Rejects nonfinite values, non-unit axes, negative force caps and
+    /// Rejects nonfinite values, non-unit axes, negative force caps/gains and
     /// enabled limits whose lower bound exceeds the upper bound.
     pub fn validate(self) -> Result<(), PhysicsError> {
         finite2("slider_first_anchor", self.first_anchor)?;
@@ -57,6 +68,9 @@ impl SliderSettings2d {
         finite("slider_lower_distance", self.lower_distance)?;
         finite("slider_upper_distance", self.upper_distance)?;
         finite("slider_motor_velocity", self.motor_velocity)?;
+        finite("slider_motor_target_distance", self.motor_target_distance)?;
+        non_negative("slider_motor_stiffness", self.motor_stiffness)?;
+        non_negative("slider_motor_damping", self.motor_damping)?;
         non_negative("slider_motor_max_force", self.motor_max_force)?;
         if self.limits_enabled && self.lower_distance > self.upper_distance {
             return Err(PhysicsError::InvalidSliderLimits);

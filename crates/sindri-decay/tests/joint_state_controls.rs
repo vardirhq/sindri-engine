@@ -353,3 +353,6 @@ mod slider_creation;
 
 #[path = "joint_state_controls/hinge_position.rs"]
 mod hinge_position;
+
+#[path = "joint_state_controls/slider_position.rs"]
+mod slider_position;
