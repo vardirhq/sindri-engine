@@ -31,6 +31,14 @@ impl WorldHost<'_> {
         }
         let (kind, enabled) = self.joint_state(owner, path)?;
         match call {
+            PhysicsCall::RemoveJoint => {
+                self.world
+                    .get_mut(owner)
+                    .expect("checked owner")
+                    .components
+                    .remove(kind);
+                Ok(Value::Unit)
+            }
             PhysicsCall::JointEnabled => Ok(Value::Bool(enabled)),
             PhysicsCall::SetJointEnabled => {
                 let Some(Value::Bool(enabled)) = args.get(1) else {

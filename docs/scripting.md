@@ -1024,6 +1024,7 @@ a person who has not clicked yet.
 | `Physics.set_joint_enabled(joint, enabled)` | nothing |
 | `Physics.set_distance(joint, max_distance)` | nothing |
 | `Physics.set_joint_endpoints(joint, first, second)` | nothing |
+| `Physics.remove_joint(joint)` | nothing |
 | `Physics.raycast(origin, direction, max_distance, mask, include_sensors, exclude)` | `RayHit2d` or `null` |
 | `Physics.cast_circle(origin, radius, direction, max_distance, mask, include_sensors, exclude)` | `RayHit2d` or `null` |
 | `Physics.cast_box(origin, half_size, rotation, direction, max_distance, mask, include_sensors, exclude)` | `RayHit2d` or `null` |
@@ -1098,6 +1099,14 @@ suspended or before endpoints are built. The length must be finite and positive.
 These calls require physics and exactly one valid authored joint; distance tuning
 requires the distance kind. They reject invalid calls before mutation and preserve
 unknown payload fields. Omitting `enabled` in old scenes means true.
+
+`Physics.remove_joint(joint)` removes exactly one valid authored distance, hinge,
+slider or spring component, releasing its solver constraint at the next fixed
+synchronization. It keeps the owner, its other components and endpoint bodies,
+and leaves legacy `connect_distance` constraints alone. It works while suspended
+or before bodies exist. Missing, conflicting or malformed joints and hosts without
+physics fail before mutation. Later joint controls fail until a joint is authored
+again. Use `set_joint_enabled` for reversible suspension.
 
 `Physics.set_joint_endpoints(joint, first, second)` retargets any one valid
 2D authored joint using entity handles. Null clears either endpoint. It stores

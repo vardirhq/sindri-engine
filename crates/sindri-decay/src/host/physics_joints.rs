@@ -21,9 +21,10 @@ impl WorldHost<'_> {
             PhysicsCall::SetHingeMotor => self.hinge_motor_call(path, args),
             PhysicsCall::SetSliderMotor => self.slider_motor_call(path, args),
             PhysicsCall::SetSpring => self.spring_call(path, args),
-            PhysicsCall::JointEnabled | PhysicsCall::SetJointEnabled | PhysicsCall::SetDistance => {
-                self.joint_state_call(call, path, args)
-            }
+            PhysicsCall::JointEnabled
+            | PhysicsCall::SetJointEnabled
+            | PhysicsCall::SetDistance
+            | PhysicsCall::RemoveJoint => self.joint_state_call(call, path, args),
             _ => unreachable!("only authored joint controls reach here"),
         }
     }

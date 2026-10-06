@@ -269,6 +269,7 @@ fn missing_conflicting_or_invalid_joint_components_are_rejected_before_mutation(
             "Physics.set_joint_enabled(this.entity, false);",
             "Physics.set_distance(this.entity, 2.0);",
             "Physics.set_joint_endpoints(this.entity, null, null);",
+            "Physics.remove_joint(this.entity);",
         ] {
             let (extractor, mut world, owner, _) = fixture(KINDS[0]);
             let components = &mut world.get_mut(owner).unwrap().components;
@@ -334,3 +335,6 @@ fn advance(
 
 #[path = "joint_state_controls/endpoints.rs"]
 mod endpoints;
+
+#[path = "joint_state_controls/removal.rs"]
+mod removal;

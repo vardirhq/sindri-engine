@@ -69,7 +69,8 @@ fn physics_params(call: PhysicsCall) -> Vec<Type> {
         PhysicsCall::ApplyImpulseAtPoint => vec![entity(), Type::Vec2, Type::Vec2],
         PhysicsCall::Layer => vec![Type::String],
         PhysicsCall::Mask => vec![Type::array_of(Type::String)],
-        PhysicsCall::JointEnabled
+        PhysicsCall::RemoveJoint
+        | PhysicsCall::JointEnabled
         | PhysicsCall::ContinuousCollision
         | PhysicsCall::Contacts
         | PhysicsCall::VelocityX
@@ -115,6 +116,7 @@ fn physics_return_type(call: PhysicsCall) -> Type {
         | PhysicsCall::SetJointEnabled
         | PhysicsCall::SetDistance
         | PhysicsCall::SetJointEndpoints
+        | PhysicsCall::RemoveJoint
         | PhysicsCall::SetContinuousCollision
         | PhysicsCall::DropThrough
         | PhysicsCall::ApplyForce

@@ -210,10 +210,26 @@ the 1,100-file size gate passed. All-target/all-feature WASM checks passed core,
 Decay and platformer; the generic browser host was rebuilt. Export and native
 Vulkan capture passed. Chromium fetched 25 assets and exercised R switching,
 suspended retargeting, reconnection and spawning without runtime errors. Native
-and browser captures were visually reviewed. CI must verify this slice; all
-checks passed on prior head `3f129f34`.
+and browser captures were visually reviewed. CI passed on typed endpoint head
+`a3713835`.
 
-Joint acceptance stays open. Add remaining motor modes and typed structural
+A **typed joint removal slice** adds `Physics.remove_joint` for all four kinds.
+Only the authored joint component is removed; next fixed synchronization releases
+its constraint. Owner/other components and bodies/motion remain, with legacy
+connections unaffected. Valid before body sync or while suspended; invalid
+owners/physics fail atomically. Later controls fail until authored again.
+Platformer Z cuts its lantern cord and ignores subsequent tether controls.
+Final scoped preflight passed 332 native tests and warning-denied all-target/
+all-feature checks for Decay and platformer. Typed lantern preflight had zero
+errors/reminders. Two-crate Clippy, 11 regenerated catalogue tests and the
+1,101-file size gate passed. All-target/all-feature WASM checks passed both
+crates; the generic browser host was rebuilt. Export and native Vulkan capture
+passed. Chromium WebGPU fetched 25 assets and exercised retarget/release/
+reconnect, cutting, subsequent tether controls and prefab spawning without
+runtime errors. Native/browser captures were visually reviewed. CI must verify
+this slice; all checks passed on prior head `a3713835`.
+
+Joint acceptance stays open. Add remaining motor modes and typed creation
 controls. Automatic editor/script save
 integration remains open; the reference gap remains partial in parity.
 
@@ -470,7 +486,7 @@ branch codex/physics-update. Read AGENTS.md, CLAUDE.md,
 docs/physics-update-handoff.md and docs/physics-update.md first.
 Implement every remaining acceptance item, including docs, in this one PR.
 CCD, one-way platforms, forces/rotation and contacts are checked and saved on
-the branch. Continue with typed joint structural controls, remaining motor modes
+the branch. Continue with typed joint creation controls, remaining motor modes
 and automatic save-reference integration, then
 the remaining checklist.
 Push checked small slices regularly, each feature in one push or less.

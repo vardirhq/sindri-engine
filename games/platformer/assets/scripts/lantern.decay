@@ -15,27 +15,32 @@ script Lantern {
         this.age += dt;
         var enabled: bool = false;
         if World.exists(this.tether) {
-            if Input.just_pressed("L") {
-                Physics.set_joint_enabled(this.tether, !Physics.joint_enabled(this.tether));
-            }
-            if Input.just_pressed("T") {
-                this.short = !this.short;
-                if this.short {
-                    Physics.set_distance(this.tether, 1.25);
-                } else {
-                    Physics.set_distance(this.tether, 2.0);
+            if Input.just_pressed("Z") {
+                Physics.remove_joint(this.tether);
+                this.tether = null;
+            } else {
+                if Input.just_pressed("L") {
+                    Physics.set_joint_enabled(this.tether, !Physics.joint_enabled(this.tether));
                 }
-            }
-            if Input.just_pressed("R") {
-                this.alternate = !this.alternate;
-                if this.alternate {
-                    this.hook = World.find("Lantern alternate hook");
-                } else {
-                    this.hook = World.find("Lantern hook");
+                if Input.just_pressed("T") {
+                    this.short = !this.short;
+                    if this.short {
+                        Physics.set_distance(this.tether, 1.25);
+                    } else {
+                        Physics.set_distance(this.tether, 2.0);
+                    }
                 }
-                Physics.set_joint_endpoints(this.tether, this.hook, this.entity);
+                if Input.just_pressed("R") {
+                    this.alternate = !this.alternate;
+                    if this.alternate {
+                        this.hook = World.find("Lantern alternate hook");
+                    } else {
+                        this.hook = World.find("Lantern hook");
+                    }
+                    Physics.set_joint_endpoints(this.tether, this.hook, this.entity);
+                }
+                enabled = Physics.joint_enabled(this.tether);
             }
-            enabled = Physics.joint_enabled(this.tether);
         }
         Physics.apply_force(this.entity, Vec2(sin(this.age * 1.8) * 0.6, 0.0));
         let p = this.transform.world_position;

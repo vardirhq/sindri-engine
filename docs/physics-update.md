@@ -414,6 +414,30 @@ surface-specific completeness. This checklist does not mark those surfaces done.
   WebGPU fetched 25 assets and exercised R switching, suspended retargeting,
   reconnection and prefab spawning without runtime errors. Native/browser game
   captures were visually reviewed.
-- CI must verify this slice; all checks passed on prior head `3f129f34`.
+- CI passed on typed endpoint head `a3713835`.
   Structural controls, additional motor modes, save-path integration and final
   joint/workspace acceptance remain open.
+
+
+### Typed joint removal checkpoint
+
+- Added `Physics.remove_joint` for all four authored 2D kinds. It removes the
+  component and releases the solver constraint at next fixed synchronization,
+  preserving the owner, other components and endpoint bodies/motion. Legacy
+  distance connections remain separately owned. Valid before initial body sync
+  or while suspended; invalid/missing/conflicting joints and missing physics
+  fail before mutation. Later joint controls fail until authored again.
+- Platformer Z cuts the lantern cord for the rest of the run. The body falls,
+  the visible cord disappears and later tether controls stay inert.
+- Final scoped preflight passed 332 native tests and warning-denied all-target/
+  all-feature checks for Decay and platformer. Typed lantern preflight had zero
+  errors/reminders. Two-crate Clippy, 11 regenerated catalogue tests and the
+  1,101-file size gate passed.
+- All-target/all-feature WASM checks passed both crates; the generic browser host
+  was rebuilt. Export and native Vulkan capture passed. Chromium WebGPU fetched
+  25 assets and exercised retarget/release/reconnect, cord cutting, subsequent
+  tether controls and prefab spawning without runtime errors. Native/browser
+  captures were visually reviewed.
+- CI must verify this slice; all checks passed on prior head `a3713835`. Creation
+  controls, additional motor modes, save-path integration and final joint/
+  workspace acceptance remain open.

@@ -502,8 +502,15 @@ out-of-scope or identical endpoints fail. Inactive references remain authored,
 with the constraint suspended until active. Settings, enabled flags, unknown
 fields and body motion are preserved. No runtime handles are serialized.
 Platformer switches its lantern between two hooks with R, including while released.
-Structural creation/removal and automatic saved-spawn reference integration
-remain open in the joint track.
+`Physics.remove_joint(owner)` removes the authored joint component and releases
+its solver constraint at the next fixed synchronization. The owner, other
+components and endpoint bodies/motion remain; legacy `connect_distance`
+constraints are unaffected. Exactly one valid authored joint and a physics host
+are required, including while suspended or before initial body synchronization.
+Subsequent joint controls fail until a joint is authored again. Platformer Z cuts
+its lantern cord for the remainder of the run; Decay hides the cord and ignores
+later tether controls. Creation controls and automatic saved-spawn reference
+integration remain open in the joint track.
 
 ## Scene-authored hinges and velocity motors
 
@@ -544,8 +551,9 @@ Typed `Physics.set_hinge_motor(joint, velocity, max_torque)` controls the hinge
 before changing its runtime component, preserves unknown fields and applies at
 the next fixed synchronization. Its values persist through endpoint rebuilds and
 the valid spawn-to-synchronization window. Zero torque disables the motor rather
-than braking; to brake, set zero velocity with positive torque. Removal and other
-structural controls are not yet exposed through typed joint calls.
+than braking; to brake, set zero velocity with positive torque. Typed
+`Physics.remove_joint` releases the authored hinge at next synchronization;
+creation controls remain absent.
 
 The generic checked inspector authors hinge settings and command undo reverses
 motor edits. Visual editor review and automatic save integration
@@ -613,7 +621,7 @@ only their fields in the runtime component, preserving unknown payload fields.
 They require the appropriate component and a physics host. Values apply at the
 next fixed synchronization, including before endpoints are built, and survive
 rebuilds. Zero force in the slider call disables its motor rather than braking.
-These calls tune existing authored constraints; structural creation/removal and
+These calls tune existing authored constraints; structural creation and
 reference diagnostics are not yet exposed through typed joint calls.
 
 These general capabilities are added for the platformer: Decay reverses a

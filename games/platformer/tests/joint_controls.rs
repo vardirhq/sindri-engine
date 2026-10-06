@@ -72,3 +72,31 @@ fn lantern_retargets_its_hook_without_rebuilding_the_body() {
     assert_eq!(run.physics.world().joint_count(), 4);
     assert!(length(&run) < 2.04);
 }
+
+#[test]
+fn cutting_the_lantern_cord_removes_only_its_authored_constraint() {
+    let mut run = Run::open().unwrap();
+    step(&mut run, 120);
+    let tether = run.entity("lantern-tether").unwrap();
+    let body = run.entity("wind-lantern").unwrap();
+    let [_, before] = run.position(body);
+    press(&mut run, Key::Z);
+    assert!(run.world.contains(tether));
+    assert!(
+        !run.world
+            .get(tether)
+            .unwrap()
+            .components
+            .contains_key("sindri.physics2d.distance_joint")
+    );
+    assert_eq!(run.physics.world().joint_count(), 3);
+    step(&mut run, 20);
+    let [_, after] = run.position(body);
+    assert!(after < before - 0.2);
+    let cord = run.entity("lantern-cord").unwrap();
+    assert!(run.world.get(cord).unwrap().transform_3d.unwrap().scale[0].abs() < f32::EPSILON);
+    for key in [Key::L, Key::T, Key::R, Key::Z] {
+        press(&mut run, key);
+    }
+    assert_eq!(run.physics.world().joint_count(), 3);
+}

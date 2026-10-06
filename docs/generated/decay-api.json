@@ -1906,6 +1906,18 @@
           "returns": "RayHit2d"
         },
         {
+          "description": "Removes the authored distance, hinge, slider or spring component from one owner; the next fixed synchronization releases its solver constraint. Keeps the owner, its other components and endpoint bodies/motion. Legacy connect_distance constraints are unaffected. Works before bodies are built or while suspended. Requires physics and exactly one valid authored joint; missing, conflicting or malformed owners fail before mutation. Later joint controls fail until a joint is authored again.",
+          "kind": "function",
+          "name": "remove_joint",
+          "parameter_names": [
+            "joint"
+          ],
+          "parameters": [
+            "Entity"
+          ],
+          "returns": "unit"
+        },
+        {
           "description": "The objects that entered this script's trigger area since the last frame. A trigger area detects things without blocking them, like a pickup.",
           "kind": "function",
           "name": "sensor_entered",

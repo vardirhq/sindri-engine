@@ -1,5 +1,7 @@
 # Changelog
 
+- Add typed authored 2D joint removal with `Physics.remove_joint`. It releases the constraint at the next fixed synchronization while keeping the owner, its other components and endpoint bodies; legacy connections remain separate. Platformer Z cuts the lantern cord for the remainder of the run.
+
 - Add typed 2D joint endpoint retargeting with `Physics.set_joint_endpoints`. Scoped handles become stable scene IDs or local prefab paths; null clears an endpoint. Invalid references fail atomically while settings, unknown fields and body motion are retained. Platformer switches its lantern between two hooks with R.
 
 - Add scoped entity-reference pickers to registered component fields in the native inspector, including nested lists. Choose by name/ID, clear a reference, or keep typing; missing and inactive targets are marked. The picker shares runtime scene/prefab resolution rules, and all four joint kinds exercise picker edits and command undo.
