@@ -7,6 +7,11 @@ pub(super) fn resolve(world: &World, owner: EntityId, target: &str) -> Option<En
     if target.is_empty() {
         return None;
     }
+    if world.get(owner)?.prefab_identity.is_some() {
+        return world
+            .prefab_entity(owner, target)
+            .filter(|&entity| world.is_active(entity));
+    }
     let within = boundary(world, owner);
     let usable = |entity| boundary(world, entity) == within && world.is_active(entity);
     // A placed prefab's root takes its instance ID, not its original root ID.

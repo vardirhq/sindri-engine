@@ -1,5 +1,7 @@
 # Changelog
 
+- Resolve authored 2D joint endpoints inside runtime-spawned prefabs through separate instance-local identity. Repeated spawns keep their own roots and children without assigning saved scene IDs. Platformer adds a reusable powered windmill placed/removed with V. Nested root aliases and exported placed-root aliases remain in progress.
+
 - Add scene-authored 2D sliders with travel limits and force-capped velocity motors, plus damped force-based springs. Typed Decay controls tune their runtime components through synchronization and rebuilds. Platformer adds a reversing lantern trolley with a retuned spring suspension. Structural controls and full prefab references remain in progress.
 
 - Add scene-authored 2D hinges with local anchors, angle limits and torque-capped velocity motors. Typed `Physics.set_hinge_motor` controls their next synchronized drive without resetting body motion. Platformer adds a reversing windmill. Sliders, springs and full prefab reference integration remain in progress.

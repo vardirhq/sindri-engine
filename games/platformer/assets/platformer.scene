@@ -2572,6 +2572,19 @@
           "script": "BreathingSpring"
         }
       }
+    },
+    {
+      "id": "windmill-setup",
+      "name": "Windmill setup",
+      "components": {
+        "sindri.script": {
+          "source": "scripts/windmill-setup.decay",
+          "script": "WindmillSetup",
+          "properties": {
+            "template": "prefabs/windmill.prefab"
+          }
+        }
+      }
     }
   ]
 }

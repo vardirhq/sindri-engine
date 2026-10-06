@@ -8,7 +8,9 @@ use std::path::{Path, PathBuf};
 use std::time::Duration;
 
 use sindri_core::{ComponentSchemaRegistry, EntityId, SceneDocument, World};
-use sindri_decay::{Physics2d, ScriptComponent, ScriptFrame, ScriptSources, Scripts};
+use sindri_decay::{
+    Physics2d, PrefabSources, ScriptComponent, ScriptFrame, ScriptSources, Scripts,
+};
 use sindri_platform::{InputEvent, InputState, Key};
 use sindri_scene::{SceneExtractor, ScenePhysics2d, SpriteAnimations};
 
@@ -24,6 +26,7 @@ pub struct Run {
     pub components: ComponentSchemaRegistry,
     pub scripts: Scripts,
     pub sources: ScriptSources,
+    pub prefabs: PrefabSources,
     /// No gravity of its own: the scene's Physics 2D World says which way is
     /// down, which is what this proves the scene can do.
     pub physics: ScenePhysics2d,
@@ -47,8 +50,9 @@ impl Run {
         document.validate().map_err(|error| error.to_string())?;
         // The coins are instances of one prefab, made here as every host
         // makes them.
+        let authored_prefabs = prefabs_under(&root)?;
         let document = document
-            .expanded(&prefabs_under(&root)?)
+            .expanded(&authored_prefabs)
             .map_err(|error| error.to_string())?;
 
         let mut components = SceneExtractor::new()
@@ -75,6 +79,10 @@ impl Run {
             }
         }
 
+        let mut prefabs = PrefabSources::new();
+        for (id, prefab) in authored_prefabs {
+            prefabs.insert(id, prefab);
+        }
         let mut physics = ScenePhysics2d::top_down().map_err(|error| error.to_string())?;
         physics.set_materials(materials_under(&root)?);
         Ok(Self {
@@ -82,6 +90,7 @@ impl Run {
             components,
             scripts: Scripts::new(),
             sources,
+            prefabs,
             physics,
             animations: SpriteAnimations::new(),
             sequences: sindri_scene::Sequences::new(),
@@ -101,6 +110,7 @@ impl Run {
             &mut self.world,
             &self.components,
             ScriptFrame::new(&self.sources, &self.input, delta)
+                .with_prefabs(&self.prefabs)
                 .with_physics(Physics2d {
                     world: physics,
                     events,

@@ -14,7 +14,7 @@ mod space;
 #[cfg(test)]
 mod tests;
 
-pub use prefab::SpawnedPrefab;
+pub use prefab::{PrefabIdentity, SpawnedPrefab};
 pub use scene::{AddedScene, LoadedScene};
 
 use std::collections::BTreeMap;
@@ -55,6 +55,9 @@ pub struct EntityData {
     /// of what they expanded into. A runtime spawn leaves it empty, as it
     /// leaves the stable ID empty: nothing spawned is saved.
     pub prefab: Option<PrefabLink>,
+    /// Runtime-only identity inside one spawned prefab, independent of saved IDs.
+    /// It survives reparenting and command undo, but is never serialized.
+    pub prefab_identity: Option<PrefabIdentity>,
 }
 
 #[derive(Clone, Debug)]

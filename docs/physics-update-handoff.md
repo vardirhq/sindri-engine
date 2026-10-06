@@ -92,12 +92,28 @@ are split by responsibility; legacy distance and hinge behavior remains covered.
 Final scoped preflight passed 1,432 native tests, all-target/all-feature checks
 and typed preflight for all three scripts with zero errors/reminders. Five-crate
 Clippy, 11 catalogue tests, WASM checks and rebuilt native/Chromium delivery and
-captures passed. The slider/spring head still requires CI verification.
+captures passed. CI is green on slider/spring commit `338db9fc`.
+
+A checked **spawned-prefab reference slice** now retains runtime-only local
+identity in core, separately from saved scene IDs and editor links. Authored
+joints resolve local siblings and their original top-level root inside one spawn;
+missing/inactive endpoints never bind another instance or a scene entity. Scope
+survives reparenting, cloning, command undo and assigning saved IDs, and dies with
+the generation-checked root. Editor duplication clears runtime scope.
+Platformer Decay places/removes a reusable powered windmill with V; two cycles
+observe reversal, fixed anchors and cleanup. All four joint kinds are exercised
+across repeated spawns, inactivity and removal; expanded nested paths are tested.
+Final scoped preflight passed 1,385 native tests and all-target/all-feature checks
+for core, scene, editor and platformer. Four-crate warning-denied Clippy, typed
+setup-script preflight (zero errors/reminders), 11 catalogue tests and WASM checks
+passed. Rebuilt Chromium export/load plus V placement/removal/replacement fetched
+24 assets without runtime errors; native Vulkan capture passed. Both captures
+were visually reviewed. CI must verify this pushed checkpoint.
 
 Joint acceptance stays open. Add remaining motor modes, typed structural
-controls and dedicated reference authoring/diagnostics. Fix stable local
-references for runtime-spawned prefabs and preserve root-alias semantics through
-export pre-expansion; the gap is explicitly recorded in parity.
+controls and dedicated reference authoring/diagnostics. Nested renamed-root
+aliases, exported placed-root aliases and saved-spawn reference remapping still
+need integration; the reference gap remains explicitly partial in parity.
 
 Continue with **the remaining joints and typed controls/lifecycle**, then
 character movement, accelerated queries, 3D/voxel physics and final integration.

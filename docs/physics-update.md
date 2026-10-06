@@ -227,4 +227,32 @@ surface-specific completeness. This checklist does not mark those surfaces done.
 - Joint acceptance remains open for complete prefab references, typed structural
   controls, dedicated reference authoring/diagnostics and remaining motor modes.
   Visual editor interaction, full browser gameplay and final workspace checks
-  remain open. CI must verify the pushed slider/spring head.
+  remain open. CI is green on slider/spring commit `338db9fc`.
+
+### Spawned-prefab reference checkpoint
+
+- Core retains runtime-only `PrefabIdentity` separately from saved scene IDs and
+  editor instance links. `World::prefab_entity` resolves enclosing local paths and
+  the original top-level root within one spawn, without crossing instances or
+  falling through to a scene entity. Root removal invalidates the scope even
+  after slot reuse; reparenting, cloning, undo and assigning saved IDs retain it.
+- All four authored joint kinds use this resolver. Repeated spawns, inactive
+  endpoints, reactivation and removal are exercised. Expanded nested sibling
+  paths and command undo are covered; editor duplication clears runtime scope.
+- Platformer Decay places/removes a reusable windmill with V. Its regression
+  runs two placement cycles, observes motor reversal and a fixed axle, checks
+  constraint cleanup and retains the original level-goal regressions.
+- Final scoped preflight passed 1,385 native tests and warning-denied all-target/
+  all-feature checks for core, scene, editor and platformer. Typed setup-script
+  preflight passed with zero errors/reminders; four-crate Clippy passed. Catalogue
+  currentness/completeness passed 11 tests; all 1,082 Rust files pass the size gate.
+- All-target/all-feature WASM checks passed core, scene and platformer. The generic
+  browser host was rebuilt; Chromium WebGPU loaded the export at
+  `/examples/platformer/`, fetched 24 assets and exercised placement, removal and
+  replacement without runtime errors. Native Vulkan capture passed; both native
+  and spawned-browser captures were visually reviewed.
+- Nested renamed-root aliases, exported placed-root aliases and saved-spawn
+  reference remapping remain incomplete. Typed structural controls, dedicated
+  reference authoring/diagnostics, other motor modes and final editor/browser/
+  workspace integration remain open. Joint acceptance stays unchecked. CI must
+  verify this pushed checkpoint.

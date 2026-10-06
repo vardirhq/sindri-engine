@@ -328,8 +328,13 @@ Decay retunes the hanging light's rest length. Native tests measure rotated rail
 motion/limits, force caps, coasting/braking, spring damping and weight support;
 scene edits/undo, suspension, rebuilds and game removal are exercised. Other motor
 modes and remaining typed ownership controls are still absent.
-Runtime-spawned prefab local references and exported prefab-root aliases remain
-gaps; dedicated picker/diagnostics and visual inspector review are unverified.
+Runtime-spawned prefab references now use a separate runtime identity, retaining
+local sibling paths and the original top-level root ID without assigning saved
+scene IDs. The platformer spawns/removes a reusable motor-driven windmill through
+Decay. Repeated instances, inactivity, root removal, reparenting and command undo
+are covered. Nested renamed-root aliases, exported placed-root aliases and
+saved-spawn reference remapping remain gaps; dedicated picker/diagnostics and
+visual inspector review are unverified.
 
 `sindri.physics2d.rigid_body` and `sindri.physics2d.collider` are registered
 scene components with defaults the engine accepts, so a scene authors bodies and

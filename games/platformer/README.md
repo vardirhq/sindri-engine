@@ -7,6 +7,9 @@ K or the west controller button tosses the wooden crate when nearby. Wind
 pushes it along the ground; an off-centre kick makes it tumble. Its forces and
 rotation are driven in Decay, with physics writing the resulting pose back.
 
+V places or removes a second powered windmill from a reusable prefab. Its hinge
+references its own root axle and rotor, and Decay reverses the motor.
+
 Arrow keys or A/D run; Space, W or Up jumps. A controller can use the left
 stick or D-pad and the south face button. Down/S or D-pad down drops through
 the raised one-way planks. On a touch screen, the first finger
@@ -94,3 +97,6 @@ changes its rest length with `Physics.set_spring` and draws the cord from solved
 positions. `tests/slider_spring.rs` checks bounded reversal, the changed light
 height and independent joint removal. Copy these separate owner entities for a
 linear mechanism or a damped suspension; keep motion rules in Decay.
+
+`tests/spawned_joints.rs` places, reverses and removes the reusable windmill twice
+through Decay, checking its fixed axle, isolated joint and fresh spawn lifecycle.

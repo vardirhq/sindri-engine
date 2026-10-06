@@ -10,3 +10,6 @@ pub(crate) use sync::SceneJoints2d;
 
 #[cfg(test)]
 mod tests;
+
+#[cfg(test)]
+mod prefab_tests;

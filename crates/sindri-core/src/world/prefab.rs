@@ -7,6 +7,15 @@ use crate::{EntityId, PrefabDocument, PrefabError, SceneEntityId};
 
 use super::{EntityData, World, WorldError};
 
+/// An authored path scoped to a single runtime spawn, never a saved scene ID.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct PrefabIdentity {
+    /// Generation-checked root handle distinguishing this spawn from every other.
+    pub root: EntityId,
+    /// Path in the expanded prefab, including its original root identity.
+    pub path: SceneEntityId,
+}
+
 /// What one spawn produced.
 #[derive(Clone, Debug)]
 pub struct SpawnedPrefab {
@@ -89,11 +98,49 @@ impl World {
             }
         }
 
+        let root = by_source_id[&root_id];
+        for (path, &entity) in &by_source_id {
+            self.get_mut(entity)
+                .expect("entity created by this spawn")
+                .prefab_identity = Some(PrefabIdentity {
+                root,
+                path: path.clone(),
+            });
+        }
+
         Ok(SpawnedPrefab {
-            root: by_source_id[&root_id],
+            root,
             entities,
             by_source_id,
         })
+    }
+
+    /// Resolves a local authored path inside the owner's spawned prefab.
+    /// Searches enclosing path namespaces first, then the prefab's own root
+    /// namespace. Missing targets never escape to a different instance or scene.
+    /// Activity is left to the caller; a disabled local target still owns its name.
+    #[must_use]
+    pub fn prefab_entity(&self, owner: EntityId, target: &str) -> Option<EntityId> {
+        let identity = self.get(owner)?.prefab_identity.as_ref()?;
+        if target.is_empty() || !self.contains(identity.root) {
+            return None;
+        }
+        let find = |path: &str| {
+            self.entities().find_map(|(entity, data)| {
+                data.prefab_identity.as_ref().and_then(|candidate| {
+                    (candidate.root == identity.root && candidate.path.as_str() == path)
+                        .then_some(entity)
+                })
+            })
+        };
+        let mut namespace = identity.path.as_str();
+        while let Some((prefix, _)) = namespace.rsplit_once('/') {
+            if let Some(entity) = find(&format!("{prefix}/{target}")) {
+                return Some(entity);
+            }
+            namespace = prefix;
+        }
+        find(target)
     }
 }
 

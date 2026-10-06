@@ -97,6 +97,28 @@ identity. That is a decision about persisting a world, not about spawning, and
 keeping the two apart is why saving a world full of bullets is a thing you ask
 for rather than a thing that happens.
 
+### Runtime-local reference identity
+
+Each spawned entity also carries a `PrefabIdentity`: the generation-checked
+root handle of this spawn and its path in the expanded prefab.
+`World::prefab_entity(owner, path)` searches the owner's enclosing path namespaces,
+then the prefab's own namespace. It includes the original root ID and never
+falls through to another instance or a scene entity. It returns disabled entities
+too, allowing callers to suspend a reference without rebinding its name.
+Removing the root invalidates the scope even if its slot is reused. Reparenting,
+world cloning, command undo and assigning stable IDs retain this runtime identity.
+
+This identity is independent of `source_id` and the editor's `PrefabLink`.
+Neither it nor its runtime handle is serialized. Saving assigned scene IDs does
+not rewrite component-local references; restoring those spawned mechanisms from
+a saved scene still needs reference remapping. Expanded nested sibling paths
+work, but aliases for a nested prefab's renamed root and pre-expanded placed
+prefab roots still need separate integration.
+
+The platformer uses this engine capability in a reusable powered windmill:
+Decay places/removes it with V, and its authored hinge resolves its own axle and
+rotor, including the prefab root.
+
 ### Editor-only state does not come along
 
 A prefab's `editor` sections describe the prefab in the editor — what is folded,

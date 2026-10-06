@@ -1,0 +1,16 @@
+// V places or removes a reusable powered mechanism beside the scene's windmill.
+script WindmillSetup {
+    @export let template: Prefab;
+    var made: Entity = null;
+    fn update(dt: f32) {
+        if Input.just_pressed("V") {
+            if this.made != null {
+                World.despawn(this.made);
+                this.made = null;
+            } else {
+                this.made = World.spawn(this.template);
+                this.made.transform.position = Vec3(5.2, 7.4, 0.35);
+            }
+        }
+    }
+}
