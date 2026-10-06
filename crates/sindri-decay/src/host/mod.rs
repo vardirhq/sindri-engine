@@ -29,6 +29,7 @@ mod person;
 mod physics;
 mod physics_contacts;
 mod physics_controls;
+mod physics_joint_creation;
 mod physics_joint_endpoints;
 mod physics_joint_state;
 mod physics_joints;

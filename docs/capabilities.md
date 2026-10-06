@@ -354,7 +354,7 @@ while suspended. Validation rejects missing/conflicting/invalid owners, wrong
 kinds/types, missing physics and non-positive/non-finite lengths before mutation.
 Unknown payload fields survive. Scene command undo/redo covers all four kinds;
 platformer Decay reels its lantern tether with T and releases/reconnects it with L.
-Structural creation and other motor modes remain.
+Typed hinge/slider/spring creation and other motor modes remain.
 Runtime-spawned prefab references now use a separate runtime identity, retaining
 local sibling paths and the original top-level root ID without assigning saved
 scene IDs. The platformer spawns/removes a reusable motor-driven windmill through
@@ -380,7 +380,15 @@ component, releasing its owned constraint at the next fixed synchronization.
 The owner, other components and bodies/motion survive, including before bodies
 are built or while suspended; legacy distance connections remain separate.
 All four kinds exercise removal and atomic rejection. Platformer Z cuts its
-lantern cord, leaving the body in free fall and later tether controls inert.
+lantern cord, leaving the body in free fall and later tether controls inert until
+repaired.
+Typed `Physics.create_distance_joint` authors an enabled maximum-distance component
+on an existing owner with no joint of any kind. Scoped stable references and length
+validate before mutation; null/inactive endpoints suspend. Next synchronization
+creates the owned constraint, retaining other components, bodies and legacy
+connections. Tests cover pre-sync creation, repeated removal/recreation, invalid
+owners/references/lengths, inactive targets and isolated runtime prefabs.
+Platformer C repairs its cut cord at the selected hook and length.
 
 `sindri.physics2d.rigid_body` and `sindri.physics2d.collider` are registered
 scene components with defaults the engine accepts, so a scene authors bodies and

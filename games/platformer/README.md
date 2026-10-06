@@ -9,7 +9,8 @@ rotation are driven in Decay, with physics writing the resulting pose back.
 
 L releases or reconnects the hanging lantern; T reels its tether in or out.
 R switches its tether between two hooks, including while released.
-Z cuts the cord for the remainder of the run; later tether controls do nothing.
+Z cuts the cord; later tether controls do nothing until C repairs it.
+C creates a fresh owned distance joint at the selected hook and tether length.
 The cord disappears while the constraint is suspended.
 
 V places or removes a second powered windmill from a reusable prefab. Its hinge
@@ -110,9 +111,9 @@ linear mechanism or a damped suspension; keep motion rules in Decay.
 through Decay, checking its fixed axle, isolated joint and fresh spawn lifecycle.
 
 `tests/joint_controls.rs` cuts the cord while preserving the lantern body and
-other constraints, then checks later controls stay inert. It retargets the lantern
-between hooks, including while
-suspended, retunes its tether, releases it into free fall,
+other constraints, then checks later controls stay inert. Repeated C repairs
+recreate the constraint and visible cord while retaining hook and length choices.
+It retargets the lantern between hooks, including while suspended, retunes its tether, releases it into free fall,
 reconnects it and returns to the original length through keyboard-driven Decay.
 
 `tests/saved_joints.rs` saves and reopens a Decay-spawned nested windmill through

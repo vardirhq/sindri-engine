@@ -438,6 +438,32 @@ surface-specific completeness. This checklist does not mark those surfaces done.
   25 assets and exercised retarget/release/reconnect, cord cutting, subsequent
   tether controls and prefab spawning without runtime errors. Native/browser
   captures were visually reviewed.
-- CI must verify this slice; all checks passed on prior head `a3713835`. Creation
+- CI passed on typed removal head `5973c8f5`. Creation
   controls, additional motor modes, save-path integration and final joint/
   workspace acceptance remain open.
+
+
+### Typed distance creation checkpoint
+
+- Added `Physics.create_distance_joint` for an existing owner carrying no joint
+  of any authored 2D kind. Scoped endpoint references and finite positive lengths
+  validate before mutation, sharing retargeting's reference contract. Null leaves
+  an endpoint unbound; inactive targets suspend until active.
+- Next fixed synchronization creates the owned constraint, retaining other owner
+  components, bodies/motion and legacy connections. Tests cover pre-sync creation,
+  repeated removal/recreation, conflicting owners, invalid lengths/references,
+  missing physics, inactive targets and runtime prefab isolation.
+- Platformer C repairs the cut lantern cord at the selected hook and length;
+  repeated cut/repair cycles retain the body and restore tether controls.
+- Final scoped preflight passed 338 native tests and warning-denied all-target/
+  all-feature checks for Decay and platformer. Typed lantern preflight had zero
+  errors/reminders. Two-crate Clippy, 11 regenerated catalogue tests and the
+  1,103-file size gate passed.
+- All-target/all-feature WASM checks passed both crates; the generic browser host
+  was rebuilt. Export and native Vulkan capture passed. Chromium WebGPU fetched
+  25 assets and exercised repeated cutting/repair, retarget/release/reconnect and
+  prefab spawning without runtime errors. Native/browser captures were visually
+  reviewed, including the repaired lantern after recovery from free fall.
+- CI must verify this slice; all checks passed on prior head `5973c8f5`.
+- Typed hinge/slider/spring creation, additional motor modes, automatic save-path
+  integration and final joint/workspace acceptance remain open.

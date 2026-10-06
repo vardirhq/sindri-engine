@@ -338,3 +338,6 @@ mod endpoints;
 
 #[path = "joint_state_controls/removal.rs"]
 mod removal;
+
+#[path = "joint_state_controls/creation.rs"]
+mod creation;

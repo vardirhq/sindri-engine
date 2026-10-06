@@ -1,6 +1,7 @@
 //! Retargeting writes scoped authored references, never serialized runtime handles.
 use decay_ir::Path;
 use decay_runtime::{RuntimeError, Value};
+use sindri_core::EntityId;
 
 use super::WorldHost;
 
@@ -16,6 +17,26 @@ impl WorldHost<'_> {
             return Err(error("needs physics, and this host is not running any"));
         }
         let (kind, _) = self.joint_state(owner, path)?;
+        let (first_ref, second_ref) = self.joint_endpoint_references(owner, path, args)?;
+        let payload = self
+            .world
+            .get_mut(owner)
+            .expect("checked owner")
+            .components
+            .get_mut(kind)
+            .expect("checked joint");
+        payload["first"] = serde_json::json!(first_ref);
+        payload["second"] = serde_json::json!(second_ref);
+        Ok(Value::Unit)
+    }
+
+    pub(super) fn joint_endpoint_references(
+        &self,
+        owner: EntityId,
+        path: &Path,
+        args: &[Value],
+    ) -> Result<(String, String), RuntimeError> {
+        let error = |message: &str| RuntimeError::Host(format!("{}: {message}", path.dotted()));
         let endpoint = |index, role| {
             if matches!(args.get(index), Some(Value::Null)) {
                 return Ok((None, String::new()));
@@ -31,15 +52,6 @@ impl WorldHost<'_> {
         if first.is_some() && first == second {
             return Err(error("joint endpoints must be different entities"));
         }
-        let payload = self
-            .world
-            .get_mut(owner)
-            .expect("checked owner")
-            .components
-            .get_mut(kind)
-            .expect("checked joint");
-        payload["first"] = serde_json::json!(first_ref);
-        payload["second"] = serde_json::json!(second_ref);
-        Ok(Value::Unit)
+        Ok((first_ref, second_ref))
     }
 }

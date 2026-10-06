@@ -1792,6 +1792,24 @@
           "returns": "bool"
         },
         {
+          "description": "Authors an enabled maximum-distance joint on an existing owner with no authored 2D joint of any kind. Scoped endpoint handles become stable IDs or local prefab paths; null leaves an endpoint unbound and inactive endpoints suspend until active. Requires physics and a finite positive length. Valid before bodies are built; the next fixed synchronization creates the owned solver constraint. Invalid owners, references, identical endpoints, lengths or existing joints fail before mutation. Keeps other owner components and body motion; legacy connect_distance constraints remain separate.",
+          "kind": "function",
+          "name": "create_distance_joint",
+          "parameter_names": [
+            "joint",
+            "first",
+            "second",
+            "max_distance"
+          ],
+          "parameters": [
+            "Entity",
+            "Entity",
+            "Entity",
+            "f32"
+          ],
+          "returns": "unit"
+        },
+        {
           "description": "Ignores only one-way solid platforms for a duration in fixed simulation time. Zero cancels; a new request replaces it. Requires a dynamic body and works before a spawned body is built.",
           "kind": "function",
           "name": "drop_through",

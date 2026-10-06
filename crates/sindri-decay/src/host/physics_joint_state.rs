@@ -10,7 +10,7 @@ use super::WorldHost;
 use super::convert::{as_f32, number};
 use crate::surface::PhysicsCall;
 
-const KINDS: [&str; 4] = [
+pub(super) const KINDS: [&str; 4] = [
     DistanceJoint2dComponent::TYPE_NAME,
     HingeJoint2dComponent::TYPE_NAME,
     SliderJoint2dComponent::TYPE_NAME,

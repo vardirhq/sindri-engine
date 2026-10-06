@@ -1025,6 +1025,7 @@ a person who has not clicked yet.
 | `Physics.set_distance(joint, max_distance)` | nothing |
 | `Physics.set_joint_endpoints(joint, first, second)` | nothing |
 | `Physics.remove_joint(joint)` | nothing |
+| `Physics.create_distance_joint(joint, first, second, max_distance)` | nothing |
 | `Physics.raycast(origin, direction, max_distance, mask, include_sensors, exclude)` | `RayHit2d` or `null` |
 | `Physics.cast_circle(origin, radius, direction, max_distance, mask, include_sensors, exclude)` | `RayHit2d` or `null` |
 | `Physics.cast_box(origin, half_size, rotation, direction, max_distance, mask, include_sensors, exclude)` | `RayHit2d` or `null` |
@@ -1099,6 +1100,17 @@ suspended or before endpoints are built. The length must be finite and positive.
 These calls require physics and exactly one valid authored joint; distance tuning
 requires the distance kind. They reject invalid calls before mutation and preserve
 unknown payload fields. Omitting `enabled` in old scenes means true.
+
+`Physics.create_distance_joint(joint, first, second, max_distance)` authors an
+enabled maximum-distance component on an existing owner with no authored 2D joint
+of any kind. Endpoint handles become scoped stable IDs or local prefab paths;
+null leaves an endpoint unbound and inactive targets suspend until active. Physics
+and a finite positive length are required. Creation validates before mutation,
+including owner conflicts, stale/unstable/out-of-scope and identical endpoints.
+It works before bodies exist; the next fixed synchronization creates the owned
+constraint without replacing bodies or legacy connections. Other owner components
+are retained. Platformer C repairs its cut cord at the selected hook and length.
+Typed hinge, slider and spring creation remain absent.
 
 `Physics.remove_joint(joint)` removes exactly one valid authored distance, hinge,
 slider or spring component, releasing its solver constraint at the next fixed

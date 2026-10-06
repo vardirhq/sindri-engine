@@ -83,6 +83,7 @@ fn physics_params(call: PhysicsCall) -> Vec<Type> {
             vec![entity(), Type::F32, Type::F32]
         }
         PhysicsCall::SetSpring => vec![entity(), Type::F32, Type::F32, Type::F32],
+        PhysicsCall::CreateDistanceJoint => vec![entity(), entity(), entity(), Type::F32],
         PhysicsCall::SetJointEndpoints => vec![entity(), entity(), entity()],
         PhysicsCall::ConnectDistance => {
             vec![entity(), entity(), Type::F32]
@@ -117,6 +118,7 @@ fn physics_return_type(call: PhysicsCall) -> Type {
         | PhysicsCall::SetDistance
         | PhysicsCall::SetJointEndpoints
         | PhysicsCall::RemoveJoint
+        | PhysicsCall::CreateDistanceJoint
         | PhysicsCall::SetContinuousCollision
         | PhysicsCall::DropThrough
         | PhysicsCall::ApplyForce

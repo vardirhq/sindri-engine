@@ -508,9 +508,19 @@ components and endpoint bodies/motion remain; legacy `connect_distance`
 constraints are unaffected. Exactly one valid authored joint and a physics host
 are required, including while suspended or before initial body synchronization.
 Subsequent joint controls fail until a joint is authored again. Platformer Z cuts
-its lantern cord for the remainder of the run; Decay hides the cord and ignores
-later tether controls. Creation controls and automatic saved-spawn reference
-integration remain open in the joint track.
+its lantern cord; Decay hides the cord and ignores tether controls until repaired.
+
+`Physics.create_distance_joint(owner, first, second, max_distance)` authors an
+enabled maximum-distance component on an existing owner carrying no authored
+2D joint of any kind. Validation and scoped endpoint rules match retargeting;
+null leaves an endpoint unbound, and inactive targets suspend until active.
+The maximum length must be finite and positive. Physics is required, but endpoint
+bodies need not be synchronized yet. Next fixed synchronization creates the
+constraint, preserving other owner components, bodies/motion and legacy connections.
+Existing joints, invalid handles/references and invalid lengths fail before mutation.
+Platformer C repairs the cut cord using its selected hook and length. Typed creation
+for other joint kinds and automatic saved-spawn reference integration remain open
+in the joint track.
 
 ## Scene-authored hinges and velocity motors
 

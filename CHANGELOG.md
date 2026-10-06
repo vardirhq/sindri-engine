@@ -1,5 +1,7 @@
 # Changelog
 
+- Add typed `Physics.create_distance_joint` to author a maximum-distance constraint on an existing owner with no joint. Scoped references and positive lengths validate atomically; creation keeps body motion and takes effect at next fixed synchronization. Platformer C repairs its cut lantern cord using the selected hook and length.
+
 - Add typed authored 2D joint removal with `Physics.remove_joint`. It releases the constraint at the next fixed synchronization while keeping the owner, its other components and endpoint bodies; legacy connections remain separate. Platformer Z cuts the lantern cord for the remainder of the run.
 
 - Add typed 2D joint endpoint retargeting with `Physics.set_joint_endpoints`. Scoped handles become stable scene IDs or local prefab paths; null clears an endpoint. Invalid references fail atomically while settings, unknown fields and body motion are retained. Platformer switches its lantern between two hooks with R.

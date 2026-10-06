@@ -6,6 +6,11 @@ pub(super) const PHYSICS: TypeEntry = TypeEntry {
     text: "2D physics: moving objects with speed and pushes, and finding out what this script's object bumped into.",
     members: &[
         call(
+            "create_distance_joint",
+            &["joint", "first", "second", "max_distance"],
+            "Authors an enabled maximum-distance joint on an existing owner with no authored 2D joint of any kind. Scoped endpoint handles become stable IDs or local prefab paths; null leaves an endpoint unbound and inactive endpoints suspend until active. Requires physics and a finite positive length. Valid before bodies are built; the next fixed synchronization creates the owned solver constraint. Invalid owners, references, identical endpoints, lengths or existing joints fail before mutation. Keeps other owner components and body motion; legacy connect_distance constraints remain separate.",
+        ),
+        call(
             "remove_joint",
             &["joint"],
             "Removes the authored distance, hinge, slider or spring component from one owner; the next fixed synchronization releases its solver constraint. Keeps the owner, its other components and endpoint bodies/motion. Legacy connect_distance constraints are unaffected. Works before bodies are built or while suspended. Requires physics and exactly one valid authored joint; missing, conflicting or malformed owners fail before mutation. Later joint controls fail until a joint is authored again.",
