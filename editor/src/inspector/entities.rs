@@ -46,36 +46,16 @@ impl EntityReferences {
             )
         };
         for (entity, data) in world.entities() {
-            let id = if world
-                .get(owner)
-                .is_some_and(|data| data.prefab_identity.is_some())
-            {
-                data.prefab_identity.as_ref().map(|identity| &identity.path)
-            } else {
-                data.source_id.as_ref()
-            };
-            let Some(id) = id else { continue };
-            let mut target = id.as_str();
-            // A loaded scene prefixes IDs, while its authored strings remain local.
-            loop {
-                if world.resolve_entity_reference(owner, target) == Some(entity) {
-                    let label = data
-                        .name
-                        .as_ref()
-                        .map_or_else(|| target.to_owned(), |name| format!("{name} ({target})"));
-                    references.choices.push(EntityChoice {
-                        reference: target.to_owned(),
-                        label,
-                    });
-                    references
-                        .statuses
-                        .insert(target.to_owned(), status(target));
-                    break;
-                }
-                let Some((_, suffix)) = target.split_once('/') else {
-                    break;
-                };
-                target = suffix;
+            if let Some(target) = world.entity_reference(owner, entity) {
+                let label = data
+                    .name
+                    .as_ref()
+                    .map_or_else(|| target.clone(), |name| format!("{name} ({target})"));
+                references.choices.push(EntityChoice {
+                    reference: target.clone(),
+                    label,
+                });
+                references.statuses.insert(target.clone(), status(&target));
             }
         }
         references

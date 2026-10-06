@@ -391,3 +391,29 @@ surface-specific completeness. This checklist does not mark those surfaces done.
 - CI must verify this slice; all checks passed on prior head `9a1f1a07`. Typed
   endpoint/structural controls, additional motor modes, save-path integration and
   final joint/workspace acceptance remain open.
+
+
+### Typed endpoint retargeting checkpoint
+
+- Added `Physics.set_joint_endpoints` for distance, hinge, slider and spring.
+  Both scoped handles validate before either stored reference changes; null
+  clears an endpoint. Inactive targets suspend until active. Settings, enabled
+  state, unknown fields and body motion are preserved through synchronization.
+- Shared `World::entity_reference` produces stable scene IDs or canonical local
+  prefab paths and also supplies native inspector choices. Runtime handles never
+  serialize; unstable, stale, out-of-scope and identical targets fail atomically.
+- Platformer R switches the lantern between two hooks, including while released.
+  All four kinds exercise retarget/clear/reconnect before/after synchronization,
+  inactive targets, unknown-field preservation and runtime prefab isolation.
+- Final scoped preflight passed 1,264 native tests and warning-denied all-target/
+  all-feature checks for core, Decay, editor and platformer. Typed lantern
+  preflight had zero errors/reminders. Four-crate Clippy, 11 regenerated catalogue
+  tests and the 1,100-file size gate passed.
+- All-target/all-feature WASM checks passed core, Decay and platformer; the generic
+  browser host was rebuilt. Export and native Vulkan capture passed. Chromium
+  WebGPU fetched 25 assets and exercised R switching, suspended retargeting,
+  reconnection and prefab spawning without runtime errors. Native/browser game
+  captures were visually reviewed.
+- CI must verify this slice; all checks passed on prior head `3f129f34`.
+  Structural controls, additional motor modes, save-path integration and final
+  joint/workspace acceptance remain open.

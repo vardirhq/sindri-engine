@@ -1023,6 +1023,7 @@ a person who has not clicked yet.
 | `Physics.joint_enabled(joint)` | `bool` |
 | `Physics.set_joint_enabled(joint, enabled)` | nothing |
 | `Physics.set_distance(joint, max_distance)` | nothing |
+| `Physics.set_joint_endpoints(joint, first, second)` | nothing |
 | `Physics.raycast(origin, direction, max_distance, mask, include_sensors, exclude)` | `RayHit2d` or `null` |
 | `Physics.cast_circle(origin, radius, direction, max_distance, mask, include_sensors, exclude)` | `RayHit2d` or `null` |
 | `Physics.cast_box(origin, half_size, rotation, direction, max_distance, mask, include_sensors, exclude)` | `RayHit2d` or `null` |
@@ -1097,6 +1098,16 @@ suspended or before endpoints are built. The length must be finite and positive.
 These calls require physics and exactly one valid authored joint; distance tuning
 requires the distance kind. They reject invalid calls before mutation and preserve
 unknown payload fields. Omitting `enabled` in old scenes means true.
+
+`Physics.set_joint_endpoints(joint, first, second)` retargets any one valid
+2D authored joint using entity handles. Null clears either endpoint. It stores
+canonical local prefab paths or stable scene IDs, never runtime handles. Both
+references validate before either changes: stale, unstable, out-of-scope or
+identical endpoints fail atomically. Inactive endpoints are valid references but
+suspend the constraint until active. Settings, enabled state, unknown fields and
+body motion remain intact; the next fixed synchronization reconnects available
+bodies, including requests made before initial body synchronization. Physics is
+required. A name lookup that returns null explicitly clears that endpoint.
 
 `Physics.set_hinge_motor(joint, velocity, max_torque)` takes a hinge-owner entity,
 a relative angular speed in radians/second and a finite non-negative torque cap.

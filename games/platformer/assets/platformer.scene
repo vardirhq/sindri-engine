@@ -2428,6 +2428,57 @@
           }
         }
       }
+    },
+    {
+      "id": "lantern-alternate-anchor",
+      "name": "Lantern alternate hook",
+      "transform_3d": {
+        "position": [
+          11,
+          8,
+          0.4
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          0.15,
+          0.15,
+          1
+        ]
+      },
+      "components": {
+        "sindri.shape": {
+          "kind": "rect",
+          "fill": [
+            0.2,
+            0.15,
+            0.1,
+            1
+          ]
+        },
+        "sindri.physics2d.collider": {
+          "shape": {
+            "shape": "circle",
+            "radius": 0.05
+          },
+          "offset": [
+            0,
+            0
+          ],
+          "rotation": 0,
+          "sensor": false,
+          "layers": {
+            "memberships": 0,
+            "filter": 0
+          },
+          "friction": 0.5,
+          "restitution": 0
+        }
+      }
     }
   ]
 }

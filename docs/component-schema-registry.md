@@ -98,4 +98,6 @@ are distinguished visibly; unresolved text is retained for later repair.
 `World::resolve_entity_reference` supplies the same canonical/alias, namespace
 and prefab-scope rules used by authored physics joints. It resolves inactive
 entities for diagnostics; physics separately requires active endpoints.
+The inverse `World::entity_reference(owner, target)` chooses a scoped authored
+string for a handle and returns none for unstable/out-of-scope targets.
 Edits remain schema-checked component commands with undo/redo.

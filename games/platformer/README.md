@@ -8,6 +8,7 @@ pushes it along the ground; an off-centre kick makes it tumble. Its forces and
 rotation are driven in Decay, with physics writing the resulting pose back.
 
 L releases or reconnects the hanging lantern; T reels its tether in or out.
+R switches its tether between two hooks, including while released.
 The cord disappears while the constraint is suspended.
 
 V places or removes a second powered windmill from a reusable prefab. Its hinge
@@ -107,7 +108,8 @@ linear mechanism or a damped suspension; keep motion rules in Decay.
 `tests/spawned_joints.rs` places, reverses and removes the reusable windmill twice
 through Decay, checking its fixed axle, isolated joint and fresh spawn lifecycle.
 
-`tests/joint_controls.rs` retunes the lantern tether, releases it into free fall,
+`tests/joint_controls.rs` retargets the lantern between hooks, including while
+suspended, retunes its tether, releases it into free fall,
 reconnects it and returns to the original length through keyboard-driven Decay.
 
 `tests/saved_joints.rs` saves and reopens a Decay-spawned nested windmill through

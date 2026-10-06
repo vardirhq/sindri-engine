@@ -1,5 +1,7 @@
 # Changelog
 
+- Add typed 2D joint endpoint retargeting with `Physics.set_joint_endpoints`. Scoped handles become stable scene IDs or local prefab paths; null clears an endpoint. Invalid references fail atomically while settings, unknown fields and body motion are retained. Platformer switches its lantern between two hooks with R.
+
 - Add scoped entity-reference pickers to registered component fields in the native inspector, including nested lists. Choose by name/ID, clear a reference, or keep typing; missing and inactive targets are marked. The picker shares runtime scene/prefab resolution rules, and all four joint kinds exercise picker edits and command undo.
 
 - Add opt-in registry-based serialization for spawned-prefab entity references. After assigning stable IDs, `World::to_scene_with_references` remaps registered fields, including nested lists, without editing the live world. Invalid or unresolved references fail the save. All four joint kinds and the platformer's spawned windmill exercise reopening; qualified joint scene IDs take precedence over relative namespace lookup.

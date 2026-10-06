@@ -44,3 +44,31 @@ fn lantern_controls_retune_suspend_and_reconnect_the_authored_tether() {
     step(&mut run, 180);
     assert!(length(&run) > 1.9 && length(&run) < 2.04);
 }
+
+#[test]
+fn lantern_retargets_its_hook_without_rebuilding_the_body() {
+    let mut run = Run::open().unwrap();
+    step(&mut run, 180);
+    let body = run.entity("wind-lantern").unwrap();
+    let tether = run.entity("lantern-tether").unwrap();
+    press(&mut run, Key::R);
+    assert_eq!(
+        run.world.get(tether).unwrap().components["sindri.physics2d.distance_joint"]["first"],
+        "lantern-alternate-anchor"
+    );
+    assert_eq!(run.physics.world().joint_count(), 4);
+    step(&mut run, 180);
+    let [x, y] = run.position(body);
+    assert!((x - 11.0).hypot(y - 8.0) < 2.04);
+    press(&mut run, Key::L);
+    press(&mut run, Key::R);
+    assert_eq!(run.physics.world().joint_count(), 3);
+    assert_eq!(
+        run.world.get(tether).unwrap().components["sindri.physics2d.distance_joint"]["first"],
+        "lantern-anchor"
+    );
+    press(&mut run, Key::L);
+    step(&mut run, 180);
+    assert_eq!(run.physics.world().joint_count(), 4);
+    assert!(length(&run) < 2.04);
+}

@@ -495,8 +495,15 @@ Platformer adds these capabilities to let the player reel the hanging lantern
 in/out with T and release/reconnect it with L. Decay hides the cord while
 suspended or after its owner is removed. Runtime regressions observe length,
 free fall, reconnection and return to the original length.
-Typed endpoint retargeting, structural creation/removal and automatic saved-spawn
-reference integration remain open in the joint track.
+Typed `Physics.set_joint_endpoints(owner, first, second)` retargets every joint
+kind through scoped authored references at the next fixed synchronization. Null
+clears either endpoint. Both handles validate before mutation; stale, unstable,
+out-of-scope or identical endpoints fail. Inactive references remain authored,
+with the constraint suspended until active. Settings, enabled flags, unknown
+fields and body motion are preserved. No runtime handles are serialized.
+Platformer switches its lantern between two hooks with R, including while released.
+Structural creation/removal and automatic saved-spawn reference integration
+remain open in the joint track.
 
 ## Scene-authored hinges and velocity motors
 

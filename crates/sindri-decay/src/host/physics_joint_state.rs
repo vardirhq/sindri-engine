@@ -67,7 +67,7 @@ impl WorldHost<'_> {
         }
     }
 
-    fn joint_state(
+    pub(super) fn joint_state(
         &self,
         owner: EntityId,
         path: &Path,

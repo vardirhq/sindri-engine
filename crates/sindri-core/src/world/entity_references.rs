@@ -2,6 +2,29 @@
 use crate::{EntityId, SceneEntityId, World};
 
 impl World {
+    /// Finds an authored string that resolves to `target` in the owner's scope.
+    ///
+    /// Uses canonical local paths for runtime prefabs and stable IDs otherwise.
+    /// Returns `None` for stale/unstable or out-of-scope targets. Activity does not
+    /// affect whether a reference can be authored.
+    #[must_use]
+    pub fn entity_reference(&self, owner: EntityId, target: EntityId) -> Option<String> {
+        let data = self.get(target)?;
+        let id = if self.get(owner)?.prefab_identity.is_some() {
+            &data.prefab_identity.as_ref()?.path
+        } else {
+            data.source_id.as_ref()?
+        };
+        let mut reference = id.as_str();
+        loop {
+            if self.resolve_entity_reference(owner, reference) == Some(target) {
+                return Some(reference.to_owned());
+            }
+            let (_, suffix) = reference.split_once('/')?;
+            reference = suffix;
+        }
+    }
+
     /// Resolves an authored entity string within the owner's scene or prefab.
     ///
     /// Qualified scene IDs precede relative namespaces; canonical IDs precede

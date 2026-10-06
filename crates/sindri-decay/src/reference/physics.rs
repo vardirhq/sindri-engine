@@ -6,6 +6,11 @@ pub(super) const PHYSICS: TypeEntry = TypeEntry {
     text: "2D physics: moving objects with speed and pushes, and finding out what this script's object bumped into.",
     members: &[
         call(
+            "set_joint_endpoints",
+            &["joint", "first", "second"],
+            "Retargets an authored 2D distance, hinge, slider or spring at the next fixed synchronization. Accepts entity handles in the owner's scene or runtime prefab; null clears either endpoint. Stores stable scene IDs or canonical prefab paths, never runtime handles. Inactive endpoints may be authored and suspend until active. Stale, unstable, out-of-scope or identical endpoints fail before mutation. Preserves enabled state, settings, unknown fields and body motion. Requires physics and exactly one valid authored joint; works before bodies are built.",
+        ),
+        call(
             "joint_enabled",
             &["joint"],
             "Reads the authored enabled flag of one 2D joint owner, including before synchronization. True does not guarantee live endpoints; inactive or missing endpoints still suspend the constraint. Requires physics and exactly one valid authored joint.",

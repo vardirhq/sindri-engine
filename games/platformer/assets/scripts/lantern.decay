@@ -5,6 +5,7 @@ script Lantern {
     var cord: Entity = null;
     var tether: Entity = null;
     var short: bool = false;
+    var alternate: bool = false;
     fn start() {
         this.hook = World.find("Lantern hook");
         this.cord = World.find("Lantern cord");
@@ -24,6 +25,15 @@ script Lantern {
                 } else {
                     Physics.set_distance(this.tether, 2.0);
                 }
+            }
+            if Input.just_pressed("R") {
+                this.alternate = !this.alternate;
+                if this.alternate {
+                    this.hook = World.find("Lantern alternate hook");
+                } else {
+                    this.hook = World.find("Lantern hook");
+                }
+                Physics.set_joint_endpoints(this.tether, this.hook, this.entity);
             }
             enabled = Physics.joint_enabled(this.tether);
         }

@@ -17,6 +17,7 @@ impl WorldHost<'_> {
         args: &[Value],
     ) -> Result<Value, RuntimeError> {
         match call {
+            PhysicsCall::SetJointEndpoints => self.joint_endpoints_call(path, args),
             PhysicsCall::SetHingeMotor => self.hinge_motor_call(path, args),
             PhysicsCall::SetSliderMotor => self.slider_motor_call(path, args),
             PhysicsCall::SetSpring => self.spring_call(path, args),

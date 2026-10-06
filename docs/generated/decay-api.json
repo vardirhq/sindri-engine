@@ -1994,6 +1994,22 @@
           "returns": "unit"
         },
         {
+          "description": "Retargets an authored 2D distance, hinge, slider or spring at the next fixed synchronization. Accepts entity handles in the owner's scene or runtime prefab; null clears either endpoint. Stores stable scene IDs or canonical prefab paths, never runtime handles. Inactive endpoints may be authored and suspend until active. Stale, unstable, out-of-scope or identical endpoints fail before mutation. Preserves enabled state, settings, unknown fields and body motion. Requires physics and exactly one valid authored joint; works before bodies are built.",
+          "kind": "function",
+          "name": "set_joint_endpoints",
+          "parameter_names": [
+            "joint",
+            "first",
+            "second"
+          ],
+          "parameters": [
+            "Entity",
+            "Entity",
+            "Entity"
+          ],
+          "returns": "unit"
+        },
+        {
           "description": "Sets an authored 2D slider owner's relative translation speed in world units/second along the first local axis, with a finite non-negative force cap. Zero force disables the drive; zero speed with positive force brakes. Validates before modifying the runtime component; applies at next fixed synchronization and survives endpoint rebuilds. Needs physics and a slider component; preserves unknown fields.",
           "kind": "function",
           "name": "set_slider_motor",
