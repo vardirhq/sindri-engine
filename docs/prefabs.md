@@ -120,6 +120,14 @@ targets and wrong-type fields fail the save. Serialization works on a clone and
 never edits the live world. Undescribed fields and unknown component payloads
 are preserved unchanged; describe every entity field that needs remapping.
 `to_scene`/`to_scene_with` retain their existing verbatim serialization contract.
+Editor `SceneFile::save`/`save_as` and subtree-to-prefab authoring automatically
+use the reference-aware serializer with the editor's active component registry.
+Stable IDs must already exist; failed reference validation leaves disk, the
+adopted path and the agreed document unchanged. Existing placed instances still
+collapse to prefab references. Save remains unavailable during Play, and Decay's
+`Save` number/flag store is separate from world snapshots; script-triggered world
+save/load is not implemented. The platformer's real Decay-spawned nested windmill
+exercises editor Save As, reopen and reversal around its fixed axle.
 Runtime spawning preserves nested root aliases through the original prefab library, including repeated expansion.
 Canonical paths take precedence over aliases, including inactive targets; competing
 aliases without a canonical target are rejected before any entities are spawned.

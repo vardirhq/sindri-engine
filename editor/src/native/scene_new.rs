@@ -95,7 +95,10 @@ impl EditorApp {
         let Some(path) = self.ask_for_scene_path(&self.file.label()) else {
             return;
         };
-        if let Err(error) = self.file.save_as(&path, &self.world) {
+        if let Err(error) = self
+            .file
+            .save_as(&path, &self.world, self.scene.components())
+        {
             self.report(error.to_string());
             return;
         }

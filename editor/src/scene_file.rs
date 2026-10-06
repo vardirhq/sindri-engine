@@ -13,7 +13,9 @@ use std::{
     path::{Path, PathBuf},
 };
 
-use sindri_core::{SceneDocument, SceneJsonError, SceneMigrator, World, WorldError};
+use sindri_core::{
+    ComponentSchemaRegistry, SceneDocument, SceneJsonError, SceneMigrator, World, WorldError,
+};
 use thiserror::Error;
 
 use crate::prefab::ScenePrefabs;
@@ -147,10 +149,17 @@ impl SceneFile {
     /// Writes a world back to the file it was opened from.
     ///
     /// The bytes are canonical, so saving a scene nobody edited reproduces the
-    /// file exactly and a review sees only what changed.
-    pub fn save(&mut self, world: &World) -> Result<(), SceneFileError> {
+    /// file exactly and a review sees only what changed. Registered entity fields
+    /// in runtime prefab spawns become stable saved references without editing
+    /// the live world. Every entity must already have a stable ID; invalid local
+    /// references fail before writing or adopting a path.
+    pub fn save(
+        &mut self,
+        world: &World,
+        components: &ComponentSchemaRegistry,
+    ) -> Result<(), SceneFileError> {
         let path = self.path.clone().ok_or(SceneFileError::NoPath)?;
-        self.save_as(&path, world)
+        self.save_as(&path, world, components)
     }
 
     /// Writes a world to a path, and adopts it.
@@ -159,8 +168,13 @@ impl SceneFile {
     /// that fails leaves the scene attached to the file it was attached to. A
     /// detached scene — one the editor opened with no file behind it — becomes
     /// a real file this way, which is the only way it ever could.
-    pub fn save_as(&mut self, path: &Path, world: &World) -> Result<(), SceneFileError> {
-        let document = world.to_scene_with(&self.prefabs)?;
+    pub fn save_as(
+        &mut self,
+        path: &Path,
+        world: &World,
+        components: &ComponentSchemaRegistry,
+    ) -> Result<(), SceneFileError> {
+        let document = world.to_scene_with_references(&self.prefabs, components)?;
         // Placeholders go back to being the instances they stand in for.
         let mut written = document.clone();
         restore(&mut written);
@@ -350,13 +364,26 @@ mod tests {
     fn a_detached_scene_can_be_saved_somewhere() {
         let directory = tempfile::tempdir().unwrap();
         let mut file = SceneFile::detached(SceneDocument::default());
-        assert!(file.path().is_none() && file.save(&World::default()).is_err());
+        assert!(
+            file.path().is_none()
+                && file
+                    .save(
+                        &World::default(),
+                        sindri_scene::SceneExtractor::new().unwrap().components()
+                    )
+                    .is_err()
+        );
 
         let world = World::from_scene(&SceneDocument::from_json(&authored_json()).unwrap())
             .unwrap()
             .world;
         let path = directory.path().join("forked.scene");
-        file.save_as(&path, &world).unwrap();
+        file.save_as(
+            &path,
+            &world,
+            sindri_scene::SceneExtractor::new().unwrap().components(),
+        )
+        .unwrap();
 
         assert_eq!(file.path(), Some(path.as_path()));
         assert_eq!(SceneFile::open(&path).unwrap().document(), file.document());
@@ -380,7 +407,11 @@ mod tests {
             file.document(),
             "the edit should have changed the document"
         );
-        file.save(&world).unwrap();
+        file.save(
+            &world,
+            sindri_scene::SceneExtractor::new().unwrap().components(),
+        )
+        .unwrap();
 
         let reopened = SceneFile::open(&path).unwrap();
         assert_eq!(
@@ -400,7 +431,11 @@ mod tests {
 
         let mut file = SceneFile::open(&path).unwrap();
         let world = World::from_scene(file.document()).unwrap().world;
-        file.save(&world).unwrap();
+        file.save(
+            &world,
+            sindri_scene::SceneExtractor::new().unwrap().components(),
+        )
+        .unwrap();
 
         assert_eq!(std::fs::read_to_string(&path).unwrap(), original);
     }
@@ -431,7 +466,13 @@ mod tests {
         let world = World::from_scene(file.document()).unwrap().world;
 
         assert!(file.path().is_none());
-        assert!(matches!(file.save(&world), Err(SceneFileError::NoPath)));
+        assert!(matches!(
+            file.save(
+                &world,
+                sindri_scene::SceneExtractor::new().unwrap().components()
+            ),
+            Err(SceneFileError::NoPath)
+        ));
     }
 
     #[test]

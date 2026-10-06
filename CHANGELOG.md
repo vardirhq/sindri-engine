@@ -1,5 +1,7 @@
 # Changelog
 
+- Make editor scene Save/Save As and subtree prefab authoring remap registered runtime-local entity references to assigned stable IDs automatically. Invalid references fail before writing or adopting a path; the live world and unknown fields remain intact. All four joint kinds survive save/reopen and saved-subtree reuse, with the platformer’s Decay-spawned windmill proving the real editor save path.
+
 - Add damped slider position motors with signed local-axis distance targets, stiffness/damping and force caps. Typed Decay controls select position or velocity drive while retaining body motion and rebuild semantics; old scenes keep velocity mode. Platformer O parks or releases its lantern trolley, and J restores the selected drive after rebuilding its rail joint.
 
 - Add force-based hinge position motors with validated relative angular targets, stiffness/damping and torque caps. Typed Decay controls switch between position and velocity drive without resetting body motion; old payloads retain velocity behavior. Platformer P holds both windmills or resumes reversal, and H rebuilds the placed hinge while preserving its selected drive.

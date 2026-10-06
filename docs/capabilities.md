@@ -354,7 +354,18 @@ while suspended. Validation rejects missing/conflicting/invalid owners, wrong
 kinds/types, missing physics and non-positive/non-finite lengths before mutation.
 Unknown payload fields survive. Scene command undo/redo covers all four kinds;
 platformer Decay reels its lantern tether with T and releases/reconnects it with L.
-Automatic save integration and visual editor review remain.
+Script-triggered world snapshots and visual editor review remain.
+Editor `SceneFile::save`/`save_as` and subtree prefab authoring automatically use
+the active registry for reference-aware serialization. Stable identities remain
+a prerequisite; invalid references fail before file writes/path adoption while
+unknown fields and the live world remain intact. Existing placed instances still
+save as prefab references. Native editor tests reopen two isolated instances of
+every joint kind, reuse saved subtrees and reject invalid saves without changing
+disk or the agreed document. The platformer's real Decay setup script spawns a
+nested windmill that editor Save As reopens with its fixed axle and reversing
+motor. Save remains unavailable during Play. Decay's number/flag store has no
+world snapshot operation; that gap is separate from editor authoring saves.
+
 Runtime-spawned prefab references now use a separate runtime identity, retaining
 local sibling paths and the original top-level root ID without assigning saved
 scene IDs. The platformer spawns/removes a reusable motor-driven windmill through
@@ -411,7 +422,7 @@ retargeting, caps, enabled limits, atomic rejection, command undo/redo, scene
 round trips, suspension and collider rebuilds. Platformer P holds both placed
 and spawned windmills, resumes their reversal, and retains the selected drive
 when H recreates the placed hinge. This capability was added for that showcase.
-Automatic save integration and visual editor review remain open.
+Script-triggered world snapshots and visual editor review remain open.
 
 Sliders also support damped force-based position drive through the shared motor
 mode; omitted modes keep velocity behavior. Typed `Physics.set_slider_position_motor`
@@ -421,7 +432,7 @@ limits still apply. Native tests prove rotated rails/offset anchors, signed
 retargeting, caps, limits, invalid atomic calls, coasting, suspension/rebuild,
 checked command undo/redo and save/reopen. Platformer O parks/releases its trolley
 and J retains the selected drive and independent spring. Added for that showcase;
-automatic save-path integration and visual editor review remain open.
+script-triggered world snapshots and visual editor review remain open.
 
 Typed `Physics.create_slider_joint` adds finite local anchors, unit local axes
 and optional finite ordered travel bounds under the same owner/scope contract.

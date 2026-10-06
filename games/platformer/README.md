@@ -145,3 +145,9 @@ phases, checking stable ownership, bounded trolley motion and continued tuning.
 
 `tests/slider_spring.rs` rebuilds the slider twice with J, checking bounded
 reversal, stable endpoint references and the independently owned suspension.
+
+The [editor save regression](../../editor/tests/scene_joint_saves.rs) also runs
+this project's real Decay windmill setup, then saves/reopens its spawned nested
+mechanism through editor Save As and proves motor reversal around a fixed axle.
+Editor authoring saves remap registered entity references automatically after
+stable IDs are assigned; gameplay world snapshots remain a separate gap.

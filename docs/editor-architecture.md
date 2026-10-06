@@ -184,6 +184,24 @@ viewport's colour and depth targets together through
 `sindri_render::ViewportTarget`, which also owns the rule that a target drawn
 into through sRGB is sampled through linear.
 
+## Saving entity references
+
+Scene Save, Save As and subtree prefab authoring pass the active component
+registry into `World::to_scene_with_references`. Registered entity fields in
+runtime prefab spawns become assigned stable scene IDs without editing the live
+world; unknown payloads and undescribed fields retain their values. Existing
+placed instances still save as references with overrides. Callers must first
+provide stable identities for every saved entity. Invalid local references or
+unstable targets fail before writing or adopting a new path, so the file and
+agreed document remain unchanged. Save is still refused during Play.
+
+Tests exercise two isolated instances of every joint kind through Save As,
+Save, reopen and saved-subtree reuse, plus invalid-reference failure atomicity.
+The platformer's real Decay setup script spawns its nested windmill and the
+editor save path reopens it with a fixed axle and reversing motor. This is
+editor authoring serialization; Decay's progress store holds numbers/flags and
+has no scene snapshot operation.
+
 ## Two views of one world
 
 The scene view is where the editor moves around: orbit, pan, zoom, and a choice

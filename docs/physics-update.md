@@ -613,5 +613,33 @@ surface-specific completeness. This checklist does not mark those surfaces done.
   tether controls without runtime errors. Visually reviewed native/browser
   captures show the trolley retain its parked position through recreation and
   resume travel while its spring stays attached.
-- CI must verify this slice; all checks passed on prior hinge head `adb632e5`. Automatic save-path integration, native
-  visual editor review and final joint/workspace acceptance remain open.
+- CI passed on slider position head `e92487ec`. Automatic save-path integration,
+  native visual editor review and final joint/workspace acceptance remain open.
+
+
+### Editor reference-aware save checkpoint
+
+- Connected editor scene Save/Save As and subtree prefab authoring to
+  `World::to_scene_with_references` with the active component registry. Existing
+  placed instances still collapse to references; unknown fields and the live
+  world remain unchanged. Stable IDs remain required before saving.
+- Missing local targets, wrong-type reference fields and unstable endpoints fail
+  before writing or adopting a new path. Tests preserve disk, the prior path and
+  the agreed document on both Save and Save As failures. Existing canonical,
+  placed-instance, missing-prefab and prefab-root save regressions pass.
+- Two runtime instances of each joint kind reopen with isolated endpoints through
+  the actual editor save API. Saved subtrees spawn twice with independent solver
+  ownership. The platformer's real Decay setup script spawns its nested windmill;
+  editor Save As/reopen retains its fixed axle and reversing motor. This connects
+  an existing engine capability to editor authoring, proven by that showcase.
+- Decay `Save` has only a number/flag progress store, so there is no existing
+  world-save operation to wire. Added a separate absent script-triggered world
+  snapshot save/load row to parity. Editor Save remains refused during Play;
+  this slice does not add a gameplay persistence lifecycle.
+- Scoped preflight passed 622 native editor tests and warning-denied all-target/
+  all-feature checks. Editor Clippy, 11 catalogue currentness/completeness tests,
+  the 1,116-file size gate and the WASM editor-stub check passed. No runtime,
+  browser, renderer, dependency or Decay host/script surface changed.
+- CI must verify this slice; all checks passed on prior slider head `e92487ec`.
+  Native visual editor review, the separate gameplay snapshot gap and final
+  joint/workspace acceptance remain open.

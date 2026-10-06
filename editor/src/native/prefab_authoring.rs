@@ -66,7 +66,12 @@ impl EditorApp {
             .root()
             .ok_or("save the scene first, so the prefab has a folder to go in")?
             .to_path_buf();
-        let document = prefab::subtree_prefab(&self.world, entity, self.file.prefabs())?;
+        let document = prefab::subtree_prefab(
+            &self.world,
+            entity,
+            self.file.prefabs(),
+            self.scene.components(),
+        )?;
         let stem = slug(data.name.as_deref().unwrap_or(root_id.as_str()));
         let path = unused_path(&folder.join("prefabs"), &stem);
         let source = self

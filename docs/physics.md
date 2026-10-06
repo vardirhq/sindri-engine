@@ -519,8 +519,18 @@ bodies need not be synchronized yet. Next fixed synchronization creates the
 constraint, preserving other owner components, bodies/motion and legacy connections.
 Existing joints, invalid handles/references and invalid lengths fail before mutation.
 Platformer C repairs the cut cord using its selected hook and length. Automatic
-automatic save-path integration and visual editor review stay open in the
+script-triggered world snapshots and visual editor review stay open in the
 joint track.
+
+Editor scene Save/Save As and subtree prefab authoring now use the active
+component registry for stable-reference remapping automatically. All entities
+must already have stable IDs. Invalid local targets/types or unstable endpoints
+fail before writing/adopting a path, without changing the live world. Tests reopen
+two isolated instances of all four joint kinds and reuse saved subtrees. The
+platformer's real Decay-spawned nested windmill reopens through editor Save As,
+retaining its fixed axle and motor reversal. Save is refused during Play; Decay's
+number/flag progress store does not save world snapshots. Script-triggered world
+save/load remains a separate absent capability.
 
 ## Scene-authored hinges and motors
 
@@ -597,12 +607,12 @@ rebuilds its placed windmill hinge and restores its selected drive while the spa
 windmill remains independently owned.
 
 The generic checked inspector authors hinge settings and command undo reverses
-motor edits. Visual editor review and automatic save integration
+motor edits. Visual editor review and script-triggered world snapshots
 remain open. This general capability is added for the platformer: Decay reverses
 its powered windmill axle every two seconds while physics keeps the rotor on its
 anchor. Native tests exercise offset anchors, limits, torque caps, coast/reverse,
 invalid atomic edits, command undo, endpoint rebuilds and gameplay removal.
-Automatic save integration and visual editor review remain in the
+Script-triggered world snapshots and visual editor review remain in the
 joint track; its acceptance checkbox remains open.
 
 ## Scene-authored sliders and springs
@@ -672,7 +682,7 @@ one constraint. Settings edits on unchanged endpoints update it in place and
 wake the bodies without resetting their motion. Owner/component removal drops
 it; inactive or missing endpoints suspend it; endpoint rebuilds reconnect in the
 same fixed step. The generic checked inspector and command undo author these
-settings; visual editor review and automatic save integration remain
+settings; visual editor review and script-triggered world snapshots remain
 open. All numeric fields are validated even when their toggle is disabled.
 
 Typed `Physics.set_slider_motor(owner, velocity, max_force)` and
@@ -704,7 +714,7 @@ Invalid settings fail before mutation. Next fixed synchronization creates the
 owned constraint while retaining other components, body motion and legacy
 connections. Platformer J rebuilds its trolley slider, restores its selected
 drive and keeps the separately owned spring attached. Native
-visual editor review and automatic save integration stay open.
+visual editor review and script-triggered world snapshots stay open.
 
 These general capabilities are added for the platformer: Decay reverses a
 powered lantern trolley near its rail ends, retunes its suspended light's spring

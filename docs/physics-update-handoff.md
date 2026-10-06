@@ -345,11 +345,31 @@ was rebuilt; export and native Vulkan capture passed. Chromium WebGPU fetched
 25 assets and exercised O parking/J recreation/O release, prefab spawning and
 tether controls without runtime errors. Visually reviewed native/browser captures
 show retained parking through recreation and resumed travel with the spring
-attached. CI passed on prior hinge head `adb632e5`; it must verify the new slider
-slice.
+attached. CI passed on slider position head `e92487ec`.
 
-Joint acceptance stays open. Add automatic editor/script save integration. Automatic editor/script
-save integration remains open; the reference gap remains partial in parity.
+An **editor reference-aware save slice** connects scene Save/Save As and subtree
+prefab authoring to `World::to_scene_with_references` with the active registry.
+Stable IDs remain a prerequisite. Unknown fields, live component strings and
+runtime identity remain unchanged; existing placed instances still save as
+references. Invalid local targets/types and unstable endpoints fail before
+writing or adopting a path. Tests retain disk, path and the agreed document on
+Save/Save As failures; two instances of every joint kind reopen independently
+and saved subtrees spawn twice with isolated constraints. The platformer's real
+Decay setup script spawns its nested windmill and editor Save As reopens it with
+motor reversal and a fixed axle, connecting an existing engine capability to
+editor authoring through the genre showcase.
+
+Scoped preflight passed 622 native editor tests and warning-denied all-target/
+all-feature checks. Editor Clippy, 11 catalogue tests, the 1,116-file size gate
+and the WASM editor-stub check passed. Runtime/browser/render/dependencies and
+Decay host/scripts are untouched. Prior slider head `e92487ec` is green; CI must
+verify the new save slice.
+
+Decay `Save` is a number/flag progress store; it has no existing world snapshot
+save/load operation to connect. That absent capability now has its own parity
+row. Save is still refused during Play. Joint acceptance remains open for native
+visual editor review/final integration; gameplay world snapshot persistence is
+a separate capability gap.
 
 Continue with **the remaining joints and typed controls/lifecycle**, then
 character movement, accelerated queries, 3D/voxel physics and final integration.
@@ -603,9 +623,11 @@ Continue the physics update in vardirhq/sindri-engine, draft PR #497,
 branch codex/physics-update. Read AGENTS.md, CLAUDE.md,
 docs/physics-update-handoff.md and docs/physics-update.md first.
 Implement every remaining acceptance item, including docs, in this one PR.
-CCD, one-way platforms, forces/rotation and contacts are checked and saved on
-the branch. Continue with remaining motor modes and automatic save-reference
-integration, then the remaining checklist.
+CCD, one-way platforms, forces/rotation, contacts, materials and the joint/motor
+slices are checked and saved on the branch. Editor saves now remap registered
+references automatically. Continue with native joint editor review, character
+movement and the remaining checklist. Script-triggered world snapshots are a
+separate absent capability tracked in parity.
 Push checked small slices regularly, each feature in one push or less.
 Keep gameplay in Decay, prove editor/runtime/script/game behavior, and do
 not mark the PR ready until final applicable checks and CI are green.
