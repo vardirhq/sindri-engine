@@ -434,6 +434,7 @@ pull request that fixes it.
 ## Core conventions
 
 - Rust 1.95.0, edition 2024, resolver 3. Do not raise the MSRV casually.
+- Use American English throughout the repository, including code identifiers, public APIs, serialized/schema fields, diagnostics, comments, and documentation. Prefer `color`, `behavior`, `center`, and similar spellings; do not introduce British-English variants such as `colour`, `behaviour`, or `centre`.
 - Workspace forbids unsafe code.
 - Prefer fixing Clippy pedantic warnings over adding `#[allow]`; justify any new
   allowance in a comment.
