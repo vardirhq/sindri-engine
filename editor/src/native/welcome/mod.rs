@@ -16,8 +16,8 @@
 //!
 //! What it is not is Unity Hub. There are no editor versions to install, no
 //! account, no news. What is left is small and worth doing well: the projects
-//! you have, the two ways to get another one, and the projects this repository
-//! ships so that a clean clone still has something to open.
+//! you have, the two ways to get another one, where to learn, and the projects
+//! this repository ships so that a clean clone still has something to open.
 
 use std::path::PathBuf;
 use std::sync::{Arc, Mutex, PoisonError};
@@ -46,20 +46,37 @@ const VIEWPORT: &str = "sindri-welcome";
 /// the same name would have CI photograph whichever one it found first.
 const TITLE: &str = "Sindri";
 
-const SIZE: [f32; 2] = [1080.0, 680.0];
+const SIZE: [f32; 2] = [1180.0, 760.0];
 const MIN_SIZE: [f32; 2] = [820.0, 520.0];
 
-/// The projects this repository ships, offered when they are actually there.
+/// The projects this repository ships, offered when they are actually there,
+/// each with the line the Examples panel shows under its name.
 ///
 /// Relative to the working directory, which is the repository root when the
 /// editor is run with `cargo run`. An installed editor is somewhere else and
 /// finds none of them, which is why a sample is listed only when it opens: a
 /// row that fails on the click is worse than no row.
 ///
-/// Gather alone, because Gather alone is a project. The cube example is a scene
-/// and a texture rather than something anyone would work in, and making it a
-/// project to pad this list would be inventing a project to have two of them.
-const SHIPPED: [&str; 1] = ["game"];
+/// Projects only. The cube example is a scene and a texture rather than
+/// something anyone would work in, and the Weave proof of concept is a test
+/// bed for one subsystem rather than something to learn the engine from.
+const SHIPPED: [(&str, &str); 8] = [
+    ("game", "Companion adventure"),
+    ("games/platformer", "2D platformer showcase"),
+    ("games/scorchball", "Couch football, 2-4 players"),
+    ("games/orbital-baked", "Arena action, baked 3D sprites"),
+    ("games/voxel-lab", "3D voxel terrain"),
+    ("games/low-tide", "Top-down moving-home game"),
+    ("games/flappy", "One-button arcade"),
+    ("games/shapes-lab", "Zero-art visual proving ground"),
+];
+
+/// A shipped project, as the Examples panel lists it.
+pub(super) struct Sample {
+    pub(super) name: String,
+    pub(super) root: PathBuf,
+    pub(super) summary: &'static str,
+}
 
 /// A project the window can offer, as a row.
 pub(super) struct Listing {
@@ -90,7 +107,7 @@ pub(super) struct Welcome {
     /// The remembered projects, as the preferences hold them.
     recent: RecentProjects,
     /// The shipped projects that are on disk.
-    samples: Vec<Listing>,
+    samples: Vec<Sample>,
     /// Whether the next launch should skip this window.
     open_last: bool,
     /// The new-project form, while it is open.
@@ -145,16 +162,16 @@ impl Welcome {
 }
 
 /// The shipped projects that exist and open.
-fn shipped_samples() -> Vec<Listing> {
+fn shipped_samples() -> Vec<Sample> {
     SHIPPED
         .iter()
-        .filter_map(|relative| {
+        .filter_map(|&(relative, summary)| {
             let root = PathBuf::from(relative);
             let project = Project::open(&root).ok()?;
-            Some(Listing {
+            Some(Sample {
                 name: project.name().to_owned(),
                 root,
-                present: true,
+                summary,
             })
         })
         .collect()
