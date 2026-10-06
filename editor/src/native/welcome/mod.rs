@@ -46,8 +46,8 @@ const VIEWPORT: &str = "sindri-welcome";
 /// the same name would have CI photograph whichever one it found first.
 const TITLE: &str = "Sindri";
 
-const SIZE: [f32; 2] = [900.0, 580.0];
-const MIN_SIZE: [f32; 2] = [640.0, 420.0];
+const SIZE: [f32; 2] = [1080.0, 680.0];
+const MIN_SIZE: [f32; 2] = [820.0, 520.0];
 
 /// The projects this repository ships, offered when they are actually there.
 ///
