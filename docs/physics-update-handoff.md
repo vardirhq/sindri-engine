@@ -16,13 +16,13 @@ a pushed handoff. Do not ask them to authorize the scope again.
 
 ## Current continuation checkpoint
 
-Native joint review has begun using an isolated X display and scratch platformer
-copy. Endpoint picker/clearing, Save and undo were inspected on the trolley.
-The discovered free-text motor mode gap is closed with enum-derived inspector
-choices for hinges/sliders. Rebuilt editor clicks saved both modes; slider
-undo/redo and retained settings were confirmed on disk. Scoped preflight passed
-515 tests, two-crate Clippy, 11 catalogue tests and WASM checks passed. Complete the remaining all-joint numeric/reference,
-save/reopen and Play visual review before checking joint acceptance.
+The 2D joint checklist is complete. See the repeatable native review in
+`docs/physics-joint-editor-review.md`: all four numeric payloads survive
+Save/reopen, Play mode switching/rebuild/spawning is visible, Save is refused
+without touching disk and Stop restores document settings. CI is green on
+`eb994996`. Continue with character movement, accelerated queries, 3D/voxel
+physics and final integration. Script-triggered world snapshots remain a
+separate absent capability.
 
 CCD, one-way platforms, **forces and rotation**, **contact snapshots**, and
 **reusable physics materials** are implemented in this PR. The checklist in `physics-update.md` is current.
@@ -633,9 +633,9 @@ docs/physics-update-handoff.md and docs/physics-update.md first.
 Implement every remaining acceptance item, including docs, in this one PR.
 CCD, one-way platforms, forces/rotation, contacts, materials and the joint/motor
 slices are checked and saved on the branch. Editor saves now remap registered
-references automatically. Continue with native joint editor review, character
-movement and the remaining checklist. Script-triggered world snapshots are a
-separate absent capability tracked in parity.
+references automatically. Continue with character movement and the remaining
+checklist. Script-triggered world snapshots are a separate absent capability
+tracked in parity.
 Push checked small slices regularly, each feature in one push or less.
 Keep gameplay in Decay, prove editor/runtime/script/game behavior, and do
 not mark the PR ready until final applicable checks and CI are green.

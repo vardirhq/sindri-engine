@@ -518,9 +518,8 @@ The maximum length must be finite and positive. Physics is required, but endpoin
 bodies need not be synchronized yet. Next fixed synchronization creates the
 constraint, preserving other owner components, bodies/motion and legacy connections.
 Existing joints, invalid handles/references and invalid lengths fail before mutation.
-Platformer C repairs the cut cord using its selected hook and length. Automatic
-script-triggered world snapshots and visual editor review stay open in the
-joint track.
+Platformer C repairs the cut cord using its selected hook and length.
+Script-triggered world snapshots remain absent.
 
 Editor scene Save/Save As and subtree prefab authoring now use the active
 component registry for stable-reference remapping automatically. All entities
@@ -585,7 +584,7 @@ spawned windmills between holding 0.6 radians and their reversing drive; H
 recreates the placed hinge and asks its script to restore its current mode.
 Checked command edits, undo/redo and scene serialization exercise the new fields;
 native backend tests prove holding, retargeting, caps, limits and atomic rejection.
-Automatic save-path integration and visual editor review remain open.
+Editor save-path integration and native visual review are exercised.
 
 Typed `Physics.set_hinge_motor(joint, velocity, max_torque)` controls the hinge
 **owner**, not a body. It requires a hinge component and a physics host, validates
@@ -607,13 +606,12 @@ rebuilds its placed windmill hinge and restores its selected drive while the spa
 windmill remains independently owned.
 
 The generic checked inspector authors hinge settings and command undo reverses
-motor edits. Visual editor review and script-triggered world snapshots
-remain open. This general capability is added for the platformer: Decay reverses
+motor edits. Native visual review is exercised; script-triggered world snapshots
+remain absent. This general capability is added for the platformer: Decay reverses
 its powered windmill axle every two seconds while physics keeps the rotor on its
 anchor. Native tests exercise offset anchors, limits, torque caps, coast/reverse,
 invalid atomic edits, command undo, endpoint rebuilds and gameplay removal.
-Script-triggered world snapshots and visual editor review remain in the
-joint track; its acceptance checkbox remains open.
+Script-triggered world snapshots remain a separate absent capability.
 
 ## Scene-authored sliders and springs
 
@@ -682,8 +680,8 @@ one constraint. Settings edits on unchanged endpoints update it in place and
 wake the bodies without resetting their motion. Owner/component removal drops
 it; inactive or missing endpoints suspend it; endpoint rebuilds reconnect in the
 same fixed step. The generic checked inspector and command undo author these
-settings; visual editor review and script-triggered world snapshots remain
-open. All numeric fields are validated even when their toggle is disabled.
+settings. Native visual review is exercised; script-triggered world snapshots
+remain absent. All numeric fields are validated even when their toggle is disabled.
 
 Typed `Physics.set_slider_motor(owner, velocity, max_force)` and
 `Physics.set_spring(owner, rest_length, stiffness, damping)` validate and patch
@@ -713,8 +711,8 @@ enabled lower distance cannot exceed upper distance. Its motor starts disabled;
 Invalid settings fail before mutation. Next fixed synchronization creates the
 owned constraint while retaining other components, body motion and legacy
 connections. Platformer J rebuilds its trolley slider, restores its selected
-drive and keeps the separately owned spring attached. Native
-visual editor review and script-triggered world snapshots stay open.
+drive and keeps the separately owned spring attached. Native visual review is
+exercised; script-triggered world snapshots remain absent.
 
 These general capabilities are added for the platformer: Decay reverses a
 powered lantern trolley near its rail ends, retunes its suspended light's spring
@@ -722,8 +720,11 @@ and draws the cord from solved positions. Its regression observes both travel
 directions, bounded rail motion, changed light height and independent removal.
 Runtime regressions exercise rotated rails, travel limits, force caps, coast/brake,
 spring extension/compression, damping, weight support and atomic invalid edits.
-Full prefab endpoint references, additional motor modes and final editor/browser
-interaction verification remain open; joint acceptance is not yet complete.
+Prefab endpoint references, velocity/position motors, editor save paths and
+native editor interaction are now exercised. The [native joint review](physics-joint-editor-review.md)
+records numeric Save/reopen, Play controls and Stop restoration. The 2D joint
+acceptance slice is complete; 3D joints, gameplay world snapshots and final
+workspace integration remain separate work.
 
 ## Runtime ownership and stepping
 

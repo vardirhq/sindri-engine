@@ -26,7 +26,7 @@ The remaining items below are the active scope.
   information, deterministic snapshots and grounded/impact proof.
 - [x] Physics materials: reusable project assets, shared validation and explicit
   literal override rules, asset loading in editor and exported games.
-- [ ] Joints: scene-authored distance, hinge, slider, spring and motor controls;
+- [x] Joints: scene-authored distance, hinge, slider, spring and motor controls;
   stable entity references, lifecycle/removal, editor undo, Decay access and proof.
 - [ ] Character movement: reusable sweep/slide collision primitive, slopes,
   steps, ground state and moving platforms; gameplay policy remains Decay.
@@ -665,3 +665,20 @@ surface-specific completeness. This checklist does not mark those surfaces done.
   travel limits retained. Scoped preflight passed 515 tests and warning-denied
   checks; two-crate Clippy, 11 catalogue tests, formatting/file-size gates and
   all-target/all-feature WASM checks passed. CI must verify the new head.
+
+### Native 2D joint acceptance checkpoint
+
+- Completed [the native editor review](physics-joint-editor-review.md) on
+  `eb994996`, whose CI is green. All four joint kinds retain numeric edits on
+  Save/reopen, including the nested hinge override. Distance undo/redo and
+  inactive reference diagnostics were inspected.
+- Editor Play runs the mechanisms, switches modes through P/O, rebuilds through
+  H/J/B and spawns an independent windmill through V. Live inspector settings
+  reflect Decay. Play Save is refused without changing disk; Stop restores
+  authored settings and saving again preserves the pre-Play hash.
+- The 2D joint checklist is complete across engine, authoring, scripting and
+  platformer proof. 3D joints and gameplay world snapshots remain separate gaps;
+  character movement, accelerated queries, 3D/voxel and final integration remain.
+- Documentation preflight passed formatting and the 1,116-file size gate.
+  Re-ran all three editor joint-save tests and 26 platformer regressions;
+  all 29 passed. This checkpoint changes documentation only; CI must verify it.
