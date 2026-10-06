@@ -41,7 +41,8 @@ impl Welcome {
             .frame(egui::Frame::new().fill(color::HEADER))
             .show(ui, |ui| {
                 let base = ui.max_rect();
-                ui.painter().hline(base.x_range(), base.top() + 0.5, hairline());
+                ui.painter()
+                    .hline(base.x_range(), base.top() + 0.5, hairline());
                 ui.horizontal_centered(|ui| {
                     ui.add_space(metric::GUTTER + 8.0);
                     let mut open_last = self.open_last;
@@ -116,9 +117,19 @@ impl Welcome {
                     ui.add_space(22.0);
                     section_title(ui, "WHAT YOU BUILD WITH");
                     ui.add_space(metric::GROUP_GAP);
-                    capability(ui, icons::SCENE, "Editor", "Author scenes and projects visually.");
+                    capability(
+                        ui,
+                        icons::SCENE,
+                        "Editor",
+                        "Author scenes and projects visually.",
+                    );
                     capability(ui, icons::SCRIPT, "Decay", "Write typed gameplay logic.");
-                    capability(ui, icons::UI_ELEMENT, "Weave", "Build responsive game interfaces.");
+                    capability(
+                        ui,
+                        icons::UI_ELEMENT,
+                        "Weave",
+                        "Build responsive game interfaces.",
+                    );
 
                     let samples: Vec<(String, PathBuf)> = self
                         .samples
@@ -287,20 +298,29 @@ fn section_title(ui: &mut egui::Ui, label: &str) {
     );
 }
 
-fn capability(ui: &mut egui::Ui, glyph: egui_material_icons::MaterialIcon, name: &str, detail: &str) {
+fn capability(
+    ui: &mut egui::Ui,
+    glyph: egui_material_icons::MaterialIcon,
+    name: &str,
+    detail: &str,
+) {
     ui.horizontal(|ui| {
         ui.add_sized(
             [28.0, 28.0],
-            egui::Label::new(
-                glyph.outlined()
-                    .rich_text()
-                    .size(18.0)
-                    .color(color::FORGE),
-            ),
+            egui::Label::new(glyph.outlined().rich_text().size(18.0).color(color::FORGE)),
         );
         ui.vertical(|ui| {
-            ui.label(RichText::new(name).size(text::BODY).strong().color(color::TEXT));
-            ui.label(RichText::new(detail).size(text::NOTE).color(color::TEXT_FAINT));
+            ui.label(
+                RichText::new(name)
+                    .size(text::BODY)
+                    .strong()
+                    .color(color::TEXT),
+            );
+            ui.label(
+                RichText::new(detail)
+                    .size(text::NOTE)
+                    .color(color::TEXT_FAINT),
+            );
         });
     });
     ui.add_space(metric::GROUP_GAP);
@@ -324,18 +344,38 @@ fn sample_row(ui: &mut egui::Ui, name: &str, root: &Path) -> bool {
         Align2::LEFT_CENTER,
         name,
         egui::FontId::proportional(text::BODY),
-        if response.hovered() { color::TEXT } else { color::TEXT_MUTED },
+        if response.hovered() {
+            color::TEXT
+        } else {
+            color::TEXT_MUTED
+        },
     );
     response.on_hover_text(root.display().to_string()).clicked()
 }
 
 fn project_card(ui: &mut egui::Ui, listing: &Listing) -> Option<Clicked> {
     let (rect, response) = button::row_sense(ui, CARD_HEIGHT);
-    let fill = if response.hovered() { color::EMBER_FAINT } else { color::RAISED };
+    let fill = if response.hovered() {
+        color::EMBER_FAINT
+    } else {
+        color::RAISED
+    };
     ui.painter().rect_filled(rect, radius(), fill);
-    outline(ui, rect, if response.hovered() { hairline() } else { hairline_soft() });
+    outline(
+        ui,
+        rect,
+        if response.hovered() {
+            hairline()
+        } else {
+            hairline_soft()
+        },
+    );
 
-    let named = if listing.present { color::TEXT } else { color::TEXT_FAINT };
+    let named = if listing.present {
+        color::TEXT
+    } else {
+        color::TEXT_FAINT
+    };
     let painter = ui.painter_at(rect);
     let left = rect.left() + 14.0;
     let name = painter.layout_no_wrap(
