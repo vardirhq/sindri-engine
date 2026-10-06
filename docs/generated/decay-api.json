@@ -933,6 +933,120 @@
       "name": "Camera"
     },
     {
+      "description": "A copied result of scene-owned 2D character movement. Gameplay reads support and collision flags to choose its own gravity, jump and recovery policy. This is historical movement, not a live solver contact or a pending request.",
+      "members": [
+        {
+          "description": "Copied ordered carry RayHit2d values, filtered to active existing entities.",
+          "kind": "value",
+          "name": "carry_collisions",
+          "type": "List<RayHit2d>"
+        },
+        {
+          "description": "Whether the carry sweep exhausted its iteration budget; false without carry.",
+          "kind": "value",
+          "name": "carry_iteration_limit_reached",
+          "type": "bool"
+        },
+        {
+          "description": "Platform translation/rotation-point displacement requested for carry, or zero without carry. Remains historical even when the platform reference is filtered.",
+          "kind": "value",
+          "name": "carry_requested",
+          "type": "Vec2"
+        },
+        {
+          "description": "Whether the carry sweep started in strict penetration; false without carry.",
+          "kind": "value",
+          "name": "carry_started_penetrating",
+          "type": "bool"
+        },
+        {
+          "description": "Collision-limited carry displacement included once in translation, or zero without carry.",
+          "kind": "value",
+          "name": "carry_translation",
+          "type": "Vec2"
+        },
+        {
+          "description": "Copied ordered slide RayHit2d values, filtered to active existing entities. Distances belong to each sweep phase.",
+          "kind": "value",
+          "name": "collisions",
+          "type": "List<RayHit2d>"
+        },
+        {
+          "description": "Nearest support-query RayHit2d before landing/snap, or null when absent or inactive. Distance describes that downward travel.",
+          "kind": "value",
+          "name": "ground",
+          "type": "RayHit2d?"
+        },
+        {
+          "description": "Whether the support probe started in strict penetration.",
+          "kind": "value",
+          "name": "ground_started_penetrating",
+          "type": "bool"
+        },
+        {
+          "description": "Whether the ground hit meets the authored up/slope limit; false when the hit is absent or filtered.",
+          "kind": "value",
+          "name": "ground_walkable",
+          "type": "bool"
+        },
+        {
+          "description": "Whether the completed endpoint has walkable support and the request was not ascending or penetrating. False if the ground entity is now inactive or removed.",
+          "kind": "value",
+          "name": "grounded",
+          "type": "bool"
+        },
+        {
+          "description": "Whether the selected slide exhausted its bounded iteration budget.",
+          "kind": "value",
+          "name": "iteration_limit_reached",
+          "type": "bool"
+        },
+        {
+          "description": "Verified carrying entity, or null without carry or when it is now inactive/removed.",
+          "kind": "value",
+          "name": "platform",
+          "type": "Entity"
+        },
+        {
+          "description": "Unsatisfied slide displacement when the iteration budget is exhausted; collision-blocked normal motion is discarded.",
+          "kind": "value",
+          "name": "remaining",
+          "type": "Vec2"
+        },
+        {
+          "description": "Selected collision-limited slide displacement, after carry or from the lifted pose of an accepted step.",
+          "kind": "value",
+          "name": "slide_translation",
+          "type": "Vec2"
+        },
+        {
+          "description": "Additional downward landing/snap translation, or zero.",
+          "kind": "value",
+          "name": "snap_translation",
+          "type": "Vec2"
+        },
+        {
+          "description": "Whether the selected character slide started in strict penetration; carry reports its own flag.",
+          "kind": "value",
+          "name": "started_penetrating",
+          "type": "bool"
+        },
+        {
+          "description": "Accepted step lift, or zero for ordinary movement.",
+          "kind": "value",
+          "name": "step_translation",
+          "type": "Vec2"
+        },
+        {
+          "description": "Total world displacement applied once at the last fixed step, including slide, step, snap and platform carry.",
+          "kind": "value",
+          "name": "translation",
+          "type": "Vec2"
+        }
+      ],
+      "name": "CharacterMotion2d"
+    },
+    {
       "description": "A managed Color tween; read with Tween.color_value.",
       "members": [],
       "name": "ColorTween"
@@ -1736,6 +1850,18 @@
           "returns": "RayHit2d"
         },
         {
+          "description": "A copied CharacterMotion2d from the last fixed controller pass, or null before first movement or for inactive/non-controller entities. Requires scene controller context; stale entity handles are errors. All scripts read the same completed pass while requests queue separately. Inactive/despawned ground, platform and collision references are filtered; grounded and ground_walkable become false when ground is filtered. Mutating returned fields/lists never changes the cached result. Settings, parenting and teleports invalidate the cache at synchronization.",
+          "kind": "function",
+          "name": "character_motion",
+          "parameter_names": [
+            "entity"
+          ],
+          "parameters": [
+            "Entity"
+          ],
+          "returns": "CharacterMotion2d?"
+        },
+        {
           "description": "The objects that started touching this script's object since the last frame, as a list.",
           "kind": "function",
           "name": "collision_started",
@@ -1886,7 +2012,7 @@
           "returns": "unit"
         },
         {
-          "description": "Ignores only one-way solid platforms for a duration in fixed simulation time. Zero cancels; a new request replaces it. Requires a dynamic body and works before a spawned body is built.",
+          "description": "Ignores only one-way solid platforms for a finite non-negative simulation duration; zero cancels. Dynamic bodies keep the solver timer, including queued spawn-window requests. Authored Character 2D entities instead queue a replacement scene-controller timer for the next fixed pass; positive remainder covers that whole pass and decrements afterward. Controller drop removes one-way support/carry and snap while ordinary floors and sensors retain their policy. Pause retains timers. Requires the corresponding physics/controller host context; invalid values preserve the previous request. No authored state is changed.",
           "kind": "function",
           "name": "drop_through",
           "parameter_names": [
@@ -1934,6 +2060,22 @@
             "List<String>"
           ],
           "returns": "f32"
+        },
+        {
+          "description": "Queues finite world-space Vec2 displacement for an active authored Character 2D at the next fixed scene step. Later requests replace earlier ones, including before spawn synchronization; invalid input preserves the pending request. snap permits authored downward snapping; ascending requests never snap. Requires scene controller context, valid character settings, a transform and no competing rigid body. Scene synchronization validates exactly one solid collider before applying input. Gameplay owns speed, gravity and jumps. Results are available from character_motion after the fixed step; solver response and discrete sensor events follow at the next solve.",
+          "kind": "function",
+          "name": "move_character",
+          "parameter_names": [
+            "entity",
+            "displacement",
+            "snap"
+          ],
+          "parameters": [
+            "Entity",
+            "Vec2",
+            "bool"
+          ],
+          "returns": "unit"
         },
         {
           "description": "Like `overlap_circle`, for a box `half_size` from its centre to each edge, turned by `rotation` radians.",

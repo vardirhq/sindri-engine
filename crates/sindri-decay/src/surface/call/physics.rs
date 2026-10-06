@@ -9,6 +9,8 @@ pub(crate) enum PhysicsCall {
     /// The closest 2D collider hit along a world-space segment.
     Raycast,
     Contacts,
+    MoveCharacter,
+    CharacterMotion,
     ContinuousCollision,
     SetContinuousCollision,
     DropThrough,
@@ -69,6 +71,8 @@ pub(crate) enum PhysicsCall {
 pub(crate) const PHYSICS_CALLS: &[(&str, PhysicsCall)] = &[
     ("raycast", PhysicsCall::Raycast),
     ("contacts", PhysicsCall::Contacts),
+    ("move_character", PhysicsCall::MoveCharacter),
+    ("character_motion", PhysicsCall::CharacterMotion),
     ("continuous_collision", PhysicsCall::ContinuousCollision),
     (
         "set_continuous_collision",

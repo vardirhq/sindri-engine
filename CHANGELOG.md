@@ -1,5 +1,7 @@
 # Changelog
 
+- Add typed Decay character displacement requests and copied optional motion/support/carry snapshots. Shared runtime/editor Play offer scene controller context; character drop-through uses the scene timer while dynamic-body hosts retain their solver API. Invalid input preserves queued requests. Platformer controller adoption and editor/game proof remain open.
+
 - Add scene-owned 2D controllers with validated settings, queued displacement/snap input, timed drop-through and synchronized platform snapshots. Movement applies once after the solve; collider response and discrete sensors observe it at the next solve. Editor/Decay/platformer proof remains open.
 - Grounded 2D movement now respects one-way support sides and cones across sliding, snapping, steps and platform carry. Request-scoped drop-through ignores only one-way solids; the host owns duration. Ordinary geometric queries stay two-sided; editor/Decay/platformer integration remains open.
 - Add opt-in synchronized platform carry to grounded 2D movement. Previous support is verified, translation and rotation-point motion are swept before character movement, and carry collisions/current pose are returned separately. Hosts retain snapshot ownership; one-way controller and editor/Decay/game integration remain in progress.

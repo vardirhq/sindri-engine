@@ -873,3 +873,31 @@ surface-specific completeness. This checklist does not mark those surfaces done.
   remain absent and have explicit parity rows. Added for platformer adoption;
   checked editor/Decay/game/native/browser proof and character acceptance remain
   open. Prior one-way head `5597ce44` is green in CI; CI must verify the new head.
+
+
+### Typed character-host checkpoint
+
+- `Physics.move_character` queues replacement world displacement/snap input;
+  optional `Physics.character_motion` copies the previous completed pass's
+  translation, support, step/snap, carry, hits and failure flags. Null guards
+  and inactive/despawned reference filtering are exercised; edits cannot alter
+  cached results. Invalid request values preserve pending input.
+- Authored controllers use the scene drop timer through `Physics.drop_through`;
+  dynamic bodies retain their solver timer and physics-only host compatibility.
+  A separate optional context preserves the existing physics/service API.
+  Shared runtime/editor Play and platformer harness provide the scene borrows.
+- Scoped preflight passed 1,023 native tests and four zero-error/reminder typed
+  fixtures. Ten controller-host regressions and a shared-session regression
+  exercise request ordering, copied values/lists, platform carry, filtering,
+  invalid inputs, drop-through/cancellation and old-host compatibility.
+- Warning-denied Clippy and native checks passed all four changed crates.
+  Eleven catalogue/currentness tests passed and API documents were regenerated.
+  WASM passed Decay/platformer with all targets and the shared game host with
+  native-only integration tests excluded. Formatting/file-size gates passed.
+- Real Chromium ran the rebuilt host and exported fixture under
+  `/examples/character-api/`: WebGPU configured, scene/script assets fetched,
+  actor/floor rendered and the script verified queued motion, grounding and
+  independent snapshot copies. This is host evidence for platformer adoption;
+  editor authoring/undo/Play and real platformer/native/browser proof remain.
+  Character acceptance is still unchecked; the platformer retains its dynamic
+  hero. Prior refactoring head `3842bac5` is green in CI; the new head is pending.

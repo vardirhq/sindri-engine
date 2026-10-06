@@ -6,6 +6,16 @@ pub(super) const PHYSICS: TypeEntry = TypeEntry {
     text: "2D physics: moving objects with speed and pushes, and finding out what this script's object bumped into.",
     members: &[
         call(
+            "move_character",
+            &["entity", "displacement", "snap"],
+            "Queues finite world-space Vec2 displacement for an active authored Character 2D at the next fixed scene step. Later requests replace earlier ones, including before spawn synchronization; invalid input preserves the pending request. snap permits authored downward snapping; ascending requests never snap. Requires scene controller context, valid character settings, a transform and no competing rigid body. Scene synchronization validates exactly one solid collider before applying input. Gameplay owns speed, gravity and jumps. Results are available from character_motion after the fixed step; solver response and discrete sensor events follow at the next solve.",
+        ),
+        call(
+            "character_motion",
+            &["entity"],
+            "A copied CharacterMotion2d from the last fixed controller pass, or null before first movement or for inactive/non-controller entities. Requires scene controller context; stale entity handles are errors. All scripts read the same completed pass while requests queue separately. Inactive/despawned ground, platform and collision references are filtered; grounded and ground_walkable become false when ground is filtered. Mutating returned fields/lists never changes the cached result. Settings, parenting and teleports invalidate the cache at synchronization.",
+        ),
+        call(
             "set_slider_position_motor",
             &[
                 "joint",
@@ -100,7 +110,7 @@ pub(super) const PHYSICS: TypeEntry = TypeEntry {
         call(
             "drop_through",
             &["entity", "seconds"],
-            "Ignores only one-way solid platforms for a duration in fixed simulation time. Zero cancels; a new request replaces it. Requires a dynamic body and works before a spawned body is built.",
+            "Ignores only one-way solid platforms for a finite non-negative simulation duration; zero cancels. Dynamic bodies keep the solver timer, including queued spawn-window requests. Authored Character 2D entities instead queue a replacement scene-controller timer for the next fixed pass; positive remainder covers that whole pass and decrements afterward. Controller drop removes one-way support/carry and snap while ordinary floors and sensors retain their policy. Pause retains timers. Requires the corresponding physics/controller host context; invalid values preserve the previous request. No authored state is changed.",
         ),
         call(
             "continuous_collision",

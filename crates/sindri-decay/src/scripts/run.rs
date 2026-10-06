@@ -8,8 +8,8 @@ use sindri_core::{EntityId, World};
 use sindri_platform::InputState;
 
 use crate::{
-    Blackboard, Physics2d, PrefabSources, ProfileSources, ScriptComponent, ScriptContext,
-    ScriptFailure, WorldHost, audio_host::AudioQueue, host::Peers, host::Spawning,
+    Blackboard, Characters2d, Physics2d, PrefabSources, ProfileSources, ScriptComponent,
+    ScriptContext, ScriptFailure, WorldHost, audio_host::AudioQueue, host::Peers, host::Spawning,
 };
 
 use super::sources::{START, ScriptSources, UPDATE};
@@ -45,6 +45,8 @@ pub(super) struct TickWorld<'a> {
     pub(super) spawned: Vec<EntityId>,
     /// Calls scripts made on each other, waiting for the pass to finish.
     pub(super) messages: Vec<super::Message>,
+    /// Scene-owned controller requests and cached results.
+    pub(super) characters: Option<Characters2d<'a>>,
     /// The physics a script may read and drive, when the host runs any.
     pub(super) physics: Option<Physics2d<'a>>,
     /// Where the screen elements are and what the pointer is doing to them.
@@ -282,6 +284,10 @@ fn host_for<'b>(
             scenes: at.scenes.as_deref_mut(),
         },
     )
+    .with_characters(at.characters.as_mut().map(|characters| Characters2d {
+        requests: &mut *characters.requests,
+        motions: characters.motions,
+    }))
     .with_tweens(&mut *at.tweens)
     .with_actions(at.actions)
     .with_sequences(at.sequences.as_deref_mut())

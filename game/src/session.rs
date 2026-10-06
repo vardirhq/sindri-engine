@@ -352,7 +352,7 @@ impl Session {
         } else {
             input
         };
-        let (physics, events) = self.physics.for_scripts();
+        let (physics, events, requests, motions) = self.physics.for_scripts_with_characters();
         let mut frame = ScriptFrame::new(&self.sources, script_input, delta_seconds)
             .with_prefabs(&self.prefabs)
             .with_profiles(&self.profiles)
@@ -364,6 +364,7 @@ impl Session {
                 world: physics,
                 events,
             })
+            .with_characters(sindri_decay::Characters2d { requests, motions })
             .with_animations(&mut self.animations)
             .with_sequences(&mut self.sequences);
         frame = frame.with_gestures(&self.gestures).with_camera_pan(pan);

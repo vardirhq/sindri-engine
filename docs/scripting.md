@@ -1003,6 +1003,8 @@ a person who has not clicked yet.
 | Call | Returns |
 | --- | --- |
 | `Physics.contacts(entity)` | `List<Contact2d>` |
+| `Physics.move_character(entity, displacement: Vec2, snap: bool)` | nothing |
+| `Physics.character_motion(entity)` | `CharacterMotion2d?` |
 | `Physics.apply_force(entity, force: Vec2)` | nothing |
 | `Physics.apply_torque(entity, torque)` | nothing |
 | `Physics.angular_velocity(entity)` | `f32` |
@@ -1070,11 +1072,14 @@ body components; only spawn-window requests require an authored body.
 Platformer's wind crate is the gameplay proof.
 
 `Physics.drop_through(entity, seconds) -> unit` ignores only one-way solid
-platforms for an authored dynamic body. The duration is finite and nonnegative;
+platforms for an authored dynamic body or Character 2D. Characters queue the
+scene timer, covering all movement-query phases at the next fixed pass; dynamic
+bodies retain their solver timer. The duration is finite and nonnegative;
 zero cancels, repeated requests replace the timer. Time advances only on fixed
 physics steps and starts at materialization for a newly spawned body. Ordinary
-floors and sensors stay active. Missing authored bodies, wrong body kinds and
-hosts without physics report errors. Geometric queries still see one-way pieces
+floors and sensors stay active. Missing authored movement owners, wrong body
+kinds and hosts without the corresponding physics/controller context report
+errors. Geometric queries still see one-way pieces
 while dropping; gameplay must decide when a query grants jump permission.
 
 `Physics.continuous_collision(entity) -> bool` reads the live 2D body setting,
@@ -1284,6 +1289,19 @@ acting on that entity. Queries currently scan collider pieces, with no separate
 spatial index. The platformer displays clearance below its hero, preserving its
 foot-sensor jump rules; Physics Playground makes masks, sensors, inside hits,
 misses, hit points and normals visible.
+
+Scene-owned 2D characters use `Physics.move_character(entity, displacement, snap)`
+to replace their queued world-space displacement for the next fixed step and
+`Physics.character_motion(entity)` to read a copied optional `CharacterMotion2d`
+from the previous completed pass. Check for null before reading support,
+translation, collision or carry fields. The runtime/editor offer a controller
+context separately from ordinary physics, preserving independent physics hosts.
+`Physics.drop_through` selects the controller timer for authored characters and
+the existing solver timer for dynamic bodies. Gameplay owns speed, gravity,
+jumps and recovery; the engine supplies collision movement. See
+[the character contract](character-movement.md#typed-decay-requests-and-motion-snapshots)
+for validation, copied fields, filtering, spawn-window behavior and solver timing.
+The platformer has not yet adopted the character API.
 
 `Physics.overlap_circle` and `Physics.overlap_box` are area checks: every
 entity with a piece overlapping a circle, or a box `half_size` from its centre

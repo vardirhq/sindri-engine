@@ -1,0 +1,30 @@
+script ControllerCarry {
+    var carried: f32 = 0.0;
+    var requested: f32 = 0.0;
+    var platform: Entity = null;
+    var ground: Entity = null;
+    var grounded: bool = false;
+    var collisions: f32 = 0.0;
+    var carry_collisions: f32 = 0.0;
+    var flags_clear: bool = false;
+    fn update(dt: f32) {
+        let motion = Physics.character_motion(World.find("Actor"));
+        if motion == null { return; }
+        carried = motion.carry_translation.x;
+        requested = motion.carry_requested.x;
+        platform = motion.platform;
+        let hit = motion.ground;
+        ground = null;
+        if hit != null { ground = hit.entity; }
+        grounded = motion.grounded && motion.ground_walkable;
+        collisions = motion.collisions.length;
+        carry_collisions = motion.carry_collisions.length;
+        flags_clear = !motion.started_penetrating && !motion.ground_started_penetrating && !motion.iteration_limit_reached && !motion.carry_started_penetrating && !motion.carry_iteration_limit_reached;
+        if motion.collisions.length > 0.0 {
+            var hit_copy = motion.collisions[0.0];
+            hit_copy.normal = Vec2(99.0, 99.0);
+        }
+        carried += motion.translation.x - motion.carry_translation.x - motion.slide_translation.x - motion.step_translation.x - motion.snap_translation.x;
+        carried += motion.remaining.x;
+    }
+}

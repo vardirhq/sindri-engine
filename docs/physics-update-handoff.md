@@ -60,8 +60,32 @@ runtime loading, storing, calling and entity/vector addressing. Both implementat
 blocks moved unchanged; the parent is now 168 lines, leaving room for controller
 context. Scoped preflight, warning-denied Clippy and all-target/all-feature WASM
 checks passed. This is a refactoring checkpoint, not a new controller API or proof.
-Continue with typed Decay requests/results, editor/runtime context wiring,
-platformer integration and native/browser proof.
+Typed controller access now offers `Physics.move_character(entity, Vec2, snap)`
+and optional copied `Physics.character_motion(entity)` results. Character 2D
+uses the scene timer through `Physics.drop_through`; dynamic bodies retain the
+solver timer and physics-only host compatibility. `Characters2d` is a separate
+optional `ScriptFrame`/host context, reborrowed per script; existing `Physics2d`
+and service literals remain compatible. Shared game runtime, editor Play and
+platformer harness supply the scene queue/result borrows.
+Snapshots expose slide/ground/step/snap/carry vectors, flags and ordered copied
+hits, filtering inactive/despawned references. Requests validate active actors,
+settings, transform and body ownership; probe assembly validates at synchronization.
+Null guards are required before accessing optional motion/ground. Invalid input
+preserves queued requests; no snapshot edits change the cache.
+Validation passed 1,023 native tests across Decay, game host, editor and platformer,
+including ten controller host regressions and a shared-session run. All four
+changed scripts passed typed preflight with zero errors/reminders. Warning-denied
+Clippy, native checks, eleven catalogue tests/currentness, formatting/size and
+WASM checks passed (Decay/platformer all targets; game excludes native-only tests).
+The rebuilt browser host loaded a small exported fixture under
+`/examples/character-api/`, fetched scene/script assets, configured WebGPU,
+rendered its actor/floor and printed the verified movement/ground/copied-cache
+observation from `game/tests/character_controller.decay`. Browser log/capture:
+`/tmp/sindri-character-api-browser.log` and `-browser.png`; fixture/export:
+`/tmp/sindri-character-api-project` and `-export`. The prior refactoring head
+`3842bac5` passed all CI; the newly pushed API head requires verification.
+Continue with checked editor component authoring/undo/Play, platformer controller
+adoption and native/browser game proof. The platformer's dynamic hero is unchanged.
 Character acceptance remains unchecked. Accelerated queries, 3D/voxel physics
 and final integration follow; gameplay world snapshots remain a separate gap.
 

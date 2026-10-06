@@ -9,7 +9,7 @@
 use sindri_platform::InputState;
 
 use super::ScriptSources;
-use crate::{Physics2d, PrefabSources, ProfileSources};
+use crate::{Characters2d, Physics2d, PrefabSources, ProfileSources};
 
 /// Everything one pass of scripts needs from the frame around it.
 ///
@@ -34,6 +34,8 @@ pub struct ScriptFrame<'a> {
     /// authored a collider — and then a script calling `Physics.*` is told so
     /// rather than quietly doing nothing.
     pub physics: Option<Physics2d<'a>>,
+    /// Scene controller input and cached results, when offered by the host.
+    pub characters: Option<Characters2d<'a>>,
     /// Where the screen elements are and what the pointer is doing to them.
     ///
     /// `None` for a host that draws no UI, and then `Ui.is_pressed` says so
@@ -109,6 +111,7 @@ impl<'a> ScriptFrame<'a> {
             profiles: ProfileSources::none(),
             input,
             physics: None,
+            characters: None,
             screen_ui: None,
             aim: None,
             gestures: None,
@@ -211,6 +214,13 @@ impl<'a> ScriptFrame<'a> {
     #[must_use]
     pub fn with_physics(mut self, physics: Physics2d<'a>) -> Self {
         self.physics = Some(physics);
+        self
+    }
+
+    /// The same frame, with scene-owned controller requests and results.
+    #[must_use]
+    pub fn with_characters(mut self, characters: Characters2d<'a>) -> Self {
+        self.characters = Some(characters);
         self
     }
 

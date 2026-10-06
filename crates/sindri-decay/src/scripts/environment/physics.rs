@@ -8,6 +8,7 @@ use crate::surface::raycast::{HIT_FIELDS, RAY_HIT};
 
 pub(super) fn add_physics_surface(environment: &mut Environment) {
     add_snapshots(environment);
+    crate::surface::character::add_snapshot(environment);
     let mut physics = HostType::new();
     for (name, call) in PHYSICS_CALLS {
         physics = physics.with_function(
@@ -65,6 +66,7 @@ fn physics_params(call: PhysicsCall) -> Vec<Type> {
         | PhysicsCall::ApplyTorque
         | PhysicsCall::SetAngularVelocity
         | PhysicsCall::ApplyAngularImpulse => vec![entity(), Type::F32],
+        PhysicsCall::MoveCharacter => vec![entity(), Type::Vec2, Type::Bool],
         PhysicsCall::ApplyForce => vec![entity(), Type::Vec2],
         PhysicsCall::ApplyImpulseAtPoint => vec![entity(), Type::Vec2, Type::Vec2],
         PhysicsCall::Layer => vec![Type::String],
@@ -73,6 +75,7 @@ fn physics_params(call: PhysicsCall) -> Vec<Type> {
         | PhysicsCall::JointEnabled
         | PhysicsCall::ContinuousCollision
         | PhysicsCall::Contacts
+        | PhysicsCall::CharacterMotion
         | PhysicsCall::VelocityX
         | PhysicsCall::VelocityY
         | PhysicsCall::AngularVelocity => vec![entity()],
@@ -136,6 +139,9 @@ fn joint_creation_params(call: PhysicsCall) -> Vec<Type> {
 fn physics_return_type(call: PhysicsCall) -> Type {
     let entity = || Type::Named(ENTITY.to_owned());
     match call {
+        PhysicsCall::CharacterMotion => Type::Optional(Box::new(Type::Named(
+            crate::surface::character::CHARACTER_MOTION.to_owned(),
+        ))),
         PhysicsCall::Contacts => Type::array_of(Type::Named(CONTACT.to_owned())),
         PhysicsCall::Raycast | PhysicsCall::CastCircle | PhysicsCall::CastBox => {
             Type::Named(RAY_HIT.to_owned())
@@ -146,7 +152,8 @@ fn physics_return_type(call: PhysicsCall) -> Type {
         | PhysicsCall::Mask
         | PhysicsCall::AngularVelocity => Type::F32,
         PhysicsCall::ContinuousCollision | PhysicsCall::JointEnabled => Type::Bool,
-        PhysicsCall::SetVelocity
+        PhysicsCall::MoveCharacter
+        | PhysicsCall::SetVelocity
         | PhysicsCall::ApplyImpulse
         | PhysicsCall::ConnectDistance
         | PhysicsCall::SetHingeMotor

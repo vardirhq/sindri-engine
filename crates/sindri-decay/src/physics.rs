@@ -22,3 +22,12 @@ pub struct Physics2d<'a> {
     /// take an event away from another.
     pub events: &'a [PhysicsEvent2d],
 }
+
+/// Scene-owned character requests and results for one pass of scripts.
+///
+/// Supply alongside `Physics2d` when the host uses scene controllers. Requests
+/// apply at the next fixed step; all scripts read the previous step's results.
+pub struct Characters2d<'a> {
+    pub requests: &'a mut sindri_scene::CharacterRequests2d,
+    pub motions: sindri_scene::CharacterMotions2d<'a>,
+}

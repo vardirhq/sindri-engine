@@ -101,11 +101,12 @@ impl Run {
         if let Err(error) = self.physics.step(&mut self.world, &self.components, step) {
             notes.push(error.to_string());
         }
-        let (physics, events) = self.physics.for_scripts();
+        let (physics, events, requests, motions) = self.physics.for_scripts_with_characters();
         let report = self.scripts.advance(
             &mut self.world,
             &self.components,
             ScriptFrame::new(&self.sources, &self.input, delta)
+                .with_characters(sindri_decay::Characters2d { requests, motions })
                 .with_prefabs(&self.prefabs)
                 .with_physics(Physics2d {
                     world: physics,

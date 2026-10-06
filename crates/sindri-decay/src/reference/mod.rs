@@ -13,6 +13,7 @@
 //! host call cannot ship undescribed, and a removed one cannot leave its
 //! description behind.
 
+mod character;
 mod game;
 mod input;
 mod physics;

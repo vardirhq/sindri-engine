@@ -1,0 +1,20 @@
+script ControllerSession {
+    var verified: bool = false;
+    fn update(dt: f32) {
+        let motion = Physics.character_motion(this.entity);
+        if motion == null { return; }
+        if motion.grounded && motion.translation.x > 0.01 && !verified {
+            var copy = motion;
+            copy.translation = Vec2(99.0, 99.0);
+            copy.ground = null;
+            let fresh = Physics.character_motion(this.entity);
+            if fresh == null { return; }
+            if fresh.grounded && fresh.translation.x < 1.0 {
+                verified = true;
+                this.transform.position.z = 0.5;
+                print("character controller session verified");
+            }
+        }
+        if !verified { Physics.move_character(this.entity, Vec2(0.02, -0.1), true); }
+    }
+}

@@ -41,6 +41,8 @@ pub struct EditorFrame<'a> {
     /// nothing is stepping and a `Physics.*` call should say so rather than
     /// answer about a simulation nobody is running.
     pub physics: Option<Physics2d<'a>>,
+    /// Scene-owned movement input and results for Play.
+    pub characters: Option<sindri_decay::Characters2d<'a>>,
     pub screen_ui: &'a sindri_scene::ScreenUi,
     pub random: &'a mut sindri_core::Rng,
     pub saves: &'a mut sindri_core::SaveStore,
@@ -389,6 +391,7 @@ impl SceneScripts {
         let EditorFrame {
             input,
             physics,
+            characters,
             screen_ui,
             random,
             saves,
@@ -408,6 +411,9 @@ impl SceneScripts {
             .with_sequences(sequences);
         if let Some(physics) = physics {
             frame = frame.with_physics(physics);
+        }
+        if let Some(characters) = characters {
+            frame = frame.with_characters(characters);
         }
         // Always timed: the Profiler is the editor's, and a tick's timing is
         // two clock reads beside a script's own work.

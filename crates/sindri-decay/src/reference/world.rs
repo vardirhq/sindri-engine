@@ -222,6 +222,7 @@ pub(super) const TYPES: &[TypeEntry] = &[
         ],
     },
     super::physics::PHYSICS,
+    super::character::CHARACTER_MOTION,
     TypeEntry {
         name: "RayHit2d",
         text: "A copied 2D ray hit snapshot. Null means no hit. Holds entity, world-space point and normal, and distance in world units. Copying or editing a snapshot never changes physics.",

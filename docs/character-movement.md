@@ -335,7 +335,9 @@ clear it. Parenting to a simulated support does not add a second carry.
 borrows; `CharacterMotions2d::get(entity)` reads a shared cached result. Scripts
 must check activity when reading during a pass, just as with other snapshots.
 Existing `for_scripts()` remains available for hosts without controller APIs.
-The Decay hosts have not yet adopted the controller borrows.
+The shared game runtime, editor Play and platformer test host now supply these
+borrows to Decay alongside the existing physics context. Physics-only hosts
+retain their independent driver and existing APIs.
 
 **Solver timing limit:** controller motion occurs after the solve so carry uses
 actual current platform motion. Queries and render transforms see the applied
@@ -346,10 +348,60 @@ apply physical push impulses or swept trigger events. A fast controller can
 cross a small sensor between solves without entering it. These limits are
 explicit parity gaps; this is not a same-step solver-response implementation.
 
+## Typed Decay requests and motion snapshots
+
+`Physics.move_character(entity, displacement, snap)` queues world-space `Vec2`
+displacement for the next fixed scene step; later input replaces earlier input.
+The actor must be active, have valid Character 2D settings and a transform, and
+have no competing authored rigid body. Probe assembly (including tilemap pieces)
+is validated by scene synchronization before queued movement applies. Finite
+components and finite displacement length are required; invalid arguments leave
+pending input intact. Calls before a spawned actor's first synchronization are
+valid. A host without scene controller context reports an error.
+
+`Physics.character_motion(entity)` returns a copied optional `CharacterMotion2d`
+from the last completed fixed pass. Check for null before reading: there is no
+result before first movement, for an inactive actor or without its character
+component. Stale entity handles are errors. All scripts in a pass read the same
+cached results while queuing future input. Settings, parenting and teleports
+invalidate caches at synchronization, not by changing an already returned copy.
+
+The snapshot contains total `translation`, selected `slide_translation`,
+`remaining`, `step_translation`, `snap_translation`, `grounded`, optional
+`ground` (`RayHit2d`), `ground_walkable`, `ground_started_penetrating`, slide
+`started_penetrating`/`iteration_limit_reached` and ordered slide `collisions`.
+Carry has nullable `platform`, `carry_requested`, `carry_translation`, ordered
+`carry_collisions` and separate `carry_started_penetrating`/
+`carry_iteration_limit_reached`. Without carry its vectors, lists and flags are
+zero/empty/false. Hits copy world point, normal and phase-relative distance.
+Inactive/despawned hit/platform references are filtered during each call;
+filtered ground also clears grounded/walkable in that copy. Applied displacement
+and other flags remain historical. Editing fields, nested hits or lists cannot
+change the engine cache or future movement.
+
+`Physics.drop_through(entity, seconds)` dispatches authored characters to the
+scene-controller timer; dynamic bodies retain the existing solver timer and
+physics-only host compatibility. A finite non-negative duration replaces pending
+time, zero cancels and invalid values preserve the queue. Timers begin at the
+next valid fixed pass, cover its whole movement and decrement afterward; pause
+retains them. Controller drop suppresses only one-way solids across slide,
+support, snap, steps and carry. Neither request changes saved component settings.
+
+Native regressions exercise previous-pass reads, input replacement, copies,
+carry/support filtering, invalid input and controller timer dispatch. A shared
+session regression exercises the same context the exported game uses. A rebuilt
+Chromium export at `/examples/character-api/` runs that fixture script, observes
+queued movement and grounded results, verifies snapshot edits leave the cache
+intact and renders the controller above its solid floor. This API
+is added generally for platformer adoption; its dynamic-body hero has not yet
+been migrated and full game acceptance remains open.
+
 ## Remaining slices
 
-Checked editor authoring/undo, typed Decay requests/result snapshots and a real
-platformer scripted run must prove the capability vertically. The platformer's
+Checked editor authoring/undo and a real platformer scripted run must prove
+the capability vertically. Typed requests/results and shared host context are
+implemented; editor Play interaction and game/browser adoption remain open.
+The platformer's
 current dynamic-body hero is retained until that integration is ready; coyote
 time, jump buffering and player input remain gameplay policy in Decay.
 Native and real browser proof are required before checking character acceptance.

@@ -2674,6 +2674,17 @@ request validation, cached script borrows and saved authored data.
 Controller queries/render transforms see the new pose immediately; solid response
 and discrete sensors process it at the next solve. Same-step response, physical
 push impulses, compound solid probes and swept controller triggers remain absent.
-Editor, typed Decay and real platformer/native/browser proof remain open; the
-platformer still uses its dynamic-body hero. This is the scene foundation for
+Typed Decay now offers queued `Physics.move_character` requests and copied optional
+`Physics.character_motion` results; `Physics.drop_through` selects controller or
+dynamic-body timers by authored movement ownership. Motion/support/carry fields
+and ordered hit lists filter inactive/despawned references without rewriting
+historical displacement. Missing controller context and invalid inputs fail
+explicitly; invalid requests preserve previous queued input. Shared game runtime,
+editor Play and platformer harness offer the same scene context. Native runtime
+and shared-session regressions exercise previous-pass reads, replacement, copied
+fields/lists, platform carry, filtering, drop/cancellation and physics-only hosts.
+A rebuilt Chromium export of the shared-session fixture runs queued movement,
+observes grounded/copied results and renders the controller above its floor.
+Editor interaction and real platformer adoption/native/browser game proof remain
+open; the platformer still uses its dynamic-body hero. This is the scene foundation for
 that showcase, not completed character acceptance.

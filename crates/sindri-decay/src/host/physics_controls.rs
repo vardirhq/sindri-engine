@@ -2,6 +2,7 @@
 
 use decay_ir::Path;
 use decay_runtime::{RuntimeError, Value};
+use sindri_core::SceneComponent;
 use sindri_physics::{RigidBody2d, RigidBodyKind};
 
 use super::WorldHost;
@@ -22,6 +23,12 @@ impl WorldHost<'_> {
         #[allow(clippy::cast_possible_truncation)]
         // Backend units are f32; overflow is validated below.
         let seconds = seconds as f32;
+        if self.world.get(entity).is_some_and(|data| {
+            data.components
+                .contains_key(sindri_scene::Character2dComponent::TYPE_NAME)
+        }) {
+            return self.character_drop_through(entity, seconds, path);
+        }
         let body: RigidBody2d = self
             .world
             .get(entity)
