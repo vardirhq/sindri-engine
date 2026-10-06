@@ -243,9 +243,20 @@ fn hero(ui: &mut egui::Ui) {
     painter.hline(rect.x_range(), rect.bottom() - 0.5, hairline());
 
     let left = rect.left() + 28.0;
-    super::super::chrome::brandmark_at(ui, Pos2::new(left, rect.top() + 28.0));
+    let mark = Pos2::new(left + 8.0, rect.top() + 36.0);
+    let arm = 8.0;
+    painter.add(egui::Shape::convex_polygon(
+        vec![
+            mark + Vec2::new(0.0, -arm),
+            mark + Vec2::new(arm, 0.0),
+            mark + Vec2::new(0.0, arm),
+            mark + Vec2::new(-arm, 0.0),
+        ],
+        color::FORGE,
+        egui::Stroke::NONE,
+    ));
     painter.text(
-        Pos2::new(left + 34.0, rect.top() + 28.0),
+        Pos2::new(left + 30.0, rect.top() + 21.0),
         Align2::LEFT_TOP,
         "Sindri",
         egui::FontId::proportional(28.0),
