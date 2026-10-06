@@ -5,7 +5,7 @@
 //! what Sindri is, the primary actions say how to begin, and recent and shipped
 //! projects make returning to work immediate.
 
-use eframe::egui::{self, Align, Align2, Layout, Pos2, RichText, Sense, UiBuilder, Vec2};
+use eframe::egui::{self, Align, Align2, Layout, Pos2, RichText, UiBuilder, Vec2};
 
 use crate::ui::theme::{color, hairline, hairline_soft, metric, radius, text};
 use crate::ui::widgets::{
@@ -14,12 +14,11 @@ use crate::ui::widgets::{
 };
 use crate::ui::{icons, widgets::button::outline};
 
-use super::{Listing, NewProject, Request, Sample, Welcome, learn};
+use super::{Listing, NewProject, Request, Sample, Welcome, hero, learn};
 
 const CARD_HEIGHT: f32 = 54.0;
 const SIDE_WIDTH: f32 = 320.0;
 const EXAMPLE_HEIGHT: f32 = 46.0;
-const HERO_HEIGHT: f32 = 154.0;
 
 enum Clicked {
     Open,
@@ -148,7 +147,7 @@ impl Welcome {
         egui::CentralPanel::default()
             .frame(egui::Frame::new().fill(color::PANEL))
             .show(ui, |ui| {
-                hero(ui);
+                hero::draw(ui);
                 panel::body(ui, |ui| {
                     ui.add_space(8.0);
                     ui.horizontal(|ui| {
@@ -232,60 +231,6 @@ impl Welcome {
             ));
         }
     }
-}
-
-fn hero(ui: &mut egui::Ui) {
-    let (rect, _) =
-        ui.allocate_exact_size(Vec2::new(ui.available_width(), HERO_HEIGHT), Sense::hover());
-    let painter = ui.painter_at(rect);
-    painter.rect_filled(rect, 0.0, color::INK);
-    let glow = egui::Color32::from_rgb(30, 25, 16);
-    painter.circle_filled(
-        Pos2::new(rect.right() - 90.0, rect.top() + 28.0),
-        150.0,
-        glow,
-    );
-    painter.circle_filled(
-        Pos2::new(rect.right() - 28.0, rect.bottom() + 54.0),
-        116.0,
-        color::EMBER,
-    );
-    painter.hline(rect.x_range(), rect.bottom() - 0.5, hairline());
-
-    let left = rect.left() + 28.0;
-    let mark = Pos2::new(left + 8.0, rect.top() + 36.0);
-    let arm = 8.0;
-    painter.add(egui::Shape::convex_polygon(
-        vec![
-            mark + Vec2::new(0.0, -arm),
-            mark + Vec2::new(arm, 0.0),
-            mark + Vec2::new(0.0, arm),
-            mark + Vec2::new(-arm, 0.0),
-        ],
-        color::FORGE,
-        egui::Stroke::NONE,
-    ));
-    painter.text(
-        Pos2::new(left + 30.0, rect.top() + 21.0),
-        Align2::LEFT_TOP,
-        "Sindri",
-        egui::FontId::proportional(28.0),
-        color::TEXT,
-    );
-    painter.text(
-        Pos2::new(left, rect.top() + 70.0),
-        Align2::LEFT_TOP,
-        "Build worlds. Give them rules. Make them playable.",
-        egui::FontId::proportional(16.0),
-        color::TEXT,
-    );
-    painter.text(
-        Pos2::new(left, rect.top() + 100.0),
-        Align2::LEFT_TOP,
-        "A Rust-powered 2D + 3D engine with a native editor, Decay gameplay, and Weave UI.",
-        egui::FontId::proportional(text::BODY),
-        color::TEXT_MUTED,
-    );
 }
 
 fn section_title(ui: &mut egui::Ui, label: &str) {

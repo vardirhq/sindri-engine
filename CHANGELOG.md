@@ -1,5 +1,7 @@
 # Changelog
 
+- The editor's welcome window is redesigned around what a returning or new user needs: a drawn dusk-range banner with the Sindri mark; recent projects with a search box, "2 days ago" times and name-tinted tiles; a Learn panel opening the guides in `docs/` (locally in a clone, on GitHub otherwise); and an Examples panel listing every shipped game project with a one-line summary instead of Causeway alone.
+
 - Low Tide separates flooded flats from permanent water: empty-handed crew can swim, ordinary crates can be waded out without automatic loss, and golden floats mark submerged wrecks. Shallow dives start while swimming and surface in the same water; one floated ore bundle must be hauled back up the ramp. The ebb no longer recalls divers from permanent water. Walking uses a closer, smoothly eased camera, with whole-crawler framing restored aboard. `Camera.orthographic_size(camera, size)` adds explicit, validated runtime projection sizing.
 
 - Low Tide wrecks contain six visible, individually selectable crates: three scrap, wood, ore and fibre. Set carried cargo down with X / Drop and pick it up again; only boarding stows it. Wreck streaming retains each taken crate, while loose ground cargo washes away in a flood.

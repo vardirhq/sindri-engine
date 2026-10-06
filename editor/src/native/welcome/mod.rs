@@ -31,6 +31,7 @@ use super::EditorApp;
 use super::unsaved::Discarding;
 
 mod create;
+mod hero;
 mod learn;
 mod view;
 
