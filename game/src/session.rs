@@ -228,7 +228,8 @@ impl Session {
             .scenes
             .get(&wanted)
             .ok_or_else(|| CausewayError::UnknownScene(wanted.clone()))?;
-        self.loaded.enter(world, &wanted, document)?;
+        self.loaded
+            .enter_with(world, &wanted, document, &self.prefabs)?;
         channel.now_playing(wanted);
         Ok(())
     }

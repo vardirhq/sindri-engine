@@ -2,7 +2,7 @@
 
 use std::collections::{BTreeSet, HashMap};
 
-use crate::prefab::{ExpandedEntity, NoPrefabs, PrefabLibrary, expand_entities};
+use crate::prefab::{NoPrefabs, PrefabLibrary, expand_entities};
 use crate::{EntityId, PrefabDocument, PrefabError, SceneEntityId};
 
 use super::{EntityData, World, WorldError};
@@ -77,7 +77,6 @@ impl World {
             ..prefab.clone()
         };
         document.validate()?;
-        validate_aliases(&expanded)?;
         let prefab = &document;
         let root_id = prefab.root()?.id.clone();
 
@@ -170,18 +169,4 @@ impl From<PrefabError> for WorldError {
     fn from(error: PrefabError) -> Self {
         Self::InvalidPrefab(error)
     }
-}
-
-/// Canonical paths shadow aliases; competing aliases must not depend on order.
-fn validate_aliases(expanded: &[ExpandedEntity]) -> Result<(), PrefabError> {
-    let canonical: BTreeSet<_> = expanded.iter().map(|part| &part.entity.id).collect();
-    let mut aliases = BTreeSet::new();
-    for part in expanded {
-        for alias in &part.aliases {
-            if !canonical.contains(alias) && !aliases.insert(alias) {
-                return Err(PrefabError::AmbiguousRootAlias(alias.clone()));
-            }
-        }
-    }
-    Ok(())
 }

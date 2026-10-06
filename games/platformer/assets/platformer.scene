@@ -144,12 +144,19 @@
             {
               "name": "drop",
               "kind": "button",
-              "bindings": ["key.S", "key.ArrowDown", "gamepad.dpad_down"]
+              "bindings": [
+                "key.S",
+                "key.ArrowDown",
+                "gamepad.dpad_down"
+              ]
             },
             {
               "name": "kick",
               "kind": "button",
-              "bindings": ["key.K", "gamepad.west"]
+              "bindings": [
+                "key.K",
+                "gamepad.west"
+              ]
             }
           ]
         }
@@ -1128,7 +1135,12 @@
         ]
       },
       "components": {
-        "sindri.tags": { "tags": ["solid", "one-way"] },
+        "sindri.tags": {
+          "tags": [
+            "solid",
+            "one-way"
+          ]
+        },
         "sindri.tilemap": {
           "texture": "textures/tiles.png",
           "palette": [
@@ -1283,14 +1295,32 @@
       "name": "Crate impact flash",
       "parent": "wind-crate",
       "transform_3d": {
-        "position": [1, 1, 0.05],
-        "rotation": [0, 0, 0, 1],
-        "scale": [2, 2, 1]
+        "position": [
+          1,
+          1,
+          0.05
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          2,
+          2,
+          1
+        ]
       },
       "components": {
         "sindri.shape": {
           "kind": "rect",
-          "fill": [1, 0.7, 0.3, 0],
+          "fill": [
+            1,
+            0.7,
+            0.3,
+            0
+          ],
           "layer": 4
         }
       }
@@ -2091,213 +2121,26 @@
     },
     {
       "id": "windmill-anchor",
-      "name": "Windmill axle",
+      "name": "Windmill assembly",
       "transform_3d": {
         "position": [
           7.0,
           7.4,
           0.35
-        ],
-        "rotation": [
-          0,
-          0,
-          0,
-          1
-        ],
-        "scale": [
-          0.15,
-          0.15,
-          1
         ]
       },
-      "components": {
-        "sindri.shape": {
-          "kind": "rect",
-          "fill": [
-            0.2,
-            0.15,
-            0.1,
-            1
-          ]
-        },
-        "sindri.physics2d.collider": {
-          "shape": {
-            "shape": "circle",
-            "radius": 0.05
+      "prefab": {
+        "source": "prefabs/windmill-kit.prefab",
+        "overrides": {
+          "mechanism": {
+            "name": "Windmill axle"
           },
-          "offset": [
-            0,
-            0
-          ],
-          "rotation": 0,
-          "sensor": false,
-          "layers": {
-            "memberships": 0,
-            "filter": 0
+          "mechanism/windmill-rotor": {
+            "name": "Windmill rotor"
           },
-          "friction": 0.5,
-          "restitution": 0
-        }
-      }
-    },
-    {
-      "id": "windmill-rotor",
-      "name": "Windmill rotor",
-      "transform_3d": {
-        "position": [
-          7.0,
-          7.4,
-          0.4
-        ],
-        "rotation": [
-          0,
-          0,
-          0,
-          1
-        ],
-        "scale": [
-          1.0,
-          1.0,
-          1.0
-        ]
-      },
-      "components": {
-        "sindri.physics2d.collider": {
-          "shape": {
-            "shape": "box",
-            "half_extents": [
-              0.75,
-              0.075
-            ]
-          },
-          "offset": [
-            0,
-            0
-          ],
-          "rotation": 0,
-          "sensor": false,
-          "layers": {
-            "memberships": 0,
-            "filter": 0
-          },
-          "friction": 0.5,
-          "restitution": 0
-        },
-        "sindri.physics2d.rigid_body": {
-          "kind": "dynamic",
-          "pose": {
-            "position": [
-              0,
-              0
-            ],
-            "rotation": 0
-          },
-          "linear_velocity": [
-            0,
-            0
-          ],
-          "angular_velocity": 0,
-          "gravity_scale": 0.0,
-          "linear_damping": 0.15,
-          "angular_damping": 0.0,
-          "lock_rotation": false,
-          "continuous_collision": true
-        }
-      }
-    },
-    {
-      "id": "windmill-hinge",
-      "name": "Windmill hinge",
-      "components": {
-        "sindri.physics2d.hinge_joint": {
-          "first": "windmill-anchor",
-          "second": "windmill-rotor",
-          "first_anchor": [
-            0.0,
-            0.0
-          ],
-          "second_anchor": [
-            0.0,
-            0.0
-          ],
-          "limits_enabled": false,
-          "lower_angle": 0.0,
-          "upper_angle": 0.0,
-          "motor_enabled": false,
-          "motor_velocity": 0.0,
-          "motor_max_torque": 0.0
-        },
-        "sindri.script": {
-          "source": "scripts/windmill.decay",
-          "script": "Windmill"
-        }
-      }
-    },
-    {
-      "id": "windmill-blade-horizontal",
-      "name": "Windmill blade",
-      "parent": "windmill-rotor",
-      "transform_3d": {
-        "position": [
-          0.0,
-          0.0,
-          0.0
-        ],
-        "rotation": [
-          0,
-          0,
-          0,
-          1
-        ],
-        "scale": [
-          1.5,
-          0.15,
-          1.0
-        ]
-      },
-      "components": {
-        "sindri.shape": {
-          "kind": "rect",
-          "fill": [
-            0.85,
-            0.5,
-            0.2,
-            1
-          ]
-        }
-      }
-    },
-    {
-      "id": "windmill-blade-vertical",
-      "name": "Windmill blade",
-      "parent": "windmill-rotor",
-      "transform_3d": {
-        "position": [
-          0.0,
-          0.0,
-          0.0
-        ],
-        "rotation": [
-          0,
-          0,
-          0,
-          1
-        ],
-        "scale": [
-          0.15,
-          1.5,
-          1.0
-        ]
-      },
-      "components": {
-        "sindri.shape": {
-          "kind": "rect",
-          "fill": [
-            0.85,
-            0.5,
-            0.2,
-            1
-          ]
+          "mechanism/windmill-hinge": {
+            "name": "Windmill hinge"
+          }
         }
       }
     },

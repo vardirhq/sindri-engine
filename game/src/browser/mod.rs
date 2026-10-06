@@ -116,7 +116,12 @@ impl BrowserCausewayApp {
             project.scenes.first().ok_or(CausewayError::MissingScene)?;
         let mut world = World::default();
         let mut loaded_scenes = LoadedScenes::new();
-        loaded_scenes.enter_keeping_identities(&mut world, entry_name, entry_document)?;
+        loaded_scenes.enter_keeping_identities_with(
+            &mut world,
+            entry_name,
+            entry_document,
+            &project.prefabs,
+        )?;
 
         let mut session = Session::with_sources(self.scene.components().clone(), project.scripts)
             .with_prefabs(project.prefabs)

@@ -143,9 +143,29 @@ zero errors/reminders. Rebuilt Chromium delivery fetched 25 assets and exercised
 nested placement/removal/replacement without runtime errors. Native Vulkan
 capture passed; both captures were visually reviewed. CI must verify this slice.
 
+A **placed-prefab root reference slice** retains original root aliases in
+runtime-only `PrefabLink` metadata. Library-aware `LoadedScenes` variants load
+original scenes through `add_scene_with`, prefixing aliases with scene namespaces.
+Native/browser entry and later scene switches retain the prefab library. Editor
+reload/undo carry aliases through link commands; duplication rebases them to the
+copy's namespace. Saving prefab references and reopening regenerates aliases.
+All four kinds cover nested roots, repeated instances, scene switching, inactivity
+and removal. Editor reload/undo/redo and independent duplicate cleanup are tested.
+Platformer's level windmill is placed from the same nested kit Decay spawns.
+Final scoped preflight passed 1,424 native tests and all-target/all-feature checks
+for core, scene, editor, the game host and platformer. Five-crate warning-denied
+Clippy, 11 catalogue tests and the 1,089-file size gate passed. Typed windmill/setup
+checks reported zero errors/reminders. WASM all-target/all-feature checks passed
+core, scene and platformer; host-library WASM checks and the rebuilt browser host
+passed. Chromium fetched 25 assets and exercised placed/spawned windmills plus V
+removal/replacement without runtime errors. Native Vulkan capture passed; native
+and browser captures were visually reviewed. CI must verify this slice; prior
+nested-runtime head `4049494a` still had its test/capture job running. Plain
+flattened documents discard aliases; saved-spawn reference remapping remains open.
+
 Joint acceptance stays open. Add remaining motor modes, typed structural
-controls and dedicated reference authoring/diagnostics. Exported placed-root
-aliases and saved-spawn reference remapping still need integration; the reference gap remains explicitly partial in parity.
+controls and dedicated reference authoring/diagnostics. Saved-spawn reference
+remapping still needs integration; the reference gap remains partial in parity.
 
 Continue with **the remaining joints and typed controls/lifecycle**, then
 character movement, accelerated queries, 3D/voxel physics and final integration.

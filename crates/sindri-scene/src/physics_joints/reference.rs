@@ -14,19 +14,18 @@ pub(super) fn resolve(world: &World, owner: EntityId, target: &str) -> Option<En
     }
     let within = boundary(world, owner);
     let usable = |entity| boundary(world, entity) == within && world.is_active(entity);
-    // A placed prefab's root takes its instance ID, not its original root ID.
-    let mut ancestor = Some(owner);
-    while let Some(entity) = ancestor {
-        let data = world.get(entity)?;
-        if data
-            .prefab
-            .as_ref()
-            .is_some_and(|link| link.root && link.path.as_str() == target)
-        {
-            return usable(entity).then_some(entity);
-        }
-        ancestor = data.parent;
-    }
+    let find = |key: &SceneEntityId| {
+        world.entity_for_source_id(key).or_else(|| {
+            world.entities().find_map(|(entity, data)| {
+                (boundary(world, entity) == within
+                    && data
+                        .prefab
+                        .as_ref()
+                        .is_some_and(|link| link.aliases.contains(key)))
+                .then_some(entity)
+            })
+        })
+    };
     let mut namespace = world
         .get(owner)?
         .source_id
@@ -34,12 +33,12 @@ pub(super) fn resolve(world: &World, owner: EntityId, target: &str) -> Option<En
         .map_or("", SceneEntityId::as_str);
     while let Some((prefix, _)) = namespace.rsplit_once('/') {
         let key = SceneEntityId::new(format!("{prefix}/{target}")).ok()?;
-        if let Some(entity) = world.entity_for_source_id(&key) {
+        if let Some(entity) = find(&key) {
             return usable(entity).then_some(entity);
         }
         namespace = prefix;
     }
-    let entity = world.entity_for_source_id(&SceneEntityId::new(target).ok()?)?;
+    let entity = find(&SceneEntityId::new(target).ok()?)?;
     usable(entity).then_some(entity)
 }
 

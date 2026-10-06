@@ -116,11 +116,23 @@ a saved scene still needs reference remapping. Runtime spawning preserves nested
 root aliases through the original prefab library, including repeated expansion.
 Canonical paths take precedence over aliases, including inactive targets; competing
 aliases without a canonical target are rejected before any entities are spawned.
-Pre-expanded placed prefab roots still need separate integration.
+Placed instances carry the same original root aliases in runtime `PrefabLink`
+metadata. `LoadedScenes` has library-aware `load_with`/`enter_with` and
+`load_keeping_identities_with`/`enter_keeping_identities_with` variants. Scene
+entry expands original documents through `World::add_scene_with`, prefixing
+aliases with the scene namespace. The native/browser project hosts retain the
+original scene and library instead of feeding a flattened document to entry.
+Editor reload updates aliases through checked link commands; duplication rebases
+aliases to the copy's instance namespace. Undo preserves them. Saving instances
+as prefab references and reopening regenerates aliases from the library; aliases
+are never serialized. `SceneDocument::expanded` remains useful for validation,
+but its plain entities discard reference metadata and should not replace
+library-aware loading when prefab-root references are needed.
 
 The platformer uses this engine capability in a reusable powered windmill:
 Decay places/removes it with V, and its authored hinge resolves its own axle and
-rotor, including the prefab root renamed inside `windmill-kit.prefab`.
+rotor, including the prefab root renamed inside `windmill-kit.prefab`. The level
+windmill is a placed instance of that same nested assembly.
 
 ### Editor-only state does not come along
 

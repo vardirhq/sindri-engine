@@ -13,3 +13,6 @@ mod tests;
 
 #[cfg(test)]
 mod prefab_tests;
+
+#[cfg(test)]
+mod placed_tests;

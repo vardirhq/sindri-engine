@@ -92,7 +92,10 @@ tether. The separate tether entity is the pattern to copy for a distance joint.
 The windmill has a separate hinge entity connecting its fixed axle and physical
 rotor. Decay reverses its torque-capped motor every two seconds with
 `Physics.set_hinge_motor`; `tests/hinge_motor.rs` observes both directions,
-a fixed axle and removal. Copy this scene pattern for a powered rotating part.
+a fixed axle and removal. The level places `windmill-kit.prefab`, which nests
+`windmill.prefab`; V spawns that same assembly. Copy these prefabs with the script
+for a powered rotating part. The authored hinge keeps its original local root
+reference through placement, export and runtime spawning.
 
 The lantern trolley travels along an authored slider rail and reverses through
 `Physics.set_slider_motor`. Its hanging light uses a force-based spring; Decay

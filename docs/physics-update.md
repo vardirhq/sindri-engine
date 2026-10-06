@@ -312,5 +312,33 @@ surface-specific completeness. This checklist does not mark those surfaces done.
   was rebuilt. Chromium WebGPU fetched 25 assets and exercised nested placement,
   removal and replacement without runtime errors. Native Vulkan capture passed;
   native and spawned-browser captures were visually reviewed.
-- CI must verify this pushed checkpoint. Pre-expanded placed-root references,
+- CI was running on nested-runtime commit `4049494a`. Pre-expanded placed-root references,
   saved-spawn remapping and remaining joint/editor/workspace acceptance stay open.
+
+
+### Placed-prefab root reference checkpoint
+
+- Original top-level and nested root aliases are retained as runtime link metadata.
+  Library-aware `LoadedScenes` entry keeps original scenes and prefabs through
+  native/browser delivery and scene switches. Scene namespaces prefix aliases;
+  canonical paths win and conflicting aliases fail during expansion.
+- Editor link commands carry aliases through reload/undo; duplication rebases
+  them to the copy's namespace. Serialized links/scenes omit aliases, and saving
+  prefab references/reopening regenerates them from the original library.
+- All four joint kinds exercise placed nested roots, repeated instances, scene
+  namespaces/switching, inactivity and removal. Canonical inactive matches block
+  alias fallback. Editor reload/undo/redo and independent duplicate cleanup are
+  covered. Platformer places its level windmill from the same nested kit Decay spawns.
+- Final scoped preflight passed 1,424 native tests and warning-denied all-target/
+  all-feature checks for core, scene, editor, the game host and platformer.
+  Five-crate Clippy, 11 catalogue tests and the 1,089-file size gate passed.
+  Typed windmill/setup checks had zero errors/reminders.
+- WASM all-target/all-feature checks passed core, scene and platformer; the game
+  host library passed all-feature WASM checks and its browser runtime was rebuilt.
+  Chromium WebGPU fetched 25 assets and exercised placed/spawned windmills plus
+  removal/replacement without runtime errors. Native Vulkan capture passed; both
+  native and browser captures were visually reviewed.
+- CI must verify this pushed slice; the prior nested-runtime head `4049494a` still
+  had its test/capture job running when this slice was checked. Saved-spawn
+  remapping, typed controls/motor modes, reference authoring and final integration
+  remain open. Plain flattened scene documents discard expansion metadata.

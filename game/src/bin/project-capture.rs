@@ -222,12 +222,9 @@ mod capture {
         for (id, bytes) in files(&assets, PREFAB_SUFFIX) {
             prefabs.insert(id, PrefabDocument::from_json(&text(bytes)?)?);
         }
-        // Match browser delivery: placed instances resolve before scene entry,
-        // while the same prefab sources remain available to runtime spawning.
-        let document = document.expanded(&prefabs)?;
         let mut world = World::default();
         let mut loaded = LoadedScenes::new();
-        loaded.enter_keeping_identities(&mut world, &scene_id, &document)?;
+        loaded.enter_keeping_identities_with(&mut world, &scene_id, &document, &prefabs)?;
         let mut profiles = ProfileSources::new();
         for (id, bytes) in files(&assets, PROFILE_SUFFIX) {
             profiles.insert(id, ProfileDocument::from_json(&text(bytes)?)?);

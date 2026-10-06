@@ -40,7 +40,9 @@ pub fn expand_entities(
     entities: &[SceneEntity],
     library: &dyn PrefabLibrary,
 ) -> Result<Vec<ExpandedEntity>, PrefabError> {
-    expand_within(entities, library, &mut Vec::new())
+    let expanded = expand_within(entities, library, &mut Vec::new())?;
+    validate_aliases(&expanded)?;
+    Ok(expanded)
 }
 
 fn expand_within(
@@ -151,11 +153,12 @@ fn place_part(
     placed_entity.prefab = None;
     ExpandedEntity {
         entity: placed_entity,
-        aliases,
+        aliases: aliases.clone(),
         link: Some(PrefabLink {
             source: instance.source.clone(),
             path: key,
             root: is_root,
+            aliases,
         }),
     }
 }
@@ -330,4 +333,18 @@ pub fn override_between(base: &SceneEntity, current: &SceneEntity) -> EntityOver
         components,
         editor: BTreeMap::new(),
     }
+}
+
+/// Canonical paths shadow aliases; competing aliases must not depend on order.
+fn validate_aliases(expanded: &[ExpandedEntity]) -> Result<(), PrefabError> {
+    let canonical: BTreeSet<_> = expanded.iter().map(|part| &part.entity.id).collect();
+    let mut aliases = BTreeSet::new();
+    for part in expanded {
+        for alias in &part.aliases {
+            if !canonical.contains(alias) && !aliases.insert(alias) {
+                return Err(PrefabError::AmbiguousRootAlias(alias.clone()));
+            }
+        }
+    }
+    Ok(())
 }

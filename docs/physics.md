@@ -404,8 +404,8 @@ before producing output; native and browser hosts use the same scene resolver.
 
 Added for the platformer: its wind crate and one-way planks share
 `materials/wood.profile`, with an explicit zero-bounce override on the planks.
-Native project delivery expands placed prefabs before entering the scene, as
-browser delivery does. Native regressions verify sharing, precedence and a changed crate rebound when
+Native and browser delivery expand placed prefabs during scene entry from the
+original library, retaining root aliases for authored references. Native regressions verify sharing, precedence and a changed crate rebound when
 the shared restitution changes. Editor loader/reload tests exercise delivery and
 last-valid retention. Visual inspector review and full browser gameplay remain
 part of final physics integration.
@@ -422,13 +422,15 @@ The endpoint strings are stable scene entity IDs, not runtime handles. Resolutio
 tries the joint owner's ID namespace before the containing scene and never binds
 across loaded scene roots. An inactive local match does not fall through to an
 external entity with the same name. Placed-prefab sibling IDs resolve within their
-instance namespace; prefab-root aliases require preserved prefab metadata.
+instance namespace. Original top-level/nested root aliases survive library-based
+scene loading, namespacing, editor reload, duplication and undo. Canonical paths
+precede aliases; inactive matches suspend without rebinding.
 Runtime-spawned prefabs resolve through `World::prefab_entity` using runtime-only
 instance identity. Local sibling paths and original top-level and nested root IDs
 resolve within that spawn; missing or inactive targets never bind another instance or a
 scene entity. Reparenting does not change ownership. All four authored joint
-kinds share this path. Pre-expanded placed-root aliases and saved-spawn reference
-remapping remain incomplete; see `prefabs.md`.
+kinds share this path. Saved-spawn reference remapping remains incomplete;
+flattening into a plain expanded document discards alias metadata. See `prefabs.md`.
 
 Constraints synchronize after all bodies, so endpoint collider/body rebuilds
 reconnect the owned joint in the same fixed step. Missing, empty, inactive or

@@ -1,3 +1,5 @@
+- Preserve authored joint root references in placed nested prefabs through native/browser scene entry and scene namespaces. Editor prefab reload, duplication and undo retain or rebase runtime aliases without serializing them. Platformer's level windmill is now a placed nested assembly, sharing its prefab with runtime spawning.
+
 # Changelog
 
 - Add reversible enabled flags to authored 2D distance, hinge, slider and spring constraints, plus typed Decay state controls and owned distance tuning. Suspension/reconnection preserves endpoint bodies and unknown fields. Platformer reels its lantern tether with T and releases/reconnects it with L. Invalid suspended distance settings now fail validation even before endpoints are available.

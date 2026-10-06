@@ -51,10 +51,6 @@ impl Run {
         // The coins are instances of one prefab, made here as every host
         // makes them.
         let authored_prefabs = prefabs_under(&root)?;
-        let document = document
-            .expanded(&authored_prefabs)
-            .map_err(|error| error.to_string())?;
-
         let mut components = SceneExtractor::new()
             .map_err(|error| error.to_string())?
             .components()
@@ -62,7 +58,7 @@ impl Run {
         components
             .register::<ScriptComponent>("Script")
             .map_err(|error| error.to_string())?;
-        let world = World::from_scene(&document)
+        let world = World::from_scene_with(&document, &authored_prefabs)
             .map_err(|error| error.to_string())?
             .world;
 

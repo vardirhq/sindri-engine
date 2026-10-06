@@ -177,7 +177,7 @@ impl World {
                 components: entity.components.clone(),
                 disabled: entity.disabled,
                 editor: entity.editor.clone(),
-                prefab: link.clone(),
+                prefab: namespaced_link(link.as_ref(), namespace),
                 ..EntityData::default()
             });
             entity_map.insert(entity.id.clone(), runtime);
@@ -302,4 +302,20 @@ fn expanded(
         validate_entities(&entities)?;
     }
     Ok(expanded)
+}
+
+/// Only aliases use scene paths; authoring links retain prefab-local paths.
+fn namespaced_link(link: Option<&crate::PrefabLink>, namespace: &str) -> Option<crate::PrefabLink> {
+    let mut link = link?.clone();
+    if !namespace.is_empty() {
+        link.aliases = link
+            .aliases
+            .iter()
+            .map(|alias| {
+                SceneEntityId::new(format!("{namespace}/{}", alias.as_str()))
+                    .expect("a prefixed non-empty ID is non-empty")
+            })
+            .collect();
+    }
+    Some(link)
 }

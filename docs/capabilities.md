@@ -333,8 +333,12 @@ serialized component payloads. The Decay spawn host passes the original prefab
 library into expansion; all four joint kinds reconnect only their own nested
 endpoints across repeated spawns, inactivity and removal. Platformer's reusable
 windmill now nests its powered mechanism in `windmill-kit.prefab`. Canonical paths
-shadow aliases; ambiguous aliases fail before spawning. Pre-expanded placed roots
-and saved-spawn reference remapping remain incomplete.
+shadow aliases; ambiguous aliases fail before spawning. Placed instances now retain
+aliases through library-aware scene entry on native/browser hosts, scene namespaces,
+editor reload/duplication and command undo. All four kinds exercise scene switching,
+inactivity and removal; saving prefab references and reopening rebuilds aliases.
+The platformer level windmill is placed from the same nested assembly. Flattened
+plain documents discard metadata; saved-spawn reference remapping remains incomplete.
 All four authored constraints now accept an enabled flag, defaulting true for
 old payloads. Typed `Physics.joint_enabled` reads the authored flag and
 `Physics.set_joint_enabled` suspends/reconnects the constraint at next fixed
