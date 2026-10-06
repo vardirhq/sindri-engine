@@ -4,6 +4,7 @@ use rapier2d::parry::query::{self, ShapeCastOptions};
 use rapier2d::parry::shape::Shape;
 use sindri_core::EntityId;
 
+use super::slide::contact_prediction;
 use super::slope::SlopeLimit2d;
 use super::sweep::{query_pose, query_shape};
 use super::{PhysicsWorld2d, r2};
@@ -100,7 +101,7 @@ impl PhysicsWorld2d {
         // Sweeps can stop slightly early on rotated/curved surfaces. Accept
         // one percent of skin plus one epsilon so a snapped endpoint retains
         // support. Cap prediction to avoid overflowing a valid finite skin.
-        let prediction = (skin.mul_add(0.01, skin) + f32::EPSILON).min(f32::MAX);
+        let prediction = contact_prediction(skin);
         self.each_piece(filter, include, |entity, piece, pose| {
             let Ok(Some(contact)) = query::contact(&at, probe, &pose, piece, prediction) else {
                 return;

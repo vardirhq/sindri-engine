@@ -764,3 +764,29 @@ surface-specific completeness. This checklist does not mark those surfaces done.
   11 catalogue tests and the 1,128-file size gate passed. No existing game,
   editor, render or browser behavior changes until this primitive is integrated.
   CI must verify the pushed slope head; full acceptance remains open.
+
+### Step and clearance checkpoint
+
+- Added optional `step_height` (default zero) to grounded movement. Supported,
+  non-ascending requests can try a full clear lift, slope-limited horizontal sweep
+  and walkable landing within the height cap, followed by endpoint support check.
+  Progress must exceed the baseline by one skin; rejected candidates retain it
+  exactly. Full-height headroom and minimum progress are conservative limits.
+- Results separate selected forward slide, step lift and downward landing/snap;
+  total translation is applied once. Ordinary snapping can remain disabled.
+- A flat-floor test exposed tilted skin-cast normals that produced a large box
+  hop. Movement now refines impact geometry with a contact query using the shared
+  skin tolerance; ray/overlap/ordinary shape-cast contracts remain unchanged.
+- Native regressions exercise all probe shapes, height boundaries, tall walls,
+  ceilings/overhangs, unsupported/jump/overlap rejection, absent/steep landings,
+  arbitrary up/rotation, filtering, fallback, read-only/accounting and validation,
+  plus repeated flat-floor movement.
+- Added generally for platformer adoption, still engine-only. Moving platforms,
+  one-way/drop-through controller policy, scene/editor/Decay integration and
+  native/browser game proof remain open; character acceptance stays unchecked.
+- Scoped preflight passed 118 native physics tests and warning-denied all-target/
+  all-feature checks. Physics Clippy, all-target/all-feature WASM compilation,
+  11 catalogue tests and the 1,130-file size gate passed. No dependencies, host
+  calls, scripts or component registrations change. Existing gameplay/browser/
+  editor rendering paths do not use these primitives yet; CI must verify the
+  pushed step head. Prior slope head `6de2dcc8` has completed CI successfully.

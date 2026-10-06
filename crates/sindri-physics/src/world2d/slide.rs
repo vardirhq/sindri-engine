@@ -199,7 +199,23 @@ impl PhysicsWorld2d {
             ) else {
                 return;
             };
-            let normal = pose.rotation.transform_vector(hit.normal2);
+            // Near the skin, cast normals can tilt even on a flat box face.
+            // Contact geometry at impact is more stable for touching features.
+            let mut impact = at;
+            impact.translation += direction * hit.time_of_impact;
+            let contact = query::contact(
+                &impact,
+                probe,
+                &pose,
+                piece,
+                contact_prediction(options.target_distance),
+            )
+            .ok()
+            .flatten();
+            let normal = contact.as_ref().map_or_else(
+                || pose.rotation.transform_vector(hit.normal2),
+                |contact| contact.normal2,
+            );
             // Tangential/separating contact must not repeatedly consume the
             // budget at zero distance while hiding an obstacle farther ahead.
             if direction.dot(normal) >= -f32::EPSILON
@@ -212,7 +228,10 @@ impl PhysicsWorld2d {
             {
                 return;
             }
-            let point = pose.transform_point(hit.witness2);
+            let point = contact.as_ref().map_or_else(
+                || pose.transform_point(hit.witness2),
+                |contact| contact.point2,
+            );
             closest = Some(ShapeHit2d {
                 entity,
                 point: [point.x, point.y],
@@ -222,4 +241,9 @@ impl PhysicsWorld2d {
         });
         closest
     }
+}
+
+/// Relative allowance for contact geometry at a sweep's nominal skin.
+pub(super) fn contact_prediction(skin: f32) -> f32 {
+    (skin.mul_add(0.01, skin) + f32::EPSILON).min(f32::MAX)
 }

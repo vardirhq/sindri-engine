@@ -1,5 +1,6 @@
 # Changelog
 
+- Add opt-in grounded 2D steps with lift/forward/landing clearance, walkable support and exact fallback on rejection. Refine movement cast normals to prevent artificial hops on flat box faces. Moving platforms, one-way controller policy and editor/Decay/game integration remain in progress.
 - Enforce slope limits during grounded 2D sliding: steep surfaces cannot create unrequested upward motion, explicit jumps retain bounded rise, and steep descent remains ungrounded. Geometric sliding stays unrestricted; full character integration remains in progress.
 - Add read-only grounded 2D sweep/slide results with optional downward snapping, post-move support and ascent suppression. Snapping defaults off; slope movement, steps, platforms and editor/Decay/game integration remain in progress.
 - Add read-only 2D ground probes with configurable up, slope limits, travel and skin. They report steep obstructions, initial penetration and zero-travel support without snapping or changing bodies. Character movement integration remains in progress.

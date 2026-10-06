@@ -926,7 +926,7 @@ accepted only for walkable support. Upward requests and initial penetration
 suppress snapping and grounded state. The result separates slide motion, support,
 snap and total translation; gameplay applies total translation once and owns
 prior support state. Native tests exercise landing, ledges, blocked ascent,
-repeated support and downhill snapping. Steps, platforms,
+repeated support and downhill snapping. Platforms,
 one-way policy and scene/editor/Decay/platformer proof remain open.
 
 Grounded sliding also enforces `max_slope_angle`: upward-facing steep contacts
@@ -936,3 +936,13 @@ remains possible without support or snap. Walkable slopes, vertical walls and
 ceilings keep geometric projection. Motion and support share the slope tolerance;
 ordinary `move_and_slide` remains unrestricted. No gameplay gravity or constant
 slope speed is supplied. See the character contract and native slope regressions.
+
+Optional grounded steps use `step_height` (default zero) and require initial
+walkable support, no ascent, clear full-height lift, improved forward progress,
+a walkable landing within the height cap and final non-penetrating support.
+Ceilings, overhangs, tall obstacles and absent/steep support retain the ordinary
+path. The result separates step lift, selected forward slide and downward landing;
+apply their total translation once. Full-height clearance and skin-sized minimum
+progress are conservative limits. Impact contact geometry now refines movement
+cast normals, preventing large artificial hops on flat box faces. Ordinary
+ray/overlap/shape-cast contracts are unchanged; see the character contract/tests.

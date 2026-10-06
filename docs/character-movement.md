@@ -1,7 +1,8 @@
 # Character movement
 
-Status: geometric sweep/slide, ground probing, grounded snapping and slope
-limits implemented; full character movement acceptance remains open in
+Status: geometric sweep/slide, ground probing, grounded snapping, slope
+limits and optional steps implemented; full character movement acceptance
+remains open in
 `physics-update.md`. Added for the platformer genre
 showcase, which has not yet adopted it. No game proof is claimed for this slice.
 
@@ -25,8 +26,12 @@ body pose, velocity, force, joint, contact or event state.
 (default 0.01) and an iteration budget in 1..=32 (default 8). Each sweep travels
 until the probe reaches the skin around a surface, then removes the untravelled
 motion into its outward normal and sweeps the remaining tangent. Rotated
-surfaces use world normals; narrow-phase normal refinement can require more
-than one hit on the same surface. Sub-epsilon remaining movement is discarded.
+surfaces use world normals; impact contact queries refine skin-cast geometry to
+avoid false upward motion from tilted cast normals on flat box faces. Contact
+prediction uses the same skin-relative allowance as support probing; when no
+contact is available the cast geometry is retained. Small numerical normal error
+can still require more than one hit on the same surface. Sub-epsilon remaining
+movement is discarded.
 
 `SlideMotion2d` returns actual translation, remaining sliding displacement,
 ordered collisions and two outcome flags. Collision distances are relative to
@@ -100,8 +105,8 @@ support queries. They remain read-only and do not retain state between calls.
 The same filter and stable entity predicate apply to both phases.
 
 `GroundedSlideOptions2d` supplies slide settings, up, maximum slope angle and
-non-negative finite `snap_distance`. Slide skin is also the support skin, so
-movement and grounding cannot disagree about that separation. Up and angle use
+non-negative finite `snap_distance` and `step_height`. Both default to zero.
+Slide skin is also the support skin, so movement and grounding cannot disagree about that separation. Up and angle use
 the ground-probe validation contract. Snap defaults to zero: support is then
 recognized only within skin plus its numerical tolerance after sliding. A floor near
 the starting pose cannot keep the character grounded after it walks off a ledge.
@@ -114,10 +119,14 @@ snap and reports ungrounded, even if a ceiling blocks ascent or touching support
 is still visible. Initial penetration likewise blocks snapping and grounding.
 
 `GroundedSlideMotion2d.translation` is the full proposal to apply once.
-`slide` retains the slope-limited sweep result, including its unsatisfied
-movement and budget flags. `snap_translation` is the additional downward motion;
-`ground` is the support query at the slide endpoint before snapping, so its hit
-distance describes that extra travel. `grounded` means the proposed endpoint
+`slide` retains the selected slope-limited sweep result, including its unsatisfied
+movement and budget flags. For ordinary movement it starts at the supplied pose;
+for an accepted step it is the forward sweep from the lifted pose.
+`step_translation` is the accepted lift (zero for ordinary movement), and
+`snap_translation` is the additional downward landing/snap motion. Their sum
+with `slide.translation` is total translation. `ground` is the support query at
+the selected slide endpoint before landing/snapping; its distance describes that
+extra downward travel. `grounded` means the proposed endpoint
 has walkable support and the request was not ascending or initially penetrating.
 Snapping is separate from slide collisions and does not alter slide remaining.
 An exhausted slide budget still permits support probing at its actual endpoint.
@@ -154,7 +163,40 @@ acceleration is applied. Up is world-space and independent of probe rotation.
 
 This is a general geometric policy added for the platformer, which has not yet
 adopted the controller. It does not make the engine/editor/Decay/game acceptance
-complete. One-way support, steps and moving-platform behavior remain open.
+complete. One-way support and moving-platform behavior remain open.
+
+## Implemented steps and clearance
+
+Positive `step_height` enables a conservative alternate lift/forward/landing
+path. It requires walkable support at the starting pose, no initial penetration,
+a non-ascending request and a non-walkable collision opposing its horizontal
+component. Horizontal travel must exceed one skin. Unobstructed motion and jumps
+retain ordinary sliding without adding a lift.
+
+The full configured lift must be clear at the skin: ceilings and overhangs cannot
+redirect it sideways. A second slope-limited sweep moves the horizontal component
+from that lifted pose. The candidate must improve horizontal progress by more
+than one skin over the ordinary result and finish its forward iteration budget.
+A downward probe travels at most the step height, accepting only walkable support;
+it never skips a steep surface for the floor below. Final rise cannot exceed the
+configured height, and a zero-travel probe confirms non-penetrating support at
+the proposed endpoint. Probe rotation stays fixed through every phase.
+
+On acceptance, step lift, forward motion and downward landing replace the
+ordinary path. On rejection, the ordinary result is retained exactly. Downward
+requested motion is replaced by the landing sweep, so an accepted step follows
+support rather than applying gravity displacement again. Landing is independent
+of ordinary `snap_distance`, so stepping can work with snap disabled. It does not
+retain an airborne step or bridge a gap without reachable support. Each slide
+phase has its own bounded iteration budget; an attempted step adds at most a
+lift, a forward sweep and support probes to the original query.
+
+The full-height clearance requirement is deliberately conservative: a lower
+obstacle beneath a ceiling that blocks the configured lift falls back to ordinary
+sliding rather than searching smaller heights. Minimum progress is tied to skin;
+very small movement requests do not step. These limitations remain visible for
+future game integration. Stepping, like slope limits, is added generally for
+platformer adoption and has engine evidence only.
 
 ## Remaining slices
 
@@ -162,8 +204,8 @@ The foundation sees one-way geometry on both sides, just like geometric queries.
 The full controller must incorporate support-side policy and timed drop-through,
 not interpret this primitive as a finished one-way movement API.
 
-Remaining engine work includes step height and clearance, ceiling/step
-interactions and moving-platform displacement. Platform riding must use synchronized
+Remaining engine work includes moving-platform displacement and one-way
+controller policy. Platform riding must use synchronized
 poses and avoid counting platform movement twice. Tests must exercise the
 one-way/drop-through interactions and initial-overlap/budget outcomes together.
 
@@ -198,3 +240,9 @@ Slope movement tests cover walkable and steep ascent, the configured angle
 boundary and changed limits, explicit jump rise, negative vertical requests,
 steep descent and walkable downhill snap, walls/ceilings, mirrored capsule and
 rotated box/up, filtering, read-only state and unchanged geometric sliding.
+
+Step tests cover opt-in low obstacles, the height boundary, tall walls, ceilings
+and forward overhangs, airborne/jump/overlap rejection, no or steep landing,
+box/circle/capsule extents, rotated up/probe, filters/predicates, exact fallback,
+read-only state, motion accounting and invalid heights. A repeated flat-floor
+regression covers contact-normal refinement for all three probe shapes.

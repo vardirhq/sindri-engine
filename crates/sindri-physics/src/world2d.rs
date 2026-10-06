@@ -15,6 +15,7 @@ mod one_way;
 mod query;
 mod slide;
 mod slope;
+mod steps;
 mod sweep;
 
 pub use motion::BodyControl2d;

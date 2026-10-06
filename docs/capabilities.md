@@ -2626,7 +2626,7 @@ this 2D slice; 3D joints, gameplay world snapshots and final integration remain.
 A read-only 2D sweep/slide movement foundation now proposes displacement against
 current collider poses without mutating bodies. Positive skin, bounded iterations,
 initial penetration, filters and deterministic ties have native engine tests.
-Step/platform and one-way movement policies, editor/Decay access
+Platform and one-way movement policies, editor/Decay access
 and platformer proof remain open; see [the contract](character-movement.md).
 Added for platformer integration, not yet adopted by that showcase.
 
@@ -2641,6 +2641,11 @@ ledge departure, repeated support, descending slopes, blocked ascent, filters an
 arbitrary up. Grounded motion now enforces its support slope limit while
 sliding: steep contacts cannot introduce unrequested rise, explicit jumps retain
 their requested rise, and steep descent remains ungrounded. Ordinary geometric
-sliding is unchanged. Native regressions exercise slope boundaries, descent,
-mirrored/rotated probes and filtering. Steps/platforms, one-way controller policy
-and editor/Decay/game proof remain open. No platformer adoption is claimed.
+projection remains unrestricted. Native regressions exercise slope boundaries, descent,
+mirrored/rotated probes and filtering. Optional steps now require starting support,
+full lift clearance, better forward progress and a walkable landing within the
+height cap. Rejected candidates preserve the ordinary result. Native tests cover
+all three probe shapes, ceilings/overhangs, height limits, absent/steep landings,
+rotated up and exact fallback. Contact-normal refinement prevents flat box-face
+casts from producing large artificial hops. Moving platforms, one-way controller
+policy and editor/Decay/game proof remain open. No platformer adoption is claimed.

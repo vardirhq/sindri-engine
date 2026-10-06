@@ -27,8 +27,10 @@ snap downward onto walkable support; snap defaults off and ascending requests
 never snap or report grounded. The same slope limit now prevents steep contacts
 from generating unrequested rise; explicit jumps and steep descent remain possible,
 and downhill snapping accepts only walkable support. Gameplay retains prior state.
-Ordinary geometric sliding and shape casts are unchanged. Continue with steps,
-platforms and one-way movement policies,
+Optional steps now require starting support, clear lift/forward sweeps, better
+progress and a walkable landing, with exact fallback. Movement normals are refined
+from impact contacts to avoid flat-box hops; ordinary shape casts are unchanged.
+Continue with moving platforms and one-way movement policies,
 then scene/editor/Decay/platformer integration and native/browser proof.
 Character acceptance remains unchecked. Accelerated queries, 3D/voxel physics
 and final integration follow; gameplay world snapshots remain a separate gap.

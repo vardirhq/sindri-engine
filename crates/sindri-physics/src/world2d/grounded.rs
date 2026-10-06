@@ -12,12 +12,13 @@ use crate::{
 };
 
 impl PhysicsWorld2d {
-    /// Computes sliding, then support and an optional downward snap.
+    /// Computes sliding, optional stepping, support and downward snapping.
     ///
     /// Snapping defaults off. Requested upward motion suppresses snapping and
     /// grounded state, even if a ceiling blocks ascent. Steep support never
     /// snaps. Does not mutate a body, store prior grounded state, depenetrate,
-    /// step, carry platforms or apply one-way policy. Steep contacts cannot
+    /// carry platforms or apply one-way policy. Steps require starting support
+    /// and clear lift/forward/landing sweeps. Steep contacts cannot
     /// create upward motion beyond the remaining request's positive rise;
     /// downhill sliding and explicit jumps remain possible.
     ///
@@ -91,12 +92,27 @@ impl PhysicsWorld2d {
                 pose.position[1] + translation[1],
             ],
         )?;
-        Ok(GroundedSlideMotion2d {
+        let result = GroundedSlideMotion2d {
             translation,
             slide,
             ground,
             snap_translation: [snap.x, snap.y],
+            step_translation: [0.0; 2],
             grounded,
-        })
+        };
+        Ok(self
+            .try_step(
+                SlideRequest2d {
+                    shape,
+                    pose,
+                    displacement,
+                    options: options.slide,
+                    filter,
+                },
+                options,
+                &result,
+                &mut include,
+            )?
+            .unwrap_or(result))
     }
 }

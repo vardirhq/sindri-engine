@@ -404,3 +404,42 @@ fn one_way_geometry_remains_solid_for_this_geometric_primitive() {
         assert_eq!(result.collisions[0].entity, entity(1));
     }
 }
+
+#[test]
+fn flat_surface_contact_refines_skin_cast_normals_without_lifting_a_box() {
+    let mut world = PhysicsWorld2d::new([0.0; 2]).unwrap();
+    insert(
+        &mut world,
+        1,
+        pose(0.0, -1.0),
+        &[Collider2d::rectangle([10.0, 0.5])],
+    );
+    for shape in [
+        ColliderShape2d::Box {
+            half_extents: [0.4, 0.5],
+        },
+        ColliderShape2d::Circle { radius: 0.5 },
+        ColliderShape2d::Capsule {
+            half_height: 0.2,
+            radius: 0.3,
+        },
+    ] {
+        let mut at = pose(0.0, 0.01);
+        for _ in 0..3 {
+            let result = world
+                .move_and_slide(
+                    shape,
+                    at,
+                    [1.5, 0.0],
+                    SlideOptions2d::default(),
+                    RaycastFilter2d::default(),
+                )
+                .unwrap();
+            near(result.translation[0], 1.5);
+            near(result.translation[1], 0.0);
+            assert!(!result.started_penetrating && !result.iteration_limit_reached);
+            at.position[0] += result.translation[0];
+            at.position[1] += result.translation[1];
+        }
+    }
+}
