@@ -1,7 +1,7 @@
 # Character movement
 
 Status: geometric sweep/slide, ground probing, grounded snapping, slope
-limits, optional steps and synchronized platform carry implemented; acceptance
+limits, optional steps, synchronized platform carry and one-way controller policy implemented; acceptance
 remains open in `physics-update.md`. Added for the platformer genre showcase, which has not yet adopted it. No game proof is claimed for this slice.
 
 ## Ownership
@@ -248,14 +248,42 @@ state. Continuous arc carry and rotating-probe sweeps remain absent and have
 explicit parity gaps. This is engine evidence for platformer adoption, not yet
 scene/editor/Decay or game proof.
 
+## Implemented one-way controller policy
+
+Grounded movement respects `OneWay2d` on each enabled solid piece by default.
+The policy's normalized local normal follows both body and piece rotation.
+Approach must not move along that normal, the contact normal must lie within
+its support cone (one f32 epsilon cosine tolerance), and the probe's rear
+support point must start on the front support plane within 0.05 world units.
+That last allowance matches solver support slop: shallow front penetration
+still reports initial penetration; a probe inside/from below passes until it
+clears the plane. Movement uses displacement, not the solver's velocity threshold.
+Ordinary solids retain strict initial-penetration behavior.
+
+`GroundedSlideOptions2d.drop_through` defaults false. True ignores only one-way
+solid pieces during this entire request: slide, initial penetration, support,
+snap, step clearance/landing and previous-platform verification/carry sweeps.
+A dropped one-way support cannot carry or ground the probe; an ordinary support
+can. Sensors retain their ordinary geometric behavior when explicitly included.
+Masks, whole-entity exclusion, host predicates and deterministic ties still
+apply. A rejected one-way hit cannot hide an ordinary floor farther below.
+The public geometric slide/ground/ray/overlap/shape-cast queries remain two-sided.
+
+The query has no body identity or timestep and stores no drop timer. The host
+owns duration and cancellation, supplying the flag for each simulation request;
+false restores policy immediately. This does not read or modify the separate
+dynamic-body `drop_through(entity, seconds)` solver timer. Scene/Decay integration
+must choose one movement owner and maintain its timed drop state explicitly.
+
+Native regressions exercise all probe shapes, ascent/descent, underside/deep
+penetration, shallow front penetration, cone rejection, piece/body rotation,
+snap/drop to an ordinary floor, request cancellation, mixed solid/sensor pieces,
+step landing and carry interactions. This remains engine evidence for platformer
+adoption, with no editor/Decay/game proof yet.
+
 ## Remaining slices
 
-The foundation sees one-way geometry on both sides, just like geometric queries.
-The full controller must incorporate support-side policy and timed drop-through,
-not interpret this primitive as a finished one-way movement API.
-
-Remaining engine work includes one-way/drop-through controller policy. Scene
-platform integration must capture synchronized support poses and apply motion
+Scene platform integration must capture synchronized support poses and apply motion
 once, including support changes, teleports and structural edits. Tests must
 exercise the one-way/drop-through interactions and initial-overlap/budget outcomes together.
 

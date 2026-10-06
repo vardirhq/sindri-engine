@@ -11,6 +11,7 @@ mod grounded;
 mod joints;
 mod materials;
 mod motion;
+mod movement_policy;
 mod one_way;
 mod platforms;
 mod query;

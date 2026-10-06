@@ -24,11 +24,12 @@ impl PhysicsWorld2d {
         let mut support_options = options.ground_options();
         support_options.max_distance = 0.0;
         if !self
-            .probe_ground_where(
+            .probe_ground_with_policy(
                 request.shape,
                 request.pose,
                 support_options,
                 request.filter,
+                request.one_way,
                 &mut include,
             )?
             .walkable
@@ -73,11 +74,12 @@ impl PhysicsWorld2d {
         }
         let endpoint = translated_pose(lifted, r2::Vector::from_array(forward.translation))?;
         support_options.max_distance = options.step_height;
-        let ground = self.probe_ground_where(
+        let ground = self.probe_ground_with_policy(
             request.shape,
             endpoint,
             support_options,
             request.filter,
+            request.one_way,
             &mut include,
         )?;
         if !ground.walkable {
@@ -91,11 +93,12 @@ impl PhysicsWorld2d {
         // rejects numerical overlap or an incline climbed beyond the step cap.
         if translation.dot(up) > options.step_height + f32::EPSILON
             || !self
-                .probe_ground_where(
+                .probe_ground_with_policy(
                     request.shape,
                     final_pose,
                     support_options,
                     request.filter,
+                    request.one_way,
                     &mut include,
                 )?
                 .walkable

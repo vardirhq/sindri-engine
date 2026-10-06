@@ -10,7 +10,7 @@ use crate::validate::non_negative;
 use crate::{OneWay2d, PhysicsError, RigidBodyKind};
 
 // Allow a small penetration while maintaining support, in world units.
-const SUPPORT_SLOP: f32 = 0.05;
+pub(super) const SUPPORT_SLOP: f32 = 0.05;
 
 #[derive(Default)]
 pub(super) struct OneWayHooks {

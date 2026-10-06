@@ -3,6 +3,7 @@
 use rapier2d::parry::query;
 use sindri_core::EntityId;
 
+use super::movement_policy::MovementProbe2d;
 use super::slide::{SlideRequest2d, contact_prediction};
 use super::slope::SlopeLimit2d;
 use super::sweep::query_pose;
@@ -34,30 +35,44 @@ impl PhysicsWorld2d {
         let mut invalid = None;
         // Reconstruct current local collider pieces at the previous body pose.
         // The same masks, sensors, exclusion and host predicate apply here.
-        self.each_piece(request.filter, &mut include, |entity, piece, posed| {
-            if entity != support.entity {
-                return;
-            }
-            let old_piece = previous * current.inverse() * posed;
-            if let Err(error) = finite2("platform_previous_piece", old_piece.translation.to_array())
-            {
-                invalid = Some(error);
-                return;
-            }
-            let Ok(Some(contact)) = query::contact(
-                &at,
-                probe.as_ref(),
-                &old_piece,
-                piece,
-                contact_prediction(options.slide.skin),
-            ) else {
-                return;
-            };
-            penetrating |= contact.dist < 0.0;
-            if first_normal.is_none() && contact.normal2.dot(up) > f32::EPSILON {
-                first_normal = Some(contact.normal2);
-            }
-        });
+        self.each_piece_policy(
+            request.filter,
+            &mut include,
+            |entity, piece, posed, policy| {
+                if entity != support.entity {
+                    return;
+                }
+                let old_piece = previous * current.inverse() * posed;
+                if let Err(error) =
+                    finite2("platform_previous_piece", old_piece.translation.to_array())
+                {
+                    invalid = Some(error);
+                    return;
+                }
+                let Ok(Some(contact)) = query::contact(
+                    &at,
+                    probe.as_ref(),
+                    &old_piece,
+                    piece,
+                    contact_prediction(options.slide.skin),
+                ) else {
+                    return;
+                };
+                let movement_probe = MovementProbe2d {
+                    shape: probe.as_ref(),
+                    pose: at,
+                    filter: request.filter,
+                    one_way: request.one_way,
+                };
+                if !movement_probe.allows(piece, old_piece, policy, -up, contact.normal2) {
+                    return;
+                }
+                penetrating |= contact.dist < 0.0;
+                if first_normal.is_none() && contact.normal2.dot(up) > f32::EPSILON {
+                    first_normal = Some(contact.normal2);
+                }
+            },
+        );
         if let Some(error) = invalid {
             return Err(error);
         }

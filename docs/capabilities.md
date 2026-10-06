@@ -2626,8 +2626,7 @@ this 2D slice; 3D joints, gameplay world snapshots and final integration remain.
 A read-only 2D sweep/slide movement foundation now proposes displacement against
 current collider poses without mutating bodies. Positive skin, bounded iterations,
 initial penetration, filters and deterministic ties have native engine tests.
-One-way controller policy, editor/Decay access
-and platformer proof remain open; see [the contract](character-movement.md).
+Editor/Decay access and platformer proof remain open; see [the contract](character-movement.md).
 Added for platformer integration, not yet adopted by that showcase.
 
 Read-only 2D ground probing adds configurable unit up, bounded slope angles,
@@ -2652,7 +2651,11 @@ old support and sweep synchronized translation/rotation-point carry before the
 character move, retaining wall clipping and crush/penetration outcomes. Native
 tests cover all shapes, snapshot advancement, simulated kinematic ordering,
 rotation, filtering, jumps and step accounting. Hosts still need to capture and
-advance snapshots without applying motion twice. One-way controller policy and
-editor/Decay/game proof remain open. Rotation follows a chord with fixed probe
+advance snapshots without applying motion twice. Grounded movement now respects
+per-piece one-way support sides/cones across sliding, support, steps and carry.
+Request-scoped drop-through ignores only one-way solids, preserving ordinary
+floors and sensor filtering; hosts own duration and cancellation. Native tests
+exercise ascent/descent, rotated normals, deep/shallow overlap, snap, step landing
+and carry/drop interactions. Editor/Decay/game proof remain open. Rotation follows a chord with fixed probe
 orientation; continuous arc and rotating-probe sweeps remain absent.
 No platformer adoption is claimed.

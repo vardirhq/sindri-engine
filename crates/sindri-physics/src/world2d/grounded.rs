@@ -16,8 +16,10 @@ impl PhysicsWorld2d {
     ///
     /// Snapping defaults off. Requested upward motion suppresses snapping and
     /// grounded state, even if a ceiling blocks ascent. Steep support never
-    /// snaps. Does not mutate a body, store prior grounded state, depenetrate,
-    /// apply one-way policy. Opt-in support snapshots add swept carry first. Steps require starting support
+    /// snaps. Does not mutate a body, store prior grounded state or recover
+    /// initial overlap. One-way support-side/cone policy applies to all phases;
+    /// drop-through ignores only one-way solids for this request.
+    /// Opt-in support snapshots add swept carry first. Steps require starting support
     /// and clear lift/forward/landing sweeps. Steep contacts cannot
     /// create upward motion beyond the remaining request's positive rise;
     /// downhill sliding and explicit jumps remain possible.
@@ -52,6 +54,7 @@ impl PhysicsWorld2d {
     ) -> Result<GroundedSlideMotion2d, PhysicsError> {
         options.validate()?;
         let request = SlideRequest2d {
+            one_way: Some(options.drop_through),
             shape,
             pose,
             displacement,
@@ -108,6 +111,7 @@ impl PhysicsWorld2d {
                 pose,
                 displacement,
                 options: options.slide,
+                one_way: request.one_way,
                 filter,
             },
             Some(SlopeLimit2d::new(up, options.max_slope_angle)),
@@ -125,8 +129,14 @@ impl PhysicsWorld2d {
         if ascending || slide.started_penetrating {
             ground_options.max_distance = 0.0;
         }
-        let ground =
-            self.probe_ground_where(shape, endpoint, ground_options, filter, &mut include)?;
+        let ground = self.probe_ground_with_policy(
+            shape,
+            endpoint,
+            ground_options,
+            filter,
+            request.one_way,
+            &mut include,
+        )?;
         let grounded = !ascending && !slide.started_penetrating && ground.walkable;
         let snap = if grounded {
             -up * ground.hit.map_or(0.0, |hit| hit.distance)
@@ -158,6 +168,7 @@ impl PhysicsWorld2d {
                     pose,
                     displacement,
                     options: options.slide,
+                    one_way: request.one_way,
                     filter,
                 },
                 options,

@@ -818,3 +818,27 @@ surface-specific completeness. This checklist does not mark those surfaces done.
   calls, scripts or component registrations change. Existing game/editor/browser
   paths have not adopted the controller yet. Prior step head `75ab9215` is green
   in CI; CI must verify the pushed carry head.
+
+### One-way character movement checkpoint
+
+- Grounded movement now respects each solid piece's `OneWay2d` support side and
+  cone in initial-overlap checks, sweeps, support/snap, step phases and previous
+  platform verification/carry. Local normals follow body and piece rotation;
+  support-plane slop matches the existing solver policy. Ordinary geometric
+  queries and dynamic-body solver/drop timer behavior remain unchanged.
+- `GroundedSlideOptions2d.drop_through` ignores only one-way solids throughout a
+  request, removing their grounding/carry while preserving ordinary floors and
+  sensor filtering. Hosts own drop duration/cancellation; the read-only query
+  has neither entity identity nor simulation time.
+- Fourteen native regressions cover all probe shapes, ascent/descent, underside
+  and deep overlap, shallow front penetration, normal cones/rotations/extreme
+  lengths, snapping/drop/cancellation, mixed solid/sensor pieces, masks/entity
+  exclusions/predicates/ties, step landing, carry and budget/overlap outcomes.
+- Scoped preflight passed 146 native physics tests, warning-denied all-target/
+  all-feature checks and formatting/file-size gates (1,135 Rust files). Physics
+  Clippy, all-target/all-feature WASM checks and eleven catalogue tests passed.
+  No dependencies, host calls, component registrations or scripts change.
+- Added for the platformer showcase, which still uses its dynamic-body hero.
+  Character acceptance stays unchecked: scene/editor/Decay/platformer integration
+  with native and real-browser game proof remains open. Prior carry head
+  `c4309a77` is green in CI; CI must verify this checkpoint after pushing.

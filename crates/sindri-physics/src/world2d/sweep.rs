@@ -164,6 +164,17 @@ impl PhysicsWorld2d {
         include: &mut impl FnMut(EntityId) -> bool,
         mut visit: impl FnMut(EntityId, &dyn Shape, r2::Pose),
     ) {
+        self.each_piece_policy(filter, include, |entity, piece, pose, _| {
+            visit(entity, piece, pose);
+        });
+    }
+
+    pub(super) fn each_piece_policy(
+        &self,
+        filter: RaycastFilter2d,
+        include: &mut impl FnMut(EntityId) -> bool,
+        mut visit: impl FnMut(EntityId, &dyn Shape, r2::Pose, Option<crate::OneWay2d>),
+    ) {
         let mut entities: Vec<&EntityId> = self.bodies.keys().collect();
         entities.sort_unstable();
         for &entity in entities {
@@ -183,7 +194,12 @@ impl PhysicsWorld2d {
                 let pose = collider
                     .position_wrt_parent()
                     .map_or(*collider.position(), |local| *body.position() * *local);
-                visit(entity, collider.shape(), pose);
+                visit(
+                    entity,
+                    collider.shape(),
+                    pose,
+                    self.one_way.policies.get(&handle).copied(),
+                );
             }
         }
     }

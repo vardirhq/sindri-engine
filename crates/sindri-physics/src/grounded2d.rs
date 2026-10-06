@@ -26,6 +26,10 @@ pub struct GroundedSlideOptions2d {
     /// Prior support snapshot, opt-in. The host must not also add its motion
     /// through parenting, velocity or the requested character displacement.
     pub platform_support: Option<PlatformSupport2d>,
+    /// Ignore one-way solids throughout this request, including support/carry.
+    /// The host owns duration/cancellation; ordinary solids and sensors retain
+    /// their filtering. False respects each piece's support side and cone.
+    pub drop_through: bool,
 }
 
 impl Default for GroundedSlideOptions2d {
@@ -37,6 +41,7 @@ impl Default for GroundedSlideOptions2d {
             snap_distance: 0.0,
             step_height: 0.0,
             platform_support: None,
+            drop_through: false,
         }
     }
 }

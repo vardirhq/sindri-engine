@@ -1,9 +1,9 @@
 //! Support probing shares the movement sweep's impact geometry and filtering.
 
 use rapier2d::parry::query::{self, ShapeCastOptions};
-use rapier2d::parry::shape::Shape;
 use sindri_core::EntityId;
 
+use super::movement_policy::MovementProbe2d;
 use super::slide::contact_prediction;
 use super::slope::SlopeLimit2d;
 use super::sweep::{query_pose, query_shape};
@@ -48,13 +48,31 @@ impl PhysicsWorld2d {
         filter: RaycastFilter2d,
         mut include: impl FnMut(EntityId) -> bool,
     ) -> Result<GroundProbe2d, PhysicsError> {
+        self.probe_ground_with_policy(shape, pose, options, filter, None, &mut include)
+    }
+
+    pub(super) fn probe_ground_with_policy(
+        &self,
+        shape: ColliderShape2d,
+        pose: PhysicsPose2d,
+        options: GroundOptions2d,
+        filter: RaycastFilter2d,
+        one_way: Option<bool>,
+        mut include: impl FnMut(EntityId) -> bool,
+    ) -> Result<GroundProbe2d, PhysicsError> {
         let shape = query_shape(shape)?;
         let at = query_pose(pose)?;
         options.validate()?;
         let up = r2::Vector::new(options.up[0], options.up[1]).normalize();
         let destination = at.translation - up * options.max_distance;
         finite2("ground_destination", [destination.x, destination.y])?;
-        if let Some(hit) = self.penetration(shape.as_ref(), at, filter, &mut include) {
+        let probe = MovementProbe2d {
+            shape: shape.as_ref(),
+            pose: at,
+            filter,
+            one_way,
+        };
+        if let Some(hit) = self.penetration(probe, -up, &mut include) {
             return Ok(GroundProbe2d {
                 hit: Some(hit),
                 walkable: false,
@@ -62,11 +80,10 @@ impl PhysicsWorld2d {
             });
         }
         let hit = self
-            .skin_support(shape.as_ref(), at, up, options.skin, filter, &mut include)
+            .skin_support(probe, up, options.skin, &mut include)
             .or_else(|| {
                 self.slide_cast(
-                    shape.as_ref(),
-                    at,
+                    probe,
                     -up,
                     ShapeCastOptions {
                         max_time_of_impact: options.max_distance,
@@ -74,7 +91,6 @@ impl PhysicsWorld2d {
                         stop_at_penetration: false,
                         compute_impact_geometry_on_penetration: true,
                     },
-                    filter,
                     &mut include,
                 )
             });
@@ -90,11 +106,9 @@ impl PhysicsWorld2d {
 
     fn skin_support(
         &self,
-        probe: &dyn Shape,
-        at: r2::Pose,
+        probe: MovementProbe2d<'_>,
         up: r2::Vector,
         skin: f32,
-        filter: RaycastFilter2d,
         include: &mut impl FnMut(EntityId) -> bool,
     ) -> Option<ShapeHit2d> {
         let mut first = None;
@@ -102,11 +116,16 @@ impl PhysicsWorld2d {
         // one percent of skin plus one epsilon so a snapped endpoint retains
         // support. Cap prediction to avoid overflowing a valid finite skin.
         let prediction = contact_prediction(skin);
-        self.each_piece(filter, include, |entity, piece, pose| {
-            let Ok(Some(contact)) = query::contact(&at, probe, &pose, piece, prediction) else {
+        self.each_piece_policy(probe.filter, include, |entity, piece, pose, policy| {
+            let Ok(Some(contact)) =
+                query::contact(&probe.pose, probe.shape, &pose, piece, prediction)
+            else {
                 return;
             };
-            if first.is_none() && contact.normal2.dot(up) > f32::EPSILON {
+            if first.is_none()
+                && contact.normal2.dot(up) > f32::EPSILON
+                && probe.allows(piece, pose, policy, -up, contact.normal2)
+            {
                 first = Some(ShapeHit2d {
                     entity,
                     point: [contact.point2.x, contact.point2.y],

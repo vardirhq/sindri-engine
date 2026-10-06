@@ -34,8 +34,14 @@ Opt-in platform snapshots now verify old support and add swept synchronized
 translation/rotation-point carry before character movement. Wall clipping and
 ceiling crush are explicit; hosts must advance snapshots once and avoid extra
 parent/solver carry. Rotation follows a chord with fixed probe orientation.
-Continue with one-way/drop-through controller policy,
-then scene/editor/Decay/platformer integration and native/browser proof.
+One-way controller policy now applies support-side/cone filtering across all
+phases; request-scoped drop-through cancels one-way support/carry while preserving
+ordinary solids and sensor filtering. Hosts own duration; geometric queries and
+dynamic-body drop timers retain their separate contracts.
+One-way checkpoint validation passed 146 native physics tests, warning-denied
+Clippy, all-target/all-feature WASM, eleven catalogue tests and size/format gates.
+Prior carry head `c4309a77` is green in CI; the next pushed head needs verification.
+Continue with scene/editor/Decay/platformer integration and native/browser proof.
 Character acceptance remains unchecked. Accelerated queries, 3D/voxel physics
 and final integration follow; gameplay world snapshots remain a separate gap.
 

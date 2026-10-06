@@ -1,9 +1,9 @@
 //! A read-only geometric primitive; gameplay decides how to apply its result.
 
 use rapier2d::parry::query::{self, ShapeCastOptions};
-use rapier2d::parry::shape::Shape;
 use sindri_core::EntityId;
 
+use super::movement_policy::MovementProbe2d;
 use super::slope::SlopeLimit2d;
 use super::sweep::{query_pose, query_shape};
 use super::{PhysicsWorld2d, r2};
@@ -21,6 +21,7 @@ pub(super) struct SlideRequest2d {
     pub displacement: [f32; 2],
     pub options: SlideOptions2d,
     pub filter: RaycastFilter2d,
+    pub one_way: Option<bool>,
 }
 
 impl SlideRequest2d {
@@ -82,6 +83,7 @@ impl PhysicsWorld2d {
                 displacement,
                 options,
                 filter,
+                one_way: None,
             },
             None,
             include,
@@ -108,7 +110,13 @@ impl PhysicsWorld2d {
             started_penetrating: false,
             iteration_limit_reached: false,
         };
-        if let Some(hit) = self.penetration(probe.as_ref(), at, filter, &mut include) {
+        let movement_probe = |pose| MovementProbe2d {
+            shape: probe.as_ref(),
+            pose,
+            filter,
+            one_way: request.one_way,
+        };
+        if let Some(hit) = self.penetration(movement_probe(at), wanted, &mut include) {
             result.started_penetrating = true;
             result.collisions.push(hit);
             return Ok(result);
@@ -128,14 +136,9 @@ impl PhysicsWorld2d {
                 stop_at_penetration: false,
                 compute_impact_geometry_on_penetration: true,
             };
-            let Some(hit) = self.slide_cast(
-                probe.as_ref(),
-                at,
-                direction,
-                cast_options,
-                filter,
-                &mut include,
-            ) else {
+            let Some(hit) =
+                self.slide_cast(movement_probe(at), direction, cast_options, &mut include)
+            else {
                 at.translation += remaining;
                 remaining = r2::Vector::ZERO;
                 break;
@@ -161,20 +164,23 @@ impl PhysicsWorld2d {
 
     pub(super) fn penetration(
         &self,
-        probe: &dyn Shape,
-        at: r2::Pose,
-        filter: RaycastFilter2d,
+        probe: MovementProbe2d<'_>,
+        direction: r2::Vector,
         include: &mut impl FnMut(EntityId) -> bool,
     ) -> Option<ShapeHit2d> {
         let mut first = None;
-        self.each_piece(filter, include, |entity, piece, pose| {
+        self.each_piece_policy(probe.filter, include, |entity, piece, pose, policy| {
+            let Ok(Some(contact)) = query::contact(&probe.pose, probe.shape, &pose, piece, 0.0)
+            else {
+                return;
+            };
             if first.is_none()
-                && query::contact(&at, probe, &pose, piece, 0.0)
-                    .is_ok_and(|contact| contact.is_some_and(|contact| contact.dist < 0.0))
+                && contact.dist < 0.0
+                && probe.allows(piece, pose, policy, direction, contact.normal2)
             {
                 first = Some(ShapeHit2d {
                     entity,
-                    point: [at.translation.x, at.translation.y],
+                    point: probe.pose.translation.to_array(),
                     normal: [0.0; 2],
                     distance: 0.0,
                 });
@@ -185,19 +191,18 @@ impl PhysicsWorld2d {
 
     pub(super) fn slide_cast(
         &self,
-        probe: &dyn Shape,
-        at: r2::Pose,
+        probe: MovementProbe2d<'_>,
         direction: r2::Vector,
         options: ShapeCastOptions,
-        filter: RaycastFilter2d,
         include: &mut impl FnMut(EntityId) -> bool,
     ) -> Option<ShapeHit2d> {
         let mut closest: Option<ShapeHit2d> = None;
-        self.each_piece(filter, include, |entity, piece, pose| {
+        let at = probe.pose;
+        self.each_piece_policy(probe.filter, include, |entity, piece, pose, policy| {
             let Ok(Some(hit)) = query::cast_shapes(
                 &at,
                 direction,
-                probe,
+                probe.shape,
                 &pose,
                 r2::Vector::ZERO,
                 piece,
@@ -211,7 +216,7 @@ impl PhysicsWorld2d {
             impact.translation += direction * hit.time_of_impact;
             let contact = query::contact(
                 &impact,
-                probe,
+                probe.shape,
                 &pose,
                 piece,
                 contact_prediction(options.target_distance),
@@ -224,7 +229,8 @@ impl PhysicsWorld2d {
             );
             // Tangential/separating contact must not repeatedly consume the
             // budget at zero distance while hiding an obstacle farther ahead.
-            if direction.dot(normal) >= -f32::EPSILON
+            if !probe.allows(piece, pose, policy, direction, normal)
+                || direction.dot(normal) >= -f32::EPSILON
                 || closest.as_ref().is_some_and(|old| {
                     hit.time_of_impact
                         .total_cmp(&old.distance)
