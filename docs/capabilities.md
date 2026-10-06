@@ -328,6 +328,13 @@ Decay retunes the hanging light's rest length. Native tests measure rotated rail
 motion/limits, force caps, coasting/braking, spring damping and weight support;
 scene edits/undo, suspension, rebuilds and game removal are exercised. Other motor
 modes and remaining typed ownership controls are still incomplete.
+Runtime-spawned nested mechanisms retain original root aliases independently of
+serialized component payloads. The Decay spawn host passes the original prefab
+library into expansion; all four joint kinds reconnect only their own nested
+endpoints across repeated spawns, inactivity and removal. Platformer's reusable
+windmill now nests its powered mechanism in `windmill-kit.prefab`. Canonical paths
+shadow aliases; ambiguous aliases fail before spawning. Pre-expanded placed roots
+and saved-spawn reference remapping remain incomplete.
 All four authored constraints now accept an enabled flag, defaulting true for
 old payloads. Typed `Physics.joint_enabled` reads the authored flag and
 `Physics.set_joint_enabled` suspends/reconnects the constraint at next fixed

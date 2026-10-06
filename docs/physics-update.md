@@ -289,4 +289,28 @@ surface-specific completeness. This checklist does not mark those surfaces done.
 - Joint acceptance stays open for endpoint retargeting, structural creation/
   removal, additional motor modes, dedicated reference authoring/diagnostics and
   remaining prefab reference integration. Final editor/browser/workspace checks
-  and CI on this pushed checkpoint remain open.
+  remain open. CI is green on joint-control commit `195106ff`.
+
+### Nested runtime root reference checkpoint
+
+- Expansion retains namespaced original root aliases as runtime metadata. Core
+  spawn validates aliases before mutation, resolves canonical paths before aliases
+  and rejects competing aliases. Component strings and saved scene IDs are unchanged.
+- Decay spawning retains the original prefab library instead of discarding metadata
+  through a pre-expanded document. Spawn limits still count the complete expansion.
+- All four joint kinds exercise renamed nested roots across repeated spawns,
+  inactivity, reactivation and removal. Core tests cover local resolution, cloning,
+  canonical precedence and atomic ambiguity rejection.
+- Platformer nests its reusable powered windmill in `windmill-kit.prefab`; its
+  scripted placement/removal regression proves the general reference capability
+  through an existing genre showcase.
+- Final scoped preflight passed 1,082 native tests and warning-denied all-target/
+  all-feature checks for core, scene, Decay and platformer. Four-crate Clippy,
+  11 catalogue currentness/completeness tests and the 1,086-file size gate passed.
+  Typed windmill/setup checks passed with zero errors/reminders.
+- All-target/all-feature WASM checks passed those four crates; the browser host
+  was rebuilt. Chromium WebGPU fetched 25 assets and exercised nested placement,
+  removal and replacement without runtime errors. Native Vulkan capture passed;
+  native and spawned-browser captures were visually reviewed.
+- CI must verify this pushed checkpoint. Pre-expanded placed-root references,
+  saved-spawn remapping and remaining joint/editor/workspace acceptance stay open.

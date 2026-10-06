@@ -424,11 +424,11 @@ across loaded scene roots. An inactive local match does not fall through to an
 external entity with the same name. Placed-prefab sibling IDs resolve within their
 instance namespace; prefab-root aliases require preserved prefab metadata.
 Runtime-spawned prefabs resolve through `World::prefab_entity` using runtime-only
-instance identity. Local sibling paths and the original top-level root ID resolve
-within that spawn; missing or inactive targets never bind another instance or a
+instance identity. Local sibling paths and original top-level and nested root IDs
+resolve within that spawn; missing or inactive targets never bind another instance or a
 scene entity. Reparenting does not change ownership. All four authored joint
-kinds share this path. Nested renamed-root aliases, pre-expanded placed-root
-aliases and saved-spawn reference remapping remain incomplete; see `prefabs.md`.
+kinds share this path. Pre-expanded placed-root aliases and saved-spawn reference
+remapping remain incomplete; see `prefabs.md`.
 
 Constraints synchronize after all bodies, so endpoint collider/body rebuilds
 reconnect the owned joint in the same fixed step. Missing, empty, inactive or

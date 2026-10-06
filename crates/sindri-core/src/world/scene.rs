@@ -61,7 +61,7 @@ impl World {
         };
         let mut entity_map = HashMap::new();
 
-        for ExpandedEntity { entity, link } in &expanded {
+        for ExpandedEntity { entity, link, .. } in &expanded {
             let runtime = world.spawn(EntityData {
                 source_id: Some(entity.id.clone()),
                 name: entity.name.clone(),
@@ -169,7 +169,7 @@ impl World {
         }
 
         let mut entity_map = HashMap::with_capacity(expanded.len());
-        for ExpandedEntity { entity, link } in &expanded {
+        for ExpandedEntity { entity, link, .. } in &expanded {
             let runtime = self.spawn(EntityData {
                 source_id: Some(namespaced[&entity.id].clone()),
                 name: entity.name.clone(),

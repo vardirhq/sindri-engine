@@ -36,9 +36,14 @@ fn every_joint_kind_connects_only_inside_its_runtime_spawn() {
                     (kind): {"first": "hook", "second": "body", "max_distance": 2.0}}}
             ]}))
             .unwrap();
+        let assembly: PrefabDocument = serde_json::from_value(json!({"format_version": 1,
+            "entities": [{"id": "assembly", "transform_3d": {"position": [0, 0, 0]}},
+                {"id": "mechanism", "parent": "assembly", "prefab": {"source": "inner.prefab"}}]}))
+        .unwrap();
+        let library = std::collections::BTreeMap::from([("inner.prefab".into(), prefab)]);
         let mut world = World::default();
-        let first = world.spawn_prefab(&prefab).unwrap();
-        let second = world.spawn_prefab(&prefab).unwrap();
+        let first = world.spawn_prefab_from(&assembly, &library).unwrap();
+        let second = world.spawn_prefab_from(&assembly, &library).unwrap();
         world
             .get_mut(second.root)
             .unwrap()
@@ -47,8 +52,8 @@ fn every_joint_kind_connects_only_inside_its_runtime_spawn() {
             .unwrap()
             .position[0] = 20.0;
         let id = |s| SceneEntityId::new(s).unwrap();
-        let owner = first.by_source_id[&id("joint")];
-        let body = first.by_source_id[&id("body")];
+        let owner = first.by_source_id[&id("mechanism/joint")];
+        let body = first.by_source_id[&id("mechanism/body")];
         let external = world.spawn(EntityData {
             source_id: Some(id("body")),
             ..EntityData::default()
@@ -59,7 +64,10 @@ fn every_joint_kind_connects_only_inside_its_runtime_spawn() {
             physics.step(&mut world, &registry, step).unwrap();
         }
         assert_eq!(physics.world().joint_count(), 2, "{kind}");
-        assert_eq!(resolve(&world, owner, "hook"), Some(first.root));
+        assert_eq!(
+            resolve(&world, owner, "hook"),
+            Some(first.by_source_id[&id("mechanism")])
+        );
         assert_eq!(resolve(&world, owner, "body"), Some(body));
         world.get_mut(body).unwrap().disabled = true;
         assert_eq!(

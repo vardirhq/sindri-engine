@@ -1,8 +1,8 @@
 //! Creating entities in a world from an authored prefab.
 
-use std::collections::HashMap;
+use std::collections::{BTreeSet, HashMap};
 
-use crate::prefab::{NoPrefabs, PrefabLibrary};
+use crate::prefab::{ExpandedEntity, NoPrefabs, PrefabLibrary, expand_entities};
 use crate::{EntityId, PrefabDocument, PrefabError, SceneEntityId};
 
 use super::{EntityData, World, WorldError};
@@ -14,6 +14,8 @@ pub struct PrefabIdentity {
     pub root: EntityId,
     /// Path in the expanded prefab, including its original root identity.
     pub path: SceneEntityId,
+    /// Original nested root paths renamed by instance expansion.
+    pub aliases: BTreeSet<SceneEntityId>,
 }
 
 /// What one spawn produced.
@@ -69,8 +71,14 @@ impl World {
         prefabs: &dyn PrefabLibrary,
     ) -> Result<SpawnedPrefab, WorldError> {
         prefab.validate()?;
-        let expanded = prefab.expanded(prefabs)?;
-        let prefab = &expanded;
+        let expanded = expand_entities(&prefab.entities, prefabs)?;
+        let document = PrefabDocument {
+            entities: expanded.iter().map(|part| part.entity.clone()).collect(),
+            ..prefab.clone()
+        };
+        document.validate()?;
+        validate_aliases(&expanded)?;
+        let prefab = &document;
         let root_id = prefab.root()?.id.clone();
 
         let mut by_source_id = HashMap::with_capacity(prefab.entities.len());
@@ -99,12 +107,15 @@ impl World {
         }
 
         let root = by_source_id[&root_id];
-        for (path, &entity) in &by_source_id {
+        for part in &expanded {
+            let path = &part.entity.id;
+            let entity = by_source_id[path];
             self.get_mut(entity)
                 .expect("entity created by this spawn")
                 .prefab_identity = Some(PrefabIdentity {
                 root,
                 path: path.clone(),
+                aliases: part.aliases.clone(),
             });
         }
 
@@ -126,12 +137,23 @@ impl World {
             return None;
         }
         let find = |path: &str| {
-            self.entities().find_map(|(entity, data)| {
-                data.prefab_identity.as_ref().and_then(|candidate| {
-                    (candidate.root == identity.root && candidate.path.as_str() == path)
-                        .then_some(entity)
+            let matches = |data: &EntityData, alias: bool| {
+                data.prefab_identity.as_ref().is_some_and(|candidate| {
+                    candidate.root == identity.root
+                        && if alias {
+                            candidate.aliases.iter().any(|key| key.as_str() == path)
+                        } else {
+                            candidate.path.as_str() == path
+                        }
                 })
-            })
+            };
+            // Canonical paths win over aliases, independent of entity order.
+            self.entities()
+                .find_map(|(entity, data)| matches(data, false).then_some(entity))
+                .or_else(|| {
+                    self.entities()
+                        .find_map(|(entity, data)| matches(data, true).then_some(entity))
+                })
         };
         let mut namespace = identity.path.as_str();
         while let Some((prefix, _)) = namespace.rsplit_once('/') {
@@ -148,4 +170,18 @@ impl From<PrefabError> for WorldError {
     fn from(error: PrefabError) -> Self {
         Self::InvalidPrefab(error)
     }
+}
+
+/// Canonical paths shadow aliases; competing aliases must not depend on order.
+fn validate_aliases(expanded: &[ExpandedEntity]) -> Result<(), PrefabError> {
+    let canonical: BTreeSet<_> = expanded.iter().map(|part| &part.entity.id).collect();
+    let mut aliases = BTreeSet::new();
+    for part in expanded {
+        for alias in &part.aliases {
+            if !canonical.contains(alias) && !aliases.insert(alias) {
+                return Err(PrefabError::AmbiguousRootAlias(alias.clone()));
+            }
+        }
+    }
+    Ok(())
 }

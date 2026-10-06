@@ -126,13 +126,26 @@ Three-crate warning-denied Clippy, 11 regenerated-catalogue checks and WASM chec
 passed. Rebuilt Chromium delivery fetched 24 assets and exercised T/L plus the
 spawned windmill without runtime errors; native Vulkan capture passed. Captures
 of short/released/reconnected states and the native run were visually reviewed.
-CI must verify the pushed slice. CI is green on prior spawned-prefab head
-`acbed858`.
+CI is green on joint-control head `195106ff`.
+
+A **nested runtime root reference slice** preserves namespaced original root
+aliases through library expansion, separately from component strings and saved
+IDs. Canonical paths shadow aliases; ambiguous aliases fail before spawn mutation.
+Decay passes the original prefab library into spawning. All four joint kinds
+exercise renamed roots; core tests cover repeated expansion, scope isolation,
+cloning, undo, canonical precedence and atomic ambiguity rejection. Platformer's
+`windmill-kit.prefab` wraps the reusable powered mechanism, proven by its V
+placement/removal regression. Final scoped preflight passed 1,082 native tests
+and warning-denied all-target/all-feature checks for core, scene, Decay and
+platformer. Four-crate Clippy, 11 catalogue tests, the 1,086-file size gate and
+all-target/all-feature WASM checks passed. Typed windmill/setup checks reported
+zero errors/reminders. Rebuilt Chromium delivery fetched 25 assets and exercised
+nested placement/removal/replacement without runtime errors. Native Vulkan
+capture passed; both captures were visually reviewed. CI must verify this slice.
 
 Joint acceptance stays open. Add remaining motor modes, typed structural
-controls and dedicated reference authoring/diagnostics. Nested renamed-root
-aliases, exported placed-root aliases and saved-spawn reference remapping still
-need integration; the reference gap remains explicitly partial in parity.
+controls and dedicated reference authoring/diagnostics. Exported placed-root
+aliases and saved-spawn reference remapping still need integration; the reference gap remains explicitly partial in parity.
 
 Continue with **the remaining joints and typed controls/lifecycle**, then
 character movement, accelerated queries, 3D/voxel physics and final integration.

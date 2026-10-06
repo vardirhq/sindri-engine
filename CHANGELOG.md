@@ -2,7 +2,7 @@
 
 - Add reversible enabled flags to authored 2D distance, hinge, slider and spring constraints, plus typed Decay state controls and owned distance tuning. Suspension/reconnection preserves endpoint bodies and unknown fields. Platformer reels its lantern tether with T and releases/reconnects it with L. Invalid suspended distance settings now fail validation even before endpoints are available.
 
-- Resolve authored 2D joint endpoints inside runtime-spawned prefabs through separate instance-local identity. Repeated spawns keep their own roots and children without assigning saved scene IDs. Platformer adds a reusable powered windmill placed/removed with V. Nested root aliases and exported placed-root aliases remain in progress.
+- Resolve authored 2D joint endpoints inside runtime-spawned prefabs through separate instance-local identity. Repeated spawns keep their own roots and children without assigning saved scene IDs. Platformer adds a reusable powered windmill placed/removed with V. Nested runtime root aliases survive library expansion; canonical paths take precedence and ambiguous aliases fail before spawning. Exported placed-root aliases remain in progress.
 
 - Add scene-authored 2D sliders with travel limits and force-capped velocity motors, plus damped force-based springs. Typed Decay controls tune their runtime components through synchronization and rebuilds. Platformer adds a reversing lantern trolley with a retuned spring suspension. Structural controls and full prefab references remain in progress.
 
