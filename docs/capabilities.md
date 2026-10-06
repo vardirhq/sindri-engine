@@ -354,7 +354,7 @@ while suspended. Validation rejects missing/conflicting/invalid owners, wrong
 kinds/types, missing physics and non-positive/non-finite lengths before mutation.
 Unknown payload fields survive. Scene command undo/redo covers all four kinds;
 platformer Decay reels its lantern tether with T and releases/reconnects it with L.
-Typed slider creation and other motor modes remain.
+Additional motor modes and automatic save integration remain.
 Runtime-spawned prefab references now use a separate runtime identity, retaining
 local sibling paths and the original top-level root ID without assigning saved
 scene IDs. The platformer spawns/removes a reusable motor-driven windmill through
@@ -403,6 +403,13 @@ local-anchor force response, repeated recreation, retained body motion/legacy
 ownership, invalid arguments, inactive/unbound targets and prefab isolation.
 Platformer B rebuilds the light's spring without resetting its tuning phase or
 replacing the trolley's independently owned slider.
+Typed `Physics.create_slider_joint` adds finite local anchors, unit local axes
+and optional finite ordered travel bounds under the same owner/scope contract.
+The new motor starts disabled; existing motor controls work before body sync.
+Tests exercise pre-sync/repeated creation, local-axis bounded travel/reversal,
+body-motion/legacy preservation, invalid geometry, inactive/unbound targets and
+runtime prefab isolation for all four constructors. Platformer J recreates the
+rail slider with its current drive direction, retaining the spring suspension.
 
 `sindri.physics2d.rigid_body` and `sindri.physics2d.collider` are registered
 scene components with defaults the engine accepts, so a scene authors bodies and

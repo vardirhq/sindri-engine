@@ -23,6 +23,7 @@ pub(super) const fn is_joint_control(call: PhysicsCall) -> bool {
             | PhysicsCall::CreateDistanceJoint
             | PhysicsCall::CreateHingeJoint
             | PhysicsCall::CreateSpringJoint
+            | PhysicsCall::CreateSliderJoint
     )
 }
 
@@ -37,6 +38,7 @@ impl WorldHost<'_> {
             PhysicsCall::CreateDistanceJoint => self.create_distance_joint_call(path, args),
             PhysicsCall::CreateHingeJoint => self.create_hinge_joint_call(path, args),
             PhysicsCall::CreateSpringJoint => self.create_spring_joint_call(path, args),
+            PhysicsCall::CreateSliderJoint => self.create_slider_joint_call(path, args),
             PhysicsCall::SetJointEndpoints => self.joint_endpoints_call(path, args),
             PhysicsCall::SetHingeMotor => self.hinge_motor_call(path, args),
             PhysicsCall::SetSliderMotor => self.slider_motor_call(path, args),

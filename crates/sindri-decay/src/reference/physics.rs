@@ -6,6 +6,22 @@ pub(super) const PHYSICS: TypeEntry = TypeEntry {
     text: "2D physics: moving objects with speed and pushes, and finding out what this script's object bumped into.",
     members: &[
         call(
+            "create_slider_joint",
+            &[
+                "joint",
+                "first",
+                "second",
+                "first_anchor",
+                "second_anchor",
+                "first_axis",
+                "second_axis",
+                "limits_enabled",
+                "lower_distance",
+                "upper_distance",
+            ],
+            "Authors an enabled slider on an existing owner with no authored 2D joint of any kind. Finite Vec2 anchors use body-local world units without transform scale; axes must be finite unit Vec2 vectors. Bounds must be finite even when disabled; enabled lower distance cannot exceed upper distance. Motor starts disabled and set_slider_motor can configure it before synchronization. Scoped handles become stable IDs or local prefab paths; null leaves an endpoint unbound and inactive targets suspend until active. Requires physics, works before bodies are built and creates its constraint at next fixed synchronization. Invalid arguments or existing joints fail before mutation. Keeps other owner components and body motion; legacy connections remain separate.",
+        ),
+        call(
             "create_spring_joint",
             &[
                 "joint",

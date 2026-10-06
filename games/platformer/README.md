@@ -13,6 +13,9 @@ Z cuts the cord; later tether controls do nothing until C repairs it.
 C creates a fresh owned distance joint at the selected hook and tether length.
 The cord disappears while the constraint is suspended.
 
+J rebuilds the trolley slider and restores its current motor direction, retaining
+its travel limits and independently owned spring.
+
 B rebuilds the trolley light's spring at its current rest length; Decay continues
 tuning it while the trolley remains on its independent rail.
 
@@ -131,3 +134,6 @@ windmill is present, checking scoped endpoints, fixed axle and continued reversa
 
 `tests/slider_spring.rs` also rebuilds the spring with B in both rest-length
 phases, checking stable ownership, bounded trolley motion and continued tuning.
+
+`tests/slider_spring.rs` rebuilds the slider twice with J, checking bounded
+reversal, stable endpoint references and the independently owned suspension.

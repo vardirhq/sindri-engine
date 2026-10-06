@@ -347,3 +347,6 @@ mod hinge_creation;
 
 #[path = "joint_state_controls/spring_creation.rs"]
 mod spring_creation;
+
+#[path = "joint_state_controls/slider_creation.rs"]
+mod slider_creation;

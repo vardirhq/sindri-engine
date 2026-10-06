@@ -196,6 +196,7 @@ fn runtime_prefab_creation_keeps_local_paths_and_rejects_other_instances() {
         (KINDS[0], CREATE),
         (KINDS[1], super::hinge_creation::CREATE),
         (KINDS[3], super::spring_creation::CREATE),
+        (KINDS[2], super::slider_creation::CREATE),
     ] {
         let (extractor, mut template, owner, body) = empty_fixture();
         let root = template

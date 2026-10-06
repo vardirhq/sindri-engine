@@ -1,5 +1,7 @@
 # Changelog
 
+- Add typed `Physics.create_slider_joint` with finite local anchors, unit local axes and optional travel limits. Empty owners, scoped endpoints and settings validate atomically; motor controls work before synchronization. Platformer J rebuilds its bounded trolley slider while retaining its current direction and independently owned spring.
+
 - Add typed `Physics.create_spring_joint` with finite local Vec2 anchors, positive rest length and non-negative stiffness/damping. Empty owners and scoped endpoints validate before mutation; creation preserves body motion and legacy constraints. Platformer B rebuilds its lantern spring without resetting the tuning phase or affecting the trolley rail.
 
 - Add typed `Physics.create_hinge_joint` with finite body-local Vec2 anchors, validated empty owners and scoped endpoints. The new hinge starts with limits/motor disabled and accepts existing motor controls before fixed synchronization. Platformer H rebuilds its placed windmill hinge independently of the spawned mechanism.

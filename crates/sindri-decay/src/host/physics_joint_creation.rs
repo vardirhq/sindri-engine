@@ -2,8 +2,10 @@
 use decay_ir::Path;
 use decay_runtime::{RuntimeError, Value};
 use sindri_core::{EntityId, SceneComponent};
-use sindri_physics::{HingeSettings2d, SpringSettings2d};
-use sindri_scene::{DistanceJoint2dComponent, HingeJoint2dComponent, SpringJoint2dComponent};
+use sindri_physics::{HingeSettings2d, SliderSettings2d, SpringSettings2d};
+use sindri_scene::{
+    DistanceJoint2dComponent, HingeJoint2dComponent, SliderJoint2dComponent, SpringJoint2dComponent,
+};
 
 use super::WorldHost;
 use super::convert::{as_f32, number};
@@ -102,6 +104,48 @@ impl WorldHost<'_> {
             .expect("checked owner")
             .components
             .insert(SpringJoint2dComponent::TYPE_NAME.into(), payload);
+        Ok(Value::Unit)
+    }
+
+    pub(super) fn create_slider_joint_call(
+        &mut self,
+        path: &Path,
+        args: &[Value],
+    ) -> Result<Value, RuntimeError> {
+        let owner = self.empty_joint_owner(path, args)?;
+        let (first, second) = self.joint_endpoint_references(owner, path, args)?;
+        let Some(Value::Bool(limits_enabled)) = args.get(7) else {
+            return Err(RuntimeError::Host(format!(
+                "{}: limits enabled must be a bool",
+                path.dotted()
+            )));
+        };
+        let scalar = |index| number(path, args.get(index).unwrap_or(&Value::Null)).map(as_f32);
+        let settings = SliderSettings2d {
+            first_anchor: vector(path, args.get(3))?,
+            second_anchor: vector(path, args.get(4))?,
+            first_axis: vector(path, args.get(5))?,
+            second_axis: vector(path, args.get(6))?,
+            limits_enabled: *limits_enabled,
+            lower_distance: scalar(8)?,
+            upper_distance: scalar(9)?,
+            ..SliderSettings2d::default()
+        };
+        settings
+            .validate()
+            .map_err(|failure| RuntimeError::Host(format!("{}: {failure}", path.dotted())))?;
+        let payload = serde_json::to_value(SliderJoint2dComponent {
+            first,
+            second,
+            enabled: true,
+            settings,
+        })
+        .map_err(|failure| RuntimeError::Host(format!("{}: {failure}", path.dotted())))?;
+        self.world
+            .get_mut(owner)
+            .expect("checked owner")
+            .components
+            .insert(SliderJoint2dComponent::TYPE_NAME.into(), payload);
         Ok(Value::Unit)
     }
 

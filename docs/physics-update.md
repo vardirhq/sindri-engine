@@ -520,6 +520,33 @@ surface-specific completeness. This checklist does not mark those surfaces done.
   25 assets and exercised two B rebuilds alongside hinge recreation, prefab
   spawning and existing tether controls without runtime errors. Native/browser
   captures were visually reviewed.
-- CI must verify this slice. Prior hinge-head CI had no reported failures; its
-  test/render job was still running. Typed slider creation, remaining motor
+- CI passed on typed spring creation head `d7b64c78`. Typed slider creation, remaining motor
   modes, automatic save integration and final joint/workspace acceptance remain open.
+
+
+### Typed slider creation checkpoint
+
+- Added `Physics.create_slider_joint` with finite body-local anchors, unit local
+  axes and optional finite travel bounds. Enabled lower distance cannot exceed
+  upper distance. The enabled slider starts with its motor disabled; existing
+  motor controls can tune it before synchronization.
+- Shared empty-owner/scope validation precedes mutation. Next synchronization
+  creates the owned constraint, retaining other components, bodies/motion and
+  legacy connections. Native tests cover pre-sync/repeated creation, local-axis
+  bounded travel and reversal, invalid anchors/axes/limits, inactive/unbound
+  targets and runtime prefab isolation for all four constructors.
+- Platformer J rebuilds its trolley slider and restores its current motor
+  direction. Repeated rebuilds retain bounded reversal and the independently
+  owned spring suspension.
+- Final scoped preflight passed 350 native tests and warning-denied all-target/
+  all-feature checks for Decay and platformer. Typed trolley-script preflight had
+  zero errors/reminders. Two-crate Clippy, 11 regenerated catalogue tests and
+  the 1,106-file size gate passed.
+- All-target/all-feature WASM checks passed both crates; the generic browser host
+  was rebuilt. Export and native Vulkan capture passed. Chromium WebGPU fetched
+  25 assets and exercised two J rebuilds alongside spring/hinge recreation,
+  prefab spawning and tether controls without runtime errors. Native/browser
+  captures were visually reviewed.
+- CI must verify this slice; all checks passed on prior head `d7b64c78`.
+  Remaining motor modes, automatic save integration and final joint/workspace
+  acceptance remain open.

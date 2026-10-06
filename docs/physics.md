@@ -518,9 +518,9 @@ The maximum length must be finite and positive. Physics is required, but endpoin
 bodies need not be synchronized yet. Next fixed synchronization creates the
 constraint, preserving other owner components, bodies/motion and legacy connections.
 Existing joints, invalid handles/references and invalid lengths fail before mutation.
-Platformer C repairs the cut cord using its selected hook and length. Typed creation
-for slider joints and automatic saved-spawn reference integration remain open
-in the joint track.
+Platformer C repairs the cut cord using its selected hook and length. Automatic
+saved-spawn reference integration and remaining motor modes stay open in the
+joint track.
 
 ## Scene-authored hinges and velocity motors
 
@@ -562,8 +562,7 @@ before changing its runtime component, preserves unknown fields and applies at
 the next fixed synchronization. Its values persist through endpoint rebuilds and
 the valid spawn-to-synchronization window. Zero torque disables the motor rather
 than braking; to brake, set zero velocity with positive torque. Typed
-`Physics.remove_joint` releases the authored hinge at next synchronization;
-typed slider creation remains absent.
+`Physics.remove_joint` releases the authored hinge at next synchronization.
 
 `Physics.create_hinge_joint(owner, first, second, first_anchor, second_anchor)`
 authors an enabled hinge on an existing owner with no authored 2D joint of any
@@ -654,7 +653,18 @@ owned constraint, preserving other components, body motion and legacy connection
 rebuilds its light's spring at its current rest length and continues tuning while
 the trolley remains on its independent rail.
 
-Typed slider creation and reference diagnostics remain absent.
+`Physics.create_slider_joint(owner, first, second, first_anchor, second_anchor,
+first_axis, second_axis, limits_enabled, lower_distance, upper_distance)` authors
+an enabled slider on an existing empty joint owner, sharing the scoped endpoint
+and physics contract. Finite anchors are body-local world units without transform
+scale, and finite axes must be unit vectors. Bounds validate even when disabled;
+enabled lower distance cannot exceed upper distance. Its motor starts disabled;
+`set_slider_motor` can configure the new component before synchronization.
+Invalid settings fail before mutation. Next fixed synchronization creates the
+owned constraint while retaining other components, body motion and legacy
+connections. Platformer J rebuilds its trolley slider, restores its current motor
+direction and keeps the separately owned spring attached. Typed reference
+diagnostics and remaining motor modes stay open.
 
 These general capabilities are added for the platformer: Decay reverses a
 powered lantern trolley near its rail ends, retunes its suspended light's spring

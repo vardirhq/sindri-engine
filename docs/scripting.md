@@ -1028,6 +1028,7 @@ a person who has not clicked yet.
 | `Physics.create_distance_joint(joint, first, second, max_distance)` | nothing |
 | `Physics.create_hinge_joint(joint, first, second, first_anchor, second_anchor)` | nothing |
 | `Physics.create_spring_joint(joint, first, second, first_anchor, second_anchor, rest_length, stiffness, damping)` | nothing |
+| `Physics.create_slider_joint(joint, first, second, first_anchor, second_anchor, first_axis, second_axis, limits_enabled, lower_distance, upper_distance)` | nothing |
 | `Physics.raycast(origin, direction, max_distance, mask, include_sensors, exclude)` | `RayHit2d` or `null` |
 | `Physics.cast_circle(origin, radius, direction, max_distance, mask, include_sensors, exclude)` | `RayHit2d` or `null` |
 | `Physics.cast_box(origin, half_size, rotation, direction, max_distance, mask, include_sensors, exclude)` | `RayHit2d` or `null` |
@@ -1129,7 +1130,16 @@ including zero. Validation precedes mutation; next fixed synchronization creates
 the enabled spring, preserving other components, body motion and legacy constraints.
 `set_spring` can retune it before synchronization. Platformer B rebuilds the light's
 spring while retaining its current rest-length phase and subsequent tuning.
-Typed slider creation remains absent.
+
+`Physics.create_slider_joint(joint, first, second, first_anchor, second_anchor,
+first_axis, second_axis, limits_enabled, lower_distance, upper_distance)` shares
+the owner/endpoint/physics contract. Anchors are finite body-local `Vec2` world
+units without transform scale; axes must be finite unit `Vec2` vectors. Bounds
+must be finite even when disabled, and enabled lower distance cannot exceed upper
+distance. The new slider is enabled with its motor disabled; `set_slider_motor`
+can configure drive before synchronization. Invalid settings fail before mutation.
+Platformer J rebuilds its trolley slider with bounded travel, restoring the current
+motor direction while retaining the separately owned lantern spring.
 
 `Physics.remove_joint(joint)` removes exactly one valid authored distance, hinge,
 slider or spring component, releasing its solver constraint at the next fixed

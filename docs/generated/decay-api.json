@@ -1830,6 +1830,36 @@
           "returns": "unit"
         },
         {
+          "description": "Authors an enabled slider on an existing owner with no authored 2D joint of any kind. Finite Vec2 anchors use body-local world units without transform scale; axes must be finite unit Vec2 vectors. Bounds must be finite even when disabled; enabled lower distance cannot exceed upper distance. Motor starts disabled and set_slider_motor can configure it before synchronization. Scoped handles become stable IDs or local prefab paths; null leaves an endpoint unbound and inactive targets suspend until active. Requires physics, works before bodies are built and creates its constraint at next fixed synchronization. Invalid arguments or existing joints fail before mutation. Keeps other owner components and body motion; legacy connections remain separate.",
+          "kind": "function",
+          "name": "create_slider_joint",
+          "parameter_names": [
+            "joint",
+            "first",
+            "second",
+            "first_anchor",
+            "second_anchor",
+            "first_axis",
+            "second_axis",
+            "limits_enabled",
+            "lower_distance",
+            "upper_distance"
+          ],
+          "parameters": [
+            "Entity",
+            "Entity",
+            "Entity",
+            "Vec2",
+            "Vec2",
+            "Vec2",
+            "Vec2",
+            "bool",
+            "f32",
+            "f32"
+          ],
+          "returns": "unit"
+        },
+        {
           "description": "Authors an enabled spring on an existing owner with no authored 2D joint of any kind. Finite Vec2 anchors use body-local world units without transform scale; rest length must be finite and positive, stiffness/damping finite and non-negative. Scoped handles become stable IDs or local prefab paths; null leaves an endpoint unbound and inactive targets suspend until active. Requires physics, works before bodies are built and creates its constraint at next fixed synchronization. Invalid arguments or existing joints fail before mutation. Keeps other owner components and body motion; legacy connections remain separate. Existing set_spring controls can retune the new joint before synchronization.",
           "kind": "function",
           "name": "create_spring_joint",

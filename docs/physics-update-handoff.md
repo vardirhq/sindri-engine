@@ -281,13 +281,30 @@ physics dispatcher within its function limit. All-target/all-feature WASM checks
 passed both crates; the generic browser host was rebuilt. Export and native
 Vulkan capture passed. Chromium WebGPU fetched 25 assets and exercised two B
 rebuilds alongside hinge recreation, prefab spawning and tether controls without
-runtime errors. Native/browser captures were visually reviewed. CI must verify
-this slice; prior hinge-head CI had no reported failures and its test/render job
-was still running.
+runtime errors. Native/browser captures were visually reviewed. CI passed on
+typed spring creation head `d7b64c78`.
 
-Joint acceptance stays open. Add remaining motor modes and typed slider
-creation controls. Automatic editor/script save integration remains open; the
-reference gap remains partial in parity.
+A **typed slider creation slice** adds `Physics.create_slider_joint` with finite
+body-local anchors, unit axes and optional finite travel bounds. Enabled lower
+bounds cannot exceed upper bounds. Motor starts disabled and accepts existing
+typed drive controls before synchronization. Shared owner/scope validation
+precedes mutation; solver allocation retains other components, body motion and
+legacy ownership. Native tests cover pre-sync/repeated creation, bounded travel
+and reversal along local axes, invalid geometry, inactive/unbound targets and prefab
+isolation for all four constructors. Platformer J rebuilds the rail slider with
+its current drive direction, preserving bounded motion and its independently
+owned spring. Final scoped preflight passed 350 native tests and warning-denied
+all-target/all-feature checks for Decay and platformer. Typed trolley-script
+preflight had zero errors/reminders. Two-crate Clippy, 11 regenerated catalogue
+tests and the 1,106-file size gate passed. All-target/all-feature WASM checks
+passed both crates; the generic browser host was rebuilt. Export and native
+Vulkan capture passed. Chromium WebGPU fetched 25 assets and exercised two J
+rebuilds alongside spring/hinge recreation, prefab spawning and tether controls
+without runtime errors. Native/browser captures were visually reviewed. CI must
+verify this slice; all checks passed on prior head `d7b64c78`.
+
+Joint acceptance stays open. Add remaining motor modes. Automatic editor/script
+save integration remains open; the reference gap remains partial in parity.
 
 Continue with **the remaining joints and typed controls/lifecycle**, then
 character movement, accelerated queries, 3D/voxel physics and final integration.
@@ -542,8 +559,8 @@ branch codex/physics-update. Read AGENTS.md, CLAUDE.md,
 docs/physics-update-handoff.md and docs/physics-update.md first.
 Implement every remaining acceptance item, including docs, in this one PR.
 CCD, one-way platforms, forces/rotation and contacts are checked and saved on
-the branch. Continue with typed slider creation controls, remaining
-motor modes and automatic save-reference integration, then the remaining checklist.
+the branch. Continue with remaining motor modes and automatic save-reference
+integration, then the remaining checklist.
 Push checked small slices regularly, each feature in one push or less.
 Keep gameplay in Decay, prove editor/runtime/script/game behavior, and do
 not mark the PR ready until final applicable checks and CI are green.

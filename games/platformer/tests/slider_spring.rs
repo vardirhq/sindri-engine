@@ -84,3 +84,44 @@ fn rebuilding_the_spring_keeps_the_trolley_and_breathing_motion() {
     }
     assert!(short && long);
 }
+
+#[test]
+fn rebuilding_the_slider_keeps_bounded_reversal_and_its_spring() {
+    let mut run = Run::open().unwrap();
+    let slider = run.entity("trolley-slider").unwrap();
+    let spring = run.entity("lantern-spring").unwrap();
+    let trolley = run.entity("trolley-body").unwrap();
+    let light = run.entity("spring-lantern").unwrap();
+    let mut forward = false;
+    let mut backward = false;
+    for frame in 0..480 {
+        let rebuild = frame == 100 || frame == 250;
+        run.key(Key::J, rebuild);
+        let notes = run.step(1.0 / 60.0);
+        assert!(notes.is_empty(), "{notes:?}");
+        assert_eq!(run.physics.world().joint_count(), 4);
+        assert!(
+            run.world
+                .get(spring)
+                .unwrap()
+                .components
+                .contains_key("sindri.physics2d.spring_joint")
+        );
+        if rebuild {
+            let joint = &run.world.get(slider).unwrap().components["sindri.physics2d.slider_joint"];
+            assert_eq!(joint["first"], "trolley-rail");
+            assert_eq!(joint["second"], "trolley-body");
+            assert_eq!(joint["lower_distance"], -1.0);
+            assert_eq!(joint["upper_distance"], 1.0);
+        }
+        let [x, y] = run.position(trolley);
+        let [lx, ly] = run.position(light);
+        assert!((8.47..=10.53).contains(&x));
+        assert!((y - 8.1).abs() < 0.03);
+        assert!((x - lx).hypot(y - ly) < 1.9);
+        let speed = run.physics.world().linear_velocity(trolley).unwrap()[0];
+        forward |= speed > 0.4;
+        backward |= speed < -0.4;
+    }
+    assert!(forward && backward);
+}
