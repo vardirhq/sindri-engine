@@ -7,6 +7,7 @@
 
 mod contact2d;
 mod ground2d;
+mod grounded2d;
 mod hinge2d;
 mod material;
 mod motor2d;
@@ -26,6 +27,7 @@ mod tests;
 
 pub use contact2d::Contact2d;
 pub use ground2d::{GroundOptions2d, GroundProbe2d};
+pub use grounded2d::{GroundedSlideMotion2d, GroundedSlideOptions2d};
 pub use hinge2d::{HingeJoint2d, HingeSettings2d};
 pub use material::PhysicsMaterial;
 pub use motor2d::MotorMode2d;

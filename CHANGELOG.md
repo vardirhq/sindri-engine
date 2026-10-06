@@ -1,5 +1,6 @@
 # Changelog
 
+- Add read-only grounded 2D sweep/slide results with optional downward snapping, post-move support and ascent suppression. Snapping defaults off; slope movement, steps, platforms and editor/Decay/game integration remain in progress.
 - Add read-only 2D ground probes with configurable up, slope limits, travel and skin. They report steep obstructions, initial penetration and zero-travel support without snapping or changing bodies. Character movement integration remains in progress.
 
 - Add read-only 2D `move_and_slide` queries with skin, bounded iterations, ordered collisions and explicit initial-penetration/budget outcomes. This is the geometric foundation for character movement; grounding, steps, moving platforms and editor/Decay/game integration remain in progress.

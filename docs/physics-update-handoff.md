@@ -17,12 +17,16 @@ a pushed handoff. Do not ask them to authorize the scope again.
 ## Current continuation checkpoint
 
 The 2D joint checklist is complete. Character movement now has checked
-engine-only sweep/slide and ground-probe foundations: see
-`docs/character-movement.md` for the contract and remaining slices. The read-only result has skin, bounded iterations,
+engine-only sweep/slide, ground-probe and optional grounded-snap foundations: see
+`docs/character-movement.md` for the contract and remaining slices. The read-only
+result has skin, bounded iterations,
 ordered hits and initial-penetration/budget flags. Ground probes classify nearest
 support against up/slope limits and detect zero-travel support with a contact
-query before sweeping. Ordinary shape casts are unchanged. Continue with
-grounded state/snap, uphill/downhill/step/platform and one-way movement policies,
+query before sweeping. Composed movement reports support after sliding and can
+snap downward onto walkable support; snap defaults off and ascending requests
+never snap or report grounded. Gameplay retains prior state. Ordinary shape casts
+are unchanged. Continue with uphill/downhill limits, steps/platforms and one-way
+movement policies,
 then scene/editor/Decay/platformer integration and native/browser proof.
 Character acceptance remains unchecked. Accelerated queries, 3D/voxel physics
 and final integration follow; gameplay world snapshots remain a separate gap.

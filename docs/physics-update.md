@@ -719,3 +719,27 @@ surface-specific completeness. This checklist does not mark those surfaces done.
   catalogue tests and the 1,123-file size gate passed. No component registration,
   script/host API, dependency or existing runtime/render/browser behavior changes.
   CI must verify this slice.
+
+### Grounded movement and optional snap checkpoint
+
+- Added read-only `move_and_slide_grounded` and its predicate variant, composing
+  slide and ground probing with a shared skin. Results separate total translation,
+  unchanged slide outcome, pre-snap support and snap translation.
+- Snap defaults off; optional downward travel accepts only walkable support.
+  Upward requests suppress snap and grounded state even when a ceiling blocks
+  ascent. Initial penetration never snaps. Support is measured after motion, so
+  walking off a ledge loses support. Gameplay owns prior state and snap decisions.
+- Native regressions exercise landing/repeated support, ledge departure, snap
+  limits, downhill support/steep rejection, blocked ascent, initial penetration,
+  arbitrary up/rotated capsule, filters/current poses, budget exhaustion, read-only
+  and validation. A rotated-slope re-probe exposed early narrow-phase stopping;
+  zero-travel support now allows one percent of skin plus one epsilon. A boundary
+  regression rejects gaps beyond that relative tolerance.
+- Added for platformer adoption, still engine-only. Uphill/downhill motion limits,
+  steps/platforms, one-way/drop-through policy, scene/editor/Decay and native/
+  browser game proof remain open; character acceptance remains unchecked.
+- Scoped preflight passed 94 native physics tests and warning-denied all-target/
+  all-feature checks. Physics Clippy, all-target/all-feature WASM compilation,
+  11 catalogue tests and the 1,126-file size gate passed. No dependencies, scripts,
+  host calls or component registrations change. Existing runtime/editor/render/
+  browser behavior is unchanged until integration; CI must verify this slice.

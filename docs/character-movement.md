@@ -1,7 +1,7 @@
 # Character movement
 
-Status: geometric sweep/slide and ground-probe foundations implemented; full character movement
-acceptance remains open in `physics-update.md`. Added for the platformer genre
+Status: geometric sweep/slide, ground probing and optional grounded snapping
+implemented; full character movement acceptance remains open in `physics-update.md`. Added for the platformer genre
 showcase, which has not yet adopted it. No game proof is claimed for this slice.
 
 ## Ownership
@@ -78,15 +78,55 @@ walkable hit does not itself mean the caller is standing on it.
 
 Initial penetration returns the usual zero-normal hit and is never walkable.
 Exact touching/inside-skin support can be detected with zero travel: a contact
-query, using one f32 epsilon of prediction allowance at the skin boundary,
-precedes the sweep. Blocking contacts at zero travel tie by entity then original
-piece order. A surface tangent to the probe direction is not support. No hit
+query, allowing one percent of skin plus one f32 epsilon for numerical error,
+precedes the sweep. Rotated/curved sweeps can stop slightly outside the nominal
+skin; this tolerance keeps snapped endpoints supported without moving them again.
+Prediction is capped at the largest finite float. Blocking contacts at zero
+travel tie by entity then original piece order. A surface tangent to the probe direction is not support. No hit
 means unwalkable, not penetrating.
 
 This API does not snap, choose jump behavior, carry platforms, limit uphill
-movement or implement one-way support/drop-through. Grounded-state and motion
-policy must be added in the following controller slices; one-way geometry still
-has the ordinary two-sided geometric query semantics here.
+movement or implement one-way support/drop-through. The composed grounded
+movement API below adds support state and optional snapping; remaining movement
+policy belongs to following controller slices. One-way geometry still has the
+ordinary two-sided geometric query semantics here.
+
+## Implemented grounded movement and optional snapping
+
+`PhysicsWorld2d::move_and_slide_grounded(shape, pose, displacement, options, filter)`
+and `move_and_slide_grounded_where(..., include)` compose the existing slide and
+support queries. They remain read-only and do not retain state between calls.
+The same filter and stable entity predicate apply to both phases.
+
+`GroundedSlideOptions2d` supplies slide settings, up, maximum slope angle and
+non-negative finite `snap_distance`. Slide skin is also the support skin, so
+movement and grounding cannot disagree about that separation. Up and angle use
+the ground-probe validation contract. Snap defaults to zero: support is then
+recognized only within skin plus its numerical tolerance after sliding. A floor near
+the starting pose cannot keep the character grounded after it walks off a ledge.
+
+A positive snap distance allows a downward probe at the slide endpoint. Only
+walkable support accepts the downward translation to the skin. A steep surface
+remains visible in the ground result but never snaps; it is not skipped for a
+floor below. Requested motion with any positive component along up disables
+snap and reports ungrounded, even if a ceiling blocks ascent or touching support
+is still visible. Initial penetration likewise blocks snapping and grounding.
+
+`GroundedSlideMotion2d.translation` is the full proposal to apply once.
+`slide` retains the unmodified geometric result, including its unsatisfied
+movement and budget flags. `snap_translation` is the additional downward motion;
+`ground` is the support query at the slide endpoint before snapping, so its hit
+distance describes that extra travel. `grounded` means the proposed endpoint
+has walkable support and the request was not ascending or initially penetrating.
+Snapping is separate from slide collisions and does not alter slide remaining.
+An exhausted slide budget still permits support probing at its actual endpoint.
+
+Gameplay keeps prior support state and chooses when to enable snap: typically
+while following ground, with zero snap in air or while jumping. Speed, gravity,
+jump timing and support transitions remain Decay decisions. The engine does not
+supply coyote time, jump buffering or persistent state. Arbitrary up and fixed
+probe rotation are supported. Ordinary shape casts and one-way geometry retain
+their existing contracts; this is not yet the full controller.
 
 ## Remaining slices
 
@@ -94,9 +134,8 @@ The foundation sees one-way geometry on both sides, just like geometric queries.
 The full controller must incorporate support-side policy and timed drop-through,
 not interpret this primitive as a finished one-way movement API.
 
-Remaining engine work includes uphill/downhill movement limits, grounded-state
-and snap behavior, step height and clearance,
-ceilings and moving-platform displacement. Platform riding must use synchronized
+Remaining engine work includes uphill/downhill movement limits, step height
+and clearance, ceilings and moving-platform displacement. Platform riding must use synchronized
 poses and avoid counting platform movement twice. Tests must exercise the
 one-way/drop-through interactions and initial-overlap/budget outcomes together.
 
@@ -119,3 +158,10 @@ Ground-probe tests cover separation/touching and zero travel, box/circle/rotated
 capsule extents, slope boundaries and steep obstruction, arbitrary up, ceiling
 orientation, initial penetration, masks/sensors/whole-entity exclusion, host
 predicates, current poses/removal, deterministic ties and invalid options.
+
+Grounded movement tests cover contact-only support, snapping on/off and distance
+limits, leaving a ledge, landing and repeated grounded movement, jump and blocked
+ceiling requests, descending walkable slopes, steep rejection, initial overlap,
+arbitrary up with a rotated capsule, shared filters/predicates, immediate pose
+changes/removal, budget exhaustion, read-only results and invalid/overflowing
+inputs. Zero-travel support tests bound the numerical skin allowance.

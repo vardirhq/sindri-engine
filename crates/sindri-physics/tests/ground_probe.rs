@@ -416,3 +416,34 @@ fn invalid_options_and_overflowing_probe_destinations_fail_before_queries() {
             .is_err()
     );
 }
+
+#[test]
+fn zero_travel_support_allows_only_skin_relative_rounding() {
+    let mut world = PhysicsWorld2d::new([0.0; 2]).unwrap();
+    insert(
+        &mut world,
+        1,
+        pose(0.0, -1.0),
+        &[Collider2d::rectangle([10.0, 0.5])],
+    );
+    for skin in [0.01, 0.1] {
+        for (gap_factor, walkable) in [(1.005, true), (1.02, false)] {
+            let ground = world
+                .probe_ground(
+                    PROBE,
+                    pose(0.0, skin * gap_factor),
+                    GroundOptions2d {
+                        skin,
+                        max_distance: 0.0,
+                        ..GroundOptions2d::default()
+                    },
+                    RaycastFilter2d::default(),
+                )
+                .unwrap();
+            assert_eq!(ground.walkable, walkable);
+            if walkable {
+                near(ground.hit.unwrap().distance, 0.0);
+            }
+        }
+    }
+}

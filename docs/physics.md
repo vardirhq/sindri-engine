@@ -910,12 +910,21 @@ positive skin, bounded iterations and explicit penetration/budget outcomes.
 It uses current poses and existing query filtering; ordinary shape casts retain
 their zero-normal initial-overlap contract. See [character movement](character-movement.md)
 for the result semantics, validation, ownership and remaining vertical slices.
-This is not yet a grounded/stepping controller; one-way geometry is two-sided
+This is not yet the full character controller; one-way geometry is two-sided
 in this primitive. No editor, Decay or platformer integration is claimed.
 
 Ground probes now report nearest support and classify world-space normals
 against configurable up and slope limits, including zero-travel contacts at the
 skin. Steep surfaces are reported, not skipped; initial penetration is unwalkable.
 The [character movement contract](character-movement.md) defines tolerances
-and remaining grounded-state/snap and movement policy. Ordinary geometric
+and remaining controller movement policy. Ordinary geometric
 queries are unchanged; this is not yet controller or game proof.
+
+`move_and_slide_grounded` composes sliding with post-move support and optional
+snapping using one shared skin. Snap defaults off; positive downward travel is
+accepted only for walkable support. Upward requests and initial penetration
+suppress snapping and grounded state. The result separates slide motion, support,
+snap and total translation; gameplay applies total translation once and owns
+prior support state. Native tests exercise landing, ledges, blocked ascent,
+repeated support and downhill snapping. Slope motion limits, steps, platforms,
+one-way policy and scene/editor/Decay/platformer proof remain open.

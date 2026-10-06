@@ -99,11 +99,12 @@ impl PhysicsWorld2d {
         include: &mut impl FnMut(EntityId) -> bool,
     ) -> Option<ShapeHit2d> {
         let mut first = None;
-        // Contact prediction includes a tiny rounding allowance at the skin
-        // boundary. A zero-time cast can miss that exact boundary entirely.
+        // Sweeps can stop slightly early on rotated/curved surfaces. Accept
+        // one percent of skin plus one epsilon so a snapped endpoint retains
+        // support. Cap prediction to avoid overflowing a valid finite skin.
+        let prediction = (skin.mul_add(0.01, skin) + f32::EPSILON).min(f32::MAX);
         self.each_piece(filter, include, |entity, piece, pose| {
-            let Ok(Some(contact)) = query::contact(&at, probe, &pose, piece, skin + f32::EPSILON)
-            else {
+            let Ok(Some(contact)) = query::contact(&at, probe, &pose, piece, prediction) else {
                 return;
             };
             if first.is_none() && contact.normal2.dot(up) > f32::EPSILON {
