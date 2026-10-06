@@ -111,9 +111,16 @@ world cloning, command undo and assigning stable IDs retain this runtime identit
 
 This identity is independent of `source_id` and the editor's `PrefabLink`.
 Neither it nor its runtime handle is serialized. Saving assigned scene IDs does
-not rewrite component-local references; restoring those spawned mechanisms from
-a saved scene still needs reference remapping. Runtime spawning preserves nested
-root aliases through the original prefab library, including repeated expansion.
+not rewrite component-local references automatically. To persist spawned mechanisms,
+call `World::to_scene_with_references(prefabs, components)` after assigning stable
+IDs. It remaps fields described as `FieldMeaning::Entity`, including dotted paths
+and `[]` lists, to their target's assigned scene ID. Inactive targets still resolve;
+empty references remain unbound. Nonempty missing/stale local targets, unstable
+targets and wrong-type fields fail the save. Serialization works on a clone and
+never edits the live world. Undescribed fields and unknown component payloads
+are preserved unchanged; describe every entity field that needs remapping.
+`to_scene`/`to_scene_with` retain their existing verbatim serialization contract.
+Runtime spawning preserves nested root aliases through the original prefab library, including repeated expansion.
 Canonical paths take precedence over aliases, including inactive targets; competing
 aliases without a canonical target are rejected before any entities are spawned.
 Placed instances carry the same original root aliases in runtime `PrefabLink`
@@ -122,8 +129,9 @@ metadata. `LoadedScenes` has library-aware `load_with`/`enter_with` and
 entry expands original documents through `World::add_scene_with`, prefixing
 aliases with the scene namespace. The native/browser project hosts retain the
 original scene and library instead of feeding a flattened document to entry.
-Editor reload updates aliases through checked link commands; duplication rebases
-aliases to the copy's instance namespace. Undo preserves them. Saving instances
+Loaded scene roots retain their runtime namespace so qualified saved IDs resolve
+inside that scene after namespacing. Editor reload updates aliases through checked
+link commands; duplication rebases aliases to the copy's instance namespace. Undo preserves them. Saving instances
 as prefab references and reopening regenerates aliases from the library; aliases
 are never serialized. `SceneDocument::expanded` remains useful for validation,
 but its plain entities discard reference metadata and should not replace

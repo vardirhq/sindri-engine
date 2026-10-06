@@ -159,13 +159,31 @@ checks reported zero errors/reminders. WASM all-target/all-feature checks passed
 core, scene and platformer; host-library WASM checks and the rebuilt browser host
 passed. Chromium fetched 25 assets and exercised placed/spawned windmills plus V
 removal/replacement without runtime errors. Native Vulkan capture passed; native
-and browser captures were visually reviewed. CI must verify this slice; prior
-nested-runtime head `4049494a` still had its test/capture job running. Plain
-flattened documents discard aliases; saved-spawn reference remapping remains open.
+and browser captures were visually reviewed. CI passed on placed-reference head
+`41073354`. Plain flattened documents discard aliases; opt-in saved-spawn
+reference remapping is supplied by the next slice.
+
+A **saved-spawn reference slice** adds opt-in registry-based
+`World::to_scene_with_references(prefabs, components)` after stable ID assignment.
+Registered entity fields, including dotted/list paths, become their local target's
+saved ID. Empty references remain unbound; malformed/unresolved/unstable targets
+fail. The live world and unknown payloads remain unchanged; no runtime identity
+serializes. All four joint kinds reopen with isolated endpoints and exercise
+qualified-ID precedence, inactivity/reactivation and removal. Platformer's
+Decay-spawned nested windmill reopens, reverses its motor and keeps its world-space
+axle fixed. Ordinary serializers remain verbatim and automatic editor/script save
+integration is not supplied. Final scoped preflight passed 1,398 native tests and
+warning-denied all-target/all-feature checks for core, scene, editor and platformer.
+Four-crate Clippy, 11 catalogue tests and the 1,093-file size gate passed.
+All-target/all-feature WASM checks passed core, scene and platformer, and the
+generic browser host was rebuilt. Export passed; Chromium WebGPU fetched 25
+assets from the saved/reopened fixture without runtime errors. Native Vulkan
+capture passed; both final captures were visually reviewed. CI must verify this
+new slice; all checks passed on prior head `41073354`.
 
 Joint acceptance stays open. Add remaining motor modes, typed structural
-controls and dedicated reference authoring/diagnostics. Saved-spawn reference
-remapping still needs integration; the reference gap remains partial in parity.
+controls and dedicated reference authoring/diagnostics. Automatic editor/script save
+integration remains open; the reference gap remains partial in parity.
 
 Continue with **the remaining joints and typed controls/lifecycle**, then
 character movement, accelerated queries, 3D/voxel physics and final integration.

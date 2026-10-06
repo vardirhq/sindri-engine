@@ -338,7 +338,13 @@ aliases through library-aware scene entry on native/browser hosts, scene namespa
 editor reload/duplication and command undo. All four kinds exercise scene switching,
 inactivity and removal; saving prefab references and reopening rebuilds aliases.
 The platformer level windmill is placed from the same nested assembly. Flattened
-plain documents discard metadata; saved-spawn reference remapping remains incomplete.
+plain documents discard metadata. Opt-in `World::to_scene_with_references` remaps
+registered entity fields to assigned stable IDs, including nested lists, without
+live edits. Unknown fields remain unchanged, empty references stay unbound and
+malformed/unresolved/unstable targets fail serialization. All four joints reopen
+with isolated endpoints; the platformer's Decay-spawned windmill reopens with motor
+reversal and its fixed axle. Qualified scene IDs take precedence over relative
+namespace lookup when an exact match exists.
 All four authored constraints now accept an enabled flag, defaulting true for
 old payloads. Typed `Physics.joint_enabled` reads the authored flag and
 `Physics.set_joint_enabled` suspends/reconnects the constraint at next fixed
@@ -353,8 +359,9 @@ Runtime-spawned prefab references now use a separate runtime identity, retaining
 local sibling paths and the original top-level root ID without assigning saved
 scene IDs. The platformer spawns/removes a reusable motor-driven windmill through
 Decay. Repeated instances, inactivity, root removal, reparenting and command undo
-are covered. Nested renamed-root aliases, exported placed-root aliases and
-saved-spawn reference remapping remain gaps; dedicated picker/diagnostics and
+are covered. Nested runtime aliases and placed roots survive library-based delivery;
+registry-based save remapping is opt-in. Automatic save-path integration remains
+open; dedicated picker/diagnostics and
 visual inspector review are unverified.
 
 `sindri.physics2d.rigid_body` and `sindri.physics2d.collider` are registered

@@ -1,8 +1,8 @@
 //! Scene scope and prefab-instance endpoint resolution.
 use sindri_core::{EntityId, SceneEntityId, World};
 
-/// Searches the owner's ID namespace before the containing scene. An inactive
-/// local target never falls through to a similarly named external entity.
+/// Qualified scene IDs precede local namespaces; simple names search locally first.
+/// An inactive match never falls through to a similarly named external entity.
 pub(super) fn resolve(world: &World, owner: EntityId, target: &str) -> Option<EntityId> {
     if target.is_empty() {
         return None;
@@ -14,6 +14,16 @@ pub(super) fn resolve(world: &World, owner: EntityId, target: &str) -> Option<En
     }
     let within = boundary(world, owner);
     let usable = |entity| boundary(world, entity) == within && world.is_active(entity);
+    // A qualified ID is relative to its loaded scene's namespace.
+    if target.contains('/') {
+        let namespace = within.and_then(|root| world.get(root)?.scene_namespace.as_deref());
+        let qualified = namespace
+            .filter(|name| !name.is_empty())
+            .map_or_else(|| target.to_owned(), |name| format!("{name}/{target}"));
+        if let Some(entity) = world.entity_for_source_id(&SceneEntityId::new(qualified).ok()?) {
+            return usable(entity).then_some(entity);
+        }
+    }
     let find = |key: &SceneEntityId| {
         world.entity_for_source_id(key).or_else(|| {
             world.entities().find_map(|(entity, data)| {

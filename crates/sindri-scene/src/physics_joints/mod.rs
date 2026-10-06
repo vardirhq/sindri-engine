@@ -16,3 +16,6 @@ mod prefab_tests;
 
 #[cfg(test)]
 mod placed_tests;
+
+#[cfg(test)]
+mod saved_tests;

@@ -136,6 +136,7 @@ impl LoadedScenes {
         }
         let root = world.spawn(EntityData {
             name: Some(name.to_owned()),
+            scene_namespace: Some(namespace.to_owned()),
             // Off until something asks for it. A scene that arrived live would
             // draw itself over whatever is already being played for the frame
             // between loading and switching.

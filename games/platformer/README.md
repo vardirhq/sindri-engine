@@ -109,3 +109,7 @@ through Decay, checking its fixed axle, isolated joint and fresh spawn lifecycle
 
 `tests/joint_controls.rs` retunes the lantern tether, releases it into free fall,
 reconnects it and returns to the original length through keyboard-driven Decay.
+
+`tests/saved_joints.rs` saves and reopens a Decay-spawned nested windmill through
+registry-based reference remapping, then checks both motor directions, its fixed
+world-space axle and independent constraint ownership.

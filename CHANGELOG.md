@@ -1,10 +1,12 @@
-- Preserve authored joint root references in placed nested prefabs through native/browser scene entry and scene namespaces. Editor prefab reload, duplication and undo retain or rebase runtime aliases without serializing them. Platformer's level windmill is now a placed nested assembly, sharing its prefab with runtime spawning.
-
 # Changelog
+
+- Add opt-in registry-based serialization for spawned-prefab entity references. After assigning stable IDs, `World::to_scene_with_references` remaps registered fields, including nested lists, without editing the live world. Invalid or unresolved references fail the save. All four joint kinds and the platformer's spawned windmill exercise reopening; qualified joint scene IDs take precedence over relative namespace lookup.
+
+- Preserve authored joint root references in placed nested prefabs through native/browser scene entry and scene namespaces. Editor prefab reload, duplication and undo retain or rebase runtime aliases without serializing them. Platformer's level windmill is now a placed nested assembly, sharing its prefab with runtime spawning.
 
 - Add reversible enabled flags to authored 2D distance, hinge, slider and spring constraints, plus typed Decay state controls and owned distance tuning. Suspension/reconnection preserves endpoint bodies and unknown fields. Platformer reels its lantern tether with T and releases/reconnects it with L. Invalid suspended distance settings now fail validation even before endpoints are available.
 
-- Resolve authored 2D joint endpoints inside runtime-spawned prefabs through separate instance-local identity. Repeated spawns keep their own roots and children without assigning saved scene IDs. Platformer adds a reusable powered windmill placed/removed with V. Nested runtime root aliases survive library expansion; canonical paths take precedence and ambiguous aliases fail before spawning. Exported placed-root aliases remain in progress.
+- Resolve authored 2D joint endpoints inside runtime-spawned prefabs through separate instance-local identity. Repeated spawns keep their own roots and children without assigning saved scene IDs. Platformer adds a reusable powered windmill placed/removed with V. Nested runtime root aliases survive library expansion; canonical paths take precedence and ambiguous aliases fail before spawning. Placed-root aliases now survive library-aware native/browser scene entry.
 
 - Add scene-authored 2D sliders with travel limits and force-capped velocity motors, plus damped force-based springs. Typed Decay controls tune their runtime components through synchronization and rebuilds. Platformer adds a reversing lantern trolley with a retuned spring suspension. Structural controls and full prefab references remain in progress.
 

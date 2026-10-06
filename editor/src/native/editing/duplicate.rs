@@ -116,6 +116,7 @@ fn copy_into(
         prefab: link,
         // An editor copy must not share the original runtime spawn's scope.
         prefab_identity: None,
+        scene_namespace: source.scene_namespace.clone(),
     };
     let handle = rehearsal.spawn(data.clone());
     // The rehearsal spawns, so the real command has a handle to name. Its own

@@ -419,7 +419,10 @@ part of final physics integration.
 ```
 
 The endpoint strings are stable scene entity IDs, not runtime handles. Resolution
-tries the joint owner's ID namespace before the containing scene and never binds
+uses an exact qualified scene ID (a string containing `/`) before relative
+namespace lookup when that ID exists inside the loaded scene (its namespace is
+applied first). Otherwise it tries the owner's namespace
+before the containing scene. It never binds
 across loaded scene roots. An inactive local match does not fall through to an
 external entity with the same name. Placed-prefab sibling IDs resolve within their
 instance namespace. Original top-level/nested root aliases survive library-based
@@ -429,8 +432,12 @@ Runtime-spawned prefabs resolve through `World::prefab_entity` using runtime-onl
 instance identity. Local sibling paths and original top-level and nested root IDs
 resolve within that spawn; missing or inactive targets never bind another instance or a
 scene entity. Reparenting does not change ownership. All four authored joint
-kinds share this path. Saved-spawn reference remapping remains incomplete;
-flattening into a plain expanded document discards alias metadata. See `prefabs.md`.
+kinds share this path. After stable IDs are assigned,
+`World::to_scene_with_references` remaps their registered endpoint fields for
+save/reopen, preserving settings and unknown fields without editing the live world.
+All four kinds exercise reopened endpoint isolation, inactivity and removal;
+platformer proves motor reversal and a fixed axle after reopening its Decay spawn.
+Flattening into a plain expanded document discards aliases; see `prefabs.md`.
 
 Constraints synchronize after all bodies, so endpoint collider/body rebuilds
 reconnect the owned joint in the same fixed step. Missing, empty, inactive or

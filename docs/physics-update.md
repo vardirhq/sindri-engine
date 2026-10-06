@@ -342,3 +342,27 @@ surface-specific completeness. This checklist does not mark those surfaces done.
   had its test/capture job running when this slice was checked. Saved-spawn
   remapping, typed controls/motor modes, reference authoring and final integration
   remain open. Plain flattened scene documents discard expansion metadata.
+
+
+### Saved-spawn reference checkpoint
+
+- Added opt-in `World::to_scene_with_references`: registered `FieldMeaning::Entity`
+  fields, including dotted/list paths, become their local target's assigned scene
+  ID. Empty references stay unbound; malformed/unresolved/unstable targets fail.
+  Unknown payloads stay untouched, live state is unchanged and no handles serialize.
+- All four joint kinds reopen with isolated endpoints and retain settings/unknown
+  fields, inactivity/reactivation and removal. Qualified scene IDs win over relative
+  namespace matches within their containing scene, including namespaced reopening.
+  Core tests cover generic list fields and atomic rejection.
+- Platformer saves/reopens a Decay-spawned nested windmill and observes motor
+  reversal, its fixed world-space axle and five independently owned constraints.
+- Final scoped preflight passed 1,398 native tests and warning-denied all-target/
+  all-feature checks for core, scene, editor and platformer. Four-crate Clippy,
+  11 catalogue tests and the 1,093-file size gate passed.
+- WASM all-target/all-feature checks passed core, scene and platformer; the generic
+  browser host was rebuilt. Export and native Vulkan capture passed. Chromium
+  WebGPU fetched 25 assets from the saved/reopened fixture without runtime errors;
+  native and browser captures were visually reviewed.
+- CI must verify this slice; all checks passed on prior head `41073354`. Existing
+  serializers remain verbatim; automatic editor/script save-path integration,
+  other joint controls and final acceptance remain open.

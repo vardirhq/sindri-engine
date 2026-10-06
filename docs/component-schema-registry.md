@@ -77,3 +77,13 @@ and component type rather than being silently skipped.
 
 The combined cube/sprite example registers camera, mesh, and sprite component types, validates its
 embedded scene in strict mode, and uses the typed query API during frame extraction.
+
+## Saving runtime prefab references
+
+`World::to_scene_with_references(prefabs, components)` uses fields described as
+`FieldMeaning::Entity` to remap local runtime-prefab paths to assigned stable IDs.
+Dotted paths and `[]` lists follow the registry's field-path grammar. Describe
+entity fields explicitly: unknown components and undescribed strings are preserved
+verbatim. The method leaves the live world unchanged and rejects nonempty missing
+or unstable targets and malformed reference fields; empty text stays unbound.
+Ordinary world serializers retain their verbatim contract.
