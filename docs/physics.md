@@ -902,3 +902,13 @@ choices through its existing checked-command path, including the default
 velocity mode for old payloads that omit the field. Selecting a mode preserves
 other settings; it does not enable the motor or reset its target or gains.
 This closes an authoring gap found while reviewing the platformer mechanisms.
+
+## Geometric movement foundation
+
+`PhysicsWorld2d::move_and_slide` computes read-only 2D swept displacement with
+positive skin, bounded iterations and explicit penetration/budget outcomes.
+It uses current poses and existing query filtering; ordinary shape casts retain
+their zero-normal initial-overlap contract. See [character movement](character-movement.md)
+for the result semantics, validation, ownership and remaining vertical slices.
+This is not yet a grounded/stepping controller; one-way geometry is two-sided
+in this primitive. No editor, Decay or platformer integration is claimed.

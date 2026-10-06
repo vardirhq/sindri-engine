@@ -12,6 +12,7 @@ mod motor2d;
 mod one_way2d;
 mod query2d;
 mod shared;
+mod slide2d;
 mod slider2d;
 mod spring2d;
 mod types2d;
@@ -29,6 +30,7 @@ pub use motor2d::MotorMode2d;
 pub use one_way2d::OneWay2d;
 pub use query2d::{RayHit2d, RaycastFilter2d};
 pub use shared::{CollisionLayers, RigidBodyKind};
+pub use slide2d::{SlideMotion2d, SlideOptions2d};
 pub use slider2d::{SliderJoint2d, SliderSettings2d};
 pub use spring2d::{SpringJoint2d, SpringSettings2d};
 pub use types2d::{

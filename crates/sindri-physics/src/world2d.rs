@@ -11,6 +11,7 @@ mod materials;
 mod motion;
 mod one_way;
 mod query;
+mod slide;
 mod sweep;
 
 pub use motion::BodyControl2d;

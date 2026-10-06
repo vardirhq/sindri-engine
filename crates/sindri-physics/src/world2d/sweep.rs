@@ -158,7 +158,7 @@ impl PhysicsWorld2d {
 
     /// Calls `visit` with every enabled piece the filter lets through, posed
     /// in the world.
-    fn each_piece(
+    pub(super) fn each_piece(
         &self,
         filter: RaycastFilter2d,
         include: &mut impl FnMut(EntityId) -> bool,
@@ -189,7 +189,7 @@ impl PhysicsWorld2d {
     }
 }
 
-fn query_shape(shape: ColliderShape2d) -> Result<r2::SharedShape, PhysicsError> {
+pub(super) fn query_shape(shape: ColliderShape2d) -> Result<r2::SharedShape, PhysicsError> {
     Ok(match shape {
         ColliderShape2d::Box { half_extents } => {
             positive("query_half_extent", half_extents[0])?;
@@ -211,7 +211,7 @@ fn query_shape(shape: ColliderShape2d) -> Result<r2::SharedShape, PhysicsError> 
     })
 }
 
-fn query_pose(pose: PhysicsPose2d) -> Result<r2::Pose, PhysicsError> {
+pub(super) fn query_pose(pose: PhysicsPose2d) -> Result<r2::Pose, PhysicsError> {
     finite2("query_position", pose.position)?;
     finite("query_rotation", pose.rotation)?;
     Ok(r2::Pose::new(

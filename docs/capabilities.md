@@ -2622,3 +2622,10 @@ rebuilds modes, and Stop restores the document. Play Save refuses to write,
 confirmed by an unchanged file hash. See [the repeatable editor review](physics-joint-editor-review.md).
 Engine/editor/Decay/platformer regressions and prior browser checks complete
 this 2D slice; 3D joints, gameplay world snapshots and final integration remain.
+
+A read-only 2D sweep/slide movement foundation now proposes displacement against
+current collider poses without mutating bodies. Positive skin, bounded iterations,
+initial penetration, filters and deterministic ties have native engine tests.
+Grounding, slope/step/platform and one-way movement policies, editor/Decay access
+and platformer proof remain open; see [the contract](character-movement.md).
+Added for platformer integration, not yet adopted by that showcase.

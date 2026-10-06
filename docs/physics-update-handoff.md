@@ -16,13 +16,14 @@ a pushed handoff. Do not ask them to authorize the scope again.
 
 ## Current continuation checkpoint
 
-The 2D joint checklist is complete. See the repeatable native review in
-`docs/physics-joint-editor-review.md`: all four numeric payloads survive
-Save/reopen, Play mode switching/rebuild/spawning is visible, Save is refused
-without touching disk and Stop restores document settings. CI is green on
-`eb994996`. Continue with character movement, accelerated queries, 3D/voxel
-physics and final integration. Script-triggered world snapshots remain a
-separate absent capability.
+The 2D joint checklist is complete. Character movement now has a checked
+engine-only sweep/slide foundation: see `docs/character-movement.md` for the
+contract and remaining slices. The read-only result has skin, bounded iterations,
+ordered hits and initial-penetration/budget flags; ordinary shape casts are
+unchanged. Continue with grounding/slope/step/platform and one-way movement
+policies, then scene/editor/Decay/platformer integration and native/browser proof.
+Character acceptance remains unchecked. Accelerated queries, 3D/voxel physics
+and final integration follow; gameplay world snapshots remain a separate gap.
 
 CCD, one-way platforms, **forces and rotation**, **contact snapshots**, and
 **reusable physics materials** are implemented in this PR. The checklist in `physics-update.md` is current.

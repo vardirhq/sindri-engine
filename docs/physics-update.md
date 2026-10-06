@@ -682,3 +682,22 @@ surface-specific completeness. This checklist does not mark those surfaces done.
 - Documentation preflight passed formatting and the 1,116-file size gate.
   Re-ran all three editor joint-save tests and 26 platformer regressions;
   all 29 passed. This checkpoint changes documentation only; CI must verify it.
+
+### Character movement foundation checkpoint
+
+- Added engine-owned read-only 2D sweep/slide queries with shape/pose/displacement,
+  positive skin, bounded iterations and ordered collision/outcome results.
+  Ordinary shape-cast initial-overlap behavior stays unchanged.
+- Native regressions exercise wall tangents, touching/escape/approach, initial
+  penetration, corners/budgets, rotated surfaces, filtering, immediate teleports
+  and removal, deterministic ties, validation and two-sided one-way geometry.
+- Established [the character movement contract](character-movement.md) and
+  existing crate boundary. Added for platformer adoption, not yet game-proven.
+  Ground/slope/step/platform and one-way movement policies, scene/editor/Decay
+  integration and native/browser gameplay proof remain open. Acceptance remains
+  unchecked; no new dependency, host API, script or component registration.
+- Scoped preflight passed 75 native physics tests and warning-denied all-target/
+  all-feature checks. Clippy, all-target/all-feature WASM compilation, 11
+  catalogue currentness/completeness tests and the 1,119-file size gate passed.
+  Runtime/editor/browser behavior is unchanged until this API is integrated.
+  CI must verify the pushed foundation head.

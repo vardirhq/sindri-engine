@@ -8,6 +8,8 @@ use crate::types2d::{Collider2d, ColliderShape2d, PhysicsPose2d, RigidBody2d};
 
 #[derive(Debug, Error, Eq, PartialEq)]
 pub enum PhysicsError {
+    #[error("slide iteration budget must be between 1 and 32")]
+    InvalidSlideIterations,
     #[error("entity {0:?} is already registered with physics")]
     EntityAlreadyRegistered(EntityId),
     #[error("entity {0:?} has no physics body")]
