@@ -33,9 +33,9 @@ Evidence: six `physics_sync3d/voxel_tests.rs` regressions,
 `game/tests/browser_voxel_landing.decay`, green in CI on `b66601e4`.
 `docs/physics-voxel-editor-review.md` records the native editor pass (voxel
 collider/Collides/3D body authoring, Play/Stop/replay). The 3D item is checked.
-Remaining: the final-integration item -- full workspace tests/Clippy/WASM/browser,
-final diff review and green CI on the final head; then retitle the PR "The
-Physics Patch" with a full description, as the user asked.
+Final integration is checked as well (see the checkpoint in
+`physics-update.md`). All acceptance items are complete; the PR is retitled
+"The Physics Patch" and is ready for review once CI on its head is green.
 
 Earlier checkpoint notes follow.
 

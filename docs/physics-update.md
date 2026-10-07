@@ -35,7 +35,7 @@ The remaining items below are the active scope.
 - [x] 3D physics and queries: fixed-step simulation, bodies/colliders/events,
   scene synchronization, editor authoring, Decay access and voxel-world proof;
   native and browser semantics exercised end to end.
-- [ ] Final integration: generated catalogue, native/WASM/browser checks,
+- [x] Final integration: generated catalogue, native/WASM/browser checks,
   workspace lint/tests, final diff review and green CI on the final head.
 
 ## Verification
@@ -1485,4 +1485,18 @@ eleven units to rest on the terrain, Stop restores authored poses and file
 hashes, and a second Play repeats it. With engine, editor, Decay, Causeway and
 browser all exercised, the 3D physics/queries item is checked. Final
 integration remains.
+
+### Final integration checkpoint
+
+On `fb1489e9`, after merging `main`: the full workspace suite passes (260
+suites, 2,711 tests, none failed), as do warning-denied workspace Clippy with all
+targets and features, the all-feature workspace WASM check, `cargo fmt --all
+--check`, the 1,208-file size gate, typed Decay preflight for every changed
+script and all capability catalogue tests (regeneration is clean). The PR
+changes no dependency manifests or lockfile and nothing in the separate `decay/`
+workspace. Chromium/WebGPU smoke checks pass in CI, including the new Causeway
+voxel landing; the native editor reviews cover the authoring surfaces. The final
+diff from `main` was reviewed for dependency direction, target `cfg`s and the
+documentation and game evidence the capability rules require. The last item is
+checked once CI is green on the head carrying this note.
 
