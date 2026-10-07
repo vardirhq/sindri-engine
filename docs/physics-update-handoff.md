@@ -114,12 +114,27 @@ the hero stepping and on the boardwalk; delivery fetched 25 assets without
 script/GPU errors. Logs/captures/export are under
 `/tmp/sindri-platformer-terrain-*`; helper:
 `/tmp/sindri-physics-tools/browser/platformer-terrain-smoke.mjs`.
-Continue with checked editor component authoring/undo/Play and authored game
-moving-platform carry proof. Browser terrain input passed; a browser run to the
-goal remains open. Character acceptance stays unchecked. Accelerated queries,
-3D/voxel physics and final integration follow. Gameplay snapshots remain absent.
-The prior adoption head `6bd4f0ef` passed all CI checks. Inspect every failed job
-on the next head before changing code if CI fails.
+The moving-platform checkpoint adds an authored one-way plank ferry across the
+first gap, driven by ordinary Decay kinematic velocity. Hero adds no platform
+motion. Four real-script gameplay tests ride across and back with fixed relative
+pose and once-only solved carry/total translation, board with a running jump
+from the normal spawn, leave/reacquire carry on jump/landing, and drop through
+into the pit/normal respawn. All 37 platformer tests pass; Ferry typed preflight
+has zero errors/reminders. Native warning-denied check/Clippy, all-target/all-feature
+WASM, formatting/size and native capture passed.
+Chromium exports the same assets with only the hero's initial pose moved aboard.
+It fetched 26 assets and drew both riding directions and a keyboard jump without
+script/GPU errors. These captures prove carry/input, not a browser run to the
+goal. Logs/captures are `/tmp/sindri-platformer-ferry-*`; scratch project/export:
+`/tmp/sindri-platformer-ferry-project` and `-export`; helper:
+`/tmp/sindri-physics-tools/browser/platformer-ferry-smoke.mjs`. Browser host
+binaries remain from `ce493275` because these slices change game assets only.
+Continue with checked editor component authoring/undo/Play and browser goal
+proof. Translation carry now has authored game proof; rotation and clipped carry
+retain engine/scene regressions. Character acceptance stays unchecked. Accelerated
+queries, 3D/voxel physics and final integration follow; gameplay snapshots remain
+absent. Terrain head `ebfc75d5` has no failed jobs; test/render CI was still running
+at the last inspection. Inspect every failed job on the current head if CI fails.
 
 CCD, one-way platforms, **forces and rotation**, **contact snapshots**, and
 **reusable physics materials** are implemented in this PR. The checklist in `physics-update.md` is current.

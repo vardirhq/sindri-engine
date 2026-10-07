@@ -1,0 +1,22 @@
+// A walkable plank ferry crosses the first gap and returns for the next rider.
+// Its solved kinematic pose supplies carry; the hero adds no platform velocity.
+script Ferry {
+    @export let speed: f32 = 0.8;
+    @export let left: f32 = 12.95;
+    @export let right: f32 = 15.05;
+    var direction: f32 = 1.0;
+
+    fn start() {
+        Physics.set_velocity(this.entity, this.speed, 0.0);
+    }
+
+    fn update(dt: f32) {
+        let x = this.transform.world_position.x;
+        if x >= this.right && this.direction > 0.0 {
+            this.direction = -1.0;
+        } else if x <= this.left && this.direction < 0.0 {
+            this.direction = 1.0;
+        }
+        Physics.set_velocity(this.entity, this.direction * this.speed, 0.0);
+    }
+}

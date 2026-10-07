@@ -956,3 +956,32 @@ surface-specific completeness. This checklist does not mark those surfaces done.
   proof remain open, so character acceptance stays unchecked. No generated
   catalogue, host or dependency changes. The prior adoption head `6bd4f0ef`
   passed all CI; CI must verify this checkpoint's head.
+
+
+### Platformer moving-platform gameplay checkpoint
+
+- Add a two-unit one-way plank ferry crossing the first gap, using ordinary
+  kinematic velocity, generated tilemap collision and the shared wood material.
+  Its Ferry script reverses between authored bounds. Hero adds no platform
+  velocity or displacement: scene support snapshots supply solved translation.
+- Four native gameplay regressions run the real Hero/Ferry scripts: a stationary
+  rider follows each solved displacement once across and back, a running jump
+  boards from the normal starting field, jumping clears carry until landing,
+  and drop-through leaves carry and falls into the ordinary respawn path.
+  Assertions cover relative pose, total/carry displacement, both directions,
+  grounded support and airborne null carry. All 37 platformer tests pass,
+  including the original no-fall flag/coin, slope/step, one-way and joint tests.
+- Ferry typed preflight reports zero errors/runtime-contract reminders. Native
+  warning-denied checks/Clippy, all-target/all-feature WASM, formatting and
+  file-size gates pass. Native capture renders the authored ferry. Chromium
+  exports the same assets with only the hero's initial pose moved aboard:
+  26 assets load, WebGPU draws the game, snapshots show both riding directions
+  and a keyboard jump, with no browser/script/GPU errors. This is carry/input
+  evidence; the browser run to the goal remains open.
+- This is general character carry proven by the platformer genre showcase.
+  Rotation and collision-clipped carry retain engine/scene regression evidence;
+  continuous arcs and rotating probes remain explicit gaps. Checked editor
+  authoring/undo/Play and browser goal proof remain open, so character acceptance
+  stays unchecked. No new host APIs, dependencies or generated catalogue changes.
+  Prior terrain CI has no failures; its test/render job is still running at
+  the last inspection. CI must verify the next head.

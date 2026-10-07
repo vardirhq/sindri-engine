@@ -1,5 +1,7 @@
 # Changelog
 
+- Add a one-way plank ferry across the platformer’s first gap, driven by Decay kinematic velocity. Scene controller support carries riders in both directions without extra gameplay displacement; jumping leaves carry, landing resumes it, and dropping through reaches the pit and normal respawn.
+
 - Add low stone steps and an inclined boardwalk to the platformer. The hero walks over the risers and follows the slope downhill without jumping; intended horizontal speed now survives a blocked controller sweep so subsequent requests can step forward. Native control tests prove disabling steps or lowering the slope limit blocks the same terrain.
 
 - Move the platformer hero to the scene-owned Character 2D controller. Decay retains movement, gravity and jump policy; separate sensors preserve coin/flag pickups and timed drop-through still reaches ordinary floors. The dynamic crate retains CCD and contact-impulse proof. Editor interaction and game slope/step/platform-carry acceptance remain open.

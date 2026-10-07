@@ -5,8 +5,9 @@ limits, optional steps, synchronized platform carry, one-way controller policy
 and scene runtime ownership implemented; acceptance remains open in
 `physics-update.md`. Added for the platformer genre showcase, whose Hero script
 now uses the controller. Authored low steps and an inclined boardwalk exercise
-step selection, walkable ascent and downhill snap; editor and moving-platform
-acceptance remain open.
+step selection, walkable ascent and downhill snap. A one-way plank ferry across
+the first gap exercises solved translation carry, reversal, boarding, jump/landing
+and drop-through. Checked editor and browser goal acceptance remain open.
 
 ## Ownership
 
@@ -166,7 +167,7 @@ acceleration is applied. Up is world-space and independent of probe rotation.
 This general policy is exercised by the platformer's inclined boardwalk through
 its real Hero script. Native tests climb and snap down it without jumping, then
 lower the slope limit and disable steps to show the same incline blocks walking.
-Full editor and moving-platform game acceptance remain open.
+Checked editor and browser goal acceptance remain open.
 
 ## Implemented steps and clearance
 
@@ -253,8 +254,16 @@ it does not sweep the circular arc or rotate the probe. Large rotations can miss
 obstacles on that arc or leave a non-circular probe intersecting the support.
 Use smaller synchronized steps and inspect the returned penetration/support
 state. Continuous arc carry and rotating-probe sweeps remain absent and have
-explicit parity gaps. This is engine evidence for platformer adoption, not yet
-scene/editor/Decay or game proof.
+explicit parity gaps. The platformer's authored kinematic ferry now proves
+translation carry through its real Ferry and Hero scripts: a stationary rider
+follows each solved displacement once across the first gap and back, a running
+jump boards it from the starting field, jump/landing clears and resumes support,
+and drop-through leaves carry and falls into the normal respawn path. Native
+regressions assert relative position, carry/total displacement, both directions
+and airborne null support. Chromium runs the same game assets with the hero
+initially aboard, showing stationary riding, reversal and a keyboard jump.
+Rotation/collision-clipped carry still has engine/scene regressions rather than
+an authored game encounter. Checked editor proof remains open.
 
 ## Implemented one-way controller policy
 
@@ -408,8 +417,8 @@ and respawn. The dynamic crate retains CCD and contact-impulse proof.
 
 ## Remaining slices
 
-Checked editor authoring/undo/Play and real-game moving-platform carry proof
-remain open. Authored game slopes and steps now have native and browser input
+Checked editor authoring/undo/Play and browser goal proof remain open. Authored
+game slopes, steps and ferry translation carry have native and browser input
 coverage. Typed requests/results, shared host context and native
 platformer adoption are implemented; coyote time, jump buffering and player input
 remain gameplay policy in Decay. Browser delivery checks exercise the exported

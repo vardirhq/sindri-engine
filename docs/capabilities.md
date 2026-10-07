@@ -2660,8 +2660,8 @@ Request-scoped drop-through ignores only one-way solids, preserving ordinary
 floors and sensor filtering; hosts own duration and cancellation. Native tests
 exercise ascent/descent, rotated normals, deep/shallow overlap, snap, step landing
 and carry/drop interactions. Scene/typed Decay integration and platformer
-one-way/terrain gameplay now exercise these policies. Checked editor and game
-moving-platform carry proof remain open. Rotation follows a chord with fixed
+one-way/terrain gameplay now exercise these policies. Checked editor proof remains open; the authored ferry now exercises game
+translation carry. Rotation follows a chord with fixed
 probe orientation; continuous arc and rotating-probe sweeps remain absent.
 
 
@@ -2693,9 +2693,20 @@ The platformer now adopts the controller through its real Hero script: native
 regressions reach the flag with coins and no falls, traverse/drop through planks,
 and exercise variable jump height, acceleration/braking and respawn. The dynamic
 crate retains CCD and contact-impulse proof. Checked editor authoring/undo/Play
-and game platform-carry proof remain open; character acceptance stays partial.
+and browser goal proof remain open; character acceptance stays partial.
 Two authored stone risers and an inclined boardwalk now exercise accepted steps,
 walkable ascent and downhill snap through the Hero script without jumping.
 Control tests disable stepping or lower the slope limit to show the same terrain
 blocks walking. Browser keyboard captures show the hero traversing that terrain;
 delivery/input evidence is recorded in the physics checkpoint.
+
+The platformer's one-way plank ferry crosses the first gap using ordinary
+kinematic velocity set by Decay. Hero adds no platform motion: scene support
+snapshots supply each actual solved displacement once. Native game regressions
+ride across and back with fixed relative position, board through a running jump
+from the starting field, leave/reacquire carry on jump/landing, and drop through
+into the pit/normal respawn path. Chromium exports the same assets with the hero
+initially aboard and renders riding in both directions and a keyboard jump.
+This is moving-platform translation proof for the genre showcase; rotation and
+carry clipping retain engine/scene test evidence. Editor and browser goal proof
+remain open.
