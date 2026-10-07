@@ -125,7 +125,7 @@ jobs:
       # so it diffs against its merge base with main instead.
       - uses: actions/checkout@v7
         with:
-          fetch-depth: ${{ github.event_name == 'workflow_dispatch' && 0 || 2 }}
+          fetch-depth: ${{ github.event_name != 'workflow_dispatch' && 2 || 0 }}
       - uses: dtolnay/rust-toolchain@1.95.0
       - uses: Swatinem/rust-cache@v2
         with:
