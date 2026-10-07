@@ -271,8 +271,14 @@ exhaustive candidates; sparse XYZ rays, overlaps and casts select one piece in
 100/1,000/10,000-piece worlds. Overflowing bounds retain conservative candidates;
 backend shape casts at near-maximum finite coordinates/extents can still return
 non-finite results, so numerical failure reporting remains a gap.
-This is the prerequisite for Causeway voxel collision proof, with scene
-synchronization, Decay, editor, resident/edited voxel collision and browser
+`ScenePhysics3d` now reconciles registered body/collider/world components with
+active scene entities, composed XYZ/quaternion transforms, gravity settings and
+parent-space write-back. Twelve regressions cover lifecycle/edits, batch rejection,
+solid/sensor events, targets, newer rotated/scaled parents and checked command
+undo/redo/save/reopen. Visual scale is preserved but does not resize 3D colliders;
+structural payload edits reset the rebuilt body's motion. This is the prerequisite
+for Causeway voxel collision proof, with game/editor host integration, native
+inspector/Play exercise, Decay, resident/edited voxel collision and browser
 execution still unimplemented.
 
 Forces and rotation have runtime and typed Decay controls: additive world force
@@ -1918,8 +1924,9 @@ settings gear.
   authored alignment and wrapping, including Weave-controlled wrapping
 - **One mesh primitive: `Cube`.** No quad, sphere, or glTF import
 - The shipped physics runtime is 2D. The standalone 3D engine world has native
-  simulation tests, but no scene integration, authoring/Decay workflow, browser
-  execution or voxel/gameplay proof
+  simulation and scene synchronization/command tests, but no game/editor host
+  integration, native inspector/Play exercise, Decay workflow, browser execution
+  or voxel/gameplay proof
 - Effects are bounded, renderer-free runtime values driven from Decay; there is
   no general authored particle/emitter system or authored parallax system
 - Grid walls, footprints, occupancy, and deterministic A* work through the

@@ -1056,6 +1056,176 @@
       "addable": true,
       "apply": {},
       "default_payload": {
+        "pieces": [
+          {
+            "friction": 0.5,
+            "layers": {
+              "filter": 4294967295,
+              "memberships": 4294967295
+            },
+            "offset": [
+              0.0,
+              0.0,
+              0.0
+            ],
+            "restitution": 0.0,
+            "rotation": [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ],
+            "sensor": false,
+            "shape": {
+              "half_extents": [
+                0.5,
+                0.5,
+                0.5
+              ],
+              "shape": "box"
+            }
+          }
+        ]
+      },
+      "display_name": "Collider 3D",
+      "fields": {
+        "pieces": [
+          {
+            "friction": 0.5,
+            "layers": {
+              "filter": 4294967295,
+              "memberships": 4294967295
+            },
+            "offset": [
+              0.0,
+              0.0,
+              0.0
+            ],
+            "restitution": 0.0,
+            "rotation": [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ],
+            "sensor": false,
+            "shape": {
+              "half_extents": [
+                0.5,
+                0.5,
+                0.5
+              ],
+              "shape": "box"
+            }
+          }
+        ]
+      },
+      "meanings": {},
+      "schema_version": 1,
+      "type_name": "sindri.physics3d.collider"
+    },
+    {
+      "addable": true,
+      "apply": {},
+      "default_payload": {
+        "angular_damping": 0.0,
+        "angular_velocity": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "gravity_scale": 1.0,
+        "kind": "dynamic",
+        "linear_damping": 0.0,
+        "linear_velocity": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "lock_rotation": false,
+        "position": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "rotation": [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      },
+      "display_name": "Rigid Body 3D",
+      "fields": {
+        "angular_damping": 0.0,
+        "angular_velocity": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "gravity_scale": 1.0,
+        "kind": "dynamic",
+        "linear_damping": 0.0,
+        "linear_velocity": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "lock_rotation": false,
+        "position": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "rotation": [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      },
+      "meanings": {
+        "kind": {
+          "kind": "choice",
+          "options": [
+            "static",
+            "dynamic",
+            "kinematic_position",
+            "kinematic_velocity"
+          ]
+        }
+      },
+      "schema_version": 1,
+      "type_name": "sindri.physics3d.rigid_body"
+    },
+    {
+      "addable": true,
+      "apply": {},
+      "default_payload": {
+        "gravity": [
+          0.0,
+          -9.81,
+          0.0
+        ],
+        "layers": []
+      },
+      "display_name": "Physics 3D World",
+      "fields": {
+        "gravity": [
+          0.0,
+          -9.81,
+          0.0
+        ],
+        "layers": []
+      },
+      "meanings": {},
+      "schema_version": 1,
+      "type_name": "sindri.physics3d.world"
+    },
+    {
+      "addable": true,
+      "apply": {},
+      "default_payload": {
         "playing": null,
         "sequences": {
           "intro": {

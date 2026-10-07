@@ -3,7 +3,7 @@
 //! Rapier is deliberately private implementation detail. Scenes, the editor,
 //! Decay, and games speak only in the types defined here. The first runtime
 //! slice is 2D; a standalone 3D world now establishes the engine foundation
-//! ahead of scene, editor, Decay and voxel-world integration.
+//! with scene ownership; game/editor hosts, Decay and voxel proof remain separate.
 
 mod contact2d;
 mod ground2d;

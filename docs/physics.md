@@ -269,8 +269,9 @@ names the index** — a compound is a list, so "restitution must be between 0 an
 because a half-built body is worse than none.
 
 The standalone 3D engine world accepts a slice of collider pieces, validates all
-of them before insertion and sums their mass. The 3D scene/editor surface remains
-unimplemented. This general piece boundary is a prerequisite for voxel collision
+of them before insertion and sums their mass. The 3D scene driver now consumes
+authored compounds; game/editor host integration remains open. This general
+piece boundary is a prerequisite for voxel collision
 geometry; it does not claim authored compounds or voxel/game proof.
 
 An entity may not participate in both the 2D and 3D physics worlds at once.
@@ -732,7 +733,8 @@ workspace integration remain separate work.
 
 `PhysicsWorld2d` and `PhysicsWorld3d` are separate runtime state beside `World`,
 not serialized state inside it. Each owns its private backend and maps `EntityId`
-to private handles. Current scene/game/editor hosts synchronize only the 2D world.
+to private handles. `ScenePhysics3d` now supplies a separate scene driver; current
+game/editor hosts still synchronize only the 2D world.
 Despawning an entity removes its body/collider before the next
 step; generation-checked IDs prevent a reused slot from inheriting old physics
 state.
@@ -861,8 +863,9 @@ piece's world-space witness and outward normal. Sweeps keep probe rotation fixed
 box/sphere dimensions must be positive, and query capsules allow zero half-height
 with positive radius. Pose validation uses the body's quaternion tolerance.
 
-Native tests exercise these engine APIs. Scene/Decay/editor access and game/voxel/
-browser proof are still absent; a unit-tested query is not a completed surface.
+Native tests exercise these engine APIs and the scene driver exposes its world.
+Host/Decay/editor query integration and game/voxel/browser proof are still absent;
+a unit-tested query is not a completed surface.
 
 ## Editor
 
@@ -925,13 +928,12 @@ XYZ; body and local collider rotations are unit quaternions in `[x, y, z, w]`
 order. Quaternions must be finite with squared norm within 0.0001 of one; zero or
 non-unit rotations outside that tolerance fail explicitly; accepted near-unit
 values normalize at the backend boundary. Shapes are boxes, spheres and Y-axis
-capsules with finite positive dimensions. Friction
-is non-negative, restitution is in [0, 1], and damping is non-negative.
+capsules with finite positive dimensions. Friction is non-negative, restitution is in [0, 1], and damping is non-negative.
 
 Bodies support static, dynamic, position-kinematic and velocity-kinematic kinds.
 Insertion validates the whole body and every piece before mutating the backend;
 errors identify the failing piece. Compounds use local offsets/rotations and sum
-mass. Gravity and scale, damping and all-axis rotation locking are engine policy.
+mass. Gravity scale, damping and all-axis rotation locking are engine policy.
 Locked rotation clears authored initial angular velocity and angular setters.
 Velocity/angular-velocity setters accept dynamic or velocity-kinematic bodies;
 impulses require dynamic bodies. All controls reject invalid values before
@@ -951,11 +953,42 @@ kinematic target timing, compound mass/impulse, teleport velocity, rotation lock
 atomic rejection and removal/reuse. WASM compilation is a separate gate; no 3D
 browser simulation is claimed until the shared host and game exercise it.
 
+The scene now registers `sindri.physics3d.rigid_body`, `sindri.physics3d.collider`
+and `sindri.physics3d.world`. Body payloads use the engine's XYZ fields (including
+`position` and `rotation`), but an entity's composed `Transform3D` is authoritative
+when present. Without a transform, the body pose is the fallback. Colliders accept
+one piece or `{ "pieces": [...] }`; a collider without a body creates a static
+body, while a body without a collider takes no part. Shape dimensions and local
+offsets are world units, independent of visual transform scale. Automatic 3D
+collider scaling is absent. World settings accept `gravity: [x, y, z]` and optional
+layer labels; removing/disabling the settings restores the host's gravity.
+Multiple active 3D world settings fail explicitly.
+
+`ScenePhysics3d` validates the complete active authored batch before changing
+runtime gravity, lifecycle or bodies. Both scene drivers reject an active entity
+claiming 2D and 3D body/collider/controller/tilemap ownership. Moving 3D bodies
+reject a Z-locked local transform rather than allowing simulation and rendering
+to disagree. The driver removes inactive/despawned entities and removed colliders,
+including inherited inactivity, and re-registers them on reactivation. Unchanged
+components preserve live velocity; transform/ancestor moves teleport or set a
+position-kinematic target. Any body/collider payload change rebuilds that body and
+resets its motion to authored values. Live coefficient/control patching is not a
+3D scene capability yet.
+
+After solving, all non-static body kinds write XYZ/quaternion poses back through
+parent space, preserving scale and component payloads. Parent bodies are written
+before children regardless of allocation order; world transforms are snapshotted
+before writes. Equivalent quaternion signs do not count as external movement.
+Position-kinematic targets set through the runtime world write back after solving.
+Events describe the last successful step; invalid input retains prior runtime
+state/events. Registered defaults and body-kind choices are available to generic
+checked authoring. Tests exercise commands/undo/redo and stable-ID save/reopen,
+not native inspector or Play interaction.
+
 This is the engine prerequisite for the physics-update voxel-world proof in
-Causeway. 3D acceptance remains unchecked: scene transform and
-lifecycle synchronization, gravity authoring, editor checked commands/Play,
-typed Decay Vec3 controls/events and actual resident/edited voxel collision remain
-separate slices. Voxel collision must derive from the occupied world, account for
+Causeway. 3D acceptance remains unchecked: game/editor host integration, native
+inspector/Play exercise, typed Decay Vec3 controls/events and actual resident/edited
+voxel collision remain separate slices. Voxel collision must derive from the occupied world, account for
 residency/dirty revisions and removal, and have a bounded update policy. An
 invisible plane or this standalone API is not voxel/game proof. CCD controls,
 contacts, force/torque, materials, joints and character controllers also have no

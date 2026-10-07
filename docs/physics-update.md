@@ -1165,3 +1165,35 @@ surface-specific completeness. This checklist does not mark those surfaces done.
   require refresh. Scene/editor/Decay/voxel and native/browser game proof remain
   open; 3D acceptance and final integration stay unchecked. CI must verify this
   checkpoint; continue with 3D scene synchronization and authoring.
+
+
+## 3D scene ownership checkpoint
+
+- Registered 3D rigid-body, single/compound collider and gravity-world components
+  now feed `ScenePhysics3d`. Composed transforms supply world XYZ/quaternion poses;
+  absent transforms use the body pose. Collider-only entities are static. Complete
+  active batches validate before gravity/lifecycle/body mutation, and both drivers
+  reject mixed 2D/3D ownership. Multiple active 3D world settings and moving
+  Z-locked 3D bodies fail explicitly.
+- Unchanged frames and transform/ancestor teleports retain velocity. Structural
+  body/collider payload edits rebuild from authored motion. Removed/inactive/
+  despawned bodies, including inherited inactivity, release ownership. All non-
+  static kinds write back through parent space after solving, preserving scale
+  and component payloads. Parents precede children even with newer parent IDs;
+  equivalent quaternion signs do not cause external-motion detection.
+- Twelve new native regressions exercise XYZ/rotation, scale retention, solids/
+  compound sensors/events, gravity override/restoration, invalid-batch atomicity,
+  lifecycle/edits/targets, rotated/scaled/newer parents and checked default
+  add/edit/undo/redo/save/reopen with unknown fields preserved. Scoped preflight,
+  warning-denied Clippy and all-target/all-feature WASM compile pass. Component
+  catalogue regeneration and all eleven catalogue tests pass. All 177 physics,
+  487 scene, 381 Decay/platformer and 11 catalogue tests pass (1,056 total).
+  Warning-denied native game/editor all-target/all-feature checks also pass.
+- Collider dimensions/offsets remain world units; visual transform scale does
+  not resize collision geometry, now tracked as an absent capability in parity.
+  This is another prerequisite for Causeway's resident/edited voxel collision
+  proof. Game/editor hosts still run the 2D driver; native inspector/Play,
+  typed Decay Vec3/events and native/browser voxel/game proof remain open.
+  3D acceptance and final integration remain unchecked. Prior head `3fd9869a`
+  is green in CI; this checkpoint needs verification. Continue with shared
+  game/editor 3D stepping and authoring, then typed scripting and voxel proof.

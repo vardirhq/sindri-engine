@@ -16,6 +16,22 @@ a pushed handoff. Do not ask them to authorize the scope again.
 
 ## Current continuation checkpoint
 
+`ScenePhysics3d` now owns registered 3D body/collider/world components beside the
+scene. Active batches validate before runtime mutation; mixed 2D/3D ownership,
+multiple 3D world settings and moving Z-locked 3D bodies fail explicitly. Lifecycle,
+transform/ancestor moves, gravity and parent-space XYZ/quaternion write-back are
+exercised. Unchanged frames/teleports preserve velocity; structural payload edits
+rebuild from authored motion. All non-static kinds write back, with parents before
+children even when the parent has a newer ID. Scale/component payloads are retained.
+Twelve new tests cover these contracts and checked add/edit/undo/redo/save/reopen.
+All 1,056 native physics/scene/Decay/platformer/catalogue tests pass. Preflight,
+warning-denied Clippy, game/editor checks, WASM and regenerated catalogue checks
+pass. Automatic 3D collider scaling is absent: dimensions/offsets remain world units.
+Prior head `3fd9869a` is green in CI; this checkpoint needs its own verification.
+Continue with game/editor 3D host stepping and native authoring/Play, then typed
+Decay Vec3/events and Causeway resident/edited voxel proof on native/browser.
+Hosts still run 2D only; 3D acceptance and final integration remain unchecked.
+
 The 3D query-only BVH now selects rays, overlaps and shape casts at current
 poses. Insert/remove/teleport update immediately; non-static pieces refresh after
 solving, and position targets remain pending. Four regressions compare exhaustive
@@ -25,9 +41,9 @@ visit 26–34 nodes. All 177 physics tests, scoped preflight, warning-denied Cli
 and all-target/all-feature WASM pass. No dependency/API/host/component/2D change.
 The overflow regression exposed backend NaN cast results at near-maximum finite
 coordinates/extents; numerical failure reporting is tracked as absent in parity.
-CI must verify this checkpoint. Continue with 3D scene synchronization and checked
-authoring, then typed Decay access and Causeway resident/edited voxel collision
-proof on native/browser. 3D acceptance and final integration remain unchecked.
+Scene synchronization is now covered by the latest checkpoint. Continue with
+game/editor host integration, typed Decay access and Causeway resident/edited
+voxel collision proof on native/browser. 3D acceptance and final integration remain unchecked.
 
 Standalone 3D rays, overlaps and fixed-orientation shape casts now use current
 body/local quaternion poses. Eight regressions cover XYZ/all shapes, rotations,
@@ -771,8 +787,8 @@ edits and current synchronized poses. Supply meaningful scaling evidence.
 ### 3D runtime and voxel proof
 
 The standalone 3D body world now runs fixed-step simulation, entity events and
-indexed rays/overlaps/shape casts. Implement scene lifecycle/writeback, editor
-authoring and typed Vec3 Decay access. Inspect both editor and exported
+indexed rays/overlaps/shape casts. The scene driver is implemented; integrate
+game/editor hosts, exercise native authoring and add typed Vec3 Decay access. Inspect both editor and exported
 game host plumbing so they share semantics. Transform3D uses quaternion [x,y,z,w].
 
 Voxel-world proof must collide with actual voxel terrain. Do not use an

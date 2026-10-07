@@ -37,6 +37,12 @@ const MOVED: f32 = 1.0e-4;
 
 #[derive(Debug, Error)]
 pub enum PhysicsSyncError {
+    #[error("entity {0:?} has both 2D and 3D physics components")]
+    ConflictingDimensions(EntityId),
+    #[error("a scene has more than one active 3D physics world component")]
+    MultipleWorlds3d,
+    #[error("moving 3D physics entity {0:?} has a Z-locked transform")]
+    LockedDepth3d(EntityId),
     #[error("character entity {0:?}: {1}")]
     InvalidCharacter(EntityId, &'static str),
     #[error("joint entity {0:?} has more than one joint component")]
@@ -192,6 +198,7 @@ impl ScenePhysics2d {
         if delta.is_zero() || !delta.as_secs_f32().is_finite() {
             return Err(PhysicsSyncError::BadStep(delta));
         }
+        crate::physics3d::validate_dimensions(world)?;
         let gravity = components
             .query::<PhysicsWorld2dComponent>(world)?
             .first()

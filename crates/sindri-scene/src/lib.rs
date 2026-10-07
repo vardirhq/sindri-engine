@@ -20,9 +20,11 @@ mod input_actions;
 mod navigation;
 mod occlusion;
 mod physics;
+mod physics3d;
 mod physics_joints;
 mod physics_material;
 mod physics_sync;
+mod physics_sync3d;
 mod placement;
 pub(crate) mod screen_ui;
 mod sequence;
@@ -82,6 +84,8 @@ pub use physics_material::{
     physics_material_profile, referenced_physics_materials,
 };
 pub use physics_sync::{PhysicsSyncError, ScenePhysics2d};
+pub use physics_sync3d::ScenePhysics3d;
+pub use physics3d::{Collider3dComponent, PhysicsWorld3dComponent, RigidBody3dComponent};
 pub use placement::{
     GridPlacementError, GridSurfaces, blocking_step_ahead, nearest_cell, resolve_grid_placements,
     standing_depth,

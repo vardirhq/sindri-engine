@@ -274,17 +274,22 @@ requests, commit history, and subsystem documentation rather than this file.
 
 ### Added
 
+- Registered 3D body, compound collider and gravity-world scene components plus
+  `ScenePhysics3d` lifecycle/transform synchronization and parent-space write-back.
+  Invalid batches, mixed 2D/3D ownership and moving Z-locked 3D bodies fail before
+  runtime mutation. Game/editor host, Decay and voxel proof remain open.
+
 - A query-only per-piece spatial index for 3D rays, overlaps and shape casts,
   refreshed on insertion/removal/teleport and completed simulation steps while
   preserving filtering and deterministic hit ordering.
 
 - Standalone 3D rays, overlaps and shape casts with quaternion probes, masks,
   sensor opt-in, whole-entity predicates and deterministic results at current
-  body poses. Scene/editor/Decay/game proof remains open.
+  body poses. Game/editor/Decay proof remains open.
 
 - A standalone 3D physics engine world with fixed-step bodies, validated unit
   quaternions, box/sphere/capsule pieces, masks, collision/sensor events and
-  basic velocity/impulse/kinematic/teleport controls. Scene, editor, Decay and
+  basic velocity/impulse/kinematic/teleport controls. Game/editor host, Decay and
   voxel collision integration remain pending.
 
 - Radio groups (toggles sharing a `group`) and dropdowns (`sindri.ui.dropdown`

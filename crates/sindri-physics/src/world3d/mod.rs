@@ -67,11 +67,7 @@ impl PhysicsWorld3d {
         if self.bodies.contains_key(&entity) {
             return Err(PhysicsError::EntityAlreadyRegistered(entity));
         }
-        if colliders.is_empty() {
-            return Err(PhysicsError::NoColliderPieces(entity));
-        }
-        validate_body(body)?;
-        validate_colliders(colliders)?;
+        Self::validate_body(entity, body, colliders)?;
         let handle = self.backend.insert_body(build::body(body));
         let handles: Vec<_> = colliders
             .iter()
@@ -95,6 +91,20 @@ impl PhysicsWorld3d {
         );
         self.index_body(entity);
         Ok(())
+    }
+
+    /// Checks a complete insertion request without touching runtime state.
+    /// Scene drivers use this before reconciling a batch of authored edits.
+    pub fn validate_body(
+        entity: EntityId,
+        body: RigidBody3d,
+        colliders: &[Collider3d],
+    ) -> Result<(), PhysicsError> {
+        if colliders.is_empty() {
+            return Err(PhysicsError::NoColliderPieces(entity));
+        }
+        validate_body(body)?;
+        validate_colliders(colliders)
     }
 
     pub fn insert_static_collider(
