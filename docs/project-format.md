@@ -29,7 +29,7 @@ Four fields, and each is read by something today.
   worse than one that says it needs a newer editor.
 - `name` is what the project is called. Stored rather than taken from the
   directory name, because the two are not the same thing: the companion game is
-  called Gather and lives in a folder called `game`. It is what the welcome
+  called Causeway and lives in a folder called `game`. It is what the welcome
   window lists and what the project browser's header shows.
 - `main_scene` is the scene opening the project opens, relative to the root and
   written with forward slashes so a checkout on another platform still finds it.
@@ -226,12 +226,24 @@ drive would hang the window rather than appear in it. The name is re-read
 whenever a project is opened, so renaming a project in its manifest shows up
 next time it is opened.
 
+Each row also says when the project was last opened ("2 days ago"), recorded
+when it is opened rather than read from the disk, and a search box filters the
+list by name or folder. A list saved before times were recorded still reads;
+its rows show no time until each project is opened again.
+
 Beside the list are the two ways to get a project that is not on it — New and
-Open — and the projects this repository ships, listed only when they are
-actually there. `SHIPPED` is relative to the working directory, which is the
-repository root under `cargo run` and is somewhere else entirely for an
-installed editor: a sample row that fails on the click is worse than no sample
-row.
+Open — a Learn panel linking to the guides in `docs/`, and the projects this
+repository ships as Examples, listed only when they are actually there.
+`SHIPPED` is relative to the working directory, which is the repository root
+under `cargo run` and is somewhere else entirely for an installed editor: a
+sample row that fails on the click is worse than no sample row. The Learn panel
+opens the local copy of a page when the repository is beside the editor and
+the GitHub copy otherwise.
+
+The banner and the tiles beside each project are drawn, not loaded: the editor
+has no image loading yet, so a project's tile is its initial on a colour derived
+from its name. Screenshot thumbnails need a cached capture per project and are
+not done yet.
 
 What it deliberately is not is Unity Hub. There are no editor versions to
 install, no account, and no news, because Sindri has none of those things to
