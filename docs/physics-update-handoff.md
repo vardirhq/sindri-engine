@@ -30,10 +30,12 @@ Floor (3 s fallback). Native embeds prefabs via `assets::PREFABS`.
 Evidence: six `physics_sync3d/voxel_tests.rs` regressions,
 `game/tests/the_game_is_played/tumbling.rs`, and a CI browser mode
 (`scripts/browser/prepare-causeway-voxels.py` + `SINDRI_VOXEL_LANDING=1`) using
-`game/tests/browser_voxel_landing.decay`. Remaining for the 3D item: native
-editor review of 3D authoring (inspector on Rigid Body/Collider/Voxel Collider
-3D, block-set Collides), Play/Stop and replay with visual evidence. Then the
-final-integration item: full workspace tests/Clippy/WASM/browser and green CI.
+`game/tests/browser_voxel_landing.decay`, green in CI on `b66601e4`.
+`docs/physics-voxel-editor-review.md` records the native editor pass (voxel
+collider/Collides/3D body authoring, Play/Stop/replay). The 3D item is checked.
+Remaining: the final-integration item -- full workspace tests/Clippy/WASM/browser,
+final diff review and green CI on the final head; then retitle the PR "The
+Physics Patch" with a full description, as the user asked.
 
 Earlier checkpoint notes follow.
 

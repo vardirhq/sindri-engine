@@ -878,8 +878,10 @@ taken back tumbles out of its cell, lands on the generated terrain and only then
 returns to the stock, detected through `Physics3d.collision_started`. Six scene
 regressions and the Causeway play test exercise landing, owner events/queries,
 edited shafts under a sleeping body, distant residency, non-colliding and slab
-blocks, release and atomic rejection. Editor-run and dedicated browser proof are
-still missing; see [`physics.md`](physics.md#authored-voxel-colliders).
+blocks, release and atomic rejection. A CI Chromium fixture lands the same
+prefab in exported Causeway, and [the native editor review](physics-voxel-editor-review.md)
+authors the voxel collider, block-set Collides and 3D bodies and lands them in
+Play. See [`physics.md`](physics.md#authored-voxel-colliders).
 
 `SceneVoxelCollision3d` now reconciles explicit complete resident voxel snapshots
 into static owner groups. Occupancy/policy revisions retain compiled geometry;

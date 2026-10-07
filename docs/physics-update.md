@@ -32,7 +32,7 @@ The remaining items below are the active scope.
   steps, ground state and moving platforms; gameplay policy remains Decay.
 - [x] 2D accelerated queries: synchronized spatial index, unchanged filtering and
   deterministic tie rules, immediate body moves/removals and scaling evidence.
-- [ ] 3D physics and queries: fixed-step simulation, bodies/colliders/events,
+- [x] 3D physics and queries: fixed-step simulation, bodies/colliders/events,
   scene synchronization, editor authoring, Decay access and voxel-world proof;
   native and browser semantics exercised end to end.
 - [ ] Final integration: generated catalogue, native/WASM/browser checks,
@@ -1473,6 +1473,16 @@ on component removal, and atomic rejection of missing worlds, conflicting owners
 unbound block sets and over-budget reaches. A browser fixture
 (`prepare-causeway-voxels.py`, `SINDRI_VOXEL_LANDING=1`) drops the same prefab
 over the wanderer in exported Causeway and requires a ray hit on the Floor and a
-landing. Editor-run proof of 3D authoring/Play remains; both acceptance items
-stay unchecked.
+landing; CI ran it green on `b66601e4`.
+
+### Native 3D and voxel editor checkpoint
+
+[The native review](physics-voxel-editor-review.md) edits Voxel Collider 3D
+(friction, undo/redo, removal, Add Component defaults) and the block-set
+Collides flag, authors Rigid Body 3D and Collider 3D on a new entity, and runs
+editor Play: the observer's loose block lands on voxels, the authored box falls
+eleven units to rest on the terrain, Stop restores authored poses and file
+hashes, and a second Play repeats it. With engine, editor, Decay, Causeway and
+browser all exercised, the 3D physics/queries item is checked. Final
+integration remains.
 

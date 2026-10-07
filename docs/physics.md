@@ -867,8 +867,8 @@ box/sphere dimensions must be positive, and query capsules allow zero half-heigh
 with positive radius. Pose validation uses the body's quaternion tolerance.
 
 Native tests exercise these engine APIs and the scene driver exposes its world.
-Host/Decay/editor query integration and game/voxel/browser proof are still absent;
-a unit-tested query is not a completed surface.
+Typed Decay queries, shared sessions, editor Play and the Causeway browser
+fixture exercise them against real voxel geometry (see below).
 
 ## Editor
 
@@ -1084,13 +1084,10 @@ not native inspector or Play interaction. The Physics menu includes all three
 This is the engine prerequisite for the physics-update voxel-world proof in
 Causeway. Two shared-session regressions exercise XYZ motion, solid landing and
 disabling/reactivating bodies; browser host execution exercises the same motion
-and landing. Native editor interaction remains unverified: in the latest headless
-review environment, adapter startup hung or failed before a usable window.
-3D acceptance remains unchecked: native inspector/Play exercise and actual
-resident/edited voxel collision remain separate slices. Typed rotated probes are
-now exercised as described above. Voxel collision must derive from the occupied world, account for
-residency/dirty revisions and removal, and have a bounded update policy. An
-invisible plane or this standalone API is not voxel/game proof. CCD controls,
+and landing. Native editor interaction is exercised in
+[the native review](physics-voxel-editor-review.md), and authored voxel
+collision (below) supplies the occupied/resident/edited world proof. Typed
+rotated probes are exercised as described above. CCD controls,
 contacts, force/torque, materials, joints and character controllers also have no
 3D authoring/Decay surface yet. The 2D API remains unchanged.
 
@@ -1232,10 +1229,8 @@ all four budget failures, late invalid inputs and retry, duplicates/ownership,
 negative-section departure/reentry, inactivity/despawn/reset and actual landing/
 contact on occupied voxel geometry followed by falling through an edited hole.
 All 497 scene tests, warning-denied native checks/Clippy and all-target/all-feature
-WASM checks pass. No component, host API or dependency changed. This is the
-native scene/solver seam toward Causeway; authored terrain/block policy and
-residency production, shared-session/editor wiring and actual game/Decay/browser
-execution remain open. It is not completed voxel-world proof.
+WASM checks pass. This is the scene/solver seam; authored voxel colliders
+(above) produce its snapshots from real worlds.
 
 ## Voxel collision geometry foundation
 
