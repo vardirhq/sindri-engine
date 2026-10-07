@@ -7,7 +7,9 @@ and scene runtime ownership implemented; acceptance remains open in
 now uses the controller. Authored low steps and an inclined boardwalk exercise
 step selection, walkable ascent and downhill snap. A one-way plank ferry across
 the first gap exercises solved translation carry, reversal, boarding, jump/landing
-and drop-through. Checked editor and browser goal acceptance remain open.
+and drop-through. Native editor authoring/undo/save/reopen/Play is exercised in
+[the editor review](physics-character-editor-review.md); browser goal acceptance
+remains open.
 
 ## Ownership
 
@@ -167,7 +169,9 @@ acceleration is applied. Up is world-space and independent of probe rotation.
 This general policy is exercised by the platformer's inclined boardwalk through
 its real Hero script. Native tests climb and snap down it without jumping, then
 lower the slope limit and disable steps to show the same incline blocks walking.
-Checked editor and browser goal acceptance remain open.
+Native editor authoring/undo/save/reopen/Play is exercised in
+[the editor review](physics-character-editor-review.md); browser goal acceptance
+remains open.
 
 ## Implemented steps and clearance
 
@@ -263,7 +267,8 @@ regressions assert relative position, carry/total displacement, both directions
 and airborne null support. Chromium runs the same game assets with the hero
 initially aboard, showing stationary riding, reversal and a keyboard jump.
 Rotation/collision-clipped carry still has engine/scene regressions rather than
-an authored game encounter. Checked editor proof remains open.
+an authored game encounter. Native editor proof is recorded in
+[the editor review](physics-character-editor-review.md).
 
 ## Implemented one-way controller policy
 
@@ -417,7 +422,9 @@ and respawn. The dynamic crate retains CCD and contact-impulse proof.
 
 ## Remaining slices
 
-Checked editor authoring/undo/Play and browser goal proof remain open. Authored
+Native editor component add/remove, settings, undo/redo, save/reopen and Play/Stop
+are exercised in [the editor review](physics-character-editor-review.md). Browser
+goal proof remains open. Authored
 game slopes, steps and ferry translation carry have native and browser input
 coverage. Typed requests/results, shared host context and native
 platformer adoption are implemented; coyote time, jump buffering and player input
@@ -432,7 +439,7 @@ skin, escape/approach at touching surfaces, initial overlap, bounded corner
 iterations, rotated surfaces, filter/predicate behavior, immediate teleports and
 removal, deterministic ties, one-way geometry's two-sided query behavior and
 invalid input rejection. These geometric tests complement the typed host and
-platformer gameplay evidence above; checked editor proof remains open.
+platformer gameplay and native editor evidence above.
 
 Ground-probe tests cover separation/touching and zero travel, box/circle/rotated
 capsule extents, slope boundaries and steep obstruction, arbitrary up, ceiling

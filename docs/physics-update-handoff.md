@@ -129,12 +129,24 @@ goal. Logs/captures are `/tmp/sindri-platformer-ferry-*`; scratch project/export
 `/tmp/sindri-platformer-ferry-project` and `-export`; helper:
 `/tmp/sindri-physics-tools/browser/platformer-ferry-smoke.mjs`. Browser host
 binaries remain from `ce493275` because these slices change game assets only.
-Continue with checked editor component authoring/undo/Play and browser goal
-proof. Translation carry now has authored game proof; rotation and clipped carry
-retain engine/scene regressions. Character acceptance stays unchecked. Accelerated
-queries, 3D/voxel physics and final integration follow; gameplay snapshots remain
-absent. Terrain head `ebfc75d5` has no failed jobs; test/render CI was still running
-at the last inspection. Inspect every failed job on the current head if CI fails.
+Native character-editor review is now complete at `da9a5328`, with a rebuilt
+binary and scratch platformer on display :98. All settings were exercised,
+including carry and up reversal; snap undo/redo and every saved field survived
+reopen. Negative skin input retained its valid value. Removing/adding Character
+2D through the Physics menu saved absent/default payloads, and undo restored
+custom settings. Reopened Play runs/jumps the hero with read-only fields; Play
+Save refuses and Stop/Save restores the pre-Play file hash. The shipped scene
+was unchanged. Procedure/results: `docs/physics-character-editor-review.md`.
+Captures: `/tmp/sindri-joint-review-character-*.png`; build/runtime logs and
+observations: `/tmp/sindri-character-editor*`; scratch project:
+`/tmp/sindri-character-editor-project`. Owned editor/Xvfb processes were stopped.
+This is a documentation/evidence checkpoint, with no implementation or assets
+changed. Editor parity is exercised; character acceptance stays unchecked until
+browser goal proof and final verification. Continue with a real browser run to
+the flag. Accelerated queries, 3D/voxel physics and final integration follow;
+gameplay snapshots remain absent. Ferry head `da9a5328` has no failed jobs;
+test/render CI was still running at the last inspection. Inspect every failed
+job on the current head if CI fails.
 
 CCD, one-way platforms, **forces and rotation**, **contact snapshots**, and
 **reusable physics materials** are implemented in this PR. The checklist in `physics-update.md` is current.

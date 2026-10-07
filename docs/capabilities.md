@@ -2630,7 +2630,8 @@ A read-only 2D sweep/slide movement foundation now proposes displacement against
 current collider poses without mutating bodies. Positive skin, bounded iterations,
 initial penetration, filters and deterministic ties have native engine tests.
 The scene/typed host now integrate it and the platformer adopts it; see
-[the contract](character-movement.md). Checked editor proof remains open.
+[the contract](character-movement.md). Native editor proof is recorded in
+[the character review](physics-character-editor-review.md).
 
 Read-only 2D ground probing adds configurable unit up, bounded slope angles,
 travel and skin. Tests exercise zero-travel support, rotated shapes, slope
@@ -2660,9 +2661,10 @@ Request-scoped drop-through ignores only one-way solids, preserving ordinary
 floors and sensor filtering; hosts own duration and cancellation. Native tests
 exercise ascent/descent, rotated normals, deep/shallow overlap, snap, step landing
 and carry/drop interactions. Scene/typed Decay integration and platformer
-one-way/terrain gameplay now exercise these policies. Checked editor proof remains open; the authored ferry now exercises game
-translation carry. Rotation follows a chord with fixed
-probe orientation; continuous arc and rotating-probe sweeps remain absent.
+one-way/terrain gameplay now exercise these policies. Native editor proof is
+recorded in [the character review](physics-character-editor-review.md); the
+authored ferry exercises game translation carry. Rotation follows a chord with
+fixed probe orientation; continuous arc and rotating-probe sweeps remain absent.
 
 
 Scene controller ownership now registers validated `sindri.physics2d.character`
@@ -2692,8 +2694,8 @@ observes grounded/copied results and renders the controller above its floor.
 The platformer now adopts the controller through its real Hero script: native
 regressions reach the flag with coins and no falls, traverse/drop through planks,
 and exercise variable jump height, acceleration/braking and respawn. The dynamic
-crate retains CCD and contact-impulse proof. Checked editor authoring/undo/Play
-and browser goal proof remain open; character acceptance stays partial.
+crate retains CCD and contact-impulse proof. Native editor authoring/undo/Play
+is reviewed; browser goal proof remains open and character acceptance stays partial.
 Two authored stone risers and an inclined boardwalk now exercise accepted steps,
 walkable ascent and downhill snap through the Hero script without jumping.
 Control tests disable stepping or lower the slope limit to show the same terrain
@@ -2708,5 +2710,14 @@ from the starting field, leave/reacquire carry on jump/landing, and drop through
 into the pit/normal respawn path. Chromium exports the same assets with the hero
 initially aboard and renders riding in both directions and a keyboard jump.
 This is moving-platform translation proof for the genre showcase; rotation and
-carry clipping retain engine/scene test evidence. Editor and browser goal proof
+carry clipping retain engine/scene test evidence. Native editor proof is recorded
+in [the character review](physics-character-editor-review.md);
+browser goal proof remains open.
+
+Native Character 2D editor review exercises every setting, snap undo/redo,
+save/reopen, add/remove through checked commands and restoring custom settings.
+The reopened platformer runs/jumps in Play with a read-only inspector; Save
+refuses during Play and file hashes confirm Stop restores the document.
+See [the repeatable review](physics-character-editor-review.md). This is editor
+proof rather than a new implementation; browser goal and final-head acceptance
 remain open.

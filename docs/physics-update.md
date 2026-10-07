@@ -985,3 +985,23 @@ surface-specific completeness. This checklist does not mark those surfaces done.
   stays unchecked. No new host APIs, dependencies or generated catalogue changes.
   Prior terrain CI has no failures; its test/render job is still running at
   the last inspection. CI must verify the next head.
+
+
+### Native character-editor proof checkpoint
+
+- Rebuilt the native editor at `da9a5328` and reviewed a scratch platformer on an
+  isolated display. Every Character 2D setting was exercised: numeric edits,
+  carry toggle and up-vector reversal. Snap undo/redo and saved JSON were checked;
+  a negative skin attempt retained the valid value. Close/reopen retained edits.
+- Inspector removal saved an absent component; Add Component → Physics →
+  Character 2D saved registered defaults. Undoing add/removal restored all custom
+  settings and the pre-sequence file hash. The shipped scene was not edited.
+- Reopened Play settles, runs and jumps the hero through its real Decay script;
+  the inspector is read-only. Play Save refuses and file hashes remain unchanged.
+  Stop restores the authored pose/settings and saving matches the pre-Play hash.
+- [The native review](physics-character-editor-review.md) records repeatable
+  procedure, values, artifacts and limits. This is exercised editor evidence,
+  not a code/API/gameplay change. Editor parity earns a check; overall character
+  acceptance remains unchecked until browser goal proof/final verification.
+  Prior ferry CI has no failures, with its test/render job still running at the
+  last inspection. The next head requires CI verification.
