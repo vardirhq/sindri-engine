@@ -14,6 +14,12 @@ impl WorldHost<'_> {
         path: &Path,
         args: &[Value],
     ) -> Result<Value, RuntimeError> {
+        if matches!(
+            call,
+            Physics3dCall::Raycast | Physics3dCall::OverlapSphere | Physics3dCall::CastSphere
+        ) {
+            return self.physics3d_query(call, path, args);
+        }
         let error = |message: &str| RuntimeError::Host(format!("{}: {message}", path.dotted()));
         let wanted = match call {
             Physics3dCall::CollisionStarted => Some(PhysicsEventKind::CollisionStarted),
@@ -109,7 +115,7 @@ impl WorldHost<'_> {
     }
 }
 
-fn vector(path: &Path, value: &Value) -> Result<[f32; 3], RuntimeError> {
+pub(super) fn vector(path: &Path, value: &Value) -> Result<[f32; 3], RuntimeError> {
     let Value::Vec3(parts) = value else {
         return Err(RuntimeError::Host(format!(
             "{} requires a Vec3",

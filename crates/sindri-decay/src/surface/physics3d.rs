@@ -3,9 +3,14 @@
 use decay_semantic::{Environment, FunctionType, HostType, Type};
 
 pub(crate) const PHYSICS3D: &str = "Physics3d";
+pub(crate) const RAY_HIT: &str = "RayHit3d";
+pub(crate) const HIT_FIELDS: [&str; 4] = ["entity", "point", "normal", "distance"];
 
 #[derive(Clone, Copy)]
 pub(crate) enum Physics3dCall {
+    Raycast,
+    OverlapSphere,
+    CastSphere,
     Velocity,
     SetVelocity,
     AngularVelocity,
@@ -18,6 +23,9 @@ pub(crate) enum Physics3dCall {
 }
 
 pub(crate) const CALLS: &[(&str, Physics3dCall)] = &[
+    ("raycast", Physics3dCall::Raycast),
+    ("overlap_sphere", Physics3dCall::OverlapSphere),
+    ("cast_sphere", Physics3dCall::CastSphere),
     ("velocity", Physics3dCall::Velocity),
     ("set_velocity", Physics3dCall::SetVelocity),
     ("angular_velocity", Physics3dCall::AngularVelocity),
@@ -31,9 +39,24 @@ pub(crate) const CALLS: &[(&str, Physics3dCall)] = &[
 
 pub(crate) fn add_surface(environment: &mut Environment) {
     let entity = || Type::Named(super::ENTITY.to_owned());
+    let fields = vec![
+        (HIT_FIELDS[0].to_owned(), entity()),
+        (HIT_FIELDS[1].to_owned(), Type::Vec3),
+        (HIT_FIELDS[2].to_owned(), Type::Vec3),
+        (HIT_FIELDS[3].to_owned(), Type::F32),
+    ];
+    environment.add_struct(RAY_HIT, fields.clone());
+    let mut hit = HostType::new();
+    for (name, ty) in fields {
+        hit = hit.with_value(name, ty);
+    }
+    environment.add_type(RAY_HIT, hit);
     let mut physics = HostType::new();
     for (name, call) in CALLS {
         let (params, return_type) = match call {
+            Physics3dCall::Raycast | Physics3dCall::OverlapSphere | Physics3dCall::CastSphere => {
+                query_signature(*call)
+            }
             Physics3dCall::Velocity | Physics3dCall::AngularVelocity => {
                 (vec![entity()], Type::Vec3)
             }
@@ -52,4 +75,24 @@ pub(crate) fn add_surface(environment: &mut Environment) {
     }
     environment.add_type(PHYSICS3D, physics);
     environment.add_value(PHYSICS3D, Type::Named(PHYSICS3D.to_owned()));
+}
+
+fn query_signature(call: Physics3dCall) -> (Vec<Type>, Type) {
+    let mut params = match call {
+        Physics3dCall::Raycast => vec![Type::Vec3, Type::Vec3, Type::F32],
+        Physics3dCall::OverlapSphere => vec![Type::Vec3, Type::F32],
+        Physics3dCall::CastSphere => vec![Type::Vec3, Type::F32, Type::Vec3, Type::F32],
+        _ => unreachable!("only query calls reach here"),
+    };
+    params.extend([
+        Type::F32,
+        Type::Bool,
+        Type::Optional(Box::new(Type::Named(super::ENTITY.to_owned()))),
+    ]);
+    let result = if matches!(call, Physics3dCall::OverlapSphere) {
+        Type::array_of(Type::Named(super::ENTITY.to_owned()))
+    } else {
+        Type::Optional(Box::new(Type::Named(RAY_HIT.to_owned())))
+    };
+    (params, result)
 }

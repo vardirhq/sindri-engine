@@ -292,8 +292,12 @@ active/lifetime filtering, copied values/events and motion through subsequent
 scene steps. A rebuilt Chromium fixture confirms typed controls and actual solid
 landing events. Controls require an active synchronized body, leave authored
 motion unchanged and fail before spawn synchronization; 3D spawn-window queuing
-remains absent. Typed 3D queries, resident/edited voxel collision and game proof
-remain unimplemented.
+remains absent. Typed 3D rays, sphere overlaps and sphere casts use indexed
+synchronized geometry, active-entity filtering, masks/sensors/whole-entity
+exclusion and copied optional `RayHit3d`/sorted overlap lists. Six bridge
+regressions and the shared-session/Chromium landing fixture exercise these
+contracts. Typed rotated box/capsule probes, layer-name lookup, resident/edited
+voxel collision and game proof remain unimplemented.
 
 Forces and rotation have runtime and typed Decay controls: additive world force
 and torque last one fixed step, impulses act immediately and off-centre kicks
@@ -1939,7 +1943,7 @@ settings gear.
 - **One mesh primitive: `Cube`.** No quad, sphere, or glTF import
 - The 3D runtime has native simulation, scene synchronization/command tests,
   shared game/editor host wiring and primitive browser motion/landing evidence.
-  Native inspector/Play interaction, typed Decay queries/spawn-window controls and occupied
+  Native inspector/Play interaction, typed rotated box/capsule probes and spawn-window controls and occupied
   resident/edited voxel/gameplay proof remain open
 - Effects are bounded, renderer-free runtime values driven from Decay; there is
   no general authored particle/emitter system or authored parallax system

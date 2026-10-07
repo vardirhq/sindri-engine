@@ -1263,3 +1263,40 @@ surface-specific completeness. This checklist does not mark those surfaces done.
   plumbing toward Causeway, not completed voxel/game proof. Native inspector/
   Play/replay, typed 3D queries, occupied/resident/edited voxel collision and final
   integration remain open. 3D acceptance stays unchecked; CI must verify this head.
+
+
+## Typed 3D ray and sphere-query checkpoint
+
+- `Physics3d.raycast`, `overlap_sphere` and `cast_sphere` query indexed synchronized
+  geometry without advancing physics. Rays/casts return copied optional
+  `RayHit3d` values with entity, world Vec3 point/normal and world-unit distance;
+  overlaps return copied sorted unique entity lists. The typed exclusion is
+  `Entity?`, rather than requiring a fake handle for no exclusion.
+- Queries validate finite f32-range vectors/scalars, positive radii, non-negative
+  travel, nonzero normalized direction and finite endpoints. Membership masks,
+  sensor opt-in and whole-entity exclusion retain engine semantics. Inactive/
+  despawned geometry is filtered even before the next synchronization. Inside/on
+  and initial-overlap hits have zero distance/normal; exact ties retain entity/
+  piece ordering. Extreme finite geometry numerical limitations remain open.
+- Six bridge regressions exercise XYZ snapshots, inclusive endpoints/misses,
+  direction normalization, sensors/masks/exclusion, inactive/despawned geometry,
+  compound uniqueness/exclusion, sphere travel/initial overlaps, invalid input,
+  missing context and copied optional/list values through a real typed script.
+  The shared-session Decay driver queries its actual landing floor with all
+  three calls and checks matching entity, point, normal and sweep travel.
+- Scoped preflight plus native host checks/tests pass 1,012 unique game/Decay/
+  editor tests. Warning-denied all-target/all-feature Clippy passes for all
+  three hosts/bridge crates; typed script preflight, formatting and size gates
+  pass. Decay all-target/all-feature WASM and rebuilt game WASM host pass.
+  API JSON/Markdown regenerate and all 11 catalogue tests pass. No dependency,
+  scene component or 2D API changed.
+- Real Chromium exported-host smoke confirms the queried solid landing with
+  WebGPU, scene/script/texture delivery and visible geometry checks intact.
+  The sequential normal platformer goal run passes with five coins, no falls,
+  seven jumps and 11.433 simulated seconds, fetching 27 assets.
+- This is general query scripting toward Causeway, not occupied/resident/edited
+  voxel/game proof. Typed rotated box/capsule probes, layer-name lookup,
+  spawn-window controls, native 3D inspector/Play/replay and final integration
+  remain open. 3D acceptance remains unchecked. Prior head `385b1421` has no
+  reported failures, with test/render captures still running; CI must verify
+  this new checkpoint.

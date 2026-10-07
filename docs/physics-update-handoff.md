@@ -16,51 +16,54 @@ a pushed handoff. Do not ask them to authorize the scope again.
 
 ## Current continuation checkpoint
 
-Typed `Physics3d` now supplies copied Vec3 velocity/angular velocity, setters,
-dynamic impulses and four copied sorted unique non-draining collision/sensor
-other-entity lists. Shared native/browser sessions and native editor Play supply
-independent 3D context. Controls require an active synchronized body; finite
-f32-range vectors/body kinds validate before mutation. Locking retains zero
-angular velocity. Controls leave authored motion unchanged and survive ordinary
-scene steps; structural rebuilds restore authored motion.
+Typed `Physics3d.raycast`, `overlap_sphere` and `cast_sphere` now use the indexed
+3D world without advancing physics. Closest hits are copied optional `RayHit3d`
+values with entity, world Vec3 point/normal and distance; overlaps are sorted
+unique copied entity lists. Exclusion is typed `Entity?`. Finite f32-range inputs,
+positive radii, non-negative travel, nonzero normalized direction and finite
+endpoints validate. Membership masks, sensor opt-in and whole-entity exclusion
+retain engine semantics. Active-entity filtering hides inactive/despawned
+geometry even before synchronization. Exact ties and zero-distance inside/initial
+hits retain engine semantics. Extreme geometry numerical limits remain open.
 
-Six new bridge regressions exercise controls, rejection/arity/context, lifecycle,
-locking and all four event queries; two scripts exercise copied sensor lists.
-A shared-session Decay driver exercises Vec3 motion and actual solid landing.
-Scoped preflight passes 1,006 game/Decay/editor tests and warning-denied all-target/
-all-feature checks, formatting, file-size and typed-script gates. Clippy, Decay
-all-target/all-feature WASM and game WASM library check/build pass. API JSON/
-Markdown regenerated; all 11 catalogue tests pass. The first full suite exposed
-missing scripting-contract table entries; the table now lists all nine calls.
-No dependency or scene schema changed.
+Six new bridge regressions exercise snapshots, boundary/miss/inside hits,
+normalization, filtering, compound uniqueness/exclusion, sphere travel/initial
+overlaps, invalid values/arity/context and copied optional/list values in typed
+scripts. The shared-session Decay driver queries its actual landing floor with
+all three calls, checking entity, point, normal and sweep travel.
+Scoped preflight plus native game/editor checks and tests pass 1,012 unique
+bridge/game/editor tests. Warning-denied Clippy, typed preflight, formatting,
+file-size, Decay all-target/all-feature WASM and game WASM build pass. Generated
+API JSON/Markdown and all 11 catalogue tests pass. No dependency, scene component
+or 2D API changed.
 
-Rebuilt exported-host Chromium smoke confirms typed controls, copied values,
-rotation locking and a solid landing event. The isolated normal platformer run
-passes with five coins, no falls, seven jumps and 11.417 simulated seconds,
-fetching 27 assets. A preceding run overlapping native compilation fell; the
-isolated run passed without changing game rules or smoke assertions. Keep
-browser input-driven runs sequential and separate from heavy native builds.
+Rebuilt exported-host Chromium confirms the queried solid landing with standard
+WebGPU/asset/pixel checks intact. The sequential normal platformer run reaches
+the flag with five coins, no falls, seven jumps and 11.433 simulated seconds
+(27 assets). Browser input runs were isolated from native compilation.
+Artifacts: `/tmp/sindri-query3d-{preflight,clippy,focused,catalogue,wasm-build,wasm-check,host-check,host-tests,browser,platformer-browser}.log`,
+`/tmp/sindri-query3d-browser.png`, `/tmp/sindri-query3d-platformer.png`.
+Scratch project/export: `/tmp/sindri-query3d-{project,export}`. Observer harness:
+`/tmp/sindri-physics-tools/browser/query3d-smoke.mjs` (standard checks plus the
+completion marker and bounded simulation wait). Permanent driver:
+`game/tests/physics3d_driver.decay`; bridge query regression:
+`crates/sindri-decay/tests/physics3d_queries.rs` and `physics3d_query.decay`.
 
-Artifacts: `/tmp/sindri-typed3d-{preflight,clippy,decay,catalogue,wasm-build,wasm-check,browser}.log`,
-`/tmp/sindri-typed3d-platformer-browser-isolated.log`,
-`/tmp/sindri-typed3d-browser.png`, `/tmp/sindri-typed3d-platformer.png`.
-Scratch project/export: `/tmp/sindri-typed3d-{project,export}`. Observer smoke:
-`/tmp/sindri-physics-tools/browser/typed3d-smoke.mjs` (standard checks plus the
-read-only completion marker, with a bounded wait for simulation).
-Permanent driver: `game/tests/physics3d_driver.decay`;
-bridge fixtures: `crates/sindri-decay/tests/physics3d_controls.rs` and its support
-module. Spawn-window controls are explicitly absent in parity: live calls fail
-before 3D body synchronization; there is no pending ordered queue yet.
+Typed velocity/angular-velocity reads/setters, dynamic impulses and four copied
+non-draining collision/sensor event queries already have separate 3D context in
+shared native/browser sessions and editor Play. Controls require active
+synchronized bodies and leave authored motion unchanged; structural rebuilds
+restore it. Spawn-window queuing remains absent and is explicitly tracked.
 
-Continue with typed 3D queries/spawn-window controls, native 3D inspector/Play/
-replay evidence and Causeway occupied/resident/edited voxel collision on native/
-browser. Native editor interaction remains unverified: in the prior headless
-review the default/Vulkan adapter spun without a window, GL had no compatible
-surface and Chrome SwiftShader crashed on native startup. Owned processes are
-stopped. Retry on a usable graphics session. Automatic 3D collider scaling is
-absent; dimensions/offsets remain world units. 3D acceptance and final integration
-stay unchecked. Prior head `a28eecc6` had no reported failures at checkpoint time,
-with test/render captures still running; CI must verify the latest head.
+Continue with typed rotated box/capsule probes and layer-name lookup, 3D
+spawn-window controls, native 3D inspector/Play/replay evidence and Causeway
+occupied/resident/edited voxel collision on native/browser. Native editor
+interaction remains unverified: the previous headless adapter review hung or
+failed before a usable window. Owned processes are stopped; retry on a usable
+graphics session. Automatic collider scaling is absent (world-unit dimensions/
+offsets). 3D acceptance and final integration stay unchecked. Prior head
+`385b1421` had no reported failures, with test/render captures still running;
+CI must verify the latest checkpoint.
 
 The 3D query-only BVH now selects rays, overlaps and shape casts at current
 poses. Insert/remove/teleport update immediately; non-static pieces refresh after

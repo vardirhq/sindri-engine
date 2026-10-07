@@ -919,6 +919,25 @@ A shared-session Decay driver and Chromium fixture exercise Vec3 controls,
 rotation locking, copied values and an actual solid landing event. This is host
 contract evidence toward Causeway, not voxel/game proof.
 
+`Physics3d.raycast(origin: Vec3, direction: Vec3, max_distance, mask,
+include_sensors, exclude: Entity?)` and `cast_sphere(origin: Vec3, radius,
+direction: Vec3, max_distance, mask, include_sensors, exclude: Entity?)` return
+copied `RayHit3d?` snapshots (entity, world Vec3 point/normal, distance).
+`overlap_sphere(centre: Vec3, radius, mask, include_sensors, exclude: Entity?)`
+returns a copied sorted unique entity list. Queries use the engine's indexed
+current synchronized geometry and active-entity predicate without stepping.
+Finite f32-range inputs, positive radii, non-negative distance, normalized nonzero
+direction and a finite endpoint are required. Masks select memberships as whole
+u32 values, sensors opt in and exclusion skips all pieces of one entity.
+Inside/on and initial overlaps return zero distance/normal; a sphere's initial
+point is its origin. Exact ties prefer entity then authored piece order.
+Six bridge regressions exercise queries, masks/sensors/exclusion, unsynchronized
+inactivity/despawn, compound uniqueness, boundary/inside hits, invalid input and
+optional/copied script snapshots. The shared-session driver and Chromium landing
+fixture query actual floor geometry using all three calls. Typed rotated box/
+capsule probes and layer-name lookup remain follow-up slices. Existing extreme
+geometry numerical limitations still apply.
+
 Initial 2D gameplay operations should cover:
 
 - get/set linear velocity;
@@ -1018,8 +1037,8 @@ Causeway. Two shared-session regressions exercise XYZ motion, solid landing and
 disabling/reactivating bodies; browser host execution exercises the same motion
 and landing. Native editor interaction remains unverified: in the latest headless
 review environment, adapter startup hung or failed before a usable window.
-3D acceptance remains unchecked: native inspector/Play exercise, typed Decay
-queries and actual resident/edited
+3D acceptance remains unchecked: native inspector/Play exercise, typed rotated
+box/capsule probes and actual resident/edited
 voxel collision remain separate slices. Voxel collision must derive from the occupied world, account for
 residency/dirty revisions and removal, and have a bounded update policy. An
 invisible plane or this standalone API is not voxel/game proof. CCD controls,

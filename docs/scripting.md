@@ -1002,6 +1002,9 @@ a person who has not clicked yet.
 
 | Call | Returns |
 | --- | --- |
+| `Physics3d.raycast(origin: Vec3, direction: Vec3, max_distance, mask, include_sensors, exclude: Entity?)` | `RayHit3d?` |
+| `Physics3d.overlap_sphere(centre: Vec3, radius, mask, include_sensors, exclude: Entity?)` | `List<Entity>` |
+| `Physics3d.cast_sphere(origin: Vec3, radius, direction: Vec3, max_distance, mask, include_sensors, exclude: Entity?)` | `RayHit3d?` |
 | `Physics3d.velocity(entity)` | `Vec3` |
 | `Physics3d.set_velocity(entity, velocity: Vec3)` | nothing |
 | `Physics3d.angular_velocity(entity)` | `Vec3` |
@@ -1028,6 +1031,18 @@ other active entities from this script's last successful 3D step. All scripts
 see the same non-draining snapshot; inactive/despawned references are filtered.
 Shared game sessions and editor Play provide the context. See
 [the physics contract](physics.md#decay) for timing and current limitations.
+
+3D rays and sphere casts return null on misses or a copied `RayHit3d` with
+`entity`, Vec3 `point`/`normal` and numeric `distance`. Sphere overlaps return
+copied sorted unique entity lists. Query vectors/scalars must be finite and fit
+engine f32 values; radii are positive, travel non-negative and directions nonzero
+(normalized by the engine). Masks are whole u32 values, sensors opt in and
+`exclude` skips every piece of one entity or is null. Queries use indexed
+synchronized geometry without stepping physics and skip inactive/despawned
+entities even before the next synchronization. Inside/on or initial-overlap hits
+have zero distance/normal; sphere initial overlaps use the probe origin as point.
+Exact hit ties prefer entity handle then piece order. Rotated box/capsule probes
+and layer-name lookup remain absent from the typed 3D surface.
 
 ### Bodies, and what they touched
 

@@ -40,7 +40,7 @@ Names in scope without qualification. Decay has no imports, so each of these is 
 - `Input`: `Input` — The keyboard. Keys are named by position, such as `"W"`, `"ArrowLeft"` or `"Space"`, so controls work on any keyboard layout.
 - `PI`: `f32` — The number π (3.14159…): half a full turn when measuring angles in radians.
 - `Physics`: `Physics` — 2D physics: moving objects with speed and pushes, and finding out what this script's object bumped into.
-- `Physics3d`: `Physics3d` — Independent 3D physics controls and copied last-step events. Requires a 3D physics host. Live controls require an active synchronized body; calls before spawn synchronization fail rather than queue. Authored motion fields are unchanged, so structural rebuilds restore authored settings.
+- `Physics3d`: `Physics3d` — Independent 3D physics controls, indexed queries and copied last-step events. Requires a 3D physics host. Live controls require an active synchronized body; calls before spawn synchronization fail rather than queue. Authored motion fields are unchanged, so structural rebuilds restore authored settings.
 - `Pointer`: `Pointer` — The mouse, or a finger on a touch screen, handled the same way so one game works on both.
 - `Profiles`: `Profiles` — Reading settings from a profile, a data file shared across a project, such as a weapon's damage and fire rate.
 - `Random`: `Random` — Random numbers. The same seed always gives the same numbers, so a run can be replayed.
@@ -359,12 +359,15 @@ The host names this type but has not described its members.
 
 ### `Physics3d`
 
-Independent 3D physics controls and copied last-step events. Requires a 3D physics host. Live controls require an active synchronized body; calls before spawn synchronization fail rather than queue. Authored motion fields are unchanged, so structural rebuilds restore authored settings.
+Independent 3D physics controls, indexed queries and copied last-step events. Requires a 3D physics host. Live controls require an active synchronized body; calls before spawn synchronization fail rather than queue. Authored motion fields are unchanged, so structural rebuilds restore authored settings.
 
 - `angular_velocity(entity: Entity)` → `Vec3` — A copied world-space Vec3 angular velocity in radians per second around XYZ of an active synchronized 3D body.
 - `apply_impulse(entity: Entity, impulse: Vec3)` → `unit` — Applies a finite world-space Vec3 impulse to an active synchronized dynamic body using its compound mass. Invalid input or body kind fails before mutation; does not change authored starting motion.
+- `cast_sphere(origin: Vec3, radius: f32, direction: Vec3, max_distance: f32, mask: f32, include_sensors: bool, exclude: Entity?)` → `RayHit3d?` — Closest fixed-orientation sphere sweep as a copied RayHit3d or null. Positive finite radius, finite Vec3 origin/direction, normalized nonzero direction and non-negative distance in engine f32 range; endpoint must remain finite. Point is world contact, distance is probe travel. Initial overlap returns origin, zero distance and zero normal. Uses indexed synchronized geometry and the ray filter, skipping inactive/despawned entities. No rotation or physics step; extreme finite geometry still has the engine's documented numerical limitations.
 - `collision_started()` → `List<Entity>` — Sorted unique other active entities that started solid contact with this script's entity in the last successful 3D step. All scripts observe the same snapshot without draining it.
 - `collision_stopped()` → `List<Entity>` — Sorted unique other active entities that stopped solid contact with this script's entity in the last successful 3D step. Removed or inactive handles are filtered.
+- `overlap_sphere(centre: Vec3, radius: f32, mask: f32, include_sensors: bool, exclude: Entity?)` → `List<Entity>` — Sorted unique copied Entity list overlapping a finite Vec3 centre and positive finite f32-range radius. Uses indexed synchronized geometry, membership mask, sensor opt-in and whole-entity exclusion; inactive/despawned entities are filtered. Does not step physics.
+- `raycast(origin: Vec3, direction: Vec3, max_distance: f32, mask: f32, include_sensors: bool, exclude: Entity?)` → `RayHit3d?` — Closest indexed 3D ray hit as a copied RayHit3d or null. Finite Vec3 origin/direction and non-negative finite f32-range distance are required; direction is normalized and the endpoint must remain finite. Whole-u32 mask selects memberships, sensors opt in and an Entity or null excludes all pieces of one entity. Skips inactive/despawned entities. Inside/on hits have distance zero and zero normal; exact ties prefer entity then piece order. Queries synchronized geometry without stepping physics.
 - `sensor_entered()` → `List<Entity>` — Sorted unique other active entities that entered sensor contact with this script's entity in the last successful 3D step. Discrete events do not guarantee fast trigger sweeps; the snapshot is not drained.
 - `sensor_exited()` → `List<Entity>` — Sorted unique other active entities that left sensor contact with this script's entity in the last successful 3D step. Removed or inactive handles are filtered; the snapshot is not drained.
 - `set_angular_velocity(entity: Entity, velocity: Vec3)` → `unit` — Sets finite Vec3 angular velocity in radians per second around world XYZ on an active synchronized dynamic or velocity-kinematic body. Rotation-locked bodies retain zero angular velocity. Invalid input fails before mutation; does not change authored starting motion.
@@ -425,6 +428,15 @@ A copied 2D ray hit snapshot. Null means no hit. Holds entity, world-space point
 - `entity`: `Entity` — The entity owning the hit collider piece.
 - `normal`: `Vec2` — The world-space surface normal, as Vec2. Zero for a hit at distance zero.
 - `point`: `Vec2` — The hit point in world coordinates, as Vec2.
+
+### `RayHit3d`
+
+Copied closest 3D ray/sphere-cast hit, optional where no hit exists. World-space point/normal and world-unit distance; editing fields never changes simulation geometry.
+
+- `distance`: `f32` — World-unit ray distance or sphere centre travel, including zero for initial overlap.
+- `entity`: `Entity` — The active entity whose collider piece was hit.
+- `normal`: `Vec3` — World-space outward Vec3 normal; zero for an inside/on or initial-overlap hit.
+- `point`: `Vec3` — World-space Vec3 hit/contact position; probe origin for an initial sphere overlap.
 
 ### `Save`
 

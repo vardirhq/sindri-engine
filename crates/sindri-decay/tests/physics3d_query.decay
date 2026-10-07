@@ -1,0 +1,19 @@
+script Query3d {
+    var verified: bool = false;
+    fn update(dt: f32) {
+        let hit = Physics3d.raycast(Vec3(0.0, 0.0, 0.0), Vec3(0.0, 0.0, 2.0), 10.0, 4294967295.0, false, null);
+        if hit != null {
+            var copy = hit;
+            copy.point.z = 99.0;
+            copy.distance = 99.0;
+            let fresh = Physics3d.raycast(Vec3(0.0, 0.0, 0.0), Vec3(0.0, 0.0, 1.0), 10.0, 4294967295.0, false, null);
+            let swept = Physics3d.cast_sphere(Vec3(0.0, 0.0, 0.0), 0.5, Vec3(0.0, 0.0, 1.0), 10.0, 4294967295.0, false, null);
+            var nearby = Physics3d.overlap_sphere(Vec3(0.0, 0.0, 5.0), 1.0, 4294967295.0, false, null);
+            nearby.clear();
+            let missed = Physics3d.raycast(Vec3(0.0, 0.0, 0.0), Vec3(1.0, 0.0, 0.0), 1.0, 4294967295.0, false, null);
+            if fresh != null && swept != null {
+                verified = fresh.entity == hit.entity && fresh.point.z == 4.5 && fresh.normal.z == -1.0 && fresh.distance == 4.5 && swept.distance > 3.99 && swept.distance < 4.01 && missed == null && Physics3d.overlap_sphere(Vec3(0.0, 0.0, 5.0), 1.0, 4294967295.0, false, null).length == 1;
+            }
+        }
+    }
+}

@@ -29,6 +29,7 @@ mod actions;
 mod person;
 mod physics;
 mod physics3d;
+mod physics3d_query;
 mod physics_character;
 mod physics_contacts;
 mod physics_controls;

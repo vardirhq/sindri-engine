@@ -82,7 +82,7 @@
       "type": "Physics"
     },
     {
-      "description": "Independent 3D physics controls and copied last-step events. Requires a 3D physics host. Live controls require an active synchronized body; calls before spawn synchronization fail rather than queue. Authored motion fields are unchanged, so structural rebuilds restore authored settings.",
+      "description": "Independent 3D physics controls, indexed queries and copied last-step events. Requires a 3D physics host. Live controls require an active synchronized body; calls before spawn synchronization fail rather than queue. Authored motion fields are unchanged, so structural rebuilds restore authored settings.",
       "kind": "value",
       "name": "Physics3d",
       "type": "Physics3d"
@@ -2381,7 +2381,7 @@
       "name": "Physics"
     },
     {
-      "description": "Independent 3D physics controls and copied last-step events. Requires a 3D physics host. Live controls require an active synchronized body; calls before spawn synchronization fail rather than queue. Authored motion fields are unchanged, so structural rebuilds restore authored settings.",
+      "description": "Independent 3D physics controls, indexed queries and copied last-step events. Requires a 3D physics host. Live controls require an active synchronized body; calls before spawn synchronization fail rather than queue. Authored motion fields are unchanged, so structural rebuilds restore authored settings.",
       "members": [
         {
           "description": "A copied world-space Vec3 angular velocity in radians per second around XYZ of an active synchronized 3D body.",
@@ -2410,6 +2410,30 @@
           "returns": "unit"
         },
         {
+          "description": "Closest fixed-orientation sphere sweep as a copied RayHit3d or null. Positive finite radius, finite Vec3 origin/direction, normalized nonzero direction and non-negative distance in engine f32 range; endpoint must remain finite. Point is world contact, distance is probe travel. Initial overlap returns origin, zero distance and zero normal. Uses indexed synchronized geometry and the ray filter, skipping inactive/despawned entities. No rotation or physics step; extreme finite geometry still has the engine's documented numerical limitations.",
+          "kind": "function",
+          "name": "cast_sphere",
+          "parameter_names": [
+            "origin",
+            "radius",
+            "direction",
+            "max_distance",
+            "mask",
+            "include_sensors",
+            "exclude"
+          ],
+          "parameters": [
+            "Vec3",
+            "f32",
+            "Vec3",
+            "f32",
+            "f32",
+            "bool",
+            "Entity?"
+          ],
+          "returns": "RayHit3d?"
+        },
+        {
           "description": "Sorted unique other active entities that started solid contact with this script's entity in the last successful 3D step. All scripts observe the same snapshot without draining it.",
           "kind": "function",
           "name": "collision_started",
@@ -2424,6 +2448,48 @@
           "parameter_names": [],
           "parameters": [],
           "returns": "List<Entity>"
+        },
+        {
+          "description": "Sorted unique copied Entity list overlapping a finite Vec3 centre and positive finite f32-range radius. Uses indexed synchronized geometry, membership mask, sensor opt-in and whole-entity exclusion; inactive/despawned entities are filtered. Does not step physics.",
+          "kind": "function",
+          "name": "overlap_sphere",
+          "parameter_names": [
+            "centre",
+            "radius",
+            "mask",
+            "include_sensors",
+            "exclude"
+          ],
+          "parameters": [
+            "Vec3",
+            "f32",
+            "f32",
+            "bool",
+            "Entity?"
+          ],
+          "returns": "List<Entity>"
+        },
+        {
+          "description": "Closest indexed 3D ray hit as a copied RayHit3d or null. Finite Vec3 origin/direction and non-negative finite f32-range distance are required; direction is normalized and the endpoint must remain finite. Whole-u32 mask selects memberships, sensors opt in and an Entity or null excludes all pieces of one entity. Skips inactive/despawned entities. Inside/on hits have distance zero and zero normal; exact ties prefer entity then piece order. Queries synchronized geometry without stepping physics.",
+          "kind": "function",
+          "name": "raycast",
+          "parameter_names": [
+            "origin",
+            "direction",
+            "max_distance",
+            "mask",
+            "include_sensors",
+            "exclude"
+          ],
+          "parameters": [
+            "Vec3",
+            "Vec3",
+            "f32",
+            "f32",
+            "bool",
+            "Entity?"
+          ],
+          "returns": "RayHit3d?"
         },
         {
           "description": "Sorted unique other active entities that entered sensor contact with this script's entity in the last successful 3D step. Discrete events do not guarantee fast trigger sweeps; the snapshot is not drained.",
@@ -2826,6 +2892,36 @@
         }
       ],
       "name": "RayHit2d"
+    },
+    {
+      "description": "Copied closest 3D ray/sphere-cast hit, optional where no hit exists. World-space point/normal and world-unit distance; editing fields never changes simulation geometry.",
+      "members": [
+        {
+          "description": "World-unit ray distance or sphere centre travel, including zero for initial overlap.",
+          "kind": "value",
+          "name": "distance",
+          "type": "f32"
+        },
+        {
+          "description": "The active entity whose collider piece was hit.",
+          "kind": "value",
+          "name": "entity",
+          "type": "Entity"
+        },
+        {
+          "description": "World-space outward Vec3 normal; zero for an inside/on or initial-overlap hit.",
+          "kind": "value",
+          "name": "normal",
+          "type": "Vec3"
+        },
+        {
+          "description": "World-space Vec3 hit/contact position; probe origin for an initial sphere overlap.",
+          "kind": "value",
+          "name": "point",
+          "type": "Vec3"
+        }
+      ],
+      "name": "RayHit3d"
     },
     {
       "description": "Saving progress between play sessions: numbers and true/false values stored under names, such as a best score.",
