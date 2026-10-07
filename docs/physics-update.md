@@ -1300,3 +1300,21 @@ surface-specific completeness. This checklist does not mark those surfaces done.
   remain open. 3D acceptance remains unchecked. Prior head `385b1421` has no
   reported failures, with test/render captures still running; CI must verify
   this new checkpoint.
+
+
+## Browser goal-player repair checkpoint
+
+- Full CI triage on `aac1a6a4` found one failure: the browser keyboard player
+  jumped over the flag, then repeatedly jumped against the wall beyond it.
+  The remaining engine, typed preflight, native tests/render, Clippy, WASM,
+  packaging and site checks passed.
+- The terrain-reading browser player now reads the goal position and brakes
+  near the flag, allowing airborne approaches to land on its actual sensor.
+  Gameplay, physics, the read-only observer and the win/coin/no-fall assertions
+  are unchanged. A Node regression checks the airborne input sequence and
+  waits for an observed win; the browser CI job runs it before captures.
+- Scoped preflight and the Node regression pass. Real exported-host Chromium
+  runs pass with five coins and no falls, including 40 ms input polling.
+  WebGPU, asset delivery and visible-render checks remain intact.
+  This repairs platformer proof automation; 3D acceptance and final integration
+  remain open, and the new head still requires CI verification.

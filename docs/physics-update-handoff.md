@@ -16,6 +16,22 @@ a pushed handoff. Do not ask them to authorize the scope again.
 
 ## Current continuation checkpoint
 
+The latest typed-query head `aac1a6a4` passed every CI job except the browser
+smoke. Full failure triage found the keyboard player jumped over the platformer
+flag sensor and ran into the tall wall beyond it (four coins, no falls, stuck
+at x=62.691). The browser player now reads the goal position from the exported
+scene and releases horizontal input near the flag to land there. It still
+requires the observer's real win, at least three coins and no falls; no game
+scripts, physics behavior or smoke thresholds changed. A Node input-sequence
+regression verifies airborne braking, waiting for observed victory and input
+cleanup, and runs before browser captures in CI. Local scoped preflight,
+Node regression and real Chromium runs pass. The final normal run braked airborne at x=60.026/y=6.735 and reached the flag
+with five coins and no falls in 11.367 simulated seconds; a run with 40 ms input polling also collected five
+coins without falling (11.55 simulated seconds). Artifacts:
+`/tmp/sindri-browser-goal-{preflight,brake,delayed,final}.log` and matching
+browser captures. CI must verify this repair before treating the head as green.
+Continue the remaining 3D feature work listed below on this same draft PR.
+
 Typed `Physics3d.raycast`, `overlap_sphere` and `cast_sphere` now use the indexed
 3D world without advancing physics. Closest hits are copied optional `RayHit3d`
 values with entity, world Vec3 point/normal and distance; overlaps are sorted

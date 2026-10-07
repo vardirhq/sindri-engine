@@ -622,6 +622,7 @@ jobs:
       - name: Smoke the rendered games
         id: browser_smoke
         run: |
+          node --test scripts/browser/*.test.mjs
           node scripts/browser/smoke.mjs examples/cube target/render-artifacts/browser-cube.png
           SINDRI_EXPECT_ASSETS=1 SINDRI_BASE_PATH=/sindri-engine/ \
             node scripts/browser/smoke.mjs target/dist/causeway target/render-artifacts/browser-causeway.png

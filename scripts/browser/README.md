@@ -33,6 +33,11 @@ engine started".
 `CHROME_PATH` points it at a browser that is already installed, for environments
 that ship one rather than letting Playwright download it.
 
+The platformer goal smoke reads terrain and the goal position from the exported
+scene and plays with keyboard input. It brakes near the flag so a jump over the
+sensor can land there; only the read-only observer's win counts as success.
+Run its input-sequence regression with `node --test scripts/browser/*.test.mjs`.
+
 ## What the first run proved
 
 The module instantiated, `run` executed, winit adopted the page's canvas, a
