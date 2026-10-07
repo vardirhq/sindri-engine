@@ -1,11 +1,12 @@
 //! A read-only geometric primitive; gameplay decides how to apply its result.
 
+use rapier2d::parry::bounding_volume::BoundingVolume;
 use rapier2d::parry::query::{self, ShapeCastOptions};
 use sindri_core::EntityId;
 
 use super::movement_policy::MovementProbe2d;
 use super::slope::SlopeLimit2d;
-use super::sweep::{query_pose, query_shape};
+use super::sweep::{query_pose, query_shape, swept_bounds};
 use super::{PhysicsWorld2d, r2};
 use crate::validate::finite2;
 use crate::{
@@ -169,23 +170,28 @@ impl PhysicsWorld2d {
         include: &mut impl FnMut(EntityId) -> bool,
     ) -> Option<ShapeHit2d> {
         let mut first = None;
-        self.each_piece_policy(probe.filter, include, |entity, piece, pose, policy| {
-            let Ok(Some(contact)) = query::contact(&probe.pose, probe.shape, &pose, piece, 0.0)
-            else {
-                return;
-            };
-            if first.is_none()
-                && contact.dist < 0.0
-                && probe.allows(piece, pose, policy, direction, contact.normal2)
-            {
-                first = Some(ShapeHit2d {
-                    entity,
-                    point: probe.pose.translation.to_array(),
-                    normal: [0.0; 2],
-                    distance: 0.0,
-                });
-            }
-        });
+        self.each_piece_policy(
+            probe.shape.compute_aabb(&probe.pose),
+            probe.filter,
+            include,
+            |entity, piece, pose, policy| {
+                let Ok(Some(contact)) = query::contact(&probe.pose, probe.shape, &pose, piece, 0.0)
+                else {
+                    return;
+                };
+                if first.is_none()
+                    && contact.dist < 0.0
+                    && probe.allows(piece, pose, policy, direction, contact.normal2)
+                {
+                    first = Some(ShapeHit2d {
+                        entity,
+                        point: probe.pose.translation.to_array(),
+                        normal: [0.0; 2],
+                        distance: 0.0,
+                    });
+                }
+            },
+        );
         first
     }
 
@@ -198,59 +204,65 @@ impl PhysicsWorld2d {
     ) -> Option<ShapeHit2d> {
         let mut closest: Option<ShapeHit2d> = None;
         let at = probe.pose;
-        self.each_piece_policy(probe.filter, include, |entity, piece, pose, policy| {
-            let Ok(Some(hit)) = query::cast_shapes(
-                &at,
-                direction,
-                probe.shape,
-                &pose,
-                r2::Vector::ZERO,
-                piece,
-                options,
-            ) else {
-                return;
-            };
-            // Near the skin, cast normals can tilt even on a flat box face.
-            // Contact geometry at impact is more stable for touching features.
-            let mut impact = at;
-            impact.translation += direction * hit.time_of_impact;
-            let contact = query::contact(
-                &impact,
-                probe.shape,
-                &pose,
-                piece,
-                contact_prediction(options.target_distance),
-            )
-            .ok()
-            .flatten();
-            let normal = contact.as_ref().map_or_else(
-                || pose.rotation.transform_vector(hit.normal2),
-                |contact| contact.normal2,
-            );
-            // Tangential/separating contact must not repeatedly consume the
-            // budget at zero distance while hiding an obstacle farther ahead.
-            if !probe.allows(piece, pose, policy, direction, normal)
-                || direction.dot(normal) >= -f32::EPSILON
-                || closest.as_ref().is_some_and(|old| {
-                    hit.time_of_impact
-                        .total_cmp(&old.distance)
-                        .then(entity.cmp(&old.entity))
-                        .is_ge()
-                })
-            {
-                return;
-            }
-            let point = contact.as_ref().map_or_else(
-                || pose.transform_point(hit.witness2),
-                |contact| contact.point2,
-            );
-            closest = Some(ShapeHit2d {
-                entity,
-                point: [point.x, point.y],
-                normal: [normal.x, normal.y],
-                distance: hit.time_of_impact,
-            });
-        });
+        self.each_piece_policy(
+            swept_bounds(probe.shape, at, direction * options.max_time_of_impact)
+                .loosened(contact_prediction(options.target_distance)),
+            probe.filter,
+            include,
+            |entity, piece, pose, policy| {
+                let Ok(Some(hit)) = query::cast_shapes(
+                    &at,
+                    direction,
+                    probe.shape,
+                    &pose,
+                    r2::Vector::ZERO,
+                    piece,
+                    options,
+                ) else {
+                    return;
+                };
+                // Near the skin, cast normals can tilt even on a flat box face.
+                // Contact geometry at impact is more stable for touching features.
+                let mut impact = at;
+                impact.translation += direction * hit.time_of_impact;
+                let contact = query::contact(
+                    &impact,
+                    probe.shape,
+                    &pose,
+                    piece,
+                    contact_prediction(options.target_distance),
+                )
+                .ok()
+                .flatten();
+                let normal = contact.as_ref().map_or_else(
+                    || pose.rotation.transform_vector(hit.normal2),
+                    |contact| contact.normal2,
+                );
+                // Tangential/separating contact must not repeatedly consume the
+                // budget at zero distance while hiding an obstacle farther ahead.
+                if !probe.allows(piece, pose, policy, direction, normal)
+                    || direction.dot(normal) >= -f32::EPSILON
+                    || closest.as_ref().is_some_and(|old| {
+                        hit.time_of_impact
+                            .total_cmp(&old.distance)
+                            .then(entity.cmp(&old.entity))
+                            .is_ge()
+                    })
+                {
+                    return;
+                }
+                let point = contact.as_ref().map_or_else(
+                    || pose.transform_point(hit.witness2),
+                    |contact| contact.point2,
+                );
+                closest = Some(ShapeHit2d {
+                    entity,
+                    point: [point.x, point.y],
+                    normal: [normal.x, normal.y],
+                    distance: hit.time_of_impact,
+                });
+            },
+        );
         closest
     }
 }

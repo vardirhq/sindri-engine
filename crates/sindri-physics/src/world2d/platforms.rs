@@ -35,13 +35,11 @@ impl PhysicsWorld2d {
         let mut invalid = None;
         // Reconstruct current local collider pieces at the previous body pose.
         // The same masks, sensors, exclusion and host predicate apply here.
-        self.each_piece_policy(
+        self.each_entity_piece(
+            support.entity,
             request.filter,
             &mut include,
-            |entity, piece, posed, policy| {
-                if entity != support.entity {
-                    return;
-                }
+            |_entity, piece, posed, policy| {
                 let old_piece = previous * current.inverse() * posed;
                 if let Err(error) =
                     finite2("platform_previous_piece", old_piece.translation.to_array())

@@ -30,7 +30,7 @@ The remaining items below are the active scope.
   stable entity references, lifecycle/removal, editor undo, Decay access and proof.
 - [x] 2D character movement: reusable sweep/slide collision primitive, slopes,
   steps, ground state and moving platforms; gameplay policy remains Decay.
-- [ ] Accelerated queries: synchronized spatial index, unchanged filtering and
+- [x] 2D accelerated queries: synchronized spatial index, unchanged filtering and
   deterministic tie rules, immediate body moves/removals and scaling evidence.
 - [ ] 3D physics and queries: fixed-step simulation, bodies/colliders/events,
   scene synchronization, editor authoring, Decay access and voxel-world proof;
@@ -1060,3 +1060,37 @@ surface-specific completeness. This checklist does not mark those surfaces done.
   it adds no gameplay policy. Controller penetration/sweep/ground/support paths
   still scan and are the next slice, so accelerated-query acceptance remains
   unchecked. Prior head `7dc8ad3a` is green in CI; this checkpoint needs its own CI.
+
+
+## Indexed controller query checkpoint
+
+- Controller penetration, skin support and slide casts now select BVH candidates
+  with bounds expanded for contact prediction/target separation. Steps, ground
+  probing, snap and carry collisions share these paths. Filtering, exact geometry,
+  one-way policy and entity/piece ordering are unchanged. Known previous support
+  reconstructs only that entity's pieces, independent of current index bounds.
+- Four new regressions compare exhaustive candidates across circles, boxes,
+  capsules, rotation, arbitrary up, skin and drop policy; retain zero-travel skin
+  support between separated shapes; reconstruct a platform moved 100 units away;
+  and visit one local entity at 100, 1,000 and 10,000 sparse pieces. They complement
+  the earlier ray/overlap/cast differential and 28–34-node sparse ray evidence.
+- Scoped preflight passed all 154 physics tests, warning-denied all-target check,
+  formatting/size gates. All-target/all-feature Clippy and WASM passed. A further
+  856 native scene/Decay/platformer tests passed, including the 37 platformer
+  regressions for goal/coins/no-falls, steps/slopes, carry, jump/landing and drop.
+- The rebuilt warning-denied WASM host fetched 27 assets and reached the flag
+  with five coins/no falls in two isolated Chromium runs (11.433 and 11.417
+  simulated seconds). The previous host's isolated baseline also collected five
+  coins with no falls. A separate aboard-start ferry export fetched 26 assets,
+  rendered both riding directions and a keyboard jump; captures were reviewed.
+- The first goal attempt overlapped a second Chromium instance and a native build
+  and fell after late jump positions. The isolated comparison is consistent with
+  delayed input under contention; it is not proof of arbitrary-load reliability.
+  Browser checks remain sequential as in CI; assertions were not weakened and no
+  gameplay or host hook was added to make the run pass.
+- This completes 2D query acceleration, exercised by the platformer genre showcase
+  through its existing Decay controller/clearance calls. Dense/long queries remain
+  output-dependent, non-static pieces need post-step refresh, and overflowing
+  bounds conservatively scan. No dependencies, public APIs or catalogue entries
+  changed. 3D physics/queries, voxel proof and final integration remain unchecked;
+  CI must still verify the new checkpoint.

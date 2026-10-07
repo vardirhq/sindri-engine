@@ -228,7 +228,8 @@ requests, commit history, and subsystem documentation rather than this file.
 
 - 2D physics rays, overlaps and shape casts select collider candidates through
   a synchronized spatial index, preserving filtering, inside hits and exact ties.
-  Controller movement and ground probes still use their existing scan path.
+  Controller penetration, movement and ground probes share the index with
+  bounds expanded for skin; historical platform support reads only its own pieces.
 
 - A text element that draws nothing else is pressed where it is drawn: its
   `bounds`, pivoted on its anchor, rather than a box centred on its position.

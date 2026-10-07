@@ -249,8 +249,10 @@ colliders, and `examples/physics` exposes live rays, hit dots, normals, falling
 bodies, bounce and sensors with desktop/touch controls. Pages exports it under
 `examples/physics/`; native project regressions and desktop/phone browser smoke
 checks exercise its real Decay controls. Rays, overlaps and shape casts now use
-a synchronized per-piece index; controller ground/movement/support queries still
-scan pieces. 3D queries remain absent; implemented 2D overlaps and shape casts
+a synchronized per-piece index, also used by controller penetration, slide and
+ground probes. Historical platform support reads only the known support entity's
+pieces; current bounds cannot discard its previous pose. 3D queries remain absent;
+implemented 2D overlaps and shape casts
 are described below.
 
 A parallel Sindri-owned 3D body/collider data model already fixes the public

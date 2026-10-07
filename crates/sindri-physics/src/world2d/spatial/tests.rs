@@ -36,6 +36,16 @@ fn populated() -> PhysicsWorld2d {
     world
 }
 
+fn with_scan<T>(world: &mut PhysicsWorld2d, read: impl FnOnce(&PhysicsWorld2d) -> T) -> T {
+    let mut scan = SpatialIndex::default();
+    scan.pieces.clone_from(&world.spatial.pieces);
+    scan.unbounded.extend(scan.pieces.keys().copied());
+    std::mem::swap(&mut world.spatial, &mut scan);
+    let result = read(world);
+    std::mem::swap(&mut world.spatial, &mut scan);
+    result
+}
+
 // Same exact narrow phase with all registered pieces forced onto the scan path.
 // Comparing this with the BVH catches omitted candidates without a timing oracle.
 fn compare_scan(world: &mut PhysicsWorld2d) {
@@ -70,12 +80,7 @@ fn compare_scan(world: &mut PhysicsWorld2d) {
                     )
                 };
                 let indexed = collect(world);
-                let mut scan = SpatialIndex::default();
-                scan.pieces.clone_from(&world.spatial.pieces);
-                scan.unbounded.extend(scan.pieces.keys().copied());
-                std::mem::swap(&mut world.spatial, &mut scan);
-                let exhaustive = collect(world);
-                std::mem::swap(&mut world.spatial, &mut scan);
+                let exhaustive = with_scan(world, collect);
                 assert_eq!(
                     indexed, exhaustive,
                     "mask {mask}, sensors {sensors}, probe {i}"
@@ -215,3 +220,5 @@ fn overflowing_bounds_use_the_conservative_fallback() {
     world.remove(id(1));
     assert!(world.spatial.unbounded.is_empty());
 }
+
+mod controllers;

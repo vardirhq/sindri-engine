@@ -795,8 +795,9 @@ a script pass. The platformer proves ground clearance against tilemap geometry;
 2D overlaps and shape casts are implemented for circles, boxes and capsules.
 Decay exposes `Physics.overlap_circle`, `overlap_box`, `cast_circle` and
 `cast_box`; Orbital's mine blast and Physics Playground exercise them.
-All 3D runtime queries remain future work. Rays, overlaps and shape casts use
-the query index; controller movement/ground/support queries still scan pieces.
+All 3D runtime queries remain future work. Rays, overlaps, shape casts and
+controller penetration/sweep/ground phases use the query index. Previous platform
+support is reconstructed directly from that known entity's pieces.
 The incremental physics update is tracked in `docs/physics-update.md`.
 
 The index uses one leaf per registered collider piece. Ray traversal tests bounds
@@ -805,7 +806,12 @@ start/end bounds at fixed orientation. Candidates are sorted by entity handle an
 piece order before the unchanged exact geometry/filtering phase. Predicates are
 called once per candidate entity, rather than for every registered entity; callers
 must not depend on visits to remote geometry. Masks, sensors, exclusions, inside
-hits and exact ties retain their previous results.
+hits and exact ties retain their previous results. Controller skin support
+expands probe bounds by contact prediction; controller casts expand start/end
+bounds by the target separation plus contact allowance. Initial penetration
+uses the probe bounds. Step, snap and carry collision phases share these paths.
+Previous-platform verification reads only the known support entity, reconstructing
+its historical piece poses regardless of where its current index bounds lie.
 
 Only non-static bodies need post-step refresh. Position-kinematic targets remain
 pending until the solver step, while other body teleports update immediately.

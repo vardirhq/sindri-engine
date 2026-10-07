@@ -1,5 +1,6 @@
 //! Support probing shares the movement sweep's impact geometry and filtering.
 
+use rapier2d::parry::bounding_volume::BoundingVolume;
 use rapier2d::parry::query::{self, ShapeCastOptions};
 use sindri_core::EntityId;
 
@@ -116,24 +117,29 @@ impl PhysicsWorld2d {
         // one percent of skin plus one epsilon so a snapped endpoint retains
         // support. Cap prediction to avoid overflowing a valid finite skin.
         let prediction = contact_prediction(skin);
-        self.each_piece_policy(probe.filter, include, |entity, piece, pose, policy| {
-            let Ok(Some(contact)) =
-                query::contact(&probe.pose, probe.shape, &pose, piece, prediction)
-            else {
-                return;
-            };
-            if first.is_none()
-                && contact.normal2.dot(up) > f32::EPSILON
-                && probe.allows(piece, pose, policy, -up, contact.normal2)
-            {
-                first = Some(ShapeHit2d {
-                    entity,
-                    point: [contact.point2.x, contact.point2.y],
-                    normal: [contact.normal2.x, contact.normal2.y],
-                    distance: 0.0,
-                });
-            }
-        });
+        self.each_piece_policy(
+            probe.shape.compute_aabb(&probe.pose).loosened(prediction),
+            probe.filter,
+            include,
+            |entity, piece, pose, policy| {
+                let Ok(Some(contact)) =
+                    query::contact(&probe.pose, probe.shape, &pose, piece, prediction)
+                else {
+                    return;
+                };
+                if first.is_none()
+                    && contact.normal2.dot(up) > f32::EPSILON
+                    && probe.allows(piece, pose, policy, -up, contact.normal2)
+                {
+                    first = Some(ShapeHit2d {
+                        entity,
+                        point: [contact.point2.x, contact.point2.y],
+                        normal: [contact.normal2.x, contact.normal2.y],
+                        distance: 0.0,
+                    });
+                }
+            },
+        );
         first
     }
 }

@@ -149,22 +149,24 @@ and pressing in one browser frame previously lost the action edge. Source:
 `scripts/browser/prepare-platformer.py`, `platformer-goal.mjs`, the smoke hook and
 `games/platformer/tests/browser_goal.decay`. See the browser proof section in
 `docs/character-movement.md` for the CI reproduction.
-Accelerated queries now have a first checked slice: rays, overlaps and shape
-casts select per-piece BVH candidates, sorted by entity/piece before the unchanged
-exact phase. Insert/remove/teleport refresh immediately; non-static bodies refresh
-after solving, while position-kinematic targets retain their pending semantics.
-The index is independent of solver timing and uses the existing Parry dependency.
-Overflow bounds use a scan fallback. Differential tests compare against a forced
-exhaustive candidate set; sparse 100/1,000/10,000-piece tests record node/candidate
-counts. The full accelerated-query acceptance remains unchecked.
-Validation: scoped preflight passed 150 physics tests, native warning-denied
-check, Clippy, WASM, formatting/size; 856 scene/Decay/platformer tests passed.
-The rebuilt WASM host passed the platformer goal gate and Physics Playground
-controls using the CI asset-kind flags. Scaling samples at 10,000 pieces visit
-28–34 nodes and one candidate. Prior head `7dc8ad3a` passed all CI.
-Continue by indexing controller penetration, slide casts, skin support and
-platform support reconstruction, preserving one-way policy and historical poses.
-Then complete 3D/voxel physics and final integration.
+2D accelerated queries now cover rays, overlaps, shape casts and controller
+penetration/sweep/ground phases. Probe bounds expand for skin/contact prediction;
+step/snap/carry collisions share those paths. Historical support reconstructs
+only the known platform entity's pieces instead of selecting its current bounds.
+The query-only per-piece BVH updates immediately on insert/remove/teleport and
+refreshes non-static pieces after solving. Position targets retain their pending
+semantics; overflowing bounds retain the scan fallback. No dependency/API changed.
+Four new controller regressions compare exhaustive candidates across shapes,
+rotation, skin, arbitrary up and one-way/drop policy, retain zero-travel separated
+skin support, reconstruct support moved 100 units away, and select one local
+entity at 100/1,000/10,000 pieces. Native physics/scene/Decay/platformer and real
+browser results are recorded in the latest physics-update checkpoint.
+Continue with 3D physics/queries and voxel proof, followed by full integration.
+Run browser smokes sequentially as CI does: the first goal attempt overlapped
+another Chromium and a native build, fell and showed late jump positions. An
+isolated previous-host baseline and indexed-host goal runs preserve the strict
+coins/no-falls assertions. This observation is consistent with input scheduling
+under load; do not weaken the gate or claim arbitrary-load reliability.
 Gameplay snapshots and a 3D character controller remain absent. Inspect every
 failed job on the current PR head before changing code if CI fails.
 

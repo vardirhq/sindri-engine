@@ -59,8 +59,13 @@ lengths fail instead of returning non-finite results. Query filters match the
 existing mask, sensor inclusion and whole-entity exclusion contract. The host
 predicate can remove inactive entities and must be stable across the call.
 Equal-distance contacts prefer entity handle, then original collider-piece
-order. Inserts, teleports and removals are visible before a physics step because
-this foundation scans pieces at their current body-relative poses.
+order. Inserts, teleports and removals update the query-only per-piece BVH before
+a physics step. Penetration uses probe bounds; skin support inflates those bounds
+by contact prediction; sweeps use start/end bounds expanded by target separation.
+The exact geometry and one-way policy are unchanged. Previous-platform support
+reads only that entity's pieces at their historical poses, so current bounds
+cannot discard support that has moved away. Predicates visit spatial candidates
+and must not depend on visits to remote entities.
 
 Ordinary ray/overlap/shape-cast contracts are unchanged. In particular, ordinary
 shape casts still return a zero normal at zero-distance overlap. The movement
@@ -446,7 +451,7 @@ hosts and the platformer on native and browser targets. Gravity, coyote time,
 jump buffering and player input remain Decay policy. Compound solid probes,
 same-step solver response, swept trigger events and curved/rotating-probe carry
 remain explicit gaps in parity. A 3D character controller is absent; the wider
-physics update still requires accelerated queries, 3D physics and final integration.
+physics update still requires 3D physics and final integration.
 
 ## Foundation evidence
 
