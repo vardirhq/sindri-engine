@@ -308,3 +308,69 @@ fn the_cannon_breaks_glass_and_without_ccd_its_shells_pass_straight_through() {
         playground.text("hint")
     );
 }
+
+fn loose_above(playground: &Playground, height: f32) -> usize {
+    playground
+        .world
+        .entities()
+        .filter(|(entity, data)| {
+            data.components.get("sindri.tags").is_some_and(|tags| {
+                tags["tags"]
+                    .as_array()
+                    .is_some_and(|list| list.iter().any(|t| t == "loose"))
+            }) && playground
+                .world
+                .world_transform(*entity)
+                .is_some_and(|transform| transform.position[1] > height)
+        })
+        .count()
+}
+
+#[test]
+fn multiball_runs_through_the_bumpers_drains_and_rides_the_lift_back_up() {
+    let mut playground = open();
+    select(&mut playground, "BUMPER PIT");
+    playground.key(Key::Digit4);
+    assert!(said("multiball"));
+    playground.play(240);
+    assert!(
+        !playground.text("hint").starts_with("Score 0 "),
+        "{}",
+        playground.text("hint")
+    );
+    assert!(
+        loose_above(&playground, 2.0) < 3,
+        "most balls drained past the flippers"
+    );
+    // A round trip: the lift waits, climbs and pours its load into the chute.
+    let mut poured = false;
+    for _ in 0..30 {
+        playground.play(60);
+        if said("lift pouring") && loose_above(&playground, 9.0) > 0 {
+            poured = true;
+            break;
+        }
+    }
+    assert!(
+        poured,
+        "the lift brought balls back to the top: {}",
+        playground.text("hint")
+    );
+}
+
+#[test]
+fn a_held_flipper_swings_up_and_drops_when_let_go() {
+    let mut playground = open();
+    let rest = turn(&playground, "flipper-left");
+    playground
+        .input
+        .apply(sindri_platform::InputEvent::KeyPressed(Key::Z));
+    playground.play(20);
+    let up = turn(&playground, "flipper-left");
+    assert!(up > rest + 0.6, "{rest} -> {up}");
+    playground
+        .input
+        .apply(sindri_platform::InputEvent::KeyReleased(Key::Z));
+    playground.play(30);
+    assert!((turn(&playground, "flipper-left") - rest).abs() < 0.1);
+}

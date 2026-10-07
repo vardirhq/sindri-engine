@@ -112,7 +112,8 @@
       "robot",
       "shells",
       "glass",
-      "hand"
+      "hand",
+      "machines"
      ]
     },
     "sindri.tags": {
@@ -156,7 +157,8 @@
       "robot",
       "shells",
       "glass",
-      "hand"
+      "hand",
+      "machines"
      ]
     },
     "sindri.tags": {
@@ -201,7 +203,8 @@
       "robot",
       "shells",
       "glass",
-      "hand"
+      "hand",
+      "machines"
      ]
     },
     "sindri.tags": {
@@ -246,7 +249,8 @@
       "robot",
       "shells",
       "glass",
-      "hand"
+      "hand",
+      "machines"
      ]
     },
     "sindri.tags": {
@@ -291,7 +295,8 @@
       "robot",
       "shells",
       "glass",
-      "hand"
+      "hand",
+      "machines"
      ]
     },
     "sindri.tags": {
@@ -1193,7 +1198,7 @@
        "sensor": false,
        "layers": {
         "memberships": 2,
-        "filter": 63
+        "filter": 191
        },
        "friction": 0.5,
        "restitution": 0.05
@@ -1298,7 +1303,7 @@
        "sensor": false,
        "layers": {
         "memberships": 2,
-        "filter": 63
+        "filter": 191
        },
        "friction": 0.5,
        "restitution": 0.05
@@ -1403,7 +1408,7 @@
        "sensor": false,
        "layers": {
         "memberships": 2,
-        "filter": 63
+        "filter": 191
        },
        "friction": 0.5,
        "restitution": 0.05
@@ -1508,7 +1513,7 @@
        "sensor": false,
        "layers": {
         "memberships": 2,
-        "filter": 63
+        "filter": 191
        },
        "friction": 0.5,
        "restitution": 0.05
@@ -1613,7 +1618,7 @@
        "sensor": false,
        "layers": {
         "memberships": 2,
-        "filter": 63
+        "filter": 191
        },
        "friction": 0.5,
        "restitution": 0.05
@@ -1718,7 +1723,7 @@
        "sensor": false,
        "layers": {
         "memberships": 2,
-        "filter": 63
+        "filter": 191
        },
        "friction": 0.5,
        "restitution": 0.05
@@ -1823,7 +1828,7 @@
        "sensor": false,
        "layers": {
         "memberships": 2,
-        "filter": 63
+        "filter": 191
        },
        "friction": 0.5,
        "restitution": 0.05
@@ -1928,7 +1933,7 @@
        "sensor": false,
        "layers": {
         "memberships": 2,
-        "filter": 63
+        "filter": 191
        },
        "friction": 0.5,
        "restitution": 0.05
@@ -2033,7 +2038,7 @@
        "sensor": false,
        "layers": {
         "memberships": 2,
-        "filter": 63
+        "filter": 191
        },
        "friction": 0.5,
        "restitution": 0.05
@@ -2138,7 +2143,7 @@
        "sensor": false,
        "layers": {
         "memberships": 2,
-        "filter": 63
+        "filter": 191
        },
        "friction": 0.5,
        "restitution": 0.05
@@ -2240,7 +2245,7 @@
        "sensor": false,
        "layers": {
         "memberships": 4,
-        "filter": 63
+        "filter": 191
        },
        "friction": 0.4,
        "restitution": 0.5
@@ -2342,7 +2347,7 @@
        "sensor": false,
        "layers": {
         "memberships": 4,
-        "filter": 63
+        "filter": 191
        },
        "friction": 0.4,
        "restitution": 0.5
@@ -2444,7 +2449,7 @@
        "sensor": false,
        "layers": {
         "memberships": 4,
-        "filter": 63
+        "filter": 191
        },
        "friction": 0.4,
        "restitution": 0.5
@@ -2546,7 +2551,7 @@
        "sensor": false,
        "layers": {
         "memberships": 4,
-        "filter": 63
+        "filter": 191
        },
        "friction": 0.4,
        "restitution": 0.5
@@ -2648,7 +2653,7 @@
        "sensor": false,
        "layers": {
         "memberships": 4,
-        "filter": 63
+        "filter": 191
        },
        "friction": 0.4,
        "restitution": 0.5
@@ -2750,7 +2755,7 @@
        "sensor": false,
        "layers": {
         "memberships": 4,
-        "filter": 63
+        "filter": 191
        },
        "friction": 0.4,
        "restitution": 0.5
@@ -2852,7 +2857,7 @@
        "sensor": false,
        "layers": {
         "memberships": 4,
-        "filter": 63
+        "filter": 191
        },
        "friction": 0.4,
        "restitution": 0.5
@@ -2954,7 +2959,7 @@
        "sensor": false,
        "layers": {
         "memberships": 4,
-        "filter": 63
+        "filter": 191
        },
        "friction": 0.4,
        "restitution": 0.5
@@ -3056,7 +3061,7 @@
        "sensor": false,
        "layers": {
         "memberships": 4,
-        "filter": 63
+        "filter": 191
        },
        "friction": 0.4,
        "restitution": 0.5
@@ -3158,7 +3163,7 @@
        "sensor": false,
        "layers": {
         "memberships": 4,
-        "filter": 63
+        "filter": 191
        },
        "friction": 0.4,
        "restitution": 0.5
@@ -3260,7 +3265,7 @@
        "sensor": false,
        "layers": {
         "memberships": 4,
-        "filter": 63
+        "filter": 191
        },
        "friction": 0.4,
        "restitution": 0.5
@@ -3362,7 +3367,7 @@
        "sensor": false,
        "layers": {
         "memberships": 4,
-        "filter": 63
+        "filter": 191
        },
        "friction": 0.4,
        "restitution": 0.5
@@ -3656,7 +3661,7 @@
        "sensor": false,
        "layers": {
         "memberships": 2,
-        "filter": 63
+        "filter": 191
        },
        "friction": 0.4,
        "restitution": 0.1
@@ -3677,7 +3682,7 @@
        "sensor": false,
        "layers": {
         "memberships": 2,
-        "filter": 63
+        "filter": 191
        },
        "friction": 0.4,
        "restitution": 0.0
@@ -4024,7 +4029,7 @@
        "sensor": false,
        "layers": {
         "memberships": 2,
-        "filter": 63
+        "filter": 191
        },
        "friction": 0.5,
        "restitution": 0.05
@@ -4137,7 +4142,7 @@
        "sensor": false,
        "layers": {
         "memberships": 2,
-        "filter": 63
+        "filter": 191
        },
        "friction": 0.5,
        "restitution": 0.05
@@ -4250,7 +4255,7 @@
        "sensor": false,
        "layers": {
         "memberships": 2,
-        "filter": 63
+        "filter": 191
        },
        "friction": 0.5,
        "restitution": 0.05
@@ -4363,7 +4368,7 @@
        "sensor": false,
        "layers": {
         "memberships": 2,
-        "filter": 63
+        "filter": 191
        },
        "friction": 0.5,
        "restitution": 0.05
@@ -4476,7 +4481,7 @@
        "sensor": false,
        "layers": {
         "memberships": 2,
-        "filter": 63
+        "filter": 191
        },
        "friction": 0.5,
        "restitution": 0.05
@@ -4589,7 +4594,7 @@
        "sensor": false,
        "layers": {
         "memberships": 2,
-        "filter": 63
+        "filter": 191
        },
        "friction": 0.5,
        "restitution": 0.05
@@ -4702,7 +4707,7 @@
        "sensor": false,
        "layers": {
         "memberships": 2,
-        "filter": 63
+        "filter": 191
        },
        "friction": 0.5,
        "restitution": 0.05
@@ -4815,7 +4820,7 @@
        "sensor": false,
        "layers": {
         "memberships": 2,
-        "filter": 63
+        "filter": 191
        },
        "friction": 0.5,
        "restitution": 0.05
@@ -4928,7 +4933,7 @@
        "sensor": false,
        "layers": {
         "memberships": 2,
-        "filter": 63
+        "filter": 191
        },
        "friction": 0.5,
        "restitution": 0.05
@@ -5041,7 +5046,7 @@
        "sensor": false,
        "layers": {
         "memberships": 2,
-        "filter": 63
+        "filter": 191
        },
        "friction": 0.5,
        "restitution": 0.05
@@ -5154,7 +5159,7 @@
        "sensor": false,
        "layers": {
         "memberships": 2,
-        "filter": 63
+        "filter": 191
        },
        "friction": 0.5,
        "restitution": 0.05
@@ -5267,7 +5272,7 @@
        "sensor": false,
        "layers": {
         "memberships": 2,
-        "filter": 63
+        "filter": 191
        },
        "friction": 0.5,
        "restitution": 0.05
@@ -5380,7 +5385,7 @@
        "sensor": false,
        "layers": {
         "memberships": 2,
-        "filter": 63
+        "filter": 191
        },
        "friction": 0.5,
        "restitution": 0.05
@@ -5493,7 +5498,7 @@
        "sensor": false,
        "layers": {
         "memberships": 2,
-        "filter": 63
+        "filter": 191
        },
        "friction": 0.5,
        "restitution": 0.05
@@ -5606,7 +5611,7 @@
        "sensor": false,
        "layers": {
         "memberships": 2,
-        "filter": 63
+        "filter": 191
        },
        "friction": 0.5,
        "restitution": 0.05
@@ -5716,7 +5721,7 @@
        "sensor": false,
        "layers": {
         "memberships": 4,
-        "filter": 63
+        "filter": 191
        },
        "friction": 0.4,
        "restitution": 0.5
@@ -6044,7 +6049,7 @@
        "sensor": false,
        "layers": {
         "memberships": 2,
-        "filter": 63
+        "filter": 191
        },
        "friction": 0.8,
        "restitution": 0.0
@@ -6065,7 +6070,7 @@
        "sensor": false,
        "layers": {
         "memberships": 2,
-        "filter": 63
+        "filter": 191
        },
        "friction": 0.8,
        "restitution": 0.0
@@ -6086,7 +6091,7 @@
        "sensor": false,
        "layers": {
         "memberships": 2,
-        "filter": 63
+        "filter": 191
        },
        "friction": 0.8,
        "restitution": 0.0
@@ -7760,6 +7765,1913 @@
      "source": "scripts/toys.decay",
      "script": "BackStop",
      "properties": {}
+    }
+   }
+  },
+  {
+   "id": "pit-left",
+   "name": "pit-left",
+   "transform_3d": {
+    "position": [
+     12.2,
+     6.6,
+     0.0
+    ],
+    "rotation": [
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     0.4,
+     12.4,
+     1.0
+    ]
+   },
+   "components": {
+    "sindri.shape": {
+     "kind": "rect",
+     "count": 6.0,
+     "fill": [
+      0.02315,
+      0.0137,
+      0.04667,
+      1.0
+     ],
+     "stroke": [
+      0.32778,
+      0.10946,
+      0.78354,
+      1.0
+     ],
+     "stroke_width": 0.08,
+     "corner_radius": 0.0,
+     "dashes": 0.0,
+     "dash_duty": 0.5,
+     "sweep_start": 0.0,
+     "sweep_turns": 1.0,
+     "blend": "over",
+     "layer": 2
+    },
+    "sindri.physics2d.collider": {
+     "pieces": [
+      {
+       "shape": {
+        "shape": "box",
+        "half_extents": [
+         0.2,
+         6.2
+        ]
+       },
+       "offset": [
+        0.0,
+        0.0
+       ],
+       "rotation": 0.0,
+       "sensor": false,
+       "layers": {
+        "memberships": 1,
+        "filter": 4294967295
+       },
+       "friction": 0.6,
+       "restitution": 0.0
+      }
+     ]
+    }
+   }
+  },
+  {
+   "id": "pit-right",
+   "name": "pit-right",
+   "transform_3d": {
+    "position": [
+     22.6,
+     5.4,
+     0.0
+    ],
+    "rotation": [
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     0.4,
+     9.6,
+     1.0
+    ]
+   },
+   "components": {
+    "sindri.shape": {
+     "kind": "rect",
+     "count": 6.0,
+     "fill": [
+      0.02315,
+      0.0137,
+      0.04667,
+      1.0
+     ],
+     "stroke": [
+      0.32778,
+      0.10946,
+      0.78354,
+      1.0
+     ],
+     "stroke_width": 0.08,
+     "corner_radius": 0.0,
+     "dashes": 0.0,
+     "dash_duty": 0.5,
+     "sweep_start": 0.0,
+     "sweep_turns": 1.0,
+     "blend": "over",
+     "layer": 2
+    },
+    "sindri.physics2d.collider": {
+     "pieces": [
+      {
+       "shape": {
+        "shape": "box",
+        "half_extents": [
+         0.2,
+         4.8
+        ]
+       },
+       "offset": [
+        0.0,
+        0.0
+       ],
+       "rotation": 0.0,
+       "sensor": false,
+       "layers": {
+        "memberships": 1,
+        "filter": 4294967295
+       },
+       "friction": 0.6,
+       "restitution": 0.0
+      }
+     ]
+    }
+   }
+  },
+  {
+   "id": "pit-back",
+   "name": "pit-back",
+   "transform_3d": {
+    "position": [
+     17.4,
+     6.6,
+     -1.5
+    ],
+    "rotation": [
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     10.0,
+     12.4,
+     1.0
+    ]
+   },
+   "components": {
+    "sindri.shape": {
+     "kind": "rect",
+     "count": 6.0,
+     "fill": [
+      0.0075,
+      0.00478,
+      0.01764,
+      1.0
+     ],
+     "stroke": [
+      0.0,
+      0.0,
+      0.0,
+      0.0
+     ],
+     "stroke_width": 0.0,
+     "corner_radius": 0.0,
+     "dashes": 0.0,
+     "dash_duty": 0.5,
+     "sweep_start": 0.0,
+     "sweep_turns": 1.0,
+     "blend": "over",
+     "layer": -20
+    }
+   }
+  },
+  {
+   "id": "pit-sling-left",
+   "name": "pit-sling-left",
+   "transform_3d": {
+    "position": [
+     13.925,
+     3.1,
+     0.0
+    ],
+    "rotation": [
+     0.0,
+     0.0,
+     -0.307384,
+     0.951585
+    ],
+    "scale": [
+     3.7607,
+     0.3,
+     1.0
+    ]
+   },
+   "components": {
+    "sindri.shape": {
+     "kind": "rect",
+     "count": 6.0,
+     "fill": [
+      0.04519,
+      0.02315,
+      0.10702,
+      1.0
+     ],
+     "stroke": [
+      0.57112,
+      0.20508,
+      1.0,
+      1.0
+     ],
+     "stroke_width": 0.08,
+     "corner_radius": 0.0,
+     "dashes": 0.0,
+     "dash_duty": 0.5,
+     "sweep_start": 0.0,
+     "sweep_turns": 1.0,
+     "blend": "over",
+     "layer": 2
+    },
+    "sindri.physics2d.collider": {
+     "pieces": [
+      {
+       "shape": {
+        "shape": "box",
+        "half_extents": [
+         1.8803,
+         0.15
+        ]
+       },
+       "offset": [
+        0.0,
+        0.0
+       ],
+       "rotation": 0.0,
+       "sensor": false,
+       "layers": {
+        "memberships": 1,
+        "filter": 4294967295
+       },
+       "friction": 0.6,
+       "restitution": 0.0
+      }
+     ]
+    }
+   }
+  },
+  {
+   "id": "pit-sling-right",
+   "name": "pit-sling-right",
+   "transform_3d": {
+    "position": [
+     20.875,
+     3.1,
+     0.0
+    ],
+    "rotation": [
+     0.0,
+     0.0,
+     -0.951585,
+     0.307384
+    ],
+    "scale": [
+     3.7607,
+     0.3,
+     1.0
+    ]
+   },
+   "components": {
+    "sindri.shape": {
+     "kind": "rect",
+     "count": 6.0,
+     "fill": [
+      0.04519,
+      0.02315,
+      0.10702,
+      1.0
+     ],
+     "stroke": [
+      0.57112,
+      0.20508,
+      1.0,
+      1.0
+     ],
+     "stroke_width": 0.08,
+     "corner_radius": 0.0,
+     "dashes": 0.0,
+     "dash_duty": 0.5,
+     "sweep_start": 0.0,
+     "sweep_turns": 1.0,
+     "blend": "over",
+     "layer": 2
+    },
+    "sindri.physics2d.collider": {
+     "pieces": [
+      {
+       "shape": {
+        "shape": "box",
+        "half_extents": [
+         1.8803,
+         0.15
+        ]
+       },
+       "offset": [
+        0.0,
+        0.0
+       ],
+       "rotation": 0.0,
+       "sensor": false,
+       "layers": {
+        "memberships": 1,
+        "filter": 4294967295
+       },
+       "friction": 0.6,
+       "restitution": 0.0
+      }
+     ]
+    }
+   }
+  },
+  {
+   "id": "bumper-0",
+   "name": "bumper-0",
+   "transform_3d": {
+    "position": [
+     14.6,
+     9.4,
+     0.3
+    ],
+    "rotation": [
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     1.4,
+     1.4,
+     1.0
+    ]
+   },
+   "components": {
+    "sindri.shape": {
+     "kind": "ellipse",
+     "count": 6.0,
+     "fill": [
+      1.0,
+      0.10946,
+      0.27468,
+      1.0
+     ],
+     "stroke": [
+      1.0,
+      0.6376,
+      0.75294,
+      1.0
+     ],
+     "stroke_width": 0.12,
+     "corner_radius": 0.0,
+     "dashes": 0.0,
+     "dash_duty": 0.5,
+     "sweep_start": 0.0,
+     "sweep_turns": 1.0,
+     "blend": "over",
+     "layer": 9
+    },
+    "sindri.physics2d.collider": {
+     "pieces": [
+      {
+       "shape": {
+        "shape": "circle",
+        "radius": 0.7
+       },
+       "offset": [
+        0.0,
+        0.0
+       ],
+       "rotation": 0.0,
+       "sensor": false,
+       "layers": {
+        "memberships": 1,
+        "filter": 4294967295
+       },
+       "friction": 0.2,
+       "restitution": 0.6
+      }
+     ]
+    },
+    "sindri.script": {
+     "source": "scripts/toys.decay",
+     "script": "Bumper",
+     "properties": {}
+    }
+   }
+  },
+  {
+   "id": "bumper-1",
+   "name": "bumper-1",
+   "transform_3d": {
+    "position": [
+     17.4,
+     11.0,
+     0.3
+    ],
+    "rotation": [
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     1.4,
+     1.4,
+     1.0
+    ]
+   },
+   "components": {
+    "sindri.shape": {
+     "kind": "ellipse",
+     "count": 6.0,
+     "fill": [
+      1.0,
+      0.10946,
+      0.27468,
+      1.0
+     ],
+     "stroke": [
+      1.0,
+      0.6376,
+      0.75294,
+      1.0
+     ],
+     "stroke_width": 0.12,
+     "corner_radius": 0.0,
+     "dashes": 0.0,
+     "dash_duty": 0.5,
+     "sweep_start": 0.0,
+     "sweep_turns": 1.0,
+     "blend": "over",
+     "layer": 9
+    },
+    "sindri.physics2d.collider": {
+     "pieces": [
+      {
+       "shape": {
+        "shape": "circle",
+        "radius": 0.7
+       },
+       "offset": [
+        0.0,
+        0.0
+       ],
+       "rotation": 0.0,
+       "sensor": false,
+       "layers": {
+        "memberships": 1,
+        "filter": 4294967295
+       },
+       "friction": 0.2,
+       "restitution": 0.6
+      }
+     ]
+    },
+    "sindri.script": {
+     "source": "scripts/toys.decay",
+     "script": "Bumper",
+     "properties": {}
+    }
+   }
+  },
+  {
+   "id": "bumper-2",
+   "name": "bumper-2",
+   "transform_3d": {
+    "position": [
+     20.2,
+     9.4,
+     0.3
+    ],
+    "rotation": [
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     1.4,
+     1.4,
+     1.0
+    ]
+   },
+   "components": {
+    "sindri.shape": {
+     "kind": "ellipse",
+     "count": 6.0,
+     "fill": [
+      1.0,
+      0.10946,
+      0.27468,
+      1.0
+     ],
+     "stroke": [
+      1.0,
+      0.6376,
+      0.75294,
+      1.0
+     ],
+     "stroke_width": 0.12,
+     "corner_radius": 0.0,
+     "dashes": 0.0,
+     "dash_duty": 0.5,
+     "sweep_start": 0.0,
+     "sweep_turns": 1.0,
+     "blend": "over",
+     "layer": 9
+    },
+    "sindri.physics2d.collider": {
+     "pieces": [
+      {
+       "shape": {
+        "shape": "circle",
+        "radius": 0.7
+       },
+       "offset": [
+        0.0,
+        0.0
+       ],
+       "rotation": 0.0,
+       "sensor": false,
+       "layers": {
+        "memberships": 1,
+        "filter": 4294967295
+       },
+       "friction": 0.2,
+       "restitution": 0.6
+      }
+     ]
+    },
+    "sindri.script": {
+     "source": "scripts/toys.decay",
+     "script": "Bumper",
+     "properties": {}
+    }
+   }
+  },
+  {
+   "id": "bumper-3",
+   "name": "bumper-3",
+   "transform_3d": {
+    "position": [
+     15.9,
+     6.6,
+     0.3
+    ],
+    "rotation": [
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     1.4,
+     1.4,
+     1.0
+    ]
+   },
+   "components": {
+    "sindri.shape": {
+     "kind": "ellipse",
+     "count": 6.0,
+     "fill": [
+      1.0,
+      0.10946,
+      0.27468,
+      1.0
+     ],
+     "stroke": [
+      1.0,
+      0.6376,
+      0.75294,
+      1.0
+     ],
+     "stroke_width": 0.12,
+     "corner_radius": 0.0,
+     "dashes": 0.0,
+     "dash_duty": 0.5,
+     "sweep_start": 0.0,
+     "sweep_turns": 1.0,
+     "blend": "over",
+     "layer": 9
+    },
+    "sindri.physics2d.collider": {
+     "pieces": [
+      {
+       "shape": {
+        "shape": "circle",
+        "radius": 0.7
+       },
+       "offset": [
+        0.0,
+        0.0
+       ],
+       "rotation": 0.0,
+       "sensor": false,
+       "layers": {
+        "memberships": 1,
+        "filter": 4294967295
+       },
+       "friction": 0.2,
+       "restitution": 0.6
+      }
+     ]
+    },
+    "sindri.script": {
+     "source": "scripts/toys.decay",
+     "script": "Bumper",
+     "properties": {}
+    }
+   }
+  },
+  {
+   "id": "bumper-4",
+   "name": "bumper-4",
+   "transform_3d": {
+    "position": [
+     18.9,
+     6.6,
+     0.3
+    ],
+    "rotation": [
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     1.4,
+     1.4,
+     1.0
+    ]
+   },
+   "components": {
+    "sindri.shape": {
+     "kind": "ellipse",
+     "count": 6.0,
+     "fill": [
+      1.0,
+      0.10946,
+      0.27468,
+      1.0
+     ],
+     "stroke": [
+      1.0,
+      0.6376,
+      0.75294,
+      1.0
+     ],
+     "stroke_width": 0.12,
+     "corner_radius": 0.0,
+     "dashes": 0.0,
+     "dash_duty": 0.5,
+     "sweep_start": 0.0,
+     "sweep_turns": 1.0,
+     "blend": "over",
+     "layer": 9
+    },
+    "sindri.physics2d.collider": {
+     "pieces": [
+      {
+       "shape": {
+        "shape": "circle",
+        "radius": 0.7
+       },
+       "offset": [
+        0.0,
+        0.0
+       ],
+       "rotation": 0.0,
+       "sensor": false,
+       "layers": {
+        "memberships": 1,
+        "filter": 4294967295
+       },
+       "friction": 0.2,
+       "restitution": 0.6
+      }
+     ]
+    },
+    "sindri.script": {
+     "source": "scripts/toys.decay",
+     "script": "Bumper",
+     "properties": {}
+    }
+   }
+  },
+  {
+   "id": "flipper-left-pin",
+   "name": "flipper-left-pin",
+   "transform_3d": {
+    "position": [
+     15.55,
+     1.8,
+     0.4
+    ],
+    "rotation": [
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     0.3,
+     0.3,
+     1.0
+    ]
+   },
+   "components": {
+    "sindri.shape": {
+     "kind": "ellipse",
+     "count": 6.0,
+     "fill": [
+      0.57112,
+      0.20508,
+      1.0,
+      1.0
+     ],
+     "stroke": [
+      0.7913,
+      0.84687,
+      0.9131,
+      1.0
+     ],
+     "stroke_width": 0.2,
+     "corner_radius": 0.0,
+     "dashes": 0.0,
+     "dash_duty": 0.5,
+     "sweep_start": 0.0,
+     "sweep_turns": 1.0,
+     "blend": "over",
+     "layer": 9
+    },
+    "sindri.physics2d.collider": {
+     "pieces": [
+      {
+       "shape": {
+        "shape": "circle",
+        "radius": 0.15
+       },
+       "offset": [
+        0.0,
+        0.0
+       ],
+       "rotation": 0.0,
+       "sensor": false,
+       "layers": {
+        "memberships": 1,
+        "filter": 0
+       },
+       "friction": 0.5,
+       "restitution": 0.0
+      }
+     ]
+    }
+   }
+  },
+  {
+   "id": "flipper-left",
+   "name": "flipper-left",
+   "transform_3d": {
+    "position": [
+     16.325,
+     1.8,
+     0.35
+    ],
+    "rotation": [
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     1.0,
+     1.0,
+     1.0
+    ]
+   },
+   "components": {
+    "sindri.physics2d.collider": {
+     "pieces": [
+      {
+       "shape": {
+        "shape": "capsule",
+        "half_height": 0.595,
+        "radius": 0.18
+       },
+       "offset": [
+        0.0,
+        0.0
+       ],
+       "rotation": 1.570796,
+       "sensor": false,
+       "layers": {
+        "memberships": 2,
+        "filter": 6
+       },
+       "friction": 0.3,
+       "restitution": 0.2
+      }
+     ]
+    },
+    "sindri.physics2d.rigid_body": {
+     "kind": "dynamic",
+     "pose": {
+      "position": [
+       0,
+       0
+      ],
+      "rotation": 0
+     },
+     "linear_velocity": [
+      0,
+      0
+     ],
+     "angular_velocity": 0,
+     "gravity_scale": 1.0,
+     "linear_damping": 0.2,
+     "angular_damping": 1.0,
+     "lock_rotation": false,
+     "continuous_collision": false
+    },
+    "sindri.script": {
+     "source": "scripts/parts.decay",
+     "script": "Part",
+     "properties": {
+      "toy": 4.0
+     }
+    }
+   }
+  },
+  {
+   "id": "flipper-left-body",
+   "name": "flipper-left-body",
+   "parent": "flipper-left",
+   "transform_3d": {
+    "position": [
+     0,
+     0,
+     0.0
+    ],
+    "rotation": [
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     1.55,
+     0.36,
+     1.0
+    ]
+   },
+   "components": {
+    "sindri.shape": {
+     "kind": "rect",
+     "count": 6.0,
+     "fill": [
+      1.0,
+      0.6376,
+      0.13287,
+      1.0
+     ],
+     "stroke": [
+      1.0,
+      0.89627,
+      0.55201,
+      1.0
+     ],
+     "stroke_width": 0.12,
+     "corner_radius": 0.0,
+     "dashes": 0.0,
+     "dash_duty": 0.5,
+     "sweep_start": 0.0,
+     "sweep_turns": 1.0,
+     "blend": "over",
+     "layer": 10
+    }
+   }
+  },
+  {
+   "id": "flipper-left-hinge",
+   "name": "flipper-left-hinge",
+   "transform_3d": {
+    "position": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "rotation": [
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     1.0,
+     1.0,
+     1.0
+    ]
+   },
+   "components": {
+    "sindri.physics2d.hinge_joint": {
+     "first": "flipper-left-pin",
+     "second": "flipper-left",
+     "first_anchor": [
+      0.0,
+      0.0
+     ],
+     "second_anchor": [
+      -0.775,
+      0.0
+     ],
+     "limits_enabled": true,
+     "lower_angle": -0.45,
+     "upper_angle": 0.45,
+     "motor_enabled": true,
+     "motor_mode": "position",
+     "motor_velocity": 0.0,
+     "motor_max_torque": 6000.0,
+     "motor_target_angle": -0.45,
+     "motor_stiffness": 2500.0,
+     "motor_damping": 80.0
+    },
+    "sindri.script": {
+     "source": "scripts/parts.decay",
+     "script": "JointPart",
+     "properties": {
+      "toy": 4.0
+     }
+    },
+    "sindri.tags": {
+     "tags": [
+      "joint"
+     ]
+    }
+   }
+  },
+  {
+   "id": "flipper-right-pin",
+   "name": "flipper-right-pin",
+   "transform_3d": {
+    "position": [
+     19.25,
+     1.8,
+     0.4
+    ],
+    "rotation": [
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     0.3,
+     0.3,
+     1.0
+    ]
+   },
+   "components": {
+    "sindri.shape": {
+     "kind": "ellipse",
+     "count": 6.0,
+     "fill": [
+      0.57112,
+      0.20508,
+      1.0,
+      1.0
+     ],
+     "stroke": [
+      0.7913,
+      0.84687,
+      0.9131,
+      1.0
+     ],
+     "stroke_width": 0.2,
+     "corner_radius": 0.0,
+     "dashes": 0.0,
+     "dash_duty": 0.5,
+     "sweep_start": 0.0,
+     "sweep_turns": 1.0,
+     "blend": "over",
+     "layer": 9
+    },
+    "sindri.physics2d.collider": {
+     "pieces": [
+      {
+       "shape": {
+        "shape": "circle",
+        "radius": 0.15
+       },
+       "offset": [
+        0.0,
+        0.0
+       ],
+       "rotation": 0.0,
+       "sensor": false,
+       "layers": {
+        "memberships": 1,
+        "filter": 0
+       },
+       "friction": 0.5,
+       "restitution": 0.0
+      }
+     ]
+    }
+   }
+  },
+  {
+   "id": "flipper-right",
+   "name": "flipper-right",
+   "transform_3d": {
+    "position": [
+     18.475,
+     1.8,
+     0.35
+    ],
+    "rotation": [
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     1.0,
+     1.0,
+     1.0
+    ]
+   },
+   "components": {
+    "sindri.physics2d.collider": {
+     "pieces": [
+      {
+       "shape": {
+        "shape": "capsule",
+        "half_height": 0.595,
+        "radius": 0.18
+       },
+       "offset": [
+        0.0,
+        0.0
+       ],
+       "rotation": 1.570796,
+       "sensor": false,
+       "layers": {
+        "memberships": 2,
+        "filter": 6
+       },
+       "friction": 0.3,
+       "restitution": 0.2
+      }
+     ]
+    },
+    "sindri.physics2d.rigid_body": {
+     "kind": "dynamic",
+     "pose": {
+      "position": [
+       0,
+       0
+      ],
+      "rotation": 0
+     },
+     "linear_velocity": [
+      0,
+      0
+     ],
+     "angular_velocity": 0,
+     "gravity_scale": 1.0,
+     "linear_damping": 0.2,
+     "angular_damping": 1.0,
+     "lock_rotation": false,
+     "continuous_collision": false
+    },
+    "sindri.script": {
+     "source": "scripts/parts.decay",
+     "script": "Part",
+     "properties": {
+      "toy": 4.0
+     }
+    }
+   }
+  },
+  {
+   "id": "flipper-right-body",
+   "name": "flipper-right-body",
+   "parent": "flipper-right",
+   "transform_3d": {
+    "position": [
+     0,
+     0,
+     0.0
+    ],
+    "rotation": [
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     1.55,
+     0.36,
+     1.0
+    ]
+   },
+   "components": {
+    "sindri.shape": {
+     "kind": "rect",
+     "count": 6.0,
+     "fill": [
+      1.0,
+      0.6376,
+      0.13287,
+      1.0
+     ],
+     "stroke": [
+      1.0,
+      0.89627,
+      0.55201,
+      1.0
+     ],
+     "stroke_width": 0.12,
+     "corner_radius": 0.0,
+     "dashes": 0.0,
+     "dash_duty": 0.5,
+     "sweep_start": 0.0,
+     "sweep_turns": 1.0,
+     "blend": "over",
+     "layer": 10
+    }
+   }
+  },
+  {
+   "id": "flipper-right-hinge",
+   "name": "flipper-right-hinge",
+   "transform_3d": {
+    "position": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "rotation": [
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     1.0,
+     1.0,
+     1.0
+    ]
+   },
+   "components": {
+    "sindri.physics2d.hinge_joint": {
+     "first": "flipper-right-pin",
+     "second": "flipper-right",
+     "first_anchor": [
+      0.0,
+      0.0
+     ],
+     "second_anchor": [
+      0.775,
+      0.0
+     ],
+     "limits_enabled": true,
+     "lower_angle": -0.45,
+     "upper_angle": 0.45,
+     "motor_enabled": true,
+     "motor_mode": "position",
+     "motor_velocity": 0.0,
+     "motor_max_torque": 6000.0,
+     "motor_target_angle": 0.45,
+     "motor_stiffness": 2500.0,
+     "motor_damping": 80.0
+    },
+    "sindri.script": {
+     "source": "scripts/parts.decay",
+     "script": "JointPart",
+     "properties": {
+      "toy": 4.0
+     }
+    },
+    "sindri.tags": {
+     "tags": [
+      "joint"
+     ]
+    }
+   }
+  },
+  {
+   "id": "gutter",
+   "name": "gutter",
+   "transform_3d": {
+    "position": [
+     22.7,
+     -0.5,
+     0.0
+    ],
+    "rotation": [
+     0.0,
+     0.0,
+     -0.05455,
+     0.998511
+    ],
+    "scale": [
+     14.6874,
+     0.25,
+     1.0
+    ]
+   },
+   "components": {
+    "sindri.shape": {
+     "kind": "rect",
+     "count": 6.0,
+     "fill": [
+      0.0137,
+      0.02956,
+      0.05781,
+      1.0
+     ],
+     "stroke": [
+      0.07227,
+      0.58408,
+      0.87137,
+      1.0
+     ],
+     "stroke_width": 0.08,
+     "corner_radius": 0.0,
+     "dashes": 0.0,
+     "dash_duty": 0.5,
+     "sweep_start": 0.0,
+     "sweep_turns": 1.0,
+     "blend": "over",
+     "layer": 2
+    },
+    "sindri.physics2d.collider": {
+     "pieces": [
+      {
+       "shape": {
+        "shape": "box",
+        "half_extents": [
+         7.3437,
+         0.125
+        ]
+       },
+       "offset": [
+        0.0,
+        0.0
+       ],
+       "rotation": 0.0,
+       "sensor": false,
+       "layers": {
+        "memberships": 1,
+        "filter": 4294967295
+       },
+       "friction": 0.6,
+       "restitution": 0.0
+      }
+     ]
+    }
+   }
+  },
+  {
+   "id": "lift-chute",
+   "name": "lift-chute",
+   "transform_3d": {
+    "position": [
+     23.75,
+     10.7,
+     0.0
+    ],
+    "rotation": [
+     0.0,
+     0.0,
+     -0.994802,
+     0.101832
+    ],
+    "scale": [
+     2.9614,
+     0.25,
+     1.0
+    ]
+   },
+   "components": {
+    "sindri.shape": {
+     "kind": "rect",
+     "count": 6.0,
+     "fill": [
+      0.0137,
+      0.02956,
+      0.05781,
+      1.0
+     ],
+     "stroke": [
+      0.07227,
+      0.58408,
+      0.87137,
+      1.0
+     ],
+     "stroke_width": 0.08,
+     "corner_radius": 0.0,
+     "dashes": 0.0,
+     "dash_duty": 0.5,
+     "sweep_start": 0.0,
+     "sweep_turns": 1.0,
+     "blend": "over",
+     "layer": 2
+    },
+    "sindri.physics2d.collider": {
+     "pieces": [
+      {
+       "shape": {
+        "shape": "box",
+        "half_extents": [
+         1.4807,
+         0.125
+        ]
+       },
+       "offset": [
+        0.0,
+        0.0
+       ],
+       "rotation": 0.0,
+       "sensor": false,
+       "layers": {
+        "memberships": 1,
+        "filter": 4294967295
+       },
+       "friction": 0.6,
+       "restitution": 0.0
+      }
+     ]
+    }
+   }
+  },
+  {
+   "id": "pinball-control",
+   "name": "pinball-control",
+   "transform_3d": {
+    "position": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "rotation": [
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     1.0,
+     1.0,
+     1.0
+    ]
+   },
+   "components": {
+    "sindri.script": {
+     "source": "scripts/toys.decay",
+     "script": "Pinball",
+     "properties": {
+      "ball": "prefabs/ball.prefab"
+     }
+    }
+   }
+  },
+  {
+   "id": "lift-rail",
+   "name": "lift-rail",
+   "transform_3d": {
+    "position": [
+     27.3,
+     -1.0,
+     -0.5
+    ],
+    "rotation": [
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     0.25,
+     26.0,
+     1.0
+    ]
+   },
+   "components": {
+    "sindri.shape": {
+     "kind": "rect",
+     "count": 6.0,
+     "fill": [
+      0.04231,
+      0.0865,
+      0.15593,
+      1.0
+     ],
+     "stroke": [
+      0.27468,
+      0.43415,
+      0.62396,
+      1.0
+     ],
+     "stroke_width": 0.2,
+     "corner_radius": 0.0,
+     "dashes": 0.0,
+     "dash_duty": 0.5,
+     "sweep_start": 0.0,
+     "sweep_turns": 1.0,
+     "blend": "over",
+     "layer": -5
+    },
+    "sindri.physics2d.collider": {
+     "pieces": [
+      {
+       "shape": {
+        "shape": "box",
+        "half_extents": [
+         0.1,
+         13.0
+        ]
+       },
+       "offset": [
+        0.0,
+        0.0
+       ],
+       "rotation": 0.0,
+       "sensor": false,
+       "layers": {
+        "memberships": 1,
+        "filter": 0
+       },
+       "friction": 0.5,
+       "restitution": 0.0
+      }
+     ]
+    }
+   }
+  },
+  {
+   "id": "lift-car",
+   "name": "lift-car",
+   "transform_3d": {
+    "position": [
+     27.3,
+     -13.4,
+     0.3
+    ],
+    "rotation": [
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     0.8,
+     0.8,
+     1.0
+    ]
+   },
+   "components": {
+    "sindri.shape": {
+     "kind": "rect",
+     "count": 6.0,
+     "fill": [
+      0.07227,
+      0.58408,
+      0.87137,
+      1.0
+     ],
+     "stroke": [
+      0.67244,
+      0.92158,
+      1.0,
+      1.0
+     ],
+     "stroke_width": 0.15,
+     "corner_radius": 0.0,
+     "dashes": 0.0,
+     "dash_duty": 0.5,
+     "sweep_start": 0.0,
+     "sweep_turns": 1.0,
+     "blend": "over",
+     "layer": 11
+    },
+    "sindri.physics2d.collider": {
+     "pieces": [
+      {
+       "shape": {
+        "shape": "box",
+        "half_extents": [
+         0.4,
+         0.4
+        ]
+       },
+       "offset": [
+        0.0,
+        0.0
+       ],
+       "rotation": 0.0,
+       "sensor": false,
+       "layers": {
+        "memberships": 128,
+        "filter": 0
+       },
+       "friction": 0.5,
+       "restitution": 0.0
+      }
+     ]
+    },
+    "sindri.physics2d.rigid_body": {
+     "kind": "dynamic",
+     "pose": {
+      "position": [
+       0,
+       0
+      ],
+      "rotation": 0
+     },
+     "linear_velocity": [
+      0,
+      0
+     ],
+     "angular_velocity": 0,
+     "gravity_scale": 1.0,
+     "linear_damping": 0.5,
+     "angular_damping": 1.0,
+     "lock_rotation": false,
+     "continuous_collision": false
+    },
+    "sindri.script": {
+     "source": "scripts/parts.decay",
+     "script": "Part",
+     "properties": {
+      "toy": 4.0
+     }
+    }
+   }
+  },
+  {
+   "id": "lift-slider",
+   "name": "lift-slider",
+   "transform_3d": {
+    "position": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "rotation": [
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     1.0,
+     1.0,
+     1.0
+    ]
+   },
+   "components": {
+    "sindri.physics2d.slider_joint": {
+     "first": "lift-rail",
+     "second": "lift-car",
+     "first_anchor": [
+      0.0,
+      0.0
+     ],
+     "second_anchor": [
+      0.0,
+      0.0
+     ],
+     "first_axis": [
+      0.0,
+      1.0
+     ],
+     "second_axis": [
+      0.0,
+      1.0
+     ],
+     "limits_enabled": true,
+     "lower_distance": -12.4,
+     "upper_distance": 12.6,
+     "motor_enabled": true,
+     "motor_mode": "position",
+     "motor_velocity": 0.0,
+     "motor_max_force": 8000.0,
+     "motor_target_distance": -12.4,
+     "motor_stiffness": 900.0,
+     "motor_damping": 140.0
+    },
+    "sindri.script": {
+     "source": "scripts/parts.decay",
+     "script": "JointPart",
+     "properties": {
+      "toy": 4.0
+     }
+    },
+    "sindri.tags": {
+     "tags": [
+      "joint"
+     ]
+    }
+   }
+  },
+  {
+   "id": "lift-bucket",
+   "name": "lift-bucket",
+   "transform_3d": {
+    "position": [
+     27.4,
+     -13.3,
+     0.32
+    ],
+    "rotation": [
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     1.0,
+     1.0,
+     1.0
+    ]
+   },
+   "components": {
+    "sindri.physics2d.collider": {
+     "pieces": [
+      {
+       "shape": {
+        "shape": "box",
+        "half_extents": [
+         1.7,
+         0.1
+        ]
+       },
+       "offset": [
+        0.0,
+        0.0
+       ],
+       "rotation": 0.0,
+       "sensor": false,
+       "layers": {
+        "memberships": 128,
+        "filter": 6
+       },
+       "friction": 0.8,
+       "restitution": 0.0
+      },
+      {
+       "shape": {
+        "shape": "box",
+        "half_extents": [
+         0.1,
+         0.55
+        ]
+       },
+       "offset": [
+        1.6,
+        0.55
+       ],
+       "rotation": 0.0,
+       "sensor": false,
+       "layers": {
+        "memberships": 128,
+        "filter": 6
+       },
+       "friction": 0.8,
+       "restitution": 0.0
+      },
+      {
+       "shape": {
+        "shape": "box",
+        "half_extents": [
+         0.06,
+         0.12
+        ]
+       },
+       "offset": [
+        -1.64,
+        0.2
+       ],
+       "rotation": 0.0,
+       "sensor": false,
+       "layers": {
+        "memberships": 128,
+        "filter": 6
+       },
+       "friction": 0.8,
+       "restitution": 0.0
+      }
+     ]
+    },
+    "sindri.physics2d.rigid_body": {
+     "kind": "dynamic",
+     "pose": {
+      "position": [
+       0,
+       0
+      ],
+      "rotation": 0
+     },
+     "linear_velocity": [
+      0,
+      0
+     ],
+     "angular_velocity": 0,
+     "gravity_scale": 1.0,
+     "linear_damping": 0.3,
+     "angular_damping": 2.0,
+     "lock_rotation": false,
+     "continuous_collision": false
+    },
+    "sindri.script": {
+     "source": "scripts/parts.decay",
+     "script": "Part",
+     "properties": {
+      "toy": 4.0
+     }
+    }
+   }
+  },
+  {
+   "id": "lift-bucket-floor",
+   "name": "lift-bucket-floor",
+   "parent": "lift-bucket",
+   "transform_3d": {
+    "position": [
+     0,
+     0,
+     0.0
+    ],
+    "rotation": [
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     3.4,
+     0.2,
+     1.0
+    ]
+   },
+   "components": {
+    "sindri.shape": {
+     "kind": "rect",
+     "count": 6.0,
+     "fill": [
+      0.07227,
+      0.58408,
+      0.87137,
+      1.0
+     ],
+     "stroke": [
+      0.67244,
+      0.92158,
+      1.0,
+      1.0
+     ],
+     "stroke_width": 0.2,
+     "corner_radius": 0.0,
+     "dashes": 0.0,
+     "dash_duty": 0.5,
+     "sweep_start": 0.0,
+     "sweep_turns": 1.0,
+     "blend": "over",
+     "layer": 11
+    }
+   }
+  },
+  {
+   "id": "lift-bucket-wall",
+   "name": "lift-bucket-wall",
+   "parent": "lift-bucket",
+   "transform_3d": {
+    "position": [
+     1.6,
+     0.55,
+     0.0
+    ],
+    "rotation": [
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     0.2,
+     1.1,
+     1.0
+    ]
+   },
+   "components": {
+    "sindri.shape": {
+     "kind": "rect",
+     "count": 6.0,
+     "fill": [
+      0.07227,
+      0.58408,
+      0.87137,
+      1.0
+     ],
+     "stroke": [
+      0.0,
+      0.0,
+      0.0,
+      0.0
+     ],
+     "stroke_width": 0.0,
+     "corner_radius": 0.0,
+     "dashes": 0.0,
+     "dash_duty": 0.5,
+     "sweep_start": 0.0,
+     "sweep_turns": 1.0,
+     "blend": "over",
+     "layer": 11
+    }
+   }
+  },
+  {
+   "id": "lift-tilt",
+   "name": "lift-tilt",
+   "transform_3d": {
+    "position": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "rotation": [
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     1.0,
+     1.0,
+     1.0
+    ]
+   },
+   "components": {
+    "sindri.physics2d.hinge_joint": {
+     "first": "lift-car",
+     "second": "lift-bucket",
+     "first_anchor": [
+      -1.6000000000000014,
+      0.1
+     ],
+     "second_anchor": [
+      -1.7,
+      0.0
+     ],
+     "limits_enabled": true,
+     "lower_angle": -0.3,
+     "upper_angle": 1.15,
+     "motor_enabled": true,
+     "motor_mode": "position",
+     "motor_velocity": 0.0,
+     "motor_max_torque": 6000.0,
+     "motor_target_angle": 0.0,
+     "motor_stiffness": 1500.0,
+     "motor_damping": 120.0
+    },
+    "sindri.script": {
+     "source": "scripts/parts.decay",
+     "script": "JointPart",
+     "properties": {
+      "toy": 4.0
+     }
+    },
+    "sindri.tags": {
+     "tags": [
+      "joint"
+     ]
     }
    }
   },

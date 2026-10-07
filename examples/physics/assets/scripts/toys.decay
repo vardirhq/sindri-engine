@@ -301,3 +301,143 @@ script BackStop {
         }
     }
 }
+
+state Pit {
+    var score: f32 = 0.0;
+    var lifting: bool = true;
+    var lifts: f32 = 0.0;
+}
+
+// The pinball wall and the lift that feeds it. The flippers are position
+// motors between a rest angle and a raised one; the lift is a slider
+// position motor that waits at the bottom, climbs, and tips its bucket.
+script Pinball {
+    @export let ball: Prefab;
+    @export let wait_bottom: f32 = 2.5;
+    @export let wait_top: f32 = 1.2;
+    // 0 waiting below, 1 climbing, 2 pouring, 3 coming down.
+    var phase: f32 = 0.0;
+    var clock: f32 = 0.0;
+    var left_up: bool = false;
+    var right_up: bool = false;
+    var balls: List<Entity> = [];
+
+    fn update(dt: f32) {
+        flippers();
+        lift(dt);
+        if Game.toy == 4.0 {
+            var running = "LIFT RUNNING";
+            if !Pit.lifting { running = "LIFT STOPPED"; }
+            Ui.set_text(World.find("hint"), "Score " + Pit.score + "   /   " + running + "   /   " + Pit.lifts + " loads carried   /   flip with Z and M");
+        }
+    }
+
+    fn flippers() {
+        let selected = Game.toy == 4.0;
+        let left = Input.is_down("Z") || (selected && (Ui.is_held(World.find("act-1")) || Input.is_down("Digit1")));
+        let right = Input.is_down("M") || (selected && (Ui.is_held(World.find("act-2")) || Input.is_down("Digit2")));
+        if left != this.left_up {
+            this.left_up = left;
+            var angle = -0.45;
+            if left { angle = 0.45; }
+            Physics.set_hinge_position_motor(World.find("flipper-left-hinge"), angle, 2500.0, 80.0, 6000.0);
+        }
+        if right != this.right_up {
+            this.right_up = right;
+            var angle = 0.45;
+            if right { angle = -0.45; }
+            Physics.set_hinge_position_motor(World.find("flipper-right-hinge"), angle, 2500.0, 80.0, 6000.0);
+        }
+    }
+
+    fn lift(dt: f32) {
+        if !Pit.lifting && this.phase == 0.0 { return; }
+        this.clock += dt;
+        let slider = World.find("lift-slider");
+        let tilt = World.find("lift-tilt");
+        if this.phase == 0.0 && this.clock > this.wait_bottom {
+            this.phase = 1.0;
+            this.clock = 0.0;
+            // Lean back so the load rolls against the far wall, then climb.
+            Physics.set_hinge_position_motor(tilt, -0.25, 1500.0, 120.0, 6000.0);
+            Physics.set_slider_position_motor(slider, 12.6, 900.0, 140.0, 8000.0);
+        }
+        if this.phase == 1.0 && World.find("lift-car").transform.world_position.y > 11.3 {
+            this.phase = 2.0;
+            this.clock = 0.0;
+            Physics.set_hinge_position_motor(tilt, 1.1, 1500.0, 120.0, 6000.0);
+            Pit.lifts += 1.0;
+            print("Playground lift pouring");
+        }
+        if this.phase == 2.0 && this.clock > this.wait_top {
+            this.phase = 3.0;
+            this.clock = 0.0;
+            Physics.set_hinge_position_motor(tilt, 0.0, 1500.0, 120.0, 6000.0);
+            Physics.set_slider_position_motor(slider, -12.4, 900.0, 140.0, 8000.0);
+        }
+        if this.phase == 3.0 && World.find("lift-car").transform.world_position.y < -13.0 {
+            this.phase = 0.0;
+            this.clock = 0.0;
+        }
+    }
+
+    on ToyAction(toy, action) {
+        if toy != 4.0 { return; }
+        if action == 3.0 {
+            Pit.lifting = !Pit.lifting;
+            print("Playground lift " + Pit.lifting);
+        }
+        if action == 4.0 { multiball(); }
+    }
+
+    // Six balls straight into the chute at the top of the table.
+    fn multiball() {
+        for i in 0..6 {
+            let ball = World.spawn(this.ball);
+            ball.transform.position = Vec3(24.4 - i * 0.65, 11.6 + i * 0.2, 0.3);
+            this.balls.push(ball);
+        }
+        while this.balls.length > 60.0 {
+            let old = this.balls.remove_at(0);
+            if World.exists(old) { World.despawn(old); }
+        }
+        print("Playground multiball");
+    }
+
+    on ResetToy(toy) {
+        if toy == 0.0 || toy == 4.0 {
+            for ball in this.balls {
+                if World.exists(ball) { World.despawn(ball); }
+            }
+            this.balls.clear();
+            Pit.score = 0.0;
+            Pit.lifts = 0.0;
+            this.phase = 0.0;
+            this.clock = 0.0;
+            Physics.set_slider_position_motor(World.find("lift-slider"), -12.4, 900.0, 140.0, 8000.0);
+            Physics.set_hinge_position_motor(World.find("lift-tilt"), 0.0, 1500.0, 120.0, 6000.0);
+        }
+    }
+}
+
+// A bumper: whatever touches it is kicked away along the contact normal, and
+// it lights up. The kick is an impulse, so a heavy ball leaves slower.
+script Bumper {
+    var glow: f32 = 0.0;
+    fn update(dt: f32) {
+        this.glow = max(0.0, this.glow - dt * 4.0);
+        for other in Physics.collision_started() {
+            if World.has_tag(other, "loose") || World.has_tag(other, "body") {
+                let here = this.transform.world_position;
+                let there = other.transform.world_position;
+                let away = Vec2(there.x - here.x, there.y - here.y).normalized;
+                Physics.apply_impulse(other, away.x * 1.6, away.y * 1.6);
+                this.glow = 1.0;
+                Pit.score += 100.0;
+                Effects.burst_at(World.find("bumper-sparks"), there.x, there.y);
+            }
+        }
+        this.shape.fill = Color(1.0, 0.36 + this.glow * 0.6, 0.56 + this.glow * 0.4, 1.0);
+        this.transform.scale = Vec3(1.4 + this.glow * 0.25, 1.4 + this.glow * 0.25, 1.0);
+    }
+}

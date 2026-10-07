@@ -84,7 +84,7 @@ and a 3D ray that reports what it hits.
 - [ ] Room, camera and pointer mapping, tools, global controls and HUD
 - [x] Wrecking ball and gantry crane
 - [x] Cannon and glass gallery
-- [ ] Ball lift, hopper, bumper pit and flippers
+- [x] Ball lift, hopper, bumper pit and flippers
 - [ ] Material lab, seesaw and trampoline
 - [ ] Test track robot, dominoes and red button
 - [ ] Probe tool and debug overlay

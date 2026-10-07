@@ -65,7 +65,7 @@
        "sensor": false,
        "layers": {
         "memberships": 4,
-        "filter": 63
+        "filter": 191
        },
        "friction": 0.3,
        "restitution": 0.6

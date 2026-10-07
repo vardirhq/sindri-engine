@@ -3,7 +3,9 @@
 
 from __future__ import annotations
 
-from common import bit, body, box, circle, material, script, shape
+import math
+
+from common import bit, body, box, capsule, circle, material, script, shape
 from scene import PARTS, Scene, hinge, slider, spring
 
 
@@ -183,8 +185,107 @@ def cannon_gallery(scene: Scene) -> None:
     })
 
 
+
+def slope(scene: Scene, entity_id, start, end, thickness=0.3, fill="#26384d", **extra):
+    """A static plank from one point to another."""
+    dx, dy = end[0] - start[0], end[1] - start[1]
+    length = (dx * dx + dy * dy) ** 0.5
+    return scene.wall(entity_id, (start[0] + end[0]) / 2, (start[1] + end[1]) / 2, length,
+                      thickness, rot=math.atan2(dy, dx), fill=fill, **extra)
+
+
+def bumper_pit(scene: Scene) -> None:
+    """A pinball table on the wall: bumpers that kick, slings, two flippers
+    on motorised hinges, and a drain onto the gutter that feeds the lift."""
+    scene.wall("pit-left", 12.2, 6.6, 0.4, 12.4, fill="#2a1f3d", edge="#9b5de5")
+    scene.wall("pit-right", 22.6, 5.4, 0.4, 9.6, fill="#2a1f3d", edge="#9b5de5")
+    scene.deco("pit-back", 17.4, 6.6, 10.0, 12.4, fill="#150f24", layer=-20, z=-1.5)
+    slope(scene, "pit-sling-left", (12.4, 4.2), (15.45, 2.0), fill="#3c2a5c", edge="#c77dff")
+    slope(scene, "pit-sling-right", (22.4, 4.2), (19.35, 2.0), fill="#3c2a5c", edge="#c77dff")
+    for index, (x, y) in enumerate([(14.6, 9.4), (17.4, 11.0), (20.2, 9.4), (15.9, 6.6),
+                                    (18.9, 6.6)]):
+        scene.add(f"bumper-{index}", f"bumper-{index}", x, y, 0.3, 1.4, 1.4, components={
+            "sindri.shape": shape("ellipse", "#ff5d8f", "#ffd1e1", sw=0.12, layer=9),
+            "sindri.physics2d.collider": {"pieces": [circle(0.7, "static", 0.2, 0.6)]},
+            "sindri.script": script(TOYS, "Bumper"),
+        })
+    for side, (x, length, rest) in enumerate([(15.55, 1.55, -0.45), (19.25, 1.55, 0.45)]):
+        name = ("left", "right")[side]
+        direction = 1.0 if side == 0 else -1.0
+        anchor(scene, f"flipper-{name}-pin", x, 1.8, 0.3, "#c77dff")
+        mid = x + direction * length / 2
+        scene.add(f"flipper-{name}", f"flipper-{name}", mid, 1.8, 0.35, components={
+            "sindri.physics2d.collider": {"pieces": [
+                capsule(length / 2 - 0.18, 0.18, "props", 0.3, 0.2, rotation=math.pi / 2,
+                        filter_mask=bit("props", "balls"))]},
+            "sindri.physics2d.rigid_body": body(damping=0.2, angular_damping=1.0),
+            "sindri.script": script(PARTS, "Part", toy=4.0),
+        })
+        scene.deco(f"flipper-{name}-body", 0, 0, length, 0.36, fill="#ffd166",
+                   edge="#fff3c4", sw=0.12, layer=10, parent=f"flipper-{name}")
+        scene.joint(f"flipper-{name}-hinge", "hinge", hinge(
+            f"flipper-{name}-pin", f"flipper-{name}", (0.0, 0.0),
+            (-direction * length / 2, 0.0), limits=(min(rest, -rest), max(rest, -rest)),
+            motor={"motor_mode": "position", "motor_target_angle": rest,
+                   "motor_stiffness": 2500.0, "motor_damping": 80.0,
+                   "motor_max_torque": 6000.0}), 4)
+
+    # The gutter: from under the flippers, down to the right, into the lift
+    # shaft. The bucket passes straight through it and scoops what waits.
+    slope(scene, "gutter", (15.4, 0.3), (30.0, -1.3), 0.25, fill="#1f3044", edge="#4cc9f0")
+    slope(scene, "lift-chute", (25.2, 11.0), (22.3, 10.4), 0.25, fill="#1f3044",
+          edge="#4cc9f0")
+    scene.add("pinball-control", "pinball-control", components={
+        "sindri.script": script(TOYS, "Pinball", ball="prefabs/ball.prefab")})
+
+
+def ball_lift(scene: Scene) -> None:
+    """A car on a vertical slider, carrying a bucket on a hinge. The slider's
+    position motor runs it up and down; the hinge tilts the bucket back to
+    hold its load and forward to pour it into the chute at the top."""
+    rail_x = 27.3
+    scene.add("lift-rail", "lift-rail", rail_x, -1.0, -0.5, 0.25, 26.0, components={
+        "sindri.shape": shape("rect", "#3a536e", "#8fb0cf", sw=0.2, layer=-5),
+        "sindri.physics2d.collider": {"pieces": [box(0.1, 13.0, "static", filter_mask=0)]},
+    })
+    bottom = -13.4
+    scene.add("lift-car", "lift-car", rail_x, bottom, 0.3, 0.8, 0.8, components={
+        "sindri.shape": shape("rect", "#4cc9f0", "#d6f6ff", sw=0.15, layer=11),
+        "sindri.physics2d.collider": {"pieces": [box(0.4, 0.4, "machines", filter_mask=0)]},
+        "sindri.physics2d.rigid_body": body(damping=0.5, angular_damping=1.0),
+        "sindri.script": script(PARTS, "Part", toy=4.0),
+    })
+    scene.joint("lift-slider", "slider", slider(
+        "lift-rail", "lift-car", (0.0, 1.0), (0.0, 0.0), (0.0, 0.0), limits=(-12.4, 12.6),
+        motor={"motor_mode": "position", "motor_target_distance": -12.4,
+               "motor_stiffness": 900.0, "motor_damping": 140.0, "motor_max_force": 8000.0}), 4)
+    width = 3.4
+    left = rail_x - 1.6
+    scene.add("lift-bucket", "lift-bucket", left + width / 2, bottom + 0.1, 0.32, components={
+        "sindri.physics2d.collider": {"pieces": [
+            box(width / 2, 0.1, "machines", 0.8, 0.0),
+            box(0.1, 0.55, "machines", 0.8, 0.0, offset=(width / 2 - 0.1, 0.55)),
+            box(0.06, 0.12, "machines", 0.8, 0.0, offset=(-width / 2 + 0.06, 0.2)),
+        ]},
+        "sindri.physics2d.rigid_body": body(damping=0.3, angular_damping=2.0),
+        "sindri.script": script(PARTS, "Part", toy=4.0),
+    })
+    scene.deco("lift-bucket-floor", 0, 0, width, 0.2, fill="#4cc9f0", edge="#d6f6ff", sw=0.2,
+               layer=11, parent="lift-bucket")
+    scene.deco("lift-bucket-wall", width / 2 - 0.1, 0.55, 0.2, 1.1, fill="#4cc9f0", layer=11,
+               parent="lift-bucket")
+    scene.joint("lift-tilt", "hinge", hinge(
+        "lift-car", "lift-bucket", (left - rail_x, 0.1), (-width / 2, 0.0),
+        limits=(-0.3, 1.15),
+        motor={"motor_mode": "position", "motor_target_angle": 0.0,
+               "motor_stiffness": 1500.0, "motor_damping": 120.0,
+               "motor_max_torque": 6000.0}), 4)
+
+
 def build(scene: Scene) -> None:
     loose_pile(scene)
     wrecking_ball(scene)
     gantry_crane(scene)
     cannon_gallery(scene)
+    bumper_pit(scene)
+    ball_lift(scene)

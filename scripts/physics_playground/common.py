@@ -9,7 +9,7 @@ import math
 FONT = "fonts/ChakraPetch-Regular.ttf"
 
 # Collision layers, in the bit order the scene's Physics 2D World names them.
-LAYERS = ["static", "props", "balls", "robot", "shells", "glass", "hand"]
+LAYERS = ["static", "props", "balls", "robot", "shells", "glass", "hand", "machines"]
 ALL = 0xFFFFFFFF
 
 
@@ -24,12 +24,15 @@ def bit(*names: str) -> int:
 # shove are kept off its filter; the hand collides with nothing.
 FILTERS = {
     "static": ALL,
-    "props": bit("static", "props", "balls", "robot", "shells", "glass"),
-    "balls": bit("static", "props", "balls", "robot", "shells", "glass"),
+    "props": bit("static", "props", "balls", "robot", "shells", "glass", "machines"),
+    "balls": bit("static", "props", "balls", "robot", "shells", "glass", "machines"),
     "robot": bit("static", "props", "balls"),
     "shells": bit("static", "props", "balls", "glass"),
     "glass": bit("static", "props", "balls", "shells", "glass"),
     "hand": 0,
+    # Machinery that passes through the room's own fixtures: the lift's
+    # bucket rises straight through the gutter it scoops balls off.
+    "machines": bit("props", "balls"),
 }
 
 
