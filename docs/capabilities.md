@@ -300,8 +300,12 @@ contracts. Typed `Physics3d.layer`/`mask` read only the active authored 3D world
 first 32 labels, combine checked names with OR and reject invalid settings or
 unknown labels. Three bridge regressions exercise full-u32 masks, duplicates,
 inactivity, live authoring and real query selection; typed script and session
-fixtures query with named masks. Typed rotated box/capsule probes, resident/edited
-voxel collision and game proof remain unimplemented.
+fixtures query with named masks. Typed rotated box/capsule overlaps and casts
+accept an arbitrary nonzero rotation axis and radians, with f64 normalization
+before quaternion conversion. Five bridge regressions exercise changed geometry,
+sweep travel, filtering, initial overlap and invalid/degenerate input; typed and
+shared-session/browser fixtures query actual geometry with all four probes.
+Resident/edited voxel collision and game proof remain unimplemented.
 
 Forces and rotation have runtime and typed Decay controls: additive world force
 and torque last one fixed step, impulses act immediately and off-centre kicks

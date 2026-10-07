@@ -934,9 +934,18 @@ point is its origin. Exact ties prefer entity then authored piece order.
 Six bridge regressions exercise queries, masks/sensors/exclusion, unsynchronized
 inactivity/despawn, compound uniqueness, boundary/inside hits, invalid input and
 optional/copied script snapshots. The shared-session driver and Chromium landing
-fixture query actual floor geometry using all three calls. Typed rotated box/
-capsule probes remain follow-up slices. Existing extreme
-geometry numerical limitations still apply.
+fixture query actual floor geometry. Typed box/capsule overlaps and casts also
+use indexed geometry, the same filters and copied results. Boxes have positive
+Vec3 half-extents. Capsules lie along local Y before rotation, with non-negative
+straight-segment half-height and positive radius; zero half-height is a sphere.
+Orientation is a finite nonzero Vec3 axis (normalized) and finite angle in radians
+using the right-hand rule; identity uses angle zero. Axes normalize in f64 before
+unit-quaternion conversion, avoiding length overflow/underflow. Casts keep this
+orientation fixed during travel. All inputs fit f32 range. Five bridge regressions
+exercise rotated misses/hits, sensor/exclusion filtering, normalized sweep travel,
+initial overlaps, invalid inputs and zero-height/extreme-axis validity. Typed and
+shared-session/browser scripts exercise all four probes on actual geometry.
+Existing extreme geometry numerical limitations still apply.
 
 `Physics3d.layer(name)` and `mask(names)` read the active authored 3D world's
 labels independently of 2D. The first 32 labels map to mask bits; duplicate

@@ -19,7 +19,13 @@ impl WorldHost<'_> {
         }
         if matches!(
             call,
-            Physics3dCall::Raycast | Physics3dCall::OverlapSphere | Physics3dCall::CastSphere
+            Physics3dCall::Raycast
+                | Physics3dCall::OverlapSphere
+                | Physics3dCall::CastSphere
+                | Physics3dCall::OverlapBox
+                | Physics3dCall::CastBox
+                | Physics3dCall::OverlapCapsule
+                | Physics3dCall::CastCapsule
         ) {
             return self.physics3d_query(call, path, args);
         }

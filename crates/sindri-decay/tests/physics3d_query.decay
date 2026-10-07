@@ -13,6 +13,13 @@ script Query3d {
             var nearby = Physics3d.overlap_sphere(Vec3(0.0, 0.0, 5.0), 1.0, mask, false, null);
             nearby.clear();
             let missed = Physics3d.raycast(Vec3(0.0, 0.0, 0.0), Vec3(1.0, 0.0, 0.0), 1.0, mask, false, null);
+            let box_hit = Physics3d.cast_box(Vec3(0.0, 0.0, 0.0), Vec3(0.1, 0.2, 0.3), Vec3(0.0, 2.0, 0.0), 1.5707963, Vec3(0.0, 0.0, 1.0), 10.0, mask, false, null);
+            let capsule_hit = Physics3d.cast_capsule(Vec3(0.0, 0.0, 0.0), 0.3, 0.1, Vec3(2.0, 0.0, 0.0), 1.5707963, Vec3(0.0, 0.0, 1.0), 10.0, mask, false, null);
+            let boxes = Physics3d.overlap_box(Vec3(0.0, 0.0, 5.0), Vec3(0.1, 0.2, 0.3), Vec3(0.0, 1.0, 0.0), 1.5707963, mask, false, null);
+            let capsules = Physics3d.overlap_capsule(Vec3(0.0, 0.0, 5.0), 0.3, 0.1, Vec3(1.0, 0.0, 0.0), 1.5707963, mask, false, null);
+            if box_hit != null && capsule_hit != null {
+                if box_hit.entity != hit.entity || capsule_hit.entity != hit.entity || !boxes.contains(hit.entity) || !capsules.contains(hit.entity) { return; }
+            } else { return; }
             if fresh != null && swept != null {
                 verified = fresh.entity == hit.entity && fresh.point.z == 4.5 && fresh.normal.z == -1.0 && fresh.distance == 4.5 && swept.distance > 3.99 && swept.distance < 4.01 && missed == null && Physics3d.overlap_sphere(Vec3(0.0, 0.0, 5.0), 1.0, mask, false, null).length == 1;
             }

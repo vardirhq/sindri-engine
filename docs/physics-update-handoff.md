@@ -16,6 +16,35 @@ a pushed handoff. Do not ask them to authorize the scope again.
 
 ## Current continuation checkpoint
 
+Typed `Physics3d.overlap_box`, `cast_box`, `overlap_capsule` and `cast_capsule`
+now use indexed active geometry and existing copied hit/list contracts. Arbitrary
+orientation takes a nonzero Vec3 rotation axis and finite radians using the
+right-hand rule. The host normalizes axes in f64 before quaternion conversion;
+identity uses angle zero, and sweep orientation remains fixed. Boxes have positive
+Vec3 half-extents; Y capsules have non-negative straight-segment half-height and
+positive radius (zero half-height is a sphere). All inputs fit engine f32 range.
+No dependency, engine query API, component schema, 2D surface or game rules changed.
+
+Five bridge regressions exercise rotation-dependent hits/misses around X/Z,
+right-hand angle direction, sensor/exclusion filtering, normalized sweep travel,
+initial overlaps, invalid shapes/axes/angles/directions/arity/context and valid
+zero-height/tiny/large-axis probes. Typed query and shared-session drivers exercise
+all four calls on actual geometry. Scoped preflight passes 398 native game/Decay
+tests and both scripts have zero errors/reminders. All 11 catalogue tests,
+warning-denied Clippy, formatting/size gates, native editor check, all-target/
+all-feature Decay WASM and rebuilt game WASM host pass. API JSON/Markdown regenerate.
+Rebuilt exported-host Chromium verifies all four probes and solid landing with
+WebGPU, four delivered assets and 21 visible colors.
+Artifacts: `/tmp/sindri-probes3d-{preflight,clippy,catalogue,generate,wasm-check,wasm-build,editor-check,export,browser}.log`,
+`/tmp/sindri-probes3d-browser.png`; export `/tmp/sindri-probes3d-export`.
+
+This is query scripting integration toward Causeway, whose occupied/resident/
+edited voxel collision and game proof remain open. Continue with 3D spawn-window
+controls, native inspector/Play/replay evidence and voxel collision proof.
+The named-mask head `25e0d134` has passed browser smoke, Decay preflight,
+Clippy, WASM, formatting and baker CI; test/render captures are still running.
+Verify final-head CI and keep 3D acceptance/final integration unchecked and PR draft.
+
 Typed `Physics3d.layer(name)` and `mask(names)` now read the active authored
 3D world's first 32 labels independently of 2D. Unknown/empty names, wrong
 arguments, malformed or multiple active settings and missing 3D context fail;

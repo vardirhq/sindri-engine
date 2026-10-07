@@ -1343,3 +1343,28 @@ surface-specific completeness. This checklist does not mark those surfaces done.
   The conditional now keeps full history for manual Decay preflight and depth
   2 for other runs. Final-head CI must verify this permanent workflow repair
   and the named-mask slice. 3D acceptance and final integration stay unchecked.
+
+
+## Typed rotated 3D probe checkpoint
+
+- `Physics3d.overlap_box`/`cast_box` and `overlap_capsule`/`cast_capsule` use
+  indexed active geometry and the ray/sphere filters and copied result contracts.
+  Orientation takes a finite nonzero Vec3 axis and finite radians with the
+  right-hand rule; f64 normalization precedes quaternion conversion. Identity
+  uses angle zero and sweeps keep orientation fixed. Box half-extents are positive;
+  local-Y capsule straight-segment half-height is non-negative and radius positive,
+  with zero half-height defining a sphere. All inputs fit engine f32 range.
+- Five bridge regressions exercise changed geometry around X/Z, angle direction,
+  filters, normalized travel, initial overlaps, invalid values/arity/context and
+  zero-height/tiny/large-axis validity. Typed and shared-session scripts call
+  all four probes against actual geometry; exported Chromium verifies landing
+  with WebGPU, asset delivery and visible geometry checks intact.
+- Scoped preflight passes 398 native tests, both typed scripts have zero errors/
+  reminders, and all 11 catalogue tests, regenerated APIs, warning-denied Clippy,
+  native editor check, Decay WASM checks and game WASM build pass.
+  No dependency, engine query API, component schema, 2D surface or game rules changed.
+- This is scripting integration toward Causeway. Spawn-window controls, native
+  inspector/Play/replay and occupied/resident/edited voxel/game proof remain open.
+  3D acceptance and final integration stay unchecked. The named-mask head has
+  passed browser/Decay preflight and other completed CI gates, with test/render
+  captures still running; the new probe head requires its own verification.

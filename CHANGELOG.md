@@ -274,6 +274,9 @@ requests, commit history, and subsystem documentation rather than this file.
 
 ### Added
 
+- Typed 3D box/capsule overlaps and casts accept rotation axes and radians,
+  returning copied hits or entity lists over indexed active geometry. Sweeps
+  keep orientation fixed; invalid dimensions or rotations fail explicitly.
 - Typed `Physics3d.layer(name)` and `mask(names)` select checked query masks
   from active authored 3D world labels independently of 2D. Invalid names,
   arguments or world settings fail explicitly; masks retain all 32 bits.

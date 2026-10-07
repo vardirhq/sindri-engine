@@ -1007,6 +1007,10 @@ a person who has not clicked yet.
 | `Physics3d.raycast(origin: Vec3, direction: Vec3, max_distance, mask, include_sensors, exclude: Entity?)` | `RayHit3d?` |
 | `Physics3d.overlap_sphere(centre: Vec3, radius, mask, include_sensors, exclude: Entity?)` | `List<Entity>` |
 | `Physics3d.cast_sphere(origin: Vec3, radius, direction: Vec3, max_distance, mask, include_sensors, exclude: Entity?)` | `RayHit3d?` |
+| `Physics3d.overlap_box(centre: Vec3, half_extents: Vec3, rotation_axis: Vec3, rotation_angle, mask, include_sensors, exclude: Entity?)` | `List<Entity>` |
+| `Physics3d.cast_box(origin: Vec3, half_extents: Vec3, rotation_axis: Vec3, rotation_angle, direction: Vec3, max_distance, mask, include_sensors, exclude: Entity?)` | `RayHit3d?` |
+| `Physics3d.overlap_capsule(centre: Vec3, half_height, radius, rotation_axis: Vec3, rotation_angle, mask, include_sensors, exclude: Entity?)` | `List<Entity>` |
+| `Physics3d.cast_capsule(origin: Vec3, half_height, radius, rotation_axis: Vec3, rotation_angle, direction: Vec3, max_distance, mask, include_sensors, exclude: Entity?)` | `RayHit3d?` |
 | `Physics3d.velocity(entity)` | `Vec3` |
 | `Physics3d.set_velocity(entity, velocity: Vec3)` | nothing |
 | `Physics3d.angular_velocity(entity)` | `Vec3` |
@@ -1052,8 +1056,19 @@ engine f32 values; radii are positive, travel non-negative and directions nonzer
 synchronized geometry without stepping physics and skip inactive/despawned
 entities even before the next synchronization. Inside/on or initial-overlap hits
 have zero distance/normal; sphere initial overlaps use the probe origin as point.
-Exact hit ties prefer entity handle then piece order. Rotated box/capsule probes
-remain absent from the typed 3D surface.
+Exact hit ties prefer entity handle then piece order.
+
+Box and capsule overlaps/casts share these filters, active-entity checks and
+copied results. Box half-extents are positive Vec3 distances from centre to faces.
+A capsule lies along local Y before rotation; `half_height` is half its straight
+segment length (non-negative, zero makes a sphere) and `radius` is positive.
+`rotation_axis` is a finite nonzero Vec3, normalized by the host;
+`rotation_angle` is finite radians about it using the right-hand rule.
+Identity orientation uses any nonzero axis and angle zero. Cast orientation stays
+fixed during travel. Inputs must fit engine f32 range. Quaternion conversion
+normalizes the axis using f64 to avoid length overflow/underflow; no quaternion
+assembly is required in scripts. Query positions and rotation axes are world-space; dimensions use world units
+independently of visual transform scale.
 
 ### Bodies, and what they touched
 

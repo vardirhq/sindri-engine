@@ -48,6 +48,64 @@ pub(super) const TYPES: &[TypeEntry] = &[
                 "Closest fixed-orientation sphere sweep as a copied RayHit3d or null. Positive finite radius, finite Vec3 origin/direction, normalized nonzero direction and non-negative distance in engine f32 range; endpoint must remain finite. Point is world contact, distance is probe travel. Initial overlap returns origin, zero distance and zero normal. Uses indexed synchronized geometry and the ray filter, skipping inactive/despawned entities. No rotation or physics step; extreme finite geometry still has the engine's documented numerical limitations.",
             ),
             call(
+                "overlap_box",
+                &[
+                    "centre",
+                    "half_extents",
+                    "rotation_axis",
+                    "rotation_angle",
+                    "mask",
+                    "include_sensors",
+                    "exclude",
+                ],
+                "Indexed active 3D shape query. Positive Vec3 half-extents define the box. Finite f32-range values are required. A nonzero Vec3 rotation_axis is normalized and rotation_angle is radians about it using the right-hand rule. Uses the ray membership mask, sensor opt-in and whole-entity exclusion. Overlaps are sorted unique copied Entity lists; casts retain initial-overlap and deterministic tie semantics. Does not step physics.",
+            ),
+            call(
+                "cast_box",
+                &[
+                    "origin",
+                    "half_extents",
+                    "rotation_axis",
+                    "rotation_angle",
+                    "direction",
+                    "max_distance",
+                    "mask",
+                    "include_sensors",
+                    "exclude",
+                ],
+                "Indexed active 3D shape query. Positive Vec3 half-extents define the box. Sweeps return copied RayHit3d or null with fixed orientation and nonzero normalized direction; travel is non-negative and the endpoint finite. Finite f32-range values are required. A nonzero Vec3 rotation_axis is normalized and rotation_angle is radians about it using the right-hand rule. Uses the ray membership mask, sensor opt-in and whole-entity exclusion. Overlaps are sorted unique copied Entity lists; casts retain initial-overlap and deterministic tie semantics. Does not step physics.",
+            ),
+            call(
+                "overlap_capsule",
+                &[
+                    "centre",
+                    "half_height",
+                    "radius",
+                    "rotation_axis",
+                    "rotation_angle",
+                    "mask",
+                    "include_sensors",
+                    "exclude",
+                ],
+                "Indexed active 3D shape query. The capsule lies along local Y before rotation; half_height is the non-negative half-length of its straight segment and radius is positive. Zero half-height is a sphere. Finite f32-range values are required. A nonzero Vec3 rotation_axis is normalized and rotation_angle is radians about it using the right-hand rule. Uses the ray membership mask, sensor opt-in and whole-entity exclusion. Overlaps are sorted unique copied Entity lists; casts retain initial-overlap and deterministic tie semantics. Does not step physics.",
+            ),
+            call(
+                "cast_capsule",
+                &[
+                    "origin",
+                    "half_height",
+                    "radius",
+                    "rotation_axis",
+                    "rotation_angle",
+                    "direction",
+                    "max_distance",
+                    "mask",
+                    "include_sensors",
+                    "exclude",
+                ],
+                "Indexed active 3D shape query. The local-Y capsule has non-negative straight-segment half_height and positive radius; zero half-height is a sphere. Sweeps return copied RayHit3d or null with fixed orientation and nonzero normalized direction; travel is non-negative and the endpoint finite. Finite f32-range values are required. A nonzero Vec3 rotation_axis is normalized and rotation_angle is radians about it using the right-hand rule. Uses the ray membership mask, sensor opt-in and whole-entity exclusion. Overlaps are sorted unique copied Entity lists; casts retain initial-overlap and deterministic tie semantics. Does not step physics.",
+            ),
+            call(
                 "velocity",
                 &["entity"],
                 "A copied world-space Vec3 linear velocity of an active synchronized 3D body.",
@@ -96,12 +154,12 @@ pub(super) const TYPES: &[TypeEntry] = &[
     },
     TypeEntry {
         name: "RayHit3d",
-        text: "Copied closest 3D ray/sphere-cast hit, optional where no hit exists. World-space point/normal and world-unit distance; editing fields never changes simulation geometry.",
+        text: "Copied closest 3D ray/shape-cast hit, optional where no hit exists. World-space point/normal and world-unit distance; editing fields never changes simulation geometry.",
         members: &[
             value("entity", "The active entity whose collider piece was hit."),
             value(
                 "point",
-                "World-space Vec3 hit/contact position; probe origin for an initial sphere overlap.",
+                "World-space Vec3 hit/contact position; probe origin for an initial shape overlap.",
             ),
             value(
                 "normal",
@@ -109,7 +167,7 @@ pub(super) const TYPES: &[TypeEntry] = &[
             ),
             value(
                 "distance",
-                "World-unit ray distance or sphere centre travel, including zero for initial overlap.",
+                "World-unit ray distance or shape centre travel, including zero for initial overlap.",
             ),
         ],
     },

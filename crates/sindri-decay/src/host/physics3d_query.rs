@@ -20,7 +20,10 @@ impl WorldHost<'_> {
         let filter_at = match call {
             Physics3dCall::Raycast => 3,
             Physics3dCall::OverlapSphere => 2,
-            Physics3dCall::CastSphere => 4,
+            Physics3dCall::CastSphere | Physics3dCall::OverlapBox => 4,
+            Physics3dCall::CastBox => 6,
+            Physics3dCall::OverlapCapsule => 5,
+            Physics3dCall::CastCapsule => 7,
             _ => unreachable!("only query calls reach here"),
         };
         if args.len() != filter_at + 3 {
@@ -53,14 +56,13 @@ impl WorldHost<'_> {
                 .map_err(|failure| error(&failure.to_string()))?;
             return Ok(hit.map_or(Value::Null, snapshot));
         }
-        let shape = ColliderShape3d::Sphere {
-            radius: scalar(path, &args[1])?,
-        };
-        let pose = PhysicsPose3d {
-            position,
-            ..PhysicsPose3d::default()
-        };
-        if matches!(call, Physics3dCall::OverlapSphere) {
+        let (shape, pose) = probe(call, path, args, position)?;
+        if matches!(
+            call,
+            Physics3dCall::OverlapSphere
+                | Physics3dCall::OverlapBox
+                | Physics3dCall::OverlapCapsule
+        ) {
             let entities = physics
                 .world
                 .overlap_where(shape, pose, filter, active)
@@ -77,8 +79,8 @@ impl WorldHost<'_> {
             .shape_cast_where(
                 shape,
                 pose,
-                vector(path, &args[2])?,
-                scalar(path, &args[3])?,
+                vector(path, &args[filter_at - 2])?,
+                scalar(path, &args[filter_at - 1])?,
                 filter,
                 active,
             )
@@ -92,6 +94,52 @@ impl WorldHost<'_> {
             })
         }))
     }
+}
+
+fn probe(
+    call: Physics3dCall,
+    path: &Path,
+    args: &[Value],
+    position: [f32; 3],
+) -> Result<(ColliderShape3d, PhysicsPose3d), RuntimeError> {
+    let (shape, rotation) = match call {
+        Physics3dCall::OverlapSphere | Physics3dCall::CastSphere => (
+            ColliderShape3d::Sphere {
+                radius: scalar(path, &args[1])?,
+            },
+            PhysicsPose3d::default().rotation,
+        ),
+        Physics3dCall::OverlapBox | Physics3dCall::CastBox => (
+            ColliderShape3d::Box {
+                half_extents: vector(path, &args[1])?,
+            },
+            rotation(path, &args[2], &args[3])?,
+        ),
+        Physics3dCall::OverlapCapsule | Physics3dCall::CastCapsule => (
+            ColliderShape3d::Capsule {
+                half_height: scalar(path, &args[1])?,
+                radius: scalar(path, &args[2])?,
+            },
+            rotation(path, &args[3], &args[4])?,
+        ),
+        _ => unreachable!("only shape query calls reach here"),
+    };
+    Ok((shape, PhysicsPose3d { position, rotation }))
+}
+
+// Normalize in f64 so finite nonzero f32 axes, including tiny components,
+// produce a finite unit quaternion without squared-length overflow/underflow.
+fn rotation(path: &Path, axis: &Value, angle: &Value) -> Result<[f32; 4], RuntimeError> {
+    let [x, y, z] = vector(path, axis)?.map(f64::from);
+    let length = x.hypot(y).hypot(z);
+    if length <= 0.0 {
+        return Err(RuntimeError::Host(format!(
+            "{} requires a nonzero rotation axis",
+            path.dotted()
+        )));
+    }
+    let (sin, cos) = (f64::from(scalar(path, angle)?) * 0.5).sin_cos();
+    Ok([x / length * sin, y / length * sin, z / length * sin, cos].map(super::convert::as_f32))
 }
 
 fn scalar(path: &Path, value: &Value) -> Result<f32, RuntimeError> {

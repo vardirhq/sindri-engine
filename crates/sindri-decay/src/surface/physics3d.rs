@@ -13,6 +13,10 @@ pub(crate) enum Physics3dCall {
     Raycast,
     OverlapSphere,
     CastSphere,
+    OverlapBox,
+    CastBox,
+    OverlapCapsule,
+    CastCapsule,
     Velocity,
     SetVelocity,
     AngularVelocity,
@@ -30,6 +34,10 @@ pub(crate) const CALLS: &[(&str, Physics3dCall)] = &[
     ("raycast", Physics3dCall::Raycast),
     ("overlap_sphere", Physics3dCall::OverlapSphere),
     ("cast_sphere", Physics3dCall::CastSphere),
+    ("overlap_box", Physics3dCall::OverlapBox),
+    ("cast_box", Physics3dCall::CastBox),
+    ("overlap_capsule", Physics3dCall::OverlapCapsule),
+    ("cast_capsule", Physics3dCall::CastCapsule),
     ("velocity", Physics3dCall::Velocity),
     ("set_velocity", Physics3dCall::SetVelocity),
     ("angular_velocity", Physics3dCall::AngularVelocity),
@@ -60,9 +68,13 @@ pub(crate) fn add_surface(environment: &mut Environment) {
         let (params, return_type) = match call {
             Physics3dCall::Layer => (vec![Type::String], Type::F32),
             Physics3dCall::Mask => (vec![Type::array_of(Type::String)], Type::F32),
-            Physics3dCall::Raycast | Physics3dCall::OverlapSphere | Physics3dCall::CastSphere => {
-                query_signature(*call)
-            }
+            Physics3dCall::Raycast
+            | Physics3dCall::OverlapSphere
+            | Physics3dCall::CastSphere
+            | Physics3dCall::OverlapBox
+            | Physics3dCall::CastBox
+            | Physics3dCall::OverlapCapsule
+            | Physics3dCall::CastCapsule => query_signature(*call),
             Physics3dCall::Velocity | Physics3dCall::AngularVelocity => {
                 (vec![entity()], Type::Vec3)
             }
@@ -88,14 +100,26 @@ fn query_signature(call: Physics3dCall) -> (Vec<Type>, Type) {
         Physics3dCall::Raycast => vec![Type::Vec3, Type::Vec3, Type::F32],
         Physics3dCall::OverlapSphere => vec![Type::Vec3, Type::F32],
         Physics3dCall::CastSphere => vec![Type::Vec3, Type::F32, Type::Vec3, Type::F32],
+        Physics3dCall::OverlapBox | Physics3dCall::CastBox => {
+            vec![Type::Vec3, Type::Vec3, Type::Vec3, Type::F32]
+        }
+        Physics3dCall::OverlapCapsule | Physics3dCall::CastCapsule => {
+            vec![Type::Vec3, Type::F32, Type::F32, Type::Vec3, Type::F32]
+        }
         _ => unreachable!("only query calls reach here"),
     };
+    if matches!(call, Physics3dCall::CastBox | Physics3dCall::CastCapsule) {
+        params.extend([Type::Vec3, Type::F32]);
+    }
     params.extend([
         Type::F32,
         Type::Bool,
         Type::Optional(Box::new(Type::Named(super::ENTITY.to_owned()))),
     ]);
-    let result = if matches!(call, Physics3dCall::OverlapSphere) {
+    let result = if matches!(
+        call,
+        Physics3dCall::OverlapSphere | Physics3dCall::OverlapBox | Physics3dCall::OverlapCapsule
+    ) {
         Type::array_of(Type::Named(super::ENTITY.to_owned()))
     } else {
         Type::Optional(Box::new(Type::Named(RAY_HIT.to_owned())))

@@ -28,6 +28,13 @@ script Physics3dDriver {
             let hit = Physics3d.raycast(origin, Vec3(0.0, -2.0, 0.0), 5.0, floor, false, this.entity);
             let swept = Physics3d.cast_sphere(origin, 0.1, Vec3(0.0, -1.0, 0.0), 5.0, floor, false, this.entity);
             let nearby = Physics3d.overlap_sphere(at - Vec3(0.0, 0.5, 0.0), 0.6, floor, false, this.entity);
+            let box_hit = Physics3d.cast_box(origin, Vec3(0.1, 0.2, 0.3), Vec3(1.0, 0.0, 0.0), 0.5, Vec3(0.0, -1.0, 0.0), 5.0, floor, false, this.entity);
+            let capsule_hit = Physics3d.cast_capsule(origin, 0.2, 0.1, Vec3(1.0, 0.0, 0.0), 0.5, Vec3(0.0, -1.0, 0.0), 5.0, floor, false, this.entity);
+            let boxes = Physics3d.overlap_box(at - Vec3(0.0, 0.5, 0.0), Vec3(0.1, 0.2, 0.3), Vec3(1.0, 0.0, 0.0), 0.5, floor, false, this.entity);
+            let capsules = Physics3d.overlap_capsule(at - Vec3(0.0, 0.5, 0.0), 0.2, 0.1, Vec3(1.0, 0.0, 0.0), 0.5, floor, false, this.entity);
+            if box_hit != null && capsule_hit != null && hit != null {
+                if box_hit.entity != hit.entity || capsule_hit.entity != hit.entity || !boxes.contains(hit.entity) || !capsules.contains(hit.entity) { return; }
+            } else { return; }
             if hit != null && swept != null {
                 verified = hit.entity == swept.entity && nearby.contains(hit.entity) && hit.normal.y > 0.99 && hit.point.y > 0.2 && hit.point.y < 0.3 && swept.distance < hit.distance;
                 if verified { print("3D typed queries and collision landing verified"); }
