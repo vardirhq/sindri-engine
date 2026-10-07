@@ -1418,3 +1418,17 @@ No physics/renderer dependency, component or host surface was introduced. This
 is a general foundation toward Causeway; actual scene-resident collision,
 revision caches, bounded frame updates and game/editor/Decay/browser proof
 remain absent. Both major acceptance items stay unchecked.
+
+### Replaceable 3D static geometry prerequisite
+
+The solver can now validate, replace and remove keyed static collider groups
+under one real entity without rebuilding its body or unaffected collider handles.
+Queries refresh immediately with canonical piece ordering and owner identity;
+invalid inputs/kinds/pending conflicts reject before mutation. Six regressions
+prove handle preservation, filters, lifetime and actual landing/contact followed
+by falling after removal. Scoped preflight passes 187 native tests; warning-denied
+Clippy and all-target/all-feature WASM checks pass. This general primitive is
+needed for Causeway's resident/edited voxel collision without artificial section
+entities. Scene policy/transform/revision caches, residency and budgets, and
+actual game/editor/Decay/browser integration remain absent. Acceptance stays
+unchecked. No dependencies, components or host APIs changed.

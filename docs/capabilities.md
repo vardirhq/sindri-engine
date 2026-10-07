@@ -866,6 +866,18 @@ than allowing the runtime type to make the broader feature look complete.
 
 ### Voxel world foundation
 
+The standalone 3D solver now owns keyed static collider groups under one real
+entity. Replacement/removal retains other collider handles and the body handle;
+queries update immediately with owner identity and canonical key/piece ordering.
+A read-only validator supports complete scene-batch preflight. Invalid geometry,
+nonstatic owners or incompatible pending controls leave the world unchanged.
+Empty owners retain identity until full removal. Six native regressions include
+actual landing/events, deletion/falling, filters and internal handle retention;
+187 physics tests, Clippy and WASM checks pass. No scene host uses this API yet:
+revision caches, resident lifecycle/budgets and actual game/browser/editor voxel
+collision remain absent. See [`physics.md`](physics.md) for the contract/cost.
+
+
 A renderer/physics-independent `compile_section_collision` now derives exact
 section-local collision boxes from occupied `VoxelSection` cells and a supplied
 solidity/shape policy. Full cubes merge deterministically across material IDs;

@@ -1094,6 +1094,43 @@ invisible plane or this standalone API is not voxel/game proof. CCD controls,
 contacts, force/torque, materials, joints and character controllers also have no
 3D authoring/Decay surface yet. The 2D API remains unchanged.
 
+## Replaceable static collider groups
+
+`PhysicsWorld3d::replace_static_group(entity, key, pose, pieces)` changes one
+static geometry group under a real engine entity, retaining that body's handle,
+all other group's collider handles and any originally inserted pieces. A first
+nonempty group creates a static owner; group keys are caller-owned runtime u64
+identities, not scene or entity handles. This is a general streamed/editable
+geometry primitive toward Causeway, with no voxel dependency in the solver.
+
+Pose belongs to the whole owner, so changing it moves every group together.
+Each piece retains its local offset/rotation, sensor, masks and coefficients.
+Immediate indexed queries see the new geometry and return the owner's entity;
+exact ties use original pieces, then ascending group key and piece order.
+Replacement rebuilds only that group's backend colliders, although query-index
+ordering/pose refresh visits the owner's retained pieces as well. Hosts must
+bound total owned pieces and per-step edits; the API imposes no residency budget.
+
+`validate_static_group` checks pose, all pieces, static kind and (for a new
+nonempty owner) pending-control compatibility without mutation, allowing hosts
+to prevalidate their whole edit batch. Invalid replacements preserve geometry.
+`remove_static_group` releases one group, preserving body and all other pieces;
+an unknown group returns false on an existing static owner. Missing/nonstatic
+owners fail. Replacing with an empty list removes that group and applies the
+owner pose; it never creates an absent owner. An empty existing owner remains
+registered until ordinary `remove`, which cancels every group and allows clean
+owner reuse. Changed/removed pieces follow ordinary structural collider event
+semantics; retained pieces are not rebuilt.
+
+Six native regressions exercise immediate replacement/removal queries,
+original-piece preservation, actual body/unaffected collider handles, canonical
+ordering, invalid inputs/nonstatic owners/pending conflicts, sensor/mask/local
+pose filtering, empty/reused owners and a dynamic body's landing/contact event
+against its real owner followed by falling after removal. All 187 physics tests,
+warning-denied native checks/Clippy and all-target/all-feature WASM checks pass.
+This is an engine prerequisite: scene policy/revision/residency wiring and real
+Causeway/Decay/editor/browser streamed collision remain absent.
+
 ## Voxel collision geometry foundation
 
 `compile_section_collision` in `sindri-voxel` accepts a `VoxelSection` and a

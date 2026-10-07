@@ -5,10 +5,15 @@ mod controls;
 mod pending;
 mod query;
 mod spatial;
+mod static_groups;
 mod sweep;
 mod validation;
 
-use std::{collections::HashMap, sync::mpsc, time::Duration};
+use std::{
+    collections::{BTreeMap, HashMap},
+    sync::mpsc,
+    time::Duration,
+};
 
 use rapier3d::prelude as r3;
 use sindri_core::EntityId;
@@ -24,10 +29,12 @@ struct BodyRecord {
     body: r3::RigidBodyHandle,
     colliders: Vec<r3::ColliderHandle>,
     kind: RigidBodyKind,
+    base_colliders: usize,
+    groups: BTreeMap<u64, Vec<r3::ColliderHandle>>,
 }
 
 /// A standalone 3D world. Hosts supply each fixed step; backend types stay private.
-/// Scene synchronization, Decay access and voxel collision are separate slices.
+/// Hosts own scene synchronization, scripting and streamed geometry lifecycle.
 pub struct PhysicsWorld3d {
     backend: r3::PhysicsWorld,
     bodies: HashMap<EntityId, BodyRecord>,
@@ -91,6 +98,8 @@ impl PhysicsWorld3d {
                 body: handle,
                 colliders: handles,
                 kind: body.kind,
+                base_colliders: colliders.len(),
+                groups: BTreeMap::new(),
             },
         );
         self.index_body(entity);

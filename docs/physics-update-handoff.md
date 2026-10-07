@@ -16,6 +16,45 @@ a pushed handoff. Do not ask them to authorize the scope again.
 
 ## Current continuation checkpoint
 
+`PhysicsWorld3d` now supports `validate_static_group`, `replace_static_group`
+and `remove_static_group`. Keyed groups share one real owner/body; replacing one
+rebuilds only its backend colliders, retaining body/unaffected collider handles
+and originally inserted pieces. Query-index refresh still visits all owner
+pieces, so scene hosts must bound total pieces/per-step work. Canonical query
+order is original pieces, then ascending u64 group key and piece order. Pose
+applies to the whole owner. Piece local poses, masks, sensors and coefficients
+are preserved; indexed queries refresh immediately with real owner identity.
+First nonempty group creates a static owner. Invalid pose/pieces/nonstatic owners
+or incompatible new-owner pending controls reject without mutation. Empty
+replacement removes one group and applies owner pose, never creating an absent
+owner. Last removal leaves the body registered until full `remove`; owner reuse
+clears all group state. Unknown group removal returns false for existing static
+owners; missing/nonstatic owners fail. All operations remain engine-generic.
+
+Six native regressions exercise preserved internal handles, canonical ordering,
+immediate replacement/removal queries, original pieces, atomic errors/pending
+retention, empty/reused owners, sensor/mask/local-pose filters and actual landing/
+contact on the real owner followed by falling after removal. Scoped preflight
+passes 187 physics tests; warning-denied Clippy and all-target/all-feature WASM
+checks pass. Logs `/tmp/sindri-static-groups-{check,focused,preflight,clippy,wasm}.log`.
+No dependency, component or Decay host surface changed; generated catalogues need
+no regeneration. This slice is native solver proof plus WASM compilation, not
+browser/scene/game group execution. Prior head `bd8c4244` passed CI run
+`37669050435`; verify the newly pushed head before claiming readiness.
+
+Next wire the scene seam using section-keyed static groups and the preceding
+`compile_section_collision` foundation. Resolve actual block support/shape policy
+and composed transforms, cache occupancy AND policy revisions, reconcile resident
+entry/edit/exit/disabled worlds and bound compile/owned-piece work. Scene public
+`VoxelGround::of` already resolves generator/palette/edits; its current footing
+policy only stores support/walkability/top, so verify full tile bounds before
+using it as a collision policy. Do not invent section entities or couple voxel
+storage to physics/scene/renderer/Causeway. Prove actual Causeway resident/edited
+collision, queries/events natively and in Chromium, then native 3D authoring/
+Play/replay. Both final acceptance items stay unchecked; keep PR #497 draft.
+
+Earlier checkpoint notes follow.
+
 The voxel collision geometry prerequisite is implemented in `sindri-voxel`:
 `compile_section_collision` takes one resident `VoxelSection` and a caller-owned
 `VoxelId -> Option<VoxelShape>` solidity/shape policy, never sampling a generator

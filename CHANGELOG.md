@@ -274,6 +274,10 @@ requests, commit history, and subsystem documentation rather than this file.
 
 ### Added
 
+- Add independently replaceable 3D static collider groups under one entity,
+  preserving the body and unaffected collider handles. Queries update immediately;
+  invalid changes fail before mutation. Scene streaming/voxel wiring remains open.
+
 - Add renderer-independent voxel section collision geometry: exact boxes with
   deterministic full-cube merging, partial slabs/posts, explicit noncollision
   policy, typed invalid-shape errors and bounded output. Scene/solver integration
