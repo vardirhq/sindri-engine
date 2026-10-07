@@ -28,6 +28,7 @@ pub(crate) use peers::Peers;
 mod actions;
 mod person;
 mod physics;
+mod physics3d;
 mod physics_character;
 mod physics_contacts;
 mod physics_controls;
@@ -109,6 +110,7 @@ pub struct WorldHost<'a> {
     profiles: &'a ProfileSources,
     /// The physics a script may read and drive, when the host runs any.
     physics: Option<crate::Physics2d<'a>>,
+    pub(crate) physics3d: Option<crate::Physics3d<'a>>,
     pub(crate) characters: Option<crate::Characters2d<'a>>,
     /// What the game remembers, when the host is keeping a save.
     saves: Option<&'a mut sindri_core::SaveStore>,

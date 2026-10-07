@@ -1228,3 +1228,38 @@ surface-specific completeness. This checklist does not mark those surfaces done.
   game capability. Native authoring/Play/replay, typed Decay Vec3 controls/events,
   resident/edited voxel collision and final integration remain open. 3D acceptance
   remains unchecked; CI must verify this new head.
+
+
+## Typed 3D controls and events checkpoint
+
+- Added the independent typed `Physics3d` namespace without changing the 2D
+  `Physics` API. Copied Vec3 linear/angular velocities, velocity setters and
+  dynamic impulses use active synchronized bodies. Finite f32-range input and
+  body kinds validate before mutation; rotation locking retains zero angular
+  velocity. Live controls leave authored motion unchanged and survive ordinary
+  scene synchronization; structural rebuilds restore authored settings.
+- Collision started/stopped and sensor entered/exited return copied sorted unique
+  other-entity lists from the last successful 3D step. Every script sees the same
+  non-draining snapshot; inactive/despawned references are filtered. Shared
+  native/browser sessions and editor Play supply separate 2D and 3D context.
+- Six new bridge regressions exercise vectors, kinds, invalid input/arity/context,
+  stale/inactive/unsynchronized bodies, locking, subsequent scene steps and all
+  four event queries. Two scripts exercise independent copied sensor lists. A new
+  shared-session Decay driver exercises actual Vec3 motion and solid landing.
+- Scoped preflight passes all 1,006 game/Decay/editor tests, warning-denied
+  all-target/all-feature checks, formatting, size and typed-script gates. Clippy,
+  Decay all-target/all-feature WASM and game WASM library check/build pass.
+  Regenerated API JSON/Markdown and all 11 catalogue tests pass. The full native
+  suite found a missing scripting-contract call table; all nine entries were
+  added before the passing rerun. No dependency or scene schema changed.
+- Rebuilt exported-host Chromium smoke confirms velocity/impulse controls,
+  rotation locking, copied values and an actual solid collision landing event,
+  with WebGPU, scene/script/texture delivery and visible geometry checks intact.
+  The isolated normal platformer goal run passes with five coins, no falls,
+  seven jumps and 11.417 simulated seconds (27 assets). An earlier run overlapping
+  native compilation fell; isolation passed without changing gameplay or checks.
+- Spawn-to-synchronization queuing remains absent, explicitly tracked in parity;
+  3D controls called before body materialization fail. This is general scripting
+  plumbing toward Causeway, not completed voxel/game proof. Native inspector/
+  Play/replay, typed 3D queries, occupied/resident/edited voxel collision and final
+  integration remain open. 3D acceptance stays unchecked; CI must verify this head.

@@ -893,8 +893,31 @@ public `sindri-physics` model/schema.
 ## Decay
 
 Decay exposes typed Sindri physics operations, not Rapier terminology. The 2D
-surface comes with the first vertical slice; 3D names are reserved by the design
-but are not claimed implemented until the 3D slice exists.
+surface remains `Physics`; the independent 3D surface is `Physics3d`.
+
+`Physics3d.velocity(entity)` and `angular_velocity(entity)` return copied Vec3
+values. `set_velocity(entity, velocity: Vec3)`,
+`set_angular_velocity(entity, velocity: Vec3)` and
+`apply_impulse(entity, impulse: Vec3)` act on active synchronized 3D bodies.
+Vectors must be finite and fit engine f32 values. Velocity controls accept dynamic
+and velocity-kinematic bodies; impulses require dynamic bodies. Rotation locking
+keeps angular velocity zero. Invalid arguments/body kinds fail before mutation.
+Controls change live simulation, leaving authored starting motion unchanged;
+structural body/collider rebuilds therefore restore authored settings. Missing
+3D host context, stale/inactive handles and bodies not yet synchronized fail
+explicitly. Spawn-to-synchronization queuing is absent in this slice.
+
+`Physics3d.collision_started()`, `collision_stopped()`, `sensor_entered()` and
+`sensor_exited()` return sorted unique lists of other active entities whose contact with this
+script's entity began or ended in the last successful step. Removed/inactive handles are
+filtered. Lists are copied and non-draining: every script sees the same completed
+snapshot. Sensor events are discrete, without fast sweep guarantees. Shared
+native/browser sessions and editor Play supply independent 2D and 3D context.
+Six native bridge regressions exercise live/persistent controls, kinds, validation,
+lifecycle and all four event queries; two scripts exercise copied sensor lists.
+A shared-session Decay driver and Chromium fixture exercise Vec3 controls,
+rotation locking, copied values and an actual solid landing event. This is host
+contract evidence toward Causeway, not voxel/game proof.
 
 Initial 2D gameplay operations should cover:
 
@@ -996,7 +1019,7 @@ disabling/reactivating bodies; browser host execution exercises the same motion
 and landing. Native editor interaction remains unverified: in the latest headless
 review environment, adapter startup hung or failed before a usable window.
 3D acceptance remains unchecked: native inspector/Play exercise, typed Decay
-Vec3 controls/events and actual resident/edited
+queries and actual resident/edited
 voxel collision remain separate slices. Voxel collision must derive from the occupied world, account for
 residency/dirty revisions and removal, and have a bounded update policy. An
 invisible plane or this standalone API is not voxel/game proof. CCD controls,

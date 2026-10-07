@@ -284,8 +284,16 @@ motion, solid landing and inactivity. An exported scratch fixture exercises
 XYZ motion/landing in Chromium with a read-only Decay observer and visible
 textured geometry. All three components appear in the Physics menu and editor
 tests pass. Native inspector/Play interaction remains unverified in this slice
-because local graphics adapter startup hangs or fails. Typed Decay 3D controls,
-resident/edited voxel collision and game proof remain unimplemented.
+because local graphics adapter startup hangs or fails. Typed `Physics3d` adds
+copied Vec3 linear/angular velocities, setters and dynamic impulses, plus all
+four sorted unique non-draining collision/sensor event queries. Six bridge
+regressions and a shared-session Decay driver exercise validation, kinds, locking,
+active/lifetime filtering, copied values/events and motion through subsequent
+scene steps. A rebuilt Chromium fixture confirms typed controls and actual solid
+landing events. Controls require an active synchronized body, leave authored
+motion unchanged and fail before spawn synchronization; 3D spawn-window queuing
+remains absent. Typed 3D queries, resident/edited voxel collision and game proof
+remain unimplemented.
 
 Forces and rotation have runtime and typed Decay controls: additive world force
 and torque last one fixed step, impulses act immediately and off-centre kicks
@@ -1931,7 +1939,7 @@ settings gear.
 - **One mesh primitive: `Cube`.** No quad, sphere, or glTF import
 - The 3D runtime has native simulation, scene synchronization/command tests,
   shared game/editor host wiring and primitive browser motion/landing evidence.
-  Native inspector/Play interaction, typed Decay controls/events and occupied
+  Native inspector/Play interaction, typed Decay queries/spawn-window controls and occupied
   resident/edited voxel/gameplay proof remain open
 - Effects are bounded, renderer-free runtime values driven from Decay; there is
   no general authored particle/emitter system or authored parallax system

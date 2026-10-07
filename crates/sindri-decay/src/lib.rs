@@ -52,7 +52,7 @@ pub use decay_semantic::Environment as ScriptEnvironment;
 pub use error::ScriptFailure;
 pub use exports::ScriptExport;
 pub use host::{ScriptContext, Spawning};
-pub use physics::{Characters2d, Physics2d};
+pub use physics::{Characters2d, Physics2d, Physics3d};
 pub use prefabs::PrefabSources;
 pub use profiles::ProfileSources;
 pub use report::{ScriptMessage, ScriptReport, ScriptTiming};

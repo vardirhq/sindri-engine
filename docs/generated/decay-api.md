@@ -40,6 +40,7 @@ Names in scope without qualification. Decay has no imports, so each of these is 
 - `Input`: `Input` — The keyboard. Keys are named by position, such as `"W"`, `"ArrowLeft"` or `"Space"`, so controls work on any keyboard layout.
 - `PI`: `f32` — The number π (3.14159…): half a full turn when measuring angles in radians.
 - `Physics`: `Physics` — 2D physics: moving objects with speed and pushes, and finding out what this script's object bumped into.
+- `Physics3d`: `Physics3d` — Independent 3D physics controls and copied last-step events. Requires a 3D physics host. Live controls require an active synchronized body; calls before spawn synchronization fail rather than queue. Authored motion fields are unchanged, so structural rebuilds restore authored settings.
 - `Pointer`: `Pointer` — The mouse, or a finger on a touch screen, handled the same way so one game works on both.
 - `Profiles`: `Profiles` — Reading settings from a profile, a data file shared across a project, such as a weapon's damage and fire rate.
 - `Random`: `Random` — Random numbers. The same seed always gives the same numbers, so a run can be replayed.
@@ -355,6 +356,20 @@ The host names this type but has not described its members.
 - `set_velocity(entity: Entity, x: f32, y: f32)` → `unit` — Sets how fast, and which way, an object is moving.
 - `velocity_x(entity: Entity)` → `f32` — How fast an object is moving sideways.
 - `velocity_y(entity: Entity)` → `f32` — How fast an object is moving up or down.
+
+### `Physics3d`
+
+Independent 3D physics controls and copied last-step events. Requires a 3D physics host. Live controls require an active synchronized body; calls before spawn synchronization fail rather than queue. Authored motion fields are unchanged, so structural rebuilds restore authored settings.
+
+- `angular_velocity(entity: Entity)` → `Vec3` — A copied world-space Vec3 angular velocity in radians per second around XYZ of an active synchronized 3D body.
+- `apply_impulse(entity: Entity, impulse: Vec3)` → `unit` — Applies a finite world-space Vec3 impulse to an active synchronized dynamic body using its compound mass. Invalid input or body kind fails before mutation; does not change authored starting motion.
+- `collision_started()` → `List<Entity>` — Sorted unique other active entities that started solid contact with this script's entity in the last successful 3D step. All scripts observe the same snapshot without draining it.
+- `collision_stopped()` → `List<Entity>` — Sorted unique other active entities that stopped solid contact with this script's entity in the last successful 3D step. Removed or inactive handles are filtered.
+- `sensor_entered()` → `List<Entity>` — Sorted unique other active entities that entered sensor contact with this script's entity in the last successful 3D step. Discrete events do not guarantee fast trigger sweeps; the snapshot is not drained.
+- `sensor_exited()` → `List<Entity>` — Sorted unique other active entities that left sensor contact with this script's entity in the last successful 3D step. Removed or inactive handles are filtered; the snapshot is not drained.
+- `set_angular_velocity(entity: Entity, velocity: Vec3)` → `unit` — Sets finite Vec3 angular velocity in radians per second around world XYZ on an active synchronized dynamic or velocity-kinematic body. Rotation-locked bodies retain zero angular velocity. Invalid input fails before mutation; does not change authored starting motion.
+- `set_velocity(entity: Entity, velocity: Vec3)` → `unit` — Sets finite world-space Vec3 linear velocity on an active synchronized dynamic or velocity-kinematic body. Invalid inputs fail before mutation; does not change authored starting motion.
+- `velocity(entity: Entity)` → `Vec3` — A copied world-space Vec3 linear velocity of an active synchronized 3D body.
 
 ### `Pointer`
 

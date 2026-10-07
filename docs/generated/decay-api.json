@@ -82,6 +82,12 @@
       "type": "Physics"
     },
     {
+      "description": "Independent 3D physics controls and copied last-step events. Requires a 3D physics host. Live controls require an active synchronized body; calls before spawn synchronization fail rather than queue. Authored motion fields are unchanged, so structural rebuilds restore authored settings.",
+      "kind": "value",
+      "name": "Physics3d",
+      "type": "Physics3d"
+    },
+    {
       "description": "The mouse, or a finger on a touch screen, handled the same way so one game works on both.",
       "kind": "value",
       "name": "Pointer",
@@ -2373,6 +2379,110 @@
         }
       ],
       "name": "Physics"
+    },
+    {
+      "description": "Independent 3D physics controls and copied last-step events. Requires a 3D physics host. Live controls require an active synchronized body; calls before spawn synchronization fail rather than queue. Authored motion fields are unchanged, so structural rebuilds restore authored settings.",
+      "members": [
+        {
+          "description": "A copied world-space Vec3 angular velocity in radians per second around XYZ of an active synchronized 3D body.",
+          "kind": "function",
+          "name": "angular_velocity",
+          "parameter_names": [
+            "entity"
+          ],
+          "parameters": [
+            "Entity"
+          ],
+          "returns": "Vec3"
+        },
+        {
+          "description": "Applies a finite world-space Vec3 impulse to an active synchronized dynamic body using its compound mass. Invalid input or body kind fails before mutation; does not change authored starting motion.",
+          "kind": "function",
+          "name": "apply_impulse",
+          "parameter_names": [
+            "entity",
+            "impulse"
+          ],
+          "parameters": [
+            "Entity",
+            "Vec3"
+          ],
+          "returns": "unit"
+        },
+        {
+          "description": "Sorted unique other active entities that started solid contact with this script's entity in the last successful 3D step. All scripts observe the same snapshot without draining it.",
+          "kind": "function",
+          "name": "collision_started",
+          "parameter_names": [],
+          "parameters": [],
+          "returns": "List<Entity>"
+        },
+        {
+          "description": "Sorted unique other active entities that stopped solid contact with this script's entity in the last successful 3D step. Removed or inactive handles are filtered.",
+          "kind": "function",
+          "name": "collision_stopped",
+          "parameter_names": [],
+          "parameters": [],
+          "returns": "List<Entity>"
+        },
+        {
+          "description": "Sorted unique other active entities that entered sensor contact with this script's entity in the last successful 3D step. Discrete events do not guarantee fast trigger sweeps; the snapshot is not drained.",
+          "kind": "function",
+          "name": "sensor_entered",
+          "parameter_names": [],
+          "parameters": [],
+          "returns": "List<Entity>"
+        },
+        {
+          "description": "Sorted unique other active entities that left sensor contact with this script's entity in the last successful 3D step. Removed or inactive handles are filtered; the snapshot is not drained.",
+          "kind": "function",
+          "name": "sensor_exited",
+          "parameter_names": [],
+          "parameters": [],
+          "returns": "List<Entity>"
+        },
+        {
+          "description": "Sets finite Vec3 angular velocity in radians per second around world XYZ on an active synchronized dynamic or velocity-kinematic body. Rotation-locked bodies retain zero angular velocity. Invalid input fails before mutation; does not change authored starting motion.",
+          "kind": "function",
+          "name": "set_angular_velocity",
+          "parameter_names": [
+            "entity",
+            "velocity"
+          ],
+          "parameters": [
+            "Entity",
+            "Vec3"
+          ],
+          "returns": "unit"
+        },
+        {
+          "description": "Sets finite world-space Vec3 linear velocity on an active synchronized dynamic or velocity-kinematic body. Invalid inputs fail before mutation; does not change authored starting motion.",
+          "kind": "function",
+          "name": "set_velocity",
+          "parameter_names": [
+            "entity",
+            "velocity"
+          ],
+          "parameters": [
+            "Entity",
+            "Vec3"
+          ],
+          "returns": "unit"
+        },
+        {
+          "description": "A copied world-space Vec3 linear velocity of an active synchronized 3D body.",
+          "kind": "function",
+          "name": "velocity",
+          "parameter_names": [
+            "entity"
+          ],
+          "parameters": [
+            "Entity"
+          ],
+          "returns": "Vec3"
+        }
+      ],
+      "name": "Physics3d"
     },
     {
       "description": "The mouse, or a finger on a touch screen, handled the same way so one game works on both.",

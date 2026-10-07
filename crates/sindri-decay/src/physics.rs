@@ -11,6 +11,13 @@
 
 use sindri_physics::{PhysicsEvent2d, PhysicsWorld2d};
 
+/// The independent 3D simulation and completed events offered to one script pass.
+pub struct Physics3d<'a> {
+    pub world: &'a mut sindri_physics::PhysicsWorld3d,
+    /// Every script observes this borrowed snapshot without draining it.
+    pub events: &'a [sindri_physics::PhysicsEvent3d],
+}
+
 /// The 2D physics one pass of scripts may reach.
 pub struct Physics2d<'a> {
     /// The simulation, for the operations gameplay drives: velocity, impulses.

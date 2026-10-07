@@ -25,6 +25,7 @@ use crate::error::CausewayError;
 
 use crate::styling::Styles;
 
+mod physics;
 mod profiles;
 /// Where a session's save is kept, and when it is written out.
 mod saves;
@@ -305,17 +306,7 @@ impl Session {
         // Physics first, so a script observes the events of the step that just
         // happened and its writes take effect on the next one, which is the
         // order `docs/physics.md` fixes.
-        self.sync_physics_materials()?;
-        self.physics.step(
-            world,
-            &self.components,
-            std::time::Duration::from_secs_f32(delta_seconds),
-        )?;
-        self.physics3d.step(
-            world,
-            &self.components,
-            std::time::Duration::from_secs_f32(delta_seconds),
-        )?;
+        self.step_physics(world, delta_seconds)?;
         // No safe area yet: reading a device's insets is the browser host's to
         // report, and it does not yet. The scene needs no change when it does.
         // Hit-tested against what was drawn, styled, when the host presents
@@ -362,6 +353,7 @@ impl Session {
             input
         };
         let (physics, events, requests, motions) = self.physics.for_scripts_with_characters();
+        let (world3d, events3d) = self.physics3d.for_scripts();
         let mut frame = ScriptFrame::new(&self.sources, script_input, delta_seconds)
             .with_prefabs(&self.prefabs)
             .with_profiles(&self.profiles)
@@ -372,6 +364,10 @@ impl Session {
             .with_physics(sindri_decay::Physics2d {
                 world: physics,
                 events,
+            })
+            .with_physics3d(sindri_decay::Physics3d {
+                world: world3d,
+                events: events3d,
             })
             .with_characters(sindri_decay::Characters2d { requests, motions })
             .with_animations(&mut self.animations)

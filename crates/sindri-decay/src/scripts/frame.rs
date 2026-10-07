@@ -34,6 +34,8 @@ pub struct ScriptFrame<'a> {
     /// authored a collider — and then a script calling `Physics.*` is told so
     /// rather than quietly doing nothing.
     pub physics: Option<Physics2d<'a>>,
+    /// Independent 3D physics; absent hosts reject `Physics3d` calls explicitly.
+    pub physics3d: Option<crate::Physics3d<'a>>,
     /// Scene controller input and cached results, when offered by the host.
     pub characters: Option<Characters2d<'a>>,
     /// Where the screen elements are and what the pointer is doing to them.
@@ -111,6 +113,7 @@ impl<'a> ScriptFrame<'a> {
             profiles: ProfileSources::none(),
             input,
             physics: None,
+            physics3d: None,
             characters: None,
             screen_ui: None,
             aim: None,
@@ -207,6 +210,13 @@ impl<'a> ScriptFrame<'a> {
     #[must_use]
     pub fn with_effects(mut self, effects: &'a mut sindri_scene::Effects2d) -> Self {
         self.effects = Some(effects);
+        self
+    }
+
+    /// The same frame, with independent 3D controls and last-step events.
+    #[must_use]
+    pub fn with_physics3d(mut self, physics: crate::Physics3d<'a>) -> Self {
+        self.physics3d = Some(physics);
         self
     }
 

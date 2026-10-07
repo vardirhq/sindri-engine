@@ -49,6 +49,7 @@ pub(super) struct TickWorld<'a> {
     pub(super) characters: Option<Characters2d<'a>>,
     /// The physics a script may read and drive, when the host runs any.
     pub(super) physics: Option<Physics2d<'a>>,
+    pub(super) physics3d: Option<crate::Physics3d<'a>>,
     /// Where the screen elements are and what the pointer is doing to them.
     pub(super) screen_ui: Option<&'a sindri_scene::ScreenUi>,
     pub(super) aim: Option<sindri_scene::voxel::VolumeAim>,
@@ -284,6 +285,10 @@ fn host_for<'b>(
             scenes: at.scenes.as_deref_mut(),
         },
     )
+    .with_physics3d(at.physics3d.as_mut().map(|physics| crate::Physics3d {
+        world: &mut *physics.world,
+        events: physics.events,
+    }))
     .with_characters(at.characters.as_mut().map(|characters| Characters2d {
         requests: &mut *characters.requests,
         motions: characters.motions,

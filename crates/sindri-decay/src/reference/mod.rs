@@ -17,6 +17,7 @@ mod character;
 mod game;
 mod input;
 mod physics;
+mod physics3d;
 mod tween;
 mod world;
 
@@ -154,7 +155,13 @@ pub const THIS: &[Entry] = &[
 ];
 
 /// Every host type, and each of its members.
-pub const TYPES: &[&[TypeEntry]] = &[world::TYPES, game::TYPES, input::TYPES, tween::TYPES];
+pub const TYPES: &[&[TypeEntry]] = &[
+    world::TYPES,
+    game::TYPES,
+    input::TYPES,
+    tween::TYPES,
+    physics3d::TYPES,
+];
 
 /// The entry for a host type, if it has one.
 #[must_use]

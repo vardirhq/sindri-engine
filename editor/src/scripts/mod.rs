@@ -41,6 +41,7 @@ pub struct EditorFrame<'a> {
     /// nothing is stepping and a `Physics.*` call should say so rather than
     /// answer about a simulation nobody is running.
     pub physics: Option<Physics2d<'a>>,
+    pub physics3d: Option<sindri_decay::Physics3d<'a>>,
     /// Scene-owned movement input and results for Play.
     pub characters: Option<sindri_decay::Characters2d<'a>>,
     pub screen_ui: &'a sindri_scene::ScreenUi,
@@ -391,6 +392,7 @@ impl SceneScripts {
         let EditorFrame {
             input,
             physics,
+            physics3d,
             characters,
             screen_ui,
             random,
@@ -411,6 +413,9 @@ impl SceneScripts {
             .with_sequences(sequences);
         if let Some(physics) = physics {
             frame = frame.with_physics(physics);
+        }
+        if let Some(physics) = physics3d {
+            frame = frame.with_physics3d(physics);
         }
         if let Some(characters) = characters {
             frame = frame.with_characters(characters);

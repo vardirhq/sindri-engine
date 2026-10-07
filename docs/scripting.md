@@ -998,6 +998,37 @@ laying out no screen UI refuses `Ui.is_pressed` for the same reason: a menu whos
 buttons never respond should be heard about on the first frame, not mistaken for
 a person who has not clicked yet.
 
+### Independent 3D physics
+
+| Call | Returns |
+| --- | --- |
+| `Physics3d.velocity(entity)` | `Vec3` |
+| `Physics3d.set_velocity(entity, velocity: Vec3)` | nothing |
+| `Physics3d.angular_velocity(entity)` | `Vec3` |
+| `Physics3d.set_angular_velocity(entity, velocity: Vec3)` | nothing |
+| `Physics3d.apply_impulse(entity, impulse: Vec3)` | nothing |
+| `Physics3d.collision_started()` | `List<Entity>` |
+| `Physics3d.collision_stopped()` | `List<Entity>` |
+| `Physics3d.sensor_entered()` | `List<Entity>` |
+| `Physics3d.sensor_exited()` | `List<Entity>` |
+
+`Physics3d` takes Vec3 values without changing the existing 2D `Physics` API.
+`velocity(entity)` and `angular_velocity(entity)` return copied Vec3 values;
+`set_velocity(entity, velocity)`, `set_angular_velocity(entity, velocity)` and
+`apply_impulse(entity, impulse)` control active synchronized 3D bodies. Velocity
+controls accept dynamic/velocity-kinematic bodies; impulses require dynamic
+bodies. Rotation-locked bodies retain zero angular velocity. Finite f32-range
+vectors validate before mutation; controls leave authored motion unchanged.
+Missing context, inactive/stale handles and pre-synchronization bodies fail
+explicitly. There is no 3D spawn-window queue yet.
+
+`collision_started()`, `collision_stopped()`, `sensor_entered()` and
+`sensor_exited()` return copied sorted unique `List<Entity>` values naming the
+other active entities from this script's last successful 3D step. All scripts
+see the same non-draining snapshot; inactive/despawned references are filtered.
+Shared game sessions and editor Play provide the context. See
+[the physics contract](physics.md#decay) for timing and current limitations.
+
 ### Bodies, and what they touched
 
 | Call | Returns |

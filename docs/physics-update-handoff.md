@@ -16,43 +16,51 @@ a pushed handoff. Do not ask them to authorize the scope again.
 
 ## Current continuation checkpoint
 
-Shared native/browser game sessions and native editor Play now step 2D, then
-3D, before scripts with one fixed duration. Fresh Play, Stop and scene replacement
-reset both editor solvers; pause/resume retains them. Added all three registered
-3D components to the Physics menu. CI on prior head `5fb48e9b` failed only its
-component family/glyph coverage test for those missing entries; the affected
-full editor suite passes now. Read the complete failed job log before further
-CI work: `/tmp/sindri-host3d-prior-ci-failures.log`.
+Typed `Physics3d` now supplies copied Vec3 velocity/angular velocity, setters,
+dynamic impulses and four copied sorted unique non-draining collision/sensor
+other-entity lists. Shared native/browser sessions and native editor Play supply
+independent 3D context. Controls require an active synchronized body; finite
+f32-range vectors/body kinds validate before mutation. Locking retains zero
+angular velocity. Controls leave authored motion unchanged and survive ordinary
+scene steps; structural rebuilds restore authored motion.
 
-Scoped preflight passes 655 game/editor tests (including two new 3D session
-regressions), warning-denied all-target/all-feature checks, formatting and size
-limits. Clippy, typed observer preflight and game WASM library check/build pass.
-An exported primitive fixture confirms XYZ motion and solid-box landing in
-Chromium through a read-only Decay observer, with standard WebGPU/asset/pixel
-checks intact. The rebuilt host also reaches the platformer flag with five
-coins, no falls, eight jumps and 11.533 simulated seconds (27 assets).
+Six new bridge regressions exercise controls, rejection/arity/context, lifecycle,
+locking and all four event queries; two scripts exercise copied sensor lists.
+A shared-session Decay driver exercises Vec3 motion and actual solid landing.
+Scoped preflight passes 1,006 game/Decay/editor tests and warning-denied all-target/
+all-feature checks, formatting, file-size and typed-script gates. Clippy, Decay
+all-target/all-feature WASM and game WASM library check/build pass. API JSON/
+Markdown regenerated; all 11 catalogue tests pass. The first full suite exposed
+missing scripting-contract table entries; the table now lists all nine calls.
+No dependency or scene schema changed.
 
-Native editor interaction remains unverified: default/Vulkan adapter startup
-spins without a window, GL reports no compatible surface and Chrome SwiftShader
-crashes on native startup. Owned processes are stopped. Retry on a usable graphics
-session; exercise component inspector edits, Play/Pause/Step/Stop and fresh replay.
-Do not infer successful native interaction from the unit suite or browser proof.
+Rebuilt exported-host Chromium smoke confirms typed controls, copied values,
+rotation locking and a solid landing event. The isolated normal platformer run
+passes with five coins, no falls, seven jumps and 11.417 simulated seconds,
+fetching 27 assets. A preceding run overlapping native compilation fell; the
+isolated run passed without changing game rules or smoke assertions. Keep
+browser input-driven runs sequential and separate from heavy native builds.
 
-Artifacts: `/tmp/sindri-host3d-{preflight,clippy,decay,wasm-check,browser,platformer-browser}.log`,
-`/tmp/sindri-host3d-browser.png`, `/tmp/sindri-host3d-platformer.png`, scratch
-project `/tmp/sindri-host3d-project` and export `/tmp/sindri-host3d-export`.
-Browser observer harness `/tmp/sindri-physics-tools/browser/physics3d-smoke.mjs`
-is the repository standard smoke helper with an additional read-only observer
-assertion. The fixture texture is copied from the platformer tiles; no render
-check threshold was weakened. Session fixtures live in
-`game/tests/the_3d_physics_works.rs` and `game/tests/physics3d_observer.decay`.
+Artifacts: `/tmp/sindri-typed3d-{preflight,clippy,decay,catalogue,wasm-build,wasm-check,browser}.log`,
+`/tmp/sindri-typed3d-platformer-browser-isolated.log`,
+`/tmp/sindri-typed3d-browser.png`, `/tmp/sindri-typed3d-platformer.png`.
+Scratch project/export: `/tmp/sindri-typed3d-{project,export}`. Observer smoke:
+`/tmp/sindri-physics-tools/browser/typed3d-smoke.mjs` (standard checks plus the
+read-only completion marker, with a bounded wait for simulation).
+Permanent driver: `game/tests/physics3d_driver.decay`;
+bridge fixtures: `crates/sindri-decay/tests/physics3d_controls.rs` and its support
+module. Spawn-window controls are explicitly absent in parity: live calls fail
+before 3D body synchronization; there is no pending ordered queue yet.
 
-Continue with native 3D inspector/Play proof, typed Decay Vec3 controls/events and
-Causeway occupied/resident/edited voxel collision on native/browser. Automatic
-3D collider scaling is absent; dimensions/offsets remain world units. 3D acceptance
-and final integration stay unchecked. CI must verify the latest checkpoint.
-The scene-driver checkpoint already passed 1,056 physics/scene/Decay/platformer/
-catalogue tests; this host slice adds no dependency, schema or host call.
+Continue with typed 3D queries/spawn-window controls, native 3D inspector/Play/
+replay evidence and Causeway occupied/resident/edited voxel collision on native/
+browser. Native editor interaction remains unverified: in the prior headless
+review the default/Vulkan adapter spun without a window, GL had no compatible
+surface and Chrome SwiftShader crashed on native startup. Owned processes are
+stopped. Retry on a usable graphics session. Automatic 3D collider scaling is
+absent; dimensions/offsets remain world units. 3D acceptance and final integration
+stay unchecked. Prior head `a28eecc6` had no reported failures at checkpoint time,
+with test/render captures still running; CI must verify the latest head.
 
 The 3D query-only BVH now selects rays, overlaps and shape casts at current
 poses. Insert/remove/teleport update immediately; non-static pieces refresh after

@@ -329,6 +329,7 @@ impl EditorApp {
             .editing_text(&self.world)
             .then(|| self.input.state().without_keys());
         let (physics, events, requests, motions) = self.physics.for_scripts_with_characters();
+        let (world3d, events3d) = self.physics3d.for_scripts();
         let mut report = self.scripts.advance(
             &mut self.world,
             components,
@@ -337,6 +338,10 @@ impl EditorApp {
                 physics: Some(sindri_decay::Physics2d {
                     world: physics,
                     events,
+                }),
+                physics3d: Some(sindri_decay::Physics3d {
+                    world: world3d,
+                    events: events3d,
                 }),
                 characters: Some(sindri_decay::Characters2d { requests, motions }),
                 screen_ui: &self.screen_ui,

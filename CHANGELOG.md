@@ -274,13 +274,19 @@ requests, commit history, and subsystem documentation rather than this file.
 
 ### Added
 
+- Typed `Physics3d` Vec3 velocity/angular-velocity controls, dynamic impulses and
+  copied non-draining collision/sensor event lists in shared native/browser
+  sessions and editor Play. Invalid input preserves motion; inactive/stale handles
+  and unsynchronized bodies fail explicitly. Controls retain authored starting
+  fields; 3D spawn-window queuing, queries and voxel/game proof remain open.
+
 - Registered 3D body, compound collider and gravity-world scene components plus
   `ScenePhysics3d` lifecycle/transform synchronization and parent-space write-back.
   Invalid batches, mixed 2D/3D ownership and moving Z-locked 3D bodies fail before
   runtime mutation. Shared native/browser sessions and editor Play now step both
   dimensions before scripts; fresh Play, Stop and scene replacement reset editor
   solvers. The Physics menu includes the three 3D components. Native editor
-  interaction, typed Decay controls and voxel/game proof remain open.
+  interaction, typed Decay queries and voxel/game proof remain open.
 
 - A query-only per-piece spatial index for 3D rays, overlaps and shape casts,
   refreshed on insertion/removal/teleport and completed simulation steps while

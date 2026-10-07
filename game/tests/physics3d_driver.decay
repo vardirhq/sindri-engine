@@ -1,0 +1,29 @@
+// Gameplay-free host contract fixture: controls, copied values and actual landing.
+script Physics3dDriver {
+    var elapsed: f32 = 0.0;
+    var started: bool = false;
+    var touched: bool = false;
+    var copied: bool = false;
+    var locked: bool = false;
+    var verified: bool = false;
+    fn update(dt: f32) {
+        elapsed += dt;
+        if !started {
+            started = true;
+            Physics3d.set_velocity(this.entity, Vec3(0.4, 0.0, 0.6));
+            Physics3d.apply_impulse(this.entity, Vec3(0.1, 0.2, 0.1));
+            Physics3d.set_angular_velocity(this.entity, Vec3(1.0, 2.0, 3.0));
+            let angular = Physics3d.angular_velocity(this.entity);
+            locked = angular.length < 0.001;
+            var velocity = Physics3d.velocity(this.entity);
+            velocity.x = 99.0;
+            copied = Physics3d.velocity(this.entity).x < 1.0;
+        }
+        if Physics3d.collision_started().length > 0 { touched = true; }
+        let at = this.transform.world_position;
+        if elapsed > 1.8 && at.x > 2.8 && at.z > 4.0 && at.y > 0.7 && at.y < 0.8 && touched && copied && locked && !verified {
+            verified = true;
+            print("3D typed controls and collision landing verified");
+        }
+    }
+}
