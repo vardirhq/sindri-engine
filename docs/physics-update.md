@@ -1094,3 +1094,27 @@ surface-specific completeness. This checklist does not mark those surfaces done.
   bounds conservatively scan. No dependencies, public APIs or catalogue entries
   changed. 3D physics/queries, voxel proof and final integration remain unchecked;
   CI must still verify the new checkpoint.
+
+
+## Standalone 3D foundation checkpoint
+
+- `PhysicsWorld3d` now owns fixed-step static/dynamic/position-kinematic/velocity-
+  kinematic bodies, compound box/sphere/Y-capsule collision, XYZ velocity and
+  impulses, quaternion poses, pending kinematic targets and normalized entity
+  collision/sensor transitions. Backend handles remain private. Complete inputs
+  validate before mutation; near-unit quaternions normalize after validation,
+  and rotation locking clears initial/live angular velocity.
+- Eleven new native regressions exercise all shapes landing on solid geometry,
+  body/local quaternion rotation and offsets, compound mass/impulses, masks and
+  sensors, fixed steps/gravity scale, targets/teleports, rotation locking, atomic
+  rejection and removal/arena reuse. All 165 physics tests and a further 856
+  scene/Decay/platformer tests passed (1,021 native tests total). Scoped preflight,
+  warning-denied Clippy and all-target/all-feature WASM compilation passed.
+- This engine foundation is a prerequisite for Causeway's actual voxel-terrain
+  proof. It has no scene synchronization, checked editor authoring/Play, typed
+  Decay Vec3 access, 3D queries or resident/edited voxel collision yet. WASM
+  compilation does not prove 3D browser simulation. 3D acceptance and final
+  integration remain unchecked. No dependency, host call or component
+  registration changed; the existing 2D event-kind reexport remains compatible.
+- Prior head `02b99c8e` is green in CI; this new checkpoint needs verification.
+  Continue with 3D queries, then the scene/editor/Decay and voxel proof slices.

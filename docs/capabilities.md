@@ -255,8 +255,14 @@ pieces; current bounds cannot discard its previous pose. 3D queries remain absen
 implemented 2D overlaps and shape casts
 are described below.
 
-A parallel Sindri-owned 3D body/collider data model already fixes the public
-shape of the later 3D slice, but no 3D runtime behavior is claimed yet.
+A standalone `PhysicsWorld3d` now exercises the parallel Sindri-owned body/collider
+model through fixed-step simulation. Native tests cover XYZ gravity, box/sphere/
+capsule solids, quaternion/local offsets, compound mass, masks and collision/
+sensor events, kinematic targets, velocity/impulse/teleport controls, rotation
+locking and atomic validation/removal. The engine rejects quaternions outside
+the unit-norm tolerance; all poses use `[x, y, z, w]`. This is the prerequisite for Causeway voxel collision
+proof, not a completed 3D surface: queries, scene synchronization, Decay, editor,
+resident/edited voxel collision and browser execution remain unimplemented.
 
 Forces and rotation have runtime and typed Decay controls: additive world force
 and torque last one fixed step, impulses act immediately and off-centre kicks
@@ -1900,8 +1906,9 @@ settings gear.
 - World-space text, rich spans, and font fallback are missing. Screen text has
   authored alignment and wrapping, including Weave-controlled wrapping
 - **One mesh primitive: `Cube`.** No quad, sphere, or glTF import
-- The exercised physics runtime is 2D. There is a Sindri-owned 3D data model but
-  no 3D simulation, authoring workflow, or gameplay proof
+- The shipped physics runtime is 2D. The standalone 3D engine world has native
+  simulation tests, but no scene integration, authoring/Decay workflow, browser
+  execution or voxel/gameplay proof
 - Effects are bounded, renderer-free runtime values driven from Decay; there is
   no general authored particle/emitter system or authored parallax system
 - Grid walls, footprints, occupancy, and deterministic A* work through the

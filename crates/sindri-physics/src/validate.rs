@@ -8,6 +8,8 @@ use crate::types2d::{Collider2d, ColliderShape2d, PhysicsPose2d, RigidBody2d};
 
 #[derive(Debug, Error, Eq, PartialEq)]
 pub enum PhysicsError {
+    #[error("physics quaternion '{0}' must have unit length")]
+    InvalidQuaternion(&'static str),
     #[error("ground up direction must have unit length")]
     InvalidGroundUp,
     #[error("ground slope angle must be between zero and pi/2 radians")]

@@ -29,10 +29,9 @@ use std::{collections::HashMap, sync::mpsc, time::Duration};
 use rapier2d::prelude as r2;
 use sindri_core::EntityId;
 
-use crate::shared::RigidBodyKind;
+use crate::shared::{PhysicsEventKind, RigidBodyKind};
 use crate::types2d::{
-    Collider2d, ColliderShape2d, DistanceJoint2d, PhysicsEvent2d, PhysicsEventKind, PhysicsPose2d,
-    RigidBody2d,
+    Collider2d, ColliderShape2d, DistanceJoint2d, PhysicsEvent2d, PhysicsPose2d, RigidBody2d,
 };
 use crate::validate::{PhysicsError, finite2, validate_body2d, validate_colliders2d};
 

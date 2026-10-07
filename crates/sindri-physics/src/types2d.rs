@@ -3,7 +3,7 @@
 use serde::{Deserialize, Serialize};
 use sindri_core::EntityId;
 
-use crate::shared::{CollisionLayers, RigidBodyKind};
+use crate::shared::{CollisionLayers, PhysicsEventKind, RigidBodyKind};
 
 #[derive(Clone, Copy, Debug, Default, PartialEq, Serialize, Deserialize)]
 pub struct PhysicsPose2d {
@@ -118,14 +118,6 @@ impl Collider2d {
             restitution: 0.0,
         }
     }
-}
-
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
-pub enum PhysicsEventKind {
-    CollisionStarted,
-    CollisionStopped,
-    SensorEntered,
-    SensorExited,
 }
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]

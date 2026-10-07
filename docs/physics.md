@@ -268,8 +268,10 @@ names the index** — a compound is a list, so "restitution must be between 0 an
 1" without one is a needle in it. Nothing is inserted unless every piece passes,
 because a half-built body is worse than none.
 
-3D colliders remain single for now; the shape of the change is known, and it
-should follow a game that needs it rather than lead one.
+The standalone 3D engine world accepts a slice of collider pieces, validates all
+of them before insertion and sums their mass. The 3D scene/editor surface remains
+unimplemented. This general piece boundary is a prerequisite for voxel collision
+geometry; it does not claim authored compounds or voxel/game proof.
 
 An entity may not participate in both the 2D and 3D physics worlds at once.
 Validation reports that as an authored configuration error instead of choosing a
@@ -728,9 +730,10 @@ workspace integration remain separate work.
 
 ## Runtime ownership and stepping
 
-`PhysicsWorld` is runtime state beside `World`, not serialized state inside it.
-It owns separate private 2D and 3D backend worlds and maps `EntityId` to private
-backend handles. Despawning an entity removes its body/collider before the next
+`PhysicsWorld2d` and `PhysicsWorld3d` are separate runtime state beside `World`,
+not serialized state inside it. Each owns its private backend and maps `EntityId`
+to private handles. Current scene/game/editor hosts synchronize only the 2D world.
+Despawning an entity removes its body/collider before the next
 step; generation-checked IDs prevent a reused slot from inheriting old physics
 state.
 
@@ -879,17 +882,49 @@ Pathfinding remains navigation, not physics. The Wisp may plan through the grid,
 but collision remains authoritative for physical overlap. Do not couple Rapier
 into `sindri-grid` to make those systems agree implicitly.
 
-## 3D parity
+## 3D engine foundation and remaining integration
 
-The architecture is not considered 3D physics support merely because
-`rapier3d` is a dependency. The later 3D vertical slice must exercise bodies,
-colliders, synchronization, editor authoring, and a real 3D proof before its
-matrix cells become green.
+`PhysicsWorld3d` now implements standalone fixed-step simulation over Sindri-owned
+`RigidBody3d`, `Collider3d`, `PhysicsPose3d` and `PhysicsEvent3d` values. Vectors are
+XYZ; body and local collider rotations are unit quaternions in `[x, y, z, w]`
+order. Quaternions must be finite with squared norm within 0.0001 of one; zero or
+non-unit rotations outside that tolerance fail explicitly; accepted near-unit
+values normalize at the backend boundary. Shapes are boxes, spheres and Y-axis
+capsules with finite positive dimensions. Friction
+is non-negative, restitution is in [0, 1], and damping is non-negative.
 
-The 2D implementation must avoid assumptions that block that slice: no common
-API whose vectors are always `Vec2`, no scalar-only neutral rotation API, no
-2D-only collision-event representation, and no backend handle in shared scene or
-script contracts.
+Bodies support static, dynamic, position-kinematic and velocity-kinematic kinds.
+Insertion validates the whole body and every piece before mutating the backend;
+errors identify the failing piece. Compounds use local offsets/rotations and sum
+mass. Gravity and scale, damping and all-axis rotation locking are engine policy.
+Locked rotation clears authored initial angular velocity and angular setters.
+Velocity/angular-velocity setters accept dynamic or velocity-kinematic bodies;
+impulses require dynamic bodies. All controls reject invalid values before
+mutation. Teleports preserve velocity; position-kinematic moves/targets take effect
+at the next fixed step. Missing handles fail instead of queuing future spawns.
+
+One positive finite engine `Duration` advances exactly one step. The engine
+returns solid/sensor start/stop events with sorted entity pairs and dimension-
+specific event values; event stream order remains backend-owned. Membership/filter
+masks use the same mutual-pair rules as 2D. Removing an entity removes all of its
+pieces and drops events whose handles no longer map to live entities, preventing
+reused backend slots from inheriting old identity. No backend types escape.
+
+Native tests exercise XYZ integration, gravity scale, all shapes landing on solid
+geometry, rotated/offset collision, quaternion round-trip, masks/sensor enter/exit,
+kinematic target timing, compound mass/impulse, teleport velocity, rotation lock,
+atomic rejection and removal/reuse. WASM compilation is a separate gate; no 3D
+browser simulation is claimed until the shared host and game exercise it.
+
+This is the engine prerequisite for the physics-update voxel-world proof in
+Causeway. 3D acceptance remains unchecked: queries/indexing, scene transform and
+lifecycle synchronization, gravity authoring, editor checked commands/Play,
+typed Decay Vec3 controls/events and actual resident/edited voxel collision remain
+separate slices. Voxel collision must derive from the occupied world, account for
+residency/dirty revisions and removal, and have a bounded update policy. An
+invisible plane or this standalone API is not voxel/game proof. CCD controls,
+contacts, force/torque, materials, joints and character controllers also have no
+3D authoring/Decay surface yet. The 2D API remains unchanged.
 
 ## Feature-track slices
 
@@ -906,8 +941,9 @@ Implement this in reviewable PRs rather than one giant patch:
 4. **Gather physics.** Convert obstacles, pickups, player movement, and one hazard
    interaction to the real physics path; prove native/browser behavior and update
    capability docs/matrices.
-5. **3D physics.** Activate the parallel 3D runtime and scene/editor/Decay
-   surfaces only when a real 3D proof can exercise them end to end.
+5. **3D physics.** Establish the standalone runtime first, then integrate
+   scene/editor/Decay surfaces with a real 3D proof that exercises them end to end.
+   The engine foundation alone does not complete this track.
 
 Each PR runs all checks relevant to its dependency and target surface. A slice
 that introduces Rapier must run `cargo deny`; a slice touching browser-reachable

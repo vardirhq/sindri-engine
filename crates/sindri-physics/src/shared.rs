@@ -64,3 +64,12 @@ impl Default for CollisionLayers {
         Self::ALL
     }
 }
+
+/// Collision and sensor transitions shared by the dimension-specific events.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum PhysicsEventKind {
+    CollisionStarted,
+    CollisionStopped,
+    SensorEntered,
+    SensorExited,
+}

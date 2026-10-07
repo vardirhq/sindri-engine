@@ -274,6 +274,11 @@ requests, commit history, and subsystem documentation rather than this file.
 
 ### Added
 
+- A standalone 3D physics engine world with fixed-step bodies, validated unit
+  quaternions, box/sphere/capsule pieces, masks, collision/sensor events and
+  basic velocity/impulse/kinematic/teleport controls. Scene, editor, Decay and
+  voxel collision integration remain pending.
+
 - Radio groups (toggles sharing a `group`) and dropdowns (`sindri.ui.dropdown`
   with `sindri.ui.option` rows the engine shows while open), with Weave's new
   `:open` state. Decay gains `Ui.selected`, `Ui.set_selected` and

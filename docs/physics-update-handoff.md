@@ -16,6 +16,21 @@ a pushed handoff. Do not ask them to authorize the scope again.
 
 ## Current continuation checkpoint
 
+The standalone 3D foundation now owns fixed-step bodies, compound box/sphere/Y
+capsule colliders, XYZ velocities/impulses, position-kinematic targets and
+entity collision/sensor transitions. Quaternions use `[x, y, z, w]`; complete
+requests validate before insertion or mutation, and accepted near-unit rotations
+normalize before reaching the backend. Rotation locking clears initial and live
+angular velocity. Backend handles remain private; the shared event-kind reexport
+preserves the 2D API. No dependency, component registration or host call changed.
+All 165 native physics tests and 856 scene/Decay/platformer tests passed, alongside
+warning-denied Clippy, all-target/all-feature WASM and scoped preflight.
+Prior head `02b99c8e` is green in CI; this checkpoint needs its own CI verification.
+Continue with 3D queries, then scene lifecycle/transform/gravity synchronization,
+typed Decay Vec3/events and checked editor authoring/Play. Complete the Causeway
+voxel-terrain proof with residency, edited collision and bounded work on native
+and browser before checking 3D acceptance. Final integration remains open.
+
 The 2D joint checklist is complete. Character movement now has checked
 engine-only sweep/slide, ground-probe and optional grounded-snap foundations: see
 `docs/character-movement.md` for the contract and remaining slices. The read-only
@@ -733,9 +748,9 @@ edits and current synchronized poses. Supply meaningful scaling evidence.
 
 ### 3D runtime and voxel proof
 
-The public 3D body/collider data model exists, but it is not a working world.
-Implement fixed-step simulation, events, queries, scene lifecycle/writeback,
-editor authoring and typed Vec3 Decay access. Inspect both editor and exported
+The standalone 3D body world now runs fixed-step simulation and entity events.
+Implement queries, scene lifecycle/writeback, editor authoring and typed Vec3
+Decay access. Inspect both editor and exported
 game host plumbing so they share semantics. Transform3D uses quaternion [x,y,z,w].
 
 Voxel-world proof must collide with actual voxel terrain. Do not use an
