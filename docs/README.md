@@ -49,7 +49,6 @@ contracts below; dated evidence should not override them.
 
 - [Editor architecture](editor-architecture.md)
 - [Editor design QA](../design-qa.md)
-- [Local-first AI authoring architecture](local-ai-architecture.md)
 
 The editor audits below are dated investigations. Their resolved findings remain
 valuable explanations of how bugs escaped code review, but
@@ -59,6 +58,15 @@ valuable explanations of how bugs escaped code review, but
 - [Editor authoring audit](editor-authoring-audit.md)
 - [Editor usability audit](editor-usability-audit.md)
 - [Taking the editor to Gather](editor-meets-the-game.md)
+
+## AI and coding agents
+
+- [Agent-native authoring](agent-native-direction.md) — the accepted direction:
+  external agents, generated docs, project checks, headless play
+- [Decay agent guide](decay-agent-guide.md)
+- [Local-first AI authoring architecture](local-ai-architecture.md) — the
+  in-editor local assistant and its Decay repair
+- [AI authoring protocol](ai-authoring-protocol.md)
 
 ## Decay
 

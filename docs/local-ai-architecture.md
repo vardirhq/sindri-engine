@@ -4,7 +4,16 @@
 **Scope:** AI-assisted authoring in the Sindri editor  
 **Primary target:** Reliable local inference on an NVIDIA RTX 3060 with 12 GB VRAM  
 **Secondary target:** Optional user-configured cloud providers  
-**Last updated:** 2026-09-27
+**Last updated:** 2026-10-07
+
+> **Direction (2026-10-07).** Sindri's primary AI path is now external coding
+> agents working on project files, supported by generated docs, project checks
+> and headless play — see [`agent-native-direction.md`](agent-native-direction.md).
+> This document's in-editor assistant keeps its current scope, guided local
+> setup and Decay repair, for people who want help without an account or a
+> terminal. The later phases below (multi-entity scene composition, vision and
+> cloud adapters, a general chat assistant) are not being pursued unless that
+> direction changes.
 
 > **Implemented so far (2026-09-27).** One slice of Phase 4, ahead of the
 > proposal protocol this document says to build first: **Decay repair**. It

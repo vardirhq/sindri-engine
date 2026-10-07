@@ -361,7 +361,7 @@ the engine would be authoring things nothing can run.
 - [ ] Named layout presets, and panels that can be rearranged — `2 by 3` and
   `Wide` presets exist and persist; arbitrary rearrangement does not
 - [ ] Script editing, or a clean handoff to the editor a developer already uses
-- [ ] Expose editor actions as structured commands, which is what AI tooling operates through
+- [ ] Expose editor actions as structured commands for automation and the local assistant. External coding agents edit project files directly instead; see `docs/agent-native-direction.md`
 
 Exit gate: someone can build one of the shipped examples from scratch inside the
 editor — entities, components, assets, and all — without hand-editing JSON.
@@ -784,6 +784,25 @@ Exit gate: a Causeway world can be explored and edited for an extended run with
 bounded memory and frame time; revisiting an evicted chunk restores the same
 biome plus saved edits; native and browser generation agree from the seed.
 
+## Agent-native authoring
+
+Sindri does not build its own AI agent; it makes a project something any coding
+agent can work in, through docs it can trust, checks it can run, and a way to
+see the result. The files are the interface, so there is no mutation CLI or MCP
+tool set ahead of evidence. See `docs/agent-native-direction.md`.
+
+- [ ] `sindri project check --format json` over scenes, prefabs, Weave, Decay and `sindri.toml`, with diagnostics raised by the crate that found them, naming the file and the JSON path or source span. `SceneDocument::validate`, `ComponentSchemaRegistry::validate_scene` and `decay-lsp --check --json` already exist and are the parts it composes
+- [ ] Generate JSON Schemas for `.scene` and `.prefab` files from the component registry into `docs/generated/`, carrying the format version they describe
+- [ ] Generate a Weave reference an agent can read, as `decay-api.json` is for Decay
+- [ ] `sindri play --headless` with a structured per-frame log, scripted input and frame capture, generalizing the games' existing scripted-run tests and `*-capture` binaries
+- [ ] The editor reloads a scene changed on disk when it has no unsaved edits, and asks when it has; scripts, textures, prefabs and Weave styles are already watched
+- [ ] `sindri new` writes a short per-project agent guide pointing at the workflow and generated documents, also packaged as a skill for agents that load them
+- [ ] An external-agent benchmark in `tools/ai-authoring-eval`: unmodified agents given a fresh project and fixed tasks, graded by `sindri project check` and a headless run, with the pass rate per agent recorded
+
+Exit gate: an unmodified external agent, given a fresh project and only what
+`sindri new` writes, completes the benchmark's tasks with every change passing
+`sindri project check` and its headless run.
+
 ## Explicitly deferred beyond the first major release
 
 - [ ] PBR and advanced shadows
@@ -795,5 +814,5 @@ biome plus saved edits; native and browser generation agree from the seed.
 - [ ] Visual scripting or shader graphs
 - [ ] Plugin marketplace
 - [ ] Cloud services
-- [ ] AI-assisted actions beyond a structured editor command proof
+- [ ] In-editor AI assistance beyond local setup and Decay repair; external agents are the supported path (`docs/agent-native-direction.md`)
 - [ ] Faster component storage: typed queries clone and deserialize each JSON payload, which `docs/entity-scaling.md` measured as the slowest part of reading a world and named as the thing to fix if any of it ever matters
