@@ -72,6 +72,7 @@ mod tests {
         RecentProject {
             path: root.display().to_string(),
             name: "Remembered".to_owned(),
+            opened: None,
         }
     }
 

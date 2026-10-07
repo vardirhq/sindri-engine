@@ -42,13 +42,13 @@ export function decodePng(buffer) {
       width = body.readUInt32BE(0);
       height = body.readUInt32BE(4);
       const depth = body[8];
-      const colour = body[9];
+      const color = body[9];
       const interlace = body[12];
       if (depth !== 8) throw new Error(`unsupported bit depth ${depth}`);
       if (interlace !== 0) throw new Error('interlaced PNGs are not supported');
-      if (colour === 2) channels = 3;
-      else if (colour === 6) channels = 4;
-      else throw new Error(`unsupported colour type ${colour}`);
+      if (color === 2) channels = 3;
+      else if (color === 6) channels = 4;
+      else throw new Error(`unsupported color type ${color}`);
     } else if (type === 'IDAT') {
       parts.push(body);
     } else if (type === 'IEND') {
@@ -89,12 +89,12 @@ export function decodePng(buffer) {
   return { width, height, channels, data };
 }
 
-/// How much was drawn: the number of distinct colours, and the mean channel
+/// How much was drawn: the number of distinct colors, and the mean channel
 /// value across the image.
 ///
 /// Two numbers rather than one because they fail differently. A frame cleared
-/// to a single flat colour is bright but has one colour; a frame drawn almost
-/// entirely in shadow has many colours but little light.
+/// to a single flat color is bright but has one color; a frame drawn almost
+/// entirely in shadow has many colors but little light.
 export function imageStatistics(buffer) {
   const { width, height, channels, data } = decodePng(buffer);
   const seen = new Set();
@@ -103,5 +103,5 @@ export function imageStatistics(buffer) {
     seen.add((data[i] << 16) | (data[i + 1] << 8) | data[i + 2]);
     total += (data[i] + data[i + 1] + data[i + 2]) / 3;
   }
-  return { width, height, colours: seen.size, mean: total / (width * height) };
+  return { width, height, colors: seen.size, mean: total / (width * height) };
 }

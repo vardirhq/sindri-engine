@@ -213,7 +213,7 @@ async fn capture(
     )?;
 
     // Through the bloom chain, because the game is neon on black and unlit
-    // neon is just a coloured line. The capture is meant to show what the game
+    // neon is just a colored line. The capture is meant to show what the game
     // looks like, so it draws it the way the game is drawn.
     let mut bloom = Bloom::new(&gpu.device, OffscreenTarget::FORMAT);
     bloom.resize(&gpu.device, width, height);

@@ -25,14 +25,14 @@
         "kind": "primitives",
         "materials": {
           "grass": {
-            "colour": "#6f9f52",
+            "color": "#6f9f52",
             "grain": {
               "strength": 0.5,
               "size": 0.12
             }
           },
           "earth": {
-            "colour": "#805236",
+            "color": "#805236",
             "grain": {
               "strength": 0.5,
               "size": 0.12
@@ -77,7 +77,7 @@
         "kind": "primitives",
         "materials": {
           "stone": {
-            "colour": "#8d8f9a",
+            "color": "#8d8f9a",
             "grain": {
               "strength": 0.5,
               "size": 0.12
@@ -108,7 +108,7 @@
         "kind": "primitives",
         "materials": {
           "earth": {
-            "colour": "#805236",
+            "color": "#805236",
             "grain": {
               "strength": 0.5,
               "size": 0.12

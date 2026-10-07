@@ -16,7 +16,7 @@ use super::EditorApp;
 const BUDGET: Duration = Duration::from_micros(16_667);
 const CHART_HEIGHT: f32 = 112.0;
 
-/// The colour a phase is drawn in, in the chart and beside its row.
+/// The color a phase is drawn in, in the chart and beside its row.
 const fn phase_color(phase: Phase) -> Color32 {
     match phase {
         Phase::Effects => color::AXIS_Z_DIM,
@@ -205,7 +205,7 @@ fn chart(
     pointed
 }
 
-/// Each phase's time, with its colour and its share of the frame.
+/// Each phase's time, with its color and its share of the frame.
 fn phases(ui: &mut egui::Ui, time_of: impl Fn(Phase) -> Duration, total: Duration) {
     egui::Grid::new("profiler phases")
         .num_columns(3)

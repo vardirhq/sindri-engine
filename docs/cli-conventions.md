@@ -63,6 +63,11 @@ that engine's error model, and the editor gets nothing out of it.
 
 ## Mutation is one invocation, one transaction
 
+> **Not scheduled.** Project files are the interface for coding agents, so
+> mutation commands are not built ahead of evidence that agents need them; read
+> and check commands come first. This section stays as the agreed shape if one
+> is built. See [`agent-native-direction.md`](agent-native-direction.md).
+
 There is no `sindri transaction begin`. A CLI process that holds an open
 transaction has to keep it somewhere between invocations, and that somewhere is
 a new kind of project state nothing else understands.

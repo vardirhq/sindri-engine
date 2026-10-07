@@ -59,7 +59,7 @@ pub(super) struct Chain {
 impl Chain {
     /// The format the blur runs in.
     ///
-    /// Float and linear, unlike every other colour target here. The chain is not
+    /// Float and linear, unlike every other color target here. The chain is not
     /// a picture anyone looks at: it is an intermediate that is written and read
     /// five or ten times in a frame, and an sRGB one would encode and decode at
     /// every step — losing the darks that a glow is mostly made of — and clamp

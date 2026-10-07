@@ -118,7 +118,7 @@ export interface Mesh {
   /** Which entry of `materials` each triangle is drawn with. */
   triangleMaterial: Uint16Array;
   materials: BandedMaterial[];
-  /** Every colour a pixel of this model can be, in the order they were declared. */
+  /** Every color a pixel of this model can be, in the order they were declared. */
   palette: string[];
   /** Named material to the ramp it was banded with, for the bake report. */
   ramps: Record<string, string[]>;

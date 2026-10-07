@@ -87,7 +87,7 @@ async fn capture(path: &Path) -> Result<(), Box<dyn Error>> {
 
     // Checked after writing, so a failing frame is still uploaded to look at.
     verify_authored_colors(&pixels)?;
-    println!("verified authored scene colours survived the render round trip");
+    println!("verified authored scene colors survived the render round trip");
     Ok(())
 }
 

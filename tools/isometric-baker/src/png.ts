@@ -37,7 +37,7 @@ export function encodePng(image: RgbaImage): Buffer {
   header.writeUInt32BE(width, 0);
   header.writeUInt32BE(height, 4);
   header[8] = 8; // bit depth
-  header[9] = 6; // colour type: truecolour with alpha
+  header[9] = 6; // color type: truecolor with alpha
   header[10] = 0; // compression: deflate
   header[11] = 0; // filter method
   header[12] = 0; // no interlacing

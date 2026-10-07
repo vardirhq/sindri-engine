@@ -50,7 +50,7 @@ pub enum ValueMember {
     List(decay_syntax::ListOp),
     /// A text property or method: `s.length`, `s.contains(part)`.
     Text(decay_syntax::StringOp),
-    /// A colour operation: `c.lerp(other, t)`, `c.with_alpha(a)`, and
+    /// A color operation: `c.lerp(other, t)`, `c.with_alpha(a)`, and
     /// `Color("#ff8800")` as `FromHex`.
     Color(decay_syntax::ColorOp),
     /// A map question or change: `m.contains(k)`, `m.remove(k)`, and

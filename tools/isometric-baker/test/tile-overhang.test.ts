@@ -16,7 +16,7 @@ function slab(positionY: number, height: number) {
       footprint: { width: 1, height: 1 },
       render: { padding: 0, outline: { enabled: false } },
       model: {
-        materials: { ground: { colour: '#3f6047' } },
+        materials: { ground: { color: '#3f6047' } },
         parts: [
           {
             type: 'box',

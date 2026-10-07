@@ -59,7 +59,7 @@ impl ChosenFormat {
 /// A browser canvas offers `bgra8unorm` and no sRGB format at all, and this
 /// engine used to stop there — `NoSrgbSurfaceFormat`, at startup, on every page
 /// load. That was not wrong to refuse: drawing into a non-sRGB target really
-/// would darken every colour. It was wrong to conclude there was no way to
+/// would darken every color. It was wrong to conclude there was no way to
 /// encode. WebGPU's answer is a view format: the swapchain stores non-sRGB
 /// bytes, and the view the renderer draws through encodes on write exactly as
 /// it always did. The invariant is untouched — every frame is written through
@@ -373,7 +373,7 @@ mod format_tests {
     /// What a browser canvas offers, which is what stopped this engine at
     /// startup on every page load: no sRGB format at all.
     ///
-    /// It is not a reason to draw in the wrong colour space, and it is not a
+    /// It is not a reason to draw in the wrong color space, and it is not a
     /// reason to refuse. The swapchain stores what the canvas can hold and the
     /// renderer draws through an sRGB view of it.
     #[test]

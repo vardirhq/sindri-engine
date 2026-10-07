@@ -40,10 +40,10 @@ pub fn is_length(name: &str) -> bool {
 /// How the two vector types are spelled. Language types rather than host
 /// ones: a vector is a value a script builds, adds and keeps, which a host
 /// type — something the host owns and a script can only name — cannot be.
-/// The colour type's name, and how it is built: `Color(1.0, 0.5, 0.0)`.
+/// The color type's name, and how it is built: `Color(1.0, 0.5, 0.0)`.
 pub const COLOR: &str = "Color";
 
-/// A colour's channels, in the order it is built and stored.
+/// A color's channels, in the order it is built and stored.
 pub const CHANNELS: [&str; 4] = ["r", "g", "b", "a"];
 
 pub const VEC2: &str = "Vec2";
@@ -115,7 +115,7 @@ pub enum Type {
     /// when time passes; Sindri runs down every timer a script's fields hold
     /// before each `update`.
     Timer,
-    /// A colour: `r`, `g`, `b` and `a`, each from 0 to 1.
+    /// A color: `r`, `g`, `b` and `a`, each from 0 to 1.
     Color,
     /// A fixed-length collection of one element type.
     ///

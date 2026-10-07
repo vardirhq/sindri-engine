@@ -18,10 +18,10 @@ The machine-readable form of this page is
 What the entity a script runs on offers, beyond the script's own fields.
 
 - `entity`: `Entity` — The object in the game this script is attached to. Pass it to calls that act on an object, such as `World.despawn(this.entity)`.
-- `shape`: `Shape` — The drawn shape on this script's object, if it has one: its colours, outline and how much of it is drawn.
-- `sprite`: `Sprite` — The image (sprite) on this script's object, if it has one: its colour and drawing order.
+- `shape`: `Shape` — The drawn shape on this script's object, if it has one: its colors, outline and how much of it is drawn.
+- `sprite`: `Sprite` — The image (sprite) on this script's object, if it has one: its color and drawing order.
 - `transform`: `Transform` — Where this script's object is, how it is turned and how big it is. Change it to move the object.
-- `ui_image`: `UiImage` — The on-screen interface image on this script's object, if it has one: its colour and drawing order.
+- `ui_image`: `UiImage` — The on-screen interface image on this script's object, if it has one: its color and drawing order.
 
 ## Globals
 
@@ -480,26 +480,26 @@ Playing an object's sequences: choreography set up for it in the scene's Timelin
 
 ### `Shape`
 
-A shape drawn in the game world, such as a circle, polygon or ring, with an inside colour and an outline.
+A shape drawn in the game world, such as a circle, polygon or ring, with an inside color and an outline.
 
 - `count`: `f32` — How many sides a polygon has (3 is a triangle, 6 a hexagon), or how many cells a grid shape is across.
 - `dash_duty`: `f32` — How much of each dash is drawn, from 0 to 1; the rest is the gap before the next. 0.5 draws dashes and gaps of equal length.
 - `dashes`: `f32` — How many dashes the outline is broken into. 0 draws a solid line.
-- `fill`: `Color` — The colour inside the shape.
+- `fill`: `Color` — The color inside the shape.
 - `layer`: `f32` — Drawing order: higher numbers are drawn in front of lower ones.
-- `stroke`: `Color` — The colour of the shape's outline.
+- `stroke`: `Color` — The color of the shape's outline.
 - `stroke_width`: `f32` — How thick the outline is, as a fraction of the shape's size.
 - `sweep_start`: `f32` — Where the outline starts, as a fraction of the way round from the top.
 - `sweep_turns`: `f32` — How much of the outline is drawn, from 0 to 1. Setting it to 0.5 draws half a ring, which makes cooldown and charge meters.
 
 ### `Sprite`
 
-A 2D image drawn in the game world, and how it is coloured.
+A 2D image drawn in the game world, and how it is colored.
 
-- `color_multiply`: `Color` — Another colour the image is multiplied by, on top of `tint`.
-- `color_offset`: `Color` — A colour added on top of the image, which can make it brighter or flash white. Keep its `a` at 0, or the image's transparent edges become visible.
+- `color_multiply`: `Color` — Another color the image is multiplied by, on top of `tint`.
+- `color_offset`: `Color` — A color added on top of the image, which can make it brighter or flash white. Keep its `a` at 0, or the image's transparent edges become visible.
 - `layer`: `f32` — Drawing order: higher numbers are drawn in front of lower ones.
-- `tint`: `Color` — A colour the image is multiplied by. White leaves it unchanged; lowering `a` fades it out.
+- `tint`: `Color` — A color the image is multiplied by. White leaves it unchanged; lowering `a` fades it out.
 
 ### `Stick`
 
@@ -605,7 +605,7 @@ The interface drawn over the game: changing text and bars, and checking buttons 
 An image in the interface drawn over the game, such as a health bar or an icon, rather than in the game world.
 
 - `layer`: `f32` — Drawing order: higher numbers are drawn in front of lower ones.
-- `tint`: `Color` — A colour the image is multiplied by. White leaves it unchanged; lowering `a` fades it out.
+- `tint`: `Color` — A color the image is multiplied by. White leaves it unchanged; lowering `a` fades it out.
 
 ### `Vec2Tween`
 

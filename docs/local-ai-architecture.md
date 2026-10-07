@@ -4,7 +4,18 @@
 **Scope:** AI-assisted authoring in the Sindri editor  
 **Primary target:** Reliable local inference on an NVIDIA RTX 3060 with 12 GB VRAM  
 **Secondary target:** Optional user-configured cloud providers  
-**Last updated:** 2026-09-27
+**Last updated:** 2026-10-07
+
+> **Direction (2026-10-07).** Sindri supports two agents on one foundation —
+> external coding agents and this local one — described in
+> [`agent-native-direction.md`](agent-native-direction.md). Both are judged by
+> the same generated docs, `sindri project check` and headless play. This
+> local agent is deliberately narrow: Decay repair (exists), writing one script
+> from a description, selected-entity edits through the proposal protocol, and
+> explaining a check failure. Its next work follows the shared checks rather
+> than building validation of its own. Multi-entity scene composition, a
+> general chat assistant, and vision and cloud adapters are not pursued here:
+> tasks of that size belong to external agents.
 
 > **Implemented so far (2026-09-27).** One slice of Phase 4, ahead of the
 > proposal protocol this document says to build first: **Decay repair**. It

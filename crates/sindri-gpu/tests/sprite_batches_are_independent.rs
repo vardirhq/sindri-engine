@@ -130,7 +130,7 @@ fn each_batch_draws_with_its_own_camera() {
 
     // Between the two sprites' edges: the wide camera's sprite reaches three
     // quarters across, the narrow one's barely past the middle. This is the
-    // pixel that was the clear colour while the bug was there.
+    // pixel that was the clear color while the bug was there.
     let between = at(SIZE / 2 + SIZE / 8, SIZE / 2);
     assert!(
         near(between, WIDE),

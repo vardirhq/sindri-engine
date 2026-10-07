@@ -21,7 +21,7 @@
     "padding": 2,
     "outline": {
       "enabled": true,
-      "colour": "#241d2b"
+      "color": "#241d2b"
     },
     "shading": {
       "light": [
@@ -40,19 +40,19 @@
     "kind": "primitives",
     "materials": {
       "stone": {
-        "colour": "#89939b"
+        "color": "#89939b"
       },
       "stone-lit": {
-        "colour": "#aab4b8"
+        "color": "#aab4b8"
       },
       "dark-stone": {
-        "colour": "#515b63"
+        "color": "#515b63"
       },
       "moss": {
-        "colour": "#58794c"
+        "color": "#58794c"
       },
       "rune": {
-        "colour": "#c7fbef",
+        "color": "#c7fbef",
         "unlit": true
       }
     },

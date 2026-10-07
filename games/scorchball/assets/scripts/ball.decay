@@ -224,7 +224,7 @@ script Ball {
     // The ring under the ball says whose it is.
     fn mark() {
         let slot = Game.holder;
-        // Pads 1-4 wear their own colour; bots 11 and 12 borrow pads 1 and 2's.
+        // Pads 1-4 wear their own color; bots 11 and 12 borrow pads 1 and 2's.
         var clip = "none";
         if slot >= 1.0 && slot <= 4.0 { clip = "p" + slot; }
         if slot > 10.0 { clip = "p" + (slot - 10.0); }

@@ -190,7 +190,7 @@ function drawTriangle(
       // Grain is read from where the fragment is on the model, not on the
       // screen, so the pattern belongs to the block. Applied after the band so
       // it moves a texel relative to its own lighting rather than overriding
-      // it, and clamped, so a grainy material still emits only the four colours
+      // it, and clamped, so a grainy material still emits only the four colors
       // its ramp promised.
       if (material.grain && !material.unlit) {
         const positions = mesh.positions;
@@ -213,11 +213,11 @@ function drawTriangle(
         );
       }
 
-      const colour = material.shades[shade];
+      const color = material.shades[shade];
       const pixel = offset * 4;
-      target.image.data[pixel] = colour.r;
-      target.image.data[pixel + 1] = colour.g;
-      target.image.data[pixel + 2] = colour.b;
+      target.image.data[pixel] = color.r;
+      target.image.data[pixel + 1] = color.g;
+      target.image.data[pixel + 2] = color.b;
       target.image.data[pixel + 3] = 255;
     }
   }

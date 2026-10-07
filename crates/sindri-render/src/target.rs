@@ -1,8 +1,8 @@
-//! Colour and depth targets that are sized, formatted, and rebuilt together.
+//! Color and depth targets that are sized, formatted, and rebuilt together.
 
 use crate::{COLOR_TARGET_FORMAT, ClearOperations, DepthTarget};
 
-/// Clears a frame's colour and depth before any pass draws into them.
+/// Clears a frame's color and depth before any pass draws into them.
 ///
 /// Clearing belongs to the frame rather than to whichever renderer happens to
 /// draw first. When it belonged to the opaque mesh pass, a second mesh erased
@@ -48,14 +48,14 @@ pub fn encode_clear(
     });
 }
 
-/// The format a sampler must read a Sindri colour target through.
+/// The format a sampler must read a Sindri color target through.
 ///
-/// Colour targets are sRGB so the hardware encodes on write, which is half of
-/// the [colour round trip](../../../docs/rendering-color.md). The other half is
+/// Color targets are sRGB so the hardware encodes on write, which is half of
+/// the [color round trip](../../../docs/rendering-color.md). The other half is
 /// whoever reads the result. A sampler that expects gamma-encoded bytes — egui's
 /// does, and says so in its shader — would have the hardware decode them on
 /// read, and two decodes against one encode renders perfectly while being the
-/// wrong colour: authored orange arrives as `(221, 43, 6)` instead of
+/// wrong color: authored orange arrives as `(221, 43, 6)` instead of
 /// `(240, 114, 43)`.
 ///
 /// Reading through the linear view of the same bytes converts nothing twice.
@@ -64,10 +64,10 @@ pub fn sampled_format(target: wgpu::TextureFormat) -> wgpu::TextureFormat {
     target.remove_srgb_suffix()
 }
 
-/// A colour target a frame draws into and something else samples afterwards,
+/// A color target a frame draws into and something else samples afterwards,
 /// with the depth buffer that belongs to it.
 ///
-/// Colour and depth are one thing here because they are only ever correct
+/// Color and depth are one thing here because they are only ever correct
 /// together: a resize that rebuilt one and not the other would render against a
 /// depth buffer of the wrong size, which is a validation error at best and a
 /// wrong picture at worst.
@@ -83,7 +83,7 @@ pub struct ViewportTarget {
 }
 
 impl ViewportTarget {
-    /// The format the colour texture is stored in.
+    /// The format the color texture is stored in.
     pub const FORMAT: wgpu::TextureFormat = COLOR_TARGET_FORMAT;
 
     pub fn new(device: &wgpu::Device, label: impl Into<String>, width: u32, height: u32) -> Self {
@@ -132,7 +132,7 @@ impl ViewportTarget {
         &self.sampled
     }
 
-    /// The colour texture itself, for copying a finished frame out of.
+    /// The color texture itself, for copying a finished frame out of.
     pub const fn color(&self) -> &wgpu::Texture {
         &self.color
     }
@@ -197,7 +197,7 @@ mod tests {
     fn a_target_is_drawn_into_through_srgb_and_read_through_linear() {
         assert!(
             ViewportTarget::FORMAT.is_srgb(),
-            "a linear colour target silently darkens every rendered colour"
+            "a linear color target silently darkens every rendered color"
         );
         assert!(
             !sampled_format(ViewportTarget::FORMAT).is_srgb(),
@@ -208,7 +208,7 @@ mod tests {
     #[test]
     fn the_two_views_describe_the_same_bytes() {
         // Same texture, two readings of it. If these were different formats
-        // rather than one format's two colour spaces, the views would be
+        // rather than one format's two color spaces, the views would be
         // describing different data and neither half would be right.
         assert_eq!(
             sampled_format(ViewportTarget::FORMAT).add_srgb_suffix(),
@@ -219,7 +219,7 @@ mod tests {
     #[test]
     fn a_format_with_no_srgb_variant_is_left_alone() {
         // Nothing in Sindri uses one today, but returning it unchanged is what
-        // keeps this a rule about colour space rather than a format rewrite.
+        // keeps this a rule about color space rather than a format rewrite.
         assert_eq!(
             sampled_format(wgpu::TextureFormat::Rgba16Float),
             wgpu::TextureFormat::Rgba16Float

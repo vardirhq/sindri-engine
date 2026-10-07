@@ -330,8 +330,8 @@ impl TextRenderer {
                 |glyph| {
                     glyph
                         .with_softness(field(instance.shadow.softness))
-                        // The shadow is the letter's shape in one flat colour, so
-                        // its outline is drawn in the same colour rather than left
+                        // The shadow is the letter's shape in one flat color, so
+                        // its outline is drawn in the same color rather than left
                         // as a rim of the face's.
                         .with_outline(outline_width, instance.shadow.color)
                 },
@@ -360,7 +360,7 @@ impl TextRenderer {
         );
     }
 
-    /// Every drawn glyph of one string, placed from `origin` and coloured
+    /// Every drawn glyph of one string, placed from `origin` and colored
     /// `face`, with `adjust` applied to each.
     fn push_glyphs(
         &mut self,

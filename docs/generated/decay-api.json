@@ -375,13 +375,13 @@
       "type": "Entity"
     },
     {
-      "description": "The drawn shape on this script's object, if it has one: its colours, outline and how much of it is drawn.",
+      "description": "The drawn shape on this script's object, if it has one: its colors, outline and how much of it is drawn.",
       "kind": "value",
       "name": "shape",
       "type": "Shape"
     },
     {
-      "description": "The image (sprite) on this script's object, if it has one: its colour and drawing order.",
+      "description": "The image (sprite) on this script's object, if it has one: its color and drawing order.",
       "kind": "value",
       "name": "sprite",
       "type": "Sprite"
@@ -393,7 +393,7 @@
       "type": "Transform"
     },
     {
-      "description": "The on-screen interface image on this script's object, if it has one: its colour and drawing order.",
+      "description": "The on-screen interface image on this script's object, if it has one: its color and drawing order.",
       "kind": "value",
       "name": "ui_image",
       "type": "UiImage"
@@ -3296,7 +3296,7 @@
       "name": "Sequence"
     },
     {
-      "description": "A shape drawn in the game world, such as a circle, polygon or ring, with an inside colour and an outline.",
+      "description": "A shape drawn in the game world, such as a circle, polygon or ring, with an inside color and an outline.",
       "members": [
         {
           "description": "How many sides a polygon has (3 is a triangle, 6 a hexagon), or how many cells a grid shape is across.",
@@ -3317,7 +3317,7 @@
           "type": "f32"
         },
         {
-          "description": "The colour inside the shape.",
+          "description": "The color inside the shape.",
           "kind": "value",
           "name": "fill",
           "type": "Color"
@@ -3329,7 +3329,7 @@
           "type": "f32"
         },
         {
-          "description": "The colour of the shape's outline.",
+          "description": "The color of the shape's outline.",
           "kind": "value",
           "name": "stroke",
           "type": "Color"
@@ -3356,16 +3356,16 @@
       "name": "Shape"
     },
     {
-      "description": "A 2D image drawn in the game world, and how it is coloured.",
+      "description": "A 2D image drawn in the game world, and how it is colored.",
       "members": [
         {
-          "description": "Another colour the image is multiplied by, on top of `tint`.",
+          "description": "Another color the image is multiplied by, on top of `tint`.",
           "kind": "value",
           "name": "color_multiply",
           "type": "Color"
         },
         {
-          "description": "A colour added on top of the image, which can make it brighter or flash white. Keep its `a` at 0, or the image's transparent edges become visible.",
+          "description": "A color added on top of the image, which can make it brighter or flash white. Keep its `a` at 0, or the image's transparent edges become visible.",
           "kind": "value",
           "name": "color_offset",
           "type": "Color"
@@ -3377,7 +3377,7 @@
           "type": "f32"
         },
         {
-          "description": "A colour the image is multiplied by. White leaves it unchanged; lowering `a` fades it out.",
+          "description": "A color the image is multiplied by. White leaves it unchanged; lowering `a` fades it out.",
           "kind": "value",
           "name": "tint",
           "type": "Color"
@@ -4166,7 +4166,7 @@
           "type": "f32"
         },
         {
-          "description": "A colour the image is multiplied by. White leaves it unchanged; lowering `a` fades it out.",
+          "description": "A color the image is multiplied by. White leaves it unchanged; lowering `a` fades it out.",
           "kind": "value",
           "name": "tint",
           "type": "Color"

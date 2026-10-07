@@ -138,7 +138,7 @@ pub enum SceneExtractError {
     InvalidCameraDistanceScale,
     #[error("camera pan must be finite")]
     InvalidCameraPan,
-    #[error("a sprite's colour transform must be finite")]
+    #[error("a sprite's color transform must be finite")]
     InvalidColorTransform,
     #[error(transparent)]
     UvRect(#[from] UvRectError),

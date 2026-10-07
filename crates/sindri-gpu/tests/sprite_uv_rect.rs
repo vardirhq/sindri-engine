@@ -72,7 +72,7 @@ fn sample(gpu: &GpuContext, rect: UvRect) -> ([u8; 4], [[u8; 4]; 4]) {
     let mut sprites = SpriteBatchRenderer::new(&gpu.device, OffscreenTarget::FORMAT);
 
     // Straight on and filling the frame, so the middle pixel is unambiguously
-    // inside the sprite and nothing but the rect decides its colour.
+    // inside the sprite and nothing but the rect decides its color.
     let view_projection = OrthographicCamera {
         center: glam::Vec2::ZERO,
         vertical_size: 1.0,
@@ -151,7 +151,7 @@ fn assert_near(actual: [u8; 4], expected: [u8; 4], what: &str) {
     assert!(close, "{what}: drew {actual:?} rather than {expected:?}");
 }
 
-/// The whole point: each cell of the sheet draws its own colour, which can only
+/// The whole point: each cell of the sheet draws its own color, which can only
 /// happen if the shader read the rect.
 #[test]
 fn each_cell_of_a_sheet_draws_its_own_pixels() {

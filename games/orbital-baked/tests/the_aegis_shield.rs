@@ -244,9 +244,9 @@ fn fire_lands_on_the_plates_rather_than_the_hull() {
 /// The Aegis wears its own steel.
 ///
 /// For a long time every boss but this one was a single orange gunship
-/// recoloured by a script tint, and the Aegis was too: a blue asked for once at
+/// recolored by a script tint, and the Aegis was too: a blue asked for once at
 /// configuration and overwritten every frame after by the cream its neighbours
-/// shared. Neither colour was one anybody chose for it, and neither belonged
+/// shared. Neither color was one anybody chose for it, and neither belonged
 /// beside its own blue plates. Every boss wears its own hull now, so the guard
 /// is two-sided — the right texture, and no tint over it.
 #[test]
@@ -273,8 +273,8 @@ fn it_wears_its_own_hull_rather_than_a_tinted_gunship() {
     for (channel, name) in sprite.tint.iter().take(3).zip(["red", "green", "blue"]) {
         assert!(
             (channel - 1.0).abs() < 1e-3,
-            "the {name} channel is {channel}: a tint would recolour a hull that \
-             is already the colour it should be"
+            "the {name} channel is {channel}: a tint would recolor a hull that \
+             is already the color it should be"
         );
     }
 }

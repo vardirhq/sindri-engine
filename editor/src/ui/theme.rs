@@ -1,6 +1,6 @@
 //! The one place the editor decides what it looks like.
 //!
-//! Every colour, every gap, and every control height the editor draws with is
+//! Every color, every gap, and every control height the editor draws with is
 //! named here. A panel that picks its own grey is how an interface stops
 //! matching itself, and the editor had eleven of them: each new panel copied a
 //! `Color32::from_rgb` out of the panel beside it and then drifted.
@@ -98,16 +98,16 @@ pub mod color {
     pub const AXIS_Y: Color32 = Color32::from_rgb(127, 176, 105);
     pub const AXIS_Z: Color32 = Color32::from_rgb(91, 144, 214);
 
-    /// The axis colours as they read on a resting control, where a full-strength
+    /// The axis colors as they read on a resting control, where a full-strength
     /// letter beside a number would shout.
     pub const AXIS_X_DIM: Color32 = Color32::from_rgb(150, 74, 72);
     pub const AXIS_Y_DIM: Color32 = Color32::from_rgb(92, 124, 78);
     pub const AXIS_Z_DIM: Color32 = Color32::from_rgb(70, 104, 150);
 
-    /// The three axis colours in order, for anything that indexes them.
+    /// The three axis colors in order, for anything that indexes them.
     pub const AXES: [Color32; 3] = [AXIS_X, AXIS_Y, AXIS_Z];
 
-    /// The dimmed axis colours in order.
+    /// The dimmed axis colors in order.
     pub const AXES_DIM: [Color32; 3] = [AXIS_X_DIM, AXIS_Y_DIM, AXIS_Z_DIM];
 }
 
@@ -197,12 +197,12 @@ pub mod text {
 
 const INTER_FONT: &[u8] = include_bytes!("../../assets/Inter.ttf");
 
-/// A hairline in the editor's border colour.
+/// A hairline in the editor's border color.
 pub fn hairline() -> Stroke {
     Stroke::new(1.0, color::LINE)
 }
 
-/// A hairline in the colour used inside a region rather than around one.
+/// A hairline in the color used inside a region rather than around one.
 pub fn hairline_soft() -> Stroke {
     Stroke::new(1.0, color::LINE_SOFT)
 }
@@ -297,7 +297,7 @@ fn apply(style: &mut egui::Style) {
     visuals.text_cursor.stroke = Stroke::new(1.0, color::FORGE);
     // A control that cannot be used should read as unavailable rather than as
     // low-contrast text: egui's default barely dims, so a disabled Save looked
-    // like an enabled one someone had chosen a bad colour for.
+    // like an enabled one someone had chosen a bad color for.
     visuals.disabled_alpha = 0.42;
     visuals.interact_cursor = Some(egui::CursorIcon::PointingHand);
     visuals.button_frame = true;

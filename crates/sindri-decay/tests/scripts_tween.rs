@@ -89,7 +89,7 @@ fn playback_pause_resume_cancel_restart_and_aliases() {
     assert_eq!(step(&mut at, 2.0), ["10"]);
 }
 #[test]
-fn vectors_colours_zero_duration_and_exact_completion() {
+fn vectors_colors_zero_duration_and_exact_completion() {
     let mut at = fixture(
         r#"
         script Test {

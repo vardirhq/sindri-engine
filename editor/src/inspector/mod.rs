@@ -90,20 +90,20 @@ pub fn humanize(key: &str) -> String {
 
 /// What one axis of an inline number row is called.
 ///
-/// Position-like values read as x/y/z/w and colours as r/g/b/a, which is the
+/// Position-like values read as x/y/z/w and colors as r/g/b/a, which is the
 /// only place the panel guesses at meaning — and it guesses from the key,
 /// which is the author's own word for it.
 #[must_use]
 pub fn axis_labels(key: &str, len: usize) -> Vec<String> {
     let spatial = ["X", "Y", "Z", "W"];
-    let colour = ["R", "G", "B", "A"];
+    let color = ["R", "G", "B", "A"];
     let rect = ["X", "Y", "W", "H"];
     let size = ["W", "H", "D", "?"];
     let names: &[&str; 4] = match key {
-        "tint" | "color" | "colour" => &colour,
-        // A sprite's colour transform holds four channels each; the two-wide
-        // `offset` a shadow or a collider carries is a place, not a colour.
-        "multiply" | "offset" if len == 4 => &colour,
+        "tint" | "color" => &color,
+        // A sprite's color transform holds four channels each; the two-wide
+        // `offset` a shadow or a collider carries is a place, not a color.
+        "multiply" | "offset" if len == 4 => &color,
         "uv_rect" => &rect,
         // A text box is a size rather than a place, and labelling it X and Y is
         // how someone types a position into it.
@@ -123,7 +123,7 @@ pub fn axis_labels(key: &str, len: usize) -> Vec<String> {
 /// through this component.
 ///
 /// An advanced field is drawn collapsed, so the panel opens on what a person
-/// usually came for. A sprite is textured, tinted and layered; its colour
+/// usually came for. A sprite is textured, tinted and layered; its color
 /// transform is the answer to a narrower question — art whose own channels are
 /// too dark for a tint to reach — and eight more number boxes above the fold
 /// would turn an ordinary tint picker into a cockpit.
@@ -243,7 +243,7 @@ mod tests {
     }
 
     #[test]
-    fn a_sprites_colour_transform_is_advanced_and_nothing_else_is() {
+    fn a_sprites_color_transform_is_advanced_and_nothing_else_is() {
         assert!(is_advanced("sindri.sprite", "color_transform"));
         assert!(
             !is_advanced("sindri.sprite", "tint"),
@@ -278,7 +278,7 @@ mod tests {
         assert_eq!(
             axis_labels("offset", 2),
             ["X", "Y"],
-            "a shadow's offset is a place, not a colour"
+            "a shadow's offset is a place, not a color"
         );
         assert_eq!(axis_labels("something", 2), ["X", "Y"]);
     }

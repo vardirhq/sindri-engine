@@ -291,8 +291,8 @@ fn a_key_reference_to_a_missing_list_is_refused() {
         .unwrap();
 
     assert!(matches!(
-        registry.describe::<Palette>([("chosen", FieldMeaning::KeyOf("colours[].id"))]),
-        Err(ComponentRegistryError::UnknownFieldPath { path, .. }) if path == "colours[].id"
+        registry.describe::<Palette>([("chosen", FieldMeaning::KeyOf("colors[].id"))]),
+        Err(ComponentRegistryError::UnknownFieldPath { path, .. }) if path == "colors[].id"
     ));
     registry
         .describe::<Palette>([

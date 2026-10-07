@@ -29,7 +29,7 @@ pub struct Fleck {
 }
 
 impl Fleck {
-    /// The colour this draws right now, fade included.
+    /// The color this draws right now, fade included.
     #[must_use]
     pub fn drawn_tint(self) -> [f32; 4] {
         if !self.fade || self.lifetime <= 0.0 {
@@ -300,7 +300,7 @@ mod tests {
     }
 
     #[test]
-    fn a_fleck_that_does_not_fade_keeps_its_colour() {
+    fn a_fleck_that_does_not_fade_keeps_its_color() {
         let mut effects = Effects2d::default();
         let mut definition = burst(1);
         definition.fade = false;

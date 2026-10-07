@@ -12,7 +12,7 @@
 //! executes it in Node. The corpus is embedded rather than read from disk,
 //! because what is under test is the decoder and not the source.
 //!
-//! The corpus is deliberately awkward: every colour type PNG defines, sixteen
+//! The corpus is deliberately awkward: every color type PNG defines, sixteen
 //! bits per channel, an interlaced encoding, and a JPEG. Those are the paths
 //! where a decoder's feature set can differ between builds, and a two-by-two
 //! image is small enough to write every expected pixel down.
@@ -36,7 +36,7 @@ const RGB16: &[u8] = include_bytes!("fixtures/decode/rgb16.png");
 const JPEG: &[u8] = include_bytes!("fixtures/decode/solid.jpg");
 const INTER: &[u8] = include_bytes!("../../../game/assets/fonts/Inter.ttf");
 
-/// What every two-by-two fixture that carries colour decodes to, in the order
+/// What every two-by-two fixture that carries color decodes to, in the order
 /// `TextureAsset` packs them: top left, top right, bottom left, bottom right.
 const CORNERS: [u8; 16] = [
     255, 0, 0, 255, // red
@@ -46,7 +46,7 @@ const CORNERS: [u8; 16] = [
 ];
 
 /// The same corners with no alpha channel in the encoding, so the fourth pixel
-/// is a colour rather than a transparency.
+/// is a color rather than a transparency.
 const OPAQUE_CORNERS: [u8; 16] = [
     255, 0, 0, 255, //
     0, 255, 0, 255, //
@@ -67,7 +67,7 @@ fn assert_pixels(name: &str, bytes: &[u8], width: u32, height: u32, expected: &[
     assert_eq!(asset.rgba8(), expected, "{name} decoded to other pixels");
 }
 
-/// Truecolour with alpha, which is the shape everything else is widened to.
+/// Truecolor with alpha, which is the shape everything else is widened to.
 #[compatibility_test]
 fn eight_bit_rgba_decodes_to_its_own_pixels() {
     assert_pixels("rgba8.png", RGBA8, 2, 2, &CORNERS);
@@ -92,10 +92,10 @@ fn an_encoding_without_alpha_arrives_opaque() {
     );
 }
 
-/// A palette is an indirection the decoder has to resolve, not a colour type a
+/// A palette is an indirection the decoder has to resolve, not a color type a
 /// GPU understands.
 #[compatibility_test]
-fn a_palette_is_expanded_to_colours() {
+fn a_palette_is_expanded_to_colors() {
     assert_pixels(
         "palette8.png",
         PALETTE8,
@@ -129,11 +129,11 @@ fn an_interlaced_encoding_is_the_same_image() {
     );
 }
 
-/// JPEG is lossy, so this asks whether the colour survived rather than whether
+/// JPEG is lossy, so this asks whether the color survived rather than whether
 /// the bytes did. A decoder that produced the wrong picture would miss by far
 /// more than a rounding step.
 #[compatibility_test]
-fn a_jpeg_decodes_to_the_colour_it_encodes() {
+fn a_jpeg_decodes_to_the_color_it_encodes() {
     let asset = decode("solid.jpg", JPEG);
     assert_eq!((asset.width(), asset.height()), (4, 4));
     for (index, pixel) in asset.rgba8().chunks_exact(4).enumerate() {

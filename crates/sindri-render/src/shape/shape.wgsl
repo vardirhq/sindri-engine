@@ -313,7 +313,7 @@ fn fs_main(in: VertexOutput) -> @location(0) vec4<f32> {
         }
         let alpha = in.stroke.a * edge;
         // Over the fill rather than added to it, so a translucent stroke on a
-        // translucent fill is the stroke's colour and not a mixture.
+        // translucent fill is the stroke's color and not a mixture.
         color = vec4<f32>(
             mix(color.rgb, in.stroke.rgb, alpha),
             color.a + alpha * (1.0 - color.a),

@@ -25,7 +25,7 @@
         "kind": "primitives",
         "materials": {
           "cloak": {
-            "colour": "#4a5e8c",
+            "color": "#4a5e8c",
             "grain": {
               "strength": 0.3,
               "size": 0.09,
@@ -41,7 +41,7 @@
             }
           },
           "cloak-d": {
-            "colour": "#36456a",
+            "color": "#36456a",
             "grain": {
               "strength": 0.26,
               "size": 0.1,
@@ -49,7 +49,7 @@
             }
           },
           "skin": {
-            "colour": "#d7a07a",
+            "color": "#d7a07a",
             "grain": {
               "strength": 0.16,
               "size": 0.07,
@@ -57,7 +57,7 @@
             }
           },
           "hat": {
-            "colour": "#8c5a3c",
+            "color": "#8c5a3c",
             "grain": {
               "strength": 0.3,
               "size": 0.08,
@@ -73,7 +73,7 @@
             }
           },
           "boot": {
-            "colour": "#43362b",
+            "color": "#43362b",
             "grain": {
               "strength": 0.24,
               "size": 0.09,
@@ -81,7 +81,7 @@
             }
           },
           "pack": {
-            "colour": "#7a6a4a",
+            "color": "#7a6a4a",
             "grain": {
               "strength": 0.3,
               "size": 0.09,
@@ -211,7 +211,7 @@
         "kind": "primitives",
         "materials": {
           "cloak": {
-            "colour": "#4a5e8c",
+            "color": "#4a5e8c",
             "grain": {
               "strength": 0.3,
               "size": 0.09,
@@ -227,7 +227,7 @@
             }
           },
           "cloak-d": {
-            "colour": "#36456a",
+            "color": "#36456a",
             "grain": {
               "strength": 0.26,
               "size": 0.1,
@@ -235,7 +235,7 @@
             }
           },
           "skin": {
-            "colour": "#d7a07a",
+            "color": "#d7a07a",
             "grain": {
               "strength": 0.16,
               "size": 0.07,
@@ -243,7 +243,7 @@
             }
           },
           "hat": {
-            "colour": "#8c5a3c",
+            "color": "#8c5a3c",
             "grain": {
               "strength": 0.3,
               "size": 0.08,
@@ -259,7 +259,7 @@
             }
           },
           "boot": {
-            "colour": "#43362b",
+            "color": "#43362b",
             "grain": {
               "strength": 0.24,
               "size": 0.09,
@@ -267,7 +267,7 @@
             }
           },
           "pack": {
-            "colour": "#7a6a4a",
+            "color": "#7a6a4a",
             "grain": {
               "strength": 0.3,
               "size": 0.09,
@@ -397,7 +397,7 @@
         "kind": "primitives",
         "materials": {
           "cloak": {
-            "colour": "#4a5e8c",
+            "color": "#4a5e8c",
             "grain": {
               "strength": 0.3,
               "size": 0.09,
@@ -413,7 +413,7 @@
             }
           },
           "cloak-d": {
-            "colour": "#36456a",
+            "color": "#36456a",
             "grain": {
               "strength": 0.26,
               "size": 0.1,
@@ -421,7 +421,7 @@
             }
           },
           "skin": {
-            "colour": "#d7a07a",
+            "color": "#d7a07a",
             "grain": {
               "strength": 0.16,
               "size": 0.07,
@@ -429,7 +429,7 @@
             }
           },
           "hat": {
-            "colour": "#8c5a3c",
+            "color": "#8c5a3c",
             "grain": {
               "strength": 0.3,
               "size": 0.08,
@@ -445,7 +445,7 @@
             }
           },
           "boot": {
-            "colour": "#43362b",
+            "color": "#43362b",
             "grain": {
               "strength": 0.24,
               "size": 0.09,
@@ -453,7 +453,7 @@
             }
           },
           "pack": {
-            "colour": "#7a6a4a",
+            "color": "#7a6a4a",
             "grain": {
               "strength": 0.3,
               "size": 0.09,
@@ -583,7 +583,7 @@
         "kind": "primitives",
         "materials": {
           "cloak": {
-            "colour": "#4a5e8c",
+            "color": "#4a5e8c",
             "grain": {
               "strength": 0.3,
               "size": 0.09,
@@ -599,7 +599,7 @@
             }
           },
           "cloak-d": {
-            "colour": "#36456a",
+            "color": "#36456a",
             "grain": {
               "strength": 0.26,
               "size": 0.1,
@@ -607,7 +607,7 @@
             }
           },
           "skin": {
-            "colour": "#d7a07a",
+            "color": "#d7a07a",
             "grain": {
               "strength": 0.16,
               "size": 0.07,
@@ -615,7 +615,7 @@
             }
           },
           "hat": {
-            "colour": "#8c5a3c",
+            "color": "#8c5a3c",
             "grain": {
               "strength": 0.3,
               "size": 0.08,
@@ -631,7 +631,7 @@
             }
           },
           "boot": {
-            "colour": "#43362b",
+            "color": "#43362b",
             "grain": {
               "strength": 0.24,
               "size": 0.09,
@@ -639,7 +639,7 @@
             }
           },
           "pack": {
-            "colour": "#7a6a4a",
+            "color": "#7a6a4a",
             "grain": {
               "strength": 0.3,
               "size": 0.09,

@@ -68,7 +68,7 @@ pub fn list_op_signature(op: ListOp, element: &Type) -> FunctionType {
     }
 }
 
-/// A colour operation.
+/// A color operation.
 #[must_use]
 pub fn color_op_signature(op: ColorOp) -> FunctionType {
     match op {

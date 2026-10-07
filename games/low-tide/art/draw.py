@@ -24,7 +24,7 @@ SS = 4
 
 # The palette. Salt and sand for the world, rust and iron for the crawler,
 # warm lamp light inside, and no blue anywhere: the Tide owns the one cool
-# colour, so it is always the thing your eye finds.
+# color, so it is always the thing your eye finds.
 SALT = (232, 228, 216)
 SALT_DIM = (226, 221, 207)
 SAND = (212, 196, 164)
@@ -91,21 +91,21 @@ class Canvas:
         base = (fill[0], fill[1], fill[2], 255) if fill else (0, 0, 0, 0)
         self.px = [list(base) for _ in range(self.w * self.h)]
 
-    def _blend(self, index, colour, alpha):
+    def _blend(self, index, color, alpha):
         if alpha <= 0:
             return
         under = self.px[index]
-        a = alpha * (colour[3] / 255 if len(colour) > 3 else 1.0)
+        a = alpha * (color[3] / 255 if len(color) > 3 else 1.0)
         out_a = a + under[3] / 255 * (1 - a)
         if out_a <= 0:
             return
         for channel in range(3):
             under[channel] = (
-                colour[channel] * a + under[channel] * (under[3] / 255) * (1 - a)
+                color[channel] * a + under[channel] * (under[3] / 255) * (1 - a)
             ) / out_a
         under[3] = out_a * 255
 
-    def paint(self, inside, colour, box=None):
+    def paint(self, inside, color, box=None):
         """Fills every sub-pixel whose centre `inside(x, y)` accepts.
 
         Coordinates are output pixels, with fractions."""
@@ -115,9 +115,9 @@ class Canvas:
             for sx in range(max(0, int(x0 * SS)), min(self.w, int(math.ceil(x1 * SS)))):
                 x = (sx + 0.5) / SS
                 if inside(x, y):
-                    self._blend(sy * self.w + sx, colour, 1.0)
+                    self._blend(sy * self.w + sx, color, 1.0)
 
-    def rect(self, x0, y0, x1, y1, colour, radius=0.0):
+    def rect(self, x0, y0, x1, y1, color, radius=0.0):
         def inside(x, y):
             if not (x0 <= x <= x1 and y0 <= y <= y1):
                 return False
@@ -127,23 +127,23 @@ class Canvas:
             cy = min(max(y, y0 + radius), y1 - radius)
             return (x - cx) ** 2 + (y - cy) ** 2 <= radius * radius
 
-        self.paint(inside, colour, (x0, y0, x1, y1))
+        self.paint(inside, color, (x0, y0, x1, y1))
 
-    def ellipse(self, cx, cy, rx, ry, colour):
+    def ellipse(self, cx, cy, rx, ry, color):
         self.paint(
             lambda x, y: ((x - cx) / rx) ** 2 + ((y - cy) / ry) ** 2 <= 1.0,
-            colour,
+            color,
             (cx - rx, cy - ry, cx + rx, cy + ry),
         )
 
-    def ring(self, cx, cy, r_out, r_in, colour):
+    def ring(self, cx, cy, r_out, r_in, color):
         def inside(x, y):
             d = (x - cx) ** 2 + (y - cy) ** 2
             return r_in * r_in <= d <= r_out * r_out
 
-        self.paint(inside, colour, (cx - r_out, cy - r_out, cx + r_out, cy + r_out))
+        self.paint(inside, color, (cx - r_out, cy - r_out, cx + r_out, cy + r_out))
 
-    def line(self, ax, ay, bx, by, width, colour):
+    def line(self, ax, ay, bx, by, width, color):
         dx, dy = bx - ax, by - ay
         length2 = dx * dx + dy * dy or 1.0
         half = width / 2
@@ -156,7 +156,7 @@ class Canvas:
         pad = half + 1
         self.paint(
             inside,
-            colour,
+            color,
             (min(ax, bx) - pad, min(ay, by) - pad, max(ax, bx) + pad, max(ay, by) + pad),
         )
 

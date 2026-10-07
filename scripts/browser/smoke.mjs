@@ -501,12 +501,12 @@ const missingAssets = EXPECT_ASSETS
 
 // Deliberately loose. A game may legitimately be dark, and this is not a
 // likeness test -- it separates a drawn frame from an empty one. The build
-// that shipped every pipeline rejected measured 5 colours at a mean of 0.09;
+// that shipped every pipeline rejected measured 5 colors at a mean of 0.09;
 // the same build working measures hundreds at a mean above 10.
-const BLANK_COLOURS = 16;
+const BLANK_COLORS = 16;
 const BLANK_MEAN = 1;
 const blank =
-  drawn !== null && (drawn.colours < BLANK_COLOURS || drawn.mean < BLANK_MEAN);
+  drawn !== null && (drawn.colors < BLANK_COLORS || drawn.mean < BLANK_MEAN);
 
 console.log(`webgpu: ${webgpu ? 'yes' : 'no'}`);
 if (hasLoadingScreen) {
@@ -527,11 +527,11 @@ if (EXPECT_ASSETS) console.log(`assets fetched: ${fetchedAssets.size}`);
 console.log(
   drawn === null
     ? 'drawn: no canvas to read'
-    : `drawn: ${drawn.colours} colours, mean ${drawn.mean.toFixed(2)}`,
+    : `drawn: ${drawn.colors} colors, mean ${drawn.mean.toFixed(2)}`,
 );
 if (blank) {
   console.log(
-    `problem: the canvas is blank (${drawn.colours} colours, mean ${drawn.mean.toFixed(2)}) -- the engine started but drew nothing`,
+    `problem: the canvas is blank (${drawn.colors} colors, mean ${drawn.mean.toFixed(2)}) -- the engine started but drew nothing`,
   );
 }
 for (const [kind, asset] of missingAssets) {

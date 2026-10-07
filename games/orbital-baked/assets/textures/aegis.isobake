@@ -12,7 +12,7 @@
     "alpha_cutoff": 128,
     "outline": {
       "enabled": true,
-      "colour": "#08131c"
+      "color": "#08131c"
     },
     "shading": {
       "light": [
@@ -34,28 +34,28 @@
         "kind": "primitives",
         "materials": {
           "hull": {
-            "colour": "#3a5972"
+            "color": "#3a5972"
           },
           "lit": {
-            "colour": "#6f95b0"
+            "color": "#6f95b0"
           },
           "mid": {
-            "colour": "#27405a"
+            "color": "#27405a"
           },
           "deep": {
-            "colour": "#16283a"
+            "color": "#16283a"
           },
           "rim": {
-            "colour": "#2b6f8c"
+            "color": "#2b6f8c"
           },
           "glow": {
-            "colour": "#57dbff"
+            "color": "#57dbff"
           },
           "hot": {
-            "colour": "#9beeff"
+            "color": "#9beeff"
           },
           "eye": {
-            "colour": "#e8fdff"
+            "color": "#e8fdff"
           }
         },
         "parts": [
@@ -542,28 +542,28 @@
         "kind": "primitives",
         "materials": {
           "hull": {
-            "colour": "#3a5972"
+            "color": "#3a5972"
           },
           "lit": {
-            "colour": "#6f95b0"
+            "color": "#6f95b0"
           },
           "mid": {
-            "colour": "#27405a"
+            "color": "#27405a"
           },
           "deep": {
-            "colour": "#16283a"
+            "color": "#16283a"
           },
           "rim": {
-            "colour": "#2b6f8c"
+            "color": "#2b6f8c"
           },
           "glow": {
-            "colour": "#57dbff"
+            "color": "#57dbff"
           },
           "hot": {
-            "colour": "#9beeff"
+            "color": "#9beeff"
           },
           "eye": {
-            "colour": "#e8fdff"
+            "color": "#e8fdff"
           }
         },
         "parts": [
@@ -1050,28 +1050,28 @@
         "kind": "primitives",
         "materials": {
           "hull": {
-            "colour": "#3a5972"
+            "color": "#3a5972"
           },
           "lit": {
-            "colour": "#6f95b0"
+            "color": "#6f95b0"
           },
           "mid": {
-            "colour": "#27405a"
+            "color": "#27405a"
           },
           "deep": {
-            "colour": "#16283a"
+            "color": "#16283a"
           },
           "rim": {
-            "colour": "#2b6f8c"
+            "color": "#2b6f8c"
           },
           "glow": {
-            "colour": "#57dbff"
+            "color": "#57dbff"
           },
           "hot": {
-            "colour": "#9beeff"
+            "color": "#9beeff"
           },
           "eye": {
-            "colour": "#e8fdff"
+            "color": "#e8fdff"
           }
         },
         "parts": [
@@ -1558,28 +1558,28 @@
         "kind": "primitives",
         "materials": {
           "hull": {
-            "colour": "#3a5972"
+            "color": "#3a5972"
           },
           "lit": {
-            "colour": "#6f95b0"
+            "color": "#6f95b0"
           },
           "mid": {
-            "colour": "#27405a"
+            "color": "#27405a"
           },
           "deep": {
-            "colour": "#16283a"
+            "color": "#16283a"
           },
           "rim": {
-            "colour": "#2b6f8c"
+            "color": "#2b6f8c"
           },
           "glow": {
-            "colour": "#57dbff"
+            "color": "#57dbff"
           },
           "hot": {
-            "colour": "#9beeff"
+            "color": "#9beeff"
           },
           "eye": {
-            "colour": "#e8fdff"
+            "color": "#e8fdff"
           }
         },
         "parts": [

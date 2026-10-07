@@ -25,7 +25,7 @@ struct VertexInput {
     // How the field is read:
     //   x  half-width of the outline, in stored field units
     //   y  extra softness added to the edge, in stored field units
-    //   z  1 when the atlas holds this glyph's own colours instead of a field
+    //   z  1 when the atlas holds this glyph's own colors instead of a field
     //   w  unused
     @location(9) shape: vec4<f32>,
 }
@@ -65,7 +65,7 @@ fn fs_main(input: VertexOutput) -> @location(0) vec4<f32> {
     // size the glyph is actually being drawn, rather than blurred at the size it
     // was rasterised. Floored so a glyph seen edge-on cannot divide by nothing.
     //
-    // Taken here, before the colour-glyph branch, because WGSL allows a
+    // Taken here, before the color-glyph branch, because WGSL allows a
     // derivative only in uniform control flow: neighbouring fragments in a quad
     // have to reach it together for the difference between them to mean
     // anything. Inside the branch it is a validation error, which a browser
@@ -73,8 +73,8 @@ fn fs_main(input: VertexOutput) -> @location(0) vec4<f32> {
     // rejected there, leaving every glyph undrawn.
     let pixel = max(fwidth(distance), 0.00001);
 
-    // A colour glyph is a picture with no edge to find, so it is drawn as it is
-    // and the face colour only scales it.
+    // A color glyph is a picture with no edge to find, so it is drawn as it is
+    // and the face color only scales it.
     if (input.shape.z > 0.5) {
         return sampled * input.face;
     }

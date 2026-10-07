@@ -37,7 +37,7 @@ import {
 } from './postprocess.ts';
 import { rasterise } from './raster.ts';
 import { type ShadingConfig } from './shading.ts';
-import { uniqueColours } from './palette.ts';
+import { uniqueColors } from './palette.ts';
 import { rotationY, vec } from './vec.ts';
 
 export interface Footprint {
@@ -52,10 +52,10 @@ export interface FrameConfig {
   supersample: number;
   /** Transparent margin kept around the model, in final pixels. */
   padding: number;
-  outline: { enabled: boolean; colour: string };
-  /** Snap colours back onto the material ramps after downsampling. */
+  outline: { enabled: boolean; color: string };
+  /** Snap colors back onto the material ramps after downsampling. */
   paletteSnap: boolean;
-  /** Extra colours the snap step may use, on top of the material ramps. */
+  /** Extra colors the snap step may use, on top of the material ramps. */
   extraPalette: string[];
   /** Coverage a pixel needs to survive alpha thresholding, 0-255. */
   alphaCutoff: number;
@@ -171,7 +171,7 @@ export interface FrameRequest {
   /**
    * The palette to snap to, when it is not this model's own.
    *
-   * A sheet of several models shares one palette, so a colour blended at the
+   * A sheet of several models shares one palette, so a color blended at the
    * edge of one tile cannot snap to a shade that only the tile beside it
    * declared. Without it each variant would be snapped against a different set
    * and two tiles meant to match would not.
@@ -182,16 +182,16 @@ export interface FrameRequest {
 /**
  * The palette a bake may snap to: the model's ramps, plus anything declared.
  *
- * Normalised and deduplicated, because the ramps come out of the colour maths
- * in one spelling and the declared colours come out of a hand-written recipe in
+ * Normalised and deduplicated, because the ramps come out of the color maths
+ * in one spelling and the declared colors come out of a hand-written recipe in
  * whatever spelling someone typed. The order is what breaks a tie when a
  * blended edge pixel is equally close to two entries, so it has to be stated
- * once rather than depending on which of two spellings of the same colour a
+ * once rather than depending on which of two spellings of the same color a
  * recipe used.
  */
 export function paletteFor(mesh: Mesh, config: FrameConfig): string[] {
-  const outline = config.outline.enabled ? [config.outline.colour] : [];
-  return uniqueColours([...mesh.palette, ...config.extraPalette, ...outline]);
+  const outline = config.outline.enabled ? [config.outline.color] : [];
+  return uniqueColors([...mesh.palette, ...config.extraPalette, ...outline]);
 }
 
 /** Render every direction, in rotation order. */
@@ -217,7 +217,7 @@ export function bakeFrames(request: FrameRequest): BakedFrame[] {
     image = downsample(image, config.supersample);
     image = thresholdAlpha(image, config.alphaCutoff);
     if (config.paletteSnap) image = snapToPalette(image, palette);
-    if (config.outline.enabled) image = addInnerOutline(image, config.outline.colour);
+    if (config.outline.enabled) image = addInnerOutline(image, config.outline.color);
 
     return {
       variant: request.variant ?? null,

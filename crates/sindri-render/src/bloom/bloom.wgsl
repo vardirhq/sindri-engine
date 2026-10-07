@@ -46,7 +46,7 @@ fn vs_fullscreen(@builtin(vertex_index) index: u32) -> VertexOutput {
     return out;
 }
 
-/// What is left of a colour once everything below the threshold is taken away.
+/// What is left of a color once everything below the threshold is taken away.
 ///
 /// Soft rather than a straight cutoff. A hard threshold makes the glow appear
 /// and vanish as a thing's brightness crosses it, which on anything that pulses
@@ -69,7 +69,7 @@ fn tone_map(color: vec3<f32>) -> vec3<f32> {
         return color / (vec3<f32>(1.0) + color);
     }
     // Narkowicz ACES approximation: compact, stable, and sufficient for a
-    // world presentation curve without pulling a colour-management system in.
+    // world presentation curve without pulling a color-management system in.
     let a = 2.51;
     let b = 0.03;
     let c = 2.43;

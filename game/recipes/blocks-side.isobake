@@ -25,7 +25,7 @@
         "kind": "primitives",
         "materials": {
           "earth-deep": {
-            "colour": "#623c1f",
+            "color": "#623c1f",
             "grain": {
               "strength": 0.4,
               "size": 0.065,
@@ -41,7 +41,7 @@
             }
           },
           "earth": {
-            "colour": "#7d5132",
+            "color": "#7d5132",
             "grain": {
               "strength": 0.46,
               "size": 0.055,
@@ -57,7 +57,7 @@
             }
           },
           "earth-top": {
-            "colour": "#94643f",
+            "color": "#94643f",
             "grain": {
               "strength": 0.46,
               "size": 0.05,
@@ -73,7 +73,7 @@
             }
           },
           "grass": {
-            "colour": "#5f9741",
+            "color": "#5f9741",
             "grain": {
               "strength": 0.22,
               "size": 0.036,
@@ -89,7 +89,7 @@
             }
           },
           "grass-deep": {
-            "colour": "#4f8037",
+            "color": "#4f8037",
             "grain": {
               "strength": 0.22,
               "size": 0.04,
@@ -205,7 +205,7 @@
         "kind": "primitives",
         "materials": {
           "earth-deep": {
-            "colour": "#623c1f",
+            "color": "#623c1f",
             "grain": {
               "strength": 0.4,
               "size": 0.065,
@@ -221,7 +221,7 @@
             }
           },
           "earth": {
-            "colour": "#7d5132",
+            "color": "#7d5132",
             "grain": {
               "strength": 0.46,
               "size": 0.055,
@@ -237,7 +237,7 @@
             }
           },
           "earth-top": {
-            "colour": "#94643f",
+            "color": "#94643f",
             "grain": {
               "strength": 0.46,
               "size": 0.05,
@@ -253,7 +253,7 @@
             }
           },
           "grass": {
-            "colour": "#5f9741",
+            "color": "#5f9741",
             "grain": {
               "strength": 0.22,
               "size": 0.036,
@@ -269,7 +269,7 @@
             }
           },
           "grass-deep": {
-            "colour": "#4f8037",
+            "color": "#4f8037",
             "grain": {
               "strength": 0.22,
               "size": 0.04,
@@ -413,7 +413,7 @@
         "kind": "primitives",
         "materials": {
           "earth-deep": {
-            "colour": "#623c1f",
+            "color": "#623c1f",
             "grain": {
               "strength": 0.4,
               "size": 0.065,
@@ -429,7 +429,7 @@
             }
           },
           "earth": {
-            "colour": "#7d5132",
+            "color": "#7d5132",
             "grain": {
               "strength": 0.46,
               "size": 0.055,
@@ -445,7 +445,7 @@
             }
           },
           "earth-top": {
-            "colour": "#94643f",
+            "color": "#94643f",
             "grain": {
               "strength": 0.46,
               "size": 0.05,
@@ -461,7 +461,7 @@
             }
           },
           "grass": {
-            "colour": "#5f9741",
+            "color": "#5f9741",
             "grain": {
               "strength": 0.22,
               "size": 0.036,
@@ -477,7 +477,7 @@
             }
           },
           "grass-deep": {
-            "colour": "#4f8037",
+            "color": "#4f8037",
             "grain": {
               "strength": 0.22,
               "size": 0.04,
@@ -621,7 +621,7 @@
         "kind": "primitives",
         "materials": {
           "earth-deep": {
-            "colour": "#623c1f",
+            "color": "#623c1f",
             "grain": {
               "strength": 0.4,
               "size": 0.065,
@@ -637,7 +637,7 @@
             }
           },
           "earth": {
-            "colour": "#7d5132",
+            "color": "#7d5132",
             "grain": {
               "strength": 0.46,
               "size": 0.055,
@@ -653,7 +653,7 @@
             }
           },
           "earth-top": {
-            "colour": "#94643f",
+            "color": "#94643f",
             "grain": {
               "strength": 0.46,
               "size": 0.05,
@@ -669,7 +669,7 @@
             }
           },
           "grass": {
-            "colour": "#5f9741",
+            "color": "#5f9741",
             "grain": {
               "strength": 0.22,
               "size": 0.036,
@@ -685,7 +685,7 @@
             }
           },
           "grass-deep": {
-            "colour": "#4f8037",
+            "color": "#4f8037",
             "grain": {
               "strength": 0.22,
               "size": 0.04,
@@ -843,7 +843,7 @@
         "kind": "primitives",
         "materials": {
           "stone": {
-            "colour": "#6f6a62",
+            "color": "#6f6a62",
             "grain": {
               "strength": 0.28,
               "size": 0.045,
@@ -851,7 +851,7 @@
             }
           },
           "earth": {
-            "colour": "#7d5132",
+            "color": "#7d5132",
             "grain": {
               "strength": 0.46,
               "size": 0.055,
@@ -867,7 +867,7 @@
             }
           },
           "earth-top": {
-            "colour": "#94643f",
+            "color": "#94643f",
             "grain": {
               "strength": 0.46,
               "size": 0.05,
@@ -883,7 +883,7 @@
             }
           },
           "earth-deep": {
-            "colour": "#623c1f",
+            "color": "#623c1f",
             "grain": {
               "strength": 0.4,
               "size": 0.065,
@@ -993,7 +993,7 @@
         "kind": "primitives",
         "materials": {
           "stone": {
-            "colour": "#6f6a62",
+            "color": "#6f6a62",
             "grain": {
               "strength": 0.28,
               "size": 0.045,
@@ -1001,7 +1001,7 @@
             }
           },
           "earth": {
-            "colour": "#7d5132",
+            "color": "#7d5132",
             "grain": {
               "strength": 0.46,
               "size": 0.055,
@@ -1017,7 +1017,7 @@
             }
           },
           "earth-top": {
-            "colour": "#94643f",
+            "color": "#94643f",
             "grain": {
               "strength": 0.46,
               "size": 0.05,
@@ -1033,7 +1033,7 @@
             }
           },
           "earth-deep": {
-            "colour": "#623c1f",
+            "color": "#623c1f",
             "grain": {
               "strength": 0.4,
               "size": 0.065,
@@ -1129,7 +1129,7 @@
         "kind": "primitives",
         "materials": {
           "stone": {
-            "colour": "#6f6a62",
+            "color": "#6f6a62",
             "grain": {
               "strength": 0.28,
               "size": 0.045,
@@ -1137,7 +1137,7 @@
             }
           },
           "stone-pale": {
-            "colour": "#8b867c",
+            "color": "#8b867c",
             "grain": {
               "strength": 0.3,
               "size": 0.042,
@@ -1261,7 +1261,7 @@
         "kind": "primitives",
         "materials": {
           "stone": {
-            "colour": "#6f6a62",
+            "color": "#6f6a62",
             "grain": {
               "strength": 0.28,
               "size": 0.045,
@@ -1269,7 +1269,7 @@
             }
           },
           "stone-pale": {
-            "colour": "#8b867c",
+            "color": "#8b867c",
             "grain": {
               "strength": 0.3,
               "size": 0.042,
@@ -1379,7 +1379,7 @@
         "kind": "primitives",
         "materials": {
           "rock-dark": {
-            "colour": "#42464c",
+            "color": "#42464c",
             "grain": {
               "strength": 0.3,
               "size": 0.06,
@@ -1387,7 +1387,7 @@
             }
           },
           "rock": {
-            "colour": "#585c63",
+            "color": "#585c63",
             "grain": {
               "strength": 0.32,
               "size": 0.05,
@@ -1403,7 +1403,7 @@
             }
           },
           "stone-pale": {
-            "colour": "#8b867c",
+            "color": "#8b867c",
             "grain": {
               "strength": 0.3,
               "size": 0.042,
@@ -1513,7 +1513,7 @@
         "kind": "primitives",
         "materials": {
           "rock-dark": {
-            "colour": "#42464c",
+            "color": "#42464c",
             "grain": {
               "strength": 0.3,
               "size": 0.06,
@@ -1521,7 +1521,7 @@
             }
           },
           "rock": {
-            "colour": "#585c63",
+            "color": "#585c63",
             "grain": {
               "strength": 0.32,
               "size": 0.05,
@@ -1645,7 +1645,7 @@
         "kind": "primitives",
         "materials": {
           "sand-deep": {
-            "colour": "#bda874",
+            "color": "#bda874",
             "grain": {
               "strength": 0.26,
               "size": 0.05,
@@ -1653,7 +1653,7 @@
             }
           },
           "sand": {
-            "colour": "#d8c48f",
+            "color": "#d8c48f",
             "grain": {
               "strength": 0.3,
               "size": 0.045,
@@ -1763,7 +1763,7 @@
         "kind": "primitives",
         "materials": {
           "sand-deep": {
-            "colour": "#bda874",
+            "color": "#bda874",
             "grain": {
               "strength": 0.26,
               "size": 0.05,
@@ -1771,7 +1771,7 @@
             }
           },
           "sand": {
-            "colour": "#d8c48f",
+            "color": "#d8c48f",
             "grain": {
               "strength": 0.3,
               "size": 0.045,
@@ -1895,7 +1895,7 @@
         "kind": "primitives",
         "materials": {
           "rock": {
-            "colour": "#585c63",
+            "color": "#585c63",
             "grain": {
               "strength": 0.32,
               "size": 0.05,
@@ -1911,7 +1911,7 @@
             }
           },
           "stone": {
-            "colour": "#6f6a62",
+            "color": "#6f6a62",
             "grain": {
               "strength": 0.28,
               "size": 0.045,
@@ -1919,7 +1919,7 @@
             }
           },
           "snow": {
-            "colour": "#e8eef5",
+            "color": "#e8eef5",
             "grain": {
               "strength": 0.18,
               "size": 0.04,
@@ -1935,7 +1935,7 @@
             }
           },
           "snow-deep": {
-            "colour": "#c6d3e0",
+            "color": "#c6d3e0",
             "grain": {
               "strength": 0.2,
               "size": 0.05,
@@ -2037,7 +2037,7 @@
         "kind": "primitives",
         "materials": {
           "rock-dark": {
-            "colour": "#42464c",
+            "color": "#42464c",
             "grain": {
               "strength": 0.3,
               "size": 0.06,
@@ -2045,7 +2045,7 @@
             }
           },
           "rock": {
-            "colour": "#585c63",
+            "color": "#585c63",
             "grain": {
               "strength": 0.32,
               "size": 0.05,
@@ -2061,7 +2061,7 @@
             }
           },
           "snow": {
-            "colour": "#e8eef5",
+            "color": "#e8eef5",
             "grain": {
               "strength": 0.18,
               "size": 0.04,
@@ -2077,7 +2077,7 @@
             }
           },
           "snow-deep": {
-            "colour": "#c6d3e0",
+            "color": "#c6d3e0",
             "grain": {
               "strength": 0.2,
               "size": 0.05,
@@ -2179,7 +2179,7 @@
         "kind": "primitives",
         "materials": {
           "ice": {
-            "colour": "#9fc6dd",
+            "color": "#9fc6dd",
             "grain": {
               "strength": 0.2,
               "size": 0.06,
@@ -2195,7 +2195,7 @@
             }
           },
           "water-deep": {
-            "colour": "#2f5d8a",
+            "color": "#2f5d8a",
             "grain": {
               "strength": 0.2,
               "size": 0.08,
@@ -2241,7 +2241,7 @@
         "kind": "primitives",
         "materials": {
           "mud": {
-            "colour": "#4e4433",
+            "color": "#4e4433",
             "grain": {
               "strength": 0.38,
               "size": 0.06,
@@ -2257,7 +2257,7 @@
             }
           },
           "moss": {
-            "colour": "#4f6b34",
+            "color": "#4f6b34",
             "grain": {
               "strength": 0.26,
               "size": 0.04,
@@ -2273,7 +2273,7 @@
             }
           },
           "mud-wet": {
-            "colour": "#3b3527",
+            "color": "#3b3527",
             "grain": {
               "strength": 0.34,
               "size": 0.07,
@@ -2375,7 +2375,7 @@
         "kind": "primitives",
         "materials": {
           "mud": {
-            "colour": "#4e4433",
+            "color": "#4e4433",
             "grain": {
               "strength": 0.38,
               "size": 0.06,
@@ -2391,7 +2391,7 @@
             }
           },
           "mud-wet": {
-            "colour": "#3b3527",
+            "color": "#3b3527",
             "grain": {
               "strength": 0.34,
               "size": 0.07,
@@ -2493,7 +2493,7 @@
         "kind": "primitives",
         "materials": {
           "mud": {
-            "colour": "#4e4433",
+            "color": "#4e4433",
             "grain": {
               "strength": 0.38,
               "size": 0.06,
@@ -2509,7 +2509,7 @@
             }
           },
           "earth": {
-            "colour": "#7d5132",
+            "color": "#7d5132",
             "grain": {
               "strength": 0.46,
               "size": 0.055,
@@ -2525,7 +2525,7 @@
             }
           },
           "moss": {
-            "colour": "#4f6b34",
+            "color": "#4f6b34",
             "grain": {
               "strength": 0.26,
               "size": 0.04,
@@ -2541,7 +2541,7 @@
             }
           },
           "earth-deep": {
-            "colour": "#623c1f",
+            "color": "#623c1f",
             "grain": {
               "strength": 0.4,
               "size": 0.065,
@@ -2651,7 +2651,7 @@
         "kind": "primitives",
         "materials": {
           "rock-dark": {
-            "colour": "#42464c",
+            "color": "#42464c",
             "grain": {
               "strength": 0.3,
               "size": 0.06,
@@ -2659,7 +2659,7 @@
             }
           },
           "gravel": {
-            "colour": "#7c7468",
+            "color": "#7c7468",
             "grain": {
               "strength": 0.4,
               "size": 0.035,
@@ -2675,7 +2675,7 @@
             }
           },
           "stone-pale": {
-            "colour": "#8b867c",
+            "color": "#8b867c",
             "grain": {
               "strength": 0.3,
               "size": 0.042,
@@ -2799,7 +2799,7 @@
         "kind": "primitives",
         "materials": {
           "sand-deep": {
-            "colour": "#bda874",
+            "color": "#bda874",
             "grain": {
               "strength": 0.26,
               "size": 0.05,
@@ -2807,7 +2807,7 @@
             }
           },
           "clay": {
-            "colour": "#a9705a",
+            "color": "#a9705a",
             "grain": {
               "strength": 0.3,
               "size": 0.05,
@@ -2917,7 +2917,7 @@
         "kind": "primitives",
         "materials": {
           "water": {
-            "colour": "#3f76a8",
+            "color": "#3f76a8",
             "grain": {
               "strength": 0.24,
               "size": 0.07,
@@ -2933,7 +2933,7 @@
             }
           },
           "water-deep": {
-            "colour": "#2f5d8a",
+            "color": "#2f5d8a",
             "grain": {
               "strength": 0.2,
               "size": 0.08,
@@ -2979,7 +2979,7 @@
         "kind": "primitives",
         "materials": {
           "plank": {
-            "colour": "#a8763f",
+            "color": "#a8763f",
             "grain": {
               "strength": 0.34,
               "size": 0.05,
@@ -2995,7 +2995,7 @@
             }
           },
           "plank-dark": {
-            "colour": "#8a5c2d",
+            "color": "#8a5c2d",
             "grain": {
               "strength": 0.3,
               "size": 0.055,

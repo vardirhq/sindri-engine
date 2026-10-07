@@ -34,6 +34,12 @@ pub struct RecentProject {
     pub path: String,
     /// What its manifest called it when it was last opened.
     pub name: String,
+    /// When it was last opened, in seconds since the Unix epoch.
+    ///
+    /// Absent from lists saved before it was recorded, which then show no time
+    /// rather than a wrong one until the project is next opened.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub opened: Option<u64>,
 }
 
 impl RecentProject {
@@ -93,6 +99,42 @@ fn normalized(path: &str) -> String {
         .to_string()
 }
 
+/// The current time in seconds since the Unix epoch, if the clock is sane.
+pub fn now() -> Option<u64> {
+    std::time::SystemTime::now()
+        .duration_since(std::time::UNIX_EPOCH)
+        .ok()
+        .map(|elapsed| elapsed.as_secs())
+}
+
+/// How long ago something happened, as the welcome window says it.
+///
+/// Coarse on purpose: "3 days ago" answers "which one was I in last", and a
+/// row that ticked over every second would be redrawn for nothing.
+pub fn ago(then: u64, now: u64) -> String {
+    const MINUTE: u64 = 60;
+    const HOUR: u64 = 60 * MINUTE;
+    const DAY: u64 = 24 * HOUR;
+    const WEEK: u64 = 7 * DAY;
+    const MONTH: u64 = 30 * DAY;
+    const YEAR: u64 = 365 * DAY;
+    let elapsed = now.saturating_sub(then);
+    let (count, unit) = match elapsed {
+        0..MINUTE => return "just now".to_owned(),
+        MINUTE..HOUR => (elapsed / MINUTE, "minute"),
+        HOUR..DAY => (elapsed / HOUR, "hour"),
+        DAY..WEEK => (elapsed / DAY, "day"),
+        WEEK..MONTH => (elapsed / WEEK, "week"),
+        MONTH..YEAR => (elapsed / MONTH, "month"),
+        _ => (elapsed / YEAR, "year"),
+    };
+    if count == 1 {
+        format!("1 {unit} ago")
+    } else {
+        format!("{count} {unit}s ago")
+    }
+}
+
 impl RecentProjects {
     /// Puts a project at the top of the list, where it was opened.
     ///
@@ -108,6 +150,7 @@ impl RecentProjects {
             RecentProject {
                 path,
                 name: project.name().to_owned(),
+                opened: now(),
             },
         );
         self.0.truncate(MAX_REMEMBERED);
@@ -237,6 +280,24 @@ mod tests {
             .collect();
         assert_eq!(paths.len(), 2, "{paths:?}");
         assert_eq!(recent.most_recent().expect("a first row").name, "Orbital");
+    }
+
+    #[test]
+    fn times_are_said_in_the_largest_whole_unit() {
+        assert_eq!(ago(100, 130), "just now");
+        assert_eq!(ago(0, 60), "1 minute ago");
+        assert_eq!(ago(0, 3 * 3600 + 59), "3 hours ago");
+        assert_eq!(ago(0, 2 * 86_400), "2 days ago");
+        assert_eq!(ago(0, 15 * 86_400), "2 weeks ago");
+        assert_eq!(ago(0, 400 * 86_400), "1 year ago");
+        assert_eq!(ago(500, 100), "just now", "a clock that went back");
+    }
+
+    #[test]
+    fn a_list_saved_without_times_still_reads() {
+        let saved = r#"[{"path":"/projects/orbital","name":"Orbital"}]"#;
+        let recent: RecentProjects = serde_json::from_str(saved).expect("the list reads");
+        assert_eq!(recent.entries()[0].opened, None);
     }
 
     #[test]

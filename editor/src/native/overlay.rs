@@ -4,7 +4,7 @@
 //! image, and an egui widget there would either fight the drag handling the
 //! viewport needs or take a bite out of the picture. So this file is painter
 //! work — a status plate, an axis indicator, and the manipulator arms — all
-//! reading their colours from the same tokens the panels use.
+//! reading their colors from the same tokens the panels use.
 
 use eframe::egui::{self, Align2, Color32, FontId, Pos2, Rect, Shape, Stroke, StrokeKind, Vec2};
 use glam::{Mat4, Vec3};
@@ -13,9 +13,9 @@ use crate::gizmo::{self, Axis};
 use crate::occlusion::FaultMark;
 use crate::ui::theme::{color, hairline, metric, radius, text};
 
-/// The colour an axis is drawn in, so an arm and the inspector's X field are
+/// The color an axis is drawn in, so an arm and the inspector's X field are
 /// recognisably the same axis.
-const fn axis_colour(axis: Axis) -> Color32 {
+const fn axis_color(axis: Axis) -> Color32 {
     match axis {
         Axis::X => color::AXIS_X,
         Axis::Y => color::AXIS_Y,
@@ -84,21 +84,21 @@ pub(super) fn paint_transform_gizmo(
     active: Option<Axis>,
 ) {
     for handle in &visual.handles {
-        let colour = if active == Some(handle.axis) {
+        let color = if active == Some(handle.axis) {
             Color32::WHITE
         } else {
-            axis_colour(handle.axis)
+            axis_color(handle.axis)
         };
         let points: Vec<Pos2> = handle
             .points
             .iter()
             .map(|point| rect.min + Vec2::new(point.x, point.y))
             .collect();
-        painter.add(Shape::line(points.clone(), Stroke::new(2.5, colour)));
+        painter.add(Shape::line(points.clone(), Stroke::new(2.5, color)));
         if let Some(end) = points.last().copied()
             && handle.points.len() == 2
         {
-            painter.circle_filled(end, 4.0, colour);
+            painter.circle_filled(end, 4.0, color);
         }
     }
     painter.circle_filled(
@@ -300,29 +300,29 @@ pub(super) fn axis_arms(view: Mat4, length: f32) -> [(Vec2, Color32, &'static st
         (Vec3::Y, color::AXIS_Y, "Y"),
         (Vec3::Z, color::AXIS_Z, "Z"),
     ]
-    .map(|(axis, colour, label)| {
+    .map(|(axis, color, label)| {
         let facing = view.transform_vector3(axis);
         (
             facing,
             Vec2::new(facing.x, -facing.y) * length,
-            colour,
+            color,
             label,
         )
     });
     // Ascending depth: in view space the camera looks down -Z, so the largest Z
     // is the arm nearest the viewer and is drawn last.
     arms.sort_by(|left, right| left.0.z.total_cmp(&right.0.z));
-    arms.map(|(_, offset, colour, label)| (offset, colour, label))
+    arms.map(|(_, offset, color, label)| (offset, color, label))
 }
 
 fn paint_axis_gizmo(painter: &egui::Painter, origin: Pos2, view: Mat4) {
     // A ground behind the arms, because three thin lines over a bright frame
     // are three thin lines nobody can see.
     painter.circle_filled(origin, AXIS_ARM + 10.0, Color32::from_black_alpha(120));
-    for (offset, colour, label) in axis_arms(view, AXIS_ARM) {
+    for (offset, color, label) in axis_arms(view, AXIS_ARM) {
         let end = origin + offset;
-        painter.line_segment([origin, end], Stroke::new(2.0, colour));
-        painter.circle_filled(end, 5.0, colour);
+        painter.line_segment([origin, end], Stroke::new(2.0, color));
+        painter.circle_filled(end, 5.0, color);
         painter.text(
             end,
             Align2::CENTER_CENTER,

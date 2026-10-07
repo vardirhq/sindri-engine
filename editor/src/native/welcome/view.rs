@@ -1,17 +1,11 @@
-//! What the welcome window looks like.
+//! The Sindri launchpad.
 //!
-//! Four regions and no more: what this program is, the projects you have, the
-//! two ways to get another one, and what happens next time. Everything is drawn
-//! from `ui::theme` tokens and `ui::widgets`, so the window that opens before
-//! the editor is recognisably the same tool as the editor.
-//!
-//! A project is a card rather than a list row. The editor's rows are 21 points
-//! tall because a hierarchy is a hundred of them and the question is always
-//! "which one"; there are at most a dozen projects here, the question is "which
-//! am I working on", and the answer needs a name and the path under it — the
-//! same project name in two checkouts is the normal case, not an odd one.
+//! The welcome window is the first piece of Sindri a new developer sees. It is
+//! therefore a launch surface, not a file picker wearing a logo: the brand says
+//! what Sindri is, the primary actions say how to begin, and recent and shipped
+//! projects make returning to work immediate.
 
-use eframe::egui::{self, Align, Align2, Layout, Pos2, RichText, UiBuilder};
+use eframe::egui::{self, Align, Align2, Layout, Pos2, RichText, UiBuilder, Vec2};
 
 use crate::ui::theme::{color, hairline, hairline_soft, metric, radius, text};
 use crate::ui::widgets::{
@@ -20,66 +14,25 @@ use crate::ui::widgets::{
 };
 use crate::ui::{icons, widgets::button::outline};
 
-use std::path::{Path, PathBuf};
+use super::{Listing, NewProject, Request, Sample, Welcome, hero, learn};
 
-use super::{Listing, NewProject, Request, Welcome};
+const CARD_HEIGHT: f32 = 54.0;
+const SIDE_WIDTH: f32 = 320.0;
+const EXAMPLE_HEIGHT: f32 = 46.0;
 
-/// How tall a project card is: a name, and the path under it.
-const CARD_HEIGHT: f32 = 46.0;
-
-/// How wide the column of actions is.
-const RAIL_WIDTH: f32 = 236.0;
-
-/// What one project card was clicked with.
 enum Clicked {
-    /// Open it.
     Open,
-    /// Take it off the list.
     Forget,
 }
 
 impl Welcome {
     pub(super) fn draw(&mut self, ui: &mut egui::Ui) {
-        Self::header(ui);
         self.footer(ui);
-        self.rail(ui);
-        self.projects(ui);
-        // Last, so the question sits over everything it is about.
+        self.side_panel(ui);
+        self.main_panel(ui);
         self.creating_form(ui);
     }
 
-    /// The mark, the name, and which build this is.
-    fn header(ui: &mut egui::Ui) {
-        egui::Panel::top("welcome-header")
-            .exact_size(metric::TOP_BAR_HEIGHT)
-            .frame(egui::Frame::new().fill(color::HEADER))
-            .show(ui, |ui| {
-                let base = ui.max_rect();
-                ui.painter()
-                    .hline(base.x_range(), base.bottom() - 0.5, hairline());
-                ui.horizontal_centered(|ui| {
-                    ui.add_space(metric::GUTTER + 4.0);
-                    super::super::chrome::brandmark(ui);
-                    ui.add_space(2.0);
-                    ui.label(
-                        RichText::new("Sindri")
-                            .size(text::TITLE)
-                            .strong()
-                            .color(color::TEXT),
-                    );
-                    ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
-                        ui.add_space(metric::GUTTER + 4.0);
-                        ui.label(
-                            RichText::new(format!("Editor {}", env!("CARGO_PKG_VERSION")))
-                                .size(text::NOTE)
-                                .color(color::TEXT_FAINT),
-                        );
-                    });
-                });
-            });
-    }
-
-    /// What happens next launch, and whatever went wrong last.
     fn footer(&mut self, ui: &mut egui::Ui) {
         egui::Panel::bottom("welcome-footer")
             .exact_size(metric::TOP_BAR_HEIGHT)
@@ -89,12 +42,12 @@ impl Welcome {
                 ui.painter()
                     .hline(base.x_range(), base.top() + 0.5, hairline());
                 ui.horizontal_centered(|ui| {
-                    ui.add_space(metric::GUTTER + 4.0);
+                    ui.add_space(metric::GUTTER + 8.0);
                     let mut open_last = self.open_last;
                     if ui
                         .checkbox(
                             &mut open_last,
-                            RichText::new("Open my last project next time, skipping this window")
+                            RichText::new("Open my last project on launch")
                                 .size(text::LABEL)
                                 .color(color::TEXT_MUTED),
                         )
@@ -103,151 +56,167 @@ impl Welcome {
                         self.open_last = open_last;
                         self.changed = true;
                     }
-                    if let Some(problem) = self.problem.clone() {
-                        ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
-                            ui.add_space(metric::GUTTER + 4.0);
+                    ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
+                        ui.add_space(metric::GUTTER + 8.0);
+                        if let Some(problem) = self.problem.clone() {
                             ui.label(
                                 RichText::new(problem)
                                     .size(text::LABEL)
                                     .color(color::DANGER_TEXT),
                             );
-                        });
-                    }
-                });
-            });
-    }
-
-    /// The two ways to get a project that is not on the list, and the ones this
-    /// repository ships.
-    fn rail(&mut self, ui: &mut egui::Ui) {
-        egui::Panel::right("welcome-actions")
-            .exact_size(RAIL_WIDTH)
-            .frame(panel::frame())
-            .show(ui, |ui| {
-                panel::body(ui, |ui| {
-                    ui.add_space(metric::GAP);
-                    if button::wide(
-                        ui,
-                        icons::ADD,
-                        "New project",
-                        Intent::Primary,
-                        "Make a project: a folder, a scene, and somewhere to put assets",
-                    )
-                    .clicked()
-                    {
-                        self.creating = Some(NewProject::default());
-                        self.problem = None;
-                    }
-                    ui.add_space(metric::GAP);
-                    if button::wide(
-                        ui,
-                        icons::FOLDER,
-                        "Open project",
-                        Intent::Normal,
-                        "Open a folder that already holds a sindri.toml",
-                    )
-                    .clicked()
-                    {
-                        self.browse();
-                    }
-
-                    // A shipped project already on the list is not offered
-                    // twice: it is on the list because it has been opened, and
-                    // a second row that opens the same project is a second row
-                    // saying nothing. Taking it off the recents puts it back.
-                    //
-                    // Taken by value so the borrow ends before a click is
-                    // written back into `self`.
-                    let samples: Vec<(String, PathBuf)> = self
-                        .samples
-                        .iter()
-                        .filter(|sample| {
-                            !self
-                                .recent
-                                .entries()
-                                .iter()
-                                .any(|entry| Path::new(&entry.path) == sample.root)
-                        })
-                        .map(|sample| (sample.name.clone(), sample.root.clone()))
-                        .collect();
-                    if !samples.is_empty() {
-                        ui.add_space(metric::GROUP_GAP);
-                        panel::rule(ui);
-                        ui.label(
-                            RichText::new("SHIPPED WITH SINDRI")
+                        } else {
+                            ui.label(
+                                RichText::new(format!(
+                                    "Sindri Editor {}  ·  pre-alpha",
+                                    env!("CARGO_PKG_VERSION")
+                                ))
                                 .size(text::NOTE)
                                 .color(color::TEXT_FAINT),
-                        );
-                        ui.add_space(metric::GAP);
-                        for (name, root) in samples {
-                            if sample_row(ui, &name, &root) {
-                                self.request = Some(Request::Open(root));
-                            }
+                            );
                         }
-                    }
+                    });
                 });
             });
     }
 
-    /// The projects, or the reason there are none.
-    fn projects(&mut self, ui: &mut egui::Ui) {
-        egui::CentralPanel::default()
-            .frame(panel::frame())
+    fn side_panel(&mut self, ui: &mut egui::Ui) {
+        egui::Panel::right("welcome-side")
+            .exact_size(SIDE_WIDTH)
+            .frame(egui::Frame::new().fill(color::HEADER))
             .show(ui, |ui| {
-                panel::body(ui, |ui| {
-                    ui.label(
-                        RichText::new("PROJECTS")
-                            .size(text::NOTE)
-                            .color(color::TEXT_FAINT),
-                    );
-                    ui.add_space(metric::GAP);
-                    let rows = self.rows();
-                    if rows.is_empty() {
-                        panel::empty_state(
-                            ui,
-                            icons::PROJECT,
-                            "No projects yet",
-                            "Make one, open a folder that holds a sindri.toml, or start \
-                             from a project shipped with Sindri.",
-                        );
-                        return;
-                    }
-                    egui::ScrollArea::vertical()
-                        .auto_shrink([false, false])
-                        .show(ui, |ui| {
-                            for row in &rows {
-                                match card(ui, row) {
-                                    Some(Clicked::Open) => {
-                                        // A project that is not there is not
-                                        // opened: the row already says so, and
-                                        // the click would fail on the load.
-                                        if row.present {
-                                            self.request = Some(Request::Open(row.root.clone()));
-                                        } else {
-                                            self.problem = Some(format!(
-                                                "{} is not there any more",
-                                                row.root.display()
-                                            ));
-                                        }
+                egui::ScrollArea::vertical()
+                    .auto_shrink([false, false])
+                    .show(ui, |ui| {
+                        panel::body(ui, |ui| {
+                            section_title(ui, "START");
+                            ui.add_space(metric::GAP);
+                            if button::wide(
+                                ui,
+                                icons::ADD,
+                                "Create a new project",
+                                Intent::Primary,
+                                "Create a Sindri project and open it",
+                            )
+                            .clicked()
+                            {
+                                self.creating = Some(NewProject::default());
+                                self.problem = None;
+                            }
+                            ui.add_space(metric::GAP);
+                            if button::wide(
+                                ui,
+                                icons::FOLDER,
+                                "Open an existing project",
+                                Intent::Normal,
+                                "Open a folder containing sindri.toml",
+                            )
+                            .clicked()
+                            {
+                                self.browse();
+                            }
+
+                            ui.add_space(22.0);
+                            section_title(ui, "LEARN");
+                            ui.add_space(metric::GAP);
+                            for guide in &learn::GUIDES {
+                                if learn::guide_row(ui, guide) {
+                                    self.problem = learn::open(guide.page).err();
+                                }
+                            }
+
+                            if !self.samples.is_empty() {
+                                ui.add_space(22.0);
+                                section_title(ui, "EXAMPLES");
+                                ui.add_space(metric::GAP);
+                                let mut opened = None;
+                                for sample in &self.samples {
+                                    if example_row(ui, sample) {
+                                        opened = Some(sample.root.clone());
                                     }
-                                    Some(Clicked::Forget) => {
-                                        self.recent.forget(&row.root.display().to_string());
-                                        self.changed = true;
-                                    }
-                                    None => {}
+                                }
+                                if let Some(root) = opened {
+                                    self.request = Some(Request::Open(root));
                                 }
                             }
                         });
+                    });
+            });
+    }
+
+    fn main_panel(&mut self, ui: &mut egui::Ui) {
+        egui::CentralPanel::default()
+            .frame(egui::Frame::new().fill(color::PANEL))
+            .show(ui, |ui| {
+                hero::draw(ui);
+                panel::body(ui, |ui| {
+                    ui.add_space(8.0);
+                    ui.horizontal(|ui| {
+                        ui.label(
+                            RichText::new("Recent projects")
+                                .size(16.0)
+                                .strong()
+                                .color(color::TEXT),
+                        );
+                        if !self.recent.is_empty() {
+                            ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
+                                ui.add(
+                                    egui::TextEdit::singleline(&mut self.search)
+                                        .hint_text("Search projects…")
+                                        .desired_width(240.0),
+                                );
+                            });
+                        }
+                    });
+                    ui.add_space(metric::GROUP_GAP);
+                    self.project_list(ui);
                 });
             });
     }
 
-    /// Asks for a folder, and takes the project in it.
-    ///
-    /// The dialog is opened from the window that asked for it rather than
-    /// handed back to the editor, because the editor is hidden and throttled to
-    /// ten frames a second while this window is up — a folder picker that took
-    /// a tenth of a second to appear would feel like a click that missed.
+    fn project_list(&mut self, ui: &mut egui::Ui) {
+        let rows = self.rows();
+        if rows.is_empty() && !self.recent.is_empty() {
+            panel::empty_state(
+                ui,
+                icons::SEARCH,
+                "No projects match",
+                "Search looks at each project's name and folder.",
+            );
+            return;
+        }
+        if rows.is_empty() {
+            panel::empty_state(
+                ui,
+                icons::PROJECT,
+                "Your work will appear here",
+                "Create your first project, or open an existing Sindri project.",
+            );
+            return;
+        }
+        egui::ScrollArea::vertical()
+            .auto_shrink([false, false])
+            .show(ui, |ui| {
+                let now = crate::project::now();
+                for row in &rows {
+                    match project_card(ui, row, now) {
+                        Some(Clicked::Open) if row.present => {
+                            self.request = Some(Request::Open(row.root.clone()));
+                        }
+                        Some(Clicked::Open) => {
+                            self.problem =
+                                Some(format!("{} is not there any more", row.root.display()));
+                        }
+                        Some(Clicked::Forget) => {
+                            self.recent.forget(&row.root.display().to_string());
+                            self.changed = true;
+                        }
+                        None => {}
+                    }
+                    ui.add_space(4.0);
+                }
+            });
+    }
+
     fn browse(&mut self) {
         let Some(root) = rfd::FileDialog::new().pick_folder() else {
             return;
@@ -264,49 +233,92 @@ impl Welcome {
     }
 }
 
-/// One shipped project, as a compact row.
-///
-/// The row allocates its own rect and paints into it, rather than sensing a
-/// scope wrapped around two labels. A scope built around labels reported no
-/// hover and swallowed the click — and painting the hover fill afterwards would
-/// have covered the text it was meant to be behind.
-fn sample_row(ui: &mut egui::Ui, name: &str, root: &Path) -> bool {
-    let (rect, response) = button::row_sense(ui, metric::ROW_HEIGHT);
-    if response.hovered() {
-        ui.painter().rect_filled(rect, radius(), color::EMBER_FAINT);
-    }
-    let foreground = if response.hovered() {
-        color::TEXT
-    } else {
-        color::TEXT_MUTED
-    };
-    let painter = ui.painter_at(rect);
-    painter.text(
-        Pos2::new(rect.left() + 4.0, rect.center().y),
-        Align2::LEFT_CENTER,
-        icons::SCENE.outlined().codepoint,
-        egui::FontId::new(13.0, icons::SCENE.outlined().font_family()),
-        color::TEXT_FAINT,
+fn section_title(ui: &mut egui::Ui, label: &str) {
+    ui.label(
+        RichText::new(label)
+            .size(text::NOTE)
+            .strong()
+            .color(color::TEXT_FAINT),
     );
-    painter.text(
-        Pos2::new(rect.left() + 22.0, rect.center().y),
-        Align2::LEFT_CENTER,
-        name,
-        egui::FontId::proportional(text::BODY),
-        foreground,
-    );
-    response.on_hover_text(root.display().to_string()).clicked()
 }
 
-/// One project, as a card: what it is called and where it is.
-fn card(ui: &mut egui::Ui, listing: &Listing) -> Option<Clicked> {
-    let (rect, response) = button::row_sense(ui, CARD_HEIGHT);
+fn example_row(ui: &mut egui::Ui, sample: &Sample) -> bool {
+    let (rect, response) = button::row_sense(ui, EXAMPLE_HEIGHT);
     if response.hovered() {
         ui.painter().rect_filled(rect, radius(), color::EMBER_FAINT);
-        outline(ui, rect, hairline());
     }
-    ui.painter()
-        .hline(rect.x_range(), rect.bottom() - 0.5, hairline_soft());
+    let painter = ui.painter_at(rect);
+    let tile = egui::Rect::from_min_size(
+        Pos2::new(rect.left() + 4.0, rect.top() + 5.0),
+        Vec2::new(54.0, EXAMPLE_HEIGHT - 10.0),
+    );
+    paint_monogram(&painter, tile, &sample.name);
+    let left = tile.right() + 12.0;
+    painter.text(
+        Pos2::new(left, rect.top() + 8.0),
+        Align2::LEFT_TOP,
+        &sample.name,
+        egui::FontId::proportional(text::BODY),
+        color::TEXT,
+    );
+    painter.text(
+        Pos2::new(left, rect.bottom() - 8.0),
+        Align2::LEFT_BOTTOM,
+        sample.summary,
+        egui::FontId::proportional(text::NOTE),
+        color::TEXT_FAINT,
+    );
+    response
+        .on_hover_text(sample.root.display().to_string())
+        .clicked()
+}
+
+/// A stand-in thumbnail: the project's initial on a tile tinted by its name.
+///
+/// The editor has no image loading yet, so there are no screenshots to show.
+/// The tint is derived from the name so a project keeps its colour between
+/// launches and two projects side by side rarely share one.
+fn paint_monogram(painter: &egui::Painter, tile: egui::Rect, name: &str) {
+    let hash = name.bytes().fold(2_166_136_261_u32, |hash, byte| {
+        (hash ^ u32::from(byte)).wrapping_mul(16_777_619)
+    });
+    let hue = f32::from(u16::try_from(hash % 360).unwrap_or(0)) / 360.0;
+    let fill: egui::Color32 = egui::ecolor::Hsva::new(hue, 0.45, 0.32, 1.0).into();
+    let edge: egui::Color32 = egui::ecolor::Hsva::new(hue, 0.5, 0.55, 1.0).into();
+    painter.rect_filled(tile, radius(), fill);
+    painter.rect_stroke(
+        tile,
+        radius(),
+        egui::Stroke::new(1.0, edge),
+        egui::StrokeKind::Inside,
+    );
+    let initial: String = name.chars().next().into_iter().collect();
+    painter.text(
+        tile.center(),
+        Align2::CENTER_CENTER,
+        initial,
+        egui::FontId::proportional(tile.height() * 0.55),
+        egui::Color32::from_white_alpha(220),
+    );
+}
+
+fn project_card(ui: &mut egui::Ui, listing: &Listing, now: Option<u64>) -> Option<Clicked> {
+    let (rect, response) = button::row_sense(ui, CARD_HEIGHT);
+    let fill = if response.hovered() {
+        color::EMBER_FAINT
+    } else {
+        color::RAISED
+    };
+    ui.painter().rect_filled(rect, radius(), fill);
+    outline(
+        ui,
+        rect,
+        if response.hovered() {
+            hairline()
+        } else {
+            hairline_soft()
+        },
+    );
 
     let named = if listing.present {
         color::TEXT
@@ -314,16 +326,21 @@ fn card(ui: &mut egui::Ui, listing: &Listing) -> Option<Clicked> {
         color::TEXT_FAINT
     };
     let painter = ui.painter_at(rect);
+    let tile = egui::Rect::from_min_size(
+        Pos2::new(rect.left() + 8.0, rect.top() + 8.0),
+        Vec2::new(56.0, CARD_HEIGHT - 16.0),
+    );
+    paint_monogram(&painter, tile, &listing.name);
+    let left = tile.right() + 12.0;
     let name = painter.layout_no_wrap(
         listing.name.clone(),
-        egui::FontId::proportional(text::BODY),
+        egui::FontId::proportional(13.0),
         named,
     );
-    let left = rect.left() + metric::GUTTER;
-    painter.galley(Pos2::new(left, rect.top() + 8.0), name.clone(), named);
+    painter.galley(Pos2::new(left, rect.top() + 9.0), name.clone(), named);
     if !listing.present {
         painter.text(
-            Pos2::new(left + name.size().x + metric::GAP, rect.top() + 9.0),
+            Pos2::new(left + name.size().x + 8.0, rect.top() + 10.0),
             Align2::LEFT_TOP,
             "MISSING",
             egui::FontId::proportional(text::NOTE),
@@ -338,27 +355,32 @@ fn card(ui: &mut egui::Ui, listing: &Listing) -> Option<Clicked> {
         color::TEXT_FAINT,
     );
 
-    // The one control inside the row, placed in a region of its own so that it
-    // answers the pointer before the row does.
-    let mut forget = false;
+    if let (Some(opened), Some(now)) = (listing.opened, now) {
+        painter.text(
+            Pos2::new(rect.right() - 44.0, rect.center().y),
+            Align2::RIGHT_CENTER,
+            crate::project::ago(opened, now),
+            egui::FontId::proportional(text::NOTE),
+            color::TEXT_FAINT,
+        );
+    }
+
     let corner = egui::Rect::from_min_size(
-        Pos2::new(rect.right() - 26.0, rect.center().y - 9.0),
-        egui::Vec2::splat(18.0),
+        Pos2::new(rect.right() - 32.0, rect.center().y - 9.0),
+        Vec2::splat(18.0),
     );
+    let mut forget = false;
     ui.scope_builder(UiBuilder::new().max_rect(corner), |ui| {
         forget = button::row_icon(
             ui,
             icons::CLOSE,
             Intent::Quiet,
-            "Take this project off the list. Nothing on disk is touched.",
+            "Remove from recent projects. Nothing on disk is touched.",
         )
         .clicked();
     });
-
     if forget {
         return Some(Clicked::Forget);
     }
-    // The card's own click means open; the remove button inside it has already
-    // said what it means, and must not also read as one.
     response.clicked().then_some(Clicked::Open)
 }

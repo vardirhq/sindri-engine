@@ -3,7 +3,7 @@
  *
  * The thing being protected is that grain is a *texture* rather than noise: it
  * has to be the same picture every time the asset is baked, and it has to stay
- * inside the four colours the material promised, or `palette_snap` and the bake
+ * inside the four colors the material promised, or `palette_snap` and the bake
  * report both start lying.
  */
 
@@ -28,7 +28,7 @@ function recipe(grain: unknown): ReturnType<typeof parseRecipe> {
       {
         name: 'block',
         model: {
-          materials: { body: grain ? { colour: '#8e8e89', grain } : { colour: '#8e8e89' } },
+          materials: { body: grain ? { color: '#8e8e89', grain } : { color: '#8e8e89' } },
           parts: [{ type: 'box', material: 'body', position: [0, 0.5, 0], size: [1, 1, 1] }],
         },
       },
@@ -44,8 +44,8 @@ function pixels(grain: unknown): Uint8Array {
   return decodePng(png.contents).data;
 }
 
-/** How many distinct opaque colours a baked block uses. */
-function colours(data: Uint8Array): Set<string> {
+/** How many distinct opaque colors a baked block uses. */
+function colors(data: Uint8Array): Set<string> {
   const seen = new Set<string>();
   for (let i = 0; i < data.length; i += 4) {
     if (data[i + 3] === 0) continue;
@@ -60,14 +60,14 @@ test('grain is a texture rather than noise, so it bakes the same twice', () => {
 });
 
 test('grain breaks a flat face up without leaving the ramp', () => {
-  const flat = colours(pixels(null));
-  const grainy = colours(pixels({ size: 0.125, strength: 0.5, seed: 3 }));
+  const flat = colors(pixels(null));
+  const grainy = colors(pixels({ size: 0.125, strength: 0.5, seed: 3 }));
   assert.ok(
     grainy.size > flat.size,
     `a grainy face should use more of its ramp than a flat one: ${grainy.size} vs ${flat.size}`,
   );
-  // Four ramp entries and one outline colour is everything a block may emit.
-  assert.ok(grainy.size <= 5, `grain must stay inside the ramp, got ${grainy.size} colours`);
+  // Four ramp entries and one outline color is everything a block may emit.
+  assert.ok(grainy.size <= 5, `grain must stay inside the ramp, got ${grainy.size} colors`);
 });
 
 test('a different seed is a different surface, and the same seed is the same one', () => {

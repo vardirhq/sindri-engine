@@ -297,6 +297,6 @@ script Dealer {
     fn a_name_bound_later_or_nowhere_offers_nothing() {
         assert!(names(&["late"]).is_empty());
         assert!(names(&["nobody"]).is_empty());
-        assert!(names(&["card", "colour"]).is_empty());
+        assert!(names(&["card", "color"]).is_empty());
     }
 }

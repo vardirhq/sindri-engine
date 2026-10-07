@@ -15,7 +15,7 @@
 //! mask, which is what makes one bake serve every size: a mask is only correct
 //! at the size it was rasterised, while a field says where the edge is and lets
 //! the shader find it exactly. It is also what makes an outline and a soft
-//! shadow a pair of thresholds rather than a second bake. Colour glyphs — an
+//! shadow a pair of thresholds rather than a second bake. Color glyphs — an
 //! emoji face — have no edge to measure and are kept as the bitmap they are;
 //! the slot says which kind it is.
 
@@ -102,7 +102,7 @@ pub struct GlyphSlot {
     pub offset: [f32; 2],
     /// The drawn rect's size in raster pixels.
     pub size: [f32; 2],
-    /// Whether the atlas holds this glyph's own colours rather than a field.
+    /// Whether the atlas holds this glyph's own colors rather than a field.
     ///
     /// An emoji face rasterises to a picture, which has no edge to measure and
     /// nothing for a tint to say. Kept as a flag on the slot rather than a
@@ -285,8 +285,8 @@ impl GlyphAtlas {
         let (texels, colored) = match image.content {
             // A field, padded by its own spread on every side. White RGB with
             // the distance in alpha: the shader reads the distance and the
-            // instance's colour does the rest, which is why one atlas serves
-            // every colour and weight of text in the frame.
+            // instance's color does the rest, which is why one atlas serves
+            // every color and weight of text in the frame.
             SwashContent::Mask => (
                 signed_distance_field(&image.data, ink[0], ink[1])
                     .into_iter()

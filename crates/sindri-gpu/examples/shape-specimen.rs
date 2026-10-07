@@ -223,7 +223,7 @@ async fn run(path: &Path) -> Result<(), Box<dyn Error>> {
     let target = OffscreenTarget::new(&gpu.device, WIDTH, HEIGHT)?;
     let depth = DepthTarget::new(&gpu.device, WIDTH, HEIGHT);
     // The sheet is drawn lit, because unlit is not what any of this is for: a
-    // stroke on black without bloom is a coloured line, and the point of the
+    // stroke on black without bloom is a colored line, and the point of the
     // shapes is that they are a light source.
     let mut bloom = Bloom::new(&gpu.device, OffscreenTarget::FORMAT);
     bloom.resize(&gpu.device, WIDTH, HEIGHT);

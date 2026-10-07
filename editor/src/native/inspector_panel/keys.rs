@@ -171,7 +171,7 @@ fn keys_of(whole: &Value, target: &str) -> Vec<Value> {
 /// A number typed or dragged here passed through every ID between the old and
 /// the new, each one a world the engine refused. A menu of the keys that exist
 /// has no such values in it. A stored key the list no longer holds is shown in
-/// the warning colour rather than hidden, because it is the reason the
+/// the warning color rather than hidden, because it is the reason the
 /// component is not drawing.
 ///
 /// Returns false, drawing nothing, when there is no whole component to read

@@ -111,6 +111,9 @@ These documents govern the work:
 - `docs/decay-direction.md` — accepted Editor + Decay authoring direction.
 - `docs/cli-conventions.md` — the grammar and contracts the `sindri` CLI and
   its generated capability documents follow.
+- `docs/agent-native-direction.md` — how Sindri supports external coding agents
+  and its own narrow local agent on one foundation: generated docs, project
+  checks, and headless play.
 - `docs/project-format.md` — what a project is, and what `sindri.toml` holds.
 - `docs/scripting.md` and `decay/LANGUAGE.md` — scripting contracts.
 - `docs/decay-agent-guide.md` — mandatory preflight and runtime-contract checklist
@@ -434,6 +437,7 @@ pull request that fixes it.
 ## Core conventions
 
 - Rust 1.95.0, edition 2024, resolver 3. Do not raise the MSRV casually.
+- Use American English throughout the repository, including code identifiers, public APIs, serialized/schema fields, diagnostics, comments, and documentation. Prefer `color`, `behavior`, `center`, and similar spellings; do not introduce British-English variants such as `colour`, `behaviour`, or `centre`.
 - Workspace forbids unsafe code.
 - Prefer fixing Clippy pedantic warnings over adding `#[allow]`; justify any new
   allowance in a comment.

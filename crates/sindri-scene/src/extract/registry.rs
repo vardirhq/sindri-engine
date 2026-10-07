@@ -128,7 +128,7 @@ fn register_cameras(components: &mut ComponentSchemaRegistry) -> Result<(), Scen
 }
 
 /// A light is aimed by its entity's rotation, so a fresh one is only its
-/// colour and strength: a warm sun at full intensity.
+/// color and strength: a warm sun at full intensity.
 fn register_light(components: &mut ComponentSchemaRegistry) -> Result<(), SceneExtractError> {
     components.register_with_default::<LightComponent>(
         "Light",
