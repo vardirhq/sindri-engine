@@ -1,0 +1,162 @@
+// The contraptions' controls. Each listens for its own ToyAction and its own
+// ResetToy; the physics is all authored joints and bodies in the scene.
+
+// A steel ball on a rigid arm. A hinge position motor winds it up; letting
+// go switches the motor off so the arm swings free; cutting the rope disables
+// the hinge, and the ball keeps whatever speed it had.
+script WreckingBall {
+    @export let wind_angle: f32 = -1.15;
+    var winding: bool = false;
+
+    fn start() { relax(); }
+
+    on ToyAction(toy, action) {
+        if toy != 1.0 { return; }
+        let hinge = World.find("wreck-hinge");
+        if action == 1.0 {
+            this.winding = true;
+            Physics.set_joint_enabled(hinge, true);
+            Physics.set_hinge_position_motor(hinge, this.wind_angle, 7000.0, 900.0, 14000.0);
+            print("Playground wrecking ball winding");
+        }
+        if action == 2.0 { relax(); print("Playground wrecking ball released"); }
+        if action == 3.0 {
+            relax();
+            Physics.set_joint_enabled(hinge, false);
+            print("Playground wrecking ball cut loose");
+        }
+        if action == 4.0 { ResetToy.emit(1.0); }
+    }
+
+    on ResetToy(toy) {
+        if toy == 0.0 || toy == 1.0 { relax(); }
+    }
+
+    on DropEverything(on) { relax(); }
+
+    fn relax() {
+        this.winding = false;
+        // Zero torque coasts rather than brakes: the arm swings free.
+        Physics.set_hinge_motor(World.find("wreck-hinge"), 0.0, 0.0);
+    }
+}
+
+// A trolley on a slider along the ceiling girder, driven by a position
+// motor; a hook on a spring whose rest length is the winch; and a grip, a
+// distance joint created at runtime between the hook and the cargo under it.
+script Crane {
+    @export let speed: f32 = 5.0;
+    @export let high: f32 = 1.4;
+    @export let low: f32 = 9.5;
+    var cable: f32 = 1.4;
+    var depth: f32 = 9.5;
+    var lowering: bool = false;
+    // Where the trolley is told to be, along the rail from its middle.
+    var target: f32 = -4.0;
+    var parked: bool = false;
+    var gripping: bool = false;
+    var held: Entity? = null;
+
+    fn update(dt: f32) {
+        var drive = 0.0;
+        if Game.toy == 2.0 {
+            if Ui.is_held(World.find("act-1")) || Input.is_down("Digit1") || Input.is_down("ArrowLeft") { drive = -1.0; }
+            if Ui.is_held(World.find("act-2")) || Input.is_down("Digit2") || Input.is_down("ArrowRight") { drive = 1.0; }
+        }
+        if drive != 0.0 || !this.parked {
+            // A position motor chasing a target that runs ahead of it: the
+            // trolley keeps an even speed under any load, and stops dead
+            // where the target stops however the hook swings.
+            this.target = clamp(this.target + drive * this.speed * dt, -11.5, 11.5);
+            Physics.set_slider_position_motor(World.find("crane-slider"), this.target, 600.0, 90.0, 4000.0);
+            this.parked = drive == 0.0;
+        }
+        var goal = this.high;
+        if this.lowering { goal = this.depth; }
+        if abs(goal - this.cable) > 0.01 {
+            let step = 4.0 * dt;
+            this.cable = this.cable + clamp(goal - this.cable, -step, step);
+            Physics.set_spring(World.find("crane-cable"), this.cable, 90.0, 6.0);
+        }
+        draw();
+    }
+
+    on ToyAction(toy, action) {
+        if toy != 2.0 { return; }
+        if action == 3.0 {
+            this.lowering = !this.lowering;
+            if this.lowering { this.depth = sound(); }
+            print("Playground crane hoist " + this.lowering);
+        }
+        if action == 4.0 {
+            if this.gripping { release(); } else { grab(); }
+        }
+    }
+
+    on ResetToy(toy) {
+        if toy == 0.0 || toy == 2.0 {
+            release();
+            this.cable = 1.4;
+            this.lowering = false;
+            this.target = -4.0;
+            this.parked = false;
+            Physics.set_spring(World.find("crane-cable"), this.cable, 90.0, 6.0);
+        }
+    }
+
+    on DropEverything(on) { release(); }
+
+    // How far down to let the hook go: the hook's own footprint, swept
+    // straight down, finds the first thing it would land on, so it stops
+    // just above the load instead of shoving it off whatever it stands on.
+    fn sound() -> f32 {
+        let hook = World.find("crane-hook");
+        let at = hook.transform.world_position;
+        let mask = Physics.mask(["static", "props", "balls", "glass"]);
+        let hit = Physics.cast_box(Vec2(at.x, at.y - 0.25), Vec2(0.5, 0.3), 0.0, Vec2(0.0, -1.0), 30.0, mask, false, hook);
+        if hit == null { return this.low; }
+        return clamp(this.cable + hit.distance - 0.08, this.high, this.low);
+    }
+
+    // The room's own cargo only: an authored joint names bodies in its own
+    // scene, and loose things spawned at runtime are not in it.
+    fn grab() {
+        let hook = World.find("crane-hook");
+        let at = hook.transform.world_position;
+        for thing in Physics.overlap_box(Vec2(at.x, at.y - 0.7), Vec2(0.7, 0.6), 0.0, movable_mask(), false, hook) {
+            if !this.gripping && World.has_tag(thing, "cargo") {
+                Physics.create_distance_joint(World.find("crane-grip"), hook, thing, 1.0);
+                this.gripping = true;
+                this.held = thing;
+                print("Playground crane grabbed");
+            }
+        }
+        if !this.gripping { print("Playground crane found nothing"); }
+    }
+
+    fn release() {
+        if this.gripping {
+            Physics.remove_joint(World.find("crane-grip"));
+            print("Playground crane dropped");
+        }
+        this.gripping = false;
+        this.held = null;
+    }
+
+    fn draw() {
+        let trolley = World.find("crane-trolley").transform.world_position;
+        let hook = World.find("crane-hook").transform.world_position;
+        line(World.find("crane-cable-line"), Vec2(trolley.x, trolley.y - 0.25), Vec2(hook.x, hook.y + 0.12), 0.06);
+        let grip = World.find("crane-grip-line");
+        let held = this.held;
+        if held != null {
+            if World.exists(held) {
+                let at = held.transform.world_position;
+                line(grip, Vec2(hook.x, hook.y), Vec2(at.x, at.y), 0.08);
+                World.set_active(grip, true);
+                return;
+            }
+        }
+        World.set_active(grip, false);
+    }
+}

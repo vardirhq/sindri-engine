@@ -93,7 +93,7 @@ shared fn action_name(toy: f32, action: f32) -> String {
 
 // Where the camera looks for each toy: centre and how much height it shows.
 shared fn toy_view(toy: f32) -> Vec3 {
-    if toy == 1.0 { return Vec3(-22.5, 7.5, 15.0); }
+    if toy == 1.0 { return Vec3(-20.0, 7.0, 15.0); }
     if toy == 2.0 { return Vec3(-16.0, 6.5, 17.0); }
     if toy == 3.0 { return Vec3(18.0, -7.5, 14.0); }
     if toy == 4.0 { return Vec3(21.0, 4.0, 22.0); }

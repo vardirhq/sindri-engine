@@ -3240,6 +3240,3076 @@
    }
   },
   {
+   "id": "wreck-shelf",
+   "name": "wreck-shelf",
+   "transform_3d": {
+    "position": [
+     -15.8,
+     2.8,
+     0.0
+    ],
+    "rotation": [
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     7.6,
+     0.4,
+     1.0
+    ]
+   },
+   "components": {
+    "sindri.shape": {
+     "kind": "rect",
+     "count": 6.0,
+     "fill": [
+      0.01938,
+      0.03955,
+      0.07421,
+      1.0
+     ],
+     "stroke": [
+      0.06848,
+      0.14413,
+      0.2384,
+      1.0
+     ],
+     "stroke_width": 0.08,
+     "corner_radius": 0.0,
+     "dashes": 0.0,
+     "dash_duty": 0.5,
+     "sweep_start": 0.0,
+     "sweep_turns": 1.0,
+     "blend": "over",
+     "layer": 2
+    },
+    "sindri.physics2d.collider": {
+     "pieces": [
+      {
+       "shape": {
+        "shape": "box",
+        "half_extents": [
+         3.8,
+         0.2
+        ]
+       },
+       "offset": [
+        0.0,
+        0.0
+       ],
+       "rotation": 0.0,
+       "sensor": false,
+       "layers": {
+        "memberships": 1,
+        "filter": 4294967295
+       },
+       "friction": 0.6,
+       "restitution": 0.0
+      }
+     ]
+    }
+   }
+  },
+  {
+   "id": "wreck-gantry",
+   "name": "wreck-gantry",
+   "transform_3d": {
+    "position": [
+     -21.5,
+     13.25,
+     0.0
+    ],
+    "rotation": [
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     2.4,
+     0.5,
+     1.0
+    ]
+   },
+   "components": {
+    "sindri.shape": {
+     "kind": "rect",
+     "count": 6.0,
+     "fill": [
+      0.02416,
+      0.04971,
+      0.09306,
+      1.0
+     ],
+     "stroke": [
+      0.06848,
+      0.14413,
+      0.2384,
+      1.0
+     ],
+     "stroke_width": 0.08,
+     "corner_radius": 0.0,
+     "dashes": 0.0,
+     "dash_duty": 0.5,
+     "sweep_start": 0.0,
+     "sweep_turns": 1.0,
+     "blend": "over",
+     "layer": 2
+    },
+    "sindri.physics2d.collider": {
+     "pieces": [
+      {
+       "shape": {
+        "shape": "box",
+        "half_extents": [
+         1.2,
+         0.25
+        ]
+       },
+       "offset": [
+        0.0,
+        0.0
+       ],
+       "rotation": 0.0,
+       "sensor": false,
+       "layers": {
+        "memberships": 1,
+        "filter": 4294967295
+       },
+       "friction": 0.6,
+       "restitution": 0.0
+      }
+     ]
+    }
+   }
+  },
+  {
+   "id": "wreck-pivot",
+   "name": "wreck-pivot",
+   "transform_3d": {
+    "position": [
+     -21.5,
+     12.4,
+     0.4
+    ],
+    "rotation": [
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     0.45,
+     0.45,
+     1.0
+    ]
+   },
+   "components": {
+    "sindri.shape": {
+     "kind": "ellipse",
+     "count": 6.0,
+     "fill": [
+      0.27468,
+      0.36625,
+      0.47932,
+      1.0
+     ],
+     "stroke": [
+      0.7913,
+      0.84687,
+      0.9131,
+      1.0
+     ],
+     "stroke_width": 0.2,
+     "corner_radius": 0.0,
+     "dashes": 0.0,
+     "dash_duty": 0.5,
+     "sweep_start": 0.0,
+     "sweep_turns": 1.0,
+     "blend": "over",
+     "layer": 9
+    },
+    "sindri.physics2d.collider": {
+     "pieces": [
+      {
+       "shape": {
+        "shape": "circle",
+        "radius": 0.225
+       },
+       "offset": [
+        0.0,
+        0.0
+       ],
+       "rotation": 0.0,
+       "sensor": false,
+       "layers": {
+        "memberships": 1,
+        "filter": 0
+       },
+       "friction": 0.5,
+       "restitution": 0.0
+      }
+     ]
+    }
+   }
+  },
+  {
+   "id": "wreck-arm",
+   "name": "wreck-arm",
+   "transform_3d": {
+    "position": [
+     -21.5,
+     5.4,
+     0.3
+    ],
+    "rotation": [
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     1.0,
+     1.0,
+     1.0
+    ]
+   },
+   "components": {
+    "sindri.physics2d.collider": {
+     "pieces": [
+      {
+       "shape": {
+        "shape": "circle",
+        "radius": 1.1
+       },
+       "offset": [
+        0.0,
+        0.0
+       ],
+       "rotation": 0.0,
+       "sensor": false,
+       "layers": {
+        "memberships": 2,
+        "filter": 63
+       },
+       "friction": 0.4,
+       "restitution": 0.1
+      },
+      {
+       "shape": {
+        "shape": "box",
+        "half_extents": [
+         0.12,
+         2.85
+        ]
+       },
+       "offset": [
+        0.0,
+        3.85
+       ],
+       "rotation": 0.0,
+       "sensor": false,
+       "layers": {
+        "memberships": 2,
+        "filter": 63
+       },
+       "friction": 0.4,
+       "restitution": 0.0
+      }
+     ]
+    },
+    "sindri.physics2d.rigid_body": {
+     "kind": "dynamic",
+     "pose": {
+      "position": [
+       0,
+       0
+      ],
+      "rotation": 0
+     },
+     "linear_velocity": [
+      0,
+      0
+     ],
+     "angular_velocity": 0,
+     "gravity_scale": 1.0,
+     "linear_damping": 0.02,
+     "angular_damping": 0.05,
+     "lock_rotation": false,
+     "continuous_collision": false
+    },
+    "sindri.physics2d.material": {
+     "profile": "materials/steel.profile",
+     "override_friction": false,
+     "friction": 0.5,
+     "override_restitution": false,
+     "restitution": 0.0
+    },
+    "sindri.script": {
+     "source": "scripts/parts.decay",
+     "script": "Part",
+     "properties": {
+      "toy": 1.0
+     }
+    },
+    "sindri.tags": {
+     "tags": [
+      "body",
+      "cargo"
+     ]
+    }
+   }
+  },
+  {
+   "id": "wreck-rod",
+   "name": "wreck-rod",
+   "parent": "wreck-arm",
+   "transform_3d": {
+    "position": [
+     0,
+     3.85,
+     -0.05
+    ],
+    "rotation": [
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     0.24,
+     5.7,
+     1.0
+    ]
+   },
+   "components": {
+    "sindri.shape": {
+     "kind": "rect",
+     "count": 6.0,
+     "fill": [
+      0.14996,
+      0.19462,
+      0.26225,
+      1.0
+     ],
+     "stroke": [
+      0.54572,
+      0.60383,
+      0.68669,
+      1.0
+     ],
+     "stroke_width": 0.15,
+     "corner_radius": 0.0,
+     "dashes": 0.0,
+     "dash_duty": 0.5,
+     "sweep_start": 0.0,
+     "sweep_turns": 1.0,
+     "blend": "over",
+     "layer": 7
+    }
+   }
+  },
+  {
+   "id": "wreck-ball",
+   "name": "wreck-ball",
+   "parent": "wreck-arm",
+   "transform_3d": {
+    "position": [
+     0,
+     0,
+     0.0
+    ],
+    "rotation": [
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     2.2,
+     2.2,
+     1.0
+    ]
+   },
+   "components": {
+    "sindri.shape": {
+     "kind": "ellipse",
+     "count": 6.0,
+     "fill": [
+      0.02843,
+      0.0356,
+      0.05448,
+      1.0
+     ],
+     "stroke": [
+      0.37124,
+      0.43415,
+      0.51492,
+      1.0
+     ],
+     "stroke_width": 0.06,
+     "corner_radius": 0.0,
+     "dashes": 0.0,
+     "dash_duty": 0.5,
+     "sweep_start": 0.0,
+     "sweep_turns": 1.0,
+     "blend": "over",
+     "layer": 8
+    }
+   }
+  },
+  {
+   "id": "wreck-shine",
+   "name": "wreck-shine",
+   "parent": "wreck-arm",
+   "transform_3d": {
+    "position": [
+     -0.35,
+     0.4,
+     0.05
+    ],
+    "rotation": [
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     0.5,
+     0.35,
+     1.0
+    ]
+   },
+   "components": {
+    "sindri.shape": {
+     "kind": "ellipse",
+     "count": 6.0,
+     "fill": [
+      1.0,
+      1.0,
+      1.0,
+      0.25
+     ],
+     "stroke": [
+      0.0,
+      0.0,
+      0.0,
+      0.0
+     ],
+     "stroke_width": 0.0,
+     "corner_radius": 0.0,
+     "dashes": 0.0,
+     "dash_duty": 0.5,
+     "sweep_start": 0.0,
+     "sweep_turns": 1.0,
+     "blend": "over",
+     "layer": 9
+    }
+   }
+  },
+  {
+   "id": "wreck-hinge",
+   "name": "wreck-hinge",
+   "transform_3d": {
+    "position": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "rotation": [
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     1.0,
+     1.0,
+     1.0
+    ]
+   },
+   "components": {
+    "sindri.physics2d.hinge_joint": {
+     "first": "wreck-pivot",
+     "second": "wreck-arm",
+     "first_anchor": [
+      0.0,
+      0.0
+     ],
+     "second_anchor": [
+      0.0,
+      7.0
+     ],
+     "limits_enabled": false,
+     "lower_angle": 0.0,
+     "upper_angle": 0.0,
+     "motor_enabled": false,
+     "motor_mode": "velocity",
+     "motor_velocity": 0.0,
+     "motor_max_torque": 0.0,
+     "motor_target_angle": 0.0,
+     "motor_stiffness": 0.0,
+     "motor_damping": 0.0
+    },
+    "sindri.script": {
+     "source": "scripts/parts.decay",
+     "script": "JointPart",
+     "properties": {
+      "toy": 1.0
+     }
+    },
+    "sindri.tags": {
+     "tags": [
+      "joint"
+     ]
+    }
+   }
+  },
+  {
+   "id": "wreck-control",
+   "name": "wreck-control",
+   "transform_3d": {
+    "position": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "rotation": [
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     1.0,
+     1.0,
+     1.0
+    ]
+   },
+   "components": {
+    "sindri.script": {
+     "source": "scripts/toys.decay",
+     "script": "WreckingBall",
+     "properties": {}
+    }
+   }
+  },
+  {
+   "id": "castle-0-0-0",
+   "name": "castle-0-0-0",
+   "transform_3d": {
+    "position": [
+     -17.4,
+     3.4,
+     0.2
+    ],
+    "rotation": [
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     0.8,
+     0.8,
+     1.0
+    ]
+   },
+   "components": {
+    "sindri.shape": {
+     "kind": "rect",
+     "count": 6.0,
+     "fill": [
+      0.58408,
+      0.25818,
+      0.07819,
+      1.0
+     ],
+     "stroke": [
+      0.0,
+      0.0,
+      0.0,
+      0.0
+     ],
+     "stroke_width": 0.0,
+     "corner_radius": 0.0,
+     "dashes": 0.0,
+     "dash_duty": 0.5,
+     "sweep_start": 0.0,
+     "sweep_turns": 1.0,
+     "blend": "over",
+     "layer": 5
+    },
+    "sindri.physics2d.collider": {
+     "pieces": [
+      {
+       "shape": {
+        "shape": "box",
+        "half_extents": [
+         0.4,
+         0.4
+        ]
+       },
+       "offset": [
+        0.0,
+        0.0
+       ],
+       "rotation": 0.0,
+       "sensor": false,
+       "layers": {
+        "memberships": 2,
+        "filter": 63
+       },
+       "friction": 0.5,
+       "restitution": 0.05
+      }
+     ]
+    },
+    "sindri.physics2d.rigid_body": {
+     "kind": "dynamic",
+     "pose": {
+      "position": [
+       0,
+       0
+      ],
+      "rotation": 0
+     },
+     "linear_velocity": [
+      0,
+      0
+     ],
+     "angular_velocity": 0,
+     "gravity_scale": 1.0,
+     "linear_damping": 0.05,
+     "angular_damping": 0.05,
+     "lock_rotation": false,
+     "continuous_collision": false
+    },
+    "sindri.script": {
+     "source": "scripts/parts.decay",
+     "script": "Part",
+     "properties": {
+      "toy": 1.0
+     }
+    },
+    "sindri.physics2d.material": {
+     "profile": "materials/wood.profile",
+     "override_friction": false,
+     "friction": 0.5,
+     "override_restitution": false,
+     "restitution": 0.0
+    },
+    "sindri.tags": {
+     "tags": [
+      "body",
+      "cargo"
+     ]
+    }
+   }
+  },
+  {
+   "id": "castle-0-0-1",
+   "name": "castle-0-0-1",
+   "transform_3d": {
+    "position": [
+     -17.4,
+     4.2,
+     0.2
+    ],
+    "rotation": [
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     0.8,
+     0.8,
+     1.0
+    ]
+   },
+   "components": {
+    "sindri.shape": {
+     "kind": "rect",
+     "count": 6.0,
+     "fill": [
+      0.58408,
+      0.25818,
+      0.07819,
+      1.0
+     ],
+     "stroke": [
+      0.0,
+      0.0,
+      0.0,
+      0.0
+     ],
+     "stroke_width": 0.0,
+     "corner_radius": 0.0,
+     "dashes": 0.0,
+     "dash_duty": 0.5,
+     "sweep_start": 0.0,
+     "sweep_turns": 1.0,
+     "blend": "over",
+     "layer": 5
+    },
+    "sindri.physics2d.collider": {
+     "pieces": [
+      {
+       "shape": {
+        "shape": "box",
+        "half_extents": [
+         0.4,
+         0.4
+        ]
+       },
+       "offset": [
+        0.0,
+        0.0
+       ],
+       "rotation": 0.0,
+       "sensor": false,
+       "layers": {
+        "memberships": 2,
+        "filter": 63
+       },
+       "friction": 0.5,
+       "restitution": 0.05
+      }
+     ]
+    },
+    "sindri.physics2d.rigid_body": {
+     "kind": "dynamic",
+     "pose": {
+      "position": [
+       0,
+       0
+      ],
+      "rotation": 0
+     },
+     "linear_velocity": [
+      0,
+      0
+     ],
+     "angular_velocity": 0,
+     "gravity_scale": 1.0,
+     "linear_damping": 0.05,
+     "angular_damping": 0.05,
+     "lock_rotation": false,
+     "continuous_collision": false
+    },
+    "sindri.script": {
+     "source": "scripts/parts.decay",
+     "script": "Part",
+     "properties": {
+      "toy": 1.0
+     }
+    },
+    "sindri.physics2d.material": {
+     "profile": "materials/wood.profile",
+     "override_friction": false,
+     "friction": 0.5,
+     "override_restitution": false,
+     "restitution": 0.0
+    },
+    "sindri.tags": {
+     "tags": [
+      "body",
+      "cargo"
+     ]
+    }
+   }
+  },
+  {
+   "id": "castle-0-1-0",
+   "name": "castle-0-1-0",
+   "transform_3d": {
+    "position": [
+     -14.2,
+     3.4,
+     0.2
+    ],
+    "rotation": [
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     0.8,
+     0.8,
+     1.0
+    ]
+   },
+   "components": {
+    "sindri.shape": {
+     "kind": "rect",
+     "count": 6.0,
+     "fill": [
+      0.58408,
+      0.25818,
+      0.07819,
+      1.0
+     ],
+     "stroke": [
+      0.0,
+      0.0,
+      0.0,
+      0.0
+     ],
+     "stroke_width": 0.0,
+     "corner_radius": 0.0,
+     "dashes": 0.0,
+     "dash_duty": 0.5,
+     "sweep_start": 0.0,
+     "sweep_turns": 1.0,
+     "blend": "over",
+     "layer": 5
+    },
+    "sindri.physics2d.collider": {
+     "pieces": [
+      {
+       "shape": {
+        "shape": "box",
+        "half_extents": [
+         0.4,
+         0.4
+        ]
+       },
+       "offset": [
+        0.0,
+        0.0
+       ],
+       "rotation": 0.0,
+       "sensor": false,
+       "layers": {
+        "memberships": 2,
+        "filter": 63
+       },
+       "friction": 0.5,
+       "restitution": 0.05
+      }
+     ]
+    },
+    "sindri.physics2d.rigid_body": {
+     "kind": "dynamic",
+     "pose": {
+      "position": [
+       0,
+       0
+      ],
+      "rotation": 0
+     },
+     "linear_velocity": [
+      0,
+      0
+     ],
+     "angular_velocity": 0,
+     "gravity_scale": 1.0,
+     "linear_damping": 0.05,
+     "angular_damping": 0.05,
+     "lock_rotation": false,
+     "continuous_collision": false
+    },
+    "sindri.script": {
+     "source": "scripts/parts.decay",
+     "script": "Part",
+     "properties": {
+      "toy": 1.0
+     }
+    },
+    "sindri.physics2d.material": {
+     "profile": "materials/wood.profile",
+     "override_friction": false,
+     "friction": 0.5,
+     "override_restitution": false,
+     "restitution": 0.0
+    },
+    "sindri.tags": {
+     "tags": [
+      "body",
+      "cargo"
+     ]
+    }
+   }
+  },
+  {
+   "id": "castle-0-1-1",
+   "name": "castle-0-1-1",
+   "transform_3d": {
+    "position": [
+     -14.2,
+     4.2,
+     0.2
+    ],
+    "rotation": [
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     0.8,
+     0.8,
+     1.0
+    ]
+   },
+   "components": {
+    "sindri.shape": {
+     "kind": "rect",
+     "count": 6.0,
+     "fill": [
+      0.58408,
+      0.25818,
+      0.07819,
+      1.0
+     ],
+     "stroke": [
+      0.0,
+      0.0,
+      0.0,
+      0.0
+     ],
+     "stroke_width": 0.0,
+     "corner_radius": 0.0,
+     "dashes": 0.0,
+     "dash_duty": 0.5,
+     "sweep_start": 0.0,
+     "sweep_turns": 1.0,
+     "blend": "over",
+     "layer": 5
+    },
+    "sindri.physics2d.collider": {
+     "pieces": [
+      {
+       "shape": {
+        "shape": "box",
+        "half_extents": [
+         0.4,
+         0.4
+        ]
+       },
+       "offset": [
+        0.0,
+        0.0
+       ],
+       "rotation": 0.0,
+       "sensor": false,
+       "layers": {
+        "memberships": 2,
+        "filter": 63
+       },
+       "friction": 0.5,
+       "restitution": 0.05
+      }
+     ]
+    },
+    "sindri.physics2d.rigid_body": {
+     "kind": "dynamic",
+     "pose": {
+      "position": [
+       0,
+       0
+      ],
+      "rotation": 0
+     },
+     "linear_velocity": [
+      0,
+      0
+     ],
+     "angular_velocity": 0,
+     "gravity_scale": 1.0,
+     "linear_damping": 0.05,
+     "angular_damping": 0.05,
+     "lock_rotation": false,
+     "continuous_collision": false
+    },
+    "sindri.script": {
+     "source": "scripts/parts.decay",
+     "script": "Part",
+     "properties": {
+      "toy": 1.0
+     }
+    },
+    "sindri.physics2d.material": {
+     "profile": "materials/wood.profile",
+     "override_friction": false,
+     "friction": 0.5,
+     "override_restitution": false,
+     "restitution": 0.0
+    },
+    "sindri.tags": {
+     "tags": [
+      "body",
+      "cargo"
+     ]
+    }
+   }
+  },
+  {
+   "id": "castle-lintel-0",
+   "name": "castle-lintel-0",
+   "transform_3d": {
+    "position": [
+     -15.8,
+     4.75,
+     0.2
+    ],
+    "rotation": [
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     4.0,
+     0.3,
+     1.0
+    ]
+   },
+   "components": {
+    "sindri.shape": {
+     "kind": "rect",
+     "count": 6.0,
+     "fill": [
+      0.26636,
+      0.10224,
+      0.02416,
+      1.0
+     ],
+     "stroke": [
+      0.0,
+      0.0,
+      0.0,
+      0.0
+     ],
+     "stroke_width": 0.0,
+     "corner_radius": 0.0,
+     "dashes": 0.0,
+     "dash_duty": 0.5,
+     "sweep_start": 0.0,
+     "sweep_turns": 1.0,
+     "blend": "over",
+     "layer": 5
+    },
+    "sindri.physics2d.collider": {
+     "pieces": [
+      {
+       "shape": {
+        "shape": "box",
+        "half_extents": [
+         2.0,
+         0.15
+        ]
+       },
+       "offset": [
+        0.0,
+        0.0
+       ],
+       "rotation": 0.0,
+       "sensor": false,
+       "layers": {
+        "memberships": 2,
+        "filter": 63
+       },
+       "friction": 0.5,
+       "restitution": 0.05
+      }
+     ]
+    },
+    "sindri.physics2d.rigid_body": {
+     "kind": "dynamic",
+     "pose": {
+      "position": [
+       0,
+       0
+      ],
+      "rotation": 0
+     },
+     "linear_velocity": [
+      0,
+      0
+     ],
+     "angular_velocity": 0,
+     "gravity_scale": 1.0,
+     "linear_damping": 0.05,
+     "angular_damping": 0.05,
+     "lock_rotation": false,
+     "continuous_collision": false
+    },
+    "sindri.script": {
+     "source": "scripts/parts.decay",
+     "script": "Part",
+     "properties": {
+      "toy": 1.0
+     }
+    },
+    "sindri.physics2d.material": {
+     "profile": "materials/wood.profile",
+     "override_friction": false,
+     "friction": 0.5,
+     "override_restitution": false,
+     "restitution": 0.0
+    },
+    "sindri.tags": {
+     "tags": [
+      "body",
+      "cargo"
+     ]
+    }
+   }
+  },
+  {
+   "id": "castle-1-0-0",
+   "name": "castle-1-0-0",
+   "transform_3d": {
+    "position": [
+     -17.4,
+     5.3,
+     0.2
+    ],
+    "rotation": [
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     0.8,
+     0.8,
+     1.0
+    ]
+   },
+   "components": {
+    "sindri.shape": {
+     "kind": "rect",
+     "count": 6.0,
+     "fill": [
+      0.39157,
+      0.7913,
+      1.0,
+      1.0
+     ],
+     "stroke": [
+      0.0,
+      0.0,
+      0.0,
+      0.0
+     ],
+     "stroke_width": 0.0,
+     "corner_radius": 0.0,
+     "dashes": 0.0,
+     "dash_duty": 0.5,
+     "sweep_start": 0.0,
+     "sweep_turns": 1.0,
+     "blend": "over",
+     "layer": 5
+    },
+    "sindri.physics2d.collider": {
+     "pieces": [
+      {
+       "shape": {
+        "shape": "box",
+        "half_extents": [
+         0.4,
+         0.4
+        ]
+       },
+       "offset": [
+        0.0,
+        0.0
+       ],
+       "rotation": 0.0,
+       "sensor": false,
+       "layers": {
+        "memberships": 2,
+        "filter": 63
+       },
+       "friction": 0.5,
+       "restitution": 0.05
+      }
+     ]
+    },
+    "sindri.physics2d.rigid_body": {
+     "kind": "dynamic",
+     "pose": {
+      "position": [
+       0,
+       0
+      ],
+      "rotation": 0
+     },
+     "linear_velocity": [
+      0,
+      0
+     ],
+     "angular_velocity": 0,
+     "gravity_scale": 1.0,
+     "linear_damping": 0.05,
+     "angular_damping": 0.05,
+     "lock_rotation": false,
+     "continuous_collision": false
+    },
+    "sindri.script": {
+     "source": "scripts/parts.decay",
+     "script": "Part",
+     "properties": {
+      "toy": 1.0
+     }
+    },
+    "sindri.physics2d.material": {
+     "profile": "materials/ice.profile",
+     "override_friction": false,
+     "friction": 0.5,
+     "override_restitution": false,
+     "restitution": 0.0
+    },
+    "sindri.tags": {
+     "tags": [
+      "body",
+      "cargo"
+     ]
+    }
+   }
+  },
+  {
+   "id": "castle-1-0-1",
+   "name": "castle-1-0-1",
+   "transform_3d": {
+    "position": [
+     -17.4,
+     6.1,
+     0.2
+    ],
+    "rotation": [
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     0.8,
+     0.8,
+     1.0
+    ]
+   },
+   "components": {
+    "sindri.shape": {
+     "kind": "rect",
+     "count": 6.0,
+     "fill": [
+      0.39157,
+      0.7913,
+      1.0,
+      1.0
+     ],
+     "stroke": [
+      0.0,
+      0.0,
+      0.0,
+      0.0
+     ],
+     "stroke_width": 0.0,
+     "corner_radius": 0.0,
+     "dashes": 0.0,
+     "dash_duty": 0.5,
+     "sweep_start": 0.0,
+     "sweep_turns": 1.0,
+     "blend": "over",
+     "layer": 5
+    },
+    "sindri.physics2d.collider": {
+     "pieces": [
+      {
+       "shape": {
+        "shape": "box",
+        "half_extents": [
+         0.4,
+         0.4
+        ]
+       },
+       "offset": [
+        0.0,
+        0.0
+       ],
+       "rotation": 0.0,
+       "sensor": false,
+       "layers": {
+        "memberships": 2,
+        "filter": 63
+       },
+       "friction": 0.5,
+       "restitution": 0.05
+      }
+     ]
+    },
+    "sindri.physics2d.rigid_body": {
+     "kind": "dynamic",
+     "pose": {
+      "position": [
+       0,
+       0
+      ],
+      "rotation": 0
+     },
+     "linear_velocity": [
+      0,
+      0
+     ],
+     "angular_velocity": 0,
+     "gravity_scale": 1.0,
+     "linear_damping": 0.05,
+     "angular_damping": 0.05,
+     "lock_rotation": false,
+     "continuous_collision": false
+    },
+    "sindri.script": {
+     "source": "scripts/parts.decay",
+     "script": "Part",
+     "properties": {
+      "toy": 1.0
+     }
+    },
+    "sindri.physics2d.material": {
+     "profile": "materials/ice.profile",
+     "override_friction": false,
+     "friction": 0.5,
+     "override_restitution": false,
+     "restitution": 0.0
+    },
+    "sindri.tags": {
+     "tags": [
+      "body",
+      "cargo"
+     ]
+    }
+   }
+  },
+  {
+   "id": "castle-1-1-0",
+   "name": "castle-1-1-0",
+   "transform_3d": {
+    "position": [
+     -14.2,
+     5.3,
+     0.2
+    ],
+    "rotation": [
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     0.8,
+     0.8,
+     1.0
+    ]
+   },
+   "components": {
+    "sindri.shape": {
+     "kind": "rect",
+     "count": 6.0,
+     "fill": [
+      0.39157,
+      0.7913,
+      1.0,
+      1.0
+     ],
+     "stroke": [
+      0.0,
+      0.0,
+      0.0,
+      0.0
+     ],
+     "stroke_width": 0.0,
+     "corner_radius": 0.0,
+     "dashes": 0.0,
+     "dash_duty": 0.5,
+     "sweep_start": 0.0,
+     "sweep_turns": 1.0,
+     "blend": "over",
+     "layer": 5
+    },
+    "sindri.physics2d.collider": {
+     "pieces": [
+      {
+       "shape": {
+        "shape": "box",
+        "half_extents": [
+         0.4,
+         0.4
+        ]
+       },
+       "offset": [
+        0.0,
+        0.0
+       ],
+       "rotation": 0.0,
+       "sensor": false,
+       "layers": {
+        "memberships": 2,
+        "filter": 63
+       },
+       "friction": 0.5,
+       "restitution": 0.05
+      }
+     ]
+    },
+    "sindri.physics2d.rigid_body": {
+     "kind": "dynamic",
+     "pose": {
+      "position": [
+       0,
+       0
+      ],
+      "rotation": 0
+     },
+     "linear_velocity": [
+      0,
+      0
+     ],
+     "angular_velocity": 0,
+     "gravity_scale": 1.0,
+     "linear_damping": 0.05,
+     "angular_damping": 0.05,
+     "lock_rotation": false,
+     "continuous_collision": false
+    },
+    "sindri.script": {
+     "source": "scripts/parts.decay",
+     "script": "Part",
+     "properties": {
+      "toy": 1.0
+     }
+    },
+    "sindri.physics2d.material": {
+     "profile": "materials/ice.profile",
+     "override_friction": false,
+     "friction": 0.5,
+     "override_restitution": false,
+     "restitution": 0.0
+    },
+    "sindri.tags": {
+     "tags": [
+      "body",
+      "cargo"
+     ]
+    }
+   }
+  },
+  {
+   "id": "castle-1-1-1",
+   "name": "castle-1-1-1",
+   "transform_3d": {
+    "position": [
+     -14.2,
+     6.1,
+     0.2
+    ],
+    "rotation": [
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     0.8,
+     0.8,
+     1.0
+    ]
+   },
+   "components": {
+    "sindri.shape": {
+     "kind": "rect",
+     "count": 6.0,
+     "fill": [
+      0.39157,
+      0.7913,
+      1.0,
+      1.0
+     ],
+     "stroke": [
+      0.0,
+      0.0,
+      0.0,
+      0.0
+     ],
+     "stroke_width": 0.0,
+     "corner_radius": 0.0,
+     "dashes": 0.0,
+     "dash_duty": 0.5,
+     "sweep_start": 0.0,
+     "sweep_turns": 1.0,
+     "blend": "over",
+     "layer": 5
+    },
+    "sindri.physics2d.collider": {
+     "pieces": [
+      {
+       "shape": {
+        "shape": "box",
+        "half_extents": [
+         0.4,
+         0.4
+        ]
+       },
+       "offset": [
+        0.0,
+        0.0
+       ],
+       "rotation": 0.0,
+       "sensor": false,
+       "layers": {
+        "memberships": 2,
+        "filter": 63
+       },
+       "friction": 0.5,
+       "restitution": 0.05
+      }
+     ]
+    },
+    "sindri.physics2d.rigid_body": {
+     "kind": "dynamic",
+     "pose": {
+      "position": [
+       0,
+       0
+      ],
+      "rotation": 0
+     },
+     "linear_velocity": [
+      0,
+      0
+     ],
+     "angular_velocity": 0,
+     "gravity_scale": 1.0,
+     "linear_damping": 0.05,
+     "angular_damping": 0.05,
+     "lock_rotation": false,
+     "continuous_collision": false
+    },
+    "sindri.script": {
+     "source": "scripts/parts.decay",
+     "script": "Part",
+     "properties": {
+      "toy": 1.0
+     }
+    },
+    "sindri.physics2d.material": {
+     "profile": "materials/ice.profile",
+     "override_friction": false,
+     "friction": 0.5,
+     "override_restitution": false,
+     "restitution": 0.0
+    },
+    "sindri.tags": {
+     "tags": [
+      "body",
+      "cargo"
+     ]
+    }
+   }
+  },
+  {
+   "id": "castle-lintel-1",
+   "name": "castle-lintel-1",
+   "transform_3d": {
+    "position": [
+     -15.8,
+     6.65,
+     0.2
+    ],
+    "rotation": [
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     4.0,
+     0.3,
+     1.0
+    ]
+   },
+   "components": {
+    "sindri.shape": {
+     "kind": "rect",
+     "count": 6.0,
+     "fill": [
+      0.26636,
+      0.10224,
+      0.02416,
+      1.0
+     ],
+     "stroke": [
+      0.0,
+      0.0,
+      0.0,
+      0.0
+     ],
+     "stroke_width": 0.0,
+     "corner_radius": 0.0,
+     "dashes": 0.0,
+     "dash_duty": 0.5,
+     "sweep_start": 0.0,
+     "sweep_turns": 1.0,
+     "blend": "over",
+     "layer": 5
+    },
+    "sindri.physics2d.collider": {
+     "pieces": [
+      {
+       "shape": {
+        "shape": "box",
+        "half_extents": [
+         2.0,
+         0.15
+        ]
+       },
+       "offset": [
+        0.0,
+        0.0
+       ],
+       "rotation": 0.0,
+       "sensor": false,
+       "layers": {
+        "memberships": 2,
+        "filter": 63
+       },
+       "friction": 0.5,
+       "restitution": 0.05
+      }
+     ]
+    },
+    "sindri.physics2d.rigid_body": {
+     "kind": "dynamic",
+     "pose": {
+      "position": [
+       0,
+       0
+      ],
+      "rotation": 0
+     },
+     "linear_velocity": [
+      0,
+      0
+     ],
+     "angular_velocity": 0,
+     "gravity_scale": 1.0,
+     "linear_damping": 0.05,
+     "angular_damping": 0.05,
+     "lock_rotation": false,
+     "continuous_collision": false
+    },
+    "sindri.script": {
+     "source": "scripts/parts.decay",
+     "script": "Part",
+     "properties": {
+      "toy": 1.0
+     }
+    },
+    "sindri.physics2d.material": {
+     "profile": "materials/wood.profile",
+     "override_friction": false,
+     "friction": 0.5,
+     "override_restitution": false,
+     "restitution": 0.0
+    },
+    "sindri.tags": {
+     "tags": [
+      "body",
+      "cargo"
+     ]
+    }
+   }
+  },
+  {
+   "id": "castle-2-0-0",
+   "name": "castle-2-0-0",
+   "transform_3d": {
+    "position": [
+     -17.4,
+     7.2,
+     0.2
+    ],
+    "rotation": [
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     0.8,
+     0.8,
+     1.0
+    ]
+   },
+   "components": {
+    "sindri.shape": {
+     "kind": "rect",
+     "count": 6.0,
+     "fill": [
+      0.69387,
+      0.35153,
+      0.13287,
+      1.0
+     ],
+     "stroke": [
+      0.0,
+      0.0,
+      0.0,
+      0.0
+     ],
+     "stroke_width": 0.0,
+     "corner_radius": 0.0,
+     "dashes": 0.0,
+     "dash_duty": 0.5,
+     "sweep_start": 0.0,
+     "sweep_turns": 1.0,
+     "blend": "over",
+     "layer": 5
+    },
+    "sindri.physics2d.collider": {
+     "pieces": [
+      {
+       "shape": {
+        "shape": "box",
+        "half_extents": [
+         0.4,
+         0.4
+        ]
+       },
+       "offset": [
+        0.0,
+        0.0
+       ],
+       "rotation": 0.0,
+       "sensor": false,
+       "layers": {
+        "memberships": 2,
+        "filter": 63
+       },
+       "friction": 0.5,
+       "restitution": 0.05
+      }
+     ]
+    },
+    "sindri.physics2d.rigid_body": {
+     "kind": "dynamic",
+     "pose": {
+      "position": [
+       0,
+       0
+      ],
+      "rotation": 0
+     },
+     "linear_velocity": [
+      0,
+      0
+     ],
+     "angular_velocity": 0,
+     "gravity_scale": 1.0,
+     "linear_damping": 0.05,
+     "angular_damping": 0.05,
+     "lock_rotation": false,
+     "continuous_collision": false
+    },
+    "sindri.script": {
+     "source": "scripts/parts.decay",
+     "script": "Part",
+     "properties": {
+      "toy": 1.0
+     }
+    },
+    "sindri.physics2d.material": {
+     "profile": "materials/wood.profile",
+     "override_friction": false,
+     "friction": 0.5,
+     "override_restitution": false,
+     "restitution": 0.0
+    },
+    "sindri.tags": {
+     "tags": [
+      "body",
+      "cargo"
+     ]
+    }
+   }
+  },
+  {
+   "id": "castle-2-0-1",
+   "name": "castle-2-0-1",
+   "transform_3d": {
+    "position": [
+     -17.4,
+     8.0,
+     0.2
+    ],
+    "rotation": [
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     0.8,
+     0.8,
+     1.0
+    ]
+   },
+   "components": {
+    "sindri.shape": {
+     "kind": "rect",
+     "count": 6.0,
+     "fill": [
+      0.69387,
+      0.35153,
+      0.13287,
+      1.0
+     ],
+     "stroke": [
+      0.0,
+      0.0,
+      0.0,
+      0.0
+     ],
+     "stroke_width": 0.0,
+     "corner_radius": 0.0,
+     "dashes": 0.0,
+     "dash_duty": 0.5,
+     "sweep_start": 0.0,
+     "sweep_turns": 1.0,
+     "blend": "over",
+     "layer": 5
+    },
+    "sindri.physics2d.collider": {
+     "pieces": [
+      {
+       "shape": {
+        "shape": "box",
+        "half_extents": [
+         0.4,
+         0.4
+        ]
+       },
+       "offset": [
+        0.0,
+        0.0
+       ],
+       "rotation": 0.0,
+       "sensor": false,
+       "layers": {
+        "memberships": 2,
+        "filter": 63
+       },
+       "friction": 0.5,
+       "restitution": 0.05
+      }
+     ]
+    },
+    "sindri.physics2d.rigid_body": {
+     "kind": "dynamic",
+     "pose": {
+      "position": [
+       0,
+       0
+      ],
+      "rotation": 0
+     },
+     "linear_velocity": [
+      0,
+      0
+     ],
+     "angular_velocity": 0,
+     "gravity_scale": 1.0,
+     "linear_damping": 0.05,
+     "angular_damping": 0.05,
+     "lock_rotation": false,
+     "continuous_collision": false
+    },
+    "sindri.script": {
+     "source": "scripts/parts.decay",
+     "script": "Part",
+     "properties": {
+      "toy": 1.0
+     }
+    },
+    "sindri.physics2d.material": {
+     "profile": "materials/wood.profile",
+     "override_friction": false,
+     "friction": 0.5,
+     "override_restitution": false,
+     "restitution": 0.0
+    },
+    "sindri.tags": {
+     "tags": [
+      "body",
+      "cargo"
+     ]
+    }
+   }
+  },
+  {
+   "id": "castle-2-1-0",
+   "name": "castle-2-1-0",
+   "transform_3d": {
+    "position": [
+     -14.2,
+     7.2,
+     0.2
+    ],
+    "rotation": [
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     0.8,
+     0.8,
+     1.0
+    ]
+   },
+   "components": {
+    "sindri.shape": {
+     "kind": "rect",
+     "count": 6.0,
+     "fill": [
+      0.69387,
+      0.35153,
+      0.13287,
+      1.0
+     ],
+     "stroke": [
+      0.0,
+      0.0,
+      0.0,
+      0.0
+     ],
+     "stroke_width": 0.0,
+     "corner_radius": 0.0,
+     "dashes": 0.0,
+     "dash_duty": 0.5,
+     "sweep_start": 0.0,
+     "sweep_turns": 1.0,
+     "blend": "over",
+     "layer": 5
+    },
+    "sindri.physics2d.collider": {
+     "pieces": [
+      {
+       "shape": {
+        "shape": "box",
+        "half_extents": [
+         0.4,
+         0.4
+        ]
+       },
+       "offset": [
+        0.0,
+        0.0
+       ],
+       "rotation": 0.0,
+       "sensor": false,
+       "layers": {
+        "memberships": 2,
+        "filter": 63
+       },
+       "friction": 0.5,
+       "restitution": 0.05
+      }
+     ]
+    },
+    "sindri.physics2d.rigid_body": {
+     "kind": "dynamic",
+     "pose": {
+      "position": [
+       0,
+       0
+      ],
+      "rotation": 0
+     },
+     "linear_velocity": [
+      0,
+      0
+     ],
+     "angular_velocity": 0,
+     "gravity_scale": 1.0,
+     "linear_damping": 0.05,
+     "angular_damping": 0.05,
+     "lock_rotation": false,
+     "continuous_collision": false
+    },
+    "sindri.script": {
+     "source": "scripts/parts.decay",
+     "script": "Part",
+     "properties": {
+      "toy": 1.0
+     }
+    },
+    "sindri.physics2d.material": {
+     "profile": "materials/wood.profile",
+     "override_friction": false,
+     "friction": 0.5,
+     "override_restitution": false,
+     "restitution": 0.0
+    },
+    "sindri.tags": {
+     "tags": [
+      "body",
+      "cargo"
+     ]
+    }
+   }
+  },
+  {
+   "id": "castle-2-1-1",
+   "name": "castle-2-1-1",
+   "transform_3d": {
+    "position": [
+     -14.2,
+     8.0,
+     0.2
+    ],
+    "rotation": [
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     0.8,
+     0.8,
+     1.0
+    ]
+   },
+   "components": {
+    "sindri.shape": {
+     "kind": "rect",
+     "count": 6.0,
+     "fill": [
+      0.69387,
+      0.35153,
+      0.13287,
+      1.0
+     ],
+     "stroke": [
+      0.0,
+      0.0,
+      0.0,
+      0.0
+     ],
+     "stroke_width": 0.0,
+     "corner_radius": 0.0,
+     "dashes": 0.0,
+     "dash_duty": 0.5,
+     "sweep_start": 0.0,
+     "sweep_turns": 1.0,
+     "blend": "over",
+     "layer": 5
+    },
+    "sindri.physics2d.collider": {
+     "pieces": [
+      {
+       "shape": {
+        "shape": "box",
+        "half_extents": [
+         0.4,
+         0.4
+        ]
+       },
+       "offset": [
+        0.0,
+        0.0
+       ],
+       "rotation": 0.0,
+       "sensor": false,
+       "layers": {
+        "memberships": 2,
+        "filter": 63
+       },
+       "friction": 0.5,
+       "restitution": 0.05
+      }
+     ]
+    },
+    "sindri.physics2d.rigid_body": {
+     "kind": "dynamic",
+     "pose": {
+      "position": [
+       0,
+       0
+      ],
+      "rotation": 0
+     },
+     "linear_velocity": [
+      0,
+      0
+     ],
+     "angular_velocity": 0,
+     "gravity_scale": 1.0,
+     "linear_damping": 0.05,
+     "angular_damping": 0.05,
+     "lock_rotation": false,
+     "continuous_collision": false
+    },
+    "sindri.script": {
+     "source": "scripts/parts.decay",
+     "script": "Part",
+     "properties": {
+      "toy": 1.0
+     }
+    },
+    "sindri.physics2d.material": {
+     "profile": "materials/wood.profile",
+     "override_friction": false,
+     "friction": 0.5,
+     "override_restitution": false,
+     "restitution": 0.0
+    },
+    "sindri.tags": {
+     "tags": [
+      "body",
+      "cargo"
+     ]
+    }
+   }
+  },
+  {
+   "id": "castle-lintel-2",
+   "name": "castle-lintel-2",
+   "transform_3d": {
+    "position": [
+     -15.8,
+     8.55,
+     0.2
+    ],
+    "rotation": [
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     4.0,
+     0.3,
+     1.0
+    ]
+   },
+   "components": {
+    "sindri.shape": {
+     "kind": "rect",
+     "count": 6.0,
+     "fill": [
+      0.26636,
+      0.10224,
+      0.02416,
+      1.0
+     ],
+     "stroke": [
+      0.0,
+      0.0,
+      0.0,
+      0.0
+     ],
+     "stroke_width": 0.0,
+     "corner_radius": 0.0,
+     "dashes": 0.0,
+     "dash_duty": 0.5,
+     "sweep_start": 0.0,
+     "sweep_turns": 1.0,
+     "blend": "over",
+     "layer": 5
+    },
+    "sindri.physics2d.collider": {
+     "pieces": [
+      {
+       "shape": {
+        "shape": "box",
+        "half_extents": [
+         2.0,
+         0.15
+        ]
+       },
+       "offset": [
+        0.0,
+        0.0
+       ],
+       "rotation": 0.0,
+       "sensor": false,
+       "layers": {
+        "memberships": 2,
+        "filter": 63
+       },
+       "friction": 0.5,
+       "restitution": 0.05
+      }
+     ]
+    },
+    "sindri.physics2d.rigid_body": {
+     "kind": "dynamic",
+     "pose": {
+      "position": [
+       0,
+       0
+      ],
+      "rotation": 0
+     },
+     "linear_velocity": [
+      0,
+      0
+     ],
+     "angular_velocity": 0,
+     "gravity_scale": 1.0,
+     "linear_damping": 0.05,
+     "angular_damping": 0.05,
+     "lock_rotation": false,
+     "continuous_collision": false
+    },
+    "sindri.script": {
+     "source": "scripts/parts.decay",
+     "script": "Part",
+     "properties": {
+      "toy": 1.0
+     }
+    },
+    "sindri.physics2d.material": {
+     "profile": "materials/wood.profile",
+     "override_friction": false,
+     "friction": 0.5,
+     "override_restitution": false,
+     "restitution": 0.0
+    },
+    "sindri.tags": {
+     "tags": [
+      "body",
+      "cargo"
+     ]
+    }
+   }
+  },
+  {
+   "id": "castle-crown",
+   "name": "castle-crown",
+   "transform_3d": {
+    "position": [
+     -15.8,
+     9.25,
+     0.25
+    ],
+    "rotation": [
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     1.1,
+     1.1,
+     1.0
+    ]
+   },
+   "components": {
+    "sindri.shape": {
+     "kind": "ellipse",
+     "count": 6.0,
+     "fill": [
+      1.0,
+      0.07819,
+      0.1912,
+      1.0
+     ],
+     "stroke": [
+      1.0,
+      0.6376,
+      0.71569,
+      1.0
+     ],
+     "stroke_width": 0.08,
+     "corner_radius": 0.0,
+     "dashes": 0.0,
+     "dash_duty": 0.5,
+     "sweep_start": 0.0,
+     "sweep_turns": 1.0,
+     "blend": "over",
+     "layer": 6
+    },
+    "sindri.physics2d.collider": {
+     "pieces": [
+      {
+       "shape": {
+        "shape": "circle",
+        "radius": 0.55
+       },
+       "offset": [
+        0.0,
+        0.0
+       ],
+       "rotation": 0.0,
+       "sensor": false,
+       "layers": {
+        "memberships": 4,
+        "filter": 63
+       },
+       "friction": 0.4,
+       "restitution": 0.5
+      }
+     ]
+    },
+    "sindri.physics2d.rigid_body": {
+     "kind": "dynamic",
+     "pose": {
+      "position": [
+       0,
+       0
+      ],
+      "rotation": 0
+     },
+     "linear_velocity": [
+      0,
+      0
+     ],
+     "angular_velocity": 0,
+     "gravity_scale": 1.0,
+     "linear_damping": 0.02,
+     "angular_damping": 0.05,
+     "lock_rotation": false,
+     "continuous_collision": false
+    },
+    "sindri.script": {
+     "source": "scripts/parts.decay",
+     "script": "Part",
+     "properties": {
+      "toy": 1.0
+     }
+    },
+    "sindri.physics2d.material": {
+     "profile": "materials/rubber.profile",
+     "override_friction": false,
+     "friction": 0.5,
+     "override_restitution": false,
+     "restitution": 0.0
+    },
+    "sindri.tags": {
+     "tags": [
+      "body",
+      "cargo"
+     ]
+    }
+   }
+  },
+  {
+   "id": "crane-rail",
+   "name": "crane-rail",
+   "transform_3d": {
+    "position": [
+     -16.0,
+     13.3,
+     0.35
+    ],
+    "rotation": [
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     26.0,
+     0.35,
+     1.0
+    ]
+   },
+   "components": {
+    "sindri.shape": {
+     "kind": "rect",
+     "count": 6.0,
+     "fill": [
+      0.04231,
+      0.0865,
+      0.15593,
+      1.0
+     ],
+     "stroke": [
+      0.27468,
+      0.43415,
+      0.62396,
+      1.0
+     ],
+     "stroke_width": 0.25,
+     "corner_radius": 0.0,
+     "dashes": 0.0,
+     "dash_duty": 0.5,
+     "sweep_start": 0.0,
+     "sweep_turns": 1.0,
+     "blend": "over",
+     "layer": 10
+    },
+    "sindri.physics2d.collider": {
+     "pieces": [
+      {
+       "shape": {
+        "shape": "box",
+        "half_extents": [
+         13.0,
+         0.17
+        ]
+       },
+       "offset": [
+        0.0,
+        0.0
+       ],
+       "rotation": 0.0,
+       "sensor": false,
+       "layers": {
+        "memberships": 1,
+        "filter": 0
+       },
+       "friction": 0.5,
+       "restitution": 0.0
+      }
+     ]
+    }
+   }
+  },
+  {
+   "id": "crane-trolley",
+   "name": "crane-trolley",
+   "transform_3d": {
+    "position": [
+     -20.0,
+     12.95,
+     0.45
+    ],
+    "rotation": [
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     1.2,
+     0.5,
+     1.0
+    ]
+   },
+   "components": {
+    "sindri.shape": {
+     "kind": "rect",
+     "count": 6.0,
+     "fill": [
+      1.0,
+      0.47353,
+      0.00091,
+      1.0
+     ],
+     "stroke": [
+      1.0,
+      0.87962,
+      0.53328,
+      1.0
+     ],
+     "stroke_width": 0.12,
+     "corner_radius": 0.0,
+     "dashes": 0.0,
+     "dash_duty": 0.5,
+     "sweep_start": 0.0,
+     "sweep_turns": 1.0,
+     "blend": "over",
+     "layer": 11
+    },
+    "sindri.physics2d.collider": {
+     "pieces": [
+      {
+       "shape": {
+        "shape": "box",
+        "half_extents": [
+         0.6,
+         0.25
+        ]
+       },
+       "offset": [
+        0.0,
+        0.0
+       ],
+       "rotation": 0.0,
+       "sensor": false,
+       "layers": {
+        "memberships": 2,
+        "filter": 0
+       },
+       "friction": 0.5,
+       "restitution": 0.0
+      }
+     ]
+    },
+    "sindri.physics2d.rigid_body": {
+     "kind": "dynamic",
+     "pose": {
+      "position": [
+       0,
+       0
+      ],
+      "rotation": 0
+     },
+     "linear_velocity": [
+      0,
+      0
+     ],
+     "angular_velocity": 0,
+     "gravity_scale": 0.0,
+     "linear_damping": 0.5,
+     "angular_damping": 0.0,
+     "lock_rotation": false,
+     "continuous_collision": false
+    },
+    "sindri.script": {
+     "source": "scripts/parts.decay",
+     "script": "Part",
+     "properties": {
+      "toy": 2.0
+     }
+    }
+   }
+  },
+  {
+   "id": "crane-slider",
+   "name": "crane-slider",
+   "transform_3d": {
+    "position": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "rotation": [
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     1.0,
+     1.0,
+     1.0
+    ]
+   },
+   "components": {
+    "sindri.physics2d.slider_joint": {
+     "first": "crane-rail",
+     "second": "crane-trolley",
+     "first_anchor": [
+      0.0,
+      0.0
+     ],
+     "second_anchor": [
+      0.0,
+      0.35
+     ],
+     "first_axis": [
+      1.0,
+      0.0
+     ],
+     "second_axis": [
+      1.0,
+      0.0
+     ],
+     "limits_enabled": true,
+     "lower_distance": -12.0,
+     "upper_distance": 12.0,
+     "motor_enabled": false,
+     "motor_mode": "velocity",
+     "motor_velocity": 0.0,
+     "motor_max_force": 0.0,
+     "motor_target_distance": 0.0,
+     "motor_stiffness": 0.0,
+     "motor_damping": 0.0
+    },
+    "sindri.script": {
+     "source": "scripts/parts.decay",
+     "script": "JointPart",
+     "properties": {
+      "toy": 2.0
+     }
+    },
+    "sindri.tags": {
+     "tags": [
+      "joint"
+     ]
+    }
+   }
+  },
+  {
+   "id": "crane-hook",
+   "name": "crane-hook",
+   "transform_3d": {
+    "position": [
+     -20.0,
+     11.0,
+     0.45
+    ],
+    "rotation": [
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     1.0,
+     1.0,
+     1.0
+    ]
+   },
+   "components": {
+    "sindri.physics2d.collider": {
+     "pieces": [
+      {
+       "shape": {
+        "shape": "box",
+        "half_extents": [
+         0.45,
+         0.12
+        ]
+       },
+       "offset": [
+        0.0,
+        0.0
+       ],
+       "rotation": 0.0,
+       "sensor": false,
+       "layers": {
+        "memberships": 2,
+        "filter": 63
+       },
+       "friction": 0.8,
+       "restitution": 0.0
+      },
+      {
+       "shape": {
+        "shape": "box",
+        "half_extents": [
+         0.08,
+         0.3
+        ]
+       },
+       "offset": [
+        -0.4,
+        -0.25
+       ],
+       "rotation": 0.0,
+       "sensor": false,
+       "layers": {
+        "memberships": 2,
+        "filter": 63
+       },
+       "friction": 0.8,
+       "restitution": 0.0
+      },
+      {
+       "shape": {
+        "shape": "box",
+        "half_extents": [
+         0.08,
+         0.3
+        ]
+       },
+       "offset": [
+        0.4,
+        -0.25
+       ],
+       "rotation": 0.0,
+       "sensor": false,
+       "layers": {
+        "memberships": 2,
+        "filter": 63
+       },
+       "friction": 0.8,
+       "restitution": 0.0
+      }
+     ]
+    },
+    "sindri.physics2d.rigid_body": {
+     "kind": "dynamic",
+     "pose": {
+      "position": [
+       0,
+       0
+      ],
+      "rotation": 0
+     },
+     "linear_velocity": [
+      0,
+      0
+     ],
+     "angular_velocity": 0,
+     "gravity_scale": 1.0,
+     "linear_damping": 0.3,
+     "angular_damping": 2.0,
+     "lock_rotation": false,
+     "continuous_collision": false
+    },
+    "sindri.script": {
+     "source": "scripts/parts.decay",
+     "script": "Part",
+     "properties": {
+      "toy": 2.0
+     }
+    },
+    "sindri.tags": {
+     "tags": [
+      "body"
+     ]
+    }
+   }
+  },
+  {
+   "id": "crane-hook-bar",
+   "name": "crane-hook-bar",
+   "parent": "crane-hook",
+   "transform_3d": {
+    "position": [
+     0,
+     0,
+     0.0
+    ],
+    "rotation": [
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     0.9,
+     0.24,
+     1.0
+    ]
+   },
+   "components": {
+    "sindri.shape": {
+     "kind": "rect",
+     "count": 6.0,
+     "fill": [
+      1.0,
+      0.47353,
+      0.00091,
+      1.0
+     ],
+     "stroke": [
+      1.0,
+      0.87962,
+      0.53328,
+      1.0
+     ],
+     "stroke_width": 0.1,
+     "corner_radius": 0.0,
+     "dashes": 0.0,
+     "dash_duty": 0.5,
+     "sweep_start": 0.0,
+     "sweep_turns": 1.0,
+     "blend": "over",
+     "layer": 12
+    }
+   }
+  },
+  {
+   "id": "crane-hook-left",
+   "name": "crane-hook-left",
+   "parent": "crane-hook",
+   "transform_3d": {
+    "position": [
+     -0.4,
+     -0.25,
+     0.0
+    ],
+    "rotation": [
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     0.16,
+     0.6,
+     1.0
+    ]
+   },
+   "components": {
+    "sindri.shape": {
+     "kind": "rect",
+     "count": 6.0,
+     "fill": [
+      1.0,
+      0.47353,
+      0.00091,
+      1.0
+     ],
+     "stroke": [
+      0.0,
+      0.0,
+      0.0,
+      0.0
+     ],
+     "stroke_width": 0.0,
+     "corner_radius": 0.0,
+     "dashes": 0.0,
+     "dash_duty": 0.5,
+     "sweep_start": 0.0,
+     "sweep_turns": 1.0,
+     "blend": "over",
+     "layer": 12
+    }
+   }
+  },
+  {
+   "id": "crane-hook-right",
+   "name": "crane-hook-right",
+   "parent": "crane-hook",
+   "transform_3d": {
+    "position": [
+     0.4,
+     -0.25,
+     0.0
+    ],
+    "rotation": [
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     0.16,
+     0.6,
+     1.0
+    ]
+   },
+   "components": {
+    "sindri.shape": {
+     "kind": "rect",
+     "count": 6.0,
+     "fill": [
+      1.0,
+      0.47353,
+      0.00091,
+      1.0
+     ],
+     "stroke": [
+      0.0,
+      0.0,
+      0.0,
+      0.0
+     ],
+     "stroke_width": 0.0,
+     "corner_radius": 0.0,
+     "dashes": 0.0,
+     "dash_duty": 0.5,
+     "sweep_start": 0.0,
+     "sweep_turns": 1.0,
+     "blend": "over",
+     "layer": 12
+    }
+   }
+  },
+  {
+   "id": "crane-cable",
+   "name": "crane-cable",
+   "transform_3d": {
+    "position": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "rotation": [
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     1.0,
+     1.0,
+     1.0
+    ]
+   },
+   "components": {
+    "sindri.physics2d.spring_joint": {
+     "first": "crane-trolley",
+     "second": "crane-hook",
+     "first_anchor": [
+      0.0,
+      -0.25
+     ],
+     "second_anchor": [
+      0.0,
+      0.12
+     ],
+     "rest_length": 1.4,
+     "stiffness": 90.0,
+     "damping": 6.0
+    },
+    "sindri.script": {
+     "source": "scripts/parts.decay",
+     "script": "JointPart",
+     "properties": {
+      "toy": 2.0
+     }
+    },
+    "sindri.tags": {
+     "tags": [
+      "joint"
+     ]
+    }
+   }
+  },
+  {
+   "id": "crane-cable-line",
+   "name": "crane-cable-line",
+   "transform_3d": {
+    "position": [
+     0,
+     0,
+     0.0
+    ],
+    "rotation": [
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     1,
+     0.06,
+     1.0
+    ]
+   },
+   "components": {
+    "sindri.shape": {
+     "kind": "rect",
+     "count": 6.0,
+     "fill": [
+      0.67954,
+      0.76815,
+      0.87137,
+      1.0
+     ],
+     "stroke": [
+      0.0,
+      0.0,
+      0.0,
+      0.0
+     ],
+     "stroke_width": 0.0,
+     "corner_radius": 0.0,
+     "dashes": 0.0,
+     "dash_duty": 0.5,
+     "sweep_start": 0.0,
+     "sweep_turns": 1.0,
+     "blend": "over",
+     "layer": 10
+    }
+   }
+  },
+  {
+   "id": "crane-grip",
+   "name": "crane-grip",
+   "transform_3d": {
+    "position": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "rotation": [
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     1.0,
+     1.0,
+     1.0
+    ]
+   },
+   "components": {}
+  },
+  {
+   "id": "crane-grip-line",
+   "name": "crane-grip-line",
+   "transform_3d": {
+    "position": [
+     0,
+     0,
+     0.0
+    ],
+    "rotation": [
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     1,
+     0.08,
+     1.0
+    ]
+   },
+   "components": {
+    "sindri.shape": {
+     "kind": "rect",
+     "count": 6.0,
+     "fill": [
+      1.0,
+      0.47353,
+      0.00091,
+      1.0
+     ],
+     "stroke": [
+      0.0,
+      0.0,
+      0.0,
+      0.0
+     ],
+     "stroke_width": 0.0,
+     "corner_radius": 0.0,
+     "dashes": 0.0,
+     "dash_duty": 0.5,
+     "sweep_start": 0.0,
+     "sweep_turns": 1.0,
+     "blend": "over",
+     "layer": 10
+    }
+   }
+  },
+  {
+   "id": "crane-control",
+   "name": "crane-control",
+   "transform_3d": {
+    "position": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "rotation": [
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     1.0,
+     1.0,
+     1.0
+    ]
+   },
+   "components": {
+    "sindri.script": {
+     "source": "scripts/toys.decay",
+     "script": "Crane",
+     "properties": {}
+    }
+   }
+  },
+  {
    "id": "hud",
    "name": "hud",
    "transform_3d": {

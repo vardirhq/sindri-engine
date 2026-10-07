@@ -82,7 +82,7 @@ and a 3D ray that reports what it hits.
 ## Checklist
 
 - [ ] Room, camera and pointer mapping, tools, global controls and HUD
-- [ ] Wrecking ball and gantry crane
+- [x] Wrecking ball and gantry crane
 - [ ] Cannon and glass gallery
 - [ ] Ball lift, hopper, bumper pit and flippers
 - [ ] Material lab, seesaw and trampoline

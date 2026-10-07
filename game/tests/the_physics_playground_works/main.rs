@@ -155,3 +155,109 @@ fn reset_puts_the_room_back() {
         "{back:?}"
     );
 }
+
+fn turn(playground: &Playground, name: &str) -> f32 {
+    let rotation = playground
+        .world
+        .world_transform(playground.id(name))
+        .expect("a transform")
+        .rotation;
+    2.0 * rotation[2].atan2(rotation[3])
+}
+
+#[test]
+fn the_wrecking_ball_winds_up_swings_through_the_castle_and_can_be_cut_loose() {
+    let mut playground = open();
+    playground.key(Key::E);
+    assert_eq!(playground.text("toy-label"), "WRECKING BALL");
+    playground.key(Key::Digit1);
+    playground.play(240);
+    assert!(
+        turn(&playground, "wreck-arm") < -1.0,
+        "{}",
+        turn(&playground, "wreck-arm")
+    );
+    let crown = playground.at("castle-crown");
+    playground.key(Key::Digit2);
+    playground.play(150);
+    let fallen = playground.at("castle-crown");
+    assert!(
+        fallen[1] < crown[1] - 2.0,
+        "the castle came down: {crown:?} -> {fallen:?}"
+    );
+    playground.key(Key::Digit1);
+    playground.play(120);
+    playground.key(Key::Digit3);
+    playground.play(60);
+    assert!(said("wrecking ball cut loose"));
+    let ball = playground.at("wreck-arm");
+    assert!(ball[1] < 4.0, "fell when cut: {ball:?}");
+    playground.key(Key::Digit4);
+    playground.play(5);
+    let back = playground.at("castle-crown");
+    assert!((back[1] - crown[1]).abs() < 0.2, "rebuilt: {back:?}");
+}
+
+fn hold(playground: &mut Playground, key: Key, steps: usize) {
+    playground
+        .input
+        .apply(sindri_platform::InputEvent::KeyPressed(key));
+    playground.play(steps);
+    playground
+        .input
+        .apply(sindri_platform::InputEvent::KeyReleased(key));
+    playground.play(2);
+}
+
+#[test]
+fn the_crane_drives_lowers_grabs_the_crown_and_lifts_it_off_the_castle() {
+    let mut playground = open();
+    playground.key(Key::E);
+    playground.key(Key::E);
+    assert_eq!(playground.text("toy-label"), "GANTRY CRANE");
+    let crown = playground.at("castle-crown");
+    let start = playground.at("crane-trolley");
+    while playground.at("crane-trolley")[0] < crown[0] - 0.6 {
+        hold(&mut playground, Key::Digit2, 3);
+        assert!(
+            playground.at("crane-trolley")[0] < start[0] + 12.0,
+            "drove past"
+        );
+    }
+    assert!(
+        (playground.at("crane-trolley")[1] - start[1]).abs() < 0.05,
+        "stays on its rail"
+    );
+    playground.play(60);
+    playground.play(120);
+    playground.key(Key::Digit3);
+    playground.play(150);
+    let hook = playground.at("crane-hook");
+    assert!(
+        hook[1] < crown[1] + 1.6,
+        "lowered onto the castle: {hook:?} over {crown:?}"
+    );
+    playground.key(Key::Digit4);
+    assert!(said("crane grabbed"), "found the crown under the hook");
+    playground.key(Key::Digit3);
+    playground.play(120);
+    let lifted = playground.at("castle-crown");
+    assert!(
+        lifted[1] > crown[1] + 0.5,
+        "lifted off the lintel: {crown:?} -> {lifted:?}"
+    );
+    hold(&mut playground, Key::Digit1, 60);
+    playground.play(60);
+    let carried = playground.at("castle-crown");
+    assert!(
+        carried[0] < crown[0] - 2.5,
+        "carried along the girder: {carried:?}"
+    );
+    playground.key(Key::Digit4);
+    assert!(said("crane dropped"));
+    playground.play(90);
+    assert!(
+        playground.at("castle-crown")[1] < carried[1] - 2.0,
+        "fell when dropped"
+    );
+}
