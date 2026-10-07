@@ -786,10 +786,11 @@ biome plus saved edits; native and browser generation agree from the seed.
 
 ## Agent-native authoring
 
-Sindri does not build its own AI agent; it makes a project something any coding
-agent can work in, through docs it can trust, checks it can run, and a way to
-see the result. The files are the interface, so there is no mutation CLI or MCP
-tool set ahead of evidence. See `docs/agent-native-direction.md`.
+Two agents stand on one foundation: external coding agents for people who use
+one, and a narrow local agent in the editor for people who do not. The
+foundation is docs an agent can trust, checks it can run, and a way to see the
+result. The files are the interface, so there is no mutation CLI or MCP tool
+set ahead of evidence. See `docs/agent-native-direction.md`.
 
 - [ ] `sindri project check --format json` over scenes, prefabs, Weave, Decay and `sindri.toml`, with diagnostics raised by the crate that found them, naming the file and the JSON path or source span. `SceneDocument::validate`, `ComponentSchemaRegistry::validate_scene` and `decay-lsp --check --json` already exist and are the parts it composes
 - [ ] Generate JSON Schemas for `.scene` and `.prefab` files from the component registry into `docs/generated/`, carrying the format version they describe
@@ -798,10 +799,15 @@ tool set ahead of evidence. See `docs/agent-native-direction.md`.
 - [ ] The editor reloads a scene changed on disk when it has no unsaved edits, and asks when it has; scripts, textures, prefabs and Weave styles are already watched
 - [ ] `sindri new` writes a short per-project agent guide pointing at the workflow and generated documents, also packaged as a skill for agents that load them
 - [ ] An external-agent benchmark in `tools/ai-authoring-eval`: unmodified agents given a fresh project and fixed tasks, graded by `sindri project check` and a headless run, with the pass rate per agent recorded
+- [ ] Local agent: write one Decay script from a description, through the same draft, check and bounded-repair loop as Decay repair, shown as a diff and applied on acceptance
+- [ ] Local agent: add or change components on the selected entity through the proposal protocol, validated by the same scene checks as `sindri project check`, applied as one undo step
+- [ ] Local agent: explain a `sindri project check` failure in the editor
+- [ ] A local-model column in the benchmark for the tasks the local agent is meant to do
 
 Exit gate: an unmodified external agent, given a fresh project and only what
 `sindri new` writes, completes the benchmark's tasks with every change passing
-`sindri project check` and its headless run.
+`sindri project check` and its headless run; and the local agent passes its
+narrower tasks under the same checks.
 
 ## Explicitly deferred beyond the first major release
 
@@ -814,5 +820,5 @@ Exit gate: an unmodified external agent, given a fresh project and only what
 - [ ] Visual scripting or shader graphs
 - [ ] Plugin marketplace
 - [ ] Cloud services
-- [ ] In-editor AI assistance beyond local setup and Decay repair; external agents are the supported path (`docs/agent-native-direction.md`)
+- [ ] In-editor AI beyond the narrow local agent (multi-file features, project exploration, general chat); external agents are the supported path for those (`docs/agent-native-direction.md`)
 - [ ] Faster component storage: typed queries clone and deserialize each JSON payload, which `docs/entity-scaling.md` measured as the slowest part of reading a world and named as the thing to fix if any of it ever matters

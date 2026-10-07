@@ -1,16 +1,18 @@
 # Agent-native authoring
 
 **Status:** Accepted direction  
-**Scope:** How Sindri supports AI coding agents (Claude Code, Codex, and whatever follows them)  
+**Scope:** How Sindri supports AI coding agents: external ones (Claude Code, Codex, and whatever follows them) and its own local one  
 **Last updated:** 2026-10-07
 
 ## The decision
 
-Sindri does not build its own AI agent. People bring the agent they already
-use, and Sindri makes sure that agent can work in a Sindri project without
-having seen Sindri before.
+Sindri does not compete with general coding agents. People who use one bring
+it, and Sindri makes sure it can work in a Sindri project without having seen
+Sindri before. People who do not — no subscription, no terminal, no account —
+get a smaller local agent inside the editor. Both agents stand on the same
+foundation, so building it once serves both.
 
-That takes three things:
+That foundation is three things:
 
 1. **Docs an agent can trust** — mostly generated from the engine, so they
    cannot describe calls that do not exist.
@@ -19,7 +21,8 @@ That takes three things:
 3. **A way to see the result** — run the game headless and read its log and
    frames, because a valid project can still behave wrongly.
 
-Everything else here explains why this is enough, and what it deliberately
+Everything else here explains why this is enough, how the two agents divide
+the work, and what it deliberately
 leaves out.
 
 ## Why the files are the interface
@@ -40,7 +43,7 @@ for a person: which components exist, what a field may hold, whether a
 reference resolves, and what the game does when it runs. That is the gap this
 direction closes.
 
-## Why not an in-editor assistant
+## Two agents, one foundation
 
 General agents improve faster than anything Sindri could embed, and competing
 with them means owning providers, keys, context management, tool loops and a
@@ -48,12 +51,50 @@ chat interface — none of which is game-engine work. An external agent also
 settles the provider question for free: the model is whichever one the person
 already pays for or runs.
 
-The local assistant described in
-[`local-ai-architecture.md`](local-ai-architecture.md) stays, at its current
-scope: guided local setup and compiler-verified **Decay repair**. It serves
-someone who wants help without an account, a subscription or a terminal, which
-an external agent does not. It does not grow into a general chat assistant, and
-new AI work goes into the three pieces below first.
+But not everyone pays for Claude or Codex, or wants a terminal. For them the
+editor hosts a **local agent**: the managed llama.cpp runner and pinned model
+described in [`local-ai-architecture.md`](local-ai-architecture.md), with no
+account, key or usage cost.
+
+The two are not separate systems. The local agent is another consumer of the
+foundation below: it reads the same generated documents, changes the same
+files, and its work is judged by the same `sindri project check` and headless
+run. The editor only hosts the loop and shows the diff. So:
+
+- every improvement to the docs and checks helps Claude, Codex and the local
+  model at once;
+- there is one trust model — whatever an agent proposes, the checks decide;
+- the checks are what make a small model usable. Decay repair already works
+  this way: draft, compile, at most two repairs, and only an answer that
+  compiles is shown. A project-wide check widens that loop from one script to
+  a whole project.
+
+### What each agent does
+
+A 7B-class local model cannot do what an external agent does: explore a
+project, plan across many files, and recover from its own mistakes. So the
+local agent is deliberately narrow, as `local-ai-architecture.md` argues —
+small context, one focused task, typed output:
+
+| Task | Local agent | External agent |
+| --- | --- | --- |
+| Fix a Decay compile error | ✅ Exists today | ✅ |
+| Write one script from a description | Next | ✅ |
+| Add or change components on the selected entity | Planned, through the [proposal protocol](ai-authoring-protocol.md) | ✅ Edits the scene file |
+| Explain a check failure | Planned | ✅ |
+| A feature across several files ("make the player dash on Shift, with a cooldown and a trail") | ❌ | ✅ |
+| Explore and refactor a project | ❌ | ✅ |
+
+The local agent's changes are always shown as a diff and applied only on
+acceptance, as one undo step. It does not become a general chat assistant; a
+task that needs one is the external agent's.
+
+### Sequencing
+
+The local agent gets better as the foundation does, so its new work follows
+the foundation rather than running beside it: writing a script from a
+description needs the checks to grade it, and entity edits need the scene
+checks the proposal protocol's validator would otherwise duplicate.
 
 A note on Unity, since it prompted this: Unity is pursuing two things at once.
 Unity Spark is a browser-based prompt-to-game tool for Google's Playground,
@@ -181,7 +222,7 @@ cannot be done safely says what it needs rather than guessing.
   benchmark below shows agents failing for lack of it, and then route changes
   through the existing proposal protocol so they stay previewable and one undo
   step.
-- **A general in-editor chat assistant.**
+- **A general in-editor chat assistant.** The local agent stays narrow.
 
 **The one likely exception** is data that is text but unpleasant to edit
 positionally: flat tilemap cell arrays, voxel data, quaternions, sprite-sheet
@@ -207,5 +248,9 @@ run. The pass rate, per agent, is the number that decides what to build next.
 4. The editor reloads a scene changed on disk.
 5. A per-project agent guide written by `sindri new`, packaged as a skill.
 6. The external-agent benchmark, after which its failures order the rest.
+7. The local agent on the same checks: writing one script from a description,
+   then selected-entity edits through the proposal protocol, then explaining a
+   check failure. The benchmark gains a local-model column for the tasks the
+   local agent is meant to do.
 
 These are tracked under *Agent-native authoring* in `ROADMAP.md`.

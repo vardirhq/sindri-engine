@@ -62,10 +62,10 @@ valuable explanations of how bugs escaped code review, but
 ## AI and coding agents
 
 - [Agent-native authoring](agent-native-direction.md) — the accepted direction:
-  external agents, generated docs, project checks, headless play
+  external agents and a local one on shared docs, checks and headless play
 - [Decay agent guide](decay-agent-guide.md)
 - [Local-first AI authoring architecture](local-ai-architecture.md) — the
-  in-editor local assistant and its Decay repair
+  narrow local agent in the editor
 - [AI authoring protocol](ai-authoring-protocol.md)
 
 ## Decay

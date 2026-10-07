@@ -8,8 +8,9 @@
 > **Scope (2026-10-07).** External coding agents do not use this protocol: they
 > edit project files and validate them with Sindri's checks, and git is their
 > undo (see [`agent-native-direction.md`](agent-native-direction.md)). The
-> protocol remains the boundary for the local in-editor assistant, and for any
-> future live-editor bridge, whose changes must stay inert, previewable and one
+> protocol remains the boundary for the local in-editor agent's entity edits,
+> validated by the same checks as `sindri project check`, and for any future
+> live-editor bridge, whose changes must stay inert, previewable and one
 > undo step.
 
 ## Purpose

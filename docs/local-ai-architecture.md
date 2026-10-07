@@ -6,14 +6,16 @@
 **Secondary target:** Optional user-configured cloud providers  
 **Last updated:** 2026-10-07
 
-> **Direction (2026-10-07).** Sindri's primary AI path is now external coding
-> agents working on project files, supported by generated docs, project checks
-> and headless play — see [`agent-native-direction.md`](agent-native-direction.md).
-> This document's in-editor assistant keeps its current scope, guided local
-> setup and Decay repair, for people who want help without an account or a
-> terminal. The later phases below (multi-entity scene composition, vision and
-> cloud adapters, a general chat assistant) are not being pursued unless that
-> direction changes.
+> **Direction (2026-10-07).** Sindri supports two agents on one foundation —
+> external coding agents and this local one — described in
+> [`agent-native-direction.md`](agent-native-direction.md). Both are judged by
+> the same generated docs, `sindri project check` and headless play. This
+> local agent is deliberately narrow: Decay repair (exists), writing one script
+> from a description, selected-entity edits through the proposal protocol, and
+> explaining a check failure. Its next work follows the shared checks rather
+> than building validation of its own. Multi-entity scene composition, a
+> general chat assistant, and vision and cloud adapters are not pursued here:
+> tasks of that size belong to external agents.
 
 > **Implemented so far (2026-09-27).** One slice of Phase 4, ahead of the
 > proposal protocol this document says to build first: **Decay repair**. It

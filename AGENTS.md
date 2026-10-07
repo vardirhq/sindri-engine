@@ -112,7 +112,8 @@ These documents govern the work:
 - `docs/cli-conventions.md` — the grammar and contracts the `sindri` CLI and
   its generated capability documents follow.
 - `docs/agent-native-direction.md` — how Sindri supports external coding agents
-  (generated docs, project checks, headless play) instead of an embedded agent.
+  and its own narrow local agent on one foundation: generated docs, project
+  checks, and headless play.
 - `docs/project-format.md` — what a project is, and what `sindri.toml` holds.
 - `docs/scripting.md` and `decay/LANGUAGE.md` — scripting contracts.
 - `docs/decay-agent-guide.md` — mandatory preflight and runtime-contract checklist
