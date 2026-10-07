@@ -613,6 +613,12 @@ jobs:
           cargo run --quiet --package sindri-export --bin sindri-export -- \
             games/low-tide target/dist/low-tide --base /examples/low-tide/
           cp -R game/pkg/. target/dist/low-tide/pkg/
+          # Keep the shipped gameplay/starting pose and add read-only telemetry
+          # for a real keyboard-driven run to the platformer's goal.
+          python3 scripts/browser/prepare-platformer.py target/browser-platformer
+          cargo run --quiet --package sindri-export --bin sindri-export -- \
+            target/browser-platformer target/dist/platformer-goal --base /examples/platformer/
+          cp -R game/pkg/. target/dist/platformer-goal/pkg/
       - name: Smoke the rendered games
         id: browser_smoke
         run: |
@@ -684,6 +690,9 @@ jobs:
             SINDRI_BASE_PATH=/examples/low-tide/ \
             SINDRI_VIEWPORT_WIDTH=390 SINDRI_VIEWPORT_HEIGHT=844 \
             node scripts/browser/smoke.mjs target/dist/low-tide target/render-artifacts/browser-low-tide-phone.png
+          SINDRI_EXPECT_ASSETS=1 SINDRI_PLATFORMER_GOAL=1 \
+            SINDRI_BASE_PATH=/examples/platformer/ \
+            node scripts/browser/smoke.mjs target/dist/platformer-goal target/render-artifacts/browser-platformer-goal.png
       - name: Smoke the startup failure paths
         id: browser_failures
         run: |

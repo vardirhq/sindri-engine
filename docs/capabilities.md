@@ -2695,7 +2695,8 @@ The platformer now adopts the controller through its real Hero script: native
 regressions reach the flag with coins and no falls, traverse/drop through planks,
 and exercise variable jump height, acceleration/braking and respawn. The dynamic
 crate retains CCD and contact-impulse proof. Native editor authoring/undo/Play
-is reviewed; browser goal proof remains open and character acceptance stays partial.
+is reviewed; the browser goal gate now exercises the normal spawn and keyboard
+controls through the flag with coins and no falls.
 Two authored stone risers and an inclined boardwalk now exercise accepted steps,
 walkable ascent and downhill snap through the Hero script without jumping.
 Control tests disable stepping or lower the slope limit to show the same terrain
@@ -2712,12 +2713,22 @@ initially aboard and renders riding in both directions and a keyboard jump.
 This is moving-platform translation proof for the genre showcase; rotation and
 carry clipping retain engine/scene test evidence. Native editor proof is recorded
 in [the character review](physics-character-editor-review.md);
-browser goal proof remains open.
+browser goal proof is exercised by the normal-spawn keyboard gate.
 
 Native Character 2D editor review exercises every setting, snap undo/redo,
 save/reopen, add/remove through checked commands and restoring custom settings.
 The reopened platformer runs/jumps in Play with a read-only inspector; Save
 refuses during Play and file hashes confirm Stop restores the document.
 See [the repeatable review](physics-character-editor-review.md). This is editor
-proof rather than a new implementation; browser goal and final-head acceptance
-remain open.
+proof rather than a new implementation. The browser goal gate completes the 2D
+character acceptance; final-head physics integration remains open.
+
+The exported platformer now has a CI browser goal regression. A scratch copy adds
+one read-only Decay observer and retains the shipped starting pose and scripts.
+Playwright drives ordinary movement/jump keyboard events using the native goal
+player's terrain decisions, waiting for an observed release between jumps.
+The gate asserts the flag, at least three coins and zero falls, and preserves
+asset-fetch, WebGPU, pixel and script-error checks. Repeated local Chromium runs
+collected five coins with eight jumps and no falls. This completes the 2D
+controller proof for the genre showcase; it does not supply a 3D controller or
+close the separately documented compound/solver/trigger/carry limitations.

@@ -13,6 +13,7 @@ import { extname, join, normalize, resolve } from 'node:path';
 import { imageStatistics } from './png.mjs';
 import { physicsDemo } from './physics-demo.mjs';
 import { freshUiEvidence, uiDemo, uiDemoEvidence } from './ui-demo.mjs';
+import { platformerGoal, platformerState } from './platformer-goal.mjs';
 
 const ROOT = resolve(process.argv[2] ?? 'examples/cube');
 const SHOT = process.argv[3];
@@ -145,6 +146,7 @@ let spatialChanges = 0;
 const inputEvidence = { boosts: 0, waiting: false, rebound: '' };
 const mixerSaid = [];
 const fetchedAssets = new Set();
+const platformerEvidence = { latest: null };
 // A shader that fails to compile is reported by the GPU implementation as a
 // console *warning*, not an error, and the page carries on and presents empty
 // frames. Collecting only errors is how a build whose every shape and glyph
@@ -152,6 +154,7 @@ const fetchedAssets = new Set();
 const GPU_REJECTION = /error while parsing wgsl|is invalid|must only be called/i;
 page.on('console', (message) => {
   const text = message.text();
+  if (process.env.SINDRI_PLATFORMER_GOAL === '1') platformerState(platformerEvidence, text);
   uiDemoEvidence(uiEvidence, text);
   const ray = text.match(/Physics ray (.+)$/);
   if (ray) physicsEvidence.results.add(ray[1]);
@@ -254,6 +257,10 @@ const loadingStuck =
   hasLoadingScreen && (await page.evaluate(() => Boolean(document.querySelector('#sindri-loading'))));
 // Then a moment to draw a frame or two into the canvas it just sized.
 await page.waitForTimeout(1500);
+
+if (process.env.SINDRI_PLATFORMER_GOAL === '1') {
+  await platformerGoal(page, ROOT, platformerEvidence, problems);
+}
 
 if (process.env.SINDRI_PHYSICS_DEMO === '1') {
   await physicsDemo(page, VIEWPORT, physicsEvidence, problems);

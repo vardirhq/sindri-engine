@@ -28,7 +28,7 @@ The remaining items below are the active scope.
   literal override rules, asset loading in editor and exported games.
 - [x] Joints: scene-authored distance, hinge, slider, spring and motor controls;
   stable entity references, lifecycle/removal, editor undo, Decay access and proof.
-- [ ] Character movement: reusable sweep/slide collision primitive, slopes,
+- [x] 2D character movement: reusable sweep/slide collision primitive, slopes,
   steps, ground state and moving platforms; gameplay policy remains Decay.
 - [ ] Accelerated queries: synchronized spatial index, unchanged filtering and
   deterministic tie rules, immediate body moves/removals and scaling evidence.
@@ -1005,3 +1005,27 @@ surface-specific completeness. This checklist does not mark those surfaces done.
   acceptance remains unchecked until browser goal proof/final verification.
   Prior ferry CI has no failures, with its test/render job still running at the
   last inspection. The next head requires CI verification.
+
+
+## Browser character goal checkpoint
+
+- The CI browser job now exports a scratch copy of the shipped platformer with
+  one read-only Decay observer. Its normal spawn, Hero script and terrain are
+  unchanged. Playwright drives ArrowRight/Space using the native goal player's
+  terrain decisions and waits for an observed release between jumps.
+- Three fresh Chromium/WebGPU runs reached the flag with five coins, eight jumps
+  and zero falls (11.533, 11.467 and 11.367 simulated seconds). Each fetched 27
+  assets under `/examples/platformer/`, configured a 960×540 canvas and passed
+  pixel/script/GPU checks. The final capture shows the win message and flag.
+- The permanent gate requires at least three coins and no falls within 90 wall
+  seconds. It never writes game state or supplies browser-specific game rules.
+- Scoped preflight passed formatting, file sizes, warning-denied platformer
+  check, all 37 native tests and typed observer preflight with zero errors or
+  runtime-contract reminders. Node helper/smoke syntax, Python fixture syntax
+  and workflow YAML parsing passed. Host binaries are unchanged from the typed
+  controller checkpoint; the new observer ran in the real WASM host.
+- This completes the 2D character acceptance together with the existing engine,
+  scene, Decay, game and native editor evidence. A 3D controller and the explicit
+  compound/solver/trigger/carry gaps remain absent. Prior head `1ea225dd` passed
+  every CI check; CI must verify this new checkpoint. Accelerated queries,
+  3D/voxel physics and full final integration remain unchecked.

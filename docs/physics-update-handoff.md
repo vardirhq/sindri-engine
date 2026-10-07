@@ -140,13 +140,18 @@ was unchanged. Procedure/results: `docs/physics-character-editor-review.md`.
 Captures: `/tmp/sindri-joint-review-character-*.png`; build/runtime logs and
 observations: `/tmp/sindri-character-editor*`; scratch project:
 `/tmp/sindri-character-editor-project`. Owned editor/Xvfb processes were stopped.
-This is a documentation/evidence checkpoint, with no implementation or assets
-changed. Editor parity is exercised; character acceptance stays unchecked until
-browser goal proof and final verification. Continue with a real browser run to
-the flag. Accelerated queries, 3D/voxel physics and final integration follow;
-gameplay snapshots remain absent. Ferry head `da9a5328` has no failed jobs;
-test/render CI was still running at the last inspection. Inspect every failed
-job on the current head if CI fails.
+The browser goal checkpoint completes 2D character acceptance. A permanent CI
+fixture copies the normal shipped platformer and adds a read-only Decay observer;
+Playwright uses real keyboard events to reach the flag, requiring at least three
+coins and no falls. Repeated local runs collected five coins and eight jumps.
+The player waits for an observed jump release before the next press; releasing
+and pressing in one browser frame previously lost the action edge. Source:
+`scripts/browser/prepare-platformer.py`, `platformer-goal.mjs`, the smoke hook and
+`games/platformer/tests/browser_goal.decay`. See the browser proof section in
+`docs/character-movement.md` for the CI reproduction.
+Continue with accelerated queries, then 3D/voxel physics and final integration.
+Gameplay snapshots and a 3D character controller remain absent. Inspect every
+failed job on the current PR head before changing code if CI fails.
 
 CCD, one-way platforms, **forces and rotation**, **contact snapshots**, and
 **reusable physics materials** are implemented in this PR. The checklist in `physics-update.md` is current.

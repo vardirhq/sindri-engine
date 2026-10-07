@@ -2,14 +2,14 @@
 
 Status: geometric sweep/slide, ground probing, grounded snapping, slope
 limits, optional steps, synchronized platform carry, one-way controller policy
-and scene runtime ownership implemented; acceptance remains open in
+and scene runtime ownership implemented; 2D acceptance is complete in
 `physics-update.md`. Added for the platformer genre showcase, whose Hero script
 now uses the controller. Authored low steps and an inclined boardwalk exercise
 step selection, walkable ascent and downhill snap. A one-way plank ferry across
 the first gap exercises solved translation carry, reversal, boarding, jump/landing
 and drop-through. Native editor authoring/undo/save/reopen/Play is exercised in
-[the editor review](physics-character-editor-review.md); browser goal acceptance
-remains open.
+[the editor review](physics-character-editor-review.md). The exported platformer
+reaches its flag through real Chromium keyboard input with five coins and no falls.
 
 ## Ownership
 
@@ -170,8 +170,8 @@ This general policy is exercised by the platformer's inclined boardwalk through
 its real Hero script. Native tests climb and snap down it without jumping, then
 lower the slope limit and disable steps to show the same incline blocks walking.
 Native editor authoring/undo/save/reopen/Play is exercised in
-[the editor review](physics-character-editor-review.md); browser goal acceptance
-remains open.
+[the editor review](physics-character-editor-review.md). The exported platformer
+reaches its flag through real Chromium keyboard input with five coins and no falls.
 
 ## Implemented steps and clearance
 
@@ -420,17 +420,33 @@ sensors preserve pickups. Native runs reach the flag with coins and no falls,
 traverse/drop through one-way planks, and check variable jump height, braking
 and respawn. The dynamic crate retains CCD and contact-impulse proof.
 
-## Remaining slices
+## Browser goal proof
 
-Native editor component add/remove, settings, undo/redo, save/reopen and Play/Stop
-are exercised in [the editor review](physics-character-editor-review.md). Browser
-goal proof remains open. Authored
-game slopes, steps and ferry translation carry have native and browser input
-coverage. Typed requests/results, shared host context and native
-platformer adoption are implemented; coyote time, jump buffering and player input
-remain gameplay policy in Decay. Browser delivery checks exercise the exported
-game, but a browser run to the goal is still required alongside these remaining
-slices before checking character acceptance.
+The CI browser job copies the shipped platformer with
+`scripts/browser/prepare-platformer.py`, exports it through `sindri-export`, then
+runs `scripts/browser/smoke.mjs` with `SINDRI_PLATFORMER_GOAL=1`,
+`SINDRI_EXPECT_ASSETS=1` and `SINDRI_BASE_PATH=/examples/platformer/`.
+The copy adds only `tests/browser_goal.decay`, a read-only observer. The normal
+starting pose, terrain and gameplay scripts remain intact. The observer reports
+completed movement, coins, falls, win state and held jump input; Playwright sends
+ordinary ArrowRight/Space events using the native goal test's terrain decisions.
+It waits for gameplay to observe a jump release before pressing again, so two
+input edges cannot collapse into one browser frame.
+
+The goal gate requires at least three coins, no falls and the flag within a
+90-second wall-clock budget. It also retains the smoke checks for fetched assets,
+WebGPU, rendered pixels and script/GPU errors, and captures the win screen.
+Local repeated Chromium runs reached the flag with five coins and eight jumps;
+no game-state writes or browser-only gameplay rules were added.
+
+## Remaining limitations
+
+The 2D controller slice is exercised in the engine, native editor, typed Decay
+hosts and the platformer on native and browser targets. Gravity, coyote time,
+jump buffering and player input remain Decay policy. Compound solid probes,
+same-step solver response, swept trigger events and curved/rotating-probe carry
+remain explicit gaps in parity. A 3D character controller is absent; the wider
+physics update still requires accelerated queries, 3D physics and final integration.
 
 ## Foundation evidence
 
