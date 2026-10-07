@@ -1,35 +1,28 @@
 # Physics Playground
 
-A feature example, authored entirely in Decay and scene components. Open
-`sindri.toml` in the editor or export it through `sindri-export`.
+A feature example and a toybox: one room full of contraptions that show what
+Sindri's physics can do, and tools to poke them with. Authored entirely in
+scene data, Decay and Weave. Open `sindri.toml` in the editor or export it
+with `sindri-export examples/physics`.
 
-The cyan ray shows the closest collider hit, the yellow dot its point and the
-green line its normal. A blue trigger flashes when falling bodies enter it.
-Orange bodies fall and bounce using the scene's gravity and restitution.
+The design and its checklist are in
+[`docs/physics-playground.md`](../../docs/physics-playground.md). The scene,
+prefabs and material profiles are written by
+`scripts/physics_playground/generate.py`; edit the numbers there and run it
+again rather than editing the generated files.
 
-The query button (C) switches what the cyan line asks:
+## Controls
 
-- Ray: `Physics.raycast`, the closest piece the line meets.
-- Circle cast: `Physics.cast_circle`, a circle of radius 0.35 swept along the
-  same line. The ring shows where it stops, which is sooner than the ray, and
-  a gap the ray slips through can stop it.
-- Area: `Physics.overlap_circle`, every object inside a ring of radius 1 at
-  the line's far end, each named once.
+| Key | Button | What it does |
+| --- | --- | --- |
+| G / B / N / P | GRAB, BLAST, SPAWN, PROBE | Choose what the pointer does. N again picks what SPAWN drops. |
+| Q / E | < > | Fly to the previous or next contraption, or back to the whole room. |
+| 1-4 | The four action buttons | Work the selected contraption. |
+| X | DROP EVERYTHING | Every joint lets go. Again puts them back. |
+| O | 100 BALLS | Pours a hundred balls in from the ceiling. |
+| V | GRAVITY | Earth, moon, zero-g, upside down, sideways. |
+| I | DEBUG | Draws colliders, contacts, velocities and joints. |
+| R | RESET | Resets the selected contraption, or the whole room. |
 
-The mask, sensor and length controls apply to all three.
-
-Use the screen buttons on desktop or touch:
-
-- Sensors (S): include trigger pieces in the ray.
-- Mask (T): all / solid layer 1 / falling bodies layer 2 / none.
-- Origin (I): move inside the solid circle to inspect distance 0, normal (0, 0).
-- Length (Q/E): change the ray's inclusive maximum distance.
-- Left/right: turn the ray by 15 degrees; arrow keys turn continuously.
-- Drop (B): reset both falling bodies. Reset (R) also resets the query and counts.
-
-Queries read synchronized physics geometry. A teleport becomes visible at the
-next fixed step.
-
-`crates/sindri-decay/tests/physics_demo.rs` opens the project, checks its scripts,
-plays the controls and observes rays, bounce and sensor events. Browser smoke
-tests use the exported project on desktop and phone under both Pages base paths.
+`game/tests/the_physics_playground_works/` plays it through the same session
+the browser runs, and the browser smoke tests play it on desktop and phone.

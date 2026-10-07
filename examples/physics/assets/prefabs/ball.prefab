@@ -1,0 +1,103 @@
+{
+ "format_version": 1,
+ "metadata": {
+  "name": "Ball"
+ },
+ "entities": [
+  {
+   "id": "ball",
+   "name": "Ball",
+   "transform_3d": {
+    "position": [
+     0,
+     0,
+     0.3
+    ],
+    "rotation": [
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     1.0,
+     1.0,
+     1.0
+    ]
+   },
+   "components": {
+    "sindri.shape": {
+     "kind": "ellipse",
+     "count": 6.0,
+     "fill": [
+      0.07227,
+      0.58408,
+      0.87137,
+      1.0
+     ],
+     "stroke": [
+      0.50888,
+      0.89627,
+      1.0,
+      1.0
+     ],
+     "stroke_width": 0.07,
+     "corner_radius": 0.0,
+     "dashes": 0.0,
+     "dash_duty": 0.5,
+     "sweep_start": 0.0,
+     "sweep_turns": 1.0,
+     "blend": "over",
+     "layer": 7
+    },
+    "sindri.physics2d.collider": {
+     "pieces": [
+      {
+       "shape": {
+        "shape": "circle",
+        "radius": 0.3
+       },
+       "offset": [
+        0.0,
+        0.0
+       ],
+       "rotation": 0.0,
+       "sensor": false,
+       "layers": {
+        "memberships": 4,
+        "filter": 63
+       },
+       "friction": 0.3,
+       "restitution": 0.6
+      }
+     ]
+    },
+    "sindri.physics2d.rigid_body": {
+     "kind": "dynamic",
+     "pose": {
+      "position": [
+       0,
+       0
+      ],
+      "rotation": 0
+     },
+     "linear_velocity": [
+      0,
+      0
+     ],
+     "angular_velocity": 0,
+     "gravity_scale": 1.0,
+     "linear_damping": 0.02,
+     "angular_damping": 0.05,
+     "lock_rotation": false,
+     "continuous_collision": false
+    },
+    "sindri.tags": {
+     "tags": [
+      "loose"
+     ]
+    }
+   }
+  }
+ ]
+}

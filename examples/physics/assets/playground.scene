@@ -1,0 +1,5320 @@
+{
+ "format_version": 10,
+ "metadata": {
+  "name": "Physics Playground"
+ },
+ "entities": [
+  {
+   "id": "camera",
+   "name": "Camera",
+   "transform_3d": {
+    "position": [
+     0.0,
+     0.0,
+     20.0
+    ],
+    "rotation": [
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     1.0,
+     1.0,
+     1.0
+    ]
+   },
+   "components": {
+    "sindri.camera": {
+     "projection": "orthographic",
+     "vertical_size": 40.0,
+     "near": 0.1,
+     "far": 100.0,
+     "fit": "height"
+    },
+    "sindri.camera.behavior": {
+     "confine": null,
+     "follow": null,
+     "shake": {
+      "decay": 2.4,
+      "frequency": 40.0,
+      "phase": 0.0,
+      "strength": 0.6,
+      "trauma": 0.0
+     }
+    }
+   }
+  },
+  {
+   "id": "environment",
+   "name": "Environment",
+   "transform_3d": {
+    "position": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "rotation": [
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     1.0,
+     1.0,
+     1.0
+    ]
+   },
+   "components": {
+    "sindri.environment": {
+     "background": [
+      0.00212,
+      0.00368,
+      0.00802,
+      1.0
+     ]
+    }
+   }
+  },
+  {
+   "id": "gravity-0",
+   "name": "gravity-0",
+   "transform_3d": {
+    "position": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "rotation": [
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     1.0,
+     1.0,
+     1.0
+    ]
+   },
+   "components": {
+    "sindri.physics2d.world": {
+     "gravity": [
+      0.0,
+      -16.0
+     ],
+     "layers": [
+      "static",
+      "props",
+      "balls",
+      "robot",
+      "shells",
+      "glass",
+      "hand"
+     ]
+    },
+    "sindri.tags": {
+     "tags": [
+      "gravity earth"
+     ]
+    }
+   }
+  },
+  {
+   "id": "gravity-1",
+   "name": "gravity-1",
+   "transform_3d": {
+    "position": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "rotation": [
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     1.0,
+     1.0,
+     1.0
+    ]
+   },
+   "components": {
+    "sindri.physics2d.world": {
+     "gravity": [
+      0.0,
+      -3.0
+     ],
+     "layers": [
+      "static",
+      "props",
+      "balls",
+      "robot",
+      "shells",
+      "glass",
+      "hand"
+     ]
+    },
+    "sindri.tags": {
+     "tags": [
+      "gravity moon"
+     ]
+    }
+   },
+   "disabled": true
+  },
+  {
+   "id": "gravity-2",
+   "name": "gravity-2",
+   "transform_3d": {
+    "position": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "rotation": [
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     1.0,
+     1.0,
+     1.0
+    ]
+   },
+   "components": {
+    "sindri.physics2d.world": {
+     "gravity": [
+      0.0,
+      0.0
+     ],
+     "layers": [
+      "static",
+      "props",
+      "balls",
+      "robot",
+      "shells",
+      "glass",
+      "hand"
+     ]
+    },
+    "sindri.tags": {
+     "tags": [
+      "gravity zero-g"
+     ]
+    }
+   },
+   "disabled": true
+  },
+  {
+   "id": "gravity-3",
+   "name": "gravity-3",
+   "transform_3d": {
+    "position": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "rotation": [
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     1.0,
+     1.0,
+     1.0
+    ]
+   },
+   "components": {
+    "sindri.physics2d.world": {
+     "gravity": [
+      0.0,
+      16.0
+     ],
+     "layers": [
+      "static",
+      "props",
+      "balls",
+      "robot",
+      "shells",
+      "glass",
+      "hand"
+     ]
+    },
+    "sindri.tags": {
+     "tags": [
+      "gravity upside down"
+     ]
+    }
+   },
+   "disabled": true
+  },
+  {
+   "id": "gravity-4",
+   "name": "gravity-4",
+   "transform_3d": {
+    "position": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "rotation": [
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     1.0,
+     1.0,
+     1.0
+    ]
+   },
+   "components": {
+    "sindri.physics2d.world": {
+     "gravity": [
+      16.0,
+      0.0
+     ],
+     "layers": [
+      "static",
+      "props",
+      "balls",
+      "robot",
+      "shells",
+      "glass",
+      "hand"
+     ]
+    },
+    "sindri.tags": {
+     "tags": [
+      "gravity sideways"
+     ]
+    }
+   },
+   "disabled": true
+  },
+  {
+   "id": "backdrop",
+   "name": "backdrop",
+   "transform_3d": {
+    "position": [
+     0,
+     0,
+     -2
+    ],
+    "rotation": [
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     60,
+     28,
+     1.0
+    ]
+   },
+   "components": {
+    "sindri.shape": {
+     "kind": "rect",
+     "count": 6.0,
+     "fill": [
+      0.00368,
+      0.007,
+      0.01764,
+      1.0
+     ],
+     "stroke": [
+      0.0,
+      0.0,
+      0.0,
+      0.0
+     ],
+     "stroke_width": 0.0,
+     "corner_radius": 0.0,
+     "dashes": 0.0,
+     "dash_duty": 0.5,
+     "sweep_start": 0.0,
+     "sweep_turns": 1.0,
+     "blend": "over",
+     "layer": -30
+    }
+   }
+  },
+  {
+   "id": "grid-major",
+   "name": "grid-major",
+   "transform_3d": {
+    "position": [
+     0,
+     0,
+     -1.9
+    ],
+    "rotation": [
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     60,
+     28,
+     1.0
+    ]
+   },
+   "components": {
+    "sindri.shape": {
+     "kind": "grid",
+     "count": 15.0,
+     "fill": [
+      0.0,
+      0.0,
+      0.0,
+      0.0
+     ],
+     "stroke": [
+      0.01161,
+      0.02624,
+      0.05781,
+      1.0
+     ],
+     "stroke_width": 0.0015,
+     "corner_radius": 0.0,
+     "dashes": 0.0,
+     "dash_duty": 0.5,
+     "sweep_start": 0.0,
+     "sweep_turns": 1.0,
+     "blend": "over",
+     "layer": -29
+    }
+   }
+  },
+  {
+   "id": "grid-minor",
+   "name": "grid-minor",
+   "transform_3d": {
+    "position": [
+     0,
+     0,
+     -1.95
+    ],
+    "rotation": [
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     60,
+     28,
+     1.0
+    ]
+   },
+   "components": {
+    "sindri.shape": {
+     "kind": "grid",
+     "count": 60.0,
+     "fill": [
+      0.0,
+      0.0,
+      0.0,
+      0.0
+     ],
+     "stroke": [
+      0.007,
+      0.016,
+      0.04231,
+      1.0
+     ],
+     "stroke_width": 0.0008,
+     "corner_radius": 0.0,
+     "dashes": 0.0,
+     "dash_duty": 0.5,
+     "sweep_start": 0.0,
+     "sweep_turns": 1.0,
+     "blend": "over",
+     "layer": -29
+    }
+   }
+  },
+  {
+   "id": "floor",
+   "name": "floor",
+   "transform_3d": {
+    "position": [
+     0,
+     -14.5,
+     0.0
+    ],
+    "rotation": [
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     62,
+     1,
+     1.0
+    ]
+   },
+   "components": {
+    "sindri.shape": {
+     "kind": "rect",
+     "count": 6.0,
+     "fill": [
+      0.016,
+      0.0319,
+      0.06125,
+      1.0
+     ],
+     "stroke": [
+      0.06848,
+      0.14413,
+      0.2384,
+      1.0
+     ],
+     "stroke_width": 0.06,
+     "corner_radius": 0.0,
+     "dashes": 0.0,
+     "dash_duty": 0.5,
+     "sweep_start": 0.0,
+     "sweep_turns": 1.0,
+     "blend": "over",
+     "layer": 2
+    },
+    "sindri.physics2d.collider": {
+     "pieces": [
+      {
+       "shape": {
+        "shape": "box",
+        "half_extents": [
+         31.0,
+         0.5
+        ]
+       },
+       "offset": [
+        0.0,
+        0.0
+       ],
+       "rotation": 0.0,
+       "sensor": false,
+       "layers": {
+        "memberships": 1,
+        "filter": 4294967295
+       },
+       "friction": 0.6,
+       "restitution": 0.0
+      }
+     ]
+    }
+   }
+  },
+  {
+   "id": "ceiling",
+   "name": "ceiling",
+   "transform_3d": {
+    "position": [
+     0,
+     14.5,
+     0.0
+    ],
+    "rotation": [
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     62,
+     1,
+     1.0
+    ]
+   },
+   "components": {
+    "sindri.shape": {
+     "kind": "rect",
+     "count": 6.0,
+     "fill": [
+      0.016,
+      0.0319,
+      0.06125,
+      1.0
+     ],
+     "stroke": [
+      0.06848,
+      0.14413,
+      0.2384,
+      1.0
+     ],
+     "stroke_width": 0.06,
+     "corner_radius": 0.0,
+     "dashes": 0.0,
+     "dash_duty": 0.5,
+     "sweep_start": 0.0,
+     "sweep_turns": 1.0,
+     "blend": "over",
+     "layer": 2
+    },
+    "sindri.physics2d.collider": {
+     "pieces": [
+      {
+       "shape": {
+        "shape": "box",
+        "half_extents": [
+         31.0,
+         0.5
+        ]
+       },
+       "offset": [
+        0.0,
+        0.0
+       ],
+       "rotation": 0.0,
+       "sensor": false,
+       "layers": {
+        "memberships": 1,
+        "filter": 4294967295
+       },
+       "friction": 0.6,
+       "restitution": 0.0
+      }
+     ]
+    }
+   }
+  },
+  {
+   "id": "left-wall",
+   "name": "left-wall",
+   "transform_3d": {
+    "position": [
+     -30.5,
+     0,
+     0.0
+    ],
+    "rotation": [
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     1,
+     30,
+     1.0
+    ]
+   },
+   "components": {
+    "sindri.shape": {
+     "kind": "rect",
+     "count": 6.0,
+     "fill": [
+      0.016,
+      0.0319,
+      0.06125,
+      1.0
+     ],
+     "stroke": [
+      0.06848,
+      0.14413,
+      0.2384,
+      1.0
+     ],
+     "stroke_width": 0.06,
+     "corner_radius": 0.0,
+     "dashes": 0.0,
+     "dash_duty": 0.5,
+     "sweep_start": 0.0,
+     "sweep_turns": 1.0,
+     "blend": "over",
+     "layer": 2
+    },
+    "sindri.physics2d.collider": {
+     "pieces": [
+      {
+       "shape": {
+        "shape": "box",
+        "half_extents": [
+         0.5,
+         15.0
+        ]
+       },
+       "offset": [
+        0.0,
+        0.0
+       ],
+       "rotation": 0.0,
+       "sensor": false,
+       "layers": {
+        "memberships": 1,
+        "filter": 4294967295
+       },
+       "friction": 0.6,
+       "restitution": 0.0
+      }
+     ]
+    }
+   }
+  },
+  {
+   "id": "right-wall",
+   "name": "right-wall",
+   "transform_3d": {
+    "position": [
+     30.5,
+     0,
+     0.0
+    ],
+    "rotation": [
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     1,
+     30,
+     1.0
+    ]
+   },
+   "components": {
+    "sindri.shape": {
+     "kind": "rect",
+     "count": 6.0,
+     "fill": [
+      0.016,
+      0.0319,
+      0.06125,
+      1.0
+     ],
+     "stroke": [
+      0.06848,
+      0.14413,
+      0.2384,
+      1.0
+     ],
+     "stroke_width": 0.06,
+     "corner_radius": 0.0,
+     "dashes": 0.0,
+     "dash_duty": 0.5,
+     "sweep_start": 0.0,
+     "sweep_turns": 1.0,
+     "blend": "over",
+     "layer": 2
+    },
+    "sindri.physics2d.collider": {
+     "pieces": [
+      {
+       "shape": {
+        "shape": "box",
+        "half_extents": [
+         0.5,
+         15.0
+        ]
+       },
+       "offset": [
+        0.0,
+        0.0
+       ],
+       "rotation": 0.0,
+       "sensor": false,
+       "layers": {
+        "memberships": 1,
+        "filter": 4294967295
+       },
+       "friction": 0.6,
+       "restitution": 0.0
+      }
+     ]
+    }
+   }
+  },
+  {
+   "id": "director",
+   "name": "Director",
+   "transform_3d": {
+    "position": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "rotation": [
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     1.0,
+     1.0,
+     1.0
+    ]
+   },
+   "components": {
+    "sindri.script": {
+     "source": "scripts/playground.decay",
+     "script": "Director",
+     "properties": {
+      "ball": "prefabs/ball.prefab",
+      "crate_box": "prefabs/crate.prefab",
+      "plank": "prefabs/plank.prefab",
+      "anvil": "prefabs/anvil.prefab",
+      "bowling": "prefabs/bowling-ball.prefab",
+      "hand_prefab": "prefabs/hand.prefab"
+     }
+    }
+   }
+  },
+  {
+   "id": "cursor",
+   "name": "cursor",
+   "transform_3d": {
+    "position": [
+     0,
+     0,
+     2.0
+    ],
+    "rotation": [
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     0.5,
+     0.5,
+     1.0
+    ]
+   },
+   "components": {
+    "sindri.shape": {
+     "kind": "ellipse",
+     "count": 6.0,
+     "fill": [
+      0.0,
+      0.0,
+      0.0,
+      0.0
+     ],
+     "stroke": [
+      1.0,
+      0.6376,
+      0.13287,
+      1.0
+     ],
+     "stroke_width": 0.12,
+     "corner_radius": 0.0,
+     "dashes": 0.0,
+     "dash_duty": 0.5,
+     "sweep_start": 0.0,
+     "sweep_turns": 1.0,
+     "blend": "over",
+     "layer": 60
+    }
+   }
+  },
+  {
+   "id": "grab-string",
+   "name": "grab-string",
+   "transform_3d": {
+    "position": [
+     0,
+     0,
+     1.9
+    ],
+    "rotation": [
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     1,
+     0.06,
+     1.0
+    ]
+   },
+   "components": {
+    "sindri.shape": {
+     "kind": "rect",
+     "count": 6.0,
+     "fill": [
+      1.0,
+      0.6376,
+      0.13287,
+      1.0
+     ],
+     "stroke": [
+      0.0,
+      0.0,
+      0.0,
+      0.0
+     ],
+     "stroke_width": 0.0,
+     "corner_radius": 0.0,
+     "dashes": 0.0,
+     "dash_duty": 0.5,
+     "sweep_start": 0.0,
+     "sweep_turns": 1.0,
+     "blend": "over",
+     "layer": 59
+    }
+   },
+   "disabled": true
+  },
+  {
+   "id": "blast-ring",
+   "name": "blast-ring",
+   "transform_3d": {
+    "position": [
+     0,
+     -40,
+     1.5
+    ],
+    "rotation": [
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     1,
+     1,
+     1.0
+    ]
+   },
+   "components": {
+    "sindri.shape": {
+     "kind": "ellipse",
+     "count": 6.0,
+     "fill": [
+      1.0,
+      0.26225,
+      0.05448,
+      0.0
+     ],
+     "stroke": [
+      1.0,
+      0.6376,
+      0.13287,
+      1.0
+     ],
+     "stroke_width": 0.04,
+     "corner_radius": 0.0,
+     "dashes": 0.0,
+     "dash_duty": 0.5,
+     "sweep_start": 0.0,
+     "sweep_turns": 1.0,
+     "blend": "over",
+     "layer": 58
+    },
+    "sindri.script": {
+     "source": "scripts/playground.decay",
+     "script": "BlastRing",
+     "properties": {}
+    }
+   }
+  },
+  {
+   "id": "blast-sparks",
+   "name": "blast-sparks",
+   "transform_3d": {
+    "position": [
+     0,
+     -40,
+     1.5
+    ],
+    "rotation": [
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     1.0,
+     1.0,
+     1.0
+    ]
+   },
+   "components": {
+    "sindri.effect.burst": {
+     "count": 36,
+     "drag": 1.6,
+     "fade": true,
+     "layer": 57,
+     "lifetime": 0.6,
+     "size": 0.28,
+     "speed": 14.0,
+     "spread": 3.1416,
+     "texture": "textures/spark.png",
+     "tint": [
+      1.0,
+      0.75,
+      0.35,
+      1.0
+     ]
+    }
+   }
+  },
+  {
+   "id": "pile-crate-0",
+   "name": "pile-crate-0",
+   "transform_3d": {
+    "position": [
+     -4.0,
+     -13.5,
+     0.2
+    ],
+    "rotation": [
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     0.9,
+     0.9,
+     1.0
+    ]
+   },
+   "components": {
+    "sindri.shape": {
+     "kind": "rect",
+     "count": 6.0,
+     "fill": [
+      1.0,
+      0.25415,
+      0.04667,
+      1.0
+     ],
+     "stroke": [
+      1.0,
+      1.0,
+      1.0,
+      1.0
+     ],
+     "stroke_width": 0.06,
+     "corner_radius": 0.0,
+     "dashes": 0.0,
+     "dash_duty": 0.5,
+     "sweep_start": 0.0,
+     "sweep_turns": 1.0,
+     "blend": "over",
+     "layer": 5
+    },
+    "sindri.physics2d.collider": {
+     "pieces": [
+      {
+       "shape": {
+        "shape": "box",
+        "half_extents": [
+         0.45,
+         0.45
+        ]
+       },
+       "offset": [
+        0.0,
+        0.0
+       ],
+       "rotation": 0.0,
+       "sensor": false,
+       "layers": {
+        "memberships": 2,
+        "filter": 63
+       },
+       "friction": 0.5,
+       "restitution": 0.05
+      }
+     ]
+    },
+    "sindri.physics2d.rigid_body": {
+     "kind": "dynamic",
+     "pose": {
+      "position": [
+       0,
+       0
+      ],
+      "rotation": 0
+     },
+     "linear_velocity": [
+      0,
+      0
+     ],
+     "angular_velocity": 0,
+     "gravity_scale": 1.0,
+     "linear_damping": 0.05,
+     "angular_damping": 0.05,
+     "lock_rotation": false,
+     "continuous_collision": false
+    },
+    "sindri.script": {
+     "source": "scripts/parts.decay",
+     "script": "Part",
+     "properties": {
+      "toy": 0.0
+     }
+    },
+    "sindri.tags": {
+     "tags": [
+      "body"
+     ]
+    }
+   }
+  },
+  {
+   "id": "pile-crate-1",
+   "name": "pile-crate-1",
+   "transform_3d": {
+    "position": [
+     -3.0,
+     -13.5,
+     0.2
+    ],
+    "rotation": [
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     0.9,
+     0.9,
+     1.0
+    ]
+   },
+   "components": {
+    "sindri.shape": {
+     "kind": "rect",
+     "count": 6.0,
+     "fill": [
+      1.0,
+      0.6376,
+      0.13287,
+      1.0
+     ],
+     "stroke": [
+      1.0,
+      1.0,
+      1.0,
+      1.0
+     ],
+     "stroke_width": 0.06,
+     "corner_radius": 0.0,
+     "dashes": 0.0,
+     "dash_duty": 0.5,
+     "sweep_start": 0.0,
+     "sweep_turns": 1.0,
+     "blend": "over",
+     "layer": 5
+    },
+    "sindri.physics2d.collider": {
+     "pieces": [
+      {
+       "shape": {
+        "shape": "box",
+        "half_extents": [
+         0.45,
+         0.45
+        ]
+       },
+       "offset": [
+        0.0,
+        0.0
+       ],
+       "rotation": 0.0,
+       "sensor": false,
+       "layers": {
+        "memberships": 2,
+        "filter": 63
+       },
+       "friction": 0.5,
+       "restitution": 0.05
+      }
+     ]
+    },
+    "sindri.physics2d.rigid_body": {
+     "kind": "dynamic",
+     "pose": {
+      "position": [
+       0,
+       0
+      ],
+      "rotation": 0
+     },
+     "linear_velocity": [
+      0,
+      0
+     ],
+     "angular_velocity": 0,
+     "gravity_scale": 1.0,
+     "linear_damping": 0.05,
+     "angular_damping": 0.05,
+     "lock_rotation": false,
+     "continuous_collision": false
+    },
+    "sindri.script": {
+     "source": "scripts/parts.decay",
+     "script": "Part",
+     "properties": {
+      "toy": 0.0
+     }
+    },
+    "sindri.tags": {
+     "tags": [
+      "body"
+     ]
+    }
+   }
+  },
+  {
+   "id": "pile-crate-2",
+   "name": "pile-crate-2",
+   "transform_3d": {
+    "position": [
+     -2.0,
+     -13.5,
+     0.2
+    ],
+    "rotation": [
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     0.9,
+     0.9,
+     1.0
+    ]
+   },
+   "components": {
+    "sindri.shape": {
+     "kind": "rect",
+     "count": 6.0,
+     "fill": [
+      0.02732,
+      0.55201,
+      0.46778,
+      1.0
+     ],
+     "stroke": [
+      1.0,
+      1.0,
+      1.0,
+      1.0
+     ],
+     "stroke_width": 0.06,
+     "corner_radius": 0.0,
+     "dashes": 0.0,
+     "dash_duty": 0.5,
+     "sweep_start": 0.0,
+     "sweep_turns": 1.0,
+     "blend": "over",
+     "layer": 5
+    },
+    "sindri.physics2d.collider": {
+     "pieces": [
+      {
+       "shape": {
+        "shape": "box",
+        "half_extents": [
+         0.45,
+         0.45
+        ]
+       },
+       "offset": [
+        0.0,
+        0.0
+       ],
+       "rotation": 0.0,
+       "sensor": false,
+       "layers": {
+        "memberships": 2,
+        "filter": 63
+       },
+       "friction": 0.5,
+       "restitution": 0.05
+      }
+     ]
+    },
+    "sindri.physics2d.rigid_body": {
+     "kind": "dynamic",
+     "pose": {
+      "position": [
+       0,
+       0
+      ],
+      "rotation": 0
+     },
+     "linear_velocity": [
+      0,
+      0
+     ],
+     "angular_velocity": 0,
+     "gravity_scale": 1.0,
+     "linear_damping": 0.05,
+     "angular_damping": 0.05,
+     "lock_rotation": false,
+     "continuous_collision": false
+    },
+    "sindri.script": {
+     "source": "scripts/parts.decay",
+     "script": "Part",
+     "properties": {
+      "toy": 0.0
+     }
+    },
+    "sindri.tags": {
+     "tags": [
+      "body"
+     ]
+    }
+   }
+  },
+  {
+   "id": "pile-crate-3",
+   "name": "pile-crate-3",
+   "transform_3d": {
+    "position": [
+     -1.0,
+     -13.5,
+     0.2
+    ],
+    "rotation": [
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     0.9,
+     0.9,
+     1.0
+    ]
+   },
+   "components": {
+    "sindri.shape": {
+     "kind": "rect",
+     "count": 6.0,
+     "fill": [
+      1.0,
+      0.10946,
+      0.27468,
+      1.0
+     ],
+     "stroke": [
+      1.0,
+      1.0,
+      1.0,
+      1.0
+     ],
+     "stroke_width": 0.06,
+     "corner_radius": 0.0,
+     "dashes": 0.0,
+     "dash_duty": 0.5,
+     "sweep_start": 0.0,
+     "sweep_turns": 1.0,
+     "blend": "over",
+     "layer": 5
+    },
+    "sindri.physics2d.collider": {
+     "pieces": [
+      {
+       "shape": {
+        "shape": "box",
+        "half_extents": [
+         0.45,
+         0.45
+        ]
+       },
+       "offset": [
+        0.0,
+        0.0
+       ],
+       "rotation": 0.0,
+       "sensor": false,
+       "layers": {
+        "memberships": 2,
+        "filter": 63
+       },
+       "friction": 0.5,
+       "restitution": 0.05
+      }
+     ]
+    },
+    "sindri.physics2d.rigid_body": {
+     "kind": "dynamic",
+     "pose": {
+      "position": [
+       0,
+       0
+      ],
+      "rotation": 0
+     },
+     "linear_velocity": [
+      0,
+      0
+     ],
+     "angular_velocity": 0,
+     "gravity_scale": 1.0,
+     "linear_damping": 0.05,
+     "angular_damping": 0.05,
+     "lock_rotation": false,
+     "continuous_collision": false
+    },
+    "sindri.script": {
+     "source": "scripts/parts.decay",
+     "script": "Part",
+     "properties": {
+      "toy": 0.0
+     }
+    },
+    "sindri.tags": {
+     "tags": [
+      "body"
+     ]
+    }
+   }
+  },
+  {
+   "id": "pile-crate-4",
+   "name": "pile-crate-4",
+   "transform_3d": {
+    "position": [
+     0.0,
+     -13.5,
+     0.2
+    ],
+    "rotation": [
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     0.9,
+     0.9,
+     1.0
+    ]
+   },
+   "components": {
+    "sindri.shape": {
+     "kind": "rect",
+     "count": 6.0,
+     "fill": [
+      0.32778,
+      0.10946,
+      0.78354,
+      1.0
+     ],
+     "stroke": [
+      1.0,
+      1.0,
+      1.0,
+      1.0
+     ],
+     "stroke_width": 0.06,
+     "corner_radius": 0.0,
+     "dashes": 0.0,
+     "dash_duty": 0.5,
+     "sweep_start": 0.0,
+     "sweep_turns": 1.0,
+     "blend": "over",
+     "layer": 5
+    },
+    "sindri.physics2d.collider": {
+     "pieces": [
+      {
+       "shape": {
+        "shape": "box",
+        "half_extents": [
+         0.45,
+         0.45
+        ]
+       },
+       "offset": [
+        0.0,
+        0.0
+       ],
+       "rotation": 0.0,
+       "sensor": false,
+       "layers": {
+        "memberships": 2,
+        "filter": 63
+       },
+       "friction": 0.5,
+       "restitution": 0.05
+      }
+     ]
+    },
+    "sindri.physics2d.rigid_body": {
+     "kind": "dynamic",
+     "pose": {
+      "position": [
+       0,
+       0
+      ],
+      "rotation": 0
+     },
+     "linear_velocity": [
+      0,
+      0
+     ],
+     "angular_velocity": 0,
+     "gravity_scale": 1.0,
+     "linear_damping": 0.05,
+     "angular_damping": 0.05,
+     "lock_rotation": false,
+     "continuous_collision": false
+    },
+    "sindri.script": {
+     "source": "scripts/parts.decay",
+     "script": "Part",
+     "properties": {
+      "toy": 0.0
+     }
+    },
+    "sindri.tags": {
+     "tags": [
+      "body"
+     ]
+    }
+   }
+  },
+  {
+   "id": "pile-crate-5",
+   "name": "pile-crate-5",
+   "transform_3d": {
+    "position": [
+     -4.0,
+     -12.5,
+     0.2
+    ],
+    "rotation": [
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     0.9,
+     0.9,
+     1.0
+    ]
+   },
+   "components": {
+    "sindri.shape": {
+     "kind": "rect",
+     "count": 6.0,
+     "fill": [
+      1.0,
+      0.25415,
+      0.04667,
+      1.0
+     ],
+     "stroke": [
+      1.0,
+      1.0,
+      1.0,
+      1.0
+     ],
+     "stroke_width": 0.06,
+     "corner_radius": 0.0,
+     "dashes": 0.0,
+     "dash_duty": 0.5,
+     "sweep_start": 0.0,
+     "sweep_turns": 1.0,
+     "blend": "over",
+     "layer": 5
+    },
+    "sindri.physics2d.collider": {
+     "pieces": [
+      {
+       "shape": {
+        "shape": "box",
+        "half_extents": [
+         0.45,
+         0.45
+        ]
+       },
+       "offset": [
+        0.0,
+        0.0
+       ],
+       "rotation": 0.0,
+       "sensor": false,
+       "layers": {
+        "memberships": 2,
+        "filter": 63
+       },
+       "friction": 0.5,
+       "restitution": 0.05
+      }
+     ]
+    },
+    "sindri.physics2d.rigid_body": {
+     "kind": "dynamic",
+     "pose": {
+      "position": [
+       0,
+       0
+      ],
+      "rotation": 0
+     },
+     "linear_velocity": [
+      0,
+      0
+     ],
+     "angular_velocity": 0,
+     "gravity_scale": 1.0,
+     "linear_damping": 0.05,
+     "angular_damping": 0.05,
+     "lock_rotation": false,
+     "continuous_collision": false
+    },
+    "sindri.script": {
+     "source": "scripts/parts.decay",
+     "script": "Part",
+     "properties": {
+      "toy": 0.0
+     }
+    },
+    "sindri.tags": {
+     "tags": [
+      "body"
+     ]
+    }
+   }
+  },
+  {
+   "id": "pile-crate-6",
+   "name": "pile-crate-6",
+   "transform_3d": {
+    "position": [
+     -3.0,
+     -12.5,
+     0.2
+    ],
+    "rotation": [
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     0.9,
+     0.9,
+     1.0
+    ]
+   },
+   "components": {
+    "sindri.shape": {
+     "kind": "rect",
+     "count": 6.0,
+     "fill": [
+      1.0,
+      0.6376,
+      0.13287,
+      1.0
+     ],
+     "stroke": [
+      1.0,
+      1.0,
+      1.0,
+      1.0
+     ],
+     "stroke_width": 0.06,
+     "corner_radius": 0.0,
+     "dashes": 0.0,
+     "dash_duty": 0.5,
+     "sweep_start": 0.0,
+     "sweep_turns": 1.0,
+     "blend": "over",
+     "layer": 5
+    },
+    "sindri.physics2d.collider": {
+     "pieces": [
+      {
+       "shape": {
+        "shape": "box",
+        "half_extents": [
+         0.45,
+         0.45
+        ]
+       },
+       "offset": [
+        0.0,
+        0.0
+       ],
+       "rotation": 0.0,
+       "sensor": false,
+       "layers": {
+        "memberships": 2,
+        "filter": 63
+       },
+       "friction": 0.5,
+       "restitution": 0.05
+      }
+     ]
+    },
+    "sindri.physics2d.rigid_body": {
+     "kind": "dynamic",
+     "pose": {
+      "position": [
+       0,
+       0
+      ],
+      "rotation": 0
+     },
+     "linear_velocity": [
+      0,
+      0
+     ],
+     "angular_velocity": 0,
+     "gravity_scale": 1.0,
+     "linear_damping": 0.05,
+     "angular_damping": 0.05,
+     "lock_rotation": false,
+     "continuous_collision": false
+    },
+    "sindri.script": {
+     "source": "scripts/parts.decay",
+     "script": "Part",
+     "properties": {
+      "toy": 0.0
+     }
+    },
+    "sindri.tags": {
+     "tags": [
+      "body"
+     ]
+    }
+   }
+  },
+  {
+   "id": "pile-crate-7",
+   "name": "pile-crate-7",
+   "transform_3d": {
+    "position": [
+     -2.0,
+     -12.5,
+     0.2
+    ],
+    "rotation": [
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     0.9,
+     0.9,
+     1.0
+    ]
+   },
+   "components": {
+    "sindri.shape": {
+     "kind": "rect",
+     "count": 6.0,
+     "fill": [
+      0.02732,
+      0.55201,
+      0.46778,
+      1.0
+     ],
+     "stroke": [
+      1.0,
+      1.0,
+      1.0,
+      1.0
+     ],
+     "stroke_width": 0.06,
+     "corner_radius": 0.0,
+     "dashes": 0.0,
+     "dash_duty": 0.5,
+     "sweep_start": 0.0,
+     "sweep_turns": 1.0,
+     "blend": "over",
+     "layer": 5
+    },
+    "sindri.physics2d.collider": {
+     "pieces": [
+      {
+       "shape": {
+        "shape": "box",
+        "half_extents": [
+         0.45,
+         0.45
+        ]
+       },
+       "offset": [
+        0.0,
+        0.0
+       ],
+       "rotation": 0.0,
+       "sensor": false,
+       "layers": {
+        "memberships": 2,
+        "filter": 63
+       },
+       "friction": 0.5,
+       "restitution": 0.05
+      }
+     ]
+    },
+    "sindri.physics2d.rigid_body": {
+     "kind": "dynamic",
+     "pose": {
+      "position": [
+       0,
+       0
+      ],
+      "rotation": 0
+     },
+     "linear_velocity": [
+      0,
+      0
+     ],
+     "angular_velocity": 0,
+     "gravity_scale": 1.0,
+     "linear_damping": 0.05,
+     "angular_damping": 0.05,
+     "lock_rotation": false,
+     "continuous_collision": false
+    },
+    "sindri.script": {
+     "source": "scripts/parts.decay",
+     "script": "Part",
+     "properties": {
+      "toy": 0.0
+     }
+    },
+    "sindri.tags": {
+     "tags": [
+      "body"
+     ]
+    }
+   }
+  },
+  {
+   "id": "pile-crate-8",
+   "name": "pile-crate-8",
+   "transform_3d": {
+    "position": [
+     -1.0,
+     -12.5,
+     0.2
+    ],
+    "rotation": [
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     0.9,
+     0.9,
+     1.0
+    ]
+   },
+   "components": {
+    "sindri.shape": {
+     "kind": "rect",
+     "count": 6.0,
+     "fill": [
+      1.0,
+      0.10946,
+      0.27468,
+      1.0
+     ],
+     "stroke": [
+      1.0,
+      1.0,
+      1.0,
+      1.0
+     ],
+     "stroke_width": 0.06,
+     "corner_radius": 0.0,
+     "dashes": 0.0,
+     "dash_duty": 0.5,
+     "sweep_start": 0.0,
+     "sweep_turns": 1.0,
+     "blend": "over",
+     "layer": 5
+    },
+    "sindri.physics2d.collider": {
+     "pieces": [
+      {
+       "shape": {
+        "shape": "box",
+        "half_extents": [
+         0.45,
+         0.45
+        ]
+       },
+       "offset": [
+        0.0,
+        0.0
+       ],
+       "rotation": 0.0,
+       "sensor": false,
+       "layers": {
+        "memberships": 2,
+        "filter": 63
+       },
+       "friction": 0.5,
+       "restitution": 0.05
+      }
+     ]
+    },
+    "sindri.physics2d.rigid_body": {
+     "kind": "dynamic",
+     "pose": {
+      "position": [
+       0,
+       0
+      ],
+      "rotation": 0
+     },
+     "linear_velocity": [
+      0,
+      0
+     ],
+     "angular_velocity": 0,
+     "gravity_scale": 1.0,
+     "linear_damping": 0.05,
+     "angular_damping": 0.05,
+     "lock_rotation": false,
+     "continuous_collision": false
+    },
+    "sindri.script": {
+     "source": "scripts/parts.decay",
+     "script": "Part",
+     "properties": {
+      "toy": 0.0
+     }
+    },
+    "sindri.tags": {
+     "tags": [
+      "body"
+     ]
+    }
+   }
+  },
+  {
+   "id": "pile-crate-9",
+   "name": "pile-crate-9",
+   "transform_3d": {
+    "position": [
+     0.0,
+     -12.5,
+     0.2
+    ],
+    "rotation": [
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     0.9,
+     0.9,
+     1.0
+    ]
+   },
+   "components": {
+    "sindri.shape": {
+     "kind": "rect",
+     "count": 6.0,
+     "fill": [
+      0.32778,
+      0.10946,
+      0.78354,
+      1.0
+     ],
+     "stroke": [
+      1.0,
+      1.0,
+      1.0,
+      1.0
+     ],
+     "stroke_width": 0.06,
+     "corner_radius": 0.0,
+     "dashes": 0.0,
+     "dash_duty": 0.5,
+     "sweep_start": 0.0,
+     "sweep_turns": 1.0,
+     "blend": "over",
+     "layer": 5
+    },
+    "sindri.physics2d.collider": {
+     "pieces": [
+      {
+       "shape": {
+        "shape": "box",
+        "half_extents": [
+         0.45,
+         0.45
+        ]
+       },
+       "offset": [
+        0.0,
+        0.0
+       ],
+       "rotation": 0.0,
+       "sensor": false,
+       "layers": {
+        "memberships": 2,
+        "filter": 63
+       },
+       "friction": 0.5,
+       "restitution": 0.05
+      }
+     ]
+    },
+    "sindri.physics2d.rigid_body": {
+     "kind": "dynamic",
+     "pose": {
+      "position": [
+       0,
+       0
+      ],
+      "rotation": 0
+     },
+     "linear_velocity": [
+      0,
+      0
+     ],
+     "angular_velocity": 0,
+     "gravity_scale": 1.0,
+     "linear_damping": 0.05,
+     "angular_damping": 0.05,
+     "lock_rotation": false,
+     "continuous_collision": false
+    },
+    "sindri.script": {
+     "source": "scripts/parts.decay",
+     "script": "Part",
+     "properties": {
+      "toy": 0.0
+     }
+    },
+    "sindri.tags": {
+     "tags": [
+      "body"
+     ]
+    }
+   }
+  },
+  {
+   "id": "pile-ball-0",
+   "name": "pile-ball-0",
+   "transform_3d": {
+    "position": [
+     4.0,
+     -10.0,
+     0.25
+    ],
+    "rotation": [
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     0.7,
+     0.7,
+     1.0
+    ]
+   },
+   "components": {
+    "sindri.shape": {
+     "kind": "ellipse",
+     "count": 6.0,
+     "fill": [
+      0.02732,
+      0.55201,
+      0.46778,
+      1.0
+     ],
+     "stroke": [
+      1.0,
+      1.0,
+      1.0,
+      1.0
+     ],
+     "stroke_width": 0.08,
+     "corner_radius": 0.0,
+     "dashes": 0.0,
+     "dash_duty": 0.5,
+     "sweep_start": 0.0,
+     "sweep_turns": 1.0,
+     "blend": "over",
+     "layer": 6
+    },
+    "sindri.physics2d.collider": {
+     "pieces": [
+      {
+       "shape": {
+        "shape": "circle",
+        "radius": 0.35
+       },
+       "offset": [
+        0.0,
+        0.0
+       ],
+       "rotation": 0.0,
+       "sensor": false,
+       "layers": {
+        "memberships": 4,
+        "filter": 63
+       },
+       "friction": 0.4,
+       "restitution": 0.5
+      }
+     ]
+    },
+    "sindri.physics2d.rigid_body": {
+     "kind": "dynamic",
+     "pose": {
+      "position": [
+       0,
+       0
+      ],
+      "rotation": 0
+     },
+     "linear_velocity": [
+      0,
+      0
+     ],
+     "angular_velocity": 0,
+     "gravity_scale": 1.0,
+     "linear_damping": 0.02,
+     "angular_damping": 0.05,
+     "lock_rotation": false,
+     "continuous_collision": false
+    },
+    "sindri.script": {
+     "source": "scripts/parts.decay",
+     "script": "Part",
+     "properties": {
+      "toy": 0.0
+     }
+    },
+    "sindri.tags": {
+     "tags": [
+      "body"
+     ]
+    }
+   }
+  },
+  {
+   "id": "pile-ball-1",
+   "name": "pile-ball-1",
+   "transform_3d": {
+    "position": [
+     4.8,
+     -10.0,
+     0.25
+    ],
+    "rotation": [
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     0.7,
+     0.7,
+     1.0
+    ]
+   },
+   "components": {
+    "sindri.shape": {
+     "kind": "ellipse",
+     "count": 6.0,
+     "fill": [
+      1.0,
+      0.10946,
+      0.27468,
+      1.0
+     ],
+     "stroke": [
+      1.0,
+      1.0,
+      1.0,
+      1.0
+     ],
+     "stroke_width": 0.08,
+     "corner_radius": 0.0,
+     "dashes": 0.0,
+     "dash_duty": 0.5,
+     "sweep_start": 0.0,
+     "sweep_turns": 1.0,
+     "blend": "over",
+     "layer": 6
+    },
+    "sindri.physics2d.collider": {
+     "pieces": [
+      {
+       "shape": {
+        "shape": "circle",
+        "radius": 0.35
+       },
+       "offset": [
+        0.0,
+        0.0
+       ],
+       "rotation": 0.0,
+       "sensor": false,
+       "layers": {
+        "memberships": 4,
+        "filter": 63
+       },
+       "friction": 0.4,
+       "restitution": 0.5
+      }
+     ]
+    },
+    "sindri.physics2d.rigid_body": {
+     "kind": "dynamic",
+     "pose": {
+      "position": [
+       0,
+       0
+      ],
+      "rotation": 0
+     },
+     "linear_velocity": [
+      0,
+      0
+     ],
+     "angular_velocity": 0,
+     "gravity_scale": 1.0,
+     "linear_damping": 0.02,
+     "angular_damping": 0.05,
+     "lock_rotation": false,
+     "continuous_collision": false
+    },
+    "sindri.script": {
+     "source": "scripts/parts.decay",
+     "script": "Part",
+     "properties": {
+      "toy": 0.0
+     }
+    },
+    "sindri.tags": {
+     "tags": [
+      "body"
+     ]
+    }
+   }
+  },
+  {
+   "id": "pile-ball-2",
+   "name": "pile-ball-2",
+   "transform_3d": {
+    "position": [
+     5.6,
+     -10.0,
+     0.25
+    ],
+    "rotation": [
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     0.7,
+     0.7,
+     1.0
+    ]
+   },
+   "components": {
+    "sindri.shape": {
+     "kind": "ellipse",
+     "count": 6.0,
+     "fill": [
+      0.32778,
+      0.10946,
+      0.78354,
+      1.0
+     ],
+     "stroke": [
+      1.0,
+      1.0,
+      1.0,
+      1.0
+     ],
+     "stroke_width": 0.08,
+     "corner_radius": 0.0,
+     "dashes": 0.0,
+     "dash_duty": 0.5,
+     "sweep_start": 0.0,
+     "sweep_turns": 1.0,
+     "blend": "over",
+     "layer": 6
+    },
+    "sindri.physics2d.collider": {
+     "pieces": [
+      {
+       "shape": {
+        "shape": "circle",
+        "radius": 0.35
+       },
+       "offset": [
+        0.0,
+        0.0
+       ],
+       "rotation": 0.0,
+       "sensor": false,
+       "layers": {
+        "memberships": 4,
+        "filter": 63
+       },
+       "friction": 0.4,
+       "restitution": 0.5
+      }
+     ]
+    },
+    "sindri.physics2d.rigid_body": {
+     "kind": "dynamic",
+     "pose": {
+      "position": [
+       0,
+       0
+      ],
+      "rotation": 0
+     },
+     "linear_velocity": [
+      0,
+      0
+     ],
+     "angular_velocity": 0,
+     "gravity_scale": 1.0,
+     "linear_damping": 0.02,
+     "angular_damping": 0.05,
+     "lock_rotation": false,
+     "continuous_collision": false
+    },
+    "sindri.script": {
+     "source": "scripts/parts.decay",
+     "script": "Part",
+     "properties": {
+      "toy": 0.0
+     }
+    },
+    "sindri.tags": {
+     "tags": [
+      "body"
+     ]
+    }
+   }
+  },
+  {
+   "id": "pile-ball-3",
+   "name": "pile-ball-3",
+   "transform_3d": {
+    "position": [
+     6.4,
+     -10.0,
+     0.25
+    ],
+    "rotation": [
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     0.7,
+     0.7,
+     1.0
+    ]
+   },
+   "components": {
+    "sindri.shape": {
+     "kind": "ellipse",
+     "count": 6.0,
+     "fill": [
+      1.0,
+      0.25415,
+      0.04667,
+      1.0
+     ],
+     "stroke": [
+      1.0,
+      1.0,
+      1.0,
+      1.0
+     ],
+     "stroke_width": 0.08,
+     "corner_radius": 0.0,
+     "dashes": 0.0,
+     "dash_duty": 0.5,
+     "sweep_start": 0.0,
+     "sweep_turns": 1.0,
+     "blend": "over",
+     "layer": 6
+    },
+    "sindri.physics2d.collider": {
+     "pieces": [
+      {
+       "shape": {
+        "shape": "circle",
+        "radius": 0.35
+       },
+       "offset": [
+        0.0,
+        0.0
+       ],
+       "rotation": 0.0,
+       "sensor": false,
+       "layers": {
+        "memberships": 4,
+        "filter": 63
+       },
+       "friction": 0.4,
+       "restitution": 0.5
+      }
+     ]
+    },
+    "sindri.physics2d.rigid_body": {
+     "kind": "dynamic",
+     "pose": {
+      "position": [
+       0,
+       0
+      ],
+      "rotation": 0
+     },
+     "linear_velocity": [
+      0,
+      0
+     ],
+     "angular_velocity": 0,
+     "gravity_scale": 1.0,
+     "linear_damping": 0.02,
+     "angular_damping": 0.05,
+     "lock_rotation": false,
+     "continuous_collision": false
+    },
+    "sindri.script": {
+     "source": "scripts/parts.decay",
+     "script": "Part",
+     "properties": {
+      "toy": 0.0
+     }
+    },
+    "sindri.tags": {
+     "tags": [
+      "body"
+     ]
+    }
+   }
+  },
+  {
+   "id": "pile-ball-4",
+   "name": "pile-ball-4",
+   "transform_3d": {
+    "position": [
+     7.2,
+     -10.0,
+     0.25
+    ],
+    "rotation": [
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     0.7,
+     0.7,
+     1.0
+    ]
+   },
+   "components": {
+    "sindri.shape": {
+     "kind": "ellipse",
+     "count": 6.0,
+     "fill": [
+      1.0,
+      0.6376,
+      0.13287,
+      1.0
+     ],
+     "stroke": [
+      1.0,
+      1.0,
+      1.0,
+      1.0
+     ],
+     "stroke_width": 0.08,
+     "corner_radius": 0.0,
+     "dashes": 0.0,
+     "dash_duty": 0.5,
+     "sweep_start": 0.0,
+     "sweep_turns": 1.0,
+     "blend": "over",
+     "layer": 6
+    },
+    "sindri.physics2d.collider": {
+     "pieces": [
+      {
+       "shape": {
+        "shape": "circle",
+        "radius": 0.35
+       },
+       "offset": [
+        0.0,
+        0.0
+       ],
+       "rotation": 0.0,
+       "sensor": false,
+       "layers": {
+        "memberships": 4,
+        "filter": 63
+       },
+       "friction": 0.4,
+       "restitution": 0.5
+      }
+     ]
+    },
+    "sindri.physics2d.rigid_body": {
+     "kind": "dynamic",
+     "pose": {
+      "position": [
+       0,
+       0
+      ],
+      "rotation": 0
+     },
+     "linear_velocity": [
+      0,
+      0
+     ],
+     "angular_velocity": 0,
+     "gravity_scale": 1.0,
+     "linear_damping": 0.02,
+     "angular_damping": 0.05,
+     "lock_rotation": false,
+     "continuous_collision": false
+    },
+    "sindri.script": {
+     "source": "scripts/parts.decay",
+     "script": "Part",
+     "properties": {
+      "toy": 0.0
+     }
+    },
+    "sindri.tags": {
+     "tags": [
+      "body"
+     ]
+    }
+   }
+  },
+  {
+   "id": "pile-ball-5",
+   "name": "pile-ball-5",
+   "transform_3d": {
+    "position": [
+     8.0,
+     -10.0,
+     0.25
+    ],
+    "rotation": [
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     0.7,
+     0.7,
+     1.0
+    ]
+   },
+   "components": {
+    "sindri.shape": {
+     "kind": "ellipse",
+     "count": 6.0,
+     "fill": [
+      0.02732,
+      0.55201,
+      0.46778,
+      1.0
+     ],
+     "stroke": [
+      1.0,
+      1.0,
+      1.0,
+      1.0
+     ],
+     "stroke_width": 0.08,
+     "corner_radius": 0.0,
+     "dashes": 0.0,
+     "dash_duty": 0.5,
+     "sweep_start": 0.0,
+     "sweep_turns": 1.0,
+     "blend": "over",
+     "layer": 6
+    },
+    "sindri.physics2d.collider": {
+     "pieces": [
+      {
+       "shape": {
+        "shape": "circle",
+        "radius": 0.35
+       },
+       "offset": [
+        0.0,
+        0.0
+       ],
+       "rotation": 0.0,
+       "sensor": false,
+       "layers": {
+        "memberships": 4,
+        "filter": 63
+       },
+       "friction": 0.4,
+       "restitution": 0.5
+      }
+     ]
+    },
+    "sindri.physics2d.rigid_body": {
+     "kind": "dynamic",
+     "pose": {
+      "position": [
+       0,
+       0
+      ],
+      "rotation": 0
+     },
+     "linear_velocity": [
+      0,
+      0
+     ],
+     "angular_velocity": 0,
+     "gravity_scale": 1.0,
+     "linear_damping": 0.02,
+     "angular_damping": 0.05,
+     "lock_rotation": false,
+     "continuous_collision": false
+    },
+    "sindri.script": {
+     "source": "scripts/parts.decay",
+     "script": "Part",
+     "properties": {
+      "toy": 0.0
+     }
+    },
+    "sindri.tags": {
+     "tags": [
+      "body"
+     ]
+    }
+   }
+  },
+  {
+   "id": "pile-ball-6",
+   "name": "pile-ball-6",
+   "transform_3d": {
+    "position": [
+     4.0,
+     -9.2,
+     0.25
+    ],
+    "rotation": [
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     0.7,
+     0.7,
+     1.0
+    ]
+   },
+   "components": {
+    "sindri.shape": {
+     "kind": "ellipse",
+     "count": 6.0,
+     "fill": [
+      1.0,
+      0.10946,
+      0.27468,
+      1.0
+     ],
+     "stroke": [
+      1.0,
+      1.0,
+      1.0,
+      1.0
+     ],
+     "stroke_width": 0.08,
+     "corner_radius": 0.0,
+     "dashes": 0.0,
+     "dash_duty": 0.5,
+     "sweep_start": 0.0,
+     "sweep_turns": 1.0,
+     "blend": "over",
+     "layer": 6
+    },
+    "sindri.physics2d.collider": {
+     "pieces": [
+      {
+       "shape": {
+        "shape": "circle",
+        "radius": 0.35
+       },
+       "offset": [
+        0.0,
+        0.0
+       ],
+       "rotation": 0.0,
+       "sensor": false,
+       "layers": {
+        "memberships": 4,
+        "filter": 63
+       },
+       "friction": 0.4,
+       "restitution": 0.5
+      }
+     ]
+    },
+    "sindri.physics2d.rigid_body": {
+     "kind": "dynamic",
+     "pose": {
+      "position": [
+       0,
+       0
+      ],
+      "rotation": 0
+     },
+     "linear_velocity": [
+      0,
+      0
+     ],
+     "angular_velocity": 0,
+     "gravity_scale": 1.0,
+     "linear_damping": 0.02,
+     "angular_damping": 0.05,
+     "lock_rotation": false,
+     "continuous_collision": false
+    },
+    "sindri.script": {
+     "source": "scripts/parts.decay",
+     "script": "Part",
+     "properties": {
+      "toy": 0.0
+     }
+    },
+    "sindri.tags": {
+     "tags": [
+      "body"
+     ]
+    }
+   }
+  },
+  {
+   "id": "pile-ball-7",
+   "name": "pile-ball-7",
+   "transform_3d": {
+    "position": [
+     4.8,
+     -9.2,
+     0.25
+    ],
+    "rotation": [
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     0.7,
+     0.7,
+     1.0
+    ]
+   },
+   "components": {
+    "sindri.shape": {
+     "kind": "ellipse",
+     "count": 6.0,
+     "fill": [
+      0.32778,
+      0.10946,
+      0.78354,
+      1.0
+     ],
+     "stroke": [
+      1.0,
+      1.0,
+      1.0,
+      1.0
+     ],
+     "stroke_width": 0.08,
+     "corner_radius": 0.0,
+     "dashes": 0.0,
+     "dash_duty": 0.5,
+     "sweep_start": 0.0,
+     "sweep_turns": 1.0,
+     "blend": "over",
+     "layer": 6
+    },
+    "sindri.physics2d.collider": {
+     "pieces": [
+      {
+       "shape": {
+        "shape": "circle",
+        "radius": 0.35
+       },
+       "offset": [
+        0.0,
+        0.0
+       ],
+       "rotation": 0.0,
+       "sensor": false,
+       "layers": {
+        "memberships": 4,
+        "filter": 63
+       },
+       "friction": 0.4,
+       "restitution": 0.5
+      }
+     ]
+    },
+    "sindri.physics2d.rigid_body": {
+     "kind": "dynamic",
+     "pose": {
+      "position": [
+       0,
+       0
+      ],
+      "rotation": 0
+     },
+     "linear_velocity": [
+      0,
+      0
+     ],
+     "angular_velocity": 0,
+     "gravity_scale": 1.0,
+     "linear_damping": 0.02,
+     "angular_damping": 0.05,
+     "lock_rotation": false,
+     "continuous_collision": false
+    },
+    "sindri.script": {
+     "source": "scripts/parts.decay",
+     "script": "Part",
+     "properties": {
+      "toy": 0.0
+     }
+    },
+    "sindri.tags": {
+     "tags": [
+      "body"
+     ]
+    }
+   }
+  },
+  {
+   "id": "pile-ball-8",
+   "name": "pile-ball-8",
+   "transform_3d": {
+    "position": [
+     5.6,
+     -9.2,
+     0.25
+    ],
+    "rotation": [
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     0.7,
+     0.7,
+     1.0
+    ]
+   },
+   "components": {
+    "sindri.shape": {
+     "kind": "ellipse",
+     "count": 6.0,
+     "fill": [
+      1.0,
+      0.25415,
+      0.04667,
+      1.0
+     ],
+     "stroke": [
+      1.0,
+      1.0,
+      1.0,
+      1.0
+     ],
+     "stroke_width": 0.08,
+     "corner_radius": 0.0,
+     "dashes": 0.0,
+     "dash_duty": 0.5,
+     "sweep_start": 0.0,
+     "sweep_turns": 1.0,
+     "blend": "over",
+     "layer": 6
+    },
+    "sindri.physics2d.collider": {
+     "pieces": [
+      {
+       "shape": {
+        "shape": "circle",
+        "radius": 0.35
+       },
+       "offset": [
+        0.0,
+        0.0
+       ],
+       "rotation": 0.0,
+       "sensor": false,
+       "layers": {
+        "memberships": 4,
+        "filter": 63
+       },
+       "friction": 0.4,
+       "restitution": 0.5
+      }
+     ]
+    },
+    "sindri.physics2d.rigid_body": {
+     "kind": "dynamic",
+     "pose": {
+      "position": [
+       0,
+       0
+      ],
+      "rotation": 0
+     },
+     "linear_velocity": [
+      0,
+      0
+     ],
+     "angular_velocity": 0,
+     "gravity_scale": 1.0,
+     "linear_damping": 0.02,
+     "angular_damping": 0.05,
+     "lock_rotation": false,
+     "continuous_collision": false
+    },
+    "sindri.script": {
+     "source": "scripts/parts.decay",
+     "script": "Part",
+     "properties": {
+      "toy": 0.0
+     }
+    },
+    "sindri.tags": {
+     "tags": [
+      "body"
+     ]
+    }
+   }
+  },
+  {
+   "id": "pile-ball-9",
+   "name": "pile-ball-9",
+   "transform_3d": {
+    "position": [
+     6.4,
+     -9.2,
+     0.25
+    ],
+    "rotation": [
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     0.7,
+     0.7,
+     1.0
+    ]
+   },
+   "components": {
+    "sindri.shape": {
+     "kind": "ellipse",
+     "count": 6.0,
+     "fill": [
+      1.0,
+      0.6376,
+      0.13287,
+      1.0
+     ],
+     "stroke": [
+      1.0,
+      1.0,
+      1.0,
+      1.0
+     ],
+     "stroke_width": 0.08,
+     "corner_radius": 0.0,
+     "dashes": 0.0,
+     "dash_duty": 0.5,
+     "sweep_start": 0.0,
+     "sweep_turns": 1.0,
+     "blend": "over",
+     "layer": 6
+    },
+    "sindri.physics2d.collider": {
+     "pieces": [
+      {
+       "shape": {
+        "shape": "circle",
+        "radius": 0.35
+       },
+       "offset": [
+        0.0,
+        0.0
+       ],
+       "rotation": 0.0,
+       "sensor": false,
+       "layers": {
+        "memberships": 4,
+        "filter": 63
+       },
+       "friction": 0.4,
+       "restitution": 0.5
+      }
+     ]
+    },
+    "sindri.physics2d.rigid_body": {
+     "kind": "dynamic",
+     "pose": {
+      "position": [
+       0,
+       0
+      ],
+      "rotation": 0
+     },
+     "linear_velocity": [
+      0,
+      0
+     ],
+     "angular_velocity": 0,
+     "gravity_scale": 1.0,
+     "linear_damping": 0.02,
+     "angular_damping": 0.05,
+     "lock_rotation": false,
+     "continuous_collision": false
+    },
+    "sindri.script": {
+     "source": "scripts/parts.decay",
+     "script": "Part",
+     "properties": {
+      "toy": 0.0
+     }
+    },
+    "sindri.tags": {
+     "tags": [
+      "body"
+     ]
+    }
+   }
+  },
+  {
+   "id": "pile-ball-10",
+   "name": "pile-ball-10",
+   "transform_3d": {
+    "position": [
+     7.2,
+     -9.2,
+     0.25
+    ],
+    "rotation": [
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     0.7,
+     0.7,
+     1.0
+    ]
+   },
+   "components": {
+    "sindri.shape": {
+     "kind": "ellipse",
+     "count": 6.0,
+     "fill": [
+      0.02732,
+      0.55201,
+      0.46778,
+      1.0
+     ],
+     "stroke": [
+      1.0,
+      1.0,
+      1.0,
+      1.0
+     ],
+     "stroke_width": 0.08,
+     "corner_radius": 0.0,
+     "dashes": 0.0,
+     "dash_duty": 0.5,
+     "sweep_start": 0.0,
+     "sweep_turns": 1.0,
+     "blend": "over",
+     "layer": 6
+    },
+    "sindri.physics2d.collider": {
+     "pieces": [
+      {
+       "shape": {
+        "shape": "circle",
+        "radius": 0.35
+       },
+       "offset": [
+        0.0,
+        0.0
+       ],
+       "rotation": 0.0,
+       "sensor": false,
+       "layers": {
+        "memberships": 4,
+        "filter": 63
+       },
+       "friction": 0.4,
+       "restitution": 0.5
+      }
+     ]
+    },
+    "sindri.physics2d.rigid_body": {
+     "kind": "dynamic",
+     "pose": {
+      "position": [
+       0,
+       0
+      ],
+      "rotation": 0
+     },
+     "linear_velocity": [
+      0,
+      0
+     ],
+     "angular_velocity": 0,
+     "gravity_scale": 1.0,
+     "linear_damping": 0.02,
+     "angular_damping": 0.05,
+     "lock_rotation": false,
+     "continuous_collision": false
+    },
+    "sindri.script": {
+     "source": "scripts/parts.decay",
+     "script": "Part",
+     "properties": {
+      "toy": 0.0
+     }
+    },
+    "sindri.tags": {
+     "tags": [
+      "body"
+     ]
+    }
+   }
+  },
+  {
+   "id": "pile-ball-11",
+   "name": "pile-ball-11",
+   "transform_3d": {
+    "position": [
+     8.0,
+     -9.2,
+     0.25
+    ],
+    "rotation": [
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     0.7,
+     0.7,
+     1.0
+    ]
+   },
+   "components": {
+    "sindri.shape": {
+     "kind": "ellipse",
+     "count": 6.0,
+     "fill": [
+      1.0,
+      0.10946,
+      0.27468,
+      1.0
+     ],
+     "stroke": [
+      1.0,
+      1.0,
+      1.0,
+      1.0
+     ],
+     "stroke_width": 0.08,
+     "corner_radius": 0.0,
+     "dashes": 0.0,
+     "dash_duty": 0.5,
+     "sweep_start": 0.0,
+     "sweep_turns": 1.0,
+     "blend": "over",
+     "layer": 6
+    },
+    "sindri.physics2d.collider": {
+     "pieces": [
+      {
+       "shape": {
+        "shape": "circle",
+        "radius": 0.35
+       },
+       "offset": [
+        0.0,
+        0.0
+       ],
+       "rotation": 0.0,
+       "sensor": false,
+       "layers": {
+        "memberships": 4,
+        "filter": 63
+       },
+       "friction": 0.4,
+       "restitution": 0.5
+      }
+     ]
+    },
+    "sindri.physics2d.rigid_body": {
+     "kind": "dynamic",
+     "pose": {
+      "position": [
+       0,
+       0
+      ],
+      "rotation": 0
+     },
+     "linear_velocity": [
+      0,
+      0
+     ],
+     "angular_velocity": 0,
+     "gravity_scale": 1.0,
+     "linear_damping": 0.02,
+     "angular_damping": 0.05,
+     "lock_rotation": false,
+     "continuous_collision": false
+    },
+    "sindri.script": {
+     "source": "scripts/parts.decay",
+     "script": "Part",
+     "properties": {
+      "toy": 0.0
+     }
+    },
+    "sindri.tags": {
+     "tags": [
+      "body"
+     ]
+    }
+   }
+  },
+  {
+   "id": "hud",
+   "name": "hud",
+   "transform_3d": {
+    "position": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "rotation": [
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     3.4,
+     2.0,
+     1.0
+    ]
+   },
+   "components": {
+    "weave.style": {
+     "classes": [
+      "hud"
+     ]
+    },
+    "sindri.ui.layout": {
+     "direction": "column",
+     "spacing": 0.02,
+     "justify": "space_between",
+     "align": "center"
+    }
+   }
+  },
+  {
+   "id": "hud-top",
+   "name": "hud-top",
+   "parent": "hud",
+   "transform_3d": {
+    "position": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "rotation": [
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     3.3,
+     0.2,
+     1.0
+    ]
+   },
+   "components": {
+    "weave.style": {
+     "classes": [
+      "top"
+     ]
+    },
+    "sindri.ui.layout": {
+     "direction": "row",
+     "spacing": 0.02,
+     "justify": "space_between",
+     "align": "start"
+    }
+   }
+  },
+  {
+   "id": "brand",
+   "name": "brand",
+   "parent": "hud-top",
+   "transform_3d": {
+    "position": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "rotation": [
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     1.0,
+     0.2,
+     1.0
+    ]
+   },
+   "components": {
+    "weave.style": {
+     "classes": [
+      "brand"
+     ]
+    },
+    "sindri.ui.layout": {
+     "direction": "column",
+     "spacing": 0.02,
+     "justify": "start",
+     "align": "start"
+    }
+   }
+  },
+  {
+   "id": "title",
+   "name": "title",
+   "parent": "brand",
+   "transform_3d": {
+    "position": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "rotation": [
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     1.0,
+     0.08,
+     1.0
+    ]
+   },
+   "components": {
+    "weave.style": {
+     "classes": [
+      "title"
+     ]
+    },
+    "sindri.ui.text": {
+     "text": "PHYSICS PLAYGROUND",
+     "font": "fonts/ChakraPetch-Regular.ttf",
+     "font_size": 0.0667,
+     "bounds": [
+      1.0,
+      0.08
+     ],
+     "anchor": "center",
+     "layer": 40,
+     "line_align": "center"
+    }
+   }
+  },
+  {
+   "id": "stats",
+   "name": "stats",
+   "parent": "brand",
+   "transform_3d": {
+    "position": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "rotation": [
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     1.2,
+     0.05,
+     1.0
+    ]
+   },
+   "components": {
+    "weave.style": {
+     "classes": [
+      "stats"
+     ]
+    },
+    "sindri.ui.text": {
+     "text": "0 bodies",
+     "font": "fonts/ChakraPetch-Regular.ttf",
+     "font_size": 0.0306,
+     "bounds": [
+      1.2,
+      0.05
+     ],
+     "anchor": "center",
+     "layer": 40,
+     "line_align": "center"
+    }
+   }
+  },
+  {
+   "id": "globals",
+   "name": "globals",
+   "parent": "hud-top",
+   "transform_3d": {
+    "position": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "rotation": [
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     2.2,
+     0.1,
+     1.0
+    ]
+   },
+   "components": {
+    "weave.style": {
+     "classes": [
+      "globals"
+     ]
+    },
+    "sindri.ui.layout": {
+     "direction": "row",
+     "spacing": 0.02,
+     "justify": "end",
+     "align": "center"
+    }
+   }
+  },
+  {
+   "id": "btn-drop",
+   "name": "btn-drop",
+   "parent": "globals",
+   "transform_3d": {
+    "position": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "rotation": [
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     0.5,
+     0.09,
+     1.0
+    ]
+   },
+   "components": {
+    "weave.style": {
+     "classes": [
+      "button",
+      "danger"
+     ]
+    },
+    "sindri.ui.shape": {
+     "kind": "rect",
+     "fill": [
+      0.00605,
+      0.01681,
+      0.03689,
+      1.0
+     ],
+     "anchor": "center",
+     "layer": 31
+    },
+    "sindri.ui.button": {
+     "label": "DROP EVERYTHING",
+     "autofocus": false,
+     "disabled": false
+    },
+    "sindri.ui.layout": {
+     "direction": "row",
+     "spacing": 0.02,
+     "justify": "center",
+     "align": "center"
+    }
+   }
+  },
+  {
+   "id": "btn-drop-label",
+   "name": "btn-drop-label",
+   "parent": "btn-drop",
+   "transform_3d": {
+    "position": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "rotation": [
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     0.5,
+     0.05,
+     1.0
+    ]
+   },
+   "components": {
+    "weave.style": {
+     "classes": [
+      "button-label"
+     ]
+    },
+    "sindri.ui.text": {
+     "text": "DROP EVERYTHING",
+     "font": "fonts/ChakraPetch-Regular.ttf",
+     "font_size": 0.0361,
+     "bounds": [
+      0.5,
+      0.05
+     ],
+     "anchor": "center",
+     "layer": 40,
+     "line_align": "center"
+    }
+   }
+  },
+  {
+   "id": "btn-balls",
+   "name": "btn-balls",
+   "parent": "globals",
+   "transform_3d": {
+    "position": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "rotation": [
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     0.3,
+     0.09,
+     1.0
+    ]
+   },
+   "components": {
+    "weave.style": {
+     "classes": [
+      "button",
+      "loud"
+     ]
+    },
+    "sindri.ui.shape": {
+     "kind": "rect",
+     "fill": [
+      0.00605,
+      0.01681,
+      0.03689,
+      1.0
+     ],
+     "anchor": "center",
+     "layer": 31
+    },
+    "sindri.ui.button": {
+     "label": "100 BALLS",
+     "autofocus": false,
+     "disabled": false
+    },
+    "sindri.ui.layout": {
+     "direction": "row",
+     "spacing": 0.02,
+     "justify": "center",
+     "align": "center"
+    }
+   }
+  },
+  {
+   "id": "btn-balls-label",
+   "name": "btn-balls-label",
+   "parent": "btn-balls",
+   "transform_3d": {
+    "position": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "rotation": [
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     0.3,
+     0.05,
+     1.0
+    ]
+   },
+   "components": {
+    "weave.style": {
+     "classes": [
+      "button-label"
+     ]
+    },
+    "sindri.ui.text": {
+     "text": "100 BALLS",
+     "font": "fonts/ChakraPetch-Regular.ttf",
+     "font_size": 0.0361,
+     "bounds": [
+      0.3,
+      0.05
+     ],
+     "anchor": "center",
+     "layer": 40,
+     "line_align": "center"
+    }
+   }
+  },
+  {
+   "id": "btn-gravity",
+   "name": "btn-gravity",
+   "parent": "globals",
+   "transform_3d": {
+    "position": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "rotation": [
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     0.4,
+     0.09,
+     1.0
+    ]
+   },
+   "components": {
+    "weave.style": {
+     "classes": [
+      "button"
+     ]
+    },
+    "sindri.ui.shape": {
+     "kind": "rect",
+     "fill": [
+      0.00605,
+      0.01681,
+      0.03689,
+      1.0
+     ],
+     "anchor": "center",
+     "layer": 31
+    },
+    "sindri.ui.button": {
+     "label": "GRAVITY: EARTH",
+     "autofocus": false,
+     "disabled": false
+    },
+    "sindri.ui.layout": {
+     "direction": "row",
+     "spacing": 0.02,
+     "justify": "center",
+     "align": "center"
+    }
+   }
+  },
+  {
+   "id": "btn-gravity-label",
+   "name": "btn-gravity-label",
+   "parent": "btn-gravity",
+   "transform_3d": {
+    "position": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "rotation": [
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     0.4,
+     0.05,
+     1.0
+    ]
+   },
+   "components": {
+    "weave.style": {
+     "classes": [
+      "button-label"
+     ]
+    },
+    "sindri.ui.text": {
+     "text": "GRAVITY: EARTH",
+     "font": "fonts/ChakraPetch-Regular.ttf",
+     "font_size": 0.0361,
+     "bounds": [
+      0.4,
+      0.05
+     ],
+     "anchor": "center",
+     "layer": 40,
+     "line_align": "center"
+    }
+   }
+  },
+  {
+   "id": "btn-debug",
+   "name": "btn-debug",
+   "parent": "globals",
+   "transform_3d": {
+    "position": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "rotation": [
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     0.3,
+     0.09,
+     1.0
+    ]
+   },
+   "components": {
+    "weave.style": {
+     "classes": [
+      "button"
+     ]
+    },
+    "sindri.ui.shape": {
+     "kind": "rect",
+     "fill": [
+      0.00605,
+      0.01681,
+      0.03689,
+      1.0
+     ],
+     "anchor": "center",
+     "layer": 31
+    },
+    "sindri.ui.button": {
+     "label": "DEBUG OFF",
+     "autofocus": false,
+     "disabled": false
+    },
+    "sindri.ui.layout": {
+     "direction": "row",
+     "spacing": 0.02,
+     "justify": "center",
+     "align": "center"
+    }
+   }
+  },
+  {
+   "id": "btn-debug-label",
+   "name": "btn-debug-label",
+   "parent": "btn-debug",
+   "transform_3d": {
+    "position": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "rotation": [
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     0.3,
+     0.05,
+     1.0
+    ]
+   },
+   "components": {
+    "weave.style": {
+     "classes": [
+      "button-label"
+     ]
+    },
+    "sindri.ui.text": {
+     "text": "DEBUG OFF",
+     "font": "fonts/ChakraPetch-Regular.ttf",
+     "font_size": 0.0361,
+     "bounds": [
+      0.3,
+      0.05
+     ],
+     "anchor": "center",
+     "layer": 40,
+     "line_align": "center"
+    }
+   }
+  },
+  {
+   "id": "btn-reset",
+   "name": "btn-reset",
+   "parent": "globals",
+   "transform_3d": {
+    "position": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "rotation": [
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     0.22,
+     0.09,
+     1.0
+    ]
+   },
+   "components": {
+    "weave.style": {
+     "classes": [
+      "button"
+     ]
+    },
+    "sindri.ui.shape": {
+     "kind": "rect",
+     "fill": [
+      0.00605,
+      0.01681,
+      0.03689,
+      1.0
+     ],
+     "anchor": "center",
+     "layer": 31
+    },
+    "sindri.ui.button": {
+     "label": "RESET",
+     "autofocus": false,
+     "disabled": false
+    },
+    "sindri.ui.layout": {
+     "direction": "row",
+     "spacing": 0.02,
+     "justify": "center",
+     "align": "center"
+    }
+   }
+  },
+  {
+   "id": "btn-reset-label",
+   "name": "btn-reset-label",
+   "parent": "btn-reset",
+   "transform_3d": {
+    "position": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "rotation": [
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     0.22,
+     0.05,
+     1.0
+    ]
+   },
+   "components": {
+    "weave.style": {
+     "classes": [
+      "button-label"
+     ]
+    },
+    "sindri.ui.text": {
+     "text": "RESET",
+     "font": "fonts/ChakraPetch-Regular.ttf",
+     "font_size": 0.0361,
+     "bounds": [
+      0.22,
+      0.05
+     ],
+     "anchor": "center",
+     "layer": 40,
+     "line_align": "center"
+    }
+   }
+  },
+  {
+   "id": "hud-bottom",
+   "name": "hud-bottom",
+   "parent": "hud",
+   "transform_3d": {
+    "position": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "rotation": [
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     3.3,
+     0.4,
+     1.0
+    ]
+   },
+   "components": {
+    "weave.style": {
+     "classes": [
+      "bottom"
+     ]
+    },
+    "sindri.ui.layout": {
+     "direction": "column",
+     "spacing": 0.02,
+     "justify": "end",
+     "align": "center"
+    }
+   }
+  },
+  {
+   "id": "toy-row",
+   "name": "toy-row",
+   "parent": "hud-bottom",
+   "transform_3d": {
+    "position": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "rotation": [
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     3.3,
+     0.1,
+     1.0
+    ]
+   },
+   "components": {
+    "weave.style": {
+     "classes": [
+      "toy-row"
+     ]
+    },
+    "sindri.ui.layout": {
+     "direction": "row",
+     "spacing": 0.02,
+     "justify": "center",
+     "align": "center"
+    }
+   }
+  },
+  {
+   "id": "toy-prev",
+   "name": "toy-prev",
+   "parent": "toy-row",
+   "transform_3d": {
+    "position": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "rotation": [
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     0.1,
+     0.09,
+     1.0
+    ]
+   },
+   "components": {
+    "weave.style": {
+     "classes": [
+      "button",
+      "arrow"
+     ]
+    },
+    "sindri.ui.shape": {
+     "kind": "rect",
+     "fill": [
+      0.00605,
+      0.01681,
+      0.03689,
+      1.0
+     ],
+     "anchor": "center",
+     "layer": 31
+    },
+    "sindri.ui.button": {
+     "label": "<",
+     "autofocus": false,
+     "disabled": false
+    },
+    "sindri.ui.layout": {
+     "direction": "row",
+     "spacing": 0.02,
+     "justify": "center",
+     "align": "center"
+    }
+   }
+  },
+  {
+   "id": "toy-prev-label",
+   "name": "toy-prev-label",
+   "parent": "toy-prev",
+   "transform_3d": {
+    "position": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "rotation": [
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     0.1,
+     0.05,
+     1.0
+    ]
+   },
+   "components": {
+    "weave.style": {
+     "classes": [
+      "button-label"
+     ]
+    },
+    "sindri.ui.text": {
+     "text": "<",
+     "font": "fonts/ChakraPetch-Regular.ttf",
+     "font_size": 0.0361,
+     "bounds": [
+      0.1,
+      0.05
+     ],
+     "anchor": "center",
+     "layer": 40,
+     "line_align": "center"
+    }
+   }
+  },
+  {
+   "id": "toy-label",
+   "name": "toy-label",
+   "parent": "toy-row",
+   "transform_3d": {
+    "position": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "rotation": [
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     0.9,
+     0.06,
+     1.0
+    ]
+   },
+   "components": {
+    "weave.style": {
+     "classes": [
+      "toy-label"
+     ]
+    },
+    "sindri.ui.text": {
+     "text": "THE WHOLE ROOM",
+     "font": "fonts/ChakraPetch-Regular.ttf",
+     "font_size": 0.0444,
+     "bounds": [
+      0.9,
+      0.06
+     ],
+     "anchor": "center",
+     "layer": 40,
+     "line_align": "center"
+    }
+   }
+  },
+  {
+   "id": "toy-next",
+   "name": "toy-next",
+   "parent": "toy-row",
+   "transform_3d": {
+    "position": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "rotation": [
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     0.1,
+     0.09,
+     1.0
+    ]
+   },
+   "components": {
+    "weave.style": {
+     "classes": [
+      "button",
+      "arrow"
+     ]
+    },
+    "sindri.ui.shape": {
+     "kind": "rect",
+     "fill": [
+      0.00605,
+      0.01681,
+      0.03689,
+      1.0
+     ],
+     "anchor": "center",
+     "layer": 31
+    },
+    "sindri.ui.button": {
+     "label": ">",
+     "autofocus": false,
+     "disabled": false
+    },
+    "sindri.ui.layout": {
+     "direction": "row",
+     "spacing": 0.02,
+     "justify": "center",
+     "align": "center"
+    }
+   }
+  },
+  {
+   "id": "toy-next-label",
+   "name": "toy-next-label",
+   "parent": "toy-next",
+   "transform_3d": {
+    "position": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "rotation": [
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     0.1,
+     0.05,
+     1.0
+    ]
+   },
+   "components": {
+    "weave.style": {
+     "classes": [
+      "button-label"
+     ]
+    },
+    "sindri.ui.text": {
+     "text": ">",
+     "font": "fonts/ChakraPetch-Regular.ttf",
+     "font_size": 0.0361,
+     "bounds": [
+      0.1,
+      0.05
+     ],
+     "anchor": "center",
+     "layer": 40,
+     "line_align": "center"
+    }
+   }
+  },
+  {
+   "id": "dock",
+   "name": "dock",
+   "parent": "hud-bottom",
+   "transform_3d": {
+    "position": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "rotation": [
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     3.3,
+     0.11,
+     1.0
+    ]
+   },
+   "components": {
+    "weave.style": {
+     "classes": [
+      "dock"
+     ]
+    },
+    "sindri.ui.layout": {
+     "direction": "row",
+     "spacing": 0.02,
+     "justify": "space_between",
+     "align": "center"
+    }
+   }
+  },
+  {
+   "id": "tools",
+   "name": "tools",
+   "parent": "dock",
+   "transform_3d": {
+    "position": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "rotation": [
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     1.5,
+     0.1,
+     1.0
+    ]
+   },
+   "components": {
+    "weave.style": {
+     "classes": [
+      "tools"
+     ]
+    },
+    "sindri.ui.layout": {
+     "direction": "row",
+     "spacing": 0.02,
+     "justify": "start",
+     "align": "center"
+    }
+   }
+  },
+  {
+   "id": "tool-grab",
+   "name": "tool-grab",
+   "parent": "tools",
+   "transform_3d": {
+    "position": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "rotation": [
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     0.3,
+     0.09,
+     1.0
+    ]
+   },
+   "components": {
+    "weave.style": {
+     "classes": [
+      "button",
+      "tool"
+     ]
+    },
+    "sindri.ui.shape": {
+     "kind": "rect",
+     "fill": [
+      0.00605,
+      0.01681,
+      0.03689,
+      1.0
+     ],
+     "anchor": "center",
+     "layer": 31
+    },
+    "sindri.ui.button": {
+     "label": "GRAB",
+     "autofocus": false,
+     "disabled": false
+    },
+    "sindri.ui.layout": {
+     "direction": "row",
+     "spacing": 0.02,
+     "justify": "center",
+     "align": "center"
+    }
+   }
+  },
+  {
+   "id": "tool-grab-label",
+   "name": "tool-grab-label",
+   "parent": "tool-grab",
+   "transform_3d": {
+    "position": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "rotation": [
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     0.3,
+     0.05,
+     1.0
+    ]
+   },
+   "components": {
+    "weave.style": {
+     "classes": [
+      "button-label"
+     ]
+    },
+    "sindri.ui.text": {
+     "text": "GRAB",
+     "font": "fonts/ChakraPetch-Regular.ttf",
+     "font_size": 0.0361,
+     "bounds": [
+      0.3,
+      0.05
+     ],
+     "anchor": "center",
+     "layer": 40,
+     "line_align": "center"
+    }
+   }
+  },
+  {
+   "id": "tool-mark-0",
+   "name": "tool-mark-0",
+   "parent": "tool-grab",
+   "transform_3d": {
+    "position": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "rotation": [
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     0.25,
+     0.01,
+     1.0
+    ]
+   },
+   "components": {
+    "weave.style": {
+     "classes": [
+      "tool-mark"
+     ]
+    },
+    "sindri.ui.shape": {
+     "kind": "rect",
+     "fill": [
+      1.0,
+      0.45079,
+      0.06301,
+      1.0
+     ],
+     "anchor": "center",
+     "layer": 33
+    }
+   }
+  },
+  {
+   "id": "tool-blast",
+   "name": "tool-blast",
+   "parent": "tools",
+   "transform_3d": {
+    "position": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "rotation": [
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     0.3,
+     0.09,
+     1.0
+    ]
+   },
+   "components": {
+    "weave.style": {
+     "classes": [
+      "button",
+      "tool"
+     ]
+    },
+    "sindri.ui.shape": {
+     "kind": "rect",
+     "fill": [
+      0.00605,
+      0.01681,
+      0.03689,
+      1.0
+     ],
+     "anchor": "center",
+     "layer": 31
+    },
+    "sindri.ui.button": {
+     "label": "BLAST",
+     "autofocus": false,
+     "disabled": false
+    },
+    "sindri.ui.layout": {
+     "direction": "row",
+     "spacing": 0.02,
+     "justify": "center",
+     "align": "center"
+    }
+   }
+  },
+  {
+   "id": "tool-blast-label",
+   "name": "tool-blast-label",
+   "parent": "tool-blast",
+   "transform_3d": {
+    "position": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "rotation": [
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     0.3,
+     0.05,
+     1.0
+    ]
+   },
+   "components": {
+    "weave.style": {
+     "classes": [
+      "button-label"
+     ]
+    },
+    "sindri.ui.text": {
+     "text": "BLAST",
+     "font": "fonts/ChakraPetch-Regular.ttf",
+     "font_size": 0.0361,
+     "bounds": [
+      0.3,
+      0.05
+     ],
+     "anchor": "center",
+     "layer": 40,
+     "line_align": "center"
+    }
+   }
+  },
+  {
+   "id": "tool-mark-1",
+   "name": "tool-mark-1",
+   "parent": "tool-blast",
+   "transform_3d": {
+    "position": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "rotation": [
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     0.25,
+     0.01,
+     1.0
+    ]
+   },
+   "components": {
+    "weave.style": {
+     "classes": [
+      "tool-mark"
+     ]
+    },
+    "sindri.ui.shape": {
+     "kind": "rect",
+     "fill": [
+      1.0,
+      0.45079,
+      0.06301,
+      1.0
+     ],
+     "anchor": "center",
+     "layer": 33
+    }
+   }
+  },
+  {
+   "id": "tool-spawn",
+   "name": "tool-spawn",
+   "parent": "tools",
+   "transform_3d": {
+    "position": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "rotation": [
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     0.3,
+     0.09,
+     1.0
+    ]
+   },
+   "components": {
+    "weave.style": {
+     "classes": [
+      "button",
+      "tool"
+     ]
+    },
+    "sindri.ui.shape": {
+     "kind": "rect",
+     "fill": [
+      0.00605,
+      0.01681,
+      0.03689,
+      1.0
+     ],
+     "anchor": "center",
+     "layer": 31
+    },
+    "sindri.ui.button": {
+     "label": "SPAWN BALL",
+     "autofocus": false,
+     "disabled": false
+    },
+    "sindri.ui.layout": {
+     "direction": "row",
+     "spacing": 0.02,
+     "justify": "center",
+     "align": "center"
+    }
+   }
+  },
+  {
+   "id": "tool-spawn-label",
+   "name": "tool-spawn-label",
+   "parent": "tool-spawn",
+   "transform_3d": {
+    "position": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "rotation": [
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     0.3,
+     0.05,
+     1.0
+    ]
+   },
+   "components": {
+    "weave.style": {
+     "classes": [
+      "button-label"
+     ]
+    },
+    "sindri.ui.text": {
+     "text": "SPAWN BALL",
+     "font": "fonts/ChakraPetch-Regular.ttf",
+     "font_size": 0.0361,
+     "bounds": [
+      0.3,
+      0.05
+     ],
+     "anchor": "center",
+     "layer": 40,
+     "line_align": "center"
+    }
+   }
+  },
+  {
+   "id": "tool-mark-2",
+   "name": "tool-mark-2",
+   "parent": "tool-spawn",
+   "transform_3d": {
+    "position": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "rotation": [
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     0.25,
+     0.01,
+     1.0
+    ]
+   },
+   "components": {
+    "weave.style": {
+     "classes": [
+      "tool-mark"
+     ]
+    },
+    "sindri.ui.shape": {
+     "kind": "rect",
+     "fill": [
+      1.0,
+      0.45079,
+      0.06301,
+      1.0
+     ],
+     "anchor": "center",
+     "layer": 33
+    }
+   }
+  },
+  {
+   "id": "tool-probe",
+   "name": "tool-probe",
+   "parent": "tools",
+   "transform_3d": {
+    "position": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "rotation": [
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     0.3,
+     0.09,
+     1.0
+    ]
+   },
+   "components": {
+    "weave.style": {
+     "classes": [
+      "button",
+      "tool"
+     ]
+    },
+    "sindri.ui.shape": {
+     "kind": "rect",
+     "fill": [
+      0.00605,
+      0.01681,
+      0.03689,
+      1.0
+     ],
+     "anchor": "center",
+     "layer": 31
+    },
+    "sindri.ui.button": {
+     "label": "PROBE",
+     "autofocus": false,
+     "disabled": false
+    },
+    "sindri.ui.layout": {
+     "direction": "row",
+     "spacing": 0.02,
+     "justify": "center",
+     "align": "center"
+    }
+   }
+  },
+  {
+   "id": "tool-probe-label",
+   "name": "tool-probe-label",
+   "parent": "tool-probe",
+   "transform_3d": {
+    "position": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "rotation": [
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     0.3,
+     0.05,
+     1.0
+    ]
+   },
+   "components": {
+    "weave.style": {
+     "classes": [
+      "button-label"
+     ]
+    },
+    "sindri.ui.text": {
+     "text": "PROBE",
+     "font": "fonts/ChakraPetch-Regular.ttf",
+     "font_size": 0.0361,
+     "bounds": [
+      0.3,
+      0.05
+     ],
+     "anchor": "center",
+     "layer": 40,
+     "line_align": "center"
+    }
+   }
+  },
+  {
+   "id": "tool-mark-3",
+   "name": "tool-mark-3",
+   "parent": "tool-probe",
+   "transform_3d": {
+    "position": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "rotation": [
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     0.25,
+     0.01,
+     1.0
+    ]
+   },
+   "components": {
+    "weave.style": {
+     "classes": [
+      "tool-mark"
+     ]
+    },
+    "sindri.ui.shape": {
+     "kind": "rect",
+     "fill": [
+      1.0,
+      0.45079,
+      0.06301,
+      1.0
+     ],
+     "anchor": "center",
+     "layer": 33
+    }
+   }
+  },
+  {
+   "id": "actions",
+   "name": "actions",
+   "parent": "dock",
+   "transform_3d": {
+    "position": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "rotation": [
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     1.6,
+     0.1,
+     1.0
+    ]
+   },
+   "components": {
+    "weave.style": {
+     "classes": [
+      "actions"
+     ]
+    },
+    "sindri.ui.layout": {
+     "direction": "row",
+     "spacing": 0.02,
+     "justify": "end",
+     "align": "center"
+    }
+   }
+  },
+  {
+   "id": "act-1",
+   "name": "act-1",
+   "parent": "actions",
+   "transform_3d": {
+    "position": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "rotation": [
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     0.36,
+     0.09,
+     1.0
+    ]
+   },
+   "components": {
+    "weave.style": {
+     "classes": [
+      "button",
+      "action"
+     ]
+    },
+    "sindri.ui.shape": {
+     "kind": "rect",
+     "fill": [
+      0.00605,
+      0.01681,
+      0.03689,
+      1.0
+     ],
+     "anchor": "center",
+     "layer": 31
+    },
+    "sindri.ui.button": {
+     "label": "ACTION 1",
+     "autofocus": false,
+     "disabled": false
+    },
+    "sindri.ui.layout": {
+     "direction": "row",
+     "spacing": 0.02,
+     "justify": "center",
+     "align": "center"
+    }
+   }
+  },
+  {
+   "id": "act-1-label",
+   "name": "act-1-label",
+   "parent": "act-1",
+   "transform_3d": {
+    "position": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "rotation": [
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     0.36,
+     0.05,
+     1.0
+    ]
+   },
+   "components": {
+    "weave.style": {
+     "classes": [
+      "button-label"
+     ]
+    },
+    "sindri.ui.text": {
+     "text": "ACTION 1",
+     "font": "fonts/ChakraPetch-Regular.ttf",
+     "font_size": 0.0361,
+     "bounds": [
+      0.36,
+      0.05
+     ],
+     "anchor": "center",
+     "layer": 40,
+     "line_align": "center"
+    }
+   }
+  },
+  {
+   "id": "act-2",
+   "name": "act-2",
+   "parent": "actions",
+   "transform_3d": {
+    "position": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "rotation": [
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     0.36,
+     0.09,
+     1.0
+    ]
+   },
+   "components": {
+    "weave.style": {
+     "classes": [
+      "button",
+      "action"
+     ]
+    },
+    "sindri.ui.shape": {
+     "kind": "rect",
+     "fill": [
+      0.00605,
+      0.01681,
+      0.03689,
+      1.0
+     ],
+     "anchor": "center",
+     "layer": 31
+    },
+    "sindri.ui.button": {
+     "label": "ACTION 2",
+     "autofocus": false,
+     "disabled": false
+    },
+    "sindri.ui.layout": {
+     "direction": "row",
+     "spacing": 0.02,
+     "justify": "center",
+     "align": "center"
+    }
+   }
+  },
+  {
+   "id": "act-2-label",
+   "name": "act-2-label",
+   "parent": "act-2",
+   "transform_3d": {
+    "position": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "rotation": [
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     0.36,
+     0.05,
+     1.0
+    ]
+   },
+   "components": {
+    "weave.style": {
+     "classes": [
+      "button-label"
+     ]
+    },
+    "sindri.ui.text": {
+     "text": "ACTION 2",
+     "font": "fonts/ChakraPetch-Regular.ttf",
+     "font_size": 0.0361,
+     "bounds": [
+      0.36,
+      0.05
+     ],
+     "anchor": "center",
+     "layer": 40,
+     "line_align": "center"
+    }
+   }
+  },
+  {
+   "id": "act-3",
+   "name": "act-3",
+   "parent": "actions",
+   "transform_3d": {
+    "position": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "rotation": [
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     0.36,
+     0.09,
+     1.0
+    ]
+   },
+   "components": {
+    "weave.style": {
+     "classes": [
+      "button",
+      "action"
+     ]
+    },
+    "sindri.ui.shape": {
+     "kind": "rect",
+     "fill": [
+      0.00605,
+      0.01681,
+      0.03689,
+      1.0
+     ],
+     "anchor": "center",
+     "layer": 31
+    },
+    "sindri.ui.button": {
+     "label": "ACTION 3",
+     "autofocus": false,
+     "disabled": false
+    },
+    "sindri.ui.layout": {
+     "direction": "row",
+     "spacing": 0.02,
+     "justify": "center",
+     "align": "center"
+    }
+   }
+  },
+  {
+   "id": "act-3-label",
+   "name": "act-3-label",
+   "parent": "act-3",
+   "transform_3d": {
+    "position": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "rotation": [
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     0.36,
+     0.05,
+     1.0
+    ]
+   },
+   "components": {
+    "weave.style": {
+     "classes": [
+      "button-label"
+     ]
+    },
+    "sindri.ui.text": {
+     "text": "ACTION 3",
+     "font": "fonts/ChakraPetch-Regular.ttf",
+     "font_size": 0.0361,
+     "bounds": [
+      0.36,
+      0.05
+     ],
+     "anchor": "center",
+     "layer": 40,
+     "line_align": "center"
+    }
+   }
+  },
+  {
+   "id": "act-4",
+   "name": "act-4",
+   "parent": "actions",
+   "transform_3d": {
+    "position": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "rotation": [
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     0.36,
+     0.09,
+     1.0
+    ]
+   },
+   "components": {
+    "weave.style": {
+     "classes": [
+      "button",
+      "action"
+     ]
+    },
+    "sindri.ui.shape": {
+     "kind": "rect",
+     "fill": [
+      0.00605,
+      0.01681,
+      0.03689,
+      1.0
+     ],
+     "anchor": "center",
+     "layer": 31
+    },
+    "sindri.ui.button": {
+     "label": "ACTION 4",
+     "autofocus": false,
+     "disabled": false
+    },
+    "sindri.ui.layout": {
+     "direction": "row",
+     "spacing": 0.02,
+     "justify": "center",
+     "align": "center"
+    }
+   }
+  },
+  {
+   "id": "act-4-label",
+   "name": "act-4-label",
+   "parent": "act-4",
+   "transform_3d": {
+    "position": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "rotation": [
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     0.36,
+     0.05,
+     1.0
+    ]
+   },
+   "components": {
+    "weave.style": {
+     "classes": [
+      "button-label"
+     ]
+    },
+    "sindri.ui.text": {
+     "text": "ACTION 4",
+     "font": "fonts/ChakraPetch-Regular.ttf",
+     "font_size": 0.0361,
+     "bounds": [
+      0.36,
+      0.05
+     ],
+     "anchor": "center",
+     "layer": 40,
+     "line_align": "center"
+    }
+   }
+  },
+  {
+   "id": "hint",
+   "name": "hint",
+   "parent": "hud-bottom",
+   "transform_3d": {
+    "position": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "rotation": [
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     2.6,
+     0.05,
+     1.0
+    ]
+   },
+   "components": {
+    "weave.style": {
+     "classes": [
+      "hint"
+     ]
+    },
+    "sindri.ui.text": {
+     "text": "",
+     "font": "fonts/ChakraPetch-Regular.ttf",
+     "font_size": 0.0306,
+     "bounds": [
+      2.6,
+      0.05
+     ],
+     "anchor": "center",
+     "layer": 40,
+     "line_align": "center"
+    }
+   }
+  }
+ ]
+}

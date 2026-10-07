@@ -1,58 +1,36 @@
-// Exercise screen controls through the exported Decay project on both viewports.
+// Plays the Physics Playground in a real browser: the keyboard's global
+// controls, a pointer tool on the canvas, and the room visibly moving.
 export async function physicsDemo(page, viewport, evidence, problems) {
-  const span = Math.min(1, viewport.width / viewport.height);
-  const click = async (x, y) => {
-    const px = viewport.width / 2 + x * span * viewport.height / 2;
-    const py = (1 - y) * viewport.height / 2;
-    if (viewport.width < 600) await page.touchscreen.tap(px, py);
-    else await page.mouse.click(px, py);
-    await page.waitForTimeout(350);
+  const touch = viewport.width < 600;
+  const tapCentre = async () => {
+    const x = viewport.width / 2;
+    const y = viewport.height * 0.55;
+    if (touch) await page.touchscreen.tap(x, y);
+    else await page.mouse.click(x, y);
+    await page.waitForTimeout(300);
   };
-  await click(-0.6, -0.54); // sensors
-  await click(0.6, -0.54); // inside the solid
-  for (let i = 0; i < 4; i += 1) await click(0, -0.54); // every mask
-  for (const [x, y] of [[-0.6, -0.69], [0, -0.69], [-0.6, -0.84], [0.6, -0.84]]) {
-    await click(x, y);
+  const said = (words) => evidence.said.some((line) => line.includes(words));
+  const waitFor = async (words, seconds = 10) => {
+    for (let i = 0; i < seconds * 4 && !said(words); i += 1) await page.waitForTimeout(250);
+    if (!said(words)) problems.push(`physics playground never said "${words}"`);
+  };
+
+  await tapCentre();
+  const still = await page.locator('canvas').screenshot();
+  await page.keyboard.press('KeyO');
+  await page.waitForTimeout(900);
+  if (still.equals(await page.locator('canvas').screenshot())) {
+    problems.push('physics playground did not move after 100 BALLS');
   }
-  await click(0, -0.84); // reset
-  await click(0.6, -0.69); // fresh falling bodies
-  const first = await page.locator('canvas').screenshot();
-  await page.waitForTimeout(700);
-  if (first.equals(await page.locator('canvas').screenshot())) {
-    problems.push('physics bodies did not move after drop');
-  }
-  // Software WebGPU can run slowly: wait on gameplay events, not wall-clock
-  // guesses about how many fixed steps have executed.
-  for (let i = 0; i < 15 && (!evidence.sensor || !evidence.contact); i += 1) {
-    await page.waitForTimeout(1000);
-  }
-  if (![...evidence.results].some(result => result.startsWith('Solid / d 3.40'))) {
-    problems.push('physics default ray did not hit the solid');
-  }
-  if (![...evidence.results].some(result => result.startsWith('Sensor / d 1.65'))) {
-    problems.push('physics sensor opt-in did not change the closest hit');
-  }
-  if (!evidence.results.has('Solid / d 0.00 / n 0.0,0.0')) {
-    problems.push('physics inside origin did not return the zero-distance contract');
-  }
-  if (!evidence.results.has('miss')) problems.push('physics mask-none did not miss');
-  for (const mask of ['ALL', 'SOLID', 'BODIES', 'NONE']) {
-    if (!evidence.masks.has(mask)) problems.push('physics missed mask control ' + mask);
-  }
-  if (evidence.changes < 11) problems.push('physics demo missed a screen control');
-  if (!evidence.sensor || !evidence.contact) problems.push('physics demo missed sensor or collision events');
-  // The query button: a circle swept along the ray, then an area at its end.
-  await click(0, -0.41);
-  for (let i = 0; i < 10 && ![...evidence.results].some(r => r.startsWith('Solid / d 3.05')); i += 1) {
-    await page.waitForTimeout(500);
-  }
-  if (![...evidence.results].some(result => result.startsWith('Solid / d 3.05'))) {
-    problems.push('physics circle cast did not stop short of the ray');
-  }
-  await click(0, -0.41);
-  if (![...evidence.results].some(result => result.startsWith('area: '))) {
-    problems.push('physics area query reported nothing');
-  }
-  await click(0, -0.84);
-  await page.waitForTimeout(350);
+  await page.keyboard.press('KeyV');
+  await waitFor('gravity MOON');
+  await page.keyboard.press('KeyB');
+  await tapCentre();
+  await waitFor('blast');
+  await page.keyboard.press('KeyX');
+  await waitFor('DROP EVERYTHING');
+  await page.keyboard.press('KeyE');
+  await waitFor('toy WRECKING BALL');
+  await page.keyboard.press('KeyR');
+  await waitFor('reset WRECKING BALL');
 }
