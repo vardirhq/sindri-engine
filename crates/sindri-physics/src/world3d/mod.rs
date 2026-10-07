@@ -3,6 +3,7 @@
 mod build;
 mod controls;
 mod query;
+mod spatial;
 mod sweep;
 mod validation;
 
@@ -29,6 +30,7 @@ pub struct PhysicsWorld3d {
     backend: r3::PhysicsWorld,
     bodies: HashMap<EntityId, BodyRecord>,
     collider_entities: HashMap<r3::ColliderHandle, EntityId>,
+    spatial: spatial::SpatialIndex,
 }
 
 impl PhysicsWorld3d {
@@ -40,6 +42,7 @@ impl PhysicsWorld3d {
             backend,
             bodies: HashMap::new(),
             collider_entities: HashMap::new(),
+            spatial: spatial::SpatialIndex::default(),
         })
     }
 
@@ -90,6 +93,7 @@ impl PhysicsWorld3d {
                 kind: body.kind,
             },
         );
+        self.index_body(entity);
         Ok(())
     }
 
@@ -115,7 +119,9 @@ impl PhysicsWorld3d {
         let Some(record) = self.bodies.remove(&entity) else {
             return false;
         };
+        self.spatial.remove_body(entity);
         for handle in record.colliders {
+            self.spatial.remove(handle);
             self.collider_entities.remove(&handle);
         }
         let _ = self.backend.remove_body(record.body);
@@ -159,6 +165,7 @@ impl PhysicsWorld3d {
         let (tear_send, _tear_recv) = mpsc::channel();
         let events = r3::ChannelEventCollector::new(collision_send, force_send, tear_send);
         self.backend.step_with_events(&(), &events);
+        self.index_simulated_bodies();
         Ok(collision_recv
             .try_iter()
             .filter_map(|event| self.normalize_event(event))

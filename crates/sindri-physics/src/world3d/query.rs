@@ -1,6 +1,6 @@
 //! Exact queries over current body/local poses, independent of solver caches.
 
-use rapier3d::parry::{query::Ray, shape::Shape};
+use rapier3d::parry::query::Ray;
 use sindri_core::EntityId;
 
 use super::{PhysicsWorld3d, r3, validation::finite3};
@@ -24,6 +24,7 @@ impl PhysicsWorld3d {
     }
 
     /// Also excludes whole entities rejected by a stable host predicate.
+    /// Only spatial candidates are visited, once per entity.
     ///
     /// # Errors
     /// Has the validation contract of [`Self::raycast`].
@@ -37,62 +38,37 @@ impl PhysicsWorld3d {
     ) -> Result<Option<RayHit3d>, PhysicsError> {
         let ray = checked_ray(origin, direction, max_distance)?;
         let mut closest: Option<RayHit3d> = None;
-        self.each_piece(filter, &mut include, |entity, piece, pose| {
-            let Some(hit) = piece.cast_ray_and_get_normal(&pose, &ray, max_distance, true) else {
-                return;
-            };
-            let distance = hit.time_of_impact;
-            if closest.as_ref().is_some_and(|old| {
-                distance
-                    .total_cmp(&old.distance)
-                    .then(entity.cmp(&old.entity))
-                    .is_ge()
-            }) {
-                return;
-            }
-            closest = Some(RayHit3d {
-                entity,
-                point: ray.point_at(distance).to_array(),
-                normal: if distance <= 0.0 {
-                    [0.0; 3]
-                } else {
-                    hit.normal.to_array()
-                },
-                distance,
-            });
-        });
-        Ok(closest)
-    }
-
-    pub(super) fn each_piece(
-        &self,
-        filter: RaycastFilter3d,
-        include: &mut impl FnMut(EntityId) -> bool,
-        mut visit: impl FnMut(EntityId, &dyn Shape, r3::Pose),
-    ) {
-        // Establish exact semantics first; a query-only index is a later slice.
-        let mut entities: Vec<_> = self.bodies.keys().copied().collect();
-        entities.sort_unstable();
-        for entity in entities {
-            if filter.exclude == Some(entity) || !include(entity) {
-                continue;
-            }
-            let record = &self.bodies[&entity];
-            let body = &self.backend.bodies[record.body];
-            for &handle in &record.colliders {
-                let collider = &self.backend.colliders[handle];
-                if !collider.is_enabled()
-                    || (!filter.include_sensors && collider.is_sensor())
-                    || collider.collision_groups().memberships.bits() & filter.mask == 0
-                {
-                    continue;
+        self.visit_candidates(
+            self.spatial.ray(&ray, max_distance),
+            filter,
+            &mut include,
+            |entity, piece, pose| {
+                let Some(hit) = piece.cast_ray_and_get_normal(&pose, &ray, max_distance, true)
+                else {
+                    return;
+                };
+                let distance = hit.time_of_impact;
+                if closest.as_ref().is_some_and(|old| {
+                    distance
+                        .total_cmp(&old.distance)
+                        .then(entity.cmp(&old.entity))
+                        .is_ge()
+                }) {
+                    return;
                 }
-                let pose = collider
-                    .position_wrt_parent()
-                    .map_or(*collider.position(), |local| *body.position() * *local);
-                visit(entity, collider.shape(), pose);
-            }
-        }
+                closest = Some(RayHit3d {
+                    entity,
+                    point: ray.point_at(distance).to_array(),
+                    normal: if distance <= 0.0 {
+                        [0.0; 3]
+                    } else {
+                        hit.normal.to_array()
+                    },
+                    distance,
+                });
+            },
+        );
+        Ok(closest)
     }
 }
 

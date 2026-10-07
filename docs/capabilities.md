@@ -264,7 +264,13 @@ and fixed-orientation shape casts use current body/local poses even before the
 first step or immediately after teleports. Native regressions cover all shapes,
 XYZ hits, rotated probes, filtering, whole-entity predicates, sorted unique
 results, exact ties, initial overlap, extreme finite directions and pending/solved
-poses. Queries scan sorted pieces; they have no spatial acceleration yet.
+poses. A query-only per-piece BVH now selects finite ray segments and probe/swept
+bounds, preserving entity/piece order. Inserts/removals/teleports update immediately
+and non-static pieces refresh after solving. Differential regressions compare
+exhaustive candidates; sparse XYZ rays, overlaps and casts select one piece in
+100/1,000/10,000-piece worlds. Overflowing bounds retain conservative candidates;
+backend shape casts at near-maximum finite coordinates/extents can still return
+non-finite results, so numerical failure reporting remains a gap.
 This is the prerequisite for Causeway voxel collision proof, with scene
 synchronization, Decay, editor, resident/edited voxel collision and browser
 execution still unimplemented.

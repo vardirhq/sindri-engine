@@ -834,9 +834,21 @@ The standalone 3D world exposes `raycast`/`raycast_where`, `overlap`/
 `RayHit3d`, `ShapeHit3d` and quaternion `PhysicsPose3d` values. Queries reconstruct
 current body/local poses, independently of the solver cache: inserts and ordinary
 teleports are visible before stepping; position-kinematic targets remain pending
-until the solve. They scan entities sorted by handle and pieces in authored order;
-3D acceleration is still absent. Stable predicates run once per non-excluded
-entity, and hosts must not rely on exhaustive predicate visits when indexing lands.
+until the solve. A query-only per-piece BVH selects finite ray segments, overlap
+probe bounds and the union of start/end sweep bounds at fixed orientation.
+Candidates are sorted by entity handle and authored piece order before exact
+geometry/filtering. Stable predicates run once per non-excluded candidate entity;
+hosts must not rely on visits to remote geometry.
+
+The 3D index updates on insertion, removal and ordinary teleports, then refreshes
+non-static pieces after each completed step, including sleeping bodies. Static
+terrain needs no post-step refresh. Outward padding protects touching bounds;
+overflowing piece bounds stay in a separate conservative candidate set and
+non-finite probe bounds select every piece. Dense/long queries remain output-
+dependent, and candidate sorting costs O(k log k). No new dependency is needed.
+The fallback preserves candidates, not numerical stability of backend geometry:
+shape casts at near-maximum finite coordinates/extents can return non-finite
+results. Numerical failure reporting for those extreme 3D queries remains a gap.
 
 Membership masks, sensor opt-in and whole-entity exclusion match the 2D contract.
 Overlaps return sorted unique entity handles. Rays/sweeps normalize finite XYZ
@@ -940,7 +952,7 @@ atomic rejection and removal/reuse. WASM compilation is a separate gate; no 3D
 browser simulation is claimed until the shared host and game exercise it.
 
 This is the engine prerequisite for the physics-update voxel-world proof in
-Causeway. 3D acceptance remains unchecked: query indexing, scene transform and
+Causeway. 3D acceptance remains unchecked: scene transform and
 lifecycle synchronization, gravity authoring, editor checked commands/Play,
 typed Decay Vec3 controls/events and actual resident/edited voxel collision remain
 separate slices. Voxel collision must derive from the occupied world, account for

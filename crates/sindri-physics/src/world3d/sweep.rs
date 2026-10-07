@@ -1,6 +1,8 @@
 //! Exact 3D overlaps and fixed-orientation sweeps.
 
+use rapier3d::parry::bounding_volume::{Aabb, BoundingVolume};
 use rapier3d::parry::query::{self, ShapeCastOptions};
+use rapier3d::parry::shape::Shape;
 use sindri_core::EntityId;
 
 use super::{PhysicsWorld3d, build, query::checked_ray, r3, validation::validate_pose};
@@ -22,6 +24,7 @@ impl PhysicsWorld3d {
     }
 
     /// Also excludes whole entities rejected by a stable host predicate.
+    /// Only spatial candidates are visited, once per entity.
     ///
     /// # Errors
     /// Has the validation contract of [`Self::overlap`].
@@ -36,14 +39,19 @@ impl PhysicsWorld3d {
         validate_pose(pose)?;
         let at = build::pose(pose);
         let mut found = Vec::new();
-        self.each_piece(filter, &mut include, |entity, piece, piece_pose| {
-            if found.last() != Some(&entity)
-                && query::intersection_test(&at, probe.as_ref(), &piece_pose, piece)
-                    .is_ok_and(|intersection| intersection.intersecting)
-            {
-                found.push(entity);
-            }
-        });
+        self.visit_candidates(
+            self.spatial.area(probe.compute_aabb(&at)),
+            filter,
+            &mut include,
+            |entity, piece, piece_pose| {
+                if found.last() != Some(&entity)
+                    && query::intersection_test(&at, probe.as_ref(), &piece_pose, piece)
+                        .is_ok_and(|intersection| intersection.intersecting)
+                {
+                    found.push(entity);
+                }
+            },
+        );
         Ok(found)
     }
 
@@ -66,6 +74,7 @@ impl PhysicsWorld3d {
     }
 
     /// Also excludes whole entities rejected by a stable host predicate.
+    /// Only spatial candidates are visited, once per entity.
     ///
     /// # Errors
     /// Has the validation contract of [`Self::shape_cast`].
@@ -89,42 +98,48 @@ impl PhysicsWorld3d {
             ..ShapeCastOptions::default()
         };
         let mut closest: Option<ShapeHit3d> = None;
-        self.each_piece(filter, &mut include, |entity, piece, piece_pose| {
-            let Ok(Some(hit)) = query::cast_shapes(
-                &at,
-                ray.dir,
-                probe.as_ref(),
-                &piece_pose,
-                r3::Vector::ZERO,
-                piece,
-                options,
-            ) else {
-                return;
-            };
-            let distance = hit.time_of_impact;
-            if closest.as_ref().is_some_and(|old| {
-                distance
-                    .total_cmp(&old.distance)
-                    .then(entity.cmp(&old.entity))
-                    .is_ge()
-            }) {
-                return;
-            }
-            let (point, normal) = if distance <= 0.0 {
-                (at.translation, r3::Vector::ZERO)
-            } else {
-                (
-                    piece_pose.transform_point(hit.witness2),
-                    piece_pose.rotation * hit.normal2,
-                )
-            };
-            closest = Some(ShapeHit3d {
-                entity,
-                point: point.to_array(),
-                normal: normal.to_array(),
-                distance,
-            });
-        });
+        self.visit_candidates(
+            self.spatial
+                .area(swept_bounds(probe.as_ref(), at, ray.dir * max_distance)),
+            filter,
+            &mut include,
+            |entity, piece, piece_pose| {
+                let Ok(Some(hit)) = query::cast_shapes(
+                    &at,
+                    ray.dir,
+                    probe.as_ref(),
+                    &piece_pose,
+                    r3::Vector::ZERO,
+                    piece,
+                    options,
+                ) else {
+                    return;
+                };
+                let distance = hit.time_of_impact;
+                if closest.as_ref().is_some_and(|old| {
+                    distance
+                        .total_cmp(&old.distance)
+                        .then(entity.cmp(&old.entity))
+                        .is_ge()
+                }) {
+                    return;
+                }
+                let (point, normal) = if distance <= 0.0 {
+                    (at.translation, r3::Vector::ZERO)
+                } else {
+                    (
+                        piece_pose.transform_point(hit.witness2),
+                        piece_pose.rotation * hit.normal2,
+                    )
+                };
+                closest = Some(ShapeHit3d {
+                    entity,
+                    point: point.to_array(),
+                    normal: normal.to_array(),
+                    distance,
+                });
+            },
+        );
         Ok(closest)
     }
 }
@@ -152,4 +167,10 @@ fn query_shape(shape: ColliderShape3d) -> Result<r3::SharedShape, PhysicsError> 
             r3::SharedShape::capsule_y(half_height, radius)
         }
     })
+}
+
+fn swept_bounds(shape: &dyn Shape, start: r3::Pose, displacement: r3::Vector) -> Aabb {
+    let mut end = start;
+    end.translation += displacement;
+    shape.compute_aabb(&start).merged(&shape.compute_aabb(&end))
 }

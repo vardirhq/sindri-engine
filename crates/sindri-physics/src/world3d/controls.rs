@@ -96,6 +96,7 @@ impl PhysicsWorld3d {
             body.set_next_kinematic_position(build::pose(pose));
         } else {
             body.set_position(build::pose(pose), true);
+            self.index_body(entity);
         }
         Ok(())
     }

@@ -1139,3 +1139,29 @@ surface-specific completeness. This checklist does not mark those surfaces done.
   with scene/editor/Decay access and native/browser game proof still absent.
   No host call, component registration, dependency or 2D behavior changed.
   3D acceptance and final integration remain unchecked; CI must verify this head.
+
+
+## Indexed 3D query checkpoint
+
+- A query-only per-piece BVH now selects 3D finite ray segments, overlap probe
+  bounds and fixed-orientation sweep start/end bounds. Candidates retain entity/
+  piece order, masks, sensor policy, whole-entity predicates and exact geometry.
+  Insertion/removal/teleport update immediately; non-static pieces refresh after
+  completed steps. Position-kinematic targets retain their pending semantics.
+- Four regressions compare exhaustive candidates across all shapes, XYZ/local/
+  probe rotations, masks/sensors/predicates, insertion/teleport/removal/reuse and
+  solved dynamic/kinematic motion. Sparse queries at 100/1,000/10,000 pieces select
+  one local piece/entity; sampled 10,000-piece XYZ rays visit 26–34 BVH nodes.
+  Piece/probe bound overflow conservatively retains candidates and removal clears
+  the fallback set. All 177 physics tests, warning-denied Clippy, scoped preflight
+  and all-target/all-feature WASM compilation pass.
+- The first overflow differential test exposed non-finite backend shape-cast
+  output at near-maximum finite coordinates/extents. That numerical reporting
+  gap is now explicit in parity and the contract. Overflow tests assert candidate
+  retention, not numerical stability of exact geometry at those extremes.
+- This is an internal engine prerequisite for Causeway voxel-terrain proof.
+  No dependency, public API, host call, component registration or 2D behavior
+  changed. Dense/long queries remain output-dependent, and non-static pieces
+  require refresh. Scene/editor/Decay/voxel and native/browser game proof remain
+  open; 3D acceptance and final integration stay unchecked. CI must verify this
+  checkpoint; continue with 3D scene synchronization and authoring.

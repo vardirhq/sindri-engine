@@ -141,7 +141,7 @@ fn filtering_ties_and_compound_predicates_are_shared_by_every_query() {
         })
         .unwrap();
     assert_eq!(hits, vec![id(2), id(8)]);
-    assert_eq!(visits, vec![id(1), id(2), id(8)]);
+    assert_eq!(visits, vec![id(2), id(8)]);
     let hit = world
         .shape_cast_where(
             probe,
