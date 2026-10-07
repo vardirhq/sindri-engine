@@ -16,6 +16,43 @@ a pushed handoff. Do not ask them to authorize the scope again.
 
 ## Current continuation checkpoint
 
+The standalone 3D spawn-control foundation is now implemented. `BodyControl3d`
+has linear/angular velocity setters and impulses; `remember_control` validates
+finite values and caller-supplied authored kind for unregistered bodies, while
+`apply_control` acts on live bodies. Insertion revalidates all requests and
+replays per-body call order only after actual compound mass is known. Explicit
+`pending_linear_velocity`/`pending_angular_velocity` getters return the last
+matching setter, without resolving impulses; ordinary velocity reads still
+require live bodies. Rotation locking applies during replay. Removal cancels
+requests even without a live body, and `finish_synchronize` expires unresolved
+requests after a successful complete insertion batch.
+
+`ScenePhysics3d` includes pending requests in complete-batch prevalidation,
+retains them after failure for a corrected retry, preserves initial spawn queues
+while reconciling and expires unresolved requests before solving. Four engine
+and three scene regressions cover order/mass, reads, locks, invalid requests,
+atomic kind-conflict rejection/retry, pre-solve movement, authored-state
+preservation and removal/inactive/colliderless expiry. Scoped preflight passes
+671 native physics/scene tests; the final focused seven tests also pass.
+Warning-denied all-target/all-feature Clippy, formatting/size gates, both changed
+crates' WASM checks and rebuilt game WASM host pass. All 11 catalogue tests pass;
+regeneration leaves generated artifacts unchanged (no host/schema change).
+The rebuilt Chromium landing/query smoke passes with WebGPU, four assets and
+21 visible colors; this is a regression, not browser queue-replay proof.
+Artifacts: `/tmp/sindri-pending3d-{preflight,focused,scene-focused,clippy,wasm-check,wasm-build,generate,catalogue,export,browser}.log`,
+`/tmp/sindri-pending3d-browser.png`; export `/tmp/sindri-pending3d-export`.
+
+Next wire existing typed `Physics3d` setters/impulses to this engine queue for
+active, validated authored 3D bodies that have not synchronized. Decide and test
+pre-materialization reads using explicit pending setters/authored starts, with
+rotation locking, without assuming impulse effects before mass exists. Prove
+real prefab spawning through typed scripts and shared native/browser sessions.
+Decay writes still fail before synchronization in this checkpoint; the parity
+row is Engine partial and Decay/editor/proof absent. This is an engine foundation
+toward Causeway; native inspector/Play/replay and occupied/resident/edited voxel
+collision/game proof remain open. Prior head `888ce871` is green in CI. Verify
+the new head, keep 3D acceptance/final integration unchecked and keep PR #497 draft.
+
 Typed `Physics3d.overlap_box`, `cast_box`, `overlap_capsule` and `cast_capsule`
 now use indexed active geometry and existing copied hit/list contracts. Arbitrary
 orientation takes a nonzero Vec3 rotation axis and finite radians using the

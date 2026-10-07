@@ -13,6 +13,8 @@ mod authoring_tests;
 #[cfg(test)]
 mod hierarchy_tests;
 #[cfg(test)]
+mod pending_tests;
+#[cfg(test)]
 mod tests;
 
 const MOVED: f32 = 1.0e-4;
@@ -81,9 +83,10 @@ impl ScenePhysics3d {
         if !gravity.into_iter().all(f32::is_finite) {
             return Err(sindri_physics::PhysicsError::NonFinite("gravity").into());
         }
-        let plan = prepare(world, components)?;
+        let plan = prepare(world, components, &self.world)?;
         self.world.set_gravity(gravity)?;
         self.synchronize(world, plan)?;
+        self.world.finish_synchronize();
         self.events = self.world.step(delta)?;
         self.write_back(world);
         Ok(())
@@ -112,7 +115,9 @@ impl ScenePhysics3d {
                 }
                 continue;
             }
-            self.remove(entity);
+            if self.world.contains(entity) {
+                self.remove(entity);
+            }
             let body = body_at(authored.body, pose);
             self.world.insert_body(entity, body, &authored.pieces)?;
             self.registered.insert(entity, authored);
@@ -166,6 +171,7 @@ impl ScenePhysics3d {
 fn prepare(
     world: &World,
     components: &ComponentSchemaRegistry,
+    physics: &PhysicsWorld3d,
 ) -> Result<BTreeMap<EntityId, Authored>, PhysicsSyncError> {
     let mut plan = BTreeMap::new();
     for (entity, collider) in components.query::<Collider3dComponent>(world)? {
@@ -182,7 +188,7 @@ fn prepare(
         {
             return Err(PhysicsSyncError::LockedDepth3d(entity));
         }
-        PhysicsWorld3d::validate_body(entity, placed, &collider.0)?;
+        physics.validate_insertion(entity, placed, &collider.0)?;
         plan.insert(
             entity,
             Authored {

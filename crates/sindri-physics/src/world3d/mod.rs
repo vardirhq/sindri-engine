@@ -2,6 +2,7 @@
 
 mod build;
 mod controls;
+mod pending;
 mod query;
 mod spatial;
 mod sweep;
@@ -16,6 +17,7 @@ use crate::{
     Collider3d, PhysicsError, PhysicsEvent3d, PhysicsEventKind, PhysicsPose3d, RigidBody3d,
     RigidBodyKind,
 };
+pub use pending::BodyControl3d;
 use validation::{finite3, validate_body, validate_colliders};
 
 struct BodyRecord {
@@ -31,6 +33,7 @@ pub struct PhysicsWorld3d {
     bodies: HashMap<EntityId, BodyRecord>,
     collider_entities: HashMap<r3::ColliderHandle, EntityId>,
     spatial: spatial::SpatialIndex,
+    pending_controls: HashMap<EntityId, Vec<BodyControl3d>>,
 }
 
 impl PhysicsWorld3d {
@@ -43,6 +46,7 @@ impl PhysicsWorld3d {
             bodies: HashMap::new(),
             collider_entities: HashMap::new(),
             spatial: spatial::SpatialIndex::default(),
+            pending_controls: HashMap::new(),
         })
     }
 
@@ -67,7 +71,7 @@ impl PhysicsWorld3d {
         if self.bodies.contains_key(&entity) {
             return Err(PhysicsError::EntityAlreadyRegistered(entity));
         }
-        Self::validate_body(entity, body, colliders)?;
+        self.validate_insertion(entity, body, colliders)?;
         let handle = self.backend.insert_body(build::body(body));
         let handles: Vec<_> = colliders
             .iter()
@@ -90,6 +94,11 @@ impl PhysicsWorld3d {
             },
         );
         self.index_body(entity);
+        if let Some(controls) = self.pending_controls.remove(&entity) {
+            for control in controls {
+                self.apply_control(entity, control)?;
+            }
+        }
         Ok(())
     }
 
@@ -126,6 +135,7 @@ impl PhysicsWorld3d {
     }
 
     pub fn remove(&mut self, entity: EntityId) -> bool {
+        self.pending_controls.remove(&entity);
         let Some(record) = self.bodies.remove(&entity) else {
             return false;
         };

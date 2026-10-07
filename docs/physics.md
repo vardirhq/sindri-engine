@@ -905,7 +905,26 @@ keeps angular velocity zero. Invalid arguments/body kinds fail before mutation.
 Controls change live simulation, leaving authored starting motion unchanged;
 structural body/collider rebuilds therefore restore authored settings. Missing
 3D host context, stale/inactive handles and bodies not yet synchronized fail
-explicitly. Spawn-to-synchronization queuing is absent in this slice.
+explicitly. These Decay calls do not yet queue controls before synchronization.
+
+The standalone engine now supplies `BodyControl3d` linear/angular velocity
+setters and impulses, `apply_control` for live bodies and `remember_control`
+for unregistered bodies whose authored kind the caller has validated. Requests
+validate finite values and body-kind rules before queuing, replay in call order
+only after actual compound mass is known, and never change authored settings.
+`pending_linear_velocity`/`pending_angular_velocity` return the last matching
+queued setter; impulses cannot affect them until materialization. Ordinary
+velocity reads still require a live body. `validate_insertion` checks body, colliders and all pending
+requests without mutation, so scene reconciliation rejects a conflicting kind
+across the whole batch before gravity, removal or rebuilding. Failed validation
+retains requests for a corrected retry. Rotation locking applies at replay.
+Removal cancels pending requests even when no body exists. `finish_synchronize`
+discards requests not materialized by a successful batch; `ScenePhysics3d` calls
+it before solving. Standalone hosts must call it after their own validated
+insertion batch. Four engine and three scene regressions exercise ordering/mass,
+kind and input rejection, lock/retry, pre-solve replay and expiry. This is the
+engine foundation toward Causeway; Decay spawn-window wiring and game proof
+remain absent, so the public scripting behavior described above is unchanged.
 
 `Physics3d.collision_started()`, `collision_stopped()`, `sensor_entered()` and
 `sensor_exited()` return sorted unique lists of other active entities whose contact with this

@@ -274,6 +274,10 @@ requests, commit history, and subsystem documentation rather than this file.
 
 ### Added
 
+- Standalone 3D spawn controls queue finite velocity setters and impulses in
+  order, replay after collider mass is known and expire unresolved requests.
+  Scene synchronization validates pending controls before mutating its batch.
+  Decay spawn-window wiring remains a follow-up.
 - Typed 3D box/capsule overlaps and casts accept rotation axes and radians,
   returning copied hits or entity lists over indexed active geometry. Sweeps
   keep orientation fixed; invalid dimensions or rotations fail explicitly.

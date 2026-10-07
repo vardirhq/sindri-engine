@@ -1368,3 +1368,29 @@ surface-specific completeness. This checklist does not mark those surfaces done.
   3D acceptance and final integration stay unchecked. The named-mask head has
   passed browser/Decay preflight and other completed CI gates, with test/render
   captures still running; the new probe head requires its own verification.
+
+
+## Ordered 3D spawn-control foundation checkpoint
+
+- Standalone `BodyControl3d` velocity/angular-velocity setters and impulses queue
+  for unregistered bodies after finite-value and authored-kind validation.
+  Insertion revalidates the complete request and replays per-body call order
+  after compound mass is known. Explicit pending getters return the last setter;
+  ordinary live reads still require materialization. Rotation locks apply during
+  replay, removal cancels pending input and successful synchronization expires
+  unresolved requests.
+- Scene prevalidation includes pending kind conflicts before any gravity,
+  removal or rebuild. Failed validation retains valid requests for a corrected
+  retry. Reconciliation preserves initial spawn queues and replays before solving.
+  Four engine and three scene regressions exercise order/mass, snapshots, locks,
+  rejection/retry, authored-state preservation and lifecycle expiry.
+- Scoped preflight passes 671 native tests; final focused regressions, Clippy,
+  all 11 catalogue tests, formatting/size gates, changed-crate WASM checks and
+  game WASM build pass. Generated artifacts remain unchanged. Rebuilt Chromium
+  landing/query smoke passes standard WebGPU/asset/pixel checks; queued replay
+  is proven natively, not in the browser yet.
+- This is an engine foundation toward Causeway. Typed Decay spawn-window wiring
+  and real prefab/session proof follow; native inspector/Play/replay and voxel
+  collision/game proof remain open. No dependency, host surface, component schema
+  or 2D behavior changed. Prior head `888ce871` is green in CI; verify the new
+  checkpoint before treating it as green. 3D acceptance/final integration stay open.

@@ -48,4 +48,4 @@ pub use types2d::{
 pub use types3d::{Collider3d, ColliderShape3d, PhysicsEvent3d, PhysicsPose3d, RigidBody3d};
 pub use validate::PhysicsError;
 pub use world2d::{BodyControl2d, PhysicsWorld2d, ShapeHit2d};
-pub use world3d::PhysicsWorld3d;
+pub use world3d::{BodyControl3d, PhysicsWorld3d};

@@ -7,7 +7,7 @@ use sindri_physics::{ColliderShape3d, PhysicsEventKind, RaycastFilter3d};
 
 const STEP: Duration = Duration::from_millis(10);
 
-fn components() -> ComponentSchemaRegistry {
+pub(super) fn components() -> ComponentSchemaRegistry {
     crate::SceneExtractor::new().unwrap().components().clone()
 }
 pub(super) fn spawn(
