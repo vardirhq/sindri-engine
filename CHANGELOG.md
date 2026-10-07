@@ -274,6 +274,10 @@ requests, commit history, and subsystem documentation rather than this file.
 
 ### Added
 
+- Standalone 3D rays, overlaps and shape casts with quaternion probes, masks,
+  sensor opt-in, whole-entity predicates and deterministic results at current
+  body poses. Spatial acceleration and scene/editor/Decay/game proof remain open.
+
 - A standalone 3D physics engine world with fixed-step bodies, validated unit
   quaternions, box/sphere/capsule pieces, masks, collision/sensor events and
   basic velocity/impulse/kinematic/teleport controls. Scene, editor, Decay and

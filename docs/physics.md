@@ -798,12 +798,12 @@ a script pass. The platformer proves ground clearance against tilemap geometry;
 2D overlaps and shape casts are implemented for circles, boxes and capsules.
 Decay exposes `Physics.overlap_circle`, `overlap_box`, `cast_circle` and
 `cast_box`; Orbital's mine blast and Physics Playground exercise them.
-All 3D runtime queries remain future work. Rays, overlaps, shape casts and
-controller penetration/sweep/ground phases use the query index. Previous platform
+2D rays, overlaps, shape casts and controller penetration/sweep/ground phases
+use the query index. Previous platform
 support is reconstructed directly from that known entity's pieces.
 The incremental physics update is tracked in `docs/physics-update.md`.
 
-The index uses one leaf per registered collider piece. Ray traversal tests bounds
+The 2D index uses one leaf per registered collider piece. Ray traversal tests bounds
 against the finite segment; overlaps use probe bounds; casts use the union of
 start/end bounds at fixed orientation. Candidates are sorted by entity handle and
 piece order before the unchanged exact geometry/filtering phase. Predicates are
@@ -828,6 +828,29 @@ and no new dependency is introduced.
 
 Results contain Sindri entity IDs, hit position/normal in the appropriate vector
 dimension, and distance. They never expose Rapier collider handles.
+
+The standalone 3D world exposes `raycast`/`raycast_where`, `overlap`/
+`overlap_where` and `shape_cast`/`shape_cast_where` using `RaycastFilter3d`,
+`RayHit3d`, `ShapeHit3d` and quaternion `PhysicsPose3d` values. Queries reconstruct
+current body/local poses, independently of the solver cache: inserts and ordinary
+teleports are visible before stepping; position-kinematic targets remain pending
+until the solve. They scan entities sorted by handle and pieces in authored order;
+3D acceleration is still absent. Stable predicates run once per non-excluded
+entity, and hosts must not rely on exhaustive predicate visits when indexing lands.
+
+Membership masks, sensor opt-in and whole-entity exclusion match the 2D contract.
+Overlaps return sorted unique entity handles. Rays/sweeps normalize finite XYZ
+directions in f64, accept extreme finite magnitudes, reject zero directions,
+negative/non-finite distance and overflowing endpoints. Rays include the segment
+endpoint. Ties prefer entity handle then authored piece order. Inside/on rays
+return the origin with zero distance/normal; penetrating shape casts return the
+probe origin with zero distance/normal. Non-penetrating casts report the touched
+piece's world-space witness and outward normal. Sweeps keep probe rotation fixed;
+box/sphere dimensions must be positive, and query capsules allow zero half-height
+with positive radius. Pose validation uses the body's quaternion tolerance.
+
+Native tests exercise these engine APIs. Scene/Decay/editor access and game/voxel/
+browser proof are still absent; a unit-tested query is not a completed surface.
 
 ## Editor
 
@@ -917,7 +940,7 @@ atomic rejection and removal/reuse. WASM compilation is a separate gate; no 3D
 browser simulation is claimed until the shared host and game exercise it.
 
 This is the engine prerequisite for the physics-update voxel-world proof in
-Causeway. 3D acceptance remains unchecked: queries/indexing, scene transform and
+Causeway. 3D acceptance remains unchecked: query indexing, scene transform and
 lifecycle synchronization, gravity authoring, editor checked commands/Play,
 typed Decay Vec3 controls/events and actual resident/edited voxel collision remain
 separate slices. Voxel collision must derive from the occupied world, account for

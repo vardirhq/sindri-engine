@@ -251,18 +251,23 @@ bodies, bounce and sensors with desktop/touch controls. Pages exports it under
 checks exercise its real Decay controls. Rays, overlaps and shape casts now use
 a synchronized per-piece index, also used by controller penetration, slide and
 ground probes. Historical platform support reads only the known support entity's
-pieces; current bounds cannot discard its previous pose. 3D queries remain absent;
-implemented 2D overlaps and shape casts
-are described below.
+pieces; current bounds cannot discard its previous pose. Implemented 2D overlaps
+and shape casts are described below.
 
 A standalone `PhysicsWorld3d` now exercises the parallel Sindri-owned body/collider
 model through fixed-step simulation. Native tests cover XYZ gravity, box/sphere/
 capsule solids, quaternion/local offsets, compound mass, masks and collision/
 sensor events, kinematic targets, velocity/impulse/teleport controls, rotation
 locking and atomic validation/removal. The engine rejects quaternions outside
-the unit-norm tolerance; all poses use `[x, y, z, w]`. This is the prerequisite for Causeway voxel collision
-proof, not a completed 3D surface: queries, scene synchronization, Decay, editor,
-resident/edited voxel collision and browser execution remain unimplemented.
+the unit-norm tolerance; all poses use `[x, y, z, w]`. Standalone 3D rays, overlaps
+and fixed-orientation shape casts use current body/local poses even before the
+first step or immediately after teleports. Native regressions cover all shapes,
+XYZ hits, rotated probes, filtering, whole-entity predicates, sorted unique
+results, exact ties, initial overlap, extreme finite directions and pending/solved
+poses. Queries scan sorted pieces; they have no spatial acceleration yet.
+This is the prerequisite for Causeway voxel collision proof, with scene
+synchronization, Decay, editor, resident/edited voxel collision and browser
+execution still unimplemented.
 
 Forces and rotation have runtime and typed Decay controls: additive world force
 and torque last one fixed step, impulses act immediately and off-centre kicks

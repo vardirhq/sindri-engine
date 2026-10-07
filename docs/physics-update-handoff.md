@@ -16,6 +16,15 @@ a pushed handoff. Do not ask them to authorize the scope again.
 
 ## Current continuation checkpoint
 
+Standalone 3D rays, overlaps and fixed-orientation shape casts now use current
+body/local quaternion poses. Eight regressions cover XYZ/all shapes, rotations,
+filtering, whole-entity predicates, sorted unique overlaps, exact entity/piece
+ties, immediate/solved/pending poses, initial overlap and extreme/invalid inputs.
+All 173 physics tests, scoped preflight, warning-denied Clippy and all-target/
+all-feature WASM compilation pass. Queries scan sorted pieces; continue with
+3D spatial acceleration, then scene/editor/Decay and the voxel game proof.
+No host, component, dependency or 2D behavior changed. CI must verify this head.
+
 The standalone 3D foundation now owns fixed-step bodies, compound box/sphere/Y
 capsule colliders, XYZ velocities/impulses, position-kinematic targets and
 entity collision/sensor transitions. Quaternions use `[x, y, z, w]`; complete
@@ -26,7 +35,7 @@ preserves the 2D API. No dependency, component registration or host call changed
 All 165 native physics tests and 856 scene/Decay/platformer tests passed, alongside
 warning-denied Clippy, all-target/all-feature WASM and scoped preflight.
 Prior head `02b99c8e` is green in CI; this checkpoint needs its own CI verification.
-Continue with 3D queries, then scene lifecycle/transform/gravity synchronization,
+Continue with 3D query acceleration, then scene lifecycle/transform/gravity synchronization,
 typed Decay Vec3/events and checked editor authoring/Play. Complete the Causeway
 voxel-terrain proof with residency, edited collision and bounded work on native
 and browser before checking 3D acceptance. Final integration remains open.
@@ -748,9 +757,9 @@ edits and current synchronized poses. Supply meaningful scaling evidence.
 
 ### 3D runtime and voxel proof
 
-The standalone 3D body world now runs fixed-step simulation and entity events.
-Implement queries, scene lifecycle/writeback, editor authoring and typed Vec3
-Decay access. Inspect both editor and exported
+The standalone 3D body world now runs fixed-step simulation, entity events and
+exact rays/overlaps/shape casts. Implement query acceleration, scene lifecycle/
+writeback, editor authoring and typed Vec3 Decay access. Inspect both editor and exported
 game host plumbing so they share semantics. Transform3D uses quaternion [x,y,z,w].
 
 Voxel-world proof must collide with actual voxel terrain. Do not use an

@@ -2,6 +2,8 @@
 
 mod build;
 mod controls;
+mod query;
+mod sweep;
 mod validation;
 
 use std::{collections::HashMap, sync::mpsc, time::Duration};

@@ -1118,3 +1118,24 @@ surface-specific completeness. This checklist does not mark those surfaces done.
   registration changed; the existing 2D event-kind reexport remains compatible.
 - Prior head `02b99c8e` is green in CI; this new checkpoint needs verification.
   Continue with 3D queries, then the scene/editor/Decay and voxel proof slices.
+
+
+## Exact 3D query checkpoint
+
+- Standalone 3D rays, overlaps and fixed-orientation box/sphere/Y-capsule casts
+  now reconstruct current body/local quaternion poses independently of solver
+  caches. Insertions and teleports are visible before stepping; kinematic targets
+  remain pending until solving. Masks match memberships, sensors are opt-in,
+  exclusion/predicates cover whole entities, and overlaps return sorted unique
+  handles. Exact hit ties prefer entity handle then authored piece order.
+- Eight native regressions cover every shape/XYZ axis, world points/normals,
+  body/local/probe rotations, filtering/predicates/compound deduplication,
+  equal-distance piece normals, insert/teleport/solved/pending/removal poses,
+  initial overlap, finite endpoints, extreme finite directions and invalid inputs.
+  All 173 physics tests pass, alongside scoped preflight, warning-denied Clippy
+  and all-target/all-feature WASM compilation.
+- Queries currently scan sorted entities and pieces; spatial acceleration is the
+  next engine slice. These are prerequisites for Causeway voxel-terrain proof,
+  with scene/editor/Decay access and native/browser game proof still absent.
+  No host call, component registration, dependency or 2D behavior changed.
+  3D acceptance and final integration remain unchecked; CI must verify this head.
