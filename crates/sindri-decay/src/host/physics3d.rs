@@ -29,7 +29,6 @@ impl WorldHost<'_> {
         ) {
             return self.physics3d_query(call, path, args);
         }
-        let error = |message: &str| RuntimeError::Host(format!("{}: {message}", path.dotted()));
         let wanted = match call {
             Physics3dCall::CollisionStarted => Some(PhysicsEventKind::CollisionStarted),
             Physics3dCall::CollisionStopped => Some(PhysicsEventKind::CollisionStopped),
@@ -40,49 +39,7 @@ impl WorldHost<'_> {
         if let Some(wanted) = wanted {
             return self.physics3d_events(wanted, path, args);
         }
-        let read = matches!(
-            call,
-            Physics3dCall::Velocity | Physics3dCall::AngularVelocity
-        );
-        if args.len() != if read { 1 } else { 2 } {
-            return Err(error("incorrect argument count"));
-        }
-        let entity = self.entity_argument(path, args, 0, "the 3D body")?;
-        if !self.world.is_active(entity) {
-            return Err(error("3D body must be active"));
-        }
-        let vector = if read {
-            [0.0; 3]
-        } else {
-            vector(path, &args[1])?
-        };
-        let physics = self
-            .physics3d
-            .as_mut()
-            .ok_or_else(|| error("host has no 3D physics"))?;
-        match call {
-            Physics3dCall::Velocity | Physics3dCall::AngularVelocity => {
-                let value = if matches!(call, Physics3dCall::Velocity) {
-                    physics.world.linear_velocity(entity)
-                } else {
-                    physics.world.angular_velocity(entity)
-                }
-                .map_err(|failure| error(&failure.to_string()))?;
-                Ok(Value::Vec3(value.map(f64::from)))
-            }
-            _ => {
-                let result = match call {
-                    Physics3dCall::SetVelocity => physics.world.set_linear_velocity(entity, vector),
-                    Physics3dCall::SetAngularVelocity => {
-                        physics.world.set_angular_velocity(entity, vector)
-                    }
-                    Physics3dCall::ApplyImpulse => physics.world.apply_impulse(entity, vector),
-                    _ => unreachable!("event and read calls handled above"),
-                };
-                result.map_err(|failure| error(&failure.to_string()))?;
-                Ok(Value::Unit)
-            }
-        }
+        self.physics3d_motion(call, path, args)
     }
     fn physics3d_events(
         &self,

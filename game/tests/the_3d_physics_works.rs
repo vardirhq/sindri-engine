@@ -2,8 +2,11 @@
 
 use serde_json::json;
 use sindri_causeway::{Session, extractor};
-use sindri_core::{EntityData, EntityId, SceneComponent, Transform3D, World};
-use sindri_decay::{ScriptComponent, ScriptSources};
+use sindri_core::{
+    EntityData, EntityId, PrefabDocument, SceneComponent, SceneEntity, SceneEntityId, Transform3D,
+    World,
+};
+use sindri_decay::{PrefabSources, ScriptComponent, ScriptSources};
 use sindri_platform::InputState;
 use sindri_scene::{Collider3dComponent, PhysicsWorld3dComponent, RigidBody3dComponent};
 
@@ -129,4 +132,53 @@ fn shared_session_offers_typed_3d_controls_and_completed_collision_events() {
     assert!(at[0] > 2.9 && at[0] < 3.1, "{at:?}");
     assert!(at[1] > 0.7 && at[1] < 0.8, "{at:?}");
     assert!(at[2] > 4.3 && at[2] < 4.5, "{at:?}");
+}
+
+#[test]
+fn shared_session_replays_typed_prefab_controls_before_first_solve() {
+    let (mut world, _, template) = fixture();
+    let mut root = SceneEntity::new(SceneEntityId::new("spawn-body").unwrap());
+    root.name = Some("Spawned body".into());
+    root.components = world.get(template).unwrap().components.clone();
+    root.components.remove(ScriptComponent::TYPE_NAME);
+    root.transform_3d = Some(Transform3D {
+        position: [0.0, 3.0, 0.0],
+        ..Transform3D::default()
+    });
+    world.despawn_recursive(template).unwrap();
+    let mut prefabs = PrefabSources::new();
+    prefabs.insert("body.prefab", PrefabDocument::single(root));
+    let mut sources = ScriptSources::new();
+    sources.insert(
+        "spawn.decay",
+        include_str!("../../crates/sindri-decay/tests/physics3d_spawn.decay"),
+    );
+    world.spawn(EntityData {
+        components: [(
+            ScriptComponent::TYPE_NAME.into(),
+            json!({
+                "source": "spawn.decay", "script": "Spawn3d",
+                "properties": {"body_prefab": "body.prefab"}
+            }),
+        )]
+        .into(),
+        ..EntityData::default()
+    });
+    let mut session = Session::with_sources(extractor().unwrap().components().clone(), sources)
+        .with_prefabs(prefabs);
+    session
+        .step(&mut world, &InputState::default(), (960.0, 540.0), 0.01)
+        .unwrap();
+    let actor = world
+        .entities()
+        .find(|(_, data)| data.name.as_deref() == Some("Spawned body"))
+        .unwrap()
+        .0;
+    assert!(world.world_transform(actor).unwrap().position[0].abs() < f32::EPSILON);
+    session
+        .step(&mut world, &InputState::default(), (960.0, 540.0), 0.01)
+        .unwrap();
+    let at = world.world_transform(actor).unwrap().position;
+    assert!((at[0] - 0.04).abs() < 0.001, "{at:?}");
+    assert!(at[1] < 3.0 && at[1] > 2.9, "{at:?}");
 }

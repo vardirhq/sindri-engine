@@ -5,7 +5,7 @@ use super::{TypeEntry, call, value};
 pub(super) const TYPES: &[TypeEntry] = &[
     TypeEntry {
         name: "Physics3d",
-        text: "Independent 3D physics controls, indexed queries and copied last-step events. Requires a 3D physics host. Live controls require an active synchronized body; calls before spawn synchronization fail rather than queue. Authored motion fields are unchanged, so structural rebuilds restore authored settings.",
+        text: "Independent 3D physics controls, indexed queries and copied last-step events. Requires a 3D physics host. Controls require an active body. Before synchronization, valid authored 3D bodies and nonempty colliders accept ordered setters/impulses; replay uses actual compound mass. Unconsumed requests expire after successful synchronization. Authored motion fields are unchanged, so structural rebuilds restore authored settings.",
         members: &[
             call(
                 "layer",
@@ -108,27 +108,27 @@ pub(super) const TYPES: &[TypeEntry] = &[
             call(
                 "velocity",
                 &["entity"],
-                "A copied world-space Vec3 linear velocity of an active synchronized 3D body.",
+                "Copied world-space Vec3 linear velocity. Before synchronization returns the last queued setter or authored starting velocity; impulses resolve only after mass is known.",
             ),
             call(
                 "set_velocity",
                 &["entity", "velocity"],
-                "Sets finite world-space Vec3 linear velocity on an active synchronized dynamic or velocity-kinematic body. Invalid inputs fail before mutation; does not change authored starting motion.",
+                "Sets finite world-space Vec3 linear velocity on an active dynamic or velocity-kinematic body; queues before synchronization after validating authored body/colliders. Invalid inputs fail before mutation; does not change authored starting motion.",
             ),
             call(
                 "angular_velocity",
                 &["entity"],
-                "A copied world-space Vec3 angular velocity in radians per second around XYZ of an active synchronized 3D body.",
+                "Copied world-space Vec3 angular velocity in radians per second around XYZ. Before synchronization returns the last queued setter or authored starting velocity; rotation locking returns zero.",
             ),
             call(
                 "set_angular_velocity",
                 &["entity", "velocity"],
-                "Sets finite Vec3 angular velocity in radians per second around world XYZ on an active synchronized dynamic or velocity-kinematic body. Rotation-locked bodies retain zero angular velocity. Invalid input fails before mutation; does not change authored starting motion.",
+                "Sets finite Vec3 angular velocity in radians per second around world XYZ on an active dynamic or velocity-kinematic body; queues before synchronization after validating authored body/colliders. Rotation-locked bodies retain zero angular velocity. Invalid input fails before mutation; does not change authored starting motion.",
             ),
             call(
                 "apply_impulse",
                 &["entity", "impulse"],
-                "Applies a finite world-space Vec3 impulse to an active synchronized dynamic body using its compound mass. Invalid input or body kind fails before mutation; does not change authored starting motion.",
+                "Applies a finite world-space Vec3 impulse to an active dynamic body using its compound mass; queues before synchronization and resolves in call order at materialization. Invalid input or body kind fails before mutation; does not change authored starting motion.",
             ),
             call(
                 "collision_started",

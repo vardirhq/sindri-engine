@@ -1394,3 +1394,14 @@ surface-specific completeness. This checklist does not mark those surfaces done.
   collision/game proof remain open. No dependency, host surface, component schema
   or 2D behavior changed. Prior head `888ce871` is green in CI; verify the new
   checkpoint before treating it as green. 3D acceptance/final integration stay open.
+
+### Typed 3D spawn controls
+
+Existing Physics3d velocity/angular setters and impulses now queue for active
+valid authored bodies with nonempty colliders before synchronization. Reads copy
+last setters or authored starting motion; impulses resolve only after mass is
+known, and rotation locking returns zero. Four bridge regressions cover real
+typed prefab spawning, call order, authored-state preservation, locks/kinds and
+invalid authoring. This is a general engine/Decay foundation toward Causeway;
+a shared native-session regression and exported Chromium fixture verify actual
+spawn replay and movement. Game/voxel/editor proof remains open. The 3D acceptance item remains unchecked.

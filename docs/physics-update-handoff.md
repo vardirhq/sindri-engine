@@ -16,6 +16,42 @@ a pushed handoff. Do not ask them to authorize the scope again.
 
 ## Current continuation checkpoint
 
+Typed `Physics3d` setters/impulses now use the ordered engine queue for active
+unmaterialized bodies after validating authored body/nonempty colliders, composed
+pose, dimension ownership and moving depth locks. Live controls retain runtime
+semantics without reparsing edited authoring. Pending reads copy the last setter
+or authored start; impulses resolve only once mass is known, and locked angular
+reads stay zero. Public signatures and dependencies are unchanged; reference
+prose and generated catalogue describe the new timing contract.
+
+Four bridge regressions exercise real typed prefab spawning, call order, copied
+pending reads, preservation of authoring, starting velocities, locks/kinds and
+malformed/missing/conflicting authoring. A shared native-session regression proves
+spawn-before-solve timing and first-step movement. A rebuilt exported Chromium
+fixture loads the real prefab and reports `3D typed prefab spawn replay verified`
+only after observing copied reads and live movement/velocity. WebGPU, eight
+fetched assets and 20 visible colors pass the existing smoke checks.
+
+Scoped preflight (Decay/game all-target/all-feature checks and full tests),
+warning-denied Clippy, Decay all-target/all-feature WASM check, game WASM build,
+format/file-size gates and all 11 catalogue tests pass (403 native tests plus
+11 catalogue tests). The game library and changed 3D integration test also pass
+WASM checks. A broader game `--all-targets` WASM experiment fails in existing
+`the_beacon_lights` / `the_game_is_played` tests, which import native-only asset
+loaders and `Session::new`; it is not the CI WASM contract, which checks workspace
+libraries/binaries. Do not claim every game test target builds for WASM. Logs:
+`/tmp/sindri-host3d-game-wasm{,-scoped}.log`. Artifacts:
+`/tmp/sindri-host3d-{preflight,clippy,wasm,wasm-build,generate,catalogue,export,browser}.log`,
+`/tmp/sindri-host3d-browser.png`, export `/tmp/sindri-host3d-export`.
+Prior head `16bed816` is green in CI (run `37664260537`). Check the current pushed head's CI before claiming readiness.
+
+Next close the actual game/voxel proof: Causeway occupied/resident/edited/bounded
+voxel collision and usable 3D authoring/Play/replay. Primitive prefab/session/
+browser fixtures prove the host contract, not game integration. The 3D acceptance
+and final integration items stay unchecked; keep PR #497 draft. The earlier
+foundation notes below describe the preceding checkpoint, before typed wiring.
+
+
 The standalone 3D spawn-control foundation is now implemented. `BodyControl3d`
 has linear/angular velocity setters and impulses; `remember_control` validates
 finite values and caller-supplied authored kind for unregistered bodies, while

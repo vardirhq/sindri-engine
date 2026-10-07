@@ -132,19 +132,17 @@ fn invalid_vectors_arity_context_and_handles_leave_live_motion_untouched() {
 }
 
 #[test]
-fn unsynchronized_and_wrong_kind_bodies_fail_and_locked_rotation_stays_zero() {
+fn queued_and_live_controls_obey_body_kind_and_rotation_lock() {
     let mut fixture = Fixture::new();
     let actor = fixture.actor("dynamic", false);
-    assert!(
-        fixture
-            .call(
-                actor,
-                "set_velocity",
-                &[reference(actor), Value::Vec3([1.0; 3])],
-                true
-            )
-            .is_err()
-    );
+    fixture
+        .call(
+            actor,
+            "set_velocity",
+            &[reference(actor), Value::Vec3([1.0; 3])],
+            true,
+        )
+        .unwrap();
     fixture
         .world
         .get_mut(actor)

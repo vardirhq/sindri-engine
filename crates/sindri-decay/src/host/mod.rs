@@ -30,6 +30,7 @@ mod person;
 mod physics;
 mod physics3d;
 mod physics3d_layers;
+mod physics3d_motion;
 mod physics3d_query;
 mod physics_character;
 mod physics_contacts;

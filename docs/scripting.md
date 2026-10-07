@@ -1033,12 +1033,17 @@ fail explicitly. With no active settings there are no names to select.
 `Physics3d` takes Vec3 values without changing the existing 2D `Physics` API.
 `velocity(entity)` and `angular_velocity(entity)` return copied Vec3 values;
 `set_velocity(entity, velocity)`, `set_angular_velocity(entity, velocity)` and
-`apply_impulse(entity, impulse)` control active synchronized 3D bodies. Velocity
+`apply_impulse(entity, impulse)` control active 3D bodies. Velocity
 controls accept dynamic/velocity-kinematic bodies; impulses require dynamic
 bodies. Rotation-locked bodies retain zero angular velocity. Finite f32-range
 vectors validate before mutation; controls leave authored motion unchanged.
-Missing context, inactive/stale handles and pre-synchronization bodies fail
-explicitly. There is no 3D spawn-window queue yet.
+Missing context and inactive/stale handles fail explicitly. Before synchronization,
+valid authored 3D body and nonempty collider components are required, without
+conflicting 2D physics or a moving depth lock. Setters/impulses queue in call order
+and replay before solving against actual compound mass. Reads copy the last
+queued setter or authored start; locked angular velocity is zero and impulses
+resolve only at materialization. Successful synchronization expires unconsumed
+requests; authored motion remains unchanged.
 
 `collision_started()`, `collision_stopped()`, `sensor_entered()` and
 `sensor_exited()` return copied sorted unique `List<Entity>` values naming the

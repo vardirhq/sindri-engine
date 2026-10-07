@@ -277,7 +277,9 @@ requests, commit history, and subsystem documentation rather than this file.
 - Standalone 3D spawn controls queue finite velocity setters and impulses in
   order, replay after collider mass is known and expire unresolved requests.
   Scene synchronization validates pending controls before mutating its batch.
-  Decay spawn-window wiring remains a follow-up.
+  Typed `Physics3d` controls now use this queue for valid authored bodies and
+  nonempty colliders. Pending reads copy last setters/authored starts; impulses
+  resolve at materialization and locked angular velocity stays zero.
 - Typed 3D box/capsule overlaps and casts accept rotation axes and radians,
   returning copied hits or entity lists over indexed active geometry. Sweeps
   keep orientation fixed; invalid dimensions or rotations fail explicitly.
@@ -293,8 +295,9 @@ requests, commit history, and subsystem documentation rather than this file.
 - Typed `Physics3d` Vec3 velocity/angular-velocity controls, dynamic impulses and
   copied non-draining collision/sensor event lists in shared native/browser
   sessions and editor Play. Invalid input preserves motion; inactive/stale handles
-  and unsynchronized bodies fail explicitly. Controls retain authored starting
-  fields; 3D spawn-window queuing, rotated probes and voxel/game proof remain open.
+  fail explicitly. Controls retain authored starting fields; the later spawn
+  queue and rotated probe slices extend this surface. Voxel/game proof remains
+  open.
 
 - Registered 3D body, compound collider and gravity-world scene components plus
   `ScenePhysics3d` lifecycle/transform synchronization and parent-space write-back.

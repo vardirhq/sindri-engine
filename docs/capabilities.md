@@ -290,15 +290,18 @@ four sorted unique non-draining collision/sensor event queries. Six bridge
 regressions and a shared-session Decay driver exercise validation, kinds, locking,
 active/lifetime filtering, copied values/events and motion through subsequent
 scene steps. A rebuilt Chromium fixture confirms typed controls and actual solid
-landing events. Controls require an active synchronized body, leave authored
-motion unchanged and fail before spawn synchronization; Decay spawn-window queuing
-remains absent. The standalone `BodyControl3d` queue now validates setters/
+landing events. Controls require an active body and leave authored motion unchanged. Before
+synchronization they validate authored bodies/nonempty colliders and queue in
+order; reads copy last setters/authored starts without resolving impulses. The standalone `BodyControl3d` queue now validates setters/
 impulses before insertion, replays them in order after compound mass is known
 and expires unresolved requests at a successful synchronization. Complete-batch
 validation includes queued kind conflicts and retains requests after failure.
 Four engine and three scene regressions exercise replay, reads, locks, rejection,
-retry and expiry; `ScenePhysics3d` replays before solving. Decay wiring and game
-proof remain open. Typed 3D rays, sphere overlaps and sphere casts use indexed
+retry and expiry; `ScenePhysics3d` replays before solving. Four typed bridge
+regressions exercise real prefab spawning, copied pending reads, locks/kinds and
+invalid authoring. A shared native-session regression and exported Chromium
+fixture verify actual spawn replay and movement; game/voxel/editor proof remains
+open. Typed 3D rays, sphere overlaps and sphere casts use indexed
 synchronized geometry, active-entity filtering, masks/sensors/whole-entity
 exclusion and copied optional `RayHit3d`/sorted overlap lists. Six bridge
 regressions and the shared-session/Chromium landing fixture exercise these
@@ -1957,7 +1960,7 @@ settings gear.
 - **One mesh primitive: `Cube`.** No quad, sphere, or glTF import
 - The 3D runtime has native simulation, scene synchronization/command tests,
   shared game/editor host wiring and primitive browser motion/landing evidence.
-  Native inspector/Play interaction, Decay spawn-window controls and occupied
+  Native inspector/Play interaction, shared-session/browser spawn controls and occupied
   resident/edited voxel/gameplay proof remain open
 - Effects are bounded, renderer-free runtime values driven from Decay; there is
   no general authored particle/emitter system or authored parallax system

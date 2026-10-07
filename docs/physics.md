@@ -898,14 +898,21 @@ surface remains `Physics`; the independent 3D surface is `Physics3d`.
 `Physics3d.velocity(entity)` and `angular_velocity(entity)` return copied Vec3
 values. `set_velocity(entity, velocity: Vec3)`,
 `set_angular_velocity(entity, velocity: Vec3)` and
-`apply_impulse(entity, impulse: Vec3)` act on active synchronized 3D bodies.
+`apply_impulse(entity, impulse: Vec3)` act on active 3D bodies.
 Vectors must be finite and fit engine f32 values. Velocity controls accept dynamic
 and velocity-kinematic bodies; impulses require dynamic bodies. Rotation locking
 keeps angular velocity zero. Invalid arguments/body kinds fail before mutation.
 Controls change live simulation, leaving authored starting motion unchanged;
 structural body/collider rebuilds therefore restore authored settings. Missing
-3D host context, stale/inactive handles and bodies not yet synchronized fail
-explicitly. These Decay calls do not yet queue controls before synchronization.
+3D host context and stale/inactive handles fail explicitly. Before synchronization,
+controls require valid authored 3D body and nonempty collider components, no
+conflicting 2D physics and no moving depth lock. The composed transform supplies
+pose, as it does for scene insertion. Requests replay in call order before the
+first solve, after actual compound mass is known. Reads return copied last queued
+setters or authored starting velocities (locked angular velocity is zero);
+impulses cannot affect reads until materialization. Unconsumed requests expire
+after a successful synchronization. Live controls retain their runtime semantics
+without reparsing authored data.
 
 The standalone engine now supplies `BodyControl3d` linear/angular velocity
 setters and impulses, `apply_control` for live bodies and `remember_control`
@@ -923,8 +930,11 @@ discards requests not materialized by a successful batch; `ScenePhysics3d` calls
 it before solving. Standalone hosts must call it after their own validated
 insertion batch. Four engine and three scene regressions exercise ordering/mass,
 kind and input rejection, lock/retry, pre-solve replay and expiry. This is the
-engine foundation toward Causeway; Decay spawn-window wiring and game proof
-remain absent, so the public scripting behavior described above is unchanged.
+engine foundation toward Causeway. Four typed bridge regressions additionally
+exercise real prefab spawning, copied pending reads, kinds/locks and malformed
+authoring. A shared native-session regression and exported Chromium fixture verify actual
+spawn replay and movement. Game/voxel integration and native editor proof remain
+open.
 
 `Physics3d.collision_started()`, `collision_stopped()`, `sensor_entered()` and
 `sensor_exited()` return sorted unique lists of other active entities whose contact with this
