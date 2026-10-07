@@ -270,9 +270,9 @@ because a half-built body is worse than none.
 
 The standalone 3D engine world accepts a slice of collider pieces, validates all
 of them before insertion and sums their mass. The 3D scene driver now consumes
-authored compounds; game/editor host integration remains open. This general
-piece boundary is a prerequisite for voxel collision
-geometry; it does not claim authored compounds or voxel/game proof.
+authored compounds; shared game sessions and native editor Play step both
+drivers. This general piece boundary is a prerequisite for voxel collision
+geometry; it does not claim voxel/game proof.
 
 An entity may not participate in both the 2D and 3D physics worlds at once.
 Validation reports that as an authored configuration error instead of choosing a
@@ -733,8 +733,11 @@ workspace integration remain separate work.
 
 `PhysicsWorld2d` and `PhysicsWorld3d` are separate runtime state beside `World`,
 not serialized state inside it. Each owns its private backend and maps `EntityId`
-to private handles. `ScenePhysics3d` now supplies a separate scene driver; current
-game/editor hosts still synchronize only the 2D world.
+to private handles. Shared native/browser game sessions and native editor Play
+synchronize and step 2D, then 3D, with the same fixed duration before scripts.
+Each dimension validates its own batch; this is not a transaction across both
+worlds. Editor fresh Play, Stop and scene replacement discard both solvers;
+pause/resume retains them, and Stop restores the authored scene snapshot.
 Despawning an entity removes its body/collider before the next
 step; generation-checked IDs prevent a reused slot from inheriting old physics
 state.
@@ -951,7 +954,8 @@ Native tests exercise XYZ integration, gravity scale, all shapes landing on soli
 geometry, rotated/offset collision, quaternion round-trip, masks/sensor enter/exit,
 kinematic target timing, compound mass/impulse, teleport velocity, rotation lock,
 atomic rejection and removal/reuse. WASM compilation is a separate gate; no 3D
-browser simulation is claimed until the shared host and game exercise it.
+voxel/game proof is claimed. A scratch exported host fixture separately exercises
+XYZ motion and solid-box landing in Chromium through a read-only Decay observer.
 
 The scene now registers `sindri.physics3d.rigid_body`, `sindri.physics3d.collider`
 and `sindri.physics3d.world`. Body payloads use the engine's XYZ fields (including
@@ -983,11 +987,16 @@ Position-kinematic targets set through the runtime world write back after solvin
 Events describe the last successful step; invalid input retains prior runtime
 state/events. Registered defaults and body-kind choices are available to generic
 checked authoring. Tests exercise commands/undo/redo and stable-ID save/reopen,
-not native inspector or Play interaction.
+not native inspector or Play interaction. The Physics menu includes all three
+3D components, and its registered-component coverage test passes.
 
 This is the engine prerequisite for the physics-update voxel-world proof in
-Causeway. 3D acceptance remains unchecked: game/editor host integration, native
-inspector/Play exercise, typed Decay Vec3 controls/events and actual resident/edited
+Causeway. Two shared-session regressions exercise XYZ motion, solid landing and
+disabling/reactivating bodies; browser host execution exercises the same motion
+and landing. Native editor interaction remains unverified: in the latest headless
+review environment, adapter startup hung or failed before a usable window.
+3D acceptance remains unchecked: native inspector/Play exercise, typed Decay
+Vec3 controls/events and actual resident/edited
 voxel collision remain separate slices. Voxel collision must derive from the occupied world, account for
 residency/dirty revisions and removal, and have a bounded update policy. An
 invisible plane or this standalone API is not voxel/game proof. CCD controls,

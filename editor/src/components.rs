@@ -205,6 +205,21 @@ const KNOWN: &[Known] = &[
         icon: icons::EFFECT,
     },
     Known {
+        type_name: "sindri.physics3d.rigid_body",
+        family: Family::Physics,
+        icon: icons::PHYSICS,
+    },
+    Known {
+        type_name: "sindri.physics3d.collider",
+        family: Family::Physics,
+        icon: icons::COLLIDER,
+    },
+    Known {
+        type_name: "sindri.physics3d.world",
+        family: Family::Physics,
+        icon: icons::PHYSICS,
+    },
+    Known {
         type_name: "sindri.physics2d.rigid_body",
         family: Family::Physics,
         icon: icons::PHYSICS,

@@ -210,6 +210,7 @@ impl EditorApp {
                 // a freshly loaded world reuses entity slots from the start.
                 self.animations = SpriteAnimations::new();
                 self.play_snapshot = None;
+                self.reset_physics();
                 self.notice = None;
                 self.announce_scene();
                 self.reload_textures();

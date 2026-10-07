@@ -277,9 +277,15 @@ parent-space write-back. Twelve regressions cover lifecycle/edits, batch rejecti
 solid/sensor events, targets, newer rotated/scaled parents and checked command
 undo/redo/save/reopen. Visual scale is preserved but does not resize 3D colliders;
 structural payload edits reset the rebuilt body's motion. This is the prerequisite
-for Causeway voxel collision proof, with game/editor host integration, native
-inspector/Play exercise, Decay, resident/edited voxel collision and browser
-execution still unimplemented.
+for Causeway voxel collision proof. Shared native/browser sessions and native
+editor Play now step both dimensions before scripts; fresh Play, Stop and scene
+replacement reset both editor solvers. Two session regressions exercise XYZ
+motion, solid landing and inactivity. An exported scratch fixture exercises
+XYZ motion/landing in Chromium with a read-only Decay observer and visible
+textured geometry. All three components appear in the Physics menu and editor
+tests pass. Native inspector/Play interaction remains unverified in this slice
+because local graphics adapter startup hangs or fails. Typed Decay 3D controls,
+resident/edited voxel collision and game proof remain unimplemented.
 
 Forces and rotation have runtime and typed Decay controls: additive world force
 and torque last one fixed step, impulses act immediately and off-centre kicks
@@ -1923,10 +1929,10 @@ settings gear.
 - World-space text, rich spans, and font fallback are missing. Screen text has
   authored alignment and wrapping, including Weave-controlled wrapping
 - **One mesh primitive: `Cube`.** No quad, sphere, or glTF import
-- The shipped physics runtime is 2D. The standalone 3D engine world has native
-  simulation and scene synchronization/command tests, but no game/editor host
-  integration, native inspector/Play exercise, Decay workflow, browser execution
-  or voxel/gameplay proof
+- The 3D runtime has native simulation, scene synchronization/command tests,
+  shared game/editor host wiring and primitive browser motion/landing evidence.
+  Native inspector/Play interaction, typed Decay controls/events and occupied
+  resident/edited voxel/gameplay proof remain open
 - Effects are bounded, renderer-free runtime values driven from Decay; there is
   no general authored particle/emitter system or authored parallax system
 - Grid walls, footprints, occupancy, and deterministic A* work through the

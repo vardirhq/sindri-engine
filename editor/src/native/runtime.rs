@@ -450,6 +450,7 @@ impl EditorApp {
         // than on resume, so pausing and carrying on does not move the point
         // stop returns to.
         self.play_snapshot = Some(self.world.clone());
+        self.reset_physics();
         // The same seed for every fresh start, so pressing Play twice gives the
         // same run twice and a bug found once can be found again. Resuming from
         // a pause deliberately does not touch it: that would replay numbers the
@@ -542,6 +543,7 @@ impl EditorApp {
         if let Some(snapshot) = self.play_snapshot.take() {
             self.world = snapshot;
         }
+        self.reset_physics();
         self.scripts.restart();
         // A prefab edited while the scene was playing was left alone then,
         // because the world being played is thrown away at Stop. The scene

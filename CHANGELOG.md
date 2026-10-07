@@ -277,7 +277,10 @@ requests, commit history, and subsystem documentation rather than this file.
 - Registered 3D body, compound collider and gravity-world scene components plus
   `ScenePhysics3d` lifecycle/transform synchronization and parent-space write-back.
   Invalid batches, mixed 2D/3D ownership and moving Z-locked 3D bodies fail before
-  runtime mutation. Game/editor host, Decay and voxel proof remain open.
+  runtime mutation. Shared native/browser sessions and editor Play now step both
+  dimensions before scripts; fresh Play, Stop and scene replacement reset editor
+  solvers. The Physics menu includes the three 3D components. Native editor
+  interaction, typed Decay controls and voxel/game proof remain open.
 
 - A query-only per-piece spatial index for 3D rays, overlaps and shape casts,
   refreshed on insertion/removal/teleport and completed simulation steps while

@@ -16,21 +16,43 @@ a pushed handoff. Do not ask them to authorize the scope again.
 
 ## Current continuation checkpoint
 
-`ScenePhysics3d` now owns registered 3D body/collider/world components beside the
-scene. Active batches validate before runtime mutation; mixed 2D/3D ownership,
-multiple 3D world settings and moving Z-locked 3D bodies fail explicitly. Lifecycle,
-transform/ancestor moves, gravity and parent-space XYZ/quaternion write-back are
-exercised. Unchanged frames/teleports preserve velocity; structural payload edits
-rebuild from authored motion. All non-static kinds write back, with parents before
-children even when the parent has a newer ID. Scale/component payloads are retained.
-Twelve new tests cover these contracts and checked add/edit/undo/redo/save/reopen.
-All 1,056 native physics/scene/Decay/platformer/catalogue tests pass. Preflight,
-warning-denied Clippy, game/editor checks, WASM and regenerated catalogue checks
-pass. Automatic 3D collider scaling is absent: dimensions/offsets remain world units.
-Prior head `3fd9869a` is green in CI; this checkpoint needs its own verification.
-Continue with game/editor 3D host stepping and native authoring/Play, then typed
-Decay Vec3/events and Causeway resident/edited voxel proof on native/browser.
-Hosts still run 2D only; 3D acceptance and final integration remain unchecked.
+Shared native/browser game sessions and native editor Play now step 2D, then
+3D, before scripts with one fixed duration. Fresh Play, Stop and scene replacement
+reset both editor solvers; pause/resume retains them. Added all three registered
+3D components to the Physics menu. CI on prior head `5fb48e9b` failed only its
+component family/glyph coverage test for those missing entries; the affected
+full editor suite passes now. Read the complete failed job log before further
+CI work: `/tmp/sindri-host3d-prior-ci-failures.log`.
+
+Scoped preflight passes 655 game/editor tests (including two new 3D session
+regressions), warning-denied all-target/all-feature checks, formatting and size
+limits. Clippy, typed observer preflight and game WASM library check/build pass.
+An exported primitive fixture confirms XYZ motion and solid-box landing in
+Chromium through a read-only Decay observer, with standard WebGPU/asset/pixel
+checks intact. The rebuilt host also reaches the platformer flag with five
+coins, no falls, eight jumps and 11.533 simulated seconds (27 assets).
+
+Native editor interaction remains unverified: default/Vulkan adapter startup
+spins without a window, GL reports no compatible surface and Chrome SwiftShader
+crashes on native startup. Owned processes are stopped. Retry on a usable graphics
+session; exercise component inspector edits, Play/Pause/Step/Stop and fresh replay.
+Do not infer successful native interaction from the unit suite or browser proof.
+
+Artifacts: `/tmp/sindri-host3d-{preflight,clippy,decay,wasm-check,browser,platformer-browser}.log`,
+`/tmp/sindri-host3d-browser.png`, `/tmp/sindri-host3d-platformer.png`, scratch
+project `/tmp/sindri-host3d-project` and export `/tmp/sindri-host3d-export`.
+Browser observer harness `/tmp/sindri-physics-tools/browser/physics3d-smoke.mjs`
+is the repository standard smoke helper with an additional read-only observer
+assertion. The fixture texture is copied from the platformer tiles; no render
+check threshold was weakened. Session fixtures live in
+`game/tests/the_3d_physics_works.rs` and `game/tests/physics3d_observer.decay`.
+
+Continue with native 3D inspector/Play proof, typed Decay Vec3 controls/events and
+Causeway occupied/resident/edited voxel collision on native/browser. Automatic
+3D collider scaling is absent; dimensions/offsets remain world units. 3D acceptance
+and final integration stay unchecked. CI must verify the latest checkpoint.
+The scene-driver checkpoint already passed 1,056 physics/scene/Decay/platformer/
+catalogue tests; this host slice adds no dependency, schema or host call.
 
 The 3D query-only BVH now selects rays, overlaps and shape casts at current
 poses. Insert/remove/teleport update immediately; non-static pieces refresh after

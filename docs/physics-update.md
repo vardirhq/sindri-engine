@@ -1197,3 +1197,34 @@ surface-specific completeness. This checklist does not mark those surfaces done.
   3D acceptance and final integration remain unchecked. Prior head `3fd9869a`
   is green in CI; this checkpoint needs verification. Continue with shared
   game/editor 3D stepping and authoring, then typed scripting and voxel proof.
+
+
+## Shared 3D host checkpoint
+
+- Shared native/browser game sessions and native editor Play step 2D, then 3D,
+  with the same fixed duration before scripts. Each driver validates its own
+  batch; there is no cross-dimension transaction. Fresh Play, Stop and scene
+  replacement reset both editor solvers; pause/resume retains runtime state.
+- Added the three 3D components to the editor Physics menu. The prior head's only
+  failed CI job reported missing family/glyph entries for precisely those types;
+  the complete affected editor suite now passes locally.
+- Two native shared-session regressions exercise XYZ motion, landing on an actual
+  solid cuboid and disabled/reactivated bodies. A read-only Decay observer watches
+  solved XYZ transforms; typed preflight has no errors or runtime reminders.
+- Scoped preflight passes all 655 game/editor tests, warning-denied all-target/
+  all-feature checks, formatting and file-size gates. Warning-denied Clippy and
+  game WASM library check/build pass. No dependency, schema or Decay host call
+  changed; no generated catalogue update is required.
+- An exported scratch fixture with the rebuilt WASM host passes the standard real
+  Chromium smoke checks: scene/script/texture fetched, WebGPU active, visible
+  textured geometry (21 colours), and the observer confirms XYZ motion/landing.
+  The same host reaches the normal platformer goal with five coins, no falls,
+  eight jumps and 11.533 simulated seconds, fetching 27 assets.
+- Native editor visual review remains unverified. In this headless environment,
+  the default/Vulkan adapter spins before opening a window, GL has no compatible
+  surface and Chrome's SwiftShader ICD crashes on native startup. Owned processes
+  were stopped. This is a review limitation, not evidence that Play is correct.
+- This is general host plumbing toward Causeway's voxel proof, not a completed
+  game capability. Native authoring/Play/replay, typed Decay Vec3 controls/events,
+  resident/edited voxel collision and final integration remain open. 3D acceptance
+  remains unchecked; CI must verify this new head.

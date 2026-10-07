@@ -15,7 +15,8 @@ use sindri_decay::{
 use sindri_platform::NativeAudioBackend;
 use sindri_platform::{AudioBackend, AudioError, FrameContext, Game, InputState, PlaybackSettings};
 use sindri_scene::{
-    AudioSourceComponent, ScenePhysics2d, ScreenExtent, ScreenUi, SpriteAnimations, TileSetBindings,
+    AudioSourceComponent, ScenePhysics2d, ScenePhysics3d, ScreenExtent, ScreenUi, SpriteAnimations,
+    TileSetBindings,
 };
 
 #[cfg(not(target_arch = "wasm32"))]
@@ -63,6 +64,8 @@ pub struct Session {
     /// which costs nothing for a scene with none and means a scene that grows
     /// one needs no change here. No gravity: Gather is seen from above.
     physics: ScenePhysics2d,
+    /// The same fixed clock drives authored 3D bodies on native and browser.
+    physics3d: ScenePhysics3d,
     /// Where the screen elements are and what the pointer is doing to them.
     pub(crate) screen_ui: ScreenUi,
     /// Whether a text field had the keyboard after the last step.
@@ -147,6 +150,7 @@ impl Session {
             animations: SpriteAnimations::new(),
             sequences: sindri_scene::Sequences::new(),
             physics: ScenePhysics2d::top_down().expect("zero gravity is finite"),
+            physics3d: ScenePhysics3d::new([0.0; 3]).expect("zero gravity is finite"),
             screen_ui: ScreenUi::default(),
             editing_text: false,
             styles: None,
@@ -303,6 +307,11 @@ impl Session {
         // order `docs/physics.md` fixes.
         self.sync_physics_materials()?;
         self.physics.step(
+            world,
+            &self.components,
+            std::time::Duration::from_secs_f32(delta_seconds),
+        )?;
+        self.physics3d.step(
             world,
             &self.components,
             std::time::Duration::from_secs_f32(delta_seconds),
