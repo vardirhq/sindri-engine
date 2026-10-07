@@ -3,7 +3,7 @@
 
 from __future__ import annotations
 
-from common import body, box, circle, material, script, shape
+from common import bit, body, box, circle, material, script, shape
 from scene import PARTS, Scene, hinge, slider, spring
 
 
@@ -127,7 +127,64 @@ def gantry_crane(scene: Scene) -> None:
         "sindri.script": script(TOYS, "Crane")})
 
 
+
+def cannon_gallery(scene: Scene) -> None:
+    """A cannon on a motorised hinge, firing shells fast enough to pass
+    straight through a sheet of glass in one step unless continuous
+    collision is on, at a gallery of hanging panes that drop when hit."""
+    base = (13.6, -13.3)
+    scene.wall("cannon-base", base[0], base[1] + 0.2, 1.6, 0.8, fill="#34495e",
+               edge="#7f9bb8")
+    anchor(scene, "cannon-pivot", base[0], base[1] + 1.0, 0.5, "#5d6d7e")
+    pivot = (base[0], base[1] + 1.0)
+    scene.add("cannon-barrel", "cannon-barrel", pivot[0] + 1.0, pivot[1], 0.35, components={
+        "sindri.physics2d.collider": {"pieces": [
+            box(1.2, 0.3, "props", 0.5, 0.0, filter_mask=bit("static", "props", "balls"))]},
+        "sindri.physics2d.rigid_body": body(damping=0.5, angular_damping=4.0),
+        "sindri.script": script(PARTS, "Part", toy=3.0),
+    })
+    scene.deco("cannon-tube", 0, 0, 2.4, 0.6, fill="#2c3e50", edge="#95a5a6", sw=0.1,
+               layer=12, parent="cannon-barrel")
+    scene.deco("cannon-band", 0.95, 0, 0.18, 0.72, fill="#f39c12", layer=13,
+               parent="cannon-barrel")
+    scene.joint("cannon-hinge", "hinge", hinge(
+        "cannon-pivot", "cannon-barrel", (0.0, 0.0), (-1.0, 0.0), limits=(-0.15, 1.2),
+        motor={"motor_mode": "position", "motor_target_angle": 0.25,
+               "motor_stiffness": 400.0, "motor_damping": 60.0, "motor_max_torque": 3000.0}),
+        3)
+    scene.add("cannon-control", "cannon-control", components={
+        "sindri.script": script(TOYS, "Cannon", shell="prefabs/shell.prefab")})
+
+    # The gallery: panes of glass hanging from a beam, and a padded back stop
+    # that knows which shells arrived without touching any glass.
+    beam_y = -2.8
+    scene.add("gallery-beam", "gallery-beam", 19.0, beam_y, 0.3, 7.0, 0.3, components={
+        "sindri.shape": shape("rect", "#3a536e", "#8fb0cf", sw=0.2, layer=10),
+        "sindri.physics2d.collider": {"pieces": [box(3.5, 0.15, "static", filter_mask=0)]},
+    })
+    for index, x in enumerate((16.6, 18.2, 19.8, 21.4)):
+        scene.add(f"pane-{index}", f"pane-{index}", x, beam_y - 4.6, 0.25, 0.1, 8.8,
+                  components={
+                      "sindri.shape": shape("rect", "#a8e6ff", "#e8f8ff", sw=0.25, layer=8,
+                                            alpha=0.45),
+                      "sindri.physics2d.collider": {"pieces": [
+                          box(0.05, 4.4, "glass", 0.2, 0.1)]},
+                      "sindri.physics2d.rigid_body": body(damping=0.1, angular_damping=0.4),
+                      "sindri.script": script(TOYS, "GlassPane", index=float(index)),
+                  }, tags=("body", "cargo", "glass"))
+        scene.joint(f"pane-hinge-{index}", "hinge", hinge(
+            "gallery-beam", f"pane-{index}", (x - 19.0, 0.0), (0.0, 4.4)), 3)
+    scene.wall("gallery-backstop", 22.8, -7.6, 0.4, 12.6, fill="#2b2f3a", edge="#c0392b")
+    scene.add("gallery-catch", "gallery-catch", 22.3, -7.6, 0.2, 0.4, 12.6, components={
+        "sindri.shape": shape("rect", "#c0392b", None, layer=4, alpha=0.18),
+        "sindri.physics2d.collider": {"pieces": [
+            box(0.2, 6.3, "static", sensor=True, filter_mask=bit("shells"))]},
+        "sindri.script": script(TOYS, "BackStop"),
+    })
+
+
 def build(scene: Scene) -> None:
     loose_pile(scene)
     wrecking_ball(scene)
     gantry_crane(scene)
+    cannon_gallery(scene)

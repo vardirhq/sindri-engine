@@ -100,6 +100,21 @@ def director(scene: Scene) -> None:
     })
 
 
+def bursts(scene: Scene) -> None:
+    """Particle bursts the scripts play at a point; never drawn on their own."""
+    for entity_id, tint, count, speed, size in [
+        ("glass-shards", [0.75, 0.93, 1.0, 1.0], 28, 7.0, 0.16),
+        ("muzzle-flash", [1.0, 0.85, 0.4, 1.0], 14, 5.0, 0.22),
+        ("bumper-sparks", [1.0, 0.45, 0.85, 1.0], 18, 6.0, 0.18),
+        ("confetti", [1.0, 0.85, 0.3, 1.0], 80, 16.0, 0.3),
+    ]:
+        scene.add(entity_id, entity_id, 0, -40, 1.5, components={"sindri.effect.burst": {
+            "count": count, "drag": 1.2, "fade": True, "layer": 57, "lifetime": 0.8,
+            "size": size, "speed": speed, "spread": 3.1416, "texture": "textures/spark.png",
+            "tint": tint,
+        }})
+
+
 def prefab(name, entity_id, components, sx=1.0, sy=None):
     return {
         "format_version": 1,
@@ -142,6 +157,13 @@ def prefabs() -> dict[str, dict]:
         "bowling-ball.prefab": prefab("Bowling ball", "bowling-ball", loose(
             "ellipse", "#5b2a86", "#c77dff", circle(0.55, "balls", 0.2, 0.15),
             body(damping=0.0, angular_damping=0.02, ccd=True), 1.1)),
+        "shell.prefab": prefab("Shell", "shell", {
+            "sindri.shape": shape("ellipse", "#ffdd57", "#ffffff", sw=0.25, layer=9),
+            "sindri.physics2d.collider": {"pieces": [circle(0.12, "shells", 0.3, 0.2)]},
+            "sindri.physics2d.rigid_body": body(damping=0.0, angular_damping=0.0, ccd=True),
+            "sindri.script": script("scripts/toys.decay", "Shell"),
+            "sindri.tags": {"tags": ["loose", "shell"]},
+        }, 0.24),
         "hand.prefab": prefab("Hand", "hand", {
             "sindri.shape": shape("ellipse", "#ffd166", "#ffffff", sw=0.18, layer=61,
                                   alpha=0.9),
@@ -201,6 +223,7 @@ def main() -> None:
     scene = Scene()
     room(scene)
     director(scene)
+    bursts(scene)
     toys.build(scene)
     hud.build(scene)
     document = {

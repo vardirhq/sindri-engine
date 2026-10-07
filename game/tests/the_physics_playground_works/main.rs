@@ -261,3 +261,50 @@ fn the_crane_drives_lowers_grabs_the_crown_and_lifts_it_off_the_castle() {
         "fell when dropped"
     );
 }
+
+fn select(playground: &mut Playground, label: &str) {
+    for _ in 0..9 {
+        if playground.text("toy-label") == label {
+            return;
+        }
+        playground.key(Key::E);
+    }
+    panic!("no toy {label}");
+}
+
+#[test]
+fn the_cannon_breaks_glass_and_without_ccd_its_shells_pass_straight_through() {
+    let mut playground = open();
+    select(&mut playground, "CANNON GALLERY");
+    playground.play(60);
+    for _ in 0..6 {
+        playground.key(Key::Digit3);
+        playground.play(12);
+    }
+    playground.play(120);
+    assert!(said("pane"), "a shell broke a pane");
+    assert!(
+        !said("passed through"),
+        "with CCD on nothing passes through glass"
+    );
+    assert!(
+        playground.text("hint").contains("6 fired"),
+        "{}",
+        playground.text("hint")
+    );
+
+    playground.key(Key::R);
+    playground.play(60);
+    playground.key(Key::Digit4);
+    assert!(said("cannon ccd false"));
+    for _ in 0..6 {
+        playground.key(Key::Digit3);
+        playground.play(12);
+    }
+    playground.play(120);
+    assert!(
+        said("passed through"),
+        "without CCD a shell tunnels: {}",
+        playground.text("hint")
+    );
+}

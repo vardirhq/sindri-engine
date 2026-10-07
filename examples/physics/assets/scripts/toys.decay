@@ -160,3 +160,144 @@ script Crane {
         World.set_active(grip, false);
     }
 }
+
+// A cannon on a hinge held by a position motor. Shells leave at a speed that
+// covers more than a pane's thickness in one fixed step, so with continuous
+// collision off most of them pass through the glass without touching it.
+state Gallery {
+    var hits: f32 = 0.0;
+    var ghosts: f32 = 0.0;
+    var fired: f32 = 0.0;
+    var ccd: bool = true;
+}
+
+script Cannon {
+    @export let shell: Prefab;
+    @export let muzzle_speed: f32 = 90.0;
+    var aim: f32 = 0.25;
+    var cooldown: f32 = 0.0;
+
+    fn update(dt: f32) {
+        this.cooldown = max(0.0, this.cooldown - dt);
+        if Game.toy == 3.0 {
+            var turn = 0.0;
+            if Ui.is_held(World.find("act-1")) || Input.is_down("Digit1") || Input.is_down("ArrowUp") { turn = 1.0; }
+            if Ui.is_held(World.find("act-2")) || Input.is_down("Digit2") || Input.is_down("ArrowDown") { turn = -1.0; }
+            if turn != 0.0 {
+                this.aim = clamp(this.aim + turn * 0.9 * dt, -0.1, 1.15);
+                Physics.set_hinge_position_motor(World.find("cannon-hinge"), this.aim, 400.0, 60.0, 3000.0);
+            }
+            if Ui.is_held(World.find("act-3")) && this.cooldown <= 0.0 { fire(); }
+            var ccd = "CCD ON";
+            if !Gallery.ccd { ccd = "CCD OFF"; }
+            Ui.set_text(World.find("hint"), ccd + "   /   " + Gallery.fired + " fired   " + Gallery.hits + " panes hit   " + Gallery.ghosts + " passed straight through");
+        }
+    }
+
+    on ToyAction(toy, action) {
+        if toy != 3.0 { return; }
+        if action == 3.0 && this.cooldown <= 0.0 { fire(); }
+        if action == 4.0 {
+            Gallery.ccd = !Gallery.ccd;
+            print("Playground cannon ccd " + Gallery.ccd);
+        }
+    }
+
+    on ResetToy(toy) {
+        if toy == 0.0 || toy == 3.0 {
+            this.aim = 0.25;
+            Gallery.hits = 0.0;
+            Gallery.ghosts = 0.0;
+            Gallery.fired = 0.0;
+            Physics.set_hinge_position_motor(World.find("cannon-hinge"), this.aim, 400.0, 60.0, 3000.0);
+        }
+    }
+
+    fn fire() {
+        this.cooldown = 0.18;
+        let barrel = World.find("cannon-barrel");
+        let at = barrel.transform.world_position;
+        let angle = barrel.transform.rotation_z;
+        let along = Vec2(cos(angle), sin(angle));
+        let muzzle = Vec2(at.x, at.y) + along * 1.45;
+        let shell = World.spawn(this.shell);
+        shell.transform.position = Vec3(muzzle.x, muzzle.y, 0.35);
+        Physics.set_continuous_collision(shell, Gallery.ccd);
+        let speed = along * this.muzzle_speed;
+        Physics.set_velocity(shell, speed.x, speed.y);
+        // Recoil: the barrel is shoved back at its muzzle, and the motor
+        // brings it back to its aim.
+        let kick = along * -1.6;
+        Physics.apply_impulse_at_point(barrel, kick, muzzle);
+        Effects.burst_at(World.find("muzzle-flash"), muzzle.x, muzzle.y);
+        Camera.impact(0.15);
+        Gallery.fired += 1.0;
+        print("Playground cannon fired");
+    }
+}
+
+// A shell: remembers whether it touched glass, and leaves after a while.
+script Shell {
+    var age: f32 = 0.0;
+    var hit_glass: bool = false;
+    fn update(dt: f32) {
+        this.age += dt;
+        for other in Physics.collision_started() {
+            if World.has_tag(other, "glass") { this.hit_glass = true; }
+        }
+        if this.age > 4.0 { World.despawn(this.entity); }
+    }
+}
+
+// A pane of glass on a hinge. A shell that touches it knocks it off its
+// hinge; a reset hangs it back up.
+script GlassPane {
+    @export let index: f32 = 0.0;
+    var home: Vec3 = Vec3(0.0, 0.0, 0.0);
+    var broken: bool = false;
+    fn start() { this.home = this.transform.position; }
+    fn update(dt: f32) {
+        for other in Physics.collision_started() {
+            if World.has_tag(other, "shell") && !this.broken {
+                this.broken = true;
+                Gallery.hits += 1.0;
+                Physics.set_joint_enabled(World.find("pane-hinge-" + this.index), false);
+                let at = this.transform.world_position;
+                Effects.burst_at(World.find("glass-shards"), at.x, at.y);
+                this.shape.fill = Color(0.66, 0.9, 1.0, 0.2);
+                print("Playground pane " + this.index + " shattered");
+            }
+        }
+    }
+    on ResetToy(toy) {
+        if toy == 0.0 || toy == 3.0 {
+            this.broken = false;
+            this.transform.position = this.home;
+            this.transform.rotation_z = 0.0;
+            this.shape.fill = Color(0.38, 0.79, 1.0, 0.45);
+            Physics.set_velocity(this.entity, 0.0, 0.0);
+            Physics.set_angular_velocity(this.entity, 0.0);
+        }
+    }
+}
+
+// Behind the gallery: counts the shells that got here without touching glass.
+// Every pane hangs across the gallery's whole height, so a shell at that
+// height that reached here while a pane still hung must have crossed one.
+script BackStop {
+    @export let top: f32 = -2.9;
+    @export let bottom: f32 = -11.5;
+    fn update(dt: f32) {
+        for other in Physics.sensor_entered() {
+            if World.has_tag(other, "shell") {
+                let y = other.transform.world_position.y;
+                let crossed = y < this.top && y > this.bottom && Gallery.hits < 4.0;
+                if crossed && !Shell.on(other).hit_glass {
+                    Gallery.ghosts += 1.0;
+                    print("Playground shell passed through");
+                }
+                World.despawn(other);
+            }
+        }
+    }
+}

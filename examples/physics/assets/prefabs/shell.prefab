@@ -1,0 +1,109 @@
+{
+ "format_version": 1,
+ "metadata": {
+  "name": "Shell"
+ },
+ "entities": [
+  {
+   "id": "shell",
+   "name": "Shell",
+   "transform_3d": {
+    "position": [
+     0,
+     0,
+     0.3
+    ],
+    "rotation": [
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     0.24,
+     0.24,
+     1.0
+    ]
+   },
+   "components": {
+    "sindri.shape": {
+     "kind": "ellipse",
+     "count": 6.0,
+     "fill": [
+      1.0,
+      0.72306,
+      0.09531,
+      1.0
+     ],
+     "stroke": [
+      1.0,
+      1.0,
+      1.0,
+      1.0
+     ],
+     "stroke_width": 0.25,
+     "corner_radius": 0.0,
+     "dashes": 0.0,
+     "dash_duty": 0.5,
+     "sweep_start": 0.0,
+     "sweep_turns": 1.0,
+     "blend": "over",
+     "layer": 9
+    },
+    "sindri.physics2d.collider": {
+     "pieces": [
+      {
+       "shape": {
+        "shape": "circle",
+        "radius": 0.12
+       },
+       "offset": [
+        0.0,
+        0.0
+       ],
+       "rotation": 0.0,
+       "sensor": false,
+       "layers": {
+        "memberships": 16,
+        "filter": 39
+       },
+       "friction": 0.3,
+       "restitution": 0.2
+      }
+     ]
+    },
+    "sindri.physics2d.rigid_body": {
+     "kind": "dynamic",
+     "pose": {
+      "position": [
+       0,
+       0
+      ],
+      "rotation": 0
+     },
+     "linear_velocity": [
+      0,
+      0
+     ],
+     "angular_velocity": 0,
+     "gravity_scale": 1.0,
+     "linear_damping": 0.0,
+     "angular_damping": 0.0,
+     "lock_rotation": false,
+     "continuous_collision": true
+    },
+    "sindri.script": {
+     "source": "scripts/toys.decay",
+     "script": "Shell",
+     "properties": {}
+    },
+    "sindri.tags": {
+     "tags": [
+      "loose",
+      "shell"
+     ]
+    }
+   }
+  }
+ ]
+}
