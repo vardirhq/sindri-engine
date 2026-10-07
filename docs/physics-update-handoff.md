@@ -16,6 +16,27 @@ a pushed handoff. Do not ask them to authorize the scope again.
 
 ## Current continuation checkpoint
 
+Authored voxel collision is wired end to end. `sindri.physics3d.voxel_collider`
+(friction/restitution/layers/margin) on a `sindri.voxel_world` entity is resolved
+by `ScenePhysics3d::step_with_tile_sets` through `VoxelGround` (sections with
+edits, content revisions, block-set `collides` + bounds policy) and planned
+beside the body batch; both validate before either commits. Residency is the
+union of sections each planned dynamic body can reach this step plus the margin.
+Game session (native/browser) and editor Play pass bound block sets. Causeway's
+builder now spawns `prefabs/loose-block.prefab` when a laid block is taken back;
+`scripts/loose-block.decay` returns it to stock on `collision_started` with the
+Floor (3 s fallback). Native embeds prefabs via `assets::PREFABS`.
+
+Evidence: six `physics_sync3d/voxel_tests.rs` regressions,
+`game/tests/the_game_is_played/tumbling.rs`, and a CI browser mode
+(`scripts/browser/prepare-causeway-voxels.py` + `SINDRI_VOXEL_LANDING=1`) using
+`game/tests/browser_voxel_landing.decay`. Remaining for the 3D item: native
+editor review of 3D authoring (inspector on Rigid Body/Collider/Voxel Collider
+3D, block-set Collides), Play/Stop and replay with visual evidence. Then the
+final-integration item: full workspace tests/Clippy/WASM/browser and green CI.
+
+Earlier checkpoint notes follow.
+
 `SceneVoxelCollision3d` now connects explicit complete resident voxel snapshots
 to keyed static solver groups under real entity owners. Public inputs are
 `VoxelCollisionWorld3d` (owner, composed pose/positive scale, physical settings,

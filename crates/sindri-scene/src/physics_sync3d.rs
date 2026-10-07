@@ -2,11 +2,16 @@
 
 use sindri_core::{ComponentSchemaRegistry, EntityId, World};
 use sindri_physics::{
-    Collider3d, PhysicsEvent3d, PhysicsPose3d, PhysicsWorld3d, RigidBody3d, RigidBodyKind,
+    Collider3d, ColliderShape3d, PhysicsEvent3d, PhysicsPose3d, PhysicsWorld3d, RigidBody3d,
+    RigidBodyKind,
 };
 use std::{collections::BTreeMap, time::Duration};
 
-use crate::{Collider3dComponent, PhysicsSyncError, PhysicsWorld3dComponent, RigidBody3dComponent};
+use crate::voxel_collision3d::VoxelReach;
+use crate::{
+    Collider3dComponent, PhysicsSyncError, PhysicsWorld3dComponent, RigidBody3dComponent,
+    SceneVoxelCollision3d, TileSetBindings,
+};
 
 #[cfg(test)]
 mod authoring_tests;
@@ -16,6 +21,8 @@ mod hierarchy_tests;
 mod pending_tests;
 #[cfg(test)]
 mod tests;
+#[cfg(test)]
+mod voxel_tests;
 
 const MOVED: f32 = 1.0e-4;
 
@@ -27,6 +34,9 @@ pub struct ScenePhysics3d {
     agreed: BTreeMap<EntityId, PhysicsPose3d>,
     host_gravity: [f32; 3],
     events: Vec<PhysicsEvent3d>,
+    /// Authored voxel colliders' static geometry. Lives and resets with the
+    /// solver, because it owns bodies inside it.
+    voxels: SceneVoxelCollision3d,
 }
 
 #[derive(Clone, PartialEq)]
@@ -43,6 +53,7 @@ impl ScenePhysics3d {
             agreed: BTreeMap::new(),
             host_gravity: gravity,
             events: Vec::new(),
+            voxels: SceneVoxelCollision3d::default(),
         })
     }
     pub const fn world(&self) -> &PhysicsWorld3d {
@@ -68,6 +79,19 @@ impl ScenePhysics3d {
         components: &ComponentSchemaRegistry,
         delta: Duration,
     ) -> Result<(), PhysicsSyncError> {
+        self.step_with_tile_sets(world, components, None, delta)
+    }
+
+    /// [`Self::step`], with the block sets authored voxel colliders name.
+    /// Voxel geometry resident near each dynamic body is planned beside the
+    /// body batch, and both validate before either changes the solver.
+    pub fn step_with_tile_sets(
+        &mut self,
+        world: &mut World,
+        components: &ComponentSchemaRegistry,
+        tile_sets: Option<&TileSetBindings>,
+        delta: Duration,
+    ) -> Result<(), PhysicsSyncError> {
         if delta.is_zero() || !delta.as_secs_f32().is_finite() {
             return Err(PhysicsSyncError::BadStep(delta));
         }
@@ -84,8 +108,13 @@ impl ScenePhysics3d {
             return Err(sindri_physics::PhysicsError::NonFinite("gravity").into());
         }
         let plan = prepare(world, components, &self.world)?;
+        let reaches = self.reaches(world, &plan, gravity, delta.as_secs_f32());
+        let voxels =
+            self.voxels
+                .plan_authored(world, components, tile_sets, &self.world, &reaches)?;
         self.world.set_gravity(gravity)?;
         self.synchronize(world, plan)?;
+        self.voxels.commit(&mut self.world, voxels)?;
         self.world.finish_synchronize();
         self.events = self.world.step(delta)?;
         self.write_back(world);
@@ -124,6 +153,37 @@ impl ScenePhysics3d {
             self.agreed.insert(entity, pose);
         }
         Ok(())
+    }
+
+    /// How far each planned dynamic body can be from where it starts by the
+    /// end of this step: its farthest piece, plus twice the travel its current
+    /// velocity and gravity allow, so a fast fall never outruns residency.
+    fn reaches(
+        &self,
+        world: &World,
+        plan: &BTreeMap<EntityId, Authored>,
+        gravity: [f32; 3],
+        seconds: f32,
+    ) -> Vec<VoxelReach> {
+        let pull = gravity.iter().map(|axis| axis * axis).sum::<f32>().sqrt();
+        plan.iter()
+            .filter_map(|(&entity, authored)| {
+                let body = authored.body?;
+                if body.kind != RigidBodyKind::Dynamic {
+                    return None;
+                }
+                let velocity = self
+                    .world
+                    .linear_velocity(entity)
+                    .unwrap_or(body.linear_velocity);
+                let speed = velocity.iter().map(|axis| axis * axis).sum::<f32>().sqrt();
+                let size = authored.pieces.iter().map(extent).fold(0.0, f32::max);
+                Some(VoxelReach {
+                    position: pose_of(world, entity, Some(body)).position,
+                    reach: size + 2.0 * (speed * seconds + pull * seconds * seconds),
+                })
+            })
+            .collect()
     }
 
     fn remove(&mut self, entity: EntityId) {
@@ -198,6 +258,29 @@ fn prepare(
         );
     }
     Ok(plan)
+}
+
+/// The farthest any point of a piece is from its body's origin.
+fn extent(piece: &Collider3d) -> f32 {
+    let offset = piece
+        .offset
+        .iter()
+        .map(|axis| axis * axis)
+        .sum::<f32>()
+        .sqrt();
+    offset
+        + match piece.shape {
+            ColliderShape3d::Box { half_extents } => half_extents
+                .iter()
+                .map(|axis| axis * axis)
+                .sum::<f32>()
+                .sqrt(),
+            ColliderShape3d::Sphere { radius } => radius,
+            ColliderShape3d::Capsule {
+                half_height,
+                radius,
+            } => half_height + radius,
+        }
 }
 
 fn body_at(body: Option<RigidBody3d>, pose: PhysicsPose3d) -> RigidBody3d {

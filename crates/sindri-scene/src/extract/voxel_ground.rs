@@ -19,13 +19,16 @@ use std::sync::{Arc, Mutex, PoisonError};
 
 use sindri_core::{TileDefinition, TileSetDocument};
 use sindri_grid::GridCoord3;
-use sindri_voxel::{SectionCoord, VoxelCoord, VoxelId, VoxelSection, VoxelSource};
+use sindri_voxel::{SectionCoord, VoxelCoord, VoxelId, VoxelSection, VoxelShape, VoxelSource};
 
 use crate::{TileSetBindings, TileSurfaces, VoxelBlock, VoxelEdit, VoxelWorldComponent};
 
 use super::SceneExtractError;
 use super::voxel_appearance::{Appearance, block_palette};
 use super::voxel_source::{Palette, SceneTerrain, terrain_source};
+
+mod collision;
+mod raycast;
 
 /// How far above a column's ground anything generated may stand: the tallest
 /// tree, and the top of an overhang's band.
@@ -178,6 +181,8 @@ pub struct VoxelGround {
     edited_columns: HashMap<(i32, i32), i32>,
     names: BTreeMap<u16, String>,
     footing: BTreeMap<u16, Footing>,
+    /// What each block is to a 3D body: its box, or nothing it collides with.
+    collision: BTreeMap<u16, Option<VoxelShape>>,
     /// Kept for asking what a block is tagged with.
     tile_set: Option<TileSetDocument>,
 }
@@ -272,6 +277,7 @@ impl VoxelGround {
                     .collect(),
             ),
         };
+        let collision = collision::shapes(&appearance);
         let mut ground = Self {
             terrain: terrain_for(TerrainKey {
                 source,
@@ -282,6 +288,7 @@ impl VoxelGround {
             edited_columns: HashMap::new(),
             names,
             footing,
+            collision,
             tile_set,
         };
         for edit in &component.edits {
@@ -467,63 +474,6 @@ impl VoxelGround {
         }
         TileSurfaces::from_tops(columns)
     }
-
-    /// The first solid voxel a ray meets, and the face it came in through.
-    ///
-    /// `origin` and `direction` are in the world's own voxel space, where a
-    /// voxel spans one unit from its coordinate. Walks voxel by voxel, so the
-    /// answer is exact at edges and corners, and gives up after `reach` units.
-    #[must_use]
-    pub fn raycast(
-        &self,
-        origin: glam::Vec3,
-        direction: glam::Vec3,
-        reach: f32,
-    ) -> Option<VoxelWorldHit> {
-        let length = direction.length();
-        if !length.is_finite() || length <= f32::EPSILON || !origin.is_finite() {
-            return None;
-        }
-        let direction = direction / length;
-        let cell = origin.floor();
-        #[allow(clippy::cast_possible_truncation)]
-        let mut at = [cell.x as i32, cell.y as i32, cell.z as i32];
-        let step = [
-            step_of(direction.x),
-            step_of(direction.y),
-            step_of(direction.z),
-        ];
-        let delta = [
-            crossing(direction.x),
-            crossing(direction.y),
-            crossing(direction.z),
-        ];
-        let mut next = [
-            first_crossing(origin.x, direction.x),
-            first_crossing(origin.y, direction.y),
-            first_crossing(origin.z, direction.z),
-        ];
-        let mut normal = [0; 3];
-        let mut travelled = 0.0;
-        while travelled <= reach {
-            if self.footing(self.voxel(at)).is_some() {
-                return Some(VoxelWorldHit { cell: at, normal });
-            }
-            let axis = if next[0] <= next[1] && next[0] <= next[2] {
-                0
-            } else if next[1] <= next[2] {
-                1
-            } else {
-                2
-            };
-            travelled = next[axis];
-            next[axis] += delta[axis];
-            at[axis] += step[axis];
-            normal = [0; 3];
-            normal[axis] = -step[axis];
-        }
-        None
-    }
 }
 
 /// From a voxel world's own space, where a voxel is the unit cube from its
@@ -556,36 +506,6 @@ fn footing_of(definition: &TileDefinition) -> Footing {
         supports: definition.supports,
         walkable: definition.walkable,
         top: definition.bounds().top(),
-    }
-}
-
-const fn step_of(direction: f32) -> i32 {
-    if direction > 0.0 {
-        1
-    } else if direction < 0.0 {
-        -1
-    } else {
-        0
-    }
-}
-
-/// How far along the ray one whole voxel is on an axis.
-fn crossing(direction: f32) -> f32 {
-    if direction == 0.0 {
-        f32::INFINITY
-    } else {
-        (1.0 / direction).abs()
-    }
-}
-
-/// How far along the ray the first voxel boundary on an axis is.
-fn first_crossing(origin: f32, direction: f32) -> f32 {
-    if direction > 0.0 {
-        (origin.floor() + 1.0 - origin) / direction
-    } else if direction < 0.0 {
-        (origin - origin.floor()) / -direction
-    } else {
-        f32::INFINITY
     }
 }
 

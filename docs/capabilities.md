@@ -866,6 +866,21 @@ than allowing the runtime type to make the broader feature look complete.
 
 ### Voxel world foundation
 
+Authored voxel worlds now collide. `sindri.physics3d.voxel_collider` on a
+`sindri.voxel_world` entity resolves the world's generator, palette and edits
+through `VoxelGround`, takes each block's collision box from its block set
+(`collides`, default true, with the tile's own height/extent bounds; water in
+Causeway is `false`), and keeps resident only the sections dynamic bodies can
+reach this step plus a margin. `ScenePhysics3d::step_with_tile_sets` validates
+the voxel snapshot and the body batch before committing either, and the shared
+game session and editor Play pass their block sets. Causeway uses it: a block
+taken back tumbles out of its cell, lands on the generated terrain and only then
+returns to the stock, detected through `Physics3d.collision_started`. Six scene
+regressions and the Causeway play test exercise landing, owner events/queries,
+edited shafts under a sleeping body, distant residency, non-colliding and slab
+blocks, release and atomic rejection. Editor-run and dedicated browser proof are
+still missing; see [`physics.md`](physics.md#authored-voxel-colliders).
+
 `SceneVoxelCollision3d` now reconciles explicit complete resident voxel snapshots
 into static owner groups. Occupancy/policy revisions retain compiled geometry;
 scale/settings changes reuse boxes, pose-only changes move the body, and section

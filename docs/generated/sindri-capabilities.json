@@ -1202,6 +1202,32 @@
       "addable": true,
       "apply": {},
       "default_payload": {
+        "friction": 0.5,
+        "layers": {
+          "filter": 4294967295,
+          "memberships": 4294967295
+        },
+        "margin": 2.0,
+        "restitution": 0.0
+      },
+      "display_name": "Voxel Collider 3D",
+      "fields": {
+        "friction": 0.5,
+        "layers": {
+          "filter": 4294967295,
+          "memberships": 4294967295
+        },
+        "margin": 2.0,
+        "restitution": 0.0
+      },
+      "meanings": {},
+      "schema_version": 1,
+      "type_name": "sindri.physics3d.voxel_collider"
+    },
+    {
+      "addable": true,
+      "apply": {},
+      "default_payload": {
         "gravity": [
           0.0,
           -9.81,

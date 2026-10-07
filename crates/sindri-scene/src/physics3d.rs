@@ -2,7 +2,7 @@
 
 use serde::Deserialize;
 use sindri_core::{SceneComponent, World};
-use sindri_physics::{Collider3d, RigidBody3d};
+use sindri_physics::{Collider3d, CollisionLayers, RigidBody3d};
 
 use crate::PhysicsSyncError;
 
@@ -41,6 +41,35 @@ impl SceneComponent for Collider3dComponent {
     const TYPE_NAME: &'static str = "sindri.physics3d.collider";
 }
 
+/// Opts the voxel world on the same entity into 3D collision. Blocks whose
+/// tiles collide become static boxes, resident only near dynamic bodies.
+#[derive(Clone, Copy, Debug, Deserialize, PartialEq)]
+pub struct VoxelCollider3dComponent {
+    #[serde(default = "half")]
+    pub friction: f32,
+    #[serde(default)]
+    pub restitution: f32,
+    #[serde(default = "every_layer")]
+    pub layers: CollisionLayers,
+    /// Voxels of collision kept resident beyond each dynamic body's reach.
+    #[serde(default = "two")]
+    pub margin: f32,
+}
+
+const fn half() -> f32 {
+    0.5
+}
+const fn two() -> f32 {
+    2.0
+}
+const fn every_layer() -> CollisionLayers {
+    CollisionLayers::ALL
+}
+
+impl SceneComponent for VoxelCollider3dComponent {
+    const TYPE_NAME: &'static str = "sindri.physics3d.voxel_collider";
+}
+
 /// Scene gravity overrides the host while this component is active.
 #[derive(Clone, Debug, Deserialize, PartialEq)]
 pub struct PhysicsWorld3dComponent {
@@ -67,6 +96,7 @@ pub(crate) fn validate_dimensions(world: &World) -> Result<(), PhysicsSyncError>
         let has_3d = [
             RigidBody3dComponent::TYPE_NAME,
             Collider3dComponent::TYPE_NAME,
+            VoxelCollider3dComponent::TYPE_NAME,
         ]
         .into_iter()
         .any(|name| data.components.contains_key(name));

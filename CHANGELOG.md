@@ -1,5 +1,7 @@
 # Changelog
 
+- Authored voxel worlds collide with 3D bodies. Add `sindri.physics3d.voxel_collider` and a block-set `collides` flag (default on; off for water); bodies land on generated and edited terrain wherever they are, with geometry kept resident only near them. In Causeway, a block taken back now tumbles out of its cell and lands before it returns to the stock.
+
 - Add a one-way plank ferry across the platformer’s first gap, driven by Decay kinematic velocity. Scene controller support carries riders in both directions without extra gameplay displacement; jumping leaves carry, landing resumes it, and dropping through reaches the pit and normal respawn.
 
 - Add low stone steps and an inclined boardwalk to the platformer. The hero walks over the risers and follows the slope downhill without jumping; intended horizontal speed now survives a blocked controller sweep so subsequent requests can step forward. Native control tests prove disabling steps or lowering the slope limit blocks the same terrain.

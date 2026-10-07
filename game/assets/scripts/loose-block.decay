@@ -1,0 +1,45 @@
+// A block taken back does not vanish into the stock. It tumbles out of the
+// hole it left, falls onto whatever the world is there now -- the ground, a
+// walkway, the bottom of the hole -- and is counted back once it lands.
+//
+// Landing is the voxel world's say, not this script's: the block is a 3D body,
+// and the ground it hits is the world's own blocks as collision geometry.
+script LooseBlock {
+    // Somewhere it never lands -- water, or off the edge of what is built --
+    // still gives the block back, a little later.
+    @export
+    let give_up_seconds: f32 = 3.0;
+
+    var age: f32 = 0.0;
+    var returned: bool = false;
+
+    fn update(dt: f32) {
+        if returned {
+            return;
+        }
+        age += dt;
+        let floor = World.find("Floor");
+        var landed: bool = false;
+        if floor != null {
+            for other in Physics3d.collision_started() {
+                if other == floor {
+                    landed = true;
+                }
+            }
+        }
+        if !landed && age < give_up_seconds {
+            return;
+        }
+        if landed {
+            // Read by the test that plays the game: the block came home by
+            // landing, not by giving up.
+            Game.set("blocks_landed", Game.get("blocks_landed", 0.0) + 1.0);
+        }
+        let builder = World.find("Builder");
+        if builder != null {
+            World.send_signal(builder, "returned", 1.0);
+        }
+        returned = true;
+        World.despawn(this.entity);
+    }
+}

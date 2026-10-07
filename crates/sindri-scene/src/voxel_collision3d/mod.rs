@@ -1,6 +1,8 @@
 //! Transactional resident voxel snapshots into keyed static solver geometry.
 
+mod authored;
 mod geometry;
+pub(crate) use authored::VoxelReach;
 mod types;
 pub use types::*;
 
@@ -21,6 +23,13 @@ struct Section {
     settings: VoxelCollisionSettings3d,
     boxes: Arc<[SectionCollisionBox]>,
     pieces: Arc<[Collider3d]>,
+}
+
+/// A prevalidated snapshot, ready to commit.
+pub(crate) struct VoxelCollisionPlan3d {
+    owners: BTreeMap<EntityId, Owner>,
+    next_key: u64,
+    report: VoxelCollisionReport3d,
 }
 
 struct Owner {
@@ -68,7 +77,37 @@ impl SceneVoxelCollision3d {
         physics: &mut PhysicsWorld3d,
         inputs: &[VoxelCollisionWorld3d<'_>],
     ) -> Result<VoxelCollisionReport3d, VoxelCollisionError3d> {
-        let (mut plan, next_key, mut report) = self.prepare(world, physics, inputs)?;
+        let plan = self.plan(world, physics, inputs)?;
+        self.commit(physics, plan)
+    }
+
+    /// The validated snapshot `synchronize` would commit, changing nothing.
+    pub(crate) fn plan(
+        &self,
+        world: &World,
+        physics: &PhysicsWorld3d,
+        inputs: &[VoxelCollisionWorld3d<'_>],
+    ) -> Result<VoxelCollisionPlan3d, VoxelCollisionError3d> {
+        let (owners, next_key, report) = self.prepare(world, physics, inputs)?;
+        Ok(VoxelCollisionPlan3d {
+            owners,
+            next_key,
+            report,
+        })
+    }
+
+    /// Commits a plan made against this solver state. Hosts that change other
+    /// solver bodies in between must not touch the plan's owners.
+    pub(crate) fn commit(
+        &mut self,
+        physics: &mut PhysicsWorld3d,
+        plan: VoxelCollisionPlan3d,
+    ) -> Result<VoxelCollisionReport3d, VoxelCollisionError3d> {
+        let VoxelCollisionPlan3d {
+            owners: mut plan,
+            next_key,
+            mut report,
+        } = plan;
         for (&entity, old) in &self.owners {
             if !plan.contains_key(&entity) {
                 if old.materialized {

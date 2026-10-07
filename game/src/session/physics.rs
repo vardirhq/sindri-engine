@@ -16,9 +16,12 @@ impl Session {
             &self.components,
             std::time::Duration::from_secs_f32(delta_seconds),
         )?;
-        self.physics3d.step(
+        // The block sets decide what an authored voxel collider's blocks are.
+        let tile_sets = (!self.tile_sets.is_empty()).then_some(&self.tile_sets);
+        self.physics3d.step_with_tile_sets(
             world,
             &self.components,
+            tile_sets,
             std::time::Duration::from_secs_f32(delta_seconds),
         )?;
         Ok(())

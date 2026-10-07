@@ -248,6 +248,12 @@ fn block_fields(
         &mut block.walkable,
         "Whether a walker can stand on it",
     );
+    flag(
+        ui,
+        "Collides",
+        &mut block.collides,
+        "Whether 3D bodies bump into its shape. Off for water and other blocks things fall through.",
+    );
     let mut tags = block.tags.join(", ");
     let before_tags = tags.clone();
     crate::native::inspector_panel::rows::text_row(ui, "Tags", &mut tags, 0.0);

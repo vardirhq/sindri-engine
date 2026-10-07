@@ -86,7 +86,9 @@ pub use physics_material::{
 };
 pub use physics_sync::{PhysicsSyncError, ScenePhysics2d};
 pub use physics_sync3d::ScenePhysics3d;
-pub use physics3d::{Collider3dComponent, PhysicsWorld3dComponent, RigidBody3dComponent};
+pub use physics3d::{
+    Collider3dComponent, PhysicsWorld3dComponent, RigidBody3dComponent, VoxelCollider3dComponent,
+};
 pub use placement::{
     GridPlacementError, GridSurfaces, blocking_step_ahead, nearest_cell, resolve_grid_placements,
     standing_depth,

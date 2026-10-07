@@ -27,7 +27,14 @@ impl EditorApp {
             .and_then(|materials| {
                 self.physics.set_materials(materials);
                 self.physics.step(&mut self.world, components, delta)?;
-                self.physics3d.step(&mut self.world, components, delta)
+                // With the block sets, because an authored voxel collider's
+                // blocks are theirs to say the shape of.
+                self.physics3d.step_with_tile_sets(
+                    &mut self.world,
+                    components,
+                    Some(self.textures.tile_sets()),
+                    delta,
+                )
             });
         if let Err(error) = result {
             self.console.error(format!("Physics: {error}"));

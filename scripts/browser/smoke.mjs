@@ -147,6 +147,7 @@ const inputEvidence = { boosts: 0, waiting: false, rebound: '' };
 const mixerSaid = [];
 const fetchedAssets = new Set();
 const platformerEvidence = { latest: null };
+const voxelEvidence = { dropped: false, landed: false };
 // A shader that fails to compile is reported by the GPU implementation as a
 // console *warning*, not an error, and the page carries on and presents empty
 // frames. Collecting only errors is how a build whose every shape and glyph
@@ -173,6 +174,8 @@ page.on('console', (message) => {
   if (result) spatialResults.add(result[1]);
   if (text.includes('Camera demo modes changed')) cameraChanges += 1;
   if (text.includes('Camera demo impact')) cameraImpacts += 1;
+  if (text.includes('Voxel landing dropped')) voxelEvidence.dropped = true;
+  if (text.includes('Voxel collision landing verified')) voxelEvidence.landed = true;
   const tweenAction = text.match(/Tween demo action ([1-5])/);
   if (tweenAction) tweenActions.add(Number(tweenAction[1]));
   if (message.type() === 'error') problems.push(text);
@@ -260,6 +263,17 @@ await page.waitForTimeout(1500);
 
 if (process.env.SINDRI_PLATFORMER_GOAL === '1') {
   await platformerGoal(page, ROOT, platformerEvidence, problems);
+}
+
+if (process.env.SINDRI_VOXEL_LANDING === '1') {
+  // Causeway's own loose block, dropped by a read-only observer onto the
+  // generated voxel terrain: it must be stopped by the world's blocks (and
+  // reported by a downward ray) rather than returned by the give-up timer.
+  for (let waited = 0; waited < 10000 && !voxelEvidence.landed; waited += 250) {
+    await page.waitForTimeout(250);
+  }
+  if (!voxelEvidence.dropped) problems.push('voxel landing observer never dropped its block');
+  if (!voxelEvidence.landed) problems.push('dropped block never landed on voxel collision');
 }
 
 if (process.env.SINDRI_PHYSICS_DEMO === '1') {

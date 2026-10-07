@@ -133,6 +133,7 @@ impl Session {
     #[must_use]
     pub fn new(components: ComponentSchemaRegistry) -> Self {
         Self::with_sources(components, sources())
+            .with_prefabs(crate::assets::prefabs().expect("the embedded prefabs parse"))
     }
 
     /// A session backed by sources supplied by the host.

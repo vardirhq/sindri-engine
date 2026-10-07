@@ -198,6 +198,10 @@ pub struct TileVariant {
 }
 
 /// What one stable tile ID means.
+// Occluding, supporting, walking and colliding are four independent answers a
+// document spells as four keys; folding them into a state enum would change the
+// format and admit no fewer combinations.
+#[allow(clippy::struct_excessive_bools)]
 #[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
 pub struct TileDefinition {
     pub faces: TileFaces,
@@ -279,6 +283,14 @@ pub struct TileDefinition {
     /// field is not the same as changing what a document meant.
     #[serde(default = "yes", alias = "solid", skip_serializing_if = "is_true")]
     pub walkable: bool,
+    /// Whether a 3D body collides with this block's bounds.
+    ///
+    /// Asked by voxel collision and by nothing else. Separate from `supports`
+    /// and `walkable`, which are what navigation stands on: a railing post
+    /// stops a rolling crate and holds nobody up, and water holds a boat up
+    /// while a dropped stone sinks through it.
+    #[serde(default = "yes", skip_serializing_if = "is_true")]
+    pub collides: bool,
     /// Words a game gives this block, for its scripts to ask about: `hot`,
     /// `slippery`, `harvestable`.
     ///

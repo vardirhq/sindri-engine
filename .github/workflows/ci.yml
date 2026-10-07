@@ -615,6 +615,12 @@ jobs:
           cp -R game/pkg/. target/dist/low-tide/pkg/
           # Keep the shipped gameplay/starting pose and add read-only telemetry
           # for a real keyboard-driven run to the platformer's goal.
+          # Causeway plus a read-only observer that drops its loose block onto
+          # the generated voxel terrain, proving voxel collision in a browser.
+          python3 scripts/browser/prepare-causeway-voxels.py target/browser-causeway-voxels
+          cargo run --quiet --package sindri-export --bin sindri-export -- \
+            target/browser-causeway-voxels target/dist/causeway-voxels --base /sindri-engine/
+          cp -R game/pkg/. target/dist/causeway-voxels/pkg/
           python3 scripts/browser/prepare-platformer.py target/browser-platformer
           cargo run --quiet --package sindri-export --bin sindri-export -- \
             target/browser-platformer target/dist/platformer-goal --base /examples/platformer/
@@ -626,6 +632,8 @@ jobs:
           node scripts/browser/smoke.mjs examples/cube target/render-artifacts/browser-cube.png
           SINDRI_EXPECT_ASSETS=1 SINDRI_BASE_PATH=/sindri-engine/ \
             node scripts/browser/smoke.mjs target/dist/causeway target/render-artifacts/browser-causeway.png
+          SINDRI_EXPECT_ASSETS=1 SINDRI_VOXEL_LANDING=1 SINDRI_BASE_PATH=/sindri-engine/ \
+            node scripts/browser/smoke.mjs target/dist/causeway-voxels target/render-artifacts/browser-causeway-voxels.png
           SINDRI_EXPECT_ASSETS=1 \
             SINDRI_BASE_PATH=/sindri-engine/examples/weave-poc/ \
             SINDRI_VIEWPORT_WIDTH=390 SINDRI_VIEWPORT_HEIGHT=844 \

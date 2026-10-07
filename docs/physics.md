@@ -1132,6 +1132,54 @@ This is an engine prerequisite. The scene snapshot adapter below now provides
 revision caches and bounded reconciliation; authored policy/residency production
 and real Causeway/Decay/editor/browser streamed collision remain absent.
 
+## Authored voxel colliders
+
+`sindri.physics3d.voxel_collider` opts the voxel world on the same entity into
+3D collision. It carries friction, restitution, layers and a residency margin
+in voxels (default two). The entity must carry `sindri.voxel_world` and must
+not also carry a 3D body or collider: the collision cache owns that entity's
+static solver body exclusively, and a conflict fails the step before either
+batch changes the solver.
+
+What collides is a block set's answer, not navigation's. `TileDefinition`
+gains `collides` (default true): a colliding block contributes its full
+`bounds()` box (height or extent, in sixteenths), and a block with
+`"collides": false` -- Causeway's water -- is passed through. `supports` and
+`walkable` are not read: a railing post stops a crate and holds no walker up.
+Worlds of numbered materials collide as whole cubes. The policy revision is a
+hash of every block's answer; each section's occupancy revision is a hash of its
+voxels after edits, so an edit, a different generator or a rebound block set
+all change the revision and equal content reuses cached geometry.
+
+Residency follows what can hit voxels. Each step, every planned dynamic body
+contributes its farthest piece extent plus twice the travel its velocity and
+gravity allow in that step, transformed into the world's voxel space (the
+entity's composed pose and scale, then the grid's cell size and centring from
+`voxel_space`) and widened by the margin. The union of sections those reaches
+touch is the complete snapshot handed to `SceneVoxelCollision3d`; terrain no
+body is near is not resident, wherever the camera is. A single reach wider than
+the section budget fails the step whole rather than publishing a partial window.
+Kinematic and static bodies do not drive residency, and queries see only
+resident sections -- a script asking about distant terrain uses `Grid`/`Aim`.
+
+`ScenePhysics3d::step_with_tile_sets` resolves these worlds through
+`VoxelGround` (generator, palette and edits), plans the voxel snapshot against
+the same solver state as the body batch, validates both, then commits bodies
+and voxels before solving. The cache lives inside `ScenePhysics3d`, so a fresh
+session or the editor's Play/Stop reset clears both together. `step` is the
+same call without block sets, for hosts whose voxel colliders use materials.
+Shared native/browser game sessions and editor Play pass their bound block sets.
+
+Causeway exercises it: taking a laid block back spawns a loose-block prefab
+whose dynamic body pops out of the emptied cell, falls onto the world's own
+voxels and returns to the stock only when `Physics3d.collision_started` reports
+the Floor world (a three-second fallback covers water and edges). Scene
+regressions cover landing and the owner contact event, raycasts against the
+owner, falling down an edited shaft after the body has slept, far-from-origin
+residency, block-set non-colliding water and half-height slabs, releasing
+geometry when the component is removed, and atomic rejection of missing worlds,
+conflicting owners, unbound block sets and over-budget reaches.
+
 ## Resident voxel snapshot adapter
 
 `SceneVoxelCollision3d` connects resolved resident `VoxelSection` snapshots to

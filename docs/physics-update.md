@@ -1446,3 +1446,33 @@ and all-target/all-feature WASM checks pass. No dependencies, component or host
 surface changed. This is the native scene seam toward Causeway: authored terrain/
 block policy, residency production and shared-session/editor/game/Decay/browser
 wiring remain open. Both major acceptance items stay unchecked.
+
+### Authored voxel collision checkpoint
+
+`sindri.physics3d.voxel_collider` turns an authored `sindri.voxel_world` into
+static 3D collision. Block sets gained an explicit `collides` flag (default
+true; Causeway's water is `false`) and each colliding block contributes its own
+bounds; `supports`/`walkable` are not consulted. `VoxelGround` produces whole
+sections with edits applied, a content revision per section and a policy
+revision. Residency follows planned dynamic bodies (farthest piece plus twice
+the step's velocity/gravity travel, plus a margin in voxels) in the world's
+composed voxel space, independent of the camera. `ScenePhysics3d` plans the
+voxel snapshot beside the body batch and validates both before committing
+either; a voxel owner may not also carry a 3D body or collider. The shared
+game session and editor Play pass their bound block sets; the cache resets with
+the solver.
+
+Causeway uses it: taking a laid block back spawns a loose-block prefab that pops
+out of the emptied cell, lands on the world's voxels and returns to the stock
+only when `Physics3d.collision_started` reports the Floor. The native play test
+drives the real gestures through the camera and observes the pop, the landing
+before the give-up time and the stock returning. Six scene regressions cover
+landing/owner events, raycasts against the owner, an edited shaft under a body
+that has slept, distant residency, non-colliding water and slab bounds, release
+on component removal, and atomic rejection of missing worlds, conflicting owners,
+unbound block sets and over-budget reaches. A browser fixture
+(`prepare-causeway-voxels.py`, `SINDRI_VOXEL_LANDING=1`) drops the same prefab
+over the wanderer in exported Causeway and requires a ray hit on the Floor and a
+landing. Editor-run proof of 3D authoring/Play remains; both acceptance items
+stay unchecked.
+

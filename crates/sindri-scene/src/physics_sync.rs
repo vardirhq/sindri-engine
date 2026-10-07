@@ -57,6 +57,14 @@ pub enum PhysicsSyncError {
     Tilemap(#[from] TilemapCollisionError),
     #[error(transparent)]
     Material(#[from] crate::PhysicsMaterialError),
+    #[error("voxel collider entity {0:?} also carries a 3D body or collider")]
+    ConflictingVoxelOwner(EntityId),
+    #[error("voxel collider entity {0:?} has no voxel world")]
+    MissingVoxelWorld(EntityId),
+    #[error("voxel collider world {0:?}: {1}")]
+    VoxelWorld(EntityId, crate::SceneExtractError),
+    #[error(transparent)]
+    VoxelCollision(#[from] crate::VoxelCollisionError3d),
 }
 
 /// The physics world a scene's authored bodies and colliders drive.

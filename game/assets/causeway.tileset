@@ -726,7 +726,8 @@
         }
       },
       "walkable": false,
-      "supports": true
+      "supports": true,
+      "collides": false
     },
     "plank-slab": {
       "faces": {
