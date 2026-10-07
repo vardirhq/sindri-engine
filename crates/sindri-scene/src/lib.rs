@@ -33,6 +33,7 @@ mod tile_chunk;
 mod tile_surface;
 mod tilemap_collision;
 mod tilesets;
+mod voxel_collision3d;
 mod voxel_render;
 
 pub use animation::{AnimationClip, AnimationError, SpriteAnimationComponent, SpriteAnimations};
@@ -112,6 +113,10 @@ pub use textures::{
 pub use tile_chunk::{TILE_CHUNK_SIZE, TileChunkCoord, TileChunkStore};
 pub use tile_surface::{TileSurfaceError, TileSurfaces};
 pub use tilemap_collision::{TilemapCollider2dComponent, TilemapCollisionError};
+pub use voxel_collision3d::{
+    SceneVoxelCollision3d, VoxelCollisionBudget3d, VoxelCollisionError3d, VoxelCollisionReport3d,
+    VoxelCollisionSection3d, VoxelCollisionSettings3d, VoxelCollisionWorld3d,
+};
 pub mod voxel;
 pub use voxel::{VoxelError, VoxelFace, VoxelHit, cube_faces, face_quad, pick};
 pub use voxel_render::{

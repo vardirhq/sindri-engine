@@ -220,3 +220,14 @@ coverage/edited-residency tests. This establishes a renderer-independent geometr
 boundary without adding physics dependencies to voxel storage. It does not
 complete resident collision: scene policy/transform resolution, revision caches,
 entry/edit/exit reconciliation, bounded work and Causeway proof remain open.
+
+### Native resident collision snapshot seam
+
+`SceneVoxelCollision3d` now caches complete supplied resident sections by occupancy
+and policy revision and reconciles them into independently replaceable static
+owner groups. It handles positive composed scale/pose, section exit, owner
+inactivity/removal and bounded full-batch prevalidation without partial holes.
+Seven native scene tests include real collision/queries/events and an edited
+hole; WASM compilation passes. Authored block/terrain resolution, residency
+production, host/editor/shared-session wiring and actual Causeway/browser proof
+remain open. See [`physics.md`](physics.md) for limits and revision ownership.

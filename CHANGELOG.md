@@ -274,6 +274,11 @@ requests, commit history, and subsystem documentation rather than this file.
 
 ### Added
 
+- Add a native scene adapter for resident voxel collision snapshots, with
+  occupancy/policy revision caches, transformed partial shapes, owner lifecycle
+  and bounded atomic reconciliation. Authored terrain and game-host wiring
+  remain open.
+
 - Add independently replaceable 3D static collider groups under one entity,
   preserving the body and unaffected collider handles. Queries update immediately;
   invalid changes fail before mutation. Scene streaming/voxel wiring remains open.

@@ -1432,3 +1432,17 @@ needed for Causeway's resident/edited voxel collision without artificial section
 entities. Scene policy/transform/revision caches, residency and budgets, and
 actual game/editor/Decay/browser integration remain absent. Acceptance stays
 unchecked. No dependencies, components or host APIs changed.
+
+### Resident voxel collision snapshot seam
+
+`SceneVoxelCollision3d` connects supplied complete resident sections and explicit
+shape policy to static owner groups. It caches occupancy/policy revisions, reuses
+boxes for scale/settings changes, moves pose-only updates, releases section/world
+lifecycle and prevalidates the whole bounded snapshot before committing. Seven
+native regressions prove cache/transform/lifetime behavior, all four budget gates,
+late errors/retry and actual landing/owner contact followed by falling through an
+edited voxel hole. Scoped preflight passes 497 scene tests, warning-denied Clippy
+and all-target/all-feature WASM checks pass. No dependencies, component or host
+surface changed. This is the native scene seam toward Causeway: authored terrain/
+block policy, residency production and shared-session/editor/game/Decay/browser
+wiring remain open. Both major acceptance items stay unchecked.

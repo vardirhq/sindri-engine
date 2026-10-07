@@ -1128,8 +1128,66 @@ ordering, invalid inputs/nonstatic owners/pending conflicts, sensor/mask/local
 pose filtering, empty/reused owners and a dynamic body's landing/contact event
 against its real owner followed by falling after removal. All 187 physics tests,
 warning-denied native checks/Clippy and all-target/all-feature WASM checks pass.
-This is an engine prerequisite: scene policy/revision/residency wiring and real
-Causeway/Decay/editor/browser streamed collision remain absent.
+This is an engine prerequisite. The scene snapshot adapter below now provides
+revision caches and bounded reconciliation; authored policy/residency production
+and real Causeway/Decay/editor/browser streamed collision remain absent.
+
+## Resident voxel snapshot adapter
+
+`SceneVoxelCollision3d` connects resolved resident `VoxelSection` snapshots to
+keyed static solver groups. It owns each supplied real scene entity's solver
+body exclusively; it creates no artificial section entities and never steps
+physics. Hosts provide the complete set of active collision worlds/sections on
+every `synchronize` call, independently of render visibility. The adapter takes
+`World` only to validate owner lifetime/activity; authored component resolution,
+composed pose/scale and residency selection remain the host's responsibility.
+
+A `VoxelCollisionWorld3d` supplies owner, world pose, positive finite XYZ scale,
+shared layers/friction/restitution/sensor settings, a collision shape policy and
+its revision. Each `VoxelCollisionSection3d` supplies coordinate, voxel snapshot
+and occupancy revision. Revisions must change whenever the corresponding data
+changes: replacing a generator with sections whose local revision is again zero
+must **not** reuse the old occupancy revision. Likewise changing a callback's
+answer requires a new policy revision. Solidity is explicit, not guessed from
+render occlusion or navigation walkability. All blocks in a snapshot share the
+world's physical settings; distinct block coefficients need separate groups or
+a later richer policy. Reflected/nonpositive scale is rejected. Geometry stays
+in the engine's f32 coordinate domain, with its existing extreme-value limits.
+
+Compiled boxes and collider arrays are retained by occupancy/policy revision,
+scale and physical settings. Unchanged sections keep their geometry; scale or
+coefficient changes rebuild collider pieces from cached boxes without recompiling
+occupancy. Pose-only changes move the owner without replacing sections. New keys
+are allocated in section-coordinate order and retained while resident. Departed
+sections release their groups; omitted, inactive or despawned owners release the
+owned body. A supplied stale owner is an error. Removing the last section keeps
+an empty owned body until its world is omitted. Reset the cache together with
+the solver; unrelated/lost owned bodies are rejected. Dropping the cache alone
+does not clean up the solver: synchronize an empty snapshot first unless both
+objects are being reset.
+
+`VoxelCollisionBudget3d` defaults to four active worlds, 64 retained sections,
+eight rebuilt sections per call and 8,192 total retained collider pieces.
+Each compilation visits at most 4,096 cells. Query-index refresh still visits
+retained owner pieces. Removal work is bounded by previously retained sections/
+pieces. Over-budget inputs fail before changing solver geometry or cached
+revisions; the adapter does not publish a partial window or silently defer a
+hole. Hosts must choose a bounded complete collision window or deliberately
+configure larger limits. Snapshot validation and every changed collider group
+complete before any insertion, removal or pose update; failed input retains the
+previous snapshot for a corrected retry. `VoxelCollisionReport3d` reports active
+world/section/piece counts and compiled/rebuilt/removed section counts.
+
+Seven native scene regressions exercise unchanged/edited/policy cache reuse,
+retained collider arrays, transformed slab bounds, scale/settings/pose updates,
+all four budget failures, late invalid inputs and retry, duplicates/ownership,
+negative-section departure/reentry, inactivity/despawn/reset and actual landing/
+contact on occupied voxel geometry followed by falling through an edited hole.
+All 497 scene tests, warning-denied native checks/Clippy and all-target/all-feature
+WASM checks pass. No component, host API or dependency changed. This is the
+native scene/solver seam toward Causeway; authored terrain/block policy and
+residency production, shared-session/editor wiring and actual game/Decay/browser
+execution remain open. It is not completed voxel-world proof.
 
 ## Voxel collision geometry foundation
 
@@ -1159,8 +1217,9 @@ WASM. This is a renderer/physics-independent engine prerequisite toward Causeway
 not solver or game proof. Scene integration must retain compiled geometry by
 occupancy **and policy** revision, rebuild only entering/edited sections, release
 leaving/disabled worlds, apply composed transforms and bound per-step work.
-Actual resident collision, queries/events on that geometry and game/editor/
-Decay/browser proof remain absent. No component or host surface changes here.
+The native scene adapter now exercises resident snapshot collision and owner
+queries/events. Authored host/game/editor/Decay/browser integration remains
+absent. No component or host surface changes here.
 
 ## Feature-track slices
 

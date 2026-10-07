@@ -16,6 +16,51 @@ a pushed handoff. Do not ask them to authorize the scope again.
 
 ## Current continuation checkpoint
 
+`SceneVoxelCollision3d` now connects explicit complete resident voxel snapshots
+to keyed static solver groups under real entity owners. Public inputs are
+`VoxelCollisionWorld3d` (owner, composed pose/positive scale, physical settings,
+shape policy/policy revision) and `VoxelCollisionSection3d` (coord, supplied
+occupancy revision, VoxelSection). Occupancy revisions MUST change on source
+replacement even if the new section's local revision repeats zero; policy
+revision MUST change whenever callback answers change. The adapter does not
+resolve authored components, choose residency or step physics. Solidity must be
+supplied explicitly, not inferred from render occlusion/navigation walkability.
+
+Cache retains Arc boxes/collider arrays by occupancy/policy revision; scale or
+settings changes reuse boxes and replace pieces; pose-only updates move owner.
+New groups allocate keys in coordinate order. Exited sections release groups;
+omitted/inactive/despawned owners release their exclusively owned solver body.
+Stale supplied entities, duplicate inputs, unrelated/lost solver state, invalid
+pose/geometry/settings and exceeded limits fail before any solver/cache commit.
+Reset cache together with solver; dropping cache alone does not remove geometry.
+Default limits: 4 active worlds, 64 sections, 8 rebuilds/call, 8,192 retained pieces.
+No partial windows or deferred holes: over-budget snapshots fail atomically.
+Query-index refresh/removal visits retained pieces, bounded by these limits.
+No new dependencies/components/host APIs; catalogues need no regeneration.
+
+Seven scene regressions exercise cache/retained arrays, policy/scale/settings/
+pose changes and transformed slabs, all four budgets, late errors/retry,
+duplicates/ownership, negative departure/reentry, inactive/despawn/reset and real
+landing/contact on occupied voxels then falling through an edited hole. Scoped
+preflight passes all 497 scene tests; warning-denied Clippy and all-target/all-
+feature WASM checks pass. Logs `/tmp/sindri-voxel-scene-{preflight,clippy,wasm}.log`.
+This proves the native snapshot/solver seam, not authored Causeway or browser
+execution. Prior head `8c0773a1` passed CI run `37672123988`; check the new head.
+
+Next produce these snapshots from actual authored voxel worlds: resolve real
+block bounds and explicit collision eligibility (do NOT equate supports/walkable/
+render opacity with solidity), bounded collision residency and stable occupancy/
+policy epochs. `VoxelGround::of` already resolves generators/palettes/edits but
+its footing only retains support/walkability/top. TileDefinition has full bounds;
+TileSetBindings has a generation counter. Plan how shared ScenePhysics3d and
+voxel prevalidation run before either batch mutates, then wire shared game/editor
+session ownership/reset. Prove real Causeway edited/resident collision, queried
+owner events and native/browser gameplay, then native inspector/Play/replay.
+Positive-scale only is deliberate in this slice. Keep both acceptance items
+unchecked and PR #497 draft.
+
+Earlier checkpoint notes follow.
+
 `PhysicsWorld3d` now supports `validate_static_group`, `replace_static_group`
 and `remove_static_group`. Keyed groups share one real owner/body; replacing one
 rebuilds only its backend colliders, retaining body/unaffected collider handles

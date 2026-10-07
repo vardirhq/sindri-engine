@@ -866,6 +866,20 @@ than allowing the runtime type to make the broader feature look complete.
 
 ### Voxel world foundation
 
+`SceneVoxelCollision3d` now reconciles explicit complete resident voxel snapshots
+into static owner groups. Occupancy/policy revisions retain compiled geometry;
+scale/settings changes reuse boxes, pose-only changes move the body, and section
+exit or world inactivity/removal releases owned geometry. Complete prevalidation
+and world/section/rebuild/piece limits reject invalid or over-budget snapshots
+without publishing partial collision. Seven native scene regressions exercise
+cache reuse, transforms/slabs, budgets/atomic retry, ownership/lifetime and real
+landing followed by falling through an edited voxel hole. All 497 scene tests,
+Clippy and WASM checks pass. Hosts still need authored block/terrain resolution,
+residency production and shared-session/editor wiring; no game/Decay/browser
+uses the adapter yet. See [`physics.md`](physics.md) for input/revision ownership,
+default limits and f32/positive-scale constraints.
+
+
 The standalone 3D solver now owns keyed static collider groups under one real
 entity. Replacement/removal retains other collider handles and the body handle;
 queries update immediately with owner identity and canonical key/piece ordering.
@@ -887,9 +901,8 @@ invalid shapes return typed errors and output is bounded by 4,096 boxes per
 section. Five regressions prove exact cover without holes, overlaps or air,
 partial shapes, worst-case bounds and edited negative sections across residency
 unload/reload; 50 crate tests and warning-denied native/WASM checks pass. It has
-no new dependencies and inserts no solver bodies. Scene revision caching,
-resident lifecycle/budget enforcement and actual Causeway collision/game proof
-remain absent; see the geometry contract in [`physics.md`](physics.md).
+no new dependencies and inserts no solver bodies. The scene snapshot adapter now provides revision caching and resident lifecycle/
+budget enforcement. Authored Causeway collision/game proof remains absent; see the geometry contract in [`physics.md`](physics.md).
 
 
 `sindri-voxel` owns signed voxel and 16³ section coordinates, palette-backed
