@@ -149,7 +149,22 @@ and pressing in one browser frame previously lost the action edge. Source:
 `scripts/browser/prepare-platformer.py`, `platformer-goal.mjs`, the smoke hook and
 `games/platformer/tests/browser_goal.decay`. See the browser proof section in
 `docs/character-movement.md` for the CI reproduction.
-Continue with accelerated queries, then 3D/voxel physics and final integration.
+Accelerated queries now have a first checked slice: rays, overlaps and shape
+casts select per-piece BVH candidates, sorted by entity/piece before the unchanged
+exact phase. Insert/remove/teleport refresh immediately; non-static bodies refresh
+after solving, while position-kinematic targets retain their pending semantics.
+The index is independent of solver timing and uses the existing Parry dependency.
+Overflow bounds use a scan fallback. Differential tests compare against a forced
+exhaustive candidate set; sparse 100/1,000/10,000-piece tests record node/candidate
+counts. The full accelerated-query acceptance remains unchecked.
+Validation: scoped preflight passed 150 physics tests, native warning-denied
+check, Clippy, WASM, formatting/size; 856 scene/Decay/platformer tests passed.
+The rebuilt WASM host passed the platformer goal gate and Physics Playground
+controls using the CI asset-kind flags. Scaling samples at 10,000 pieces visit
+28–34 nodes and one candidate. Prior head `7dc8ad3a` passed all CI.
+Continue by indexing controller penetration, slide casts, skin support and
+platform support reconstruction, preserving one-way policy and historical poses.
+Then complete 3D/voxel physics and final integration.
 Gameplay snapshots and a 3D character controller remain absent. Inspect every
 failed job on the current PR head before changing code if CI fails.
 

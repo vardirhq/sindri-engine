@@ -1029,3 +1029,34 @@ surface-specific completeness. This checklist does not mark those surfaces done.
   compound/solver/trigger/carry gaps remain absent. Prior head `1ea225dd` passed
   every CI check; CI must verify this new checkpoint. Accelerated queries,
   3D/voxel physics and full final integration remain unchecked.
+
+
+## Indexed ray/area query checkpoint
+
+- A query-only per-piece BVH now selects candidates for 2D rays, overlaps and
+  shape casts. Insert/remove/teleport update immediately; completed solves refresh
+  non-static pieces. Position-kinematic targets remain pending until solving.
+  Candidates retain entity/piece ordering, masks, sensor policy, whole-entity
+  predicates and the unchanged exact geometry phase. No new dependency or public
+  API was introduced. Overflowing bounds use an exhaustive fallback.
+- Four new regressions compare indexed results with exhaustive candidates before
+  stepping and after rotation/teleport/removal/reinsertion, verify solved velocity
+  and pending position targets, cover overflow fallback and count sparse query
+  work. At 100, 1,000 and 10,000 pieces, first/middle/last samples select one piece;
+  the 10,000-piece rays visit 28–34 BVH nodes rather than every piece.
+- Scoped preflight passed all 150 physics tests, warning-denied all-target check,
+  formatting and size checks. Physics all-target/all-feature Clippy and WASM
+  checks passed. A further 856 native tests across scene, Decay and platformer
+  passed, including all 37 platformer tests.
+- A rebuilt warning-denied WASM host ran the normal platformer to the flag with
+  five coins/eight jumps/no falls and fetched 27 assets. Physics Playground's real
+  Chromium controls exercised masks, sensor opt-in, inside/miss rays, swept
+  circles, overlaps and events, fetched five assets and passed WebGPU/pixel/error
+  checks using CI's `scene,script,font` asset-kind setting. Both captures were
+  visually reviewed. The first Playground invocation omitted that setting and
+  incorrectly required a runtime request for the licence text; the corrected
+  invocation matches CI and passes without source changes.
+- This is an internal query optimization used by the platformer genre showcase;
+  it adds no gameplay policy. Controller penetration/sweep/ground/support paths
+  still scan and are the next slice, so accelerated-query acceptance remains
+  unchecked. Prior head `7dc8ad3a` is green in CI; this checkpoint needs its own CI.

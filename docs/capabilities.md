@@ -239,8 +239,8 @@ Closest-hit 2D raycasts return Sindri `RayHit2d` snapshots (entity, world-space
 point/normal, distance). Directions are normalized; maximum distance is
 inclusive; invalid finite/range inputs fail. Membership masks, sensor opt-in and
 whole-entity exclusion select pieces before choosing a hit. Inside hits have
-zero distance/normal; exact ties prefer entity handle then piece order. Direct
-scans work before the first step and after a body move. Decay returns `null` on
+zero distance/normal; exact ties prefer entity handle then piece order. A
+query-only per-piece BVH works before the first step and after a body move. Decay returns `null` on
 a miss and skips inactive/despawned entities immediately, while scene geometry
 changes are synchronized at the next step. Engine and Decay regressions cover
 geometry, compounds, filtering, validation, copies and removal/reuse. The
@@ -248,8 +248,10 @@ platformer displays ground clearance through jumps against painted tilemap
 colliders, and `examples/physics` exposes live rays, hit dots, normals, falling
 bodies, bounce and sensors with desktop/touch controls. Pages exports it under
 `examples/physics/`; native project regressions and desktop/phone browser smoke
-checks exercise its real Decay controls. 3D queries and an accelerated query index remain absent; implemented 2D
-overlaps and shape casts are described below.
+checks exercise its real Decay controls. Rays, overlaps and shape casts now use
+a synchronized per-piece index; controller ground/movement/support queries still
+scan pieces. 3D queries remain absent; implemented 2D overlaps and shape casts
+are described below.
 
 A parallel Sindri-owned 3D body/collider data model already fixes the public
 shape of the later 3D slice, but no 3D runtime behavior is claimed yet.

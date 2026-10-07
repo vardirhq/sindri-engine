@@ -773,9 +773,10 @@ API. Add them only for a demonstrated gameplay requirement.
 The implemented query is `PhysicsWorld2d::raycast(origin, direction,
 max_distance, RaycastFilter2d) -> Result<Option<RayHit2d>, PhysicsError>`.
 `raycast_where` additionally accepts an entity predicate for a scene host to
-exclude inactive/despawned entities immediately. Both scan registered collider
-pieces at current body poses, including offsets and rotations, without relying
-on a broad-phase query index that may be stale before the first step.
+exclude inactive/despawned entities immediately. A query-only per-piece BVH
+selects candidates at current body poses, including offsets and rotations. It
+updates immediately on insertion, removal and teleports, and after each completed
+solver step; it does not depend on the solver broad phase being current.
 
 Direction is normalized, distance is non-negative and inclusive, and geometry
 inputs must be finite. Zero direction is rejected. Normalization accepts even
@@ -794,8 +795,27 @@ a script pass. The platformer proves ground clearance against tilemap geometry;
 2D overlaps and shape casts are implemented for circles, boxes and capsules.
 Decay exposes `Physics.overlap_circle`, `overlap_box`, `cast_circle` and
 `cast_box`; Orbital's mine blast and Physics Playground exercise them.
-All 3D runtime queries remain future work. Queries currently scan collider pieces;
-the incremental physics update is tracked in `docs/physics-update.md`.
+All 3D runtime queries remain future work. Rays, overlaps and shape casts use
+the query index; controller movement/ground/support queries still scan pieces.
+The incremental physics update is tracked in `docs/physics-update.md`.
+
+The index uses one leaf per registered collider piece. Ray traversal tests bounds
+against the finite segment; overlaps use probe bounds; casts use the union of
+start/end bounds at fixed orientation. Candidates are sorted by entity handle and
+piece order before the unchanged exact geometry/filtering phase. Predicates are
+called once per candidate entity, rather than for every registered entity; callers
+must not depend on visits to remote geometry. Masks, sensors, exclusions, inside
+hits and exact ties retain their previous results.
+
+Only non-static bodies need post-step refresh. Position-kinematic targets remain
+pending until the solver step, while other body teleports update immediately.
+Scene collider edits retain their existing remove/reinsert synchronization path.
+Outward bounds padding protects touching geometry; overflowing bounds take a
+conservative exact-scan fallback instead of introducing new validation failures.
+Work is output-dependent: a dense/long query may still select every piece, and
+sorting costs O(k log k) for k candidates. Refresh is proportional to registered
+non-static collider pieces, including sleeping bodies. No backend types escape
+and no new dependency is introduced.
 
 Results contain Sindri entity IDs, hit position/normal in the appropriate vector
 dimension, and distance. They never expose Rapier collider handles.

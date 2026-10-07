@@ -31,7 +31,8 @@ impl PhysicsWorld2d {
     ///
     /// Scene hosts use this to omit entities despawned or disabled since their
     /// last physics synchronization. Geometry comes from current body poses;
-    /// newly authored colliders appear at the next synchronization.
+    /// newly authored colliders appear at the next synchronization. The predicate
+    /// must be stable during the call; only spatial candidates are visited.
     ///
     /// # Errors
     /// Has the same validation contract as [`Self::raycast`].
@@ -45,53 +46,57 @@ impl PhysicsWorld2d {
     ) -> Result<Option<RayHit2d>, PhysicsError> {
         let ray = checked_ray(origin, direction, max_distance)?;
         let mut closest: Option<RayHit2d> = None;
-        // A direct scan also works before the first step, without a stale
-        // broad-phase index. Compound pieces retain their authored order.
-        for (&entity, record) in &self.bodies {
-            if filter.exclude == Some(entity) || !include(entity) {
+        let mut last_entity = None;
+        let mut accepted = false;
+        for candidate in self.spatial.ray(&ray, max_distance) {
+            let entity = candidate.entity;
+            if last_entity != Some(entity) {
+                accepted = filter.exclude != Some(entity) && include(entity);
+                last_entity = Some(entity);
+            }
+            if !accepted {
                 continue;
             }
+            let record = &self.bodies[&entity];
             let body = &self.backend.bodies[record.body];
-            for &handle in &record.colliders {
-                let collider = &self.backend.colliders[handle];
-                if !collider.is_enabled()
-                    || (!filter.include_sensors && collider.is_sensor())
-                    || collider.collision_groups().memberships.bits() & filter.mask == 0
-                {
-                    continue;
-                }
-                let pose = collider
-                    .position_wrt_parent()
-                    .map_or(*collider.position(), |local| *body.position() * *local);
-                let Some(hit) =
-                    collider
-                        .shape()
-                        .cast_ray_and_get_normal(&pose, &ray, max_distance, true)
-                else {
-                    continue;
-                };
-                let distance = hit.time_of_impact;
-                if closest.as_ref().is_some_and(|old| {
-                    distance
-                        .total_cmp(&old.distance)
-                        .then(entity.cmp(&old.entity))
-                        .is_ge()
-                }) {
-                    continue;
-                }
-                let point = ray.point_at(distance);
-                let normal = if distance <= 0.0 {
-                    r2::Vector::ZERO
-                } else {
-                    hit.normal
-                };
-                closest = Some(RayHit2d {
-                    entity,
-                    point: [point.x, point.y],
-                    normal: [normal.x, normal.y],
-                    distance,
-                });
+            let collider = &self.backend.colliders[candidate.handle];
+            if !collider.is_enabled()
+                || (!filter.include_sensors && collider.is_sensor())
+                || collider.collision_groups().memberships.bits() & filter.mask == 0
+            {
+                continue;
             }
+            let pose = collider
+                .position_wrt_parent()
+                .map_or(*collider.position(), |local| *body.position() * *local);
+            let Some(hit) =
+                collider
+                    .shape()
+                    .cast_ray_and_get_normal(&pose, &ray, max_distance, true)
+            else {
+                continue;
+            };
+            let distance = hit.time_of_impact;
+            if closest.as_ref().is_some_and(|old| {
+                distance
+                    .total_cmp(&old.distance)
+                    .then(entity.cmp(&old.entity))
+                    .is_ge()
+            }) {
+                continue;
+            }
+            let point = ray.point_at(distance);
+            let normal = if distance <= 0.0 {
+                r2::Vector::ZERO
+            } else {
+                hit.normal
+            };
+            closest = Some(RayHit2d {
+                entity,
+                point: [point.x, point.y],
+                normal: [normal.x, normal.y],
+                distance,
+            });
         }
         Ok(closest)
     }

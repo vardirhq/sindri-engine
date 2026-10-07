@@ -17,6 +17,7 @@ mod platforms;
 mod query;
 mod slide;
 mod slope;
+mod spatial;
 mod steps;
 mod sweep;
 
@@ -52,6 +53,7 @@ struct BodyRecord2d {
 /// The first runtime physics world. It owns Rapier completely and exposes only
 /// Sindri entities, values, events, and joints.
 pub struct PhysicsWorld2d {
+    spatial: spatial::SpatialIndex,
     contacts: HashMap<EntityId, Vec<crate::Contact2d>>,
     backend: r2::PhysicsWorld,
     one_way: one_way::OneWayHooks,
@@ -86,6 +88,7 @@ impl PhysicsWorld2d {
         let mut backend = r2::PhysicsWorld::new();
         backend.gravity = r2::Vector::new(gravity[0], gravity[1]);
         Ok(Self {
+            spatial: spatial::SpatialIndex::default(),
             contacts: HashMap::new(),
             backend,
             one_way: one_way::OneWayHooks::default(),
@@ -165,6 +168,7 @@ impl PhysicsWorld2d {
                 kind: body.kind,
             },
         );
+        self.index_body(entity);
         if let Some(seconds) = self.pending_drop.remove(&entity) {
             self.drop_through(entity, seconds)?;
         }
@@ -242,7 +246,9 @@ impl PhysicsWorld2d {
         let Some(record) = self.bodies.remove(&entity) else {
             return false;
         };
+        self.spatial.remove_body(entity);
         for handle in &record.colliders {
+            self.spatial.remove(*handle);
             self.one_way.policies.remove(handle);
             self.collider_entities.remove(handle);
         }
@@ -312,6 +318,7 @@ impl PhysicsWorld2d {
         let (tear_send, _tear_recv) = mpsc::channel();
         let events = r2::ChannelEventCollector::new(collision_send, force_send, tear_send);
         self.backend.step_with_events(&self.one_way, &events);
+        self.index_simulated_bodies();
         self.snapshot_contacts(dt);
         self.clear_step_forces();
         self.one_way.dropping.retain(|_, seconds| {

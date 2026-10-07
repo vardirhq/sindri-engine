@@ -123,6 +123,7 @@ impl PhysicsWorld2d {
         } else {
             body.set_position(target, true);
             self.invalidate_contacts(entity);
+            self.index_body(entity);
         }
         Ok(())
     }
