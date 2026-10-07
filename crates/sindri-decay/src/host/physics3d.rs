@@ -14,6 +14,9 @@ impl WorldHost<'_> {
         path: &Path,
         args: &[Value],
     ) -> Result<Value, RuntimeError> {
+        if matches!(call, Physics3dCall::Layer | Physics3dCall::Mask) {
+            return self.physics3d_layers(call, path, args);
+        }
         if matches!(
             call,
             Physics3dCall::Raycast | Physics3dCall::OverlapSphere | Physics3dCall::CastSphere

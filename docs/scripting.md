@@ -1002,6 +1002,8 @@ a person who has not clicked yet.
 
 | Call | Returns |
 | --- | --- |
+| `Physics3d.layer(name: String)` | numeric mask bit |
+| `Physics3d.mask(names: List<String>)` | numeric mask |
 | `Physics3d.raycast(origin: Vec3, direction: Vec3, max_distance, mask, include_sensors, exclude: Entity?)` | `RayHit3d?` |
 | `Physics3d.overlap_sphere(centre: Vec3, radius, mask, include_sensors, exclude: Entity?)` | `List<Entity>` |
 | `Physics3d.cast_sphere(origin: Vec3, radius, direction: Vec3, max_distance, mask, include_sensors, exclude: Entity?)` | `RayHit3d?` |
@@ -1014,6 +1016,15 @@ a person who has not clicked yet.
 | `Physics3d.collision_stopped()` | `List<Entity>` |
 | `Physics3d.sensor_entered()` | `List<Entity>` |
 | `Physics3d.sensor_exited()` | `List<Entity>` |
+
+`layer(name)` selects a named bit from the active authored
+`sindri.physics3d.world`; `mask(names)` combines those bits with OR. The first
+32 labels map to bits 0–31; duplicate labels select the first bit and empty
+labels cannot be selected. Repeated requested names are harmless and an empty
+list returns zero. Lookup reads current authored names without stepping physics,
+ignores inactive settings and never uses 2D world names. Missing 3D host, unknown
+names, wrong argument types, malformed settings or multiple active 3D worlds
+fail explicitly. With no active settings there are no names to select.
 
 `Physics3d` takes Vec3 values without changing the existing 2D `Physics` API.
 `velocity(entity)` and `angular_velocity(entity)` return copied Vec3 values;
@@ -1042,7 +1053,7 @@ synchronized geometry without stepping physics and skip inactive/despawned
 entities even before the next synchronization. Inside/on or initial-overlap hits
 have zero distance/normal; sphere initial overlaps use the probe origin as point.
 Exact hit ties prefer entity handle then piece order. Rotated box/capsule probes
-and layer-name lookup remain absent from the typed 3D surface.
+remain absent from the typed 3D surface.
 
 ### Bodies, and what they touched
 

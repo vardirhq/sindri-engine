@@ -46,7 +46,7 @@ impl SceneComponent for Collider3dComponent {
 pub struct PhysicsWorld3dComponent {
     #[serde(default = "earth_gravity")]
     pub gravity: [f32; 3],
-    /// Layer labels, in bit order. Typed 3D name lookup is a later host slice.
+    /// Layer labels in bit order for `Physics3d.layer` and `Physics3d.mask`.
     #[serde(default)]
     pub layers: Vec<String>,
 }

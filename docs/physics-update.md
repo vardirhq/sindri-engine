@@ -1318,3 +1318,28 @@ surface-specific completeness. This checklist does not mark those surfaces done.
   WebGPU, asset delivery and visible-render checks remain intact.
   This repairs platformer proof automation; 3D acceptance and final integration
   remain open, and the new head still requires CI verification.
+
+
+## Named 3D query-mask checkpoint
+
+- Typed `Physics3d.layer(name)` and `mask(names)` read current active authored
+  3D world labels without stepping, independently of 2D. The first 32 labels
+  map to mask bits; duplicate labels select the first nonempty matching name,
+  repeated requests combine with OR and an empty list returns zero. Unknown
+  names, invalid arguments/settings, multiple active 3D worlds and absent
+  host context fail explicitly.
+- Three bridge regressions exercise full-u32 bits, duplicate/empty labels,
+  authoring/inactivity, dimension isolation and query selection. Typed query
+  and shared-session scripts now use named masks. Rebuilt Chromium confirms
+  actual queried landing with WebGPU, delivery and visible geometry intact.
+- Scoped preflight passes 880 native tests; all 11 catalogue tests, generated
+  API artifacts, warning-denied Clippy, typed scripts, native editor check,
+  WASM checks and game WASM build pass. No dependency, component schema,
+  2D surface or gameplay behavior changed. This is scripting integration toward
+  Causeway; typed rotated probes, spawn-window controls, native editor and
+  occupied/resident/edited voxel proof remain open.
+- Manual CI on the browser-repair head exposed an existing checkout expression
+  that selected depth 2 when depth 0 was intended, leaving `origin/main` absent.
+  The conditional now keeps full history for manual Decay preflight and depth
+  2 for other runs. Final-head CI must verify this permanent workflow repair
+  and the named-mask slice. 3D acceptance and final integration stay unchecked.

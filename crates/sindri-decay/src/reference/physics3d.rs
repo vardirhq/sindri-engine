@@ -8,6 +8,16 @@ pub(super) const TYPES: &[TypeEntry] = &[
         text: "Independent 3D physics controls, indexed queries and copied last-step events. Requires a 3D physics host. Live controls require an active synchronized body; calls before spawn synchronization fail rather than queue. Authored motion fields are unchanged, so structural rebuilds restore authored settings.",
         members: &[
             call(
+                "layer",
+                &["name"],
+                "Query mask bit for a text name in the active authored 3D world's first 32 layer labels. Empty labels cannot be selected; duplicate names select the first bit. Reads current authoring without stepping; ignores inactive settings and never reads 2D names. Unknown names, malformed or multiple active world settings and missing 3D host fail.",
+            ),
+            call(
+                "mask",
+                &["names"],
+                "Combines Physics3d.layer bits from a List<str> using bitwise OR. Repeated names do not add bits; an empty list returns zero. Every name is checked; non-text elements, unknown names, invalid active world settings or missing 3D host fail.",
+            ),
+            call(
                 "raycast",
                 &[
                     "origin",

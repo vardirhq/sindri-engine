@@ -8,7 +8,7 @@ use serde_json::json;
 use sindri_core::{EntityData, EntityId, SceneComponent};
 use sindri_decay::{Physics3d, ScriptComponent, ScriptFrame, ScriptSources, Scripts};
 use sindri_platform::InputState;
-use sindri_scene::Collider3dComponent;
+use sindri_scene::{Collider3dComponent, PhysicsWorld3dComponent};
 use support::{Fixture, near, reference};
 
 fn placed(fixture: &mut Fixture, position: [f32; 3], sensor: bool) -> EntityId {
@@ -241,6 +241,14 @@ fn typed_script_reads_optional_hit_and_mutates_only_its_copy() {
     );
     let mut sources = ScriptSources::new();
     sources.insert("query.decay", include_str!("physics3d_query.decay"));
+    fixture.world.spawn(EntityData {
+        components: [(
+            PhysicsWorld3dComponent::TYPE_NAME.into(),
+            json!({"layers": ["targets"]}),
+        )]
+        .into(),
+        ..EntityData::default()
+    });
     fixture.step();
     let input = InputState::default();
     let mut scripts = Scripts::new();

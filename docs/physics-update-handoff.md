@@ -16,6 +16,36 @@ a pushed handoff. Do not ask them to authorize the scope again.
 
 ## Current continuation checkpoint
 
+Typed `Physics3d.layer(name)` and `mask(names)` now read the active authored
+3D world's first 32 labels independently of 2D. Unknown/empty names, wrong
+arguments, malformed or multiple active settings and missing 3D context fail;
+duplicate labels select the first bit, repeated requests OR together and an
+empty list returns zero. Inactive settings are ignored and current authored
+edits are visible without stepping. Three bridge regressions exercise real query
+filtering, dimension isolation, authoring/inactivity, bit 31 and invalid inputs.
+Both the native typed query script and shared-session driver now query with
+named masks. Rebuilt exported-host Chromium confirms queried solid landing
+with WebGPU, four delivered assets and 21 visible colors.
+
+Scoped preflight passes 880 native game/Decay/scene tests, both typed scripts
+have zero errors/reminders, and warning-denied all-target/all-feature checks and
+Clippy pass. All 11 catalogue tests pass and API JSON/Markdown regenerate.
+Decay and scene WASM checks, the game WASM build and native editor check pass.
+Artifacts: `/tmp/sindri-layer3d-{preflight,clippy,catalogue,generate,wasm-check,scene-wasm,wasm-build,editor-check,export,browser}.log`,
+`/tmp/sindri-layer3d-browser.png`; export `/tmp/sindri-layer3d-export`.
+No dependency, body/component schema, 2D surface or gameplay behavior changed.
+This is scripting integration toward Causeway; voxel/game proof remains open.
+Continue with typed rotated box/capsule probes, spawn-window controls and the
+remaining native editor and occupied/resident/edited voxel proof below.
+
+The browser-repair head had no automatic CI checks attached, so CI was started
+through its existing manual trigger (run `37656772383`). It exposed a checkout
+expression bug: `condition && 0 || 2` selects 2 even when the condition is true,
+leaving `origin/main` unavailable to manual Decay preflight. The expression now
+uses `condition != workflow_dispatch && 2 || 0`, which keeps full history for
+manual runs. This is a permanent repair to the existing CI contract, not a
+self-modifying workflow. Final-head CI must verify both changes; keep the PR draft.
+
 The latest typed-query head `aac1a6a4` passed every CI job except the browser
 smoke. Full failure triage found the keyboard player jumped over the platformer
 flag sensor and ran into the tall wall beyond it (four coins, no falls, stuck

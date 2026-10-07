@@ -296,7 +296,11 @@ remains absent. Typed 3D rays, sphere overlaps and sphere casts use indexed
 synchronized geometry, active-entity filtering, masks/sensors/whole-entity
 exclusion and copied optional `RayHit3d`/sorted overlap lists. Six bridge
 regressions and the shared-session/Chromium landing fixture exercise these
-contracts. Typed rotated box/capsule probes, layer-name lookup, resident/edited
+contracts. Typed `Physics3d.layer`/`mask` read only the active authored 3D world's
+first 32 labels, combine checked names with OR and reject invalid settings or
+unknown labels. Three bridge regressions exercise full-u32 masks, duplicates,
+inactivity, live authoring and real query selection; typed script and session
+fixtures query with named masks. Typed rotated box/capsule probes, resident/edited
 voxel collision and game proof remain unimplemented.
 
 Forces and rotation have runtime and typed Decay controls: additive world force

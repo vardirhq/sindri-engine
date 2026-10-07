@@ -8,6 +8,8 @@ pub(crate) const HIT_FIELDS: [&str; 4] = ["entity", "point", "normal", "distance
 
 #[derive(Clone, Copy)]
 pub(crate) enum Physics3dCall {
+    Layer,
+    Mask,
     Raycast,
     OverlapSphere,
     CastSphere,
@@ -23,6 +25,8 @@ pub(crate) enum Physics3dCall {
 }
 
 pub(crate) const CALLS: &[(&str, Physics3dCall)] = &[
+    ("layer", Physics3dCall::Layer),
+    ("mask", Physics3dCall::Mask),
     ("raycast", Physics3dCall::Raycast),
     ("overlap_sphere", Physics3dCall::OverlapSphere),
     ("cast_sphere", Physics3dCall::CastSphere),
@@ -54,6 +58,8 @@ pub(crate) fn add_surface(environment: &mut Environment) {
     let mut physics = HostType::new();
     for (name, call) in CALLS {
         let (params, return_type) = match call {
+            Physics3dCall::Layer => (vec![Type::String], Type::F32),
+            Physics3dCall::Mask => (vec![Type::array_of(Type::String)], Type::F32),
             Physics3dCall::Raycast | Physics3dCall::OverlapSphere | Physics3dCall::CastSphere => {
                 query_signature(*call)
             }

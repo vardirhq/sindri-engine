@@ -29,15 +29,13 @@ fn fixture_with_script(script: &str, source: &str) -> (World, Session, EntityId)
         components: [(Collider3dComponent::TYPE_NAME.into(), collider)].into(),
         ..EntityData::default()
     });
+    let mut settings = registry
+        .default_payload(PhysicsWorld3dComponent::TYPE_NAME)
+        .unwrap()
+        .clone();
+    settings["layers"] = json!(["floor"]);
     world.spawn(EntityData {
-        components: [(
-            PhysicsWorld3dComponent::TYPE_NAME.into(),
-            registry
-                .default_payload(PhysicsWorld3dComponent::TYPE_NAME)
-                .unwrap()
-                .clone(),
-        )]
-        .into(),
+        components: [(PhysicsWorld3dComponent::TYPE_NAME.into(), settings)].into(),
         ..EntityData::default()
     });
     let mut body = registry

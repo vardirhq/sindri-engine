@@ -22,10 +22,12 @@ script Physics3dDriver {
         if Physics3d.collision_started().length > 0 { touched = true; }
         let at = this.transform.world_position;
         if elapsed > 1.8 && at.x > 2.8 && at.z > 4.0 && at.y > 0.7 && at.y < 0.8 && touched && copied && locked && !verified {
+            let floor = Physics3d.mask(["floor", "floor"]);
+            if floor != Physics3d.layer("floor") { return; }
             let origin = at + Vec3(0.0, 2.0, 0.0);
-            let hit = Physics3d.raycast(origin, Vec3(0.0, -2.0, 0.0), 5.0, 4294967295.0, false, this.entity);
-            let swept = Physics3d.cast_sphere(origin, 0.1, Vec3(0.0, -1.0, 0.0), 5.0, 4294967295.0, false, this.entity);
-            let nearby = Physics3d.overlap_sphere(at - Vec3(0.0, 0.5, 0.0), 0.6, 4294967295.0, false, this.entity);
+            let hit = Physics3d.raycast(origin, Vec3(0.0, -2.0, 0.0), 5.0, floor, false, this.entity);
+            let swept = Physics3d.cast_sphere(origin, 0.1, Vec3(0.0, -1.0, 0.0), 5.0, floor, false, this.entity);
+            let nearby = Physics3d.overlap_sphere(at - Vec3(0.0, 0.5, 0.0), 0.6, floor, false, this.entity);
             if hit != null && swept != null {
                 verified = hit.entity == swept.entity && nearby.contains(hit.entity) && hit.normal.y > 0.99 && hit.point.y > 0.2 && hit.point.y < 0.3 && swept.distance < hit.distance;
                 if verified { print("3D typed queries and collision landing verified"); }

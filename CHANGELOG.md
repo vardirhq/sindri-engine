@@ -274,6 +274,9 @@ requests, commit history, and subsystem documentation rather than this file.
 
 ### Added
 
+- Typed `Physics3d.layer(name)` and `mask(names)` select checked query masks
+  from active authored 3D world labels independently of 2D. Invalid names,
+  arguments or world settings fail explicitly; masks retain all 32 bits.
 - Typed `Physics3d.raycast`, `overlap_sphere` and `cast_sphere` over indexed
   synchronized 3D geometry, with masks, sensor opt-in, whole-entity exclusion
   and inactive/despawned filtering. Closest hits are copied optional `RayHit3d`

@@ -935,8 +935,19 @@ Six bridge regressions exercise queries, masks/sensors/exclusion, unsynchronized
 inactivity/despawn, compound uniqueness, boundary/inside hits, invalid input and
 optional/copied script snapshots. The shared-session driver and Chromium landing
 fixture query actual floor geometry using all three calls. Typed rotated box/
-capsule probes and layer-name lookup remain follow-up slices. Existing extreme
+capsule probes remain follow-up slices. Existing extreme
 geometry numerical limitations still apply.
+
+`Physics3d.layer(name)` and `mask(names)` read the active authored 3D world's
+labels independently of 2D. The first 32 labels map to mask bits; duplicate
+labels choose the first nonempty matching name. Empty labels cannot be selected,
+repeated requests combine with OR and an empty list yields zero. Inactive
+settings are ignored; current authored edits are visible before synchronization.
+Unknown names, wrong types/arity, malformed settings, multiple active 3D worlds
+and absent 3D context fail explicitly. Bridge regressions cover the high u32 bit,
+duplicates/empty names, invalid inputs, active authoring and real query filtering;
+the typed query and shared-session/browser fixtures use named masks. This is
+scripting integration toward Causeway, whose voxel/game proof remains open.
 
 Initial 2D gameplay operations should cover:
 

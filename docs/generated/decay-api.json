@@ -2450,6 +2450,30 @@
           "returns": "List<Entity>"
         },
         {
+          "description": "Query mask bit for a text name in the active authored 3D world's first 32 layer labels. Empty labels cannot be selected; duplicate names select the first bit. Reads current authoring without stepping; ignores inactive settings and never reads 2D names. Unknown names, malformed or multiple active world settings and missing 3D host fail.",
+          "kind": "function",
+          "name": "layer",
+          "parameter_names": [
+            "name"
+          ],
+          "parameters": [
+            "String"
+          ],
+          "returns": "f32"
+        },
+        {
+          "description": "Combines Physics3d.layer bits from a List<str> using bitwise OR. Repeated names do not add bits; an empty list returns zero. Every name is checked; non-text elements, unknown names, invalid active world settings or missing 3D host fail.",
+          "kind": "function",
+          "name": "mask",
+          "parameter_names": [
+            "names"
+          ],
+          "parameters": [
+            "List<String>"
+          ],
+          "returns": "f32"
+        },
+        {
           "description": "Sorted unique copied Entity list overlapping a finite Vec3 centre and positive finite f32-range radius. Uses indexed synchronized geometry, membership mask, sensor opt-in and whole-entity exclusion; inactive/despawned entities are filtered. Does not step physics.",
           "kind": "function",
           "name": "overlap_sphere",
