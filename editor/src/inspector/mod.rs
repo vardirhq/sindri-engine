@@ -97,7 +97,7 @@ pub fn axis_labels(key: &str, len: usize) -> Vec<String> {
     let rect = ["X", "Y", "W", "H"];
     let size = ["W", "H", "D", "?"];
     let names: &[&str; 4] = match key {
-        "tint" | "color" | "color" => &color,
+        "tint" | "color" => &color,
         // A sprite's color transform holds four channels each; the two-wide
         // `offset` a shadow or a collider carries is a place, not a color.
         "multiply" | "offset" if len == 4 => &color,
