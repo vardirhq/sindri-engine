@@ -929,3 +929,30 @@ surface-specific completeness. This checklist does not mark those surfaces done.
   authored game slope/step/platform-carry proof and browser goal proof remain
   open; character acceptance stays unchecked. No dependencies, host API or
   generated catalogue changes. Final-head CI must verify this checkpoint.
+
+
+### Platformer slope/step gameplay checkpoint
+
+- Add two 0.25-unit stone risers and a roughly 20-degree plank boardwalk to the
+  starting field, using the existing painted tile assets and general tilemap
+  collision/rotation. No bespoke Rust gameplay or engine API is introduced.
+- Hero keeps intended horizontal speed at obstacles while the controller clips
+  displacement. Resetting that speed on every hit starved conservative step
+  selection at a riser; subsequent input requests can now clear it. Ceiling
+  collisions still cut rising velocity. The camera test allows two seconds of
+  travel through the new terrain while retaining its bounds/follow assertions.
+- Four native tests run the real Hero script without jump input: both risers
+  produce accepted lifts onto their own support entities, the boardwalk grants
+  walkable uphill support and downhill snap, disabling steps blocks the first
+  riser, and a lower slope limit (with steps disabled) blocks the same incline.
+  All 33 platformer tests pass, including the original no-fall flag/coin run.
+- Typed Hero preflight has zero errors/runtime-contract reminders. Native
+  warning-denied checks/Clippy, all-target/all-feature WASM, formatting and
+  file-size checks pass. Native project capture and Chromium export/input
+  checks draw the new terrain; browser snapshots show the hero stepping and
+  walking on the boardwalk. Chromium fetches 25 assets with no script/GPU errors.
+- This is general character movement proven by the platformer genre showcase.
+  Checked editor authoring/undo/Play, game moving-platform carry and browser goal
+  proof remain open, so character acceptance stays unchecked. No generated
+  catalogue, host or dependency changes. The prior adoption head `6bd4f0ef`
+  passed all CI; CI must verify this checkpoint's head.

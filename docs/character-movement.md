@@ -3,8 +3,10 @@
 Status: geometric sweep/slide, ground probing, grounded snapping, slope
 limits, optional steps, synchronized platform carry, one-way controller policy
 and scene runtime ownership implemented; acceptance remains open in
-`physics-update.md`. Added for the platformer genre showcase, which has not yet
-adopted it. No game proof is claimed for this slice.
+`physics-update.md`. Added for the platformer genre showcase, whose Hero script
+now uses the controller. Authored low steps and an inclined boardwalk exercise
+step selection, walkable ascent and downhill snap; editor and moving-platform
+acceptance remain open.
 
 ## Ownership
 
@@ -161,9 +163,10 @@ optional snap distance; requests that leave its reach become airborne. Vertical
 walls and ceilings retain ordinary sliding. No autonomous gravity or downhill
 acceleration is applied. Up is world-space and independent of probe rotation.
 
-This is a general geometric policy added for the platformer, which has not yet
-adopted the controller. It does not make the engine/editor/Decay/game acceptance
-complete. One-way controller support and vertical integration remain open.
+This general policy is exercised by the platformer's inclined boardwalk through
+its real Hero script. Native tests climb and snap down it without jumping, then
+lower the slope limit and disable steps to show the same incline blocks walking.
+Full editor and moving-platform game acceptance remain open.
 
 ## Implemented steps and clearance
 
@@ -196,7 +199,10 @@ obstacle beneath a ceiling that blocks the configured lift falls back to ordinar
 sliding rather than searching smaller heights. Minimum progress is tied to skin;
 very small movement requests do not step. These limitations remain visible for
 future game integration. Stepping, like slope limits, is added generally for
-platformer adoption and has engine evidence only.
+platformer adoption. Its two authored 0.25-unit stone risers now exercise accepted
+step lifts through the Hero script; disabling steps makes the first riser block.
+Intended horizontal speed remains script-owned at obstacles, so clipping one
+request does not prevent the next request from advancing over a low step.
 
 ## Implemented moving-platform carry
 
@@ -402,8 +408,9 @@ and respawn. The dynamic crate retains CCD and contact-impulse proof.
 
 ## Remaining slices
 
-Checked editor authoring/undo/Play and real-game slope, step and moving-platform
-carry proof remain open. Typed requests/results, shared host context and native
+Checked editor authoring/undo/Play and real-game moving-platform carry proof
+remain open. Authored game slopes and steps now have native and browser input
+coverage. Typed requests/results, shared host context and native
 platformer adoption are implemented; coyote time, jump buffering and player input
 remain gameplay policy in Decay. Browser delivery checks exercise the exported
 game, but a browser run to the goal is still required alongside these remaining
@@ -415,8 +422,8 @@ Native tests cover all probe shapes in empty space, zero motion, wall tangents,
 skin, escape/approach at touching surfaces, initial overlap, bounded corner
 iterations, rotated surfaces, filter/predicate behavior, immediate teleports and
 removal, deterministic ties, one-way geometry's two-sided query behavior and
-invalid input rejection. This is engine evidence only; Editor, Decay and game
-proof remain absent.
+invalid input rejection. These geometric tests complement the typed host and
+platformer gameplay evidence above; checked editor proof remains open.
 
 Ground-probe tests cover separation/touching and zero travel, box/circle/rotated
 capsule extents, slope boundaries and steep obstruction, arbitrary up, ceiling

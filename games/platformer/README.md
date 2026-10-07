@@ -34,7 +34,10 @@ makes Sindri's virtual stick and a second finger jumps. A tap is a hop and a
 held press a full jump; a jump pressed just before landing, or just after
 running off a ledge, still counts. Horizontal movement accelerates and
 decelerates rather than snapping between stopped and full speed, with
-deliberately lighter air control after committing to a jump.
+deliberately lighter air control after committing to a jump. Two low stone steps
+and an inclined boardwalk near the start can be walked over without jumping.
+The controller steps onto each riser and follows the boardwalk downhill; input
+continues building intended speed while collision clips the actual movement.
 
 The touch path is functional input, but the platformer does not yet draw its
 mobile controls. Visible on-screen affordances for the stick and jump action

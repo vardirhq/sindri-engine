@@ -170,9 +170,10 @@ script Hero {
                 this.on_one_way = World.has_tag(support.entity, "one-way");
             }
         }
+        // Keep intended horizontal speed at obstacles: the controller clips
+        // displacement and can use the next request to clear a low step.
         for contact in motion.collisions {
             if contact.normal.y < -0.5 && this.rise > 0.0 { this.rise = 0.0; }
-            if contact.normal.x * this.horizontal < -0.5 { this.horizontal = 0.0; }
         }
     }
 

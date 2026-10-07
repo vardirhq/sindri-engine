@@ -114,7 +114,9 @@ fn the_camera_follows_the_hero() {
     let hero = run.entity("hero").expect("the hero");
     run.key(Key::ArrowRight, true);
     let mut furthest = 0.0_f32;
-    for _ in 0..90 {
+    // Give the low steps and boardwalk time to be traversed before checking
+    // that the camera has left its initial left-bound clamp.
+    for _ in 0..120 {
         step(&mut run);
         let [x, y] = run.position(camera);
         furthest = furthest.max(x);

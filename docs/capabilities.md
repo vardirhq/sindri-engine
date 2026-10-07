@@ -2629,8 +2629,8 @@ this 2D slice; 3D joints, gameplay world snapshots and final integration remain.
 A read-only 2D sweep/slide movement foundation now proposes displacement against
 current collider poses without mutating bodies. Positive skin, bounded iterations,
 initial penetration, filters and deterministic ties have native engine tests.
-Editor/Decay access and platformer proof remain open; see [the contract](character-movement.md).
-Added for platformer integration, not yet adopted by that showcase.
+The scene/typed host now integrate it and the platformer adopts it; see
+[the contract](character-movement.md). Checked editor proof remains open.
 
 Read-only 2D ground probing adds configurable unit up, bounded slope angles,
 travel and skin. Tests exercise zero-travel support, rotated shapes, slope
@@ -2659,9 +2659,10 @@ per-piece one-way support sides/cones across sliding, support, steps and carry.
 Request-scoped drop-through ignores only one-way solids, preserving ordinary
 floors and sensor filtering; hosts own duration and cancellation. Native tests
 exercise ascent/descent, rotated normals, deep/shallow overlap, snap, step landing
-and carry/drop interactions. Editor/Decay/game proof remain open. Rotation follows a chord with fixed probe
-orientation; continuous arc and rotating-probe sweeps remain absent.
-No platformer adoption is claimed.
+and carry/drop interactions. Scene/typed Decay integration and platformer
+one-way/terrain gameplay now exercise these policies. Checked editor and game
+moving-platform carry proof remain open. Rotation follows a chord with fixed
+probe orientation; continuous arc and rotating-probe sweeps remain absent.
 
 
 Scene controller ownership now registers validated `sindri.physics2d.character`
@@ -2692,5 +2693,9 @@ The platformer now adopts the controller through its real Hero script: native
 regressions reach the flag with coins and no falls, traverse/drop through planks,
 and exercise variable jump height, acceleration/braking and respawn. The dynamic
 crate retains CCD and contact-impulse proof. Checked editor authoring/undo/Play
-and game slope/step/platform-carry proof remain open; character acceptance stays
-partial. Browser delivery evidence is recorded in the physics checkpoint.
+and game platform-carry proof remain open; character acceptance stays partial.
+Two authored stone risers and an inclined boardwalk now exercise accepted steps,
+walkable ascent and downhill snap through the Hero script without jumping.
+Control tests disable stepping or lower the slope limit to show the same terrain
+blocks walking. Browser keyboard captures show the hero traversing that terrain;
+delivery/input evidence is recorded in the physics checkpoint.

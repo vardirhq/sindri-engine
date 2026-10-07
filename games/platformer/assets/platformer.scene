@@ -2490,6 +2490,222 @@
           "restitution": 0
         }
       }
+    },
+    {
+      "id": "low-step-a",
+      "name": "Low stone step",
+      "transform_3d": {
+        "position": [
+          4.8,
+          3.25,
+          0.1
+        ],
+        "rotation": [
+          0,
+          0,
+          0.0,
+          1.0
+        ],
+        "scale": [
+          0.65,
+          0.25,
+          1
+        ]
+      },
+      "components": {
+        "sindri.tags": {
+          "tags": [
+            "solid"
+          ]
+        },
+        "sindri.tilemap": {
+          "texture": "textures/tiles.png",
+          "palette": [
+            "grass",
+            "dirt",
+            "stone",
+            "plank",
+            "tuft"
+          ],
+          "columns": 1,
+          "rows": 1,
+          "tiles": [
+            2
+          ],
+          "layer": 1
+        },
+        "sindri.physics2d.tilemap_collider": {
+          "passable": [],
+          "layers": {
+            "memberships": 1,
+            "filter": 10
+          },
+          "friction": 0.5,
+          "restitution": 0.0
+        }
+      }
+    },
+    {
+      "id": "low-step-b",
+      "name": "Upper stone step",
+      "transform_3d": {
+        "position": [
+          5.45,
+          3.5,
+          0.1
+        ],
+        "rotation": [
+          0,
+          0,
+          0.0,
+          1.0
+        ],
+        "scale": [
+          0.65,
+          0.5,
+          1
+        ]
+      },
+      "components": {
+        "sindri.tags": {
+          "tags": [
+            "solid"
+          ]
+        },
+        "sindri.tilemap": {
+          "texture": "textures/tiles.png",
+          "palette": [
+            "grass",
+            "dirt",
+            "stone",
+            "plank",
+            "tuft"
+          ],
+          "columns": 1,
+          "rows": 1,
+          "tiles": [
+            2
+          ],
+          "layer": 1
+        },
+        "sindri.physics2d.tilemap_collider": {
+          "passable": [],
+          "layers": {
+            "memberships": 1,
+            "filter": 10
+          },
+          "friction": 0.5,
+          "restitution": 0.0
+        }
+      }
+    },
+    {
+      "id": "boardwalk-up",
+      "name": "Boardwalk incline",
+      "transform_3d": {
+        "position": [
+          8.3,
+          3,
+          0.1
+        ],
+        "rotation": [
+          0,
+          0,
+          0.17410813759359595,
+          0.9847265389049334
+        ],
+        "scale": [
+          2.12908036676699,
+          0.15,
+          1
+        ]
+      },
+      "components": {
+        "sindri.tags": {
+          "tags": [
+            "solid"
+          ]
+        },
+        "sindri.tilemap": {
+          "texture": "textures/tiles.png",
+          "palette": [
+            "grass",
+            "dirt",
+            "stone",
+            "plank",
+            "tuft"
+          ],
+          "columns": 1,
+          "rows": 1,
+          "tiles": [
+            3
+          ],
+          "layer": 1
+        },
+        "sindri.physics2d.tilemap_collider": {
+          "passable": [],
+          "layers": {
+            "memberships": 1,
+            "filter": 10
+          },
+          "friction": 0.5,
+          "restitution": 0.0
+        }
+      }
+    },
+    {
+      "id": "boardwalk-down",
+      "name": "Boardwalk descent",
+      "transform_3d": {
+        "position": [
+          10.3,
+          3.730056989660849,
+          0.1
+        ],
+        "rotation": [
+          0,
+          0,
+          -0.17410813759359595,
+          0.9847265389049334
+        ],
+        "scale": [
+          2.12908036676699,
+          0.15,
+          1
+        ]
+      },
+      "components": {
+        "sindri.tags": {
+          "tags": [
+            "solid"
+          ]
+        },
+        "sindri.tilemap": {
+          "texture": "textures/tiles.png",
+          "palette": [
+            "grass",
+            "dirt",
+            "stone",
+            "plank",
+            "tuft"
+          ],
+          "columns": 1,
+          "rows": 1,
+          "tiles": [
+            3
+          ],
+          "layer": 1
+        },
+        "sindri.physics2d.tilemap_collider": {
+          "passable": [],
+          "layers": {
+            "memberships": 1,
+            "filter": 10
+          },
+          "friction": 0.5,
+          "restitution": 0.0
+        }
+      }
     }
   ]
 }

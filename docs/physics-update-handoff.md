@@ -99,12 +99,27 @@ Artifacts: `/tmp/sindri-platformer-controller-{preflight,clippy,wasm,browser}.lo
 `/tmp/sindri-platformer-controller-{standing,jump,browser}.png`, export directory
 `/tmp/sindri-platformer-controller-export`. The browser host binaries are from
 `ce493275` (this checkpoint changes only game assets/tests/docs).
+The terrain checkpoint adds two 0.25-unit stone risers and a roughly 20-degree
+plank boardwalk using existing tile art/general rotated tilemap collision. Hero
+keeps intended horizontal speed at obstacles so a clipped request does not starve
+the next low-step attempt; ceiling hits still reset rising velocity. Four native
+control tests walk both risers and climb/snap down the boardwalk without jumping,
+then disable steps/lower the slope limit and block on the same terrain. The
+camera test allows two seconds through the added terrain while preserving its
+follow and bounds assertions. All 33 platformer tests pass, including the
+no-fall goal/coin run, and typed Hero preflight reports zero errors/reminders.
+Native warning-denied checks/Clippy, all-target/all-feature WASM, formatting/size,
+native capture and Chromium export/input checks passed. Browser snapshots show
+the hero stepping and on the boardwalk; delivery fetched 25 assets without
+script/GPU errors. Logs/captures/export are under
+`/tmp/sindri-platformer-terrain-*`; helper:
+`/tmp/sindri-physics-tools/browser/platformer-terrain-smoke.mjs`.
 Continue with checked editor component authoring/undo/Play and authored game
-slope/step/platform-carry proof. Browser delivery/input passed; a browser run to
-the goal remains open. Character acceptance stays unchecked. Accelerated queries,
+moving-platform carry proof. Browser terrain input passed; a browser run to the
+goal remains open. Character acceptance stays unchecked. Accelerated queries,
 3D/voxel physics and final integration follow. Gameplay snapshots remain absent.
-The API head's checks have no failures; test/render CI was still running at the
-last inspection. Inspect every failed job if either head later fails.
+The prior adoption head `6bd4f0ef` passed all CI checks. Inspect every failed job
+on the next head before changing code if CI fails.
 
 CCD, one-way platforms, **forces and rotation**, **contact snapshots**, and
 **reusable physics materials** are implemented in this PR. The checklist in `physics-update.md` is current.

@@ -1,5 +1,7 @@
 # Changelog
 
+- Add low stone steps and an inclined boardwalk to the platformer. The hero walks over the risers and follows the slope downhill without jumping; intended horizontal speed now survives a blocked controller sweep so subsequent requests can step forward. Native control tests prove disabling steps or lowering the slope limit blocks the same terrain.
+
 - Move the platformer hero to the scene-owned Character 2D controller. Decay retains movement, gravity and jump policy; separate sensors preserve coin/flag pickups and timed drop-through still reaches ordinary floors. The dynamic crate retains CCD and contact-impulse proof. Editor interaction and game slope/step/platform-carry acceptance remain open.
 
 - Add typed Decay character displacement requests and copied optional motion/support/carry snapshots. Shared runtime/editor Play offer scene controller context; character drop-through uses the scene timer while dynamic-body hosts retain their solver API. Invalid input preserves queued requests. Platformer controller adoption and editor/game proof remain open.
