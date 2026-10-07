@@ -274,6 +274,11 @@ requests, commit history, and subsystem documentation rather than this file.
 
 ### Added
 
+- Add renderer-independent voxel section collision geometry: exact boxes with
+  deterministic full-cube merging, partial slabs/posts, explicit noncollision
+  policy, typed invalid-shape errors and bounded output. Scene/solver integration
+  and actual game collision remain follow-up work.
+
 - Standalone 3D spawn controls queue finite velocity setters and impulses in
   order, replay after collider mass is known and expire unresolved requests.
   Scene synchronization validates pending controls before mutating its batch.

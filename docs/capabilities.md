@@ -866,6 +866,20 @@ than allowing the runtime type to make the broader feature look complete.
 
 ### Voxel world foundation
 
+A renderer/physics-independent `compile_section_collision` now derives exact
+section-local collision boxes from occupied `VoxelSection` cells and a supplied
+solidity/shape policy. Full cubes merge deterministically across material IDs;
+partial slabs/posts retain exact bounds, air and policy-excluded blocks are
+empty. Integer sixteenth-voxel bounds avoid world-coordinate precision loss;
+invalid shapes return typed errors and output is bounded by 4,096 boxes per
+section. Five regressions prove exact cover without holes, overlaps or air,
+partial shapes, worst-case bounds and edited negative sections across residency
+unload/reload; 50 crate tests and warning-denied native/WASM checks pass. It has
+no new dependencies and inserts no solver bodies. Scene revision caching,
+resident lifecycle/budget enforcement and actual Causeway collision/game proof
+remain absent; see the geometry contract in [`physics.md`](physics.md).
+
+
 `sindri-voxel` owns signed voxel and 16³ section coordinates, palette-backed
 section storage, deterministic random-access generation, bounded 3D residency,
 sparse edits, dirty tracking, and deduplicated generation/meshing work queues.

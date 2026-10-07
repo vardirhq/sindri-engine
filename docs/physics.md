@@ -1086,13 +1086,44 @@ Causeway. Two shared-session regressions exercise XYZ motion, solid landing and
 disabling/reactivating bodies; browser host execution exercises the same motion
 and landing. Native editor interaction remains unverified: in the latest headless
 review environment, adapter startup hung or failed before a usable window.
-3D acceptance remains unchecked: native inspector/Play exercise, typed rotated
-box/capsule probes and actual resident/edited
-voxel collision remain separate slices. Voxel collision must derive from the occupied world, account for
+3D acceptance remains unchecked: native inspector/Play exercise and actual
+resident/edited voxel collision remain separate slices. Typed rotated probes are
+now exercised as described above. Voxel collision must derive from the occupied world, account for
 residency/dirty revisions and removal, and have a bounded update policy. An
 invisible plane or this standalone API is not voxel/game proof. CCD controls,
 contacts, force/torque, materials, joints and character controllers also have no
 3D authoring/Decay surface yet. The 2D API remains unchanged.
+
+## Voxel collision geometry foundation
+
+`compile_section_collision` in `sindri-voxel` accepts a `VoxelSection` and a
+caller-owned `VoxelId -> Option<VoxelShape>` collision policy. Air is always
+empty; `None` makes other blocks noncolliding. Solidity is independent of render
+transparency/occlusion, so a host must supply its actual block policy rather than
+infer collision from what hides a face. The function never samples a generator
+or a neighbouring/unresident section and never mutates occupancy.
+
+`SectionCollisionBox` uses exact section-local integer min/max bounds in
+sixteenths of a voxel, within 0..=256. Full cubes merge greedily in X, then Z,
+then Y, across material IDs that the policy classifies as full. Partial slabs,
+posts and other box shapes retain their individual exact bounds. Output is
+deterministic for a stable policy, disjoint and covers precisely the collidable
+occupancy; the box count is at most 4,096, not necessarily the minimum possible.
+Invalid zero-thickness, inverted or out-of-voxel shapes return a typed
+`VoxelCollisionError`. Physics coefficients and per-block collision layers are
+not represented in this geometry compiler; hosts needing distinct coefficients
+must partition policy/output rather than silently merge incompatible settings.
+
+Five native regressions exercise air/full sections, merging across materials,
+24 varied occupancy patterns with exact cover/no-overlap/no-air assertions,
+partial shapes/noncollision, worst-case output bounds, typed errors and edited
+negative sections across residency unload/reload. The crate also checks for
+WASM. This is a renderer/physics-independent engine prerequisite toward Causeway,
+not solver or game proof. Scene integration must retain compiled geometry by
+occupancy **and policy** revision, rebuild only entering/edited sections, release
+leaving/disabled worlds, apply composed transforms and bound per-step work.
+Actual resident collision, queries/events on that geometry and game/editor/
+Decay/browser proof remain absent. No component or host surface changes here.
 
 ## Feature-track slices
 

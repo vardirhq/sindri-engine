@@ -1405,3 +1405,16 @@ typed prefab spawning, call order, authored-state preservation, locks/kinds and
 invalid authoring. This is a general engine/Decay foundation toward Causeway;
 a shared native-session regression and exported Chromium fixture verify actual
 spawn replay and movement. Game/voxel/editor proof remains open. The 3D acceptance item remains unchecked.
+
+### Voxel collision geometry prerequisite
+
+The voxel crate now compiles occupied section cells into exact disjoint boxes
+through a caller-supplied collision policy. Full cubes merge deterministically;
+slabs/posts stay exact, air/noncolliding blocks are omitted and invalid shapes
+return typed errors. Five regressions prove exact coverage, worst-case output
+bounds and edited negative residency round trips. All 50 voxel tests, scoped
+preflight, warning-denied Clippy and all-target/all-feature WASM checks pass.
+No physics/renderer dependency, component or host surface was introduced. This
+is a general foundation toward Causeway; actual scene-resident collision,
+revision caches, bounded frame updates and game/editor/Decay/browser proof
+remain absent. Both major acceptance items stay unchecked.

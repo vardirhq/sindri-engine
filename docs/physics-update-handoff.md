@@ -16,6 +16,35 @@ a pushed handoff. Do not ask them to authorize the scope again.
 
 ## Current continuation checkpoint
 
+The voxel collision geometry prerequisite is implemented in `sindri-voxel`:
+`compile_section_collision` takes one resident `VoxelSection` and a caller-owned
+`VoxelId -> Option<VoxelShape>` solidity/shape policy, never sampling a generator
+or neighbour. Air never calls the policy. Full cubes merge greedily X/Z/Y across
+material IDs; partial slabs/posts retain exact bounds. `SectionCollisionBox`
+uses section-local integer sixteenths in 0..=256; invalid empty/inverted/out-of-
+voxel shapes return `VoxelCollisionError`. Output is deterministic, disjoint,
+exact and at most 4,096 boxes, not necessarily minimal. No dependencies,
+components or host APIs changed; generated catalogue regeneration is unnecessary.
+
+Five regressions prove exact cover/no-overlap/no-air over 24 occupancy patterns,
+full/empty merging, noncolliding blocks, partial shapes, worst-case output, typed
+errors and edited negative sections across unload/reload. Scoped preflight passes
+all 50 voxel tests; warning-denied Clippy and all-target/all-feature WASM checks
+pass. Logs `/tmp/sindri-voxel-collision-{focused,preflight,clippy,wasm}.log`.
+The compiler is a standalone prerequisite, not physics: no solver bodies, frame
+cache or host behavior changed, so this slice does not claim browser execution.
+
+Next implement the scene seam: resolve real block solidity/shapes and composed
+world transforms, cache by occupancy AND policy revision, reconcile entering/
+edited/leaving resident sections and enforce bounded per-step work. Avoid coupling
+voxel storage to scene JSON, physics, renderer or Causeway. Then prove real
+Causeway collision/queries/events on occupied/resident/edited geometry in native
+and browser sessions, and native 3D authoring/Play/replay. Voxel collision stays
+all-absent in parity despite its CPU geometry prerequisite; the 3D acceptance and
+final integration items stay unchecked. Keep the single PR #497 draft.
+
+Earlier checkpoint notes follow.
+
 Typed `Physics3d` setters/impulses now use the ordered engine queue for active
 unmaterialized bodies after validating authored body/nonempty colliders, composed
 pose, dimension ownership and moving depth locks. Live controls retain runtime
