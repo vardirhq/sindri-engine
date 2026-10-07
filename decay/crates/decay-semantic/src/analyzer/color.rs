@@ -1,7 +1,7 @@
-//! Colours: building one, reading and writing its channels, and blending.
+//! Colors: building one, reading and writing its channels, and blending.
 //!
-//! A colour is a language value like a vector: four numbers, `r`, `g`, `b`
-//! and `a`, each from 0 to 1. The engine's colours — a sprite's `tint`, a
+//! A color is a language value like a vector: four numbers, `r`, `g`, `b`
+//! and `a`, each from 0 to 1. The engine's colors — a sprite's `tint`, a
 //! shape's `fill` — are this type, so one is read, held and assigned whole.
 
 use decay_syntax::{ColorOp, Expr, ExprKind, Span, parse_hex};
@@ -29,7 +29,7 @@ impl Analyzer<'_, '_> {
                         Code::InvalidOperand,
                         text.span,
                         format!(
-                            "`{written}` is not a colour: write `#rrggbb` or `#rrggbbaa`, as in \
+                            "`{written}` is not a color: write `#rrggbb` or `#rrggbbaa`, as in \
                              `\"#ff8800\"`"
                         ),
                     );
@@ -74,7 +74,7 @@ impl Analyzer<'_, '_> {
             self.error(
                 Code::FunctionNotCalled,
                 span,
-                format!("`{field}` on a colour needs arguments -- call it: `.{field}(...)`"),
+                format!("`{field}` on a color needs arguments -- call it: `.{field}(...)`"),
             );
         } else {
             self.error(Code::UnknownMember, span, missing_member(field));

@@ -51,7 +51,7 @@ pub(super) fn export_row(
         if !value.is_array() {
             *value = script_value_json(&export.default);
         }
-        super::super::field::colour_row(ui, &export.name, value);
+        super::super::field::color_row(ui, &export.name, value);
     } else if export.type_name.as_deref() == Some("Profile") {
         super::super::field::asset_row(ui, id, &export.name, value, assets.profiles, None, indent);
     } else if export.type_name.as_deref() == Some("Prefab") {

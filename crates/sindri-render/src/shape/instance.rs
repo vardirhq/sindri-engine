@@ -52,7 +52,7 @@ impl ShapeInstance {
     /// The starting point rather than the common case: most of what this draws
     /// is an outline, which is [`Self::stroked`] or this with a transparent
     /// fill. Both exist because "a filled disc" and "a ring" are different
-    /// enough that spelling out which one is meant reads better than a colour
+    /// enough that spelling out which one is meant reads better than a color
     /// with a zero in it.
     #[must_use]
     pub fn filled(model: Mat4, kind: Shape, fill: [f32; 4]) -> Self {
@@ -162,13 +162,13 @@ impl ShapeInstance {
         Mat4::from_cols_array_2d(&self.model)
     }
 
-    /// The colour inside the shape.
+    /// The color inside the shape.
     #[must_use]
     pub const fn fill(self) -> [f32; 4] {
         self.fill
     }
 
-    /// The colour of its outline, and how wide that outline is.
+    /// The color of its outline, and how wide that outline is.
     #[must_use]
     pub const fn stroke(self) -> ([f32; 4], f32) {
         (self.stroke, self.geometry[2])

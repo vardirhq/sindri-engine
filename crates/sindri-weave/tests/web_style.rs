@@ -69,11 +69,11 @@ fn field(world: &World, id: &str, component: &str, name: &str) -> serde_json::Va
     world.get(entity).expect("live").components[component][name].clone()
 }
 
-fn colour(world: &World, id: &str, component: &str, name: &str) -> [f64; 4] {
+fn color(world: &World, id: &str, component: &str, name: &str) -> [f64; 4] {
     let value = field(world, id, component, name);
     let channels: Vec<f64> = value
         .as_array()
-        .expect("a colour")
+        .expect("a color")
         .iter()
         .map(|channel| channel.as_f64().expect("a number"))
         .collect();
@@ -81,12 +81,12 @@ fn colour(world: &World, id: &str, component: &str, name: &str) -> [f64; 4] {
 }
 
 #[test]
-fn text_inside_a_panel_takes_the_panel_colour() {
+fn text_inside_a_panel_takes_the_panel_color() {
     let sheet = parse(".menu { color: #ffffff; font-size: 24px; }").expect("parses");
     let styled = PresentationWorld::resolve(&menu(), &sheet, VIEW).expect("resolves");
     let world = styled.world();
     assert_eq!(
-        colour(world, "play-label", "sindri.ui.text", "color"),
+        color(world, "play-label", "sindri.ui.text", "color"),
         [1.0; 4]
     );
     let size = field(world, "play-label", "sindri.ui.text", "font_size")
@@ -101,7 +101,7 @@ fn a_descendant_selector_reaches_into_the_hierarchy() {
         .expect("parses");
     let styled = PresentationWorld::resolve(&menu(), &sheet, VIEW).expect("resolves");
     assert_eq!(
-        colour(styled.world(), "play-label", "sindri.ui.text", "color"),
+        color(styled.world(), "play-label", "sindri.ui.text", "color"),
         [0.0, 0.0, 0.0, 1.0],
         "the more specific descendant rule wins"
     );
@@ -120,10 +120,10 @@ fn theme_variables_are_written_once_and_used_anywhere() {
     let styled = PresentationWorld::resolve(&menu(), &sheet, VIEW).expect("resolves");
     let world = styled.world();
     assert_eq!(
-        colour(world, "play", "sindri.ui.shape", "fill"),
+        color(world, "play", "sindri.ui.shape", "fill"),
         [0.0, 0.0, 0.0, 1.0]
     );
-    assert_eq!(colour(world, "volume", "sindri.ui.shape", "fill"), [1.0; 4]);
+    assert_eq!(color(world, "volume", "sindri.ui.shape", "fill"), [1.0; 4]);
 }
 
 #[test]
@@ -154,7 +154,7 @@ fn hover_and_press_follow_the_pointer() {
             &UiStates::from([(play, states)]),
         )
         .expect("resolves");
-        colour(styled.world(), "play", "sindri.ui.shape", "fill")
+        color(styled.world(), "play", "sindri.ui.shape", "fill")
     };
     assert_eq!(fill(States::NONE), [0.0, 0.0, 0.0, 1.0]);
     assert_eq!(fill(States::HOVER), [1.0; 4]);
@@ -170,12 +170,12 @@ fn a_disabled_control_is_disabled_without_being_told() {
         .expect("parses");
     let styled = PresentationWorld::resolve(&menu(), &sheet, VIEW).expect("resolves");
     assert_eq!(
-        colour(styled.world(), "volume", "sindri.ui.shape", "fill"),
+        color(styled.world(), "volume", "sindri.ui.shape", "fill"),
         [0.0, 0.0, 0.0, 1.0]
     );
 }
 
-/// The live presenter: a hovered button fades to its hover colour over the
+/// The live presenter: a hovered button fades to its hover color over the
 /// transition, and hover reaches the panel it sits in, as in CSS.
 #[test]
 fn a_live_presentation_fades_on_hover_and_hover_reaches_containers() {
@@ -211,31 +211,28 @@ fn a_live_presentation_fades_on_hover_and_hover_reaches_containers() {
 
     let resting = frame(&mut presenter, None);
     assert_eq!(
-        colour(&resting, "play", "sindri.ui.shape", "fill"),
+        color(&resting, "play", "sindri.ui.shape", "fill"),
         [0.0, 0.0, 0.0, 1.0]
     );
 
     frame(&mut presenter, Some(play));
     presenter.advance(0.05);
     let halfway = frame(&mut presenter, Some(play));
-    let fill = colour(&halfway, "play", "sindri.ui.shape", "fill");
+    let fill = color(&halfway, "play", "sindri.ui.shape", "fill");
     assert!(
         fill[0] > 0.1 && fill[0] < 0.4,
         "part way, in linear light: {fill:?}"
     );
     assert!(presenter.animating());
     assert_eq!(
-        colour(&halfway, "menu", "sindri.ui.shape", "fill"),
+        color(&halfway, "menu", "sindri.ui.shape", "fill"),
         [1.0; 4],
         "the menu the button is in is hovered too, and does not transition"
     );
 
     presenter.advance(0.1);
     let arrived = frame(&mut presenter, Some(play));
-    assert_eq!(
-        colour(&arrived, "play", "sindri.ui.shape", "fill"),
-        [1.0; 4]
-    );
+    assert_eq!(color(&arrived, "play", "sindri.ui.shape", "fill"), [1.0; 4]);
     assert!(!presenter.animating());
 }
 
@@ -276,12 +273,9 @@ fn focus_comes_from_the_host_and_stays_on_the_focused_element() {
             &with_focus(Default::default(), Some(play)),
         )
         .expect("presents");
+    assert_eq!(color(&focused, "play", "sindri.ui.shape", "fill"), [1.0; 4]);
     assert_eq!(
-        colour(&focused, "play", "sindri.ui.shape", "fill"),
-        [1.0; 4]
-    );
-    assert_eq!(
-        colour(&focused, "menu", "sindri.ui.shape", "fill"),
+        color(&focused, "menu", "sindri.ui.shape", "fill"),
         [0.0, 0.0, 0.0, 1.0]
     );
 
@@ -293,7 +287,7 @@ fn focus_comes_from_the_host_and_stays_on_the_focused_element() {
         .present(&world, &sheets, VIEW, &with_focus(Default::default(), None))
         .expect("presents");
     assert_eq!(
-        colour(&flagged, "play", "sindri.ui.shape", "fill"),
+        color(&flagged, "play", "sindri.ui.shape", "fill"),
         [0.0, 0.0, 0.0, 1.0]
     );
 }

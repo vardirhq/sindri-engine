@@ -17,7 +17,7 @@ import { bake, sheetIdFor, toJson } from '../src/bake.ts';
 import { firstDifference } from '../src/image.ts';
 import { decodePng } from '../src/png.ts';
 import { parseRecipe } from '../src/recipe.ts';
-import { usedColours } from '../src/postprocess.ts';
+import { usedColors } from '../src/postprocess.ts';
 import { paletteFor } from '../src/frames.ts';
 
 /** The miniature Sindri asset root the fixture bakes into, and out of. */
@@ -114,14 +114,14 @@ test('the gutter repeats each frame edge rather than leaving a hole', async () =
   assert.equal(at(gutter - 1, gutter - 1), at(gutter, gutter), 'the corner repeats the corner');
 });
 
-test('nothing comes out in a colour the recipe did not declare', async () => {
+test('nothing comes out in a color the recipe did not declare', async () => {
   const recipe = await standingStone();
   const result = bake(recipe);
   const declared = new Set(result.meshes.flatMap((mesh) => paletteFor(mesh, recipe.render)));
 
   for (const frame of result.frames) {
-    for (const colour of usedColours(frame.image)) {
-      assert.ok(declared.has(colour), `${frame.direction} drew ${colour}, which is not in the palette`);
+    for (const color of usedColors(frame.image)) {
+      assert.ok(declared.has(color), `${frame.direction} drew ${color}, which is not in the palette`);
     }
   }
   assert.deepEqual(result.report.warnings, []);
@@ -145,14 +145,14 @@ test('documents are written with a trailing newline', () => {
   assert.equal(toJson({ a: 1 }), '{\n  "a": 1\n}\n');
 });
 
-test('a colour declared in a different case is still one palette entry', async () => {
+test('a color declared in a different case is still one palette entry', async () => {
   const recipe = await standingStone();
   const shouted = {
     ...recipe,
-    render: { ...recipe.render, outline: { enabled: true, colour: '#241D2B' } },
+    render: { ...recipe.render, outline: { enabled: true, color: '#241D2B' } },
   };
   // The palette decides ties when a blended edge pixel is snapped, so the same
-  // colour spelled twice would be two entries and the bake could differ from
+  // color spelled twice would be two entries and the bake could differ from
   // one that spelled it once.
   const result = bake(shouted);
   assert.deepEqual(result.report.warnings, []);
@@ -172,7 +172,7 @@ function flat(view: 'top-down' | 'side', pixelsPerUnit: number) {
       pixels_per_unit: pixelsPerUnit,
       directions: 1,
       model: {
-        materials: { hull: { colour: '#7fd4ff' } },
+        materials: { hull: { color: '#7fd4ff' } },
         // A unit wide, a unit deep, and deliberately taller than either.
         parts: [{ type: 'box', material: 'hull', position: [0, 1, 0], size: [1, 2, 1] }],
       },
@@ -218,7 +218,7 @@ test('a model larger than any footprint is fine when nothing hands out ground', 
       pixels_per_unit: 8,
       directions: 1,
       model: {
-        materials: { hull: { colour: '#7fd4ff' } },
+        materials: { hull: { color: '#7fd4ff' } },
         parts: [{ type: 'box', material: 'hull', size: [6, 1, 6] }],
       },
     }),
@@ -235,7 +235,7 @@ test('block-face output bakes aligned independently named layers', () => {
         {
           name: 'grass',
           model: {
-            materials: { earth: { colour: '#805236' }, grass: { colour: '#6f9f52' } },
+            materials: { earth: { color: '#805236' }, grass: { color: '#6f9f52' } },
             parts: [
               { type: 'box', material: 'earth', position: [0, 0.5, 0], size: [1, 1, 1] },
               { type: 'plate', material: 'grass', position: [0, 1.001, 0], size: [1, 1] },

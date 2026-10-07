@@ -6,7 +6,7 @@ use sindri_core::{SceneComponent, SpriteRef, SpriteRefError};
 /// An authored burst of flecks.
 ///
 /// On an entity rather than passed to a call, because these are a designer's
-/// numbers — how many, how fast, how big, what colour — and a script that had to
+/// numbers — how many, how fast, how big, what color — and a script that had to
 /// name all of them would be a script nobody could read. A bullet fires
 /// `Effects.burst(this.entity)` and the scene decides what that looks like.
 #[derive(Clone, Debug, Deserialize, PartialEq)]
@@ -15,7 +15,7 @@ pub struct EffectBurstComponent {
     ///
     /// One reference for the whole burst, so a burst is one batch. A fleck is
     /// cheap because nothing about it varies per fleck except its motion and
-    /// its colour, and a texture that varied would cost a draw call.
+    /// its color, and a texture that varied would cost a draw call.
     pub texture: String,
     /// How many flecks one burst throws.
     #[serde(default = "default_count")]

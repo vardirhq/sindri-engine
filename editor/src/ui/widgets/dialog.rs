@@ -4,7 +4,7 @@
 //! be removed from disk. They are different questions with different answers —
 //! one can offer to save first, the other has nothing to offer — so what is
 //! shared here is the shape and not the buttons: a modal of one width, an icon
-//! in the colour of the consequence, a title, and the question wrapped under
+//! in the color of the consequence, a title, and the question wrapped under
 //! it. The caller adds whatever answering it means.
 //!
 //! `form` is the same modal without the consequence. Making a project is not a

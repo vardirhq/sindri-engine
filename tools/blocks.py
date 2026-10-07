@@ -47,8 +47,8 @@ MATERIALS = {
 def materials(*names):
     out = {}
     for name in names:
-        colour, strength, size, seed, ramp = MATERIALS[name]
-        entry = {"colour": colour, "grain": {"strength": strength, "size": size, "seed": seed}}
+        color, strength, size, seed, ramp = MATERIALS[name]
+        entry = {"color": color, "grain": {"strength": strength, "size": size, "seed": seed}}
         if ramp:
             entry["ramp"] = {"lightness": list(ramp)}
         out[name] = entry
@@ -86,7 +86,7 @@ def strata(deep, middle, top, cap=None, cap_depth=0.16):
 
 
 def speckled(parts, material, seed, count, low, high, names):
-    """Scatter a few inclusions so a face is not one flat colour."""
+    """Scatter a few inclusions so a face is not one flat color."""
     rng = random.Random(seed)
     for _ in range(count):
         side = rng.uniform(low, high)

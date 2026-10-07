@@ -126,9 +126,9 @@ script Charger {
         else { elite_color(Color(0.45, 1.0, 0.82)); }
     }
 
-    // The trait's colour, keeping the body's fade but never fading below 0.24.
-    fn elite_color(colour: Color) {
-        this.sprite.tint = colour.with_alpha(max(this.sprite.tint.a, 0.24));
+    // The trait's color, keeping the body's fade but never fading below 0.24.
+    fn elite_color(color: Color) {
+        this.sprite.tint = color.with_alpha(max(this.sprite.tint.a, 0.24));
     }
 
     fn die() {

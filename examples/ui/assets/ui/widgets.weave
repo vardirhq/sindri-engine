@@ -1,4 +1,4 @@
-/* Weave Control Room: every size, colour and state the widgets show.
+/* Weave Control Room: every size, color and state the widgets show.
    Decay writes values and words; this decides how they look. */
 
 :root {

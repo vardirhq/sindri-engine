@@ -114,7 +114,7 @@ impl ShapeRenderer {
         };
 
         Self {
-            // The shader writes premultiplied colour, which is what lets one
+            // The shader writes premultiplied color, which is what lets one
             // shader serve both: premultiplied over is a normal composite, and
             // premultiplied added is light.
             pipelines: [

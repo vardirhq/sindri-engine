@@ -114,7 +114,7 @@ pub enum GpuError {
     #[error("the presentation surface was lost and could not be created again: {0}")]
     CreateSurface(#[from] wgpu::CreateSurfaceError),
     #[error(
-        "surface offers no sRGB format, so rendered colours could not be encoded and every frame \
+        "surface offers no sRGB format, so rendered colors could not be encoded and every frame \
          would display too dark"
     )]
     NoSrgbSurfaceFormat,

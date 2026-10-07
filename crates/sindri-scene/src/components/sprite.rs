@@ -9,11 +9,11 @@ const fn zero_rgba() -> [f32; 4] {
     [0.0, 0.0, 0.0, 0.0]
 }
 
-/// Optional per-channel colour math applied after the ordinary sprite tint.
+/// Optional per-channel color math applied after the ordinary sprite tint.
 ///
 /// Identity defaults make this safe for every existing scene. Keeping it
 /// separate from `tint` preserves the simple authoring path while allowing
-/// imported art to reproduce Flash-style colour transforms when it needs to.
+/// imported art to reproduce Flash-style color transforms when it needs to.
 #[derive(Clone, Copy, Debug, Deserialize, PartialEq)]
 pub struct SpriteColorTransform {
     #[serde(default = "opaque_white")]

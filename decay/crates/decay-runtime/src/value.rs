@@ -53,7 +53,7 @@ pub enum Value {
     Vec2([f64; 2]),
     /// Three numbers, `x`, `y`, `z`.
     Vec3([f64; 3]),
-    /// A colour: `r`, `g`, `b`, `a`, each from 0 to 1. Built, read and
+    /// A color: `r`, `g`, `b`, `a`, each from 0 to 1. Built, read and
     /// written channel by channel as a vector is by component.
     Color([f64; 4]),
     /// A countdown: the seconds it has to go, never below zero, and the

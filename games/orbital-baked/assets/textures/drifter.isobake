@@ -12,7 +12,7 @@
     "alpha_cutoff": 128,
     "outline": {
       "enabled": true,
-      "colour": "#0a1018"
+      "color": "#0a1018"
     },
     "shading": {
       "light": [
@@ -34,22 +34,22 @@
         "kind": "primitives",
         "materials": {
           "shell": {
-            "colour": "#2dd6ff"
+            "color": "#2dd6ff"
           },
           "lit": {
-            "colour": "#8fe9ff"
+            "color": "#8fe9ff"
           },
           "deep": {
-            "colour": "#0f5e7d"
+            "color": "#0f5e7d"
           },
           "dark": {
-            "colour": "#06303f"
+            "color": "#06303f"
           },
           "lens": {
-            "colour": "#eafdff"
+            "color": "#eafdff"
           },
           "glow": {
-            "colour": "#5cf2e0"
+            "color": "#5cf2e0"
           }
         },
         "parts": [
@@ -477,22 +477,22 @@
         "kind": "primitives",
         "materials": {
           "shell": {
-            "colour": "#2dd6ff"
+            "color": "#2dd6ff"
           },
           "lit": {
-            "colour": "#8fe9ff"
+            "color": "#8fe9ff"
           },
           "deep": {
-            "colour": "#0f5e7d"
+            "color": "#0f5e7d"
           },
           "dark": {
-            "colour": "#06303f"
+            "color": "#06303f"
           },
           "lens": {
-            "colour": "#eafdff"
+            "color": "#eafdff"
           },
           "glow": {
-            "colour": "#5cf2e0"
+            "color": "#5cf2e0"
           }
         },
         "parts": [
@@ -920,22 +920,22 @@
         "kind": "primitives",
         "materials": {
           "shell": {
-            "colour": "#2dd6ff"
+            "color": "#2dd6ff"
           },
           "lit": {
-            "colour": "#8fe9ff"
+            "color": "#8fe9ff"
           },
           "deep": {
-            "colour": "#0f5e7d"
+            "color": "#0f5e7d"
           },
           "dark": {
-            "colour": "#06303f"
+            "color": "#06303f"
           },
           "lens": {
-            "colour": "#eafdff"
+            "color": "#eafdff"
           },
           "glow": {
-            "colour": "#5cf2e0"
+            "color": "#5cf2e0"
           }
         },
         "parts": [
@@ -1363,22 +1363,22 @@
         "kind": "primitives",
         "materials": {
           "shell": {
-            "colour": "#2dd6ff"
+            "color": "#2dd6ff"
           },
           "lit": {
-            "colour": "#8fe9ff"
+            "color": "#8fe9ff"
           },
           "deep": {
-            "colour": "#0f5e7d"
+            "color": "#0f5e7d"
           },
           "dark": {
-            "colour": "#06303f"
+            "color": "#06303f"
           },
           "lens": {
-            "colour": "#eafdff"
+            "color": "#eafdff"
           },
           "glow": {
-            "colour": "#5cf2e0"
+            "color": "#5cf2e0"
           }
         },
         "parts": [

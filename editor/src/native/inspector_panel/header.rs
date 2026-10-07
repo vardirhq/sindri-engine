@@ -168,7 +168,7 @@ pub(super) struct IdentityEdit {
 /// points at. It was neither, so the editor could produce `game-object-1` and
 /// nothing else, and a scene of `player`, `floor` and `orb-1` was unreachable.
 ///
-/// A value that cannot be used is shown in the colour the editor uses for a
+/// A value that cannot be used is shown in the color the editor uses for a
 /// refusal and says why on hover, rather than being written and rejected: the
 /// draft is committed every frame, so a refused command would be refused again
 /// on the next one and the console would fill with the same line.

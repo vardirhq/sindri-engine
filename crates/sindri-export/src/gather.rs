@@ -105,7 +105,7 @@ pub struct ProjectExport {
 }
 
 /// A splash as the page shows it, with its image read and its settings
-/// checked: a colour that is not one, or a time that is not a time, is a
+/// checked: a color that is not one, or a time that is not a time, is a
 /// mistake to report now rather than a page that quietly ignores it.
 fn read_splash(project: &Path, splash: SplashSection) -> Result<crate::page::Splash, ExportError> {
     let bad = |what: String| ExportError::Project(format!("[web.splash] {what}"));
@@ -119,7 +119,7 @@ fn read_splash(project: &Path, splash: SplashSection) -> Result<crate::page::Spl
         let digits = background.strip_prefix('#').unwrap_or_default();
         if digits.len() != 6 || !digits.chars().all(|c| c.is_ascii_hexdigit()) {
             return Err(bad(format!(
-                "background {background:?} is not a `#rrggbb` colour"
+                "background {background:?} is not a `#rrggbb` color"
             )));
         }
     }

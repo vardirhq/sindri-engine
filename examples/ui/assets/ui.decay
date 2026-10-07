@@ -1,5 +1,5 @@
 // The Control Room's behaviour: what each widget's value says, and what
-// happens when the person changes one. Weave owns every size, colour and
+// happens when the person changes one. Weave owns every size, color and
 // state; nothing here positions or paints anything.
 
 script WidgetDemo {

@@ -12,7 +12,7 @@
     "alpha_cutoff": 128,
     "outline": {
       "enabled": true,
-      "colour": "#241d2b"
+      "color": "#241d2b"
     },
     "shading": {
       "light": [
@@ -34,13 +34,13 @@
         "kind": "primitives",
         "materials": {
           "core": {
-            "colour": "#ffd76a"
+            "color": "#ffd76a"
           },
           "ember": {
-            "colour": "#ff6a1e"
+            "color": "#ff6a1e"
           },
           "wave": {
-            "colour": "#ff9d3d"
+            "color": "#ff9d3d"
           }
         },
         "parts": [
@@ -197,13 +197,13 @@
         "kind": "primitives",
         "materials": {
           "core": {
-            "colour": "#ffd76a"
+            "color": "#ffd76a"
           },
           "ember": {
-            "colour": "#ff6a1e"
+            "color": "#ff6a1e"
           },
           "wave": {
-            "colour": "#ff9d3d"
+            "color": "#ff9d3d"
           }
         },
         "parts": [
@@ -455,13 +455,13 @@
         "kind": "primitives",
         "materials": {
           "core": {
-            "colour": "#ffd76a"
+            "color": "#ffd76a"
           },
           "ember": {
-            "colour": "#ff6a1e"
+            "color": "#ff6a1e"
           },
           "wave": {
-            "colour": "#ff9d3d"
+            "color": "#ff9d3d"
           }
         },
         "parts": [
@@ -713,13 +713,13 @@
         "kind": "primitives",
         "materials": {
           "core": {
-            "colour": "#ffd76a"
+            "color": "#ffd76a"
           },
           "ember": {
-            "colour": "#ff6a1e"
+            "color": "#ff6a1e"
           },
           "wave": {
-            "colour": "#ff9d3d"
+            "color": "#ff9d3d"
           }
         },
         "parts": [
@@ -960,13 +960,13 @@
         "kind": "primitives",
         "materials": {
           "core": {
-            "colour": "#ffd76a"
+            "color": "#ffd76a"
           },
           "ember": {
-            "colour": "#ff6a1e"
+            "color": "#ff6a1e"
           },
           "wave": {
-            "colour": "#ff9d3d"
+            "color": "#ff9d3d"
           }
         },
         "parts": [

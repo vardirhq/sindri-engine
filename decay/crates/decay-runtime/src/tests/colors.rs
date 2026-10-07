@@ -1,4 +1,4 @@
-//! Colours: built from channels or hex, read and written by channel, and
+//! Colors: built from channels or hex, read and written by channel, and
 //! blended.
 
 use crate::{EmptyHost, Runtime, RuntimeError, Value};
@@ -32,7 +32,7 @@ fn call(function: &str, args: Vec<Value>) -> Result<Value, RuntimeError> {
 }
 
 #[test]
-fn a_colour_is_built_from_channels_or_hex() {
+fn a_color_is_built_from_channels_or_hex() {
     assert_eq!(call("opaque", vec![]), Ok(Value::Number(1.0)));
     assert_eq!(
         call("hex", vec![]),
@@ -43,7 +43,7 @@ fn a_colour_is_built_from_channels_or_hex() {
 }
 
 #[test]
-fn a_channel_is_read_and_written_where_the_colour_is_held() {
+fn a_channel_is_read_and_written_where_the_color_is_held() {
     assert_eq!(
         call("channel", vec![]),
         Ok(Value::Color([1.0, 0.25, 0.0, 1.0]))
@@ -52,7 +52,7 @@ fn a_channel_is_read_and_written_where_the_colour_is_held() {
 }
 
 #[test]
-fn a_colour_blends_and_fades() {
+fn a_color_blends_and_fades() {
     assert_eq!(
         call("blend", vec![]),
         Ok(Value::Color([0.5, 0.25, 0.125, 0.5]))
@@ -64,7 +64,7 @@ fn a_colour_blends_and_fades() {
 }
 
 #[test]
-fn text_that_is_not_a_colour_is_named_when_it_runs() {
+fn text_that_is_not_a_color_is_named_when_it_runs() {
     assert_eq!(
         call("bad", vec![Value::String("orange".to_owned())]),
         Err(RuntimeError::InvalidColor("orange".to_owned()))

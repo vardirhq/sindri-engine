@@ -13,7 +13,7 @@ const MINIMAL = {
   id: 'stone',
   texture: 'textures/stone.png',
   model: {
-    materials: { rock: { colour: '#808080' } },
+    materials: { rock: { color: '#808080' } },
     parts: [{ type: 'box', material: 'rock', size: [1, 1, 1] }],
   },
 };
@@ -100,17 +100,17 @@ test('an unknown primitive names the ones that exist', () => {
 test('a material may be named or written inline', () => {
   const recipe = parse({
     model: {
-      materials: { rock: { colour: '#808080', unlit: true } },
+      materials: { rock: { color: '#808080', unlit: true } },
       parts: [
         { type: 'box', material: 'rock', size: [1, 1, 1] },
-        { type: 'sphere', material: { colour: '#ff0000' }, radius: 0.2 },
+        { type: 'sphere', material: { color: '#ff0000' }, radius: 0.2 },
       ],
     },
   });
   const model = recipe.variants[0].model;
   assert.equal(model.materials.rock.unlit, true);
   assert.deepEqual(model.parts[1].material, {
-    colour: '#ff0000',
+    color: '#ff0000',
     ramp: undefined,
     unlit: undefined,
     grain: undefined,
@@ -121,20 +121,20 @@ test('a texture has to be a png, because that is what a bake writes', () => {
   assert.throws(() => parse({ texture: 'textures/stone.webp' }), /must name a \.png/);
 });
 
-test('a mistyped colour is caught where it was written', () => {
+test('a mistyped color is caught where it was written', () => {
   assert.throws(
     () =>
       parse({
         model: {
-          materials: { rock: { colour: '#80808' } },
+          materials: { rock: { color: '#80808' } },
           parts: [{ type: 'box', material: 'rock', size: [1, 1, 1] }],
         },
       }),
-    /expected a hex colour/,
+    /expected a hex color/,
   );
-  assert.throws(() => parse({ render: { outline: { colour: 'grey' } } }), /expected a hex colour/);
-  // Case is spelling, not meaning: an upper-case colour is the same colour.
-  assert.doesNotThrow(() => parse({ render: { outline: { colour: '#241D2B' } } }));
+  assert.throws(() => parse({ render: { outline: { color: 'grey' } } }), /expected a hex color/);
+  // Case is spelling, not meaning: an upper-case color is the same color.
+  assert.doesNotThrow(() => parse({ render: { outline: { color: '#241D2B' } } }));
 });
 
 test('a flat view states its scale directly and has no tile', () => {
@@ -184,7 +184,7 @@ test('a flat prefab cannot occupy a tilemap', () => {
 test('a grainy material says how big a texel is and how much it moves', () => {
   const recipe = parse({
     model: {
-      materials: { rock: { colour: '#808080', grain: { size: 0.125, strength: 0.4, seed: 7 } } },
+      materials: { rock: { color: '#808080', grain: { size: 0.125, strength: 0.4, seed: 7 } } },
       parts: [{ type: 'box', material: 'rock', size: [1, 1, 1] }],
     },
   });
@@ -200,7 +200,7 @@ test('a texel with no size, or a strength off the scale, is caught where it was 
     () =>
       parse({
         model: {
-          materials: { rock: { colour: '#808080', grain: { size: 0, strength: 0.4 } } },
+          materials: { rock: { color: '#808080', grain: { size: 0, strength: 0.4 } } },
           parts: [{ type: 'box', material: 'rock', size: [1, 1, 1] }],
         },
       }),
@@ -210,7 +210,7 @@ test('a texel with no size, or a strength off the scale, is caught where it was 
     () =>
       parse({
         model: {
-          materials: { rock: { colour: '#808080', grain: { size: 0.1, strength: 4 } } },
+          materials: { rock: { color: '#808080', grain: { size: 0.1, strength: 4 } } },
           parts: [{ type: 'box', material: 'rock', size: [1, 1, 1] }],
         },
       }),

@@ -28,7 +28,7 @@ pub enum ConstValue {
         enumeration: String,
         variant: String,
     },
-    /// A colour: `Color(1.0, 0.5, 0.0)` or `Color("#ff8000")`.
+    /// A color: `Color(1.0, 0.5, 0.0)` or `Color("#ff8000")`.
     Color([f64; 4]),
 }
 
@@ -263,7 +263,7 @@ impl Folder<'_, '_> {
             self.error(
                 Code::ConstantNotFixed,
                 span,
-                "a constant colour is `Color(r, g, b)`, `Color(r, g, b, a)` or `Color(\"#rrggbb\")`"
+                "a constant color is `Color(r, g, b)`, `Color(r, g, b, a)` or `Color(\"#rrggbb\")`"
                     .to_owned(),
             );
         }

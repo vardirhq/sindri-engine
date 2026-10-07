@@ -73,7 +73,7 @@ impl SpriteInstance {
         10 => Float32x4
     ];
 
-    /// A sprite drawn from the whole of its texture with identity colour math.
+    /// A sprite drawn from the whole of its texture with identity color math.
     pub fn new(model: Mat4, tint: [f32; 4]) -> Self {
         Self {
             model: model.to_cols_array_2d(),
@@ -111,7 +111,7 @@ impl SpriteInstance {
         self
     }
 
-    /// Applies advanced per-channel colour math without changing batch keys.
+    /// Applies advanced per-channel color math without changing batch keys.
     #[must_use]
     pub const fn with_color_transform(mut self, multiply: [f32; 4], offset: [f32; 4]) -> Self {
         self.color_multiply = multiply;

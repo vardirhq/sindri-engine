@@ -1,5 +1,5 @@
 {
-  "about": "Every component this engine build registers. `fields` is what the component has; `default_payload` is what a fresh one is, and is null for a type with no honest blank — one naming an asset the engine cannot invent. `addable` says whether a tool can add one without being given anything else. `meanings` says what a field is *for* where the shape alone cannot: which asset kind it names, which spellings it accepts, that it is a colour, an angle, a bounded number, a collision mask, or another entity. A path is dotted, and `[]` descends into a list, so `pieces[].friction` describes every piece. A choice that also carries `variants` decides the shape of what holds it: each spelling names the fields the object has when the tag says that word, and writing the word without them is a payload the engine refuses. `apply` says when a tool should apply an edit, by path, the empty path being the whole component and the closest path winning: `instant` as it is made (anything not listed), `settled` once the person stops typing or dragging, `manual` only when they ask, because applying it is a rebuild.",
+  "about": "Every component this engine build registers. `fields` is what the component has; `default_payload` is what a fresh one is, and is null for a type with no honest blank — one naming an asset the engine cannot invent. `addable` says whether a tool can add one without being given anything else. `meanings` says what a field is *for* where the shape alone cannot: which asset kind it names, which spellings it accepts, that it is a color, an angle, a bounded number, a collision mask, or another entity. A path is dotted, and `[]` descends into a list, so `pieces[].friction` describes every piece. A choice that also carries `variants` decides the shape of what holds it: each spelling names the fields the object has when the tag says that word, and writing the word without them is a payload the engine refuses. `apply` says when a tool should apply an edit, by path, the empty path being the whole component and the closest path winning: `instant` as it is made (anything not listed), `settled` once the person stops typing or dragging, `manual` only when they ask, because applying it is a rebuild.",
   "components": [
     {
       "addable": false,
@@ -161,7 +161,7 @@
           "kind": "asset"
         },
         "tint": {
-          "kind": "colour"
+          "kind": "color"
         }
       },
       "schema_version": 1,
@@ -275,7 +275,7 @@
       },
       "meanings": {
         "ambient_color": {
-          "kind": "colour"
+          "kind": "color"
         },
         "ambient_intensity": {
           "kind": "range",
@@ -288,7 +288,7 @@
           "min": 0.0
         },
         "background": {
-          "kind": "colour"
+          "kind": "color"
         },
         "bloom.intensity": {
           "kind": "range",
@@ -311,7 +311,7 @@
           "min": 0.0
         },
         "fog.color": {
-          "kind": "colour"
+          "kind": "color"
         },
         "fog.density": {
           "kind": "range",
@@ -486,7 +486,7 @@
       },
       "meanings": {
         "color": {
-          "kind": "colour"
+          "kind": "color"
         },
         "intensity": {
           "kind": "range",
@@ -836,7 +836,7 @@
           ]
         },
         "fill": {
-          "kind": "colour"
+          "kind": "color"
         },
         "kind": {
           "kind": "choice",
@@ -848,7 +848,7 @@
           ]
         },
         "stroke": {
-          "kind": "colour"
+          "kind": "color"
         },
         "sweep_start": {
           "kind": "angle"
@@ -917,7 +917,7 @@
           "kind": "asset"
         },
         "tint": {
-          "kind": "colour"
+          "kind": "color"
         }
       },
       "schema_version": 1,
@@ -1071,7 +1071,7 @@
           "kind": "asset"
         },
         "tint": {
-          "kind": "colour"
+          "kind": "color"
         }
       },
       "schema_version": 1,
@@ -1329,7 +1329,7 @@
           "kind": "asset"
         },
         "tint": {
-          "kind": "colour"
+          "kind": "color"
         }
       },
       "schema_version": 1,
@@ -1536,7 +1536,7 @@
           ]
         },
         "fill": {
-          "kind": "colour"
+          "kind": "color"
         },
         "kind": {
           "kind": "choice",
@@ -1548,10 +1548,10 @@
           ]
         },
         "shadow.color": {
-          "kind": "colour"
+          "kind": "color"
         },
         "stroke": {
-          "kind": "colour"
+          "kind": "color"
         },
         "sweep_start": {
           "kind": "angle"
@@ -1677,7 +1677,7 @@
           ]
         },
         "color": {
-          "kind": "colour"
+          "kind": "color"
         },
         "font": {
           "asset": "font",
@@ -1694,10 +1694,10 @@
           ]
         },
         "outline.color": {
-          "kind": "colour"
+          "kind": "color"
         },
         "shadow.color": {
-          "kind": "colour"
+          "kind": "color"
         },
         "wrap": {
           "kind": "choice",

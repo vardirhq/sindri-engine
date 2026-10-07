@@ -14,8 +14,8 @@ use crate::{Specificity, Stylesheet, Tree, Viewport};
 
 /// Properties an element takes from its parent when it says nothing itself.
 ///
-/// The text properties, as in CSS: colour a panel and every label in it is
-/// that colour, unless a label says otherwise.
+/// The text properties, as in CSS: color a panel and every label in it is
+/// that color, unless a label says otherwise.
 pub const INHERITED: [&str; 9] = [
     "color",
     "font-size",
@@ -425,7 +425,7 @@ mod tests {
             rules[0].declarations,
             [("color".to_owned(), "#222".to_owned(), true)]
         );
-        // `text`'s colour lost to the ID; its width did not.
+        // `text`'s color lost to the ID; its width did not.
         assert_eq!(
             rules[1].declarations,
             [

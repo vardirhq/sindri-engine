@@ -37,7 +37,7 @@ function plateRecipe(tile: { width: number; height: number }): string {
       outline: { enabled: false },
     },
     model: {
-      materials: { flat: { colour: '#808080' } },
+      materials: { flat: { color: '#808080' } },
       parts: [{ type: 'box', material: 'flat', position: [0, 0, 0], size: [1, 0, 1] }],
     },
   });

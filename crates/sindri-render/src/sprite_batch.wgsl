@@ -60,8 +60,8 @@ fn vs_main(input: VertexInput) -> VertexOutput {
 @fragment
 fn fs_main(input: VertexOutput) -> @location(0) vec4<f32> {
     let sampled = textureSample(sprite_texture, sprite_sampler, input.uv);
-    let colour = sampled * input.tint * input.color_multiply + input.color_offset;
-    return vec4<f32>(colour.rgb * input.shade, colour.a);
+    let color = sampled * input.tint * input.color_multiply + input.color_offset;
+    return vec4<f32>(color.rgb * input.shade, color.a);
 }
 
 // Opaque geometry, which writes depth.

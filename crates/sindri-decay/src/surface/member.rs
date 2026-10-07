@@ -67,7 +67,7 @@ const TINT: &[(&str, Node)] = &[
     ("a", tint(SPRITE_COMPONENT, 3)),
 ];
 
-/// One channel of a sprite's advanced colour transform.
+/// One channel of a sprite's advanced color transform.
 ///
 /// Separate from [`tint`] because the transform is two quadruples rather than
 /// one, and because only the world sprite carries it: a script that reached
@@ -185,7 +185,7 @@ const SHAPE_STROKE: &[(&str, Node)] = &[
     ("a", shape_stroke(3)),
 ];
 
-/// A shape has two colours where a sprite has one, and runtime geometry a
+/// A shape has two colors where a sprite has one, and runtime geometry a
 /// sprite cannot provide.
 ///
 /// `count` lets gameplay choose a polygon silhouette without replacing the

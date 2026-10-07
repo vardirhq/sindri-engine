@@ -29,16 +29,16 @@ and re-baking rewrites the generated files in place.
 ## Grain
 
 A flat-shaded box gives three flat faces. That reads as a *shape*, and blocks
-made of it look like coloured cardboard: a face of grass and a face of stone
+made of it look like colored cardboard: a face of grass and a face of stone
 differ only in hue. What tells them apart in the voxel games this art is copying
 is not the lighting — it is that each face is a small grid of texels that
-disagree slightly about their colour.
+disagree slightly about their color.
 
 There are no texture maps here and no way to author one, so a material may
 instead say its surface is grainy:
 
 ```json
-"stone": { "colour": "#8e8e89", "grain": { "size": 0.125, "strength": 0.45, "seed": 31 } }
+"stone": { "color": "#8e8e89", "grain": { "size": 0.125, "strength": 0.45, "seed": 31 } }
 ```
 
 `size` is a texel in tile units, so the block decides how coarse its own surface
@@ -49,7 +49,7 @@ is noise rather than texture. `seed` picks a stream, so two materials do not
 agree.
 
 The shift is one step along the ramp the material already has, clamped, so a
-grainy material still emits only the four colours its palette promised — which
+grainy material still emits only the four colors its palette promised — which
 is what keeps `palette_snap` and the bake report honest.
 
 It is hashed from the texel's position **on the model**, not on the screen. The
@@ -193,8 +193,8 @@ layers of one fixed isometric view, not rotations of a freestanding object.
     "name": "grass",
     "model": {
       "materials": {
-        "earth": { "colour": "#805236" },
-        "grass": { "colour": "#6f9f52" }
+        "earth": { "color": "#805236" },
+        "grass": { "color": "#6f9f52" }
       },
       "parts": [
         { "type": "box", "material": "earth", "position": [0, 0.5, 0], "size": [1, 1, 1] },
@@ -258,12 +258,12 @@ the recipe is the source.
     "padding": 2,
     "alpha_cutoff": 128,
     "palette_snap": true,
-    "outline": { "enabled": true, "colour": "#241d2b" },
+    "outline": { "enabled": true, "color": "#241d2b" },
     "shading": { "light": [-0.3, 0.89, 0.35], "thresholds": [0.25, 0.5, 0.8] }
   },
   "model": {
     "kind": "primitives",
-    "materials": { "stone": { "colour": "#8d8f9a" } },
+    "materials": { "stone": { "color": "#8d8f9a" } },
     "parts": [{ "type": "box", "material": "stone", "size": [0.34, 0.88, 0.4] }]
   }
 }
@@ -273,7 +273,7 @@ Primitives are `box`, `plate`, `cylinder`, `cone` and `sphere`. A `plate` is a
 single flat quad in the XZ plane, and it exists because a *flat* floor tile is
 not a box: a box of zero height has its top and bottom faces in exactly the same
 plane, and which of them wins a pixel then comes down to the last bit of an
-interpolation — so a tile that should be one flat colour comes out dithered
+interpolation — so a tile that should be one flat color comes out dithered
 between its brightest and darkest shade.
 
 ### Footprints
@@ -383,7 +383,7 @@ This is not defensive tidiness. `TextureFilter::Nearest` in
 is sampled bilinearly — and a frame packed edge to edge against its neighbour is
 blended with it. On a sprite with transparent padding that is a faint rim; on a
 floor tile, whose art fills its cell exactly, it is the tile beside it smeared
-across every cell. A transparent gutter would only trade a colour seam for a
+across every cell. A transparent gutter would only trade a color seam for a
 dark one, which is why the edge is repeated instead.
 
 A scene refers to one frame by name — `textures/standing-stone.png#north` — and

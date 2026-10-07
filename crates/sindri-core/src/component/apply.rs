@@ -1,7 +1,7 @@
 //! When an edit to a field takes effect.
 //!
 //! Most fields are cheap to change, and a tool should apply what is typed as
-//! it is typed: a colour, a position, a label. Some are not. A voxel world
+//! it is typed: a color, a position, a label. Some are not. A voxel world
 //! regenerates its terrain from its generator, and applying each keystroke of
 //! `10` meant regenerating at `1` first, with the editor frozen until it was
 //! done. So a component says, per field or as a whole, how an edit to it is

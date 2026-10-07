@@ -135,11 +135,11 @@ pub const THIS: &[Entry] = &[
     ),
     value(
         "shape",
-        "The drawn shape on this script's object, if it has one: its colours, outline and how much of it is drawn.",
+        "The drawn shape on this script's object, if it has one: its colors, outline and how much of it is drawn.",
     ),
     value(
         "sprite",
-        "The image (sprite) on this script's object, if it has one: its colour and drawing order.",
+        "The image (sprite) on this script's object, if it has one: its color and drawing order.",
     ),
     value(
         "transform",
@@ -147,7 +147,7 @@ pub const THIS: &[Entry] = &[
     ),
     value(
         "ui_image",
-        "The on-screen interface image on this script's object, if it has one: its colour and drawing order.",
+        "The on-screen interface image on this script's object, if it has one: its color and drawing order.",
     ),
 ];
 

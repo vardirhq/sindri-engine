@@ -543,7 +543,7 @@ pub(crate) const SAVE_CALLS: &[(&str, SaveCall)] = &[
 /// Short-lived visual flecks a script can throw.
 ///
 /// What a burst looks like is authored on the entity as `sindri.effect.burst`,
-/// because how many, how fast, how big and what colour are a designer's numbers
+/// because how many, how fast, how big and what color are a designer's numbers
 /// and a call that named all of them would be one nobody could read.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub(crate) enum EffectsCall {

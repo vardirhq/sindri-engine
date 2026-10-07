@@ -10,8 +10,8 @@ import { type BakedFrame, type Canvas, bakeFrames, measureCanvas, paletteFor } f
 import { type Camera, createCamera, createFlatCamera } from './camera.ts';
 import { type BlockFace, type Mesh, blockFaceMesh, buildMesh } from './model.ts';
 import { encodePng } from './png.ts';
-import { uniqueColours } from './palette.ts';
-import { usedColours } from './postprocess.ts';
+import { uniqueColors } from './palette.ts';
+import { usedColors } from './postprocess.ts';
 import { buildPrefab } from './prefab.ts';
 import { type Recipe } from './recipe.ts';
 import {
@@ -124,7 +124,7 @@ export function bake(recipe: Recipe): BakeResult {
     camera,
     recipe.render.padding,
   );
-  const palette = uniqueColours(meshes.flatMap((mesh) => paletteFor(mesh, recipe.render)));
+  const palette = uniqueColors(meshes.flatMap((mesh) => paletteFor(mesh, recipe.render)));
 
   const renderModels: { mesh: Mesh; name: string | null }[] = [];
   const faces: BlockFace[] = ['top', 'south', 'east'];
@@ -237,10 +237,10 @@ function report(
     };
   });
 
-  const used = uniqueColours(frames.flatMap((frame) => usedColours(frame.image)));
-  for (const colour of used) {
-    if (!declared.includes(colour)) {
-      warnings.push(`${colour} is in the output but not in the declared palette`);
+  const used = uniqueColors(frames.flatMap((frame) => usedColors(frame.image)));
+  for (const color of used) {
+    if (!declared.includes(color)) {
+      warnings.push(`${color} is in the output but not in the declared palette`);
     }
   }
 

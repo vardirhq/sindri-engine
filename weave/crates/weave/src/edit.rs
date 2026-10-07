@@ -161,10 +161,10 @@ mod tests {
         let last = set_declaration(SHEET, 7, ".button:hover", "color", "#0f0").expect("edits");
         assert_eq!(last, SHEET.replace("color: red", "color: #0f0"));
         // The comment after the declaration is kept, and so is its `;`.
-        let coloured = set_declaration(SHEET, 2, ".menu", "color", "#eee").expect("edits");
+        let colored = set_declaration(SHEET, 2, ".menu", "color", "#eee").expect("edits");
         assert!(
-            coloured.contains("color: #eee; /* white; on dark */"),
-            "{coloured}"
+            colored.contains("color: #eee; /* white; on dark */"),
+            "{colored}"
         );
     }
 

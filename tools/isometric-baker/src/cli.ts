@@ -95,7 +95,7 @@ function describe(result: BakeResult): string {
     `${report.id}: ${result.frames.length} frames of ${report.canvas.width}x${report.canvas.height}`,
     `  anchor        ${report.anchor[0]}, ${report.anchor[1]} (the centre of every frame)`,
     `  sprite scale  ${report.spriteScale.map((v) => v.toFixed(4)).join(' x ')} world units`,
-    `  palette       ${report.palette.length} colours: ${report.palette.join(' ')}`,
+    `  palette       ${report.palette.length} colors: ${report.palette.join(' ')}`,
   ];
   for (const frame of report.frames) {
     lines.push(`  ${frame.direction.padEnd(12)}content ${frame.content}, margin ${frame.margin}px`);

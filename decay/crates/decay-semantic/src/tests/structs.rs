@@ -57,7 +57,7 @@ fn every_mistake_about_a_struct_is_refused() {
              fn update(dt: f32) {
                  let a = Card(name: "a");
                  let b = Card(name: "a", weight: "heavy");
-                 let c = Card(name: "a", weight: 1.0, colour: 2.0);
+                 let c = Card(name: "a", weight: 1.0, color: 2.0);
                  let d = Card(name: "a", name: "b", weight: 1.0);
                  let e = Card("a", 1.0);
                  let f = a.size;
@@ -71,7 +71,7 @@ fn every_mistake_about_a_struct_is_refused() {
     for expected in [
         "`Card` needs every field without a default: missing `weight`",
         "cannot assign `String` to `f32`",
-        "`Card` has no field `colour`; it has `name`, `weight`",
+        "`Card` has no field `color`; it has `name`, `weight`",
         "`name` is given twice",
         "`Card` is a struct: name its fields, as in `Card(name: ..., weight: ...)`",
         "`Card` has no field `size`; it has `name`, `weight`",

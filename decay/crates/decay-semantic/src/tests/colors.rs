@@ -1,4 +1,4 @@
-//! Colours: every way to build one, and every mistake with one, checked.
+//! Colors: every way to build one, and every mistake with one, checked.
 
 use crate::{Environment, analyze_with_environment};
 
@@ -11,7 +11,7 @@ fn messages(source: &str) -> Vec<String> {
 }
 
 #[test]
-fn a_colour_is_accepted_wherever_a_value_goes() {
+fn a_color_is_accepted_wherever_a_value_goes() {
     let found = messages(
         r##"struct Theme { back: Color, fore: Color = Color("#ffffff") }
          script S {
@@ -30,7 +30,7 @@ fn a_colour_is_accepted_wherever_a_value_goes() {
 }
 
 #[test]
-fn every_mistake_about_a_colour_is_refused() {
+fn every_mistake_about_a_color_is_refused() {
     let found = messages(
         r#"script S {
              fn f() {
@@ -49,11 +49,11 @@ fn every_mistake_about_a_colour_is_refused() {
     let all = found.join("\n");
     for expected in [
         "`Color` takes `r, g, b`, `r, g, b, a` or a hex text like `\"#ff8800\"`, found 2 arguments",
-        "`orange` is not a colour: write `#rrggbb` or `#rrggbbaa`",
+        "`orange` is not a color: write `#rrggbb` or `#rrggbbaa`",
         "expected `String`, found `f32`",
         "cannot assign to a component of immutable `fixed`",
         "`Color` has no member `x`; it has `r`, `g`, `b`, `a`, `lerp`, `with_alpha`",
-        "`lerp` on a colour needs arguments -- call it: `.lerp(...)`",
+        "`lerp` on a color needs arguments -- call it: `.lerp(...)`",
         "`r` is a number, not a function -- write `.r`",
         "cannot assign `Color` to `f32`",
     ] {

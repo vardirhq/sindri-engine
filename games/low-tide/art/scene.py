@@ -126,9 +126,9 @@ def shape(fill, layer, corner=0.0):
     }
 
 
-def text(anchor, size, words, colour=(1.0, 0.96, 0.88, 1.0)):
+def text(anchor, size, words, color=(1.0, 0.96, 0.88, 1.0)):
     return {
-        "anchor": anchor, "color": list(colour), "font": "fonts/Inter.ttf",
+        "anchor": anchor, "color": list(color), "font": "fonts/Inter.ttf",
         "font_size": size, "line_height": size * 1.25, "layer": 100,
         "text": words, "bold": True,
         # Light text reads against the instrument and hint panels.
@@ -512,10 +512,10 @@ def dive_cutaway():
                  "vertical_size": 20.0, "near": 0.1, "far": 100.0, "fit": "height"}}},
              {"id": "dive-controller", "name": "Dive controller",
              "components": {"sindri.script": script("scripts/dive.decay", "Dive")}}]
-    def rect(key, x, y, w, h, colour, layer, corner=0):
+    def rect(key, x, y, w, h, color, layer, corner=0):
         found.append({"id": key, "name": key, "parent": "dive-stage",
             "transform_3d": transform(x, y, 0.1, 0, (w, h)),
-            "components": {"sindri.shape": shape(colour, layer, corner)}})
+            "components": {"sindri.shape": shape(color, layer, corner)}})
     rect("deep-water", 0, -5, 80, 60, [0.025, 0.105, 0.14, 1], 20)
     for i in range(12):
         shade = 0.18 - i * 0.01

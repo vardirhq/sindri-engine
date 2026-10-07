@@ -1,8 +1,8 @@
-//! Checks that a captured image shows the colours the demo scene authors.
+//! Checks that a captured image shows the colors the demo scene authors.
 //!
 //! The headless capture verifies its own pixels before writing them, but the
 //! editor screenshot had nothing looking at it, which is how the editor's
-//! viewport spent a release sampling its colour target through a view that
+//! viewport spent a release sampling its color target through a view that
 //! decoded a second time: every check passed and only the picture was wrong.
 //!
 //! This reads back an image CI has already produced and holds it to the same
@@ -27,9 +27,9 @@ fn verify(path: &str) -> Result<String, String> {
         .map_err(|error| format!("could not decode {path}: {error}"))?;
 
     sindri_cube::verify_authored_colors(image.rgba8())
-        .map_err(|error| format!("{path} is not the colour the scene authored.\n{error}"))?;
+        .map_err(|error| format!("{path} is not the color the scene authored.\n{error}"))?;
     Ok(format!(
-        "verified authored scene colours in {path} ({}x{})",
+        "verified authored scene colors in {path} ({}x{})",
         image.width(),
         image.height()
     ))
