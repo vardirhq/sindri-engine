@@ -1,0 +1,19 @@
+// Read-only observation for the browser player; no movement or game-state writes.
+script BrowserGoalObserver {
+    var elapsed: f32 = 0.0;
+
+    fn update(dt: f32) {
+        this.elapsed += dt;
+        let hero = World.find("Hero");
+        let motion = Physics.character_motion(hero);
+        if motion == null { return; }
+        let p = hero.transform.world_position;
+        var grounded: f32 = 0.0;
+        var won: f32 = 0.0;
+        var jump_held: f32 = 0.0;
+        if motion.grounded { grounded = 1.0; }
+        if Game.won { won = 1.0; }
+        if Action.held("jump") { jump_held = 1.0; }
+        print("Platformer state " + this.elapsed.fixed(3) + " " + p.x.fixed(3) + " " + p.y.fixed(3) + " " + grounded.fixed(0) + " " + Game.coins.fixed(0) + " " + Game.falls.fixed(0) + " " + won.fixed(0) + " " + jump_held.fixed(0));
+    }
+}

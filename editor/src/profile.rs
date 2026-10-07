@@ -51,6 +51,8 @@ impl ProfileEditor {
                 .clone()
                 .unwrap_or_else(|| "profile is unreadable".into())
         })?;
+        sindri_scene::physics_material_profile(&self.path.to_string_lossy(), document)
+            .map_err(|error| error.to_string())?;
         let json = document
             .to_canonical_json()
             .map_err(|error| error.to_string())?;
@@ -78,5 +80,24 @@ mod tests {
         editor.dirty = true;
         editor.save().unwrap();
         assert_eq!(ProfileEditor::open(&path).document.unwrap().name, "Strider");
+    }
+
+    #[test]
+    fn invalid_physics_coefficients_cannot_overwrite_the_asset() {
+        let directory = tempfile::tempdir().unwrap();
+        let path = directory.path().join("wood.profile");
+        let valid = r#"{"format_version":1,"type":"physics_material","values":{"friction":0.3,"restitution":0.1}}"#;
+        std::fs::write(&path, valid).unwrap();
+        let mut editor = ProfileEditor::open(&path);
+        editor
+            .document
+            .as_mut()
+            .unwrap()
+            .values
+            .insert("friction".into(), serde_json::json!(-0.5));
+        editor.dirty = true;
+        assert!(editor.save().is_err());
+        assert!(editor.dirty);
+        assert_eq!(std::fs::read_to_string(path).unwrap(), valid);
     }
 }

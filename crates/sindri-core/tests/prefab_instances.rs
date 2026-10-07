@@ -99,6 +99,7 @@ fn an_instance_loads_as_the_entities_its_prefab_describes() {
             source: "prefabs/coin.prefab".to_owned(),
             path: id("coin"),
             root: true,
+            aliases: [id("coin-1/coin")].into(),
         })
     );
     let sparkle_data = world.get(sparkle).unwrap();

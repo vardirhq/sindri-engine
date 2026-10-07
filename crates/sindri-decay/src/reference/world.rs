@@ -221,123 +221,8 @@ pub(super) const TYPES: &[TypeEntry] = &[
             call("live", &[], "How many particles are currently on screen."),
         ],
     },
-    TypeEntry {
-        name: "Physics",
-        text: "2D physics: moving objects with speed and pushes, and finding out what this script's object bumped into.",
-        members: &[
-            call(
-                "apply_impulse",
-                &["entity", "x", "y"],
-                "Gives an object a sudden push in a direction. Heavier objects move less.",
-            ),
-            call(
-                "collision_started",
-                &[],
-                "The objects that started touching this script's object since the last frame, as a list.",
-            ),
-            call(
-                "collision_stopped",
-                &[],
-                "The objects that stopped touching this script's object since the last frame, as a list.",
-            ),
-            call(
-                "connect_distance",
-                &["first", "second", "max_distance"],
-                "Ties two objects together like a rope: they can come closer, but never further apart than a distance.",
-            ),
-            call(
-                "cast_box",
-                &[
-                    "origin",
-                    "half_size",
-                    "rotation",
-                    "direction",
-                    "max_distance",
-                    "mask",
-                    "include_sensors",
-                    "exclude",
-                ],
-                "Like `cast_circle`, for a box `half_size` from its centre to each edge, turned by `rotation` radians.",
-            ),
-            call(
-                "cast_circle",
-                &[
-                    "origin",
-                    "radius",
-                    "direction",
-                    "max_distance",
-                    "mask",
-                    "include_sensors",
-                    "exclude",
-                ],
-                "Sweeps a circle from `origin` along `direction` and returns the first collider it would touch, as RayHit2d or null: a raycast with a size, for whether something fits through a gap. `point` is where they touch and `distance` how far the circle's centre travelled. Starting already overlapping gives distance 0 and normal Vec2(0, 0). The filter arguments are the raycast's.",
-            ),
-            call(
-                "layer",
-                &["name"],
-                "The mask for one collision layer the scene's physics world names, such as `\"ground\"`, for a query's `mask` argument. A name the world does not give is an error.",
-            ),
-            call(
-                "mask",
-                &["names"],
-                "The mask for several named collision layers at once, such as `[\"ground\", \"enemies\"]`.",
-            ),
-            call(
-                "overlap_box",
-                &[
-                    "center",
-                    "half_size",
-                    "rotation",
-                    "mask",
-                    "include_sensors",
-                    "exclude",
-                ],
-                "Like `overlap_circle`, for a box `half_size` from its centre to each edge, turned by `rotation` radians.",
-            ),
-            call(
-                "overlap_circle",
-                &["center", "radius", "mask", "include_sensors", "exclude"],
-                "Every object with a collider inside a circle, as a list, each once: an area check for a blast, an aura or a pickup radius. The filter arguments are the raycast's: which layers, whether trigger areas count, and one object to leave out (or null). Ignores inactive objects.",
-            ),
-            call(
-                "raycast",
-                &[
-                    "origin",
-                    "direction",
-                    "max_distance",
-                    "mask",
-                    "include_sensors",
-                    "exclude",
-                ],
-                "The closest 2D collider hit, as RayHit2d or null. Normalizes a nonzero Vec2 direction; returns world-space point, normal and distance. The mask selects collider memberships; include_sensors opts into triggers; exclude skips all pieces of one entity (or null). Origin, direction and distance must be finite; distance non-negative; mask a whole u32. Inside hits have distance 0 and normal Vec2(0, 0). Queries synchronized geometry; ignores inactive/despawned entities. Ties prefer entity handle then piece order.",
-            ),
-            call(
-                "sensor_entered",
-                &[],
-                "The objects that entered this script's trigger area since the last frame. A trigger area detects things without blocking them, like a pickup.",
-            ),
-            call(
-                "sensor_exited",
-                &[],
-                "The objects that left this script's trigger area since the last frame.",
-            ),
-            call(
-                "set_velocity",
-                &["entity", "x", "y"],
-                "Sets how fast, and which way, an object is moving.",
-            ),
-            call(
-                "velocity_x",
-                &["entity"],
-                "How fast an object is moving sideways.",
-            ),
-            call(
-                "velocity_y",
-                &["entity"],
-                "How fast an object is moving up or down.",
-            ),
-        ],
-    },
+    super::physics::PHYSICS,
+    super::character::CHARACTER_MOTION,
     TypeEntry {
         name: "RayHit2d",
         text: "A copied 2D ray hit snapshot. Null means no hit. Holds entity, world-space point and normal, and distance in world units. Copying or editing a snapshot never changes physics.",
@@ -349,6 +234,33 @@ pub(super) const TYPES: &[TypeEntry] = &[
                 "The world-space surface normal, as Vec2. Zero for a hit at distance zero.",
             ),
             value("distance", "Distance from the ray origin, in world units."),
+        ],
+    },
+    TypeEntry {
+        name: "Contact2d",
+        text: "A copied solid solver contact from the last fixed step, relative to the queried body. Sensors are excluded. Multiple points/pieces may name one entity. Sleeping contacts retain support geometry and report zero new impulses/force. Editing a snapshot does not change physics.",
+        members: &[
+            value("entity", "The other entity touching the queried body."),
+            value(
+                "point",
+                "World-space midpoint of the two surface anchors, as Vec2.",
+            ),
+            value(
+                "normal",
+                "World-space unit push direction towards the queried body, as Vec2.",
+            ),
+            value(
+                "normal_impulse",
+                "Nonnegative normal impulse from the last solve.",
+            ),
+            value(
+                "tangent_impulse",
+                "Signed friction impulse along Vec2(-normal.y, normal.x).",
+            ),
+            value(
+                "force",
+                "Total world impulse divided by the fixed step's seconds, as Vec2.",
+            ),
         ],
     },
     TypeEntry {

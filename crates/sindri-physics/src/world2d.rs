@@ -4,9 +4,24 @@
 //! speak only in the types this crate defines, which is what makes the
 //! backend replaceable.
 
+mod contacts;
+mod controls;
+mod ground;
+mod grounded;
+mod joints;
+mod materials;
+mod motion;
+mod movement_policy;
+mod one_way;
+mod platforms;
 mod query;
+mod slide;
+mod slope;
+mod spatial;
+mod steps;
 mod sweep;
 
+pub use motion::BodyControl2d;
 pub use sweep::ShapeHit2d;
 
 use std::{collections::HashMap, sync::mpsc, time::Duration};
@@ -14,14 +29,11 @@ use std::{collections::HashMap, sync::mpsc, time::Duration};
 use rapier2d::prelude as r2;
 use sindri_core::EntityId;
 
-use crate::shared::RigidBodyKind;
+use crate::shared::{PhysicsEventKind, RigidBodyKind};
 use crate::types2d::{
-    Collider2d, ColliderShape2d, DistanceJoint2d, PhysicsEvent2d, PhysicsEventKind, PhysicsPose2d,
-    RigidBody2d,
+    Collider2d, ColliderShape2d, DistanceJoint2d, PhysicsEvent2d, PhysicsPose2d, RigidBody2d,
 };
-use crate::validate::{
-    PhysicsError, finite2, positive, validate_body2d, validate_colliders2d, validate_pose2d,
-};
+use crate::validate::{PhysicsError, finite2, validate_body2d, validate_colliders2d};
 
 #[derive(Clone)]
 struct BodyRecord2d {
@@ -40,7 +52,12 @@ struct BodyRecord2d {
 /// The first runtime physics world. It owns Rapier completely and exposes only
 /// Sindri entities, values, events, and joints.
 pub struct PhysicsWorld2d {
+    spatial: spatial::SpatialIndex,
+    contacts: HashMap<EntityId, Vec<crate::Contact2d>>,
     backend: r2::PhysicsWorld,
+    one_way: one_way::OneWayHooks,
+    pending_drop: HashMap<EntityId, f32>,
+    pending_controls: HashMap<EntityId, Vec<BodyControl2d>>,
     bodies: HashMap<EntityId, BodyRecord2d>,
     collider_entities: HashMap<r2::ColliderHandle, EntityId>,
     /// Velocities set on a body that does not exist yet.
@@ -61,6 +78,7 @@ pub struct PhysicsWorld2d {
     /// not reached the physics world yet. They are resolved after the scene has
     /// synchronized every body for the frame.
     pending_distance_joints: Vec<DistanceJoint2d>,
+    owned_joints: HashMap<EntityId, joints::OwnedJoint>,
 }
 
 impl PhysicsWorld2d {
@@ -69,11 +87,17 @@ impl PhysicsWorld2d {
         let mut backend = r2::PhysicsWorld::new();
         backend.gravity = r2::Vector::new(gravity[0], gravity[1]);
         Ok(Self {
+            spatial: spatial::SpatialIndex::default(),
+            contacts: HashMap::new(),
             backend,
+            one_way: one_way::OneWayHooks::default(),
+            pending_drop: HashMap::new(),
+            pending_controls: HashMap::new(),
             bodies: HashMap::new(),
             collider_entities: HashMap::new(),
             pending_velocity: HashMap::new(),
             pending_distance_joints: Vec::new(),
+            owned_joints: HashMap::new(),
         })
     }
 
@@ -108,6 +132,19 @@ impl PhysicsWorld2d {
         }
         validate_body2d(&body)?;
         validate_colliders2d(colliders)?;
+        if self.pending_drop.contains_key(&entity) && body.kind != RigidBodyKind::Dynamic {
+            return Err(PhysicsError::WrongBodyKind(
+                entity,
+                "drop through",
+                body.kind,
+            ));
+        }
+
+        if let Some(controls) = self.pending_controls.get(&entity) {
+            for control in controls {
+                control.validate(entity, body.kind)?;
+            }
+        }
 
         let body_handle = self.backend.insert_body(body_builder(body));
         let handles: Vec<r2::ColliderHandle> = colliders
@@ -117,6 +154,8 @@ impl PhysicsWorld2d {
                     .insert_collider(collider_builder(entity, *collider), Some(body_handle))
             })
             .collect();
+        self.backend.bodies[body_handle]
+            .recompute_mass_properties_from_colliders(&self.backend.colliders);
         for handle in &handles {
             self.collider_entities.insert(*handle, entity);
         }
@@ -128,6 +167,10 @@ impl PhysicsWorld2d {
                 kind: body.kind,
             },
         );
+        self.index_body(entity);
+        if let Some(seconds) = self.pending_drop.remove(&entity) {
+            self.drop_through(entity, seconds)?;
+        }
         // What a script asked for before this existed.
         if let Some(velocity) = self.pending_velocity.remove(&entity)
             && matches!(
@@ -137,6 +180,11 @@ impl PhysicsWorld2d {
         {
             self.backend.bodies[body_handle]
                 .set_linvel(r2::Vector::new(velocity[0], velocity[1]), true);
+        }
+        if let Some(controls) = self.pending_controls.remove(&entity) {
+            for control in controls {
+                self.apply_control(entity, control)?;
+            }
         }
         Ok(())
     }
@@ -155,71 +203,11 @@ impl PhysicsWorld2d {
     ) -> Result<(), PhysicsError> {
         finite2("linear_velocity", velocity)?;
         self.pending_velocity.insert(entity, velocity);
+        self.pending_controls
+            .entry(entity)
+            .or_default()
+            .push(BodyControl2d::LinearVelocity(velocity));
         Ok(())
-    }
-
-    /// Connects two bodies with a hard maximum-distance joint.
-    ///
-    /// The bodies may move closer and rotate freely, but the solver will not
-    /// allow their centres to separate beyond `max_distance`. The backend uses
-    /// Rapier's rope joint today; callers see only Sindri entities and units.
-    pub fn connect_distance(
-        &mut self,
-        first: EntityId,
-        second: EntityId,
-        max_distance: f32,
-    ) -> Result<(), PhysicsError> {
-        validate_distance_joint(first, second, max_distance)?;
-        let first_body = self.record(first)?.body;
-        let second_body = self.record(second)?.body;
-        self.backend.impulse_joints.insert(
-            first_body,
-            second_body,
-            r2::RopeJointBuilder::new(max_distance).contacts_enabled(false),
-            true,
-        );
-        Ok(())
-    }
-
-    /// Queues a distance joint whose bodies are authored but not both built yet.
-    ///
-    /// This is the joint equivalent of `remember_linear_velocity`: a prefab may
-    /// spawn a chain and connect it in one script pass, while physics materializes
-    /// all those bodies at the next scene synchronization.
-    pub fn remember_distance_joint(
-        &mut self,
-        first: EntityId,
-        second: EntityId,
-        max_distance: f32,
-    ) -> Result<(), PhysicsError> {
-        validate_distance_joint(first, second, max_distance)?;
-        self.pending_distance_joints
-            .push(DistanceJoint2d::new(first, second, max_distance));
-        Ok(())
-    }
-
-    /// Finishes the lifecycle window opened by scripts before synchronization.
-    ///
-    /// Every body has now had a chance to materialize. Pending joints whose two
-    /// endpoints exist are created; requests whose endpoint vanished are simply
-    /// discarded because there is no longer anything useful to connect.
-    pub fn finish_synchronize(&mut self) -> Result<(), PhysicsError> {
-        let pending = std::mem::take(&mut self.pending_distance_joints);
-        for joint in pending {
-            if self.contains(joint.first) && self.contains(joint.second) {
-                self.connect_distance(joint.first, joint.second, joint.max_distance)?;
-            }
-        }
-        self.pending_velocity.clear();
-        Ok(())
-    }
-
-    /// Drops remembered work without resolving it.
-    ///
-    /// Kept for callers that deliberately abandon a synchronization pass.
-    pub fn forget_pending(&mut self) {
-        self.pending_velocity.clear();
-        self.pending_distance_joints.clear();
     }
 
     /// Inserts an entity with no authored rigid-body as static collision
@@ -243,18 +231,30 @@ impl PhysicsWorld2d {
     }
 
     pub fn remove(&mut self, entity: EntityId) -> bool {
+        self.remove_owned_joint(entity);
+        self.owned_joints.retain(|_, record| {
+            let (first, second) = record.joint.endpoints();
+            first != entity && second != entity
+        });
+        self.invalidate_contacts(entity);
+        self.pending_controls.remove(&entity);
+        self.pending_drop.remove(&entity);
         self.pending_velocity.remove(&entity);
         self.pending_distance_joints
             .retain(|joint| joint.first != entity && joint.second != entity);
         let Some(record) = self.bodies.remove(&entity) else {
             return false;
         };
+        self.spatial.remove_body(entity);
         for handle in &record.colliders {
+            self.spatial.remove(*handle);
+            self.one_way.policies.remove(handle);
             self.collider_entities.remove(handle);
         }
         // Rapier drops a body's colliders and attached joints with it. That is
         // important for breakable chains: removing one link severs both sides
         // without a stale constraint surviving on behalf of a dead entity.
+        self.one_way.dropping.remove(&record.body);
         let _ = self.backend.remove_body(record.body);
         true
     }
@@ -302,100 +302,6 @@ impl PhysicsWorld2d {
         Ok(self.backend.bodies[self.record(entity)?.body].mass())
     }
 
-    pub fn linear_velocity(&self, entity: EntityId) -> Result<[f32; 2], PhysicsError> {
-        if let Some(record) = self.bodies.get(&entity) {
-            let velocity = self.backend.bodies[record.body].linvel();
-            return Ok([velocity.x, velocity.y]);
-        }
-        if let Some(velocity) = self.pending_velocity.get(&entity) {
-            return Ok(*velocity);
-        }
-        Err(PhysicsError::MissingEntity(entity))
-    }
-
-    pub fn set_linear_velocity(
-        &mut self,
-        entity: EntityId,
-        velocity: [f32; 2],
-    ) -> Result<(), PhysicsError> {
-        finite2("linear_velocity", velocity)?;
-        let record = self.record(entity)?.clone();
-        if !matches!(
-            record.kind,
-            RigidBodyKind::Dynamic | RigidBodyKind::KinematicVelocity
-        ) {
-            return Err(PhysicsError::WrongBodyKind(
-                entity,
-                "set linear velocity",
-                record.kind,
-            ));
-        }
-        self.backend.bodies[record.body]
-            .set_linvel(r2::Vector::new(velocity[0], velocity[1]), true);
-        Ok(())
-    }
-
-    pub fn apply_impulse(
-        &mut self,
-        entity: EntityId,
-        impulse: [f32; 2],
-    ) -> Result<(), PhysicsError> {
-        finite2("impulse", impulse)?;
-        let record = self.record(entity)?.clone();
-        if record.kind != RigidBodyKind::Dynamic {
-            return Err(PhysicsError::WrongBodyKind(
-                entity,
-                "apply impulse",
-                record.kind,
-            ));
-        }
-        self.backend.bodies[record.body]
-            .apply_impulse(r2::Vector::new(impulse[0], impulse[1]), true);
-        Ok(())
-    }
-
-    pub fn set_kinematic_target(
-        &mut self,
-        entity: EntityId,
-        pose: PhysicsPose2d,
-    ) -> Result<(), PhysicsError> {
-        validate_pose2d(pose)?;
-        let record = self.record(entity)?.clone();
-        if record.kind != RigidBodyKind::KinematicPosition {
-            return Err(PhysicsError::WrongBodyKind(
-                entity,
-                "set kinematic target",
-                record.kind,
-            ));
-        }
-        self.backend.bodies[record.body].set_next_kinematic_position(r2::Pose::new(
-            r2::Vector::new(pose.position[0], pose.position[1]),
-            pose.rotation,
-        ));
-        Ok(())
-    }
-
-    /// Puts a body somewhere else, as a teleport rather than a movement: it
-    /// does not sweep through what lies between, and its velocity is kept.
-    ///
-    /// For a position-kinematic body the move is its next target instead, so
-    /// a platform moved this way carries what stands on it.
-    pub fn move_to(&mut self, entity: EntityId, pose: PhysicsPose2d) -> Result<(), PhysicsError> {
-        validate_pose2d(pose)?;
-        let record = self.record(entity)?.clone();
-        let target = r2::Pose::new(
-            r2::Vector::new(pose.position[0], pose.position[1]),
-            pose.rotation,
-        );
-        let body = &mut self.backend.bodies[record.body];
-        if record.kind == RigidBodyKind::KinematicPosition {
-            body.set_next_kinematic_position(target);
-        } else {
-            body.set_position(target, true);
-        }
-        Ok(())
-    }
-
     /// Advances exactly one engine fixed step and returns normalized Sindri
     /// collision/sensor events generated during that step.
     pub fn step(&mut self, delta: Duration) -> Result<Vec<PhysicsEvent2d>, PhysicsError> {
@@ -410,7 +316,14 @@ impl PhysicsWorld2d {
         // Sindri currently creates only rigid bodies, so tear events stay private.
         let (tear_send, _tear_recv) = mpsc::channel();
         let events = r2::ChannelEventCollector::new(collision_send, force_send, tear_send);
-        self.backend.step_with_events(&(), &events);
+        self.backend.step_with_events(&self.one_way, &events);
+        self.index_simulated_bodies();
+        self.snapshot_contacts(dt);
+        self.clear_step_forces();
+        self.one_way.dropping.retain(|_, seconds| {
+            *seconds -= dt;
+            *seconds > 0.0
+        });
 
         Ok(collision_recv
             .try_iter()
@@ -444,17 +357,6 @@ impl PhysicsWorld2d {
     }
 }
 
-fn validate_distance_joint(
-    first: EntityId,
-    second: EntityId,
-    max_distance: f32,
-) -> Result<(), PhysicsError> {
-    if first == second {
-        return Err(PhysicsError::JointToSelf(first));
-    }
-    positive("distance_joint_max_distance", max_distance)
-}
-
 fn body_builder(body: RigidBody2d) -> r2::RigidBodyBuilder {
     let builder = match body.kind {
         RigidBodyKind::Static => r2::RigidBodyBuilder::fixed(),
@@ -471,6 +373,7 @@ fn body_builder(body: RigidBody2d) -> r2::RigidBodyBuilder {
         body.linear_velocity[0],
         body.linear_velocity[1],
     ))
+    .ccd_enabled(body.continuous_collision)
     .angvel(body.angular_velocity)
     .gravity_scale(body.gravity_scale)
     .linear_damping(body.linear_damping)

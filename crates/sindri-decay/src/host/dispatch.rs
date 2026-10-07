@@ -46,6 +46,10 @@ impl WorldHost<'_> {
                 .contains(&name)
                 .then(|| self.action_call(name, path, args));
         }
+        if namespace == crate::surface::physics3d::PHYSICS3D {
+            return named(crate::surface::physics3d::CALLS, name)
+                .map(|call| self.physics3d_call(call, path, args));
+        }
         match namespace {
             CAMERA => named(CAMERA_CALLS, name).map(|call| self.camera_call(call, path, args)),
             GAME => named(GAME_CALLS, name).map(|call| self.game_call(call, path, args)),

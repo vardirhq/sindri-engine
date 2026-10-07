@@ -998,15 +998,118 @@ laying out no screen UI refuses `Ui.is_pressed` for the same reason: a menu whos
 buttons never respond should be heard about on the first frame, not mistaken for
 a person who has not clicked yet.
 
+### Independent 3D physics
+
+| Call | Returns |
+| --- | --- |
+| `Physics3d.layer(name: String)` | numeric mask bit |
+| `Physics3d.mask(names: List<String>)` | numeric mask |
+| `Physics3d.raycast(origin: Vec3, direction: Vec3, max_distance, mask, include_sensors, exclude: Entity?)` | `RayHit3d?` |
+| `Physics3d.overlap_sphere(centre: Vec3, radius, mask, include_sensors, exclude: Entity?)` | `List<Entity>` |
+| `Physics3d.cast_sphere(origin: Vec3, radius, direction: Vec3, max_distance, mask, include_sensors, exclude: Entity?)` | `RayHit3d?` |
+| `Physics3d.overlap_box(centre: Vec3, half_extents: Vec3, rotation_axis: Vec3, rotation_angle, mask, include_sensors, exclude: Entity?)` | `List<Entity>` |
+| `Physics3d.cast_box(origin: Vec3, half_extents: Vec3, rotation_axis: Vec3, rotation_angle, direction: Vec3, max_distance, mask, include_sensors, exclude: Entity?)` | `RayHit3d?` |
+| `Physics3d.overlap_capsule(centre: Vec3, half_height, radius, rotation_axis: Vec3, rotation_angle, mask, include_sensors, exclude: Entity?)` | `List<Entity>` |
+| `Physics3d.cast_capsule(origin: Vec3, half_height, radius, rotation_axis: Vec3, rotation_angle, direction: Vec3, max_distance, mask, include_sensors, exclude: Entity?)` | `RayHit3d?` |
+| `Physics3d.velocity(entity)` | `Vec3` |
+| `Physics3d.set_velocity(entity, velocity: Vec3)` | nothing |
+| `Physics3d.angular_velocity(entity)` | `Vec3` |
+| `Physics3d.set_angular_velocity(entity, velocity: Vec3)` | nothing |
+| `Physics3d.apply_impulse(entity, impulse: Vec3)` | nothing |
+| `Physics3d.collision_started()` | `List<Entity>` |
+| `Physics3d.collision_stopped()` | `List<Entity>` |
+| `Physics3d.sensor_entered()` | `List<Entity>` |
+| `Physics3d.sensor_exited()` | `List<Entity>` |
+
+`layer(name)` selects a named bit from the active authored
+`sindri.physics3d.world`; `mask(names)` combines those bits with OR. The first
+32 labels map to bits 0–31; duplicate labels select the first bit and empty
+labels cannot be selected. Repeated requested names are harmless and an empty
+list returns zero. Lookup reads current authored names without stepping physics,
+ignores inactive settings and never uses 2D world names. Missing 3D host, unknown
+names, wrong argument types, malformed settings or multiple active 3D worlds
+fail explicitly. With no active settings there are no names to select.
+
+`Physics3d` takes Vec3 values without changing the existing 2D `Physics` API.
+`velocity(entity)` and `angular_velocity(entity)` return copied Vec3 values;
+`set_velocity(entity, velocity)`, `set_angular_velocity(entity, velocity)` and
+`apply_impulse(entity, impulse)` control active 3D bodies. Velocity
+controls accept dynamic/velocity-kinematic bodies; impulses require dynamic
+bodies. Rotation-locked bodies retain zero angular velocity. Finite f32-range
+vectors validate before mutation; controls leave authored motion unchanged.
+Missing context and inactive/stale handles fail explicitly. Before synchronization,
+valid authored 3D body and nonempty collider components are required, without
+conflicting 2D physics or a moving depth lock. Setters/impulses queue in call order
+and replay before solving against actual compound mass. Reads copy the last
+queued setter or authored start; locked angular velocity is zero and impulses
+resolve only at materialization. Successful synchronization expires unconsumed
+requests; authored motion remains unchanged.
+
+`collision_started()`, `collision_stopped()`, `sensor_entered()` and
+`sensor_exited()` return copied sorted unique `List<Entity>` values naming the
+other active entities from this script's last successful 3D step. All scripts
+see the same non-draining snapshot; inactive/despawned references are filtered.
+Shared game sessions and editor Play provide the context. See
+[the physics contract](physics.md#decay) for timing and current limitations.
+
+3D rays and sphere casts return null on misses or a copied `RayHit3d` with
+`entity`, Vec3 `point`/`normal` and numeric `distance`. Sphere overlaps return
+copied sorted unique entity lists. Query vectors/scalars must be finite and fit
+engine f32 values; radii are positive, travel non-negative and directions nonzero
+(normalized by the engine). Masks are whole u32 values, sensors opt in and
+`exclude` skips every piece of one entity or is null. Queries use indexed
+synchronized geometry without stepping physics and skip inactive/despawned
+entities even before the next synchronization. Inside/on or initial-overlap hits
+have zero distance/normal; sphere initial overlaps use the probe origin as point.
+Exact hit ties prefer entity handle then piece order.
+
+Box and capsule overlaps/casts share these filters, active-entity checks and
+copied results. Box half-extents are positive Vec3 distances from centre to faces.
+A capsule lies along local Y before rotation; `half_height` is half its straight
+segment length (non-negative, zero makes a sphere) and `radius` is positive.
+`rotation_axis` is a finite nonzero Vec3, normalized by the host;
+`rotation_angle` is finite radians about it using the right-hand rule.
+Identity orientation uses any nonzero axis and angle zero. Cast orientation stays
+fixed during travel. Inputs must fit engine f32 range. Quaternion conversion
+normalizes the axis using f64 to avoid length overflow/underflow; no quaternion
+assembly is required in scripts. Query positions and rotation axes are world-space; dimensions use world units
+independently of visual transform scale.
+
 ### Bodies, and what they touched
 
 | Call | Returns |
 | --- | --- |
+| `Physics.contacts(entity)` | `List<Contact2d>` |
+| `Physics.move_character(entity, displacement: Vec2, snap: bool)` | nothing |
+| `Physics.character_motion(entity)` | `CharacterMotion2d?` |
+| `Physics.apply_force(entity, force: Vec2)` | nothing |
+| `Physics.apply_torque(entity, torque)` | nothing |
+| `Physics.angular_velocity(entity)` | `f32` |
+| `Physics.set_angular_velocity(entity, velocity)` | nothing |
+| `Physics.apply_angular_impulse(entity, impulse)` | nothing |
+| `Physics.apply_impulse_at_point(entity, impulse: Vec2, point: Vec2)` | nothing |
+| `Physics.drop_through(entity, seconds)` | nothing |
+| `Physics.continuous_collision(entity)` | `bool` |
+| `Physics.set_continuous_collision(entity, enabled)` | nothing |
 | `Physics.velocity_x(entity)` | `f32` |
 | `Physics.velocity_y(entity)` | `f32` |
 | `Physics.set_velocity(entity, x, y)` | nothing |
 | `Physics.apply_impulse(entity, x, y)` | nothing |
 | `Physics.connect_distance(first, second, max_distance)` | nothing |
+| `Physics.set_hinge_motor(joint, velocity, max_torque)` | nothing |
+| `Physics.set_hinge_position_motor(joint, target_angle, stiffness, damping, max_torque)` | nothing |
+| `Physics.set_slider_motor(joint, velocity, max_force)` | nothing |
+| `Physics.set_slider_position_motor(joint, target_distance, stiffness, damping, max_force)` | nothing |
+| `Physics.set_spring(joint, rest_length, stiffness, damping)` | nothing |
+| `Physics.joint_enabled(joint)` | `bool` |
+| `Physics.set_joint_enabled(joint, enabled)` | nothing |
+| `Physics.set_distance(joint, max_distance)` | nothing |
+| `Physics.set_joint_endpoints(joint, first, second)` | nothing |
+| `Physics.remove_joint(joint)` | nothing |
+| `Physics.create_distance_joint(joint, first, second, max_distance)` | nothing |
+| `Physics.create_hinge_joint(joint, first, second, first_anchor, second_anchor)` | nothing |
+| `Physics.create_spring_joint(joint, first, second, first_anchor, second_anchor, rest_length, stiffness, damping)` | nothing |
+| `Physics.create_slider_joint(joint, first, second, first_anchor, second_anchor, first_axis, second_axis, limits_enabled, lower_distance, upper_distance)` | nothing |
 | `Physics.raycast(origin, direction, max_distance, mask, include_sensors, exclude)` | `RayHit2d` or `null` |
 | `Physics.cast_circle(origin, radius, direction, max_distance, mask, include_sensors, exclude)` | `RayHit2d` or `null` |
 | `Physics.cast_box(origin, half_size, rotation, direction, max_distance, mask, include_sensors, exclude)` | `RayHit2d` or `null` |
@@ -1019,6 +1122,51 @@ a person who has not clicked yet.
 | `Physics.sensor_entered()` | `List<Entity>` |
 | `Physics.sensor_exited()` | `List<Entity>` |
 
+`Physics.contacts(entity)` copies solid solver contacts from the last fixed
+step. A `Contact2d` contains `entity` (the other body), world `point` and
+`normal` as Vec2, `normal_impulse`, signed `tangent_impulse`, and world `force`
+as Vec2. The normal points towards the queried body; the tangent is
+`Vec2(-normal.y, normal.x)`. Force is total impulse divided by fixed-step seconds.
+Points are ordered by entity, point, normal and impulse, including multiple
+points/pieces on one entity. Sensors are excluded. Sleeping contacts keep their
+support geometry but report zero new impulses/force. Copies can be edited without
+changing physics. Before the first step or spawn synchronization the list is
+empty; absent physics and active entities without bodies fail. Inactive and
+despawned others are filtered immediately. Runtime teleports/removal invalidate
+contacts; scene transform writes reach physics at the next synchronization.
+Platformer uses this for support grounding and the crate's hard-landing flash.
+
+Forces and torques add together for the next fixed step, then clear. Impulses
+act immediately and do not scale with dt. All points/vectors are world-space;
+angles are radians and positive angular motion is counterclockwise. Dynamic
+bodies accept forces/impulses; angular setters also accept velocity-kinematic
+bodies. Rotation locks suppress turning. Nonfinite values, missing
+bodies and absent physics hosts report errors. Spawn-window requests replay in
+call order after collider mass is known; the angular getter before that returns
+the latest queued setter or authored initial value. Removal/abandonment discards
+pending work. A host with its own driver can control live bodies without scene
+body components; only spawn-window requests require an authored body.
+Platformer's wind crate is the gameplay proof.
+
+`Physics.drop_through(entity, seconds) -> unit` ignores only one-way solid
+platforms for an authored dynamic body or Character 2D. Characters queue the
+scene timer, covering all movement-query phases at the next fixed pass; dynamic
+bodies retain their solver timer. The duration is finite and nonnegative;
+zero cancels, repeated requests replace the timer. Time advances only on fixed
+physics steps and starts at materialization for a newly spawned body. Ordinary
+floors and sensors stay active. Missing authored movement owners, wrong body
+kinds and hosts without the corresponding physics/controller context report
+errors. Geometric queries still see one-way pieces
+while dropping; gameplay must decide when a query grants jump permission.
+
+`Physics.continuous_collision(entity) -> bool` reads the live 2D body setting,
+or its authored setting before a newly spawned body is synchronized.
+`Physics.set_continuous_collision(entity, enabled) -> unit` requires an authored
+dynamic body and updates its live state and runtime payload without replacing
+it. Velocity, joints and contacts survive CCD-only edits. Hosts without physics
+and missing authored bodies report errors. The platformer wind crate uses this control.
+Sensors stay discrete; swept bullet-versus-bullet collision is not guaranteed.
+
 This is **Sindri physics, never Rapier**. `docs/physics.md` makes the backend a
 private implementation detail, and a namespace that leaked its vocabulary would
 make the backend unreplaceable one script at a time.
@@ -1027,6 +1175,118 @@ A body is authored, not created here: an entity carries `sindri.physics2d.collid
 and optionally `sindri.physics2d.rigid_body`, and `ScenePhysics2d` keeps the
 simulation in step with what the scene says. A prefab carrying those components
 spawns with them, which is how a bullet gets a body.
+
+`Physics.joint_enabled(joint)` reads an authored constraint's enabled flag,
+including before synchronization. It does not report whether the backend has
+connected valid active endpoints. `Physics.set_joint_enabled(joint, enabled)`
+releases or reconnects the constraint at the next fixed synchronization, keeping
+its owner, endpoints and settings. Bodies retain their motion; reconnection may
+change that motion through the ordinary solver. `Physics.set_distance(joint,
+max_distance)` tunes an authored maximum-distance constraint, including while
+suspended or before endpoints are built. The length must be finite and positive.
+These calls require physics and exactly one valid authored joint; distance tuning
+requires the distance kind. They reject invalid calls before mutation and preserve
+unknown payload fields. Omitting `enabled` in old scenes means true.
+
+`Physics.create_distance_joint(joint, first, second, max_distance)` authors an
+enabled maximum-distance component on an existing owner with no authored 2D joint
+of any kind. Endpoint handles become scoped stable IDs or local prefab paths;
+null leaves an endpoint unbound and inactive targets suspend until active. Physics
+and a finite positive length are required. Creation validates before mutation,
+including owner conflicts, stale/unstable/out-of-scope and identical endpoints.
+It works before bodies exist; the next fixed synchronization creates the owned
+constraint without replacing bodies or legacy connections. Other owner components
+are retained. Platformer C repairs its cut cord at the selected hook and length.
+
+`Physics.create_hinge_joint(joint, first, second, first_anchor, second_anchor)`
+uses the same owner, physics and scoped endpoint contract. Its finite `Vec2`
+anchors are body-local world units without transform scale. The enabled hinge
+starts with angular limits and motor disabled; `set_hinge_motor` drives it after
+creation, even before initial body synchronization. Invalid anchors fail before
+mutation. Platformer H rebuilds the placed windmill hinge and restarts its motor,
+without affecting the separately spawned windmill.
+
+`Physics.create_spring_joint(joint, first, second, first_anchor, second_anchor,
+rest_length, stiffness, damping)` uses the same owner/endpoint/physics contract.
+Finite `Vec2` anchors use body-local world units without transform scale. Rest
+length must be finite and positive; stiffness and damping finite and non-negative,
+including zero. Validation precedes mutation; next fixed synchronization creates
+the enabled spring, preserving other components, body motion and legacy constraints.
+`set_spring` can retune it before synchronization. Platformer B rebuilds the light's
+spring while retaining its current rest-length phase and subsequent tuning.
+
+`Physics.create_slider_joint(joint, first, second, first_anchor, second_anchor,
+first_axis, second_axis, limits_enabled, lower_distance, upper_distance)` shares
+the owner/endpoint/physics contract. Anchors are finite body-local `Vec2` world
+units without transform scale; axes must be finite unit `Vec2` vectors. Bounds
+must be finite even when disabled, and enabled lower distance cannot exceed upper
+distance. The new slider is enabled with its motor disabled; `set_slider_motor`
+can configure drive before synchronization. Invalid settings fail before mutation.
+Platformer J rebuilds its trolley slider with bounded travel, restoring the current
+motor direction while retaining the separately owned lantern spring.
+
+`Physics.remove_joint(joint)` removes exactly one valid authored distance, hinge,
+slider or spring component, releasing its solver constraint at the next fixed
+synchronization. It keeps the owner, its other components and endpoint bodies,
+and leaves legacy `connect_distance` constraints alone. It works while suspended
+or before bodies exist. Missing, conflicting or malformed joints and hosts without
+physics fail before mutation. Later joint controls fail until a joint is authored
+again. Use `set_joint_enabled` for reversible suspension.
+
+`Physics.set_joint_endpoints(joint, first, second)` retargets any one valid
+2D authored joint using entity handles. Null clears either endpoint. It stores
+canonical local prefab paths or stable scene IDs, never runtime handles. Both
+references validate before either changes: stale, unstable, out-of-scope or
+identical endpoints fail atomically. Inactive endpoints are valid references but
+suspend the constraint until active. Settings, enabled state, unknown fields and
+body motion remain intact; the next fixed synchronization reconnects available
+bodies, including requests made before initial body synchronization. Physics is
+required. A name lookup that returns null explicitly clears that endpoint.
+
+`Physics.set_hinge_motor(joint, velocity, max_torque)` takes a hinge-owner entity,
+a relative angular speed in radians/second and a finite non-negative torque cap.
+It explicitly selects velocity mode, including after position drive.
+Positive speed turns its second endpoint counterclockwise relative to the first.
+Zero torque disables the drive (coasting); zero speed with positive torque brakes.
+The call validates and updates the runtime hinge component, preserving unknown
+fields, and physics applies it at the next fixed synchronization. This also
+works before newly spawned endpoints are built, and survives their rebuilds.
+It needs a physics host and an authored `sindri.physics2d.hinge_joint` component;
+invalid requests leave the payload unchanged. Full prefab endpoint references
+remain incomplete; see [the physics contract](physics.md).
+Platformer's windmill uses this typed control to reverse its powered axle.
+
+`Physics.set_hinge_position_motor(joint, target_angle, stiffness, damping, max_torque)`
+selects a damped force-based position drive on the authored hinge owner. The
+relative target is finite radians within `[-pi, pi]`; gains and torque cap are
+finite and non-negative. Enabled angular limits still bound motion. Zero torque
+coasts. Validation is atomic, unknown fields and body motion are preserved, and
+settings apply at next synchronization, including before bodies exist and after
+suspension/rebuild. Platformer P holds both windmills at 0.6 radians or resumes
+velocity reversal. H recreation restores the selected drive through a typed
+`Windmill` message. Slider position drive follows the same mode-switching contract below.
+
+`Physics.set_slider_position_motor(joint, target_distance, stiffness, damping, max_force)`
+selects a damped force-based position motor on an authored slider owner. The
+finite target is signed local-anchor separation along the first body's local
+axis in unscaled world units; gains and force cap are finite and non-negative.
+Enabled travel limits still bound motion, including targets outside their range.
+Zero force coasts. Validation is atomic, unknown fields and body motion remain,
+and the next synchronization applies settings even before bodies exist or after
+suspension/rebuild. The velocity setter switches back explicitly. Platformer O
+parks/releases its trolley and J retains its selected drive through recreation.
+
+`Physics.set_slider_motor(joint, velocity, max_force)` tunes an authored slider
+owner's relative translation speed in world units/second along the first local
+axis, explicitly selecting velocity mode, with a finite non-negative force cap. Zero force coasts; zero speed with
+positive force brakes. `Physics.set_spring(joint, rest_length, stiffness, damping)`
+tunes a spring owner with positive rest length and non-negative stiffness/damping.
+All values must be finite. Both validate before modifying runtime component
+fields, preserve unknown fields, apply at the next fixed synchronization and
+survive endpoint rebuilds, including calls before the bodies are built. Wrong
+components or missing physics fail; invalid values leave the payload unchanged.
+Platformer's lantern trolley reverses and retunes its suspended light with these
+calls. Joint creation/removal and full prefab references remain incomplete.
 
 `Physics.connect_distance` creates a maximum-distance connection between two
 authored 2D bodies. They may move closer and rotate freely, but their centres
@@ -1106,6 +1366,19 @@ acting on that entity. Queries currently scan collider pieces, with no separate
 spatial index. The platformer displays clearance below its hero, preserving its
 foot-sensor jump rules; Physics Playground makes masks, sensors, inside hits,
 misses, hit points and normals visible.
+
+Scene-owned 2D characters use `Physics.move_character(entity, displacement, snap)`
+to replace their queued world-space displacement for the next fixed step and
+`Physics.character_motion(entity)` to read a copied optional `CharacterMotion2d`
+from the previous completed pass. Check for null before reading support,
+translation, collision or carry fields. The runtime/editor offer a controller
+context separately from ordinary physics, preserving independent physics hosts.
+`Physics.drop_through` selects the controller timer for authored characters and
+the existing solver timer for dynamic bodies. Gameplay owns speed, gravity,
+jumps and recovery; the engine supplies collision movement. See
+[the character contract](character-movement.md#typed-decay-requests-and-motion-snapshots)
+for validation, copied fields, filtering, spawn-window behavior and solver timing.
+The platformer has not yet adopted the character API.
 
 `Physics.overlap_circle` and `Physics.overlap_box` are area checks: every
 entity with a piece overlapping a circle, or a box `half_size` from its centre

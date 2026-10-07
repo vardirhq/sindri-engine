@@ -1,0 +1,27 @@
+// Real prefab spawn: impulses before the last setter must not survive it.
+script Spawn3d {
+    @export let body_prefab: Prefab;
+    var copied: bool = false;
+    var spawned: Entity? = null;
+    var verified: bool = false;
+    fn start() {
+        let body = World.spawn(this.body_prefab);
+        spawned = body;
+        Physics3d.set_velocity(body, Vec3(2.0, 0.0, 0.0));
+        Physics3d.apply_impulse(body, Vec3(1.0, 0.0, 0.0));
+        var snapshot = Physics3d.velocity(body);
+        snapshot.x = 99.0;
+        copied = Physics3d.velocity(body).x == 2.0;
+        Physics3d.set_velocity(body, Vec3(4.0, 0.0, 0.0));
+    }
+    fn update(dt: f32) {
+        let body = spawned;
+        if body != null && copied && !verified {
+            let at = body.transform.world_position;
+            if at.x > 0.03 && Physics3d.velocity(body).x == 4.0 {
+                verified = true;
+                print("3D typed prefab spawn replay verified");
+            }
+        }
+    }
+}

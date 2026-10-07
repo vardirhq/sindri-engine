@@ -258,17 +258,8 @@ impl ProjectLoaders {
             let prefab = loaded(&self.prefabs, &id)?;
             prefabs.insert(id, prefab);
         }
-        // A scene's instances are made from the prefabs just loaded, once,
-        // so every scene the session enters is already what it plays.
-        let scenes = scenes
-            .into_iter()
-            .map(|(id, scene)| {
-                scene
-                    .expanded(&prefabs)
-                    .map(|scene| (id.clone(), scene))
-                    .map_err(|error| CausewayError::BrowserAsset(format!("{id}: {error}")))
-            })
-            .collect::<Result<Vec<_>, _>>()?;
+        // Keep original instances: scene entry expands from this library and
+        // retains root aliases needed by authored references.
         let mut profiles = ProfileSources::new();
         for id in ids(AssetKind::Profile) {
             let profile = loaded(&self.profiles, &id)?;

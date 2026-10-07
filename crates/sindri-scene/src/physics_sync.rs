@@ -22,7 +22,9 @@ use sindri_physics::{
 use thiserror::Error;
 
 use crate::components::TilemapComponent;
-use crate::physics::{Collider2dComponent, PhysicsWorld2dComponent, RigidBody2dComponent};
+use crate::physics::{
+    Collider2dComponent, OneWay2dComponent, PhysicsWorld2dComponent, RigidBody2dComponent,
+};
 use crate::tilemap_collision::{TilemapCollider2dComponent, TilemapCollisionError};
 
 #[cfg(test)]
@@ -35,6 +37,16 @@ const MOVED: f32 = 1.0e-4;
 
 #[derive(Debug, Error)]
 pub enum PhysicsSyncError {
+    #[error("entity {0:?} has both 2D and 3D physics components")]
+    ConflictingDimensions(EntityId),
+    #[error("a scene has more than one active 3D physics world component")]
+    MultipleWorlds3d,
+    #[error("moving 3D physics entity {0:?} has a Z-locked transform")]
+    LockedDepth3d(EntityId),
+    #[error("character entity {0:?}: {1}")]
+    InvalidCharacter(EntityId, &'static str),
+    #[error("joint entity {0:?} has more than one joint component")]
+    ConflictingJointComponents(EntityId),
     #[error("a fixed step cannot be {0:?} long")]
     BadStep(Duration),
     #[error(transparent)]
@@ -43,6 +55,16 @@ pub enum PhysicsSyncError {
     Physics(#[from] PhysicsError),
     #[error(transparent)]
     Tilemap(#[from] TilemapCollisionError),
+    #[error(transparent)]
+    Material(#[from] crate::PhysicsMaterialError),
+    #[error("voxel collider entity {0:?} also carries a 3D body or collider")]
+    ConflictingVoxelOwner(EntityId),
+    #[error("voxel collider entity {0:?} has no voxel world")]
+    MissingVoxelWorld(EntityId),
+    #[error("voxel collider world {0:?}: {1}")]
+    VoxelWorld(EntityId, crate::SceneExtractError),
+    #[error(transparent)]
+    VoxelCollision(#[from] crate::VoxelCollisionError3d),
 }
 
 /// The physics world a scene's authored bodies and colliders drive.
@@ -70,18 +92,22 @@ pub struct ScenePhysics2d {
     /// What the host asked for, which a scene naming no gravity of its own
     /// keeps.
     host_gravity: [f32; 2],
+    materials: crate::PhysicsMaterialSources,
+    joints: crate::physics_joints::SceneJoints2d,
+    characters: crate::characters::SceneCharacters2d,
 }
 
 /// What a scene said about one entity, as far as physics is concerned.
 ///
-/// Compared rather than the whole component, because a change to *anything*
-/// physics reads means the body has to be rebuilt, and a change to anything
-/// else must not.
+/// Compared rather than the whole component: structural changes rebuild the
+/// body, while live control and coefficient edits preserve its solver state.
+/// Fields physics does not read cannot cause a rebuild.
 #[derive(Clone, PartialEq)]
 struct Authored {
     body: Option<RigidBody2d>,
     collider: Vec<sindri_physics::Collider2d>,
     kind: RigidBodyKind,
+    one_way: Option<sindri_physics::OneWay2d>,
 }
 
 impl ScenePhysics2d {
@@ -97,6 +123,9 @@ impl ScenePhysics2d {
             agreed: BTreeMap::new(),
             events: Vec::new(),
             host_gravity: gravity,
+            materials: crate::PhysicsMaterialSources::default(),
+            joints: crate::physics_joints::SceneJoints2d::default(),
+            characters: crate::characters::SceneCharacters2d::default(),
         })
     }
 
@@ -115,6 +144,25 @@ impl ScenePhysics2d {
         &mut self.world
     }
 
+    /// Replaces resolved material assets. Changes reach existing colliders at
+    /// the next fixed step without replacing their bodies.
+    pub fn set_materials(&mut self, materials: crate::PhysicsMaterialSources) {
+        self.materials = materials;
+    }
+
+    /// Runtime controller input queue; requests are consumed by the next fixed step.
+    pub fn character_requests(&mut self) -> &mut crate::CharacterRequests2d {
+        &mut self.characters.requests
+    }
+
+    /// Last applied controller proposal, absent before synchronization or after invalidation.
+    pub fn character_motion(
+        &self,
+        entity: EntityId,
+    ) -> Option<&sindri_physics::GroundedSlideMotion2d> {
+        self.characters.motion(entity)
+    }
+
     /// What collided during the last step, in the order the backend reported.
     pub fn events(&self) -> &[PhysicsEvent2d] {
         &self.events
@@ -128,6 +176,20 @@ impl ScenePhysics2d {
     /// have to work around.
     pub const fn for_scripts(&mut self) -> (&mut PhysicsWorld2d, &[PhysicsEvent2d]) {
         (&mut self.world, self.events.as_slice())
+    }
+
+    /// Disjoint script borrows for physics and the scene-owned controller runtime.
+    /// Existing hosts can retain [`Self::for_scripts`] until they expose controllers.
+    pub fn for_scripts_with_characters(
+        &mut self,
+    ) -> (
+        &mut PhysicsWorld2d,
+        &[PhysicsEvent2d],
+        &mut crate::CharacterRequests2d,
+        crate::CharacterMotions2d<'_>,
+    ) {
+        let (requests, motions) = self.characters.for_scripts();
+        (&mut self.world, &self.events, requests, motions)
     }
 
     /// One fixed update: author state in, step, results out.
@@ -144,6 +206,7 @@ impl ScenePhysics2d {
         if delta.is_zero() || !delta.as_secs_f32().is_finite() {
             return Err(PhysicsSyncError::BadStep(delta));
         }
+        crate::physics3d::validate_dimensions(world)?;
         let gravity = components
             .query::<PhysicsWorld2dComponent>(world)?
             .first()
@@ -156,13 +219,17 @@ impl ScenePhysics2d {
             self.world.set_gravity(gravity)?;
         }
         self.synchronize(world, components)?;
+        self.joints
+            .synchronize(world, components, &mut self.world)?;
         // Scripts may set velocity or connect two freshly spawned bodies before
         // either backend body exists. Synchronization above gave every authored
         // body its chance to materialize; resolve those deferred operations now
         // so the coming fixed step sees the intended chain rather than one frame
         // of independent pieces.
         self.world.finish_synchronize()?;
+        self.characters.hold(world, &mut self.world)?;
         self.events = self.world.step(delta)?;
+        self.characters.apply(world, &mut self.world, delta)?;
         self.write_back(world);
         Ok(())
     }
@@ -179,29 +246,38 @@ impl ScenePhysics2d {
         components: &ComponentSchemaRegistry,
     ) -> Result<(), PhysicsSyncError> {
         let mut live = BTreeSet::new();
-        for (entity, collider) in collider_pieces(world, components)? {
+        let pieces = collider_pieces(world, components)?;
+        self.characters.prepare(world, components, &pieces)?;
+        for (entity, mut collider) in pieces {
+            if let Some(material) =
+                components.get::<crate::PhysicsMaterial2dComponent>(world, entity)?
+            {
+                self.materials.apply(&material, &mut collider)?;
+            }
             live.insert(entity);
             let body = components
                 .get::<RigidBody2dComponent>(world, entity)?
                 .map(|authored| authored.0);
+            let body = if self.characters.contains(entity) {
+                Some(RigidBody2d {
+                    kind: RigidBodyKind::KinematicVelocity,
+                    gravity_scale: 0.0,
+                    lock_rotation: true,
+                    ..RigidBody2d::default()
+                })
+            } else {
+                body
+            };
             let authored = Authored {
                 body,
                 collider,
+                one_way: components
+                    .get::<OneWay2dComponent>(world, entity)?
+                    .map(|policy| policy.0),
                 kind: body.map_or(RigidBodyKind::Static, |body| body.kind),
             };
-            match self.registered.get(&entity) {
-                // Unchanged: leave the body alone. Rebuilding it would discard
-                // the velocity and contacts the simulation owns, which is every
-                // frame's worth of physics. Unless its transform was moved by
-                // something else, which moves the body with it.
-                Some(previous) if *previous == authored => {
-                    self.follow_transform(world, entity, authored.body)?;
-                    continue;
-                }
-                Some(_) => {
-                    self.world.remove(entity);
-                }
-                None => {}
+            if self.update_registered(world, entity, &authored)? {
+                continue;
             }
             // The authored pose comes from the entity's transform, which is the
             // one place a position is written down. A body's own pose field is
@@ -218,6 +294,7 @@ impl ScenePhysics2d {
             };
             match outcome {
                 Ok(()) => {
+                    self.world.set_one_way(entity, authored.one_way)?;
                     self.registered.insert(entity, authored);
                     self.agreed.insert(entity, pose);
                 }
@@ -242,10 +319,64 @@ impl ScenePhysics2d {
             .collect();
         for entity in gone {
             self.world.remove(entity);
+            self.characters.invalidate(entity);
             self.registered.remove(&entity);
             self.agreed.remove(&entity);
         }
         Ok(())
+    }
+
+    /// Support policy, CCD and coefficient edits preserve solver state.
+    fn update_registered(
+        &mut self,
+        world: &World,
+        entity: EntityId,
+        authored: &Authored,
+    ) -> Result<bool, PhysicsSyncError> {
+        let Some(previous) = self.registered.get(&entity) else {
+            return Ok(false);
+        };
+        if previous == authored {
+            self.follow_transform(world, entity, authored.body)?;
+            return Ok(true);
+        }
+        let mut comparable = previous.clone();
+        comparable.one_way = authored.one_way;
+        for (before, after) in comparable.collider.iter_mut().zip(&authored.collider) {
+            before.friction = after.friction;
+            before.restitution = after.restitution;
+        }
+        if let (Some(before), Some(after)) = (&mut comparable.body, authored.body)
+            && authored.kind == RigidBodyKind::Dynamic
+        {
+            before.continuous_collision = after.continuous_collision;
+        }
+        if comparable == *authored {
+            if previous.collider != authored.collider {
+                let materials: Vec<_> = authored
+                    .collider
+                    .iter()
+                    .map(|piece| sindri_physics::PhysicsMaterial {
+                        friction: piece.friction,
+                        restitution: piece.restitution,
+                    })
+                    .collect();
+                self.world.set_materials(entity, &materials)?;
+            }
+            self.world.set_one_way(entity, authored.one_way)?;
+            if authored.kind == RigidBodyKind::Dynamic {
+                self.world.set_continuous_collision(
+                    entity,
+                    authored.body.is_some_and(|body| body.continuous_collision),
+                )?;
+            }
+            self.registered.insert(entity, authored.clone());
+            self.follow_transform(world, entity, authored.body)?;
+            return Ok(true);
+        }
+        self.world.remove(entity);
+        self.characters.invalidate(entity);
+        Ok(false)
     }
 
     /// Moves a registered body to where its transform now is, when something
@@ -263,6 +394,7 @@ impl ScenePhysics2d {
                 || (agreed.rotation - now.rotation).abs() > MOVED
         });
         if moved {
+            self.characters.invalidate(entity);
             self.world.move_to(entity, now)?;
             self.agreed.insert(entity, now);
         }

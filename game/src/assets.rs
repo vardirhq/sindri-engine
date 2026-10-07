@@ -105,7 +105,18 @@ pub(crate) const SCRIPTS: &[(&str, &str)] = &[
         "scripts/mode-button.decay",
         include_str!("../assets/scripts/mode-button.decay"),
     ),
+    (
+        "scripts/loose-block.decay",
+        include_str!("../assets/scripts/loose-block.decay"),
+    ),
 ];
+
+/// The prefabs the scripts spawn, embedded beside the scripts that name them.
+#[cfg(not(target_arch = "wasm32"))]
+pub(crate) const PREFABS: &[(&str, &str)] = &[(
+    "prefabs/loose-block.prefab",
+    include_str!("../assets/prefabs/loose-block.prefab"),
+)];
 
 /// Native art bytes used by the standalone game and capture tests.
 #[cfg(not(target_arch = "wasm32"))]
@@ -344,4 +355,18 @@ pub fn sources() -> ScriptSources {
         sources.insert(*id, *text);
     }
     sources
+}
+
+/// The embedded native prefabs, keyed by the IDs the scripts name.
+///
+/// # Errors
+/// A prefab that does not parse, which is a broken build rather than a runtime
+/// condition.
+#[cfg(not(target_arch = "wasm32"))]
+pub fn prefabs() -> Result<sindri_decay::PrefabSources, CausewayError> {
+    let mut prefabs = sindri_decay::PrefabSources::new();
+    for (id, text) in PREFABS {
+        prefabs.insert(*id, sindri_core::PrefabDocument::from_json(text)?);
+    }
+    Ok(prefabs)
 }

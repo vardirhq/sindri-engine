@@ -97,6 +97,59 @@ identity. That is a decision about persisting a world, not about spawning, and
 keeping the two apart is why saving a world full of bullets is a thing you ask
 for rather than a thing that happens.
 
+### Runtime-local reference identity
+
+Each spawned entity also carries a `PrefabIdentity`: the generation-checked
+root handle of this spawn, its path in the expanded prefab, and namespaced
+aliases for original nested roots renamed during expansion.
+`World::prefab_entity(owner, path)` searches the owner's enclosing path namespaces,
+then the prefab's own namespace. It includes the original root ID and never
+falls through to another instance or a scene entity. It returns disabled entities
+too, allowing callers to suspend a reference without rebinding its name.
+Removing the root invalidates the scope even if its slot is reused. Reparenting,
+world cloning, command undo and assigning stable IDs retain this runtime identity.
+
+This identity is independent of `source_id` and the editor's `PrefabLink`.
+Neither it nor its runtime handle is serialized. Saving assigned scene IDs does
+not rewrite component-local references automatically. To persist spawned mechanisms,
+call `World::to_scene_with_references(prefabs, components)` after assigning stable
+IDs. It remaps fields described as `FieldMeaning::Entity`, including dotted paths
+and `[]` lists, to their target's assigned scene ID. Inactive targets still resolve;
+empty references remain unbound. Nonempty missing/stale local targets, unstable
+targets and wrong-type fields fail the save. Serialization works on a clone and
+never edits the live world. Undescribed fields and unknown component payloads
+are preserved unchanged; describe every entity field that needs remapping.
+`to_scene`/`to_scene_with` retain their existing verbatim serialization contract.
+Editor `SceneFile::save`/`save_as` and subtree-to-prefab authoring automatically
+use the reference-aware serializer with the editor's active component registry.
+Stable IDs must already exist; failed reference validation leaves disk, the
+adopted path and the agreed document unchanged. Existing placed instances still
+collapse to prefab references. Save remains unavailable during Play, and Decay's
+`Save` number/flag store is separate from world snapshots; script-triggered world
+save/load is not implemented. The platformer's real Decay-spawned nested windmill
+exercises editor Save As, reopen and reversal around its fixed axle.
+Runtime spawning preserves nested root aliases through the original prefab library, including repeated expansion.
+Canonical paths take precedence over aliases, including inactive targets; competing
+aliases without a canonical target are rejected before any entities are spawned.
+Placed instances carry the same original root aliases in runtime `PrefabLink`
+metadata. `LoadedScenes` has library-aware `load_with`/`enter_with` and
+`load_keeping_identities_with`/`enter_keeping_identities_with` variants. Scene
+entry expands original documents through `World::add_scene_with`, prefixing
+aliases with the scene namespace. The native/browser project hosts retain the
+original scene and library instead of feeding a flattened document to entry.
+Loaded scene roots retain their runtime namespace so qualified saved IDs resolve
+inside that scene after namespacing. Editor reload updates aliases through checked
+link commands; duplication rebases aliases to the copy's instance namespace. Undo preserves them. Saving instances
+as prefab references and reopening regenerates aliases from the library; aliases
+are never serialized. `SceneDocument::expanded` remains useful for validation,
+but its plain entities discard reference metadata and should not replace
+library-aware loading when prefab-root references are needed.
+
+The platformer uses this engine capability in a reusable powered windmill:
+Decay places/removes it with V, and its authored hinge resolves its own axle and
+rotor, including the prefab root renamed inside `windmill-kit.prefab`. The level
+windmill is a placed instance of that same nested assembly.
+
 ### Editor-only state does not come along
 
 A prefab's `editor` sections describe the prefab in the editor — what is folded,

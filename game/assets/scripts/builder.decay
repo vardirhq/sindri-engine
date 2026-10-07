@@ -13,6 +13,11 @@ script Builder {
     @export
     let stock: f32 = 12.0;
 
+    // What a block taken back becomes on its way home: a small body that
+    // tumbles out of its hole and lands on the world before it is counted.
+    @export
+    let loose_block: Prefab;
+
     // Which block the next click lays down, as an index rather than a name:
     // the HUD wants to show which of three is chosen, and counting is the
     // thing Decay has.
@@ -59,6 +64,9 @@ script Builder {
             chosen = 3.0;
         }
 
+        // Blocks that have tumbled home and landed.
+        left += World.take_signal("returned");
+
         // Read by the HUD, and by the test that plays the game without one.
         Game.set("chosen", chosen);
         Game.set("left", left);
@@ -103,7 +111,15 @@ script Builder {
                 || taken == "plank-post" {
                 // The empty string clears a cell.
                 Grid.set_block(floor, Aim.x, Aim.y, Aim.z, "");
-                left += 1.0;
+                // It pops out of the cell it filled -- column across, height
+                // up, row into the world -- and comes back to the stock when
+                // it lands.
+                let loose = World.spawn(this.loose_block);
+                loose.transform.position.x = Aim.x;
+                loose.transform.position.y = Aim.z + 0.5;
+                loose.transform.position.z = Aim.y;
+                let pop = Vec3(Random.range(-1.0, 1.0), 4.5, Random.range(-1.0, 1.0));
+                Physics3d.set_velocity(loose, pop);
             }
         }
     }

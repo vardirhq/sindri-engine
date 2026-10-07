@@ -100,6 +100,10 @@ pub struct PrefabLink {
     /// Whether this is the instance's root, which is the entity the scene
     /// writes the instance as.
     pub root: bool,
+    /// Original root aliases in the containing scene's namespace.
+    /// Runtime expansion metadata, omitted from serialized links.
+    #[serde(skip)]
+    pub aliases: BTreeSet<SceneEntityId>,
 }
 
 /// Where prefab documents come from when an instance names one.

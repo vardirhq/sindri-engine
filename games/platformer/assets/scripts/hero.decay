@@ -1,10 +1,9 @@
 // The hero: runs, jumps, picks up coins and reaches the flag.
 //
-// Standing is decided by the foot sensor, the small sensor box under the
-// capsule: it touches the ground and nothing else, so walls and ceilings never
-// count as floor. A jump is forgiving in the two ways players expect: pressed
-// a moment before landing it still happens (the buffer), and pressed a moment
-// after running off a ledge it still counts (coyote time).
+// Controller support grants standing only above a walkable surface.
+// Body and foot sensors handle pickups; overlapping a plank from below never grants
+// a jump. Coyote time and a jump buffer keep jumps forgiving.
+// Down/S/d-pad down drops through one-way planks onto the painted floor.
 //
 // Keyboard, gamepad and touch all feed the same run/jump path. Touch uses
 // Sindri's virtual Stick for movement; a second finger is the jump button.
@@ -14,14 +13,20 @@ script Hero {
     @export let deceleration: f32 = 90.0;
     @export let air_acceleration: f32 = 90.0;
     @export let jump_speed: f32 = 14.0;
+    @export let gravity: f32 = 30.0;
+    @export let terminal_speed: f32 = 30.0;
     @export let coyote: f32 = 0.1;
     @export let buffer: f32 = 0.12;
     @export let fall_limit: f32 = -3.0;
     @export let spawn_x: f32 = 2.5;
     @export let spawn_y: f32 = 4.0;
 
-    // Ground contacts the foot sensor is in, over every box it overlaps.
+    // Supporting ground beneath the feet, rather than a sensor overlap.
     var ground: f32 = 0.0;
+    var horizontal: f32 = 0.0;
+    var rise: f32 = 0.0;
+    var drop_left: f32 = 0.0;
+    var on_one_way: bool = false;
     var since_ground: f32 = 1.0;
     var since_press: f32 = 1.0;
     var facing: f32 = 1.0;
@@ -37,10 +42,12 @@ script Hero {
     }
 
     fn update(dt: f32) {
+        this.drop_left = max(0.0, this.drop_left - dt);
         touch();
         probe_ground();
         if Game.won {
-            Physics.set_velocity(this.entity, 0.0, Physics.velocity_y(this.entity));
+            this.horizontal = 0.0;
+            move(dt);
             show(0.0);
             return;
         }
@@ -70,8 +77,16 @@ script Hero {
             this.since_ground += dt;
         }
 
-        var rise: f32 = Physics.velocity_y(this.entity);
-        if this.since_press <= this.buffer && this.since_ground <= this.coyote {
+        var rise: f32 = this.rise;
+        if Action.pressed("drop") && this.on_one_way && this.ground > 0.0 {
+            Physics.drop_through(this.entity, 0.35);
+            this.drop_left = 0.35;
+            this.ground = 0.0;
+            this.since_ground = 1.0;
+            this.since_press = 1.0;
+            rise = -2.0;
+        }
+        if this.drop_left <= 0.0 && this.since_press <= this.buffer && this.since_ground <= this.coyote {
             rise = this.jump_speed;
             this.since_press = 1.0;
             this.since_ground = 1.0;
@@ -86,7 +101,7 @@ script Hero {
         // Build and shed horizontal speed instead of snapping straight to the
         // target. The short ramp preserves the showcase's established jump
         // timing while still making starts, stops and reversals feel physical.
-        var horizontal: f32 = Physics.velocity_x(this.entity);
+        var horizontal: f32 = this.horizontal;
         let target = run * this.speed;
         var rate: f32 = this.air_acceleration;
         if this.ground > 0.0 {
@@ -102,7 +117,9 @@ script Hero {
         } else if horizontal > target {
             horizontal = max(target, horizontal - step);
         }
-        Physics.set_velocity(this.entity, horizontal, rise);
+        this.horizontal = horizontal;
+        this.rise = rise;
+        move(dt);
 
         if run != 0.0 {
             this.facing = run;
@@ -125,15 +142,39 @@ script Hero {
         }
     }
 
-    // Read the same simulated colliders as the foot sensor, but only the
-    // ground: the layer the level's physics world names, so nothing else on
-    // the way down -- a pickup, the flag -- is mistaken for a floor. This is
-    // clearance, not jump permission.
+    // Velocity, gravity and snap permission are gameplay decisions. The scene
+    // applies this displacement once at the next fixed step, after platform carry.
+    fn move(dt: f32) {
+        this.rise = max(-this.terminal_speed, this.rise - this.gravity * dt);
+        Physics.move_character(this.entity, Vec2(this.horizontal * dt, this.rise * dt), this.ground > 0.0 && this.drop_left <= 0.0);
+    }
+
+    // The ray measures clearance; controller support grants jump permission.
+    // Discrete sensor contacts stay for pickups, never for solid grounding.
     fn probe_ground() {
         let p = this.transform.world_position;
         let hit = Physics.raycast(Vec2(p.x, p.y), Vec2(0.0, -1.0), 12.0, Physics.layer("ground"), false, this.entity);
         Game.ground_found = hit != null;
-        if hit != null { Game.ground_clearance = max(0.0, hit.distance - 0.5); }
+        this.ground = 0.0;
+        this.on_one_way = false;
+        if hit != null {
+            Game.ground_clearance = max(0.0, hit.distance - 0.5);
+        }
+        let motion = Physics.character_motion(this.entity);
+        if motion == null { return; }
+        if motion.grounded && this.drop_left <= 0.0 {
+            this.ground = 1.0;
+            this.rise = 0.0;
+            let support = motion.ground;
+            if support != null {
+                this.on_one_way = World.has_tag(support.entity, "one-way");
+            }
+        }
+        // Keep intended horizontal speed at obstacles: the controller clips
+        // displacement and can use the next request to clear a low step.
+        for contact in motion.collisions {
+            if contact.normal.y < -0.5 && this.rise > 0.0 { this.rise = 0.0; }
+        }
     }
 
     // What the capsule and the foot sensor touched this step. A coin taken
@@ -143,8 +184,6 @@ script Hero {
         for other in Physics.sensor_entered() {
             if !World.exists(other) {
                 // Already taken.
-            } else if World.has_tag(other, "solid") {
-                this.ground += 1.0;
             } else if World.has_tag(other, "coin") {
                 World.despawn(other);
                 Game.coins += 1.0;
@@ -152,17 +191,19 @@ script Hero {
                 Game.won = true;
             }
         }
-        for other in Physics.sensor_exited() {
-            if World.exists(other) && World.has_tag(other, "solid") {
-                this.ground = max(0.0, this.ground - 1.0);
-            }
-        }
     }
 
     fn respawn() {
         this.transform.position.x = this.spawn_x;
         this.transform.position.y = this.spawn_y;
-        Physics.set_velocity(this.entity, 0.0, 0.0);
+        this.horizontal = 0.0;
+        this.rise = 0.0;
+        this.drop_left = 0.0;
+        this.on_one_way = false;
+        this.since_ground = 1.0;
+        this.since_press = 1.0;
+        Physics.drop_through(this.entity, 0.0);
+        Physics.move_character(this.entity, Vec2(0.0, 0.0), false);
         this.ground = 0.0;
         Game.falls += 1.0;
     }

@@ -13,7 +13,7 @@
 
 use std::collections::BTreeMap;
 
-use crate::{EntityData, EntityId, SceneDocument, World, WorldError};
+use crate::{EntityData, EntityId, NoPrefabs, PrefabLibrary, SceneDocument, World, WorldError};
 
 /// The scenes a world holds, and which one is live.
 ///
@@ -77,7 +77,7 @@ impl LoadedScenes {
         name: &str,
         scene: &SceneDocument,
     ) -> Result<EntityId, WorldError> {
-        self.load_under(world, name, scene, name)
+        self.load_with(world, name, scene, &NoPrefabs)
     }
 
     /// The same, keeping the identities the scene file spells.
@@ -92,7 +92,35 @@ impl LoadedScenes {
         name: &str,
         scene: &SceneDocument,
     ) -> Result<EntityId, WorldError> {
-        self.load_under(world, name, scene, "")
+        self.load_keeping_identities_with(world, name, scene, &NoPrefabs)
+    }
+
+    /// Loads a namespaced scene from its original prefab library.
+    ///
+    /// # Errors
+    /// Invalid scene or prefab contents, or colliding stable identities.
+    pub fn load_with(
+        &mut self,
+        world: &mut World,
+        name: &str,
+        scene: &SceneDocument,
+        prefabs: &dyn PrefabLibrary,
+    ) -> Result<EntityId, WorldError> {
+        self.load_under(world, name, scene, name, prefabs)
+    }
+
+    /// Loads a scene from its prefab library while keeping authored identities.
+    ///
+    /// # Errors
+    /// Invalid scene or prefab contents, or colliding stable identities.
+    pub fn load_keeping_identities_with(
+        &mut self,
+        world: &mut World,
+        name: &str,
+        scene: &SceneDocument,
+        prefabs: &dyn PrefabLibrary,
+    ) -> Result<EntityId, WorldError> {
+        self.load_under(world, name, scene, "", prefabs)
     }
 
     fn load_under(
@@ -101,12 +129,14 @@ impl LoadedScenes {
         name: &str,
         scene: &SceneDocument,
         namespace: &str,
+        prefabs: &dyn PrefabLibrary,
     ) -> Result<EntityId, WorldError> {
         if let Some(root) = self.roots.get(name) {
             return Ok(*root);
         }
         let root = world.spawn(EntityData {
             name: Some(name.to_owned()),
+            scene_namespace: Some(namespace.to_owned()),
             // Off until something asks for it. A scene that arrived live would
             // draw itself over whatever is already being played for the frame
             // between loading and switching.
@@ -116,7 +146,7 @@ impl LoadedScenes {
         // If the scene will not load, the root it would have lived under goes
         // away with it: a name that half-exists is worse than one that does
         // not, because `holds` would answer yes for an empty scene.
-        if let Err(error) = world.add_scene(scene, namespace, Some(root)) {
+        if let Err(error) = world.add_scene_with(scene, namespace, Some(root), prefabs) {
             let _ = world.despawn_recursive(root);
             return Err(error);
         }
@@ -153,7 +183,7 @@ impl LoadedScenes {
         name: &str,
         scene: &SceneDocument,
     ) -> Result<EntityId, SceneSwitchError> {
-        self.enter_under(world, name, scene, name)
+        self.enter_with(world, name, scene, &NoPrefabs)
     }
 
     /// The same, keeping the identities the scene file spells.
@@ -163,7 +193,35 @@ impl LoadedScenes {
         name: &str,
         scene: &SceneDocument,
     ) -> Result<EntityId, SceneSwitchError> {
-        self.enter_under(world, name, scene, "")
+        self.enter_keeping_identities_with(world, name, scene, &NoPrefabs)
+    }
+
+    /// Enters a namespaced scene using its original prefab library.
+    ///
+    /// # Errors
+    /// Invalid scene or prefab contents, or a failed scene switch.
+    pub fn enter_with(
+        &mut self,
+        world: &mut World,
+        name: &str,
+        scene: &SceneDocument,
+        prefabs: &dyn PrefabLibrary,
+    ) -> Result<EntityId, SceneSwitchError> {
+        self.enter_under(world, name, scene, name, prefabs)
+    }
+
+    /// Enters a scene from its prefab library while keeping authored identities.
+    ///
+    /// # Errors
+    /// Invalid scene or prefab contents, or a failed scene switch.
+    pub fn enter_keeping_identities_with(
+        &mut self,
+        world: &mut World,
+        name: &str,
+        scene: &SceneDocument,
+        prefabs: &dyn PrefabLibrary,
+    ) -> Result<EntityId, SceneSwitchError> {
+        self.enter_under(world, name, scene, "", prefabs)
     }
 
     fn enter_under(
@@ -172,9 +230,10 @@ impl LoadedScenes {
         name: &str,
         scene: &SceneDocument,
         namespace: &str,
+        prefabs: &dyn PrefabLibrary,
     ) -> Result<EntityId, SceneSwitchError> {
         let root = self
-            .load_under(world, name, scene, namespace)
+            .load_under(world, name, scene, namespace, prefabs)
             .map_err(|source| SceneSwitchError::Load {
                 scene: name.to_owned(),
                 source,

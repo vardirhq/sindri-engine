@@ -134,7 +134,7 @@ impl EditorApp {
             self.report(format!("Not saved. {PLAYING_TIP}"));
             return;
         }
-        match self.file.save(&self.world) {
+        match self.file.save(&self.world, self.scene.components()) {
             Ok(()) => {
                 self.saved_revision = self.history.revision();
                 self.notice = None;
@@ -210,6 +210,7 @@ impl EditorApp {
                 // a freshly loaded world reuses entity slots from the start.
                 self.animations = SpriteAnimations::new();
                 self.play_snapshot = None;
+                self.reset_physics();
                 self.notice = None;
                 self.announce_scene();
                 self.reload_textures();

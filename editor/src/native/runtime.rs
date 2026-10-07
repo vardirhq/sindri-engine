@@ -12,6 +12,8 @@ use crate::ui::theme::{color, metric, radius, text};
 
 use super::EditorApp;
 
+mod physics;
+
 pub(super) fn transport_icon(
     ui: &mut egui::Ui,
     icon: MaterialIcon,
@@ -286,8 +288,8 @@ impl EditorApp {
         // Physics next, so a script observes the events of the step that just
         // happened and its writes take effect on the next one. `docs/physics.md`
         // fixes that order: consumers run after the step publishes.
-        if let Err(error) = self.physics.step(&mut self.world, components, fixed_delta) {
-            self.console.error(format!("Physics: {error}"));
+        if !self.step_physics(components, fixed_delta) {
+            return;
         }
         clock.lap(&mut self.profiler, Phase::Physics);
         // No safe area: a desktop window has no notch. A host that has one — a
@@ -326,7 +328,8 @@ impl EditorApp {
             .screen_ui
             .editing_text(&self.world)
             .then(|| self.input.state().without_keys());
-        let (physics, events) = self.physics.for_scripts();
+        let (physics, events, requests, motions) = self.physics.for_scripts_with_characters();
+        let (world3d, events3d) = self.physics3d.for_scripts();
         let mut report = self.scripts.advance(
             &mut self.world,
             components,
@@ -336,6 +339,11 @@ impl EditorApp {
                     world: physics,
                     events,
                 }),
+                physics3d: Some(sindri_decay::Physics3d {
+                    world: world3d,
+                    events: events3d,
+                }),
+                characters: Some(sindri_decay::Characters2d { requests, motions }),
                 screen_ui: &self.screen_ui,
                 random: &mut self.random,
                 saves: &mut self.saves,
@@ -447,6 +455,7 @@ impl EditorApp {
         // than on resume, so pausing and carrying on does not move the point
         // stop returns to.
         self.play_snapshot = Some(self.world.clone());
+        self.reset_physics();
         // The same seed for every fresh start, so pressing Play twice gives the
         // same run twice and a bug found once can be found again. Resuming from
         // a pause deliberately does not touch it: that would replay numbers the
@@ -539,6 +548,7 @@ impl EditorApp {
         if let Some(snapshot) = self.play_snapshot.take() {
             self.world = snapshot;
         }
+        self.reset_physics();
         self.scripts.restart();
         // A prefab edited while the scene was playing was left alone then,
         // because the world being played is thrown away at Stop. The scene

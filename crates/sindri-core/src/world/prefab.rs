@@ -1,11 +1,22 @@
 //! Creating entities in a world from an authored prefab.
 
-use std::collections::HashMap;
+use std::collections::{BTreeSet, HashMap};
 
-use crate::prefab::{NoPrefabs, PrefabLibrary};
+use crate::prefab::{NoPrefabs, PrefabLibrary, expand_entities};
 use crate::{EntityId, PrefabDocument, PrefabError, SceneEntityId};
 
 use super::{EntityData, World, WorldError};
+
+/// An authored path scoped to a single runtime spawn, never a saved scene ID.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct PrefabIdentity {
+    /// Generation-checked root handle distinguishing this spawn from every other.
+    pub root: EntityId,
+    /// Path in the expanded prefab, including its original root identity.
+    pub path: SceneEntityId,
+    /// Original nested root paths renamed by instance expansion.
+    pub aliases: BTreeSet<SceneEntityId>,
+}
 
 /// What one spawn produced.
 #[derive(Clone, Debug)]
@@ -60,8 +71,13 @@ impl World {
         prefabs: &dyn PrefabLibrary,
     ) -> Result<SpawnedPrefab, WorldError> {
         prefab.validate()?;
-        let expanded = prefab.expanded(prefabs)?;
-        let prefab = &expanded;
+        let expanded = expand_entities(&prefab.entities, prefabs)?;
+        let document = PrefabDocument {
+            entities: expanded.iter().map(|part| part.entity.clone()).collect(),
+            ..prefab.clone()
+        };
+        document.validate()?;
+        let prefab = &document;
         let root_id = prefab.root()?.id.clone();
 
         let mut by_source_id = HashMap::with_capacity(prefab.entities.len());
@@ -89,11 +105,63 @@ impl World {
             }
         }
 
+        let root = by_source_id[&root_id];
+        for part in &expanded {
+            let path = &part.entity.id;
+            let entity = by_source_id[path];
+            self.get_mut(entity)
+                .expect("entity created by this spawn")
+                .prefab_identity = Some(PrefabIdentity {
+                root,
+                path: path.clone(),
+                aliases: part.aliases.clone(),
+            });
+        }
+
         Ok(SpawnedPrefab {
-            root: by_source_id[&root_id],
+            root,
             entities,
             by_source_id,
         })
+    }
+
+    /// Resolves a local authored path inside the owner's spawned prefab.
+    /// Searches enclosing path namespaces first, then the prefab's own root
+    /// namespace. Missing targets never escape to a different instance or scene.
+    /// Activity is left to the caller; a disabled local target still owns its name.
+    #[must_use]
+    pub fn prefab_entity(&self, owner: EntityId, target: &str) -> Option<EntityId> {
+        let identity = self.get(owner)?.prefab_identity.as_ref()?;
+        if target.is_empty() || !self.contains(identity.root) {
+            return None;
+        }
+        let find = |path: &str| {
+            let matches = |data: &EntityData, alias: bool| {
+                data.prefab_identity.as_ref().is_some_and(|candidate| {
+                    candidate.root == identity.root
+                        && if alias {
+                            candidate.aliases.iter().any(|key| key.as_str() == path)
+                        } else {
+                            candidate.path.as_str() == path
+                        }
+                })
+            };
+            // Canonical paths win over aliases, independent of entity order.
+            self.entities()
+                .find_map(|(entity, data)| matches(data, false).then_some(entity))
+                .or_else(|| {
+                    self.entities()
+                        .find_map(|(entity, data)| matches(data, true).then_some(entity))
+                })
+        };
+        let mut namespace = identity.path.as_str();
+        while let Some((prefix, _)) = namespace.rsplit_once('/') {
+            if let Some(entity) = find(&format!("{prefix}/{target}")) {
+                return Some(entity);
+            }
+            namespace = prefix;
+        }
+        find(target)
     }
 }
 

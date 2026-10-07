@@ -18,11 +18,14 @@
 //! name in `names` and a root here.
 
 mod call;
+pub(crate) mod character;
+pub(crate) mod contact;
 mod gamepad;
 mod maths;
 mod member;
 pub(super) mod names;
 mod person;
+pub(crate) mod physics3d;
 pub(crate) mod raycast;
 pub(crate) mod tween;
 

@@ -8,8 +8,8 @@ use sindri_core::{EntityId, World};
 use sindri_platform::InputState;
 
 use crate::{
-    Blackboard, Physics2d, PrefabSources, ProfileSources, ScriptComponent, ScriptContext,
-    ScriptFailure, WorldHost, audio_host::AudioQueue, host::Peers, host::Spawning,
+    Blackboard, Characters2d, Physics2d, PrefabSources, ProfileSources, ScriptComponent,
+    ScriptContext, ScriptFailure, WorldHost, audio_host::AudioQueue, host::Peers, host::Spawning,
 };
 
 use super::sources::{START, ScriptSources, UPDATE};
@@ -45,8 +45,11 @@ pub(super) struct TickWorld<'a> {
     pub(super) spawned: Vec<EntityId>,
     /// Calls scripts made on each other, waiting for the pass to finish.
     pub(super) messages: Vec<super::Message>,
+    /// Scene-owned controller requests and cached results.
+    pub(super) characters: Option<Characters2d<'a>>,
     /// The physics a script may read and drive, when the host runs any.
     pub(super) physics: Option<Physics2d<'a>>,
+    pub(super) physics3d: Option<crate::Physics3d<'a>>,
     /// Where the screen elements are and what the pointer is doing to them.
     pub(super) screen_ui: Option<&'a sindri_scene::ScreenUi>,
     pub(super) aim: Option<sindri_scene::voxel::VolumeAim>,
@@ -282,6 +285,14 @@ fn host_for<'b>(
             scenes: at.scenes.as_deref_mut(),
         },
     )
+    .with_physics3d(at.physics3d.as_mut().map(|physics| crate::Physics3d {
+        world: &mut *physics.world,
+        events: physics.events,
+    }))
+    .with_characters(at.characters.as_mut().map(|characters| Characters2d {
+        requests: &mut *characters.requests,
+        motions: characters.motions,
+    }))
     .with_tweens(&mut *at.tweens)
     .with_actions(at.actions)
     .with_sequences(at.sequences.as_deref_mut())

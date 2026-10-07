@@ -1,0 +1,10 @@
+script Events3d {
+    var count: f32 = 0.0;
+    var copied: bool = false;
+    fn update(dt: f32) {
+        var touched = Physics3d.sensor_entered();
+        count = touched.length;
+        touched.clear();
+        copied = Physics3d.sensor_entered().length == count;
+    }
+}

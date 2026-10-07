@@ -12,6 +12,7 @@
 
 mod crossing;
 mod support;
+mod tumbling;
 
 use glam::Vec3;
 use sindri_platform::{InputEvent, InputState, Key, MouseButton};

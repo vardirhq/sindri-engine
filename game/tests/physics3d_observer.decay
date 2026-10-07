@@ -1,0 +1,13 @@
+// Read-only observer of actual host-solved XYZ motion and solid landing.
+script Physics3dObserver {
+    var elapsed: f32 = 0.0;
+    var verified: bool = false;
+    fn update(dt: f32) {
+        elapsed += dt;
+        let at = this.transform.position;
+        if elapsed > 1.8 && at.x > 2.3 && at.z > 3.5 && at.y > 0.7 && at.y < 0.8 && !verified {
+            verified = true;
+            print("3D host solid landing and XYZ motion verified");
+        }
+    }
+}

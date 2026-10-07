@@ -1,10 +1,10 @@
 //! Area checks and swept shapes: what a shape placed somewhere overlaps, and
 //! what it would first touch moved along a line.
 //!
-//! Both answer from current body poses by scanning every registered piece, as
-//! the raycast does, so they work before the first step and need no
-//! broad-phase index kept fresh between synchronizations.
+//! A query-only spatial index selects candidates at current body poses, including
+//! before the first step. Exact geometry and deterministic ordering are unchanged.
 
+use rapier2d::parry::bounding_volume::{Aabb, BoundingVolume};
 use rapier2d::parry::query::{self, ShapeCastOptions};
 use rapier2d::parry::shape::Shape;
 
@@ -56,7 +56,8 @@ impl PhysicsWorld2d {
     }
 
     /// Every entity with a piece overlapping `shape` placed at `pose`, each
-    /// once, in handle order.
+    /// once, in handle order. The predicate must be stable during the call; only
+    /// spatial candidates are visited.
     ///
     /// # Errors
     /// Rejects a non-finite pose and a shape with a non-positive size.
@@ -70,16 +71,21 @@ impl PhysicsWorld2d {
         let probe = query_shape(shape)?;
         let at = query_pose(pose)?;
         let mut found = Vec::new();
-        self.each_piece(filter, &mut include, |entity, piece, piece_pose| {
-            // Pieces arrive grouped by entity, in handle order, so a second
-            // overlapping piece of the same entity is always the last found.
-            if found.last() != Some(&entity)
-                && query::intersection_test(&at, probe.as_ref(), &piece_pose, piece)
-                    .is_ok_and(|intersection| intersection.intersecting)
-            {
-                found.push(entity);
-            }
-        });
+        self.each_piece_in(
+            probe.compute_aabb(&at),
+            filter,
+            &mut include,
+            |entity, piece, piece_pose| {
+                // Pieces arrive grouped by entity, in handle order, so a second
+                // overlapping piece of the same entity is always the last found.
+                if found.last() != Some(&entity)
+                    && query::intersection_test(&at, probe.as_ref(), &piece_pose, piece)
+                        .is_ok_and(|intersection| intersection.intersecting)
+                {
+                    found.push(entity);
+                }
+            },
+        );
         Ok(found)
     }
 
@@ -87,7 +93,8 @@ impl PhysicsWorld2d {
     /// without rotating it, and reports the first piece it touches.
     ///
     /// Starting inside a piece gives a zero-distance hit with a zero normal,
-    /// as the raycast does. Exact ties prefer the smaller entity handle.
+    /// as the raycast does. Exact ties prefer the smaller entity handle. The
+    /// predicate must be stable during the call; only candidates are visited.
     ///
     /// # Errors
     /// Rejects non-finite values, a negative distance, a zero direction and a
@@ -117,79 +124,64 @@ impl PhysicsWorld2d {
             ..ShapeCastOptions::default()
         };
         let mut closest: Option<ShapeHit2d> = None;
-        self.each_piece(filter, &mut include, |entity, piece, piece_pose| {
-            let Ok(Some(hit)) = query::cast_shapes(
-                &at,
-                velocity,
-                probe.as_ref(),
-                &piece_pose,
-                r2::Vector::ZERO,
-                piece,
-                options,
-            ) else {
-                return;
-            };
-            let distance = hit.time_of_impact;
-            if closest.as_ref().is_some_and(|old| {
-                distance
-                    .total_cmp(&old.distance)
-                    .then(entity.cmp(&old.entity))
-                    .is_ge()
-            }) {
-                return;
-            }
-            let (point, normal) = if distance <= 0.0 {
-                (at.translation, r2::Vector::ZERO)
-            } else {
-                (
-                    piece_pose.transform_point(hit.witness2),
-                    piece_pose.rotation.transform_vector(hit.normal2),
-                )
-            };
-            closest = Some(ShapeHit2d {
-                entity,
-                point: [point.x, point.y],
-                normal: [normal.x, normal.y],
-                distance,
-            });
-        });
+        self.each_piece_in(
+            swept_bounds(probe.as_ref(), at, velocity * max_distance),
+            filter,
+            &mut include,
+            |entity, piece, piece_pose| {
+                let Ok(Some(hit)) = query::cast_shapes(
+                    &at,
+                    velocity,
+                    probe.as_ref(),
+                    &piece_pose,
+                    r2::Vector::ZERO,
+                    piece,
+                    options,
+                ) else {
+                    return;
+                };
+                let distance = hit.time_of_impact;
+                if closest.as_ref().is_some_and(|old| {
+                    distance
+                        .total_cmp(&old.distance)
+                        .then(entity.cmp(&old.entity))
+                        .is_ge()
+                }) {
+                    return;
+                }
+                let (point, normal) = if distance <= 0.0 {
+                    (at.translation, r2::Vector::ZERO)
+                } else {
+                    (
+                        piece_pose.transform_point(hit.witness2),
+                        piece_pose.rotation.transform_vector(hit.normal2),
+                    )
+                };
+                closest = Some(ShapeHit2d {
+                    entity,
+                    point: [point.x, point.y],
+                    normal: [normal.x, normal.y],
+                    distance,
+                });
+            },
+        );
         Ok(closest)
     }
 
-    /// Calls `visit` with every enabled piece the filter lets through, posed
-    /// in the world.
-    fn each_piece(
+    fn each_piece_in(
         &self,
+        bounds: Aabb,
         filter: RaycastFilter2d,
         include: &mut impl FnMut(EntityId) -> bool,
         mut visit: impl FnMut(EntityId, &dyn Shape, r2::Pose),
     ) {
-        let mut entities: Vec<&EntityId> = self.bodies.keys().collect();
-        entities.sort_unstable();
-        for &entity in entities {
-            if filter.exclude == Some(entity) || !include(entity) {
-                continue;
-            }
-            let record = &self.bodies[&entity];
-            let body = &self.backend.bodies[record.body];
-            for &handle in &record.colliders {
-                let collider = &self.backend.colliders[handle];
-                if !collider.is_enabled()
-                    || (!filter.include_sensors && collider.is_sensor())
-                    || collider.collision_groups().memberships.bits() & filter.mask == 0
-                {
-                    continue;
-                }
-                let pose = collider
-                    .position_wrt_parent()
-                    .map_or(*collider.position(), |local| *body.position() * *local);
-                visit(entity, collider.shape(), pose);
-            }
-        }
+        self.each_piece_policy(bounds, filter, include, |entity, piece, pose, _| {
+            visit(entity, piece, pose);
+        });
     }
 }
 
-fn query_shape(shape: ColliderShape2d) -> Result<r2::SharedShape, PhysicsError> {
+pub(super) fn query_shape(shape: ColliderShape2d) -> Result<r2::SharedShape, PhysicsError> {
     Ok(match shape {
         ColliderShape2d::Box { half_extents } => {
             positive("query_half_extent", half_extents[0])?;
@@ -211,11 +203,17 @@ fn query_shape(shape: ColliderShape2d) -> Result<r2::SharedShape, PhysicsError> 
     })
 }
 
-fn query_pose(pose: PhysicsPose2d) -> Result<r2::Pose, PhysicsError> {
+pub(super) fn query_pose(pose: PhysicsPose2d) -> Result<r2::Pose, PhysicsError> {
     finite2("query_position", pose.position)?;
     finite("query_rotation", pose.rotation)?;
     Ok(r2::Pose::new(
         r2::Vector::new(pose.position[0], pose.position[1]),
         pose.rotation,
     ))
+}
+
+pub(super) fn swept_bounds(shape: &dyn Shape, start: r2::Pose, displacement: r2::Vector) -> Aabb {
+    let mut end = start;
+    end.translation += displacement;
+    shape.compute_aabb(&start).merged(&shape.compute_aabb(&end))
 }

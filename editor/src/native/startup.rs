@@ -6,7 +6,7 @@
 
 use glam::Vec2 as GlamVec2;
 use sindri_core::{CommandHistory, World};
-use sindri_scene::{SceneExtractor, ScenePhysics2d, ScreenUi, SpriteAnimations};
+use sindri_scene::{SceneExtractor, ScenePhysics2d, ScenePhysics3d, ScreenUi, SpriteAnimations};
 
 use crate::audition::Audition;
 use crate::selection::Selection;
@@ -180,6 +180,7 @@ impl EditorApp {
             game_view_rect: None,
             game_device: device::DevicePreview::default(),
             physics: ScenePhysics2d::top_down().expect("zero gravity is finite"),
+            physics3d: ScenePhysics3d::new([0.0; 3]).expect("zero gravity is finite"),
             screen_ui: ScreenUi::default(),
             random: sindri_core::Rng::default(),
             saves: sindri_core::SaveStore::default(),

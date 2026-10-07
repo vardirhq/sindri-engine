@@ -161,7 +161,7 @@ fn compound_offsets_rotations_capsules_and_ties_are_stable() {
 }
 
 #[test]
-fn queries_track_move_step_remove_and_reused_handles_without_a_query_index() {
+fn queries_track_move_step_remove_and_reused_handles_with_current_geometry() {
     let mut world = PhysicsWorld2d::new([0.0, 0.0]).unwrap();
     world
         .insert_body(

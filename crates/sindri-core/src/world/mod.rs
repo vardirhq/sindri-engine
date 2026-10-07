@@ -5,16 +5,18 @@
 //! generation-checked [`EntityId`], which is not the [`SceneEntityId`] a file
 //! carries: `scene` is the seam between the two.
 
+mod entity_references;
 mod hierarchy;
 mod instances;
 mod prefab;
+mod references;
 mod scene;
 mod space;
 
 #[cfg(test)]
 mod tests;
 
-pub use prefab::SpawnedPrefab;
+pub use prefab::{PrefabIdentity, SpawnedPrefab};
 pub use scene::{AddedScene, LoadedScene};
 
 use std::collections::BTreeMap;
@@ -55,6 +57,12 @@ pub struct EntityData {
     /// of what they expanded into. A runtime spawn leaves it empty, as it
     /// leaves the stable ID empty: nothing spawned is saved.
     pub prefab: Option<PrefabLink>,
+    /// Runtime-only identity inside one spawned prefab, independent of saved IDs.
+    /// It survives reparenting and command undo, but is never serialized.
+    pub prefab_identity: Option<PrefabIdentity>,
+    /// Namespace of an anonymous loaded-scene root, for qualified local references.
+    /// Runtime bookkeeping only; not serialized with entities.
+    pub scene_namespace: Option<String>,
 }
 
 #[derive(Clone, Debug)]
@@ -270,6 +278,13 @@ impl World {
 
 #[derive(Clone, Debug, Error, PartialEq)]
 pub enum WorldError {
+    #[error("cannot save prefab reference {component}.{field} on {owner:?}: {detail}")]
+    InvalidPrefabReference {
+        owner: EntityId,
+        component: String,
+        field: String,
+        detail: String,
+    },
     #[error("invalid or stale entity handle {0:?}")]
     InvalidEntity(EntityId),
     #[error("entity slot {0:?} is already occupied")]

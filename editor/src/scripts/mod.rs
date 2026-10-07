@@ -41,6 +41,9 @@ pub struct EditorFrame<'a> {
     /// nothing is stepping and a `Physics.*` call should say so rather than
     /// answer about a simulation nobody is running.
     pub physics: Option<Physics2d<'a>>,
+    pub physics3d: Option<sindri_decay::Physics3d<'a>>,
+    /// Scene-owned movement input and results for Play.
+    pub characters: Option<sindri_decay::Characters2d<'a>>,
     pub screen_ui: &'a sindri_scene::ScreenUi,
     pub random: &'a mut sindri_core::Rng,
     pub saves: &'a mut sindri_core::SaveStore,
@@ -138,6 +141,10 @@ impl SceneScripts {
         referenced.extend(self.project_scripts.iter().cloned());
         referenced.extend(self.scripts.referenced_prefabs(world, components));
         referenced.extend(self.scripts.referenced_profiles(world, components));
+        match sindri_scene::referenced_physics_materials(world, components) {
+            Ok(materials) => referenced.extend(materials),
+            Err(error) => notes.push(ScriptNote::Failed(error.to_string())),
+        }
         let wanted: BTreeSet<AssetId> = referenced
             .iter()
             .filter_map(|reference| AssetId::new(reference.clone()).ok())
@@ -195,6 +202,17 @@ impl SceneScripts {
             }
         }
         notes
+    }
+
+    /// Resolved materials come from the same asynchronous loader as profiles.
+    pub fn physics_materials(
+        &self,
+    ) -> Result<sindri_scene::PhysicsMaterialSources, sindri_scene::PhysicsMaterialError> {
+        sindri_scene::PhysicsMaterialSources::from_profiles(
+            self.profiles
+                .ids()
+                .filter_map(|id| self.profiles.get(id).map(|profile| (id, profile))),
+        )
     }
 
     /// Whether any of the project is still on its way.
@@ -255,6 +273,9 @@ impl SceneScripts {
                     let Some(text) = loader.get(&id) else {
                         continue;
                     };
+                    if let Some(watch) = watch.as_mut() {
+                        watch.watch(&id);
+                    }
                     let again = sources.get(id.as_str()).is_some()
                         || prefabs.get(id.as_str()).is_some()
                         || profiles.get(id.as_str()).is_some();
@@ -271,7 +292,15 @@ impl SceneScripts {
                         }
                     } else if is_profile(id.as_str()) {
                         match ProfileDocument::from_json(text) {
-                            Ok(profile) => profiles.insert(id.as_str(), profile),
+                            Ok(profile) => {
+                                if let Err(error) =
+                                    sindri_scene::physics_material_profile(id.as_str(), &profile)
+                                {
+                                    notes.push(ScriptNote::Failed(error.to_string()));
+                                    continue;
+                                }
+                                profiles.insert(id.as_str(), profile);
+                            }
                             Err(error) => {
                                 notes.push(ScriptNote::Failed(format!("{id}: {error}")));
                                 continue;
@@ -285,9 +314,6 @@ impl SceneScripts {
                     } else {
                         ScriptNote::Loaded(format!("Loaded {id}"))
                     });
-                    if let Some(watch) = watch.as_mut() {
-                        watch.watch(&id);
-                    }
                 }
                 AssetLoadOutcome::Failed(error) => notes.push(ScriptNote::Failed(format!(
                     "{}: {}",
@@ -366,6 +392,8 @@ impl SceneScripts {
         let EditorFrame {
             input,
             physics,
+            physics3d,
+            characters,
             screen_ui,
             random,
             saves,
@@ -385,6 +413,12 @@ impl SceneScripts {
             .with_sequences(sequences);
         if let Some(physics) = physics {
             frame = frame.with_physics(physics);
+        }
+        if let Some(physics) = physics3d {
+            frame = frame.with_physics3d(physics);
+        }
+        if let Some(characters) = characters {
+            frame = frame.with_characters(characters);
         }
         // Always timed: the Profiler is the editor's, and a tick's timing is
         // two clock reads beside a script's own work.

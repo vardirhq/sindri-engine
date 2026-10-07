@@ -15,7 +15,8 @@ use sindri_decay::{
 use sindri_platform::NativeAudioBackend;
 use sindri_platform::{AudioBackend, AudioError, FrameContext, Game, InputState, PlaybackSettings};
 use sindri_scene::{
-    AudioSourceComponent, ScenePhysics2d, ScreenExtent, ScreenUi, SpriteAnimations, TileSetBindings,
+    AudioSourceComponent, ScenePhysics2d, ScenePhysics3d, ScreenExtent, ScreenUi, SpriteAnimations,
+    TileSetBindings,
 };
 
 #[cfg(not(target_arch = "wasm32"))]
@@ -24,6 +25,8 @@ use crate::error::CausewayError;
 
 use crate::styling::Styles;
 
+mod physics;
+mod profiles;
 /// Where a session's save is kept, and when it is written out.
 mod saves;
 
@@ -62,6 +65,8 @@ pub struct Session {
     /// which costs nothing for a scene with none and means a scene that grows
     /// one needs no change here. No gravity: Gather is seen from above.
     physics: ScenePhysics2d,
+    /// The same fixed clock drives authored 3D bodies on native and browser.
+    physics3d: ScenePhysics3d,
     /// Where the screen elements are and what the pointer is doing to them.
     pub(crate) screen_ui: ScreenUi,
     /// Whether a text field had the keyboard after the last step.
@@ -128,6 +133,7 @@ impl Session {
     #[must_use]
     pub fn new(components: ComponentSchemaRegistry) -> Self {
         Self::with_sources(components, sources())
+            .with_prefabs(crate::assets::prefabs().expect("the embedded prefabs parse"))
     }
 
     /// A session backed by sources supplied by the host.
@@ -146,6 +152,7 @@ impl Session {
             animations: SpriteAnimations::new(),
             sequences: sindri_scene::Sequences::new(),
             physics: ScenePhysics2d::top_down().expect("zero gravity is finite"),
+            physics3d: ScenePhysics3d::new([0.0; 3]).expect("zero gravity is finite"),
             screen_ui: ScreenUi::default(),
             editing_text: false,
             styles: None,
@@ -164,24 +171,6 @@ impl Session {
             loaded: sindri_core::LoadedScenes::new(),
             channel: None,
         }
-    }
-
-    /// The prefabs this project's scripts can spawn.
-    ///
-    /// A build had no way to be given any, so `World.spawn` in a shipped game
-    /// answered that the prefab was missing while the same scene spawned
-    /// correctly in the editor. A project whose enemies are prefabs is every
-    /// project that spawns anything.
-    #[must_use]
-    pub fn with_prefabs(mut self, prefabs: PrefabSources) -> Self {
-        self.prefabs = prefabs;
-        self
-    }
-
-    #[must_use]
-    pub fn with_profiles(mut self, profiles: ProfileSources) -> Self {
-        self.profiles = profiles;
-        self
     }
 
     /// The tile sets the scenes' volumes name.
@@ -245,7 +234,8 @@ impl Session {
             .scenes
             .get(&wanted)
             .ok_or_else(|| CausewayError::UnknownScene(wanted.clone()))?;
-        self.loaded.enter(world, &wanted, document)?;
+        self.loaded
+            .enter_with(world, &wanted, document, &self.prefabs)?;
         channel.now_playing(wanted);
         Ok(())
     }
@@ -317,11 +307,7 @@ impl Session {
         // Physics first, so a script observes the events of the step that just
         // happened and its writes take effect on the next one, which is the
         // order `docs/physics.md` fixes.
-        self.physics.step(
-            world,
-            &self.components,
-            std::time::Duration::from_secs_f32(delta_seconds),
-        )?;
+        self.step_physics(world, delta_seconds)?;
         // No safe area yet: reading a device's insets is the browser host's to
         // report, and it does not yet. The scene needs no change when it does.
         // Hit-tested against what was drawn, styled, when the host presents
@@ -367,7 +353,8 @@ impl Session {
         } else {
             input
         };
-        let (physics, events) = self.physics.for_scripts();
+        let (physics, events, requests, motions) = self.physics.for_scripts_with_characters();
+        let (world3d, events3d) = self.physics3d.for_scripts();
         let mut frame = ScriptFrame::new(&self.sources, script_input, delta_seconds)
             .with_prefabs(&self.prefabs)
             .with_profiles(&self.profiles)
@@ -379,6 +366,11 @@ impl Session {
                 world: physics,
                 events,
             })
+            .with_physics3d(sindri_decay::Physics3d {
+                world: world3d,
+                events: events3d,
+            })
+            .with_characters(sindri_decay::Characters2d { requests, motions })
             .with_animations(&mut self.animations)
             .with_sequences(&mut self.sequences);
         frame = frame.with_gestures(&self.gestures).with_camera_pan(pan);

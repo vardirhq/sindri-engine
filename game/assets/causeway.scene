@@ -153,6 +153,7 @@
       "components": {
         "sindri.script": {
           "properties": {
+            "loose_block": "prefabs/loose-block.prefab",
             "stock": 12.0
           },
           "script": "Builder",
@@ -171,6 +172,15 @@
       "components": {
         "sindri.grid.navigation": {
           "max_step": 1.0
+        },
+        "sindri.physics3d.voxel_collider": {
+          "friction": 0.8,
+          "layers": {
+            "filter": 4294967295,
+            "memberships": 4294967295
+          },
+          "margin": 2.0,
+          "restitution": 0.0
         },
         "sindri.tile_grid": {
           "cell_height": 1.0,
@@ -396,6 +406,16 @@
           "clip": "audio/background.wav",
           "looping": true,
           "volume": 0.2
+        }
+      }
+    },
+    {
+      "id": "physics",
+      "name": "Physics",
+      "components": {
+        "sindri.physics3d.world": {
+          "gravity": [0.0, -9.81, 0.0],
+          "layers": ["solid"]
         }
       }
     },

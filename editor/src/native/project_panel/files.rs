@@ -115,7 +115,7 @@ impl EditorApp {
     }
 
     /// Makes a reusable profile and opens its structured inspector.
-    pub(super) fn new_profile(&mut self, beside: &Path) {
+    pub(super) fn new_profile(&mut self, beside: &Path, physics: bool) {
         let Some(root) = self.project.root().map(Path::to_path_buf) else {
             return;
         };
@@ -123,7 +123,21 @@ impl EditorApp {
             return;
         };
         let name = unused_name(&parent, "profile", sindri_core::PROFILE_SUFFIX);
-        let starter = sindri_core::ProfileDocument::default()
+        let document = if physics {
+            sindri_core::ProfileDocument {
+                name: "New Physics Material".into(),
+                profile_type: "physics_material".into(),
+                values: [
+                    ("friction".into(), serde_json::json!(0.5)),
+                    ("restitution".into(), serde_json::json!(0.0)),
+                ]
+                .into(),
+                ..sindri_core::ProfileDocument::default()
+            }
+        } else {
+            sindri_core::ProfileDocument::default()
+        };
+        let starter = document
             .to_canonical_json()
             .expect("the default profile is valid");
         match ops::create_file(&root, &parent, &name, &starter) {

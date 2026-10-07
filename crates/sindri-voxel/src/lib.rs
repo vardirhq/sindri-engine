@@ -6,6 +6,7 @@
 //! that want a world without game code behind it.
 
 mod cache;
+mod collision;
 mod coord;
 mod material;
 mod mesh;
@@ -20,6 +21,7 @@ mod world;
 pub use cache::{
     MeshingProfile, SectionMeshCache, SectionMeshJob, SectionMeshKey, SectionMeshRevision,
 };
+pub use collision::{SectionCollisionBox, VoxelCollisionError, compile_section_collision};
 pub use coord::{LocalVoxelCoord, SECTION_EDGE, SECTION_VOLUME, SectionCoord, VoxelCoord};
 pub use material::{
     DefaultVoxelMaterials, FaceOcclusion, RenderClass, VOXEL_STEPS, VoxelMaterial,

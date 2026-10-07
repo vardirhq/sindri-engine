@@ -14,8 +14,8 @@ use sindri_core::{CommandHistory, EngineLifecycle, EntityId, SceneComponent, Tra
 use sindri_decay::ScriptComponent;
 use sindri_scene::{
     AudioSourceComponent, CameraComponent, GridNavigationComponent, GridOccupantComponent,
-    SceneExtractor, ScenePhysics2d, ScreenUi, SpriteAnimations, SpriteComponent, UiImageComponent,
-    UiTextComponent,
+    SceneExtractor, ScenePhysics2d, ScenePhysics3d, ScreenUi, SpriteAnimations, SpriteComponent,
+    UiImageComponent, UiTextComponent,
 };
 
 pub use window::run;
@@ -305,10 +305,9 @@ struct EditorApp {
     game_viewport: RuntimeViewport,
     /// The physics Play steps, and the bodies a scene's colliders became.
     ///
-    /// No gravity: the engine has no opinion about which way is down, and a
-    /// scene-level setting is a project-format field that arrives with the
-    /// feature that reads it. `docs/physics.md` has the open item.
+    /// Both dimensions default to zero gravity; authored world settings override it.
     physics: ScenePhysics2d,
+    physics3d: ScenePhysics3d,
     /// Where the screen elements are and what the pointer is doing to them.
     ///
     /// Recomputed every frame from the world, so a button moved in the

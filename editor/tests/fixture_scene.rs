@@ -124,7 +124,8 @@ fn a_scene_with_an_unknown_component_opens_and_keeps_it() {
         .apply(buffer.into_transaction("Move"), &mut world)
         .expect("editing an entity beside an unknown component is ordinary");
 
-    file.save(&world).expect("the scene saves");
+    file.save(&world, SceneExtractor::new().unwrap().components())
+        .expect("the scene saves");
     let reopened = SceneFile::open(&path).expect("the scene opens again");
     let carried = reopened
         .document()
@@ -172,7 +173,8 @@ fn a_locked_transform_refuses_a_move_and_keeps_its_lock_through_a_save() {
         .apply(buffer.into_transaction("Move Cube"), &mut world)
         .expect_err("a locked transform must refuse to leave its layer");
 
-    file.save(&world).expect("the copy saves");
+    file.save(&world, SceneExtractor::new().unwrap().components())
+        .expect("the copy saves");
     let reopened = SceneFile::open(&path).expect("the copy opens again");
     let saved = World::from_scene(reopened.document())
         .expect("the saved scene loads")
@@ -430,7 +432,8 @@ fn an_edit_made_through_a_command_survives_a_save_and_reopen() {
         [1.5, -2.0, 3.25],
     );
 
-    file.save(&world).expect("the scene saves");
+    file.save(&world, SceneExtractor::new().unwrap().components())
+        .expect("the scene saves");
 
     let reopened = SceneFile::open(&path).expect("the saved scene reopens");
     let saved = reopened
@@ -453,7 +456,8 @@ fn undoing_every_edit_saves_the_file_back_as_it_was() {
     move_cube(&mut world, &mut history, [9.0, 9.0, 9.0]);
     history.undo(&mut world).expect("undo applies");
 
-    file.save(&world).expect("the scene saves");
+    file.save(&world, SceneExtractor::new().unwrap().components())
+        .expect("the scene saves");
     assert_eq!(
         fs::read_to_string(&path).expect("the saved scene is readable"),
         original,
@@ -468,7 +472,8 @@ fn saving_the_untouched_fixture_leaves_the_file_identical() {
     let (_directory, path, mut file, world) = scratch();
     let original = fs::read_to_string(&path).expect("the copy is readable");
 
-    file.save(&world).expect("the scene saves");
+    file.save(&world, SceneExtractor::new().unwrap().components())
+        .expect("the scene saves");
 
     assert_eq!(
         fs::read_to_string(&path).expect("the saved scene is readable"),

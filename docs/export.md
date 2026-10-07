@@ -28,6 +28,12 @@ one, a sheet because it sits beside a texture that has one. So an asset that
 stopped being used stops being carried, and one that started being used cannot
 be forgotten.
 
+Physics material component references ship their `.profile` assets from scenes
+and prefabs, even when an entity starts inactive. Physics profiles are validated
+before output is written. Native and browser project hosts deliver them through
+the normal profile loader and resolve coefficients at the scene boundary; no
+manual include list is required. See [the material contract](physics.md#reusable-collision-materials).
+
 The exception is in `sindri.toml`:
 
 ```toml

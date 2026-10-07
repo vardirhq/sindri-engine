@@ -76,6 +76,22 @@ rather than as the entities it expands to, and its overrides are the
 difference from the prefab, so saving an instance nobody edited reproduces it
 exactly. [Prefabs](prefabs.md#placing-one-in-a-scene) has the format.
 
+Loaded scene roots retain their runtime namespace, independently of their display
+name, so qualified references resolve after loading under a new namespace. This
+bookkeeping is not serialized. Library-aware scene loading retains original prefab
+root aliases as runtime link metadata, namespaced with scene IDs. They are omitted from serialized links and
+scene files; saving instances as references and reopening regenerates them from
+the library. Flattening with `SceneDocument::expanded` discards this metadata,
+so hosts with prefab-root references load original documents through
+`World::from_scene_with`, `World::add_scene_with` or `LoadedScenes`' library-aware
+variants. After assigning IDs to runtime spawns, use
+`World::to_scene_with_references(prefabs, components)` to remap registered entity
+fields before serialization. It uses registry `FieldMeaning::Entity` metadata,
+including nested lists, leaves the live world untouched and rejects nonempty
+unresolvable or unstable targets and malformed reference fields. Empty references
+remain unbound; unknown/undescribed fields remain unchanged. Ordinary `to_scene`
+and `to_scene_with` still serialize payloads verbatim.
+
 Scenes reject non-finite transform values. JSON has no `NaN` or `Infinity` literal, so a scene
 containing one could not be read back; validation catches it at the point it is introduced instead.
 

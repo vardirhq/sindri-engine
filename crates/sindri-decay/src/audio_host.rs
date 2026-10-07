@@ -168,6 +168,20 @@ impl<'a> WorldHost<'a> {
         self
     }
 
+    /// Supplies independent 3D controls and the completed event snapshot.
+    #[must_use]
+    pub fn with_physics3d(mut self, physics: Option<crate::Physics3d<'a>>) -> Self {
+        self.inner.physics3d = physics;
+        self
+    }
+
+    /// Supplies the scene's controller queue and cached results.
+    #[must_use]
+    pub fn with_characters(mut self, characters: Option<crate::Characters2d<'a>>) -> Self {
+        self.inner.characters = characters;
+        self
+    }
+
     pub fn new(
         world: &'a mut sindri_core::World,
         entity: sindri_core::EntityId,

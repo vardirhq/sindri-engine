@@ -208,3 +208,26 @@ Do not rewrite Causeway in one jump. Each phase leaves main usable. New engine A
 - **Phase 4:** in progress. Mesh work now carries a monotonic revision and mesher profile, including a new revision when a halo neighbour changes. `SectionMeshCache<T>` keeps the last compiled value drawable while replacement work is pending, rejects superseded results, separates block/smooth/hybrid/custom profiles, and exposes one operation to release every profile named by a leaving residency delta. `sindri-render` persistently stores textured GPU buffers behind opaque cache identities, uploads only newer replacement revisions, draws old buffers while work is pending, supports 32-bit section indices, explicitly releases departed entries, and reports cache counters. `sindri-scene` now maps opaque semantic block faces to texture/atlas batches and stable renderer identities without leaking renderer types into `sindri-voxel`, and conservatively frustum-culls transformed section bounds before submission. The Voxel Lab scene uses this path in the editor, and the browser proof exposes residency/cache counters. Cutout/transparent pipelines, editor voxel interaction, and camera-driven scene residency remain.
 
 Causeway has moved onto the engine path: its ground is a camera-following `sindri.voxel_world`, edited through the `Grid` calls, with no terrain code left in `game/`.
+
+### Collision geometry prerequisite
+
+`sindri-voxel::compile_section_collision` now compiles a supplied resident section
+and collision shape policy into exact section-local sixteenth-voxel boxes.
+Full cubes merge in X/Z/Y; partial shapes retain their bounds, air/noncolliding
+blocks are omitted and malformed shapes fail with typed errors. At most 4,096
+boxes can be produced. See [`physics.md`](physics.md) for the contract and native
+coverage/edited-residency tests. This establishes a renderer-independent geometry
+boundary without adding physics dependencies to voxel storage. It does not
+complete resident collision: scene policy/transform resolution, revision caches,
+entry/edit/exit reconciliation, bounded work and Causeway proof remain open.
+
+### Native resident collision snapshot seam
+
+`SceneVoxelCollision3d` now caches complete supplied resident sections by occupancy
+and policy revision and reconciles them into independently replaceable static
+owner groups. It handles positive composed scale/pose, section exit, owner
+inactivity/removal and bounded full-batch prevalidation without partial holes.
+Seven native scene tests include real collision/queries/events and an edited
+hole; WASM compilation passes. Authored block/terrain resolution, residency
+production, host/editor/shared-session wiring and actual Causeway/browser proof
+remain open. See [`physics.md`](physics.md) for limits and revision ownership.

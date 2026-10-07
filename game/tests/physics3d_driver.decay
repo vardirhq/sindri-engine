@@ -1,0 +1,44 @@
+// Gameplay-free host contract fixture: controls, copied values and actual landing.
+script Physics3dDriver {
+    var elapsed: f32 = 0.0;
+    var started: bool = false;
+    var touched: bool = false;
+    var copied: bool = false;
+    var locked: bool = false;
+    var verified: bool = false;
+    fn update(dt: f32) {
+        elapsed += dt;
+        if !started {
+            started = true;
+            Physics3d.set_velocity(this.entity, Vec3(0.4, 0.0, 0.6));
+            Physics3d.apply_impulse(this.entity, Vec3(0.1, 0.2, 0.1));
+            Physics3d.set_angular_velocity(this.entity, Vec3(1.0, 2.0, 3.0));
+            let angular = Physics3d.angular_velocity(this.entity);
+            locked = angular.length < 0.001;
+            var velocity = Physics3d.velocity(this.entity);
+            velocity.x = 99.0;
+            copied = Physics3d.velocity(this.entity).x < 1.0;
+        }
+        if Physics3d.collision_started().length > 0 { touched = true; }
+        let at = this.transform.world_position;
+        if elapsed > 1.8 && at.x > 2.8 && at.z > 4.0 && at.y > 0.7 && at.y < 0.8 && touched && copied && locked && !verified {
+            let floor = Physics3d.mask(["floor", "floor"]);
+            if floor != Physics3d.layer("floor") { return; }
+            let origin = at + Vec3(0.0, 2.0, 0.0);
+            let hit = Physics3d.raycast(origin, Vec3(0.0, -2.0, 0.0), 5.0, floor, false, this.entity);
+            let swept = Physics3d.cast_sphere(origin, 0.1, Vec3(0.0, -1.0, 0.0), 5.0, floor, false, this.entity);
+            let nearby = Physics3d.overlap_sphere(at - Vec3(0.0, 0.5, 0.0), 0.6, floor, false, this.entity);
+            let box_hit = Physics3d.cast_box(origin, Vec3(0.1, 0.2, 0.3), Vec3(1.0, 0.0, 0.0), 0.5, Vec3(0.0, -1.0, 0.0), 5.0, floor, false, this.entity);
+            let capsule_hit = Physics3d.cast_capsule(origin, 0.2, 0.1, Vec3(1.0, 0.0, 0.0), 0.5, Vec3(0.0, -1.0, 0.0), 5.0, floor, false, this.entity);
+            let boxes = Physics3d.overlap_box(at - Vec3(0.0, 0.5, 0.0), Vec3(0.1, 0.2, 0.3), Vec3(1.0, 0.0, 0.0), 0.5, floor, false, this.entity);
+            let capsules = Physics3d.overlap_capsule(at - Vec3(0.0, 0.5, 0.0), 0.2, 0.1, Vec3(1.0, 0.0, 0.0), 0.5, floor, false, this.entity);
+            if box_hit != null && capsule_hit != null && hit != null {
+                if box_hit.entity != hit.entity || capsule_hit.entity != hit.entity || !boxes.contains(hit.entity) || !capsules.contains(hit.entity) { return; }
+            } else { return; }
+            if hit != null && swept != null {
+                verified = hit.entity == swept.entity && nearby.contains(hit.entity) && hit.normal.y > 0.99 && hit.point.y > 0.2 && hit.point.y < 0.3 && swept.distance < hit.distance;
+                if verified { print("3D typed queries and collision landing verified"); }
+            }
+        }
+    }
+}

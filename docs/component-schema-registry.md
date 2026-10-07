@@ -77,3 +77,27 @@ and component type rather than being silently skipped.
 
 The combined cube/sprite example registers camera, mesh, and sprite component types, validates its
 embedded scene in strict mode, and uses the typed query API during frame extraction.
+
+## Saving runtime prefab references
+
+`World::to_scene_with_references(prefabs, components)` uses fields described as
+`FieldMeaning::Entity` to remap local runtime-prefab paths to assigned stable IDs.
+Dotted paths and `[]` lists follow the registry's field-path grammar. Describe
+entity fields explicitly: unknown components and undescribed strings are preserved
+verbatim. The method leaves the live world unchanged and rejects nonempty missing
+or unstable targets and malformed reference fields; empty text stays unbound.
+Ordinary world serializers retain their verbatim contract.
+
+## Authoring entity references
+
+Fields described as `FieldMeaning::Entity` get a typeable entity picker at every
+object/list depth in the native inspector. Choices include stable IDs and names
+within the owner's scene, or canonical local paths within one runtime prefab.
+An explicit None choice clears the field. Missing targets and inactive targets
+are distinguished visibly; unresolved text is retained for later repair.
+`World::resolve_entity_reference` supplies the same canonical/alias, namespace
+and prefab-scope rules used by authored physics joints. It resolves inactive
+entities for diagnostics; physics separately requires active endpoints.
+The inverse `World::entity_reference(owner, target)` chooses a scoped authored
+string for a handle and returns none for unstable/out-of-scope targets.
+Edits remain schema-checked component commands with undo/redo.

@@ -1,8 +1,11 @@
 //! The physics components, and what a fresh one of each is.
 
-use sindri_core::ComponentSchemaRegistry;
+use sindri_core::{AssetKind, ComponentSchemaRegistry, FieldMeaning};
+use sindri_physics::MotorMode2d;
 
-use crate::physics::{Collider2dComponent, PhysicsWorld2dComponent, RigidBody2dComponent};
+use crate::physics::{
+    Collider2dComponent, OneWay2dComponent, PhysicsWorld2dComponent, RigidBody2dComponent,
+};
 use crate::tilemap_collision::TilemapCollider2dComponent;
 
 use super::SceneExtractError;
@@ -22,7 +25,8 @@ pub(super) fn register(components: &mut ComponentSchemaRegistry) -> Result<(), S
             "gravity_scale": 1.0,
             "linear_damping": 0.0,
             "angular_damping": 0.0,
-            "lock_rotation": false
+            "lock_rotation": false,
+            "continuous_collision": false
         }),
     )?;
     // The default is written as a compound of one rather than as a bare
@@ -60,5 +64,86 @@ pub(super) fn register(components: &mut ComponentSchemaRegistry) -> Result<(), S
         "Physics 2D World",
         serde_json::json!({ "gravity": [0.0, -9.81], "layers": [] }),
     )?;
+    components.register_with_default::<OneWay2dComponent>(
+        "One-Way Platform 2D",
+        serde_json::json!({ "normal": [0.0, 1.0], "angle": std::f32::consts::FRAC_PI_4 }),
+    )?;
+    components.register_with_default::<crate::PhysicsMaterial2dComponent>(
+        "Physics Material 2D",
+        serde_json::json!({"profile": "", "override_friction": false, "friction": 0.5, "override_restitution": false, "restitution": 0.0}),
+    )?;
+    components.describe::<crate::PhysicsMaterial2dComponent>([(
+        "profile",
+        FieldMeaning::Asset(AssetKind::Profile),
+    )])?;
+    components.register_with_default::<crate::DistanceJoint2dComponent>(
+        "Distance Joint 2D",
+        serde_json::json!({"first": "", "second": "", "enabled": true, "max_distance": 1.0}),
+    )?;
+    components.describe::<crate::DistanceJoint2dComponent>([
+        ("first", FieldMeaning::Entity),
+        ("second", FieldMeaning::Entity),
+    ])?;
+    components.register_with_default::<crate::Character2dComponent>(
+        "Character 2D",
+        serde_json::json!({"skin": 0.01, "max_iterations": 8, "up": [0.0, 1.0],
+            "max_slope_angle": std::f32::consts::FRAC_PI_4, "snap_distance": 0.0,
+            "step_height": 0.0, "carry_platforms": true}),
+    )?;
+    super::physics3d_registry::register(components)?;
+    register_hinge(components)?;
+    register_linear_joints(components)?;
     Ok(())
+}
+
+fn register_hinge(components: &mut ComponentSchemaRegistry) -> Result<(), SceneExtractError> {
+    components.register_with_default::<crate::HingeJoint2dComponent>(
+        "Hinge Joint 2D",
+        serde_json::json!({
+            "first": "", "second": "", "enabled": true, "first_anchor": [0.0, 0.0],
+            "second_anchor": [0.0, 0.0], "limits_enabled": false,
+            "lower_angle": 0.0, "upper_angle": 0.0, "motor_enabled": false,
+            "motor_velocity": 0.0, "motor_max_torque": 0.0, "motor_mode": "velocity",
+            "motor_target_angle": 0.0, "motor_stiffness": 0.0, "motor_damping": 0.0
+        }),
+    )?;
+    components.describe::<crate::HingeJoint2dComponent>([
+        ("first", FieldMeaning::Entity),
+        ("second", FieldMeaning::Entity),
+        ("motor_mode", motor_modes()),
+    ])?;
+    Ok(())
+}
+
+fn register_linear_joints(
+    components: &mut ComponentSchemaRegistry,
+) -> Result<(), SceneExtractError> {
+    components.register_with_default::<crate::SliderJoint2dComponent>(
+        "Slider Joint 2D",
+        serde_json::json!({"first": "", "second": "", "enabled": true, "first_anchor": [0.0, 0.0],
+            "second_anchor": [0.0, 0.0], "first_axis": [1.0, 0.0], "second_axis": [1.0, 0.0],
+            "limits_enabled": false, "lower_distance": 0.0, "upper_distance": 0.0,
+            "motor_enabled": false, "motor_velocity": 0.0, "motor_max_force": 0.0,
+            "motor_mode": "velocity", "motor_target_distance": 0.0,
+            "motor_stiffness": 0.0, "motor_damping": 0.0}),
+    )?;
+    components.describe::<crate::SliderJoint2dComponent>([
+        ("first", FieldMeaning::Entity),
+        ("second", FieldMeaning::Entity),
+        ("motor_mode", motor_modes()),
+    ])?;
+    components.register_with_default::<crate::SpringJoint2dComponent>(
+        "Spring Joint 2D",
+        serde_json::json!({"first": "", "second": "", "enabled": true, "first_anchor": [0.0, 0.0],
+            "second_anchor": [0.0, 0.0], "rest_length": 1.0, "stiffness": 10.0, "damping": 1.0}),
+    )?;
+    components.describe::<crate::SpringJoint2dComponent>([
+        ("first", FieldMeaning::Entity),
+        ("second", FieldMeaning::Entity),
+    ])?;
+    Ok(())
+}
+
+fn motor_modes() -> FieldMeaning {
+    FieldMeaning::choice(MotorMode2d::ALL.into_iter().map(MotorMode2d::as_str))
 }

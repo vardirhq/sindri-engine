@@ -20,6 +20,9 @@ pub const MAX_PREFAB_NESTING: usize = 16;
 pub struct ExpandedEntity {
     pub entity: SceneEntity,
     pub link: Option<PrefabLink>,
+    /// Namespaced original root IDs retained for runtime-local references.
+    /// These aliases are expansion metadata and are not serialized.
+    pub aliases: BTreeSet<SceneEntityId>,
 }
 
 /// Every instance in `entities` replaced by the entities its prefab describes.
@@ -37,7 +40,9 @@ pub fn expand_entities(
     entities: &[SceneEntity],
     library: &dyn PrefabLibrary,
 ) -> Result<Vec<ExpandedEntity>, PrefabError> {
-    expand_within(entities, library, &mut Vec::new())
+    let expanded = expand_within(entities, library, &mut Vec::new())?;
+    validate_aliases(&expanded)?;
+    Ok(expanded)
 }
 
 fn expand_within(
@@ -51,6 +56,7 @@ fn expand_within(
             expanded.push(ExpandedEntity {
                 entity: entity.clone(),
                 link: None,
+                aliases: BTreeSet::new(),
             });
             continue;
         };
@@ -74,63 +80,87 @@ fn expand_within(
             .find(|inner| inner.entity.parent.is_none())
             .map(|inner| inner.entity.id.clone())
             .ok_or(PrefabError::NoRoot)?;
-        let placed = |key: &SceneEntityId| {
-            if key == &root_key {
-                entity.id.clone()
-            } else {
-                instance_path(&entity.id, key)
-            }
-        };
         let gone = removed_keys(&inner, &instance.removed, &root_key);
         for part in inner {
             let key = part.entity.id.clone();
             if gone.contains(&key) {
                 continue;
             }
-            let is_root = key == root_key;
-            let mut placed_entity = part.entity;
-            placed_entity.id = placed(&key);
-            placed_entity.parent = if is_root {
-                entity.parent.clone()
-            } else {
-                placed_entity.parent.as_ref().map(&placed)
-            };
-            if let Some(changes) = instance.overrides.get(&key) {
-                apply_override(&mut placed_entity, changes);
-            }
-            if is_root {
-                // What the scene says about the instance itself wins over
-                // everything the prefab and its overrides said.
-                if entity.name.is_some() {
-                    placed_entity.name.clone_from(&entity.name);
-                }
-                if entity.transform_3d.is_some() {
-                    placed_entity.transform_3d = entity.transform_3d;
-                }
-                placed_entity.disabled |= entity.disabled;
-                placed_entity.editor.clone_from(&entity.editor);
-            } else {
-                // A prefab's editor state is about the prefab as a document,
-                // and says nothing about one of its instances; the instance's
-                // own is in its override.
-                placed_entity.editor = instance
-                    .overrides
-                    .get(&key)
-                    .map(|changes| changes.editor.clone())
-                    .unwrap_or_default();
-            }
-            placed_entity.prefab = None;
-            expanded.push(ExpandedEntity {
-                entity: placed_entity,
-                link: Some(PrefabLink {
-                    source: instance.source.clone(),
-                    path: key,
-                    root: is_root,
-                }),
-            });
+            expanded.push(place_part(part, entity, &root_key));
         }
     }
     Ok(expanded)
+}
+
+/// Places one expanded member, preserving nested aliases and override semantics.
+fn place_part(
+    part: ExpandedEntity,
+    instance_entity: &SceneEntity,
+    root_key: &SceneEntityId,
+) -> ExpandedEntity {
+    let instance = instance_entity
+        .prefab
+        .as_ref()
+        .expect("an instance is being expanded");
+    let key = part.entity.id.clone();
+    let placed = |key: &SceneEntityId| {
+        if key == root_key {
+            instance_entity.id.clone()
+        } else {
+            instance_path(&instance_entity.id, key)
+        }
+    };
+    let mut aliases: BTreeSet<_> = part
+        .aliases
+        .iter()
+        .map(|alias| instance_path(&instance_entity.id, alias))
+        .collect();
+    if key == *root_key {
+        aliases.insert(instance_path(&instance_entity.id, &key));
+    }
+    let is_root = key == *root_key;
+    let mut placed_entity = part.entity;
+    placed_entity.id = placed(&key);
+    placed_entity.parent = if is_root {
+        instance_entity.parent.clone()
+    } else {
+        placed_entity.parent.as_ref().map(&placed)
+    };
+    if let Some(changes) = instance.overrides.get(&key) {
+        apply_override(&mut placed_entity, changes);
+    }
+    if is_root {
+        // What the scene says about the instance itself wins over
+        // everything the prefab and its overrides said.
+        if instance_entity.name.is_some() {
+            placed_entity.name.clone_from(&instance_entity.name);
+        }
+        if instance_entity.transform_3d.is_some() {
+            placed_entity.transform_3d = instance_entity.transform_3d;
+        }
+        placed_entity.disabled |= instance_entity.disabled;
+        placed_entity.editor.clone_from(&instance_entity.editor);
+    } else {
+        // A prefab's editor state is about the prefab as a document,
+        // and says nothing about one of its instances; the instance's
+        // own is in its override.
+        placed_entity.editor = instance
+            .overrides
+            .get(&key)
+            .map(|changes| changes.editor.clone())
+            .unwrap_or_default();
+    }
+    placed_entity.prefab = None;
+    ExpandedEntity {
+        entity: placed_entity,
+        aliases: aliases.clone(),
+        link: Some(PrefabLink {
+            source: instance.source.clone(),
+            path: key,
+            root: is_root,
+            aliases,
+        }),
+    }
 }
 
 /// The keys an instance does without: the ones it names, and everything under
@@ -303,4 +333,18 @@ pub fn override_between(base: &SceneEntity, current: &SceneEntity) -> EntityOver
         components,
         editor: BTreeMap::new(),
     }
+}
+
+/// Canonical paths shadow aliases; competing aliases must not depend on order.
+fn validate_aliases(expanded: &[ExpandedEntity]) -> Result<(), PrefabError> {
+    let canonical: BTreeSet<_> = expanded.iter().map(|part| &part.entity.id).collect();
+    let mut aliases = BTreeSet::new();
+    for part in expanded {
+        for alias in &part.aliases {
+            if !canonical.contains(alias) && !aliases.insert(alias) {
+                return Err(PrefabError::AmbiguousRootAlias(alias.clone()));
+            }
+        }
+    }
+    Ok(())
 }

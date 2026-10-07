@@ -9,6 +9,55 @@ use tempfile::TempDir;
 
 use super::{SceneScripts, ScriptFailure};
 
+fn material_text(friction: f32) -> String {
+    json!({"format_version": 1, "type": "physics_material", "values": {"friction": friction, "restitution": 0.1}}).to_string()
+}
+
+fn wait_for_material(scripts: &mut SceneScripts) -> Vec<super::ScriptNote> {
+    let mut notes = Vec::new();
+    for _ in 0..200 {
+        notes.extend(scripts.poll());
+        if !scripts.loading() {
+            return notes;
+        }
+        sleep(Duration::from_millis(10));
+    }
+    panic!("material never arrived");
+}
+
+#[test]
+fn physics_profiles_reload_asynchronously_and_retain_the_last_valid_edit() {
+    let directory = TempDir::new().unwrap();
+    let path = directory.path().join("wood.profile");
+    fs::write(&path, material_text(0.3)).unwrap();
+    let scene = directory.path().join("test.scene");
+    let mut scripts = SceneScripts::for_scene(Some(&scene));
+    assert!(
+        wait_for_material(&mut scripts)
+            .iter()
+            .all(|note| !matches!(note, super::ScriptNote::Failed(_)))
+    );
+    assert!(scripts.physics_materials().is_ok());
+    for (friction, valid) in [(-0.6, false), (0.777, true)] {
+        fs::write(&path, material_text(friction)).unwrap();
+        scripts.last_examined -= super::WATCH_INTERVAL;
+        let notes = wait_for_material(&mut scripts);
+        assert_eq!(
+            notes
+                .iter()
+                .any(|note| matches!(note, super::ScriptNote::Failed(_))),
+            !valid,
+            "{notes:?}"
+        );
+        let profile = scripts.profiles.get("wood.profile").unwrap();
+        let material = sindri_scene::physics_material_profile("wood.profile", profile)
+            .unwrap()
+            .unwrap();
+        let expected = if valid { friction } else { 0.3 };
+        assert!((material.friction - expected).abs() < f32::EPSILON);
+    }
+}
+
 /// A world holding one entity that runs `source`, and a registry that knows
 /// what `sindri.script` is.
 fn scripted(source: &str) -> (World, ComponentSchemaRegistry) {

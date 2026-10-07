@@ -100,7 +100,8 @@
           "layers": [
             "ground",
             "hero",
-            "pickups"
+            "pickups",
+            "crate"
           ]
         },
         "sindri.input.actions": {
@@ -138,6 +139,23 @@
                 "key.W",
                 "key.ArrowUp",
                 "gamepad.south"
+              ]
+            },
+            {
+              "name": "drop",
+              "kind": "button",
+              "bindings": [
+                "key.S",
+                "key.ArrowDown",
+                "gamepad.dpad_down"
+              ]
+            },
+            {
+              "name": "kick",
+              "kind": "button",
+              "bindings": [
+                "key.K",
+                "gamepad.west"
               ]
             }
           ]
@@ -1096,6 +1114,218 @@
       }
     },
     {
+      "id": "one-way-planks",
+      "name": "One-way planks",
+      "transform_3d": {
+        "position": [
+          6,
+          5.5,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1,
+          0.2,
+          1
+        ]
+      },
+      "components": {
+        "sindri.tags": {
+          "tags": [
+            "solid",
+            "one-way"
+          ]
+        },
+        "sindri.tilemap": {
+          "texture": "textures/tiles.png",
+          "palette": [
+            "grass",
+            "dirt",
+            "stone",
+            "plank",
+            "tuft"
+          ],
+          "columns": 4,
+          "rows": 1,
+          "tiles": [
+            3,
+            3,
+            3,
+            3
+          ],
+          "layer": 0
+        },
+        "sindri.physics2d.tilemap_collider": {
+          "passable": [],
+          "layers": {
+            "memberships": 1,
+            "filter": 10
+          },
+          "friction": 0.5,
+          "restitution": 0.0
+        },
+        "sindri.physics2d.one_way": {
+          "normal": [
+            0,
+            1
+          ],
+          "angle": 0.7853982
+        },
+        "sindri.physics2d.material": {
+          "profile": "materials/wood.profile",
+          "override_friction": false,
+          "friction": 0.5,
+          "override_restitution": true,
+          "restitution": 0.0
+        }
+      }
+    },
+    {
+      "id": "wind-crate",
+      "name": "Wind crate",
+      "transform_3d": {
+        "position": [
+          4.0,
+          4.0,
+          0.3
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          0.3,
+          0.3,
+          1
+        ]
+      },
+      "components": {
+        "sindri.tilemap": {
+          "texture": "textures/tiles.png",
+          "palette": [
+            "grass",
+            "dirt",
+            "stone",
+            "plank",
+            "tuft"
+          ],
+          "columns": 2,
+          "rows": 2,
+          "tiles": [
+            3,
+            3,
+            3,
+            3
+          ],
+          "layer": 3
+        },
+        "sindri.physics2d.rigid_body": {
+          "kind": "dynamic",
+          "pose": {
+            "position": [
+              0,
+              0
+            ],
+            "rotation": 0
+          },
+          "linear_velocity": [
+            0,
+            0
+          ],
+          "angular_velocity": 0,
+          "gravity_scale": 1,
+          "linear_damping": 0.2,
+          "angular_damping": 0.2,
+          "lock_rotation": false,
+          "continuous_collision": true
+        },
+        "sindri.physics2d.collider": {
+          "pieces": [
+            {
+              "shape": {
+                "shape": "box",
+                "half_extents": [
+                  0.3,
+                  0.3
+                ]
+              },
+              "offset": [
+                0.3,
+                0.3
+              ],
+              "rotation": 0,
+              "sensor": false,
+              "layers": {
+                "memberships": 8,
+                "filter": 1
+              },
+              "friction": 0.3,
+              "restitution": 0.1
+            }
+          ]
+        },
+        "sindri.script": {
+          "source": "scripts/crate.decay",
+          "script": "Crate",
+          "properties": {}
+        },
+        "sindri.tags": {
+          "tags": [
+            "kickable"
+          ]
+        },
+        "sindri.physics2d.material": {
+          "profile": "materials/wood.profile",
+          "override_friction": false,
+          "friction": 0.5,
+          "override_restitution": false,
+          "restitution": 0.0
+        }
+      }
+    },
+    {
+      "id": "crate-impact-flash",
+      "name": "Crate impact flash",
+      "parent": "wind-crate",
+      "transform_3d": {
+        "position": [
+          1,
+          1,
+          0.05
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          2,
+          2,
+          1
+        ]
+      },
+      "components": {
+        "sindri.shape": {
+          "kind": "rect",
+          "fill": [
+            1,
+            0.7,
+            0.3,
+            0
+          ],
+          "layer": 4
+        }
+      }
+    },
+    {
       "id": "hero",
       "name": "Hero",
       "transform_3d": {
@@ -1159,25 +1389,6 @@
           "playing": "idle",
           "speed": 1.0
         },
-        "sindri.physics2d.rigid_body": {
-          "kind": "dynamic",
-          "pose": {
-            "position": [
-              0,
-              0
-            ],
-            "rotation": 0
-          },
-          "linear_velocity": [
-            0,
-            0
-          ],
-          "angular_velocity": 0,
-          "gravity_scale": 1.0,
-          "linear_damping": 0,
-          "angular_damping": 0,
-          "lock_rotation": true
-        },
         "sindri.physics2d.collider": {
           "pieces": [
             {
@@ -1194,7 +1405,7 @@
               "sensor": false,
               "layers": {
                 "memberships": 2,
-                "filter": 4294967295
+                "filter": 1
               },
               "friction": 0.0,
               "restitution": 0.0
@@ -1219,6 +1430,25 @@
               },
               "friction": 0.0,
               "restitution": 0.0
+            },
+            {
+              "shape": {
+                "shape": "capsule",
+                "half_height": 0.16,
+                "radius": 0.3
+              },
+              "offset": [
+                0.0,
+                -0.04
+              ],
+              "rotation": 0.0,
+              "sensor": true,
+              "layers": {
+                "memberships": 2,
+                "filter": 4294967295
+              },
+              "friction": 0.0,
+              "restitution": 0.0
             }
           ]
         },
@@ -1231,6 +1461,18 @@
           "source": "scripts/hero.decay",
           "script": "Hero",
           "properties": {}
+        },
+        "sindri.physics2d.character": {
+          "skin": 0.01,
+          "max_iterations": 8,
+          "up": [
+            0.0,
+            1.0
+          ],
+          "max_slope_angle": 0.7853982,
+          "snap_distance": 0.2,
+          "step_height": 0.3,
+          "carry_platforms": true
         }
       }
     },
@@ -1715,6 +1957,851 @@
             "softness": 0.002
           },
           "bold": true
+        }
+      }
+    },
+    {
+      "id": "lantern-anchor",
+      "name": "Lantern hook",
+      "transform_3d": {
+        "position": [
+          12,
+          8,
+          0.4
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          0.15,
+          0.15,
+          1
+        ]
+      },
+      "components": {
+        "sindri.shape": {
+          "kind": "rect",
+          "fill": [
+            0.2,
+            0.15,
+            0.1,
+            1
+          ]
+        },
+        "sindri.physics2d.collider": {
+          "shape": {
+            "shape": "circle",
+            "radius": 0.05
+          },
+          "offset": [
+            0,
+            0
+          ],
+          "rotation": 0,
+          "sensor": false,
+          "layers": {
+            "memberships": 0,
+            "filter": 0
+          },
+          "friction": 0.5,
+          "restitution": 0
+        }
+      }
+    },
+    {
+      "id": "wind-lantern",
+      "name": "Hanging lantern",
+      "transform_3d": {
+        "position": [
+          12,
+          6,
+          0.4
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          0.36,
+          0.36,
+          1
+        ]
+      },
+      "components": {
+        "sindri.shape": {
+          "kind": "ellipse",
+          "fill": [
+            1,
+            0.8,
+            0.25,
+            1
+          ]
+        },
+        "sindri.physics2d.collider": {
+          "shape": {
+            "shape": "circle",
+            "radius": 0.18
+          },
+          "offset": [
+            0,
+            0
+          ],
+          "rotation": 0,
+          "sensor": false,
+          "layers": {
+            "memberships": 0,
+            "filter": 0
+          },
+          "friction": 0.5,
+          "restitution": 0
+        },
+        "sindri.physics2d.rigid_body": {
+          "kind": "dynamic",
+          "pose": {
+            "position": [
+              0,
+              0
+            ],
+            "rotation": 0
+          },
+          "linear_velocity": [
+            0,
+            0
+          ],
+          "angular_velocity": 0,
+          "gravity_scale": 1.0,
+          "linear_damping": 0.15,
+          "angular_damping": 0.15,
+          "lock_rotation": false,
+          "continuous_collision": true
+        },
+        "sindri.script": {
+          "source": "scripts/lantern.decay",
+          "script": "Lantern"
+        }
+      }
+    },
+    {
+      "id": "lantern-tether",
+      "name": "Lantern tether",
+      "components": {
+        "sindri.physics2d.distance_joint": {
+          "first": "lantern-anchor",
+          "second": "wind-lantern",
+          "max_distance": 2.0
+        }
+      }
+    },
+    {
+      "id": "lantern-cord",
+      "name": "Lantern cord",
+      "transform_3d": {
+        "position": [
+          12,
+          7,
+          0.35
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          0.025,
+          2,
+          1
+        ]
+      },
+      "components": {
+        "sindri.shape": {
+          "kind": "rect",
+          "fill": [
+            0.25,
+            0.18,
+            0.1,
+            1
+          ]
+        }
+      }
+    },
+    {
+      "id": "windmill-anchor",
+      "name": "Windmill assembly",
+      "transform_3d": {
+        "position": [
+          7.0,
+          7.4,
+          0.35
+        ]
+      },
+      "prefab": {
+        "source": "prefabs/windmill-kit.prefab",
+        "overrides": {
+          "mechanism": {
+            "name": "Windmill axle"
+          },
+          "mechanism/windmill-rotor": {
+            "name": "Windmill rotor"
+          },
+          "mechanism/windmill-hinge": {
+            "name": "Windmill hinge"
+          }
+        }
+      }
+    },
+    {
+      "id": "trolley-rail",
+      "name": "Lantern rail",
+      "transform_3d": {
+        "position": [
+          9.5,
+          8.1,
+          0.35
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          2.2,
+          0.04,
+          1
+        ]
+      },
+      "components": {
+        "sindri.shape": {
+          "kind": "rect",
+          "fill": [
+            0.2,
+            0.15,
+            0.1,
+            1
+          ]
+        },
+        "sindri.physics2d.collider": {
+          "shape": {
+            "shape": "circle",
+            "radius": 0.05
+          },
+          "offset": [
+            0,
+            0
+          ],
+          "rotation": 0,
+          "sensor": false,
+          "layers": {
+            "memberships": 0,
+            "filter": 0
+          },
+          "friction": 0.5,
+          "restitution": 0
+        }
+      }
+    },
+    {
+      "id": "trolley-body",
+      "name": "Lantern trolley",
+      "transform_3d": {
+        "position": [
+          9.5,
+          8.1,
+          0.4
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          0.25,
+          0.25,
+          1
+        ]
+      },
+      "components": {
+        "sindri.shape": {
+          "kind": "rect",
+          "fill": [
+            1,
+            0.8,
+            0.25,
+            1
+          ]
+        },
+        "sindri.physics2d.collider": {
+          "shape": {
+            "shape": "circle",
+            "radius": 0.18
+          },
+          "offset": [
+            0,
+            0
+          ],
+          "rotation": 0,
+          "sensor": false,
+          "layers": {
+            "memberships": 0,
+            "filter": 0
+          },
+          "friction": 0.5,
+          "restitution": 0
+        },
+        "sindri.physics2d.rigid_body": {
+          "kind": "dynamic",
+          "pose": {
+            "position": [
+              0,
+              0
+            ],
+            "rotation": 0
+          },
+          "linear_velocity": [
+            0,
+            0
+          ],
+          "angular_velocity": 0,
+          "gravity_scale": 0.0,
+          "linear_damping": 0.0,
+          "angular_damping": 0.15,
+          "lock_rotation": false,
+          "continuous_collision": true
+        },
+        "sindri.script": {
+          "source": "scripts/trolley.decay",
+          "script": "Trolley"
+        }
+      }
+    },
+    {
+      "id": "spring-lantern",
+      "name": "Spring lantern",
+      "transform_3d": {
+        "position": [
+          9.5,
+          6.7,
+          0.4
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          0.32,
+          0.32,
+          1
+        ]
+      },
+      "components": {
+        "sindri.shape": {
+          "kind": "ellipse",
+          "fill": [
+            1,
+            0.8,
+            0.25,
+            1
+          ]
+        },
+        "sindri.physics2d.collider": {
+          "shape": {
+            "shape": "circle",
+            "radius": 0.16
+          },
+          "offset": [
+            0,
+            0
+          ],
+          "rotation": 0,
+          "sensor": false,
+          "layers": {
+            "memberships": 0,
+            "filter": 0
+          },
+          "friction": 0.5,
+          "restitution": 0
+        },
+        "sindri.physics2d.rigid_body": {
+          "kind": "dynamic",
+          "pose": {
+            "position": [
+              0,
+              0
+            ],
+            "rotation": 0
+          },
+          "linear_velocity": [
+            0,
+            0
+          ],
+          "angular_velocity": 0,
+          "gravity_scale": 1.0,
+          "linear_damping": 0.15,
+          "angular_damping": 0.15,
+          "lock_rotation": false,
+          "continuous_collision": true
+        },
+        "sindri.script": {
+          "source": "scripts/spring_lantern.decay",
+          "script": "SpringLantern"
+        }
+      }
+    },
+    {
+      "id": "spring-cord",
+      "name": "Spring lantern cord",
+      "transform_3d": {
+        "position": [
+          9.5,
+          7.4,
+          0.35
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          0.025,
+          1.4,
+          1
+        ]
+      },
+      "components": {
+        "sindri.shape": {
+          "kind": "rect",
+          "fill": [
+            0.25,
+            0.18,
+            0.1,
+            1
+          ]
+        }
+      }
+    },
+    {
+      "id": "trolley-slider",
+      "name": "Trolley slider",
+      "components": {
+        "sindri.physics2d.slider_joint": {
+          "first": "trolley-rail",
+          "second": "trolley-body",
+          "first_axis": [
+            1.0,
+            0.0
+          ],
+          "second_axis": [
+            1.0,
+            0.0
+          ],
+          "limits_enabled": true,
+          "lower_distance": -1.0,
+          "upper_distance": 1.0
+        }
+      }
+    },
+    {
+      "id": "lantern-spring",
+      "name": "Lantern spring",
+      "components": {
+        "sindri.physics2d.spring_joint": {
+          "first": "trolley-body",
+          "second": "spring-lantern",
+          "rest_length": 1.0,
+          "stiffness": 20.0,
+          "damping": 1.2
+        },
+        "sindri.script": {
+          "source": "scripts/spring.decay",
+          "script": "BreathingSpring"
+        }
+      }
+    },
+    {
+      "id": "windmill-setup",
+      "name": "Windmill setup",
+      "components": {
+        "sindri.script": {
+          "source": "scripts/windmill-setup.decay",
+          "script": "WindmillSetup",
+          "properties": {
+            "template": "prefabs/windmill-kit.prefab"
+          }
+        }
+      }
+    },
+    {
+      "id": "lantern-alternate-anchor",
+      "name": "Lantern alternate hook",
+      "transform_3d": {
+        "position": [
+          11,
+          8,
+          0.4
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          0.15,
+          0.15,
+          1
+        ]
+      },
+      "components": {
+        "sindri.shape": {
+          "kind": "rect",
+          "fill": [
+            0.2,
+            0.15,
+            0.1,
+            1
+          ]
+        },
+        "sindri.physics2d.collider": {
+          "shape": {
+            "shape": "circle",
+            "radius": 0.05
+          },
+          "offset": [
+            0,
+            0
+          ],
+          "rotation": 0,
+          "sensor": false,
+          "layers": {
+            "memberships": 0,
+            "filter": 0
+          },
+          "friction": 0.5,
+          "restitution": 0
+        }
+      }
+    },
+    {
+      "id": "low-step-a",
+      "name": "Low stone step",
+      "transform_3d": {
+        "position": [
+          4.8,
+          3.25,
+          0.1
+        ],
+        "rotation": [
+          0,
+          0,
+          0.0,
+          1.0
+        ],
+        "scale": [
+          0.65,
+          0.25,
+          1
+        ]
+      },
+      "components": {
+        "sindri.tags": {
+          "tags": [
+            "solid"
+          ]
+        },
+        "sindri.tilemap": {
+          "texture": "textures/tiles.png",
+          "palette": [
+            "grass",
+            "dirt",
+            "stone",
+            "plank",
+            "tuft"
+          ],
+          "columns": 1,
+          "rows": 1,
+          "tiles": [
+            2
+          ],
+          "layer": 1
+        },
+        "sindri.physics2d.tilemap_collider": {
+          "passable": [],
+          "layers": {
+            "memberships": 1,
+            "filter": 10
+          },
+          "friction": 0.5,
+          "restitution": 0.0
+        }
+      }
+    },
+    {
+      "id": "low-step-b",
+      "name": "Upper stone step",
+      "transform_3d": {
+        "position": [
+          5.45,
+          3.5,
+          0.1
+        ],
+        "rotation": [
+          0,
+          0,
+          0.0,
+          1.0
+        ],
+        "scale": [
+          0.65,
+          0.5,
+          1
+        ]
+      },
+      "components": {
+        "sindri.tags": {
+          "tags": [
+            "solid"
+          ]
+        },
+        "sindri.tilemap": {
+          "texture": "textures/tiles.png",
+          "palette": [
+            "grass",
+            "dirt",
+            "stone",
+            "plank",
+            "tuft"
+          ],
+          "columns": 1,
+          "rows": 1,
+          "tiles": [
+            2
+          ],
+          "layer": 1
+        },
+        "sindri.physics2d.tilemap_collider": {
+          "passable": [],
+          "layers": {
+            "memberships": 1,
+            "filter": 10
+          },
+          "friction": 0.5,
+          "restitution": 0.0
+        }
+      }
+    },
+    {
+      "id": "boardwalk-up",
+      "name": "Boardwalk incline",
+      "transform_3d": {
+        "position": [
+          8.3,
+          3,
+          0.1
+        ],
+        "rotation": [
+          0,
+          0,
+          0.17410813759359595,
+          0.9847265389049334
+        ],
+        "scale": [
+          2.12908036676699,
+          0.15,
+          1
+        ]
+      },
+      "components": {
+        "sindri.tags": {
+          "tags": [
+            "solid"
+          ]
+        },
+        "sindri.tilemap": {
+          "texture": "textures/tiles.png",
+          "palette": [
+            "grass",
+            "dirt",
+            "stone",
+            "plank",
+            "tuft"
+          ],
+          "columns": 1,
+          "rows": 1,
+          "tiles": [
+            3
+          ],
+          "layer": 1
+        },
+        "sindri.physics2d.tilemap_collider": {
+          "passable": [],
+          "layers": {
+            "memberships": 1,
+            "filter": 10
+          },
+          "friction": 0.5,
+          "restitution": 0.0
+        }
+      }
+    },
+    {
+      "id": "boardwalk-down",
+      "name": "Boardwalk descent",
+      "transform_3d": {
+        "position": [
+          10.3,
+          3.730056989660849,
+          0.1
+        ],
+        "rotation": [
+          0,
+          0,
+          -0.17410813759359595,
+          0.9847265389049334
+        ],
+        "scale": [
+          2.12908036676699,
+          0.15,
+          1
+        ]
+      },
+      "components": {
+        "sindri.tags": {
+          "tags": [
+            "solid"
+          ]
+        },
+        "sindri.tilemap": {
+          "texture": "textures/tiles.png",
+          "palette": [
+            "grass",
+            "dirt",
+            "stone",
+            "plank",
+            "tuft"
+          ],
+          "columns": 1,
+          "rows": 1,
+          "tiles": [
+            3
+          ],
+          "layer": 1
+        },
+        "sindri.physics2d.tilemap_collider": {
+          "passable": [],
+          "layers": {
+            "memberships": 1,
+            "filter": 10
+          },
+          "friction": 0.5,
+          "restitution": 0.0
+        }
+      }
+    },
+    {
+      "id": "gap-ferry",
+      "name": "Gap ferry",
+      "transform_3d": {
+        "position": [
+          12.95,
+          3.25,
+          0.2
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          0.5,
+          0.2,
+          1
+        ]
+      },
+      "components": {
+        "sindri.tags": {
+          "tags": [
+            "solid",
+            "one-way",
+            "moving-platform"
+          ]
+        },
+        "sindri.tilemap": {
+          "texture": "textures/tiles.png",
+          "palette": [
+            "grass",
+            "dirt",
+            "stone",
+            "plank",
+            "tuft"
+          ],
+          "columns": 4,
+          "rows": 1,
+          "tiles": [
+            3,
+            3,
+            3,
+            3
+          ],
+          "layer": 0
+        },
+        "sindri.physics2d.tilemap_collider": {
+          "passable": [],
+          "layers": {
+            "memberships": 1,
+            "filter": 10
+          },
+          "friction": 0.5,
+          "restitution": 0.0
+        },
+        "sindri.physics2d.one_way": {
+          "normal": [
+            0,
+            1
+          ],
+          "angle": 0.7853982
+        },
+        "sindri.physics2d.material": {
+          "profile": "materials/wood.profile",
+          "override_friction": false,
+          "friction": 0.5,
+          "override_restitution": true,
+          "restitution": 0.0
+        },
+        "sindri.physics2d.rigid_body": {
+          "kind": "kinematic_velocity",
+          "pose": {
+            "position": [
+              0,
+              0
+            ],
+            "rotation": 0
+          },
+          "linear_velocity": [
+            0.8,
+            0
+          ],
+          "angular_velocity": 0,
+          "gravity_scale": 0,
+          "linear_damping": 0,
+          "angular_damping": 0,
+          "lock_rotation": true,
+          "continuous_collision": false
+        },
+        "sindri.script": {
+          "source": "scripts/ferry.decay",
+          "script": "Ferry",
+          "properties": {}
         }
       }
     }

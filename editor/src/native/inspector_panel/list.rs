@@ -262,6 +262,7 @@ mod tests {
                     registry: extractor.components(),
                     type_name: "sindri.voxel_world",
                     assets: FieldAssets {
+                        entities: None,
                         textures: &[],
                         fonts: &[],
                         scripts: &[],

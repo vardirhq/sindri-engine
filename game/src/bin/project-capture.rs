@@ -213,9 +213,6 @@ mod capture {
         let assets = project.join("assets");
         let (scene_id, sheet_ids) = manifest(project)?;
         let document = SceneDocument::from_json(&fs::read_to_string(assets.join(&scene_id))?)?;
-        let mut world = World::default();
-        let mut loaded = LoadedScenes::new();
-        loaded.enter_keeping_identities(&mut world, &scene_id, &document)?;
 
         let mut sources = ScriptSources::new();
         for (id, bytes) in files(&assets, ".decay") {
@@ -225,6 +222,9 @@ mod capture {
         for (id, bytes) in files(&assets, PREFAB_SUFFIX) {
             prefabs.insert(id, PrefabDocument::from_json(&text(bytes)?)?);
         }
+        let mut world = World::default();
+        let mut loaded = LoadedScenes::new();
+        loaded.enter_keeping_identities_with(&mut world, &scene_id, &document, &prefabs)?;
         let mut profiles = ProfileSources::new();
         for (id, bytes) in files(&assets, PROFILE_SUFFIX) {
             profiles.insert(id, ProfileDocument::from_json(&text(bytes)?)?);
@@ -386,6 +386,16 @@ mod capture {
         png.write_header()?.write_image_data(&pixels)?;
         println!("wrote {}", path.display());
         Ok(())
+    }
+
+    #[cfg(test)]
+    #[test]
+    fn native_project_delivery_expands_prefabs_and_resolves_physics_profiles() {
+        let root = Path::new(env!("CARGO_MANIFEST_DIR")).join("../games/platformer");
+        let (mut player, _, _) = open(&root, [960.0, 540.0]).unwrap();
+        player.play(0.5).unwrap();
+        let crate_id = SceneEntityId::new("wind-crate").unwrap();
+        assert!(player.world.entity_for_source_id(&crate_id).is_some());
     }
 }
 

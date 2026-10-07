@@ -10,6 +10,7 @@ mod animation;
 mod audio;
 mod camera_control;
 mod camera_math;
+mod characters;
 mod collision_outline;
 mod components;
 pub(crate) mod effects;
@@ -19,7 +20,11 @@ mod input_actions;
 mod navigation;
 mod occlusion;
 mod physics;
+mod physics3d;
+mod physics_joints;
+mod physics_material;
 mod physics_sync;
+mod physics_sync3d;
 mod placement;
 pub(crate) mod screen_ui;
 mod sequence;
@@ -28,6 +33,7 @@ mod tile_chunk;
 mod tile_surface;
 mod tilemap_collision;
 mod tilesets;
+mod voxel_collision3d;
 mod voxel_render;
 
 pub use animation::{AnimationClip, AnimationError, SpriteAnimationComponent, SpriteAnimations};
@@ -38,6 +44,7 @@ pub use camera_control::{
     set_camera_orthographic_size, set_camera_shake, set_camera_smoothing,
 };
 pub use camera_math::camera_rotation_from_look_at;
+pub use characters::{Character2dComponent, CharacterMotions2d, CharacterRequests2d};
 pub use collision_outline::{CollisionShapes, collision_shapes};
 pub use components::{
     BiomeDocument, CameraBehaviorComponent, CameraBounds, CameraComponent, CameraFit, CameraFollow,
@@ -67,10 +74,21 @@ pub use occlusion::{
     OcclusionError, OcclusionFinding, OcclusionProbe, OcclusionReport, sweep_occlusion,
 };
 pub use physics::{
-    Collider2dComponent, LAYER_LIMIT, PhysicsWorld2dComponent, RigidBody2dComponent, RigidBodyKind,
-    collision_layers, layer_bit,
+    Collider2dComponent, LAYER_LIMIT, OneWay2dComponent, PhysicsWorld2dComponent,
+    RigidBody2dComponent, RigidBodyKind, collision_layers, layer_bit,
+};
+pub use physics_joints::{
+    DistanceJoint2dComponent, HingeJoint2dComponent, SliderJoint2dComponent, SpringJoint2dComponent,
+};
+pub use physics_material::{
+    PhysicsMaterial2dComponent, PhysicsMaterialError, PhysicsMaterialSources,
+    physics_material_profile, referenced_physics_materials,
 };
 pub use physics_sync::{PhysicsSyncError, ScenePhysics2d};
+pub use physics_sync3d::ScenePhysics3d;
+pub use physics3d::{
+    Collider3dComponent, PhysicsWorld3dComponent, RigidBody3dComponent, VoxelCollider3dComponent,
+};
 pub use placement::{
     GridPlacementError, GridSurfaces, blocking_step_ahead, nearest_cell, resolve_grid_placements,
     standing_depth,
@@ -97,6 +115,10 @@ pub use textures::{
 pub use tile_chunk::{TILE_CHUNK_SIZE, TileChunkCoord, TileChunkStore};
 pub use tile_surface::{TileSurfaceError, TileSurfaces};
 pub use tilemap_collision::{TilemapCollider2dComponent, TilemapCollisionError};
+pub use voxel_collision3d::{
+    SceneVoxelCollision3d, VoxelCollisionBudget3d, VoxelCollisionError3d, VoxelCollisionReport3d,
+    VoxelCollisionSection3d, VoxelCollisionSettings3d, VoxelCollisionWorld3d,
+};
 pub mod voxel;
 pub use voxel::{VoxelError, VoxelFace, VoxelHit, cube_faces, face_quad, pick};
 pub use voxel_render::{

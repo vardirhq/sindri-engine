@@ -39,6 +39,7 @@ use super::rows::{At, Authored, Described, value_row};
 /// list its own meaning names, and the list only grows.
 #[derive(Clone, Copy)]
 pub(crate) struct FieldAssets<'a> {
+    pub(crate) entities: Option<&'a crate::inspector::entities::EntityReferences>,
     pub(crate) textures: &'a [String],
     pub(crate) fonts: &'a [String],
     pub(crate) scripts: &'a [String],

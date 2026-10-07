@@ -1,0 +1,8 @@
+{
+  "format_version": 1,
+  "metadata": { "name": "Reusable windmill assembly" },
+  "entities": [
+    { "id": "mount", "name": "Windmill assembly", "transform_3d": { "position": [0.0, 0.0, 0.0] } },
+    { "id": "mechanism", "parent": "mount", "prefab": { "source": "prefabs/windmill.prefab" } }
+  ]
+}

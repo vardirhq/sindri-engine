@@ -11,6 +11,7 @@ mod effects;
 mod frustum;
 mod meanings;
 mod mesh;
+mod physics3d_registry;
 mod physics_registry;
 pub(crate) mod registry;
 mod shape;

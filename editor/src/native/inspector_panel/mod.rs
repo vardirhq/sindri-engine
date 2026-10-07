@@ -13,6 +13,7 @@ pub(super) mod add_component;
 pub(super) mod blocks;
 mod body;
 pub(super) mod draft;
+mod entity;
 pub(super) mod field;
 pub(super) mod header;
 mod held;
@@ -72,6 +73,7 @@ pub(super) struct InspectorTools<'a> {
 /// alternative — reading each list inline — is what made one method long enough
 /// that nobody would read it either.
 struct PanelContext {
+    entities: crate::inspector::entities::EntityReferences,
     fonts: Vec<String>,
     textures: Vec<String>,
     scripts: Vec<String>,
@@ -123,6 +125,7 @@ impl PanelContext {
 
     fn assets(&self) -> FieldAssets<'_> {
         FieldAssets {
+            entities: Some(&self.entities),
             textures: &self.textures,
             fonts: &self.fonts,
             scripts: &self.scripts,
@@ -354,7 +357,11 @@ impl EditorApp {
         self.refresh_textures();
     }
 
-    fn panel_context(&self, components: &BTreeMap<String, Value>) -> PanelContext {
+    fn panel_context(
+        &self,
+        entity: EntityId,
+        components: &BTreeMap<String, Value>,
+    ) -> PanelContext {
         // Either image family: an animated HUD element reads its sheet from the
         // UI image, exactly as a world sprite does.
         let animation_texture = components
@@ -366,6 +373,11 @@ impl EditorApp {
             .map(|reference| reference.texture().to_owned());
         let scripts = self.project.scripts();
         PanelContext {
+            entities: crate::inspector::entities::EntityReferences::new(
+                &self.world,
+                entity,
+                components,
+            ),
             script_container: scripts.iter().find_map(|source| {
                 self.scripts
                     .declared(source)
@@ -442,7 +454,7 @@ impl EditorApp {
         let mut components = held.shown.clone();
         self.refresh_thumbnails(&components);
         let styles = self.styles_view(ui.ctx(), entity);
-        let context = self.panel_context(&components);
+        let context = self.panel_context(entity, &components);
         let addable = self.addable_components(&components, context.defaults());
         // The text the ID field is showing: whatever is being typed if this
         // entity's ID is mid-edit, and what the world holds otherwise.

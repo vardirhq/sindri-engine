@@ -205,6 +205,26 @@ const KNOWN: &[Known] = &[
         icon: icons::EFFECT,
     },
     Known {
+        type_name: "sindri.physics3d.rigid_body",
+        family: Family::Physics,
+        icon: icons::PHYSICS,
+    },
+    Known {
+        type_name: "sindri.physics3d.collider",
+        family: Family::Physics,
+        icon: icons::COLLIDER,
+    },
+    Known {
+        type_name: "sindri.physics3d.voxel_collider",
+        family: Family::Physics,
+        icon: icons::COLLIDER,
+    },
+    Known {
+        type_name: "sindri.physics3d.world",
+        family: Family::Physics,
+        icon: icons::PHYSICS,
+    },
+    Known {
         type_name: "sindri.physics2d.rigid_body",
         family: Family::Physics,
         icon: icons::PHYSICS,
@@ -218,6 +238,41 @@ const KNOWN: &[Known] = &[
         type_name: "sindri.physics2d.tilemap_collider",
         family: Family::Physics,
         icon: icons::COLLIDER,
+    },
+    Known {
+        type_name: "sindri.physics2d.one_way",
+        family: Family::Physics,
+        icon: icons::COLLIDER,
+    },
+    Known {
+        type_name: "sindri.physics2d.material",
+        family: Family::Physics,
+        icon: icons::COLLIDER,
+    },
+    Known {
+        type_name: "sindri.physics2d.character",
+        family: Family::Physics,
+        icon: icons::PHYSICS,
+    },
+    Known {
+        type_name: "sindri.physics2d.slider_joint",
+        family: Family::Physics,
+        icon: icons::PHYSICS,
+    },
+    Known {
+        type_name: "sindri.physics2d.spring_joint",
+        family: Family::Physics,
+        icon: icons::PHYSICS,
+    },
+    Known {
+        type_name: "sindri.physics2d.hinge_joint",
+        family: Family::Physics,
+        icon: icons::PHYSICS,
+    },
+    Known {
+        type_name: "sindri.physics2d.distance_joint",
+        family: Family::Physics,
+        icon: icons::PHYSICS,
     },
     Known {
         type_name: "sindri.physics2d.world",

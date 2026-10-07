@@ -302,7 +302,11 @@ fn a_scene_file_opens_its_instances_and_saves_them_back() {
         .unwrap()
         .world;
     assert_eq!(world.len(), 2);
-    file.save(&world).unwrap();
+    file.save(
+        &world,
+        sindri_scene::SceneExtractor::new().unwrap().components(),
+    )
+    .unwrap();
     assert_eq!(file.document(), &scene.canonicalized());
     let _ = std::fs::remove_dir_all(&directory);
 }
@@ -347,7 +351,11 @@ fn a_prefab_opens_as_a_document_and_saves_as_a_prefab() {
         .unwrap()
         .world;
     assert_eq!(world.len(), 3, "the chest and the coin in it");
-    file.save(&world).unwrap();
+    file.save(
+        &world,
+        sindri_scene::SceneExtractor::new().unwrap().components(),
+    )
+    .unwrap();
     let saved = PrefabDocument::from_json(&std::fs::read_to_string(&path).unwrap()).unwrap();
     assert_eq!(saved, chest.canonicalized());
 
@@ -356,7 +364,14 @@ fn a_prefab_opens_as_a_document_and_saves_as_a_prefab() {
         source_id: Some(id("stray")),
         ..sindri_core::EntityData::default()
     });
-    assert!(file.save(&two_roots).is_err(), "a prefab keeps one root");
+    assert!(
+        file.save(
+            &two_roots,
+            sindri_scene::SceneExtractor::new().unwrap().components()
+        )
+        .is_err(),
+        "a prefab keeps one root"
+    );
     let _ = std::fs::remove_dir_all(&directory);
 }
 
@@ -385,7 +400,13 @@ fn a_subtree_becomes_a_prefab_that_nests_the_instances_in_it() {
     };
     let world = World::from_scene_with(&scene, &prefabs).unwrap().world;
     let chest = world.entity_for_source_id(&id("chest")).unwrap();
-    let prefab = super::subtree_prefab(&world, chest, &prefabs).unwrap();
+    let prefab = super::subtree_prefab(
+        &world,
+        chest,
+        &prefabs,
+        sindri_scene::SceneExtractor::new().unwrap().components(),
+    )
+    .unwrap();
     let ids: Vec<&str> = prefab
         .entities
         .iter()
@@ -445,7 +466,11 @@ fn a_scene_with_a_missing_prefab_opens_and_saves_it_back_unchanged() {
     assert_eq!(file.missing().len(), 1);
     let world = crate::native::load_world(&crate::native::scene_extractor(), &file).unwrap();
     assert_eq!(world.len(), 2, "a placeholder, and the entity under it");
-    file.save(&world).unwrap();
+    file.save(
+        &world,
+        sindri_scene::SceneExtractor::new().unwrap().components(),
+    )
+    .unwrap();
     let saved =
         SceneDocument::from_json(&std::fs::read_to_string(&path).unwrap()).expect("it reads");
     assert_eq!(saved, scene);

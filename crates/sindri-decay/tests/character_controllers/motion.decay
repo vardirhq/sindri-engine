@@ -1,0 +1,23 @@
+script ControllerMotion {
+    var missing: bool = false;
+    var x: f32 = 0.0;
+    var grounded: bool = false;
+    var copied: bool = false;
+    fn update(dt: f32) {
+        let previous = Physics.character_motion(this.entity);
+        missing = previous == null;
+        if previous != null {
+            x = previous.translation.x;
+            grounded = previous.grounded;
+            var copy = previous;
+            copy.translation = Vec2(99.0, 99.0);
+            copy.collisions.push(RayHit2d(entity: this.entity, point: Vec2(0.0, 0.0), normal: Vec2(0.0, 1.0), distance: 0.0));
+            let fresh = Physics.character_motion(this.entity);
+            if fresh != null {
+                copied = fresh.translation.x == previous.translation.x && fresh.collisions.length == previous.collisions.length;
+            }
+        }
+        Physics.move_character(this.entity, Vec2(9.0, 0.0), false);
+        Physics.move_character(this.entity, Vec2(0.25, -0.1), true);
+    }
+}

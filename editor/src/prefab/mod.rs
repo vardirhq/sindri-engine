@@ -206,3 +206,6 @@ fn authored_footprint(prefab: &PrefabDocument) -> Vec<[i32; 2]> {
 mod instance_tests;
 #[cfg(test)]
 mod tests;
+
+#[cfg(test)]
+mod joint_tests;

@@ -239,8 +239,8 @@ Closest-hit 2D raycasts return Sindri `RayHit2d` snapshots (entity, world-space
 point/normal, distance). Directions are normalized; maximum distance is
 inclusive; invalid finite/range inputs fail. Membership masks, sensor opt-in and
 whole-entity exclusion select pieces before choosing a hit. Inside hits have
-zero distance/normal; exact ties prefer entity handle then piece order. Direct
-scans work before the first step and after a body move. Decay returns `null` on
+zero distance/normal; exact ties prefer entity handle then piece order. A
+query-only per-piece BVH works before the first step and after a body move. Decay returns `null` on
 a miss and skips inactive/despawned entities immediately, while scene geometry
 changes are synchronized at the next step. Engine and Decay regressions cover
 geometry, compounds, filtering, validation, copies and removal/reuse. The
@@ -248,11 +248,261 @@ platformer displays ground clearance through jumps against painted tilemap
 colliders, and `examples/physics` exposes live rays, hit dots, normals, falling
 bodies, bounce and sensors with desktop/touch controls. Pages exports it under
 `examples/physics/`; native project regressions and desktop/phone browser smoke
-checks exercise its real Decay controls. Overlap/shape casts, 3D queries and an
-accelerated query index remain absent.
+checks exercise its real Decay controls. Rays, overlaps and shape casts now use
+a synchronized per-piece index, also used by controller penetration, slide and
+ground probes. Historical platform support reads only the known support entity's
+pieces; current bounds cannot discard its previous pose. Implemented 2D overlaps
+and shape casts are described below.
 
-A parallel Sindri-owned 3D body/collider data model already fixes the public
-shape of the later 3D slice, but no 3D runtime behavior is claimed yet.
+A standalone `PhysicsWorld3d` now exercises the parallel Sindri-owned body/collider
+model through fixed-step simulation. Native tests cover XYZ gravity, box/sphere/
+capsule solids, quaternion/local offsets, compound mass, masks and collision/
+sensor events, kinematic targets, velocity/impulse/teleport controls, rotation
+locking and atomic validation/removal. The engine rejects quaternions outside
+the unit-norm tolerance; all poses use `[x, y, z, w]`. Standalone 3D rays, overlaps
+and fixed-orientation shape casts use current body/local poses even before the
+first step or immediately after teleports. Native regressions cover all shapes,
+XYZ hits, rotated probes, filtering, whole-entity predicates, sorted unique
+results, exact ties, initial overlap, extreme finite directions and pending/solved
+poses. A query-only per-piece BVH now selects finite ray segments and probe/swept
+bounds, preserving entity/piece order. Inserts/removals/teleports update immediately
+and non-static pieces refresh after solving. Differential regressions compare
+exhaustive candidates; sparse XYZ rays, overlaps and casts select one piece in
+100/1,000/10,000-piece worlds. Overflowing bounds retain conservative candidates;
+backend shape casts at near-maximum finite coordinates/extents can still return
+non-finite results, so numerical failure reporting remains a gap.
+`ScenePhysics3d` now reconciles registered body/collider/world components with
+active scene entities, composed XYZ/quaternion transforms, gravity settings and
+parent-space write-back. Twelve regressions cover lifecycle/edits, batch rejection,
+solid/sensor events, targets, newer rotated/scaled parents and checked command
+undo/redo/save/reopen. Visual scale is preserved but does not resize 3D colliders;
+structural payload edits reset the rebuilt body's motion. This is the prerequisite
+for Causeway voxel collision proof. Shared native/browser sessions and native
+editor Play now step both dimensions before scripts; fresh Play, Stop and scene
+replacement reset both editor solvers. Two session regressions exercise XYZ
+motion, solid landing and inactivity. An exported scratch fixture exercises
+XYZ motion/landing in Chromium with a read-only Decay observer and visible
+textured geometry. All three components appear in the Physics menu and editor
+tests pass. Native inspector/Play interaction remains unverified in this slice
+because local graphics adapter startup hangs or fails. Typed `Physics3d` adds
+copied Vec3 linear/angular velocities, setters and dynamic impulses, plus all
+four sorted unique non-draining collision/sensor event queries. Six bridge
+regressions and a shared-session Decay driver exercise validation, kinds, locking,
+active/lifetime filtering, copied values/events and motion through subsequent
+scene steps. A rebuilt Chromium fixture confirms typed controls and actual solid
+landing events. Controls require an active body and leave authored motion unchanged. Before
+synchronization they validate authored bodies/nonempty colliders and queue in
+order; reads copy last setters/authored starts without resolving impulses. The standalone `BodyControl3d` queue now validates setters/
+impulses before insertion, replays them in order after compound mass is known
+and expires unresolved requests at a successful synchronization. Complete-batch
+validation includes queued kind conflicts and retains requests after failure.
+Four engine and three scene regressions exercise replay, reads, locks, rejection,
+retry and expiry; `ScenePhysics3d` replays before solving. Four typed bridge
+regressions exercise real prefab spawning, copied pending reads, locks/kinds and
+invalid authoring. A shared native-session regression and exported Chromium
+fixture verify actual spawn replay and movement; game/voxel/editor proof remains
+open. Typed 3D rays, sphere overlaps and sphere casts use indexed
+synchronized geometry, active-entity filtering, masks/sensors/whole-entity
+exclusion and copied optional `RayHit3d`/sorted overlap lists. Six bridge
+regressions and the shared-session/Chromium landing fixture exercise these
+contracts. Typed `Physics3d.layer`/`mask` read only the active authored 3D world's
+first 32 labels, combine checked names with OR and reject invalid settings or
+unknown labels. Three bridge regressions exercise full-u32 masks, duplicates,
+inactivity, live authoring and real query selection; typed script and session
+fixtures query with named masks. Typed rotated box/capsule overlaps and casts
+accept an arbitrary nonzero rotation axis and radians, with f64 normalization
+before quaternion conversion. Five bridge regressions exercise changed geometry,
+sweep travel, filtering, initial overlap and invalid/degenerate input; typed and
+shared-session/browser fixtures query actual geometry with all four probes.
+Resident/edited voxel collision and game proof remain unimplemented.
+
+Forces and rotation have runtime and typed Decay controls: additive world force
+and torque last one fixed step, impulses act immediately and off-centre kicks
+turn a body. Dynamic/velocity-kinematic rules, finite values and rotation locks
+are validated; spawn-window requests replay after collider mass is known and
+expire if never materialized. The platformer's wind crate exercises force,
+torque, angular velocity and impulses through its real kick input, with scene
+rotation writeback. Native, WASM and browser CI passed on the forces/rotation head; browser input and
+visual inspector review remain in final integration. See `docs/physics.md`.
+
+`PhysicsWorld2d::contacts` and typed `Physics.contacts(entity)` expose copied
+solid solver snapshots: other entity, world point, push normal towards the
+queried body, normal and signed friction impulses, and world force over the last
+fixed dt. Solver manifolds supply solved impulses. Ordering is deterministic
+by entity, point, normal and impulses. Sensors are excluded; sleeping support
+remains with zero new impulse/force. Runtime teleports and removals invalidate
+contacts, and Decay filters inactive/despawned others. Spawn-window queries are
+empty; missing bodies/physics fail. The platformer's crate flashes on a hard
+landing; its hero now grounds from controller results while keeping its ray
+for clearance.
+This is a general capability added for that genre showcase. Native regressions
+cover momentum/force balance, compound pieces, snapshot copies, lifecycle,
+ordering and sleeping support. Browser interaction/editor Play inspection remain
+in final integration.
+
+One-way support is authored with `sindri.physics2d.one_way`: a validated local
+normal and contact cone, applied to solid collider and tilemap pieces. Pair
+filtering also covers CCD ascent. `Physics.drop_through(entity, seconds)` uses
+fixed simulation time, preserves ordinary floors/sensors and works in the spawn
+window. Policy edits and undo keep live velocity/joints. Platformer's visible
+planks prove ascent, landing, input-driven dropping to painted ground and landing
+again; native regressions cover rotated normals, kinematic geometry and timer
+cancellation. Queries remain geometric, so its Decay grounding uses solved support
+contacts and descent rather than foot-sensor overlap. Chromium export/load
+smoke passed; visual inspector and full browser interactions remain in final
+physics integration.
+
+Reusable physics coefficients are project `.profile` assets with type
+`physics_material`, resolved at the scene boundary using shared validation.
+`sindri.physics2d.material` applies them to all an entity's collider pieces,
+including tilemap collision; explicit override flags win over profile values,
+and entities without the component retain their literals. Editor creation,
+profile selection, asynchronous delivery and hot reload use the existing profile
+pipeline. Invalid reloads retain the previous valid edit; coefficient changes
+preserve solver bodies, velocities and joints. Export discovers material
+references and validates profiles, and the shared native/browser host resolves
+them before stepping. Platformer reuses wood for its wind crate and planks,
+explicitly disables plank bounce, and tests the effect of changed restitution.
+Editor loader/reload regression coverage is present; visual inspector review and
+browser gameplay interaction remain in final physics integration.
+
+`sindri.physics2d.distance_joint` adds a scene-authored maximum-distance
+constraint owned by a separate entity. Endpoint strings resolve to stable IDs
+inside the containing scene; unchanged frames retain one constraint, edits/undo
+preserve body motion, and endpoint rebuilds reconnect after body synchronization.
+Inactive/missing endpoints suspend the constraint; removing its entity/component
+releases it independently of legacy script-created joints. Platformer's lantern
+sways under Decay wind within its authored tether and renders its cord in Decay.
+`sindri.physics2d.hinge_joint` adds body-local anchors, bounded relative angles
+and torque-capped velocity motors. Unchanged frames keep the constraint; setting
+edits wake its endpoints without resetting body motion. Typed
+`Physics.set_hinge_motor` updates the runtime component for the next synchronization,
+including before endpoints are built. Platformer's Decay-driven windmill reverses
+its axle motor; native tests exercise limits, caps, coasting, atomic validation,
+undo and rebuilds.
+
+`sindri.physics2d.slider_joint` adds aligned local axes, signed travel limits and
+force-capped velocity drive; `sindri.physics2d.spring_joint` adds radial
+force-based stiffness/damping.
+Typed `Physics.set_slider_motor` and `Physics.set_spring` validate atomic runtime
+component edits for next synchronization, preserving unknown fields and rebuild
+behavior. Platformer's powered lantern trolley reverses along its rail while
+Decay retunes the hanging light's rest length. Native tests measure rotated rail
+motion/limits, force caps, coasting/braking, spring damping and weight support;
+scene edits/undo, suspension, rebuilds and game removal are exercised. Editor save integration and native visual review are exercised.
+Runtime-spawned nested mechanisms retain original root aliases independently of
+serialized component payloads. The Decay spawn host passes the original prefab
+library into expansion; all four joint kinds reconnect only their own nested
+endpoints across repeated spawns, inactivity and removal. Platformer's reusable
+windmill now nests its powered mechanism in `windmill-kit.prefab`. Canonical paths
+shadow aliases; ambiguous aliases fail before spawning. Placed instances now retain
+aliases through library-aware scene entry on native/browser hosts, scene namespaces,
+editor reload/duplication and command undo. All four kinds exercise scene switching,
+inactivity and removal; saving prefab references and reopening rebuilds aliases.
+The platformer level windmill is placed from the same nested assembly. Flattened
+plain documents discard metadata. Opt-in `World::to_scene_with_references` remaps
+registered entity fields to assigned stable IDs, including nested lists, without
+live edits. Unknown fields remain unchanged, empty references stay unbound and
+malformed/unresolved/unstable targets fail serialization. All four joints reopen
+with isolated endpoints; the platformer's Decay-spawned windmill reopens with motor
+reversal and its fixed axle. Qualified scene IDs take precedence over relative
+namespace lookup when an exact match exists.
+All four authored constraints now accept an enabled flag, defaulting true for
+old payloads. Typed `Physics.joint_enabled` reads the authored flag and
+`Physics.set_joint_enabled` suspends/reconnects the constraint at next fixed
+synchronization without rebuilding endpoint bodies. `Physics.set_distance`
+tunes owned maximum-distance constraints, including before initial sync and
+while suspended. Validation rejects missing/conflicting/invalid owners, wrong
+kinds/types, missing physics and non-positive/non-finite lengths before mutation.
+Unknown payload fields survive. Scene command undo/redo covers all four kinds;
+platformer Decay reels its lantern tether with T and releases/reconnects it with L.
+Script-triggered world snapshots remain absent.
+Editor `SceneFile::save`/`save_as` and subtree prefab authoring automatically use
+the active registry for reference-aware serialization. Stable identities remain
+a prerequisite; invalid references fail before file writes/path adoption while
+unknown fields and the live world remain intact. Existing placed instances still
+save as prefab references. Native editor tests reopen two isolated instances of
+every joint kind, reuse saved subtrees and reject invalid saves without changing
+disk or the agreed document. The platformer's real Decay setup script spawns a
+nested windmill that editor Save As reopens with its fixed axle and reversing
+motor. Save remains unavailable during Play. Decay's number/flag store has no
+world snapshot operation; that gap is separate from editor authoring saves.
+
+Runtime-spawned prefab references now use a separate runtime identity, retaining
+local sibling paths and the original top-level root ID without assigning saved
+scene IDs. The platformer spawns/removes a reusable motor-driven windmill through
+Decay. Repeated instances, inactivity, root removal, reparenting and command undo
+are covered. Nested runtime aliases and placed roots survive library-based delivery;
+registry-based save remapping is opt-in. Automatic save-path integration remains
+open. Registered entity fields now have scoped native inspector choices, explicit
+clearing and visible missing/inactive diagnostics through the runtime's shared
+resolver. Real picker-click edits retarget/clear all four constraint kinds, and
+command undo restores their constraints/unknown payloads. Visual inspector review
+remains in final integration.
+
+Typed joint endpoint retargeting uses `Physics.set_joint_endpoints` for all four
+2D kinds. It accepts scoped entity handles or null to clear an endpoint, storing
+stable scene IDs/canonical prefab paths. Invalid scope, stale/unstable handles and
+identical endpoints fail before mutation; inactive targets suspend until active.
+Settings, enabled state, unknown payloads and body motion are retained. Platformer
+switches its lantern between two hooks with R, including while released. Generic
+inverse references also drive the inspector choices through the same core rules.
+
+Typed `Physics.remove_joint` removes exactly one valid authored 2D joint
+component, releasing its owned constraint at the next fixed synchronization.
+The owner, other components and bodies/motion survive, including before bodies
+are built or while suspended; legacy distance connections remain separate.
+All four kinds exercise removal and atomic rejection. Platformer Z cuts its
+lantern cord, leaving the body in free fall and later tether controls inert until
+repaired.
+Typed `Physics.create_distance_joint` authors an enabled maximum-distance component
+on an existing owner with no joint of any kind. Scoped stable references and length
+validate before mutation; null/inactive endpoints suspend. Next synchronization
+creates the owned constraint, retaining other components, bodies and legacy
+connections. Tests cover pre-sync creation, repeated removal/recreation, invalid
+owners/references/lengths, inactive targets and isolated runtime prefabs.
+Platformer C repairs its cut cord at the selected hook and length.
+Typed `Physics.create_hinge_joint` uses the same empty-owner/scoped-endpoint
+contract with finite body-local `Vec2` anchors. Limits and motor start disabled;
+existing motor controls configure the new component before synchronization.
+Pre-sync creation, repeated recreation, local anchors, motor behavior, owner/
+anchor rejection, inactive/unbound targets and runtime prefab isolation are tested.
+Platformer H rebuilds its placed windmill hinge; the rotor remains at its axle
+and reverses through Decay while the separate spawned windmill stays intact.
+Typed `Physics.create_spring_joint` supplies finite body-local anchors, positive
+rest length and non-negative stiffness/damping under the same empty-owner/scope
+contract. Existing tuning works before synchronization. Native tests exercise
+local-anchor force response, repeated recreation, retained body motion/legacy
+ownership, invalid arguments, inactive/unbound targets and prefab isolation.
+Platformer B rebuilds the light's spring without resetting its tuning phase or
+replacing the trolley's independently owned slider.
+Hinges also support a damped force-based position motor. Old payloads default
+to velocity mode; typed `Physics.set_hinge_position_motor` selects a relative
+angle within `[-pi, pi]`, finite non-negative stiffness/damping and a torque cap.
+The velocity setter switches back explicitly. Native tests exercise holding,
+retargeting, caps, enabled limits, atomic rejection, command undo/redo, scene
+round trips, suspension and collider rebuilds. Platformer P holds both placed
+and spawned windmills, resumes their reversal, and retains the selected drive
+when H recreates the placed hinge. This capability was added for that showcase.
+Script-triggered world snapshots remain absent.
+
+Sliders also support damped force-based position drive through the shared motor
+mode; omitted modes keep velocity behavior. Typed `Physics.set_slider_position_motor`
+sets finite signed anchor separation along the first local axis, non-negative
+stiffness/damping and a force cap. The velocity setter switches back; travel
+limits still apply. Native tests prove rotated rails/offset anchors, signed
+retargeting, caps, limits, invalid atomic calls, coasting, suspension/rebuild,
+checked command undo/redo and save/reopen. Platformer O parks/releases its trolley
+and J retains the selected drive and independent spring. Added for that showcase;
+script-triggered world snapshots remain absent.
+
+Typed `Physics.create_slider_joint` adds finite local anchors, unit local axes
+and optional finite ordered travel bounds under the same owner/scope contract.
+The new motor starts disabled; existing motor controls work before body sync.
+Tests exercise pre-sync/repeated creation, local-axis bounded travel/reversal,
+body-motion/legacy preservation, invalid geometry, inactive/unbound targets and
+runtime prefab isolation for all four constructors. Platformer J recreates the
+rail slider with its current drive direction, retaining the spring suspension.
 
 `sindri.physics2d.rigid_body` and `sindri.physics2d.collider` are registered
 scene components with defaults the engine accepts, so a scene authors bodies and
@@ -287,8 +537,7 @@ carry handles: a box's four edges, a circle's radius, a capsule's radius and
 height. Dragging an edge keeps the opposite edge where it was, along the piece's
 own rotated axis, and a whole drag is one undo step. The generic inspector
 also exposes the body and collider payloads — a compound's pieces are added, removed,
-reordered, and edited down to each piece's shape, though no game in this
-repository authors a compound yet — and editor Play steps them through the same
+reordered, and edited down to each piece's shape, with a two-piece compound used by the platformer — and editor Play steps them through the same
 fixed-update path as a build. `games/orbital-baked` is the end-to-end proof:
 player, enemies, projectiles, pickups, and effects use distinct masks and
 collision or sensor events continuously.
@@ -616,6 +865,62 @@ access remain missing.
 than allowing the runtime type to make the broader feature look complete.
 
 ### Voxel world foundation
+
+Authored voxel worlds now collide. `sindri.physics3d.voxel_collider` on a
+`sindri.voxel_world` entity resolves the world's generator, palette and edits
+through `VoxelGround`, takes each block's collision box from its block set
+(`collides`, default true, with the tile's own height/extent bounds; water in
+Causeway is `false`), and keeps resident only the sections dynamic bodies can
+reach this step plus a margin. `ScenePhysics3d::step_with_tile_sets` validates
+the voxel snapshot and the body batch before committing either, and the shared
+game session and editor Play pass their block sets. Causeway uses it: a block
+taken back tumbles out of its cell, lands on the generated terrain and only then
+returns to the stock, detected through `Physics3d.collision_started`. Six scene
+regressions and the Causeway play test exercise landing, owner events/queries,
+edited shafts under a sleeping body, distant residency, non-colliding and slab
+blocks, release and atomic rejection. A CI Chromium fixture lands the same
+prefab in exported Causeway, and [the native editor review](physics-voxel-editor-review.md)
+authors the voxel collider, block-set Collides and 3D bodies and lands them in
+Play. See [`physics.md`](physics.md#authored-voxel-colliders).
+
+`SceneVoxelCollision3d` now reconciles explicit complete resident voxel snapshots
+into static owner groups. Occupancy/policy revisions retain compiled geometry;
+scale/settings changes reuse boxes, pose-only changes move the body, and section
+exit or world inactivity/removal releases owned geometry. Complete prevalidation
+and world/section/rebuild/piece limits reject invalid or over-budget snapshots
+without publishing partial collision. Seven native scene regressions exercise
+cache reuse, transforms/slabs, budgets/atomic retry, ownership/lifetime and real
+landing followed by falling through an edited voxel hole. All 497 scene tests,
+Clippy and WASM checks pass. Hosts still need authored block/terrain resolution,
+residency production and shared-session/editor wiring; no game/Decay/browser
+uses the adapter yet. See [`physics.md`](physics.md) for input/revision ownership,
+default limits and f32/positive-scale constraints.
+
+
+The standalone 3D solver now owns keyed static collider groups under one real
+entity. Replacement/removal retains other collider handles and the body handle;
+queries update immediately with owner identity and canonical key/piece ordering.
+A read-only validator supports complete scene-batch preflight. Invalid geometry,
+nonstatic owners or incompatible pending controls leave the world unchanged.
+Empty owners retain identity until full removal. Six native regressions include
+actual landing/events, deletion/falling, filters and internal handle retention;
+187 physics tests, Clippy and WASM checks pass. No scene host uses this API yet:
+revision caches, resident lifecycle/budgets and actual game/browser/editor voxel
+collision remain absent. See [`physics.md`](physics.md) for the contract/cost.
+
+
+A renderer/physics-independent `compile_section_collision` now derives exact
+section-local collision boxes from occupied `VoxelSection` cells and a supplied
+solidity/shape policy. Full cubes merge deterministically across material IDs;
+partial slabs/posts retain exact bounds, air and policy-excluded blocks are
+empty. Integer sixteenth-voxel bounds avoid world-coordinate precision loss;
+invalid shapes return typed errors and output is bounded by 4,096 boxes per
+section. Five regressions prove exact cover without holes, overlaps or air,
+partial shapes, worst-case bounds and edited negative sections across residency
+unload/reload; 50 crate tests and warning-denied native/WASM checks pass. It has
+no new dependencies and inserts no solver bodies. The scene snapshot adapter now provides revision caching and resident lifecycle/
+budget enforcement. Authored Causeway collision/game proof remains absent; see the geometry contract in [`physics.md`](physics.md).
+
 
 `sindri-voxel` owns signed voxel and 16³ section coordinates, palette-backed
 section storage, deterministic random-access generation, bounded 3D residency,
@@ -1709,8 +2014,10 @@ settings gear.
 - World-space text, rich spans, and font fallback are missing. Screen text has
   authored alignment and wrapping, including Weave-controlled wrapping
 - **One mesh primitive: `Cube`.** No quad, sphere, or glTF import
-- The exercised physics runtime is 2D. There is a Sindri-owned 3D data model but
-  no 3D simulation, authoring workflow, or gameplay proof
+- The 3D runtime has native simulation, scene synchronization/command tests,
+  shared game/editor host wiring and primitive browser motion/landing evidence.
+  Native inspector/Play interaction, shared-session/browser spawn controls and occupied
+  resident/edited voxel/gameplay proof remain open
 - Effects are bounded, renderer-free runtime values driven from Decay; there is
   no general authored particle/emitter system or authored parallax system
 - Grid walls, footprints, occupancy, and deterministic A* work through the
@@ -1884,6 +2191,18 @@ half — whichever side of the event this entity was on. Despawning either half
 from inside the answer is safe. A host running no physics refuses the call
 rather than reporting a velocity of zero for a body that does not exist.
 Exercised in `crates/sindri-decay/tests/a_script_drives_a_body.rs`.
+
+**2D continuous collision is opt-in.** `RigidBody2d.continuous_collision` defaults
+false, including old payloads. Live dynamic-body toggles preserve velocity and
+joints; scene synchronization does not rebuild a body for CCD-only edits.
+Typed Decay controls support newly spawned bodies before synchronization.
+`crates/sindri-physics/tests/continuous_collision.rs` compares a fast bullet
+against a thin kinematic wall with a discrete control; the bridge regression
+exercises the spawn window and undo. The platformer wind crate opts in through
+its authored body and Decay start control; its launch/rotation and the native
+run-to-flag remain checked. Scoped native, Clippy, WASM and catalogue checks passed.
+Visual inspector and real browser verification remain in final integration.
+Sensors stay discrete; bullet-versus-bullet CCD is not guaranteed.
 
 **And a script can tell where the person is pointing.** `Pointer.x`,
 `Pointer.y` and `Pointer.inside` read the position and whether there is one;
@@ -2175,13 +2494,14 @@ controls and gizmos remain absent. See `docs/cameras.md`.
 `games/platformer` is the first genre showcase: a side-view level painted as a
 tilemap and made solid by a Tilemap Collider 2D, a hero who runs and jumps, ten
 coins and a flag, a HUD, and a camera that follows. It has no Rust of its own;
-the scene and two Decay scripts are the game, and it exports to the site.
+the scene and its Decay scripts are the game, and it exports to the site.
 
-**Its hero is a dynamic body driven by velocity.** A capsule collider with
-zero friction and a foot sensor under it: the sensor touches the ground and
-nothing else, so walls and ceilings never count as floor. Decay counts the
-ground contacts from `Physics.sensor_entered`/`sensor_exited`, and gives the
-jump the two forgivenesses players expect, a buffer for a press just before
+**Its hero uses the scene-owned Character 2D controller.** Decay integrates
+velocity and gravity, queues displacement and reads cached walkable support.
+One capsule probe checks ground obstacles; body and foot sensors preserve
+pickups independently. Walls, ceilings and one-way undersides never grant
+standing. It gives the jump the two forgivenesses players expect, a buffer
+for a press just before
 landing and coyote time for one just after running off a ledge. Letting go
 early cuts the rise short.
 
@@ -2198,7 +2518,7 @@ holds the camera to following it inside the level.
 
 ### Not yet
 
-- No enemies, hazards or one-way platforms; the plank tile waits on the last.
+- No enemies or hazards; raised one-way planks support jumping and timed drop-through.
 - No level after the first, no pause and no restart without Stop.
 - No site card or captured screenshot yet; the showcase library adds them.
 
@@ -2410,3 +2730,125 @@ Native headless tests exercise keys and phone touch; extraction tests exercise
 the rendered faces and cache retention. Editor Scene view remains unverified;
 no fluid simulation, 3D flood mesh, decoration or animated/glowing map face is
 claimed. See `voxel-terrain.md` for the contract.
+
+Hinge and slider motor authoring uses registered velocity/position choices
+from the engine enum, rather than a free-text mode field. Old joint payloads
+inherit the default choice. Native editor review of a scratch platformer scene
+exercised the endpoint picker, clearing, Save and undo. Rebuilt editor clicks
+selected Position for the nested windmill hinge and trolley slider; saved
+payloads retain other settings, and slider undo/redo restores omitted defaults
+and the selected mode. The completed native review is recorded below.
+
+The authored 2D joint slice has completed native visual review: all four numeric
+payloads reopen, nested hinge overrides persist, editor Play switches and
+rebuilds modes, and Stop restores the document. Play Save refuses to write,
+confirmed by an unchanged file hash. See [the repeatable editor review](physics-joint-editor-review.md).
+Engine/editor/Decay/platformer regressions and prior browser checks complete
+this 2D slice; 3D joints, gameplay world snapshots and final integration remain.
+
+A read-only 2D sweep/slide movement foundation now proposes displacement against
+current collider poses without mutating bodies. Positive skin, bounded iterations,
+initial penetration, filters and deterministic ties have native engine tests.
+The scene/typed host now integrate it and the platformer adopts it; see
+[the contract](character-movement.md). Native editor proof is recorded in
+[the character review](physics-character-editor-review.md).
+
+Read-only 2D ground probing adds configurable unit up, bounded slope angles,
+travel and skin. Tests exercise zero-travel support, rotated shapes, slope
+boundaries, steep obstruction, penetration, filters, current poses and invalid
+inputs. The nearest hit remains visible when unwalkable. The composed grounded
+movement query adds post-slide support state and optional
+downward snapping, default off. Ascending requests and initial penetration never
+snap or report grounded; steep support does not snap. Native tests cover landing,
+ledge departure, repeated support, descending slopes, blocked ascent, filters and
+arbitrary up. Grounded motion now enforces its support slope limit while
+sliding: steep contacts cannot introduce unrequested rise, explicit jumps retain
+their requested rise, and steep descent remains ungrounded. Ordinary geometric
+projection remains unrestricted. Native regressions exercise slope boundaries, descent,
+mirrored/rotated probes and filtering. Optional steps now require starting support,
+full lift clearance, better forward progress and a walkable landing within the
+height cap. Rejected candidates preserve the ordinary result. Native tests cover
+all three probe shapes, ceilings/overhangs, height limits, absent/steep landings,
+rotated up and exact fallback. Contact-normal refinement prevents flat box-face
+casts from producing large artificial hops. Opt-in platform snapshots now verify
+old support and sweep synchronized translation/rotation-point carry before the
+character move, retaining wall clipping and crush/penetration outcomes. Native
+tests cover all shapes, snapshot advancement, simulated kinematic ordering,
+rotation, filtering, jumps and step accounting. Hosts still need to capture and
+advance snapshots without applying motion twice. Grounded movement now respects
+per-piece one-way support sides/cones across sliding, support, steps and carry.
+Request-scoped drop-through ignores only one-way solids, preserving ordinary
+floors and sensor filtering; hosts own duration and cancellation. Native tests
+exercise ascent/descent, rotated normals, deep/shallow overlap, snap, step landing
+and carry/drop interactions. Scene/typed Decay integration and platformer
+one-way/terrain gameplay now exercise these policies. Native editor proof is
+recorded in [the character review](physics-character-editor-review.md); the
+authored ferry exercises game translation carry. Rotation follows a chord with
+fixed probe orientation; continuous arc and rotating-probe sweeps remain absent.
+
+
+Scene controller ownership now registers validated `sindri.physics2d.character`
+settings beside the existing Collider 2D. It derives a stationary kinematic body,
+requires one solid probe and rejects a simultaneous rigid body; extra sensors,
+probe offsets/rotation and query masks are exercised. Runtime movement requests
+replace per-step input and specify snap permission; timed controller drop-through
+uses fixed simulation duration. Fresh support is seeded before the solve and
+current platform motion is carried afterward, with motion applied once and
+parent-relative writeback. Scene native tests cover spawning, first-step vertical
+carry, rotation, parented riders, teleports/rebuilds/inactivity/slot reuse, timers,
+request validation, cached script borrows and saved authored data.
+Controller queries/render transforms see the new pose immediately; solid response
+and discrete sensors process it at the next solve. Same-step response, physical
+push impulses, compound solid probes and swept controller triggers remain absent.
+Typed Decay now offers queued `Physics.move_character` requests and copied optional
+`Physics.character_motion` results; `Physics.drop_through` selects controller or
+dynamic-body timers by authored movement ownership. Motion/support/carry fields
+and ordered hit lists filter inactive/despawned references without rewriting
+historical displacement. Missing controller context and invalid inputs fail
+explicitly; invalid requests preserve previous queued input. Shared game runtime,
+editor Play and platformer harness offer the same scene context. Native runtime
+and shared-session regressions exercise previous-pass reads, replacement, copied
+fields/lists, platform carry, filtering, drop/cancellation and physics-only hosts.
+A rebuilt Chromium export of the shared-session fixture runs queued movement,
+observes grounded/copied results and renders the controller above its floor.
+The platformer now adopts the controller through its real Hero script: native
+regressions reach the flag with coins and no falls, traverse/drop through planks,
+and exercise variable jump height, acceleration/braking and respawn. The dynamic
+crate retains CCD and contact-impulse proof. Native editor authoring/undo/Play
+is reviewed; the browser goal gate now exercises the normal spawn and keyboard
+controls through the flag with coins and no falls.
+Two authored stone risers and an inclined boardwalk now exercise accepted steps,
+walkable ascent and downhill snap through the Hero script without jumping.
+Control tests disable stepping or lower the slope limit to show the same terrain
+blocks walking. Browser keyboard captures show the hero traversing that terrain;
+delivery/input evidence is recorded in the physics checkpoint.
+
+The platformer's one-way plank ferry crosses the first gap using ordinary
+kinematic velocity set by Decay. Hero adds no platform motion: scene support
+snapshots supply each actual solved displacement once. Native game regressions
+ride across and back with fixed relative position, board through a running jump
+from the starting field, leave/reacquire carry on jump/landing, and drop through
+into the pit/normal respawn path. Chromium exports the same assets with the hero
+initially aboard and renders riding in both directions and a keyboard jump.
+This is moving-platform translation proof for the genre showcase; rotation and
+carry clipping retain engine/scene test evidence. Native editor proof is recorded
+in [the character review](physics-character-editor-review.md);
+browser goal proof is exercised by the normal-spawn keyboard gate.
+
+Native Character 2D editor review exercises every setting, snap undo/redo,
+save/reopen, add/remove through checked commands and restoring custom settings.
+The reopened platformer runs/jumps in Play with a read-only inspector; Save
+refuses during Play and file hashes confirm Stop restores the document.
+See [the repeatable review](physics-character-editor-review.md). This is editor
+proof rather than a new implementation. The browser goal gate completes the 2D
+character acceptance; final-head physics integration remains open.
+
+The exported platformer now has a CI browser goal regression. A scratch copy adds
+one read-only Decay observer and retains the shipped starting pose and scripts.
+Playwright drives ordinary movement/jump keyboard events using the native goal
+player's terrain decisions, waiting for an observed release between jumps.
+The gate asserts the flag, at least three coins and zero falls, and preserves
+asset-fetch, WebGPU, pixel and script-error checks. Repeated local Chromium runs
+collected five coins with eight jumps and no falls. This completes the 2D
+controller proof for the genre showcase; it does not supply a 3D controller or
+close the separately documented compound/solver/trigger/carry limitations.

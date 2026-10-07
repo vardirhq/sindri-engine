@@ -532,6 +532,38 @@
       "addable": true,
       "apply": {},
       "default_payload": {
+        "carry_platforms": true,
+        "max_iterations": 8,
+        "max_slope_angle": 0.7853981852531433,
+        "skin": 0.01,
+        "snap_distance": 0.0,
+        "step_height": 0.0,
+        "up": [
+          0.0,
+          1.0
+        ]
+      },
+      "display_name": "Character 2D",
+      "fields": {
+        "carry_platforms": true,
+        "max_iterations": 8,
+        "max_slope_angle": 0.7853981852531433,
+        "skin": 0.01,
+        "snap_distance": 0.0,
+        "step_height": 0.0,
+        "up": [
+          0.0,
+          1.0
+        ]
+      },
+      "meanings": {},
+      "schema_version": 1,
+      "type_name": "sindri.physics2d.character"
+    },
+    {
+      "addable": true,
+      "apply": {},
+      "default_payload": {
         "pieces": [
           {
             "friction": 0.5,
@@ -628,8 +660,153 @@
       "addable": true,
       "apply": {},
       "default_payload": {
+        "enabled": true,
+        "first": "",
+        "max_distance": 1.0,
+        "second": ""
+      },
+      "display_name": "Distance Joint 2D",
+      "fields": {
+        "enabled": true,
+        "first": "",
+        "max_distance": 1.0,
+        "second": ""
+      },
+      "meanings": {
+        "first": {
+          "kind": "entity"
+        },
+        "second": {
+          "kind": "entity"
+        }
+      },
+      "schema_version": 1,
+      "type_name": "sindri.physics2d.distance_joint"
+    },
+    {
+      "addable": true,
+      "apply": {},
+      "default_payload": {
+        "enabled": true,
+        "first": "",
+        "first_anchor": [
+          0.0,
+          0.0
+        ],
+        "limits_enabled": false,
+        "lower_angle": 0.0,
+        "motor_damping": 0.0,
+        "motor_enabled": false,
+        "motor_max_torque": 0.0,
+        "motor_mode": "velocity",
+        "motor_stiffness": 0.0,
+        "motor_target_angle": 0.0,
+        "motor_velocity": 0.0,
+        "second": "",
+        "second_anchor": [
+          0.0,
+          0.0
+        ],
+        "upper_angle": 0.0
+      },
+      "display_name": "Hinge Joint 2D",
+      "fields": {
+        "enabled": true,
+        "first": "",
+        "first_anchor": [
+          0.0,
+          0.0
+        ],
+        "limits_enabled": false,
+        "lower_angle": 0.0,
+        "motor_damping": 0.0,
+        "motor_enabled": false,
+        "motor_max_torque": 0.0,
+        "motor_mode": "velocity",
+        "motor_stiffness": 0.0,
+        "motor_target_angle": 0.0,
+        "motor_velocity": 0.0,
+        "second": "",
+        "second_anchor": [
+          0.0,
+          0.0
+        ],
+        "upper_angle": 0.0
+      },
+      "meanings": {
+        "first": {
+          "kind": "entity"
+        },
+        "motor_mode": {
+          "kind": "choice",
+          "options": [
+            "velocity",
+            "position"
+          ]
+        },
+        "second": {
+          "kind": "entity"
+        }
+      },
+      "schema_version": 1,
+      "type_name": "sindri.physics2d.hinge_joint"
+    },
+    {
+      "addable": true,
+      "apply": {},
+      "default_payload": {
+        "friction": 0.5,
+        "override_friction": false,
+        "override_restitution": false,
+        "profile": "",
+        "restitution": 0.0
+      },
+      "display_name": "Physics Material 2D",
+      "fields": {
+        "friction": 0.5,
+        "override_friction": false,
+        "override_restitution": false,
+        "profile": "",
+        "restitution": 0.0
+      },
+      "meanings": {
+        "profile": {
+          "asset": "profile",
+          "kind": "asset"
+        }
+      },
+      "schema_version": 1,
+      "type_name": "sindri.physics2d.material"
+    },
+    {
+      "addable": true,
+      "apply": {},
+      "default_payload": {
+        "angle": 0.7853981852531433,
+        "normal": [
+          0.0,
+          1.0
+        ]
+      },
+      "display_name": "One-Way Platform 2D",
+      "fields": {
+        "angle": 0.7853981852531433,
+        "normal": [
+          0.0,
+          1.0
+        ]
+      },
+      "meanings": {},
+      "schema_version": 1,
+      "type_name": "sindri.physics2d.one_way"
+    },
+    {
+      "addable": true,
+      "apply": {},
+      "default_payload": {
         "angular_damping": 0.0,
         "angular_velocity": 0.0,
+        "continuous_collision": false,
         "gravity_scale": 1.0,
         "kind": "dynamic",
         "linear_damping": 0.0,
@@ -650,6 +827,7 @@
       "fields": {
         "angular_damping": 0.0,
         "angular_velocity": 0.0,
+        "continuous_collision": false,
         "gravity_scale": 1.0,
         "kind": "dynamic",
         "linear_damping": 0.0,
@@ -682,6 +860,137 @@
       },
       "schema_version": 1,
       "type_name": "sindri.physics2d.rigid_body"
+    },
+    {
+      "addable": true,
+      "apply": {},
+      "default_payload": {
+        "enabled": true,
+        "first": "",
+        "first_anchor": [
+          0.0,
+          0.0
+        ],
+        "first_axis": [
+          1.0,
+          0.0
+        ],
+        "limits_enabled": false,
+        "lower_distance": 0.0,
+        "motor_damping": 0.0,
+        "motor_enabled": false,
+        "motor_max_force": 0.0,
+        "motor_mode": "velocity",
+        "motor_stiffness": 0.0,
+        "motor_target_distance": 0.0,
+        "motor_velocity": 0.0,
+        "second": "",
+        "second_anchor": [
+          0.0,
+          0.0
+        ],
+        "second_axis": [
+          1.0,
+          0.0
+        ],
+        "upper_distance": 0.0
+      },
+      "display_name": "Slider Joint 2D",
+      "fields": {
+        "enabled": true,
+        "first": "",
+        "first_anchor": [
+          0.0,
+          0.0
+        ],
+        "first_axis": [
+          1.0,
+          0.0
+        ],
+        "limits_enabled": false,
+        "lower_distance": 0.0,
+        "motor_damping": 0.0,
+        "motor_enabled": false,
+        "motor_max_force": 0.0,
+        "motor_mode": "velocity",
+        "motor_stiffness": 0.0,
+        "motor_target_distance": 0.0,
+        "motor_velocity": 0.0,
+        "second": "",
+        "second_anchor": [
+          0.0,
+          0.0
+        ],
+        "second_axis": [
+          1.0,
+          0.0
+        ],
+        "upper_distance": 0.0
+      },
+      "meanings": {
+        "first": {
+          "kind": "entity"
+        },
+        "motor_mode": {
+          "kind": "choice",
+          "options": [
+            "velocity",
+            "position"
+          ]
+        },
+        "second": {
+          "kind": "entity"
+        }
+      },
+      "schema_version": 1,
+      "type_name": "sindri.physics2d.slider_joint"
+    },
+    {
+      "addable": true,
+      "apply": {},
+      "default_payload": {
+        "damping": 1.0,
+        "enabled": true,
+        "first": "",
+        "first_anchor": [
+          0.0,
+          0.0
+        ],
+        "rest_length": 1.0,
+        "second": "",
+        "second_anchor": [
+          0.0,
+          0.0
+        ],
+        "stiffness": 10.0
+      },
+      "display_name": "Spring Joint 2D",
+      "fields": {
+        "damping": 1.0,
+        "enabled": true,
+        "first": "",
+        "first_anchor": [
+          0.0,
+          0.0
+        ],
+        "rest_length": 1.0,
+        "second": "",
+        "second_anchor": [
+          0.0,
+          0.0
+        ],
+        "stiffness": 10.0
+      },
+      "meanings": {
+        "first": {
+          "kind": "entity"
+        },
+        "second": {
+          "kind": "entity"
+        }
+      },
+      "schema_version": 1,
+      "type_name": "sindri.physics2d.spring_joint"
     },
     {
       "addable": true,
@@ -742,6 +1051,202 @@
       "meanings": {},
       "schema_version": 1,
       "type_name": "sindri.physics2d.world"
+    },
+    {
+      "addable": true,
+      "apply": {},
+      "default_payload": {
+        "pieces": [
+          {
+            "friction": 0.5,
+            "layers": {
+              "filter": 4294967295,
+              "memberships": 4294967295
+            },
+            "offset": [
+              0.0,
+              0.0,
+              0.0
+            ],
+            "restitution": 0.0,
+            "rotation": [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ],
+            "sensor": false,
+            "shape": {
+              "half_extents": [
+                0.5,
+                0.5,
+                0.5
+              ],
+              "shape": "box"
+            }
+          }
+        ]
+      },
+      "display_name": "Collider 3D",
+      "fields": {
+        "pieces": [
+          {
+            "friction": 0.5,
+            "layers": {
+              "filter": 4294967295,
+              "memberships": 4294967295
+            },
+            "offset": [
+              0.0,
+              0.0,
+              0.0
+            ],
+            "restitution": 0.0,
+            "rotation": [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ],
+            "sensor": false,
+            "shape": {
+              "half_extents": [
+                0.5,
+                0.5,
+                0.5
+              ],
+              "shape": "box"
+            }
+          }
+        ]
+      },
+      "meanings": {},
+      "schema_version": 1,
+      "type_name": "sindri.physics3d.collider"
+    },
+    {
+      "addable": true,
+      "apply": {},
+      "default_payload": {
+        "angular_damping": 0.0,
+        "angular_velocity": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "gravity_scale": 1.0,
+        "kind": "dynamic",
+        "linear_damping": 0.0,
+        "linear_velocity": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "lock_rotation": false,
+        "position": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "rotation": [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      },
+      "display_name": "Rigid Body 3D",
+      "fields": {
+        "angular_damping": 0.0,
+        "angular_velocity": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "gravity_scale": 1.0,
+        "kind": "dynamic",
+        "linear_damping": 0.0,
+        "linear_velocity": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "lock_rotation": false,
+        "position": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "rotation": [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      },
+      "meanings": {
+        "kind": {
+          "kind": "choice",
+          "options": [
+            "static",
+            "dynamic",
+            "kinematic_position",
+            "kinematic_velocity"
+          ]
+        }
+      },
+      "schema_version": 1,
+      "type_name": "sindri.physics3d.rigid_body"
+    },
+    {
+      "addable": true,
+      "apply": {},
+      "default_payload": {
+        "friction": 0.5,
+        "layers": {
+          "filter": 4294967295,
+          "memberships": 4294967295
+        },
+        "margin": 2.0,
+        "restitution": 0.0
+      },
+      "display_name": "Voxel Collider 3D",
+      "fields": {
+        "friction": 0.5,
+        "layers": {
+          "filter": 4294967295,
+          "memberships": 4294967295
+        },
+        "margin": 2.0,
+        "restitution": 0.0
+      },
+      "meanings": {},
+      "schema_version": 1,
+      "type_name": "sindri.physics3d.voxel_collider"
+    },
+    {
+      "addable": true,
+      "apply": {},
+      "default_payload": {
+        "gravity": [
+          0.0,
+          -9.81,
+          0.0
+        ],
+        "layers": []
+      },
+      "display_name": "Physics 3D World",
+      "fields": {
+        "gravity": [
+          0.0,
+          -9.81,
+          0.0
+        ],
+        "layers": []
+      },
+      "meanings": {},
+      "schema_version": 1,
+      "type_name": "sindri.physics3d.world"
     },
     {
       "addable": true,

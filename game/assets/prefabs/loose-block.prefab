@@ -1,0 +1,106 @@
+{
+  "format_version": 1,
+  "metadata": {
+    "name": "Loose block"
+  },
+  "entities": [
+    {
+      "id": "loose-block",
+      "name": "Loose block",
+      "transform_3d": {
+        "position": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "rotation": [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        "scale": [
+          0.55,
+          0.55,
+          0.55
+        ]
+      },
+      "components": {
+        "sindri.physics3d.collider": {
+          "pieces": [
+            {
+              "shape": {
+                "shape": "box",
+                "half_extents": [
+                  0.28,
+                  0.28,
+                  0.28
+                ]
+              },
+              "offset": [
+                0.0,
+                0.0,
+                0.0
+              ],
+              "rotation": [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ],
+              "sensor": false,
+              "layers": {
+                "memberships": 4294967295,
+                "filter": 4294967295
+              },
+              "friction": 0.8,
+              "restitution": 0.2
+            }
+          ]
+        },
+        "sindri.physics3d.rigid_body": {
+          "kind": "dynamic",
+          "position": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "rotation": [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          "linear_velocity": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "angular_velocity": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "gravity_scale": 1.0,
+          "linear_damping": 0.0,
+          "angular_damping": 0.0,
+          "lock_rotation": true
+        },
+        "sindri.script": {
+          "script": "LooseBlock",
+          "source": "scripts/loose-block.decay"
+        },
+        "sindri.sprite": {
+          "billboard": true,
+          "texture": "textures/blocks-side.png#plank",
+          "tint": [
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ]
+        }
+      }
+    }
+  ]
+}

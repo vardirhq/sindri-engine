@@ -1,0 +1,41 @@
+// Read-only browser observer: drops Causeway's own loose block over the
+// wanderer and reports once the voxel Floor has both answered a downward ray
+// and stopped the block -- landing, not the give-up fallback.
+script BrowserVoxelLanding {
+    @export let block: Prefab;
+    var frames: f32 = 0.0;
+    var dropped: Entity? = null;
+    var queried: bool = false;
+    var verified: bool = false;
+    fn update(dt: f32) {
+        frames += 1.0;
+        let floor = World.find("Floor");
+        let wanderer = World.find("Wanderer");
+        if floor == null || wanderer == null || verified {
+            return;
+        }
+        if frames == 30.0 {
+            let at = wanderer.transform.world_position;
+            let body = World.spawn(this.block);
+            body.transform.position.x = at.x;
+            body.transform.position.y = at.y + 3.0;
+            body.transform.position.z = at.z;
+            dropped = body;
+            print("Voxel landing dropped");
+        }
+        let body = dropped;
+        if body != null && World.exists(body) {
+            let from = body.transform.world_position;
+            let hit = Physics3d.raycast(from, Vec3(0.0, -1.0, 0.0), 8.0, Physics3d.layer("solid"), false, body);
+            if hit != null {
+                if hit.entity == floor {
+                    queried = true;
+                }
+            }
+        }
+        if queried && Game.get("blocks_landed", 0.0) > 0.5 {
+            verified = true;
+            print("Voxel collision landing verified");
+        }
+    }
+}

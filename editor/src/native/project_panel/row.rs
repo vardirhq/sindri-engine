@@ -291,6 +291,10 @@ pub(crate) fn row_menu(
             asked = Some(BrowserAction::NewProfile(entry.path.clone()));
             ui.close();
         }
+        if menu::item(ui, "New physics material here").clicked() {
+            asked = Some(BrowserAction::NewPhysicsMaterial(entry.path.clone()));
+            ui.close();
+        }
         if menu::item(ui, "New block set here").clicked() {
             asked = Some(BrowserAction::NewBlockSet(entry.path.clone()));
             ui.close();

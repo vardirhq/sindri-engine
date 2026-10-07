@@ -183,6 +183,8 @@ pub enum PrefabError {
     Cycle(Vec<String>),
     #[error("prefabs are nested more than {0} deep")]
     TooDeep(usize),
+    #[error("the expanded prefab root alias '{}' names several entities", .0.as_str())]
+    AmbiguousRootAlias(SceneEntityId),
     #[error(transparent)]
     Entities(#[from] SceneError),
 }

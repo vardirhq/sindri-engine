@@ -35,6 +35,8 @@ pub enum CausewayError {
     #[error(transparent)]
     TileSet(#[from] sindri_core::TileSetError),
     #[error(transparent)]
+    Prefab(#[from] sindri_core::PrefabJsonError),
+    #[error(transparent)]
     Decode(#[from] sindri_assets::AssetDecodeError),
     #[error(transparent)]
     Audio(#[from] AudioError),

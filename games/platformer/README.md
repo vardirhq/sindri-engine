@@ -3,13 +3,43 @@
 The first genre showcase: a small side-view platformer. Run and jump across a
 painted level, pick up the coins and reach the flag.
 
+K or the west controller button tosses the wooden crate when nearby. Wind
+pushes it along the ground; an off-centre kick makes it tumble. Its forces and
+rotation are driven in Decay, with physics writing the resulting pose back.
+
+L releases or reconnects the hanging lantern; T reels its tether in or out.
+R switches its tether between two hooks, including while released.
+Z cuts the cord; later tether controls do nothing until C repairs it.
+C creates a fresh owned distance joint at the selected hook and tether length.
+The cord disappears while the constraint is suspended.
+
+O parks the trolley at a fixed place along its rail or releases it to reverse.
+J rebuilds the trolley slider and restores its selected drive, retaining
+its travel limits and independently owned spring.
+
+B rebuilds the trolley light's spring at its current rest length; Decay continues
+tuning it while the trolley remains on its independent rail.
+
+P toggles both windmills between holding an angle and reversing.
+H rebuilds the placed windmill hinge and restores its selected drive, keeping the axle
+fixed and the separately spawned mechanism independent.
+
+V places or removes a second powered windmill from a reusable prefab. Its hinge
+references its own root axle and rotor, and Decay reverses the motor.
+
 Arrow keys or A/D run; Space, W or Up jumps. A controller can use the left
-stick or D-pad and the south face button. On a touch screen, the first finger
+stick or D-pad and the south face button. Down/S or D-pad down drops through
+the raised one-way planks. On a touch screen, the first finger
 makes Sindri's virtual stick and a second finger jumps. A tap is a hop and a
 held press a full jump; a jump pressed just before landing, or just after
 running off a ledge, still counts. Horizontal movement accelerates and
 decelerates rather than snapping between stopped and full speed, with
-deliberately lighter air control after committing to a jump.
+deliberately lighter air control after committing to a jump. Two low stone steps
+and an inclined boardwalk near the start can be walked over without jumping.
+The controller steps onto each riser and follows the boardwalk downhill; input
+continues building intended speed while collision clips the actual movement.
+A plank ferry crosses the first gap and returns. Jump aboard and stop running
+to ride it; jumping leaves its carry, and Down drops through it into the pit.
 
 The touch path is functional input, but the platformer does not yet draw its
 mobile controls. Visible on-screen affordances for the stick and jump action
@@ -34,9 +64,11 @@ It uses, with no Rust of its own:
 
 - a **tilemap** painted in the editor, made solid by a **Tilemap Collider 2D**,
   with grass tufts left passable;
-- the scene's own **gravity**, from a **Physics 2D World**;
-- a **dynamic body** with a capsule collider and a **foot sensor** that says
-  when the hero is standing, so walls and ceilings never count as floor;
+- the scene's own **gravity**, from a **Physics 2D World**, for the dynamic crate;
+- a **Character 2D** controller with one ground-filtered capsule probe and
+  separate body/foot pickup sensors; **controller support** grants standing so
+  plank undersides never grant a jump; Decay owns velocity, gravity and jump policy;
+- visible **one-way planks** with local support normals and timed drop-through;
 - **sprite animation** clips for idle, run, jump and fall;
 - **keyboard, gamepad and touch input** through one movement path, including
   Sindri's built-in touch stick;
@@ -55,3 +87,73 @@ opens in 2D, framed on the game's camera. It is also exported to the site at
 player hold right and jump at every gap and wall until it reaches the flag
 without falling, and checks the camera follows. `src/lib.rs` is the harness
 that plays it without a window, built from the same public pieces a host uses.
+
+`tests/one_way_platforms.rs` jumps through the authored planks, lands on top,
+drops through using the real input action, stops on the ordinary painted floor
+and lands on the planks again after the drop timer expires.
+
+The hero now grants jump permission from solved solid contact normals, retaining
+its ray for the ground-clearance display. The wind crate flashes amber on hard
+landings from contact impulse. Both policies live in Decay and exercise the
+general contact snapshot API added for this genre showcase.
+
+The crate and planks share `assets/materials/wood.profile`, a reusable physics
+material added for this showcase. The planks explicitly override restitution
+to zero; the crate keeps the shared bounce. `tests/physics_materials.rs` checks
+that both use the asset and that changing its restitution changes the crate's
+rebound. Copy the profile and material component with the scene when using this
+project as a starting point.
+
+A lantern hangs from a scene-authored distance joint near the raised planks.
+Decay applies the wind and draws the cord from the solved body positions;
+`tests/distance_joints.rs` verifies motion, the distance bound and releasing the
+tether. The separate tether entity is the pattern to copy for a distance joint.
+
+The windmill has a separate hinge entity connecting its fixed axle and physical
+rotor. Decay reverses its torque-capped motor every two seconds with
+`Physics.set_hinge_motor`; `tests/hinge_motor.rs` observes both directions,
+a fixed axle and removal. P toggles both windmills between holding 0.6 radians
+through `Physics.set_hinge_position_motor` and their reversing velocity drive.
+H recreation restores the selected mode through the windmill script. Tests
+exercise both modes and a rebuild while holding. The level places `windmill-kit.prefab`, which nests
+`windmill.prefab`; V spawns that same assembly. Copy these prefabs with the script
+for a powered rotating part. The authored hinge keeps its original local root
+reference through placement, export and runtime spawning.
+
+The lantern trolley travels along an authored slider rail and reverses through
+`Physics.set_slider_motor`. O holds it at a signed offset of 0.5 world units
+using `Physics.set_slider_position_motor`; J retains the selected mode.
+`tests/slider_spring.rs` also proves parking, rebuilding and resumed reversal
+while retaining the independent light. Its hanging light uses a force-based spring; Decay
+changes its rest length with `Physics.set_spring` and draws the cord from solved
+positions. `tests/slider_spring.rs` checks bounded reversal, the changed light
+height and independent joint removal. Copy these separate owner entities for a
+linear mechanism or a damped suspension; keep motion rules in Decay.
+
+`tests/spawned_joints.rs` places, reverses and removes the reusable windmill twice
+through Decay, checking its fixed axle, isolated joint and fresh spawn lifecycle.
+
+`tests/joint_controls.rs` cuts the cord while preserving the lantern body and
+other constraints, then checks later controls stay inert. Repeated C repairs
+recreate the constraint and visible cord while retaining hook and length choices.
+It retargets the lantern between hooks, including while suspended, retunes its tether, releases it into free fall,
+reconnects it and returns to the original length through keyboard-driven Decay.
+
+`tests/saved_joints.rs` saves and reopens a Decay-spawned nested windmill through
+registry-based reference remapping, then checks both motor directions, its fixed
+world-space axle and independent constraint ownership.
+
+`tests/hinge_motor.rs` also rebuilds the placed hinge twice with H while a second
+windmill is present, checking scoped endpoints, fixed axle and continued reversal.
+
+`tests/slider_spring.rs` also rebuilds the spring with B in both rest-length
+phases, checking stable ownership, bounded trolley motion and continued tuning.
+
+`tests/slider_spring.rs` rebuilds the slider twice with J, checking bounded
+reversal, stable endpoint references and the independently owned suspension.
+
+The [editor save regression](../../editor/tests/scene_joint_saves.rs) also runs
+this project's real Decay windmill setup, then saves/reopens its spawned nested
+mechanism through editor Save As and proves motor reversal around a fixed axle.
+Editor authoring saves remap registered entity references automatically after
+stable IDs are assigned; gameplay world snapshots remain a separate gap.

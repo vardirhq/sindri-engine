@@ -15,7 +15,8 @@
 use std::collections::HashMap;
 
 use sindri_core::{
-    CommandBuffer, EntityData, EntityId, SceneEntityId, World, WorldCommand, instance_path,
+    CommandBuffer, EntityData, EntityId, PrefabLink, SceneEntityId, World, WorldCommand,
+    instance_path,
 };
 
 /// Adds the commands that copy `entity` and its descendants beside it, and
@@ -77,9 +78,18 @@ fn copy_into(
         });
     let is_member = within.is_some();
     let source_id = within.unwrap_or_else(|| unused_id(rehearsal, source.source_id.as_ref()));
-    let link = source.prefab.clone().filter(|link| link.root || is_member);
+    let mut link = source.prefab.clone().filter(|link| link.root || is_member);
     if link.as_ref().is_some_and(|link| link.root) {
         copied_roots.insert(entity, source_id.clone());
+    }
+    if let Some(link) = &mut link
+        && let Some(original_root) = world.instance_root(entity)
+        && let Some(original_id) = world
+            .get(original_root)
+            .and_then(|data| data.source_id.as_ref())
+        && let Some(copied_id) = copied_roots.get(&original_root)
+    {
+        rebase_aliases(link, original_id, copied_id);
     }
     let data = EntityData {
         source_id: Some(source_id),
@@ -104,6 +114,9 @@ fn copy_into(
         disabled: source.disabled,
         editor: source.editor.clone(),
         prefab: link,
+        // An editor copy must not share the original runtime spawn's scope.
+        prefab_identity: None,
+        scene_namespace: source.scene_namespace.clone(),
     };
     let handle = rehearsal.spawn(data.clone());
     // The rehearsal spawns, so the real command has a handle to name. Its own
@@ -144,3 +157,19 @@ fn taken(world: &World, candidate: &str) -> bool {
             .is_some_and(|id| id.as_str() == candidate)
     })
 }
+
+/// Root aliases belong to the copied instance's namespace, never its source.
+fn rebase_aliases(link: &mut PrefabLink, original: &SceneEntityId, copied: &SceneEntityId) {
+    let prefix = format!("{}/", original.as_str());
+    link.aliases = link
+        .aliases
+        .iter()
+        .filter_map(|alias| {
+            let local = SceneEntityId::new(alias.as_str().strip_prefix(&prefix)?).ok()?;
+            Some(instance_path(copied, &local))
+        })
+        .collect();
+}
+
+#[cfg(test)]
+mod reference_tests;

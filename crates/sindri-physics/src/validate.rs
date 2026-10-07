@@ -8,14 +8,30 @@ use crate::types2d::{Collider2d, ColliderShape2d, PhysicsPose2d, RigidBody2d};
 
 #[derive(Debug, Error, Eq, PartialEq)]
 pub enum PhysicsError {
+    #[error("physics quaternion '{0}' must have unit length")]
+    InvalidQuaternion(&'static str),
+    #[error("ground up direction must have unit length")]
+    InvalidGroundUp,
+    #[error("ground slope angle must be between zero and pi/2 radians")]
+    InvalidGroundSlopeAngle,
+    #[error("slide iteration budget must be between 1 and 32")]
+    InvalidSlideIterations,
     #[error("entity {0:?} is already registered with physics")]
     EntityAlreadyRegistered(EntityId),
     #[error("entity {0:?} has no physics body")]
     MissingEntity(EntityId),
     #[error("entity {0:?} cannot perform {1} with a {2:?} body")]
     WrongBodyKind(EntityId, &'static str, RigidBodyKind),
-    #[error("a distance joint cannot connect entity {0:?} to itself")]
+    #[error("a joint cannot connect entity {0:?} to itself")]
     JointToSelf(EntityId),
+    #[error("hinge limits must be ordered and within [-pi, pi] radians")]
+    InvalidJointLimits,
+    #[error("hinge motor target must be within [-pi, pi] radians")]
+    InvalidHingeMotorTarget,
+    #[error("slider axes must have unit length")]
+    InvalidJointAxis,
+    #[error("slider lower distance must not exceed its upper distance")]
+    InvalidSliderLimits,
     #[error("physics value '{0}' must be finite")]
     NonFinite(&'static str),
     #[error("physics value '{0}' must be positive")]
@@ -26,6 +42,10 @@ pub enum PhysicsError {
     NotNormalized(&'static str),
     #[error("physics timestep must be finite and greater than zero")]
     InvalidTimestep,
+    #[error("one-way support angle must be between zero and pi/2 radians")]
+    InvalidOneWayAngle,
+    #[error("material update needs {expected} collider pieces, got {actual}")]
+    MaterialPieceCount { expected: usize, actual: usize },
     #[error("collider piece {index} is invalid: {reason}")]
     ColliderPiece {
         index: usize,

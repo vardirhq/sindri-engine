@@ -61,7 +61,7 @@ impl World {
         };
         let mut entity_map = HashMap::new();
 
-        for ExpandedEntity { entity, link } in &expanded {
+        for ExpandedEntity { entity, link, .. } in &expanded {
             let runtime = world.spawn(EntityData {
                 source_id: Some(entity.id.clone()),
                 name: entity.name.clone(),
@@ -169,7 +169,7 @@ impl World {
         }
 
         let mut entity_map = HashMap::with_capacity(expanded.len());
-        for ExpandedEntity { entity, link } in &expanded {
+        for ExpandedEntity { entity, link, .. } in &expanded {
             let runtime = self.spawn(EntityData {
                 source_id: Some(namespaced[&entity.id].clone()),
                 name: entity.name.clone(),
@@ -177,7 +177,7 @@ impl World {
                 components: entity.components.clone(),
                 disabled: entity.disabled,
                 editor: entity.editor.clone(),
-                prefab: link.clone(),
+                prefab: namespaced_link(link.as_ref(), namespace),
                 ..EntityData::default()
             });
             entity_map.insert(entity.id.clone(), runtime);
@@ -302,4 +302,20 @@ fn expanded(
         validate_entities(&entities)?;
     }
     Ok(expanded)
+}
+
+/// Only aliases use scene paths; authoring links retain prefab-local paths.
+fn namespaced_link(link: Option<&crate::PrefabLink>, namespace: &str) -> Option<crate::PrefabLink> {
+    let mut link = link?.clone();
+    if !namespace.is_empty() {
+        link.aliases = link
+            .aliases
+            .iter()
+            .map(|alias| {
+                SceneEntityId::new(format!("{namespace}/{}", alias.as_str()))
+                    .expect("a prefixed non-empty ID is non-empty")
+            })
+            .collect();
+    }
+    Some(link)
 }

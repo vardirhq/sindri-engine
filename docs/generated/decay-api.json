@@ -82,6 +82,12 @@
       "type": "Physics"
     },
     {
+      "description": "Independent 3D physics controls, indexed queries and copied last-step events. Requires a 3D physics host. Controls require an active body. Before synchronization, valid authored 3D bodies and nonempty colliders accept ordered setters/impulses; replay uses actual compound mass. Unconsumed requests expire after successful synchronization. Authored motion fields are unchanged, so structural rebuilds restore authored settings.",
+      "kind": "value",
+      "name": "Physics3d",
+      "type": "Physics3d"
+    },
+    {
       "description": "The mouse, or a finger on a touch screen, handled the same way so one game works on both.",
       "kind": "value",
       "name": "Pointer",
@@ -933,9 +939,165 @@
       "name": "Camera"
     },
     {
+      "description": "A copied result of scene-owned 2D character movement. Gameplay reads support and collision flags to choose its own gravity, jump and recovery policy. This is historical movement, not a live solver contact or a pending request.",
+      "members": [
+        {
+          "description": "Copied ordered carry RayHit2d values, filtered to active existing entities.",
+          "kind": "value",
+          "name": "carry_collisions",
+          "type": "List<RayHit2d>"
+        },
+        {
+          "description": "Whether the carry sweep exhausted its iteration budget; false without carry.",
+          "kind": "value",
+          "name": "carry_iteration_limit_reached",
+          "type": "bool"
+        },
+        {
+          "description": "Platform translation/rotation-point displacement requested for carry, or zero without carry. Remains historical even when the platform reference is filtered.",
+          "kind": "value",
+          "name": "carry_requested",
+          "type": "Vec2"
+        },
+        {
+          "description": "Whether the carry sweep started in strict penetration; false without carry.",
+          "kind": "value",
+          "name": "carry_started_penetrating",
+          "type": "bool"
+        },
+        {
+          "description": "Collision-limited carry displacement included once in translation, or zero without carry.",
+          "kind": "value",
+          "name": "carry_translation",
+          "type": "Vec2"
+        },
+        {
+          "description": "Copied ordered slide RayHit2d values, filtered to active existing entities. Distances belong to each sweep phase.",
+          "kind": "value",
+          "name": "collisions",
+          "type": "List<RayHit2d>"
+        },
+        {
+          "description": "Nearest support-query RayHit2d before landing/snap, or null when absent or inactive. Distance describes that downward travel.",
+          "kind": "value",
+          "name": "ground",
+          "type": "RayHit2d?"
+        },
+        {
+          "description": "Whether the support probe started in strict penetration.",
+          "kind": "value",
+          "name": "ground_started_penetrating",
+          "type": "bool"
+        },
+        {
+          "description": "Whether the ground hit meets the authored up/slope limit; false when the hit is absent or filtered.",
+          "kind": "value",
+          "name": "ground_walkable",
+          "type": "bool"
+        },
+        {
+          "description": "Whether the completed endpoint has walkable support and the request was not ascending or penetrating. False if the ground entity is now inactive or removed.",
+          "kind": "value",
+          "name": "grounded",
+          "type": "bool"
+        },
+        {
+          "description": "Whether the selected slide exhausted its bounded iteration budget.",
+          "kind": "value",
+          "name": "iteration_limit_reached",
+          "type": "bool"
+        },
+        {
+          "description": "Verified carrying entity, or null without carry or when it is now inactive/removed.",
+          "kind": "value",
+          "name": "platform",
+          "type": "Entity"
+        },
+        {
+          "description": "Unsatisfied slide displacement when the iteration budget is exhausted; collision-blocked normal motion is discarded.",
+          "kind": "value",
+          "name": "remaining",
+          "type": "Vec2"
+        },
+        {
+          "description": "Selected collision-limited slide displacement, after carry or from the lifted pose of an accepted step.",
+          "kind": "value",
+          "name": "slide_translation",
+          "type": "Vec2"
+        },
+        {
+          "description": "Additional downward landing/snap translation, or zero.",
+          "kind": "value",
+          "name": "snap_translation",
+          "type": "Vec2"
+        },
+        {
+          "description": "Whether the selected character slide started in strict penetration; carry reports its own flag.",
+          "kind": "value",
+          "name": "started_penetrating",
+          "type": "bool"
+        },
+        {
+          "description": "Accepted step lift, or zero for ordinary movement.",
+          "kind": "value",
+          "name": "step_translation",
+          "type": "Vec2"
+        },
+        {
+          "description": "Total world displacement applied once at the last fixed step, including slide, step, snap and platform carry.",
+          "kind": "value",
+          "name": "translation",
+          "type": "Vec2"
+        }
+      ],
+      "name": "CharacterMotion2d"
+    },
+    {
       "description": "A managed Color tween; read with Tween.color_value.",
       "members": [],
       "name": "ColorTween"
+    },
+    {
+      "description": "A copied solid solver contact from the last fixed step, relative to the queried body. Sensors are excluded. Multiple points/pieces may name one entity. Sleeping contacts retain support geometry and report zero new impulses/force. Editing a snapshot does not change physics.",
+      "members": [
+        {
+          "description": "The other entity touching the queried body.",
+          "kind": "value",
+          "name": "entity",
+          "type": "Entity"
+        },
+        {
+          "description": "Total world impulse divided by the fixed step's seconds, as Vec2.",
+          "kind": "value",
+          "name": "force",
+          "type": "Vec2"
+        },
+        {
+          "description": "World-space unit push direction towards the queried body, as Vec2.",
+          "kind": "value",
+          "name": "normal",
+          "type": "Vec2"
+        },
+        {
+          "description": "Nonnegative normal impulse from the last solve.",
+          "kind": "value",
+          "name": "normal_impulse",
+          "type": "f32"
+        },
+        {
+          "description": "World-space midpoint of the two surface anchors, as Vec2.",
+          "kind": "value",
+          "name": "point",
+          "type": "Vec2"
+        },
+        {
+          "description": "Signed friction impulse along Vec2(-normal.y, normal.x).",
+          "kind": "value",
+          "name": "tangent_impulse",
+          "type": "f32"
+        }
+      ],
+      "name": "Contact2d"
     },
     {
       "description": "Particle effects, such as sparks and explosions. The particles are only drawn; they are not objects and nothing can touch them.",
@@ -1558,6 +1720,46 @@
       "description": "2D physics: moving objects with speed and pushes, and finding out what this script's object bumped into.",
       "members": [
         {
+          "description": "Radians per second. Before a spawned body is built, reads its authored value or latest queued setter.",
+          "kind": "function",
+          "name": "angular_velocity",
+          "parameter_names": [
+            "entity"
+          ],
+          "parameters": [
+            "Entity"
+          ],
+          "returns": "f32"
+        },
+        {
+          "description": "Applies an immediate angular impulse to a dynamic body, independent of timestep.",
+          "kind": "function",
+          "name": "apply_angular_impulse",
+          "parameter_names": [
+            "entity",
+            "impulse"
+          ],
+          "parameters": [
+            "Entity",
+            "f32"
+          ],
+          "returns": "unit"
+        },
+        {
+          "description": "Adds a world-space Vec2 force for the next fixed step, then clears it. Repeated calls add; requires a dynamic body.",
+          "kind": "function",
+          "name": "apply_force",
+          "parameter_names": [
+            "entity",
+            "force"
+          ],
+          "parameters": [
+            "Entity",
+            "Vec2"
+          ],
+          "returns": "unit"
+        },
+        {
           "description": "Gives an object a sudden push in a direction. Heavier objects move less.",
           "kind": "function",
           "name": "apply_impulse",
@@ -1569,6 +1771,36 @@
           "parameters": [
             "Entity",
             "f32",
+            "f32"
+          ],
+          "returns": "unit"
+        },
+        {
+          "description": "Applies a world-space Vec2 impulse at a world-space Vec2 point, translating and turning a dynamic body. All motion controls support the spawn window.",
+          "kind": "function",
+          "name": "apply_impulse_at_point",
+          "parameter_names": [
+            "entity",
+            "impulse",
+            "point"
+          ],
+          "parameters": [
+            "Entity",
+            "Vec2",
+            "Vec2"
+          ],
+          "returns": "unit"
+        },
+        {
+          "description": "Adds torque for the next fixed step, then clears it. Positive turns counterclockwise; requires a dynamic body.",
+          "kind": "function",
+          "name": "apply_torque",
+          "parameter_names": [
+            "entity",
+            "torque"
+          ],
+          "parameters": [
+            "Entity",
             "f32"
           ],
           "returns": "unit"
@@ -1624,6 +1856,18 @@
           "returns": "RayHit2d"
         },
         {
+          "description": "A copied CharacterMotion2d from the last fixed controller pass, or null before first movement or for inactive/non-controller entities. Requires scene controller context; stale entity handles are errors. All scripts read the same completed pass while requests queue separately. Inactive/despawned ground, platform and collision references are filtered; grounded and ground_walkable become false when ground is filtered. Mutating returned fields/lists never changes the cached result. Settings, parenting and teleports invalidate the cache at synchronization.",
+          "kind": "function",
+          "name": "character_motion",
+          "parameter_names": [
+            "entity"
+          ],
+          "parameters": [
+            "Entity"
+          ],
+          "returns": "CharacterMotion2d?"
+        },
+        {
           "description": "The objects that started touching this script's object since the last frame, as a list.",
           "kind": "function",
           "name": "collision_started",
@@ -1656,6 +1900,150 @@
           "returns": "unit"
         },
         {
+          "description": "Copied Contact2d solid solver contacts from the last fixed step, ordered by other entity, point, normal and impulse. Normal points towards the queried body. Sensors are excluded; sleeping contacts report zero new impulses/force. Empty before simulation/spawn synchronization. Missing bodies/physics fail. Inactive/despawned others are omitted; removal and teleports invalidate affected snapshots.",
+          "kind": "function",
+          "name": "contacts",
+          "parameter_names": [
+            "entity"
+          ],
+          "parameters": [
+            "Entity"
+          ],
+          "returns": "List<Contact2d>"
+        },
+        {
+          "description": "Whether this authored 2D body uses swept solid collision. Sensors remain discrete.",
+          "kind": "function",
+          "name": "continuous_collision",
+          "parameter_names": [
+            "entity"
+          ],
+          "parameters": [
+            "Entity"
+          ],
+          "returns": "bool"
+        },
+        {
+          "description": "Authors an enabled maximum-distance joint on an existing owner with no authored 2D joint of any kind. Scoped endpoint handles become stable IDs or local prefab paths; null leaves an endpoint unbound and inactive endpoints suspend until active. Requires physics and a finite positive length. Valid before bodies are built; the next fixed synchronization creates the owned solver constraint. Invalid owners, references, identical endpoints, lengths or existing joints fail before mutation. Keeps other owner components and body motion; legacy connect_distance constraints remain separate.",
+          "kind": "function",
+          "name": "create_distance_joint",
+          "parameter_names": [
+            "joint",
+            "first",
+            "second",
+            "max_distance"
+          ],
+          "parameters": [
+            "Entity",
+            "Entity",
+            "Entity",
+            "f32"
+          ],
+          "returns": "unit"
+        },
+        {
+          "description": "Authors an enabled hinge on an existing owner with no authored 2D joint of any kind. Anchors are finite body-local Vec2 distances without transform scale. Angular limits and motor start disabled; set_hinge_motor can drive the new joint. Scoped handles become stable IDs or local prefab paths; null leaves an endpoint unbound and inactive targets suspend until active. Requires physics, works before bodies are built and creates its constraint at next fixed synchronization. Invalid owners, references, identical endpoints, anchors or existing joints fail before mutation. Keeps other owner components and body motion; legacy connections remain separate.",
+          "kind": "function",
+          "name": "create_hinge_joint",
+          "parameter_names": [
+            "joint",
+            "first",
+            "second",
+            "first_anchor",
+            "second_anchor"
+          ],
+          "parameters": [
+            "Entity",
+            "Entity",
+            "Entity",
+            "Vec2",
+            "Vec2"
+          ],
+          "returns": "unit"
+        },
+        {
+          "description": "Authors an enabled slider on an existing owner with no authored 2D joint of any kind. Finite Vec2 anchors use body-local world units without transform scale; axes must be finite unit Vec2 vectors. Bounds must be finite even when disabled; enabled lower distance cannot exceed upper distance. Motor starts disabled and set_slider_motor can configure it before synchronization. Scoped handles become stable IDs or local prefab paths; null leaves an endpoint unbound and inactive targets suspend until active. Requires physics, works before bodies are built and creates its constraint at next fixed synchronization. Invalid arguments or existing joints fail before mutation. Keeps other owner components and body motion; legacy connections remain separate.",
+          "kind": "function",
+          "name": "create_slider_joint",
+          "parameter_names": [
+            "joint",
+            "first",
+            "second",
+            "first_anchor",
+            "second_anchor",
+            "first_axis",
+            "second_axis",
+            "limits_enabled",
+            "lower_distance",
+            "upper_distance"
+          ],
+          "parameters": [
+            "Entity",
+            "Entity",
+            "Entity",
+            "Vec2",
+            "Vec2",
+            "Vec2",
+            "Vec2",
+            "bool",
+            "f32",
+            "f32"
+          ],
+          "returns": "unit"
+        },
+        {
+          "description": "Authors an enabled spring on an existing owner with no authored 2D joint of any kind. Finite Vec2 anchors use body-local world units without transform scale; rest length must be finite and positive, stiffness/damping finite and non-negative. Scoped handles become stable IDs or local prefab paths; null leaves an endpoint unbound and inactive targets suspend until active. Requires physics, works before bodies are built and creates its constraint at next fixed synchronization. Invalid arguments or existing joints fail before mutation. Keeps other owner components and body motion; legacy connections remain separate. Existing set_spring controls can retune the new joint before synchronization.",
+          "kind": "function",
+          "name": "create_spring_joint",
+          "parameter_names": [
+            "joint",
+            "first",
+            "second",
+            "first_anchor",
+            "second_anchor",
+            "rest_length",
+            "stiffness",
+            "damping"
+          ],
+          "parameters": [
+            "Entity",
+            "Entity",
+            "Entity",
+            "Vec2",
+            "Vec2",
+            "f32",
+            "f32",
+            "f32"
+          ],
+          "returns": "unit"
+        },
+        {
+          "description": "Ignores only one-way solid platforms for a finite non-negative simulation duration; zero cancels. Dynamic bodies keep the solver timer, including queued spawn-window requests. Authored Character 2D entities instead queue a replacement scene-controller timer for the next fixed pass; positive remainder covers that whole pass and decrements afterward. Controller drop removes one-way support/carry and snap while ordinary floors and sensors retain their policy. Pause retains timers. Requires the corresponding physics/controller host context; invalid values preserve the previous request. No authored state is changed.",
+          "kind": "function",
+          "name": "drop_through",
+          "parameter_names": [
+            "entity",
+            "seconds"
+          ],
+          "parameters": [
+            "Entity",
+            "f32"
+          ],
+          "returns": "unit"
+        },
+        {
+          "description": "Reads the authored enabled flag of one 2D joint owner, including before synchronization. True does not guarantee live endpoints; inactive or missing endpoints still suspend the constraint. Requires physics and exactly one valid authored joint.",
+          "kind": "function",
+          "name": "joint_enabled",
+          "parameter_names": [
+            "joint"
+          ],
+          "parameters": [
+            "Entity"
+          ],
+          "returns": "bool"
+        },
+        {
           "description": "The mask for one collision layer the scene's physics world names, such as `\"ground\"`, for a query's `mask` argument. A name the world does not give is an error.",
           "kind": "function",
           "name": "layer",
@@ -1678,6 +2066,22 @@
             "List<String>"
           ],
           "returns": "f32"
+        },
+        {
+          "description": "Queues finite world-space Vec2 displacement for an active authored Character 2D at the next fixed scene step. Later requests replace earlier ones, including before spawn synchronization; invalid input preserves the pending request. snap permits authored downward snapping; ascending requests never snap. Requires scene controller context, valid character settings, a transform and no competing rigid body. Scene synchronization validates exactly one solid collider before applying input. Gameplay owns speed, gravity and jumps. Results are available from character_motion after the fixed step; solver response and discrete sensor events follow at the next solve.",
+          "kind": "function",
+          "name": "move_character",
+          "parameter_names": [
+            "entity",
+            "displacement",
+            "snap"
+          ],
+          "parameters": [
+            "Entity",
+            "Vec2",
+            "bool"
+          ],
+          "returns": "unit"
         },
         {
           "description": "Like `overlap_circle`, for a box `half_size` from its centre to each edge, turned by `rotation` radians.",
@@ -1744,6 +2148,18 @@
           "returns": "RayHit2d"
         },
         {
+          "description": "Removes the authored distance, hinge, slider or spring component from one owner; the next fixed synchronization releases its solver constraint. Keeps the owner, its other components and endpoint bodies/motion. Legacy connect_distance constraints are unaffected. Works before bodies are built or while suspended. Requires physics and exactly one valid authored joint; missing, conflicting or malformed owners fail before mutation. Later joint controls fail until a joint is authored again.",
+          "kind": "function",
+          "name": "remove_joint",
+          "parameter_names": [
+            "joint"
+          ],
+          "parameters": [
+            "Entity"
+          ],
+          "returns": "unit"
+        },
+        {
           "description": "The objects that entered this script's trigger area since the last frame. A trigger area detects things without blocking them, like a pickup.",
           "kind": "function",
           "name": "sensor_entered",
@@ -1758,6 +2174,168 @@
           "parameter_names": [],
           "parameters": [],
           "returns": "List<Entity>"
+        },
+        {
+          "description": "Sets radians per second on a dynamic or velocity-kinematic body, respecting rotation locks.",
+          "kind": "function",
+          "name": "set_angular_velocity",
+          "parameter_names": [
+            "entity",
+            "velocity"
+          ],
+          "parameters": [
+            "Entity",
+            "f32"
+          ],
+          "returns": "unit"
+        },
+        {
+          "description": "Enables swept solid collision on a dynamic 2D body, including before a spawned body is built. Keeps velocity and joints.",
+          "kind": "function",
+          "name": "set_continuous_collision",
+          "parameter_names": [
+            "entity",
+            "enabled"
+          ],
+          "parameters": [
+            "Entity",
+            "bool"
+          ],
+          "returns": "unit"
+        },
+        {
+          "description": "Tunes an authored 2D maximum-distance constraint for the next fixed synchronization. Distance must be finite and positive. Works while suspended or before endpoints are built; preserves unknown fields and body motion. Requires physics and an authored distance joint.",
+          "kind": "function",
+          "name": "set_distance",
+          "parameter_names": [
+            "joint",
+            "max_distance"
+          ],
+          "parameters": [
+            "Entity",
+            "f32"
+          ],
+          "returns": "unit"
+        },
+        {
+          "description": "Selects velocity mode on an authored 2D hinge owner and sets its relative angular velocity target in radians/second and finite non-negative torque cap. Positive turns the second body counterclockwise relative to the first. Zero torque disables the motor (it coasts rather than brakes). Applied at the next fixed synchronization, including before endpoints are built; persists through rebuilds. Invalid values leave the component unchanged. Needs physics and a hinge component on the owner.",
+          "kind": "function",
+          "name": "set_hinge_motor",
+          "parameter_names": [
+            "joint",
+            "velocity",
+            "max_torque"
+          ],
+          "parameters": [
+            "Entity",
+            "f32",
+            "f32"
+          ],
+          "returns": "unit"
+        },
+        {
+          "description": "Selects a force-based position motor on an authored hinge owner. Target is relative radians within [-pi, pi]; stiffness, damping and torque cap must be finite and non-negative. Zero torque disables drive. Requires physics; validates before mutation, preserves unknown fields and body motion, and applies at next synchronization even before bodies exist. Settings survive suspension and endpoint rebuilds. set_hinge_motor selects velocity mode again. Enabled angular limits still bound motion.",
+          "kind": "function",
+          "name": "set_hinge_position_motor",
+          "parameter_names": [
+            "joint",
+            "target_angle",
+            "stiffness",
+            "damping",
+            "max_torque"
+          ],
+          "parameters": [
+            "Entity",
+            "f32",
+            "f32",
+            "f32",
+            "f32"
+          ],
+          "returns": "unit"
+        },
+        {
+          "description": "Suspends or reconnects an authored distance, hinge, slider or spring at the next fixed synchronization. Keeps the owner, endpoints, settings and body motion; preserves unknown fields. Validates before mutation, including in the spawn window. Requires physics and exactly one valid authored joint.",
+          "kind": "function",
+          "name": "set_joint_enabled",
+          "parameter_names": [
+            "joint",
+            "enabled"
+          ],
+          "parameters": [
+            "Entity",
+            "bool"
+          ],
+          "returns": "unit"
+        },
+        {
+          "description": "Retargets an authored 2D distance, hinge, slider or spring at the next fixed synchronization. Accepts entity handles in the owner's scene or runtime prefab; null clears either endpoint. Stores stable scene IDs or canonical prefab paths, never runtime handles. Inactive endpoints may be authored and suspend until active. Stale, unstable, out-of-scope or identical endpoints fail before mutation. Preserves enabled state, settings, unknown fields and body motion. Requires physics and exactly one valid authored joint; works before bodies are built.",
+          "kind": "function",
+          "name": "set_joint_endpoints",
+          "parameter_names": [
+            "joint",
+            "first",
+            "second"
+          ],
+          "parameters": [
+            "Entity",
+            "Entity",
+            "Entity"
+          ],
+          "returns": "unit"
+        },
+        {
+          "description": "Selects velocity mode on an authored 2D slider owner and sets its relative translation speed in world units/second along the first local axis, with a finite non-negative force cap. Zero force disables the drive; zero speed with positive force brakes. Validates before modifying the runtime component; applies at next fixed synchronization and survives endpoint rebuilds. Needs physics and a slider component; preserves unknown fields.",
+          "kind": "function",
+          "name": "set_slider_motor",
+          "parameter_names": [
+            "joint",
+            "velocity",
+            "max_force"
+          ],
+          "parameters": [
+            "Entity",
+            "f32",
+            "f32"
+          ],
+          "returns": "unit"
+        },
+        {
+          "description": "Selects a damped force-based position motor on an authored slider owner. Target is finite signed anchor separation along the first body's local axis in world units without transform scale. Stiffness, damping and force cap must be finite and non-negative. Enabled travel limits still bound motion; zero force disables drive. Requires physics; validates before mutation, preserves unknown fields/body motion and applies at next synchronization even before bodies exist. Settings survive suspension/rebuilds. set_slider_motor selects velocity mode again.",
+          "kind": "function",
+          "name": "set_slider_position_motor",
+          "parameter_names": [
+            "joint",
+            "target_distance",
+            "stiffness",
+            "damping",
+            "max_force"
+          ],
+          "parameters": [
+            "Entity",
+            "f32",
+            "f32",
+            "f32",
+            "f32"
+          ],
+          "returns": "unit"
+        },
+        {
+          "description": "Tunes an authored 2D spring owner's positive rest length and non-negative force-based stiffness/damping. All values must be finite. Invalid calls leave the component unchanged; valid changes apply at the next fixed synchronization, including before endpoints are built, and survive rebuilds. Needs physics and a spring component; preserves unknown fields.",
+          "kind": "function",
+          "name": "set_spring",
+          "parameter_names": [
+            "joint",
+            "rest_length",
+            "stiffness",
+            "damping"
+          ],
+          "parameters": [
+            "Entity",
+            "f32",
+            "f32",
+            "f32"
+          ],
+          "returns": "unit"
         },
         {
           "description": "Sets how fast, and which way, an object is moving.",
@@ -1801,6 +2379,308 @@
         }
       ],
       "name": "Physics"
+    },
+    {
+      "description": "Independent 3D physics controls, indexed queries and copied last-step events. Requires a 3D physics host. Controls require an active body. Before synchronization, valid authored 3D bodies and nonempty colliders accept ordered setters/impulses; replay uses actual compound mass. Unconsumed requests expire after successful synchronization. Authored motion fields are unchanged, so structural rebuilds restore authored settings.",
+      "members": [
+        {
+          "description": "Copied world-space Vec3 angular velocity in radians per second around XYZ. Before synchronization returns the last queued setter or authored starting velocity; rotation locking returns zero.",
+          "kind": "function",
+          "name": "angular_velocity",
+          "parameter_names": [
+            "entity"
+          ],
+          "parameters": [
+            "Entity"
+          ],
+          "returns": "Vec3"
+        },
+        {
+          "description": "Applies a finite world-space Vec3 impulse to an active dynamic body using its compound mass; queues before synchronization and resolves in call order at materialization. Invalid input or body kind fails before mutation; does not change authored starting motion.",
+          "kind": "function",
+          "name": "apply_impulse",
+          "parameter_names": [
+            "entity",
+            "impulse"
+          ],
+          "parameters": [
+            "Entity",
+            "Vec3"
+          ],
+          "returns": "unit"
+        },
+        {
+          "description": "Indexed active 3D shape query. Positive Vec3 half-extents define the box. Sweeps return copied RayHit3d or null with fixed orientation and nonzero normalized direction; travel is non-negative and the endpoint finite. Finite f32-range values are required. A nonzero Vec3 rotation_axis is normalized and rotation_angle is radians about it using the right-hand rule. Uses the ray membership mask, sensor opt-in and whole-entity exclusion. Overlaps are sorted unique copied Entity lists; casts retain initial-overlap and deterministic tie semantics. Does not step physics.",
+          "kind": "function",
+          "name": "cast_box",
+          "parameter_names": [
+            "origin",
+            "half_extents",
+            "rotation_axis",
+            "rotation_angle",
+            "direction",
+            "max_distance",
+            "mask",
+            "include_sensors",
+            "exclude"
+          ],
+          "parameters": [
+            "Vec3",
+            "Vec3",
+            "Vec3",
+            "f32",
+            "Vec3",
+            "f32",
+            "f32",
+            "bool",
+            "Entity?"
+          ],
+          "returns": "RayHit3d?"
+        },
+        {
+          "description": "Indexed active 3D shape query. The local-Y capsule has non-negative straight-segment half_height and positive radius; zero half-height is a sphere. Sweeps return copied RayHit3d or null with fixed orientation and nonzero normalized direction; travel is non-negative and the endpoint finite. Finite f32-range values are required. A nonzero Vec3 rotation_axis is normalized and rotation_angle is radians about it using the right-hand rule. Uses the ray membership mask, sensor opt-in and whole-entity exclusion. Overlaps are sorted unique copied Entity lists; casts retain initial-overlap and deterministic tie semantics. Does not step physics.",
+          "kind": "function",
+          "name": "cast_capsule",
+          "parameter_names": [
+            "origin",
+            "half_height",
+            "radius",
+            "rotation_axis",
+            "rotation_angle",
+            "direction",
+            "max_distance",
+            "mask",
+            "include_sensors",
+            "exclude"
+          ],
+          "parameters": [
+            "Vec3",
+            "f32",
+            "f32",
+            "Vec3",
+            "f32",
+            "Vec3",
+            "f32",
+            "f32",
+            "bool",
+            "Entity?"
+          ],
+          "returns": "RayHit3d?"
+        },
+        {
+          "description": "Closest fixed-orientation sphere sweep as a copied RayHit3d or null. Positive finite radius, finite Vec3 origin/direction, normalized nonzero direction and non-negative distance in engine f32 range; endpoint must remain finite. Point is world contact, distance is probe travel. Initial overlap returns origin, zero distance and zero normal. Uses indexed synchronized geometry and the ray filter, skipping inactive/despawned entities. No rotation or physics step; extreme finite geometry still has the engine's documented numerical limitations.",
+          "kind": "function",
+          "name": "cast_sphere",
+          "parameter_names": [
+            "origin",
+            "radius",
+            "direction",
+            "max_distance",
+            "mask",
+            "include_sensors",
+            "exclude"
+          ],
+          "parameters": [
+            "Vec3",
+            "f32",
+            "Vec3",
+            "f32",
+            "f32",
+            "bool",
+            "Entity?"
+          ],
+          "returns": "RayHit3d?"
+        },
+        {
+          "description": "Sorted unique other active entities that started solid contact with this script's entity in the last successful 3D step. All scripts observe the same snapshot without draining it.",
+          "kind": "function",
+          "name": "collision_started",
+          "parameter_names": [],
+          "parameters": [],
+          "returns": "List<Entity>"
+        },
+        {
+          "description": "Sorted unique other active entities that stopped solid contact with this script's entity in the last successful 3D step. Removed or inactive handles are filtered.",
+          "kind": "function",
+          "name": "collision_stopped",
+          "parameter_names": [],
+          "parameters": [],
+          "returns": "List<Entity>"
+        },
+        {
+          "description": "Query mask bit for a text name in the active authored 3D world's first 32 layer labels. Empty labels cannot be selected; duplicate names select the first bit. Reads current authoring without stepping; ignores inactive settings and never reads 2D names. Unknown names, malformed or multiple active world settings and missing 3D host fail.",
+          "kind": "function",
+          "name": "layer",
+          "parameter_names": [
+            "name"
+          ],
+          "parameters": [
+            "String"
+          ],
+          "returns": "f32"
+        },
+        {
+          "description": "Combines Physics3d.layer bits from a List<str> using bitwise OR. Repeated names do not add bits; an empty list returns zero. Every name is checked; non-text elements, unknown names, invalid active world settings or missing 3D host fail.",
+          "kind": "function",
+          "name": "mask",
+          "parameter_names": [
+            "names"
+          ],
+          "parameters": [
+            "List<String>"
+          ],
+          "returns": "f32"
+        },
+        {
+          "description": "Indexed active 3D shape query. Positive Vec3 half-extents define the box. Finite f32-range values are required. A nonzero Vec3 rotation_axis is normalized and rotation_angle is radians about it using the right-hand rule. Uses the ray membership mask, sensor opt-in and whole-entity exclusion. Overlaps are sorted unique copied Entity lists; casts retain initial-overlap and deterministic tie semantics. Does not step physics.",
+          "kind": "function",
+          "name": "overlap_box",
+          "parameter_names": [
+            "centre",
+            "half_extents",
+            "rotation_axis",
+            "rotation_angle",
+            "mask",
+            "include_sensors",
+            "exclude"
+          ],
+          "parameters": [
+            "Vec3",
+            "Vec3",
+            "Vec3",
+            "f32",
+            "f32",
+            "bool",
+            "Entity?"
+          ],
+          "returns": "List<Entity>"
+        },
+        {
+          "description": "Indexed active 3D shape query. The capsule lies along local Y before rotation; half_height is the non-negative half-length of its straight segment and radius is positive. Zero half-height is a sphere. Finite f32-range values are required. A nonzero Vec3 rotation_axis is normalized and rotation_angle is radians about it using the right-hand rule. Uses the ray membership mask, sensor opt-in and whole-entity exclusion. Overlaps are sorted unique copied Entity lists; casts retain initial-overlap and deterministic tie semantics. Does not step physics.",
+          "kind": "function",
+          "name": "overlap_capsule",
+          "parameter_names": [
+            "centre",
+            "half_height",
+            "radius",
+            "rotation_axis",
+            "rotation_angle",
+            "mask",
+            "include_sensors",
+            "exclude"
+          ],
+          "parameters": [
+            "Vec3",
+            "f32",
+            "f32",
+            "Vec3",
+            "f32",
+            "f32",
+            "bool",
+            "Entity?"
+          ],
+          "returns": "List<Entity>"
+        },
+        {
+          "description": "Sorted unique copied Entity list overlapping a finite Vec3 centre and positive finite f32-range radius. Uses indexed synchronized geometry, membership mask, sensor opt-in and whole-entity exclusion; inactive/despawned entities are filtered. Does not step physics.",
+          "kind": "function",
+          "name": "overlap_sphere",
+          "parameter_names": [
+            "centre",
+            "radius",
+            "mask",
+            "include_sensors",
+            "exclude"
+          ],
+          "parameters": [
+            "Vec3",
+            "f32",
+            "f32",
+            "bool",
+            "Entity?"
+          ],
+          "returns": "List<Entity>"
+        },
+        {
+          "description": "Closest indexed 3D ray hit as a copied RayHit3d or null. Finite Vec3 origin/direction and non-negative finite f32-range distance are required; direction is normalized and the endpoint must remain finite. Whole-u32 mask selects memberships, sensors opt in and an Entity or null excludes all pieces of one entity. Skips inactive/despawned entities. Inside/on hits have distance zero and zero normal; exact ties prefer entity then piece order. Queries synchronized geometry without stepping physics.",
+          "kind": "function",
+          "name": "raycast",
+          "parameter_names": [
+            "origin",
+            "direction",
+            "max_distance",
+            "mask",
+            "include_sensors",
+            "exclude"
+          ],
+          "parameters": [
+            "Vec3",
+            "Vec3",
+            "f32",
+            "f32",
+            "bool",
+            "Entity?"
+          ],
+          "returns": "RayHit3d?"
+        },
+        {
+          "description": "Sorted unique other active entities that entered sensor contact with this script's entity in the last successful 3D step. Discrete events do not guarantee fast trigger sweeps; the snapshot is not drained.",
+          "kind": "function",
+          "name": "sensor_entered",
+          "parameter_names": [],
+          "parameters": [],
+          "returns": "List<Entity>"
+        },
+        {
+          "description": "Sorted unique other active entities that left sensor contact with this script's entity in the last successful 3D step. Removed or inactive handles are filtered; the snapshot is not drained.",
+          "kind": "function",
+          "name": "sensor_exited",
+          "parameter_names": [],
+          "parameters": [],
+          "returns": "List<Entity>"
+        },
+        {
+          "description": "Sets finite Vec3 angular velocity in radians per second around world XYZ on an active dynamic or velocity-kinematic body; queues before synchronization after validating authored body/colliders. Rotation-locked bodies retain zero angular velocity. Invalid input fails before mutation; does not change authored starting motion.",
+          "kind": "function",
+          "name": "set_angular_velocity",
+          "parameter_names": [
+            "entity",
+            "velocity"
+          ],
+          "parameters": [
+            "Entity",
+            "Vec3"
+          ],
+          "returns": "unit"
+        },
+        {
+          "description": "Sets finite world-space Vec3 linear velocity on an active dynamic or velocity-kinematic body; queues before synchronization after validating authored body/colliders. Invalid inputs fail before mutation; does not change authored starting motion.",
+          "kind": "function",
+          "name": "set_velocity",
+          "parameter_names": [
+            "entity",
+            "velocity"
+          ],
+          "parameters": [
+            "Entity",
+            "Vec3"
+          ],
+          "returns": "unit"
+        },
+        {
+          "description": "Copied world-space Vec3 linear velocity. Before synchronization returns the last queued setter or authored starting velocity; impulses resolve only after mass is known.",
+          "kind": "function",
+          "name": "velocity",
+          "parameter_names": [
+            "entity"
+          ],
+          "parameters": [
+            "Entity"
+          ],
+          "returns": "Vec3"
+        }
+      ],
+      "name": "Physics3d"
     },
     {
       "description": "The mouse, or a finger on a touch screen, handled the same way so one game works on both.",
@@ -2144,6 +3024,36 @@
         }
       ],
       "name": "RayHit2d"
+    },
+    {
+      "description": "Copied closest 3D ray/shape-cast hit, optional where no hit exists. World-space point/normal and world-unit distance; editing fields never changes simulation geometry.",
+      "members": [
+        {
+          "description": "World-unit ray distance or shape centre travel, including zero for initial overlap.",
+          "kind": "value",
+          "name": "distance",
+          "type": "f32"
+        },
+        {
+          "description": "The active entity whose collider piece was hit.",
+          "kind": "value",
+          "name": "entity",
+          "type": "Entity"
+        },
+        {
+          "description": "World-space outward Vec3 normal; zero for an inside/on or initial-overlap hit.",
+          "kind": "value",
+          "name": "normal",
+          "type": "Vec3"
+        },
+        {
+          "description": "World-space Vec3 hit/contact position; probe origin for an initial shape overlap.",
+          "kind": "value",
+          "name": "point",
+          "type": "Vec3"
+        }
+      ],
+      "name": "RayHit3d"
     },
     {
       "description": "Saving progress between play sessions: numbers and true/false values stored under names, such as a best score.",
