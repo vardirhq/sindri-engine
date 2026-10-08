@@ -99,6 +99,12 @@ block or crate it hits and how far.
   so the quarry is a floor with walls raised by edits rather than an island.
   The game hosts do not bind the engine's built-in blocks, so the quarry ships
   its own block set and textures.
+- Decay cannot ask whether a UI element is laid out yet, and `Ui.position`
+  on one that is not stops the frame. Coming back from the quarry, the
+  director waits a few frames before measuring the bars.
+- The editor's own Play has no headless harness, so the editor proof is that
+  it compiles every script and loads every prefab the scripts spawn; Play
+  itself was not exercised here.
 - Decay cannot change a collider's material at runtime, so material comparisons
   use separate authored bodies.
 - There is no simulation time scale, and no in-game debug drawing of colliders:
@@ -116,5 +122,5 @@ block or crate it hits and how far.
 - [x] Test track robot, dominoes and red button
 - [x] Probe tool and debug overlay
 - [x] Voxel Quarry 3D annex
-- [ ] Session regressions, browser smoke on desktop and phone, editor Play
-- [ ] Documentation: README, parity, capabilities, changelog, pre-alpha exit
+- [x] Session regressions, browser smoke on desktop and phone, editor load
+- [x] Documentation: README, parity, capabilities, changelog, pre-alpha exit
