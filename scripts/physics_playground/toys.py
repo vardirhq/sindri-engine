@@ -182,7 +182,7 @@ def cannon_gallery(scene: Scene) -> None:
         "sindri.physics2d.collider": {"pieces": [
             box(0.2, 6.3, "static", sensor=True, filter_mask=bit("shells"))]},
         "sindri.script": script(TOYS, "BackStop"),
-    })
+    }, tags=("sensor",))
 
 
 

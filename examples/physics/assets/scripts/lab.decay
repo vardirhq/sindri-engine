@@ -1,0 +1,377 @@
+// The probe tool and the debug overlay: the playground's instruments.
+//
+// The probe is the old query lab grown up: drag from where the query starts to
+// where it points, and it casts a ray, a circle or a box that way, or asks what
+// overlaps a circle that big, through the layers the mask lets in. The overlay
+// draws over the room without replacing it: outlines coloured by what each
+// body is doing, velocity arrows, solver contacts with their normals, and every
+// authored joint from anchor to anchor.
+
+// One authored joint, as the generator wrote it: the overlay cannot read a
+// joint's anchors, only whether it is on.
+struct JointLink {
+    owner: String,
+    first: String,
+    second: String,
+    first_anchor: Vec2,
+    second_anchor: Vec2,
+}
+
+shared fn probe_name(index: f32) -> String {
+    if index == 1.0 { return "CIRCLE CAST"; }
+    if index == 2.0 { return "BOX CAST"; }
+    if index == 3.0 { return "AREA"; }
+    return "RAY";
+}
+
+shared fn mask_name(index: f32) -> String {
+    if index == 1.0 { return "SOLIDS"; }
+    if index == 2.0 { return "PROPS"; }
+    if index == 3.0 { return "BALLS"; }
+    return "EVERYTHING";
+}
+
+shared fn probe_mask(index: f32) -> f32 {
+    if index == 1.0 { return Physics.mask(["static"]); }
+    if index == 2.0 { return Physics.mask(["props", "glass", "shells"]); }
+    if index == 3.0 { return Physics.mask(["balls"]); }
+    return Physics.mask(["static", "props", "balls", "robot", "shells", "glass", "machines"]);
+}
+
+// What a probe says it found, from the tags the room gives things.
+shared fn describe(thing: Entity) -> String {
+    if World.has_tag(thing, "robot") { return "the robot"; }
+    if World.has_tag(thing, "domino") { return "a domino"; }
+    if World.has_tag(thing, "glass") { return "a glass pane"; }
+    if World.has_tag(thing, "shell") { return "a shell"; }
+    if World.has_tag(thing, "button") { return "the red button"; }
+    if World.has_tag(thing, "platform") { return "the lift"; }
+    if World.has_tag(thing, "round") && (World.has_tag(thing, "body") || World.has_tag(thing, "loose")) { return "a ball"; }
+    if World.has_tag(thing, "body") || World.has_tag(thing, "loose") { return "a body"; }
+    if World.has_tag(thing, "one-way") { return "a one-way plank"; }
+    return "the room";
+}
+
+shared fn pair(v: Vec2) -> String {
+    return "(" + v.x.fixed(2) + ", " + v.y.fixed(2) + ")";
+}
+
+// Where a body-local anchor is in the world.
+shared fn anchored(thing: Entity, anchor: Vec2) -> Vec2 {
+    let at = thing.transform.world_position;
+    let turn = thing.transform.rotation_z;
+    let c = cos(turn);
+    let s = sin(turn);
+    return Vec2(at.x + anchor.x * c - anchor.y * s, at.y + anchor.x * s + anchor.y * c);
+}
+
+script Probe {
+    @export let ring: Prefab;
+    var origin: Vec2 = Vec2(0.0, 0.0);
+    var aim: Vec2 = Vec2(4.0, 0.0);
+    var dragging: bool = false;
+    var showing: bool = false;
+    var marks: List<Entity> = [];
+    var marked: f32 = 0.0;
+    // What the probe found, for the readout under the title.
+    var text: String = "";
+
+    fn update(dt: f32) {
+        let probing = Game.tool == 3.0;
+        World.set_active(World.find("btn-mask"), probing);
+        if !probing {
+            if this.showing { hide(); }
+            this.text = "";
+            return;
+        }
+        if Input.just_pressed("L") || Ui.is_pressed(World.find("btn-mask")) {
+            Game.probe_mask = (Game.probe_mask + 1.0) % 4.0;
+        }
+        Ui.set_text(World.find("btn-mask-label"), "MASK: " + mask_name(Game.probe_mask));
+        let director = Director.on(World.find("Director"));
+        let at = director.view_center + Pointer.overlay * (director.view_height * 0.5);
+        if Pointer.just_pressed("Left") && !Pointer.over_ui && Pointer.inside {
+            this.origin = at;
+            this.aim = at;
+            this.dragging = true;
+            this.showing = true;
+        }
+        if this.dragging {
+            this.aim = at;
+            if !Pointer.is_down("Left") { this.dragging = false; }
+        }
+        if !this.showing {
+            this.text = probe_name(Game.probe) + " through " + mask_name(Game.probe_mask) + ": drag from where it starts to where it points.";
+            return;
+        }
+        cast();
+    }
+
+    fn cast() {
+        let delta = this.aim - this.origin;
+        let length = delta.length;
+        var direction = Vec2(1.0, 0.0);
+        if length > 0.01 { direction = delta.normalized; }
+        let reach = max(0.05, length);
+        let mask = probe_mask(Game.probe_mask);
+        let kind = probe_name(Game.probe) + " through " + mask_name(Game.probe_mask);
+        Game.queries += 1.0;
+        if Game.probe == 3.0 {
+            area(max(0.3, length), mask, kind);
+            return;
+        }
+        World.set_active(World.find("probe-area"), false);
+        hide_marks(0.0);
+        let turn = atan2(direction.y, direction.x);
+        var hit: RayHit2d? = null;
+        if Game.probe == 0.0 { hit = Physics.raycast(this.origin, direction, reach, mask, false, null); }
+        if Game.probe == 1.0 { hit = Physics.cast_circle(this.origin, 0.5, direction, reach, mask, false, null); }
+        if Game.probe == 2.0 { hit = Physics.cast_box(this.origin, Vec2(0.6, 0.35), turn, direction, reach, mask, false, null); }
+        var end = this.aim;
+        if length <= 0.01 { end = this.origin + direction * reach; }
+        let found = hit;
+        if found != null { end = this.origin + direction * found.distance; }
+        line(World.find("probe-line"), this.origin, end, 0.06);
+        World.set_active(World.find("probe-line"), true);
+        ghost(end, turn);
+        let dot = World.find("probe-hit");
+        let normal = World.find("probe-normal");
+        if found != null {
+            dot.transform.position = Vec3(found.point.x, found.point.y, 1.9);
+            line(normal, found.point, found.point + found.normal * 1.4, 0.07);
+            World.set_active(dot, true);
+            World.set_active(normal, true);
+            this.text = kind + ": " + describe(found.entity) + " at " + found.distance.fixed(2) + " u, point " + pair(found.point) + ", normal " + pair(found.normal);
+        } else {
+            World.set_active(dot, false);
+            World.set_active(normal, false);
+            this.text = kind + ": nothing within " + reach.fixed(2) + " u";
+        }
+    }
+
+    // The shape a cast sweeps, drawn where it stops.
+    fn ghost(at: Vec2, turn: f32) {
+        let round = World.find("probe-ghost-circle");
+        let square = World.find("probe-ghost-box");
+        World.set_active(round, Game.probe == 1.0);
+        World.set_active(square, Game.probe == 2.0);
+        round.transform.position = Vec3(at.x, at.y, 1.9);
+        square.transform.position = Vec3(at.x, at.y, 1.9);
+        square.transform.rotation_z = turn;
+    }
+
+    fn area(radius: f32, mask: f32, kind: String) {
+        World.set_active(World.find("probe-line"), false);
+        World.set_active(World.find("probe-hit"), false);
+        World.set_active(World.find("probe-normal"), false);
+        World.set_active(World.find("probe-ghost-circle"), false);
+        World.set_active(World.find("probe-ghost-box"), false);
+        let zone = World.find("probe-area");
+        zone.transform.position = Vec3(this.origin.x, this.origin.y, 1.9);
+        zone.transform.scale = Vec3(radius * 2.0, radius * 2.0, 1.0);
+        World.set_active(zone, true);
+        let found = Physics.overlap_circle(this.origin, radius, mask, true, null);
+        var count = 0.0;
+        for thing in found {
+            if count < 48.0 {
+                var mark: Entity? = null;
+                if count < this.marks.length {
+                    mark = this.marks[count];
+                } else {
+                    let made = World.spawn(this.ring);
+                    this.marks.push(made);
+                    mark = made;
+                }
+                let shown = mark ?? thing;
+                let at = thing.transform.world_position;
+                let size = max(thing.transform.scale.x, thing.transform.scale.y);
+                shown.transform.position = Vec3(at.x, at.y, 1.95);
+                shown.transform.scale = Vec3(min(size, 3.0) + 0.3, min(size, 3.0) + 0.3, 1.0);
+                World.set_active(shown, true);
+            }
+            count += 1.0;
+        }
+        hide_marks(min(count, 48.0));
+        this.text = kind + ": " + count + " overlapping within " + radius.fixed(2) + " u of " + pair(this.origin);
+    }
+
+    fn hide_marks(from: f32) {
+        var index = from;
+        while index < this.marked {
+            World.set_active(this.marks[index], false);
+            index += 1.0;
+        }
+        this.marked = from;
+    }
+
+    fn hide() {
+        this.showing = false;
+        this.dragging = false;
+        for name in ["probe-line", "probe-hit", "probe-normal", "probe-ghost-circle", "probe-ghost-box", "probe-area"] {
+            World.set_active(World.find(name), false);
+        }
+        hide_marks(0.0);
+    }
+}
+
+script DebugOverlay {
+    @export let outline: Prefab;
+    @export let ring: Prefab;
+    @export let bar: Prefab;
+    @export let dot: Prefab;
+    @export let links: List<JointLink> = [];
+
+    var rects: List<Entity> = [];
+    var rings: List<Entity> = [];
+    var bars: List<Entity> = [];
+    var dots: List<Entity> = [];
+    // How many of each kind were drawn this frame, and the frame before:
+    // 0 outline, 1 ring, 2 bar, 3 dot.
+    var used: List<f32> = [0.0, 0.0, 0.0, 0.0];
+    var before: List<f32> = [0.0, 0.0, 0.0, 0.0];
+    var shown: bool = false;
+    var text: String = "";
+
+    fn update(dt: f32) {
+        let layer = World.find("debug-layer");
+        if !Game.debug {
+            if this.shown {
+                World.set_active(layer, false);
+                this.shown = false;
+            }
+            this.text = "";
+            return;
+        }
+        if !this.shown {
+            World.set_active(layer, true);
+            this.shown = true;
+        }
+        this.before = this.used;
+        this.used = [0.0, 0.0, 0.0, 0.0];
+        let director = Director.on(World.find("Director"));
+        let half = Vec2(director.view_height * max(0.3, Viewport.aspect) * 0.5, director.view_height * 0.5);
+        let things = Physics.overlap_box(director.view_center, half, 0.0, 4294967295.0, true, null);
+        var awake = 0.0;
+        var touching = 0.0;
+        var drawn = 0.0;
+        for thing in things {
+            if drawn < 260.0 {
+                drawn += 1.0;
+                let movable = World.has_tag(thing, "body") || World.has_tag(thing, "loose");
+                var color = Color(0.35, 0.55, 0.8, 0.7);
+                if movable {
+                    let velocity = Vec2(Physics.velocity_x(thing), Physics.velocity_y(thing));
+                    let speed = velocity.length;
+                    color = Color(0.55, 0.6, 0.7, 0.8);
+                    if speed > 0.05 {
+                        awake += 1.0;
+                        color = Color(0.3, 1.0, 0.6, 0.95);
+                    }
+                    let at = thing.transform.world_position;
+                    if speed > 0.4 {
+                        let tip = Vec2(at.x, at.y) + velocity * 0.12;
+                        stroke(Vec2(at.x, at.y), tip, 0.06, Color(1.0, 0.85, 0.3, 0.95));
+                        spot(tip, 0.16, Color(1.0, 0.85, 0.3, 0.95));
+                    }
+                    for contact in Physics.contacts(thing) {
+                        if touching < 180.0 {
+                            touching += 1.0;
+                            let push = 0.25 + min(1.0, contact.normal_impulse * 0.6);
+                            spot(contact.point, 0.14, Color(1.0, 0.3, 0.4, 1.0));
+                            stroke(contact.point, contact.point + contact.normal * push, 0.04, Color(1.0, 0.45, 0.5, 0.9));
+                        }
+                    }
+                }
+                if World.has_tag(thing, "sensor") { color = Color(0.85, 1.0, 0.3, 0.9); }
+                trace(thing, color);
+            }
+        }
+        var joined = 0.0;
+        for link in this.links {
+            let owner = World.find(link.owner);
+            let first = World.find(link.first);
+            let second = World.find(link.second);
+            if owner != null && first != null && second != null {
+                var color = Color(1.0, 0.35, 0.35, 0.9);
+                if Physics.joint_enabled(owner) {
+                    color = Color(0.4, 1.0, 0.85, 0.9);
+                    joined += 1.0;
+                }
+                let a = anchored(first, link.first_anchor);
+                let b = anchored(second, link.second_anchor);
+                if a.distance(b) > 0.05 { stroke(a, b, 0.05, color); }
+                spot(a, 0.22, color);
+                spot(b, 0.22, color);
+            }
+        }
+        tidy();
+        this.text = things.length + " in view, " + awake + " awake, " + touching + " contacts, " + joined + " of " + this.links.length + " joints on";
+    }
+
+    // An outline over a collider, the size the thing is drawn.
+    fn trace(thing: Entity, color: Color) {
+        var size = thing.transform.scale;
+        if World.has_tag(thing, "robot") { size = Vec3(0.68, 1.18, 1.0); }
+        var mark = take(0.0);
+        if World.has_tag(thing, "round") { mark = take(1.0); }
+        let at = thing.transform.world_position;
+        mark.transform.position = Vec3(at.x, at.y, 1.8);
+        mark.transform.rotation_z = thing.transform.rotation_z;
+        mark.transform.scale = Vec3(max(0.05, abs(size.x)), max(0.05, abs(size.y)), 1.0);
+        mark.shape.stroke = color;
+        mark.shape.stroke_width = min(0.45, 0.1 / max(0.05, min(abs(size.x), abs(size.y))));
+    }
+
+    fn stroke(from: Vec2, to: Vec2, width: f32, color: Color) {
+        let mark = take(2.0);
+        line(mark, from, to, width);
+        mark.transform.position.z = 1.85;
+        mark.shape.fill = color;
+    }
+
+    fn spot(at: Vec2, size: f32, color: Color) {
+        let mark = take(3.0);
+        mark.transform.position = Vec3(at.x, at.y, 1.9);
+        mark.transform.scale = Vec3(size, size, 1.0);
+        mark.shape.fill = color;
+    }
+
+    // The next free mark of a kind: 0 outline, 1 ring, 2 bar, 3 dot. A mark
+    // hidden last frame is switched back on; the pool only grows.
+    fn take(kind: f32) -> Entity {
+        var pool = this.rects;
+        var prefab = this.outline;
+        if kind == 1.0 { pool = this.rings; prefab = this.ring; }
+        if kind == 2.0 { pool = this.bars; prefab = this.bar; }
+        if kind == 3.0 { pool = this.dots; prefab = this.dot; }
+        let index = this.used[kind];
+        this.used[kind] = index + 1.0;
+        if index < pool.length {
+            let mark = pool[index];
+            if index >= this.before[kind] { World.set_active(mark, true); }
+            return mark;
+        }
+        let made = World.spawn_child(prefab, World.find("debug-layer"));
+        if kind == 0.0 { this.rects.push(made); }
+        if kind == 1.0 { this.rings.push(made); }
+        if kind == 2.0 { this.bars.push(made); }
+        if kind == 3.0 { this.dots.push(made); }
+        return made;
+    }
+
+    // Marks drawn last frame and not this one go dark.
+    fn tidy() {
+        hide_from(this.rects, this.used[0], this.before[0]);
+        hide_from(this.rings, this.used[1], this.before[1]);
+        hide_from(this.bars, this.used[2], this.before[2]);
+        hide_from(this.dots, this.used[3], this.before[3]);
+    }
+
+    fn hide_from(pool: List<Entity>, from: f32, to: f32) {
+        var index = from;
+        while index < to && index < pool.length {
+            World.set_active(pool[index], false);
+            index += 1.0;
+        }
+    }
+}

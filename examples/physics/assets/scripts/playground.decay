@@ -11,6 +11,10 @@ state Game {
     var spawned: f32 = 0.0;
     var blasts: f32 = 0.0;
     var grabs: f32 = 0.0;
+    // The probe's query (0 ray, 1 circle cast, 2 box cast, 3 area) and mask.
+    var probe: f32 = 0.0;
+    var probe_mask: f32 = 0.0;
+    var queries: f32 = 0.0;
 }
 
 // A toy was asked to do one of its four things: 1 to 4.
@@ -168,6 +172,7 @@ script Director {
     var held: Entity? = null;
     var hold_offset: Vec2 = Vec2(0.0, 0.0);
     var started: bool = false;
+    var frames: f32 = 0.0;
 
     fn start() {
         refresh_labels();
@@ -224,7 +229,10 @@ script Director {
             if Game.tool == 2.0 { this.item = (this.item + 1.0) % 5.0; }
             choose_tool(2.0);
         }
-        if Input.just_pressed("P") { choose_tool(3.0); }
+        if Input.just_pressed("P") {
+            if Game.tool == 3.0 { Game.probe = (Game.probe + 1.0) % 4.0; }
+            choose_tool(3.0);
+        }
         if Input.just_pressed("Q") { choose_toy(Game.toy - 1.0); }
         if Input.just_pressed("E") { choose_toy(Game.toy + 1.0); }
         if Input.just_pressed("X") { drop_everything(); }
@@ -250,7 +258,10 @@ script Director {
             if Game.tool == 2.0 { this.item = (this.item + 1.0) % 5.0; }
             choose_tool(2.0);
         }
-        if Ui.is_pressed(World.find("tool-probe")) { choose_tool(3.0); }
+        if Ui.is_pressed(World.find("tool-probe")) {
+            if Game.tool == 3.0 { Game.probe = (Game.probe + 1.0) % 4.0; }
+            choose_tool(3.0);
+        }
         if Ui.is_pressed(World.find("toy-prev")) { choose_toy(Game.toy - 1.0); }
         if Ui.is_pressed(World.find("toy-next")) { choose_toy(Game.toy + 1.0); }
         for i in 0..4 {
@@ -464,6 +475,17 @@ script Director {
     fn stats() {
         let things = World.with_tag("body").length + this.spawned.length;
         Ui.set_text(World.find("stats"), things + " bodies  /  " + World.with_tag("joint").length + " joints  /  gravity " + gravity_name(Game.gravity));
+        // What the probe and the debug overlay have to say, under the title,
+        // once every script has had its first frame.
+        this.frames += 1.0;
+        if this.frames < 2.0 { return; }
+        var readout = Probe.on(World.find("Probe")).text;
+        let debug = DebugOverlay.on(World.find("Debug overlay")).text;
+        if debug != "" {
+            if readout != "" { readout = readout + "\n"; }
+            readout = readout + debug;
+        }
+        Ui.set_text(World.find("readout"), readout);
     }
 
     fn refresh_labels() {
@@ -486,6 +508,9 @@ script Director {
         if this.item == 3.0 { spawn = "SPAWN ANVIL"; }
         if this.item == 4.0 { spawn = "SPAWN BOWLING"; }
         Ui.set_text(World.find("tool-spawn-label"), spawn);
+        var probe = "PROBE";
+        if Game.tool == 3.0 { probe = probe_name(Game.probe); }
+        Ui.set_text(World.find("tool-probe-label"), probe);
         for i in 0..TOOLS {
             let chosen = World.find("tool-mark-" + i);
             World.set_active(chosen, Game.tool == i);

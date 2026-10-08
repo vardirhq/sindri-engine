@@ -2092,7 +2092,8 @@
     },
     "sindri.tags": {
      "tags": [
-      "body"
+      "body",
+      "round"
      ]
     }
    }
@@ -2194,7 +2195,8 @@
     },
     "sindri.tags": {
      "tags": [
-      "body"
+      "body",
+      "round"
      ]
     }
    }
@@ -2296,7 +2298,8 @@
     },
     "sindri.tags": {
      "tags": [
-      "body"
+      "body",
+      "round"
      ]
     }
    }
@@ -2398,7 +2401,8 @@
     },
     "sindri.tags": {
      "tags": [
-      "body"
+      "body",
+      "round"
      ]
     }
    }
@@ -2500,7 +2504,8 @@
     },
     "sindri.tags": {
      "tags": [
-      "body"
+      "body",
+      "round"
      ]
     }
    }
@@ -2602,7 +2607,8 @@
     },
     "sindri.tags": {
      "tags": [
-      "body"
+      "body",
+      "round"
      ]
     }
    }
@@ -2704,7 +2710,8 @@
     },
     "sindri.tags": {
      "tags": [
-      "body"
+      "body",
+      "round"
      ]
     }
    }
@@ -2806,7 +2813,8 @@
     },
     "sindri.tags": {
      "tags": [
-      "body"
+      "body",
+      "round"
      ]
     }
    }
@@ -2908,7 +2916,8 @@
     },
     "sindri.tags": {
      "tags": [
-      "body"
+      "body",
+      "round"
      ]
     }
    }
@@ -3010,7 +3019,8 @@
     },
     "sindri.tags": {
      "tags": [
-      "body"
+      "body",
+      "round"
      ]
     }
    }
@@ -3112,7 +3122,8 @@
     },
     "sindri.tags": {
      "tags": [
-      "body"
+      "body",
+      "round"
      ]
     }
    }
@@ -3214,7 +3225,8 @@
     },
     "sindri.tags": {
      "tags": [
-      "body"
+      "body",
+      "round"
      ]
     }
    }
@@ -3431,6 +3443,11 @@
        "friction": 0.5,
        "restitution": 0.0
       }
+     ]
+    },
+    "sindri.tags": {
+     "tags": [
+      "round"
      ]
     }
    }
@@ -5576,7 +5593,8 @@
     "sindri.tags": {
      "tags": [
       "body",
-      "cargo"
+      "cargo",
+      "round"
      ]
     }
    }
@@ -6428,6 +6446,11 @@
        "friction": 0.5,
        "restitution": 0.0
       }
+     ]
+    },
+    "sindri.tags": {
+     "tags": [
+      "round"
      ]
     }
    }
@@ -7576,6 +7599,11 @@
      "source": "scripts/toys.decay",
      "script": "BackStop",
      "properties": {}
+    },
+    "sindri.tags": {
+     "tags": [
+      "sensor"
+     ]
     }
    }
   },
@@ -7991,6 +8019,11 @@
      "source": "scripts/toys.decay",
      "script": "Bumper",
      "properties": {}
+    },
+    "sindri.tags": {
+     "tags": [
+      "round"
+     ]
     }
    }
   },
@@ -8066,6 +8099,11 @@
      "source": "scripts/toys.decay",
      "script": "Bumper",
      "properties": {}
+    },
+    "sindri.tags": {
+     "tags": [
+      "round"
+     ]
     }
    }
   },
@@ -8141,6 +8179,11 @@
      "source": "scripts/toys.decay",
      "script": "Bumper",
      "properties": {}
+    },
+    "sindri.tags": {
+     "tags": [
+      "round"
+     ]
     }
    }
   },
@@ -8216,6 +8259,11 @@
      "source": "scripts/toys.decay",
      "script": "Bumper",
      "properties": {}
+    },
+    "sindri.tags": {
+     "tags": [
+      "round"
+     ]
     }
    }
   },
@@ -8291,6 +8339,11 @@
      "source": "scripts/toys.decay",
      "script": "Bumper",
      "properties": {}
+    },
+    "sindri.tags": {
+     "tags": [
+      "round"
+     ]
     }
    }
   },
@@ -8360,6 +8413,11 @@
        "friction": 0.5,
        "restitution": 0.0
       }
+     ]
+    },
+    "sindri.tags": {
+     "tags": [
+      "round"
      ]
     }
    }
@@ -8611,6 +8669,11 @@
        "friction": 0.5,
        "restitution": 0.0
       }
+     ]
+    },
+    "sindri.tags": {
+     "tags": [
+      "round"
      ]
     }
    }
@@ -10221,7 +10284,8 @@
     },
     "sindri.tags": {
      "tags": [
-      "body"
+      "body",
+      "round"
      ]
     }
    }
@@ -10451,7 +10515,8 @@
     },
     "sindri.tags": {
      "tags": [
-      "body"
+      "body",
+      "round"
      ]
     }
    }
@@ -10681,7 +10746,8 @@
     },
     "sindri.tags": {
      "tags": [
-      "body"
+      "body",
+      "round"
      ]
     }
    }
@@ -10911,7 +10977,8 @@
     },
     "sindri.tags": {
      "tags": [
-      "body"
+      "body",
+      "round"
      ]
     }
    }
@@ -11468,7 +11535,8 @@
     "sindri.tags": {
      "tags": [
       "body",
-      "cargo"
+      "cargo",
+      "round"
      ]
     }
    }
@@ -11539,6 +11607,11 @@
        "friction": 0.5,
        "restitution": 0.0
       }
+     ]
+    },
+    "sindri.tags": {
+     "tags": [
+      "round"
      ]
     }
    }
@@ -11811,6 +11884,11 @@
        "friction": 0.5,
        "restitution": 0.0
       }
+     ]
+    },
+    "sindri.tags": {
+     "tags": [
+      "round"
      ]
     }
    }
@@ -12126,6 +12204,11 @@
        "restitution": 0.0
       }
      ]
+    },
+    "sindri.tags": {
+     "tags": [
+      "round"
+     ]
     }
    }
   },
@@ -12294,6 +12377,11 @@
        "friction": 0.5,
        "restitution": 0.0
       }
+     ]
+    },
+    "sindri.tags": {
+     "tags": [
+      "round"
      ]
     }
    }
@@ -12495,7 +12583,8 @@
     "sindri.tags": {
      "tags": [
       "body",
-      "cargo"
+      "cargo",
+      "round"
      ]
     }
    }
@@ -14062,7 +14151,8 @@
     "sindri.tags": {
      "tags": [
       "body",
-      "kickable"
+      "kickable",
+      "round"
      ]
     }
    }
@@ -16285,6 +16375,355 @@
    }
   },
   {
+   "id": "probe",
+   "name": "Probe",
+   "transform_3d": {
+    "position": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "rotation": [
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     1.0,
+     1.0,
+     1.0
+    ]
+   },
+   "components": {
+    "sindri.script": {
+     "source": "scripts/lab.decay",
+     "script": "Probe",
+     "properties": {
+      "ring": "prefabs/debug-ring.prefab"
+     }
+    }
+   }
+  },
+  {
+   "id": "probe-line",
+   "name": "probe-line",
+   "transform_3d": {
+    "position": [
+     0,
+     -40,
+     1.9
+    ],
+    "rotation": [
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     1.0,
+     0.06,
+     1.0
+    ]
+   },
+   "components": {
+    "sindri.shape": {
+     "kind": "rect",
+     "count": 6.0,
+     "fill": [
+      0.20508,
+      0.94731,
+      1.0,
+      1.0
+     ],
+     "stroke": [
+      0.0,
+      0.0,
+      0.0,
+      0.0
+     ],
+     "stroke_width": 0.0,
+     "corner_radius": 0.0,
+     "dashes": 0.0,
+     "dash_duty": 0.5,
+     "sweep_start": 0.0,
+     "sweep_turns": 1.0,
+     "blend": "over",
+     "layer": 62
+    }
+   },
+   "disabled": true
+  },
+  {
+   "id": "probe-normal",
+   "name": "probe-normal",
+   "transform_3d": {
+    "position": [
+     0,
+     -40,
+     1.9
+    ],
+    "rotation": [
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     1.0,
+     0.07,
+     1.0
+    ]
+   },
+   "components": {
+    "sindri.shape": {
+     "kind": "rect",
+     "count": 6.0,
+     "fill": [
+      1.0,
+      0.27468,
+      0.40724,
+      1.0
+     ],
+     "stroke": [
+      0.0,
+      0.0,
+      0.0,
+      0.0
+     ],
+     "stroke_width": 0.0,
+     "corner_radius": 0.0,
+     "dashes": 0.0,
+     "dash_duty": 0.5,
+     "sweep_start": 0.0,
+     "sweep_turns": 1.0,
+     "blend": "over",
+     "layer": 63
+    }
+   },
+   "disabled": true
+  },
+  {
+   "id": "probe-hit",
+   "name": "probe-hit",
+   "transform_3d": {
+    "position": [
+     0,
+     -40,
+     1.9
+    ],
+    "rotation": [
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     0.3,
+     0.3,
+     1.0
+    ]
+   },
+   "components": {
+    "sindri.shape": {
+     "kind": "ellipse",
+     "count": 6.0,
+     "fill": [
+      1.0,
+      1.0,
+      1.0,
+      1.0
+     ],
+     "stroke": [
+      0.20508,
+      0.94731,
+      1.0,
+      1.0
+     ],
+     "stroke_width": 0.05,
+     "corner_radius": 0.0,
+     "dashes": 0.0,
+     "dash_duty": 0.5,
+     "sweep_start": 0.0,
+     "sweep_turns": 1.0,
+     "blend": "over",
+     "layer": 64
+    }
+   },
+   "disabled": true
+  },
+  {
+   "id": "probe-ghost-circle",
+   "name": "probe-ghost-circle",
+   "transform_3d": {
+    "position": [
+     0,
+     -40,
+     1.9
+    ],
+    "rotation": [
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     1.0,
+     1.0,
+     1.0
+    ]
+   },
+   "components": {
+    "sindri.shape": {
+     "kind": "ellipse",
+     "count": 6.0,
+     "fill": [
+      0.20508,
+      0.94731,
+      1.0,
+      0.12
+     ],
+     "stroke": [
+      0.20508,
+      0.94731,
+      1.0,
+      1.0
+     ],
+     "stroke_width": 0.05,
+     "corner_radius": 0.0,
+     "dashes": 16.0,
+     "dash_duty": 0.5,
+     "sweep_start": 0.0,
+     "sweep_turns": 1.0,
+     "blend": "over",
+     "layer": 61
+    }
+   },
+   "disabled": true
+  },
+  {
+   "id": "probe-ghost-box",
+   "name": "probe-ghost-box",
+   "transform_3d": {
+    "position": [
+     0,
+     -40,
+     1.9
+    ],
+    "rotation": [
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     1.2,
+     0.7,
+     1.0
+    ]
+   },
+   "components": {
+    "sindri.shape": {
+     "kind": "rect",
+     "count": 6.0,
+     "fill": [
+      0.20508,
+      0.94731,
+      1.0,
+      0.12
+     ],
+     "stroke": [
+      0.20508,
+      0.94731,
+      1.0,
+      1.0
+     ],
+     "stroke_width": 0.05,
+     "corner_radius": 0.0,
+     "dashes": 16.0,
+     "dash_duty": 0.5,
+     "sweep_start": 0.0,
+     "sweep_turns": 1.0,
+     "blend": "over",
+     "layer": 61
+    }
+   },
+   "disabled": true
+  },
+  {
+   "id": "probe-area",
+   "name": "probe-area",
+   "transform_3d": {
+    "position": [
+     0,
+     -40,
+     1.9
+    ],
+    "rotation": [
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     1.0,
+     1.0,
+     1.0
+    ]
+   },
+   "components": {
+    "sindri.shape": {
+     "kind": "ellipse",
+     "count": 6.0,
+     "fill": [
+      0.20508,
+      0.94731,
+      1.0,
+      0.12
+     ],
+     "stroke": [
+      0.20508,
+      0.94731,
+      1.0,
+      1.0
+     ],
+     "stroke_width": 0.05,
+     "corner_radius": 0.0,
+     "dashes": 16.0,
+     "dash_duty": 0.5,
+     "sweep_start": 0.0,
+     "sweep_turns": 1.0,
+     "blend": "over",
+     "layer": 60
+    }
+   },
+   "disabled": true
+  },
+  {
+   "id": "debug-layer",
+   "name": "debug-layer",
+   "transform_3d": {
+    "position": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "rotation": [
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     1.0,
+     1.0,
+     1.0
+    ]
+   },
+   "components": {},
+   "disabled": true
+  },
+  {
    "id": "hud",
    "name": "hud",
    "transform_3d": {
@@ -16467,6 +16906,144 @@
      "font_size": 0.0306,
      "bounds": [
       1.2,
+      0.05
+     ],
+     "anchor": "center",
+     "layer": 40,
+     "line_align": "center"
+    }
+   }
+  },
+  {
+   "id": "readout",
+   "name": "readout",
+   "parent": "brand",
+   "transform_3d": {
+    "position": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "rotation": [
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     1.6,
+     0.08,
+     1.0
+    ]
+   },
+   "components": {
+    "weave.style": {
+     "classes": [
+      "readout"
+     ]
+    },
+    "sindri.ui.text": {
+     "text": "",
+     "font": "fonts/ChakraPetch-Regular.ttf",
+     "font_size": 0.0306,
+     "bounds": [
+      1.6,
+      0.08
+     ],
+     "anchor": "center",
+     "layer": 40,
+     "line_align": "center"
+    }
+   }
+  },
+  {
+   "id": "btn-mask",
+   "name": "btn-mask",
+   "parent": "brand",
+   "transform_3d": {
+    "position": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "rotation": [
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     0.4,
+     0.09,
+     1.0
+    ]
+   },
+   "components": {
+    "weave.style": {
+     "classes": [
+      "button",
+      "mask"
+     ]
+    },
+    "sindri.ui.shape": {
+     "kind": "rect",
+     "fill": [
+      0.00605,
+      0.01681,
+      0.03689,
+      1.0
+     ],
+     "anchor": "center",
+     "layer": 31
+    },
+    "sindri.ui.button": {
+     "label": "MASK: EVERYTHING",
+     "autofocus": false,
+     "disabled": false
+    },
+    "sindri.ui.layout": {
+     "direction": "row",
+     "spacing": 0.02,
+     "justify": "center",
+     "align": "center"
+    }
+   },
+   "disabled": true
+  },
+  {
+   "id": "btn-mask-label",
+   "name": "btn-mask-label",
+   "parent": "btn-mask",
+   "transform_3d": {
+    "position": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "rotation": [
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     0.4,
+     0.05,
+     1.0
+    ]
+   },
+   "components": {
+    "weave.style": {
+     "classes": [
+      "button-label"
+     ]
+    },
+    "sindri.ui.text": {
+     "text": "MASK: EVERYTHING",
+     "font": "fonts/ChakraPetch-Regular.ttf",
+     "font_size": 0.0361,
+     "bounds": [
+      0.4,
       0.05
      ],
      "anchor": "center",
@@ -18358,6 +18935,289 @@
      "anchor": "center",
      "layer": 40,
      "line_align": "center"
+    }
+   }
+  },
+  {
+   "id": "overlay",
+   "name": "Debug overlay",
+   "transform_3d": {
+    "position": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "rotation": [
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     1.0,
+     1.0,
+     1.0
+    ]
+   },
+   "components": {
+    "sindri.script": {
+     "source": "scripts/lab.decay",
+     "script": "DebugOverlay",
+     "properties": {
+      "outline": "prefabs/debug-rect.prefab",
+      "ring": "prefabs/debug-ring.prefab",
+      "bar": "prefabs/debug-bar.prefab",
+      "dot": "prefabs/debug-dot.prefab",
+      "links": [
+       {
+        "owner": "wreck-hinge",
+        "first": "wreck-pivot",
+        "second": "wreck-arm",
+        "first_anchor": [
+         0.0,
+         0.0
+        ],
+        "second_anchor": [
+         0.0,
+         7.0
+        ]
+       },
+       {
+        "owner": "crane-slider",
+        "first": "crane-rail",
+        "second": "crane-trolley",
+        "first_anchor": [
+         0.0,
+         0.0
+        ],
+        "second_anchor": [
+         0.0,
+         0.35
+        ]
+       },
+       {
+        "owner": "crane-cable",
+        "first": "crane-trolley",
+        "second": "crane-hook",
+        "first_anchor": [
+         0.0,
+         -0.25
+        ],
+        "second_anchor": [
+         0.0,
+         0.12
+        ]
+       },
+       {
+        "owner": "cannon-hinge",
+        "first": "cannon-pivot",
+        "second": "cannon-barrel",
+        "first_anchor": [
+         0.0,
+         0.0
+        ],
+        "second_anchor": [
+         -1.0,
+         0.0
+        ]
+       },
+       {
+        "owner": "pane-hinge-0",
+        "first": "gallery-beam",
+        "second": "pane-0",
+        "first_anchor": [
+         -2.3999999999999986,
+         0.0
+        ],
+        "second_anchor": [
+         0.0,
+         4.4
+        ]
+       },
+       {
+        "owner": "pane-hinge-1",
+        "first": "gallery-beam",
+        "second": "pane-1",
+        "first_anchor": [
+         -0.8000000000000007,
+         0.0
+        ],
+        "second_anchor": [
+         0.0,
+         4.4
+        ]
+       },
+       {
+        "owner": "pane-hinge-2",
+        "first": "gallery-beam",
+        "second": "pane-2",
+        "first_anchor": [
+         0.8000000000000007,
+         0.0
+        ],
+        "second_anchor": [
+         0.0,
+         4.4
+        ]
+       },
+       {
+        "owner": "pane-hinge-3",
+        "first": "gallery-beam",
+        "second": "pane-3",
+        "first_anchor": [
+         2.3999999999999986,
+         0.0
+        ],
+        "second_anchor": [
+         0.0,
+         4.4
+        ]
+       },
+       {
+        "owner": "flipper-left-hinge",
+        "first": "flipper-left-pin",
+        "second": "flipper-left",
+        "first_anchor": [
+         0.0,
+         0.0
+        ],
+        "second_anchor": [
+         -0.775,
+         0.0
+        ]
+       },
+       {
+        "owner": "flipper-right-hinge",
+        "first": "flipper-right-pin",
+        "second": "flipper-right",
+        "first_anchor": [
+         0.0,
+         0.0
+        ],
+        "second_anchor": [
+         0.775,
+         0.0
+        ]
+       },
+       {
+        "owner": "lift-slider",
+        "first": "lift-rail",
+        "second": "lift-car",
+        "first_anchor": [
+         0.0,
+         0.0
+        ],
+        "second_anchor": [
+         0.0,
+         0.0
+        ]
+       },
+       {
+        "owner": "lift-tilt",
+        "first": "lift-car",
+        "second": "lift-bucket",
+        "first_anchor": [
+         -1.6000000000000014,
+         0.1
+        ],
+        "second_anchor": [
+         -1.7,
+         0.0
+        ]
+       },
+       {
+        "owner": "seesaw-hinge",
+        "first": "seesaw-fulcrum",
+        "second": "seesaw-plank",
+        "first_anchor": [
+         0.0,
+         0.8
+        ],
+        "second_anchor": [
+         0.0,
+         0.0
+        ]
+       },
+       {
+        "owner": "anvil-rope",
+        "first": "anvil-hook",
+        "second": "anvil",
+        "first_anchor": [
+         0.0,
+         0.0
+        ],
+        "second_anchor": [
+         0.0,
+         0.0
+        ]
+       },
+       {
+        "owner": "tramp-guide",
+        "first": "tramp-base",
+        "second": "tramp-bed",
+        "first_anchor": [
+         0.0,
+         0.0
+        ],
+        "second_anchor": [
+         0.0,
+         0.0
+        ]
+       },
+       {
+        "owner": "tramp-spring-left",
+        "first": "tramp-foot-left",
+        "second": "tramp-bed",
+        "first_anchor": [
+         0.0,
+         0.0
+        ],
+        "second_anchor": [
+         -1.6,
+         0.0
+        ]
+       },
+       {
+        "owner": "tramp-spring-right",
+        "first": "tramp-foot-right",
+        "second": "tramp-bed",
+        "first_anchor": [
+         0.0,
+         0.0
+        ],
+        "second_anchor": [
+         1.6,
+         0.0
+        ]
+       },
+       {
+        "owner": "button-rail",
+        "first": "button-socket",
+        "second": "button-cap",
+        "first_anchor": [
+         0,
+         0.54
+        ],
+        "second_anchor": [
+         0,
+         0
+        ]
+       },
+       {
+        "owner": "button-spring",
+        "first": "button-socket",
+        "second": "button-cap",
+        "first_anchor": [
+         0,
+         0
+        ],
+        "second_anchor": [
+         0,
+         0
+        ]
+       }
+      ]
+     }
     }
    }
   }

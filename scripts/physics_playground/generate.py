@@ -22,6 +22,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent))
 
 import hud  # noqa: E402
+import lab  # noqa: E402
 import toys  # noqa: E402
 import track  # noqa: E402
 from common import (  # noqa: E402
@@ -129,7 +130,7 @@ def prefabs() -> dict[str, dict]:
     return {
         "ball.prefab": prefab("Ball", "ball", loose(
             "ellipse", "#4cc9f0", "#bdf3ff", circle(0.3, "balls", 0.3, 0.6),
-            body(damping=0.02, angular_damping=0.05), 0.6)),
+            body(damping=0.02, angular_damping=0.05), 0.6, tags=("loose", "round"))),
         "crate.prefab": prefab("Crate", "crate", loose(
             "rect", "#c98b4f", "#f2c38b", box(0.45, 0.45, "props", 0.6, 0.05),
             body(damping=0.05, angular_damping=0.05), 0.9)),
@@ -145,13 +146,13 @@ def prefabs() -> dict[str, dict]:
         }, 1.1, 0.8),
         "bowling-ball.prefab": prefab("Bowling ball", "bowling-ball", loose(
             "ellipse", "#5b2a86", "#c77dff", circle(0.55, "balls", 0.2, 0.15),
-            body(damping=0.0, angular_damping=0.02, ccd=True), 1.1)),
+            body(damping=0.0, angular_damping=0.02, ccd=True), 1.1, tags=("loose", "round"))),
         "shell.prefab": prefab("Shell", "shell", {
             "sindri.shape": shape("ellipse", "#ffdd57", "#ffffff", sw=0.25, layer=9),
             "sindri.physics2d.collider": {"pieces": [circle(0.12, "shells", 0.3, 0.2)]},
             "sindri.physics2d.rigid_body": body(damping=0.0, angular_damping=0.0, ccd=True),
             "sindri.script": script("scripts/toys.decay", "Shell"),
-            "sindri.tags": {"tags": ["loose", "shell"]},
+            "sindri.tags": {"tags": ["loose", "shell", "round"]},
         }, 0.24),
         "hand.prefab": prefab("Hand", "hand", {
             "sindri.shape": shape("ellipse", "#ffd166", "#ffffff", sw=0.18, layer=61,
@@ -159,6 +160,7 @@ def prefabs() -> dict[str, dict]:
             "sindri.physics2d.collider": {"pieces": [circle(0.05, "hand", 0.0, 0.0)]},
             "sindri.physics2d.rigid_body": body("kinematic_velocity"),
         }, 0.35),
+        **lab.prefabs(prefab),
     }
 
 
@@ -216,7 +218,9 @@ def main() -> None:
     toys.build(scene)
     track.test_track(scene)
     track.domino_run(scene)
+    lab.build(scene)
     hud.build(scene)
+    lab.overlay(scene)
     document = {
         "format_version": 10,
         "metadata": {"name": "Physics Playground"},

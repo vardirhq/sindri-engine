@@ -10,8 +10,9 @@
 //! Steps after the size run in order: `click:<entity>` presses and releases
 //! over an element, `wheel:<entity>:<pixels>` scrolls over one (positive is
 //! down the list), `key:<Key>` taps a key, `type:<text>` commits characters,
-//! `set:<name>=<value>` writes a shared board value, and `wait:<seconds>`
-//! plays on. Each prints what it hit, so a picture of the
+//! `set:<name>=<value>` writes a shared board value, `move:<x>,<y>` puts the
+//! pointer at a pixel, `down` and `up` press and release the left button
+//! there, and `wait:<seconds>` plays on. Each prints what it hit, so a picture of the
 //! wrong thing says why.
 
 #[cfg(not(target_arch = "wasm32"))]
@@ -195,6 +196,24 @@ mod capture {
                     self.step()?;
                 }
                 "wait" => self.play(rest.parse()?)?,
+                // A pointer at a pixel, and the left button pressed or let
+                // go there: enough to drag something across the world.
+                "move" => {
+                    let (x, y) = rest.split_once(',').ok_or("move:<x>,<y>")?;
+                    let (x, y) = (x.parse()?, y.parse()?);
+                    self.input.apply(InputEvent::PointerMoved { x, y });
+                    self.step()?;
+                }
+                "down" => {
+                    self.input
+                        .apply(InputEvent::ButtonPressed(MouseButton::Left));
+                    self.step()?;
+                }
+                "up" => {
+                    self.input
+                        .apply(InputEvent::ButtonReleased(MouseButton::Left));
+                    self.step()?;
+                }
                 "set" => {
                     let (name, value) = rest.split_once('=').ok_or("set:<name>=<value>")?;
                     self.session.set_board(name, value.parse()?);

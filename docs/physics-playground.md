@@ -60,9 +60,12 @@ Global buttons: DROP EVERYTHING (disable every joint in the room), 100 BALLS,
 GRAVITY (earth, moon, zero-g, upside down, sideways), DEBUG and RESET. Each has
 a key; the bar is touch-sized.
 
-DEBUG draws, without replacing the normal look, collider outlines, contact
-points and normals, velocity arrows, joint anchors and the probe's geometry,
-plus a live count of bodies and contacts.
+DEBUG draws, without replacing the normal look, collider outlines coloured by
+state (resting, moving, static, sensor), contact points with normals scaled by
+their impulse, velocity arrows, and every authored joint from anchor to anchor
+(green while on, red once cut), plus a live count of what is in view, awake,
+touching and joined. The probe reads out what it hit, where, how far and the
+surface normal; P cycles its query and L (or the MASK button) its layers.
 
 ## The 3D annex
 
@@ -80,7 +83,9 @@ and a 3D ray that reports what it hits.
 - Decay cannot change a collider's material at runtime, so material comparisons
   use separate authored bodies.
 - There is no simulation time scale, and no in-game debug drawing of colliders:
-  the overlay is drawn in Decay with shapes.
+  the overlay is drawn in Decay with pooled shapes. Decay cannot read a
+  collider's shape or a joint's anchors, so the generator tags round colliders
+  and hands the overlay every joint's bodies and anchors.
 
 ## Checklist
 
@@ -90,7 +95,7 @@ and a 3D ray that reports what it hits.
 - [x] Ball lift, hopper, bumper pit and flippers
 - [x] Material lab, seesaw and trampoline
 - [x] Test track robot, dominoes and red button
-- [ ] Probe tool and debug overlay
+- [x] Probe tool and debug overlay
 - [ ] Voxel Quarry 3D annex
 - [ ] Session regressions, browser smoke on desktop and phone, editor Play
 - [ ] Documentation: README, parity, capabilities, changelog, pre-alpha exit

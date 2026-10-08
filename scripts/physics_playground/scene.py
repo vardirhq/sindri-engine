@@ -18,6 +18,9 @@ class Scene:
     def __init__(self) -> None:
         self.entities: list[dict] = []
         self.ids: set[str] = set()
+        # Every authored joint's owner, bodies and anchors, for the debug
+        # overlay to draw: Decay can read a joint's state but not its anchors.
+        self.links: list[dict] = []
 
     def add(self, entity_id, name=None, x=0.0, y=0.0, z=0.0, sx=1.0, sy=None, rot=0.0,
             parent=None, components=None, tags=None):
@@ -85,7 +88,29 @@ class Scene:
     def joint(self, entity_id, kind, payload, toy, name=None, behaviour=None):
         components = {f"sindri.physics2d.{kind}_joint": payload}
         components["sindri.script"] = behaviour or script(PARTS, "JointPart", toy=float(toy))
+        self.links.append({
+            "owner": name or entity_id, "first": payload["first"], "second": payload["second"],
+            "first_anchor": payload.get("first_anchor", [0.0, 0.0]),
+            "second_anchor": payload.get("second_anchor", [0.0, 0.0]),
+        })
         return self.add(entity_id, name, components=components, tags=("joint",))
+
+    def finish(self) -> None:
+        """Tags what the debug overlay outlines as a circle, and names joint
+        ends by the names `World.find` looks for."""
+        names = {entity["id"]: entity["name"] for entity in self.entities}
+        for entity in self.entities:
+            collider = entity["components"].get("sindri.physics2d.collider")
+            if not collider:
+                continue
+            pieces = collider["pieces"]
+            if pieces and all(p["shape"]["shape"] == "circle" for p in pieces):
+                tags = entity["components"].setdefault("sindri.tags", {"tags": []})["tags"]
+                if "round" not in tags:
+                    tags.append("round")
+        for link in self.links:
+            link["first"] = names.get(link["first"], link["first"])
+            link["second"] = names.get(link["second"], link["second"])
 
     # A purely drawn shape.
     def deco(self, entity_id, x, y, w, h, kind="rect", fill="#ffffff", alpha=1.0,

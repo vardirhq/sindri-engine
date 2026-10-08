@@ -43,6 +43,9 @@ def build(scene) -> None:
                       1.0, 0.2)
     label(scene, "title", "brand", "PHYSICS PLAYGROUND", ["title"], 24, (1.0, 0.08))
     label(scene, "stats", "brand", "0 bodies", ["stats"], 11, (1.2, 0.05))
+    label(scene, "readout", "brand", "", ["readout"], 11, (1.6, 0.08))
+    button(scene, "btn-mask", "brand", "MASK: EVERYTHING", ["mask"], 0.4)
+    scene.entities[[e["id"] for e in scene.entities].index("btn-mask")]["disabled"] = True
 
     container(scene, "globals", "hud-top", ["globals"], "row", "end", "center", 2.2, 0.1)
     button(scene, "btn-drop", "globals", "DROP EVERYTHING", ["danger"], 0.5)

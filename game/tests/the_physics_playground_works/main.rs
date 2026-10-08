@@ -1,6 +1,7 @@
 //! The Physics Playground, played: the room's tools, its global buttons and
 //! every contraption, observed through what a person would see move.
 
+mod lab;
 mod support;
 mod track;
 

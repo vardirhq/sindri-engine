@@ -100,7 +100,8 @@
     "sindri.tags": {
      "tags": [
       "loose",
-      "shell"
+      "shell",
+      "round"
      ]
     }
    }

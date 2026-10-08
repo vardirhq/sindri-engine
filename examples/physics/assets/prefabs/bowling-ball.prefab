@@ -94,7 +94,8 @@
     },
     "sindri.tags": {
      "tags": [
-      "loose"
+      "loose",
+      "round"
      ]
     }
    }
