@@ -148,6 +148,7 @@ sindri-physics    -> sindri-core (+ sindri-grid only when a real integration nee
 sindri-scene      -> sindri-core + sindri-grid + sindri-render + sindri-physics + sindri-voxel
 sindri-decay      -> core + grid + physics + platform + scene + decay language crates
 sindri-runtime    -> assets + core + decay + platform + scene + weave
+sindri-player     -> assets + core + decay + desktop + platform + render + runtime + scene
 editor            -> assets + core + decay + physics + platform + render + runtime + scene
 sindri-causeway   -> consumer of the engine; nothing depends on it
 games/*, examples/* -> consumers of the engine; nothing depends on them
@@ -167,6 +168,10 @@ Important constraints:
   — the shipped native and browser hosts, the editor's Play, and the test
   harnesses — rather than assembling the engine's parts into a loop of its
   own. It has no window, GPU or editor dependency.
+- `sindri-player` is the one host a project needs: the WebAssembly module
+  every browser export ships, and `sindri-player <project>` natively. It knows
+  nothing about any one game; a game crate that needs a native build of its
+  own, as Causeway does, is a consumer of it, never the other way round.
 - Engine crates never depend on the editor or the companion game.
 - `decay/` is a separate Cargo workspace and may not depend on `sindri-*` crates.
   `sindri-decay` is the one-way bridge into the language.

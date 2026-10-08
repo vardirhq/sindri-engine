@@ -1,4 +1,5 @@
-//! Fetching a project over HTTP, one kind of asset at a time.
+//! Fetching a project over HTTP, one kind of asset at a time: the player's
+//! source in a browser.
 //!
 //! Nothing is owned until the fetch source has returned it through
 //! `AssetLoader` and the manifest has accepted the bytes, which is the
@@ -9,47 +10,27 @@ use std::collections::BTreeMap;
 
 use sindri_assets::{
     AssetDecoder, AssetKind, AssetLoadOutcome, AssetLoadQueueConfig, AssetLoader, AssetManifest,
-    AudioAsset, AudioAssetDecoder, FetchAssetSource, FontAsset, FontAssetDecoder,
-    MANIFEST_FILE_NAME, PrefabAssetDecoder, ProfileAssetDecoder, SceneAssetDecoder,
-    SpriteSheetAssetDecoder, TextAssetDecoder, TextureAsset, TextureAssetDecoder,
-    TileSetAssetDecoder,
+    AudioAssetDecoder, FetchAssetSource, FontAssetDecoder, MANIFEST_FILE_NAME, PrefabAssetDecoder,
+    ProfileAssetDecoder, SceneAssetDecoder, SpriteSheetAssetDecoder, TextAssetDecoder,
+    TextureAssetDecoder, TileSetAssetDecoder,
 };
-use sindri_core::{AssetId, SceneDocument, SpriteSheetDocument, TileSetDocument};
+use sindri_core::AssetId;
 use sindri_decay::{PrefabSources, ProfileSources, ScriptSources};
-use weave::Stylesheet;
 
-use crate::error::CausewayError;
+use crate::error::PlayerError;
+use crate::project::ProjectAssets;
 
-pub(super) struct BrowserProjectAssets {
-    /// Every scene the manifest ships, entry scene first.
-    ///
-    /// Keeping the whole set is what makes `Scene.go` meaningful in an exported
-    /// browser project. The loader used to retain only the first document even
-    /// though it had fetched and verified all of them.
-    pub(super) scenes: Vec<(String, SceneDocument)>,
-    pub(super) scripts: ScriptSources,
-    pub(super) prefabs: PrefabSources,
-    pub(super) profiles: ProfileSources,
-    pub(super) textures: Vec<(AssetId, TextureAsset)>,
-    pub(super) fonts: Vec<(AssetId, FontAsset)>,
-    pub(super) audio: Vec<(AssetId, AudioAsset)>,
-    pub(super) sheets: BTreeMap<String, SpriteSheetDocument>,
-    pub(super) tile_sets: Vec<(AssetId, TileSetDocument)>,
-    pub(super) stylesheets: Vec<Stylesheet>,
-    pub(super) asset_count: usize,
-}
-
-pub(super) struct BrowserProjectLoader {
+pub(crate) struct BrowserProjectLoader {
     phase: Option<LoadPhase>,
 }
 
-pub(super) enum LoadPhase {
+pub(crate) enum LoadPhase {
     Manifest(AssetLoader<TextAssetDecoder>),
     Assets(Box<ProjectLoaders>),
 }
 
 impl BrowserProjectLoader {
-    pub(super) fn new() -> Result<Self, CausewayError> {
+    pub(crate) fn new() -> Result<Self, PlayerError> {
         let source = FetchAssetSource::new("assets")?;
         let mut manifest =
             AssetLoader::new(source, AssetLoadQueueConfig::default(), TextAssetDecoder)?;
@@ -59,7 +40,7 @@ impl BrowserProjectLoader {
         })
     }
 
-    pub(super) fn poll(&mut self) -> Result<Option<BrowserProjectAssets>, CausewayError> {
+    pub(crate) fn poll(&mut self) -> Result<Option<ProjectAssets>, PlayerError> {
         let Some(phase) = self.phase.take() else {
             return Ok(None);
         };
@@ -87,7 +68,7 @@ impl BrowserProjectLoader {
     }
 }
 
-pub(super) struct ProjectLoaders {
+pub(crate) struct ProjectLoaders {
     scene: AssetLoader<SceneAssetDecoder>,
     scripts: AssetLoader<TextAssetDecoder>,
     textures: AssetLoader<TextureAssetDecoder>,
@@ -110,7 +91,7 @@ fn queue_config(manifest: &AssetManifest, kind: AssetKind) -> AssetLoadQueueConf
 }
 
 impl ProjectLoaders {
-    pub(super) fn new(manifest: AssetManifest) -> Result<Self, CausewayError> {
+    pub(crate) fn new(manifest: AssetManifest) -> Result<Self, PlayerError> {
         // Where the export put the assets, which the manifest names because it
         // is the one file that is never cached. A project served straight from
         // a source tree says nothing, and then the assets sit beside the
@@ -207,7 +188,7 @@ impl ProjectLoaders {
         })
     }
 
-    pub(super) fn poll(&mut self) -> Result<Option<BrowserProjectAssets>, CausewayError> {
+    pub(crate) fn poll(&mut self) -> Result<Option<ProjectAssets>, PlayerError> {
         poll_loader(&mut self.scene)?;
         poll_loader(&mut self.scripts)?;
         poll_loader(&mut self.textures)?;
@@ -242,7 +223,7 @@ impl ProjectLoaders {
         };
         let scene_ids = ids(AssetKind::Scene);
         if scene_ids.is_empty() {
-            return Err(CausewayError::MissingScene);
+            return Err(PlayerError::MissingScene);
         }
         let scenes = scene_ids
             .iter()
@@ -279,12 +260,12 @@ impl ProjectLoaders {
             .map(|id| loaded(&self.styles, id).map(|source| (id.clone(), source)))
             .collect::<Result<BTreeMap<_, _>, _>>()?;
         let stylesheets = weave::compose_all(&style_sources)
-            .map_err(|error| CausewayError::BrowserAsset(error.to_string()))?
+            .map_err(|error| PlayerError::BrowserAsset(error.to_string()))?
             .into_iter()
             .map(|(_, sheet)| sheet)
             .collect();
         let asset_count = self.manifest.len();
-        Ok(Some(BrowserProjectAssets {
+        Ok(Some(ProjectAssets {
             scenes,
             scripts,
             prefabs,
@@ -301,20 +282,18 @@ impl ProjectLoaders {
 }
 
 /// Asks for every asset the manifest records of one kind.
-pub(super) fn request_kind<D: AssetDecoder>(
+pub(crate) fn request_kind<D: AssetDecoder>(
     loader: &mut AssetLoader<D>,
     manifest: &AssetManifest,
     kind: AssetKind,
-) -> Result<(), CausewayError> {
+) -> Result<(), PlayerError> {
     for id in manifest.ids_of(kind) {
         loader.request(id.clone())?;
     }
     Ok(())
 }
 
-pub(super) fn poll_loader<D: AssetDecoder>(
-    loader: &mut AssetLoader<D>,
-) -> Result<(), CausewayError> {
+pub(crate) fn poll_loader<D: AssetDecoder>(loader: &mut AssetLoader<D>) -> Result<(), PlayerError> {
     for outcome in loader.poll() {
         if let AssetLoadOutcome::Failed(error) = outcome {
             return Err(error.into());
@@ -323,7 +302,7 @@ pub(super) fn poll_loader<D: AssetDecoder>(
     Ok(())
 }
 
-pub(super) fn loaded<D>(loader: &AssetLoader<D>, id: &str) -> Result<D::Asset, CausewayError>
+pub(crate) fn loaded<D>(loader: &AssetLoader<D>, id: &str) -> Result<D::Asset, PlayerError>
 where
     D: AssetDecoder,
     D::Asset: Clone,
@@ -332,13 +311,13 @@ where
     loader
         .get(&id)
         .cloned()
-        .ok_or_else(|| CausewayError::BrowserAsset(format!("'{id}' completed without a value")))
+        .ok_or_else(|| PlayerError::BrowserAsset(format!("'{id}' completed without a value")))
 }
 
-pub(super) fn loaded_many<D>(
+pub(crate) fn loaded_many<D>(
     loader: &AssetLoader<D>,
     ids: &[String],
-) -> Result<Vec<(AssetId, D::Asset)>, CausewayError>
+) -> Result<Vec<(AssetId, D::Asset)>, PlayerError>
 where
     D: AssetDecoder,
     D::Asset: Clone,
@@ -347,7 +326,7 @@ where
         .map(|id| {
             let asset_id = AssetId::new(id.clone())?;
             let asset = loader.get(&asset_id).cloned().ok_or_else(|| {
-                CausewayError::BrowserAsset(format!("'{asset_id}' completed without a value"))
+                PlayerError::BrowserAsset(format!("'{asset_id}' completed without a value"))
             })?;
             Ok((asset_id, asset))
         })

@@ -13,7 +13,7 @@ use sindri_assets::{BuiltinError, builtin_textures};
 use sindri_render::{Texture2D, TextureRegistry};
 use sindri_scene::TextureBindings;
 
-use crate::CausewayError;
+use crate::PlayerError;
 
 /// Uploads every texture the engine ships and binds it, with its sheet.
 pub fn bind_builtin_textures(
@@ -21,7 +21,7 @@ pub fn bind_builtin_textures(
     queue: &wgpu::Queue,
     registry: &mut TextureRegistry,
     bindings: &mut TextureBindings,
-) -> Result<(), CausewayError> {
+) -> Result<(), PlayerError> {
     for texture in builtin_textures() {
         let asset = texture.decode()?;
         let uploaded = Texture2D::from_rgba8(
@@ -40,7 +40,7 @@ pub fn bind_builtin_textures(
     Ok(())
 }
 
-impl From<BuiltinError> for CausewayError {
+impl From<BuiltinError> for PlayerError {
     fn from(error: BuiltinError) -> Self {
         Self::Builtin(Box::new(error))
     }

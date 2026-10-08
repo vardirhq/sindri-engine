@@ -7,11 +7,6 @@ rust-version.workspace = true
 license.workspace = true
 publish = false
 
-# `cdylib` so the game can be built for the browser, `rlib` so its own tests and
-# its capture binary can still link it.
-[lib]
-crate-type = ["cdylib", "rlib"]
-
 [dependencies]
 sindri-assets = { path = "../crates/sindri-assets" }
 sindri-core = { path = "../crates/sindri-core" }
@@ -19,6 +14,7 @@ sindri-decay = { path = "../crates/sindri-decay" }
 sindri-desktop = { path = "../crates/sindri-desktop" }
 sindri-grid = { path = "../crates/sindri-grid" }
 sindri-platform = { path = "../crates/sindri-platform" }
+sindri-player = { path = "../crates/sindri-player" }
 sindri-render = { path = "../crates/sindri-render" }
 sindri-runtime = { path = "../crates/sindri-runtime" }
 sindri-scene = { path = "../crates/sindri-scene" }
@@ -35,11 +31,6 @@ env_logger = "0.11"
 pollster.workspace = true
 sindri-gpu = { path = "../crates/sindri-gpu" }
 png = "0.18"
-
-[target.'cfg(target_arch = "wasm32")'.dependencies]
-console_error_panic_hook = "0.1"
-console_log = "1"
-wasm-bindgen.workspace = true
 
 [lints]
 workspace = true

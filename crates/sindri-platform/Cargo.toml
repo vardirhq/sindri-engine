@@ -20,6 +20,7 @@ audio = ["dep:rodio"]
 gamepad = ["dep:gilrs"]
 
 [dependencies]
+log.workspace = true
 sindri-core = { path = "../sindri-core", version = "0.1.0" }
 serde_json.workspace = true
 thiserror.workspace = true
@@ -36,7 +37,6 @@ rodio = { version = "0.22.2", optional = true, default-features = false, feature
 
 [target.'cfg(target_arch = "wasm32")'.dependencies]
 js-sys.workspace = true
-log.workspace = true
 wasm-bindgen.workspace = true
 web-sys = { workspace = true, features = ["Blob", "BlobPropertyBag", "HtmlAudioElement", "HtmlMediaElement", "MediaError", "Storage", "Url", "Window"] }
 

@@ -2,8 +2,8 @@
 
 ```bash
 cargo run -p sindri-export --bin sindri-export -- game dist --base /sindri-engine/
-wasm-pack build game --target web --out-dir pkg
-cp -R game/pkg/. dist/pkg/
+wasm-pack build crates/sindri-player --target web --out-dir pkg
+cp -R crates/sindri-player/pkg/. dist/pkg/
 ```
 
 The export writes the project; `wasm-pack` writes the host. They are separate on
@@ -78,7 +78,7 @@ the browser host in beside each one:
 cargo run -p sindri-export --bin sindri-export -- \
   games/orbital-baked target/pages/examples/orbital-baked \
   --base "${PAGES_BASE_PATH}/examples/orbital-baked/"
-cp -R game/pkg/. target/pages/examples/orbital-baked/pkg/
+cp -R crates/sindri-player/pkg/. target/pages/examples/orbital-baked/pkg/
 ```
 
 One host serves every project, because it reads the manifest rather than
@@ -115,16 +115,18 @@ used to carry a list of asset IDs per kind, compiled in — which meant adding a
 texture meant editing Rust, and a project the host crate had never heard of
 could not be exported at all. `AssetKind` in the manifest is what replaced that.
 
-The shared bundle is currently built from the historical `sindri-causeway`
-crate in `game/`, so its files are named `sindri_causeway.js` and
-`sindri_causeway_bg.wasm`. That name does not identify the project being
-loaded. Its manifest determines the scenes, assets and Decay scripts.
+The bundle is `sindri-player` (`crates/sindri-player`), the one host every
+export ships, so its files are `sindri_player.js` and `sindri_player_bg.wasm`
+whatever the project is. It plays on the shared runtime session
+(`sindri-runtime`) and knows nothing about any one game: the manifest decides
+the scenes, assets and Decay scripts. Natively the same player is
+`sindri-player <project>`, reading the project from its directory instead.
 
-The execution host still has Causeway coupling: it uses that crate's session
-and terrain setup and the fixed `sindri.causeway.save` browser storage key.
-Extracting a generic project host, keeping Causeway terrain setup in its own
-project, and isolating save storage per project remain follow-up work. Renaming
-the bundle alone would not complete that separation.
+A project's browser save is kept under `sindri.<entry scene>.save`, named by
+the scene it opens on. Every game on one site shares one origin's storage, and
+the key used to be the fixed `sindri.causeway.save`, so two games deployed side
+by side overwrote each other's progress. A save made under the old key is not
+carried over.
 
 Each kind has its own bounded asynchronous queue. The host sizes that queue from
 the manifest before requesting the kind, while keeping the number of concurrent

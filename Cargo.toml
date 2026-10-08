@@ -11,6 +11,7 @@ members = [
     "crates/sindri-gpu",
     "crates/sindri-grid",
     "crates/sindri-physics",
+    "crates/sindri-player",
     "crates/sindri-platform",
     "crates/sindri-render",
     "crates/sindri-runtime",

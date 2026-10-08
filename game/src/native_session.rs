@@ -2,16 +2,18 @@
 //! and the sound device it plays through.
 
 use sindri_core::ComponentSchemaRegistry;
-use sindri_platform::NativeAudioBackend;
+use sindri_platform::{MaybeAudio, NativeAudioBackend};
 use sindri_runtime::Session;
 
 use crate::assets::{prefabs, sources};
 use crate::error::CausewayError;
 
-pub type CausewayAudio = NativeAudioBackend;
+pub type CausewayAudio = MaybeAudio<NativeAudioBackend>;
 
+/// The machine's sound device, or silence on one that has none.
+#[allow(clippy::unnecessary_wraps)]
 pub fn causeway_audio_backend() -> Result<CausewayAudio, CausewayError> {
-    Ok(NativeAudioBackend::new()?)
+    Ok(MaybeAudio::open_or_silent(NativeAudioBackend::new))
 }
 
 /// A session backed by the scripts and prefabs the native game embeds.

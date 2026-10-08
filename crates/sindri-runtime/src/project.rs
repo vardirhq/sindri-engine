@@ -67,12 +67,15 @@ fn text(id: &str, bytes: Vec<u8>) -> Result<String, String> {
 
 /// What `sindri.toml` says: the main scene's ID under `assets/`, its entry
 /// stylesheets, and the paths of its other scenes.
-type Manifest = (String, Vec<String>, Vec<String>);
+pub type Manifest = (String, Vec<String>, Vec<String>);
 
 /// Reads the parts of `sindri.toml` a run needs. Deliberately not a TOML
 /// parser: the manifest's contract is `docs/project-format.md`, and these
 /// three keys are quoted strings in it.
-fn manifest(project: &Path) -> Result<Manifest, String> {
+///
+/// # Errors
+/// A manifest that will not read or names no main scene.
+pub fn manifest(project: &Path) -> Result<Manifest, String> {
     let toml = fs::read_to_string(project.join("sindri.toml"))
         .map_err(|error| format!("{}: {error}", project.join("sindri.toml").display()))?;
     let quoted = |line: &str| -> Vec<String> {

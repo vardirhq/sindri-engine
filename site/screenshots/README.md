@@ -70,7 +70,7 @@ runs a project in a browser. Export the project, then point the smoke at it:
 ```
 cargo run -p sindri-export --bin sindri-export -- \
   games/shapes-lab target/dist/shapes-lab --base /sindri-engine/
-cp -R game/pkg/. target/dist/shapes-lab/pkg/
+cp -R crates/sindri-player/pkg/. target/dist/shapes-lab/pkg/
 SINDRI_EXPECT_ASSETS=1 SINDRI_BASE_PATH=/sindri-engine/ \
   SINDRI_VIEWPORT_WIDTH=1440 SINDRI_VIEWPORT_HEIGHT=900 \
   node scripts/browser/smoke.mjs target/dist/shapes-lab \
@@ -78,7 +78,7 @@ SINDRI_EXPECT_ASSETS=1 SINDRI_BASE_PATH=/sindri-engine/ \
 ```
 
 The same two commands with `weave-poc` produce `weave-poc.png`. Both need
-`game/pkg` built first (`wasm-pack build game --target web --out-dir pkg`).
+`crates/sindri-player/pkg` built first (`wasm-pack build crates/sindri-player --target web --out-dir pkg`).
 
 The phone-shaped captures are 390x844 because that is the viewport
 `it_fits_a_phone` holds the game to; they are the same game at the size the

@@ -1,18 +1,19 @@
-//! Causeway's browser host.
+//! The player: install a project, then step and draw it every frame.
 //!
-//! The old browser build proved only that `include_bytes!` survives WASM. This
-//! one does not own a scene, script, texture, font, sheet, or sound until the
-//! browser fetch source has returned it through `AssetLoader` and the manifest
-//! has accepted the bytes. Native stays on the embedded path so changing web
-//! delivery cannot quietly destabilise the desktop game.
-
-mod loader;
+//! Where the project comes from is the only thing that differs between a
+//! browser and a desktop. In a browser nothing is owned until the fetch
+//! source has returned it through `AssetLoader` and the manifest has accepted
+//! the bytes; natively the project is read from the directory named on the
+//! command line. Both arrive as [`ProjectAssets`], and from there a project
+//! is installed, stepped, styled and drawn the same way.
 
 use std::time::Duration;
 
 use sindri_core::{AssetId, EngineState, LoadedScenes, World, sheet_id_for};
 use sindri_desktop::{AppContext, DesktopApp, Flow};
-use sindri_platform::{AudioBackend, AudioClip, BrowserAudioBackend, EngineHost, InputEvent};
+#[cfg(target_arch = "wasm32")]
+use sindri_platform::BrowserAudioBackend;
+use sindri_platform::{AudioBackend, AudioClip, EngineHost, InputEvent};
 use sindri_render::{
     DepthTarget, FrameRenderers, FrameTarget, GlyphRenderer, ShapeRenderer, SpriteBatchRenderer,
     TextRenderer, Texture2D, TextureRegistry, TexturedCubeRenderer, Viewport,
@@ -23,16 +24,33 @@ use sindri_scene::{
 };
 use weave::Viewport as WeaveViewport;
 
-use self::loader::{BrowserProjectAssets, BrowserProjectLoader};
-use crate::Session;
-use crate::assets::extractor;
-use crate::error::CausewayError;
+#[cfg(target_arch = "wasm32")]
+use crate::browser::BrowserProjectLoader;
+use crate::error::PlayerError;
+use crate::project::ProjectAssets;
+use sindri_runtime::{Session, scene_extractor};
 
-pub(super) struct BrowserCausewayApp {
-    loader: Option<BrowserProjectLoader>,
-    pending: Option<BrowserProjectAssets>,
-    audio: Option<BrowserAudioBackend>,
-    engine: Option<EngineHost<Session, BrowserAudioBackend>>,
+/// The sound device a platform plays through.
+#[cfg(target_arch = "wasm32")]
+type Audio = BrowserAudioBackend;
+#[cfg(not(target_arch = "wasm32"))]
+type Audio = sindri_platform::MaybeAudio<sindri_platform::NativeAudioBackend>;
+
+/// Where the project being played is coming from.
+enum Source {
+    /// Still being fetched over the network.
+    #[cfg(target_arch = "wasm32")]
+    Fetching(BrowserProjectLoader),
+    /// Read, waiting for the first draw to install it.
+    Ready(Box<ProjectAssets>),
+    /// Installed, or never coming.
+    Spent,
+}
+
+pub(crate) struct Player {
+    source: Source,
+    audio: Option<Audio>,
+    engine: Option<EngineHost<Session, Audio>>,
     scene: SceneExtractor,
     bindings: TextureBindings,
     tile_sets: TileSetBindings,
@@ -50,7 +68,7 @@ pub(super) struct BrowserCausewayApp {
     paused_for_page: bool,
 }
 
-impl BrowserCausewayApp {
+impl Player {
     #[allow(clippy::cast_possible_truncation)]
     fn weave_viewport(&self) -> WeaveViewport {
         WeaveViewport {
@@ -62,8 +80,8 @@ impl BrowserCausewayApp {
     fn install(
         &mut self,
         context: &AppContext<'_>,
-        project: BrowserProjectAssets,
-    ) -> Result<(), CausewayError> {
+        project: ProjectAssets,
+    ) -> Result<(), PlayerError> {
         let mut loaded_textures: Vec<AssetId> = Vec::new();
         for (id, asset) in project.textures {
             let texture = Texture2D::from_rgba8(
@@ -97,9 +115,10 @@ impl BrowserCausewayApp {
                 .bind_font(id.as_str(), asset.family(), asset.bytes().to_vec());
         }
 
-        let mut audio = self.audio.take().ok_or_else(|| {
-            CausewayError::BrowserAsset("browser audio backend was already moved".into())
-        })?;
+        let mut audio = self
+            .audio
+            .take()
+            .ok_or_else(|| PlayerError::Project("the audio backend was already moved".into()))?;
         for (id, asset) in project.audio {
             audio.register(AudioClip::new(
                 id.as_str(),
@@ -113,7 +132,8 @@ impl BrowserCausewayApp {
         // like native does, and give the session the complete scene set so a
         // Decay `Scene.go` request has somewhere real to go.
         let (entry_name, entry_document) =
-            project.scenes.first().ok_or(CausewayError::MissingScene)?;
+            project.scenes.first().ok_or(PlayerError::MissingScene)?;
+        let saves = save_backend(entry_name);
         let mut world = World::default();
         let mut loaded_scenes = LoadedScenes::new();
         loaded_scenes.enter_keeping_identities_with(
@@ -132,9 +152,7 @@ impl BrowserCausewayApp {
             // cannot reach would be the worst of both.
             .with_tile_sets(self.tile_sets.clone())
             .with_styles(project.stylesheets);
-        session.keep_saves_in(Box::new(sindri_platform::BrowserSaves::under(
-            "sindri.causeway.save",
-        )));
+        session.keep_saves_in(saves);
 
         session.settle_styles(&mut world, self.weave_viewport())?;
         let mut engine =
@@ -144,14 +162,11 @@ impl BrowserCausewayApp {
         engine.set_viewport(self.viewport[0], self.viewport[1]);
         self.engine = Some(engine);
         self.sync_page_lifecycle()?;
-        log::info!(
-            "Causeway loaded {} project assets through browser fetch",
-            project.asset_count
-        );
+        log::info!("Loaded {} project assets", project.asset_count);
         Ok(())
     }
 
-    fn sync_page_lifecycle(&mut self) -> Result<(), CausewayError> {
+    fn sync_page_lifecycle(&mut self) -> Result<(), PlayerError> {
         let should_pause = !self.page_visible || self.platform_suspended;
         let Some(engine) = &mut self.engine else {
             return Ok(());
@@ -167,16 +182,16 @@ impl BrowserCausewayApp {
         Ok(())
     }
 
-    fn clear_loading(&self, context: &AppContext<'_>, view: &wgpu::TextureView) {
+    fn clear_loading(context: &AppContext<'_>, view: &wgpu::TextureView) {
         let mut encoder =
             context
                 .device()
                 .create_command_encoder(&wgpu::CommandEncoderDescriptor {
-                    label: Some("Sindri Causeway loading encoder"),
+                    label: Some("Sindri player loading encoder"),
                 });
         {
             let _pass = encoder.begin_render_pass(&wgpu::RenderPassDescriptor {
-                label: Some("Sindri Causeway loading pass"),
+                label: Some("Sindri player loading pass"),
                 color_attachments: &[Some(wgpu::RenderPassColorAttachment {
                     view,
                     depth_slice: None,
@@ -201,8 +216,8 @@ impl BrowserCausewayApp {
     }
 }
 
-impl DesktopApp for BrowserCausewayApp {
-    type Error = CausewayError;
+impl DesktopApp for Player {
+    type Error = PlayerError;
 
     fn create(context: &AppContext<'_>) -> Result<Self, Self::Error> {
         // The engine's own assets first: the export leaves them out of the
@@ -216,13 +231,12 @@ impl DesktopApp for BrowserCausewayApp {
             &mut bindings,
         )?;
         let mut tile_sets = TileSetBindings::new();
-        crate::bind_builtin_tile_sets(&mut tile_sets)?;
+        sindri_runtime::bind_builtin_tile_sets(&mut tile_sets)?;
         Ok(Self {
-            loader: Some(BrowserProjectLoader::new()?),
-            pending: None,
-            audio: Some(BrowserAudioBackend::new()),
+            source: Source::open()?,
+            audio: Some(audio_backend()?),
             engine: None,
-            scene: extractor()?,
+            scene: scene_extractor().map_err(PlayerError::Project)?,
             bindings,
             tile_sets,
             textures,
@@ -268,13 +282,7 @@ impl DesktopApp for BrowserCausewayApp {
 
     fn update(&mut self, delta: Duration) -> Result<Flow, Self::Error> {
         if self.engine.is_none() {
-            if self.pending.is_none()
-                && let Some(loader) = &mut self.loader
-                && let Some(project) = loader.poll()?
-            {
-                self.pending = Some(project);
-                self.loader = None;
-            }
+            self.source.poll()?;
             return Ok(Flow::Continue);
         }
 
@@ -332,14 +340,14 @@ impl DesktopApp for BrowserCausewayApp {
         view: &wgpu::TextureView,
     ) -> Result<(), Self::Error> {
         if self.engine.is_none()
-            && let Some(project) = self.pending.take()
+            && let Some(project) = self.source.take()
         {
-            self.install(context, project)?;
+            self.install(context, *project)?;
         }
 
         let viewport = self.weave_viewport();
         let Some(engine) = &mut self.engine else {
-            self.clear_loading(context, view);
+            Self::clear_loading(context, view);
             return Ok(());
         };
 
@@ -349,11 +357,11 @@ impl DesktopApp for BrowserCausewayApp {
         let styled = engine
             .game_mut()
             .style(&mut world, viewport)
-            .map_err(CausewayError::from);
+            .map_err(PlayerError::from);
         let prepared = styled.and_then(|undo| {
             // Measured as styled, since a stylesheet sets the font size.
             let prepared = measure_ui_text(&world, self.scene.components(), &mut self.text)
-                .map_err(CausewayError::from)
+                .map_err(PlayerError::from)
                 .and_then(|sizes| {
                     let prepared = self.scene.extract_animated(
                         &world,
@@ -380,7 +388,7 @@ impl DesktopApp for BrowserCausewayApp {
             context
                 .device()
                 .create_command_encoder(&wgpu::CommandEncoderDescriptor {
-                    label: Some("Sindri Causeway browser encoder"),
+                    label: Some("Sindri player encoder"),
                 });
         encode_prepared_frame(
             FrameRenderers {
@@ -402,5 +410,91 @@ impl DesktopApp for BrowserCausewayApp {
         )?;
         context.queue().submit([encoder.finish()]);
         Ok(())
+    }
+}
+
+impl Source {
+    /// Starts fetching the project served beside the page.
+    #[cfg(target_arch = "wasm32")]
+    fn open() -> Result<Self, PlayerError> {
+        Ok(Self::Fetching(BrowserProjectLoader::new()?))
+    }
+
+    /// Reads the project named on the command line.
+    #[cfg(not(target_arch = "wasm32"))]
+    fn open() -> Result<Self, PlayerError> {
+        let directory = std::env::args_os().nth(1).ok_or_else(|| {
+            PlayerError::Project("usage: sindri-player <project directory>".to_owned())
+        })?;
+        let project = crate::directory::read(std::path::Path::new(&directory))?;
+        Ok(Self::Ready(Box::new(project)))
+    }
+
+    /// Moves a fetch on, keeping what arrived. Nothing to do natively, where
+    /// the project was read before the window opened.
+    #[cfg_attr(
+        not(target_arch = "wasm32"),
+        allow(clippy::unused_self, clippy::unnecessary_wraps)
+    )]
+    fn poll(&mut self) -> Result<(), PlayerError> {
+        #[cfg(target_arch = "wasm32")]
+        if let Self::Fetching(loader) = self
+            && let Some(project) = loader.poll()?
+        {
+            *self = Self::Ready(Box::new(project));
+        }
+        Ok(())
+    }
+
+    /// The project, once, if it has arrived.
+    // Which other variants there are depends on the target, so the catch-all
+    // is the one arm that reads the same on both.
+    #[allow(clippy::match_wildcard_for_single_variants)]
+    fn take(&mut self) -> Option<Box<ProjectAssets>> {
+        match std::mem::replace(self, Self::Spent) {
+            Self::Ready(project) => Some(project),
+            other => {
+                *self = other;
+                None
+            }
+        }
+    }
+}
+
+#[cfg(target_arch = "wasm32")]
+#[allow(clippy::unnecessary_wraps)]
+fn audio_backend() -> Result<Audio, PlayerError> {
+    Ok(BrowserAudioBackend::new())
+}
+
+#[cfg(not(target_arch = "wasm32"))]
+#[allow(clippy::unnecessary_wraps)]
+fn audio_backend() -> Result<Audio, PlayerError> {
+    Ok(sindri_platform::MaybeAudio::open_or_silent(
+        sindri_platform::NativeAudioBackend::new,
+    ))
+}
+
+/// Where a project's save is kept: the page's storage in a browser, a file
+/// beside where the player was run natively. Named by the project's entry
+/// scene, because every game on one site shares one origin's storage, and a
+/// save keyed by anything less is a save another game overwrites.
+fn save_backend(entry_scene: &str) -> Box<dyn sindri_platform::SaveBackend> {
+    let stem = entry_scene
+        .rsplit('/')
+        .next()
+        .unwrap_or(entry_scene)
+        .trim_end_matches(".scene");
+    #[cfg(target_arch = "wasm32")]
+    {
+        Box::new(sindri_platform::BrowserSaves::under(&format!(
+            "sindri.{stem}.save"
+        )))
+    }
+    #[cfg(not(target_arch = "wasm32"))]
+    {
+        Box::new(sindri_platform::FileSaves::at(std::path::Path::new(
+            &format!("{stem}-save.json"),
+        )))
     }
 }

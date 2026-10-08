@@ -1,5 +1,7 @@
 # Changelog
 
+- Every exported game is played by `sindri-player`, the engine's own host, rather than by a bundle built from Causeway's crate: a published game now loads `sindri_player.js`, and `cargo run -p sindri-player -- <project>` plays any project directory natively. Browser saves are kept per project, under `sindri.<entry scene>.save`, where every game on a site used to share `sindri.causeway.save` and overwrite each other's progress; a save made under the old key is not carried over. A native host on a machine with no sound device now plays silently instead of refusing to start.
+
 - Run the editor with `cargo editor <project>`: an optimised, incrementally built profile in which a game plays about as fast as in a release build. The plain dev profile now optimises every dependency, which makes Play in a `cargo run` editor about 1.6× faster at no cost to rebuilding after an edit.
 
 - Every host binds the engine's own block set and textures. `builtin:blocks` was only ever bound by the editor, so a project whose voxel world named it failed in the exported browser build and in `project-capture`.
