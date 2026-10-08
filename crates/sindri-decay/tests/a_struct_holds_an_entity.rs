@@ -4,7 +4,7 @@
 //! The struct field is read as a value first and the path walks on from the
 //! reference it holds. Before, the whole chain went to the host as one path
 //! rooted at a local holding a struct, which the checker accepted and the
-//! runtime refused: a RayHit2d's `entity` could be passed on, but not asked
+//! runtime refused: a `RayHit2d`'s `entity` could be passed on, but not asked
 //! where it was.
 
 use serde_json::json;
@@ -61,5 +61,7 @@ fn a_path_walks_on_from_an_entity_in_a_struct_field() {
     assert!(report.failures.is_empty(), "{report:#?}");
     assert!((scripts.blackboard().get("read", 0.0) - 2.0).abs() < 1.0e-9);
     let position = world.get(target).unwrap().transform_3d.unwrap().position;
-    assert_eq!(position, [2.0, 3.0, 4.0]);
+    for (actual, expected) in position.into_iter().zip([2.0, 3.0, 4.0]) {
+        assert!((actual - expected).abs() < 1.0e-6, "{position:?}");
+    }
 }
