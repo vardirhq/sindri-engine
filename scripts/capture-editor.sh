@@ -20,6 +20,9 @@ entity_filter=${3:-}
 # build: the failure is then "window did not appear", which describes the window
 # accurately and the problem not at all. A build here is a fraction of a second
 # once the binary exists.
+#
+# The plain dev profile rather than `cargo editor`'s: a screenshot needs one
+# correct frame, not a fast one, and CI already holds dev artifacts.
 cargo build --package sindri-editor
 
 cargo run --package sindri-editor -- "$scene" &

@@ -184,8 +184,14 @@ For the current outside-in audit rather than an aspirational feature list, see [
 The workspace currently requires Rust 1.95.
 
 ```bash
-cargo run --package sindri-editor
+cargo editor                      # the welcome window, optimised
+cargo editor games/platformer     # straight into a project
 ```
+
+`cargo editor` is an alias for an optimised, incrementally built profile: the
+editor plays a game about as fast as a release build does. Working on the
+editor itself, `cargo run --package sindri-editor` builds faster after an
+edit and still optimises every dependency.
 
 The repository includes games, feature examples, fixtures, deterministic captures, and regression tests that exercise the same implementations used by the editor and runtime.
 

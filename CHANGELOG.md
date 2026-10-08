@@ -1,5 +1,7 @@
 # Changelog
 
+- Run the editor with `cargo editor <project>`: an optimised, incrementally built profile in which a game plays about as fast as in a release build. The plain dev profile now optimises every dependency, which makes Play in a `cargo run` editor about 1.6× faster at no cost to rebuilding after an edit.
+
 - Every host binds the engine's own block set and textures. `builtin:blocks` was only ever bound by the editor, so a project whose voxel world named it failed in the exported browser build and in `project-capture`.
 
 - The Profiler times the editor's whole frame, not only Play's steps: upkeep, presentation, extraction, encoding, the panels, egui's painting and the wait for the next frame each have a phase, and a toolbar toggle records frames while editing. `sindri-editor <project> --benchmark <report.json>` measures a project at rest and in Play and exits; `project-benchmark` measures the same project as the browser host plays it, and `scripts/frame-benchmark.py` compares the two.

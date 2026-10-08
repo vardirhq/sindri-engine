@@ -100,11 +100,11 @@ capabilities; each is proven on a genre showcase or flagship named in its slice.
   the target chosen from them. The run is played without input: what a
   scripted input sequence would add is proven by slice 3's parity tests
   rather than timed here.
-- [ ] **2. Build profiles.** The dev profile optimises dependencies (and the
-  workspace as far as compile time allows, measured), and there is one
-  documented way to launch the editor optimised. README,
-  `scripts/capture-editor.sh` and `docs/editor-architecture.md` agree with it.
-  The slice-1 benchmark records the before and after.
+- [x] **2. Build profiles.** The dev profile optimises every dependency;
+  a new `editor` profile (release, incremental, 256 codegen units) is what
+  `cargo editor <project>` runs. README, `scripts/capture-editor.sh` and
+  `docs/editor-architecture.md` say which is for what; the measurements are
+  below.
 - [ ] **3. One runtime session.** `sindri-runtime` exists with the session,
   styling settlement, physics and audio wiring the shipped host uses today.
   `sindri-causeway` runs on it natively and in the browser; editor Play runs
@@ -215,6 +215,27 @@ noted: `project-capture` and `project-benchmark` could not open a project
 whose voxel world names `builtin:blocks`, and neither could the shipped
 browser host; every host now binds the engine's own block set and textures,
 as the editor always did.
+
+## Build profiles
+
+Slice 2, measured the same way as the baselines: a clean build of the editor,
+a rebuild after touching one of its files, and the work per frame in Play.
+
+| Build | Clean build | Rebuild after an edit | Platformer in Play | Orbital in Play |
+|---|---|---|---|---|
+| dev, as it was | 110 s | 11 s | 69.7 ms | 169.6 ms |
+| dev, dependencies at `opt-level = 2` | 327 s | 11 s | 40.9 ms | 109.9 ms |
+| dev, and the workspace at `opt-level = 1` | 370 s | 26 s | 20.8 ms | 60.8 ms |
+| `editor` profile | 364 s | 3 s | 17.6 ms | — |
+| release | — | — | 16.7 ms | 49.6 ms |
+
+The dev profile takes the second row: it costs one longer clean build and
+nothing per edit, and the tests already optimised their dependencies, so a
+plain build and the test suite now share those artifacts rather than each
+building them. The third row is close to release but makes working on the
+editor two and a half times slower to rebuild; the `editor` profile gets
+release speed for using the editor instead. A rebuild after a touch with no
+change is what was timed; a real edit recompiles more, in both profiles.
 
 ## Verification
 

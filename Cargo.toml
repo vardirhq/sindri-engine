@@ -103,3 +103,24 @@ missing_panics_doc = "allow"
 # Decay VM rather than in the test harnesses themselves.
 [profile.test.package."*"]
 opt-level = 2
+
+# The same, for every build. The editor run unoptimised was the larger part of
+# why a game played in it lagged while the browser build, which is release,
+# did not: optimising only the dependencies (egui, wgpu, the solvers, the
+# Decay crates' own) took the platformer's Play from about 70 ms a frame to
+# 41, at no cost to rebuilding after an edit, because a dependency is built
+# once. It also lets a plain build and the tests share those artifacts
+# instead of building every dependency twice. Measured in
+# docs/editor-update.md.
+[profile.dev.package."*"]
+opt-level = 2
+
+# Running the editor, rather than working on it: release optimisation with
+# incremental, finely split compilation so a rebuild after pulling stays
+# short. `cargo editor <project>` (an alias in .cargo/config.toml) uses it.
+# The platformer plays at 17.6 ms a frame here against 16.7 in a full release
+# build and 70 in the plain dev profile.
+[profile.editor]
+inherits = "release"
+incremental = true
+codegen-units = 256

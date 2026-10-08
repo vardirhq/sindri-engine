@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Times a project in the editor and in the standalone host, and compares them.
 
-    scripts/frame-benchmark.py run games/platformer [--release] [--frames N]
+    scripts/frame-benchmark.py run games/platformer [--profile P] [--frames N]
     scripts/frame-benchmark.py summarize target/bench/*.json
 
 `run` builds both benchmarks, plays the project in the editor (under
@@ -135,16 +135,17 @@ def editor_ui(stats: dict) -> float:
     return sum(stats["phases"].get(key, 0.0) for key in ("panels", "paint"))
 
 
-def editor_binary(release: bool) -> Path:
-    return ROOT / "target" / ("release" if release else "debug") / "sindri-editor"
+def target_dir(profile: str) -> Path:
+    """Where cargo puts a profile's binaries: `dev` builds into `debug`."""
+    return ROOT / "target" / ("debug" if profile == "dev" else profile)
 
 
 def run(args: argparse.Namespace) -> int:
     project = args.project.rstrip("/")
     name = Path(project).name
-    build = "release" if args.release else "debug"
+    build = args.profile
     BENCH.mkdir(parents=True, exist_ok=True)
-    profile = ["--release"] if args.release else []
+    profile = ["--profile", args.profile]
     subprocess.run(["cargo", "build", "-p", "sindri-editor", *profile], cwd=ROOT, check=True)
     subprocess.run(
         ["cargo", "build", "-p", "sindri-causeway", "--bin", "project-benchmark", *profile],
@@ -153,7 +154,7 @@ def run(args: argparse.Namespace) -> int:
     )
     editor_report = BENCH / f"{name}-editor-{build}.json"
     command = [
-        str(editor_binary(args.release)),
+        str(target_dir(args.profile) / "sindri-editor"),
         project,
         "--benchmark",
         str(editor_report),
@@ -174,7 +175,7 @@ def run(args: argparse.Namespace) -> int:
         ]
     subprocess.run(command, cwd=ROOT, check=True, timeout=args.timeout)
     standalone_report = BENCH / f"{name}-standalone-{build}.json"
-    standalone = ROOT / "target" / build / "project-benchmark"
+    standalone = target_dir(args.profile) / "project-benchmark"
     subprocess.run(
         [str(standalone), project, str(standalone_report), str(args.frames), str(args.settle)],
         cwd=ROOT,
@@ -208,7 +209,11 @@ def main() -> int:
     commands = parser.add_subparsers(dest="command", required=True)
     running = commands.add_parser("run", help="measure a project in both hosts")
     running.add_argument("project")
-    running.add_argument("--release", action="store_true", help="measure optimised builds")
+    running.add_argument(
+        "--profile",
+        default="dev",
+        help="the cargo profile to build and measure: dev, editor or release",
+    )
     running.add_argument("--frames", type=int, default=600)
     running.add_argument("--settle", type=int, default=60)
     running.add_argument("--timeout", type=int, default=900, help="seconds per host")
