@@ -39,7 +39,7 @@ This is the most important Sindri/Decay distinction.
 | `World.send_signal(entity, name, value)` | Sends runtime data to a running script | During gameplay |
 | `World.take_signal(name)` | Consumes accumulated runtime signal data on the receiving script | During gameplay |
 | `Name.on(entity).field` | Reads or writes another script's live field, checked when it compiles | Any time; before it starts, a write sets its starting value |
-| `Name.on(entity).message(args)` | Sends a typed message, delivered after the pass | During gameplay |
+| `Name.on(entity).message(args)` | Sends a typed message, delivered after the pass. It gives nothing back: binding its result (`let x = Name.on(e).f()`) is a compile error, so read a field for a value | During gameplay |
 | `Event.emit(args)` / `on Event(args) { }` | Emits a declared event to every script handling it, delivered after the pass | During gameplay |
 | `Timer(seconds)` in a field, read with `.done` / `.left` / `.progress` | A countdown that runs down on its own before each `update` | Any time |
 | `shared fn name(...)` at the top of any `.decay` file (a plain top-level `fn` is that file's only) | A helper every script calls by name, with no `this` | Any time |
