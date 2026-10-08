@@ -2,8 +2,8 @@
 
 ## Start here
 
-Work on branch `ccr-4791a75f-7rfx8g` in `vardirhq/sindri-engine`. Keep the
-whole update in one pull request; do not split it into several. Read
+Work on branch `ccr-4791a75f-7rfx8g` in `vardirhq/sindri-engine`, draft PR
+#503. Keep the whole update in one pull request; do not split it into several. Read
 `AGENTS.md` and `CLAUDE.md` freshly before editing, then
 [the update's checklist](editor-update.md), `docs/editor-architecture.md` and
 `docs/editor-direction.md`.
@@ -15,19 +15,30 @@ less, with smaller checkpoints preferred.
 
 ## Current checkpoint
 
-Planning only. No code has changed. The plan was written while another pull
-request's CI was running; before slice 1, bring this branch up to date with
-`main` so the update starts from whatever that pull request merged.
+Draft PR #503. Slices 1 and 2 are checked. Slice 3 is in progress:
 
-## Next
+- `sindri-runtime` holds the session (from Causeway), `ProjectRun` (open any
+  project directory and play it, with test conveniences: keys, pads, tags,
+  `on_screen`, board) and `StepReport` (prints, failures, problems, phase
+  times; `notes()` and `log()`).
+- Editor Play runs on the session (`editor/src/native/runtime/play.rs`).
+- `sindri-player` is the generic host: the browser module every export
+  ships (`sindri_player.js`) and `sindri-player <project>` natively. Saves are
+  keyed per project. `MaybeAudio` plays silently without a sound device.
+- Harnesses on `ProjectRun`: platformer, Flappy, Low Tide, Scorchball, the
+  Camera Lab (whose own app is gone).
 
-Slice 1, measuring the whole frame. Start from `editor/src/profiler.rs`
-(`Phase`) and `editor/src/native/frame.rs`, which is where one editor frame
-begins and ends. The headless benchmark should reuse how `editor/tests/`
-already opens projects without a window. The standalone side can use the
-showcases' existing test harnesses until slice 3 replaces them. Record the
-baselines in `docs/editor-update.md` before changing any build profile, so
-slice 2 has a before to compare against.
+Left in slice 3: Orbital's harness (`games/orbital-baked/src/lib.rs`); Voxel
+Lab, which has its own browser app and renderer that Pages builds separately
+(`games/voxel-lab/src/browser.rs`); the parity test (the same scripted input
+ends in an identical world through the editor's Play session and through
+`ProjectRun`); real-browser checks of every export; and docs (`parity.md`,
+`capabilities.md`, the `docs/editor-update.md` slice 3 entry).
+
+Gate every push with fmt, warning-denied Clippy and the changed crates'
+tests, run unpiped so a failure stops the push. Debug info off keeps the
+build inside the disk allowance (`CARGO_PROFILE_DEV_DEBUG=0`,
+`CARGO_PROFILE_TEST_DEBUG=0`).
 
 ## Notes for later slices
 
