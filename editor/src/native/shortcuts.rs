@@ -93,10 +93,31 @@ pub(super) fn pressed(input: &mut egui::InputState, typing: bool) -> Shortcuts {
     }
 }
 
+/// Copy and Paste, which reach egui as events of their own rather than as
+/// keys: whether Copy was pressed, and the text a Paste carried. Nothing is
+/// read while a field has the keyboard, whose copy and paste they are.
+pub(super) fn clipboard_keys(input: &egui::InputState, typing: bool) -> (bool, Option<String>) {
+    if typing {
+        return (false, None);
+    }
+    let mut copied = false;
+    let mut pasted = None;
+    for event in &input.events {
+        match event {
+            egui::Event::Copy => copied = true,
+            egui::Event::Paste(text) => pasted = Some(text.clone()),
+            _ => {}
+        }
+    }
+    (copied, pasted)
+}
+
 impl EditorApp {
     pub(super) fn handle_shortcuts(&mut self, context: &egui::Context) {
         let typing = context.egui_wants_keyboard_input();
         let keys = context.input_mut(|input| pressed(input, typing));
+        let (copied, pasted) = context.input(|input| clipboard_keys(input, typing));
+        self.clipboard_keys(context, copied, pasted.as_deref());
         // Read whatever the transport is doing, so a key is consumed rather
         // than falling through to something else, and then acted on only where
         // acting is allowed. Save says why it refused; undo and redo do not,

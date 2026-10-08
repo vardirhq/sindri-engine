@@ -18,7 +18,7 @@ use crate::ui::theme::color;
 use crate::ui::theme::metric::ROW_HEIGHT;
 use crate::ui::widgets::{
     button::{self, Intent},
-    panel,
+    menu, panel,
 };
 
 use super::EditorApp;
@@ -165,6 +165,11 @@ impl EditorApp {
             },
             collapsed,
             authoring,
+            can_paste: self.can_paste(),
+            nested: self
+                .world
+                .get(entity)
+                .is_some_and(|data| data.parent.is_some()),
         }
     }
 
@@ -252,11 +257,14 @@ impl EditorApp {
                 // Clicking past the last row clears the selection. Without
                 // somewhere to click that means "nothing", a selection made by
                 // accident can only be replaced.
-                if ui
-                    .allocate_response(ui.available_size(), egui::Sense::click())
-                    .clicked()
-                {
+                let space = end_space(ui);
+                if space.clicked() {
                     clicked = Some((None, Pick::Only));
+                }
+                // And right-clicking there is where something new is made:
+                // the + in the tab strip, offered where the pointer already is.
+                if let Some(chosen) = space_menu(&space, authoring, self.can_paste()) {
+                    asked = Some(chosen);
                 }
                 if let Some((entity, how)) = clicked {
                     self.pick(entity, how, &listed);
@@ -305,6 +313,16 @@ pub(super) enum RowAction {
     SwitchSelection(bool),
     /// Move this entity that many places among its siblings.
     MoveBy(EntityId, isize),
+    Copy(EntityId),
+    CopySelection,
+    /// Paste what was copied under this entity.
+    PasteInto(EntityId),
+    /// Paste what was copied at the top level.
+    Paste,
+    /// Move this entity out from under its parent.
+    ToTopLevel(EntityId),
+    /// Make something new at the top level.
+    Create(CreateGameObject),
 }
 
 impl EditorApp {
@@ -345,6 +363,12 @@ impl EditorApp {
                 self.switch_entities(selected.all(), on);
             }
             RowAction::MoveBy(entity, offset) => self.move_among_siblings(entity, offset),
+            RowAction::Copy(entity) => self.copy_entities(&[entity]),
+            RowAction::CopySelection => self.copy_selection(),
+            RowAction::PasteInto(entity) => self.paste(Some(entity), None),
+            RowAction::Paste => self.paste(None, None),
+            RowAction::ToTopLevel(entity) => self.reparent(entity, None),
+            RowAction::Create(create) => self.create_game_object(create),
         }
     }
 
@@ -399,4 +423,47 @@ impl InSight {
             self.unseen = 0.0;
         }
     }
+}
+
+/// The space past the last row: at least two rows of it, so a list longer
+/// than the panel still has somewhere past its end to click.
+fn end_space(ui: &mut egui::Ui) -> egui::Response {
+    let room = ui
+        .available_size()
+        .max(egui::vec2(ui.available_width(), ROW_HEIGHT * 2.0));
+    ui.allocate_response(room, egui::Sense::click())
+}
+
+/// The menu a right-click opens past the last row: what can be made at the
+/// top level, and what was copied.
+fn space_menu(space: &egui::Response, authoring: bool, can_paste: bool) -> Option<RowAction> {
+    let mut asked = None;
+    menu::on_right_click(space, |ui| {
+        menu::subject(ui, "This scene");
+        ui.add_enabled_ui(authoring, |ui| {
+            let offered = [
+                ("Create Empty", CreateGameObject::Empty { parent: None }),
+                ("Create UI Image", CreateGameObject::UiImage),
+                (
+                    "Create Directional Light",
+                    CreateGameObject::DirectionalLight,
+                ),
+            ];
+            for (label, create) in offered {
+                if menu::item(ui, label).clicked() {
+                    asked = Some(RowAction::Create(create));
+                    ui.close();
+                }
+            }
+            ui.separator();
+            if ui
+                .add_enabled(can_paste, menu::entry("Paste", "Ctrl+V"))
+                .clicked()
+            {
+                asked = Some(RowAction::Paste);
+                ui.close();
+            }
+        });
+    });
+    asked
 }

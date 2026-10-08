@@ -273,7 +273,7 @@ skeletal animation.
 | Moving a body by its transform | ✅ | — | ✅ | ✅ | **Par** | A script writing a body's position teleports it, keeping its velocity, as in Unity; a position-kinematic body takes it as its next target. The platformer's respawn is the proof |
 | **One-way platforms** | ✅ | 🟡 | ✅ | ✅ | **Partial** | Local support normal/cone on solid pieces, including tilemaps; CCD pair filtering and timed Decay drop-through. Platformer planks prove ascent, descent/landing and dropping to an ordinary floor. Command-backed policy/undo regressions preserve velocity/joints. Native, WASM and Chromium export/load smoke passed; visual inspector and full browser interaction verification remain in final integration. Geometric queries still see both sides |
 | **Continuous collision (CCD)** | ✅ | 🟡 | ✅ | ✅ | **Partial** | Opt-in 2D body flag, scene synchronization and typed Decay controls; thin kinematic-wall and spawn-window/undo lifecycle regressions. Platformer hero opts in; command-backed edits/undo preserve solver state. Native and WASM checks passed; visual inspector/browser verification remains in final integration. Sensors stay discrete; bullet-versus-bullet sweeping is not guaranteed |
-| Collider gizmos in the Scene view | — | ✅ | — | — | **Par** | Every 2D collider is outlined from the pieces physics is given, tilemap boxes included; the selected one's box edges, circle radius and capsule height drag, one undo step a drag. Offsets and rotations are still typed, and 3D colliders have no gizmo |
+| Collider gizmos in the Scene view | — | ✅ | — | — | **Par** | Every 2D collider is outlined from the pieces physics is given, tilemap boxes included; the selected one's box edges, circle radius and capsule height drag, one undo step a drag. 3D colliders are drawn as wireframes. Offsets and rotations are still typed, and 3D pieces have no handles |
 | Scene gravity | ✅ | ✅ | — | ✅ | **Par** | `sindri.physics2d.world` sets the scene's gravity, so editor Play runs a platformer as its build will; the platformer and Scorchball each set theirs. One vector; no per-area gravity. Decay reads and turns it with `Physics.gravity`/`Physics.set_gravity` (the Physics Playground's GRAVITY button), and a change wakes resting bodies in 2D and 3D |
 
 ## Navigation and grids
@@ -455,13 +455,13 @@ file.
 | Feature | Editor | vs. baseline | Gap that matters |
 | --- | :-: | --- | --- |
 | Scene view, hierarchy, generic inspector, project browser | ✅ | **Par** | — |
-| Gizmos: transform, snapping, Z-lock-safe movement | ✅ | **Par** | No camera or effect gizmos. 2D colliders have theirs; 3D colliders do not |
+| Gizmos: transform, snapping, Z-lock-safe movement | ✅ | **Par** | 2D colliders, 3D colliders, 2D joints, a selected character's footing and a selected effect burst's reach are drawn; only 2D colliders have handles. No camera-behaviour gizmo |
 | Play / pause / stop / single-step, snapshot restore | ✅ | **Ahead** | Single-step and snapshot restore are better than Unity's play mode, and so is editing while playing: Unity throws play-mode changes away, Sindri lists them at Stop to keep or discard. Play steps the shipped runtime session on a styled world, and a parity test ends four games in the same world in the editor and the build |
 | Tilemap painting, sheet slicer, texture picker | ✅ | **Par** | — |
 | **Asset pickers for schema fields generally** | ✅ | **Ahead** | Declared per component in the schema registry, checked against the field template, and carried in `docs/generated/`. Unity needs a plugin (Odin) for the equivalent |
 | **Array-of-object editing** | ✅ | **Par** | A list of objects is added to, removed from and reordered, with each item's fields drawn through its meanings. Decided by the template, so a tilemap's thousand tiles stay a readout |
 | **Tagged-enum (variant) fields** | ✅ | **Par** | A field that decides what else its object holds is switched as one edit, at any depth — Godot's equivalent is swapping a Resource subtype. What is ours is that every variant is proved to decode at startup, so an unpickable one fails the build rather than the scene |
-| Console / log panel | ✅ | **Par** | Every failure the editor reports, plus script `print` named by the entity that printed it, filtered by level, repeats collapsed to a count, with a jump to the entity a line is about and an error count in the status bar. It can now be put wherever it is wanted — it opens beside the Scene view — so watching the log no longer costs the project browser, and a failure recurring every frame is one counted line wherever it sits in the log rather than a new line per frame |
+| Console / log panel | ✅ | **Par** | Every failure the editor reports, plus script `print` named by the entity that printed it, filtered by level, repeats collapsed to a count, with a jump to the entity a line is about and an error count in the status bar. It can now be put wherever it is wanted — it opens beside the Scene view — so watching the log no longer costs the project browser, and a failure recurring every frame is one counted line wherever it sits in the log rather than a new line per frame. What is wrong now is grouped by cause, one message with every entity it reaches under it, and the status bar counts causes |
 | Profiler view | 🟡 | **Behind** | The Profiler panel times the whole editor frame by phase — upkeep, each gameplay phase of Play, the views' presentation, extraction and encoding, panels, painting and waiting — as a stacked chart of the last 300 frames against the 60 fps budget, with each script's share, slowest first, and optionally while editing. CPU only: no GPU timings, no per-call breakdown inside a script, and shipped builds are not profiled in-game |
 | **Search / filter in hierarchy or project** | ❌ | **Absent** | Painful past a few dozen entities |
 | **Project settings surface** | ❌ | **Absent** | `sindri.toml` is edited by hand |
@@ -621,8 +621,9 @@ output of the file; everything above is evidence.
    editor timelines remain, and Weave keyframes are still absent.
 9. ~~**Collider gizmos in the Scene view.**~~ **Done.** Every 2D collider is
    outlined from the pieces physics is given, and the selected one's edges,
-   radius and height drag as one undo step. Offsets, rotations and 3D colliders
-   remain.
+   radius and height drag as one undo step. 3D colliders, joints, a
+   character's footing and an effect's reach are drawn too. Offsets, rotations
+   and handles on 3D pieces remain.
 10. **Multiple scenes and additive loading.** **Mostly done.** Scenes load
     beside each other and `Scene.go` switches between them natively and in the
     browser, and the editor's Scenes panel edits the project's scene list as a

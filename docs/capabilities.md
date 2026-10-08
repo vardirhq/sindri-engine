@@ -1767,6 +1767,30 @@ frame.
   can already do — open a scene, look inside a folder, slice an image — plus the
   asset path a component field wants, the one the open scene resolves against,
   which until now had to be read off the row and typed back in
+- **A right-click menu wherever one is expected.** The hierarchy's empty space
+  creates an empty, a UI image or a light, and pastes; the project browser's
+  makes a folder, script, profile, physics material or block set in the folder
+  being looked at, imports, and refreshes; a component's heading copies its
+  values, pastes them onto another component of the same kind, resets it to its
+  blank and removes it; a field's name copies its value and resets it to the
+  schema's; the Scene view frames the selection or everything and creates or
+  pastes at the point clicked; a console line copies, selects the entity it
+  names, and clears. Component order is not authored, so there is no Move up
+  or down for a component
+- **Copy and paste entities.** Copy (a row's menu, or Ctrl+C with the
+  hierarchy in hand) keeps the copied subtrees as they were, so a copy pastes
+  whole after the original was changed or deleted; Paste (Ctrl+V, the empty
+  space, or the Scene view) lands at the top level, "Paste as child" under a
+  row, and "Paste here" at the point clicked. A row's menu also moves an entity
+  out to the top level
+- **Gizmos for what simulates without drawing.** A 2D joint is drawn between
+  its anchors as physics places them, with a rope's reach, a hinge's allowed
+  swing, a slider's travel and a spring's rest length, and a click on its line
+  selects it; a 3D collider's pieces as wireframes; a selected character's
+  footing, from its collider's lowest point: the steepest slope it walks, how
+  high it steps and how far down it snaps; and a selected effect burst's reach,
+  from its speed, spread, life and drag. Audio has no gizmo because a source
+  plays at one volume wherever it is
 - **Creating empty root or child GameObjects and deleting entities**, from the
   hierarchy. Creation assigns a stable scene ID immediately, and creating a
   child opens its parent. Deleting takes the whole subtree, and **undo brings
@@ -2018,9 +2042,8 @@ Listed because a control that looks like a feature is worse than an absent one.
 under use and what the editor cannot express at all.
 `docs/editor-authoring-audit.md` is the second sweep, which asks the harder
 question: whether the controls that do work add up to a tool the companion game
-could be built in. They now do — every finding it made is fixed except the six
-right-click surfaces it tabulates, which are places to put actions that already
-exist rather than gaps in what the editor can express. This is the summary, and
+could be built in. They now do — every finding it made is fixed, the six
+right-click surfaces it tabulates included. This is the summary, and
 it is deliberately short: everything the audits found is either working or gone,
 and what is left here is waiting on a build rather than on a handler.
 
@@ -2080,10 +2103,9 @@ settings gear.
   does not edit them side by side. There are no project settings beyond the
   scene list and main scene, and a door named at run time (`Scene.go(next)`)
   is not drawn on the board
-- Context menus exist on hierarchy and project rows only. Empty panel space,
-  component/property rows, the Scene view, and console lines still lack their
-  natural context actions
-- No copy/paste of entities or components
+- Copied entities and component values are kept by the editor, not the
+  system clipboard, which is given only their names or JSON text; they do not
+  paste into another editor window
 - No build/export controls; static web export is currently a CLI and CI workflow
 - No versioned editor protocol; the editor and runtime are one process
 - Decay source opens as a read-only text preview. The editor cannot modify it;

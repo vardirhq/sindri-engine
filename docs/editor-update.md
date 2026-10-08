@@ -173,7 +173,7 @@ capabilities; each is proven on a genre showcase or flagship named in its slice.
   (`native/run_scrub.rs`). The bound is two minutes: 120 copies, one a second.
   `editor/tests/scrub_a_run.rs` scrubs Orbital back from its third wave to its
   first, resumes, and every replayed step matches the recording.
-- [ ] **7. Close the remaining audit gaps.**
+- [x] **7. Close the remaining audit gaps.**
   - Gizmos for the shapes that still have none. Colliders, cameras and lights
     have them; audit joints, 3D colliders, character controllers, audio
     falloff and effect reach first, then build each one that is missing.
@@ -181,6 +181,25 @@ capabilities; each is proven on a genre showcase or flagship named in its slice.
   - The six right-click surfaces `docs/editor-authoring-audit.md` §6 lists.
   - Angle, Mask and Entity inspector controls, sprite thumbnails, and Camera
     Behaviour's declared meanings (`docs/editor-usability-audit.md` §6).
+
+  Done. The audit found joints, 3D colliders, character footing and effect
+  reach undrawn; audio has nothing to draw, since a source has no falloff.
+  `sindri_scene::shape_gizmos` works each out from what the simulation is
+  given and `native/shape_gizmo.rs` draws them, joints and 3D colliders always
+  and footing and reach for the selection; a click on a joint selects it.
+  `Console::causes` groups current problems by message, and the status bar and
+  console tab count causes. Every surface in the authoring audit's table has
+  its menu (`native/scene_menu.rs`, `inspector_panel/section/heading.rs`, the
+  hierarchy's and project browser's empty space, console lines), and entities
+  copy and paste through an editor clipboard (`editing/clipboard.rs`, Ctrl+C
+  and Ctrl+V read as egui's Copy and Paste events). Mask and Entity controls
+  and sprite thumbnails already existed; the Angle row is new, and edits in
+  degrees. Camera Behaviour declares its meanings, which needed a new registry
+  idea: `describe_optional` says what a `null` field holds once added, so its
+  fields can be described and the inspector offers Add and Remove. Fields
+  list in the order the type declares them (`field_order`). Checked in the
+  editor under Xvfb: each menu opens and acts, the joints, footing and
+  inspector rows draw.
 - [ ] **8. Final integration.** Causeway plays in the editor at the target;
   `parity.md`, `capabilities.md`, `editor-architecture.md`,
   `editor-direction.md`, the audits' status lines, `CHANGELOG.md` and

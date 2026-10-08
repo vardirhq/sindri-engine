@@ -84,7 +84,9 @@ mod runtime;
 mod scene_board_view;
 mod scene_io;
 mod scene_lighting;
+mod scene_menu;
 mod scene_new;
+mod shape_gizmo;
 mod shortcuts;
 mod slicer_view;
 mod sprite_sheet_view;
@@ -406,6 +408,8 @@ struct EditorApp {
     stop_review: Option<run_review::StopReview>,
     /// The run so far, to scrub back through; `None` when nothing plays.
     recording: Option<crate::recording::Recording>,
+    /// What Copy took, for Paste.
+    clipboard: Option<editing::clipboard::Clipboard>,
 }
 
 impl EditorApp {

@@ -84,7 +84,7 @@ impl EditorApp {
         let mut rolled = false;
         // What is wrong now, carried by the console's own tab wherever it is,
         // whether or not the console is the tab showing.
-        let problems = self.console.problems().len();
+        let problems = self.console.causes().len();
         let problem_badge = (problems > 0).then(|| problems.to_string());
         let strip = tabs::row(ui, shape, |ui| {
             for (index, panel) in panels.iter().copied().enumerate() {

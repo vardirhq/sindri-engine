@@ -5,6 +5,8 @@
 //! row is: what the editor can do with each kind of file, and what hangs
 //! underneath a folder or a sliced image.
 
+use std::path::Path;
+
 use eframe::egui::{self, Response};
 
 use crate::project::{AssetKind, ProjectEntry};
@@ -325,6 +327,56 @@ pub(crate) fn row_menu(
         ui.separator();
         if menu::danger(ui, "Delete", "Del").clicked() {
             asked = Some(BrowserAction::ConfirmDelete(entry.path.clone()));
+            ui.close();
+        }
+    });
+    asked
+}
+
+/// What an empty-space entry makes, given the folder.
+type Offer = fn(std::path::PathBuf) -> BrowserAction;
+
+/// The menu a right-click opens on the listing's empty space: what can be
+/// made in, or brought into, the folder being looked at.
+///
+/// The space under the last row is where people right-click to make
+/// something new, and it offered nothing; the same verbs were only on a row,
+/// which an empty folder does not have.
+///
+/// `room` is how tall the view is: the space fills what the rows leave of it,
+/// measured from the rows rather than from where the view is scrolled to, so
+/// it never grows the list it sits at the end of.
+pub(super) fn space_menu(ui: &mut egui::Ui, here: &Path, room: f32) -> Option<BrowserAction> {
+    let height = (room - ui.min_rect().height()).max(24.0);
+    let (_, response) = ui.allocate_exact_size(
+        egui::vec2(ui.available_width(), height),
+        egui::Sense::click(),
+    );
+    let mut asked = None;
+    let name = here.file_name().map_or_else(
+        || "This folder".to_owned(),
+        |name| name.to_string_lossy().into_owned(),
+    );
+    menu::on_right_click(&response, |ui| {
+        menu::subject(ui, &name);
+        let here = here.to_path_buf();
+        let offered: [(&str, Offer); 6] = [
+            ("New folder", BrowserAction::NewFolder),
+            ("New script", BrowserAction::NewScript),
+            ("New profile", BrowserAction::NewProfile),
+            ("New physics material", BrowserAction::NewPhysicsMaterial),
+            ("New block set", BrowserAction::NewBlockSet),
+            ("Import files…", BrowserAction::Import),
+        ];
+        for (label, action) in offered {
+            if menu::item(ui, label).clicked() {
+                asked = Some(action(here.clone()));
+                ui.close();
+            }
+        }
+        ui.separator();
+        if menu::item(ui, "Refresh").clicked() {
+            asked = Some(BrowserAction::Refresh);
             ui.close();
         }
     });

@@ -18,6 +18,7 @@ use crate::selection;
 use crate::space::space_of;
 
 pub(super) mod choosing;
+pub(super) mod clipboard;
 pub(super) mod duplicate;
 mod structure;
 
@@ -35,7 +36,7 @@ use super::{EditorApp, UI_IMAGE_COMPONENT};
 /// A UI element is its own entry rather than "make an empty and then find the
 /// right component", because which space a thing is in is the first thing an
 /// author knows about it and the last thing they should have to discover.
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub(super) enum CreateGameObject {
     Empty { parent: Option<EntityId> },
     UiImage,
@@ -167,6 +168,15 @@ impl EditorApp {
     /// command can be redone onto the same handle, and so there is something to
     /// select without asking the world what just appeared.
     pub(super) fn create_entity(&mut self, parent: Option<EntityId>) {
+        self.create_entity_placed(parent, Transform3D::default());
+    }
+
+    /// The same, standing where `transform` puts it.
+    pub(super) fn create_entity_placed(
+        &mut self,
+        parent: Option<EntityId>,
+        transform: Transform3D,
+    ) {
         let entity = self.world.next_handle();
         let source_id = next_game_object_id(&self.world);
         let mut buffer = CommandBuffer::new();
@@ -176,7 +186,7 @@ impl EditorApp {
                 source_id: Some(source_id),
                 name: Some("GameObject".to_owned()),
                 parent,
-                transform_3d: Some(Transform3D::default()),
+                transform_3d: Some(transform),
                 ..EntityData::default()
             }),
         });

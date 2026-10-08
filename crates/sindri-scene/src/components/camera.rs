@@ -60,6 +60,19 @@ pub enum CameraFit {
     Shorter,
 }
 
+impl CameraFit {
+    /// Every fit, by the names a scene stores, for an editor to offer.
+    pub const ALL: [Self; 2] = [Self::Height, Self::Shorter];
+
+    #[must_use]
+    pub const fn as_str(self) -> &'static str {
+        match self {
+            Self::Height => "height",
+            Self::Shorter => "shorter",
+        }
+    }
+}
+
 impl CameraComponent {
     /// The projections a camera may have, by the names a scene stores.
     ///

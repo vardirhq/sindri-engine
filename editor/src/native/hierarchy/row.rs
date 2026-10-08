@@ -46,6 +46,10 @@ pub(super) struct RowLook {
     /// Whether the verbs that write to the world are offered at all. A running
     /// scene is not the document, and Stop puts back what Play started with.
     pub(super) authoring: bool,
+    /// Whether something has been copied that could be pasted under this row.
+    pub(super) can_paste: bool,
+    /// Whether this entity is under another, so has a top level to move to.
+    pub(super) nested: bool,
 }
 
 /// What one row reported this frame.
@@ -116,6 +120,8 @@ pub(super) fn entity_row(
             authoring: look.authoring,
             can_move: look.can_move,
             switched_off: look.switched_off,
+            can_paste: look.can_paste,
+            nested: look.nested,
         },
         &mut report.asked,
     );
@@ -143,12 +149,18 @@ pub(super) fn entity_row(
 }
 
 /// How many entities a row's menu is about, and whether it may write.
+///
+/// The bools are independent facts about the row, each deciding whether one
+/// entry is offered, not states of one thing.
+#[allow(clippy::struct_excessive_bools)]
 #[derive(Clone, Copy)]
 struct Group {
     size: usize,
     authoring: bool,
     can_move: (bool, bool),
     switched_off: bool,
+    can_paste: bool,
+    nested: bool,
 }
 
 /// The menu a right-click opens on a row.
@@ -196,6 +208,11 @@ fn row_menu(
                 *asked = Some(RowAction::CreateChild(entity));
                 ui.close();
             }
+        });
+        ui.separator();
+        clipboard_entries(ui, entity, group, asked);
+        ui.separator();
+        ui.add_enabled_ui(group.authoring, |ui| {
             // On or off is a fact about each entity, so a selection is switched
             // together: what someone means by disabling five rows is five
             // entities off, not a toggle applied five times to whatever each
@@ -254,6 +271,44 @@ fn row_menu(
                 ui.close();
             }
         });
+    });
+}
+
+/// Copy, paste under, and move out from under a parent: the entries about
+/// where a row sits. Copying reads and writes nothing, so it is offered while
+/// playing too; pasting is an edit like any other.
+fn clipboard_entries(
+    ui: &mut egui::Ui,
+    entity: EntityId,
+    group: Group,
+    asked: &mut Option<RowAction>,
+) {
+    let many = group.size > 1;
+    if menu::item_with_key(ui, "Copy", "Ctrl+C").clicked() {
+        *asked = Some(if many {
+            RowAction::CopySelection
+        } else {
+            RowAction::Copy(entity)
+        });
+        ui.close();
+    }
+    ui.add_enabled_ui(group.authoring, |ui| {
+        if !many
+            && ui
+                .add_enabled(group.can_paste, menu::entry("Paste as child", ""))
+                .clicked()
+        {
+            *asked = Some(RowAction::PasteInto(entity));
+            ui.close();
+        }
+        if !many
+            && ui
+                .add_enabled(group.nested, menu::entry("Move to top level", ""))
+                .clicked()
+        {
+            *asked = Some(RowAction::ToTopLevel(entity));
+            ui.close();
+        }
     });
 }
 

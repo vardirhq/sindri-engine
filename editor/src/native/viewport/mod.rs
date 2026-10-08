@@ -333,6 +333,8 @@ impl EditorApp {
             let owned = painting || gizmo_owned || collider_owned;
             self.move_camera(context, response, rect.height(), owned);
             self.light_overlay(context, response, owned);
+            self.shape_gizmo_overlay(context, response, owned);
+            self.scene_menu(rect, response);
         }
         let camera = if editing {
             self.scene_camera()

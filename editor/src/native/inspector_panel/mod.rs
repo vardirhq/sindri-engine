@@ -10,6 +10,7 @@
 //! claims it, and `draft` turns the whole of it into commands.
 
 pub(super) mod add_component;
+mod angle;
 pub(super) mod blocks;
 mod body;
 pub(super) mod draft;

@@ -83,7 +83,7 @@ pub(crate) fn object_rows(
     let blank = fields.map(|fields| choices::blank_for(registry, type_name, fields, payload));
     let mut drawn = fields::drawn_payload(blank.as_ref(), payload);
     let whole = super::keys::has_keys(registry, type_name).then(|| drawn.clone());
-    for key in fields::ordered_keys(&drawn) {
+    for key in fields::ordered_keys_declared(&drawn, registry.field_order(type_name)) {
         if (skip_properties && key == "properties") || !inspector::applies(type_name, &key) {
             continue;
         }
@@ -111,6 +111,21 @@ pub(crate) fn object_rows(
             continue;
         };
         let meaning = registry.meaning(type_name, &key);
+        // The rows drawn here rather than by `value_row` get its field menu
+        // here too.
+        if (asset_list(meaning, assets).is_some() || is_color(meaning, value))
+            && let Some(written) = super::section::heading::field_menu(
+                ui,
+                type_name,
+                &key,
+                &inspector::humanize(&key),
+                0.0,
+                value,
+                registry.exemplar(type_name, &key),
+            )
+        {
+            *value = written;
+        }
         if let Some(list) = asset_list(meaning, assets) {
             asset_row(
                 ui,

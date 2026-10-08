@@ -6,7 +6,7 @@ use serde::Deserialize;
 use serde_json::json;
 
 use super::*;
-use crate::SceneEntity;
+use crate::{SceneEntity, SceneEntityId};
 
 #[derive(Debug, Deserialize, PartialEq, Eq)]
 struct Health {

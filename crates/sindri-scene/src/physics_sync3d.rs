@@ -294,7 +294,7 @@ fn body_at(body: Option<RigidBody3d>, pose: PhysicsPose3d) -> RigidBody3d {
         })
     }
 }
-fn pose_of(world: &World, entity: EntityId, body: Option<RigidBody3d>) -> PhysicsPose3d {
+pub(crate) fn pose_of(world: &World, entity: EntityId, body: Option<RigidBody3d>) -> PhysicsPose3d {
     world.world_transform(entity).map_or_else(
         || {
             body.map_or_else(PhysicsPose3d::default, |body| PhysicsPose3d {

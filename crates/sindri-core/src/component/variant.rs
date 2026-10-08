@@ -53,12 +53,14 @@ impl super::ComponentRegistration {
     /// What the field template holds at `path`, as any variant makes it.
     pub(super) fn exemplar(&self, path: &str) -> Option<&Value> {
         let template = self.fields.as_ref()?;
-        meaning::exemplar(template, path).or_else(|| {
-            self.variants
-                .iter()
-                .flat_map(|tagged| &tagged.forms)
-                .find_map(|form| meaning::exemplar(form, path))
-        })
+        meaning::exemplar(template, path)
+            .or_else(|| {
+                self.variants
+                    .iter()
+                    .flat_map(|tagged| &tagged.forms)
+                    .find_map(|form| meaning::exemplar(form, path))
+            })
+            .or_else(|| self.optional_exemplar(path))
     }
 }
 

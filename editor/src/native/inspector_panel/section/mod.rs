@@ -7,6 +7,7 @@
 
 pub(super) mod animation;
 pub(super) mod grid;
+pub(crate) mod heading;
 pub(super) mod script;
 pub(super) mod script_value;
 pub(super) mod styles;
@@ -23,6 +24,7 @@ use sindri_core::ComponentSchemaRegistry;
 
 use self::animation::animation_section;
 use self::grid::{grid_navigation_section, grid_occupant_section};
+use self::heading::{act_on_heading, heading_menu};
 use self::script::{script_choice_row, script_exports_section};
 use self::text::text_section;
 use self::tile_volume::tile_volume_section;
@@ -95,32 +97,10 @@ pub(super) fn components_sections(
         let payload = components
             .get_mut(&name)
             .expect("the component name came from this map");
-        let title = component_label(&name);
-        // The same icons the hierarchy gives these entities, so a row and its
-        // component are recognisably the same thing.
-        let open = section::component(
-            ui,
-            egui::Id::new(("inspector-component", name.as_str())),
-            icons::for_component(&name),
-            &title,
-            |ui| {
-                if inspector::is_removable(&name)
-                    && button::row_icon(
-                        ui,
-                        icons::REMOVE,
-                        Intent::Danger,
-                        &format!("Remove {title}"),
-                    )
-                    .clicked()
-                {
-                    removed = Some(name.clone());
-                }
-                // In the header, whether or not the fields show, so edits that
-                // have not reached the scene are not forgotten behind a fold,
-                // and so appearing moves no field out from under the caret.
-                apply_actions(ui, &name, apply);
-            },
-        );
+        let (open, remove) = component_heading(ui, &name, payload, registry, apply);
+        if remove {
+            removed = Some(name.clone());
+        }
         if !open {
             continue;
         }
@@ -173,6 +153,52 @@ pub(super) fn components_sections(
         ui.add_space(5.0);
     }
     removed
+}
+
+/// A component's heading: its name, its remove button and pending edits, and
+/// the menu a right-click on it opens. Answers whether it is open, and whether
+/// it was asked to be removed.
+fn component_heading(
+    ui: &mut egui::Ui,
+    name: &str,
+    payload: &mut Value,
+    registry: &ComponentSchemaRegistry,
+    apply: &mut ApplyFrame,
+) -> (bool, bool) {
+    let title = component_label(name);
+    let removable = inspector::is_removable(name);
+    let mut removed = false;
+    let mut heading = None;
+    // The same icons the hierarchy gives these entities, so a row and its
+    // component are recognisably the same thing.
+    let open = section::component_with_menu(
+        ui,
+        egui::Id::new(("inspector-component", name)),
+        icons::for_component(name),
+        &title,
+        |ui| {
+            if removable
+                && button::row_icon(
+                    ui,
+                    icons::REMOVE,
+                    Intent::Danger,
+                    &format!("Remove {title}"),
+                )
+                .clicked()
+            {
+                removed = true;
+            }
+            // In the header, whether or not the fields show, so edits that
+            // have not reached the scene are not forgotten behind a fold,
+            // and so appearing moves no field out from under the caret.
+            apply_actions(ui, name, apply);
+        },
+        |ui| heading_menu(ui, name, &title, removable, registry, &mut heading),
+    );
+    if let Some(asked) = heading {
+        removed |= act_on_heading(ui, name, payload, asked);
+    }
+    (open, removed)
 }
 
 /// Authoring tools precede the geometry they operate on.

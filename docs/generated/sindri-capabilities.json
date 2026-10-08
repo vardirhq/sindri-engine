@@ -64,6 +64,13 @@
         "vertical_fov_degrees": 60.0
       },
       "meanings": {
+        "fit": {
+          "kind": "choice",
+          "options": [
+            "height",
+            "shorter"
+          ]
+        },
         "projection": {
           "kind": "choice",
           "options": [
@@ -73,6 +80,7 @@
           "variants": {
             "orthographic": {
               "far": 100.0,
+              "fit": "height",
               "near": 0.10000000149011612,
               "vertical_size": 6.0
             },
@@ -113,7 +121,41 @@
           "trauma": 0.0
         }
       },
-      "meanings": {},
+      "meanings": {
+        "follow.max_speed": {
+          "kind": "range",
+          "max": null,
+          "min": 0.0
+        },
+        "follow.smoothing": {
+          "kind": "range",
+          "max": null,
+          "min": 0.0
+        },
+        "follow.target": {
+          "kind": "entity"
+        },
+        "shake.decay": {
+          "kind": "range",
+          "max": null,
+          "min": 0.0
+        },
+        "shake.frequency": {
+          "kind": "range",
+          "max": null,
+          "min": 0.0
+        },
+        "shake.strength": {
+          "kind": "range",
+          "max": null,
+          "min": 0.0
+        },
+        "shake.trauma": {
+          "kind": "range",
+          "max": 1.0,
+          "min": 0.0
+        }
+      },
       "schema_version": 1,
       "type_name": "sindri.camera.behavior"
     },
@@ -556,7 +598,11 @@
           1.0
         ]
       },
-      "meanings": {},
+      "meanings": {
+        "max_slope_angle": {
+          "kind": "angle"
+        }
+      },
       "schema_version": 1,
       "type_name": "sindri.physics2d.character"
     },
@@ -737,6 +783,9 @@
         "first": {
           "kind": "entity"
         },
+        "lower_angle": {
+          "kind": "angle"
+        },
         "motor_mode": {
           "kind": "choice",
           "options": [
@@ -744,8 +793,14 @@
             "position"
           ]
         },
+        "motor_target_angle": {
+          "kind": "angle"
+        },
         "second": {
           "kind": "entity"
+        },
+        "upper_angle": {
+          "kind": "angle"
         }
       },
       "schema_version": 1,
@@ -796,7 +851,11 @@
           1.0
         ]
       },
-      "meanings": {},
+      "meanings": {
+        "angle": {
+          "kind": "angle"
+        }
+      },
       "schema_version": 1,
       "type_name": "sindri.physics2d.one_way"
     },

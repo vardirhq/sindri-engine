@@ -363,13 +363,12 @@ Most of these are the actions a right-click would offer, which is §6.
 **Missing basic**, and the one that makes several of the others feel worse than
 they are.
 
-**Partly fixed.** The two panels that list things have menus now: a hierarchy
-row and a project row. `ui::widgets::menu` is where the shape lives — a fixed
+**Fixed.** Every surface in the table below has its menu, built with the
+editor update (`docs/editor-update.md`, slice 7). The two panels that list
+things had menus first: a hierarchy row and a project row. `ui::widgets::menu` is where the shape lives — a fixed
 width so a menu does not resize with the name of whatever is selected, a subject
 line naming what the entries act on, entries that say their key, and a
-destructive entry that reads as destructive. The other six surfaces in the table
-below are still open, and the two notes under it still apply to whoever builds
-them.
+destructive entry that reads as destructive, and the other six follow it.
 
 There is not a single context menu in the editor. `grep -rn context_menu
 editor/src` returns nothing. Every action the tool has is a toolbar icon, a
@@ -382,14 +381,14 @@ Where a right-click is expected and does nothing today:
 
 | Where | What belongs there | State |
 | --- | --- | --- |
-| A hierarchy row | Rename, Duplicate, Delete, Create child, Copy/Paste, Focus (F), Move to top level | **Done** but for copy/paste and move-to-top-level |
-| Hierarchy empty space | Create Empty, Create UI Image, Paste | Open |
-| A project row | Open, Slice (a texture), Rename, Delete, Duplicate, Reveal in file manager | **Partly**: open, slice, and the two paths worth copying. Rename, delete and duplicate are file operations, which is the rest of §4 |
-| Project empty space | New folder, Import, Refresh | Open |
-| A component heading | Remove, Reset to default, Copy/Paste values, Move up/down | Open |
-| A property row | Reset this field to its default, Copy value | Open |
-| The Scene view | Frame selected, Frame all, Create at this point, Paste | Open |
-| A console line | Copy message, Select the entity it names, Clear | Open |
+| A hierarchy row | Rename, Duplicate, Delete, Create child, Copy/Paste, Focus (F), Move to top level | **Done** |
+| Hierarchy empty space | Create Empty, Create UI Image, Paste | **Done**, with a directional light |
+| A project row | Open, Slice (a texture), Rename, Delete, Duplicate, Reveal in file manager | **Done** but for Reveal in file manager; the full path copies instead |
+| Project empty space | New folder, Import, Refresh | **Done**, with the other New entries |
+| A component heading | Remove, Reset to default, Copy/Paste values, Move up/down | **Done** but for Move up/down: component order is not authored, so every entity lists the same kinds in the same place |
+| A property row | Reset this field to its default, Copy value | **Done** |
+| The Scene view | Frame selected, Frame all, Create at this point, Paste | **Done** |
+| A console line | Copy message, Select the entity it names, Clear | **Done** |
 
 Two things worth knowing before this is built, both found while checking it:
 

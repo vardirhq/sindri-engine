@@ -15,8 +15,8 @@
 use std::collections::HashMap;
 
 use sindri_core::{
-    CommandBuffer, EntityData, EntityId, PrefabLink, SceneEntityId, World, WorldCommand,
-    instance_path,
+    CommandBuffer, EntityData, EntityId, PrefabLink, SceneEntityId, Transform3D, World,
+    WorldCommand, instance_path,
 };
 
 /// Adds the commands that copy `entity` and its descendants beside it, and
@@ -44,8 +44,33 @@ pub(crate) fn duplicate_into(
         world,
         entity,
         parent,
+        None,
         buffer,
         &mut copied_roots,
+    ))
+}
+
+/// Adds the commands that copy `entity`, from `world`, and its descendants
+/// under `parent` in the world `rehearsal` stands for, at `placed` when given
+/// rather than where the original was. What a paste is: the entity copied
+/// from one world, which may be a clipboard's, into another.
+pub(crate) fn copy_under(
+    rehearsal: &mut World,
+    world: &World,
+    entity: EntityId,
+    parent: Option<EntityId>,
+    placed: Option<Transform3D>,
+    buffer: &mut CommandBuffer,
+) -> Option<EntityId> {
+    world.get(entity)?;
+    Some(copy_into(
+        rehearsal,
+        world,
+        entity,
+        parent,
+        placed,
+        buffer,
+        &mut HashMap::new(),
     ))
 }
 
@@ -64,6 +89,7 @@ fn copy_into(
     world: &World,
     entity: EntityId,
     parent: Option<EntityId>,
+    placed: Option<Transform3D>,
     buffer: &mut CommandBuffer,
     copied_roots: &mut HashMap<EntityId, SceneEntityId>,
 ) -> EntityId {
@@ -106,7 +132,7 @@ fn copy_into(
         // The copy's own children are spawned by the recursion below; taking
         // the original's list would name entities that are not under it.
         children: Vec::new(),
-        transform_3d: source.transform_3d,
+        transform_3d: placed.or(source.transform_3d),
         components: source.components.clone(),
         // A copy of a switched-off entity is switched off: the copy is of what
         // is there, and one that arrived running would be a surprise in a
@@ -129,7 +155,15 @@ fn copy_into(
         data: Box::new(data),
     });
     for child in &source.children {
-        copy_into(rehearsal, world, *child, Some(handle), buffer, copied_roots);
+        copy_into(
+            rehearsal,
+            world,
+            *child,
+            Some(handle),
+            None,
+            buffer,
+            copied_roots,
+        );
     }
     handle
 }

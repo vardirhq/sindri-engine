@@ -214,6 +214,7 @@ impl EditorApp {
             run_edits: crate::run_edits::RunEdits::default(),
             stop_review: None,
             recording: None,
+            clipboard: None,
         };
         // A benchmark plays at the screen the standalone benchmark draws,
         // so both lay the game out against the same media queries.

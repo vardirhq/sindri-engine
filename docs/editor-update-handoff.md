@@ -15,7 +15,7 @@ less, with smaller checkpoints preferred.
 
 ## Current checkpoint
 
-Draft PR #503. Slices 1, 2, 3, 5 and 6 are checked; slice 4 is open on the platformer's last 0.3 ms (see the plan). Next: slice 7, the remaining audit gaps.
+Draft PR #503. Slices 1, 2, 3, 5, 6 and 7 are checked; slice 4 is open on the platformer's last 0.3 ms (see the plan). Next: slice 8, final integration.
 Slice 3 left:
 
 - `sindri-runtime` holds the session (from Causeway), `ProjectRun` (open any
@@ -62,3 +62,6 @@ build inside the disk allowance (`CARGO_PROFILE_DEV_DEBUG=0`,
   then undo); the editing views still resolve through `ProjectStyles`.
 - `scripts/frame-benchmark.py run <project> --profile editor` measures the
   slice-4 target; the baselines are in `docs/editor-update.md`.
+- Under Xvfb, `xdotool` clicks, drags and wheel reach the editor but its key
+  presses do not (F2 does nothing), so keyboard paths are proved through a
+  real egui frame in tests (`native/tests/shortcuts.rs`) rather than by hand.

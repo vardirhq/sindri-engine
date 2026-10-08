@@ -287,8 +287,21 @@ fn asset_column(
     let searching = !search.trim().is_empty();
     let matching = project.matching(search);
     let rows = browser.rows(&matching, searching, listing.base);
+    // Where something made in the empty space goes: the folder being looked
+    // at, else where the listing starts.
+    let here = browser
+        .folder
+        .clone()
+        .or_else(|| listing.base.map(Path::to_path_buf))
+        .or_else(|| project.root().map(Path::to_path_buf));
     if rows.is_empty() {
         empty_listing(ui, searching, browser.is_scoped());
+        let room = ui.available_height() + ui.min_rect().height();
+        if let Some(here) = &here
+            && let Some(asked) = row::space_menu(ui, here, room)
+        {
+            action = asked;
+        }
         return action;
     }
     // A project has more assets than a dock has room for, in either
@@ -340,6 +353,11 @@ fn asset_column(
             }
             if project.truncated() {
                 panel::note(ui, "More files than the browser reads");
+            }
+            if let Some(here) = &here
+                && let Some(asked) = row::space_menu(ui, here, in_sight.height())
+            {
+                action = asked;
             }
         });
     action

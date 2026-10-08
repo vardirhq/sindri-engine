@@ -88,6 +88,20 @@ pub struct Problem {
     pub subject: Option<EntityId>,
 }
 
+/// Problems that share a cause: one message, and every entity it was
+/// reported about.
+///
+/// A texture that is not bound fails every sprite that names it, and listing
+/// the same sentence forty times, once per sprite, hid the two other things
+/// wrong under it. The cause is said once, with the entities it reaches under
+/// it, so fixing it is seen to fix all of them.
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct Cause {
+    pub message: String,
+    /// The entities it is about, in the order they were reported.
+    pub subjects: Vec<EntityId>,
+}
+
 /// The problems a frame found, rebuilt every frame.
 ///
 /// The log is history: after an invalid value was dragged back into range, it
@@ -186,6 +200,30 @@ impl Console {
     /// What was wrong in the last complete frame.
     pub fn problems(&self) -> &[Problem] {
         &self.now.found
+    }
+
+    /// What was wrong in the last complete frame, grouped by cause, in the
+    /// order each cause was first reported.
+    pub fn causes(&self) -> Vec<Cause> {
+        let mut causes: Vec<Cause> = Vec::new();
+        for problem in &self.now.found {
+            let index = causes
+                .iter()
+                .position(|cause| cause.message == problem.message)
+                .unwrap_or_else(|| {
+                    causes.push(Cause {
+                        message: problem.message.clone(),
+                        subjects: Vec::new(),
+                    });
+                    causes.len() - 1
+                });
+            if let Some(subject) = problem.subject
+                && !causes[index].subjects.contains(&subject)
+            {
+                causes[index].subjects.push(subject);
+            }
+        }
+        causes
     }
 
     /// Oldest first, which is the order a log is read in.
@@ -469,5 +507,22 @@ mod tests {
             }
         }
         assert_eq!(console.counts().errors, 3);
+    }
+
+    #[test]
+    fn problems_with_one_cause_are_one_group_naming_every_entity() {
+        let mut console = Console::default();
+        let mut world = sindri_core::World::default();
+        let [a, b] = [(); 2].map(|()| world.spawn(sindri_core::EntityData::default()));
+        console.fail("Sprite: `ship.png` is not bound", Some(a));
+        console.fail("Environment: fog must be at least 0", None);
+        console.fail("Sprite: `ship.png` is not bound", Some(b));
+        console.fail("Sprite: `ship.png` is not bound", Some(a));
+        console.begin_frame();
+        let causes = console.causes();
+        assert_eq!(causes.len(), 2);
+        assert_eq!(causes[0].message, "Sprite: `ship.png` is not bound");
+        assert_eq!(causes[0].subjects, vec![a, b]);
+        assert!(causes[1].subjects.is_empty());
     }
 }
