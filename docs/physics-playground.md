@@ -72,8 +72,9 @@ and a 3D ray that reports what it hits.
 
 ## Known public-surface gaps found here
 
-- Decay cannot change world gravity. The playground switches between authored
-  Physics 2D World settings entities instead, so only one is active at a time.
+- Decay could not change world gravity, and a gravity change left sleeping
+  bodies where they rested. Fixed here: `Physics.set_gravity` changes the
+  authored world settings, and a change wakes every dynamic body.
 - Decay cannot change a collider's material at runtime, so material comparisons
   use separate authored bodies.
 - There is no simulation time scale, and no in-game debug drawing of colliders:

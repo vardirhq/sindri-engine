@@ -53,6 +53,9 @@ pub(crate) enum PhysicsCall {
     /// several, from the names the scene's physics world gives its layers.
     Layer,
     Mask,
+    /// Which way is down: the active Physics 2D World's authored gravity.
+    Gravity,
+    SetGravity,
     /// The entities this one started touching during the last step.
     ///
     /// A query rather than a callback, because Decay now has a value that can
@@ -116,6 +119,8 @@ pub(crate) const PHYSICS_CALLS: &[(&str, PhysicsCall)] = &[
     ("cast_box", PhysicsCall::CastBox),
     ("layer", PhysicsCall::Layer),
     ("mask", PhysicsCall::Mask),
+    ("gravity", PhysicsCall::Gravity),
+    ("set_gravity", PhysicsCall::SetGravity),
     ("collision_started", PhysicsCall::CollisionStarted),
     ("collision_stopped", PhysicsCall::CollisionStopped),
     ("sensor_entered", PhysicsCall::SensorEntered),

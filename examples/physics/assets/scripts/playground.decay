@@ -126,6 +126,15 @@ shared fn gravity_name(index: f32) -> String {
     return "EARTH";
 }
 
+// Which way is down for each GRAVITY setting, in units per second squared.
+shared fn gravity_pull(index: f32) -> Vec2 {
+    if index == 1.0 { return Vec2(0.0, -3.0); }
+    if index == 2.0 { return Vec2(0.0, 0.0); }
+    if index == 3.0 { return Vec2(0.0, 16.0); }
+    if index == 4.0 { return Vec2(16.0, 0.0); }
+    return Vec2(0.0, -16.0);
+}
+
 shared fn tool_name(index: f32) -> String {
     if index == 1.0 { return "BLAST"; }
     if index == 2.0 { return "SPAWN"; }
@@ -277,10 +286,8 @@ script Director {
     }
 
     fn cycle_gravity() {
-        let before = World.find("gravity-" + Game.gravity);
         Game.gravity = (Game.gravity + 1.0) % 5.0;
-        World.set_active(before, false);
-        World.set_active(World.find("gravity-" + Game.gravity), true);
+        Physics.set_gravity(gravity_pull(Game.gravity));
         refresh_labels();
         print("Playground gravity " + gravity_name(Game.gravity));
     }
@@ -314,11 +321,8 @@ script Director {
         let_go();
         if Game.toy == 0.0 {
             clean_up();
-            if Game.gravity != 0.0 {
-                World.set_active(World.find("gravity-" + Game.gravity), false);
-                World.set_active(World.find("gravity-0"), true);
-                Game.gravity = 0.0;
-            }
+            Game.gravity = 0.0;
+            Physics.set_gravity(gravity_pull(0.0));
             if Game.chaos { drop_everything(); }
         }
         ResetToy.emit(Game.toy);

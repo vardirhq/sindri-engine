@@ -102,10 +102,15 @@ pub const LAYER_LIMIT: usize = 32;
 
 /// The collision layer names the world's scene gave its physics world, in bit
 /// order, or none when it names none.
+///
+/// The settings read are the first *active* ones, the same the solver steps
+/// with, so switching one world settings entity off for another changes the
+/// names along with the gravity.
 #[must_use]
 pub fn collision_layers(world: &sindri_core::World) -> Vec<String> {
     world
         .entities()
+        .filter(|(entity, _)| world.is_active(*entity))
         .find_map(|(_, data)| data.components.get(PhysicsWorld2dComponent::TYPE_NAME))
         .and_then(|payload| payload.get("layers"))
         .and_then(serde_json::Value::as_array)

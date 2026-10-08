@@ -34,14 +34,6 @@ DIRECTOR = "scripts/playground.decay"
 # The room's inside: x from -30 to 30, y from -14 to 14.
 LEFT, RIGHT, FLOOR, CEILING = -30.0, 30.0, -14.0, 14.0
 
-GRAVITIES = [
-    ("Earth", [0.0, -16.0]),
-    ("Moon", [0.0, -3.0]),
-    ("Zero-G", [0.0, 0.0]),
-    ("Upside down", [0.0, 16.0]),
-    ("Sideways", [16.0, 0.0]),
-]
-
 
 def room(scene: Scene) -> None:
     scene.add("camera", "Camera", 0.0, 0.0, 20.0, components={"sindri.camera": {
@@ -55,14 +47,10 @@ def room(scene: Scene) -> None:
     scene.add("environment", "Environment", components={"sindri.environment": {
         "background": rgba("#070c16"),
     }})
-    for index, (name, gravity) in enumerate(GRAVITIES):
-        entity = scene.add(f"gravity-{index}", f"gravity-{index}", components={
-            "sindri.physics2d.world": {"gravity": gravity, "layers": LAYERS},
-        })
-        entity["name"] = f"gravity-{index}"
-        if index:
-            entity["disabled"] = True
-        entity["components"]["sindri.tags"] = {"tags": [f"gravity {name.lower()}"]}
+    # One world; the GRAVITY button turns it with `Physics.set_gravity`.
+    scene.add("physics-world", "Physics World", components={
+        "sindri.physics2d.world": {"gravity": [0.0, -16.0], "layers": LAYERS},
+    })
 
     # The back wall: a panel and two grids, the ancestor's graph paper.
     scene.deco("backdrop", 0, 0, 60, 28, fill="#0c1424", layer=-30, z=-2)

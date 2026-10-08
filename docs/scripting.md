@@ -1117,6 +1117,8 @@ independently of visual transform scale.
 | `Physics.overlap_box(center, half_size, rotation, mask, include_sensors, exclude)` | `[Entity]` |
 | `Physics.layer(name)` | `f32` |
 | `Physics.mask(names)` | `f32` |
+| `Physics.gravity()` | `Vec2` |
+| `Physics.set_gravity(gravity)` | nothing |
 | `Physics.collision_started()` | `List<Entity>` |
 | `Physics.collision_stopped()` | `List<Entity>` |
 | `Physics.sensor_entered()` | `List<Entity>` |
@@ -1411,6 +1413,17 @@ Colliders still store their memberships and filters as masks, which is what
 physics reads, and the editor's inspector shows a mask as the layers it holds
 by name. The platformer names its layers, and its hero's ground probe asks for
 `Physics.layer("ground")`.
+
+`Physics.gravity()` is which way is down, from the first active
+`sindri.physics2d.world` (or the host's own when the scene authors none), and
+`Physics.set_gravity(Vec2(0.0, 16.0))` changes that component's gravity, keeping
+its layer names. Changing the authored value rather than the solver behind it
+means the change survives the solver being rebuilt and shows in the inspector
+during Play. The next fixed step uses it, and bodies asleep at rest are woken,
+so a crate on the floor falls up when gravity turns over. A scene without
+active world settings, or a gravity that is not finite, is an error. The Physics
+Playground's GRAVITY button cycles Earth, Moon, zero-g, upside down and sideways
+this way.
 
 **Contact detail (points, normals and impulses of a collision) remains absent.**
 

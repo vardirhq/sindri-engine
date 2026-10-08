@@ -63,7 +63,16 @@ impl PhysicsWorld3d {
 
     pub fn set_gravity(&mut self, gravity: [f32; 3]) -> Result<(), PhysicsError> {
         finite3("gravity", gravity)?;
-        self.backend.gravity = r3::Vector::from_array(gravity);
+        let gravity = r3::Vector::from_array(gravity);
+        if gravity != self.backend.gravity {
+            self.backend.gravity = gravity;
+            // Resting bodies sleep; without a wake they would ignore the change.
+            for (_, body) in self.backend.bodies.iter_mut() {
+                if body.is_dynamic() {
+                    body.wake_up(true);
+                }
+            }
+        }
         Ok(())
     }
 
