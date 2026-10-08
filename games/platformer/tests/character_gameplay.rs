@@ -23,7 +23,7 @@ fn jump_peak(held_frames: usize) -> f32 {
         advance(&mut run, 1);
         peak = peak.max(run.position(hero)[1]);
     }
-    assert!(run.physics.character_motion(hero).unwrap().grounded);
+    assert!(run.physics().character_motion(hero).unwrap().grounded);
     peak
 }
 
@@ -76,5 +76,5 @@ fn falling_respawns_and_clears_script_velocity() {
     assert!((run.board("falls") - 1.0).abs() < f32::EPSILON);
     let [x, y] = run.position(hero);
     assert!((x - 2.5).abs() < 0.001 && (y - 3.5).abs() < 0.08);
-    assert!(run.physics.character_motion(hero).unwrap().grounded);
+    assert!(run.physics().character_motion(hero).unwrap().grounded);
 }

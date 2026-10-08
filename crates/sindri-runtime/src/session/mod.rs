@@ -544,3 +544,38 @@ impl Session {
         &self.tile_sets
     }
 }
+
+/// What a test or a tool reaches into a run for: the shared board, the save,
+/// and the solver's materials.
+impl Session {
+    /// The shared board, for putting a run into a state without playing it
+    /// there: a level about to be gained, a boss about to appear.
+    pub fn blackboard_mut(&mut self) -> &mut sindri_decay::Blackboard {
+        self.scripts.blackboard_mut()
+    }
+
+    /// What the run has saved so far.
+    #[must_use]
+    pub const fn saves(&self) -> &sindri_core::SaveStore {
+        &self.saves
+    }
+
+    /// The 2D solver, to change what it simulates with outside a step.
+    pub const fn physics_mut(&mut self) -> &mut ScenePhysics2d {
+        &mut self.physics
+    }
+}
+
+impl Session {
+    /// The prefabs scripts can spawn, as the host delivered them.
+    #[must_use]
+    pub const fn prefabs(&self) -> &PrefabSources {
+        &self.prefabs
+    }
+
+    /// The profiles scripts and physics materials read.
+    #[must_use]
+    pub const fn profiles(&self) -> &ProfileSources {
+        &self.profiles
+    }
+}

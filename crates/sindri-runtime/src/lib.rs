@@ -16,11 +16,13 @@
 
 mod builtins;
 mod error;
+pub mod project;
 mod report;
 mod session;
 mod styling;
 
 pub use builtins::bind_builtin_tile_sets;
 pub use error::RuntimeError;
+pub use project::{ProjectRun, STEP, scene_extractor};
 pub use report::{StepPhase, StepReport, StepTimes};
 pub use session::Session;

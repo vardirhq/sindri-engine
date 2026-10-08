@@ -19,7 +19,7 @@ use sindri_render::{
 };
 use sindri_scene::{CameraView, SceneRuntime, TextureBindings, measure_ui_text};
 
-use super::{ProjectPlayer, text};
+use super::ProjectPlayer;
 
 /// Where one draw's time went, on the CPU.
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
@@ -80,7 +80,10 @@ impl ProjectRenderer {
                 .and_then(|id| sheet_id_for(&id))
                 .and_then(|sheet| sheets.get(sheet.as_str()));
             if let Some(json) = sheet {
-                bindings.bind_sheet(id, &SpriteSheetDocument::from_json(&text(json.clone())?)?)?;
+                bindings.bind_sheet(
+                    id,
+                    &SpriteSheetDocument::from_json(std::str::from_utf8(json)?)?,
+                )?;
             }
         }
         let (width, height) = size;

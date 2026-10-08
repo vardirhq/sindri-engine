@@ -11,7 +11,7 @@ fn wind_moves_the_lantern_without_escaping_its_authored_tether() {
     for _ in 0..300 {
         let notes = run.step(1.0 / 60.0);
         assert!(notes.is_empty(), "{notes:?}");
-        assert_eq!(run.physics.world().joint_count(), 4);
+        assert_eq!(run.physics().world().joint_count(), 4);
         let [x, y] = run.position(lantern);
         let [hx, hy] = run.position(hook);
         assert!((x - hx).hypot(y - hy) < 2.04, "lantern escaped its tether");
@@ -21,5 +21,5 @@ fn wind_moves_the_lantern_without_escaping_its_authored_tether() {
     let tether = run.entity("lantern-tether").unwrap();
     run.world.despawn_recursive(tether).unwrap();
     assert!(run.step(1.0 / 60.0).is_empty());
-    assert_eq!(run.physics.world().joint_count(), 3);
+    assert_eq!(run.physics().world().joint_count(), 3);
 }

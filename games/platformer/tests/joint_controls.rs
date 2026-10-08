@@ -32,13 +32,13 @@ fn lantern_controls_retune_suspend_and_reconnect_the_authored_tether() {
     assert!(length(&run) < 1.3);
     press(&mut run, Key::L);
     step(&mut run, 30);
-    assert_eq!(run.physics.world().joint_count(), 3);
+    assert_eq!(run.physics().world().joint_count(), 3);
     assert!(length(&run) > 3.0);
     let cord = run.entity("lantern-cord").unwrap();
     assert!(run.world.get(cord).unwrap().transform_3d.unwrap().scale[0].abs() < f32::EPSILON);
     press(&mut run, Key::L);
     step(&mut run, 180);
-    assert_eq!(run.physics.world().joint_count(), 4);
+    assert_eq!(run.physics().world().joint_count(), 4);
     assert!(length(&run) < 1.3);
     press(&mut run, Key::T);
     step(&mut run, 180);
@@ -56,20 +56,20 @@ fn lantern_retargets_its_hook_without_rebuilding_the_body() {
         run.world.get(tether).unwrap().components["sindri.physics2d.distance_joint"]["first"],
         "lantern-alternate-anchor"
     );
-    assert_eq!(run.physics.world().joint_count(), 4);
+    assert_eq!(run.physics().world().joint_count(), 4);
     step(&mut run, 180);
     let [x, y] = run.position(body);
     assert!((x - 11.0).hypot(y - 8.0) < 2.04);
     press(&mut run, Key::L);
     press(&mut run, Key::R);
-    assert_eq!(run.physics.world().joint_count(), 3);
+    assert_eq!(run.physics().world().joint_count(), 3);
     assert_eq!(
         run.world.get(tether).unwrap().components["sindri.physics2d.distance_joint"]["first"],
         "lantern-anchor"
     );
     press(&mut run, Key::L);
     step(&mut run, 180);
-    assert_eq!(run.physics.world().joint_count(), 4);
+    assert_eq!(run.physics().world().joint_count(), 4);
     assert!(length(&run) < 2.04);
 }
 
@@ -89,7 +89,7 @@ fn cutting_the_lantern_cord_removes_only_its_authored_constraint() {
             .components
             .contains_key("sindri.physics2d.distance_joint")
     );
-    assert_eq!(run.physics.world().joint_count(), 3);
+    assert_eq!(run.physics().world().joint_count(), 3);
     step(&mut run, 20);
     let [_, after] = run.position(body);
     assert!(after < before - 0.2);
@@ -98,7 +98,7 @@ fn cutting_the_lantern_cord_removes_only_its_authored_constraint() {
     for key in [Key::L, Key::T, Key::R, Key::Z] {
         press(&mut run, key);
     }
-    assert_eq!(run.physics.world().joint_count(), 3);
+    assert_eq!(run.physics().world().joint_count(), 3);
 }
 
 #[test]
@@ -112,10 +112,10 @@ fn repairing_the_cut_cord_creates_a_new_owned_joint_repeatedly() {
     for _ in 0..2 {
         press(&mut run, Key::Z);
         step(&mut run, 20);
-        assert_eq!(run.physics.world().joint_count(), 3);
+        assert_eq!(run.physics().world().joint_count(), 3);
         press(&mut run, Key::C);
         assert!(run.world.contains(body));
-        assert_eq!(run.physics.world().joint_count(), 4);
+        assert_eq!(run.physics().world().joint_count(), 4);
         let joint = &run.world.get(owner).unwrap().components["sindri.physics2d.distance_joint"];
         assert_eq!(joint["first"], "lantern-alternate-anchor");
         assert_eq!(joint["max_distance"], 1.25);
@@ -125,10 +125,10 @@ fn repairing_the_cut_cord_creates_a_new_owned_joint_repeatedly() {
         let cord = run.entity("lantern-cord").unwrap();
         assert!(run.world.get(cord).unwrap().transform_3d.unwrap().scale[0] > 1.0);
         press(&mut run, Key::C);
-        assert_eq!(run.physics.world().joint_count(), 4);
+        assert_eq!(run.physics().world().joint_count(), 4);
     }
     press(&mut run, Key::L);
-    assert_eq!(run.physics.world().joint_count(), 3);
+    assert_eq!(run.physics().world().joint_count(), 3);
     press(&mut run, Key::L);
-    assert_eq!(run.physics.world().joint_count(), 4);
+    assert_eq!(run.physics().world().joint_count(), 4);
 }

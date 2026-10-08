@@ -114,6 +114,9 @@ capabilities; each is proven on a genre showcase or flagship named in its slice.
   session and the standalone session, for the platformer, Scorchball, Low
   Tide and Orbital. Scripts in editor Play run on a styled world, as in the
   build. WASM and real-browser checks pass for every exported project.
+  The generic host every export ships moves out of Causeway's crate into its
+  own, so a published game loads `sindri_player.js` rather than
+  `sindri_causeway.js`, and Causeway becomes a project like any other.
 - [ ] **4. Cut per-frame waste.**
   - Weave presentation in the editor settles and lays states in place with
     undo, as the shipped host does; no view clones the world to present it.
