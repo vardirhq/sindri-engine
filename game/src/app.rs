@@ -18,11 +18,12 @@ use sindri_scene::SceneExtractor;
 #[cfg(not(target_arch = "wasm32"))]
 use sindri_scene::{CameraView, SceneRuntime, TextureBindings, TileSetBindings, measure_ui_text};
 
+use crate::Session;
 use crate::assets::{
     bind_audio, bind_fonts, bind_textures, bind_tile_sets, extractor, scenes, stylesheets, world,
 };
 use crate::error::CausewayError;
-use crate::session::{CausewayAudio, Session, causeway_audio_backend};
+use crate::native_session::{CausewayAudio, causeway_audio_backend, session};
 
 /// Native Causeway keeps the standalone embedded-project path.
 #[cfg(not(target_arch = "wasm32"))]
@@ -60,7 +61,7 @@ impl CausewayApp {
             .game_mut()
             .settle_styles(&mut world, weave_viewport(context));
         *self.engine.world_mut() = world;
-        settled
+        Ok(settled?)
     }
 }
 
@@ -81,8 +82,7 @@ impl DesktopApp for CausewayApp {
         let mut audio = causeway_audio_backend()?;
         bind_audio(&mut audio)?;
 
-        let mut session =
-            Session::new(scene.components().clone()).with_tile_sets(bind_tile_sets()?);
+        let mut session = session(scene.components().clone()).with_tile_sets(bind_tile_sets()?);
         // Beside the executable rather than in an application data directory:
         // Causeway is a demonstration that gets run from a checkout, and a save
         // buried in a per-user folder is one nobody can find to delete. A real
@@ -150,7 +150,8 @@ impl DesktopApp for CausewayApp {
         let styled = self
             .engine
             .game_mut()
-            .style(&mut world, weave_viewport(context));
+            .style(&mut world, weave_viewport(context))
+            .map_err(CausewayError::from);
         let prepared = styled.and_then(|undo| {
             // Measured as styled, since a stylesheet sets the font size.
             let prepared = measure_ui_text(&world, self.scene.components(), &mut self.text)

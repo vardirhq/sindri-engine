@@ -20,6 +20,7 @@ sindri-desktop = { path = "../crates/sindri-desktop" }
 sindri-grid = { path = "../crates/sindri-grid" }
 sindri-platform = { path = "../crates/sindri-platform" }
 sindri-render = { path = "../crates/sindri-render" }
+sindri-runtime = { path = "../crates/sindri-runtime" }
 sindri-scene = { path = "../crates/sindri-scene" }
 sindri-weave = { path = "../crates/sindri-weave" }
 glam.workspace = true

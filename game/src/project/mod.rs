@@ -152,7 +152,8 @@ impl ProjectPlayer {
     pub fn advance(&mut self) -> Result<(), Box<dyn Error>> {
         let viewport = (self.size[0], self.size[1]);
         self.session
-            .step(&mut self.world, &self.input, viewport, STEP)?;
+            .step(&mut self.world, &self.input, viewport, STEP)?
+            .log();
         self.input.begin_frame(Duration::from_secs_f32(STEP));
         Ok(())
     }

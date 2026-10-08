@@ -92,7 +92,8 @@ impl Demo {
                 (self.size[0], self.size[1]),
                 STEP,
             )
-            .expect("the step runs");
+            .expect("the step runs")
+            .log();
         self.input.begin_frame(Duration::from_secs_f32(STEP));
         let view = self.viewport();
         let undo = self

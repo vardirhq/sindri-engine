@@ -24,9 +24,9 @@ use sindri_scene::{
 use weave::Viewport as WeaveViewport;
 
 use self::loader::{BrowserProjectAssets, BrowserProjectLoader};
+use crate::Session;
 use crate::assets::extractor;
 use crate::error::CausewayError;
-use crate::session::Session;
 
 pub(super) struct BrowserCausewayApp {
     loader: Option<BrowserProjectLoader>,
@@ -346,7 +346,10 @@ impl DesktopApp for BrowserCausewayApp {
         // Styled where it stands for this draw and put back straight after;
         // taken out of the host for the while so the session can style it.
         let mut world = std::mem::take(engine.world_mut());
-        let styled = engine.game_mut().style(&mut world, viewport);
+        let styled = engine
+            .game_mut()
+            .style(&mut world, viewport)
+            .map_err(CausewayError::from);
         let prepared = styled.and_then(|undo| {
             // Measured as styled, since a stylesheet sets the font size.
             let prepared = measure_ui_text(&world, self.scene.components(), &mut self.text)

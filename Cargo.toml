@@ -13,6 +13,7 @@ members = [
     "crates/sindri-physics",
     "crates/sindri-platform",
     "crates/sindri-render",
+    "crates/sindri-runtime",
     "crates/sindri-scene",
     "crates/sindri-weave",
     "crates/sindri-voxel",

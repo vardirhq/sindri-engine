@@ -1,7 +1,7 @@
 //! Both scene solvers advance on the host fixed clock before scripts.
 
 use super::Session;
-use crate::error::CausewayError;
+use crate::RuntimeError;
 use sindri_core::World;
 
 impl Session {
@@ -9,7 +9,7 @@ impl Session {
         &mut self,
         world: &mut World,
         delta_seconds: f32,
-    ) -> Result<(), CausewayError> {
+    ) -> Result<(), RuntimeError> {
         self.sync_physics_materials()?;
         self.physics.step(
             world,

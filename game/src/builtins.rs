@@ -1,4 +1,6 @@
-//! The engine's own assets, bound before anything a project names.
+//! The engine's own textures, bound before anything a project names. Their
+//! tile sets are `sindri_runtime`'s to bind, since a run needs them without
+//! a GPU.
 //!
 //! A `builtin:` reference is not a file: the exporter leaves it out of a
 //! site's manifest because the engine provides it (`sindri-export`'s
@@ -7,20 +9,11 @@
 //! The editor has always bound them; every host here does too now, the same
 //! way, so a project that plays in the editor plays in a build.
 
-use sindri_assets::{BuiltinError, builtin_textures, builtin_tile_sets};
+use sindri_assets::{BuiltinError, builtin_textures};
 use sindri_render::{Texture2D, TextureRegistry};
-use sindri_scene::{TextureBindings, TileSetBindings};
+use sindri_scene::TextureBindings;
 
 use crate::CausewayError;
-
-/// Binds every tile set the engine ships.
-pub fn bind_builtin_tile_sets(tile_sets: &mut TileSetBindings) -> Result<(), CausewayError> {
-    for built_in in builtin_tile_sets() {
-        let (reference, tile_set) = built_in?;
-        tile_sets.bind(reference, tile_set)?;
-    }
-    Ok(())
-}
 
 /// Uploads every texture the engine ships and binds it, with its sheet.
 pub fn bind_builtin_textures(

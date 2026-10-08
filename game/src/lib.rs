@@ -27,11 +27,11 @@ mod app;
 mod assets;
 mod builtins;
 mod error;
+#[cfg(not(target_arch = "wasm32"))]
+mod native_session;
 /// Any project played offscreen, for the capture and benchmark tools.
 #[cfg(not(target_arch = "wasm32"))]
 pub mod project;
-mod session;
-mod styling;
 
 // The crate's public surface: what `bin/`, `tests/`, and the browser host
 // reach for. Where an item lives inside the crate is not their business.
@@ -43,9 +43,12 @@ pub use assets::{
     scenes, sources, stylesheets, world,
 };
 pub use assets::{extractor, presented_world};
-pub use builtins::{bind_builtin_textures, bind_builtin_tile_sets};
+pub use builtins::bind_builtin_textures;
 pub use error::CausewayError;
-pub use session::Session;
+#[cfg(not(target_arch = "wasm32"))]
+pub use native_session::session;
+pub use sindri_runtime::Session;
+pub use sindri_runtime::bind_builtin_tile_sets;
 
 #[cfg_attr(target_arch = "wasm32", wasm_bindgen::prelude::wasm_bindgen(start))]
 pub fn run() {

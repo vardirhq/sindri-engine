@@ -14,8 +14,7 @@ use weave::{Stylesheet, Viewport};
 
 use sindri_scene::{ScreenExtent, UiTextSizes};
 
-use crate::Session;
-use crate::error::CausewayError;
+use crate::{RuntimeError, Session};
 
 /// A game's stylesheets and the presenter that runs their transitions.
 #[derive(Debug)]
@@ -55,11 +54,11 @@ impl Styles {
         &mut self,
         world: &mut World,
         viewport: Viewport,
-    ) -> Result<(), CausewayError> {
+    ) -> Result<(), RuntimeError> {
         self.viewport = viewport;
         self.presenter
             .settle(world, &self.stylesheets, viewport)
-            .map_err(|error| CausewayError::Weave(error.to_string()))
+            .map_err(|error| RuntimeError::Weave(error.to_string()))
     }
 
     /// Styles `world` for what the pointer is doing to `screen_ui`; the
@@ -68,14 +67,14 @@ impl Styles {
         &mut self,
         world: &mut World,
         screen_ui: &ScreenUi,
-    ) -> Result<Undo, CausewayError> {
+    ) -> Result<Undo, RuntimeError> {
         let states = sindri_weave::with_focus(
             sindri_weave::pointer_states(world, screen_ui.hovered(), screen_ui.active()),
             screen_ui.focused(),
         );
         self.presenter
             .present_over(world, &self.stylesheets, self.viewport, &states)
-            .map_err(|error| CausewayError::Weave(error.to_string()))
+            .map_err(|error| RuntimeError::Weave(error.to_string()))
     }
 }
 
@@ -98,7 +97,7 @@ impl Session {
         &mut self,
         world: &mut World,
         viewport: weave::Viewport,
-    ) -> Result<(), CausewayError> {
+    ) -> Result<(), RuntimeError> {
         let Some(styles) = &mut self.styles else {
             return Ok(());
         };
@@ -121,7 +120,7 @@ impl Session {
         world: &World,
         viewport: weave::Viewport,
         text_sizes: UiTextSizes,
-    ) -> Result<(), CausewayError> {
+    ) -> Result<(), RuntimeError> {
         self.text_sizes = text_sizes;
         if self.styles.is_some() {
             self.screen_ui.lay_out(
@@ -142,7 +141,7 @@ impl Session {
         &mut self,
         world: &mut World,
         viewport: weave::Viewport,
-    ) -> Result<Option<sindri_weave::Undo>, CausewayError> {
+    ) -> Result<Option<sindri_weave::Undo>, RuntimeError> {
         let Some(styles) = &mut self.styles else {
             return Ok(None);
         };

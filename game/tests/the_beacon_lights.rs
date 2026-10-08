@@ -34,7 +34,10 @@ fn play(world: &mut World, session: &mut Session, seconds: f32) {
     let idle = InputState::default();
     #[allow(clippy::cast_possible_truncation, clippy::cast_sign_loss)]
     for _ in 0..(seconds / STEP).round() as usize {
-        session.step(world, &idle, VIEWPORT, STEP).expect("a step");
+        session
+            .step(world, &idle, VIEWPORT, STEP)
+            .expect("a step")
+            .log();
     }
 }
 
@@ -42,7 +45,7 @@ fn play(world: &mut World, session: &mut Session, seconds: f32) {
 fn arriving_swells_the_beacon_then_it_breathes() {
     let scene = extractor().expect("the schemas register");
     let (mut world, loaded) = world().expect("the world loads");
-    let mut session = Session::new(scene.components().clone())
+    let mut session = sindri_causeway::session(scene.components().clone())
         .with_scenes(sindri_causeway::scenes().expect("the scenes load"), loaded)
         .with_tile_sets(sindri_causeway::bind_tile_sets().expect("the tile set binds"));
     let beacon = beacon(&world);

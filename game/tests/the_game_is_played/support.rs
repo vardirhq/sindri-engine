@@ -16,7 +16,7 @@ pub(crate) const STEP: f32 = 1.0 / 60.0;
 pub(crate) fn session() -> (World, SceneExtractor, Session) {
     let scene = extractor().expect("the schemas register");
     let (world, loaded) = world().expect("the world loads");
-    let session = Session::new(scene.components().clone())
+    let session = sindri_causeway::session(scene.components().clone())
         .with_scenes(sindri_causeway::scenes().expect("the scenes load"), loaded)
         .with_tile_sets(sindri_causeway::bind_tile_sets().expect("the tile set binds"));
     (world, scene, session)
@@ -44,14 +44,16 @@ pub(crate) fn click(world: &mut World, session: &mut Session, at: [f32; 2], butt
     held.apply(InputEvent::ButtonPressed(button));
     session
         .step(world, &held, VIEWPORT, STEP)
-        .expect("the press steps");
+        .expect("the press steps")
+        .log();
     // A frame boundary, exactly as a host puts one there. Without it the press
     // edge is still set on the next step and one click lays two blocks.
     held.begin_frame(std::time::Duration::from_secs_f32(STEP));
     held.apply(InputEvent::ButtonReleased(button));
     session
         .step(world, &held, VIEWPORT, STEP)
-        .expect("the release steps");
+        .expect("the release steps")
+        .log();
     // One frame with nothing down, which is what a host does between two
     // clicks. Without it the finished press is still in the set when the next
     // one starts, and the recogniser -- which keeps what it has decided about
@@ -60,7 +62,8 @@ pub(crate) fn click(world: &mut World, session: &mut Session, at: [f32; 2], butt
     held.begin_frame(std::time::Duration::from_secs_f32(STEP));
     session
         .step(world, &held, VIEWPORT, STEP)
-        .expect("the empty frame steps");
+        .expect("the empty frame steps")
+        .log();
 }
 
 /// Holding still, which is how a block is taken back.
@@ -74,18 +77,21 @@ pub(crate) fn hold(world: &mut World, session: &mut Session, at: [f32; 2]) {
     held.apply(InputEvent::ButtonPressed(MouseButton::Left));
     session
         .step(world, &held, VIEWPORT, STEP)
-        .expect("the press steps");
+        .expect("the press steps")
+        .log();
     // Past the long-press limit without moving. Reported once, while the
     // finger is still down, so one hold takes one block.
     held.begin_frame(std::time::Duration::from_millis(600));
     session
         .step(world, &held, VIEWPORT, STEP)
-        .expect("the hold steps");
+        .expect("the hold steps")
+        .log();
     held.begin_frame(std::time::Duration::from_secs_f32(STEP));
     held.apply(InputEvent::ButtonReleased(MouseButton::Left));
     session
         .step(world, &held, VIEWPORT, STEP)
-        .expect("the release steps");
+        .expect("the release steps")
+        .log();
 }
 
 pub(crate) fn tap_touch(
@@ -102,7 +108,8 @@ pub(crate) fn tap_touch(
     });
     session
         .step(world, &input, VIEWPORT, STEP)
-        .expect("the touch press steps");
+        .expect("the touch press steps")
+        .log();
 
     input.begin_frame(std::time::Duration::from_secs_f32(STEP));
     input.apply(InputEvent::TouchEnded { id: 7 });
@@ -114,12 +121,14 @@ pub(crate) fn tap_touch(
     let touched = [aim.cell.x, aim.cell.y, aim.cell.z];
     session
         .step(world, &input, VIEWPORT, STEP)
-        .expect("the touch release steps");
+        .expect("the touch release steps")
+        .log();
 
     input.begin_frame(std::time::Duration::from_secs_f32(STEP));
     session
         .step(world, &input, VIEWPORT, STEP)
-        .expect("the empty touch frame steps");
+        .expect("the empty touch frame steps")
+        .log();
     touched
 }
 
@@ -156,7 +165,8 @@ pub(crate) fn settle(world: &mut World, session: &mut Session, steps: usize) {
     for _ in 0..steps {
         session
             .step(world, &idle, VIEWPORT, STEP)
-            .expect("an idle step");
+            .expect("an idle step")
+            .log();
     }
 }
 

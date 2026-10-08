@@ -71,12 +71,15 @@ pub enum CausewayError {
     #[cfg(target_arch = "wasm32")]
     #[error("browser project asset error: {0}")]
     BrowserAsset(String),
+    /// The run itself: a script's scene change, a solver, a stylesheet.
     #[error(transparent)]
-    Host(#[from] Box<HostError<CausewayError>>),
+    Runtime(#[from] sindri_runtime::RuntimeError),
+    #[error(transparent)]
+    Host(#[from] Box<HostError<sindri_runtime::RuntimeError>>),
 }
 
-impl From<HostError<CausewayError>> for CausewayError {
-    fn from(error: HostError<CausewayError>) -> Self {
+impl From<HostError<sindri_runtime::RuntimeError>> for CausewayError {
+    fn from(error: HostError<sindri_runtime::RuntimeError>) -> Self {
         Self::Host(Box::new(error))
     }
 }

@@ -1,8 +1,5 @@
-//! One run of the game: the world, its scripts, and a frame of both.
-//!
-//! **There are no game rules here.** Moving, gathering, counting, and
-//! winning are Decay scripts in `assets/scripts/`; this advances them
-//! and hands what they did to the engine.
+//! One run of a scene: the world's scripts and everything they drive, and a
+//! fixed step of all of it.
 
 use std::collections::BTreeMap;
 
@@ -10,52 +7,36 @@ use sindri_core::{ComponentSchemaRegistry, World};
 use sindri_decay::{
     AudioCommand, PrefabSources, ProfileSources, ScriptFrame, ScriptSources, Scripts,
 };
-
-#[cfg(not(target_arch = "wasm32"))]
-use sindri_platform::NativeAudioBackend;
-use sindri_platform::{AudioBackend, AudioError, FrameContext, Game, InputState, PlaybackSettings};
+use sindri_platform::InputState;
 use sindri_scene::{
-    AudioSourceComponent, ScenePhysics2d, ScenePhysics3d, ScreenExtent, ScreenUi, SpriteAnimations,
-    TileSetBindings,
+    ScenePhysics2d, ScenePhysics3d, ScreenExtent, ScreenUi, SpriteAnimations, TileSetBindings,
 };
 
-#[cfg(not(target_arch = "wasm32"))]
-use crate::assets::sources;
-use crate::error::CausewayError;
-
+use crate::report::Laps;
 use crate::styling::Styles;
+use crate::{RuntimeError, StepPhase, StepReport, bind_builtin_tile_sets};
 
+mod audio;
+mod game;
 mod physics;
 mod profiles;
 /// Where a session's save is kept, and when it is written out.
 mod saves;
 
-#[cfg(not(target_arch = "wasm32"))]
-pub(crate) type CausewayAudio = NativeAudioBackend;
-
-#[cfg(not(target_arch = "wasm32"))]
-pub(crate) fn causeway_audio_backend() -> Result<CausewayAudio, CausewayError> {
-    Ok(NativeAudioBackend::new()?)
-}
-
 /// The gameplay, which is the scripts and nothing else.
 pub struct Session {
     scripts: Scripts,
     sources: ScriptSources,
-    /// The prefabs the scripts can spawn.
-    ///
-    /// Empty: Gather shows what the engine already does rather than reaching
-    /// for what it has just grown, and nothing it runs spawns. A host that does
-    /// fills this the same way it fills the sources.
+    /// The prefabs the scripts can spawn, as the host delivered them.
     prefabs: PrefabSources,
-    /// What the scenes' tile volumes are made of.
-    ///
-    /// Empty by default, which is right for a host with no volumes and wrong
-    /// the moment one has a floor: an unbound tile set means a script is told
-    /// so rather than quietly walking on water.
+    /// What the scenes' tile volumes are made of: the engine's own sets, and
+    /// whatever the host binds. An unbound tile set means a script is told so
+    /// rather than quietly walking on water.
     tile_sets: TileSetBindings,
     profiles: ProfileSources,
     pub(crate) components: ComponentSchemaRegistry,
+    /// Whether each step is timed, phase by phase and script by script.
+    measuring: bool,
     animations: SpriteAnimations,
     /// Where each playing sequence has got to.
     sequences: sindri_scene::Sequences,
@@ -63,7 +44,8 @@ pub struct Session {
     ///
     /// Stepped every fixed update whether or not the scene authors a collider,
     /// which costs nothing for a scene with none and means a scene that grows
-    /// one needs no change here. No gravity: Gather is seen from above.
+    /// one needs no change here. No gravity until a scene's Physics 2D World
+    /// says which way is down.
     physics: ScenePhysics2d,
     /// The same fixed clock drives authored 3D bodies on native and browser.
     physics3d: ScenePhysics3d,
@@ -128,27 +110,20 @@ pub struct Session {
 }
 
 impl Session {
-    /// A native session backed by the embedded project scripts.
-    #[cfg(not(target_arch = "wasm32"))]
-    #[must_use]
-    pub fn new(components: ComponentSchemaRegistry) -> Self {
-        Self::with_sources(components, sources())
-            .with_prefabs(crate::assets::prefabs().expect("the embedded prefabs parse"))
-    }
-
-    /// A session backed by sources supplied by the host.
+    /// A session running `sources` against scenes described by `components`.
     ///
-    /// Browser delivery uses this after the script assets arrive through the
-    /// real fetch pipeline; native `new` supplies the embedded equivalent.
+    /// Every host supplies the sources its own way: the native game embeds
+    /// them, the browser fetches them, the editor loads and hot-reloads them.
     #[must_use]
     pub fn with_sources(components: ComponentSchemaRegistry, sources: ScriptSources) -> Self {
         Self {
             scripts: Scripts::new(),
             sources,
             prefabs: PrefabSources::new(),
-            tile_sets: TileSetBindings::new(),
+            tile_sets: with_builtins(TileSetBindings::new()),
             profiles: ProfileSources::new(),
             components,
+            measuring: false,
             animations: SpriteAnimations::new(),
             sequences: sindri_scene::Sequences::new(),
             physics: ScenePhysics2d::top_down().expect("zero gravity is finite"),
@@ -173,16 +148,22 @@ impl Session {
         }
     }
 
-    /// The tile sets the scenes' volumes name.
+    /// The tile sets the scenes' volumes name, beside the engine's own.
     ///
     /// Without these a script's pathfinding cannot tell a pond from a lawn:
     /// which cells are solid is the tile set's answer, and the session has no
-    /// business guessing it. Gather's floor is a volume, so this is how the
-    /// water stops being walkable.
+    /// business guessing it.
     #[must_use]
     pub fn with_tile_sets(mut self, tile_sets: TileSetBindings) -> Self {
-        self.tile_sets = tile_sets;
+        self.tile_sets = with_builtins(tile_sets);
         self
+    }
+
+    /// Times every step, phase by phase and script by script, into its
+    /// [`StepReport`]. Off by default: a shipped game never asks.
+    pub fn set_measuring(&mut self, measuring: bool) {
+        self.measuring = measuring;
+        self.scripts.set_measuring(measuring);
     }
 
     /// The scenes this project can reach, and which of them is already open.
@@ -217,7 +198,7 @@ impl Session {
     /// the scene being left, from a world this rearranges underneath it. The
     /// scene it came from is switched off rather than unloaded, so walking back
     /// in finds it as it was.
-    fn follow_scene_request(&mut self, world: &mut World) -> Result<(), CausewayError> {
+    fn follow_scene_request(&mut self, world: &mut World) -> Result<(), RuntimeError> {
         let Some(channel) = self.channel.as_mut() else {
             return Ok(());
         };
@@ -233,7 +214,7 @@ impl Session {
         let document = self
             .scenes
             .get(&wanted)
-            .ok_or_else(|| CausewayError::UnknownScene(wanted.clone()))?;
+            .ok_or_else(|| RuntimeError::UnknownScene(wanted.clone()))?;
         self.loaded
             .enter_with(world, &wanted, document, &self.prefabs)?;
         channel.now_playing(wanted);
@@ -296,18 +277,23 @@ impl Session {
         )
     }
 
-    /// One fixed step: the scripts run, then the animations move.
+    /// One fixed step: physics, the screen UI, effects, the scripts, then
+    /// what moves after them. Every host runs this, and only this, so a
+    /// scene steps the same in each.
     pub fn step(
         &mut self,
         world: &mut World,
         input: &InputState,
         viewport: (f32, f32),
         delta_seconds: f32,
-    ) -> Result<(), CausewayError> {
+    ) -> Result<StepReport, RuntimeError> {
+        let mut laps = Laps::start(self.measuring);
+        let mut problems = Vec::new();
         // Physics first, so a script observes the events of the step that just
         // happened and its writes take effect on the next one, which is the
         // order `docs/physics.md` fixes.
         self.step_physics(world, delta_seconds)?;
+        laps.lap(StepPhase::Physics);
         // No safe area yet: reading a device's insets is the browser host's to
         // report, and it does not yet. The scene needs no change when it does.
         // Hit-tested against what was drawn, styled, when the host presents
@@ -325,10 +311,12 @@ impl Session {
         self.screen_ui.read(world, extent, input.presses());
         self.screen_ui
             .read_controls(world, &sindri_decay::ui_input(input, viewport.1));
+        laps.lap(StepPhase::ScreenUi);
         // Before the scripts, so a fleck thrown this frame is drawn where it
         // was thrown rather than one frame along.
         self.effects
             .advance(std::time::Duration::from_secs_f32(delta_seconds));
+        laps.lap(StepPhase::Effects);
         // Worked out here rather than by the scripts, because this is the
         // layer holding a camera and a viewport. A script asking which block
         // the pointer is on would otherwise have to invert the projection
@@ -392,15 +380,10 @@ impl Session {
         if let Some(channel) = self.channel.as_mut() {
             frame = frame.with_scenes(channel);
         }
-        let report = self.scripts.advance(world, &self.components, frame);
+        let scripts = self.scripts.advance(world, &self.components, frame);
         self.pending_audio
             .extend(self.scripts.take_audio_commands());
-        for failure in &report.failures {
-            log::error!("{failure}");
-        }
-        for message in &report.printed {
-            log::info!("{}", message.message);
-        }
+        laps.lap(StepPhase::Scripts);
         self.animations
             .advance(world, &self.components, delta_seconds)?;
         // After the scripts, so a sequence a script named this step starts
@@ -409,7 +392,7 @@ impl Session {
             .sequences
             .advance(world, &self.components, delta_seconds)?;
         for (_, problem) in &played.problems {
-            log::error!("Sequence: {problem}");
+            problems.push(format!("Sequence: {problem}"));
         }
         self.pending_audio
             .extend(played.sounds.into_iter().map(|sound| AudioCommand::Play {
@@ -417,9 +400,11 @@ impl Session {
                 clip: sound.clip,
                 volume: sound.volume,
             }));
+        laps.lap(StepPhase::Animation);
         // After the scripts, so a camera following the player follows where
         // this step left it. The voxel world keeps its own window under it.
         sindri_scene::update_camera_behaviors(world, delta_seconds);
+        laps.lap(StepPhase::Cameras);
         // After the scripts, because a walker's depth is a consequence of where
         // this step left it, and before anything draws. Props settle on the
         // first pass and never move again; only what moved costs anything.
@@ -430,80 +415,17 @@ impl Session {
             tile_sets,
             &mut self.surfaces,
         ) {
-            log::error!("{error}");
+            problems.push(error.to_string());
         }
         // Last, so a script's request is performed with no script mid-call in
         // the scene it is leaving.
         self.follow_scene_request(world)?;
-        Ok(())
-    }
-
-    fn start_autoplay(
-        &mut self,
-        world: &World,
-        audio: &mut dyn AudioBackend,
-    ) -> Result<(), CausewayError> {
-        if self.autoplay_started {
-            return Ok(());
-        }
-        for (_, source) in self.components.query::<AudioSourceComponent>(world)? {
-            if !source.autoplay {
-                continue;
-            }
-            let settings = if source.looping {
-                PlaybackSettings::looping(source.normalized_volume())
-            } else {
-                PlaybackSettings::once(source.normalized_volume())
-            };
-            match self.mixer.play(audio, &source.clip, settings, source.bus()) {
-                Ok(_) => {}
-                Err(AudioError::Locked) => return Ok(()),
-                Err(error) => return Err(error.into()),
-            }
-        }
-        self.autoplay_started = true;
-        Ok(())
-    }
-
-    fn flush_audio(&mut self, audio: &mut dyn AudioBackend) -> Result<(), CausewayError> {
-        fn survivable(error: &AudioError) -> bool {
-            matches!(error, AudioError::MissingClip(_) | AudioError::Locked)
-        }
-
-        for command in std::mem::take(&mut self.pending_audio) {
-            let played = match command {
-                AudioCommand::Play { clip, volume, bus } => {
-                    self.mixer
-                        .play(audio, &clip, PlaybackSettings::once(volume), &bus)
-                }
-                AudioCommand::Loop { clip, volume, bus } => {
-                    self.mixer
-                        .play(audio, &clip, PlaybackSettings::looping(volume), &bus)
-                }
-                AudioCommand::SetVolume { bus, volume } => {
-                    self.mixer.set_bus_volume(audio, &bus, volume);
-                    continue;
-                }
-                AudioCommand::StopAll => {
-                    self.mixer.stop_all(audio);
-                    continue;
-                }
-                AudioCommand::PauseAll => {
-                    audio.pause_all();
-                    continue;
-                }
-                AudioCommand::ResumeAll => {
-                    audio.resume_all();
-                    continue;
-                }
-            };
-            match played {
-                Ok(_) => {}
-                Err(error) if survivable(&error) => log::warn!("{error}"),
-                Err(error) => return Err(error.into()),
-            }
-        }
-        Ok(())
+        laps.lap(StepPhase::Placement);
+        Ok(StepReport {
+            scripts,
+            problems,
+            times: laps.finish(),
+        })
     }
 
     /// Whether a text field had the keyboard after the last step, so the host
@@ -551,26 +473,74 @@ impl Session {
     }
 }
 
-impl Game for Session {
-    type Error = CausewayError;
+/// `tile_sets` with the engine's own bound beside them.
+fn with_builtins(mut tile_sets: TileSetBindings) -> TileSetBindings {
+    // Only a broken build fails here, and sindri-assets' own tests refuse
+    // one; a run carries on without them rather than not starting.
+    if let Err(error) = bind_builtin_tile_sets(&mut tile_sets) {
+        log::error!("{error}");
+    }
+    tile_sets
+}
 
-    fn fixed_update(&mut self, context: &mut FrameContext<'_>) -> Result<(), Self::Error> {
-        self.start_autoplay(context.world, context.audio)?;
-        #[allow(clippy::cast_precision_loss)]
-        let viewport = (context.viewport[0] as f32, context.viewport[1] as f32);
-        self.step(
-            context.world,
-            context.input,
-            viewport,
-            context.time.delta.as_secs_f32(),
-        )?;
-        self.write_saves(context.time.delta.as_secs_f32(), false);
-        self.flush_audio(context.audio)
+/// What a host that edits while it plays needs: the editor delivers sources
+/// as they are saved, shows what the solvers and scripts hold, and keeps a
+/// run's save when the run ends.
+impl Session {
+    /// Replaces the script sources, as a host that reloads them does. A
+    /// running script whose text changed recompiles on its next step.
+    pub fn set_sources(&mut self, sources: ScriptSources) {
+        self.sources = sources;
     }
 
-    /// The last chance to keep what a run earned.
-    fn stop(&mut self, _context: &mut FrameContext<'_>) -> Result<(), Self::Error> {
+    /// Replaces the prefabs scripts can spawn.
+    pub fn set_prefabs(&mut self, prefabs: PrefabSources) {
+        self.prefabs = prefabs;
+    }
+
+    /// Replaces the profiles scripts and physics materials read.
+    pub fn set_profiles(&mut self, profiles: ProfileSources) {
+        self.profiles = profiles;
+    }
+
+    /// Compiles every script the world names without running any, and says
+    /// which would not.
+    pub fn compile(&mut self, world: &World) -> Vec<sindri_decay::ScriptFailure> {
+        self.scripts.compile(world, &self.components, &self.sources)
+    }
+
+    /// Writes the save out now, whatever the cadence says: the run is ending.
+    pub fn finish(&mut self) {
         self.write_saves(0.0, true);
-        Ok(())
+    }
+
+    /// The scripts as they run: their instances, fields and blackboard.
+    #[must_use]
+    pub const fn scripts(&self) -> &Scripts {
+        &self.scripts
+    }
+
+    /// The 2D solver, for whatever draws what it holds.
+    #[must_use]
+    pub const fn physics(&self) -> &ScenePhysics2d {
+        &self.physics
+    }
+
+    /// The 3D solver, for whatever draws what it holds.
+    #[must_use]
+    pub const fn physics3d(&self) -> &ScenePhysics3d {
+        &self.physics3d
+    }
+
+    /// The schemas the scenes are read with.
+    #[must_use]
+    pub const fn components(&self) -> &ComponentSchemaRegistry {
+        &self.components
+    }
+
+    /// The tile sets the scenes' volumes name, the engine's own included.
+    #[must_use]
+    pub const fn tile_sets(&self) -> &TileSetBindings {
+        &self.tile_sets
     }
 }

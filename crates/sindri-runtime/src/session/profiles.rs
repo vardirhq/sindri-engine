@@ -23,7 +23,7 @@ impl Session {
         self
     }
 
-    pub(super) fn sync_physics_materials(&mut self) -> Result<(), crate::error::CausewayError> {
+    pub(super) fn sync_physics_materials(&mut self) -> Result<(), crate::RuntimeError> {
         let profiles = self
             .profiles
             .ids()
