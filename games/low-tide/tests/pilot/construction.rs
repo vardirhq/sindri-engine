@@ -7,7 +7,8 @@ pub fn patch(pilot: &mut Pilot, block: &str) {
     let (cx, cz) = column_row(pilot.crew_world());
     let mut terrain = pilot
         .run
-        .components
+        .session
+        .components()
         .get::<VoxelWorldComponent>(&pilot.run.world, basin)
         .unwrap()
         .unwrap();

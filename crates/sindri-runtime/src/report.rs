@@ -80,6 +80,19 @@ pub struct StepReport {
 }
 
 impl StepReport {
+    /// What went wrong in the step, worded: every script failure and every
+    /// problem. Empty for a step that went as written, which is what a test
+    /// asserts.
+    #[must_use]
+    pub fn notes(&self) -> Vec<String> {
+        self.scripts
+            .failures
+            .iter()
+            .map(ToString::to_string)
+            .chain(self.problems.iter().cloned())
+            .collect()
+    }
+
     /// Writes what the step said to the log: prints at info, failures and
     /// problems as errors. What a shipped host does with a step, which has
     /// nowhere else to put it.

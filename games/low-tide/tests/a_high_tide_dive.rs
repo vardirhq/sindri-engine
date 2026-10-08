@@ -193,7 +193,7 @@ fn the_hull_blocks_swimming_and_empty_air_recalls_without_payment() {
     assert!(pilot.flag("dive_loot"));
     pilot
         .run
-        .scripts
+        .session
         .blackboard_mut()
         .set("dive_air", f64::from(STEP));
     pilot.wait(0.1);
@@ -213,10 +213,10 @@ fn the_ramp_refuses_diving_and_permanent_water_stays_divable_through_the_ebb() {
     assert!(!pilot.flag("diving"));
     enter(&mut pilot);
     swim(&mut pilot, [-1.5, -2.0]);
-    pilot.run.scripts.blackboard_mut().set("tide_time", 280.0);
+    pilot.run.session.blackboard_mut().set("tide_time", 280.0);
     pilot.wait(0.1);
     assert!(pilot.flag("diving"));
-    pilot.run.scripts.blackboard_mut().set("tide_time", 405.0);
+    pilot.run.session.blackboard_mut().set("tide_time", 405.0);
     pilot.wait(0.1);
     assert!(
         pilot.flag("diving"),
@@ -250,13 +250,13 @@ fn temporarily_flooded_flats_allow_swimming_but_not_wreck_diving() {
     pilot.walk_deck(&[[6.5, -7.5], [10.0, -7.5]]);
     let ground = pilot.surface_under(pilot.crew_world());
     assert_ne!(ground, "brine");
-    pilot.run.scripts.blackboard_mut().set("tide_time", 280.0);
+    pilot.run.session.blackboard_mut().set("tide_time", 280.0);
     pilot.wait(0.1);
     assert!(pilot.flag("swimming"));
     pilot.use_it();
     pilot.wait(0.1);
     assert!(!pilot.flag("diving"));
-    pilot.run.scripts.blackboard_mut().set("tide_time", 405.0);
+    pilot.run.session.blackboard_mut().set("tide_time", 405.0);
     pilot.wait(0.1);
     assert!(!pilot.flag("swimming"));
     assert_eq!(pilot.surface_under(pilot.crew_world()), ground);

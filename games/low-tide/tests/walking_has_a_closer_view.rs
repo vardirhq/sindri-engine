@@ -45,7 +45,7 @@ fn views(mut pilot: Pilot) {
         size(&pilot) > foot_size + 5.0,
         "boarding restores crawler framing"
     );
-    let width = size(&pilot) * f64::from(pilot.run.screen[0] / pilot.run.screen[1]);
+    let width = size(&pilot) * f64::from(pilot.run.size[0] / pilot.run.size[1]);
     assert!(width >= 12.0, "both treads fit on a phone");
 }
 

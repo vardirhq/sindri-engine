@@ -19,7 +19,7 @@ pub fn project() -> PathBuf {
 }
 
 /// One run of the game: the project, played as a host plays it.
-pub struct Run(ProjectRun);
+pub struct Run(Box<ProjectRun>);
 
 impl Run {
     /// Opens the project: every scene, script, prefab and profile in it.
@@ -27,21 +27,14 @@ impl Run {
     /// # Errors
     /// If the project will not read, will not parse, or will not load.
     pub fn open() -> Result<Self, String> {
-        ProjectRun::open(&project(), [960.0, 540.0]).map(Self)
+        ProjectRun::open(&project(), [960.0, 540.0]).map(|run| Self(Box::new(run)))
     }
 
     /// One fixed step, returning every failure it reported.
     pub fn step(&mut self, delta: f32) -> Vec<String> {
-        match self.0.step(delta) {
-            Ok(report) => report
-                .scripts
-                .failures
-                .iter()
-                .map(ToString::to_string)
-                .chain(report.problems)
-                .collect(),
-            Err(error) => vec![error],
-        }
+        self.0
+            .step(delta)
+            .map_or_else(|error| vec![error], |report| report.notes())
     }
 
     /// The 2D solver the scene's Physics 2D World configures.
