@@ -216,9 +216,10 @@ script Director {
     // read from where Weave laid them out: the bars are fixed in pixels, so
     // on a small screen they cover more of the room.
     fn measure_band() {
-        if this.frames < 2.0 { return; }
+        // Weave lays the bars out a few frames after the scene comes on.
+        if this.frames < 10.0 { return; }
         let low = World.find("toy-prev");
-        let high = World.find("btn-reset");
+        let high = World.find("btn-drop");
         this.band_low = Ui.position(low).y + Ui.size(low).y * 0.5;
         this.band_high = Ui.position(high).y - Ui.size(high).y * 0.5;
     }
@@ -335,6 +336,9 @@ script Director {
     fn to_quarry() {
         let_go();
         print("Playground off to the quarry");
+        // Coming back, the bars are laid out again a frame after this scene
+        // is switched on; until then there is nothing to measure.
+        this.frames = 0.0;
         Scene.go("quarry.scene");
     }
 

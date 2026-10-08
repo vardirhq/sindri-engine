@@ -65,9 +65,13 @@ mod capture {
         Ok(String::from_utf8(bytes)?)
     }
 
+    /// What `sindri.toml` says: the main scene's ID, its entry stylesheets,
+    /// and the paths of its other scenes.
+    type Manifest = (String, Vec<String>, Vec<String>);
+
     /// The project's main scene, its other scenes and its entry stylesheets,
     /// from `sindri.toml`.
-    fn manifest(project: &Path) -> Result<(String, Vec<String>, Vec<String>), Box<dyn Error>> {
+    fn manifest(project: &Path) -> Result<Manifest, Box<dyn Error>> {
         let toml = fs::read_to_string(project.join("sindri.toml"))?;
         let quoted = |line: &str| -> Vec<String> {
             line.split('"')

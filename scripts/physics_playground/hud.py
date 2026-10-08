@@ -53,7 +53,6 @@ def build(scene) -> None:
     button(scene, "btn-gravity", "globals", "GRAVITY: EARTH", [], 0.4)
     button(scene, "btn-debug", "globals", "DEBUG OFF", [], 0.3)
     button(scene, "btn-reset", "globals", "RESET", [], 0.22)
-    button(scene, "btn-quarry", "globals", "3D QUARRY", ["loud"], 0.3)
 
     container(scene, "hud-bottom", "hud", ["bottom"], "column", "end", "center", 3.3, 0.4)
     container(scene, "toy-row", "hud-bottom", ["toy-row"], "row", "center", "center",
@@ -61,6 +60,7 @@ def build(scene) -> None:
     button(scene, "toy-prev", "toy-row", "<", ["arrow"], 0.1)
     label(scene, "toy-label", "toy-row", "THE WHOLE ROOM", ["toy-label"], 16, (0.9, 0.06))
     button(scene, "toy-next", "toy-row", ">", ["arrow"], 0.1)
+    button(scene, "btn-quarry", "toy-row", "3D QUARRY", ["loud"], 0.3)
 
     container(scene, "dock", "hud-bottom", ["dock"], "row", "space_between", "center",
               3.3, 0.11)
