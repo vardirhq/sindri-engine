@@ -23,6 +23,7 @@ sys.path.insert(0, str(Path(__file__).parent))
 
 import hud  # noqa: E402
 import toys  # noqa: E402
+import track  # noqa: E402
 from common import (  # noqa: E402
     LAYERS, body, box, circle, rgba, script, shape, transform,
 )
@@ -213,6 +214,8 @@ def main() -> None:
     director(scene)
     bursts(scene)
     toys.build(scene)
+    track.test_track(scene)
+    track.domino_run(scene)
     hud.build(scene)
     document = {
         "format_version": 10,

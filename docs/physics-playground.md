@@ -37,7 +37,7 @@ workaround uses public authoring, and the gap is recorded in `docs/parity.md`.
 | Ball lift and bumper pit | Run the lift, open the hopper, work the flippers | Slider position motor, trapdoor hinge, contact-driven bumper kicks, flipper limits, restitution |
 | Material lab | Race blocks down ice, wood and rubber; drop balls on four pads | Physics material profiles, friction, restitution |
 | Seesaw and trampoline | Drop the anvil, launch the ball, bounce on the springs | Hinge limits, spring joints, mass |
-| Test track | Drive the robot over slopes and steps, ride the lift, drop through planks, kick things | Character 2D, one-way platforms, moving-platform carry, impulse at a point |
+| Test track | Drive the robot up steps and down a slope, ride the lift it calls by standing on it, drop through planks, shove and kick crates | Character 2D steps, slopes and snap, one-way platforms, kinematic platform carry, impulse at a point, the room's gravity read with `Physics.gravity` |
 | Dominoes and the red button | Knock the first one over | Stacking, contacts, a spring-loaded slider button that sets off DROP EVERYTHING |
 
 The contraptions are connected: balls drain along the floor to the lift, the
@@ -75,6 +75,8 @@ and a 3D ray that reports what it hits.
 - Decay could not change world gravity, and a gravity change left sleeping
   bodies where they rested. Fixed here: `Physics.set_gravity` changes the
   authored world settings, and a change wakes every dynamic body.
+- A path through an entity held in a struct field (`hit.entity.transform`)
+  passed the checker and failed at runtime. Fixed in the Decay lowering.
 - Decay cannot change a collider's material at runtime, so material comparisons
   use separate authored bodies.
 - There is no simulation time scale, and no in-game debug drawing of colliders:
@@ -87,7 +89,7 @@ and a 3D ray that reports what it hits.
 - [x] Cannon and glass gallery
 - [x] Ball lift, hopper, bumper pit and flippers
 - [x] Material lab, seesaw and trampoline
-- [ ] Test track robot, dominoes and red button
+- [x] Test track robot, dominoes and red button
 - [ ] Probe tool and debug overlay
 - [ ] Voxel Quarry 3D annex
 - [ ] Session regressions, browser smoke on desktop and phone, editor Play

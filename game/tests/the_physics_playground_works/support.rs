@@ -34,6 +34,10 @@ impl log::Log for Capture {
     }
     fn log(&self, record: &log::Record<'_>) {
         if self.enabled(record.metadata()) {
+            // PLAYGROUND_ECHO=1 shows every print while a test runs.
+            if std::env::var_os("PLAYGROUND_ECHO").is_some() {
+                eprintln!("{}", record.args());
+            }
             LINES.with(|lines| {
                 lines
                     .borrow_mut()

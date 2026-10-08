@@ -2,13 +2,14 @@
 //! every contraption, observed through what a person would see move.
 
 mod support;
+mod track;
 
 use sindri_platform::Key;
 use support::{Playground, said};
 
 const WIDE: (f32, f32) = (1280.0, 720.0);
 
-fn open() -> Playground {
+pub(crate) fn open() -> Playground {
     Playground::open(WIDE.0, WIDE.1)
 }
 
@@ -70,13 +71,14 @@ fn grabbing_a_crate_lifts_it_and_letting_go_throws_it() {
     for step in 1..=20u8 {
         let target = [
             start[0] + f32::from(step) * 0.2,
-            start[1] + f32::from(step) * 0.35,
+            // Up to just under the test track's deck, which roofs the pile.
+            start[1] + f32::from(step) * 0.22,
         ];
         let pixel = playground.pixel_of_world(target);
         playground.move_to(pixel);
     }
     let lifted = playground.at("pile-crate-2");
-    assert!(lifted[1] > start[1] + 4.0, "{start:?} -> {lifted:?}");
+    assert!(lifted[1] > start[1] + 3.0, "{start:?} -> {lifted:?}");
     assert!(said("Playground grabbed"));
     playground.release();
     playground.play(10);
@@ -198,7 +200,7 @@ fn the_wrecking_ball_winds_up_swings_through_the_castle_and_can_be_cut_loose() {
     assert!((back[1] - crown[1]).abs() < 0.2, "rebuilt: {back:?}");
 }
 
-fn hold(playground: &mut Playground, key: Key, steps: usize) {
+pub(crate) fn hold(playground: &mut Playground, key: Key, steps: usize) {
     playground
         .input
         .apply(sindri_platform::InputEvent::KeyPressed(key));
@@ -262,7 +264,7 @@ fn the_crane_drives_lowers_grabs_the_crown_and_lifts_it_off_the_castle() {
     );
 }
 
-fn select(playground: &mut Playground, label: &str) {
+pub(crate) fn select(playground: &mut Playground, label: &str) {
     for _ in 0..9 {
         if playground.text("toy-label") == label {
             return;
