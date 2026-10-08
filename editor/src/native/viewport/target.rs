@@ -51,7 +51,10 @@ pub(in crate::native) struct RuntimeViewport {
 }
 
 impl RuntimeViewport {
-    pub(in crate::native) fn new(render_state: eframe::egui_wgpu::RenderState, label: &str) -> Self {
+    pub(in crate::native) fn new(
+        render_state: eframe::egui_wgpu::RenderState,
+        label: &str,
+    ) -> Self {
         let target = ViewportTarget::new(
             &render_state.device,
             label,
