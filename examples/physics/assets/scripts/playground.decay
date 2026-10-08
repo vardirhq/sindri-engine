@@ -375,6 +375,13 @@ script Director {
             Physics.set_gravity(gravity_pull(0.0));
             if Game.chaos { drop_everything(); }
         } else {
+            // With everything dropped, the room's parts lie wherever gravity
+            // threw them, and some in this contraption's way. Setting it up
+            // again puts the room back first, or the debris undoes it.
+            if Game.chaos {
+                drop_everything();
+                ResetToy.emit(0.0);
+            }
             clear_around(toy_view(Game.toy));
         }
         ResetToy.emit(Game.toy);

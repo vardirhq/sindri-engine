@@ -1,6 +1,6 @@
 # Changelog
 
-- Fix the Physics Playground's domino run sometimes stopping short of its red button. The last domino's tip only just reached the button's edge, so after the room had been played with it could come to rest leaning against the cap without pressing it, about one time in four at the pace a busy browser plays. The button now sits where the domino lands on it squarely.
+- Fix the Physics Playground's domino run sometimes stopping short of its red button. The last domino's tip only just reached the button's edge, so after the room had been played with it could come to rest leaning against the cap without pressing it, about one time in four at the pace a busy browser plays. The button now sits where the domino lands on it squarely. Setting a contraption up again while everything is dropped now puts the room back first: the room's parts lay wherever gravity had thrown them, and on the domino ledge they knocked the run over from its far end.
 
 - Every exported game is played by `sindri-player`, the engine's own host, rather than by a bundle built from Causeway's crate: a published game now loads `sindri_player.js`, and `cargo run -p sindri-player -- <project>` plays any project directory natively. Browser saves are kept per project, under `sindri.<entry scene>.save`, where every game on a site used to share `sindri.causeway.save` and overwrite each other's progress; a save made under the old key is not carried over. A native host on a machine with no sound device now plays silently instead of refusing to start.
 

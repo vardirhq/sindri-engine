@@ -123,3 +123,30 @@ fn setting_the_domino_run_up_again_clears_the_balls_that_rained_on_it() {
         times("Playground red button") > presses
     });
 }
+
+#[test]
+fn setting_the_domino_run_up_while_everything_is_dropped_puts_the_room_back_first() {
+    // What CI's browser smoke met: a hundred balls set the red button off,
+    // DROP EVERYTHING let every joint go, and the room's parts fell onto the
+    // ledge. Setting the run up again put only its own parts back, so the
+    // debris knocked its far end over and the run never reached the button.
+    let mut playground = open();
+    playground.key(Key::Digit1);
+    assert!(said("Playground DROP EVERYTHING"));
+    playground.play(60);
+    // Then gravity turned every way, as the smoke does next, throwing what
+    // fell across the room.
+    for _ in 0..5 {
+        playground.key(Key::V);
+        playground.play(40);
+    }
+    playground.play(120);
+    select(&mut playground, "DOMINO RUN");
+    playground.key(Key::R);
+    playground.play(90);
+    let presses = times("Playground red button");
+    playground.key(Key::Digit1);
+    until(&mut playground, 900, "the run reaching the button", |_| {
+        times("Playground red button") > presses
+    });
+}
