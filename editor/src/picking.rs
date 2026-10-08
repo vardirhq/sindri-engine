@@ -209,7 +209,7 @@ fn mesh_hit(ray: RaySegment, transform: Transform3D, primitive: MeshPrimitive) -
     }
 }
 
-/// Intersects the renderer's cube, whose local vertices span `[-1, 1]`.
+/// Intersects the renderer's unit cube, whose local vertices span `[-0.5, 0.5]`.
 fn cube_hit(ray: RaySegment) -> Option<f32> {
     let direction = ray.far - ray.near;
     let mut entering = 0.0_f32;
@@ -220,13 +220,13 @@ fn cube_hit(ray: RaySegment) -> Option<f32> {
         (ray.near.z, direction.z),
     ] {
         if direction.abs() <= f32::EPSILON {
-            if !(-1.0..=1.0).contains(&origin) {
+            if !(-0.5..=0.5).contains(&origin) {
                 return None;
             }
             continue;
         }
-        let first = (-1.0 - origin) / direction;
-        let second = (1.0 - origin) / direction;
+        let first = (-0.5 - origin) / direction;
+        let second = (0.5 - origin) / direction;
         entering = entering.max(first.min(second));
         leaving = leaving.min(first.max(second));
         if entering > leaving {

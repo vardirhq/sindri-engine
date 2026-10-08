@@ -22,9 +22,8 @@ QUARRY = "scripts/quarry.decay"
 GROUND = 6  # the flat floor's top layer of voxels
 TOP = GROUND + 1  # where its surface is: the top of that layer
 ALL = 4294967295
-# The `cube` mesh primitive spans -1 to 1: two units wide at scale 1. A crate
-# whose collider is one unit across is drawn at half scale to match it.
-CUBE = 0.5
+# The `cube` mesh primitive is a unit cube, the size of a default box collider.
+CUBE = 1.0
 
 
 def look_at(eye, target):
@@ -139,11 +138,11 @@ def build() -> dict:
 
     # The laser: a thin red column swept across the quarry, firing a ray down.
     laser = scene.add("q-laser", "q-laser")
-    laser["transform_3d"] = at(0, 14, 0.5, [0.03, 0.5, 0.03])
+    laser["transform_3d"] = at(0, 14, 0.5, [0.06, 1.0, 0.06])
     laser["components"]["sindri.mesh"] = {"layer": 0, "primitive": "cube",
                                           "texture": "textures/laser.png"}
     spot = scene.add("q-laser-hit", "q-laser-hit")
-    spot["transform_3d"] = at(0, TOP, 0.5, 0.15)
+    spot["transform_3d"] = at(0, TOP, 0.5, 0.3)
     spot["components"]["sindri.mesh"] = {"layer": 0, "primitive": "cube",
                                          "texture": "textures/laser.png"}
 

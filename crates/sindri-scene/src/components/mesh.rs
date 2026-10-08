@@ -7,6 +7,8 @@ use sindri_core::SceneComponent;
 #[serde(rename_all = "snake_case")]
 #[non_exhaustive]
 pub enum MeshPrimitive {
+    /// A unit cube, one unit across and centred on the entity: the size of a
+    /// default Collider 3D box, so the two match at any scale.
     Cube,
     Surface,
 }
