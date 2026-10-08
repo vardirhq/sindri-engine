@@ -33,6 +33,16 @@ signature. If you cannot demonstrate an entry, correct it or delete it.
 
 ## Engine
 
+### Static GLB decoding (render integration pending)
+
+`ModelAssetDecoder` parses self-contained binary GLB into reusable CPU geometry,
+node local matrices/children, materials and embedded base-color textures. The
+tiny deterministic fixture exercises both index widths, multiple primitives,
+mesh reuse, non-indexed triangles and malformed/unsupported diagnostics.
+`AssetLoader` reuse is covered. This is CPU decoding only: no scene model
+reference, GPU draw, browser render or Low Tide visual proof is claimed yet.
+See [imported models](imported-models.md).
+
 ### Lifecycle and time
 
 Legal state transitions are enforced rather than assumed: an engine can be

@@ -1,5 +1,10 @@
 # Changelog
 
+- Add CPU-side static GLB decoding with retained hierarchy, reusable meshes,
+  normals/UVs, 16/32-bit indices, material factors, embedded base-color images,
+  and asset-aware malformed/unsupported diagnostics. Runtime model rendering
+  and scene/export integration remain pending.
+
 - The `cube` mesh primitive is now a unit cube, one unit across like a default Collider 3D box, so a cube mesh and its collider match at any scale. It used to be two units across, which drew 3D bodies twice the size of their colliders. Editor picking follows the new size; the cube example and the editor fixture are drawn at scale 2 to look as they did.
 
 - Fix switching scenes when both have an environment: a switched-off scene's `sindri.environment` counted as a second one and stopped the frame. `project-capture` now loads every scene a project lists, so captures can follow `Scene.go`, and can drag the pointer with `move`, `down` and `up` steps.
