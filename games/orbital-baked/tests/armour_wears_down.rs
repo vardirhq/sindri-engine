@@ -31,7 +31,8 @@ fn isolated_run() -> Run {
         .world
         .entities()
         .filter_map(|(entity, _)| {
-            run.components
+            run.session
+                .components()
                 .get::<sindri_core::TagsComponent>(&run.world, entity)
                 .ok()
                 .flatten()
@@ -47,8 +48,10 @@ fn isolated_run() -> Run {
 }
 
 fn spawn_spine(run: &mut Run) -> EntityId {
+    let run = &mut **run;
     let document = run
-        .prefabs
+        .session
+        .prefabs()
         .get("prefabs/spine.prefab")
         .expect("the Spine prefab ships");
     let entity = run.world.spawn_prefab(document).expect("boss spawns").root;
@@ -61,7 +64,8 @@ fn tagged(run: &Run, tag: &str) -> Vec<EntityId> {
     run.world
         .entities()
         .filter_map(|(entity, _)| {
-            run.components
+            run.session
+                .components()
                 .get::<sindri_core::TagsComponent>(&run.world, entity)
                 .ok()
                 .flatten()
@@ -79,7 +83,8 @@ fn segment_at(run: &Run, wanted_slot: f64) -> EntityId {
 }
 
 fn segment_slot(run: &Run, entity: EntityId) -> Option<f64> {
-    run.components
+    run.session
+        .components()
         .get::<ScriptComponent>(&run.world, entity)
         .ok()
         .flatten()
@@ -102,7 +107,8 @@ fn position(run: &Run, entity: EntityId) -> [f32; 2] {
 }
 
 fn velocity(run: &Run, entity: EntityId) -> [f32; 2] {
-    run.physics
+    run.session
+        .physics()
         .world()
         .linear_velocity(entity)
         .expect("every Spine section has a physics body")
@@ -213,7 +219,8 @@ fn every_spine_section_replays_one_cardinal_route() {
         let positions: Vec<_> = chain.iter().map(|entity| position(&run, *entity)).collect();
         for (index, entity) in chain.iter().copied().enumerate() {
             let [vx, vy] = run
-                .physics
+                .session
+                .physics()
                 .world()
                 .linear_velocity(entity)
                 .expect("every Spine section has a physics body");
@@ -256,11 +263,11 @@ fn destroying_a_middle_segment_severs_and_promotes_the_rear_chain() {
     let cut = segment_at(&run, 4.0);
     let new_head = segment_at(&run, 5.0);
     assert_eq!(
-        run.physics.world().joint_count(),
+        run.session.physics().world().joint_count(),
         0,
         "Spine follows a cardinal predecessor route rather than behaving as a rope"
     );
-    run.scripts
+    run.session
         .blackboard_mut()
         .send_signal(cut.to_bits(), "hazard_damage", 20.0);
 
@@ -281,7 +288,7 @@ fn destroying_a_middle_segment_severs_and_promotes_the_rear_chain() {
         "only the struck section is lost"
     );
     assert_eq!(
-        run.scripts.field(new_head, "head"),
+        run.session.scripts().field(new_head, "head"),
         Some(&ScriptValue::Number(1.0)),
         "the first surviving rear section becomes an autonomous head"
     );
@@ -309,13 +316,14 @@ fn a_severed_rear_chain_keeps_its_unvisited_route() {
 
     for frame in 0..270 {
         if frame == 90 {
-            run.scripts
+            run.session
                 .blackboard_mut()
                 .send_signal(cut.to_bits(), "hazard_damage", 20.0);
         }
         step(&mut run);
         let positions: Vec<_> = chain.iter().map(|entity| position(&run, *entity)).collect();
-        promoted |= run.scripts.field(chain[0], "head") == Some(&ScriptValue::Number(1.0));
+        promoted |=
+            run.session.scripts().field(chain[0], "head") == Some(&ScriptValue::Number(1.0));
         if promoted {
             delayed_turn |=
                 movement_axis(velocity(&run, chain[0])) != movement_axis(velocity(&run, chain[1]));
@@ -348,7 +356,8 @@ fn a_severed_rear_chain_keeps_its_unvisited_route() {
 fn every_armour_clip_names_frames_the_sheet_holds() {
     let run = Run::open().expect("the project opens");
     let prefab = run
-        .prefabs
+        .session
+        .prefabs()
         .get("prefabs/spine.prefab")
         .expect("the boss prefab ships");
     let text =

@@ -26,6 +26,7 @@ wgpu.workspace = true
 sindri-core = { path = "../../crates/sindri-core" }
 sindri-decay = { path = "../../crates/sindri-decay" }
 sindri-platform = { path = "../../crates/sindri-platform" }
+sindri-runtime = { path = "../../crates/sindri-runtime" }
 sindri-scene = { path = "../../crates/sindri-scene" }
 serde_json.workspace = true
 

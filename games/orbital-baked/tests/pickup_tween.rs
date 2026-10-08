@@ -25,7 +25,8 @@ fn pickup_appears_pauses_and_reaches_its_authored_scale() {
     }
     run.set_board("run_state", 1.0);
     let prefab = run
-        .prefabs
+        .session
+        .prefabs()
         .get("prefabs/powerup.prefab")
         .expect("pickup")
         .clone();

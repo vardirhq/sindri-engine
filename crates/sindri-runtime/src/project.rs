@@ -18,7 +18,7 @@ use sindri_core::{
 };
 use sindri_decay::{PrefabSources, ProfileSources, ScriptComponent, ScriptSources};
 use sindri_platform::{GamepadAxis, GamepadButton, InputEvent, InputState, Key, PadId};
-use sindri_scene::{SceneExtractor, TileSetBindings};
+use sindri_scene::{SceneExtractor, TileSetBindings, UiTextSizes};
 
 use crate::{Session, StepReport};
 
@@ -140,14 +140,45 @@ impl ProjectRun {
     /// A file that will not read or parse, a scene that will not load, or a
     /// stylesheet that will not compose — each named.
     pub fn open(project: &Path, size: [f32; 2]) -> Result<Self, String> {
+        Self::open_on(project, None, size)
+    }
+
+    /// Opens the project on another of its scenes, named as `Scene.go` names
+    /// it, as a tool or a test does to start somewhere other than the main
+    /// scene without playing its way there. The main scene stays reachable.
+    ///
+    /// # Errors
+    /// As [`Self::open`], and a scene the project does not list.
+    pub fn open_scene(project: &Path, scene: &str, size: [f32; 2]) -> Result<Self, String> {
+        Self::open_on(project, Some(scene), size)
+    }
+
+    fn open_on(project: &Path, entry: Option<&str>, size: [f32; 2]) -> Result<Self, String> {
         let assets = project.join("assets");
-        let (scene_id, sheet_ids, other_scenes) = manifest(project)?;
+        let (main_id, sheet_ids, other_scenes) = manifest(project)?;
         let read_scene = |path: &Path| -> Result<SceneDocument, String> {
             let json =
                 fs::read_to_string(path).map_err(|error| format!("{}: {error}", path.display()))?;
             SceneDocument::from_json(&json).map_err(|error| format!("{}: {error}", path.display()))
         };
-        let document = read_scene(&assets.join(&scene_id))?;
+        // Every scene goes to the session: the main one under its asset ID,
+        // the others under their file names, which is the name `Scene.go`
+        // asks for, as the export names them.
+        let mut scenes = vec![(main_id.clone(), read_scene(&assets.join(&main_id))?)];
+        for path in other_scenes {
+            let name = Path::new(&path)
+                .file_name()
+                .and_then(|name| name.to_str())
+                .ok_or("a scene path without a file name")?
+                .to_owned();
+            scenes.push((name, read_scene(&project.join(&path))?));
+        }
+        let scene_id = entry.unwrap_or(&main_id).to_owned();
+        let document = scenes
+            .iter()
+            .find(|(name, _)| *name == scene_id)
+            .map(|(_, document)| document.clone())
+            .ok_or_else(|| format!("sindri.toml lists no scene {scene_id}"))?;
 
         let mut sources = ScriptSources::new();
         for (id, bytes) in files_under(&assets, ".decay") {
@@ -190,17 +221,6 @@ impl ProjectRun {
                 weave::compose(&id, &weave_sources).map_err(|error| format!("{id}: {error}"))?,
             );
         }
-        // Every scene goes to the session under its file name, which is the
-        // name `Scene.go` asks for, as the export names them.
-        let mut scenes = vec![(scene_id, document)];
-        for path in other_scenes {
-            let name = Path::new(&path)
-                .file_name()
-                .and_then(|name| name.to_str())
-                .ok_or("a scene path without a file name")?
-                .to_owned();
-            scenes.push((name, read_scene(&project.join(&path))?));
-        }
         let scene = scene_extractor()?;
         let mut session = Session::with_sources(scene.components().clone(), sources)
             .with_prefabs(prefabs)
@@ -227,7 +247,8 @@ impl ProjectRun {
     }
 
     /// One fixed step of gameplay, then the input moves on to the next
-    /// frame, as a host's update does. Nothing is drawn.
+    /// frame and the frame is presented, as a host's update and draw do.
+    /// Nothing is drawn, but a styled game is laid out as it would be.
     ///
     /// # Errors
     /// What stops a run: a solver, a scene change, a stylesheet.
@@ -242,7 +263,38 @@ impl ProjectRun {
             )
             .map_err(|error| error.to_string())?;
         self.input.begin_frame(Duration::from_secs_f32(delta));
+        self.present()?;
         Ok(report)
+    }
+
+    /// What a host does around a draw, without drawing: a styled game is
+    /// styled in place for the frame, its screen laid out as shown, which the
+    /// next step's clicks are hit-tested against, and the styling undone.
+    /// Without this a styled run kept the layout it opened with, and a click
+    /// on a screen that had since changed met nothing.
+    ///
+    /// # Errors
+    /// A stylesheet that will not apply.
+    pub fn present(&mut self) -> Result<(), String> {
+        if !self.session.is_styled() {
+            return Ok(());
+        }
+        let view = weave::Viewport {
+            width: self.size[0],
+            height: self.size[1],
+        };
+        let undo = self
+            .session
+            .style(&mut self.world, view)
+            .map_err(|error| error.to_string())?;
+        let laid_out = self
+            .session
+            .record_drawn(&self.world, view, UiTextSizes::new())
+            .map_err(|error| error.to_string());
+        if let Some(undo) = undo {
+            undo.undo(&mut self.world);
+        }
+        laid_out
     }
 
     /// Holds or lets go of a key, as the window would.

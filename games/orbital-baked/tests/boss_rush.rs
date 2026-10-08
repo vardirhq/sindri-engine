@@ -43,7 +43,8 @@ fn clear_the_boss(run: &mut Run) {
         .world
         .entities()
         .filter_map(|(entity, _)| {
-            run.components
+            run.session
+                .components()
                 .get::<sindri_core::TagsComponent>(&run.world, entity)
                 .ok()
                 .flatten()

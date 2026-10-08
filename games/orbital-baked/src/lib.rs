@@ -9,19 +9,10 @@
 //! one Sindri exports; if the game needed anything private, this file could not
 //! be written and the authoring surface would still be incomplete.
 
+use std::ops::{Deref, DerefMut};
 use std::path::{Path, PathBuf};
-use std::time::Duration;
 
-use sindri_core::{
-    ComponentSchemaRegistry, PREFAB_SUFFIX, PrefabDocument, Rng, SaveStore, SceneDocument, World,
-};
-use sindri_decay::{
-    Physics2d, PrefabSources, ProfileSources, ScriptComponent, ScriptFrame, ScriptSources, Scripts,
-};
-use sindri_platform::InputState;
-use sindri_scene::{
-    Effects2d, SceneExtractor, ScenePhysics2d, ScreenExtent, ScreenUi, SpriteAnimations,
-};
+use sindri_runtime::ProjectRun;
 
 /// Where the project is, from wherever the harness is being run.
 #[must_use]
@@ -29,285 +20,57 @@ pub fn project() -> PathBuf {
     Path::new(env!("CARGO_MANIFEST_DIR")).to_path_buf()
 }
 
-/// One run of the game, held together exactly as a host holds it.
-pub struct Run {
-    pub world: World,
-    pub components: ComponentSchemaRegistry,
-    pub scripts: Scripts,
-    pub sources: ScriptSources,
-    pub prefabs: PrefabSources,
-    pub profiles: ProfileSources,
-    pub physics: ScenePhysics2d,
-    pub screen_ui: ScreenUi,
-    pub effects: Effects2d,
-    /// Where each animated sprite has got to.
-    ///
-    /// Beside the world rather than in it, because advancing a clip must not
-    /// dirty the scene it came from — which is also what lets a capture step
-    /// the run forward without rewriting the project it opened.
-    pub animations: SpriteAnimations,
-    /// Where each playing sequence has got to.
-    pub sequences: sindri_scene::Sequences,
-    pub random: Rng,
-    pub saves: SaveStore,
-    pub input: InputState,
-    /// The viewport the overlay is laid out against. A phone in portrait and a
-    /// desktop window differ only in this number.
-    pub viewport: (f32, f32),
-    pub elapsed: f32,
-}
+/// One run of the game: the project, played as a host plays it, on a
+/// landscape screen unless opened on another.
+pub struct Run(Box<ProjectRun>);
 
 impl Run {
-    /// Opens the project: its scene, every script the scene runs, and every
-    /// prefab those scripts can spawn.
+    /// Opens the project: every scene, script, prefab and stylesheet in it.
     ///
     /// # Errors
     /// If the project will not read, will not parse, or will not load.
     pub fn open() -> Result<Self, String> {
-        Self::open_from(&project().join("assets"), "orbital.scene")
+        Self::open_on(None, [1280.0, 720.0])
     }
 
-    /// Opens one of the project's authored scenes directly.
-    ///
-    /// This is primarily useful to deterministic tools and tests. It avoids
-    /// reproducing scene-transition input merely to inspect a development
-    /// playground, while still loading the scene through the same host path as
-    /// the normal game.
+    /// Opens the project on another of its scenes, without playing its way
+    /// there.
     ///
     /// # Errors
     /// If the named scene will not read, parse, validate, or load.
     pub fn open_scene(scene: &str) -> Result<Self, String> {
-        Self::open_from(&project().join("assets"), scene)
+        Self::open_on(Some(scene), [1280.0, 720.0])
     }
 
-    /// Opens a build rather than a source tree.
-    ///
-    /// Everything is read by the logical ID the manifest names, out of the
-    /// content-hashed directory it names — which is what a browser does, and
-    /// the reason this can say whether an export is playable rather than only
-    /// whether its bytes arrived.
+    /// Opens the project on `scene`, or its main scene, to play on a screen
+    /// of `size` pixels. A phone in portrait and a desktop window differ only
+    /// in this.
     ///
     /// # Errors
-    /// If the build will not read, will not parse, or will not load.
-    pub fn open_export(root: &Path) -> Result<Self, String> {
-        let text = std::fs::read_to_string(root.join("assets/sindri.manifest"))
-            .map_err(|error| format!("no manifest: {error}"))?;
-        let manifest: serde_json::Value =
-            serde_json::from_str(&text).map_err(|error| error.to_string())?;
-        let content_root = manifest
-            .get("content_root")
-            .and_then(serde_json::Value::as_str)
-            .unwrap_or_default();
-        let assets = root.join("assets").join(content_root);
-        let scene = manifest
-            .get("assets")
-            .and_then(serde_json::Value::as_object)
-            .and_then(|assets| {
-                assets
-                    .iter()
-                    .find(|(_, entry)| {
-                        entry.get("kind").and_then(serde_json::Value::as_str) == Some("scene")
-                    })
-                    .map(|(id, _)| id.clone())
-            })
-            .ok_or_else(|| "the manifest names no scene".to_owned())?;
-        Self::open_from(&assets, &scene)
+    /// As [`Self::open`].
+    pub fn open_on(scene: Option<&str>, size: [f32; 2]) -> Result<Self, String> {
+        match scene {
+            Some(scene) => ProjectRun::open_scene(&project(), scene, size),
+            None => ProjectRun::open(&project(), size),
+        }
+        .map(|run| Self(Box::new(run)))
     }
 
-    fn open_from(root: &Path, scene: &str) -> Result<Self, String> {
-        let scene_path = root.join(scene);
-        let text =
-            std::fs::read_to_string(&scene_path).map_err(|e| format!("{scene_path:?}: {e}"))?;
-        let document: SceneDocument = serde_json::from_str(&text).map_err(|e| e.to_string())?;
-        document.validate().map_err(|e| e.to_string())?;
-
-        let extractor = SceneExtractor::new().map_err(|e| e.to_string())?;
-        let mut components = extractor.components().clone();
-        components
-            .register::<ScriptComponent>("Script")
-            .map_err(|e| e.to_string())?;
-
-        let world = World::from_scene(&document)
-            .map_err(|e| e.to_string())?
-            .world;
-
-        // Read from the directory rather than listed here, because a list here
-        // is the thing that makes adding an enemy mean editing Rust.
-        let mut sources = ScriptSources::new();
-        for entry in std::fs::read_dir(root.join("scripts")).map_err(|e| e.to_string())? {
-            let path = entry.map_err(|e| e.to_string())?.path();
-            if path.extension().is_some_and(|e| e == "decay") {
-                let name = path.file_name().unwrap_or_default().to_string_lossy();
-                let text = std::fs::read_to_string(&path).map_err(|e| e.to_string())?;
-                sources.insert(format!("scripts/{name}"), text);
-            }
-        }
-        let mut prefabs = PrefabSources::new();
-        for entry in std::fs::read_dir(root.join("prefabs")).map_err(|e| e.to_string())? {
-            let path = entry.map_err(|e| e.to_string())?.path();
-            let name = path
-                .file_name()
-                .unwrap_or_default()
-                .to_string_lossy()
-                .into_owned();
-            if name.ends_with(PREFAB_SUFFIX) {
-                let text = std::fs::read_to_string(&path).map_err(|e| e.to_string())?;
-                let prefab =
-                    PrefabDocument::from_json(&text).map_err(|e| format!("{name}: {e}"))?;
-                prefabs.insert(format!("prefabs/{name}"), prefab);
-            }
-        }
-        let mut profiles = ProfileSources::new();
-        let profiles_dir = root.join("profiles");
-        if profiles_dir.exists() {
-            for entry in std::fs::read_dir(&profiles_dir).map_err(|e| e.to_string())? {
-                let path = entry.map_err(|e| e.to_string())?.path();
-                let name = path
-                    .file_name()
-                    .unwrap_or_default()
-                    .to_string_lossy()
-                    .into_owned();
-                if name.ends_with(sindri_core::PROFILE_SUFFIX) {
-                    let text = std::fs::read_to_string(&path).map_err(|e| e.to_string())?;
-                    let profile = sindri_core::ProfileDocument::from_json(&text)
-                        .map_err(|e| format!("{name}: {e}"))?;
-                    profiles.insert(format!("profiles/{name}"), profile);
-                }
-            }
-        }
-
-        Ok(Self {
-            world,
-            components,
-            scripts: Scripts::new(),
-            sources,
-            prefabs,
-            profiles,
-            physics: ScenePhysics2d::top_down().map_err(|e| e.to_string())?,
-            screen_ui: ScreenUi::default(),
-            effects: Effects2d::default(),
-            animations: SpriteAnimations::new(),
-            sequences: sindri_scene::Sequences::new(),
-            random: Rng::default(),
-            saves: SaveStore::default(),
-            input: InputState::default(),
-            viewport: (1280.0, 720.0),
-            elapsed: 0.0,
-        })
-    }
-
-    /// Every script failure this pass reported, in the order they happened.
+    /// One fixed step, returning every failure it reported.
     ///
     /// A step returns them rather than ignoring them, because a game whose
     /// scripts are quietly failing looks from the outside like a game that is
     /// simply not doing very much.
     pub fn step(&mut self, delta: f32) -> Vec<String> {
-        let step = Duration::from_secs_f32(delta);
-        let mut notes = Vec::new();
-        if let Err(error) = self.physics.step(&mut self.world, &self.components, step) {
-            notes.push(error.to_string());
-        }
-        if let Err(error) = self.screen_ui.update(
-            &mut self.world,
-            &self.components,
-            ScreenExtent::new(self.viewport.0, self.viewport.1),
-            self.input.presses(),
-        ) {
-            notes.push(error.to_string());
-        }
-        self.screen_ui.read_controls(
-            &mut self.world,
-            &sindri_decay::ui_input(&self.input, self.viewport.1),
-        );
-        self.effects.advance(step);
-
-        // A focused text field keeps the keys: a callsign with a W in it
-        // does not also fly the ship.
-        let held_back = self
-            .screen_ui
-            .editing_text(&self.world)
-            .then(|| self.input.without_keys());
-        let (physics, events) = self.physics.for_scripts();
-        let report = self.scripts.advance(
-            &mut self.world,
-            &self.components,
-            ScriptFrame::new(
-                &self.sources,
-                held_back.as_ref().unwrap_or(&self.input),
-                delta,
-            )
-            .with_prefabs(&self.prefabs)
-            .with_profiles(&self.profiles)
-            .with_screen_ui(&self.screen_ui)
-            .with_random(&mut self.random)
-            .with_saves(&mut self.saves)
-            .with_effects(&mut self.effects)
-            .with_physics(Physics2d {
-                world: physics,
-                events,
-            })
-            .with_animations(&mut self.animations)
-            .with_sequences(&mut self.sequences),
-        );
-        for failure in &report.failures {
-            notes.push(failure.to_string());
-        }
-        // After the scripts, so a clip a script started this step is advanced
-        // by this step — and so a read of `is_finished` answers for the advance
-        // that already happened rather than the one about to.
-        if let Err(error) = self
-            .animations
-            .advance(&self.world, &self.components, delta)
-        {
-            notes.push(error.to_string());
-        }
-        // After the scripts too, so a sequence a script named this step starts
-        // now. Its cue sounds are dropped: a harness plays no audio.
-        match self
-            .sequences
-            .advance(&mut self.world, &self.components, delta)
-        {
-            Ok(played) => notes.extend(
-                played
-                    .problems
-                    .iter()
-                    .map(|(_, problem)| format!("Sequence: {problem}")),
-            ),
-            Err(error) => notes.push(error.to_string()),
-        }
-        self.scripts.take_audio_commands();
-        // After the scripts, so an impact a script made this step shakes this
-        // step's frame.
-        sindri_scene::update_camera_behaviors(&mut self.world, delta);
-        self.elapsed += delta;
-        // At the end rather than the beginning, because an edge is delivered by
-        // the step that follows the event: clearing at the top of a step would
-        // wipe the press that had just been reported and never happened.
-        self.input.begin_frame(step);
-        notes
-    }
-
-    /// What a script left on the shared board.
-    #[must_use]
-    pub fn board(&self, name: &str) -> f32 {
-        narrow(self.scripts.blackboard().get(name, 0.0))
+        self.0
+            .step(delta)
+            .map_or_else(|error| vec![error], |report| report.notes())
     }
 
     /// How many entities carry a tag, which is how the game names its groups.
     #[must_use]
     pub fn count(&self, tag: &str) -> usize {
-        self.world
-            .entities()
-            .filter(|(entity, _)| {
-                self.world.is_active(*entity)
-                    && self
-                        .components
-                        .get::<sindri_core::TagsComponent>(&self.world, *entity)
-                        .ok()
-                        .flatten()
-                        .is_some_and(|tags| tags.has(tag))
-            })
-            .count()
+        self.tagged(tag).len()
     }
 
     /// The entity a scene named, which is how the harness reaches one.
@@ -317,13 +80,6 @@ impl Run {
             .entities()
             .find(|(_, data)| data.name.as_deref() == Some(name))
             .map(|(entity, _)| entity)
-    }
-
-    /// The extractor the harness loaded, for a caller that wants to draw a
-    /// frame rather than only step one.
-    #[must_use]
-    pub fn scene_extractor(&self) -> SceneExtractor {
-        SceneExtractor::new().expect("the components registered when the run opened")
     }
 
     /// Every texture the scene names, so a caller can load them off disk.
@@ -390,7 +146,7 @@ impl Run {
     /// For a test that wants to reach an ending without playing until it
     /// happens — the same write the game makes when a hull runs out.
     pub fn set_board(&mut self, name: &str, value: f32) {
-        self.scripts.blackboard_mut().set(name, f64::from(value));
+        self.0.session.set_board(name, value);
     }
 
     /// The names of the active entities carrying a tag.
@@ -405,7 +161,8 @@ impl Run {
             .filter(|(entity, _)| {
                 self.world.is_active(*entity)
                     && self
-                        .components
+                        .session
+                        .components()
                         .get::<sindri_core::TagsComponent>(&self.world, *entity)
                         .ok()
                         .flatten()
@@ -431,20 +188,14 @@ impl Run {
         // assuming how many frames that takes, which is a number that changes
         // whenever a screen gains a layout.
         let mut waited = 0;
-        while self.screen_ui.rect(entity).is_none() && waited < 8 {
+        while self.on_screen(entity).is_none() && waited < 8 {
             self.step(1.0 / 60.0);
             waited += 1;
         }
-        let rect = self
-            .screen_ui
-            .rect(entity)
+        let [x, y] = self
+            .on_screen(entity)
             .unwrap_or_else(|| panic!("{name} never got a place on the screen"));
-        let (width, height) = self.viewport;
-        let half_width = width / height;
-        (
-            (rect.center[0] / half_width * 0.5 + 0.5) * width,
-            (0.5 - rect.center[1] * 0.5) * height,
-        )
+        (x, y)
     }
 
     /// Puts the mouse pointer over an element.
@@ -513,4 +264,18 @@ impl Run {
 #[allow(clippy::cast_possible_truncation)]
 fn narrow(value: f64) -> f32 {
     value as f32
+}
+
+impl Deref for Run {
+    type Target = ProjectRun;
+
+    fn deref(&self) -> &ProjectRun {
+        &self.0
+    }
+}
+
+impl DerefMut for Run {
+    fn deref_mut(&mut self) -> &mut ProjectRun {
+        &mut self.0
+    }
 }
