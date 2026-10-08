@@ -1366,7 +1366,7 @@ inactive/despawned entities are skipped immediately. A held result stays a
 snapshot after a later step or despawn; check `World.exists(hit.entity)` before
 acting on that entity. Queries currently scan collider pieces, with no separate
 spatial index. The platformer displays clearance below its hero, preserving its
-foot-sensor jump rules; Physics Playground makes masks, sensors, inside hits,
+foot-sensor jump rules; the Physics Playground's probe makes masks, hits,
 misses, hit points and normals visible.
 
 Scene-owned 2D characters use `Physics.move_character(entity, displacement, snap)`
@@ -1393,8 +1393,8 @@ Starting already overlapping gives distance 0 and normal (0, 0). The mask,
 sensor and exclude arguments, the validation and the synchronization rules are
 the raycast's. A radius or half size must be positive. Orbital Last Stand's
 hostile mine damages what its blast circle overlaps, so a target whose edge the
-blast reaches is hit; Physics Playground shows a swept circle stopping short of
-the ray and an area naming what it holds.
+blast reaches is hit; the Physics Playground's probe shows a swept circle or
+box stopping where it touches and an area counting what it holds.
 
 ```decay
 let centre = Vec2(this.transform.position.x, this.transform.position.y);

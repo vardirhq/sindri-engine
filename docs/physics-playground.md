@@ -17,22 +17,26 @@ other rectangles". The measure is three people:
 
 ## Shape
 
-One wide room, about 60 by 28 world units, packed with contraptions that share
-the space. The camera opens on the whole room and flies in to a contraption
-when its chip is selected. Each contraption is a prefab, so resetting one means
-despawning it and spawning it again, and every joint in it is authored once.
+One wide room, 60 by 28 world units, packed with contraptions that share the
+space. The camera opens on the whole room and flies in to a contraption when
+its chip is selected. Contraptions are scene entities rather than prefabs: an
+authored joint can only name bodies in its own scene or prefab, and the crane
+must be able to pick up anything the room was built with. Each part remembers
+where the scene put it, so resetting a contraption puts its parts back and
+turns its joints on again.
 
 Gameplay is entirely Decay, layout and styling are Weave, and geometry is
-scene and prefab data written by `scripts/generate-physics-playground.py`. No
-Rust is added for the playground. Where the public surface lacks something, the
-workaround uses public authoring, and the gap is recorded in `docs/parity.md`.
+scene and prefab data written by `scripts/physics_playground/generate.py`.
+Where the public surface lacked something genuinely missing, the engine was
+fixed rather than worked around, and the rest is recorded below and in
+`docs/parity.md`.
 
 ## Contraptions
 
 | Contraption | What you do | What it exercises |
 | --- | --- | --- |
 | Wrecking ball | Wind it up, let go, cut it loose | Hinge position motor, motor release, joint enable, compound bodies, a tower of mixed materials |
-| Gantry crane | Drive the trolley, lower the hook, grab and drop | Slider velocity motor, spring winch (`set_spring`), joints created at runtime, overlap queries |
+| Gantry crane | Drive the trolley, lower the hook, grab and drop | Slider position motor chasing a moving target (a velocity motor sags under load), spring winch (`set_spring`), a distance joint created at runtime, a box cast to find the load |
 | Cannon and glass gallery | Aim, fire, switch CCD off and watch shells ghost through glass | Hinge position motor aim, impulses, continuous collision, thin hinged panes, sensors |
 | Ball lift and bumper pit | Run the lift, open the hopper, work the flippers | Slider position motor, trapdoor hinge, contact-driven bumper kicks, flipper limits, restitution |
 | Material lab | Race blocks down ice, wood and rubber; drop balls on four pads | Physics material profiles, friction, restitution |
@@ -48,9 +52,9 @@ and the domino run ends on the button that wrecks the room.
 
 The pointer always holds one tool:
 
-- **Grab** joins a kinematic hand to whatever is under the pointer with a hinge
-  created at the grabbed point, so things swing from where you hold them and
-  can be thrown.
+- **Grab** ties a kinematic hand to whatever is under the pointer with a short
+  rope, so things swing from where you hold them and keep their speed when
+  thrown.
 - **Blast** applies radial impulses at points inside an overlap circle.
 - **Spawn** drops the selected object: ball, crate, plank, anvil or bowling ball.
 - **Probe** is the old playground's query lab: drag a ray, circle cast, box cast
@@ -89,7 +93,7 @@ and a 3D ray that reports what it hits.
 
 ## Checklist
 
-- [ ] Room, camera and pointer mapping, tools, global controls and HUD
+- [x] Room, camera and pointer mapping, tools, global controls and HUD
 - [x] Wrecking ball and gantry crane
 - [x] Cannon and glass gallery
 - [x] Ball lift, hopper, bumper pit and flippers

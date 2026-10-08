@@ -245,8 +245,9 @@ a miss and skips inactive/despawned entities immediately, while scene geometry
 changes are synchronized at the next step. Engine and Decay regressions cover
 geometry, compounds, filtering, validation, copies and removal/reuse. The
 platformer displays ground clearance through jumps against painted tilemap
-colliders, and `examples/physics` exposes live rays, hit dots, normals, falling
-bodies, bounce and sensors with desktop/touch controls. Pages exports it under
+colliders, and `examples/physics`, the Physics Playground, has a probe that
+drags rays, circle and box casts and area queries through a layer mask and reads
+out what they hit, how far and the surface normal, with desktop/touch controls. Pages exports it under
 `examples/physics/`; native project regressions and desktop/phone browser smoke
 checks exercise its real Decay controls. Rays, overlaps and shape casts now use
 a synchronized per-piece index, also used by controller penetration, slide and
@@ -548,8 +549,8 @@ sweeps one along a line to the first piece it touches, both from current body
 poses with the raycast's filter (`crates/sindri-physics/tests/overlap_and_shape_cast.rs`).
 Decay's `Physics.overlap_circle`, `overlap_box`, `cast_circle` and `cast_box`
 reach them. Orbital's hostile mine damages what its blast circle overlaps
-(`combat_lab.rs` proves a target caught by its edge), and Physics Playground
-switches its line between a ray, a swept circle and an area.
+(`combat_lab.rs` proves a target caught by its edge), and the Physics
+Playground's probe casts a ray, a circle or a box, or counts an area.
 
 A scene's `sindri.physics2d.world` names its collision layers bit by bit.
 `Physics.layer` and `Physics.mask` turn names into masks and refuse an unknown

@@ -805,7 +805,7 @@ and normal (0, 0). Other hits report the world-space surface normal.
 `RayHit2d` is a snapshot. Scene transform writes and new colliders take effect
 at the next synchronization. Decay skips inactive/despawned entities even during
 a script pass. The platformer proves ground clearance against tilemap geometry;
-`examples/physics` visualizes filtering, hits, normals and trigger events.
+the Physics Playground's probe visualizes filtering, hits and normals.
 
 2D overlaps and shape casts are implemented for circles, boxes and capsules.
 Decay exposes `Physics.overlap_circle`, `overlap_box`, `cast_circle` and
