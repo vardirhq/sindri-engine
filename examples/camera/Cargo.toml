@@ -1,36 +1,26 @@
 [package]
 name = "sindri-camera-demo"
-description = "Shared native and browser gameplay camera behavior proof for Sindri"
+description = "Tests that play the Camera Lab, a gameplay camera behaviour project"
 version.workspace = true
 edition.workspace = true
 rust-version.workspace = true
 license.workspace = true
 publish = false
 
+# No game code: the lab is its scene, Decay and stylesheet in `assets/`, and
+# `sindri-player examples/camera` plays it. What lives here is the harness
+# its tests play it through.
 [lib]
-crate-type = ["cdylib", "rlib"]
+path = "src/lib.rs"
 
 [dependencies]
-log.workspace = true
-sindri-core = { path = "../../crates/sindri-core" }
-sindri-desktop = { path = "../../crates/sindri-desktop" }
-sindri-decay = { path = "../../crates/sindri-decay" }
-sindri-platform = { path = "../../crates/sindri-platform" }
-sindri-render = { path = "../../crates/sindri-render" }
-sindri-scene = { path = "../../crates/sindri-scene" }
-thiserror.workspace = true
-wgpu.workspace = true
-
-[target.'cfg(not(target_arch = "wasm32"))'.dependencies]
-env_logger = "0.11"
-
-[target.'cfg(target_arch = "wasm32")'.dependencies]
-console_error_panic_hook = "0.1"
-console_log = "1"
-wasm-bindgen.workspace = true
+sindri-runtime = { path = "../../crates/sindri-runtime" }
 
 [dev-dependencies]
 serde_json.workspace = true
+sindri-core = { path = "../../crates/sindri-core" }
+sindri-platform = { path = "../../crates/sindri-platform", default-features = false }
+sindri-scene = { path = "../../crates/sindri-scene" }
 
 [lints]
 workspace = true

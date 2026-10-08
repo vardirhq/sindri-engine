@@ -56,19 +56,6 @@ impl Run {
         });
     }
 
-    /// Where the middle of a screen element was laid out, in pixels from the
-    /// top left, for a finger to press it.
-    #[must_use]
-    pub fn on_screen(&self, entity: EntityId) -> Option<[f32; 2]> {
-        let rect = self.0.session.screen_ui().rect(entity)?;
-        let [width, height] = self.0.size;
-        let half_height = height / 2.0;
-        Some([
-            width / 2.0 + rect.center[0] * half_height,
-            half_height - rect.center[1] * half_height,
-        ])
-    }
-
     /// Where an entity is relative to its parent, in the plane.
     #[must_use]
     pub fn local(&self, entity: EntityId) -> [f32; 2] {

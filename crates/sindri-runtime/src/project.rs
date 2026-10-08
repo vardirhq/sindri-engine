@@ -302,6 +302,19 @@ impl ProjectRun {
             .collect()
     }
 
+    /// Where the middle of a screen element was laid out at the last step,
+    /// in pixels from the top left, for a pointer or finger to press it.
+    #[must_use]
+    pub fn on_screen(&self, entity: EntityId) -> Option<[f32; 2]> {
+        let rect = self.session.screen_ui().rect(entity)?;
+        let [width, height] = self.size;
+        let half_height = height / 2.0;
+        Some([
+            width / 2.0 + rect.center[0] * half_height,
+            half_height - rect.center[1] * half_height,
+        ])
+    }
+
     /// What a script left on the shared board.
     #[must_use]
     pub fn board(&self, name: &str) -> f32 {
