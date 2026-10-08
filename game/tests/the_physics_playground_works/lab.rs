@@ -26,10 +26,7 @@ fn the_probe_casts_through_a_mask_and_counts_an_area() {
     let down = [crate_top[0], -14.5];
 
     let said = probe(&mut playground, from, down);
-    assert!(
-        said.starts_with("RAY / EVERYTHING / a body at"),
-        "{said}"
-    );
+    assert!(said.starts_with("RAY / EVERYTHING / a body at"), "{said}");
     assert!(said.contains("normal (0.00, 1.00)"), "{said}");
 
     // Solids only: the ray goes through the crates to the floor.
