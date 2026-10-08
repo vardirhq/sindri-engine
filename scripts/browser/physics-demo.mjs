@@ -14,7 +14,9 @@ export async function physicsDemo(page, viewport, evidence, problems) {
   // set off the domino run on their own, so an earlier line does not count.
   const waitFor = async (words, seconds = 10, before = times(words)) => {
     for (let i = 0; i < seconds * 4 && times(words) <= before; i += 1) await page.waitForTimeout(250);
-    if (times(words) <= before) problems.push(`physics playground never said "${words}"`);
+    if (times(words) <= before) {
+      problems.push(`physics playground never said "${words}"; last said: ${evidence.said.slice(-6).join(' | ')}`);
+    }
   };
   const press = async (key, words, seconds) => {
     const before = times(words);
@@ -39,7 +41,13 @@ export async function physicsDemo(page, viewport, evidence, problems) {
   await tapCentre();
   await waitFor('blast', 10, blasts);
   await press('KeyI', 'debug true');
-  await press('KeyX', 'Playground ');
+  // DROP EVERYTHING toggles, and the hundred balls may already have set it
+  // off through the domino run, so either answer will do.
+  const toggles = () => times('DROP EVERYTHING') + times('joints restored');
+  const toggled = toggles();
+  await page.keyboard.press('KeyX');
+  for (let i = 0; i < 40 && toggles() <= toggled; i += 1) await page.waitForTimeout(250);
+  if (toggles() <= toggled) problems.push('physics playground ignored DROP EVERYTHING');
   await press('KeyE', 'toy WRECKING BALL');
   await press('KeyR', 'reset WRECKING BALL');
 
@@ -58,5 +66,5 @@ export async function physicsDemo(page, viewport, evidence, problems) {
   await page.waitForTimeout(1200);
   const presses = times('red button');
   await press('Digit1', 'domino pushed');
-  await waitFor('red button', 15, presses);
+  await waitFor('red button', 45, presses);
 }

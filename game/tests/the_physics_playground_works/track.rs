@@ -2,7 +2,7 @@
 
 use sindri_platform::Key;
 
-use crate::support::{Playground, said};
+use crate::support::{Playground, said, times};
 use crate::{hold, open, select};
 
 /// Steps until `done` holds, or panics naming what never happened.
@@ -107,4 +107,19 @@ fn the_domino_run_presses_the_red_button_and_the_button_drops_everything() {
         |_| said("Playground red button") && said("Playground DROP EVERYTHING"),
     );
     assert_eq!(playground.text("btn-drop-label"), "PUT IT BACK");
+}
+
+#[test]
+fn setting_the_domino_run_up_again_clears_the_balls_that_rained_on_it() {
+    let mut playground = open();
+    playground.key(Key::O);
+    playground.play(420);
+    select(&mut playground, "DOMINO RUN");
+    playground.key(Key::R);
+    playground.play(90);
+    let presses = times("Playground red button");
+    playground.key(Key::Digit1);
+    until(&mut playground, 900, "the run reaching the button", |_| {
+        times("Playground red button") > presses
+    });
 }

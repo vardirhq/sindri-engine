@@ -361,10 +361,31 @@ script Director {
             Game.gravity = 0.0;
             Physics.set_gravity(gravity_pull(0.0));
             if Game.chaos { drop_everything(); }
+        } else {
+            clear_around(toy_view(Game.toy));
         }
         ResetToy.emit(Game.toy);
         refresh_labels();
         print("Playground reset " + toy_name(Game.toy));
+    }
+
+    // Takes away what was spawned in a contraption's view, so a reset puts it
+    // back clear of the balls that rained into it.
+    fn clear_around(view: Vec3) {
+        let half = Vec2(view.z * 0.9, view.z * 0.5);
+        var kept: List<Entity> = [];
+        for thing in this.spawned {
+            if World.exists(thing) {
+                let at = thing.transform.world_position;
+                if abs(at.x - view.x) < half.x && abs(at.y - view.y) < half.y {
+                    World.despawn(thing);
+                } else {
+                    kept.push(thing);
+                }
+            }
+        }
+        this.spawned = kept;
+        Game.spawned = kept.length;
     }
 
     fn clean_up() {

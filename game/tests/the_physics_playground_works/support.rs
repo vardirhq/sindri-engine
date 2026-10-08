@@ -77,6 +77,17 @@ pub fn said(words: &str) -> bool {
     LINES.with(|lines| lines.borrow().iter().any(|(_, line)| line.contains(words)))
 }
 
+/// How many prints on this thread's playground so far contained `words`.
+pub fn times(words: &str) -> usize {
+    LINES.with(|lines| {
+        lines
+            .borrow()
+            .iter()
+            .filter(|(_, line)| line.contains(words))
+            .count()
+    })
+}
+
 pub struct Playground {
     pub session: Session,
     pub world: World,
