@@ -30,7 +30,10 @@ fn crates_rest_on_voxels_fall_into_dug_holes_and_the_room_waits() {
     playground.key(Key::R);
     playground.play(60);
     let home = playground.at("q-crate-1");
-    assert!((home[1] - resting[1]).abs() < 0.3, "{resting:?} -> {home:?}");
+    assert!(
+        (home[1] - resting[1]).abs() < 0.3,
+        "{resting:?} -> {home:?}"
+    );
 
     // Back to the room, which was only switched off.
     let before = times("Playground quarry back to the room");
