@@ -2,6 +2,7 @@
 //! every contraption, observed through what a person would see move.
 
 mod lab;
+mod quarry;
 mod support;
 mod track;
 

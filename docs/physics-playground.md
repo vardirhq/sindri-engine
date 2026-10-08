@@ -73,9 +73,15 @@ surface normal; P cycles its query and L (or the MASK button) its layers.
 
 ## The 3D annex
 
-A second scene, the Voxel Quarry, carries the 3D foundation: a voxel island
-with a voxel collider, crates and barrels dropped onto it, holes dug under them,
-and a 3D ray that reports what it hits.
+A second scene, the Voxel Quarry, carries the 3D foundation. K or the 3D
+QUARRY button goes there with `Scene.go`, and back; the room waits, switched
+off, as it was. The floor is a `sindri.voxel_world` with stepped stone walls
+and a voxel collider. Crates are 3D rigid bodies resting on it. Clicking the
+ground digs out the block under the pointer; DIG UNDER finds the ground under
+every crate with a 3D ray and opens a pit there, so each drops into its own
+hole; DROP CRATES rains more in; RESET fills every hole and puts the crates
+back. A laser sweeps across firing a 3D ray straight down and reads out the
+block or crate it hits and how far.
 
 ## Known public-surface gaps found here
 
@@ -84,6 +90,15 @@ and a 3D ray that reports what it hits.
   authored world settings, and a change wakes every dynamic body.
 - A path through an entity held in a struct field (`hit.entity.transform`)
   passed the checker and failed at runtime. Fixed in the Decay lowering.
+- A switched-off scene's environment still counted, so a project whose two
+  scenes each had one failed on `Scene.go`. Fixed: environments, like every
+  other component, take part only while active.
+- `project-capture` played only a project's main scene. Fixed: it loads every
+  scene `sindri.toml` lists, as the export does.
+- The layered voxel generator makes an endless plain, solid all the way down,
+  so the quarry is a floor with walls raised by edits rather than an island.
+  The game hosts do not bind the engine's built-in blocks, so the quarry ships
+  its own block set and textures.
 - Decay cannot change a collider's material at runtime, so material comparisons
   use separate authored bodies.
 - There is no simulation time scale, and no in-game debug drawing of colliders:
@@ -100,6 +115,6 @@ and a 3D ray that reports what it hits.
 - [x] Material lab, seesaw and trampoline
 - [x] Test track robot, dominoes and red button
 - [x] Probe tool and debug overlay
-- [ ] Voxel Quarry 3D annex
+- [x] Voxel Quarry 3D annex
 - [ ] Session regressions, browser smoke on desktop and phone, editor Play
 - [ ] Documentation: README, parity, capabilities, changelog, pre-alpha exit

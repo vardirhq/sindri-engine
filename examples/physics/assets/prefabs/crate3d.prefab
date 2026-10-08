@@ -1,0 +1,103 @@
+{
+ "format_version": 1,
+ "metadata": {
+  "name": "Crate 3D"
+ },
+ "entities": [
+  {
+   "id": "crate3d",
+   "name": "Crate 3D",
+   "transform_3d": {
+    "position": [
+     0,
+     0,
+     0
+    ],
+    "rotation": [
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     1.0,
+     1.0,
+     1.0
+    ]
+   },
+   "components": {
+    "sindri.mesh": {
+     "layer": 0,
+     "primitive": "cube",
+     "texture": "textures/crate.png"
+    },
+    "sindri.physics3d.rigid_body": {
+     "kind": "dynamic",
+     "position": [
+      0,
+      0,
+      0
+     ],
+     "rotation": [
+      0,
+      0,
+      0,
+      1
+     ],
+     "linear_velocity": [
+      0,
+      0,
+      0
+     ],
+     "angular_velocity": [
+      0,
+      0,
+      0
+     ],
+     "gravity_scale": 1.0,
+     "linear_damping": 0.05,
+     "angular_damping": 0.1,
+     "lock_rotation": false
+    },
+    "sindri.physics3d.collider": {
+     "pieces": [
+      {
+       "shape": {
+        "shape": "box",
+        "half_extents": [
+         0.5,
+         0.5,
+         0.5
+        ]
+       },
+       "offset": [
+        0,
+        0,
+        0
+       ],
+       "rotation": [
+        0,
+        0,
+        0,
+        1
+       ],
+       "sensor": false,
+       "layers": {
+        "memberships": 4294967295,
+        "filter": 4294967295
+       },
+       "friction": 0.7,
+       "restitution": 0.1
+      }
+     ]
+    },
+    "sindri.tags": {
+     "tags": [
+      "crate",
+      "dropped"
+     ]
+    }
+   }
+  }
+ ]
+}

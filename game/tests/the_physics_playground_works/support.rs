@@ -12,11 +12,12 @@ use std::{
 
 use sindri_causeway::{Session, extractor};
 use sindri_core::{
-    EntityId, LoadedScenes, PrefabDocument, ProfileDocument, SceneDocument, SceneEntityId, World,
+    EntityId, LoadedScenes, PrefabDocument, ProfileDocument, SceneDocument, SceneEntityId,
+    TileSetDocument, World,
 };
 use sindri_decay::{PrefabSources, ProfileSources, ScriptSources, Scripts};
 use sindri_platform::{InputEvent, InputState, Key, MouseButton};
-use sindri_scene::UiTextSizes;
+use sindri_scene::{TileSetBindings, UiTextSizes};
 
 pub const STEP: f32 = 1.0 / 60.0;
 
@@ -120,7 +121,8 @@ impl Playground {
             );
         }
         let mut world = World::default();
-        LoadedScenes::new()
+        let mut loaded = LoadedScenes::new();
+        loaded
             .enter_keeping_identities_with(&mut world, "playground.scene", &document, &placed)
             .expect("the scene loads");
         let mut sources = ScriptSources::new();
@@ -132,12 +134,32 @@ impl Playground {
         assert!(failures.is_empty(), "{failures:?}");
         let weave: BTreeMap<String, String> = files("weave", "ui");
         let sheet = weave::compose("ui/playground.weave", &weave).expect("the stylesheet composes");
+        // The 3D annex: its own scene, and the block set its voxels use.
+        let quarry = SceneDocument::from_json(
+            &std::fs::read_to_string(project().join("quarry.scene")).expect("the quarry reads"),
+        )
+        .expect("the quarry parses");
+        let mut tile_sets = TileSetBindings::new();
+        tile_sets
+            .bind(
+                "quarry.tileset",
+                TileSetDocument::from_json(
+                    &std::fs::read_to_string(project().join("quarry.tileset"))
+                        .expect("the block set reads"),
+                )
+                .expect("the block set parses"),
+            )
+            .expect("the block set binds");
         let session = Session::with_sources(scene.components().clone(), sources)
             .with_prefabs(prefabs)
             .with_profiles(profiles)
+            .with_tile_sets(tile_sets)
             .with_scenes(
-                vec![("playground.scene".to_owned(), document)],
-                LoadedScenes::new(),
+                vec![
+                    ("playground.scene".to_owned(), document),
+                    ("quarry.scene".to_owned(), quarry),
+                ],
+                loaded,
             )
             .with_styles(vec![sheet]);
         let mut playground = Self {

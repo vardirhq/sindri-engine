@@ -1,5 +1,7 @@
 # Changelog
 
+- Fix switching scenes when both have an environment: a switched-off scene's `sindri.environment` counted as a second one and stopped the frame. `project-capture` now loads every scene a project lists, so captures can follow `Scene.go`, and can drag the pointer with `move`, `down` and `up` steps.
+
 - Fix reaching an entity held in a struct field: `hit.entity.transform.position` passed the checker but failed at runtime with NotAReference. The field is now read as a value and the path walks on from the entity it holds, for reads and writes alike.
 
 - Add `Physics.gravity()` and `Physics.set_gravity(v)` to Decay. They read and change the first active `sindri.physics2d.world`, so the change shows in the inspector and survives a solver rebuild. Changing gravity now wakes resting bodies in 2D and 3D, so a sleeping crate falls up when gravity turns over, and collision layer names follow the active world settings as gravity already did.

@@ -53,6 +53,7 @@ def build(scene) -> None:
     button(scene, "btn-gravity", "globals", "GRAVITY: EARTH", [], 0.4)
     button(scene, "btn-debug", "globals", "DEBUG OFF", [], 0.3)
     button(scene, "btn-reset", "globals", "RESET", [], 0.22)
+    button(scene, "btn-quarry", "globals", "3D QUARRY", ["loud"], 0.3)
 
     container(scene, "hud-bottom", "hud", ["bottom"], "column", "end", "center", 3.3, 0.4)
     container(scene, "toy-row", "hud-bottom", ["toy-row"], "row", "center", "center",

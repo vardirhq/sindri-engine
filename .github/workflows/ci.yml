@@ -669,11 +669,11 @@ jobs:
             SINDRI_VIEWPORT_WIDTH=390 SINDRI_VIEWPORT_HEIGHT=844 \
             node scripts/browser/smoke.mjs target/dist/spatial-root target/render-artifacts/browser-spatial-phone.png
           SINDRI_EXPECT_ASSETS=1 SINDRI_PHYSICS_DEMO=1 \
-            SINDRI_EXPECT_ASSET_KINDS=scene,script,font,prefab,profile,texture \
+            SINDRI_EXPECT_ASSET_KINDS=scene,script,font,prefab,profile,texture,tileset \
             SINDRI_BASE_PATH=/sindri-engine/examples/physics/ \
             node scripts/browser/smoke.mjs target/dist/physics target/render-artifacts/browser-physics.png
           SINDRI_EXPECT_ASSETS=1 SINDRI_PHYSICS_DEMO=1 \
-            SINDRI_EXPECT_ASSET_KINDS=scene,script,font,prefab,profile,texture \
+            SINDRI_EXPECT_ASSET_KINDS=scene,script,font,prefab,profile,texture,tileset \
             SINDRI_BASE_PATH=/examples/physics/ \
             SINDRI_VIEWPORT_WIDTH=390 SINDRI_VIEWPORT_HEIGHT=844 \
             node scripts/browser/smoke.mjs target/dist/physics-root target/render-artifacts/browser-physics-phone.png

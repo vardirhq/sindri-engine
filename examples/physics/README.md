@@ -27,6 +27,9 @@ again rather than editing the generated files.
   trampoline's springs.
 - **Test track**: a robot that climbs steps, rides a lift it calls by standing
   on it, drops through one-way planks, shoves crates and kicks them.
+- **Voxel Quarry** (K, or 3D QUARRY): the 3D annex, a scene of its own. Crates
+  on a voxel floor; click the ground to dig, DIG UNDER to drop every crate into
+  a pit of its own, DROP CRATES for more, and a laser firing a 3D ray down.
 - **Domino run**: fourteen dominoes, and at the end a red button that sets off
   DROP EVERYTHING. A hundred balls can knock them over too.
 
@@ -44,6 +47,7 @@ again rather than editing the generated files.
 | V | GRAVITY | Earth, moon, zero-g, upside down, sideways. |
 | I | DEBUG | Outlines by state, contacts and normals, velocities, and every joint from anchor to anchor. |
 | R | RESET | Resets the selected contraption, or the whole room. |
+| K | 3D QUARRY | Goes to the Voxel Quarry, and back. |
 
 The probe is dragged: press where a query starts and let go where it points.
 It casts a ray, a circle or a box, or counts what overlaps a circle, and the

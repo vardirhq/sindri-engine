@@ -30,7 +30,7 @@ sindri.ui.text { color: var(--ink); }
 .mask .button-label { font-size: 11px; color: #7df9ff; }
 .title { width: 360px; height: 28px; font-size: 22px; letter-spacing: 4px; text-align: start; color: var(--accent); }
 .stats { width: 420px; height: 16px; font-size: 11px; letter-spacing: 1px; text-align: start; color: var(--muted); }
-.globals { width: 760px; height: 40px; direction: row; gap: 8px; justify-content: end; align-items: center; }
+.globals { width: 900px; height: 40px; direction: row; gap: 8px; justify-content: end; align-items: center; }
 
 .bottom { width: 100%; height: 118px; direction: column; gap: 8px; justify-content: end; align-items: center; }
 .toy-row { width: 100%; height: 36px; direction: row; gap: 10px; justify-content: center; align-items: center; }
@@ -63,6 +63,7 @@ sindri.ui.text { color: var(--ink); }
 #btn-gravity { width: 180px; }
 #btn-debug { width: 120px; }
 #btn-reset { width: 90px; }
+#btn-quarry { width: 120px; }
 
 .tool { width: 122px; height: 40px; direction: column; gap: 3px; }
 .tool-mark { width: 60%; height: 3px; background: var(--accent); border-radius: 2px; }
@@ -89,6 +90,7 @@ sindri.ui.text { color: var(--ink); }
     #btn-gravity { width: 92px; }
     #btn-debug { width: 58px; }
     #btn-reset { width: 46px; }
+    #btn-quarry { width: 62px; }
     .bottom { height: 150px; gap: 6px; }
     .toy-label { width: 220px; font-size: 14px; letter-spacing: 1px; }
     .dock { height: 84px; direction: column; gap: 6px; justify-content: end; }

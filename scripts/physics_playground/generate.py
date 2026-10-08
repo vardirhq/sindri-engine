@@ -23,6 +23,7 @@ sys.path.insert(0, str(Path(__file__).parent))
 
 import hud  # noqa: E402
 import lab  # noqa: E402
+import quarry  # noqa: E402
 import toys  # noqa: E402
 import track  # noqa: E402
 from common import (  # noqa: E402
@@ -233,6 +234,11 @@ def main() -> None:
         write_json(ROOT / "materials" / name, value)
     (ROOT / "textures").mkdir(parents=True, exist_ok=True)
     (ROOT / "textures/spark.png").write_bytes(spark_png())
+    write_json(ROOT / "quarry.scene", quarry.build())
+    write_json(ROOT / "quarry.tileset", quarry.TILESET)
+    write_json(ROOT / "prefabs/crate3d.prefab", quarry.crate_prefab())
+    for name, data in quarry.textures().items():
+        (ROOT / "textures" / name).write_bytes(data)
     print(f"wrote {len(scene.entities)} entities")
 
 

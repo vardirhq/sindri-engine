@@ -17561,6 +17561,101 @@
    }
   },
   {
+   "id": "btn-quarry",
+   "name": "btn-quarry",
+   "parent": "globals",
+   "transform_3d": {
+    "position": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "rotation": [
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     0.3,
+     0.09,
+     1.0
+    ]
+   },
+   "components": {
+    "weave.style": {
+     "classes": [
+      "button",
+      "loud"
+     ]
+    },
+    "sindri.ui.shape": {
+     "kind": "rect",
+     "fill": [
+      0.00605,
+      0.01681,
+      0.03689,
+      1.0
+     ],
+     "anchor": "center",
+     "layer": 31
+    },
+    "sindri.ui.button": {
+     "label": "3D QUARRY",
+     "autofocus": false,
+     "disabled": false
+    },
+    "sindri.ui.layout": {
+     "direction": "row",
+     "spacing": 0.02,
+     "justify": "center",
+     "align": "center"
+    }
+   }
+  },
+  {
+   "id": "btn-quarry-label",
+   "name": "btn-quarry-label",
+   "parent": "btn-quarry",
+   "transform_3d": {
+    "position": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "rotation": [
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     0.3,
+     0.05,
+     1.0
+    ]
+   },
+   "components": {
+    "weave.style": {
+     "classes": [
+      "button-label"
+     ]
+    },
+    "sindri.ui.text": {
+     "text": "3D QUARRY",
+     "font": "fonts/ChakraPetch-Regular.ttf",
+     "font_size": 0.0361,
+     "bounds": [
+      0.3,
+      0.05
+     ],
+     "anchor": "center",
+     "layer": 40,
+     "line_align": "center"
+    }
+   }
+  },
+  {
    "id": "hud-bottom",
    "name": "hud-bottom",
    "parent": "hud",

@@ -258,6 +258,7 @@ script Director {
         if Input.just_pressed("V") { cycle_gravity(); }
         if Input.just_pressed("I") { toggle_debug(); }
         if Input.just_pressed("R") { reset(); }
+        if Input.just_pressed("K") { to_quarry(); }
         if Input.just_pressed("Digit1") { act(1.0); }
         if Input.just_pressed("Digit2") { act(2.0); }
         if Input.just_pressed("Digit3") { act(3.0); }
@@ -270,6 +271,7 @@ script Director {
         if Ui.is_pressed(World.find("btn-gravity")) { cycle_gravity(); }
         if Ui.is_pressed(World.find("btn-debug")) { toggle_debug(); }
         if Ui.is_pressed(World.find("btn-reset")) { reset(); }
+        if Ui.is_pressed(World.find("btn-quarry")) { to_quarry(); }
         if Ui.is_pressed(World.find("tool-grab")) { choose_tool(0.0); }
         if Ui.is_pressed(World.find("tool-blast")) { choose_tool(1.0); }
         if Ui.is_pressed(World.find("tool-spawn")) {
@@ -327,6 +329,13 @@ script Director {
         Physics.set_gravity(gravity_pull(Game.gravity));
         refresh_labels();
         print("Playground gravity " + gravity_name(Game.gravity));
+    }
+
+    // The 3D annex is its own scene; this one waits, switched off, as it was.
+    fn to_quarry() {
+        let_go();
+        print("Playground off to the quarry");
+        Scene.go("quarry.scene");
     }
 
     fn toggle_debug() {

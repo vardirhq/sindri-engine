@@ -65,8 +65,9 @@ mod capture {
         Ok(String::from_utf8(bytes)?)
     }
 
-    /// The project's main scene and its entry stylesheets, from `sindri.toml`.
-    fn manifest(project: &Path) -> Result<(String, Vec<String>), Box<dyn Error>> {
+    /// The project's main scene, its other scenes and its entry stylesheets,
+    /// from `sindri.toml`.
+    fn manifest(project: &Path) -> Result<(String, Vec<String>, Vec<String>), Box<dyn Error>> {
         let toml = fs::read_to_string(project.join("sindri.toml"))?;
         let quoted = |line: &str| -> Vec<String> {
             line.split('"')
@@ -95,7 +96,18 @@ mod capture {
                     .is_some_and(|extension| extension.eq_ignore_ascii_case("weave"))
             })
             .collect();
-        Ok((scene, sheets))
+        // Other scenes `Scene.go` can reach, kept as their paths under the
+        // project; the list may also run over several lines.
+        let others = toml
+            .lines()
+            .position(|line| line.trim_start().starts_with("scenes"))
+            .map(|start| {
+                let rest = toml.lines().skip(start).collect::<Vec<_>>().join("\n");
+                let list = rest.split_once(']').map_or(rest.as_str(), |(list, _)| list);
+                quoted(list)
+            })
+            .unwrap_or_default();
+        Ok((scene, sheets, others))
     }
 
     /// A pixel over the middle of `name`, as the last step laid it out.
@@ -230,7 +242,7 @@ mod capture {
 
     fn open(project: &Path, size: [f32; 2]) -> Result<Opened, Box<dyn Error>> {
         let assets = project.join("assets");
-        let (scene_id, sheet_ids) = manifest(project)?;
+        let (scene_id, sheet_ids, other_scenes) = manifest(project)?;
         let document = SceneDocument::from_json(&fs::read_to_string(assets.join(&scene_id))?)?;
 
         let mut sources = ScriptSources::new();
@@ -261,12 +273,24 @@ mod capture {
             sheets.push(weave::compose(&id, &weave_sources)?);
         }
 
+        // Every scene goes to the session under its file name, which is the
+        // name `Scene.go` asks for, as the export names them.
+        let mut scenes = vec![(scene_id, document)];
+        for path in other_scenes {
+            let name = Path::new(&path)
+                .file_name()
+                .and_then(|name| name.to_str())
+                .ok_or("a scene path without a file name")?
+                .to_owned();
+            let other = SceneDocument::from_json(&fs::read_to_string(project.join(&path))?)?;
+            scenes.push((name, other));
+        }
         let scene = extractor()?;
         let mut session = Session::with_sources(scene.components().clone(), sources)
             .with_prefabs(prefabs)
             .with_profiles(profiles)
             .with_tile_sets(tile_sets.clone())
-            .with_scenes(vec![(scene_id, document)], loaded)
+            .with_scenes(scenes, loaded)
             .with_styles(sheets);
         let view = weave::Viewport {
             width: size[0],

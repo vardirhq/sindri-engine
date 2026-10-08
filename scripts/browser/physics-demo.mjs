@@ -67,4 +67,12 @@ export async function physicsDemo(page, viewport, evidence, problems) {
   const presses = times('red button');
   await press('Digit1', 'domino pushed');
   await waitFor('red button', 45, presses);
+
+  // The 3D annex: a voxel quarry in a scene of its own, and back again.
+  await press('KeyK', 'off to the quarry');
+  await page.waitForTimeout(1500);
+  await press('Digit2', 'quarry dug under');
+  await press('Digit1', 'quarry crates dropped');
+  await page.waitForTimeout(1500);
+  await press('KeyK', 'quarry back to the room');
 }
