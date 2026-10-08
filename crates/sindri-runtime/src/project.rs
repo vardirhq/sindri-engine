@@ -14,10 +14,10 @@ use std::time::Duration;
 
 use sindri_core::{
     EntityId, LoadedScenes, PREFAB_SUFFIX, PROFILE_SUFFIX, PrefabDocument, ProfileDocument,
-    SceneDocument, SceneEntityId, TileSetDocument, World,
+    SceneDocument, SceneEntityId, TagsComponent, TileSetDocument, World,
 };
 use sindri_decay::{PrefabSources, ProfileSources, ScriptComponent, ScriptSources};
-use sindri_platform::{InputEvent, InputState, Key};
+use sindri_platform::{GamepadAxis, GamepadButton, InputEvent, InputState, Key, PadId};
 use sindri_scene::{SceneExtractor, TileSetBindings};
 
 use crate::{Session, StepReport};
@@ -249,6 +249,54 @@ impl ProjectRun {
         } else {
             InputEvent::KeyReleased(key)
         });
+    }
+
+    /// Plugs in a pad, as the platform would report it.
+    pub fn connect(&mut self, pad: u32) {
+        self.input.apply(InputEvent::GamepadConnected(PadId(pad)));
+    }
+
+    /// Unplugs a pad.
+    pub fn disconnect(&mut self, pad: u32) {
+        self.input
+            .apply(InputEvent::GamepadDisconnected(PadId(pad)));
+    }
+
+    /// Presses or lets go of a pad's button.
+    pub fn button(&mut self, pad: u32, button: GamepadButton, down: bool) {
+        let pad = PadId(pad);
+        self.input.apply(if down {
+            InputEvent::GamepadPressed { pad, button }
+        } else {
+            InputEvent::GamepadReleased { pad, button }
+        });
+    }
+
+    /// Moves a pad's stick or trigger to `value`.
+    pub fn axis(&mut self, pad: u32, axis: GamepadAxis, value: f32) {
+        self.input.apply(InputEvent::GamepadAxisMoved {
+            pad: PadId(pad),
+            axis,
+            value,
+        });
+    }
+
+    /// Every active entity carrying `tag`, in the world's order.
+    #[must_use]
+    pub fn tagged(&self, tag: &str) -> Vec<EntityId> {
+        let components = self.session.components();
+        self.world
+            .entities()
+            .filter(|(entity, _)| {
+                self.world.is_active(*entity)
+                    && components
+                        .get::<TagsComponent>(&self.world, *entity)
+                        .ok()
+                        .flatten()
+                        .is_some_and(|tags| tags.has(tag))
+            })
+            .map(|(entity, _)| entity)
+            .collect()
     }
 
     /// What a script left on the shared board.
