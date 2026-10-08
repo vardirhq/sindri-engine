@@ -15,25 +15,33 @@ less, with smaller checkpoints preferred.
 
 ## Current checkpoint
 
-Draft PR #503. Slices 1 and 2 are checked. Slice 3 is in progress:
+Draft PR #503. Slices 1 and 2 are checked. Slice 3's work is done and waits
+only on CI's browser run to check it:
 
 - `sindri-runtime` holds the session (from Causeway), `ProjectRun` (open any
-  project directory and play it, with test conveniences: keys, pads, tags,
-  `on_screen`, board) and `StepReport` (prints, failures, problems, phase
-  times; `notes()` and `log()`).
-- Editor Play runs on the session (`editor/src/native/runtime/play.rs`).
+  project directory, on its main scene or another with `open_scene`, and
+  play it headless: keys, pads, tags, `on_screen`, board) and `StepReport`
+  (prints, failures, problems, phase times; `notes()` and `log()`).
+  `ProjectRun::step` presents after stepping — styles in place, lays the
+  screen out, undoes — because a styled session hit-tests clicks against the
+  last frame drawn.
+- Editor Play runs on the session; `play_session::start` assembles it from
+  what the editor loaded, outside the window.
 - `sindri-player` is the generic host: the browser module every export
-  ships (`sindri_player.js`) and `sindri-player <project>` natively. Saves are
-  keyed per project. `MaybeAudio` plays silently without a sound device.
-- Harnesses on `ProjectRun`: platformer, Flappy, Low Tide, Scorchball, the
-  Camera Lab (whose own app is gone).
+  ships (`sindri_player.js`) and `sindri-player <project>` natively.
+- Every game's harness is a `ProjectRun`: platformer, Flappy, Low Tide,
+  Scorchball, Orbital, the Camera Lab.
+- `editor/tests/play_matches_the_build.rs` is the parity proof for the
+  platformer, Scorchball, Low Tide and Orbital.
+- Voxel Lab keeps its own browser app on purpose: it is an engine lab like
+  Shapes Lab, whose Rust terrain and camera are the subject, not a scene and
+  Decay project. Slice 3 does not name it.
+- The browser smoke's intermittent "red button" failure was the Physics
+  Playground's domino run ending marginally on its button (main had it too);
+  fixed in the playground, with `game/tests/the_physics_playground_works/smoke.rs`.
 
-Left in slice 3: Orbital's harness (`games/orbital-baked/src/lib.rs`); Voxel
-Lab, which has its own browser app and renderer that Pages builds separately
-(`games/voxel-lab/src/browser.rs`); the parity test (the same scripted input
-ends in an identical world through the editor's Play session and through
-`ProjectRun`); real-browser checks of every export; and docs (`parity.md`,
-`capabilities.md`, the `docs/editor-update.md` slice 3 entry).
+Next: check slice 3 in `docs/editor-update.md` once CI's browser run is green
+on the head, then slice 4.
 
 Gate every push with fmt, warning-denied Clippy and the changed crates'
 tests, run unpiped so a failure stops the push. Debug info off keeps the
@@ -42,13 +50,8 @@ build inside the disk allowance (`CARGO_PROFILE_DEV_DEBUG=0`,
 
 ## Notes for later slices
 
-- `sindri-causeway` is the WebAssembly host every export ships
-  (`crates/sindri-export/src/page.rs`, `HOST_MODULE`), so its session is
-  effectively the engine's player already. Slice 3 moves it rather than
-  writing a new one: `game/src/session.rs`, `game/src/session/*` and
-  `game/src/styling.rs`.
-- Showcase harnesses that hand-assemble a loop today: `games/platformer`,
-  `games/scorchball`, `games/low-tide`, `games/flappy`, `games/orbital-baked`
-  and `examples/camera`, each in `src/lib.rs`.
-- `game/src/styling.rs` explains the in-place presentation the editor should
-  adopt in slice 4; `sindri_weave::Presenter` and its `Undo` are the API.
+- Slice 4's in-place presentation is already how a run's Game view draws
+  (`editor/src/native/viewport/mod.rs`, `session.style` then `record_drawn`
+  then undo); the editing views still resolve through `ProjectStyles`.
+- `scripts/frame-benchmark.py run <project> --profile editor` measures the
+  slice-4 target; the baselines are in `docs/editor-update.md`.
