@@ -5,7 +5,7 @@
     "demo.scene": {
       "kind": "scene",
       "bytes": 2959,
-      "hash": "sha256:9049f7e13b613b995d969ae70f8ebedc3b4b8cfd1f5e5f675d01b2aad9a23ef5"
+      "hash": "sha256:e0b7efe09e263e66aea5e44e730ea92ec8cb36f5363abefccf888da944cea499"
     },
     "textures/badge.png": {
       "kind": "texture",
