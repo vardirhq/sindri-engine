@@ -78,6 +78,7 @@ impl EditorApp {
         // job, once per frame.
         if !editing {
             self.game_view_rect = Some(rect);
+            self.last_game_view = Some(rect);
         }
         // Only the centre's viewport is the canvas: a Scene view someone
         // dragged into a corner is not what the other corners arrange
@@ -120,58 +121,11 @@ impl EditorApp {
         let interaction = self.interact_view(&context, &response, rect, tab);
         let editing = interaction.editing;
         let camera = interaction.camera;
-        let scale = context.pixels_per_point();
         // Worked out before the viewport is borrowed: the canvas and Weave
         // viewport are facts about the project's screen, not about the GPU
         // surface being drawn into.
         let canvas = self.canvas_for(editing);
-        let shown = self.shown_world(editing, rect, context.cumulative_frame_nr());
-        let source_world = shown.as_ref().unwrap_or(&self.world);
-        let viewport_size = (
-            physical_viewport_dimension(rect.width(), scale),
-            physical_viewport_dimension(rect.height(), scale),
-        );
-        let pictured = self.authoring_enabled();
-        let viewport = if editing {
-            &mut self.scene_viewport
-        } else {
-            &mut self.game_viewport
-        };
-        if super::animated::moves(source_world, self.textures.tile_sets()) {
-            context.request_repaint_after(super::animated::FRAME);
-        }
-        let failure = viewport
-            .render(
-                &mut self.renderers,
-                SceneSource {
-                    scene: &self.scene,
-                    world: source_world,
-                    animations: &self.animations,
-                    effects: &self.effects,
-                    textures: &self.textures,
-                    studio_lighting: editing && self.preferences.studio_lighting,
-                },
-                viewport_size,
-                camera,
-                // The Scene view puts the UI in the world, where panning and
-                // zooming reach it; the Game view is the screen, so there the
-                // overlay is the screen.
-                canvas,
-                &mut self.profiler,
-            )
-            .err();
-        super::console_view::record_extract_problems(
-            &self.scene,
-            &mut self.console,
-            &mut self.render_error,
-        );
-        // The Scenes panel's picture of this scene: the frame just drawn, while
-        // it is the scene being edited, never a run in progress that a stop is
-        // about to put back.
-        if failure.is_none() && pictured {
-            let (board, scene) = (&mut self.scene_board, self.file.path());
-            picture(board, &mut self.profiler, viewport, scene, tab);
-        }
+        let failure = self.draw_frame(&context, tab, rect, camera, canvas);
         // Two views can be live at once, and the first thing to go wrong is the
         // thing worth reading, so a later success does not erase it.
         if let Some(failure) = failure {
@@ -182,8 +136,13 @@ impl EditorApp {
                 self.render_error = Some(failure);
             }
         }
+        let texture = if editing {
+            self.scene_viewport.texture_id
+        } else {
+            self.game_viewport.texture_id
+        };
         ui.painter().image(
-            viewport.texture_id,
+            texture,
             rect,
             Rect::from_min_max(Pos2::ZERO, Pos2::new(1.0, 1.0)),
             Color32::WHITE,
@@ -211,7 +170,7 @@ impl EditorApp {
                 ui.painter()
                     .rect_filled(panel, 0.0, crate::ui::theme::color::WELL);
                 ui.painter().image(
-                    viewport.texture_id,
+                    texture,
                     rect,
                     Rect::from_min_max(Pos2::ZERO, Pos2::new(1.0, 1.0)),
                     Color32::WHITE,
@@ -221,6 +180,106 @@ impl EditorApp {
             paint_viewport_border(ui.painter(), rect, visible, self.problem());
         }
         context.request_repaint();
+    }
+
+    /// Draws the world a view shows into its target, and answers what went
+    /// wrong, if anything did.
+    ///
+    /// A run's Game view is drawn as a build draws it: the session lays the
+    /// pointer's states over the world in place, the frame is drawn, the
+    /// session is told what was drawn so the next step's clicks land where
+    /// things are shown, and the states come off again. No copy of the world.
+    fn draw_frame(
+        &mut self,
+        context: &egui::Context,
+        tab: WorkspaceTab,
+        rect: Rect,
+        camera: CameraView,
+        canvas: sindri_scene::UiCanvas,
+    ) -> Option<String> {
+        let editing = tab == WorkspaceTab::Scene;
+        let shown = self.shown_world(editing, rect, context.cumulative_frame_nr());
+        let styling =
+            (!editing && self.session.is_some()).then(|| self.presentation_viewport(false, rect));
+        let undo = styling.and_then(|viewport| self.style_run(viewport));
+        let source_world = shown.as_ref().unwrap_or(&self.world);
+        let scale = context.pixels_per_point();
+        let viewport_size = (
+            physical_viewport_dimension(rect.width(), scale),
+            physical_viewport_dimension(rect.height(), scale),
+        );
+        let pictured = self.authoring_enabled();
+        let viewport = if editing {
+            &mut self.scene_viewport
+        } else {
+            &mut self.game_viewport
+        };
+        if super::animated::moves(source_world, self.textures.tile_sets()) {
+            context.request_repaint_after(super::animated::FRAME);
+        }
+        let (animations, effects) = self
+            .session
+            .as_ref()
+            .map_or((&self.still.animations, &self.still.effects), |session| {
+                (session.animations(), session.effects())
+            });
+        let drawn = viewport.render(
+            &mut self.renderers,
+            SceneSource {
+                scene: &self.scene,
+                world: source_world,
+                animations,
+                effects,
+                textures: &self.textures,
+                studio_lighting: editing && self.preferences.studio_lighting,
+            },
+            viewport_size,
+            camera,
+            // The Scene view puts the UI in the world, where panning and
+            // zooming reach it; the Game view is the screen, so there the
+            // overlay is the screen.
+            canvas,
+            &mut self.profiler,
+        );
+        // The Scenes panel's picture of this scene: the frame just drawn, while
+        // it is the scene being edited, never a run in progress that a stop is
+        // about to put back.
+        if drawn.is_ok() && pictured {
+            let (board, scene) = (&mut self.scene_board, self.file.path());
+            picture(board, &mut self.profiler, viewport, scene, tab);
+        }
+        let failure = match (drawn, styling, self.session.as_mut()) {
+            (Ok(sizes), Some(viewport), Some(session)) => session
+                .record_drawn(&self.world, viewport, sizes)
+                .err()
+                .map(|error| error.to_string()),
+            (Ok(_), ..) => None,
+            (Err(failure), ..) => Some(failure),
+        };
+        if let Some(undo) = undo {
+            undo.undo(&mut self.world);
+        }
+        super::console_view::record_extract_problems(
+            &self.scene,
+            &mut self.console,
+            &mut self.render_error,
+        );
+        failure
+    }
+
+    /// Lays the pointer's states over a run's world for one draw, timed as
+    /// presentation; what to take off again once it is drawn.
+    fn style_run(&mut self, viewport: weave::Viewport) -> Option<sindri_weave::Undo> {
+        let presenting = Instant::now();
+        let styled = self.session.as_mut()?.style(&mut self.world, viewport);
+        self.profiler.add(Phase::Presentation, presenting.elapsed());
+        match styled {
+            Ok(undo) => undo,
+            Err(error) => {
+                self.console.fail(format!("Weave: {error}"), None);
+                None
+            }
+        }
     }
 
     fn interact_view(

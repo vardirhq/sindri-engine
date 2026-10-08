@@ -26,6 +26,7 @@ const fn phase_color(phase: Phase) -> Color32 {
         Phase::Scripts => color::FORGE,
         Phase::Animation => color::AXIS_Y,
         Phase::Cameras => color::AXIS_X_DIM,
+        Phase::Placement => color::EMBER_FAINT,
         Phase::Presentation => color::AXIS_X,
         Phase::Extraction => color::TEXT_MUTED,
         Phase::Encoding => color::TEXT_FAINT,

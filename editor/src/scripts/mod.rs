@@ -25,37 +25,14 @@ use sindri_core::{
     AssetId, AssetStatus, ComponentSchemaRegistry, PrefabDocument, ProfileDocument, World,
 };
 use sindri_decay::{
-    Physics2d, PrefabSources, ProfileSources, ScriptExport, ScriptFailure, ScriptFrame,
-    ScriptReport, ScriptSources, Scripts, referenced_sources,
+    PrefabSources, ProfileSources, ScriptExport, ScriptFailure, ScriptSources, Scripts,
+    referenced_sources,
 };
-use sindri_platform::InputState;
 
 /// What one editor frame gives the scripts in it.
 ///
 /// Bundled for the same reason the engine's `ScriptFrame` is: every capability
 /// Play grows adds a parameter, and a list of eight is one nobody reads.
-pub struct EditorFrame<'a> {
-    pub input: &'a InputState,
-    /// The physics Play is stepping, so a script can drive a body and be told
-    /// what it touched. `None` while the scene is at rest, which is when
-    /// nothing is stepping and a `Physics.*` call should say so rather than
-    /// answer about a simulation nobody is running.
-    pub physics: Option<Physics2d<'a>>,
-    pub physics3d: Option<sindri_decay::Physics3d<'a>>,
-    /// Scene-owned movement input and results for Play.
-    pub characters: Option<sindri_decay::Characters2d<'a>>,
-    pub screen_ui: &'a sindri_scene::ScreenUi,
-    pub random: &'a mut sindri_core::Rng,
-    pub saves: &'a mut sindri_core::SaveStore,
-    pub effects: &'a mut sindri_scene::Effects2d,
-    /// Where each animated sprite has got to, so a script can ask whether a
-    /// clip has finished and play one again from its start.
-    pub animations: &'a mut sindri_scene::SpriteAnimations,
-    /// Where each playing sequence has got to, so a script can wait on a cue.
-    pub sequences: &'a mut sindri_scene::Sequences,
-    pub delta_seconds: f32,
-}
-
 /// One worker, because scripts, prefabs and profiles are small text files; and
 /// no limit on how many wait, because opening a project asks for every one of
 /// them at once. There used to be a limit of sixteen, which Orbital Baked's 59
@@ -373,57 +350,14 @@ impl SceneScripts {
         )
     }
 
-    /// What scripts asked to hear since this was last asked, oldest first.
-    pub fn take_audio_commands(&mut self) -> Vec<sindri_decay::AudioCommand> {
-        self.scripts.take_audio_commands()
+    /// The sources loaded so far, for a run to copy.
+    pub const fn sources(&self) -> &ScriptSources {
+        &self.sources
     }
 
-    /// Moves every script in the world on by one frame.
-    pub fn advance(
-        &mut self,
-        world: &mut World,
-        components: &ComponentSchemaRegistry,
-        frame: EditorFrame<'_>,
-    ) -> ScriptReport {
-        // Nothing starts against half a project; see `loading`.
-        if self.loading() {
-            return ScriptReport::default();
-        }
-        let EditorFrame {
-            input,
-            physics,
-            physics3d,
-            characters,
-            screen_ui,
-            random,
-            saves,
-            effects,
-            animations,
-            sequences,
-            delta_seconds,
-        } = frame;
-        let mut frame = ScriptFrame::new(&self.sources, input, delta_seconds)
-            .with_prefabs(&self.prefabs)
-            .with_profiles(&self.profiles)
-            .with_screen_ui(screen_ui)
-            .with_random(random)
-            .with_saves(saves)
-            .with_effects(effects)
-            .with_animations(animations)
-            .with_sequences(sequences);
-        if let Some(physics) = physics {
-            frame = frame.with_physics(physics);
-        }
-        if let Some(physics) = physics3d {
-            frame = frame.with_physics3d(physics);
-        }
-        if let Some(characters) = characters {
-            frame = frame.with_characters(characters);
-        }
-        // Always timed: the Profiler is the editor's, and a tick's timing is
-        // two clock reads beside a script's own work.
-        self.scripts.set_measuring(true);
-        self.scripts.advance(world, components, frame)
+    /// The profiles loaded so far, for a run to copy.
+    pub const fn profiles(&self) -> &ProfileSources {
+        &self.profiles
     }
 
     /// What one script declares it wants authored, for the inspector to draw.

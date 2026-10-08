@@ -113,7 +113,12 @@ impl EditorApp {
             }
             Stage::Playing { editing } => {
                 let playing = self.profiler.take_captured();
-                write_report(&run, context, &editing, &playing);
+                let errors: Vec<String> = self
+                    .console
+                    .at_least(crate::console::Level::Error)
+                    .map(|entry| format!("{} (x{})", entry.message, entry.count))
+                    .collect();
+                write_report(&run, context, &editing, &playing, &errors);
                 self.toggle_play_mode();
                 Stage::Closing
             }
@@ -127,9 +132,15 @@ impl EditorApp {
 }
 
 /// Writes what was recorded, and says where, or why it could not.
-fn write_report(run: &BenchmarkRun, context: &egui::Context, editing: &[Frame], playing: &[Frame]) {
+fn write_report(
+    run: &BenchmarkRun,
+    context: &egui::Context,
+    editing: &[Frame],
+    playing: &[Frame],
+    errors: &[String],
+) {
     let window = context.content_rect().size();
-    let report = report_json(&run.opened, [window.x, window.y], editing, playing);
+    let report = report_json(&run.opened, [window.x, window.y], editing, playing, errors);
     let written = serde_json::to_string_pretty(&report)
         .map_err(|error| error.to_string())
         .and_then(|text| std::fs::write(&run.plan.report, text).map_err(|error| error.to_string()));

@@ -6,7 +6,7 @@
 
 use glam::Vec2 as GlamVec2;
 use sindri_core::{CommandHistory, World};
-use sindri_scene::{SceneExtractor, ScenePhysics2d, ScenePhysics3d, ScreenUi, SpriteAnimations};
+use sindri_scene::SceneExtractor;
 
 use crate::audition::Audition;
 use crate::selection::Selection;
@@ -180,22 +180,18 @@ impl EditorApp {
             scene_board: scene_board_view::SceneBoardState::default(),
             profiler: crate::profiler::Profiler::default(),
             play_audio: crate::play_audio::PlayAudio::new(crate::play_audio::native()),
-            sequences: sindri_scene::Sequences::new(),
             sheet_camera: super::sprite_sheet_view::SheetCamera::default(),
             timeline: crate::timeline::TimelineState::default(),
             textured_revision: TexturedAt::default(),
             scene_viewport,
             game_viewport,
             game_view_rect: None,
+            last_game_view: None,
             game_device: device::DevicePreview::default(),
-            physics: ScenePhysics2d::top_down().expect("zero gravity is finite"),
-            physics3d: ScenePhysics3d::new([0.0; 3]).expect("zero gravity is finite"),
-            screen_ui: ScreenUi::default(),
-            random: sindri_core::Rng::default(),
-            saves: sindri_core::SaveStore::default(),
-            effects: sindri_scene::Effects2d::default(),
+            saves: super::runtime::EditorSaves::default(),
+            session: None,
+            still: super::Stillness::default(),
             clock: fixed_step_clock(),
-            animations: SpriteAnimations::new(),
             scripts: SceneScripts::for_scene(None),
             input: EditorInput::default(),
             play_snapshot: None,

@@ -84,6 +84,8 @@ def describe(path: Path) -> list[str]:
     report = json.loads(path.read_text())
     build = "optimised" if report.get("optimized") else "debug"
     lines = [f"{path.name}: {report['host']}, {build}, {report['opened']}"]
+    for error in report.get("errors", []):
+        lines.append(f"  error: {error}")
     for name, frames in report["sections"].items():
         stats = section_stats(frames)
         lines.append(

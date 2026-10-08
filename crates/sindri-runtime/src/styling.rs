@@ -111,6 +111,24 @@ impl Session {
         Ok(())
     }
 
+    /// Replaces the stylesheets and settles `world` with them, as a host that
+    /// reloads a saved stylesheet during a run does.
+    pub fn set_stylesheets(
+        &mut self,
+        world: &mut World,
+        stylesheets: Vec<Stylesheet>,
+        viewport: Viewport,
+    ) -> Result<(), RuntimeError> {
+        self.styles = Styles::new(stylesheets);
+        self.settle_styles(world, viewport)
+    }
+
+    /// Whether the game presents through any stylesheet.
+    #[must_use]
+    pub const fn is_styled(&self) -> bool {
+        self.styles.is_some()
+    }
+
     /// Tells the session what the host just drew: `world` as drawn, at
     /// `viewport`, with its text measured. Clicks are hit-tested against this
     /// until the next draw, so an element sized by its words is clicked at

@@ -9,7 +9,7 @@ use sindri_render::{
     SpriteBatchRenderer, TextRenderer, TexturedCubeRenderer, Viewport, ViewportTarget,
     encode_lit_frame, encode_prepared_frame,
 };
-use sindri_scene::{CameraView, EnvironmentComponent, SceneRuntime, UiCanvas};
+use sindri_scene::{CameraView, EnvironmentComponent, SceneRuntime, UiCanvas, UiTextSizes};
 
 use super::super::scene_io::SceneSource;
 use super::super::{
@@ -100,7 +100,7 @@ impl RuntimeViewport {
         camera: CameraView,
         canvas: UiCanvas,
         profiler: &mut Profiler,
-    ) -> Result<(), String> {
+    ) -> Result<UiTextSizes, String> {
         let began = Instant::now();
         self.resize(size.0, size.1);
         // Text that fits its words is measured by the same renderer that
@@ -185,7 +185,7 @@ impl RuntimeViewport {
                 .map_err(|error| error.to_string())?;
             profiler.add(Phase::Gpu, waiting.elapsed());
         }
-        Ok(())
+        Ok(text_sizes)
     }
 
     /// Sets the cube renderer's light, shadows, fog and ambient occlusion for

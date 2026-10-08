@@ -10,7 +10,7 @@ use sindri_core::{
     CommandBuffer, EntityData, EntityId, SceneComponent, SceneEntityId, Transform3D, World,
     WorldCommand,
 };
-use sindri_scene::{LightComponent, SpriteAnimations, default_sun_transform};
+use sindri_scene::{LightComponent, default_sun_transform};
 
 use crate::ordering;
 use crate::project::AssetKind;
@@ -557,9 +557,9 @@ impl EditorApp {
                 self.tile_volume_tool.reset();
                 self.animation_tool.reset();
                 self.lifecycle = initialized_lifecycle();
-                // A cursor belongs to the world it was advanced against, and
-                // a freshly loaded world reuses entity slots from the start.
-                self.animations = SpriteAnimations::new();
+                // A run belongs to the world it was started against, and a
+                // freshly loaded world reuses entity slots from the start.
+                self.session = None;
                 self.play_snapshot = None;
                 self.notice = None;
                 self.announce_scene();

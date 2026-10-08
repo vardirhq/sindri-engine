@@ -206,11 +206,10 @@ impl EditorApp {
                 self.animation_tool.reset();
                 self.saved_revision = self.history.revision();
                 self.lifecycle = initialized_lifecycle();
-                // A cursor belongs to the world it was advanced against, and
-                // a freshly loaded world reuses entity slots from the start.
-                self.animations = SpriteAnimations::new();
+                // A run belongs to the world it was started against, and a
+                // freshly loaded world reuses entity slots from the start.
+                self.session = None;
                 self.play_snapshot = None;
-                self.reset_physics();
                 self.notice = None;
                 self.announce_scene();
                 self.reload_textures();

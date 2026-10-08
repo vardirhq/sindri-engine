@@ -19,25 +19,14 @@ impl EditorApp {
         if self.styles.is_empty() {
             return None;
         }
+        // A running game is styled by its session, which settled the world
+        // when Play started and lays the pointer's states over the Game view
+        // in place as it draws: what either view shows of a run is the world.
+        if !self.authoring_enabled() {
+            return None;
+        }
         let viewport = self.presentation_viewport(editing, rect);
-        // The Game view of a running game is live: the pointer's states and
-        // transitions. Anything else is the authored presentation.
-        let presented = if !editing && !self.authoring_enabled() {
-            let states = sindri_weave::with_focus(
-                sindri_weave::pointer_states(
-                    &self.world,
-                    self.screen_ui.hovered(),
-                    self.screen_ui.active(),
-                ),
-                self.screen_ui.focused(),
-            );
-            self.styles.present_live(&self.world, viewport, &states)
-        } else {
-            if self.authoring_enabled() {
-                self.styles.stop_live();
-            }
-            self.styles.resolve(&self.world, viewport)
-        };
+        let presented = self.styles.resolve(&self.world, viewport);
         match presented {
             Ok(world) => Some(world),
             Err(error) => {
@@ -51,13 +40,24 @@ impl EditorApp {
         }
     }
 
+    /// The logical screen Weave styles a run for: the Game view's, as last
+    /// drawn, or the screen the editor opens at before it has been.
+    pub(super) fn game_presentation_viewport(&self) -> WeaveViewport {
+        // The size the views' targets start at, in points: small enough
+        // that the conversion is exact.
+        let rect = self.last_game_view.unwrap_or_else(|| {
+            Rect::from_min_size(eframe::egui::Pos2::ZERO, eframe::egui::vec2(960.0, 540.0))
+        });
+        self.presentation_viewport(false, rect)
+    }
+
     /// The logical screen dimensions Weave resolves against.
     ///
     /// A named device uses its real logical size, not the number of editor
     /// points its preview happened to fit into. In Free mode the Game view is
     /// the screen. The Scene view follows that Game rectangle when one has been
     /// drawn, so both views choose the same media queries while shown together.
-    fn presentation_viewport(&self, editing: bool, rect: Rect) -> WeaveViewport {
+    pub(super) fn presentation_viewport(&self, editing: bool, rect: Rect) -> WeaveViewport {
         let (width, height) = self.game_device.size.unwrap_or_else(|| {
             if editing {
                 self.game_view_rect

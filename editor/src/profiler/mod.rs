@@ -1,8 +1,8 @@
 //! Where an editor frame's time goes.
 //!
 //! A frame is everything between one call to the editor's `ui` and the next:
-//! the upkeep before anything moves, the fixed steps Play ran — effects,
-//! physics, the screen UI, scripts, sprite animation, cameras — the views'
+//! the upkeep before anything moves, the fixed steps Play ran — physics, the
+//! screen UI, effects, scripts, animation, cameras, placement — the views'
 //! presentation, extraction and encoding, the panels laid out around them,
 //! egui painting the window, and the wait until the next frame begins. Each is
 //! timed on the CPU and kept for the last few seconds, with each script's
@@ -39,7 +39,7 @@ mod tests;
 pub const KEPT: usize = 300;
 
 /// How many phases a frame is divided into.
-pub const PHASES: usize = 14;
+pub const PHASES: usize = 15;
 
 /// One part of a frame.
 #[derive(Clone, Copy, Debug, Eq, PartialEq, Ord, PartialOrd)]
@@ -53,6 +53,8 @@ pub enum Phase {
     Scripts,
     Animation,
     Cameras,
+    /// Grid placements settling and any scene change a script asked for.
+    Placement,
     /// Working out the world a view shows when it is not the world itself:
     /// Weave's presentation of it, or the Timeline's pose.
     Presentation,
@@ -83,6 +85,7 @@ impl Phase {
         Self::Scripts,
         Self::Animation,
         Self::Cameras,
+        Self::Placement,
         Self::Presentation,
         Self::Extraction,
         Self::Encoding,
@@ -101,6 +104,7 @@ impl Phase {
             Self::Scripts => "Scripts",
             Self::Animation => "Animation",
             Self::Cameras => "Cameras",
+            Self::Placement => "Placement",
             Self::Presentation => "Presentation",
             Self::Extraction => "Extraction",
             Self::Encoding => "Encoding",
@@ -121,6 +125,7 @@ impl Phase {
             Self::Scripts => "scripts",
             Self::Animation => "animation",
             Self::Cameras => "cameras",
+            Self::Placement => "placement",
             Self::Presentation => "presentation",
             Self::Extraction => "extraction",
             Self::Encoding => "encoding",

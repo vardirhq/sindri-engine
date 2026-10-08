@@ -197,7 +197,7 @@ impl super::EditorApp {
         let local = [position.x - rect.min.x, position.y - rect.min.y];
         if let Some(entity) = extent
             .pointer(local)
-            .and_then(|point| self.screen_ui.element_at(point))
+            .and_then(|point| self.screen_ui().element_at(point))
         {
             self.select(Some(entity));
         }

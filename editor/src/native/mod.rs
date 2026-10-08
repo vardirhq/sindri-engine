@@ -14,8 +14,7 @@ use sindri_core::{CommandHistory, EngineLifecycle, EntityId, SceneComponent, Tra
 use sindri_decay::ScriptComponent;
 use sindri_scene::{
     AudioSourceComponent, CameraComponent, GridNavigationComponent, GridOccupantComponent,
-    SceneExtractor, ScenePhysics2d, ScenePhysics3d, ScreenUi, SpriteAnimations, SpriteComponent,
-    UiImageComponent, UiTextComponent,
+    SceneExtractor, ScreenUi, SpriteAnimations, SpriteComponent, UiImageComponent, UiTextComponent,
 };
 
 pub use window::run;
@@ -288,8 +287,6 @@ struct EditorApp {
     sheet_camera: sprite_sheet_view::SheetCamera,
     /// The Timeline panel's playhead, choice and preview.
     timeline: crate::timeline::TimelineState,
-    /// Where each sequence Play is running has got to.
-    sequences: sindri_scene::Sequences,
     /// What Play sounds like, and the Audio panel's monitor.
     play_audio: crate::play_audio::PlayAudio,
     /// Where Play's time went, for the Profiler panel.
@@ -304,32 +301,15 @@ struct EditorApp {
     textured_revision: TexturedAt,
     scene_viewport: RuntimeViewport,
     game_viewport: RuntimeViewport,
-    /// The physics Play steps, and the bodies a scene's colliders became.
-    ///
-    /// Both dimensions default to zero gravity; authored world settings override it.
-    physics: ScenePhysics2d,
-    physics3d: ScenePhysics3d,
-    /// Where the screen elements are and what the pointer is doing to them.
-    ///
-    /// Recomputed every frame from the world, so a button moved in the
-    /// inspector is pressable where it now is rather than where it was.
-    screen_ui: ScreenUi,
-    /// The run's random stream.
-    ///
-    /// Put back to its seed every time Play starts, so pressing Play twice
-    /// gives the same run twice. That is what makes a bug found in Play a bug
-    /// that can be found again, and it is the opposite of what a shipped game
-    /// wants — which is why a game seeds itself instead.
-    random: sindri_core::Rng,
-    /// What a played scene remembers.
-    ///
-    /// Kept in memory for as long as the editor is open, and never written to
-    /// disk. A script's `Save.*` calls work and round-trip inside a session, so
-    /// persistence can be play-tested; putting a file into someone's project
-    /// directory because they pressed Play would be a side effect they did not
-    /// ask for. Where a real save belongs is the shipped host's decision, and
-    /// `docs/scripting.md` says so.
-    saves: sindri_core::SaveStore,
+    /// What a played scene remembers, kept between runs in one sitting and
+    /// never written to disk. See `runtime/saves.rs`.
+    saves: runtime::EditorSaves,
+    /// The run Play is stepping: the same session a build steps. `None`
+    /// while editing.
+    session: Option<sindri_runtime::Session>,
+    /// What views draw with while nothing runs: no animation has moved and
+    /// no fleck has been thrown.
+    still: Stillness,
     /// The fixed-step clock Play runs on.
     ///
     /// The same one a shipped game uses, so a scene steps the same number of
@@ -337,11 +317,6 @@ struct EditorApp {
     /// simulated as fast as the editor happened to redraw, which made a
     /// play-test evidence about the editor rather than about the game.
     clock: sindri_core::FixedStepClock,
-    /// The live flecks a played scene has thrown.
-    ///
-    /// Cleared when Play stops, because a fleck outliving the run that threw it
-    /// would be a scene at rest that is still moving.
-    effects: sindri_scene::Effects2d,
     /// Where the Game view was drawn last frame, in window points.
     ///
     /// Kept because scripts advance before the layout runs, so the rectangle a
@@ -350,17 +325,14 @@ struct EditorApp {
     /// view instead — a pointer has nowhere to be when the game is not on
     /// screen.
     game_view_rect: Option<egui::Rect>,
+    /// Where the Game view was last drawn, kept when it stops being drawn:
+    /// the screen a run is styled for when Play starts.
+    last_game_view: Option<egui::Rect>,
     /// The screen shape the Game view is pretending to be.
     ///
     /// Not a preference that outlives the session: it is a thing to look
     /// through while arranging a screen, not a setting about the editor.
     game_device: device::DevicePreview,
-    /// Where each animated sprite has got to.
-    ///
-    /// Runtime state, so it lives here rather than in the world: an animation
-    /// playing must not be an unsaved change. Play advances it, pause holds it,
-    /// and stop puts every clip back to its first frame.
-    animations: SpriteAnimations,
     /// The scripts the open scene runs, and the sources behind them.
     scripts: SceneScripts,
     /// The keyboard a running script reads, translated from egui's.
@@ -418,6 +390,24 @@ struct EditorApp {
     prefab_session: prefab_writes::PrefabSession,
     /// The benchmark the command line asked for, while it runs.
     benchmark: Option<benchmark::BenchmarkRun>,
+}
+
+impl EditorApp {
+    /// The screen UI as the run last laid it out, or an empty one while
+    /// editing: what the pointer is over, what is focused.
+    fn screen_ui(&self) -> &ScreenUi {
+        self.session
+            .as_ref()
+            .map_or(&self.still.screen_ui, sindri_runtime::Session::screen_ui)
+    }
+}
+
+/// What a view draws with while nothing is running.
+#[derive(Default)]
+struct Stillness {
+    animations: SpriteAnimations,
+    effects: sindri_scene::Effects2d,
+    screen_ui: ScreenUi,
 }
 
 /// What the textures were last asked about: the history revision, since an

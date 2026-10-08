@@ -8,7 +8,7 @@
 //! only the editor's half, kept apart from the window so a test can read what
 //! it parses and what it writes.
 //!
-//! A report is raw frames rather than averages, so what is made of them —
+//! A report is raw frames rather than averages, beside the console's errors, so what is made of them —
 //! percentiles, ratios, the table in `docs/editor-update.md` — can change
 //! without running anything again.
 
@@ -94,12 +94,21 @@ pub fn frame_json(frame: &Frame) -> Value {
 
 /// A whole report: what was opened, how the editor was built, and each
 /// section's frames.
-pub fn report_json(opened: &str, window: [f32; 2], editing: &[Frame], playing: &[Frame]) -> Value {
+pub fn report_json(
+    opened: &str,
+    window: [f32; 2],
+    editing: &[Frame],
+    playing: &[Frame],
+    errors: &[String],
+) -> Value {
     json!({
         "host": "editor",
         "opened": opened,
         "optimized": !cfg!(debug_assertions),
         "window": window,
+        // What the console held as errors when the run ended: a run that
+        // measured fast because its scripts failed should say so.
+        "errors": errors,
         "sections": {
             "editing": editing.iter().map(frame_json).collect::<Vec<_>>(),
             "playing": playing.iter().map(frame_json).collect::<Vec<_>>(),
@@ -164,9 +173,11 @@ mod tests {
             written["phases"].as_object().unwrap().len(),
             Phase::ALL.len()
         );
-        let report = report_json("games/platformer", [1440.0, 1024.0], &[], &[frame]);
+        let errors = ["Hero: no such field".to_owned()];
+        let report = report_json("games/platformer", [1440.0, 1024.0], &[], &[frame], &errors);
         assert_eq!(report["host"], "editor");
         assert_eq!(report["sections"]["playing"].as_array().unwrap().len(), 1);
         assert!(report["sections"]["editing"].as_array().unwrap().is_empty());
+        assert_eq!(report["errors"][0], "Hero: no such field");
     }
 }
