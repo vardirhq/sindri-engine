@@ -127,8 +127,20 @@ impl RuntimeViewport {
                     .with_text_sizes(&text_sizes),
             )
             .map_err(|error| error.to_string())?;
+        profiler.add(Phase::Extraction, began.elapsed());
+        // The editor's own frame — the panels egui painted last time — may
+        // still be on the GPU, and a submit behind it blocks until it is done.
+        // Waited for first when measuring, so that wait is timed as the GPU's
+        // rather than as this view's encoding.
+        if profiler.waits_for_gpu() {
+            let waiting = Instant::now();
+            self.render_state
+                .device
+                .poll(wgpu::PollType::wait_indefinitely())
+                .map_err(|error| error.to_string())?;
+            profiler.add(Phase::Gpu, waiting.elapsed());
+        }
         let extracted = Instant::now();
-        profiler.add(Phase::Extraction, extracted - began);
         let mut encoder =
             self.render_state
                 .device
