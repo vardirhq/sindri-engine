@@ -471,3 +471,13 @@ than failing, with roll then decided by leftover rounding error, so dragging thr
 can whip the whole scene round. Pitch turns the offset in the plane that holds it and `up`, so it
 adds directly to the angle between them, and `orbited_offset` clamps it there — a hundredth of a
 radian short of either pole.
+
+## Imported model references
+
+`sindri.model` names an external `AssetId` and an optional render layer. Hosts
+prepare decoded GLB resources through `sindri::model::prepare` and bind them to
+`SceneExtractor`; instances share geometry while retaining separate world
+transforms. `referenced_models` includes inactive entities for asset discovery.
+Extraction rejects missing bindings and uses the active world camera. See
+[imported models](imported-models.md) for the bounded static subset and remaining
+host/export work. No imported geometry is serialized into scene payloads.

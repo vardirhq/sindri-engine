@@ -52,21 +52,22 @@ pub use components::{
     EnvironmentError, EnvironmentFog, EnvironmentPostProcess, EnvironmentShadows,
     EnvironmentToneMapping, GridNavigationComponent, GridOccupantComponent, GridPlacementComponent,
     GridWallDocument, LightComponent, LightError, LightKind, MeshComponent, MeshPrimitive,
-    NaturalTerrainDocument, ShapeComponent, ShapeGeometry, SpriteColorTransform, SpriteComponent,
-    Sun, TileCellDocument, TileDraw, TileGridComponent, TileGridError, TileProjection, TileSpace,
-    TileVolumeComponent, TileVolumeError, TileVolumeIndex, TilemapComponent, TilemapError,
-    UiAnchor, UiFill, UiFillEdge, UiImageComponent, UiShapeBlend, UiShapeComponent, UiShapeKind,
-    UiShapeShadow, UiTextAutoSize, UiTextCase, UiTextComponent, UiTextLineAlign, UiTextOutline,
-    UiTextShadow, UiTextWrap, VoxelBlock, VoxelEdit, VoxelGeneratorDocument, VoxelMapFlood,
-    VoxelMaterialDocument, VoxelView, VoxelWorldComponent, add_camera_trauma, cell_to_local_in,
-    default_sun_transform, environment_of, environments_in, light_direction, lights_in, sun_in,
-    ui_text_template, update_camera_behaviors,
+    ModelComponent, NaturalTerrainDocument, ShapeComponent, ShapeGeometry, SpriteColorTransform,
+    SpriteComponent, Sun, TileCellDocument, TileDraw, TileGridComponent, TileGridError,
+    TileProjection, TileSpace, TileVolumeComponent, TileVolumeError, TileVolumeIndex,
+    TilemapComponent, TilemapError, UiAnchor, UiFill, UiFillEdge, UiImageComponent, UiShapeBlend,
+    UiShapeComponent, UiShapeKind, UiShapeShadow, UiTextAutoSize, UiTextCase, UiTextComponent,
+    UiTextLineAlign, UiTextOutline, UiTextShadow, UiTextWrap, VoxelBlock, VoxelEdit,
+    VoxelGeneratorDocument, VoxelMapFlood, VoxelMaterialDocument, VoxelView, VoxelWorldComponent,
+    add_camera_trauma, cell_to_local_in, default_sun_transform, environment_of, environments_in,
+    light_direction, lights_in, sun_in, ui_text_template, update_camera_behaviors,
 };
 pub use effects::{EffectBurstComponent, Effects2d, Fleck};
 pub use extract::{
     CameraView, ExtractProblem, OverlayPlacement, OverlayView, SceneExtractError, SceneExtractor,
     SceneRuntime, UiCanvas, ViewCamera, VoxelGround, VoxelWorldHit, WorldProjection,
-    overlay_for_viewport, overlay_in_scene, pan_for_drag, voxel_space, world_camera_of,
+    overlay_for_viewport, overlay_in_scene, pan_for_drag, referenced_models, voxel_space,
+    world_camera_of,
 };
 pub use input_actions::InputActionsComponent;
 pub use navigation::{GridNavigationError, GridPlacement, WorldGridNavigation};

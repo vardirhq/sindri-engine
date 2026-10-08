@@ -529,6 +529,19 @@
       "type_name": "sindri.mesh"
     },
     {
+      "addable": false,
+      "apply": {},
+      "default_payload": null,
+      "display_name": "Model",
+      "fields": {
+        "asset": "models/model.glb",
+        "layer": 0
+      },
+      "meanings": {},
+      "schema_version": 1,
+      "type_name": "sindri.model"
+    },
+    {
       "addable": true,
       "apply": {},
       "default_payload": {

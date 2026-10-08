@@ -47,6 +47,7 @@ fn only_the_components_that_name_a_project_asset_lack_a_default() {
             "sindri.audio.source",
             "sindri.grid.occupant",
             "sindri.grid.placement",
+            "sindri.model",
             "sindri.ui.text",
         ])
     );

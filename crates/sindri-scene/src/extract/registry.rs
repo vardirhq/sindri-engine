@@ -243,6 +243,11 @@ fn register_drawables(components: &mut ComponentSchemaRegistry) -> Result<(), Sc
     register_cameras(components)?;
     register_environment(components)?;
     register_light(components)?;
+    // An asset reference has no honest blank model the engine can invent.
+    components.register_with_fields::<crate::ModelComponent>(
+        "Model",
+        serde_json::json!({ "asset": "models/model.glb", "layer": 0 }),
+    )?;
     components.register_with_default::<MeshComponent>(
         "Mesh",
         serde_json::json!({

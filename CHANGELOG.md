@@ -1,5 +1,10 @@
 # Changelog
 
+- Add `sindri.model` external asset references, shared scene bindings, inactive
+  reference discovery and world-transform extraction. The public facade prepares
+  decoded assets without coupling scene/render to assets. Project hosts and
+  export packaging remain pending.
+
 - Add an independent imported-model GPU path with retained hierarchy, normals,
   UVs, 16/32-bit indices, base-color textures, metallic/roughness lighting,
   depth testing, mirrored transforms and shared GPU residency. Scene and project

@@ -1,7 +1,7 @@
 # Imported models
 
-Status: CPU decoding and reusable GPU model rendering are implemented. Scene
-references, host loading, export packaging and crawler visual proof remain open.
+Status: CPU decoding, reusable GPU model rendering and scene references are
+implemented. Host loading, export packaging and crawler visual proof remain open.
 Do not treat these building blocks as a completed external-project capability.
 
 ## Asset boundary
@@ -56,6 +56,24 @@ Invalid render resources and singular/nonfinite model matrices return typed
 errors. Geometry buffers and image dimensions are checked against device
 limits before upload. The pipeline uses target-independent wgpu APIs.
 
+## Scene and facade boundary
+
+A scene entity references an external asset without embedding its vertices:
+
+```json
+{ "components": { "sindri.model": { "asset": "models/crawler.glb", "layer": 0 } } }
+```
+
+`ModelComponent` validates the logical `AssetId`. `referenced_models(world)`
+deduplicates all references, including inactive entities needed by future scene
+switches. Hosts decode once, call `sindri::model::prepare` once per asset and
+bind the shared resource with `SceneExtractor::bind_model`. Missing bindings
+name the asset in a typed extraction error. Active instances extract into the
+opaque 3D stage with the authored layer, world camera and entity world matrix.
+The facade performs the conversion so neither scene nor render depends on the
+asset crate. Local node matrices remain Y-up and are never converted twice.
+The component has no invented default model and no editor authoring UI.
+
 ## Supported subset and diagnostics
 
 Only triangle primitives and one embedded binary buffer are supported. External
@@ -91,10 +109,6 @@ cargo run -p sindri-assets --example model -- path/to/model.glb
 
 ## Remaining integration
 
-- Add a distinct model asset reference component instead of serializing
-  imported geometry into `SurfaceMesh`.
-- Bind decoded assets at the scene/render seam without making the renderer
-  depend on core, scenes, assets or the editor.
 - Exercise depth-tested material primitives through native and WebGPU hosts.
 - Discover scene/prefab model references in the exporter and package the GLB
   unchanged in the existing content-hashed manifest layout.

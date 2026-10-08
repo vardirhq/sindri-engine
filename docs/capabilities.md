@@ -42,8 +42,12 @@ mesh reuse, non-indexed triangles and malformed/unsupported diagnostics.
 `AssetLoader` reuse is covered. A separate renderer resource and GPU path retain
 normal/UV geometry, hierarchy, textures and materials, composing node and entity
 matrices with inverse-transpose normals. GPU readback coverage checks colors,
-depth and upload reuse; renderer resource tests check malformed data. Scene model
-references, browser rendering and Low Tide visual proof are not claimed yet.
+depth and upload reuse; renderer resource tests check malformed data. Scene
+`ModelComponent` references validate asset paths and extract shared resources
+with entity world transforms. Disabled models are discovered without drawing;
+missing bindings name the asset. The public facade converts decoded models
+without cross-coupling foundational crates. Host loading, browser rendering and
+Low Tide visual proof are not claimed yet.
 See [imported models](imported-models.md).
 
 ### Lifecycle and time

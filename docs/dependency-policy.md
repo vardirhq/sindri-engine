@@ -106,3 +106,11 @@ raise the MSRV beyond 1.95, that it compiles for `wasm32-unknown-unknown` if the
 crate it lands in must, and that its licence is already on the allowlist. Shared
 versions belong in `[workspace.dependencies]`, referenced as
 `dep.workspace = true`.
+
+## Imported-model conversion
+
+The public `sindri` facade converts CPU `ModelAsset` values into renderer
+`ModelData` when its `render` feature is enabled. Its optional `glam` dependency
+uses the existing workspace version for column-major node matrices. Assets,
+scene and render retain their dependency boundaries; no renderer dependency on
+assets or core is introduced. Project hosts can use this bridge once per asset.
