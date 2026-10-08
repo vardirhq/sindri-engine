@@ -357,26 +357,35 @@ impl Lowerer<'_> {
     /// can name, and the path starts there instead, so the runtime treats it
     /// as it treats any local holding a reference. `true` when a local was
     /// opened, which [`Self::release`] then closes.
+    ///
+    /// A struct field along the way is a value too: `hit.entity.transform`
+    /// reads `hit.entity` as the field it is and walks `transform` from the
+    /// reference it holds, rather than asking the host for a path rooted at a
+    /// local that holds a struct.
     pub(super) fn path_or_held(
         &self,
         expr: &Expr,
         invalid: &str,
         instructions: &mut Vec<Instruction>,
     ) -> (Path, bool) {
-        if let Some(path) = Self::path_from_expr(expr) {
-            return (path, false);
-        }
         let mut fields = Vec::new();
         let mut root = expr;
         loop {
             match &root.kind {
-                ExprKind::Member { object, field } => {
+                ExprKind::Member { object, field }
+                    if fields.is_empty() || !self.reads_a_field(root) =>
+                {
                     fields.push(field.clone());
                     root = object;
                 }
                 ExprKind::Group(inner) => root = inner,
                 _ => break,
             }
+        }
+        if !self.reads_a_field(root)
+            && let Some(path) = Self::path_from_expr(expr)
+        {
+            return (path, false);
         }
         if fields.is_empty() {
             return (Path(vec![invalid.into()]), false);
@@ -390,6 +399,16 @@ impl Lowerer<'_> {
             mutable: false,
         });
         (Path(fields), true)
+    }
+
+    /// Whether `expr` reads a field of a struct value, which the analysis
+    /// records as a component read.
+    fn reads_a_field(&self, expr: &Expr) -> bool {
+        matches!(&expr.kind, ExprKind::Member { .. })
+            && matches!(
+                self.value_member(expr.span),
+                Some(ValueMember::Component(_))
+            )
     }
 
     /// Closes the local [`Self::path_or_held`] opened, if it opened one.

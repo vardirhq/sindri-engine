@@ -315,6 +315,13 @@ a game seen from above does not, and the editor's Play must run each the way its
 build will. One per scene, like the Environment. A scene without one keeps the
 gravity its host constructed `ScenePhysics2d` with.
 
+The settings that count are the first *active* ones, for gravity and for the
+layer names alike. A script reads and turns gravity with `Physics.gravity()`
+and `Physics.set_gravity(v)`, which change this component rather than the
+solver behind it. A change of gravity wakes every dynamic body in both
+dimensions, because a body asleep at rest would otherwise ignore it while
+everything in motion fell the new way.
+
 ## Transform ownership
 
 `Transform3D` remains the authored and visible transform for both dimensions.
@@ -798,7 +805,7 @@ and normal (0, 0). Other hits report the world-space surface normal.
 `RayHit2d` is a snapshot. Scene transform writes and new colliders take effect
 at the next synchronization. Decay skips inactive/despawned entities even during
 a script pass. The platformer proves ground clearance against tilemap geometry;
-`examples/physics` visualizes filtering, hits, normals and trigger events.
+the Physics Playground's probe visualizes filtering, hits and normals.
 
 2D overlaps and shape casts are implemented for circles, boxes and capsules.
 Decay exposes `Physics.overlap_circle`, `overlap_box`, `cast_circle` and

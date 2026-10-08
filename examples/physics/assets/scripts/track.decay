@@ -1,0 +1,261 @@
+// The test track and the domino run.
+//
+// The robot is a Character 2D. Its script decides speed, jumps and gravity
+// and asks the scene to move it; the controller climbs the steps, follows the
+// slope, stands on the lift while the lift's own motion carries it, and lets
+// it drop through one-way planks. Crates it walks into get shoved, and a kick
+// is an impulse at the point of contact.
+
+script Robot {
+    @export let speed: f32 = 6.0;
+    @export let acceleration: f32 = 60.0;
+    @export let air_acceleration: f32 = 30.0;
+    @export let jump_speed: f32 = 13.0;
+    // How much harder than the room's gravity the robot falls: snappy jumps.
+    @export let heft: f32 = 1.9;
+    @export let shove: f32 = 0.35;
+    @export let kick: f32 = 5.5;
+
+    var home: Vec3 = Vec3(0.0, 0.0, 0.0);
+    var horizontal: f32 = 0.0;
+    var rise: f32 = 0.0;
+    var grounded: bool = false;
+    var on_one_way: bool = false;
+    var drop_left: f32 = 0.0;
+    var facing: f32 = 1.0;
+    var boot_left: f32 = 0.0;
+    var jump_asked: bool = false;
+    var kick_asked: bool = false;
+    var kicks: f32 = 0.0;
+
+    fn start() { this.home = this.transform.position; }
+
+    on ToyAction(toy, action) {
+        if toy != 7.0 { return; }
+        if action == 3.0 { this.jump_asked = true; }
+        if action == 4.0 { this.kick_asked = true; }
+    }
+
+    on ResetToy(toy) {
+        if toy == 0.0 || toy == 7.0 { go_home(); }
+    }
+
+    fn update(dt: f32) {
+        this.drop_left = max(0.0, this.drop_left - dt);
+        this.boot_left = max(0.0, this.boot_left - dt);
+        World.set_active(World.find("robot-boot"), this.boot_left > 0.0);
+        sense();
+        let p = this.transform.position;
+        if abs(p.x) > 31.0 || abs(p.y) > 15.5 {
+            go_home();
+            return;
+        }
+
+        var run = 0.0;
+        var jump = this.jump_asked;
+        var drop = false;
+        var kicking = this.kick_asked;
+        this.jump_asked = false;
+        this.kick_asked = false;
+        if Game.toy == 7.0 {
+            if Input.is_down("A") || Input.is_down("ArrowLeft") || Ui.is_held(World.find("act-1")) { run -= 1.0; }
+            if Input.is_down("D") || Input.is_down("ArrowRight") || Ui.is_held(World.find("act-2")) { run += 1.0; }
+            if Input.just_pressed("W") || Input.just_pressed("Space") || Input.just_pressed("ArrowUp") { jump = true; }
+            if Input.just_pressed("S") || Input.just_pressed("ArrowDown") { drop = true; }
+            if Input.just_pressed("F") { kicking = true; }
+        }
+        if run != 0.0 { face(run); }
+        if kicking { boot(); }
+
+        if drop && this.grounded && this.on_one_way {
+            Physics.drop_through(this.entity, 0.3);
+            this.drop_left = 0.3;
+            this.grounded = false;
+            this.rise = -2.0;
+            print("Playground robot drops through");
+        } else if jump && this.grounded {
+            this.rise = this.jump_speed;
+            this.grounded = false;
+        }
+
+        // The room's gravity, whichever way it points, at the robot's heft.
+        let pull = Physics.gravity() * this.heft;
+        var rate = this.air_acceleration;
+        if this.grounded { rate = this.acceleration; }
+        let target = run * this.speed;
+        let step = rate * dt;
+        this.horizontal = this.horizontal + clamp(target - this.horizontal, -step, step);
+        if !this.grounded { this.horizontal += pull.x * dt; }
+        this.rise = clamp(this.rise + pull.y * dt, -30.0, 30.0);
+        if this.grounded && this.rise < 0.0 { this.rise = 0.0; }
+        Physics.move_character(this.entity, Vec2(this.horizontal * dt, this.rise * dt), this.grounded && this.drop_left <= 0.0 && this.rise <= 0.0);
+    }
+
+    // What the last controller pass found: support, and what the robot walked
+    // into. A loose thing it walks into is shoved, so crates move out of the
+    // way instead of standing like walls.
+    fn sense() {
+        this.grounded = false;
+        this.on_one_way = false;
+        let motion = Physics.character_motion(this.entity);
+        if motion == null { return; }
+        if motion.grounded && this.drop_left <= 0.0 {
+            this.grounded = true;
+            let support = motion.ground;
+            if support != null { this.on_one_way = World.has_tag(support.entity, "one-way"); }
+        }
+        for hit in motion.collisions {
+            if hit.normal.y < -0.5 && this.rise > 0.0 { this.rise = 0.0; }
+            if World.has_tag(hit.entity, "body") || World.has_tag(hit.entity, "loose") {
+                Physics.apply_impulse_at_point(hit.entity, hit.normal * (0.0 - this.shove), hit.point);
+            }
+        }
+    }
+
+    fn face(direction: f32) {
+        this.facing = sign(direction);
+        World.find("robot-visor").transform.position.x = 0.12 * this.facing;
+        World.find("robot-boot").transform.position.x = 0.4 * this.facing;
+    }
+
+    // A boot out in front: everything loose it reaches gets an impulse at the
+    // point where the boot meets it, so a crate kicked high also spins.
+    fn boot() {
+        this.boot_left = 0.18;
+        let p = this.transform.position;
+        let reach = Vec2(p.x + this.facing * 0.75, p.y - 0.2);
+        var hits = 0.0;
+        for thing in Physics.overlap_circle(reach, 0.75, Physics.mask(["props", "balls", "shells", "glass"]), false, this.entity) {
+            if World.has_tag(thing, "body") || World.has_tag(thing, "loose") {
+                let there = thing.transform.position;
+                let point = Vec2(there.x - this.facing * 0.3, p.y - 0.2);
+                Physics.apply_impulse_at_point(thing, Vec2(this.facing * this.kick, this.kick * 0.55), point);
+                hits += 1.0;
+            }
+        }
+        Effects.burst_at(World.find("muzzle-flash"), reach.x, reach.y);
+        this.kicks += 1.0;
+        print("Playground robot kick " + hits);
+    }
+
+    fn go_home() {
+        this.transform.position = this.home;
+        this.horizontal = 0.0;
+        this.rise = 0.0;
+        this.drop_left = 0.0;
+        Physics.drop_through(this.entity, 0.0);
+        Physics.move_character(this.entity, Vec2(0.0, 0.0), false);
+    }
+}
+
+// A kinematic platform the robot calls by standing on it. It rises with its
+// rider, waits at the top until the rider steps off, and will not come down on
+// a robot standing underneath. The controller carries the rider from the
+// platform's solved motion; nothing here moves the robot.
+script TrackLift {
+    @export let bottom: f32 = -7.6;
+    @export let top: f32 = -2.15;
+    @export let speed: f32 = 2.4;
+    @export let half_width: f32 = 0.9;
+    var waiting: f32 = 0.0;
+    var rising: bool = false;
+
+    on ResetToy(toy) {
+        if toy == 0.0 || toy == 7.0 {
+            this.transform.position.y = this.bottom;
+            this.rising = false;
+            Physics.set_velocity(this.entity, 0.0, 0.0);
+        }
+    }
+
+    fn update(dt: f32) {
+        let here = this.transform.position;
+        let robot = World.find("Robot").transform.position;
+        // The robot stands about 0.75 above the platform's middle when on it.
+        let over = abs(robot.x - here.x) < this.half_width + 0.3;
+        let riding = over && robot.y > here.y + 0.68 && robot.y < here.y + 1.2;
+        let beneath = over && robot.y < here.y + 0.5;
+        this.waiting = max(0.0, this.waiting - dt);
+        if !this.rising && riding && here.y <= this.bottom + 0.05 && this.waiting <= 0.0 {
+            this.rising = true;
+            print("Playground lift going up");
+        }
+        if this.rising && here.y >= this.top {
+            this.rising = false;
+            this.waiting = 1.5;
+        }
+        var velocity = 0.0;
+        if this.rising {
+            velocity = this.speed;
+        } else if here.y > this.bottom && this.waiting <= 0.0 && !riding && !beneath {
+            velocity = 0.0 - this.speed;
+        }
+        // Land exactly: a step that would overshoot an end is cut short.
+        if velocity > 0.0 { velocity = min(velocity, (this.top - here.y) / dt); }
+        if velocity < 0.0 { velocity = max(velocity, (this.bottom - here.y) / dt); }
+        Physics.set_velocity(this.entity, 0.0, velocity);
+    }
+}
+
+// The red button: a cap on a vertical slider, held up by a spring. Pushed
+// far enough down, by a domino or anything else heavy, it sets off DROP
+// EVERYTHING; it re-arms once the spring has it back up.
+script RedButton {
+    @export let toy: f32 = 8.0;
+    @export let travel: f32 = 0.2;
+    var home: Vec3 = Vec3(0.0, 0.0, 0.0);
+    var armed: bool = true;
+    var down: bool = false;
+    var settle: f32 = 1.0;
+    var presses: f32 = 0.0;
+
+    fn start() { this.home = this.transform.position; }
+
+    on ToyAction(toy, action) {
+        if toy != 8.0 { return; }
+        if action == 1.0 {
+            let first = World.find("domino-0");
+            let top = first.transform.position + Vec3(0.0, 0.7, 0.0);
+            Physics.apply_impulse_at_point(first, Vec2(0.35, 0.0), Vec2(top.x, top.y));
+            print("Playground domino pushed");
+        }
+        if action == 2.0 { ResetToy.emit(8.0); }
+        if action == 3.0 {
+            let at = this.transform.position;
+            Physics.apply_impulse_at_point(this.entity, Vec2(0.0, -2.5), Vec2(at.x, at.y));
+        }
+        if action == 4.0 {
+            this.armed = !this.armed;
+            if this.armed { print("Playground red button armed"); } else { print("Playground red button disarmed"); }
+        }
+    }
+
+    on ResetToy(toy) {
+        if toy == 0.0 || toy == 8.0 {
+            this.transform.position = this.home;
+            Physics.set_velocity(this.entity, 0.0, 0.0);
+            this.settle = 1.0;
+            this.down = false;
+        }
+    }
+
+    fn update(dt: f32) {
+        this.settle = max(0.0, this.settle - dt);
+        let depth = this.home.y - this.transform.position.y;
+        if !this.down && depth > this.travel && this.settle <= 0.0 {
+            this.down = true;
+            this.presses += 1.0;
+            let at = this.transform.position;
+            Effects.burst_at(World.find("confetti"), at.x, at.y + 0.4);
+            if this.armed {
+                ButtonPressed.emit(at.x, at.y);
+            } else {
+                print("Playground red button pressed while disarmed");
+            }
+        }
+        if this.down && depth < this.travel * 0.4 { this.down = false; }
+    }
+}
+
+// The red button went down while armed.
+event ButtonPressed(x: f32, y: f32);

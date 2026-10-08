@@ -1,0 +1,5602 @@
+{
+ "format_version": 10,
+ "metadata": {
+  "name": "Voxel Quarry"
+ },
+ "entities": [
+  {
+   "id": "q-camera",
+   "name": "Quarry Camera",
+   "transform_3d": {
+    "position": [
+     12.0,
+     17.0,
+     14.0
+    ],
+    "rotation": [
+     -0.229383,
+     0.35361,
+     0.089888,
+     0.902366
+    ],
+    "scale": [
+     1.0,
+     1.0,
+     1.0
+    ]
+   },
+   "components": {
+    "sindri.camera": {
+     "projection": "perspective",
+     "vertical_fov_degrees": 45.0,
+     "near": 0.1,
+     "far": 200.0
+    }
+   }
+  },
+  {
+   "id": "q-sun",
+   "name": "Quarry Sun",
+   "transform_3d": {
+    "position": [
+     0,
+     30,
+     0
+    ],
+    "rotation": [
+     -0.416852,
+     0.401068,
+     0.212271,
+     0.787604
+    ],
+    "scale": [
+     1.0,
+     1.0,
+     1.0
+    ]
+   },
+   "components": {
+    "sindri.light": {
+     "kind": "directional",
+     "color": [
+      1.0,
+      0.93,
+      0.8
+     ],
+     "intensity": 1.1
+    }
+   }
+  },
+  {
+   "id": "q-environment",
+   "name": "Quarry Environment",
+   "transform_3d": {
+    "position": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "rotation": [
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     1.0,
+     1.0,
+     1.0
+    ]
+   },
+   "components": {
+    "sindri.environment": {
+     "background": [
+      0.01229,
+      0.0331,
+      0.0648,
+      1.0
+     ],
+     "ambient_intensity": 0.45
+    }
+   }
+  },
+  {
+   "id": "q-physics",
+   "name": "Quarry Physics",
+   "transform_3d": {
+    "position": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "rotation": [
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     1.0,
+     1.0,
+     1.0
+    ]
+   },
+   "components": {
+    "sindri.physics3d.world": {
+     "gravity": [
+      0.0,
+      -16.0,
+      0.0
+     ],
+     "layers": [
+      "solid"
+     ]
+    }
+   }
+  },
+  {
+   "id": "q-floor",
+   "name": "Quarry Floor",
+   "transform_3d": {
+    "position": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "rotation": [
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     1.0,
+     1.0,
+     1.0
+    ]
+   },
+   "components": {
+    "sindri.voxel_world": {
+     "blocks": "quarry.tileset",
+     "generator": {
+      "kind": "layered_terrain",
+      "base_height": 6,
+      "height_variation": 0,
+      "surface_voxel": "grass",
+      "subsurface_voxel": "dirt",
+      "deep_voxel": "stone",
+      "subsurface_depth": 3
+     },
+     "render_radius": 2,
+     "vertical_radius": 1,
+     "focus": [
+      0,
+      0,
+      0
+     ],
+     "edits": [
+      {
+       "at": [
+        -9,
+        7,
+        -9
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        -9,
+        8,
+        -9
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        -9,
+        9,
+        -9
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        -9,
+        10,
+        -9
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        -9,
+        7,
+        -8
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        -9,
+        8,
+        -8
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        -9,
+        9,
+        -8
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        -9,
+        7,
+        -7
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        -9,
+        8,
+        -7
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        -9,
+        7,
+        -6
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        -8,
+        7,
+        -9
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        -8,
+        8,
+        -9
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        -8,
+        9,
+        -9
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        -8,
+        10,
+        -9
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        -8,
+        7,
+        -8
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        -8,
+        8,
+        -8
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        -8,
+        9,
+        -8
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        -8,
+        7,
+        -7
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        -8,
+        8,
+        -7
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        -8,
+        7,
+        -6
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        -7,
+        7,
+        -9
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        -7,
+        8,
+        -9
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        -7,
+        9,
+        -9
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        -7,
+        10,
+        -9
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        -7,
+        7,
+        -8
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        -7,
+        8,
+        -8
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        -7,
+        9,
+        -8
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        -7,
+        7,
+        -7
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        -7,
+        8,
+        -7
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        -7,
+        7,
+        -6
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        -6,
+        7,
+        -9
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        -6,
+        8,
+        -9
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        -6,
+        9,
+        -9
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        -6,
+        10,
+        -9
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        -6,
+        7,
+        -8
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        -6,
+        8,
+        -8
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        -6,
+        9,
+        -8
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        -6,
+        7,
+        -7
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        -6,
+        8,
+        -7
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        -6,
+        7,
+        -6
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        -5,
+        7,
+        -9
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        -5,
+        8,
+        -9
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        -5,
+        9,
+        -9
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        -5,
+        10,
+        -9
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        -5,
+        7,
+        -8
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        -5,
+        8,
+        -8
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        -5,
+        9,
+        -8
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        -5,
+        7,
+        -7
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        -5,
+        8,
+        -7
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        -5,
+        7,
+        -6
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        -4,
+        7,
+        -9
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        -4,
+        8,
+        -9
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        -4,
+        9,
+        -9
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        -4,
+        10,
+        -9
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        -4,
+        7,
+        -8
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        -4,
+        8,
+        -8
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        -4,
+        9,
+        -8
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        -4,
+        7,
+        -7
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        -4,
+        8,
+        -7
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        -4,
+        7,
+        -6
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        -3,
+        7,
+        -9
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        -3,
+        8,
+        -9
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        -3,
+        9,
+        -9
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        -3,
+        10,
+        -9
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        -3,
+        7,
+        -8
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        -3,
+        8,
+        -8
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        -3,
+        9,
+        -8
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        -3,
+        7,
+        -7
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        -3,
+        8,
+        -7
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        -3,
+        7,
+        -6
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        -2,
+        7,
+        -9
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        -2,
+        8,
+        -9
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        -2,
+        9,
+        -9
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        -2,
+        10,
+        -9
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        -2,
+        7,
+        -8
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        -2,
+        8,
+        -8
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        -2,
+        9,
+        -8
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        -2,
+        7,
+        -7
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        -2,
+        8,
+        -7
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        -2,
+        7,
+        -6
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        -1,
+        7,
+        -9
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        -1,
+        8,
+        -9
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        -1,
+        9,
+        -9
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        -1,
+        10,
+        -9
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        -1,
+        7,
+        -8
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        -1,
+        8,
+        -8
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        -1,
+        9,
+        -8
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        -1,
+        7,
+        -7
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        -1,
+        8,
+        -7
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        -1,
+        7,
+        -6
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        0,
+        7,
+        -9
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        0,
+        8,
+        -9
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        0,
+        9,
+        -9
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        0,
+        10,
+        -9
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        0,
+        7,
+        -8
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        0,
+        8,
+        -8
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        0,
+        9,
+        -8
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        0,
+        7,
+        -7
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        0,
+        8,
+        -7
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        0,
+        7,
+        -6
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        1,
+        7,
+        -9
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        1,
+        8,
+        -9
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        1,
+        9,
+        -9
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        1,
+        10,
+        -9
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        1,
+        7,
+        -8
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        1,
+        8,
+        -8
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        1,
+        9,
+        -8
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        1,
+        7,
+        -7
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        1,
+        8,
+        -7
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        1,
+        7,
+        -6
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        2,
+        7,
+        -9
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        2,
+        8,
+        -9
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        2,
+        9,
+        -9
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        2,
+        10,
+        -9
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        2,
+        7,
+        -8
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        2,
+        8,
+        -8
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        2,
+        9,
+        -8
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        2,
+        7,
+        -7
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        2,
+        8,
+        -7
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        2,
+        7,
+        -6
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        3,
+        7,
+        -9
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        3,
+        8,
+        -9
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        3,
+        9,
+        -9
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        3,
+        10,
+        -9
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        3,
+        7,
+        -8
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        3,
+        8,
+        -8
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        3,
+        9,
+        -8
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        3,
+        7,
+        -7
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        3,
+        8,
+        -7
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        3,
+        7,
+        -6
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        4,
+        7,
+        -9
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        4,
+        8,
+        -9
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        4,
+        9,
+        -9
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        4,
+        10,
+        -9
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        4,
+        7,
+        -8
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        4,
+        8,
+        -8
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        4,
+        9,
+        -8
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        4,
+        7,
+        -7
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        4,
+        8,
+        -7
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        4,
+        7,
+        -6
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        5,
+        7,
+        -9
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        5,
+        8,
+        -9
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        5,
+        9,
+        -9
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        5,
+        10,
+        -9
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        5,
+        7,
+        -8
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        5,
+        8,
+        -8
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        5,
+        9,
+        -8
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        5,
+        7,
+        -7
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        5,
+        8,
+        -7
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        5,
+        7,
+        -6
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        6,
+        7,
+        -9
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        6,
+        8,
+        -9
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        6,
+        9,
+        -9
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        6,
+        10,
+        -9
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        6,
+        7,
+        -8
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        6,
+        8,
+        -8
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        6,
+        9,
+        -8
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        6,
+        7,
+        -7
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        6,
+        8,
+        -7
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        6,
+        7,
+        -6
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        7,
+        7,
+        -9
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        7,
+        8,
+        -9
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        7,
+        9,
+        -9
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        7,
+        10,
+        -9
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        7,
+        7,
+        -8
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        7,
+        8,
+        -8
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        7,
+        9,
+        -8
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        7,
+        7,
+        -7
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        7,
+        8,
+        -7
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        7,
+        7,
+        -6
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        8,
+        7,
+        -9
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        8,
+        8,
+        -9
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        8,
+        9,
+        -9
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        8,
+        10,
+        -9
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        8,
+        7,
+        -8
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        8,
+        8,
+        -8
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        8,
+        9,
+        -8
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        8,
+        7,
+        -7
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        8,
+        8,
+        -7
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        8,
+        7,
+        -6
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        9,
+        7,
+        -9
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        9,
+        8,
+        -9
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        9,
+        9,
+        -9
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        9,
+        10,
+        -9
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        9,
+        7,
+        -8
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        9,
+        8,
+        -8
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        9,
+        9,
+        -8
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        9,
+        7,
+        -7
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        9,
+        8,
+        -7
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        9,
+        7,
+        -6
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        6,
+        7,
+        -5
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        7,
+        7,
+        -5
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        7,
+        8,
+        -5
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        8,
+        7,
+        -5
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        8,
+        8,
+        -5
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        8,
+        9,
+        -5
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        9,
+        7,
+        -5
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        9,
+        8,
+        -5
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        9,
+        9,
+        -5
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        9,
+        10,
+        -5
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        6,
+        7,
+        -4
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        7,
+        7,
+        -4
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        7,
+        8,
+        -4
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        8,
+        7,
+        -4
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        8,
+        8,
+        -4
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        8,
+        9,
+        -4
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        9,
+        7,
+        -4
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        9,
+        8,
+        -4
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        9,
+        9,
+        -4
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        9,
+        10,
+        -4
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        6,
+        7,
+        -3
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        7,
+        7,
+        -3
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        7,
+        8,
+        -3
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        8,
+        7,
+        -3
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        8,
+        8,
+        -3
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        8,
+        9,
+        -3
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        9,
+        7,
+        -3
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        9,
+        8,
+        -3
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        9,
+        9,
+        -3
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        9,
+        10,
+        -3
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        6,
+        7,
+        -2
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        7,
+        7,
+        -2
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        7,
+        8,
+        -2
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        8,
+        7,
+        -2
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        8,
+        8,
+        -2
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        8,
+        9,
+        -2
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        9,
+        7,
+        -2
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        9,
+        8,
+        -2
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        9,
+        9,
+        -2
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        9,
+        10,
+        -2
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        6,
+        7,
+        -1
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        7,
+        7,
+        -1
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        7,
+        8,
+        -1
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        8,
+        7,
+        -1
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        8,
+        8,
+        -1
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        8,
+        9,
+        -1
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        9,
+        7,
+        -1
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        9,
+        8,
+        -1
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        9,
+        9,
+        -1
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        9,
+        10,
+        -1
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        6,
+        7,
+        0
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        7,
+        7,
+        0
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        7,
+        8,
+        0
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        8,
+        7,
+        0
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        8,
+        8,
+        0
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        8,
+        9,
+        0
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        9,
+        7,
+        0
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        9,
+        8,
+        0
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        9,
+        9,
+        0
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        9,
+        10,
+        0
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        6,
+        7,
+        1
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        7,
+        7,
+        1
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        7,
+        8,
+        1
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        8,
+        7,
+        1
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        8,
+        8,
+        1
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        8,
+        9,
+        1
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        9,
+        7,
+        1
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        9,
+        8,
+        1
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        9,
+        9,
+        1
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        9,
+        10,
+        1
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        6,
+        7,
+        2
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        7,
+        7,
+        2
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        7,
+        8,
+        2
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        8,
+        7,
+        2
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        8,
+        8,
+        2
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        8,
+        9,
+        2
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        9,
+        7,
+        2
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        9,
+        8,
+        2
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        9,
+        9,
+        2
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        9,
+        10,
+        2
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        6,
+        7,
+        3
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        7,
+        7,
+        3
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        7,
+        8,
+        3
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        8,
+        7,
+        3
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        8,
+        8,
+        3
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        8,
+        9,
+        3
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        9,
+        7,
+        3
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        9,
+        8,
+        3
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        9,
+        9,
+        3
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        9,
+        10,
+        3
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        6,
+        7,
+        4
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        7,
+        7,
+        4
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        7,
+        8,
+        4
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        8,
+        7,
+        4
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        8,
+        8,
+        4
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        8,
+        9,
+        4
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        9,
+        7,
+        4
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        9,
+        8,
+        4
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        9,
+        9,
+        4
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        9,
+        10,
+        4
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        6,
+        7,
+        5
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        7,
+        7,
+        5
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        7,
+        8,
+        5
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        8,
+        7,
+        5
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        8,
+        8,
+        5
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        8,
+        9,
+        5
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        9,
+        7,
+        5
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        9,
+        8,
+        5
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        9,
+        9,
+        5
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        9,
+        10,
+        5
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        6,
+        7,
+        6
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        7,
+        7,
+        6
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        7,
+        8,
+        6
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        8,
+        7,
+        6
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        8,
+        8,
+        6
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        8,
+        9,
+        6
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        9,
+        7,
+        6
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        9,
+        8,
+        6
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        9,
+        9,
+        6
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        9,
+        10,
+        6
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        6,
+        7,
+        7
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        7,
+        7,
+        7
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        7,
+        8,
+        7
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        8,
+        7,
+        7
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        8,
+        8,
+        7
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        8,
+        9,
+        7
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        9,
+        7,
+        7
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        9,
+        8,
+        7
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        9,
+        9,
+        7
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        9,
+        10,
+        7
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        6,
+        7,
+        8
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        7,
+        7,
+        8
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        7,
+        8,
+        8
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        8,
+        7,
+        8
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        8,
+        8,
+        8
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        8,
+        9,
+        8
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        9,
+        7,
+        8
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        9,
+        8,
+        8
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        9,
+        9,
+        8
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        9,
+        10,
+        8
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        6,
+        7,
+        9
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        7,
+        7,
+        9
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        7,
+        8,
+        9
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        8,
+        7,
+        9
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        8,
+        8,
+        9
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        8,
+        9,
+        9
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        9,
+        7,
+        9
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        9,
+        8,
+        9
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        9,
+        9,
+        9
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        9,
+        10,
+        9
+       ],
+       "block": "stone"
+      },
+      {
+       "at": [
+        -8,
+        6,
+        4
+       ],
+       "block": "sand"
+      },
+      {
+       "at": [
+        -8,
+        6,
+        5
+       ],
+       "block": "sand"
+      },
+      {
+       "at": [
+        -8,
+        6,
+        6
+       ],
+       "block": "sand"
+      },
+      {
+       "at": [
+        -8,
+        6,
+        7
+       ],
+       "block": "sand"
+      },
+      {
+       "at": [
+        -7,
+        6,
+        4
+       ],
+       "block": "sand"
+      },
+      {
+       "at": [
+        -7,
+        6,
+        5
+       ],
+       "block": "sand"
+      },
+      {
+       "at": [
+        -7,
+        6,
+        6
+       ],
+       "block": "sand"
+      },
+      {
+       "at": [
+        -7,
+        6,
+        7
+       ],
+       "block": "sand"
+      },
+      {
+       "at": [
+        -6,
+        6,
+        4
+       ],
+       "block": "sand"
+      },
+      {
+       "at": [
+        -6,
+        6,
+        5
+       ],
+       "block": "sand"
+      },
+      {
+       "at": [
+        -6,
+        6,
+        6
+       ],
+       "block": "sand"
+      },
+      {
+       "at": [
+        -6,
+        6,
+        7
+       ],
+       "block": "sand"
+      },
+      {
+       "at": [
+        -5,
+        6,
+        4
+       ],
+       "block": "sand"
+      },
+      {
+       "at": [
+        -5,
+        6,
+        5
+       ],
+       "block": "sand"
+      },
+      {
+       "at": [
+        -5,
+        6,
+        6
+       ],
+       "block": "sand"
+      },
+      {
+       "at": [
+        -5,
+        6,
+        7
+       ],
+       "block": "sand"
+      }
+     ]
+    },
+    "sindri.physics3d.voxel_collider": {
+     "friction": 0.8,
+     "layers": {
+      "filter": 4294967295,
+      "memberships": 4294967295
+     },
+     "margin": 2.0,
+     "restitution": 0.0
+    }
+   }
+  },
+  {
+   "id": "q-crate-0",
+   "name": "q-crate-0",
+   "transform_3d": {
+    "position": [
+     -2.5,
+     7.5,
+     0.5
+    ],
+    "rotation": [
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     1.0,
+     1.0,
+     1.0
+    ]
+   },
+   "components": {
+    "sindri.mesh": {
+     "layer": 0,
+     "primitive": "cube",
+     "texture": "textures/steel.png"
+    },
+    "sindri.physics3d.rigid_body": {
+     "kind": "dynamic",
+     "position": [
+      0,
+      0,
+      0
+     ],
+     "rotation": [
+      0,
+      0,
+      0,
+      1
+     ],
+     "linear_velocity": [
+      0,
+      0,
+      0
+     ],
+     "angular_velocity": [
+      0,
+      0,
+      0
+     ],
+     "gravity_scale": 1.0,
+     "linear_damping": 0.05,
+     "angular_damping": 0.1,
+     "lock_rotation": false
+    },
+    "sindri.physics3d.collider": {
+     "pieces": [
+      {
+       "shape": {
+        "shape": "box",
+        "half_extents": [
+         0.5,
+         0.5,
+         0.5
+        ]
+       },
+       "offset": [
+        0,
+        0,
+        0
+       ],
+       "rotation": [
+        0,
+        0,
+        0,
+        1
+       ],
+       "sensor": false,
+       "layers": {
+        "memberships": 4294967295,
+        "filter": 4294967295
+       },
+       "friction": 0.7,
+       "restitution": 0.1
+      }
+     ]
+    },
+    "sindri.tags": {
+     "tags": [
+      "crate"
+     ]
+    },
+    "sindri.script": {
+     "source": "scripts/quarry.decay",
+     "script": "QuarryCrate",
+     "properties": {}
+    }
+   }
+  },
+  {
+   "id": "q-crate-1",
+   "name": "q-crate-1",
+   "transform_3d": {
+    "position": [
+     -2.5,
+     8.5,
+     0.5
+    ],
+    "rotation": [
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     1.0,
+     1.0,
+     1.0
+    ]
+   },
+   "components": {
+    "sindri.mesh": {
+     "layer": 0,
+     "primitive": "cube",
+     "texture": "textures/crate.png"
+    },
+    "sindri.physics3d.rigid_body": {
+     "kind": "dynamic",
+     "position": [
+      0,
+      0,
+      0
+     ],
+     "rotation": [
+      0,
+      0,
+      0,
+      1
+     ],
+     "linear_velocity": [
+      0,
+      0,
+      0
+     ],
+     "angular_velocity": [
+      0,
+      0,
+      0
+     ],
+     "gravity_scale": 1.0,
+     "linear_damping": 0.05,
+     "angular_damping": 0.1,
+     "lock_rotation": false
+    },
+    "sindri.physics3d.collider": {
+     "pieces": [
+      {
+       "shape": {
+        "shape": "box",
+        "half_extents": [
+         0.5,
+         0.5,
+         0.5
+        ]
+       },
+       "offset": [
+        0,
+        0,
+        0
+       ],
+       "rotation": [
+        0,
+        0,
+        0,
+        1
+       ],
+       "sensor": false,
+       "layers": {
+        "memberships": 4294967295,
+        "filter": 4294967295
+       },
+       "friction": 0.7,
+       "restitution": 0.1
+      }
+     ]
+    },
+    "sindri.tags": {
+     "tags": [
+      "crate"
+     ]
+    },
+    "sindri.script": {
+     "source": "scripts/quarry.decay",
+     "script": "QuarryCrate",
+     "properties": {}
+    }
+   }
+  },
+  {
+   "id": "q-crate-2",
+   "name": "q-crate-2",
+   "transform_3d": {
+    "position": [
+     -2.5,
+     9.5,
+     0.5
+    ],
+    "rotation": [
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     1.0,
+     1.0,
+     1.0
+    ]
+   },
+   "components": {
+    "sindri.mesh": {
+     "layer": 0,
+     "primitive": "cube",
+     "texture": "textures/crate.png"
+    },
+    "sindri.physics3d.rigid_body": {
+     "kind": "dynamic",
+     "position": [
+      0,
+      0,
+      0
+     ],
+     "rotation": [
+      0,
+      0,
+      0,
+      1
+     ],
+     "linear_velocity": [
+      0,
+      0,
+      0
+     ],
+     "angular_velocity": [
+      0,
+      0,
+      0
+     ],
+     "gravity_scale": 1.0,
+     "linear_damping": 0.05,
+     "angular_damping": 0.1,
+     "lock_rotation": false
+    },
+    "sindri.physics3d.collider": {
+     "pieces": [
+      {
+       "shape": {
+        "shape": "box",
+        "half_extents": [
+         0.5,
+         0.5,
+         0.5
+        ]
+       },
+       "offset": [
+        0,
+        0,
+        0
+       ],
+       "rotation": [
+        0,
+        0,
+        0,
+        1
+       ],
+       "sensor": false,
+       "layers": {
+        "memberships": 4294967295,
+        "filter": 4294967295
+       },
+       "friction": 0.7,
+       "restitution": 0.1
+      }
+     ]
+    },
+    "sindri.tags": {
+     "tags": [
+      "crate"
+     ]
+    },
+    "sindri.script": {
+     "source": "scripts/quarry.decay",
+     "script": "QuarryCrate",
+     "properties": {}
+    }
+   }
+  },
+  {
+   "id": "q-crate-3",
+   "name": "q-crate-3",
+   "transform_3d": {
+    "position": [
+     -2.5,
+     10.5,
+     0.5
+    ],
+    "rotation": [
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     1.0,
+     1.0,
+     1.0
+    ]
+   },
+   "components": {
+    "sindri.mesh": {
+     "layer": 0,
+     "primitive": "cube",
+     "texture": "textures/crate.png"
+    },
+    "sindri.physics3d.rigid_body": {
+     "kind": "dynamic",
+     "position": [
+      0,
+      0,
+      0
+     ],
+     "rotation": [
+      0,
+      0,
+      0,
+      1
+     ],
+     "linear_velocity": [
+      0,
+      0,
+      0
+     ],
+     "angular_velocity": [
+      0,
+      0,
+      0
+     ],
+     "gravity_scale": 1.0,
+     "linear_damping": 0.05,
+     "angular_damping": 0.1,
+     "lock_rotation": false
+    },
+    "sindri.physics3d.collider": {
+     "pieces": [
+      {
+       "shape": {
+        "shape": "box",
+        "half_extents": [
+         0.5,
+         0.5,
+         0.5
+        ]
+       },
+       "offset": [
+        0,
+        0,
+        0
+       ],
+       "rotation": [
+        0,
+        0,
+        0,
+        1
+       ],
+       "sensor": false,
+       "layers": {
+        "memberships": 4294967295,
+        "filter": 4294967295
+       },
+       "friction": 0.7,
+       "restitution": 0.1
+      }
+     ]
+    },
+    "sindri.tags": {
+     "tags": [
+      "crate"
+     ]
+    },
+    "sindri.script": {
+     "source": "scripts/quarry.decay",
+     "script": "QuarryCrate",
+     "properties": {}
+    }
+   }
+  },
+  {
+   "id": "q-crate-4",
+   "name": "q-crate-4",
+   "transform_3d": {
+    "position": [
+     -2.5,
+     11.5,
+     0.5
+    ],
+    "rotation": [
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     1.0,
+     1.0,
+     1.0
+    ]
+   },
+   "components": {
+    "sindri.mesh": {
+     "layer": 0,
+     "primitive": "cube",
+     "texture": "textures/steel.png"
+    },
+    "sindri.physics3d.rigid_body": {
+     "kind": "dynamic",
+     "position": [
+      0,
+      0,
+      0
+     ],
+     "rotation": [
+      0,
+      0,
+      0,
+      1
+     ],
+     "linear_velocity": [
+      0,
+      0,
+      0
+     ],
+     "angular_velocity": [
+      0,
+      0,
+      0
+     ],
+     "gravity_scale": 1.0,
+     "linear_damping": 0.05,
+     "angular_damping": 0.1,
+     "lock_rotation": false
+    },
+    "sindri.physics3d.collider": {
+     "pieces": [
+      {
+       "shape": {
+        "shape": "box",
+        "half_extents": [
+         0.5,
+         0.5,
+         0.5
+        ]
+       },
+       "offset": [
+        0,
+        0,
+        0
+       ],
+       "rotation": [
+        0,
+        0,
+        0,
+        1
+       ],
+       "sensor": false,
+       "layers": {
+        "memberships": 4294967295,
+        "filter": 4294967295
+       },
+       "friction": 0.7,
+       "restitution": 0.1
+      }
+     ]
+    },
+    "sindri.tags": {
+     "tags": [
+      "crate"
+     ]
+    },
+    "sindri.script": {
+     "source": "scripts/quarry.decay",
+     "script": "QuarryCrate",
+     "properties": {}
+    }
+   }
+  },
+  {
+   "id": "q-crate-5",
+   "name": "q-crate-5",
+   "transform_3d": {
+    "position": [
+     1.0,
+     7.5,
+     3.5
+    ],
+    "rotation": [
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     1.0,
+     1.0,
+     1.0
+    ]
+   },
+   "components": {
+    "sindri.mesh": {
+     "layer": 0,
+     "primitive": "cube",
+     "texture": "textures/crate.png"
+    },
+    "sindri.physics3d.rigid_body": {
+     "kind": "dynamic",
+     "position": [
+      0,
+      0,
+      0
+     ],
+     "rotation": [
+      0,
+      0,
+      0,
+      1
+     ],
+     "linear_velocity": [
+      0,
+      0,
+      0
+     ],
+     "angular_velocity": [
+      0,
+      0,
+      0
+     ],
+     "gravity_scale": 1.0,
+     "linear_damping": 0.05,
+     "angular_damping": 0.1,
+     "lock_rotation": false
+    },
+    "sindri.physics3d.collider": {
+     "pieces": [
+      {
+       "shape": {
+        "shape": "box",
+        "half_extents": [
+         0.5,
+         0.5,
+         0.5
+        ]
+       },
+       "offset": [
+        0,
+        0,
+        0
+       ],
+       "rotation": [
+        0,
+        0,
+        0,
+        1
+       ],
+       "sensor": false,
+       "layers": {
+        "memberships": 4294967295,
+        "filter": 4294967295
+       },
+       "friction": 0.7,
+       "restitution": 0.1
+      }
+     ]
+    },
+    "sindri.tags": {
+     "tags": [
+      "crate"
+     ]
+    },
+    "sindri.script": {
+     "source": "scripts/quarry.decay",
+     "script": "QuarryCrate",
+     "properties": {}
+    }
+   }
+  },
+  {
+   "id": "q-crate-6",
+   "name": "q-crate-6",
+   "transform_3d": {
+    "position": [
+     2.05,
+     7.5,
+     3.5
+    ],
+    "rotation": [
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     1.0,
+     1.0,
+     1.0
+    ]
+   },
+   "components": {
+    "sindri.mesh": {
+     "layer": 0,
+     "primitive": "cube",
+     "texture": "textures/crate.png"
+    },
+    "sindri.physics3d.rigid_body": {
+     "kind": "dynamic",
+     "position": [
+      0,
+      0,
+      0
+     ],
+     "rotation": [
+      0,
+      0,
+      0,
+      1
+     ],
+     "linear_velocity": [
+      0,
+      0,
+      0
+     ],
+     "angular_velocity": [
+      0,
+      0,
+      0
+     ],
+     "gravity_scale": 1.0,
+     "linear_damping": 0.05,
+     "angular_damping": 0.1,
+     "lock_rotation": false
+    },
+    "sindri.physics3d.collider": {
+     "pieces": [
+      {
+       "shape": {
+        "shape": "box",
+        "half_extents": [
+         0.5,
+         0.5,
+         0.5
+        ]
+       },
+       "offset": [
+        0,
+        0,
+        0
+       ],
+       "rotation": [
+        0,
+        0,
+        0,
+        1
+       ],
+       "sensor": false,
+       "layers": {
+        "memberships": 4294967295,
+        "filter": 4294967295
+       },
+       "friction": 0.7,
+       "restitution": 0.1
+      }
+     ]
+    },
+    "sindri.tags": {
+     "tags": [
+      "crate"
+     ]
+    },
+    "sindri.script": {
+     "source": "scripts/quarry.decay",
+     "script": "QuarryCrate",
+     "properties": {}
+    }
+   }
+  },
+  {
+   "id": "q-crate-7",
+   "name": "q-crate-7",
+   "transform_3d": {
+    "position": [
+     3.1,
+     7.5,
+     3.5
+    ],
+    "rotation": [
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     1.0,
+     1.0,
+     1.0
+    ]
+   },
+   "components": {
+    "sindri.mesh": {
+     "layer": 0,
+     "primitive": "cube",
+     "texture": "textures/crate.png"
+    },
+    "sindri.physics3d.rigid_body": {
+     "kind": "dynamic",
+     "position": [
+      0,
+      0,
+      0
+     ],
+     "rotation": [
+      0,
+      0,
+      0,
+      1
+     ],
+     "linear_velocity": [
+      0,
+      0,
+      0
+     ],
+     "angular_velocity": [
+      0,
+      0,
+      0
+     ],
+     "gravity_scale": 1.0,
+     "linear_damping": 0.05,
+     "angular_damping": 0.1,
+     "lock_rotation": false
+    },
+    "sindri.physics3d.collider": {
+     "pieces": [
+      {
+       "shape": {
+        "shape": "box",
+        "half_extents": [
+         0.5,
+         0.5,
+         0.5
+        ]
+       },
+       "offset": [
+        0,
+        0,
+        0
+       ],
+       "rotation": [
+        0,
+        0,
+        0,
+        1
+       ],
+       "sensor": false,
+       "layers": {
+        "memberships": 4294967295,
+        "filter": 4294967295
+       },
+       "friction": 0.7,
+       "restitution": 0.1
+      }
+     ]
+    },
+    "sindri.tags": {
+     "tags": [
+      "crate"
+     ]
+    },
+    "sindri.script": {
+     "source": "scripts/quarry.decay",
+     "script": "QuarryCrate",
+     "properties": {}
+    }
+   }
+  },
+  {
+   "id": "q-crate-8",
+   "name": "q-crate-8",
+   "transform_3d": {
+    "position": [
+     1.52,
+     8.5,
+     3.5
+    ],
+    "rotation": [
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     1.0,
+     1.0,
+     1.0
+    ]
+   },
+   "components": {
+    "sindri.mesh": {
+     "layer": 0,
+     "primitive": "cube",
+     "texture": "textures/steel.png"
+    },
+    "sindri.physics3d.rigid_body": {
+     "kind": "dynamic",
+     "position": [
+      0,
+      0,
+      0
+     ],
+     "rotation": [
+      0,
+      0,
+      0,
+      1
+     ],
+     "linear_velocity": [
+      0,
+      0,
+      0
+     ],
+     "angular_velocity": [
+      0,
+      0,
+      0
+     ],
+     "gravity_scale": 1.0,
+     "linear_damping": 0.05,
+     "angular_damping": 0.1,
+     "lock_rotation": false
+    },
+    "sindri.physics3d.collider": {
+     "pieces": [
+      {
+       "shape": {
+        "shape": "box",
+        "half_extents": [
+         0.5,
+         0.5,
+         0.5
+        ]
+       },
+       "offset": [
+        0,
+        0,
+        0
+       ],
+       "rotation": [
+        0,
+        0,
+        0,
+        1
+       ],
+       "sensor": false,
+       "layers": {
+        "memberships": 4294967295,
+        "filter": 4294967295
+       },
+       "friction": 0.7,
+       "restitution": 0.1
+      }
+     ]
+    },
+    "sindri.tags": {
+     "tags": [
+      "crate"
+     ]
+    },
+    "sindri.script": {
+     "source": "scripts/quarry.decay",
+     "script": "QuarryCrate",
+     "properties": {}
+    }
+   }
+  },
+  {
+   "id": "q-crate-9",
+   "name": "q-crate-9",
+   "transform_3d": {
+    "position": [
+     2.57,
+     8.5,
+     3.5
+    ],
+    "rotation": [
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     1.0,
+     1.0,
+     1.0
+    ]
+   },
+   "components": {
+    "sindri.mesh": {
+     "layer": 0,
+     "primitive": "cube",
+     "texture": "textures/crate.png"
+    },
+    "sindri.physics3d.rigid_body": {
+     "kind": "dynamic",
+     "position": [
+      0,
+      0,
+      0
+     ],
+     "rotation": [
+      0,
+      0,
+      0,
+      1
+     ],
+     "linear_velocity": [
+      0,
+      0,
+      0
+     ],
+     "angular_velocity": [
+      0,
+      0,
+      0
+     ],
+     "gravity_scale": 1.0,
+     "linear_damping": 0.05,
+     "angular_damping": 0.1,
+     "lock_rotation": false
+    },
+    "sindri.physics3d.collider": {
+     "pieces": [
+      {
+       "shape": {
+        "shape": "box",
+        "half_extents": [
+         0.5,
+         0.5,
+         0.5
+        ]
+       },
+       "offset": [
+        0,
+        0,
+        0
+       ],
+       "rotation": [
+        0,
+        0,
+        0,
+        1
+       ],
+       "sensor": false,
+       "layers": {
+        "memberships": 4294967295,
+        "filter": 4294967295
+       },
+       "friction": 0.7,
+       "restitution": 0.1
+      }
+     ]
+    },
+    "sindri.tags": {
+     "tags": [
+      "crate"
+     ]
+    },
+    "sindri.script": {
+     "source": "scripts/quarry.decay",
+     "script": "QuarryCrate",
+     "properties": {}
+    }
+   }
+  },
+  {
+   "id": "q-crate-10",
+   "name": "q-crate-10",
+   "transform_3d": {
+    "position": [
+     2.04,
+     9.5,
+     3.5
+    ],
+    "rotation": [
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     1.0,
+     1.0,
+     1.0
+    ]
+   },
+   "components": {
+    "sindri.mesh": {
+     "layer": 0,
+     "primitive": "cube",
+     "texture": "textures/crate.png"
+    },
+    "sindri.physics3d.rigid_body": {
+     "kind": "dynamic",
+     "position": [
+      0,
+      0,
+      0
+     ],
+     "rotation": [
+      0,
+      0,
+      0,
+      1
+     ],
+     "linear_velocity": [
+      0,
+      0,
+      0
+     ],
+     "angular_velocity": [
+      0,
+      0,
+      0
+     ],
+     "gravity_scale": 1.0,
+     "linear_damping": 0.05,
+     "angular_damping": 0.1,
+     "lock_rotation": false
+    },
+    "sindri.physics3d.collider": {
+     "pieces": [
+      {
+       "shape": {
+        "shape": "box",
+        "half_extents": [
+         0.5,
+         0.5,
+         0.5
+        ]
+       },
+       "offset": [
+        0,
+        0,
+        0
+       ],
+       "rotation": [
+        0,
+        0,
+        0,
+        1
+       ],
+       "sensor": false,
+       "layers": {
+        "memberships": 4294967295,
+        "filter": 4294967295
+       },
+       "friction": 0.7,
+       "restitution": 0.1
+      }
+     ]
+    },
+    "sindri.tags": {
+     "tags": [
+      "crate"
+     ]
+    },
+    "sindri.script": {
+     "source": "scripts/quarry.decay",
+     "script": "QuarryCrate",
+     "properties": {}
+    }
+   }
+  },
+  {
+   "id": "q-crate-11",
+   "name": "q-crate-11",
+   "transform_3d": {
+    "position": [
+     -6.0,
+     7.5,
+     -3.0
+    ],
+    "rotation": [
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     1.0,
+     1.0,
+     1.0
+    ]
+   },
+   "components": {
+    "sindri.mesh": {
+     "layer": 0,
+     "primitive": "cube",
+     "texture": "textures/crate.png"
+    },
+    "sindri.physics3d.rigid_body": {
+     "kind": "dynamic",
+     "position": [
+      0,
+      0,
+      0
+     ],
+     "rotation": [
+      0,
+      0,
+      0,
+      1
+     ],
+     "linear_velocity": [
+      0,
+      0,
+      0
+     ],
+     "angular_velocity": [
+      0,
+      0,
+      0
+     ],
+     "gravity_scale": 1.0,
+     "linear_damping": 0.05,
+     "angular_damping": 0.1,
+     "lock_rotation": false
+    },
+    "sindri.physics3d.collider": {
+     "pieces": [
+      {
+       "shape": {
+        "shape": "box",
+        "half_extents": [
+         0.5,
+         0.5,
+         0.5
+        ]
+       },
+       "offset": [
+        0,
+        0,
+        0
+       ],
+       "rotation": [
+        0,
+        0,
+        0,
+        1
+       ],
+       "sensor": false,
+       "layers": {
+        "memberships": 4294967295,
+        "filter": 4294967295
+       },
+       "friction": 0.7,
+       "restitution": 0.1
+      }
+     ]
+    },
+    "sindri.tags": {
+     "tags": [
+      "crate"
+     ]
+    },
+    "sindri.script": {
+     "source": "scripts/quarry.decay",
+     "script": "QuarryCrate",
+     "properties": {}
+    }
+   }
+  },
+  {
+   "id": "q-crate-12",
+   "name": "q-crate-12",
+   "transform_3d": {
+    "position": [
+     -4.4,
+     7.5,
+     -3.0
+    ],
+    "rotation": [
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     1.0,
+     1.0,
+     1.0
+    ]
+   },
+   "components": {
+    "sindri.mesh": {
+     "layer": 0,
+     "primitive": "cube",
+     "texture": "textures/steel.png"
+    },
+    "sindri.physics3d.rigid_body": {
+     "kind": "dynamic",
+     "position": [
+      0,
+      0,
+      0
+     ],
+     "rotation": [
+      0,
+      0,
+      0,
+      1
+     ],
+     "linear_velocity": [
+      0,
+      0,
+      0
+     ],
+     "angular_velocity": [
+      0,
+      0,
+      0
+     ],
+     "gravity_scale": 1.0,
+     "linear_damping": 0.05,
+     "angular_damping": 0.1,
+     "lock_rotation": false
+    },
+    "sindri.physics3d.collider": {
+     "pieces": [
+      {
+       "shape": {
+        "shape": "box",
+        "half_extents": [
+         0.5,
+         0.5,
+         0.5
+        ]
+       },
+       "offset": [
+        0,
+        0,
+        0
+       ],
+       "rotation": [
+        0,
+        0,
+        0,
+        1
+       ],
+       "sensor": false,
+       "layers": {
+        "memberships": 4294967295,
+        "filter": 4294967295
+       },
+       "friction": 0.7,
+       "restitution": 0.1
+      }
+     ]
+    },
+    "sindri.tags": {
+     "tags": [
+      "crate"
+     ]
+    },
+    "sindri.script": {
+     "source": "scripts/quarry.decay",
+     "script": "QuarryCrate",
+     "properties": {}
+    }
+   }
+  },
+  {
+   "id": "q-crate-13",
+   "name": "q-crate-13",
+   "transform_3d": {
+    "position": [
+     -2.8,
+     7.5,
+     -3.0
+    ],
+    "rotation": [
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     1.0,
+     1.0,
+     1.0
+    ]
+   },
+   "components": {
+    "sindri.mesh": {
+     "layer": 0,
+     "primitive": "cube",
+     "texture": "textures/crate.png"
+    },
+    "sindri.physics3d.rigid_body": {
+     "kind": "dynamic",
+     "position": [
+      0,
+      0,
+      0
+     ],
+     "rotation": [
+      0,
+      0,
+      0,
+      1
+     ],
+     "linear_velocity": [
+      0,
+      0,
+      0
+     ],
+     "angular_velocity": [
+      0,
+      0,
+      0
+     ],
+     "gravity_scale": 1.0,
+     "linear_damping": 0.05,
+     "angular_damping": 0.1,
+     "lock_rotation": false
+    },
+    "sindri.physics3d.collider": {
+     "pieces": [
+      {
+       "shape": {
+        "shape": "box",
+        "half_extents": [
+         0.5,
+         0.5,
+         0.5
+        ]
+       },
+       "offset": [
+        0,
+        0,
+        0
+       ],
+       "rotation": [
+        0,
+        0,
+        0,
+        1
+       ],
+       "sensor": false,
+       "layers": {
+        "memberships": 4294967295,
+        "filter": 4294967295
+       },
+       "friction": 0.7,
+       "restitution": 0.1
+      }
+     ]
+    },
+    "sindri.tags": {
+     "tags": [
+      "crate"
+     ]
+    },
+    "sindri.script": {
+     "source": "scripts/quarry.decay",
+     "script": "QuarryCrate",
+     "properties": {}
+    }
+   }
+  },
+  {
+   "id": "q-crate-14",
+   "name": "q-crate-14",
+   "transform_3d": {
+    "position": [
+     -1.1999999999999993,
+     7.5,
+     -3.0
+    ],
+    "rotation": [
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     1.0,
+     1.0,
+     1.0
+    ]
+   },
+   "components": {
+    "sindri.mesh": {
+     "layer": 0,
+     "primitive": "cube",
+     "texture": "textures/crate.png"
+    },
+    "sindri.physics3d.rigid_body": {
+     "kind": "dynamic",
+     "position": [
+      0,
+      0,
+      0
+     ],
+     "rotation": [
+      0,
+      0,
+      0,
+      1
+     ],
+     "linear_velocity": [
+      0,
+      0,
+      0
+     ],
+     "angular_velocity": [
+      0,
+      0,
+      0
+     ],
+     "gravity_scale": 1.0,
+     "linear_damping": 0.05,
+     "angular_damping": 0.1,
+     "lock_rotation": false
+    },
+    "sindri.physics3d.collider": {
+     "pieces": [
+      {
+       "shape": {
+        "shape": "box",
+        "half_extents": [
+         0.5,
+         0.5,
+         0.5
+        ]
+       },
+       "offset": [
+        0,
+        0,
+        0
+       ],
+       "rotation": [
+        0,
+        0,
+        0,
+        1
+       ],
+       "sensor": false,
+       "layers": {
+        "memberships": 4294967295,
+        "filter": 4294967295
+       },
+       "friction": 0.7,
+       "restitution": 0.1
+      }
+     ]
+    },
+    "sindri.tags": {
+     "tags": [
+      "crate"
+     ]
+    },
+    "sindri.script": {
+     "source": "scripts/quarry.decay",
+     "script": "QuarryCrate",
+     "properties": {}
+    }
+   }
+  },
+  {
+   "id": "q-laser",
+   "name": "q-laser",
+   "transform_3d": {
+    "position": [
+     0,
+     14,
+     0.5
+    ],
+    "rotation": [
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     0.06,
+     1.0,
+     0.06
+    ]
+   },
+   "components": {
+    "sindri.mesh": {
+     "layer": 0,
+     "primitive": "cube",
+     "texture": "textures/laser.png"
+    }
+   }
+  },
+  {
+   "id": "q-laser-hit",
+   "name": "q-laser-hit",
+   "transform_3d": {
+    "position": [
+     0,
+     7,
+     0.5
+    ],
+    "rotation": [
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     0.3,
+     0.3,
+     0.3
+    ]
+   },
+   "components": {
+    "sindri.mesh": {
+     "layer": 0,
+     "primitive": "cube",
+     "texture": "textures/laser.png"
+    }
+   }
+  },
+  {
+   "id": "q-director",
+   "name": "Quarry Director",
+   "transform_3d": {
+    "position": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "rotation": [
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     1.0,
+     1.0,
+     1.0
+    ]
+   },
+   "components": {
+    "sindri.script": {
+     "source": "scripts/quarry.decay",
+     "script": "Quarry",
+     "properties": {
+      "crate_prefab": "prefabs/crate3d.prefab"
+     }
+    }
+   }
+  },
+  {
+   "id": "q-hud",
+   "name": "q-hud",
+   "transform_3d": {
+    "position": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "rotation": [
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     3.4,
+     2.0,
+     1.0
+    ]
+   },
+   "components": {
+    "weave.style": {
+     "classes": [
+      "hud"
+     ]
+    },
+    "sindri.ui.layout": {
+     "direction": "column",
+     "spacing": 0.02,
+     "justify": "space_between",
+     "align": "center"
+    }
+   }
+  },
+  {
+   "id": "q-top",
+   "name": "q-top",
+   "parent": "q-hud",
+   "transform_3d": {
+    "position": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "rotation": [
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     3.3,
+     0.2,
+     1.0
+    ]
+   },
+   "components": {
+    "weave.style": {
+     "classes": [
+      "top"
+     ]
+    },
+    "sindri.ui.layout": {
+     "direction": "row",
+     "spacing": 0.02,
+     "justify": "space_between",
+     "align": "start"
+    }
+   }
+  },
+  {
+   "id": "q-brand",
+   "name": "q-brand",
+   "parent": "q-top",
+   "transform_3d": {
+    "position": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "rotation": [
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     1.0,
+     0.2,
+     1.0
+    ]
+   },
+   "components": {
+    "weave.style": {
+     "classes": [
+      "brand"
+     ]
+    },
+    "sindri.ui.layout": {
+     "direction": "column",
+     "spacing": 0.02,
+     "justify": "start",
+     "align": "start"
+    }
+   }
+  },
+  {
+   "id": "q-title",
+   "name": "q-title",
+   "parent": "q-brand",
+   "transform_3d": {
+    "position": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "rotation": [
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     1.0,
+     0.08,
+     1.0
+    ]
+   },
+   "components": {
+    "weave.style": {
+     "classes": [
+      "title"
+     ]
+    },
+    "sindri.ui.text": {
+     "text": "VOXEL QUARRY",
+     "font": "fonts/ChakraPetch-Regular.ttf",
+     "font_size": 0.0667,
+     "bounds": [
+      1.0,
+      0.08
+     ],
+     "anchor": "center",
+     "layer": 40,
+     "line_align": "center"
+    }
+   }
+  },
+  {
+   "id": "q-stats",
+   "name": "q-stats",
+   "parent": "q-brand",
+   "transform_3d": {
+    "position": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "rotation": [
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     1.2,
+     0.05,
+     1.0
+    ]
+   },
+   "components": {
+    "weave.style": {
+     "classes": [
+      "stats"
+     ]
+    },
+    "sindri.ui.text": {
+     "text": "",
+     "font": "fonts/ChakraPetch-Regular.ttf",
+     "font_size": 0.0306,
+     "bounds": [
+      1.2,
+      0.05
+     ],
+     "anchor": "center",
+     "layer": 40,
+     "line_align": "center"
+    }
+   }
+  },
+  {
+   "id": "q-readout",
+   "name": "q-readout",
+   "parent": "q-brand",
+   "transform_3d": {
+    "position": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "rotation": [
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     1.6,
+     0.08,
+     1.0
+    ]
+   },
+   "components": {
+    "weave.style": {
+     "classes": [
+      "readout"
+     ]
+    },
+    "sindri.ui.text": {
+     "text": "",
+     "font": "fonts/ChakraPetch-Regular.ttf",
+     "font_size": 0.0306,
+     "bounds": [
+      1.6,
+      0.08
+     ],
+     "anchor": "center",
+     "layer": 40,
+     "line_align": "center"
+    }
+   }
+  },
+  {
+   "id": "q-globals",
+   "name": "q-globals",
+   "parent": "q-top",
+   "transform_3d": {
+    "position": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "rotation": [
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     2.2,
+     0.1,
+     1.0
+    ]
+   },
+   "components": {
+    "weave.style": {
+     "classes": [
+      "globals"
+     ]
+    },
+    "sindri.ui.layout": {
+     "direction": "row",
+     "spacing": 0.02,
+     "justify": "end",
+     "align": "center"
+    }
+   }
+  },
+  {
+   "id": "q-back",
+   "name": "q-back",
+   "parent": "q-globals",
+   "transform_3d": {
+    "position": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "rotation": [
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     0.3,
+     0.09,
+     1.0
+    ]
+   },
+   "components": {
+    "weave.style": {
+     "classes": [
+      "button",
+      "loud"
+     ]
+    },
+    "sindri.ui.shape": {
+     "kind": "rect",
+     "fill": [
+      0.00605,
+      0.01681,
+      0.03689,
+      1.0
+     ],
+     "anchor": "center",
+     "layer": 31
+    },
+    "sindri.ui.button": {
+     "label": "< THE ROOM",
+     "autofocus": false,
+     "disabled": false
+    },
+    "sindri.ui.layout": {
+     "direction": "row",
+     "spacing": 0.02,
+     "justify": "center",
+     "align": "center"
+    }
+   }
+  },
+  {
+   "id": "q-back-label",
+   "name": "q-back-label",
+   "parent": "q-back",
+   "transform_3d": {
+    "position": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "rotation": [
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     0.3,
+     0.05,
+     1.0
+    ]
+   },
+   "components": {
+    "weave.style": {
+     "classes": [
+      "button-label"
+     ]
+    },
+    "sindri.ui.text": {
+     "text": "< THE ROOM",
+     "font": "fonts/ChakraPetch-Regular.ttf",
+     "font_size": 0.0361,
+     "bounds": [
+      0.3,
+      0.05
+     ],
+     "anchor": "center",
+     "layer": 40,
+     "line_align": "center"
+    }
+   }
+  },
+  {
+   "id": "q-reset",
+   "name": "q-reset",
+   "parent": "q-globals",
+   "transform_3d": {
+    "position": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "rotation": [
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     0.22,
+     0.09,
+     1.0
+    ]
+   },
+   "components": {
+    "weave.style": {
+     "classes": [
+      "button"
+     ]
+    },
+    "sindri.ui.shape": {
+     "kind": "rect",
+     "fill": [
+      0.00605,
+      0.01681,
+      0.03689,
+      1.0
+     ],
+     "anchor": "center",
+     "layer": 31
+    },
+    "sindri.ui.button": {
+     "label": "RESET",
+     "autofocus": false,
+     "disabled": false
+    },
+    "sindri.ui.layout": {
+     "direction": "row",
+     "spacing": 0.02,
+     "justify": "center",
+     "align": "center"
+    }
+   }
+  },
+  {
+   "id": "q-reset-label",
+   "name": "q-reset-label",
+   "parent": "q-reset",
+   "transform_3d": {
+    "position": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "rotation": [
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     0.22,
+     0.05,
+     1.0
+    ]
+   },
+   "components": {
+    "weave.style": {
+     "classes": [
+      "button-label"
+     ]
+    },
+    "sindri.ui.text": {
+     "text": "RESET",
+     "font": "fonts/ChakraPetch-Regular.ttf",
+     "font_size": 0.0361,
+     "bounds": [
+      0.22,
+      0.05
+     ],
+     "anchor": "center",
+     "layer": 40,
+     "line_align": "center"
+    }
+   }
+  },
+  {
+   "id": "q-bottom",
+   "name": "q-bottom",
+   "parent": "q-hud",
+   "transform_3d": {
+    "position": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "rotation": [
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     3.3,
+     0.4,
+     1.0
+    ]
+   },
+   "components": {
+    "weave.style": {
+     "classes": [
+      "bottom"
+     ]
+    },
+    "sindri.ui.layout": {
+     "direction": "column",
+     "spacing": 0.02,
+     "justify": "end",
+     "align": "center"
+    }
+   }
+  },
+  {
+   "id": "q-dock",
+   "name": "q-dock",
+   "parent": "q-bottom",
+   "transform_3d": {
+    "position": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "rotation": [
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     3.3,
+     0.11,
+     1.0
+    ]
+   },
+   "components": {
+    "weave.style": {
+     "classes": [
+      "dock"
+     ]
+    },
+    "sindri.ui.layout": {
+     "direction": "row",
+     "spacing": 0.02,
+     "justify": "center",
+     "align": "center"
+    }
+   }
+  },
+  {
+   "id": "q-actions",
+   "name": "q-actions",
+   "parent": "q-dock",
+   "transform_3d": {
+    "position": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "rotation": [
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     3.0,
+     0.1,
+     1.0
+    ]
+   },
+   "components": {
+    "weave.style": {
+     "classes": [
+      "actions"
+     ]
+    },
+    "sindri.ui.layout": {
+     "direction": "row",
+     "spacing": 0.02,
+     "justify": "center",
+     "align": "center"
+    }
+   }
+  },
+  {
+   "id": "q-act-1",
+   "name": "q-act-1",
+   "parent": "q-actions",
+   "transform_3d": {
+    "position": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "rotation": [
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     0.36,
+     0.09,
+     1.0
+    ]
+   },
+   "components": {
+    "weave.style": {
+     "classes": [
+      "button",
+      "action"
+     ]
+    },
+    "sindri.ui.shape": {
+     "kind": "rect",
+     "fill": [
+      0.00605,
+      0.01681,
+      0.03689,
+      1.0
+     ],
+     "anchor": "center",
+     "layer": 31
+    },
+    "sindri.ui.button": {
+     "label": "DROP CRATES",
+     "autofocus": false,
+     "disabled": false
+    },
+    "sindri.ui.layout": {
+     "direction": "row",
+     "spacing": 0.02,
+     "justify": "center",
+     "align": "center"
+    }
+   }
+  },
+  {
+   "id": "q-act-1-label",
+   "name": "q-act-1-label",
+   "parent": "q-act-1",
+   "transform_3d": {
+    "position": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "rotation": [
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     0.36,
+     0.05,
+     1.0
+    ]
+   },
+   "components": {
+    "weave.style": {
+     "classes": [
+      "button-label"
+     ]
+    },
+    "sindri.ui.text": {
+     "text": "DROP CRATES",
+     "font": "fonts/ChakraPetch-Regular.ttf",
+     "font_size": 0.0361,
+     "bounds": [
+      0.36,
+      0.05
+     ],
+     "anchor": "center",
+     "layer": 40,
+     "line_align": "center"
+    }
+   }
+  },
+  {
+   "id": "q-act-2",
+   "name": "q-act-2",
+   "parent": "q-actions",
+   "transform_3d": {
+    "position": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "rotation": [
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     0.36,
+     0.09,
+     1.0
+    ]
+   },
+   "components": {
+    "weave.style": {
+     "classes": [
+      "button",
+      "action"
+     ]
+    },
+    "sindri.ui.shape": {
+     "kind": "rect",
+     "fill": [
+      0.00605,
+      0.01681,
+      0.03689,
+      1.0
+     ],
+     "anchor": "center",
+     "layer": 31
+    },
+    "sindri.ui.button": {
+     "label": "DIG UNDER",
+     "autofocus": false,
+     "disabled": false
+    },
+    "sindri.ui.layout": {
+     "direction": "row",
+     "spacing": 0.02,
+     "justify": "center",
+     "align": "center"
+    }
+   }
+  },
+  {
+   "id": "q-act-2-label",
+   "name": "q-act-2-label",
+   "parent": "q-act-2",
+   "transform_3d": {
+    "position": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "rotation": [
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     0.36,
+     0.05,
+     1.0
+    ]
+   },
+   "components": {
+    "weave.style": {
+     "classes": [
+      "button-label"
+     ]
+    },
+    "sindri.ui.text": {
+     "text": "DIG UNDER",
+     "font": "fonts/ChakraPetch-Regular.ttf",
+     "font_size": 0.0361,
+     "bounds": [
+      0.36,
+      0.05
+     ],
+     "anchor": "center",
+     "layer": 40,
+     "line_align": "center"
+    }
+   }
+  },
+  {
+   "id": "q-act-3",
+   "name": "q-act-3",
+   "parent": "q-actions",
+   "transform_3d": {
+    "position": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "rotation": [
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     0.36,
+     0.09,
+     1.0
+    ]
+   },
+   "components": {
+    "weave.style": {
+     "classes": [
+      "button",
+      "action"
+     ]
+    },
+    "sindri.ui.shape": {
+     "kind": "rect",
+     "fill": [
+      0.00605,
+      0.01681,
+      0.03689,
+      1.0
+     ],
+     "anchor": "center",
+     "layer": 31
+    },
+    "sindri.ui.button": {
+     "label": "SHOVE",
+     "autofocus": false,
+     "disabled": false
+    },
+    "sindri.ui.layout": {
+     "direction": "row",
+     "spacing": 0.02,
+     "justify": "center",
+     "align": "center"
+    }
+   }
+  },
+  {
+   "id": "q-act-3-label",
+   "name": "q-act-3-label",
+   "parent": "q-act-3",
+   "transform_3d": {
+    "position": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "rotation": [
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     0.36,
+     0.05,
+     1.0
+    ]
+   },
+   "components": {
+    "weave.style": {
+     "classes": [
+      "button-label"
+     ]
+    },
+    "sindri.ui.text": {
+     "text": "SHOVE",
+     "font": "fonts/ChakraPetch-Regular.ttf",
+     "font_size": 0.0361,
+     "bounds": [
+      0.36,
+      0.05
+     ],
+     "anchor": "center",
+     "layer": 40,
+     "line_align": "center"
+    }
+   }
+  },
+  {
+   "id": "q-act-4",
+   "name": "q-act-4",
+   "parent": "q-actions",
+   "transform_3d": {
+    "position": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "rotation": [
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     0.36,
+     0.09,
+     1.0
+    ]
+   },
+   "components": {
+    "weave.style": {
+     "classes": [
+      "button",
+      "action"
+     ]
+    },
+    "sindri.ui.shape": {
+     "kind": "rect",
+     "fill": [
+      0.00605,
+      0.01681,
+      0.03689,
+      1.0
+     ],
+     "anchor": "center",
+     "layer": 31
+    },
+    "sindri.ui.button": {
+     "label": "STOP LASER",
+     "autofocus": false,
+     "disabled": false
+    },
+    "sindri.ui.layout": {
+     "direction": "row",
+     "spacing": 0.02,
+     "justify": "center",
+     "align": "center"
+    }
+   }
+  },
+  {
+   "id": "q-act-4-label",
+   "name": "q-act-4-label",
+   "parent": "q-act-4",
+   "transform_3d": {
+    "position": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "rotation": [
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     0.36,
+     0.05,
+     1.0
+    ]
+   },
+   "components": {
+    "weave.style": {
+     "classes": [
+      "button-label"
+     ]
+    },
+    "sindri.ui.text": {
+     "text": "STOP LASER",
+     "font": "fonts/ChakraPetch-Regular.ttf",
+     "font_size": 0.0361,
+     "bounds": [
+      0.36,
+      0.05
+     ],
+     "anchor": "center",
+     "layer": 40,
+     "line_align": "center"
+    }
+   }
+  },
+  {
+   "id": "q-hint",
+   "name": "q-hint",
+   "parent": "q-bottom",
+   "transform_3d": {
+    "position": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "rotation": [
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     2.6,
+     0.05,
+     1.0
+    ]
+   },
+   "components": {
+    "weave.style": {
+     "classes": [
+      "hint"
+     ]
+    },
+    "sindri.ui.text": {
+     "text": "Tap or click the ground to dig a block. 1-4 work the quarry; K goes back to the room.",
+     "font": "fonts/ChakraPetch-Regular.ttf",
+     "font_size": 0.0306,
+     "bounds": [
+      2.6,
+      0.05
+     ],
+     "anchor": "center",
+     "layer": 40,
+     "line_align": "center"
+    }
+   }
+  }
+ ]
+}

@@ -61,6 +61,24 @@ impl Analyzer<'_, '_> {
             self.check_assignable(expected, &initializer_type, span);
         }
 
+        // An untyped binding of nothing would otherwise be accepted here and
+        // fail at runtime wherever it is used. The common way in is another
+        // script's function, which is a message and gives nothing back.
+        let initializer_type = if declared_type.is_none() && initializer_type == Type::Unit {
+            self.error(
+                Code::TypeMismatch,
+                span,
+                format!(
+                    "`{name}` would hold nothing: the right side gives `unit`. \
+                     Another script's function (`Name.on(entity).f()`) is a message \
+                     delivered later and returns nothing -- read one of its fields instead"
+                ),
+            );
+            Type::Unknown
+        } else {
+            initializer_type
+        };
+
         self.define_local(
             name,
             Symbol {

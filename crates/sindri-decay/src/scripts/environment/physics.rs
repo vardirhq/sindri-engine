@@ -70,6 +70,7 @@ fn physics_params(call: PhysicsCall) -> Vec<Type> {
         PhysicsCall::ApplyForce => vec![entity(), Type::Vec2],
         PhysicsCall::ApplyImpulseAtPoint => vec![entity(), Type::Vec2, Type::Vec2],
         PhysicsCall::Layer => vec![Type::String],
+        PhysicsCall::SetGravity => vec![Type::Vec2],
         PhysicsCall::Mask => vec![Type::array_of(Type::String)],
         PhysicsCall::RemoveJoint
         | PhysicsCall::JointEnabled
@@ -146,6 +147,7 @@ fn physics_return_type(call: PhysicsCall) -> Type {
         PhysicsCall::Raycast | PhysicsCall::CastCircle | PhysicsCall::CastBox => {
             Type::Named(RAY_HIT.to_owned())
         }
+        PhysicsCall::Gravity => Type::Vec2,
         PhysicsCall::VelocityX
         | PhysicsCall::VelocityY
         | PhysicsCall::Layer
@@ -175,7 +177,8 @@ fn physics_return_type(call: PhysicsCall) -> Type {
         | PhysicsCall::ApplyTorque
         | PhysicsCall::SetAngularVelocity
         | PhysicsCall::ApplyAngularImpulse
-        | PhysicsCall::ApplyImpulseAtPoint => Type::Unit,
+        | PhysicsCall::ApplyImpulseAtPoint
+        | PhysicsCall::SetGravity => Type::Unit,
         _ => Type::array_of(entity()),
     }
 }

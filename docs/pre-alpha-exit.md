@@ -48,6 +48,8 @@ Voxel terrain must participate in real collision.
 
 The Physics Showcase must demonstrate the system as something worth playing with, not merely a collection of rectangles politely falling onto other rectangles.
 
+The Physics Showcase is `examples/physics`, the Physics Playground; [`physics-playground.md`](physics-playground.md) records what it covers and the gaps it found.
+
 ### Decay
 
 Gameplay belongs in Decay.

@@ -139,7 +139,7 @@ const problems = [];
 const tweenActions = new Set();
 let cameraChanges = 0;
 let cameraImpacts = 0;
-const physicsEvidence = { results: new Set(), masks: new Set(), changes: 0, sensor: false, contact: false };
+const physicsEvidence = { said: [] };
 const uiEvidence = freshUiEvidence();
 const spatialResults = new Set();
 let spatialChanges = 0;
@@ -157,12 +157,8 @@ page.on('console', (message) => {
   const text = message.text();
   if (process.env.SINDRI_PLATFORMER_GOAL === '1') platformerState(platformerEvidence, text);
   uiDemoEvidence(uiEvidence, text);
-  const ray = text.match(/Physics ray (.+)$/);
-  if (ray) physicsEvidence.results.add(ray[1]);
-  const mask = text.match(/Physics controls (ALL|SOLID|BODIES|NONE)/);
-  if (mask) { physicsEvidence.masks.add(mask[1]); physicsEvidence.changes += 1; }
-  if (text.includes('Physics sensor entered')) physicsEvidence.sensor = true;
-  if (text.includes('Physics contact')) physicsEvidence.contact = true;
+  const playground = text.match(/Playground (.+)$/);
+  if (playground) physicsEvidence.said.push(playground[1]);
   const mixer = text.match(/Mixer (.+)$/);
   if (mixer) mixerSaid.push(mixer[1]);
   if (text.includes('Input boost')) inputEvidence.boosts += 1;

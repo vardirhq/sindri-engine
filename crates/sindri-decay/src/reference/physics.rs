@@ -215,6 +215,16 @@ pub(super) const PHYSICS: TypeEntry = TypeEntry {
             "Sweeps a circle from `origin` along `direction` and returns the first collider it would touch, as RayHit2d or null: a raycast with a size, for whether something fits through a gap. `point` is where they touch and `distance` how far the circle's centre travelled. Starting already overlapping gives distance 0 and normal Vec2(0, 0). The filter arguments are the raycast's.",
         ),
         call(
+            "gravity",
+            &[],
+            "Which way is down, as a Vec2 in world units per second squared: the first active Physics 2D World's authored gravity, or the host's own when the scene authors none.",
+        ),
+        call(
+            "set_gravity",
+            &["gravity"],
+            "Changes the first active Physics 2D World's authored gravity to a finite Vec2, keeping its layer names. The next fixed step uses it and the inspector shows it; every body feels it, scaled by its own gravity scale. Fails when the scene authors no active world settings to change.",
+        ),
+        call(
             "layer",
             &["name"],
             "The mask for one collision layer the scene's physics world names, such as `\"ground\"`, for a query's `mask` argument. A name the world does not give is an error.",

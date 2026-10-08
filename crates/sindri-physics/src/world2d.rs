@@ -110,7 +110,18 @@ impl PhysicsWorld2d {
     /// have; only what pulls on them changes.
     pub fn set_gravity(&mut self, gravity: [f32; 2]) -> Result<(), PhysicsError> {
         finite2("gravity", gravity)?;
-        self.backend.gravity = r2::Vector::new(gravity[0], gravity[1]);
+        let gravity = r2::Vector::new(gravity[0], gravity[1]);
+        if gravity != self.backend.gravity {
+            self.backend.gravity = gravity;
+            // A body asleep on the floor feels nothing until it is woken, so a
+            // flip of gravity would otherwise leave resting things where they
+            // were while everything in motion fell the new way.
+            for (_, body) in self.backend.bodies.iter_mut() {
+                if body.is_dynamic() {
+                    body.wake_up(true);
+                }
+            }
+        }
         Ok(())
     }
 

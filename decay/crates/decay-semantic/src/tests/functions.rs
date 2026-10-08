@@ -95,3 +95,26 @@ fn every_mistake_about_a_shared_function_is_refused() {
         );
     }
 }
+
+#[test]
+fn nothing_cannot_be_bound_or_asked_anything() {
+    let found = messages(
+        "fn nothing() { }
+         script Enemy { fn update(dt: f32) {
+             let k = nothing();
+             let j: f32 = 2.0;
+             let s: String = \"x\" + j.fixed(1);
+             nothing().fixed(1);
+         } }",
+        &Environment::new(),
+    );
+    assert_eq!(found.len(), 2, "{found:?}");
+    assert!(
+        found.iter().any(|m| m.contains("`k` would hold nothing")),
+        "{found:?}"
+    );
+    assert!(
+        found.iter().any(|m| m.contains("has no `fixed`")),
+        "{found:?}"
+    );
+}

@@ -1,0 +1,104 @@
+{
+ "format_version": 1,
+ "metadata": {
+  "name": "Bowling ball"
+ },
+ "entities": [
+  {
+   "id": "bowling-ball",
+   "name": "Bowling ball",
+   "transform_3d": {
+    "position": [
+     0,
+     0,
+     0.3
+    ],
+    "rotation": [
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     1.0,
+     1.0,
+     1.0
+    ]
+   },
+   "components": {
+    "sindri.shape": {
+     "kind": "ellipse",
+     "count": 6.0,
+     "fill": [
+      0.10462,
+      0.02315,
+      0.2384,
+      1.0
+     ],
+     "stroke": [
+      0.57112,
+      0.20508,
+      1.0,
+      1.0
+     ],
+     "stroke_width": 0.07,
+     "corner_radius": 0.0,
+     "dashes": 0.0,
+     "dash_duty": 0.5,
+     "sweep_start": 0.0,
+     "sweep_turns": 1.0,
+     "blend": "over",
+     "layer": 7
+    },
+    "sindri.physics2d.collider": {
+     "pieces": [
+      {
+       "shape": {
+        "shape": "circle",
+        "radius": 0.55
+       },
+       "offset": [
+        0.0,
+        0.0
+       ],
+       "rotation": 0.0,
+       "sensor": false,
+       "layers": {
+        "memberships": 4,
+        "filter": 191
+       },
+       "friction": 0.2,
+       "restitution": 0.15
+      }
+     ]
+    },
+    "sindri.physics2d.rigid_body": {
+     "kind": "dynamic",
+     "pose": {
+      "position": [
+       0,
+       0
+      ],
+      "rotation": 0
+     },
+     "linear_velocity": [
+      0,
+      0
+     ],
+     "angular_velocity": 0,
+     "gravity_scale": 1.0,
+     "linear_damping": 0.0,
+     "angular_damping": 0.02,
+     "lock_rotation": false,
+     "continuous_collision": true
+    },
+    "sindri.tags": {
+     "tags": [
+      "loose",
+      "round"
+     ]
+    }
+   }
+  }
+ ]
+}

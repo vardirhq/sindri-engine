@@ -10,8 +10,9 @@
 //! Steps after the size run in order: `click:<entity>` presses and releases
 //! over an element, `wheel:<entity>:<pixels>` scrolls over one (positive is
 //! down the list), `key:<Key>` taps a key, `type:<text>` commits characters,
-//! `set:<name>=<value>` writes a shared board value, and `wait:<seconds>`
-//! plays on. Each prints what it hit, so a picture of the
+//! `set:<name>=<value>` writes a shared board value, `move:<x>,<y>` puts the
+//! pointer at a pixel, `down` and `up` press and release the left button
+//! there, and `wait:<seconds>` plays on. Each prints what it hit, so a picture of the
 //! wrong thing says why.
 
 #[cfg(not(target_arch = "wasm32"))]
@@ -64,8 +65,13 @@ mod capture {
         Ok(String::from_utf8(bytes)?)
     }
 
-    /// The project's main scene and its entry stylesheets, from `sindri.toml`.
-    fn manifest(project: &Path) -> Result<(String, Vec<String>), Box<dyn Error>> {
+    /// What `sindri.toml` says: the main scene's ID, its entry stylesheets,
+    /// and the paths of its other scenes.
+    type Manifest = (String, Vec<String>, Vec<String>);
+
+    /// The project's main scene, its other scenes and its entry stylesheets,
+    /// from `sindri.toml`.
+    fn manifest(project: &Path) -> Result<Manifest, Box<dyn Error>> {
         let toml = fs::read_to_string(project.join("sindri.toml"))?;
         let quoted = |line: &str| -> Vec<String> {
             line.split('"')
@@ -94,7 +100,18 @@ mod capture {
                     .is_some_and(|extension| extension.eq_ignore_ascii_case("weave"))
             })
             .collect();
-        Ok((scene, sheets))
+        // Other scenes `Scene.go` can reach, kept as their paths under the
+        // project; the list may also run over several lines.
+        let others = toml
+            .lines()
+            .position(|line| line.trim_start().starts_with("scenes"))
+            .map(|start| {
+                let rest = toml.lines().skip(start).collect::<Vec<_>>().join("\n");
+                let list = rest.split_once(']').map_or(rest.as_str(), |(list, _)| list);
+                quoted(list)
+            })
+            .unwrap_or_default();
+        Ok((scene, sheets, others))
     }
 
     /// A pixel over the middle of `name`, as the last step laid it out.
@@ -195,6 +212,24 @@ mod capture {
                     self.step()?;
                 }
                 "wait" => self.play(rest.parse()?)?,
+                // A pointer at a pixel, and the left button pressed or let
+                // go there: enough to drag something across the world.
+                "move" => {
+                    let (x, y) = rest.split_once(',').ok_or("move:<x>,<y>")?;
+                    let (x, y) = (x.parse()?, y.parse()?);
+                    self.input.apply(InputEvent::PointerMoved { x, y });
+                    self.step()?;
+                }
+                "down" => {
+                    self.input
+                        .apply(InputEvent::ButtonPressed(MouseButton::Left));
+                    self.step()?;
+                }
+                "up" => {
+                    self.input
+                        .apply(InputEvent::ButtonReleased(MouseButton::Left));
+                    self.step()?;
+                }
                 "set" => {
                     let (name, value) = rest.split_once('=').ok_or("set:<name>=<value>")?;
                     self.session.set_board(name, value.parse()?);
@@ -211,7 +246,7 @@ mod capture {
 
     fn open(project: &Path, size: [f32; 2]) -> Result<Opened, Box<dyn Error>> {
         let assets = project.join("assets");
-        let (scene_id, sheet_ids) = manifest(project)?;
+        let (scene_id, sheet_ids, other_scenes) = manifest(project)?;
         let document = SceneDocument::from_json(&fs::read_to_string(assets.join(&scene_id))?)?;
 
         let mut sources = ScriptSources::new();
@@ -242,12 +277,24 @@ mod capture {
             sheets.push(weave::compose(&id, &weave_sources)?);
         }
 
+        // Every scene goes to the session under its file name, which is the
+        // name `Scene.go` asks for, as the export names them.
+        let mut scenes = vec![(scene_id, document)];
+        for path in other_scenes {
+            let name = Path::new(&path)
+                .file_name()
+                .and_then(|name| name.to_str())
+                .ok_or("a scene path without a file name")?
+                .to_owned();
+            let other = SceneDocument::from_json(&fs::read_to_string(project.join(&path))?)?;
+            scenes.push((name, other));
+        }
         let scene = extractor()?;
         let mut session = Session::with_sources(scene.components().clone(), sources)
             .with_prefabs(prefabs)
             .with_profiles(profiles)
             .with_tile_sets(tile_sets.clone())
-            .with_scenes(vec![(scene_id, document)], loaded)
+            .with_scenes(scenes, loaded)
             .with_styles(sheets);
         let view = weave::Viewport {
             width: size[0],

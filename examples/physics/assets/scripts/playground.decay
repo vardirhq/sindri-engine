@@ -1,0 +1,599 @@
+// The playground's director: the camera, the pointer's tools, the global
+// buttons and the toy selector. Every toy is its own script; this one only
+// says which toy is selected and passes on what the player asked of it.
+
+state Game {
+    var toy: f32 = 0.0;
+    var tool: f32 = 0.0;
+    var debug: bool = false;
+    var gravity: f32 = 0.0;
+    var chaos: bool = false;
+    var spawned: f32 = 0.0;
+    var blasts: f32 = 0.0;
+    var grabs: f32 = 0.0;
+    // The probe's query (0 ray, 1 circle cast, 2 box cast, 3 area) and mask.
+    var probe: f32 = 0.0;
+    var probe_mask: f32 = 0.0;
+    var queries: f32 = 0.0;
+}
+
+// A toy was asked to do one of its four things: 1 to 4.
+event ToyAction(toy: f32, action: f32);
+// A toy, or 0 for the whole room, goes back to how the scene authored it.
+event ResetToy(toy: f32);
+// DROP EVERYTHING: every joint lets go, every motor stops.
+event DropEverything(on: bool);
+
+const TOOLS: f32 = 4.0;
+const TOYS: f32 = 8.0;
+
+shared fn toy_name(toy: f32) -> String {
+    if toy == 1.0 { return "WRECKING BALL"; }
+    if toy == 2.0 { return "GANTRY CRANE"; }
+    if toy == 3.0 { return "CANNON GALLERY"; }
+    if toy == 4.0 { return "BUMPER PIT"; }
+    if toy == 5.0 { return "MATERIAL LAB"; }
+    if toy == 6.0 { return "SEESAW + TRAMPOLINE"; }
+    if toy == 7.0 { return "TEST TRACK"; }
+    if toy == 8.0 { return "DOMINO RUN"; }
+    return "THE WHOLE ROOM";
+}
+
+// What a toy's four buttons say, comma-free so it fits a chip.
+shared fn action_name(toy: f32, action: f32) -> String {
+    if toy == 1.0 {
+        if action == 1.0 { return "WIND UP"; }
+        if action == 2.0 { return "LET GO"; }
+        if action == 3.0 { return "CUT ROPE"; }
+        return "REBUILD";
+    }
+    if toy == 2.0 {
+        if action == 1.0 { return "< TROLLEY"; }
+        if action == 2.0 { return "TROLLEY >"; }
+        if action == 3.0 { return "HOIST"; }
+        return "GRAB / DROP";
+    }
+    if toy == 3.0 {
+        if action == 1.0 { return "AIM UP"; }
+        if action == 2.0 { return "AIM DOWN"; }
+        if action == 3.0 { return "FIRE"; }
+        return "CCD";
+    }
+    if toy == 4.0 {
+        if action == 1.0 { return "LEFT FLIP"; }
+        if action == 2.0 { return "RIGHT FLIP"; }
+        if action == 3.0 { return "LIFT"; }
+        return "MULTIBALL";
+    }
+    if toy == 5.0 {
+        if action == 1.0 { return "RACE"; }
+        if action == 2.0 { return "BOUNCE TEST"; }
+        if action == 3.0 { return "TILT"; }
+        return "RESET LAB";
+    }
+    if toy == 6.0 {
+        if action == 1.0 { return "DROP ANVIL"; }
+        if action == 2.0 { return "LOAD BALL"; }
+        if action == 3.0 { return "STIFFER"; }
+        return "SOFTER";
+    }
+    if toy == 7.0 {
+        if action == 1.0 { return "< LEFT"; }
+        if action == 2.0 { return "RIGHT >"; }
+        if action == 3.0 { return "JUMP"; }
+        return "KICK";
+    }
+    if toy == 8.0 {
+        if action == 1.0 { return "PUSH"; }
+        if action == 2.0 { return "SET UP"; }
+        if action == 3.0 { return "PRESS IT"; }
+        return "ARM / DISARM";
+    }
+    if action == 1.0 { return "DROP EVERYTHING"; }
+    if action == 2.0 { return "100 BALLS"; }
+    if action == 3.0 { return "BLAST ALL"; }
+    return "CLEAN UP";
+}
+
+// Where the camera looks for each toy: centre and how much height it shows.
+shared fn toy_view(toy: f32) -> Vec3 {
+    if toy == 1.0 { return Vec3(-20.0, 7.0, 15.0); }
+    if toy == 2.0 { return Vec3(-16.0, 6.5, 17.0); }
+    if toy == 3.0 { return Vec3(18.0, -7.5, 14.0); }
+    if toy == 4.0 { return Vec3(21.0, 4.0, 22.0); }
+    if toy == 5.0 { return Vec3(-23.0, -6.5, 15.0); }
+    if toy == 6.0 { return Vec3(-9.5, -8.0, 13.0); }
+    if toy == 7.0 { return Vec3(3.0, -4.2, 12.5); }
+    if toy == 8.0 { return Vec3(2.6, 4.0, 10.0); }
+    return Vec3(0.0, 0.0, 0.0);
+}
+
+// One line under the dock saying what to try; a toy may replace it with a
+// live readout while it is selected.
+shared fn toy_hint(toy: f32) -> String {
+    if toy == 1.0 { return "Wind it up, let it go. Cut the rope mid-swing."; }
+    if toy == 2.0 { return "Hold the arrows to drive. HOIST lowers onto whatever is below; GRAB ties it on."; }
+    if toy == 3.0 { return "Hold aim, hold FIRE. Turn CCD off and watch shells pass through the glass."; }
+    if toy == 4.0 { return "Flip with Z and M. LIFT carries the balls back up to the top."; }
+    if toy == 5.0 { return "Same ramp, same push: ice, wood and rubber do not agree."; }
+    if toy == 6.0 { return "Drop the anvil on the seesaw. Tune the trampoline's springs."; }
+    if toy == 7.0 { return "A/D or arrows walk, W or Space jumps, S drops through planks, F kicks. Ride the lift."; }
+    if toy == 8.0 { return "Push the first domino. The last one lands on the red button, and the red button means it."; }
+    return "Grab, throw, blast, spawn. Q and E visit each contraption.";
+}
+
+shared fn gravity_name(index: f32) -> String {
+    if index == 1.0 { return "MOON"; }
+    if index == 2.0 { return "ZERO-G"; }
+    if index == 3.0 { return "UPSIDE DOWN"; }
+    if index == 4.0 { return "SIDEWAYS"; }
+    return "EARTH";
+}
+
+// Which way is down for each GRAVITY setting, in units per second squared.
+shared fn gravity_pull(index: f32) -> Vec2 {
+    if index == 1.0 { return Vec2(0.0, -3.0); }
+    if index == 2.0 { return Vec2(0.0, 0.0); }
+    if index == 3.0 { return Vec2(0.0, 16.0); }
+    if index == 4.0 { return Vec2(16.0, 0.0); }
+    return Vec2(0.0, -16.0);
+}
+
+shared fn tool_name(index: f32) -> String {
+    if index == 1.0 { return "BLAST"; }
+    if index == 2.0 { return "SPAWN"; }
+    if index == 3.0 { return "PROBE"; }
+    return "GRAB";
+}
+
+// Everything the pointer's tools may pick up, push or probe: what moves.
+shared fn movable_mask() -> f32 {
+    return Physics.mask(["props", "balls", "shells", "glass"]);
+}
+
+script Director {
+    @export let ball: Prefab;
+    @export let crate_box: Prefab;
+    @export let plank: Prefab;
+    @export let anvil: Prefab;
+    @export let bowling: Prefab;
+    @export let hand_prefab: Prefab;
+
+    // The room the overview fits, in world units.
+    @export let room_width: f32 = 62.0;
+    @export let room_height: f32 = 30.0;
+
+    var view_center: Vec2 = Vec2(0.0, 0.0);
+    var view_height: f32 = 30.0;
+    var item: f32 = 0.0;
+    var balls_owed: f32 = 0.0;
+    var spawned: List<Entity> = [];
+    var hand: Entity? = null;
+    var held: Entity? = null;
+    var hold_offset: Vec2 = Vec2(0.0, 0.0);
+    var started: bool = false;
+    var frames: f32 = 0.0;
+    // The clear band of screen between the bars, in overlay units.
+    var band_low: f32 = -0.62;
+    var band_high: f32 = 0.82;
+
+    fn start() {
+        refresh_labels();
+    }
+
+    fn update(dt: f32) {
+        if !this.started {
+            this.started = true;
+            let goal = target_view();
+            this.view_center = Vec2(goal.x, goal.y);
+            this.view_height = goal.z;
+        }
+        keys();
+        buttons();
+        measure_band();
+        follow_view(dt);
+        pointer(dt);
+        rain();
+        stats();
+    }
+
+    // What the camera wants to show, as a centre and a height: a toy, or the
+    // whole room, fitted into the band of screen the bars leave clear.
+    fn target_view() -> Vec3 {
+        let band = max(0.6, this.band_high - this.band_low);
+        let middle = (this.band_high + this.band_low) * 0.5;
+        if Game.toy != 0.0 {
+            let view = toy_view(Game.toy);
+            let height = view.z * 2.0 / (band * 0.96);
+            return Vec3(view.x, view.y - middle * height * 0.5, height);
+        }
+        let aspect = max(0.3, Viewport.aspect);
+        let height = max(this.room_height * 2.0 / (band * 0.97), this.room_width / aspect * 1.02);
+        return Vec3(0.0, 0.0 - middle * height * 0.5, height);
+    }
+
+    // The band between the top bar and the bottom dock, in overlay units,
+    // read from where Weave laid them out: the bars are fixed in pixels, so
+    // on a small screen they cover more of the room.
+    fn measure_band() {
+        // Weave lays the bars out a few frames after the scene comes on.
+        if this.frames < 10.0 { return; }
+        let low = World.find("toy-prev");
+        let high = World.find("btn-drop");
+        this.band_low = Ui.position(low).y + Ui.size(low).y * 0.5;
+        this.band_high = Ui.position(high).y - Ui.size(high).y * 0.5;
+    }
+
+    fn follow_view(dt: f32) {
+        let goal = target_view();
+        let blend = 1.0 - exp(-6.0 * dt);
+        this.view_center = this.view_center.lerp(Vec2(goal.x, goal.y), blend);
+        this.view_height = lerp(this.view_height, goal.z, blend);
+        let camera = World.find("Camera");
+        camera.transform.position.x = this.view_center.x;
+        camera.transform.position.y = this.view_center.y;
+        Camera.orthographic_size(camera, this.view_height);
+    }
+
+    // The pointer in the world: the overlay is two units tall and centred, and
+    // the camera shows view_height units of height around view_center.
+    fn pointer_world() -> Vec2 {
+        return this.view_center + Pointer.overlay * (this.view_height * 0.5);
+    }
+
+    fn keys() {
+        if Input.just_pressed("G") { choose_tool(0.0); }
+        if Input.just_pressed("B") { choose_tool(1.0); }
+        if Input.just_pressed("N") {
+            if Game.tool == 2.0 { this.item = (this.item + 1.0) % 5.0; }
+            choose_tool(2.0);
+        }
+        if Input.just_pressed("P") {
+            if Game.tool == 3.0 { Game.probe = (Game.probe + 1.0) % 4.0; }
+            choose_tool(3.0);
+        }
+        if Input.just_pressed("Q") { choose_toy(Game.toy - 1.0); }
+        if Input.just_pressed("E") { choose_toy(Game.toy + 1.0); }
+        if Input.just_pressed("X") { drop_everything(); }
+        if Input.just_pressed("O") { this.balls_owed += 100.0; }
+        if Input.just_pressed("V") { cycle_gravity(); }
+        if Input.just_pressed("I") { toggle_debug(); }
+        if Input.just_pressed("R") { reset(); }
+        if Input.just_pressed("K") { to_quarry(); }
+        if Input.just_pressed("Digit1") { act(1.0); }
+        if Input.just_pressed("Digit2") { act(2.0); }
+        if Input.just_pressed("Digit3") { act(3.0); }
+        if Input.just_pressed("Digit4") { act(4.0); }
+    }
+
+    fn buttons() {
+        if Ui.is_pressed(World.find("btn-drop")) { drop_everything(); }
+        if Ui.is_pressed(World.find("btn-balls")) { this.balls_owed += 100.0; }
+        if Ui.is_pressed(World.find("btn-gravity")) { cycle_gravity(); }
+        if Ui.is_pressed(World.find("btn-debug")) { toggle_debug(); }
+        if Ui.is_pressed(World.find("btn-reset")) { reset(); }
+        if Ui.is_pressed(World.find("btn-quarry")) { to_quarry(); }
+        if Ui.is_pressed(World.find("tool-grab")) { choose_tool(0.0); }
+        if Ui.is_pressed(World.find("tool-blast")) { choose_tool(1.0); }
+        if Ui.is_pressed(World.find("tool-spawn")) {
+            if Game.tool == 2.0 { this.item = (this.item + 1.0) % 5.0; }
+            choose_tool(2.0);
+        }
+        if Ui.is_pressed(World.find("tool-probe")) {
+            if Game.tool == 3.0 { Game.probe = (Game.probe + 1.0) % 4.0; }
+            choose_tool(3.0);
+        }
+        if Ui.is_pressed(World.find("toy-prev")) { choose_toy(Game.toy - 1.0); }
+        if Ui.is_pressed(World.find("toy-next")) { choose_toy(Game.toy + 1.0); }
+        for i in 0..4 {
+            let action = i + 1.0;
+            if Ui.is_pressed(World.find("act-" + action)) { act(action); }
+        }
+    }
+
+    // The domino run's red button: the one thing in the room that presses
+    // DROP EVERYTHING by itself.
+    on ButtonPressed(x, y) {
+        Camera.impact(1.0);
+        print("Playground red button");
+        if !Game.chaos { drop_everything(); }
+    }
+
+    fn act(action: f32) {
+        if Game.toy == 0.0 {
+            if action == 1.0 { drop_everything(); }
+            if action == 2.0 { this.balls_owed += 100.0; }
+            if action == 3.0 { blast(this.view_center, 40.0, 26.0); }
+            if action == 4.0 { clean_up(); }
+            return;
+        }
+        ToyAction.emit(Game.toy, action);
+    }
+
+    fn choose_tool(index: f32) {
+        Game.tool = index;
+        let_go();
+        refresh_labels();
+    }
+
+    fn choose_toy(index: f32) {
+        var toy = index;
+        if toy < 0.0 { toy = TOYS; }
+        if toy > TOYS { toy = 0.0; }
+        Game.toy = toy;
+        refresh_labels();
+        print("Playground toy " + toy_name(toy));
+    }
+
+    fn cycle_gravity() {
+        Game.gravity = (Game.gravity + 1.0) % 5.0;
+        Physics.set_gravity(gravity_pull(Game.gravity));
+        refresh_labels();
+        print("Playground gravity " + gravity_name(Game.gravity));
+    }
+
+    // The 3D annex is its own scene; this one waits, switched off, as it was.
+    fn to_quarry() {
+        let_go();
+        print("Playground off to the quarry");
+        // Coming back, the bars are laid out again a frame after this scene
+        // is switched on; until then there is nothing to measure.
+        this.frames = 0.0;
+        Scene.go("quarry.scene");
+    }
+
+    fn toggle_debug() {
+        Game.debug = !Game.debug;
+        refresh_labels();
+        print("Playground debug " + Game.debug);
+    }
+
+    fn drop_everything() {
+        Game.chaos = !Game.chaos;
+        let_go();
+        DropEverything.emit(Game.chaos);
+        if Game.chaos {
+            for joint in World.with_tag("joint") {
+                Physics.set_joint_enabled(joint, false);
+            }
+            Camera.impact(0.8);
+            print("Playground DROP EVERYTHING");
+        } else {
+            for joint in World.with_tag("joint") {
+                Physics.set_joint_enabled(joint, true);
+            }
+            print("Playground joints restored");
+        }
+        refresh_labels();
+    }
+
+    fn reset() {
+        let_go();
+        if Game.toy == 0.0 {
+            clean_up();
+            Game.gravity = 0.0;
+            Physics.set_gravity(gravity_pull(0.0));
+            if Game.chaos { drop_everything(); }
+        } else {
+            clear_around(toy_view(Game.toy));
+        }
+        ResetToy.emit(Game.toy);
+        refresh_labels();
+        print("Playground reset " + toy_name(Game.toy));
+    }
+
+    // Takes away what was spawned in a contraption's view, so a reset puts it
+    // back clear of the balls that rained into it.
+    fn clear_around(view: Vec3) {
+        let half = Vec2(view.z * 0.9, view.z * 0.5);
+        var kept: List<Entity> = [];
+        for thing in this.spawned {
+            if World.exists(thing) {
+                let at = thing.transform.world_position;
+                if abs(at.x - view.x) < half.x && abs(at.y - view.y) < half.y {
+                    World.despawn(thing);
+                } else {
+                    kept.push(thing);
+                }
+            }
+        }
+        this.spawned = kept;
+        Game.spawned = kept.length;
+    }
+
+    fn clean_up() {
+        for thing in this.spawned {
+            if World.exists(thing) { World.despawn(thing); }
+        }
+        this.spawned.clear();
+        this.balls_owed = 0.0;
+        Game.spawned = 0.0;
+    }
+
+    // Pours owed balls in from the ceiling a few a step, so a hundred arrive
+    // as a downpour rather than as one solid lump.
+    fn rain() {
+        var poured = 0.0;
+        while this.balls_owed > 0.0 && poured < 3.0 {
+            let x = Random.range(-28.0, 28.0);
+            let y = Random.range(12.0, 13.5);
+            let ball = make(0.0, Vec2(x, y));
+            Physics.set_velocity(ball, Random.range(-2.0, 2.0), Random.range(-4.0, 0.0));
+            this.balls_owed -= 1.0;
+            poured += 1.0;
+        }
+    }
+
+    // Spawns item 0 ball, 1 crate, 2 plank, 3 anvil or 4 bowling ball.
+    fn make(kind: f32, at: Vec2) -> Entity {
+        var prefab = this.ball;
+        if kind == 1.0 { prefab = this.crate_box; }
+        if kind == 2.0 { prefab = this.plank; }
+        if kind == 3.0 { prefab = this.anvil; }
+        if kind == 4.0 { prefab = this.bowling; }
+        let thing = World.spawn(prefab);
+        thing.transform.position = Vec3(at.x, at.y, 0.3);
+        this.spawned.push(thing);
+        // The room holds a few hundred loose things; past that the oldest go.
+        while this.spawned.length > 320.0 {
+            let oldest = this.spawned.remove_at(0);
+            if World.exists(oldest) { World.despawn(oldest); }
+        }
+        Game.spawned = this.spawned.length;
+        return thing;
+    }
+
+    fn pointer(dt: f32) {
+        let at = pointer_world();
+        let cursor = World.find("cursor");
+        cursor.transform.position = Vec3(at.x, at.y, 2.0);
+        World.set_active(cursor, Pointer.inside && !Pointer.over_ui);
+        if Pointer.just_pressed("Left") && !Pointer.over_ui {
+            if Game.tool == 0.0 { grab(at); }
+            if Game.tool == 1.0 { blast(at, 3.2, 9.0); }
+            if Game.tool == 2.0 { make(this.item, at); }
+        }
+        if this.hand != null {
+            hold(at, dt);
+            if !Pointer.is_down("Left") { let_go(); }
+        }
+    }
+
+    // Ties a kinematic hand to whatever is under the pointer with a short
+    // rope, and moves the hand with the pointer. Letting go keeps the body's
+    // speed, which is how a throw works.
+    fn grab(at: Vec2) {
+        let found = Physics.overlap_circle(at, 0.12, movable_mask(), false, null);
+        if found.length == 0.0 { return; }
+        let target = found[0];
+        let hand: Entity = World.spawn(this.hand_prefab);
+        hand.transform.position = Vec3(at.x, at.y, 1.0);
+        let centre = target.transform.world_position;
+        let reach = max(0.05, Vec2(centre.x, centre.y).distance(at));
+        Physics.connect_distance(hand, target, reach);
+        this.hand = hand;
+        this.held = target;
+        Game.grabs += 1.0;
+        print("Playground grabbed");
+    }
+
+    fn hold(at: Vec2, dt: f32) {
+        let hand = this.hand;
+        if hand == null { return; }
+        let now = hand.transform.world_position;
+        let pull = (at - Vec2(now.x, now.y)) / max(dt, 0.001);
+        Physics.set_velocity(hand, pull.x, pull.y);
+        let held = this.held;
+        let string = World.find("grab-string");
+        if held != null && World.exists(held) {
+            let other = held.transform.world_position;
+            line(string, Vec2(now.x, now.y), Vec2(other.x, other.y), 0.06);
+            World.set_active(string, true);
+        }
+    }
+
+    fn let_go() {
+        let hand = this.hand;
+        if hand != null {
+            if World.exists(hand) { World.despawn(hand); }
+        }
+        this.hand = null;
+        this.held = null;
+        World.set_active(World.find("grab-string"), false);
+    }
+
+    // Shoves everything movable inside a circle outwards, pushing each at a
+    // point on its near side so it spins as well as flies.
+    fn blast(at: Vec2, radius: f32, strength: f32) {
+        for thing in Physics.overlap_circle(at, radius, movable_mask(), false, null) {
+            let place = thing.transform.world_position;
+            let away = Vec2(place.x, place.y) - at;
+            let distance = away.length;
+            var direction = away.normalized;
+            if distance < 0.01 { direction = Vec2(0.0, 1.0); }
+            let falloff = 1.0 - min(1.0, distance / radius) * 0.6;
+            let push = direction * strength * falloff + Vec2(0.0, strength * 0.25);
+            let point = Vec2(place.x, place.y) - direction * 0.15 + Vec2(-direction.y, direction.x) * 0.1;
+            Physics.apply_impulse_at_point(thing, push, point);
+        }
+        let ring = World.find("blast-ring");
+        BlastRing.on(ring).go(at, radius);
+        Effects.burst_at(World.find("blast-sparks"), at.x, at.y);
+        Camera.impact(min(1.0, 0.25 + strength / 40.0));
+        Game.blasts += 1.0;
+        print("Playground blast");
+    }
+
+    fn stats() {
+        let things = World.with_tag("body").length + this.spawned.length;
+        Ui.set_text(World.find("stats"), things + " bodies  /  " + World.with_tag("joint").length + " joints  /  gravity " + gravity_name(Game.gravity));
+        // What the probe and the debug overlay have to say, under the title,
+        // once every script has had its first frame.
+        this.frames += 1.0;
+        if this.frames < 2.0 { return; }
+        var readout = Probe.on(World.find("Probe")).text;
+        let debug = DebugOverlay.on(World.find("Debug overlay")).text;
+        if debug != "" {
+            if readout != "" { readout = readout + "\n"; }
+            readout = readout + debug;
+        }
+        Ui.set_text(World.find("readout"), readout);
+    }
+
+    fn refresh_labels() {
+        Ui.set_text(World.find("btn-gravity-label"), "GRAVITY: " + gravity_name(Game.gravity));
+        var debug = "DEBUG OFF";
+        if Game.debug { debug = "DEBUG ON"; }
+        Ui.set_text(World.find("btn-debug-label"), debug);
+        var drop = "DROP EVERYTHING";
+        if Game.chaos { drop = "PUT IT BACK"; }
+        Ui.set_text(World.find("btn-drop-label"), drop);
+        Ui.set_text(World.find("toy-label"), toy_name(Game.toy));
+        Ui.set_text(World.find("hint"), toy_hint(Game.toy));
+        for i in 0..4 {
+            let action = i + 1.0;
+            Ui.set_text(World.find("act-" + action + "-label"), action_name(Game.toy, action));
+        }
+        var spawn = "SPAWN BALL";
+        if this.item == 1.0 { spawn = "SPAWN CRATE"; }
+        if this.item == 2.0 { spawn = "SPAWN PLANK"; }
+        if this.item == 3.0 { spawn = "SPAWN ANVIL"; }
+        if this.item == 4.0 { spawn = "SPAWN BOWLING"; }
+        Ui.set_text(World.find("tool-spawn-label"), spawn);
+        var probe = "PROBE";
+        if Game.tool == 3.0 { probe = probe_name(Game.probe); }
+        Ui.set_text(World.find("tool-probe-label"), probe);
+        for i in 0..TOOLS {
+            let chosen = World.find("tool-mark-" + i);
+            World.set_active(chosen, Game.tool == i);
+        }
+    }
+}
+
+// Draws an entity as a bar from one point to another.
+shared fn line(entity: Entity, start: Vec2, end: Vec2, width: f32) {
+    let delta = end - start;
+    entity.transform.position.x = (start.x + end.x) * 0.5;
+    entity.transform.position.y = (start.y + end.y) * 0.5;
+    entity.transform.scale = Vec3(max(0.001, delta.length), width, 1.0);
+    entity.transform.rotation_z = atan2(delta.y, delta.x);
+}
+
+// The ring a blast leaves, growing and fading.
+script BlastRing {
+    var age: f32 = 1.0;
+    var radius: f32 = 1.0;
+    fn go(at: Vec2, size: f32) {
+        this.age = 0.0;
+        this.radius = size;
+        this.transform.position = Vec3(at.x, at.y, 1.5);
+    }
+    fn update(dt: f32) {
+        this.age += dt;
+        let t = min(1.0, this.age / 0.35);
+        let size = this.radius * 2.0 * (0.3 + 0.7 * t);
+        this.transform.scale = Vec3(size, size, 1.0);
+        this.shape.stroke = Color(1.0, 0.8, 0.35, 1.0 - t);
+        this.shape.fill = Color(1.0, 0.55, 0.2, 0.25 * (1.0 - t));
+    }
+}

@@ -1,0 +1,117 @@
+/* Physics Playground: the bars over the room. Decay writes the words; this
+   decides how they look. The room itself is never covered: everything sits
+   in a top strip and a bottom dock. */
+
+:root {
+    --ink: #e8f1fb;
+    --muted: #7f98b3;
+    --panel: #0b1522ee;
+    --line: #29425c;
+    --accent: #ffd166;
+    --hot: #ff4f5e;
+    --cool: #4cc9f0;
+}
+
+sindri.ui.text { color: var(--ink); }
+
+.hud {
+    width: 100vw;
+    height: 100vh;
+    padding: 14px 18px;
+    direction: column;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.top { width: 100%; height: 120px; direction: row; justify-content: space-between; align-items: start; }
+.brand { width: 440px; height: 120px; direction: column; gap: 2px; justify-content: start; align-items: start; }
+.readout { width: 440px; height: 44px; font-size: 11px; line-height: 15px; text-align: start; color: #9fe8ff; }
+.mask { width: 170px; height: 28px; margin-top: 4px; border-color: #7df9ff; }
+.mask .button-label { font-size: 11px; color: #7df9ff; }
+.title { width: 360px; height: 28px; font-size: 22px; letter-spacing: 4px; text-align: start; color: var(--accent); }
+.stats { width: 420px; height: 16px; font-size: 11px; letter-spacing: 1px; text-align: start; color: var(--muted); }
+.globals { width: 760px; height: 40px; direction: row; gap: 8px; justify-content: end; align-items: center; }
+
+.bottom { width: 100%; height: 118px; direction: column; gap: 8px; justify-content: end; align-items: center; }
+.toy-row { width: 100%; height: 36px; direction: row; gap: 10px; justify-content: center; align-items: center; }
+.toy-label { width: 300px; height: 24px; font-size: 18px; letter-spacing: 3px; text-align: center; color: var(--accent); }
+.dock { width: 100%; height: 44px; direction: row; justify-content: space-between; align-items: center; }
+.tools { width: 520px; height: 44px; direction: row; gap: 8px; justify-content: start; align-items: center; }
+.actions { width: 600px; height: 44px; direction: row; gap: 8px; justify-content: end; align-items: center; }
+.hint { width: 100%; height: 14px; font-size: 11px; color: var(--muted); text-align: center; }
+
+.button {
+    width: 120px;
+    height: 38px;
+    direction: row;
+    justify-content: center;
+    align-items: center;
+    background: var(--panel);
+    border-color: var(--line);
+    border-width: 1px;
+    border-radius: 10px;
+}
+.button:hover { background: #15283d; border-color: #4f7499; }
+.button:active { background: #1f3a57; border-color: var(--accent); }
+.button-label { width: 100%; height: 18px; font-size: 13px; letter-spacing: 1px; text-align: center; }
+
+.danger { width: 190px; background: #3a0d16ee; border-color: var(--hot); border-width: 2px; }
+.danger:hover { background: #5c1422; }
+.danger .button-label { color: #ffd1d6; font-size: 14px; letter-spacing: 2px; }
+.loud { width: 120px; border-color: var(--cool); }
+.loud .button-label { color: var(--cool); }
+#btn-gravity { width: 180px; }
+#btn-debug { width: 120px; }
+#btn-reset { width: 90px; }
+#btn-quarry { width: 120px; }
+
+.tool { width: 122px; height: 40px; direction: column; gap: 3px; }
+.tool-mark { width: 60%; height: 3px; background: var(--accent); border-radius: 2px; }
+.arrow { width: 44px; height: 34px; }
+.arrow .button-label { font-size: 18px; color: var(--accent); }
+.action { width: 140px; height: 40px; border-color: #3d6185; }
+.action .button-label { color: #cfe3ff; }
+
+/* Narrow screens: the dock stacks, labels shrink, the room keeps the middle. */
+@media (orientation: portrait) {
+    .hud { padding: 10px 8px; }
+    .top { height: 140px; direction: column; gap: 6px; align-items: center; }
+    .brand { width: 100%; height: 96px; align-items: center; }
+    .title { width: 100%; font-size: 17px; letter-spacing: 2px; text-align: center; }
+    .stats { width: 100%; font-size: 9px; text-align: center; }
+    .readout { width: 100%; height: 28px; font-size: 9px; line-height: 13px; text-align: center; }
+    .mask { width: 120px; height: 24px; }
+    .globals { width: 100%; height: 34px; gap: 4px; justify-content: center; }
+    .button { height: 32px; border-radius: 8px; }
+    .button-label { font-size: 10px; letter-spacing: 0px; }
+    .danger { width: 108px; }
+    .danger .button-label { font-size: 10px; letter-spacing: 0px; }
+    .loud { width: 62px; }
+    #btn-gravity { width: 92px; }
+    #btn-debug { width: 58px; }
+    #btn-reset { width: 46px; }
+    #btn-quarry { width: 62px; }
+    .bottom { height: 150px; gap: 6px; }
+    .toy-label { width: 220px; font-size: 14px; letter-spacing: 1px; }
+    .dock { height: 84px; direction: column; gap: 6px; justify-content: end; }
+    .tools { width: 100%; height: 38px; gap: 4px; justify-content: center; }
+    .actions { width: 100%; height: 38px; gap: 4px; justify-content: center; }
+    .tool { width: 86px; height: 36px; }
+    .action { width: 86px; height: 36px; }
+    .hint { font-size: 9px; }
+}
+
+@media (orientation: landscape) and (max-height: 460px) {
+    .hud { padding: 6px 10px; }
+    .top { height: 36px; }
+    .title { font-size: 16px; height: 20px; }
+    .readout { height: 0px; font-size: 1px; }
+    .button { height: 30px; }
+    .button-label { font-size: 11px; }
+    .bottom { height: 84px; gap: 4px; }
+    .toy-row { height: 28px; }
+    .dock { height: 34px; }
+    .tool { height: 32px; }
+    .action { height: 32px; }
+    .hint { height: 0px; font-size: 1px; }
+}

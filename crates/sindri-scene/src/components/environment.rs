@@ -250,6 +250,9 @@ pub fn environments_in(
 ) -> Vec<(EntityId, Result<EnvironmentComponent, EnvironmentError>)> {
     world
         .entities()
+        // A switched-off environment takes no part, like any other component:
+        // a project's second scene keeps its own while the first plays.
+        .filter(|(entity, _)| world.is_active(*entity))
         .filter_map(|(entity, data)| {
             let payload = data.components.get(EnvironmentComponent::TYPE_NAME)?;
             let environment = serde_json::from_value::<EnvironmentComponent>(payload.clone())
@@ -299,5 +302,31 @@ mod tests {
         assert!(!environment.shadows.enabled);
         assert!(!environment.ambient_occlusion.enabled);
         assert!(!environment.fog.enabled);
+    }
+
+    /// Two scenes of one project each bring an environment; the one switched
+    /// off with its scene must not make the one playing a second.
+    #[test]
+    fn a_switched_off_environment_is_not_a_second_one() {
+        let mut world = World::default();
+        let payload = |red: f32| {
+            [(
+                EnvironmentComponent::TYPE_NAME.to_owned(),
+                serde_json::json!({"background": [red, 0.0, 0.0, 1.0]}),
+            )]
+            .into_iter()
+            .collect()
+        };
+        world.spawn(sindri_core::EntityData {
+            components: payload(0.25),
+            disabled: true,
+            ..sindri_core::EntityData::default()
+        });
+        world.spawn(sindri_core::EntityData {
+            components: payload(0.75),
+            ..sindri_core::EntityData::default()
+        });
+        let found = environment_of(&world).unwrap().unwrap();
+        assert!((found.background[0] - 0.75).abs() < f32::EPSILON);
     }
 }

@@ -29,6 +29,9 @@ impl WorldHost<'_> {
         path: &Path,
         args: &[Value],
     ) -> Result<Value, RuntimeError> {
+        if matches!(call, PhysicsCall::Gravity | PhysicsCall::SetGravity) {
+            return self.gravity_call(call, path, args);
+        }
         if matches!(call, PhysicsCall::Layer | PhysicsCall::Mask) {
             return self.layer_mask(call, path, args);
         }

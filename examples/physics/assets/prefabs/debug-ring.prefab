@@ -1,0 +1,56 @@
+{
+ "format_version": 1,
+ "metadata": {
+  "name": "debug-ring"
+ },
+ "entities": [
+  {
+   "id": "debug-ring",
+   "name": "debug-ring",
+   "transform_3d": {
+    "position": [
+     0,
+     0,
+     0.3
+    ],
+    "rotation": [
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "scale": [
+     1.0,
+     1.0,
+     1.0
+    ]
+   },
+   "components": {
+    "sindri.shape": {
+     "kind": "ellipse",
+     "count": 6.0,
+     "fill": [
+      0.0,
+      0.0,
+      0.0,
+      0.0
+     ],
+     "stroke": [
+      1.0,
+      1.0,
+      1.0,
+      1.0
+     ],
+     "stroke_width": 0.08,
+     "corner_radius": 0.0,
+     "dashes": 0.0,
+     "dash_duty": 0.5,
+     "sweep_start": 0.0,
+     "sweep_turns": 1.0,
+     "blend": "over",
+     "layer": 56
+    }
+   }
+  }
+ ]
+}

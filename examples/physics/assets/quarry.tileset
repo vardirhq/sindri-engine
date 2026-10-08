@@ -1,0 +1,189 @@
+{
+ "format_version": 1,
+ "tiles": {
+  "grass": {
+   "faces": {
+    "top": {
+     "sprite": "textures/grass.png",
+     "size": [
+      1.0,
+      1.0
+     ]
+    },
+    "bottom": {
+     "sprite": "textures/dirt.png",
+     "size": [
+      1.0,
+      1.0
+     ]
+    },
+    "north": {
+     "sprite": "textures/grass-side.png",
+     "size": [
+      1.0,
+      1.0
+     ]
+    },
+    "south": {
+     "sprite": "textures/grass-side.png",
+     "size": [
+      1.0,
+      1.0
+     ]
+    },
+    "east": {
+     "sprite": "textures/grass-side.png",
+     "size": [
+      1.0,
+      1.0
+     ]
+    },
+    "west": {
+     "sprite": "textures/grass-side.png",
+     "size": [
+      1.0,
+      1.0
+     ]
+    }
+   }
+  },
+  "dirt": {
+   "faces": {
+    "top": {
+     "sprite": "textures/dirt.png",
+     "size": [
+      1.0,
+      1.0
+     ]
+    },
+    "bottom": {
+     "sprite": "textures/dirt.png",
+     "size": [
+      1.0,
+      1.0
+     ]
+    },
+    "north": {
+     "sprite": "textures/dirt.png",
+     "size": [
+      1.0,
+      1.0
+     ]
+    },
+    "south": {
+     "sprite": "textures/dirt.png",
+     "size": [
+      1.0,
+      1.0
+     ]
+    },
+    "east": {
+     "sprite": "textures/dirt.png",
+     "size": [
+      1.0,
+      1.0
+     ]
+    },
+    "west": {
+     "sprite": "textures/dirt.png",
+     "size": [
+      1.0,
+      1.0
+     ]
+    }
+   }
+  },
+  "stone": {
+   "faces": {
+    "top": {
+     "sprite": "textures/stone.png",
+     "size": [
+      1.0,
+      1.0
+     ]
+    },
+    "bottom": {
+     "sprite": "textures/stone.png",
+     "size": [
+      1.0,
+      1.0
+     ]
+    },
+    "north": {
+     "sprite": "textures/stone.png",
+     "size": [
+      1.0,
+      1.0
+     ]
+    },
+    "south": {
+     "sprite": "textures/stone.png",
+     "size": [
+      1.0,
+      1.0
+     ]
+    },
+    "east": {
+     "sprite": "textures/stone.png",
+     "size": [
+      1.0,
+      1.0
+     ]
+    },
+    "west": {
+     "sprite": "textures/stone.png",
+     "size": [
+      1.0,
+      1.0
+     ]
+    }
+   }
+  },
+  "sand": {
+   "faces": {
+    "top": {
+     "sprite": "textures/sand.png",
+     "size": [
+      1.0,
+      1.0
+     ]
+    },
+    "bottom": {
+     "sprite": "textures/sand.png",
+     "size": [
+      1.0,
+      1.0
+     ]
+    },
+    "north": {
+     "sprite": "textures/sand.png",
+     "size": [
+      1.0,
+      1.0
+     ]
+    },
+    "south": {
+     "sprite": "textures/sand.png",
+     "size": [
+      1.0,
+      1.0
+     ]
+    },
+    "east": {
+     "sprite": "textures/sand.png",
+     "size": [
+      1.0,
+      1.0
+     ]
+    },
+    "west": {
+     "sprite": "textures/sand.png",
+     "size": [
+      1.0,
+      1.0
+     ]
+    }
+   }
+  }
+ }
+}

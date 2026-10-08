@@ -1,35 +1,58 @@
 # Physics Playground
 
-A feature example, authored entirely in Decay and scene components. Open
-`sindri.toml` in the editor or export it through `sindri-export`.
+A feature example and a toybox: one room full of contraptions that show what
+Sindri's physics can do, and tools to poke them with. Authored entirely in
+scene data, Decay and Weave. Open `sindri.toml` in the editor or export it
+with `sindri-export examples/physics`.
 
-The cyan ray shows the closest collider hit, the yellow dot its point and the
-green line its normal. A blue trigger flashes when falling bodies enter it.
-Orange bodies fall and bounce using the scene's gravity and restitution.
+The design and its checklist are in
+[`docs/physics-playground.md`](../../docs/physics-playground.md). The scene,
+prefabs and material profiles are written by
+`scripts/physics_playground/generate.py`; edit the numbers there and run it
+again rather than editing the generated files.
 
-The query button (C) switches what the cyan line asks:
+## What is in the room
 
-- Ray: `Physics.raycast`, the closest piece the line meets.
-- Circle cast: `Physics.cast_circle`, a circle of radius 0.35 swept along the
-  same line. The ring shows where it stops, which is sooner than the ray, and
-  a gap the ray slips through can stop it.
-- Area: `Physics.overlap_circle`, every object inside a ring of radius 1 at
-  the line's far end, each named once.
+- **Wrecking ball**: wind it up with a hinge position motor, let it swing
+  through a castle of wood, glass and steel, or cut the rope.
+- **Gantry crane**: drive the trolley, lower the hook, grab whatever is under
+  it with a joint made at runtime, and drop it somewhere worse.
+- **Cannon gallery**: aim and fire through hanging glass panes; switch
+  continuous collision off and watch shells ghost straight through.
+- **Bumper pit**: flippers, bumpers that kick, and a ball lift that carries
+  what drains back up to the top.
+- **Material lab**: ice, wood and rubber race down one ramp; four pads show how
+  high each material bounces.
+- **Seesaw and trampoline**: drop the anvil, launch the ball, retune the
+  trampoline's springs.
+- **Test track**: a robot that climbs steps, rides a lift it calls by standing
+  on it, drops through one-way planks, shoves crates and kicks them.
+- **Voxel Quarry** (K, or 3D QUARRY): the 3D annex, a scene of its own. Crates
+  on a voxel floor; click the ground to dig, DIG UNDER to drop every crate into
+  a pit of its own, DROP CRATES for more, and a laser firing a 3D ray down.
+- **Domino run**: fourteen dominoes, and at the end a red button that sets off
+  DROP EVERYTHING. A hundred balls can knock them over too.
 
-The mask, sensor and length controls apply to all three.
+## Controls
 
-Use the screen buttons on desktop or touch:
+| Key | Button | What it does |
+| --- | --- | --- |
+| G / B / N / P | GRAB, BLAST, SPAWN, PROBE | Choose what the pointer does. N again picks what SPAWN drops; P again picks the probe's query. |
+| L | MASK | Which layers the probe sees. |
+| Q / E | < > | Fly to the previous or next contraption, or back to the whole room. |
+| 1-4 | The four action buttons | Work the selected contraption. |
+| A / D, W, S, F | LEFT, RIGHT, JUMP, KICK | Drive the robot on the test track. |
+| X | DROP EVERYTHING | Every joint lets go. Again puts them back. |
+| O | 100 BALLS | Pours a hundred balls in from the ceiling. |
+| V | GRAVITY | Earth, moon, zero-g, upside down, sideways. |
+| I | DEBUG | Outlines by state, contacts and normals, velocities, and every joint from anchor to anchor. |
+| R | RESET | Resets the selected contraption, or the whole room. |
+| K | 3D QUARRY | Goes to the Voxel Quarry, and back. |
 
-- Sensors (S): include trigger pieces in the ray.
-- Mask (T): all / solid layer 1 / falling bodies layer 2 / none.
-- Origin (I): move inside the solid circle to inspect distance 0, normal (0, 0).
-- Length (Q/E): change the ray's inclusive maximum distance.
-- Left/right: turn the ray by 15 degrees; arrow keys turn continuously.
-- Drop (B): reset both falling bodies. Reset (R) also resets the query and counts.
+The probe is dragged: press where a query starts and let go where it points.
+It casts a ray, a circle or a box, or counts what overlaps a circle, and the
+readout under the title says what it hit, how far, and which way the surface
+faces.
 
-Queries read synchronized physics geometry. A teleport becomes visible at the
-next fixed step.
-
-`crates/sindri-decay/tests/physics_demo.rs` opens the project, checks its scripts,
-plays the controls and observes rays, bounce and sensor events. Browser smoke
-tests use the exported project on desktop and phone under both Pages base paths.
+`game/tests/the_physics_playground_works/` plays it through the same session
+the browser runs, and the browser smoke tests play it on desktop and phone.

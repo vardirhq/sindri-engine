@@ -22,6 +22,17 @@ impl Analyzer<'_, '_> {
                 }
                 return Type::Unknown;
             }
+            if object_type == Type::Unit {
+                self.error(
+                    Code::UnknownMember,
+                    callee.span,
+                    format!("this gives `unit`, which holds nothing, so it has no `{field}`"),
+                );
+                for argument in args {
+                    self.expr_type(argument);
+                }
+                return Type::Unknown;
+            }
             if object_type.dimensions().is_some() {
                 return self.vector_call_type(&object_type, field, args, span);
             }

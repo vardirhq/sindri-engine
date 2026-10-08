@@ -35,6 +35,7 @@ mod physics3d_query;
 mod physics_character;
 mod physics_contacts;
 mod physics_controls;
+mod physics_gravity;
 mod physics_hinge_position;
 mod physics_joint_creation;
 mod physics_joint_endpoints;

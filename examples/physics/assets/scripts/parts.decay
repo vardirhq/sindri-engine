@@ -1,0 +1,37 @@
+// What every authored part of a toy knows: where the scene put it, so a reset
+// can put it back. Toys are scene entities rather than prefabs because an
+// authored joint can only name bodies in its own scene or prefab, and the
+// crane must be able to pick up anything the room was built with.
+
+script Part {
+    // Which toy this part belongs to; 0 is the room itself.
+    @export let toy: f32 = 0.0;
+
+    var home: Vec3 = Vec3(0.0, 0.0, 0.0);
+    var home_turn: f32 = 0.0;
+
+    fn start() {
+        this.home = this.transform.position;
+        this.home_turn = this.transform.rotation_z;
+    }
+
+    on ResetToy(toy) {
+        if toy == 0.0 || toy == this.toy { put_back(); }
+    }
+
+    fn put_back() {
+        this.transform.position = this.home;
+        this.transform.rotation_z = this.home_turn;
+        Physics.set_velocity(this.entity, 0.0, 0.0);
+        Physics.set_angular_velocity(this.entity, 0.0);
+    }
+}
+
+// A joint owner: DROP EVERYTHING turns it off, a reset turns it back on.
+script JointPart {
+    @export let toy: f32 = 0.0;
+
+    on ResetToy(toy) {
+        if toy == 0.0 || toy == this.toy { Physics.set_joint_enabled(this.entity, true); }
+    }
+}
