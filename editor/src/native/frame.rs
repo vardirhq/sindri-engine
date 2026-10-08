@@ -42,10 +42,34 @@ impl EditorApp {
 impl eframe::App for EditorApp {
     /// Settings are written when eframe decides to, which includes shutdown.
     fn save(&mut self, storage: &mut dyn eframe::Storage) {
+        if self.benchmark.is_some() {
+            return;
+        }
         self.preferences.save(storage);
     }
 
-    fn ui(&mut self, ui: &mut egui::Ui, _frame: &mut eframe::Frame) {
+    fn ui(&mut self, ui: &mut egui::Ui, frame: &mut eframe::Frame) {
+        // The frame before this one closes when this one opens: eframe reports
+        // what painting it cost only now.
+        let began = std::time::Instant::now();
+        let painted = frame
+            .info()
+            .cpu_usage
+            .and_then(|seconds| std::time::Duration::try_from_secs_f32(seconds).ok());
+        self.profiler.begin(
+            began,
+            painted,
+            self.lifecycle.state() == sindri_core::EngineState::Running,
+        );
+        self.frame(ui);
+        self.drive_benchmark(ui.ctx());
+        self.profiler.end(began.elapsed());
+    }
+}
+
+impl EditorApp {
+    /// Everything one frame of the editor does, in order.
+    fn frame(&mut self, ui: &mut egui::Ui) {
         // Before anything else: the welcome window is a window of its own, and
         // while it is the only one open there is no scene to draw, no viewport
         // to render into, and a hidden window to not spend a frame on.
@@ -56,6 +80,7 @@ impl eframe::App for EditorApp {
             }
         }
         self.show_window(ui.ctx());
+        let upkeep = std::time::Instant::now();
         // Presentation and textures both refresh before extraction, so a saved
         // asset change is visible in the frame that first notices it.
         self.refresh_styles();
@@ -65,6 +90,8 @@ impl eframe::App for EditorApp {
             .textures
             .poll(&state.device, &state.queue, &mut self.renderers.text);
         self.record_texture_notes(arrived);
+        self.profiler
+            .add(crate::profiler::Phase::Upkeep, upkeep.elapsed());
         self.advance_play(ui.ctx());
         self.update_title(ui.ctx());
         self.handle_close_request(ui.ctx());

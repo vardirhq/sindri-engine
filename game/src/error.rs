@@ -48,6 +48,9 @@ pub enum CausewayError {
     Json(#[from] sindri_core::SceneJsonError),
     #[error(transparent)]
     Frame(#[from] FrameEncodeError),
+    /// One of the engine's own assets would not decode: a broken build.
+    #[error(transparent)]
+    Builtin(Box<sindri_assets::BuiltinError>),
     #[error("Gather presentation could not be composed: {0}")]
     Weave(String),
     #[cfg(target_arch = "wasm32")]

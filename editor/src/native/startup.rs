@@ -100,9 +100,18 @@ impl EditorApp {
     // Long because it names every field the editor holds, once; the work it
     // does is the handful of calls after the literal.
     #[allow(clippy::too_many_lines)]
-    pub(super) fn new(context: &eframe::CreationContext<'_>) -> Self {
+    pub(super) fn new(
+        context: &eframe::CreationContext<'_>,
+        benchmark: Option<crate::benchmark::BenchmarkPlan>,
+    ) -> Self {
         crate::ui::theme::install(&context.egui_ctx);
-        let preferences = Preferences::load(context.storage);
+        // A benchmark measures the editor as it ships, not as somebody last
+        // arranged it.
+        let preferences = if benchmark.is_some() {
+            Preferences::default()
+        } else {
+            Preferences::load(context.storage)
+        };
         let scene = scene_extractor();
         let (decided, file, open_error) = Self::opening(&preferences);
         let (world, load_error) = Self::opening_world(&scene, &file);
@@ -200,6 +209,10 @@ impl EditorApp {
             project_name: None,
             project_main_scene: None,
             prefab_session: super::prefab_writes::PrefabSession::default(),
+            benchmark: benchmark.map(|plan| {
+                let opened = std::env::args().nth(1).unwrap_or_default();
+                super::benchmark::BenchmarkRun::new(plan, opened)
+            }),
         };
         // Said after the field is built rather than during it, because what
         // there is to say is read off the world and the bindings.

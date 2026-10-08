@@ -462,7 +462,7 @@ file.
 | **Array-of-object editing** | ✅ | **Par** | A list of objects is added to, removed from and reordered, with each item's fields drawn through its meanings. Decided by the template, so a tilemap's thousand tiles stay a readout |
 | **Tagged-enum (variant) fields** | ✅ | **Par** | A field that decides what else its object holds is switched as one edit, at any depth — Godot's equivalent is swapping a Resource subtype. What is ours is that every variant is proved to decode at startup, so an unpickable one fails the build rather than the scene |
 | Console / log panel | ✅ | **Par** | Every failure the editor reports, plus script `print` named by the entity that printed it, filtered by level, repeats collapsed to a count, with a jump to the entity a line is about and an error count in the status bar. It can now be put wherever it is wanted — it opens beside the Scene view — so watching the log no longer costs the project browser, and a failure recurring every frame is one counted line wherever it sits in the log rather than a new line per frame |
-| Profiler view | 🟡 | **Behind** | The Profiler panel times each frame of Play by phase — effects, physics, screen UI, scripts, animation, cameras and each view drawn — as a stacked chart of the last 300 frames against the 60 fps budget, with each script's share, slowest first. CPU only: no GPU timings, no per-call breakdown inside a script, and shipped builds are not profiled |
+| Profiler view | 🟡 | **Behind** | The Profiler panel times the whole editor frame by phase — upkeep, each gameplay phase of Play, the views' presentation, extraction and encoding, panels, painting and waiting — as a stacked chart of the last 300 frames against the 60 fps budget, with each script's share, slowest first, and optionally while editing. CPU only: no GPU timings, no per-call breakdown inside a script, and shipped builds are not profiled in-game |
 | **Search / filter in hierarchy or project** | ❌ | **Absent** | Painful past a few dozen entities |
 | **Project settings surface** | ❌ | **Absent** | `sindri.toml` is edited by hand |
 | **Build / export UI** | ❌ | **Absent** | Export is CLI-only |
@@ -502,7 +502,7 @@ file.
 | Named validation errors at the boundary | ✅ | **Ahead** | — |
 | Deterministic replay from a seed | ✅ | **Ahead** | Reproducing a bug is a seed, not a video |
 | In-editor console | ✅ | **Par** | See the editor section. It can be placed anywhere and opens beside the Scene view |
-| Profiler / frame timing | 🟡 | **Behind** | The editor's Profiler panel times Play frame by frame and script by script; a browser or desktop build has no timing of its own |
+| Profiler / frame timing | 🟡 | **Behind** | The editor's Profiler panel times every phase of its frame and each script; `sindri-editor --benchmark` and `project-benchmark` record comparable reports for the editor and the shipped host's loop. A running browser or desktop build has no timing of its own |
 | **Debug draw from scripts** | ❌ | **Absent** | A script cannot draw a line to show what it thinks it is doing |
 | **Frame / draw-call debugger** | ❌ | **Absent** | — |
 | **Crash and error reporting in a shipped build** | ❌ | **Absent** | — |
@@ -634,9 +634,9 @@ output of the file; everything above is evidence.
     follows its hero with it. Decay camera-mode controls and authoring gizmos
     remain as the row's gap.
 13. **Autotiling.** The daily cost of painting tilemaps by hand.
-14. **Profiler view.** **Started.** The Profiler panel times each frame of
-    Play by phase and each script within it. GPU time, a breakdown inside a
-    script, and timing a shipped build remain.
+14. **Profiler view.** **Started.** The Profiler panel times every phase of
+    the editor's frame and each script within Play. GPU time, a breakdown
+    inside a script, and timing a running shipped build remain.
 
 Of the open items, what is left of 10 is cheap relative to its daily cost and
 13–14 are real but survivable. The next queue is the gaps the done items left

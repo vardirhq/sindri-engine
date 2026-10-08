@@ -1,5 +1,7 @@
 //! The rendered views: their targets, their renderers, and drawing one.
 
+use std::time::Instant;
+
 use eframe::{
     egui::{self, Align2, Color32, FontId, Pos2, Rect, Sense, Shape, Stroke},
     wgpu,
@@ -24,7 +26,10 @@ use super::pointer::TilemapHover;
 use super::prefab_pointer::paint_prefab_target;
 use super::scene_io::SceneSource;
 use super::view_interaction::{PaintHover, ViewInteraction};
-use super::{EditorApp, INITIAL_VIEWPORT_HEIGHT, INITIAL_VIEWPORT_WIDTH, WorkspaceTab};
+use super::{
+    EditorApp, INITIAL_VIEWPORT_HEIGHT, INITIAL_VIEWPORT_WIDTH, WorkspaceTab, scene_board_view,
+};
+use crate::profiler::{Phase, Profiler};
 use crate::tile_volume::TilePlacement;
 use crate::ui::theme::{color, text};
 
@@ -107,7 +112,9 @@ impl RuntimeViewport {
         size: (u32, u32),
         camera: CameraView,
         canvas: UiCanvas,
+        profiler: &mut Profiler,
     ) -> Result<(), String> {
+        let began = Instant::now();
         self.resize(size.0, size.1);
         // Text that fits its words is measured by the same renderer that
         // draws it, so the view shows the size the game will.
@@ -133,41 +140,15 @@ impl RuntimeViewport {
                     .with_text_sizes(&text_sizes),
             )
             .map_err(|error| error.to_string())?;
+        let extracted = Instant::now();
+        profiler.add(Phase::Extraction, extracted - began);
         let mut encoder =
             self.render_state
                 .device
                 .create_command_encoder(&wgpu::CommandEncoderDescriptor {
                     label: Some("Sindri editor runtime viewport encoder"),
                 });
-        // The extractor's environment rather than the world's: tolerantly, an
-        // invalid one is the last valid one, so lighting holds still while a
-        // value is dragged out of range instead of the frame failing.
-        let environment = source
-            .scene
-            .environment(source.world)
-            .map_err(|error| error.to_string())?;
-        // The scene's sun and ambient, or the editor's own light when the
-        // Scene view has the scene's lighting switched off.
-        let (lighting, shadows) =
-            super::scene_lighting::lighting_for(source, camera, self.aspect(), environment)?;
-        renderers.cube.set_lighting(lighting);
-        renderers
-            .cube
-            .set_shadows(&self.render_state.device, shadows);
-        renderers.cube.set_fog(
-            environment
-                .map(EnvironmentComponent::fog_settings)
-                .unwrap_or_default(),
-        );
-        renderers
-            .cube
-            .set_ambient_occlusion(environment.map_or(0.0, |environment| {
-                if environment.ambient_occlusion.enabled {
-                    environment.ambient_occlusion.strength
-                } else {
-                    0.0
-                }
-            }));
+        let environment = self.light(renderers, source, camera)?;
         let frame_renderers = FrameRenderers {
             cube: &mut renderers.cube,
             sprites: &mut renderers.sprites,
@@ -208,7 +189,56 @@ impl RuntimeViewport {
         }
         .map_err(|error| error.to_string())?;
         self.render_state.queue.submit([encoder.finish()]);
+        profiler.add(Phase::Encoding, extracted.elapsed());
+        if profiler.waits_for_gpu() {
+            let waiting = Instant::now();
+            self.render_state
+                .device
+                .poll(wgpu::PollType::wait_indefinitely())
+                .map_err(|error| error.to_string())?;
+            profiler.add(Phase::Gpu, waiting.elapsed());
+        }
         Ok(())
+    }
+
+    /// Sets the cube renderer's light, shadows, fog and ambient occlusion for
+    /// this view, and answers the environment they came from.
+    fn light(
+        &self,
+        renderers: &mut SceneRenderers,
+        source: SceneSource<'_>,
+        camera: CameraView,
+    ) -> Result<Option<EnvironmentComponent>, String> {
+        // The extractor's environment rather than the world's: tolerantly, an
+        // invalid one is the last valid one, so lighting holds still while a
+        // value is dragged out of range instead of the frame failing.
+        let environment = source
+            .scene
+            .environment(source.world)
+            .map_err(|error| error.to_string())?;
+        // The scene's sun and ambient, or the editor's own light when the
+        // Scene view has the scene's lighting switched off.
+        let (lighting, shadows) =
+            super::scene_lighting::lighting_for(source, camera, self.aspect(), environment)?;
+        renderers.cube.set_lighting(lighting);
+        renderers
+            .cube
+            .set_shadows(&self.render_state.device, shadows);
+        renderers.cube.set_fog(
+            environment
+                .map(EnvironmentComponent::fog_settings)
+                .unwrap_or_default(),
+        );
+        renderers
+            .cube
+            .set_ambient_occlusion(environment.map_or(0.0, |environment| {
+                if environment.ambient_occlusion.enabled {
+                    environment.ambient_occlusion.strength
+                } else {
+                    0.0
+                }
+            }));
+        Ok(environment)
     }
 
     /// Resizes the target and, when it actually changed, points egui at the
@@ -228,6 +258,27 @@ impl RuntimeViewport {
                 self.texture_id,
             );
     }
+}
+
+/// Gives the Scenes panel the frame a view just drew of `scene`, as often as
+/// the board wants one; nothing for a scene with no file yet. The copy is GPU
+/// work recorded on the CPU, so it is timed as encoding.
+fn picture(
+    board: &mut scene_board_view::SceneBoardState,
+    profiler: &mut Profiler,
+    viewport: &RuntimeViewport,
+    scene: Option<&std::path::Path>,
+    tab: WorkspaceTab,
+) {
+    let Some(scene) = scene else {
+        return;
+    };
+    let copying = Instant::now();
+    let game = tab == WorkspaceTab::Game;
+    board
+        .pictures_mut()
+        .take(&viewport.render_state, &viewport.target, scene, game);
+    profiler.add(Phase::Encoding, copying.elapsed());
 }
 
 /// What the viewport answers to.
@@ -292,9 +343,13 @@ impl EditorApp {
     /// The world a view draws when it is not the document itself: the
     /// Timeline's playhead posed on it, Weave's presentation of it, or both.
     fn shown_world(&mut self, editing: bool, rect: Rect, frame: u64) -> Option<sindri_core::World> {
+        let presenting = Instant::now();
         let presented = self.resolve_presentation(editing, rect);
-        self.timeline_posed(presented.as_ref().unwrap_or(&self.world), frame)
-            .or(presented)
+        let shown = self
+            .timeline_posed(presented.as_ref().unwrap_or(&self.world), frame)
+            .or(presented);
+        self.profiler.add(Phase::Presentation, presenting.elapsed());
+        shown
     }
 
     /// Draws one view of the world into whatever space `ui` has left.
@@ -355,6 +410,7 @@ impl EditorApp {
                 // zooming reach it; the Game view is the screen, so there the
                 // overlay is the screen.
                 canvas,
+                &mut self.profiler,
             )
             .err();
         super::console_view::record_extract_problems(
@@ -365,16 +421,9 @@ impl EditorApp {
         // The Scenes panel's picture of this scene: the frame just drawn, while
         // it is the scene being edited, never a run in progress that a stop is
         // about to put back.
-        if failure.is_none()
-            && pictured
-            && let Some(scene) = self.file.path()
-        {
-            self.scene_board.pictures_mut().take(
-                &viewport.render_state,
-                &viewport.target,
-                scene,
-                tab == WorkspaceTab::Game,
-            );
+        if failure.is_none() && pictured {
+            let (board, scene) = (&mut self.scene_board, self.file.path());
+            picture(board, &mut self.profiler, viewport, scene, tab);
         }
         // Two views can be live at once, and the first thing to go wrong is the
         // thing worth reading, so a later success does not erase it.

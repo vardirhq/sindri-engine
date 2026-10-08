@@ -205,15 +205,27 @@ impl DesktopApp for BrowserCausewayApp {
     type Error = CausewayError;
 
     fn create(context: &AppContext<'_>) -> Result<Self, Self::Error> {
+        // The engine's own assets first: the export leaves them out of the
+        // manifest because they come with the engine, not over the network.
+        let mut textures = TextureRegistry::new(context.device(), context.queue());
+        let mut bindings = TextureBindings::new();
+        crate::bind_builtin_textures(
+            context.device(),
+            context.queue(),
+            &mut textures,
+            &mut bindings,
+        )?;
+        let mut tile_sets = TileSetBindings::new();
+        crate::bind_builtin_tile_sets(&mut tile_sets)?;
         Ok(Self {
             loader: Some(BrowserProjectLoader::new()?),
             pending: None,
             audio: Some(BrowserAudioBackend::new()),
             engine: None,
             scene: extractor()?,
-            bindings: TextureBindings::new(),
-            tile_sets: TileSetBindings::new(),
-            textures: TextureRegistry::new(context.device(), context.queue()),
+            bindings,
+            tile_sets,
+            textures,
             depth: DepthTarget::new(context.device(), context.width(), context.height()),
             cubes: TexturedCubeRenderer::new(context.device(), context.format()),
             sprites: SpriteBatchRenderer::new(context.device(), context.format()),

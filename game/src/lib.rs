@@ -25,7 +25,11 @@ mod browser;
 #[cfg(not(target_arch = "wasm32"))]
 mod app;
 mod assets;
+mod builtins;
 mod error;
+/// Any project played offscreen, for the capture and benchmark tools.
+#[cfg(not(target_arch = "wasm32"))]
+pub mod project;
 mod session;
 mod styling;
 
@@ -39,6 +43,7 @@ pub use assets::{
     scenes, sources, stylesheets, world,
 };
 pub use assets::{extractor, presented_world};
+pub use builtins::{bind_builtin_textures, bind_builtin_tile_sets};
 pub use error::CausewayError;
 pub use session::Session;
 

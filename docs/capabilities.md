@@ -1563,16 +1563,28 @@ frame.
   while the monitor carries over. Pause holds every voice and Stop ends them.
   Without an audio device Play carries on silently, listing one-shots for a
   second. No level meters, and buses are not yet declared by the project
-- **Profiles Play.** The Profiler panel (a top tab beside the Game view,
-  under the Scene view beside the Game view when docked) keeps the last 300
-  frames of Play, each timed on the CPU by phase: effects, physics, screen UI,
-  scripts, sprite animation, cameras, and the Scene and Game views drawn.
-  They are drawn as stacked bars against the 60 fps budget; pointing at a bar
-  shows that frame and a click pins it, and otherwise the panel shows the
-  average frame. Each script's time and runs per frame are listed slowest
-  first, summed over every entity running it (`Scripts::set_measuring`
-  reports them). Starting Play clears it. GPU time, a breakdown inside a
-  script, and timing a shipped build are not measured
+- **Profiles the editor's frame.** The Profiler panel (a top tab beside the
+  Game view, under the Scene view beside the Game view when docked) keeps the
+  last 300 frames of Play, each timed on the CPU from one call of the editor's
+  frame to the next: upkeep (hot reload, assets and scripts arriving,
+  compiling), the fixed steps' effects, physics, screen UI, scripts, sprite
+  animation and cameras, then each view's presentation (Weave or a Timeline
+  pose), extraction and encoding, the panels laid out around them, egui
+  painting the window (from eframe's own CPU figure), and the wait until the
+  next frame. Waiting is listed but left out of the bars, which are drawn
+  against the 60 fps budget; pointing at one shows that frame and a click pins
+  it, and otherwise the panel shows the average frame. Each script's time and
+  runs per frame are listed slowest first, summed over every entity running
+  it (`Scripts::set_measuring` reports them). A toolbar toggle records frames
+  while editing too. Starting Play clears it. GPU time and a breakdown inside
+  a script are not measured
+- **Benchmarks itself against the shipped host.** `sindri-editor <project>
+  --benchmark <report.json>` waits for the project's assets, records frames
+  at rest and then of Play with vsync off and default settings, writes every
+  frame's phases and exits; `project-benchmark` plays the same project
+  offscreen the way the browser host does. `scripts/frame-benchmark.py`
+  runs both and compares the work per frame. The measured baselines are in
+  `docs/editor-update.md`
 - **Shows a project's scenes as a board.** The Scenes panel (a tab beside the
   Scene view, or beside the Game view in the docked preset, and in the View
   menu) has a card for the main scene and each scene in `[project] scenes`,

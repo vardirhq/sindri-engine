@@ -238,6 +238,7 @@ pub const TILE_SETS: &[(&str, &str)] = &[(
 #[cfg(not(target_arch = "wasm32"))]
 pub fn bind_tile_sets() -> Result<TileSetBindings, CausewayError> {
     let mut bindings = TileSetBindings::new();
+    crate::bind_builtin_tile_sets(&mut bindings)?;
     for (id, json) in TILE_SETS {
         bindings.bind(*id, TileSetDocument::from_json(json)?)?;
     }
@@ -252,6 +253,7 @@ pub fn bind_textures(
 ) -> Result<(TextureRegistry, TextureBindings), CausewayError> {
     let mut textures = TextureRegistry::new(device, queue);
     let mut bindings = TextureBindings::new();
+    crate::bind_builtin_textures(device, queue, &mut textures, &mut bindings)?;
     for (id, bytes) in TEXTURES {
         let asset = TextureAssetDecoder.decode(AssetBytes::new(
             (*id).parse::<AssetId>()?,

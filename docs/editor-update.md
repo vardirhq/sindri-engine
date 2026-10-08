@@ -90,13 +90,16 @@ capabilities; each is proven on a genre showcase or flagship named in its slice.
 
 ## Acceptance checklist
 
-- [ ] **1. Measure the whole frame.** The Profiler times egui layout and
-  tessellation, extraction, GPU submission, present wait and idle, beside the
-  existing gameplay phases. A headless editor-frame benchmark opens Causeway,
-  the platformer, Orbital Last Stand and Voxel Lab, plays a scripted run, and
-  reports frame-time percentiles. Baselines for debug and optimised builds,
-  and the standalone host for the same projects, are recorded below, with the
-  frame-time target chosen from them.
+- [x] **1. Measure the whole frame.** The Profiler times upkeep,
+  presentation, extraction, encoding, panels, egui's painting and waiting
+  beside the existing gameplay phases, and can record while editing.
+  `sindri-editor <project> --benchmark <report.json>` and
+  `project-benchmark` record comparable reports; `scripts/frame-benchmark.py`
+  runs and compares them. Baselines for debug and optimised builds of
+  Causeway, the platformer, Orbital Last Stand and Voxel Lab are below, with
+  the target chosen from them. The run is played without input: what a
+  scripted input sequence would add is proven by slice 3's parity tests
+  rather than timed here.
 - [ ] **2. Build profiles.** The dev profile optimises dependencies (and the
   workspace as far as compile time allows, measured), and there is one
   documented way to launch the editor optimised. README,
@@ -156,7 +159,62 @@ capabilities; each is proven on a genre showcase or flagship named in its slice.
 
 ## Baselines
 
-Recorded by slice 1. Empty until then.
+Measured on this update's branch before any of slices 2–8, on a 4-core cloud
+VM with no GPU: Mesa's lavapipe (software Vulkan, Mesa 25.2.8) under Xvfb. The
+editor runs at its default 1440×1024 in the Canvas arrangement with the Game
+view showing; the standalone host draws offscreen at 1280×720. 300 frames per
+section after 60 to settle, vsync off. Times are means of the CPU **work** per
+frame in milliseconds: waiting for the GPU or the display is reported apart
+and left out, because on a software GPU it measures the GPU, not the editor.
+
+Reproduce with `scripts/frame-benchmark.py run <project> [--release]`.
+
+| Project | Build | Editor at rest | Editor in Play | Steps / frame | One-step game frame | Standalone | Ratio | Editor's own UI |
+|---|---|---|---|---|---|---|---|---|
+| Platformer | debug | 46.7 | 67.5 | 5.14 | 18.6 | 9.8 | 1.91× | 29.6 |
+| Platformer | optimised | 15.4 | 16.7 | 2.10 | 6.4 | 1.3 | 4.97× | 9.4 |
+| Causeway | debug | 48.0 | 88.8 | 6.44 | 54.9 | 28.7 | 1.92× | 20.8 |
+| Causeway | optimised | 16.5 | 47.2 | 4.07 | 35.6 | 3.0 | 11.81× | 10.3 |
+| Orbital | debug | 127.8 | 184.5 | 8.00 | 76.2 | 38.7 | 1.97× | 58.6 |
+| Orbital | optimised | 41.7 | 49.6 | 4.37 | 32.1 | 6.8 | 4.73× | 13.6 |
+| Voxel Lab | debug | 203.8 | 403.5 | 8.00 | 378.1 | 159.3 | 2.37× | 21.9 |
+| Voxel Lab | optimised | 109.6 | 172.0 | 8.00 | 161.1 | 9.4 | 17.08× | 10.7 |
+
+The **one-step game frame** is what the editor spends drawing the game plus
+one fixed step of gameplay, which is what a standalone frame is. The editor
+in Play runs more than one step a frame because it is slow, and each extra
+step makes the next frame slower: Orbital and Voxel Lab sit at the clock's
+eight-step ceiling. **Editor's own UI** is panels plus egui's painting.
+
+What the numbers say:
+
+1. **The unoptimised build is most of the lag a person sees.** Debug costs
+   3–4× an optimised build almost everywhere, and the panels alone take
+   22–48 ms a frame in debug against 1–6 ms optimised.
+2. **Per step, gameplay costs the same in both hosts**: 4.6 against 4.8 ms
+   on the debug platformer, 0.78 against 0.71 optimised. The simulation is
+   not where the editor loses.
+3. **Where it loses is drawing.** Optimised, the editor's encoding is 4.9 ms
+   on the platformer against 0.4, 34 ms on Causeway against 1.8, 23 ms on
+   Orbital against 0.8 and 98–160 ms on Voxel Lab against 8 — even editing,
+   with nothing moving, so a voxel world is being remeshed or re-uploaded
+   every frame. Orbital spends a further 6–7 ms on presentation, its Weave
+   world copies.
+4. **Editor Play is not the game.** Voxel Lab's gameplay costs the editor
+   0.03 ms a step against 0.48 standalone: Play there runs almost nothing.
+   The editor's script frame gives scripts no pointer aim, gestures, camera
+   pan, tile sets or `Scene.go`, which the shipped session does, and steps
+   effects before physics rather than after it. Slice 3 is a correctness fix
+   before it is a performance one.
+
+**Target.** In an optimised build, on all four projects: the editor's
+one-step game frame is at most 1.25× the standalone host's, and at rest the
+editor does not redraw. The editor's own UI is reported alongside and must
+not grow. Gaps found while measuring are fixed in this update rather than
+noted: `project-capture` and `project-benchmark` could not open a project
+whose voxel world names `builtin:blocks`, and neither could the shipped
+browser host; every host now binds the engine's own block set and textures,
+as the editor always did.
 
 ## Verification
 

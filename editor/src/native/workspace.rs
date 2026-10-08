@@ -299,23 +299,6 @@ impl EditorApp {
     /// Every arm is a call into the module that owns that region: what a panel
     /// contains is that module's business, and where it is drawn is this one's.
     fn draw_panel(&mut self, ui: &mut egui::Ui, panel: DockPanel) {
-        let began = std::time::Instant::now();
-        self.draw_panel_body(ui, panel);
-        // A view drawn while Play runs is part of the game's frame; one drawn
-        // over a paused or stopped scene is not.
-        let phase = match panel {
-            DockPanel::Scene => Some(crate::profiler::Phase::SceneView),
-            DockPanel::Game => Some(crate::profiler::Phase::GameView),
-            _ => None,
-        };
-        if let Some(phase) = phase
-            && self.lifecycle.state() == sindri_core::EngineState::Running
-        {
-            self.profiler.add(phase, began.elapsed());
-        }
-    }
-
-    fn draw_panel_body(&mut self, ui: &mut egui::Ui, panel: DockPanel) {
         match panel {
             DockPanel::Scene => {
                 if self.preferences.workspace.chrome().floats() {

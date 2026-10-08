@@ -195,9 +195,7 @@ impl EditorApp {
     /// than waiting for someone to press Play. What the transport changes is
     /// how much time a frame is worth, so a scene at rest runs nothing.
     pub(super) fn advance_play(&mut self, context: &egui::Context) {
-        // The frame before this one is over: its steps ran last time through
-        // here and its views have been drawn since.
-        self.profiler.finish();
+        let upkeep = std::time::Instant::now();
         if self.lifecycle.state() == EngineState::Running {
             // Nothing else asks for a frame while the pointer is still, so
             // without this a played scene runs only as fast as the mouse moves.
@@ -250,6 +248,7 @@ impl EditorApp {
         // scene that behaves differently here than in the build is a scene
         // nobody can trust a play-test of. `EngineCore` steps a fixed clock and
         // runs gameplay a whole number of times per frame; so does this.
+        self.profiler.add(Phase::Upkeep, upkeep.elapsed());
         let steps = self
             .clock
             .advance(std::time::Duration::from_secs_f32(delta));

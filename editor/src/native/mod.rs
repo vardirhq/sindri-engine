@@ -44,6 +44,7 @@ use crate::{
 mod animated;
 mod assistant_view;
 mod audio_view;
+mod benchmark;
 mod block_pointer;
 mod block_set_view;
 mod camera;
@@ -415,6 +416,8 @@ struct EditorApp {
     project_main_scene: Option<PathBuf>,
     /// The scene a prefab was opened from, and the prefab files edits wrote.
     prefab_session: prefab_writes::PrefabSession,
+    /// The benchmark the command line asked for, while it runs.
+    benchmark: Option<benchmark::BenchmarkRun>,
 }
 
 /// What the textures were last asked about: the history revision, since an

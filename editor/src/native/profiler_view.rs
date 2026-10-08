@@ -19,14 +19,20 @@ const CHART_HEIGHT: f32 = 112.0;
 /// The color a phase is drawn in, in the chart and beside its row.
 const fn phase_color(phase: Phase) -> Color32 {
     match phase {
+        Phase::Upkeep => color::FORGE_DIM,
         Phase::Effects => color::AXIS_Z_DIM,
         Phase::Physics => color::AXIS_Z,
         Phase::ScreenUi => color::AXIS_Y_DIM,
         Phase::Scripts => color::FORGE,
         Phase::Animation => color::AXIS_Y,
         Phase::Cameras => color::AXIS_X_DIM,
-        Phase::SceneView => color::TEXT_FAINT,
-        Phase::GameView => color::TEXT_MUTED,
+        Phase::Presentation => color::AXIS_X,
+        Phase::Extraction => color::TEXT_MUTED,
+        Phase::Encoding => color::TEXT_FAINT,
+        Phase::Gpu => color::LINE_SOFT,
+        Phase::Panels => color::EMBER,
+        Phase::Paint => color::LINE,
+        Phase::Waiting => color::WELL,
     }
 }
 
@@ -37,26 +43,44 @@ fn millis(time: Duration) -> String {
 impl EditorApp {
     /// The Profiler panel.
     pub(super) fn profiler_body(&mut self, ui: &mut egui::Ui) {
-        if profiler_panel(ui, &self.profiler) {
+        let asked = profiler_panel(ui, &self.profiler);
+        if asked.clear {
             self.profiler.clear();
+        }
+        if asked.toggle_editing {
+            let on = !self.profiler.while_editing();
+            self.profiler.set_while_editing(on);
         }
     }
 }
 
-/// Draws the panel; answers whether Clear was pressed.
-pub(super) fn profiler_panel(ui: &mut egui::Ui, profiler: &Profiler) -> bool {
+/// What the panel's toolbar was asked to do.
+#[derive(Clone, Copy, Debug, Default)]
+pub(super) struct Asked {
+    pub(super) clear: bool,
+    pub(super) toggle_editing: bool,
+}
+
+/// Draws the panel; answers what its toolbar was asked to do.
+pub(super) fn profiler_panel(ui: &mut egui::Ui, profiler: &Profiler) -> Asked {
     let frames = profiler.frames();
     let summary = profiler.summary();
-    let mut cleared = false;
+    let mut asked = Asked::default();
     ui.horizontal(|ui| {
         ui.set_height(metric::TOOLBAR_HEIGHT);
         ui.add_space(metric::GUTTER);
         let said = if frames.is_empty() {
             "No frames yet".to_owned()
         } else {
+            let rate = if summary.interval.is_zero() {
+                0.0
+            } else {
+                1.0 / summary.interval.as_secs_f64()
+            };
             format!(
-                "{} frames · average {} · worst {}",
+                "{} frames · {:.0} fps · working {} on average, {} at worst",
                 summary.frames,
+                rate,
                 millis(summary.average),
                 millis(summary.worst)
             )
@@ -76,7 +100,17 @@ pub(super) fn profiler_panel(ui: &mut egui::Ui, profiler: &Profiler) -> bool {
             )
             .clicked()
             {
-                cleared = true;
+                asked.clear = true;
+            }
+            if button::icon(
+                ui,
+                icons::INSPECTOR,
+                profiler.while_editing(),
+                "Record frames while editing too, not only while playing",
+            )
+            .clicked()
+            {
+                asked.toggle_editing = true;
             }
         });
     });
@@ -86,9 +120,9 @@ pub(super) fn profiler_panel(ui: &mut egui::Ui, profiler: &Profiler) -> bool {
             ui,
             icons::PROFILER,
             "Nothing measured yet",
-            "Press Play: each frame's physics, scripts, UI and views are timed here, and each script's share of them.",
+            "Press Play: each frame's steps, views, panels and painting are timed here, and each script's share of them.",
         );
-        return cleared;
+        return asked;
     }
     let pinned_id = ui.id().with("profiler pinned frame");
     let mut pinned: Option<usize> = ui.data(|data| data.get_temp(pinned_id));
@@ -107,13 +141,13 @@ pub(super) fn profiler_panel(ui: &mut egui::Ui, profiler: &Profiler) -> bool {
                     heading(
                         ui,
                         &format!(
-                            "One frame: {} in {} step{}",
-                            millis(frame.total()),
+                            "One frame: {} working in {} step{}",
+                            millis(frame.work()),
                             frame.steps,
                             if frame.steps == 1 { "" } else { "s" }
                         ),
                     );
-                    phases(ui, |phase| frame.phase(phase), frame.total());
+                    phases(ui, |phase| frame.phase(phase), frame.work());
                     scripts(ui, &Summary::of(std::iter::once(frame)));
                 } else {
                     heading(ui, "Average frame");
@@ -122,7 +156,7 @@ pub(super) fn profiler_panel(ui: &mut egui::Ui, profiler: &Profiler) -> bool {
                 }
             });
         });
-    cleared
+    asked
 }
 
 fn heading(ui: &mut egui::Ui, words: &str) {
@@ -130,9 +164,11 @@ fn heading(ui: &mut egui::Ui, words: &str) {
     ui.add_space(4.0);
 }
 
-/// The frames as stacked bars, newest on the right, with the 60 Hz budget
-/// marked. Answers the frame under the pointer; a click pins one, and a
-/// click on the same one again lets it go.
+/// The frames' work as stacked bars, newest on the right, with the 60 Hz
+/// budget marked. Waiting for the GPU or the display is left out: at a
+/// display's rate it fills every bar up to the refresh interval, which says
+/// nothing about the editor. Answers the frame under the pointer; a click
+/// pins one, and a click on the same one again lets it go.
 fn chart(
     ui: &mut egui::Ui,
     profiler: &Profiler,
@@ -162,7 +198,7 @@ fn chart(
         let left = column(at);
         let mut bottom = rect.bottom();
         let lit = Some(at) == pointed || Some(at) == *pinned;
-        for phase in Phase::ALL {
+        for phase in Phase::ALL.into_iter().filter(|phase| phase.is_work()) {
             let tall = height_of(frame.phase(phase));
             if tall <= 0.0 {
                 continue;
@@ -205,7 +241,9 @@ fn chart(
     pointed
 }
 
-/// Each phase's time, with its color and its share of the frame.
+/// Each phase's time, with its color and its share of the frame's work.
+/// Waiting for the GPU or the display is no share of that, so those rows
+/// have none.
 fn phases(ui: &mut egui::Ui, time_of: impl Fn(Phase) -> Duration, total: Duration) {
     egui::Grid::new("profiler phases")
         .num_columns(3)
@@ -228,13 +266,13 @@ fn phases(ui: &mut egui::Ui, time_of: impl Fn(Phase) -> Duration, total: Duratio
                         .monospace()
                         .color(color::TEXT_MUTED),
                 );
-                let share = if total.is_zero() {
-                    0.0
+                let share = if total.is_zero() || !phase.is_work() {
+                    String::new()
                 } else {
-                    time.as_secs_f64() / total.as_secs_f64() * 100.0
+                    format!("{:.0}%", time.as_secs_f64() / total.as_secs_f64() * 100.0)
                 };
                 ui.label(
-                    RichText::new(format!("{share:.0}%"))
+                    RichText::new(share)
                         .size(text::LABEL)
                         .color(color::TEXT_FAINT),
                 );
@@ -311,16 +349,19 @@ mod tests {
                         )),
                         ..Default::default()
                     },
-                    |ui| asked = profiler_panel(ui, profiler),
+                    |ui| asked = profiler_panel(ui, profiler).clear,
                 )
                 .drop_without_applying_deltas();
             asked
         };
         draw(&profiler, Vec::new());
-        for _ in 0..10 {
+        let mut at = std::time::Instant::now();
+        for _ in 0..11 {
+            profiler.begin(at, Some(Duration::from_millis(4)), true);
             profiler.add(Phase::Scripts, Duration::from_millis(2));
             profiler.step(Vec::new());
-            profiler.finish();
+            profiler.end(Duration::from_millis(3));
+            at += Duration::from_millis(16);
         }
         draw(&profiler, Vec::new());
         // Clear sits at the toolbar's right edge.
