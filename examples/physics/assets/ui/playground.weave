@@ -74,11 +74,11 @@ sindri.ui.text { color: var(--ink); }
 /* Narrow screens: the dock stacks, labels shrink, the room keeps the middle. */
 @media (orientation: portrait) {
     .hud { padding: 10px 8px; }
-    .top { height: 92px; direction: column; gap: 6px; align-items: center; }
-    .brand { width: 100%; height: 40px; align-items: center; }
+    .top { height: 140px; direction: column; gap: 6px; align-items: center; }
+    .brand { width: 100%; height: 96px; align-items: center; }
     .title { width: 100%; font-size: 17px; letter-spacing: 2px; text-align: center; }
     .stats { width: 100%; font-size: 9px; text-align: center; }
-    .readout { width: 100%; height: 26px; font-size: 9px; line-height: 12px; text-align: center; }
+    .readout { width: 100%; height: 28px; font-size: 9px; line-height: 13px; text-align: center; }
     .mask { width: 120px; height: 24px; }
     .globals { width: 100%; height: 34px; gap: 4px; justify-content: center; }
     .button { height: 32px; border-radius: 8px; }

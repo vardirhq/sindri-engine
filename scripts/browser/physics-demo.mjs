@@ -9,10 +9,17 @@ export async function physicsDemo(page, viewport, evidence, problems) {
     else await page.mouse.click(x, y);
     await page.waitForTimeout(300);
   };
-  const said = (words) => evidence.said.some((line) => line.includes(words));
-  const waitFor = async (words, seconds = 10) => {
-    for (let i = 0; i < seconds * 4 && !said(words); i += 1) await page.waitForTimeout(250);
-    if (!said(words)) problems.push(`physics playground never said "${words}"`);
+  const times = (words) => evidence.said.filter((line) => line.includes(words)).length;
+  // Waits for the playground to say something again: the hundred balls can
+  // set off the domino run on their own, so an earlier line does not count.
+  const waitFor = async (words, seconds = 10, before = times(words)) => {
+    for (let i = 0; i < seconds * 4 && times(words) <= before; i += 1) await page.waitForTimeout(250);
+    if (times(words) <= before) problems.push(`physics playground never said "${words}"`);
+  };
+  const press = async (key, words, seconds) => {
+    const before = times(words);
+    await page.keyboard.press(key);
+    await waitFor(words, seconds, before);
   };
 
   await tapCentre();
@@ -22,15 +29,34 @@ export async function physicsDemo(page, viewport, evidence, problems) {
   if (still.equals(await page.locator('canvas').screenshot())) {
     problems.push('physics playground did not move after 100 BALLS');
   }
-  await page.keyboard.press('KeyV');
-  await waitFor('gravity MOON');
+  await press('KeyV', 'gravity MOON');
+  await press('KeyV', 'gravity ZERO-G');
+  await press('KeyV', 'gravity UPSIDE DOWN');
+  await press('KeyV', 'gravity SIDEWAYS');
+  await press('KeyV', 'gravity EARTH');
+  const blasts = times('blast');
   await page.keyboard.press('KeyB');
   await tapCentre();
-  await waitFor('blast');
-  await page.keyboard.press('KeyX');
-  await waitFor('DROP EVERYTHING');
-  await page.keyboard.press('KeyE');
-  await waitFor('toy WRECKING BALL');
-  await page.keyboard.press('KeyR');
-  await waitFor('reset WRECKING BALL');
+  await waitFor('blast', 10, blasts);
+  await press('KeyI', 'debug true');
+  await press('KeyX', 'Playground ');
+  await press('KeyE', 'toy WRECKING BALL');
+  await press('KeyR', 'reset WRECKING BALL');
+
+  // The robot: back round to the test track, walk and kick.
+  await press('KeyQ', 'toy THE WHOLE ROOM');
+  await press('KeyQ', 'toy DOMINO RUN');
+  await press('KeyQ', 'toy TEST TRACK');
+  await page.keyboard.down('KeyD');
+  await page.waitForTimeout(700);
+  await page.keyboard.up('KeyD');
+  await press('KeyF', 'robot kick');
+
+  // The domino run, set up again, pushed, and the red button it ends on.
+  await press('KeyE', 'toy DOMINO RUN');
+  await press('KeyR', 'reset DOMINO RUN');
+  await page.waitForTimeout(1200);
+  const presses = times('red button');
+  await press('Digit1', 'domino pushed');
+  await waitFor('red button', 15, presses);
 }

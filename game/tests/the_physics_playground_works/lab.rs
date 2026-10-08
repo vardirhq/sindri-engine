@@ -27,7 +27,7 @@ fn the_probe_casts_through_a_mask_and_counts_an_area() {
 
     let said = probe(&mut playground, from, down);
     assert!(
-        said.starts_with("RAY through EVERYTHING: a body at"),
+        said.starts_with("RAY / EVERYTHING / a body at"),
         "{said}"
     );
     assert!(said.contains("normal (0.00, 1.00)"), "{said}");
@@ -36,7 +36,7 @@ fn the_probe_casts_through_a_mask_and_counts_an_area() {
     playground.key(Key::L);
     let said = probe(&mut playground, from, down);
     assert!(
-        said.starts_with("RAY through SOLIDS: the room at 5.00"),
+        said.starts_with("RAY / SOLIDS / the room at 5.00"),
         "{said}"
     );
 
@@ -51,8 +51,8 @@ fn the_probe_casts_through_a_mask_and_counts_an_area() {
         [crate_top[0], -13.0],
         [crate_top[0] + 2.0, -13.0],
     );
-    assert!(said.starts_with("AREA through PROPS: "), "{said}");
-    let count: f32 = said["AREA through PROPS: ".len()..]
+    assert!(said.starts_with("AREA / PROPS / "), "{said}");
+    let count: f32 = said["AREA / PROPS / ".len()..]
         .split(' ')
         .next()
         .and_then(|n| n.parse().ok())
@@ -68,7 +68,7 @@ fn debug_draws_the_room_and_counts_what_it_sees() {
     playground.play(3);
     assert_eq!(playground.text("btn-debug-label"), "DEBUG ON");
     let said = playground.text("readout");
-    assert!(said.contains(" in view, "), "{said}");
+    assert!(said.contains(" in view / "), "{said}");
     assert!(said.ends_with("19 of 19 joints on"), "{said}");
     playground.key(Key::X);
     playground.play(2);

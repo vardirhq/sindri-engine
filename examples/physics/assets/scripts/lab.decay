@@ -101,7 +101,7 @@ script Probe {
             if !Pointer.is_down("Left") { this.dragging = false; }
         }
         if !this.showing {
-            this.text = probe_name(Game.probe) + " through " + mask_name(Game.probe_mask) + ": drag from where it starts to where it points.";
+            this.text = probe_name(Game.probe) + " / " + mask_name(Game.probe_mask) + " / drag from where it starts to where it points";
             return;
         }
         cast();
@@ -114,7 +114,7 @@ script Probe {
         if length > 0.01 { direction = delta.normalized; }
         let reach = max(0.05, length);
         let mask = probe_mask(Game.probe_mask);
-        let kind = probe_name(Game.probe) + " through " + mask_name(Game.probe_mask);
+        let kind = probe_name(Game.probe) + " / " + mask_name(Game.probe_mask);
         Game.queries += 1.0;
         if Game.probe == 3.0 {
             area(max(0.3, length), mask, kind);
@@ -141,11 +141,11 @@ script Probe {
             line(normal, found.point, found.point + found.normal * 1.4, 0.07);
             World.set_active(dot, true);
             World.set_active(normal, true);
-            this.text = kind + ": " + describe(found.entity) + " at " + found.distance.fixed(2) + " u, point " + pair(found.point) + ", normal " + pair(found.normal);
+            this.text = kind + " / " + describe(found.entity) + " at " + found.distance.fixed(2) + " u / normal " + pair(found.normal);
         } else {
             World.set_active(dot, false);
             World.set_active(normal, false);
-            this.text = kind + ": nothing within " + reach.fixed(2) + " u";
+            this.text = kind + " / nothing within " + reach.fixed(2) + " u";
         }
     }
 
@@ -192,7 +192,7 @@ script Probe {
             count += 1.0;
         }
         hide_marks(min(count, 48.0));
-        this.text = kind + ": " + count + " overlapping within " + radius.fixed(2) + " u of " + pair(this.origin);
+        this.text = kind + " / " + count + " within " + radius.fixed(2) + " u";
     }
 
     fn hide_marks(from: f32) {
@@ -305,7 +305,7 @@ script DebugOverlay {
             }
         }
         tidy();
-        this.text = things.length + " in view, " + awake + " awake, " + touching + " contacts, " + joined + " of " + this.links.length + " joints on";
+        this.text = things.length + " in view / " + awake + " awake / " + touching + " contacts / " + joined + " of " + this.links.length + " joints on";
     }
 
     // An outline over a collider, the size the thing is drawn.
