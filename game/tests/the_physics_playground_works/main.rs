@@ -3,6 +3,7 @@
 
 mod lab;
 mod quarry;
+mod smoke;
 mod support;
 mod track;
 
