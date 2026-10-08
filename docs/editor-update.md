@@ -138,7 +138,7 @@ capabilities; each is proven on a genre showcase or flagship named in its slice.
   - Acceptance: editor Play meets the slice-1 target against the standalone
     host on all four benchmark projects, and an untouched editor does not
     redraw.
-- [ ] **5. Edit while playing, with a decision at Stop.** Authoring stays
+- [x] **5. Edit while playing, with a decision at Stop.** Authoring stays
   enabled during a run. An edit made while playing is a command applied to the
   running world and recorded against the run; Stop lists those edits and
   applies the ones kept to the restored snapshot as ordinary history
@@ -147,6 +147,15 @@ capabilities; each is proven on a genre showcase or flagship named in its slice.
   dropped. Proof: tune the platformer hero's jump during a run, keep it, and
   the saved scene carries it; discard and it does not.
   `docs/editor-direction.md` and the authoring-guard contract are updated.
+  Done: every editor edit goes through `apply_edit`, which records it against
+  the run while playing (`editor/src/run_edits.rs`); Stop offers each back
+  (`native/run_review.rs`) as the component fields and transform parts it
+  changed. `run_edits/tests.rs` tunes the platformer hero's jump during a run,
+  keeps it and finds it in the saved scene, discards it and does not, and
+  keeps a scale without the position the run moved the hero to. Checked in
+  the editor itself: a coin moved while playing is offered at Stop, kept as
+  an undoable entry, and discarded leaves the scene as it was. Prefab
+  placement and prefab files stay stopped-only, as Save does.
 - [ ] **6. Record and scrub a run.** A run records periodic session snapshots
   and its input log; the Timeline scrubs to any recorded step by restoring the
   nearest snapshot and replaying, deterministically. Scrubbing pauses the run;

@@ -152,11 +152,8 @@ impl EditorApp {
                 ..EntityData::default()
             }),
         });
-        self.history.break_merge_run();
-        if let Err(error) = self.history.apply(
-            buffer.into_transaction(format!("Create {name}")),
-            &mut self.world,
-        ) {
+        self.break_merge_runs();
+        if let Err(error) = self.apply_edit(buffer.into_transaction(format!("Create {name}"))) {
             self.report(error.to_string());
             return;
         }
@@ -183,15 +180,12 @@ impl EditorApp {
                 ..EntityData::default()
             }),
         });
-        self.history.break_merge_run();
-        if let Err(error) = self.history.apply(
-            buffer.into_transaction(if parent.is_some() {
-                "Create child"
-            } else {
-                "Create GameObject"
-            }),
-            &mut self.world,
-        ) {
+        self.break_merge_runs();
+        if let Err(error) = self.apply_edit(buffer.into_transaction(if parent.is_some() {
+            "Create child"
+        } else {
+            "Create GameObject"
+        })) {
             self.report(error.to_string());
             return;
         }
@@ -248,16 +242,13 @@ impl EditorApp {
         for entity in roots {
             buffer.push(WorldCommand::Despawn { entity });
         }
-        self.history.break_merge_run();
+        self.break_merge_runs();
         let label = if entities.len() == 1 {
             "Delete entity".to_owned()
         } else {
             format!("Delete {} entities", entities.len())
         };
-        if let Err(error) = self
-            .history
-            .apply(buffer.into_transaction(label), &mut self.world)
-        {
+        if let Err(error) = self.apply_edit(buffer.into_transaction(label)) {
             self.report(error.to_string());
             return;
         }
@@ -301,16 +292,13 @@ impl EditorApp {
         if buffer.is_empty() {
             return;
         }
-        self.history.break_merge_run();
+        self.break_merge_runs();
         let label = if copies.len() == 1 {
             "Duplicate entity".to_owned()
         } else {
             format!("Duplicate {} entities", copies.len())
         };
-        if let Err(error) = self
-            .history
-            .apply(buffer.into_transaction(label), &mut self.world)
-        {
+        if let Err(error) = self.apply_edit(buffer.into_transaction(label)) {
             self.report(error.to_string());
             return;
         }
@@ -335,11 +323,8 @@ impl EditorApp {
             entity,
             name: wanted,
         });
-        self.history.break_merge_run();
-        if let Err(error) = self
-            .history
-            .apply(buffer.into_transaction("Rename entity"), &mut self.world)
-        {
+        self.break_merge_runs();
+        if let Err(error) = self.apply_edit(buffer.into_transaction("Rename entity")) {
             self.report(error.to_string());
         }
     }
@@ -375,11 +360,8 @@ impl EditorApp {
         } else {
             format!("{verb} {} entities", buffer.len())
         };
-        self.history.break_merge_run();
-        if let Err(error) = self
-            .history
-            .apply(buffer.into_transaction(label), &mut self.world)
-        {
+        self.break_merge_runs();
+        if let Err(error) = self.apply_edit(buffer.into_transaction(label)) {
             self.report(error.to_string());
             return;
         }
@@ -414,12 +396,9 @@ impl EditorApp {
         if buffer.is_empty() {
             return;
         }
-        self.history.break_merge_run();
+        self.break_merge_runs();
         let label = if offset < 0 { "Move up" } else { "Move down" };
-        if let Err(error) = self
-            .history
-            .apply(buffer.into_transaction(label), &mut self.world)
-        {
+        if let Err(error) = self.apply_edit(buffer.into_transaction(label)) {
             self.report(error.to_string());
         }
     }
@@ -510,17 +489,14 @@ impl EditorApp {
         } else {
             format!("Reparent {moved} entities")
         };
-        self.history.break_merge_run();
-        if let Err(error) = self
-            .history
-            .apply(buffer.into_transaction(label), &mut self.world)
-        {
+        self.break_merge_runs();
+        if let Err(error) = self.apply_edit(buffer.into_transaction(label)) {
             self.report(error.to_string());
         }
     }
 
     pub(super) fn undo(&mut self) {
-        self.history.break_merge_run();
+        self.break_merge_runs();
         let from = self.history.revision();
         if let Err(error) = self.history.undo(&mut self.world) {
             self.report(error.to_string());
@@ -533,7 +509,7 @@ impl EditorApp {
     }
 
     pub(super) fn redo(&mut self) {
-        self.history.break_merge_run();
+        self.break_merge_runs();
         let from = self.history.revision();
         if let Err(error) = self.history.redo(&mut self.world) {
             self.report(error.to_string());

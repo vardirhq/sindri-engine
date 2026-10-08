@@ -54,11 +54,9 @@ impl EditorApp {
     fn hierarchy_header(&self, ui: &mut egui::Ui) -> (Option<CreateGameObject>, bool) {
         let mut create = None;
         let mut deleted = false;
-        // Spawning and despawning are world writes, and a running scene is not
-        // the document: Stop puts back the world as it was when Play was
-        // pressed, so anything made here while playing would vanish without
-        // being mentioned.
-        let authoring = self.authoring_enabled();
+        // Spawning and despawning while a scene plays land in the run, and
+        // Stop offers them back to keep or discard.
+        let authoring = self.world_editable();
         ui.add_enabled_ui(authoring, |ui| {
             // Offered only with something selected, because "delete" with
             // nothing chosen has no answer and a disabled button is a
@@ -173,7 +171,7 @@ impl EditorApp {
     fn hierarchy_contents(&mut self, ui: &mut egui::Ui) {
         let mut reparenting = None;
         let mut asked: Option<RowAction> = None;
-        let authoring = self.authoring_enabled();
+        let authoring = self.world_editable();
         egui::ScrollArea::vertical()
             .auto_shrink([false; 2])
             .show_viewport(ui, |ui, shown| {

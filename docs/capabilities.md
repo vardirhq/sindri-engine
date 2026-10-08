@@ -583,6 +583,17 @@ of dragging between steps sum rather than losing the first. This was wrong in
 the shipped host too, and is now covered by tests in
 `crates/sindri-platform/tests/game_loop.rs`.
 
+**A scene can be edited while it plays.** Inspector fields, the hierarchy's
+create, rename, duplicate and delete, gizmos, and tile and block painting act on
+the running world at once, so a jump can be tuned and tried in the same run.
+Each edit is recorded against the run rather than the scene's history
+(`editor/src/run_edits.rs`). Stop restores the snapshot from Play and lists
+them; the ones kept are applied to the restored scene as ordinary undoable
+entries, by the component fields and transform parts each one changed, so a
+value the game itself wrote while running does not come back with them. An
+edit to something the run spawned is explained rather than dropped. Saving,
+new scenes, prefab files and undo/redo wait for Stop.
+
 **A held scene can be stepped once**, which is what a debugger's step button is
 for: the bug that happens in one frame and is gone before anyone can look at it.
 It runs the same body a played frame runs, so a scene stepped sixty times is a
@@ -2055,8 +2066,9 @@ settings gear.
 
 ### Editor
 
-- Play mode is intentionally read-only. Stop restores the snapshot from Play;
-  editing a running scene and keeping those changes is not supported
+- Saving, new scenes, prefab files and undo/redo wait for Stop. Everything
+  else edits a running scene: Stop lists the edits made while playing and
+  keeps the chosen ones (see Editor Play)
 - The editor edits one scene at a time; the Scenes panel shows the rest but
   does not edit them side by side. There are no project settings beyond the
   scene list and main scene, and a door named at run time (`Scene.go(next)`)

@@ -42,15 +42,17 @@ as the fallback it is.
 
 ### Live editing is the centre, not a mode
 
-Today Stop restores the world as it was when Play was pressed, so tuning means
-play, stop, guess, play again — and the feel you were tuning against is gone by
-the time you are editing. That is the single largest cost in the loop above.
+Stop restores the world as it was when Play was pressed, so tuning used to mean
+play, stop, guess, play again — and the feel you were tuning against was gone by
+the time you were editing. That was the single largest cost in the loop above.
 
 The capability is: **edit while playing, and decide what to keep when the run
-ends.** A change made during a run is a command like any other; what it needs is
-for Stop to ask which of them survive the snapshot restore instead of assuming
-none do. That works because editor mutations already go through checked commands
-rather than direct world writes.
+ends**, and it is built. A change made during a run is a command like any other,
+applied to the running world and recorded against the run (`run_edits.rs`); Stop
+lists them and applies the kept ones to the restored scene as ordinary history
+entries. What comes back is what the person changed — the component fields and
+transform parts an edit wrote — not the values the game wrote beside them, and
+an edit to something the run spawned is explained rather than dropped.
 
 ### Direct manipulation before fields
 
@@ -214,9 +216,8 @@ it are done.
    lines, each counted correctly.
 3. **Gizmos for the shapes that have none** — colliders, cameras, effect radii.
    Each one removes a round trip through Play.
-4. **Edit while playing, with a decision at Stop.** The largest single
-   improvement to the loop, and the one that needs the most care around the
-   snapshot boundary.
+4. **Edit while playing, with a decision at Stop.** Built in the editor
+   update: the largest single improvement to the loop.
 5. **Record and scrub a run.** Depends on 4 having settled what a run's
    authority over the world is.
 

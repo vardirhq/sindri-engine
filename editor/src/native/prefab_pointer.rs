@@ -168,11 +168,8 @@ impl EditorApp {
                 return;
             }
         };
-        self.history.break_merge_run();
-        if let Err(error) = self.history.apply(
-            buffer.into_transaction(format!("Place {label}")),
-            &mut self.world,
-        ) {
+        self.break_merge_runs();
+        if let Err(error) = self.apply_edit(buffer.into_transaction(format!("Place {label}"))) {
             self.report(error.to_string());
             return;
         }
@@ -226,12 +223,9 @@ impl EditorApp {
                 return;
             }
         };
-        self.history.break_merge_run();
+        self.break_merge_runs();
         let label = format!("Add {}", super::instances::file_name(&source));
-        if let Err(error) = self
-            .history
-            .apply(buffer.into_transaction(label), &mut self.world)
-        {
+        if let Err(error) = self.apply_edit(buffer.into_transaction(label)) {
             self.report(error.to_string());
             return;
         }

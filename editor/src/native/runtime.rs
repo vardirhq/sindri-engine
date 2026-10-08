@@ -156,7 +156,7 @@ pub(super) fn play_button(ui: &mut egui::Ui, transport: Transport) -> Response {
 ///
 /// One sentence, in one place, because it is on every disabled control and in
 /// the console line a refused save leaves behind.
-pub(super) const PLAYING_TIP: &str = "Stop the scene first: a running scene is not the document";
+pub(super) const PLAYING_TIP: &str = "Stop the scene first: a running scene is not the document. Stop offers back what you changed while it played";
 
 /// Whether the editor may write to the world and to the file in this state.
 ///
@@ -168,22 +168,31 @@ pub(super) const fn authoring_allowed(state: EngineState) -> bool {
 }
 
 impl EditorApp {
-    /// Whether the editor may write to the world and to the file right now.
+    /// Whether the editor may touch the document right now: save it, start
+    /// another, write prefab files, or show it styled and posed for editing.
     ///
-    /// False while the scene is playing, and that is the whole of play mode's
-    /// safety. Stop restores the world as it was when Play was pressed
-    /// ([`Self::stop_playback`]), so an edit made in between is thrown away —
-    /// and the history keeps its transaction, leaving undo describing changes
-    /// the world no longer contains. Saving was worse still: `save` writes the
-    /// live world, so Ctrl+S mid-run replaced the authored scene on disk with
-    /// wherever the scripts had pushed everything, and Stop then restored a
-    /// world the file no longer matched.
+    /// False while the scene is playing. Stop restores the world as it was
+    /// when Play was pressed ([`Self::stop_playback`]), so the running world
+    /// is not the document: saving it mid-run once replaced the authored
+    /// scene on disk with wherever the scripts had pushed everything.
     ///
-    /// Editing a running scene and keeping the changes is a real feature, and
-    /// it is not this one: it needs history that can be rebased onto a world
-    /// that moved underneath it, or a play mode that runs against a copy.
-    /// Until then the honest answer is that a running scene is not the
-    /// document.
+    /// Editing the world is a different question, answered by
+    /// [`Self::world_editable`]: always yes. An edit made while playing is
+    /// applied to the run and recorded against it rather than the scene's
+    /// history ([`Self::apply_edit`]); Stop offers each one back, applied to
+    /// the restored scene by the fields it changed, as an ordinary history
+    /// entry ([`crate::run_edits`]). Undo and redo walk the scene's history,
+    /// so they wait for Stop too.
+    /// Whether the open world can be edited: always. While a scene plays an
+    /// edit lands in the run, and Stop offers it back to keep or discard
+    /// (`run_review.rs`). What [`Self::authoring_enabled`] still guards is
+    /// the document: saving, new scenes, prefab files.
+    #[allow(clippy::unused_self)] // a method, so each guard reads as the question it asks
+    pub(super) const fn world_editable(&self) -> bool {
+        true
+    }
+
+    /// See the comment above [`Self::world_editable`].
     pub(super) const fn authoring_enabled(&self) -> bool {
         authoring_allowed(self.lifecycle.state())
     }

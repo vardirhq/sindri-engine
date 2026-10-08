@@ -244,10 +244,10 @@ impl EditorApp {
     /// Writes one cell through the command layer. Repeated calls during one
     /// drag share a merge key, and pointer release closes that merge run.
     ///
-    /// Refused while the scene is playing, for the reason every other world
-    /// write is: Stop would throw the painting away.
+    /// While the scene plays, the painting lands in the run and Stop offers it
+    /// back.
     pub(super) fn apply_tile_brush(&mut self, hover: &TilemapHover) {
-        if !self.authoring_enabled() {
+        if !self.world_editable() {
             return;
         }
         let Some(original) = self
@@ -293,7 +293,7 @@ impl EditorApp {
         let transaction = buffer
             .into_transaction("Paint tilemap")
             .merging(format!("tilemap:{}", hover.entity.index()));
-        if let Err(error) = self.history.apply(transaction, &mut self.world) {
+        if let Err(error) = self.apply_edit(transaction) {
             self.report(error.to_string());
         }
     }
@@ -460,7 +460,7 @@ impl EditorApp {
         anchoring: Anchoring,
         visual: &gizmo::GizmoVisual,
     ) -> bool {
-        if !self.authoring_enabled() {
+        if !self.world_editable() {
             self.gizmo_drag = None;
             return false;
         }
@@ -562,7 +562,7 @@ impl EditorApp {
                 drag.entity.index(),
                 drag.mode.label()
             ));
-        if let Err(error) = self.history.apply(transaction, &mut self.world) {
+        if let Err(error) = self.apply_edit(transaction) {
             self.report(error.to_string());
             self.gizmo_drag = None;
         }

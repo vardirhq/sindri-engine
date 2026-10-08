@@ -100,8 +100,9 @@ impl EditorApp {
         // Read whatever the transport is doing, so a key is consumed rather
         // than falling through to something else, and then acted on only where
         // acting is allowed. Save says why it refused; undo and redo do not,
-        // because a running scene is not a thing they have anything to say
-        // about.
+        // because they walk the scene's history and a run's edits are not in
+        // it until Stop keeps them. Duplicate, rename and delete are edits,
+        // and edits are allowed while playing.
         let authoring = self.authoring_enabled();
         if keys.save_as {
             self.save_as();
@@ -117,6 +118,8 @@ impl EditorApp {
             } else if keys.undo {
                 self.undo();
             }
+        }
+        if self.world_editable() {
             self.act_on_selection(keys);
         }
         if keys.focus {

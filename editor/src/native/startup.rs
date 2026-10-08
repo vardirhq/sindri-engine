@@ -211,6 +211,8 @@ impl EditorApp {
                 super::benchmark::BenchmarkRun::new(plan, opened)
             }),
             disk_watch: super::wake::DiskWatch::start(context.egui_ctx.clone()),
+            run_edits: crate::run_edits::RunEdits::default(),
+            stop_review: None,
         };
         // A benchmark plays at the screen the standalone benchmark draws,
         // so both lay the game out against the same media queries.

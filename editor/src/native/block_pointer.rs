@@ -131,7 +131,7 @@ impl EditorApp {
     }
 
     pub(super) fn apply_volume_brush(&mut self, hover: &TileVolumeHover, remove: bool) {
-        if !self.authoring_enabled() {
+        if !self.world_editable() {
             return;
         }
         let Some(mut payload) = self
@@ -180,7 +180,7 @@ impl EditorApp {
         let transaction = buffer
             .into_transaction("Build tile volume")
             .merging(format!("tile-volume:{}", hover.entity.index()));
-        if let Err(error) = self.history.apply(transaction, &mut self.world) {
+        if let Err(error) = self.apply_edit(transaction) {
             self.report(error.to_string());
         }
     }

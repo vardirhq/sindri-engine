@@ -144,11 +144,14 @@ impl EditorApp {
         }
         // Releasing the pointer ends a drag, so the next one is its own step.
         if ui.ctx().input(|input| input.pointer.any_released()) {
-            self.history.break_merge_run();
+            self.break_merge_runs();
         }
         // Drawn last so they sit over everything, and asked before Escape is
         // read as clearing the selection.
-        if self.confirm_dialog(ui.ctx()) || self.confirm_delete(ui.ctx()) {
+        if self.confirm_dialog(ui.ctx())
+            || self.confirm_delete(ui.ctx())
+            || self.stop_review_window(ui.ctx())
+        {
             return;
         }
         // Escape clears the selection wherever the pointer happens to be. The

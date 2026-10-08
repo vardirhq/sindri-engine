@@ -92,6 +92,9 @@ pub mod ordering;
 /// The session editor Play starts, assembled from what the editor loaded.
 #[cfg(not(target_arch = "wasm32"))]
 pub mod play_session;
+/// Edits made while a scene plays, and what Stop does with them.
+#[cfg(not(target_arch = "wasm32"))]
+pub mod run_edits;
 /// The Decay scripts an open scene runs.
 #[cfg(not(target_arch = "wasm32"))]
 pub mod scripts;

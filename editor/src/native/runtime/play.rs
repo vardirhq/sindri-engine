@@ -315,6 +315,9 @@ impl EditorApp {
         if let Some(snapshot) = self.play_snapshot.take() {
             self.world = snapshot;
         }
+        // What was edited while it played is offered back, now that there is
+        // a scene again to keep it in.
+        self.offer_run_edits();
         // A prefab edited while the scene was playing was left alone then,
         // because the world being played is thrown away at Stop. The scene
         // being edited follows it now.

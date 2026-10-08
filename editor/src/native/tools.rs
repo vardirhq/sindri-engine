@@ -62,7 +62,7 @@ impl EditorApp {
     fn choose_mode(&mut self, mode: GizmoMode) {
         self.gizmo_mode = mode;
         self.gizmo_drag = None;
-        self.history.break_merge_run();
+        self.break_merge_runs();
     }
 
     /// Which axes the manipulators work in, and whether they snap.

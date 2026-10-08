@@ -87,12 +87,9 @@ impl EditorApp {
         if buffer.is_empty() {
             return;
         }
-        self.history.break_merge_run();
+        self.break_merge_runs();
         let before = self.history.revision();
-        if let Err(error) = self
-            .history
-            .apply(buffer.into_transaction(label), &mut self.world)
-        {
+        if let Err(error) = self.apply_edit(buffer.into_transaction(label)) {
             self.report(error.to_string());
         }
         self.record_prefab_writes(writes, before);
@@ -241,11 +238,8 @@ impl EditorApp {
         for entity in self.world.instance_members(root) {
             buffer.push(WorldCommand::SetPrefabLink { entity, link: None });
         }
-        self.history.break_merge_run();
-        if let Err(error) = self.history.apply(
-            buffer.into_transaction("Unpack prefab instance"),
-            &mut self.world,
-        ) {
+        self.break_merge_runs();
+        if let Err(error) = self.apply_edit(buffer.into_transaction("Unpack prefab instance")) {
             self.report(error.to_string());
         }
     }

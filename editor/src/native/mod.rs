@@ -78,6 +78,7 @@ mod project_open;
 mod project_panel;
 mod projection;
 mod repair_view;
+mod run_review;
 mod runtime;
 mod scene_board_view;
 mod scene_io;
@@ -398,6 +399,10 @@ struct EditorApp {
     benchmark: Option<benchmark::BenchmarkRun>,
     /// Wakes the editor at rest when a file in the open project changes.
     disk_watch: wake::DiskWatch,
+    /// Edits made while the scene plays, for Stop to offer back.
+    run_edits: crate::run_edits::RunEdits,
+    /// The offer, once Stop has made it and until it is answered.
+    stop_review: Option<run_review::StopReview>,
 }
 
 impl EditorApp {
