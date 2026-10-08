@@ -156,6 +156,11 @@ struct Gpu {
 
 struct EditorApp {
     scene: SceneExtractor,
+    /// The Game view's own extractor. What an extractor keeps between frames
+    /// follows the camera it last drew for — a voxel world's resident
+    /// sections, above all — and two views looking from two places through
+    /// one remeshed the sections each other had just made, every frame.
+    game_scene: SceneExtractor,
     world: World,
     file: SceneFile,
     /// The history revision the open file was last agreed with.

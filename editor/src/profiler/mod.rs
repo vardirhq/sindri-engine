@@ -39,7 +39,7 @@ mod tests;
 pub const KEPT: usize = 300;
 
 /// How many phases a frame is divided into.
-pub const PHASES: usize = 15;
+pub const PHASES: usize = 16;
 
 /// One part of a frame.
 #[derive(Clone, Copy, Debug, Eq, PartialEq, Ord, PartialOrd)]
@@ -65,6 +65,10 @@ pub enum Phase {
     /// Waiting for a view's GPU work to finish, which only a benchmark does
     /// so that the GPU's time is not counted as the next submission's.
     Gpu,
+    /// Drawing the Scene view while a run plays — its presentation,
+    /// extraction and encoding — beside the Game view. A second picture of
+    /// the world is an editor's, as its panels are, not the game's frame.
+    SceneView,
     /// Laying out every panel and its chrome: the editor's own `ui` less
     /// everything above.
     Panels,
@@ -90,6 +94,7 @@ impl Phase {
         Self::Extraction,
         Self::Encoding,
         Self::Gpu,
+        Self::SceneView,
         Self::Panels,
         Self::Paint,
         Self::Waiting,
@@ -109,6 +114,7 @@ impl Phase {
             Self::Extraction => "Extraction",
             Self::Encoding => "Encoding",
             Self::Gpu => "GPU",
+            Self::SceneView => "Scene view",
             Self::Panels => "Panels",
             Self::Paint => "Paint",
             Self::Waiting => "Waiting",
@@ -130,6 +136,7 @@ impl Phase {
             Self::Extraction => "extraction",
             Self::Encoding => "encoding",
             Self::Gpu => "gpu",
+            Self::SceneView => "scene_view",
             Self::Panels => "panels",
             Self::Paint => "paint",
             Self::Waiting => "waiting",
@@ -220,6 +227,8 @@ pub struct Profiler {
     captured: Option<Vec<Frame>>,
     /// Whether each view waits for its GPU work before the frame goes on.
     waits_for_gpu: bool,
+    /// Whether the view being drawn is the Scene view beside a run.
+    scene_beside_run: bool,
 }
 
 impl Profiler {
@@ -253,7 +262,20 @@ impl Profiler {
 
     /// Adds time to a phase of the open frame.
     pub fn add(&mut self, phase: Phase, time: Duration) {
+        // While the Scene view draws beside a run, its drawing is its own.
+        let phase = match phase {
+            Phase::Presentation | Phase::Extraction | Phase::Encoding if self.scene_beside_run => {
+                Phase::SceneView
+            }
+            phase => phase,
+        };
         self.current.phases[phase.index()] += time;
+    }
+
+    /// Books the views' drawing to [`Phase::SceneView`] from now until told
+    /// otherwise: the Scene view is being drawn beside a run.
+    pub fn set_scene_beside_run(&mut self, on: bool) {
+        self.scene_beside_run = on;
     }
 
     /// Counts a fixed step, with what each script took in it.

@@ -124,6 +124,7 @@ impl EditorApp {
         } = Self::gpu(context, file.anchor());
         let project = ProjectTree::beside(file.anchor());
         let mut app = Self {
+            game_scene: scene.clone(),
             scene,
             world,
             file,
@@ -211,6 +212,14 @@ impl EditorApp {
             }),
             disk_watch: super::wake::DiskWatch::start(context.egui_ctx.clone()),
         };
+        // A benchmark plays at the screen the standalone benchmark draws,
+        // so both lay the game out against the same media queries.
+        if app.benchmark.is_some() {
+            app.game_device = super::device::DevicePreview {
+                name: "Benchmark",
+                size: Some((1280.0, 720.0)),
+            };
+        }
         // Said after the field is built rather than during it, because what
         // there is to say is read off the world and the bindings.
         if let Some(failure) = app.notice.clone() {

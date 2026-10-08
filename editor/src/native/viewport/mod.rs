@@ -88,16 +88,18 @@ impl EditorApp {
         }
     }
 
-    /// The world a view draws when it is not the document itself: the
-    /// Timeline's playhead posed on it, Weave's presentation of it, or both.
-    fn shown_world(&mut self, editing: bool, rect: Rect, frame: u64) -> Option<sindri_core::World> {
+    /// Styles the world in place for a view's draw — Weave's presentation of
+    /// the edited scene, or a run's pointer states — and answers what takes it
+    /// off again. Timed as presentation.
+    fn style_for_draw(&mut self, editing: bool, rect: Rect) -> Option<sindri_weave::Undo> {
+        if !editing && self.session.is_some() {
+            let viewport = self.presentation_viewport(false, rect);
+            return self.style_run(viewport);
+        }
         let presenting = Instant::now();
-        let presented = self.resolve_presentation(editing, rect);
-        let shown = self
-            .timeline_posed(presented.as_ref().unwrap_or(&self.world), frame)
-            .or(presented);
+        let undo = self.present_for_editing(editing, rect);
         self.profiler.add(Phase::Presentation, presenting.elapsed());
-        shown
+        undo
     }
 
     /// Draws one view of the world into whatever space `ui` has left.
@@ -197,16 +199,27 @@ impl EditorApp {
         canvas: sindri_scene::UiCanvas,
     ) -> Option<String> {
         let editing = tab == WorkspaceTab::Scene;
-        let shown = self.shown_world(editing, rect, context.cumulative_frame_nr());
+        self.profiler
+            .set_scene_beside_run(editing && self.session.is_some());
+        // Styled where it stands and put back once drawn, as a build draws:
+        // presenting a copy was a copy of the world per view per frame.
+        let undo = self.style_for_draw(editing, rect);
         let styling =
             (!editing && self.session.is_some()).then(|| self.presentation_viewport(false, rect));
-        let undo = styling.and_then(|viewport| self.style_run(viewport));
+        // The Timeline's playhead posed on the styled world, while previewed.
+        let shown = self.timeline_posed(&self.world, context.cumulative_frame_nr());
         let source_world = shown.as_ref().unwrap_or(&self.world);
         let scale = context.pixels_per_point();
-        let viewport_size = (
-            physical_viewport_dimension(rect.width(), scale),
-            physical_viewport_dimension(rect.height(), scale),
-        );
+        let viewport_size = if !editing && self.benchmark.is_some() {
+            // The pixels the standalone benchmark draws, so the two encode
+            // and rasterise the same frame.
+            (1280, 720)
+        } else {
+            (
+                physical_viewport_dimension(rect.width(), scale),
+                physical_viewport_dimension(rect.height(), scale),
+            )
+        };
         let pictured = self.authoring_enabled();
         let viewport = if editing {
             &mut self.scene_viewport
@@ -225,7 +238,11 @@ impl EditorApp {
         let drawn = viewport.render(
             &mut self.renderers,
             SceneSource {
-                scene: &self.scene,
+                scene: if editing {
+                    &self.scene
+                } else {
+                    &self.game_scene
+                },
                 world: source_world,
                 animations,
                 effects,
@@ -258,8 +275,13 @@ impl EditorApp {
         if let Some(undo) = undo {
             undo.undo(&mut self.world);
         }
+        self.profiler.set_scene_beside_run(false);
         super::console_view::record_extract_problems(
-            &self.scene,
+            if editing {
+                &self.scene
+            } else {
+                &self.game_scene
+            },
             &mut self.console,
             &mut self.render_error,
         );

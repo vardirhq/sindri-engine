@@ -121,7 +121,7 @@ def compare(editor: Path, standalone: Path) -> list[str]:
         f"standalone {theirs['phases'].get('step', 0.0):.2f} ms",
         f"  One-step game frame: editor {one_step:.2f} ms, "
         f"standalone {theirs['work_mean']:.2f} ms: {one_step / theirs['work_mean']:.2f}x; "
-        f"editor's own UI (panels + paint) {editor_ui(ours):.2f} ms",
+        f"editor's own UI (panels, paint, Scene view) {editor_ui(ours):.2f} ms",
     ]
 
 
@@ -137,7 +137,10 @@ def one_step_frame(stats: dict) -> float:
 
 
 def editor_ui(stats: dict) -> float:
-    return sum(stats["phases"].get(key, 0.0) for key in ("panels", "paint"))
+    """The editor's own work beside the game: its panels, egui's painting,
+    and the Scene view drawn beside a run, which is a second picture of the
+    world rather than the game's frame."""
+    return sum(stats["phases"].get(key, 0.0) for key in ("panels", "paint", "scene_view"))
 
 
 def target_dir(profile: str) -> Path:

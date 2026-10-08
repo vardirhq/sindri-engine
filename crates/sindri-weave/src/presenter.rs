@@ -71,6 +71,36 @@ impl Presenter {
         Ok(world)
     }
 
+    /// Presents `world` through each stylesheet in order in place, for this
+    /// viewport and these pointer states, and returns what takes it off
+    /// again.
+    ///
+    /// For a tool showing a world it edits rather than runs: [`Self::present`]
+    /// without the copy, which for a world holding a level of tiles is the
+    /// level copied every frame. The caller draws, then undoes before anything
+    /// else reads the world. On an error the world is put back first.
+    pub fn present_in_place(
+        &mut self,
+        world: &mut World,
+        stylesheets: &[Stylesheet],
+        viewport: Viewport,
+        states: &UiStates,
+    ) -> Result<Undo, ApplyError> {
+        let mut undo = Undo::default();
+        for (sheet, stylesheet) in stylesheets.iter().enumerate() {
+            let pass = Pass {
+                transitions: Some((&mut self.transitions, sheet)),
+                undo: Some(&mut undo),
+                ..Pass::default()
+            };
+            if let Err(error) = apply(world, stylesheet, viewport, states, pass) {
+                undo.undo(world);
+                return Err(error);
+            }
+        }
+        Ok(undo)
+    }
+
     /// Styles `world` with the stylesheets' rules, no pointer states, for
     /// this viewport: the world the game runs on, until the screen changes.
     pub fn settle(
@@ -98,9 +128,11 @@ impl Presenter {
     /// Gives newly spawned entities their base stylesheet values without
     /// touching entities scripts may have changed since the initial settle.
     ///
-    /// Styling happens on a copy first. Only the new entities are copied back,
-    /// so an invalid declaration cannot leave a half-styled live world and an
-    /// existing entity keeps script-written values as an inline style would.
+    /// The world is styled where it stands and every entity that was there
+    /// before is put back, so only the new ones keep their styling: an
+    /// existing entity keeps script-written values, as an inline style would.
+    /// Styling a copy instead cost a copy of the world on every frame that
+    /// spawned anything. An invalid declaration puts everything back.
     fn settle_spawned(
         &mut self,
         world: &mut World,
@@ -115,31 +147,27 @@ impl Presenter {
         for settled in &mut self.settled {
             settled.retain(|entity, _| current.contains(entity));
         }
-        let spawned: Vec<_> = current.difference(&self.known).copied().collect();
+        let spawned: BTreeSet<_> = current.difference(&self.known).copied().collect();
         if spawned.is_empty() {
             self.known = current;
             return Ok(());
         }
 
-        let mut styled = world.clone();
+        let mut undo = Undo::default();
         let mut recorded = vec![Declared::new(); stylesheets.len()];
         for (stylesheet, declarations) in stylesheets.iter().zip(&mut recorded) {
             let pass = Pass {
                 record: Some(declarations),
+                undo: Some(&mut undo),
                 ..Pass::default()
             };
-            apply(&mut styled, stylesheet, viewport, &UiStates::new(), pass)?;
+            if let Err(error) = apply(world, stylesheet, viewport, &UiStates::new(), pass) {
+                undo.undo(world);
+                return Err(error);
+            }
         }
+        undo.undo_except(world, &spawned);
 
-        for entity in &spawned {
-            let styled_data = styled
-                .get(*entity)
-                .expect("spawned entity is present in styled world")
-                .clone();
-            *world
-                .get_mut(*entity)
-                .expect("spawned entity is present in live world") = styled_data;
-        }
         for (settled, declarations) in self.settled.iter_mut().zip(recorded) {
             for entity in &spawned {
                 if let Some(values) = declarations.get(entity) {

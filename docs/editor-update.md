@@ -227,6 +227,53 @@ whose voxel world names `builtin:blocks`, and neither could the shipped
 browser host; every host now binds the engine's own block set and textures,
 as the editor always did.
 
+## Slice 4 so far
+
+**Two of the findings above were measurement errors.** Finding 3's editor
+encoding was mostly a software GPU finishing egui's previous frame: a view's
+submit blocked on it and the wait was booked as encoding. A benchmark now
+waits for the GPU before each view encodes, timed as GPU, as the standalone
+benchmark waits after each frame. Finding 4's 0.48 ms standalone step for
+Voxel Lab is lavapipe winding down after a frame: the first phase after a GPU
+wait absorbs it, and the same step measures 10 µs headless. Voxel Lab's
+gameplay costs the same in both hosts.
+
+The benchmark now also compares like with like: the editor's Game view plays
+at the standalone's 1280 × 720, with no pointer resting over it (the
+benchmark plays without input; a hovered element was styled every frame),
+and the Scene view drawn beside a run is timed as its own phase, reported
+with the panels as the editor's work rather than as the game's frame.
+
+What changed in the editor:
+
+- An editor at rest asks for no frames. A background watcher wakes it when a
+  project file changes; loads still in flight are looked for again shortly.
+  Untouched for three seconds after a second's grace, the platformer, Orbital
+  and Causeway draw no frames; Voxel Lab draws its animated water, which asks.
+- Weave presents the edited scene in place with undo
+  (`Presenter::present_in_place`), and a run's spawned entities are settled
+  in place rather than in a copy of the world.
+- Each view has its own extractor and cube renderer. Sharing them, a voxel
+  world's Game view recorded its frame in 8.7 ms against 3.5 alone.
+- The hierarchy, console and project lists lay out only the rows in sight.
+
+One-step game frame against the standalone host, optimised, 600 frames:
+
+| Project | Editor | Standalone | Ratio |
+|---|---|---|---|
+| Causeway | 2.68 ms | 2.66 ms | 1.01× |
+| Platformer | 1.60–1.67 ms | 1.24–1.29 ms | 1.25–1.32× |
+| Orbital | 6.94 ms | 6.48 ms | 1.07× |
+| Voxel Lab | 9.14 ms | 8.55 ms | 1.07× |
+
+Left open: the platformer is at or just over the target. Its gap is 0.3 ms on
+a 1.2 ms frame, and most of it is the step itself: physics takes 0.40 ms a
+step in the editor against 0.31 standalone, on the same world (the parity
+test proves it) with the same code, which points at the editor's own frame
+evicting caches between steps rather than at work the editor adds. The
+caching sub-items above were premised on finding 3's numbers; measured
+correctly, upkeep and extraction are under a millisecond on every project.
+
 ## Build profiles
 
 Slice 2, measured the same way as the baselines: a clean build of the editor,

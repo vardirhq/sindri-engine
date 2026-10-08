@@ -24,7 +24,6 @@ use crate::profiler::{Phase, Profiler};
 /// twice for the same thing. The textures used to live here too, handed over by
 /// the cube example; they belong to the open scene, which is where they are now.
 pub(in crate::native) struct SceneRenderers {
-    pub(in crate::native) cube: TexturedCubeRenderer,
     pub(in crate::native) sprites: SpriteBatchRenderer,
     pub(in crate::native) text: TextRenderer,
     pub(in crate::native) glyphs: GlyphRenderer,
@@ -34,7 +33,6 @@ pub(in crate::native) struct SceneRenderers {
 impl SceneRenderers {
     pub(in crate::native) fn new(render_state: &eframe::egui_wgpu::RenderState) -> Self {
         Self {
-            cube: TexturedCubeRenderer::new(&render_state.device, ViewportTarget::FORMAT),
             sprites: SpriteBatchRenderer::new(&render_state.device, ViewportTarget::FORMAT),
             text: TextRenderer::new(),
             glyphs: GlyphRenderer::new(&render_state.device, ViewportTarget::FORMAT),
@@ -48,6 +46,11 @@ pub(in crate::native) struct RuntimeViewport {
     target: ViewportTarget,
     pub(super) texture_id: egui::TextureId,
     bloom: Bloom,
+    /// Each view's own: the cube renderer keeps a view's light, shadows and
+    /// meshes between frames, and two views drawing through one rebuilt
+    /// each other's every frame — a voxel world's Game view recorded in
+    /// 8.7 ms what it records alone in 3.5.
+    cube: TexturedCubeRenderer,
 }
 
 impl RuntimeViewport {
@@ -72,11 +75,13 @@ impl RuntimeViewport {
             INITIAL_VIEWPORT_WIDTH,
             INITIAL_VIEWPORT_HEIGHT,
         );
+        let cube = TexturedCubeRenderer::new(&render_state.device, ViewportTarget::FORMAT);
         Self {
             render_state,
             target,
             texture_id,
             bloom,
+            cube,
         }
     }
 
@@ -147,9 +152,9 @@ impl RuntimeViewport {
                 .create_command_encoder(&wgpu::CommandEncoderDescriptor {
                     label: Some("Sindri editor runtime viewport encoder"),
                 });
-        let environment = self.light(renderers, source, camera)?;
+        let environment = self.light(source, camera)?;
         let frame_renderers = FrameRenderers {
-            cube: &mut renderers.cube,
+            cube: &mut self.cube,
             sprites: &mut renderers.sprites,
             text: &mut renderers.text,
             glyphs: &mut renderers.glyphs,
@@ -203,8 +208,7 @@ impl RuntimeViewport {
     /// Sets the cube renderer's light, shadows, fog and ambient occlusion for
     /// this view, and answers the environment they came from.
     fn light(
-        &self,
-        renderers: &mut SceneRenderers,
+        &mut self,
         source: SceneSource<'_>,
         camera: CameraView,
     ) -> Result<Option<EnvironmentComponent>, String> {
@@ -219,17 +223,14 @@ impl RuntimeViewport {
         // Scene view has the scene's lighting switched off.
         let (lighting, shadows) =
             super::super::scene_lighting::lighting_for(source, camera, self.aspect(), environment)?;
-        renderers.cube.set_lighting(lighting);
-        renderers
-            .cube
-            .set_shadows(&self.render_state.device, shadows);
-        renderers.cube.set_fog(
+        self.cube.set_lighting(lighting);
+        self.cube.set_shadows(&self.render_state.device, shadows);
+        self.cube.set_fog(
             environment
                 .map(EnvironmentComponent::fog_settings)
                 .unwrap_or_default(),
         );
-        renderers
-            .cube
+        self.cube
             .set_ambient_occlusion(environment.map_or(0.0, |environment| {
                 if environment.ambient_occlusion.enabled {
                     environment.ambient_occlusion.strength

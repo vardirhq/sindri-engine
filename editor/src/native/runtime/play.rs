@@ -73,6 +73,12 @@ impl EditorApp {
         let game_view = if super::super::device::picking(context) {
             self.pick_in_game(context);
             None
+        } else if self.benchmark.is_some() {
+            // A benchmark plays without input, as the standalone one does:
+            // the pointer resting over the Game view would hover an element
+            // and style it every frame, which the build it is compared with
+            // never sees.
+            None
         } else {
             self.game_view_rect
         };

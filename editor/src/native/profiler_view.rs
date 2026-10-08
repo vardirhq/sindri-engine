@@ -31,6 +31,7 @@ const fn phase_color(phase: Phase) -> Color32 {
         Phase::Extraction => color::TEXT_MUTED,
         Phase::Encoding => color::TEXT_FAINT,
         Phase::Gpu => color::LINE_SOFT,
+        Phase::SceneView => color::FORGE_BRIGHT,
         Phase::Panels => color::EMBER,
         Phase::Paint => color::LINE,
         Phase::Waiting => color::WELL,

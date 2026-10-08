@@ -12,7 +12,7 @@ use std::path::{Path, PathBuf};
 use std::time::{Duration, Instant, SystemTime};
 
 use sindri_core::World;
-use sindri_weave::{PresentationWorld, UiStates};
+use sindri_weave::{PresentationWorld, Presenter, UiStates};
 use weave::{Stylesheet, Viewport};
 
 use crate::project::{MANIFEST_NAME, Project};
@@ -35,6 +35,8 @@ pub struct ProjectStyles {
     /// The screen the scene was last presented at, which the devtools panel
     /// inspects at so it shows the media queries that are on screen.
     viewport: Option<Viewport>,
+    /// Styles the edited world in place for a draw.
+    presenter: Presenter,
 }
 
 impl Default for ProjectStyles {
@@ -45,6 +47,7 @@ impl Default for ProjectStyles {
             snapshot: BTreeMap::new(),
             next_poll: Instant::now(),
             viewport: None,
+            presenter: Presenter::new(),
         }
     }
 }
@@ -62,6 +65,7 @@ impl ProjectStyles {
             snapshot: watch_snapshot(project.root())?,
             next_poll: Instant::now() + POLL_INTERVAL,
             viewport: None,
+            presenter: Presenter::new(),
         })
     }
 
@@ -107,6 +111,29 @@ impl ProjectStyles {
         let replacement = Self::load(&project)?;
         *self = replacement;
         Ok(true)
+    }
+
+    /// Styles the edited world in place for one draw at `viewport`, and
+    /// returns what takes the styling off again, which the caller does once
+    /// drawn and before anything else reads the world. `None` for a project
+    /// with no stylesheets. Each root is applied in manifest order, as the
+    /// host applies them.
+    ///
+    /// # Errors
+    /// A stylesheet that will not apply; the world is put back first.
+    pub fn present(
+        &mut self,
+        world: &mut World,
+        viewport: Viewport,
+    ) -> Result<Option<sindri_weave::Undo>, String> {
+        if self.sheets.is_empty() {
+            return Ok(None);
+        }
+        self.viewport = Some(viewport);
+        self.presenter
+            .present_in_place(world, &self.sheets, viewport, &UiStates::new())
+            .map(Some)
+            .map_err(|error| error.to_string())
     }
 
     /// Resolves a disposable presented world for one viewport.

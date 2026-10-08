@@ -6,29 +6,24 @@ use weave::Viewport as WeaveViewport;
 use super::EditorApp;
 
 impl EditorApp {
-    /// Resolves the authored world through the project's Weave presentation.
+    /// Styles the edited world in place through the project's Weave
+    /// presentation for one view's draw, and returns what takes it off.
     ///
-    /// Kept outside `render_view` because resolving presentation is one concern
-    /// of its own and because failures need the same console/render-error path
-    /// whichever viewport asked for them.
-    pub(super) fn resolve_presentation(
+    /// A running game is styled by its session instead, which settled the
+    /// world when Play started and lays the pointer's states over the Game
+    /// view as it draws. Failures go to the console and the render error
+    /// whichever view asked.
+    pub(super) fn present_for_editing(
         &mut self,
         editing: bool,
         rect: Rect,
-    ) -> Option<sindri_core::World> {
-        if self.styles.is_empty() {
-            return None;
-        }
-        // A running game is styled by its session, which settled the world
-        // when Play started and lays the pointer's states over the Game view
-        // in place as it draws: what either view shows of a run is the world.
-        if !self.authoring_enabled() {
+    ) -> Option<sindri_weave::Undo> {
+        if self.styles.is_empty() || !self.authoring_enabled() {
             return None;
         }
         let viewport = self.presentation_viewport(editing, rect);
-        let presented = self.styles.resolve(&self.world, viewport);
-        match presented {
-            Ok(world) => Some(world),
+        match self.styles.present(&mut self.world, viewport) {
+            Ok(undo) => undo,
             Err(error) => {
                 let failure = format!("Weave: {error}");
                 self.console.fail(&failure, None);
