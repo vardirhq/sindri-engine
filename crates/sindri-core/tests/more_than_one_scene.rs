@@ -399,21 +399,23 @@ fn a_world_that_is_a_scene_can_be_adopted_and_left() {
     world.get_mut(lamp).expect("the lamp").disabled = true;
     let mut scenes = LoadedScenes::new();
 
-    let root = scenes.adopt(&mut world, "cottage.scene").expect("adopted");
+    let switch = scenes.adopt(&mut world, "cottage.scene").expect("adopted");
 
     assert_eq!(scenes.active(), Some("cottage.scene"));
-    assert_eq!(scenes.adopt(&mut world, "cottage.scene"), Ok(root));
+    assert_eq!(scenes.adopt(&mut world, "cottage.scene"), Ok(switch));
     let room = world.entity_for_source_id(&id("room")).expect("the room");
-    let door = world.entity_for_source_id(&id("door")).expect("the door keeps its id");
-    assert_eq!(world.get(room).and_then(|data| data.parent), Some(root));
-    assert_eq!(world.get(lamp).and_then(|data| data.parent), Some(root));
+    let door = world
+        .entity_for_source_id(&id("door"))
+        .expect("the door keeps its id");
+    assert_eq!(world.get(room).and_then(|data| data.parent), Some(switch));
+    assert_eq!(world.get(lamp).and_then(|data| data.parent), Some(switch));
     assert_eq!(
         world.get(door).and_then(|data| data.parent),
         Some(room),
         "only the top level moves"
     );
     assert_eq!(
-        world.get(root).map(|data| data.children.clone()),
+        world.get(switch).map(|data| data.children.clone()),
         Some(vec![room, lamp]),
         "in the order they were made"
     );
@@ -421,7 +423,10 @@ fn a_world_that_is_a_scene_can_be_adopted_and_left() {
     scenes
         .enter(&mut world, "barn", &cottage("door"))
         .expect("another scene is entered");
-    assert!(!world.is_active(room), "leaving switches the adopted scene off");
+    assert!(
+        !world.is_active(room),
+        "leaving switches the adopted scene off"
+    );
     scenes.go_to(&mut world, "cottage.scene").expect("and back");
     assert!(world.is_active(room));
     assert!(
