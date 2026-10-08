@@ -173,6 +173,9 @@ script Director {
     var hold_offset: Vec2 = Vec2(0.0, 0.0);
     var started: bool = false;
     var frames: f32 = 0.0;
+    // The clear band of screen between the bars, in overlay units.
+    var band_low: f32 = -0.62;
+    var band_high: f32 = 0.82;
 
     fn start() {
         refresh_labels();
@@ -187,22 +190,37 @@ script Director {
         }
         keys();
         buttons();
+        measure_band();
         follow_view(dt);
         pointer(dt);
         rain();
         stats();
     }
 
-    // What the camera wants to show: a toy, or the whole room fitted to the
-    // screen with room left for the bars above and below.
+    // What the camera wants to show, as a centre and a height: a toy, or the
+    // whole room, fitted into the band of screen the bars leave clear.
     fn target_view() -> Vec3 {
+        let band = max(0.6, this.band_high - this.band_low);
+        let middle = (this.band_high + this.band_low) * 0.5;
         if Game.toy != 0.0 {
             let view = toy_view(Game.toy);
-            return Vec3(view.x, view.y - view.z * 0.04, view.z * 1.18);
+            let height = view.z * 2.0 / (band * 0.96);
+            return Vec3(view.x, view.y - middle * height * 0.5, height);
         }
         let aspect = max(0.3, Viewport.aspect);
-        let fit = max(this.room_height, this.room_width / aspect);
-        return Vec3(0.0, -fit * 0.03, fit * 1.2);
+        let height = max(this.room_height * 2.0 / (band * 0.97), this.room_width / aspect * 1.02);
+        return Vec3(0.0, 0.0 - middle * height * 0.5, height);
+    }
+
+    // The band between the top bar and the bottom dock, in overlay units,
+    // read from where Weave laid them out: the bars are fixed in pixels, so
+    // on a small screen they cover more of the room.
+    fn measure_band() {
+        if this.frames < 2.0 { return; }
+        let low = World.find("toy-prev");
+        let high = World.find("btn-reset");
+        this.band_low = Ui.position(low).y + Ui.size(low).y * 0.5;
+        this.band_high = Ui.position(high).y - Ui.size(high).y * 0.5;
     }
 
     fn follow_view(dt: f32) {
