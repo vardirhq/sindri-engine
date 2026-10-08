@@ -344,8 +344,8 @@ fn multiball_runs_through_the_bumpers_drains_and_rides_the_lift_back_up() {
     );
     // A round trip: the lift waits, climbs and pours its load into the chute.
     let mut poured = false;
-    for _ in 0..30 {
-        playground.play(60);
+    for _ in 0..1800 {
+        playground.step();
         if said("lift pouring") && loose_above(&playground, 9.0) > 0 {
             poured = true;
             break;
@@ -373,4 +373,87 @@ fn a_held_flipper_swings_up_and_drops_when_let_go() {
         .apply(sindri_platform::InputEvent::KeyReleased(Key::Z));
     playground.play(30);
     assert!((turn(&playground, "flipper-left") - rest).abs() < 0.1);
+}
+
+fn hint_number(hint: &str, after: &str) -> f32 {
+    let rest = &hint[hint
+        .find(after)
+        .unwrap_or_else(|| panic!("{after} in {hint}"))
+        + after.len()..];
+    rest.split_whitespace()
+        .next()
+        .and_then(|word| word.parse().ok())
+        .unwrap_or_else(|| panic!("a number after {after} in {hint}"))
+}
+
+#[test]
+fn the_material_lab_separates_ice_wood_and_rubber_by_friction_and_bounce() {
+    let mut playground = open();
+    select(&mut playground, "MATERIAL LAB");
+    playground.key(Key::Digit1);
+    playground.key(Key::Digit2);
+    playground.play(180);
+    let hint = playground.text("hint");
+    let ice = hint_number(&hint, "ice ");
+    let wood = hint_number(&hint, "wood ");
+    let rubber = hint_number(&hint, "rubber ");
+    assert!(ice > wood && wood > rubber, "{hint}");
+    assert!(rubber < 1.5, "rubber grips the ramp: {hint}");
+    let bounce = &hint[hint.find("BOUNCE").expect("bounce readout")..];
+    let rubber = hint_number(bounce, "rubber ");
+    let steel = hint_number(bounce, "steel ");
+    let clay = hint_number(bounce, "clay ");
+    assert!(rubber > steel && steel > clay, "{bounce}");
+}
+
+#[test]
+fn dropping_the_anvil_launches_the_ball_off_the_seesaw() {
+    let mut playground = open();
+    select(&mut playground, "SEESAW + TRAMPOLINE");
+    let rest = playground.at("seesaw-ball");
+    playground.key(Key::Digit1);
+    assert!(said("anvil dropped"));
+    let mut highest = rest[1];
+    for _ in 0..90 {
+        playground.step();
+        highest = highest.max(playground.at("seesaw-ball")[1]);
+    }
+    assert!(
+        highest > rest[1] + 2.0,
+        "launched: {rest:?} up to {highest}"
+    );
+}
+
+#[test]
+fn stiffer_trampoline_springs_give_less_under_the_same_ball() {
+    let mut playground = open();
+    select(&mut playground, "SEESAW + TRAMPOLINE");
+    let rest = playground.at("tramp-bed")[1];
+    let dip = |playground: &mut Playground| {
+        playground.key(Key::Digit2);
+        let mut lowest = f32::MAX;
+        let mut highest = f32::MIN;
+        for _ in 0..150 {
+            playground.step();
+            lowest = lowest.min(playground.at("tramp-bed")[1]);
+            highest = highest.max(playground.at("tramp-ball")[1]);
+        }
+        (lowest, highest)
+    };
+    let (soft, bounced) = dip(&mut playground);
+    assert!(soft < rest - 0.3, "the bed gave: {rest} -> {soft}");
+    assert!(
+        bounced > rest + 1.0,
+        "and threw the ball back up: {bounced}"
+    );
+    for _ in 0..3 {
+        playground.key(Key::Digit3);
+    }
+    assert!(said("trampoline 540"), "three times stiffer");
+    playground.play(60);
+    let (stiff, _) = dip(&mut playground);
+    assert!(
+        stiff > soft + 0.2,
+        "soft dipped to {soft}, stiff only to {stiff}"
+    );
 }

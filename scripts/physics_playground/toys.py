@@ -6,7 +6,7 @@ from __future__ import annotations
 import math
 
 from common import bit, body, box, capsule, circle, material, script, shape
-from scene import PARTS, Scene, hinge, slider, spring
+from scene import PARTS, Scene, distance, hinge, slider, spring
 
 
 def loose_pile(scene: Scene) -> None:
@@ -282,6 +282,121 @@ def ball_lift(scene: Scene) -> None:
                "motor_max_torque": 6000.0}), 4)
 
 
+
+def material_lab(scene: Scene) -> None:
+    """One rough ramp and three blocks that do not collide with one
+    another, so ice, wood and rubber take exactly the same slope with
+    exactly the same push; below, four pads of different bounce."""
+    top, foot = (-29.6, -1.6), (-24.2, -3.6)
+    # Friction combines by the smaller of the two, so the ramp is very rough
+    # and each block's own material decides how it slides.
+    slope(scene, "lab-ramp", top, foot, 0.3, fill="#203247", edge="#a8e6ff",
+          friction=4.0)
+    scene.wall("lab-runout", -21.4, foot[1] - 0.15, 5.6, 0.3, fill="#203247",
+               edge="#a8e6ff", friction=4.0)
+    scene.wall("lab-stop", -18.45, foot[1] + 0.35, 0.3, 1.3, fill="#3a536e")
+    angle = math.atan2(top[1] - foot[1], top[0] - foot[0])
+    for index, (key, material_key, color) in enumerate([
+        ("ice", ICE, "#a8e6ff"), ("wood", WOOD, "#c98b4f"), ("rubber", RUBBER, "#ff4f79"),
+    ]):
+        run = (foot[0] - top[0], foot[1] - top[1])
+        length = math.hypot(*run)
+        along = (run[0] / length, run[1] / length)
+        up = (-along[1], along[0])
+        lift = 0.15 + 0.4 + 0.02
+        x = top[0] + along[0] * 0.7 + up[0] * lift
+        y = top[1] + along[1] * 0.7 + up[1] * lift
+        scene.add(f"racer-{key}", f"racer-{key}", x, y, 0.2 + index * 0.02, 0.8, 0.8,
+                  rot=angle - math.pi, components={
+                      "sindri.shape": shape("rect", color, "#ffffff", sw=0.08, layer=6,
+                                            alpha=0.85),
+                      "sindri.physics2d.collider": {"pieces": [
+                          box(0.4, 0.4, "props", filter_mask=bit("static"))]},
+                      "sindri.physics2d.rigid_body": body(),
+                      "sindri.physics2d.material": material(material_key),
+                      "sindri.script": script(TOYS, "Racer", lane=float(index)),
+                  }, tags=("body", "racer"))
+
+    # Bounce pads: the same ball dropped from the same height on each.
+    for index, (key, material_key, color) in enumerate([
+        ("rubber", RUBBER, "#ff4f79"), ("steel", STEEL, "#a4b0be"),
+        ("wood", WOOD, "#c98b4f"), ("clay", CLAY, "#b5651d"),
+    ]):
+        x = -28.6 + index * 2.2
+        scene.wall(f"pad-{key}", x, -13.75, 1.8, 0.5, fill=color, edge="#ffffff",
+                   extra={"sindri.physics2d.material": material(material_key)})
+        scene.add(f"bouncer-{key}", f"bouncer-{key}", x, -6.6, 0.25, 0.7, 0.7, components={
+            "sindri.shape": shape("ellipse", "#e8f1fb", "#ffffff", sw=0.08, layer=6),
+            "sindri.physics2d.collider": {"pieces": [
+                circle(0.35, "balls", 0.4, 0.5, filter_mask=bit("static"))]},
+            "sindri.physics2d.rigid_body": body(lock=True),
+            "sindri.script": script(TOYS, "Bouncer", pad=float(index)),
+        }, tags=("body",))
+        scene.deco(f"bounce-mark-{key}", x, -6.6, 1.0, 0.06, fill="#ffd166", layer=4)
+    scene.add("lab-control", "lab-control", components={
+        "sindri.script": script(TOYS, "MaterialLab")})
+
+
+def seesaw_trampoline(scene: Scene) -> None:
+    """A seesaw on a limited hinge with an anvil hanging over one end on a
+    rope, and a trampoline bed on a slider held up by two springs."""
+    scene.add("seesaw-fulcrum", "seesaw-fulcrum", -14.6, -13.35, 0.2, 1.4, 1.3, components={
+        "sindri.shape": shape("polygon", "#34495e", "#7f9bb8", sw=0.06, layer=4, count=3),
+        "sindri.physics2d.collider": {"pieces": [box(0.25, 0.6, "static")]},
+    })
+    scene.add("seesaw-plank", "seesaw-plank", -14.6, -12.55, 0.25, 7.0, 0.3, components={
+        "sindri.shape": shape("rect", "#d9a066", "#f6d2a0", sw=0.1, layer=6),
+        "sindri.physics2d.collider": {"pieces": [
+            box(3.5, 0.15, "props", 0.8, 0.0),
+            box(0.08, 0.22, "props", 0.8, 0.0, offset=(-3.42, 0.3)),
+            box(0.08, 0.22, "props", 0.8, 0.0, offset=(3.42, 0.3)),
+        ]},
+        "sindri.physics2d.rigid_body": body(damping=0.05, angular_damping=0.2),
+        "sindri.script": script(PARTS, "Part", toy=6.0),
+    }, tags=("body", "cargo"))
+    for side, dx in (("left", -3.42), ("right", 3.42)):
+        scene.deco(f"seesaw-lip-{side}", dx / 7.0, 0.3 / 0.3, 0.16 / 7.0, 0.44 / 0.3,
+                   fill="#f6d2a0", layer=6, parent="seesaw-plank")
+    scene.joint("seesaw-hinge", "hinge", hinge(
+        "seesaw-fulcrum", "seesaw-plank", (0.0, 0.8), (0.0, 0.0), limits=(-0.2, 0.2)), 6)
+    scene.ball("seesaw-ball", -17.6, -11.4, 0.35, 6, "#4cc9f0", "#d6f6ff", restitution=0.3,
+               tags=("body", "cargo"))
+    anchor(scene, "anvil-hook", -12.0, -1.6, 0.35)
+    scene.crate("anvil", -12.0, -4.6, 1.8, 1.3, 6, "#3d4554", "#9aa7bb", mat=material(STEEL),
+                tags=("body", "cargo"))
+    scene.joint("anvil-rope", "distance", distance("anvil-hook", "anvil", 3.0), 6)
+    scene.deco("anvil-rope-line", 0, 0, 1, 0.05, fill="#d7e3f0", layer=3)
+
+    # The trampoline: the bed rides a vertical slider and sits on two springs.
+    bed_y = -11.6
+    anchor(scene, "tramp-base", -7.2, -13.6, 0.4)
+    scene.wall("tramp-frame", -7.2, -13.75, 4.4, 0.5, fill="#2b3f56")
+    scene.add("tramp-bed", "tramp-bed", -7.2, bed_y, 0.25, 4.0, 0.25, components={
+        "sindri.shape": shape("rect", "#2ec4b6", "#c7fff8", sw=0.12, layer=6),
+        "sindri.physics2d.collider": {"pieces": [box(2.0, 0.12, "props", 0.6, 0.6)]},
+        "sindri.physics2d.rigid_body": body(damping=0.0, angular_damping=2.0),
+        "sindri.script": script(PARTS, "Part", toy=6.0),
+    }, tags=("body",))
+    scene.joint("tramp-guide", "slider", slider(
+        "tramp-base", "tramp-bed", (0.0, 1.0), (0.0, 0.0), (0.0, 0.0),
+        limits=(0.25, 3.6)), 6)
+    for side, dx in (("left", -1.6), ("right", 1.6)):
+        scene.add(f"tramp-foot-{side}", f"tramp-foot-{side}", -7.2 + dx, -13.4, 0.2, 0.3, 0.3,
+                  components={
+                      "sindri.shape": shape("ellipse", "#7f9bb8", None, layer=5),
+                      "sindri.physics2d.collider": {"pieces": [
+                          circle(0.15, "static", filter_mask=0)]},
+                  })
+        scene.joint(f"tramp-spring-{side}", "spring", spring(
+            f"tramp-foot-{side}", "tramp-bed", 2.2, 160.0, 0.4, (0.0, 0.0), (dx, 0.0)), 6)
+        scene.deco(f"tramp-coil-{side}", -7.2 + dx, -12.5, 0.35, 1.8, fill="#00000000",
+                   alpha=0.0, edge="#c7fff8", sw=0.2, layer=5, dashes=10)
+    scene.ball("tramp-ball", -7.0, -3.0, 0.4, 6, "#ffd166", "#fff3c4", restitution=0.6,
+               tags=("body", "cargo"))
+    scene.add("seesaw-control", "seesaw-control", components={
+        "sindri.script": script(TOYS, "Seesaw")})
+
+
 def build(scene: Scene) -> None:
     loose_pile(scene)
     wrecking_ball(scene)
@@ -289,3 +404,5 @@ def build(scene: Scene) -> None:
     cannon_gallery(scene)
     bumper_pit(scene)
     ball_lift(scene)
+    material_lab(scene)
+    seesaw_trampoline(scene)

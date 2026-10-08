@@ -441,3 +441,150 @@ script Bumper {
         this.transform.scale = Vec3(1.4 + this.glow * 0.25, 1.4 + this.glow * 0.25, 1.0);
     }
 }
+
+// Ice, wood and rubber on one frictionless ramp. They do not collide with one
+// another, so each has the ramp to itself; only their materials differ.
+script Racer {
+    @export let lane: f32 = 0.0;
+    var home: Vec3 = Vec3(0.0, 0.0, 0.0);
+    var turn: f32 = 0.0;
+    fn start() {
+        this.home = this.transform.position;
+        this.turn = this.transform.rotation_z;
+    }
+    on ToyAction(toy, action) {
+        if toy != 5.0 { return; }
+        if action == 1.0 { go(2.5); }
+        if action == 3.0 { go(7.0); }
+    }
+    on ResetToy(toy) {
+        if toy == 0.0 || toy == 5.0 { go(0.0); }
+    }
+    // Back to the top of the ramp, then the same push down the slope for all.
+    fn go(push: f32) {
+        this.transform.position = this.home;
+        this.transform.rotation_z = this.turn;
+        let along = Vec2(cos(this.turn), sin(this.turn));
+        Physics.set_velocity(this.entity, along.x * push, along.y * push);
+        Physics.set_angular_velocity(this.entity, 0.0);
+    }
+    // Read by the lab's readout. A field, because another script's function
+    // is a message: it runs after the pass and gives nothing back.
+    var travelled: f32 = 0.0;
+    fn update(dt: f32) {
+        this.travelled = this.transform.position.x - this.home.x;
+    }
+}
+
+// The same ball dropped on four pads; remembers how high it came back up.
+script Bouncer {
+    @export let pad: f32 = 0.0;
+    var home: Vec3 = Vec3(0.0, 0.0, 0.0);
+    var landed: bool = false;
+    var bounces: f32 = 0.0;
+    var peak: f32 = 0.0;
+    // How high the bounce came back above where it rests on its pad.
+    var rebound: f32 = 0.0;
+    fn start() { this.home = this.transform.position; }
+    fn update(dt: f32) {
+        // The first bounce only: later ones are lower and would hide it.
+        for other in Physics.collision_started() {
+            this.bounces += 1.0;
+            if !this.landed {
+                this.landed = true;
+                this.peak = this.transform.position.y;
+            }
+        }
+        if this.bounces == 1.0 && this.transform.position.y > this.peak {
+            this.peak = this.transform.position.y;
+        }
+        let mark = World.find("bounce-mark-" + pad_name(this.pad));
+        if this.landed {
+            mark.transform.position.y = this.peak;
+            this.rebound = this.peak + 13.5 - 0.35;
+        }
+    }
+    on ToyAction(toy, action) {
+        if toy == 5.0 && action == 2.0 { drop(); }
+    }
+    on ResetToy(toy) {
+        if toy == 0.0 || toy == 5.0 { drop(); }
+    }
+    fn drop() {
+        this.transform.position = this.home;
+        Physics.set_velocity(this.entity, 0.0, 0.0);
+        this.landed = false;
+        this.bounces = 0.0;
+        this.peak = this.home.y;
+        this.rebound = 0.0;
+    }
+}
+
+shared fn pad_name(index: f32) -> String {
+    if index == 1.0 { return "steel"; }
+    if index == 2.0 { return "wood"; }
+    if index == 3.0 { return "clay"; }
+    return "rubber";
+}
+
+script MaterialLab {
+    fn update(dt: f32) {
+        if Game.toy != 5.0 { return; }
+        let ice = Racer.on(World.find("racer-ice")).travelled;
+        let wood = Racer.on(World.find("racer-wood")).travelled;
+        let rubber = Racer.on(World.find("racer-rubber")).travelled;
+        var bounce = "";
+        for i in 0..4 {
+            let height = Bouncer.on(World.find("bouncer-" + pad_name(i))).rebound;
+            bounce = bounce + "  " + pad_name(i) + " " + height.fixed(1);
+        }
+        Ui.set_text(World.find("hint"), "RACE ice " + ice.fixed(1) + "  wood " + wood.fixed(1) + "  rubber " + rubber.fixed(1) + "   /   BOUNCE" + bounce);
+    }
+    on ToyAction(toy, action) {
+        if toy == 5.0 && action == 4.0 { ResetToy.emit(5.0); }
+    }
+}
+
+// The seesaw's anvil hangs on a rope; dropping it cuts the rope. The
+// trampoline's two springs can be made stiffer or softer.
+script Seesaw {
+    var stiffness: f32 = 160.0;
+    fn update(dt: f32) {
+        let rope = World.find("anvil-rope-line");
+        let hanging = Physics.joint_enabled(World.find("anvil-rope"));
+        World.set_active(rope, hanging);
+        if hanging {
+            let hook = World.find("anvil-hook").transform.world_position;
+            let anvil = World.find("anvil").transform.world_position;
+            line(rope, Vec2(hook.x, hook.y), Vec2(anvil.x, anvil.y), 0.05);
+        }
+        if Game.toy == 6.0 {
+            let ball = World.find("seesaw-ball").transform.world_position;
+            Ui.set_text(World.find("hint"), "Ball height " + (ball.y + 14.0).fixed(1) + "   /   trampoline springs " + this.stiffness + " N/m");
+        }
+    }
+    on ToyAction(toy, action) {
+        if toy != 6.0 { return; }
+        if action == 1.0 {
+            Physics.set_joint_enabled(World.find("anvil-rope"), false);
+            print("Playground anvil dropped");
+        }
+        if action == 2.0 {
+            let ball = World.find("tramp-ball");
+            ball.transform.position = Vec3(-7.0, -3.0, 0.25);
+            Physics.set_velocity(ball, 0.0, 0.0);
+            print("Playground trampoline ball");
+        }
+        if action == 3.0 { tune(this.stiffness * 1.5); }
+        if action == 4.0 { tune(this.stiffness / 1.5); }
+    }
+    on ResetToy(toy) {
+        if toy == 0.0 || toy == 6.0 { tune(160.0); }
+    }
+    fn tune(stiffness: f32) {
+        this.stiffness = clamp(round(stiffness), 20.0, 1200.0);
+        Physics.set_spring(World.find("tramp-spring-left"), 2.2, this.stiffness, 0.4);
+        Physics.set_spring(World.find("tramp-spring-right"), 2.2, this.stiffness, 0.4);
+        print("Playground trampoline " + this.stiffness);
+    }
+}

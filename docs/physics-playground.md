@@ -85,7 +85,7 @@ and a 3D ray that reports what it hits.
 - [x] Wrecking ball and gantry crane
 - [x] Cannon and glass gallery
 - [x] Ball lift, hopper, bumper pit and flippers
-- [ ] Material lab, seesaw and trampoline
+- [x] Material lab, seesaw and trampoline
 - [ ] Test track robot, dominoes and red button
 - [ ] Probe tool and debug overlay
 - [ ] Voxel Quarry 3D annex

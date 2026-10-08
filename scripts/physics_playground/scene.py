@@ -37,6 +37,8 @@ class Scene:
     # Static geometry: a drawn, colliding box.
     def wall(self, entity_id, x, y, w, h, rot=0.0, fill=STATIC_FILL, edge=STATIC_EDGE,
              friction=0.6, restitution=0.0, layer=2, extra=None, name=None):
+        if edge is None:
+            edge = STATIC_EDGE
         components = {
             "sindri.shape": shape("rect", fill, edge, sw=min(0.08, 0.06 / max(0.2, min(w, h))),
                                   layer=layer),
