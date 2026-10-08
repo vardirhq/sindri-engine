@@ -456,7 +456,7 @@ file.
 | --- | :-: | --- | --- |
 | Scene view, hierarchy, generic inspector, project browser | ✅ | **Par** | — |
 | Gizmos: transform, snapping, Z-lock-safe movement | ✅ | **Par** | No camera or effect gizmos. 2D colliders have theirs; 3D colliders do not |
-| Play / pause / stop / single-step, snapshot restore | ✅ | **Ahead** | Single-step and snapshot restore are better than Unity's play mode |
+| Play / pause / stop / single-step, snapshot restore | ✅ | **Ahead** | Single-step and snapshot restore are better than Unity's play mode. Play steps the shipped runtime session on a styled world, and a parity test ends four games in the same world in the editor and the build |
 | Tilemap painting, sheet slicer, texture picker | ✅ | **Par** | — |
 | **Asset pickers for schema fields generally** | ✅ | **Ahead** | Declared per component in the schema registry, checked against the field template, and carried in `docs/generated/`. Unity needs a plugin (Odin) for the equivalent |
 | **Array-of-object editing** | ✅ | **Par** | A list of objects is added to, removed from and reordered, with each item's fields drawn through its meanings. Decided by the template, so a tilemap's thousand tiles stay a readout |

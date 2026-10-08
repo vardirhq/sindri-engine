@@ -89,6 +89,9 @@ pub mod occlusion;
 /// Where an entity sits among its siblings.
 #[cfg(not(target_arch = "wasm32"))]
 pub mod ordering;
+/// The session editor Play starts, assembled from what the editor loaded.
+#[cfg(not(target_arch = "wasm32"))]
+pub mod play_session;
 /// The Decay scripts an open scene runs.
 #[cfg(not(target_arch = "wasm32"))]
 pub mod scripts;

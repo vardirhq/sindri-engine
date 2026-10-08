@@ -561,12 +561,17 @@ ground probe asks for `ground`.
 
 ### Editor Play
 
-Play runs **the same fixed-step loop a shipped game runs**. The editor owns a
-`FixedStepClock`, advances it with the real frame delta, and runs gameplay a
-whole number of times per frame — effects, physics, screen UI, scripts and
-animations, in that order, at the fixed rate. Before this it stepped once per
-*rendered* frame, so a scene was simulated as fast as the machine happened to
-draw and a play-test was evidence about the editor rather than about the game.
+Play runs **the session a shipped game runs**: `sindri_runtime::Session`, the
+one the browser host, `sindri-player` and every game's test harness step. The
+editor owns a `FixedStepClock`, advances it with the real frame delta, and
+steps the session a whole number of times per frame, on a world styled by the
+project's stylesheets as a build's is. It used to assemble its own loop, which
+ran effects before physics and gave scripts no aim, gestures, tile sets or
+`Scene.go`; before that it stepped once per *rendered* frame. Either way a
+play-test was evidence about the editor rather than about the game.
+`editor/tests/play_matches_the_build.rs` opens the platformer, Scorchball, Low
+Tide and Orbital the way the editor does and the way a build does, steps both
+with the same scripted input, and requires the same world at the end.
 
 **An edge belongs to exactly one fixed step.** A key going down is one event and
 gameplay runs in the fixed step, so the edge is spent once a step has seen it —
@@ -1547,9 +1552,9 @@ frame.
   beacon lights by its own sequences: arriving plays `arrive`, a swell whose
   first cue sounds the chime, and the script moves it on to the looping `glow`
   when that finishes (`game/tests/the_beacon_lights.rs`). A cue's sound is
-  found by the export's walk of the scene, so a project need not list it. The
-  test harnesses of the platformer, Flappy, Scorchball and Orbital advance
-  sequences too. No curve editor, blending, or tracks beyond numbers and cues
+  found by the export's walk of the scene, so a project need not list it. Every
+  game's test harness is a `sindri_runtime::ProjectRun`, which advances them
+  as a build does. No curve editor, blending, or tracks beyond numbers and cues
 - **Plays a scene's audio in Play, and mixes it for the author.** Play starts
   a scene's autoplay `sindri.audio.source`s and performs every request its
   scripts make through `Audio`, through the same `AudioMixer` a build uses;

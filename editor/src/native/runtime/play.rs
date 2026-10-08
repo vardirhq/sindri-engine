@@ -11,7 +11,7 @@
 use std::path::Path;
 
 use eframe::egui;
-use sindri_core::{EngineState, LoadedScenes, SceneDocument};
+use sindri_core::EngineState;
 use sindri_runtime::{Session, StepPhase, StepReport};
 
 use crate::profiler::Phase;
@@ -235,80 +235,31 @@ impl EditorApp {
     /// A new one for every run, seeded the same way, so pressing Play twice
     /// gives the same run twice and a bug found once can be found again.
     fn start_session(&mut self) -> Result<Session, String> {
-        let mut session = Session::with_sources(
-            self.scene.components().clone(),
-            self.scripts.sources().clone(),
-        )
-        .with_prefabs(self.scripts.prefabs().clone())
-        .with_profiles(self.scripts.profiles().clone())
-        .with_tile_sets(self.textures.tile_sets().clone())
-        .with_styles(self.styles.sheets().to_vec());
-        if let Some((scenes, loaded)) = self.playable_scenes()? {
-            session = session.with_scenes(scenes, loaded);
-        }
+        let viewport = self.game_presentation_viewport();
+        let components = self.scene.components().clone();
+        let root = self.open_project_root.clone();
+        let file = self.file.path().map(Path::to_path_buf);
+        let mut session = crate::play_session::start(
+            &crate::play_session::PlaySources {
+                components: &components,
+                scripts: &self.scripts,
+                tile_sets: self.textures.tile_sets(),
+                sheets: self.styles.sheets(),
+            },
+            &mut self.world,
+            crate::play_session::OpenScene {
+                project: root.as_deref(),
+                file: file.as_deref(),
+            },
+            viewport,
+        )?;
         // Always timed: the Profiler is the editor's, and a phase's timing is
         // two clock reads beside the phase's own work.
         session.set_measuring(true);
+        // Before the first step, as a build loads its save before its first
+        // frame.
         session.keep_saves_in(self.saves.backend());
-        let viewport = self.game_presentation_viewport();
-        session
-            .settle_styles(&mut self.world, viewport)
-            .map_err(|error| error.to_string())?;
         Ok(session)
-    }
-
-    /// The scenes a script's `Scene.go` can reach, named as a build names
-    /// them — by file name — with the open one adopted as the one playing.
-    /// `None` for a scene outside a project, which has nowhere to go.
-    #[allow(clippy::type_complexity)]
-    fn playable_scenes(
-        &mut self,
-    ) -> Result<Option<(Vec<(String, SceneDocument)>, LoadedScenes)>, String> {
-        let (Some(root), Some(open)) = (self.open_project_root.clone(), self.file.path()) else {
-            return Ok(None);
-        };
-        let open = open.to_path_buf();
-        let Ok(project) = crate::project::Project::open(&root) else {
-            return Ok(None);
-        };
-        let name = |path: &Path| {
-            path.file_name()
-                .map(|name| name.to_string_lossy().into_owned())
-        };
-        let mut scenes = Vec::new();
-        for path in project.scenes() {
-            let Some(named) = name(&path) else {
-                continue;
-            };
-            // The open scene is the world itself, edits and all, rather than
-            // what its file said when it was last saved.
-            if path == open {
-                continue;
-            }
-            // A declared scene whose file is missing is one a door cannot
-            // reach, which `Scene.go` says when it is asked; it does not stop
-            // the run.
-            let Ok(text) = std::fs::read_to_string(&path) else {
-                continue;
-            };
-            let document = SceneDocument::from_json(&text)
-                .map_err(|error| format!("{}: {error}", path.display()))?;
-            scenes.push((named, document));
-        }
-        let Some(current) = name(&open) else {
-            return Ok(None);
-        };
-        let mut loaded = LoadedScenes::new();
-        loaded
-            .adopt(&mut self.world, &current)
-            .map_err(|error| error.to_string())?;
-        // The open scene is listed too, so a door back to it finds it.
-        if let Ok(text) = std::fs::read_to_string(&open)
-            && let Ok(document) = SceneDocument::from_json(&text)
-        {
-            scenes.push((current, document));
-        }
-        Ok(Some((scenes, loaded)))
     }
 
     /// Runs exactly one fixed step of a held scene.
