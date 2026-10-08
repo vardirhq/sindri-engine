@@ -1,5 +1,10 @@
 # Changelog
 
+- Add an independent imported-model GPU path with retained hierarchy, normals,
+  UVs, 16/32-bit indices, base-color textures, metallic/roughness lighting,
+  depth testing, mirrored transforms and shared GPU residency. Scene and project
+  host integration remains in progress.
+
 - Add CPU-side static GLB decoding with retained hierarchy, reusable meshes,
   normals/UVs, 16/32-bit indices, material factors, embedded base-color images,
   and asset-aware malformed/unsupported diagnostics. Runtime model rendering

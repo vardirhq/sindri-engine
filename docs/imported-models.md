@@ -1,8 +1,8 @@
 # Imported models
 
-Status: first implementation slice, CPU decoding only. Runtime rendering,
-scene references, GPU ownership, export packaging and visual proof remain open.
-Do not treat a decoded model as a rendered one.
+Status: CPU decoding and reusable GPU model rendering are implemented. Scene
+references, host loading, export packaging and crawler visual proof remain open.
+Do not treat these building blocks as a completed external-project capability.
 
 ## Asset boundary
 
@@ -27,6 +27,35 @@ Materials retain metallic/roughness factors, double-sidedness and alpha cutoff.
 Embedded PNG/JPEG base-color images use the existing texture decoder; sampler
 wrap and filter enums are retained for eventual GPU upload.
 
+## Renderer boundary
+
+`sindri-render::RenderModel::new(ModelData)` validates immutable geometry,
+materials, images and hierarchy without depending on assets or scenes. Hosts
+adapt decoder data once and share `Arc<RenderModel>` instances. The original
+node names, indices, local matrices and mesh references remain available; a
+separate list accumulates selected-scene node matrices for drawing.
+
+`FrameCommand::Model` carries that shared resource and the entity world matrix.
+The GPU cache uploads each mesh primitive and base-color image once, reuses
+them across nodes, instances and frames, and releases entries when the resource
+loses its last owner. Cache statistics expose residency, uploads and draws.
+Each draw has an independent reusable uniform slot.
+
+The model vertex path retains normals and UVs instead of converting through
+inline `SurfaceMesh` or the existing position/UV/AO vertex format. Both index
+widths are used directly by the GPU. Drawing composes entity and hierarchy
+matrices, transforms normals by inverse transpose, writes/tests depth, and
+handles mirrored instances and double-sided materials. Embedded base-color
+textures are sampled as sRGB, factors are linear, and alpha masks discard.
+Ambient plus the existing directional world light uses metallic/roughness
+factors in a direct GGX lighting approximation. Environment-map lighting,
+texture mipmaps, model shadows and atmosphere are currently deferred. Existing
+mesh lighting, shadows and vertex layouts are unchanged.
+
+Invalid render resources and singular/nonfinite model matrices return typed
+errors. Geometry buffers and image dimensions are checked against device
+limits before upload. The pipeline uses target-independent wgpu APIs.
+
 ## Supported subset and diagnostics
 
 Only triangle primitives and one embedded binary buffer are supported. External
@@ -48,7 +77,11 @@ small fixture with two mesh primitives/materials, both index widths, a reused
 mesh, parent/local transforms, non-indexed geometry, and one embedded texture.
 Its sibling `generate.py` reproduces it using the Python standard library.
 Decoder tests cover these plus malformed ranges, cycles, unsupported features
-and repeated asset requests. No unit test depends on the external crawler.
+and repeated asset requests. Renderer tests cover hierarchy and invalid resource
+validation. The GPU imported-model test reads back material/texture pixels,
+checks distinct instance uniforms, mirrored-instance depth, both index widths,
+and one upload across repeated draws, followed by residency release. No unit
+test depends on the external crawler.
 
 Inspect an actual file without claiming a render proof:
 
@@ -62,9 +95,7 @@ cargo run -p sindri-assets --example model -- path/to/model.glb
   imported geometry into `SurfaceMesh`.
 - Bind decoded assets at the scene/render seam without making the renderer
   depend on core, scenes, assets or the editor.
-- Retain GPU geometry and textures across instances/frames, with release and
-  revision handling; apply normals with an inverse-transpose world matrix.
-- Draw depth-tested material primitives through native and WebGPU hosts.
+- Exercise depth-tested material primitives through native and WebGPU hosts.
 - Discover scene/prefab model references in the exporter and package the GLB
   unchanged in the existing content-hashed manifest layout.
 - Continue external `low-tide-3d` PR #1 with the real cutaway file and verify
@@ -72,7 +103,9 @@ cargo run -p sindri-assets --example model -- path/to/model.glb
 
 ## Editor boundary
 
-No editor changes are part of this slice. Editor PR #503 introduces runtime and
+One editor test exhaustively matching frame commands accepts the new model
+variant. No editor implementation or UI changes are part of this slice.
+Editor PR #503 introduces runtime and
 player crates and moves browser/project host code; coordinate those host moves
 at integration time rather than merging or editing its branch. Full model
 authoring UI remains deferred. External Low Tide is the request that found this

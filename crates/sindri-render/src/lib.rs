@@ -11,6 +11,7 @@ mod frame;
 mod glyph;
 mod lighting;
 mod mesh;
+mod model;
 mod offscreen;
 mod shadow;
 mod shape;
@@ -47,6 +48,10 @@ pub use glyph::{
 };
 pub use lighting::WorldLighting;
 pub use mesh::{ColoredVertex, MeshBuffers, TexturedVertex};
+pub use model::{
+    ModelCacheStats, ModelData, ModelGeometry, ModelHierarchyNode, ModelImage, ModelIndexData,
+    ModelNodeInstance, ModelRenderError, ModelSurface, ModelVertex, RenderModel,
+};
 pub use offscreen::{OffscreenError, OffscreenReadback, OffscreenTarget};
 pub use shadow::ShadowSettings;
 pub use shape::{
