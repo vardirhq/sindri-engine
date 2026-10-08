@@ -10,7 +10,7 @@ use sindri_scene::SceneExtractor;
 
 use crate::preferences::ConsoleFilter;
 use crate::ui::theme::{color, metric, text};
-use crate::ui::widgets::{button, button::Intent, panel};
+use crate::ui::widgets::{button, button::Intent, lazy, panel};
 use crate::{
     console::{Console, Entry, Level},
     scripts::ScriptNote,
@@ -256,16 +256,27 @@ pub(super) fn console_view(
         // Pinned to the newest entry: a log you have to scroll to the bottom of
         // to see what just happened is a log nobody reads.
         .stick_to_bottom(true)
-        .show(ui, |ui| {
+        .show_viewport(ui, |ui, in_sight| {
             ui.spacing_mut().item_spacing.y = 1.0;
             ui.add_space(2.0);
             let mut shown = 0_usize;
-            for entry in console.at_least(filter.floor()) {
+            let entries = console.at_least(filter.floor()).map(|entry| {
                 shown += 1;
-                if let Some(entity) = console_row(ui, entry, named) {
-                    action.go_to = Some(entity);
-                }
-            }
+                (lazy::key(&entry.message), entry)
+            });
+            lazy::rows(
+                ui,
+                in_sight,
+                ui.id().with("console rows"),
+                metric::ROW_HEIGHT,
+                entries,
+                |_| false,
+                |ui, entry| {
+                    if let Some(entity) = console_row(ui, entry, named) {
+                        action.go_to = Some(entity);
+                    }
+                },
+            );
             // A filter that hides everything has to say that it did, or an
             // empty panel reads as a console that stopped working.
             if shown == 0 {

@@ -18,7 +18,8 @@ use crate::{
     preferences::{AssetScope, AssetView},
     project::{AssetKind, ProjectTree},
     ui::icons,
-    ui::widgets::panel,
+    ui::theme::metric,
+    ui::widgets::{lazy, panel},
 };
 
 use super::EditorApp;
@@ -295,7 +296,7 @@ fn asset_column(
     // without the last few assets falling off the bottom.
     egui::ScrollArea::vertical()
         .auto_shrink([false, false])
-        .show(ui, |ui| {
+        .show_viewport(ui, |ui, in_sight| {
             match view {
                 AssetView::Grid => {
                     ui.spacing_mut().item_spacing = egui::vec2(6.0, 6.0);
@@ -313,19 +314,28 @@ fn asset_column(
                     // shows a useful number of them without taking height from
                     // the viewport it sits under.
                     ui.spacing_mut().item_spacing.y = 0.0;
-                    for (entry, depth) in &rows {
-                        // The row being renamed gets the draft; every other
-                        // row gets its name.
-                        let editing = renaming
-                            .as_mut()
-                            .filter(|(path, _)| path == &entry.path)
-                            .map(|(_, name)| name);
-                        if let Some(chosen) =
-                            listing_row(ui, entry, *depth, searching, scenes, browser, editing)
-                        {
-                            action = chosen;
-                        }
-                    }
+                    let renamed = renaming.as_ref().map(|(path, _)| path.clone());
+                    lazy::rows(
+                        ui,
+                        in_sight,
+                        ui.id().with("asset rows"),
+                        metric::ROW_HEIGHT,
+                        rows.iter().map(|row| (lazy::key(&row.0.path), row)),
+                        |(entry, _)| renamed.as_ref() == Some(&entry.path),
+                        |ui, (entry, depth)| {
+                            // The row being renamed gets the draft; every
+                            // other row gets its name.
+                            let editing = renaming
+                                .as_mut()
+                                .filter(|(path, _)| path == &entry.path)
+                                .map(|(_, name)| name);
+                            if let Some(chosen) =
+                                listing_row(ui, entry, *depth, searching, scenes, browser, editing)
+                            {
+                                action = chosen;
+                            }
+                        },
+                    );
                 }
             }
             if project.truncated() {

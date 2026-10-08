@@ -23,6 +23,14 @@ enum Stage {
     Loading {
         waited: usize,
     },
+    /// Leaving the editor untouched and asking for nothing, counting the
+    /// frames it draws anyway. An editor at rest should draw none.
+    Resting {
+        /// When the rest began: the first resting frame, which the last
+        /// loading frame asked for and so is not counted.
+        began: Option<std::time::Instant>,
+        frames: usize,
+    },
     /// Letting frames pass before recording. `editing` is what the editing
     /// section recorded, once it has: settling with it is settling into Play.
     Settling {
@@ -36,6 +44,14 @@ enum Stage {
     Closing,
 }
 
+/// How long an editor at rest is watched.
+const REST: std::time::Duration = std::time::Duration::from_secs(3);
+
+/// How long it is given first to finish what opening started — the last
+/// textures arriving, the first picture for the Scenes panel — whose frames
+/// are not the editor at rest.
+const GRACE: std::time::Duration = std::time::Duration::from_secs(1);
+
 /// A benchmark in progress.
 #[derive(Debug)]
 pub(super) struct BenchmarkRun {
@@ -43,6 +59,8 @@ pub(super) struct BenchmarkRun {
     stage: Stage,
     /// What was opened, as the command line said it.
     opened: String,
+    /// Frames drawn while the editor was left at rest.
+    rest_frames: Option<usize>,
 }
 
 impl BenchmarkRun {
@@ -51,6 +69,7 @@ impl BenchmarkRun {
             plan,
             stage: Stage::Loading { waited: 0 },
             opened,
+            rest_frames: None,
         }
     }
 }
@@ -62,8 +81,11 @@ impl EditorApp {
             return;
         };
         // Every frame is drawn while measuring: a benchmark is the cost of a
-        // frame, and an editor that skipped frames would report none.
-        context.request_repaint();
+        // frame, and an editor that skipped frames would report none. Except
+        // at rest, which is measuring whether it draws any.
+        if !matches!(run.stage, Stage::Resting { .. }) {
+            context.request_repaint();
+        }
         run.stage = match std::mem::replace(&mut run.stage, Stage::Closing) {
             Stage::Loading { waited } => {
                 let loading = self.scripts.loading() || self.textures.loading();
@@ -78,10 +100,43 @@ impl EditorApp {
                     // as the standalone benchmark does, so the two compare
                     // the CPU's work rather than how far behind the GPU is.
                     self.profiler.set_waits_for_gpu(true);
-                    Stage::Settling {
-                        left: run.plan.settle,
-                        editing: None,
+                    Stage::Resting {
+                        began: None,
+                        frames: 0,
                     }
+                }
+            }
+            // Woken when the rest is over; anything else that draws a frame
+            // meanwhile is the editor not being idle.
+            Stage::Resting {
+                began: None,
+                frames,
+            } => {
+                // From another thread, as the disk watcher wakes the editor:
+                // a timed repaint asked for inside a frame is not kept by
+                // every platform once the window has gone quiet.
+                let waking = context.clone();
+                std::thread::spawn(move || {
+                    std::thread::sleep(GRACE + REST);
+                    waking.request_repaint();
+                });
+                Stage::Resting {
+                    began: Some(std::time::Instant::now()),
+                    frames,
+                }
+            }
+            Stage::Resting {
+                began: Some(began),
+                frames,
+            } if began.elapsed() < GRACE + REST => Stage::Resting {
+                began: Some(began),
+                frames: frames + usize::from(began.elapsed() >= GRACE),
+            },
+            Stage::Resting { frames, .. } => {
+                run.rest_frames = Some(frames);
+                Stage::Settling {
+                    left: run.plan.settle,
+                    editing: None,
                 }
             }
             Stage::Settling { left, editing } if left > 0 => Stage::Settling {
@@ -140,7 +195,15 @@ fn write_report(
     errors: &[String],
 ) {
     let window = context.content_rect().size();
-    let report = report_json(&run.opened, [window.x, window.y], editing, playing, errors);
+    let rest = run.rest_frames.map(|frames| (REST.as_secs_f32(), frames));
+    let report = report_json(
+        &run.opened,
+        [window.x, window.y],
+        rest,
+        editing,
+        playing,
+        errors,
+    );
     let written = serde_json::to_string_pretty(&report)
         .map_err(|error| error.to_string())
         .and_then(|text| std::fs::write(&run.plan.report, text).map_err(|error| error.to_string()));

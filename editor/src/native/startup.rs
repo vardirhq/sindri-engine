@@ -209,6 +209,7 @@ impl EditorApp {
                 let opened = std::env::args().nth(1).unwrap_or_default();
                 super::benchmark::BenchmarkRun::new(plan, opened)
             }),
+            disk_watch: super::wake::DiskWatch::start(context.egui_ctx.clone()),
         };
         // Said after the field is built rather than during it, because what
         // there is to say is read off the world and the bindings.

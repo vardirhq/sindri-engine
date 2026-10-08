@@ -39,6 +39,22 @@ impl EditorApp {
     }
 }
 
+impl EditorApp {
+    /// What brings the next frame when nobody is touching the editor: the
+    /// disk, watched off the frame, and anything still on its way in, which
+    /// is looked for again shortly. Otherwise an editor at rest is idle.
+    fn keep_watching(&self, context: &egui::Context) {
+        let folder = self
+            .open_project_root
+            .as_deref()
+            .or_else(|| self.file.path().and_then(std::path::Path::parent));
+        self.disk_watch.follow(folder);
+        if self.scripts.loading() || self.textures.loading() {
+            context.request_repaint_after(std::time::Duration::from_millis(30));
+        }
+    }
+}
+
 impl eframe::App for EditorApp {
     /// Settings are written when eframe decides to, which includes shutdown.
     fn save(&mut self, storage: &mut dyn eframe::Storage) {
@@ -81,6 +97,7 @@ impl EditorApp {
         }
         self.show_window(ui.ctx());
         let upkeep = std::time::Instant::now();
+        self.keep_watching(ui.ctx());
         // Presentation and textures both refresh before extraction, so a saved
         // asset change is visible in the frame that first notices it.
         self.refresh_styles();

@@ -15,8 +15,8 @@ less, with smaller checkpoints preferred.
 
 ## Current checkpoint
 
-Draft PR #503. Slices 1 and 2 are checked. Slice 3's work is done and waits
-only on CI's browser run to check it:
+Draft PR #503. Slices 1, 2 and 3 are checked; slice 4 is in progress.
+Slice 3 left:
 
 - `sindri-runtime` holds the session (from Causeway), `ProjectRun` (open any
   project directory, on its main scene or another with `open_scene`, and
@@ -40,8 +40,15 @@ only on CI's browser run to check it:
   Playground's domino run ending marginally on its button (main had it too);
   fixed in the playground, with `game/tests/the_physics_playground_works/smoke.rs`.
 
-Next: check slice 3 in `docs/editor-update.md` once CI's browser run is green
-on the head, then slice 4.
+Slice 4 so far: the editor benchmark times the GPU it waits on as GPU (the
+platformer's "encoding" was a software GPU finishing egui's frame); an
+editor at rest asks for no frames, a background watcher (`native/wake.rs`)
+wakes it when a project file changes, and the benchmark counts frames drawn
+in three seconds untouched; the hierarchy, console and project lists lay out
+only rows in sight (`ui/widgets/lazy.rs`). On lavapipe the first phase
+after a GPU wait absorbs the driver winding down (about 0.4 ms), which is
+why `project-benchmark` times Voxel Lab's step at 0.49 ms against 10 µs
+headless; it is not a gameplay difference.
 
 Gate every push with fmt, warning-denied Clippy and the changed crates'
 tests, run unpiped so a failure stops the push. Debug info off keeps the

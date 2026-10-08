@@ -179,7 +179,6 @@ impl EditorApp {
             let visible = self.unobscured(rect);
             paint_viewport_border(ui.painter(), rect, visible, self.problem());
         }
-        context.request_repaint();
     }
 
     /// Draws the world a view shows into its target, and answers what went

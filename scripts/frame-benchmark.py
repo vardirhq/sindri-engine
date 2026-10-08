@@ -86,6 +86,9 @@ def describe(path: Path) -> list[str]:
     lines = [f"{path.name}: {report['host']}, {build}, {report['opened']}"]
     for error in report.get("errors", []):
         lines.append(f"  error: {error}")
+    rest = report.get("rest")
+    if rest:
+        lines.append(f"  at rest  {rest['frames']} frames drawn in {rest['seconds']:.0f} s untouched")
     for name, frames in report["sections"].items():
         stats = section_stats(frames)
         lines.append(

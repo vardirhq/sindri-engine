@@ -97,6 +97,7 @@ pub fn frame_json(frame: &Frame) -> Value {
 pub fn report_json(
     opened: &str,
     window: [f32; 2],
+    rest: Option<(f32, usize)>,
     editing: &[Frame],
     playing: &[Frame],
     errors: &[String],
@@ -106,6 +107,9 @@ pub fn report_json(
         "opened": opened,
         "optimized": !cfg!(debug_assertions),
         "window": window,
+        // Frames drawn while the editor was left untouched for so many
+        // seconds before measuring: an editor at rest should draw none.
+        "rest": rest.map(|(seconds, frames)| json!({ "seconds": seconds, "frames": frames })),
         // What the console held as errors when the run ended: a run that
         // measured fast because its scripts failed should say so.
         "errors": errors,
@@ -174,7 +178,15 @@ mod tests {
             Phase::ALL.len()
         );
         let errors = ["Hero: no such field".to_owned()];
-        let report = report_json("games/platformer", [1440.0, 1024.0], &[], &[frame], &errors);
+        let report = report_json(
+            "games/platformer",
+            [1440.0, 1024.0],
+            Some((3.0, 0)),
+            &[],
+            &[frame],
+            &errors,
+        );
+        assert_eq!(report["rest"]["frames"], 0);
         assert_eq!(report["host"], "editor");
         assert_eq!(report["sections"]["playing"].as_array().unwrap().len(), 1);
         assert!(report["sections"]["editing"].as_array().unwrap().is_empty());

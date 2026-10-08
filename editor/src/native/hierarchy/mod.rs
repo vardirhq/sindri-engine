@@ -15,6 +15,7 @@ use crate::selection::Pick;
 use crate::space::EntitySpace;
 use crate::ui::icons;
 use crate::ui::theme::color;
+use crate::ui::theme::metric::ROW_HEIGHT;
 use crate::ui::widgets::{
     button::{self, Intent},
     panel,
@@ -175,8 +176,9 @@ impl EditorApp {
         let authoring = self.authoring_enabled();
         egui::ScrollArea::vertical()
             .auto_shrink([false; 2])
-            .show(ui, |ui| {
+            .show_viewport(ui, |ui, shown| {
                 ui.spacing_mut().item_spacing.y = 0.0;
+                let mut sight = InSight::new(ui, shown);
                 ui.add_space(2.0);
                 let needle = self.search.trim().to_lowercase();
                 let collapsed = self.collapsed_entities();
@@ -194,6 +196,7 @@ impl EditorApp {
                     (EntitySpace::World, "World", icons::WORLD),
                     (EntitySpace::Ui, "UI", icons::UI_ELEMENT),
                 ] {
+                    sight.catch_up(ui);
                     ui.add_space(if space == EntitySpace::Ui { 8.0 } else { 0.0 });
                     let root = hierarchy_group(ui, label, icon);
                     if let Some(entity) = hierarchy_drop_target(ui, &root, &self.world, None) {
@@ -206,8 +209,11 @@ impl EditorApp {
                             continue;
                         }
                         listed.push(entity);
-                        let folded = collapsed.contains(&entity) && needle.is_empty();
                         let renaming = self.renaming == Some(entity);
+                        if !sight.row(ui, renaming) {
+                            continue;
+                        }
+                        let folded = collapsed.contains(&entity) && needle.is_empty();
                         let look = self.row_look(entity, depth, folded, authoring);
                         let report = entity_row(
                             ui,
@@ -216,12 +222,8 @@ impl EditorApp {
                             &look,
                             renaming.then_some(&mut self.rename_draft),
                         );
-                        if report.asked.is_some() {
-                            asked = report.asked;
-                        }
-                        if report.reparent.is_some() {
-                            reparenting = report.reparent;
-                        }
+                        asked = report.asked.or(asked);
+                        reparenting = report.reparent.or(reparenting);
                         if report.toggled {
                             toggled = Some(entity);
                         }
@@ -230,6 +232,7 @@ impl EditorApp {
                         }
                     }
                 }
+                sight.catch_up(ui);
                 if listed.is_empty() {
                     ui.add_space(6.0);
                     panel::note(
@@ -352,5 +355,50 @@ impl EditorApp {
         self.select(Some(entity));
         self.rename_draft = self.world.get(entity).map(entity_name).unwrap_or_default();
         self.renaming = Some(entity);
+    }
+}
+
+/// Which hierarchy rows are in sight, and the space standing in for those
+/// that are not. Only rows in sight are laid out, so the scroll bar still
+/// measures them all while a scene of thousands lays out the few shown:
+/// laying out every row each frame was most of the panel's cost.
+struct InSight {
+    /// Where the list's content begins.
+    top: f32,
+    /// The part of the content in sight.
+    shown: egui::Rect,
+    /// Space for rows passed over and not yet added.
+    unseen: f32,
+}
+
+impl InSight {
+    fn new(ui: &egui::Ui, shown: egui::Rect) -> Self {
+        Self {
+            top: ui.min_rect().top(),
+            shown,
+            unseen: 0.0,
+        }
+    }
+
+    /// Whether the next row is to be laid out: it is in sight, or `always`.
+    /// A row that is not is counted as space instead.
+    fn row(&mut self, ui: &mut egui::Ui, always: bool) -> bool {
+        let at = ui.cursor().top() - self.top + self.unseen;
+        let in_sight = at + ROW_HEIGHT >= self.shown.top() - ROW_HEIGHT
+            && at <= self.shown.bottom() + ROW_HEIGHT;
+        if !in_sight && !always {
+            self.unseen += ROW_HEIGHT;
+            return false;
+        }
+        self.catch_up(ui);
+        true
+    }
+
+    /// Adds the space for the rows passed over.
+    fn catch_up(&mut self, ui: &mut egui::Ui) {
+        if self.unseen > 0.0 {
+            ui.add_space(self.unseen);
+            self.unseen = 0.0;
+        }
     }
 }

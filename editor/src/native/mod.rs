@@ -94,6 +94,7 @@ mod unsaved;
 mod view_interaction;
 mod viewport;
 mod viewport_chrome;
+mod wake;
 mod welcome;
 mod window;
 mod workspace;
@@ -390,6 +391,8 @@ struct EditorApp {
     prefab_session: prefab_writes::PrefabSession,
     /// The benchmark the command line asked for, while it runs.
     benchmark: Option<benchmark::BenchmarkRun>,
+    /// Wakes the editor at rest when a file in the open project changes.
+    disk_watch: wake::DiskWatch,
 }
 
 impl EditorApp {

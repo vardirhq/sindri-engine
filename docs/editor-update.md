@@ -105,7 +105,7 @@ capabilities; each is proven on a genre showcase or flagship named in its slice.
   `cargo editor <project>` runs. README, `scripts/capture-editor.sh` and
   `docs/editor-architecture.md` say which is for what; the measurements are
   below.
-- [ ] **3. One runtime session.** `sindri-runtime` exists with the session,
+- [x] **3. One runtime session.** `sindri-runtime` exists with the session,
   styling settlement, physics and audio wiring the shipped host uses today.
   `sindri-causeway` runs on it natively and in the browser; editor Play runs
   on it and `fixed_step` / `EditorFrame` are gone; the genre showcases' and
@@ -117,6 +117,14 @@ capabilities; each is proven on a genre showcase or flagship named in its slice.
   The generic host every export ships moves out of Causeway's crate into its
   own, so a published game loads `sindri_player.js` rather than
   `sindri_causeway.js`, and Causeway becomes a project like any other.
+  Done: `sindri-runtime` (session, `ProjectRun`, `StepReport`) and
+  `sindri-player`; editor Play starts its session through
+  `play_session::start`; every game's harness is a `ProjectRun`;
+  `editor/tests/play_matches_the_build.rs` ends the platformer, Scorchball,
+  Low Tide and Orbital in the same world both ways after 600 scripted steps;
+  WASM and CI's real-browser run of every export pass. Voxel Lab keeps its
+  own browser app: it is an engine lab whose Rust terrain and camera are the
+  subject, as Shapes Lab's are.
 - [ ] **4. Cut per-frame waste.**
   - Weave presentation in the editor settles and lays states in place with
     undo, as the shipped host does; no view clones the world to present it.
