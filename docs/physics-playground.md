@@ -105,6 +105,12 @@ block or crate it hits and how far.
 - The editor's own Play has no headless harness, so the editor proof is that
   it compiles every script and loads every prefab the scripts spawn; Play
   itself was not exercised here.
+- The `cube` mesh primitive spanned -1 to 1, two units wide at scale 1, while
+  a default Collider 3D box is one unit wide, and nothing said so. The quarry
+  drew every crate twice the size of its body, so crates stacked correctly
+  looked as if they sank into one another. Fixed: the primitive is a unit
+  cube, editor picking matches it, and the scenes that relied on the old size
+  are drawn at scale 2 so they look as they did.
 - Decay cannot change a collider's material at runtime, so material comparisons
   use separate authored bodies.
 - There is no simulation time scale, and no in-game debug drawing of colliders:

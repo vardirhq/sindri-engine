@@ -124,6 +124,38 @@ fn opaque_geometry_blocks_a_sprite_behind_but_not_one_in_front() {
     );
 }
 
+/// The cube primitive is a unit cube, the size of a default Collider 3D box,
+/// and a click meets it where it is drawn rather than where a cube twice its
+/// size would be.
+#[test]
+fn a_cube_is_picked_across_one_unit_at_scale_one() {
+    let extractor = SceneExtractor::new().unwrap();
+    let mut world = World::default();
+    let cube = spawn(
+        &mut world,
+        Transform3D {
+            position: [0.0, 0.0, 0.5],
+            scale: [0.4, 0.4, 0.4],
+            ..Transform3D::default()
+        },
+        "sindri.mesh",
+        json!({
+            "primitive": "cube",
+            "texture": "procedural:checkerboard"
+        }),
+    );
+    // 0.1 from the middle: inside the 0.2 half-width the cube is drawn at.
+    assert_eq!(
+        pick_world(&world, extractor.components(), Mat4::IDENTITY, [0.55, 0.5]).unwrap(),
+        Some(cube)
+    );
+    // 0.3 from the middle: outside it, though inside a two-unit cube's 0.4.
+    assert_eq!(
+        pick_world(&world, extractor.components(), Mat4::IDENTITY, [0.65, 0.5]).unwrap(),
+        None
+    );
+}
+
 #[test]
 fn only_a_filled_tilemap_cell_selects_the_map() {
     let extractor = SceneExtractor::new().unwrap();
