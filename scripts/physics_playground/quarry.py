@@ -22,6 +22,9 @@ QUARRY = "scripts/quarry.decay"
 GROUND = 6  # the flat floor's top layer of voxels
 TOP = GROUND + 1  # where its surface is: the top of that layer
 ALL = 4294967295
+# The `cube` mesh primitive spans -1 to 1: two units wide at scale 1. A crate
+# whose collider is one unit across is drawn at half scale to match it.
+CUBE = 0.5
 
 
 def look_at(eye, target):
@@ -86,7 +89,7 @@ def walls() -> list[dict]:
 
 def build() -> dict:
     scene = Scene()
-    eye, target = (12.0, 17.0, 14.0), (-0.5, TOP, 0.5)
+    eye, target = (9.0, 13.5, 10.5), (-0.5, TOP, 0.5)
     camera = scene.add("q-camera", "Quarry Camera")
     camera["transform_3d"] = at(*eye, rotation=look_at(eye, target))
     camera["components"]["sindri.camera"] = {
@@ -131,16 +134,16 @@ def build() -> dict:
     for index, (x, y, z) in enumerate(crates):
         texture = "textures/crate.png" if index % 4 else "textures/steel.png"
         entity = scene.add(f"q-crate-{index}", f"q-crate-{index}")
-        entity["transform_3d"] = at(x, y, z)
+        entity["transform_3d"] = at(x, y, z, CUBE)
         entity["components"] = crate_components(texture)
 
     # The laser: a thin red column swept across the quarry, firing a ray down.
     laser = scene.add("q-laser", "q-laser")
-    laser["transform_3d"] = at(0, 14, 0.5, [0.06, 1.0, 0.06])
+    laser["transform_3d"] = at(0, 14, 0.5, [0.03, 0.5, 0.03])
     laser["components"]["sindri.mesh"] = {"layer": 0, "primitive": "cube",
                                           "texture": "textures/laser.png"}
     spot = scene.add("q-laser-hit", "q-laser-hit")
-    spot["transform_3d"] = at(0, TOP, 0.5, 0.3)
+    spot["transform_3d"] = at(0, TOP, 0.5, 0.15)
     spot["components"]["sindri.mesh"] = {"layer": 0, "primitive": "cube",
                                          "texture": "textures/laser.png"}
 
@@ -194,7 +197,7 @@ def crate_prefab() -> dict:
         "metadata": {"name": "Crate 3D"},
         "entities": [{
             "id": "crate3d", "name": "Crate 3D",
-            "transform_3d": at(0, 0, 0),
+            "transform_3d": at(0, 0, 0, CUBE),
             "components": crate_components(tags=("crate", "dropped"), home=False),
         }],
     }
