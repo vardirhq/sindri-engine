@@ -220,6 +220,9 @@ it are done.
 5. **Record and scrub a run.** Depends on 4 having settled what a run's
    authority over the world is.
 
+Items 4 and 5 are scheduled in the editor update, `docs/editor-update.md`,
+on top of one runtime session shared with the shipped host.
+
 ## Modes
 
 A mode is a **different document and a different canvas**, not a different set
