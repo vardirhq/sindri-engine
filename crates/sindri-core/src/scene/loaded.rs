@@ -154,6 +154,41 @@ impl LoadedScenes {
         Ok(root)
     }
 
+    /// Takes what the world already holds as the scene `name`, and plays it.
+    ///
+    /// For a host whose world *is* a scene rather than one loaded into it —
+    /// the editor, which plays the document it is editing. Every top-level
+    /// entity goes under a new root, in the order they were made, so the
+    /// scene has the one switch every scene has and a script's `Scene.go`
+    /// can leave it and come back to it as it left it. Identities stay as
+    /// the file spells them, as for a project's opening scene. Answers the
+    /// existing root when `name` is already held.
+    ///
+    /// # Errors
+    /// Only a hierarchy that cannot take a parent, which a valid world never
+    /// is.
+    pub fn adopt(&mut self, world: &mut World, name: &str) -> Result<EntityId, WorldError> {
+        if let Some(root) = self.roots.get(name) {
+            return Ok(*root);
+        }
+        let top: Vec<EntityId> = world
+            .entities()
+            .filter(|(_, data)| data.parent.is_none())
+            .map(|(entity, _)| entity)
+            .collect();
+        let root = world.spawn(EntityData {
+            name: Some(name.to_owned()),
+            scene_namespace: Some(String::new()),
+            ..EntityData::default()
+        });
+        for entity in top {
+            world.set_parent(entity, Some(root))?;
+        }
+        self.roots.insert(name.to_owned(), root);
+        self.active = Some(name.to_owned());
+        Ok(root)
+    }
+
     /// Switches to a scene the world already holds.
     ///
     /// Every other scene is switched off, including one that was somehow left
