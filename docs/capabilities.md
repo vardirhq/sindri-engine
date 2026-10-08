@@ -594,6 +594,13 @@ value the game itself wrote while running does not come back with them. An
 edit to something the run spawned is explained rather than dropped. Saving,
 new scenes, prefab files and undo/redo wait for Stop.
 
+**A run can be scrubbed.** Play records each fixed step's input, which steps
+the Game view was drawn after, and a copy of the world and session every second,
+keeping the last two minutes. The Timeline's Run strip takes the run to any
+recorded step: it pauses, restores the copy at or before it and replays the
+recorded input, which a restored session steps exactly as it did the first time.
+Playing on from there carries on and lets the recorded future go.
+
 **A held scene can be stepped once**, which is what a debugger's step button is
 for: the bug that happens in one frame and is gone before anyone can look at it.
 It runs the same body a played frame runs, so a scene stepped sixty times is a

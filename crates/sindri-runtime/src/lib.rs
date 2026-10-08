@@ -25,4 +25,4 @@ pub use builtins::bind_builtin_tile_sets;
 pub use error::RuntimeError;
 pub use project::{ProjectRun, STEP, scene_extractor};
 pub use report::{StepPhase, StepReport, StepTimes};
-pub use session::Session;
+pub use session::{Checkpoint, Session};

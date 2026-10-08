@@ -265,10 +265,15 @@ impl EditorApp {
             picture(board, &mut self.profiler, viewport, scene, tab);
         }
         let failure = match (drawn, styling, self.session.as_mut()) {
-            (Ok(sizes), Some(viewport), Some(session)) => session
-                .record_drawn(&self.world, viewport, sizes)
-                .err()
-                .map(|error| error.to_string()),
+            (Ok(sizes), Some(viewport), Some(session)) => {
+                if let Some(recording) = self.recording.as_mut() {
+                    recording.drew(viewport);
+                }
+                session
+                    .record_drawn(&self.world, viewport, sizes)
+                    .err()
+                    .map(|error| error.to_string())
+            }
             (Ok(_), ..) => None,
             (Err(failure), ..) => Some(failure),
         };

@@ -61,6 +61,7 @@ const MESSAGE_ROUNDS: usize = 8;
 /// made in.
 pub(crate) const SPAWN_LIMIT_PER_PASS: usize = 4096;
 
+#[derive(Clone)]
 struct Compiled {
     source: String,
     /// The project's declared shape it was compiled against: another script
@@ -86,6 +87,7 @@ fn collect(
     }
 }
 
+#[derive(Clone)]
 pub(crate) struct Running {
     elapsed_seconds: f32,
     source: String,
@@ -106,7 +108,7 @@ pub(crate) struct Message {
     pub(crate) args: Vec<decay_runtime::Value>,
 }
 
-#[derive(Default)]
+#[derive(Clone, Default)]
 pub struct Scripts {
     programs: BTreeMap<String, Compiled>,
     running: BTreeMap<EntityId, Running>,

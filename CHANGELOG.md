@@ -1,5 +1,7 @@
 # Changelog
 
+- Scrub a run. Play now records the last two minutes of a run, and the Timeline's Run strip takes it back to any step: the run pauses there exactly as it was, and playing on carries on from that step. A run's whole state can now be copied and restored — scripts, both physics solvers, the screen UI, effects — and a restored run given the same input plays exactly as it did.
+
 - Edit a scene while it plays. Inspector fields, the hierarchy's create, rename, duplicate and delete, gizmos, and tile and block painting now act on the running game at once, so a jump can be tuned and tried in the same run. Stop restores the scene as it was and lists what you changed; the changes you keep are applied as ordinary undoable edits, carrying only the fields and transform parts you touched, never values the game wrote while it ran. An edit to something the run spawned is explained rather than dropped. Saving, new scenes, prefab files and undo/redo still wait for Stop.
 
 - Fix the Physics Playground's domino run sometimes stopping short of its red button. The last domino's tip only just reached the button's edge, so after the room had been played with it could come to rest leaning against the cap without pressing it, about one time in four at the pace a busy browser plays. The button now sits where the domino lands on it squarely. Setting a contraption up again while everything is dropped now puts the room back first: the room's parts lay wherever gravity had thrown them, and on the domino ledge they knocked the run over from its far end.

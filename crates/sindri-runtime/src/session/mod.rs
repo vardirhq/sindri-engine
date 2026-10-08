@@ -16,6 +16,8 @@ use crate::report::Laps;
 use crate::styling::Styles;
 use crate::{RuntimeError, StepPhase, StepReport, bind_builtin_tile_sets};
 
+mod checkpoint;
+pub use checkpoint::Checkpoint;
 mod audio;
 mod game;
 mod physics;

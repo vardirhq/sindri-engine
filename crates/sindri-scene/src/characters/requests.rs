@@ -10,7 +10,7 @@ pub(super) struct MotionRequest {
 }
 
 /// One pending movement and drop-duration update per character, consumed by a fixed step.
-#[derive(Default)]
+#[derive(Clone, Default)]
 pub struct CharacterRequests2d {
     pub(super) motion: BTreeMap<EntityId, MotionRequest>,
     pub(super) drop: BTreeMap<EntityId, f32>,

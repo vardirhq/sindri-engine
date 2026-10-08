@@ -10,7 +10,7 @@ use sindri_physics::{
 };
 use std::collections::BTreeSet;
 
-#[derive(Default)]
+#[derive(Clone, Default)]
 pub(crate) struct SceneJoints2d {
     owners: BTreeSet<EntityId>,
 }

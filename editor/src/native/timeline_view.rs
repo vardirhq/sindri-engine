@@ -36,6 +36,8 @@ pub(super) struct View<'a> {
 impl EditorApp {
     /// The Timeline panel.
     pub(super) fn timeline_body(&mut self, ui: &mut egui::Ui) {
+        // A run in progress can be scrubbed whatever is selected.
+        self.run_scrubber(ui);
         let Some(entity) = self.selection.primary() else {
             panel::empty_state(
                 ui,

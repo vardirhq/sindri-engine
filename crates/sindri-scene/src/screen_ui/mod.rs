@@ -57,7 +57,7 @@ impl SceneComponent for UiButtonComponent {
     const TYPE_NAME: &'static str = "sindri.ui.button";
 }
 
-#[derive(Debug, Default)]
+#[derive(Clone, Debug, Default)]
 pub struct ScreenUi {
     viewport_half: [f32; 2],
     rects: BTreeMap<EntityId, Element>,

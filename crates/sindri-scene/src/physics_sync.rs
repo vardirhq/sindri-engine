@@ -72,6 +72,7 @@ pub enum PhysicsSyncError {
 /// Held beside [`World`] rather than in it, for the reason every derived thing
 /// is: a scene saved mid-run has to be the scene that was opened, and a body's
 /// solver state is not something an author wrote.
+#[derive(Clone)]
 pub struct ScenePhysics2d {
     world: PhysicsWorld2d,
     /// Which entities are in the physics world, and what they were authored as.

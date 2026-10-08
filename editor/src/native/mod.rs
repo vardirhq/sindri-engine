@@ -79,6 +79,7 @@ mod project_panel;
 mod projection;
 mod repair_view;
 mod run_review;
+mod run_scrub;
 mod runtime;
 mod scene_board_view;
 mod scene_io;
@@ -403,6 +404,8 @@ struct EditorApp {
     run_edits: crate::run_edits::RunEdits,
     /// The offer, once Stop has made it and until it is answered.
     stop_review: Option<run_review::StopReview>,
+    /// The run so far, to scrub back through; `None` when nothing plays.
+    recording: Option<crate::recording::Recording>,
 }
 
 impl EditorApp {

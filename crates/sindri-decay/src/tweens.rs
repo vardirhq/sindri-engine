@@ -6,6 +6,7 @@ use std::collections::{BTreeMap, BTreeSet};
 
 pub(crate) const LIMIT: usize = 8192;
 
+#[derive(Clone)]
 pub(crate) struct Track {
     pub(crate) owner: EntityId,
     pub(crate) from: Value,
@@ -121,7 +122,7 @@ impl Track {
     }
 }
 
-#[derive(Default)]
+#[derive(Clone, Default)]
 pub(crate) struct Tweens {
     tracks: BTreeMap<u64, Track>,
     owners: BTreeMap<EntityId, BTreeSet<u64>>,

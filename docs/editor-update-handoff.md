@@ -15,7 +15,7 @@ less, with smaller checkpoints preferred.
 
 ## Current checkpoint
 
-Draft PR #503. Slices 1, 2, 3 and 5 are checked; slice 4 is open on the platformer's last 0.3 ms (see the plan). Next: slice 6, record and scrub a run.
+Draft PR #503. Slices 1, 2, 3, 5 and 6 are checked; slice 4 is open on the platformer's last 0.3 ms (see the plan). Next: slice 7, the remaining audit gaps.
 Slice 3 left:
 
 - `sindri-runtime` holds the session (from Causeway), `ProjectRun` (open any

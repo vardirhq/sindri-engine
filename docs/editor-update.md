@@ -156,13 +156,23 @@ capabilities; each is proven on a genre showcase or flagship named in its slice.
   the editor itself: a coin moved while playing is offered at Stop, kept as
   an undoable entry, and discarded leaves the scene as it was. Prefab
   placement and prefab files stay stopped-only, as Save does.
-- [ ] **6. Record and scrub a run.** A run records periodic session snapshots
+- [x] **6. Record and scrub a run.** A run records periodic session snapshots
   and its input log; the Timeline scrubs to any recorded step by restoring the
   nearest snapshot and replaying, deterministically. Scrubbing pauses the run;
   resuming continues from the scrubbed step and discards the recorded future.
   Memory is bounded and the bound is stated. Proof: scrub an Orbital Last
   Stand run back to an earlier wave and resume; a replayed range is identical
   to the recorded one.
+  Done: the whole session can be checkpointed (`Session::checkpoint`, with
+  both physics worlds copying Rapier's state and fresh pipelines, and the
+  script runtime, screen UI, effects and grid surfaces cloned), and a copy goes
+  on exactly as the original (`sindri-physics/tests/copies_go_on_as_the_original.rs`,
+  `sindri-runtime/tests/a_run_goes_back.rs`). Play records each step's input,
+  which steps the Game view was drawn after, and a copy every second
+  (`editor/src/recording.rs`); the Timeline's Run strip scrubs it
+  (`native/run_scrub.rs`). The bound is two minutes: 120 copies, one a second.
+  `editor/tests/scrub_a_run.rs` scrubs Orbital back from its third wave to its
+  first, resumes, and every replayed step matches the recording.
 - [ ] **7. Close the remaining audit gaps.**
   - Gizmos for the shapes that still have none. Colliders, cameras and lights
     have them; audit joints, 3D colliders, character controllers, audio

@@ -17,7 +17,7 @@ use sindri_scene::{ScreenExtent, UiTextSizes};
 use crate::{RuntimeError, Session};
 
 /// A game's stylesheets and the presenter that runs their transitions.
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub(crate) struct Styles {
     presenter: Presenter,
     stylesheets: Vec<Stylesheet>,

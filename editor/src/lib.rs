@@ -92,6 +92,9 @@ pub mod ordering;
 /// The session editor Play starts, assembled from what the editor loaded.
 #[cfg(not(target_arch = "wasm32"))]
 pub mod play_session;
+/// A run, recorded so it can be scrubbed.
+#[cfg(not(target_arch = "wasm32"))]
+pub mod recording;
 /// Edits made while a scene plays, and what Stop does with them.
 #[cfg(not(target_arch = "wasm32"))]
 pub mod run_edits;

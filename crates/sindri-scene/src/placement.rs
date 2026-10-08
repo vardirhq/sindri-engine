@@ -37,7 +37,7 @@ use crate::{
 /// Held by the caller rather than hidden in a static, so a host that runs two
 /// worlds gets two caches and a test gets a fresh one by writing
 /// `GridSurfaces::default()`.
-#[derive(Debug, Default)]
+#[derive(Clone, Debug, Default)]
 pub struct GridSurfaces {
     /// What was derived, and what it was derived from.
     derived: BTreeMap<EntityId, (u64, u64, Option<TileSurfaces>)>,

@@ -50,7 +50,7 @@ impl Fleck {
 /// Runtime state beside the world, derived from what a scene authors and never
 /// serialized — the same shape as `SpriteAnimations`, `ScenePhysics2d` and
 /// `ScreenUi`.
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub struct Effects2d {
     flecks: Vec<Fleck>,
     capacity: usize,

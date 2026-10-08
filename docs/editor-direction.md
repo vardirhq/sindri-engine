@@ -218,8 +218,8 @@ it are done.
    Each one removes a round trip through Play.
 4. **Edit while playing, with a decision at Stop.** Built in the editor
    update: the largest single improvement to the loop.
-5. **Record and scrub a run.** Depends on 4 having settled what a run's
-   authority over the world is.
+5. **Record and scrub a run.** Built in the editor update: the last two
+   minutes of a run, scrubbed from the Timeline and played on from.
 
 Items 4 and 5 are scheduled in the editor update, `docs/editor-update.md`,
 on top of one runtime session shared with the shipped host.

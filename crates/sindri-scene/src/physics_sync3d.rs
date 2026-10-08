@@ -28,6 +28,7 @@ const MOVED: f32 = 1.0e-4;
 
 /// Runtime state beside the scene, never serialized into authored components.
 /// Hosts must call this once per engine fixed step; game/editor wiring is separate.
+#[derive(Clone)]
 pub struct ScenePhysics3d {
     world: PhysicsWorld3d,
     registered: BTreeMap<EntityId, Authored>,

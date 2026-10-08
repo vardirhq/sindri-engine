@@ -137,12 +137,23 @@ impl EditorApp {
         let Some(session) = self.session.as_mut() else {
             return;
         };
+        if let Some(recording) = self.recording.as_mut() {
+            recording.before_step(crate::recording::RecordedStep {
+                input: self.input.state().clone(),
+                viewport: view_size,
+                delta: fixed_delta.as_secs_f32(),
+                drawn: None,
+            });
+        }
         let stepped = session.step(
             &mut self.world,
             self.input.state(),
             view_size,
             fixed_delta.as_secs_f32(),
         );
+        if let Some(recording) = self.recording.as_mut() {
+            recording.after_step(&self.world, session);
+        }
         let audio = session.take_audio_commands();
         let copied = session.take_copied();
         if let Some(text) = copied {
@@ -213,7 +224,12 @@ impl EditorApp {
         // run's.
         self.profiler.clear();
         match self.start_session() {
-            Ok(session) => self.session = Some(session),
+            Ok(session) => {
+                // Recorded from its first step, so it can be scrubbed back
+                // over (`recording.rs`).
+                self.recording = Some(crate::recording::Recording::start(&self.world, &session));
+                self.session = Some(session);
+            }
             Err(problem) => {
                 if let Some(snapshot) = self.play_snapshot.take() {
                     self.world = snapshot;
@@ -305,6 +321,7 @@ impl EditorApp {
         if let Some(mut session) = self.session.take() {
             session.finish();
         }
+        self.recording = None;
         self.play_audio.stop();
         if let Err(error) = self.lifecycle.stop() {
             self.report(error.to_string());

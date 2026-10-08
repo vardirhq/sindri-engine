@@ -5,6 +5,7 @@
 //! slice is 2D; a standalone 3D world now establishes the engine foundation
 //! with scene ownership; game/editor hosts, Decay and voxel proof remain separate.
 
+mod backend;
 mod contact2d;
 mod ground2d;
 mod grounded2d;
