@@ -211,18 +211,18 @@ it are done.
    Extended since with overlay placement and the `Canvas` preset; see the
    canvas-first section above.
 2. ~~**Error grouping in the console.**~~ Done: a repeat is counted against any
-   matching entry rather than only the one before it. What is left is grouping
-   by *cause* — forty entities failing for one missing script are still forty
-   lines, each counted correctly.
-3. **Gizmos for the shapes that have none** — colliders, cameras, effect radii.
-   Each one removes a round trip through Play.
-4. **Edit while playing, with a decision at Stop.** Built in the editor
+   matching entry rather than only the one before it, and what is wrong now
+   is grouped by cause, one message with every entity it reaches under it.
+3. ~~**Gizmos for the shapes that have none.**~~ Done: colliders in 2D and
+   3D, cameras, lights, joints, a character's footing and an effect's reach.
+   Only 2D colliders have handles; the rest are drawn.
+4. ~~**Edit while playing, with a decision at Stop.**~~ Done in the editor
    update: the largest single improvement to the loop.
-5. **Record and scrub a run.** Built in the editor update: the last two
+5. ~~**Record and scrub a run.**~~ Done in the editor update: the last two
    minutes of a run, scrubbed from the Timeline and played on from.
 
-Items 4 and 5 are scheduled in the editor update, `docs/editor-update.md`,
-on top of one runtime session shared with the shipped host.
+Items 2 to 5 were finished in the editor update, `docs/editor-update.md`, on
+top of one runtime session shared with the shipped host.
 
 ## Modes
 

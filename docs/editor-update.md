@@ -312,6 +312,15 @@ evicting caches between steps rather than at work the editor adds. The
 caching sub-items above were premised on finding 3's numbers; measured
 correctly, upkeep and extraction are under a millisecond on every project.
 
+Measured again after slices 5 to 7, with a run now recorded while it plays:
+the platformer's one-step game frame is 1.46 ms in the editor against
+1.09 ms standalone (1.33×), the gap split between the step (+0.11 ms),
+encoding (+0.13) and extraction (+0.06); Orbital's is 6.71 against 7.53
+(0.89×). Recording copies the world and the session once a second, which
+costs about a step and a half at that moment (0.77 ms for the platformer,
+6.7 ms for Orbital, against steps of 0.43 and 4.7 ms) and about 2% of a
+step on average.
+
 ## Build profiles
 
 Slice 2, measured the same way as the baselines: a clean build of the editor,

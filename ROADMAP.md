@@ -242,6 +242,7 @@ console line nobody reads.
 - [x] Add command-based undo/redo with transaction grouping
 - [x] Add 3D orbit, pan, and zoom camera controls, with a reset to the authored camera
 - [x] Add play, pause, stop, and reset-to-authored-state
+- [x] Play the shipped game's own session in the editor — `sindri-runtime` holds it, and the editor and every export (`sindri-player`) step the same one; edit while a scene plays and choose at Stop what to keep; record a run and scrub back through it (`docs/editor-update.md`)
 - [x] Add one sprite, one cube, and one camera editor fixture — `editor/assets/fixture.scene`; it holds two cameras rather than one, because a mesh needs a world camera and a sprite resolves its anchor against an overlay camera
 - [ ] Add protocol contract and save/reload integration tests (save, reload, and undo are covered end to end in `editor/tests/fixture_scene.rs`; the protocol contract waits on the protocol)
 
@@ -290,7 +291,7 @@ Exit gate: shared grid/gameplay logic supports both sprite isometric and orthogr
 
 - [ ] Implement minimal `sindri new/dev/build/test/editor` CLI
 - [ ] Add native and web project templates to `sindri new`
-- [ ] Add native packaging; the static-web export pipeline, content-hashed manifest, shared browser host, Pages deployment, and browser smoke suite are complete
+- [ ] Add native packaging; the static-web export pipeline, content-hashed manifest, shared browser host, Pages deployment, and browser smoke suite are complete, and `sindri-player <project>` plays any project natively, unpackaged
 - [x] Add curated examples with CI build and browser smoke coverage
 - [ ] Complete the documentation set: Editor/Decay and web-export guides exist; CLI/Decay and Rust extension guidance wait on those public surfaces
 - [ ] Document supported browsers, GPUs, OSes, and MSRV

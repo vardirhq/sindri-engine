@@ -134,6 +134,38 @@ speed is had instead.
 `scripts/capture-editor.sh` and CI build the plain dev profile, since what
 they need from the editor is a picture, not a frame rate.
 
+## Play is the shipped game
+
+Editor Play does not have a game loop of its own. `sindri-runtime` holds the
+game's `Session` — scripts, both physics solvers, the screen UI, effects,
+sequences, saves and scene switching — and `editor/src/play_session.rs`
+assembles one for the open scene exactly as `sindri-player`, the host every
+export ships, assembles it for a project. The editor's fixed-step clock steps
+it; `editor/tests/play_matches_the_build.rs` plays four games both ways with
+the same input and requires the same world.
+
+A run is the world the session steps, so an edit made while it plays has two
+places it could go. `EditorApp::apply_edit` decides: stopped, an edit lands in
+the scene's history; playing, it is applied to the running world and recorded
+against the run (`editor/src/run_edits.rs`). Stop restores the world Play
+began with and offers the run's edits back (`native/run_review.rs`), each as
+the component fields and transform parts it changed, and the kept ones become
+ordinary history entries. Every editing path goes through `apply_edit`, so no
+panel has to know whether a scene is playing.
+
+A session can be copied (`Session::checkpoint`, with the physics worlds'
+Rapier state copied in `sindri-physics/src/backend.rs`), and a copy given the
+same input steps exactly as the original. `editor/src/recording.rs` keeps each
+step's input and a copy of the world and session every second, bounded to the
+last two minutes; the Timeline's Run strip (`native/run_scrub.rs`) restores the
+copy at or before a step and replays the input to it.
+
+A frame does no work it does not need. An editor at rest asks for no frames
+and is woken by input or by the project watcher (`native/wake.rs`); a run's
+Game view is styled by Weave in place and undone after drawing rather than
+drawn from a copy of the world; and each view has its own extractor and
+renderer, so the Scene view beside a run does not rebuild the Game view's.
+
 ## Visual principles
 
 - Dense, calm workspace rather than default toolkit styling.
