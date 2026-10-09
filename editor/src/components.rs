@@ -90,6 +90,11 @@ const KNOWN: &[Known] = &[
         icon: icons::CAMERA,
     },
     Known {
+        type_name: "sindri.camera.orbit",
+        family: Family::Behaviour,
+        icon: icons::CAMERA,
+    },
+    Known {
         type_name: "sindri.light",
         family: Family::Rendering,
         icon: icons::LIGHT,
