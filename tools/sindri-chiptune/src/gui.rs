@@ -101,9 +101,9 @@ impl eframe::App for ComposerApp {
                     self.status = "Render worker disconnected.".into();
                     self.job = None;
                 }
-                Err(mpsc::TryRecvError::Empty) => {
-                    ui.ctx().request_repaint_after(std::time::Duration::from_millis(100))
-                }
+                Err(mpsc::TryRecvError::Empty) => ui
+                    .ctx()
+                    .request_repaint_after(std::time::Duration::from_millis(100)),
             }
         }
         ui.vertical(|ui| {
