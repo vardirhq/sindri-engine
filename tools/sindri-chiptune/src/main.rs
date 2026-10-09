@@ -143,6 +143,12 @@ fn render_samples(settings: &Settings, tracks: &[Vec<Note>; 3]) -> Vec<f32> {
     let samples = (seconds * f64::from(RATE)).round() as u32;
     let mut audio = Vec::with_capacity(samples as usize);
     // Cache current notes by advancing cursors, not searching all notes per sample.
+    let (bass_wave, arp_duty, lead_duty) = match settings.mood {
+        Mood::Mysterious => (true, 0.125, 0.25),
+        Mood::Hopeful => (true, 0.5, 0.5),
+        Mood::Tense => (false, 0.125, 0.125),
+        Mood::Melancholic => (true, 0.25, 0.5),
+    };
     let mut cursors = [0_usize; 3];
     for i in 0..samples {
         let t = f64::from(i) / f64::from(RATE);
@@ -157,9 +163,9 @@ fn render_samples(settings: &Settings, tracks: &[Vec<Note>; 3]) -> Vec<f32> {
             }
         }
         let channels = [
-            (voice(&tracks[0][cursors[0]..], t, 0.5, true, step), 0.35),
-            (voice(&tracks[1][cursors[1]..], t, 0.125, false, step), 0.22),
-            (voice(&tracks[2][cursors[2]..], t, 0.25, false, step), 0.29),
+            (voice(&tracks[0][cursors[0]..], t, 0.5, bass_wave, step), 0.35),
+            (voice(&tracks[1][cursors[1]..], t, arp_duty, false, step), 0.22),
+            (voice(&tracks[2][cursors[2]..], t, lead_duty, false, step), 0.29),
         ];
         let mixed: f64 = channels.iter().map(|(v, gain)| v * gain).sum::<f64>()
             + noise(settings.seed, t, step, settings.energy);
