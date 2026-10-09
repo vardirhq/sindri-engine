@@ -1,0 +1,16 @@
+[package]
+name = "sindri-chiptune"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+
+[lints]
+workspace = true
+
+[dependencies]
+eframe.workspace = true
+
+# Standalone audio preview; no dependency on Sindri platform or runtime.
+[target.'cfg(not(target_arch = "wasm32"))'.dependencies]
+rodio = { version = "0.22.2", default-features = false, features = ["playback"] }
