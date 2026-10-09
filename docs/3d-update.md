@@ -61,8 +61,9 @@ Order:
   remain pending; Decay currently has no quaternion or Vec4 value type.
 - Slice 6 also has explicit perspective FOV control and `sindri.camera.orbit`
   with world-space follow, aiming, smoothing and sight-line collision pull-in.
-  The Orbit Camera Lab runs to its goal through Session; editor/browser/game
-  proof and mouse look remain pending.
+  The Orbit Camera Lab runs to its goal through Session and exported Chromium;
+  native and WebGPU captures show pull-in and recovery. Editor/game proof and
+  mouse look remain pending.
 - Then the rest of slice 6, which unblocks moving through 3D (Low Tide's
   crawler and crew included).
 - Then slices 2 to 4 (measurement, instancing and one lit path, lights),

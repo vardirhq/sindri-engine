@@ -2592,7 +2592,12 @@ controls and gizmos remain absent. See `docs/cameras.md`.
 `examples/orbit` is an authored feature project with a walker, raised goal and
 blocking wall. Decay changes the perspective FOV and orbit angles; the shared
 runtime follows, aims, pulls in against the wall and recovers after the wall
-is disabled. Its project test opens, compiles and runs to the goal. Scene
+is disabled. Its project test opens, compiles and runs to the goal. Native and
+exported Chromium captures were visually inspected before and after recovery;
+the browser fetched the exported assets and reported the scripted goal without
+runtime or GPU errors. The flat-color example produces fourteen screenshot
+colors, so its local smoke used an eight-color minimum plus blue-walker and
+gold-goal pixel checks instead of the generic sixteen-color blank-frame gate. Scene
 regressions cover immediate pull-in, smoothed recovery, sensor/layer/self
 filtering, rotated and scaled parents, Z locks, invalid settings and payload
 preservation. The schema supplies generic inspector field meanings, but no

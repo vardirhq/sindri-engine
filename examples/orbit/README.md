@@ -18,7 +18,9 @@ shared runtime handles following, smoothing, aiming and obstruction queries.
 The floor is on another collision layer, and the target's collider is excluded.
 
 The project regression opens the scene, compiles all scripts and plays to its
-goal while checking camera pull-in, recovery, facing and the live FOV. This is
-feature evidence. Explorer's model-based game, mouse look and browser proof
+goal while checking camera pull-in, recovery, facing and the live FOV. Native
+and exported WebGPU Chromium captures show the blocked and recovered camera;
+the browser run reaches the scripted goal. This is feature evidence.
+Explorer's model-based game, mouse look and browser proof
 remain pending. Collision uses one sight-line ray, not a camera-volume sweep;
 collider poses come from the last physics phase.
