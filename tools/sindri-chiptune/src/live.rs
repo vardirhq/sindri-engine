@@ -1,7 +1,11 @@
 //! Continuous sample source: the audio thread owns its timeline and synth state.
 use super::{Note, RATE, Settings, STEPS, voice, noise};
 use rodio::Source;
-use std::{num::NonZero, sync::{Arc, atomic::{AtomicU64, Ordering}, mpsc::{self, Sender, Receiver}}, time::Duration};
+use std::{
+    num::NonZero,
+    sync::{Arc, atomic::{AtomicU64, Ordering}, mpsc::{self, Receiver, Sender}},
+    time::Duration,
+};
 
 pub(super) enum Command {
     Update(Settings),
@@ -37,6 +41,8 @@ impl LiveSource {
         };
         (source, transport)
     }
+    // Song length and seek position are bounded to minutes at 44.1 kHz.
+    #[allow(clippy::cast_possible_truncation, clippy::cast_sign_loss)]
     fn refresh(&mut self) {
         while let Ok(command) = self.rx.try_recv() {
             match command {
@@ -48,7 +54,7 @@ impl LiveSource {
                     self.cursors = [0; 3];
                 }
                 Command::Seek(bar) => {
-                    self.sample = (bar.min(31) as f64 * 16.0 * self.step() * f64::from(RATE)) as u64;
+                    self.sample = (f64::from(u32::try_from(bar.min(31)).expect("bar")) * 16.0 * self.step() * f64::from(RATE)) as u64;
                     self.cursors = [0; 3];
                 }
                 Command::Loop(value) => self.looped = value,
@@ -56,18 +62,20 @@ impl LiveSource {
         }
     }
     fn step(&self) -> f64 { 60.0 / self.settings.bpm / 4.0 }
+    // The timeline is always below u32::MAX samples; conversion retains precision.
+    #[allow(clippy::cast_possible_truncation, clippy::cast_sign_loss)]
     fn fill(&mut self) {
         self.refresh();
         let step = self.step();
-        let total = (STEPS as f64 * step * f64::from(RATE)) as u64;
+        let total = (f64::from(u32::try_from(STEPS).expect("step count")) * step * f64::from(RATE)) as u64;
         for sample in &mut self.buffer {
             if self.sample >= total {
                 if self.looped { self.sample = 0; self.cursors = [0; 3]; } else { *sample = 0.0; continue; }
             }
-            let t = self.sample as f64 / f64::from(RATE);
+            let t = f64::from(u32::try_from(self.sample).expect("short composition")) / f64::from(RATE);
             for (cursor, notes) in self.cursors.iter_mut().zip(&self.tracks) {
                 while *cursor < notes.len()
-                    && (notes[*cursor].start + notes[*cursor].len) as f64 * step <= t {
+                    && f64::from(u32::try_from(notes[*cursor].start + notes[*cursor].len).expect("note step")) * step <= t {
                     *cursor += 1;
                 }
             }
