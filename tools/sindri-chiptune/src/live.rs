@@ -1,9 +1,13 @@
 //! Continuous sample source: the audio thread owns its timeline and synth state.
-use super::{Note, RATE, Settings, STEPS, voice, noise};
+use super::{Note, RATE, STEPS, Settings, noise, voice};
 use rodio::Source;
 use std::{
     num::NonZero,
-    sync::{Arc, atomic::{AtomicU64, Ordering}, mpsc::{self, Receiver, Sender}},
+    sync::{
+        Arc,
+        atomic::{AtomicU64, Ordering},
+        mpsc::{self, Receiver, Sender},
+    },
     time::Duration,
 };
 
@@ -34,10 +38,20 @@ impl LiveSource {
     pub(super) fn new(settings: Settings, tracks: [Vec<Note>; 3]) -> (Self, Transport) {
         let (tx, rx) = mpsc::channel();
         let position = Arc::new(AtomicU64::new(0));
-        let transport = Transport { tx, position: Arc::clone(&position) };
+        let transport = Transport {
+            tx,
+            position: Arc::clone(&position),
+        };
         let source = Self {
-            settings, tracks, rx, position, sample: 0, looped: true,
-            buffer: [0.0; 256], offset: 256, cursors: [0; 3],
+            settings,
+            tracks,
+            rx,
+            position,
+            sample: 0,
+            looped: true,
+            buffer: [0.0; 256],
+            offset: 256,
+            cursors: [0; 3],
         };
         (source, transport)
     }
@@ -54,28 +68,46 @@ impl LiveSource {
                     self.cursors = [0; 3];
                 }
                 Command::Seek(bar) => {
-                    self.sample = (f64::from(u32::try_from(bar.min(31)).expect("bar")) * 16.0 * self.step() * f64::from(RATE)) as u64;
+                    self.sample = (f64::from(u32::try_from(bar.min(31)).expect("bar"))
+                        * 16.0
+                        * self.step()
+                        * f64::from(RATE)) as u64;
                     self.cursors = [0; 3];
                 }
                 Command::Loop(value) => self.looped = value,
             }
         }
     }
-    fn step(&self) -> f64 { 60.0 / self.settings.bpm / 4.0 }
+    fn step(&self) -> f64 {
+        60.0 / self.settings.bpm / 4.0
+    }
     // The timeline is always below u32::MAX samples; conversion retains precision.
     #[allow(clippy::cast_possible_truncation, clippy::cast_sign_loss)]
     fn fill(&mut self) {
         self.refresh();
         let step = self.step();
-        let total = (f64::from(u32::try_from(STEPS).expect("step count")) * step * f64::from(RATE)) as u64;
+        let total =
+            (f64::from(u32::try_from(STEPS).expect("step count")) * step * f64::from(RATE)) as u64;
         for sample in &mut self.buffer {
             if self.sample >= total {
-                if self.looped { self.sample = 0; self.cursors = [0; 3]; } else { *sample = 0.0; continue; }
+                if self.looped {
+                    self.sample = 0;
+                    self.cursors = [0; 3];
+                } else {
+                    *sample = 0.0;
+                    continue;
+                }
             }
-            let t = f64::from(u32::try_from(self.sample).expect("short composition")) / f64::from(RATE);
+            let t =
+                f64::from(u32::try_from(self.sample).expect("short composition")) / f64::from(RATE);
             for (cursor, notes) in self.cursors.iter_mut().zip(&self.tracks) {
                 while *cursor < notes.len()
-                    && f64::from(u32::try_from(notes[*cursor].start + notes[*cursor].len).expect("note step")) * step <= t {
+                    && f64::from(
+                        u32::try_from(notes[*cursor].start + notes[*cursor].len)
+                            .expect("note step"),
+                    ) * step
+                        <= t
+                {
                     *cursor += 1;
                 }
             }
@@ -83,14 +115,26 @@ impl LiveSource {
             for channel in 0..3 {
                 if self.settings.rack.audible(channel) {
                     let sound = self.settings.rack.tracks[channel];
-                    mixed += voice(&self.tracks[channel][self.cursors[channel]..], t, step, sound)
-                        * f64::from(sound.volume) * 0.45;
+                    mixed += voice(
+                        &self.tracks[channel][self.cursors[channel]..],
+                        t,
+                        step,
+                        sound,
+                    ) * f64::from(sound.volume)
+                        * 0.45;
                 }
             }
             if self.settings.rack.audible(3) {
                 let sound = self.settings.rack.tracks[3];
-                mixed += noise(self.settings.seed, t, step, self.settings.energy, self.settings.mood, sound.preset)
-                    * f64::from(sound.volume) * 0.55;
+                mixed += noise(
+                    self.settings.seed,
+                    t,
+                    step,
+                    self.settings.energy,
+                    self.settings.mood,
+                    sound.preset,
+                ) * f64::from(sound.volume)
+                    * 0.55;
             }
             *sample = mixed.clamp(-1.0, 1.0) as f32;
             self.sample += 1;
@@ -102,17 +146,27 @@ impl LiveSource {
 impl Iterator for LiveSource {
     type Item = f32;
     fn next(&mut self) -> Option<Self::Item> {
-        if self.offset == self.buffer.len() { self.fill(); }
+        if self.offset == self.buffer.len() {
+            self.fill();
+        }
         let sample = self.buffer[self.offset];
         self.offset += 1;
         Some(sample)
     }
 }
 impl Source for LiveSource {
-    fn current_span_len(&self) -> Option<usize> { None }
-    fn channels(&self) -> NonZero<u16> { NonZero::new(1).expect("mono") }
-    fn sample_rate(&self) -> NonZero<u32> { NonZero::new(RATE).expect("rate") }
-    fn total_duration(&self) -> Option<Duration> { None }
+    fn current_span_len(&self) -> Option<usize> {
+        None
+    }
+    fn channels(&self) -> NonZero<u16> {
+        NonZero::new(1).expect("mono")
+    }
+    fn sample_rate(&self) -> NonZero<u32> {
+        NonZero::new(RATE).expect("rate")
+    }
+    fn total_duration(&self) -> Option<Duration> {
+        None
+    }
 }
 
 #[cfg(test)]
@@ -123,12 +177,16 @@ mod tests {
         let settings = Settings::default();
         let notes = super::super::compose_with(&settings);
         let (mut source, transport) = LiveSource::new(settings.clone(), notes);
-        for _ in 0..1024 { source.next(); }
+        for _ in 0..1024 {
+            source.next();
+        }
         let before = source.sample;
         let mut changed = settings;
         changed.rack.tracks[2].volume = 0.0;
         transport.tx.send(Command::Update(changed)).expect("send");
-        for _ in 0..512 { source.next(); }
+        for _ in 0..512 {
+            source.next();
+        }
         assert!(source.sample > before);
     }
 }

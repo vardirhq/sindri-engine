@@ -3,7 +3,10 @@ use super::instruments::Preset;
 use super::live::{Command, LiveSource, Transport};
 use super::{Mood, Settings, compose_with, render_with};
 use eframe::egui::{self, Color32, RichText};
-use rodio::{Player, stream::{DeviceSinkBuilder, MixerDeviceSink}};
+use rodio::{
+    Player,
+    stream::{DeviceSinkBuilder, MixerDeviceSink},
+};
 use std::{
     error::Error,
     sync::mpsc::{self, Receiver},
@@ -89,7 +92,9 @@ impl ComposerApp {
         }
     }
     fn stop(&mut self) {
-        if let Some(player) = self.sink.take() { player.stop(); }
+        if let Some(player) = self.sink.take() {
+            player.stop();
+        }
         self.stream = None;
         self.transport = None;
         self.paused = false;
@@ -100,7 +105,8 @@ impl ComposerApp {
             let mut playing = self.settings.clone();
             playing.seed = self.active_seed;
             let _ = transport.tx.send(Command::Update(playing));
-            ui.ctx().request_repaint_after(std::time::Duration::from_millis(70));
+            ui.ctx()
+                .request_repaint_after(std::time::Duration::from_millis(70));
         }
     }
     fn poll(&mut self, ui: &egui::Ui) {
@@ -267,68 +273,91 @@ impl ComposerApp {
         });
     }
     fn transport_controls(&mut self, ui: &mut egui::Ui) {
-
-            ui.horizontal(|ui| {
+        ui.horizontal(|ui| {
+            if ui
+                .add_enabled(true, egui::Button::new("▶  Play / Switch A"))
+                .clicked()
+            {
+                self.start_live(self.settings.seed);
+            }
+            if ui
+                .add_enabled(true, egui::Button::new("▶  Switch B"))
+                .clicked()
+            {
+                self.start_live(self.settings.seed.wrapping_add(1));
+            }
+            if ui
+                .add_enabled(self.job.is_none(), egui::Button::new("Use B as A"))
+                .clicked()
+            {
+                self.settings.seed = self.settings.seed.wrapping_add(1);
+                self.status = "Candidate B is now A. Export uses the selected seed.".into();
+            }
+            if ui
+                .add_enabled(self.sink.is_some(), egui::Button::new("■  Stop"))
+                .clicked()
+            {
+                self.stop();
+            }
+            if ui
+                .add_enabled(
+                    self.job.is_none() && !self.output.trim().is_empty(),
+                    egui::Button::new("↓  Export WAV"),
+                )
+                .clicked()
+            {
+                self.export(self.settings.seed);
+            }
+        });
+        ui.horizontal(|ui| {
+            if let Some(player) = &self.sink {
                 if ui
-                    .add_enabled(true, egui::Button::new("▶  Play / Switch A"))
+                    .button(if self.paused {
+                        "▶ Resume"
+                    } else {
+                        "Ⅱ Pause"
+                    })
                     .clicked()
                 {
-                    self.start_live(self.settings.seed);
-                }
-                if ui
-                    .add_enabled(true, egui::Button::new("▶  Switch B"))
-                    .clicked()
-                {
-                    self.start_live(self.settings.seed.wrapping_add(1));
-                }
-                if ui
-                    .add_enabled(self.job.is_none(), egui::Button::new("Use B as A"))
-                    .clicked()
-                {
-                    self.settings.seed = self.settings.seed.wrapping_add(1);
-                    self.status = "Candidate B is now A. Export uses the selected seed.".into();
-                }
-                if ui
-                    .add_enabled(self.sink.is_some(), egui::Button::new("■  Stop"))
-                    .clicked()
-                {
-                    self.stop();
-                }
-                if ui
-                    .add_enabled(
-                        self.job.is_none() && !self.output.trim().is_empty(),
-                        egui::Button::new("↓  Export WAV"),
-                    )
-                    .clicked()
-                {
-                    self.export(self.settings.seed);
-                }
-            });
-            ui.horizontal(|ui| {
-                if let Some(player) = &self.sink {
-                    if ui.button(if self.paused { "▶ Resume" } else { "Ⅱ Pause" }).clicked() {
-                        if self.paused { player.play(); } else { player.pause(); }
-                        self.paused = !self.paused;
+                    if self.paused {
+                        player.play();
+                    } else {
+                        player.pause();
                     }
+                    self.paused = !self.paused;
                 }
-                if ui.checkbox(&mut self.looping, "Loop").changed() {
-                    if let Some(transport) = &self.transport { let _ = transport.tx.send(Command::Loop(self.looping)); }
-                }
+            }
+            if ui.checkbox(&mut self.looping, "Loop").changed() {
                 if let Some(transport) = &self.transport {
-                    let samples = transport.position.load(std::sync::atomic::Ordering::Relaxed);
-                    let bar = (samples as f64 / (f64::from(super::RATE) * 60.0 / self.settings.bpm * 4.0)) as usize;
-                    let mut bar_control = bar.min(31);
-                    if ui.add(egui::Slider::new(&mut bar_control, 0..=31).text("Bar")).changed() {
-                        let _ = transport.tx.send(Command::Seek(bar_control));
-                    }
-                    if ui.button("↤ Beginning").clicked() { let _ = transport.tx.send(Command::Seek(0)); }
-                    if ui.button("↦ Theme").clicked() { let _ = transport.tx.send(Command::Seek(8)); }
+                    let _ = transport.tx.send(Command::Loop(self.looping));
                 }
-            });
-            ui.horizontal(|ui| {
-                ui.label("Save as");
-                ui.text_edit_singleline(&mut self.output);
-            });
+            }
+            if let Some(transport) = &self.transport {
+                let samples = transport
+                    .position
+                    .load(std::sync::atomic::Ordering::Relaxed);
+                let bar = (samples as f64
+                    / (f64::from(super::RATE) * 60.0 / self.settings.bpm * 4.0))
+                    as usize;
+                let mut bar_control = bar.min(31);
+                if ui
+                    .add(egui::Slider::new(&mut bar_control, 0..=31).text("Bar"))
+                    .changed()
+                {
+                    let _ = transport.tx.send(Command::Seek(bar_control));
+                }
+                if ui.button("↤ Beginning").clicked() {
+                    let _ = transport.tx.send(Command::Seek(0));
+                }
+                if ui.button("↦ Theme").clicked() {
+                    let _ = transport.tx.send(Command::Seek(8));
+                }
+            }
+        });
+        ui.horizontal(|ui| {
+            ui.label("Save as");
+            ui.text_edit_singleline(&mut self.output);
+        });
     }
     fn instrument_rack(&mut self, ui: &mut egui::Ui) {
         ui.heading("Instrument rack");
@@ -456,13 +485,24 @@ impl eframe::App for ComposerApp {
                     .color(Color32::from_gray(170)),
             );
             ui.add_space(16.0);
-            egui::Frame::group(ui.style()).fill(Color32::from_rgb(20, 35, 49)).inner_margin(14.0).show(ui, |ui| {
-                ui.label(RichText::new("LIVE TRANSPORT").strong().color(Color32::from_rgb(114, 206, 203)));
-                self.transport_controls(ui);
-                ui.label(RichText::new(&self.status).color(Color32::from_rgb(120, 200, 204)));
-            });
+            egui::Frame::group(ui.style())
+                .fill(Color32::from_rgb(20, 35, 49))
+                .inner_margin(14.0)
+                .show(ui, |ui| {
+                    ui.label(
+                        RichText::new("LIVE TRANSPORT")
+                            .strong()
+                            .color(Color32::from_rgb(114, 206, 203)),
+                    );
+                    self.transport_controls(ui);
+                    ui.label(RichText::new(&self.status).color(Color32::from_rgb(120, 200, 204)));
+                });
             ui.add_space(16.0);
-            ui.label(RichText::new("01   COMPOSITION & ARRANGEMENT").strong().color(Color32::from_rgb(114, 206, 203)));
+            ui.label(
+                RichText::new("01   COMPOSITION & ARRANGEMENT")
+                    .strong()
+                    .color(Color32::from_rgb(114, 206, 203)),
+            );
             ui.add_space(6.0);
             ui.columns(2, |columns| {
                 egui::Frame::group(columns[0].style())
@@ -471,10 +511,18 @@ impl eframe::App for ComposerApp {
                     .show(&mut columns[1], |ui| self.arrangement(ui));
             });
             ui.add_space(14.0);
-            ui.label(RichText::new("02   A / B COMPOSITION TIMELINE").strong().color(Color32::from_rgb(114, 206, 203)));
+            ui.label(
+                RichText::new("02   A / B COMPOSITION TIMELINE")
+                    .strong()
+                    .color(Color32::from_rgb(114, 206, 203)),
+            );
             self.compare(ui);
             ui.add_space(14.0);
-            ui.label(RichText::new("03   LIVE FOUR-CHANNEL MIXER").strong().color(Color32::from_rgb(114, 206, 203)));
+            ui.label(
+                RichText::new("03   LIVE FOUR-CHANNEL MIXER")
+                    .strong()
+                    .color(Color32::from_rgb(114, 206, 203)),
+            );
             self.instrument_rack(ui);
             ui.add_space(10.0);
             ui.separator();
