@@ -1,45 +1,51 @@
-# Sindri Chiptune Lab (Standalone Prototype)
+# Sindri Chiptune Lab
 
-Run from the repository root:
+A standalone, experimental music generator. Nothing in the Sindri editor,
+runtime, Decay, or player depends on this binary.
+
+## Launch
 
 ```sh
 cargo run -p sindri-chiptune
 ```
 
-This opens a standalone egui desktop window with mood, key, tempo, energy,
-seed and output WAV controls. **Generate WAV** renders in a worker thread;
-**Open WAV** launches the result in your OS's default audio application.
-There is no editor integration or dependency on Sindri's runtime/audio engine.
+The desktop UI exposes mood, key, tempo, energy, and seed. **Preview**
+composes and renders in memory, then plays directly through the default
+audio device using Rodio. No WAV file is created during preview.
+**Stop** halts playback. **Export WAV** writes a mono 44.1 kHz PCM
+file only when requested. Preview rendering runs on a background thread.
 
-Headless CLI remains available:
+**New variation** advances the deterministic seed. Changing seed now
+changes motif contour, rhythmic placement, arpeggio order, bass variation,
+and note selection. Mood changes chord progression and harmonic color;
+energy changes note densities and dynamics; tempo and key remain musical
+controls. The four-section 32-bar arrangement is still fixed, and the
+music is still an experiment, not yet a full composition engine.
+
+The CLI remains usable:
 
 ```sh
 cargo run -p sindri-chiptune -- --seed 42 --output chiptune.wav
 cargo run -p sindri-chiptune -- --seed 43 --bpm 140 --key 5 --energy 0.7 --output variation.wav
 ```
 
-Key is a pitch class from 0 (C) through 11 (B); energy is 0.0–1.0.
-The CLI defaults to the original mysterious D-minor-inspired arrangement.
-Mood selection and some extra expressive controls are currently GUI-only.
+CLI key is a pitch class from 0 (C) to 11 (B). Energy is 0.0 to 1.0.
+The desktop app requires an audio device for preview. WAV export works
+without one. On Linux the Rodio backend may require ALSA development
+libraries to compile, as with the engine's existing native audio stack.
 
-Produces a mono 44.1 kHz 16-bit PCM WAV (32 bars, around 65 seconds at
-118 BPM). The fixed four-section structure uses three melodic channels
-(bass, arpeggios, melody) and procedural noise percussion.
+Composition, sample generation, and UI live in separate functions so they
+can be extracted into libraries if the experiment proves worthwhile.
+The standalone UI is not plugged into Sindri.
 
-This is a **listening and experimentation prototype**, not a full
-AI composer or a true Game Boy hardware emulator. Different moods change
-chord order, while tempo, key, energy and seed influence generated output.
-Some seed changes are intentionally subtle; sophisticated motif search,
-independent track regeneration, sound design and dedicated music playback
-controls remain future work.
-
-The program reuses only the repository's existing eframe dependency.
-No Autotracker source code is copied.
-
-## Quality gates
+## Checks
 
 ```sh
 cargo fmt --all --check
 RUSTFLAGS="-D warnings" cargo check -p sindri-chiptune --all-targets --all-features
+cargo clippy -p sindri-chiptune --all-targets --all-features -- -D warnings
 cargo test -p sindri-chiptune --all-features
 ```
+
+The core's tests verify determinism, note bounds, and that seed,
+mood, and energy materially change generated note data.
