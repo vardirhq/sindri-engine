@@ -33,6 +33,32 @@ signature. If you cannot demonstrate an entry, correct it or delete it.
 
 ## Engine
 
+### External static GLB model assets
+
+`ModelAssetDecoder` parses self-contained binary GLB into reusable CPU geometry,
+node local matrices/children, materials and embedded base-color textures. The
+tiny deterministic fixture exercises both index widths, multiple primitives,
+mesh reuse, non-indexed triangles and malformed/unsupported diagnostics.
+`AssetLoader` reuse is covered. A separate renderer resource and GPU path retain
+normal/UV geometry, hierarchy, textures and materials, composing node and entity
+matrices with inverse-transpose normals. GPU readback coverage checks colors,
+depth and upload reuse; renderer resource tests check malformed data. Scene
+`ModelComponent` references validate asset paths and extract shared resources
+with entity world transforms. Disabled models are discovered without drawing;
+missing bindings name the asset. The public facade converts decoded models
+without cross-coupling foundational crates. The editor catalogue assigns the
+registered component an existing icon/family; imported-model authoring is
+still deferred. Model manifests and export retain original GLB bytes and discover
+scene/prefab
+references, including inactive entities. Native project capture and the WebGPU
+project host prepare/bind models once through the existing asset queue and
+apply scene lighting. The exact Low Tide cutaway crawler was visually inspected
+in both runtimes at 1200 × 1000, correctly oriented and visibly recognizable.
+Exported bytes match the source hash. Model shadows, full editor authoring,
+animation and skinning remain deferred. This external proof does not claim
+the repository's in-tree game completion surface.
+See [imported models](imported-models.md).
+
 ### Lifecycle and time
 
 Legal state transitions are enforced rather than assumed: an engine can be
@@ -2072,7 +2098,9 @@ settings gear.
   `docs/tile-system-2.md`.
 - World-space text, rich spans, and font fallback are missing. Screen text has
   authored alignment and wrapping, including Weave-controlled wrapping
-- **One mesh primitive: `Cube`.** No quad, sphere, or glTF import
+- Built-in 3D geometry has cube and inline surface meshes; external static GLB
+  assets now render. Additional generated primitives and glTF animation/skinning
+  remain open.
 - The 3D runtime has native simulation, scene synchronization/command tests,
   shared game/editor host wiring and primitive browser motion/landing evidence.
   Native inspector/Play interaction, shared-session/browser spawn controls and occupied
@@ -2672,9 +2700,9 @@ as evidence of a capability.
 `tools/isometric-baker` bakes a 3D model into an ordinary sprite sheet and the
 `.sheet` beside it, offline. Its contract is `docs/isometric-baker.md`.
 
-It is emphatically **not** runtime 3D and does not imply any. The engine still
-has one mesh primitive, no glTF import, no material authoring and no lighting
-system, exactly as the sections above say. Nothing the engine, editor, native
+The baker produces sprites offline. Runtime 3D separately supports cube/surface
+meshes, static external GLB assets and scene lighting; those capabilities are
+exercised by their runtime paths rather than inferred from the baker. Nothing the engine, editor, native
 game or browser export builds depends on the tool: the assets it produces are
 ordinary PNGs and sheet documents, and by the time a game loads one there is
 nothing left to say it was baked.

@@ -14,6 +14,7 @@ use crate::{
 const SHADER: &str = include_str!("textured_cube.wgsl");
 
 mod geometry;
+mod model;
 mod shadow_pass;
 mod uniform;
 
@@ -119,6 +120,7 @@ fn create_pipeline(
 
 #[derive(Debug)]
 pub struct TexturedCubeRenderer {
+    models: crate::model::ModelRenderer,
     pipeline: wgpu::RenderPipeline,
     bind_group_layout: wgpu::BindGroupLayout,
     batches: Vec<MeshBatch>,
@@ -163,6 +165,7 @@ impl TexturedCubeRenderer {
         let shadow_map = ShadowMap::new(device, ShadowSettings::default().map_size);
         let (shadow_bind_group_layout, shadow_pipeline) = create_shadow_pipeline(device);
         Self {
+            models: crate::model::ModelRenderer::new(device, target_format),
             pipeline,
             bind_group_layout,
             batches: Vec::new(),
@@ -216,6 +219,7 @@ impl TexturedCubeRenderer {
     /// Makes the reusable draw slots available for a new GPU submission.
     pub fn begin_submission(&mut self) {
         self.next = 0;
+        self.models.begin_submission();
     }
 
     fn reserve(&mut self, device: &wgpu::Device) -> usize {

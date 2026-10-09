@@ -11,6 +11,8 @@ mod effects;
 mod frustum;
 mod meanings;
 mod mesh;
+mod model;
+pub use model::referenced_models;
 mod physics3d_registry;
 mod physics_registry;
 pub(crate) mod registry;
@@ -84,6 +86,7 @@ fn environment_clear(environment: Option<crate::EnvironmentComponent>) -> ClearO
 #[derive(Clone, Debug)]
 pub struct SceneExtractor {
     components: ComponentSchemaRegistry,
+    models: BTreeMap<sindri_core::AssetId, std::sync::Arc<sindri_render::RenderModel>>,
     /// Tile volumes already resolved into the faces they draw.
     ///
     /// An island is thousands of faces that do not change while the player
@@ -120,6 +123,10 @@ fn transform_matrix(transform: Transform3D) -> Mat4 {
 
 #[derive(Debug, Error)]
 pub enum SceneExtractError {
+    #[error("model asset '{0}' is not loaded and bound")]
+    MissingModel(sindri_core::AssetId),
+    #[error(transparent)]
+    Model(#[from] sindri_render::ModelRenderError),
     #[error(transparent)]
     Components(#[from] ComponentRegistryError),
     #[error(transparent)]
@@ -204,6 +211,7 @@ impl SceneExtractor {
     pub fn new() -> Result<Self, SceneExtractError> {
         Ok(Self {
             components: builtin_components()?,
+            models: BTreeMap::new(),
             baked_volumes: RefCell::default(),
             voxel_worlds: voxel_world::VoxelWorldCache::default(),
             voxel_maps: voxel_map::VoxelMapCache::default(),
@@ -307,6 +315,7 @@ impl SceneExtractor {
         self.begin_frame();
         let mut frame = ExtractedFrame::new(viewport, environment_clear(self.environment(world)?));
         self.push_meshes(world, &cameras, textures, &mut frame)?;
+        self.push_models(world, &cameras, &mut frame)?;
         self.push_voxel_worlds(world, &cameras, textures, tile_sets, seconds, &mut frame)?;
         let resting = SpriteAnimations::new();
         let animations = animations.unwrap_or(&resting);
@@ -369,6 +378,7 @@ impl SceneExtractor {
         self.begin_frame();
         let mut frame = ExtractedFrame::new(viewport, environment_clear(self.environment(world)?));
         self.push_meshes(world, &cameras, textures, &mut frame)?;
+        self.push_models(world, &cameras, &mut frame)?;
         self.push_voxel_worlds(world, &cameras, textures, tile_sets, seconds, &mut frame)?;
         let resting = SpriteAnimations::new();
         let animations = animations.unwrap_or(&resting);

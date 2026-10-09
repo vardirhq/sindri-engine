@@ -43,6 +43,8 @@ pub enum PlayerError {
     #[error(transparent)]
     Texture(#[from] TextureError),
     #[error(transparent)]
+    Model(#[from] sindri_render::ModelRenderError),
+    #[error(transparent)]
     Animation(#[from] sindri_scene::AnimationError),
     #[error(transparent)]
     Json(#[from] sindri_core::SceneJsonError),

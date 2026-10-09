@@ -1,5 +1,7 @@
 # Changelog
 
+- Load imported models everywhere a project plays. `sindri-player` loads `.glb` models in the browser and natively. The capture and benchmark tools bind them and light them as authored. The editor loads, binds and hot-reloads them for the Scene and Game views, and draws the rest of a scene while one loads or fails to decode. A project that keeps its assets beside `sindri.toml`, as Low Tide does, plays as it exports.
+
 - Every game steps faster. The engine no longer re-decodes components, lays out an unchanged screen, re-checks script text or steps an empty 3D world every fixed step: components are decoded once per change (`sindri_core::Decoded`), a script setting a value to what it already is no longer counts as an edit, and Decay finds a local without hashing its name. The platformer's step takes about half the work it did, and Orbital's standalone step went from 1.13 to 0.84 ms.
 
 - The editor's remaining gaps from its audits are closed. Right-click menus on the hierarchy's and project browser's empty space, a component's heading, a field's name, the Scene view and console lines; copy and paste of entities (Ctrl+C, Ctrl+V, Paste as child, Paste here) and of a component's values; Move to top level. The Scene view draws 2D joints (a click selects one), 3D colliders, a selected character's slope, step and snap, and a selected effect burst's reach. Current problems are grouped by cause, naming the entities under each, and counted by cause. Angles are edited in degrees; Camera Behaviour's follow and confine are added and removed in the inspector, with an entity picker for the target; a camera's fit is a choice; and a component's fields are listed in the order its type declares them. Components can declare an optional field (`describe_optional`), whose fields can then be described.
@@ -17,6 +19,30 @@
 - Every host binds the engine's own block set and textures. `builtin:blocks` was only ever bound by the editor, so a project whose voxel world named it failed in the exported browser build and in `project-capture`.
 
 - The Profiler times the editor's whole frame, not only Play's steps: upkeep, presentation, extraction, encoding, the panels, egui's painting and the wait for the next frame each have a phase, and a toolbar toggle records frames while editing. `sindri-editor <project> --benchmark <report.json>` measures a project at rest and in Play and exits; `project-benchmark` measures the same project as the browser host plays it, and `scripts/frame-benchmark.py` compares the two.
+- Load external model references through native/browser project asset queues,
+  export original validated GLB bytes as model assets, and apply authored scene
+  lighting in both hosts. The real Low Tide cutaway crawler is visually verified
+  in native offscreen and WebGPU runtimes. Imported-model shadows and full editor
+  model UX remain deferred.
+
+- Assign the registered imported-model component its existing rendering family
+  and mesh icon so the editor component catalogue remains complete. Model
+  authoring and loading UI remain deferred.
+
+- Add `sindri.model` external asset references, shared scene bindings, inactive
+  reference discovery and world-transform extraction. The public facade prepares
+  decoded assets without coupling scene/render to assets. Project hosts and
+  export packaging remain pending.
+
+- Add an independent imported-model GPU path with retained hierarchy, normals,
+  UVs, 16/32-bit indices, base-color textures, metallic/roughness lighting,
+  depth testing, mirrored transforms and shared GPU residency. Scene and project
+  host integration remains in progress.
+
+- Add CPU-side static GLB decoding with retained hierarchy, reusable meshes,
+  normals/UVs, 16/32-bit indices, material factors, embedded base-color images,
+  and asset-aware malformed/unsupported diagnostics. Runtime model rendering
+  and scene/export integration remain pending.
 
 - The `cube` mesh primitive is now a unit cube, one unit across like a default Collider 3D box, so a cube mesh and its collider match at any scale. It used to be two units across, which drew 3D bodies twice the size of their colliders. Editor picking follows the new size; the cube example and the editor fixture are drawn at scale 2 to look as they did.
 

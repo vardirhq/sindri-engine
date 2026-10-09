@@ -7,8 +7,8 @@ use std::{
 };
 
 use sindri_assets::{
-    AssetLoader, AssetWatch, FileSystemAssetSource, FontAssetDecoder, SpriteSheetAssetDecoder,
-    TextureAssetDecoder, TileSetAssetDecoder,
+    AssetLoader, AssetWatch, FileSystemAssetSource, FontAssetDecoder, ModelAssetDecoder,
+    SpriteSheetAssetDecoder, TextureAssetDecoder, TileSetAssetDecoder,
 };
 use sindri_core::{AssetId, SpriteRef, World, sheet_id_for};
 use sindri_render::{TextRenderer, Texture2D, TextureRegistry};
@@ -86,6 +86,17 @@ impl SceneTextures {
             tile_sets: root.as_deref().and_then(|root| {
                 AssetLoader::new(FileSystemAssetSource::new(root), QUEUE, TileSetAssetDecoder).ok()
             }),
+            models: root.as_deref().and_then(|root| {
+                let loader =
+                    AssetLoader::new(FileSystemAssetSource::new(root), QUEUE, ModelAssetDecoder)
+                        .ok()?;
+                Some(match manifest_beside(root) {
+                    Some(manifest) => loader.with_manifest(manifest),
+                    None => loader,
+                })
+            }),
+            bound_models: BTreeSet::new(),
+            released_models: Vec::new(),
             sliced: BTreeMap::new(),
             watch: root.map(AssetWatch::new),
             last_examined: Instant::now(),
@@ -147,6 +158,8 @@ impl SceneTextures {
     /// a whole world cheap.
     pub fn request(&mut self, world: &World, text: &mut TextRenderer) -> Vec<TextureNote> {
         let (wanted_fonts, mut notes) = self.request_fonts(world, text);
+        let (wanted_models, model_notes) = self.request_models(world);
+        notes.extend(model_notes);
         let (wanted_tile_sets, tile_notes) = self.request_tile_sets(world);
         notes.extend(tile_notes);
         let mut referenced = referenced_textures(world);
@@ -199,6 +212,7 @@ impl SceneTextures {
                 .union(&wanted_fonts)
                 .cloned()
                 .chain(wanted_tile_sets.iter().cloned())
+                .chain(wanted_models)
                 .collect();
             watch.retain(&watched);
         }
@@ -305,6 +319,7 @@ impl SceneTextures {
             loader: Some(loader),
             fonts,
             tile_sets,
+            models,
             watch: Some(watch),
             ..
         } = self
@@ -313,17 +328,21 @@ impl SceneTextures {
         };
         let mut notes = Vec::new();
         for id in watch.changed() {
-            let result =
-                if let Some(fonts) = fonts.as_mut().filter(|fonts| fonts.get(&id).is_some()) {
-                    fonts.reload(&id)
-                } else if let Some(tile_sets) = tile_sets
-                    .as_mut()
-                    .filter(|tile_sets| tile_sets.get(&id).is_some())
-                {
-                    tile_sets.reload(&id)
-                } else {
-                    loader.reload(&id)
-                };
+            let result = if let Some(fonts) =
+                fonts.as_mut().filter(|fonts| fonts.get(&id).is_some())
+            {
+                fonts.reload(&id)
+            } else if let Some(tile_sets) = tile_sets
+                .as_mut()
+                .filter(|tile_sets| tile_sets.get(&id).is_some())
+            {
+                tile_sets.reload(&id)
+            } else if let Some(models) = models.as_mut().filter(|models| models.get(&id).is_some())
+            {
+                models.reload(&id)
+            } else {
+                loader.reload(&id)
+            };
             if let Err(error) = result {
                 notes.push(TextureNote::Failed(format!("{id}: {error}")));
             }

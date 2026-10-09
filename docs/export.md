@@ -195,3 +195,13 @@ failure instead of leaving the loading screen up for ever.
   A project with several would need to say which ship.
 - **The host crate is named by hand.** The export takes a module name because a
   project does not say which binary will run it.
+
+## Static imported models
+
+`sindri.model.asset` references are discovered from every listed scene and
+expanded prefab, including inactive instances. Models ship once as manifest
+kind `model`; their GLB bytes are preserved rather than converted into scene
+vertices. The exporter validates the bounded static subset before output, so
+missing or unsupported/malformed models fail with the logical asset named.
+Both project-root and `assets/` layouts are covered. See
+[imported models](imported-models.md) for native/browser proof and limitations.

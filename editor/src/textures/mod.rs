@@ -15,6 +15,7 @@
 //! one, so the two kinds cannot be confused and no rule has to be remembered.
 
 mod builtin;
+mod models;
 mod poll;
 mod request;
 
@@ -29,8 +30,8 @@ use std::{
 
 use sindri_assets::{
     AssetLoadQueueConfig, AssetLoader, AssetManifest, AssetWatch, FontAssetDecoder,
-    MANIFEST_FILE_NAME, SpriteSheetAssetDecoder, TextureAsset, TextureAssetDecoder,
-    TileSetAssetDecoder,
+    MANIFEST_FILE_NAME, ModelAssetDecoder, SpriteSheetAssetDecoder, TextureAsset,
+    TextureAssetDecoder, TileSetAssetDecoder,
 };
 use sindri_core::{AssetId, World};
 use sindri_render::{Texture2D, TextureError, TextureRegistry};
@@ -92,6 +93,13 @@ pub struct SceneTextures {
     sheets: Option<AssetLoader<SpriteSheetAssetDecoder>>,
     /// Semantic block assets used by stackable tile volumes.
     tile_sets: Option<AssetLoader<TileSetAssetDecoder>>,
+    /// Imported models, decoded here and bound to the scene's extractor
+    /// (`models.rs`).
+    models: Option<AssetLoader<ModelAssetDecoder>>,
+    /// The models bound to the extractor, so a new scene can unbind them.
+    bound_models: BTreeSet<AssetId>,
+    /// Models no longer named, to unbind at the next poll.
+    released_models: Vec<AssetId>,
     /// Which texture each sheet cuts, keyed by the sheet's own ID.
     sliced: BTreeMap<AssetId, String>,
     registry: TextureRegistry,
@@ -201,6 +209,10 @@ impl SceneTextures {
                 .is_some_and(|loader| loader.outstanding() > 0)
             || self
                 .tile_sets
+                .as_ref()
+                .is_some_and(|loader| loader.outstanding() > 0)
+            || self
+                .models
                 .as_ref()
                 .is_some_and(|loader| loader.outstanding() > 0)
     }

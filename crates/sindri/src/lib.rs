@@ -3,6 +3,9 @@
 //! Feature crates will be re-exported here as they become stable. Keeping a
 //! facade prevents games from depending on Sindri's internal crate layout.
 
+#[cfg(feature = "render")]
+pub mod model;
+
 pub use sindri_assets as assets;
 pub use sindri_core as core;
 pub use sindri_grid as grid;

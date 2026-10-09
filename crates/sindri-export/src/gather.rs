@@ -251,6 +251,7 @@ impl ProjectExport {
             }
         }
         while let Some(world) = pending.pop() {
+            super::models::references(&world, &mut wanted);
             for reference in referenced_textures(&world) {
                 wanted.insert(reference, AssetKind::Texture);
             }
@@ -401,6 +402,7 @@ impl ProjectExport {
             });
         }
 
+        super::models::validate(&assets)?;
         let splash = file
             .web
             .splash

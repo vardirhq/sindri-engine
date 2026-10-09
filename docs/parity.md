@@ -213,7 +213,7 @@ the gap is legible, not because it is scheduled.
 | Feature | Engine | Editor | Decay | Proof | vs. baseline | Gap that matters |
 | --- | :-: | :-: | :-: | :-: | --- | --- |
 | Cameras, depth, cube primitive, inline textured surface mesh | 🟡 | 🟡 | ❌ | 🟡 | **Behind** | The cube primitive is a unit cube, the size of a default Collider 3D box. `examples/cube` draws an authored inline mesh; meshes are inline, rebuilt into GPU buffers per draw, and have no asset/import pipeline yet |
-| **glTF / model import** | ❌ | ❌ | ❌ | ❌ | **Absent** | `tools/isometric-baker` renders models to 2D sprites offline, in three views; that is not runtime 3D |
+| **glTF / model import** | 🟡 | ❌ | ❌ | ❌ | **Behind** | Static self-contained GLB CPU decoding and a separate reusable GPU model path retain hierarchy, normals/UVs, both index widths, materials and textures. Decoder/resource/GPU readback tests cover diagnostics, transforms and reuse. Scene references, facade conversion and external-project packaging are tested. The actual Low Tide cutaway GLB is visually verified in native offscreen and WebGPU project hosts. Static subset only; no model shadows, animation/skinning, imported-model editor UX or in-tree game proof; see `docs/imported-models.md`. Offline isometric baking is not runtime 3D |
 | **Materials** | ❌ | ❌ | ❌ | ❌ | **Absent** | — |
 | **Lighting** | 🟡 | 🟡 | ❌ | 🟡 | **Behind** | One authored ambient contribution plus one directional world light shade textured 3D geometry and voxel terrain in editor viewports and Voxel Lab, with one bounded directional shadow map. No local lights, PBR materials, normal maps, cascaded shadows, or Decay control yet. |
 | **Skeletal animation** | ❌ | ❌ | ❌ | ❌ | **Absent** | — |

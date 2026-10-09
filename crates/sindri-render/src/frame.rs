@@ -73,6 +73,11 @@ pub struct FrameCamera {
 
 #[derive(Clone, Debug)]
 pub enum FrameCommand {
+    /// Shared imported geometry, with its retained hierarchy in model space.
+    Model {
+        model: Mat4,
+        asset: std::sync::Arc<crate::RenderModel>,
+    },
     TexturedCube {
         model: Mat4,
         texture: TextureId,

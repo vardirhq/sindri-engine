@@ -13,12 +13,13 @@ use sindri_core::{AssetId, SceneEntityId, World};
 use sindri_platform::{InputEvent, InputState, Key, MouseButton};
 use sindri_render::TextRenderer;
 use sindri_runtime::ProjectRun;
-use sindri_runtime::project::files_under;
+use sindri_runtime::project::{assets_root, files_under};
 use sindri_scene::{SceneExtractor, TileSetBindings, measure_ui_text};
 
 use crate::Session;
 
 mod draw;
+mod models;
 
 pub use draw::{DrawTimes, ProjectRenderer};
 
@@ -172,8 +173,15 @@ pub struct OpenedProject {
 /// `sindri_runtime::ProjectRun`'s run, with the fonts and images a drawing
 /// host adds.
 pub fn open(project: &Path, size: [f32; 2]) -> Result<OpenedProject, Box<dyn Error>> {
-    let run = ProjectRun::open(project, size)?;
-    let assets = project.join("assets");
+    let mut run = ProjectRun::open(project, size)?;
+    let assets = assets_root(project);
+    // Every model the project holds, as the player binds them: a scene
+    // reached later, or a prefab spawned later, draws without a load.
+    models::bind(
+        &assets,
+        files_under(&assets, ".glb").into_keys().collect(),
+        &mut run.scene,
+    )?;
     let mut text = TextRenderer::new();
     for (id, bytes) in files_under(&assets, ".ttf") {
         let asset = FontAssetDecoder.decode(AssetBytes::new(id.parse::<AssetId>()?, bytes))?;

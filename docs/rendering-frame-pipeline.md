@@ -1,5 +1,14 @@
 # Rendering frame pipeline
 
+Imported models use `FrameCommand::Model`: a shared immutable renderer resource
+and an entity matrix. `RenderModel` retains authored local node matrices and
+accumulated mesh instances separately. `TexturedCubeRenderer` owns an independent
+model GPU cache/pipeline, so the existing `FrameRenderers` host contract and
+inline mesh/voxel vertex layouts stay compatible. Geometry and embedded textures
+upload once per shared resource; draw uniforms are independent per primitive
+instance. See [imported models](imported-models.md) for the supported material
+subset, diagnostics, residency behavior and deferred model shadows.
+
 Sindri separates a frame into three explicit stages:
 
 1. **Extraction** converts world and scene state into render commands without issuing GPU work.

@@ -254,7 +254,10 @@ editor is pleasant to use for an afternoon is tracked separately, below.
 ## Milestone 8 — Basic 3D product capability
 
 - [ ] Finalize mesh and material public APIs
-- [ ] Add glTF 2.0 mesh/material import using an established loader
+- [ ] Add glTF 2.0 mesh/material import using an established loader — static
+  self-contained GLB engine/native/browser rendering and external-project export
+  are exercised; imported-model editor preview/authoring and broader import
+  features remain. See `docs/imported-models.md`.
 - [ ] Add normals, UVs, and basic unlit/standard material paths
 - [ ] Add directional light and ambient/environment term
 - [ ] Add frustum culling and mesh instancing after profiling

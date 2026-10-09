@@ -82,6 +82,13 @@ impl Player {
         context: &AppContext<'_>,
         project: ProjectAssets,
     ) -> Result<(), PlayerError> {
+        for (id, asset) in project.models {
+            let prepared = sindri::model::prepare(asset)?;
+            for warning in prepared.warnings {
+                log::warn!("{id}: {warning}");
+            }
+            self.scene.bind_model(id, prepared.resource);
+        }
         let mut loaded_textures: Vec<AssetId> = Vec::new();
         for (id, asset) in project.textures {
             let texture = Texture2D::from_rgba8(
@@ -359,6 +366,7 @@ impl DesktopApp for Player {
             .style(&mut world, viewport)
             .map_err(PlayerError::from);
         let prepared = styled.and_then(|undo| {
+            self.cubes.set_lighting(self.scene.lighting(&world)?);
             // Measured as styled, since a stylesheet sets the font size.
             let prepared = measure_ui_text(&world, self.scene.components(), &mut self.text)
                 .map_err(PlayerError::from)

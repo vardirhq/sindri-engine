@@ -107,6 +107,10 @@ impl EditorApp {
             .textures
             .poll(&state.device, &state.queue, &mut self.renderers.text);
         self.record_texture_notes(arrived);
+        let arrived = self
+            .textures
+            .poll_models(&mut [&mut self.scene, &mut self.game_scene]);
+        self.record_texture_notes(arrived);
         self.profiler
             .add(crate::profiler::Phase::Upkeep, upkeep.elapsed());
         self.advance_play(ui.ctx());
