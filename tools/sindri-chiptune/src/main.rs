@@ -14,11 +14,32 @@ const BPM: f64 = 118.0;
 mod gui;
 
 #[derive(Clone, Debug)]
-struct Settings { seed: u64, bpm: f64, key: i32, energy: f64, mood: Mood, output: PathBuf }
+struct Settings {
+    seed: u64,
+    bpm: f64,
+    key: i32,
+    energy: f64,
+    mood: Mood,
+    output: PathBuf,
+}
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
-enum Mood { Mysterious, Hopeful, Tense, Melancholic }
+enum Mood {
+    Mysterious,
+    Hopeful,
+    Tense,
+    Melancholic,
+}
 impl Settings {
-    fn default() -> Self { Self { seed: 42, bpm: BPM, key: 2, energy: 0.45, mood: Mood::Mysterious, output: PathBuf::from("chiptune.wav") } }
+    fn default() -> Self {
+        Self {
+            seed: 42,
+            bpm: BPM,
+            key: 2,
+            energy: 0.45,
+            mood: Mood::Mysterious,
+            output: PathBuf::from("chiptune.wav"),
+        }
+    }
 }
 
 const BARS: usize = 32;
@@ -65,7 +86,12 @@ fn section_energy(bar: usize) -> f64 {
 }
 
 #[cfg(test)]
-fn compose(seed: u64) -> [Vec<Note>; 3] { compose_with(&Settings { seed, ..Settings::default() }) }
+fn compose(seed: u64) -> [Vec<Note>; 3] {
+    compose_with(&Settings {
+        seed,
+        ..Settings::default()
+    })
+}
 fn compose_with(settings: &Settings) -> [Vec<Note>; 3] {
     let mut rng = Rng::new(settings.seed);
     let mut tracks: [Vec<Note>; 3] = std::array::from_fn(|_| Vec::new());
@@ -76,7 +102,8 @@ fn compose_with(settings: &Settings) -> [Vec<Note>; 3] {
         Mood::Hopeful => [38, 41, 34, 36],
         Mood::Tense => [38, 36, 34, 33],
         Mood::Melancholic => [38, 34, 36, 41],
-    }.map(|note| note + base);
+    }
+    .map(|note| note + base);
     let motif = [0, 2, 1, -3, 0, 1, -1, -3];
     for bar in 0..BARS {
         let root = roots[(bar / 2) % 4];
@@ -239,7 +266,8 @@ fn render_with(settings: &Settings, tracks: &[Vec<Note>; 3]) -> Result<(), Box<d
             (voice(&tracks[1][cursors[1]..], t, 0.125, false, step), 0.22),
             (voice(&tracks[2][cursors[2]..], t, 0.25, false, step), 0.29),
         ];
-        let mixed: f64 = channels.iter().map(|(v, gain)| v * gain).sum::<f64>() + noise(settings.seed, t, step, settings.energy);
+        let mixed: f64 = channels.iter().map(|(v, gain)| v * gain).sum::<f64>()
+            + noise(settings.seed, t, step, settings.energy);
         let sample = (mixed.clamp(-1.0, 1.0) * 32767.0).round() as i16;
         file.write_all(&sample.to_le_bytes())?;
     }
@@ -250,11 +278,15 @@ fn render_with(settings: &Settings, tracks: &[Vec<Note>; 3]) -> Result<(), Box<d
 fn main() -> Result<(), Box<dyn Error>> {
     let mut settings = Settings::default();
     let mut args = env::args().skip(1);
-    if env::args().len() == 1 { return gui::run(); }
+    if env::args().len() == 1 {
+        return gui::run();
+    }
     while let Some(arg) = args.next() {
         match arg.as_str() {
             "--seed" => settings.seed = args.next().ok_or("missing --seed value")?.parse()?,
-            "--output" => settings.output = PathBuf::from(args.next().ok_or("missing --output path")?),
+            "--output" => {
+                settings.output = PathBuf::from(args.next().ok_or("missing --output path")?)
+            }
             "--bpm" => settings.bpm = args.next().ok_or("missing --bpm value")?.parse()?,
             "--energy" => settings.energy = args.next().ok_or("missing --energy value")?.parse()?,
             "--key" => settings.key = args.next().ok_or("missing --key value")?.parse()?,
@@ -267,10 +299,20 @@ fn main() -> Result<(), Box<dyn Error>> {
             _ => return Err(format!("unknown argument: {arg}").into()),
         }
     }
-    if !(60.0..=220.0).contains(&settings.bpm) || !(0.0..=1.0).contains(&settings.energy) || !(0..=11).contains(&settings.key) { return Err("bpm must be 60..220, energy 0..1, key 0..11".into()); }
+    if !(60.0..=220.0).contains(&settings.bpm)
+        || !(0.0..=1.0).contains(&settings.energy)
+        || !(0..=11).contains(&settings.key)
+    {
+        return Err("bpm must be 60..220, energy 0..1, key 0..11".into());
+    }
     let tracks = compose_with(&settings);
     render_with(&settings, &tracks)?;
-    println!("Wrote {} (seed {}, {} BPM, 32 bars)", settings.output.display(), settings.seed, settings.bpm);
+    println!(
+        "Wrote {} (seed {}, {} BPM, 32 bars)",
+        settings.output.display(),
+        settings.seed,
+        settings.bpm
+    );
     Ok(())
 }
 

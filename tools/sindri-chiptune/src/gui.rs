@@ -1,7 +1,12 @@
 //! Standalone desktop controls. No Sindri editor integration.
 use super::{Mood, Settings, compose_with, render_with};
 use eframe::egui;
-use std::{error::Error, process::Command, sync::mpsc::{self, Receiver}, thread};
+use std::{
+    error::Error,
+    process::Command,
+    sync::mpsc::{self, Receiver},
+    thread,
+};
 
 #[derive(Default)]
 struct ComposerApp {
@@ -34,7 +39,9 @@ impl Default for ComposerSettings {
 
 impl ComposerApp {
     fn generate(&mut self) {
-        if self.job.is_some() { return; }
+        if self.job.is_some() {
+            return;
+        }
         let values = Settings {
             seed: self.settings.seed,
             bpm: self.settings.bpm,
@@ -66,10 +73,14 @@ impl ComposerApp {
         #[cfg(target_os = "macos")]
         let result = Command::new("open").arg(path).spawn();
         #[cfg(target_os = "windows")]
-        let result = Command::new("cmd").args(["/C", "start", ""]).arg(path).spawn();
+        let result = Command::new("cmd")
+            .args(["/C", "start", ""])
+            .arg(path)
+            .spawn();
         #[cfg(not(any(target_os = "linux", target_os = "macos", target_os = "windows")))]
         let result: std::io::Result<std::process::Child> = Err(std::io::Error::new(
-            std::io::ErrorKind::Unsupported, "No system file opener available",
+            std::io::ErrorKind::Unsupported,
+            "No system file opener available",
         ));
         self.status = match result {
             Ok(_) => "Opened WAV using system default application.".into(),
@@ -90,7 +101,9 @@ impl eframe::App for ComposerApp {
                     self.status = "Render worker disconnected.".into();
                     self.job = None;
                 }
-                Err(mpsc::TryRecvError::Empty) => ctx.request_repaint_after(std::time::Duration::from_millis(100)),
+                Err(mpsc::TryRecvError::Empty) => {
+                    ctx.request_repaint_after(std::time::Duration::from_millis(100))
+                }
             }
         }
         egui::CentralPanel::default().show(ctx, |ui| {
