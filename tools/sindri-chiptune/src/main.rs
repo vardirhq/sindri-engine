@@ -13,6 +13,7 @@ const BPM: f64 = 118.0;
 mod composer;
 mod gui;
 mod instruments;
+mod live;
 
 #[derive(Clone, Debug)]
 struct Settings {
