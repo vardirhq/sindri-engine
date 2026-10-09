@@ -12,6 +12,7 @@ use std::{
 const RATE: u32 = 44_100;
 const BPM: f64 = 118.0;
 mod gui;
+mod composer;
 
 #[derive(Clone, Debug)]
 struct Settings {
@@ -44,8 +45,6 @@ impl Settings {
 
 const BARS: usize = 32;
 const STEPS: usize = BARS * 16;
-const SCALE: [i32; 7] = [0, 2, 3, 5, 7, 8, 10]; // D natural minor
-
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 struct Note {
     pitch: i32,
@@ -70,130 +69,12 @@ impl Rng {
     }
 }
 
-fn degree(root: i32, index: i32) -> i32 {
-    let oct = index.div_euclid(7);
-    let idx = usize::try_from(index.rem_euclid(7)).expect("scale index");
-    root + SCALE[idx] + oct * 12
-}
-
-fn section_energy(bar: usize) -> f64 {
-    match bar / 8 {
-        0 => 0.25,
-        1 => 0.40,
-        2 => 0.58,
-        _ => 0.30,
-    }
-}
-
 #[cfg(test)]
 fn compose(seed: u64) -> [Vec<Note>; 3] {
-    compose_with(&Settings {
-        seed,
-        ..Settings::default()
-    })
+    compose_with(&Settings { seed, ..Settings::default() })
 }
 fn compose_with(settings: &Settings) -> [Vec<Note>; 3] {
-    let mut motif_rng = Rng::new(settings.seed ^ 0x11a4);
-    let mut bass_rng = Rng::new(settings.seed ^ 0x22b5);
-    let mut arp_rng = Rng::new(settings.seed ^ 0x33c6);
-    let mut melody_rng = Rng::new(settings.seed ^ 0x44d7);
-    let mut tracks: [Vec<Note>; 3] = std::array::from_fn(|_| Vec::new());
-    // Relative chord roots. Mood changes the entire progression, not only velocity.
-    let progressions: [[i32; 4]; 4] = [
-        [0, -4, 3, -2],  // mysterious: i, VI, III, VII
-        [0, 3, 5, -2],   // hopeful: i, III, iv, VII
-        [0, -2, -4, -1], // tense: i, VII, VI, leading tone
-        [0, -4, -2, 3],  // melancholic: i, VI, VII, III
-    ];
-    let mood_idx = match settings.mood {
-        Mood::Mysterious => 0,
-        Mood::Hopeful => 1,
-        Mood::Tense => 2,
-        Mood::Melancholic => 3,
-    };
-    let base = 36 + settings.key; // MIDI C2 + pitch class
-    let roots = progressions[mood_idx].map(|n| base + n);
-    let shapes: [[i32; 8]; 5] = [
-        [0, 2, 1, -2, 0, 1, -1, -3],
-        [0, 1, 3, 2, 0, -2, -1, 1],
-        [0, -2, -1, 1, 2, 0, 1, -1],
-        [0, 3, 2, 0, -1, 1, -2, 0],
-        [0, 1, -1, 2, 3, 1, -2, 0],
-    ];
-    let motif = shapes[usize::try_from(motif_rng.range(shapes.len() as u64)).expect("shape")];
-    let rhythm = usize::try_from(motif_rng.range(3)).expect("rhythm");
-    let direction = if motif_rng.range(2) == 0 { 1 } else { -1 };
-    let shift = i32::try_from(motif_rng.range(5)).expect("shift") - 2;
-    let arp_order: [[usize; 4]; 4] = [[0, 1, 2, 1], [0, 2, 1, 2], [2, 1, 0, 1], [0, 1, 0, 2]];
-    let arp_pattern = arp_order[usize::try_from(arp_rng.range(4)).expect("arp")];
-    for bar in 0..BARS {
-        let section = bar / 8;
-        let root = roots[(bar / 2) % 4];
-        let intensity = (section_energy(bar) * settings.energy / 0.45).clamp(0.05, 1.0);
-        let bass_density = (0.25 + intensity * 0.72).min(0.97);
-        for beat in 0..4 {
-            if beat > 0 && bass_rng.range(100) >= (bass_density * 100.0) as u64 {
-                continue;
-            }
-            let variation = if beat == 3 && bass_rng.range(4) == 0 {
-                12
-            } else if beat == 2 && bass_rng.range(3) == 0 {
-                7
-            } else {
-                0
-            };
-            tracks[0].push(Note {
-                pitch: root + variation,
-                start: bar * 16 + beat * 4,
-                len: if bass_rng.range(4) == 0 { 2 } else { 3 },
-                velocity: (45.0 + intensity * 35.0) as u8,
-            });
-        }
-        let arp_density = (0.20 + intensity * 0.65).min(0.9);
-        let chord = match settings.mood {
-            Mood::Hopeful => [0, 4, 7],
-            Mood::Tense => [0, 3, 6],
-            Mood::Mysterious | Mood::Melancholic => [0, 3, 7],
-        };
-        for i in 0..8 {
-            if arp_rng.range(100) >= (arp_density * 100.0) as u64 {
-                continue;
-            }
-            let degree = arp_pattern[(i + (bar % 4)) % 4];
-            tracks[1].push(Note {
-                pitch: root + 12 + chord[degree] + if section == 2 && i == 6 { 12 } else { 0 },
-                start: bar * 16 + i * 2,
-                len: if intensity < 0.4 { 2 } else { 1 },
-                velocity: (20.0 + intensity * 36.0) as u8,
-            });
-        }
-        let melody_density = (0.25 + intensity * 0.65).min(0.95);
-        let phrase_variation = i32::try_from(melody_rng.range(3)).expect("variation") - 1;
-        let phrase_shift = if section == 2 { 2 } else { 0 };
-        for (i, step) in motif.iter().enumerate() {
-            if section == 0 && bar % 4 < 2 {
-                continue;
-            }
-            if melody_rng.range(100) >= (melody_density * 100.0) as u64 {
-                continue;
-            }
-            let offset =
-                direction * step + shift + phrase_shift + if i == 5 { phrase_variation } else { 0 };
-            let pitch = degree(root + 24, offset);
-            let slot = match rhythm {
-                0 => i * 2,
-                1 => [0, 2, 3, 6, 8, 10, 13, 14][i],
-                _ => [0, 1, 4, 6, 8, 11, 12, 14][i],
-            };
-            tracks[2].push(Note {
-                pitch,
-                start: bar * 16 + slot,
-                len: if i == 3 || i == 7 { 2 } else { 1 },
-                velocity: (34.0 + intensity * 44.0) as u8,
-            });
-        }
-    }
-    tracks
+    composer::compose(settings)
 }
 
 fn freq(midi: i32) -> f64 {
