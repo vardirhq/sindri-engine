@@ -1,7 +1,11 @@
 //! Standalone Chiptune Lab user interface. No Sindri editor dependencies.
 use super::{Mood, RATE, Settings, compose_with, render_samples, render_with};
 use eframe::egui::{self, Color32, RichText};
-use rodio::{Player, buffer::SamplesBuffer, stream::{DeviceSinkBuilder, MixerDeviceSink}};
+use rodio::{
+    Player,
+    buffer::SamplesBuffer,
+    stream::{DeviceSinkBuilder, MixerDeviceSink},
+};
 use std::num::NonZero;
 use std::{
     error::Error,
@@ -76,7 +80,11 @@ impl ComposerApp {
         match DeviceSinkBuilder::open_default_sink() {
             Ok(stream) => {
                 let sink = Player::connect_new(stream.mixer());
-                sink.append(SamplesBuffer::new(NonZero::new(1).expect("mono"), NonZero::new(RATE).expect("sample rate"), samples));
+                sink.append(SamplesBuffer::new(
+                    NonZero::new(1).expect("mono"),
+                    NonZero::new(RATE).expect("sample rate"),
+                    samples,
+                ));
                 sink.play();
                 self.stream = Some(stream);
                 self.sink = Some(sink);
