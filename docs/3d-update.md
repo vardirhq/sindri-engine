@@ -40,7 +40,11 @@ GLB decoding, a model GPU path and project export; slice 1 merges it. Read again
      CCD.
    - Collision cannot come from a model: there are no trimesh or convex
      colliders, and collider size ignores scale.
-5. **Nothing proves it.** No in-tree project moves a character through a 3D
+5. **There is no smooth ground.** The only generated world is
+   `sindri-voxel`'s block terrain. A 3D game built from smooth models has
+   no heightmap terrain to stand them on, and no way to scatter trees or
+   rocks across one.
+6. **Nothing proves it.** No in-tree project moves a character through a 3D
    level with a perspective camera. The low-tide crawler proof is external,
    and AGENTS.md does not count it.
 
@@ -117,6 +121,28 @@ GLB decoding, a model GPU path and project export; slice 1 merges it. Read again
 - [ ] 3D collider handles (box extents, sphere radius, capsule height), one
   undo step per drag. Fit to model bounds.
 
+### 5b. Terrain
+Depends on slice 3's instancing for foliage and slice 5's ray hits for
+placement. The roadmap's "height/mesh terrain next" is this slice.
+- [ ] `sindri.terrain`: a chunked heightfield, either generated from a seed
+  (reusing `sindri-voxel`'s height and biome fields) or loaded from a 16-bit
+  heightmap. Normals come from the heights. Distant chunks drop detail
+  without cracks.
+- [ ] Up to four ground layers (for example grass, rock and sand) blended by
+  slope, height or painted weights, through slice 3's lit path and shadows.
+- [ ] A Rapier heightfield collider. Decay can ask `Terrain.height_at` and
+  `Terrain.normal_at`.
+- [ ] Foliage: rules (a model, density, slope and height range, biome) that
+  scatter instances deterministically from the seed. Each sits on the
+  surface and can tilt to its normal; it may carry a collider.
+- [ ] Editor:
+  - sculpt brushes (raise, lower, smooth, flatten);
+  - brushes that paint layers and paint or erase foliage;
+  - one undo step per stroke;
+  - anything dropped or moved can snap to the ground.
+- [ ] Terrain exports and plays in the browser, and its edits save as a
+  heightmap asset beside the scene.
+
 ### 6. Play in 3D
 - [ ] Decay 3D transforms:
   - `rotation` (quaternion);
@@ -151,7 +177,8 @@ GLB decoding, a model GPU path and project export; slice 1 merges it. Read again
 ### 7. Prove it
 - [ ] A new genre showcase, `games/explorer`: a third-person 3D game built
   from GLB models.
-  - It needs a level with collision from its model, a character controller,
+  - Its level stands on `sindri.terrain` with scattered foliage.
+  - It needs collision from its models and the terrain, a character controller,
     an orbit camera with mouse look and touch, lights and shadows, and a
     goal.
   - It is exported to Pages, smoke-tested in Chromium, and has a scripted run
@@ -175,6 +202,7 @@ GLB decoding, a model GPU path and project export; slice 1 merges it. Read again
 - IBL and environment maps, SSAO, MSAA/TAA, LOD, occlusion culling.
 - `.gltf` with external files, OBJ and FBX.
 - 3D joints.
+- Caves, overhangs and holes in terrain. Those stay with voxel terrain.
 - Validation on representative integrated and discrete GPUs. This is not
   possible in this container; it is a manual check.
 
@@ -185,6 +213,11 @@ GLB decoding, a model GPU path and project export; slice 1 merges it. Read again
    exported by a real tool tests skinning far better than a generated one.
    Small generated GLBs stay as test fixtures.
 2. **Animation.** Skeletal animation is in scope (slice 6b).
+3. **Terrain.** Smooth heightmap terrain with foliage is in scope (slice 5b).
+   Voxel terrain stays for worlds that are dug into or destroyed, as
+   Causeway's is. Low Tide's seabed is the external case it serves: tides
+   need a waterline that slides over a slope, and the crawler's tracks need
+   continuous ground.
 
 ## Open questions
 
