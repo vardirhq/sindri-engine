@@ -1,3 +1,8 @@
+pub(crate) mod quaternion;
+mod spatial;
+
+pub use spatial::TransformError;
+
 use serde::{Deserialize, Serialize};
 
 /// Where a thing is, how it is turned, and how big it is.

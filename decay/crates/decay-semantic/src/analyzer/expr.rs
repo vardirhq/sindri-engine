@@ -209,6 +209,7 @@ impl Analyzer<'_, '_> {
             }
             ExprKind::Member { object, field } => {
                 let object_type = self.expr_type(object);
+                self.check_host_member_write(object, &object_type, field, target.span);
                 if ((object_type.dimensions().is_some() || object_type == Type::Color)
                     && self.value_rooted(object))
                     || self.is_struct(&object_type)

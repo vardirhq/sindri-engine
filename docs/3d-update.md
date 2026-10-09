@@ -55,10 +55,10 @@ This plan is the state of the work. Whoever picks it up next reads
 together, and pushes each slice before starting the next.
 
 Order:
-- Slice 6's remaining transform items (`forward`/`right`/`up`, `look_at`,
-  `rotate_around`) are next. `forward` and its kin are read-only, and no
-  read-only member exists yet: `surface::Leaf` has no notion of it, and
-  `decay-lsp` and `docs/scripting.md` would need to show it.
+- Slice 6 now has world-space read-only `forward`/`right`/`up` and checked
+  `look_at`/`rotate_around`, with parent-space conversion, atomic validation,
+  compiler/LSP metadata and the transform feature example. Quaternion values
+  remain pending; Decay currently has no quaternion or Vec4 value type.
 - Then the rest of slice 6, which unblocks moving through 3D (Low Tide's
   crawler and crew included).
 - Then slices 2 to 4 (measurement, instancing and one lit path, lights),
@@ -168,8 +168,10 @@ placement. The roadmap's "height/mesh terrain next" is this slice.
   forward; each keeps the others when written).
 - [ ] Decay 3D transforms, the rest:
   - `rotation` (quaternion);
-  - `forward`/`right`/`up`;
-  - `look_at`, `rotate_around`.
+  - [x] `forward`/`right`/`up`;
+  - [x] `look_at`, `rotate_around`.
+  The [Transform Lab](../examples/transform/README.md) opens and runs to its
+  goal through the shared runtime; game proof remains with Explorer.
 - [ ] Camera: FOV, look-at, and an orbit/third-person follow mode with
   collision pull-in (a 3D ray).
 - [ ] Input: pointer delta on `Pointer`, and pointer lock in native and

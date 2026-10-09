@@ -1,0 +1,29 @@
+// A feature example: face a raised goal and move there, with an orbiting camera.
+script Walker {
+    @export
+    let speed: f32 = 2.0;
+    var arrived: bool = false;
+
+    fn update(dt: f32) {
+        if arrived { return; }
+        let goal = World.find("Goal");
+        let distance = this.transform.world_position.distance(goal.transform.world_position);
+        if distance <= 0.01 {
+            arrived = true;
+            Game.set("arrived", 1.0);
+            print("Arrived");
+            return;
+        }
+        this.transform.look_at(goal.transform.world_position);
+        this.transform.world_position += this.transform.forward * min(distance, speed * dt);
+    }
+}
+
+script Orbit {
+    fn start() {
+        this.transform.look_at(Vec3(0.0, 1.0, 0.0));
+    }
+    fn update(dt: f32) {
+        this.transform.rotate_around(Vec3(0.0, 1.0, 0.0), Vec3(0.0, 1.0, 0.0), dt * 0.15);
+    }
+}

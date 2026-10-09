@@ -150,6 +150,12 @@ impl Host for WorldHost<'_> {
             }
             return self.peer_store(subject, path, value);
         };
+        if leaf.is_read_only() {
+            return Err(RuntimeError::Host(format!(
+                "{} is read-only",
+                path.dotted()
+            )));
+        }
         let entity = self.subject(subject, path)?;
         let number = number(path, &value)?;
 
@@ -242,10 +248,12 @@ impl Host for WorldHost<'_> {
         path: &Path,
         args: &[Value],
     ) -> Result<Option<Value>, RuntimeError> {
-        // Nothing on the surface is called *through* a reference: an entity is
-        // a thing to read and write, not a thing with methods. Refusing here
-        // keeps `target.axis("a", "b")` from reaching `Input`. What is called
-        // through one is another script, and that is a message.
+        if let Some(value) = self.transform_call(subject, path, args)? {
+            return Ok(Some(value));
+        }
+        // Transform methods above are the entity methods. Other reference calls
+        // address script messages; refusing namespace calls here keeps
+        // `target.axis("a", "b")` from reaching `Input`.
         if subject.is_some() {
             return Ok(self.peer_call(subject, path, args));
         }

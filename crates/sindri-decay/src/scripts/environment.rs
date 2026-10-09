@@ -505,7 +505,14 @@ pub(super) fn collect_types() -> Vec<(String, HostType)> {
             }
             let mut ty = HostType::new();
             for (field, child) in *nested {
-                ty = ty.with_value(*field, describe_node(child));
+                ty = if child.is_read_only() {
+                    ty.with_read_only_value(*field, describe_node(child))
+                } else {
+                    ty.with_value(*field, describe_node(child))
+                };
+            }
+            if *name == crate::surface::TRANSFORM {
+                ty = crate::surface::transform::add_calls(ty);
             }
             into.push(((*name).to_owned(), ty));
             walk(nested, into);

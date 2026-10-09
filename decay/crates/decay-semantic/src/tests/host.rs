@@ -259,3 +259,27 @@ fn a_held_reference_to_this_script_is_not_this() {
     assert!(said("other.ping(1.0); let l = other.loud;").is_empty());
     assert!(!said("this.ping(1.0);").is_empty());
 }
+
+#[test]
+fn computed_host_values_reject_whole_and_component_writes_but_allow_copies() {
+    let mut environment = Environment::new();
+    environment.add_type(
+        "Pose",
+        HostType::new().with_read_only_value("direction", Type::Vec3),
+    );
+    environment.add_this_value("pose", Type::Named("Pose".into()));
+    for (target, value) in [
+        ("this.pose.direction", "Vec3(1.0, 0.0, 0.0)"),
+        ("this.pose.direction.x", "1.0"),
+    ] {
+        let source = format!("script Test {{ fn update() {{ {target} = {value}; }} }}");
+        let checked = analyze_with_environment(&source, &environment);
+        assert_eq!(checked.diagnostics.len(), 1, "{:?}", checked.diagnostics);
+        assert_eq!(checked.diagnostics[0].code, "immutable");
+    }
+    let copied = analyze_with_environment(
+        "script Test { fn update() { var direction = this.pose.direction; direction.x += 1.0; } }",
+        &environment,
+    );
+    assert!(copied.diagnostics.is_empty(), "{:?}", copied.diagnostics);
+}

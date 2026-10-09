@@ -186,7 +186,7 @@ pub(crate) fn member_type(
         .into_iter()
         .find(|(member, _)| member == name)
         .map(|(_, symbol)| match symbol {
-            ExternalSymbol::Value(ty) => ty,
+            ExternalSymbol::Value(ty) | ExternalSymbol::ReadOnlyValue(ty) => ty,
             ExternalSymbol::Function(function) => function.return_type,
         })
 }

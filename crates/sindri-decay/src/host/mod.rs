@@ -55,6 +55,7 @@ mod services;
 mod shape_query;
 mod shared;
 mod tiles;
+mod transform;
 mod tween;
 mod ui;
 mod widgets;

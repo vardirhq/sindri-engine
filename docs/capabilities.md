@@ -2167,6 +2167,17 @@ lists, always with explicit fallbacks. Orbital Last Stand exercises this by
 driving its 160-entry module registry, weighted pools, requirements, display
 copy, and generic effects from one profile rather than ID switchboards.
 
+The 3D transform surface additionally offers read-only world-space unit
+`forward`, `right`, and `up`, and checked `look_at(target)` and
+`rotate_around(pivot, axis, radians)` methods on own and referenced entities.
+The script regressions cover rotated/scaled parents, normalized directions,
+copy-versus-write semantics, and atomic errors including the Z lock. The
+[Transform Lab](../examples/transform/README.md) opens a perspective scene
+and runs to its goal.
+This is slice 6 of `docs/3d-update.md`, a foundation for Explorer rather than
+completed game proof: no in-tree game uses these new methods yet. A quaternion
+value and character/orbit-camera systems remain pending.
+
 A script reaches its own transform's position, scale and Z rotation, its
 sprite's tint and layer, the keyboard, the frame's delta and its own elapsed
 time, logical grid position through an explicit tilemap entity, maths functions,

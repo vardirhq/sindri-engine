@@ -27,6 +27,7 @@ pub(super) mod names;
 mod person;
 pub(crate) mod physics3d;
 pub(crate) mod raycast;
+pub(crate) mod transform;
 pub(crate) mod tween;
 
 #[cfg(test)]
@@ -72,6 +73,16 @@ pub(crate) enum Node {
     Handle(Handle),
 }
 
+impl Node {
+    pub(crate) fn is_read_only(&self) -> bool {
+        match self {
+            Self::Leaf(leaf) => leaf.is_read_only(),
+            Self::Group(_, members) => members.iter().all(|(_, node)| node.is_read_only()),
+            Self::Handle(_) => false,
+        }
+    }
+}
+
 /// The references the surface offers.
 #[derive(Clone, Copy, Debug)]
 pub(crate) enum Handle {
@@ -115,19 +126,32 @@ pub(crate) enum Vector {
     /// Where the entity is in the world, parents folded in. Written, it moves
     /// the entity there by working out the local position that puts it there.
     WorldPosition,
+    Forward,
+    Right,
+    Up,
 }
 
 impl Vector {
+    pub(crate) const fn is_read_only(self) -> bool {
+        matches!(self, Self::Forward | Self::Right | Self::Up)
+    }
+
     /// Whether this reads and writes the world transform rather than the
     /// stored, parent-relative one.
     pub(crate) const fn is_world(self) -> bool {
-        matches!(self, Self::WorldPosition)
+        matches!(
+            self,
+            Self::WorldPosition | Self::Forward | Self::Right | Self::Up
+        )
     }
 
-    pub(crate) const fn get(self, transform: &Transform3D) -> [f32; 3] {
+    pub(crate) fn get(self, transform: &Transform3D) -> [f32; 3] {
         match self {
             Self::Position | Self::WorldPosition => transform.position,
             Self::Scale => transform.scale,
+            Self::Forward => transform.forward(),
+            Self::Right => transform.right(),
+            Self::Up => transform.up(),
         }
     }
 
@@ -135,6 +159,7 @@ impl Vector {
         match self {
             Self::Position | Self::WorldPosition => transform.position = value,
             Self::Scale => transform.scale = value,
+            Self::Forward | Self::Right | Self::Up => {}
         }
     }
 }
@@ -280,6 +305,10 @@ fn leaf_in(root: &'static [(&'static str, Node)], parts: &[&str]) -> Option<Leaf
 }
 
 impl Leaf {
+    pub(crate) const fn is_read_only(self) -> bool {
+        matches!(self, Self::TransformAxis(vector, _) if vector.is_read_only())
+    }
+
     /// Reads the number this leaf names, or `None` when the entity has no such
     /// component or the payload does not hold one there.
     /// Reads one number, asking for the world transform only if it is the

@@ -33,10 +33,43 @@ const WORLD_POSITION: &[(&str, Node)] = &[
     ),
 ];
 
+const fn direction(vector: Vector) -> Node {
+    // Literal promoted arrays keep the surface static.
+    match vector {
+        Vector::Forward => Node::Group(
+            VEC3,
+            &[
+                ("x", Node::Leaf(Leaf::TransformAxis(Vector::Forward, 0))),
+                ("y", Node::Leaf(Leaf::TransformAxis(Vector::Forward, 1))),
+                ("z", Node::Leaf(Leaf::TransformAxis(Vector::Forward, 2))),
+            ],
+        ),
+        Vector::Right => Node::Group(
+            VEC3,
+            &[
+                ("x", Node::Leaf(Leaf::TransformAxis(Vector::Right, 0))),
+                ("y", Node::Leaf(Leaf::TransformAxis(Vector::Right, 1))),
+                ("z", Node::Leaf(Leaf::TransformAxis(Vector::Right, 2))),
+            ],
+        ),
+        _ => Node::Group(
+            VEC3,
+            &[
+                ("x", Node::Leaf(Leaf::TransformAxis(Vector::Up, 0))),
+                ("y", Node::Leaf(Leaf::TransformAxis(Vector::Up, 1))),
+                ("z", Node::Leaf(Leaf::TransformAxis(Vector::Up, 2))),
+            ],
+        ),
+    }
+}
+
 pub(crate) const TRANSFORM_MEMBERS: &[(&str, Node)] = &[
     ("position", Node::Group(VEC3, POSITION)),
     ("world_position", Node::Group(VEC3, WORLD_POSITION)),
     ("scale", Node::Group(VEC3, SCALE)),
+    ("forward", direction(Vector::Forward)),
+    ("right", direction(Vector::Right)),
+    ("up", direction(Vector::Up)),
     (
         "rotation_z",
         Node::Leaf(Leaf::TransformScalar(Scalar::RotationZ)),

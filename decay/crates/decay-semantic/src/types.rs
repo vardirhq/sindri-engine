@@ -300,6 +300,14 @@ impl HostType {
         self
     }
 
+    /// Adds a computed member that scripts may read but cannot write through.
+    #[must_use]
+    pub fn with_read_only_value(mut self, name: impl Into<String>, ty: Type) -> Self {
+        self.members
+            .insert(name.into(), ExternalSymbol::ReadOnlyValue(ty));
+        self
+    }
+
     #[must_use]
     pub fn with_function(mut self, name: impl Into<String>, function: FunctionType) -> Self {
         self.members

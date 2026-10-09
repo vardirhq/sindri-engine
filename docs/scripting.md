@@ -137,6 +137,12 @@ interprets, and `WorldHost` is the only place that gives them a meaning.
 | `this.transform.scale.{x,y,z}` | `f32` | yes | yes |
 | `this.transform.rotation_z` | `f32` | yes | yes |
 | `this.transform.{yaw,pitch,roll}` | `f32` | yes | yes |
+| `this.transform.{forward,right,up}` | `Vec3` | yes | no |
+| `this.transform.forward.{x,y,z}` | `f32` | yes | no |
+| `this.transform.right.{x,y,z}` | `f32` | yes | no |
+| `this.transform.up.{x,y,z}` | `f32` | yes | no |
+| `this.transform.look_at(target)` | unit | call | — |
+| `this.transform.rotate_around(pivot, axis, radians)` | unit | call | — |
 
 **A vector member is reached whole or one component at a time.**
 `this.transform.position` is a `Vec3` a script can hold, add to and store back
@@ -157,6 +163,30 @@ to compare two entities in different places in the hierarchy; write it to put a
 child at a point in the world, which stores whatever local position puts it
 there. `World.set_parent` keeps the local transform, so something spawned at
 local zero and then parented sits on its new parent.
+
+**Directions and aiming use world space.** `forward`, `right`, and `up`
+are read-only unit `Vec3` values, based on the composed rotation and ignoring
+scale (including negative scale). Identity faces -Z, with +X right and +Y up.
+Assignments to a whole direction or one of its components are compile errors;
+a copied vector is an ordinary value a script may change. Invalid/zero authored
+quaternions use the identity rotation for direction reads.
+
+`transform.look_at(target: Vec3)` faces a world target with Y up and zero world
+roll, preserving position and scale. At a vertical target yaw is zero. A target
+at the entity's position is an error. `transform.rotate_around(pivot: Vec3,
+axis: Vec3, radians: f32)` rotates both position and orientation around a world
+pivot and axis; the nonzero axis is normalized. Both work through `this`,
+`this.entity`, and another entity or script reference. Results are converted
+back to the parent's local transform. Orbiting under a parent with a zero scale
+axis is refused. Inputs must be finite and fit engine `f32`; invalid input,
+non-finite output, or an orbit that changes a Z-locked layer leaves the transform
+unchanged. These calls change the world immediately, with physics following
+its normal synchronization boundary.
+
+```decay
+this.transform.look_at(goal.transform.world_position);
+this.transform.world_position += this.transform.forward * speed * dt;
+```
 
 **A solid object turns by yaw, pitch and roll.** All three are radians, in a
 Y-up world. `yaw` turns it on the ground, about the up axis; at zero it faces
@@ -286,6 +316,12 @@ table above lists, reaching the same numbers.
 | `this.entity.transform.scale.{x,y,z}` | `f32` | yes | yes |
 | `this.entity.transform.rotation_z` | `f32` | yes | yes |
 | `this.entity.transform.{yaw,pitch,roll}` | `f32` | yes | yes |
+| `this.entity.transform.{forward,right,up}` | `Vec3` | yes | no |
+| `this.entity.transform.forward.{x,y,z}` | `f32` | yes | no |
+| `this.entity.transform.right.{x,y,z}` | `f32` | yes | no |
+| `this.entity.transform.up.{x,y,z}` | `f32` | yes | no |
+| `this.entity.transform.look_at(target)` | unit | call | — |
+| `this.entity.transform.rotate_around(pivot, axis, radians)` | unit | call | — |
 | `this.entity.sprite.{tint,color_multiply,color_offset}` | `Color` | yes | yes |
 | `this.entity.sprite.tint.{r,g,b,a}` | `f32` | yes | yes |
 | `this.entity.sprite.color_multiply.{r,g,b,a}` | `f32` | yes | yes |

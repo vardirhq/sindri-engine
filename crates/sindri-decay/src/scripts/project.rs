@@ -274,6 +274,9 @@ impl Project {
             for (member, symbol) in base.members() {
                 ty = match symbol {
                     ExternalSymbol::Value(value) => ty.with_value(member, value.clone()),
+                    ExternalSymbol::ReadOnlyValue(value) => {
+                        ty.with_read_only_value(member, value.clone())
+                    }
                     ExternalSymbol::Function(function) => {
                         ty.with_function(member, function.clone())
                     }

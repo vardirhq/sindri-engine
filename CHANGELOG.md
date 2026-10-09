@@ -1,5 +1,11 @@
 # Changelog
 
+- Aim and orbit entities from Decay with `transform.look_at` and
+  `transform.rotate_around`, including under rotated/scaled parents. Read
+  world-space `forward`, `right`, and `up` to move the way an entity faces.
+  Direction writes are rejected by the compiler and runtime; completion,
+  hover, and the generated API identify them as read-only.
+
 - Turn solid objects from Decay. `this.transform.yaw`, `pitch` and `roll` read and write a 3D rotation in radians: yaw turns on the ground, pitch tips up or down, roll turns about the facing, and writing one keeps the others.
 
 - Find every way in under `Input`. `Input.Action`, `Input.Pointer`, `Input.Stick`, `Input.Gesture`, `Input.Touch`, `Input.Keyboard` and `Input.Gamepad` are the namespaces that grew beside `Input` one at a time, now reached from where someone looking for touch controls starts, checked as the same types and answered by the same state. `Input`'s own calls are still the keyboard, so no script changes; the flat names stay until the scripts here move to the gathered ones.

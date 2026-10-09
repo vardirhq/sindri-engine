@@ -80,7 +80,11 @@ fn described_entity_paths(environment: &Environment) -> BTreeSet<String> {
         symbol: &ExternalSymbol,
         into: &mut BTreeSet<String>,
     ) {
-        let ExternalSymbol::Value(ty) = symbol else {
+        if matches!(symbol, ExternalSymbol::Function(_)) {
+            into.insert(prefix);
+            return;
+        }
+        let (ExternalSymbol::Value(ty) | ExternalSymbol::ReadOnlyValue(ty)) = symbol else {
             return;
         };
         if let Some(dimensions) = ty.dimensions() {

@@ -66,7 +66,7 @@ pub use tileset::{
     TileFace, TileFaceVisual, TileFaces, TileSetDocument, TileSetError,
 };
 pub use time::{FixedStepClock, FixedStepConfig, FrameSteps, TimeError, TimeScale};
-pub use transform::Transform3D;
+pub use transform::{Transform3D, TransformError};
 pub use variant::{stable_hash, stable_hash_with, weighted_index};
 pub use world::{
     AddedScene, EntityData, LoadedScene, PrefabIdentity, SpawnedPrefab, World, WorldError,

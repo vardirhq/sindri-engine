@@ -28,6 +28,10 @@ language model.
   project refresh as correctness issues, not editor polish.
 - Every completed section needs regression tests. CI is not the test harness.
 
+- [x] Carry host read-only member metadata through checking, completion, hover,
+  and generated API documents. Regression tests exercise transform directions
+  and their component assignments; copied vectors retain ordinary mutability.
+
 ## P0 — correctness and drift
 
 These are defects or sources of actively misleading tooling.

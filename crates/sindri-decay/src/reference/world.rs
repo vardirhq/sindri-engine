@@ -115,6 +115,28 @@ pub(super) const TYPES: &[TypeEntry] = &[
         text: "Where an object is, how it is turned and how big it is. For an object attached to another, these are measured from that parent.",
         members: &[
             value(
+                "forward",
+                "Read-only unit world-space facing direction: -Z at identity. Parent rotation is included and scale is ignored. Copy it to move with `world_position += forward * speed * dt`.",
+            ),
+            value(
+                "right",
+                "Read-only unit world-space +X direction, with parent rotation included and scale ignored.",
+            ),
+            value(
+                "up",
+                "Read-only unit world-space +Y direction, with parent rotation included and scale ignored.",
+            ),
+            call(
+                "look_at",
+                &["target"],
+                "Faces a world-space Vec3 target with Y up and zero world roll; preserves position and scale, including under a parent. Vertical targets use yaw zero. Coincident/non-finite targets are errors with no mutation.",
+            ),
+            call(
+                "rotate_around",
+                &["pivot", "axis", "radians"],
+                "Rotates position and orientation around a world-space Vec3 pivot and nonzero Vec3 axis by radians. Normalizes the axis and preserves scale. Invalid input/output, a singular parent scale, or movement off a Z-locked layer is an error with no mutation.",
+            ),
+            value(
                 "position",
                 "Where the object is. Change it to move the object: `this.transform.position.x += speed * dt`. Measured from the parent if it has one.",
             ),
