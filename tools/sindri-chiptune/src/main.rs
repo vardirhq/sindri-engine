@@ -3,7 +3,6 @@
 use std::{
     env,
     error::Error,
-    f64::consts::TAU,
     fs::File,
     io::{BufWriter, Write},
     path::PathBuf,
@@ -13,6 +12,7 @@ const RATE: u32 = 44_100;
 const BPM: f64 = 118.0;
 mod composer;
 mod gui;
+mod instruments;
 
 #[derive(Clone, Debug)]
 struct Settings {
@@ -22,6 +22,7 @@ struct Settings {
     energy: f64,
     mood: Mood,
     output: PathBuf,
+    rack: instruments::Rack,
 }
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 enum Mood {
@@ -39,6 +40,7 @@ impl Settings {
             energy: 0.45,
             mood: Mood::Mysterious,
             output: PathBuf::from("chiptune.wav"),
+            rack: instruments::Rack::default(),
         }
     }
 }
@@ -83,67 +85,41 @@ fn compose_with(settings: &Settings) -> [Vec<Note>; 3] {
 fn freq(midi: i32) -> f64 {
     440.0 * 2_f64.powf((f64::from(midi) - 69.0) / 12.0)
 }
-fn pulse(time: f64, hz: f64, duty: f64) -> f64 {
-    if (time * hz).fract() < duty {
-        1.0
-    } else {
-        -1.0
-    }
-}
 #[cfg(test)]
 fn step_seconds() -> f64 {
     60.0 / BPM / 4.0
 }
 
-fn voice(notes: &[Note], t: f64, duty: f64, wave: bool, step: f64) -> f64 {
+fn voice(notes: &[Note], t: f64, step: f64, sound: instruments::TrackSound) -> f64 {
     let active = notes.iter().find(|n| {
         let start = f64::from(u32::try_from(n.start).expect("start")) * step;
         t >= start && t < start + f64::from(u32::try_from(n.len).expect("length")) * step
     });
-    let Some(n) = active else {
-        return 0.0;
-    };
-    let local = t - f64::from(u32::try_from(n.start).expect("start")) * step;
-    let duration = f64::from(u32::try_from(n.len).expect("length")) * step;
-    let attack = (local / 0.006).min(1.0);
-    let release = ((duration - local) / 0.03).clamp(0.0, 1.0);
-    let hz = freq(n.pitch);
-    let sample = if wave {
-        // Game Boy-style rounded triangle approximation
-        (TAU * hz * t).sin() * 0.75 + (TAU * hz * t * 3.0).sin() * 0.08
-    } else {
-        pulse(t, hz, duty)
-    };
-    sample * attack * release * f64::from(n.velocity) / 127.0
+    let Some(note) = active else { return 0.0; };
+    let local = t - f64::from(u32::try_from(note.start).expect("start")) * step;
+    let duration = f64::from(u32::try_from(note.len).expect("length")) * step;
+    let hz = freq(note.pitch + sound.octave * 12);
+    sound.preset.sample(t * hz, local, duration) * f64::from(note.velocity) / 127.0
 }
 
-fn noise(seed: u64, time: f64, step: f64, energy: f64, mood: Mood) -> f64 {
+fn noise(seed: u64, time: f64, step: f64, energy: f64, mood: Mood, preset: instruments::Preset) -> f64 {
     let tick = (time / step).floor() as usize;
-    if tick >= STEPS {
-        return 0.0;
-    }
-    let bar = tick / 16;
+    if tick >= STEPS { return 0.0; }
     let hit = match mood {
         Mood::Mysterious => tick % 8 == 0,
         Mood::Hopeful => tick % 4 == 0,
         Mood::Tense => tick % 2 == 0,
         Mood::Melancholic => tick % 16 == 8,
     };
-    if !hit || (bar < 8 && matches!(mood, Mood::Mysterious | Mood::Melancholic)) {
-        return 0.0;
-    }
+    if !hit || (tick / 16 < 8 && matches!(mood, Mood::Mysterious | Mood::Melancholic)) { return 0.0; }
     let phase = time % step;
-    if phase > 0.065 {
-        return 0.0;
-    }
     let sample_index = (time * f64::from(RATE)) as u64;
     let mut x = sample_index ^ seed ^ 0xabcd_1234;
     x ^= x >> 33;
     x = x.wrapping_mul(0xff51_afd7_ed55_8ccd);
     x ^= x >> 33;
     let white = if x & 1 == 0 { -1.0 } else { 1.0 };
-    let strength = if tick % 16 == 8 { 0.10 } else { 0.035 };
-    white * strength * (energy / 0.45) * (1.0 - phase / 0.065)
+    preset.noise(white, phase) * (energy / 0.45).min(1.5)
 }
 
 fn render_samples(settings: &Settings, tracks: &[Vec<Note>; 3]) -> Vec<f32> {
@@ -152,12 +128,6 @@ fn render_samples(settings: &Settings, tracks: &[Vec<Note>; 3]) -> Vec<f32> {
     let samples = (seconds * f64::from(RATE)).round() as u32;
     let mut audio = Vec::with_capacity(samples as usize);
     // Cache current notes by advancing cursors, not searching all notes per sample.
-    let (bass_wave, arp_duty, lead_duty) = match settings.mood {
-        Mood::Mysterious => (true, 0.125, 0.25),
-        Mood::Hopeful => (true, 0.5, 0.5),
-        Mood::Tense => (false, 0.125, 0.125),
-        Mood::Melancholic => (true, 0.25, 0.5),
-    };
     let mut cursors = [0_usize; 3];
     for i in 0..samples {
         let t = f64::from(i) / f64::from(RATE);
@@ -171,22 +141,19 @@ fn render_samples(settings: &Settings, tracks: &[Vec<Note>; 3]) -> Vec<f32> {
                 *cursor += 1;
             }
         }
-        let channels = [
-            (
-                voice(&tracks[0][cursors[0]..], t, 0.5, bass_wave, step),
-                0.35,
-            ),
-            (
-                voice(&tracks[1][cursors[1]..], t, arp_duty, false, step),
-                0.22,
-            ),
-            (
-                voice(&tracks[2][cursors[2]..], t, lead_duty, false, step),
-                0.29,
-            ),
-        ];
-        let mixed: f64 = channels.iter().map(|(v, gain)| v * gain).sum::<f64>()
-            + noise(settings.seed, t, step, settings.energy, settings.mood);
+        let mut mixed = 0.0;
+        for channel in 0..3 {
+            if settings.rack.audible(channel) {
+                let sound = settings.rack.tracks[channel];
+                mixed += voice(&tracks[channel][cursors[channel]..], t, step, sound)
+                    * f64::from(sound.volume) * 0.45;
+            }
+        }
+        if settings.rack.audible(3) {
+            let sound = settings.rack.tracks[3];
+            mixed += noise(settings.seed, t, step, settings.energy, settings.mood, sound.preset)
+                * f64::from(sound.volume) * 0.55;
+        }
         let sample = (mixed.clamp(-1.0, 1.0) * 32767.0).round() as i16;
         audio.push(f32::from(sample) / 32767.0);
     }
