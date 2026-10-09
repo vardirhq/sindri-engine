@@ -114,13 +114,19 @@ fn voice(notes: &[Note], t: f64, duty: f64, wave: bool, step: f64) -> f64 {
     sample * attack * release * f64::from(n.velocity) / 127.0
 }
 
-fn noise(seed: u64, time: f64, step: f64, energy: f64) -> f64 {
+fn noise(seed: u64, time: f64, step: f64, energy: f64, mood: Mood) -> f64 {
     let tick = (time / step).floor() as usize;
     if tick >= STEPS || tick % 4 != 0 {
         return 0.0;
     }
     let bar = tick / 16;
-    if bar < 8 || (bar >= 24 && tick % 16 != 0) {
+    let hit = match mood {
+        Mood::Mysterious => tick % 8 == 0,
+        Mood::Hopeful => tick % 4 == 0,
+        Mood::Tense => tick % 2 == 0,
+        Mood::Melancholic => tick % 16 == 8,
+    };
+    if !hit || (bar < 8 && matches!(mood, Mood::Mysterious | Mood::Melancholic)) {
         return 0.0;
     }
     let phase = time % step;
@@ -168,7 +174,7 @@ fn render_samples(settings: &Settings, tracks: &[Vec<Note>; 3]) -> Vec<f32> {
             (voice(&tracks[2][cursors[2]..], t, lead_duty, false, step), 0.29),
         ];
         let mixed: f64 = channels.iter().map(|(v, gain)| v * gain).sum::<f64>()
-            + noise(settings.seed, t, step, settings.energy);
+            + noise(settings.seed, t, step, settings.energy, settings.mood);
         let sample = (mixed.clamp(-1.0, 1.0) * 32767.0).round() as i16;
         audio.push(f32::from(sample) / 32767.0);
     }
@@ -216,6 +222,13 @@ fn main() -> Result<(), Box<dyn Error>> {
             "--bpm" => settings.bpm = args.next().ok_or("missing --bpm value")?.parse()?,
             "--energy" => settings.energy = args.next().ok_or("missing --energy value")?.parse()?,
             "--key" => settings.key = args.next().ok_or("missing --key value")?.parse()?,
+            "--mood" => settings.mood = match args.next().ok_or("missing --mood value")?.as_str() {
+                "mysterious" => Mood::Mysterious,
+                "hopeful" => Mood::Hopeful,
+                "tense" => Mood::Tense,
+                "melancholic" => Mood::Melancholic,
+                _ => return Err("mood must be mysterious, hopeful, tense, or melancholic".into()),
+            },
             "--help" | "-h" => {
                 println!(
                     "sindri-chiptune [--seed NUMBER] [--output PATH]\nGenerates 32 bars of D-minor exploratory chiptune at 118 BPM."
