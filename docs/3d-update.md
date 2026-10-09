@@ -138,6 +138,16 @@ GLB decoding, a model GPU path and project export; slice 1 merges it. Read again
   - 3D collider dimensions follow transform scale.
 - [ ] Physics material profiles in 3D, sharing the 2D asset format.
 
+### 6b. Skeletal animation
+- [ ] Decode skins (joints, inverse bind matrices, `JOINTS_0`/`WEIGHTS_0`)
+  and animation clips (translation, rotation, scale; step and linear
+  sampling) from GLB.
+- [ ] GPU skinning in the model path, including its shadow pass.
+- [ ] `sindri.animator`: the playing clip, speed and looping, with
+  cross-fades between clips. Decay can play, blend and query clips.
+- [ ] The editor previews a model's clips in the inspector and plays them
+  in the Scene view.
+
 ### 7. Prove it
 - [ ] A new genre showcase, `games/explorer`: a third-person 3D game built
   from GLB models.
@@ -161,22 +171,22 @@ GLB decoding, a model GPU path and project export; slice 1 merges it. Read again
 
 ## Out of scope (stated, not silently dropped)
 
-- Skeletal and morph animation; glTF animation clips. Node transforms are
-  retained, so rigid part animation from Decay is possible.
+- Morph-target animation.
 - IBL and environment maps, SSAO, MSAA/TAA, LOD, occlusion culling.
 - `.gltf` with external files, OBJ and FBX.
 - 3D joints.
 - Validation on representative integrated and discrete GPUs. This is not
   possible in this container; it is a manual check.
 
+## Decisions
+
+1. **Art for the showcase.** A CC0 kit (Quaternius) vendored under
+   `games/explorer/assets` with its licence, because a rigged character
+   exported by a real tool tests skinning far better than a generated one.
+   Small generated GLBs stay as test fixtures.
+2. **Animation.** Skeletal animation is in scope (slice 6b).
+
 ## Open questions
 
-1. **Art for the showcase.** The choices are to generate GLBs procedurally
-   with a script in-tree (like the #504 fixture), or to vendor a CC0 kit (for
-   example Kenney or Quaternius) under `games/explorer/assets` with its
-   licence.
-2. **Animation.** A third-person character without skeletal animation will
-   look stiff. Either skinning is pulled into scope, or the character is
-   built from rigid parts.
-3. **Low Tide.** Should its needs (the crawler, crew on a moving deck) steer
+1. **Low Tide.** Should its needs (the crawler, crew on a moving deck) steer
    slice 6, or stay external?
