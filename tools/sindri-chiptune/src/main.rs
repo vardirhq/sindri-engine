@@ -100,10 +100,10 @@ fn compose_with(settings: &Settings) -> [Vec<Note>; 3] {
     let mut tracks: [Vec<Note>; 3] = std::array::from_fn(|_| Vec::new());
     // Relative chord roots. Mood changes the entire progression, not only velocity.
     let progressions: [[i32; 4]; 4] = [
-        [0, -4, 3, -2], // mysterious: i, VI, III, VII
-        [0, 3, 5, -2], // hopeful: i, III, iv, VII
+        [0, -4, 3, -2],  // mysterious: i, VI, III, VII
+        [0, 3, 5, -2],   // hopeful: i, III, iv, VII
         [0, -2, -4, -1], // tense: i, VII, VI, leading tone
-        [0, -4, -2, 3], // melancholic: i, VI, VII, III
+        [0, -4, -2, 3],  // melancholic: i, VI, VII, III
     ];
     let mood_idx = match settings.mood {
         Mood::Mysterious => 0,
@@ -135,7 +135,13 @@ fn compose_with(settings: &Settings) -> [Vec<Note>; 3] {
             if beat > 0 && bass_rng.range(100) >= (bass_density * 100.0) as u64 {
                 continue;
             }
-            let variation = if beat == 3 && bass_rng.range(4) == 0 { 12 } else if beat == 2 && bass_rng.range(3) == 0 { 7 } else { 0 };
+            let variation = if beat == 3 && bass_rng.range(4) == 0 {
+                12
+            } else if beat == 2 && bass_rng.range(3) == 0 {
+                7
+            } else {
+                0
+            };
             tracks[0].push(Note {
                 pitch: root + variation,
                 start: bar * 16 + beat * 4,
@@ -150,7 +156,9 @@ fn compose_with(settings: &Settings) -> [Vec<Note>; 3] {
             Mood::Mysterious | Mood::Melancholic => [0, 3, 7],
         };
         for i in 0..8 {
-            if arp_rng.range(100) >= (arp_density * 100.0) as u64 { continue; }
+            if arp_rng.range(100) >= (arp_density * 100.0) as u64 {
+                continue;
+            }
             let degree = arp_pattern[(i + (bar % 4)) % 4];
             tracks[1].push(Note {
                 pitch: root + 12 + chord[degree] + if section == 2 && i == 6 { 12 } else { 0 },
@@ -163,11 +171,20 @@ fn compose_with(settings: &Settings) -> [Vec<Note>; 3] {
         let phrase_variation = i32::try_from(melody_rng.range(3)).expect("variation") - 1;
         let phrase_shift = if section == 2 { 2 } else { 0 };
         for (i, step) in motif.iter().enumerate() {
-            if section == 0 && bar % 4 < 2 { continue; }
-            if melody_rng.range(100) >= (melody_density * 100.0) as u64 { continue; }
-            let offset = direction * step + shift + phrase_shift + if i == 5 { phrase_variation } else { 0 };
+            if section == 0 && bar % 4 < 2 {
+                continue;
+            }
+            if melody_rng.range(100) >= (melody_density * 100.0) as u64 {
+                continue;
+            }
+            let offset =
+                direction * step + shift + phrase_shift + if i == 5 { phrase_variation } else { 0 };
             let pitch = degree(root + 24, offset);
-            let slot = match rhythm { 0 => i * 2, 1 => [0, 2, 3, 6, 8, 10, 13, 14][i], _ => [0, 1, 4, 6, 8, 11, 12, 14][i] };
+            let slot = match rhythm {
+                0 => i * 2,
+                1 => [0, 2, 3, 6, 8, 10, 13, 14][i],
+                _ => [0, 1, 4, 6, 8, 11, 12, 14][i],
+            };
             tracks[2].push(Note {
                 pitch,
                 start: bar * 16 + slot,
@@ -274,7 +291,9 @@ fn render_samples(settings: &Settings, tracks: &[Vec<Note>; 3]) -> Vec<f32> {
 fn render_with(settings: &Settings, tracks: &[Vec<Note>; 3]) -> Result<(), Box<dyn Error>> {
     let audio = render_samples(settings, tracks);
     let mut file = BufWriter::new(File::create(&settings.output)?);
-    let bytes = u32::try_from(audio.len())?.checked_mul(2).ok_or("WAV too long")?;
+    let bytes = u32::try_from(audio.len())?
+        .checked_mul(2)
+        .ok_or("WAV too long")?;
     file.write_all(b"RIFF")?;
     file.write_all(&(36 + bytes).to_le_bytes())?;
     file.write_all(b"WAVEfmt ")?;
@@ -359,8 +378,14 @@ mod tests {
     }
     #[test]
     fn different_seeds_change_melody_and_accompaniment() {
-        let a = compose_with(&Settings { seed: 42, ..Settings::default() });
-        let b = compose_with(&Settings { seed: 43, ..Settings::default() });
+        let a = compose_with(&Settings {
+            seed: 42,
+            ..Settings::default()
+        });
+        let b = compose_with(&Settings {
+            seed: 43,
+            ..Settings::default()
+        });
         assert_ne!(a[2], b[2], "melody should change");
         assert_ne!(a[1], b[1], "arpeggio should change");
     }
@@ -368,10 +393,15 @@ mod tests {
     fn mood_and_energy_change_composition() {
         let default = Settings::default();
         let original = compose_with(&default);
-        let hopeful = compose_with(&Settings { mood: Mood::Hopeful, ..default.clone() });
-        let energetic = compose_with(&Settings { energy: 0.9, ..default });
+        let hopeful = compose_with(&Settings {
+            mood: Mood::Hopeful,
+            ..default.clone()
+        });
+        let energetic = compose_with(&Settings {
+            energy: 0.9,
+            ..default
+        });
         assert_ne!(original[0], hopeful[0], "mood should change harmony");
         assert_ne!(original[1], energetic[1], "energy should change density");
     }
-
 }
