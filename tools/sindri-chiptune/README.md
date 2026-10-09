@@ -8,7 +8,7 @@ cargo run -p sindri-chiptune
 
 The redesigned desktop UI contains a four-track instrument rack, composition settings, four-section
 arrangement information, an eight-bar piano-roll comparison for two seed
-candidates, A/B auditioning directly from memory and explicit WAV export. Each part has an independent preset, volume, mute, solo and (for tonal parts) octave shift. These modify the render, not the composed notes.
+candidates, A/B auditioning through a continuous sample source and explicit WAV export. Each part has an independent preset, volume, mute, solo and (for tonal parts) octave shift. These modify the render, not the composed notes.
 
 ## What V2 changes
 
@@ -62,3 +62,21 @@ cargo test -p sindri-chiptune --all-features
 Tests include deterministic generation, note bounds, contrasting mood
 arrangements, and seed-dependent melodic pitch changes. Listening against
 the original prototype is the next subjective acceptance gate.
+
+
+## Live workflow (experimental)
+
+**Play A** starts continuous synthesis rather than pre-rendering 32 bars.
+While audio plays, adjust instrument preset, mute, solo, level, octave, energy
+or tempo. The audio thread reads parameter updates between 256-sample blocks,
+without rebuilding a WAV or restarting the transport. **Switch B** updates
+the song notes using the next seed; **Pause**, **Stop**, **Loop**, and bar
+seek are available on the transport. Export continues to use offline rendering
+and does not interrupt live playback.
+
+The real-time source lives in `src/live.rs`, separate from `composer.rs`,
+`instruments.rs`, and the egui presentation. The source uses a message queue
+for parameter updates and keeps note cursors in the audio thread. This is an
+experimental transport, not yet a fully optimized, sample-accurate game-audio
+engine. Performance, synchronization at song transitions, and auditory quality
+still require local hands-on validation.
