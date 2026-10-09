@@ -14,7 +14,7 @@ use std::time::Duration;
 
 use sindri_core::{
     EntityId, LoadedScenes, PREFAB_SUFFIX, PROFILE_SUFFIX, PrefabDocument, ProfileDocument,
-    SceneDocument, SceneEntityId, TagsComponent, TileSetDocument, World,
+    SceneDocument, SceneEntityId, TagsComponent, TileSetDocument, UnknownComponentPolicy, World,
 };
 use sindri_decay::{PrefabSources, ProfileSources, ScriptComponent, ScriptSources};
 use sindri_platform::{GamepadAxis, GamepadButton, InputEvent, InputState, Key, PadId};
@@ -69,35 +69,47 @@ fn text(id: &str, bytes: Vec<u8>) -> Result<String, String> {
 /// stylesheets, and the paths of its other scenes.
 pub type Manifest = (String, Vec<String>, Vec<String>);
 
-/// Reads the parts of `sindri.toml` a run needs. Deliberately not a TOML
-/// parser: the manifest's contract is `docs/project-format.md`, and these
-/// three keys are quoted strings in it.
+/// The parts of `sindri.toml` a run reads; the rest of the file is for the
+/// export and the editor (`docs/project-format.md`).
+#[derive(serde::Deserialize)]
+struct ProjectFile {
+    project: ProjectSection,
+    #[serde(default)]
+    assets: AssetsSection,
+}
+
+#[derive(serde::Deserialize)]
+struct ProjectSection {
+    main_scene: String,
+    #[serde(default)]
+    scenes: Vec<String>,
+}
+
+#[derive(Default, serde::Deserialize)]
+struct AssetsSection {
+    #[serde(default)]
+    include: Vec<String>,
+}
+
+/// Reads the parts of `sindri.toml` a run needs, parsed as TOML as the export
+/// parses it, so the two cannot read one file differently.
 ///
 /// # Errors
 /// A manifest that will not read or names no main scene.
 pub fn manifest(project: &Path) -> Result<Manifest, String> {
-    let toml = fs::read_to_string(project.join("sindri.toml"))
-        .map_err(|error| format!("{}: {error}", project.join("sindri.toml").display()))?;
-    let quoted = |line: &str| -> Vec<String> {
-        line.split('"')
-            .skip(1)
-            .step_by(2)
-            .map(str::to_owned)
-            .collect()
-    };
-    let scene = toml
-        .lines()
-        .find(|line| line.trim_start().starts_with("main_scene"))
-        .and_then(|line| quoted(line).into_iter().next())
-        .ok_or("sindri.toml names no main_scene")?;
-    let scene = scene.strip_prefix("assets/").unwrap_or(&scene).to_owned();
-    // The include list may run over several lines, up to its `]`.
-    let include = toml
-        .find("include")
-        .map(|start| &toml[start..])
-        .and_then(|rest| rest.split_once(']').map(|(list, _)| list))
-        .unwrap_or_default();
-    let sheets = quoted(include)
+    let path = project.join("sindri.toml");
+    let text = fs::read_to_string(&path).map_err(|error| format!("{}: {error}", path.display()))?;
+    let file: ProjectFile =
+        toml::from_str(&text).map_err(|error| format!("{}: {error}", path.display()))?;
+    let scene = file
+        .project
+        .main_scene
+        .strip_prefix("assets/")
+        .unwrap_or(&file.project.main_scene)
+        .to_owned();
+    let sheets = file
+        .assets
+        .include
         .into_iter()
         .filter(|id| {
             Path::new(id)
@@ -105,18 +117,17 @@ pub fn manifest(project: &Path) -> Result<Manifest, String> {
                 .is_some_and(|extension| extension.eq_ignore_ascii_case("weave"))
         })
         .collect();
-    // Other scenes `Scene.go` can reach, kept as their paths under the
-    // project; the list may also run over several lines.
-    let others = toml
-        .lines()
-        .position(|line| line.trim_start().starts_with("scenes"))
-        .map(|start| {
-            let rest = toml.lines().skip(start).collect::<Vec<_>>().join("\n");
-            let list = rest.split_once(']').map_or(rest.as_str(), |(list, _)| list);
-            quoted(list)
-        })
-        .unwrap_or_default();
-    Ok((scene, sheets, others))
+    Ok((scene, sheets, file.project.scenes))
+}
+
+/// What a scene is called to `Scene.go` and the session: its file name, as
+/// the export and the editor name it, wherever under the project it sits.
+fn scene_name(path: &str) -> Result<String, String> {
+    Path::new(path)
+        .file_name()
+        .and_then(|name| name.to_str())
+        .map(str::to_owned)
+        .ok_or_else(|| format!("{path}: a scene path without a file name"))
 }
 
 /// A project being played, without a window: its world, its session, and
@@ -155,23 +166,27 @@ impl ProjectRun {
 
     fn open_on(project: &Path, entry: Option<&str>, size: [f32; 2]) -> Result<Self, String> {
         let assets = project.join("assets");
-        let (main_id, sheet_ids, other_scenes) = manifest(project)?;
+        let (main_path, sheet_ids, other_scenes) = manifest(project)?;
+        let main_id = scene_name(&main_path)?;
         let read_scene = |path: &Path| -> Result<SceneDocument, String> {
             let json =
                 fs::read_to_string(path).map_err(|error| format!("{}: {error}", path.display()))?;
             SceneDocument::from_json(&json).map_err(|error| format!("{}: {error}", path.display()))
         };
-        // Every scene goes to the session: the main one under its asset ID,
-        // the others under their file names, which is the name `Scene.go`
-        // asks for, as the export names them.
-        let mut scenes = vec![(main_id.clone(), read_scene(&assets.join(&main_id))?)];
+        // Every scene goes to the session under its file name, which is the
+        // name `Scene.go` asks for, as the export names them.
+        let mut scenes = vec![(main_id.clone(), read_scene(&assets.join(&main_path))?)];
         for path in other_scenes {
-            let name = Path::new(&path)
-                .file_name()
-                .and_then(|name| name.to_str())
-                .ok_or("a scene path without a file name")?
-                .to_owned();
-            scenes.push((name, read_scene(&project.join(&path))?));
+            scenes.push((scene_name(&path)?, read_scene(&project.join(&path))?));
+        }
+        // Component data is checked the way the renderer will read it, so a
+        // typo such as an unknown shape kind fails when the run opens rather
+        // than first in a browser.
+        let scene = scene_extractor()?;
+        for (name, document) in &scenes {
+            scene
+                .validate(document, UnknownComponentPolicy::Preserve)
+                .map_err(|error| format!("{name}: {error}"))?;
         }
         let scene_id = entry.unwrap_or(&main_id).to_owned();
         let document = scenes
@@ -221,7 +236,6 @@ impl ProjectRun {
                 weave::compose(&id, &weave_sources).map_err(|error| format!("{id}: {error}"))?,
             );
         }
-        let scene = scene_extractor()?;
         let mut session = Session::with_sources(scene.components().clone(), sources)
             .with_prefabs(prefabs)
             .with_profiles(profiles)

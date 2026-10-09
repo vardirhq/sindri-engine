@@ -33,7 +33,21 @@ impl EditorApp {
     /// The command layer's refusal, with the world unchanged.
     pub(super) fn apply_edit(&mut self, transaction: Transaction) -> Result<(), CommandError> {
         if self.session.is_some() {
-            self.run_edits.apply(transaction, &mut self.world)
+            // Made where the run stands, and kept with the recording, so a
+            // scrub back past it and forward again finds it there.
+            let step = self
+                .recording
+                .as_ref()
+                .map_or(0, crate::recording::Recording::at);
+            let recorded = self.recording.is_some().then(|| transaction.clone());
+            self.run_edits
+                .apply_at(transaction, &mut self.world, step)?;
+            if let (Some(recording), Some(edit)) = (self.recording.as_mut(), recorded)
+                && let Some(carried_on) = recording.edited(edit)
+            {
+                self.run_edits.forget_after(carried_on);
+            }
+            Ok(())
         } else {
             self.history.apply(transaction, &mut self.world)
         }

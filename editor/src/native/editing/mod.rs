@@ -545,8 +545,7 @@ impl EditorApp {
                 self.lifecycle = initialized_lifecycle();
                 // A run belongs to the world it was started against, and a
                 // freshly loaded world reuses entity slots from the start.
-                self.session = None;
-                self.play_snapshot = None;
+                self.abandon_run();
                 self.notice = None;
                 self.announce_scene();
                 self.reload_textures();

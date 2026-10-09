@@ -17,7 +17,9 @@ sindri-decay = { path = "../sindri-decay" }
 sindri-platform = { path = "../sindri-platform" }
 sindri-scene = { path = "../sindri-scene" }
 sindri-weave = { path = "../sindri-weave" }
+serde.workspace = true
 thiserror.workspace = true
+toml = "1.1"
 weave = { path = "../../weave/crates/weave" }
 web-time.workspace = true
 

@@ -103,10 +103,11 @@ fn orbital_scrubbed_back_a_wave_and_resumed_plays_the_same_again() {
     );
 
     // Scrub back, as the Timeline does.
-    let (mark, steps) = recording.seek(BACK_TO).expect("recorded");
-    run.world = mark.world.clone();
-    run.session.restore(&mark.session);
-    for step in steps {
+    let replay = recording.seek(BACK_TO).expect("recorded");
+    assert!(replay.edits.is_empty(), "nothing was edited in this run");
+    run.world = replay.mark.world.clone();
+    run.session.restore(&replay.mark.session);
+    for step in replay.steps {
         run.input = step.input;
         run.step(step.delta).expect("replays");
     }

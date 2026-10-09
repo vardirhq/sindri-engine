@@ -7,7 +7,10 @@
 //! the same input steps exactly as the original did. What a session is told
 //! by its host is not part of it: where saves are written is the host's, so a
 //! restored session keeps writing where it was, and whether it is timing its
-//! steps is the host's choice too.
+//! steps is the host's choice too. So are the script sources, prefabs and
+//! profiles a host delivers as they are saved: a run taken back after a
+//! script was edited plays on with the edit, which recompiles on the next
+//! step, rather than with the text the copy was taken under.
 
 use super::Session;
 
@@ -23,11 +26,15 @@ impl Session {
     }
 
     /// Puts this session back as it was when `checkpoint` was taken, keeping
-    /// where its saves go and whether it is measuring. The world must be put
+    /// where its saves go, whether it is measuring, and the sources, prefabs
+    /// and profiles its host has delivered since. The world must be put
     /// back to the copy taken with it.
     pub fn restore(&mut self, checkpoint: &Checkpoint) {
         let mut restored = checkpoint.0.copied();
         std::mem::swap(&mut restored.save_backend, &mut self.save_backend);
+        std::mem::swap(&mut restored.sources, &mut self.sources);
+        std::mem::swap(&mut restored.prefabs, &mut self.prefabs);
+        std::mem::swap(&mut restored.profiles, &mut self.profiles);
         restored.measuring = self.measuring;
         restored.scripts.set_measuring(self.measuring);
         *self = restored;
@@ -65,5 +72,28 @@ impl Session {
             loaded: self.loaded.clone(),
             channel: self.channel.clone(),
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use sindri_decay::ScriptSources;
+
+    use super::Session;
+
+    /// A script saved after the copy was taken is still the script a restored
+    /// run plays.
+    #[test]
+    fn a_restored_session_keeps_the_sources_delivered_since() {
+        let mut first = ScriptSources::new();
+        first.insert("scripts/player.decay", "old");
+        let mut session =
+            Session::with_sources(sindri_core::ComponentSchemaRegistry::default(), first);
+        let copy = session.checkpoint();
+        let mut saved = ScriptSources::new();
+        saved.insert("scripts/player.decay", "new");
+        session.set_sources(saved);
+        session.restore(&copy);
+        assert_eq!(session.sources.get("scripts/player.decay"), Some("new"));
     }
 }

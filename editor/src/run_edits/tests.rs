@@ -277,3 +277,60 @@ fn a_scale_changed_while_the_run_moved_the_hero_keeps_the_scale_not_the_move() {
     );
     let _ = std::fs::remove_dir_all(folder);
 }
+
+/// Something made while playing may take a slot the run had emptied, which
+/// the restored scene still fills: kept, it is made at a slot that is free.
+#[test]
+fn something_made_where_the_run_freed_a_slot_is_kept_beside_what_was_there() {
+    let mut snapshot = World::default();
+    let pickup = snapshot.spawn(EntityData {
+        name: Some("Pickup".to_owned()),
+        ..EntityData::default()
+    });
+    let mut running = snapshot.clone();
+    running.despawn_recursive(pickup).expect("the run takes it");
+    let made = running.next_handle();
+    assert_eq!(made.index(), pickup.index(), "the freed slot is reused");
+    let mut edits = RunEdits::default();
+    let mut commands = CommandBuffer::new();
+    commands.push(WorldCommand::Spawn {
+        entity: made,
+        data: Box::new(EntityData {
+            name: Some("GameObject".to_owned()),
+            ..EntityData::default()
+        }),
+    });
+    edits
+        .apply(commands.into_transaction("Create"), &mut running)
+        .expect("made while playing");
+    edits.break_merge_run();
+    let mut commands = CommandBuffer::new();
+    commands.push(WorldCommand::SetName {
+        entity: made,
+        name: Some("Spawner".to_owned()),
+    });
+    edits
+        .apply(commands.into_transaction("Rename"), &mut running)
+        .expect("renamed while playing");
+
+    let mut history = CommandHistory::default();
+    for verdict in review(&edits.take(), &snapshot) {
+        let Verdict::Keep(transaction) = verdict else {
+            panic!("kept: {verdict:?}");
+        };
+        history
+            .apply(transaction, &mut snapshot)
+            .expect("lands in a free slot");
+    }
+    assert_eq!(
+        snapshot.get(pickup).and_then(|data| data.name.as_deref()),
+        Some("Pickup"),
+        "what was there stays"
+    );
+    assert!(
+        snapshot
+            .entities()
+            .any(|(_, data)| data.name.as_deref() == Some("Spawner")),
+        "and the new one is there, renamed"
+    );
+}

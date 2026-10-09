@@ -137,13 +137,17 @@ impl EditorApp {
         let Some(session) = self.session.as_mut() else {
             return;
         };
-        if let Some(recording) = self.recording.as_mut() {
-            recording.before_step(crate::recording::RecordedStep {
+        if let Some(recording) = self.recording.as_mut()
+            && let Some(carried_on) = recording.before_step(crate::recording::RecordedStep {
                 input: self.input.state().clone(),
                 viewport: view_size,
                 delta: fixed_delta.as_secs_f32(),
                 drawn: None,
-            });
+            })
+        {
+            // Taken back and carried on: what was edited after that point is
+            // no longer in the run, so Stop no longer offers it.
+            self.run_edits.forget_after(carried_on);
         }
         let stepped = session.step(
             &mut self.world,
@@ -316,6 +320,18 @@ impl EditorApp {
     /// Undo history is deliberately left alone. A script moving something is
     /// not an action the author took, so it was never on the history, and
     /// putting the world back does not change what undo means.
+    /// Lets a run go without offering anything back: the scene it was played
+    /// against is being replaced, so neither its world nor what was edited in
+    /// it has anywhere to go. Its recording and its edits go with it.
+    pub(in crate::native) fn abandon_run(&mut self) {
+        self.session = None;
+        self.play_snapshot = None;
+        self.recording = None;
+        self.play_audio.stop();
+        drop(self.run_edits.take());
+        self.stop_review = None;
+    }
+
     pub(in crate::native) fn stop_playback(&mut self) {
         // What the run saved is kept for the next one in this sitting.
         if let Some(mut session) = self.session.take() {

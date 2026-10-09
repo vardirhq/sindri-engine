@@ -116,7 +116,14 @@ impl EditorApp {
     pub(super) fn handle_shortcuts(&mut self, context: &egui::Context) {
         let typing = context.egui_wants_keyboard_input();
         let keys = context.input_mut(|input| pressed(input, typing));
-        let (copied, pasted) = context.input(|input| clipboard_keys(input, typing));
+        // Text selected in a label is what Ctrl+C copies, there as anywhere:
+        // the console's lines, a readout. Only with none is it the entities.
+        let selecting = context
+            .with_plugin(|labels: &mut egui::text_selection::LabelSelectionState| {
+                labels.has_selection()
+            })
+            .unwrap_or(false);
+        let (copied, pasted) = context.input(|input| clipboard_keys(input, typing || selecting));
         self.clipboard_keys(context, copied, pasted.as_deref());
         // Read whatever the transport is doing, so a key is consumed rather
         // than falling through to something else, and then acted on only where

@@ -4,7 +4,9 @@
 //! pauses the run, puts the world and session back to the recorded copy at or
 //! before the step, and steps forward with the recorded input, laying the
 //! screen out after the steps the Game view was drawn after, as it was then.
-//! Resuming carries on from there and lets the recorded future go.
+//! Edits made during the run are made again before the steps they were made
+//! before. Resuming carries on from there and lets the recorded future go,
+//! the edits in it included.
 
 use eframe::egui::{self, RichText};
 use sindri_core::EngineState;
@@ -60,13 +62,22 @@ impl EditorApp {
         else {
             return;
         };
-        let Some((mark, steps)) = recording.seek(target) else {
+        let Some(replay) = recording.seek(target) else {
             return;
         };
-        self.world = mark.world.clone();
-        session.restore(&mark.session);
+        self.world = replay.mark.world.clone();
+        session.restore(&replay.mark.session);
         let components = self.scene.components().clone();
-        for step in steps {
+        // Edits are made again as they were made, without a history: they
+        // are already recorded against the run.
+        let mut remade = sindri_core::CommandHistory::with_limit(0);
+        let mut edits = replay.edits.into_iter().peekable();
+        for (at, step) in (replay.mark.step..).zip(replay.steps) {
+            while let Some((_, edit)) = edits.next_if(|(made, _)| *made == at) {
+                if let Err(error) = remade.apply(edit, &mut self.world) {
+                    self.console.error(format!("Scrub: {error}"));
+                }
+            }
             if let Err(error) =
                 session.step(&mut self.world, &step.input, step.viewport, step.delta)
             {
@@ -92,6 +103,12 @@ impl EditorApp {
                 }
             }
         }
+        for (_, edit) in edits {
+            if let Err(error) = remade.apply(edit, &mut self.world) {
+                self.console.error(format!("Scrub: {error}"));
+            }
+        }
         recording.scrubbed_to(target);
+        self.break_merge_runs();
     }
 }

@@ -37,6 +37,8 @@ pub struct RunEdit {
     /// What each entity it wrote to was called, for saying which one.
     names: BTreeMap<EntityId, String>,
     merge_key: Option<String>,
+    /// How many steps of the run had run when it was made.
+    step: u64,
 }
 
 impl RunEdit {
@@ -78,6 +80,19 @@ impl RunEdits {
         &mut self,
         transaction: Transaction,
         world: &mut World,
+    ) -> Result<(), CommandError> {
+        self.apply_at(transaction, world, 0)
+    }
+
+    /// The same, made when `step` steps of the run had run.
+    ///
+    /// # Errors
+    /// The command layer's refusal, with the world unchanged.
+    pub fn apply_at(
+        &mut self,
+        transaction: Transaction,
+        world: &mut World,
+        step: u64,
     ) -> Result<(), CommandError> {
         let mut before = BTreeMap::new();
         let mut transforms = BTreeMap::new();
@@ -135,10 +150,18 @@ impl RunEdits {
                 transforms,
                 names,
                 merge_key,
+                step,
             }),
         }
         self.merging = true;
         Ok(())
+    }
+
+    /// Lets go of the edits made after `step`: the run was taken back there
+    /// and carried on, so they are no longer in it.
+    pub fn forget_after(&mut self, step: u64) {
+        self.edits.retain(|edit| edit.step <= step);
+        self.merging = false;
     }
 
     /// Ends a continuous interaction, so the next edit is its own.
@@ -177,10 +200,19 @@ pub enum Verdict {
 /// Entities an earlier edit in the list spawned count as there, on the
 /// assumption that edit is kept; if it is not, keeping a later one fails
 /// and says so then.
+///
+/// An entity made during the run was given the handle the running world had
+/// free, which may be a slot the run had emptied and the restored scene still
+/// fills; such a one is moved to a handle the restored scene has free, and
+/// every later edit naming it follows.
 #[must_use]
 pub fn review(edits: &[RunEdit], restored: &World) -> Vec<Verdict> {
+    let moved = free_handles(edits, restored);
     let mut made: BTreeSet<EntityId> = BTreeSet::new();
     edits
+        .iter()
+        .map(|edit| retargeted(edit, &moved))
+        .collect::<Vec<_>>()
         .iter()
         .map(|edit| {
             let verdict = review_one(edit, restored, &made);
@@ -282,6 +314,79 @@ fn review_one(edit: &RunEdit, restored: &World, made: &BTreeSet<EntityId>) -> Ve
         }
     }
     Verdict::Keep(commands.into_transaction(edit.label.clone()))
+}
+
+/// Where each entity the edits make can be made in `restored`: its own handle
+/// when that slot is free there, else the next one that is.
+fn free_handles(edits: &[RunEdit], restored: &World) -> BTreeMap<EntityId, EntityId> {
+    let mut rehearsal = restored.clone();
+    let mut moved = BTreeMap::new();
+    for command in edits.iter().flat_map(|edit| &edit.commands) {
+        let WorldCommand::Spawn { entity, data } = command else {
+            continue;
+        };
+        if rehearsal.spawn_at(*entity, (**data).clone()).is_err() {
+            let free = rehearsal.next_handle();
+            if rehearsal.spawn_at(free, (**data).clone()).is_ok() {
+                moved.insert(*entity, free);
+            }
+        }
+    }
+    moved
+}
+
+/// `edit` with every handle in `moved` replaced by where it moved to.
+fn retargeted(edit: &RunEdit, moved: &BTreeMap<EntityId, EntityId>) -> RunEdit {
+    if moved.is_empty() {
+        return edit.clone();
+    }
+    let to = |entity: EntityId| moved.get(&entity).copied().unwrap_or(entity);
+    let mut edit = edit.clone();
+    for command in &mut edit.commands {
+        match command {
+            WorldCommand::Spawn { entity, data } => {
+                *entity = to(*entity);
+                data.parent = data.parent.map(to);
+                for child in &mut data.children {
+                    *child = to(*child);
+                }
+            }
+            WorldCommand::SetParent { entity, parent } => {
+                *entity = to(*entity);
+                *parent = parent.map(to);
+            }
+            WorldCommand::Restore { root, entities, .. } => {
+                *root = to(*root);
+                for (entity, data) in entities {
+                    *entity = to(*entity);
+                    data.parent = data.parent.map(to);
+                }
+            }
+            WorldCommand::SetName { entity, .. }
+            | WorldCommand::SetSourceId { entity, .. }
+            | WorldCommand::SetTransform3D { entity, .. }
+            | WorldCommand::SetComponent { entity, .. }
+            | WorldCommand::RemoveComponent { entity, .. }
+            | WorldCommand::SetDisabled { entity, .. }
+            | WorldCommand::SetEditorEntry { entity, .. }
+            | WorldCommand::SetPrefabLink { entity, .. }
+            | WorldCommand::Despawn { entity } => *entity = to(*entity),
+            WorldCommand::SetSceneName { .. } => {}
+        }
+    }
+    edit.before = std::mem::take(&mut edit.before)
+        .into_iter()
+        .map(|((entity, kind), value)| ((to(entity), kind), value))
+        .collect();
+    edit.transforms = std::mem::take(&mut edit.transforms)
+        .into_iter()
+        .map(|(entity, value)| (to(entity), value))
+        .collect();
+    edit.names = std::mem::take(&mut edit.names)
+        .into_iter()
+        .map(|(entity, name)| (to(entity), name))
+        .collect();
+    edit
 }
 
 /// `current` with the parts of a transform that went from `before` to

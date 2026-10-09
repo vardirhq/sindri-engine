@@ -2,11 +2,11 @@
 //!
 //! Duplicate puts a copy beside the original at once; copy and paste let the
 //! copy land somewhere else, later: under another entity, at the top level,
-//! or at a point in the Scene view. The clipboard keeps a copy of the world as
-//! it was when Copy was pressed, so what is pasted is what was copied even if
-//! the original has since been changed or deleted, and a prefab instance
-//! copied whole pastes as a new instance of the same prefab, as a duplicate
-//! does (`duplicate.rs`).
+//! or at a point in the Scene view. The clipboard keeps the copied subtrees as
+//! they were when Copy was pressed, in a world of their own, so what is pasted
+//! is what was copied even if the original has since been changed or deleted,
+//! and a prefab instance copied whole pastes as a new instance of the same
+//! prefab, as a duplicate does (`duplicate.rs`).
 //!
 //! The clipboard is the editor's own, not the system's: an entity is a
 //! subtree of components that only this editor reads. The system's is given
@@ -18,7 +18,7 @@
 
 use eframe::egui;
 use glam::Vec3;
-use sindri_core::{CommandBuffer, EntityId, World};
+use sindri_core::{CommandBuffer, EntityId, Transform3D, World};
 
 use super::duplicate::copy_under;
 use crate::native::EditorApp;
@@ -26,10 +26,12 @@ use crate::selection;
 
 /// What Copy took.
 pub(in crate::native) struct Clipboard {
-    /// The world when Copy was pressed.
+    /// The copied subtrees, at their own handles, each root standing where
+    /// it stood in the world and under nothing.
     world: World,
-    /// The topmost entities copied, in the order they were listed.
-    roots: Vec<EntityId>,
+    /// The topmost entities copied, in the order they were listed, each with
+    /// where it stood under its parent.
+    roots: Vec<(EntityId, Option<Transform3D>)>,
     /// Their names, as given to the system clipboard.
     text: String,
     /// Whether the system clipboard has been given `text` yet: a menu copies
@@ -60,9 +62,27 @@ impl EditorApp {
             .map(|&root| self.entity_label(root))
             .collect::<Vec<_>>()
             .join("\n");
+        let mut kept = World::default();
+        let mut placed = Vec::with_capacity(roots.len());
+        for &root in &roots {
+            let Ok(subtree) = self.world.capture_subtree(root) else {
+                continue;
+            };
+            let local = self.world.get(root).and_then(|data| data.transform_3d);
+            let in_world = self.world.world_transform(root);
+            for (entity, mut data) in subtree {
+                if entity == root {
+                    data.parent = None;
+                    data.transform_3d = in_world.or(data.transform_3d);
+                }
+                // At the handles they had, which no two subtrees share.
+                let _ = kept.spawn_at(entity, data);
+            }
+            placed.push((root, local));
+        }
         self.clipboard = Some(Clipboard {
-            world: self.world.clone(),
-            roots,
+            world: kept,
+            roots: placed,
             text,
             written: false,
         });
@@ -106,7 +126,8 @@ impl EditorApp {
     /// Pastes what was copied under `parent`, or at the top level, and selects
     /// it. At the top level each copy keeps where it was in the world; under
     /// an entity it keeps where it was under its own parent. Given `at`, the
-    /// first copy lands there and the rest keep their places around it.
+    /// first copy lands over that point, at its own depth, and the rest keep
+    /// their places around it.
     pub(in crate::native) fn paste(&mut self, parent: Option<EntityId>, at: Option<Vec3>) {
         let Some(clipboard) = self.clipboard.as_ref() else {
             return;
@@ -114,17 +135,21 @@ impl EditorApp {
         let origin = clipboard
             .roots
             .first()
-            .and_then(|&root| clipboard.world.world_transform(root))
+            .and_then(|&(root, _)| clipboard.world.world_transform(root))
             .map(|transform| Vec3::from_array(transform.position));
         let mut buffer = CommandBuffer::new();
         let mut rehearsal = self.world.clone();
         let mut pasted = Vec::new();
-        for &root in &clipboard.roots {
+        for &(root, local) in &clipboard.roots {
             let placed = if parent.is_some() {
-                None
+                local
             } else {
                 clipboard.world.world_transform(root).map(|mut transform| {
                     if let (Some(at), Some(origin)) = (at, origin) {
+                        // Moved across the plane the point was picked in,
+                        // keeping its depth: a sprite drawn above the
+                        // background is pasted above it.
+                        let at = Vec3::new(at.x, at.y, origin.z);
                         let offset = Vec3::from_array(transform.position) - origin;
                         transform.position = (at + offset).to_array();
                     }
