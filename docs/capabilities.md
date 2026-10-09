@@ -180,6 +180,14 @@ is not saved between sessions.
 
 ### Audio
 
+The standalone `tools/sindri-chiptune` Sound Lab now has a cached A/B score,
+undoable monophonic piano-roll edits, live mixer/tempo changes, shaped procedural
+harmony/motifs/percussion and bounded MIDI note import/export. Its native layout
+is exercised in egui tests and an Xvfb capture; MIDI and composition tests verify
+structural behavior. Actual audio-device audition remains unverified here. This
+is an isolated tool, not an Engine / Editor / Decay capability or game proof.
+
+
 Audio is a platform service rather than simulation state. Encoded WAV, Ogg, and
 MP3 assets are identified and validated by the asset layer, then registered with
 an `AudioBackend`. Native hosts use Rodio/CPAL, browser hosts use media elements

@@ -14,6 +14,7 @@ use std::{
 pub(super) enum Command {
     Update(Settings),
     Replace(Settings, [Vec<Note>; 3]),
+    Edit([Vec<Note>; 3]),
     Seek(usize),
     Loop(bool),
 }
@@ -60,7 +61,19 @@ impl LiveSource {
     fn refresh(&mut self) {
         while let Ok(command) = self.rx.try_recv() {
             match command {
-                Command::Update(settings) => self.settings = settings,
+                Command::Update(settings) => {
+                    // Preserve musical position across tempo changes, then re-seek cursors.
+                    self.sample = (f64::from(u32::try_from(self.sample).expect("short song"))
+                        * self.settings.bpm
+                        / settings.bpm)
+                        .round() as u64;
+                    self.settings = settings;
+                    self.cursors = [0; 3];
+                }
+                Command::Edit(tracks) => {
+                    self.tracks = tracks;
+                    self.cursors = [0; 3];
+                }
                 Command::Replace(settings, tracks) => {
                     self.settings = settings;
                     self.tracks = tracks;
@@ -145,8 +158,19 @@ impl LiveSource {
 }
 impl Iterator for LiveSource {
     type Item = f32;
+    // The fixed song length fits in u64 samples for the supported tempo range.
+    #[allow(clippy::cast_possible_truncation, clippy::cast_sign_loss)]
     fn next(&mut self) -> Option<Self::Item> {
         if self.offset == self.buffer.len() {
+            self.refresh();
+            if !self.looped
+                && self.sample
+                    >= (f64::from(u32::try_from(STEPS).expect("steps"))
+                        * self.step()
+                        * f64::from(RATE)) as u64
+            {
+                return None;
+            }
             self.fill();
         }
         let sample = self.buffer[self.offset];
@@ -172,6 +196,42 @@ impl Source for LiveSource {
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[test]
+    fn tempo_updates_preserve_musical_position() {
+        let settings = Settings::default();
+        let (mut source, transport) =
+            LiveSource::new(settings.clone(), crate::desktop::compose_with(&settings));
+        source.sample = 44_100;
+        let mut changed = settings;
+        changed.bpm *= 2.0;
+        transport.tx.send(Command::Update(changed)).expect("send");
+        source.refresh();
+        assert_eq!(source.sample, 22_050);
+        assert_eq!(source.cursors, [0; 3]);
+    }
+    #[test]
+    fn note_edits_preserve_the_timeline() {
+        let settings = Settings::default();
+        let (mut source, transport) =
+            LiveSource::new(settings.clone(), crate::desktop::compose_with(&settings));
+        source.sample = 44_100;
+        transport
+            .tx
+            .send(Command::Edit(std::array::from_fn(|_| Vec::new())))
+            .expect("send");
+        source.refresh();
+        assert_eq!(source.sample, 44_100);
+        assert!(source.tracks.iter().all(Vec::is_empty));
+    }
+    #[test]
+    fn non_looping_playback_finishes() {
+        let settings = Settings::default();
+        let (mut source, transport) =
+            LiveSource::new(settings.clone(), crate::desktop::compose_with(&settings));
+        source.sample = 6_000_000;
+        transport.tx.send(Command::Loop(false)).expect("send");
+        assert!(source.next().is_none());
+    }
     #[test]
     fn live_updates_do_not_reset_position() {
         let settings = Settings::default();

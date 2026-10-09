@@ -146,7 +146,7 @@ impl TrackSound {
     }
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq)]
 pub(super) struct Rack {
     pub(super) tracks: [TrackSound; 4],
 }
@@ -184,9 +184,10 @@ mod tests {
     }
     #[test]
     fn presets_have_different_samples() {
-        assert_ne!(
-            Preset::Bell.sample(0.23, 0.1, 0.4),
-            Preset::BrightSquare.sample(0.23, 0.1, 0.4)
+        assert!(
+            (Preset::Bell.sample(0.23, 0.1, 0.4) - Preset::BrightSquare.sample(0.23, 0.1, 0.4))
+                .abs()
+                > 0.01
         );
     }
 }

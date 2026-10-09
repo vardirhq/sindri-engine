@@ -301,6 +301,7 @@ Sindri's strongest domain relative to the baseline.
 | **Spatial audio / panning** | ❌ | ❌ | ❌ | ❌ | **Absent** | — |
 | **Per-voice handles** | ❌ | — | ❌ | — | **Behind** | A script cannot stop the specific sound it started |
 | **Music transitions / crossfade** | ❌ | ❌ | ❌ | ❌ | **Absent** | — |
+| **Procedural music authoring / MIDI note editing** | ❌ | ❌ | ❌ | ❌ | **Absent in engine** | `tools/sindri-chiptune` is a standalone native prototype with generated motifs, editable monophonic scores and bounded MIDI interchange. Native tests and Xvfb layout capture are tool evidence, not Engine / Editor / Decay or game proof; audio-device audition remains unverified |
 
 ## Input
 

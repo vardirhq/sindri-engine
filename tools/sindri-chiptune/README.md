@@ -1,82 +1,90 @@
-# Sindri Chiptune Lab: Composer V2
+# Sindri Sound Lab
 
-Standalone Rust composition laboratory. **No Sindri editor or runtime integration.**
+A standalone native chiptune workstation. No Sindri editor or runtime integration.
 
 ```sh
 cargo run -p sindri-chiptune
 ```
 
-The redesigned desktop UI contains a four-track instrument rack, composition settings, four-section
-arrangement information, an eight-bar piano-roll comparison for two seed
-candidates, A/B auditioning through a continuous sample source and explicit WAV export. Each part has an independent preset, volume, mute, solo and (for tonal parts) octave shift. These modify the render, not the composed notes.
+The persistent transport sits above a composition inspector, editable piano roll
+and four-part mixer. On compact windows the mixer joins the scrollable inspector.
+Amber marks transport/actions; blue, purple, mint and copper identify the voices.
 
-## What V2 changes
+## Compose, edit, listen
 
-- Hierarchical composition: a style determines scale, harmonic progression,
-  groove, note density and melodic movement, with a four-section energy curve.
-- Four genuinely different strategies: mysterious exploration (modal,
-  spacious), hopeful adventure (major, bouncing), tense action (chromatic,
-  driving), and melancholic reflection (minor, slow-moving).
-- Seeded 64-candidate motif search with a small structural scoring function.
-  Chosen motifs repeat and develop across sections; the middle section
-  introduces a second theme.
-- Style-dependent bass rhythm, chord arpeggiation, melody rests, instrument
-  articulation and pulse duty.
-- A/B comparison displays the first eight bars of actual generated note
-  events for the current seed and the next seed. Play either without saving
-  a file. WAV export saves the selected base seed.
-- Independent random streams for the planning, bass, arpeggio and lead.
+1. Choose mood, key, seed and density, then **Generate A + B**. The two scores are
+   cached; painting the UI never recomposes the song. Generation replaces both
+   candidates and clears note-edit history.
+2. Select A or B and press **Play**. Switching candidates or generating a new
+   pair intentionally restarts playback. Pause/resume, stop, loop, restart and
+   clicking the bar ruler control the transport.
+3. Choose Bass, Arpeggio or Lead. Click empty space to add a note, click a note to
+   select it, drag to move it or right-click to delete it. The selected-note
+   inspector changes pitch, duration and velocity. Notes snap to sixteenth
+   steps. Undo/redo retains up to 64 edits. One voice per tonal part means
+   overlapping edits are rejected and rolled back.
+4. Choose an eight-bar section. Scroll the piano roll horizontally to see all
+   eight bars. **Fit notes** and the pitch-window control choose the displayed
+   two-octave register; notes outside that register remain in the score.
+5. Adjust sounds, levels, mute/solo, octave or tempo while listening. Note edits
+   and tempo changes preserve musical position. Mood/key/seed/density wait for
+   Generate. These draft changes cannot silently alter the playing score.
+6. Export the **selected** score as WAV or MIDI. WAV includes the rack settings
+   and generated percussion; MIDI contains raw tonal notes and song tempo.
 
-Note-data generation is deterministic for the same settings and seed.
-The synthesizer is inspired by early handheld hardware but is not a precise
-hardware emulator. Human listening is still required to judge musical quality.
+## Musical structure
 
-## Headless export
+Four styles use major, minor, Dorian or Phrygian harmony. Chords stack thirds in
+that style's scale instead of applying one major/minor chord shape everywhere.
+A seeded motif search favors bounded, balanced contours. The lead keeps a hook
+in the global key, resolves accents to chord tones, repeats a question/answer
+phrase, leaves cadence breaths and lands on the tonic. The rise uses a second
+motif and the return recalls the original. Intro and return strip back activity.
+The percussion voice combines a pitched kick, backbeat, short hats and fills.
+
+The synthesizer offers 12 tonal presets and 3 percussion kits. These are software
+interpretations, not cycle-accurate hardware emulations. Structural tests do not
+prove a song is enjoyable; listening remains the subjective acceptance gate.
+
+## MIDI interchange
+
+**Export MIDI** writes Standard MIDI File format 1: a tempo/time-signature track
+and three tonal channels at 480 ticks per quarter. Notes, durations and velocities
+round-trip; synth presets, mixer gains, mute/solo and octave shifts are not MIDI
+note edits and are not encoded. The procedural percussion voice is not exported.
+
+**Import MIDI** replaces the selected candidate after validation. It accepts
+format 0/1, metrical timing, constant 60–220 BPM, 4/4 and at most three nonempty
+monophonic tonal channels, mapped in channel order. Imported timing is quantized
+to sixteenths and must fit 32 bars. Unsupported polyphony, percussion, sustain,
+pitch bends, tempo changes, meters and malformed files produce explicit errors.
+Other controller/program/metadata events are not interpreted. This is bounded
+note interchange, not a general DAW or hardware-MIDI interface.
+
+## Headless WAV export
 
 ```sh
-cargo run -p sindri-chiptune -- --seed 42 --output composition.wav
+cargo run -p sindri-chiptune -- --seed 42 --mood hopeful --output composition.wav
 cargo run -p sindri-chiptune -- --seed 43 --bpm 140 --key 5 --energy 0.7 --output variation.wav
 ```
 
-GUI mood changes the generation style. The CLI currently defaults to
-Mysterious; CLI mood flags are not part of this iteration.
+`--mood`: mysterious, hopeful, tense or melancholic. Linux builds need ALSA
+headers. Desktop modules and dependencies are excluded from the WASM build; its
+binary is an inert stub, not a browser workstation. No new dependencies were added.
 
-## Boundaries / known limitations
-
-Everything stays under `tools/sindri-chiptune/` and depends only on
-eframe and native Rodio. The synthesizer offers 12 tonal presets and 3 percussion kits; these are software-synthesis interpretations, not cycle-accurate chip emulations. Preview is rendered to memory, not streamed
-incrementally; long previews must render before playback. Linux audio may
-require ALSA development packages. The structure is still fixed at 32 bars.
-Candidate scoring is explicit heuristic search, not ML or AI. A/B comparison
-is not yet a full selective-track editing system.
-
-## Validation
+## Validation / remaining limits
 
 ```sh
 cargo fmt --all --check
 RUSTFLAGS="-D warnings" cargo check -p sindri-chiptune --all-targets --all-features
 cargo clippy -p sindri-chiptune --all-targets --all-features -- -D warnings
 cargo test -p sindri-chiptune --all-features
+cargo check -p sindri-chiptune --all-features --target wasm32-unknown-unknown
 ```
 
-Tests include deterministic generation, note bounds, contrasting mood
-arrangements, and seed-dependent melodic pitch changes. Listening against
-the original prototype is the next subjective acceptance gate.
-
-
-## Live workflow (experimental)
-
-**Play A** starts continuous synthesis rather than pre-rendering 32 bars.
-While audio plays, adjust instrument preset, mute, solo, level, octave, energy
-or tempo. The audio thread reads parameter updates between 256-sample blocks,
-without rebuilding a WAV or restarting the transport. **Switch B** updates
-the song notes using the next seed; **Pause**, **Stop**, **Loop**, and bar
-seek are available on the transport. Export continues to use offline rendering
-and does not interrupt live playback.
-
-The real-time source lives in `src/live.rs`, separate from `composer.rs`,
-`instruments.rs`, and the egui presentation. The source uses a message queue
-for parameter updates and keeps note cursors in the audio thread. This is an
-experimental transport, not yet a fully optimized, sample-accurate game-audio
-engine. Performance, synchronization at song transitions, and auditory quality
-still require local hands-on validation.
+Tests cover monophonic in-key generation over many seeds, tonic resolution, motif
+recurrence, MIDI round-trip/malformed input, cached scores, undo/redo, overlap
+rollback, compact/wide layout, live edits, tempo continuity and non-loop completion.
+Native layout has been captured under Xvfb. Real audio-device audition remains
+unverified here. Arrangement length is fixed at 32 bars; no project persistence,
+editable drum score, MIDI controllers, effects or editor integration yet.
