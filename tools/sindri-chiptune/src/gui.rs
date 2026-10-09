@@ -1,6 +1,6 @@
 //! Standalone Chiptune Lab user interface. No Sindri editor dependencies.
-use super::{Mood, RATE, Settings, compose_with, render_samples, render_with};
 use super::instruments::Preset;
+use super::{Mood, RATE, Settings, compose_with, render_samples, render_with};
 use eframe::egui::{self, Color32, RichText};
 use rodio::{
     Player,
@@ -266,15 +266,25 @@ impl ComposerApp {
     }
     fn instrument_rack(&mut self, ui: &mut egui::Ui) {
         ui.heading("Instrument rack");
-        ui.label(RichText::new("Change sounds without changing the composition").color(Color32::from_gray(160)));
+        ui.label(
+            RichText::new("Change sounds without changing the composition")
+                .color(Color32::from_gray(160)),
+        );
         ui.add_space(8.0);
-        for (index, title) in ["BASS", "HARMONY / ARP", "LEAD", "PERCUSSION"].iter().enumerate() {
+        for (index, title) in ["BASS", "HARMONY / ARP", "LEAD", "PERCUSSION"]
+            .iter()
+            .enumerate()
+        {
             let track = &mut self.settings.rack.tracks[index];
             egui::Frame::group(ui.style()).show(ui, |ui| {
                 ui.horizontal(|ui| {
                     ui.label(RichText::new(format!("{}  {}", index + 1, title)).strong());
                     ui.separator();
-                    let presets: &[Preset] = if index == 3 { &Preset::DRUMS } else { &Preset::TONAL };
+                    let presets: &[Preset] = if index == 3 {
+                        &Preset::DRUMS
+                    } else {
+                        &Preset::TONAL
+                    };
                     egui::ComboBox::from_id_salt(("preset", index))
                         .selected_text(track.preset.name())
                         .width(145.0)
@@ -296,7 +306,9 @@ impl ComposerApp {
                 });
             });
         }
-        ui.small("Changes affect the next preview or export. They never regenerate the note patterns.");
+        ui.small(
+            "Changes affect the next preview or export. They never regenerate the note patterns.",
+        );
     }
 
     fn arrangement(&self, ui: &mut egui::Ui) {

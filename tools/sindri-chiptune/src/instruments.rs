@@ -3,28 +3,54 @@ use std::f64::consts::TAU;
 
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
 pub(super) enum Preset {
-    WarmTriangle, DeepBass, RubberBass, SoftSquare, BrightSquare,
-    HollowPulse, Bell, Glass, Detuned, SawLead, Organ, SoftPluck,
-    SoftNoise, CrispNoise, IndustrialNoise,
+    WarmTriangle,
+    DeepBass,
+    RubberBass,
+    SoftSquare,
+    BrightSquare,
+    HollowPulse,
+    Bell,
+    Glass,
+    Detuned,
+    SawLead,
+    Organ,
+    SoftPluck,
+    SoftNoise,
+    CrispNoise,
+    IndustrialNoise,
 }
 impl Preset {
     pub(super) const TONAL: [Self; 12] = [
-        Self::WarmTriangle, Self::DeepBass, Self::RubberBass, Self::SoftSquare,
-        Self::BrightSquare, Self::HollowPulse, Self::Bell, Self::Glass,
-        Self::Detuned, Self::SawLead, Self::Organ, Self::SoftPluck,
+        Self::WarmTriangle,
+        Self::DeepBass,
+        Self::RubberBass,
+        Self::SoftSquare,
+        Self::BrightSquare,
+        Self::HollowPulse,
+        Self::Bell,
+        Self::Glass,
+        Self::Detuned,
+        Self::SawLead,
+        Self::Organ,
+        Self::SoftPluck,
     ];
-    pub(super) const DRUMS: [Self; 3] = [
-        Self::SoftNoise, Self::CrispNoise, Self::IndustrialNoise,
-    ];
+    pub(super) const DRUMS: [Self; 3] = [Self::SoftNoise, Self::CrispNoise, Self::IndustrialNoise];
     pub(super) fn name(self) -> &'static str {
         match self {
-            Self::WarmTriangle => "Warm Triangle", Self::DeepBass => "Deep Bass",
-            Self::RubberBass => "Rubber Bass", Self::SoftSquare => "Soft Square",
-            Self::BrightSquare => "Bright Square", Self::HollowPulse => "Hollow Pulse",
-            Self::Bell => "Bell Pluck", Self::Glass => "Glass Arpeggio",
-            Self::Detuned => "Detuned Pulse", Self::SawLead => "Saw Lead",
-            Self::Organ => "Chip Organ", Self::SoftPluck => "Soft Pluck",
-            Self::SoftNoise => "Soft Percussion", Self::CrispNoise => "Crisp Drums",
+            Self::WarmTriangle => "Warm Triangle",
+            Self::DeepBass => "Deep Bass",
+            Self::RubberBass => "Rubber Bass",
+            Self::SoftSquare => "Soft Square",
+            Self::BrightSquare => "Bright Square",
+            Self::HollowPulse => "Hollow Pulse",
+            Self::Bell => "Bell Pluck",
+            Self::Glass => "Glass Arpeggio",
+            Self::Detuned => "Detuned Pulse",
+            Self::SawLead => "Saw Lead",
+            Self::Organ => "Chip Organ",
+            Self::SoftPluck => "Soft Pluck",
+            Self::SoftNoise => "Soft Percussion",
+            Self::CrispNoise => "Crisp Drums",
             Self::IndustrialNoise => "Industrial Kit",
         }
     }
@@ -34,16 +60,36 @@ impl Preset {
             Self::WarmTriangle => 1.0 - 4.0 * (p - 0.5).abs(),
             Self::DeepBass => (TAU * p).sin() * 0.85 + (TAU * p * 2.0).sin() * 0.15,
             Self::RubberBass => (TAU * p).sin() * 0.55 + if p < 0.3 { 0.3 } else { -0.3 },
-            Self::SoftSquare => if p < 0.5 { 0.7 } else { -0.7 },
-            Self::BrightSquare => if p < 0.5 { 1.0 } else { -1.0 },
-            Self::HollowPulse => if p < 0.125 { 1.0 } else { -1.0 },
+            Self::SoftSquare => {
+                if p < 0.5 {
+                    0.7
+                } else {
+                    -0.7
+                }
+            }
+            Self::BrightSquare => {
+                if p < 0.5 {
+                    1.0
+                } else {
+                    -1.0
+                }
+            }
+            Self::HollowPulse => {
+                if p < 0.125 {
+                    1.0
+                } else {
+                    -1.0
+                }
+            }
             Self::Bell => (TAU * p).sin() * 0.65 + (TAU * p * 2.51).sin() * 0.3,
             Self::Glass => (TAU * p).sin() * 0.6 + (TAU * p * 4.0).sin() * 0.32,
             Self::Detuned => {
                 (if p < 0.25 { 1.0 } else { -1.0 }) * 0.6 + (TAU * p * 1.009).sin() * 0.4
             }
             Self::SawLead => 2.0 * p - 1.0,
-            Self::Organ => (TAU * p).sin() * 0.5 + (TAU * p * 2.0).sin() * 0.3 + (TAU * p * 3.0).sin() * 0.2,
+            Self::Organ => {
+                (TAU * p).sin() * 0.5 + (TAU * p * 2.0).sin() * 0.3 + (TAU * p * 3.0).sin() * 0.2
+            }
             Self::SoftPluck => (TAU * p).sin() * 0.8 + (TAU * p * 3.0).sin() * 0.15,
             _ => 0.0,
         }
@@ -67,7 +113,9 @@ impl Preset {
             Self::IndustrialNoise => 0.22,
             _ => 0.0,
         };
-        if age > length || length == 0.0 { return 0.0; }
+        if age > length || length == 0.0 {
+            return 0.0;
+        }
         let texture = match self {
             Self::SoftNoise => 0.45,
             Self::CrispNoise => 0.8,
@@ -88,7 +136,13 @@ pub(super) struct TrackSound {
 }
 impl TrackSound {
     const fn new(preset: Preset, volume: f32) -> Self {
-        Self { preset, volume, muted: false, solo: false, octave: 0 }
+        Self {
+            preset,
+            volume,
+            muted: false,
+            solo: false,
+            octave: 0,
+        }
     }
 }
 
@@ -98,12 +152,14 @@ pub(super) struct Rack {
 }
 impl Default for Rack {
     fn default() -> Self {
-        Self { tracks: [
-            TrackSound::new(Preset::WarmTriangle, 0.65),
-            TrackSound::new(Preset::Glass, 0.42),
-            TrackSound::new(Preset::HollowPulse, 0.65),
-            TrackSound::new(Preset::SoftNoise, 0.38),
-        ] }
+        Self {
+            tracks: [
+                TrackSound::new(Preset::WarmTriangle, 0.65),
+                TrackSound::new(Preset::Glass, 0.42),
+                TrackSound::new(Preset::HollowPulse, 0.65),
+                TrackSound::new(Preset::SoftNoise, 0.38),
+            ],
+        }
     }
 }
 impl Rack {
@@ -128,6 +184,9 @@ mod tests {
     }
     #[test]
     fn presets_have_different_samples() {
-        assert_ne!(Preset::Bell.sample(0.23, 0.1, 0.4), Preset::BrightSquare.sample(0.23, 0.1, 0.4));
+        assert_ne!(
+            Preset::Bell.sample(0.23, 0.1, 0.4),
+            Preset::BrightSquare.sample(0.23, 0.1, 0.4)
+        );
     }
 }

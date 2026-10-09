@@ -95,23 +95,36 @@ fn voice(notes: &[Note], t: f64, step: f64, sound: instruments::TrackSound) -> f
         let start = f64::from(u32::try_from(n.start).expect("start")) * step;
         t >= start && t < start + f64::from(u32::try_from(n.len).expect("length")) * step
     });
-    let Some(note) = active else { return 0.0; };
+    let Some(note) = active else {
+        return 0.0;
+    };
     let local = t - f64::from(u32::try_from(note.start).expect("start")) * step;
     let duration = f64::from(u32::try_from(note.len).expect("length")) * step;
     let hz = freq(note.pitch + sound.octave * 12);
     sound.preset.sample(t * hz, local, duration) * f64::from(note.velocity) / 127.0
 }
 
-fn noise(seed: u64, time: f64, step: f64, energy: f64, mood: Mood, preset: instruments::Preset) -> f64 {
+fn noise(
+    seed: u64,
+    time: f64,
+    step: f64,
+    energy: f64,
+    mood: Mood,
+    preset: instruments::Preset,
+) -> f64 {
     let tick = (time / step).floor() as usize;
-    if tick >= STEPS { return 0.0; }
+    if tick >= STEPS {
+        return 0.0;
+    }
     let hit = match mood {
         Mood::Mysterious => tick % 8 == 0,
         Mood::Hopeful => tick % 4 == 0,
         Mood::Tense => tick % 2 == 0,
         Mood::Melancholic => tick % 16 == 8,
     };
-    if !hit || (tick / 16 < 8 && matches!(mood, Mood::Mysterious | Mood::Melancholic)) { return 0.0; }
+    if !hit || (tick / 16 < 8 && matches!(mood, Mood::Mysterious | Mood::Melancholic)) {
+        return 0.0;
+    }
     let phase = time % step;
     let sample_index = (time * f64::from(RATE)) as u64;
     let mut x = sample_index ^ seed ^ 0xabcd_1234;
@@ -146,13 +159,21 @@ fn render_samples(settings: &Settings, tracks: &[Vec<Note>; 3]) -> Vec<f32> {
             if settings.rack.audible(channel) {
                 let sound = settings.rack.tracks[channel];
                 mixed += voice(&tracks[channel][cursors[channel]..], t, step, sound)
-                    * f64::from(sound.volume) * 0.45;
+                    * f64::from(sound.volume)
+                    * 0.45;
             }
         }
         if settings.rack.audible(3) {
             let sound = settings.rack.tracks[3];
-            mixed += noise(settings.seed, t, step, settings.energy, settings.mood, sound.preset)
-                * f64::from(sound.volume) * 0.55;
+            mixed += noise(
+                settings.seed,
+                t,
+                step,
+                settings.energy,
+                settings.mood,
+                sound.preset,
+            ) * f64::from(sound.volume)
+                * 0.55;
         }
         let sample = (mixed.clamp(-1.0, 1.0) * 32767.0).round() as i16;
         audio.push(f32::from(sample) / 32767.0);
@@ -208,7 +229,9 @@ fn main() -> Result<(), Box<dyn Error>> {
                     "tense" => Mood::Tense,
                     "melancholic" => Mood::Melancholic,
                     _ => {
-                        return Err("mood must be mysterious, hopeful, tense, or melancholic".into());
+                        return Err(
+                            "mood must be mysterious, hopeful, tense, or melancholic".into()
+                        );
                     }
                 }
             }
