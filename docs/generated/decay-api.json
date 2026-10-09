@@ -64,7 +64,7 @@
       "type": "Grid"
     },
     {
-      "description": "The keyboard. Keys are named by position, such as `\"W\"`, `\"ArrowLeft\"` or `\"Space\"`, so controls work on any keyboard layout.",
+      "description": "Every way the player reaches the game, in one place. Start with `Input.Action`, which works the same whatever the player holds; `Input.Pointer`, `Input.Stick` and `Input.Gesture` for mouse and touch; `Input.Keyboard`, `Input.Touch` and `Input.Gamepad` for one device read directly. The calls directly on `Input` are the keyboard, kept for older scripts: prefer `Input.Keyboard`.",
       "kind": "value",
       "name": "Input",
       "type": "Input"
@@ -1656,10 +1656,52 @@
       "name": "Grid"
     },
     {
-      "description": "The keyboard. Keys are named by position, such as `\"W\"`, `\"ArrowLeft\"` or `\"Space\"`, so controls work on any keyboard layout.",
+      "description": "Every way the player reaches the game, in one place. Start with `Input.Action`, which works the same whatever the player holds; `Input.Pointer`, `Input.Stick` and `Input.Gesture` for mouse and touch; `Input.Keyboard`, `Input.Touch` and `Input.Gamepad` for one device read directly. The calls directly on `Input` are the keyboard, kept for older scripts: prefer `Input.Keyboard`.",
       "members": [
         {
-          "description": "-1, 0 or 1 from a pair of keys, for movement: `Input.axis(\"A\", \"D\")` is -1 holding A, 1 holding D and 0 for neither or both.",
+          "description": "What the player means, such as `\"jump\"` or `\"move\"`, from the actions the scene declares. The best place to start: one script works with keys, a controller or a touch screen. The same as `Action`.",
+          "kind": "value",
+          "name": "Action",
+          "type": "Action"
+        },
+        {
+          "description": "Game controllers, read by player number. The same as `Gamepad`.",
+          "kind": "value",
+          "name": "Gamepad",
+          "type": "Gamepad"
+        },
+        {
+          "description": "Taps, holds, drags and pinches, for touch-first controls. The same as `Gesture`.",
+          "kind": "value",
+          "name": "Gesture",
+          "type": "Gesture"
+        },
+        {
+          "description": "The keys, named by position so controls work on any keyboard layout.",
+          "kind": "value",
+          "name": "Keyboard",
+          "type": "Keyboard"
+        },
+        {
+          "description": "The mouse, or a finger on a touch screen, handled the same way so one game works on both. The same as `Pointer`.",
+          "kind": "value",
+          "name": "Pointer",
+          "type": "Pointer"
+        },
+        {
+          "description": "A virtual joystick for touch screens: wherever a thumb lands becomes the center, and dragging from there steers. The same as `Stick`.",
+          "kind": "value",
+          "name": "Stick",
+          "type": "Stick"
+        },
+        {
+          "description": "Every finger on a touch screen, for games that need more than one. For steering, `Input.Stick` is simpler. The same as `Touch`.",
+          "kind": "value",
+          "name": "Touch",
+          "type": "Touch"
+        },
+        {
+          "description": "-1, 0 or 1 from a pair of keys, for movement: `Input.Keyboard.axis(\"A\", \"D\")` is -1 holding A, 1 holding D and 0 for neither or both.",
           "kind": "function",
           "name": "axis",
           "parameter_names": [
@@ -1710,6 +1752,62 @@
         }
       ],
       "name": "Input"
+    },
+    {
+      "description": "The keyboard, as `Input.Keyboard`. Keys are named by position, such as `\"W\"`, `\"ArrowLeft\"` or `\"Space\"`, so controls work on any keyboard layout. For controls that also work on a controller or a touch screen, use `Input.Action`.",
+      "members": [
+        {
+          "description": "-1, 0 or 1 from a pair of keys, for movement: `Input.Keyboard.axis(\"A\", \"D\")` is -1 holding A, 1 holding D and 0 for neither or both.",
+          "kind": "function",
+          "name": "axis",
+          "parameter_names": [
+            "negative",
+            "positive"
+          ],
+          "parameters": [
+            "String",
+            "String"
+          ],
+          "returns": "f32"
+        },
+        {
+          "description": "Whether a key is being held down.",
+          "kind": "function",
+          "name": "is_down",
+          "parameter_names": [
+            "key"
+          ],
+          "parameters": [
+            "String"
+          ],
+          "returns": "bool"
+        },
+        {
+          "description": "Whether a key was pressed this frame. True only once per press, however long it is held.",
+          "kind": "function",
+          "name": "just_pressed",
+          "parameter_names": [
+            "key"
+          ],
+          "parameters": [
+            "String"
+          ],
+          "returns": "bool"
+        },
+        {
+          "description": "Whether a key was let go this frame.",
+          "kind": "function",
+          "name": "just_released",
+          "parameter_names": [
+            "key"
+          ],
+          "parameters": [
+            "String"
+          ],
+          "returns": "bool"
+        }
+      ],
+      "name": "Keyboard"
     },
     {
       "description": "A managed number tween; read with Tween.number_value.",

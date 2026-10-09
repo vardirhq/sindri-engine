@@ -1,5 +1,7 @@
 # Changelog
 
+- Find every way in under `Input`. `Input.Action`, `Input.Pointer`, `Input.Stick`, `Input.Gesture`, `Input.Touch`, `Input.Keyboard` and `Input.Gamepad` are the namespaces that grew beside `Input` one at a time, now reached from where someone looking for touch controls starts, checked as the same types and answered by the same state. `Input`'s own calls are still the keyboard, so no script changes; the flat names stay until the scripts here move to the gathered ones.
+
 - Load imported models everywhere a project plays. `sindri-player` loads `.glb` models in the browser and natively. The capture and benchmark tools bind them and light them as authored. The editor loads, binds and hot-reloads them for the Scene and Game views, and draws the rest of a scene while one loads or fails to decode. A project that keeps its assets beside `sindri.toml`, as Low Tide does, plays as it exports.
 
 - Every game steps faster. The engine no longer re-decodes components, lays out an unchanged screen, re-checks script text or steps an empty 3D world every fixed step: components are decoded once per change (`sindri_core::Decoded`), a script setting a value to what it already is no longer counts as an edit, and Decay finds a local without hashing its name. The platformer's step takes about half the work it did, and Orbital's standalone step went from 1.13 to 0.84 ms.

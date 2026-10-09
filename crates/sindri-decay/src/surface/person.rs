@@ -1,5 +1,25 @@
 //! Host surface for player input and camera-facing runtime values.
 
+use super::names::{ACTION, GAMEPAD, GESTURE, INPUT, KEYBOARD, POINTER, STICK, TOUCH};
+
+/// What `Input` gathers, each under its own name.
+///
+/// Each is also the name of the namespace that answers it, so `Input.Stick.x`
+/// is answered by dropping `Input` rather than by a second path to the same
+/// state. `Aim` and `Camera` are not here: they answer questions about the
+/// world the person is looking at, not about what their hands are doing.
+pub(crate) const INPUT_GROUPS: &[&str] =
+    &[ACTION, GAMEPAD, GESTURE, KEYBOARD, POINTER, STICK, TOUCH];
+
+/// The namespace a path names, with `Input` gathered away: `Input.Stick.x` is
+/// `Stick.x`. A path that does not go through `Input` this way is unchanged.
+pub(crate) fn ungrouped<'a, 'b>(parts: &'a [&'b str]) -> &'a [&'b str] {
+    match parts {
+        [root, group, _, ..] if *root == INPUT && INPUT_GROUPS.contains(group) => &parts[1..],
+        _ => parts,
+    }
+}
+
 #[derive(Clone, Copy, Debug)]
 pub(crate) enum InputQuery {
     Axis,

@@ -11,7 +11,16 @@ pub(crate) const SHAPE: &str = "Shape";
 
 pub(crate) const RGBA: &str = "Rgba";
 
+/// Every way the person reaches the game, gathered under one name.
+///
+/// A script looking for touch controls starts at `Input`, so that is where
+/// they have to be found: `Input.Stick.x` is `Stick.x`, `Input.Keyboard` is the
+/// keyboard. The calls directly on `Input` are the keyboard too, as they were
+/// before it gathered anything, so no script stops compiling.
 pub(crate) const INPUT: &str = "Input";
+
+/// The keys, by position, as `Input.Keyboard`.
+pub(crate) const KEYBOARD: &str = "Keyboard";
 
 /// What the person means, from the scene's declared input actions.
 pub(crate) const ACTION: &str = "Action";

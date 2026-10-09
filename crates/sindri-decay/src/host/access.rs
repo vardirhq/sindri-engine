@@ -14,7 +14,7 @@ use crate::surface::{
     AIM, AIM_VALUES, CAMERA, CAMERA_VALUES, FUNCTIONS, GESTURE, GESTURE_VALUES, Handle,
     HostFunction, Leaf, POINTER, POINTER_VALUES, PRINT, STICK, STICK_VALUES, TOUCH, TOUCH_COUNT,
     VIEWPORT, VIEWPORT_VALUES, ViewportValue, follow_mut, handle, leaf, leaf_through_reference,
-    vector_components,
+    ungrouped, vector_components,
 };
 
 impl Host for WorldHost<'_> {
@@ -39,7 +39,7 @@ impl Host for WorldHost<'_> {
         // about the frame like `Time.delta`, and never about a subject: a
         // reference cannot be asked where the mouse is.
         if subject.is_none()
-            && let [namespace, name] = parts.as_slice()
+            && let [namespace, name] = ungrouped(&parts)
         {
             if *namespace == POINTER
                 && let Some((_, value)) = POINTER_VALUES.iter().find(|(known, _)| known == name)
@@ -255,7 +255,7 @@ impl Host for WorldHost<'_> {
             return Ok(Some(value));
         }
 
-        if let [namespace, name] = parts.as_slice()
+        if let [namespace, name] = ungrouped(&parts)
             && let Some(result) = self.namespaced_call(namespace, name, path, args)
         {
             return result.map(Some);

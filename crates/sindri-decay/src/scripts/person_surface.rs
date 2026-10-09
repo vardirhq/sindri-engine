@@ -4,9 +4,39 @@ use decay_semantic::{Environment, FunctionType, HostType, Type};
 
 use crate::surface::{
     AIM, AIM_VALUES, AimValue, CAMERA, CAMERA_CALLS, CAMERA_VALUES, CameraCall, ENTITY, GESTURE,
-    GESTURE_VALUES, GestureValue, POINTER, POINTER_QUERIES, POINTER_VALUES, PointerValue, STICK,
-    STICK_VALUES, StickValue, TOUCH, TOUCH_CALLS, TOUCH_COUNT, VIEWPORT, VIEWPORT_VALUES,
+    GESTURE_VALUES, GestureValue, INPUT, INPUT_GROUPS, INPUT_QUERIES, KEYBOARD, POINTER,
+    POINTER_QUERIES, POINTER_VALUES, PointerValue, STICK, STICK_VALUES, StickValue, TOUCH,
+    TOUCH_CALLS, TOUCH_COUNT, VIEWPORT, VIEWPORT_VALUES,
 };
+
+/// `Input`, which is the keyboard as it always was, and every other way the
+/// person reaches the game gathered under it: `Input.Keyboard`, `Input.Stick`.
+///
+/// Each group is the very type its own global has, so `Input.Pointer.x` checks
+/// exactly as `Pointer.x` does and the two can never disagree.
+pub(super) fn add_input_surface(environment: &mut Environment) {
+    let mut keyboard = HostType::new();
+    for (name, query) in INPUT_QUERIES {
+        keyboard = keyboard.with_function(
+            *name,
+            FunctionType {
+                params: vec![Type::String; query.keys()],
+                return_type: if query.is_number() {
+                    Type::F32
+                } else {
+                    Type::Bool
+                },
+            },
+        );
+    }
+    let mut input = keyboard.clone();
+    for group in INPUT_GROUPS {
+        input = input.with_value(*group, Type::Named((*group).to_owned()));
+    }
+    environment.add_type(KEYBOARD, keyboard);
+    environment.add_type(INPUT, input);
+    environment.add_value(INPUT, Type::Named(INPUT.to_owned()));
+}
 
 pub(super) fn add_viewport_surface(environment: &mut Environment) {
     let mut viewport = HostType::new();

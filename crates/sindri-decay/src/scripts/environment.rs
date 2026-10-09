@@ -23,11 +23,11 @@ use crate::{
     audio_host::AUDIO,
     surface::{
         ANIMATION, ANIMATION_CALLS, AnimationCall, CONSTANTS, EFFECTS, EFFECTS_CALLS, ENTITY,
-        EffectsCall, FUNCTIONS, GAME, GAME_CALLS, GAMEPAD, GameCall, HostFunction, INPUT,
-        INPUT_QUERIES, Node, PRINT, PROFILE, PROFILE_CALLS, PROFILES, ProfileCall, RANDOM,
-        RANDOM_CALLS, RandomCall, SAVE, SAVE_CALLS, SCENE, SCENE_CALLS, SEQUENCE, SEQUENCE_CALLS,
-        SaveCall, SceneCall, SequenceCall, THIS, THROUGH_REFERENCE, TIME, TIME_VALUES, UI,
-        UI_CALLS, UiCall, gamepad_type,
+        EffectsCall, FUNCTIONS, GAME, GAME_CALLS, GAMEPAD, GameCall, HostFunction, Node, PRINT,
+        PROFILE, PROFILE_CALLS, PROFILES, ProfileCall, RANDOM, RANDOM_CALLS, RandomCall, SAVE,
+        SAVE_CALLS, SCENE, SCENE_CALLS, SEQUENCE, SEQUENCE_CALLS, SaveCall, SceneCall,
+        SequenceCall, THIS, THROUGH_REFERENCE, TIME, TIME_VALUES, UI, UI_CALLS, UiCall,
+        gamepad_type,
     },
 };
 
@@ -80,22 +80,7 @@ pub fn environment() -> Environment {
         },
     );
 
-    let mut input = HostType::new();
-    for (name, query) in INPUT_QUERIES {
-        input = input.with_function(
-            *name,
-            FunctionType {
-                params: vec![Type::String; query.keys()],
-                return_type: if query.is_number() {
-                    Type::F32
-                } else {
-                    Type::Bool
-                },
-            },
-        );
-    }
-    environment.add_type(INPUT, input);
-    environment.add_value(INPUT, Type::Named(INPUT.to_owned()));
+    super::person_surface::add_input_surface(&mut environment);
     environment.add_type(GAMEPAD, gamepad_type());
     environment.add_value(GAMEPAD, Type::Named(GAMEPAD.to_owned()));
 

@@ -1,30 +1,71 @@
 //! The person playing: keys, pads, pointer, fingers, and the camera and
 //! screen they look through.
 
-use super::{TypeEntry, call, value};
+use super::{Entry, TypeEntry, call, value};
+
+// The keyboard's calls, which `Input` offers directly for older scripts and
+// `Input.Keyboard` offers for new ones: one description of each, not two that
+// can drift apart.
+const AXIS: Entry = call(
+    "axis",
+    &["negative", "positive"],
+    "-1, 0 or 1 from a pair of keys, for movement: `Input.Keyboard.axis(\"A\", \"D\")` is -1 holding A, 1 holding D and 0 for neither or both.",
+);
+const IS_DOWN: Entry = call("is_down", &["key"], "Whether a key is being held down.");
+const JUST_PRESSED: Entry = call(
+    "just_pressed",
+    &["key"],
+    "Whether a key was pressed this frame. True only once per press, however long it is held.",
+);
+const JUST_RELEASED: Entry = call(
+    "just_released",
+    &["key"],
+    "Whether a key was let go this frame.",
+);
 
 pub(super) const TYPES: &[TypeEntry] = &[
     TypeEntry {
         name: "Input",
-        text: "The keyboard. Keys are named by position, such as `\"W\"`, `\"ArrowLeft\"` or `\"Space\"`, so controls work on any keyboard layout.",
+        text: "Every way the player reaches the game, in one place. Start with `Input.Action`, which works the same whatever the player holds; `Input.Pointer`, `Input.Stick` and `Input.Gesture` for mouse and touch; `Input.Keyboard`, `Input.Touch` and `Input.Gamepad` for one device read directly. The calls directly on `Input` are the keyboard, kept for older scripts: prefer `Input.Keyboard`.",
         members: &[
-            call(
-                "axis",
-                &["negative", "positive"],
-                "-1, 0 or 1 from a pair of keys, for movement: `Input.axis(\"A\", \"D\")` is -1 holding A, 1 holding D and 0 for neither or both.",
+            AXIS,
+            IS_DOWN,
+            JUST_PRESSED,
+            JUST_RELEASED,
+            value(
+                "Action",
+                "What the player means, such as `\"jump\"` or `\"move\"`, from the actions the scene declares. The best place to start: one script works with keys, a controller or a touch screen. The same as `Action`.",
             ),
-            call("is_down", &["key"], "Whether a key is being held down."),
-            call(
-                "just_pressed",
-                &["key"],
-                "Whether a key was pressed this frame. True only once per press, however long it is held.",
+            value(
+                "Gamepad",
+                "Game controllers, read by player number. The same as `Gamepad`.",
             ),
-            call(
-                "just_released",
-                &["key"],
-                "Whether a key was let go this frame.",
+            value(
+                "Gesture",
+                "Taps, holds, drags and pinches, for touch-first controls. The same as `Gesture`.",
+            ),
+            value(
+                "Keyboard",
+                "The keys, named by position so controls work on any keyboard layout.",
+            ),
+            value(
+                "Pointer",
+                "The mouse, or a finger on a touch screen, handled the same way so one game works on both. The same as `Pointer`.",
+            ),
+            value(
+                "Stick",
+                "A virtual joystick for touch screens: wherever a thumb lands becomes the center, and dragging from there steers. The same as `Stick`.",
+            ),
+            value(
+                "Touch",
+                "Every finger on a touch screen, for games that need more than one. For steering, `Input.Stick` is simpler. The same as `Touch`.",
             ),
         ],
+    },
+    TypeEntry {
+        name: "Keyboard",
+        text: "The keyboard, as `Input.Keyboard`. Keys are named by position, such as `\"W\"`, `\"ArrowLeft\"` or `\"Space\"`, so controls work on any keyboard layout. For controls that also work on a controller or a touch screen, use `Input.Action`.",
+        members: &[AXIS, IS_DOWN, JUST_PRESSED, JUST_RELEASED],
     },
     TypeEntry {
         name: "Action",

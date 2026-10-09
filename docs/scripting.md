@@ -1759,6 +1759,34 @@ names its bus with `bus`, or leaves it empty to follow `loop`/`play`. Orbital
 Last Stand's pause screen moves the master, music and effects buses with three
 sliders and remembers them.
 
+### Every way in, under `Input`
+
+| Member | The same as |
+| --- | --- |
+| `Input.Action` | `Action`, what the player means, from the scene's actions |
+| `Input.Pointer` | `Pointer`, the mouse or a finger, one way for both |
+| `Input.Stick` | `Stick`, a virtual joystick from whichever finger steers |
+| `Input.Gesture` | `Gesture`, taps, holds, drags and pinches |
+| `Input.Touch` | `Touch`, every finger, by index |
+| `Input.Keyboard` | the keyboard: `Input.Keyboard.is_down("W")` |
+| `Input.Gamepad` | `Gamepad`, the pads, by player slot |
+
+Each way in grew as a namespace of its own, and someone looking for touch
+controls starts at `Input`. So `Input` gathers them: `Input.Stick.x` is
+`Stick.x`, checked as the same type and answered by the same state, so the two
+spellings cannot disagree. Write the gathered form in new scripts. The flat
+names stay until the scripts in this repository have moved, and are then
+retired.
+
+`Input.Mouse` does not exist, deliberately: `Input.Pointer` is the mouse and a
+finger alike, which is what lets one game work on a desktop and a phone. `Aim`
+and `Camera` are not gathered either; they answer questions about the world the
+person is looking at, not about what their hands are doing.
+
+The calls directly on `Input` — `Input.is_down` and the rest below — are the
+keyboard, as they were before `Input` gathered anything, so older scripts keep
+compiling. `Input.Keyboard` is the same four calls under a name that says so.
+
 ### Input actions
 
 | Call | Returns |
@@ -1804,8 +1832,9 @@ example rebinds them.
 | `Input.just_pressed(key)` | `bool` |
 | `Input.just_released(key)` | `bool` |
 
-Keys are named physically, by where they are rather than what they type, so a
-binding survives a change of layout: `"W"`, `"ArrowLeft"`, `"Space"`,
+Each is also `Input.Keyboard.axis` and so on, which is the spelling new
+scripts should use. Keys are named physically, by where they are rather than
+what they type, so a binding survives a change of layout: `"W"`, `"ArrowLeft"`, `"Space"`,
 `"Digit1"`, `"ShiftLeft"`. Matching ignores case, because the name is typed by a
 person. `sindri_platform::Key::ALL` is the list.
 
