@@ -33,7 +33,7 @@ pub use asset::{
 pub use command::{CommandBuffer, CommandError, CommandHistory, Transaction, WorldCommand};
 pub use component::{
     ApplyMode, AssetKind, ComponentMetadata, ComponentRegistryError, ComponentSchemaRegistry,
-    FieldMeaning, SceneComponent, UnknownComponentPolicy,
+    Decoded, FieldMeaning, SceneComponent, UnknownComponentPolicy,
 };
 pub use easing::Easing;
 pub use engine::{EngineCore, EngineError, EngineFrame};

@@ -358,7 +358,7 @@ impl EditorApp {
         let transaction = buffer
             .into_transaction("Resize collider")
             .merging(format!("collider-handle:{}", entity.index()));
-        if let Err(error) = self.history.apply(transaction, &mut self.world) {
+        if let Err(error) = self.apply_edit(transaction) {
             self.report(error.to_string());
         }
     }

@@ -4,15 +4,21 @@ use super::{
     DistanceJoint2dComponent, HingeJoint2dComponent, SliderJoint2dComponent, SpringJoint2dComponent,
 };
 use crate::PhysicsSyncError;
-use sindri_core::{ComponentSchemaRegistry, EntityId, World};
+use sindri_core::{ComponentSchemaRegistry, Decoded, EntityId, World};
 use sindri_physics::{
     DistanceJoint2d, HingeJoint2d, PhysicsError, PhysicsWorld2d, SliderJoint2d, SpringJoint2d,
 };
 use std::collections::BTreeSet;
 
-#[derive(Default)]
+#[derive(Clone, Default)]
 pub(crate) struct SceneJoints2d {
     owners: BTreeSet<EntityId>,
+    /// Each kind's components, decoded once per change rather than once a
+    /// step.
+    distance: Decoded<DistanceJoint2dComponent>,
+    hinge: Decoded<HingeJoint2dComponent>,
+    slider: Decoded<SliderJoint2dComponent>,
+    spring: Decoded<SpringJoint2dComponent>,
 }
 
 enum AuthoredJoint {
@@ -94,28 +100,29 @@ impl SceneJoints2d {
         components: &ComponentSchemaRegistry,
         physics: &mut PhysicsWorld2d,
     ) -> Result<(), PhysicsSyncError> {
-        let mut authored: Vec<_> = components
-            .query::<DistanceJoint2dComponent>(world)?
+        let mut authored: Vec<_> = self
+            .distance
+            .query(components, world)?
             .into_iter()
-            .map(|(owner, joint)| (owner, AuthoredJoint::Distance(joint)))
+            .map(|(owner, joint)| (owner, AuthoredJoint::Distance(joint.clone())))
             .collect();
         authored.extend(
-            components
-                .query::<HingeJoint2dComponent>(world)?
+            self.hinge
+                .query(components, world)?
                 .into_iter()
-                .map(|(owner, joint)| (owner, AuthoredJoint::Hinge(joint))),
+                .map(|(owner, joint)| (owner, AuthoredJoint::Hinge(joint.clone()))),
         );
         authored.extend(
-            components
-                .query::<SliderJoint2dComponent>(world)?
+            self.slider
+                .query(components, world)?
                 .into_iter()
-                .map(|(owner, joint)| (owner, AuthoredJoint::Slider(joint))),
+                .map(|(owner, joint)| (owner, AuthoredJoint::Slider(joint.clone()))),
         );
         authored.extend(
-            components
-                .query::<SpringJoint2dComponent>(world)?
+            self.spring
+                .query(components, world)?
                 .into_iter()
-                .map(|(owner, joint)| (owner, AuthoredJoint::Spring(joint))),
+                .map(|(owner, joint)| (owner, AuthoredJoint::Spring(joint.clone()))),
         );
         let mut live = BTreeSet::new();
         for (owner, joint) in &authored {

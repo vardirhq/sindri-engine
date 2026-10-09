@@ -23,9 +23,9 @@ use sindri_physics::{ColliderShape2d, RigidBodyKind};
 use crate::animation::SpriteAnimationComponent;
 use crate::audio::AudioSourceComponent;
 use crate::components::{
-    CameraComponent, GridOccupantComponent, MeshComponent, ShapeComponent, SpriteComponent,
-    TileGridComponent, TileProjection, TileVolumeComponent, TilemapComponent, UiImageComponent,
-    UiShapeBlend, UiShapeComponent, UiShapeKind, UiTextComponent,
+    CameraComponent, CameraFit, GridOccupantComponent, MeshComponent, ShapeComponent,
+    SpriteComponent, TileGridComponent, TileProjection, TileVolumeComponent, TilemapComponent,
+    UiImageComponent, UiShapeBlend, UiShapeComponent, UiShapeKind, UiTextComponent,
 };
 use crate::components::{UiAnchor, UiTextCase, UiTextLineAlign, UiTextWrap};
 use crate::effects::EffectBurstComponent;
@@ -161,12 +161,17 @@ fn describe_projections(components: &mut ComponentSchemaRegistry) -> Result<(), 
                 orthographic,
                 json!({
                     "vertical_size": CameraComponent::DEFAULT_VERTICAL_SIZE,
+                    "fit": CameraFit::default().as_str(),
                     "near": CameraComponent::DEFAULT_NEAR,
                     "far": CameraComponent::DEFAULT_FAR
                 }),
             ),
         ],
     )?;
+    components.describe::<CameraComponent>([(
+        "fit",
+        FieldMeaning::choice(CameraFit::ALL.into_iter().map(CameraFit::as_str)),
+    )])?;
     Ok(())
 }
 

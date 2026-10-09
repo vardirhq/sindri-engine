@@ -32,6 +32,7 @@ pub(crate) struct VoxelCollisionPlan3d {
     report: VoxelCollisionReport3d,
 }
 
+#[derive(Clone)]
 struct Owner {
     pose: PhysicsPose3d,
     materialized: bool,
@@ -42,6 +43,7 @@ struct Owner {
 /// solver body exclusively; hosts recreate this cache whenever the solver resets.
 /// Inputs are the complete resident snapshot, not just its dirty subset.
 /// This adapter does not step physics, resolve authoring or choose residency.
+#[derive(Clone)]
 pub struct SceneVoxelCollision3d {
     budget: VoxelCollisionBudget3d,
     owners: BTreeMap<EntityId, Owner>,

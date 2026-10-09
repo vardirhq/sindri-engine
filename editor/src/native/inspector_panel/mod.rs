@@ -10,6 +10,7 @@
 //! claims it, and `draft` turns the whole of it into commands.
 
 pub(super) mod add_component;
+mod angle;
 pub(super) mod blocks;
 mod body;
 pub(super) mod draft;
@@ -174,7 +175,7 @@ impl EditorApp {
         let transaction = buffer
             .into_transaction("Edit entity")
             .merging(format!("inspector:{}", entity.index()));
-        if let Err(error) = self.history.apply(transaction, &mut self.world) {
+        if let Err(error) = self.apply_edit(transaction) {
             self.report(error.to_string());
         }
     }
@@ -244,11 +245,8 @@ impl EditorApp {
         }
         let mut buffer = CommandBuffer::new();
         buffer.push(WorldCommand::SetSceneName { name: wanted });
-        self.history.break_merge_run();
-        if let Err(error) = self
-            .history
-            .apply(buffer.into_transaction("Rename scene"), &mut self.world)
-        {
+        self.break_merge_runs();
+        if let Err(error) = self.apply_edit(buffer.into_transaction("Rename scene")) {
             self.report(error.to_string());
         }
     }
@@ -276,11 +274,8 @@ impl EditorApp {
         if buffer.is_empty() {
             return;
         }
-        self.history.break_merge_run();
-        if let Err(error) = self
-            .history
-            .apply(buffer.into_transaction("Change stable ID"), &mut self.world)
-        {
+        self.break_merge_runs();
+        if let Err(error) = self.apply_edit(buffer.into_transaction("Change stable ID")) {
             self.report(error.to_string());
         }
     }
@@ -310,7 +305,7 @@ impl EditorApp {
         let transaction = buffer
             .into_transaction("Edit components")
             .merging(format!("inspector:{}", entity.index()));
-        if let Err(error) = self.history.apply(transaction, &mut self.world) {
+        if let Err(error) = self.apply_edit(transaction) {
             self.report(error.to_string());
         }
     }
@@ -331,11 +326,8 @@ impl EditorApp {
             type_name: type_name.to_owned(),
             payload,
         });
-        self.history.break_merge_run();
-        if let Err(error) = self
-            .history
-            .apply(buffer.into_transaction("Add component"), &mut self.world)
-        {
+        self.break_merge_runs();
+        if let Err(error) = self.apply_edit(buffer.into_transaction("Add component")) {
             self.report(error.to_string());
         }
         self.refresh_textures();
@@ -347,11 +339,8 @@ impl EditorApp {
             entity,
             type_name: type_name.to_owned(),
         });
-        self.history.break_merge_run();
-        if let Err(error) = self
-            .history
-            .apply(buffer.into_transaction("Remove component"), &mut self.world)
-        {
+        self.break_merge_runs();
+        if let Err(error) = self.apply_edit(buffer.into_transaction("Remove component")) {
             self.report(error.to_string());
         }
         self.refresh_textures();
@@ -449,7 +438,9 @@ impl EditorApp {
         let mut switched = None;
         let mut removed = None;
         let mut added = None;
-        let authoring = self.authoring_enabled();
+        // Editable while playing too: the edit lands in the run, and Stop
+        // offers it back.
+        let authoring = self.world_editable();
         let mut held = self.held_components(entity, stored);
         let mut components = held.shown.clone();
         self.refresh_thumbnails(&components);

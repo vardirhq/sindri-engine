@@ -204,11 +204,18 @@ Dependency order, cheapest unlock first.
 error banner moved clear of the status bar and wrapped. Item 3 is done for
 ranges, three-channel colour, numeric choice, texture and sprite pickers, and
 whole-number vectors, with Environment and Voxel World declaring their
-meanings; Angle, Mask and Entity controls, sprite thumbnails, template field
-order, and Camera Behaviour's meanings remain. Item 4 is done: current problems are kept
+meanings, and is now done in full (`docs/editor-update.md`, slice 7): angles
+are edited in degrees, masks by layer name and entity references from the
+scene's entities; texture and sprite fields show their picture, in the field
+and in the picker; a component's fields are listed in the order its type
+declares them, where serde reports one (a flattened or tagged component keeps
+the ranked order, and nested objects are still alphabetical); and Camera
+Behaviour declares its meanings, its follow and confine added and removed as
+optional fields. Item 4 is done: current problems are kept
 apart from the log, counted and named on the status bar, badged on the
 console's tab, and opened from either; lines copy, and their entity links no
-longer run off the panel. Grouping by cause remains. Item 5 is done: the title bar
+longer run off the panel. Problems are grouped by cause, naming the entities
+under each, and counted by cause. Item 5 is done: the title bar
 collision, shared dock budget, squeezed sizes no longer persisted, Wide's
 assistant column, the bottom-dock project listing, status plate and axes
 placement, the Canvas inspector's height, and readout truncation. The viewport

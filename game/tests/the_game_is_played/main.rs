@@ -120,7 +120,8 @@ fn the_build_camera_looks_somewhere_else_and_the_ground_is_there() {
     });
     session
         .step(&mut world, &drag, VIEWPORT, STEP)
-        .expect("the drag starts");
+        .expect("the drag starts")
+        .log();
     drag.begin_frame(std::time::Duration::from_secs_f32(STEP));
     drag.apply(InputEvent::TouchMoved {
         id: 11,
@@ -129,7 +130,8 @@ fn the_build_camera_looks_somewhere_else_and_the_ground_is_there() {
     });
     session
         .step(&mut world, &drag, VIEWPORT, STEP)
-        .expect("the build camera pans");
+        .expect("the build camera pans")
+        .log();
 
     let camera_after = entity_position(&world, "World Camera");
     assert!(
@@ -202,12 +204,14 @@ fn a_phone_tap_in_play_moves_the_target_and_the_wanderer() {
     toggle.apply(InputEvent::KeyPressed(Key::Tab));
     session
         .step(&mut world, &toggle, VIEWPORT, STEP)
-        .expect("play mode toggles");
+        .expect("play mode toggles")
+        .log();
     toggle.begin_frame(std::time::Duration::from_secs_f32(STEP));
     toggle.apply(InputEvent::KeyReleased(Key::Tab));
     session
         .step(&mut world, &toggle, VIEWPORT, STEP)
-        .expect("tab releases");
+        .expect("tab releases")
+        .log();
     assert_eq!(
         ui_text(&world, &scene, "ModeLabel").text,
         "PLAY",
@@ -291,12 +295,14 @@ fn a_phone_tap_in_play_moves_the_target_and_the_wanderer() {
     build.apply(InputEvent::KeyPressed(Key::Tab));
     session
         .step(&mut world, &build, VIEWPORT, STEP)
-        .expect("build mode toggles");
+        .expect("build mode toggles")
+        .log();
     build.begin_frame(std::time::Duration::from_secs_f32(STEP));
     build.apply(InputEvent::KeyReleased(Key::Tab));
     session
         .step(&mut world, &build, VIEWPORT, STEP)
-        .expect("tab releases into build");
+        .expect("tab releases into build")
+        .log();
     assert_eq!(
         ui_text(&world, &scene, "ModeLabel").text,
         "BUILD",

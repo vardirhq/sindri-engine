@@ -10,9 +10,9 @@ use sindri_scene::SceneExtractor;
 
 use crate::preferences::ConsoleFilter;
 use crate::ui::theme::{color, metric, text};
-use crate::ui::widgets::{button, button::Intent, panel};
+use crate::ui::widgets::{button, button::Intent, lazy, menu, panel};
 use crate::{
-    console::{Console, Entry, Level},
+    console::{Cause, Console, Entry, Level},
     scripts::ScriptNote,
     textures::TextureNote,
 };
@@ -68,8 +68,8 @@ impl EditorApp {
 /// so the one place always on screen named nothing and led nowhere. It now
 /// names the problem and opens it. Returns whether it was clicked.
 pub(super) fn status_problems(ui: &mut egui::Ui, console: &Console) -> bool {
-    let problems = console.problems();
-    let healthy = problems.is_empty();
+    let causes = console.causes();
+    let healthy = causes.is_empty();
     panel::status_dot(
         ui,
         if healthy {
@@ -78,7 +78,7 @@ pub(super) fn status_problems(ui: &mut egui::Ui, console: &Console) -> bool {
             color::DANGER
         },
     );
-    let said = match problems {
+    let said = match causes.as_slice() {
         [] => "Renderer ready".to_owned(),
         [only] => only.message.clone(),
         [first, rest @ ..] => format!("{} (and {} more)", first.message, rest.len()),
@@ -108,9 +108,10 @@ pub(super) fn status_problems(ui: &mut egui::Ui, console: &Console) -> bool {
 const STATUS_MESSAGE_WIDTH: f32 = 420.0;
 
 /// The count at the far end of the status bar: what is wrong now, not how
-/// many errors the log has seen. Returns whether it was clicked.
+/// many errors the log has seen, and counted by cause, so forty sprites
+/// naming one missing texture are one problem. Returns whether it was clicked.
 pub(super) fn status_count(ui: &mut egui::Ui, console: &Console) -> bool {
-    let count = console.problems().len();
+    let count = console.causes().len();
     let said = match count {
         0 => "No problems".to_owned(),
         1 => "1 problem".to_owned(),
@@ -256,16 +257,27 @@ pub(super) fn console_view(
         // Pinned to the newest entry: a log you have to scroll to the bottom of
         // to see what just happened is a log nobody reads.
         .stick_to_bottom(true)
-        .show(ui, |ui| {
+        .show_viewport(ui, |ui, in_sight| {
             ui.spacing_mut().item_spacing.y = 1.0;
             ui.add_space(2.0);
             let mut shown = 0_usize;
-            for entry in console.at_least(filter.floor()) {
+            let entries = console.at_least(filter.floor()).map(|entry| {
                 shown += 1;
-                if let Some(entity) = console_row(ui, entry, named) {
-                    action.go_to = Some(entity);
-                }
-            }
+                (lazy::key(&entry.message), entry)
+            });
+            lazy::rows(
+                ui,
+                in_sight,
+                ui.id().with("console rows"),
+                metric::ROW_HEIGHT,
+                entries,
+                |_| false,
+                |ui, entry| match console_row(ui, entry, named, true) {
+                    Some(RowAsk::GoTo(entity)) => action.go_to = Some(entity),
+                    Some(RowAsk::Clear) => action.cleared = true,
+                    None => {}
+                },
+            );
             // A filter that hides everything has to say that it did, or an
             // empty panel reads as a console that stopped working.
             if shown == 0 {
@@ -276,7 +288,8 @@ pub(super) fn console_view(
     action
 }
 
-/// What is wrong at this moment, with the way to each entity it is about.
+/// What is wrong at this moment, grouped by cause, with the way to each
+/// entity a cause reaches.
 ///
 /// The log below it remembers everything that ever went wrong, which is what a
 /// log is for and not what "is my scene broken?" is asking.
@@ -285,7 +298,8 @@ fn problems_now(
     console: &Console,
     named: &dyn Fn(EntityId) -> Option<String>,
 ) -> Option<EntityId> {
-    if console.problems().is_empty() {
+    let causes = console.causes();
+    if causes.is_empty() {
         panel::empty_state(
             ui,
             crate::ui::icons::CONSOLE,
@@ -300,18 +314,65 @@ fn problems_now(
         .show(ui, |ui| {
             ui.spacing_mut().item_spacing.y = 1.0;
             ui.add_space(2.0);
-            for problem in console.problems() {
-                let entry = Entry {
-                    level: Level::Error,
-                    message: problem.message.clone(),
-                    count: 1,
-                    subject: problem.subject,
-                };
-                if let Some(entity) = console_row(ui, &entry, named) {
+            for cause in &causes {
+                if let Some(entity) = cause_row(ui, cause, named) {
+                    go_to = Some(entity);
+                }
+                ui.add_space(3.0);
+            }
+        });
+    go_to
+}
+
+/// How many of the entities a cause reaches are listed by name before the
+/// rest are counted.
+const NAMED_SUBJECTS: usize = 12;
+
+/// One cause: its message once, and the entities it reaches under it.
+fn cause_row(
+    ui: &mut egui::Ui,
+    cause: &Cause,
+    named: &dyn Fn(EntityId) -> Option<String>,
+) -> Option<EntityId> {
+    let entry = Entry {
+        level: Level::Error,
+        message: cause.message.clone(),
+        count: 1,
+        subject: match cause.subjects.as_slice() {
+            [only] => Some(*only),
+            _ => None,
+        },
+    };
+    let mut go_to = match console_row(ui, &entry, named, false) {
+        Some(RowAsk::GoTo(entity)) => Some(entity),
+        _ => None,
+    };
+    if cause.subjects.len() > 1 {
+        ui.horizontal_wrapped(|ui| {
+            ui.spacing_mut().item_spacing.x = 4.0;
+            // Lined up under the message, past the dot.
+            ui.add_space(metric::GUTTER + 15.0);
+            ui.label(
+                RichText::new(format!("On {}:", cause.subjects.len()))
+                    .size(text::NOTE)
+                    .color(color::TEXT_FAINT),
+            );
+            for &entity in cause.subjects.iter().take(NAMED_SUBJECTS) {
+                let name = named(entity).unwrap_or_else(|| "(unnamed)".to_owned());
+                if button::labelled(ui, &name, Intent::Quiet, "Select this entity").clicked() {
                     go_to = Some(entity);
                 }
             }
+            let rest = cause.subjects.len().saturating_sub(NAMED_SUBJECTS);
+            if rest > 0 {
+                ui.label(
+                    RichText::new(format!("and {rest} more"))
+                        .size(text::NOTE)
+                        .color(color::TEXT_FAINT),
+                );
+            }
         });
+    }
     go_to
 }
 
@@ -366,14 +427,28 @@ fn console_tools(
     });
 }
 
-/// One line, reporting the entity it was asked to go to.
+/// What a line was asked for.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub(super) enum RowAsk {
+    /// Select the entity it is about.
+    GoTo(EntityId),
+    /// Empty the log.
+    Clear,
+}
+
+/// One line, reporting what it was asked for. A log line offers Clear on its
+/// menu; a current problem cannot be cleared, only fixed.
 pub(super) fn console_row(
     ui: &mut egui::Ui,
     entry: &Entry,
     named: &dyn Fn(EntityId) -> Option<String>,
-) -> Option<EntityId> {
+    clearable: bool,
+) -> Option<RowAsk> {
     let tint = level_tint(entry.level);
-    let mut go_to = None;
+    let mut asked = None;
+    let subject = entry
+        .subject
+        .and_then(|entity| named(entity).map(|name| (entity, name)));
     ui.horizontal_top(|ui| {
         ui.spacing_mut().item_spacing.x = 5.0;
         ui.add_space(metric::GUTTER);
@@ -391,24 +466,36 @@ pub(super) fn console_row(
         // underneath: placed beside a wrapped message, the count and the way
         // to the entity had no width left and ran off the panel's edge.
         ui.vertical(|ui| {
-            ui.add(
-                egui::Label::new(RichText::new(&entry.message).size(text::LABEL).color(tint))
-                    .wrap()
-                    .sense(egui::Sense::click()),
-            )
-            .on_hover_text("Right-click to copy")
-            .context_menu(|ui| {
-                if ui.button("Copy message").clicked() {
+            let line = ui
+                .add(
+                    egui::Label::new(RichText::new(&entry.message).size(text::LABEL).color(tint))
+                        .wrap()
+                        .sense(egui::Sense::click()),
+                )
+                .on_hover_text("Right-click for more");
+            menu::on_right_click(&line, |ui| {
+                menu::subject(ui, "This line");
+                if menu::item(ui, "Copy message").clicked() {
                     ui.ctx().copy_text(entry.message.clone());
                     ui.close();
+                }
+                if let Some((entity, name)) = &subject
+                    && menu::item(ui, &format!("Select {name}")).clicked()
+                {
+                    asked = Some(RowAsk::GoTo(*entity));
+                    ui.close();
+                }
+                if clearable {
+                    ui.separator();
+                    if menu::danger(ui, "Clear the console", "").clicked() {
+                        asked = Some(RowAsk::Clear);
+                        ui.close();
+                    }
                 }
             });
             // The entity the line is about, as the way to it. An error naming
             // an entity you cannot reach is a dead end, and the runtime can
             // only name a handle, which nobody can look for in a list.
-            let subject = entry
-                .subject
-                .and_then(|entity| named(entity).map(|name| (entity, name)));
             // A message that repeated sixty times is one line with a count, not
             // sixty lines that scroll the useful one away.
             if entry.count > 1 || subject.is_some() {
@@ -420,22 +507,22 @@ pub(super) fn console_row(
                             color::TEXT_FAINT,
                         );
                     }
-                    if let Some((entity, name)) = subject
+                    if let Some((entity, name)) = &subject
                         && button::labelled(
                             ui,
-                            &name,
+                            name,
                             Intent::Quiet,
                             "Select the entity this is about",
                         )
                         .clicked()
                     {
-                        go_to = Some(entity);
+                        asked = Some(RowAsk::GoTo(*entity));
                     }
                 });
             }
         });
     });
-    go_to
+    asked
 }
 
 pub(super) fn lifecycle_label(state: EngineState) -> &'static str {

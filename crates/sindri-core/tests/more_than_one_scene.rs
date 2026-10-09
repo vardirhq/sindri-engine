@@ -386,3 +386,51 @@ fn an_opening_scene_and_a_guest_scene_coexist() {
         guest.entity_map[&id("door")]
     );
 }
+
+/// A world that is already a scene — the editor's, which is the document being
+/// edited — can be adopted as one, left for another and come back to as it was
+/// left, with the identities its file spells.
+#[test]
+fn a_world_that_is_a_scene_can_be_adopted_and_left() {
+    let mut world = World::from_scene(&cottage("door"))
+        .expect("the scene loads")
+        .world;
+    let lamp = world.entity_for_source_id(&id("lamp")).expect("the lamp");
+    world.get_mut(lamp).expect("the lamp").disabled = true;
+    let mut scenes = LoadedScenes::new();
+
+    let switch = scenes.adopt(&mut world, "cottage.scene").expect("adopted");
+
+    assert_eq!(scenes.active(), Some("cottage.scene"));
+    assert_eq!(scenes.adopt(&mut world, "cottage.scene"), Ok(switch));
+    let room = world.entity_for_source_id(&id("room")).expect("the room");
+    let door = world
+        .entity_for_source_id(&id("door"))
+        .expect("the door keeps its id");
+    assert_eq!(world.get(room).and_then(|data| data.parent), Some(switch));
+    assert_eq!(world.get(lamp).and_then(|data| data.parent), Some(switch));
+    assert_eq!(
+        world.get(door).and_then(|data| data.parent),
+        Some(room),
+        "only the top level moves"
+    );
+    assert_eq!(
+        world.get(switch).map(|data| data.children.clone()),
+        Some(vec![room, lamp]),
+        "in the order they were made"
+    );
+
+    scenes
+        .enter(&mut world, "barn", &cottage("door"))
+        .expect("another scene is entered");
+    assert!(
+        !world.is_active(room),
+        "leaving switches the adopted scene off"
+    );
+    scenes.go_to(&mut world, "cottage.scene").expect("and back");
+    assert!(world.is_active(room));
+    assert!(
+        !world.is_active(lamp),
+        "an entity switched off on its own stays off when its scene comes back"
+    );
+}

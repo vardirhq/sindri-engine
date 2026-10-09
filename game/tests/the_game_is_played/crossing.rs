@@ -71,7 +71,8 @@ fn a_walkway_laid_across_the_river_takes_the_wanderer_to_the_beacon() {
         idle.begin_frame(std::time::Duration::from_secs_f32(STEP));
         session
             .step(&mut world, &idle, VIEWPORT, STEP)
-            .expect("the release steps");
+            .expect("the release steps")
+            .log();
         assert_eq!(
             block_at(&world, &scene, [*column, row, SEA + 1]).as_deref(),
             Some("plank-slab"),
@@ -83,12 +84,14 @@ fn a_walkway_laid_across_the_river_takes_the_wanderer_to_the_beacon() {
     toggle.apply(InputEvent::KeyPressed(Key::Tab));
     session
         .step(&mut world, &toggle, VIEWPORT, STEP)
-        .expect("play mode toggles");
+        .expect("play mode toggles")
+        .log();
     toggle.begin_frame(std::time::Duration::from_secs_f32(STEP));
     toggle.apply(InputEvent::KeyReleased(Key::Tab));
     session
         .step(&mut world, &toggle, VIEWPORT, STEP)
-        .expect("tab releases");
+        .expect("tab releases")
+        .log();
 
     let camera = view_projection(&world, &scene);
     #[allow(clippy::cast_precision_loss)]

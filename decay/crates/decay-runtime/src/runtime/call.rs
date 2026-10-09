@@ -65,7 +65,7 @@ impl<'a, H: Host> Runtime<'a, H> {
         let mut fields = HashMap::new();
         for field in &container.fields {
             let value = if let Some(initializer) = &field.initializer {
-                let mut frame = Frame::new(HashMap::new());
+                let mut frame = Frame::new(Vec::new());
                 self.execute_instructions(container, &mut fields, &mut frame, initializer)?
             } else {
                 // A vector field nobody initialised starts at zero, as a

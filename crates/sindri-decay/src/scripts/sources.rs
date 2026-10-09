@@ -49,6 +49,10 @@ pub const LIFECYCLE: [LifecycleFunction; 2] = [
 #[derive(Clone, Debug, Default)]
 pub struct ScriptSources {
     sources: BTreeMap<String, String>,
+    /// Changes whenever a source does, from a counter shared by every set of
+    /// sources, so a compiled script can tell it is still current without
+    /// comparing its text every step.
+    revision: u64,
     /// Every script's declared shape, and the environment a script in this
     /// project compiles against. Worked out the first time it is asked for and
     /// forgotten whenever a source changes.
@@ -57,6 +61,12 @@ pub struct ScriptSources {
     /// declares it, for a script's program to link in. Forgotten with the
     /// project whenever a source changes.
     shared: OnceLock<SharedFunctions>,
+}
+
+/// A revision no set of sources has had.
+fn next_revision() -> u64 {
+    static CLOCK: std::sync::atomic::AtomicU64 = std::sync::atomic::AtomicU64::new(0);
+    CLOCK.fetch_add(1, std::sync::atomic::Ordering::Relaxed) + 1
 }
 
 /// The project's shared functions, and the files declaring some that do not
@@ -77,14 +87,23 @@ impl ScriptSources {
 
     pub fn insert(&mut self, id: impl Into<String>, source: impl Into<String>) {
         self.sources.insert(id.into(), source.into());
+        self.revision = next_revision();
         self.project = OnceLock::new();
         self.shared = OnceLock::new();
     }
 
     pub fn remove(&mut self, id: &str) -> Option<String> {
+        self.revision = next_revision();
         self.project = OnceLock::new();
         self.shared = OnceLock::new();
         self.sources.remove(id)
+    }
+
+    /// Which version of the sources this is: different whenever a source
+    /// was added, changed or removed since.
+    #[must_use]
+    pub const fn revision(&self) -> u64 {
+        self.revision
     }
 
     #[must_use]

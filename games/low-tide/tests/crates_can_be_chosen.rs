@@ -7,7 +7,7 @@ use sindri_decay::ScriptValue;
 use sindri_platform::Key;
 
 fn field(pilot: &Pilot, entity: EntityId, name: &str) -> f64 {
-    match pilot.run.scripts.field(entity, name) {
+    match pilot.run.session.scripts().field(entity, name) {
         Some(ScriptValue::Number(value)) => *value,
         other => panic!("numeric {name}: {other:?}"),
     }
@@ -81,7 +81,7 @@ fn choose_wood_set_it_down_pick_it_up_and_stow_once_on_keys_and_touch() {
             .find(|entity| pilot.run.world.get(*entity).unwrap().parent.is_none())
             .unwrap();
         assert_eq!(
-            pilot.run.scripts.field(loose, "kind"),
+            pilot.run.session.scripts().field(loose, "kind"),
             Some(&ScriptValue::Variant("Resource.Wood".into()))
         );
         pilot.use_it();
@@ -116,7 +116,7 @@ fn dropped_cargo_washes_away_once_and_wreck_crates_survive_the_tide() {
         .unwrap();
     let wreck = pilot.run.entity("wreck-1").unwrap();
     let mask = field(&pilot, wreck, "cargo_mask");
-    pilot.run.scripts.blackboard_mut().set("tide_time", 280.0);
+    pilot.run.session.blackboard_mut().set("tide_time", 280.0);
     pilot.wait(0.2);
     assert!(pilot.run.world.get(loose).is_none());
     assert!((pilot.board("washed") - 1.0).abs() < 0.01);

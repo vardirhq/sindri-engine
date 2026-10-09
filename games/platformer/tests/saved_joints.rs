@@ -14,13 +14,13 @@ fn saved_spawned_windmill_reopens_with_its_own_axle_and_motor() {
     run.world.assign_missing_source_ids("saved").unwrap();
     let saved = run
         .world
-        .to_scene_with_references(&run.prefabs, &run.components)
+        .to_scene_with_references(run.prefabs(), run.components())
         .unwrap();
     let text = saved.to_canonical_json().unwrap();
     assert!(!text.contains("prefab_identity"));
     let document = sindri_core::SceneDocument::from_json(&text).unwrap();
     let mut restored = Run::open().unwrap();
-    restored.world = World::from_scene_with(&document, &restored.prefabs)
+    restored.world = World::from_scene_with(&document, restored.prefabs())
         .unwrap()
         .world;
     let named = |name| {
@@ -37,8 +37,8 @@ fn saved_spawned_windmill_reopens_with_its_own_axle_and_motor() {
     for _ in 0..360 {
         let notes = restored.step(1.0 / 60.0);
         assert!(notes.is_empty(), "{notes:?}");
-        assert_eq!(restored.physics.world().joint_count(), 5);
-        let speed = restored.physics.world().angular_velocity(rotor).unwrap();
+        assert_eq!(restored.physics().world().joint_count(), 5);
+        let speed = restored.physics().world().angular_velocity(rotor).unwrap();
         forward |= speed > 1.0;
         backward |= speed < -1.0;
         let [x, y] = restored.world.world_transform(rotor).unwrap().position_2d();

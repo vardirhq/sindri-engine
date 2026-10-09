@@ -12,7 +12,7 @@ use crate::{OneWay2d, PhysicsError, RigidBodyKind};
 // Allow a small penetration while maintaining support, in world units.
 pub(super) const SUPPORT_SLOP: f32 = 0.05;
 
-#[derive(Default)]
+#[derive(Clone, Default)]
 pub(super) struct OneWayHooks {
     pub policies: HashMap<r2::ColliderHandle, OneWay2d>,
     pub dropping: HashMap<r2::RigidBodyHandle, f32>,

@@ -63,7 +63,8 @@ fn two_asteroids_actually_bounce_in_the_game_runtime() {
     run.set_board("sector", 1.0);
 
     let prefab = run
-        .prefabs
+        .session
+        .prefabs()
         .get("prefabs/hazard-asteroid-large.prefab")
         .expect("large asteroid prefab ships")
         .clone();
@@ -97,11 +98,13 @@ fn two_asteroids_actually_bounce_in_the_game_runtime() {
     // assign ordinary drift, which this controlled test then replaces with a
     // head-on approach so a real physical response is unavoidable.
     step(&mut run);
-    run.physics
+    run.session
+        .physics_mut()
         .world_mut()
         .set_linear_velocity(left, [2.0, 0.0])
         .expect("left asteroid accepts velocity");
-    run.physics
+    run.session
+        .physics_mut()
         .world_mut()
         .set_linear_velocity(right, [-2.0, 0.0])
         .expect("right asteroid accepts velocity");
@@ -110,12 +113,14 @@ fn two_asteroids_actually_bounce_in_the_game_runtime() {
     for _ in 0..90 {
         step(&mut run);
         let left_vx = run
-            .physics
+            .session
+            .physics()
             .world()
             .linear_velocity(left)
             .expect("left asteroid stays physical")[0];
         let right_vx = run
-            .physics
+            .session
+            .physics()
             .world()
             .linear_velocity(right)
             .expect("right asteroid stays physical")[0];

@@ -32,13 +32,11 @@ pub struct ProjectStyles {
     root: Option<PathBuf>,
     snapshot: BTreeMap<PathBuf, FileStamp>,
     next_poll: Instant,
-    /// The running game's presentation: pointer states and transitions.
-    presenter: Presenter,
-    /// What Play last drew, styled, for the next step's hit-testing.
-    live: Option<World>,
     /// The screen the scene was last presented at, which the devtools panel
     /// inspects at so it shows the media queries that are on screen.
     viewport: Option<Viewport>,
+    /// Styles the edited world in place for a draw.
+    presenter: Presenter,
 }
 
 impl Default for ProjectStyles {
@@ -48,9 +46,8 @@ impl Default for ProjectStyles {
             root: None,
             snapshot: BTreeMap::new(),
             next_poll: Instant::now(),
-            presenter: Presenter::new(),
-            live: None,
             viewport: None,
+            presenter: Presenter::new(),
         }
     }
 }
@@ -67,13 +64,17 @@ impl ProjectStyles {
             root: Some(project.root().to_path_buf()),
             snapshot: watch_snapshot(project.root())?,
             next_poll: Instant::now() + POLL_INTERVAL,
-            presenter: Presenter::new(),
-            live: None,
             viewport: None,
+            presenter: Presenter::new(),
         })
     }
 
     #[must_use]
+    /// The composed stylesheets, for a run to present with.
+    pub fn sheets(&self) -> &[Stylesheet] {
+        &self.sheets
+    }
+
     pub fn is_empty(&self) -> bool {
         self.sheets.is_empty()
     }
@@ -112,46 +113,34 @@ impl ProjectStyles {
         Ok(true)
     }
 
+    /// Styles the edited world in place for one draw at `viewport`, and
+    /// returns what takes the styling off again, which the caller does once
+    /// drawn and before anything else reads the world. `None` for a project
+    /// with no stylesheets. Each root is applied in manifest order, as the
+    /// host applies them.
+    ///
+    /// # Errors
+    /// A stylesheet that will not apply; the world is put back first.
+    pub fn present(
+        &mut self,
+        world: &mut World,
+        viewport: Viewport,
+    ) -> Result<Option<sindri_weave::Undo>, String> {
+        if self.sheets.is_empty() {
+            return Ok(None);
+        }
+        self.viewport = Some(viewport);
+        self.presenter
+            .present_in_place(world, &self.sheets, viewport, &UiStates::new())
+            .map(Some)
+            .map_err(|error| error.to_string())
+    }
+
     /// Resolves a disposable presented world for one viewport.
     ///
     /// Each root is applied in manifest order, matching the host's sequential
     /// stylesheet semantics. The authored world is never mutated, so changing
     /// a viewport or closing the editor cannot leak presentation into a save.
-    /// Presents the running game: `:hover` and `:active` follow the pointer
-    /// and transitions ease. The result is also kept, because Play hit-tests
-    /// against what it last drew.
-    pub fn present_live(
-        &mut self,
-        authored: &World,
-        viewport: Viewport,
-        states: &UiStates,
-    ) -> Result<World, String> {
-        self.viewport = Some(viewport);
-        let presented = self
-            .presenter
-            .present(authored, &self.sheets, viewport, states)
-            .map_err(|error| error.to_string())?;
-        self.live = Some(presented.clone());
-        Ok(presented)
-    }
-
-    /// Moves transitions on by one step of play.
-    pub fn advance(&mut self, seconds: f32) {
-        self.presenter.advance(seconds);
-    }
-
-    /// What Play last drew, if it is drawing.
-    #[must_use]
-    pub const fn live(&self) -> Option<&World> {
-        self.live.as_ref()
-    }
-
-    /// Forgets the running game's presentation, when Play stops.
-    pub fn stop_live(&mut self) {
-        self.live = None;
-        self.presenter = Presenter::new();
-    }
-
     pub fn resolve(&mut self, authored: &World, viewport: Viewport) -> Result<World, String> {
         self.viewport = Some(viewport);
         let mut world = authored.clone();
@@ -212,12 +201,10 @@ impl ProjectStyles {
         Ok(())
     }
 
-    /// The scene as last presented, styled, for reading what was drawn: the
-    /// live game's when Play is running, and a fresh resolution otherwise.
+    /// The scene as presented at the screen it was last presented at, for
+    /// reading what was drawn. A run's world is already styled, so `authored`
+    /// is then what was drawn, give or take the pointer's states.
     pub fn drawn(&mut self, authored: &World) -> Option<World> {
-        if let Some(live) = &self.live {
-            return Some(live.clone());
-        }
         let viewport = self.viewport?;
         self.resolve(authored, viewport).ok()
     }

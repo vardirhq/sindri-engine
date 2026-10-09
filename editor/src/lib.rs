@@ -15,6 +15,9 @@ pub mod animation;
 pub mod assistant;
 #[cfg(not(target_arch = "wasm32"))]
 pub mod audition;
+/// What a benchmark run of the editor is asked for, and what it writes.
+#[cfg(not(target_arch = "wasm32"))]
+pub mod benchmark;
 /// A block set opened for editing: its blocks, their faces and flags.
 #[cfg(not(target_arch = "wasm32"))]
 pub mod block_set;
@@ -63,7 +66,7 @@ pub mod preferences;
 pub mod preview;
 #[cfg(not(target_arch = "wasm32"))]
 pub mod profile;
-/// Where Play's time goes, frame by frame.
+/// Where an editor frame's time goes, phase by phase.
 #[cfg(not(target_arch = "wasm32"))]
 pub mod profiler;
 #[cfg(not(target_arch = "wasm32"))]
@@ -86,6 +89,15 @@ pub mod occlusion;
 /// Where an entity sits among its siblings.
 #[cfg(not(target_arch = "wasm32"))]
 pub mod ordering;
+/// The session editor Play starts, assembled from what the editor loaded.
+#[cfg(not(target_arch = "wasm32"))]
+pub mod play_session;
+/// A run, recorded so it can be scrubbed.
+#[cfg(not(target_arch = "wasm32"))]
+pub mod recording;
+/// Edits made while a scene plays, and what Stop does with them.
+#[cfg(not(target_arch = "wasm32"))]
+pub mod run_edits;
 /// The Decay scripts an open scene runs.
 #[cfg(not(target_arch = "wasm32"))]
 pub mod scripts;

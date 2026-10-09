@@ -81,7 +81,12 @@ fn arc_skips_impact_targets_and_moves_toward_the_next_nearest_enemy() {
     enemy(&mut run, [0.2, 0.0, 0.0]);
     enemy(&mut run, [3.0, 0.0, 0.0]);
     enemy(&mut run, [0.0, 4.0, 0.0]);
-    let prefab = run.prefabs.get("prefabs/arc.prefab").expect("arc").clone();
+    let prefab = run
+        .session
+        .prefabs()
+        .get("prefabs/arc.prefab")
+        .expect("arc")
+        .clone();
     let arc = run.world.spawn_prefab(&prefab).expect("spawn").root;
     step(&mut run);
     step(&mut run);

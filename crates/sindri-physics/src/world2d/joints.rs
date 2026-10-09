@@ -11,6 +11,7 @@ mod hinge;
 mod slider;
 mod spring;
 
+#[derive(Clone)]
 pub(super) struct OwnedJoint {
     pub(super) handle: r2::ImpulseJointHandle,
     pub(super) joint: OwnedJointSpec,

@@ -14,7 +14,8 @@ fn the_starter_is_small_and_has_four_real_cargo_slots() {
     let deck = pilot.run.entity("deck").unwrap();
     let map = pilot
         .run
-        .components
+        .session
+        .components()
         .get::<TilemapComponent>(&pilot.run.world, deck)
         .unwrap()
         .unwrap();
@@ -36,7 +37,8 @@ fn tile(pilot: &Pilot, column: u32, row: u32) -> Option<u32> {
     let deck = pilot.run.entity("deck").unwrap();
     pilot
         .run
-        .components
+        .session
+        .components()
         .get::<TilemapComponent>(&pilot.run.world, deck)
         .unwrap()
         .unwrap()
@@ -114,8 +116,8 @@ fn missing_physical_cargo_cannot_be_partly_spent_or_replaced_by_hud_counts() {
     pilot::construction::gather(&mut pilot, "trunk");
     pilot::construction::bench(&mut pilot);
     let before = tile(&pilot, 4, 10);
-    pilot.run.scripts.blackboard_mut().set("wood", 2.0);
-    pilot.run.scripts.blackboard_mut().set("scrap", 2.0);
+    pilot.run.session.blackboard_mut().set("wood", 2.0);
+    pilot.run.session.blackboard_mut().set("scrap", 2.0);
     pilot.use_it();
     assert_eq!(tile(&pilot, 4, 10), before);
     assert!((pilot.board("crates") - 1.0).abs() < 0.01);
@@ -133,7 +135,8 @@ fn load_hold(pilot: &mut Pilot, first: u32, second: u32, kinds: [&str; 2]) {
     let deck = pilot.run.entity("deck").unwrap();
     let mut map = pilot
         .run
-        .components
+        .session
+        .components()
         .get::<TilemapComponent>(&pilot.run.world, deck)
         .unwrap()
         .unwrap();
@@ -153,12 +156,12 @@ fn load_hold(pilot: &mut Pilot, first: u32, second: u32, kinds: [&str; 2]) {
         .components
         .get_mut("sindri.tilemap")
         .unwrap()["tiles"] = serde_json::to_value(map.tiles).unwrap();
-    pilot.run.scripts.blackboard_mut().set("crates", 4.0);
+    pilot.run.session.blackboard_mut().set("crates", 4.0);
     for kind in ["wood", "fibre", "ore", "scrap"] {
-        pilot.run.scripts.blackboard_mut().set(kind, 0.0);
+        pilot.run.session.blackboard_mut().set(kind, 0.0);
     }
     for kind in kinds {
-        pilot.run.scripts.blackboard_mut().set(kind, 2.0);
+        pilot.run.session.blackboard_mut().set(kind, 2.0);
     }
     pilot.wait(0.1);
 }

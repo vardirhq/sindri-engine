@@ -32,7 +32,8 @@ const ROSTER: [&str; 12] = [
 
 fn prefab_json(run: &Run, ident: &str) -> serde_json::Value {
     let prefab = run
-        .prefabs
+        .session
+        .prefabs()
         .get(&format!("prefabs/{ident}.prefab"))
         .unwrap_or_else(|| panic!("{ident} ships a prefab"));
     serde_json::to_value(prefab).expect("the prefab serialises")

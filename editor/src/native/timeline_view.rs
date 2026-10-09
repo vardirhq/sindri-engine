@@ -36,6 +36,8 @@ pub(super) struct View<'a> {
 impl EditorApp {
     /// The Timeline panel.
     pub(super) fn timeline_body(&mut self, ui: &mut egui::Ui) {
+        // A run in progress can be scrubbed whatever is selected.
+        self.run_scrubber(ui);
         let Some(entity) = self.selection.primary() else {
             panel::empty_state(
                 ui,
@@ -132,7 +134,7 @@ impl EditorApp {
         if !dragging && !structural {
             // A drag is one step of history; the next one starts its own.
             if ui.input(|input| input.pointer.any_released()) {
-                self.history.break_merge_run();
+                self.break_merge_runs();
             }
         }
         self.timeline = state;
@@ -159,10 +161,10 @@ impl EditorApp {
         let transaction = if merge {
             transaction.merging(format!("timeline:{}", entity.index()))
         } else {
-            self.history.break_merge_run();
+            self.break_merge_runs();
             transaction
         };
-        if let Err(error) = self.history.apply(transaction, &mut self.world) {
+        if let Err(error) = self.apply_edit(transaction) {
             self.report(error.to_string());
         }
     }

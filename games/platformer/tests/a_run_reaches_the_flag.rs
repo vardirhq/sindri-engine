@@ -17,7 +17,7 @@ fn step(run: &mut Run) {
 fn level(run: &Run) -> (TilemapComponent, [f32; 2]) {
     let entity = run.entity("level").expect("the level");
     let tilemap = run
-        .components
+        .components()
         .get::<TilemapComponent>(&run.world, entity)
         .expect("a readable tilemap")
         .expect("the level is a tilemap");
@@ -43,10 +43,10 @@ fn the_hero_stands_on_the_painted_ground() {
     for _ in 0..90 {
         step(&mut run);
     }
-    assert!(run.physics.character_motion(hero).unwrap().grounded);
+    assert!(run.physics().character_motion(hero).unwrap().grounded);
     let crate_entity = run.entity("wind-crate").unwrap();
     assert!(
-        run.physics
+        run.physics()
             .world()
             .continuous_collision(crate_entity)
             .unwrap()
@@ -82,7 +82,7 @@ fn a_player_running_and_jumping_reaches_the_flag() {
         }
         let [x, y] = run.position(hero);
         let settled = run
-            .physics
+            .physics()
             .character_motion(hero)
             .is_some_and(|motion| motion.grounded);
         #[allow(clippy::cast_possible_truncation)]

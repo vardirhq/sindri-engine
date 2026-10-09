@@ -29,7 +29,8 @@ fn lab_run() -> Run {
         .disabled = true;
 
     let document = run
-        .prefabs
+        .session
+        .prefabs()
         .get("prefabs/combat-lab.prefab")
         .expect("the combat lab prefab ships")
         .clone();
@@ -157,7 +158,8 @@ fn the_stress_preset_has_real_cross_attack_reactions() {
 fn a_mine_blast_catches_a_target_by_its_edge() {
     let mut run = lab_run();
     let document = run
-        .prefabs
+        .session
+        .prefabs()
         .get("prefabs/attack-hostile-mine.prefab")
         .expect("the mine prefab ships")
         .clone();
@@ -184,7 +186,8 @@ fn a_mine_blast_catches_a_target_by_its_edge() {
     step(&mut run);
     step(&mut run);
     let hp = run
-        .scripts
+        .session
+        .scripts()
         .field(target, "hp")
         .and_then(|value| match value {
             sindri_decay::ScriptValue::Number(hp) => Some(*hp),

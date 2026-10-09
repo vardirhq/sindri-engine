@@ -24,6 +24,30 @@ pub fn component(
     title: &str,
     actions: impl FnOnce(&mut egui::Ui),
 ) -> bool {
+    component_header(ui, id, icon, title, actions).0
+}
+
+/// The same header, with a menu a right-click on it opens.
+pub fn component_with_menu(
+    ui: &mut egui::Ui,
+    id: Id,
+    icon: MaterialIcon,
+    title: &str,
+    actions: impl FnOnce(&mut egui::Ui),
+    menu: impl FnOnce(&mut egui::Ui),
+) -> bool {
+    let (open, response) = component_header(ui, id, icon, title, actions);
+    super::menu::on_right_click(&response, menu);
+    open
+}
+
+fn component_header(
+    ui: &mut egui::Ui,
+    id: Id,
+    icon: MaterialIcon,
+    title: &str,
+    actions: impl FnOnce(&mut egui::Ui),
+) -> (bool, egui::Response) {
     let mut open = ui.data_mut(|data| *data.get_temp_mut_or(id, true));
     let width = ui.available_width();
     let (rect, response) =
@@ -48,7 +72,10 @@ pub fn component(
             .layout(Layout::left_to_right(Align::Center)),
     );
     content.spacing_mut().item_spacing.x = 4.0;
-    content.label(
+    // Not selectable, so a click or a right-click on the words reaches the
+    // heading rather than starting a text selection.
+    let plain = |text: RichText| egui::Label::new(text).selectable(false);
+    content.add(plain(
         if open {
             icons::EXPANDED
         } else {
@@ -58,14 +85,16 @@ pub fn component(
         .rich_text()
         .size(15.0)
         .color(color::TEXT_FAINT),
-    );
-    content.label(icon.outlined().rich_text().size(15.0).color(color::FORGE));
-    content.label(
+    ));
+    content.add(plain(
+        icon.outlined().rich_text().size(15.0).color(color::FORGE),
+    ));
+    content.add(plain(
         RichText::new(title)
             .strong()
             .size(text::HEADING)
             .color(color::TEXT),
-    );
+    ));
     let actions_rect = rect.shrink2(Vec2::new(5.0, 2.0));
     let mut trailing = content.new_child(
         UiBuilder::new()
@@ -85,12 +114,12 @@ pub fn component(
         open = !open;
         ui.data_mut(|data| data.insert_temp(id, open));
     }
-    response.on_hover_text(if open {
+    let response = response.on_hover_text(if open {
         "Collapse this component"
     } else {
         "Expand this component"
     });
-    open
+    (open, response)
 }
 
 /// A heading inside a component: a label for the rows under it.

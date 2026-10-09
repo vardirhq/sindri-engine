@@ -65,8 +65,8 @@ impl EditorApp {
         let open = ctx.data(|data| data.get_temp::<bool>(Id::new(SECTION)).unwrap_or(true));
         let states = sindri_weave::pointer_states(
             &self.world,
-            self.screen_ui.hovered(),
-            self.screen_ui.active(),
+            self.screen_ui().hovered(),
+            self.screen_ui().active(),
         );
         let (inspection, viewport) = self.styles.inspect(&self.world, entity, &states)?;
         let mut view = StylesView {

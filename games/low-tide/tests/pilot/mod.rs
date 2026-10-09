@@ -61,7 +61,7 @@ impl Pilot {
     /// The same voyage on a phone held upright, played by touch.
     pub fn on_a_phone() -> Self {
         let mut pilot = Self::new();
-        pilot.run.screen = [390.0, 844.0];
+        pilot.run.size = [390.0, 844.0];
         pilot.touch = true;
         pilot
     }
@@ -186,9 +186,9 @@ impl Pilot {
         let basin = self.run.entity("basin").expect("the Basin");
         VoxelGround::of_entity(
             &self.run.world,
-            &self.run.components,
+            self.run.session.components(),
             basin,
-            Some(&self.run.tile_sets),
+            Some(self.run.session.tile_sets()),
         )
         .expect("the Basin reads")
         .expect("the Basin is a voxel world")

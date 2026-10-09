@@ -48,8 +48,10 @@ that runs exported games, the camera example and the platformer's test harness.
 
 The dedicated demo lives in `examples/camera`, now an authored project with
 a `sindri.toml`, packaged font and responsive Weave presentation, exported at
-`/examples/camera/` and listed in the Pages directory. Its native entry point
-uses the same scene and Decay scripts.
+`/examples/camera/` and listed in the Pages directory. Natively,
+`sindri-player examples/camera` plays the same project, stylesheet and all;
+the lab's own window app, which skipped its Weave styles, is gone, and its
+crate is the harness its tests play it through.
 
 The cyan camera-relative rectangle visualizes the dead zone; amber boundary
 lines and corner markers visualize camera-center confinement. The outer gray

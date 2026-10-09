@@ -561,12 +561,17 @@ ground probe asks for `ground`.
 
 ### Editor Play
 
-Play runs **the same fixed-step loop a shipped game runs**. The editor owns a
-`FixedStepClock`, advances it with the real frame delta, and runs gameplay a
-whole number of times per frame — effects, physics, screen UI, scripts and
-animations, in that order, at the fixed rate. Before this it stepped once per
-*rendered* frame, so a scene was simulated as fast as the machine happened to
-draw and a play-test was evidence about the editor rather than about the game.
+Play runs **the session a shipped game runs**: `sindri_runtime::Session`, the
+one the browser host, `sindri-player` and every game's test harness step. The
+editor owns a `FixedStepClock`, advances it with the real frame delta, and
+steps the session a whole number of times per frame, on a world styled by the
+project's stylesheets as a build's is. It used to assemble its own loop, which
+ran effects before physics and gave scripts no aim, gestures, tile sets or
+`Scene.go`; before that it stepped once per *rendered* frame. Either way a
+play-test was evidence about the editor rather than about the game.
+`editor/tests/play_matches_the_build.rs` opens the platformer, Scorchball, Low
+Tide and Orbital the way the editor does and the way a build does, steps both
+with the same scripted input, and requires the same world at the end.
 
 **An edge belongs to exactly one fixed step.** A key going down is one event and
 gameplay runs in the fixed step, so the edge is spent once a step has seen it —
@@ -577,6 +582,24 @@ gameplay sees it. Accumulated pointer motion follows the same rule: two frames
 of dragging between steps sum rather than losing the first. This was wrong in
 the shipped host too, and is now covered by tests in
 `crates/sindri-platform/tests/game_loop.rs`.
+
+**A scene can be edited while it plays.** Inspector fields, the hierarchy's
+create, rename, duplicate and delete, gizmos, and tile and block painting act on
+the running world at once, so a jump can be tuned and tried in the same run.
+Each edit is recorded against the run rather than the scene's history
+(`editor/src/run_edits.rs`). Stop restores the snapshot from Play and lists
+them; the ones kept are applied to the restored scene as ordinary undoable
+entries, by the component fields and transform parts each one changed, so a
+value the game itself wrote while running does not come back with them. An
+edit to something the run spawned is explained rather than dropped. Saving,
+new scenes, prefab files and undo/redo wait for Stop.
+
+**A run can be scrubbed.** Play records each fixed step's input, which steps
+the Game view was drawn after, and a copy of the world and session every second,
+keeping the last two minutes. The Timeline's Run strip takes the run to any
+recorded step: it pauses, restores the copy at or before it and replays the
+recorded input, which a restored session steps exactly as it did the first time.
+Playing on from there carries on and lets the recorded future go.
 
 **A held scene can be stepped once**, which is what a debugger's step button is
 for: the bug that happens in one frame and is gone before anyone can look at it.
@@ -1547,9 +1570,9 @@ frame.
   beacon lights by its own sequences: arriving plays `arrive`, a swell whose
   first cue sounds the chime, and the script moves it on to the looping `glow`
   when that finishes (`game/tests/the_beacon_lights.rs`). A cue's sound is
-  found by the export's walk of the scene, so a project need not list it. The
-  test harnesses of the platformer, Flappy, Scorchball and Orbital advance
-  sequences too. No curve editor, blending, or tracks beyond numbers and cues
+  found by the export's walk of the scene, so a project need not list it. Every
+  game's test harness is a `sindri_runtime::ProjectRun`, which advances them
+  as a build does. No curve editor, blending, or tracks beyond numbers and cues
 - **Plays a scene's audio in Play, and mixes it for the author.** Play starts
   a scene's autoplay `sindri.audio.source`s and performs every request its
   scripts make through `Audio`, through the same `AudioMixer` a build uses;
@@ -1563,16 +1586,28 @@ frame.
   while the monitor carries over. Pause holds every voice and Stop ends them.
   Without an audio device Play carries on silently, listing one-shots for a
   second. No level meters, and buses are not yet declared by the project
-- **Profiles Play.** The Profiler panel (a top tab beside the Game view,
-  under the Scene view beside the Game view when docked) keeps the last 300
-  frames of Play, each timed on the CPU by phase: effects, physics, screen UI,
-  scripts, sprite animation, cameras, and the Scene and Game views drawn.
-  They are drawn as stacked bars against the 60 fps budget; pointing at a bar
-  shows that frame and a click pins it, and otherwise the panel shows the
-  average frame. Each script's time and runs per frame are listed slowest
-  first, summed over every entity running it (`Scripts::set_measuring`
-  reports them). Starting Play clears it. GPU time, a breakdown inside a
-  script, and timing a shipped build are not measured
+- **Profiles the editor's frame.** The Profiler panel (a top tab beside the
+  Game view, under the Scene view beside the Game view when docked) keeps the
+  last 300 frames of Play, each timed on the CPU from one call of the editor's
+  frame to the next: upkeep (hot reload, assets and scripts arriving,
+  compiling), the fixed steps' effects, physics, screen UI, scripts, sprite
+  animation and cameras, then each view's presentation (Weave or a Timeline
+  pose), extraction and encoding, the panels laid out around them, egui
+  painting the window (from eframe's own CPU figure), and the wait until the
+  next frame. Waiting is listed but left out of the bars, which are drawn
+  against the 60 fps budget; pointing at one shows that frame and a click pins
+  it, and otherwise the panel shows the average frame. Each script's time and
+  runs per frame are listed slowest first, summed over every entity running
+  it (`Scripts::set_measuring` reports them). A toolbar toggle records frames
+  while editing too. Starting Play clears it. GPU time and a breakdown inside
+  a script are not measured
+- **Benchmarks itself against the shipped host.** `sindri-editor <project>
+  --benchmark <report.json>` waits for the project's assets, records frames
+  at rest and then of Play with vsync off and default settings, writes every
+  frame's phases and exits; `project-benchmark` plays the same project
+  offscreen the way the browser host does. `scripts/frame-benchmark.py`
+  runs both and compares the work per frame. The measured baselines are in
+  `docs/editor-update.md`
 - **Shows a project's scenes as a board.** The Scenes panel (a tab beside the
   Scene view, or beside the Game view in the docked preset, and in the View
   menu) has a card for the main scene and each scene in `[project] scenes`,
@@ -1732,6 +1767,30 @@ frame.
   can already do — open a scene, look inside a folder, slice an image — plus the
   asset path a component field wants, the one the open scene resolves against,
   which until now had to be read off the row and typed back in
+- **A right-click menu wherever one is expected.** The hierarchy's empty space
+  creates an empty, a UI image or a light, and pastes; the project browser's
+  makes a folder, script, profile, physics material or block set in the folder
+  being looked at, imports, and refreshes; a component's heading copies its
+  values, pastes them onto another component of the same kind, resets it to its
+  blank and removes it; a field's name copies its value and resets it to the
+  schema's; the Scene view frames the selection or everything and creates or
+  pastes at the point clicked; a console line copies, selects the entity it
+  names, and clears. Component order is not authored, so there is no Move up
+  or down for a component
+- **Copy and paste entities.** Copy (a row's menu, or Ctrl+C with the
+  hierarchy in hand) keeps the copied subtrees as they were, so a copy pastes
+  whole after the original was changed or deleted; Paste (Ctrl+V, the empty
+  space, or the Scene view) lands at the top level, "Paste as child" under a
+  row, and "Paste here" at the point clicked. A row's menu also moves an entity
+  out to the top level
+- **Gizmos for what simulates without drawing.** A 2D joint is drawn between
+  its anchors as physics places them, with a rope's reach, a hinge's allowed
+  swing, a slider's travel and a spring's rest length, and a click on its line
+  selects it; a 3D collider's pieces as wireframes; a selected character's
+  footing, from its collider's lowest point: the steepest slope it walks, how
+  high it steps and how far down it snaps; and a selected effect burst's reach,
+  from its speed, spread, life and drag. Audio has no gizmo because a source
+  plays at one volume wherever it is
 - **Creating empty root or child GameObjects and deleting entities**, from the
   hierarchy. Creation assigns a stable scene ID immediately, and creating a
   child opens its parent. Deleting takes the whole subtree, and **undo brings
@@ -1983,9 +2042,8 @@ Listed because a control that looks like a feature is worse than an absent one.
 under use and what the editor cannot express at all.
 `docs/editor-authoring-audit.md` is the second sweep, which asks the harder
 question: whether the controls that do work add up to a tool the companion game
-could be built in. They now do — every finding it made is fixed except the six
-right-click surfaces it tabulates, which are places to put actions that already
-exist rather than gaps in what the editor can express. This is the summary, and
+could be built in. They now do — every finding it made is fixed, the six
+right-click surfaces it tabulates included. This is the summary, and
 it is deliberately short: everything the audits found is either working or gone,
 and what is left here is waiting on a build rather than on a handler.
 
@@ -2038,16 +2096,16 @@ settings gear.
 
 ### Editor
 
-- Play mode is intentionally read-only. Stop restores the snapshot from Play;
-  editing a running scene and keeping those changes is not supported
+- Saving, new scenes, prefab files and undo/redo wait for Stop. Everything
+  else edits a running scene: Stop lists the edits made while playing and
+  keeps the chosen ones (see Editor Play)
 - The editor edits one scene at a time; the Scenes panel shows the rest but
   does not edit them side by side. There are no project settings beyond the
   scene list and main scene, and a door named at run time (`Scene.go(next)`)
   is not drawn on the board
-- Context menus exist on hierarchy and project rows only. Empty panel space,
-  component/property rows, the Scene view, and console lines still lack their
-  natural context actions
-- No copy/paste of entities or components
+- Copied entities and component values are kept by the editor, not the
+  system clipboard, which is given only their names or JSON text; they do not
+  paste into another editor window
 - No build/export controls; static web export is currently a CLI and CI workflow
 - No versioned editor protocol; the editor and runtime are one process
 - Decay source opens as a read-only text preview. The editor cannot modify it;

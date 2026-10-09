@@ -56,7 +56,7 @@ impl EditorApp {
             (entity, _) => self.selection.replace(entity),
         };
         if moved {
-            self.history.break_merge_run();
+            self.break_merge_runs();
             self.gizmo_drag = None;
             self.tilemap_tool.reset();
             self.tile_volume_tool.reset();

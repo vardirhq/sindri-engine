@@ -122,3 +122,38 @@ fn save_as_is_not_swallowed_by_save() {
     let new_scene = shortcuts_for(egui::Modifiers::COMMAND, egui::Key::N);
     assert!(new_scene.new_scene);
 }
+
+/// What Copy and Paste carried through a real egui frame, with or without a
+/// field holding the keyboard.
+fn clipboard_events(events: Vec<egui::Event>, typing: bool) -> (bool, Option<String>) {
+    let context = egui::Context::default();
+    let read = std::cell::RefCell::new((false, None));
+    context
+        .run_ui(
+            egui::RawInput {
+                events,
+                ..Default::default()
+            },
+            |ui| {
+                *read.borrow_mut() = ui
+                    .ctx()
+                    .input(|input| super::super::shortcuts::clipboard_keys(input, typing));
+            },
+        )
+        .drop_without_applying_deltas();
+    read.into_inner()
+}
+
+/// Ctrl+C and Ctrl+V reach egui as Copy and Paste events, not keys, so they
+/// are read as events; and a field being typed in keeps its own.
+#[test]
+fn copy_and_paste_are_read_from_their_events() {
+    let (copied, pasted) = clipboard_events(
+        vec![egui::Event::Copy, egui::Event::Paste("anvil".to_owned())],
+        false,
+    );
+    assert!(copied);
+    assert_eq!(pasted.as_deref(), Some("anvil"));
+    let (copied, pasted) = clipboard_events(vec![egui::Event::Copy], true);
+    assert!(!copied && pasted.is_none(), "a field's copy is the field's");
+}

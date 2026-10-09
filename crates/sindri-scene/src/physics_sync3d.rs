@@ -28,6 +28,7 @@ const MOVED: f32 = 1.0e-4;
 
 /// Runtime state beside the scene, never serialized into authored components.
 /// Hosts must call this once per engine fixed step; game/editor wiring is separate.
+#[derive(Clone)]
 pub struct ScenePhysics3d {
     world: PhysicsWorld3d,
     registered: BTreeMap<EntityId, Authored>,
@@ -96,6 +97,12 @@ impl ScenePhysics3d {
             return Err(PhysicsSyncError::BadStep(delta));
         }
         crate::physics3d::validate_dimensions(world)?;
+        // A scene with nothing 3D in it, and a solver holding nothing, has
+        // nothing to synchronize or step: a 2D game pays nothing for 3D.
+        if self.world.is_empty() && self.registered.is_empty() && !authors_3d(world) {
+            self.events.clear();
+            return Ok(());
+        }
         let settings = components.query::<PhysicsWorld3dComponent>(world)?;
         if settings.len() > 1 {
             return Err(PhysicsSyncError::MultipleWorlds3d);
@@ -283,6 +290,16 @@ fn extent(piece: &Collider3d) -> f32 {
         }
 }
 
+/// Whether anything in `world` carries 3D physics: every 3D physics
+/// component is named under `sindri.physics3d.`.
+fn authors_3d(world: &World) -> bool {
+    world.entities().any(|(_, data)| {
+        data.components
+            .keys()
+            .any(|name| name.starts_with("sindri.physics3d."))
+    })
+}
+
 fn body_at(body: Option<RigidBody3d>, pose: PhysicsPose3d) -> RigidBody3d {
     RigidBody3d {
         position: pose.position,
@@ -293,7 +310,7 @@ fn body_at(body: Option<RigidBody3d>, pose: PhysicsPose3d) -> RigidBody3d {
         })
     }
 }
-fn pose_of(world: &World, entity: EntityId, body: Option<RigidBody3d>) -> PhysicsPose3d {
+pub(crate) fn pose_of(world: &World, entity: EntityId, body: Option<RigidBody3d>) -> PhysicsPose3d {
     world.world_transform(entity).map_or_else(
         || {
             body.map_or_else(PhysicsPose3d::default, |body| PhysicsPose3d {

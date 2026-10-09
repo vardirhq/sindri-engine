@@ -20,7 +20,7 @@ pub(super) struct Character {
     parent: Option<EntityId>,
 }
 
-#[derive(Default)]
+#[derive(Clone, Default)]
 pub(super) struct CharacterState {
     support: Option<PlatformSupport2d>,
     drop_seconds: f32,
@@ -42,7 +42,7 @@ impl<'a> CharacterMotions2d<'a> {
     }
 }
 
-#[derive(Default)]
+#[derive(Clone, Default)]
 pub(crate) struct SceneCharacters2d {
     authored: BTreeMap<EntityId, Character>,
     states: BTreeMap<EntityId, CharacterState>,

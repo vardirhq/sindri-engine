@@ -72,7 +72,7 @@ fn underside_sensor_overlap_does_not_grant_a_jump() {
     step(&mut run);
     let planks = run.entity("one-way-planks").unwrap();
     assert!(
-        run.physics
+        run.physics()
             .events()
             .iter()
             .any(|event| (event.first == hero && event.second == planks)

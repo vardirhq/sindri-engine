@@ -5,7 +5,7 @@ use pilot::{Pilot, distance};
 use sindri_scene::{VoxelGround, VoxelWorldComponent};
 
 fn time(pilot: &mut Pilot, seconds: f64) {
-    pilot.run.scripts.blackboard_mut().set("tide_time", seconds);
+    pilot.run.session.blackboard_mut().set("tide_time", seconds);
     pilot.wait(0.1);
 }
 
@@ -13,7 +13,8 @@ fn level(pilot: &Pilot) -> f32 {
     let basin = pilot.run.entity("basin").unwrap();
     pilot
         .run
-        .components
+        .session
+        .components()
         .get::<VoxelWorldComponent>(&pilot.run.world, basin)
         .unwrap()
         .unwrap()

@@ -82,7 +82,14 @@ pub(super) struct Frame {
     /// function body's own bindings, which is the arrangement the analyzer
     /// checks against: a parameter and a body binding of the same name are a
     /// duplicate, not a shadow.
-    scopes: Vec<HashMap<String, Slot>>,
+    ///
+    /// Held as one list, innermost binding last, with where each inner scope
+    /// begins: a function has a handful of locals, and a short backwards scan
+    /// finds one sooner than hashing its name, without a map made for every
+    /// block entered.
+    bindings: Vec<(String, Slot)>,
+    /// Where each scope opened after the base one starts in `bindings`.
+    scope_starts: Vec<usize>,
     stack: Vec<Value>,
     /// The collections a `for` is part way through, innermost last.
     ///
@@ -104,29 +111,55 @@ enum Walk {
 }
 
 impl Frame {
-    pub(super) fn new(locals: HashMap<String, Slot>) -> Self {
+    pub(super) fn new(locals: Vec<(String, Slot)>) -> Self {
         Self {
-            scopes: vec![locals],
+            bindings: locals,
+            scope_starts: Vec::new(),
             stack: Vec::new(),
             walks: Vec::new(),
         }
     }
 
+    /// Binds `name` in the innermost scope, replacing a binding of the same
+    /// name already in that scope, as a redeclaration there does.
     pub(super) fn declare(&mut self, name: &str, slot: Slot) {
-        if let Some(scope) = self.scopes.last_mut() {
-            scope.insert(name.to_owned(), slot);
+        let start = self.scope_starts.last().copied().unwrap_or(0);
+        if let Some((_, existing)) = self.bindings[start..]
+            .iter_mut()
+            .find(|(bound, _)| bound == name)
+        {
+            *existing = slot;
+        } else {
+            self.bindings.push((name.to_owned(), slot));
         }
     }
 
     pub(super) fn lookup(&self, name: &str) -> Option<&Slot> {
-        self.scopes.iter().rev().find_map(|scope| scope.get(name))
+        self.bindings
+            .iter()
+            .rev()
+            .find(|(bound, _)| bound == name)
+            .map(|(_, slot)| slot)
     }
 
     pub(super) fn lookup_mut(&mut self, name: &str) -> Option<&mut Slot> {
-        self.scopes
+        self.bindings
             .iter_mut()
             .rev()
-            .find_map(|scope| scope.get_mut(name))
+            .find(|(bound, _)| bound == name)
+            .map(|(_, slot)| slot)
+    }
+
+    fn enter_scope(&mut self) {
+        self.scope_starts.push(self.bindings.len());
+    }
+
+    /// Closes the innermost scope; the base scope holds the parameters, so it
+    /// is never the one being closed.
+    fn exit_scope(&mut self) {
+        if let Some(start) = self.scope_starts.pop() {
+            self.bindings.truncate(start);
+        }
     }
 }
 
@@ -472,14 +505,8 @@ impl<'a, H: Host> Runtime<'a, H> {
                 Instruction::StartTimer | Instruction::Timer(_) => {
                     Self::step_timer(frame, &instructions[ip])?;
                 }
-                Instruction::ScopeEnter => frame.scopes.push(HashMap::new()),
-                Instruction::ScopeExit => {
-                    // The base scope holds the parameters, so it is never the
-                    // one being closed.
-                    if frame.scopes.len() > 1 {
-                        frame.scopes.pop();
-                    }
-                }
+                Instruction::ScopeEnter => frame.enter_scope(),
+                Instruction::ScopeExit => frame.exit_scope(),
             }
             ip += 1;
         }

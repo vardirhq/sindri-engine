@@ -18,7 +18,8 @@ use crate::{
     preferences::{AssetScope, AssetView},
     project::{AssetKind, ProjectTree},
     ui::icons,
-    ui::widgets::panel,
+    ui::theme::metric,
+    ui::widgets::{lazy, panel},
 };
 
 use super::EditorApp;
@@ -286,8 +287,21 @@ fn asset_column(
     let searching = !search.trim().is_empty();
     let matching = project.matching(search);
     let rows = browser.rows(&matching, searching, listing.base);
+    // Where something made in the empty space goes: the folder being looked
+    // at, else where the listing starts.
+    let here = browser
+        .folder
+        .clone()
+        .or_else(|| listing.base.map(Path::to_path_buf))
+        .or_else(|| project.root().map(Path::to_path_buf));
     if rows.is_empty() {
         empty_listing(ui, searching, browser.is_scoped());
+        let room = ui.available_height() + ui.min_rect().height();
+        if let Some(here) = &here
+            && let Some(asked) = row::space_menu(ui, here, room)
+        {
+            action = asked;
+        }
         return action;
     }
     // A project has more assets than a dock has room for, in either
@@ -295,7 +309,7 @@ fn asset_column(
     // without the last few assets falling off the bottom.
     egui::ScrollArea::vertical()
         .auto_shrink([false, false])
-        .show(ui, |ui| {
+        .show_viewport(ui, |ui, in_sight| {
             match view {
                 AssetView::Grid => {
                     ui.spacing_mut().item_spacing = egui::vec2(6.0, 6.0);
@@ -313,23 +327,37 @@ fn asset_column(
                     // shows a useful number of them without taking height from
                     // the viewport it sits under.
                     ui.spacing_mut().item_spacing.y = 0.0;
-                    for (entry, depth) in &rows {
-                        // The row being renamed gets the draft; every other
-                        // row gets its name.
-                        let editing = renaming
-                            .as_mut()
-                            .filter(|(path, _)| path == &entry.path)
-                            .map(|(_, name)| name);
-                        if let Some(chosen) =
-                            listing_row(ui, entry, *depth, searching, scenes, browser, editing)
-                        {
-                            action = chosen;
-                        }
-                    }
+                    let renamed = renaming.as_ref().map(|(path, _)| path.clone());
+                    lazy::rows(
+                        ui,
+                        in_sight,
+                        ui.id().with("asset rows"),
+                        metric::ROW_HEIGHT,
+                        rows.iter().map(|row| (lazy::key(&row.0.path), row)),
+                        |(entry, _)| renamed.as_ref() == Some(&entry.path),
+                        |ui, (entry, depth)| {
+                            // The row being renamed gets the draft; every
+                            // other row gets its name.
+                            let editing = renaming
+                                .as_mut()
+                                .filter(|(path, _)| path == &entry.path)
+                                .map(|(_, name)| name);
+                            if let Some(chosen) =
+                                listing_row(ui, entry, *depth, searching, scenes, browser, editing)
+                            {
+                                action = chosen;
+                            }
+                        },
+                    );
                 }
             }
             if project.truncated() {
                 panel::note(ui, "More files than the browser reads");
+            }
+            if let Some(here) = &here
+                && let Some(asked) = row::space_menu(ui, here, in_sight.height())
+            {
+                action = asked;
             }
         });
     action

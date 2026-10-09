@@ -120,7 +120,7 @@ impl EditorApp {
     /// thing that can disagree with the first, and each step here is a
     /// transaction that already knows how to reverse itself.
     pub(super) fn travel_history(&mut self, travel: Travel) {
-        self.history.break_merge_run();
+        self.break_merge_runs();
         for _ in 0..travel.unsigned_abs() {
             let from = self.history.revision();
             let moved = if travel < 0 {

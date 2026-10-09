@@ -6,7 +6,7 @@
 
 use glam::Vec2 as GlamVec2;
 use sindri_core::{CommandHistory, World};
-use sindri_scene::{SceneExtractor, ScenePhysics2d, ScenePhysics3d, ScreenUi, SpriteAnimations};
+use sindri_scene::SceneExtractor;
 
 use crate::audition::Audition;
 use crate::selection::Selection;
@@ -100,9 +100,18 @@ impl EditorApp {
     // Long because it names every field the editor holds, once; the work it
     // does is the handful of calls after the literal.
     #[allow(clippy::too_many_lines)]
-    pub(super) fn new(context: &eframe::CreationContext<'_>) -> Self {
+    pub(super) fn new(
+        context: &eframe::CreationContext<'_>,
+        benchmark: Option<crate::benchmark::BenchmarkPlan>,
+    ) -> Self {
         crate::ui::theme::install(&context.egui_ctx);
-        let preferences = Preferences::load(context.storage);
+        // A benchmark measures the editor as it ships, not as somebody last
+        // arranged it.
+        let preferences = if benchmark.is_some() {
+            Preferences::default()
+        } else {
+            Preferences::load(context.storage)
+        };
         let scene = scene_extractor();
         let (decided, file, open_error) = Self::opening(&preferences);
         let (world, load_error) = Self::opening_world(&scene, &file);
@@ -115,6 +124,7 @@ impl EditorApp {
         } = Self::gpu(context, file.anchor());
         let project = ProjectTree::beside(file.anchor());
         let mut app = Self {
+            game_scene: scene.clone(),
             scene,
             world,
             file,
@@ -171,22 +181,18 @@ impl EditorApp {
             scene_board: scene_board_view::SceneBoardState::default(),
             profiler: crate::profiler::Profiler::default(),
             play_audio: crate::play_audio::PlayAudio::new(crate::play_audio::native()),
-            sequences: sindri_scene::Sequences::new(),
             sheet_camera: super::sprite_sheet_view::SheetCamera::default(),
             timeline: crate::timeline::TimelineState::default(),
             textured_revision: TexturedAt::default(),
             scene_viewport,
             game_viewport,
             game_view_rect: None,
+            last_game_view: None,
             game_device: device::DevicePreview::default(),
-            physics: ScenePhysics2d::top_down().expect("zero gravity is finite"),
-            physics3d: ScenePhysics3d::new([0.0; 3]).expect("zero gravity is finite"),
-            screen_ui: ScreenUi::default(),
-            random: sindri_core::Rng::default(),
-            saves: sindri_core::SaveStore::default(),
-            effects: sindri_scene::Effects2d::default(),
+            saves: super::runtime::EditorSaves::default(),
+            session: None,
+            still: super::Stillness::default(),
             clock: fixed_step_clock(),
-            animations: SpriteAnimations::new(),
             scripts: SceneScripts::for_scene(None),
             input: EditorInput::default(),
             play_snapshot: None,
@@ -200,7 +206,24 @@ impl EditorApp {
             project_name: None,
             project_main_scene: None,
             prefab_session: super::prefab_writes::PrefabSession::default(),
+            benchmark: benchmark.map(|plan| {
+                let opened = std::env::args().nth(1).unwrap_or_default();
+                super::benchmark::BenchmarkRun::new(plan, opened)
+            }),
+            disk_watch: super::wake::DiskWatch::start(context.egui_ctx.clone()),
+            run_edits: crate::run_edits::RunEdits::default(),
+            stop_review: None,
+            recording: None,
+            clipboard: None,
         };
+        // A benchmark plays at the screen the standalone benchmark draws,
+        // so both lay the game out against the same media queries.
+        if app.benchmark.is_some() {
+            app.game_device = super::device::DevicePreview {
+                name: "Benchmark",
+                size: Some((1280.0, 720.0)),
+            };
+        }
         // Said after the field is built rather than during it, because what
         // there is to say is read off the world and the bindings.
         if let Some(failure) = app.notice.clone() {

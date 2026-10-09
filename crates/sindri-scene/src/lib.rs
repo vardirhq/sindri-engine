@@ -23,11 +23,13 @@ mod physics;
 mod physics3d;
 mod physics_joints;
 mod physics_material;
+mod physics_reads;
 mod physics_sync;
 mod physics_sync3d;
 mod placement;
 pub(crate) mod screen_ui;
 mod sequence;
+mod shape_gizmos;
 mod textures;
 mod tile_chunk;
 mod tile_surface;
@@ -105,6 +107,7 @@ pub use sequence::{
     SequenceError, SequenceStep, Sequences, Step, TRANSFORM_PROPERTIES, Track, easing, pose,
     referenced_sounds, resolve, top_level,
 };
+pub use shape_gizmos::{GizmoKind, GizmoStroke, ShapeGizmo, shape_gizmos};
 /// The shapes a collider is made of, which the editor draws and resizes.
 pub use sindri_physics::{Collider2d, ColliderShape2d};
 pub use textures::{

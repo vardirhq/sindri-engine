@@ -10,7 +10,7 @@ use sindri_core::{
     CommandBuffer, EntityData, EntityId, SceneComponent, SceneEntityId, Transform3D, World,
     WorldCommand,
 };
-use sindri_scene::{LightComponent, SpriteAnimations, default_sun_transform};
+use sindri_scene::{LightComponent, default_sun_transform};
 
 use crate::ordering;
 use crate::project::AssetKind;
@@ -18,6 +18,7 @@ use crate::selection;
 use crate::space::space_of;
 
 pub(super) mod choosing;
+pub(super) mod clipboard;
 pub(super) mod duplicate;
 mod structure;
 
@@ -35,7 +36,7 @@ use super::{EditorApp, UI_IMAGE_COMPONENT};
 /// A UI element is its own entry rather than "make an empty and then find the
 /// right component", because which space a thing is in is the first thing an
 /// author knows about it and the last thing they should have to discover.
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub(super) enum CreateGameObject {
     Empty { parent: Option<EntityId> },
     UiImage,
@@ -152,11 +153,8 @@ impl EditorApp {
                 ..EntityData::default()
             }),
         });
-        self.history.break_merge_run();
-        if let Err(error) = self.history.apply(
-            buffer.into_transaction(format!("Create {name}")),
-            &mut self.world,
-        ) {
+        self.break_merge_runs();
+        if let Err(error) = self.apply_edit(buffer.into_transaction(format!("Create {name}"))) {
             self.report(error.to_string());
             return;
         }
@@ -170,6 +168,15 @@ impl EditorApp {
     /// command can be redone onto the same handle, and so there is something to
     /// select without asking the world what just appeared.
     pub(super) fn create_entity(&mut self, parent: Option<EntityId>) {
+        self.create_entity_placed(parent, Transform3D::default());
+    }
+
+    /// The same, standing where `transform` puts it.
+    pub(super) fn create_entity_placed(
+        &mut self,
+        parent: Option<EntityId>,
+        transform: Transform3D,
+    ) {
         let entity = self.world.next_handle();
         let source_id = next_game_object_id(&self.world);
         let mut buffer = CommandBuffer::new();
@@ -179,19 +186,16 @@ impl EditorApp {
                 source_id: Some(source_id),
                 name: Some("GameObject".to_owned()),
                 parent,
-                transform_3d: Some(Transform3D::default()),
+                transform_3d: Some(transform),
                 ..EntityData::default()
             }),
         });
-        self.history.break_merge_run();
-        if let Err(error) = self.history.apply(
-            buffer.into_transaction(if parent.is_some() {
-                "Create child"
-            } else {
-                "Create GameObject"
-            }),
-            &mut self.world,
-        ) {
+        self.break_merge_runs();
+        if let Err(error) = self.apply_edit(buffer.into_transaction(if parent.is_some() {
+            "Create child"
+        } else {
+            "Create GameObject"
+        })) {
             self.report(error.to_string());
             return;
         }
@@ -248,16 +252,13 @@ impl EditorApp {
         for entity in roots {
             buffer.push(WorldCommand::Despawn { entity });
         }
-        self.history.break_merge_run();
+        self.break_merge_runs();
         let label = if entities.len() == 1 {
             "Delete entity".to_owned()
         } else {
             format!("Delete {} entities", entities.len())
         };
-        if let Err(error) = self
-            .history
-            .apply(buffer.into_transaction(label), &mut self.world)
-        {
+        if let Err(error) = self.apply_edit(buffer.into_transaction(label)) {
             self.report(error.to_string());
             return;
         }
@@ -301,16 +302,13 @@ impl EditorApp {
         if buffer.is_empty() {
             return;
         }
-        self.history.break_merge_run();
+        self.break_merge_runs();
         let label = if copies.len() == 1 {
             "Duplicate entity".to_owned()
         } else {
             format!("Duplicate {} entities", copies.len())
         };
-        if let Err(error) = self
-            .history
-            .apply(buffer.into_transaction(label), &mut self.world)
-        {
+        if let Err(error) = self.apply_edit(buffer.into_transaction(label)) {
             self.report(error.to_string());
             return;
         }
@@ -335,11 +333,8 @@ impl EditorApp {
             entity,
             name: wanted,
         });
-        self.history.break_merge_run();
-        if let Err(error) = self
-            .history
-            .apply(buffer.into_transaction("Rename entity"), &mut self.world)
-        {
+        self.break_merge_runs();
+        if let Err(error) = self.apply_edit(buffer.into_transaction("Rename entity")) {
             self.report(error.to_string());
         }
     }
@@ -375,11 +370,8 @@ impl EditorApp {
         } else {
             format!("{verb} {} entities", buffer.len())
         };
-        self.history.break_merge_run();
-        if let Err(error) = self
-            .history
-            .apply(buffer.into_transaction(label), &mut self.world)
-        {
+        self.break_merge_runs();
+        if let Err(error) = self.apply_edit(buffer.into_transaction(label)) {
             self.report(error.to_string());
             return;
         }
@@ -414,12 +406,9 @@ impl EditorApp {
         if buffer.is_empty() {
             return;
         }
-        self.history.break_merge_run();
+        self.break_merge_runs();
         let label = if offset < 0 { "Move up" } else { "Move down" };
-        if let Err(error) = self
-            .history
-            .apply(buffer.into_transaction(label), &mut self.world)
-        {
+        if let Err(error) = self.apply_edit(buffer.into_transaction(label)) {
             self.report(error.to_string());
         }
     }
@@ -510,17 +499,14 @@ impl EditorApp {
         } else {
             format!("Reparent {moved} entities")
         };
-        self.history.break_merge_run();
-        if let Err(error) = self
-            .history
-            .apply(buffer.into_transaction(label), &mut self.world)
-        {
+        self.break_merge_runs();
+        if let Err(error) = self.apply_edit(buffer.into_transaction(label)) {
             self.report(error.to_string());
         }
     }
 
     pub(super) fn undo(&mut self) {
-        self.history.break_merge_run();
+        self.break_merge_runs();
         let from = self.history.revision();
         if let Err(error) = self.history.undo(&mut self.world) {
             self.report(error.to_string());
@@ -533,7 +519,7 @@ impl EditorApp {
     }
 
     pub(super) fn redo(&mut self) {
-        self.history.break_merge_run();
+        self.break_merge_runs();
         let from = self.history.revision();
         if let Err(error) = self.history.redo(&mut self.world) {
             self.report(error.to_string());
@@ -557,10 +543,9 @@ impl EditorApp {
                 self.tile_volume_tool.reset();
                 self.animation_tool.reset();
                 self.lifecycle = initialized_lifecycle();
-                // A cursor belongs to the world it was advanced against, and
-                // a freshly loaded world reuses entity slots from the start.
-                self.animations = SpriteAnimations::new();
-                self.play_snapshot = None;
+                // A run belongs to the world it was started against, and a
+                // freshly loaded world reuses entity slots from the start.
+                self.abandon_run();
                 self.notice = None;
                 self.announce_scene();
                 self.reload_textures();

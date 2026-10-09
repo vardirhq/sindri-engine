@@ -1,18 +1,16 @@
 //! Playing the platformer without a window.
 //!
 //! There is no game code here. What the game does is in `assets/`, the scene
-//! and its Decay, and this module assembles the public pieces a host
-//! assembles, in the order a host runs them, so a test can play it.
+//! and its Decay; this opens the project the way every host does, with the
+//! one runtime session every host steps, so a test plays what a build plays.
 
+use std::ops::{Deref, DerefMut};
 use std::path::{Path, PathBuf};
-use std::time::Duration;
 
-use sindri_core::{ComponentSchemaRegistry, EntityId, SceneDocument, World};
-use sindri_decay::{
-    Physics2d, PrefabSources, ScriptComponent, ScriptFrame, ScriptSources, Scripts,
-};
-use sindri_platform::{InputEvent, InputState, Key};
-use sindri_scene::{SceneExtractor, ScenePhysics2d, SpriteAnimations};
+use sindri_core::ComponentSchemaRegistry;
+use sindri_decay::PrefabSources;
+use sindri_runtime::ProjectRun;
+use sindri_scene::ScenePhysics2d;
 
 /// Where the project is, from wherever the harness is being run.
 #[must_use]
@@ -20,204 +18,52 @@ pub fn project() -> PathBuf {
     Path::new(env!("CARGO_MANIFEST_DIR")).to_path_buf()
 }
 
-/// One run of the game, held together as a host holds it.
-pub struct Run {
-    pub world: World,
-    pub components: ComponentSchemaRegistry,
-    pub scripts: Scripts,
-    pub sources: ScriptSources,
-    pub prefabs: PrefabSources,
-    /// No gravity of its own: the scene's Physics 2D World says which way is
-    /// down, which is what this proves the scene can do.
-    pub physics: ScenePhysics2d,
-    pub animations: SpriteAnimations,
-    /// Where each playing sequence has got to.
-    pub sequences: sindri_scene::Sequences,
-    pub input: InputState,
-}
+/// One run of the game: the project, played as a host plays it.
+pub struct Run(Box<ProjectRun>);
 
 impl Run {
-    /// Opens the project: its scene and every script in it.
+    /// Opens the project: every scene, script, prefab and profile in it.
     ///
     /// # Errors
     /// If the project will not read, will not parse, or will not load.
     pub fn open() -> Result<Self, String> {
-        let root = project().join("assets");
-        let text = std::fs::read_to_string(root.join("platformer.scene"))
-            .map_err(|error| error.to_string())?;
-        let document: SceneDocument =
-            serde_json::from_str(&text).map_err(|error| error.to_string())?;
-        document.validate().map_err(|error| error.to_string())?;
-        // The coins are instances of one prefab, made here as every host
-        // makes them.
-        let authored_prefabs = prefabs_under(&root)?;
-        let mut components = SceneExtractor::new()
-            .map_err(|error| error.to_string())?
-            .components()
-            .clone();
-        components
-            .register::<ScriptComponent>("Script")
-            .map_err(|error| error.to_string())?;
-        let world = World::from_scene_with(&document, &authored_prefabs)
-            .map_err(|error| error.to_string())?
-            .world;
-
-        let mut sources = ScriptSources::new();
-        for entry in std::fs::read_dir(root.join("scripts")).map_err(|error| error.to_string())? {
-            let path = entry.map_err(|error| error.to_string())?.path();
-            if path
-                .extension()
-                .is_some_and(|extension| extension == "decay")
-            {
-                let name = path.file_name().unwrap_or_default().to_string_lossy();
-                let text = std::fs::read_to_string(&path).map_err(|error| error.to_string())?;
-                sources.insert(format!("scripts/{name}"), text);
-            }
-        }
-
-        let mut prefabs = PrefabSources::new();
-        for (id, prefab) in authored_prefabs {
-            prefabs.insert(id, prefab);
-        }
-        let mut physics = ScenePhysics2d::top_down().map_err(|error| error.to_string())?;
-        physics.set_materials(materials_under(&root)?);
-        Ok(Self {
-            world,
-            components,
-            scripts: Scripts::new(),
-            sources,
-            prefabs,
-            physics,
-            animations: SpriteAnimations::new(),
-            sequences: sindri_scene::Sequences::new(),
-            input: InputState::default(),
-        })
+        ProjectRun::open(&project(), [960.0, 540.0]).map(|run| Self(Box::new(run)))
     }
 
     /// One fixed step, returning every failure it reported.
     pub fn step(&mut self, delta: f32) -> Vec<String> {
-        let step = Duration::from_secs_f32(delta);
-        let mut notes = Vec::new();
-        if let Err(error) = self.physics.step(&mut self.world, &self.components, step) {
-            notes.push(error.to_string());
-        }
-        let (physics, events, requests, motions) = self.physics.for_scripts_with_characters();
-        let report = self.scripts.advance(
-            &mut self.world,
-            &self.components,
-            ScriptFrame::new(&self.sources, &self.input, delta)
-                .with_characters(sindri_decay::Characters2d { requests, motions })
-                .with_prefabs(&self.prefabs)
-                .with_physics(Physics2d {
-                    world: physics,
-                    events,
-                })
-                .with_animations(&mut self.animations)
-                .with_sequences(&mut self.sequences),
-        );
-        notes.extend(report.failures.iter().map(ToString::to_string));
-        if let Err(error) = self
-            .animations
-            .advance(&self.world, &self.components, delta)
-        {
-            notes.push(error.to_string());
-        }
-        // After the scripts too, so a sequence a script named this step starts
-        // now. Its cue sounds are dropped: a harness plays no audio.
-        match self
-            .sequences
-            .advance(&mut self.world, &self.components, delta)
-        {
-            Ok(played) => notes.extend(
-                played
-                    .problems
-                    .iter()
-                    .map(|(_, problem)| format!("Sequence: {problem}")),
-            ),
-            Err(error) => notes.push(error.to_string()),
-        }
-        sindri_scene::update_camera_behaviors(&mut self.world, delta);
-        self.input.begin_frame(step);
-        notes
+        self.0
+            .step(delta)
+            .map_or_else(|error| vec![error], |report| report.notes())
     }
 
-    /// Holds or lets go of a key, as the window would.
-    pub fn key(&mut self, key: Key, down: bool) {
-        self.input.apply(if down {
-            InputEvent::KeyPressed(key)
-        } else {
-            InputEvent::KeyReleased(key)
-        });
-    }
-
-    /// What a script left on the shared board.
+    /// The 2D solver the scene's Physics 2D World configures.
     #[must_use]
-    pub fn board(&self, name: &str) -> f32 {
-        #[allow(clippy::cast_possible_truncation)]
-        let value = self.scripts.blackboard().get(name, 0.0) as f32;
-        value
+    pub const fn physics(&self) -> &ScenePhysics2d {
+        self.0.session.physics()
     }
 
-    /// The entity a scene gave this stable ID.
     #[must_use]
-    pub fn entity(&self, id: &str) -> Option<EntityId> {
-        self.world
-            .entities()
-            .find(|(_, data)| {
-                data.source_id
-                    .as_ref()
-                    .is_some_and(|source| source.as_str() == id)
-            })
-            .map(|(entity, _)| entity)
+    pub const fn components(&self) -> &ComponentSchemaRegistry {
+        self.0.session.components()
     }
 
-    /// Where an entity is, in the plane.
     #[must_use]
-    pub fn position(&self, entity: EntityId) -> [f32; 2] {
-        self.world
-            .get(entity)
-            .and_then(|data| data.transform_3d)
-            .map_or([0.0, 0.0], sindri_core::Transform3D::position_2d)
+    pub const fn prefabs(&self) -> &PrefabSources {
+        self.0.session.prefabs()
     }
 }
 
-/// Every prefab under the asset root, by the asset ID a scene names it with.
-fn prefabs_under(
-    root: &std::path::Path,
-) -> Result<std::collections::BTreeMap<String, sindri_core::PrefabDocument>, String> {
-    let mut prefabs = std::collections::BTreeMap::new();
-    let Ok(entries) = std::fs::read_dir(root.join("prefabs")) else {
-        return Ok(prefabs);
-    };
-    for entry in entries {
-        let path = entry.map_err(|error| error.to_string())?.path();
-        if path
-            .extension()
-            .is_some_and(|extension| extension == "prefab")
-        {
-            let text = std::fs::read_to_string(&path).map_err(|error| error.to_string())?;
-            let prefab = sindri_core::PrefabDocument::from_json(&text)
-                .map_err(|error| format!("{}: {error}", path.display()))?;
-            let name = path.file_name().unwrap_or_default().to_string_lossy();
-            prefabs.insert(format!("prefabs/{name}"), prefab);
-        }
+impl Deref for Run {
+    type Target = ProjectRun;
+
+    fn deref(&self) -> &ProjectRun {
+        &self.0
     }
-    Ok(prefabs)
 }
 
-/// Host plumbing: authored profiles resolve before physics takes its first step.
-fn materials_under(root: &Path) -> Result<sindri_scene::PhysicsMaterialSources, String> {
-    let mut profiles = std::collections::BTreeMap::new();
-    for entry in std::fs::read_dir(root.join("materials")).map_err(|error| error.to_string())? {
-        let path = entry.map_err(|error| error.to_string())?.path();
-        let text = std::fs::read_to_string(&path).map_err(|error| error.to_string())?;
-        let profile =
-            sindri_core::ProfileDocument::from_json(&text).map_err(|error| error.to_string())?;
-        let name = path.file_name().unwrap_or_default().to_string_lossy();
-        profiles.insert(format!("materials/{name}"), profile);
+impl DerefMut for Run {
+    fn deref_mut(&mut self) -> &mut ProjectRun {
+        &mut self.0
     }
-    sindri_scene::PhysicsMaterialSources::from_profiles(
-        profiles.iter().map(|(id, profile)| (id.as_str(), profile)),
-    )
-    .map_err(|error| error.to_string())
 }

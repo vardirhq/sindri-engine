@@ -40,7 +40,7 @@ pub fn pick_up_at_first_wreck(pilot: &mut Pilot) {
         .find(|(entity, data)| {
             data.parent == Some(wreck)
                 && data.name.as_deref() == Some("Loose cargo")
-                && pilot.run.scripts.field(*entity, "kind")
+                && pilot.run.session.scripts().field(*entity, "kind")
                     == Some(&sindri_decay::ScriptValue::Variant("Resource.Scrap".into()))
         })
         .map(|(entity, _)| entity)
@@ -88,7 +88,8 @@ pub fn salvage_the_first_wreck(pilot: &mut Pilot) {
     let deck = pilot.run.entity("deck").expect("the deck");
     let hold = pilot
         .run
-        .components
+        .session
+        .components()
         .get::<sindri_scene::TilemapComponent>(&pilot.run.world, deck)
         .expect("a readable deck")
         .expect("the deck is a tilemap");

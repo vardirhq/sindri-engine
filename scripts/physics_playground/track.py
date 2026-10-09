@@ -114,7 +114,7 @@ def robot(scene: Scene, x, y) -> None:
 
 LEDGE_TOP = 3.0
 DOMINOES = 14
-BUTTON_X = 9.75
+BUTTON_X = 9.15
 
 
 def domino_run(scene: Scene) -> None:

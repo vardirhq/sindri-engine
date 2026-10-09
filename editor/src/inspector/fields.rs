@@ -81,12 +81,24 @@ pub fn merge_edits(defaults: Option<&Value>, payload: &mut Value, drawn: &Value)
 /// belongs.
 #[must_use]
 pub fn ordered_keys(payload: &Value) -> Vec<String> {
+    ordered_keys_declared(payload, &[])
+}
+
+/// The same, in the order the component declares its fields where it says
+/// one: the author's order wins, and only fields it does not list fall back
+/// to the ranking. A material read Bottom, Side, Top, Voxel, alphabetically,
+/// with the ID it *is* last.
+pub fn ordered_keys_declared(payload: &Value, declared: &[&str]) -> Vec<String> {
     let Value::Object(fields) = payload else {
         return Vec::new();
     };
-    let mut ranked: BTreeMap<(u8, String), String> = BTreeMap::new();
+    let mut ranked: BTreeMap<(usize, u8, String), String> = BTreeMap::new();
     for key in fields.keys() {
-        ranked.insert((rank(key), key.clone()), key.clone());
+        let place = declared
+            .iter()
+            .position(|name| name == key)
+            .unwrap_or(declared.len());
+        ranked.insert((place, rank(key), key.clone()), key.clone());
     }
     ranked.into_values().collect()
 }
@@ -104,7 +116,7 @@ fn rank(key: &str) -> u8 {
 
 #[cfg(test)]
 mod tests {
-    use super::{drawn_payload, merge_edits, ordered_keys};
+    use super::{drawn_payload, merge_edits, ordered_keys, ordered_keys_declared};
     use serde_json::json;
 
     /// Two of one component now show the same rows, whatever either of them
@@ -180,6 +192,20 @@ mod tests {
             ordered_keys(&sprite),
             ["texture", "layer", "tint"],
             "what it draws first, then the two that say how, alphabetically"
+        );
+    }
+
+    #[test]
+    fn the_declared_order_wins_over_the_alphabet() {
+        let material = json!({ "bottom": "", "side": "", "top": "", "voxel": 1 });
+        assert_eq!(
+            ordered_keys_declared(&material, &["voxel", "top", "side", "bottom"]),
+            ["voxel", "top", "side", "bottom"]
+        );
+        assert_eq!(
+            ordered_keys_declared(&material, &["voxel"]),
+            ["voxel", "bottom", "side", "top"],
+            "and what it does not list follows, as before"
         );
     }
 }

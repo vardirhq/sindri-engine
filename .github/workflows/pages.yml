@@ -42,7 +42,7 @@ jobs:
       - name: Build the browser host
         env:
           WASM_OPT: ${{ github.event_name == 'pull_request' && '--no-opt' || '' }}
-        run: wasm-pack build game --target web --release --out-dir pkg $WASM_OPT
+        run: wasm-pack build crates/sindri-player --target web --release --out-dir pkg $WASM_OPT
       - name: Build Voxel Lab
         env:
           WASM_OPT: ${{ github.event_name == 'pull_request' && '--no-opt' || '' }}
@@ -86,7 +86,7 @@ jobs:
               "$src" "target/pages/examples/$route" --base "${PAGES_BASE_PATH}/examples/$route/" \
               --build-id "${GITHUB_SHA:0:7}"
             mkdir -p "target/pages/examples/$route/pkg"
-            cp -R game/pkg/. "target/pages/examples/$route/pkg/"
+            cp -R crates/sindri-player/pkg/. "target/pages/examples/$route/pkg/"
           done
           mkdir -p target/pages/examples/voxel-lab/pkg
           cp games/voxel-lab/web/index.html target/pages/examples/voxel-lab/index.html
@@ -126,8 +126,8 @@ jobs:
           for route in physics ui spatial camera tween causeway flappy orbital-baked shapes-lab weave-poc platformer scorchball low-tide; do
             test -f "target/pages/examples/$route/index.html"
             test -f "target/pages/examples/$route/assets/sindri.manifest"
-            test -f "target/pages/examples/$route/pkg/sindri_causeway.js"
-            test -f "target/pages/examples/$route/pkg/sindri_causeway_bg.wasm"
+            test -f "target/pages/examples/$route/pkg/sindri_player.js"
+            test -f "target/pages/examples/$route/pkg/sindri_player_bg.wasm"
             grep -q '"kind": "scene"' "target/pages/examples/$route/assets/sindri.manifest"
           done
           test -f target/pages/examples/voxel-lab/index.html

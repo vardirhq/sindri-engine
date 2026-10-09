@@ -1,0 +1,85 @@
+//! What can stop a project from playing, in either host.
+
+use sindri_platform::{AudioError, HostError};
+use sindri_render::{FrameEncodeError, TextureError};
+use sindri_scene::SheetBindError;
+use thiserror::Error;
+
+#[derive(Debug, Error)]
+pub enum PlayerError {
+    /// A project directory that will not read, named.
+    #[error("{0}")]
+    Project(String),
+    #[error(transparent)]
+    Scene(#[from] sindri_scene::SceneExtractError),
+    #[error(transparent)]
+    Physics(#[from] sindri_scene::PhysicsSyncError),
+    #[error("the manifest records no scene, so there is nothing to open")]
+    MissingScene,
+    #[error(transparent)]
+    SceneSwitch(#[from] sindri_core::SceneSwitchError),
+    #[error("no scene named '{0}' is in this project")]
+    UnknownScene(String),
+    #[error(transparent)]
+    Document(#[from] sindri_core::SceneError),
+    #[error(transparent)]
+    World(#[from] sindri_core::WorldError),
+    #[error(transparent)]
+    Component(#[from] sindri_core::ComponentRegistryError),
+    #[error(transparent)]
+    Asset(#[from] sindri_core::AssetIdError),
+    #[error(transparent)]
+    Sheet(#[from] sindri_core::SheetError),
+    #[error(transparent)]
+    SheetBind(#[from] SheetBindError),
+    #[error(transparent)]
+    TileSet(#[from] sindri_core::TileSetError),
+    #[error(transparent)]
+    Prefab(#[from] sindri_core::PrefabJsonError),
+    #[error(transparent)]
+    Decode(#[from] sindri_assets::AssetDecodeError),
+    #[error(transparent)]
+    Audio(#[from] AudioError),
+    #[error(transparent)]
+    Texture(#[from] TextureError),
+    #[error(transparent)]
+    Animation(#[from] sindri_scene::AnimationError),
+    #[error(transparent)]
+    Json(#[from] sindri_core::SceneJsonError),
+    #[error(transparent)]
+    Frame(#[from] FrameEncodeError),
+    /// One of the engine's own assets would not decode: a broken build.
+    #[error(transparent)]
+    Builtin(Box<sindri_assets::BuiltinError>),
+    #[error("the project's presentation could not be composed: {0}")]
+    Weave(String),
+    #[cfg(target_arch = "wasm32")]
+    #[error(transparent)]
+    AssetQueue(#[from] sindri_assets::AssetLoadQueueCreateError),
+    #[cfg(target_arch = "wasm32")]
+    #[error(transparent)]
+    AssetLoader(#[from] sindri_assets::AssetLoaderError),
+    #[cfg(target_arch = "wasm32")]
+    #[error(transparent)]
+    AssetLoad(#[from] sindri_core::AssetLoadError),
+    #[cfg(target_arch = "wasm32")]
+    #[error(transparent)]
+    Manifest(#[from] sindri_assets::ManifestError),
+    #[cfg(target_arch = "wasm32")]
+    #[error(transparent)]
+    UrlRoot(#[from] sindri_assets::UrlRootError),
+    #[cfg(target_arch = "wasm32")]
+    #[error("browser project asset error: {0}")]
+    BrowserAsset(String),
+    /// The run itself: a script's scene change, a solver, a stylesheet.
+    #[error(transparent)]
+    Runtime(#[from] sindri_runtime::RuntimeError),
+    #[error(transparent)]
+    Host(#[from] Box<HostError<sindri_runtime::RuntimeError>>),
+}
+
+impl From<HostError<sindri_runtime::RuntimeError>> for PlayerError {
+    fn from(error: HostError<sindri_runtime::RuntimeError>) -> Self {
+        Self::Host(Box::new(error))
+    }
+}

@@ -18,7 +18,7 @@ fn the_hero_walks_up_the_low_steps() {
     let mut stepped_second = false;
     for _ in 0..150 {
         assert!(run.step(STEP).is_empty());
-        let motion = run.physics.character_motion(hero).unwrap();
+        let motion = run.physics().character_motion(hero).unwrap();
         if motion.step_translation[1] > 0.0 {
             assert!(motion.grounded);
             let support = motion.ground.hit.unwrap().entity;
@@ -53,7 +53,12 @@ fn disabling_steps_keeps_the_same_riser_blocking() {
     for _ in 0..150 {
         assert!(run.step(STEP).is_empty());
         assert!(
-            run.physics.character_motion(hero).unwrap().step_translation[1].abs() < f32::EPSILON
+            run.physics()
+                .character_motion(hero)
+                .unwrap()
+                .step_translation[1]
+                .abs()
+                < f32::EPSILON
         );
     }
     assert!(
@@ -86,7 +91,7 @@ fn the_hero_climbs_and_snaps_down_the_boardwalk_without_jumping() {
         assert!(run.step(STEP).is_empty());
         let [x, y] = run.position(hero);
         peak = peak.max(y);
-        let motion = run.physics.character_motion(hero).unwrap();
+        let motion = run.physics().character_motion(hero).unwrap();
         assert!(!motion.slide.started_penetrating);
         if let Some(hit) = motion.ground.hit {
             if hit.entity == uphill && x > 9.0 {

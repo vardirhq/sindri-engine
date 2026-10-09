@@ -81,6 +81,26 @@ pub struct PhysicsWorld2d {
     owned_joints: HashMap<EntityId, joints::OwnedJoint>,
 }
 
+/// A copy that goes on exactly as this world would: what recording a run
+/// snapshots.
+impl Clone for PhysicsWorld2d {
+    fn clone(&self) -> Self {
+        Self {
+            spatial: self.spatial.clone(),
+            contacts: self.contacts.clone(),
+            backend: crate::backend::copy2d(&self.backend),
+            one_way: self.one_way.clone(),
+            pending_drop: self.pending_drop.clone(),
+            pending_controls: self.pending_controls.clone(),
+            bodies: self.bodies.clone(),
+            collider_entities: self.collider_entities.clone(),
+            pending_velocity: self.pending_velocity.clone(),
+            pending_distance_joints: self.pending_distance_joints.clone(),
+            owned_joints: self.owned_joints.clone(),
+        }
+    }
+}
+
 impl PhysicsWorld2d {
     pub fn new(gravity: [f32; 2]) -> Result<Self, PhysicsError> {
         finite2("gravity", gravity)?;

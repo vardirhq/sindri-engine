@@ -141,13 +141,9 @@ async fn capture(
     canvas: UiCanvas,
     view: CameraView,
 ) -> Result<(), Box<dyn Error>> {
-    let mut run = if what == "lab" {
-        Run::open_scene("combat-lab.scene")
-    } else {
-        Run::open()
-    }
-    .map_err(|error| -> Box<dyn Error> { error.into() })?;
-    run.viewport = (width as f32, height as f32);
+    let scene = (what == "lab").then_some("combat-lab.scene");
+    let mut run = Run::open_on(scene, [width as f32, height as f32])
+        .map_err(|error| -> Box<dyn Error> { error.into() })?;
 
     let instance = wgpu::Instance::default();
     let gpu = GpuContext::request(&instance, None, &GpuRequestOptions::default()).await?;
@@ -202,13 +198,13 @@ async fn capture(
     // every one of them drew as the missing-texture chequerboard.
     let (textures, bindings) = bind(&run, &gpu.device, &gpu.queue, &mut text)?;
 
-    let prepared = run.scene_extractor().extract_animated(
+    let prepared = run.scene.extract_animated(
         &run.world,
         Viewport::new(width, height),
         view,
         &bindings,
         SceneRuntime::default()
-            .with_effects(&run.effects)
+            .with_effects(run.session.effects())
             .with_canvas(canvas),
     )?;
 

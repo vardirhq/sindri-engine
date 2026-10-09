@@ -39,13 +39,53 @@ impl EditorApp {
     }
 }
 
+impl EditorApp {
+    /// What brings the next frame when nobody is touching the editor: the
+    /// disk, watched off the frame, and anything still on its way in, which
+    /// is looked for again shortly. Otherwise an editor at rest is idle.
+    fn keep_watching(&self, context: &egui::Context) {
+        let folder = self
+            .open_project_root
+            .as_deref()
+            .or_else(|| self.file.path().and_then(std::path::Path::parent));
+        self.disk_watch.follow(folder);
+        if self.scripts.loading() || self.textures.loading() {
+            context.request_repaint_after(std::time::Duration::from_millis(30));
+        }
+    }
+}
+
 impl eframe::App for EditorApp {
     /// Settings are written when eframe decides to, which includes shutdown.
     fn save(&mut self, storage: &mut dyn eframe::Storage) {
+        if self.benchmark.is_some() {
+            return;
+        }
         self.preferences.save(storage);
     }
 
-    fn ui(&mut self, ui: &mut egui::Ui, _frame: &mut eframe::Frame) {
+    fn ui(&mut self, ui: &mut egui::Ui, frame: &mut eframe::Frame) {
+        // The frame before this one closes when this one opens: eframe reports
+        // what painting it cost only now.
+        let began = std::time::Instant::now();
+        let painted = frame
+            .info()
+            .cpu_usage
+            .and_then(|seconds| std::time::Duration::try_from_secs_f32(seconds).ok());
+        self.profiler.begin(
+            began,
+            painted,
+            self.lifecycle.state() == sindri_core::EngineState::Running,
+        );
+        self.frame(ui);
+        self.drive_benchmark(ui.ctx());
+        self.profiler.end(began.elapsed());
+    }
+}
+
+impl EditorApp {
+    /// Everything one frame of the editor does, in order.
+    fn frame(&mut self, ui: &mut egui::Ui) {
         // Before anything else: the welcome window is a window of its own, and
         // while it is the only one open there is no scene to draw, no viewport
         // to render into, and a hidden window to not spend a frame on.
@@ -56,6 +96,8 @@ impl eframe::App for EditorApp {
             }
         }
         self.show_window(ui.ctx());
+        let upkeep = std::time::Instant::now();
+        self.keep_watching(ui.ctx());
         // Presentation and textures both refresh before extraction, so a saved
         // asset change is visible in the frame that first notices it.
         self.refresh_styles();
@@ -65,6 +107,8 @@ impl eframe::App for EditorApp {
             .textures
             .poll(&state.device, &state.queue, &mut self.renderers.text);
         self.record_texture_notes(arrived);
+        self.profiler
+            .add(crate::profiler::Phase::Upkeep, upkeep.elapsed());
         self.advance_play(ui.ctx());
         self.update_title(ui.ctx());
         self.handle_close_request(ui.ctx());
@@ -100,11 +144,14 @@ impl eframe::App for EditorApp {
         }
         // Releasing the pointer ends a drag, so the next one is its own step.
         if ui.ctx().input(|input| input.pointer.any_released()) {
-            self.history.break_merge_run();
+            self.break_merge_runs();
         }
         // Drawn last so they sit over everything, and asked before Escape is
         // read as clearing the selection.
-        if self.confirm_dialog(ui.ctx()) || self.confirm_delete(ui.ctx()) {
+        if self.confirm_dialog(ui.ctx())
+            || self.confirm_delete(ui.ctx())
+            || self.stop_review_window(ui.ctx())
+        {
             return;
         }
         // Escape clears the selection wherever the pointer happens to be. The

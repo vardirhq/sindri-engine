@@ -9,7 +9,8 @@ fn patch(pilot: &mut Pilot, block: &str, level: i32) -> [i32; 3] {
     let (column, row) = column_row(pilot.crew_world());
     let mut terrain = pilot
         .run
-        .components
+        .session
+        .components()
         .get::<VoxelWorldComponent>(&pilot.run.world, basin)
         .unwrap()
         .unwrap();
@@ -81,7 +82,8 @@ fn harvest(mut pilot: Pilot, block: &str, kind: &str, tile: u32) {
     let deck = pilot.run.entity("deck").unwrap();
     let hold = pilot
         .run
-        .components
+        .session
+        .components()
         .get::<TilemapComponent>(&pilot.run.world, deck)
         .unwrap()
         .unwrap();
@@ -127,13 +129,13 @@ fn full_holds_and_flooded_resources_refuse_harvesting() {
     ashore(&mut pilot);
     let at = patch(&mut pilot, "salt", 10);
     assert_eq!(pilot.surface_under(pilot.crew_world()), "salt");
-    pilot.run.scripts.blackboard_mut().set("crates", 4.0);
+    pilot.run.session.blackboard_mut().set("crates", 4.0);
     pilot.use_it();
     assert_eq!(pilot.ground().block(at), "salt");
     let carried = pilot.run.entity("carried").unwrap();
     assert!(!pilot.run.world.is_active(carried));
-    pilot.run.scripts.blackboard_mut().set("crates", 0.0);
-    pilot.run.scripts.blackboard_mut().set("tide_time", 280.0);
+    pilot.run.session.blackboard_mut().set("crates", 0.0);
+    pilot.run.session.blackboard_mut().set("tide_time", 280.0);
     pilot.wait(0.1);
     pilot.use_it();
     assert_eq!(pilot.ground().block(at), "salt");
@@ -164,7 +166,8 @@ fn rock_can_supply_ore_with_keys_and_touch() {
         let deck = pilot.run.entity("deck").unwrap();
         let hold = pilot
             .run
-            .components
+            .session
+            .components()
             .get::<TilemapComponent>(&pilot.run.world, deck)
             .unwrap()
             .unwrap();
@@ -180,7 +183,7 @@ fn a_flood_washes_the_resource_that_was_stowed() {
     pilot.use_it();
     bring_home(&mut pilot);
     assert!((pilot.board("wood") - 1.0).abs() < 0.01);
-    pilot.run.scripts.blackboard_mut().set("tide_time", 280.0);
+    pilot.run.session.blackboard_mut().set("tide_time", 280.0);
     pilot.wait(0.2);
     assert!(pilot.flag("flooded"));
     assert!(pilot.board("wood").abs() < 0.01);

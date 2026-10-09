@@ -90,6 +90,9 @@ pub(super) fn register(components: &mut ComponentSchemaRegistry) -> Result<(), S
             "max_slope_angle": std::f32::consts::FRAC_PI_4, "snap_distance": 0.0,
             "step_height": 0.0, "carry_platforms": true}),
     )?;
+    components
+        .describe::<crate::Character2dComponent>([("max_slope_angle", FieldMeaning::Angle)])?;
+    components.describe::<OneWay2dComponent>([("angle", FieldMeaning::Angle)])?;
     super::physics3d_registry::register(components)?;
     register_hinge(components)?;
     register_linear_joints(components)?;
@@ -111,6 +114,9 @@ fn register_hinge(components: &mut ComponentSchemaRegistry) -> Result<(), SceneE
         ("first", FieldMeaning::Entity),
         ("second", FieldMeaning::Entity),
         ("motor_mode", motor_modes()),
+        ("lower_angle", FieldMeaning::Angle),
+        ("upper_angle", FieldMeaning::Angle),
+        ("motor_target_angle", FieldMeaning::Angle),
     ])?;
     Ok(())
 }

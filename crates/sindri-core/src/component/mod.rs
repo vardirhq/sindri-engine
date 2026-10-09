@@ -2,18 +2,22 @@ use std::collections::BTreeMap;
 
 use serde::de::DeserializeOwned;
 use serde_json::Value;
-use thiserror::Error;
 
-use crate::{EntityId, SceneDocument, SceneEntityId, SceneError, World};
+use crate::{EntityId, SceneDocument, World};
 
 mod apply;
+mod decoded;
+mod error;
 mod fields;
 mod meaning;
+mod optional;
 #[cfg(test)]
 mod tests;
 mod variant;
 
 pub use apply::ApplyMode;
+pub use decoded::Decoded;
+pub use error::ComponentRegistryError;
 use fields::declared_fields;
 pub use meaning::{AssetKind, FieldMeaning};
 
@@ -80,6 +84,11 @@ struct ComponentRegistration {
     /// Empty for the ordinary case, which is a component with no field that
     /// decides the shape of another.
     variants: Vec<variant::TaggedField>,
+    /// The fields absent until someone adds them; see [`optional`].
+    optionals: Vec<optional::OptionalField>,
+    /// The order the type declares its fields in, as serde reports it; empty
+    /// when serde does not say (an enum, or a flattened struct).
+    order: Vec<&'static str>,
     /// How edits to its fields are applied, by path; see [`ApplyMode`].
     apply: Vec<(String, ApplyMode)>,
 }
@@ -219,6 +228,8 @@ impl ComponentSchemaRegistry {
                 default_payload,
                 meanings: Vec::new(),
                 variants: Vec::new(),
+                optionals: Vec::new(),
+                order: declared_fields::<T>().unwrap_or_default(),
                 apply: Vec::new(),
             },
         );
@@ -285,6 +296,16 @@ impl ComponentSchemaRegistry {
     #[must_use]
     pub fn exemplar(&self, type_name: &str, path: &str) -> Option<&Value> {
         self.registrations.get(type_name)?.exemplar(path)
+    }
+
+    /// The order the component declares its fields in, which is the order its
+    /// author meant them read in: what it is before how it is tuned. Empty
+    /// when the type does not say.
+    #[must_use]
+    pub fn field_order(&self, type_name: &str) -> &[&'static str] {
+        self.registrations
+            .get(type_name)
+            .map_or(&[], |registration| registration.order.as_slice())
     }
 
     /// What this component's field at `path` means, if anything has said.
@@ -397,12 +418,10 @@ impl ComponentSchemaRegistry {
 
     pub fn decode<T: SceneComponent>(&self, payload: &Value) -> Result<T, ComponentRegistryError> {
         self.require_registered(T::TYPE_NAME)?;
-        serde_json::from_value(payload.clone()).map_err(|source| {
-            ComponentRegistryError::InvalidPayload {
-                entity: "<detached>".to_owned(),
-                type_name: T::TYPE_NAME.to_owned(),
-                source,
-            }
+        T::deserialize(payload).map_err(|source| ComponentRegistryError::InvalidPayload {
+            entity: "<detached>".to_owned(),
+            type_name: T::TYPE_NAME.to_owned(),
+            source,
         })
     }
 
@@ -429,7 +448,7 @@ impl ComponentSchemaRegistry {
                     .map(|payload| (entity_id, entity, payload))
             })
             .map(|(entity_id, entity, payload)| {
-                serde_json::from_value(payload.clone())
+                T::deserialize(payload)
                     .map(|component| (entity_id, component))
                     .map_err(|source| ComponentRegistryError::InvalidPayload {
                         entity: entity.source_id.as_ref().map_or_else(
@@ -464,7 +483,7 @@ impl ComponentSchemaRegistry {
         let Some(payload) = data.components.get(T::TYPE_NAME) else {
             return Ok(None);
         };
-        serde_json::from_value(payload.clone())
+        T::deserialize(payload)
             .map(Some)
             .map_err(|source| ComponentRegistryError::InvalidPayload {
                 entity: data.source_id.as_ref().map_or_else(
@@ -499,93 +518,4 @@ fn validate_type_name(type_name: &'static str) -> Result<(), ComponentRegistryEr
     } else {
         Err(ComponentRegistryError::InvalidTypeName(type_name))
     }
-}
-
-#[derive(Debug, Error)]
-pub enum ComponentRegistryError {
-    #[error("component type name '{0}' is invalid")]
-    InvalidTypeName(&'static str),
-    #[error("component display names cannot be empty")]
-    EmptyDisplayName,
-    #[error("component type '{0}' is already registered")]
-    AlreadyRegistered(String),
-    #[error("component type '{0}' is not registered")]
-    NotRegistered(&'static str),
-    #[error("the field template for component type '{0}' is not an object")]
-    InvalidFields(&'static str),
-    #[error("component type '{0}' has no field template, so its fields cannot be described")]
-    DescribedWithoutFields(&'static str),
-    #[error("component type '{type_name}' has no field at '{path}'")]
-    UnknownFieldPath {
-        type_name: &'static str,
-        path: String,
-    },
-    #[error(
-        "the field at '{path}' of component type '{type_name}' is not a choice, \
-         so its variants have no spellings to be picked by"
-    )]
-    VariantsWithoutChoice {
-        type_name: &'static str,
-        path: String,
-    },
-    #[error(
-        "'{variant}' is not one of the spellings the choice at '{path}' of \
-         component type '{type_name}' accepts"
-    )]
-    UnknownVariant {
-        type_name: &'static str,
-        path: String,
-        variant: String,
-    },
-    #[error(
-        "the choice at '{path}' of component type '{type_name}' accepts \
-         '{variant}', which no variant describes"
-    )]
-    UndescribedVariant {
-        type_name: &'static str,
-        path: String,
-        variant: String,
-    },
-    #[error(
-        "the template for variant '{variant}' of component type '{type_name}' is not an object"
-    )]
-    InvalidVariantTemplate {
-        type_name: &'static str,
-        variant: String,
-    },
-    #[error(
-        "choosing '{variant}' for component type '{type_name}' does not produce \
-         a component the engine accepts"
-    )]
-    VariantMismatch {
-        type_name: &'static str,
-        variant: String,
-        #[source]
-        source: serde_json::Error,
-    },
-    #[error("the field template for component type '{type_name}' does not match it: {wrong}")]
-    TemplateMismatch {
-        type_name: &'static str,
-        wrong: String,
-    },
-    #[error("the payload registered for component type '{type_name}' does not decode as it")]
-    InvalidDefault {
-        type_name: String,
-        #[source]
-        source: serde_json::Error,
-    },
-    #[error("entity {entity:?} contains unknown component type '{type_name}'")]
-    UnknownComponent {
-        entity: SceneEntityId,
-        type_name: String,
-    },
-    #[error("entity '{entity}' has invalid '{type_name}' component data")]
-    InvalidPayload {
-        entity: String,
-        type_name: String,
-        #[source]
-        source: serde_json::Error,
-    },
-    #[error(transparent)]
-    InvalidScene(#[from] SceneError),
 }

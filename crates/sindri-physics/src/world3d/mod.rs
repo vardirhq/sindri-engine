@@ -25,6 +25,7 @@ use crate::{
 pub use pending::BodyControl3d;
 use validation::{finite3, validate_body, validate_colliders};
 
+#[derive(Clone)]
 struct BodyRecord {
     body: r3::RigidBodyHandle,
     colliders: Vec<r3::ColliderHandle>,
@@ -41,6 +42,20 @@ pub struct PhysicsWorld3d {
     collider_entities: HashMap<r3::ColliderHandle, EntityId>,
     spatial: spatial::SpatialIndex,
     pending_controls: HashMap<EntityId, Vec<BodyControl3d>>,
+}
+
+/// A copy that goes on exactly as this world would: what recording a run
+/// snapshots.
+impl Clone for PhysicsWorld3d {
+    fn clone(&self) -> Self {
+        Self {
+            backend: crate::backend::copy3d(&self.backend),
+            bodies: self.bodies.clone(),
+            collider_entities: self.collider_entities.clone(),
+            spatial: self.spatial.clone(),
+            pending_controls: self.pending_controls.clone(),
+        }
+    }
 }
 
 impl PhysicsWorld3d {

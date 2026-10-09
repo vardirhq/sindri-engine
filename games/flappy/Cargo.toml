@@ -13,11 +13,8 @@ publish = false
 path = "src/lib.rs"
 
 [dependencies]
-sindri-core = { path = "../../crates/sindri-core" }
-sindri-decay = { path = "../../crates/sindri-decay" }
 sindri-platform = { path = "../../crates/sindri-platform" }
-sindri-scene = { path = "../../crates/sindri-scene" }
-serde_json.workspace = true
+sindri-runtime = { path = "../../crates/sindri-runtime" }
 
 [lints]
 workspace = true

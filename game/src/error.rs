@@ -50,30 +50,24 @@ pub enum CausewayError {
     Frame(#[from] FrameEncodeError),
     #[error("Gather presentation could not be composed: {0}")]
     Weave(String),
-    #[cfg(target_arch = "wasm32")]
+    /// The player's own work: the engine's built-in textures.
     #[error(transparent)]
-    AssetQueue(#[from] sindri_assets::AssetLoadQueueCreateError),
-    #[cfg(target_arch = "wasm32")]
+    Player(#[from] Box<sindri_player::PlayerError>),
+    /// The run itself: a script's scene change, a solver, a stylesheet.
     #[error(transparent)]
-    AssetLoader(#[from] sindri_assets::AssetLoaderError),
-    #[cfg(target_arch = "wasm32")]
+    Runtime(#[from] sindri_runtime::RuntimeError),
     #[error(transparent)]
-    AssetLoad(#[from] sindri_core::AssetLoadError),
-    #[cfg(target_arch = "wasm32")]
-    #[error(transparent)]
-    Manifest(#[from] sindri_assets::ManifestError),
-    #[cfg(target_arch = "wasm32")]
-    #[error(transparent)]
-    UrlRoot(#[from] sindri_assets::UrlRootError),
-    #[cfg(target_arch = "wasm32")]
-    #[error("browser project asset error: {0}")]
-    BrowserAsset(String),
-    #[error(transparent)]
-    Host(#[from] Box<HostError<CausewayError>>),
+    Host(#[from] Box<HostError<sindri_runtime::RuntimeError>>),
 }
 
-impl From<HostError<CausewayError>> for CausewayError {
-    fn from(error: HostError<CausewayError>) -> Self {
+impl From<HostError<sindri_runtime::RuntimeError>> for CausewayError {
+    fn from(error: HostError<sindri_runtime::RuntimeError>) -> Self {
         Self::Host(Box::new(error))
+    }
+}
+
+impl From<sindri_player::PlayerError> for CausewayError {
+    fn from(error: sindri_player::PlayerError) -> Self {
+        Self::Player(Box::new(error))
     }
 }

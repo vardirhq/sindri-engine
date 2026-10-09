@@ -18,7 +18,7 @@ fn trolley_reverses_inside_its_rail_and_spring_retuning_changes_light_height() {
         let [x, y] = run.position(trolley);
         assert!((8.47..=10.53).contains(&x), "trolley escaped at {x}");
         assert!((y - 8.1).abs() < 0.03);
-        let speed = run.physics.world().linear_velocity(trolley).unwrap()[0];
+        let speed = run.physics().world().linear_velocity(trolley).unwrap()[0];
         forward |= speed > 0.4;
         backward |= speed < -0.4;
         let [lx, ly] = run.position(light);
@@ -32,7 +32,7 @@ fn trolley_reverses_inside_its_rail_and_spring_retuning_changes_light_height() {
             lengthened |= length > 1.4;
             longest = longest.max(length);
         }
-        assert_eq!(run.physics.world().joint_count(), 4);
+        assert_eq!(run.physics().world().joint_count(), 4);
     }
     assert!(forward && backward, "the scripted slider must reverse");
     assert!(
@@ -42,11 +42,11 @@ fn trolley_reverses_inside_its_rail_and_spring_retuning_changes_light_height() {
     let spring = run.entity("lantern-spring").unwrap();
     run.world.despawn_recursive(spring).unwrap();
     assert!(run.step(1.0 / 60.0).is_empty());
-    assert_eq!(run.physics.world().joint_count(), 3);
+    assert_eq!(run.physics().world().joint_count(), 3);
     let slider = run.entity("trolley-slider").unwrap();
     run.world.despawn_recursive(slider).unwrap();
     assert!(run.step(1.0 / 60.0).is_empty());
-    assert_eq!(run.physics.world().joint_count(), 2);
+    assert_eq!(run.physics().world().joint_count(), 2);
 }
 
 #[test]
@@ -62,7 +62,7 @@ fn rebuilding_the_spring_keeps_the_trolley_and_breathing_motion() {
         run.key(Key::B, rebuild);
         let notes = run.step(1.0 / 60.0);
         assert!(notes.is_empty(), "{notes:?}");
-        assert_eq!(run.physics.world().joint_count(), 4);
+        assert_eq!(run.physics().world().joint_count(), 4);
         if rebuild {
             let joint = &run.world.get(spring).unwrap().components["sindri.physics2d.spring_joint"];
             assert_eq!(joint["first"], "trolley-body");
@@ -99,7 +99,7 @@ fn rebuilding_the_slider_keeps_bounded_reversal_and_its_spring() {
         run.key(Key::J, rebuild);
         let notes = run.step(1.0 / 60.0);
         assert!(notes.is_empty(), "{notes:?}");
-        assert_eq!(run.physics.world().joint_count(), 4);
+        assert_eq!(run.physics().world().joint_count(), 4);
         assert!(
             run.world
                 .get(spring)
@@ -119,7 +119,7 @@ fn rebuilding_the_slider_keeps_bounded_reversal_and_its_spring() {
         assert!((8.47..=10.53).contains(&x));
         assert!((y - 8.1).abs() < 0.03);
         assert!((x - lx).hypot(y - ly) < 1.9);
-        let speed = run.physics.world().linear_velocity(trolley).unwrap()[0];
+        let speed = run.physics().world().linear_velocity(trolley).unwrap()[0];
         forward |= speed > 0.4;
         backward |= speed < -0.4;
     }
@@ -143,7 +143,7 @@ fn parking_rebuilding_and_releasing_the_trolley_keeps_its_spring() {
         for _ in 0..600 {
             let notes = run.step(1.0 / 60.0);
             assert!(notes.is_empty(), "{notes:?}");
-            assert_eq!(run.physics.world().joint_count(), 4);
+            assert_eq!(run.physics().world().joint_count(), 4);
             let [x, y] = run.position(trolley);
             let [lx, ly] = run.position(light);
             assert!((y - 8.1).abs() < 0.03);
@@ -165,8 +165,8 @@ fn parking_rebuilding_and_releasing_the_trolley_keeps_its_spring() {
         let notes = run.step(1.0 / 60.0);
         assert!(notes.is_empty(), "{notes:?}");
         assert!((8.47..=10.53).contains(&run.position(trolley)[0]));
-        assert_eq!(run.physics.world().joint_count(), 4);
-        let speed = run.physics.world().linear_velocity(trolley).unwrap()[0];
+        assert_eq!(run.physics().world().joint_count(), 4);
+        let speed = run.physics().world().linear_velocity(trolley).unwrap()[0];
         forward |= speed > 0.4;
         backward |= speed < -0.4;
     }

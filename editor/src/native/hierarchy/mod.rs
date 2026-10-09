@@ -15,9 +15,10 @@ use crate::selection::Pick;
 use crate::space::EntitySpace;
 use crate::ui::icons;
 use crate::ui::theme::color;
+use crate::ui::theme::metric::ROW_HEIGHT;
 use crate::ui::widgets::{
     button::{self, Intent},
-    panel,
+    menu, panel,
 };
 
 use super::EditorApp;
@@ -53,11 +54,9 @@ impl EditorApp {
     fn hierarchy_header(&self, ui: &mut egui::Ui) -> (Option<CreateGameObject>, bool) {
         let mut create = None;
         let mut deleted = false;
-        // Spawning and despawning are world writes, and a running scene is not
-        // the document: Stop puts back the world as it was when Play was
-        // pressed, so anything made here while playing would vanish without
-        // being mentioned.
-        let authoring = self.authoring_enabled();
+        // Spawning and despawning while a scene plays land in the run, and
+        // Stop offers them back to keep or discard.
+        let authoring = self.world_editable();
         ui.add_enabled_ui(authoring, |ui| {
             // Offered only with something selected, because "delete" with
             // nothing chosen has no answer and a disabled button is a
@@ -166,17 +165,23 @@ impl EditorApp {
             },
             collapsed,
             authoring,
+            can_paste: self.can_paste(),
+            nested: self
+                .world
+                .get(entity)
+                .is_some_and(|data| data.parent.is_some()),
         }
     }
 
     fn hierarchy_contents(&mut self, ui: &mut egui::Ui) {
         let mut reparenting = None;
         let mut asked: Option<RowAction> = None;
-        let authoring = self.authoring_enabled();
+        let authoring = self.world_editable();
         egui::ScrollArea::vertical()
             .auto_shrink([false; 2])
-            .show(ui, |ui| {
+            .show_viewport(ui, |ui, shown| {
                 ui.spacing_mut().item_spacing.y = 0.0;
+                let mut sight = InSight::new(ui, shown);
                 ui.add_space(2.0);
                 let needle = self.search.trim().to_lowercase();
                 let collapsed = self.collapsed_entities();
@@ -194,6 +199,7 @@ impl EditorApp {
                     (EntitySpace::World, "World", icons::WORLD),
                     (EntitySpace::Ui, "UI", icons::UI_ELEMENT),
                 ] {
+                    sight.catch_up(ui);
                     ui.add_space(if space == EntitySpace::Ui { 8.0 } else { 0.0 });
                     let root = hierarchy_group(ui, label, icon);
                     if let Some(entity) = hierarchy_drop_target(ui, &root, &self.world, None) {
@@ -206,8 +212,11 @@ impl EditorApp {
                             continue;
                         }
                         listed.push(entity);
-                        let folded = collapsed.contains(&entity) && needle.is_empty();
                         let renaming = self.renaming == Some(entity);
+                        if !sight.row(ui, renaming) {
+                            continue;
+                        }
+                        let folded = collapsed.contains(&entity) && needle.is_empty();
                         let look = self.row_look(entity, depth, folded, authoring);
                         let report = entity_row(
                             ui,
@@ -216,12 +225,8 @@ impl EditorApp {
                             &look,
                             renaming.then_some(&mut self.rename_draft),
                         );
-                        if report.asked.is_some() {
-                            asked = report.asked;
-                        }
-                        if report.reparent.is_some() {
-                            reparenting = report.reparent;
-                        }
+                        asked = report.asked.or(asked);
+                        reparenting = report.reparent.or(reparenting);
                         if report.toggled {
                             toggled = Some(entity);
                         }
@@ -230,6 +235,7 @@ impl EditorApp {
                         }
                     }
                 }
+                sight.catch_up(ui);
                 if listed.is_empty() {
                     ui.add_space(6.0);
                     panel::note(
@@ -251,11 +257,14 @@ impl EditorApp {
                 // Clicking past the last row clears the selection. Without
                 // somewhere to click that means "nothing", a selection made by
                 // accident can only be replaced.
-                if ui
-                    .allocate_response(ui.available_size(), egui::Sense::click())
-                    .clicked()
-                {
+                let space = end_space(ui);
+                if space.clicked() {
                     clicked = Some((None, Pick::Only));
+                }
+                // And right-clicking there is where something new is made:
+                // the + in the tab strip, offered where the pointer already is.
+                if let Some(chosen) = space_menu(&space, authoring, self.can_paste()) {
+                    asked = Some(chosen);
                 }
                 if let Some((entity, how)) = clicked {
                     self.pick(entity, how, &listed);
@@ -304,6 +313,16 @@ pub(super) enum RowAction {
     SwitchSelection(bool),
     /// Move this entity that many places among its siblings.
     MoveBy(EntityId, isize),
+    Copy(EntityId),
+    CopySelection,
+    /// Paste what was copied under this entity.
+    PasteInto(EntityId),
+    /// Paste what was copied at the top level.
+    Paste,
+    /// Move this entity out from under its parent.
+    ToTopLevel(EntityId),
+    /// Make something new at the top level.
+    Create(CreateGameObject),
 }
 
 impl EditorApp {
@@ -344,6 +363,12 @@ impl EditorApp {
                 self.switch_entities(selected.all(), on);
             }
             RowAction::MoveBy(entity, offset) => self.move_among_siblings(entity, offset),
+            RowAction::Copy(entity) => self.copy_entities(&[entity]),
+            RowAction::CopySelection => self.copy_selection(),
+            RowAction::PasteInto(entity) => self.paste(Some(entity), None),
+            RowAction::Paste => self.paste(None, None),
+            RowAction::ToTopLevel(entity) => self.reparent(entity, None),
+            RowAction::Create(create) => self.create_game_object(create),
         }
     }
 
@@ -353,4 +378,92 @@ impl EditorApp {
         self.rename_draft = self.world.get(entity).map(entity_name).unwrap_or_default();
         self.renaming = Some(entity);
     }
+}
+
+/// Which hierarchy rows are in sight, and the space standing in for those
+/// that are not. Only rows in sight are laid out, so the scroll bar still
+/// measures them all while a scene of thousands lays out the few shown:
+/// laying out every row each frame was most of the panel's cost.
+struct InSight {
+    /// Where the list's content begins.
+    top: f32,
+    /// The part of the content in sight.
+    shown: egui::Rect,
+    /// Space for rows passed over and not yet added.
+    unseen: f32,
+}
+
+impl InSight {
+    fn new(ui: &egui::Ui, shown: egui::Rect) -> Self {
+        Self {
+            top: ui.min_rect().top(),
+            shown,
+            unseen: 0.0,
+        }
+    }
+
+    /// Whether the next row is to be laid out: it is in sight, or `always`.
+    /// A row that is not is counted as space instead.
+    fn row(&mut self, ui: &mut egui::Ui, always: bool) -> bool {
+        let at = ui.cursor().top() - self.top + self.unseen;
+        let in_sight = at + ROW_HEIGHT >= self.shown.top() - ROW_HEIGHT
+            && at <= self.shown.bottom() + ROW_HEIGHT;
+        if !in_sight && !always {
+            self.unseen += ROW_HEIGHT;
+            return false;
+        }
+        self.catch_up(ui);
+        true
+    }
+
+    /// Adds the space for the rows passed over.
+    fn catch_up(&mut self, ui: &mut egui::Ui) {
+        if self.unseen > 0.0 {
+            ui.add_space(self.unseen);
+            self.unseen = 0.0;
+        }
+    }
+}
+
+/// The space past the last row: at least two rows of it, so a list longer
+/// than the panel still has somewhere past its end to click.
+fn end_space(ui: &mut egui::Ui) -> egui::Response {
+    let room = ui
+        .available_size()
+        .max(egui::vec2(ui.available_width(), ROW_HEIGHT * 2.0));
+    ui.allocate_response(room, egui::Sense::click())
+}
+
+/// The menu a right-click opens past the last row: what can be made at the
+/// top level, and what was copied.
+fn space_menu(space: &egui::Response, authoring: bool, can_paste: bool) -> Option<RowAction> {
+    let mut asked = None;
+    menu::on_right_click(space, |ui| {
+        menu::subject(ui, "This scene");
+        ui.add_enabled_ui(authoring, |ui| {
+            let offered = [
+                ("Create Empty", CreateGameObject::Empty { parent: None }),
+                ("Create UI Image", CreateGameObject::UiImage),
+                (
+                    "Create Directional Light",
+                    CreateGameObject::DirectionalLight,
+                ),
+            ];
+            for (label, create) in offered {
+                if menu::item(ui, label).clicked() {
+                    asked = Some(RowAction::Create(create));
+                    ui.close();
+                }
+            }
+            ui.separator();
+            if ui
+                .add_enabled(can_paste, menu::entry("Paste", "Ctrl+V"))
+                .clicked()
+            {
+                asked = Some(RowAction::Paste);
+                ui.close();
+            }
+        });
+    });
+    asked
 }

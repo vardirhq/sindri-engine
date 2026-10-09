@@ -11,7 +11,7 @@ use sindri_platform::{ActionMap, Actions, InputState};
 use sindri_scene::InputActionsComponent;
 
 /// The actions a running scene declares, and what each is worth this step.
-#[derive(Default)]
+#[derive(Clone, Default)]
 pub(crate) struct InputActions {
     /// The payload last read, to tell a change from the same declaration.
     read: Option<serde_json::Value>,

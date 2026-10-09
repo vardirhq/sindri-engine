@@ -7,3 +7,8 @@
 # The version has to match the `wasm-bindgen` the workspace resolves.
 [target.wasm32-unknown-unknown]
 runner = "wasm-bindgen-test-runner"
+
+# `cargo editor <scene or project>` runs the editor optimised, the way to use
+# it rather than to work on it. See [profile.editor] in Cargo.toml.
+[alias]
+editor = "run --profile editor --package sindri-editor --"

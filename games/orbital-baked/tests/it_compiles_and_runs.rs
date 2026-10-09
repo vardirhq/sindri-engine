@@ -5,9 +5,8 @@ use orbital_baked::Run;
 #[test]
 fn the_project_opens_and_every_script_compiles() {
     let mut run = Run::open().expect("the project opens");
-    let failures = run
-        .scripts
-        .compile(&run.world, &run.components, &run.sources);
+    let run = &mut *run;
+    let failures = run.session.compile(&run.world);
     let reported: Vec<String> = failures.iter().map(ToString::to_string).collect();
     assert!(reported.is_empty(), "{reported:#?}");
 }

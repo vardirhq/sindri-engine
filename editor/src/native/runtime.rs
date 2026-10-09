@@ -2,17 +2,18 @@
 
 use eframe::egui::{self, Color32, Response, RichText, Stroke, Vec2};
 use egui_material_icons::MaterialIcon;
-use sindri_core::{ComponentSchemaRegistry, EngineLifecycle, EngineState, FixedStepConfig};
+use sindri_core::{EngineLifecycle, EngineState, FixedStepConfig};
 use sindri_decay::ScriptFailure;
-use sindri_scene::SpriteAnimations;
 
 use crate::console::Level;
-use crate::profiler::Phase;
 use crate::ui::theme::{color, metric, radius, text};
 
 use super::EditorApp;
 
-mod physics;
+mod play;
+mod saves;
+
+pub(super) use saves::EditorSaves;
 
 pub(super) fn transport_icon(
     ui: &mut egui::Ui,
@@ -155,7 +156,7 @@ pub(super) fn play_button(ui: &mut egui::Ui, transport: Transport) -> Response {
 ///
 /// One sentence, in one place, because it is on every disabled control and in
 /// the console line a refused save leaves behind.
-pub(super) const PLAYING_TIP: &str = "Stop the scene first: a running scene is not the document";
+pub(super) const PLAYING_TIP: &str = "Stop the scene first: a running scene is not the document. Stop offers back what you changed while it played";
 
 /// Whether the editor may write to the world and to the file in this state.
 ///
@@ -167,257 +168,33 @@ pub(super) const fn authoring_allowed(state: EngineState) -> bool {
 }
 
 impl EditorApp {
-    /// Whether the editor may write to the world and to the file right now.
+    /// Whether the editor may touch the document right now: save it, start
+    /// another, write prefab files, or show it styled and posed for editing.
     ///
-    /// False while the scene is playing, and that is the whole of play mode's
-    /// safety. Stop restores the world as it was when Play was pressed
-    /// ([`Self::stop_playback`]), so an edit made in between is thrown away —
-    /// and the history keeps its transaction, leaving undo describing changes
-    /// the world no longer contains. Saving was worse still: `save` writes the
-    /// live world, so Ctrl+S mid-run replaced the authored scene on disk with
-    /// wherever the scripts had pushed everything, and Stop then restored a
-    /// world the file no longer matched.
+    /// False while the scene is playing. Stop restores the world as it was
+    /// when Play was pressed ([`Self::stop_playback`]), so the running world
+    /// is not the document: saving it mid-run once replaced the authored
+    /// scene on disk with wherever the scripts had pushed everything.
     ///
-    /// Editing a running scene and keeping the changes is a real feature, and
-    /// it is not this one: it needs history that can be rebased onto a world
-    /// that moved underneath it, or a play mode that runs against a copy.
-    /// Until then the honest answer is that a running scene is not the
-    /// document.
+    /// Editing the world is a different question, answered by
+    /// [`Self::world_editable`]: always yes. An edit made while playing is
+    /// applied to the run and recorded against it rather than the scene's
+    /// history ([`Self::apply_edit`]); Stop offers each one back, applied to
+    /// the restored scene by the fields it changed, as an ordinary history
+    /// entry ([`crate::run_edits`]). Undo and redo walk the scene's history,
+    /// so they wait for Stop too.
+    /// Whether the open world can be edited: always. While a scene plays an
+    /// edit lands in the run, and Stop offers it back to keep or discard
+    /// (`run_review.rs`). What [`Self::authoring_enabled`] still guards is
+    /// the document: saving, new scenes, prefab files.
+    #[allow(clippy::unused_self)] // a method, so each guard reads as the question it asks
+    pub(super) const fn world_editable(&self) -> bool {
+        true
+    }
+
+    /// See the comment above [`Self::world_editable`].
     pub(super) const fn authoring_enabled(&self) -> bool {
         authoring_allowed(self.lifecycle.state())
-    }
-
-    /// Takes delivery of any script that arrived, then moves every script on by
-    /// whatever this frame is worth.
-    ///
-    /// Called every frame, like the animations, and for the same reason: a
-    /// script that will not compile should say so when the scene opens rather
-    /// than waiting for someone to press Play. What the transport changes is
-    /// how much time a frame is worth, so a scene at rest runs nothing.
-    pub(super) fn advance_play(&mut self, context: &egui::Context) {
-        // The frame before this one is over: its steps ran last time through
-        // here and its views have been drawn since.
-        self.profiler.finish();
-        if self.lifecycle.state() == EngineState::Running {
-            // Nothing else asks for a frame while the pointer is still, so
-            // without this a played scene runs only as fast as the mouse moves.
-            context.request_repaint();
-        }
-        let notes = self.scripts.poll();
-        self.record_script_notes(notes);
-
-        let delta = animation_delta(
-            self.lifecycle.state(),
-            context.input(|input| input.stable_dt),
-        );
-        // The keyboard is read only while the scene is actually running, and
-        // never while a text field has it: renaming an entity to "Wall" must
-        // not walk the player left. Read every frame regardless, so that
-        // stopping releases what was held rather than leaving it down.
-        let listening =
-            self.lifecycle.state() == EngineState::Running && !context.egui_wants_keyboard_input();
-        // While picking, the Game view's pointer is the picker's: the game
-        // sees it leave, and its press selects rather than plays.
-        let game_view = if super::device::picking(context) {
-            self.pick_in_game(context);
-            None
-        } else {
-            self.game_view_rect
-        };
-        self.input.update(context, listening, game_view);
-        // Forgotten now that this frame's input has been read, and filled in
-        // again by whichever view draws. A workspace that stops showing the
-        // Game view then reports no rectangle rather than the last one it had,
-        // and a script sees the pointer leave rather than sticking where the
-        // view used to be.
-        // Kept before the rectangle is forgotten: the screen UI is laid out in
-        // the Game view's own pixels, which is the same viewport a script's
-        // pointer coordinates are already in.
-        let view_size = self
-            .game_view_rect
-            .map(|rect| (rect.width(), rect.height()));
-        self.game_view_rect = None;
-
-        // Compiled whatever the transport says, so a broken script reports at
-        // the scene it was opened with and the inspector can read what a script
-        // wants authored without anyone pressing Play.
-        let components = self.scene.components().clone();
-        for failure in self.scripts.compile(&self.world, &components) {
-            self.record_script_failure(&failure);
-        }
-
-        // The same loop a shipped game runs, for the reason Play exists: a
-        // scene that behaves differently here than in the build is a scene
-        // nobody can trust a play-test of. `EngineCore` steps a fixed clock and
-        // runs gameplay a whole number of times per frame; so does this.
-        let steps = self
-            .clock
-            .advance(std::time::Duration::from_secs_f32(delta));
-        for step in 0..steps.fixed_steps {
-            self.fixed_step(&components, steps.fixed_delta, view_size);
-            if let Some(text) = self.screen_ui.take_copied() {
-                context.copy_text(text);
-            }
-            if step == 0 {
-                // An edge belongs to one step. Spending it here rather than per
-                // rendered frame is what keeps a 30 Hz display from firing a
-                // button twice and a 144 Hz one from losing the click entirely.
-                self.input.spend(steps.fixed_delta);
-            }
-        }
-        if steps.fixed_steps == 0 && self.lifecycle.state() != EngineState::Running {
-            // Nothing is going to consume them, and a scene at rest should not
-            // accumulate a frame's worth of releases for ever.
-            self.input.spend(std::time::Duration::from_secs_f32(delta));
-        }
-    }
-
-    /// One fixed step: everything gameplay does, in the order the engine fixes.
-    fn fixed_step(
-        &mut self,
-        components: &ComponentSchemaRegistry,
-        fixed_delta: std::time::Duration,
-        view_size: Option<(f32, f32)>,
-    ) {
-        let delta = fixed_delta.as_secs_f32();
-        let mut clock = PhaseClock::start();
-        // Flecks move before scripts, so one thrown this step is drawn where it
-        // was thrown rather than one step along.
-        self.effects.advance(fixed_delta);
-        clock.lap(&mut self.profiler, Phase::Effects);
-        // Physics next, so a script observes the events of the step that just
-        // happened and its writes take effect on the next one. `docs/physics.md`
-        // fixes that order: consumers run after the step publishes.
-        if !self.step_physics(components, fixed_delta) {
-            return;
-        }
-        clock.lap(&mut self.profiler, Phase::Physics);
-        // No safe area: a desktop window has no notch. A host that has one — a
-        // browser on a phone — reports it, and the same scene moves its
-        // anchored elements in without being edited.
-        let (view_width, view_height) = view_size.unwrap_or((0.0, 0.0));
-        let input_state = self.input.state();
-        // Hit-tested against what the Game view drew, styled, when the
-        // project presents through Weave: a click belongs to where an element
-        // is shown.
-        self.styles.advance(delta);
-        let extent = sindri_scene::ScreenExtent::new(view_width, view_height);
-        let updated = match self.styles.live() {
-            Some(presented) => self.screen_ui.update_presented(
-                presented,
-                &mut self.world,
-                components,
-                extent,
-                input_state.presses(),
-            ),
-            None => {
-                self.screen_ui
-                    .update(&mut self.world, components, extent, input_state.presses())
-            }
-        };
-        if let Err(error) = updated {
-            self.console.error(format!("Screen UI: {error}"));
-        }
-        self.screen_ui.read_controls(
-            &mut self.world,
-            &sindri_decay::ui_input(input_state, view_height),
-        );
-        clock.lap(&mut self.profiler, Phase::ScreenUi);
-        // A focused text field keeps the keys, as it does in the build.
-        let held_back = self
-            .screen_ui
-            .editing_text(&self.world)
-            .then(|| self.input.state().without_keys());
-        let (physics, events, requests, motions) = self.physics.for_scripts_with_characters();
-        let (world3d, events3d) = self.physics3d.for_scripts();
-        let mut report = self.scripts.advance(
-            &mut self.world,
-            components,
-            crate::scripts::EditorFrame {
-                input: held_back.as_ref().unwrap_or(self.input.state()),
-                physics: Some(sindri_decay::Physics2d {
-                    world: physics,
-                    events,
-                }),
-                physics3d: Some(sindri_decay::Physics3d {
-                    world: world3d,
-                    events: events3d,
-                }),
-                characters: Some(sindri_decay::Characters2d { requests, motions }),
-                screen_ui: &self.screen_ui,
-                random: &mut self.random,
-                saves: &mut self.saves,
-                effects: &mut self.effects,
-                animations: &mut self.animations,
-                sequences: &mut self.sequences,
-                delta_seconds: delta,
-            },
-        );
-        // Heard on the step that asked, as a build plays it.
-        for problem in self.play_audio.perform(self.scripts.take_audio_commands()) {
-            self.console.error(problem);
-        }
-        clock.lap(&mut self.profiler, Phase::Scripts);
-        let timings = std::mem::take(&mut report.timings);
-        // Animations move with gameplay rather than with the display, because a
-        // clip that advanced per rendered frame would play at a different speed
-        // in the editor than in the build.
-        if let Err(error) = self.animations.advance(&self.world, components, delta) {
-            self.console.error(format!("Sprite animation: {error}"));
-        }
-        self.advance_sequences(components, delta);
-        clock.lap(&mut self.profiler, Phase::Animation);
-        // After the scripts, so a camera following the player follows where
-        // this step left it.
-        sindri_scene::update_camera_behaviors(&mut self.world, delta);
-        clock.lap(&mut self.profiler, Phase::Cameras);
-        self.profiler.step(timings);
-
-        for message in report.printed {
-            // Named by entity, because "moving" is not something an author can
-            // act on when six entities run the same script.
-            self.console.info(format!(
-                "{}: {}",
-                self.entity_label(message.entity),
-                message.message
-            ));
-        }
-        for failure in report.failures {
-            // Collapsed by the console the same way a broken clip is: a script
-            // that fails does it sixty times a second, and one line with a
-            // count says more than sixty that scroll.
-            self.record_script_failure(&failure);
-        }
-    }
-
-    /// Moves every sequence on one step and plays the sounds its cues ask for.
-    ///
-    /// After the scripts, as in a build, so a sequence named this step starts
-    /// now; its cue sounds are heard on the step they are reached.
-    fn advance_sequences(&mut self, components: &ComponentSchemaRegistry, delta: f32) {
-        match self.sequences.advance(&mut self.world, components, delta) {
-            Ok(played) => {
-                for (entity, problem) in played.problems {
-                    self.console.error(format!(
-                        "{}: Sequence: {problem}",
-                        self.entity_label(entity)
-                    ));
-                }
-                let sounds = played
-                    .sounds
-                    .into_iter()
-                    .map(|sound| sindri_decay::AudioCommand::Play {
-                        bus: sound.bus().to_owned(),
-                        clip: sound.clip,
-                        volume: sound.volume,
-                    })
-                    .collect();
-                for problem in self.play_audio.perform(sounds) {
-                    self.console.error(problem);
-                }
-            }
-            Err(error) => self.console.error(format!("Sequence: {error}")),
-        }
     }
 
     /// Says what a script did wrong, naming the entity it happened on.
@@ -437,47 +214,6 @@ impl EditorApp {
         }
     }
 
-    /// Enters play mode, or leaves it.
-    ///
-    /// One button, two directions, and no third meaning: pressing it while
-    /// something is playing stops it rather than pausing it, which is what its
-    /// label says and what the equivalent button does everywhere else. Pausing
-    /// is [`Self::toggle_pause`].
-    ///
-    /// Play and stop move the engine lifecycle rather than a display flag, so
-    /// the editor exercises the same transitions a runtime host does.
-    pub(super) fn toggle_play_mode(&mut self) {
-        if Transport::of(self.lifecycle.state()).is_playing() {
-            self.stop_playback();
-            return;
-        }
-        // Taken before the first frame runs, and only on a fresh start rather
-        // than on resume, so pausing and carrying on does not move the point
-        // stop returns to.
-        self.play_snapshot = Some(self.world.clone());
-        self.reset_physics();
-        // The same seed for every fresh start, so pressing Play twice gives the
-        // same run twice and a bug found once can be found again. Resuming from
-        // a pause deliberately does not touch it: that would replay numbers the
-        // scene has already acted on.
-        self.random = sindri_core::Rng::default();
-        self.input.forget_players();
-        // A fresh run is profiled from its first frame, not after the last
-        // run's.
-        self.profiler.clear();
-        if let Err(error) = self.lifecycle.start() {
-            self.report(error.to_string());
-        }
-        // Authored sources start with the run, as they do in a build.
-        let components = self.scene.components().clone();
-        for problem in self
-            .play_audio
-            .start(self.file.anchor(), &self.world, &components)
-        {
-            self.console.error(problem);
-        }
-    }
-
     /// Holds a running scene where it is, or lets a held one carry on.
     ///
     /// Does nothing outside play mode, where there is nothing to hold: the
@@ -494,81 +230,5 @@ impl EditorApp {
         }
         self.play_audio
             .set_paused(self.lifecycle.state() == EngineState::Paused);
-    }
-
-    /// Runs exactly one fixed step of a held scene.
-    ///
-    /// Only while paused, because that is the only time it means anything: a
-    /// running scene is already stepping, and a stopped one has nothing to
-    /// step. What it is for is the bug that happens in one frame and is gone
-    /// before anyone can look at it — the whole reason a debugger has a step
-    /// button.
-    ///
-    /// It runs the same body a played frame runs, so a scene single-stepped
-    /// sixty times is a scene that played for a second.
-    pub(super) fn single_step(&mut self, context: &egui::Context) {
-        if self.lifecycle.state() != EngineState::Paused {
-            return;
-        }
-        let components = self.scene.components().clone();
-        let view_size = self
-            .game_view_rect
-            .map(|rect| (rect.width(), rect.height()));
-        // Read now, because a step taken from a keyboard shortcut has input
-        // that a paused frame never delivered.
-        let _ = context;
-        self.fixed_step(&components, self.clock.fixed_delta(), view_size);
-        self.input.spend(self.clock.fixed_delta());
-    }
-
-    /// Ends a play session, putting back what playing changed.
-    ///
-    /// Scripts write to the world, so the world is part of what playing
-    /// changed — and restoring it is what makes Play safe to press on work in
-    /// progress. The snapshot is the world as it was when Play was pressed,
-    /// not the authored document: a scene edited and then played must come
-    /// back to the edit, or pressing Play would quietly discard it.
-    ///
-    /// Undo history is deliberately left alone. A script moving something is
-    /// not an action the author took, so it was never on the history, and
-    /// putting the world back does not change what undo means.
-    pub(super) fn stop_playback(&mut self) {
-        // A fleck outliving the run that threw it would be a scene at rest that
-        // is still moving.
-        self.effects.clear();
-        self.play_audio.stop();
-        if let Err(error) = self.lifecycle.stop() {
-            self.report(error.to_string());
-        }
-        self.animations = SpriteAnimations::new();
-        self.sequences.clear();
-        // Entity handles survive, because this is the same world restored
-        // rather than one reloaded from a document — so the selection and the
-        // history keep pointing at the things they named.
-        if let Some(snapshot) = self.play_snapshot.take() {
-            self.world = snapshot;
-        }
-        self.reset_physics();
-        self.scripts.restart();
-        // A prefab edited while the scene was playing was left alone then,
-        // because the world being played is thrown away at Stop. The scene
-        // being edited follows it now.
-        self.follow_prefab_changes();
-    }
-}
-
-/// Times consecutive phases of a step, each lap ending one and starting the
-/// next.
-struct PhaseClock(std::time::Instant);
-
-impl PhaseClock {
-    fn start() -> Self {
-        Self(std::time::Instant::now())
-    }
-
-    fn lap(&mut self, profiler: &mut crate::profiler::Profiler, phase: Phase) {
-        let now = std::time::Instant::now();
-        profiler.add(phase, now - self.0);
-        self.0 = now;
     }
 }

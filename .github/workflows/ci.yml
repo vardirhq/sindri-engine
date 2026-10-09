@@ -550,7 +550,7 @@ jobs:
           WASM_OPT: ${{ github.event_name == 'pull_request' && '--no-opt' || '' }}
         run: |
           wasm-pack build examples/cube --target web --out-dir pkg $WASM_OPT
-          wasm-pack build game --target web --out-dir pkg $WASM_OPT
+          wasm-pack build crates/sindri-player --target web --out-dir pkg $WASM_OPT
       # Everything below runs against the *exported* directory rather than the
       # source tree. That is the point: what CI proves is what a deployment
       # would serve, page and manifest and hashed assets and all.
@@ -559,12 +559,12 @@ jobs:
         run: |
           cargo run --quiet --package sindri-export --bin sindri-export -- \
             game target/dist/causeway --base /sindri-engine/
-          cp -R game/pkg/. target/dist/causeway/pkg/
+          cp -R crates/sindri-player/pkg/. target/dist/causeway/pkg/
           # Weave uses the same generic browser host, but adds an Other asset
           # that the host recognizes as a presentation stylesheet.
           cargo run --quiet --package sindri-export --bin sindri-export -- \
             games/weave-poc target/dist/weave --base /sindri-engine/examples/weave-poc/
-          cp -R game/pkg/. target/dist/weave/pkg/
+          cp -R crates/sindri-player/pkg/. target/dist/weave/pkg/
           # Orbital, the one deployed to Pages that a person actually plays. It
           # is the project with prefabs -- including prefabs only another
           # prefab names -- and screens switched off until something shows
@@ -573,46 +573,46 @@ jobs:
           # portrait rules are reached only in a browser at phone width.
           cargo run --quiet --package sindri-export --bin sindri-export -- \
             games/orbital-baked target/dist/orbital-baked --base /sindri-engine/
-          cp -R game/pkg/. target/dist/orbital-baked/pkg/
+          cp -R crates/sindri-player/pkg/. target/dist/orbital-baked/pkg/
           cargo run --quiet --package sindri-export --bin sindri-export -- \
             examples/tween target/dist/tween --base /sindri-engine/examples/tween/
-          cp -R game/pkg/. target/dist/tween/pkg/
+          cp -R crates/sindri-player/pkg/. target/dist/tween/pkg/
           cargo run --quiet --package sindri-export --bin sindri-export -- \
             examples/tween target/dist/tween-root --base /examples/tween/
-          cp -R game/pkg/. target/dist/tween-root/pkg/
+          cp -R crates/sindri-player/pkg/. target/dist/tween-root/pkg/
           cargo run --quiet --package sindri-export --bin sindri-export -- \
             examples/camera target/dist/camera --base /sindri-engine/examples/camera/
-          cp -R game/pkg/. target/dist/camera/pkg/
+          cp -R crates/sindri-player/pkg/. target/dist/camera/pkg/
           cargo run --quiet --package sindri-export --bin sindri-export -- \
             examples/camera target/dist/camera-root --base /examples/camera/
-          cp -R game/pkg/. target/dist/camera-root/pkg/
+          cp -R crates/sindri-player/pkg/. target/dist/camera-root/pkg/
           cargo run --quiet --package sindri-export --bin sindri-export -- \
             examples/spatial target/dist/spatial --base /sindri-engine/examples/spatial/
-          cp -R game/pkg/. target/dist/spatial/pkg/
+          cp -R crates/sindri-player/pkg/. target/dist/spatial/pkg/
           cargo run --quiet --package sindri-export --bin sindri-export -- \
             examples/spatial target/dist/spatial-root --base /examples/spatial/
-          cp -R game/pkg/. target/dist/spatial-root/pkg/
+          cp -R crates/sindri-player/pkg/. target/dist/spatial-root/pkg/
           cargo run --quiet --package sindri-export --bin sindri-export -- \
             examples/physics target/dist/physics --base /sindri-engine/examples/physics/
-          cp -R game/pkg/. target/dist/physics/pkg/
+          cp -R crates/sindri-player/pkg/. target/dist/physics/pkg/
           cargo run --quiet --package sindri-export --bin sindri-export -- \
             examples/physics target/dist/physics-root --base /examples/physics/
-          cp -R game/pkg/. target/dist/physics-root/pkg/
+          cp -R crates/sindri-player/pkg/. target/dist/physics-root/pkg/
           cargo run --quiet --package sindri-export --bin sindri-export -- \
             examples/audio target/dist/audio --base /sindri-engine/examples/audio/
-          cp -R game/pkg/. target/dist/audio/pkg/
+          cp -R crates/sindri-player/pkg/. target/dist/audio/pkg/
           cargo run --quiet --package sindri-export --bin sindri-export -- \
             examples/input target/dist/input --base /sindri-engine/examples/input/
-          cp -R game/pkg/. target/dist/input/pkg/
+          cp -R crates/sindri-player/pkg/. target/dist/input/pkg/
           cargo run --quiet --package sindri-export --bin sindri-export -- \
             examples/ui target/dist/ui --base /sindri-engine/examples/ui/
-          cp -R game/pkg/. target/dist/ui/pkg/
+          cp -R crates/sindri-player/pkg/. target/dist/ui/pkg/
           cargo run --quiet --package sindri-export --bin sindri-export -- \
             examples/ui target/dist/ui-root --base /examples/ui/
-          cp -R game/pkg/. target/dist/ui-root/pkg/
+          cp -R crates/sindri-player/pkg/. target/dist/ui-root/pkg/
           cargo run --quiet --package sindri-export --bin sindri-export -- \
             games/low-tide target/dist/low-tide --base /examples/low-tide/
-          cp -R game/pkg/. target/dist/low-tide/pkg/
+          cp -R crates/sindri-player/pkg/. target/dist/low-tide/pkg/
           # Keep the shipped gameplay/starting pose and add read-only telemetry
           # for a real keyboard-driven run to the platformer's goal.
           # Causeway plus a read-only observer that drops its loose block onto
@@ -620,11 +620,11 @@ jobs:
           python3 scripts/browser/prepare-causeway-voxels.py target/browser-causeway-voxels
           cargo run --quiet --package sindri-export --bin sindri-export -- \
             target/browser-causeway-voxels target/dist/causeway-voxels --base /sindri-engine/
-          cp -R game/pkg/. target/dist/causeway-voxels/pkg/
+          cp -R crates/sindri-player/pkg/. target/dist/causeway-voxels/pkg/
           python3 scripts/browser/prepare-platformer.py target/browser-platformer
           cargo run --quiet --package sindri-export --bin sindri-export -- \
             target/browser-platformer target/dist/platformer-goal --base /examples/platformer/
-          cp -R game/pkg/. target/dist/platformer-goal/pkg/
+          cp -R crates/sindri-player/pkg/. target/dist/platformer-goal/pkg/
       - name: Smoke the rendered games
         id: browser_smoke
         run: |

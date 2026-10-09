@@ -68,12 +68,12 @@ fn click(
         y: point[1] * VIEWPORT.1,
     });
     held.apply(InputEvent::ButtonPressed(MouseButton::Left));
-    session.step(world, &held, VIEWPORT, STEP_SECONDS)?;
+    session.step(world, &held, VIEWPORT, STEP_SECONDS)?.log();
     // A frame boundary, exactly as a host puts one there: without it the press
     // edge is still set on the next step and one click lays two blocks.
     held.begin_frame(std::time::Duration::from_secs_f32(STEP_SECONDS));
     held.apply(InputEvent::ButtonReleased(MouseButton::Left));
-    session.step(world, &held, VIEWPORT, STEP_SECONDS)?;
+    session.step(world, &held, VIEWPORT, STEP_SECONDS)?.log();
     Ok(())
 }
 
@@ -86,7 +86,9 @@ fn play(
 ) -> Result<(), Box<dyn Error>> {
     // A settling step first, so the ground has answered where everything
     // stands before anything is aimed at it.
-    session.step(world, &InputState::default(), VIEWPORT, STEP_SECONDS)?;
+    session
+        .step(world, &InputState::default(), VIEWPORT, STEP_SECONDS)?
+        .log();
     let camera = sindri_scene::world_camera_of(world, scene.components(), VIEWPORT.0 / VIEWPORT.1)?
         .ok_or("the scene has no world camera")?;
 
@@ -94,7 +96,7 @@ fn play(
     // Second block in the palette: earth, which fills its cell.
     let mut choose = InputState::default();
     choose.apply(InputEvent::KeyPressed(Key::Digit2));
-    session.step(world, &choose, VIEWPORT, STEP_SECONDS)?;
+    session.step(world, &choose, VIEWPORT, STEP_SECONDS)?.log();
     // A little tower in front of the walker, so the picture shows the game
     // having been played rather than the world as it was generated.
     for _ in 0..PLACEMENTS {
@@ -105,7 +107,7 @@ fn play(
     // be of somebody using it.
     let idle = InputState::default();
     for _ in 0..900 {
-        session.step(world, &idle, VIEWPORT, STEP_SECONDS)?;
+        session.step(world, &idle, VIEWPORT, STEP_SECONDS)?.log();
     }
     Ok(())
 }
@@ -134,7 +136,7 @@ async fn capture(path: &Path) -> Result<(), Box<dyn Error>> {
 
     let scene = extractor()?;
     let (mut world, loaded) = world()?;
-    let mut session = Session::new(scene.components().clone())
+    let mut session = sindri_causeway::session(scene.components().clone())
         .with_scenes(sindri_causeway::scenes()?, loaded)
         .with_tile_sets(tile_sets.clone());
 

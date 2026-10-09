@@ -115,6 +115,9 @@ pub(crate) fn value_row(
     authored: Authored,
 ) {
     let label = inspector::humanize(key);
+    if super::angle::around_row(ui, at, &label, value, indent) {
+        return;
+    }
     if described_row(ui, at, &label, key, value, indent) {
         return;
     }
@@ -222,7 +225,7 @@ pub(crate) fn value_row(
 /// A field that decides what the rest of this object holds is drawn first, and
 /// applied to the object rather than to itself: that is the edit it actually
 /// is.
-fn object_rows(ui: &mut egui::Ui, at: At<'_>, value: &mut Value, indent: f32) {
+pub(super) fn object_rows(ui: &mut egui::Ui, at: At<'_>, value: &mut Value, indent: f32) {
     let tag = variant_row(ui, at, value, indent + 10.0);
     let Value::Object(nested) = value else {
         return;
@@ -337,6 +340,10 @@ fn described_row(
         }
         FieldMeaning::Color if super::field::is_color(Some(meaning), value) => {
             color_row(ui, key, value);
+            true
+        }
+        FieldMeaning::Angle if value.is_number() => {
+            super::angle::angle_row(ui, label, value, indent);
             true
         }
         FieldMeaning::Range { min, max } if value.is_number() => {

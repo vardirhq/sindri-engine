@@ -83,7 +83,7 @@ fn returning_to_a_streamed_wreck_does_not_refill_scrap() {
     travel(&mut pilot, site);
     pilot.use_it();
     assert_eq!(
-        pilot.run.scripts.field(wreck, "scrap"),
+        pilot.run.session.scripts().field(wreck, "scrap"),
         Some(&ScriptValue::Number(2.0))
     );
     let carried = pilot.run.entity("carried").unwrap();
@@ -94,7 +94,8 @@ fn returning_to_a_streamed_wreck_does_not_refill_scrap() {
     let basin = pilot.run.entity("basin").unwrap();
     let mut terrain = pilot
         .run
-        .components
+        .session
+        .components()
         .get::<VoxelWorldComponent>(&pilot.run.world, basin)
         .unwrap()
         .unwrap();
@@ -113,12 +114,12 @@ fn returning_to_a_streamed_wreck_does_not_refill_scrap() {
         .find(|entity| distance(pilot.run.position(*entity), site) < 0.01)
         .expect("the same wreck returns");
     assert_eq!(
-        pilot.run.scripts.field(returned, "scrap"),
+        pilot.run.session.scripts().field(returned, "scrap"),
         Some(&ScriptValue::Number(2.0)),
         "no free refill"
     );
     assert_eq!(
-        pilot.run.scripts.field(returned, "cargo_mask"),
+        pilot.run.session.scripts().field(returned, "cargo_mask"),
         Some(&ScriptValue::Number(62.0))
     );
     let slots: Vec<_> = pilot
@@ -128,7 +129,7 @@ fn returning_to_a_streamed_wreck_does_not_refill_scrap() {
         .filter(|(_, data)| {
             data.parent == Some(returned) && data.name.as_deref() == Some("Loose cargo")
         })
-        .map(|(entity, _)| pilot.run.scripts.field(entity, "slot").cloned())
+        .map(|(entity, _)| pilot.run.session.scripts().field(entity, "slot").cloned())
         .collect();
     assert_eq!(
         slots.len(),

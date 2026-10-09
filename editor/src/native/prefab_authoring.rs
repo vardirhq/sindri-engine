@@ -121,12 +121,9 @@ impl EditorApp {
         if writes.len() > 1 {
             label = format!("Make {} prefabs", writes.len());
         }
-        self.history.break_merge_run();
+        self.break_merge_runs();
         let before = self.history.revision();
-        if let Err(error) = self
-            .history
-            .apply(buffer.into_transaction(label), &mut self.world)
-        {
+        if let Err(error) = self.apply_edit(buffer.into_transaction(label)) {
             self.report(error.to_string());
             return;
         }

@@ -18,7 +18,7 @@
 //! Conflating the two is what made `sindri.ui.text` inspect as two rows when it
 //! has seven.
 
-use sindri_core::{BUILTIN_BLOCKS, ComponentSchemaRegistry, TagsComponent};
+use sindri_core::{BUILTIN_BLOCKS, ComponentSchemaRegistry, FieldMeaning, TagsComponent};
 
 use crate::animation::SpriteAnimationComponent;
 use crate::audio::AudioSourceComponent;
@@ -124,6 +124,40 @@ fn register_cameras(components: &mut ComponentSchemaRegistry) -> Result<(), Scen
             }
         }),
     )?;
+    describe_camera_behavior(components)
+}
+
+/// A camera's behaviour follows and confines only once those are added, so
+/// what each holds is said here, and then what its fields mean: the target is
+/// an entity in the scene, and the rates are rates. The shake's phase and
+/// offset are the shake's own running state rather than anything to tune.
+fn describe_camera_behavior(
+    components: &mut ComponentSchemaRegistry,
+) -> Result<(), SceneExtractError> {
+    let at_least_zero = || FieldMeaning::Range {
+        min: 0.0,
+        max: f64::INFINITY,
+    };
+    components.describe_optional::<CameraBehaviorComponent>(
+        "follow",
+        serde_json::json!({
+            "target": "", "offset": [0.0, 0.0, 0.0], "dead_zone": [0.0, 0.0],
+            "smoothing": 8.0, "max_speed": 0.0
+        }),
+    )?;
+    components.describe_optional::<CameraBehaviorComponent>(
+        "confine",
+        serde_json::json!({ "min": [-10.0, -10.0], "max": [10.0, 10.0] }),
+    )?;
+    components.describe::<CameraBehaviorComponent>([
+        ("follow.target", FieldMeaning::Entity),
+        ("follow.smoothing", at_least_zero()),
+        ("follow.max_speed", at_least_zero()),
+        ("shake.trauma", FieldMeaning::Range { min: 0.0, max: 1.0 }),
+        ("shake.strength", at_least_zero()),
+        ("shake.decay", at_least_zero()),
+        ("shake.frequency", at_least_zero()),
+    ])?;
     Ok(())
 }
 

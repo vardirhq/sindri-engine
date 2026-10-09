@@ -26,7 +26,8 @@ fn cargo(pilot: &mut Pilot) {
     let deck = pilot.run.entity("deck").unwrap();
     let mut map = pilot
         .run
-        .components
+        .session
+        .components()
         .get::<TilemapComponent>(&pilot.run.world, deck)
         .unwrap()
         .unwrap();
@@ -39,8 +40,8 @@ fn cargo(pilot: &mut Pilot) {
         .components
         .get_mut("sindri.tilemap")
         .unwrap()["tiles"] = serde_json::to_value(map.tiles).unwrap();
-    pilot.run.scripts.blackboard_mut().set("crates", 1.0);
-    pilot.run.scripts.blackboard_mut().set("scrap", 1.0);
+    pilot.run.session.blackboard_mut().set("crates", 1.0);
+    pilot.run.session.blackboard_mut().set("scrap", 1.0);
     pilot.wait(0.1);
 }
 
@@ -49,7 +50,7 @@ fn cargo_focus_and_confirmation_follow_the_real_crate_on_a_phone() {
     let mut pilot = Pilot::on_a_phone();
     cargo(&mut pilot);
     // A finger brings up the controls without moving the crew.
-    pilot.run.scripts.blackboard_mut().set("touch", 1.0);
+    pilot.run.session.blackboard_mut().set("touch", 1.0);
     pilot.wait(0.1);
     assert!(active(&pilot, "crate-focus"));
     assert!(active(&pilot, "context-panel"));
@@ -91,7 +92,7 @@ fn escape_cancels_discard_and_tide_meter_tracks_the_phase() {
     pilot.tap(Key::Escape);
     assert!(!pilot.flag("discard_armed"));
     assert!((pilot.board("crates") - 1.0).abs() < 0.01);
-    pilot.run.scripts.blackboard_mut().set("tide_time", 90.0);
+    pilot.run.session.blackboard_mut().set("tide_time", 90.0);
     pilot.wait(0.1);
     let width = |id| {
         pilot

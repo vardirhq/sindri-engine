@@ -64,7 +64,20 @@ impl Undo {
 
     /// Puts back everything styling changed.
     pub fn undo(self, world: &mut World) {
+        self.undo_except(world, &std::collections::BTreeSet::new());
+    }
+
+    /// Puts back everything styling changed except on `kept`, whose styled
+    /// values stay.
+    pub(crate) fn undo_except(
+        self,
+        world: &mut World,
+        kept: &std::collections::BTreeSet<EntityId>,
+    ) {
         for (entity, saved) in self.saved {
+            if kept.contains(&entity) {
+                continue;
+            }
             let Some(data) = world.get_mut(entity) else {
                 continue;
             };

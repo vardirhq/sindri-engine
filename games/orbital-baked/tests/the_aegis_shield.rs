@@ -32,7 +32,8 @@ fn isolated_run() -> Run {
         .world
         .entities()
         .filter_map(|(entity, _)| {
-            run.components
+            run.session
+                .components()
                 .get::<sindri_core::TagsComponent>(&run.world, entity)
                 .ok()
                 .flatten()
@@ -52,7 +53,8 @@ fn tagged(run: &Run, tag: &str) -> Vec<EntityId> {
     run.world
         .entities()
         .filter_map(|(entity, _)| {
-            run.components
+            run.session
+                .components()
                 .get::<sindri_core::TagsComponent>(&run.world, entity)
                 .ok()
                 .flatten()
@@ -63,8 +65,10 @@ fn tagged(run: &Run, tag: &str) -> Vec<EntityId> {
 }
 
 fn spawn_aegis(run: &mut Run) -> EntityId {
+    let run = &mut **run;
     let document = run
-        .prefabs
+        .session
+        .prefabs()
         .get("prefabs/aegis.prefab")
         .expect("the Aegis prefab ships");
     let entity = run.world.spawn_prefab(document).expect("boss spawns").root;
@@ -164,7 +168,8 @@ fn fire_lands_on_the_plates_rather_than_the_hull() {
     assert_eq!(run.count("shield"), 8, "the ring is up");
 
     let bullet = run
-        .prefabs
+        .session
+        .prefabs()
         .get("prefabs/bullet.prefab")
         .expect("the bullet prefab ships")
         .clone();
@@ -258,7 +263,8 @@ fn it_wears_its_own_hull_rather_than_a_tinted_gunship() {
     }
 
     let sprite = run
-        .components
+        .session
+        .components()
         .get::<sindri_scene::SpriteComponent>(&run.world, aegis)
         .expect("the sprite store answers")
         .expect("the Aegis draws a sprite")

@@ -17,7 +17,7 @@ pub(super) struct QueryPiece {
     pub handle: r3::ColliderHandle,
 }
 
-#[derive(Default)]
+#[derive(Clone, Default)]
 pub(super) struct SpatialIndex {
     tree: Bvh,
     pieces: HashMap<u32, QueryPiece>,

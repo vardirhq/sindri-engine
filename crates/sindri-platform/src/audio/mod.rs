@@ -15,6 +15,7 @@ use thiserror::Error;
 // build without the feature still has something that satisfies the boundary.
 #[cfg(target_arch = "wasm32")]
 mod browser;
+mod maybe;
 mod mixer;
 #[cfg(all(not(target_arch = "wasm32"), feature = "audio"))]
 mod native;
@@ -25,6 +26,7 @@ mod tests;
 
 #[cfg(target_arch = "wasm32")]
 pub use browser::BrowserAudioBackend;
+pub use maybe::MaybeAudio;
 pub use mixer::{AudioMixer, EFFECTS_BUS, MASTER_BUS, MUSIC_BUS, PlayingVoice};
 #[cfg(all(not(target_arch = "wasm32"), feature = "audio"))]
 pub use native::NativeAudioBackend;

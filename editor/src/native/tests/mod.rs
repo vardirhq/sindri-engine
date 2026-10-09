@@ -3,6 +3,7 @@
 //! A child module sees its ancestors' private items, so these reach the
 //! whole of `native` without anything being widened for them.
 
+mod clipboard;
 mod hierarchy;
 mod hierarchy_input;
 mod inspector;

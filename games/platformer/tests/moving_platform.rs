@@ -43,7 +43,7 @@ fn a_stationary_rider_is_carried_once_across_the_gap_and_back() {
             "relative x: {x}, {platform_x}"
         );
         assert!((y - platform_y - 0.51).abs() < 0.003);
-        let motion = run.physics.character_motion(hero).unwrap();
+        let motion = run.physics().character_motion(hero).unwrap();
         assert!(motion.grounded && !motion.slide.started_penetrating);
         let carry = motion.platform.as_ref().unwrap();
         assert_eq!(carry.entity, ferry);
@@ -67,7 +67,7 @@ fn jumping_leaves_carry_then_landing_resumes_it() {
     let airborne_x = run.position(hero)[0];
     for _ in 0..20 {
         step(&mut run);
-        let motion = run.physics.character_motion(hero).unwrap();
+        let motion = run.physics().character_motion(hero).unwrap();
         assert!(!motion.grounded && motion.platform.is_none());
         assert!((run.position(hero)[0] - airborne_x).abs() < 0.001);
     }
@@ -75,7 +75,7 @@ fn jumping_leaves_carry_then_landing_resumes_it() {
     let mut landed = false;
     for _ in 0..120 {
         step(&mut run);
-        let motion = run.physics.character_motion(hero).unwrap();
+        let motion = run.physics().character_motion(hero).unwrap();
         landed |= motion.grounded
             && motion
                 .platform
@@ -107,7 +107,7 @@ fn a_running_jump_boards_the_ferry_from_the_starting_field() {
             run.key(Key::Space, false);
             braking = true;
         }
-        let motion = run.physics.character_motion(hero).unwrap();
+        let motion = run.physics().character_motion(hero).unwrap();
         if braking && motion.grounded && motion.platform.as_ref().is_some_and(|p| p.entity == ferry)
         {
             carried_frames += 1;
@@ -134,7 +134,7 @@ fn dropping_through_the_ferry_stops_carry_and_respawns_from_the_pit() {
     let x = run.position(hero)[0];
     for _ in 0..10 {
         step(&mut run);
-        let motion = run.physics.character_motion(hero).unwrap();
+        let motion = run.physics().character_motion(hero).unwrap();
         assert!(!motion.grounded && motion.platform.is_none());
         assert!((run.position(hero)[0] - x).abs() < 0.001);
     }
@@ -143,5 +143,5 @@ fn dropping_through_the_ferry_stops_carry_and_respawns_from_the_pit() {
     }
     assert!((run.board("falls") - 1.0).abs() < f32::EPSILON);
     assert!((run.position(hero)[0] - 2.5).abs() < 0.001);
-    assert!(run.physics.character_motion(hero).unwrap().grounded);
+    assert!(run.physics().character_motion(hero).unwrap().grounded);
 }

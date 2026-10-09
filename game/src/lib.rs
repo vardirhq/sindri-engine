@@ -11,23 +11,23 @@
 //! gameplay meant writing Rust here, the scripting layer would not be doing its
 //! job.
 //!
-//! Native builds embed the project so the standalone binary has no working
-//! directory requirement. Browser builds deliberately do not: `browser` loads
-//! the same logical IDs through `FetchAssetSource` + `AssetLoader`, which proves
-//! the static-hosting path rather than proving only that `include_bytes!` works
-//! in WebAssembly.
+//! The native build embeds the project so the standalone binary has no working
+//! directory requirement. In a browser Causeway is a project like any other,
+//! exported and played by `sindri-player`, which is the one host every export
+//! ships.
 
+#[cfg(not(target_arch = "wasm32"))]
 use sindri_desktop::WindowConfig;
-
-#[cfg(target_arch = "wasm32")]
-mod browser;
 
 #[cfg(not(target_arch = "wasm32"))]
 mod app;
 mod assets;
 mod error;
-mod session;
-mod styling;
+#[cfg(not(target_arch = "wasm32"))]
+mod native_session;
+/// Any project played offscreen, for the capture and benchmark tools.
+#[cfg(not(target_arch = "wasm32"))]
+pub mod project;
 
 // The crate's public surface: what `bin/`, `tests/`, and the browser host
 // reach for. Where an item lives inside the crate is not their business.
@@ -40,30 +40,20 @@ pub use assets::{
 };
 pub use assets::{extractor, presented_world};
 pub use error::CausewayError;
-pub use session::Session;
+#[cfg(not(target_arch = "wasm32"))]
+pub use native_session::session;
+pub use sindri_player::bind_builtin_textures;
+pub use sindri_runtime::Session;
+pub use sindri_runtime::bind_builtin_tile_sets;
 
-#[cfg_attr(target_arch = "wasm32", wasm_bindgen::prelude::wasm_bindgen(start))]
+/// Opens the native game's window and plays it.
+#[cfg(not(target_arch = "wasm32"))]
 pub fn run() {
-    #[cfg(not(target_arch = "wasm32"))]
-    {
-        env_logger::init();
-        if let Err(error) = sindri_desktop::run::<app::CausewayApp>(WindowConfig {
-            title: "Gather".to_owned(),
-            ..WindowConfig::default()
-        }) {
-            log::error!("{error}");
-        }
-    }
-
-    #[cfg(target_arch = "wasm32")]
-    {
-        console_error_panic_hook::set_once();
-        let _ = console_log::init_with_level(log::Level::Info);
-        if let Err(error) = sindri_desktop::run::<browser::BrowserCausewayApp>(WindowConfig {
-            title: "Gather".to_owned(),
-            ..WindowConfig::default()
-        }) {
-            log::error!("{error}");
-        }
+    env_logger::init();
+    if let Err(error) = sindri_desktop::run::<app::CausewayApp>(WindowConfig {
+        title: "Gather".to_owned(),
+        ..WindowConfig::default()
+    }) {
+        log::error!("{error}");
     }
 }

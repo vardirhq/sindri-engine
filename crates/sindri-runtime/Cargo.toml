@@ -1,0 +1,30 @@
+[package]
+name = "sindri-runtime"
+description = "One run of a Sindri scene: the session every host and the editor's Play step"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+# Depends on the independently versioned Weave workspace through sindri-weave.
+publish = false
+
+[dependencies]
+log.workspace = true
+sindri-assets = { path = "../sindri-assets" }
+sindri-core = { path = "../sindri-core" }
+sindri-decay = { path = "../sindri-decay" }
+sindri-platform = { path = "../sindri-platform" }
+sindri-scene = { path = "../sindri-scene" }
+sindri-weave = { path = "../sindri-weave" }
+serde.workspace = true
+thiserror.workspace = true
+toml = "1.1"
+weave = { path = "../../weave/crates/weave" }
+web-time.workspace = true
+
+[lints]
+workspace = true
+
+[dev-dependencies]
+serde_json.workspace = true

@@ -6,40 +6,24 @@ use weave::Viewport as WeaveViewport;
 use super::EditorApp;
 
 impl EditorApp {
-    /// Resolves the authored world through the project's Weave presentation.
+    /// Styles the edited world in place through the project's Weave
+    /// presentation for one view's draw, and returns what takes it off.
     ///
-    /// Kept outside `render_view` because resolving presentation is one concern
-    /// of its own and because failures need the same console/render-error path
-    /// whichever viewport asked for them.
-    pub(super) fn resolve_presentation(
+    /// A running game is styled by its session instead, which settled the
+    /// world when Play started and lays the pointer's states over the Game
+    /// view as it draws. Failures go to the console and the render error
+    /// whichever view asked.
+    pub(super) fn present_for_editing(
         &mut self,
         editing: bool,
         rect: Rect,
-    ) -> Option<sindri_core::World> {
-        if self.styles.is_empty() {
+    ) -> Option<sindri_weave::Undo> {
+        if self.styles.is_empty() || !self.authoring_enabled() {
             return None;
         }
         let viewport = self.presentation_viewport(editing, rect);
-        // The Game view of a running game is live: the pointer's states and
-        // transitions. Anything else is the authored presentation.
-        let presented = if !editing && !self.authoring_enabled() {
-            let states = sindri_weave::with_focus(
-                sindri_weave::pointer_states(
-                    &self.world,
-                    self.screen_ui.hovered(),
-                    self.screen_ui.active(),
-                ),
-                self.screen_ui.focused(),
-            );
-            self.styles.present_live(&self.world, viewport, &states)
-        } else {
-            if self.authoring_enabled() {
-                self.styles.stop_live();
-            }
-            self.styles.resolve(&self.world, viewport)
-        };
-        match presented {
-            Ok(world) => Some(world),
+        match self.styles.present(&mut self.world, viewport) {
+            Ok(undo) => undo,
             Err(error) => {
                 let failure = format!("Weave: {error}");
                 self.console.fail(&failure, None);
@@ -51,13 +35,24 @@ impl EditorApp {
         }
     }
 
+    /// The logical screen Weave styles a run for: the Game view's, as last
+    /// drawn, or the screen the editor opens at before it has been.
+    pub(super) fn game_presentation_viewport(&self) -> WeaveViewport {
+        // The size the views' targets start at, in points: small enough
+        // that the conversion is exact.
+        let rect = self.last_game_view.unwrap_or_else(|| {
+            Rect::from_min_size(eframe::egui::Pos2::ZERO, eframe::egui::vec2(960.0, 540.0))
+        });
+        self.presentation_viewport(false, rect)
+    }
+
     /// The logical screen dimensions Weave resolves against.
     ///
     /// A named device uses its real logical size, not the number of editor
     /// points its preview happened to fit into. In Free mode the Game view is
     /// the screen. The Scene view follows that Game rectangle when one has been
     /// drawn, so both views choose the same media queries while shown together.
-    fn presentation_viewport(&self, editing: bool, rect: Rect) -> WeaveViewport {
+    pub(super) fn presentation_viewport(&self, editing: bool, rect: Rect) -> WeaveViewport {
         let (width, height) = self.game_device.size.unwrap_or_else(|| {
             if editing {
                 self.game_view_rect

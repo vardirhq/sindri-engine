@@ -222,3 +222,20 @@ fn a_failed_styling_leaves_the_world_as_it_was() {
     assert!(error.is_err());
     assert_eq!(entities(&live), settled);
 }
+
+#[test]
+fn presenting_in_place_draws_what_a_copy_draws_and_undoes_to_the_authored_world() {
+    let authored = load();
+    let sheet = parse(STYLE).expect("Weave parses");
+    let sheets = [sheet];
+    let copied = Presenter::new()
+        .present(&authored, &sheets, VIEWPORT, &UiStates::new())
+        .expect("styles a copy");
+    let mut live = authored.clone();
+    let undo = Presenter::new()
+        .present_in_place(&mut live, &sheets, VIEWPORT, &UiStates::new())
+        .expect("styles in place");
+    assert_eq!(entities(&live), entities(&copied));
+    undo.undo(&mut live);
+    assert_eq!(entities(&live), entities(&authored));
+}

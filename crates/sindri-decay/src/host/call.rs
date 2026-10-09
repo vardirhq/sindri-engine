@@ -122,10 +122,20 @@ impl WorldHost<'_> {
                 // Written on the entity itself rather than down through its
                 // children, which is what makes switching a screen back on
                 // restore the children that were off on their own account.
-                let data = self.world.get_mut(entity).ok_or_else(|| {
-                    RuntimeError::Host(format!("{}: that entity is gone", path.dotted()))
-                })?;
-                data.disabled = !*active;
+                let switched_off = self
+                    .world
+                    .get(entity)
+                    .ok_or_else(|| {
+                        RuntimeError::Host(format!("{}: that entity is gone", path.dotted()))
+                    })?
+                    .disabled;
+                // Only a switch is a change: setting what is already set every
+                // update must not count as editing the entity.
+                if switched_off == *active
+                    && let Some(data) = self.world.get_mut(entity)
+                {
+                    data.disabled = !*active;
+                }
                 Ok(Value::Unit)
             }
             WorldCall::IsActive => {

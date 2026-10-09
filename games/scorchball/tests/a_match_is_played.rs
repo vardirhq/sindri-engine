@@ -209,8 +209,9 @@ fn a_sign_drops_from_the_sky_and_cannot_be_taken_until_it_lands() {
     let sign = sign.expect("a sign dropped");
     // Blue waits exactly where it will land, and it is only taken once there.
     let at = run.position(sign);
+    let blue = player(&run, 1.0);
     run.world
-        .get_mut(player(&run, 1.0))
+        .get_mut(blue)
         .and_then(|data| data.transform_3d.as_mut())
         .expect("Blue")
         .position = [at[0], at[1] + 1.1, 1.0];
@@ -279,7 +280,7 @@ fn every_power_does_what_it_says() {
         match kind {
             1 => assert!(run.scale(blue) > 4.5, "the Enlarger grew Blue"),
             3 => assert!(run.board("wind") > 0.0, "Blue's wind blows towards Red"),
-            4 => assert!(run.effects.live() > 0, "the ball is burning"),
+            4 => assert!(run.session.effects().live() > 0, "the ball is burning"),
             _ => {}
         }
         seen[kind as usize] = true;
@@ -315,7 +316,7 @@ fn a_fireball_sets_an_opponent_running_wild() {
             break;
         }
     }
-    assert!(run.effects.live() > 0, "the ball is burning");
+    assert!(run.session.effects().live() > 0, "the ball is burning");
     // Red walks into the burning ball, and is set alight: with its stick at
     // rest it keeps moving, which is running wild.
     let ball = run.entity("ball").expect("the ball");
