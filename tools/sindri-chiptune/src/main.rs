@@ -116,7 +116,7 @@ fn voice(notes: &[Note], t: f64, duty: f64, wave: bool, step: f64) -> f64 {
 
 fn noise(seed: u64, time: f64, step: f64, energy: f64, mood: Mood) -> f64 {
     let tick = (time / step).floor() as usize;
-    if tick >= STEPS || tick % 4 != 0 {
+    if tick >= STEPS {
         return 0.0;
     }
     let bar = tick / 16;
