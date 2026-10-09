@@ -1834,42 +1834,49 @@
           "description": "What the player means, such as `\"jump\"` or `\"move\"`, from the actions the scene declares. The best place to start: one script works with keys, a controller or a touch screen. The same as `Action`.",
           "kind": "value",
           "name": "Action",
+          "read_only": false,
           "type": "Action"
         },
         {
           "description": "Game controllers, read by player number. The same as `Gamepad`.",
           "kind": "value",
           "name": "Gamepad",
+          "read_only": false,
           "type": "Gamepad"
         },
         {
           "description": "Taps, holds, drags and pinches, for touch-first controls. The same as `Gesture`.",
           "kind": "value",
           "name": "Gesture",
+          "read_only": false,
           "type": "Gesture"
         },
         {
           "description": "The keys, named by position so controls work on any keyboard layout.",
           "kind": "value",
           "name": "Keyboard",
+          "read_only": false,
           "type": "Keyboard"
         },
         {
           "description": "The mouse, or a finger on a touch screen, handled the same way so one game works on both. The same as `Pointer`.",
           "kind": "value",
           "name": "Pointer",
+          "read_only": false,
           "type": "Pointer"
         },
         {
           "description": "A virtual joystick for touch screens: wherever a thumb lands becomes the center, and dragging from there steers. The same as `Stick`.",
           "kind": "value",
           "name": "Stick",
+          "read_only": false,
           "type": "Stick"
         },
         {
           "description": "Every finger on a touch screen, for games that need more than one. For steering, `Input.Stick` is simpler. The same as `Touch`.",
           "kind": "value",
           "name": "Touch",
+          "read_only": false,
           "type": "Touch"
         },
         {
