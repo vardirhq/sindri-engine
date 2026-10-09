@@ -1,13 +1,9 @@
 //! Standalone Chiptune Lab user interface. No Sindri editor dependencies.
 use super::instruments::Preset;
-use super::{Mood, RATE, Settings, compose_with, render_samples, render_with};
+use super::live::{Command, LiveSource, Transport};
+use super::{Mood, Settings, compose_with, render_with};
 use eframe::egui::{self, Color32, RichText};
-use rodio::{
-    Player,
-    buffer::SamplesBuffer,
-    stream::{DeviceSinkBuilder, MixerDeviceSink},
-};
-use std::num::NonZero;
+use rodio::{Player, stream::{DeviceSinkBuilder, MixerDeviceSink}};
 use std::{
     error::Error,
     sync::mpsc::{self, Receiver},
@@ -15,7 +11,6 @@ use std::{
 };
 
 enum JobResult {
-    Audio(Vec<f32>),
     Saved(String),
 }
 type Job = Receiver<Result<JobResult, String>>;
@@ -26,6 +21,8 @@ struct ComposerApp {
     job: Option<Job>,
     stream: Option<MixerDeviceSink>,
     sink: Option<Player>,
+    transport: Option<Transport>,
+    looping: bool,
     status: String,
 }
 impl Default for ComposerApp {
@@ -36,12 +33,14 @@ impl Default for ComposerApp {
             job: None,
             stream: None,
             sink: None,
+            transport: None,
+            looping: true,
             status: "Ready to compose. Preview plays in memory.".into(),
         }
     }
 }
 impl ComposerApp {
-    fn start(&mut self, preview: bool, seed: u64) {
+    fn export(&mut self, seed: u64) {
         if self.job.is_some() {
             return;
         }
@@ -53,57 +52,54 @@ impl ComposerApp {
         }
         let (tx, rx) = mpsc::channel();
         self.job = Some(rx);
-        self.status = if preview {
-            "Composing preview..."
-        } else {
-            "Exporting WAV..."
-        }
-        .into();
+        self.status = "Exporting WAV...".into();
         thread::spawn(move || {
             let notes = compose_with(&settings);
-            let result = if preview {
-                Ok(JobResult::Audio(render_samples(&settings, &notes)))
-            } else {
-                render_with(&settings, &notes)
-                    .map(|()| JobResult::Saved(settings.output.display().to_string()))
-                    .map_err(|error| error.to_string())
-            };
+            let result = render_with(&settings, &notes)
+                .map(|()| JobResult::Saved(settings.output.display().to_string()))
+                .map_err(|error| error.to_string());
             let _ = tx.send(result);
         });
     }
-    fn stop(&mut self) {
-        if let Some(sink) = self.sink.take() {
-            sink.stop();
+    fn start_live(&mut self, seed: u64) {
+        let mut settings = self.settings.clone();
+        settings.seed = seed;
+        let notes = compose_with(&settings);
+        if let Some(transport) = &self.transport {
+            let _ = transport.tx.send(Command::Replace(settings, notes));
+            self.status = "Switched composition at the start of the song.".into();
+            return;
         }
-        self.stream = None;
-        self.status = "Playback stopped.".into();
-    }
-    fn play(&mut self, samples: Vec<f32>) {
         match DeviceSinkBuilder::open_default_sink() {
             Ok(stream) => {
-                let sink = Player::connect_new(stream.mixer());
-                sink.append(SamplesBuffer::new(
-                    NonZero::new(1).expect("mono"),
-                    NonZero::new(RATE).expect("sample rate"),
-                    samples,
-                ));
-                sink.play();
+                let player = Player::connect_new(stream.mixer());
+                let (source, transport) = LiveSource::new(settings, notes);
+                let _ = transport.tx.send(Command::Loop(self.looping));
+                player.append(source);
+                player.play();
                 self.stream = Some(stream);
-                self.sink = Some(sink);
-                self.status = "Playing preview · no WAV file created.".into();
+                self.sink = Some(player);
+                self.transport = Some(transport);
+                self.status = "Live playback. Change instruments or levels while listening.".into();
             }
-            Err(error) => {
-                self.status = format!("Audio device unavailable: {error}");
-            }
+            Err(error) => self.status = format!("Audio device unavailable: {error}"),
+        }
+    }
+    fn stop(&mut self) {
+        if let Some(player) = self.sink.take() { player.stop(); }
+        self.stream = None;
+        self.transport = None;
+        self.status = "Playback stopped.".into();
+    }
+    fn sync_audio(&self, ui: &egui::Ui) {
+        if let Some(transport) = &self.transport {
+            let _ = transport.tx.send(Command::Update(self.settings.clone()));
+            ui.ctx().request_repaint_after(std::time::Duration::from_millis(70));
         }
     }
     fn poll(&mut self, ui: &egui::Ui) {
         let result = self.job.as_ref().map(Receiver::try_recv);
         match result {
-            Some(Ok(Ok(JobResult::Audio(samples)))) => {
-                self.job = None;
-                self.play(samples);
-            }
             Some(Ok(Ok(JobResult::Saved(path)))) => {
                 self.job = None;
                 self.status = format!("Export complete: {path}");
@@ -371,6 +367,7 @@ impl ComposerApp {
 impl eframe::App for ComposerApp {
     fn ui(&mut self, ui: &mut egui::Ui, _frame: &mut eframe::Frame) {
         self.poll(ui);
+        self.sync_audio(ui);
         ui.visuals_mut().panel_fill = Color32::from_rgb(20, 25, 34);
         egui::ScrollArea::vertical().show(ui, |ui| {
             ui.add_space(10.0);
@@ -399,16 +396,16 @@ impl eframe::App for ComposerApp {
             ui.separator();
             ui.horizontal(|ui| {
                 if ui
-                    .add_enabled(self.job.is_none(), egui::Button::new("▶  Play A"))
+                    .add_enabled(true, egui::Button::new("▶  Play / Switch A"))
                     .clicked()
                 {
-                    self.start(true, self.settings.seed);
+                    self.start_live(self.settings.seed);
                 }
                 if ui
-                    .add_enabled(self.job.is_none(), egui::Button::new("▶  Play B"))
+                    .add_enabled(true, egui::Button::new("▶  Switch B"))
                     .clicked()
                 {
-                    self.start(true, self.settings.seed.wrapping_add(1));
+                    self.start_live(self.settings.seed.wrapping_add(1));
                 }
                 if ui
                     .add_enabled(self.job.is_none(), egui::Button::new("Use B as A"))
@@ -430,7 +427,19 @@ impl eframe::App for ComposerApp {
                     )
                     .clicked()
                 {
-                    self.start(false, self.settings.seed);
+                    self.export(self.settings.seed);
+                }
+            });
+            ui.horizontal(|ui| {
+                if ui.checkbox(&mut self.looping, "Loop").changed() {
+                    if let Some(transport) = &self.transport { let _ = transport.tx.send(Command::Loop(self.looping)); }
+                }
+                if let Some(transport) = &self.transport {
+                    let samples = transport.position.load(std::sync::atomic::Ordering::Relaxed);
+                    let bar = (samples as f64 / (f64::from(super::RATE) * 60.0 / self.settings.bpm * 4.0)) as usize;
+                    ui.label(format!("Bar {} / 32", bar.min(31) + 1));
+                    if ui.button("↤ Beginning").clicked() { let _ = transport.tx.send(Command::Seek(0)); }
+                    if ui.button("↦ Theme").clicked() { let _ = transport.tx.send(Command::Seek(8)); }
                 }
             });
             ui.horizontal(|ui| {
