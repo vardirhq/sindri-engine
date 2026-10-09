@@ -92,7 +92,7 @@ fn step_seconds() -> f64 {
 }
 
 fn voice(notes: &[Note], t: f64, step: f64, sound: instruments::TrackSound) -> f64 {
-    let active = notes.iter().find(|n| {
+    let active = notes.first().filter(|n| {
         let start = f64::from(u32::try_from(n.start).expect("start")) * step;
         t >= start && t < start + f64::from(u32::try_from(n.len).expect("length")) * step
     });
