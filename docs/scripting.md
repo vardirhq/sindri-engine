@@ -1969,6 +1969,14 @@ without changing the scene's authored transform.
 | --- | --- |
 | `Camera.add_trauma(amount)` | unit |
 
+The explicit-entity 3D camera calls are `Camera.perspective_fov(camera, degrees)`,
+`Camera.orbit(camera, target, yaw, pitch, distance)`, `Camera.orbit_offset(camera, Vec3)`,
+`Camera.orbit_smoothing(camera, rate)`, `Camera.orbit_collision(camera, mask, padding)`
+and `Camera.clear_orbit(camera)`. Orbit is engine-owned world-space follow,
+aiming and sight-line obstruction pull-in; see the full checked contract in
+[`camera-runtime-scripting.md`](camera-runtime-scripting.md). These calls do
+not require the singular 2D behavior camera.
+
 `Camera.add_trauma` adds a finite, non-negative amount to the authored gameplay camera's shake trauma, clamped by the engine to one. Decay decides when an impact happens; `sindri.camera.behavior` owns the waveform, strength, frequency, and decay. The call requires exactly one authored `sindri.camera` carrying `sindri.camera.behavior`; ambiguity or absence is a runtime error rather than a silently ignored camera effect.
 
 | Path | Type |

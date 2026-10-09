@@ -78,6 +78,22 @@ Runtime mode changes are already available through `Camera.follow`,
 combat shake. Dedicated editor behavior controls and gizmos remain follow-up
 work.
 
+## Third-person 3D orbit
+
+`sindri.camera.orbit` follows an authored target in world space, smooths its
+position, faces the focus and pulls in immediately when a 3D sight-line ray
+hits an obstruction. Yaw/pitch are radians, with zero yaw on +Z and positive
+pitch above the target. Settings and limits are in
+[`camera-runtime-scripting.md`](camera-runtime-scripting.md). The shared
+runtime steps it after scripts and animation using synchronized physics poses.
+It takes precedence over 2D behavior on the same camera.
+
+The registered component describes its target as an entity field and exposes
+numeric settings to the generic inspector. Dedicated creation controls,
+orbit gizmos and on-screen editor verification remain pending. The
+[Orbit Camera Lab](../examples/orbit/README.md) exercises it in a real project;
+Explorer remains the game proof.
+
 ## Screen-space UI and overlays
 
 The `sindri.ui.*` family does not require a camera entity. Their projection is owned by the viewport and their anchors resolve against the viewport's screen-space extent.

@@ -1,0 +1,243 @@
+{
+  "format_version": 10,
+  "metadata": {
+    "name": "3D Orbit Camera Lab"
+  },
+  "entities": [
+    {
+      "id": "camera",
+      "name": "Camera",
+      "transform_3d": {
+        "position": [
+          0,
+          3,
+          6
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "sindri.camera": {
+          "projection": "perspective",
+          "vertical_fov_degrees": 50,
+          "near": 0.1,
+          "far": 100
+        },
+        "sindri.script": {
+          "source": "orbit.decay",
+          "script": "CameraRig"
+        }
+      }
+    },
+    {
+      "id": "walker",
+      "name": "Walker",
+      "transform_3d": {
+        "position": [
+          -1,
+          0.5,
+          -1
+        ],
+        "scale": [
+          0.5,
+          0.5,
+          0.8
+        ]
+      },
+      "components": {
+        "sindri.mesh": {
+          "primitive": "cube",
+          "texture": "textures/walker.png"
+        },
+        "sindri.script": {
+          "source": "orbit.decay",
+          "script": "Walker"
+        },
+        "sindri.physics3d.collider": {
+          "shape": {
+            "shape": "box",
+            "half_extents": [
+              0.25,
+              0.25,
+              0.4
+            ]
+          },
+          "offset": [
+            0,
+            0,
+            0
+          ],
+          "rotation": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "sensor": false,
+          "layers": {
+            "memberships": 1,
+            "filter": 4294967295
+          },
+          "friction": 0.5,
+          "restitution": 0
+        }
+      }
+    },
+    {
+      "id": "goal",
+      "name": "Goal",
+      "transform_3d": {
+        "position": [
+          1,
+          2,
+          -3
+        ],
+        "scale": [
+          0.4,
+          0.4,
+          0.4
+        ]
+      },
+      "components": {
+        "sindri.mesh": {
+          "primitive": "cube",
+          "texture": "textures/goal.png"
+        }
+      }
+    },
+    {
+      "id": "barrier",
+      "name": "Barrier",
+      "transform_3d": {
+        "position": [
+          0,
+          2,
+          1
+        ],
+        "scale": [
+          10,
+          4,
+          0.4
+        ]
+      },
+      "components": {
+        "sindri.mesh": {
+          "primitive": "cube",
+          "texture": "textures/floor.png"
+        },
+        "sindri.physics3d.collider": {
+          "shape": {
+            "shape": "box",
+            "half_extents": [
+              5,
+              2,
+              0.2
+            ]
+          },
+          "offset": [
+            0,
+            0,
+            0
+          ],
+          "rotation": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "sensor": false,
+          "layers": {
+            "memberships": 1,
+            "filter": 4294967295
+          },
+          "friction": 0.5,
+          "restitution": 0
+        },
+        "sindri.script": {
+          "source": "orbit.decay",
+          "script": "Barrier"
+        }
+      }
+    },
+    {
+      "id": "floor",
+      "name": "Floor",
+      "transform_3d": {
+        "position": [
+          0,
+          -0.3,
+          0
+        ],
+        "scale": [
+          14,
+          0.2,
+          14
+        ]
+      },
+      "components": {
+        "sindri.mesh": {
+          "primitive": "cube",
+          "texture": "textures/floor.png"
+        },
+        "sindri.physics3d.collider": {
+          "shape": {
+            "shape": "box",
+            "half_extents": [
+              7,
+              0.1,
+              7
+            ]
+          },
+          "offset": [
+            0,
+            0,
+            0
+          ],
+          "rotation": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "sensor": false,
+          "layers": {
+            "memberships": 2,
+            "filter": 4294967295
+          },
+          "friction": 0.5,
+          "restitution": 0
+        }
+      }
+    },
+    {
+      "id": "sun",
+      "name": "Sun",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "sindri.light": {
+          "kind": "directional",
+          "color": [
+            1,
+            0.95,
+            0.8
+          ],
+          "intensity": 1.1
+        }
+      }
+    }
+  ]
+}

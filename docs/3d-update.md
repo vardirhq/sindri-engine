@@ -59,10 +59,18 @@ Order:
   `look_at`/`rotate_around`, with parent-space conversion, atomic validation,
   compiler/LSP metadata and the transform feature example. Quaternion values
   remain pending; Decay currently has no quaternion or Vec4 value type.
+- Slice 6 also has explicit perspective FOV control and `sindri.camera.orbit`
+  with world-space follow, aiming, smoothing and sight-line collision pull-in.
+  The Orbit Camera Lab runs to its goal through Session; editor/browser/game
+  proof and mouse look remain pending.
 - Then the rest of slice 6, which unblocks moving through 3D (Low Tide's
   crawler and crew included).
 - Then slices 2 to 4 (measurement, instancing and one lit path, lights),
   which terrain (5b) and the showcase need.
+- Slice 4b records future runtime environment controls and day/night proof.
+  Start it only after unified materials, imported-model shadows, runtime light
+  access and point/spot lights are ready. This does not change the current
+  slice 6 priority. Keep the work in PR #507.
 
 The yaw/pitch/roll convention is fixed: radians, Y-up, -Z forward (as
 cameras face), YXZ order. Build on `Transform3D::yaw_pitch_roll_radians` and
@@ -120,7 +128,69 @@ cameras face), YXZ order. Build on `Transform3D::yaw_pitch_roll_radians` and
   every geometry kind.
 - [ ] The editor shows range spheres and cone gizmos. Create Point Light and
   Create Spot Light.
-- [ ] Decay can read and set a light's colour, intensity and enabled state.
+- [ ] Decay can read and set directional, point and spot light color,
+  intensity and enabled state. Prefer entity property access, such as
+  `sun.light.intensity`, if it fits the existing typed host surface; settle
+  the exact API against current Decay conventions before implementing it.
+- [ ] Directional lights rotate through the existing 3D transform API.
+  Runtime property and transform changes update lighting and shadow direction
+  in the next rendered frame in native, browser and editor Play runtimes.
+- [ ] Point and spot lights can ride moving 3D parents: composed world
+  translation and rotation determine position and spotlight direction.
+  Decay can change their properties, and imported GLB geometry is lit through
+  the unified renderer in native, browser and editor Play.
+
+### 4b. Runtime environment controls and day/night proof (future work)
+
+Scheduled only; do not start this example before its dependencies are ready.
+Implementation order within the lighting track is unified 3D materials and
+lighting (3), imported-model shadow casting/receiving (3), runtime Decay light
+access (4), point/spot lights (4), runtime environment access, then the example
+and integration tests below. Runtime light access may land before local lights
+without changing the current slice order.
+
+Low Tide 3D (`vardirhq/low-tide-3d`) is the initial external integration case
+that requests these general capabilities. It stays a consumer, never an engine
+dependency. Time progression, sunrise/sunset transitions and gameplay
+consequences belong to game Decay scripts. There is no engine day/night API,
+second lighting path or Low Tide gameplay in Rust.
+
+- [ ] Expose scene environment properties to Decay: ambient intensity,
+  ambient color (already supported by the authored renderer contract), and
+  background/clear color. Expose fog color, density and distance once unified
+  fog is ready; existing textured/voxel fog does not yet cover imported models.
+- [ ] Apply runtime environment edits without restarting the scene or
+  unnecessarily rebuilding render resources. Share the authored environment
+  and unified material/lighting/shadow path across all hosts.
+- [ ] Add a small, self-contained feature example with a configurable Decay
+  game clock, sunrise, midday, sunset and night; a rotating directional sun;
+  smooth sun brightness/color, ambient and background transitions; and night
+  illumination while the sun is disabled. No visible-sun renderer is required.
+- [ ] The example moves an imported GLB object carrying a functional point
+  or spot light. Imported models cast and receive dynamic shadows that follow
+  the sun. This proves generic mounted lights rather than crawler-specific
+  headlights, cabin/work lights or floodlight logic.
+- [ ] Test typed property reads/writes, invalid values and atomic rejection,
+  runtime frame updates, parenting and shadow direction where practical.
+  Open the example, compile its scripts and run a scripted clock to its goal
+  through Session; visually verify native and real WebGPU browser output and
+  exercise the same scene in editor Play before claiming completion.
+- [ ] Update scripting and subsystem contracts, generated Decay API docs and
+  machine-readable metadata (via the generator), LSP/semantic validation where
+  relevant, capability/parity evidence and the changelog. Name the external
+  integration and feature example honestly; retain in-tree game proof as a
+  separate completion requirement under AGENTS.md.
+
+Acceptance: a Decay script continuously advances its own clock and changes
+the sun, ambient illumination and background; the same scene renders correctly
+in native, browser and editor Play; a moving imported GLB carries functional
+lights; and imported models cast and receive shadows. Do not tick this item
+based only on schemas or compilable APIs. Deliver it in small, tested commits
+pushed regularly to this existing PR once the dependencies pass.
+
+Skyboxes, procedural atmosphere, stars, moon rendering and weather are optional
+future enhancements, not prerequisites; do not build a complete skybox solely
+for this example.
 
 ### 5. Author 3D scenes in the editor
 - [ ] The editor loads models through the same asset queue as the player,
@@ -172,8 +242,11 @@ placement. The roadmap's "height/mesh terrain next" is this slice.
   - [x] `look_at`, `rotate_around`.
   The [Transform Lab](../examples/transform/README.md) opens and runs to its
   goal through the shared runtime; game proof remains with Explorer.
-- [ ] Camera: FOV, look-at, and an orbit/third-person follow mode with
-  collision pull-in (a 3D ray).
+- [ ] Camera:
+  - [x] Explicit perspective FOV and transform look-at.
+  - [x] Engine-owned orbit/third-person follow with smoothing and collision
+    pull-in (a 3D ray), checked in the [Orbit Camera Lab](../examples/orbit/README.md).
+  - [ ] Explorer gameplay, editor authoring and browser proof.
 - [ ] Input: pointer delta on `Pointer`, and pointer lock in native and
   browser (`requestPointerLock`).
 - [ ] `sindri.physics3d.character`:

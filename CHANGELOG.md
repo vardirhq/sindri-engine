@@ -1,5 +1,10 @@
 # Changelog
 
+- Follow a 3D target with an engine-owned orbit camera: smooth movement, aiming,
+  immediate obstruction pull-in and recovery when the view clears. Decay selects
+  explicit camera entities, changes orbit settings and perspective FOV, and can
+  stop orbit without resetting the pose. The Orbit Camera Lab runs to its goal.
+
 - Aim and orbit entities from Decay with `transform.look_at` and
   `transform.rotate_around`, including under rotated/scaled parents. Read
   world-space `forward`, `right`, and `up` to move the way an entity faces.

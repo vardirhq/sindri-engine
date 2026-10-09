@@ -33,7 +33,7 @@ fn every_built_in_component_names_its_fields() {
 /// they simply cannot be created without a host that knows what is lying
 /// beside the scene.
 #[test]
-fn only_the_components_that_name_a_project_asset_lack_a_default() {
+fn components_requiring_project_references_lack_a_default() {
     let components = builtin_components().expect("the built-in schemas register");
     let uncreatable: BTreeSet<&str> = components
         .registered_components()
@@ -45,6 +45,7 @@ fn only_the_components_that_name_a_project_asset_lack_a_default() {
         BTreeSet::from([
             "sindri.animation.sprite",
             "sindri.audio.source",
+            "sindri.camera.orbit",
             "sindri.grid.occupant",
             "sindri.grid.placement",
             "sindri.model",

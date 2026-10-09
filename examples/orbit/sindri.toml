@@ -1,0 +1,4 @@
+format_version = 1
+[project]
+name = "3D Orbit Camera Lab"
+main_scene = "assets/orbit.scene"

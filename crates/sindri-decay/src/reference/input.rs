@@ -298,7 +298,7 @@ pub(super) const TYPES: &[TypeEntry] = &[
     },
     TypeEntry {
         name: "Camera",
-        text: "The game's camera: sizing an orthographic view and changing engine-owned follow, confinement, and shake behavior.",
+        text: "The game's camera: projection sizing, 3D orbit with obstruction pull-in, and engine-owned 2D follow, confinement and shake.",
         members: &[
             call(
                 "add_trauma",
@@ -339,6 +339,36 @@ pub(super) const TYPES: &[TypeEntry] = &[
                 "orthographic_size",
                 &["camera", "size"],
                 "Sets an explicitly selected orthographic camera's view size to a positive finite number. Works without camera behavior and preserves clipping, fit and unknown camera fields.",
+            ),
+            call(
+                "perspective_fov",
+                &["camera", "degrees"],
+                "Sets an explicit perspective camera's vertical field of view in degrees, strictly between 0 and 180. Preserves clipping and unknown fields; requires no behavior component.",
+            ),
+            call(
+                "orbit",
+                &["camera", "target", "yaw", "pitch", "distance"],
+                "Creates or retargets an explicit camera's engine-owned world-space orbit. Angles are radians; zero yaw is +Z behind the target, positive pitch is above it. Preserves offset, smoothing and collision settings. Target must be an active authored spatial entity, independent of the camera hierarchy.",
+            ),
+            call(
+                "orbit_offset",
+                &["camera", "offset"],
+                "Sets the orbit focus offset in world units from the target's world position.",
+            ),
+            call(
+                "orbit_smoothing",
+                &["camera", "rate"],
+                "Sets exponential orbit position smoothing per second. Zero snaps. Obstruction pull-in remains immediate.",
+            ),
+            call(
+                "orbit_collision",
+                &["camera", "mask", "padding"],
+                "Sets collider membership bits and world-unit pull-in padding below orbit distance. Mask must be a whole u32; zero disables queries. Sensors, the camera and target are excluded; a ray protects the sight line, not the near-plane volume.",
+            ),
+            call(
+                "clear_orbit",
+                &["camera"],
+                "Removes an explicit camera's orbit while keeping its last pose. Any existing 2D camera behavior resumes.",
             ),
             call(
                 "max_speed",

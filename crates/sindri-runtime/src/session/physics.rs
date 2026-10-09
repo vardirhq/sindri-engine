@@ -3,8 +3,21 @@
 use super::Session;
 use crate::RuntimeError;
 use sindri_core::World;
+use sindri_scene::{ScenePhysics2d, ScenePhysics3d};
 
 impl Session {
+    /// The 2D solver, for whatever draws what it holds.
+    #[must_use]
+    pub const fn physics(&self) -> &ScenePhysics2d {
+        &self.physics
+    }
+
+    /// The 3D solver, for whatever draws what it holds.
+    #[must_use]
+    pub const fn physics3d(&self) -> &ScenePhysics3d {
+        &self.physics3d
+    }
+
     pub(super) fn step_physics(
         &mut self,
         world: &mut World,

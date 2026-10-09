@@ -1,0 +1,40 @@
+// The camera stays on the walker's side of the barrier, then returns to its orbit.
+script CameraRig {
+    var elapsed: f32 = 0.0;
+    fn start() {
+        let target = World.find("Walker");
+        Camera.perspective_fov(this.entity, 65.0);
+        Camera.orbit(this.entity, target, 0.0, 0.35, 6.0);
+        Camera.orbit_offset(this.entity, Vec3(0.0, 0.5, 0.0));
+        Camera.orbit_smoothing(this.entity, 8.0);
+        Camera.orbit_collision(this.entity, 1.0, 0.2);
+    }
+    fn update(dt: f32) {
+        elapsed += dt;
+        Camera.orbit(this.entity, World.find("Walker"), elapsed * 0.2, 0.35, 6.0);
+    }
+}
+
+script Walker {
+    var arrived: bool = false;
+    fn update(dt: f32) {
+        if arrived { return; }
+        let goal = World.find("Goal");
+        let distance = this.transform.world_position.distance(goal.transform.world_position);
+        if distance <= 0.01 {
+            arrived = true;
+            print("Arrived");
+            return;
+        }
+        this.transform.look_at(goal.transform.world_position);
+        this.transform.world_position += this.transform.forward * min(distance, 0.8 * dt);
+    }
+}
+
+script Barrier {
+    var elapsed: f32 = 0.0;
+    fn update(dt: f32) {
+        elapsed += dt;
+        if elapsed >= 2.0 { World.set_active(this.entity, false); }
+    }
+}

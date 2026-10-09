@@ -26,6 +26,7 @@ mod peers;
 
 pub(crate) use peers::Peers;
 mod actions;
+mod camera_3d;
 mod person;
 mod physics;
 mod physics3d;

@@ -74,8 +74,21 @@ pub(super) fn add_camera_surface(environment: &mut Environment) {
             | CameraCall::Impact
             | CameraCall::Smoothing
             | CameraCall::MaxSpeed => vec![Type::F32],
-            CameraCall::OrthographicSize => vec![Type::Named(ENTITY.to_owned()), Type::F32],
-            CameraCall::Follow => vec![Type::Named(ENTITY.to_owned())],
+            CameraCall::OrthographicSize
+            | CameraCall::PerspectiveFov
+            | CameraCall::OrbitSmoothing => vec![Type::Named(ENTITY.to_owned()), Type::F32],
+            CameraCall::Orbit => vec![
+                Type::Named(ENTITY.to_owned()),
+                Type::Named(ENTITY.to_owned()),
+                Type::F32,
+                Type::F32,
+                Type::F32,
+            ],
+            CameraCall::OrbitOffset => vec![Type::Named(ENTITY.to_owned()), Type::Vec3],
+            CameraCall::OrbitCollision => {
+                vec![Type::Named(ENTITY.to_owned()), Type::F32, Type::F32]
+            }
+            CameraCall::ClearOrbit | CameraCall::Follow => vec![Type::Named(ENTITY.to_owned())],
             CameraCall::ClearFollow | CameraCall::ClearBounds => Vec::new(),
             CameraCall::FollowOffset | CameraCall::Shake => vec![Type::F32, Type::F32, Type::F32],
             CameraCall::DeadZone => vec![Type::F32, Type::F32],

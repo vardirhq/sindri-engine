@@ -57,6 +57,14 @@ impl WorldHost<'_> {
             Ok(as_f32(value))
         };
         let changed = match call {
+            CameraCall::PerspectiveFov
+            | CameraCall::Orbit
+            | CameraCall::OrbitOffset
+            | CameraCall::OrbitSmoothing
+            | CameraCall::OrbitCollision
+            | CameraCall::ClearOrbit => {
+                return self.camera_3d_call(call, path, args);
+            }
             CameraCall::AddTrauma | CameraCall::Impact => {
                 let amount = numeric(0)?;
                 if amount < 0.0 {

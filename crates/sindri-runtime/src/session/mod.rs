@@ -19,6 +19,7 @@ use crate::{RuntimeError, StepPhase, StepReport, bind_builtin_tile_sets};
 mod checkpoint;
 pub use checkpoint::Checkpoint;
 mod audio;
+mod cameras;
 mod game;
 mod physics;
 mod profiles;
@@ -405,7 +406,7 @@ impl Session {
         laps.lap(StepPhase::Animation);
         // After the scripts, so a camera following the player follows where
         // this step left it. The voxel world keeps its own window under it.
-        sindri_scene::update_camera_behaviors(world, delta_seconds);
+        self.step_cameras(world, delta_seconds, &mut problems);
         laps.lap(StepPhase::Cameras);
         // After the scripts, because a walker's depth is a consequence of where
         // this step left it, and before anything draws. Props settle on the
@@ -520,18 +521,6 @@ impl Session {
     #[must_use]
     pub const fn scripts(&self) -> &Scripts {
         &self.scripts
-    }
-
-    /// The 2D solver, for whatever draws what it holds.
-    #[must_use]
-    pub const fn physics(&self) -> &ScenePhysics2d {
-        &self.physics
-    }
-
-    /// The 3D solver, for whatever draws what it holds.
-    #[must_use]
-    pub const fn physics3d(&self) -> &ScenePhysics3d {
-        &self.physics3d
     }
 
     /// The schemas the scenes are read with.

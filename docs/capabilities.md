@@ -2587,6 +2587,20 @@ Runtime regressions exercise modes and phone touch; browser smoke covers desktop
 and phone controls and project/custom-domain routes. Dedicated editor behavior
 controls and gizmos remain absent. See `docs/cameras.md`.
 
+## 3D Orbit Camera Lab
+
+`examples/orbit` is an authored feature project with a walker, raised goal and
+blocking wall. Decay changes the perspective FOV and orbit angles; the shared
+runtime follows, aims, pulls in against the wall and recovers after the wall
+is disabled. Its project test opens, compiles and runs to the goal. Scene
+regressions cover immediate pull-in, smoothed recovery, sensor/layer/self
+filtering, rotated and scaled parents, Z locks, invalid settings and payload
+preservation. The schema supplies generic inspector field meanings, but no
+editor view has yet been exercised for this component. Collision uses one
+sight-line ray and synchronized obstacle poses; mouse lock, volume sweeps and
+Explorer's game/browser proof remain pending. This is new general camera
+capability for Explorer in slice 6 of `docs/3d-update.md`.
+
 ## The platformer
 
 `games/platformer` is the first genre showcase: a side-view level painted as a
