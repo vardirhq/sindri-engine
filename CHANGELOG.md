@@ -1,5 +1,9 @@
 # Changelog
 
+- Assign the registered imported-model component its existing rendering family
+  and mesh icon so the editor component catalogue remains complete. Model
+  authoring and loading UI remain deferred.
+
 - Add `sindri.model` external asset references, shared scene bindings, inactive
   reference discovery and world-transform extraction. The public facade prepares
   decoded assets without coupling scene/render to assets. Project hosts and

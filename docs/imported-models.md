@@ -118,7 +118,10 @@ cargo run -p sindri-assets --example model -- path/to/model.glb
 ## Editor boundary
 
 One editor test exhaustively matching frame commands accepts the new model
-variant. No editor implementation or UI changes are part of this slice.
+variant. One component catalogue row assigns the registered model component
+the existing rendering family and mesh icon, as required by the editor
+catalogue completeness test. There is no imported-model authoring UI or
+editor asset-loading implementation.
 Editor PR #503 introduces runtime and
 player crates and moves browser/project host code; coordinate those host moves
 at integration time rather than merging or editing its branch. Full model

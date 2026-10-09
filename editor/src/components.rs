@@ -100,6 +100,11 @@ const KNOWN: &[Known] = &[
         icon: icons::EFFECT,
     },
     Known {
+        type_name: "sindri.model",
+        family: Family::Rendering,
+        icon: icons::MESH,
+    },
+    Known {
         type_name: "sindri.mesh",
         family: Family::Rendering,
         icon: icons::MESH,
