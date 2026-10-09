@@ -64,6 +64,7 @@ fn section_energy(bar: usize) -> f64 {
     }
 }
 
+#[cfg(test)]
 fn compose(seed: u64) -> [Vec<Note>; 3] { compose_with(&Settings { seed, ..Settings::default() }) }
 fn compose_with(settings: &Settings) -> [Vec<Note>; 3] {
     let mut rng = Rng::new(settings.seed);
@@ -151,6 +152,7 @@ fn pulse(time: f64, hz: f64, duty: f64) -> f64 {
         -1.0
     }
 }
+#[cfg(test)]
 fn step_seconds() -> f64 {
     60.0 / BPM / 4.0
 }
@@ -200,7 +202,6 @@ fn noise(seed: u64, time: f64, step: f64, energy: f64) -> f64 {
     white * strength * (energy / 0.45) * (1.0 - phase / 0.065)
 }
 
-fn render(path: &PathBuf, seed: u64, tracks: &[Vec<Note>; 3]) -> Result<(), Box<dyn Error>> { render_with(&Settings { seed, output: path.clone(), ..Settings::default() }, tracks) }
 fn render_with(settings: &Settings, tracks: &[Vec<Note>; 3]) -> Result<(), Box<dyn Error>> {
     let step = 60.0 / settings.bpm / 4.0;
     let seconds = f64::from(u32::try_from(STEPS).expect("step count")) * step;
