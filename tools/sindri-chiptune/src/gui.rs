@@ -430,7 +430,7 @@ impl ComposerApp {
                 }
             });
         ui.add_space(12.0);
-        ui.small("The preview is rendered to memory, not a temporary audio file. Export only when you like a variation.");
+        ui.small("The sequencer runs continuously while you tune instruments. Export when you are satisfied.");
     }
 }
 
@@ -471,11 +471,11 @@ impl eframe::App for ComposerApp {
                     .show(&mut columns[1], |ui| self.arrangement(ui));
             });
             ui.add_space(14.0);
-            ui.label(RichText::new("02   FOUR-CHANNEL MIXER").strong().color(Color32::from_rgb(114, 206, 203)));
-            self.instrument_rack(ui);
-            ui.add_space(14.0);
-            ui.label(RichText::new("03   A / B COMPOSITION TIMELINE").strong().color(Color32::from_rgb(114, 206, 203)));
+            ui.label(RichText::new("02   A / B COMPOSITION TIMELINE").strong().color(Color32::from_rgb(114, 206, 203)));
             self.compare(ui);
+            ui.add_space(14.0);
+            ui.label(RichText::new("03   LIVE FOUR-CHANNEL MIXER").strong().color(Color32::from_rgb(114, 206, 203)));
+            self.instrument_rack(ui);
             ui.add_space(10.0);
             ui.separator();
             ui.add_space(9.0);
