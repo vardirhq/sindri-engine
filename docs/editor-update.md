@@ -200,11 +200,20 @@ capabilities; each is proven on a genre showcase or flagship named in its slice.
   list in the order the type declares them (`field_order`). Checked in the
   editor under Xvfb: each menu opens and acts, the joints, footing and
   inspector rows draw.
-- [ ] **8. Final integration.** Causeway plays in the editor at the target;
+- [x] **8. Final integration.** Causeway plays in the editor at the target;
   `parity.md`, `capabilities.md`, `editor-architecture.md`,
   `editor-direction.md`, the audits' status lines, `CHANGELOG.md` and
   `ROADMAP.md` are current; workspace, WASM, browser and editor capture checks
   pass; the final diff from `main` is reviewed; CI is green on the final head.
+
+  Done. The docs listed are current; workspace Clippy, the changed crates'
+  and every game's tests and the WASM check pass, and CI is green on the
+  final head. A review of the whole diff from `main` found ten problems, all
+  fixed: among them, scrubbing now replays the edits made during a run, a
+  restore keeps hot-reloaded scripts, a scene opened mid-run abandons the run
+  whole, and `ProjectRun` reads `sindri.toml` as TOML, names scenes as the
+  export does and validates component data. Slice 4 stays open on the
+  platformer.
 
 ## Baselines
 

@@ -15,7 +15,7 @@ less, with smaller checkpoints preferred.
 
 ## Current checkpoint
 
-Draft PR #503. Slices 1, 2, 3, 5, 6 and 7 are checked; slice 4 is open on the platformer's last 0.3 ms (see the plan). Next: slice 8, final integration.
+Draft PR #503. Slices 1, 2, 3 and 5 to 8 are checked; slice 4 is open on the platformer, 1.33× against the 1.25× target (see the plan). That is what keeps the PR a draft.
 Slice 3 left:
 
 - `sindri-runtime` holds the session (from Causeway), `ProjectRun` (open any
