@@ -14,9 +14,9 @@ use decay_runtime::{RuntimeError, Value};
 use crate::surface::{
     ANIMATION, ANIMATION_CALLS, CAMERA, CAMERA_CALLS, EFFECTS, EFFECTS_CALLS, GAME, GAME_CALLS,
     GAMEPAD, GAMEPAD_QUERIES, GRID, GRID_CALLS, GameCall, INPUT, INPUT_QUERIES, InputQuery,
-    PHYSICS, PHYSICS_CALLS, POINTER, POINTER_QUERIES, PROFILE_CALLS, PROFILES, PointerQuery,
-    RANDOM, RANDOM_CALLS, SAVE, SAVE_CALLS, SCENE, SCENE_CALLS, SEQUENCE, SEQUENCE_CALLS, TOUCH,
-    TOUCH_CALLS, UI, UI_CALLS, WORLD, WORLD_CALLS,
+    KEYBOARD, PHYSICS, PHYSICS_CALLS, POINTER, POINTER_QUERIES, PROFILE_CALLS, PROFILES,
+    PointerQuery, RANDOM, RANDOM_CALLS, SAVE, SAVE_CALLS, SCENE, SCENE_CALLS, SEQUENCE,
+    SEQUENCE_CALLS, TOUCH, TOUCH_CALLS, UI, UI_CALLS, WORLD, WORLD_CALLS,
 };
 
 use super::WorldHost;
@@ -80,7 +80,9 @@ impl WorldHost<'_> {
             POINTER => {
                 named(POINTER_QUERIES, name).map(|query| self.pointer_query(query, path, args))
             }
-            INPUT => named(INPUT_QUERIES, name).map(|query| self.input_query(query, path, args)),
+            INPUT | KEYBOARD => {
+                named(INPUT_QUERIES, name).map(|query| self.input_query(query, path, args))
+            }
             GAMEPAD => {
                 named(GAMEPAD_QUERIES, name).map(|query| self.gamepad_query(query, path, args))
             }

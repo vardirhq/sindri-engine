@@ -37,7 +37,7 @@ Names in scope without qualification. Decay has no imports, so each of these is 
 - `Gamepad`: `Gamepad` — Game controllers. Each player gets a number from 1 to 8 when they press a button on their controller; 0 means any controller.
 - `Gesture`: `Gesture` — What the player did with the mouse or a finger: a tap, a hold, a drag or a pinch. Works the same for both.
 - `Grid`: `Grid` — Grids of tiles, flat or stacked in layers like building blocks: what each cell holds, where objects stand on them, and paths across them.
-- `Input`: `Input` — The keyboard. Keys are named by position, such as `"W"`, `"ArrowLeft"` or `"Space"`, so controls work on any keyboard layout.
+- `Input`: `Input` — Every way the player reaches the game, in one place. Start with `Input.Action`, which works the same whatever the player holds; `Input.Pointer`, `Input.Stick` and `Input.Gesture` for mouse and touch; `Input.Keyboard`, `Input.Touch` and `Input.Gamepad` for one device read directly. The calls directly on `Input` are the keyboard, kept for older scripts: prefer `Input.Keyboard`.
 - `PI`: `f32` — The number π (3.14159…): half a full turn when measuring angles in radians.
 - `Physics`: `Physics` — 2D physics: moving objects with speed and pushes, and finding out what this script's object bumped into.
 - `Physics3d`: `Physics3d` — Independent 3D physics controls, indexed queries and copied last-step events. Requires a 3D physics host. Controls require an active body. Before synchronization, valid authored 3D bodies and nonempty colliders accept ordered setters/impulses; replay uses actual compound mass. Unconsumed requests expire after successful synchronization. Authored motion fields are unchanged, so structural rebuilds restore authored settings.
@@ -297,9 +297,25 @@ Grids of tiles, flat or stacked in layers like building blocks: what each cell h
 
 ### `Input`
 
-The keyboard. Keys are named by position, such as `"W"`, `"ArrowLeft"` or `"Space"`, so controls work on any keyboard layout.
+Every way the player reaches the game, in one place. Start with `Input.Action`, which works the same whatever the player holds; `Input.Pointer`, `Input.Stick` and `Input.Gesture` for mouse and touch; `Input.Keyboard`, `Input.Touch` and `Input.Gamepad` for one device read directly. The calls directly on `Input` are the keyboard, kept for older scripts: prefer `Input.Keyboard`.
 
-- `axis(negative: String, positive: String)` → `f32` — -1, 0 or 1 from a pair of keys, for movement: `Input.axis("A", "D")` is -1 holding A, 1 holding D and 0 for neither or both.
+- `Action`: `Action` — What the player means, such as `"jump"` or `"move"`, from the actions the scene declares. The best place to start: one script works with keys, a controller or a touch screen. The same as `Action`.
+- `Gamepad`: `Gamepad` — Game controllers, read by player number. The same as `Gamepad`.
+- `Gesture`: `Gesture` — Taps, holds, drags and pinches, for touch-first controls. The same as `Gesture`.
+- `Keyboard`: `Keyboard` — The keys, named by position so controls work on any keyboard layout.
+- `Pointer`: `Pointer` — The mouse, or a finger on a touch screen, handled the same way so one game works on both. The same as `Pointer`.
+- `Stick`: `Stick` — A virtual joystick for touch screens: wherever a thumb lands becomes the center, and dragging from there steers. The same as `Stick`.
+- `Touch`: `Touch` — Every finger on a touch screen, for games that need more than one. For steering, `Input.Stick` is simpler. The same as `Touch`.
+- `axis(negative: String, positive: String)` → `f32` — -1, 0 or 1 from a pair of keys, for movement: `Input.Keyboard.axis("A", "D")` is -1 holding A, 1 holding D and 0 for neither or both.
+- `is_down(key: String)` → `bool` — Whether a key is being held down.
+- `just_pressed(key: String)` → `bool` — Whether a key was pressed this frame. True only once per press, however long it is held.
+- `just_released(key: String)` → `bool` — Whether a key was let go this frame.
+
+### `Keyboard`
+
+The keyboard, as `Input.Keyboard`. Keys are named by position, such as `"W"`, `"ArrowLeft"` or `"Space"`, so controls work on any keyboard layout. For controls that also work on a controller or a touch screen, use `Input.Action`.
+
+- `axis(negative: String, positive: String)` → `f32` — -1, 0 or 1 from a pair of keys, for movement: `Input.Keyboard.axis("A", "D")` is -1 holding A, 1 holding D and 0 for neither or both.
 - `is_down(key: String)` → `bool` — Whether a key is being held down.
 - `just_pressed(key: String)` → `bool` — Whether a key was pressed this frame. True only once per press, however long it is held.
 - `just_released(key: String)` → `bool` — Whether a key was let go this frame.
