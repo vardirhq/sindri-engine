@@ -55,7 +55,6 @@ struct Motif {
 
 fn candidate(rng: &mut Rng, style: Style) -> Motif {
     let mut degrees = [0; 8];
-    let mut slots = [0; 8];
     let mut lengths = [1; 8];
     let mut current = i32::try_from(rng.range(5)).expect("degree") - 2;
     let patterns = match style.groove {
@@ -64,7 +63,7 @@ fn candidate(rng: &mut Rng, style: Style) -> Motif {
         Groove::Drive => [[0, 1, 2, 4, 8, 9, 10, 12], [0, 2, 4, 5, 8, 10, 12, 13]],
         Groove::Ballad => [[0, 3, 4, 7, 8, 11, 12, 15], [0, 2, 4, 6, 9, 11, 13, 15]],
     };
-    slots = patterns[usize::try_from(rng.range(2)).expect("pattern")];
+    let slots = patterns[usize::try_from(rng.range(2)).expect("pattern")];
     for (i, degree) in degrees.iter_mut().enumerate() {
         let width = u64::try_from(style.max_step * 2 + 1).expect("step width");
         let step = i32::try_from(rng.range(width)).expect("step") - style.max_step;
@@ -123,7 +122,7 @@ fn bass(tracks: &mut [Vec<Note>; 3], rng: &mut Rng, style: Style, root: i32, bar
         if i > 0 && rng.range(100) > (55.0 + power * 40.0) as u64 { continue; }
         let pitch = if i > 0 && rng.range(4) == 0 { root + 7 } else { root };
         tracks[0].push(Note {
-            pitch, start: bar * 16 + slot,
+            pitch, start: bar * 16 + *slot,
             len: match style.groove { Groove::Ballad | Groove::Drift => 6, Groove::Bounce => 2, Groove::Drive => 3 },
             velocity: (42.0 + power * 42.0) as u8,
         });
