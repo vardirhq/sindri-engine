@@ -198,7 +198,7 @@ impl ComposerApp {
             let painter = ui.painter_at(area);
             painter.rect_filled(area, 4.0, Color32::from_rgb(14, 21, 32));
             for beat in 0..=8 {
-                let x = area.left() + area.width() * beat as f32 / 8.0;
+                let x = area.left() + area.width() * f32::from(u16::try_from(beat).expect("beat")) / 8.0;
                 painter.line_segment(
                     [egui::pos2(x, area.top()), egui::pos2(x, area.bottom())],
                     egui::Stroke::new(0.5, Color32::from_gray(48)),
@@ -211,9 +211,9 @@ impl ComposerApp {
             ];
             for (channel, track) in notes.iter().enumerate() {
                 for note in track.iter().filter(|note| note.start < 128) {
-                    let x = area.left() + area.width() * note.start as f32 / 128.0;
-                    let w = (area.width() * note.len as f32 / 128.0).max(2.0);
-                    let pitch = (note.pitch - 28).clamp(0, 70) as f32;
+                    let x = area.left() + area.width() * f32::from(u16::try_from(note.start).expect("start")) / 128.0;
+                    let w = (area.width() * f32::from(u16::try_from(note.len).expect("length")) / 128.0).max(2.0);
+                    let pitch = f32::from(u16::try_from((note.pitch - 28).clamp(0, 70)).expect("pitch"));
                     let y = area.bottom() - 6.0 - pitch / 70.0 * 88.0;
                     painter.rect_filled(
                         egui::Rect::from_min_size(egui::pos2(x, y), egui::vec2(w, 3.0)),
@@ -228,6 +228,14 @@ impl ComposerApp {
         });
     }
 
+    fn compare(&self, ui: &mut egui::Ui) {
+            ui.heading("Candidate comparison");
+            ui.label(RichText::new("See the actual first eight bars of each composition. Audition either candidate before exporting.").color(Color32::from_gray(160)));
+            ui.columns(2, |columns| {
+                self.scorecard(&mut columns[0], self.settings.seed, "A  /  ORIGINAL", Color32::from_rgb(108, 210, 187));
+                self.scorecard(&mut columns[1], self.settings.seed.wrapping_add(1), "B  /  VARIATION", Color32::from_rgb(189, 145, 225));
+            });
+    }
     fn arrangement(&self, ui: &mut egui::Ui) {
         ui.heading("Arrangement");
         ui.label(
@@ -309,12 +317,7 @@ impl eframe::App for ComposerApp {
                     .show(&mut columns[1], |ui| self.arrangement(ui));
             });
             ui.add_space(14.0);
-            ui.heading("Candidate comparison");
-            ui.label(RichText::new("See the actual first eight bars of each composition. Audition either candidate before exporting.").color(Color32::from_gray(160)));
-            ui.columns(2, |columns| {
-                self.scorecard(&mut columns[0], self.settings.seed, "A  /  ORIGINAL", Color32::from_rgb(108, 210, 187));
-                self.scorecard(&mut columns[1], self.settings.seed.wrapping_add(1), "B  /  VARIATION", Color32::from_rgb(189, 145, 225));
-            });
+            self.compare(ui);
             ui.add_space(10.0);
             ui.separator();
             ui.horizontal(|ui| {
