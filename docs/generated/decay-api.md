@@ -549,10 +549,13 @@ Every finger on a touch screen, numbered from 0, for games that need more than o
 
 Where an object is, how it is turned and how big it is. For an object attached to another, these are measured from that parent.
 
+- `pitch`: `f32` — How far a 3D object is tipped up (positive) or down from level, in radians, after its yaw. Changing it keeps its yaw and roll.
 - `position`: `Vec3` — Where the object is. Change it to move the object: `this.transform.position.x += speed * dt`. Measured from the parent if it has one.
-- `rotation_z`: `f32` — How far the object is turned, in radians. A full turn is `TAU`.
+- `roll`: `f32` — How far a 3D object is turned about the way it faces, in radians, after its yaw and pitch. Changing it keeps its yaw and pitch.
+- `rotation_z`: `f32` — How far the object is turned, in radians. A full turn is `TAU`. This is the turn of a flat object in a 2D game; it replaces any 3D turn.
 - `scale`: `Vec3` — How big the object is on each axis; 1 is its normal size.
 - `world_position`: `Vec3` — Where the object is in the world, even when it is attached to a parent. Use it to compare positions of objects in different places.
+- `yaw`: `f32` — Which way a 3D object faces on the ground, in radians: a turn about the up (Y) axis. At zero it faces -Z, and positive turns it left. It moves along `Vec3(-sin(yaw), 0.0, -cos(yaw))`, and faces a point `d` away with `atan2(-d.x, -d.z)`. Changing it keeps its pitch and roll.
 
 ### `Tween`
 

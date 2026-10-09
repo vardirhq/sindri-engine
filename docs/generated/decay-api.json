@@ -3603,13 +3603,25 @@
       "description": "Where an object is, how it is turned and how big it is. For an object attached to another, these are measured from that parent.",
       "members": [
         {
+          "description": "How far a 3D object is tipped up (positive) or down from level, in radians, after its yaw. Changing it keeps its yaw and roll.",
+          "kind": "value",
+          "name": "pitch",
+          "type": "f32"
+        },
+        {
           "description": "Where the object is. Change it to move the object: `this.transform.position.x += speed * dt`. Measured from the parent if it has one.",
           "kind": "value",
           "name": "position",
           "type": "Vec3"
         },
         {
-          "description": "How far the object is turned, in radians. A full turn is `TAU`.",
+          "description": "How far a 3D object is turned about the way it faces, in radians, after its yaw and pitch. Changing it keeps its yaw and pitch.",
+          "kind": "value",
+          "name": "roll",
+          "type": "f32"
+        },
+        {
+          "description": "How far the object is turned, in radians. A full turn is `TAU`. This is the turn of a flat object in a 2D game; it replaces any 3D turn.",
           "kind": "value",
           "name": "rotation_z",
           "type": "f32"
@@ -3625,6 +3637,12 @@
           "kind": "value",
           "name": "world_position",
           "type": "Vec3"
+        },
+        {
+          "description": "Which way a 3D object faces on the ground, in radians: a turn about the up (Y) axis. At zero it faces -Z, and positive turns it left. It moves along `Vec3(-sin(yaw), 0.0, -cos(yaw))`, and faces a point `d` away with `atan2(-d.x, -d.z)`. Changing it keeps its pitch and roll.",
+          "kind": "value",
+          "name": "yaw",
+          "type": "f32"
         }
       ],
       "name": "Transform"

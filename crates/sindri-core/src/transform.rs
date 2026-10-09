@@ -100,6 +100,52 @@ impl Transform3D {
         self.rotation = [0.0, 0.0, sin, cos];
     }
 
+    /// The rotation as `[yaw, pitch, roll]` in radians, for a Y-up world.
+    ///
+    /// Yaw turns about the world's up axis, pitch then tips about the
+    /// transform's own X, and roll last turns about its own Z, so a yaw is
+    /// always a turn on the ground however the thing is tipped. With every
+    /// angle zero, it faces -Z, as cameras do.
+    ///
+    /// Straight up or straight down, yaw and roll turn about the same axis and
+    /// only their sum means anything. The whole of that turn is reported as
+    /// yaw and roll as zero.
+    pub fn yaw_pitch_roll_radians(self) -> [f32; 3] {
+        let [x, y, z, w] = self.rotation;
+        // The third column of the rotation matrix, and the parts of the first
+        // and second rows that the decomposition needs.
+        let m02 = 2.0 * (x * z + y * w);
+        let m12 = 2.0 * (y * z - x * w);
+        let m22 = 1.0 - 2.0 * (x * x + y * y);
+        let pitch = (-m12).clamp(-1.0, 1.0).asin();
+        if m12.abs() < 0.999_999 {
+            let m10 = 2.0 * (x * y + z * w);
+            let m11 = 1.0 - 2.0 * (x * x + z * z);
+            [f32::atan2(m02, m22), pitch, f32::atan2(m10, m11)]
+        } else {
+            let m00 = 1.0 - 2.0 * (y * y + z * z);
+            let m20 = 2.0 * (x * z - y * w);
+            [f32::atan2(-m20, m00), pitch, 0.0]
+        }
+    }
+
+    /// Turns it to a yaw, pitch and roll, as
+    /// [`yaw_pitch_roll_radians`](Self::yaw_pitch_roll_radians) reads them.
+    ///
+    /// Written out rather than composed with what was there, as
+    /// [`set_rotation_z_radians`](Self::set_rotation_z_radians) is.
+    pub fn set_yaw_pitch_roll_radians(&mut self, [yaw, pitch, roll]: [f32; 3]) {
+        let (sy, cy) = (yaw * 0.5).sin_cos();
+        let (sp, cp) = (pitch * 0.5).sin_cos();
+        let (sr, cr) = (roll * 0.5).sin_cos();
+        self.rotation = [
+            sp * cy * cr + cp * sy * sr,
+            cp * sy * cr - sp * cy * sr,
+            cp * cy * sr - sp * sy * cr,
+            cp * cy * cr + sp * sy * sr,
+        ];
+    }
+
     /// Whether replacing this transform with `next` would move it off the layer
     /// it declared it stays on.
     ///
@@ -250,5 +296,87 @@ mod tests {
         let eighth = std::f32::consts::FRAC_PI_4.sin();
         assert!((transform.rotation[2] - eighth).abs() < 1.0e-6);
         assert!((transform.rotation[3] - eighth).abs() < 1.0e-6);
+    }
+
+    /// Turns `vector` by the transform's rotation.
+    fn rotate(transform: Transform3D, vector: [f32; 3]) -> [f32; 3] {
+        let [x, y, z, w] = transform.rotation;
+        let [vx, vy, vz] = vector;
+        let twice = [
+            2.0 * (y * vz - z * vy),
+            2.0 * (z * vx - x * vz),
+            2.0 * (x * vy - y * vx),
+        ];
+        [
+            vx + w * twice[0] + (y * twice[2] - z * twice[1]),
+            vy + w * twice[1] + (z * twice[0] - x * twice[2]),
+            vz + w * twice[2] + (x * twice[1] - y * twice[0]),
+        ]
+    }
+
+    fn close<const N: usize>(a: [f32; N], b: [f32; N]) -> bool {
+        a.iter().zip(b).all(|(a, b)| (a - b).abs() < 1.0e-5)
+    }
+
+    #[test]
+    fn yaw_turns_on_the_ground_and_pitch_tips_the_way_it_faces() {
+        use std::f32::consts::FRAC_PI_2;
+        let mut transform = Transform3D::default();
+
+        transform.set_yaw_pitch_roll_radians([FRAC_PI_2, 0.0, 0.0]);
+        assert!(close(rotate(transform, [0.0, 0.0, -1.0]), [-1.0, 0.0, 0.0]));
+        assert!(close(rotate(transform, [0.0, 1.0, 0.0]), [0.0, 1.0, 0.0]));
+
+        transform.set_yaw_pitch_roll_radians([FRAC_PI_2, FRAC_PI_2 * 0.5, 0.0]);
+        let half = 0.5_f32.sqrt();
+        assert!(close(
+            rotate(transform, [0.0, 0.0, -1.0]),
+            [-half, half, 0.0]
+        ));
+    }
+
+    #[test]
+    fn yaw_pitch_and_roll_read_back_what_was_written() {
+        let mut transform = Transform3D::default();
+        for angles in [
+            [0.3, -0.4, 1.2],
+            [-2.9, 1.1, -0.2],
+            [3.0, 0.0, 0.0],
+            [0.0, -1.5, 2.5],
+        ] {
+            transform.set_yaw_pitch_roll_radians(angles);
+            assert!(
+                close(transform.yaw_pitch_roll_radians(), angles),
+                "{angles:?} read back as {:?}",
+                transform.yaw_pitch_roll_radians()
+            );
+        }
+    }
+
+    #[test]
+    fn roll_alone_is_the_two_dimensional_turn() {
+        let mut transform = Transform3D::default();
+        transform.set_yaw_pitch_roll_radians([0.0, 0.0, 0.8]);
+        assert!((transform.rotation_z_radians() - 0.8).abs() < 1.0e-6);
+        transform.set_rotation_z_radians(-1.3);
+        assert!(close(transform.yaw_pitch_roll_radians(), [0.0, 0.0, -1.3]));
+    }
+
+    #[test]
+    fn looking_straight_up_keeps_the_whole_turn_in_yaw() {
+        use std::f32::consts::FRAC_PI_2;
+        let mut transform = Transform3D::default();
+        transform.set_yaw_pitch_roll_radians([0.5, FRAC_PI_2, 0.25]);
+        let forward = rotate(transform, [0.0, 0.0, -1.0]);
+        let [yaw, pitch, roll] = transform.yaw_pitch_roll_radians();
+        assert!((pitch - FRAC_PI_2).abs() < 1.0e-3);
+        assert_eq!(roll.to_bits(), 0.0_f32.to_bits());
+        let mut again = Transform3D::default();
+        again.set_yaw_pitch_roll_radians([yaw, pitch, roll]);
+        assert!(close(rotate(again, [0.0, 0.0, -1.0]), forward));
+        assert!(close(
+            rotate(again, [0.0, 1.0, 0.0]),
+            rotate(transform, [0.0, 1.0, 0.0])
+        ));
     }
 }

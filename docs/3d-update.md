@@ -48,6 +48,26 @@ GLB decoding, a model GPU path and project export; slice 1 merges it. Read again
    level with a perspective camera. The low-tide crawler proof is external,
    and AGENTS.md does not count it.
 
+## Handing over
+
+This plan is the state of the work. Whoever picks it up next reads
+`AGENTS.md` first, ticks a box only when its code, tests and docs land
+together, and pushes each slice before starting the next.
+
+Order:
+- Slice 6's remaining transform items (`forward`/`right`/`up`, `look_at`,
+  `rotate_around`) are next. `forward` and its kin are read-only, and no
+  read-only member exists yet: `surface::Leaf` has no notion of it, and
+  `decay-lsp` and `docs/scripting.md` would need to show it.
+- Then the rest of slice 6, which unblocks moving through 3D (Low Tide's
+  crawler and crew included).
+- Then slices 2 to 4 (measurement, instancing and one lit path, lights),
+  which terrain (5b) and the showcase need.
+
+The yaw/pitch/roll convention is fixed: radians, Y-up, -Z forward (as
+cameras face), YXZ order. Build on `Transform3D::yaw_pitch_roll_radians` and
+`set_yaw_pitch_roll_radians` rather than adding another.
+
 ## Slices
 
 ### 1. Land #504 on the shared runtime
@@ -144,9 +164,10 @@ placement. The roadmap's "height/mesh terrain next" is this slice.
   heightmap asset beside the scene.
 
 ### 6. Play in 3D
-- [ ] Decay 3D transforms:
+- [x] Decay `yaw`/`pitch`/`roll` on the transform (radians, Y-up, -Z
+  forward; each keeps the others when written).
+- [ ] Decay 3D transforms, the rest:
   - `rotation` (quaternion);
-  - `euler`/`yaw`/`pitch`/`roll`;
   - `forward`/`right`/`up`;
   - `look_at`, `rotate_around`.
 - [ ] Camera: FOV, look-at, and an orbit/third-person follow mode with

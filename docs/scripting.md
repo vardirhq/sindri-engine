@@ -136,6 +136,7 @@ interprets, and `WorldHost` is the only place that gives them a meaning.
 | `this.transform.world_position.{x,y,z}` | `f32` | yes | yes |
 | `this.transform.scale.{x,y,z}` | `f32` | yes | yes |
 | `this.transform.rotation_z` | `f32` | yes | yes |
+| `this.transform.{yaw,pitch,roll}` | `f32` | yes | yes |
 
 **A vector member is reached whole or one component at a time.**
 `this.transform.position` is a `Vec3` a script can hold, add to and store back
@@ -156,6 +157,24 @@ to compare two entities in different places in the hierarchy; write it to put a
 child at a point in the world, which stores whatever local position puts it
 there. `World.set_parent` keeps the local transform, so something spawned at
 local zero and then parented sits on its new parent.
+
+**A solid object turns by yaw, pitch and roll.** All three are radians, in a
+Y-up world. `yaw` turns it on the ground, about the up axis; at zero it faces
+-Z, as cameras do, and a positive yaw turns it left. `pitch` then tips it up
+(positive) or down, and `roll` last turns it about the way it faces. Writing
+one keeps the other two, so steering is one line and does not undo a tilt:
+
+```decay
+let to_goal = goal.transform.world_position - this.transform.world_position;
+this.transform.yaw = atan2(-to_goal.x, -to_goal.z);
+let yaw = this.transform.yaw;
+this.transform.position += Vec3(-sin(yaw), 0.0, -cos(yaw)) * speed * dt;
+```
+
+`rotation_z` is the turn of a flat thing facing the camera, for 2D games.
+Writing it replaces the whole rotation with a turn about Z, which is the same
+as setting `roll` with yaw and pitch at zero. Looking straight up or down, yaw
+and roll turn about the same axis; the whole of that turn reads back as yaw.
 
 Screen UI is placed by the overlay's layout rather than this, and its
 `position` is already relative to its parent's box.
@@ -266,6 +285,7 @@ table above lists, reaching the same numbers.
 | `this.entity.transform.world_position.{x,y,z}` | `f32` | yes | yes |
 | `this.entity.transform.scale.{x,y,z}` | `f32` | yes | yes |
 | `this.entity.transform.rotation_z` | `f32` | yes | yes |
+| `this.entity.transform.{yaw,pitch,roll}` | `f32` | yes | yes |
 | `this.entity.sprite.{tint,color_multiply,color_offset}` | `Color` | yes | yes |
 | `this.entity.sprite.tint.{r,g,b,a}` | `f32` | yes | yes |
 | `this.entity.sprite.color_multiply.{r,g,b,a}` | `f32` | yes | yes |

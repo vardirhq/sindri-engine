@@ -141,25 +141,38 @@ impl Vector {
 
 /// A transform member that is one float.
 ///
-/// Only the Z rotation, deliberately. A gameplay script should not be asked to
-/// assemble a quaternion by hand, and a third of a 3D rotation API is worse
-/// than none of one.
+/// `rotation_z` is the whole turn of a flat thing. `yaw`, `pitch` and `roll`
+/// are the whole turn of a solid one, as three angles, so a gameplay script is
+/// never asked to assemble a quaternion by hand. Setting one of the three keeps
+/// the other two.
 #[derive(Clone, Copy, Debug)]
 pub(crate) enum Scalar {
     RotationZ,
+    Yaw,
+    Pitch,
+    Roll,
 }
 
 impl Scalar {
     pub(crate) fn get(self, transform: &Transform3D) -> f32 {
         match self {
             Self::RotationZ => transform.rotation_z_radians(),
+            Self::Yaw => transform.yaw_pitch_roll_radians()[0],
+            Self::Pitch => transform.yaw_pitch_roll_radians()[1],
+            Self::Roll => transform.yaw_pitch_roll_radians()[2],
         }
     }
 
     pub(crate) fn set(self, transform: &mut Transform3D, value: f32) {
-        match self {
-            Self::RotationZ => transform.set_rotation_z_radians(value),
-        }
+        let index = match self {
+            Self::RotationZ => return transform.set_rotation_z_radians(value),
+            Self::Yaw => 0,
+            Self::Pitch => 1,
+            Self::Roll => 2,
+        };
+        let mut angles = transform.yaw_pitch_roll_radians();
+        angles[index] = value;
+        transform.set_yaw_pitch_roll_radians(angles);
     }
 }
 

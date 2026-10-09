@@ -41,6 +41,9 @@ pub(crate) const TRANSFORM_MEMBERS: &[(&str, Node)] = &[
         "rotation_z",
         Node::Leaf(Leaf::TransformScalar(Scalar::RotationZ)),
     ),
+    ("yaw", Node::Leaf(Leaf::TransformScalar(Scalar::Yaw))),
+    ("pitch", Node::Leaf(Leaf::TransformScalar(Scalar::Pitch))),
+    ("roll", Node::Leaf(Leaf::TransformScalar(Scalar::Roll))),
 ];
 
 /// A tint channel of `component`, by its place in its `[r, g, b, a]`.
