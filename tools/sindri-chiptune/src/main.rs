@@ -11,8 +11,8 @@ use std::{
 
 const RATE: u32 = 44_100;
 const BPM: f64 = 118.0;
-mod gui;
 mod composer;
+mod gui;
 
 #[derive(Clone, Debug)]
 struct Settings {
@@ -71,7 +71,10 @@ impl Rng {
 
 #[cfg(test)]
 fn compose(seed: u64) -> [Vec<Note>; 3] {
-    compose_with(&Settings { seed, ..Settings::default() })
+    compose_with(&Settings {
+        seed,
+        ..Settings::default()
+    })
 }
 fn compose_with(settings: &Settings) -> [Vec<Note>; 3] {
     composer::compose(settings)
@@ -169,9 +172,18 @@ fn render_samples(settings: &Settings, tracks: &[Vec<Note>; 3]) -> Vec<f32> {
             }
         }
         let channels = [
-            (voice(&tracks[0][cursors[0]..], t, 0.5, bass_wave, step), 0.35),
-            (voice(&tracks[1][cursors[1]..], t, arp_duty, false, step), 0.22),
-            (voice(&tracks[2][cursors[2]..], t, lead_duty, false, step), 0.29),
+            (
+                voice(&tracks[0][cursors[0]..], t, 0.5, bass_wave, step),
+                0.35,
+            ),
+            (
+                voice(&tracks[1][cursors[1]..], t, arp_duty, false, step),
+                0.22,
+            ),
+            (
+                voice(&tracks[2][cursors[2]..], t, lead_duty, false, step),
+                0.29,
+            ),
         ];
         let mixed: f64 = channels.iter().map(|(v, gain)| v * gain).sum::<f64>()
             + noise(settings.seed, t, step, settings.energy, settings.mood);
@@ -222,13 +234,17 @@ fn main() -> Result<(), Box<dyn Error>> {
             "--bpm" => settings.bpm = args.next().ok_or("missing --bpm value")?.parse()?,
             "--energy" => settings.energy = args.next().ok_or("missing --energy value")?.parse()?,
             "--key" => settings.key = args.next().ok_or("missing --key value")?.parse()?,
-            "--mood" => settings.mood = match args.next().ok_or("missing --mood value")?.as_str() {
-                "mysterious" => Mood::Mysterious,
-                "hopeful" => Mood::Hopeful,
-                "tense" => Mood::Tense,
-                "melancholic" => Mood::Melancholic,
-                _ => return Err("mood must be mysterious, hopeful, tense, or melancholic".into()),
-            },
+            "--mood" => {
+                settings.mood = match args.next().ok_or("missing --mood value")?.as_str() {
+                    "mysterious" => Mood::Mysterious,
+                    "hopeful" => Mood::Hopeful,
+                    "tense" => Mood::Tense,
+                    "melancholic" => Mood::Melancholic,
+                    _ => {
+                        return Err("mood must be mysterious, hopeful, tense, or melancholic".into());
+                    }
+                }
+            }
             "--help" | "-h" => {
                 println!(
                     "sindri-chiptune [--seed NUMBER] [--output PATH]\nGenerates 32 bars of D-minor exploratory chiptune at 118 BPM."

@@ -1,8 +1,13 @@
 //! Standalone hierarchical chiptune composer: harmony, motifs, sections and grooves.
-use super::{Mood, Note, Rng, Settings, BARS};
+use super::{BARS, Mood, Note, Rng, Settings};
 
 #[derive(Clone, Copy)]
-enum Groove { Drift, Bounce, Drive, Ballad }
+enum Groove {
+    Drift,
+    Bounce,
+    Drive,
+    Ballad,
+}
 
 #[derive(Clone, Copy)]
 struct Style {
@@ -19,23 +24,47 @@ impl Style {
         match mood {
             Mood::Mysterious => Self {
                 scale: [0, 2, 3, 5, 7, 9, 10],
-                progression: if alternate { [0, 5, 3, 6, 0, 4, 5, 0] } else { [0, 6, 3, 4, 5, 2, 4, 0] },
-                groove: Groove::Drift, max_step: 2, silence: 34,
+                progression: if alternate {
+                    [0, 5, 3, 6, 0, 4, 5, 0]
+                } else {
+                    [0, 6, 3, 4, 5, 2, 4, 0]
+                },
+                groove: Groove::Drift,
+                max_step: 2,
+                silence: 34,
             },
             Mood::Hopeful => Self {
                 scale: [0, 2, 4, 5, 7, 9, 11],
-                progression: if alternate { [0, 4, 3, 5, 0, 3, 4, 0] } else { [0, 3, 5, 4, 3, 4, 0, 0] },
-                groove: Groove::Bounce, max_step: 4, silence: 12,
+                progression: if alternate {
+                    [0, 4, 3, 5, 0, 3, 4, 0]
+                } else {
+                    [0, 3, 5, 4, 3, 4, 0, 0]
+                },
+                groove: Groove::Bounce,
+                max_step: 4,
+                silence: 12,
             },
             Mood::Tense => Self {
                 scale: [0, 1, 3, 5, 7, 8, 10],
-                progression: if alternate { [0, 1, 6, 1, 0, 5, 1, 0] } else { [0, 6, 1, 4, 0, 1, 5, 0] },
-                groove: Groove::Drive, max_step: 5, silence: 10,
+                progression: if alternate {
+                    [0, 1, 6, 1, 0, 5, 1, 0]
+                } else {
+                    [0, 6, 1, 4, 0, 1, 5, 0]
+                },
+                groove: Groove::Drive,
+                max_step: 5,
+                silence: 10,
             },
             Mood::Melancholic => Self {
                 scale: [0, 2, 3, 5, 7, 8, 10],
-                progression: if alternate { [0, 5, 2, 6, 3, 5, 4, 0] } else { [0, 3, 5, 2, 4, 6, 3, 0] },
-                groove: Groove::Ballad, max_step: 2, silence: 42,
+                progression: if alternate {
+                    [0, 5, 2, 6, 3, 5, 4, 0]
+                } else {
+                    [0, 3, 5, 2, 4, 6, 3, 0]
+                },
+                groove: Groove::Ballad,
+                max_step: 2,
+                silence: 42,
             },
         }
     }
@@ -70,21 +99,45 @@ fn candidate(rng: &mut Rng, style: Style) -> Motif {
         current = (current + step).clamp(-6, 9);
         *degree = current;
         lengths[i] = match style.groove {
-            Groove::Ballad => if i % 2 == 0 { 3 } else { 1 },
-            Groove::Drift => if i % 3 == 0 { 2 } else { 1 },
+            Groove::Ballad => {
+                if i % 2 == 0 {
+                    3
+                } else {
+                    1
+                }
+            }
+            Groove::Drift => {
+                if i % 3 == 0 {
+                    2
+                } else {
+                    1
+                }
+            }
             Groove::Bounce | Groove::Drive => 1,
         };
         lengths[i] = lengths[i].min(16 - slots[i]);
     }
-    Motif { degrees, slots, lengths }
+    Motif {
+        degrees,
+        slots,
+        lengths,
+    }
 }
 
 fn score(m: &Motif, style: Style) -> i32 {
     let mut result = 0;
     for pair in m.degrees.windows(2) {
         let distance = (pair[1] - pair[0]).abs();
-        result += if distance <= 2 { 6 } else if distance <= style.max_step { 2 } else { -6 };
-        if distance == 0 { result -= 2; }
+        result += if distance <= 2 {
+            6
+        } else if distance <= style.max_step {
+            2
+        } else {
+            -6
+        };
+        if distance == 0 {
+            result -= 2;
+        }
     }
     // Prefer a phrase with direction, contrast, and a recognizable ending.
     result += (m.degrees[0] - m.degrees[7]).abs().min(4) * 2;
@@ -107,11 +160,23 @@ fn choose_motif(rng: &mut Rng, style: Style) -> Motif {
 }
 
 fn intensity(bar: usize, energy: f64) -> f64 {
-    let curve = match bar / 8 { 0 => 0.48, 1 => 0.82, 2 => 1.0, _ => 0.54 };
+    let curve = match bar / 8 {
+        0 => 0.48,
+        1 => 0.82,
+        2 => 1.0,
+        _ => 0.54,
+    };
     (curve * energy).clamp(0.02, 1.0)
 }
 
-fn bass(tracks: &mut [Vec<Note>; 3], rng: &mut Rng, style: Style, root: i32, bar: usize, power: f64) {
+fn bass(
+    tracks: &mut [Vec<Note>; 3],
+    rng: &mut Rng,
+    style: Style,
+    root: i32,
+    bar: usize,
+    power: f64,
+) {
     let slots: &[usize] = match style.groove {
         Groove::Drift => &[0, 8],
         Groove::Bounce => &[0, 3, 8, 12],
@@ -119,17 +184,35 @@ fn bass(tracks: &mut [Vec<Note>; 3], rng: &mut Rng, style: Style, root: i32, bar
         Groove::Ballad => &[0, 10],
     };
     for (i, slot) in slots.iter().enumerate() {
-        if i > 0 && rng.range(100) > (55.0 + power * 40.0) as u64 { continue; }
-        let pitch = if i > 0 && rng.range(4) == 0 { root + 7 } else { root };
+        if i > 0 && rng.range(100) > (55.0 + power * 40.0) as u64 {
+            continue;
+        }
+        let pitch = if i > 0 && rng.range(4) == 0 {
+            root + 7
+        } else {
+            root
+        };
         tracks[0].push(Note {
-            pitch, start: bar * 16 + *slot,
-            len: match style.groove { Groove::Ballad | Groove::Drift => 6, Groove::Bounce => 2, Groove::Drive => 3 },
+            pitch,
+            start: bar * 16 + *slot,
+            len: match style.groove {
+                Groove::Ballad | Groove::Drift => 6,
+                Groove::Bounce => 2,
+                Groove::Drive => 3,
+            },
             velocity: (42.0 + power * 42.0) as u8,
         });
     }
 }
 
-fn accompaniment(tracks: &mut [Vec<Note>; 3], rng: &mut Rng, style: Style, root: i32, bar: usize, power: f64) {
+fn accompaniment(
+    tracks: &mut [Vec<Note>; 3],
+    rng: &mut Rng,
+    style: Style,
+    root: i32,
+    bar: usize,
+    power: f64,
+) {
     let intervals = match style.groove {
         Groove::Drift => [0, 7, 3, 10],
         Groove::Bounce => [0, 4, 7, 12],
@@ -144,7 +227,9 @@ fn accompaniment(tracks: &mut [Vec<Note>; 3], rng: &mut Rng, style: Style, root:
     };
     let phase = usize::try_from(rng.range(4)).expect("phase");
     for slot in (0..16).step_by(gap) {
-        if rng.range(100) > (36.0 + power * 52.0) as u64 { continue; }
+        if rng.range(100) > (36.0 + power * 52.0) as u64 {
+            continue;
+        }
         let chord_index = (slot / gap + phase) % 4;
         tracks[1].push(Note {
             pitch: root + 12 + intervals[chord_index],
@@ -155,14 +240,30 @@ fn accompaniment(tracks: &mut [Vec<Note>; 3], rng: &mut Rng, style: Style, root:
     }
 }
 
-fn melody(tracks: &mut [Vec<Note>; 3], rng: &mut Rng, style: Style, motif: Motif, root: i32, bar: usize, power: f64) {
+fn melody(
+    tracks: &mut [Vec<Note>; 3],
+    rng: &mut Rng,
+    style: Style,
+    motif: Motif,
+    root: i32,
+    bar: usize,
+    power: f64,
+) {
     let phrase = bar % 8;
     let section = bar / 8;
-    if section == 0 && phrase < 2 { return; }
+    if section == 0 && phrase < 2 {
+        return;
+    }
     for i in 0..8 {
         let rest = style.silence.saturating_sub((power * 24.0) as u64);
-        if rng.range(100) < rest { continue; }
-        let change = if phrase >= 4 && i == 5 { i32::try_from(rng.range(3)).expect("change") - 1 } else { 0 };
+        if rng.range(100) < rest {
+            continue;
+        }
+        let change = if phrase >= 4 && i == 5 {
+            i32::try_from(rng.range(3)).expect("change") - 1
+        } else {
+            0
+        };
         let direction = if section == 2 && phrase >= 4 { -1 } else { 1 };
         let degree = direction * motif.degrees[i] + change + if section == 2 { 2 } else { 0 };
         tracks[2].push(Note {
@@ -213,7 +314,10 @@ mod tests {
     #[test]
     fn seeds_change_actual_melodic_pitches() {
         let first = compose(&Settings::default());
-        let second = compose(&Settings { seed: 931, ..Settings::default() });
+        let second = compose(&Settings {
+            seed: 931,
+            ..Settings::default()
+        });
         let a: Vec<_> = first[2].iter().map(|n| n.pitch).collect();
         let b: Vec<_> = second[2].iter().map(|n| n.pitch).collect();
         assert_ne!(a, b);

@@ -191,14 +191,19 @@ impl ComposerApp {
         egui::Frame::group(ui.style()).show(ui, |ui| {
             ui.horizontal(|ui| {
                 ui.label(RichText::new(title).strong().color(tint));
-                ui.label(RichText::new(format!("SEED {seed}")).small().color(Color32::GRAY));
+                ui.label(
+                    RichText::new(format!("SEED {seed}"))
+                        .small()
+                        .color(Color32::GRAY),
+                );
             });
             let width = ui.available_width().max(120.0);
             let (area, _) = ui.allocate_exact_size(egui::vec2(width, 102.0), egui::Sense::hover());
             let painter = ui.painter_at(area);
             painter.rect_filled(area, 4.0, Color32::from_rgb(14, 21, 32));
             for beat in 0..=8 {
-                let x = area.left() + area.width() * f32::from(u16::try_from(beat).expect("beat")) / 8.0;
+                let x = area.left()
+                    + area.width() * f32::from(u16::try_from(beat).expect("beat")) / 8.0;
                 painter.line_segment(
                     [egui::pos2(x, area.top()), egui::pos2(x, area.bottom())],
                     egui::Stroke::new(0.5, Color32::from_gray(48)),
@@ -211,30 +216,52 @@ impl ComposerApp {
             ];
             for (channel, track) in notes.iter().enumerate() {
                 for note in track.iter().filter(|note| note.start < 128) {
-                    let x = area.left() + area.width() * f32::from(u16::try_from(note.start).expect("start")) / 128.0;
-                    let w = (area.width() * f32::from(u16::try_from(note.len).expect("length")) / 128.0).max(2.0);
-                    let pitch = f32::from(u16::try_from((note.pitch - 28).clamp(0, 70)).expect("pitch"));
+                    let x = area.left()
+                        + area.width() * f32::from(u16::try_from(note.start).expect("start"))
+                            / 128.0;
+                    let w = (area.width() * f32::from(u16::try_from(note.len).expect("length"))
+                        / 128.0)
+                        .max(2.0);
+                    let pitch =
+                        f32::from(u16::try_from((note.pitch - 28).clamp(0, 70)).expect("pitch"));
                     let y = area.bottom() - 6.0 - pitch / 70.0 * 88.0;
                     painter.rect_filled(
                         egui::Rect::from_min_size(egui::pos2(x, y), egui::vec2(w, 3.0)),
-                        1.0, colors[channel],
+                        1.0,
+                        colors[channel],
                     );
                 }
             }
-            ui.label(RichText::new(format!(
-                "{} bass · {} arp · {} lead notes",
-                notes[0].len(), notes[1].len(), notes[2].len(),
-            )).small().color(Color32::from_gray(151)));
+            ui.label(
+                RichText::new(format!(
+                    "{} bass · {} arp · {} lead notes",
+                    notes[0].len(),
+                    notes[1].len(),
+                    notes[2].len(),
+                ))
+                .small()
+                .color(Color32::from_gray(151)),
+            );
         });
     }
 
     fn compare(&self, ui: &mut egui::Ui) {
-            ui.heading("Candidate comparison");
-            ui.label(RichText::new("See the actual first eight bars of each composition. Audition either candidate before exporting.").color(Color32::from_gray(160)));
-            ui.columns(2, |columns| {
-                self.scorecard(&mut columns[0], self.settings.seed, "A  /  ORIGINAL", Color32::from_rgb(108, 210, 187));
-                self.scorecard(&mut columns[1], self.settings.seed.wrapping_add(1), "B  /  VARIATION", Color32::from_rgb(189, 145, 225));
-            });
+        ui.heading("Candidate comparison");
+        ui.label(RichText::new("See the actual first eight bars of each composition. Audition either candidate before exporting.").color(Color32::from_gray(160)));
+        ui.columns(2, |columns| {
+            self.scorecard(
+                &mut columns[0],
+                self.settings.seed,
+                "A  /  ORIGINAL",
+                Color32::from_rgb(108, 210, 187),
+            );
+            self.scorecard(
+                &mut columns[1],
+                self.settings.seed.wrapping_add(1),
+                "B  /  VARIATION",
+                Color32::from_rgb(189, 145, 225),
+            );
+        });
     }
     fn arrangement(&self, ui: &mut egui::Ui) {
         ui.heading("Arrangement");
@@ -327,10 +354,16 @@ impl eframe::App for ComposerApp {
                 {
                     self.start(true, self.settings.seed);
                 }
-                if ui.add_enabled(self.job.is_none(), egui::Button::new("▶  Play B")).clicked() {
+                if ui
+                    .add_enabled(self.job.is_none(), egui::Button::new("▶  Play B"))
+                    .clicked()
+                {
                     self.start(true, self.settings.seed.wrapping_add(1));
                 }
-                if ui.add_enabled(self.job.is_none(), egui::Button::new("Use B as A")).clicked() {
+                if ui
+                    .add_enabled(self.job.is_none(), egui::Button::new("Use B as A"))
+                    .clicked()
+                {
                     self.settings.seed = self.settings.seed.wrapping_add(1);
                     self.status = "Candidate B is now A. Export uses the selected seed.".into();
                 }
