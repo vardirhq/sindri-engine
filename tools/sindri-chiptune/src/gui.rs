@@ -47,9 +47,6 @@ impl ComposerApp {
         let mut settings = self.settings.clone();
         settings.seed = seed;
         settings.output = self.output.clone().into();
-        if self.sink.is_some() {
-            self.stop();
-        }
         let (tx, rx) = mpsc::channel();
         self.job = Some(rx);
         self.status = "Exporting WAV...".into();
@@ -368,7 +365,11 @@ impl eframe::App for ComposerApp {
     fn ui(&mut self, ui: &mut egui::Ui, _frame: &mut eframe::Frame) {
         self.poll(ui);
         self.sync_audio(ui);
-        ui.visuals_mut().panel_fill = Color32::from_rgb(20, 25, 34);
+        ui.visuals_mut().panel_fill = Color32::from_rgb(14, 19, 28);
+        ui.visuals_mut().window_fill = Color32::from_rgb(18, 26, 38);
+        ui.visuals_mut().widgets.inactive.bg_fill = Color32::from_rgb(37, 49, 66);
+        ui.visuals_mut().widgets.hovered.bg_fill = Color32::from_rgb(57, 80, 99);
+        ui.visuals_mut().selection.bg_fill = Color32::from_rgb(39, 129, 145);
         egui::ScrollArea::vertical().show(ui, |ui| {
             ui.add_space(10.0);
             ui.label(
@@ -382,6 +383,8 @@ impl eframe::App for ComposerApp {
                     .color(Color32::from_gray(170)),
             );
             ui.add_space(18.0);
+            ui.label(RichText::new("01   COMPOSITION & ARRANGEMENT").strong().color(Color32::from_rgb(114, 206, 203)));
+            ui.add_space(6.0);
             ui.columns(2, |columns| {
                 egui::Frame::group(columns[0].style())
                     .show(&mut columns[0], |ui| self.controls(ui));
@@ -389,11 +392,14 @@ impl eframe::App for ComposerApp {
                     .show(&mut columns[1], |ui| self.arrangement(ui));
             });
             ui.add_space(14.0);
+            ui.label(RichText::new("02   FOUR-CHANNEL MIXER").strong().color(Color32::from_rgb(114, 206, 203)));
             self.instrument_rack(ui);
             ui.add_space(14.0);
+            ui.label(RichText::new("03   A / B COMPOSITION TIMELINE").strong().color(Color32::from_rgb(114, 206, 203)));
             self.compare(ui);
             ui.add_space(10.0);
             ui.separator();
+            ui.label(RichText::new("04   TRANSPORT & EXPORT").strong().color(Color32::from_rgb(114, 206, 203)));
             ui.horizontal(|ui| {
                 if ui
                     .add_enabled(true, egui::Button::new("▶  Play / Switch A"))
