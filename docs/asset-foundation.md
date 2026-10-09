@@ -80,8 +80,9 @@ Queue capacity includes waiting, active, and completed-but-undrained requests. E
 ## Typed decoding
 
 `ModelAssetDecoder` decodes static self-contained GLB models while retaining
-their hierarchy, mesh reuse, materials and embedded base-color images. GPU and
-scene integration are not yet implemented. See [imported models](imported-models.md)
+their hierarchy, mesh reuse, materials and embedded base-color images. The
+public facade prepares reusable renderer resources for scene bindings and
+native/browser project hosts. See [imported models](imported-models.md)
 for the exact subset, diagnostics and fixture tests.
 
 Source completions remain encoded bytes until a runtime selects an `AssetDecoder`. `TextureAssetDecoder` accepts PNG and JPEG data and produces dimensions plus tightly packed RGBA8 pixels suitable for the existing `Texture2D::from_rgba8` GPU upload path. `SceneAssetDecoder` deserializes a `SceneDocument` and runs the normal version, stable-ID, parent, and hierarchy validation before the scene can become ready. `SpriteSheetAssetDecoder` does the same for the sidecar that slices a texture into named sprites — its own decoder rather than text a caller parses, because a malformed sheet should fail as the asset it is, naming itself, rather than arriving as a string that fails somewhere later with no idea where it came from. `FontAssetDecoder` validates OpenType bytes and records the first face's declared family while retaining the original bytes, giving native and browser renderers one project-owned face instead of a platform font lookup.
@@ -174,3 +175,12 @@ An asset the manifest does not mention loads normally. A manifest is a statement
 ## Deliberate boundaries
 
 GPU upload stays outside. A loader that owned a device could not be tested without one, and the host is the only thing that has one: it reads a ready `TextureAsset` and puts it on the GPU itself. Fallback/error assets, root and URL rules, native hot reload, manifests, and the static exporter's content-hashed asset layout now sit on top of this separation. GPU upload remains host-owned. Keeping storage, source, scheduling, decoding, and upload separate is what lets native and WebAssembly hosts share the same ownership and error semantics.
+
+## Model delivery
+
+`AssetKind::Model` marks self-contained binary GLB assets. Native project capture
+uses `FileSystemAssetSource`; the browser host uses manifest-verified fetches.
+Both use `AssetLoader<ModelAssetDecoder>` and prepare one shared renderer resource
+per logical model through `sindri::model::prepare`. Instances reuse that resource
+and GPU residency rather than decoding or uploading each frame. Export carries
+the original GLB unchanged. See [imported models](imported-models.md).

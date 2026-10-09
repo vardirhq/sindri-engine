@@ -1,8 +1,10 @@
 # Imported models
 
-Status: CPU decoding, reusable GPU model rendering and scene references are
-implemented. Host loading, export packaging and crawler visual proof remain open.
-Do not treat these building blocks as a completed external-project capability.
+Status: bounded static GLB decoding, reusable GPU rendering, scene references,
+external-project export and native/browser project loading are implemented.
+The actual Low Tide cutaway crawler has been visually inspected in native
+offscreen Sindri and exported WebGPU Sindri. This is static model support, not
+the whole glTF specification or completed imported-model editor UX.
 
 ## Asset boundary
 
@@ -25,13 +27,14 @@ normals are generated from triangle geometry; missing UVs are zero only when
 the primitive does not need a texture. Base-color factors are linear RGBA.
 Materials retain metallic/roughness factors, double-sidedness and alpha cutoff.
 Embedded PNG/JPEG base-color images use the existing texture decoder; sampler
-wrap and filter enums are retained for eventual GPU upload.
+wrap and filter enums are retained for GPU upload.
 
 ## Renderer boundary
 
 `sindri-render::RenderModel::new(ModelData)` validates immutable geometry,
-materials, images and hierarchy without depending on assets or scenes. Hosts
-adapt decoder data once and share `Arc<RenderModel>` instances. The original
+materials, images and hierarchy without depending on assets or scenes. The
+public facade adapts decoder data once; hosts share `Arc<RenderModel>`
+instances. The original
 node names, indices, local matrices and mesh references remain available; a
 separate list accumulates selected-scene node matrices for drawing.
 
@@ -98,7 +101,12 @@ Decoder tests cover these plus malformed ranges, cycles, unsupported features
 and repeated asset requests. Renderer tests cover hierarchy and invalid resource
 validation. The GPU imported-model test reads back material/texture pixels,
 checks distinct instance uniforms, mirrored-instance depth, both index widths,
-and one upload across repeated draws, followed by residency release. No unit
+and one upload across repeated draws, followed by residency release. Scene and
+facade tests cover logical references, world transforms, disabled discovery and
+conversion without an axis change. Native queue tests bind repeated scene
+references to one resource. Export tests cover project-root/asset-directory
+layouts, repeated references, other scenes, placed prefabs, original bytes/hash,
+and missing/malformed model diagnostics. No unit
 test depends on the external crawler.
 
 Inspect an actual file without claiming a render proof:
@@ -107,13 +115,43 @@ Inspect an actual file without claiming a render proof:
 cargo run -p sindri-assets --example model -- path/to/model.glb
 ```
 
-## Remaining integration
+## Project loading and export
 
-- Exercise depth-tested material primitives through native and WebGPU hosts.
-- Discover scene/prefab model references in the exporter and package the GLB
-  unchanged in the existing content-hashed manifest layout.
-- Continue external `low-tide-3d` PR #1 with the real cutaway file and verify
-  recognizable Y-up rendering through an orthographic three-quarter camera.
+`AssetKind::Model` identifies binary GLB assets in the manifest. Export walks
+all listed scenes and expanded prefab worlds, including inactive references,
+validates models through the same decoder and packages original bytes under
+the existing content hash. Repeated references produce one manifest entry.
+Projects with assets beside `sindri.toml` and those using `assets/` both work.
+Missing files and unsupported/malformed GLBs stop export with named diagnostics.
+
+The browser project host sizes a model queue from the manifest, verifies fetched
+bytes, decodes them and prepares/binds each logical model once. Native
+`project-capture` uses the filesystem source and the same asynchronous queue and
+decoder at startup, collecting model IDs from listed scenes and loaded prefabs.
+Neither reparses model instances during extraction. Both hosts apply authored
+ambient and directional lighting before drawing. The native capture is a real
+offscreen GPU runtime; a generic interactive native project player is outside
+this change and remains part of the host/editor overhaul.
+
+## External crawler proof
+
+[Low Tide PR #1](https://github.com/vardirhq/low-tide-3d/pull/1) references the
+unchanged `Low_Tide_Kit/starter_crawler_cutaway.glb`. Native and Chrome headless
+WebGPU captures at 1200 × 1000 were visually inspected on 2026-10-09: the tracks,
+ramp, wood deck, furniture and cabin are visible with correct Y-up orientation,
+material colors and orthographic three-quarter framing. The model has 177
+nodes, 19 meshes, 85 primitives, 16 materials and no base-color textures.
+No construction-coordinate conversion, inline vertices or replacement art is
+used. A simple seabed, ambient light and directional sun are authored in the
+external scene; no Low Tide behavior is added to engine crates.
+
+The export carried the scene, a solid ground texture and the original
+888,192-byte GLB, SHA-256
+`de9a1ec5d3d99cd8e2ca47ebe7e48d9fb202ccd4fddd09be85b6ea4818730ec2`.
+Browser smoke confirmed WebGPU, loading completion and HTTP delivery of all
+three kinds. See the external project's
+[proof and reproduction commands](https://github.com/vardirhq/low-tide-3d/blob/poc/isometric-crawler/docs/POC.md).
+Imported-model shadows remain deferred and disabled in the proof.
 
 ## Editor boundary
 

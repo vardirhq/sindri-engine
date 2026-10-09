@@ -16,6 +16,10 @@
 //! wrong thing says why.
 
 #[cfg(not(target_arch = "wasm32"))]
+#[path = "project-capture/models.rs"]
+mod models;
+
+#[cfg(not(target_arch = "wasm32"))]
 mod capture {
     use std::{collections::BTreeMap, error::Error, fs, io::BufWriter, path::Path, time::Duration};
 
@@ -245,7 +249,11 @@ mod capture {
     type Opened = (Player, BTreeMap<String, Vec<u8>>, BTreeMap<String, Vec<u8>>);
 
     fn open(project: &Path, size: [f32; 2]) -> Result<Opened, Box<dyn Error>> {
-        let assets = project.join("assets");
+        let assets = if project.join("assets").is_dir() {
+            project.join("assets")
+        } else {
+            project.to_path_buf()
+        };
         let (scene_id, sheet_ids, other_scenes) = manifest(project)?;
         let document = SceneDocument::from_json(&fs::read_to_string(assets.join(&scene_id))?)?;
 
@@ -289,7 +297,25 @@ mod capture {
             let other = SceneDocument::from_json(&fs::read_to_string(project.join(&path))?)?;
             scenes.push((name, other));
         }
-        let scene = extractor()?;
+        let mut scene = extractor()?;
+        let mut model_ids = sindri_scene::referenced_models(&world);
+        for (_, document) in &scenes {
+            let expanded = World::from_scene_with(document, &prefabs)?.world;
+            model_ids.extend(sindri_scene::referenced_models(&expanded));
+        }
+        for id in prefabs.ids() {
+            let prefab = prefabs.get(id).ok_or("missing loaded prefab")?;
+            let expanded = World::from_scene_with(
+                &SceneDocument {
+                    entities: prefab.entities.clone(),
+                    ..SceneDocument::default()
+                },
+                &prefabs,
+            )?
+            .world;
+            model_ids.extend(sindri_scene::referenced_models(&expanded));
+        }
+        super::models::bind(&assets, model_ids, &mut scene)?;
         let mut session = Session::with_sources(scene.components().clone(), sources)
             .with_prefabs(prefabs)
             .with_profiles(profiles)
@@ -383,6 +409,7 @@ mod capture {
 
         let view = player.viewport();
         let undo = player.session.style(&mut player.world, view)?;
+        cubes.set_lighting(player.scene.lighting(&player.world)?);
         let sizes = measure_ui_text(&player.world, player.scene.components(), &mut player.text)?;
         let prepared = player.scene.extract_animated(
             &player.world,

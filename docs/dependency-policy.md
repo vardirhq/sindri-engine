@@ -114,3 +114,8 @@ The public `sindri` facade converts CPU `ModelAsset` values into renderer
 uses the existing workspace version for column-major node matrices. Assets,
 scene and render retain their dependency boundaries; no renderer dependency on
 assets or core is introduced. Project hosts can use this bridge once per asset.
+
+The historical project hosts in `game/` depend on this public facade to prepare
+imported models once. This adds no external dependency or reverse dependency on
+editor code. Generic host relocation belongs to editor PR #503 and is not merged
+or duplicated here.

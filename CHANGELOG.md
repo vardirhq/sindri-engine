@@ -1,5 +1,11 @@
 # Changelog
 
+- Load external model references through native/browser project asset queues,
+  export original validated GLB bytes as model assets, and apply authored scene
+  lighting in both hosts. The real Low Tide cutaway crawler is visually verified
+  in native offscreen and WebGPU runtimes. Imported-model shadows and full editor
+  model UX remain deferred.
+
 - Assign the registered imported-model component its existing rendering family
   and mesh icon so the editor component catalogue remains complete. Model
   authoring and loading UI remain deferred.

@@ -479,5 +479,5 @@ prepare decoded GLB resources through `sindri::model::prepare` and bind them to
 `SceneExtractor`; instances share geometry while retaining separate world
 transforms. `referenced_models` includes inactive entities for asset discovery.
 Extraction rejects missing bindings and uses the active world camera. See
-[imported models](imported-models.md) for the bounded static subset and remaining
-host/export work. No imported geometry is serialized into scene payloads.
+[imported models](imported-models.md) for the bounded static subset, project
+loading/export contract and native/browser proof. No imported geometry is serialized into scene payloads.

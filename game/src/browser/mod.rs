@@ -64,6 +64,13 @@ impl BrowserCausewayApp {
         context: &AppContext<'_>,
         project: BrowserProjectAssets,
     ) -> Result<(), CausewayError> {
+        for (id, asset) in project.models {
+            let prepared = sindri::model::prepare(asset)?;
+            for warning in prepared.warnings {
+                log::warn!("{id}: {warning}");
+            }
+            self.scene.bind_model(id, prepared.resource);
+        }
         let mut loaded_textures: Vec<AssetId> = Vec::new();
         for (id, asset) in project.textures {
             let texture = Texture2D::from_rgba8(
@@ -336,6 +343,7 @@ impl DesktopApp for BrowserCausewayApp {
         let mut world = std::mem::take(engine.world_mut());
         let styled = engine.game_mut().style(&mut world, viewport);
         let prepared = styled.and_then(|undo| {
+            self.cubes.set_lighting(self.scene.lighting(&world)?);
             // Measured as styled, since a stylesheet sets the font size.
             let prepared = measure_ui_text(&world, self.scene.components(), &mut self.text)
                 .map_err(CausewayError::from)
