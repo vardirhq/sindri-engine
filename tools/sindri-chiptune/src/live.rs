@@ -1,5 +1,5 @@
 //! Continuous sample source: the audio thread owns its timeline and synth state.
-use super::{Mood, Note, RATE, Settings, STEPS, voice, noise};
+use super::{Note, RATE, Settings, STEPS, voice, noise};
 use rodio::Source;
 use std::{num::NonZero, sync::{Arc, atomic::{AtomicU64, Ordering}, mpsc::{self, Sender, Receiver}}, time::Duration};
 
@@ -23,6 +23,7 @@ pub(super) struct LiveSource {
     sample: u64,
     looped: bool,
     buffer: [f32; 256],
+    cursors: [usize; 3],
     offset: usize,
 }
 impl LiveSource {
@@ -32,7 +33,7 @@ impl LiveSource {
         let transport = Transport { tx, position: Arc::clone(&position) };
         let source = Self {
             settings, tracks, rx, position, sample: 0, looped: true,
-            buffer: [0.0; 256], offset: 256,
+            buffer: [0.0; 256], offset: 256, cursors: [0; 3],
         };
         (source, transport)
     }
@@ -44,9 +45,11 @@ impl LiveSource {
                     self.settings = settings;
                     self.tracks = tracks;
                     self.sample = 0;
+                    self.cursors = [0; 3];
                 }
                 Command::Seek(bar) => {
                     self.sample = (bar.min(31) as f64 * 16.0 * self.step() * f64::from(RATE)) as u64;
+                    self.cursors = [0; 3];
                 }
                 Command::Loop(value) => self.looped = value,
             }
@@ -59,14 +62,20 @@ impl LiveSource {
         let total = (STEPS as f64 * step * f64::from(RATE)) as u64;
         for sample in &mut self.buffer {
             if self.sample >= total {
-                if self.looped { self.sample = 0; } else { *sample = 0.0; continue; }
+                if self.looped { self.sample = 0; self.cursors = [0; 3]; } else { *sample = 0.0; continue; }
             }
             let t = self.sample as f64 / f64::from(RATE);
+            for (cursor, notes) in self.cursors.iter_mut().zip(&self.tracks) {
+                while *cursor < notes.len()
+                    && (notes[*cursor].start + notes[*cursor].len) as f64 * step <= t {
+                    *cursor += 1;
+                }
+            }
             let mut mixed = 0.0;
             for channel in 0..3 {
                 if self.settings.rack.audible(channel) {
                     let sound = self.settings.rack.tracks[channel];
-                    mixed += voice(&self.tracks[channel], t, step, sound)
+                    mixed += voice(&self.tracks[channel][self.cursors[channel]..], t, step, sound)
                         * f64::from(sound.volume) * 0.45;
                 }
             }
