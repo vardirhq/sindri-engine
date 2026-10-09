@@ -6,6 +6,7 @@ use serde_json::Value;
 use crate::{EntityId, SceneDocument, World};
 
 mod apply;
+mod decoded;
 mod error;
 mod fields;
 mod meaning;
@@ -15,6 +16,7 @@ mod tests;
 mod variant;
 
 pub use apply::ApplyMode;
+pub use decoded::Decoded;
 pub use error::ComponentRegistryError;
 use fields::declared_fields;
 pub use meaning::{AssetKind, FieldMeaning};
@@ -416,12 +418,10 @@ impl ComponentSchemaRegistry {
 
     pub fn decode<T: SceneComponent>(&self, payload: &Value) -> Result<T, ComponentRegistryError> {
         self.require_registered(T::TYPE_NAME)?;
-        serde_json::from_value(payload.clone()).map_err(|source| {
-            ComponentRegistryError::InvalidPayload {
-                entity: "<detached>".to_owned(),
-                type_name: T::TYPE_NAME.to_owned(),
-                source,
-            }
+        T::deserialize(payload).map_err(|source| ComponentRegistryError::InvalidPayload {
+            entity: "<detached>".to_owned(),
+            type_name: T::TYPE_NAME.to_owned(),
+            source,
         })
     }
 
@@ -448,7 +448,7 @@ impl ComponentSchemaRegistry {
                     .map(|payload| (entity_id, entity, payload))
             })
             .map(|(entity_id, entity, payload)| {
-                serde_json::from_value(payload.clone())
+                T::deserialize(payload)
                     .map(|component| (entity_id, component))
                     .map_err(|source| ComponentRegistryError::InvalidPayload {
                         entity: entity.source_id.as_ref().map_or_else(
@@ -483,7 +483,7 @@ impl ComponentSchemaRegistry {
         let Some(payload) = data.components.get(T::TYPE_NAME) else {
             return Ok(None);
         };
-        serde_json::from_value(payload.clone())
+        T::deserialize(payload)
             .map(Some)
             .map_err(|source| ComponentRegistryError::InvalidPayload {
                 entity: data.source_id.as_ref().map_or_else(

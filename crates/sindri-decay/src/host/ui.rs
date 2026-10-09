@@ -228,21 +228,32 @@ impl WorldHost<'_> {
     }
 
     /// Edits an entity's text payload, or says why it could not.
+    /// Writes a text element's payload, and only when that changes it: a HUD
+    /// setting the same words every update is not a change to the entity, and
+    /// counting it as one would lay the screen out again every step.
     fn write_text(
         &mut self,
         entity: EntityId,
         path: &Path,
         edit: impl FnOnce(&mut serde_json::Value),
     ) -> Result<Value, RuntimeError> {
-        let data = self
+        let mut edited = self
             .world
-            .get_mut(entity)
-            .ok_or_else(|| gone(path, entity))?;
-        let payload = data
+            .get(entity)
+            .ok_or_else(|| gone(path, entity))?
             .components
-            .get_mut(UiTextComponent::TYPE_NAME)
-            .ok_or_else(|| not_a(path, entity, "text"))?;
-        edit(payload);
+            .get(UiTextComponent::TYPE_NAME)
+            .ok_or_else(|| not_a(path, entity, "text"))?
+            .clone();
+        edit(&mut edited);
+        let data = self.world.get(entity).ok_or_else(|| gone(path, entity))?;
+        if data.components.get(UiTextComponent::TYPE_NAME) == Some(&edited) {
+            return Ok(Value::Unit);
+        }
+        if let Some(data) = self.world.get_mut(entity) {
+            data.components
+                .insert(UiTextComponent::TYPE_NAME.to_owned(), edited);
+        }
         Ok(Value::Unit)
     }
 }

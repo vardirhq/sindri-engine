@@ -316,10 +316,16 @@ pub(super) fn ensure_compiled(
             asset: component.source.clone(),
         });
     };
-    if programs.get(&component.source).is_some_and(|compiled| {
-        compiled.source == source && compiled.project == sources.project_key()
-    }) {
-        return Ok(());
+    if let Some(compiled) = programs.get_mut(&component.source) {
+        if compiled.revision == sources.revision() {
+            return Ok(());
+        }
+        // The sources changed somewhere; this script is current if its own
+        // text and the project's declared shape are what it was built from.
+        if compiled.source == source && compiled.project == sources.project_key() {
+            compiled.revision = sources.revision();
+            return Ok(());
+        }
     }
 
     let lowered = lower_with_environment(source, sources.environment());
@@ -341,6 +347,7 @@ pub(super) fn ensure_compiled(
     programs.insert(
         component.source.clone(),
         Compiled {
+            revision: sources.revision(),
             source: source.to_owned(),
             project: sources.project_key().to_owned(),
             program: std::rc::Rc::new(program),

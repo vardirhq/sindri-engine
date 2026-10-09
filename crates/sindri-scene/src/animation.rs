@@ -139,6 +139,8 @@ impl SceneComponent for SpriteAnimationComponent {
 #[derive(Clone, Debug, Default)]
 pub struct SpriteAnimations {
     playback: BTreeMap<EntityId, Playback>,
+    /// The animation components, decoded once per change.
+    authored: sindri_core::Decoded<SpriteAnimationComponent>,
 }
 
 #[derive(Clone, Debug)]
@@ -175,7 +177,7 @@ impl SpriteAnimations {
             return Err(AnimationError::BadDelta(delta_seconds));
         }
         let mut live = BTreeMap::new();
-        for (entity, animation) in components.query::<SpriteAnimationComponent>(world)? {
+        for (entity, animation) in self.authored.query(components, world)? {
             let Some((name, clip)) = animation.playing_clip()? else {
                 continue;
             };

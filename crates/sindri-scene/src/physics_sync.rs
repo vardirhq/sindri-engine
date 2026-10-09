@@ -22,9 +22,7 @@ use sindri_physics::{
 use thiserror::Error;
 
 use crate::components::TilemapComponent;
-use crate::physics::{
-    Collider2dComponent, OneWay2dComponent, PhysicsWorld2dComponent, RigidBody2dComponent,
-};
+use crate::physics::Collider2dComponent;
 use crate::tilemap_collision::{TilemapCollider2dComponent, TilemapCollisionError};
 
 #[cfg(test)]
@@ -96,6 +94,9 @@ pub struct ScenePhysics2d {
     materials: crate::PhysicsMaterialSources,
     joints: crate::physics_joints::SceneJoints2d,
     characters: crate::characters::SceneCharacters2d,
+    /// What synchronizing reads, decoded once per change rather than once a
+    /// step.
+    reads: crate::physics_reads::PhysicsReads,
 }
 
 /// What a scene said about one entity, as far as physics is concerned.
@@ -127,6 +128,7 @@ impl ScenePhysics2d {
             materials: crate::PhysicsMaterialSources::default(),
             joints: crate::physics_joints::SceneJoints2d::default(),
             characters: crate::characters::SceneCharacters2d::default(),
+            reads: crate::physics_reads::PhysicsReads::default(),
         })
     }
 
@@ -208,8 +210,10 @@ impl ScenePhysics2d {
             return Err(PhysicsSyncError::BadStep(delta));
         }
         crate::physics3d::validate_dimensions(world)?;
-        let gravity = components
-            .query::<PhysicsWorld2dComponent>(world)?
+        let gravity = self
+            .reads
+            .settings
+            .query(components, world)?
             .first()
             .map_or(self.host_gravity, |(_, settings)| settings.gravity);
         // Exact on purpose: this asks whether the authored value changed, and
@@ -247,17 +251,17 @@ impl ScenePhysics2d {
         components: &ComponentSchemaRegistry,
     ) -> Result<(), PhysicsSyncError> {
         let mut live = BTreeSet::new();
-        let pieces = collider_pieces(world, components)?;
+        let pieces = self.reads.collider_pieces(world, components)?;
         self.characters.prepare(world, components, &pieces)?;
         for (entity, mut collider) in pieces {
-            if let Some(material) =
-                components.get::<crate::PhysicsMaterial2dComponent>(world, entity)?
-            {
-                self.materials.apply(&material, &mut collider)?;
+            if let Some(material) = self.reads.materials.get(components, world, entity)? {
+                self.materials.apply(material, &mut collider)?;
             }
             live.insert(entity);
-            let body = components
-                .get::<RigidBody2dComponent>(world, entity)?
+            let body = self
+                .reads
+                .bodies
+                .get(components, world, entity)?
                 .map(|authored| authored.0);
             let body = if self.characters.contains(entity) {
                 Some(RigidBody2d {
@@ -272,8 +276,10 @@ impl ScenePhysics2d {
             let authored = Authored {
                 body,
                 collider,
-                one_way: components
-                    .get::<OneWay2dComponent>(world, entity)?
+                one_way: self
+                    .reads
+                    .one_ways
+                    .get(components, world, entity)?
                     .map(|policy| policy.0),
                 kind: body.map_or(RigidBodyKind::Static, |body| body.kind),
             };

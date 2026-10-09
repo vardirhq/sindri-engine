@@ -1,6 +1,6 @@
 //! Scene ownership of 3D rigid bodies, without host-specific stepping policy.
 
-use sindri_core::{ComponentSchemaRegistry, EntityId, World};
+use sindri_core::{ComponentSchemaRegistry, EntityId, SceneComponent, World};
 use sindri_physics::{
     Collider3d, ColliderShape3d, PhysicsEvent3d, PhysicsPose3d, PhysicsWorld3d, RigidBody3d,
     RigidBodyKind,
@@ -97,6 +97,12 @@ impl ScenePhysics3d {
             return Err(PhysicsSyncError::BadStep(delta));
         }
         crate::physics3d::validate_dimensions(world)?;
+        // A scene with nothing 3D in it, and a solver holding nothing, has
+        // nothing to synchronize or step: a 2D game pays nothing for 3D.
+        if self.world.is_empty() && self.registered.is_empty() && !authors_3d(world) {
+            self.events.clear();
+            return Ok(());
+        }
         let settings = components.query::<PhysicsWorld3dComponent>(world)?;
         if settings.len() > 1 {
             return Err(PhysicsSyncError::MultipleWorlds3d);
@@ -282,6 +288,20 @@ fn extent(piece: &Collider3d) -> f32 {
                 radius,
             } => half_height + radius,
         }
+}
+
+/// Whether anything in `world` carries 3D physics.
+fn authors_3d(world: &World) -> bool {
+    world.entities().any(|(_, data)| {
+        [
+            RigidBody3dComponent::TYPE_NAME,
+            Collider3dComponent::TYPE_NAME,
+            crate::VoxelCollider3dComponent::TYPE_NAME,
+            PhysicsWorld3dComponent::TYPE_NAME,
+        ]
+        .into_iter()
+        .any(|name| data.components.contains_key(name))
+    })
 }
 
 fn body_at(body: Option<RigidBody3d>, pose: PhysicsPose3d) -> RigidBody3d {

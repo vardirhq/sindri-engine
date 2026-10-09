@@ -89,10 +89,7 @@ impl SceneComponent for PhysicsWorld3dComponent {
 }
 
 pub(crate) fn validate_dimensions(world: &World) -> Result<(), PhysicsSyncError> {
-    for (entity, data) in world
-        .entities()
-        .filter(|(entity, _)| world.is_active(*entity))
-    {
+    for (entity, data) in world.entities() {
         let has_3d = [
             RigidBody3dComponent::TYPE_NAME,
             Collider3dComponent::TYPE_NAME,
@@ -108,7 +105,9 @@ pub(crate) fn validate_dimensions(world: &World) -> Result<(), PhysicsSyncError>
         ]
         .into_iter()
         .any(|name| data.components.contains_key(name));
-        if has_3d && has_2d {
+        // Active asked last: it walks the entity's ancestors, and almost no
+        // entity carries both kinds.
+        if has_3d && has_2d && world.is_active(entity) {
             return Err(PhysicsSyncError::ConflictingDimensions(entity));
         }
     }

@@ -14,6 +14,7 @@ mod hierarchy;
 mod layout;
 mod layout_pass;
 mod measure;
+mod memo;
 mod navigation;
 mod rect;
 mod slider;
@@ -84,6 +85,8 @@ pub struct ScreenUi {
     /// The `autofocus` controls that were on screen last step, so one that
     /// arrives is noticed.
     autofocused: BTreeSet<EntityId>,
+    /// What `rects` was laid out from, so an unchanged screen keeps it.
+    laid_from: Option<memo::LayoutInputs>,
 }
 
 #[derive(Clone, Copy, Debug)]
@@ -111,6 +114,7 @@ impl ScreenUi {
     ) -> Result<(), ComponentRegistryError> {
         self.viewport_half = extent.half();
         self.rects = Self::place(world, components, extent, &UiTextSizes::new())?;
+        self.laid_from = None;
         self.read_presses(world, extent, presses);
         Ok(())
     }
@@ -132,6 +136,7 @@ impl ScreenUi {
     ) -> Result<(), ComponentRegistryError> {
         self.viewport_half = extent.half();
         self.rects = Self::place(presented, components, extent, &UiTextSizes::new())?;
+        self.laid_from = None;
         self.read_presses(world, extent, presses);
         Ok(())
     }
@@ -150,7 +155,12 @@ impl ScreenUi {
         text: &UiTextSizes,
     ) -> Result<(), ComponentRegistryError> {
         self.viewport_half = extent.half();
+        let inputs = memo::LayoutInputs::of(drawn, extent, text);
+        if self.laid_from.as_ref() == Some(&inputs) {
+            return Ok(());
+        }
         self.rects = Self::place(drawn, components, extent, text)?;
+        self.laid_from = Some(inputs);
         Ok(())
     }
 

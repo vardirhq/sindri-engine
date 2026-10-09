@@ -23,6 +23,7 @@ mod physics;
 mod physics3d;
 mod physics_joints;
 mod physics_material;
+mod physics_reads;
 mod physics_sync;
 mod physics_sync3d;
 mod placement;

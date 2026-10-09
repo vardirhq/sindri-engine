@@ -63,6 +63,9 @@ pub(crate) const SPAWN_LIMIT_PER_PASS: usize = 4096;
 
 #[derive(Clone)]
 struct Compiled {
+    /// The sources' revision it was last found current at, which settles
+    /// the question without reading the text again while nothing changed.
+    revision: u64,
     source: String,
     /// The project's declared shape it was compiled against: another script
     /// gaining or losing a field changes what this one may say about it.
