@@ -330,6 +330,10 @@ impl eframe::App for ComposerApp {
                 if ui.add_enabled(self.job.is_none(), egui::Button::new("▶  Play B")).clicked() {
                     self.start(true, self.settings.seed.wrapping_add(1));
                 }
+                if ui.add_enabled(self.job.is_none(), egui::Button::new("Use B as A")).clicked() {
+                    self.settings.seed = self.settings.seed.wrapping_add(1);
+                    self.status = "Candidate B is now A. Export uses the selected seed.".into();
+                }
                 if ui
                     .add_enabled(self.sink.is_some(), egui::Button::new("■  Stop"))
                     .clicked()
