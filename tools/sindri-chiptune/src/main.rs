@@ -11,6 +11,16 @@ use std::{
 
 const RATE: u32 = 44_100;
 const BPM: f64 = 118.0;
+mod gui;
+
+#[derive(Clone, Debug)]
+struct Settings { seed: u64, bpm: f64, key: i32, energy: f64, mood: Mood, output: PathBuf }
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+enum Mood { Mysterious, Hopeful, Tense, Melancholic }
+impl Settings {
+    fn default() -> Self { Self { seed: 42, bpm: BPM, key: 2, energy: 0.45, mood: Mood::Mysterious, output: PathBuf::from("chiptune.wav") } }
+}
+
 const BARS: usize = 32;
 const STEPS: usize = BARS * 16;
 const SCALE: [i32; 7] = [0, 2, 3, 5, 7, 8, 10]; // D natural minor
@@ -54,19 +64,26 @@ fn section_energy(bar: usize) -> f64 {
     }
 }
 
-fn compose(seed: u64) -> [Vec<Note>; 3] {
-    let mut rng = Rng::new(seed);
+fn compose(seed: u64) -> [Vec<Note>; 3] { compose_with(&Settings { seed, ..Settings::default() }) }
+fn compose_with(settings: &Settings) -> [Vec<Note>; 3] {
+    let mut rng = Rng::new(settings.seed);
     let mut tracks: [Vec<Note>; 3] = std::array::from_fn(|_| Vec::new());
     // Dm, Bb, F, C. Each two bars. Chord roots as MIDI pitches.
-    let roots = [38, 34, 41, 36];
+    let base = settings.key - 2;
+    let roots = match settings.mood {
+        Mood::Mysterious => [38, 34, 41, 36],
+        Mood::Hopeful => [38, 41, 34, 36],
+        Mood::Tense => [38, 36, 34, 33],
+        Mood::Melancholic => [38, 34, 36, 41],
+    }.map(|note| note + base);
     let motif = [0, 2, 1, -3, 0, 1, -1, -3];
     for bar in 0..BARS {
         let root = roots[(bar / 2) % 4];
         let section = bar / 8;
-        let energy = section_energy(bar);
+        let energy = (section_energy(bar) * settings.energy / 0.45).clamp(0.05, 0.95);
         // bass: strong beat roots, occasional fifth, with explicit rests
         for beat in 0..4 {
-            if beat == 3 && section == 0 {
+            if (beat == 3 && section == 0) || (settings.energy < 0.3 && beat == 1) {
                 continue;
             }
             let pitch = if beat == 2 && section > 0 {
@@ -84,7 +101,7 @@ fn compose(seed: u64) -> [Vec<Note>; 3] {
         // Harmony: sparse eighth-note broken chords, not random pitches.
         let intervals = [0, 7, 12, 15, 12, 7, 3, 7];
         for i in 0..8 {
-            if section == 0 && i % 2 != 0 {
+            if (section == 0 && i % 2 != 0) || (settings.energy < 0.3 && i % 3 == 0) {
                 continue;
             }
             if section == 3 && i >= 6 {
@@ -98,7 +115,7 @@ fn compose(seed: u64) -> [Vec<Note>; 3] {
             });
         }
         // Two-bar motif, rest/response phrasing, transposed with the harmony.
-        if section == 0 && bar % 4 < 2 {
+        if (section == 0 && bar % 4 < 2) || (settings.energy < 0.2 && bar % 2 == 0) {
             continue;
         }
         for (i, offset) in motif.iter().enumerate() {
@@ -138,8 +155,7 @@ fn step_seconds() -> f64 {
     60.0 / BPM / 4.0
 }
 
-fn voice(notes: &[Note], t: f64, duty: f64, wave: bool) -> f64 {
-    let step = step_seconds();
+fn voice(notes: &[Note], t: f64, duty: f64, wave: bool, step: f64) -> f64 {
     let active = notes.iter().find(|n| {
         let start = f64::from(u32::try_from(n.start).expect("start")) * step;
         t >= start && t < start + f64::from(u32::try_from(n.len).expect("length")) * step
@@ -161,8 +177,8 @@ fn voice(notes: &[Note], t: f64, duty: f64, wave: bool) -> f64 {
     sample * attack * release * f64::from(n.velocity) / 127.0
 }
 
-fn noise(seed: u64, time: f64) -> f64 {
-    let tick = (time / step_seconds()).floor() as usize;
+fn noise(seed: u64, time: f64, step: f64, energy: f64) -> f64 {
+    let tick = (time / step).floor() as usize;
     if tick >= STEPS || tick % 4 != 0 {
         return 0.0;
     }
@@ -170,7 +186,7 @@ fn noise(seed: u64, time: f64) -> f64 {
     if bar < 8 || (bar >= 24 && tick % 16 != 0) {
         return 0.0;
     }
-    let phase = time % step_seconds();
+    let phase = time % step;
     if phase > 0.065 {
         return 0.0;
     }
@@ -181,13 +197,15 @@ fn noise(seed: u64, time: f64) -> f64 {
     x ^= x >> 33;
     let white = if x & 1 == 0 { -1.0 } else { 1.0 };
     let strength = if tick % 16 == 8 { 0.10 } else { 0.035 };
-    white * strength * (1.0 - phase / 0.065)
+    white * strength * (energy / 0.45) * (1.0 - phase / 0.065)
 }
 
-fn render(path: &PathBuf, seed: u64, tracks: &[Vec<Note>; 3]) -> Result<(), Box<dyn Error>> {
-    let seconds = f64::from(u32::try_from(STEPS).expect("step count")) * step_seconds();
+fn render(path: &PathBuf, seed: u64, tracks: &[Vec<Note>; 3]) -> Result<(), Box<dyn Error>> { render_with(&Settings { seed, output: path.clone(), ..Settings::default() }, tracks) }
+fn render_with(settings: &Settings, tracks: &[Vec<Note>; 3]) -> Result<(), Box<dyn Error>> {
+    let step = 60.0 / settings.bpm / 4.0;
+    let seconds = f64::from(u32::try_from(STEPS).expect("step count")) * step;
     let samples = (seconds * f64::from(RATE)).round() as u32;
-    let mut file = BufWriter::new(File::create(path)?);
+    let mut file = BufWriter::new(File::create(&settings.output)?);
     let bytes = samples.checked_mul(2).ok_or("WAV too long")?;
     file.write_all(b"RIFF")?;
     file.write_all(&(36 + bytes).to_le_bytes())?;
@@ -209,18 +227,18 @@ fn render(path: &PathBuf, seed: u64, tracks: &[Vec<Note>; 3]) -> Result<(), Box<
             while *cursor < notes.len()
                 && f64::from(
                     u32::try_from(notes[*cursor].start + notes[*cursor].len).expect("step"),
-                ) * step_seconds()
+                ) * step
                     <= t
             {
                 *cursor += 1;
             }
         }
         let channels = [
-            (voice(&tracks[0][cursors[0]..], t, 0.5, true), 0.35),
-            (voice(&tracks[1][cursors[1]..], t, 0.125, false), 0.22),
-            (voice(&tracks[2][cursors[2]..], t, 0.25, false), 0.29),
+            (voice(&tracks[0][cursors[0]..], t, 0.5, true, step), 0.35),
+            (voice(&tracks[1][cursors[1]..], t, 0.125, false, step), 0.22),
+            (voice(&tracks[2][cursors[2]..], t, 0.25, false, step), 0.29),
         ];
-        let mixed: f64 = channels.iter().map(|(v, gain)| v * gain).sum::<f64>() + noise(seed, t);
+        let mixed: f64 = channels.iter().map(|(v, gain)| v * gain).sum::<f64>() + noise(settings.seed, t, step, settings.energy);
         let sample = (mixed.clamp(-1.0, 1.0) * 32767.0).round() as i16;
         file.write_all(&sample.to_le_bytes())?;
     }
@@ -229,13 +247,16 @@ fn render(path: &PathBuf, seed: u64, tracks: &[Vec<Note>; 3]) -> Result<(), Box<
 }
 
 fn main() -> Result<(), Box<dyn Error>> {
-    let mut seed = 42_u64;
-    let mut output = PathBuf::from("chiptune.wav");
+    let mut settings = Settings::default();
     let mut args = env::args().skip(1);
+    if env::args().len() == 1 { return gui::run(); }
     while let Some(arg) = args.next() {
         match arg.as_str() {
-            "--seed" => seed = args.next().ok_or("missing --seed value")?.parse()?,
-            "--output" => output = PathBuf::from(args.next().ok_or("missing --output path")?),
+            "--seed" => settings.seed = args.next().ok_or("missing --seed value")?.parse()?,
+            "--output" => settings.output = PathBuf::from(args.next().ok_or("missing --output path")?),
+            "--bpm" => settings.bpm = args.next().ok_or("missing --bpm value")?.parse()?,
+            "--energy" => settings.energy = args.next().ok_or("missing --energy value")?.parse()?,
+            "--key" => settings.key = args.next().ok_or("missing --key value")?.parse()?,
             "--help" | "-h" => {
                 println!(
                     "sindri-chiptune [--seed NUMBER] [--output PATH]\nGenerates 32 bars of D-minor exploratory chiptune at 118 BPM."
@@ -245,9 +266,10 @@ fn main() -> Result<(), Box<dyn Error>> {
             _ => return Err(format!("unknown argument: {arg}").into()),
         }
     }
-    let tracks = compose(seed);
-    render(&output, seed, &tracks)?;
-    println!("Wrote {} (seed {seed}, 118 BPM, 32 bars)", output.display());
+    if !(60.0..=220.0).contains(&settings.bpm) || !(0.0..=1.0).contains(&settings.energy) || !(0..=11).contains(&settings.key) { return Err("bpm must be 60..220, energy 0..1, key 0..11".into()); }
+    let tracks = compose_with(&settings);
+    render_with(&settings, &tracks)?;
+    println!("Wrote {} (seed {}, {} BPM, 32 bars)", settings.output.display(), settings.seed, settings.bpm);
     Ok(())
 }
 
