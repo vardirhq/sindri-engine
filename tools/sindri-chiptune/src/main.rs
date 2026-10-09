@@ -93,76 +93,86 @@ fn compose(seed: u64) -> [Vec<Note>; 3] {
     })
 }
 fn compose_with(settings: &Settings) -> [Vec<Note>; 3] {
-    let mut rng = Rng::new(settings.seed);
+    let mut motif_rng = Rng::new(settings.seed ^ 0x11a4);
+    let mut bass_rng = Rng::new(settings.seed ^ 0x22b5);
+    let mut arp_rng = Rng::new(settings.seed ^ 0x33c6);
+    let mut melody_rng = Rng::new(settings.seed ^ 0x44d7);
     let mut tracks: [Vec<Note>; 3] = std::array::from_fn(|_| Vec::new());
-    // Dm, Bb, F, C. Each two bars. Chord roots as MIDI pitches.
-    let base = settings.key - 2;
-    let roots = match settings.mood {
-        Mood::Mysterious => [38, 34, 41, 36],
-        Mood::Hopeful => [38, 41, 34, 36],
-        Mood::Tense => [38, 36, 34, 33],
-        Mood::Melancholic => [38, 34, 36, 41],
-    }
-    .map(|note| note + base);
-    let motif = [0, 2, 1, -3, 0, 1, -1, -3];
+    // Relative chord roots. Mood changes the entire progression, not only velocity.
+    let progressions: [[i32; 4]; 4] = [
+        [0, -4, 3, -2], // mysterious: i, VI, III, VII
+        [0, 3, 5, -2], // hopeful: i, III, iv, VII
+        [0, -2, -4, -1], // tense: i, VII, VI, leading tone
+        [0, -4, -2, 3], // melancholic: i, VI, VII, III
+    ];
+    let mood_idx = match settings.mood {
+        Mood::Mysterious => 0,
+        Mood::Hopeful => 1,
+        Mood::Tense => 2,
+        Mood::Melancholic => 3,
+    };
+    let base = 36 + settings.key; // MIDI C2 + pitch class
+    let roots = progressions[mood_idx].map(|n| base + n);
+    let shapes: [[i32; 8]; 5] = [
+        [0, 2, 1, -2, 0, 1, -1, -3],
+        [0, 1, 3, 2, 0, -2, -1, 1],
+        [0, -2, -1, 1, 2, 0, 1, -1],
+        [0, 3, 2, 0, -1, 1, -2, 0],
+        [0, 1, -1, 2, 3, 1, -2, 0],
+    ];
+    let motif = shapes[usize::try_from(motif_rng.range(shapes.len() as u64)).expect("shape")];
+    let rhythm = usize::try_from(motif_rng.range(3)).expect("rhythm");
+    let direction = if motif_rng.range(2) == 0 { 1 } else { -1 };
+    let shift = i32::try_from(motif_rng.range(5)).expect("shift") - 2;
+    let arp_order: [[usize; 4]; 4] = [[0, 1, 2, 1], [0, 2, 1, 2], [2, 1, 0, 1], [0, 1, 0, 2]];
+    let arp_pattern = arp_order[usize::try_from(arp_rng.range(4)).expect("arp")];
     for bar in 0..BARS {
-        let root = roots[(bar / 2) % 4];
         let section = bar / 8;
-        let energy = (section_energy(bar) * settings.energy / 0.45).clamp(0.05, 0.95);
-        // bass: strong beat roots, occasional fifth, with explicit rests
+        let root = roots[(bar / 2) % 4];
+        let intensity = (section_energy(bar) * settings.energy / 0.45).clamp(0.05, 1.0);
+        let bass_density = (0.25 + intensity * 0.72).min(0.97);
         for beat in 0..4 {
-            if (beat == 3 && section == 0) || (settings.energy < 0.3 && beat == 1) {
+            if beat > 0 && bass_rng.range(100) >= (bass_density * 100.0) as u64 {
                 continue;
             }
-            let pitch = if beat == 2 && section > 0 {
-                root + 7
-            } else {
-                root
-            };
+            let variation = if beat == 3 && bass_rng.range(4) == 0 { 12 } else if beat == 2 && bass_rng.range(3) == 0 { 7 } else { 0 };
             tracks[0].push(Note {
-                pitch,
+                pitch: root + variation,
                 start: bar * 16 + beat * 4,
-                len: 3,
-                velocity: 58,
+                len: if bass_rng.range(4) == 0 { 2 } else { 3 },
+                velocity: (45.0 + intensity * 35.0) as u8,
             });
         }
-        // Harmony: sparse eighth-note broken chords, not random pitches.
-        let intervals = [0, 7, 12, 15, 12, 7, 3, 7];
+        let arp_density = (0.20 + intensity * 0.65).min(0.9);
+        let chord = match settings.mood {
+            Mood::Hopeful => [0, 4, 7],
+            Mood::Tense => [0, 3, 6],
+            Mood::Mysterious | Mood::Melancholic => [0, 3, 7],
+        };
         for i in 0..8 {
-            if (section == 0 && i % 2 != 0) || (settings.energy < 0.3 && i % 3 == 0) {
-                continue;
-            }
-            if section == 3 && i >= 6 {
-                continue;
-            }
+            if arp_rng.range(100) >= (arp_density * 100.0) as u64 { continue; }
+            let degree = arp_pattern[(i + (bar % 4)) % 4];
             tracks[1].push(Note {
-                pitch: root + 12 + intervals[i],
+                pitch: root + 12 + chord[degree] + if section == 2 && i == 6 { 12 } else { 0 },
                 start: bar * 16 + i * 2,
-                len: 1,
-                velocity: 20 + (energy * 24.0) as u8,
+                len: if intensity < 0.4 { 2 } else { 1 },
+                velocity: (20.0 + intensity * 36.0) as u8,
             });
         }
-        // Two-bar motif, rest/response phrasing, transposed with the harmony.
-        if (section == 0 && bar % 4 < 2) || (settings.energy < 0.2 && bar % 2 == 0) {
-            continue;
-        }
-        for (i, offset) in motif.iter().enumerate() {
-            if i == 3 || i == 7 {
-                continue;
-            } // space between questions and answers
-            if section == 3 && i >= 4 {
-                continue;
-            }
-            let variation = if bar % 8 >= 4 && i == 5 { 1 } else { 0 };
-            let contour = offset + variation;
-            let pitch = degree(root + 24, contour);
-            let start = bar * 16 + i * 2;
-            let jitter = if rng.range(12) == 0 { 1 } else { 0 };
+        let melody_density = (0.25 + intensity * 0.65).min(0.95);
+        let phrase_variation = i32::try_from(melody_rng.range(3)).expect("variation") - 1;
+        let phrase_shift = if section == 2 { 2 } else { 0 };
+        for (i, step) in motif.iter().enumerate() {
+            if section == 0 && bar % 4 < 2 { continue; }
+            if melody_rng.range(100) >= (melody_density * 100.0) as u64 { continue; }
+            let offset = direction * step + shift + phrase_shift + if i == 5 { phrase_variation } else { 0 };
+            let pitch = degree(root + 24, offset);
+            let slot = match rhythm { 0 => i * 2, 1 => [0, 2, 3, 6, 8, 10, 13, 14][i], _ => [0, 1, 4, 6, 8, 11, 12, 14][i] };
             tracks[2].push(Note {
                 pitch,
-                start,
-                len: if i == 2 || i == 6 { 3 } else { 2 },
-                velocity: 35 + (energy * 28.0) as u8 + jitter,
+                start: bar * 16 + slot,
+                len: if i == 3 || i == 7 { 2 } else { 1 },
+                velocity: (34.0 + intensity * 44.0) as u8,
             });
         }
     }
@@ -229,24 +239,11 @@ fn noise(seed: u64, time: f64, step: f64, energy: f64) -> f64 {
     white * strength * (energy / 0.45) * (1.0 - phase / 0.065)
 }
 
-fn render_with(settings: &Settings, tracks: &[Vec<Note>; 3]) -> Result<(), Box<dyn Error>> {
+fn render_samples(settings: &Settings, tracks: &[Vec<Note>; 3]) -> Vec<f32> {
     let step = 60.0 / settings.bpm / 4.0;
     let seconds = f64::from(u32::try_from(STEPS).expect("step count")) * step;
     let samples = (seconds * f64::from(RATE)).round() as u32;
-    let mut file = BufWriter::new(File::create(&settings.output)?);
-    let bytes = samples.checked_mul(2).ok_or("WAV too long")?;
-    file.write_all(b"RIFF")?;
-    file.write_all(&(36 + bytes).to_le_bytes())?;
-    file.write_all(b"WAVEfmt ")?;
-    file.write_all(&16_u32.to_le_bytes())?;
-    file.write_all(&1_u16.to_le_bytes())?;
-    file.write_all(&1_u16.to_le_bytes())?;
-    file.write_all(&RATE.to_le_bytes())?;
-    file.write_all(&(RATE * 2).to_le_bytes())?;
-    file.write_all(&2_u16.to_le_bytes())?;
-    file.write_all(&16_u16.to_le_bytes())?;
-    file.write_all(b"data")?;
-    file.write_all(&bytes.to_le_bytes())?;
+    let mut audio = Vec::with_capacity(samples as usize);
     // Cache current notes by advancing cursors, not searching all notes per sample.
     let mut cursors = [0_usize; 3];
     for i in 0..samples {
@@ -269,7 +266,30 @@ fn render_with(settings: &Settings, tracks: &[Vec<Note>; 3]) -> Result<(), Box<d
         let mixed: f64 = channels.iter().map(|(v, gain)| v * gain).sum::<f64>()
             + noise(settings.seed, t, step, settings.energy);
         let sample = (mixed.clamp(-1.0, 1.0) * 32767.0).round() as i16;
-        file.write_all(&sample.to_le_bytes())?;
+        audio.push(f32::from(sample) / 32767.0);
+    }
+    audio
+}
+
+fn render_with(settings: &Settings, tracks: &[Vec<Note>; 3]) -> Result<(), Box<dyn Error>> {
+    let audio = render_samples(settings, tracks);
+    let mut file = BufWriter::new(File::create(&settings.output)?);
+    let bytes = u32::try_from(audio.len())?.checked_mul(2).ok_or("WAV too long")?;
+    file.write_all(b"RIFF")?;
+    file.write_all(&(36 + bytes).to_le_bytes())?;
+    file.write_all(b"WAVEfmt ")?;
+    file.write_all(&16_u32.to_le_bytes())?;
+    file.write_all(&1_u16.to_le_bytes())?;
+    file.write_all(&1_u16.to_le_bytes())?;
+    file.write_all(&RATE.to_le_bytes())?;
+    file.write_all(&(RATE * 2).to_le_bytes())?;
+    file.write_all(&2_u16.to_le_bytes())?;
+    file.write_all(&16_u16.to_le_bytes())?;
+    file.write_all(b"data")?;
+    file.write_all(&bytes.to_le_bytes())?;
+    for sample in audio {
+        let pcm = (sample.clamp(-1.0, 1.0) * 32767.0).round() as i16;
+        file.write_all(&pcm.to_le_bytes())?;
     }
     file.flush()?;
     Ok(())
