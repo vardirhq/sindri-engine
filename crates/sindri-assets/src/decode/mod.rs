@@ -5,6 +5,7 @@
 //! changes.
 
 mod font;
+mod model;
 mod prefab;
 mod profile;
 mod scene;
@@ -17,6 +18,10 @@ mod tileset;
 mod tests;
 
 pub use font::{FontAsset, FontAssetDecoder};
+pub use model::{
+    ModelAsset, ModelAssetDecoder, ModelIndices, ModelMaterial, ModelMesh, ModelNode,
+    ModelPrimitive, ModelTexture,
+};
 pub use prefab::PrefabAssetDecoder;
 pub use profile::ProfileAssetDecoder;
 pub use scene::SceneAssetDecoder;

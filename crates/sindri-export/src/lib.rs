@@ -20,6 +20,7 @@
 //! without anyone remembering to bump a version.
 
 mod gather;
+mod models;
 mod page;
 mod prefabs;
 mod write;

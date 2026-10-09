@@ -317,6 +317,16 @@ fn encode_passes<'p>(
         shape_renderer.set_clip(pass.clip);
         cube_renderer.set_camera_position(pass.camera.position);
         match &pass.command {
+            FrameCommand::Model { model, asset } => {
+                cube_renderer.encode_model(
+                    device,
+                    queue,
+                    encoder,
+                    target,
+                    asset,
+                    (*model, pass.camera),
+                )?;
+            }
             FrameCommand::TexturedCube { model, texture } => cube_renderer.encode_world(
                 DrawContext {
                     device,
@@ -461,6 +471,8 @@ fn encode_cached_textured_mesh(
 
 #[derive(Debug, Error)]
 pub enum FrameEncodeError {
+    #[error(transparent)]
+    Model(#[from] crate::ModelRenderError),
     #[error(transparent)]
     Sprites(#[from] SpriteBatchError),
     #[error(transparent)]

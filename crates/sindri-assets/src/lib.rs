@@ -27,9 +27,10 @@ pub use builtin::{
 };
 pub use decode::{
     AssetCompletionApplyError, AssetDecodeError, AssetDecoder, DecodedAssetCompletion, FontAsset,
-    FontAssetDecoder, PrefabAssetDecoder, ProfileAssetDecoder, SceneAssetDecoder,
-    SpriteSheetAssetDecoder, TextAssetDecoder, TextureAsset, TextureAssetDecoder,
-    TileSetAssetDecoder, decode_completion,
+    FontAssetDecoder, ModelAsset, ModelAssetDecoder, ModelIndices, ModelMaterial, ModelMesh,
+    ModelNode, ModelPrimitive, ModelTexture, PrefabAssetDecoder, ProfileAssetDecoder,
+    SceneAssetDecoder, SpriteSheetAssetDecoder, TextAssetDecoder, TextureAsset,
+    TextureAssetDecoder, TileSetAssetDecoder, decode_completion,
 };
 #[cfg(target_arch = "wasm32")]
 pub use fetch::FetchAssetSource;

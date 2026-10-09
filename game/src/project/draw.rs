@@ -117,6 +117,8 @@ impl ProjectRenderer {
         let prepared = measure_ui_text(&player.world, player.scene.components(), &mut player.text)
             .map_err(Box::<dyn Error>::from)
             .and_then(|sizes| {
+                self.cubes
+                    .set_lighting(player.scene.lighting(&player.world)?);
                 let prepared = player.scene.extract_animated(
                     &player.world,
                     Viewport::new(self.size.0, self.size.1),

@@ -38,6 +38,19 @@ pub fn scene_extractor() -> Result<SceneExtractor, String> {
     Ok(extractor)
 }
 
+/// Where a project's assets live: `assets/` when it has one, else beside
+/// `sindri.toml`, which is how a project that keeps its art at its root (and
+/// names it from there) is laid out. Export reads the same rule.
+#[must_use]
+pub fn assets_root(project: &Path) -> std::path::PathBuf {
+    let assets = project.join("assets");
+    if assets.is_dir() {
+        assets
+    } else {
+        project.to_path_buf()
+    }
+}
+
 /// Every file under `root` whose name ends with `suffix`, by its asset ID.
 #[must_use]
 pub fn files_under(root: &Path, suffix: &str) -> BTreeMap<String, Vec<u8>> {
@@ -165,7 +178,7 @@ impl ProjectRun {
     }
 
     fn open_on(project: &Path, entry: Option<&str>, size: [f32; 2]) -> Result<Self, String> {
-        let assets = project.join("assets");
+        let assets = assets_root(project);
         let (main_path, sheet_ids, other_scenes) = manifest(project)?;
         let main_id = scene_name(&main_path)?;
         let read_scene = |path: &Path| -> Result<SceneDocument, String> {

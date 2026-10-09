@@ -28,7 +28,8 @@ pub struct ExtractProblem {
 }
 
 impl SceneExtractor {
-    /// Draws around invalid environments and voxel worlds instead of failing.
+    /// Draws around invalid environments and voxel worlds, and models not
+    /// (yet) bound, instead of failing.
     ///
     /// For editors, where a value is often invalid for the moment it takes to
     /// finish typing it. Each one skipped is reported by [`Self::problems`]

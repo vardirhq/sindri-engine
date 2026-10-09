@@ -10,9 +10,9 @@ use std::collections::BTreeMap;
 
 use sindri_assets::{
     AssetDecoder, AssetKind, AssetLoadOutcome, AssetLoadQueueConfig, AssetLoader, AssetManifest,
-    AudioAssetDecoder, FetchAssetSource, FontAssetDecoder, MANIFEST_FILE_NAME, PrefabAssetDecoder,
-    ProfileAssetDecoder, SceneAssetDecoder, SpriteSheetAssetDecoder, TextAssetDecoder,
-    TextureAssetDecoder, TileSetAssetDecoder,
+    AudioAssetDecoder, FetchAssetSource, FontAssetDecoder, MANIFEST_FILE_NAME, ModelAssetDecoder,
+    PrefabAssetDecoder, ProfileAssetDecoder, SceneAssetDecoder, SpriteSheetAssetDecoder,
+    TextAssetDecoder, TextureAssetDecoder, TileSetAssetDecoder,
 };
 use sindri_core::AssetId;
 use sindri_decay::{PrefabSources, ProfileSources, ScriptSources};
@@ -71,6 +71,7 @@ impl BrowserProjectLoader {
 pub(crate) struct ProjectLoaders {
     scene: AssetLoader<SceneAssetDecoder>,
     scripts: AssetLoader<TextAssetDecoder>,
+    models: AssetLoader<ModelAssetDecoder>,
     textures: AssetLoader<TextureAssetDecoder>,
     fonts: AssetLoader<FontAssetDecoder>,
     audio: AssetLoader<AudioAssetDecoder>,
@@ -115,6 +116,9 @@ impl ProjectLoaders {
             TextureAssetDecoder,
         )?
         .with_manifest(manifest.clone());
+        let mut models =
+            AssetLoader::new(source.clone(), config(AssetKind::Model), ModelAssetDecoder)?
+                .with_manifest(manifest.clone());
         let mut fonts =
             AssetLoader::new(source.clone(), config(AssetKind::Font), FontAssetDecoder)?
                 .with_manifest(manifest.clone());
@@ -157,6 +161,7 @@ impl ProjectLoaders {
         request_kind(&mut scene, &manifest, AssetKind::Scene)?;
         request_kind(&mut scripts, &manifest, AssetKind::Script)?;
         request_kind(&mut textures, &manifest, AssetKind::Texture)?;
+        request_kind(&mut models, &manifest, AssetKind::Model)?;
         request_kind(&mut fonts, &manifest, AssetKind::Font)?;
         request_kind(&mut audio, &manifest, AssetKind::Audio)?;
         request_kind(&mut sheets, &manifest, AssetKind::Sheet)?;
@@ -179,6 +184,7 @@ impl ProjectLoaders {
             profiles,
             styles,
             style_ids,
+            models,
             textures,
             fonts,
             audio,
@@ -191,6 +197,7 @@ impl ProjectLoaders {
     pub(crate) fn poll(&mut self) -> Result<Option<ProjectAssets>, PlayerError> {
         poll_loader(&mut self.scene)?;
         poll_loader(&mut self.scripts)?;
+        poll_loader(&mut self.models)?;
         poll_loader(&mut self.textures)?;
         poll_loader(&mut self.fonts)?;
         poll_loader(&mut self.audio)?;
@@ -202,6 +209,7 @@ impl ProjectLoaders {
 
         if self.scene.outstanding()
             + self.scripts.outstanding()
+            + self.models.outstanding()
             + self.textures.outstanding()
             + self.fonts.outstanding()
             + self.audio.outstanding()
@@ -246,6 +254,7 @@ impl ProjectLoaders {
             let profile = loaded(&self.profiles, &id)?;
             profiles.insert(id, profile);
         }
+        let models = loaded_many(&self.models, &ids(AssetKind::Model))?;
         let textures = loaded_many(&self.textures, &ids(AssetKind::Texture))?;
         let fonts = loaded_many(&self.fonts, &ids(AssetKind::Font))?;
         let audio = loaded_many(&self.audio, &ids(AssetKind::Audio))?;
@@ -270,6 +279,7 @@ impl ProjectLoaders {
             scripts,
             prefabs,
             profiles,
+            models,
             textures,
             fonts,
             audio,

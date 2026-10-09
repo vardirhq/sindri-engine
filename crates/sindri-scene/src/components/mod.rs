@@ -15,6 +15,7 @@ mod environment_check;
 mod grid;
 mod light;
 mod mesh;
+mod model;
 mod sprite;
 mod tile_volume;
 mod tilemap;
@@ -43,6 +44,7 @@ pub use light::{
     sun_in,
 };
 pub use mesh::{MeshComponent, MeshPrimitive};
+pub use model::ModelComponent;
 pub use sprite::{SpriteColorTransform, SpriteComponent};
 pub use tile_volume::{
     TileCellDocument, TileGridComponent, TileGridError, TileSpace, TileVolumeComponent,

@@ -287,3 +287,13 @@ Two consequences worth knowing:
 - The runtime and exporter read the manifest's entry scene and asset policy,
   but there is no broader runtime settings surface yet: window policy, host
   module selection, and target-specific settings are not project fields.
+
+## External static models
+
+An entity can reference a self-contained GLB with
+`"sindri.model": { "asset": "models/crawler.glb", "layer": 0 }`. The asset ID is
+relative to the project's asset root; models remain separate files. Export finds
+references in scenes and prefabs automatically, validates and preserves their
+bytes, and records manifest kind `model`. Native project capture and the exported
+WebGPU host load these references through the normal asset pipeline. See
+[imported models](imported-models.md) for supported features and diagnostics.

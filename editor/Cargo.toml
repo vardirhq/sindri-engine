@@ -13,6 +13,7 @@ sha2.workspace = true
 egui_material_icons = { version = "0.8", default-features = false, features = ["outline"] }
 glam.workspace = true
 wgpu.workspace = true
+sindri = { path = "../crates/sindri" }
 sindri-assets = { path = "../crates/sindri-assets" }
 sindri-core = { path = "../crates/sindri-core" }
 sindri-decay = { path = "../crates/sindri-decay" }

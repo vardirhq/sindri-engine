@@ -302,6 +302,8 @@ impl EditorApp {
     pub(super) fn reload_textures(&mut self) {
         let state = self.render_state.clone();
         self.renderers.text.clear_bindings();
+        self.textures
+            .release_models(&mut [&mut self.scene, &mut self.game_scene]);
         self.textures = SceneTextures::for_scene(&state.device, &state.queue, self.file.anchor());
         self.textured_revision = super::TexturedAt {
             history: self.history.revision(),
