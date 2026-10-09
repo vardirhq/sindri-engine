@@ -357,4 +357,21 @@ mod tests {
     fn duration_is_expected() {
         assert!((f64::from(STEPS as u32) * step_seconds() - 65.0847).abs() < 0.001);
     }
+    #[test]
+    fn different_seeds_change_melody_and_accompaniment() {
+        let a = compose_with(&Settings { seed: 42, ..Settings::default() });
+        let b = compose_with(&Settings { seed: 43, ..Settings::default() });
+        assert_ne!(a[2], b[2], "melody should change");
+        assert_ne!(a[1], b[1], "arpeggio should change");
+    }
+    #[test]
+    fn mood_and_energy_change_composition() {
+        let default = Settings::default();
+        let original = compose_with(&default);
+        let hopeful = compose_with(&Settings { mood: Mood::Hopeful, ..default.clone() });
+        let energetic = compose_with(&Settings { energy: 0.9, ..default });
+        assert_ne!(original[0], hopeful[0], "mood should change harmony");
+        assert_ne!(original[1], energetic[1], "energy should change density");
+    }
+
 }
