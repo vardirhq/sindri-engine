@@ -125,7 +125,7 @@ capabilities; each is proven on a genre showcase or flagship named in its slice.
   WASM and CI's real-browser run of every export pass. Voxel Lab keeps its
   own browser app: it is an engine lab whose Rust terrain and camera are the
   subject, as Shapes Lab's are.
-- [ ] **4. Cut per-frame waste.**
+- [x] **4. Cut per-frame waste.**
   - Weave presentation in the editor settles and lays states in place with
     undo, as the shipped host does; no view clones the world to present it.
   - The registry, script queries, the animated-world scan and edit-mode
@@ -329,6 +329,22 @@ encoding (+0.13) and extraction (+0.06); Orbital's is 6.71 against 7.53
 costs about a step and a half at that moment (0.77 ms for the platformer,
 6.7 ms for Orbital, against steps of 0.43 and 4.7 ms) and about 2% of a
 step on average.
+
+**Closed by making the step itself cheaper.** The platformer is a small level
+with a handful of bodies, and its 0.37 ms headless step was mostly the engine
+re-deriving what had not changed. Profiled with callgrind, a quarter of it was
+physics decoding every collider's JSON every step, a sixth laying out an
+unchanged screen, and the rest of the waste in comparing script sources,
+hashing script locals and stepping an empty 3D world. Each is fixed for every
+game, not this one: components decode through `sindri_core::Decoded`, kept
+until the entity's revision and the component's payload change; screen
+layout is kept while its inputs are unchanged; a script write that changes
+nothing is not an edit; compiled scripts check a sources revision; a Decay
+frame is a flat list; a scene with nothing 3D skips the 3D world. The step
+went from about 2.14 to 1.06 million instructions. Measured again, three runs
+of the platformer give 0.95×, 1.16× and 1.05× (one-step game frame 1.34 to
+1.44 ms against 1.21 to 1.41 standalone, on a busier machine than the earlier
+runs), and Orbital 0.96×, its standalone step down from 1.13 to 0.84 ms.
 
 ## Build profiles
 

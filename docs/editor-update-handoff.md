@@ -15,7 +15,7 @@ less, with smaller checkpoints preferred.
 
 ## Current checkpoint
 
-Draft PR #503. Slices 1, 2, 3 and 5 to 8 are checked; slice 4 is open on the platformer, 1.33× against the 1.25× target (see the plan). That is what keeps the PR a draft.
+Draft PR #503. All eight slices are checked. Slice 4 closed by making the engine's step cheaper rather than the editor's frame (see the plan).
 Slice 3 left:
 
 - `sindri-runtime` holds the session (from Causeway), `ProjectRun` (open any
