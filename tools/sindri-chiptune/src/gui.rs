@@ -1,178 +1,214 @@
-//! Standalone desktop controls. No Sindri editor integration.
-use super::{Mood, Settings, compose_with, render_with};
-use eframe::egui;
-use std::{
-    error::Error,
-    process::Command,
-    sync::mpsc::{self, Receiver},
-    thread,
-};
+//! Standalone Chiptune Lab user interface. No Sindri editor dependencies.
+use super::{Mood, RATE, Settings, compose_with, render_samples, render_with};
+use eframe::egui::{self, Color32, RichText};
+use rodio::{OutputStream, OutputStreamBuilder, Sink, buffer::SamplesBuffer};
+use std::{error::Error, sync::mpsc::{self, Receiver}, thread};
 
-#[derive(Default)]
+enum JobResult { Audio(Vec<f32>), Saved(String) }
+type Job = Receiver<Result<JobResult, String>>;
+
 struct ComposerApp {
-    settings: ComposerSettings,
-    job: Option<Receiver<Result<String, String>>>,
+    settings: Settings,
+    output: String,
+    job: Option<Job>,
+    stream: Option<OutputStream>,
+    sink: Option<Sink>,
     status: String,
 }
-
-struct ComposerSettings {
-    seed: u64,
-    bpm: f64,
-    key: i32,
-    energy: f64,
-    mood: Mood,
-    output: String,
-}
-
-impl Default for ComposerSettings {
+impl Default for ComposerApp {
     fn default() -> Self {
         Self {
-            seed: 42,
-            bpm: 118.0,
-            key: 2,
-            energy: 0.45,
-            mood: Mood::Mysterious,
-            output: "chiptune.wav".into(),
+            settings: Settings::default(), output: "chiptune.wav".into(),
+            job: None, stream: None, sink: None,
+            status: "Ready to compose. Preview plays in memory.".into(),
         }
     }
 }
-
 impl ComposerApp {
-    fn generate(&mut self) {
-        if self.job.is_some() {
-            return;
-        }
-        let values = Settings {
-            seed: self.settings.seed,
-            bpm: self.settings.bpm,
-            key: self.settings.key,
-            energy: self.settings.energy,
-            mood: self.settings.mood,
-            output: self.settings.output.clone().into(),
-        };
+    fn start(&mut self, preview: bool) {
+        if self.job.is_some() { return; }
+        let mut settings = self.settings.clone();
+        settings.output = self.output.clone().into();
+        if self.sink.is_some() { self.stop(); }
         let (tx, rx) = mpsc::channel();
         self.job = Some(rx);
-        self.status = "Generating WAV...".into();
+        self.status = if preview { "Composing preview..." } else { "Exporting WAV..." }.into();
         thread::spawn(move || {
-            let tracks = compose_with(&values);
-            let result = render_with(&values, &tracks)
-                .map(|()| format!("Saved {}", values.output.display()))
-                .map_err(|error| error.to_string());
+            let notes = compose_with(&settings);
+            let result = if preview {
+                Ok(JobResult::Audio(render_samples(&settings, &notes)))
+            } else {
+                render_with(&settings, &notes)
+                    .map(|()| JobResult::Saved(settings.output.display().to_string()))
+                    .map_err(|error| error.to_string())
+            };
             let _ = tx.send(result);
         });
     }
-
-    fn open_audio(&mut self) {
-        let path = std::path::Path::new(&self.settings.output);
-        if !path.is_file() {
-            self.status = "Generate a WAV before opening it.".into();
-            return;
+    fn stop(&mut self) {
+        if let Some(sink) = self.sink.take() { sink.stop(); }
+        self.stream = None;
+        self.status = "Playback stopped.".into();
+    }
+    fn play(&mut self, samples: Vec<f32>) {
+        match OutputStreamBuilder::open_default_stream() {
+            Ok(stream) => {
+                let sink = Sink::connect_new(stream.mixer());
+                sink.append(SamplesBuffer::new(1, RATE, samples));
+                sink.play();
+                self.stream = Some(stream);
+                self.sink = Some(sink);
+                self.status = "Playing preview · no WAV file created.".into();
+            }
+            Err(error) => { self.status = format!("Audio device unavailable: {error}"); }
         }
-        #[cfg(target_os = "linux")]
-        let result = Command::new("xdg-open").arg(path).spawn();
-        #[cfg(target_os = "macos")]
-        let result = Command::new("open").arg(path).spawn();
-        #[cfg(target_os = "windows")]
-        let result = Command::new("cmd")
-            .args(["/C", "start", ""])
-            .arg(path)
-            .spawn();
-        #[cfg(not(any(target_os = "linux", target_os = "macos", target_os = "windows")))]
-        let result: std::io::Result<std::process::Child> = Err(std::io::Error::new(
-            std::io::ErrorKind::Unsupported,
-            "No system file opener available",
-        ));
-        self.status = match result {
-            Ok(_) => "Opened WAV using system default application.".into(),
-            Err(error) => format!("Could not open audio: {error}"),
-        };
+    }
+    fn poll(&mut self, ui: &egui::Ui) {
+        let result = self.job.as_ref().map(Receiver::try_recv);
+        match result {
+            Some(Ok(Ok(JobResult::Audio(samples)))) => { self.job = None; self.play(samples); }
+            Some(Ok(Ok(JobResult::Saved(path)))) => {
+                self.job = None;
+                self.status = format!("Export complete: {path}");
+            }
+            Some(Ok(Err(error))) => { self.job = None; self.status = format!("Error: {error}"); }
+            Some(Err(mpsc::TryRecvError::Disconnected)) => {
+                self.job = None; self.status = "Render worker disconnected.".into();
+            }
+            Some(Err(mpsc::TryRecvError::Empty)) => {
+                ui.ctx().request_repaint_after(std::time::Duration::from_millis(80));
+            }
+            None => {}
+        }
+    }
+    fn controls(&mut self, ui: &mut egui::Ui) {
+        ui.heading("Composition");
+        ui.add_space(6.0);
+        ui.label("MOOD / HARMONY");
+        egui::ComboBox::from_id_salt("mood")
+            .selected_text(match self.settings.mood {
+                Mood::Mysterious => "Mysterious / exploratory",
+                Mood::Hopeful => "Hopeful / uplifting",
+                Mood::Tense => "Tense / uneasy",
+                Mood::Melancholic => "Melancholic / reflective",
+            })
+            .width(230.0)
+            .show_ui(ui, |ui| {
+                for (mood, name) in [
+                    (Mood::Mysterious, "Mysterious / exploratory"),
+                    (Mood::Hopeful, "Hopeful / uplifting"),
+                    (Mood::Tense, "Tense / uneasy"),
+                    (Mood::Melancholic, "Melancholic / reflective"),
+                ] {
+                    ui.selectable_value(&mut self.settings.mood, mood, name);
+                }
+            });
+        ui.add_space(8.0);
+        ui.label("KEY");
+        egui::ComboBox::from_id_salt("key")
+            .selected_text(["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"][usize::try_from(self.settings.key).unwrap_or(2)])
+            .show_ui(ui, |ui| {
+                for (i, name) in ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"].iter().enumerate() {
+                    ui.selectable_value(&mut self.settings.key, i32::try_from(i).expect("key"), *name);
+                }
+            });
+        ui.add_space(10.0);
+        ui.label("TEMPO");
+        ui.add(egui::Slider::new(&mut self.settings.bpm, 60.0..=220.0).suffix(" BPM"));
+        ui.add_space(6.0);
+        ui.label("ENERGY / DENSITY");
+        ui.add(egui::Slider::new(&mut self.settings.energy, 0.05..=1.0).show_value(true));
+        ui.small("Low = spacious phrases. High = more rhythmic activity.");
+        ui.add_space(10.0);
+        ui.label("COMPOSITION SEED");
+        ui.horizontal(|ui| {
+            ui.add(egui::DragValue::new(&mut self.settings.seed).speed(1));
+            if ui.button("New variation ↻").clicked() {
+                self.settings.seed = self.settings.seed.wrapping_add(1);
+                self.status = "Seed changed. Preview to hear the new composition.".into();
+            }
+        });
+    }
+    fn arrangement(&self, ui: &mut egui::Ui) {
+        ui.heading("Arrangement");
+        ui.label(RichText::new("32 BARS  /  4 SECTIONS  /  4 CHANNELS").color(Color32::from_gray(155)).small());
+        ui.add_space(10.0);
+        ui.horizontal(|ui| {
+            for (title, tint, description) in [
+                ("A · INTRO", Color32::from_rgb(55, 105, 127), "Establish mood"),
+                ("B · THEME", Color32::from_rgb(66, 143, 158), "Develop motif"),
+                ("C · RISE", Color32::from_rgb(132, 94, 158), "Build tension"),
+                ("D · OUTRO", Color32::from_rgb(62, 111, 126), "Release"),
+            ] {
+                egui::Frame::new().fill(tint.gamma_multiply(0.45)).corner_radius(6.0).inner_margin(10.0).show(ui, |ui| {
+                    ui.set_min_width(130.0);
+                    ui.label(RichText::new(title).strong().color(Color32::WHITE));
+                    ui.label(RichText::new(description).color(Color32::WHITE).small());
+                    ui.small("8 bars");
+                });
+            }
+        });
+        ui.add_space(16.0);
+        ui.label("INSTRUMENTS");
+        egui::Grid::new("channels").num_columns(2).spacing([20.0, 8.0]).show(ui, |ui| {
+            for (name, description) in [
+                ("01  WAVE BASS", "Roots, fifths, octave accents"),
+                ("02  PULSE ARP", "Seeded arpeggio contour"),
+                ("03  PULSE LEAD", "Seeded motifs and rhythmic shapes"),
+                ("04  NOISE", "Sparse percussion"),
+            ] {
+                ui.label(RichText::new(name).strong());
+                ui.label(description);
+                ui.end_row();
+            }
+        });
+        ui.add_space(12.0);
+        ui.small("The preview is rendered to memory, not a temporary audio file. Export only when you like a variation.");
     }
 }
 
 impl eframe::App for ComposerApp {
     fn ui(&mut self, ui: &mut egui::Ui, _frame: &mut eframe::Frame) {
-        if let Some(receiver) = &self.job {
-            match receiver.try_recv() {
-                Ok(result) => {
-                    self.status = result.unwrap_or_else(|error| format!("Render failed: {error}"));
-                    self.job = None;
-                }
-                Err(mpsc::TryRecvError::Disconnected) => {
-                    self.status = "Render worker disconnected.".into();
-                    self.job = None;
-                }
-                Err(mpsc::TryRecvError::Empty) => ui
-                    .ctx()
-                    .request_repaint_after(std::time::Duration::from_millis(100)),
-            }
-        }
+        self.poll(ui);
+        ui.visuals_mut().panel_fill = Color32::from_rgb(20, 25, 34);
         ui.vertical(|ui| {
-            ui.heading("Sindri Chiptune Lab");
-            ui.label("Standalone procedural Game Boy-inspired composition experiment");
-            ui.separator();
-            egui::Grid::new("composition_settings").num_columns(2).spacing([16.0, 12.0]).show(ui, |ui| {
-                ui.label("Mood");
-                egui::ComboBox::from_id_salt("mood")
-                    .selected_text(match self.settings.mood {
-                        Mood::Mysterious => "Mysterious",
-                        Mood::Hopeful => "Hopeful",
-                        Mood::Tense => "Tense",
-                        Mood::Melancholic => "Melancholic",
-                    })
-                    .show_ui(ui, |ui| {
-                        ui.selectable_value(&mut self.settings.mood, Mood::Mysterious, "Mysterious");
-                        ui.selectable_value(&mut self.settings.mood, Mood::Hopeful, "Hopeful");
-                        ui.selectable_value(&mut self.settings.mood, Mood::Tense, "Tense");
-                        ui.selectable_value(&mut self.settings.mood, Mood::Melancholic, "Melancholic");
-                    });
-                ui.end_row();
-                ui.label("Key (pitch class)");
-                egui::ComboBox::from_id_salt("key")
-                    .selected_text(["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"][usize::try_from(self.settings.key).unwrap_or(2)])
-                    .show_ui(ui, |ui| {
-                        for (index, name) in ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"].iter().enumerate() {
-                            ui.selectable_value(&mut self.settings.key, i32::try_from(index).expect("12 keys"), *name);
-                        }
-                    });
-                ui.end_row();
-                ui.label("Tempo");
-                ui.add(egui::Slider::new(&mut self.settings.bpm, 60.0..=220.0).suffix(" BPM"));
-                ui.end_row();
-                ui.label("Energy");
-                ui.add(egui::Slider::new(&mut self.settings.energy, 0.05..=1.0));
-                ui.end_row();
-                ui.label("Seed");
-                ui.add(egui::DragValue::new(&mut self.settings.seed).speed(1));
-                ui.end_row();
-                ui.label("Output WAV");
-                ui.text_edit_singleline(&mut self.settings.output);
-                ui.end_row();
+            ui.add_space(10.0);
+            ui.label(RichText::new("SINDRI  /  SOUND LAB").color(Color32::from_rgb(105, 197, 211)).strong());
+            ui.heading(RichText::new("Chiptune Composer").size(29.0));
+            ui.label(RichText::new("A standalone procedural music playground").color(Color32::from_gray(170)));
+            ui.add_space(18.0);
+            ui.columns(2, |columns| {
+                egui::Frame::group(columns[0].style()).show(&mut columns[0], |ui| self.controls(ui));
+                egui::Frame::group(columns[1].style()).show(&mut columns[1], |ui| self.arrangement(ui));
             });
-            ui.add_space(12.0);
+            ui.add_space(14.0);
+            ui.separator();
             ui.horizontal(|ui| {
-                if ui.add_enabled(self.job.is_none() && !self.settings.output.trim().is_empty(), egui::Button::new("Generate WAV")).clicked() {
-                    self.generate();
+                if ui.add_enabled(self.job.is_none(), egui::Button::new("▶  Preview")).clicked() {
+                    self.start(true);
                 }
-                if ui.button("Open WAV").clicked() {
-                    self.open_audio();
+                if ui.add_enabled(self.sink.is_some(), egui::Button::new("■  Stop")).clicked() {
+                    self.stop();
                 }
-                if ui.button("Next seed").clicked() {
-                    self.settings.seed = self.settings.seed.wrapping_add(1);
+                if ui.add_enabled(self.job.is_none() && !self.output.trim().is_empty(), egui::Button::new("↓  Export WAV")).clicked() {
+                    self.start(false);
                 }
             });
-            ui.add_space(8.0);
-            ui.label(&self.status);
-            ui.separator();
-            ui.small("32 bars · 4 channels · offline WAV export. The existing CLI is still available with --seed and --output.");
+            ui.horizontal(|ui| {
+                ui.label("Save as");
+                ui.text_edit_singleline(&mut self.output);
+            });
+            ui.add_space(9.0);
+            ui.label(RichText::new(&self.status).color(Color32::from_rgb(120, 200, 204)));
         });
     }
 }
 
 pub(super) fn run() -> Result<(), Box<dyn Error>> {
-    eframe::run_native(
-        "Sindri Chiptune Lab",
-        eframe::NativeOptions::default(),
-        Box::new(|_| Ok(Box::<ComposerApp>::default())),
-    )?;
+    let options = eframe::NativeOptions {
+        viewport: egui::ViewportBuilder::default().with_inner_size([960.0, 620.0]),
+        ..Default::default()
+    };
+    eframe::run_native("Sindri Chiptune Lab", options, Box::new(|_| Ok(Box::<ComposerApp>::default())))?;
     Ok(())
 }
