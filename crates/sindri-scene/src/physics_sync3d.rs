@@ -1,6 +1,6 @@
 //! Scene ownership of 3D rigid bodies, without host-specific stepping policy.
 
-use sindri_core::{ComponentSchemaRegistry, EntityId, SceneComponent, World};
+use sindri_core::{ComponentSchemaRegistry, EntityId, World};
 use sindri_physics::{
     Collider3d, ColliderShape3d, PhysicsEvent3d, PhysicsPose3d, PhysicsWorld3d, RigidBody3d,
     RigidBodyKind,
@@ -290,17 +290,13 @@ fn extent(piece: &Collider3d) -> f32 {
         }
 }
 
-/// Whether anything in `world` carries 3D physics.
+/// Whether anything in `world` carries 3D physics: every 3D physics
+/// component is named under `sindri.physics3d.`.
 fn authors_3d(world: &World) -> bool {
     world.entities().any(|(_, data)| {
-        [
-            RigidBody3dComponent::TYPE_NAME,
-            Collider3dComponent::TYPE_NAME,
-            crate::VoxelCollider3dComponent::TYPE_NAME,
-            PhysicsWorld3dComponent::TYPE_NAME,
-        ]
-        .into_iter()
-        .any(|name| data.components.contains_key(name))
+        data.components
+            .keys()
+            .any(|name| name.starts_with("sindri.physics3d."))
     })
 }
 

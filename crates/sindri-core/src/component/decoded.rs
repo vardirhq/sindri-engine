@@ -9,12 +9,16 @@
 //! An entity's revision changes whenever anything about it does
 //! ([`World::revision`]), so a value decoded at one revision is still the
 //! value at that revision. This keeps each decode with the revision it was
-//! made at and decodes again only when the revision moved. What is cached is
+//! made at and decodes again only when the revision moved, and even then only
+//! when the component's own payload is not the one it was decoded from: a
+//! body that moved changed its transform, not its collider. What is cached is
 //! only the decode: whether an entity is active depends on its ancestors as
 //! well, so that is asked every time, as [`ComponentSchemaRegistry::query`]
 //! asks it.
 
 use std::collections::BTreeMap;
+
+use serde_json::Value;
 
 use super::{ComponentRegistryError, ComponentSchemaRegistry, SceneComponent};
 use crate::{EntityId, World};
@@ -22,7 +26,16 @@ use crate::{EntityId, World};
 /// One component type's decodes, by entity.
 #[derive(Clone, Debug)]
 pub struct Decoded<T> {
-    held: BTreeMap<EntityId, (u64, Option<T>)>,
+    held: BTreeMap<EntityId, Held<T>>,
+}
+
+/// One entity's decode: the revision it was last found current at, the
+/// payload it was decoded from, and what that decoded to.
+#[derive(Clone, Debug)]
+struct Held<T> {
+    revision: u64,
+    payload: Option<Value>,
+    value: Option<T>,
 }
 
 impl<T> Default for Decoded<T> {
@@ -48,7 +61,7 @@ impl<T: SceneComponent> Decoded<T> {
         if !self.refresh(registry, world, entity)? {
             return Ok(None);
         }
-        Ok(self.held.get(&entity).and_then(|(_, value)| value.as_ref()))
+        Ok(self.held.get(&entity).and_then(|held| held.value.as_ref()))
     }
 
     /// What [`ComponentSchemaRegistry::query`] answers, decoding only the
@@ -75,8 +88,8 @@ impl<T: SceneComponent> Decoded<T> {
         Ok(carrying
             .into_iter()
             .filter_map(|entity| {
-                let (_, value) = self.held.get(&entity)?;
-                value.as_ref().map(|value| (entity, value))
+                let held = self.held.get(&entity)?;
+                held.value.as_ref().map(|value| (entity, value))
             })
             .collect())
     }
@@ -96,13 +109,24 @@ impl<T: SceneComponent> Decoded<T> {
         if !world.is_active(entity) {
             return Ok(false);
         }
-        if self
-            .held
-            .get(&entity)
-            .is_none_or(|(held, _)| *held != revision)
-        {
-            let value = registry.get::<T>(world, entity)?;
-            self.held.insert(entity, (revision, value));
+        let payload = world
+            .get(entity)
+            .and_then(|data| data.components.get(T::TYPE_NAME));
+        match self.held.get_mut(&entity) {
+            Some(held) if held.revision == revision => {}
+            // Something else about the entity changed; this component did not.
+            Some(held) if held.payload.as_ref() == payload => held.revision = revision,
+            _ => {
+                let value = registry.get::<T>(world, entity)?;
+                self.held.insert(
+                    entity,
+                    Held {
+                        revision,
+                        payload: payload.cloned(),
+                        value,
+                    },
+                );
+            }
         }
         Ok(true)
     }
@@ -144,9 +168,9 @@ mod tests {
             decoded.query(&registry, &world).unwrap(),
             [(entity, &Speed { value: 1.0 })]
         );
-        let held = decoded.held.get(&entity).unwrap().0;
+        let held = decoded.held.get(&entity).unwrap().revision;
         decoded.query(&registry, &world).unwrap();
-        assert_eq!(decoded.held.get(&entity).unwrap().0, held, "kept");
+        assert_eq!(decoded.held.get(&entity).unwrap().revision, held, "kept");
 
         world
             .get_mut(entity)

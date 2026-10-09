@@ -90,21 +90,32 @@ impl SceneComponent for PhysicsWorld3dComponent {
 
 pub(crate) fn validate_dimensions(world: &World) -> Result<(), PhysicsSyncError> {
     for (entity, data) in world.entities() {
-        let has_3d = [
-            RigidBody3dComponent::TYPE_NAME,
-            Collider3dComponent::TYPE_NAME,
-            VoxelCollider3dComponent::TYPE_NAME,
-        ]
-        .into_iter()
-        .any(|name| data.components.contains_key(name));
-        let has_2d = [
-            crate::RigidBody2dComponent::TYPE_NAME,
-            crate::Collider2dComponent::TYPE_NAME,
-            crate::TilemapCollider2dComponent::TYPE_NAME,
-            crate::Character2dComponent::TYPE_NAME,
-        ]
-        .into_iter()
-        .any(|name| data.components.contains_key(name));
+        // One pass over what the entity carries, which is a handful of keys,
+        // rather than a lookup for every name of either kind.
+        let (mut has_2d, mut has_3d) = (false, false);
+        for name in data.components.keys() {
+            if !name.starts_with("sindri.physics") {
+                continue;
+            }
+            if [
+                RigidBody3dComponent::TYPE_NAME,
+                Collider3dComponent::TYPE_NAME,
+                VoxelCollider3dComponent::TYPE_NAME,
+            ]
+            .contains(&name.as_str())
+            {
+                has_3d = true;
+            } else if [
+                crate::RigidBody2dComponent::TYPE_NAME,
+                crate::Collider2dComponent::TYPE_NAME,
+                crate::TilemapCollider2dComponent::TYPE_NAME,
+                crate::Character2dComponent::TYPE_NAME,
+            ]
+            .contains(&name.as_str())
+            {
+                has_2d = true;
+            }
+        }
         // Active asked last: it walks the entity's ancestors, and almost no
         // entity carries both kinds.
         if has_3d && has_2d && world.is_active(entity) {
