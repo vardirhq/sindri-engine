@@ -6,9 +6,9 @@ Standalone Rust composition laboratory. **No Sindri editor or runtime integratio
 cargo run -p sindri-chiptune
 ```
 
-The redesigned desktop UI contains composition settings, four-section
+The redesigned desktop UI contains a four-track instrument rack, composition settings, four-section
 arrangement information, an eight-bar piano-roll comparison for two seed
-candidates, A/B auditioning directly from memory and explicit WAV export.
+candidates, A/B auditioning directly from memory and explicit WAV export. Each part has an independent preset, volume, mute, solo and (for tonal parts) octave shift. These modify the render, not the composed notes.
 
 ## What V2 changes
 
@@ -44,7 +44,7 @@ Mysterious; CLI mood flags are not part of this iteration.
 ## Boundaries / known limitations
 
 Everything stays under `tools/sindri-chiptune/` and depends only on
-eframe and native Rodio. Preview is rendered to memory, not streamed
+eframe and native Rodio. The synthesizer offers 12 tonal presets and 3 percussion kits; these are software-synthesis interpretations, not cycle-accurate chip emulations. Preview is rendered to memory, not streamed
 incrementally; long previews must render before playback. Linux audio may
 require ALSA development packages. The structure is still fixed at 32 bars.
 Candidate scoring is explicit heuristic search, not ML or AI. A/B comparison
