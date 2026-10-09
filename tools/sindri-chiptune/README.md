@@ -22,7 +22,8 @@ Amber marks transport/actions; blue, purple, mint and copper identify the voices
    select it, drag to move it or right-click to delete it. The selected-note
    inspector changes pitch, duration and velocity. Notes snap to sixteenth
    steps. Undo/redo retains up to 64 edits. One voice per tonal part means
-   overlapping edits are rejected and rolled back.
+   overlapping edits are rejected and rolled back. Undoing a MIDI import restores
+   tempo along with notes.
 4. Choose an eight-bar section. Scroll the piano roll horizontally to see all
    eight bars. **Fit notes** and the pitch-window control choose the displayed
    two-octave register; notes outside that register remain in the score.
@@ -43,7 +44,9 @@ motif and the return recalls the original. Intro and return strip back activity.
 The percussion voice combines a pitched kick, backbeat, short hats and fills.
 
 The synthesizer offers 12 tonal presets and 3 percussion kits. These are software
-interpretations, not cycle-accurate hardware emulations. Structural tests do not
+interpretations, not cycle-accurate hardware emulations. Narrow pulse waves
+have zero mean, and detuned/inharmonic partials advance continuously across
+fundamental cycles. Structural tests do not
 prove a song is enjoyable; listening remains the subjective acceptance gate.
 
 ## MIDI interchange

@@ -24,6 +24,12 @@ const TRACK_COLORS: [Color32; 4] = [
 ];
 type Job = Receiver<Result<String, String>>;
 
+struct ScoreSnapshot {
+    candidate: usize,
+    notes: [Vec<Note>; 3],
+    bpm: f64,
+}
+
 struct ComposerApp {
     settings: Settings,
     generated: Settings,
@@ -35,8 +41,8 @@ struct ComposerApp {
     selected_note: Option<usize>,
     note_length: usize,
     drag_origin: Option<(usize, Note, usize, i32)>,
-    undo: Vec<(usize, [Vec<Note>; 3])>,
-    redo: Vec<(usize, [Vec<Note>; 3])>,
+    undo: Vec<ScoreSnapshot>,
+    redo: Vec<ScoreSnapshot>,
     midi_path: String,
     output: String,
     job: Option<Job>,

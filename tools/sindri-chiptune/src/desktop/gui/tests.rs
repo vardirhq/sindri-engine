@@ -64,3 +64,15 @@ fn workstation_draws_at_wide_and_compact_window_sizes() {
         output.textures_delta.clear();
     }
 }
+
+#[test]
+fn undo_and_redo_restore_imported_tempo_with_notes() {
+    let mut app = ComposerApp::default();
+    let before = app.settings.bpm;
+    app.save_undo();
+    app.settings.bpm = 160.0;
+    app.undo_edit();
+    assert!((app.settings.bpm - before).abs() < f64::EPSILON);
+    app.redo_edit();
+    assert!((app.settings.bpm - 160.0).abs() < f64::EPSILON);
+}

@@ -59,7 +59,7 @@ impl Preset {
         match self {
             Self::WarmTriangle => 1.0 - 4.0 * (p - 0.5).abs(),
             Self::DeepBass => (TAU * p).sin() * 0.85 + (TAU * p * 2.0).sin() * 0.15,
-            Self::RubberBass => (TAU * p).sin() * 0.55 + if p < 0.3 { 0.3 } else { -0.3 },
+            Self::RubberBass => (TAU * p).sin() * 0.55 + Self::pulse(p, 0.3) * 0.3,
             Self::SoftSquare => {
                 if p < 0.5 {
                     0.7
@@ -74,24 +74,24 @@ impl Preset {
                     -1.0
                 }
             }
-            Self::HollowPulse => {
-                if p < 0.125 {
-                    1.0
-                } else {
-                    -1.0
-                }
-            }
-            Self::Bell => (TAU * p).sin() * 0.65 + (TAU * p * 2.51).sin() * 0.3,
+            Self::HollowPulse => Self::pulse(p, 0.125),
+            Self::Bell => (TAU * p).sin() * 0.65 + (TAU * phase * 2.51).sin() * 0.3,
             Self::Glass => (TAU * p).sin() * 0.6 + (TAU * p * 4.0).sin() * 0.32,
-            Self::Detuned => {
-                (if p < 0.25 { 1.0 } else { -1.0 }) * 0.6 + (TAU * p * 1.009).sin() * 0.4
-            }
+            Self::Detuned => Self::pulse(p, 0.25) * 0.6 + (TAU * phase * 1.009).sin() * 0.4,
             Self::SawLead => 2.0 * p - 1.0,
             Self::Organ => {
                 (TAU * p).sin() * 0.5 + (TAU * p * 2.0).sin() * 0.3 + (TAU * p * 3.0).sin() * 0.2
             }
             Self::SoftPluck => (TAU * p).sin() * 0.8 + (TAU * p * 3.0).sin() * 0.15,
             _ => 0.0,
+        }
+    }
+    // A narrow pulse must have zero mean to avoid a large DC offset in the mix.
+    fn pulse(phase: f64, duty: f64) -> f64 {
+        if phase < duty {
+            1.0
+        } else {
+            -duty / (1.0 - duty)
         }
     }
     pub(super) fn sample(self, phase: f64, age: f64, duration: f64) -> f64 {
@@ -181,6 +181,19 @@ mod tests {
         assert!(!rack.audible(0));
         rack.tracks[2].muted = true;
         assert!(!rack.audible(2));
+    }
+    #[test]
+    fn hollow_pulse_has_no_dc_offset() {
+        let sum: f64 = (0..128)
+            .map(|i| Preset::HollowPulse.wave(f64::from(i) / 128.0))
+            .sum();
+        assert!(sum.abs() < 1e-10);
+    }
+    #[test]
+    fn detuned_partial_does_not_reset_every_fundamental_cycle() {
+        let a = Preset::Detuned.wave(0.23);
+        let b = Preset::Detuned.wave(1.23);
+        assert!((a - b).abs() > 0.001);
     }
     #[test]
     fn presets_have_different_samples() {
