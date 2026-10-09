@@ -90,7 +90,7 @@ impl ComposerApp {
 }
 
 impl eframe::App for ComposerApp {
-    fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
+    fn ui(&mut self, ui: &mut egui::Ui, _frame: &mut eframe::Frame) {
         if let Some(receiver) = &self.job {
             match receiver.try_recv() {
                 Ok(result) => {
@@ -102,11 +102,11 @@ impl eframe::App for ComposerApp {
                     self.job = None;
                 }
                 Err(mpsc::TryRecvError::Empty) => {
-                    ctx.request_repaint_after(std::time::Duration::from_millis(100))
+                    ui.ctx().request_repaint_after(std::time::Duration::from_millis(100))
                 }
             }
         }
-        egui::CentralPanel::default().show(ctx, |ui| {
+        ui.vertical(|ui| {
             ui.heading("Sindri Chiptune Lab");
             ui.label("Standalone procedural Game Boy-inspired composition experiment");
             ui.separator();
