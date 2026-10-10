@@ -80,7 +80,10 @@ impl ScenePhysics3d {
         &mut self.characters.requests
     }
     /// The last applied character result, or none before synchronization.
-    pub fn character_motion(&self, entity: EntityId) -> Option<&sindri_physics::CharacterMotion3d> {
+    pub fn character_motion(
+        &self,
+        entity: EntityId,
+    ) -> Option<&sindri_physics::GroundedCharacterMotion3d> {
         self.characters.motion(entity)
     }
     /// Disjoint runtime borrows for hosts with scene-owned character APIs.
@@ -153,8 +156,16 @@ impl ScenePhysics3d {
         self.characters.commit(characters);
         self.voxels.commit(&mut self.world, voxels)?;
         self.world.finish_synchronize();
-        self.characters.hold(&mut self.world)?;
+        self.characters.hold(world, &mut self.world)?;
         self.events = self.world.step(delta)?;
+        let carry_reaches = self.characters.carry_reaches(&self.world)?;
+        if !carry_reaches.is_empty() {
+            reaches.extend(carry_reaches);
+            let voxels =
+                self.voxels
+                    .plan_authored(world, components, tile_sets, &self.world, &reaches)?;
+            self.voxels.commit(&mut self.world, voxels)?;
+        }
         self.characters.apply(world, &mut self.world)?;
         self.write_back(world);
         Ok(())

@@ -1428,10 +1428,12 @@ for validation, backend flag semantics, numerical limits and remaining slices.
 solid Collider 3D piece, with optional sensor pieces and no authored rigid body.
 `ScenePhysics3d` consumes queued world displacement after the solve, applies it
 once and writes the result through the existing parent-space transform path.
-Character reach participates in voxel residency before any bodies change.
+Input/solver reach participates in voxel residency before any bodies change.
+Actual solved carry expands residency before rider queries; a carry budget failure
+retains queued input and leaves riders unmoved but does not roll back the solve.
 Session uses this same driver, including checkpoints; no host assembles another
 movement loop. Backend limits, request/result lifetime, next-solve sensor timing
-and remaining carry/Decay/game proof are specified in
+and remaining Decay/game proof are specified in
 [the character contract](character-movement.md#3d-scene-ownership).
 
 ### Classified 3D ground queries
@@ -1443,7 +1445,7 @@ retain steep nearest surfaces and reject initial penetration as support. Filters
 stable whole-entity predicate reuse, deterministic ties and current poses use the
 existing query index. No snap, carry or gameplay standing policy is applied.
 Native geometry/filter/lifecycle/invalid-input regressions exercise this general
-Explorer prerequisite; scene platform carry and browser/editor/Decay/game proof
+Explorer prerequisite; browser/editor/Decay/game proof
 remain pending. See [the contract](character-movement.md#classified-3d-ground-queries).
 
 ### Read-only 3D platform carry
@@ -1455,6 +1457,15 @@ translation and rotation-point travel sweep before input movement, with separate
 copied carry/movement hits and one total translation. Pending targets contribute
 nothing until solved. Native regressions cover geometry, filtering, wall clipping,
 vertical platforms, jumps and validation. Hosts still own snapshot invalidation,
-once-only application and terrain reach; scene carry is the next slice. See
+once-only application and terrain reach; scene ownership is described above. See
 [the contract](character-movement.md#read-only-3d-platform-carry) for chord,
 fixed-orientation and backend correction/iteration limits.
+
+Scene Character 3D enables platform carry by default, with a flat
+`carry_platforms` opt-out. Support is classified before solving; solved translation
+and rotation-point carry precede input movement and are included once in the
+cached `GroundedCharacterMotion3d`. Dependent rider caches invalidate with support
+lifecycle changes; fresh snapshots prevent replay after clipped travel. Native
+scene and Session regressions exercise parenting, jumps, lifecycle, replay and
+terrain budgets. Browser/controller, editor interaction and Explorer proof remain
+pending; no controller-on-controller carry is claimed.

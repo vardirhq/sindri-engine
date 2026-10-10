@@ -110,8 +110,12 @@ impl PhysicsWorld3d {
         let previous = build::pose(support.previous_pose);
         let current = build::pose(current_pose);
         let origin = r3::Vector::from_array(pose.position);
-        let local = previous.inverse_transform_point(origin);
-        let requested = current.transform_point(local) - origin;
+        let requested = if previous == current {
+            r3::Vector::ZERO
+        } else {
+            let local = previous.inverse_transform_point(origin);
+            current.transform_point(local) - origin
+        };
         finite3("platform_displacement", requested.to_array())?;
         let movement_options = crate::CharacterOptions3d {
             slide: false,

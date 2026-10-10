@@ -2900,8 +2900,14 @@ previous support, solved translation/rotation-point carry, ordinary movement and
 classified final support. Eight native regressions cover clipping, vertical
 platforms, jumps, compound offsets, filtering, copies and invalid input; the
 [carry contract](character-movement.md#read-only-3d-platform-carry) records chord
-and backend limits. Scene platform carry does not use this composition yet.
-Gameplay supplies gravity/jumps. Platform carry, Decay controls, browser/controller
+and backend limits. Scene carry now uses the composition with classified pre-solve support, a flat
+`carry_platforms` opt-out, dependent cache invalidation and once-only parent-space
+writeback. Terrain keeps its input/solver window before the solve and expands for
+actual carry before rider queries. A post-solve carry budget failure retains input
+and leaves riders unmoved; it does not roll back solver state. Native scene and
+Session tests cover boarding, jumps, parented rotation, wall clipping, lifecycle,
+checkpoint replay and terrain budgets.
+Gameplay supplies gravity/jumps. Decay controls, browser/controller
 and editor interaction, and Explorer adoption remain pending; see
 [the contract](character-movement.md#3d-scene-ownership). This is a general
 capability added for the planned Explorer showcase, not completed game proof.

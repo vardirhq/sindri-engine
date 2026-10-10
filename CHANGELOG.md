@@ -1,5 +1,11 @@
 # Changelog
 
+- Scene Character 3D now carries riders through solved platform translation and
+  rotation, with classified support, separate carry hits and a `carry_platforms`
+  opt-out. Parenting applies motion once, lifecycle changes clear rider caches,
+  and actual carry expands terrain residency before movement queries. Session
+  checkpoints replay carry. Decay, browser/controller and game proof remain pending.
+
 - Add read-only 3D platform carry composition: verified previous support,
   collision-limited translation and rotation-point travel, separate carry hits
   and classified final grounding. Scene lifecycle, terrain reach and Decay

@@ -154,6 +154,7 @@ fn scaled_offset_probe_blocks_and_writes_world_motion_under_a_rotated_parent() {
         physics
             .character_motion(actor)
             .unwrap()
+            .movement
             .collisions
             .iter()
             .any(|c| c.hit.entity == wall)
@@ -219,6 +220,7 @@ fn exactly_one_scaled_solid_uses_its_filter_and_ignores_sensors() {
         physics
             .character_motion(actor)
             .unwrap()
+            .movement
             .collisions
             .iter()
             .all(|c| c.hit.entity == wall)
@@ -353,7 +355,7 @@ fn inactivity_removal_and_rebuilds_discard_stale_state_but_keep_same_step_input(
 }
 
 #[test]
-fn current_solved_platforms_block_without_implicit_carry_and_caches_are_borrowed() {
+fn current_solved_platforms_carry_once_and_caches_are_borrowed() {
     let mut world = World::default();
     let platform = spawn(
         &mut world,
@@ -385,7 +387,7 @@ fn current_solved_platforms_block_without_implicit_carry_and_caches_are_borrowed
     step(&mut physics, &mut world);
     near(
         world.world_transform(actor).unwrap().position,
-        [0.0, 0.51, 0.0],
+        [1.0, 0.51, 0.0],
     );
     let (_, _, requests, motions) = physics.for_scripts_with_characters();
     let cached = motions.get(actor).unwrap().clone();
@@ -396,14 +398,14 @@ fn current_solved_platforms_block_without_implicit_carry_and_caches_are_borrowed
     step(&mut physics, &mut world);
     near(
         world.world_transform(actor).unwrap().position,
-        [1.0, 0.51, 0.0],
+        [2.0, 0.51, 0.0],
     );
     let overlap = physics
         .world()
         .overlap(
             ColliderShape3d::Sphere { radius: 0.1 },
             PhysicsPose3d {
-                position: [1.0, 0.51, 0.0],
+                position: [2.0, 0.51, 0.0],
                 ..PhysicsPose3d::default()
             },
             RaycastFilter3d::default(),

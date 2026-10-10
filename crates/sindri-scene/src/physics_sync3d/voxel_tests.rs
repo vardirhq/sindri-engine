@@ -317,6 +317,7 @@ fn character_travel_keeps_voxels_resident_without_a_dynamic_body() {
         physics
             .character_motion(actor)
             .unwrap()
+            .movement
             .collisions
             .iter()
             .any(|c| c.hit.entity == floor)
@@ -343,4 +344,97 @@ fn character_travel_keeps_voxels_resident_without_a_dynamic_body() {
         .unwrap();
     run(&mut physics, &mut world, None, 1);
     assert!((world.world_transform(actor).unwrap().position[0] - 4_001.5).abs() < 0.02);
+}
+
+#[test]
+fn solved_carry_expands_terrain_before_riders_move_and_budget_failure_retains_input() {
+    let mut world = World::default();
+    let voxels = materials(&json!([]));
+    let (_, top) = surface(&voxels, None);
+    let floor = voxel_world(&mut world, voxels, true);
+    let platform = spawn(
+        &mut world,
+        [12.5, top + 1.5, 0.5],
+        Some(RigidBodyKind::KinematicPosition),
+        Collider3d::cuboid([5.0, 0.5, 5.0]),
+    );
+    let actor = spawn(
+        &mut world,
+        [12.5, top + 2.51, 0.5],
+        None,
+        Collider3d::sphere(0.5),
+    );
+    world
+        .get_mut(actor)
+        .unwrap()
+        .components
+        .insert(crate::Character3dComponent::TYPE_NAME.into(), json!({}));
+    let mut physics = earth();
+    run(&mut physics, &mut world, None, 1);
+    let ray = |physics: &ScenePhysics3d| {
+        physics
+            .world()
+            .raycast(
+                [16.5, top + 4.0, 0.5],
+                [0.0, -1.0, 0.0],
+                10.0,
+                RaycastFilter3d {
+                    mask: 2,
+                    ..RaycastFilter3d::default()
+                },
+            )
+            .unwrap()
+    };
+    // Only the terrain has layer 2, and that far section is initially absent.
+    for entity in [platform, actor] {
+        let data = world.get_mut(entity).unwrap();
+        let mut collider: Collider3dComponent =
+            serde_json::from_value(data.components[Collider3dComponent::TYPE_NAME].clone())
+                .unwrap();
+        collider.0[0].layers.memberships = 1;
+        data.components.insert(
+            Collider3dComponent::TYPE_NAME.into(),
+            json!({"pieces": collider.0}),
+        );
+    }
+    run(&mut physics, &mut world, None, 1);
+    assert!(ray(&physics).is_none());
+    physics
+        .world_mut()
+        .set_kinematic_target(
+            platform,
+            PhysicsPose3d {
+                position: [16.5, top + 1.5, 0.5],
+                ..PhysicsPose3d::default()
+            },
+        )
+        .unwrap();
+    run(&mut physics, &mut world, None, 1);
+    assert!((world.world_transform(actor).unwrap().position[0] - 16.5).abs() < 0.02);
+    assert_eq!(ray(&physics).unwrap().entity, floor);
+    physics
+        .character_requests()
+        .move_character(actor, [1.0, 0.0, 0.0], false)
+        .unwrap();
+    physics
+        .world_mut()
+        .set_kinematic_target(
+            platform,
+            PhysicsPose3d {
+                position: [116.5, top + 1.5, 0.5],
+                ..PhysicsPose3d::default()
+            },
+        )
+        .unwrap();
+    assert!(matches!(
+        physics.step(&mut world, &components(), STEP),
+        Err(PhysicsSyncError::VoxelCollision(
+            VoxelCollisionError3d::Budget("sections")
+        ))
+    ));
+    assert!((world.world_transform(actor).unwrap().position[0] - 16.5).abs() < 0.02);
+    // Solver motion is not rolled back; input survives and old carry is not retried.
+    run(&mut physics, &mut world, None, 1);
+    assert!((world.world_transform(actor).unwrap().position[0] - 17.5).abs() < 0.02);
+    assert!(physics.character_motion(actor).unwrap().platform.is_none());
 }

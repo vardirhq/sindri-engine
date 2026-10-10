@@ -618,7 +618,7 @@ Browser, editor, Decay and Explorer proof of this new primitive remain pending.
 compose opt-in platform carry, the existing Rapier movement query and classified
 zero-travel support at the final endpoint. `GroundedCharacterOptions3d` contains
 `movement: CharacterOptions3d` and nullable `platform_support`. This is general
-Explorer foundation work; scene-owned carry is not wired yet.
+Explorer foundation work; scene ownership is described below.
 
 `PlatformSupport3d` names a runtime entity and its previous synchronized pose.
 Before carrying, current compound geometry is checked at that previous body pose,
@@ -653,8 +653,8 @@ translation once and advance snapshots even when carry is clipped. Retain/captur
 support only from the final classified grounded hit. Clear it on teleport,
 reparenting, rebuild, inactivity, removal and handle reuse, and do not also add
 support motion through parenting, solver velocity or requested displacement.
-Scene integration must account for carry in terrain residency before solving.
-These lifecycle/residency obligations remain the next slice.
+Scene integration accounts for input residency before solving and actual solved
+carry residency before querying movement, as described below.
 
 Large rotations can miss obstacles along the circular arc, and a rising support
 clipped by a ceiling may leave penetration visible in the final ground probe.
@@ -666,18 +666,20 @@ Eight native regressions cover pending versus solved poses, translation/vertical
 motion, rotation, wall clipping, restored support collision, input jumps, masks,
 predicates, sensors, missing/detached/steep/penetrating support, compound offsets
 outside current bounds, clone/copy stability, raw versus classified grounding and
-invalid/extreme input. Scene, Decay, editor, browser and game proof remain pending.
+invalid/extreme input. Scene proof is described below; Decay, editor, browser and
+game proof remain pending.
 
 ## 3D scene ownership
 
-`sindri.physics3d.character` authors the flat `CharacterOptions3d` fields above.
+`sindri.physics3d.character` authors the flat `CharacterOptions3d` fields above
+and `carry_platforms` (default true).
 Defaults and edited payloads use the same validation. A controller requires a
 transform and Collider 3D with exactly one solid box/sphere/capsule; extra sensors
 are allowed. It uses the composed-scale solid piece, including its local offset,
 rotation and filter mask, excludes its whole entity and ignores inactive obstacles.
 Authored rigid bodies, mixed 2D/3D ownership and moving Z locks are rejected.
 The scene derives a stationary velocity-kinematic body. Gameplay still supplies
-all displacement, including gravity and jumps; solver velocities are zeroed before
+input displacement, including gravity and jumps; solver velocities are zeroed before
 solving so they cannot become a second movement owner.
 
 `ScenePhysics3d::character_requests()` returns `CharacterRequests3d`.
@@ -693,26 +695,48 @@ not automatically authorize snapping or become a walkable-support decision.
 Controller settings and scaled geometry validate beside the ordinary body batch
 before lifecycle changes. Voxel residency includes each character's geometry,
 requested travel and skin/snap/step margins even without dynamic bodies. An
-oversized residency window fails before any body changes. Characters are held
-stationary during the solve, then queried against current solved poses in entity
-order. Each successful result applies once; parent-space writeback retains
+oversized input residency window fails before any body changes. Characters are
+held stationary during the solve. Enabled carry captures zero-travel walkable
+support before the solve for fresh or previously classified grounded characters;
+raw Rapier flags never seed it. Other character controllers cannot supply carry
+support in this slice. After solving, actual support translation/rotation-point
+travel expands the same voxel residency, retaining the original input/solver
+window, before any character movement query. Unchanged support poses skip this
+extra plan. This uses actual solved travel rather than predicted platform velocity.
+Characters are then queried against current solved poses in entity order. Each
+successful result applies once; parent-space writeback retains
 rotation and scale. Queries see the applied pose immediately. Physical response
 and discrete sensor events observe it at the following solve, with no push
 impulses or swept trigger events. Stationary bounded correction and all backend
 flag limits from the query contract still apply.
 
-`character_motion(entity)` returns the last applied `CharacterMotion3d`.
+`character_motion(entity)` returns the last applied `GroundedCharacterMotion3d`:
+one total translation, separate `movement` and nullable `platform` carry hits,
+classified `ground` and `grounded`. The raw backend flags remain under `movement`.
+Carry executes before input movement and advances from the current pre-solve
+snapshot each pass, even when clipped. A jump leaves classified grounding and
+prevents support capture on the following pass. Setting `carry_platforms` false
+uses ordinary movement/classification without carry. Parent writeback applies
+world carry once, retaining the rider's world orientation and authored scale;
+parenting does not add a second displacement.
 `for_scripts_with_characters()` supplies disjoint solver/event/request/result
 borrows with `CharacterMotions3d::get(entity)`. Results are immutable snapshots;
 activity must still be checked while reading during a script pass. Settings,
 parenting, scaled geometry, body rebuilds and teleports invalidate caches during
-synchronization; removal/inactivity discard them. Cloning the driver or a Session
+synchronization; removal/inactivity discard them. Support-owner changes also
+invalidate dependent cached rider results. Each pre-solve pass clears transient
+support snapshots and verifies current contact, so stale travel is never retried.
+Cloning the driver or a Session
 checkpoint includes pending input and cached results, without changing saved
 component payloads. `Session::character_requests3d()` exposes the same queue to
 Rust hosts; Decay access is scheduled separately.
 
-As with backend solver failures, a movement-query error after solving is not a
-transactional rollback of the fixed pass. Requests already applied successfully
+As with backend solver failures, an actual-carry residency failure or movement-query
+error after solving is not a transactional rollback of the fixed pass. Carry-window
+budget/geometry failure leaves all riders unmoved and requests queued, although
+the solver and its event state have already advanced. The next successful pass
+captures fresh current support rather than retrying old carry. Requests already
+applied successfully
 are consumed; a failed request and later requests remain queued. Hosts must report
 the error rather than treating an incomplete pass as a successful gameplay frame.
 
@@ -721,5 +745,18 @@ cloned replay, no solver gravity or velocity, masks/sensors, scaled offset probe
 under rotated parents, lifecycle/rebuilds, current solved platform poses,
 immediate query visibility and far-away voxel residency/budget rejection. A
 shared Session regression verifies once-only movement and checkpoint replay.
-This remains partial Explorer foundation evidence: platform carry, Decay,
-controller browser verification, editor interaction and game adoption are pending.
+Additional native regressions cover fresh boarding, solved translation/reversal,
+vertical travel, jump departure, parented rotation without double carry, wall
+clipping without replay, lifecycle invalidation, carry opt-out and flat authoring,
+raw-ground rejection, terrain expansion and post-solve budget failure/input
+retention. Session exercises first-solve carry and checkpoint replay through the
+shared runtime. Stationary rotated support returns exactly zero carry rather than
+accumulating inverse/forward transform rounding. Decay access, controller browser
+verification, editor interaction and Explorer adoption remain pending.
+
+Scoped physics/runtime/scene preflight, warning-denied Clippy (also editor and
+capabilities), catalogue/generated-document checks and Rust 1.95 scene/runtime
+WASM checks pass. The rebuilt generic browser player passes Orbit Camera Lab's
+real WebGPU Chromium capture/denial/goal regression with an inspected screenshot.
+That verifies existing host behavior after this change; the new controller's
+browser/editor interaction and in-tree game proof remain open.

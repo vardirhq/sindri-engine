@@ -1181,6 +1181,7 @@
       "addable": true,
       "apply": {},
       "default_payload": {
+        "carry_platforms": true,
         "max_slope_angle": 0.7853981852531433,
         "min_slide_angle": 0.7853981852531433,
         "skin": 0.009999999776482582,
@@ -1197,6 +1198,7 @@
       },
       "display_name": "Character 3D",
       "fields": {
+        "carry_platforms": true,
         "max_slope_angle": 0.7853981852531433,
         "min_slide_angle": 0.7853981852531433,
         "skin": 0.009999999776482582,

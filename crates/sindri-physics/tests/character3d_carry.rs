@@ -381,3 +381,39 @@ fn compound_offset_support_verifies_old_geometry_outside_current_bounds() {
     near(motion.translation, [100.0; 3]);
     assert!(motion.grounded);
 }
+
+#[test]
+fn stationary_rotated_support_has_exactly_zero_carry_without_rounding_drift() {
+    let mut world = PhysicsWorld3d::new([0.0; 3]).unwrap();
+    let (sin, cos) = (0.37_f32 * 0.5).sin_cos();
+    world
+        .insert_static_collider(
+            id(1),
+            PhysicsPose3d {
+                rotation: [0.0, sin, 0.0, cos],
+                ..at([0.0, -0.5, 0.0])
+            },
+            &[Collider3d::cuboid([5.0, 0.5, 5.0])],
+        )
+        .unwrap();
+    let support = PlatformSupport3d {
+        entity: id(1),
+        previous_pose: world.pose(id(1)).unwrap(),
+    };
+    let motion = query(&world, at([1.7, 0.51, 1.2]), [0.0; 3], Some(support));
+    let carry = motion.platform.unwrap();
+    assert!(
+        carry
+            .requested
+            .into_iter()
+            .all(|axis| axis.abs() < f32::EPSILON)
+    );
+    assert!(
+        carry
+            .motion
+            .translation
+            .into_iter()
+            .all(|axis| axis.abs() < f32::EPSILON)
+    );
+    assert!(carry.motion.collisions.is_empty());
+}
