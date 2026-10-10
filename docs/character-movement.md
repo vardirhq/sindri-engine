@@ -572,6 +572,46 @@ scene behavior after pose synchronization changed. The new movement query is
 not yet exercised in a browser. Decay, editor interaction, moving-platform and
 Explorer goal proof remain pending.
 
+## Classified 3D ground queries
+
+`PhysicsWorld3d::probe_ground(shape, pose, options, filter)` and
+`probe_ground_where(..., include)` return copied `GroundProbe3d` values without
+moving bodies, snapping, changing velocity or choosing gameplay support.
+This is a general prerequisite for Explorer's moving platforms; scene carry and
+Decay access remain pending.
+
+`GroundOptions3d` defaults to world up [0, 1, 0], slope limit pi/4, travel 0.1
+and skin 0.01. Up uses the movement query's squared-unit-norm tolerance of
+0.0001 and normalizes before use. Slope accepts 0..=pi/2, travel must be finite
+and non-negative, and skin finite and positive. The fixed-orientation box,
+sphere or capsule travels downward to the skin, rather than physical contact.
+Zero travel can classify touching or existing skin contacts, allowing numerical
+slack of one percent of skin plus `f32::EPSILON`.
+
+The hit copies obstacle entity, world point/normal and travel distance. The
+nearest surface is retained even when too steep; the query does not look through
+it for a walkable floor. Exact distance ties use entity-handle order, then piece
+order within an entity. A normal must face up and its normalized alignment plus
+1e-6 must meet the cosine of the slope limit. Horizontal walls and ceilings
+remain unwalkable even at pi/2. Any initial contact deeper than `f32::EPSILON`
+blocks support: `started_penetrating` is true and the first penetrating entity
+in stable traversal supplies a zero-distance, zero-normal hit at the probe
+origin. This flag is independent of the movement wrapper's raw Rapier flags.
+
+The same current-pose per-piece index, masks, sensor policy and whole-entity
+exclusion apply. The optional predicate runs once per spatial candidate entity;
+all its pieces reuse that answer. Invalid shapes, poses, settings, overflowing
+probe bounds/extents or nonfinite selected hit geometry fail explicitly. Any
+unbounded obstacle fails the query even when excluded, matching the movement
+wrapper's conservative validation rather than ordinary queries' fallback.
+
+Native regressions cover every probe shape, skin and touching contacts, travel,
+steep nearest support, penetration, arbitrary up, rotated compound offsets,
+filters, predicate reuse, ties, immediate teleports/removal, copies/clone replay
+and invalid/extreme input. They distinguish Rapier's broad grounded prediction
+from classified support and verify support at a movement query's landed endpoint.
+Browser, editor, Decay and Explorer proof of this new primitive remain pending.
+
 ## 3D scene ownership
 
 `sindri.physics3d.character` authors the flat `CharacterOptions3d` fields above.

@@ -1,5 +1,9 @@
 # Changelog
 
+- Add read-only classified 3D ground probes: nearest support geometry, slope
+  limits, skin contacts and explicit initial penetration, using current collider
+  poses and deterministic ties. Scene platform carry and Decay access remain pending.
+
 - Add scene-owned 3D character movement: queued XYZ displacement, scaled solid
   probes, terrain residency, cached movement results and shared Session replay.
   Gameplay owns gravity and jumps; Decay access and platform carry remain pending.

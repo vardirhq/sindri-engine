@@ -307,8 +307,9 @@ solid landing, wall slide, steps/headroom, snap, slopes, arbitrary up, filtering
 teleports, copies, clone replay and invalid input. Platform carry is intentionally
 separate from this displacement query. Rapier contact/flag semantics and bounded
 iteration/correction limits are documented in [Character movement](character-movement.md).
-This is a foundation added for Explorer; scene/Decay/editor/browser controller
-integration, moving platforms and game goal proof remain pending.
+This is a foundation added for Explorer, with scene ownership described below;
+Decay/editor/browser controller integration, moving platforms and game goal
+proof remain pending.
 
 `ScenePhysics3d` now reconciles registered body/collider/world components with
 active scene entities, composed XYZ/quaternion transforms, gravity settings and
@@ -2890,6 +2891,11 @@ The 3D character foundation now has scene ownership through
 requests, scaled single-solid probes, cached results and voxel residency covering
 requested movement. Native scene and shared Session tests exercise filtering,
 parent writeback, invalid input, rebuilds, terrain budgets and checkpoint replay.
+Read-only `probe_ground` queries now classify nearest skin/touching or downward
+support against a slope limit, retain steep hits and flag initial penetration.
+Native tests cover shapes, compound offsets, filters, ties, current poses and
+invalid inputs; [the query contract](character-movement.md#classified-3d-ground-queries)
+records numerical limits. Scene platform carry does not use these probes yet.
 Gameplay supplies gravity/jumps. Platform carry, Decay controls, browser/controller
 and editor interaction, and Explorer adoption remain pending; see
 [the contract](character-movement.md#3d-scene-ownership). This is a general

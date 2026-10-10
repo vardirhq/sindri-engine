@@ -3,6 +3,7 @@
 mod build;
 mod character;
 mod controls;
+mod ground;
 mod pending;
 mod query;
 mod spatial;

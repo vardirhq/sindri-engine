@@ -1416,8 +1416,8 @@ kinematic character controller in engine-owned `CharacterOptions3d`,
 `CharacterMotion3d` and `CharacterCollision3d` values. They are read-only
 world-displacement queries with current-pose geometry, slope/step/snap options
 and copied hit results; applying motion and gameplay policy are separate.
-There is no 3D scene controller or Decay surface yet. This is added generally
-for Explorer's planned movement, with native engine regression evidence and
+Scene ownership is described below; there is no Decay surface yet. This is added
+generally for Explorer's planned movement, with native engine regression evidence and
 honestly pending game/editor/browser proof. See
 [Character movement](character-movement.md#3d-character-movement-foundation)
 for validation, backend flag semantics, numerical limits and remaining slices.
@@ -1433,3 +1433,15 @@ Session uses this same driver, including checkpoints; no host assembles another
 movement loop. Backend limits, request/result lifetime, next-solve sensor timing
 and remaining carry/Decay/game proof are specified in
 [the character contract](character-movement.md#3d-scene-ownership).
+
+### Classified 3D ground queries
+
+`PhysicsWorld3d::probe_ground` and `probe_ground_where` expose read-only nearest
+support geometry through `GroundOptions3d` and copied `GroundProbe3d` values.
+They classify skin/touching contacts and downward casts against a slope limit,
+retain steep nearest surfaces and reject initial penetration as support. Filters,
+stable whole-entity predicate reuse, deterministic ties and current poses use the
+existing query index. No snap, carry or gameplay standing policy is applied.
+Native geometry/filter/lifecycle/invalid-input regressions exercise this general
+Explorer prerequisite; scene platform carry and browser/editor/Decay/game proof
+remain pending. See [the contract](character-movement.md#classified-3d-ground-queries).

@@ -86,7 +86,9 @@ Order:
   flag/correction limits are explicit. Scene-owned requests now derive stationary
   kinematic bodies, extend voxel residency and apply collision-limited travel once
   after solving through Session, with cached results and replay tests. Decay,
-  editor, solved platform carry and Explorer proof remain pending. Continue with
+  editor, solved platform carry and Explorer proof remain pending. Classified
+  read-only ground probes now provide support entities, slope checks and initial
+  penetration rejection with native tests. Continue with
   solved platform support/carry before scripting/game integration; do not add
   gameplay rules in Rust.
 - Then the rest of slice 6, which unblocks moving through 3D (Low Tide's
@@ -290,6 +292,8 @@ placement. The roadmap's "height/mesh terrain next" is this slice.
     and ground-snap options; current poses, copied results and strict validation.
   - [x] Scene-owned requests/results and fixed-step application, scaled probes,
     character voxel residency, lifecycle invalidation and Session replay.
+  - [x] Read-only classified ground probes with support entities, skin contacts,
+    slope limits, penetration rejection, deterministic ties and native tests.
   - [ ] Solved moving-platform support/carry with translation/rotation and
     lifecycle invalidation.
   - [ ] `Physics3d.character_motion` and movement requests in Decay.
