@@ -97,3 +97,28 @@ application a device and a texture view. It does not choose a surface format or
 decide what a failed acquisition means — that is the
 [presentation surface policy](rendering-surface.md). It does not own the game
 loop's simulation semantics, which belong to `sindri-platform`.
+
+## Captured mouse input foundation
+
+`InputEvent::PointerLockChanged` reports actual cursor capture, never merely a
+request. `PointerMotion` carries relative displacement, positive right/down in
+host-defined units, and contributes only while the reported lock is active and
+the input state is focused. Unlocked `PointerMoved` continues to derive
+displacement from absolute viewport positions. While captured, absolute moves
+and leave events are ignored for mouse position, displacement and UI presses,
+so host cursor warps cannot double-count motion or cancel a drag. Touch remains
+independent.
+
+Changing capture mode discards pending displacement and rebases the first
+unlocked absolute move. Duplicate feedback preserves pending motion. Focus loss
+clears capture, motion and the absolute mouse position; returning focus does
+not request recapture. Hosts remain responsible for actually releasing the
+cursor on focus loss. Nonfinite displacement or a sum that overflows is dropped
+as one event. `EngineHost` spends relative displacement exactly once, preserving
+it across frames that earn no fixed step and clearing it after the first catchup
+step while retaining capture state.
+
+This is the shared input foundation only. The windowed host does not yet
+request native cursor capture or browser pointer lock, and Decay has no capture
+request or lock-state API. Those host operations must report actual success,
+release and asynchronous browser denial before the capability is complete.

@@ -1,5 +1,10 @@
 # Changelog
 
+- Add shared input groundwork for pointer lock: actual capture feedback and
+  relative mouse motion, with mode-change rebasing, focus-loss cleanup and
+  once-per-step accumulation. Native/browser capture and Decay controls remain
+  pending.
+
 - Read mouse displacement from Decay with read-only `Pointer.delta` or
   `Input.Pointer.delta`, as a `Vec2` in viewport pixels per fixed step. Orbit
   Camera Lab now supports right-button drag-to-look with adjustable sensitivity

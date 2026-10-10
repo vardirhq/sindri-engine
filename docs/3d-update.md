@@ -64,6 +64,10 @@ Order:
   The Orbit Camera Lab runs to its goal through Session and exported Chromium;
   native and WebGPU captures show pull-in and recovery. Editor/game proof and
   pointer lock remain pending.
+- Pointer-lock groundwork now has shared capture feedback and relative-motion
+  events, with tests for mode changes, focus loss and once-per-step consumption.
+  No shipped host captures the cursor yet; native/browser capture, Decay
+  requests and editor Play integration are the next input slice.
 - Then the rest of slice 6, which unblocks moving through 3D (Low Tide's
   crawler and crew included).
 - Then slices 2 to 4 (measurement, instancing and one lit path, lights),
@@ -252,6 +256,10 @@ placement. The roadmap's "height/mesh terrain next" is this slice.
   - [x] Read-only mouse `Pointer.delta` / `Input.Pointer.delta` in viewport
     pixels per fixed step, with typed access and drag-to-look in Orbit Camera Lab.
   - [ ] Pointer lock in native and browser (`requestPointerLock`).
+    - [x] Shared input capture feedback and relative-motion accumulation,
+      including transition rebasing, focus loss and fixed-step regressions.
+    - [ ] Host capture/release and actual-state feedback, Decay requests and
+      read-only lock state, with native/browser runtime verification.
   - [ ] Explorer game and editor Play input proof.
 - [ ] `sindri.physics3d.character`:
   - a Rapier kinematic character controller, with slopes, steps, ground snap

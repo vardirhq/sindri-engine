@@ -2992,3 +2992,24 @@ the same local eight-color smoke threshold as its earlier capture (fourteen
 colors drawn); the repository browser gate is unchanged. This is feature
 example evidence; Explorer game and editor Play proof remain pending, and
 pointer lock/unbounded relative motion are not implemented.
+
+### Pointer-lock input foundation
+
+The shared platform input state accepts `PointerLockChanged` as actual host
+capture feedback and `PointerMotion` as relative mouse displacement. These are
+platform events, not Decay APIs or capture requests. Relative motion is accepted
+only while captured and focused; cursor warps and leave events do not add motion
+or move/cancel UI presses during capture. Changing capture mode discards pending
+motion and rebases the next absolute position. Focus loss clears capture, pending
+motion and the absolute mouse position; focus regain does not recapture.
+Nonfinite motion and overflowing sums are rejected atomically.
+
+`crates/sindri-platform/tests/pointer_motion.rs` exercises these transitions,
+invalid input and once-only consumption through the real `EngineHost` fixed-step
+loop, including frames with no step and catchup steps. No shipped host emits the
+new events yet. The rebuilt generic player also passed the existing real WebGPU
+Chromium drag regression: the walker reached its goal and Decay received 60
+pixels right/40 down exactly once, with assets loaded and no runtime/GPU errors.
+This verifies unlocked input after the shared-state change, not browser capture.
+Native/browser capture, Decay requests, editor Play and game proof remain
+pending; pointer lock is still absent on those surfaces.
