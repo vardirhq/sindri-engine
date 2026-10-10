@@ -35,6 +35,15 @@ impl Host for WorldHost<'_> {
             return Ok(Some(value));
         }
 
+        if subject.is_none()
+            && let [POINTER, "delta", axis @ ("x" | "y")] = ungrouped(&parts)
+        {
+            let index = usize::from(*axis == "y");
+            return Ok(Some(Value::Number(f64::from(
+                self.context.input.pointer_delta()[index],
+            ))));
+        }
+
         // Where the person is pointing, and how many fingers are down. Facts
         // about the frame like `Time.delta`, and never about a subject: a
         // reference cannot be asked where the mouse is.
@@ -135,6 +144,12 @@ impl Host for WorldHost<'_> {
     ) -> Result<bool, RuntimeError> {
         if subject.is_none() && self.shared_store(path, &value)? {
             return Ok(true);
+        }
+        if subject.is_none() && Self::is_pointer_delta(path) {
+            return Err(RuntimeError::Host(format!(
+                "{} is read-only",
+                path.dotted()
+            )));
         }
         let Some(under) = Self::addressed(subject, path) else {
             return Ok(false);

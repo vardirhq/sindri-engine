@@ -310,3 +310,72 @@ fn a_drag_is_four_lines_of_gameplay() {
         "dragged thirty pixels"
     );
 }
+
+#[test]
+fn mouse_delta_accumulates_once_per_step_and_copies_as_a_vector() {
+    let (mut world, entity, sources) = world(
+        r"
+        script Reader {
+            fn update(dt: f32) {
+                var motion = Input.Pointer.delta;
+                motion.x += 1.0;
+                this.transform.position.x = motion.x;
+                this.transform.position.y = Pointer.delta.y;
+                this.transform.position.z = Input.Pointer.delta.x;
+            }
+        }
+    ",
+    );
+    let mut scripts = Scripts::new();
+    let mut input = InputState::default();
+    input.apply(InputEvent::PointerMoved { x: 100.0, y: 80.0 });
+    assert!(advance(&mut scripts, &mut world, &sources, &input).is_quiet());
+    assert!(
+        position(&world, entity)
+            .into_iter()
+            .zip([1.0, 0.0, 0.0])
+            .all(|(a, b)| (a - b).abs() < 1.0e-5)
+    );
+    input.apply(InputEvent::PointerMoved { x: 110.0, y: 75.0 });
+    input.apply(InputEvent::PointerMoved { x: 125.0, y: 90.0 });
+    assert!(advance(&mut scripts, &mut world, &sources, &input).is_quiet());
+    assert!(
+        position(&world, entity)
+            .into_iter()
+            .zip([26.0, 10.0, 25.0])
+            .all(|(a, b)| (a - b).abs() < 1.0e-5)
+    );
+    input.begin_frame(std::time::Duration::from_millis(16));
+    assert!(advance(&mut scripts, &mut world, &sources, &input).is_quiet());
+    assert!(
+        position(&world, entity)
+            .into_iter()
+            .zip([1.0, 0.0, 0.0])
+            .all(|(a, b)| (a - b).abs() < 1.0e-5)
+    );
+    input.apply(InputEvent::PointerLeft);
+    input.apply(InputEvent::PointerMoved { x: 900.0, y: 500.0 });
+    assert!(advance(&mut scripts, &mut world, &sources, &input).is_quiet());
+    assert!(
+        position(&world, entity)
+            .into_iter()
+            .zip([1.0, 0.0, 0.0])
+            .all(|(a, b)| (a - b).abs() < 1.0e-5)
+    );
+}
+
+#[test]
+fn pointer_delta_is_read_only_through_both_namespaces() {
+    for target in ["Pointer.delta", "Input.Pointer.delta"] {
+        for (suffix, value) in [("", "Vec2(1.0, 2.0)"), (".x", "1.0")] {
+            let source =
+                format!("script Reader {{ fn update(dt: f32) {{ {target}{suffix} = {value}; }} }}");
+            let checked = sindri_decay::check_source(&source);
+            assert!(!checked.compiles(), "{source}");
+            assert!(
+                checked.diagnostics.iter().any(|d| d.code == "immutable"),
+                "{checked:?}"
+            );
+        }
+    }
+}

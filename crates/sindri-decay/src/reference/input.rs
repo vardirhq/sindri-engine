@@ -195,6 +195,10 @@ pub(super) const TYPES: &[TypeEntry] = &[
                 "The pointer's position in pixels, from the top-left corner of the game's view.",
             ),
             value(
+                "delta",
+                "Read-only Vec2 mouse displacement in viewport pixels accumulated for this fixed step: positive right and down. First arrival/re-entry adds no displacement; the next step reads zero without movement. This is displacement, not velocity: do not multiply by dt. Touch uses Gesture.drag_x/drag_y. Pointer lock is not supported yet.",
+            ),
+            value(
                 "x",
                 "The pointer's distance from the left edge of the game's view, in pixels.",
             ),

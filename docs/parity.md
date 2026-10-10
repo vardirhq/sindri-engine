@@ -308,6 +308,8 @@ Sindri's strongest domain relative to the baseline.
 | Feature | Engine | Editor | Decay | Proof | vs. baseline | Gap that matters |
 | --- | :-: | :-: | :-: | :-: | --- | --- |
 | Keyboard, mouse, touch behind the platform boundary | ✅ | ✅ | ✅ | ✅ | **Par** | — |
+| **Mouse displacement for 3D look** | 🟡 | ❌ | 🟡 | 🟡 | **Partial** | Read-only `Pointer.delta` / `Input.Pointer.delta` returns accumulated viewport-pixel mouse movement once per fixed step, positive right/down. Bridge and Orbit Camera Lab Session tests exercise component/vector access, reset, re-entry, atomic write refusal and drag-to-look with pitch limits. Feature example evidence; Explorer and editor Play proof remain absent. Touch uses Gesture, and pointer lock/unbounded relative motion remain absent |
+| **Pointer lock** | ❌ | ❌ | ❌ | ❌ | **Absent** | Native cursor grab and browser `requestPointerLock` are not exposed; mouse look is bounded by the window |
 | Unified pointer, bounded fingers | ✅ | ✅ | ✅ | ✅ | **Par** | — |
 | Touch stick built from a finger | ✅ | — | ✅ | ✅ | **Ahead** | A considered solution to a problem most engines leave to the game. Low Tide steers, walks and drives with it on a phone, draws it where the thumb landed, and its tests play a whole salvage run by touch |
 | **Stick anchor in screen units** | ❌ | — | ❌ | — | **Behind** | `Stick.anchor_x`/`anchor_y` are physical pixels, and a script cannot learn the view's size in pixels, so a game drawing its stick cannot place the ring from the numbers the input came from. Low Tide reads `Pointer.overlay` when the stick engages instead, which is right only while the steering thumb is the pointer's finger |

@@ -63,7 +63,7 @@ Order:
   with world-space follow, aiming, smoothing and sight-line collision pull-in.
   The Orbit Camera Lab runs to its goal through Session and exported Chromium;
   native and WebGPU captures show pull-in and recovery. Editor/game proof and
-  mouse look remain pending.
+  pointer lock remain pending.
 - Then the rest of slice 6, which unblocks moving through 3D (Low Tide's
   crawler and crew included).
 - Then slices 2 to 4 (measurement, instancing and one lit path, lights),
@@ -248,8 +248,11 @@ placement. The roadmap's "height/mesh terrain next" is this slice.
   - [x] Engine-owned orbit/third-person follow with smoothing and collision
     pull-in (a 3D ray), checked in the [Orbit Camera Lab](../examples/orbit/README.md).
   - [ ] Explorer gameplay, editor authoring and browser proof.
-- [ ] Input: pointer delta on `Pointer`, and pointer lock in native and
-  browser (`requestPointerLock`).
+- [ ] Input:
+  - [x] Read-only mouse `Pointer.delta` / `Input.Pointer.delta` in viewport
+    pixels per fixed step, with typed access and drag-to-look in Orbit Camera Lab.
+  - [ ] Pointer lock in native and browser (`requestPointerLock`).
+  - [ ] Explorer game and editor Play input proof.
 - [ ] `sindri.physics3d.character`:
   - a Rapier kinematic character controller, with slopes, steps, ground snap
     and moving platforms;

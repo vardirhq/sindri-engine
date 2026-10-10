@@ -1,6 +1,9 @@
 // The camera stays on the walker's side of the barrier, then returns to its orbit.
 script CameraRig {
-    var elapsed: f32 = 0.0;
+    var yaw: f32 = 0.0;
+    var pitch: f32 = 0.35;
+    @export
+    var sensitivity: f32 = 0.005;
     fn start() {
         let target = World.find("Walker");
         Camera.perspective_fov(this.entity, 65.0);
@@ -10,8 +13,13 @@ script CameraRig {
         Camera.orbit_collision(this.entity, 1.0, 0.2);
     }
     fn update(dt: f32) {
-        elapsed += dt;
-        Camera.orbit(this.entity, World.find("Walker"), elapsed * 0.2, 0.35, 6.0);
+        yaw += dt * 0.2;
+        if Input.Pointer.is_down("Right") && !Input.Pointer.over_ui {
+            let motion = Input.Pointer.delta;
+            yaw -= motion.x * sensitivity;
+            pitch = clamp(pitch + motion.y * sensitivity, -1.2, 1.2);
+        }
+        Camera.orbit(this.entity, World.find("Walker"), yaw, pitch, 6.0);
     }
 }
 

@@ -1986,6 +1986,7 @@ not require the singular 2D behavior camera.
 | `Pointer.overlay_x` | `f32` |
 | `Pointer.overlay_y` | `f32` |
 | `Pointer.position` | `Vec2` |
+| `Pointer.delta` (read-only) | `Vec2` |
 | `Pointer.overlay` | `Vec2` |
 | `Pointer.inside` | `bool` |
 | `Pointer.over_ui` | `bool` |
@@ -1995,6 +1996,17 @@ not require the singular 2D behavior camera.
 | `Pointer.is_down(button)` | `bool` |
 | `Pointer.just_pressed(button)` | `bool` |
 | `Pointer.just_released(button)` | `bool` |
+
+`Pointer.delta` (also `Input.Pointer.delta`) is mouse displacement in viewport
+pixels accumulated until the next fixed step: positive X is right, positive Y
+is down. Read the whole vector or `.x`/`.y`; assigning either the value or a
+component is rejected. A mutable copy is independent. First arrival and
+re-entry establish a position without adding displacement; steps without
+movement read zero. Multiply by sensitivity in radians per pixel for mouse
+look, without multiplying by `dt`. Touch motion uses `Gesture.drag_x`/`drag_y`;
+this value is mouse-only. Pointer lock and unbounded relative motion are still
+absent, so movement stops at the window edge. Orbit Camera Lab demonstrates
+right-button mouse look with pitch clamping.
 
 | Path | Type |
 | --- | --- |

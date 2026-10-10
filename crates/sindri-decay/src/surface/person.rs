@@ -66,6 +66,7 @@ pub(crate) enum PointerValue {
     OverlayX,
     OverlayY,
     Position,
+    Delta,
     Overlay,
 }
 pub(crate) const POINTER_VALUES: &[(&str, PointerValue)] = &[
@@ -74,6 +75,7 @@ pub(crate) const POINTER_VALUES: &[(&str, PointerValue)] = &[
     ("overlay_x", PointerValue::OverlayX),
     ("overlay_y", PointerValue::OverlayY),
     ("position", PointerValue::Position),
+    ("delta", PointerValue::Delta),
     ("overlay", PointerValue::Overlay),
     ("inside", PointerValue::Inside),
     ("over_ui", PointerValue::OverUi),

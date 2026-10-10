@@ -6,7 +6,8 @@ use decay_runtime::{RuntimeError, Value};
 use super::WorldHost;
 use super::convert::{as_f32, number};
 use crate::surface::{
-    AimValue, CameraCall, CameraValue, GestureValue, PointerValue, StickValue, TouchCall,
+    AimValue, CameraCall, CameraValue, GestureValue, INPUT, POINTER, PointerValue, StickValue,
+    TouchCall,
 };
 
 impl WorldHost<'_> {
@@ -172,6 +173,17 @@ impl WorldHost<'_> {
         }
     }
 
+    pub(super) fn is_pointer_delta(path: &Path) -> bool {
+        let mut parts = path.0.iter().map(String::as_str);
+        let root = parts.next();
+        let namespace = if root == Some(INPUT) {
+            parts.next()
+        } else {
+            root
+        };
+        namespace == Some(POINTER) && parts.next() == Some("delta")
+    }
+
     pub(super) fn pointer_value(&self, value: PointerValue) -> Value {
         let position = self.context.input.pointer_position();
         let overlay = || {
@@ -187,6 +199,10 @@ impl WorldHost<'_> {
             ),
             PointerValue::Position => {
                 let [x, y] = position.unwrap_or([0.0, 0.0]);
+                Value::Vec2([f64::from(x), f64::from(y)])
+            }
+            PointerValue::Delta => {
+                let [x, y] = self.context.input.pointer_delta();
                 Value::Vec2([f64::from(x), f64::from(y)])
             }
             PointerValue::Overlay => {

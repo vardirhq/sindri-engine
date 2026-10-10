@@ -2983,6 +2983,13 @@
       "description": "The mouse, or a finger on a touch screen, handled the same way so one game works on both.",
       "members": [
         {
+          "description": "Read-only Vec2 mouse displacement in viewport pixels accumulated for this fixed step: positive right and down. First arrival/re-entry adds no displacement; the next step reads zero without movement. This is displacement, not velocity: do not multiply by dt. Touch uses Gesture.drag_x/drag_y. Pointer lock is not supported yet.",
+          "kind": "value",
+          "name": "delta",
+          "read_only": true,
+          "type": "Vec2"
+        },
+        {
           "description": "Whether the mouse is over the game or a finger is on the screen. Check this before trusting a position.",
           "kind": "value",
           "name": "inside",

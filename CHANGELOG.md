@@ -1,5 +1,10 @@
 # Changelog
 
+- Read mouse displacement from Decay with read-only `Pointer.delta` or
+  `Input.Pointer.delta`, as a `Vec2` in viewport pixels per fixed step. Orbit
+  Camera Lab now supports right-button drag-to-look with adjustable sensitivity
+  and pitch limits. Pointer lock remains pending.
+
 - Follow a 3D target with an engine-owned orbit camera: smooth movement, aiming,
   immediate obstruction pull-in and recovery when the view clears. Decay selects
   explicit camera entities, changes orbit settings and perspective FOV, and can

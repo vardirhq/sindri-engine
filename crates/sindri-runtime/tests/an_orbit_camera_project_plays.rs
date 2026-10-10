@@ -69,3 +69,41 @@ fn an_orbit_camera_pulls_in_recovers_and_follows_the_walker_to_its_goal() {
     assert!((payload["vertical_fov_degrees"].as_f64().unwrap() - 65.0).abs() < 1.0e-6);
     assert!((payload["near"].as_f64().unwrap() - 0.1).abs() < 1.0e-6);
 }
+
+#[test]
+fn mouse_drag_changes_orbit_angles_once_and_clamps_pitch() {
+    use sindri_platform::{InputEvent, MouseButton};
+    let path = Path::new(env!("CARGO_MANIFEST_DIR")).join("../../examples/orbit");
+    let mut run = ProjectRun::open(&path, [960.0, 540.0]).unwrap();
+    let camera = run.entity("camera").expect("authored camera");
+    run.input
+        .apply(InputEvent::PointerMoved { x: 100.0, y: 100.0 });
+    run.step(STEP).unwrap();
+    run.input
+        .apply(InputEvent::PointerMoved { x: 120.0, y: 110.0 });
+    run.step(STEP).unwrap();
+    let orbit = &run.world.get(camera).unwrap().components["sindri.camera.orbit"];
+    assert!((orbit["pitch"].as_f64().unwrap() - 0.35).abs() < 1.0e-6);
+    run.input
+        .apply(InputEvent::ButtonPressed(MouseButton::Right));
+    run.input
+        .apply(InputEvent::PointerMoved { x: 180.0, y: 150.0 });
+    let report = run.step(STEP).unwrap();
+    assert!(report.scripts.is_quiet(), "{:?}", report.scripts);
+    assert!(report.problems.is_empty(), "{:?}", report.problems);
+    let orbit = &run.world.get(camera).unwrap().components["sindri.camera.orbit"];
+    let yaw = orbit["yaw"].as_f64().unwrap();
+    assert!((yaw - (f64::from(STEP) * 0.6 - 0.3)).abs() < 1.0e-6);
+    assert!((orbit["pitch"].as_f64().unwrap() - 0.55).abs() < 1.0e-6);
+    run.step(STEP).unwrap();
+    let orbit = &run.world.get(camera).unwrap().components["sindri.camera.orbit"];
+    assert!((orbit["yaw"].as_f64().unwrap() - yaw - f64::from(STEP) * 0.2).abs() < 1.0e-6);
+    run.input.apply(InputEvent::PointerMoved {
+        x: 180.0,
+        y: 10000.0,
+    });
+    let report = run.step(STEP).unwrap();
+    assert!(report.problems.is_empty(), "{:?}", report.problems);
+    let orbit = &run.world.get(camera).unwrap().components["sindri.camera.orbit"];
+    assert!((orbit["pitch"].as_f64().unwrap() - 1.2).abs() < 1.0e-6);
+}

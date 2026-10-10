@@ -462,9 +462,9 @@ impl Server {
             return members;
         }
 
-        let start = usize::from(first == "this");
-        for segment in &chain[start..] {
-            let symbol = if start == 1 && current.is_none() {
+        // The root is already resolved; walk only its members.
+        for segment in &chain[1..] {
+            let symbol = if first == "this" && current.is_none() {
                 self.environment
                     .this()
                     .member(segment)

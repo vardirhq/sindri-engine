@@ -408,6 +408,7 @@ Independent 3D physics controls, indexed queries and copied last-step events. Re
 
 The mouse, or a finger on a touch screen, handled the same way so one game works on both.
 
+- `delta`: `Vec2` (read-only) — Read-only Vec2 mouse displacement in viewport pixels accumulated for this fixed step: positive right and down. First arrival/re-entry adds no displacement; the next step reads zero without movement. This is displacement, not velocity: do not multiply by dt. Touch uses Gesture.drag_x/drag_y. Pointer lock is not supported yet.
 - `inside`: `bool` — Whether the mouse is over the game or a finger is on the screen. Check this before trusting a position.
 - `is_down(button: String)` → `bool` — Whether a mouse button, `"Left"`, `"Middle"` or `"Right"`, is held. A finger on the screen counts as `"Left"`.
 - `just_pressed(button: String)` → `bool` — Whether a mouse button was pressed this frame.

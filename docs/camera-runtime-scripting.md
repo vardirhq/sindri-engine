@@ -94,3 +94,9 @@ remain separate capabilities.
 through the shared runtime while exercising FOV, pull-in, recovery and aiming.
 It is feature evidence; Explorer's gameplay, editor and browser proof remain
 pending.
+
+Orbit Camera Lab also demonstrates mouse look: `Input.Pointer.delta` is a
+read-only `Vec2` displacement in viewport pixels for this fixed step. Its Decay
+script applies sensitivity without `dt`, ignores UI captures and clamps pitch.
+Pointer lock remains a separate dependency; dragging cannot cross the window
+edge yet. Touch games should use the existing `Gesture` drag surface.

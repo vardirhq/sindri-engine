@@ -253,6 +253,25 @@ fn runtime_refuses_direction_writes_even_without_the_compiler() {
             );
         }
     }
+    for prefix in [vec!["Pointer", "delta"], vec!["Input", "Pointer", "delta"]] {
+        for (suffix, value) in [
+            (vec![], Value::Vec2([1.0, 2.0])),
+            (vec!["x"], Value::Number(2.0)),
+        ] {
+            let path = Path(
+                prefix
+                    .iter()
+                    .chain(&suffix)
+                    .map(|v| (*v).to_owned())
+                    .collect(),
+            );
+            let error = host.store(None, &path, value).unwrap_err();
+            assert!(
+                matches!(&error, decay_runtime::RuntimeError::Host(message) if message.contains("read-only")),
+                "{error:?}"
+            );
+        }
+    }
     assert_eq!(
         world.get(actor).unwrap().transform_3d,
         Some(Transform3D::default())

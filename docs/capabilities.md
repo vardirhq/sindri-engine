@@ -2969,3 +2969,26 @@ asset-fetch, WebGPU, pixel and script-error checks. Repeated local Chromium runs
 collected five coins with eight jumps and no falls. This completes the 2D
 controller proof for the genre showcase; it does not supply a 3D controller or
 close the separately documented compound/solver/trigger/carry limitations.
+
+### Mouse delta for 3D camera scripts
+
+`Pointer.delta` and `Input.Pointer.delta` expose the existing platform mouse
+movement accumulator as a read-only `Vec2`, including component reads. Movement
+is in viewport pixels, positive right/down, spent once per fixed step; a first
+arrival/re-entry adds no jump. It is displacement rather than velocity, and
+independent of touch (`Gesture` remains the touch drag surface). Compiler and
+runtime reject writes, while a copied vector stays mutable. Bridge regressions
+exercise accumulated movement, reset, re-entry and both namespaces; LSP tests
+check completion/hover from the same host metadata.
+
+Orbit Camera Lab uses it for right-button drag-to-look, with sensitivity and
+pitch limits in Decay. Its Session regression checks yaw/pitch changes, no
+repeated displacement on the next step and pitch clamping. Real WebGPU
+Chromium drove a right-button drag through the exported generic player; a
+console observer in a disposable copy recorded exactly 60 pixels right and 40
+down, once. Assets loaded, the walker reached its goal and inspected captures
+showed the camera response without runtime/GPU errors. The flat-color lab used
+the same local eight-color smoke threshold as its earlier capture (fourteen
+colors drawn); the repository browser gate is unchanged. This is feature
+example evidence; Explorer game and editor Play proof remain pending, and
+pointer lock/unbounded relative motion are not implemented.

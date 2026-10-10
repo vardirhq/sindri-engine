@@ -127,17 +127,18 @@ pub(super) fn add_gesture_surface(environment: &mut Environment) {
 pub(super) fn add_pointer_surface(environment: &mut Environment) {
     let mut pointer = HostType::new();
     for (name, value) in POINTER_VALUES {
-        pointer = pointer.with_value(
-            *name,
-            match value {
-                PointerValue::X
-                | PointerValue::Y
-                | PointerValue::OverlayX
-                | PointerValue::OverlayY => Type::F32,
-                PointerValue::Inside | PointerValue::OverUi => Type::Bool,
-                PointerValue::Position | PointerValue::Overlay => Type::Vec2,
-            },
-        );
+        let value_type = match value {
+            PointerValue::X | PointerValue::Y | PointerValue::OverlayX | PointerValue::OverlayY => {
+                Type::F32
+            }
+            PointerValue::Inside | PointerValue::OverUi => Type::Bool,
+            PointerValue::Position | PointerValue::Delta | PointerValue::Overlay => Type::Vec2,
+        };
+        pointer = if *value == PointerValue::Delta {
+            pointer.with_read_only_value(*name, value_type)
+        } else {
+            pointer.with_value(*name, value_type)
+        };
     }
     for (name, _) in POINTER_QUERIES {
         pointer = pointer.with_function(
