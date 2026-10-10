@@ -7,168 +7,196 @@
       "description": "What the player means rather than what they pressed: the input actions the scene declares, such as `\"jump\"` or `\"move\"`, each bound to keys, buttons and sticks that can be changed while the game runs. A binding is written as text: `\"key.Space\"`, two sources for an axis (`\"key.A/key.D\"`), or four for a direction (`\"key.W/key.S/key.A/key.D\"`). A name the scene does not declare is an error.",
       "kind": "value",
       "name": "Action",
+      "read_only": false,
       "type": "Action"
     },
     {
       "description": "Which block in a 3D block world the mouse or finger is pointing at, for building and digging games.",
       "kind": "value",
       "name": "Aim",
+      "read_only": false,
       "type": "Aim"
     },
     {
       "description": "Playing an object's animations, such as walk or jump, set up for it in the scene.",
       "kind": "value",
       "name": "Animation",
+      "read_only": false,
       "type": "Animation"
     },
     {
       "description": "Playing sound effects and music. Every sound goes through a bus — `\"effects\"`, `\"music\"`, or any other name — and every bus through `\"master\"`, so a settings screen can turn each down.",
       "kind": "value",
       "name": "Audio",
+      "read_only": false,
       "type": "Audio"
     },
     {
-      "description": "The game's camera: sizing an orthographic view and changing engine-owned follow, confinement, and shake behavior.",
+      "description": "The game's camera: projection sizing, 3D orbit with obstruction pull-in, and engine-owned 2D follow, confinement and shake.",
       "kind": "value",
       "name": "Camera",
+      "read_only": false,
       "type": "Camera"
     },
     {
       "description": "Particle effects, such as sparks and explosions. The particles are only drawn; they are not objects and nothing can touch them.",
       "kind": "value",
       "name": "Effects",
+      "read_only": false,
       "type": "Effects"
     },
     {
       "description": "Numbers stored under names that every script can read and write, such as a score. Declaring them with `state` is safer, because a misspelt name then becomes an error.",
       "kind": "value",
       "name": "Game",
+      "read_only": false,
       "type": "Game"
     },
     {
       "description": "Game controllers. Each player gets a number from 1 to 8 when they press a button on their controller; 0 means any controller.",
       "kind": "value",
       "name": "Gamepad",
+      "read_only": false,
       "type": "Gamepad"
     },
     {
       "description": "What the player did with the mouse or a finger: a tap, a hold, a drag or a pinch. Works the same for both.",
       "kind": "value",
       "name": "Gesture",
+      "read_only": false,
       "type": "Gesture"
     },
     {
       "description": "Grids of tiles, flat or stacked in layers like building blocks: what each cell holds, where objects stand on them, and paths across them.",
       "kind": "value",
       "name": "Grid",
+      "read_only": false,
       "type": "Grid"
     },
     {
       "description": "Every way the player reaches the game, in one place. Start with `Input.Action`, which works the same whatever the player holds; `Input.Pointer`, `Input.Stick` and `Input.Gesture` for mouse and touch; `Input.Keyboard`, `Input.Touch` and `Input.Gamepad` for one device read directly. The calls directly on `Input` are the keyboard, kept for older scripts: prefer `Input.Keyboard`.",
       "kind": "value",
       "name": "Input",
+      "read_only": false,
       "type": "Input"
     },
     {
       "description": "The number π (3.14159…): half a full turn when measuring angles in radians.",
       "kind": "value",
       "name": "PI",
+      "read_only": false,
       "type": "f32"
     },
     {
       "description": "2D physics: moving objects with speed and pushes, and finding out what this script's object bumped into.",
       "kind": "value",
       "name": "Physics",
+      "read_only": false,
       "type": "Physics"
     },
     {
       "description": "Independent 3D physics controls, indexed queries and copied last-step events. Requires a 3D physics host. Controls require an active body. Before synchronization, valid authored 3D bodies and nonempty colliders accept ordered setters/impulses; replay uses actual compound mass. Unconsumed requests expire after successful synchronization. Authored motion fields are unchanged, so structural rebuilds restore authored settings.",
       "kind": "value",
       "name": "Physics3d",
+      "read_only": false,
       "type": "Physics3d"
     },
     {
       "description": "The mouse, or a finger on a touch screen, handled the same way so one game works on both.",
       "kind": "value",
       "name": "Pointer",
+      "read_only": false,
       "type": "Pointer"
     },
     {
       "description": "Reading settings from a profile, a data file shared across a project, such as a weapon's damage and fire rate.",
       "kind": "value",
       "name": "Profiles",
+      "read_only": false,
       "type": "Profiles"
     },
     {
       "description": "Random numbers. The same seed always gives the same numbers, so a run can be replayed.",
       "kind": "value",
       "name": "Random",
+      "read_only": false,
       "type": "Random"
     },
     {
       "description": "Saving progress between play sessions: numbers and true/false values stored under names, such as a best score.",
       "kind": "value",
       "name": "Save",
+      "read_only": false,
       "type": "Save"
     },
     {
       "description": "Scenes are a game's separate places or screens, such as a menu, a level or a shop. This asks which one is playing and moves to another.",
       "kind": "value",
       "name": "Scene",
+      "read_only": false,
       "type": "Scene"
     },
     {
       "description": "Playing an object's sequences: choreography set up for it in the scene's Timeline, such as a title sliding in or a door opening, with named cues along the way.",
       "kind": "value",
       "name": "Sequence",
+      "read_only": false,
       "type": "Sequence"
     },
     {
       "description": "A virtual joystick for touch screens: wherever a thumb lands becomes the centre, and dragging from there steers.",
       "kind": "value",
       "name": "Stick",
+      "read_only": false,
       "type": "Stick"
     },
     {
       "description": "The number τ (6.28318…), which is 2π: one full turn when measuring angles in radians.",
       "kind": "value",
       "name": "TAU",
+      "read_only": false,
       "type": "f32"
     },
     {
       "description": "Time in the game. A game runs as a series of frames, many times a second.",
       "kind": "value",
       "name": "Time",
+      "read_only": false,
       "type": "Time"
     },
     {
       "description": "Every finger on a touch screen, numbered from 0, for games that need more than one finger.",
       "kind": "value",
       "name": "Touch",
+      "read_only": false,
       "type": "Touch"
     },
     {
       "description": "Creates automatically playing gameplay tweens owned by the calling script. Copies alias playback state. Advance occurs before the owner's subsequent updates using script delta. No automatic property binding. Curves: linear, ease, ease-in, ease-out, ease-in-out. Finite endpoints and finite non-negative duration are required; zero duration completes immediately. Maximum 8192 retained handles per runner; dispose unused handles.",
       "kind": "value",
       "name": "Tween",
+      "read_only": false,
       "type": "Tween"
     },
     {
       "description": "The interface drawn over the game: changing text and bars, and checking buttons and sliders.",
       "kind": "value",
       "name": "Ui",
+      "read_only": false,
       "type": "Ui"
     },
     {
       "description": "The area of the screen the game is drawn in.",
       "kind": "value",
       "name": "Viewport",
+      "read_only": false,
       "type": "Viewport"
     },
     {
       "description": "Finding, creating and removing the objects in a game. Every object in a scene (a player, an enemy, a button) is an entity.",
       "kind": "value",
       "name": "World",
+      "read_only": false,
       "type": "World"
     },
     {
@@ -372,30 +400,35 @@
       "description": "The object in the game this script is attached to. Pass it to calls that act on an object, such as `World.despawn(this.entity)`.",
       "kind": "value",
       "name": "entity",
+      "read_only": false,
       "type": "Entity"
     },
     {
       "description": "The drawn shape on this script's object, if it has one: its colors, outline and how much of it is drawn.",
       "kind": "value",
       "name": "shape",
+      "read_only": false,
       "type": "Shape"
     },
     {
       "description": "The image (sprite) on this script's object, if it has one: its color and drawing order.",
       "kind": "value",
       "name": "sprite",
+      "read_only": false,
       "type": "Sprite"
     },
     {
       "description": "Where this script's object is, how it is turned and how big it is. Change it to move the object.",
       "kind": "value",
       "name": "transform",
+      "read_only": false,
       "type": "Transform"
     },
     {
       "description": "The on-screen interface image on this script's object, if it has one: its color and drawing order.",
       "kind": "value",
       "name": "ui_image",
+      "read_only": false,
       "type": "UiImage"
     }
   ],
@@ -509,42 +542,49 @@
           "description": "Whether the pointer is over a block. Always check this first: when it is false, every other `Aim` value is 0, which is a real position.",
           "kind": "value",
           "name": "hit",
+          "read_only": false,
           "type": "bool"
         },
         {
           "description": "Where a new block would go if placed now: the column of the empty space next to the side being pointed at.",
           "kind": "value",
           "name": "place_x",
+          "read_only": false,
           "type": "f32"
         },
         {
           "description": "The row where a new block would go.",
           "kind": "value",
           "name": "place_y",
+          "read_only": false,
           "type": "f32"
         },
         {
           "description": "The height level where a new block would go.",
           "kind": "value",
           "name": "place_z",
+          "read_only": false,
           "type": "f32"
         },
         {
           "description": "The column of the block being pointed at.",
           "kind": "value",
           "name": "x",
+          "read_only": false,
           "type": "f32"
         },
         {
           "description": "The row of the block being pointed at.",
           "kind": "value",
           "name": "y",
+          "read_only": false,
           "type": "f32"
         },
         {
           "description": "The height level of the block being pointed at.",
           "kind": "value",
           "name": "z",
+          "read_only": false,
           "type": "f32"
         }
       ],
@@ -761,7 +801,7 @@
       "name": "Audio"
     },
     {
-      "description": "The game's camera: sizing an orthographic view and changing engine-owned follow, confinement, and shake behavior.",
+      "description": "The game's camera: projection sizing, 3D orbit with obstruction pull-in, and engine-owned 2D follow, confinement and shake.",
       "members": [
         {
           "description": "Adds impact trauma to the authored behavior camera. Bigger amounts shake harder, up to 1, and the authored shake fades by itself.",
@@ -807,6 +847,18 @@
           "name": "clear_follow",
           "parameter_names": [],
           "parameters": [],
+          "returns": "unit"
+        },
+        {
+          "description": "Removes an explicit camera's orbit while keeping its last pose. Any existing 2D camera behavior resumes.",
+          "kind": "function",
+          "name": "clear_orbit",
+          "parameter_names": [
+            "camera"
+          ],
+          "parameters": [
+            "Entity"
+          ],
           "returns": "unit"
         },
         {
@@ -876,6 +928,70 @@
           "returns": "unit"
         },
         {
+          "description": "Creates or retargets an explicit camera's engine-owned world-space orbit. Angles are radians; zero yaw is +Z behind the target, positive pitch is above it. Preserves offset, smoothing and collision settings. Target must be an active authored spatial entity, independent of the camera hierarchy.",
+          "kind": "function",
+          "name": "orbit",
+          "parameter_names": [
+            "camera",
+            "target",
+            "yaw",
+            "pitch",
+            "distance"
+          ],
+          "parameters": [
+            "Entity",
+            "Entity",
+            "f32",
+            "f32",
+            "f32"
+          ],
+          "returns": "unit"
+        },
+        {
+          "description": "Sets collider membership bits and world-unit pull-in padding below orbit distance. Mask must be a whole u32; zero disables queries. Sensors, the camera and target are excluded; a ray protects the sight line, not the near-plane volume.",
+          "kind": "function",
+          "name": "orbit_collision",
+          "parameter_names": [
+            "camera",
+            "mask",
+            "padding"
+          ],
+          "parameters": [
+            "Entity",
+            "f32",
+            "f32"
+          ],
+          "returns": "unit"
+        },
+        {
+          "description": "Sets the orbit focus offset in world units from the target's world position.",
+          "kind": "function",
+          "name": "orbit_offset",
+          "parameter_names": [
+            "camera",
+            "offset"
+          ],
+          "parameters": [
+            "Entity",
+            "Vec3"
+          ],
+          "returns": "unit"
+        },
+        {
+          "description": "Sets exponential orbit position smoothing per second. Zero snaps. Obstruction pull-in remains immediate.",
+          "kind": "function",
+          "name": "orbit_smoothing",
+          "parameter_names": [
+            "camera",
+            "rate"
+          ],
+          "parameters": [
+            "Entity",
+            "f32"
+          ],
+          "returns": "unit"
+        },
+        {
           "description": "Sets an explicitly selected orthographic camera's view size to a positive finite number. Works without camera behavior and preserves clipping, fit and unknown camera fields.",
           "kind": "function",
           "name": "orthographic_size",
@@ -893,19 +1009,36 @@
           "description": "How far the camera view is moved sideways from where it was placed in the scene.",
           "kind": "value",
           "name": "pan_x",
+          "read_only": false,
           "type": "f32"
         },
         {
           "description": "How far the camera view is moved up or down from where it was placed in the scene.",
           "kind": "value",
           "name": "pan_y",
+          "read_only": false,
           "type": "f32"
         },
         {
           "description": "How far the camera view is moved forwards or backwards from where it was placed in the scene.",
           "kind": "value",
           "name": "pan_z",
+          "read_only": false,
           "type": "f32"
+        },
+        {
+          "description": "Sets an explicit perspective camera's vertical field of view in degrees, strictly between 0 and 180. Preserves clipping and unknown fields; requires no behavior component.",
+          "kind": "function",
+          "name": "perspective_fov",
+          "parameter_names": [
+            "camera",
+            "degrees"
+          ],
+          "parameters": [
+            "Entity",
+            "f32"
+          ],
+          "returns": "unit"
         },
         {
           "description": "Changes the authored behavior camera's shake strength, frequency, and trauma decay.",
@@ -939,118 +1072,279 @@
       "name": "Camera"
     },
     {
+      "description": "Verified solved platform carry, already included in total character translation. A platform rotation moves the probe origin along a straight swept chord; it does not rotate the actor.",
+      "members": [
+        {
+          "description": "Active existing platform entity whose solved movement carried the actor.",
+          "kind": "value",
+          "name": "entity",
+          "read_only": false,
+          "type": "Entity"
+        },
+        {
+          "description": "Collision-limited CharacterMovement3d carry phase, separate from ordinary movement.",
+          "kind": "value",
+          "name": "motion",
+          "read_only": false,
+          "type": "CharacterMovement3d"
+        },
+        {
+          "description": "World-space Vec3 displacement requested by the platform's previous/current poses.",
+          "kind": "value",
+          "name": "requested",
+          "read_only": false,
+          "type": "Vec3"
+        }
+      ],
+      "name": "CharacterCarry3d"
+    },
+    {
+      "description": "One historical movement-phase collision; internal stair and snap probes are not events.",
+      "members": [
+        {
+          "description": "Copied world-space RayHit3d for the collided piece; distance belongs to this sweep phase.",
+          "kind": "value",
+          "name": "hit",
+          "read_only": false,
+          "type": "RayHit3d"
+        },
+        {
+          "description": "World-space Vec3 movement already applied at this collision.",
+          "kind": "value",
+          "name": "translation_applied",
+          "read_only": false,
+          "type": "Vec3"
+        },
+        {
+          "description": "World-space Vec3 movement remaining at this collision.",
+          "kind": "value",
+          "name": "translation_remaining",
+          "read_only": false,
+          "type": "Vec3"
+        }
+      ],
+      "name": "CharacterCollision3d"
+    },
+    {
       "description": "A copied result of scene-owned 2D character movement. Gameplay reads support and collision flags to choose its own gravity, jump and recovery policy. This is historical movement, not a live solver contact or a pending request.",
       "members": [
         {
           "description": "Copied ordered carry RayHit2d values, filtered to active existing entities.",
           "kind": "value",
           "name": "carry_collisions",
+          "read_only": false,
           "type": "List<RayHit2d>"
         },
         {
           "description": "Whether the carry sweep exhausted its iteration budget; false without carry.",
           "kind": "value",
           "name": "carry_iteration_limit_reached",
+          "read_only": false,
           "type": "bool"
         },
         {
           "description": "Platform translation/rotation-point displacement requested for carry, or zero without carry. Remains historical even when the platform reference is filtered.",
           "kind": "value",
           "name": "carry_requested",
+          "read_only": false,
           "type": "Vec2"
         },
         {
           "description": "Whether the carry sweep started in strict penetration; false without carry.",
           "kind": "value",
           "name": "carry_started_penetrating",
+          "read_only": false,
           "type": "bool"
         },
         {
           "description": "Collision-limited carry displacement included once in translation, or zero without carry.",
           "kind": "value",
           "name": "carry_translation",
+          "read_only": false,
           "type": "Vec2"
         },
         {
           "description": "Copied ordered slide RayHit2d values, filtered to active existing entities. Distances belong to each sweep phase.",
           "kind": "value",
           "name": "collisions",
+          "read_only": false,
           "type": "List<RayHit2d>"
         },
         {
           "description": "Nearest support-query RayHit2d before landing/snap, or null when absent or inactive. Distance describes that downward travel.",
           "kind": "value",
           "name": "ground",
+          "read_only": false,
           "type": "RayHit2d?"
         },
         {
           "description": "Whether the support probe started in strict penetration.",
           "kind": "value",
           "name": "ground_started_penetrating",
+          "read_only": false,
           "type": "bool"
         },
         {
           "description": "Whether the ground hit meets the authored up/slope limit; false when the hit is absent or filtered.",
           "kind": "value",
           "name": "ground_walkable",
+          "read_only": false,
           "type": "bool"
         },
         {
           "description": "Whether the completed endpoint has walkable support and the request was not ascending or penetrating. False if the ground entity is now inactive or removed.",
           "kind": "value",
           "name": "grounded",
+          "read_only": false,
           "type": "bool"
         },
         {
           "description": "Whether the selected slide exhausted its bounded iteration budget.",
           "kind": "value",
           "name": "iteration_limit_reached",
+          "read_only": false,
           "type": "bool"
         },
         {
           "description": "Verified carrying entity, or null without carry or when it is now inactive/removed.",
           "kind": "value",
           "name": "platform",
+          "read_only": false,
           "type": "Entity"
         },
         {
           "description": "Unsatisfied slide displacement when the iteration budget is exhausted; collision-blocked normal motion is discarded.",
           "kind": "value",
           "name": "remaining",
+          "read_only": false,
           "type": "Vec2"
         },
         {
           "description": "Selected collision-limited slide displacement, after carry or from the lifted pose of an accepted step.",
           "kind": "value",
           "name": "slide_translation",
+          "read_only": false,
           "type": "Vec2"
         },
         {
           "description": "Additional downward landing/snap translation, or zero.",
           "kind": "value",
           "name": "snap_translation",
+          "read_only": false,
           "type": "Vec2"
         },
         {
           "description": "Whether the selected character slide started in strict penetration; carry reports its own flag.",
           "kind": "value",
           "name": "started_penetrating",
+          "read_only": false,
           "type": "bool"
         },
         {
           "description": "Accepted step lift, or zero for ordinary movement.",
           "kind": "value",
           "name": "step_translation",
+          "read_only": false,
           "type": "Vec2"
         },
         {
           "description": "Total world displacement applied once at the last fixed step, including slide, step, snap and platform carry.",
           "kind": "value",
           "name": "translation",
+          "read_only": false,
           "type": "Vec2"
         }
       ],
       "name": "CharacterMotion2d"
+    },
+    {
+      "description": "Copied historical scene-owned 3D character result. Gameplay chooses gravity, jumping and recovery. This is not a live contact or pending request.",
+      "members": [
+        {
+          "description": "Zero-travel endpoint support RayHit3d or null when absent/inactive. It is independent of raw backend grounded.",
+          "kind": "value",
+          "name": "ground",
+          "read_only": false,
+          "type": "RayHit3d?"
+        },
+        {
+          "description": "Whether the endpoint support probe started in strict penetration.",
+          "kind": "value",
+          "name": "ground_started_penetrating",
+          "read_only": false,
+          "type": "bool"
+        },
+        {
+          "description": "Whether the active ground hit satisfies authored up and slope limit.",
+          "kind": "value",
+          "name": "ground_walkable",
+          "read_only": false,
+          "type": "bool"
+        },
+        {
+          "description": "Classified walkable final support without penetration or ascending input; false when ground is now inactive or removed.",
+          "kind": "value",
+          "name": "grounded",
+          "read_only": false,
+          "type": "bool"
+        },
+        {
+          "description": "CharacterMovement3d from the carried pose, excluding carry translation and hits.",
+          "kind": "value",
+          "name": "movement",
+          "read_only": false,
+          "type": "CharacterMovement3d"
+        },
+        {
+          "description": "CharacterCarry3d or null without verified carry or when its entity is now inactive/removed.",
+          "kind": "value",
+          "name": "platform",
+          "read_only": false,
+          "type": "CharacterCarry3d?"
+        },
+        {
+          "description": "Total world-space Vec3 displacement applied once, including actual platform carry.",
+          "kind": "value",
+          "name": "translation",
+          "read_only": false,
+          "type": "Vec3"
+        }
+      ],
+      "name": "CharacterMotion3d"
+    },
+    {
+      "description": "Copied raw Rapier movement phase. Backend flags are not classified walkable support and must not alone authorize snapping. No independent step/snap displacement or iteration-limit status is available.",
+      "members": [
+        {
+          "description": "Ordered copied CharacterCollision3d list, filtered to active existing hit entities.",
+          "kind": "value",
+          "name": "collisions",
+          "read_only": false,
+          "type": "List<CharacterCollision3d>"
+        },
+        {
+          "description": "Raw backend nearby upward-facing contact flag; may include steep or predicted contacts.",
+          "kind": "value",
+          "name": "grounded",
+          "read_only": false,
+          "type": "bool"
+        },
+        {
+          "description": "Raw backend slope-handling flag, which can also be set while climbing.",
+          "kind": "value",
+          "name": "sliding_down_slope",
+          "read_only": false,
+          "type": "bool"
+        },
+        {
+          "description": "Collision-limited world-space Vec3 displacement of this phase.",
+          "kind": "value",
+          "name": "translation",
+          "read_only": false,
+          "type": "Vec3"
+        }
+      ],
+      "name": "CharacterMovement3d"
     },
     {
       "description": "A managed Color tween; read with Tween.color_value.",
@@ -1064,36 +1358,42 @@
           "description": "The other entity touching the queried body.",
           "kind": "value",
           "name": "entity",
+          "read_only": false,
           "type": "Entity"
         },
         {
           "description": "Total world impulse divided by the fixed step's seconds, as Vec2.",
           "kind": "value",
           "name": "force",
+          "read_only": false,
           "type": "Vec2"
         },
         {
           "description": "World-space unit push direction towards the queried body, as Vec2.",
           "kind": "value",
           "name": "normal",
+          "read_only": false,
           "type": "Vec2"
         },
         {
           "description": "Nonnegative normal impulse from the last solve.",
           "kind": "value",
           "name": "normal_impulse",
+          "read_only": false,
           "type": "f32"
         },
         {
           "description": "World-space midpoint of the two surface anchors, as Vec2.",
           "kind": "value",
           "name": "point",
+          "read_only": false,
           "type": "Vec2"
         },
         {
           "description": "Signed friction impulse along Vec2(-normal.y, normal.x).",
           "kind": "value",
           "name": "tangent_impulse",
+          "read_only": false,
           "type": "f32"
         }
       ],
@@ -1148,24 +1448,28 @@
           "description": "The object's drawn shape, if it has one.",
           "kind": "value",
           "name": "shape",
+          "read_only": false,
           "type": "Shape"
         },
         {
           "description": "The object's image (sprite), if it has one.",
           "kind": "value",
           "name": "sprite",
+          "read_only": false,
           "type": "Sprite"
         },
         {
           "description": "Where the object is, how it is turned and how big it is.",
           "kind": "value",
           "name": "transform",
+          "read_only": false,
           "type": "Transform"
         },
         {
           "description": "The object's on-screen interface image, if it has one.",
           "kind": "value",
           "name": "ui_image",
+          "read_only": false,
           "type": "UiImage"
         }
       ],
@@ -1310,66 +1614,77 @@
           "description": "How far the drag moved sideways this frame. Add it to a camera's position to pan.",
           "kind": "value",
           "name": "drag_x",
+          "read_only": false,
           "type": "f32"
         },
         {
           "description": "How far the drag moved up or down this frame.",
           "kind": "value",
           "name": "drag_y",
+          "read_only": false,
           "type": "f32"
         },
         {
           "description": "Whether the player is dragging.",
           "kind": "value",
           "name": "dragging",
+          "read_only": false,
           "type": "bool"
         },
         {
           "description": "Whether the player has pressed and held still long enough to count as a long press.",
           "kind": "value",
           "name": "held",
+          "read_only": false,
           "type": "bool"
         },
         {
           "description": "Where the long press is, sideways.",
           "kind": "value",
           "name": "hold_x",
+          "read_only": false,
           "type": "f32"
         },
         {
           "description": "Where the long press is, up or down.",
           "kind": "value",
           "name": "hold_y",
+          "read_only": false,
           "type": "f32"
         },
         {
           "description": "How much two fingers pinched this frame: above 1 when spreading apart, below 1 when closing, and 1 when not pinching. Multiply a zoom by it.",
           "kind": "value",
           "name": "pinch",
+          "read_only": false,
           "type": "f32"
         },
         {
           "description": "Whether two fingers are pinching.",
           "kind": "value",
           "name": "pinching",
+          "read_only": false,
           "type": "bool"
         },
         {
           "description": "Where the tap was, sideways.",
           "kind": "value",
           "name": "tap_x",
+          "read_only": false,
           "type": "f32"
         },
         {
           "description": "Where the tap was, up or down.",
           "kind": "value",
           "name": "tap_y",
+          "read_only": false,
           "type": "f32"
         },
         {
           "description": "Whether the player tapped (a quick press without moving) this frame. Check this before reading `tap_x` and `tap_y`.",
           "kind": "value",
           "name": "tapped",
+          "read_only": false,
           "type": "bool"
         }
       ],
@@ -1662,42 +1977,49 @@
           "description": "What the player means, such as `\"jump\"` or `\"move\"`, from the actions the scene declares. The best place to start: one script works with keys, a controller or a touch screen. The same as `Action`.",
           "kind": "value",
           "name": "Action",
+          "read_only": false,
           "type": "Action"
         },
         {
           "description": "Game controllers, read by player number. The same as `Gamepad`.",
           "kind": "value",
           "name": "Gamepad",
+          "read_only": false,
           "type": "Gamepad"
         },
         {
           "description": "Taps, holds, drags and pinches, for touch-first controls. The same as `Gesture`.",
           "kind": "value",
           "name": "Gesture",
+          "read_only": false,
           "type": "Gesture"
         },
         {
           "description": "The keys, named by position so controls work on any keyboard layout.",
           "kind": "value",
           "name": "Keyboard",
+          "read_only": false,
           "type": "Keyboard"
         },
         {
           "description": "The mouse, or a finger on a touch screen, handled the same way so one game works on both. The same as `Pointer`.",
           "kind": "value",
           "name": "Pointer",
+          "read_only": false,
           "type": "Pointer"
         },
         {
           "description": "A virtual joystick for touch screens: wherever a thumb lands becomes the center, and dragging from there steers. The same as `Stick`.",
           "kind": "value",
           "name": "Stick",
+          "read_only": false,
           "type": "Stick"
         },
         {
           "description": "Every finger on a touch screen, for games that need more than one. For steering, `Input.Stick` is simpler. The same as `Touch`.",
           "kind": "value",
           "name": "Touch",
+          "read_only": false,
           "type": "Touch"
         },
         {
@@ -2610,6 +2932,18 @@
           "returns": "RayHit3d?"
         },
         {
+          "description": "Copied CharacterMotion3d from the last completed controller step, or null before a result exists or for an inactive/non-controller entity. Requires scene character context. Classified support, raw movement and carry remain separate; repeated reads do not drain results. Inactive ground, platform and collision references are filtered; historical translation and raw backend flags remain unchanged. Editing copies never changes simulation or queued movement.",
+          "kind": "function",
+          "name": "character_motion",
+          "parameter_names": [
+            "entity"
+          ],
+          "parameters": [
+            "Entity"
+          ],
+          "returns": "CharacterMotion3d?"
+        },
+        {
           "description": "Sorted unique other active entities that started solid contact with this script's entity in the last successful 3D step. All scripts observe the same snapshot without draining it.",
           "kind": "function",
           "name": "collision_started",
@@ -2648,6 +2982,22 @@
             "List<String>"
           ],
           "returns": "f32"
+        },
+        {
+          "description": "Queues finite world-space Vec3 displacement for an active authored Character 3D at the next fixed step, including before first synchronization. Last valid request wins; invalid requests preserve it. Snap only enables the authored snap distance. Requires scene character context, valid settings/transform and no competing body/controller. Scene synchronization validates scaled solid geometry before movement. Gameplay owns gravity, speed and jump policy; events observe the moved pose on the following solver step.",
+          "kind": "function",
+          "name": "move_character",
+          "parameter_names": [
+            "entity",
+            "displacement",
+            "snap"
+          ],
+          "parameters": [
+            "Entity",
+            "Vec3",
+            "bool"
+          ],
+          "returns": "unit"
         },
         {
           "description": "Indexed active 3D shape query. Positive Vec3 half-extents define the box. Finite f32-range values are required. A nonzero Vec3 rotation_axis is normalized and rotation_angle is radians about it using the right-hand rule. Uses the ray membership mask, sensor opt-in and whole-entity exclusion. Overlaps are sorted unique copied Entity lists; casts retain initial-overlap and deterministic tie semantics. Does not step physics.",
@@ -2804,9 +3154,17 @@
       "description": "The mouse, or a finger on a touch screen, handled the same way so one game works on both.",
       "members": [
         {
+          "description": "Read-only Vec2 mouse displacement accumulated for this fixed step: positive right and down. Unlocked input uses viewport pixels; captured input uses native raw device counts or browser physical pixels. First arrival/re-entry adds no displacement; the next step reads zero without movement. This is displacement, not velocity: do not multiply by dt. Touch uses Gesture.drag_x/drag_y. Use lock/unlock to request cursor capture and locked to read actual host state.",
+          "kind": "value",
+          "name": "delta",
+          "read_only": true,
+          "type": "Vec2"
+        },
+        {
           "description": "Whether the mouse is over the game or a finger is on the screen. Check this before trusting a position.",
           "kind": "value",
           "name": "inside",
+          "read_only": false,
           "type": "bool"
         },
         {
@@ -2846,45 +3204,75 @@
           "returns": "bool"
         },
         {
+          "description": "Requests cursor capture from the windowed host. Call after a player click in a browser; capture is asynchronous and may be denied. Read `locked` for actual state.",
+          "kind": "function",
+          "name": "lock",
+          "parameter_names": [],
+          "parameters": [],
+          "returns": "unit"
+        },
+        {
+          "description": "Read-only actual host cursor capture state, not the last request. False in headless runs and hosts without capture support.",
+          "kind": "value",
+          "name": "locked",
+          "read_only": true,
+          "type": "bool"
+        },
+        {
           "description": "Whether the pointer is over part of the interface, such as a button. Check it so clicking a button does not also shoot or move in the game.",
           "kind": "value",
           "name": "over_ui",
+          "read_only": false,
           "type": "bool"
         },
         {
           "description": "The pointer's position in screen units, where 0 is the centre of the screen and the screen is 2 units tall. The same on any screen size.",
           "kind": "value",
           "name": "overlay",
+          "read_only": false,
           "type": "Vec2"
         },
         {
           "description": "The pointer's sideways position in screen units, where 0 is the centre.",
           "kind": "value",
           "name": "overlay_x",
+          "read_only": false,
           "type": "f32"
         },
         {
           "description": "The pointer's up-down position in screen units, where 0 is the centre.",
           "kind": "value",
           "name": "overlay_y",
+          "read_only": false,
           "type": "f32"
         },
         {
           "description": "The pointer's position in pixels, from the top-left corner of the game's view.",
           "kind": "value",
           "name": "position",
+          "read_only": false,
           "type": "Vec2"
+        },
+        {
+          "description": "Requests cursor release. Escape, focus loss and suspension also release capture; no automatic recapture.",
+          "kind": "function",
+          "name": "unlock",
+          "parameter_names": [],
+          "parameters": [],
+          "returns": "unit"
         },
         {
           "description": "The pointer's distance from the left edge of the game's view, in pixels.",
           "kind": "value",
           "name": "x",
+          "read_only": false,
           "type": "f32"
         },
         {
           "description": "The pointer's distance from the top edge of the game's view, in pixels.",
           "kind": "value",
           "name": "y",
+          "read_only": false,
           "type": "f32"
         }
       ],
@@ -3120,24 +3508,28 @@
           "description": "Distance from the ray origin, in world units.",
           "kind": "value",
           "name": "distance",
+          "read_only": false,
           "type": "f32"
         },
         {
           "description": "The entity owning the hit collider piece.",
           "kind": "value",
           "name": "entity",
+          "read_only": false,
           "type": "Entity"
         },
         {
           "description": "The world-space surface normal, as Vec2. Zero for a hit at distance zero.",
           "kind": "value",
           "name": "normal",
+          "read_only": false,
           "type": "Vec2"
         },
         {
           "description": "The hit point in world coordinates, as Vec2.",
           "kind": "value",
           "name": "point",
+          "read_only": false,
           "type": "Vec2"
         }
       ],
@@ -3150,24 +3542,28 @@
           "description": "World-unit ray distance or shape centre travel, including zero for initial overlap.",
           "kind": "value",
           "name": "distance",
+          "read_only": false,
           "type": "f32"
         },
         {
           "description": "The active entity whose collider piece was hit.",
           "kind": "value",
           "name": "entity",
+          "read_only": false,
           "type": "Entity"
         },
         {
           "description": "World-space outward Vec3 normal; zero for an inside/on or initial-overlap hit.",
           "kind": "value",
           "name": "normal",
+          "read_only": false,
           "type": "Vec3"
         },
         {
           "description": "World-space Vec3 hit/contact position; probe origin for an initial shape overlap.",
           "kind": "value",
           "name": "point",
+          "read_only": false,
           "type": "Vec3"
         }
       ],
@@ -3420,54 +3816,63 @@
           "description": "How many sides a polygon has (3 is a triangle, 6 a hexagon), or how many cells a grid shape is across.",
           "kind": "value",
           "name": "count",
+          "read_only": false,
           "type": "f32"
         },
         {
           "description": "How much of each dash is drawn, from 0 to 1; the rest is the gap before the next. 0.5 draws dashes and gaps of equal length.",
           "kind": "value",
           "name": "dash_duty",
+          "read_only": false,
           "type": "f32"
         },
         {
           "description": "How many dashes the outline is broken into. 0 draws a solid line.",
           "kind": "value",
           "name": "dashes",
+          "read_only": false,
           "type": "f32"
         },
         {
           "description": "The color inside the shape.",
           "kind": "value",
           "name": "fill",
+          "read_only": false,
           "type": "Color"
         },
         {
           "description": "Drawing order: higher numbers are drawn in front of lower ones.",
           "kind": "value",
           "name": "layer",
+          "read_only": false,
           "type": "f32"
         },
         {
           "description": "The color of the shape's outline.",
           "kind": "value",
           "name": "stroke",
+          "read_only": false,
           "type": "Color"
         },
         {
           "description": "How thick the outline is, as a fraction of the shape's size.",
           "kind": "value",
           "name": "stroke_width",
+          "read_only": false,
           "type": "f32"
         },
         {
           "description": "Where the outline starts, as a fraction of the way round from the top.",
           "kind": "value",
           "name": "sweep_start",
+          "read_only": false,
           "type": "f32"
         },
         {
           "description": "How much of the outline is drawn, from 0 to 1. Setting it to 0.5 draws half a ring, which makes cooldown and charge meters.",
           "kind": "value",
           "name": "sweep_turns",
+          "read_only": false,
           "type": "f32"
         }
       ],
@@ -3480,24 +3885,28 @@
           "description": "Another color the image is multiplied by, on top of `tint`.",
           "kind": "value",
           "name": "color_multiply",
+          "read_only": false,
           "type": "Color"
         },
         {
           "description": "A color added on top of the image, which can make it brighter or flash white. Keep its `a` at 0, or the image's transparent edges become visible.",
           "kind": "value",
           "name": "color_offset",
+          "read_only": false,
           "type": "Color"
         },
         {
           "description": "Drawing order: higher numbers are drawn in front of lower ones.",
           "kind": "value",
           "name": "layer",
+          "read_only": false,
           "type": "f32"
         },
         {
           "description": "A color the image is multiplied by. White leaves it unchanged; lowering `a` fades it out.",
           "kind": "value",
           "name": "tint",
+          "read_only": false,
           "type": "Color"
         }
       ],
@@ -3510,36 +3919,42 @@
           "description": "Where the thumb first landed, sideways. Use it to draw the joystick.",
           "kind": "value",
           "name": "anchor_x",
+          "read_only": false,
           "type": "f32"
         },
         {
           "description": "Where the thumb first landed, up or down.",
           "kind": "value",
           "name": "anchor_y",
+          "read_only": false,
           "type": "f32"
         },
         {
           "description": "Which way and how far the joystick is pushed, as a direction up to 1 long.",
           "kind": "value",
           "name": "direction",
+          "read_only": false,
           "type": "Vec2"
         },
         {
           "description": "Whether a thumb is on the joystick, even if it is not pushing.",
           "kind": "value",
           "name": "held",
+          "read_only": false,
           "type": "bool"
         },
         {
           "description": "How far the joystick is pushed right, from -1 (fully left) to 1 (fully right).",
           "kind": "value",
           "name": "x",
+          "read_only": false,
           "type": "f32"
         },
         {
           "description": "How far the joystick is pushed down, from -1 (fully up) to 1 (fully down).",
           "kind": "value",
           "name": "y",
+          "read_only": false,
           "type": "f32"
         }
       ],
@@ -3552,12 +3967,14 @@
           "description": "How many seconds the last frame took. Multiply speeds by it so movement is the same at any frame rate. The same as `update`'s `dt`.",
           "kind": "value",
           "name": "delta",
+          "read_only": false,
           "type": "f32"
         },
         {
           "description": "How many seconds this script has been running.",
           "kind": "value",
           "name": "elapsed",
+          "read_only": false,
           "type": "f32"
         }
       ],
@@ -3570,6 +3987,7 @@
           "description": "How many fingers are on the screen.",
           "kind": "value",
           "name": "count",
+          "read_only": false,
           "type": "f32"
         },
         {
@@ -3603,28 +4021,102 @@
       "description": "Where an object is, how it is turned and how big it is. For an object attached to another, these are measured from that parent.",
       "members": [
         {
-          "description": "Where the object is. Change it to move the object: `this.transform.position.x += speed * dt`. Measured from the parent if it has one.",
+          "description": "Read-only unit world-space facing direction: -Z at identity. Parent rotation is included and scale is ignored. Copy it to move with `world_position += forward * speed * dt`.",
           "kind": "value",
-          "name": "position",
+          "name": "forward",
+          "read_only": true,
           "type": "Vec3"
         },
         {
-          "description": "How far the object is turned, in radians. A full turn is `TAU`.",
+          "description": "Faces a world-space Vec3 target with Y up and zero world roll; preserves position and scale, including under a parent. Vertical targets use yaw zero. Coincident/non-finite targets are errors with no mutation.",
+          "kind": "function",
+          "name": "look_at",
+          "parameter_names": [
+            "target"
+          ],
+          "parameters": [
+            "Vec3"
+          ],
+          "returns": "unit"
+        },
+        {
+          "description": "How far a 3D object is tipped up (positive) or down from level, in radians, after its yaw. Changing it keeps its yaw and roll.",
+          "kind": "value",
+          "name": "pitch",
+          "read_only": false,
+          "type": "f32"
+        },
+        {
+          "description": "Where the object is. Change it to move the object: `this.transform.position.x += speed * dt`. Measured from the parent if it has one.",
+          "kind": "value",
+          "name": "position",
+          "read_only": false,
+          "type": "Vec3"
+        },
+        {
+          "description": "Read-only unit world-space +X direction, with parent rotation included and scale ignored.",
+          "kind": "value",
+          "name": "right",
+          "read_only": true,
+          "type": "Vec3"
+        },
+        {
+          "description": "How far a 3D object is turned about the way it faces, in radians, after its yaw and pitch. Changing it keeps its yaw and pitch.",
+          "kind": "value",
+          "name": "roll",
+          "read_only": false,
+          "type": "f32"
+        },
+        {
+          "description": "Rotates position and orientation around a world-space Vec3 pivot and nonzero Vec3 axis by radians. Normalizes the axis and preserves scale. Invalid input/output, a singular parent scale, or movement off a Z-locked layer is an error with no mutation.",
+          "kind": "function",
+          "name": "rotate_around",
+          "parameter_names": [
+            "pivot",
+            "axis",
+            "radians"
+          ],
+          "parameters": [
+            "Vec3",
+            "Vec3",
+            "f32"
+          ],
+          "returns": "unit"
+        },
+        {
+          "description": "How far the object is turned, in radians. A full turn is `TAU`. This is the turn of a flat object in a 2D game; it replaces any 3D turn.",
           "kind": "value",
           "name": "rotation_z",
+          "read_only": false,
           "type": "f32"
         },
         {
           "description": "How big the object is on each axis; 1 is its normal size.",
           "kind": "value",
           "name": "scale",
+          "read_only": false,
+          "type": "Vec3"
+        },
+        {
+          "description": "Read-only unit world-space +Y direction, with parent rotation included and scale ignored.",
+          "kind": "value",
+          "name": "up",
+          "read_only": true,
           "type": "Vec3"
         },
         {
           "description": "Where the object is in the world, even when it is attached to a parent. Use it to compare positions of objects in different places.",
           "kind": "value",
           "name": "world_position",
+          "read_only": false,
           "type": "Vec3"
+        },
+        {
+          "description": "Which way a 3D object faces on the ground, in radians: a turn about the up (Y) axis. At zero it faces -Z, and positive turns it left. It moves along `Vec3(-sin(yaw), 0.0, -cos(yaw))`, and faces a point `d` away with `atan2(-d.x, -d.z)`. Changing it keeps its pitch and roll.",
+          "kind": "value",
+          "name": "yaw",
+          "read_only": false,
+          "type": "f32"
         }
       ],
       "name": "Transform"
@@ -4281,12 +4773,14 @@
           "description": "Drawing order: higher numbers are drawn in front of lower ones.",
           "kind": "value",
           "name": "layer",
+          "read_only": false,
           "type": "f32"
         },
         {
           "description": "A color the image is multiplied by. White leaves it unchanged; lowering `a` fades it out.",
           "kind": "value",
           "name": "tint",
+          "read_only": false,
           "type": "Color"
         }
       ],
@@ -4309,6 +4803,7 @@
           "description": "The game view's width divided by its height: above 1 for a wide screen, below 1 for a phone held upright.",
           "kind": "value",
           "name": "aspect",
+          "read_only": false,
           "type": "f32"
         }
       ],

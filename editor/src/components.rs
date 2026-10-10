@@ -90,6 +90,11 @@ const KNOWN: &[Known] = &[
         icon: icons::CAMERA,
     },
     Known {
+        type_name: "sindri.camera.orbit",
+        family: Family::Behaviour,
+        icon: icons::CAMERA,
+    },
+    Known {
         type_name: "sindri.light",
         family: Family::Rendering,
         icon: icons::LIGHT,
@@ -208,6 +213,11 @@ const KNOWN: &[Known] = &[
         type_name: "sindri.effect.burst",
         family: Family::Rendering,
         icon: icons::EFFECT,
+    },
+    Known {
+        type_name: "sindri.physics3d.character",
+        family: Family::Physics,
+        icon: icons::PHYSICS,
     },
     Known {
         type_name: "sindri.physics3d.rigid_body",

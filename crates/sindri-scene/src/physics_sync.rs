@@ -41,6 +41,8 @@ pub enum PhysicsSyncError {
     MultipleWorlds3d,
     #[error("moving 3D physics entity {0:?} has a Z-locked transform")]
     LockedDepth3d(EntityId),
+    #[error("3D collider entity {0:?}: {1}")]
+    ColliderScale3d(EntityId, crate::ColliderScaleError3d),
     #[error("character entity {0:?}: {1}")]
     InvalidCharacter(EntityId, &'static str),
     #[error("joint entity {0:?} has more than one joint component")]

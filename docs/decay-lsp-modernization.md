@@ -28,6 +28,21 @@ language model.
   project refresh as correctness issues, not editor polish.
 - Every completed section needs regression tests. CI is not the test harness.
 
+- [x] Carry host read-only member metadata through checking, completion, hover,
+  and generated API documents. Regression tests exercise transform directions
+  and their component assignments; copied vectors retain ordinary mutability.
+  Mouse delta and `Pointer.locked` / `Input.Pointer.locked` exercise read-only
+  vector/boolean metadata and capture-call completion.
+  `Pointer.delta` and `Input.Pointer.delta` also exercise read-only Vec2
+  completion/hover and immutable diagnostics through both namespaces. Nested
+  host globals are walked from their resolved root, fixing `Input.Pointer`
+  completion/hover (the root was previously looked up twice).
+
+- [x] Exercise typed 3D character movement calls and optional nested copied
+  results through the shared host environment: completion/hover exposes
+  the movement signature, typed batch preflight accepts the checked fixtures, and
+  compiler regressions reject Vec2 displacement and wrong result-field types.
+
 ## P0 — correctness and drift
 
 These are defects or sources of actively misleading tooling.

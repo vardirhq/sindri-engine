@@ -31,7 +31,7 @@ Names in scope without qualification. Decay has no imports, so each of these is 
 - `Aim`: `Aim` — Which block in a 3D block world the mouse or finger is pointing at, for building and digging games.
 - `Animation`: `Animation` — Playing an object's animations, such as walk or jump, set up for it in the scene.
 - `Audio`: `Audio` — Playing sound effects and music. Every sound goes through a bus — `"effects"`, `"music"`, or any other name — and every bus through `"master"`, so a settings screen can turn each down.
-- `Camera`: `Camera` — The game's camera: sizing an orthographic view and changing engine-owned follow, confinement, and shake behavior.
+- `Camera`: `Camera` — The game's camera: projection sizing, 3D orbit with obstruction pull-in, and engine-owned 2D follow, confinement and shake.
 - `Effects`: `Effects` — Particle effects, such as sparks and explosions. The particles are only drawn; they are not objects and nothing can touch them.
 - `Game`: `Game` — Numbers stored under names that every script can read and write, such as a score. Declaring them with `state` is safer, because a misspelt name then becomes an error.
 - `Gamepad`: `Gamepad` — Game controllers. Each player gets a number from 1 to 8 when they press a button on their controller; 0 means any controller.
@@ -162,23 +162,45 @@ Playing sound effects and music. Every sound goes through a bus — `"effects"`,
 
 ### `Camera`
 
-The game's camera: sizing an orthographic view and changing engine-owned follow, confinement, and shake behavior.
+The game's camera: projection sizing, 3D orbit with obstruction pull-in, and engine-owned 2D follow, confinement and shake.
 
 - `add_trauma(amount: f32)` → `unit` — Adds impact trauma to the authored behavior camera. Bigger amounts shake harder, up to 1, and the authored shake fades by itself.
 - `bounds(min_x: f32, min_y: f32, max_x: f32, max_y: f32)` → `unit` — Confines the authored behavior camera to the given world-space rectangle.
 - `clear_bounds()` → `unit` — Removes runtime confinement from the authored behavior camera.
 - `clear_follow()` → `unit` — Stops the authored behavior camera following a target.
+- `clear_orbit(camera: Entity)` → `unit` — Removes an explicit camera's orbit while keeping its last pose. Any existing 2D camera behavior resumes.
 - `dead_zone(x: f32, y: f32)` → `unit` — Sets the follow dead-zone size for the authored behavior camera.
 - `follow(target: Entity)` → `unit` — Makes the authored behavior camera follow an entity at runtime.
 - `follow_offset(x: f32, y: f32, z: f32)` → `unit` — Sets the world-space offset from the follow target used by the authored behavior camera.
 - `impact(amount: f32)` → `unit` — Shakes the authored behavior camera at least this hard, up to 1: a smaller impact while a bigger one is still shaking changes nothing, so many small hits in a frame do not add up to the biggest shake.
 - `max_speed(value: f32)` → `unit` — Sets the maximum follow speed of the authored behavior camera.
+- `orbit(camera: Entity, target: Entity, yaw: f32, pitch: f32, distance: f32)` → `unit` — Creates or retargets an explicit camera's engine-owned world-space orbit. Angles are radians; zero yaw is +Z behind the target, positive pitch is above it. Preserves offset, smoothing and collision settings. Target must be an active authored spatial entity, independent of the camera hierarchy.
+- `orbit_collision(camera: Entity, mask: f32, padding: f32)` → `unit` — Sets collider membership bits and world-unit pull-in padding below orbit distance. Mask must be a whole u32; zero disables queries. Sensors, the camera and target are excluded; a ray protects the sight line, not the near-plane volume.
+- `orbit_offset(camera: Entity, offset: Vec3)` → `unit` — Sets the orbit focus offset in world units from the target's world position.
+- `orbit_smoothing(camera: Entity, rate: f32)` → `unit` — Sets exponential orbit position smoothing per second. Zero snaps. Obstruction pull-in remains immediate.
 - `orthographic_size(camera: Entity, size: f32)` → `unit` — Sets an explicitly selected orthographic camera's view size to a positive finite number. Works without camera behavior and preserves clipping, fit and unknown camera fields.
 - `pan_x`: `f32` — How far the camera view is moved sideways from where it was placed in the scene.
 - `pan_y`: `f32` — How far the camera view is moved up or down from where it was placed in the scene.
 - `pan_z`: `f32` — How far the camera view is moved forwards or backwards from where it was placed in the scene.
+- `perspective_fov(camera: Entity, degrees: f32)` → `unit` — Sets an explicit perspective camera's vertical field of view in degrees, strictly between 0 and 180. Preserves clipping and unknown fields; requires no behavior component.
 - `shake(strength: f32, frequency: f32, decay: f32)` → `unit` — Changes the authored behavior camera's shake strength, frequency, and trauma decay.
 - `smoothing(value: f32)` → `unit` — Sets how strongly the authored behavior camera smooths its follow movement.
+
+### `CharacterCarry3d`
+
+Verified solved platform carry, already included in total character translation. A platform rotation moves the probe origin along a straight swept chord; it does not rotate the actor.
+
+- `entity`: `Entity` — Active existing platform entity whose solved movement carried the actor.
+- `motion`: `CharacterMovement3d` — Collision-limited CharacterMovement3d carry phase, separate from ordinary movement.
+- `requested`: `Vec3` — World-space Vec3 displacement requested by the platform's previous/current poses.
+
+### `CharacterCollision3d`
+
+One historical movement-phase collision; internal stair and snap probes are not events.
+
+- `hit`: `RayHit3d` — Copied world-space RayHit3d for the collided piece; distance belongs to this sweep phase.
+- `translation_applied`: `Vec3` — World-space Vec3 movement already applied at this collision.
+- `translation_remaining`: `Vec3` — World-space Vec3 movement remaining at this collision.
 
 ### `CharacterMotion2d`
 
@@ -202,6 +224,27 @@ A copied result of scene-owned 2D character movement. Gameplay reads support and
 - `started_penetrating`: `bool` — Whether the selected character slide started in strict penetration; carry reports its own flag.
 - `step_translation`: `Vec2` — Accepted step lift, or zero for ordinary movement.
 - `translation`: `Vec2` — Total world displacement applied once at the last fixed step, including slide, step, snap and platform carry.
+
+### `CharacterMotion3d`
+
+Copied historical scene-owned 3D character result. Gameplay chooses gravity, jumping and recovery. This is not a live contact or pending request.
+
+- `ground`: `RayHit3d?` — Zero-travel endpoint support RayHit3d or null when absent/inactive. It is independent of raw backend grounded.
+- `ground_started_penetrating`: `bool` — Whether the endpoint support probe started in strict penetration.
+- `ground_walkable`: `bool` — Whether the active ground hit satisfies authored up and slope limit.
+- `grounded`: `bool` — Classified walkable final support without penetration or ascending input; false when ground is now inactive or removed.
+- `movement`: `CharacterMovement3d` — CharacterMovement3d from the carried pose, excluding carry translation and hits.
+- `platform`: `CharacterCarry3d?` — CharacterCarry3d or null without verified carry or when its entity is now inactive/removed.
+- `translation`: `Vec3` — Total world-space Vec3 displacement applied once, including actual platform carry.
+
+### `CharacterMovement3d`
+
+Copied raw Rapier movement phase. Backend flags are not classified walkable support and must not alone authorize snapping. No independent step/snap displacement or iteration-limit status is available.
+
+- `collisions`: `List<CharacterCollision3d>` — Ordered copied CharacterCollision3d list, filtered to active existing hit entities.
+- `grounded`: `bool` — Raw backend nearby upward-facing contact flag; may include steep or predicted contacts.
+- `sliding_down_slope`: `bool` — Raw backend slope-handling flag, which can also be set while climbing.
+- `translation`: `Vec3` — Collision-limited world-space Vec3 displacement of this phase.
 
 ### `ColorTween`
 
@@ -384,10 +427,12 @@ Independent 3D physics controls, indexed queries and copied last-step events. Re
 - `cast_box(origin: Vec3, half_extents: Vec3, rotation_axis: Vec3, rotation_angle: f32, direction: Vec3, max_distance: f32, mask: f32, include_sensors: bool, exclude: Entity?)` → `RayHit3d?` — Indexed active 3D shape query. Positive Vec3 half-extents define the box. Sweeps return copied RayHit3d or null with fixed orientation and nonzero normalized direction; travel is non-negative and the endpoint finite. Finite f32-range values are required. A nonzero Vec3 rotation_axis is normalized and rotation_angle is radians about it using the right-hand rule. Uses the ray membership mask, sensor opt-in and whole-entity exclusion. Overlaps are sorted unique copied Entity lists; casts retain initial-overlap and deterministic tie semantics. Does not step physics.
 - `cast_capsule(origin: Vec3, half_height: f32, radius: f32, rotation_axis: Vec3, rotation_angle: f32, direction: Vec3, max_distance: f32, mask: f32, include_sensors: bool, exclude: Entity?)` → `RayHit3d?` — Indexed active 3D shape query. The local-Y capsule has non-negative straight-segment half_height and positive radius; zero half-height is a sphere. Sweeps return copied RayHit3d or null with fixed orientation and nonzero normalized direction; travel is non-negative and the endpoint finite. Finite f32-range values are required. A nonzero Vec3 rotation_axis is normalized and rotation_angle is radians about it using the right-hand rule. Uses the ray membership mask, sensor opt-in and whole-entity exclusion. Overlaps are sorted unique copied Entity lists; casts retain initial-overlap and deterministic tie semantics. Does not step physics.
 - `cast_sphere(origin: Vec3, radius: f32, direction: Vec3, max_distance: f32, mask: f32, include_sensors: bool, exclude: Entity?)` → `RayHit3d?` — Closest fixed-orientation sphere sweep as a copied RayHit3d or null. Positive finite radius, finite Vec3 origin/direction, normalized nonzero direction and non-negative distance in engine f32 range; endpoint must remain finite. Point is world contact, distance is probe travel. Initial overlap returns origin, zero distance and zero normal. Uses indexed synchronized geometry and the ray filter, skipping inactive/despawned entities. No rotation or physics step; extreme finite geometry still has the engine's documented numerical limitations.
+- `character_motion(entity: Entity)` → `CharacterMotion3d?` — Copied CharacterMotion3d from the last completed controller step, or null before a result exists or for an inactive/non-controller entity. Requires scene character context. Classified support, raw movement and carry remain separate; repeated reads do not drain results. Inactive ground, platform and collision references are filtered; historical translation and raw backend flags remain unchanged. Editing copies never changes simulation or queued movement.
 - `collision_started()` → `List<Entity>` — Sorted unique other active entities that started solid contact with this script's entity in the last successful 3D step. All scripts observe the same snapshot without draining it.
 - `collision_stopped()` → `List<Entity>` — Sorted unique other active entities that stopped solid contact with this script's entity in the last successful 3D step. Removed or inactive handles are filtered.
 - `layer(name: String)` → `f32` — Query mask bit for a text name in the active authored 3D world's first 32 layer labels. Empty labels cannot be selected; duplicate names select the first bit. Reads current authoring without stepping; ignores inactive settings and never reads 2D names. Unknown names, malformed or multiple active world settings and missing 3D host fail.
 - `mask(names: List<String>)` → `f32` — Combines Physics3d.layer bits from a List<str> using bitwise OR. Repeated names do not add bits; an empty list returns zero. Every name is checked; non-text elements, unknown names, invalid active world settings or missing 3D host fail.
+- `move_character(entity: Entity, displacement: Vec3, snap: bool)` → `unit` — Queues finite world-space Vec3 displacement for an active authored Character 3D at the next fixed step, including before first synchronization. Last valid request wins; invalid requests preserve it. Snap only enables the authored snap distance. Requires scene character context, valid settings/transform and no competing body/controller. Scene synchronization validates scaled solid geometry before movement. Gameplay owns gravity, speed and jump policy; events observe the moved pose on the following solver step.
 - `overlap_box(centre: Vec3, half_extents: Vec3, rotation_axis: Vec3, rotation_angle: f32, mask: f32, include_sensors: bool, exclude: Entity?)` → `List<Entity>` — Indexed active 3D shape query. Positive Vec3 half-extents define the box. Finite f32-range values are required. A nonzero Vec3 rotation_axis is normalized and rotation_angle is radians about it using the right-hand rule. Uses the ray membership mask, sensor opt-in and whole-entity exclusion. Overlaps are sorted unique copied Entity lists; casts retain initial-overlap and deterministic tie semantics. Does not step physics.
 - `overlap_capsule(centre: Vec3, half_height: f32, radius: f32, rotation_axis: Vec3, rotation_angle: f32, mask: f32, include_sensors: bool, exclude: Entity?)` → `List<Entity>` — Indexed active 3D shape query. The capsule lies along local Y before rotation; half_height is the non-negative half-length of its straight segment and radius is positive. Zero half-height is a sphere. Finite f32-range values are required. A nonzero Vec3 rotation_axis is normalized and rotation_angle is radians about it using the right-hand rule. Uses the ray membership mask, sensor opt-in and whole-entity exclusion. Overlaps are sorted unique copied Entity lists; casts retain initial-overlap and deterministic tie semantics. Does not step physics.
 - `overlap_sphere(centre: Vec3, radius: f32, mask: f32, include_sensors: bool, exclude: Entity?)` → `List<Entity>` — Sorted unique copied Entity list overlapping a finite Vec3 centre and positive finite f32-range radius. Uses indexed synchronized geometry, membership mask, sensor opt-in and whole-entity exclusion; inactive/despawned entities are filtered. Does not step physics.
@@ -402,15 +447,19 @@ Independent 3D physics controls, indexed queries and copied last-step events. Re
 
 The mouse, or a finger on a touch screen, handled the same way so one game works on both.
 
+- `delta`: `Vec2` (read-only) — Read-only Vec2 mouse displacement accumulated for this fixed step: positive right and down. Unlocked input uses viewport pixels; captured input uses native raw device counts or browser physical pixels. First arrival/re-entry adds no displacement; the next step reads zero without movement. This is displacement, not velocity: do not multiply by dt. Touch uses Gesture.drag_x/drag_y. Use lock/unlock to request cursor capture and locked to read actual host state.
 - `inside`: `bool` — Whether the mouse is over the game or a finger is on the screen. Check this before trusting a position.
 - `is_down(button: String)` → `bool` — Whether a mouse button, `"Left"`, `"Middle"` or `"Right"`, is held. A finger on the screen counts as `"Left"`.
 - `just_pressed(button: String)` → `bool` — Whether a mouse button was pressed this frame.
 - `just_released(button: String)` → `bool` — Whether a mouse button was let go this frame, or the last finger lifted.
+- `lock()` → `unit` — Requests cursor capture from the windowed host. Call after a player click in a browser; capture is asynchronous and may be denied. Read `locked` for actual state.
+- `locked`: `bool` (read-only) — Read-only actual host cursor capture state, not the last request. False in headless runs and hosts without capture support.
 - `over_ui`: `bool` — Whether the pointer is over part of the interface, such as a button. Check it so clicking a button does not also shoot or move in the game.
 - `overlay`: `Vec2` — The pointer's position in screen units, where 0 is the centre of the screen and the screen is 2 units tall. The same on any screen size.
 - `overlay_x`: `f32` — The pointer's sideways position in screen units, where 0 is the centre.
 - `overlay_y`: `f32` — The pointer's up-down position in screen units, where 0 is the centre.
 - `position`: `Vec2` — The pointer's position in pixels, from the top-left corner of the game's view.
+- `unlock()` → `unit` — Requests cursor release. Escape, focus loss and suspension also release capture; no automatic recapture.
 - `x`: `f32` — The pointer's distance from the left edge of the game's view, in pixels.
 - `y`: `f32` — The pointer's distance from the top edge of the game's view, in pixels.
 
@@ -549,10 +598,18 @@ Every finger on a touch screen, numbered from 0, for games that need more than o
 
 Where an object is, how it is turned and how big it is. For an object attached to another, these are measured from that parent.
 
+- `forward`: `Vec3` (read-only) — Read-only unit world-space facing direction: -Z at identity. Parent rotation is included and scale is ignored. Copy it to move with `world_position += forward * speed * dt`.
+- `look_at(target: Vec3)` → `unit` — Faces a world-space Vec3 target with Y up and zero world roll; preserves position and scale, including under a parent. Vertical targets use yaw zero. Coincident/non-finite targets are errors with no mutation.
+- `pitch`: `f32` — How far a 3D object is tipped up (positive) or down from level, in radians, after its yaw. Changing it keeps its yaw and roll.
 - `position`: `Vec3` — Where the object is. Change it to move the object: `this.transform.position.x += speed * dt`. Measured from the parent if it has one.
-- `rotation_z`: `f32` — How far the object is turned, in radians. A full turn is `TAU`.
+- `right`: `Vec3` (read-only) — Read-only unit world-space +X direction, with parent rotation included and scale ignored.
+- `roll`: `f32` — How far a 3D object is turned about the way it faces, in radians, after its yaw and pitch. Changing it keeps its yaw and pitch.
+- `rotate_around(pivot: Vec3, axis: Vec3, radians: f32)` → `unit` — Rotates position and orientation around a world-space Vec3 pivot and nonzero Vec3 axis by radians. Normalizes the axis and preserves scale. Invalid input/output, a singular parent scale, or movement off a Z-locked layer is an error with no mutation.
+- `rotation_z`: `f32` — How far the object is turned, in radians. A full turn is `TAU`. This is the turn of a flat object in a 2D game; it replaces any 3D turn.
 - `scale`: `Vec3` — How big the object is on each axis; 1 is its normal size.
+- `up`: `Vec3` (read-only) — Read-only unit world-space +Y direction, with parent rotation included and scale ignored.
 - `world_position`: `Vec3` — Where the object is in the world, even when it is attached to a parent. Use it to compare positions of objects in different places.
+- `yaw`: `f32` — Which way a 3D object faces on the ground, in radians: a turn about the up (Y) axis. At zero it faces -Z, and positive turns it left. It moves along `Vec3(-sin(yaw), 0.0, -cos(yaw))`, and faces a point `d` away with `atan2(-d.x, -d.z)`. Changing it keeps its pitch and roll.
 
 ### `Tween`
 

@@ -153,7 +153,7 @@ fn scalar(path: &Path, value: &Value) -> Result<f32, RuntimeError> {
     Ok(super::convert::as_f32(value))
 }
 
-fn snapshot(hit: RayHit3d) -> Value {
+pub(super) fn snapshot(hit: RayHit3d) -> Value {
     Value::Struct {
         shape: Rc::new(StructShape {
             name: RAY_HIT.to_owned(),

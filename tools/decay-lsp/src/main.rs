@@ -319,6 +319,14 @@ impl Server {
         let Some(word) = word_at(&source, offset) else {
             return Value::Null;
         };
+        if let (Some(chain), _) = completion_chain(&source[..offset])
+            && let Some((_, symbol)) = self
+                .members_for_chain(&source, offset, &chain)
+                .into_iter()
+                .find(|(name, _)| name == word)
+        {
+            return hover_symbol(word, &symbol);
+        }
         if let Some(ty) = values::local_type(
             &decay_semantic::analyze_with_environment(&source, &self.environment),
             word,
@@ -454,9 +462,9 @@ impl Server {
             return members;
         }
 
-        let start = usize::from(first == "this");
-        for segment in &chain[start..] {
-            let symbol = if start == 1 && current.is_none() {
+        // The root is already resolved; walk only its members.
+        for segment in &chain[1..] {
+            let symbol = if first == "this" && current.is_none() {
                 self.environment
                     .this()
                     .member(segment)
@@ -504,7 +512,7 @@ impl Server {
 
 fn symbol_type(symbol: ExternalSymbol) -> decay_semantic::Type {
     match symbol {
-        ExternalSymbol::Value(ty) => ty,
+        ExternalSymbol::Value(ty) | ExternalSymbol::ReadOnlyValue(ty) => ty,
         ExternalSymbol::Function(function) => function.return_type,
     }
 }
@@ -557,3 +565,6 @@ fn run_server() -> io::Result<()> {
     }
     Ok(())
 }
+
+#[cfg(test)]
+mod spatial_tests;

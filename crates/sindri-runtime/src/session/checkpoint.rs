@@ -66,6 +66,8 @@ impl Session {
             // A checkpoint writes no saves; `restore` hands back the host's.
             save_backend: Box::new(sindri_platform::MemorySaves::new()),
             pending_audio: self.pending_audio.clone(),
+            // Window commands are consumed externally and must not replay.
+            pending_pointer_lock: None,
             mixer: self.mixer.clone(),
             autoplay_started: self.autoplay_started,
             scenes: self.scenes.clone(),

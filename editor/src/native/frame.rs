@@ -78,6 +78,7 @@ impl eframe::App for EditorApp {
             self.lifecycle.state() == sindri_core::EngineState::Running,
         );
         self.frame(ui);
+        self.drain_play_cursor(ui.ctx());
         self.drive_benchmark(ui.ctx());
         self.profiler.end(began.elapsed());
     }
@@ -113,6 +114,7 @@ impl EditorApp {
         self.record_texture_notes(arrived);
         self.profiler
             .add(crate::profiler::Phase::Upkeep, upkeep.elapsed());
+        self.release_play_cursor_if_needed(ui.ctx());
         self.advance_play(ui.ctx());
         self.update_title(ui.ctx());
         self.handle_close_request(ui.ctx());

@@ -18,8 +18,11 @@ use crate::{RuntimeError, StepPhase, StepReport, bind_builtin_tile_sets};
 
 mod checkpoint;
 pub use checkpoint::Checkpoint;
+mod animation;
 mod audio;
+mod cameras;
 mod game;
+mod input;
 mod physics;
 mod profiles;
 /// Where a session's save is kept, and when it is written out.
@@ -96,6 +99,7 @@ pub struct Session {
     /// file; the browser host uses the page's own storage.
     save_backend: Box<dyn sindri_platform::SaveBackend>,
     pending_audio: Vec<AudioCommand>,
+    pending_pointer_lock: Option<bool>,
     /// Bus volumes, and which bus each playing voice went through.
     mixer: sindri_platform::AudioMixer,
     autoplay_started: bool,
@@ -142,6 +146,7 @@ impl Session {
             since_written: 0.0,
             save_backend: Box::new(sindri_platform::MemorySaves::new()),
             pending_audio: Vec::new(),
+            pending_pointer_lock: None,
             mixer: sindri_platform::AudioMixer::new(),
             autoplay_started: false,
             scenes: BTreeMap::new(),
@@ -344,7 +349,8 @@ impl Session {
             input
         };
         let (physics, events, requests, motions) = self.physics.for_scripts_with_characters();
-        let (world3d, events3d) = self.physics3d.for_scripts();
+        let (world3d, events3d, requests3d, motions3d) =
+            self.physics3d.for_scripts_with_characters();
         let mut frame = ScriptFrame::new(&self.sources, script_input, delta_seconds)
             .with_prefabs(&self.prefabs)
             .with_profiles(&self.profiles)
@@ -361,6 +367,10 @@ impl Session {
                 events: events3d,
             })
             .with_characters(sindri_decay::Characters2d { requests, motions })
+            .with_characters3d(sindri_decay::Characters3d {
+                requests: requests3d,
+                motions: motions3d,
+            })
             .with_animations(&mut self.animations)
             .with_sequences(&mut self.sequences);
         frame = frame.with_gestures(&self.gestures).with_camera_pan(pan);
@@ -383,29 +393,15 @@ impl Session {
             frame = frame.with_scenes(channel);
         }
         let scripts = self.scripts.advance(world, &self.components, frame);
+        self.collect_pointer_lock(&scripts);
         self.pending_audio
             .extend(self.scripts.take_audio_commands());
         laps.lap(StepPhase::Scripts);
-        self.animations
-            .advance(world, &self.components, delta_seconds)?;
-        // After the scripts, so a sequence a script named this step starts
-        // now, and before the cameras, so one that moves a camera is followed.
-        let played = self
-            .sequences
-            .advance(world, &self.components, delta_seconds)?;
-        for (_, problem) in &played.problems {
-            problems.push(format!("Sequence: {problem}"));
-        }
-        self.pending_audio
-            .extend(played.sounds.into_iter().map(|sound| AudioCommand::Play {
-                bus: sound.bus().to_owned(),
-                clip: sound.clip,
-                volume: sound.volume,
-            }));
+        self.step_animations(world, delta_seconds, &mut problems)?;
         laps.lap(StepPhase::Animation);
         // After the scripts, so a camera following the player follows where
         // this step left it. The voxel world keeps its own window under it.
-        sindri_scene::update_camera_behaviors(world, delta_seconds);
+        self.step_cameras(world, delta_seconds, &mut problems);
         laps.lap(StepPhase::Cameras);
         // After the scripts, because a walker's depth is a consequence of where
         // this step left it, and before anything draws. Props settle on the
@@ -435,12 +431,6 @@ impl Session {
     #[must_use]
     pub const fn editing_text(&self) -> bool {
         self.editing_text
-    }
-
-    /// Text copied or cut in a field since this was last asked, for the host
-    /// to put on the system clipboard.
-    pub fn take_copied(&mut self) -> Option<String> {
-        self.screen_ui.take_copied()
     }
 
     /// Sets a shared board value, as a script's `Game.name = value` would.
@@ -520,18 +510,6 @@ impl Session {
     #[must_use]
     pub const fn scripts(&self) -> &Scripts {
         &self.scripts
-    }
-
-    /// The 2D solver, for whatever draws what it holds.
-    #[must_use]
-    pub const fn physics(&self) -> &ScenePhysics2d {
-        &self.physics
-    }
-
-    /// The 3D solver, for whatever draws what it holds.
-    #[must_use]
-    pub const fn physics3d(&self) -> &ScenePhysics3d {
-        &self.physics3d
     }
 
     /// The schemas the scenes are read with.

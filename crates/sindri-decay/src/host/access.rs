@@ -35,6 +35,15 @@ impl Host for WorldHost<'_> {
             return Ok(Some(value));
         }
 
+        if subject.is_none()
+            && let [POINTER, "delta", axis @ ("x" | "y")] = ungrouped(&parts)
+        {
+            let index = usize::from(*axis == "y");
+            return Ok(Some(Value::Number(f64::from(
+                self.context.input.pointer_delta()[index],
+            ))));
+        }
+
         // Where the person is pointing, and how many fingers are down. Facts
         // about the frame like `Time.delta`, and never about a subject: a
         // reference cannot be asked where the mouse is.
@@ -136,6 +145,12 @@ impl Host for WorldHost<'_> {
         if subject.is_none() && self.shared_store(path, &value)? {
             return Ok(true);
         }
+        if subject.is_none() && Self::is_read_only_pointer(path) {
+            return Err(RuntimeError::Host(format!(
+                "{} is read-only",
+                path.dotted()
+            )));
+        }
         let Some(under) = Self::addressed(subject, path) else {
             return Ok(false);
         };
@@ -150,6 +165,12 @@ impl Host for WorldHost<'_> {
             }
             return self.peer_store(subject, path, value);
         };
+        if leaf.is_read_only() {
+            return Err(RuntimeError::Host(format!(
+                "{} is read-only",
+                path.dotted()
+            )));
+        }
         let entity = self.subject(subject, path)?;
         let number = number(path, &value)?;
 
@@ -242,10 +263,12 @@ impl Host for WorldHost<'_> {
         path: &Path,
         args: &[Value],
     ) -> Result<Option<Value>, RuntimeError> {
-        // Nothing on the surface is called *through* a reference: an entity is
-        // a thing to read and write, not a thing with methods. Refusing here
-        // keeps `target.axis("a", "b")` from reaching `Input`. What is called
-        // through one is another script, and that is a message.
+        if let Some(value) = self.transform_call(subject, path, args)? {
+            return Ok(Some(value));
+        }
+        // Transform methods above are the entity methods. Other reference calls
+        // address script messages; refusing namespace calls here keeps
+        // `target.axis("a", "b")` from reaching `Input`.
         if subject.is_some() {
             return Ok(self.peer_call(subject, path, args));
         }

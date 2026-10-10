@@ -10,7 +10,10 @@ mod animation;
 mod audio;
 mod camera_control;
 mod camera_math;
+mod camera_orbit;
 mod characters;
+mod characters3d;
+mod collider_scale3d;
 mod collision_outline;
 mod components;
 pub(crate) mod effects;
@@ -43,26 +46,34 @@ pub use audio::AudioSourceComponent;
 pub use camera_control::{
     clear_camera_bounds, clear_camera_follow, raise_camera_trauma, set_camera_bounds,
     set_camera_dead_zone, set_camera_follow_offset, set_camera_follow_target, set_camera_max_speed,
-    set_camera_orthographic_size, set_camera_shake, set_camera_smoothing,
+    set_camera_orthographic_size, set_camera_perspective_fov, set_camera_shake,
+    set_camera_smoothing,
 };
 pub use camera_math::camera_rotation_from_look_at;
+pub use camera_orbit::{
+    CameraOrbitError, clear_camera_orbit, set_camera_orbit, set_camera_orbit_collision,
+    set_camera_orbit_offset, set_camera_orbit_smoothing, update_orbit_cameras,
+};
 pub use characters::{Character2dComponent, CharacterMotions2d, CharacterRequests2d};
+pub use characters3d::{Character3dComponent, CharacterMotions3d, CharacterRequests3d};
+pub use collider_scale3d::ColliderScaleError3d;
 pub use collision_outline::{CollisionShapes, collision_shapes};
 pub use components::{
     BiomeDocument, CameraBehaviorComponent, CameraBounds, CameraComponent, CameraFit, CameraFollow,
-    CameraShake, EnvironmentAmbientOcclusion, EnvironmentBloom, EnvironmentComponent,
-    EnvironmentError, EnvironmentFog, EnvironmentPostProcess, EnvironmentShadows,
-    EnvironmentToneMapping, GridNavigationComponent, GridOccupantComponent, GridPlacementComponent,
-    GridWallDocument, LightComponent, LightError, LightKind, MeshComponent, MeshPrimitive,
-    ModelComponent, NaturalTerrainDocument, ShapeComponent, ShapeGeometry, SpriteColorTransform,
-    SpriteComponent, Sun, TileCellDocument, TileDraw, TileGridComponent, TileGridError,
-    TileProjection, TileSpace, TileVolumeComponent, TileVolumeError, TileVolumeIndex,
-    TilemapComponent, TilemapError, UiAnchor, UiFill, UiFillEdge, UiImageComponent, UiShapeBlend,
-    UiShapeComponent, UiShapeKind, UiShapeShadow, UiTextAutoSize, UiTextCase, UiTextComponent,
-    UiTextLineAlign, UiTextOutline, UiTextShadow, UiTextWrap, VoxelBlock, VoxelEdit,
-    VoxelGeneratorDocument, VoxelMapFlood, VoxelMaterialDocument, VoxelView, VoxelWorldComponent,
-    add_camera_trauma, cell_to_local_in, default_sun_transform, environment_of, environments_in,
-    light_direction, lights_in, sun_in, ui_text_template, update_camera_behaviors,
+    CameraOrbitComponent, CameraShake, EnvironmentAmbientOcclusion, EnvironmentBloom,
+    EnvironmentComponent, EnvironmentError, EnvironmentFog, EnvironmentPostProcess,
+    EnvironmentShadows, EnvironmentToneMapping, GridNavigationComponent, GridOccupantComponent,
+    GridPlacementComponent, GridWallDocument, LightComponent, LightError, LightKind, MeshComponent,
+    MeshPrimitive, ModelComponent, NaturalTerrainDocument, ShapeComponent, ShapeGeometry,
+    SpriteColorTransform, SpriteComponent, Sun, TileCellDocument, TileDraw, TileGridComponent,
+    TileGridError, TileProjection, TileSpace, TileVolumeComponent, TileVolumeError,
+    TileVolumeIndex, TilemapComponent, TilemapError, UiAnchor, UiFill, UiFillEdge,
+    UiImageComponent, UiShapeBlend, UiShapeComponent, UiShapeKind, UiShapeShadow, UiTextAutoSize,
+    UiTextCase, UiTextComponent, UiTextLineAlign, UiTextOutline, UiTextShadow, UiTextWrap,
+    VoxelBlock, VoxelEdit, VoxelGeneratorDocument, VoxelMapFlood, VoxelMaterialDocument, VoxelView,
+    VoxelWorldComponent, add_camera_trauma, cell_to_local_in, default_sun_transform,
+    environment_of, environments_in, light_direction, lights_in, sun_in, ui_text_template,
+    update_camera_behaviors,
 };
 pub use effects::{EffectBurstComponent, Effects2d, Fleck};
 pub use extract::{

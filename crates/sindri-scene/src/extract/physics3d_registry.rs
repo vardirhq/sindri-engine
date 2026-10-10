@@ -5,7 +5,8 @@ use sindri_physics::{Collider3d, RigidBody3d, RigidBodyKind};
 
 use super::SceneExtractError;
 use crate::{
-    Collider3dComponent, PhysicsWorld3dComponent, RigidBody3dComponent, VoxelCollider3dComponent,
+    Character3dComponent, Collider3dComponent, PhysicsWorld3dComponent, RigidBody3dComponent,
+    VoxelCollider3dComponent,
 };
 
 pub(super) fn register(components: &mut ComponentSchemaRegistry) -> Result<(), SceneExtractError> {
@@ -17,6 +18,14 @@ pub(super) fn register(components: &mut ComponentSchemaRegistry) -> Result<(), S
         "kind",
         FieldMeaning::choice(RigidBodyKind::ALL.into_iter().map(RigidBodyKind::as_str)),
     )])?;
+    components.register_with_default::<Character3dComponent>(
+        "Character 3D",
+        serde_json::json!(Character3dComponent::default()),
+    )?;
+    components.describe::<Character3dComponent>([
+        ("max_slope_angle", FieldMeaning::Angle),
+        ("min_slide_angle", FieldMeaning::Angle),
+    ])?;
     components.register_with_default::<Collider3dComponent>(
         "Collider 3D",
         serde_json::json!({"pieces": [Collider3d::cuboid([0.5; 3])]}),

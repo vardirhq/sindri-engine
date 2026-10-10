@@ -135,8 +135,14 @@ fn push_symbols(page: &mut String, symbols: &[Symbol]) {
 fn signature(symbol: &Symbol) -> String {
     match symbol {
         Symbol::Value {
-            name, type_name, ..
-        } => format!("`{name}`: `{type_name}`"),
+            name,
+            type_name,
+            read_only,
+            ..
+        } => format!(
+            "`{name}`: `{type_name}`{}",
+            if *read_only { " (read-only)" } else { "" }
+        ),
         Symbol::Function {
             name,
             params,

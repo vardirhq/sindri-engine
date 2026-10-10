@@ -144,6 +144,16 @@ export ships, assembles it for a project. The editor's fixed-step clock steps
 it; `editor/tests/play_matches_the_build.rs` plays four games both ways with
 the same input and requires the same world.
 
+Cursor capture uses the same Decay requests as the shipped player.
+`native/play_cursor.rs` drains Session after fixed steps and editor actions,
+checks actual native window capture results (Locked, then X11 confinement),
+and reports feedback to `EditorInput`. egui raw `MouseMoved` events carry native
+device counts; absolute warps cannot add motion while captured. Input edges
+and motion are spent only after a fixed step. Capture requires a running,
+visible Game view and releases on Escape, focus loss, pause/stop, text input,
+picking or hiding that view. Resuming does not recapture; dropping the editor
+releases any remaining grab.
+
 A run is the world the session steps, so an edit made while it plays has two
 places it could go. `EditorApp::apply_edit` decides: stopped, an edit lands in
 the scene's history; playing, it is applied to the running world and recorded

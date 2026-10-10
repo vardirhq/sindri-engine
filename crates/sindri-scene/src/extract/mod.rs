@@ -16,6 +16,7 @@ pub use model::referenced_models;
 mod physics3d_registry;
 mod physics_registry;
 pub(crate) mod registry;
+mod registry_cameras;
 mod shape;
 mod sprite;
 mod text;

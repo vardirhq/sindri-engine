@@ -16,7 +16,7 @@ impl SceneComponent for RigidBody3dComponent {
 }
 
 /// One shape or a compound of local box/sphere/Y-capsule pieces.
-/// Dimensions and offsets are in world units, independent of visual scale.
+/// Dimensions and offsets are local units, scaled by the composed transform.
 #[derive(Clone, Debug, Deserialize, PartialEq)]
 #[serde(from = "AuthoredCollider3d")]
 pub struct Collider3dComponent(pub Vec<Collider3d>);
@@ -42,7 +42,7 @@ impl SceneComponent for Collider3dComponent {
 }
 
 /// Opts the voxel world on the same entity into 3D collision. Blocks whose
-/// tiles collide become static boxes, resident only near dynamic bodies.
+/// tiles collide become static boxes, resident only near dynamic bodies and scene characters.
 #[derive(Clone, Copy, Debug, Deserialize, PartialEq)]
 pub struct VoxelCollider3dComponent {
     #[serde(default = "half")]
@@ -51,7 +51,7 @@ pub struct VoxelCollider3dComponent {
     pub restitution: f32,
     #[serde(default = "every_layer")]
     pub layers: CollisionLayers,
-    /// Voxels of collision kept resident beyond each dynamic body's reach.
+    /// Voxels of collision kept resident beyond each body's or character's reach.
     #[serde(default = "two")]
     pub margin: f32,
 }
@@ -98,6 +98,7 @@ pub(crate) fn validate_dimensions(world: &World) -> Result<(), PhysicsSyncError>
                 continue;
             }
             if [
+                crate::Character3dComponent::TYPE_NAME,
                 RigidBody3dComponent::TYPE_NAME,
                 Collider3dComponent::TYPE_NAME,
                 VoxelCollider3dComponent::TYPE_NAME,

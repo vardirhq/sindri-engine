@@ -37,6 +37,7 @@ pub(crate) enum Symbol {
     Value {
         name: String,
         type_name: String,
+        read_only: bool,
         reference: Option<Entry>,
     },
     Function {
@@ -64,10 +65,14 @@ impl Symbol {
         let description = self.reference().map(|entry| entry.text);
         match self {
             Self::Value {
-                name, type_name, ..
+                name,
+                type_name,
+                read_only,
+                ..
             } => json!({
                 "name": name,
                 "kind": "value",
+                "read_only": read_only,
                 "type": type_name,
                 "description": description,
             }),
@@ -183,9 +188,10 @@ fn sorted(symbols: impl Iterator<Item = Symbol>) -> Vec<Symbol> {
 
 fn symbol_of(name: &str, symbol: &ExternalSymbol, reference: Option<Entry>) -> Symbol {
     match symbol {
-        ExternalSymbol::Value(ty) => Symbol::Value {
+        ExternalSymbol::Value(ty) | ExternalSymbol::ReadOnlyValue(ty) => Symbol::Value {
             name: name.to_owned(),
             type_name: type_name(ty),
+            read_only: matches!(symbol, ExternalSymbol::ReadOnlyValue(_)),
             reference,
         },
         ExternalSymbol::Function(FunctionType {

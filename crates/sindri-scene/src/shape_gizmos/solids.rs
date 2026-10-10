@@ -15,23 +15,24 @@ pub(super) fn colliders(world: &World, components: &ComponentSchemaRegistry) -> 
         .query::<Collider3dComponent>(world)
         .unwrap_or_default()
         .into_iter()
-        .map(|(entity, collider)| {
+        .filter_map(|(entity, collider)| {
+            let scale = world.world_transform(entity).unwrap_or_default().scale;
+            let pieces = collider.scaled(scale).ok()?;
             let body = components
                 .get::<RigidBody3dComponent>(world, entity)
                 .ok()
                 .flatten()
                 .map(|authored| authored.0);
             let pose = pose_of(world, entity, body);
-            ShapeGizmo {
+            Some(ShapeGizmo {
                 entity,
                 kind: GizmoKind::Collider3d,
-                strokes: collider
-                    .0
+                strokes: pieces
                     .iter()
                     .flat_map(|piece| wireframe(pose, piece))
                     .collect(),
                 marks: Vec::new(),
-            }
+            })
         })
         .collect()
 }

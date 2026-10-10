@@ -285,8 +285,8 @@ pub(crate) fn completion_item(label: &str, kind: u8, detail: Option<&str>) -> Va
 
 pub(crate) fn symbol_completion(name: &str, symbol: &ExternalSymbol) -> Value {
     match symbol {
-        ExternalSymbol::Value(ty) => {
-            json!({"label":name,"kind":6,"detail":ty.display_name()})
+        ExternalSymbol::Value(ty) | ExternalSymbol::ReadOnlyValue(ty) => {
+            json!({"label":name,"kind":6,"detail":format!("{}{}", ty.display_name(), if matches!(symbol, ExternalSymbol::ReadOnlyValue(_)) { " (read-only)" } else { "" })})
         }
         ExternalSymbol::Function(function) => json!({
             "label":name,
@@ -300,8 +300,16 @@ pub(crate) fn symbol_completion(name: &str, symbol: &ExternalSymbol) -> Value {
 
 pub(crate) fn hover_symbol(name: &str, symbol: &ExternalSymbol) -> Value {
     let value = match symbol {
-        ExternalSymbol::Value(ty) => {
-            format!("```decay\n{name}: {}\n```", ty.display_name())
+        ExternalSymbol::Value(ty) | ExternalSymbol::ReadOnlyValue(ty) => {
+            format!(
+                "```decay\n{name}: {}\n```{}",
+                ty.display_name(),
+                if matches!(symbol, ExternalSymbol::ReadOnlyValue(_)) {
+                    "\nRead-only."
+                } else {
+                    ""
+                }
+            )
         }
         ExternalSymbol::Function(function) => {
             format!("```decay\n{}\n```", signature(name, function))

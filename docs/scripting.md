@@ -136,6 +136,13 @@ interprets, and `WorldHost` is the only place that gives them a meaning.
 | `this.transform.world_position.{x,y,z}` | `f32` | yes | yes |
 | `this.transform.scale.{x,y,z}` | `f32` | yes | yes |
 | `this.transform.rotation_z` | `f32` | yes | yes |
+| `this.transform.{yaw,pitch,roll}` | `f32` | yes | yes |
+| `this.transform.{forward,right,up}` | `Vec3` | yes | no |
+| `this.transform.forward.{x,y,z}` | `f32` | yes | no |
+| `this.transform.right.{x,y,z}` | `f32` | yes | no |
+| `this.transform.up.{x,y,z}` | `f32` | yes | no |
+| `this.transform.look_at(target)` | unit | call | — |
+| `this.transform.rotate_around(pivot, axis, radians)` | unit | call | — |
 
 **A vector member is reached whole or one component at a time.**
 `this.transform.position` is a `Vec3` a script can hold, add to and store back
@@ -156,6 +163,48 @@ to compare two entities in different places in the hierarchy; write it to put a
 child at a point in the world, which stores whatever local position puts it
 there. `World.set_parent` keeps the local transform, so something spawned at
 local zero and then parented sits on its new parent.
+
+**Directions and aiming use world space.** `forward`, `right`, and `up`
+are read-only unit `Vec3` values, based on the composed rotation and ignoring
+scale (including negative scale). Identity faces -Z, with +X right and +Y up.
+Assignments to a whole direction or one of its components are compile errors;
+a copied vector is an ordinary value a script may change. Invalid/zero authored
+quaternions use the identity rotation for direction reads.
+
+`transform.look_at(target: Vec3)` faces a world target with Y up and zero world
+roll, preserving position and scale. At a vertical target yaw is zero. A target
+at the entity's position is an error. `transform.rotate_around(pivot: Vec3,
+axis: Vec3, radians: f32)` rotates both position and orientation around a world
+pivot and axis; the nonzero axis is normalized. Both work through `this`,
+`this.entity`, and another entity or script reference. Results are converted
+back to the parent's local transform. Orbiting under a parent with a zero scale
+axis is refused. Inputs must be finite and fit engine `f32`; invalid input,
+non-finite output, or an orbit that changes a Z-locked layer leaves the transform
+unchanged. These calls change the world immediately, with physics following
+its normal synchronization boundary.
+
+```decay
+this.transform.look_at(goal.transform.world_position);
+this.transform.world_position += this.transform.forward * speed * dt;
+```
+
+**A solid object turns by yaw, pitch and roll.** All three are radians, in a
+Y-up world. `yaw` turns it on the ground, about the up axis; at zero it faces
+-Z, as cameras do, and a positive yaw turns it left. `pitch` then tips it up
+(positive) or down, and `roll` last turns it about the way it faces. Writing
+one keeps the other two, so steering is one line and does not undo a tilt:
+
+```decay
+let to_goal = goal.transform.world_position - this.transform.world_position;
+this.transform.yaw = atan2(-to_goal.x, -to_goal.z);
+let yaw = this.transform.yaw;
+this.transform.position += Vec3(-sin(yaw), 0.0, -cos(yaw)) * speed * dt;
+```
+
+`rotation_z` is the turn of a flat thing facing the camera, for 2D games.
+Writing it replaces the whole rotation with a turn about Z, which is the same
+as setting `roll` with yaw and pitch at zero. Looking straight up or down, yaw
+and roll turn about the same axis; the whole of that turn reads back as yaw.
 
 Screen UI is placed by the overlay's layout rather than this, and its
 `position` is already relative to its parent's box.
@@ -266,6 +315,13 @@ table above lists, reaching the same numbers.
 | `this.entity.transform.world_position.{x,y,z}` | `f32` | yes | yes |
 | `this.entity.transform.scale.{x,y,z}` | `f32` | yes | yes |
 | `this.entity.transform.rotation_z` | `f32` | yes | yes |
+| `this.entity.transform.{yaw,pitch,roll}` | `f32` | yes | yes |
+| `this.entity.transform.{forward,right,up}` | `Vec3` | yes | no |
+| `this.entity.transform.forward.{x,y,z}` | `f32` | yes | no |
+| `this.entity.transform.right.{x,y,z}` | `f32` | yes | no |
+| `this.entity.transform.up.{x,y,z}` | `f32` | yes | no |
+| `this.entity.transform.look_at(target)` | unit | call | — |
+| `this.entity.transform.rotate_around(pivot, axis, radians)` | unit | call | — |
 | `this.entity.sprite.{tint,color_multiply,color_offset}` | `Color` | yes | yes |
 | `this.entity.sprite.tint.{r,g,b,a}` | `f32` | yes | yes |
 | `this.entity.sprite.color_multiply.{r,g,b,a}` | `f32` | yes | yes |
@@ -1002,6 +1058,8 @@ a person who has not clicked yet.
 
 | Call | Returns |
 | --- | --- |
+| `Physics3d.move_character(entity, displacement: Vec3, snap: bool)` | nothing |
+| `Physics3d.character_motion(entity)` | `CharacterMotion3d?` |
 | `Physics3d.layer(name: String)` | numeric mask bit |
 | `Physics3d.mask(names: List<String>)` | numeric mask |
 | `Physics3d.raycast(origin: Vec3, direction: Vec3, max_distance, mask, include_sensors, exclude: Entity?)` | `RayHit3d?` |
@@ -1029,6 +1087,16 @@ list returns zero. Lookup reads current authored names without stepping physics,
 ignores inactive settings and never uses 2D world names. Missing 3D host, unknown
 names, wrong argument types, malformed settings or multiple active 3D worlds
 fail explicitly. With no active settings there are no names to select.
+
+Scene-owned 3D characters accept next-fixed-step movement through
+`move_character` and return copied optional results through `character_motion`.
+`CharacterMotion3d` separates classified endpoint support from raw
+`CharacterMovement3d` flags and nullable `CharacterCarry3d`; ordered collisions
+retain hit and applied/remaining displacement. Last valid input wins. Both calls
+require scene character context, supplied by Session in every host. Gameplay owns
+gravity, jumping and snap policy. See [the 3D character contract](character-movement.md#typed-3d-decay-requests-and-results)
+for validation, timing, filtering and copy semantics. Native script/Session tests
+exercise this surface; controller browser/editor/Explorer proof remains pending.
 
 `Physics3d` takes Vec3 values without changing the existing 2D `Physics` API.
 `velocity(entity)` and `angular_velocity(entity)` return copied Vec3 values;
@@ -1913,6 +1981,14 @@ without changing the scene's authored transform.
 | --- | --- |
 | `Camera.add_trauma(amount)` | unit |
 
+The explicit-entity 3D camera calls are `Camera.perspective_fov(camera, degrees)`,
+`Camera.orbit(camera, target, yaw, pitch, distance)`, `Camera.orbit_offset(camera, Vec3)`,
+`Camera.orbit_smoothing(camera, rate)`, `Camera.orbit_collision(camera, mask, padding)`
+and `Camera.clear_orbit(camera)`. Orbit is engine-owned world-space follow,
+aiming and sight-line obstruction pull-in; see the full checked contract in
+[`camera-runtime-scripting.md`](camera-runtime-scripting.md). These calls do
+not require the singular 2D behavior camera.
+
 `Camera.add_trauma` adds a finite, non-negative amount to the authored gameplay camera's shake trauma, clamped by the engine to one. Decay decides when an impact happens; `sindri.camera.behavior` owns the waveform, strength, frequency, and decay. The call requires exactly one authored `sindri.camera` carrying `sindri.camera.behavior`; ambiguity or absence is a runtime error rather than a silently ignored camera effect.
 
 | Path | Type |
@@ -1922,15 +1998,32 @@ without changing the scene's authored transform.
 | `Pointer.overlay_x` | `f32` |
 | `Pointer.overlay_y` | `f32` |
 | `Pointer.position` | `Vec2` |
+| `Pointer.locked` (read-only) | `bool` |
+| `Pointer.delta` (read-only) | `Vec2` |
 | `Pointer.overlay` | `Vec2` |
 | `Pointer.inside` | `bool` |
 | `Pointer.over_ui` | `bool` |
 
 | Call | Returns |
 | --- | --- |
+| `Pointer.lock()` | `unit` |
+| `Pointer.unlock()` | `unit` |
 | `Pointer.is_down(button)` | `bool` |
 | `Pointer.just_pressed(button)` | `bool` |
 | `Pointer.just_released(button)` | `bool` |
+
+`Pointer.delta` (also `Input.Pointer.delta`) is mouse displacement accumulated
+until the next fixed step: positive X is right, positive Y
+is down. Read the whole vector or `.x`/`.y`; assigning either the value or a
+component is rejected. A mutable copy is independent. First arrival and
+re-entry establish a position without adding displacement; steps without
+movement read zero. Unlocked motion uses viewport pixels; captured motion uses
+native raw device counts or browser physical pixels. Multiply by sensitivity
+in radians per motion unit, without multiplying by `dt`. Touch uses
+`Gesture.drag_x`/`drag_y`; this value is mouse-only. `lock()` and `unlock()`
+request capture/release, while read-only `locked` reports actual host state;
+see the cursor capture contract below. Orbit Camera Lab demonstrates captured
+look and right-button drag-to-look with pitch clamping.
 
 | Path | Type |
 | --- | --- |
@@ -2919,3 +3012,37 @@ original endpoints. Completion is polled, so a game can use its existing typed
 messages/events for follow-up actions. This slice does not add property-path
 binding, timelines, sequences, callbacks, loop/yoyo modes or CSS keyframes.
 Orbital's `powerup.decay` uses a managed vector tween for its pickup appearance.
+
+## Cursor capture for 3D mouse look
+
+`Pointer.lock()` / `Input.Pointer.lock()` request capture from the windowed
+native/browser player or native editor Play. `unlock()` requests release;
+read-only `locked` reports actual host state. Both calls take no arguments and return unit. A request
+does not change `locked` within the script invocation. Requests from successful
+script invocations are collected in execution order, last request winning,
+and Session drains the latest request once after the host advances gameplay.
+A failed invocation does not forward its pending capture request.
+
+In a browser, request capture after a player click. Security policy, lack of
+user activation, or platform support can deny it. Browser success is polled
+from the document's actual locked element; synchronous exceptions and rejected
+promises are handled without stopping gameplay. Native capture uses Locked
+where supported and confinement with raw device motion on X11. Escape, focus
+loss and host suspension release capture. There is no automatic recapture.
+
+`Pointer.delta` remains the motion input, positive right/down. Unlocked input
+uses viewport pixels; captured native input uses raw device counts, while
+browser input uses physical-pixel movement. Tune sensitivity per game; do not
+multiply displacement by dt. Absolute cursor warps do not contribute while
+captured. Capture transitions clear pending motion and rebase the first
+unlocked position. Touch remains separate.
+
+Headless runs do not perform capture, so requests remain intentions until a
+host supplies actual-state input. Checkpoint
+restore does not replay consumed window commands. Orbit Camera Lab demonstrates
+click-to-capture, U/second-click release and captured look in Decay. Explorer
+game proof remains pending. Editor Play accepts capture only while running,
+with a visible Game view and the pointer inside it. Escape, window focus loss,
+pause/stop, text editing, picking or hiding the Game view releases capture;
+resuming or regaining focus does not recapture. Raw native motion uses device
+counts without applying the editor display scale.

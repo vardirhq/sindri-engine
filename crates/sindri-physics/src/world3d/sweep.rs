@@ -144,7 +144,7 @@ impl PhysicsWorld3d {
     }
 }
 
-fn query_shape(shape: ColliderShape3d) -> Result<r3::SharedShape, PhysicsError> {
+pub(super) fn query_shape(shape: ColliderShape3d) -> Result<r3::SharedShape, PhysicsError> {
     Ok(match shape {
         ColliderShape3d::Box {
             half_extents: [x, y, z],

@@ -160,6 +160,59 @@
       "type_name": "sindri.camera.behavior"
     },
     {
+      "addable": false,
+      "apply": {},
+      "default_payload": null,
+      "display_name": "Camera Orbit",
+      "fields": {
+        "collision_mask": 4294967295,
+        "collision_padding": 0.2,
+        "distance": 6.0,
+        "offset": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "pitch": 0.35,
+        "smoothing": 8.0,
+        "target": "target",
+        "yaw": 0.0
+      },
+      "meanings": {
+        "collision_mask": {
+          "kind": "range",
+          "max": 4294967295.0,
+          "min": 0.0
+        },
+        "collision_padding": {
+          "kind": "range",
+          "max": null,
+          "min": 0.0
+        },
+        "distance": {
+          "kind": "range",
+          "max": null,
+          "min": 0.0
+        },
+        "pitch": {
+          "kind": "angle"
+        },
+        "smoothing": {
+          "kind": "range",
+          "max": null,
+          "min": 0.0
+        },
+        "target": {
+          "kind": "entity"
+        },
+        "yaw": {
+          "kind": "angle"
+        }
+      },
+      "schema_version": 1,
+      "type_name": "sindri.camera.orbit"
+    },
+    {
       "addable": true,
       "apply": {},
       "default_payload": {
@@ -1123,6 +1176,53 @@
       "meanings": {},
       "schema_version": 1,
       "type_name": "sindri.physics2d.world"
+    },
+    {
+      "addable": true,
+      "apply": {},
+      "default_payload": {
+        "carry_platforms": true,
+        "max_slope_angle": 0.7853981852531433,
+        "min_slide_angle": 0.7853981852531433,
+        "skin": 0.009999999776482582,
+        "slide": true,
+        "snap_distance": 0.0,
+        "step_dynamic_bodies": false,
+        "step_height": 0.0,
+        "step_min_width": 0.10000000149011612,
+        "up": [
+          0.0,
+          1.0,
+          0.0
+        ]
+      },
+      "display_name": "Character 3D",
+      "fields": {
+        "carry_platforms": true,
+        "max_slope_angle": 0.7853981852531433,
+        "min_slide_angle": 0.7853981852531433,
+        "skin": 0.009999999776482582,
+        "slide": true,
+        "snap_distance": 0.0,
+        "step_dynamic_bodies": false,
+        "step_height": 0.0,
+        "step_min_width": 0.10000000149011612,
+        "up": [
+          0.0,
+          1.0,
+          0.0
+        ]
+      },
+      "meanings": {
+        "max_slope_angle": {
+          "kind": "angle"
+        },
+        "min_slide_angle": {
+          "kind": "angle"
+        }
+      },
+      "schema_version": 1,
+      "type_name": "sindri.physics3d.character"
     },
     {
       "addable": true,

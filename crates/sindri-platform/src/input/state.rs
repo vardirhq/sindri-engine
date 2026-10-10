@@ -7,6 +7,7 @@ use std::time::Duration;
 use sindri_core::{Presses, StickSettings, VirtualStick};
 
 use super::gamepad::{GamepadAxis, GamepadButton, Gamepads, PadId};
+use super::mouse::MouseState;
 use super::{Key, MouseButton};
 
 /// How many fingers a host reports before the rest are dropped.
@@ -35,6 +36,17 @@ pub enum InputEvent {
         y: f32,
     },
     PointerLeft,
+    /// Relative mouse movement while the host has actually captured the cursor.
+    ///
+    /// Positive right/down, in units defined by the host. Absolute pointer
+    /// positions do not contribute to displacement while locked. Hosts must
+    /// report successful capture before sending these events.
+    PointerMotion {
+        x: f32,
+        y: f32,
+    },
+    /// Actual host capture state, never merely a request to capture.
+    PointerLockChanged(bool),
     /// A finger arrived, moved, or left, in the same logical pixels a pointer
     /// is reported in.
     ///
@@ -95,7 +107,7 @@ pub struct InputState {
     buttons_held: BTreeSet<MouseButton>,
     buttons_pressed: BTreeSet<MouseButton>,
     buttons_released: BTreeSet<MouseButton>,
-    pointer: Option<[f32; 2]>,
+    mouse: MouseState,
     /// Where each live finger is, by the id its host gave it.
     ///
     /// Ordered by id so "the first touch" is the same finger from one frame to
@@ -109,7 +121,6 @@ pub struct InputState {
     /// wherever it was let go; without this a finger is nowhere, and every
     /// press that ends -- which is every tap -- ends over no element at all.
     touches_ended: BTreeMap<u64, [f32; 2]>,
-    pointer_delta: [f32; 2],
     scroll_delta: [f32; 2],
     text_input: String,
     focused: bool,
@@ -141,11 +152,10 @@ impl Default for InputState {
             buttons_held: BTreeSet::new(),
             buttons_pressed: BTreeSet::new(),
             buttons_released: BTreeSet::new(),
-            pointer: None,
+            mouse: MouseState::default(),
             touches: BTreeMap::new(),
             touches_began: BTreeSet::new(),
             touches_ended: BTreeMap::new(),
-            pointer_delta: [0.0, 0.0],
             scroll_delta: [0.0, 0.0],
             text_input: String::new(),
             focused: true,
@@ -163,10 +173,24 @@ impl InputState {
     /// key repeat cannot make `key_pressed` fire more than once per physical
     /// press.
     pub fn apply(&mut self, event: InputEvent) {
+        if let InputEvent::PointerMoved { x, y } = event
+            && (!x.is_finite() || !y.is_finite())
+        {
+            return;
+        }
         // Before the device bookkeeping, because a button press is placed at
         // where the pointer was *before* this event, and a move in the same
         // event would otherwise have already shifted it.
-        super::presses::apply(&mut self.presses, event, self.pointer);
+        // Cursor warps and leave events during capture are not UI drags.
+        if !self.mouse.locked
+            || !matches!(
+                event,
+                InputEvent::PointerMoved { .. } | InputEvent::PointerLeft
+            )
+        {
+            super::presses::apply(&mut self.presses, event, self.mouse.position);
+        }
+        self.mouse.apply(event, self.focused);
         match event {
             InputEvent::TextInput(c) => {
                 if !c.is_control() && self.text_input.len() < 4096 {
@@ -193,14 +217,10 @@ impl InputState {
                     self.buttons_released.insert(button);
                 }
             }
-            InputEvent::PointerMoved { x, y } => {
-                if let Some([previous_x, previous_y]) = self.pointer {
-                    self.pointer_delta[0] += x - previous_x;
-                    self.pointer_delta[1] += y - previous_y;
-                }
-                self.pointer = Some([x, y]);
-            }
-            InputEvent::PointerLeft => self.pointer = None,
+            InputEvent::PointerMoved { .. }
+            | InputEvent::PointerLeft
+            | InputEvent::PointerMotion { .. }
+            | InputEvent::PointerLockChanged(_) => {}
             InputEvent::TouchStarted { id, x, y } => {
                 // A host that reports more fingers than anyone has is dropping
                 // the extra ones rather than growing a map without limit.
@@ -259,7 +279,7 @@ impl InputState {
         self.buttons_released.clear();
         self.touches_began.clear();
         self.touches_ended.clear();
-        self.pointer_delta = [0.0, 0.0];
+        self.mouse.begin_frame();
         self.scroll_delta = [0.0, 0.0];
         self.presses.advance(delta);
         self.gamepads.begin_frame();
@@ -363,7 +383,7 @@ impl InputState {
     /// The mouse and nothing else. [`Self::pointer_position`] is the one a
     /// game reads.
     pub const fn pointer(&self) -> Option<[f32; 2]> {
-        self.pointer
+        self.mouse.position
     }
 
     /// Where *the* pointer is: the mouse if there is one, else the first
@@ -376,7 +396,8 @@ impl InputState {
     /// is using the mouse on.
     #[must_use]
     pub fn pointer_position(&self) -> Option<[f32; 2]> {
-        self.pointer
+        self.mouse
+            .position
             .or_else(|| self.touches.values().next().copied())
             // A finger that lifted this frame is still the answer to "where is
             // the pointer" for the rest of it, so a tap completes where it
@@ -430,8 +451,20 @@ impl InputState {
         self.touches.values().nth(index).copied()
     }
 
+    /// Accumulated mouse displacement, consumed at the next fixed step.
+    ///
+    /// Unlocked motion is derived from absolute pointer positions. Locked
+    /// motion comes only from host-relative events, in that host's units.
     pub const fn pointer_delta(&self) -> [f32; 2] {
-        self.pointer_delta
+        self.mouse.delta
+    }
+
+    /// Whether the host has reported actual cursor capture.
+    ///
+    /// Losing focus clears this state; regaining focus does not recapture.
+    #[must_use]
+    pub const fn pointer_locked(&self) -> bool {
+        self.mouse.locked
     }
 
     /// Committed text accumulated until the host spends this frame.

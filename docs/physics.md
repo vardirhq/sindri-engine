@@ -1060,9 +1060,21 @@ and `sindri.physics3d.world`. Body payloads use the engine's XYZ fields (includi
 `position` and `rotation`), but an entity's composed `Transform3D` is authoritative
 when present. Without a transform, the body pose is the fallback. Colliders accept
 one piece or `{ "pieces": [...] }`; a collider without a body creates a static
-body, while a body without a collider takes no part. Shape dimensions and local
-offsets are world units, independent of visual transform scale. Automatic 3D
-collider scaling is absent. World settings accept `gravity: [x, y, z]` and optional
+body, while a body without a collider takes no part. Shape dimensions and
+offsets are local units. The scene applies the entity's
+composed world scale (including parents) once before solver insertion and voxel
+reach planning. Without a transform, scale is one. Positive finite uniform scale
+works for all pieces; boxes also support nonuniform scale if their local rotated
+axes remain orthogonal. Axis-permuting rotations work; sheared boxes, nonuniform
+spheres/capsules, zero/negative scale and overflowing dimensions/offsets fail
+explicitly, naming the entity and piece when applicable. The scene does not
+approximate ellipsoids or stretched capsule caps. Collider wireframes use the
+same resolved geometry and omit unsupported geometry. Standalone solver values
+remain world units, and 2D collider semantics are unchanged. Existing scenes
+authored with world-unit dimensions must convert them to local units; an
+axis-aligned box's old half extents and offsets divide by its composed scale.
+Orbit Camera Lab is converted, while the quarry's unit-scale pieces need no edit.
+World settings accept `gravity: [x, y, z]` and optional
 layer labels; removing/disabling the settings restores the host's gravity.
 Multiple active 3D world settings fail explicitly.
 
@@ -1073,8 +1085,12 @@ reject a Z-locked local transform rather than allowing simulation and rendering
 to disagree. The driver removes inactive/despawned entities and removed colliders,
 including inherited inactivity, and re-registers them on reactivation. Unchanged
 components preserve live velocity; transform/ancestor moves teleport or set a
-position-kinematic target. Any body/collider payload change rebuilds that body and
-resets its motion to authored values. Live coefficient/control patching is not a
+position-kinematic target. Any body/collider payload change or resolved geometry
+change caused by entity
+or ancestor scale rebuilds that body and resets its motion to authored values.
+Unchanged scale does not rebuild; scale writes become effective at the next
+fixed step. Authored collider payloads are never rewritten by scaling. Live
+coefficient/control patching is not a
 3D scene capability yet.
 
 After solving, all non-static body kinds write XYZ/quaternion poses back through
@@ -1155,7 +1171,9 @@ hash of every block's answer; each section's occupancy revision is a hash of its
 voxels after edits, so an edit, a different generator or a rebound block set
 all change the revision and equal content reuses cached geometry.
 
-Residency follows what can hit voxels. Each step, every planned dynamic body
+Residency follows what can hit voxels. Scene characters add their scaled probe
+extent, requested travel and skin/snap/step margins to the same residency plan,
+so characters alone retain collision terrain. Each step, every planned dynamic body
 contributes its farthest piece extent plus twice the travel its velocity and
 gravity allow in that step, transformed into the world's voxel space (the
 entity's composed pose and scale, then the grid's cell size and centring from
@@ -1163,8 +1181,8 @@ entity's composed pose and scale, then the grid's cell size and centring from
 touch is the complete snapshot handed to `SceneVoxelCollision3d`; terrain no
 body is near is not resident, wherever the camera is. A single reach wider than
 the section budget fails the step whole rather than publishing a partial window.
-Kinematic and static bodies do not drive residency, and queries see only
-resident sections -- a script asking about distant terrain uses `Grid`/`Aim`.
+Ordinary authored kinematic and static bodies do not drive residency; scene
+characters do. Queries see only resident sections -- a script asking about distant terrain uses `Grid`/`Aim`.
 
 `ScenePhysics3d::step_with_tile_sets` resolves these worlds through
 `VoxelGround` (generator, palette and edits), plans the voxel snapshot against
@@ -1390,3 +1408,64 @@ No game rules are supplied. See the character contract for frame ordering,
 query masks, transform semantics, sensor timing and remaining editor/Decay/game
 integration. Compound character probes, same-step solver response and swept
 controller triggers remain absent.
+
+## 3D character query foundation
+
+`PhysicsWorld3d::move_character` and `move_character_where` wrap Rapier's
+kinematic character controller in engine-owned `CharacterOptions3d`,
+`CharacterMotion3d` and `CharacterCollision3d` values. They are read-only
+world-displacement queries with current-pose geometry, slope/step/snap options
+and copied hit results; applying motion and gameplay policy are separate.
+Scene ownership is described below; there is no Decay surface yet. This is added
+generally for Explorer's planned movement, with native engine regression evidence and
+honestly pending game/editor/browser proof. See
+[Character movement](character-movement.md#3d-character-movement-foundation)
+for validation, backend flag semantics, numerical limits and remaining slices.
+
+### Scene-owned 3D character movement
+
+`sindri.physics3d.character` derives a stationary kinematic body from one scaled
+solid Collider 3D piece, with optional sensor pieces and no authored rigid body.
+`ScenePhysics3d` consumes queued world displacement after the solve, applies it
+once and writes the result through the existing parent-space transform path.
+Input/solver reach participates in voxel residency before any bodies change.
+Actual solved carry expands residency before rider queries; a carry budget failure
+retains queued input and leaves riders unmoved but does not roll back the solve.
+Session uses this same driver, including checkpoints; no host assembles another
+movement loop. Backend limits, request/result lifetime, next-solve sensor timing
+and remaining Decay/game proof are specified in
+[the character contract](character-movement.md#3d-scene-ownership).
+
+### Classified 3D ground queries
+
+`PhysicsWorld3d::probe_ground` and `probe_ground_where` expose read-only nearest
+support geometry through `GroundOptions3d` and copied `GroundProbe3d` values.
+They classify skin/touching contacts and downward casts against a slope limit,
+retain steep nearest surfaces and reject initial penetration as support. Filters,
+stable whole-entity predicate reuse, deterministic ties and current poses use the
+existing query index. No snap, carry or gameplay standing policy is applied.
+Native geometry/filter/lifecycle/invalid-input regressions exercise this general
+Explorer prerequisite; browser/editor/Decay/game proof
+remain pending. See [the contract](character-movement.md#classified-3d-ground-queries).
+
+### Read-only 3D platform carry
+
+`move_character_grounded` / `move_character_grounded_where` combine optional
+`PlatformSupport3d`, collision-limited carry, ordinary Rapier movement and
+classified final support. Current compound geometry verifies the previous pose;
+translation and rotation-point travel sweep before input movement, with separate
+copied carry/movement hits and one total translation. Pending targets contribute
+nothing until solved. Native regressions cover geometry, filtering, wall clipping,
+vertical platforms, jumps and validation. Hosts still own snapshot invalidation,
+once-only application and terrain reach; scene ownership is described above. See
+[the contract](character-movement.md#read-only-3d-platform-carry) for chord,
+fixed-orientation and backend correction/iteration limits.
+
+Scene Character 3D enables platform carry by default, with a flat
+`carry_platforms` opt-out. Support is classified before solving; solved translation
+and rotation-point carry precede input movement and are included once in the
+cached `GroundedCharacterMotion3d`. Dependent rider caches invalidate with support
+lifecycle changes; fresh snapshots prevent replay after clipped travel. Native
+scene and Session regressions exercise parenting, jumps, lifecycle, replay and
+terrain budgets. Browser/controller, editor interaction and Explorer proof remain
+pending; no controller-on-controller carry is claimed.

@@ -8,6 +8,8 @@ pub(crate) const HIT_FIELDS: [&str; 4] = ["entity", "point", "normal", "distance
 
 #[derive(Clone, Copy)]
 pub(crate) enum Physics3dCall {
+    MoveCharacter,
+    CharacterMotion,
     Layer,
     Mask,
     Raycast,
@@ -29,6 +31,8 @@ pub(crate) enum Physics3dCall {
 }
 
 pub(crate) const CALLS: &[(&str, Physics3dCall)] = &[
+    ("move_character", Physics3dCall::MoveCharacter),
+    ("character_motion", Physics3dCall::CharacterMotion),
     ("layer", Physics3dCall::Layer),
     ("mask", Physics3dCall::Mask),
     ("raycast", Physics3dCall::Raycast),
@@ -63,9 +67,15 @@ pub(crate) fn add_surface(environment: &mut Environment) {
         hit = hit.with_value(name, ty);
     }
     environment.add_type(RAY_HIT, hit);
+    super::character3d::add_snapshots(environment);
     let mut physics = HostType::new();
     for (name, call) in CALLS {
         let (params, return_type) = match call {
+            Physics3dCall::MoveCharacter => (vec![entity(), Type::Vec3, Type::Bool], Type::Unit),
+            Physics3dCall::CharacterMotion => (
+                vec![entity()],
+                Type::Optional(Box::new(Type::Named(super::character3d::MOTION.to_owned()))),
+            ),
             Physics3dCall::Layer => (vec![Type::String], Type::F32),
             Physics3dCall::Mask => (vec![Type::array_of(Type::String)], Type::F32),
             Physics3dCall::Raycast

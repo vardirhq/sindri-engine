@@ -26,9 +26,12 @@ mod peers;
 
 pub(crate) use peers::Peers;
 mod actions;
+mod camera_3d;
 mod person;
 mod physics;
 mod physics3d;
+mod physics3d_character;
+mod physics3d_character_snapshot;
 mod physics3d_layers;
 mod physics3d_motion;
 mod physics3d_query;
@@ -55,6 +58,7 @@ mod services;
 mod shape_query;
 mod shared;
 mod tiles;
+mod transform;
 mod tween;
 mod ui;
 mod widgets;
@@ -116,6 +120,7 @@ pub struct WorldHost<'a> {
     physics: Option<crate::Physics2d<'a>>,
     pub(crate) physics3d: Option<crate::Physics3d<'a>>,
     pub(crate) characters: Option<crate::Characters2d<'a>>,
+    pub(crate) characters3d: Option<crate::Characters3d<'a>>,
     /// What the game remembers, when the host is keeping a save.
     saves: Option<&'a mut sindri_core::SaveStore>,
     /// The fleck pool, when the host is running one.
@@ -169,6 +174,7 @@ pub struct WorldHost<'a> {
     scenes: Option<&'a mut crate::SceneChannel>,
     /// What the script said, in order. Drained by the caller after the call.
     printed: Vec<String>,
+    pointer_lock_request: Option<bool>,
     /// The other scripts in the pass, for a host that runs several.
     peers: Option<peers::Peers<'a>>,
     pub(crate) tweens: Option<&'a mut crate::tweens::Tweens>,

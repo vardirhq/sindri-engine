@@ -40,9 +40,76 @@ GLB decoding, a model GPU path and project export; slice 1 merges it. Read again
      CCD.
    - Collision cannot come from a model: there are no trimesh or convex
      colliders, and collider size ignores scale.
-5. **Nothing proves it.** No in-tree project moves a character through a 3D
+5. **There is no smooth ground.** The only generated world is
+   `sindri-voxel`'s block terrain. A 3D game built from smooth models has
+   no heightmap terrain to stand them on, and no way to scatter trees or
+   rocks across one.
+6. **Nothing proves it.** No in-tree project moves a character through a 3D
    level with a perspective camera. The low-tide crawler proof is external,
    and AGENTS.md does not count it.
+
+## Handing over
+
+This plan is the state of the work. Whoever picks it up next reads
+`AGENTS.md` first, ticks a box only when its code, tests and docs land
+together, and pushes each slice before starting the next.
+
+Order:
+- Slice 6 now has world-space read-only `forward`/`right`/`up` and checked
+  `look_at`/`rotate_around`, with parent-space conversion, atomic validation,
+  compiler/LSP metadata and the transform feature example. Quaternion values
+  remain pending; Decay currently has no quaternion or Vec4 value type.
+- Slice 6 also has explicit perspective FOV control and `sindri.camera.orbit`
+  with world-space follow, aiming, smoothing and sight-line collision pull-in.
+  The Orbit Camera Lab runs to its goal through Session and exported Chromium;
+  native and WebGPU captures show pull-in and recovery. Editor/game proof
+  remains pending.
+- Pointer lock now connects Decay lock/unlock requests and read-only actual
+  state through Session to the native/browser host. Shared relative motion
+  excludes cursor warps, rebases mode changes and is consumed once per step.
+  Real Chromium checks unbounded motion, U/Escape release and sandbox denial;
+  native X11/Vulkan verifies unbounded raw motion, U/Escape/focus-loss release
+  and no recapture on focus regain. Native editor Play now verifies the same
+  raw input and actual capture, including pause/stop and hidden-view release.
+  Explorer game proof remains pending.
+- Collider scale now resolves local dimensions and offsets through composed
+  positive entity/parent scale. Uniform scale works for every shape; nonuniform
+  boxes work when their local axes remain orthogonal. Unsupported shear and
+  nonuniform round shapes fail before runtime mutation. Native scene tests cover
+  solid landing, queries, parent offsets, editor wireframes and scale rebuilds.
+  Orbit Camera Lab uses local collider units, verifies wall resizing through
+  Session, and reaches its goal in real WebGPU Chromium. Browser scale editing,
+  native editor interaction and Explorer adoption remain pending.
+- The 3D character foundation now wraps Rapier's controller in read-only
+  engine-owned displacement queries over the existing current-pose BVH. Native
+  tests cover walls, slopes, steps, snapping, filtering and validation; backend
+  flag/correction limits are explicit. Scene-owned requests now derive stationary
+  kinematic bodies, extend voxel residency and apply collision-limited travel once
+  after solving through Session, with cached results and replay tests. Editor
+  interaction, controller browser and Explorer proof remain pending. Classified
+  read-only ground probes now provide support entities, slope checks and initial
+  penetration rejection with native tests. A read-only grounded movement
+  composition now verifies previous support, sweeps solved translation/rotation
+  and returns separate carry hits plus classified final support. Scene-owned carry
+  now seeds classified pre-solve support, applies solved motion once, invalidates
+  dependent rider caches and expands terrain for actual carry before querying.
+  Native scene and Session regressions verify parenting, replay and terrain
+  budgets. Typed Decay movement requests and copied support/movement/carry
+  records now have native host/script and Session timing/replay regressions,
+  compiler/LSP checks and generated API metadata. Continue with controller
+  browser/editor/Explorer proof; do not add gameplay rules in Rust.
+- Then the rest of slice 6, which unblocks moving through 3D (Low Tide's
+  crawler and crew included).
+- Then slices 2 to 4 (measurement, instancing and one lit path, lights),
+  which terrain (5b) and the showcase need.
+- Slice 4b records future runtime environment controls and day/night proof.
+  Start it only after unified materials, imported-model shadows, runtime light
+  access and point/spot lights are ready. This does not change the current
+  slice 6 priority. Keep the work in PR #507.
+
+The yaw/pitch/roll convention is fixed: radians, Y-up, -Z forward (as
+cameras face), YXZ order. Build on `Transform3D::yaw_pitch_roll_radians` and
+`set_yaw_pitch_roll_radians` rather than adding another.
 
 ## Slices
 
@@ -96,7 +163,69 @@ GLB decoding, a model GPU path and project export; slice 1 merges it. Read again
   every geometry kind.
 - [ ] The editor shows range spheres and cone gizmos. Create Point Light and
   Create Spot Light.
-- [ ] Decay can read and set a light's colour, intensity and enabled state.
+- [ ] Decay can read and set directional, point and spot light color,
+  intensity and enabled state. Prefer entity property access, such as
+  `sun.light.intensity`, if it fits the existing typed host surface; settle
+  the exact API against current Decay conventions before implementing it.
+- [ ] Directional lights rotate through the existing 3D transform API.
+  Runtime property and transform changes update lighting and shadow direction
+  in the next rendered frame in native, browser and editor Play runtimes.
+- [ ] Point and spot lights can ride moving 3D parents: composed world
+  translation and rotation determine position and spotlight direction.
+  Decay can change their properties, and imported GLB geometry is lit through
+  the unified renderer in native, browser and editor Play.
+
+### 4b. Runtime environment controls and day/night proof (future work)
+
+Scheduled only; do not start this example before its dependencies are ready.
+Implementation order within the lighting track is unified 3D materials and
+lighting (3), imported-model shadow casting/receiving (3), runtime Decay light
+access (4), point/spot lights (4), runtime environment access, then the example
+and integration tests below. Runtime light access may land before local lights
+without changing the current slice order.
+
+Low Tide 3D (`vardirhq/low-tide-3d`) is the initial external integration case
+that requests these general capabilities. It stays a consumer, never an engine
+dependency. Time progression, sunrise/sunset transitions and gameplay
+consequences belong to game Decay scripts. There is no engine day/night API,
+second lighting path or Low Tide gameplay in Rust.
+
+- [ ] Expose scene environment properties to Decay: ambient intensity,
+  ambient color (already supported by the authored renderer contract), and
+  background/clear color. Expose fog color, density and distance once unified
+  fog is ready; existing textured/voxel fog does not yet cover imported models.
+- [ ] Apply runtime environment edits without restarting the scene or
+  unnecessarily rebuilding render resources. Share the authored environment
+  and unified material/lighting/shadow path across all hosts.
+- [ ] Add a small, self-contained feature example with a configurable Decay
+  game clock, sunrise, midday, sunset and night; a rotating directional sun;
+  smooth sun brightness/color, ambient and background transitions; and night
+  illumination while the sun is disabled. No visible-sun renderer is required.
+- [ ] The example moves an imported GLB object carrying a functional point
+  or spot light. Imported models cast and receive dynamic shadows that follow
+  the sun. This proves generic mounted lights rather than crawler-specific
+  headlights, cabin/work lights or floodlight logic.
+- [ ] Test typed property reads/writes, invalid values and atomic rejection,
+  runtime frame updates, parenting and shadow direction where practical.
+  Open the example, compile its scripts and run a scripted clock to its goal
+  through Session; visually verify native and real WebGPU browser output and
+  exercise the same scene in editor Play before claiming completion.
+- [ ] Update scripting and subsystem contracts, generated Decay API docs and
+  machine-readable metadata (via the generator), LSP/semantic validation where
+  relevant, capability/parity evidence and the changelog. Name the external
+  integration and feature example honestly; retain in-tree game proof as a
+  separate completion requirement under AGENTS.md.
+
+Acceptance: a Decay script continuously advances its own clock and changes
+the sun, ambient illumination and background; the same scene renders correctly
+in native, browser and editor Play; a moving imported GLB carries functional
+lights; and imported models cast and receive shadows. Do not tick this item
+based only on schemas or compilable APIs. Deliver it in small, tested commits
+pushed regularly to this existing PR once the dependencies pass.
+
+Skyboxes, procedural atmosphere, stars, moon rendering and weather are optional
+future enhancements, not prerequisites; do not build a complete skybox solely
+for this example.
 
 ### 5. Author 3D scenes in the editor
 - [ ] The editor loads models through the same asset queue as the player,
@@ -117,25 +246,77 @@ GLB decoding, a model GPU path and project export; slice 1 merges it. Read again
 - [ ] 3D collider handles (box extents, sphere radius, capsule height), one
   undo step per drag. Fit to model bounds.
 
+### 5b. Terrain
+Depends on slice 3's instancing for foliage and slice 5's ray hits for
+placement. The roadmap's "height/mesh terrain next" is this slice.
+- [ ] `sindri.terrain`: a chunked heightfield, either generated from a seed
+  (reusing `sindri-voxel`'s height and biome fields) or loaded from a 16-bit
+  heightmap. Normals come from the heights. Distant chunks drop detail
+  without cracks.
+- [ ] Up to four ground layers (for example grass, rock and sand) blended by
+  slope, height or painted weights, through slice 3's lit path and shadows.
+- [ ] A Rapier heightfield collider. Decay can ask `Terrain.height_at` and
+  `Terrain.normal_at`.
+- [ ] Foliage: rules (a model, density, slope and height range, biome) that
+  scatter instances deterministically from the seed. Each sits on the
+  surface and can tilt to its normal; it may carry a collider.
+- [ ] Editor:
+  - sculpt brushes (raise, lower, smooth, flatten);
+  - brushes that paint layers and paint or erase foliage;
+  - one undo step per stroke;
+  - anything dropped or moved can snap to the ground.
+- [ ] Terrain exports and plays in the browser, and its edits save as a
+  heightmap asset beside the scene.
+
 ### 6. Play in 3D
-- [ ] Decay 3D transforms:
+- [x] Decay `yaw`/`pitch`/`roll` on the transform (radians, Y-up, -Z
+  forward; each keeps the others when written).
+- [ ] Decay 3D transforms, the rest:
   - `rotation` (quaternion);
-  - `euler`/`yaw`/`pitch`/`roll`;
-  - `forward`/`right`/`up`;
-  - `look_at`, `rotate_around`.
-- [ ] Camera: FOV, look-at, and an orbit/third-person follow mode with
-  collision pull-in (a 3D ray).
-- [ ] Input: pointer delta on `Pointer`, and pointer lock in native and
-  browser (`requestPointerLock`).
+  - [x] `forward`/`right`/`up`;
+  - [x] `look_at`, `rotate_around`.
+  The [Transform Lab](../examples/transform/README.md) opens and runs to its
+  goal through the shared runtime; game proof remains with Explorer.
+- [ ] Camera:
+  - [x] Explicit perspective FOV and transform look-at.
+  - [x] Engine-owned orbit/third-person follow with smoothing and collision
+    pull-in (a 3D ray), checked in the [Orbit Camera Lab](../examples/orbit/README.md).
+  - [ ] Explorer gameplay, editor authoring and browser proof.
+- [ ] Input:
+  - [x] Read-only mouse `Pointer.delta` / `Input.Pointer.delta` in viewport
+    pixels per fixed step, with typed access and drag-to-look in Orbit Camera Lab.
+  - [x] Pointer lock in native and browser (`requestPointerLock`).
+    - [x] Shared input capture feedback and relative-motion accumulation,
+      including transition rebasing, focus loss and fixed-step regressions.
+    - [x] Host capture/release and actual-state feedback, Decay requests and
+      read-only lock state, with native/browser runtime verification.
+  - [x] Native editor Play input: checked window capture feedback, raw mouse
+    counts, U/Escape/focus-loss/pause/stop/hidden-view release, no automatic
+    recapture, unit regressions and actual X11 window verification.
+  - [ ] Explorer game input proof.
 - [ ] `sindri.physics3d.character`:
-  - a Rapier kinematic character controller, with slopes, steps, ground snap
-    and moving platforms;
-  - `Physics3d.character_motion` in Decay;
-  - editor gizmos reused from the 2D character.
+  - [x] Engine-owned read-only Rapier movement query with tested slope, step
+    and ground-snap options; current poses, copied results and strict validation.
+  - [x] Scene-owned requests/results and fixed-step application, scaled probes,
+    character voxel residency, lifecycle invalidation and Session replay.
+  - [x] Read-only classified ground probes with support entities, skin contacts,
+    slope limits, penetration rejection, deterministic ties and native tests.
+  - [x] Read-only grounded movement with verified previous support, solved
+    translation/rotation-point carry, separate hits and classified final support.
+  - [x] Scene-owned solved moving-platform support/carry with translation/rotation,
+    lifecycle invalidation, opt-out, actual-carry terrain residency and native
+    scene/Session replay regressions. Browser/editor/game proof remains below.
+  - [x] `Physics3d.character_motion` and movement requests in Decay: typed
+    optional support/carry, separate raw movement and detailed collisions,
+    next-step/last-valid-input validation, nested copies, native scripts and
+    shared Session replay, compiler/LSP and generated API metadata.
+  - [ ] Editor gizmos reused from the 2D character, browser and Explorer proof.
 - [ ] Collision from content:
   - static trimesh colliders built from a model's meshes;
   - convex hulls for dynamic props;
-  - 3D collider dimensions follow transform scale.
+  - [x] Scene collider dimensions and offsets follow composed positive scale,
+    with uniform round shapes, orthogonal nonuniform boxes and atomic rejection.
+  - [ ] Browser scale editing, native editor interaction and Explorer scale proof.
 - [ ] Physics material profiles in 3D, sharing the 2D asset format.
 
 ### 6b. Skeletal animation
@@ -151,7 +332,8 @@ GLB decoding, a model GPU path and project export; slice 1 merges it. Read again
 ### 7. Prove it
 - [ ] A new genre showcase, `games/explorer`: a third-person 3D game built
   from GLB models.
-  - It needs a level with collision from its model, a character controller,
+  - Its level stands on `sindri.terrain` with scattered foliage.
+  - It needs collision from its models and the terrain, a character controller,
     an orbit camera with mouse look and touch, lights and shadows, and a
     goal.
   - It is exported to Pages, smoke-tested in Chromium, and has a scripted run
@@ -175,8 +357,10 @@ GLB decoding, a model GPU path and project export; slice 1 merges it. Read again
 - IBL and environment maps, SSAO, MSAA/TAA, LOD, occlusion culling.
 - `.gltf` with external files, OBJ and FBX.
 - 3D joints.
-- Validation on representative integrated and discrete GPUs. This is not
-  possible in this container; it is a manual check.
+- Caves, overhangs and holes in terrain. Those stay with voxel terrain.
+- Validation across representative integrated and discrete GPUs remains a
+  broader manual check. This slice exercises native X11/Vulkan on an RTX 3060
+  and browser WebGPU on Chromium's software Vulkan backend.
 
 ## Decisions
 
@@ -185,6 +369,11 @@ GLB decoding, a model GPU path and project export; slice 1 merges it. Read again
    exported by a real tool tests skinning far better than a generated one.
    Small generated GLBs stay as test fixtures.
 2. **Animation.** Skeletal animation is in scope (slice 6b).
+3. **Terrain.** Smooth heightmap terrain with foliage is in scope (slice 5b).
+   Voxel terrain stays for worlds that are dug into or destroyed, as
+   Causeway's is. Low Tide's seabed is the external case it serves: tides
+   need a waterline that slides over a slope, and the crawler's tracks need
+   continuous ground.
 
 ## Open questions
 

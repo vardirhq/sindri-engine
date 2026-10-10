@@ -97,3 +97,43 @@ application a device and a texture view. It does not choose a surface format or
 decide what a failed acquisition means — that is the
 [presentation surface policy](rendering-surface.md). It does not own the game
 loop's simulation semantics, which belong to `sindri-platform`.
+
+## Captured mouse input foundation
+
+`InputEvent::PointerLockChanged` reports actual cursor capture, never merely a
+request. `PointerMotion` carries relative displacement, positive right/down in
+host-defined units, and contributes only while the reported lock is active and
+the input state is focused. Unlocked `PointerMoved` continues to derive
+displacement from absolute viewport positions. While captured, absolute moves
+and leave events are ignored for mouse position, displacement and UI presses,
+so host cursor warps cannot double-count motion or cancel a drag. Touch remains
+independent.
+
+Changing capture mode discards pending displacement and rebases the first
+unlocked absolute move. Duplicate feedback preserves pending motion. Focus loss
+clears capture, motion and the absolute mouse position; returning focus does
+not request recapture. Hosts remain responsible for actually releasing the
+cursor on focus loss. Nonfinite displacement or a sum that overflows is dropped
+as one event. `EngineHost` spends relative displacement exactly once, preserving
+it across frames that earn no fixed step and clearing it after the first catchup
+step while retaining capture state.
+
+`DesktopApp::take_pointer_lock_request` drains a capture intention after update.
+The windowed host owns cursor capture: native Locked (or X11 confinement with
+raw device motion) and browser `requestPointerLock`. The browser uses a caught
+function call plus Promise rejection handling because the older void binding
+cannot handle synchronous security exceptions. Actual browser state is polled
+before update and before relative motion; returning from a request is never
+success feedback. Delayed grants after explicit release are released again.
+
+Escape, focus loss, suspension, a hidden page, failure and normal host exit
+release capture. Regaining focus does not recapture. Requests while unfocused
+are ignored. Native raw device counts and browser physical-pixel displacement
+feed the same input path, with absolute events ignored while captured.
+`Session` retains the latest successful script's request across fixed steps
+until the host drains it once; restored checkpoints do not replay commands.
+Native editor Play owns its eframe window capture separately from the player
+host, draining the same Session request and reporting only successful window
+calls. Its egui raw motion feeds the shared input state without display scaling.
+Capture is allowed only in a visible, running Game view; Escape, focus loss,
+pause/stop, text editing, picking and hiding the Game view release it.

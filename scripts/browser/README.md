@@ -38,6 +38,17 @@ scene and plays with keyboard input. It brakes near the flag so a jump over the
 sensor can land there; only the read-only observer's win counts as success.
 Run its input-sequence regression with `node --test scripts/browser/*.test.mjs`.
 
+The Orbit Camera Lab capture regression uses full Chromium's headless mode
+(`channel: 'chromium'`), which `playwright install chromium` installs alongside
+the headless shell. The shell does not deliver the expected relative motion
+from Playwright's mouse moves while captured. The regression keeps the exact
+1420-by-60 displacement assertion, release checks, sandbox denial and game goal:
+
+```sh
+SINDRI_BASE_PATH=/examples/orbit/ node scripts/browser/pointer-lock.mjs \
+  target/dist/orbit target/browser-orbit-pointer-lock.png
+```
+
 ## What the first run proved
 
 The module instantiated, `run` executed, winit adopted the page's canvas, a

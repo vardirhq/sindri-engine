@@ -337,3 +337,53 @@ fn reaching_for_a_method_is_refused_with_advice() {
     let reported = format!("{failures:?}");
     assert!(reported.contains("call it as `helper(...)`"), "{reported}");
 }
+
+/// A 3D steering script: turn toward a point on the ground, tip up, then walk
+/// the way it faces. Each angle keeps the others when it is written.
+#[test]
+fn a_script_turns_a_solid_object_to_face_a_point_and_walks_toward_it() {
+    const STEER: &str = r"
+script Steer {
+    var done: bool = false;
+
+    fn update(dt: f32) {
+        if done { return; }
+        done = true;
+        let to_goal = Vec3(-4.0, 0.0, 0.0) - this.transform.position;
+        this.transform.yaw = atan2(-to_goal.x, -to_goal.z);
+        this.transform.pitch = 0.5;
+        this.transform.roll = 0.25;
+        let yaw = this.transform.yaw;
+        this.transform.position += Vec3(-sin(yaw), 0.0, -cos(yaw)) * 2.0;
+    }
+}
+";
+    let mut sources = ScriptSources::new();
+    sources.insert("scripts/steer.decay", STEER);
+    let (mut world, entity) = world_with(json!({
+        "source": "scripts/steer.decay",
+        "script": "Steer",
+        "properties": {},
+    }));
+
+    let failures = Scripts::new().advance(
+        &mut world,
+        &registry(),
+        ScriptFrame::new(&sources, &InputState::default(), 0.1),
+    );
+    assert!(failures.is_quiet(), "{failures:?}");
+
+    let transform = world
+        .get(entity)
+        .and_then(|data| data.transform_3d)
+        .expect("the entity kept its transform");
+    let [yaw, pitch, roll] = transform.yaw_pitch_roll_radians();
+    assert!(
+        (yaw - std::f32::consts::FRAC_PI_2).abs() < 1.0e-5,
+        "yaw {yaw}"
+    );
+    assert!((pitch - 0.5).abs() < 1.0e-5, "pitch {pitch}");
+    assert!((roll - 0.25).abs() < 1.0e-5, "roll {roll}");
+    let [x, y, z] = transform.position;
+    assert!((x + 2.0).abs() < 1.0e-5 && y.abs() < 1.0e-5 && z.abs() < 1.0e-5);
+}

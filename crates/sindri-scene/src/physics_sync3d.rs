@@ -9,8 +9,9 @@ use std::{collections::BTreeMap, time::Duration};
 
 use crate::voxel_collision3d::VoxelReach;
 use crate::{
-    Collider3dComponent, PhysicsSyncError, PhysicsWorld3dComponent, RigidBody3dComponent,
-    SceneVoxelCollision3d, TileSetBindings,
+    Character3dComponent, CharacterMotions3d, CharacterRequests3d, Collider3dComponent,
+    PhysicsSyncError, PhysicsWorld3dComponent, RigidBody3dComponent, SceneVoxelCollision3d,
+    TileSetBindings,
 };
 
 #[cfg(test)]
@@ -19,6 +20,8 @@ mod authoring_tests;
 mod hierarchy_tests;
 #[cfg(test)]
 mod pending_tests;
+#[cfg(test)]
+mod scale_tests;
 #[cfg(test)]
 mod tests;
 #[cfg(test)]
@@ -38,6 +41,7 @@ pub struct ScenePhysics3d {
     /// Authored voxel colliders' static geometry. Lives and resets with the
     /// solver, because it owns bodies inside it.
     voxels: SceneVoxelCollision3d,
+    characters: crate::characters3d::SceneCharacters3d,
 }
 
 #[derive(Clone, PartialEq)]
@@ -55,6 +59,7 @@ impl ScenePhysics3d {
             host_gravity: gravity,
             events: Vec::new(),
             voxels: SceneVoxelCollision3d::default(),
+            characters: crate::characters3d::SceneCharacters3d::default(),
         })
     }
     pub const fn world(&self) -> &PhysicsWorld3d {
@@ -68,6 +73,30 @@ impl ScenePhysics3d {
     }
     pub const fn for_scripts(&mut self) -> (&mut PhysicsWorld3d, &[PhysicsEvent3d]) {
         (&mut self.world, self.events.as_slice())
+    }
+
+    /// Pending world-space character movement for the next fixed step.
+    pub fn character_requests(&mut self) -> &mut CharacterRequests3d {
+        &mut self.characters.requests
+    }
+    /// The last applied character result, or none before synchronization.
+    pub fn character_motion(
+        &self,
+        entity: EntityId,
+    ) -> Option<&sindri_physics::GroundedCharacterMotion3d> {
+        self.characters.motion(entity)
+    }
+    /// Disjoint runtime borrows for hosts with scene-owned character APIs.
+    pub fn for_scripts_with_characters(
+        &mut self,
+    ) -> (
+        &mut PhysicsWorld3d,
+        &[PhysicsEvent3d],
+        &mut CharacterRequests3d,
+        CharacterMotions3d<'_>,
+    ) {
+        let (requests, motions) = self.characters.for_scripts();
+        (&mut self.world, &self.events, requests, motions)
     }
 
     /// Validates the authored batch, reconciles lifecycle/edits, solves and writes
@@ -84,7 +113,7 @@ impl ScenePhysics3d {
     }
 
     /// [`Self::step`], with the block sets authored voxel colliders name.
-    /// Voxel geometry resident near each dynamic body is planned beside the
+    /// Voxel geometry resident near each dynamic body or character is planned beside the
     /// body batch, and both validate before either changes the solver.
     pub fn step_with_tile_sets(
         &mut self,
@@ -101,6 +130,7 @@ impl ScenePhysics3d {
         // nothing to synchronize or step: a 2D game pays nothing for 3D.
         if self.world.is_empty() && self.registered.is_empty() && !authors_3d(world) {
             self.events.clear();
+            self.characters.commit(BTreeMap::new());
             return Ok(());
         }
         let settings = components.query::<PhysicsWorld3dComponent>(world)?;
@@ -115,15 +145,28 @@ impl ScenePhysics3d {
             return Err(sindri_physics::PhysicsError::NonFinite("gravity").into());
         }
         let plan = prepare(world, components, &self.world)?;
-        let reaches = self.reaches(world, &plan, gravity, delta.as_secs_f32());
+        let characters = crate::characters3d::SceneCharacters3d::plan(world, components)?;
+        let mut reaches = self.reaches(world, &plan, gravity, delta.as_secs_f32());
+        reaches.extend(self.characters.reaches(world, &characters)?);
         let voxels =
             self.voxels
                 .plan_authored(world, components, tile_sets, &self.world, &reaches)?;
         self.world.set_gravity(gravity)?;
         self.synchronize(world, plan)?;
+        self.characters.commit(characters);
         self.voxels.commit(&mut self.world, voxels)?;
         self.world.finish_synchronize();
+        self.characters.hold(world, &mut self.world)?;
         self.events = self.world.step(delta)?;
+        let carry_reaches = self.characters.carry_reaches(&self.world)?;
+        if !carry_reaches.is_empty() {
+            reaches.extend(carry_reaches);
+            let voxels =
+                self.voxels
+                    .plan_authored(world, components, tile_sets, &self.world, &reaches)?;
+            self.voxels.commit(&mut self.world, voxels)?;
+        }
+        self.characters.apply(world, &mut self.world)?;
         self.write_back(world);
         Ok(())
     }
@@ -146,6 +189,7 @@ impl ScenePhysics3d {
             let pose = pose_of(world, entity, authored.body);
             if self.registered.get(&entity) == Some(&authored) {
                 if self.agreed.get(&entity).is_none_or(|old| moved(*old, pose)) {
+                    self.characters.invalidate(entity);
                     self.world.move_to(entity, pose)?;
                     self.agreed.insert(entity, pose);
                 }
@@ -194,6 +238,7 @@ impl ScenePhysics3d {
     }
 
     fn remove(&mut self, entity: EntityId) {
+        self.characters.invalidate(entity);
         self.world.remove(entity);
         self.registered.remove(&entity);
         self.agreed.remove(&entity);
@@ -242,9 +287,16 @@ fn prepare(
 ) -> Result<BTreeMap<EntityId, Authored>, PhysicsSyncError> {
     let mut plan = BTreeMap::new();
     for (entity, collider) in components.query::<Collider3dComponent>(world)? {
-        let body = components
+        let character = components.get::<Character3dComponent>(world, entity)?;
+        let mut body = components
             .get::<RigidBody3dComponent>(world, entity)?
             .map(|value| value.0);
+        if character.is_some() && body.is_none() {
+            body = Some(RigidBody3d {
+                kind: RigidBodyKind::KinematicVelocity,
+                ..RigidBody3d::default()
+            });
+        }
         let pose = pose_of(world, entity, body);
         let placed = body_at(body, pose);
         if placed.kind != RigidBodyKind::Static
@@ -256,19 +308,18 @@ fn prepare(
             return Err(PhysicsSyncError::LockedDepth3d(entity));
         }
         physics.validate_insertion(entity, placed, &collider.0)?;
-        plan.insert(
-            entity,
-            Authored {
-                body,
-                pieces: collider.0,
-            },
-        );
+        let scale = world.world_transform(entity).unwrap_or_default().scale;
+        let pieces = collider
+            .scaled(scale)
+            .map_err(|error| PhysicsSyncError::ColliderScale3d(entity, error))?;
+        physics.validate_insertion(entity, placed, &pieces)?;
+        plan.insert(entity, Authored { body, pieces });
     }
     Ok(plan)
 }
 
 /// The farthest any point of a piece is from its body's origin.
-fn extent(piece: &Collider3d) -> f32 {
+pub(crate) fn extent(piece: &Collider3d) -> f32 {
     let offset = piece
         .offset
         .iter()

@@ -298,12 +298,35 @@ exhaustive candidates; sparse XYZ rays, overlaps and casts select one piece in
 100/1,000/10,000-piece worlds. Overflowing bounds retain conservative candidates;
 backend shape casts at near-maximum finite coordinates/extents can still return
 non-finite results, so numerical failure reporting remains a gap.
+
+`PhysicsWorld3d::move_character` now wraps Rapier's kinematic character controller
+in engine-owned read-only movement queries. Absolute separation, slope limits,
+optional steps/snap, stationary correction and copied collision values use the
+existing current-pose query index. Native engine tests exercise XYZ motion,
+solid landing, wall slide, steps/headroom, snap, slopes, arbitrary up, filtering,
+teleports, copies, clone replay and invalid input. Platform carry is intentionally
+separate from this displacement query. Rapier contact/flag semantics and bounded
+iteration/correction limits are documented in [Character movement](character-movement.md).
+This is a foundation added for Explorer, with scene ownership described below;
+Decay/editor/browser controller integration, moving platforms and game goal
+proof remain pending.
+
 `ScenePhysics3d` now reconciles registered body/collider/world components with
 active scene entities, composed XYZ/quaternion transforms, gravity settings and
 parent-space write-back. Twelve regressions cover lifecycle/edits, batch rejection,
 solid/sensor events, targets, newer rotated/scaled parents and checked command
-undo/redo/save/reopen. Visual scale is preserved but does not resize 3D colliders;
-structural payload edits reset the rebuilt body's motion. This is the prerequisite
+undo/redo/save/reopen. Composed positive transform scale now resizes 3D collider
+dimensions and offsets, including inherited scale. Boxes support nonuniform
+scale with orthogonal local axes; spheres/capsules require uniform scale. Shear,
+nonpositive/nonfinite scale and overflow fail before batch mutation. The shared
+editor wireframe path resolves the same geometry. Native scene regressions
+exercise scaled solid landing, queries, parent offsets, wireframes, rebuild timing
+and atomic rejection. A shared Session regression narrows/restores Orbit Camera
+Lab's barrier and verifies recovery/immediate pull-in. The converted lab reaches
+its goal in real WebGPU Chromium with fetched assets, rendered pixels and no
+runtime errors; captured input and denial regressions also pass. Browser scale
+editing, native editor visual verification and Explorer adoption remain pending. Structural payload or resolved scale edits
+reset the rebuilt body's motion. This is the prerequisite
 for Causeway voxel collision proof. Shared native/browser sessions and native
 editor Play now step both dimensions before scripts; fresh Play, Stop and scene
 replacement reset both editor solvers. Two session regressions exercise XYZ
@@ -2167,6 +2190,17 @@ lists, always with explicit fallbacks. Orbital Last Stand exercises this by
 driving its 160-entry module registry, weighted pools, requirements, display
 copy, and generic effects from one profile rather than ID switchboards.
 
+The 3D transform surface additionally offers read-only world-space unit
+`forward`, `right`, and `up`, and checked `look_at(target)` and
+`rotate_around(pivot, axis, radians)` methods on own and referenced entities.
+The script regressions cover rotated/scaled parents, normalized directions,
+copy-versus-write semantics, and atomic errors including the Z lock. The
+[Transform Lab](../examples/transform/README.md) opens a perspective scene
+and runs to its goal.
+This is slice 6 of `docs/3d-update.md`, a foundation for Explorer rather than
+completed game proof: no in-tree game uses these new methods yet. A quaternion
+value and character/orbit-camera systems remain pending.
+
 A script reaches its own transform's position, scale and Z rotation, its
 sprite's tint and layer, the keyboard, the frame's delta and its own elapsed
 time, logical grid position through an explicit tilemap entity, maths functions,
@@ -2576,6 +2610,25 @@ Runtime regressions exercise modes and phone touch; browser smoke covers desktop
 and phone controls and project/custom-domain routes. Dedicated editor behavior
 controls and gizmos remain absent. See `docs/cameras.md`.
 
+## 3D Orbit Camera Lab
+
+`examples/orbit` is an authored feature project with a walker, raised goal and
+blocking wall. Decay changes the perspective FOV and orbit angles; the shared
+runtime follows, aims, pulls in against the wall and recovers after the wall
+is disabled. Its project test opens, compiles and runs to the goal. Native and
+exported Chromium captures were visually inspected before and after recovery;
+the browser fetched the exported assets and reported the scripted goal without
+runtime or GPU errors. The flat-color example produces fourteen screenshot
+colors, so its local smoke used an eight-color minimum plus blue-walker and
+gold-goal pixel checks instead of the generic sixteen-color blank-frame gate. Scene
+regressions cover immediate pull-in, smoothed recovery, sensor/layer/self
+filtering, rotated and scaled parents, Z locks, invalid settings and payload
+preservation. The schema supplies generic inspector field meanings, but no
+editor view has yet been exercised for this component. Collision uses one
+sight-line ray and synchronized obstacle poses; mouse lock, volume sweeps and
+Explorer's game/browser proof remain pending. This is new general camera
+capability for Explorer in slice 6 of `docs/3d-update.md`.
+
 ## The platformer
 
 `games/platformer` is the first genre showcase: a side-view level painted as a
@@ -2833,6 +2886,38 @@ confirmed by an unchanged file hash. See [the repeatable editor review](physics-
 Engine/editor/Decay/platformer regressions and prior browser checks complete
 this 2D slice; 3D joints, gameplay world snapshots and final integration remain.
 
+The 3D character foundation now has scene ownership through
+`sindri.physics3d.character`: stationary kinematic bodies, next-fixed-step XYZ
+requests, scaled single-solid probes, cached results and voxel residency covering
+requested movement. Native scene and shared Session tests exercise filtering,
+parent writeback, invalid input, rebuilds, terrain budgets and checkpoint replay.
+Read-only `probe_ground` queries now classify nearest skin/touching or downward
+support against a slope limit, retain steep hits and flag initial penetration.
+Native tests cover shapes, compound offsets, filters, ties, current poses and
+invalid inputs; [the query contract](character-movement.md#classified-3d-ground-queries)
+records numerical limits. `move_character_grounded` now composes verified
+previous support, solved translation/rotation-point carry, ordinary movement and
+classified final support. Eight native regressions cover clipping, vertical
+platforms, jumps, compound offsets, filtering, copies and invalid input; the
+[carry contract](character-movement.md#read-only-3d-platform-carry) records chord
+and backend limits. Scene carry now uses the composition with classified pre-solve support, a flat
+`carry_platforms` opt-out, dependent cache invalidation and once-only parent-space
+writeback. Terrain keeps its input/solver window before the solve and expands for
+actual carry before rider queries. A post-solve carry budget failure retains input
+and leaves riders unmoved; it does not roll back solver state. Native scene and
+Session tests cover boarding, jumps, parented rotation, wall clipping, lifecycle,
+checkpoint replay and terrain budgets.
+Typed `Physics3d.move_character` now queues Vec3 displacement and
+`Physics3d.character_motion` copies optional classified support, raw movement,
+carry and detailed collisions. Native host/script tests exercise next-step and
+last-valid-input semantics, invalid context/values/ownership, stale-reference
+filtering and nested copy mutation; shared Session verifies real-script timing
+and checkpoint replay. Compiler/LSP and generated API metadata use the same
+record types. Gameplay supplies gravity/jumps. Browser/controller and editor
+interaction, and Explorer adoption remain pending; see
+[the contract](character-movement.md#3d-scene-ownership). This is a general
+capability added for the planned Explorer showcase, not completed game proof.
+
 A read-only 2D sweep/slide movement foundation now proposes displacement against
 current collider poses without mutating bodies. Positive skin, bounded iterations,
 initial penetration, filters and deterministic ties have native engine tests.
@@ -2939,3 +3024,92 @@ asset-fetch, WebGPU, pixel and script-error checks. Repeated local Chromium runs
 collected five coins with eight jumps and no falls. This completes the 2D
 controller proof for the genre showcase; it does not supply a 3D controller or
 close the separately documented compound/solver/trigger/carry limitations.
+
+### Mouse delta for 3D camera scripts
+
+`Pointer.delta` and `Input.Pointer.delta` expose the existing platform mouse
+movement accumulator as a read-only `Vec2`, including component reads. Movement
+is in viewport pixels, positive right/down, spent once per fixed step; a first
+arrival/re-entry adds no jump. It is displacement rather than velocity, and
+independent of touch (`Gesture` remains the touch drag surface). Compiler and
+runtime reject writes, while a copied vector stays mutable. Bridge regressions
+exercise accumulated movement, reset, re-entry and both namespaces; LSP tests
+check completion/hover from the same host metadata.
+
+Orbit Camera Lab uses it for right-button drag-to-look, with sensitivity and
+pitch limits in Decay. Its Session regression checks yaw/pitch changes, no
+repeated displacement on the next step and pitch clamping. Real WebGPU
+Chromium drove a right-button drag through the exported generic player; a
+console observer in a disposable copy recorded exactly 60 pixels right and 40
+down, once. Assets loaded, the walker reached its goal and inspected captures
+showed the camera response without runtime/GPU errors. The flat-color lab used
+the same local eight-color smoke threshold as its earlier capture (fourteen
+colors drawn); the repository browser gate is unchanged. This is feature
+example evidence; native editor Play also exercises captured delta. Explorer
+game proof remains pending.
+Native/browser capture is described below.
+
+### Pointer-lock input foundation
+
+The shared platform input state accepts `PointerLockChanged` as actual host
+capture feedback and `PointerMotion` as relative mouse displacement. These are
+platform events, not Decay APIs or capture requests. Relative motion is accepted
+only while captured and focused; cursor warps and leave events do not add motion
+or move/cancel UI presses during capture. Changing capture mode discards pending
+motion and rebases the next absolute position. Focus loss clears capture, pending
+motion and the absolute mouse position; focus regain does not recapture.
+Nonfinite motion and overflowing sums are rejected atomically.
+
+`crates/sindri-platform/tests/pointer_motion.rs` exercises these transitions,
+invalid input and once-only consumption through the real `EngineHost` fixed-step
+loop, including frames with no step and catchup steps. Native/browser player
+hosts now emit this feedback and motion, as described below.
+
+### Native/browser cursor capture from Decay
+
+`Pointer.lock()` / `Input.Pointer.lock()` request capture; `unlock()` requests
+release and read-only `locked` reports actual state. No request changes state
+within an invocation. Successful invocation outputs collect requests in execution
+order (last request wins), Session queues the latest across fixed steps, and
+`DesktopApp` drains it once after update. Failed invocations do not forward their
+capture intent; checkpoint restore does not replay window commands.
+
+The windowed host uses native Locked, with X11 confinement plus raw device
+motion as a fallback. Browser capture calls are caught at the JavaScript boundary
+and Promise rejection is consumed; actual document lock is polled before gameplay
+and relative motion. Delayed grants after explicit release are released again.
+Escape, focus loss, suspension, hidden pages, failure and normal exit release
+capture. Returning focus does not recapture. Motion uses native raw device counts
+or browser physical pixels, positive right/down, through the existing delta API.
+
+Bridge regressions cover actual-state reads, both namespaces, read-only writes,
+invalid call signatures and failed-invocation intent. Orbit Camera Lab's Session
+regression covers request draining, relative camera motion and checkpoint restore.
+LSP tests cover read-only boolean metadata and capture-call completion; generated
+reference/metadata share the same typed host surface.
+
+`scripts/browser/pointer-lock.mjs` runs the exported lab in real WebGPU Chromium:
+a trusted click captures, movement beyond the viewport reaches Decay as exactly
+1,420 horizontal/60 vertical units once, U and Escape release, and a sandboxed
+frame denies capture without false success or interrupting the goal run. The
+captured-look screenshot was inspected. CI exports the same project and runs
+this regression, retaining its screenshot. Its flat-color fixture uses an
+eight-color minimum; the general browser smoke threshold remains unchanged.
+Native X11 verification runs the same generic player in an isolated Xvfb
+window on Vulkan, reaches the goal, and drives capture/raw motion/U/Escape/focus
+changes with XTest. Decay observes 4,000 horizontal/120 vertical raw units in
+one step, releases on each requested/focus transition and does not recapture
+on focus regain. The native window screenshot was inspected alongside Chromium.
+Native platforms other than this X11 run were not visually exercised here.
+Native editor Play also drains Session requests after stepping and editor
+transport/layout changes. Native window calls report success before input sees
+capture; missing windows cannot report false success. egui raw mouse events
+feed native counts without display scaling; the shared state ignores absolute
+warps. Unit regressions cover accumulation across frames, once-only consumption,
+release rebasing, stopping and absent windows. The actual X11 editor window runs
+Orbit Camera Lab to its goal, reports 6,000 horizontal/120 vertical raw units
+from an unbounded XTest move, and releases on U/Escape, pause/stop, focus loss
+and hiding the Game view. An external pointer-grab probe verifies actual capture
+and release; resume/focus regain/new Play do not automatically recapture. The
+editor screenshot with Decay motion and goal output was inspected. Other native
+editor platforms and Explorer game proof remain pending.

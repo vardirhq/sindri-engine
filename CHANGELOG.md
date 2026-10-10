@@ -1,5 +1,76 @@
 # Changelog
 
+- Decay can queue scene-owned 3D character displacement with
+  `Physics3d.move_character` and read copied optional support, raw movement,
+  platform carry and collisions through `Physics3d.character_motion`. Invalid
+  input preserves the last valid request; scripts observe completed movement
+  on the next fixed step. Native host/script and Session replay tests cover the
+  API; controller browser, editor and Explorer proof remain pending.
+
+- Scene Character 3D now carries riders through solved platform translation and
+  rotation, with classified support, separate carry hits and a `carry_platforms`
+  opt-out. Parenting applies motion once, lifecycle changes clear rider caches,
+  and actual carry expands terrain residency before movement queries. Session
+  checkpoints replay carry. Decay, browser/controller and game proof remain pending.
+
+- Add read-only 3D platform carry composition: verified previous support,
+  collision-limited translation and rotation-point travel, separate carry hits
+  and classified final grounding. Scene lifecycle, terrain reach and Decay
+  integration remain pending.
+
+- Add read-only classified 3D ground probes: nearest support geometry, slope
+  limits, skin contacts and explicit initial penetration, using current collider
+  poses and deterministic ties. Scene platform carry and Decay access remain pending.
+
+- Add scene-owned 3D character movement: queued XYZ displacement, scaled solid
+  probes, terrain residency, cached movement results and shared Session replay.
+  Gameplay owns gravity and jumps; Decay access and platform carry remain pending.
+
+- Add a 3D character movement foundation: read-only Rapier queries with
+  engine-owned slope, step and snap settings, current collider poses and copied
+  movement/hit results. Scene ownership, Decay, editor and moving-platform
+  integration remain pending.
+
+- 3D collider dimensions and offsets follow entity and parent scale. Uniform
+  positive scale works for every shape; boxes also support nonuniform scale
+  when their rotated axes stay orthogonal. Unsupported shear, stretched round
+  shapes and invalid scale fail explicitly. Scale edits rebuild collision at the
+  next fixed step; collider wireframes use the same geometry. Existing scenes
+  using world-unit collider dimensions must convert them to local units.
+
+- Native editor Play supports Decay cursor capture and raw mouse look, with
+  checked capture feedback and release on Escape, focus loss, pause/stop or
+  hiding the Game view.
+
+- Capture the cursor from Decay with `Pointer.lock()` / `Input.Pointer.lock()`,
+  release with `unlock()`, and read actual state through read-only `locked`.
+  Native/browser players feed unbounded relative motion through `Pointer.delta`;
+  Escape, focus loss and suspension release capture. Browser denial leaves the
+  game running. Orbit Camera Lab demonstrates captured look.
+
+- Add shared input groundwork for pointer lock: actual capture feedback and
+  relative mouse motion, with mode-change rebasing, focus-loss cleanup and
+  once-per-step accumulation. Native/browser capture and Decay controls remain
+  pending.
+
+- Read mouse displacement from Decay with read-only `Pointer.delta` or
+  `Input.Pointer.delta`, as a `Vec2` in viewport pixels per fixed step. Orbit
+  Camera Lab now supports right-button drag-to-look with adjustable sensitivity
+  and pitch limits. Pointer lock remains pending.
+
+- Follow a 3D target with an engine-owned orbit camera: smooth movement, aiming,
+  immediate obstruction pull-in and recovery when the view clears. Decay selects
+  explicit camera entities, changes orbit settings and perspective FOV, and can
+  stop orbit without resetting the pose. The Orbit Camera Lab runs to its goal.
+
+- Aim and orbit entities from Decay with `transform.look_at` and
+  `transform.rotate_around`, including under rotated/scaled parents. Read
+  world-space `forward`, `right`, and `up` to move the way an entity faces.
+  Direction writes are rejected by the compiler and runtime; completion,
+  hover, and the generated API identify them as read-only.
+
+- Turn solid objects from Decay. `this.transform.yaw`, `pitch` and `roll` read and write a 3D rotation in radians: yaw turns on the ground, pitch tips up or down, roll turns about the facing, and writing one keeps the others.
+
 - Find every way in under `Input`. `Input.Action`, `Input.Pointer`, `Input.Stick`, `Input.Gesture`, `Input.Touch`, `Input.Keyboard` and `Input.Gamepad` are the namespaces that grew beside `Input` one at a time, now reached from where someone looking for touch controls starts, checked as the same types and answered by the same state. `Input`'s own calls are still the keyboard, so no script changes; the flat names stay until the scripts here move to the gathered ones.
 
 - Load imported models everywhere a project plays. `sindri-player` loads `.glb` models in the browser and natively. The capture and benchmark tools bind them and light them as authored. The editor loads, binds and hot-reloads them for the Scene and Game views, and draws the rest of a scene while one loads or fails to decode. A project that keeps its assets beside `sindri.toml`, as Low Tide does, plays as it exports.

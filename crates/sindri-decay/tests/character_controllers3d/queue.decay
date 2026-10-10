@@ -1,0 +1,11 @@
+script Queue3d {
+    var observed: f32 = -1.0;
+    fn start() {
+        Physics3d.move_character(this.entity, Vec3(9.0, 0.0, 0.0), false);
+        Physics3d.move_character(this.entity, Vec3(1.0, 2.0, 3.0), false);
+    }
+    fn update(dt: f32) {
+        let result = Physics3d.character_motion(this.entity);
+        if result != null { observed = result.translation.z; }
+    }
+}

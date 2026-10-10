@@ -1,7 +1,10 @@
 //! Fixed-step 3D rigid bodies behind the Sindri entity boundary.
 
 mod build;
+mod character;
 mod controls;
+mod ground;
+mod grounded;
 mod pending;
 mod query;
 mod spatial;

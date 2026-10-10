@@ -8,6 +8,16 @@ pub(super) const TYPES: &[TypeEntry] = &[
         text: "Independent 3D physics controls, indexed queries and copied last-step events. Requires a 3D physics host. Controls require an active body. Before synchronization, valid authored 3D bodies and nonempty colliders accept ordered setters/impulses; replay uses actual compound mass. Unconsumed requests expire after successful synchronization. Authored motion fields are unchanged, so structural rebuilds restore authored settings.",
         members: &[
             call(
+                "move_character",
+                &["entity", "displacement", "snap"],
+                "Queues finite world-space Vec3 displacement for an active authored Character 3D at the next fixed step, including before first synchronization. Last valid request wins; invalid requests preserve it. Snap only enables the authored snap distance. Requires scene character context, valid settings/transform and no competing body/controller. Scene synchronization validates scaled solid geometry before movement. Gameplay owns gravity, speed and jump policy; events observe the moved pose on the following solver step.",
+            ),
+            call(
+                "character_motion",
+                &["entity"],
+                "Copied CharacterMotion3d from the last completed controller step, or null before a result exists or for an inactive/non-controller entity. Requires scene character context. Classified support, raw movement and carry remain separate; repeated reads do not drain results. Inactive ground, platform and collision references are filtered; historical translation and raw backend flags remain unchanged. Editing copies never changes simulation or queued movement.",
+            ),
+            call(
                 "layer",
                 &["name"],
                 "Query mask bit for a text name in the active authored 3D world's first 32 layer labels. Empty labels cannot be selected; duplicate names select the first bit. Reads current authoring without stepping; ignores inactive settings and never reads 2D names. Unknown names, malformed or multiple active world settings and missing 3D host fail.",

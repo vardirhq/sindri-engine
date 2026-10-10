@@ -209,3 +209,25 @@ pub fn set_camera_orthographic_size(world: &mut World, camera: EntityId, size: f
     payload["vertical_size"] = Value::from(size);
     true
 }
+
+/// Changes an explicitly selected perspective camera's vertical field of view in degrees.
+/// Clipping and unknown payload fields are preserved; invalid input does not mutate it.
+pub fn set_camera_perspective_fov(world: &mut World, camera: EntityId, degrees: f32) -> bool {
+    if !degrees.is_finite() || degrees <= 0.0 || degrees >= 180.0 {
+        return false;
+    }
+    let Some(payload) = world
+        .get_mut(camera)
+        .and_then(|data| data.components.get_mut(CameraComponent::TYPE_NAME))
+    else {
+        return false;
+    };
+    if !matches!(
+        serde_json::from_value::<CameraComponent>(payload.clone()),
+        Ok(CameraComponent::Perspective { .. })
+    ) {
+        return false;
+    }
+    payload["vertical_fov_degrees"] = Value::from(degrees);
+    true
+}

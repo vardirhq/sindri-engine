@@ -6,7 +6,8 @@ use decay_runtime::{RuntimeError, Value};
 use super::WorldHost;
 use super::convert::{as_f32, number};
 use crate::surface::{
-    AimValue, CameraCall, CameraValue, GestureValue, PointerValue, StickValue, TouchCall,
+    AimValue, CameraCall, CameraValue, GestureValue, INPUT, POINTER, PointerValue, StickValue,
+    TouchCall,
 };
 
 impl WorldHost<'_> {
@@ -57,6 +58,14 @@ impl WorldHost<'_> {
             Ok(as_f32(value))
         };
         let changed = match call {
+            CameraCall::PerspectiveFov
+            | CameraCall::Orbit
+            | CameraCall::OrbitOffset
+            | CameraCall::OrbitSmoothing
+            | CameraCall::OrbitCollision
+            | CameraCall::ClearOrbit => {
+                return self.camera_3d_call(call, path, args);
+            }
             CameraCall::AddTrauma | CameraCall::Impact => {
                 let amount = numeric(0)?;
                 if amount < 0.0 {
@@ -164,6 +173,22 @@ impl WorldHost<'_> {
         }
     }
 
+    /// Drains a successful script's capture intent for the windowed host.
+    pub fn take_pointer_lock_request(&mut self) -> Option<bool> {
+        self.pointer_lock_request.take()
+    }
+
+    pub(super) fn is_read_only_pointer(path: &Path) -> bool {
+        let mut parts = path.0.iter().map(String::as_str);
+        let root = parts.next();
+        let namespace = if root == Some(INPUT) {
+            parts.next()
+        } else {
+            root
+        };
+        namespace == Some(POINTER) && matches!(parts.next(), Some("delta" | "locked"))
+    }
+
     pub(super) fn pointer_value(&self, value: PointerValue) -> Value {
         let position = self.context.input.pointer_position();
         let overlay = || {
@@ -172,6 +197,7 @@ impl WorldHost<'_> {
                 .unwrap_or([0.0, 0.0])
         };
         match value {
+            PointerValue::Locked => Value::Bool(self.context.input.pointer_locked()),
             PointerValue::Inside => Value::Bool(position.is_some()),
             PointerValue::OverUi => Value::Bool(
                 self.screen_ui
@@ -179,6 +205,10 @@ impl WorldHost<'_> {
             ),
             PointerValue::Position => {
                 let [x, y] = position.unwrap_or([0.0, 0.0]);
+                Value::Vec2([f64::from(x), f64::from(y)])
+            }
+            PointerValue::Delta => {
+                let [x, y] = self.context.input.pointer_delta();
                 Value::Vec2([f64::from(x), f64::from(y)])
             }
             PointerValue::Overlay => {
