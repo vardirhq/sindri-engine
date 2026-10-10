@@ -14,6 +14,7 @@
 //! description behind.
 
 mod character;
+mod character3d;
 mod game;
 mod input;
 mod physics;
@@ -161,6 +162,7 @@ pub const TYPES: &[&[TypeEntry]] = &[
     input::TYPES,
     tween::TYPES,
     physics3d::TYPES,
+    character3d::TYPES,
 ];
 
 /// The entry for a host type, if it has one.

@@ -30,6 +30,8 @@ mod camera_3d;
 mod person;
 mod physics;
 mod physics3d;
+mod physics3d_character;
+mod physics3d_character_snapshot;
 mod physics3d_layers;
 mod physics3d_motion;
 mod physics3d_query;
@@ -118,6 +120,7 @@ pub struct WorldHost<'a> {
     physics: Option<crate::Physics2d<'a>>,
     pub(crate) physics3d: Option<crate::Physics3d<'a>>,
     pub(crate) characters: Option<crate::Characters2d<'a>>,
+    pub(crate) characters3d: Option<crate::Characters3d<'a>>,
     /// What the game remembers, when the host is keeping a save.
     saves: Option<&'a mut sindri_core::SaveStore>,
     /// The fleck pool, when the host is running one.

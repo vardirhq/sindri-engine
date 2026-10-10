@@ -18,6 +18,7 @@ use crate::{RuntimeError, StepPhase, StepReport, bind_builtin_tile_sets};
 
 mod checkpoint;
 pub use checkpoint::Checkpoint;
+mod animation;
 mod audio;
 mod cameras;
 mod game;
@@ -348,7 +349,8 @@ impl Session {
             input
         };
         let (physics, events, requests, motions) = self.physics.for_scripts_with_characters();
-        let (world3d, events3d) = self.physics3d.for_scripts();
+        let (world3d, events3d, requests3d, motions3d) =
+            self.physics3d.for_scripts_with_characters();
         let mut frame = ScriptFrame::new(&self.sources, script_input, delta_seconds)
             .with_prefabs(&self.prefabs)
             .with_profiles(&self.profiles)
@@ -365,6 +367,10 @@ impl Session {
                 events: events3d,
             })
             .with_characters(sindri_decay::Characters2d { requests, motions })
+            .with_characters3d(sindri_decay::Characters3d {
+                requests: requests3d,
+                motions: motions3d,
+            })
             .with_animations(&mut self.animations)
             .with_sequences(&mut self.sequences);
         frame = frame.with_gestures(&self.gestures).with_camera_pan(pan);
@@ -391,22 +397,7 @@ impl Session {
         self.pending_audio
             .extend(self.scripts.take_audio_commands());
         laps.lap(StepPhase::Scripts);
-        self.animations
-            .advance(world, &self.components, delta_seconds)?;
-        // After the scripts, so a sequence a script named this step starts
-        // now, and before the cameras, so one that moves a camera is followed.
-        let played = self
-            .sequences
-            .advance(world, &self.components, delta_seconds)?;
-        for (_, problem) in &played.problems {
-            problems.push(format!("Sequence: {problem}"));
-        }
-        self.pending_audio
-            .extend(played.sounds.into_iter().map(|sound| AudioCommand::Play {
-                bus: sound.bus().to_owned(),
-                clip: sound.clip,
-                volume: sound.volume,
-            }));
+        self.step_animations(world, delta_seconds, &mut problems)?;
         laps.lap(StepPhase::Animation);
         // After the scripts, so a camera following the player follows where
         // this step left it. The voxel world keeps its own window under it.

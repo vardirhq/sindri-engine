@@ -2907,8 +2907,14 @@ actual carry before rider queries. A post-solve carry budget failure retains inp
 and leaves riders unmoved; it does not roll back solver state. Native scene and
 Session tests cover boarding, jumps, parented rotation, wall clipping, lifecycle,
 checkpoint replay and terrain budgets.
-Gameplay supplies gravity/jumps. Decay controls, browser/controller
-and editor interaction, and Explorer adoption remain pending; see
+Typed `Physics3d.move_character` now queues Vec3 displacement and
+`Physics3d.character_motion` copies optional classified support, raw movement,
+carry and detailed collisions. Native host/script tests exercise next-step and
+last-valid-input semantics, invalid context/values/ownership, stale-reference
+filtering and nested copy mutation; shared Session verifies real-script timing
+and checkpoint replay. Compiler/LSP and generated API metadata use the same
+record types. Gameplay supplies gravity/jumps. Browser/controller and editor
+interaction, and Explorer adoption remain pending; see
 [the contract](character-movement.md#3d-scene-ownership). This is a general
 capability added for the planned Explorer showcase, not completed game proof.
 

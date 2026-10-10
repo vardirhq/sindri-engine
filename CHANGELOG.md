@@ -1,5 +1,12 @@
 # Changelog
 
+- Decay can queue scene-owned 3D character displacement with
+  `Physics3d.move_character` and read copied optional support, raw movement,
+  platform carry and collisions through `Physics3d.character_motion`. Invalid
+  input preserves the last valid request; scripts observe completed movement
+  on the next fixed step. Native host/script and Session replay tests cover the
+  API; controller browser, editor and Explorer proof remain pending.
+
 - Scene Character 3D now carries riders through solved platform translation and
   rotation, with classified support, separate carry hits and a `carry_platforms`
   opt-out. Parenting applies motion once, lifecycle changes clear rider caches,

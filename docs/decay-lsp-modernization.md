@@ -38,6 +38,11 @@ language model.
   host globals are walked from their resolved root, fixing `Input.Pointer`
   completion/hover (the root was previously looked up twice).
 
+- [x] Exercise typed 3D character movement calls and optional nested copied
+  results through the shared host environment: completion/hover exposes
+  the movement signature, typed batch preflight accepts the checked fixtures, and
+  compiler regressions reject Vec2 displacement and wrong result-field types.
+
 ## P0 — correctness and drift
 
 These are defects or sources of actively misleading tooling.

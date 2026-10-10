@@ -38,3 +38,11 @@ pub struct Characters2d<'a> {
     pub requests: &'a mut sindri_scene::CharacterRequests2d,
     pub motions: sindri_scene::CharacterMotions2d<'a>,
 }
+
+/// Scene-owned 3D character input and copied last-step results.
+///
+/// Independent of `Characters2d`; requests apply at the next fixed step.
+pub struct Characters3d<'a> {
+    pub requests: &'a mut sindri_scene::CharacterRequests3d,
+    pub motions: sindri_scene::CharacterMotions3d<'a>,
+}

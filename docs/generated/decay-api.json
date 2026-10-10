@@ -1072,6 +1072,60 @@
       "name": "Camera"
     },
     {
+      "description": "Verified solved platform carry, already included in total character translation. A platform rotation moves the probe origin along a straight swept chord; it does not rotate the actor.",
+      "members": [
+        {
+          "description": "Active existing platform entity whose solved movement carried the actor.",
+          "kind": "value",
+          "name": "entity",
+          "read_only": false,
+          "type": "Entity"
+        },
+        {
+          "description": "Collision-limited CharacterMovement3d carry phase, separate from ordinary movement.",
+          "kind": "value",
+          "name": "motion",
+          "read_only": false,
+          "type": "CharacterMovement3d"
+        },
+        {
+          "description": "World-space Vec3 displacement requested by the platform's previous/current poses.",
+          "kind": "value",
+          "name": "requested",
+          "read_only": false,
+          "type": "Vec3"
+        }
+      ],
+      "name": "CharacterCarry3d"
+    },
+    {
+      "description": "One historical movement-phase collision; internal stair and snap probes are not events.",
+      "members": [
+        {
+          "description": "Copied world-space RayHit3d for the collided piece; distance belongs to this sweep phase.",
+          "kind": "value",
+          "name": "hit",
+          "read_only": false,
+          "type": "RayHit3d"
+        },
+        {
+          "description": "World-space Vec3 movement already applied at this collision.",
+          "kind": "value",
+          "name": "translation_applied",
+          "read_only": false,
+          "type": "Vec3"
+        },
+        {
+          "description": "World-space Vec3 movement remaining at this collision.",
+          "kind": "value",
+          "name": "translation_remaining",
+          "read_only": false,
+          "type": "Vec3"
+        }
+      ],
+      "name": "CharacterCollision3d"
+    },
+    {
       "description": "A copied result of scene-owned 2D character movement. Gameplay reads support and collision flags to choose its own gravity, jump and recovery policy. This is historical movement, not a live solver contact or a pending request.",
       "members": [
         {
@@ -1202,6 +1256,95 @@
         }
       ],
       "name": "CharacterMotion2d"
+    },
+    {
+      "description": "Copied historical scene-owned 3D character result. Gameplay chooses gravity, jumping and recovery. This is not a live contact or pending request.",
+      "members": [
+        {
+          "description": "Zero-travel endpoint support RayHit3d or null when absent/inactive. It is independent of raw backend grounded.",
+          "kind": "value",
+          "name": "ground",
+          "read_only": false,
+          "type": "RayHit3d?"
+        },
+        {
+          "description": "Whether the endpoint support probe started in strict penetration.",
+          "kind": "value",
+          "name": "ground_started_penetrating",
+          "read_only": false,
+          "type": "bool"
+        },
+        {
+          "description": "Whether the active ground hit satisfies authored up and slope limit.",
+          "kind": "value",
+          "name": "ground_walkable",
+          "read_only": false,
+          "type": "bool"
+        },
+        {
+          "description": "Classified walkable final support without penetration or ascending input; false when ground is now inactive or removed.",
+          "kind": "value",
+          "name": "grounded",
+          "read_only": false,
+          "type": "bool"
+        },
+        {
+          "description": "CharacterMovement3d from the carried pose, excluding carry translation and hits.",
+          "kind": "value",
+          "name": "movement",
+          "read_only": false,
+          "type": "CharacterMovement3d"
+        },
+        {
+          "description": "CharacterCarry3d or null without verified carry or when its entity is now inactive/removed.",
+          "kind": "value",
+          "name": "platform",
+          "read_only": false,
+          "type": "CharacterCarry3d?"
+        },
+        {
+          "description": "Total world-space Vec3 displacement applied once, including actual platform carry.",
+          "kind": "value",
+          "name": "translation",
+          "read_only": false,
+          "type": "Vec3"
+        }
+      ],
+      "name": "CharacterMotion3d"
+    },
+    {
+      "description": "Copied raw Rapier movement phase. Backend flags are not classified walkable support and must not alone authorize snapping. No independent step/snap displacement or iteration-limit status is available.",
+      "members": [
+        {
+          "description": "Ordered copied CharacterCollision3d list, filtered to active existing hit entities.",
+          "kind": "value",
+          "name": "collisions",
+          "read_only": false,
+          "type": "List<CharacterCollision3d>"
+        },
+        {
+          "description": "Raw backend nearby upward-facing contact flag; may include steep or predicted contacts.",
+          "kind": "value",
+          "name": "grounded",
+          "read_only": false,
+          "type": "bool"
+        },
+        {
+          "description": "Raw backend slope-handling flag, which can also be set while climbing.",
+          "kind": "value",
+          "name": "sliding_down_slope",
+          "read_only": false,
+          "type": "bool"
+        },
+        {
+          "description": "Collision-limited world-space Vec3 displacement of this phase.",
+          "kind": "value",
+          "name": "translation",
+          "read_only": false,
+          "type": "Vec3"
+        }
+      ],
+      "name": "CharacterMovement3d"
     },
     {
       "description": "A managed Color tween; read with Tween.color_value.",
@@ -2789,6 +2932,18 @@
           "returns": "RayHit3d?"
         },
         {
+          "description": "Copied CharacterMotion3d from the last completed controller step, or null before a result exists or for an inactive/non-controller entity. Requires scene character context. Classified support, raw movement and carry remain separate; repeated reads do not drain results. Inactive ground, platform and collision references are filtered; historical translation and raw backend flags remain unchanged. Editing copies never changes simulation or queued movement.",
+          "kind": "function",
+          "name": "character_motion",
+          "parameter_names": [
+            "entity"
+          ],
+          "parameters": [
+            "Entity"
+          ],
+          "returns": "CharacterMotion3d?"
+        },
+        {
           "description": "Sorted unique other active entities that started solid contact with this script's entity in the last successful 3D step. All scripts observe the same snapshot without draining it.",
           "kind": "function",
           "name": "collision_started",
@@ -2827,6 +2982,22 @@
             "List<String>"
           ],
           "returns": "f32"
+        },
+        {
+          "description": "Queues finite world-space Vec3 displacement for an active authored Character 3D at the next fixed step, including before first synchronization. Last valid request wins; invalid requests preserve it. Snap only enables the authored snap distance. Requires scene character context, valid settings/transform and no competing body/controller. Scene synchronization validates scaled solid geometry before movement. Gameplay owns gravity, speed and jump policy; events observe the moved pose on the following solver step.",
+          "kind": "function",
+          "name": "move_character",
+          "parameter_names": [
+            "entity",
+            "displacement",
+            "snap"
+          ],
+          "parameters": [
+            "Entity",
+            "Vec3",
+            "bool"
+          ],
+          "returns": "unit"
         },
         {
           "description": "Indexed active 3D shape query. Positive Vec3 half-extents define the box. Finite f32-range values are required. A nonzero Vec3 rotation_axis is normalized and rotation_angle is radians about it using the right-hand rule. Uses the ray membership mask, sensor opt-in and whole-entity exclusion. Overlaps are sorted unique copied Entity lists; casts retain initial-overlap and deterministic tie semantics. Does not step physics.",

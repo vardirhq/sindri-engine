@@ -200,6 +200,7 @@ impl Scripts {
             physics,
             physics3d,
             characters,
+            characters3d,
             screen_ui,
             aim,
             gestures,
@@ -252,6 +253,7 @@ impl Scripts {
             physics,
             physics3d,
             characters,
+            characters3d,
             screen_ui,
             aim,
             gestures,
@@ -292,14 +294,7 @@ impl Scripts {
         Self::start_spawned(&mut report, &mut live, &mut at, components, delta_seconds);
         Self::deliver_messages(&mut report, &mut live, &mut at, components, delta_seconds);
 
-        at.tweens.retain(|entity| live.contains(&entity));
-        at.running.retain(|entity, _| live.contains(entity));
-        // What was waiting for something that never started goes with it.
-        let world = &*at.world;
-        at.starting.retain(|entity, _| world.get(*entity).is_some());
-        let world = &*at.world;
-        at.blackboard
-            .retain_signals(|bits| world.get(EntityId::from_bits(bits)).is_some());
+        run::retain_live(&mut at, &live);
         report
     }
 

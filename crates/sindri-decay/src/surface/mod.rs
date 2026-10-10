@@ -19,6 +19,7 @@
 
 mod call;
 pub(crate) mod character;
+pub(crate) mod character3d;
 pub(crate) mod contact;
 mod gamepad;
 mod maths;

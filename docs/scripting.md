@@ -1058,6 +1058,8 @@ a person who has not clicked yet.
 
 | Call | Returns |
 | --- | --- |
+| `Physics3d.move_character(entity, displacement: Vec3, snap: bool)` | nothing |
+| `Physics3d.character_motion(entity)` | `CharacterMotion3d?` |
 | `Physics3d.layer(name: String)` | numeric mask bit |
 | `Physics3d.mask(names: List<String>)` | numeric mask |
 | `Physics3d.raycast(origin: Vec3, direction: Vec3, max_distance, mask, include_sensors, exclude: Entity?)` | `RayHit3d?` |
@@ -1085,6 +1087,16 @@ list returns zero. Lookup reads current authored names without stepping physics,
 ignores inactive settings and never uses 2D world names. Missing 3D host, unknown
 names, wrong argument types, malformed settings or multiple active 3D worlds
 fail explicitly. With no active settings there are no names to select.
+
+Scene-owned 3D characters accept next-fixed-step movement through
+`move_character` and return copied optional results through `character_motion`.
+`CharacterMotion3d` separates classified endpoint support from raw
+`CharacterMovement3d` flags and nullable `CharacterCarry3d`; ordered collisions
+retain hit and applied/remaining displacement. Last valid input wins. Both calls
+require scene character context, supplied by Session in every host. Gameplay owns
+gravity, jumping and snap policy. See [the 3D character contract](character-movement.md#typed-3d-decay-requests-and-results)
+for validation, timing, filtering and copy semantics. Native script/Session tests
+exercise this surface; controller browser/editor/Explorer proof remains pending.
 
 `Physics3d` takes Vec3 values without changing the existing 2D `Physics` API.
 `velocity(entity)` and `angular_velocity(entity)` return copied Vec3 values;

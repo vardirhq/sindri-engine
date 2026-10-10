@@ -1,0 +1,41 @@
+script Observe3d {
+    var total: f32 = 0.0;
+    var carried: f32 = 0.0;
+    var requested: f32 = 0.0;
+    var raw_grounded: bool = false;
+    var grounded: bool = false;
+    var platform: Entity;
+    var ground: Entity;
+    var collisions: f32 = 0.0;
+    fn update(dt: f32) {
+        let actor = World.find("Actor");
+        let result = Physics3d.character_motion(actor);
+        if result == null { return; }
+        total = result.translation.x;
+        grounded = result.grounded;
+        raw_grounded = result.movement.grounded;
+        let support = result.ground;
+        ground = null;
+        if support != null { ground = support.entity; }
+        let carry = result.platform;
+        platform = null;
+        carried = 0.0;
+        requested = 0.0;
+        if carry != null {
+            platform = carry.entity;
+            carried = carry.motion.translation.x;
+            requested = carry.requested.x;
+        }
+        collisions = 0.0;
+        for collision in result.movement.collisions {
+            collisions += 1.0;
+            let normal = collision.hit.normal;
+            let applied = collision.translation_applied;
+            let remaining = collision.translation_remaining;
+        }
+        // Mutating a returned record must never alter the cached result.
+        var copy = result;
+        copy.translation.x = 500.0;
+        copy.movement.translation.x = 500.0;
+    }
+}

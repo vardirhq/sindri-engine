@@ -85,18 +85,19 @@ Order:
   tests cover walls, slopes, steps, snapping, filtering and validation; backend
   flag/correction limits are explicit. Scene-owned requests now derive stationary
   kinematic bodies, extend voxel residency and apply collision-limited travel once
-  after solving through Session, with cached results and replay tests. Decay,
-  editor and Explorer proof remain pending. Classified
+  after solving through Session, with cached results and replay tests. Editor
+  interaction, controller browser and Explorer proof remain pending. Classified
   read-only ground probes now provide support entities, slope checks and initial
   penetration rejection with native tests. A read-only grounded movement
   composition now verifies previous support, sweeps solved translation/rotation
-  and returns separate carry hits plus classified final support. Continue with
-  Decay movement/support/carry access before game integration. Scene-owned carry
+  and returns separate carry hits plus classified final support. Scene-owned carry
   now seeds classified pre-solve support, applies solved motion once, invalidates
   dependent rider caches and expands terrain for actual carry before querying.
   Native scene and Session regressions verify parenting, replay and terrain
-  budgets. Keep controller browser/editor/Explorer proof pending; do not add
-  gameplay rules in Rust.
+  budgets. Typed Decay movement requests and copied support/movement/carry
+  records now have native host/script and Session timing/replay regressions,
+  compiler/LSP checks and generated API metadata. Continue with controller
+  browser/editor/Explorer proof; do not add gameplay rules in Rust.
 - Then the rest of slice 6, which unblocks moving through 3D (Low Tide's
   crawler and crew included).
 - Then slices 2 to 4 (measurement, instancing and one lit path, lights),
@@ -305,7 +306,10 @@ placement. The roadmap's "height/mesh terrain next" is this slice.
   - [x] Scene-owned solved moving-platform support/carry with translation/rotation,
     lifecycle invalidation, opt-out, actual-carry terrain residency and native
     scene/Session replay regressions. Browser/editor/game proof remains below.
-  - [ ] `Physics3d.character_motion` and movement requests in Decay.
+  - [x] `Physics3d.character_motion` and movement requests in Decay: typed
+    optional support/carry, separate raw movement and detailed collisions,
+    next-step/last-valid-input validation, nested copies, native scripts and
+    shared Session replay, compiler/LSP and generated API metadata.
   - [ ] Editor gizmos reused from the 2D character, browser and Explorer proof.
 - [ ] Collision from content:
   - static trimesh colliders built from a model's meshes;

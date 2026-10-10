@@ -47,6 +47,7 @@ pub(super) struct TickWorld<'a> {
     pub(super) messages: Vec<super::Message>,
     /// Scene-owned controller requests and cached results.
     pub(super) characters: Option<Characters2d<'a>>,
+    pub(super) characters3d: Option<crate::Characters3d<'a>>,
     /// The physics a script may read and drive, when the host runs any.
     pub(super) physics: Option<Physics2d<'a>>,
     pub(super) physics3d: Option<crate::Physics3d<'a>>,
@@ -68,6 +69,18 @@ pub(super) struct TickWorld<'a> {
     pub(super) sequences: Option<&'a mut sindri_scene::Sequences>,
     /// What a stacked volume's cells mean, when the host has loaded any.
     pub(super) tile_sets: Option<&'a sindri_scene::TileSetBindings>,
+}
+
+/// Drops instance state and signals whose owners no longer survive the pass.
+pub(super) fn retain_live(at: &mut TickWorld<'_>, live: &BTreeSet<EntityId>) {
+    at.tweens.retain(|entity| live.contains(&entity));
+    at.running.retain(|entity, _| live.contains(entity));
+    // What was waiting for something that never started goes with it.
+    let world = &*at.world;
+    at.starting.retain(|entity, _| world.get(*entity).is_some());
+    let world = &*at.world;
+    at.blackboard
+        .retain_signals(|bits| world.get(EntityId::from_bits(bits)).is_some());
 }
 
 pub(super) fn tick(
@@ -293,6 +306,14 @@ fn host_for<'b>(
         requests: &mut *characters.requests,
         motions: characters.motions,
     }))
+    .with_characters3d(
+        at.characters3d
+            .as_mut()
+            .map(|characters| crate::Characters3d {
+                requests: &mut *characters.requests,
+                motions: characters.motions,
+            }),
+    )
     .with_tweens(&mut *at.tweens)
     .with_actions(at.actions)
     .with_sequences(at.sequences.as_deref_mut())

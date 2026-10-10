@@ -182,6 +182,13 @@ impl<'a> WorldHost<'a> {
         self
     }
 
+    /// Supplies the independent 3D scene controller queue and cached results.
+    #[must_use]
+    pub fn with_characters3d(mut self, characters: Option<crate::Characters3d<'a>>) -> Self {
+        self.inner.characters3d = characters;
+        self
+    }
+
     pub fn new(
         world: &'a mut sindri_core::World,
         entity: sindri_core::EntityId,

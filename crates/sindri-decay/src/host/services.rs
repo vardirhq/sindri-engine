@@ -86,6 +86,7 @@ impl<'a> WorldHost<'a> {
             tile_sets,
             physics3d: None,
             characters: None,
+            characters3d: None,
             walkable: None,
             sequences: None,
             printed: Vec::new(),

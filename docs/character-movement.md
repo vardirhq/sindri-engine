@@ -451,7 +451,8 @@ hosts and the platformer on native and browser targets. Gravity, coyote time,
 jump buffering and player input remain Decay policy. Compound solid probes,
 same-step solver response, swept trigger events and curved/rotating-probe carry
 remain explicit gaps in parity. The 3D scene controller below is a foundation;
-Decay access, platform carry and game proof remain pending.
+Scene platform carry and typed Decay access are covered below; browser, editor
+interaction and Explorer game proof remain pending.
 
 ## Foundation evidence
 
@@ -494,8 +495,8 @@ input and actual position/velocity-kinematic simulation ordering.
 ## 3D character movement foundation
 
 Added generally for the planned Explorer genre showcase in PR #507. It is an
-engine primitive with the scene ownership described below, not yet a Decay API
-or completed game feature.
+engine capability with scene ownership and typed Decay access described below.
+Explorer adoption and full surface proof remain pending.
 It uses Rapier's kinematic character controller behind Sindri-owned types;
 2D movement and its platformer contract remain unchanged.
 
@@ -569,16 +570,16 @@ bounded stationary correction and invalid/extreme input. All 206 physics tests,
 checks/build pass. The rebuilt Orbit Lab passes its real WebGPU Chromium
 capture/denial/goal regression with an inspected screenshot, checking existing
 scene behavior after pose synchronization changed. The new movement query is
-not yet exercised in a browser. Decay, editor interaction, moving-platform and
-Explorer goal proof remain pending.
+not yet exercised in a browser. Scene carry and typed Decay proof are described
+below; editor interaction and Explorer goal proof remain pending.
 
 ## Classified 3D ground queries
 
 `PhysicsWorld3d::probe_ground(shape, pose, options, filter)` and
 `probe_ground_where(..., include)` return copied `GroundProbe3d` values without
 moving bodies, snapping, changing velocity or choosing gameplay support.
-This is a general prerequisite for Explorer's moving platforms; scene carry and
-Decay access remain pending.
+This is a general prerequisite for Explorer's moving platforms, used by the
+scene carry and typed Decay result surface described below.
 
 `GroundOptions3d` defaults to world up [0, 1, 0], slope limit pi/4, travel 0.1
 and skin 0.01. Up uses the movement query's squared-unit-norm tolerance of
@@ -610,7 +611,8 @@ steep nearest support, penetration, arbitrary up, rotated compound offsets,
 filters, predicate reuse, ties, immediate teleports/removal, copies/clone replay
 and invalid/extreme input. They distinguish Rapier's broad grounded prediction
 from classified support and verify support at a movement query's landed endpoint.
-Browser, editor, Decay and Explorer proof of this new primitive remain pending.
+Scene and typed Decay result proof are described below. Browser, editor
+interaction and Explorer proof of this primitive remain pending.
 
 ## Read-only 3D platform carry
 
@@ -666,8 +668,8 @@ Eight native regressions cover pending versus solved poses, translation/vertical
 motion, rotation, wall clipping, restored support collision, input jumps, masks,
 predicates, sensors, missing/detached/steep/penetrating support, compound offsets
 outside current bounds, clone/copy stability, raw versus classified grounding and
-invalid/extreme input. Scene proof is described below; Decay, editor, browser and
-game proof remain pending.
+invalid/extreme input. Scene and typed Decay proof are described below; editor
+interaction, browser and game proof remain pending.
 
 ## 3D scene ownership
 
@@ -729,7 +731,7 @@ support snapshots and verifies current contact, so stale travel is never retried
 Cloning the driver or a Session
 checkpoint includes pending input and cached results, without changing saved
 component payloads. `Session::character_requests3d()` exposes the same queue to
-Rust hosts; Decay access is scheduled separately.
+Rust hosts and Decay through the scene context described below.
 
 As with backend solver failures, an actual-carry residency failure or movement-query
 error after solving is not a transactional rollback of the fixed pass. Carry-window
@@ -751,8 +753,9 @@ clipping without replay, lifecycle invalidation, carry opt-out and flat authorin
 raw-ground rejection, terrain expansion and post-solve budget failure/input
 retention. Session exercises first-solve carry and checkpoint replay through the
 shared runtime. Stationary rotated support returns exactly zero carry rather than
-accumulating inverse/forward transform rounding. Decay access, controller browser
-verification, editor interaction and Explorer adoption remain pending.
+accumulating inverse/forward transform rounding. Typed Decay access is covered
+below; controller browser verification, editor interaction and Explorer adoption
+remain pending.
 
 Scoped physics/runtime/scene preflight, warning-denied Clippy (also editor and
 capabilities), catalogue/generated-document checks and Rust 1.95 scene/runtime
@@ -760,3 +763,51 @@ WASM checks pass. The rebuilt generic browser player passes Orbit Camera Lab's
 real WebGPU Chromium capture/denial/goal regression with an inspected screenshot.
 That verifies existing host behavior after this change; the new controller's
 browser/editor interaction and in-tree game proof remain open.
+
+## Typed 3D Decay requests and results
+
+`Physics3d.move_character(entity, displacement: Vec3, snap: bool)` queues world
+XYZ displacement for the next fixed step. The last valid request wins, including
+calls before first synchronization; invalid vectors, settings, inactive targets,
+missing transforms, competing bodies/controllers or absent scene context fail
+without replacing it. Each component must be finite and fit f32, and the vector
+length must fit the movement backend. Scaled single-solid probe assembly and
+terrain budgets remain synchronization checks. Snap enables only the authored
+snap distance; gameplay supplies gravity, jump velocity and its snap decision.
+
+`Physics3d.character_motion(entity)` returns a copied `CharacterMotion3d?` from
+the last completed controller step, or null before a result exists or when the
+target is inactive or no longer a controller. A stale actor handle is a host error,
+as with other entity-taking physics calls. A physics-only host without scene
+character context rejects both calls. Every shared Session supplies independent
+2D/3D request queues and borrowed results to each script pass; reads never drain
+results and scripts run after physics, so queued movement applies next step.
+
+The copied records follow the language's ordinary mutable value semantics:
+
+| Record | Fields |
+| --- | --- |
+| `CharacterMotion3d` | `translation: Vec3`, `movement: CharacterMovement3d`, `grounded: bool`, `ground: RayHit3d?`, `ground_walkable: bool`, `ground_started_penetrating: bool`, `platform: CharacterCarry3d?` |
+| `CharacterMovement3d` | `translation: Vec3`, `grounded: bool`, `sliding_down_slope: bool`, `collisions: List<CharacterCollision3d>` |
+| `CharacterCollision3d` | `hit: RayHit3d`, `translation_applied: Vec3`, `translation_remaining: Vec3` |
+| `CharacterCarry3d` | `entity: Entity`, `requested: Vec3`, `motion: CharacterMovement3d` |
+
+Top-level translation includes actual carry exactly once. Movement excludes
+carry; `platform.motion` reports its separate phase. Top-level grounding uses
+classified walkable endpoint support, while `movement.grounded` and
+`movement.sliding_down_slope` preserve the documented raw Rapier limitations.
+No unavailable iteration-limit, penetration or separate step/snap flag is
+invented for raw movement. The endpoint ground probe reports its own penetration.
+Inactive or removed ground/collision entities are filtered; platform becomes
+null when its entity is inactive or removed. Historical total translation and
+raw backend flags stay unchanged. Editing any nested record cannot change the
+cached result, simulation or input queue. Platform quaternions are not exposed:
+Decay currently has no quaternion value type.
+
+Six native host/script regressions exercise startup queueing, last-valid input,
+invalid values/context/ownership, typed support/carry, collision filtering and
+nested copy mutation and raw versus classified grounding. A shared Session regression observes next-step movement
+and checkpoint replay through a real Decay script. Compiler/LSP checks exercise
+signatures, optional nested result fields, completion and hover. This general
+capability is added for the planned Explorer showcase; controller browser,
+editor interaction and Explorer goal proof remain pending.
