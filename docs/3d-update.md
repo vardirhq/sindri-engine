@@ -88,9 +88,11 @@ Order:
   after solving through Session, with cached results and replay tests. Decay,
   editor, solved platform carry and Explorer proof remain pending. Classified
   read-only ground probes now provide support entities, slope checks and initial
-  penetration rejection with native tests. Continue with
-  solved platform support/carry before scripting/game integration; do not add
-  gameplay rules in Rust.
+  penetration rejection with native tests. A read-only grounded movement
+  composition now verifies previous support, sweeps solved translation/rotation
+  and returns separate carry hits plus classified final support. Continue with
+  scene-owned support lifecycle/carry and terrain reach before scripting/game
+  integration; do not add gameplay rules in Rust.
 - Then the rest of slice 6, which unblocks moving through 3D (Low Tide's
   crawler and crew included).
 - Then slices 2 to 4 (measurement, instancing and one lit path, lights),
@@ -294,6 +296,8 @@ placement. The roadmap's "height/mesh terrain next" is this slice.
     character voxel residency, lifecycle invalidation and Session replay.
   - [x] Read-only classified ground probes with support entities, skin contacts,
     slope limits, penetration rejection, deterministic ties and native tests.
+  - [x] Read-only grounded movement with verified previous support, solved
+    translation/rotation-point carry, separate hits and classified final support.
   - [ ] Solved moving-platform support/carry with translation/rotation and
     lifecycle invalidation.
   - [ ] `Physics3d.character_motion` and movement requests in Decay.

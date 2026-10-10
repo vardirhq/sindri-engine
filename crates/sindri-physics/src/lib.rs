@@ -11,6 +11,7 @@ mod contact2d;
 mod ground2d;
 mod ground3d;
 mod grounded2d;
+mod grounded3d;
 mod hinge2d;
 mod material;
 mod motor2d;
@@ -36,6 +37,9 @@ pub use contact2d::Contact2d;
 pub use ground2d::{GroundOptions2d, GroundProbe2d};
 pub use ground3d::{GroundOptions3d, GroundProbe3d};
 pub use grounded2d::{GroundedSlideMotion2d, GroundedSlideOptions2d};
+pub use grounded3d::{
+    GroundedCharacterMotion3d, GroundedCharacterOptions3d, PlatformCarry3d, PlatformSupport3d,
+};
 pub use hinge2d::{HingeJoint2d, HingeSettings2d};
 pub use material::PhysicsMaterial;
 pub use motor2d::MotorMode2d;

@@ -612,6 +612,62 @@ and invalid/extreme input. They distinguish Rapier's broad grounded prediction
 from classified support and verify support at a movement query's landed endpoint.
 Browser, editor, Decay and Explorer proof of this new primitive remain pending.
 
+## Read-only 3D platform carry
+
+`PhysicsWorld3d::move_character_grounded` and `move_character_grounded_where`
+compose opt-in platform carry, the existing Rapier movement query and classified
+zero-travel support at the final endpoint. `GroundedCharacterOptions3d` contains
+`movement: CharacterOptions3d` and nullable `platform_support`. This is general
+Explorer foundation work; scene-owned carry is not wired yet.
+
+`PlatformSupport3d` names a runtime entity and its previous synchronized pose.
+Before carrying, current compound geometry is checked at that previous body pose,
+including local offsets/rotations, masks, sensor policy and the host predicate.
+Previous bounds may lie outside the current spatial index, so verification visits
+only that body's pieces directly without rebuilding or cloning the world.
+Missing, excluded, filtered, detached, steep or initially penetrating support
+produces no carry. Invalid previous poses fail even for missing/excluded supports.
+Unbounded current obstacles and overflowing previous support bounds fail explicitly.
+
+The previous inverse pose maps the probe origin into support-local coordinates;
+the current solved pose maps it back into world space. Their difference is the
+requested translation, including rotation about the body origin. Pending targets
+produce no carry until the actual pose advances. Carry sweeps a straight chord
+with fixed probe orientation and sliding, steps and snap disabled, excluding only
+the carrying entity. The ordinary movement query then runs from the carried pose
+with that entity included again. A zero carry request skips its sweep and returns
+zero translation, false raw flags and no hits, avoiding a second stationary
+correction. Nonzero carry retains Rapier's movement/correction limits.
+
+`GroundedCharacterMotion3d.translation` includes actual carry exactly once.
+`movement` contains the separate raw backend result after carry. `platform`, when
+verified, copies entity, current pose, requested displacement and collision-limited
+`motion`, including its separate hits. `ground` copies classified final support.
+The composed `grounded` flag requires walkable final support and no upward input
+request; it does not inherit the raw backend flag. Rising/falling support motion
+is not an input jump. Jump requests execute after carry; no platform velocity
+inheritance, impulses, crush damage or recovery gameplay is introduced.
+
+This query does not consume snapshots or apply movement. Hosts must apply total
+translation once and advance snapshots even when carry is clipped. Retain/capture
+support only from the final classified grounded hit. Clear it on teleport,
+reparenting, rebuild, inactivity, removal and handle reuse, and do not also add
+support motion through parenting, solver velocity or requested displacement.
+Scene integration must account for carry in terrain residency before solving.
+These lifecycle/residency obligations remain the next slice.
+
+Large rotations can miss obstacles along the circular arc, and a rising support
+clipped by a ceiling may leave penetration visible in the final ground probe.
+The probe does not rotate with the support. Rapier's bounded correction and
+unreported iteration exhaustion remain limits; there is no continuous arc sweep,
+rotating probe sweep or crush/recovery policy.
+
+Eight native regressions cover pending versus solved poses, translation/vertical
+motion, rotation, wall clipping, restored support collision, input jumps, masks,
+predicates, sensors, missing/detached/steep/penetrating support, compound offsets
+outside current bounds, clone/copy stability, raw versus classified grounding and
+invalid/extreme input. Scene, Decay, editor, browser and game proof remain pending.
+
 ## 3D scene ownership
 
 `sindri.physics3d.character` authors the flat `CharacterOptions3d` fields above.

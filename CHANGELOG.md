@@ -1,5 +1,10 @@
 # Changelog
 
+- Add read-only 3D platform carry composition: verified previous support,
+  collision-limited translation and rotation-point travel, separate carry hits
+  and classified final grounding. Scene lifecycle, terrain reach and Decay
+  integration remain pending.
+
 - Add read-only classified 3D ground probes: nearest support geometry, slope
   limits, skin contacts and explicit initial penetration, using current collider
   poses and deterministic ties. Scene platform carry and Decay access remain pending.

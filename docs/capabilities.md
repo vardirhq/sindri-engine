@@ -2895,7 +2895,12 @@ Read-only `probe_ground` queries now classify nearest skin/touching or downward
 support against a slope limit, retain steep hits and flag initial penetration.
 Native tests cover shapes, compound offsets, filters, ties, current poses and
 invalid inputs; [the query contract](character-movement.md#classified-3d-ground-queries)
-records numerical limits. Scene platform carry does not use these probes yet.
+records numerical limits. `move_character_grounded` now composes verified
+previous support, solved translation/rotation-point carry, ordinary movement and
+classified final support. Eight native regressions cover clipping, vertical
+platforms, jumps, compound offsets, filtering, copies and invalid input; the
+[carry contract](character-movement.md#read-only-3d-platform-carry) records chord
+and backend limits. Scene platform carry does not use this composition yet.
 Gameplay supplies gravity/jumps. Platform carry, Decay controls, browser/controller
 and editor interaction, and Explorer adoption remain pending; see
 [the contract](character-movement.md#3d-scene-ownership). This is a general

@@ -1445,3 +1445,16 @@ existing query index. No snap, carry or gameplay standing policy is applied.
 Native geometry/filter/lifecycle/invalid-input regressions exercise this general
 Explorer prerequisite; scene platform carry and browser/editor/Decay/game proof
 remain pending. See [the contract](character-movement.md#classified-3d-ground-queries).
+
+### Read-only 3D platform carry
+
+`move_character_grounded` / `move_character_grounded_where` combine optional
+`PlatformSupport3d`, collision-limited carry, ordinary Rapier movement and
+classified final support. Current compound geometry verifies the previous pose;
+translation and rotation-point travel sweep before input movement, with separate
+copied carry/movement hits and one total translation. Pending targets contribute
+nothing until solved. Native regressions cover geometry, filtering, wall clipping,
+vertical platforms, jumps and validation. Hosts still own snapshot invalidation,
+once-only application and terrain reach; scene carry is the next slice. See
+[the contract](character-movement.md#read-only-3d-platform-carry) for chord,
+fixed-orientation and backend correction/iteration limits.

@@ -124,7 +124,7 @@ fn controller(options: CharacterOptions3d) -> KinematicCharacterController {
     }
 }
 
-fn checked_request(
+pub(super) fn checked_request(
     shape: ColliderShape3d,
     pose: PhysicsPose3d,
     displacement: [f32; 3],
