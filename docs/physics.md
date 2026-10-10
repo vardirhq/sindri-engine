@@ -1406,3 +1406,16 @@ No game rules are supplied. See the character contract for frame ordering,
 query masks, transform semantics, sensor timing and remaining editor/Decay/game
 integration. Compound character probes, same-step solver response and swept
 controller triggers remain absent.
+
+## 3D character query foundation
+
+`PhysicsWorld3d::move_character` and `move_character_where` wrap Rapier's
+kinematic character controller in engine-owned `CharacterOptions3d`,
+`CharacterMotion3d` and `CharacterCollision3d` values. They are read-only
+world-displacement queries with current-pose geometry, slope/step/snap options
+and copied hit results; applying motion and gameplay policy are separate.
+There is no 3D scene controller or Decay surface yet. This is added generally
+for Explorer's planned movement, with native engine regression evidence and
+honestly pending game/editor/browser proof. See
+[Character movement](character-movement.md#3d-character-movement-foundation)
+for validation, backend flag semantics, numerical limits and remaining slices.

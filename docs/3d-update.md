@@ -80,6 +80,12 @@ Order:
   Orbit Camera Lab uses local collider units, verifies wall resizing through
   Session, and reaches its goal in real WebGPU Chromium. Browser scale editing,
   native editor interaction and Explorer adoption remain pending.
+- The 3D character foundation now wraps Rapier's controller in read-only
+  engine-owned displacement queries over the existing current-pose BVH. Native
+  tests cover walls, slopes, steps, snapping, filtering and validation; backend
+  flag/correction limits are explicit. Scene ownership, Decay, editor, solved
+  platform carry and Explorer proof remain pending. Continue with scene runtime
+  ownership before scripting/game integration; do not add gameplay rules in Rust.
 - Then the rest of slice 6, which unblocks moving through 3D (Low Tide's
   crawler and crew included).
 - Then slices 2 to 4 (measurement, instancing and one lit path, lights),
@@ -277,10 +283,12 @@ placement. The roadmap's "height/mesh terrain next" is this slice.
     recapture, unit regressions and actual X11 window verification.
   - [ ] Explorer game input proof.
 - [ ] `sindri.physics3d.character`:
-  - a Rapier kinematic character controller, with slopes, steps, ground snap
-    and moving platforms;
-  - `Physics3d.character_motion` in Decay;
-  - editor gizmos reused from the 2D character.
+  - [x] Engine-owned read-only Rapier movement query with tested slope, step
+    and ground-snap options; current poses, copied results and strict validation.
+  - [ ] Scene-owned requests/results and fixed-step application, solved moving
+    platform carry with translation/rotation and lifecycle invalidation.
+  - [ ] `Physics3d.character_motion` and movement requests in Decay.
+  - [ ] Editor gizmos reused from the 2D character, browser and Explorer proof.
 - [ ] Collision from content:
   - static trimesh colliders built from a model's meshes;
   - convex hulls for dynamic props;

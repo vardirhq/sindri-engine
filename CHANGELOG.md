@@ -1,5 +1,10 @@
 # Changelog
 
+- Add a 3D character movement foundation: read-only Rapier queries with
+  engine-owned slope, step and snap settings, current collider poses and copied
+  movement/hit results. Scene ownership, Decay, editor and moving-platform
+  integration remain pending.
+
 - 3D collider dimensions and offsets follow entity and parent scale. Uniform
   positive scale works for every shape; boxes also support nonuniform scale
   when their rotated axes stay orthogonal. Unsupported shear, stretched round

@@ -298,6 +298,18 @@ exhaustive candidates; sparse XYZ rays, overlaps and casts select one piece in
 100/1,000/10,000-piece worlds. Overflowing bounds retain conservative candidates;
 backend shape casts at near-maximum finite coordinates/extents can still return
 non-finite results, so numerical failure reporting remains a gap.
+
+`PhysicsWorld3d::move_character` now wraps Rapier's kinematic character controller
+in engine-owned read-only movement queries. Absolute separation, slope limits,
+optional steps/snap, stationary correction and copied collision values use the
+existing current-pose query index. Native engine tests exercise XYZ motion,
+solid landing, wall slide, steps/headroom, snap, slopes, arbitrary up, filtering,
+teleports, copies, clone replay and invalid input. Platform carry is intentionally
+separate from this displacement query. Rapier contact/flag semantics and bounded
+iteration/correction limits are documented in [Character movement](character-movement.md).
+This is a foundation added for Explorer; scene/Decay/editor/browser controller
+integration, moving platforms and game goal proof remain pending.
+
 `ScenePhysics3d` now reconciles registered body/collider/world components with
 active scene entities, composed XYZ/quaternion transforms, gravity settings and
 parent-space write-back. Twelve regressions cover lifecycle/edits, batch rejection,

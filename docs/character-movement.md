@@ -1,6 +1,6 @@
 # Character movement
 
-Status: geometric sweep/slide, ground probing, grounded snapping, slope
+2D status: geometric sweep/slide, ground probing, grounded snapping, slope
 limits, optional steps, synchronized platform carry, one-way controller policy
 and scene runtime ownership implemented; 2D acceptance is complete in
 `physics-update.md`. Added for the platformer genre showcase, whose Hero script
@@ -450,8 +450,8 @@ The 2D controller slice is exercised in the engine, native editor, typed Decay
 hosts and the platformer on native and browser targets. Gravity, coyote time,
 jump buffering and player input remain Decay policy. Compound solid probes,
 same-step solver response, swept trigger events and curved/rotating-probe carry
-remain explicit gaps in parity. A 3D character controller is absent; the wider
-physics update still requires 3D physics and final integration.
+remain explicit gaps in parity. A 3D scene/Decay controller is absent; the
+read-only engine foundation below precedes that integration.
 
 ## Foundation evidence
 
@@ -490,3 +490,83 @@ rotation-point displacement, snapshot advancement, wall clipping and ceiling
 crush reporting, jumps/ledges, filters/sensors/host predicates/removal, stale or
 steep support, compound offsets/rotation, carry plus step accounting, invalid
 input and actual position/velocity-kinematic simulation ordering.
+
+## 3D character movement foundation
+
+Added generally for the planned Explorer genre showcase in PR #507. It is an
+engine primitive, not yet a scene component, Decay API or completed game feature.
+It uses Rapier's kinematic character controller behind Sindri-owned types;
+2D movement and its platformer contract remain unchanged.
+
+`PhysicsWorld3d::move_character(shape, pose, displacement, options, filter)` and
+`move_character_where(..., include)` return a copied `CharacterMotion3d` without
+changing any body pose, velocity, event state or scene. Shapes are the existing
+box, sphere and Y-axis capsule probes (including a zero-height query capsule).
+The world-space displacement is not velocity; probe orientation stays fixed.
+The predicate is stable for the call and may run repeatedly across movement,
+step and support probes. Membership masks, sensor policy and whole-entity
+exclusion use the existing `RaycastFilter3d` contract, independently of the
+obstacle's physical pair filter. Exact ties and traversal order remain
+backend-owned, unlike the deterministic ordinary Sindri query tie policy.
+
+The existing query-only per-piece BVH supplies Rapier's query pipeline. Its
+collider world poses and bounds update at insertion/teleport, after solving and
+when static groups change, so movement sees the same current geometry as rays
+without waiting for a physics step or rebuilding a second spatial index.
+
+`CharacterOptions3d` uses absolute world-unit distances: positive `skin`
+(default 0.01), optional `snap_distance`/`step_height` (both default zero),
+`step_min_width` (0.1) and opt-in `step_dynamic_bodies` (false). It also carries
+`slide` (true), unit world-space `up` ([0, 1, 0]), `max_slope_angle` and
+`min_slide_angle` (both pi/4 radians). Angles accept 0..=pi/2; distances must be
+finite/non-negative and skin positive. Up must be within 0.0001 of unit norm
+and normalizes before use. Scene integration must decide when to enable steps
+and snap; gravity, jumps and acceleration belong in game scripts.
+
+The result contains total `translation`, `grounded`, `sliding_down_slope` and
+ordered movement-phase `CharacterCollision3d` values. A collision copies a
+`ShapeHit3d` (entity, world point/normal, distance from that sweep's start), plus
+`translation_applied` and `translation_remaining` at impact. Internal stair,
+snap and support probes do not populate that collision list. Editing a copied
+result cannot affect later movement.
+
+Backend limits are explicit: `grounded` means Rapier found a nearby upward-facing
+contact, not that it passed the configured walkable slope test. Prediction
+includes skin plus 0.05 world units. `sliding_down_slope` preserves Rapier's flag,
+which may also be set during uphill slope handling. Rapier's movement loop has
+its own fixed 20-iteration budget, without a public exhaustion flag. Approximate
+curved shape-cast normals can
+introduce small normal nudges or lateral travel loss, including on flat faces;
+native slope/capsule checks use explicit 0.01–0.02 world-unit tolerances.
+Stationary near-zero requests can propose bounded depenetration (four passes,
+total at most one quarter of the backend's local-bounds up extent); moving
+penetration uses Rapier's shape-cast policy.
+There is no Sindri penetration flag or recovery policy yet. Sensor-inclusive
+queries can block movement, but Rapier's stationary correction ignores sensors.
+Steps/snap and these flags need scene/game policy before they become gameplay
+contracts. This foundation supplies no push impulses, swept trigger events or
+rotating probe casts.
+
+A displacement query passes zero timestep to the backend, disabling automatic
+velocity-based platform friction/carry. Future scene ownership must add solved
+translation/rotation-point carry exactly once and invalidate support when its
+owner rebuilds, teleports or disappears. No moving-platform feature is claimed.
+
+Shape, pose, settings, displacement, destination and expanded probe bounds
+validate before queries. Non-finite copied backend results fail explicitly.
+If any obstacle has overflowing spatial bounds, this controller query fails
+instead of silently dropping the ordinary index's conservative fallback pieces.
+Ordinary Sindri queries retain their existing overflow fallback behavior.
+
+Native regressions cover free XYZ movement for every shape, wall slide/stop,
+solid landing and stationary support, snap on/off and upward suppression,
+low/tall steps and headroom, slope limits, rotated capsules/arbitrary up,
+mask/sensor/exclusion/predicate filtering, immediate offset teleports and handle
+reuse, copied/read-only state, cloned solve replay, no implicit platform carry,
+bounded stationary correction and invalid/extreme input. All 206 physics tests,
+26 existing 3D scene regressions, warning-denied checks/Clippy and Rust 1.95 WASM
+checks/build pass. The rebuilt Orbit Lab passes its real WebGPU Chromium
+capture/denial/goal regression with an inspected screenshot, checking existing
+scene behavior after pose synchronization changed. The new movement query is
+not yet exercised in a browser. Scene ownership, Decay, editor authoring,
+moving-platform and Explorer goal proof also remain pending.
