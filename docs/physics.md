@@ -1171,7 +1171,9 @@ hash of every block's answer; each section's occupancy revision is a hash of its
 voxels after edits, so an edit, a different generator or a rebound block set
 all change the revision and equal content reuses cached geometry.
 
-Residency follows what can hit voxels. Each step, every planned dynamic body
+Residency follows what can hit voxels. Scene characters add their scaled probe
+extent, requested travel and skin/snap/step margins to the same residency plan,
+so characters alone retain collision terrain. Each step, every planned dynamic body
 contributes its farthest piece extent plus twice the travel its velocity and
 gravity allow in that step, transformed into the world's voxel space (the
 entity's composed pose and scale, then the grid's cell size and centring from
@@ -1179,8 +1181,8 @@ entity's composed pose and scale, then the grid's cell size and centring from
 touch is the complete snapshot handed to `SceneVoxelCollision3d`; terrain no
 body is near is not resident, wherever the camera is. A single reach wider than
 the section budget fails the step whole rather than publishing a partial window.
-Kinematic and static bodies do not drive residency, and queries see only
-resident sections -- a script asking about distant terrain uses `Grid`/`Aim`.
+Ordinary authored kinematic and static bodies do not drive residency; scene
+characters do. Queries see only resident sections -- a script asking about distant terrain uses `Grid`/`Aim`.
 
 `ScenePhysics3d::step_with_tile_sets` resolves these worlds through
 `VoxelGround` (generator, palette and edits), plans the voxel snapshot against
@@ -1419,3 +1421,15 @@ for Explorer's planned movement, with native engine regression evidence and
 honestly pending game/editor/browser proof. See
 [Character movement](character-movement.md#3d-character-movement-foundation)
 for validation, backend flag semantics, numerical limits and remaining slices.
+
+### Scene-owned 3D character movement
+
+`sindri.physics3d.character` derives a stationary kinematic body from one scaled
+solid Collider 3D piece, with optional sensor pieces and no authored rigid body.
+`ScenePhysics3d` consumes queued world displacement after the solve, applies it
+once and writes the result through the existing parent-space transform path.
+Character reach participates in voxel residency before any bodies change.
+Session uses this same driver, including checkpoints; no host assembles another
+movement loop. Backend limits, request/result lifetime, next-solve sensor timing
+and remaining carry/Decay/game proof are specified in
+[the character contract](character-movement.md#3d-scene-ownership).

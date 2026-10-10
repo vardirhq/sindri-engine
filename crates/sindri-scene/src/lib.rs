@@ -12,6 +12,7 @@ mod camera_control;
 mod camera_math;
 mod camera_orbit;
 mod characters;
+mod characters3d;
 mod collider_scale3d;
 mod collision_outline;
 mod components;
@@ -54,6 +55,7 @@ pub use camera_orbit::{
     set_camera_orbit_offset, set_camera_orbit_smoothing, update_orbit_cameras,
 };
 pub use characters::{Character2dComponent, CharacterMotions2d, CharacterRequests2d};
+pub use characters3d::{Character3dComponent, CharacterMotions3d, CharacterRequests3d};
 pub use collider_scale3d::ColliderScaleError3d;
 pub use collision_outline::{CollisionShapes, collision_shapes};
 pub use components::{

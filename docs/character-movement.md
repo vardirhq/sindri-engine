@@ -450,8 +450,8 @@ The 2D controller slice is exercised in the engine, native editor, typed Decay
 hosts and the platformer on native and browser targets. Gravity, coyote time,
 jump buffering and player input remain Decay policy. Compound solid probes,
 same-step solver response, swept trigger events and curved/rotating-probe carry
-remain explicit gaps in parity. A 3D scene/Decay controller is absent; the
-read-only engine foundation below precedes that integration.
+remain explicit gaps in parity. The 3D scene controller below is a foundation;
+Decay access, platform carry and game proof remain pending.
 
 ## Foundation evidence
 
@@ -494,7 +494,8 @@ input and actual position/velocity-kinematic simulation ordering.
 ## 3D character movement foundation
 
 Added generally for the planned Explorer genre showcase in PR #507. It is an
-engine primitive, not yet a scene component, Decay API or completed game feature.
+engine primitive with the scene ownership described below, not yet a Decay API
+or completed game feature.
 It uses Rapier's kinematic character controller behind Sindri-owned types;
 2D movement and its platformer contract remain unchanged.
 
@@ -568,5 +569,61 @@ bounded stationary correction and invalid/extreme input. All 206 physics tests,
 checks/build pass. The rebuilt Orbit Lab passes its real WebGPU Chromium
 capture/denial/goal regression with an inspected screenshot, checking existing
 scene behavior after pose synchronization changed. The new movement query is
-not yet exercised in a browser. Scene ownership, Decay, editor authoring,
-moving-platform and Explorer goal proof also remain pending.
+not yet exercised in a browser. Decay, editor interaction, moving-platform and
+Explorer goal proof remain pending.
+
+## 3D scene ownership
+
+`sindri.physics3d.character` authors the flat `CharacterOptions3d` fields above.
+Defaults and edited payloads use the same validation. A controller requires a
+transform and Collider 3D with exactly one solid box/sphere/capsule; extra sensors
+are allowed. It uses the composed-scale solid piece, including its local offset,
+rotation and filter mask, excludes its whole entity and ignores inactive obstacles.
+Authored rigid bodies, mixed 2D/3D ownership and moving Z locks are rejected.
+The scene derives a stationary velocity-kinematic body. Gameplay still supplies
+all displacement, including gravity and jumps; solver velocities are zeroed before
+solving so they cannot become a second movement owner.
+
+`ScenePhysics3d::character_requests()` returns `CharacterRequests3d`.
+`move_character(entity, displacement, snap)` queues world-space XYZ travel for the
+next fixed pass. The last valid request wins; nonfinite vectors and overflowing
+lengths are rejected before replacing input. Missing/inactive/non-controller
+requests are discarded at synchronization. Pause retains input; an invalid
+step or authored batch consumes none. A body rebuild or teleport preserves valid
+same-step input. No-request frames query zero displacement with snap disabled:
+gameplay must explicitly permit snap each step. Raw backend grounded status does
+not automatically authorize snapping or become a walkable-support decision.
+
+Controller settings and scaled geometry validate beside the ordinary body batch
+before lifecycle changes. Voxel residency includes each character's geometry,
+requested travel and skin/snap/step margins even without dynamic bodies. An
+oversized residency window fails before any body changes. Characters are held
+stationary during the solve, then queried against current solved poses in entity
+order. Each successful result applies once; parent-space writeback retains
+rotation and scale. Queries see the applied pose immediately. Physical response
+and discrete sensor events observe it at the following solve, with no push
+impulses or swept trigger events. Stationary bounded correction and all backend
+flag limits from the query contract still apply.
+
+`character_motion(entity)` returns the last applied `CharacterMotion3d`.
+`for_scripts_with_characters()` supplies disjoint solver/event/request/result
+borrows with `CharacterMotions3d::get(entity)`. Results are immutable snapshots;
+activity must still be checked while reading during a script pass. Settings,
+parenting, scaled geometry, body rebuilds and teleports invalidate caches during
+synchronization; removal/inactivity discard them. Cloning the driver or a Session
+checkpoint includes pending input and cached results, without changing saved
+component payloads. `Session::character_requests3d()` exposes the same queue to
+Rust hosts; Decay access is scheduled separately.
+
+As with backend solver failures, a movement-query error after solving is not a
+transactional rollback of the fixed pass. Requests already applied successfully
+are consumed; a failed request and later requests remain queued. Hosts must report
+the error rather than treating an incomplete pass as a successful gameplay frame.
+
+Native scene regressions cover request replacement, invalid input/batch/step,
+cloned replay, no solver gravity or velocity, masks/sensors, scaled offset probes
+under rotated parents, lifecycle/rebuilds, current solved platform poses,
+immediate query visibility and far-away voxel residency/budget rejection. A
+shared Session regression verifies once-only movement and checkpoint replay.
+This remains partial Explorer foundation evidence: platform carry, Decay,
+controller browser verification, editor interaction and game adoption are pending.

@@ -83,9 +83,12 @@ Order:
 - The 3D character foundation now wraps Rapier's controller in read-only
   engine-owned displacement queries over the existing current-pose BVH. Native
   tests cover walls, slopes, steps, snapping, filtering and validation; backend
-  flag/correction limits are explicit. Scene ownership, Decay, editor, solved
-  platform carry and Explorer proof remain pending. Continue with scene runtime
-  ownership before scripting/game integration; do not add gameplay rules in Rust.
+  flag/correction limits are explicit. Scene-owned requests now derive stationary
+  kinematic bodies, extend voxel residency and apply collision-limited travel once
+  after solving through Session, with cached results and replay tests. Decay,
+  editor, solved platform carry and Explorer proof remain pending. Continue with
+  solved platform support/carry before scripting/game integration; do not add
+  gameplay rules in Rust.
 - Then the rest of slice 6, which unblocks moving through 3D (Low Tide's
   crawler and crew included).
 - Then slices 2 to 4 (measurement, instancing and one lit path, lights),
@@ -285,8 +288,10 @@ placement. The roadmap's "height/mesh terrain next" is this slice.
 - [ ] `sindri.physics3d.character`:
   - [x] Engine-owned read-only Rapier movement query with tested slope, step
     and ground-snap options; current poses, copied results and strict validation.
-  - [ ] Scene-owned requests/results and fixed-step application, solved moving
-    platform carry with translation/rotation and lifecycle invalidation.
+  - [x] Scene-owned requests/results and fixed-step application, scaled probes,
+    character voxel residency, lifecycle invalidation and Session replay.
+  - [ ] Solved moving-platform support/carry with translation/rotation and
+    lifecycle invalidation.
   - [ ] `Physics3d.character_motion` and movement requests in Decay.
   - [ ] Editor gizmos reused from the 2D character, browser and Explorer proof.
 - [ ] Collision from content:

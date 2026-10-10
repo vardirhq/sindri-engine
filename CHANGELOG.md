@@ -1,5 +1,9 @@
 # Changelog
 
+- Add scene-owned 3D character movement: queued XYZ displacement, scaled solid
+  probes, terrain residency, cached movement results and shared Session replay.
+  Gameplay owns gravity and jumps; Decay access and platform carry remain pending.
+
 - Add a 3D character movement foundation: read-only Rapier queries with
   engine-owned slope, step and snap settings, current collider poses and copied
   movement/hit results. Scene ownership, Decay, editor and moving-platform

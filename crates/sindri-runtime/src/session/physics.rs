@@ -18,6 +18,12 @@ impl Session {
         &self.physics3d
     }
 
+    /// Queue world-space 3D character movement for the next shared fixed step.
+    /// Gameplay supplies displacement; the scene controller owns collision resolution.
+    pub fn character_requests3d(&mut self) -> &mut sindri_scene::CharacterRequests3d {
+        self.physics3d.character_requests()
+    }
+
     pub(super) fn step_physics(
         &mut self,
         world: &mut World,

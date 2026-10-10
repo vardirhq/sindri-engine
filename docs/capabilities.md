@@ -2885,6 +2885,16 @@ confirmed by an unchanged file hash. See [the repeatable editor review](physics-
 Engine/editor/Decay/platformer regressions and prior browser checks complete
 this 2D slice; 3D joints, gameplay world snapshots and final integration remain.
 
+The 3D character foundation now has scene ownership through
+`sindri.physics3d.character`: stationary kinematic bodies, next-fixed-step XYZ
+requests, scaled single-solid probes, cached results and voxel residency covering
+requested movement. Native scene and shared Session tests exercise filtering,
+parent writeback, invalid input, rebuilds, terrain budgets and checkpoint replay.
+Gameplay supplies gravity/jumps. Platform carry, Decay controls, browser/controller
+and editor interaction, and Explorer adoption remain pending; see
+[the contract](character-movement.md#3d-scene-ownership). This is a general
+capability added for the planned Explorer showcase, not completed game proof.
+
 A read-only 2D sweep/slide movement foundation now proposes displacement against
 current collider poses without mutating bodies. Positive skin, bounded iterations,
 initial penetration, filters and deterministic ties have native engine tests.

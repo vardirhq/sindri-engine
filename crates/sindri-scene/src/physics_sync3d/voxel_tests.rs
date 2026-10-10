@@ -287,3 +287,60 @@ fn a_window_larger_than_the_budget_is_refused_whole() {
     ));
     assert!(!physics.world().contains(giant));
 }
+
+#[test]
+fn character_travel_keeps_voxels_resident_without_a_dynamic_body() {
+    let mut world = World::default();
+    let voxels = materials(&json!([]));
+    let (_, top) = surface(&voxels, None);
+    let floor = voxel_world(&mut world, voxels, true);
+    let actor = spawn(
+        &mut world,
+        [4_000.5, top + 1.0, -2_500.5],
+        None,
+        Collider3d::sphere(0.25),
+    );
+    world
+        .get_mut(actor)
+        .unwrap()
+        .components
+        .insert(crate::Character3dComponent::TYPE_NAME.into(), json!({}));
+    let mut physics = earth();
+    physics
+        .character_requests()
+        .move_character(actor, [0.0, -2.0, 0.0], false)
+        .unwrap();
+    run(&mut physics, &mut world, None, 1);
+    assert!((height(&world, actor) - (top + 0.26)).abs() < 0.02);
+    assert!(physics.character_motion(actor).unwrap().grounded);
+    assert!(
+        physics
+            .character_motion(actor)
+            .unwrap()
+            .collisions
+            .iter()
+            .any(|c| c.hit.entity == floor)
+    );
+    // No queued gameplay displacement means no gravity or platform travel.
+    let before = height(&world, actor);
+    run(&mut physics, &mut world, None, 10);
+    assert!((height(&world, actor) - before).abs() < 0.02);
+    physics
+        .character_requests()
+        .move_character(actor, [0.0, -80.0, 0.0], false)
+        .unwrap();
+    assert!(matches!(
+        physics.step(&mut world, &components(), STEP),
+        Err(PhysicsSyncError::VoxelCollision(
+            VoxelCollisionError3d::Budget("sections")
+        ))
+    ));
+    assert!((height(&world, actor) - before).abs() < 0.02);
+    // The failed plan retains input; replace it with a bounded request.
+    physics
+        .character_requests()
+        .move_character(actor, [1.0, -0.1, 0.0], false)
+        .unwrap();
+    run(&mut physics, &mut world, None, 1);
+    assert!((world.world_transform(actor).unwrap().position[0] - 4_001.5).abs() < 0.02);
+}
