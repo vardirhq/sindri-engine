@@ -89,6 +89,7 @@ impl<'a> WorldHost<'a> {
             walkable: None,
             sequences: None,
             printed: Vec::new(),
+            pointer_lock_request: None,
             peers: None,
             tweens: None,
             actions: None,

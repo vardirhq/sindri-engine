@@ -107,3 +107,38 @@ fn mouse_drag_changes_orbit_angles_once_and_clamps_pitch() {
     let orbit = &run.world.get(camera).unwrap().components["sindri.camera.orbit"];
     assert!((orbit["pitch"].as_f64().unwrap() - 1.2).abs() < 1.0e-6);
 }
+
+#[test]
+fn capture_intent_is_drained_once_and_relative_motion_drives_the_camera() {
+    use sindri_platform::{InputEvent, Key, MouseButton};
+    let path = Path::new(env!("CARGO_MANIFEST_DIR")).join("../../examples/orbit");
+    let mut run = ProjectRun::open(&path, [960.0, 540.0]).unwrap();
+    run.step(STEP).unwrap();
+    run.input
+        .apply(InputEvent::PointerMoved { x: 100.0, y: 100.0 });
+    run.input
+        .apply(InputEvent::ButtonPressed(MouseButton::Left));
+    let report = run.step(STEP).unwrap();
+    assert_eq!(report.scripts.pointer_lock_request, Some(true));
+    assert_eq!(run.session.take_pointer_lock_request(), Some(true));
+    assert_eq!(run.session.take_pointer_lock_request(), None);
+    assert!(!run.input.pointer_locked());
+    run.input.apply(InputEvent::PointerLockChanged(true));
+    run.input
+        .apply(InputEvent::PointerMotion { x: 60.0, y: 40.0 });
+    let report = run.step(STEP).unwrap();
+    assert!(report.notes().is_empty(), "{report:?}");
+    let camera = run.entity("camera").unwrap();
+    let orbit = &run.world.get(camera).unwrap().components["sindri.camera.orbit"];
+    assert!((orbit["pitch"].as_f64().unwrap() - 0.55).abs() < 1.0e-6);
+    run.input.apply(InputEvent::KeyPressed(Key::U));
+    run.step(STEP).unwrap();
+    let checkpoint = run.session.checkpoint();
+    assert_eq!(run.session.take_pointer_lock_request(), Some(false));
+    run.session.restore(&checkpoint);
+    assert_eq!(
+        run.session.take_pointer_lock_request(),
+        None,
+        "restoring does not replay window commands"
+    );
+}

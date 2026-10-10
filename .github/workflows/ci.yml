@@ -621,6 +621,9 @@ jobs:
           cargo run --quiet --package sindri-export --bin sindri-export -- \
             target/browser-causeway-voxels target/dist/causeway-voxels --base /sindri-engine/
           cp -R crates/sindri-player/pkg/. target/dist/causeway-voxels/pkg/
+          cargo run --quiet --package sindri-export --bin sindri-export -- \
+            examples/orbit target/dist/orbit --base /examples/orbit/
+          cp -R crates/sindri-player/pkg/. target/dist/orbit/pkg/
           python3 scripts/browser/prepare-platformer.py target/browser-platformer
           cargo run --quiet --package sindri-export --bin sindri-export -- \
             target/browser-platformer target/dist/platformer-goal --base /examples/platformer/
@@ -630,6 +633,8 @@ jobs:
         run: |
           node --test scripts/browser/*.test.mjs
           node scripts/browser/smoke.mjs examples/cube target/render-artifacts/browser-cube.png
+          SINDRI_BASE_PATH=/examples/orbit/ \
+            node scripts/browser/pointer-lock.mjs target/dist/orbit target/render-artifacts/browser-orbit-pointer-lock.png
           SINDRI_EXPECT_ASSETS=1 SINDRI_BASE_PATH=/sindri-engine/ \
             node scripts/browser/smoke.mjs target/dist/causeway target/render-artifacts/browser-causeway.png
           SINDRI_EXPECT_ASSETS=1 SINDRI_VOXEL_LANDING=1 SINDRI_BASE_PATH=/sindri-engine/ \
@@ -720,6 +725,7 @@ jobs:
           name: browser-captures
           path: |
             target/render-artifacts/browser-cube.png
+            target/render-artifacts/browser-orbit-pointer-lock.png
             target/render-artifacts/browser-causeway.png
             target/render-artifacts/browser-weave-phone.png
             target/render-artifacts/browser-orbital-baked-phone.png

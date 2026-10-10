@@ -2990,8 +2990,8 @@ down, once. Assets loaded, the walker reached its goal and inspected captures
 showed the camera response without runtime/GPU errors. The flat-color lab used
 the same local eight-color smoke threshold as its earlier capture (fourteen
 colors drawn); the repository browser gate is unchanged. This is feature
-example evidence; Explorer game and editor Play proof remain pending, and
-pointer lock/unbounded relative motion are not implemented.
+example evidence; Explorer game and editor Play proof remain pending.
+Native/browser capture is described below.
 
 ### Pointer-lock input foundation
 
@@ -3006,10 +3006,43 @@ Nonfinite motion and overflowing sums are rejected atomically.
 
 `crates/sindri-platform/tests/pointer_motion.rs` exercises these transitions,
 invalid input and once-only consumption through the real `EngineHost` fixed-step
-loop, including frames with no step and catchup steps. No shipped host emits the
-new events yet. The rebuilt generic player also passed the existing real WebGPU
-Chromium drag regression: the walker reached its goal and Decay received 60
-pixels right/40 down exactly once, with assets loaded and no runtime/GPU errors.
-This verifies unlocked input after the shared-state change, not browser capture.
-Native/browser capture, Decay requests, editor Play and game proof remain
-pending; pointer lock is still absent on those surfaces.
+loop, including frames with no step and catchup steps. Native/browser player
+hosts now emit this feedback and motion, as described below.
+
+### Native/browser cursor capture from Decay
+
+`Pointer.lock()` / `Input.Pointer.lock()` request capture; `unlock()` requests
+release and read-only `locked` reports actual state. No request changes state
+within an invocation. Successful invocation outputs collect requests in execution
+order (last request wins), Session queues the latest across fixed steps, and
+`DesktopApp` drains it once after update. Failed invocations do not forward their
+capture intent; checkpoint restore does not replay window commands.
+
+The windowed host uses native Locked, with X11 confinement plus raw device
+motion as a fallback. Browser capture calls are caught at the JavaScript boundary
+and Promise rejection is consumed; actual document lock is polled before gameplay
+and relative motion. Delayed grants after explicit release are released again.
+Escape, focus loss, suspension, hidden pages, failure and normal exit release
+capture. Returning focus does not recapture. Motion uses native raw device counts
+or browser physical pixels, positive right/down, through the existing delta API.
+
+Bridge regressions cover actual-state reads, both namespaces, read-only writes,
+invalid call signatures and failed-invocation intent. Orbit Camera Lab's Session
+regression covers request draining, relative camera motion and checkpoint restore.
+LSP tests cover read-only boolean metadata and capture-call completion; generated
+reference/metadata share the same typed host surface.
+
+`scripts/browser/pointer-lock.mjs` runs the exported lab in real WebGPU Chromium:
+a trusted click captures, movement beyond the viewport reaches Decay as exactly
+1,420 horizontal/60 vertical units once, U and Escape release, and a sandboxed
+frame denies capture without false success or interrupting the goal run. The
+captured-look screenshot was inspected. CI exports the same project and runs
+this regression, retaining its screenshot. Its flat-color fixture uses an
+eight-color minimum; the general browser smoke threshold remains unchanged.
+Native X11 verification runs the same generic player in an isolated Xvfb
+window on Vulkan, reaches the goal, and drives capture/raw motion/U/Escape/focus
+changes with XTest. Decay observes 4,000 horizontal/120 vertical raw units in
+one step, releases on each requested/focus transition and does not recapture
+on focus regain. The native window screenshot was inspected alongside Chromium.
+Native platforms other than this X11 run were not visually exercised here.
+Editor Play capture and Explorer game proof remain pending.

@@ -5,8 +5,8 @@ use decay_semantic::{Environment, FunctionType, HostType, Type};
 use crate::surface::{
     AIM, AIM_VALUES, AimValue, CAMERA, CAMERA_CALLS, CAMERA_VALUES, CameraCall, ENTITY, GESTURE,
     GESTURE_VALUES, GestureValue, INPUT, INPUT_GROUPS, INPUT_QUERIES, KEYBOARD, POINTER,
-    POINTER_QUERIES, POINTER_VALUES, PointerValue, STICK, STICK_VALUES, StickValue, TOUCH,
-    TOUCH_CALLS, TOUCH_COUNT, VIEWPORT, VIEWPORT_VALUES,
+    POINTER_QUERIES, POINTER_VALUES, PointerQuery, PointerValue, STICK, STICK_VALUES, StickValue,
+    TOUCH, TOUCH_CALLS, TOUCH_COUNT, VIEWPORT, VIEWPORT_VALUES,
 };
 
 /// `Input`, which is the keyboard as it always was, and every other way the
@@ -131,21 +131,22 @@ pub(super) fn add_pointer_surface(environment: &mut Environment) {
             PointerValue::X | PointerValue::Y | PointerValue::OverlayX | PointerValue::OverlayY => {
                 Type::F32
             }
-            PointerValue::Inside | PointerValue::OverUi => Type::Bool,
+            PointerValue::Inside | PointerValue::OverUi | PointerValue::Locked => Type::Bool,
             PointerValue::Position | PointerValue::Delta | PointerValue::Overlay => Type::Vec2,
         };
-        pointer = if *value == PointerValue::Delta {
+        pointer = if matches!(value, PointerValue::Delta | PointerValue::Locked) {
             pointer.with_read_only_value(*name, value_type)
         } else {
             pointer.with_value(*name, value_type)
         };
     }
-    for (name, _) in POINTER_QUERIES {
+    for (name, query) in POINTER_QUERIES {
+        let capture = matches!(query, PointerQuery::Lock | PointerQuery::Unlock);
         pointer = pointer.with_function(
             *name,
             FunctionType {
-                params: vec![Type::String],
-                return_type: Type::Bool,
+                params: if capture { vec![] } else { vec![Type::String] },
+                return_type: if capture { Type::Unit } else { Type::Bool },
             },
         );
     }

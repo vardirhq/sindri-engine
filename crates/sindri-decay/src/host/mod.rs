@@ -171,6 +171,7 @@ pub struct WorldHost<'a> {
     scenes: Option<&'a mut crate::SceneChannel>,
     /// What the script said, in order. Drained by the caller after the call.
     printed: Vec<String>,
+    pointer_lock_request: Option<bool>,
     /// The other scripts in the pass, for a host that runs several.
     peers: Option<peers::Peers<'a>>,
     pub(crate) tweens: Option<&'a mut crate::tweens::Tweens>,

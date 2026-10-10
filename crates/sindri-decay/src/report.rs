@@ -40,6 +40,9 @@ pub struct ScriptReport {
     /// How long each script's tick took, when the host asked for timings
     /// with [`crate::Scripts::set_measuring`]. Empty otherwise.
     pub timings: Vec<ScriptTiming>,
+    /// Last successful script's cursor capture request, in execution order.
+    /// Actual capture is reported back through platform input, not this value.
+    pub pointer_lock_request: Option<bool>,
 }
 
 impl ScriptReport {
@@ -47,6 +50,6 @@ impl ScriptReport {
     /// a caller should be able to check without looking at two fields.
     #[must_use]
     pub fn is_quiet(&self) -> bool {
-        self.printed.is_empty() && self.failures.is_empty()
+        self.printed.is_empty() && self.failures.is_empty() && self.pointer_lock_request.is_none()
     }
 }

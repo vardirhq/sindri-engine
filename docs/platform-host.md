@@ -118,7 +118,18 @@ as one event. `EngineHost` spends relative displacement exactly once, preserving
 it across frames that earn no fixed step and clearing it after the first catchup
 step while retaining capture state.
 
-This is the shared input foundation only. The windowed host does not yet
-request native cursor capture or browser pointer lock, and Decay has no capture
-request or lock-state API. Those host operations must report actual success,
-release and asynchronous browser denial before the capability is complete.
+`DesktopApp::take_pointer_lock_request` drains a capture intention after update.
+The windowed host owns cursor capture: native Locked (or X11 confinement with
+raw device motion) and browser `requestPointerLock`. The browser uses a caught
+function call plus Promise rejection handling because the older void binding
+cannot handle synchronous security exceptions. Actual browser state is polled
+before update and before relative motion; returning from a request is never
+success feedback. Delayed grants after explicit release are released again.
+
+Escape, focus loss, suspension, a hidden page, failure and normal host exit
+release capture. Regaining focus does not recapture. Requests while unfocused
+are ignored. Native raw device counts and browser physical-pixel displacement
+feed the same input path, with absolute events ignored while captured.
+`Session` retains the latest successful script's request across fixed steps
+until the host drains it once; restored checkpoints do not replay commands.
+Editor Play capture remains pending.

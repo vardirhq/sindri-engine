@@ -75,7 +75,7 @@ pub(super) fn tick(
     entity: EntityId,
     component: &ScriptComponent,
     delta_seconds: f32,
-) -> Result<Vec<String>, ScriptFailure> {
+) -> Result<RunOutput, ScriptFailure> {
     ensure_compiled(at.programs, at.sources, entity, component)?;
     let program = std::rc::Rc::clone(&at.programs[&component.source].program);
     let container = program
@@ -175,11 +175,11 @@ pub(super) fn tick(
         }
         Ok(())
     })();
-    let printed = runtime.into_host().take_printed();
+    let output = RunOutput::from_host(runtime.into_host());
     if let Some(current) = current {
         at.running.insert(entity, current);
     }
-    outcome.map(|()| printed)
+    outcome.map(|()| output)
 }
 
 /// Runs a message another script sent: `function` on `entity`'s script, with
@@ -192,16 +192,16 @@ pub(super) fn deliver(
     at: &mut TickWorld<'_>,
     entity: EntityId,
     message: super::Message,
-) -> Result<Vec<String>, ScriptFailure> {
+) -> Result<RunOutput, ScriptFailure> {
     if at.world.get(entity).is_none() {
-        return Ok(Vec::new());
+        return Ok(RunOutput::default());
     }
     let Some(mut current) = at.running.remove(&entity) else {
-        return Ok(Vec::new());
+        return Ok(RunOutput::default());
     };
     let Some(compiled) = at.programs.get(&current.source) else {
         at.running.insert(entity, current);
-        return Ok(Vec::new());
+        return Ok(RunOutput::default());
     };
     let program = std::rc::Rc::clone(&compiled.program);
     let script = current.script.clone();
@@ -215,9 +215,9 @@ pub(super) fn deliver(
         .call_instance(&mut current.instance, &message.name, message.args)
         .map(|_| ())
         .map_err(|error| ScriptFailure::runtime(entity, &script, &message.name, &error));
-    let printed = runtime.into_host().take_printed();
+    let output = RunOutput::from_host(runtime.into_host());
     at.running.insert(entity, current);
-    outcome.map(|()| printed)
+    outcome.map(|()| output)
 }
 
 /// Every running script with a function of this name, in the order a pass
@@ -506,4 +506,41 @@ pub(crate) fn to_value(value: &serde_json::Value) -> Option<Value> {
         )?,
         serde_json::Value::Object(_) => return None,
     })
+}
+
+/// Side effects from a successful script invocation.
+#[derive(Default)]
+pub(super) struct RunOutput {
+    printed: Vec<String>,
+    pointer_lock_request: Option<bool>,
+}
+
+impl RunOutput {
+    fn from_host(mut host: WorldHost<'_>) -> Self {
+        Self {
+            printed: host.take_printed(),
+            pointer_lock_request: host.take_pointer_lock_request(),
+        }
+    }
+}
+
+pub(super) fn collect(
+    report: &mut crate::ScriptReport,
+    entity: EntityId,
+    outcome: Result<RunOutput, ScriptFailure>,
+) {
+    match outcome {
+        Ok(output) => {
+            report.printed.extend(
+                output
+                    .printed
+                    .into_iter()
+                    .map(|message| crate::ScriptMessage { entity, message }),
+            );
+            if output.pointer_lock_request.is_some() {
+                report.pointer_lock_request = output.pointer_lock_request;
+            }
+        }
+        Err(failure) => report.failures.push(failure),
+    }
 }

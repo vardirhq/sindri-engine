@@ -62,12 +62,14 @@ Order:
 - Slice 6 also has explicit perspective FOV control and `sindri.camera.orbit`
   with world-space follow, aiming, smoothing and sight-line collision pull-in.
   The Orbit Camera Lab runs to its goal through Session and exported Chromium;
-  native and WebGPU captures show pull-in and recovery. Editor/game proof and
-  pointer lock remain pending.
-- Pointer-lock groundwork now has shared capture feedback and relative-motion
-  events, with tests for mode changes, focus loss and once-per-step consumption.
-  No shipped host captures the cursor yet; native/browser capture, Decay
-  requests and editor Play integration are the next input slice.
+  native and WebGPU captures show pull-in and recovery. Editor/game proof
+  remains pending.
+- Pointer lock now connects Decay lock/unlock requests and read-only actual
+  state through Session to the native/browser host. Shared relative motion
+  excludes cursor warps, rebases mode changes and is consumed once per step.
+  Real Chromium checks unbounded motion, U/Escape release and sandbox denial;
+  native X11/Vulkan verifies unbounded raw motion, U/Escape/focus-loss release
+  and no recapture on focus regain. Editor Play/Explorer proof remains pending.
 - Then the rest of slice 6, which unblocks moving through 3D (Low Tide's
   crawler and crew included).
 - Then slices 2 to 4 (measurement, instancing and one lit path, lights),
@@ -255,10 +257,10 @@ placement. The roadmap's "height/mesh terrain next" is this slice.
 - [ ] Input:
   - [x] Read-only mouse `Pointer.delta` / `Input.Pointer.delta` in viewport
     pixels per fixed step, with typed access and drag-to-look in Orbit Camera Lab.
-  - [ ] Pointer lock in native and browser (`requestPointerLock`).
+  - [x] Pointer lock in native and browser (`requestPointerLock`).
     - [x] Shared input capture feedback and relative-motion accumulation,
       including transition rebasing, focus loss and fixed-step regressions.
-    - [ ] Host capture/release and actual-state feedback, Decay requests and
+    - [x] Host capture/release and actual-state feedback, Decay requests and
       read-only lock state, with native/browser runtime verification.
   - [ ] Explorer game and editor Play input proof.
 - [ ] `sindri.physics3d.character`:
@@ -311,8 +313,9 @@ placement. The roadmap's "height/mesh terrain next" is this slice.
 - `.gltf` with external files, OBJ and FBX.
 - 3D joints.
 - Caves, overhangs and holes in terrain. Those stay with voxel terrain.
-- Validation on representative integrated and discrete GPUs. This is not
-  possible in this container; it is a manual check.
+- Validation across representative integrated and discrete GPUs remains a
+  broader manual check. This slice exercises native X11/Vulkan on an RTX 3060
+  and browser WebGPU on Chromium's software Vulkan backend.
 
 ## Decisions
 

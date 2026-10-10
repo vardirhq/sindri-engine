@@ -173,7 +173,12 @@ impl WorldHost<'_> {
         }
     }
 
-    pub(super) fn is_pointer_delta(path: &Path) -> bool {
+    /// Drains a successful script's capture intent for the windowed host.
+    pub fn take_pointer_lock_request(&mut self) -> Option<bool> {
+        self.pointer_lock_request.take()
+    }
+
+    pub(super) fn is_read_only_pointer(path: &Path) -> bool {
         let mut parts = path.0.iter().map(String::as_str);
         let root = parts.next();
         let namespace = if root == Some(INPUT) {
@@ -181,7 +186,7 @@ impl WorldHost<'_> {
         } else {
             root
         };
-        namespace == Some(POINTER) && parts.next() == Some("delta")
+        namespace == Some(POINTER) && matches!(parts.next(), Some("delta" | "locked"))
     }
 
     pub(super) fn pointer_value(&self, value: PointerValue) -> Value {
@@ -192,6 +197,7 @@ impl WorldHost<'_> {
                 .unwrap_or([0.0, 0.0])
         };
         match value {
+            PointerValue::Locked => Value::Bool(self.context.input.pointer_locked()),
             PointerValue::Inside => Value::Bool(position.is_some()),
             PointerValue::OverUi => Value::Bool(
                 self.screen_ui

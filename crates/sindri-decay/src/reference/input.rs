@@ -155,6 +155,20 @@ pub(super) const TYPES: &[TypeEntry] = &[
         name: "Pointer",
         text: "The mouse, or a finger on a touch screen, handled the same way so one game works on both.",
         members: &[
+            call(
+                "lock",
+                &[],
+                "Requests cursor capture from the windowed host. Call after a player click in a browser; capture is asynchronous and may be denied. Read `locked` for actual state.",
+            ),
+            call(
+                "unlock",
+                &[],
+                "Requests cursor release. Escape, focus loss and suspension also release capture; no automatic recapture.",
+            ),
+            value(
+                "locked",
+                "Read-only actual host cursor capture state, not the last request. False in headless runs and hosts without capture support.",
+            ),
             value(
                 "inside",
                 "Whether the mouse is over the game or a finger is on the screen. Check this before trusting a position.",
@@ -196,7 +210,7 @@ pub(super) const TYPES: &[TypeEntry] = &[
             ),
             value(
                 "delta",
-                "Read-only Vec2 mouse displacement in viewport pixels accumulated for this fixed step: positive right and down. First arrival/re-entry adds no displacement; the next step reads zero without movement. This is displacement, not velocity: do not multiply by dt. Touch uses Gesture.drag_x/drag_y. Pointer lock is not supported yet.",
+                "Read-only Vec2 mouse displacement accumulated for this fixed step: positive right and down. Unlocked input uses viewport pixels; captured input uses native raw device counts or browser physical pixels. First arrival/re-entry adds no displacement; the next step reads zero without movement. This is displacement, not velocity: do not multiply by dt. Touch uses Gesture.drag_x/drag_y. Use lock/unlock to request cursor capture and locked to read actual host state.",
             ),
             value(
                 "x",

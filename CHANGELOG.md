@@ -1,5 +1,12 @@
 # Changelog
 
+- Capture the cursor from Decay with `Pointer.lock()` / `Input.Pointer.lock()`,
+  release with `unlock()`, and read actual state through read-only `locked`.
+  Native/browser players feed unbounded relative motion through `Pointer.delta`;
+  Escape, focus loss and suspension release capture. Browser denial leaves the
+  game running. Orbit Camera Lab demonstrates captured look. Editor Play capture
+  remains pending.
+
 - Add shared input groundwork for pointer lock: actual capture feedback and
   relative mouse motion, with mode-change rebasing, focus-loss cleanup and
   once-per-step accumulation. Native/browser capture and Decay controls remain

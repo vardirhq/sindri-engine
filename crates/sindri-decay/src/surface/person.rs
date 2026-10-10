@@ -47,11 +47,15 @@ pub(crate) const INPUT_QUERIES: &[(&str, InputQuery)] = &[
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub(crate) enum PointerQuery {
+    Lock,
+    Unlock,
     Down,
     Pressed,
     Released,
 }
 pub(crate) const POINTER_QUERIES: &[(&str, PointerQuery)] = &[
+    ("lock", PointerQuery::Lock),
+    ("unlock", PointerQuery::Unlock),
     ("is_down", PointerQuery::Down),
     ("just_pressed", PointerQuery::Pressed),
     ("just_released", PointerQuery::Released),
@@ -67,6 +71,7 @@ pub(crate) enum PointerValue {
     OverlayY,
     Position,
     Delta,
+    Locked,
     Overlay,
 }
 pub(crate) const POINTER_VALUES: &[(&str, PointerValue)] = &[
@@ -76,6 +81,7 @@ pub(crate) const POINTER_VALUES: &[(&str, PointerValue)] = &[
     ("overlay_y", PointerValue::OverlayY),
     ("position", PointerValue::Position),
     ("delta", PointerValue::Delta),
+    ("locked", PointerValue::Locked),
     ("overlay", PointerValue::Overlay),
     ("inside", PointerValue::Inside),
     ("over_ui", PointerValue::OverUi),

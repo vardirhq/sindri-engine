@@ -267,6 +267,10 @@ impl DesktopApp for Player {
             .is_some_and(|engine| engine.game().editing_text())
     }
 
+    fn take_pointer_lock_request(&mut self) -> Option<bool> {
+        self.engine.as_mut()?.game_mut().take_pointer_lock_request()
+    }
+
     fn take_copied(&mut self) -> Option<String> {
         self.engine.as_mut()?.game_mut().take_copied()
     }

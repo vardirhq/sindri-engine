@@ -379,3 +379,68 @@ fn pointer_delta_is_read_only_through_both_namespaces() {
         }
     }
 }
+
+#[test]
+fn capture_requests_do_not_pretend_to_be_actual_capture() {
+    let (mut world, _, sources) = world(
+        r"
+        script Reader {
+            fn update(dt: f32) {
+                Pointer.lock();
+                print(Pointer.locked);
+                Input.Pointer.unlock();
+                print(Input.Pointer.locked);
+            }
+        }
+    ",
+    );
+    let mut scripts = Scripts::new();
+    let mut input = InputState::default();
+    let report = advance(&mut scripts, &mut world, &sources, &input);
+    assert!(report.failures.is_empty(), "{report:?}");
+    assert_eq!(report.pointer_lock_request, Some(false));
+    assert!(report.printed.iter().all(|m| m.message == "false"));
+    assert!(!report.is_quiet());
+    input.apply(InputEvent::PointerLockChanged(true));
+    let report = advance(&mut scripts, &mut world, &sources, &input);
+    assert!(report.failures.is_empty(), "{report:?}");
+    assert!(report.printed.iter().all(|m| m.message == "true"));
+    assert_eq!(report.pointer_lock_request, Some(false));
+}
+
+#[test]
+fn capture_state_is_read_only_and_requests_take_no_arguments() {
+    for namespace in ["Pointer", "Input.Pointer"] {
+        let source =
+            format!("script Reader {{ fn update(dt: f32) {{ {namespace}.locked = true; }} }}");
+        let checked = sindri_decay::check_source(&source);
+        assert!(
+            checked.diagnostics.iter().any(|d| d.code == "immutable"),
+            "{checked:?}"
+        );
+        for call in ["lock", "unlock"] {
+            let source =
+                format!("script Reader {{ fn update(dt: f32) {{ {namespace}.{call}(true); }} }}");
+            assert!(!sindri_decay::check_source(&source).compiles(), "{source}");
+        }
+    }
+}
+
+#[test]
+fn a_failed_script_does_not_forward_capture_intent() {
+    let (mut world, _, sources) = world(
+        r"
+        script Reader {
+            fn update(dt: f32) { Pointer.lock(); Touch.x(9.0); }
+        }
+    ",
+    );
+    let report = advance(
+        &mut Scripts::new(),
+        &mut world,
+        &sources,
+        &InputState::default(),
+    );
+    assert_eq!(report.failures.len(), 1);
+    assert!(report.pointer_lock_request.is_none());
+}

@@ -1986,6 +1986,7 @@ not require the singular 2D behavior camera.
 | `Pointer.overlay_x` | `f32` |
 | `Pointer.overlay_y` | `f32` |
 | `Pointer.position` | `Vec2` |
+| `Pointer.locked` (read-only) | `bool` |
 | `Pointer.delta` (read-only) | `Vec2` |
 | `Pointer.overlay` | `Vec2` |
 | `Pointer.inside` | `bool` |
@@ -1993,20 +1994,24 @@ not require the singular 2D behavior camera.
 
 | Call | Returns |
 | --- | --- |
+| `Pointer.lock()` | `unit` |
+| `Pointer.unlock()` | `unit` |
 | `Pointer.is_down(button)` | `bool` |
 | `Pointer.just_pressed(button)` | `bool` |
 | `Pointer.just_released(button)` | `bool` |
 
-`Pointer.delta` (also `Input.Pointer.delta`) is mouse displacement in viewport
-pixels accumulated until the next fixed step: positive X is right, positive Y
+`Pointer.delta` (also `Input.Pointer.delta`) is mouse displacement accumulated
+until the next fixed step: positive X is right, positive Y
 is down. Read the whole vector or `.x`/`.y`; assigning either the value or a
 component is rejected. A mutable copy is independent. First arrival and
 re-entry establish a position without adding displacement; steps without
-movement read zero. Multiply by sensitivity in radians per pixel for mouse
-look, without multiplying by `dt`. Touch motion uses `Gesture.drag_x`/`drag_y`;
-this value is mouse-only. Pointer lock and unbounded relative motion are still
-absent, so movement stops at the window edge. Orbit Camera Lab demonstrates
-right-button mouse look with pitch clamping.
+movement read zero. Unlocked motion uses viewport pixels; captured motion uses
+native raw device counts or browser physical pixels. Multiply by sensitivity
+in radians per motion unit, without multiplying by `dt`. Touch uses
+`Gesture.drag_x`/`drag_y`; this value is mouse-only. `lock()` and `unlock()`
+request capture/release, while read-only `locked` reports actual host state;
+see the cursor capture contract below. Orbit Camera Lab demonstrates captured
+look and right-button drag-to-look with pitch clamping.
 
 | Path | Type |
 | --- | --- |
@@ -2995,3 +3000,33 @@ original endpoints. Completion is polled, so a game can use its existing typed
 messages/events for follow-up actions. This slice does not add property-path
 binding, timelines, sequences, callbacks, loop/yoyo modes or CSS keyframes.
 Orbital's `powerup.decay` uses a managed vector tween for its pickup appearance.
+
+## Cursor capture for 3D mouse look
+
+`Pointer.lock()` / `Input.Pointer.lock()` request capture from the windowed
+native/browser player. `unlock()` requests release; read-only `locked` reports
+actual host state. Both calls take no arguments and return unit. A request
+does not change `locked` within the script invocation. Requests from successful
+script invocations are collected in execution order, last request winning,
+and Session drains the latest request once after the host advances gameplay.
+A failed invocation does not forward its pending capture request.
+
+In a browser, request capture after a player click. Security policy, lack of
+user activation, or platform support can deny it. Browser success is polled
+from the document's actual locked element; synchronous exceptions and rejected
+promises are handled without stopping gameplay. Native capture uses Locked
+where supported and confinement with raw device motion on X11. Escape, focus
+loss and host suspension release capture. There is no automatic recapture.
+
+`Pointer.delta` remains the motion input, positive right/down. Unlocked input
+uses viewport pixels; captured native input uses raw device counts, while
+browser input uses physical-pixel movement. Tune sensitivity per game; do not
+multiply displacement by dt. Absolute cursor warps do not contribute while
+captured. Capture transitions clear pending motion and rebase the first
+unlocked position. Touch remains separate.
+
+Headless runs and editor Play currently do not perform capture, so requests
+there remain intentions until a host supplies actual-state input. Checkpoint
+restore does not replay consumed window commands. Orbit Camera Lab demonstrates
+click-to-capture, U/second-click release and captured look in Decay. Explorer
+and editor Play proof remain pending.

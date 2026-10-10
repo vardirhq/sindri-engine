@@ -408,16 +408,19 @@ Independent 3D physics controls, indexed queries and copied last-step events. Re
 
 The mouse, or a finger on a touch screen, handled the same way so one game works on both.
 
-- `delta`: `Vec2` (read-only) — Read-only Vec2 mouse displacement in viewport pixels accumulated for this fixed step: positive right and down. First arrival/re-entry adds no displacement; the next step reads zero without movement. This is displacement, not velocity: do not multiply by dt. Touch uses Gesture.drag_x/drag_y. Pointer lock is not supported yet.
+- `delta`: `Vec2` (read-only) — Read-only Vec2 mouse displacement accumulated for this fixed step: positive right and down. Unlocked input uses viewport pixels; captured input uses native raw device counts or browser physical pixels. First arrival/re-entry adds no displacement; the next step reads zero without movement. This is displacement, not velocity: do not multiply by dt. Touch uses Gesture.drag_x/drag_y. Use lock/unlock to request cursor capture and locked to read actual host state.
 - `inside`: `bool` — Whether the mouse is over the game or a finger is on the screen. Check this before trusting a position.
 - `is_down(button: String)` → `bool` — Whether a mouse button, `"Left"`, `"Middle"` or `"Right"`, is held. A finger on the screen counts as `"Left"`.
 - `just_pressed(button: String)` → `bool` — Whether a mouse button was pressed this frame.
 - `just_released(button: String)` → `bool` — Whether a mouse button was let go this frame, or the last finger lifted.
+- `lock()` → `unit` — Requests cursor capture from the windowed host. Call after a player click in a browser; capture is asynchronous and may be denied. Read `locked` for actual state.
+- `locked`: `bool` (read-only) — Read-only actual host cursor capture state, not the last request. False in headless runs and hosts without capture support.
 - `over_ui`: `bool` — Whether the pointer is over part of the interface, such as a button. Check it so clicking a button does not also shoot or move in the game.
 - `overlay`: `Vec2` — The pointer's position in screen units, where 0 is the centre of the screen and the screen is 2 units tall. The same on any screen size.
 - `overlay_x`: `f32` — The pointer's sideways position in screen units, where 0 is the centre.
 - `overlay_y`: `f32` — The pointer's up-down position in screen units, where 0 is the centre.
 - `position`: `Vec2` — The pointer's position in pixels, from the top-left corner of the game's view.
+- `unlock()` → `unit` — Requests cursor release. Escape, focus loss and suspension also release capture; no automatic recapture.
 - `x`: `f32` — The pointer's distance from the left edge of the game's view, in pixels.
 - `y`: `f32` — The pointer's distance from the top edge of the game's view, in pixels.
 

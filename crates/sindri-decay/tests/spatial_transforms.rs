@@ -253,6 +253,17 @@ fn runtime_refuses_direction_writes_even_without_the_compiler() {
             );
         }
     }
+    for parts in [
+        vec!["Pointer", "locked"],
+        vec!["Input", "Pointer", "locked"],
+    ] {
+        let path = Path(parts.into_iter().map(str::to_owned).collect());
+        let error = host.store(None, &path, Value::Bool(true)).unwrap_err();
+        assert!(
+            matches!(&error, decay_runtime::RuntimeError::Host(message) if message.contains("read-only")),
+            "{error:?}"
+        );
+    }
     for prefix in [vec!["Pointer", "delta"], vec!["Input", "Pointer", "delta"]] {
         for (suffix, value) in [
             (vec![], Value::Vec2([1.0, 2.0])),

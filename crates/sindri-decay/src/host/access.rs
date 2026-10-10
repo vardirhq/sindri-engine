@@ -145,7 +145,7 @@ impl Host for WorldHost<'_> {
         if subject.is_none() && self.shared_store(path, &value)? {
             return Ok(true);
         }
-        if subject.is_none() && Self::is_pointer_delta(path) {
+        if subject.is_none() && Self::is_read_only_pointer(path) {
             return Err(RuntimeError::Host(format!(
                 "{} is read-only",
                 path.dotted()

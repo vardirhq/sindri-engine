@@ -2983,7 +2983,7 @@
       "description": "The mouse, or a finger on a touch screen, handled the same way so one game works on both.",
       "members": [
         {
-          "description": "Read-only Vec2 mouse displacement in viewport pixels accumulated for this fixed step: positive right and down. First arrival/re-entry adds no displacement; the next step reads zero without movement. This is displacement, not velocity: do not multiply by dt. Touch uses Gesture.drag_x/drag_y. Pointer lock is not supported yet.",
+          "description": "Read-only Vec2 mouse displacement accumulated for this fixed step: positive right and down. Unlocked input uses viewport pixels; captured input uses native raw device counts or browser physical pixels. First arrival/re-entry adds no displacement; the next step reads zero without movement. This is displacement, not velocity: do not multiply by dt. Touch uses Gesture.drag_x/drag_y. Use lock/unlock to request cursor capture and locked to read actual host state.",
           "kind": "value",
           "name": "delta",
           "read_only": true,
@@ -3033,6 +3033,21 @@
           "returns": "bool"
         },
         {
+          "description": "Requests cursor capture from the windowed host. Call after a player click in a browser; capture is asynchronous and may be denied. Read `locked` for actual state.",
+          "kind": "function",
+          "name": "lock",
+          "parameter_names": [],
+          "parameters": [],
+          "returns": "unit"
+        },
+        {
+          "description": "Read-only actual host cursor capture state, not the last request. False in headless runs and hosts without capture support.",
+          "kind": "value",
+          "name": "locked",
+          "read_only": true,
+          "type": "bool"
+        },
+        {
           "description": "Whether the pointer is over part of the interface, such as a button. Check it so clicking a button does not also shoot or move in the game.",
           "kind": "value",
           "name": "over_ui",
@@ -3066,6 +3081,14 @@
           "name": "position",
           "read_only": false,
           "type": "Vec2"
+        },
+        {
+          "description": "Requests cursor release. Escape, focus loss and suspension also release capture; no automatic recapture.",
+          "kind": "function",
+          "name": "unlock",
+          "parameter_names": [],
+          "parameters": [],
+          "returns": "unit"
         },
         {
           "description": "The pointer's distance from the left edge of the game's view, in pixels.",

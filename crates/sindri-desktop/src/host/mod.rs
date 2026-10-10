@@ -12,6 +12,7 @@
 //! this file is the loop between them.
 
 mod app;
+mod cursor;
 mod page_size;
 mod startup;
 #[cfg(target_arch = "wasm32")]
@@ -36,7 +37,7 @@ use sindri_gpu::{GpuContext, WindowSurface};
 use sindri_platform::{FrameTimer, GamepadReader, InputEvent};
 use winit::{
     application::ApplicationHandler,
-    event::WindowEvent,
+    event::{DeviceEvent, DeviceId, WindowEvent},
     event_loop::{ActiveEventLoop, EventLoop, EventLoopProxy},
     window::{Window, WindowId},
 };
@@ -77,6 +78,7 @@ struct Host<A: DesktopApp> {
     page_visible: bool,
     /// Whether the page has been told the game is on screen.
     announced_ready: bool,
+    cursor: cursor::CursorCapture,
     /// The modifiers held now, which decide whether a key press types.
     modifiers: winit::keyboard::ModifiersState,
     /// What a key press typed and whether an IME is composing, so composed
@@ -118,6 +120,7 @@ impl<A: DesktopApp> Host<A> {
             failure: None,
             page_visible,
             announced_ready: false,
+            cursor: cursor::CursorCapture::default(),
             modifiers: winit::keyboard::ModifiersState::empty(),
             typist: typing::Typist::default(),
             #[cfg(target_arch = "wasm32")]
@@ -157,6 +160,7 @@ impl<A: DesktopApp> Host<A> {
         if self.failure.is_none() {
             self.failure = Some(error);
         }
+        self.release_cursor();
         self.state = State::Stopped;
         event_loop.exit();
     }
@@ -246,6 +250,9 @@ impl<A: DesktopApp> Host<A> {
     #[cfg(target_arch = "wasm32")]
     fn set_visibility(&mut self, event_loop: &ActiveEventLoop, visible: bool) {
         self.page_visible = visible;
+        if !visible {
+            self.release_cursor();
+        }
         let result = match &mut self.state {
             State::Running(running) => {
                 if visible {
@@ -273,10 +280,19 @@ impl<A: DesktopApp> Host<A> {
 
         let app = &mut running.app;
         running.pads.poll(|event| app.input(event));
+        if let Some(window) = &self.window {
+            self.cursor.sync(window, &mut running.app);
+        }
         let delta = running.timer.tick(&running.clock);
         let flow = running.app.update(delta).map_err(DesktopError::App)?;
         if flow == Flow::Exit {
+            self.release_cursor();
             return Ok(flow);
+        }
+        if let Some(lock) = running.app.take_pointer_lock_request()
+            && let Some(window) = &self.window
+        {
+            self.cursor.request(window, &mut running.app, lock);
         }
         self.sync_text_entry();
         let State::Running(running) = &mut self.state else {
@@ -322,6 +338,23 @@ impl<A: DesktopApp> Host<A> {
 }
 
 impl<A: DesktopApp> ApplicationHandler<Startup> for Host<A> {
+    fn device_event(
+        &mut self,
+        _event_loop: &ActiveEventLoop,
+        _device_id: DeviceId,
+        event: DeviceEvent,
+    ) {
+        if let DeviceEvent::MouseMotion { delta } = event
+            && let Some(window) = &self.window
+            && let State::Running(running) = &mut self.state
+        {
+            self.cursor.sync(window, &mut running.app);
+            if let Some(input) = self.cursor.motion(delta) {
+                running.app.input(input);
+            }
+        }
+    }
+
     fn resumed(&mut self, event_loop: &ActiveEventLoop) {
         if matches!(self.state, State::Running(_)) {
             let result = match &mut self.state {
@@ -361,6 +394,7 @@ impl<A: DesktopApp> ApplicationHandler<Startup> for Host<A> {
     }
 
     fn suspended(&mut self, event_loop: &ActiveEventLoop) {
+        self.release_cursor();
         let result = match &mut self.state {
             State::Running(running) => {
                 running.timer.reset();
@@ -461,6 +495,15 @@ impl<A: DesktopApp> ApplicationHandler<Startup> for Host<A> {
             return;
         }
 
+        if matches!(
+            event,
+            WindowEvent::Focused(false) | WindowEvent::CloseRequested
+        ) || matches!(&event, WindowEvent::KeyboardInput { event, .. }
+                if event.state == winit::event::ElementState::Pressed
+                    && event.physical_key == winit::keyboard::PhysicalKey::Code(winit::keyboard::KeyCode::Escape))
+        {
+            self.release_cursor();
+        }
         let scale_factor = self
             .window
             .as_ref()

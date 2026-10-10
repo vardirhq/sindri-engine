@@ -31,7 +31,9 @@ language model.
 - [x] Carry host read-only member metadata through checking, completion, hover,
   and generated API documents. Regression tests exercise transform directions
   and their component assignments; copied vectors retain ordinary mutability.
-  Mouse `Pointer.delta` and `Input.Pointer.delta` also exercise read-only Vec2
+  Mouse delta and `Pointer.locked` / `Input.Pointer.locked` exercise read-only
+  vector/boolean metadata and capture-call completion.
+  `Pointer.delta` and `Input.Pointer.delta` also exercise read-only Vec2
   completion/hover and immutable diagnostics through both namespaces. Nested
   host globals are walked from their resolved root, fixing `Input.Pointer`
   completion/hover (the root was previously looked up twice).

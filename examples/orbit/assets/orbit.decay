@@ -2,6 +2,7 @@
 script CameraRig {
     var yaw: f32 = 0.0;
     var pitch: f32 = 0.35;
+    var was_locked: bool = false;
     @export
     var sensitivity: f32 = 0.005;
     fn start() {
@@ -14,8 +15,21 @@ script CameraRig {
     }
     fn update(dt: f32) {
         yaw += dt * 0.2;
-        if Input.Pointer.is_down("Right") && !Input.Pointer.over_ui {
+        if Input.Pointer.just_pressed("Left") && !Input.Pointer.over_ui && Input.Touch.count == 0.0 {
+            if Input.Pointer.locked { Input.Pointer.unlock(); }
+            else { Input.Pointer.lock(); }
+        }
+        if Input.Keyboard.just_pressed("U") { Input.Pointer.unlock(); }
+        if Input.Pointer.locked != was_locked {
+            was_locked = Input.Pointer.locked;
+            if was_locked { print("Pointer captured"); }
+            else { print("Pointer released"); }
+        }
+        if Input.Pointer.locked || (Input.Pointer.is_down("Right") && !Input.Pointer.over_ui) {
             let motion = Input.Pointer.delta;
+            if Input.Pointer.locked && (motion.x != 0.0 || motion.y != 0.0) {
+                print("Pointer motion " + motion.x + " " + motion.y);
+            }
             yaw -= motion.x * sensitivity;
             pitch = clamp(pitch + motion.y * sensitivity, -1.2, 1.2);
         }

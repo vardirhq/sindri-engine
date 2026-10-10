@@ -231,6 +231,11 @@ impl<'a> WorldHost<'a> {
         }
     }
 
+    /// Cursor capture intent from this invocation, for the windowed host.
+    pub fn take_pointer_lock_request(&mut self) -> Option<bool> {
+        self.inner.take_pointer_lock_request()
+    }
+
     pub fn take_printed(&mut self) -> Vec<String> {
         self.inner.take_printed()
     }

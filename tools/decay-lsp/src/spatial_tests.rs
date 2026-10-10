@@ -36,11 +36,16 @@ fn completion_hover_and_diagnostics_agree_on_read_only_directions() {
 }
 
 #[test]
-fn pointer_delta_completion_and_hover_are_read_only_in_both_namespaces() {
-    for namespace in ["Pointer", "Input.Pointer"] {
+fn pointer_motion_and_capture_metadata_are_read_only_in_both_namespaces() {
+    for (namespace, member, expected) in [
+        ("Pointer", "delta", "Vec2"),
+        ("Input.Pointer", "delta", "Vec2"),
+        ("Pointer", "locked", "bool"),
+        ("Input.Pointer", "locked", "bool"),
+    ] {
         let source =
-            format!("script Test {{ fn update(dt: f32) {{ let motion = {namespace}.delta; }} }}");
-        let uri = "file:///tmp/pointer-delta.decay";
+            format!("script Test {{ fn update(dt: f32) {{ let value = {namespace}.{member}; }} }}");
+        let uri = "file:///tmp/pointer.decay";
         let mut server = Server::new();
         server.documents.insert(
             uri.into(),
@@ -49,17 +54,21 @@ fn pointer_delta_completion_and_hover_are_read_only_in_both_namespaces() {
                 version: 1,
             },
         );
-        let offset = source.find("delta;").unwrap();
+        let offset = source.find(&format!("{member};")).unwrap();
         let params = json!({"textDocument":{"uri":uri}, "position":{"line":0,"character":offset}});
         let Value::Array(items) = server.completion(&params) else {
             panic!("completion array");
         };
-        let delta = items.iter().find(|item| item["label"] == "delta").unwrap();
-        assert_eq!(delta["detail"], "Vec2 (read-only)");
+        let entry = items.iter().find(|item| item["label"] == member).unwrap();
+        assert_eq!(entry["detail"], format!("{expected} (read-only)"));
         let hover = server.hover(&params);
         let text = hover["contents"]["value"].as_str().unwrap();
-        assert!(text.contains("Read-only"), "{text}");
-        assert!(text.contains("Vec2"), "{text}");
+        assert!(
+            text.contains("Read-only") && text.contains(expected),
+            "{text}"
+        );
+        assert!(items.iter().any(|item| item["label"] == "lock"));
+        assert!(items.iter().any(|item| item["label"] == "unlock"));
     }
 }
 
