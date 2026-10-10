@@ -33,6 +33,9 @@ const origin = `http://127.0.0.1:${server.address().port}`;
 let browser;
 try {
   browser = await chromium.launch({
+    // Full Chromium's headless mode supports captured relative mouse input.
+    // The separate headless shell reports cursor warps for CDP mouse moves.
+    channel: 'chromium',
     executablePath: process.env.CHROME_PATH || undefined,
     args: ['--enable-unsafe-webgpu', '--enable-features=Vulkan', '--use-angle=vulkan', '--use-vulkan=swiftshader', '--enable-gpu', '--ignore-gpu-blocklist', '--no-sandbox'],
   });
