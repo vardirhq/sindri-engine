@@ -52,3 +52,8 @@ Actual X11 pointer-grab probes verify U/Escape/focus-loss/pause/stop/hidden-view
 release; focus regain, resume and a new Play do not recapture automatically.
 Editor input unit tests also cover raw counts at non-unit display scale,
 ignored absolute warps, accumulation between steps and once-only consumption.
+
+Collider dimensions are local units: each rendered cube uses half extents
+`[0.5, 0.5, 0.5]`, and the scene applies its entity scale to physics. Changing
+a barrier's scale updates both the visible wall and orbit collision at the next
+fixed step. Explorer game adoption remains part of the 3D plan.

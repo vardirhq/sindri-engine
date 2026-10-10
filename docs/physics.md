@@ -1060,9 +1060,21 @@ and `sindri.physics3d.world`. Body payloads use the engine's XYZ fields (includi
 `position` and `rotation`), but an entity's composed `Transform3D` is authoritative
 when present. Without a transform, the body pose is the fallback. Colliders accept
 one piece or `{ "pieces": [...] }`; a collider without a body creates a static
-body, while a body without a collider takes no part. Shape dimensions and local
-offsets are world units, independent of visual transform scale. Automatic 3D
-collider scaling is absent. World settings accept `gravity: [x, y, z]` and optional
+body, while a body without a collider takes no part. Shape dimensions and
+offsets are local units. The scene applies the entity's
+composed world scale (including parents) once before solver insertion and voxel
+reach planning. Without a transform, scale is one. Positive finite uniform scale
+works for all pieces; boxes also support nonuniform scale if their local rotated
+axes remain orthogonal. Axis-permuting rotations work; sheared boxes, nonuniform
+spheres/capsules, zero/negative scale and overflowing dimensions/offsets fail
+explicitly, naming the entity and piece when applicable. The scene does not
+approximate ellipsoids or stretched capsule caps. Collider wireframes use the
+same resolved geometry and omit unsupported geometry. Standalone solver values
+remain world units, and 2D collider semantics are unchanged. Existing scenes
+authored with world-unit dimensions must convert them to local units; an
+axis-aligned box's old half extents and offsets divide by its composed scale.
+Orbit Camera Lab is converted, while the quarry's unit-scale pieces need no edit.
+World settings accept `gravity: [x, y, z]` and optional
 layer labels; removing/disabling the settings restores the host's gravity.
 Multiple active 3D world settings fail explicitly.
 
@@ -1073,8 +1085,12 @@ reject a Z-locked local transform rather than allowing simulation and rendering
 to disagree. The driver removes inactive/despawned entities and removed colliders,
 including inherited inactivity, and re-registers them on reactivation. Unchanged
 components preserve live velocity; transform/ancestor moves teleport or set a
-position-kinematic target. Any body/collider payload change rebuilds that body and
-resets its motion to authored values. Live coefficient/control patching is not a
+position-kinematic target. Any body/collider payload change or resolved geometry
+change caused by entity
+or ancestor scale rebuilds that body and resets its motion to authored values.
+Unchanged scale does not rebuild; scale writes become effective at the next
+fixed step. Authored collider payloads are never rewritten by scaling. Live
+coefficient/control patching is not a
 3D scene capability yet.
 
 After solving, all non-static body kinds write XYZ/quaternion poses back through

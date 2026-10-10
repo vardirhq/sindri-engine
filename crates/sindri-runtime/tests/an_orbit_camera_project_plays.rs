@@ -4,6 +4,67 @@ use sindri_runtime::{ProjectRun, STEP};
 use std::path::Path;
 
 #[test]
+fn resizing_an_orbit_barrier_changes_collision_on_the_next_session_step() {
+    let path = Path::new(env!("CARGO_MANIFEST_DIR")).join("../../examples/orbit");
+    let mut run = ProjectRun::open(&path, [960.0, 540.0]).unwrap();
+    let named = |name: &str, run: &ProjectRun| {
+        run.world
+            .entities()
+            .find(|(_, data)| data.name.as_deref() == Some(name))
+            .map(|(id, _)| id)
+            .unwrap()
+    };
+    let barrier = named("Barrier", &run);
+    let camera = named("Camera", &run);
+    let report = run.step(STEP).unwrap();
+    assert!(report.problems.is_empty(), "{:?}", report.problems);
+    let before = run.world.world_transform(camera).unwrap().position;
+    assert!(before[2] < 0.8);
+    run.world
+        .get_mut(barrier)
+        .unwrap()
+        .transform_3d
+        .as_mut()
+        .unwrap()
+        .scale = [0.02, 4.0, 0.4];
+    assert!(
+        run.world
+            .world_transform(camera)
+            .unwrap()
+            .position
+            .iter()
+            .zip(before)
+            .all(|(a, b)| (a - b).abs() < f32::EPSILON)
+    );
+    for _ in 0..30 {
+        let report = run.step(STEP).unwrap();
+        assert!(report.problems.is_empty(), "{:?}", report.problems);
+        assert!(
+            report.scripts.failures.is_empty(),
+            "{:?}",
+            report.scripts.failures
+        );
+    }
+    assert!(
+        run.world.world_transform(camera).unwrap().position[2] > 1.5,
+        "camera recovers after the wall narrows"
+    );
+    run.world
+        .get_mut(barrier)
+        .unwrap()
+        .transform_3d
+        .as_mut()
+        .unwrap()
+        .scale = [10.0, 4.0, 0.4];
+    let report = run.step(STEP).unwrap();
+    assert!(report.problems.is_empty(), "{:?}", report.problems);
+    assert!(
+        run.world.world_transform(camera).unwrap().position[2] < 0.8,
+        "restored wall immediately pulls the camera in"
+    );
+}
+
+#[test]
 fn an_orbit_camera_pulls_in_recovers_and_follows_the_walker_to_its_goal() {
     let path = Path::new(env!("CARGO_MANIFEST_DIR")).join("../../examples/orbit");
     let mut run = ProjectRun::open(&path, [960.0, 540.0]).expect("orbit project opens");

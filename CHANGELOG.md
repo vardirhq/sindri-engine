@@ -1,5 +1,12 @@
 # Changelog
 
+- 3D collider dimensions and offsets follow entity and parent scale. Uniform
+  positive scale works for every shape; boxes also support nonuniform scale
+  when their rotated axes stay orthogonal. Unsupported shear, stretched round
+  shapes and invalid scale fail explicitly. Scale edits rebuild collision at the
+  next fixed step; collider wireframes use the same geometry. Existing scenes
+  using world-unit collider dimensions must convert them to local units.
+
 - Native editor Play supports Decay cursor capture and raw mouse look, with
   checked capture feedback and release on Escape, focus loss, pause/stop or
   hiding the Game view.

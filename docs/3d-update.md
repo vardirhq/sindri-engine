@@ -72,6 +72,14 @@ Order:
   and no recapture on focus regain. Native editor Play now verifies the same
   raw input and actual capture, including pause/stop and hidden-view release.
   Explorer game proof remains pending.
+- Collider scale now resolves local dimensions and offsets through composed
+  positive entity/parent scale. Uniform scale works for every shape; nonuniform
+  boxes work when their local axes remain orthogonal. Unsupported shear and
+  nonuniform round shapes fail before runtime mutation. Native scene tests cover
+  solid landing, queries, parent offsets, editor wireframes and scale rebuilds.
+  Orbit Camera Lab uses local collider units, verifies wall resizing through
+  Session, and reaches its goal in real WebGPU Chromium. Browser scale editing,
+  native editor interaction and Explorer adoption remain pending.
 - Then the rest of slice 6, which unblocks moving through 3D (Low Tide's
   crawler and crew included).
 - Then slices 2 to 4 (measurement, instancing and one lit path, lights),
@@ -276,7 +284,9 @@ placement. The roadmap's "height/mesh terrain next" is this slice.
 - [ ] Collision from content:
   - static trimesh colliders built from a model's meshes;
   - convex hulls for dynamic props;
-  - 3D collider dimensions follow transform scale.
+  - [x] Scene collider dimensions and offsets follow composed positive scale,
+    with uniform round shapes, orthogonal nonuniform boxes and atomic rejection.
+  - [ ] Browser scale editing, native editor interaction and Explorer scale proof.
 - [ ] Physics material profiles in 3D, sharing the 2D asset format.
 
 ### 6b. Skeletal animation

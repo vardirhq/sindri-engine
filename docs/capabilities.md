@@ -302,8 +302,18 @@ non-finite results, so numerical failure reporting remains a gap.
 active scene entities, composed XYZ/quaternion transforms, gravity settings and
 parent-space write-back. Twelve regressions cover lifecycle/edits, batch rejection,
 solid/sensor events, targets, newer rotated/scaled parents and checked command
-undo/redo/save/reopen. Visual scale is preserved but does not resize 3D colliders;
-structural payload edits reset the rebuilt body's motion. This is the prerequisite
+undo/redo/save/reopen. Composed positive transform scale now resizes 3D collider
+dimensions and offsets, including inherited scale. Boxes support nonuniform
+scale with orthogonal local axes; spheres/capsules require uniform scale. Shear,
+nonpositive/nonfinite scale and overflow fail before batch mutation. The shared
+editor wireframe path resolves the same geometry. Native scene regressions
+exercise scaled solid landing, queries, parent offsets, wireframes, rebuild timing
+and atomic rejection. A shared Session regression narrows/restores Orbit Camera
+Lab's barrier and verifies recovery/immediate pull-in. The converted lab reaches
+its goal in real WebGPU Chromium with fetched assets, rendered pixels and no
+runtime errors; captured input and denial regressions also pass. Browser scale
+editing, native editor visual verification and Explorer adoption remain pending. Structural payload or resolved scale edits
+reset the rebuilt body's motion. This is the prerequisite
 for Causeway voxel collision proof. Shared native/browser sessions and native
 editor Play now step both dimensions before scripts; fresh Play, Stop and scene
 replacement reset both editor solvers. Two session regressions exercise XYZ

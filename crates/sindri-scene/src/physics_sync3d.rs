@@ -20,6 +20,8 @@ mod hierarchy_tests;
 #[cfg(test)]
 mod pending_tests;
 #[cfg(test)]
+mod scale_tests;
+#[cfg(test)]
 mod tests;
 #[cfg(test)]
 mod voxel_tests;
@@ -256,13 +258,12 @@ fn prepare(
             return Err(PhysicsSyncError::LockedDepth3d(entity));
         }
         physics.validate_insertion(entity, placed, &collider.0)?;
-        plan.insert(
-            entity,
-            Authored {
-                body,
-                pieces: collider.0,
-            },
-        );
+        let scale = world.world_transform(entity).unwrap_or_default().scale;
+        let pieces = collider
+            .scaled(scale)
+            .map_err(|error| PhysicsSyncError::ColliderScale3d(entity, error))?;
+        physics.validate_insertion(entity, placed, &pieces)?;
+        plan.insert(entity, Authored { body, pieces });
     }
     Ok(plan)
 }

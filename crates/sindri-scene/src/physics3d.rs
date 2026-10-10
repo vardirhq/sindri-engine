@@ -16,7 +16,7 @@ impl SceneComponent for RigidBody3dComponent {
 }
 
 /// One shape or a compound of local box/sphere/Y-capsule pieces.
-/// Dimensions and offsets are in world units, independent of visual scale.
+/// Dimensions and offsets are local units, scaled by the composed transform.
 #[derive(Clone, Debug, Deserialize, PartialEq)]
 #[serde(from = "AuthoredCollider3d")]
 pub struct Collider3dComponent(pub Vec<Collider3d>);

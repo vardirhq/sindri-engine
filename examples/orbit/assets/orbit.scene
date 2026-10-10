@@ -60,9 +60,9 @@
           "shape": {
             "shape": "box",
             "half_extents": [
-              0.25,
-              0.25,
-              0.4
+              0.5,
+              0.5,
+              0.5
             ]
           },
           "offset": [
@@ -132,9 +132,9 @@
           "shape": {
             "shape": "box",
             "half_extents": [
-              5,
-              2,
-              0.2
+              0.5,
+              0.5,
+              0.5
             ]
           },
           "offset": [
@@ -186,9 +186,9 @@
           "shape": {
             "shape": "box",
             "half_extents": [
-              7,
-              0.1,
-              7
+              0.5,
+              0.5,
+              0.5
             ]
           },
           "offset": [
