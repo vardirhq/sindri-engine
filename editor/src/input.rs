@@ -18,6 +18,8 @@
 //! and a pointer outside it is reported as having left — because it has, as far
 //! as the game is concerned.
 
+mod pointer;
+
 use eframe::egui;
 use sindri_platform::{GamepadReader, InputEvent, InputState, Key, MouseButton};
 
@@ -101,6 +103,11 @@ pub struct EditorInput {
 }
 
 impl EditorInput {
+    /// Actual window capture feedback, separate from a script's request.
+    pub fn pointer_lock_changed(&mut self, locked: bool) {
+        self.state.apply(InputEvent::PointerLockChanged(locked));
+    }
+
     pub const fn state(&self) -> &InputState {
         &self.state
     }
@@ -220,117 +227,6 @@ impl EditorInput {
                     self.state.apply(InputEvent::KeyPressed(key));
                 } else if !held && was {
                     self.state.apply(InputEvent::KeyReleased(key));
-                }
-            }
-        });
-    }
-
-    /// This frame's pointer and fingers, in the Game view's own pixels.
-    fn update_pointer(&mut self, context: &egui::Context, view: Option<egui::Rect>) {
-        let Some(view) = view else {
-            self.state.apply(InputEvent::PointerLeft);
-            return;
-        };
-        // Positions arrive from egui in points, relative to the window. A
-        // script reads them relative to the viewport, which is what every
-        // other host reports and what makes a position mean the same thing in
-        // editor Play as in the real build.
-        //
-        // Scaled to physical pixels, because that is the viewport's own space:
-        // the Game view is rendered at `physical_viewport_dimension`, and a
-        // screen element's hit rect comes from dividing a position by that. In
-        // points, a position is the scale factor too small, so on a display
-        // reporting anything but 1.0 every press in Play lands above and left
-        // of where the person actually pressed -- the same fault that stopped a
-        // phone from reaching a button, hidden here behind the 1.0 that an
-        // ordinary desktop and every test both report.
-        let scale = context.pixels_per_point();
-        let local = |position: egui::Pos2| {
-            (
-                (position.x - view.min.x) * scale,
-                (position.y - view.min.y) * scale,
-            )
-        };
-
-        context.input(|input| {
-            // Wheel movement over the Game view, in the physical pixels every
-            // other position here is in. A notch is a line, which the desktop
-            // host counts as fifty pixels, so a scroll list moves as far in
-            // Play as it does in the build.
-            if input.pointer.latest_pos().is_some_and(|p| view.contains(p)) {
-                for event in &input.events {
-                    if let egui::Event::MouseWheel { unit, delta, .. } = event {
-                        let per = match unit {
-                            egui::MouseWheelUnit::Point => scale,
-                            egui::MouseWheelUnit::Line => SCROLL_LINE_PIXELS * scale,
-                            egui::MouseWheelUnit::Page => view.height() * scale,
-                        };
-                        self.state.apply(InputEvent::Scrolled {
-                            x: delta.x * per,
-                            y: delta.y * per,
-                        });
-                    }
-                }
-            }
-            // A pointer over the inspector is not over the game. Reporting it
-            // anyway would let a script aim at a panel, and clamping it to the
-            // edge would be worse: the game would think the person is pointing
-            // at somewhere they are not.
-            match input.pointer.latest_pos() {
-                Some(position) if view.contains(position) => {
-                    let (x, y) = local(position);
-                    self.state.apply(InputEvent::PointerMoved { x, y });
-                }
-                _ => self.state.apply(InputEvent::PointerLeft),
-            }
-
-            for event in &input.events {
-                match event {
-                    egui::Event::PointerButton {
-                        pos,
-                        button,
-                        pressed,
-                        ..
-                    } => {
-                        let Some((_, button)) = BUTTONS.iter().find(|(known, _)| known == button)
-                        else {
-                            continue;
-                        };
-                        // A press that began outside the view is not the game's,
-                        // but the release that ends it is — otherwise a button
-                        // pressed on a panel and released over the game would
-                        // leave the game holding a button nobody pressed, and
-                        // one pressed on the game and released off it would
-                        // stay down for ever.
-                        if *pressed && !view.contains(*pos) {
-                            continue;
-                        }
-                        self.state.apply(if *pressed {
-                            InputEvent::ButtonPressed(*button)
-                        } else {
-                            InputEvent::ButtonReleased(*button)
-                        });
-                    }
-                    egui::Event::Touch { id, phase, pos, .. } => {
-                        let (x, y) = local(*pos);
-                        let id = id.0;
-                        self.state.apply(match phase {
-                            egui::TouchPhase::Start if view.contains(*pos) => {
-                                InputEvent::TouchStarted { id, x, y }
-                            }
-                            // A finger that started outside the view is not the
-                            // game's, and the platform ignores a move for one
-                            // that never started — so this needs no second
-                            // check to stay consistent.
-                            egui::TouchPhase::Start | egui::TouchPhase::Move => {
-                                InputEvent::TouchMoved { id, x, y }
-                            }
-                            egui::TouchPhase::End | egui::TouchPhase::Cancel => {
-                                InputEvent::TouchEnded { id }
-                            }
-                        });
-                    }
-                    _ => {}
                 }
             }
         });

@@ -66,8 +66,9 @@ impl EditorApp {
         // never while a text field has it: renaming an entity to "Wall" must
         // not walk the player left. Read every frame regardless, so that
         // stopping releases what was held rather than leaving it down.
-        let listening =
-            self.lifecycle.state() == EngineState::Running && !context.egui_wants_keyboard_input();
+        let listening = self.lifecycle.state() == EngineState::Running
+            && !context.egui_wants_keyboard_input()
+            && context.input(|input| input.focused);
         // While picking, the Game view's pointer is the picker's: the game
         // sees it leave, and its press selects rather than plays.
         let game_view = if super::super::device::picking(context) {
@@ -91,6 +92,7 @@ impl EditorApp {
             .game_view_rect
             .map_or((0.0, 0.0), |rect| (rect.width(), rect.height()));
         self.game_view_rect = None;
+        self.game_pointer_available = false;
 
         // Compiled whatever the transport says, so a broken script reports at
         // the scene it was opened with and the inspector can read what a

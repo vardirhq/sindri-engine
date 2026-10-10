@@ -132,4 +132,8 @@ are ignored. Native raw device counts and browser physical-pixel displacement
 feed the same input path, with absolute events ignored while captured.
 `Session` retains the latest successful script's request across fixed steps
 until the host drains it once; restored checkpoints do not replay commands.
-Editor Play capture remains pending.
+Native editor Play owns its eframe window capture separately from the player
+host, draining the same Session request and reporting only successful window
+calls. Its egui raw motion feeds the shared input state without display scaling.
+Capture is allowed only in a visible, running Game view; Escape, focus loss,
+pause/stop, text editing, picking and hiding the Game view release it.

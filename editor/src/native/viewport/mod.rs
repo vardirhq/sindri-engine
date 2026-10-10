@@ -110,7 +110,14 @@ impl EditorApp {
     /// drift into being two renderers.
     pub(super) fn render_view(&mut self, ui: &mut egui::Ui, tab: WorkspaceTab) {
         let context = ui.ctx().clone();
-        let (panel, response) = ui.allocate_exact_size(ui.available_size(), viewport_sense());
+        // Gameplay owns the Game view's keyboard. Making its rectangle an
+        // egui focus target would suppress the next frame's gameplay input.
+        let sense = if tab == WorkspaceTab::Scene {
+            viewport_sense()
+        } else {
+            Sense::CLICK.union(Sense::DRAG)
+        };
+        let (panel, response) = ui.allocate_exact_size(ui.available_size(), sense);
         // The Game view is drawn at the shape of the screen it is standing in
         // for, which is the panel's own unless someone chose otherwise. The
         // Scene view is always the panel: it is a place to work, not a picture
@@ -122,6 +129,11 @@ impl EditorApp {
         };
         let interaction = self.interact_view(&context, &response, rect, tab);
         let editing = interaction.editing;
+        if !editing {
+            // Floating editor panels cover parts of the Game rectangle. The
+            // layer hit accounts for occlusion; a panel click cannot capture.
+            self.game_pointer_available = context.rect_contains_pointer(ui.layer_id(), rect);
+        }
         let camera = interaction.camera;
         // Worked out before the viewport is borrowed: the canvas and Weave
         // viewport are facts about the project's screen, not about the GPU

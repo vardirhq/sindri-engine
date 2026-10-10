@@ -3004,8 +3004,8 @@ Orbital's `powerup.decay` uses a managed vector tween for its pickup appearance.
 ## Cursor capture for 3D mouse look
 
 `Pointer.lock()` / `Input.Pointer.lock()` request capture from the windowed
-native/browser player. `unlock()` requests release; read-only `locked` reports
-actual host state. Both calls take no arguments and return unit. A request
+native/browser player or native editor Play. `unlock()` requests release;
+read-only `locked` reports actual host state. Both calls take no arguments and return unit. A request
 does not change `locked` within the script invocation. Requests from successful
 script invocations are collected in execution order, last request winning,
 and Session drains the latest request once after the host advances gameplay.
@@ -3025,8 +3025,12 @@ multiply displacement by dt. Absolute cursor warps do not contribute while
 captured. Capture transitions clear pending motion and rebase the first
 unlocked position. Touch remains separate.
 
-Headless runs and editor Play currently do not perform capture, so requests
-there remain intentions until a host supplies actual-state input. Checkpoint
+Headless runs do not perform capture, so requests remain intentions until a
+host supplies actual-state input. Checkpoint
 restore does not replay consumed window commands. Orbit Camera Lab demonstrates
 click-to-capture, U/second-click release and captured look in Decay. Explorer
-and editor Play proof remain pending.
+game proof remains pending. Editor Play accepts capture only while running,
+with a visible Game view and the pointer inside it. Escape, window focus loss,
+pause/stop, text editing, picking or hiding the Game view releases capture;
+resuming or regaining focus does not recapture. Raw native motion uses device
+counts without applying the editor display scale.

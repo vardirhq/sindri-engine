@@ -195,6 +195,8 @@ impl EditorApp {
             clock: fixed_step_clock(),
             scripts: SceneScripts::for_scene(None),
             input: EditorInput::default(),
+            play_cursor: super::play_cursor::PlayCursor::new(context.winit_window().cloned()),
+            game_pointer_available: false,
             play_snapshot: None,
             notice: open_error.or(load_error),
             render_error: None,

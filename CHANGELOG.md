@@ -1,11 +1,14 @@
 # Changelog
 
+- Native editor Play supports Decay cursor capture and raw mouse look, with
+  checked capture feedback and release on Escape, focus loss, pause/stop or
+  hiding the Game view.
+
 - Capture the cursor from Decay with `Pointer.lock()` / `Input.Pointer.lock()`,
   release with `unlock()`, and read actual state through read-only `locked`.
   Native/browser players feed unbounded relative motion through `Pointer.delta`;
   Escape, focus loss and suspension release capture. Browser denial leaves the
-  game running. Orbit Camera Lab demonstrates captured look. Editor Play capture
-  remains pending.
+  game running. Orbit Camera Lab demonstrates captured look.
 
 - Add shared input groundwork for pointer lock: actual capture feedback and
   relative mouse motion, with mode-change rebasing, focus-loss cleanup and

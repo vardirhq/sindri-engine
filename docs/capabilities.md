@@ -2990,7 +2990,8 @@ down, once. Assets loaded, the walker reached its goal and inspected captures
 showed the camera response without runtime/GPU errors. The flat-color lab used
 the same local eight-color smoke threshold as its earlier capture (fourteen
 colors drawn); the repository browser gate is unchanged. This is feature
-example evidence; Explorer game and editor Play proof remain pending.
+example evidence; native editor Play also exercises captured delta. Explorer
+game proof remains pending.
 Native/browser capture is described below.
 
 ### Pointer-lock input foundation
@@ -3045,4 +3046,15 @@ changes with XTest. Decay observes 4,000 horizontal/120 vertical raw units in
 one step, releases on each requested/focus transition and does not recapture
 on focus regain. The native window screenshot was inspected alongside Chromium.
 Native platforms other than this X11 run were not visually exercised here.
-Editor Play capture and Explorer game proof remain pending.
+Native editor Play also drains Session requests after stepping and editor
+transport/layout changes. Native window calls report success before input sees
+capture; missing windows cannot report false success. egui raw mouse events
+feed native counts without display scaling; the shared state ignores absolute
+warps. Unit regressions cover accumulation across frames, once-only consumption,
+release rebasing, stopping and absent windows. The actual X11 editor window runs
+Orbit Camera Lab to its goal, reports 6,000 horizontal/120 vertical raw units
+from an unbounded XTest move, and releases on U/Escape, pause/stop, focus loss
+and hiding the Game view. An external pointer-grab probe verifies actual capture
+and release; resume/focus regain/new Play do not automatically recapture. The
+editor screenshot with Decay motion and goal output was inspected. Other native
+editor platforms and Explorer game proof remain pending.

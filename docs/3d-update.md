@@ -69,7 +69,9 @@ Order:
   excludes cursor warps, rebases mode changes and is consumed once per step.
   Real Chromium checks unbounded motion, U/Escape release and sandbox denial;
   native X11/Vulkan verifies unbounded raw motion, U/Escape/focus-loss release
-  and no recapture on focus regain. Editor Play/Explorer proof remains pending.
+  and no recapture on focus regain. Native editor Play now verifies the same
+  raw input and actual capture, including pause/stop and hidden-view release.
+  Explorer game proof remains pending.
 - Then the rest of slice 6, which unblocks moving through 3D (Low Tide's
   crawler and crew included).
 - Then slices 2 to 4 (measurement, instancing and one lit path, lights),
@@ -262,7 +264,10 @@ placement. The roadmap's "height/mesh terrain next" is this slice.
       including transition rebasing, focus loss and fixed-step regressions.
     - [x] Host capture/release and actual-state feedback, Decay requests and
       read-only lock state, with native/browser runtime verification.
-  - [ ] Explorer game and editor Play input proof.
+  - [x] Native editor Play input: checked window capture feedback, raw mouse
+    counts, U/Escape/focus-loss/pause/stop/hidden-view release, no automatic
+    recapture, unit regressions and actual X11 window verification.
+  - [ ] Explorer game input proof.
 - [ ] `sindri.physics3d.character`:
   - a Rapier kinematic character controller, with slopes, steps, ground snap
     and moving platforms;
