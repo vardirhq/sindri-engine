@@ -230,6 +230,11 @@ const KNOWN: &[Known] = &[
         icon: icons::COLLIDER,
     },
     Known {
+        type_name: "sindri.physics3d.model_collider",
+        family: Family::Physics,
+        icon: icons::COLLIDER,
+    },
+    Known {
         type_name: "sindri.physics3d.voxel_collider",
         family: Family::Physics,
         icon: icons::COLLIDER,
