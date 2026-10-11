@@ -1,5 +1,10 @@
 # Changelog
 
+- Add bounded CPU model collision preparation with accumulated GLB node
+  transforms, instance provenance, reflected winding and typed diagnostics.
+  The model inspection example accepts `--collision` to report prepared counts.
+  Physics triangle/hull shapes and runtime model colliders remain pending.
+
 - Selected 3D characters now show orange slope, step and snap footing guides
   from their validated scaled collider geometry. Native editor review verifies
   settings/undo/save/reopen and keyboard Play to the Character Lab goal; Stop

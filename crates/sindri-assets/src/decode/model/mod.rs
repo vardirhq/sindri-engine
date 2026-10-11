@@ -1,11 +1,15 @@
 //! Static, self-contained binary glTF models. No filesystem or GPU ownership.
 
+mod collision;
 mod geometry;
 mod parse;
 #[cfg(test)]
 mod tests;
 
 use super::TextureAsset;
+pub use collision::{
+    ModelCollisionError, ModelCollisionLimits, ModelCollisionMesh, ModelCollisionPart,
+};
 
 /// A reusable model, retaining authored node identities and local matrices.
 #[derive(Clone, Debug)]

@@ -99,7 +99,11 @@ Order:
   compiler/LSP checks and generated API metadata. Selected 3D footing gizmos now
   reuse the orange character overlay; native editor review verifies settings,
   undo/redo, save/reopen, Play goal and Stop restoration. Continue with Explorer
-  proof and content collision; do not add gameplay rules in Rust. The Character Lab
+  proof and content collision; do not add gameplay rules in Rust. CPU model
+  collision preparation now expands selected GLB node/primitive instances into
+  bounded model-space triangles, preserving provenance and mirrored winding.
+  Next add physics triangle/hull support and scene/runtime asset bindings before
+  claiming imported-content collision. The Character Lab
   now exercises Decay gravity/jumps, solved carry/reversal and a keyboard goal
   through native Session and exported Chromium. It is feature proof, not Explorer
   completion.
@@ -322,6 +326,13 @@ placement. The roadmap's "height/mesh terrain next" is this slice.
     review exercises settings, undo/redo, save/reopen, Play goal and Stop.
   - [ ] Explorer controller adoption and game goal proof.
 - [ ] Collision from content:
+  - [x] CPU model-space triangle preparation in `sindri-assets`: bounded selected
+    hierarchy/instance expansion, source ranges, reflected winding, invalid-data
+    diagnostics, native GLB regressions and the `model --collision` inspector.
+    No runtime model collider is implied.
+  - [ ] Physics triangle/hull geometry, backend validation and query support.
+  - [ ] Scene/runtime model-collider asset bindings, asynchronous loading and
+    native/browser/editor/Explorer proof, without an assets → physics dependency.
   - static trimesh colliders built from a model's meshes;
   - convex hulls for dynamic props;
   - [x] Scene collider dimensions and offsets follow composed positive scale,

@@ -29,6 +29,57 @@ Materials retain metallic/roughness factors, double-sidedness and alpha cutoff.
 Embedded PNG/JPEG base-color images use the existing texture decoder; sampler
 wrap and filter enums are retained for GPU upload.
 
+## CPU collision preparation
+
+`ModelAsset::collision_mesh(ModelCollisionLimits)` produces owned positions and
+triangle indices in model space, with one source range per instantiated node,
+mesh and primitive. It walks selected roots depth-first in authored order and
+accumulates column-major local matrices. Repeated meshes expand at each selected
+node; unreachable nodes stay out. Entity world transforms remain the host's
+responsibility. No coordinate conversion, material filtering, welding, hull
+construction, physics body or runtime collider is implied.
+
+This foundation is added for the planned Explorer showcase. Assets own CPU
+geometry preparation; physics will own backend geometry and queries; scene and
+runtime will bind logical model references through shared geometry resources.
+The asset crate acquires no physics, renderer, scene or new math dependency.
+
+Reflection reverses each triangle's second and third index, preserving authored
+orientation under negative node determinants. Both decoded index widths and
+generated non-indexed triangles produce checked u32 indices. Per-part vertex and
+triangle ranges retain original node, mesh and primitive indices. Normals, UVs
+and materials do not enter collision preparation; masked holes therefore have
+no implied collision policy.
+
+Default limits allow 65,536 selected hierarchy nodes, 1,000,000 expanded
+vertices and 1,000,000 triangles, counting repeated instances. Traversal is
+iterative, including deep chains. Limits are checked before expanding pending
+children, appending geometry or copying indices. Vertex indices also stay within
+u32 range. A caller can supply other limits; zero rejects nonempty data.
+
+Preparation validates the selected traversal and geometry even when public
+asset fields were edited after decoding. Missing/repeated nodes, missing meshes,
+empty/incomplete/out-of-range triangles, nonfinite vertices, singular/projective
+transforms, overflowing accumulated matrices/positions and degenerate transformed
+triangles return `ModelCollisionError`. Unselected data is not revalidated here;
+the decoder remains responsible for the complete GLB. Failure returns no partial
+mesh and never changes the original model. Affine matrix products and triangle
+area checks use f64 intermediates with checked narrowing to model-space f32.
+
+Six native regressions use the existing static GLB fixture and cover hierarchy,
+reused meshes, source ranges, both index widths, non-indexed geometry, reflection,
+exact bounds, 8,192-node traversal and malformed mutable data. The inspector
+prints 15 vertices, five triangles and five primitive instances for that fixture:
+
+```bash
+cargo run -p sindri-assets --example model -- \
+  crates/sindri-assets/tests/fixtures/models/static-model.glb --collision
+```
+
+This is CPU preparation proof. Physics triangle/hull support, model-collider
+authoring and asset bindings, and native/browser/editor/Explorer collision proof
+remain pending. Existing model rendering and decoding are unchanged.
+
 ## Renderer boundary
 
 `sindri-render::RenderModel::new(ModelData)` validates immutable geometry,

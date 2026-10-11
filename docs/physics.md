@@ -1469,3 +1469,12 @@ lifecycle changes; fresh snapshots prevent replay after clipped travel. Native
 scene and Session regressions exercise parenting, jumps, lifecycle, replay and
 terrain budgets. Browser/controller, editor interaction and Explorer proof remain
 pending; no controller-on-controller carry is claimed.
+
+### Imported-model collision preparation
+
+Assets now prepare bounded model-space triangles with accumulated selected-node
+transforms, reflected winding and primitive-instance ranges. This is the CPU
+geometry prerequisite for model-derived static meshes and convex hulls, added
+for the planned Explorer showcase. Physics backend shapes/queries and scene
+asset bindings remain absent; no runtime body is created by preparation. See
+[the asset contract](imported-models.md#cpu-collision-preparation).

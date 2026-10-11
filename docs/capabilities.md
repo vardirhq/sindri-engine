@@ -312,6 +312,17 @@ Scene/Decay integration, moving-platform carry and browser feature proof are
 implemented below; native editor proof is recorded in
 [the review](physics-character3d-editor-review.md). Explorer game goal proof remains pending.
 
+Model assets now expose bounded CPU `collision_mesh` preparation: selected-root
+node matrices are accumulated, reused mesh primitives expand per instance,
+reflections correct index winding, and node/mesh/primitive ranges are retained.
+Six native GLB regressions cover order, copied data, both index widths,
+non-indexed geometry, mirror transforms, exact budgets, deep iterative traversal
+and malformed data. The optional `sindri-assets` model inspector's `--collision`
+flag reports prepared counts without creating physics bodies. This is a
+foundation added for the planned Explorer showcase; static triangle/hull shapes,
+scene asset bindings and imported-model collision on every runtime surface
+remain absent. See [the contract](imported-models.md#cpu-collision-preparation).
+
 `ScenePhysics3d` now reconciles registered body/collider/world components with
 active scene entities, composed XYZ/quaternion transforms, gravity settings and
 parent-space write-back. Twelve regressions cover lifecycle/edits, batch rejection,
