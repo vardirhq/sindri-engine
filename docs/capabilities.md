@@ -333,8 +333,12 @@ foundation for Explorer. Static scene model components and explicit Session GLB
 bindings now exercise character collision, scale/lifecycle, asset replacement and
 checkpoint replay in native regressions. Shared discovery and export now cover
 collision-only scene/prefab references, inactive entities, deduplicated assets and
-original verified GLB bytes. Automatic player/browser/editor collision binding,
-model asset picker metadata and project/game proof remain pending. See
+original verified GLB bytes. The shared native/browser player now installs
+collision before gameplay, expanding scenes/prefabs/overrides and preparing only
+authored collider assets. Model Collision Lab opens/compiles and walks into an
+imported wall, around it and to its goal through the player's Session regression
+and exported browser smoke. Editor/headless automatic binding, model asset picker
+metadata and Explorer game proof remain pending. See
 [the contract and numeric limits](physics.md#static-triangle-geometry).
 
 `ConvexHull3d` now constructs bounded, immutable volumetric resources, shared by

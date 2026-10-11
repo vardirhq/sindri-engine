@@ -1572,8 +1572,11 @@ assets. Failed preparation keeps the previous binding. Removing a binding makes
 active references fail before the next 3D solve, retaining live geometry until
 corrected. Shared model asset discovery and export include collision-only
 references from scenes and prefabs, including inactive entities. Automatic
-player/browser/editor collision binding is not wired yet; discovery alone does
-not install solver geometry.
+native/browser player collision binding now runs after asset loading completes
+and before Session starts. It expands all scene/prefab references, including
+inactive entities and overrides, and prepares only authored collision assets.
+Missing or invalid geometry names the logical asset ID. Editor Play and headless
+`ProjectRun` automatic binding remain pending.
 
 The scene driver prevalidates the entire authored plan before changing its
 solver. Composed positive finite scale is baked into model-space triangles;

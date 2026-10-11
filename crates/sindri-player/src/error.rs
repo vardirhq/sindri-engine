@@ -37,6 +37,8 @@ pub enum PlayerError {
     #[error(transparent)]
     Prefab(#[from] sindri_core::PrefabJsonError),
     #[error(transparent)]
+    PrefabExpansion(#[from] sindri_core::PrefabError),
+    #[error(transparent)]
     Decode(#[from] sindri_assets::AssetDecodeError),
     #[error(transparent)]
     Audio(#[from] AudioError),
@@ -44,6 +46,14 @@ pub enum PlayerError {
     Texture(#[from] TextureError),
     #[error(transparent)]
     Model(#[from] sindri_render::ModelRenderError),
+    #[error("model collision asset '{0}' was not loaded")]
+    MissingModelCollision(sindri_core::AssetId),
+    #[error("model collision asset '{asset}': {source}")]
+    ModelCollision {
+        asset: sindri_core::AssetId,
+        #[source]
+        source: sindri_runtime::ModelCollisionBindingError,
+    },
     #[error(transparent)]
     Animation(#[from] sindri_scene::AnimationError),
     #[error(transparent)]

@@ -73,3 +73,12 @@ SINDRI_BASE_PATH=/examples/character3d/ node scripts/browser/character3d.mjs \
 It checks runtime/GPU errors, fetched assets and rendered colors, and writes a
 goal capture. Native project tests separately verify ferry reversal and once-only
 carry. Editor interaction and Explorer game proof remain open.
+
+The Model Collision Lab verifies imported GLB collision through the normal
+asynchronous browser player: D into the wall, S around its end, D across and
+W to the goal. It checks the GLB fetch, gameplay milestones and runtime/GPU errors.
+
+```sh
+SINDRI_BASE_PATH=/examples/model-collision/ node scripts/browser/model-collision.mjs \
+  target/dist/model-collision target/browser-model-collision.png
+```

@@ -1,5 +1,10 @@
 # Changelog
 
+- The shared native/browser player now installs static GLB collision before
+  gameplay starts, including later scenes and prefab references. Render-only
+  models need no collision geometry; missing/invalid collision assets name their
+  logical IDs. Model Collision Lab demonstrates wall obstruction and a goal route.
+
 - Discover and export collision-only GLB references from scenes and prefabs,
   including inactive entities and shared render/collision assets. Automatic
   runtime collision binding remains pending.

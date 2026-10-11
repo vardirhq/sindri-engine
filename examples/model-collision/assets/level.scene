@@ -1,0 +1,170 @@
+{
+  "format_version": 10,
+  "metadata": {
+    "name": "Model Collision Lab"
+  },
+  "entities": [
+    {
+      "id": "camera",
+      "name": "Camera",
+      "transform_3d": {
+        "position": [
+          4,
+          6,
+          10
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "sindri.camera": {
+          "projection": "perspective",
+          "vertical_fov_degrees": 50,
+          "near": 0.1,
+          "far": 100
+        },
+        "sindri.script": {
+          "source": "walker.decay",
+          "script": "CameraRig"
+        }
+      }
+    },
+    {
+      "id": "level",
+      "name": "Level",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "sindri.model": {
+          "asset": "models/level.glb"
+        },
+        "sindri.physics3d.model_collider": {
+          "asset": "models/level.glb"
+        }
+      }
+    },
+    {
+      "id": "walker",
+      "name": "Walker",
+      "transform_3d": {
+        "position": [
+          -2,
+          0.31,
+          0
+        ],
+        "scale": [
+          0.6,
+          0.6,
+          0.6
+        ]
+      },
+      "components": {
+        "sindri.mesh": {
+          "primitive": "cube",
+          "texture": "textures/walker.png"
+        },
+        "sindri.physics3d.collider": {
+          "pieces": [
+            {
+              "shape": {
+                "shape": "box",
+                "half_extents": [
+                  0.5,
+                  0.5,
+                  0.5
+                ]
+              },
+              "offset": [
+                0,
+                0,
+                0
+              ],
+              "rotation": [
+                0,
+                0,
+                0,
+                1
+              ],
+              "sensor": false,
+              "layers": {
+                "memberships": 1,
+                "filter": 4294967295
+              },
+              "friction": 0.5,
+              "restitution": 0
+            }
+          ]
+        },
+        "sindri.physics3d.character": {
+          "snap_distance": 0.15
+        },
+        "sindri.script": {
+          "source": "walker.decay",
+          "script": "Walker"
+        }
+      }
+    },
+    {
+      "id": "goal",
+      "name": "Goal",
+      "transform_3d": {
+        "position": [
+          2,
+          0.05,
+          0
+        ],
+        "scale": [
+          1,
+          0.1,
+          1
+        ]
+      },
+      "components": {
+        "sindri.mesh": {
+          "primitive": "cube",
+          "texture": "textures/goal.png"
+        }
+      }
+    },
+    {
+      "id": "sun",
+      "name": "Sun",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "sindri.light": {
+          "kind": "directional",
+          "color": [
+            1,
+            0.95,
+            0.8
+          ],
+          "intensity": 1.1
+        }
+      }
+    }
+  ]
+}

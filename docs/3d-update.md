@@ -105,13 +105,16 @@ Order:
   Standalone static triangle geometry now shares immutable acceleration resources
   across keyed groups, with immediate queries, native landing/replay and validation
   regressions. Clone-shared convex hulls now support mixed primitive/hull bodies,
-  validated mass and native dynamic/kinematic/sensor/replay regressions. Next add
-  automatic host asset loading and project proof before claiming imported-content
+  validated mass and native dynamic/kinematic/sensor/replay regressions. Continue
+  with editor/headless loading and Explorer proof before claiming imported-content
   collision complete. Static scene colliders now accept explicit Session bindings,
   with native GLB movement/replay and asset replacement regressions. Shared
   discovery/export now include collision-only references from scenes and prefabs,
   inactive entities and shared render/collision assets. Automatic host collision
-  binding and project proof are next.
+  binding is now installed by the shared native/browser player before gameplay.
+  Model Collision Lab supplies imported-wall obstruction and a goal route through
+  player Session tests and exported browser smoke. Editor/headless binding and
+  Explorer game proof remain pending.
   The Character Lab
   now exercises Decay gravity/jumps, solved carry/reversal and a keyboard goal
   through native Session and exported Chromium. It is feature proof, not Explorer
@@ -353,8 +356,13 @@ placement. The roadmap's "height/mesh terrain next" is this slice.
       scale and native scene/GLB movement, lifecycle, replacement and replay tests.
     - [x] Shared collision-only asset discovery and export, with inactive/prefab
       references, deduplication, original bytes and missing-asset regressions.
-    - [ ] Automatic player/browser/editor collision binding, model asset field
-      metadata/picker and runtime project proof.
+    - [x] Shared player collision installation after native/browser loading,
+      before Session starts; scene/prefab/override/inactive discovery, render-only
+      opt-out and named missing/invalid asset regressions.
+    - [x] Model Collision Lab feature proof: actual GLB wall obstruction and
+      keyboard bypass/goal through player Session tests and exported browser smoke.
+    - [ ] Automatic editor/headless collision binding, model asset field
+      metadata/picker and Explorer game proof.
     - [ ] Model-derived convex scene colliders for dynamic props.
   - static trimesh colliders built from a model's meshes;
   - convex hulls for dynamic props;

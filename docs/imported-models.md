@@ -239,7 +239,21 @@ See [scene ownership and limitations](physics.md#static-model-scene-ownership).
 
 This is an explicit host API. Shared asset discovery and export include
 collision-only references, including inactive entities and prefab contents, and deduplicate render/collision uses.
-Export verifies and ships the original GLB bytes. Player/browser/editor queues
-do not yet deliver model collision bindings.
+Export verifies and ships the original GLB bytes. The shared native/browser
+player now prepares collision only for authored model-collider references after
+loading completes, before starting Session. Discovery expands every project scene
+and prefab, including instance overrides and inactive entities, so later scenes
+and spawned content already have bindings. Missing assets or failed collision
+preparation report the logical asset ID. Render-only models need not contain
+valid physics geometry. Editor Play and headless `ProjectRun` automatic collision
+loading remain pending.
+
+[Model Collision Lab](../examples/model-collision/README.md) is the player feature
+proof: one GLB supplies the rendered ground/wall and static collision, while
+Decay drives the walker into the wall and around it to a goal. The native player
+regression opens/compiles the project and steps the keyboard route through
+Session. The exported browser smoke plays the same route with ordinary keyboard
+input, verifies the GLB fetch and checks runtime/GPU errors. It remains feature
+proof; Explorer game adoption is open.
 Convex model scene authoring, model asset picker metadata and Explorer proof also
 remain scheduled in slice 6; rendered GLBs do not automatically acquire collision.

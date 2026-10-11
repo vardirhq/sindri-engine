@@ -17,6 +17,7 @@ mod builtins;
 #[cfg(not(target_arch = "wasm32"))]
 mod directory;
 mod error;
+mod models;
 mod player;
 mod project;
 
