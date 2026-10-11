@@ -1570,8 +1570,10 @@ The runtime calls bounded CPU model preparation, then scene-owned
 `ModelCollisionGeometry3d` validation; neither scene nor physics depends on
 assets. Failed preparation keeps the previous binding. Removing a binding makes
 active references fail before the next 3D solve, retaining live geometry until
-corrected. Automatic player/browser/editor loading and collision-only export
-asset discovery are not wired yet; authored references alone do not load files.
+corrected. Shared model asset discovery and export include collision-only
+references from scenes and prefabs, including inactive entities. Automatic
+player/browser/editor collision binding is not wired yet; discovery alone does
+not install solver geometry.
 
 The scene driver prevalidates the entire authored plan before changing its
 solver. Composed positive finite scale is baked into model-space triangles;

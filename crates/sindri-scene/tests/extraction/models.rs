@@ -140,3 +140,21 @@ fn disabled_models_are_discovered_for_loading_but_not_drawn() {
         .unwrap();
     assert!(frame.passes().is_empty());
 }
+
+#[test]
+fn collision_only_and_shared_models_are_discovered_once() {
+    let world = world_from(&scene(
+        r#",
+        { "id": "collision", "disabled": true,
+          "components": { "sindri.physics3d.model_collider": { "asset": "models/collision.glb" } } },
+        { "id": "shared",
+          "components": {
+            "sindri.model": { "asset": "models/shared.glb" },
+            "sindri.physics3d.model_collider": { "asset": "models/shared.glb" }
+          } }"#,
+    ));
+    assert_eq!(
+        referenced_models(&world).into_iter().collect::<Vec<_>>(),
+        ["models/collision.glb", "models/shared.glb"]
+    );
+}

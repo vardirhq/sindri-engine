@@ -331,9 +331,10 @@ surface gaps, filtering and local rotation, resource sharing, atomic invalid
 edits, replacement/removal, dynamic landing and cloned-world replay. This is
 foundation for Explorer. Static scene model components and explicit Session GLB
 bindings now exercise character collision, scale/lifecycle, asset replacement and
-checkpoint replay in native regressions. Automatic player/browser/editor loading,
-collision-only export discovery, model asset picker metadata and project/game proof
-remain pending. See
+checkpoint replay in native regressions. Shared discovery and export now cover
+collision-only scene/prefab references, inactive entities, deduplicated assets and
+original verified GLB bytes. Automatic player/browser/editor collision binding,
+model asset picker metadata and project/game proof remain pending. See
 [the contract and numeric limits](physics.md#static-triangle-geometry).
 
 `ConvexHull3d` now constructs bounded, immutable volumetric resources, shared by

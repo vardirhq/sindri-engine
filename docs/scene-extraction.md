@@ -477,7 +477,8 @@ radian short of either pole.
 `sindri.model` names an external `AssetId` and an optional render layer. Hosts
 prepare decoded GLB resources through `sindri::model::prepare` and bind them to
 `SceneExtractor`; instances share geometry while retaining separate world
-transforms. `referenced_models` includes inactive entities for asset discovery.
+transforms. `referenced_models` includes render and static model-collider references,
+including inactive entities, for deduplicated asset discovery.
 Extraction rejects missing bindings and uses the active world camera. See
 [imported models](imported-models.md) for the bounded static subset, project
 loading/export contract and native/browser proof. No imported geometry is serialized into scene payloads.

@@ -1,5 +1,9 @@
 # Changelog
 
+- Discover and export collision-only GLB references from scenes and prefabs,
+  including inactive entities and shared render/collision assets. Automatic
+  runtime collision binding remains pending.
+
 - Add static model collider scene references and explicit Session GLB collision
   bindings, with positive inherited scale, lifecycle and checkpoint-aware asset
   replacement. Automatic player/editor loading and project proof remain pending.

@@ -237,7 +237,9 @@ and collision references are independent. Native Session tests use the binary
 GLB fixture for character obstruction, checkpoint replay and asset replacement.
 See [scene ownership and limitations](physics.md#static-model-scene-ownership).
 
-This is an explicit host API. Player/browser/editor asset queues and export do
-not yet discover collision-only references or deliver model collision bindings.
+This is an explicit host API. Shared asset discovery and export include
+collision-only references, including inactive entities and prefab contents, and deduplicate render/collision uses.
+Export verifies and ships the original GLB bytes. Player/browser/editor queues
+do not yet deliver model collision bindings.
 Convex model scene authoring, model asset picker metadata and Explorer proof also
 remain scheduled in slice 6; rendered GLBs do not automatically acquire collision.

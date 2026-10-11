@@ -108,7 +108,10 @@ Order:
   validated mass and native dynamic/kinematic/sensor/replay regressions. Next add
   automatic host asset loading and project proof before claiming imported-content
   collision complete. Static scene colliders now accept explicit Session bindings,
-  with native GLB movement/replay and asset replacement regressions.
+  with native GLB movement/replay and asset replacement regressions. Shared
+  discovery/export now include collision-only references from scenes and prefabs,
+  inactive entities and shared render/collision assets. Automatic host collision
+  binding and project proof are next.
   The Character Lab
   now exercises Decay gravity/jumps, solved carry/reversal and a keyboard goal
   through native Session and exported Chromium. It is feature proof, not Explorer
@@ -348,8 +351,10 @@ placement. The roadmap's "height/mesh terrain next" is this slice.
     native/browser/editor/Explorer proof, without an assets → physics dependency:
     - [x] Static model component, explicit Session CPU binding, composed positive
       scale and native scene/GLB movement, lifecycle, replacement and replay tests.
-    - [ ] Automatic player/browser/editor loading, collision-only export asset
-      discovery, model asset field metadata/picker and runtime project proof.
+    - [x] Shared collision-only asset discovery and export, with inactive/prefab
+      references, deduplication, original bytes and missing-asset regressions.
+    - [ ] Automatic player/browser/editor collision binding, model asset field
+      metadata/picker and runtime project proof.
     - [ ] Model-derived convex scene colliders for dynamic props.
   - static trimesh colliders built from a model's meshes;
   - convex hulls for dynamic props;

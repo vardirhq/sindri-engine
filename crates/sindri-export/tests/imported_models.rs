@@ -30,6 +30,8 @@ fn project(name: &str, rooted: bool) -> Scratch {
       "format_version": 10, "entities": [
         {"id":"one", "components":{"sindri.model":{"asset":"models/reused.glb"}}},
         {"id":"two", "components":{"sindri.model":{"asset":"models/reused.glb"}}},
+        {"id":"collision", "disabled":true, "components":{"sindri.physics3d.model_collider":{"asset":"models/collision.glb"}}},
+        {"id":"shared-collision", "components":{"sindri.physics3d.model_collider":{"asset":"models/reused.glb"}}},
         {"id":"placed", "prefab":{"source":"prefabs/part.prefab"}}
       ]}"#,
     );
@@ -44,10 +46,11 @@ fn project(name: &str, rooted: bool) -> Scratch {
         &root,
         &format!("{prefix}prefabs/part.prefab"),
         br#"{
-      "format_version":1, "entities":[{"id":"part",
-      "components":{"sindri.model":{"asset":"models/part.glb"}}}]}"#,
+      "format_version":1, "entities":[
+      {"id":"part", "components":{"sindri.model":{"asset":"models/part.glb"}}},
+      {"id":"collision", "parent":"part", "components":{"sindri.physics3d.model_collider":{"asset":"models/prefab-collision.glb"}}}]}"#,
     );
-    for name in ["reused", "hidden", "part"] {
+    for name in ["reused", "hidden", "part", "collision", "prefab-collision"] {
         write(&root, &format!("{prefix}models/{name}.glb"), GLB);
     }
     Scratch(root)
@@ -62,7 +65,7 @@ fn root_and_assets_projects_ship_deduplicated_models_from_scenes_and_prefabs() {
             .iter()
             .filter(|asset| asset.kind == AssetKind::Model)
             .collect();
-        assert_eq!(models.len(), 3);
+        assert_eq!(models.len(), 5);
         assert!(models.iter().all(|asset| asset.bytes == GLB));
         let destination = scratch.0.join("export");
         export.write(&destination, "/").unwrap();
@@ -70,7 +73,7 @@ fn root_and_assets_projects_ship_deduplicated_models_from_scenes_and_prefabs() {
             &std::fs::read_to_string(destination.join("assets").join(MANIFEST_FILE_NAME)).unwrap(),
         )
         .unwrap();
-        assert_eq!(manifest.ids_of(AssetKind::Model).count(), 3);
+        assert_eq!(manifest.ids_of(AssetKind::Model).count(), 5);
         for model in models {
             let id = AssetId::new(model.id.clone()).unwrap();
             let bytes = std::fs::read(
@@ -94,4 +97,19 @@ fn missing_and_malformed_models_fail_export_with_the_asset_named() {
     std::fs::remove_file(scratch.0.join("models/reused.glb")).unwrap();
     let error = ProjectExport::gather(&scratch.0).unwrap_err().to_string();
     assert!(error.contains("models/reused.glb"), "{error}");
+}
+
+#[test]
+fn missing_and_malformed_collision_only_models_name_the_asset() {
+    let scratch = project("missing-collision", false);
+    write(
+        &scratch.0,
+        "assets/models/collision.glb",
+        b"invalid binary glTF",
+    );
+    let error = ProjectExport::gather(&scratch.0).unwrap_err().to_string();
+    assert!(error.contains("models/collision.glb"), "{error}");
+    std::fs::remove_file(scratch.0.join("assets/models/collision.glb")).unwrap();
+    let error = ProjectExport::gather(&scratch.0).unwrap_err().to_string();
+    assert!(error.contains("models/collision.glb"), "{error}");
 }
