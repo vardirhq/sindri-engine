@@ -104,8 +104,10 @@ Order:
   bounded model-space triangles, preserving provenance and mirrored winding.
   Standalone static triangle geometry now shares immutable acceleration resources
   across keyed groups, with immediate queries, native landing/replay and validation
-  regressions. Next add hull support and scene/runtime asset bindings before
-  claiming imported-content collision. The Character Lab
+  regressions. Clone-shared convex hulls now support mixed primitive/hull bodies,
+  validated mass and native dynamic/kinematic/sensor/replay regressions. Next add
+  scene/runtime asset bindings before claiming imported-content collision.
+  The Character Lab
   now exercises Decay gravity/jumps, solved carry/reversal and a keyboard goal
   through native Session and exported Chromium. It is feature proof, not Explorer
   completion.
@@ -336,7 +338,10 @@ placement. The roadmap's "height/mesh terrain next" is this slice.
     - [x] Immutable static triangle geometry and keyed groups, native immediate
       queries/character movement, landing/replay and atomic validation regressions.
       Standalone foundation only; no scene model collider is implied.
-    - [ ] Convex hull geometry and dynamic-body support.
+    - [x] Immutable volumetric hull geometry and mixed primitive/hull bodies,
+      bounded construction/mass validation and native dynamic landing, pending
+      impulses, sensor events, kinematic controls and replay. Standalone proof;
+      scene model bindings and browser/editor/Explorer project proof remain open.
   - [ ] Scene/runtime model-collider asset bindings, asynchronous loading and
     native/browser/editor/Explorer proof, without an assets → physics dependency.
   - static trimesh colliders built from a model's meshes;

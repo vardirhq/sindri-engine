@@ -1,5 +1,9 @@
 # Changelog
 
+- Add clone-shared convex collision hulls and mixed primitive/hull rigid bodies
+  with bounded construction, validated mass and native dynamic/kinematic/sensor
+  regressions. Model scene bindings and browser/editor/game proof remain pending.
+
 - Add shared immutable static triangle collision geometry and keyed physics
   groups, with immediate queries and tested dynamic landing/replay. Invalid
   geometry or group edits fail before mutation. Model scene bindings, dynamic

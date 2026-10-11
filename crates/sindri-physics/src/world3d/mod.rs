@@ -3,6 +3,7 @@
 mod build;
 mod character;
 mod controls;
+mod convex_hull;
 mod ground;
 mod grounded;
 mod pending;

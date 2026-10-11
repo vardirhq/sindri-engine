@@ -8,6 +8,7 @@
 mod backend;
 mod character3d;
 mod contact2d;
+mod convex_hull3d;
 mod ground2d;
 mod ground3d;
 mod grounded2d;
@@ -35,6 +36,7 @@ mod tests;
 
 pub use character3d::{CharacterCollision3d, CharacterMotion3d, CharacterOptions3d};
 pub use contact2d::Contact2d;
+pub use convex_hull3d::{ConvexHull3d, ConvexHullCollider3d, ConvexHullError3d};
 pub use ground2d::{GroundOptions2d, GroundProbe2d};
 pub use ground3d::{GroundOptions3d, GroundProbe3d};
 pub use grounded2d::{GroundedSlideMotion2d, GroundedSlideOptions2d};

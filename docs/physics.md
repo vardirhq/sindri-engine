@@ -1476,7 +1476,8 @@ Assets now prepare bounded model-space triangles with accumulated selected-node
 transforms, reflected winding and primitive-instance ranges. This is the CPU
 geometry prerequisite for model-derived static meshes and convex hulls, added
 for the planned Explorer showcase. Static triangle geometry and standalone-world
-queries are now implemented; scene asset bindings and convex hulls remain absent.
+queries are now implemented; scene asset bindings remain absent. Standalone
+convex hulls are available below.
 No runtime body is created by asset preparation. See [the asset contract](imported-models.md#cpu-collision-preparation).
 
 ### Static triangle geometry
@@ -1511,6 +1512,43 @@ open gaps and two-sided rays, immediate ray/overlap/cast/ground/character querie
 local rotation and filtering, replacement/removal, failed late-piece edits and
 pending controls, dynamic sphere landing and identical cloned-world replay.
 This is standalone physics proof for the planned Explorer showcase. Primitive
-`ColliderShape3d` and serialized scene payloads remain unchanged. Dynamic hulls,
-model asset bindings and native/browser/editor/Explorer project proof remain
-pending; WebAssembly compilation alone does not prove browser behavior.
+`ColliderShape3d` and serialized scene payloads remain unchanged. Model asset
+bindings and native/browser/editor/Explorer project proof remain pending;
+WebAssembly compilation alone does not prove browser behavior.
+
+### Convex hull geometry
+
+`ConvexHull3d::new(points)` builds an immutable, clone-shared volumetric hull
+without asset, renderer or scene dependencies. It fills concavities rather than
+performing convex decomposition. Duplicate and interior points are allowed;
+scale is baked into input positions. Construction accepts 4..=4,096 points in
++/-10,000 local units. Too few/too many points, nonfinite/out-of-range points,
+flat/collinear/identical input and unusable backend mass properties return
+`ConvexHullError3d`. Unit-density mass, principal inertia and their inverses must
+be positive and finite, with finite center of mass and inertia-frame rotation.
+Tiny, thin or numerically ill-conditioned hulls may therefore be rejected.
+
+`ConvexHullCollider3d` carries the shared geometry, local pose, sensor flag,
+layers and existing `PhysicsMaterial`. `PhysicsWorld3d::validate_hull_body` and
+`insert_hull_body` take a rigid body, primitive pieces and hull pieces. Diagnostics
+number primitives first, then hulls. Compounds require 1..=1,024 total pieces.
+The body, all pieces, composed bounds, individual/combined mass properties,
+entity ownership and queued controls are checked before insertion. Failure keeps
+pending controls and leaves the world untouched. Geometry has default unit
+density; sensor pieces contribute mass, matching existing primitive behavior.
+
+Hull bodies use the ordinary insertion, coefficients, immediate queries,
+teleports/kinematic targets, velocity/impulse controls, events, removal and world
+snapshot lifecycle. All four body kinds work; a hull may join primitives in a
+compound. Primitive-only compounds also pass through this API, subject to its
+stricter count and mass checks. Static hulls remain original body pieces when
+keyed static groups are added later.
+
+Seven native regressions exercise invalid/degenerate construction, shared
+geometry and exact tetrahedron rays/interior overlap, mixed-compound mass and
+local rotation/offset, pending impulses, dynamic landing and cloned replay,
+atomic invalid edits/budgets/duplicate ownership, both kinematic kinds and sensor
+filtering/enter/exit events. This foundation is added for the planned Explorer
+showcase. Model-derived scene authoring/bindings and native/browser/editor/game
+project proof remain pending. Serialized primitive shapes and Decay APIs do not
+change in this slice; WASM compilation is not browser behavior proof.

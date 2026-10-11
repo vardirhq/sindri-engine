@@ -53,6 +53,10 @@ pub enum PhysicsError {
     },
     #[error("entity {0:?} has a collider with no pieces")]
     NoColliderPieces(EntityId),
+    #[error("collider compound has {actual} pieces, exceeding its limit of {limit}")]
+    TooManyColliderPieces { actual: usize, limit: usize },
+    #[error("collider compound must have finite positive mass and principal inertia")]
+    InvalidMassProperties,
 }
 
 pub(crate) fn validate_body2d(body: &RigidBody2d) -> Result<(), PhysicsError> {

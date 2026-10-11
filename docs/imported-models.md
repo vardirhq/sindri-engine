@@ -78,9 +78,10 @@ cargo run -p sindri-assets --example model -- \
 
 This is CPU preparation proof. Physics now provides immutable static triangle
 resources and standalone keyed groups with native query/landing/replay tests;
-see [the physics contract](physics.md#static-triangle-geometry). Convex hulls,
-model-collider authoring/asset bindings, and native/browser/editor/Explorer
-project collision proof remain pending. Existing model rendering and decoding
+see [the physics contract](physics.md#static-triangle-geometry). Standalone convex
+hull resources and mixed rigid bodies now have native landing/control/replay
+tests as well. Model-collider authoring/asset bindings and
+native/browser/editor/Explorer project collision proof remain pending. Existing model rendering and decoding
 are unchanged.
 
 ## Renderer boundary

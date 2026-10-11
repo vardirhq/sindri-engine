@@ -320,7 +320,7 @@ non-indexed geometry, mirror transforms, exact budgets, deep iterative traversal
 and malformed data. The optional `sindri-assets` model inspector's `--collision`
 flag reports prepared counts without creating physics bodies. This is a
 foundation added for the planned Explorer showcase. Standalone static triangle
-physics is available below; hulls, scene asset bindings and imported-model
+physics is available below; scene asset bindings and imported-model
 project collision on every runtime surface remain absent. See
 [the contract](imported-models.md#cpu-collision-preparation).
 
@@ -329,9 +329,19 @@ Static physics now provides clone-shared `TriangleMesh3d` resources and
 regressions exercise immediate ray/overlap/cast/ground/character queries, open
 surface gaps, filtering and local rotation, resource sharing, atomic invalid
 edits, replacement/removal, dynamic landing and cloned-world replay. This is
-standalone physics foundation for Explorer; model scene bindings, dynamic hulls
-and native/browser/editor/game project proof remain pending. See
+standalone physics foundation for Explorer; model scene bindings and
+native/browser/editor/game project proof remain pending. See
 [the contract and numeric limits](physics.md#static-triangle-geometry).
+
+`ConvexHull3d` now constructs bounded, immutable volumetric resources, shared by
+`ConvexHullCollider3d` pieces in mixed primitive/hull rigid bodies. Native tests
+exercise exact tetrahedron geometry, duplicates/invalid/degenerate points,
+shared resources, compound mass and local transforms, pending impulses, dynamic
+landing/replay, atomic failures, both kinematic kinds and sensor masks/events.
+The same insertion and control/query lifecycle supports all four body kinds.
+This is standalone foundation added for Explorer; model scene bindings and
+native/browser/editor/game project proof remain pending. See
+[the hull contract and numeric limits](physics.md#convex-hull-geometry).
 
 `ScenePhysics3d` now reconciles registered body/collider/world components with
 active scene entities, composed XYZ/quaternion transforms, gravity settings and
