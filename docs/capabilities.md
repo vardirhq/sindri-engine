@@ -309,7 +309,8 @@ separate from this displacement query. Rapier contact/flag semantics and bounded
 iteration/correction limits are documented in [Character movement](character-movement.md).
 This is a foundation added for Explorer, with scene ownership described below;
 Scene/Decay integration, moving-platform carry and browser feature proof are
-implemented below; editor interaction and Explorer game goal proof remain pending.
+implemented below; native editor proof is recorded in
+[the review](physics-character3d-editor-review.md). Explorer game goal proof remains pending.
 
 `ScenePhysics3d` now reconciles registered body/collider/world components with
 active scene entities, composed XYZ/quaternion transforms, gravity settings and
@@ -2919,8 +2920,14 @@ native Session, verifies idle carry/reversal, and reaches its goal through keybo
 jump, airborne carry release and floor landing. Exported WebGPU Chromium plays
 the same project with ordinary keys, verifies each milestone, fetched assets and
 no runtime/GPU errors, and captures the blue rider on the gold goal pad. CI runs
-both project tests and the browser regression. Editor interaction and Explorer
-adoption remain pending; see
+both project tests and the browser regression. Selected 3D characters now show
+orange slope, step and snap guides from the runtime's validated scaled probe,
+with exact box/sphere/capsule projection extents and world-space up/reach. Four
+scene regressions cover parenting, scaling, sensors, invalid geometry and disabled
+controllers. Native editor [review](physics-character3d-editor-review.md) exercises
+snap undo/redo, step editing, invalid skin rejection, save/reopen, keyboard Play
+to the goal, read-only controls, Save refusal and Stop restoration. Explorer
+adoption remains pending; see
 [the contract](character-movement.md#3d-scene-ownership). This is a general
 capability added for the planned Explorer showcase, not completed game proof.
 

@@ -13,6 +13,7 @@
 //! A component that does not parse draws nothing rather than a stale shape;
 //! the inspector names the broken field.
 
+mod characters3d;
 mod joints;
 mod reach;
 mod solids;
@@ -29,7 +30,7 @@ pub enum GizmoKind {
     Joint,
     /// A 3D collider's pieces.
     Collider3d,
-    /// A 2D character's footing: the steepest ground it walks, how high it
+    /// A 2D or 3D character's footing: the steepest ground it walks, how high it
     /// steps and how far down it snaps.
     Character,
     /// How far an effect burst's flecks can fly.
@@ -77,7 +78,7 @@ pub struct ShapeGizmo {
     pub entity: EntityId,
     pub kind: GizmoKind,
     pub strokes: Vec<GizmoStroke>,
-    /// Points worth a dot: a joint's anchors.
+    /// Points worth a dot: a joint's anchors or a character's foot.
     pub marks: Vec<[f32; 3]>,
 }
 
@@ -87,7 +88,10 @@ pub struct ShapeGizmo {
 pub fn shape_gizmos(world: &World, components: &ComponentSchemaRegistry) -> Vec<ShapeGizmo> {
     let mut gizmos = joints::joints(world, components);
     gizmos.extend(solids::colliders(world, components));
-    gizmos.extend(reach::characters(world, components));
+    let mut footing = reach::characters(world, components);
+    footing.extend(characters3d::characters(world, components));
+    footing.sort_by_key(|gizmo| gizmo.entity);
+    gizmos.extend(footing);
     gizmos.extend(reach::effects(world, components));
     gizmos
 }

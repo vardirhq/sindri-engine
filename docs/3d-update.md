@@ -96,8 +96,10 @@ Order:
   Native scene and Session regressions verify parenting, replay and terrain
   budgets. Typed Decay movement requests and copied support/movement/carry
   records now have native host/script and Session timing/replay regressions,
-  compiler/LSP checks and generated API metadata. Continue with controller
-  editor/Explorer proof; do not add gameplay rules in Rust. The Character Lab
+  compiler/LSP checks and generated API metadata. Selected 3D footing gizmos now
+  reuse the orange character overlay; native editor review verifies settings,
+  undo/redo, save/reopen, Play goal and Stop restoration. Continue with Explorer
+  proof and content collision; do not add gameplay rules in Rust. The Character Lab
   now exercises Decay gravity/jumps, solved carry/reversal and a keyboard goal
   through native Session and exported Chromium. It is feature proof, not Explorer
   completion.
@@ -315,7 +317,10 @@ placement. The roadmap's "height/mesh terrain next" is this slice.
     shared Session replay, compiler/LSP and generated API metadata.
   - [x] Character Lab feature example: Decay gravity/jumps, ferry carry/reversal,
     native Session keyboard goal and real WebGPU Chromium goal/capture, with CI.
-  - [ ] Editor gizmos reused from the 2D character and Explorer goal proof.
+  - [x] Editor footing gizmos reuse the selected 2D character overlay, using
+    validated scaled probes for slope/step/snap guides. Native Character Lab
+    review exercises settings, undo/redo, save/reopen, Play goal and Stop.
+  - [ ] Explorer controller adoption and game goal proof.
 - [ ] Collision from content:
   - static trimesh colliders built from a model's meshes;
   - convex hulls for dynamic props;

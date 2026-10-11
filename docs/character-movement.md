@@ -828,5 +828,23 @@ The exported shared WebGPU player runs the same scripts/assets in Chromium.
 carry, jump, floor landing and goal milestones; it also verifies fetched assets,
 changed rendered pixels and absence of GPU/runtime errors. CI runs the check
 and uploads its goal capture. This is feature-example proof. Native editor
-controller interaction and Explorer game adoption remain pending; primitive
-engine tests remain the evidence for slopes, steps and collision edge cases.
+controller interaction is now recorded in
+[the review](physics-character3d-editor-review.md); Explorer game adoption remains
+pending. Primitive engine tests remain the evidence for slopes, steps and
+collision edge cases.
+
+## 3D editor footing guides
+
+The existing selected-character orange overlay draws 3D slope rays and a ring,
+a step-height ring when positive, and a snap-distance ring when positive. Its
+foot is the collider center projected down by the primitive's exact extent
+along world-space `up`. The scene controller plan supplies validated settings
+and the same scaled solid probe used by movement; sensors do not set its foot.
+Box, sphere and Y-capsule projections account for composed parent/entity scale,
+rotation and collider offsets. Step/snap distances stay in world units.
+
+These are authoring guides, not predicted support contacts, accepted steps or
+snap results. The ring width uses the larger extent on two perpendicular axes
+in the footing plane. Invalid controller plans hide all 3D footing guides,
+matching the runtime's batch rejection; non-finite derived points are omitted.
+The existing selection filter hides footing on unselected entities.

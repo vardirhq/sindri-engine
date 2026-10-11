@@ -34,6 +34,8 @@ SINDRI_BASE_PATH=/examples/character3d/ node scripts/browser/character3d.mjs \
   target/dist/character3d target/character3d.png
 ```
 
-This is native Session and browser feature proof. Editor controller interaction
-and the Explorer game's goal remain separate acceptance items. Imported models,
+This is native Session, browser and editor feature proof. The
+[native editor review](../../docs/physics-character3d-editor-review.md) exercises
+selected footing guides, settings/undo/save/reopen and keyboard Play to the goal.
+The Explorer game's goal remains a separate acceptance item. Imported models,
 slopes, steps and terrain residency are not demonstrated by this small project.

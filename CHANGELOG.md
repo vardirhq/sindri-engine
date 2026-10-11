@@ -1,5 +1,10 @@
 # Changelog
 
+- Selected 3D characters now show orange slope, step and snap footing guides
+  from their validated scaled collider geometry. Native editor review verifies
+  settings/undo/save/reopen and keyboard Play to the Character Lab goal; Stop
+  restores the authored scene. Explorer game adoption remains pending.
+
 - Add the 3D Character Lab: Decay gravity, keyboard movement/jumping and a
   reversing ferry with solved carry. Native Session tests and real WebGPU
   Chromium keyboard play verify landing and goal completion; CI captures the
