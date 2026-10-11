@@ -60,3 +60,16 @@ were real gaps then. They are closed by the shared project host and static
 export path: browser smoke tests now load the generated manifest and hashed
 assets, run Decay gameplay, verify audio promises, and exercise readable
 capability failures under the GitHub Pages subpath.
+
+The 3D Character Lab uses the shared player's normal keyboard path. Its check
+waits for solved carry, jumps with Space, walks with D, then verifies floor
+landing and the goal without editing scripts or world state:
+
+```sh
+SINDRI_BASE_PATH=/examples/character3d/ node scripts/browser/character3d.mjs \
+  target/dist/character3d target/browser-character3d.png
+```
+
+It checks runtime/GPU errors, fetched assets and rendered colors, and writes a
+goal capture. Native project tests separately verify ferry reversal and once-only
+carry. Editor interaction and Explorer game proof remain open.

@@ -1,0 +1,78 @@
+// Gameplay owns gravity, jump permission and speed. The engine clips each move.
+script Walker {
+    @export
+    var speed: f32 = 3.0;
+    @export
+    var gravity: f32 = 12.0;
+    @export
+    var jump_speed: f32 = 5.0;
+    var rise: f32 = 0.0;
+    var carried: bool = false;
+    var jumped: bool = false;
+    var landed: bool = false;
+    var arrived: bool = false;
+    fn start() {
+        print("Character lab ready: ride, Space to jump, D to reach the gold pad");
+    }
+    fn update(dt: f32) {
+        let motion = Physics3d.character_motion(this.entity);
+        var grounded = false;
+        if motion != null {
+            grounded = motion.grounded;
+            let platform = motion.platform;
+            if platform != null {
+                if platform.motion.translation.x > 0.0 && !carried {
+                    carried = true;
+                    print("Character carried");
+                }
+            }
+            if grounded && rise <= 0.0 { rise = 0.0; }
+            for collision in motion.movement.collisions {
+                if collision.hit.normal.y < -0.5 && rise > 0.0 { rise = 0.0; }
+            }
+            let support = motion.ground;
+            if support != null {
+                if grounded && support.entity == World.find("Floor") && jumped && !landed {
+                    landed = true;
+                    print("Character landed on floor");
+                }
+            }
+        }
+        if grounded && Input.Keyboard.just_pressed("Space") {
+            rise = jump_speed;
+            jumped = true;
+            print("Character jumped");
+        }
+        var horizontal = 0.0;
+        var depth = 0.0;
+        if Input.Keyboard.is_down("D") { horizontal += speed; }
+        if Input.Keyboard.is_down("A") { horizontal -= speed; }
+        if Input.Keyboard.is_down("S") { depth += speed; }
+        if Input.Keyboard.is_down("W") { depth -= speed; }
+        if carried && jumped && landed && !arrived {
+            let delta = this.transform.world_position - World.find("Goal").transform.world_position;
+            if abs(delta.x) < 0.6 && abs(delta.z) < 0.8 {
+                arrived = true;
+                print("Character goal reached");
+            }
+        }
+        rise = max(-15.0, rise - gravity * dt);
+        Physics3d.move_character(this.entity, Vec3(horizontal * dt, rise * dt, depth * dt), grounded && rise <= 0.0);
+    }
+}
+
+script Ferry {
+    fn update(dt: f32) {
+        let x = this.transform.world_position.x;
+        if x >= 2.0 { Physics3d.set_velocity(this.entity, Vec3(-1.0, 0.0, 0.0)); }
+        if x <= -1.0 { Physics3d.set_velocity(this.entity, Vec3(1.0, 0.0, 0.0)); }
+    }
+}
+
+script CameraRig {
+    fn start() {
+        Camera.orbit(this.entity, World.find("Walker"), 0.0, 0.45, 8.0);
+        Camera.orbit_offset(this.entity, Vec3(0.0, 0.3, 0.0));
+        Camera.orbit_smoothing(this.entity, 8.0);
+    }
+}

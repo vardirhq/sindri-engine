@@ -811,3 +811,22 @@ and checkpoint replay through a real Decay script. Compiler/LSP checks exercise
 signatures, optional nested result fields, completion and hover. This general
 capability is added for the planned Explorer showcase; controller browser,
 editor interaction and Explorer goal proof remain pending.
+
+## 3D controller feature proof
+
+[Character Lab](../examples/character3d/README.md) is a small project added for
+the planned Explorer capability, with a gray floor, gold ferry and goal, blue
+box controller and perspective follow camera. Decay owns gravity, keyboard
+movement, jump permission, platform reversal and goal rules. Native Session
+tests open/compile the project, verify idle carry through reversal without
+double translation, and use Space/D input to jump, release airborne carry,
+land on the floor and reach the goal. The jump step consumes final pre-solve
+support carry; the following airborne step has none.
+
+The exported shared WebGPU player runs the same scripts/assets in Chromium.
+`scripts/browser/character3d.mjs` uses ordinary keyboard input and waits for
+carry, jump, floor landing and goal milestones; it also verifies fetched assets,
+changed rendered pixels and absence of GPU/runtime errors. CI runs the check
+and uploads its goal capture. This is feature-example proof. Native editor
+controller interaction and Explorer game adoption remain pending; primitive
+engine tests remain the evidence for slopes, steps and collision edge cases.

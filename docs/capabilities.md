@@ -308,8 +308,8 @@ teleports, copies, clone replay and invalid input. Platform carry is intentional
 separate from this displacement query. Rapier contact/flag semantics and bounded
 iteration/correction limits are documented in [Character movement](character-movement.md).
 This is a foundation added for Explorer, with scene ownership described below;
-Decay/editor/browser controller integration, moving platforms and game goal
-proof remain pending.
+Scene/Decay integration, moving-platform carry and browser feature proof are
+implemented below; editor interaction and Explorer game goal proof remain pending.
 
 `ScenePhysics3d` now reconciles registered body/collider/world components with
 active scene entities, composed XYZ/quaternion transforms, gravity settings and
@@ -2913,8 +2913,14 @@ carry and detailed collisions. Native host/script tests exercise next-step and
 last-valid-input semantics, invalid context/values/ownership, stale-reference
 filtering and nested copy mutation; shared Session verifies real-script timing
 and checkpoint replay. Compiler/LSP and generated API metadata use the same
-record types. Gameplay supplies gravity/jumps. Browser/controller and editor
-interaction, and Explorer adoption remain pending; see
+record types. Gameplay supplies gravity/jumps. The new
+[Character Lab](../examples/character3d/README.md) opens and compiles through
+native Session, verifies idle carry/reversal, and reaches its goal through keyboard
+jump, airborne carry release and floor landing. Exported WebGPU Chromium plays
+the same project with ordinary keys, verifies each milestone, fetched assets and
+no runtime/GPU errors, and captures the blue rider on the gold goal pad. CI runs
+both project tests and the browser regression. Editor interaction and Explorer
+adoption remain pending; see
 [the contract](character-movement.md#3d-scene-ownership). This is a general
 capability added for the planned Explorer showcase, not completed game proof.
 

@@ -97,7 +97,10 @@ Order:
   budgets. Typed Decay movement requests and copied support/movement/carry
   records now have native host/script and Session timing/replay regressions,
   compiler/LSP checks and generated API metadata. Continue with controller
-  browser/editor/Explorer proof; do not add gameplay rules in Rust.
+  editor/Explorer proof; do not add gameplay rules in Rust. The Character Lab
+  now exercises Decay gravity/jumps, solved carry/reversal and a keyboard goal
+  through native Session and exported Chromium. It is feature proof, not Explorer
+  completion.
 - Then the rest of slice 6, which unblocks moving through 3D (Low Tide's
   crawler and crew included).
 - Then slices 2 to 4 (measurement, instancing and one lit path, lights),
@@ -310,7 +313,9 @@ placement. The roadmap's "height/mesh terrain next" is this slice.
     optional support/carry, separate raw movement and detailed collisions,
     next-step/last-valid-input validation, nested copies, native scripts and
     shared Session replay, compiler/LSP and generated API metadata.
-  - [ ] Editor gizmos reused from the 2D character, browser and Explorer proof.
+  - [x] Character Lab feature example: Decay gravity/jumps, ferry carry/reversal,
+    native Session keyboard goal and real WebGPU Chromium goal/capture, with CI.
+  - [ ] Editor gizmos reused from the 2D character and Explorer goal proof.
 - [ ] Collision from content:
   - static trimesh colliders built from a model's meshes;
   - convex hulls for dynamic props;

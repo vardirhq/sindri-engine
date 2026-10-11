@@ -1,5 +1,10 @@
 # Changelog
 
+- Add the 3D Character Lab: Decay gravity, keyboard movement/jumping and a
+  reversing ferry with solved carry. Native Session tests and real WebGPU
+  Chromium keyboard play verify landing and goal completion; CI captures the
+  browser goal. Editor controller interaction and Explorer adoption remain pending.
+
 - Decay can queue scene-owned 3D character displacement with
   `Physics3d.move_character` and read copied optional support, raw movement,
   platform carry and collisions through `Physics3d.character_motion`. Invalid
