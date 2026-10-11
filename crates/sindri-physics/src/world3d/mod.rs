@@ -10,6 +10,7 @@ mod query;
 mod spatial;
 mod static_groups;
 mod sweep;
+mod triangle_mesh;
 mod validation;
 
 use std::{
@@ -106,26 +107,38 @@ impl PhysicsWorld3d {
             return Err(PhysicsError::EntityAlreadyRegistered(entity));
         }
         self.validate_insertion(entity, body, colliders)?;
+        let prepared = colliders
+            .iter()
+            .map(|collider| build::collider(entity, *collider))
+            .collect();
+        self.insert_prepared_body(entity, body, prepared)
+    }
+
+    // Callers validate geometry, body ownership and pending controls first.
+    fn insert_prepared_body(
+        &mut self,
+        entity: EntityId,
+        body: RigidBody3d,
+        colliders: Vec<r3::ColliderBuilder>,
+    ) -> Result<(), PhysicsError> {
         let handle = self.backend.insert_body(build::body(body));
         let handles: Vec<_> = colliders
-            .iter()
-            .map(|collider| {
-                self.backend
-                    .insert_collider(build::collider(entity, *collider), Some(handle))
-            })
+            .into_iter()
+            .map(|collider| self.backend.insert_collider(collider, Some(handle)))
             .collect();
         self.backend.bodies[handle]
             .recompute_mass_properties_from_colliders(&self.backend.colliders);
         for &collider in &handles {
             self.collider_entities.insert(collider, entity);
         }
+        let base_colliders = handles.len();
         self.bodies.insert(
             entity,
             BodyRecord {
                 body: handle,
                 colliders: handles,
                 kind: body.kind,
-                base_colliders: colliders.len(),
+                base_colliders,
                 groups: BTreeMap::new(),
             },
         );

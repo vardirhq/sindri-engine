@@ -1,5 +1,10 @@
 # Changelog
 
+- Add shared immutable static triangle collision geometry and keyed physics
+  groups, with immediate queries and tested dynamic landing/replay. Invalid
+  geometry or group edits fail before mutation. Model scene bindings, dynamic
+  hulls and browser/editor/game project proof remain pending.
+
 - Add bounded CPU model collision preparation with accumulated GLB node
   transforms, instance provenance, reflected winding and typed diagnostics.
   The model inspection example accepts `--collision` to report prepared counts.

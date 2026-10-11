@@ -74,9 +74,17 @@ impl PhysicsWorld3d {
         colliders: &[Collider3d],
     ) -> Result<(), PhysicsError> {
         Self::validate_body(entity, body, colliders)?;
+        self.validate_pending_controls(entity, body.kind)
+    }
+
+    pub(super) fn validate_pending_controls(
+        &self,
+        entity: EntityId,
+        kind: RigidBodyKind,
+    ) -> Result<(), PhysicsError> {
         if let Some(controls) = self.pending_controls.get(&entity) {
             for &control in controls {
-                control.validate(entity, body.kind)?;
+                control.validate(entity, kind)?;
             }
         }
         Ok(())

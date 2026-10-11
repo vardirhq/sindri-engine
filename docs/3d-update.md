@@ -102,7 +102,9 @@ Order:
   proof and content collision; do not add gameplay rules in Rust. CPU model
   collision preparation now expands selected GLB node/primitive instances into
   bounded model-space triangles, preserving provenance and mirrored winding.
-  Next add physics triangle/hull support and scene/runtime asset bindings before
+  Standalone static triangle geometry now shares immutable acceleration resources
+  across keyed groups, with immediate queries, native landing/replay and validation
+  regressions. Next add hull support and scene/runtime asset bindings before
   claiming imported-content collision. The Character Lab
   now exercises Decay gravity/jumps, solved carry/reversal and a keyboard goal
   through native Session and exported Chromium. It is feature proof, not Explorer
@@ -330,7 +332,11 @@ placement. The roadmap's "height/mesh terrain next" is this slice.
     hierarchy/instance expansion, source ranges, reflected winding, invalid-data
     diagnostics, native GLB regressions and the `model --collision` inspector.
     No runtime model collider is implied.
-  - [ ] Physics triangle/hull geometry, backend validation and query support.
+  - [ ] Physics triangle/hull geometry, backend validation and query support:
+    - [x] Immutable static triangle geometry and keyed groups, native immediate
+      queries/character movement, landing/replay and atomic validation regressions.
+      Standalone foundation only; no scene model collider is implied.
+    - [ ] Convex hull geometry and dynamic-body support.
   - [ ] Scene/runtime model-collider asset bindings, asynchronous loading and
     native/browser/editor/Explorer proof, without an assets → physics dependency.
   - static trimesh colliders built from a model's meshes;

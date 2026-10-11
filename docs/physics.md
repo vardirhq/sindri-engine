@@ -1475,6 +1475,42 @@ pending; no controller-on-controller carry is claimed.
 Assets now prepare bounded model-space triangles with accumulated selected-node
 transforms, reflected winding and primitive-instance ranges. This is the CPU
 geometry prerequisite for model-derived static meshes and convex hulls, added
-for the planned Explorer showcase. Physics backend shapes/queries and scene
-asset bindings remain absent; no runtime body is created by preparation. See
-[the asset contract](imported-models.md#cpu-collision-preparation).
+for the planned Explorer showcase. Static triangle geometry and standalone-world
+queries are now implemented; scene asset bindings and convex hulls remain absent.
+No runtime body is created by asset preparation. See [the asset contract](imported-models.md#cpu-collision-preparation).
+
+### Static triangle geometry
+
+`TriangleMesh3d::new(vertices, triangles)` builds an immutable, clone-shared
+physics resource without an asset, renderer or scene dependency. Its private
+backend acceleration structure is shared across instances and world snapshots.
+It accepts open, disconnected and nonmanifold surfaces without welding or repair;
+rays see both sides and gaps remain empty. A mesh is a surface, not a solid
+volume or a convex approximation. Authored winding remains meaningful for normals.
+
+Construction rejects empty geometry, more than 1,000,000 vertices or triangles,
+nonfinite coordinates or coordinates outside +/-100,000,000 units, out-of-range
+indices and degenerate triangles. Triangle cross-product squared length must be
+positive and finite in backend f32 arithmetic; extremely small triangles can
+therefore fail even after CPU model preparation succeeds. These bounds keep
+construction arithmetic representable. `TriangleMeshError3d` identifies a failing
+vertex or triangle; failed construction returns no partial resource.
+
+`TriangleMeshCollider3d` adds local pose, sensor flag, collision layers and
+`PhysicsMaterial` coefficients. `PhysicsWorld3d::validate_static_mesh_group` and
+`replace_static_mesh_group` validate the owner pose, every piece (with its index),
+composed mesh bounds, static ownership and incompatible pending controls before
+mutation. Static meshes share keys, body identity, ordering, replacement and
+removal with existing primitive groups. A group can replace either kind. The
+owner pose moves all groups; piece poses remain local. An empty replacement
+removes a group and never creates an absent owner. Queries see changes before
+a solver step; simulation contacts update at the next solve.
+
+Seven native regressions exercise geometry errors/budgets, shared resources,
+open gaps and two-sided rays, immediate ray/overlap/cast/ground/character queries,
+local rotation and filtering, replacement/removal, failed late-piece edits and
+pending controls, dynamic sphere landing and identical cloned-world replay.
+This is standalone physics proof for the planned Explorer showcase. Primitive
+`ColliderShape3d` and serialized scene payloads remain unchanged. Dynamic hulls,
+model asset bindings and native/browser/editor/Explorer project proof remain
+pending; WebAssembly compilation alone does not prove browser behavior.

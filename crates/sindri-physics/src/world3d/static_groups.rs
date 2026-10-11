@@ -3,7 +3,7 @@
 use sindri_core::EntityId;
 
 use super::{
-    PhysicsWorld3d, build,
+    PhysicsWorld3d, build, r3,
     validation::{validate_colliders, validate_pose},
 };
 use crate::{Collider3d, PhysicsError, PhysicsPose3d, RigidBody3d, RigidBodyKind};
@@ -22,6 +22,14 @@ impl PhysicsWorld3d {
     ) -> Result<(), PhysicsError> {
         validate_pose(pose)?;
         validate_colliders(pieces)?;
+        self.validate_static_owner(entity, !pieces.is_empty())
+    }
+
+    pub(super) fn validate_static_owner(
+        &self,
+        entity: EntityId,
+        has_geometry: bool,
+    ) -> Result<(), PhysicsError> {
         if let Some(record) = self.bodies.get(&entity) {
             if record.kind != RigidBodyKind::Static {
                 return Err(PhysicsError::WrongBodyKind(
@@ -30,17 +38,8 @@ impl PhysicsWorld3d {
                     record.kind,
                 ));
             }
-        } else if !pieces.is_empty() {
-            self.validate_insertion(
-                entity,
-                RigidBody3d {
-                    kind: RigidBodyKind::Static,
-                    position: pose.position,
-                    rotation: pose.rotation,
-                    ..RigidBody3d::default()
-                },
-                pieces,
-            )?;
+        } else if has_geometry {
+            self.validate_pending_controls(entity, RigidBodyKind::Static)?;
         }
         Ok(())
     }
@@ -68,13 +67,35 @@ impl PhysicsWorld3d {
         pieces: &[Collider3d],
     ) -> Result<(), PhysicsError> {
         self.validate_static_group(entity, pose, pieces)?;
+        let prepared = pieces
+            .iter()
+            .map(|piece| build::collider(entity, *piece))
+            .collect();
+        self.replace_prepared_static_group(entity, key, pose, prepared)
+    }
+
+    // Both primitive and triangle groups use the same ownership/query lifecycle.
+    pub(super) fn replace_prepared_static_group(
+        &mut self,
+        entity: EntityId,
+        key: u64,
+        pose: PhysicsPose3d,
+        pieces: Vec<r3::ColliderBuilder>,
+    ) -> Result<(), PhysicsError> {
         if !self.contains(entity) {
             if pieces.is_empty() {
                 return Ok(());
             }
-            self.insert_static_collider(entity, pose, pieces)?;
-            // Insertion just validated and created this record. Move its initial
-            // handles into group ownership so later replacement releases them.
+            self.insert_prepared_body(
+                entity,
+                RigidBody3d {
+                    kind: RigidBodyKind::Static,
+                    position: pose.position,
+                    rotation: pose.rotation,
+                    ..RigidBody3d::default()
+                },
+                pieces,
+            )?;
             let record = self
                 .bodies
                 .get_mut(&entity)
@@ -86,11 +107,8 @@ impl PhysicsWorld3d {
         self.remove_static_group(entity, key)?;
         let handle = self.record(entity)?.body;
         let handles: Vec<_> = pieces
-            .iter()
-            .map(|piece| {
-                self.backend
-                    .insert_collider(build::collider(entity, *piece), Some(handle))
-            })
+            .into_iter()
+            .map(|piece| self.backend.insert_collider(piece, Some(handle)))
             .collect();
         for &handle in &handles {
             self.collider_entities.insert(handle, entity);

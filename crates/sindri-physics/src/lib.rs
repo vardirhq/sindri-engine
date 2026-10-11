@@ -23,6 +23,7 @@ mod shared;
 mod slide2d;
 mod slider2d;
 mod spring2d;
+mod triangle_mesh3d;
 mod types2d;
 mod types3d;
 mod validate;
@@ -51,6 +52,7 @@ pub use shared::{CollisionLayers, PhysicsEventKind, RigidBodyKind};
 pub use slide2d::{SlideMotion2d, SlideOptions2d};
 pub use slider2d::{SliderJoint2d, SliderSettings2d};
 pub use spring2d::{SpringJoint2d, SpringSettings2d};
+pub use triangle_mesh3d::{TriangleMesh3d, TriangleMeshCollider3d, TriangleMeshError3d};
 pub use types2d::{
     Collider2d, ColliderShape2d, DistanceJoint2d, PhysicsEvent2d, PhysicsPose2d, RigidBody2d,
 };
