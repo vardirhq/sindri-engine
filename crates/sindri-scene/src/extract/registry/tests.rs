@@ -49,6 +49,7 @@ fn components_requiring_project_references_lack_a_default() {
             "sindri.grid.occupant",
             "sindri.grid.placement",
             "sindri.model",
+            "sindri.physics3d.model_collider",
             "sindri.ui.text",
         ])
     );

@@ -22,7 +22,7 @@ mod session;
 mod styling;
 
 pub use builtins::bind_builtin_tile_sets;
-pub use error::RuntimeError;
+pub use error::{ModelCollisionBindingError, RuntimeError};
 pub use project::{ProjectRun, STEP, scene_extractor};
 pub use report::{StepPhase, StepReport, StepTimes};
 pub use session::{Checkpoint, Session};

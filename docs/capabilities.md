@@ -325,12 +325,15 @@ project collision on every runtime surface remain absent. See
 [the contract](imported-models.md#cpu-collision-preparation).
 
 Static physics now provides clone-shared `TriangleMesh3d` resources and
-`TriangleMeshCollider3d` properties through keyed static groups. Seven native
+`TriangleMeshCollider3d` properties through keyed static groups. Eight native
 regressions exercise immediate ray/overlap/cast/ground/character queries, open
 surface gaps, filtering and local rotation, resource sharing, atomic invalid
 edits, replacement/removal, dynamic landing and cloned-world replay. This is
-standalone physics foundation for Explorer; model scene bindings and
-native/browser/editor/game project proof remain pending. See
+foundation for Explorer. Static scene model components and explicit Session GLB
+bindings now exercise character collision, scale/lifecycle, asset replacement and
+checkpoint replay in native regressions. Automatic player/browser/editor loading,
+collision-only export discovery, model asset picker metadata and project/game proof
+remain pending. See
 [the contract and numeric limits](physics.md#static-triangle-geometry).
 
 `ConvexHull3d` now constructs bounded, immutable volumetric resources, shared by

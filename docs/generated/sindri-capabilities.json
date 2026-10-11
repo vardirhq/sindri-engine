@@ -1297,6 +1297,25 @@
       "type_name": "sindri.physics3d.collider"
     },
     {
+      "addable": false,
+      "apply": {},
+      "default_payload": null,
+      "display_name": "Static Model Collider 3D",
+      "fields": {
+        "asset": "models/collision.glb",
+        "friction": 0.5,
+        "layers": {
+          "filter": 4294967295,
+          "memberships": 4294967295
+        },
+        "restitution": 0.0,
+        "sensor": false
+      },
+      "meanings": {},
+      "schema_version": 1,
+      "type_name": "sindri.physics3d.model_collider"
+    },
+    {
       "addable": true,
       "apply": {},
       "default_payload": {

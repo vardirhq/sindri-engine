@@ -6,6 +6,30 @@ use sindri_core::World;
 use sindri_scene::{ScenePhysics2d, ScenePhysics3d};
 
 impl Session {
+    /// Prepares decoded model triangles and binds them for the next fixed step.
+    /// Call after asynchronous loading succeeds; rendering remains independent.
+    /// Failed preparation retains the previous binding and live solver geometry.
+    ///
+    /// # Errors
+    /// Names invalid CPU preparation or static physics geometry.
+    pub fn bind_model_collision(
+        &mut self,
+        id: sindri_core::AssetId,
+        asset: &sindri_assets::ModelAsset,
+    ) -> Result<(), crate::ModelCollisionBindingError> {
+        let mesh = asset.collision_mesh(sindri_assets::ModelCollisionLimits::default())?;
+        let resource = sindri_scene::ModelCollisionGeometry3d::new(mesh.positions, mesh.triangles)?;
+        self.physics3d
+            .model_collision_bindings_mut()
+            .bind(id, std::sync::Arc::new(resource));
+        Ok(())
+    }
+
+    /// Removes a host binding; active scene references fail before the next solve.
+    pub fn unbind_model_collision(&mut self, id: &sindri_core::AssetId) {
+        self.physics3d.model_collision_bindings_mut().unbind(id);
+    }
+
     /// The 2D solver, for whatever draws what it holds.
     #[must_use]
     pub const fn physics(&self) -> &ScenePhysics2d {

@@ -35,6 +35,12 @@ const MOVED: f32 = 1.0e-4;
 
 #[derive(Debug, Error)]
 pub enum PhysicsSyncError {
+    #[error("model collider entity {0:?} has no collision binding for '{1}'")]
+    MissingModelCollision(EntityId, sindri_core::AssetId),
+    #[error("model collider entity {0:?}: {1}")]
+    InvalidModelCollider(EntityId, &'static str),
+    #[error("model collider entity {0:?}: {1}")]
+    ModelCollisionGeometry(EntityId, sindri_physics::TriangleMeshError3d),
     #[error("entity {0:?} has both 2D and 3D physics components")]
     ConflictingDimensions(EntityId),
     #[error("a scene has more than one active 3D physics world component")]

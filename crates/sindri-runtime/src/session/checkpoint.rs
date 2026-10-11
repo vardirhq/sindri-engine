@@ -8,7 +8,8 @@
 //! by its host is not part of it: where saves are written is the host's, so a
 //! restored session keeps writing where it was, and whether it is timing its
 //! steps is the host's choice too. So are the script sources, prefabs and
-//! profiles a host delivers as they are saved: a run taken back after a
+//! profiles and model collision bindings a host delivers as they are saved: a
+//! run taken back after a
 //! script was edited plays on with the edit, which recompiles on the next
 //! step, rather than with the text the copy was taken under.
 
@@ -26,15 +27,19 @@ impl Session {
     }
 
     /// Puts this session back as it was when `checkpoint` was taken, keeping
-    /// where its saves go, whether it is measuring, and the sources, prefabs
-    /// and profiles its host has delivered since. The world must be put
-    /// back to the copy taken with it.
+    /// where its saves go, whether it is measuring, and the sources, prefabs,
+    /// profiles and model collision bindings its host has delivered since.
+    /// The world must be put back to the copy taken with it.
     pub fn restore(&mut self, checkpoint: &Checkpoint) {
         let mut restored = checkpoint.0.copied();
         std::mem::swap(&mut restored.save_backend, &mut self.save_backend);
         std::mem::swap(&mut restored.sources, &mut self.sources);
         std::mem::swap(&mut restored.prefabs, &mut self.prefabs);
         std::mem::swap(&mut restored.profiles, &mut self.profiles);
+        std::mem::swap(
+            restored.physics3d.model_collision_bindings_mut(),
+            self.physics3d.model_collision_bindings_mut(),
+        );
         restored.measuring = self.measuring;
         restored.scripts.set_measuring(self.measuring);
         *self = restored;

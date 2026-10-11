@@ -403,3 +403,39 @@ fn dynamic_body_lands_on_static_triangles_and_replays() {
     assert_eq!(pose, copy.pose(id(2)).unwrap());
     assert!(touched);
 }
+
+#[test]
+fn original_mesh_insertion_validates_before_ownership_changes() {
+    let mut world = PhysicsWorld3d::new([0.0; 3]).unwrap();
+    let pose = at([0.0; 3]);
+    assert!(world.insert_static_mesh(id(1), pose, &[]).is_err());
+    let mut invalid = floor();
+    invalid.material.restitution = 2.0;
+    assert!(
+        world
+            .insert_static_mesh(id(1), pose, &[floor(), invalid])
+            .is_err()
+    );
+    assert!(world.is_empty());
+    world
+        .remember_control(
+            id(2),
+            RigidBodyKind::Dynamic,
+            BodyControl3d::Impulse([1.0, 0.0, 0.0]),
+        )
+        .unwrap();
+    assert!(world.insert_static_mesh(id(2), pose, &[floor()]).is_err());
+    assert!(world.pending_controls.contains_key(&id(2)));
+    assert!(!world.contains(id(2)));
+    world.insert_static_mesh(id(1), pose, &[floor()]).unwrap();
+    let handle = world.bodies[&id(1)].colliders[0];
+    world
+        .validate_static_mesh_insertion(id(1), pose, &[floor()])
+        .unwrap();
+    assert!(matches!(
+        world.insert_static_mesh(id(1), pose, &[floor()]),
+        Err(PhysicsError::EntityAlreadyRegistered(_))
+    ));
+    assert_eq!(world.bodies[&id(1)].colliders[0], handle);
+    assert_eq!(ray(&world, 0.0).unwrap().entity, id(1));
+}

@@ -106,7 +106,9 @@ Order:
   across keyed groups, with immediate queries, native landing/replay and validation
   regressions. Clone-shared convex hulls now support mixed primitive/hull bodies,
   validated mass and native dynamic/kinematic/sensor/replay regressions. Next add
-  scene/runtime asset bindings before claiming imported-content collision.
+  automatic host asset loading and project proof before claiming imported-content
+  collision complete. Static scene colliders now accept explicit Session bindings,
+  with native GLB movement/replay and asset replacement regressions.
   The Character Lab
   now exercises Decay gravity/jumps, solved carry/reversal and a keyboard goal
   through native Session and exported Chromium. It is feature proof, not Explorer
@@ -343,7 +345,12 @@ placement. The roadmap's "height/mesh terrain next" is this slice.
       impulses, sensor events, kinematic controls and replay. Standalone proof;
       scene model bindings and browser/editor/Explorer project proof remain open.
   - [ ] Scene/runtime model-collider asset bindings, asynchronous loading and
-    native/browser/editor/Explorer proof, without an assets → physics dependency.
+    native/browser/editor/Explorer proof, without an assets → physics dependency:
+    - [x] Static model component, explicit Session CPU binding, composed positive
+      scale and native scene/GLB movement, lifecycle, replacement and replay tests.
+    - [ ] Automatic player/browser/editor loading, collision-only export asset
+      discovery, model asset field metadata/picker and runtime project proof.
+    - [ ] Model-derived convex scene colliders for dynamic props.
   - static trimesh colliders built from a model's meshes;
   - convex hulls for dynamic props;
   - [x] Scene collider dimensions and offsets follow composed positive scale,

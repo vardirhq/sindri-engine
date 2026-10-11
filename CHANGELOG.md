@@ -1,5 +1,8 @@
 # Changelog
 
+- Add static model collider scene references and explicit Session GLB collision
+  bindings, with positive inherited scale, lifecycle and checkpoint-aware asset
+  replacement. Automatic player/editor loading and project proof remain pending.
 - Add clone-shared convex collision hulls and mixed primitive/hull rigid bodies
   with bounded construction, validated mass and native dynamic/kinematic/sensor
   regressions. Model scene bindings and browser/editor/game proof remain pending.

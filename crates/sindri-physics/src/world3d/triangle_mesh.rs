@@ -9,6 +9,57 @@ use super::{
 use crate::{PhysicsError, PhysicsPose3d, TriangleMeshCollider3d};
 
 impl PhysicsWorld3d {
+    /// Prevalidates a complete static mesh insertion, including queued controls.
+    /// Existing registration is ignored so scene drivers can prevalidate rebuilds.
+    ///
+    /// # Errors
+    /// Rejects empty pieces, invalid poses/properties/bounds or pending motion.
+    pub fn validate_static_mesh_insertion(
+        &self,
+        entity: EntityId,
+        pose: PhysicsPose3d,
+        pieces: &[TriangleMeshCollider3d],
+    ) -> Result<(), PhysicsError> {
+        if pieces.is_empty() {
+            return Err(PhysicsError::NoColliderPieces(entity));
+        }
+        validate_pose(pose)?;
+        for (index, piece) in pieces.iter().enumerate() {
+            validate_piece(piece, pose).map_err(|reason| PhysicsError::ColliderPiece {
+                index,
+                reason: Box::new(reason),
+            })?;
+        }
+        self.validate_pending_controls(entity, crate::RigidBodyKind::Static)
+    }
+
+    /// Inserts triangle pieces as one static body's original colliders.
+    ///
+    /// # Errors
+    /// Duplicate ownership or invalid insertion fails without mutation.
+    pub fn insert_static_mesh(
+        &mut self,
+        entity: EntityId,
+        pose: PhysicsPose3d,
+        pieces: &[TriangleMeshCollider3d],
+    ) -> Result<(), PhysicsError> {
+        if self.contains(entity) {
+            return Err(PhysicsError::EntityAlreadyRegistered(entity));
+        }
+        self.validate_static_mesh_insertion(entity, pose, pieces)?;
+        let prepared = pieces.iter().map(|piece| collider(entity, piece)).collect();
+        self.insert_prepared_body(
+            entity,
+            crate::RigidBody3d {
+                kind: crate::RigidBodyKind::Static,
+                position: pose.position,
+                rotation: pose.rotation,
+                ..crate::RigidBody3d::default()
+            },
+            prepared,
+        )
+    }
+
     /// Checks all triangle pieces, the owner pose and static ownership without
     /// mutation, including incompatible pending motion on an absent owner.
     ///

@@ -225,3 +225,19 @@ before it draws. Model authoring (thumbnails, dragging a model in, triangle
 picking, an asset picker) is the next slice of [the 3D update](3d-update.md).
 External Low Tide is the request that found this gap; it does not by itself
 satisfy this repository's in-tree game proof rule.
+
+## Explicit runtime collision binding
+
+A decoded `ModelAsset` can now be delivered to
+`Session::bind_model_collision(id, &asset)` for an authored
+`sindri.physics3d.model_collider` reference. CPU preparation expands the selected
+GLB hierarchy once; the scene driver owns static geometry and applies composed
+positive scale, pose changes and lifecycle on its shared fixed step. Rendering
+and collision references are independent. Native Session tests use the binary
+GLB fixture for character obstruction, checkpoint replay and asset replacement.
+See [scene ownership and limitations](physics.md#static-model-scene-ownership).
+
+This is an explicit host API. Player/browser/editor asset queues and export do
+not yet discover collision-only references or deliver model collision bindings.
+Convex model scene authoring, model asset picker metadata and Explorer proof also
+remain scheduled in slice 6; rendered GLBs do not automatically acquire collision.

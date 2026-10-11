@@ -1507,13 +1507,15 @@ owner pose moves all groups; piece poses remain local. An empty replacement
 removes a group and never creates an absent owner. Queries see changes before
 a solver step; simulation contacts update at the next solve.
 
-Seven native regressions exercise geometry errors/budgets, shared resources,
+Eight native regressions exercise geometry errors/budgets, shared resources,
 open gaps and two-sided rays, immediate ray/overlap/cast/ground/character queries,
 local rotation and filtering, replacement/removal, failed late-piece edits and
-pending controls, dynamic sphere landing and identical cloned-world replay.
+pending controls, original body insertion/duplicate ownership, dynamic sphere
+landing and identical cloned-world replay.
 This is standalone physics proof for the planned Explorer showcase. Primitive
-`ColliderShape3d` and serialized scene payloads remain unchanged. Model asset
-bindings and native/browser/editor/Explorer project proof remain pending;
+`ColliderShape3d` remains unchanged. Explicit static scene asset bindings are
+described below; automatic host loading and native/browser/editor/Explorer
+project proof remain pending;
 WebAssembly compilation alone does not prove browser behavior.
 
 ### Convex hull geometry
@@ -1552,3 +1554,40 @@ filtering/enter/exit events. This foundation is added for the planned Explorer
 showcase. Model-derived scene authoring/bindings and native/browser/editor/game
 project proof remain pending. Serialized primitive shapes and Decay APIs do not
 change in this slice; WASM compilation is not browser behavior proof.
+
+### Static model scene ownership
+
+`sindri.physics3d.model_collider` requires a logical `asset` ID and optionally
+accepts `friction` (default 0.5), `restitution` (0), `layers` (all) and `sensor`
+(false). It owns one static body and cannot coexist with a 3D rigid body,
+primitive collider, character or voxel collider. Mixed 2D/3D ownership is rejected.
+A render model is optional and can name a different asset. There is no invented
+blank asset or add-component default. Model asset picker metadata is still absent.
+
+Hosts explicitly prepare and deliver resources with
+`Session::bind_model_collision(id, &ModelAsset)` after asynchronous decoding.
+The runtime calls bounded CPU model preparation, then scene-owned
+`ModelCollisionGeometry3d` validation; neither scene nor physics depends on
+assets. Failed preparation keeps the previous binding. Removing a binding makes
+active references fail before the next 3D solve, retaining live geometry until
+corrected. Automatic player/browser/editor loading and collision-only export
+asset discovery are not wired yet; authored references alone do not load files.
+
+The scene driver prevalidates the entire authored plan before changing its
+solver. Composed positive finite scale is baked into model-space triangles;
+nonuniform scale is supported, invalid/overflowing/degenerate results fail.
+Identity geometry shares its immutable resource. A cache retains at most 64
+scaled variants; active colliders retain their resources independently. Preparation
+may populate this derived cache even when another entity invalidates the plan.
+Unchanged source/properties/scale keeps the registration; changed resources or
+scale rebuild once. Translation/rotation uses existing static teleports. Disable,
+removal and primitive/model transitions use the same ownership lifecycle.
+
+Checkpoints copy the solver and share immutable geometry. Restoring keeps the
+latest host-delivered bindings, like script sources; the next step reconciles
+against those resources. Native scene tests exercise dynamic landing, inherited
+scale/rotation, invalid updates, lifecycle and ownership transitions. Native
+Session tests decode the actual GLB fixture, block character motion, replay the
+same checkpoint and retain replacements across restore and failed preparation.
+This slice is foundation for Explorer; native/browser/editor project and game
+proof remain pending, and no surface earns a completion checkmark from compiling.

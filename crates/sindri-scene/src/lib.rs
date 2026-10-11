@@ -20,6 +20,7 @@ pub(crate) mod effects;
 mod extract;
 mod generation;
 mod input_actions;
+mod model_collision3d;
 mod navigation;
 mod occlusion;
 mod physics;
@@ -83,6 +84,9 @@ pub use extract::{
     world_camera_of,
 };
 pub use input_actions::InputActionsComponent;
+pub use model_collision3d::{
+    ModelCollider3dComponent, ModelCollisionBindings3d, ModelCollisionGeometry3d,
+};
 pub use navigation::{GridNavigationError, GridPlacement, WorldGridNavigation};
 pub use occlusion::{
     OcclusionError, OcclusionFinding, OcclusionProbe, OcclusionReport, sweep_occlusion,
@@ -120,6 +124,7 @@ pub use sequence::{
     referenced_sounds, resolve, top_level,
 };
 pub use shape_gizmos::{GizmoKind, GizmoStroke, ShapeGizmo, shape_gizmos};
+pub use sindri_physics::TriangleMeshError3d as ModelCollisionGeometryError3d;
 /// The shapes a collider is made of, which the editor draws and resizes.
 pub use sindri_physics::{Collider2d, ColliderShape2d};
 pub use textures::{
