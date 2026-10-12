@@ -4,6 +4,12 @@ on:
   workflow_run:
     workflows: ["Sindri Pages", "CI", "Dependencies", "Shapes Lab", "Decay", "Decay VS Code", "Autofix"]
     types: [completed]
+  workflow_dispatch:
+    inputs:
+      pr_number:
+        description: "Open PR to publish after all checks pass"
+        required: true
+        type: string
 
 permissions:
   contents: read
@@ -26,7 +32,7 @@ jobs:
     name: Build verified WIP site
     outputs:
       preview_ready: ${{ steps.preview.outputs.ready }}
-    if: github.event.workflow_run.event == 'pull_request'
+    if: github.event_name == 'workflow_dispatch' || github.event.workflow_run.event == 'pull_request'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
@@ -53,7 +59,6 @@ jobs:
         run: wasm-pack build games/voxel-lab --target web --release --out-dir pkg $WASM_OPT
       - uses: actions/configure-pages@v6
         id: pages
-        if: github.event.workflow_run.event == 'pull_request'
         with:
           enablement: true
       - name: Assemble Sindri site
@@ -165,9 +170,10 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           EVENT_RUN: ${{ github.event.workflow_run.id }}
           EVENT_HEAD: ${{ github.event.workflow_run.head_sha }}
+          PR_NUMBER: ${{ inputs.pr_number }}
           REPO: ${{ github.repository }}
         run: |
-          python3 site/verify_wip_preview.py "$REPO" "$EVENT_RUN" "$EVENT_HEAD" >> "$GITHUB_OUTPUT"
+          python3 site/verify_wip_preview.py "$REPO" "$EVENT_RUN" "$EVENT_HEAD" "$PR_NUMBER" >> "$GITHUB_OUTPUT"
       - name: Overlay approved 3D preview
         if: steps.preview.outputs.ready == 'true'
         env:
