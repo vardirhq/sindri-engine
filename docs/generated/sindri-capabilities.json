@@ -1326,6 +1326,30 @@
       "type_name": "sindri.physics3d.model_collider"
     },
     {
+      "addable": false,
+      "apply": {},
+      "default_payload": null,
+      "display_name": "Convex Model Collider 3D",
+      "fields": {
+        "asset": "models/collision.glb",
+        "friction": 0.5,
+        "layers": {
+          "filter": 4294967295,
+          "memberships": 4294967295
+        },
+        "restitution": 0.0,
+        "sensor": false
+      },
+      "meanings": {
+        "asset": {
+          "asset": "model",
+          "kind": "asset"
+        }
+      },
+      "schema_version": 1,
+      "type_name": "sindri.physics3d.model_convex_collider"
+    },
+    {
       "addable": true,
       "apply": {},
       "default_payload": {

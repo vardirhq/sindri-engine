@@ -62,6 +62,7 @@ impl ModelCollisionGeometry3d {
 pub struct ModelCollisionBindings3d {
     resources: BTreeMap<AssetId, Arc<ModelCollisionGeometry3d>>,
     scaled: BTreeMap<(AssetId, [u32; 3]), TriangleMesh3d>,
+    pub(crate) convex: crate::model_convex_collision3d::ModelConvexBindings3d,
 }
 impl ModelCollisionBindings3d {
     /// Replaces a logical resource and drops its cached scaled variants.

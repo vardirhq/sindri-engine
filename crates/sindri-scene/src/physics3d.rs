@@ -100,6 +100,7 @@ pub(crate) fn validate_dimensions(world: &World) -> Result<(), PhysicsSyncError>
             if [
                 crate::Character3dComponent::TYPE_NAME,
                 crate::ModelCollider3dComponent::TYPE_NAME,
+                crate::ModelConvexCollider3dComponent::TYPE_NAME,
                 RigidBody3dComponent::TYPE_NAME,
                 Collider3dComponent::TYPE_NAME,
                 VoxelCollider3dComponent::TYPE_NAME,

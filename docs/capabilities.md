@@ -362,7 +362,10 @@ exercise exact tetrahedron geometry, duplicates/invalid/degenerate points,
 shared resources, compound mass and local transforms, pending impulses, dynamic
 landing/replay, atomic failures, both kinematic kinds and sensor masks/events.
 The same insertion and control/query lifecycle supports all four body kinds.
-This is standalone foundation added for Explorer; model scene bindings and
+This is foundation added for Explorer; explicit convex-model scene and Session
+bindings now exercise scaled dynamic landing, mixed pieces, retained velocity,
+lifecycle, atomic failures and checkpoint-aware GLB replacement. Automatic
+convex discovery/export/player/headless/editor binding and
 native/browser/editor/game project proof remain pending. See
 [the hull contract and numeric limits](physics.md#convex-hull-geometry).
 

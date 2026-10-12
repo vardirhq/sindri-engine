@@ -9,17 +9,23 @@ use std::{collections::BTreeMap, time::Duration};
 
 use crate::voxel_collision3d::VoxelReach;
 use crate::{
-    Character3dComponent, CharacterMotions3d, CharacterRequests3d, Collider3dComponent,
-    PhysicsSyncError, PhysicsWorld3dComponent, RigidBody3dComponent, SceneVoxelCollision3d,
-    TileSetBindings,
+    CharacterMotions3d, CharacterRequests3d, PhysicsSyncError, PhysicsWorld3dComponent,
+    SceneVoxelCollision3d, TileSetBindings,
 };
+
+#[cfg(test)]
+use crate::{Collider3dComponent, RigidBody3dComponent};
 
 #[cfg(test)]
 mod authoring_tests;
 #[cfg(test)]
+mod convex_model_tests;
+#[cfg(test)]
 mod hierarchy_tests;
 #[cfg(test)]
 mod model_tests;
+mod prepare;
+use prepare::prepare;
 #[cfg(test)]
 mod pending_tests;
 #[cfg(test)]
@@ -52,6 +58,7 @@ struct Authored {
     body: Option<RigidBody3d>,
     pieces: Vec<Collider3d>,
     model: Option<crate::model_collision3d::PreparedModelCollider3d>,
+    convex: Option<crate::model_convex_collision3d::PreparedModelConvex3d>,
 }
 
 impl ScenePhysics3d {
@@ -213,6 +220,13 @@ impl ScenePhysics3d {
             if let Some(model) = &authored.model {
                 self.world
                     .insert_static_mesh(entity, pose, std::slice::from_ref(&model.piece))?;
+            } else if let Some(convex) = &authored.convex {
+                self.world.insert_hull_body(
+                    entity,
+                    body,
+                    &authored.pieces,
+                    std::slice::from_ref(&convex.piece),
+                )?;
             } else {
                 self.world.insert_body(entity, body, &authored.pieces)?;
             }
@@ -244,7 +258,12 @@ impl ScenePhysics3d {
                     .linear_velocity(entity)
                     .unwrap_or(body.linear_velocity);
                 let speed = velocity.iter().map(|axis| axis * axis).sum::<f32>().sqrt();
-                let size = authored.pieces.iter().map(extent).fold(0.0, f32::max);
+                let size = authored
+                    .pieces
+                    .iter()
+                    .map(extent)
+                    .fold(0.0, f32::max)
+                    .max(authored.convex.as_ref().map_or(0.0, |hull| hull.extent));
                 Some(VoxelReach {
                     position: pose_of(world, entity, Some(body)).position,
                     reach: size + 2.0 * (speed * seconds + pull * seconds * seconds),
@@ -294,108 +313,6 @@ impl ScenePhysics3d {
             }
         }
     }
-}
-
-fn prepare(
-    world: &World,
-    components: &ComponentSchemaRegistry,
-    physics: &PhysicsWorld3d,
-    models: &mut crate::ModelCollisionBindings3d,
-    registered: &BTreeMap<EntityId, Authored>,
-) -> Result<BTreeMap<EntityId, Authored>, PhysicsSyncError> {
-    let mut plan = BTreeMap::new();
-    for (entity, collider) in components.query::<Collider3dComponent>(world)? {
-        let character = components.get::<Character3dComponent>(world, entity)?;
-        let mut body = components
-            .get::<RigidBody3dComponent>(world, entity)?
-            .map(|value| value.0);
-        if character.is_some() && body.is_none() {
-            body = Some(RigidBody3d {
-                kind: RigidBodyKind::KinematicVelocity,
-                ..RigidBody3d::default()
-            });
-        }
-        let pose = pose_of(world, entity, body);
-        let placed = body_at(body, pose);
-        if placed.kind != RigidBodyKind::Static
-            && world
-                .get(entity)
-                .and_then(|data| data.transform_3d)
-                .is_some_and(|transform| transform.z_locked)
-        {
-            return Err(PhysicsSyncError::LockedDepth3d(entity));
-        }
-        physics.validate_insertion(entity, placed, &collider.0)?;
-        let scale = world.world_transform(entity).unwrap_or_default().scale;
-        let pieces = collider
-            .scaled(scale)
-            .map_err(|error| PhysicsSyncError::ColliderScale3d(entity, error))?;
-        physics.validate_insertion(entity, placed, &pieces)?;
-        plan.insert(
-            entity,
-            Authored {
-                body,
-                pieces,
-                model: None,
-            },
-        );
-    }
-    for (entity, component) in components.query::<crate::ModelCollider3dComponent>(world)? {
-        let model = prepare_model(
-            world,
-            physics,
-            models,
-            entity,
-            component,
-            registered
-                .get(&entity)
-                .and_then(|authored| authored.model.as_ref()),
-        )?;
-        plan.insert(
-            entity,
-            Authored {
-                body: None,
-                pieces: Vec::new(),
-                model: Some(model),
-            },
-        );
-    }
-    Ok(plan)
-}
-
-fn prepare_model(
-    world: &World,
-    physics: &PhysicsWorld3d,
-    models: &mut crate::ModelCollisionBindings3d,
-    entity: EntityId,
-    component: crate::ModelCollider3dComponent,
-    previous: Option<&crate::model_collision3d::PreparedModelCollider3d>,
-) -> Result<crate::model_collision3d::PreparedModelCollider3d, PhysicsSyncError> {
-    let data = world
-        .get(entity)
-        .ok_or(sindri_physics::PhysicsError::MissingEntity(entity))?;
-    if [
-        <Collider3dComponent as sindri_core::SceneComponent>::TYPE_NAME,
-        <RigidBody3dComponent as sindri_core::SceneComponent>::TYPE_NAME,
-        <Character3dComponent as sindri_core::SceneComponent>::TYPE_NAME,
-        <crate::VoxelCollider3dComponent as sindri_core::SceneComponent>::TYPE_NAME,
-    ]
-    .iter()
-    .any(|name| data.components.contains_key(*name))
-    {
-        return Err(PhysicsSyncError::InvalidModelCollider(
-            entity,
-            "static model collision owns its body; remove competing 3D physics components",
-        ));
-    }
-    let scale = world.world_transform(entity).unwrap_or_default().scale;
-    let model = models.prepare(entity, component, scale, previous)?;
-    physics.validate_static_mesh_insertion(
-        entity,
-        pose_of(world, entity, None),
-        std::slice::from_ref(&model.piece),
-    )?;
-    Ok(model)
 }
 
 /// The farthest any point of a piece is from its body's origin.

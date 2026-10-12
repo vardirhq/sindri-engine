@@ -81,8 +81,8 @@ resources and standalone keyed groups with native query/landing/replay tests;
 see [the physics contract](physics.md#static-triangle-geometry). Standalone convex
 hull resources and mixed rigid bodies now have native landing/control/replay
 tests as well. Static model scene bindings and native/browser/editor-session
-feature proof are described below. Convex model scene bindings, broader model
-authoring and Explorer game proof remain pending.
+feature proof are described below. Explicit convex model scene bindings now have native regression proof;
+automatic convex loading/authoring and Explorer game proof remain pending.
 
 ## Renderer boundary
 
@@ -295,3 +295,16 @@ invalid-reload retention, Save refusal and Stop restoration. It remains feature
 proof; Explorer game adoption is open.
 Convex model scene authoring and Explorer proof also
 remain scheduled in slice 6; rendered GLBs do not automatically acquire collision.
+
+
+## Explicit convex model binding
+
+`Session::bind_model_convex_collision` prepares at most 4,096 expanded vertices
+from a decoded selected GLB hierarchy, then builds shared scene-owned volumetric
+geometry. The `sindri.physics3d.model_convex_collider` component can share a rigid
+body and primitive pieces; a single hull fills all model gaps and concavities.
+Planar/oversized/invalid geometry fails atomically. Positive composed nonuniform
+scale, dynamic writeback, lifecycle and checkpoint-aware replacements have native
+scene and Session regression evidence. See [ownership and limits](physics.md#convex-model-scene-ownership).
+Automatic convex reference discovery/export/player/headless/editor binding,
+editor Add Component defaults and project/browser/Explorer proof remain open.

@@ -25,6 +25,32 @@ impl Session {
         Ok(())
     }
 
+    /// Prepares one volumetric hull from the selected decoded model hierarchy.
+    /// Call after asynchronous loading. Convex approximation fills concavities;
+    /// failure leaves the previous hull binding and live solver unchanged.
+    ///
+    /// # Errors
+    /// Invalid model preparation or bounded, nonvolumetric hull geometry.
+    pub fn bind_model_convex_collision(
+        &mut self,
+        id: sindri_core::AssetId,
+        asset: &sindri_assets::ModelAsset,
+    ) -> Result<(), crate::ModelCollisionBindingError> {
+        let mesh = asset.collision_mesh(sindri_assets::ModelCollisionLimits {
+            vertices: 4_096,
+            ..sindri_assets::ModelCollisionLimits::default()
+        })?;
+        let resource = sindri_scene::ModelConvexGeometry3d::new(mesh.positions)?;
+        self.physics3d
+            .bind_model_convex_collision(id, std::sync::Arc::new(resource));
+        Ok(())
+    }
+
+    /// Removes a convex binding; active references fail before the next solve.
+    pub fn unbind_model_convex_collision(&mut self, id: &sindri_core::AssetId) {
+        self.physics3d.unbind_model_convex_collision(id);
+    }
+
     /// Removes a host binding; active scene references fail before the next solve.
     pub fn unbind_model_collision(&mut self, id: &sindri_core::AssetId) {
         self.physics3d.model_collision_bindings_mut().unbind(id);

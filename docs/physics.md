@@ -1546,13 +1546,13 @@ compound. Primitive-only compounds also pass through this API, subject to its
 stricter count and mass checks. Static hulls remain original body pieces when
 keyed static groups are added later.
 
-Seven native regressions exercise invalid/degenerate construction, shared
+Eight native regressions exercise invalid/degenerate construction, shared
 geometry and exact tetrahedron rays/interior overlap, mixed-compound mass and
 local rotation/offset, pending impulses, dynamic landing and cloned replay,
 atomic invalid edits/budgets/duplicate ownership, both kinematic kinds and sensor
 filtering/enter/exit events. This foundation is added for the planned Explorer
-showcase. Model-derived scene authoring/bindings and native/browser/editor/game
-project proof remain pending. Serialized primitive shapes and Decay APIs do not
+showcase. Model-derived scene bindings now have explicit native proof below; automatic
+asset loading and native/browser/editor/game project proof remain pending. Serialized primitive shapes and Decay APIs do not
 change in this slice; WASM compilation is not browser behavior proof.
 
 ### Static model scene ownership
@@ -1607,3 +1607,47 @@ Session tests decode the actual GLB fixture, block character motion, replay the
 same checkpoint and retain replacements across restore and failed preparation.
 This slice is foundation for Explorer; native/browser/editor project and game
 proof remain pending, and no surface earns a completion checkmark from compiling.
+
+
+### Convex model scene ownership
+
+`sindri.physics3d.model_convex_collider` uses the static model collider's required
+`asset` and optional friction/restitution/layers/sensor fields. It supplies one
+volumetric hull to an optional `sindri.physics3d.rigid_body`; without that body it
+is static. All four body kinds are supported. Primitive collider pieces may
+share this body, while characters, static model collision, voxel collision and
+mixed 2D/3D owners are rejected before solver mutation. Moving Z-locked owners
+are rejected. Rendering remains independent.
+
+Hosts explicitly call `Session::bind_model_convex_collision(id, &ModelAsset)`
+after decoding. CPU preparation expands the selected hierarchy with a 4,096
+expanded-vertex budget, including duplicate vertices and repeated mesh instances.
+`ModelConvexGeometry3d` computes one hull of the entire hierarchy; it fills gaps
+and concavities and performs no decomposition, welding or simplification. A flat
+model fails with a typed error. Hull point, volume and mass limits are those of
+`ConvexHull3d`; asset preparation retains its other default node/triangle limits.
+Failed preparation leaves the previous binding intact.
+
+Positive finite composed nonuniform scale is baked into points. Unit-scale
+instances share immutable geometry; at most 64 scaled variants are cached,
+with active instances retaining their geometry independently. Source, scale or
+collider/body edits rebuild; unchanged frames and transform teleports preserve
+velocity. Dynamic hull extent contributes to voxel residency. Disable, removal
+and primitive transitions use the shared scene lifecycle. Checkpoints share
+immutable hulls and restoring preserves the latest host bindings.
+
+Native scene regressions exercise landing, scaling, inherited placement, mixed
+pieces, live velocity, replay, residency extent, invalid scale/material/ownership,
+Z-lock and unbinding retention. A Session regression uses the decoded GLB fixture,
+reorients a node to make it volumetric, moves and replays its body, and verifies
+replacement across restore and rejected planar replacement. Hull rebuild
+prevalidation ignores existing registration; insertion still rejects duplicate
+ownership.
+
+This is foundation added for Explorer. Convex references are not yet included in
+shared player/headless/editor loading or export discovery. Add Component defaults,
+convex authoring guards, Decay-driven project proof and real browser/editor/game
+exercise remain open. The component is registered with a model asset field
+meaning, but no blank/add default. Use the explicit binding API for this slice;
+loading a rendered model alone does not bind convex collision. Static triangle
+and convex bindings are independent, even when they name the same asset.

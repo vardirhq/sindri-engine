@@ -15,7 +15,8 @@ impl PhysicsWorld3d {
     ///
     /// # Errors
     /// Rejects body/piece values, overflowing bounds or unusable combined mass,
-    /// duplicate ownership and incompatible pending controls before mutation.
+    /// incompatible pending controls before mutation. Existing registration is ignored
+    /// so scene drivers can prevalidate a rebuild.
     pub fn validate_hull_body(
         &self,
         entity: EntityId,
@@ -41,6 +42,9 @@ impl PhysicsWorld3d {
         primitives: &[Collider3d],
         hulls: &[ConvexHullCollider3d],
     ) -> Result<(), PhysicsError> {
+        if self.contains(entity) {
+            return Err(PhysicsError::EntityAlreadyRegistered(entity));
+        }
         let prepared = self.prepare_hull_body(entity, body, primitives, hulls)?;
         self.insert_prepared_body(entity, body, prepared)
     }
@@ -52,9 +56,6 @@ impl PhysicsWorld3d {
         primitives: &[Collider3d],
         hulls: &[ConvexHullCollider3d],
     ) -> Result<Vec<r3::ColliderBuilder>, PhysicsError> {
-        if self.contains(entity) {
-            return Err(PhysicsError::EntityAlreadyRegistered(entity));
-        }
         let count = primitives.len().checked_add(hulls.len());
         if count == Some(0) {
             return Err(PhysicsError::NoColliderPieces(entity));

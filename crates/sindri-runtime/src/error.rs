@@ -41,4 +41,6 @@ pub enum ModelCollisionBindingError {
     Preparation(#[from] sindri_assets::ModelCollisionError),
     #[error(transparent)]
     Geometry(#[from] sindri_scene::ModelCollisionGeometryError3d),
+    #[error(transparent)]
+    ConvexGeometry(#[from] sindri_scene::ModelConvexGeometryError3d),
 }

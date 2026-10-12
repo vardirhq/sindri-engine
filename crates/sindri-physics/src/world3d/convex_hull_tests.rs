@@ -406,3 +406,24 @@ fn sensor_hulls_keep_masks_exclusions_and_enter_exit_events() {
             .any(|event| event.kind == PhysicsEventKind::SensorExited)
     );
 }
+
+#[test]
+fn rebuild_validation_ignores_registration_but_insertion_keeps_ownership() {
+    let mut world = PhysicsWorld3d::new([0.0; 3]).unwrap();
+    let body = RigidBody3d::default();
+    let pieces = [cube()];
+    world.insert_hull_body(id(1), body, &[], &pieces).unwrap();
+    world.validate_hull_body(id(1), body, &[], &pieces).unwrap();
+    assert!(matches!(
+        world.insert_hull_body(id(1), body, &[], &pieces),
+        Err(PhysicsError::EntityAlreadyRegistered(_))
+    ));
+    let mut invalid = body;
+    invalid.position[0] = f32::NAN;
+    assert!(
+        world
+            .validate_hull_body(id(1), invalid, &[], &pieces)
+            .is_err()
+    );
+    assert_eq!(ray(&world, 0.0).unwrap().entity, id(1));
+}

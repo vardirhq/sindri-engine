@@ -41,6 +41,8 @@ pub enum PhysicsSyncError {
     InvalidModelCollider(EntityId, &'static str),
     #[error("model collider entity {0:?}: {1}")]
     ModelCollisionGeometry(EntityId, sindri_physics::TriangleMeshError3d),
+    #[error("convex model collider entity {0:?}: {1}")]
+    ModelConvexGeometry(EntityId, sindri_physics::ConvexHullError3d),
     #[error("entity {0:?} has both 2D and 3D physics components")]
     ConflictingDimensions(EntityId),
     #[error("a scene has more than one active 3D physics world component")]

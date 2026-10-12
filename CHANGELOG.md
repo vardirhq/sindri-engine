@@ -1,5 +1,10 @@
 # Changelog
 
+- Add explicit convex-model scene/Session collision binding for movable props,
+  with positive nonuniform scale, mixed primitive compounds, shared geometry,
+  voxel reach and checkpoint-aware replacement. Automatic project loading,
+  editor authoring and game proof remain pending.
+
 - Render-model and static-model-collider fields now offer project GLB pickers in
   the editor. Add Component uses real project models and respects world-space
   and physics ownership constraints. The two asset fields have independent

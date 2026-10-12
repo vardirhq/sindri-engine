@@ -382,7 +382,14 @@ placement. The roadmap's "height/mesh terrain next" is this slice.
       ownership/world-space guards, uppercase native discovery and independent
       Undo/Redo; generated catalogue and native save/reopen/Play review.
     - [ ] Explorer game proof.
-    - [ ] Model-derived convex scene colliders for dynamic props.
+    - [ ] Model-derived convex colliders across authored projects:
+      - [x] Convex scene ownership and explicit Session GLB binding, composed
+        positive scale, mixed primitive/hull bodies, dynamic voxel reach and native
+        landing/lifecycle/atomic failure/replacement/checkpoint regressions.
+      - [ ] Convex reference discovery/export and automatic player/headless/editor
+        loading, safe hot reload and editor defaults/ownership guards.
+      - [ ] Decay-driven dynamic prop project goal, native/browser/editor exercise
+        and Explorer game adoption.
   - static trimesh colliders built from a model's meshes;
   - convex hulls for dynamic props;
   - [x] Scene collider dimensions and offsets follow composed positive scale,
