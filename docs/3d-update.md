@@ -386,10 +386,13 @@ placement. The roadmap's "height/mesh terrain next" is this slice.
       - [x] Convex scene ownership and explicit Session GLB binding, composed
         positive scale, mixed primitive/hull bodies, dynamic voxel reach and native
         landing/lifecycle/atomic failure/replacement/checkpoint regressions.
-      - [ ] Convex reference discovery/export and automatic player/headless/editor
-        loading, safe hot reload and editor defaults/ownership guards.
-      - [ ] Decay-driven dynamic prop project goal, native/browser/editor exercise
-        and Explorer game adoption.
+      - [x] Convex reference discovery/export and automatic player/headless/editor
+        loading, atomic shared reload and editor defaults/ownership guards.
+      - [x] Model Collision Lab falling GLB prop, Decay contact-start impulse and
+        travel goal through native player tests, rebuilt Chromium and native
+        editor Play; safe reload and authoring review.
+      - [ ] Explorer adoption of dynamic model props and game goal proof.
+      - [ ] Pre-synchronization Decay controls for newly spawned convex-only bodies.
   - static trimesh colliders built from a model's meshes;
   - convex hulls for dynamic props;
   - [x] Scene collider dimensions and offsets follow composed positive scale,

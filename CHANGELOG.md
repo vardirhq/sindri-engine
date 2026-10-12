@@ -1,5 +1,10 @@
 # Changelog
 
+- Automatically discover, export and bind convex GLB collision in the player,
+  headless runs and editor Play. Shared triangle/convex uses load once and reload
+  atomically; editor defaults and guards support rigid-body/primitive compounds.
+  Model Collision Lab adds a falling prop with a Decay impulse and travel goal.
+
 - Add explicit convex-model scene/Session collision binding for movable props,
   with positive nonuniform scale, mixed primitive compounds, shared geometry,
   voxel reach and checkpoint-aware replacement. Automatic project loading,

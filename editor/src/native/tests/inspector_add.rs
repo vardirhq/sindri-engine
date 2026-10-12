@@ -375,7 +375,11 @@ fn navigation_asks_for_the_tilemap_it_navigates() {
 fn imported_components_need_a_project_model_and_do_not_mix_static_and_body_colliders() {
     let extractor = extractor();
     let components = extractor.components();
-    for type_name in ["sindri.model", "sindri.physics3d.model_collider"] {
+    for type_name in [
+        "sindri.model",
+        "sindri.physics3d.model_collider",
+        "sindri.physics3d.model_convex_collider",
+    ] {
         assert_eq!(
             reason(
                 components,
@@ -445,4 +449,61 @@ fn imported_components_need_a_project_model_and_do_not_mix_static_and_body_colli
         .into_iter()
         .collect();
     assert!(!usable(components, &hud, project).contains(&"sindri.model".to_owned()));
+}
+
+#[test]
+fn convex_model_authoring_allows_body_compounds_and_rejects_competing_owners() {
+    let extractor = extractor();
+    let components = extractor.components();
+    let project = ProjectDefaults {
+        model: Some("models/prop.glb"),
+        ..ProjectDefaults::default()
+    };
+    let convex = "sindri.physics3d.model_convex_collider";
+    for allowed in ["sindri.physics3d.rigid_body", "sindri.physics3d.collider"] {
+        let present = [(allowed.into(), serde_json::json!({}))]
+            .into_iter()
+            .collect();
+        assert!(reason(components, &present, project, SceneHolds::default(), convex).is_none());
+        let present = [(convex.into(), serde_json::json!({}))]
+            .into_iter()
+            .collect();
+        assert!(
+            reason(
+                components,
+                &present,
+                project,
+                SceneHolds::default(),
+                allowed
+            )
+            .is_none()
+        );
+    }
+    for conflicting in [
+        "sindri.physics3d.model_collider",
+        "sindri.physics3d.character",
+        "sindri.physics3d.voxel_collider",
+        "sindri.physics2d.rigid_body",
+        "sindri.physics2d.collider",
+        "sindri.physics2d.character",
+        "sindri.physics2d.tilemap_collider",
+    ] {
+        let present = [(conflicting.into(), serde_json::json!({}))]
+            .into_iter()
+            .collect();
+        assert!(reason(components, &present, project, SceneHolds::default(), convex).is_some());
+        let present = [(convex.into(), serde_json::json!({}))]
+            .into_iter()
+            .collect();
+        assert!(
+            reason(
+                components,
+                &present,
+                project,
+                SceneHolds::default(),
+                conflicting
+            )
+            .is_some()
+        );
+    }
 }

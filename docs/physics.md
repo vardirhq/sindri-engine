@@ -1644,10 +1644,27 @@ replacement across restore and rejected planar replacement. Hull rebuild
 prevalidation ignores existing registration; insertion still rejects duplicate
 ownership.
 
-This is foundation added for Explorer. Convex references are not yet included in
-shared player/headless/editor loading or export discovery. Add Component defaults,
-convex authoring guards, Decay-driven project proof and real browser/editor/game
-exercise remain open. The component is registered with a model asset field
-meaning, but no blank/add default. Use the explicit binding API for this slice;
-loading a rendered model alone does not bind convex collision. Static triangle
-and convex bindings are independent, even when they name the same asset.
+Shared discovery now retains separate triangle/convex uses for each logical
+asset across scenes, expanded prefabs/overrides and inactive entities. Export
+includes convex-only references and original verified GLB bytes. The native/browser
+player, headless `ProjectRun` and editor Play prepare only authored representations
+before gameplay. Editor startup merges unsaved and later-scene uses without losing
+either representation, and keeps their assets retained through Play.
+
+`Session::bind_model_collisions` expands CPU geometry once, validates every
+requested representation, then replaces bindings. A failed hull preparation leaves
+both previous bindings intact, including an asset used for triangles elsewhere.
+Shared triangle/convex use inherits the 4,096 expanded-vertex convex budget;
+triangle-only assets keep their larger budget. Editor model reload uses this same
+atomic operation and retains the previous rendered model on collision failure.
+References introduced during Play still require stopping and restarting.
+
+Add Convex Model Collider uses a real project GLB and the model asset picker.
+Rigid bodies and primitive pieces may share it; static model/voxel collision,
+characters and 2D collision (including tilemaps) are withheld in either order.
+Model Collision Lab now has a volumetric GLB prop that falls onto the imported
+floor, receives a Decay impulse after landing, and reaches a travel goal. This is
+native player/Session, rebuilt browser and native editor feature proof for Explorer;
+see the [editor review](model-collision-editor-review.md#convex-props-and-authoring).
+Explorer game adoption remains open. Static triangle
+and convex bindings remain independent, even when they name the same asset.

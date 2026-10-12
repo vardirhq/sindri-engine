@@ -165,6 +165,76 @@
           "intensity": 1.1
         }
       }
+    },
+    {
+      "id": "prop",
+      "name": "Prop",
+      "transform_3d": {
+        "position": [
+          -3,
+          3,
+          -2
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "sindri.model": {
+          "asset": "models/prop.glb"
+        },
+        "sindri.physics3d.model_convex_collider": {
+          "asset": "models/prop.glb",
+          "friction": 0.5
+        },
+        "sindri.physics3d.rigid_body": {
+          "kind": "dynamic",
+          "position": [
+            0,
+            0,
+            0
+          ],
+          "rotation": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "linear_velocity": [
+            0,
+            0,
+            0
+          ],
+          "angular_velocity": [
+            0,
+            0,
+            0
+          ],
+          "gravity_scale": 1,
+          "linear_damping": 0,
+          "angular_damping": 0,
+          "lock_rotation": true
+        },
+        "sindri.script": {
+          "source": "walker.decay",
+          "script": "Prop"
+        }
+      }
+    },
+    {
+      "id": "physics",
+      "name": "Physics",
+      "components": {
+        "sindri.physics3d.world": {
+          "gravity": [
+            0,
+            -9.81,
+            0
+          ]
+        }
+      }
     }
   ]
 }

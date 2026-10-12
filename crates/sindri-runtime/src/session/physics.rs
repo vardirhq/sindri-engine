@@ -46,6 +46,44 @@ impl Session {
         Ok(())
     }
 
+    /// Prepares every authored representation before replacing any binding.
+    /// Shared triangle/convex references load once and fail atomically on reload.
+    ///
+    /// # Errors
+    /// Invalid bounded model preparation, triangles or volumetric hull.
+    pub fn bind_model_collisions(
+        &mut self,
+        id: sindri_core::AssetId,
+        asset: &sindri_assets::ModelAsset,
+        usage: crate::model_assets::ModelCollisionUse,
+    ) -> Result<(), crate::ModelCollisionBindingError> {
+        if !usage.triangles && !usage.convex {
+            return Ok(());
+        }
+        let mesh = asset.collision_mesh(sindri_assets::ModelCollisionLimits {
+            vertices: if usage.convex { 4_096 } else { 1_000_000 },
+            ..sindri_assets::ModelCollisionLimits::default()
+        })?;
+        let convex = usage
+            .convex
+            .then(|| sindri_scene::ModelConvexGeometry3d::new(mesh.positions.clone()))
+            .transpose()?;
+        let triangles = usage
+            .triangles
+            .then(|| sindri_scene::ModelCollisionGeometry3d::new(mesh.positions, mesh.triangles))
+            .transpose()?;
+        if let Some(resource) = convex {
+            self.physics3d
+                .bind_model_convex_collision(id.clone(), std::sync::Arc::new(resource));
+        }
+        if let Some(resource) = triangles {
+            self.physics3d
+                .model_collision_bindings_mut()
+                .bind(id, std::sync::Arc::new(resource));
+        }
+        Ok(())
+    }
+
     /// Removes a convex binding; active references fail before the next solve.
     pub fn unbind_model_convex_collision(&mut self, id: &sindri_core::AssetId) {
         self.physics3d.unbind_model_convex_collision(id);

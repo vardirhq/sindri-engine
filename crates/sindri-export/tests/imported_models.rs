@@ -30,7 +30,7 @@ fn project(name: &str, rooted: bool) -> Scratch {
       "format_version": 10, "entities": [
         {"id":"one", "components":{"sindri.model":{"asset":"models/reused.glb"}}},
         {"id":"two", "components":{"sindri.model":{"asset":"models/reused.glb"}}},
-        {"id":"collision", "disabled":true, "components":{"sindri.physics3d.model_collider":{"asset":"models/collision.glb"}}},
+        {"id":"collision", "disabled":true, "components":{"sindri.physics3d.model_convex_collider":{"asset":"models/collision.glb"}}},
         {"id":"shared-collision", "components":{"sindri.physics3d.model_collider":{"asset":"models/reused.glb"}}},
         {"id":"placed", "prefab":{"source":"prefabs/part.prefab"}}
       ]}"#,
@@ -48,7 +48,7 @@ fn project(name: &str, rooted: bool) -> Scratch {
         br#"{
       "format_version":1, "entities":[
       {"id":"part", "components":{"sindri.model":{"asset":"models/part.glb"}}},
-      {"id":"collision", "parent":"part", "components":{"sindri.physics3d.model_collider":{"asset":"models/prefab-collision.glb"}}}]}"#,
+      {"id":"collision", "parent":"part", "components":{"sindri.physics3d.model_convex_collider":{"asset":"models/prefab-collision.glb"}}}]}"#,
     );
     for name in ["reused", "hidden", "part", "collision", "prefab-collision"] {
         write(&root, &format!("{prefix}models/{name}.glb"), GLB);

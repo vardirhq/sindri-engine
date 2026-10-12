@@ -48,3 +48,27 @@ script CameraRig {
         this.transform.look_at(Vec3(0.0, 0.0, 0.0));
     }
 }
+
+
+// A falling imported prop: the solved pose triggers one Decay impulse, then
+// its travel proves that the hull is a real dynamic body on the shared clock.
+script Prop {
+    var pushed: bool = false;
+    var arrived: bool = false;
+    fn update(dt: f32) {
+        let position = this.transform.world_position;
+        if !pushed {
+            for other in Physics3d.collision_started() {
+                if other == World.find("Level") {
+                    pushed = true;
+                    Physics3d.apply_impulse(this.entity, Vec3(3.0, 0.0, 0.0));
+                    print("Model prop landed and pushed");
+                }
+            }
+        }
+        if pushed && !arrived && position.x > -2.3 {
+            arrived = true;
+            print("Model prop goal reached");
+        }
+    }
+}

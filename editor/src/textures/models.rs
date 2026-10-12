@@ -28,7 +28,7 @@ impl SceneTextures {
             .iter()
             .filter_map(|reference| AssetId::new(reference.clone()).ok())
             .collect();
-        wanted.extend(self.play_models.iter().cloned());
+        wanted.extend(self.play_models.keys().cloned());
         let Some(models) = &mut self.models else {
             for reference in references {
                 notes.push(TextureNote::Failed(format!(
@@ -78,9 +78,10 @@ impl SceneTextures {
                     let Some(asset) = models.get(&id).cloned() else {
                         continue;
                     };
-                    if self.play_models.contains(&id)
+                    if self.play_models.contains_key(&id)
                         && let Some(session) = session.as_deref_mut()
-                        && let Err(error) = session.bind_model_collision(id.clone(), &asset)
+                        && let Err(error) =
+                            session.bind_model_collisions(id.clone(), &asset, self.play_models[&id])
                     {
                         notes.push(TextureNote::Failed(format!("{id}: {error}")));
                         continue;
@@ -132,9 +133,12 @@ impl SceneTextures {
     ///
     /// # Errors
     /// No source directory or a queue request failure, naming the asset.
-    pub fn request_play_models(&mut self, wanted: BTreeSet<AssetId>) -> Result<(), String> {
+    pub fn request_play_models(
+        &mut self,
+        wanted: sindri_runtime::model_assets::ModelCollisionReferences,
+    ) -> Result<(), String> {
         self.play_models = wanted;
-        for id in &self.play_models {
+        for id in self.play_models.keys() {
             let loader = self
                 .models
                 .as_mut()

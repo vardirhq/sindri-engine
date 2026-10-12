@@ -206,7 +206,8 @@ fn withheld(
     scene: SceneHolds,
 ) -> Option<&'static str> {
     const MODEL_COLLIDER: &str = "sindri.physics3d.model_collider";
-    const OTHER_COLLIDERS: [&str; 7] = [
+    const OTHER_COLLIDERS: [&str; 9] = [
+        "sindri.physics3d.model_convex_collider",
         "sindri.physics3d.rigid_body",
         "sindri.physics3d.collider",
         "sindri.physics3d.voxel_collider",
@@ -214,8 +215,19 @@ fn withheld(
         "sindri.physics2d.rigid_body",
         "sindri.physics2d.collider",
         "sindri.physics2d.character",
+        "sindri.physics2d.tilemap_collider",
     ];
 
+    const CONVEX: &str = "sindri.physics3d.model_convex_collider";
+    const INCOMPATIBLE: [&str; 7] = [
+        MODEL_COLLIDER,
+        "sindri.physics3d.character",
+        "sindri.physics3d.voxel_collider",
+        "sindri.physics2d.rigid_body",
+        "sindri.physics2d.collider",
+        "sindri.physics2d.character",
+        "sindri.physics2d.tilemap_collider",
+    ];
     // First, because it is the one that breaks a scene rather than merely
     // failing to help. A second authored world camera is not tolerated: the
     // extract refuses the whole scene with `MultipleWorldCameras`, both
@@ -239,6 +251,13 @@ fn withheld(
             "A static model collider owns its collision; remove the other physics body, collider or character first",
         );
     }
+    if (metadata.type_name == CONVEX && INCOMPATIBLE.iter().any(|name| present.contains_key(*name)))
+        || (INCOMPATIBLE.contains(&metadata.type_name.as_str()) && present.contains_key(CONVEX))
+    {
+        return Some(
+            "Convex model collision cannot share a character, voxel or static model collider, or 2D physics",
+        );
+    }
     if component_default(components, &metadata.type_name, project).is_some() {
         return None;
     }
@@ -246,7 +265,9 @@ fn withheld(
     // these names the one thing to go and make.
     Some(match metadata.type_name.as_str() {
         UI_TEXT_COMPONENT => "No font in the project beside this scene",
-        "sindri.model" | "sindri.physics3d.model_collider" => {
+        "sindri.model"
+        | "sindri.physics3d.model_collider"
+        | "sindri.physics3d.model_convex_collider" => {
             "No supported .glb model in the project beside this scene"
         }
         AUDIO_SOURCE_COMPONENT => "No audio clip in the project beside this scene",
@@ -274,7 +295,9 @@ pub(crate) fn component_default(
     }
     let template = components.fields(type_name)?;
     match type_name {
-        "sindri.model" | "sindri.physics3d.model_collider" => {
+        "sindri.model"
+        | "sindri.physics3d.model_collider"
+        | "sindri.physics3d.model_convex_collider" => {
             completed(template, [("asset", Value::from(project.model?))])
         }
         GRID_OCCUPANT_COMPONENT => completed(template, [("grid", Value::from(project.grid?))]),

@@ -6,7 +6,7 @@ use sindri_render::{
 };
 
 use super::{SceneExtractError, SceneExtractor, camera::ResolvedCameras, transform_matrix};
-use crate::{ModelCollider3dComponent, ModelComponent};
+use crate::{ModelCollider3dComponent, ModelComponent, ModelConvexCollider3dComponent};
 
 /// Every render or collision model named by the world, including inactive entities.
 ///
@@ -19,6 +19,7 @@ pub fn referenced_models(world: &World) -> BTreeSet<String> {
             [
                 ModelComponent::TYPE_NAME,
                 ModelCollider3dComponent::TYPE_NAME,
+                ModelConvexCollider3dComponent::TYPE_NAME,
             ]
             .into_iter()
             .filter_map(|name| data.components.get(name))

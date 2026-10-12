@@ -306,5 +306,10 @@ body and primitive pieces; a single hull fills all model gaps and concavities.
 Planar/oversized/invalid geometry fails atomically. Positive composed nonuniform
 scale, dynamic writeback, lifecycle and checkpoint-aware replacements have native
 scene and Session regression evidence. See [ownership and limits](physics.md#convex-model-scene-ownership).
-Automatic convex reference discovery/export/player/headless/editor binding,
-editor Add Component defaults and project/browser/Explorer proof remain open.
+Convex-only references now participate in discovery/export and asynchronous
+player loading, native headless runs and editor Play. Discovery retains all
+representations needed per logical asset, and atomic preparation prevents a
+failed hull reload from partially replacing shared triangle collision. Editor
+Add Component uses a project model and enforces compatible ownership. Model
+Collision Lab exercises a falling imported prop and a Decay impulse/travel goal;
+Explorer adoption remains open.

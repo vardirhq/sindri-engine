@@ -139,7 +139,7 @@ fn collision_models(
         ModelAssetDecoder,
     )
     .unwrap();
-    for id in wanted {
+    for id in wanted.into_keys() {
         models.request(id).unwrap();
     }
     let deadline = Instant::now() + Duration::from_secs(20);
@@ -306,6 +306,10 @@ fn model_collision_lab_blocks_and_reaches_the_same_goal_in_editor_and_headless()
     );
     assert!(
         said.iter().any(|line| line == "Model goal reached"),
+        "{said:?}"
+    );
+    assert!(
+        said.iter().any(|line| line == "Model prop goal reached"),
         "{said:?}"
     );
     editor.session.restore(&checkpoint);

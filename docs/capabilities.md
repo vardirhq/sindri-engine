@@ -364,9 +364,16 @@ landing/replay, atomic failures, both kinematic kinds and sensor masks/events.
 The same insertion and control/query lifecycle supports all four body kinds.
 This is foundation added for Explorer; explicit convex-model scene and Session
 bindings now exercise scaled dynamic landing, mixed pieces, retained velocity,
-lifecycle, atomic failures and checkpoint-aware GLB replacement. Automatic
-convex discovery/export/player/headless/editor binding and
-native/browser/editor/game project proof remain pending. See
+lifecycle, atomic failures and checkpoint-aware GLB replacement. Shared convex discovery/export and player/headless/editor Play loading now
+retain both representations per logical asset, with atomic shared reload.
+Collision-only headless layouts, inactive/prefab export, merged unsaved/later
+references and authoring compatibility have regressions. Model Collision Lab
+adds a falling GLB prop with a Decay contact-start/impulse/travel goal through
+native player and editor/headless parity tests, rebuilt Chromium and native
+editor Play. The [editor review](model-collision-editor-review.md#convex-props-and-authoring)
+checks valid/invalid reload, Add Component, independent picking/Undo/Redo, save
+and reopen. Explorer game
+proof remains pending. See
 [the hull contract and numeric limits](physics.md#convex-hull-geometry).
 
 `ScenePhysics3d` now reconciles registered body/collider/world components with

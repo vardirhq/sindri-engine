@@ -1,5 +1,5 @@
 use super::*;
-use sindri_core::{SceneComponent, SceneDocument};
+use sindri_core::{AssetId, SceneComponent, SceneDocument};
 use sindri_scene::ModelCollider3dComponent;
 
 #[test]
@@ -27,7 +27,7 @@ fn play_uses_unsaved_inactive_collision_references_and_refuses_missing_queue() {
     let wanted = collision_references(&sources, &loaded.world, OpenScene::default()).unwrap();
     assert_eq!(
         wanted
-            .into_iter()
+            .into_keys()
             .map(|id| id.as_str().to_owned())
             .collect::<Vec<_>>(),
         ["models/unsaved.glb"]

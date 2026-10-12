@@ -1,6 +1,6 @@
 # Model Collision Lab
 
-A feature example of static collision from an imported GLB. One model contains
+A feature example of static and dynamic convex collision from imported GLBs. One model contains
 both the green ground and the orange wall; the same asset is referenced by
 `sindri.model` and `sindri.physics3d.model_collider`. The shared player prepares
 collision before starting gameplay after asset loading completes (asynchronously in the browser).
@@ -26,5 +26,12 @@ Editor Play and native headless `ProjectRun` also install collision before
 stepping. The editor/headless parity test follows the same route with matching
 world state, restores the initial world and replays wall obstruction. A [native editor review](../../docs/model-collision-editor-review.md) verifies
 Play goal, valid/invalid model reloads, Save refusal and Stop restoration.
-Dynamic convex model components and Explorer game adoption remain separate
-work; this example is feature proof.
+A purple volumetric prop is rendered and collides from `models/prop.glb`.
+It falls onto the imported floor; Decay observes landing, applies one impulse,
+and reports its travel goal. `models/generate-prop.py` reproduces that GLB.
+The native player and editor/headless parity regressions check this goal beside
+the walker goal, and the browser smoke requires both GLB fetches and both goals.
+Editor Add Convex Model Collider uses project models, permits body/primitive
+compounds, and withholds incompatible owners. Reload preparation is atomic when
+one GLB supplies both triangle and convex collision. Explorer game adoption
+remains separate work; this example is feature proof.

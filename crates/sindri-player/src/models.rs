@@ -1,11 +1,9 @@
 //! Model rendering and collision are installed after both asset sources finish.
 
-use std::collections::BTreeSet;
-
 use sindri_assets::ModelAsset;
 use sindri_core::{AssetId, ComponentSchemaRegistry, SceneDocument};
 use sindri_decay::PrefabSources;
-use sindri_runtime::Session;
+use sindri_runtime::{Session, model_assets::ModelCollisionReferences};
 use sindri_scene::SceneExtractor;
 
 use crate::PlayerError;
@@ -16,7 +14,7 @@ pub(super) fn references(
     scenes: &[(String, SceneDocument)],
     prefabs: &PrefabSources,
     components: &ComponentSchemaRegistry,
-) -> Result<BTreeSet<AssetId>, PlayerError> {
+) -> Result<ModelCollisionReferences, PlayerError> {
     sindri_runtime::model_assets::collision_references(scenes, prefabs, components)
         .map_err(PlayerError::ModelCollisionReferences)
 }
@@ -25,20 +23,20 @@ pub(super) fn references(
 /// valid physics surface. The host starts no gameplay until this succeeds.
 pub(super) fn install(
     models: Vec<(AssetId, ModelAsset)>,
-    collision: &BTreeSet<AssetId>,
+    collision: &ModelCollisionReferences,
     scene: &mut SceneExtractor,
     session: &mut Session,
 ) -> Result<(), PlayerError> {
     if let Some(missing) = collision
-        .iter()
+        .keys()
         .find(|id| !models.iter().any(|(loaded, _)| loaded == *id))
     {
         return Err(PlayerError::MissingModelCollision(missing.clone()));
     }
     for (id, asset) in models {
-        if collision.contains(&id) {
+        if let Some(usage) = collision.get(&id) {
             session
-                .bind_model_collision(id.clone(), &asset)
+                .bind_model_collisions(id.clone(), &asset, *usage)
                 .map_err(|source| PlayerError::ModelCollision {
                     asset: id.clone(),
                     source,

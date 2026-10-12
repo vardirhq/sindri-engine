@@ -15,8 +15,8 @@ gold pad; one loaded GLB supplies both the green floor and orange wall.
 
 Save during Play is refused as a running scene is not the document. Stop
 returns Walker to its authored position `[-2, 0.31, 0]`, removes the run's
-scene container and restores the selected character guides. The scene bytes
-stay identical to the shipped example through Play, Save refusal and Stop;
+scene container and restores the selected character guides. At this static-loading review, the scene bytes
+stayed identical to that version of the shipped example through Play, Save refusal and Stop;
 SHA-256: `70bfab86921ddd3c059332a511e7c6bf160328cf0de6e7f7db620b9738c332d0`.
 
 ## Model reload
@@ -43,9 +43,9 @@ Automated editor/headless parity checks also run the full route with matching
 world state at every step, restore the initial world and replay obstruction.
 Startup regressions cover unsaved inactive references, absent/unready queues
 and named decode failures; headless tests cover both asset layouts, later
-scenes and nested prefab overrides. Asset picker authoring, references added
-during a running scene, dynamic model hull components and Explorer remain
-separate work.
+scenes and nested prefab overrides. The authoring and convex slices below extend this review. References added
+during a running scene still require restarting Play; Explorer remains separate
+work.
 
 ## Model asset authoring
 
@@ -85,3 +85,41 @@ The same authored scratch project was then opened in the actual native
 keyboard obstruction and the walker on the gold pad. This closes the native
 player-window visual check for imported models on X11/software Vulkan; it does
 not broaden the GPU/platform coverage or replace Explorer game proof.
+
+
+## Convex props and authoring
+
+The convex-loading slice was reviewed on 2026-10-12 with a freshly built editor
+and `target/tmp/convex-model-editor/` on isolated X11/software Vulkan.
+Prop references `models/prop.glb` for rendering and convex collision, with a
+separate dynamic body. Play loads both lab GLBs before gameplay. The purple prop
+falls onto the imported floor, Decay observes the contact-start event and applies
+one impulse, and the console reports `Model prop landed and pushed` followed by
+`Model prop goal reached`. The inspector settles near x=-2.088, y=0.500, z=-2.
+
+Replace the scratch prop GLB with a valid 75% size version, including its bounds.
+The renderer shrinks and the solved body settles at y=0.375. Replace it with the
+planar decoded-model fixture: the console names `models/prop.glb` and the
+volumetric-hull error, while the prior small purple model and y=0.375 collision
+remain. Restore the shipped prop. Stop restores its authored [-3, 3, -2] pose.
+This checks a convex reload in the real editor; a separate Session regression
+checks atomic retention when the same asset also supplies triangle collision.
+
+Add Component → Physics → Convex Model Collider 3D on Goal supplies the real
+`models/level.glb` asset and default material/layers/sensor fields. Save persists
+it; Undo removes it and Save persists removal. Restore Goal before Play.
+The convex asset picker offers the project's two GLBs. Choose level for convex
+collision while Model continues to name prop; Undo/Redo changes the convex field
+independently. Undo to the original prop reference and save. Reopening shows both
+references and the authored prop pose intact, with both GLBs loaded. Native guard
+regressions cover allowed body/primitive compounds and incompatible owners in
+both orders, including 2D tilemap collision.
+
+Inspected captures include `target/tmp/convex-editor-play-prop-goal.png`,
+`convex-editor-reload-valid.png`, `convex-editor-reload-invalid.png`,
+`convex-editor-stop-restored.png`, `convex-editor-component-added.png`,
+`convex-editor-reopened.png`, `convex-editor-picked-final.png` and
+`convex-editor-redo-final.png`. The rebuilt browser smoke separately fetches both
+GLBs and reaches both the walker and prop goals; the editor/headless parity
+regression compares every step and restores/replays the imported wall.
+This is feature proof; Explorer and broader GPU/platform verification remain open.

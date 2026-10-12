@@ -114,3 +114,22 @@ fn headless_loads_later_scenes_and_spawnable_nested_prefab_overrides() {
         "spawnable prefab: {error}"
     );
 }
+
+#[test]
+fn convex_collision_only_models_load_in_both_layouts_and_reject_planar_replacements() {
+    for assets_dir in [false, true] {
+        let project = Scratch::new(assets_dir);
+        fs::write(project.assets().join("main.scene"), r#"{"format_version":10,"entities":[{"id":"prop","components":{"sindri.physics3d.model_convex_collider":{"asset":"models/prop.glb"}}}]}"#).unwrap();
+        fs::write(
+            project.assets().join("models/prop.glb"),
+            include_bytes!("../../../examples/model-collision/assets/models/prop.glb"),
+        )
+        .unwrap();
+        let mut run = ProjectRun::open(&project.0, [640.0, 360.0]).unwrap();
+        assert!(run.step(STEP).unwrap().notes().is_empty());
+        project.model("models/prop.glb");
+        let error = ProjectRun::open(&project.0, [640.0, 360.0]).err().unwrap();
+        assert!(error.contains("models/prop.glb"), "{error}");
+        assert!(error.contains("volumetric"), "{error}");
+    }
+}

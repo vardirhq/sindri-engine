@@ -5,12 +5,12 @@
 //! compared with what a build plays without opening one: the parity tests
 //! start this beside `sindri_runtime::ProjectRun` and step both.
 
-use std::{collections::BTreeSet, path::Path};
+use std::path::Path;
 
 use sindri_assets::{AssetLoader, ModelAssetDecoder};
 
-use sindri_core::{AssetId, ComponentSchemaRegistry, LoadedScenes, SceneDocument, World};
-use sindri_runtime::Session;
+use sindri_core::{ComponentSchemaRegistry, LoadedScenes, SceneDocument, World};
+use sindri_runtime::{Session, model_assets::ModelCollisionReferences};
 use sindri_scene::TileSetBindings;
 use weave::{Stylesheet, Viewport};
 
@@ -63,7 +63,7 @@ pub fn start(
     if let Some((scenes, loaded)) = playable_scenes(world, open)? {
         session = session.with_scenes(scenes, loaded);
     }
-    for id in collision {
+    for (id, usage) in collision {
         let loader = sources
             .models
             .ok_or_else(|| format!("{id}: no model asset queue"))?;
@@ -74,7 +74,7 @@ pub fn start(
             format!("{id}: model collision is still loading; try Play when loading finishes")
         })?;
         session
-            .bind_model_collision(id.clone(), asset)
+            .bind_model_collisions(id.clone(), asset, usage)
             .map_err(|error| format!("{id}: {error}"))?;
     }
     session
@@ -92,7 +92,7 @@ pub fn collision_references(
     sources: &PlaySources<'_>,
     world: &World,
     open: OpenScene<'_>,
-) -> Result<BTreeSet<AssetId>, String> {
+) -> Result<ModelCollisionReferences, String> {
     let mut copy = world.clone();
     let mut scenes = playable_scenes(&mut copy, open)?.map_or_else(Vec::new, |(scenes, _)| scenes);
     if let Some(file) = open
@@ -107,10 +107,10 @@ pub fn collision_references(
         sources.scripts.prefabs(),
         sources.components,
     )?;
-    wanted.extend(sindri_runtime::model_assets::collision_world_references(
-        world,
-        sources.components,
-    )?);
+    sindri_runtime::model_assets::merge_references(
+        &mut wanted,
+        sindri_runtime::model_assets::collision_world_references(world, sources.components)?,
+    );
     Ok(wanted)
 }
 

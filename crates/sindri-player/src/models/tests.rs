@@ -24,7 +24,7 @@ fn references_include_later_inactive_scenes_nested_prefabs_and_instance_override
         PrefabDocument::from_json(
             r#"{
         "format_version":1,"entities":[{"id":"root","components":{
-        "sindri.physics3d.model_collider":{"asset":"models/prefab.glb"}}}]}"#,
+        "sindri.physics3d.model_convex_collider":{"asset":"models/prefab.glb"}}}]}"#,
         )
         .unwrap(),
     );
@@ -41,15 +41,15 @@ fn references_include_later_inactive_scenes_nested_prefabs_and_instance_override
         ("later.scene".into(), SceneDocument::from_json(r#"{
             "format_version":10,"entities":[
             {"id":"hidden","disabled":true,"components":{
-              "sindri.physics3d.model_collider":{"asset":"models/hidden.glb"}}},
+              "sindri.physics3d.model_convex_collider":{"asset":"models/hidden.glb"}}},
             {"id":"placed","prefab":{"source":"nested.prefab","overrides":{
-              "nested":{"components":{"sindri.physics3d.model_collider":{"asset":"models/override.glb"}}}}}}
+              "nested":{"components":{"sindri.physics3d.model_convex_collider":{"asset":"models/override.glb"}}}}}}
             ]}"#).unwrap()),
     ];
     let scene = SceneExtractor::new().unwrap();
     let ids = references(&scenes, &prefabs, scene.components()).unwrap();
     assert_eq!(
-        ids.iter().map(AssetId::as_str).collect::<Vec<_>>(),
+        ids.keys().map(AssetId::as_str).collect::<Vec<_>>(),
         [
             "models/hidden.glb",
             "models/override.glb",
@@ -128,7 +128,7 @@ fn only_authored_collision_assets_need_valid_physics_geometry() {
     assert!(
         install(
             vec![(id.clone(), asset.clone())],
-            &BTreeSet::new(),
+            &ModelCollisionReferences::new(),
             &mut scene,
             &mut session
         )
@@ -136,7 +136,15 @@ fn only_authored_collision_assets_need_valid_physics_geometry() {
     );
     let error = install(
         vec![(id.clone(), asset)],
-        &[id.clone()].into_iter().collect(),
+        &[(
+            id.clone(),
+            sindri_runtime::model_assets::ModelCollisionUse {
+                triangles: true,
+                convex: false,
+            },
+        )]
+        .into_iter()
+        .collect(),
         &mut scene,
         &mut session,
     )
@@ -151,7 +159,15 @@ fn missing_collision_asset_fails_installation_with_its_id() {
     let id = AssetId::new("models/missing.glb").unwrap();
     let error = install(
         Vec::new(),
-        &[id.clone()].into_iter().collect(),
+        &[(
+            id.clone(),
+            sindri_runtime::model_assets::ModelCollisionUse {
+                triangles: true,
+                convex: false,
+            },
+        )]
+        .into_iter()
+        .collect(),
         &mut scene,
         &mut session,
     )
@@ -195,6 +211,10 @@ fn model_collision_project_opens_compiles_blocks_and_walks_to_its_goal() {
     }
     assert!(
         said.iter().any(|line| line == "Model wall blocked"),
+        "{said:?}"
+    );
+    assert!(
+        said.iter().any(|line| line == "Model prop goal reached"),
         "{said:?}"
     );
     assert!(
