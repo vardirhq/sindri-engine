@@ -6,9 +6,6 @@ on:
   pull_request:
     branches: [main]
   workflow_dispatch:
-  workflow_run:
-    workflows: ["Sindri Pages", "CI", "Dependencies", "Shapes Lab", "Decay", "Decay VS Code", "Autofix"]
-    types: [completed]
 
 permissions:
   contents: read
@@ -29,10 +26,7 @@ concurrency:
 jobs:
   build:
     name: Build Sindri site
-    outputs:
-      preview_ready: ${{ steps.preview.outputs.ready }}
     runs-on: ubuntu-latest
-    if: github.event_name != 'workflow_run' || github.event.workflow_run.event == 'pull_request'
     steps:
       - uses: actions/checkout@v7
       - uses: dtolnay/rust-toolchain@1.95.0
@@ -164,45 +158,15 @@ jobs:
           path: target/directory-captures
           if-no-files-found: warn
           retention-days: 14
-      - name: Validate green PR head and find preview artifact
-        id: preview
-        if: github.event_name == 'workflow_run'
-        env:
-          GH_TOKEN: ${{ github.token }}
-          EVENT_RUN: ${{ github.event.workflow_run.id }}
-          EVENT_HEAD: ${{ github.event.workflow_run.head_sha }}
-          REPO: ${{ github.repository }}
-        run: |
-          python3 site/verify_wip_preview.py "$REPO" "$EVENT_RUN" "$EVENT_HEAD" > "$RUNNER_TEMP/preview.env"
-          cat "$RUNNER_TEMP/preview.env" >> "$GITHUB_OUTPUT"
-      - name: Overlay approved WIP preview
-        if: github.event_name == 'workflow_run' && steps.preview.outputs.ready == 'true'
-        env:
-          GH_TOKEN: ${{ github.token }}
-          REPO: ${{ github.repository }}
-          PR: ${{ steps.preview.outputs.pr }}
-          PREVIEW_RUN: ${{ steps.preview.outputs.preview_run }}
-        run: |
-          mkdir -p "target/pages/wip/$PR"
-          gh run download "$PREVIEW_RUN" --repo "$REPO" --name 3d-labs-preview --dir "target/pages/wip/$PR"
-          test -f "target/pages/wip/$PR/index.html"
-          for route in transform orbit character3d model-collision; do
-            test -f "target/pages/wip/$PR/$route/pkg/sindri_player_bg.wasm"
-          done
-          mkdir -p target/pages/wip
-          python3 site/build_wip_directory.py target/pages/wip "$PR" "${{ steps.preview.outputs.sha }}"
-      - name: Skip publication if CI is not green
-        if: github.event_name == 'workflow_run' && steps.preview.outputs.ready != 'true'
-        run: echo "Not publishing an unverified PR preview."
       - uses: actions/upload-pages-artifact@v5
-        if: github.event_name != 'pull_request' && (github.event_name != 'workflow_run' || steps.preview.outputs.ready == 'true')
+        if: github.event_name != 'pull_request'
         with:
           path: target/pages
 
   deploy:
     name: Deploy Sindri site
     needs: build
-    if: github.event_name != 'pull_request' && (github.event_name != 'workflow_run' || needs.build.outputs.preview_ready == 'true')
+    if: github.event_name != 'pull_request'
     runs-on: ubuntu-latest
     environment:
       name: github-pages
