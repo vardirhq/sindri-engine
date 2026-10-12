@@ -4,7 +4,6 @@ on:
   workflow_run:
     workflows: ["Sindri Pages", "CI", "Dependencies", "Shapes Lab", "Decay", "Decay VS Code", "Autofix"]
     types: [completed]
-  workflow_dispatch:
 
 permissions:
   contents: read
@@ -53,7 +52,7 @@ jobs:
         run: wasm-pack build games/voxel-lab --target web --release --out-dir pkg $WASM_OPT
       - uses: actions/configure-pages@v6
         id: pages
-        if: github.event_name == 'workflow_dispatch' || github.event.workflow_run.event == 'pull_request'
+        if: github.event.workflow_run.event == 'pull_request'
         with:
           enablement: true
       - name: Assemble Sindri site
