@@ -28,11 +28,30 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  verify:
+    name: Verify PR head and checks
+    runs-on: ubuntu-latest
+    outputs:
+      ready: ${{ needs.verify.outputs.ready }}
+      pr: ${{ steps.preview.outputs.pr }}
+      sha: ${{ steps.preview.outputs.sha }}
+      preview_run: ${{ steps.preview.outputs.preview_run }}
+    steps:
+      - uses: actions/checkout@v7
+      - name: Verify exact PR head and successful checks
+        id: preview
+        env:
+          GH_TOKEN: ${{ github.token }}
+          EVENT_RUN: ${{ github.event.workflow_run.id }}
+          EVENT_HEAD: ${{ github.event.workflow_run.head_sha }}
+          PR_NUMBER: ${{ inputs.pr_number }}
+          REPO: ${{ github.repository }}
+        run: |
+          python3 site/verify_wip_preview.py "$REPO" "$EVENT_RUN" "$EVENT_HEAD" "$PR_NUMBER" >> "$GITHUB_OUTPUT"
   build:
     name: Build verified WIP site
-    outputs:
-      preview_ready: ${{ steps.preview.outputs.ready }}
-    if: github.event_name == 'workflow_dispatch' || github.event.workflow_run.event == 'pull_request'
+    needs: verify
+    if: needs.verify.outputs.ready == 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
@@ -164,16 +183,6 @@ jobs:
           path: target/directory-captures
           if-no-files-found: warn
           retention-days: 14
-      - name: Verify exact PR head and successful checks
-        id: preview
-        env:
-          GH_TOKEN: ${{ github.token }}
-          EVENT_RUN: ${{ github.event.workflow_run.id }}
-          EVENT_HEAD: ${{ github.event.workflow_run.head_sha }}
-          PR_NUMBER: ${{ inputs.pr_number }}
-          REPO: ${{ github.repository }}
-        run: |
-          python3 site/verify_wip_preview.py "$REPO" "$EVENT_RUN" "$EVENT_HEAD" "$PR_NUMBER" >> "$GITHUB_OUTPUT"
       - name: Overlay approved 3D preview
         if: steps.preview.outputs.ready == 'true'
         env:
@@ -198,7 +207,7 @@ jobs:
   deploy:
     name: Deploy Sindri site
     needs: build
-    if: needs.build.outputs.preview_ready == 'true'
+    if: needs.build.result == 'success'
     runs-on: ubuntu-latest
     environment:
       name: github-pages
