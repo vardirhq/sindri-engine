@@ -3203,3 +3203,16 @@ travel goal. The project Session regression checks first materialization and
 checkpoint replay. Rebuilt Chromium reaches both goals, and native editor
 Play/restart/Stop is recorded in the [review](model-collision-editor-review.md#convex-prefab-spawn-window-motion).
 This is feature proof for Explorer; game adoption remains open.
+
+### Live 3D collision coefficients
+
+The standalone `PhysicsWorld3d` now reads copied `PhysicsMaterial` values and
+updates complete coefficient batches on primitive, convex, triangle and keyed
+static colliders. Invalid values or a piece count mismatch leave the batch
+unchanged. Existing geometry/body handles, mass, motion, forces and kinematic
+targets survive; changed values wake contact processing while identical values
+leave sleeping bodies asleep. Native regressions verify friction changes on
+existing contacts, static-floor wakeup, restitution response and checkpoint
+replay. See [the physics contract](physics.md#live-3d-collision-coefficients).
+This is a prerequisite for 3D profiles, not their completion: scene resolution,
+project/editor/browser integration and Explorer game proof remain pending.

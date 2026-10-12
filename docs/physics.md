@@ -1116,6 +1116,39 @@ rotated probes are exercised as described above. CCD controls,
 contacts, force/torque, materials, joints and character controllers also have no
 3D authoring/Decay surface yet. The 2D API remains unchanged.
 
+## Live 3D collision coefficients
+
+`PhysicsWorld3d::materials(entity)` returns copied `PhysicsMaterial` values.
+`set_materials(entity, values)` updates existing colliders without rebuilding
+their body or geometry. The order is the original primitive pieces followed by
+convex hull pieces, then static groups in ascending key and piece order. Static
+triangle meshes use their original piece order. An existing static owner whose
+groups have all been removed accepts an empty list; an absent owner fails.
+
+The complete piece count and all coefficients validate before any mutation.
+Friction is finite and nonnegative; restitution is finite in `[0, 1]`, using
+the same asset-free `PhysicsMaterial` rules as 2D. Updates preserve collider
+and body handles, pose, mass, linear/angular velocity, forces, position-kinematic
+targets and checkpoint replay. Changed values refresh contact processing and
+wake affected bodies, including sleeping neighbors of a changed static floor.
+Identical values leave sleeping bodies asleep. Friction retains the minimum
+combine rule and restitution the average rule.
+
+Rapier can reuse a resting contact's cached coefficients even after a pose
+refresh. A changed batch therefore requests one full contact update on the next
+successful step, temporarily bypassing contact recycling for that step only.
+Normal recycling resumes afterward. Checkpoints retain the pending refresh;
+an invalid timestep does not consume it. Geometry and contact identities remain
+intact. A profile reload may consequently cost one full world contact pass.
+
+Native backend regressions exercise mixed primitive/hull validation and state,
+static triangle/group order and identity, empty owners, sleeping bodies,
+kinematic targets, friction changes on existing contacts without new start
+events, sleeping-neighbor wakeup and restitution/replay. This is the runtime
+foundation for shared 3D physics profiles. Scene profile resolution, coefficient
+reload without scene rebuilds, editor/Decay authoring and Explorer gameplay
+proof remain pending; no new game capability is claimed by this backend slice.
+
 ## Replaceable static collider groups
 
 `PhysicsWorld3d::replace_static_group(entity, key, pose, pieces)` changes one

@@ -401,6 +401,13 @@ placement. The roadmap's "height/mesh terrain next" is this slice.
     with uniform round shapes, orthogonal nonuniform boxes and atomic rejection.
   - [ ] Browser scale editing, native editor interaction and Explorer scale proof.
 - [ ] Physics material profiles in 3D, sharing the 2D asset format.
+  - [x] Standalone live coefficient reads/updates for primitive, convex, triangle
+    and keyed static colliders, with atomic validation, retained motion/geometry,
+    contact wakeup, friction/restitution response and native replay regressions.
+  - [ ] Resolve shared profiles and overrides at the scene boundary, retaining
+    live motion on coefficient-only edits and reloads.
+  - [ ] Exercise project loading/export, editor authoring, native/browser feature
+    proof and Explorer gameplay adoption.
 
 ### 6b. Skeletal animation
 - [ ] Decode skins (joints, inverse bind matrices, `JOINTS_0`/`WEIGHTS_0`)

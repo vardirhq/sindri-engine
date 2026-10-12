@@ -1,5 +1,10 @@
 # Changelog
 
+- Add standalone live 3D collider coefficient reads and atomic updates for
+  primitive, convex, triangle and streamed static geometry. Updates retain
+  motion, geometry and contacts, wake affected bodies and replay in checkpoints.
+  Shared scene profiles and editor/game adoption remain pending.
+
 - Convex-model prefabs now accept typed Decay motion reads, setters and impulses
   immediately after spawning. Queued controls use actual scaled/combined mass,
   preserve previous valid requests on rejected authoring and replay once. Model

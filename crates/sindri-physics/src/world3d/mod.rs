@@ -6,6 +6,7 @@ mod controls;
 mod convex_hull;
 mod ground;
 mod grounded;
+mod materials;
 mod pending;
 mod query;
 mod spatial;
@@ -47,6 +48,7 @@ pub struct PhysicsWorld3d {
     collider_entities: HashMap<r3::ColliderHandle, EntityId>,
     spatial: spatial::SpatialIndex,
     pending_controls: HashMap<EntityId, Vec<BodyControl3d>>,
+    materials_changed: bool,
 }
 
 /// A copy that goes on exactly as this world would: what recording a run
@@ -59,6 +61,7 @@ impl Clone for PhysicsWorld3d {
             collider_entities: self.collider_entities.clone(),
             spatial: self.spatial.clone(),
             pending_controls: self.pending_controls.clone(),
+            materials_changed: self.materials_changed,
         }
     }
 }
@@ -74,6 +77,7 @@ impl PhysicsWorld3d {
             collider_entities: HashMap::new(),
             spatial: spatial::SpatialIndex::default(),
             pending_controls: HashMap::new(),
+            materials_changed: false,
         })
     }
 
@@ -244,7 +248,23 @@ impl PhysicsWorld3d {
         let (force_send, _force_recv) = mpsc::channel();
         let (tear_send, _tear_recv) = mpsc::channel();
         let events = r3::ChannelEventCollector::new(collision_send, force_send, tear_send);
+        // Rapier can recycle resting contacts using their cached coefficients.
+        // One full contact update after an edit refreshes them without replacing
+        // colliders or losing warm-start impulses. Restore normal recycling after.
+        let recycle_distance = self
+            .backend
+            .integration_parameters
+            .normalized_contact_recycle_distance;
+        if self.materials_changed {
+            self.backend
+                .integration_parameters
+                .normalized_contact_recycle_distance = 0.0;
+        }
         self.backend.step_with_events(&(), &events);
+        self.backend
+            .integration_parameters
+            .normalized_contact_recycle_distance = recycle_distance;
+        self.materials_changed = false;
         self.index_simulated_bodies();
         Ok(collision_recv
             .try_iter()
