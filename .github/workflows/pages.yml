@@ -198,6 +198,7 @@ jobs:
             test -f "target/wip-preview/$route/index.html"
             test -f "target/wip-preview/$route/assets/sindri.manifest"
             test -f "target/wip-preview/$route/pkg/sindri_player_bg.wasm"
+            grep -Fq "<base href=\"/wip/${{ github.event.pull_request.number }}/$route/\">" "target/wip-preview/$route/index.html"
           done
       - name: Upload 3D lab preview bundle
         if: github.event_name == 'pull_request'
