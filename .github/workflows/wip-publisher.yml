@@ -26,6 +26,7 @@ jobs:
     name: Build verified WIP site
     outputs:
       preview_ready: ${{ steps.preview.outputs.ready }}
+    if: github.event.workflow_run.event == 'pull_request'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
@@ -191,7 +192,7 @@ jobs:
   deploy:
     name: Deploy Sindri site
     needs: build
-    if: github.event_name != 'pull_request'
+    if: needs.build.outputs.preview_ready == 'true'
     runs-on: ubuntu-latest
     environment:
       name: github-pages
