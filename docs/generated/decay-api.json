@@ -95,7 +95,7 @@
       "type": "Physics"
     },
     {
-      "description": "Independent 3D physics controls, indexed queries and copied last-step events. Requires a 3D physics host. Controls require an active body. Before synchronization, valid authored 3D bodies and nonempty colliders accept ordered setters/impulses; replay uses actual compound mass. Unconsumed requests expire after successful synchronization. Authored motion fields are unchanged, so structural rebuilds restore authored settings.",
+      "description": "Independent 3D physics controls, indexed queries and copied last-step events. Requires a 3D physics host. Controls require an active body. Before synchronization, valid authored 3D bodies with nonempty primitive colliders or convex-model references accept ordered setters/impulses. Convex asset geometry, scaled hull mass and pending controls validate at scene synchronization; replay uses actual compound mass. Unconsumed requests expire after successful synchronization. Authored motion fields are unchanged, so structural rebuilds restore authored settings.",
       "kind": "value",
       "name": "Physics3d",
       "read_only": false,
@@ -2821,7 +2821,7 @@
       "name": "Physics"
     },
     {
-      "description": "Independent 3D physics controls, indexed queries and copied last-step events. Requires a 3D physics host. Controls require an active body. Before synchronization, valid authored 3D bodies and nonempty colliders accept ordered setters/impulses; replay uses actual compound mass. Unconsumed requests expire after successful synchronization. Authored motion fields are unchanged, so structural rebuilds restore authored settings.",
+      "description": "Independent 3D physics controls, indexed queries and copied last-step events. Requires a 3D physics host. Controls require an active body. Before synchronization, valid authored 3D bodies with nonempty primitive colliders or convex-model references accept ordered setters/impulses. Convex asset geometry, scaled hull mass and pending controls validate at scene synchronization; replay uses actual compound mass. Unconsumed requests expire after successful synchronization. Authored motion fields are unchanged, so structural rebuilds restore authored settings.",
       "members": [
         {
           "description": "Copied world-space Vec3 angular velocity in radians per second around XYZ. Before synchronization returns the last queued setter or authored starting velocity; rotation locking returns zero.",

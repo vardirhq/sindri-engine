@@ -123,3 +123,25 @@ Inspected captures include `target/tmp/convex-editor-play-prop-goal.png`,
 GLBs and reaches both the walker and prop goals; the editor/headless parity
 regression compares every step and restores/replays the imported wall.
 This is feature proof; Explorer and broader GPU/platform verification remain open.
+
+
+## Convex prefab spawn-window motion
+
+The spawn-window slice was reviewed with the freshly built native editor on
+2026-10-12 using `target/tmp/convex-spawn-editor/` on isolated X11/software Vulkan.
+The authored scene now has six entities; CameraRig's typed prefab export names
+`prefabs/prop.prefab`. The prefab contains the convex-only dynamic GLB body and
+its Prop script. Play preloads that prefab and its model, spawns the purple prop,
+and reports `Model spawn controls queued` before it has a solver body. Native
+Session regressions separately inspect this boundary and its first materialized
+velocity/mass and checkpoint replay.
+
+The native console then reports `Model prop landed and pushed` and
+`Model prop goal reached`, and the purple GLB is visible on the imported floor.
+Stop removes the spawned prop and the run's scene container, returning to six
+authored entities. Restart queues the commands once for a fresh run and reaches
+the goal again. Captures `target/tmp/convex-spawn-editor-play.png`,
+`convex-spawn-editor-goal.png` and `convex-spawn-editor-stopped.png` were inspected.
+The rebuilt Chromium smoke independently requires pending-read verification,
+both GLB fetches, the prop goal and the keyboard walker goal with no runtime/GPU
+errors. Explorer adoption and broader platform/GPU coverage remain open.

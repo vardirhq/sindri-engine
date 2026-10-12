@@ -5,7 +5,7 @@ use super::{TypeEntry, call, value};
 pub(super) const TYPES: &[TypeEntry] = &[
     TypeEntry {
         name: "Physics3d",
-        text: "Independent 3D physics controls, indexed queries and copied last-step events. Requires a 3D physics host. Controls require an active body. Before synchronization, valid authored 3D bodies and nonempty colliders accept ordered setters/impulses; replay uses actual compound mass. Unconsumed requests expire after successful synchronization. Authored motion fields are unchanged, so structural rebuilds restore authored settings.",
+        text: "Independent 3D physics controls, indexed queries and copied last-step events. Requires a 3D physics host. Controls require an active body. Before synchronization, valid authored 3D bodies with nonempty primitive colliders or convex-model references accept ordered setters/impulses. Convex asset geometry, scaled hull mass and pending controls validate at scene synchronization; replay uses actual compound mass. Unconsumed requests expire after successful synchronization. Authored motion fields are unchanged, so structural rebuilds restore authored settings.",
         members: &[
             call(
                 "move_character",

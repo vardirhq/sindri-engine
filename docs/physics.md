@@ -912,8 +912,10 @@ keeps angular velocity zero. Invalid arguments/body kinds fail before mutation.
 Controls change live simulation, leaving authored starting motion unchanged;
 structural body/collider rebuilds therefore restore authored settings. Missing
 3D host context and stale/inactive handles fail explicitly. Before synchronization,
-controls require valid authored 3D body and nonempty collider components, no
-conflicting 2D physics and no moving depth lock. The composed transform supplies
+controls require a valid authored 3D body with nonempty primitive colliders or
+a convex-model reference, compatible ownership and no moving depth lock. Convex
+schema/material fields and positive composed scale validate before queuing; hull
+geometry and mass validate at synchronization. The composed transform supplies
 pose, as it does for scene insertion. Requests replay in call order before the
 first solve, after actual compound mass is known. Reads return copied last queued
 setters or authored starting velocities (locked angular velocity is zero);
@@ -1668,3 +1670,33 @@ native player/Session, rebuilt browser and native editor feature proof for Explo
 see the [editor review](model-collision-editor-review.md#convex-props-and-authoring).
 Explorer game adoption remains open. Static triangle
 and convex bindings remain independent, even when they name the same asset.
+
+
+### Convex-model spawn-window controls
+
+Existing `Physics3d` motion reads, setters and impulses now accept an authored
+convex-only body before its first synchronization, and hull/primitive compounds.
+`PhysicsWorld3d::validate_body_settings` checks the real authored/composed body
+without requiring or inventing primitive geometry. The host also validates
+collider schemas, nonempty primitive pieces when present, convex material,
+positive finite composed hull scale, dimension/owner conflicts and moving Z locks.
+Invalid authoring or input never replaces an earlier valid queued request.
+
+No asset loading or hull construction runs in the scripting host. Geometry,
+bounds, volume, scaled mass and pending kind compatibility validate together
+before scene solver mutation. Missing/invalid hull bindings fail synchronization
+and retain queued controls for a corrected retry. Reads return copied authored
+starts/last queued setters; impulses wait for the actual combined mass. Rotation
+locks still return zero angular velocity. Successful materialization replays once
+in call order, retains authored motion fields and participates in checkpoints.
+
+Five native host regressions cover scaled hull mass/ordered controls/replay,
+invalid authoring preserving the last request, kinematic impulse rejection and
+rotation locks, mixed-compound mass, and missing binding/corrected retry.
+Model Collision Lab now spawns its prop from a typed prefab, queues velocity,
+impulse and angular motion immediately, and reports pending-read verification.
+A project Session regression checks the first materialization step and checkpoint
+replay, then reaches the prop's contact-start impulse/travel goal. Rebuilt Chromium verifies the pending-read message, both fetched GLBs and both
+lab goals. Native editor Play/restart reaches the prop goal and Stop removes
+the spawned body; see [the review](model-collision-editor-review.md#convex-prefab-spawn-window-motion).
+Explorer adoption remains open.

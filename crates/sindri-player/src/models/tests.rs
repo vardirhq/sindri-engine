@@ -210,6 +210,11 @@ fn model_collision_project_opens_compiles_blocks_and_walks_to_its_goal() {
         input.apply(InputEvent::KeyReleased(key));
     }
     assert!(
+        said.iter()
+            .any(|line| line == "Model spawn controls queued"),
+        "{said:?}"
+    );
+    assert!(
         said.iter().any(|line| line == "Model wall blocked"),
         "{said:?}"
     );

@@ -312,6 +312,11 @@ fn model_collision_lab_blocks_and_reaches_the_same_goal_in_editor_and_headless()
         said.iter().any(|line| line == "Model prop goal reached"),
         "{said:?}"
     );
+    assert!(
+        said.iter()
+            .any(|line| line == "Model spawn controls queued"),
+        "{said:?}"
+    );
     editor.session.restore(&checkpoint);
     editor.world = snapshot;
     assert_eq!(state(&editor), initial, "Stop restores the authored world");

@@ -26,7 +26,11 @@ Editor Play and native headless `ProjectRun` also install collision before
 stepping. The editor/headless parity test follows the same route with matching
 world state, restores the initial world and replays wall obstruction. A [native editor review](../../docs/model-collision-editor-review.md) verifies
 Play goal, valid/invalid model reloads, Save refusal and Stop restoration.
-A purple volumetric prop is rendered and collides from `models/prop.glb`.
+A purple volumetric prop is spawned from `prefabs/prop.prefab` and is rendered
+and collides from `models/prop.glb`. The camera script queues typed velocity,
+impulse and locked angular motion immediately after spawning, and verifies
+pending reads before its first solve. A Session regression checks materialization
+and checkpoint replay with actual hull mass.
 It falls onto the imported floor; Decay observes landing, applies one impulse,
 and reports its travel goal. `models/generate-prop.py` reproduces that GLB.
 The native player and editor/headless parity regressions check this goal beside

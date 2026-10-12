@@ -3190,3 +3190,16 @@ and hiding the Game view. An external pointer-grab probe verifies actual capture
 and release; resume/focus regain/new Play do not automatically recapture. The
 editor screenshot with Decay motion and goal output was inspected. Other native
 editor platforms and Explorer game proof remain pending.
+
+
+Convex-model spawn-window motion now shares the existing `Physics3d` control
+queue. The host validates real body settings and primitive/convex authoring
+without creating stand-in geometry; full model bindings, hull volume/bounds and
+combined mass validate at scene synchronization. Five native host regressions
+cover scaled/mixed mass, pending reads, rotation locks, invalid authoring,
+geometry retry and once-only replay. Model Collision Lab now spawns a typed
+convex GLB prefab, queues controls immediately, and reaches its landing/impulse
+travel goal. The project Session regression checks first materialization and
+checkpoint replay. Rebuilt Chromium reaches both goals, and native editor
+Play/restart/Stop is recorded in the [review](model-collision-editor-review.md#convex-prefab-spawn-window-motion).
+This is feature proof for Explorer; game adoption remains open.

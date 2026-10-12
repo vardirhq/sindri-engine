@@ -1,5 +1,10 @@
 # Changelog
 
+- Convex-model prefabs now accept typed Decay motion reads, setters and impulses
+  immediately after spawning. Queued controls use actual scaled/combined mass,
+  preserve previous valid requests on rejected authoring and replay once. Model
+  Collision Lab spawns its GLB prop from a typed prefab and verifies this path.
+
 - Automatically discover, export and bind convex GLB collision in the player,
   headless runs and editor Play. Shared triangle/convex uses load once and reload
   atomically; editor defaults and guards support rigid-body/primitive compounds.

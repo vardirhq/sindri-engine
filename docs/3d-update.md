@@ -392,7 +392,9 @@ placement. The roadmap's "height/mesh terrain next" is this slice.
         travel goal through native player tests, rebuilt Chromium and native
         editor Play; safe reload and authoring review.
       - [ ] Explorer adoption of dynamic model props and game goal proof.
-      - [ ] Pre-synchronization Decay controls for newly spawned convex-only bodies.
+      - [x] Pre-synchronization Decay controls for convex-only/mixed bodies,
+        real-body/schema/material/ownership checks, deferred geometry retry,
+        scaled/combined mass and checkpoint replay; typed spawned-prop lab proof.
   - static trimesh colliders built from a model's meshes;
   - convex hulls for dynamic props;
   - [x] Scene collider dimensions and offsets follow composed positive scale,

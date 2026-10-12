@@ -44,8 +44,18 @@ script Walker {
 }
 
 script CameraRig {
+    @export let prop_prefab: Prefab;
     fn start() {
         this.transform.look_at(Vec3(0.0, 0.0, 0.0));
+        let prop = World.spawn(this.prop_prefab);
+        Physics3d.set_velocity(prop, Vec3(0.5, 0.0, 0.0));
+        Physics3d.apply_impulse(prop, Vec3(0.5, 0.0, 0.0));
+        Physics3d.set_angular_velocity(prop, Vec3(0.0, 1.0, 0.0));
+        let linear = Physics3d.velocity(prop);
+        let angular = Physics3d.angular_velocity(prop);
+        if abs(linear.x - 0.5) < 0.001 && abs(angular.y) < 0.001 {
+            print("Model spawn controls queued");
+        }
     }
 }
 

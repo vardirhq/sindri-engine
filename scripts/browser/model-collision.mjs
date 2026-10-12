@@ -44,6 +44,7 @@ try {
   };
   await page.goto(origin + base);
   await waitFor('Model collision ready');
+  await waitFor('Model spawn controls queued');
   await page.locator('canvas').click({ position: { x: 200, y: 200 } });
   const before = await page.locator('canvas').screenshot();
   await page.keyboard.down('KeyD');
@@ -66,7 +67,7 @@ try {
   assert([...fetched].some((path) => path.endsWith('/models/level.glb')), 'the collision GLB was fetched');
   assert([...fetched].some((path) => path.endsWith('/models/prop.glb')), 'the convex prop GLB was fetched');
   assert.deepEqual(errors, [], 'no runtime or GPU errors');
-  console.log('Model collision: fetched GLB, wall obstruction, bypass, dynamic prop impulse and goals passed');
+  console.log('Model collision: fetched GLB, wall obstruction, bypass, spawned convex controls, dynamic prop impulse and goals passed');
 } finally {
   if (browser) await browser.close();
   await new Promise((done) => server.close(done));

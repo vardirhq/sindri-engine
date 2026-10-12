@@ -166,6 +166,16 @@ impl PhysicsWorld3d {
         validate_colliders(colliders)
     }
 
+    /// Validates finite body settings and a usable orientation without requiring
+    /// collider geometry. Useful for queued controls before model materialization.
+    ///
+    /// # Errors
+    /// Invalid body pose, velocity, gravity scale or damping. Collider geometry,
+    /// mass, ownership and pending controls require complete insertion validation.
+    pub fn validate_body_settings(body: RigidBody3d) -> Result<(), PhysicsError> {
+        validate_body(body)
+    }
+
     pub fn insert_static_collider(
         &mut self,
         entity: EntityId,

@@ -65,10 +65,12 @@ Do not use `set_property` as a setter for a running script:
 World.set_property(part, "leader_x", x);
 ```
 
+Author a typed prefab export (`@export let part_prefab: Prefab;`) on the
+spawner; `World.spawn` takes that prefab value rather than a raw string.
 Configure a newly spawned entity before it is allowed to start:
 
 ```decay
-let part = World.spawn("prefabs/body-part.prefab");
+let part = World.spawn(this.part_prefab);
 World.set_property(part, "group", group);
 World.set_property(part, "leader", this.entity);
 ```

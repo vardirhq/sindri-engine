@@ -313,3 +313,11 @@ failed hull reload from partially replacing shared triangle collision. Editor
 Add Component uses a project model and enforces compatible ownership. Model
 Collision Lab exercises a falling imported prop and a Decay impulse/travel goal;
 Explorer adoption remains open.
+
+
+Convex-model prefabs also accept Decay motion commands immediately after spawning,
+before their first physics body is materialized. Project discovery preloads
+spawnable prefab GLBs, while scene synchronization supplies actual scaled hull
+mass for queued impulses. Model Collision Lab uses a typed prefab export to
+spawn its prop, verifies copied pending reads and reaches its existing prop goal.
+See [the spawn-window contract](physics.md#convex-model-spawn-window-controls).

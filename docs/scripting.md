@@ -1106,8 +1106,12 @@ controls accept dynamic/velocity-kinematic bodies; impulses require dynamic
 bodies. Rotation-locked bodies retain zero angular velocity. Finite f32-range
 vectors validate before mutation; controls leave authored motion unchanged.
 Missing context and inactive/stale handles fail explicitly. Before synchronization,
-valid authored 3D body and nonempty collider components are required, without
-conflicting 2D physics or a moving depth lock. Setters/impulses queue in call order
+a valid authored 3D rigid body and either nonempty primitive colliders or a
+convex-model reference are required. Convex references may share primitive pieces.
+Body settings, schema/material fields, positive composed hull scale, incompatible
+2D/character/static-model/voxel ownership and moving depth locks validate before
+queuing. Model bindings, hull bounds/volume, scaled geometry and actual mass
+validate at the next scene synchronization, not during the script call. Setters/impulses queue in call order
 and replay before solving against actual compound mass. Reads copy the last
 queued setter or authored start; locked angular velocity is zero and impulses
 resolve only at materialization. Successful synchronization expires unconsumed
