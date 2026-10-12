@@ -82,6 +82,8 @@ jobs:
           rm -f "$output"
       - name: Test agent preflight discovery
         run: python3 -m unittest scripts/test_preflight.py
+      - name: Test site publisher verification
+        run: python3 -m unittest discover -s site/tests
       - name: Check file sizes with structured diagnostics
         id: file_size
         shell: bash

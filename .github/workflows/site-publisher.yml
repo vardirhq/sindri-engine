@@ -1,0 +1,141 @@
+name: Sindri Site Publisher
+
+# The only workflow that deploys GitHub Pages. Every run recomputes the whole
+# site from live GitHub state: the newest stable build that `Sindri Pages`
+# uploaded from main, plus `/wip/<pr>/` for each open pull request from this
+# repository whose current head passed every check and uploaded a preview.
+# See site/README.md ("WIP previews") for the rules.
+#
+# It starts whenever a workflow it depends on finishes (on any branch, so a
+# push to main and a pull request push both converge here), when a pull
+# request closes (to drop its preview), or by hand. Its own runs are not in
+# the list, so it never triggers itself.
+on:
+  workflow_run:
+    workflows: ["Sindri Pages", "CI", "Dependencies", "Shapes Lab", "Decay", "Decay VS Code", "Autofix", "Weave"]
+    types: [completed]
+    # Runs started from Dependabot get a read-only token and never carry a
+    # preview, so their completion has nothing to publish.
+    branches-ignore: ["dependabot/**"]
+  pull_request_target:
+    types: [closed]
+  workflow_dispatch:
+    inputs:
+      pr_number:
+        description: "Pull request to report on (optional; every eligible PR is published)"
+        required: false
+        type: string
+
+permissions: {}
+
+# One publisher at a time, never cancelling a running deployment. GitHub keeps
+# only the newest queued run and cancels older queued ones, which loses
+# nothing: every run plans from scratch, and none skips planning, so the queued
+# run that survives always sees the newest state. Shows up as "cancelled" runs.
+concurrency:
+  group: sindri-site-publisher
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    name: Plan and assemble site
+    runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      checks: read
+      contents: read
+      pull-requests: read
+      statuses: read
+    outputs:
+      deploy: ${{ steps.plan.outputs.deploy }}
+      requested_ok: ${{ steps.plan.outputs.requested_ok }}
+    steps:
+      # Trusted code only: the default branch for workflow_run and
+      # pull_request_target, never the pull request's head.
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event_name == 'workflow_dispatch' && github.ref || github.event.repository.default_branch }}
+          persist-credentials: false
+      - name: Verify pull request heads and plan the site
+        id: plan
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          EVENT_RUN: ${{ github.event.workflow_run.id }}
+          PR_NUMBER: ${{ inputs.pr_number }}
+          SITE_URL: ${{ vars.SITE_URL || 'https://sindri.vardir.no' }}
+        run: |
+          python3 site/wip_previews.py plan --repo "$REPO" --event-run "$EVENT_RUN" \
+            --pr "$PR_NUMBER" --site-url "$SITE_URL" --plan-out "$RUNNER_TEMP/plan.json"
+      - name: Assemble stable site and previews
+        if: steps.plan.outputs.deploy == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+        run: |
+          python3 site/wip_previews.py assemble --repo "$REPO" --plan "$RUNNER_TEMP/plan.json" \
+            --out target/pages --staging "$RUNNER_TEMP/wip-staging"
+      - name: Verify assembled routes
+        if: steps.plan.outputs.deploy == 'true'
+        env:
+          PREVIEWS: ${{ steps.plan.outputs.previews }}
+        run: |
+          test -f target/pages/index.html
+          test -f target/pages/directory/index.html
+          test -f target/pages/wip/index.html
+          test -f target/pages/wip/manifest.json
+          for route in physics causeway voxel-lab; do
+            test -f "target/pages/examples/$route/index.html"
+          done
+          for pr in ${PREVIEWS//,/ }; do
+            for route in transform orbit character3d model-collision; do
+              test -f "target/pages/wip/$pr/$route/pkg/sindri_player_bg.wasm"
+            done
+          done
+          echo "Publishing $(find target/pages -type f | wc -l) files; previews: ${PREVIEWS:-none}"
+      - uses: actions/upload-pages-artifact@v5
+        if: steps.plan.outputs.deploy == 'true'
+        with:
+          path: target/pages
+
+  deploy:
+    name: Deploy Sindri site
+    needs: publish
+    if: needs.publish.outputs.deploy == 'true'
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Publish GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v5
+
+  # A manual run asked about one pull request; if that one is not live, the
+  # run must not look like a success. The summary of the first job says why.
+  requested:
+    name: Requested preview published
+    needs: [publish, deploy]
+    if: always() && github.event_name == 'workflow_dispatch' && inputs.pr_number != ''
+    runs-on: ubuntu-latest
+    permissions: {}
+    steps:
+      - name: Check the requested pull request
+        env:
+          OK: ${{ needs.publish.outputs.requested_ok }}
+          DEPLOY: ${{ needs.publish.outputs.deploy }}
+          DEPLOYED: ${{ needs.deploy.result }}
+          PR: ${{ inputs.pr_number }}
+        run: |
+          if [[ "$OK" != "true" ]]; then
+            echo "::error::PR #$PR was not published; see the job summary of 'Plan and assemble site' for the reason."
+            exit 1
+          fi
+          if [[ "$DEPLOY" == "true" && "$DEPLOYED" != "success" ]]; then
+            echo "::error::PR #$PR passed verification but the deployment did not succeed ($DEPLOYED)."
+            exit 1
+          fi
+          echo "PR #$PR is verified and live (or already was)."
