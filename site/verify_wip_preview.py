@@ -11,7 +11,7 @@ import sys
 repo, event_run, event_sha = sys.argv[1:]
 def api(path):
     return json.loads(subprocess.check_output(
-        ["gh", "api", "--paginate", path], text=True))
+        ["gh", "api", path], text=True))
 
 def output(**values):
     for key, value in values.items():
@@ -30,8 +30,6 @@ sha = pr["head"]["sha"]
 if pr["state"] != "open" or pr["head"]["repo"]["full_name"] != repo or sha != event_sha:
     output(ready="false")
     sys.exit(0)
-checks = api(f"repos/{repo}/commits/{sha}/check-runs?per_page=100")
-check_runs = checks["check_runs"] if isinstance(checks, dict) else []
 # Required workflow names are the existing CI suite; none can be pending or failing.
 required = {"Sindri Pages", "CI", "Dependencies", "Shapes Lab", "Decay", "Decay VS Code", "Autofix"}
 runs = api(f"repos/{repo}/actions/runs?head_sha={sha}&per_page=100")
