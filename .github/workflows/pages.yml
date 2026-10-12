@@ -163,15 +163,17 @@ jobs:
         with:
           path: target/pages
 
-  deploy:
-    name: Deploy Sindri site
-    needs: build
-    if: github.event_name != 'pull_request'
-    runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    steps:
-      - name: Publish GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v5
+      # Pages replaces the whole site on every deployment, so this workflow no
+      # longer deploys: the Sindri Site Publisher composes this stable build
+      # with every verified pull request preview under /wip/ and deploys that,
+      # so a push to main never erases an active preview. It starts when this
+      # run completes and reuses this artifact instead of rebuilding.
+      - name: Keep the stable site for the publisher
+        if: github.event_name != 'pull_request'
+        uses: actions/upload-artifact@v7
+        with:
+          name: stable-site
+          path: target/pages
+          include-hidden-files: true
+          if-no-files-found: error
+          retention-days: 90

@@ -97,7 +97,7 @@ class VerifyTests(unittest.TestCase):
         v = self.verdict(gh)
         self.assertEqual(v.status, "rejected")
         self.assertIn("no pull_request workflow ran for head 7e9fe4f42041", v.reason)
-        self.assertIn("merge conflict", v.reason)
+        self.assertIn("conflicted with its base", v.reason)
         self.assertTrue(any(f"head_sha={HEAD}" in c for c in gh.calls))
         self.assertFalse(any(MERGE in c for c in gh.calls))
 

@@ -127,8 +127,8 @@ def verify_pr(api: Callable, repo: str, pr: dict) -> Verdict:
     if not runs:
         verdict.reason = (
             f"no pull_request workflow ran for head {sha[:12]}. GitHub creates no runs when the "
-            "pull request had a merge conflict at push time (or Actions skipped the push); "
-            "push a commit or use 'Update branch' to start CI for this head"
+            "pull request conflicted with its base when this head was pushed, or when a workflow "
+            "token pushed it; push a commit or use 'Update branch' to start CI for this head"
         )
         return verdict
 
@@ -298,7 +298,8 @@ def decide(desired: dict, live: dict | None, verdicts: Iterable[Verdict]) -> tup
 
 def fetch_live(site_url: str) -> dict | None:
     try:
-        url = site_url.rstrip("/") + "/wip/manifest.json"
+        # The query string sidesteps the CDN's cached copy of an older deploy.
+        url = f"{site_url.rstrip('/')}/wip/manifest.json?run={os.environ.get('GITHUB_RUN_ID', '0')}"
         with urllib.request.urlopen(url, timeout=20) as response:
             return json.load(response)
     except Exception as error:  # noqa: BLE001 - any failure means "unknown"
