@@ -88,18 +88,17 @@ jobs:
             mkdir -p "target/pages/examples/$route/pkg"
             cp -R crates/sindri-player/pkg/. "target/pages/examples/$route/pkg/"
           done
-          # Unmerged 3D labs are exported as a separate, downloadable preview.
-          # They are deliberately NOT added to the production site directory.
+          # Build isolated, unmerged browser previews without publishing to Pages.
           if [[ "$GITHUB_EVENT_NAME" == "pull_request" ]]; then
-            for project in \\
-              "examples/transform:transform" \\
-              "examples/orbit:orbit" \\
-              "examples/character3d:character3d" \\
+            for project in \
+              "examples/transform:transform" \
+              "examples/orbit:orbit" \
+              "examples/character3d:character3d" \
               "examples/model-collision:model-collision"; do
               src="${project%%:*}"
               route="${project##*:}"
-              cargo run --quiet --package sindri-export --bin sindri-export -- \\
-                "$src" "target/wip-preview/$route" --base "/$route/" \\
+              cargo run --quiet --package sindri-export --bin sindri-export -- \
+                "$src" "target/wip-preview/$route" --base "/$route/" \
                 --build-id "${GITHUB_SHA:0:7}"
               mkdir -p "target/wip-preview/$route/pkg"
               cp -R crates/sindri-player/pkg/. "target/wip-preview/$route/pkg/"
