@@ -88,6 +88,23 @@ jobs:
             mkdir -p "target/pages/examples/$route/pkg"
             cp -R crates/sindri-player/pkg/. "target/pages/examples/$route/pkg/"
           done
+          # Unmerged 3D labs are exported as a separate, downloadable preview.
+          # They are deliberately NOT added to the production site directory.
+          if [[ "$GITHUB_EVENT_NAME" == "pull_request" ]]; then
+            for project in \\
+              "examples/transform:transform" \\
+              "examples/orbit:orbit" \\
+              "examples/character3d:character3d" \\
+              "examples/model-collision:model-collision"; do
+              src="${project%%:*}"
+              route="${project##*:}"
+              cargo run --quiet --package sindri-export --bin sindri-export -- \\
+                "$src" "target/wip-preview/$route" --base "/$route/" \\
+                --build-id "${GITHUB_SHA:0:7}"
+              mkdir -p "target/wip-preview/$route/pkg"
+              cp -R crates/sindri-player/pkg/. "target/wip-preview/$route/pkg/"
+            done
+          fi
           mkdir -p target/pages/examples/voxel-lab/pkg
           cp games/voxel-lab/web/index.html target/pages/examples/voxel-lab/index.html
           cp -R games/voxel-lab/pkg/. target/pages/examples/voxel-lab/pkg/
@@ -155,6 +172,22 @@ jobs:
           path: target/directory-captures
           if-no-files-found: warn
           retention-days: 14
+      - name: Verify 3D preview exports
+        if: github.event_name == 'pull_request'
+        run: |
+          for route in transform orbit character3d model-collision; do
+            test -f "target/wip-preview/$route/index.html"
+            test -f "target/wip-preview/$route/assets/sindri.manifest"
+            test -f "target/wip-preview/$route/pkg/sindri_player_bg.wasm"
+          done
+      - name: Upload 3D lab preview bundle
+        if: github.event_name == 'pull_request'
+        uses: actions/upload-artifact@v7
+        with:
+          name: 3d-labs-preview
+          path: target/wip-preview
+          retention-days: 14
+          if-no-files-found: error
       - uses: actions/upload-pages-artifact@v5
         if: github.event_name != 'pull_request'
         with:
