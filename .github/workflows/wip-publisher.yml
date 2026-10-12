@@ -32,7 +32,7 @@ jobs:
     name: Verify PR head and checks
     runs-on: ubuntu-latest
     outputs:
-      ready: ${{ needs.verify.outputs.ready }}
+      ready: ${{ steps.preview.outputs.ready }}
       pr: ${{ steps.preview.outputs.pr }}
       sha: ${{ steps.preview.outputs.sha }}
       preview_run: ${{ steps.preview.outputs.preview_run }}
@@ -184,13 +184,13 @@ jobs:
           if-no-files-found: warn
           retention-days: 14
       - name: Overlay approved 3D preview
-        if: steps.preview.outputs.ready == 'true'
+        if: needs.verify.outputs.ready == 'true'
         env:
           GH_TOKEN: ${{ github.token }}
           REPO: ${{ github.repository }}
-          PR: ${{ steps.preview.outputs.pr }}
-          PREVIEW_RUN: ${{ steps.preview.outputs.preview_run }}
-          PREVIEW_SHA: ${{ steps.preview.outputs.sha }}
+          PR: ${{ needs.verify.outputs.pr }}
+          PREVIEW_RUN: ${{ needs.verify.outputs.preview_run }}
+          PREVIEW_SHA: ${{ needs.verify.outputs.sha }}
         run: |
           mkdir -p "target/pages/wip/$PR"
           gh run download "$PREVIEW_RUN" --repo "$REPO" --name 3d-labs-preview --dir "target/pages/wip/$PR"
@@ -200,7 +200,7 @@ jobs:
           done
           python3 site/build_wip_directory.py target/pages/wip "$PR" "$PREVIEW_SHA"
       - uses: actions/upload-pages-artifact@v5
-        if: steps.preview.outputs.ready == 'true'
+        if: needs.verify.outputs.ready == 'true'
         with:
           path: target/pages
 
