@@ -1575,8 +1575,15 @@ references from scenes and prefabs, including inactive entities. Automatic
 native/browser player collision binding now runs after asset loading completes
 and before Session starts. It expands all scene/prefab references, including
 inactive entities and overrides, and prepares only authored collision assets.
-Missing or invalid geometry names the logical asset ID. Editor Play and headless
-`ProjectRun` automatic binding remain pending.
+Missing or invalid geometry names the logical asset ID. Native headless
+`ProjectRun` waits for its worker queue and installs authored collision before
+stepping. Editor Play uses its asynchronous model queue, including unsaved world
+references and retained later-scene/prefab assets; unavailable or invalid assets
+keep Play stopped with a named diagnostic. Successful model reloads replace
+collision before the next step; failures retain the last valid binding. Stop
+releases Play-only retention. References introduced during Play require restarting
+the run. Model Collision Lab's editor/headless parity regression reaches the goal
+with identical state, then restores and replays wall obstruction.
 
 The scene driver prevalidates the entire authored plan before changing its
 solver. Composed positive finite scale is baked into model-space triangles;

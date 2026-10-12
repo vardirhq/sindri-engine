@@ -1,5 +1,10 @@
 # Changelog
 
+- Editor Play and native headless project runs now install authored GLB collision
+  before gameplay. Play validates its asynchronous model queue, keeps later-scene
+  collision assets alive and safely replaces collision on model reload. Model
+  Collision Lab has editor/headless goal parity and restore/replay regressions.
+
 - The shared native/browser player now installs static GLB collision before
   gameplay starts, including later scenes and prefab references. Render-only
   models need no collision geometry; missing/invalid collision assets name their

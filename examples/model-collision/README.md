@@ -22,6 +22,9 @@ as the native/browser host. `scripts/browser/model-collision.mjs` plays the
 exported project with keyboard events, verifies the GLB fetch and all milestones,
 and captures the result without changing world state.
 
-This proves the shared player binding path. Editor Play collision delivery,
-headless `ProjectRun` automatic model loading, dynamic convex model components
-and Explorer game adoption remain separate work; this example is feature proof.
+Editor Play and native headless `ProjectRun` also install collision before
+stepping. The editor/headless parity test follows the same route with matching
+world state, restores the initial world and replays wall obstruction. A [native editor review](../../docs/model-collision-editor-review.md) verifies
+Play goal, valid/invalid model reloads, Save refusal and Stop restoration.
+Dynamic convex model components and Explorer game adoption remain separate
+work; this example is feature proof.

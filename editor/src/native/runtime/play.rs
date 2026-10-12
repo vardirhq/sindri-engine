@@ -263,16 +263,38 @@ impl EditorApp {
     /// A new one for every run, seeded the same way, so pressing Play twice
     /// gives the same run twice and a bug found once can be found again.
     fn start_session(&mut self) -> Result<Session, String> {
+        if self.scripts.loading() {
+            return Err(
+                "Project scripts are still loading; try Play when loading finishes".to_owned(),
+            );
+        }
         let viewport = self.game_presentation_viewport();
         let components = self.scene.components().clone();
         let root = self.open_project_root.clone();
         let file = self.file.path().map(Path::to_path_buf);
+        let open = crate::play_session::OpenScene {
+            project: root.as_deref(),
+            file: file.as_deref(),
+        };
+        let collision = crate::play_session::collision_references(
+            &crate::play_session::PlaySources {
+                components: &components,
+                scripts: &self.scripts,
+                tile_sets: self.textures.tile_sets(),
+                sheets: self.styles.sheets(),
+                models: self.textures.model_loader(),
+            },
+            &self.world,
+            open,
+        )?;
+        self.textures.request_play_models(collision)?;
         let mut session = crate::play_session::start(
             &crate::play_session::PlaySources {
                 components: &components,
                 scripts: &self.scripts,
                 tile_sets: self.textures.tile_sets(),
                 sheets: self.styles.sheets(),
+                models: self.textures.model_loader(),
             },
             &mut self.world,
             crate::play_session::OpenScene {
@@ -326,6 +348,7 @@ impl EditorApp {
     /// against is being replaced, so neither its world nor what was edited in
     /// it has anywhere to go. Its recording and its edits go with it.
     pub(in crate::native) fn abandon_run(&mut self) {
+        self.textures.clear_play_models();
         self.session = None;
         self.play_snapshot = None;
         self.recording = None;
@@ -335,6 +358,7 @@ impl EditorApp {
     }
 
     pub(in crate::native) fn stop_playback(&mut self) {
+        self.textures.clear_play_models();
         // What the run saved is kept for the next one in this sitting.
         if let Some(mut session) = self.session.take() {
             session.finish();

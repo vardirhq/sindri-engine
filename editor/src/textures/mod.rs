@@ -98,6 +98,8 @@ pub struct SceneTextures {
     models: Option<AssetLoader<ModelAssetDecoder>>,
     /// The models bound to the extractor, so a new scene can unbind them.
     bound_models: BTreeSet<AssetId>,
+    /// Collision models needed by the current Play run, including later scenes.
+    play_models: BTreeSet<AssetId>,
     /// Models no longer named, to unbind at the next poll.
     released_models: Vec<AssetId>,
     /// Which texture each sheet cuts, keyed by the sheet's own ID.

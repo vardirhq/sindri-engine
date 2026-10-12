@@ -24,10 +24,11 @@ impl SceneTextures {
         let mut notes = Vec::new();
         let mut references = referenced_models(world);
         references.extend(referenced_models(&self.prefab_world));
-        let wanted: BTreeSet<AssetId> = references
+        let mut wanted: BTreeSet<AssetId> = references
             .iter()
             .filter_map(|reference| AssetId::new(reference.clone()).ok())
             .collect();
+        wanted.extend(self.play_models.iter().cloned());
         let Some(models) = &mut self.models else {
             for reference in references {
                 notes.push(TextureNote::Failed(format!(
@@ -51,6 +52,16 @@ impl SceneTextures {
     /// Prepares whatever models arrived and binds them to each of `scenes`, and
     /// unbinds the ones no longer named.
     pub fn poll_models(&mut self, scenes: &mut [&mut SceneExtractor]) -> Vec<TextureNote> {
+        self.poll_play_models(scenes, None)
+    }
+
+    /// Also refreshes authored collision during Play. Invalid replacements
+    /// retain the previous collision binding and report their asset ID.
+    pub fn poll_play_models(
+        &mut self,
+        scenes: &mut [&mut SceneExtractor],
+        mut session: Option<&mut sindri_runtime::Session>,
+    ) -> Vec<TextureNote> {
         let mut notes = Vec::new();
         for released in std::mem::take(&mut self.released_models) {
             for scene in scenes.iter_mut() {
@@ -67,6 +78,13 @@ impl SceneTextures {
                     let Some(asset) = models.get(&id).cloned() else {
                         continue;
                     };
+                    if self.play_models.contains(&id)
+                        && let Some(session) = session.as_deref_mut()
+                        && let Err(error) = session.bind_model_collision(id.clone(), &asset)
+                    {
+                        notes.push(TextureNote::Failed(format!("{id}: {error}")));
+                        continue;
+                    }
                     let node_count = asset.nodes.len();
                     match sindri::model::prepare(asset) {
                         Ok(prepared) => {
@@ -99,6 +117,38 @@ impl SceneTextures {
             }
         }
         notes
+    }
+
+    /// The queue holding decoded model assets, shared with Play startup.
+    #[must_use]
+    pub fn model_loader(
+        &self,
+    ) -> Option<&sindri_assets::AssetLoader<sindri_assets::ModelAssetDecoder>> {
+        self.models.as_ref()
+    }
+
+    /// Keeps later-scene collision assets alive and asks the worker queue for
+    /// them before Play starts. No filesystem I/O runs on the frame thread.
+    ///
+    /// # Errors
+    /// No source directory or a queue request failure, naming the asset.
+    pub fn request_play_models(&mut self, wanted: BTreeSet<AssetId>) -> Result<(), String> {
+        self.play_models = wanted;
+        for id in &self.play_models {
+            let loader = self
+                .models
+                .as_mut()
+                .ok_or_else(|| format!("{id}: no model asset queue"))?;
+            loader
+                .request(id.clone())
+                .map_err(|error| format!("{id}: {error}"))?;
+        }
+        Ok(())
+    }
+
+    /// Releases Play-only retention after Stop, leaving authored references.
+    pub fn clear_play_models(&mut self) {
+        self.play_models.clear();
     }
 
     /// Unbinds every model this scene bound, before another scene's

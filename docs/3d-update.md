@@ -113,8 +113,11 @@ Order:
   inactive entities and shared render/collision assets. Automatic host collision
   binding is now installed by the shared native/browser player before gameplay.
   Model Collision Lab supplies imported-wall obstruction and a goal route through
-  player Session tests and exported browser smoke. Editor/headless binding and
-  Explorer game proof remain pending.
+  player Session tests and exported browser smoke. Native headless loading and
+  editor Play now bind collision before gameplay; editor/headless parity tests
+  compare every step through the goal and restore/replay wall obstruction. Model
+  picker metadata and Explorer proof remain. Native editor review verifies the
+  goal, moved-wall reload, invalid-reload retention and Stop restoration.
   The Character Lab
   now exercises Decay gravity/jumps, solved carry/reversal and a keyboard goal
   through native Session and exported Chromium. It is feature proof, not Explorer
@@ -361,8 +364,15 @@ placement. The roadmap's "height/mesh terrain next" is this slice.
       opt-out and named missing/invalid asset regressions.
     - [x] Model Collision Lab feature proof: actual GLB wall obstruction and
       keyboard bypass/goal through player Session tests and exported browser smoke.
-    - [ ] Automatic editor/headless collision binding, model asset field
-      metadata/picker and Explorer game proof.
+    - [x] Native headless collision loading and editor Play binding from the
+      asynchronous model queue, including unsaved references and retained later
+      scene/prefab assets; named startup failures and safe model hot reload.
+    - [x] Model Collision Lab editor/headless goal parity and restore/replay proof;
+      headless layout/inactive/missing/malformed/nested override regressions.
+    - [x] Native editor Play goal, moved-wall reload, invalid collision replacement
+      retention, Save refusal and Stop restoration; see
+      [the interaction review](model-collision-editor-review.md).
+    - [ ] Model asset field metadata/picker and Explorer game proof.
     - [ ] Model-derived convex scene colliders for dynamic props.
   - static trimesh colliders built from a model's meshes;
   - convex hulls for dynamic props;

@@ -96,6 +96,7 @@ impl SceneTextures {
                 })
             }),
             bound_models: BTreeSet::new(),
+            play_models: BTreeSet::new(),
             released_models: Vec::new(),
             sliced: BTreeMap::new(),
             watch: root.map(AssetWatch::new),

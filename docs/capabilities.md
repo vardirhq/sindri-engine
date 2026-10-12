@@ -337,8 +337,15 @@ original verified GLB bytes. The shared native/browser player now installs
 collision before gameplay, expanding scenes/prefabs/overrides and preparing only
 authored collider assets. Model Collision Lab opens/compiles and walks into an
 imported wall, around it and to its goal through the player's Session regression
-and exported browser smoke. Editor/headless automatic binding, model asset picker
-metadata and Explorer game proof remain pending. See
+and exported browser smoke. Native headless loading and editor Play now install
+collision before gameplay; the lab's editor/headless parity regression compares
+every step through wall obstruction and the goal and restores/replays collision.
+Editor startup checks its asynchronous queue, honors unsaved references and keeps
+later-scene assets alive; model reload failures retain previous collision.
+Native editor [review](model-collision-editor-review.md) verifies the goal,
+moved-wall reload, failed-replacement retention, Save refusal and Stop restoration
+on X11/software Vulkan. Model asset picker metadata and Explorer game proof
+remain pending. See
 [the contract and numeric limits](physics.md#static-triangle-geometry).
 
 `ConvexHull3d` now constructs bounded, immutable volumetric resources, shared by

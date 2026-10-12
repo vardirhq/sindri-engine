@@ -16,6 +16,7 @@
 
 mod builtins;
 mod error;
+pub mod model_assets;
 pub mod project;
 mod report;
 mod session;

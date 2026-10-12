@@ -3,10 +3,10 @@
 use std::collections::BTreeSet;
 
 use sindri_assets::ModelAsset;
-use sindri_core::{AssetId, ComponentSchemaRegistry, SceneComponent, SceneDocument, SceneEntity};
+use sindri_core::{AssetId, ComponentSchemaRegistry, SceneDocument};
 use sindri_decay::PrefabSources;
 use sindri_runtime::Session;
-use sindri_scene::{ModelCollider3dComponent, SceneExtractor};
+use sindri_scene::SceneExtractor;
 
 use crate::PlayerError;
 
@@ -17,31 +17,8 @@ pub(super) fn references(
     prefabs: &PrefabSources,
     components: &ComponentSchemaRegistry,
 ) -> Result<BTreeSet<AssetId>, PlayerError> {
-    let mut wanted = BTreeSet::new();
-    for (_, scene) in scenes {
-        collect(&scene.expanded(prefabs)?.entities, components, &mut wanted)?;
-    }
-    for prefab in prefabs.ids().filter_map(|id| prefabs.get(id)) {
-        collect(&prefab.expanded(prefabs)?.entities, components, &mut wanted)?;
-    }
-    Ok(wanted)
-}
-
-fn collect(
-    entities: &[SceneEntity],
-    components: &ComponentSchemaRegistry,
-    wanted: &mut BTreeSet<AssetId>,
-) -> Result<(), PlayerError> {
-    for entity in entities {
-        if let Some(payload) = entity.components.get(ModelCollider3dComponent::TYPE_NAME) {
-            wanted.insert(
-                components
-                    .decode::<ModelCollider3dComponent>(payload)?
-                    .asset,
-            );
-        }
-    }
-    Ok(())
+    sindri_runtime::model_assets::collision_references(scenes, prefabs, components)
+        .map_err(PlayerError::ModelCollisionReferences)
 }
 
 /// Prepare collision only when authored: a render-only GLB need not be a

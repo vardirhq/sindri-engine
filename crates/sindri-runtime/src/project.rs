@@ -249,12 +249,20 @@ impl ProjectRun {
                 weave::compose(&id, &weave_sources).map_err(|error| format!("{id}: {error}"))?,
             );
         }
+        let collision =
+            crate::model_assets::collision_references(&scenes, &prefabs, scene.components())?;
         let mut session = Session::with_sources(scene.components().clone(), sources)
             .with_prefabs(prefabs)
             .with_profiles(profiles)
             .with_tile_sets(tile_sets)
             .with_scenes(scenes, loaded)
             .with_styles(sheets);
+        #[cfg(not(target_arch = "wasm32"))]
+        crate::model_assets::load_collision(&assets, &collision, &mut session)?;
+        #[cfg(target_arch = "wasm32")]
+        if !collision.is_empty() {
+            return Err("headless model collision loading requires a native filesystem".to_owned());
+        }
         session
             .settle_styles(
                 &mut world,

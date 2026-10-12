@@ -80,9 +80,9 @@ This is CPU preparation proof. Physics now provides immutable static triangle
 resources and standalone keyed groups with native query/landing/replay tests;
 see [the physics contract](physics.md#static-triangle-geometry). Standalone convex
 hull resources and mixed rigid bodies now have native landing/control/replay
-tests as well. Model-collider authoring/asset bindings and
-native/browser/editor/Explorer project collision proof remain pending. Existing model rendering and decoding
-are unchanged.
+tests as well. Static model scene bindings and native/browser/editor-session
+feature proof are described below. Convex model scene bindings, asset picking
+and Explorer game proof remain pending.
 
 ## Renderer boundary
 
@@ -245,15 +245,34 @@ loading completes, before starting Session. Discovery expands every project scen
 and prefab, including instance overrides and inactive entities, so later scenes
 and spawned content already have bindings. Missing assets or failed collision
 preparation report the logical asset ID. Render-only models need not contain
-valid physics geometry. Editor Play and headless `ProjectRun` automatic collision
-loading remain pending.
+valid physics geometry. Native headless `ProjectRun` loads only authored collision
+references through the filesystem worker queue before stepping, including later
+scenes and spawnable prefabs, in both project asset layouts. Render-only model
+bytes remain a drawing host's responsibility.
+
+Editor Play binds decoded collision models from its asynchronous asset queue
+before creating the recording or starting scripts. Startup discovers the live
+world's unsaved edits, inactive entities, declared later scenes and expanded
+spawnable prefabs. Later-scene collision assets remain retained for the run.
+If an asset is still loading, Play reports its ID and stays stopped; retry when
+loading completes. Missing, malformed and invalid collision geometry also keep
+Play stopped. A successful GLB reload replaces render and collision resources
+before the next step; failed collision preparation retains the previous binding.
+Stop releases Play-only retention and restores the authored world. New collision
+asset references introduced during a run require stopping and starting Play again.
 
 [Model Collision Lab](../examples/model-collision/README.md) is the player feature
 proof: one GLB supplies the rendered ground/wall and static collision, while
 Decay drives the walker into the wall and around it to a goal. The native player
 regression opens/compiles the project and steps the keyboard route through
-Session. The exported browser smoke plays the same route with ordinary keyboard
-input, verifies the GLB fetch and checks runtime/GPU errors. It remains feature
+Session. Editor Play and `ProjectRun` now run the same obstruction/bypass/goal
+route with matching world state at every step; checkpoint restoration and replay
+retain wall collision. Headless regressions cover collision-only layouts,
+inactive missing/malformed assets, later scenes and nested prefab overrides.
+The exported browser smoke plays the same route with ordinary keyboard
+input, verifies the GLB fetch and checks runtime/GPU errors. A native editor
+[review](model-collision-editor-review.md) verifies the goal, moved-wall reload,
+invalid-reload retention, Save refusal and Stop restoration. It remains feature
 proof; Explorer game adoption is open.
 Convex model scene authoring, model asset picker metadata and Explorer proof also
 remain scheduled in slice 6; rendered GLBs do not automatically acquire collision.

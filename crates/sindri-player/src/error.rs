@@ -36,8 +36,8 @@ pub enum PlayerError {
     TileSet(#[from] sindri_core::TileSetError),
     #[error(transparent)]
     Prefab(#[from] sindri_core::PrefabJsonError),
-    #[error(transparent)]
-    PrefabExpansion(#[from] sindri_core::PrefabError),
+    #[error("model collision references: {0}")]
+    ModelCollisionReferences(String),
     #[error(transparent)]
     Decode(#[from] sindri_assets::AssetDecodeError),
     #[error(transparent)]

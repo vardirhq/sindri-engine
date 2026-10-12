@@ -16,6 +16,7 @@ use std::collections::BTreeMap;
 use std::path::{Path, PathBuf};
 use std::time::{Duration, Instant};
 
+use sindri_assets::{AssetLoadQueueConfig, AssetLoader, FileSystemAssetSource, ModelAssetDecoder};
 use sindri_core::TileSetDocument;
 use sindri_editor::native::{load_world, scene_extractor};
 use sindri_editor::play_session::{self, OpenScene, PlaySources};
@@ -70,12 +71,22 @@ fn in_the_editor(root: &Path) -> ProjectRun {
         tile_sets.bind(&id, document).expect("the tile set binds");
     }
     let styles = ProjectStyles::load(&project).expect("the stylesheets compose");
+    let models = collision_models(
+        root,
+        &scene,
+        &components,
+        &scripts,
+        &tile_sets,
+        styles.sheets(),
+        &world,
+    );
     let session = play_session::start(
         &PlaySources {
             components: &components,
             scripts: &scripts,
             tile_sets: &tile_sets,
             sheets: styles.sheets(),
+            models: Some(&models),
         },
         &mut world,
         OpenScene {
@@ -95,6 +106,58 @@ fn in_the_editor(root: &Path) -> ProjectRun {
         size: SIZE,
         scene: extractor,
     }
+}
+
+fn collision_models(
+    root: &Path,
+    scene: &Path,
+    components: &sindri_core::ComponentSchemaRegistry,
+    scripts: &SceneScripts,
+    tile_sets: &TileSetBindings,
+    sheets: &[weave::Stylesheet],
+    world: &sindri_core::World,
+) -> AssetLoader<ModelAssetDecoder> {
+    let open = OpenScene {
+        project: Some(root),
+        file: Some(scene),
+    };
+    let wanted = play_session::collision_references(
+        &PlaySources {
+            components,
+            scripts,
+            tile_sets,
+            sheets,
+            models: None,
+        },
+        world,
+        open,
+    )
+    .unwrap();
+    let mut models = AssetLoader::new(
+        FileSystemAssetSource::new(sindri_runtime::project::assets_root(root)),
+        AssetLoadQueueConfig::unbounded(2),
+        ModelAssetDecoder,
+    )
+    .unwrap();
+    for id in wanted {
+        models.request(id).unwrap();
+    }
+    let deadline = Instant::now() + Duration::from_secs(20);
+    loop {
+        let outcomes = models.poll();
+        assert!(
+            !outcomes
+                .iter()
+                .any(|outcome| matches!(outcome, sindri_assets::AssetLoadOutcome::Failed(_))),
+            "{outcomes:?}"
+        );
+        if models.outstanding() == 0 {
+            break;
+        }
+        assert!(Instant::now() < deadline);
+        std::thread::sleep(Duration::from_millis(1));
+    }
+    models
 }
 
 /// The same input for both: a click in the middle of the screen, which
@@ -212,4 +275,49 @@ fn low_tide_plays_the_same_in_the_editor_and_the_build() {
 #[test]
 fn orbital_plays_the_same_in_the_editor_and_the_build() {
     plays_the_same("orbital-baked");
+}
+
+#[test]
+fn model_collision_lab_blocks_and_reaches_the_same_goal_in_editor_and_headless() {
+    let root = Path::new(env!("CARGO_MANIFEST_DIR")).join("../examples/model-collision");
+    let mut editor = in_the_editor(&root);
+    let mut build = ProjectRun::open(&root, SIZE).unwrap();
+    let mut said = Vec::new();
+    let initial = state(&editor);
+    let checkpoint = editor.session.checkpoint();
+    let snapshot = editor.world.clone();
+    for (key, frames) in [(Key::D, 90), (Key::S, 45), (Key::D, 48), (Key::W, 45)] {
+        editor.key(key, true);
+        build.key(key, true);
+        for _ in 0..frames {
+            let ours = editor.step(STEP).unwrap();
+            let theirs = build.step(STEP).unwrap();
+            assert!(ours.notes().is_empty(), "{ours:?}");
+            assert!(theirs.notes().is_empty(), "{theirs:?}");
+            assert_eq!(state(&editor), state(&build));
+            said.extend(ours.scripts.printed.into_iter().map(|line| line.message));
+        }
+        editor.key(key, false);
+        build.key(key, false);
+    }
+    assert!(
+        said.iter().any(|line| line == "Model wall blocked"),
+        "{said:?}"
+    );
+    assert!(
+        said.iter().any(|line| line == "Model goal reached"),
+        "{said:?}"
+    );
+    editor.session.restore(&checkpoint);
+    editor.world = snapshot;
+    assert_eq!(state(&editor), initial, "Stop restores the authored world");
+    editor.key(Key::D, true);
+    for _ in 0..90 {
+        assert!(editor.step(STEP).unwrap().notes().is_empty());
+    }
+    let walker = editor.entity("walker").unwrap();
+    assert!(
+        editor.world.world_transform(walker).unwrap().position[0] < -0.29,
+        "replay retains wall collision"
+    );
 }
