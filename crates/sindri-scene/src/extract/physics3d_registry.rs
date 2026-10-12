@@ -43,6 +43,10 @@ pub(super) fn register(components: &mut ComponentSchemaRegistry) -> Result<(), S
         "Static Model Collider 3D",
         serde_json::json!({"asset": "models/collision.glb", "friction": 0.5, "restitution": 0.0, "layers": sindri_physics::CollisionLayers::ALL, "sensor": false}),
     )?;
+    components.describe::<crate::ModelCollider3dComponent>([(
+        "asset",
+        FieldMeaning::Asset(sindri_core::AssetKind::Model),
+    )])?;
     components.register_with_default::<PhysicsWorld3dComponent>(
         "Physics 3D World",
         serde_json::json!({"gravity": [0.0, -9.81, 0.0], "layers": []}),

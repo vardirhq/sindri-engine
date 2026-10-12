@@ -51,9 +51,11 @@ pub fn assets_root(project: &Path) -> std::path::PathBuf {
     }
 }
 
-/// Every file under `root` whose name ends with `suffix`, by its asset ID.
+/// Every file under `root` whose name ends with `suffix`, ignoring ASCII case,
+/// by its unchanged asset ID.
 #[must_use]
 pub fn files_under(root: &Path, suffix: &str) -> BTreeMap<String, Vec<u8>> {
+    let suffix = suffix.to_ascii_lowercase();
     let mut found = BTreeMap::new();
     let mut pending = vec![root.to_path_buf()];
     while let Some(dir) = pending.pop() {
@@ -64,7 +66,10 @@ pub fn files_under(root: &Path, suffix: &str) -> BTreeMap<String, Vec<u8>> {
             let path = entry.path();
             if path.is_dir() {
                 pending.push(path);
-            } else if path.to_string_lossy().ends_with(suffix)
+            } else if path
+                .to_string_lossy()
+                .to_ascii_lowercase()
+                .ends_with(&suffix)
                 && let (Ok(relative), Ok(bytes)) = (path.strip_prefix(root), fs::read(&path))
             {
                 found.insert(relative.to_string_lossy().replace('\\', "/"), bytes);

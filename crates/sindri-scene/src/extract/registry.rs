@@ -220,6 +220,10 @@ fn register_drawables(components: &mut ComponentSchemaRegistry) -> Result<(), Sc
         "Model",
         serde_json::json!({ "asset": "models/model.glb", "layer": 0 }),
     )?;
+    components.describe::<crate::ModelComponent>([(
+        "asset",
+        sindri_core::FieldMeaning::Asset(sindri_core::AssetKind::Model),
+    )])?;
     components.register_with_default::<MeshComponent>(
         "Mesh",
         serde_json::json!({

@@ -632,7 +632,12 @@
         "asset": "models/model.glb",
         "layer": 0
       },
-      "meanings": {},
+      "meanings": {
+        "asset": {
+          "asset": "model",
+          "kind": "asset"
+        }
+      },
       "schema_version": 1,
       "type_name": "sindri.model"
     },
@@ -1311,7 +1316,12 @@
         "restitution": 0.0,
         "sensor": false
       },
-      "meanings": {},
+      "meanings": {
+        "asset": {
+          "asset": "model",
+          "kind": "asset"
+        }
+      },
       "schema_version": 1,
       "type_name": "sindri.physics3d.model_collider"
     },

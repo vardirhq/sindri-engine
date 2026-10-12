@@ -202,3 +202,43 @@ fn model_collision_project_opens_compiles_blocks_and_walks_to_its_goal() {
         "{said:?}"
     );
 }
+
+#[cfg(not(target_arch = "wasm32"))]
+#[test]
+fn native_directory_loads_uppercase_glb_extensions_without_changing_asset_ids() {
+    use std::fs;
+    let root = std::env::temp_dir().join(format!("sindri-uppercase-model-{}", std::process::id()));
+    fs::create_dir_all(root.join("models")).unwrap();
+    fs::write(
+        root.join("sindri.toml"),
+        "format_version=1\n[project]\nname='Uppercase'\nmain_scene='main.scene'\n",
+    )
+    .unwrap();
+    fs::write(root.join("main.scene"), r#"{"format_version":10,"entities":[{"id":"level","components":{"sindri.physics3d.model_collider":{"asset":"models/LEVEL.GLB"}}}]}"#).unwrap();
+    fs::write(
+        root.join("models/LEVEL.GLB"),
+        include_bytes!("../../../sindri-assets/tests/fixtures/models/static-model.glb"),
+    )
+    .unwrap();
+    let project = crate::directory::read(&root).unwrap();
+    assert_eq!(project.models.len(), 1);
+    assert_eq!(project.models[0].0.as_str(), "models/LEVEL.GLB");
+    let mut scene = sindri_runtime::scene_extractor().unwrap();
+    let collision = references(&project.scenes, &project.prefabs, scene.components()).unwrap();
+    let mut loaded = World::from_scene(&project.scenes[0].1).unwrap();
+    let mut session = Session::with_sources(scene.components().clone(), project.scripts);
+    install(project.models, &collision, &mut scene, &mut session).unwrap();
+    assert!(
+        session
+            .step(
+                &mut loaded.world,
+                &InputState::default(),
+                (640.0, 360.0),
+                sindri_runtime::STEP
+            )
+            .unwrap()
+            .notes()
+            .is_empty()
+    );
+    fs::remove_dir_all(root).unwrap();
+}

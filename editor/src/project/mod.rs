@@ -354,6 +354,19 @@ impl ProjectTree {
             .collect()
     }
 
+    /// References to supported self-contained GLB models. Other mesh formats
+    /// remain visible in the browser but are not offered as loadable models.
+    pub fn models(&self) -> Vec<String> {
+        self.referenced(AssetKind::Mesh)
+            .filter(|reference| {
+                Path::new(reference)
+                    .extension()
+                    .is_some_and(|extension| extension.eq_ignore_ascii_case("glb"))
+            })
+            .map(str::to_owned)
+            .collect()
+    }
+
     /// References to every audio clip the browser can see.
     pub fn audio(&self) -> Vec<String> {
         self.referenced(AssetKind::Audio)

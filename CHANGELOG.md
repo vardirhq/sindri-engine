@@ -1,5 +1,11 @@
 # Changelog
 
+- Render-model and static-model-collider fields now offer project GLB pickers in
+  the editor. Add Component uses real project models and respects world-space
+  and physics ownership constraints. The two asset fields have independent
+  widget and undo scopes, while continuous component drags still merge. Native
+  directory loading accepts extension case without changing asset IDs.
+
 - Editor Play and native headless project runs now install authored GLB collision
   before gameplay. Play validates its asynchronous model queue, keeps later-scene
   collision assets alive and safely replaces collision on model reload. Model

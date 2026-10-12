@@ -1562,7 +1562,11 @@ accepts `friction` (default 0.5), `restitution` (0), `layers` (all) and `sensor`
 (false). It owns one static body and cannot coexist with a 3D rigid body,
 primitive collider, character or voxel collider. Mixed 2D/3D ownership is rejected.
 A render model is optional and can name a different asset. There is no invented
-blank asset or add-component default. Model asset picker metadata is still absent.
+blank asset or engine add-component default. The editor completes the component
+from a real project GLB and offers a model asset picker through declared field
+metadata. It withholds competing body/collider/character components in either
+order. Render and collision asset choices remain independent and undo separately;
+see the [native authoring review](model-collision-editor-review.md#model-asset-authoring).
 
 Hosts explicitly prepare and deliver resources with
 `Session::bind_model_collision(id, &ModelAsset)` after asynchronous decoding.

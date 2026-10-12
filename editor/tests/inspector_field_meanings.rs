@@ -51,6 +51,8 @@ fn no_asset_picker_the_editor_offered_was_lost() {
         ("sindri.ui.text", "font", AssetKind::Font),
         ("sindri.audio.source", "clip", AssetKind::Audio),
         ("sindri.script", "source", AssetKind::Script),
+        ("sindri.model", "asset", AssetKind::Model),
+        ("sindri.physics3d.model_collider", "asset", AssetKind::Model),
     ] {
         assert_eq!(
             components.meaning(type_name, key),

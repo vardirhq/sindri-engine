@@ -95,10 +95,28 @@ pub(crate) fn component_commands(
     (buffer, refused)
 }
 
+/// Keep edits to different components independent, while repeated frames of
+/// a drag within the same component remain one undo entry.
+pub(super) fn component_transaction(
+    entity: EntityId,
+    buffer: CommandBuffer,
+    original: &BTreeMap<String, Value>,
+    draft: &BTreeMap<String, Value>,
+) -> sindri_core::Transaction {
+    let changed: Vec<_> = draft
+        .iter()
+        .filter(|(name, payload)| original.get(*name) != Some(*payload))
+        .map(|(name, _)| name.as_str())
+        .collect();
+    buffer
+        .into_transaction("Edit components")
+        .merging(format!("components:{}:{changed:?}", entity.index()))
+}
+
 /// What the open project can complete a component with.
 ///
-/// Five components cannot be created out of nothing: they name a font, a
-/// sheet, another entity, a clip, or a script source, and the engine has no
+/// Some components cannot be created out of nothing: they name a project
+/// asset, a sheet, another entity or a script source, and the engine has no
 /// honest guess for any of them. What it does have is a project sitting beside
 /// the scene, so the editor completes the registry's field template with the
 /// first thing of the right kind the project holds. This is the whole of that
@@ -107,6 +125,7 @@ pub(crate) fn component_commands(
 #[derive(Clone, Copy, Default)]
 pub(crate) struct ProjectDefaults<'a> {
     pub(crate) font: Option<&'a str>,
+    pub(crate) model: Option<&'a str>,
     pub(crate) sprite: Option<&'a str>,
     pub(crate) grid: Option<&'a str>,
     pub(crate) audio: Option<&'a str>,
@@ -186,6 +205,17 @@ fn withheld(
     project: ProjectDefaults<'_>,
     scene: SceneHolds,
 ) -> Option<&'static str> {
+    const MODEL_COLLIDER: &str = "sindri.physics3d.model_collider";
+    const OTHER_COLLIDERS: [&str; 7] = [
+        "sindri.physics3d.rigid_body",
+        "sindri.physics3d.collider",
+        "sindri.physics3d.voxel_collider",
+        "sindri.physics3d.character",
+        "sindri.physics2d.rigid_body",
+        "sindri.physics2d.collider",
+        "sindri.physics2d.character",
+    ];
+
     // First, because it is the one that breaks a scene rather than merely
     // failing to help. A second authored world camera is not tolerated: the
     // extract refuses the whole scene with `MultipleWorldCameras`, both
@@ -198,6 +228,17 @@ fn withheld(
     {
         return Some("Add a Tilemap to this entity first: navigation is over its grid");
     }
+    if (metadata.type_name == MODEL_COLLIDER
+        && OTHER_COLLIDERS
+            .iter()
+            .any(|name| present.contains_key(*name)))
+        || (OTHER_COLLIDERS.contains(&metadata.type_name.as_str())
+            && present.contains_key(MODEL_COLLIDER))
+    {
+        return Some(
+            "A static model collider owns its collision; remove the other physics body, collider or character first",
+        );
+    }
     if component_default(components, &metadata.type_name, project).is_some() {
         return None;
     }
@@ -205,6 +246,9 @@ fn withheld(
     // these names the one thing to go and make.
     Some(match metadata.type_name.as_str() {
         UI_TEXT_COMPONENT => "No font in the project beside this scene",
+        "sindri.model" | "sindri.physics3d.model_collider" => {
+            "No supported .glb model in the project beside this scene"
+        }
         AUDIO_SOURCE_COMPONENT => "No audio clip in the project beside this scene",
         GRID_OCCUPANT_COMPONENT => "Nothing in this scene has a grid to occupy",
         SCRIPT_COMPONENT => "No .decay script in the project declares a container to run",
@@ -230,6 +274,9 @@ pub(crate) fn component_default(
     }
     let template = components.fields(type_name)?;
     match type_name {
+        "sindri.model" | "sindri.physics3d.model_collider" => {
+            completed(template, [("asset", Value::from(project.model?))])
+        }
         GRID_OCCUPANT_COMPONENT => completed(template, [("grid", Value::from(project.grid?))]),
         UI_TEXT_COMPONENT => completed(template, [("font", Value::from(project.font?))]),
         AUDIO_SOURCE_COMPONENT => completed(template, [("clip", Value::from(project.audio?))]),

@@ -142,14 +142,18 @@ pub(super) fn components_sections(
         // The registry's field template is what says which fields this
         // component has, so an instance that wrote none of them still shows all
         // of them.
-        object_rows(
-            ui,
-            &name,
-            payload,
-            registry,
-            assets,
-            name == "sindri.script",
-        );
+        // Different components can name the same field (for example, both
+        // model components have `asset`); their widgets must be independent.
+        ui.push_id(&name, |ui| {
+            object_rows(
+                ui,
+                &name,
+                payload,
+                registry,
+                assets,
+                name == "sindri.script",
+            );
+        });
         ui.add_space(5.0);
     }
     removed

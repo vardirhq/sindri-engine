@@ -82,6 +82,7 @@ struct PanelContext {
     profiles: Vec<String>,
     prefabs: Vec<String>,
     tile_sets: Vec<String>,
+    models: Vec<String>,
     pictures: super::thumbnails::Pictures,
     block_sets: TileSetBindings,
     /// What the scene's physics world calls its collision layers.
@@ -114,6 +115,7 @@ impl PanelContext {
     fn defaults(&self) -> ProjectDefaults<'_> {
         ProjectDefaults {
             font: self.fonts.first().map(String::as_str),
+            model: self.models.first().map(String::as_str),
             sprite: self.animation_sprites.first().map(String::as_str),
             grid: self.grids.first().map(|(_, id)| id.as_str()),
             audio: self.audio.first().map(String::as_str),
@@ -134,6 +136,7 @@ impl PanelContext {
             profiles: &self.profiles,
             prefabs: &self.prefabs,
             tile_sets: &self.tile_sets,
+            models: &self.models,
             pictures: &self.pictures,
             block_sets: Some(&self.block_sets),
             layers: &self.layers,
@@ -300,11 +303,7 @@ impl EditorApp {
         if buffer.is_empty() {
             return;
         }
-        // The same merge key the rest of the inspector uses, so dragging a tint
-        // is one undo step rather than one per frame of the drag.
-        let transaction = buffer
-            .into_transaction("Edit components")
-            .merging(format!("inspector:{}", entity.index()));
+        let transaction = draft::component_transaction(entity, buffer, original, draft);
         if let Err(error) = self.apply_edit(transaction) {
             self.report(error.to_string());
         }
@@ -380,6 +379,7 @@ impl EditorApp {
             audio: self.project.audio(),
             profiles: self.project.profiles(),
             prefabs: self.project.prefabs(),
+            models: self.project.models(),
             // The engine's own block set is always there to choose, first,
             // beside whatever sets the project holds.
             tile_sets: std::iter::once(sindri_core::BUILTIN_BLOCKS.to_owned())

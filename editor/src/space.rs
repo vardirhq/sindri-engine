@@ -33,11 +33,11 @@ pub const UI_NAMESPACE: &str = "sindri.ui.";
 /// entity silently decided it was a world object, after which the menu would
 /// not offer UI Text at all: the editor could not have built Gather's HUD.
 ///
-/// These four are the ones that place something: three that draw through a
-/// camera, and the camera itself.
-pub const WORLD_COMPONENTS: [&str; 4] = [
+/// These place something through a world camera, or provide that camera.
+pub const WORLD_COMPONENTS: [&str; 5] = [
     "sindri.camera",
     "sindri.mesh",
+    "sindri.model",
     "sindri.sprite",
     "sindri.tilemap",
 ];

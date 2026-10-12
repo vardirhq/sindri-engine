@@ -46,3 +46,42 @@ and named decode failures; headless tests cover both asset layouts, later
 scenes and nested prefab overrides. Asset picker authoring, references added
 during a running scene, dynamic model hull components and Explorer remain
 separate work.
+
+## Model asset authoring
+
+The 2026-10-12 model-picker slice was reviewed on the same isolated
+X11/software Vulkan setup with a new scratch project under
+`target/tmp/model-picker-editor/`. It adds `models/alternate.glb`, with the wall
+at x=0.5 and matching bounds, plus unsupported `.obj` and `.gltf` files.
+
+Both Model and Physics3d Model Collider offer only the two GLBs. Select the
+alternate render asset, then the alternate collider asset: each selection is
+independent. Undoing the second restores only the collider reference; Redo
+restores it. Saved scene JSON confirms the two fields independently. Generic
+field widgets are scoped by component, and component edit history scopes keep
+the two pickers separate while continuous drags within a component still merge.
+
+Add Component → Rendering → Model on Goal starts with the actual
+`models/alternate.glb` asset rather than a placeholder. Save persists it and one
+Undo removes it. Restore Goal before playing the route.
+
+Close and reopen the saved project. Both Level references still name the
+alternate GLB. Play loads that asset, the walker stops at the shifted wall
+(x≈0.19), then keyboard input takes it around the wall to the gold goal. All four
+milestones appear in the console. Stop restores Walker to `[-2, 0.31, 0]` and
+keeps the authored model choices; it does not change the saved scene bytes.
+
+Inspected captures include `picker-fixed.png`, `both-picked.png`,
+`model-added.png`, `reopened.png`, `alternate-blocked.png`,
+`alternate-goal.png` and `alternate-stopped.png`. The shipped example remains
+unchanged. Regression tests cover GLB-only choices in both asset layouts,
+uppercase native loading with exact IDs, real project-backed defaults,
+world/HUD separation, competing physics ownership, independent asset Undo/Redo
+and continued drag merging. Explorer adoption remains pending.
+
+The same authored scratch project was then opened in the actual native
+`sindri-player <project>` window at 960 × 540. Inspected `native-player.png`,
+`native-player-blocked.png` and `native-player-goal.png` show the imported wall,
+keyboard obstruction and the walker on the gold pad. This closes the native
+player-window visual check for imported models on X11/software Vulkan; it does
+not broaden the GPU/platform coverage or replace Explorer game proof.

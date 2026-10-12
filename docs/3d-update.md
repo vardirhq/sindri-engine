@@ -116,8 +116,12 @@ Order:
   player Session tests and exported browser smoke. Native headless loading and
   editor Play now bind collision before gameplay; editor/headless parity tests
   compare every step through the goal and restore/replay wall obstruction. Model
-  picker metadata and Explorer proof remain. Native editor review verifies the
-  goal, moved-wall reload, invalid-reload retention and Stop restoration.
+  picker metadata is now declared for render/collision fields, with GLB choices,
+  project-backed Add Component defaults and independent Undo/Redo. Explorer proof
+  remains. Native editor review verifies the
+  goal, moved-wall reload, invalid-reload retention and Stop restoration. The
+  authored alternate-wall project was also visually played in the real native
+  player window on X11/software Vulkan.
   The Character Lab
   now exercises Decay gravity/jumps, solved carry/reversal and a keyboard goal
   through native Session and exported Chromium. It is feature proof, not Explorer
@@ -265,8 +269,10 @@ for this example.
     ground grid with snapping.
 - [ ] Create menu: Cube, Sphere, Plane, Camera, Point Light, Spot Light,
   Model (asset picker).
-- [ ] Inspector for `sindri.model`: an asset picker, the node list, and the
-  material overrides each node uses.
+- [x] Render/static-collision model asset metadata and GLB-only project pickers,
+  real project-backed Add Component defaults and independent widget/undo scopes;
+  native save/reopen and Play proof in Model Collision Lab.
+- [ ] Inspector model node list and material overrides each node uses.
 - [ ] 3D collider handles (box extents, sphere radius, capsule height), one
   undo step per drag. Fit to model bounds.
 
@@ -372,7 +378,10 @@ placement. The roadmap's "height/mesh terrain next" is this slice.
     - [x] Native editor Play goal, moved-wall reload, invalid collision replacement
       retention, Save refusal and Stop restoration; see
       [the interaction review](model-collision-editor-review.md).
-    - [ ] Model asset field metadata/picker and Explorer game proof.
+    - [x] Model asset field metadata/pickers, project-backed Add Component defaults,
+      ownership/world-space guards, uppercase native discovery and independent
+      Undo/Redo; generated catalogue and native save/reopen/Play review.
+    - [ ] Explorer game proof.
     - [ ] Model-derived convex scene colliders for dynamic props.
   - static trimesh colliders built from a model's meshes;
   - convex hulls for dynamic props;

@@ -35,6 +35,7 @@ pub enum AssetKind {
     Profile,
     TileSet,
     Weave,
+    Model,
 }
 
 impl AssetKind {
@@ -49,6 +50,7 @@ impl AssetKind {
             Self::Profile => "profile",
             Self::TileSet => "tile_set",
             Self::Weave => "weave",
+            Self::Model => "model",
         }
     }
 }

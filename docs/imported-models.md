@@ -81,8 +81,8 @@ resources and standalone keyed groups with native query/landing/replay tests;
 see [the physics contract](physics.md#static-triangle-geometry). Standalone convex
 hull resources and mixed rigid bodies now have native landing/control/replay
 tests as well. Static model scene bindings and native/browser/editor-session
-feature proof are described below. Convex model scene bindings, asset picking
-and Explorer game proof remain pending.
+feature proof are described below. Convex model scene bindings, broader model
+authoring and Explorer game proof remain pending.
 
 ## Renderer boundary
 
@@ -130,7 +130,9 @@ name the asset in a typed extraction error. Active instances extract into the
 opaque 3D stage with the authored layer, world camera and entity world matrix.
 The facade performs the conversion so neither scene nor render depends on the
 asset crate. Local node matrices remain Y-up and are never converted twice.
-The component has no invented default model and no editor authoring UI.
+The component has no invented default model. The editor completes Add Component
+with the first supported GLB in the project, and its asset field uses the model
+picker described below.
 
 ## Supported subset and diagnostics
 
@@ -221,8 +223,25 @@ file is loaded again and rebound. Decode warnings and failures are console
 lines. Until a model arrives, or when its file will not decode, the editor's
 tolerant extraction draws the rest of the scene and names the waiting entity
 as a problem; a game still fails on an unbound model, because every host binds
-before it draws. Model authoring (thumbnails, dragging a model in, triangle
-picking, an asset picker) is the next slice of [the 3D update](3d-update.md).
+before it draws. Both render-model and static-model-collider `asset` fields now
+declare `FieldMeaning::Asset(AssetKind::Model)`. The inspector offers project GLBs
+(case-insensitive extension matching), keeping glTF/OBJ/FBX files visible in the
+project browser without offering them as supported model choices. References
+remain typeable and schema checked. Add Model and Static Model Collider complete
+their field templates with a real project GLB; without one they are withheld.
+Rendered models belong to world space, and static collision cannot share its
+owner with other physics bodies, colliders or characters. Render and collision
+fields have separate widget scopes and separate component undo entries; a drag
+within a component still merges. Native directory suffix discovery also ignores
+ASCII case without changing asset IDs, so a chosen `.GLB` runs natively.
+
+Native [authoring review](model-collision-editor-review.md#model-asset-authoring)
+verifies independent selections, Undo/Redo, Add Model, save/reopen and Play using
+a different GLB wall, then opens that authored project in the real native player
+window and visually verifies wall obstruction and the walker on the goal pad. This is general authoring for the imported-content track,
+requested by external Low Tide; Explorer's in-tree game adoption remains open.
+Thumbnails, model drops, triangle picking, node inspection and material overrides
+remain in [the 3D update](3d-update.md).
 External Low Tide is the request that found this gap; it does not by itself
 satisfy this repository's in-tree game proof rule.
 
@@ -274,5 +293,5 @@ input, verifies the GLB fetch and checks runtime/GPU errors. A native editor
 [review](model-collision-editor-review.md) verifies the goal, moved-wall reload,
 invalid-reload retention, Save refusal and Stop restoration. It remains feature
 proof; Explorer game adoption is open.
-Convex model scene authoring, model asset picker metadata and Explorer proof also
+Convex model scene authoring and Explorer proof also
 remain scheduled in slice 6; rendered GLBs do not automatically acquire collision.

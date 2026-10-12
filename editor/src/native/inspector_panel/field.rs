@@ -46,6 +46,7 @@ pub(crate) struct FieldAssets<'a> {
     pub(crate) audio: &'a [String],
     pub(crate) profiles: &'a [String],
     pub(crate) prefabs: &'a [String],
+    pub(crate) models: &'a [String],
     pub(crate) tile_sets: &'a [String],
     /// What each loaded texture reference looks like, for a field that can
     /// show one: a voxel material as a cube.
@@ -176,6 +177,7 @@ pub(crate) fn asset_list<'a>(
         AssetKind::Profile => assets.profiles,
         AssetKind::TileSet => assets.tile_sets,
         AssetKind::Prefab => assets.prefabs,
+        AssetKind::Model => assets.models,
         // A stylesheet is not something a component field names.
         AssetKind::Weave => return None,
     })

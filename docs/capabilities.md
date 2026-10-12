@@ -47,8 +47,11 @@ depth and upload reuse; renderer resource tests check malformed data. Scene
 with entity world transforms. Disabled models are discovered without drawing;
 missing bindings name the asset. The public facade converts decoded models
 without cross-coupling foundational crates. The editor catalogue assigns the
-registered component an existing icon/family; imported-model authoring is
-still deferred. Model manifests and export retain original GLB bytes and discover
+registered component an existing icon/family. Render and static-collision asset
+fields now declare model metadata, use a GLB-only project picker and complete
+Add Component with an actual model. Independent widget/component history scopes
+keep the two selections separate; native review verifies Undo/Redo, save/reopen
+and Play with an alternate wall. Broader model authoring remains deferred. Model manifests and export retain original GLB bytes and discover
 scene/prefab
 references, including inactive entities. Native project capture and the WebGPU
 project host prepare/bind models once through the existing asset queue and
@@ -56,7 +59,10 @@ apply scene lighting. The exact Low Tide cutaway crawler was visually inspected
 in both runtimes at 1200 × 1000, correctly oriented and visibly recognizable.
 Exported bytes match the source hash. Model shadows, full editor authoring,
 animation and skinning remain deferred. This external proof does not claim
-the repository's in-tree game completion surface.
+the repository's in-tree game completion surface. Model Collision Lab now also
+has native player-window visual proof on X11/software Vulkan, after editor asset
+selection and save/reopen; the imported wall blocks keyboard movement and the
+walker renders on the goal pad.
 See [imported models](imported-models.md).
 
 ### Lifecycle and time
@@ -344,8 +350,10 @@ Editor startup checks its asynchronous queue, honors unsaved references and keep
 later-scene assets alive; model reload failures retain previous collision.
 Native editor [review](model-collision-editor-review.md) verifies the goal,
 moved-wall reload, failed-replacement retention, Save refusal and Stop restoration
-on X11/software Vulkan. Model asset picker metadata and Explorer game proof
-remain pending. See
+on X11/software Vulkan. The same review now exercises model asset picking,
+independent Undo/Redo, project-backed Add Model and save/reopen followed by Play.
+Picker metadata is reflected in the generated catalogue; uppercase GLB native
+loading is covered without changing IDs. Explorer game proof remains pending. See
 [the contract and numeric limits](physics.md#static-triangle-geometry).
 
 `ConvexHull3d` now constructs bounded, immutable volumetric resources, shared by
