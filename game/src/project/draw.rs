@@ -119,6 +119,12 @@ impl ProjectRenderer {
             .and_then(|sizes| {
                 self.cubes
                     .set_lighting(player.scene.lighting(&player.world)?);
+                let shadows = player
+                    .scene
+                    .environment(&player.world)?
+                    .map(sindri_scene::EnvironmentComponent::shadow_settings)
+                    .unwrap_or_default();
+                self.cubes.set_shadows(&gpu.device, shadows);
                 let prepared = player.scene.extract_animated(
                     &player.world,
                     Viewport::new(self.size.0, self.size.1),

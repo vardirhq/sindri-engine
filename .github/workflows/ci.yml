@@ -366,7 +366,12 @@ jobs:
         id: scene_capture
         env:
           WGPU_BACKEND: vulkan
-        run: cargo run --package sindri-cube --bin capture -- target/render-artifacts/scene-frame-pipeline.png
+        run: |
+          cargo run --package sindri-cube --bin capture -- target/render-artifacts/scene-frame-pipeline.png
+          python3 scripts/browser/prepare-benchmark3d.py target/native-benchmark3d-no-shadows
+          cargo run --package sindri-causeway --bin project-capture -- examples/benchmark3d target/render-artifacts/native-benchmark3d.png 960 540 wait:0.5
+          cargo run --package sindri-causeway --bin project-capture -- target/native-benchmark3d-no-shadows target/render-artifacts/native-benchmark3d-no-shadows.png 960 540 wait:0.5
+          node scripts/browser/compare-shadows.mjs target/render-artifacts/native-benchmark3d.png target/render-artifacts/native-benchmark3d-no-shadows.png
       - name: Capture the companion game mid-run
         id: causeway_capture
         env:
@@ -398,6 +403,8 @@ jobs:
             target/render-artifacts/editor-runtime-viewport.png
             target/render-artifacts/editor-tile-volume.png
             target/render-artifacts/scene-frame-pipeline.png
+            target/render-artifacts/native-benchmark3d.png
+            target/render-artifacts/native-benchmark3d-no-shadows.png
             target/render-artifacts/causeway.png
             target/render-artifacts/orbital-spectacle-desktop.png
             target/render-artifacts/orbital-spectacle-phone.png
@@ -623,6 +630,14 @@ jobs:
           cargo run --quiet --package sindri-export --bin sindri-export -- \
             target/browser-causeway-voxels target/dist/causeway-voxels --base /sindri-engine/
           cp -R crates/sindri-player/pkg/. target/dist/causeway-voxels/pkg/
+          python3 examples/benchmark3d/assets/generate.py --check
+          cargo run --quiet --package sindri-export --bin sindri-export -- \
+            examples/benchmark3d target/dist/benchmark3d --base /examples/benchmark3d/
+          cp -R crates/sindri-player/pkg/. target/dist/benchmark3d/pkg/
+          python3 scripts/browser/prepare-benchmark3d.py target/browser-benchmark3d-no-shadows
+          cargo run --quiet --package sindri-export --bin sindri-export -- \
+            target/browser-benchmark3d-no-shadows target/dist/benchmark3d-no-shadows --base /examples/benchmark3d/
+          cp -R crates/sindri-player/pkg/. target/dist/benchmark3d-no-shadows/pkg/
           cargo run --quiet --package sindri-export --bin sindri-export -- \
             examples/transform target/dist/transform --base /examples/transform/
           cp -R crates/sindri-player/pkg/. target/dist/transform/pkg/
@@ -644,6 +659,11 @@ jobs:
         run: |
           node --test scripts/browser/*.test.mjs
           node scripts/browser/smoke.mjs examples/cube target/render-artifacts/browser-cube.png
+          SINDRI_BASE_PATH=/examples/benchmark3d/ \
+            node scripts/browser/benchmark3d.mjs target/dist/benchmark3d target/render-artifacts/browser-benchmark3d.png
+          SINDRI_BASE_PATH=/examples/benchmark3d/ \
+            node scripts/browser/benchmark3d.mjs target/dist/benchmark3d-no-shadows target/render-artifacts/browser-benchmark3d-no-shadows.png
+          node scripts/browser/compare-shadows.mjs target/render-artifacts/browser-benchmark3d.png target/render-artifacts/browser-benchmark3d-no-shadows.png
           SINDRI_BASE_PATH=/examples/transform/ \
             node scripts/browser/transform.mjs target/dist/transform target/render-artifacts/browser-transform.png
           SINDRI_BASE_PATH=/examples/orbit/ \
@@ -748,6 +768,8 @@ jobs:
             target/render-artifacts/browser-character3d.png
             target/render-artifacts/browser-model-collision.png
             target/render-artifacts/browser-transform.png
+            target/render-artifacts/browser-benchmark3d.png
+            target/render-artifacts/browser-benchmark3d-no-shadows.png
             target/render-artifacts/browser-causeway.png
             target/render-artifacts/browser-weave-phone.png
             target/render-artifacts/browser-orbital-baked-phone.png

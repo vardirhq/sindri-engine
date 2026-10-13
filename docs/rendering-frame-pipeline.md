@@ -99,6 +99,16 @@ draws two batches into one frame, at two scales and with two instance counts,
 and reads back the pixels that only come out right when each batch kept its
 own.
 
+## Authored shadow settings in every project host
+
+The shared native/browser player and offscreen `ProjectRenderer` apply the
+validated environment's `shadow_settings` before encoding each frame, as editor
+viewports do. An absent environment restores defaults, so a previous scene's
+shadow state cannot leak into the next. The same encoder handles primitive,
+inline and cached voxel shadow geometry; imported model shadows remain deferred.
+The fixed `examples/benchmark3d` workload and shadow-on/off native/browser captures
+exercise delivery, rather than inferring it from authored component presence.
+
 ## Current boundary
 
 The frame command enum intentionally contains only the render capabilities that exist today. It is

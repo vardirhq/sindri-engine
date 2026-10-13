@@ -2579,6 +2579,18 @@ the README.
 
 ### World presentation
 
+The fixed [3D Benchmark](../examples/benchmark3d/README.md) supplies 100 cubes,
+100 inline pyramid surfaces and 100 references to one shared GLB, plus a floor.
+Its native asset-queue/Session regression verifies ready, static poses, actual
+extracted commands and shared model resources; real Chromium fetches all six
+assets and draws the workload. Native/browser player and offscreen capture paths
+now apply authored shadow settings; on/off captures verify delivery alongside
+editor benchmarks. Imported models still do not cast or receive shadows.
+CPU benchmark phases and GPU completion wait are available; draw/pass/upload
+counters, GPU timestamps and performance targets remain pending. The
+[baseline record](3d-benchmark-baseline.md) records the hardware/profile context,
+short editor/standalone sample and native/browser shadow comparisons.
+
 `sindri.environment` is authored scene state for background, ambient fill, directional shadows, voxel contact-depth ambient occlusion, and an ordered world post stack. The sun is a `sindri.light` entity (kind `directional`) aimed by its rotation along local -Z; `SceneExtractor::lighting` combines it with the environment's ambient into renderer-owned `WorldLighting`, tolerating an invalid light in the editor; textured cubes, authored meshes, and cached voxel meshes share that model in editor and browser rendering. Voxel Lab is the acceptance surface. Directional shadows use one bounded depth map with authored coverage, 256–2048 resolution, and bias controls; both transient world meshes and persistent voxel meshes cast and receive them. The post stack applies exposure, tone mapping, contrast, saturation, bloom, and vignette before crisp overlay/UI rendering. Screen-space AO for arbitrary geometry, fog, sky, local lights, materials, cascaded shadow quality, and advanced post effects remain follow-up capabilities.
 
 ### Not yet

@@ -93,3 +93,11 @@ SINDRI_BASE_PATH=/examples/model-collision/ node scripts/browser/model-collision
 It requires the saved/copied/restored quaternion milestones and walker arrival,
 all five scene/script/texture fetches, changed rendered pixels and no runtime or
 GPU errors. CI retains its final capture.
+
+`benchmark3d.mjs` opens the fixed 300-prop workload, requires its ready goal
+and six asset fetches, and retains a rendered capture without runtime/GPU errors.
+It verifies delivery; performance counters and targets are separate work.
+
+`prepare-benchmark3d.py` makes the shadow-disabled control project without
+changing the source fixture. `compare-shadows.mjs` compares same-host RGB
+captures and requires more than 100 changed and darkened pixels.

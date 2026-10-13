@@ -372,6 +372,12 @@ impl DesktopApp for Player {
             .map_err(PlayerError::from);
         let prepared = styled.and_then(|undo| {
             self.cubes.set_lighting(self.scene.lighting(&world)?);
+            let shadows = self
+                .scene
+                .environment(&world)?
+                .map(sindri_scene::EnvironmentComponent::shadow_settings)
+                .unwrap_or_default();
+            self.cubes.set_shadows(context.device(), shadows);
             // Measured as styled, since a stylesheet sets the font size.
             let prepared = measure_ui_text(&world, self.scene.components(), &mut self.text)
                 .map_err(PlayerError::from)

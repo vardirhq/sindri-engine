@@ -128,14 +128,16 @@ Order:
   now exercises Decay gravity/jumps, solved carry/reversal and a keyboard goal
   through native Session and exported Chromium. It is feature proof, not Explorer
   completion.
-- Then the rest of slice 6, which unblocks moving through 3D (Low Tide's
-  crawler and crew included).
-- Then slices 2 to 4 (measurement, instancing and one lit path, lights),
-  which terrain (5b) and the showcase need.
+- Slice 6's feature foundations are implemented; Explorer game adoption and
+  proof remain open. Continue with slice 2 measurement: the fixed workload and
+  CPU baseline are available, while physical draw/pass/upload counters and GPU
+  timestamps remain pending.
+- Then slices 3 to 4 (instancing and one lit path, lights), which terrain (5b)
+  and the showcase need.
 - Slice 4b records future runtime environment controls and day/night proof.
   Start it only after unified materials, imported-model shadows, runtime light
   access and point/spot lights are ready. This does not change the current
-  slice 6 priority. Keep the work in PR #507.
+  foundation/measurement priority. Keep the work in PR #507.
 
 The yaw/pitch/roll convention is fixed: radians, Y-up, -Z forward (as
 cameras face), YXZ order. Build on `Transform3D::yaw_pitch_roll_radians` and
@@ -161,10 +163,14 @@ cameras face), YXZ order. Build on `Transform3D::yaw_pitch_roll_radians` and
   window. It is not yet looked at on screen.
 
 ### 2. Measure 3D
-- [ ] A benchmark project: a few hundred props (cubes, surface meshes,
-  repeated models), shadows on, perspective camera.
-  `scripts/frame-benchmark.py` reports draw count, passes, uploads and
-  encode/GPU time.
+- [x] Fixed benchmark project: 100 cubes, 100 inline pyramid surfaces and 100
+  references to one GLB, a perspective camera and authored directional shadows.
+  Shared player/capture paths now apply shadow settings; native extraction checks
+  counts/resource sharing and Session ready, and real browser smoke draws it.
+  See [3D Benchmark](../examples/benchmark3d/README.md).
+- [ ] `scripts/frame-benchmark.py` reports actual draw count, passes, uploads and
+  encode/GPU time. Existing CPU timings and GPU completion wait are not these
+  counters or GPU timestamp measurements.
 - [ ] Set the targets the next slice must meet (for example, draws and passes
   per frame independent of repeated props, and zero steady-state uploads).
 

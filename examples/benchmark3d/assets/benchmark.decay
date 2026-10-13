@@ -1,0 +1,18 @@
+// A fixed render workload: only the startup camera aim changes the world.
+script Benchmark {
+    var steps: f32 = 0.0;
+    var ready: bool = false;
+
+    fn start() {
+        this.transform.look_at(Vec3(0.0, 0.0, 0.0));
+        print("3D benchmark loaded");
+    }
+    fn update(dt: f32) {
+        if ready { return; }
+        steps += 1.0;
+        if steps >= 30.0 {
+            ready = true;
+            print("3D benchmark ready");
+        }
+    }
+}

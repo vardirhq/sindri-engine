@@ -1,5 +1,9 @@
 # Changelog
 
+- Add a fixed 300-prop perspective 3D benchmark project with cubes, inline
+  surfaces and repeated GLBs. Native/browser players and offscreen captures now
+  honor authored directional shadow settings, matching editor viewports.
+
 - Read, copy and restore 3D `transform.rotation` as a typed `Quat` value in
   Decay. Whole writes normalize finite nonzero values atomically; invalid writes
   retain the previous transform. Transform Lab transfers its facing to the goal
