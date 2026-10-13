@@ -28,7 +28,37 @@ Inspected captures: `target/orbit-authoring-before.png`, `orbit-authoring-menu.p
 `orbit-authoring-added.png`, `orbit-authoring-invalid.png`,
 `orbit-authoring-play.png`, `orbit-authoring-goal.png`,
 `orbit-authoring-stopped.png` and `orbit-authoring-reopened.png`.
-This is feature proof for Explorer. Dedicated orbit guides, the in-tree game
-and broader GPU/native-platform coverage remain open. Runtime/browser orbit
-behavior was already exercised by the shipped lab; this slice changes native
+This is feature proof for Explorer. The in-tree game and broader GPU/native
+platform coverage remain open. Selected-guide evidence follows below.
+Runtime/browser orbit behavior was already exercised by the shipped lab; this slice changes native
 editor authoring and introduces no new browser or Decay API.
+
+## Selected orbit guides
+
+Rebuilt the native editor and reopened the same scratch project with distance
+7. Selecting Camera in Scene view shows the amber world-space focus, requested
+position, sight line and yaw circle. Selecting Floor hides those guides. Zooming
+in until the actual camera marker is behind the Scene eye leaves the focus and
+clipped guide line visible, without mirrored markers or a spray across the view.
+
+Play/Pause shows the current camera pulled in near the walker while the
+requested marker stays on the seven-unit orbit. Resuming disables the barrier,
+recovers the camera to its requested position and reaches `Walker: Arrived`.
+The blue current-pose marker disappears once the two positions are within
+0.05 units. Stop restores position [0, 3, 6] and the authored guides. Editing yaw
+moves the requested marker along its circle; Undo restores the earlier setting
+and guide. No edited scene was saved in this guide review.
+
+The first inspection exposed overlapping requested/current labels. The final
+build puts the current label below its marker and backs labels with dark plates;
+both are readable in the inspected selected and paused views.
+
+Final inspected captures: `target/orbit-guides-framed.png`,
+`orbit-guides-unselected.png`, `orbit-guides-pull-in.png`,
+`orbit-guides-recovered.png`, `orbit-guides-stopped.png`,
+`orbit-guides-yaw.png`, `orbit-guides-undone.png` and
+`orbit-guides-near-plane.png`. Unit tests cover world-axis angles/offsets on
+rotated/scaled parents, the yaw circle's requested distance/height, current and
+target movement, invalid targets/settings, overflow and near-plane clipping.
+The guides are read-only settings/pose evidence, without a second camera solver
+or an obstruction-volume preview. Explorer proof remains open.

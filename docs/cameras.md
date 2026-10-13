@@ -96,8 +96,17 @@ edits validate settings and target ownership before becoming commands; rejected
 orbit edits retain the previous payload while unrelated valid component edits
 remain independent. Creation, numeric editing, Undo/Redo, save/reopen and authored
 Play are exercised in the [native review](camera-orbit-editor-review.md).
-Dedicated orbit guides and Explorer gameplay proof remain pending. The
-[Orbit Camera Lab](../examples/orbit/README.md) exercises it in a real project;
+
+Selecting an active orbit camera shows an amber focus marker, requested
+position, sight line and yaw circle at the authored pitch/distance. A blue
+"Camera now" marker and line show the actual world pose when it differs by more
+than 0.05 units, including smoothing and collision pull-in during Play. Offset
+and angles follow world axes even with rotated/scaled parents. Lines use the
+same near-plane clipping as frusta; guides remain visible when the camera
+marker is behind the Scene eye and never become picking targets or commands.
+These are settings/pose guides, without an editor-side obstruction prediction
+or camera-volume clearance visualization. Explorer gameplay proof remains
+pending. The [Orbit Camera Lab](../examples/orbit/README.md) exercises it in a real project;
 Explorer remains the game proof.
 
 ## Screen-space UI and overlays

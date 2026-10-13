@@ -1,10 +1,14 @@
 # Changelog
 
+- Show selected orbit camera focus, requested position/yaw circle and current
+  pose in the Scene view, including pull-in/recovery during Play. Guides use
+  world axes, clip at the near plane and remain outside camera picking.
+
 - Add Camera Orbit through the editor using a real active spatial target.
   Creation requires a Camera; numeric and target edits reject invalid settings
   before writing commands. Native review verifies Undo/Redo, save/reopen and
-  authored orbit Play without a camera script. Orbit guides and Explorer game
-  adoption remain pending.
+  authored orbit Play without a camera script. Explorer game adoption remains
+  pending.
 
 - Share physics material `.profile` assets between 2D and 3D. The new Physics
   Material 3D component applies profiles and explicit overrides to primitive,

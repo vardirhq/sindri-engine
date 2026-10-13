@@ -2694,10 +2694,14 @@ edits are refused before commands, retaining the previous component. Unit tests
 exercise defaults, self/child/inactive/UI/unidentified exclusions, validation,
 Undo/Redo and save/reopen. Native [review](camera-orbit-editor-review.md) removes
 the camera script from a scratch Orbit Camera Lab, authors orbit in the inspector
-and reaches the walker goal with engine-owned pull-in/recovery. Dedicated orbit
-guides remain open. Collision uses one
-sight-line ray and synchronized obstacle poses; mouse lock, volume sweeps and
-Explorer's game/browser proof remain pending. This is new general camera
+and reaches the walker goal with engine-owned pull-in/recovery. Selected Scene
+view guides show the world-space focus, requested position/yaw circle and
+actual camera pose during pull-in/recovery, with near-plane clipping and no
+picking or world mutations. Parented target/owner, live poses, invalid targets,
+overflow and a camera behind the Scene eye have regressions. Collision uses one
+sight-line ray and synchronized obstacle poses; camera-volume sweeps and
+Explorer's game/browser proof remain pending. Pointer lock has separate native,
+browser and editor feature-lab evidence. This is new general camera
 capability for Explorer in slice 6 of `docs/3d-update.md`.
 
 ## The platformer

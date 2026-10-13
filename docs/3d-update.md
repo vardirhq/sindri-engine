@@ -314,7 +314,9 @@ placement. The roadmap's "height/mesh terrain next" is this slice.
   - [x] Editor Camera Orbit creation from a real authored target, checked
     settings/target edits, Undo/Redo and save/reopen; native authored Play
     without the camera script observes pull-in/recovery and reaches the goal.
-  - [ ] Dedicated orbit guides and Explorer gameplay/browser proof.
+  - [x] Selected orbit focus, requested position/yaw circle and current-pose
+    guides, clipped in Scene view and verified in native editor Play.
+  - [ ] Explorer gameplay/browser proof.
 - [ ] Input:
   - [x] Read-only mouse `Pointer.delta` / `Input.Pointer.delta` in viewport
     pixels per fixed step, with typed access and drag-to-look in Orbit Camera Lab.

@@ -708,3 +708,11 @@ components still become commands with their own transaction scope. Runtime
 pose validation remains with the shared camera driver. Tests and the
 [native review](camera-orbit-editor-review.md) exercise creation, validation,
 undo/redo, persistence and authored Play.
+
+Selected orbit guides live in the camera overlay's private `orbit` module.
+They derive focus/desired/current world positions from scene components and
+transforms each frame, draw the yaw circle at requested pitch/distance, and use
+the shared near-plane projection helpers. Their painter does not enter the
+camera hit-test path and writes no commands. The actual pose line makes runtime
+smoothing/pull-in visible; the editor does not run a second orbit solver or
+predict obstruction clearance.
