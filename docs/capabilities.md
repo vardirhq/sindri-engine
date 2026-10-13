@@ -2376,7 +2376,12 @@ as an `List<Entity>`. An event is about a pair, so the answer names the other
 half — whichever side of the event this entity was on. Despawning either half
 from inside the answer is safe. A host running no physics refuses the call
 rather than reporting a velocity of zero for a body that does not exist.
-Exercised in `crates/sindri-decay/tests/a_script_drives_a_body.rs`.
+Exercised in `crates/sindri-decay/tests/a_script_drives_a_body.rs`. The 2D
+lists describe the solve before scripts: consumers check `World.exists` before
+reading a reference that cleanup may have removed earlier in the script pass.
+Physics Playground applies this to shells, panes, backstops and bumpers; a
+project regression resets the room after a ball contacts a pane, and the
+real desktop/phone browser smoke exercises cleanup after its chaos controls.
 
 **2D continuous collision is opt-in.** `RigidBody2d.continuous_collision` defaults
 false, including old payloads. Live dynamic-body toggles preserve velocity and

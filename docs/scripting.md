@@ -1404,7 +1404,12 @@ piercing bullets need, and it falls out of the event rather than being a feature
 hit, or the thing that hit it — is an ordinary `World.despawn`, and the body
 leaves the simulation before the next step. Walking the answer while despawning
 from it is the case `World.exists` covers, exactly as for any other collection of
-references.
+references. A reset or cleanup in an earlier script can remove a referenced
+entity before another script consumes that solve's collision list. Check
+`World.exists(other)` before reading tags, transforms, script fields or applying
+an impulse. Physics Playground's shell, pane, backstop and bumper consumers
+exercise this rule; its regression spawns a ball against a pane and resets the
+room before the pane consumes that solve's contact.
 
 **A host with no physics refuses these**, rather than reporting a velocity of
 zero for a body that does not exist. A game whose bullets never move because

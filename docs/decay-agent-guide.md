@@ -92,6 +92,10 @@ data; it does not inspect that live field.
 - Script updates and physics integration happen at defined frame boundaries.
   Check the host contract before assuming a transform or velocity write is
   visible in the same update.
+- A 2D collision/sensor event list describes the solve before scripts in that
+  fixed step. An earlier script's cleanup may already have removed a referenced
+  entity. Check `World.exists` before reading tags, transforms or script fields,
+  or applying physics controls, including when walking a copied list during despawning.
 - Signals accumulate until consumed. Confirm whether the receiver should sum,
   clamp, or treat the value as an event.
 - A spawned script does not automatically inherit the spawner's runtime state.

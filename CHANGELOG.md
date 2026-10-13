@@ -1,5 +1,9 @@
 # Changelog
 
+- Keep Physics Playground scripts running when RESET or CLEAN UP removes a
+  body named by a collision event. Shells, panes, backstops and
+  bumpers check existence before using event references.
+
 - Resize Orbit Camera Lab's barrier with 1/2, inspect it from the far side
   with 3 and resume automatic orbit/removal with R. Synchronized center/edge
   rays verify live collision width. Browser
