@@ -1,5 +1,8 @@
 //! The typed host's 3D directions and methods, exercised through real scripts.
 
+#[path = "spatial_transforms/quaternion.rs"]
+mod quaternion;
+
 use serde_json::json;
 use sindri_core::{
     ComponentSchemaRegistry, EntityData, EntityId, SceneComponent, Transform3D, World,
@@ -185,10 +188,24 @@ fn invalid_operations_and_z_locked_orbits_preserve_the_transform() {
     }
 }
 
+fn assert_read_only(
+    host: &mut sindri_decay::WorldHost<'_>,
+    subject: Option<u64>,
+    path: &decay_ir::Path,
+    value: decay_runtime::Value,
+) {
+    use decay_runtime::Host;
+    let error = host.store(subject, path, value).unwrap_err();
+    assert!(
+        matches!(&error, decay_runtime::RuntimeError::Host(message) if message.contains("read-only")),
+        "{error:?}"
+    );
+}
+
 #[test]
 fn runtime_refuses_direction_writes_even_without_the_compiler() {
     use decay_ir::Path;
-    use decay_runtime::{Host, Value};
+    use decay_runtime::Value;
     use sindri_decay::{
         AudioQueue, Blackboard, HostServices, PrefabSources, ProfileSources, ScriptContext,
         Spawning, WorldHost,
@@ -238,6 +255,7 @@ fn runtime_refuses_direction_writes_even_without_the_compiler() {
         for (suffix, value) in [
             (vec!["forward"], Value::Vec3([1.0, 0.0, 0.0])),
             (vec!["right", "x"], Value::Number(2.0)),
+            (vec!["rotation", "y"], Value::Number(2.0)),
         ] {
             let path = Path(
                 prefix
@@ -246,11 +264,7 @@ fn runtime_refuses_direction_writes_even_without_the_compiler() {
                     .map(|v| (*v).to_owned())
                     .collect(),
             );
-            let error = host.store(subject, &path, value).unwrap_err();
-            assert!(
-                matches!(&error, decay_runtime::RuntimeError::Host(message) if message.contains("read-only")),
-                "{error:?}"
-            );
+            assert_read_only(&mut host, subject, &path, value);
         }
     }
     for parts in [
@@ -258,11 +272,7 @@ fn runtime_refuses_direction_writes_even_without_the_compiler() {
         vec!["Input", "Pointer", "locked"],
     ] {
         let path = Path(parts.into_iter().map(str::to_owned).collect());
-        let error = host.store(None, &path, Value::Bool(true)).unwrap_err();
-        assert!(
-            matches!(&error, decay_runtime::RuntimeError::Host(message) if message.contains("read-only")),
-            "{error:?}"
-        );
+        assert_read_only(&mut host, None, &path, Value::Bool(true));
     }
     for prefix in [vec!["Pointer", "delta"], vec!["Input", "Pointer", "delta"]] {
         for (suffix, value) in [
@@ -276,11 +286,7 @@ fn runtime_refuses_direction_writes_even_without_the_compiler() {
                     .map(|v| (*v).to_owned())
                     .collect(),
             );
-            let error = host.store(None, &path, value).unwrap_err();
-            assert!(
-                matches!(&error, decay_runtime::RuntimeError::Host(message) if message.contains("read-only")),
-                "{error:?}"
-            );
+            assert_read_only(&mut host, None, &path, value);
         }
     }
     assert_eq!(

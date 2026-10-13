@@ -52,6 +52,14 @@ pub fn environment() -> Environment {
         environment.add_type(name, ty);
     }
 
+    environment.add_struct(
+        crate::surface::QUAT,
+        crate::surface::QUAT_FIELDS
+            .into_iter()
+            .map(|name| (name.to_owned(), Type::F32))
+            .collect(),
+    );
+
     for (name, _) in CONSTANTS {
         environment.add_value(*name, Type::F32);
     }

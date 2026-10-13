@@ -483,6 +483,15 @@ Reading settings from a profile, a data file shared across a project, such as a 
 - `text(profile: Profile, key: String, fallback: String)` → `String` — A text setting from the profile, or `fallback` if it is missing.
 - `text_at(profile: Profile, collection: String, index: f32, key: String, fallback: String)` → `String` — A text setting from one item in a list in the profile, or `fallback`.
 
+### `Quat`
+
+A copied quaternion value, with x/y/z/w components. Build with Quat(x: 0.0, y: 0.0, z: 0.0, w: 1.0), or copy transform.rotation. Change a local var's components, then assign the whole value; no quaternion arithmetic or interpolation methods are provided.
+
+- `w`: `f32` — The quaternion's scalar component; identity has w = 1 and x/y/z = 0.
+- `x`: `f32` — The quaternion's X component.
+- `y`: `f32` — The quaternion's Y component.
+- `z`: `f32` — The quaternion's Z component.
+
 ### `Random`
 
 Random numbers. The same seed always gives the same numbers, so a run can be replayed.
@@ -605,6 +614,7 @@ Where an object is, how it is turned and how big it is. For an object attached t
 - `right`: `Vec3` (read-only) — Read-only unit world-space +X direction, with parent rotation included and scale ignored.
 - `roll`: `f32` — How far a 3D object is turned about the way it faces, in radians, after its yaw and pitch. Changing it keeps its yaw and pitch.
 - `rotate_around(pivot: Vec3, axis: Vec3, radians: f32)` → `unit` — Rotates position and orientation around a world-space Vec3 pivot and nonzero Vec3 axis by radians. Normalizes the axis and preserves scale. Invalid input/output, a singular parent scale, or movement off a Z-locked layer is an error with no mutation.
+- `rotation`: `Quat` — Parent-relative Quat in x/y/z/w order. Reads copy the stored rotation; whole writes normalize finite nonzero values atomically and preserve position, scale and Z lock. Stored components are readable; change components on a local var and assign it back. Zero/non-finite writes fail without mutation.
 - `rotation_z`: `f32` — How far the object is turned, in radians. A full turn is `TAU`. This is the turn of a flat object in a 2D game; it replaces any 3D turn.
 - `scale`: `Vec3` — How big the object is on each axis; 1 is its normal size.
 - `up`: `Vec3` (read-only) — Read-only unit world-space +Y direction, with parent rotation included and scale ignored.

@@ -111,9 +111,26 @@ pub(super) const TYPES: &[TypeEntry] = &[
         ],
     },
     TypeEntry {
+        name: "Quat",
+        text: "A copied quaternion value, with x/y/z/w components. Build with Quat(x: 0.0, y: 0.0, z: 0.0, w: 1.0), or copy transform.rotation. Change a local var's components, then assign the whole value; no quaternion arithmetic or interpolation methods are provided.",
+        members: &[
+            value("x", "The quaternion's X component."),
+            value("y", "The quaternion's Y component."),
+            value("z", "The quaternion's Z component."),
+            value(
+                "w",
+                "The quaternion's scalar component; identity has w = 1 and x/y/z = 0.",
+            ),
+        ],
+    },
+    TypeEntry {
         name: "Transform",
         text: "Where an object is, how it is turned and how big it is. For an object attached to another, these are measured from that parent.",
         members: &[
+            value(
+                "rotation",
+                "Parent-relative Quat in x/y/z/w order. Reads copy the stored rotation; whole writes normalize finite nonzero values atomically and preserve position, scale and Z lock. Stored components are readable; change components on a local var and assign it back. Zero/non-finite writes fail without mutation.",
+            ),
             value(
                 "forward",
                 "Read-only unit world-space facing direction: -Z at identity. Parent rotation is included and scale is ignored. Copy it to move with `world_position += forward * speed * dt`.",

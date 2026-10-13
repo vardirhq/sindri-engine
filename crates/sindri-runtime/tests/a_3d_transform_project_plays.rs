@@ -18,6 +18,9 @@ fn the_parented_walker_reaches_a_raised_goal_while_the_camera_orbits() {
     let goal = find("Goal", &run);
     let camera = find("Camera", &run);
     let initial_camera = run.world.world_transform(camera).unwrap();
+    let initial_walker = run.world.get(walker).unwrap().transform_3d.unwrap();
+    let initial_position = run.world.world_transform(walker).unwrap().position;
+    let mut quaternion_proven = false;
     let mut arrived = false;
     for _ in 0..400 {
         let report = run.step(STEP).expect("session steps");
@@ -26,6 +29,11 @@ fn the_parented_walker_reaches_a_raised_goal_while_the_camera_orbits() {
             "{:?}",
             report.scripts.failures
         );
+        quaternion_proven |= report
+            .scripts
+            .printed
+            .iter()
+            .any(|line| line.message == "Quaternion copied and restored");
         if report
             .scripts
             .printed
@@ -37,12 +45,34 @@ fn the_parented_walker_reaches_a_raised_goal_while_the_camera_orbits() {
         }
     }
     assert!(arrived, "the feature example runs to its goal");
+    assert!(
+        quaternion_proven,
+        "copied quaternion rotation reaches both entities"
+    );
+    let restored = run.world.get(walker).unwrap().transform_3d.unwrap();
+    assert_eq!(
+        restored.rotation.map(f32::to_bits),
+        initial_walker.rotation.map(f32::to_bits)
+    );
+    assert_eq!(
+        restored.scale.map(f32::to_bits),
+        initial_walker.scale.map(f32::to_bits)
+    );
     let at = run.world.world_transform(walker).unwrap().position;
     let target = run.world.world_transform(goal).unwrap().position;
     assert!(
         at.into_iter()
             .zip(target)
             .all(|(a, b)| (a - b).abs() < 0.01)
+    );
+    let goal_facing = run.world.world_transform(goal).unwrap().forward();
+    let travel: [f32; 3] = std::array::from_fn(|i| target[i] - initial_position[i]);
+    let travel_length = travel.into_iter().map(|v| v * v).sum::<f32>().sqrt();
+    assert!(
+        goal_facing
+            .into_iter()
+            .zip(travel)
+            .all(|(a, b)| (a - b / travel_length).abs() < 0.001)
     );
     let final_camera = run.world.world_transform(camera).unwrap();
     assert!((final_camera.position[0] - initial_camera.position[0]).abs() > 1.0);

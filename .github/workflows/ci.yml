@@ -624,6 +624,9 @@ jobs:
             target/browser-causeway-voxels target/dist/causeway-voxels --base /sindri-engine/
           cp -R crates/sindri-player/pkg/. target/dist/causeway-voxels/pkg/
           cargo run --quiet --package sindri-export --bin sindri-export -- \
+            examples/transform target/dist/transform --base /examples/transform/
+          cp -R crates/sindri-player/pkg/. target/dist/transform/pkg/
+          cargo run --quiet --package sindri-export --bin sindri-export -- \
             examples/orbit target/dist/orbit --base /examples/orbit/
           cp -R crates/sindri-player/pkg/. target/dist/orbit/pkg/
           cargo run --quiet --package sindri-export --bin sindri-export -- \
@@ -641,6 +644,8 @@ jobs:
         run: |
           node --test scripts/browser/*.test.mjs
           node scripts/browser/smoke.mjs examples/cube target/render-artifacts/browser-cube.png
+          SINDRI_BASE_PATH=/examples/transform/ \
+            node scripts/browser/transform.mjs target/dist/transform target/render-artifacts/browser-transform.png
           SINDRI_BASE_PATH=/examples/orbit/ \
             node scripts/browser/pointer-lock.mjs target/dist/orbit target/render-artifacts/browser-orbit-pointer-lock.png
           SINDRI_BASE_PATH=/examples/character3d/ \
@@ -742,6 +747,7 @@ jobs:
             target/render-artifacts/browser-orbit-pointer-lock-scale-wide.png
             target/render-artifacts/browser-character3d.png
             target/render-artifacts/browser-model-collision.png
+            target/render-artifacts/browser-transform.png
             target/render-artifacts/browser-causeway.png
             target/render-artifacts/browser-weave-phone.png
             target/render-artifacts/browser-orbital-baked-phone.png

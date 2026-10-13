@@ -48,6 +48,7 @@ mod physics_motion;
 mod physics_slider_position;
 mod print;
 mod profile;
+mod quaternion;
 mod query;
 mod random;
 mod raycast;

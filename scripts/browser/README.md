@@ -88,3 +88,8 @@ W to the goal. It checks the GLB fetch, gameplay milestones and runtime/GPU erro
 SINDRI_BASE_PATH=/examples/model-collision/ node scripts/browser/model-collision.mjs \
   target/dist/model-collision target/browser-model-collision.png
 ```
+
+`transform.mjs` plays the exported Transform Lab through the real WebGPU player.
+It requires the saved/copied/restored quaternion milestones and walker arrival,
+all five scene/script/texture fetches, changed rendered pixels and no runtime or
+GPU errors. CI retains its final capture.

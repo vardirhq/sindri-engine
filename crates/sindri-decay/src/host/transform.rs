@@ -1,7 +1,9 @@
 //! World-space aim and orbit, converted to the entity's stored parent space.
 
+use crate::surface::Leaf;
 use decay_ir::Path;
 use decay_runtime::{RuntimeError, Value};
+use sindri_core::EntityId;
 
 use super::{WorldHost, convert::as_f32, physics3d::vector};
 use crate::surface::transform::{CALLS, TransformCall};
@@ -81,5 +83,60 @@ impl WorldHost<'_> {
             .ok_or_else(|| error("entity no longer exists"))?
             .transform_3d = Some(next);
         Ok(Some(Value::Unit))
+    }
+    /// Store one transform scalar through the shared leaf description.
+    pub(super) fn store_transform_leaf(
+        &mut self,
+        entity: EntityId,
+        leaf: Leaf,
+        number: f64,
+        path: &Path,
+    ) -> Result<bool, RuntimeError> {
+        let Some(mut transform) = self.transform_of(entity) else {
+            return Ok(false);
+        };
+        match leaf {
+            Leaf::TransformAxis(vector, index) if vector.is_world() => {
+                // Moved in the world, and stored as the place under its
+                // parent that puts it there.
+                let Some(mut placed) = self.world.world_transform(entity) else {
+                    return Ok(false);
+                };
+                let mut values = vector.get(&placed);
+                values[index] = as_f32(number);
+                vector.set(&mut placed, values);
+                transform = self.world.local_for_world(entity, placed);
+            }
+            Leaf::TransformAxis(vector, index) => {
+                let mut values = vector.get(&transform);
+                values[index] = as_f32(number);
+                vector.set(&mut transform, values);
+            }
+            Leaf::TransformScalar(scalar) => {
+                scalar.set(&mut transform, as_f32(number));
+            }
+            Leaf::Component { .. } | Leaf::TransformRotation(_) => {
+                unreachable!("matched above")
+            }
+        }
+
+        // The Z lock is an invariant of the transform, not a rule the
+        // editor enforces on the way in. A script is a write path like
+        // any other, and one that could ignore the lock would be the
+        // hole that makes the lock worthless.
+        if self
+            .transform_of(entity)
+            .is_some_and(|current| current.z_lock_rejects(Some(transform)))
+        {
+            return Err(RuntimeError::Host(format!(
+                "{} would move a Z-locked transform off its layer",
+                path.dotted()
+            )));
+        }
+        let Some(data) = self.world.get_mut(entity) else {
+            return Ok(false);
+        };
+        data.transform_3d = Some(transform);
+        Ok(true)
     }
 }

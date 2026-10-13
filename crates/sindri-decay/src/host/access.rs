@@ -8,7 +8,7 @@ use decay_ir::Path;
 use decay_runtime::{Host, RuntimeError, Value};
 use sindri_core::{EntityId, Transform3D};
 
-use super::convert::{as_f32, describe, number};
+use super::convert::{describe, number};
 use super::{WorldHost, print};
 use crate::surface::{
     AIM, AIM_VALUES, CAMERA, CAMERA_VALUES, FUNCTIONS, GESTURE, GESTURE_VALUES, Handle,
@@ -106,6 +106,10 @@ impl Host for WorldHost<'_> {
             }));
         }
 
+        if let Some(rotation) = self.load_rotation(subject, path, &under)? {
+            return Ok(Some(rotation));
+        }
+
         let found = if subject.is_some() {
             leaf_through_reference(&under)
         } else {
@@ -154,6 +158,9 @@ impl Host for WorldHost<'_> {
         let Some(under) = Self::addressed(subject, path) else {
             return Ok(false);
         };
+        if self.store_rotation(subject, path, &under, &value)? {
+            return Ok(true);
+        }
         let found = if subject.is_some() {
             leaf_through_reference(&under)
         } else {
@@ -176,51 +183,9 @@ impl Host for WorldHost<'_> {
 
         match leaf {
             Leaf::TransformAxis(..) | Leaf::TransformScalar(_) => {
-                let Some(mut transform) = self.transform_of(entity) else {
-                    return Ok(false);
-                };
-                match leaf {
-                    Leaf::TransformAxis(vector, index) if vector.is_world() => {
-                        // Moved in the world, and stored as the place under its
-                        // parent that puts it there.
-                        let Some(mut placed) = self.world.world_transform(entity) else {
-                            return Ok(false);
-                        };
-                        let mut values = vector.get(&placed);
-                        values[index] = as_f32(number);
-                        vector.set(&mut placed, values);
-                        transform = self.world.local_for_world(entity, placed);
-                    }
-                    Leaf::TransformAxis(vector, index) => {
-                        let mut values = vector.get(&transform);
-                        values[index] = as_f32(number);
-                        vector.set(&mut transform, values);
-                    }
-                    Leaf::TransformScalar(scalar) => {
-                        scalar.set(&mut transform, as_f32(number));
-                    }
-                    Leaf::Component { .. } => unreachable!("matched above"),
-                }
-
-                // The Z lock is an invariant of the transform, not a rule the
-                // editor enforces on the way in. A script is a write path like
-                // any other, and one that could ignore the lock would be the
-                // hole that makes the lock worthless.
-                if self
-                    .transform_of(entity)
-                    .is_some_and(|current| current.z_lock_rejects(Some(transform)))
-                {
-                    return Err(RuntimeError::Host(format!(
-                        "{} would move a Z-locked transform off its layer",
-                        path.dotted()
-                    )));
-                }
-                let Some(data) = self.world.get_mut(entity) else {
-                    return Ok(false);
-                };
-                data.transform_3d = Some(transform);
-                Ok(true)
+                self.store_transform_leaf(entity, leaf, number, path)
             }
+            Leaf::TransformRotation(_) => unreachable!("handled by store_rotation"),
             Leaf::Component { component, pointer } => {
                 let Some(data) = self.world.get_mut(entity) else {
                     return Ok(false);

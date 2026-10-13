@@ -1,5 +1,10 @@
 # Changelog
 
+- Read, copy and restore 3D `transform.rotation` as a typed `Quat` value in
+  Decay. Whole writes normalize finite nonzero values atomically; invalid writes
+  retain the previous transform. Transform Lab transfers its facing to the goal
+  and restores its starting rotation on arrival.
+
 - Keep Physics Playground scripts running when RESET or CLEAN UP removes a
   body named by a collision event. Shells, panes, backstops and
   bumpers check existence before using event references.

@@ -2263,8 +2263,20 @@ copy-versus-write semantics, and atomic errors including the Z lock. The
 [Transform Lab](../examples/transform/README.md) opens a perspective scene
 and runs to its goal.
 This is slice 6 of `docs/3d-update.md`, a foundation for Explorer rather than
-completed game proof: no in-tree game uses these new methods yet. A quaternion
-value and character/orbit-camera systems remain pending.
+completed game proof: no in-tree game uses these new methods yet. Quaternion
+composition/interpolation remains pending; character and orbit-camera feature
+proof is documented below.
+
+`transform.rotation` is a copied parent-relative `Quat` x/y/z/w value, using
+Decay's existing struct constructor and copy semantics. Whole writes normalize
+finite nonzero values atomically; zero/non-finite writes retain the transform.
+Stored components are readable; edit a copied local value and assign it back.
+Script regressions cover huge/tiny magnitudes, invalid input, parented rotation,
+copy independence and runtime rejection of direct component writes. Transform
+Lab saves its rotation, transfers its facing to the goal and restores its original
+on arrival through Session and exported Chromium. Generated host metadata exposes
+the type to the checker and LSP. This is a general transform capability added to
+finish the planned 3D scripting surface; Explorer game proof remains pending.
 
 A script reaches its own transform's position, scale and Z rotation, its
 sprite's tint and layer, the keyboard, the frame's delta and its own elapsed

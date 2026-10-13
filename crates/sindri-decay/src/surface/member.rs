@@ -63,10 +63,20 @@ const fn direction(vector: Vector) -> Node {
     }
 }
 
+pub(crate) const QUAT: &str = "Quat";
+pub(crate) const QUAT_FIELDS: [&str; 4] = ["x", "y", "z", "w"];
+const ROTATION: &[(&str, Node)] = &[
+    ("x", Node::Leaf(Leaf::TransformRotation(0))),
+    ("y", Node::Leaf(Leaf::TransformRotation(1))),
+    ("z", Node::Leaf(Leaf::TransformRotation(2))),
+    ("w", Node::Leaf(Leaf::TransformRotation(3))),
+];
+
 pub(crate) const TRANSFORM_MEMBERS: &[(&str, Node)] = &[
     ("position", Node::Group(VEC3, POSITION)),
     ("world_position", Node::Group(VEC3, WORLD_POSITION)),
     ("scale", Node::Group(VEC3, SCALE)),
+    ("rotation", Node::Group(QUAT, ROTATION)),
     ("forward", direction(Vector::Forward)),
     ("right", direction(Vector::Right)),
     ("up", direction(Vector::Up)),

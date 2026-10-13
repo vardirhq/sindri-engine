@@ -57,8 +57,10 @@ together, and pushes each slice before starting the next.
 Order:
 - Slice 6 now has world-space read-only `forward`/`right`/`up` and checked
   `look_at`/`rotate_around`, with parent-space conversion, atomic validation,
-  compiler/LSP metadata and the transform feature example. Quaternion values
-  remain pending; Decay currently has no quaternion or Vec4 value type.
+  compiler/LSP metadata and the transform feature example. Parent-relative
+  quaternion rotation now uses a copied host-provided `Quat` struct with atomic
+  normalized whole writes and save/copy/restore proof in Transform Lab. Quaternion
+  composition/interpolation and Explorer game proof remain pending.
 - Slice 6 also has explicit perspective FOV control and `sindri.camera.orbit`
   with world-space follow, aiming, smoothing and sight-line collision pull-in.
   The Orbit Camera Lab runs to its goal through Session and exported Chromium;
@@ -301,8 +303,8 @@ placement. The roadmap's "height/mesh terrain next" is this slice.
 ### 6. Play in 3D
 - [x] Decay `yaw`/`pitch`/`roll` on the transform (radians, Y-up, -Z
   forward; each keeps the others when written).
-- [ ] Decay 3D transforms, the rest:
-  - `rotation` (quaternion);
+- [x] Decay 3D transforms, the rest:
+  - [x] `rotation` (copied `Quat` quaternion; atomic normalized whole writes);
   - [x] `forward`/`right`/`up`;
   - [x] `look_at`, `rotate_around`.
   The [Transform Lab](../examples/transform/README.md) opens and runs to its

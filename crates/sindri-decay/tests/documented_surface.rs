@@ -105,6 +105,10 @@ fn described_entity_paths(environment: &Environment) -> BTreeSet<String> {
             into.insert(prefix);
             return;
         };
+        // Host-provided structs are copied values as well as member paths.
+        if environment.structs().any(|(known, _)| known == name) {
+            into.insert(prefix.clone());
+        }
         let described = environment
             .get_type(name)
             .unwrap_or_else(|| panic!("`{name}` is named by the surface but never described"));

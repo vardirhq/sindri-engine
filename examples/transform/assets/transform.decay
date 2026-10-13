@@ -3,12 +3,32 @@ script Walker {
     @export
     let speed: f32 = 2.0;
     var arrived: bool = false;
+    var home_rotation: Quat = Quat(x: 0.0, y: 0.0, z: 0.0, w: 1.0);
+
+    fn start() {
+        home_rotation = this.transform.rotation;
+        print("Quaternion saved");
+    }
 
     fn update(dt: f32) {
         if arrived { return; }
         let goal = World.find("Goal");
         let distance = this.transform.world_position.distance(goal.transform.world_position);
         if distance <= 0.01 {
+            let facing = this.transform.rotation;
+            goal.transform.rotation = facing;
+            this.transform.rotation = home_rotation;
+            let copied = goal.transform.rotation;
+            let restored = this.transform.rotation;
+            let copy_error = abs(copied.x - facing.x) + abs(copied.y - facing.y)
+                + abs(copied.z - facing.z) + abs(copied.w - facing.w);
+            let restore_error = abs(restored.x - home_rotation.x) + abs(restored.y - home_rotation.y)
+                + abs(restored.z - home_rotation.z) + abs(restored.w - home_rotation.w);
+            if copy_error > 0.0001 || restore_error > 0.0001 {
+                print("Quaternion mismatch");
+                return;
+            }
+            print("Quaternion copied and restored");
             arrived = true;
             Game.set("arrived", 1.0);
             print("Arrived");

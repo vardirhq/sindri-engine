@@ -42,7 +42,9 @@ pub(crate) use call::{
 };
 pub(crate) use gamepad::{GAMEPAD_QUERIES, GamepadQuery, gamepad_type};
 pub(crate) use maths::{CONSTANTS, FUNCTIONS, HostFunction};
-pub(crate) use member::{SHAPE_MEMBERS, SPRITE_MEMBERS, TRANSFORM_MEMBERS, UI_IMAGE_MEMBERS};
+pub(crate) use member::{
+    QUAT, QUAT_FIELDS, SHAPE_MEMBERS, SPRITE_MEMBERS, TRANSFORM_MEMBERS, UI_IMAGE_MEMBERS,
+};
 pub(crate) use names::{
     ACTION, AIM, ANIMATION, CAMERA, EFFECTS, ENTITY, GAME, GAMEPAD, GESTURE, GRID, INPUT, KEYBOARD,
     PHYSICS, POINTER, PREFAB, PROFILE, PROFILES, RANDOM, SAVE, SCENE, SEQUENCE, SHAPE, SPRITE,
@@ -99,6 +101,8 @@ pub(crate) enum Leaf {
     TransformAxis(Vector, usize),
     /// A scalar member of the transform.
     TransformScalar(Scalar),
+    /// One component of the stored parent-relative quaternion.
+    TransformRotation(usize),
     /// A number inside a component's stored JSON payload.
     ///
     /// Reached by pointer rather than through the typed view, because a
@@ -326,6 +330,7 @@ impl Leaf {
             }
             Self::TransformAxis(vector, index) => f64::from(vector.get(transform?)[index]),
             Self::TransformScalar(scalar) => f64::from(scalar.get(transform?)),
+            Self::TransformRotation(index) => f64::from(transform?.rotation[index]),
             Self::Component { component, pointer } => {
                 follow(components?.get(component)?, pointer)?.as_f64()?
             }

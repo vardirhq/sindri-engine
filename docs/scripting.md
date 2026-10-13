@@ -135,6 +135,8 @@ interprets, and `WorldHost` is the only place that gives them a meaning.
 | `this.transform.position.{x,y,z}` | `f32` | yes | yes |
 | `this.transform.world_position.{x,y,z}` | `f32` | yes | yes |
 | `this.transform.scale.{x,y,z}` | `f32` | yes | yes |
+| `this.transform.rotation` | `Quat` | yes | whole value |
+| `this.transform.rotation.{x,y,z,w}` | `f32` | yes | no |
 | `this.transform.rotation_z` | `f32` | yes | yes |
 | `this.transform.{yaw,pitch,roll}` | `f32` | yes | yes |
 | `this.transform.{forward,right,up}` | `Vec3` | yes | no |
@@ -151,6 +153,32 @@ interprets, and `WorldHost` is the only place that gives them a meaning.
 through the same accessors, so they cannot disagree: writing a whole vector
 writes its three components, in order. Vectors themselves are the language's,
 not the engine's; `decay/LANGUAGE.md` has what they can do.
+
+**A rotation is a copied `Quat` value.** Its components are `x`, `y`, `z`,
+`w`; identity is `Quat(x: 0.0, y: 0.0, z: 0.0, w: 1.0)`. This host-provided
+struct uses Decay's existing named-field constructor and copy semantics:
+
+```decay
+let saved: Quat = this.transform.rotation;
+var changed = saved;
+changed.y = 1.0;
+changed.w = 1.0;
+this.transform.rotation = changed;
+other.transform.rotation = saved;
+```
+
+Reads return the stored parent-relative quaternion, including an authored
+non-unit value. Whole writes normalize finite, nonzero values before one atomic
+mutation. Scaling before normalization handles huge and tiny finite script
+numbers; only normalized components cross the engine's f32 boundary. Zero or
+non-finite input is a host error and leaves the transform unchanged. Position,
+scale and Z lock remain exact, even under a singular or nonuniform parent.
+Stored components may be read through `this`, `this.entity` or another entity,
+but must be changed on a local `var` and assigned back whole. `Quat` has no
+multiplication, axis-angle constructor or interpolation methods yet; use the
+existing yaw/pitch/roll and aiming methods for those controls. Transform Lab
+copies the walker's facing onto its goal and restores its saved rotation on
+arrival; its Session and browser tests verify both operations.
 
 **A child's transform is relative to its parent.** Moving, turning or growing a
 parent carries its children, so a marker spawned under a player with
@@ -314,6 +342,8 @@ table above lists, reaching the same numbers.
 | `this.entity.transform.position.{x,y,z}` | `f32` | yes | yes |
 | `this.entity.transform.world_position.{x,y,z}` | `f32` | yes | yes |
 | `this.entity.transform.scale.{x,y,z}` | `f32` | yes | yes |
+| `this.entity.transform.rotation` | `Quat` | yes | whole value |
+| `this.entity.transform.rotation.{x,y,z,w}` | `f32` | yes | no |
 | `this.entity.transform.rotation_z` | `f32` | yes | yes |
 | `this.entity.transform.{yaw,pitch,roll}` | `f32` | yes | yes |
 | `this.entity.transform.{forward,right,up}` | `Vec3` | yes | no |
@@ -2831,11 +2861,12 @@ than none at all.
 
 ### What is deliberately absent
 
-Two absences, each for a reason worth stating.
+Two remaining limits.
 
-**No full 3D rotation**: a gameplay script should not be asked to assemble a
-quaternion by hand, and offering a third of a 3D rotation API is worse than
-offering none.
+**No quaternion composition or interpolation.** Scripts can copy and restore
+`Quat` rotations and use yaw/pitch/roll, world directions, `look_at` and
+`rotate_around`. Quaternion multiplication, axis-angle value construction and
+slerp are not available yet.
 
 **No query by component type.** A script asks for a group by authored tag, and
 that is the only way to ask. Spelling `sindri.sprite` in a script would put
