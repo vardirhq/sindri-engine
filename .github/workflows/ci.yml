@@ -738,6 +738,8 @@ jobs:
           path: |
             target/render-artifacts/browser-cube.png
             target/render-artifacts/browser-orbit-pointer-lock.png
+            target/render-artifacts/browser-orbit-pointer-lock-scale-narrow.png
+            target/render-artifacts/browser-orbit-pointer-lock-scale-wide.png
             target/render-artifacts/browser-character3d.png
             target/render-artifacts/browser-model-collision.png
             target/render-artifacts/browser-causeway.png

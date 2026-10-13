@@ -404,7 +404,10 @@ placement. The roadmap's "height/mesh terrain next" is this slice.
   - convex hulls for dynamic props;
   - [x] Scene collider dimensions and offsets follow composed positive scale,
     with uniform round shapes, orthogonal nonuniform boxes and atomic rejection.
-  - [ ] Browser scale editing, native editor interaction and Explorer scale proof.
+  - [x] Orbit Lab keyboard shrink/restore with synchronized center/edge query
+    evidence through Session and real Chromium; native editor scale edits,
+    Undo/Redo, save/reopen, Play query/goal and Stop restoration.
+  - [ ] Explorer scale adoption and game proof.
 - [ ] Physics material profiles in 3D, sharing the 2D asset format.
   - [x] Standalone live coefficient reads/updates for primitive, convex, triangle
     and keyed static colliders, with atomic validation, retained motion/geometry,

@@ -1,5 +1,11 @@
 # Changelog
 
+- Resize Orbit Camera Lab's barrier with 1/2, inspect it from the far side
+  with 3 and resume automatic orbit/removal with R. Synchronized center/edge
+  rays verify live collision width. Browser
+  controls and native editor scale editing, Undo/Redo, persistence and Play
+  provide feature proof; Explorer adoption remains open.
+
 - Show selected orbit camera focus, requested position/yaw circle and current
   pose in the Scene view, including pull-in/recovery during Play. Guides use
   world axes, clip at the near plane and remain outside camera picking.

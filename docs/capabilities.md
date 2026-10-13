@@ -2704,6 +2704,18 @@ Explorer's game/browser proof remain pending. Pointer lock has separate native,
 browser and editor feature-lab evidence. This is new general camera
 capability for Explorer in slice 6 of `docs/3d-update.md`.
 
+Orbit Lab also exercises existing transform scale through normal keyboard
+controls: 1 narrows the wall, 2 restores it and R resumes automatic removal.
+Manual edits reactivate and retain the barrier. A synchronized center ray must
+hit it before an outside ray can verify the narrow/wide state, preventing an
+inactive/missing collider from counting as scale proof. Session regression
+observes reactivation, repeated edits, orbit recovery/pull-in and the goal;
+Chromium drives the same controls and captures both widths. Native
+[scale review](collider-scale-editor-review.md) verifies matching mesh/collider
+guides, Undo/Redo, save/reopen, Play queries/goal and Stop restoring the saved
+scale. This is feature adoption of the existing general 3D scale capability;
+Explorer game proof remains open.
+
 ## The platformer
 
 `games/platformer` is the first genre showcase: a side-view level painted as a

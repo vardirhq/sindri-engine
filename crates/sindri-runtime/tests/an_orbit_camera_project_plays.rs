@@ -4,6 +4,99 @@ use sindri_runtime::{ProjectRun, STEP};
 use std::path::Path;
 
 #[test]
+fn keyboard_scale_edits_reactivate_the_wall_and_update_queries_and_orbit() {
+    use sindri_platform::{InputEvent, Key};
+    let path = Path::new(env!("CARGO_MANIFEST_DIR")).join("../../examples/orbit");
+    let mut run = ProjectRun::open(&path, [960.0, 540.0]).unwrap();
+    let barrier = run.entity("barrier").unwrap();
+    let camera = run.entity("camera").unwrap();
+    for _ in 0..150 {
+        let report = run.step(STEP).unwrap();
+        assert!(report.notes().is_empty(), "{report:?}");
+    }
+    assert!(
+        !run.world.is_active(barrier),
+        "the automatic wall disappeared"
+    );
+
+    let mut arrived = false;
+    for (key, width, message) in [
+        (Key::Digit1, 0.02, "Barrier scale query narrow"),
+        (Key::Digit2, 10.0, "Barrier scale query wide"),
+        (Key::Digit1, 0.02, "Barrier scale query narrow"),
+    ] {
+        run.input.apply(InputEvent::KeyPressed(key));
+        let report = run.step(STEP).unwrap();
+        assert!(report.notes().is_empty(), "{report:?}");
+        run.input.apply(InputEvent::KeyReleased(key));
+        let mut verified = false;
+        for _ in 0..30 {
+            let report = run.step(STEP).unwrap();
+            assert!(report.notes().is_empty(), "{report:?}");
+            verified |= report
+                .scripts
+                .printed
+                .iter()
+                .any(|line| line.message == message);
+            arrived |= report
+                .scripts
+                .printed
+                .iter()
+                .any(|line| line.message == "Arrived");
+        }
+        assert!(verified, "the synchronized scale query reports {message}");
+        assert!(run.world.is_active(barrier));
+        assert!((run.world.world_transform(barrier).unwrap().scale[0] - width).abs() < 1.0e-5);
+        let z = run.world.world_transform(camera).unwrap().position[2];
+        if width > 1.0 {
+            assert!(z < 0.8, "restored wall pulls the orbit in: {z}");
+        } else {
+            let target = run
+                .world
+                .world_transform(run.entity("walker").unwrap())
+                .unwrap()
+                .position;
+            let pose = run.world.world_transform(camera).unwrap().position;
+            let focus = [target[0], target[1] + 0.5, target[2]];
+            let distance = pose
+                .into_iter()
+                .zip(focus)
+                .map(|(a, b)| (a - b).powi(2))
+                .sum::<f32>()
+                .sqrt();
+            assert!(
+                distance > 5.7,
+                "narrowed wall lets the orbit recover: {distance}"
+            );
+        }
+    }
+    run.input.apply(InputEvent::KeyPressed(Key::Digit3));
+    let report = run.step(STEP).unwrap();
+    assert!(report.notes().is_empty(), "{report:?}");
+    run.input.apply(InputEvent::KeyReleased(Key::Digit3));
+    let orbit = &run.world.get(camera).unwrap().components["sindri.camera.orbit"];
+    assert!((orbit["yaw"].as_f64().unwrap() - std::f64::consts::PI).abs() < 1.0e-6);
+    run.input.apply(InputEvent::KeyPressed(Key::R));
+    let report = run.step(STEP).unwrap();
+    assert!(report.notes().is_empty(), "{report:?}");
+    run.input.apply(InputEvent::KeyReleased(Key::R));
+    for _ in 0..150 {
+        let report = run.step(STEP).unwrap();
+        assert!(report.notes().is_empty(), "{report:?}");
+        arrived |= report
+            .scripts
+            .printed
+            .iter()
+            .any(|line| line.message == "Arrived");
+    }
+    assert!(
+        !run.world.is_active(barrier),
+        "R restores the automatic removal"
+    );
+    assert!(arrived, "the walker still reaches its goal");
+}
+
+#[test]
 fn resizing_an_orbit_barrier_changes_collision_on_the_next_session_step() {
     let path = Path::new(env!("CARGO_MANIFEST_DIR")).join("../../examples/orbit");
     let mut run = ProjectRun::open(&path, [960.0, 540.0]).unwrap();

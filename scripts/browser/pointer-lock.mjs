@@ -71,6 +71,29 @@ try {
   assert.equal(await page.evaluate(() => document.pointerLockElement), null, 'Escape does not automatically recapture');
   for (let i = 0; i < 120 && !logs.some((text) => text.includes('Arrived')); i++) await page.waitForTimeout(100);
   assert(logs.some((text) => text.includes('Arrived')), 'the project reaches its goal');
+  // Resize through gameplay input after the automatic barrier has disappeared.
+  // The script waits for synchronized center/edge rays, so a missing collider
+  // cannot count as a successful shrink. Every edit needs a new query result.
+  await page.keyboard.press('3'); // Look back at the wall from the walker's far side.
+  await page.waitForTimeout(750); // Let the shared orbit smoothing settle.
+  for (const [key, state] of [['1', 'narrow'], ['2', 'wide'], ['1', 'narrow']]) {
+    const message = `Barrier scale query ${state}`;
+    const before = logs.filter(text => text.includes(message)).length;
+    await page.keyboard.press(key);
+    for (let i = 0; i < 100 && logs.filter(text => text.includes(message)).length <= before; i++) {
+      await page.waitForTimeout(100);
+    }
+    assert(logs.filter(text => text.includes(message)).length > before,
+      `scale edit ${state} reaches synchronized center/edge collision queries`);
+    await page.waitForTimeout(150);
+    if (shot) await page.screenshot({ path: shot.replace(/\.png$/, '') + `-scale-${state}.png` });
+  }
+  await page.keyboard.press('r');
+  for (let i = 0; i < 50 && !logs.some(text => text.includes('Barrier automatic')); i++) {
+    await page.waitForTimeout(100);
+  }
+  assert(logs.some(text => text.includes('Barrier automatic')), 'R restores the automatic barrier');
+  await page.waitForTimeout(2500);
   assert.deepEqual(errors, [], 'no runtime or GPU errors');
   const pixels = await page.screenshot(shot ? { path: shot } : {});
   // This tiny flat-color fixture has fewer colors than the general game gate.
@@ -95,7 +118,7 @@ try {
   for (let i = 0; i < 120 && !deniedLogs.some((text) => text.includes('Arrived')); i++) await denied.waitForTimeout(100);
   assert(deniedLogs.some((text) => text.includes('Arrived')), 'denial leaves gameplay running');
   assert.deepEqual(deniedErrors, [], 'denial produces no unrelated runtime errors');
-  console.log(`Pointer lock: unbounded ${sum} motion, explicit release, Escape, sandbox denial and game goal passed`);
+  console.log(`Pointer lock: unbounded ${sum} motion, explicit release, Escape, sandbox denial, synchronized scale edits and game goal passed`);
 } finally {
   if (browser) await browser.close();
   await new Promise((done) => server.close(done));

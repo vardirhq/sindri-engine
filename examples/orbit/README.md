@@ -27,6 +27,13 @@ captured motion. Capture needs a player gesture in a browser and may be denied;
 `Input.Pointer.locked` reports actual state. Native captured motion uses raw
 device counts; browser motion uses physical pixels. In editor Play, hiding
 the Game view, pausing/stopping, editing text or picking releases capture.
+Press 1 to shrink the barrier to 0.02 units wide, 2 to restore its ten-unit
+width. Press 3 to inspect the wall from the walker's far side without the
+camera's automatic yaw, or R to restart automatic orbit and the wall's
+two-second disappearance. Manual edits reactivate the barrier and keep it
+visible. The script waits for synchronized
+center and edge rays before reporting the new collision width: the center
+must still hit the wall, while the ray at X=3 misses it only when narrow.
 Touch look remains pending.
 
 The project regression opens the scene, compiles all scripts and plays to its
@@ -35,9 +42,12 @@ and exported WebGPU Chromium captures show the blocked and recovered camera;
 the browser run reaches the scripted goal. A real Chromium right-button drag
 also reached Decay as exactly 60 pixels right and 40 down once, with the camera
 response captured. This is feature evidence.
-Explorer's model-based game and editor authoring proof remain pending.
+Explorer's model-based game proof remains pending. Native editor scale
+editing, Undo/Redo, save/reopen and Play are recorded in
+[the scale review](../../docs/collider-scale-editor-review.md).
 `scripts/browser/pointer-lock.mjs` exercises real browser capture, unbounded
-motion, U/Escape release, sandbox denial and the project goal. Collision uses one sight-line ray, not a camera-volume sweep;
+motion, U/Escape release, sandbox denial, repeated runtime scale edits and the
+project goal. Collision uses one sight-line ray, not a camera-volume sweep;
 collider poses come from the last physics phase.
 
 Native X11/Vulkan verification also runs the actual window to the goal, drives

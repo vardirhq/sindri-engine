@@ -1079,6 +1079,11 @@ remain world units, and 2D collider semantics are unchanged. Existing scenes
 authored with world-unit dimensions must convert them to local units; an
 axis-aligned box's old half extents and offsets divide by its composed scale.
 Orbit Camera Lab is converted, while the quarry's unit-scale pieces need no edit.
+Orbit Lab's keyboard shrink/restore controls exercise live scaling through
+Session and real Chromium: center and edge rays verify synchronized geometry,
+including reactivating a removed barrier. Native [scale review](collider-scale-editor-review.md)
+exercises inspector edits, matching wireframes, Undo/Redo, persistence, Play and
+Stop restoration. Explorer game adoption remains open.
 World settings accept `gravity: [x, y, z]` and optional
 layer labels; removing/disabling the settings restores the host's gravity.
 Multiple active 3D world settings fail explicitly.
