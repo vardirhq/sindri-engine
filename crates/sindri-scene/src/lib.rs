@@ -101,8 +101,8 @@ pub use physics_joints::{
     DistanceJoint2dComponent, HingeJoint2dComponent, SliderJoint2dComponent, SpringJoint2dComponent,
 };
 pub use physics_material::{
-    PhysicsMaterial2dComponent, PhysicsMaterialError, PhysicsMaterialSources,
-    physics_material_profile, referenced_physics_materials,
+    PhysicsMaterial2dComponent, PhysicsMaterial3dComponent, PhysicsMaterialError,
+    PhysicsMaterialSources, physics_material_profile, referenced_physics_materials,
 };
 pub use physics_sync::{PhysicsSyncError, ScenePhysics2d};
 pub use physics_sync3d::ScenePhysics3d;

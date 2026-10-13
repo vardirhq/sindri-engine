@@ -145,3 +145,48 @@ the goal again. Captures `target/tmp/convex-spawn-editor-play.png`,
 The rebuilt Chromium smoke independently requires pending-read verification,
 both GLB fetches, the prop goal and the keyboard walker goal with no runtime/GPU
 errors. Explorer adoption and broader platform/GPU coverage remain open.
+
+## Shared 3D physics profiles
+
+Reviewed on 2026-10-12 and 2026-10-13 with the freshly built native editor in
+`target/tmp/physics-material3d-editor/`, using isolated X11 and Mesa software
+Vulkan. The source lab's imported floor and spawned prop share
+`materials/slide.profile`: friction 0.3 and restitution 0.4, with explicit
+zero-restitution overrides on both owners. The scratch project is separate
+from the source example.
+
+The Level inspector displays the material's profile and override controls.
+The profile dropdown lists the project's profile asset and excludes its GLBs
+and textures. Toggling the friction override, Undo/Redo and Save changes the
+saved component through checked commands; restarting the editor reopens the
+saved enabled override with the original profile reference. Its disabled
+friction override uses the shared coefficient; the scratch enabled override
+selects the local default 0.5.
+
+Play preloads the shared profile and prefab, renders the imported models,
+reports the queued spawn controls, lands the prop, applies its Decay impulse
+and reaches the prop goal. Editing the profile's friction to 0.4 while paused
+reports `Reloaded materials/slide.profile`; resuming reaches the prop goal in
+the same run. A subsequent external edit to friction -1 reports an asset-named
+nonnegative-value failure and retains the last valid profile while Play
+continues. Restoring the valid profile reloads it. Stop returns to six authored
+entities and removes the spawned prop, retaining the saved component settings.
+
+Inspected captures are `target/physics-material3d-editor-authoring.png`,
+`physics-material3d-editor-picker.png`, `physics-material3d-editor-saved-override.png`,
+`physics-material3d-editor-reopened.png`, `physics-material3d-editor-play.png`,
+`physics-material3d-editor-profile-reload.png`,
+`physics-material3d-editor-invalid-reload.png` and
+`physics-material3d-editor-stopped.png`. The rebuilt exported-browser capture
+`target/browser-physics-material3d.png` shows the purple prop on the imported
+floor and the blue walker at the gold goal. Its smoke verifies the shared
+profile fetch, both GLBs, both goals and no runtime/GPU errors. Native
+player and editor/headless parity tests independently run both goals.
+
+Native scene tests verify primitive/hull/triangle/voxel resolution, bad-reference
+and override batch rejection, profile removal, retained velocity and contact
+continuity, no voxel geometry rebuild budget use, and character carry with a
+pending platform target. A project Session test verifies shared values, live
+reload and checkpoint restore using the latest host profile. These are feature
+examples for Explorer; game adoption and broader platform/GPU coverage remain
+open.

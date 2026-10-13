@@ -23,6 +23,9 @@ mod convex_model_tests;
 #[cfg(test)]
 mod hierarchy_tests;
 #[cfg(test)]
+mod material_tests;
+mod materials;
+#[cfg(test)]
 mod model_tests;
 mod prepare;
 use prepare::prepare;
@@ -42,6 +45,7 @@ const MOVED: f32 = 1.0e-4;
 #[derive(Clone)]
 pub struct ScenePhysics3d {
     world: PhysicsWorld3d,
+    materials: crate::PhysicsMaterialSources,
     registered: BTreeMap<EntityId, Authored>,
     agreed: BTreeMap<EntityId, PhysicsPose3d>,
     host_gravity: [f32; 3],
@@ -65,6 +69,7 @@ impl ScenePhysics3d {
     pub fn new(gravity: [f32; 3]) -> Result<Self, PhysicsSyncError> {
         Ok(Self {
             world: PhysicsWorld3d::new(gravity)?,
+            materials: crate::PhysicsMaterialSources::default(),
             registered: BTreeMap::new(),
             agreed: BTreeMap::new(),
             host_gravity: gravity,
@@ -73,6 +78,10 @@ impl ScenePhysics3d {
             characters: crate::characters3d::SceneCharacters3d::default(),
             models: crate::ModelCollisionBindings3d::default(),
         })
+    }
+    /// Replaces host-resolved coefficients; active references validate next step.
+    pub fn set_materials(&mut self, materials: crate::PhysicsMaterialSources) {
+        self.materials = materials;
     }
     pub const fn world(&self) -> &PhysicsWorld3d {
         &self.world
@@ -156,19 +165,25 @@ impl ScenePhysics3d {
         if !gravity.into_iter().all(f32::is_finite) {
             return Err(sindri_physics::PhysicsError::NonFinite("gravity").into());
         }
-        let plan = prepare(
+        let mut plan = prepare(
             world,
             components,
             &self.world,
             &mut self.models,
             &self.registered,
         )?;
+        materials::apply(world, components, &self.materials, &mut plan)?;
         let characters = crate::characters3d::SceneCharacters3d::plan(world, components)?;
         let mut reaches = self.reaches(world, &plan, gravity, delta.as_secs_f32());
         reaches.extend(self.characters.reaches(world, &characters)?);
-        let voxels =
-            self.voxels
-                .plan_authored(world, components, tile_sets, &self.world, &reaches)?;
+        let voxels = self.voxels.plan_authored(
+            world,
+            components,
+            tile_sets,
+            &self.world,
+            &reaches,
+            &self.materials,
+        )?;
         self.world.set_gravity(gravity)?;
         self.synchronize(world, plan)?;
         self.characters.commit(characters);
@@ -179,9 +194,14 @@ impl ScenePhysics3d {
         let carry_reaches = self.characters.carry_reaches(&self.world)?;
         if !carry_reaches.is_empty() {
             reaches.extend(carry_reaches);
-            let voxels =
-                self.voxels
-                    .plan_authored(world, components, tile_sets, &self.world, &reaches)?;
+            let voxels = self.voxels.plan_authored(
+                world,
+                components,
+                tile_sets,
+                &self.world,
+                &reaches,
+                &self.materials,
+            )?;
             self.voxels.commit(&mut self.world, voxels)?;
         }
         self.characters.apply(world, &mut self.world)?;
@@ -205,7 +225,16 @@ impl ScenePhysics3d {
         }
         for (entity, authored) in plan {
             let pose = pose_of(world, entity, authored.body);
-            if self.registered.get(&entity) == Some(&authored) {
+            if self
+                .registered
+                .get(&entity)
+                .is_some_and(|previous| materials::same_geometry(previous, &authored))
+            {
+                if self.registered.get(&entity) != Some(&authored) {
+                    self.world
+                        .set_materials(entity, &materials::coefficients(&authored))?;
+                    self.registered.insert(entity, authored);
+                }
                 if self.agreed.get(&entity).is_none_or(|old| moved(*old, pose)) {
                     self.characters.invalidate(entity);
                     self.world.move_to(entity, pose)?;

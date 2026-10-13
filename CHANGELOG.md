@@ -1,5 +1,11 @@
 # Changelog
 
+- Share physics material `.profile` assets between 2D and 3D. The new Physics
+  Material 3D component applies profiles and explicit overrides to primitive,
+  model, convex and voxel colliders; coefficient edits/reloads preserve motion,
+  contacts and streamed groups. Model Collision Lab shares a profile between
+  its imported floor and spawned prop. Explorer adoption remains pending.
+
 - Add standalone live 3D collider coefficient reads and atomic updates for
   primitive, convex, triangle and streamed static geometry. Updates retain
   motion, geometry and contacts, wake affected bodies and replay in checkpoints.

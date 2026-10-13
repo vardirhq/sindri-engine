@@ -386,7 +386,10 @@ at the scene boundary uses the engine-owned `PhysicsMaterial::validate` rules;
 asset decoders and core profile documents stay independent of physics.
 
 An entity's `sindri.physics2d.material` names `profile` and applies it to every
-ordinary and generated tilemap collider piece, sensors included. Without a
+ordinary and generated tilemap collider piece, sensors included. Its 3D counterpart,
+`sindri.physics3d.material`, uses exactly the same fields and asset format for
+primitive compounds, characters, static model triangles, convex model hulls and
+resident voxel sections. Without a
 material component, existing per-piece literals are unchanged. An empty profile
 keeps those literals. A non-empty reference must resolve to a loaded physics
 profile; a missing or differently typed profile fails the fixed step. The profile
@@ -1144,10 +1147,35 @@ intact. A profile reload may consequently cost one full world contact pass.
 Native backend regressions exercise mixed primitive/hull validation and state,
 static triangle/group order and identity, empty owners, sleeping bodies,
 kinematic targets, friction changes on existing contacts without new start
-events, sleeping-neighbor wakeup and restitution/replay. This is the runtime
-foundation for shared 3D physics profiles. Scene profile resolution, coefficient
-reload without scene rebuilds, editor/Decay authoring and Explorer gameplay
-proof remain pending; no new game capability is claimed by this backend slice.
+events, sleeping-neighbor wakeup and restitution/replay.
+
+Scene synchronization resolves profiles before committing any 3D body or voxel
+batch. Missing/wrongly typed profiles and invalid enabled overrides leave live
+3D geometry, motion and events intact. Cached model plans start from authored
+literal coefficients every step, so removing a profile restores those values.
+Coefficient-only edits (including literal model coefficients) preserve body
+motion, character support state and existing contacts. Structural geometry,
+layers, sensor, scale or body edits retain the normal rebuild behavior.
+
+Voxel coefficient edits retain compiled boxes, section keys and solver groups,
+consume no geometry rebuild budget and apply coefficients in solver group order.
+Session builds one source set for both dimensions before stepping; restoring a
+checkpoint keeps the latest profile assets delivered by the host. Export discovers
+3D profile references in inactive entities and spawned prefab contents as well as
+ordinary scenes. The editor registers Physics Material 3D in its Physics family,
+with a profile asset field and command-backed generic override controls.
+
+Model Collision Lab's floor and spawned convex prop share `materials/slide.profile`
+and explicitly override restitution to zero. Native scene/runtime/export
+regressions exercise sharing, precedence, invalid-batch retention, reload,
+profile removal, structural rebuilds and checkpoint replay. This capability is
+added for Explorer, with feature-lab proof; Explorer adoption remains pending.
+The rebuilt Chromium smoke fetches the profile and both GLBs, reaches both goals,
+checks rendered colors and reports no runtime/GPU errors. The native editor
+[review](model-collision-editor-review.md#shared-3d-physics-profiles) covers
+profile selection, overrides, Undo/Redo, save/reopen, valid/invalid asset reload,
+prop Play goal and Stop restoration. Native visual evidence is X11/software
+Vulkan; broader platform/GPU coverage remains open.
 
 ## Replaceable static collider groups
 

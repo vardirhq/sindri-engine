@@ -1302,6 +1302,33 @@
       "type_name": "sindri.physics3d.collider"
     },
     {
+      "addable": true,
+      "apply": {},
+      "default_payload": {
+        "friction": 0.5,
+        "override_friction": false,
+        "override_restitution": false,
+        "profile": "",
+        "restitution": 0.0
+      },
+      "display_name": "Physics Material 3D",
+      "fields": {
+        "friction": 0.5,
+        "override_friction": false,
+        "override_restitution": false,
+        "profile": "",
+        "restitution": 0.0
+      },
+      "meanings": {
+        "profile": {
+          "asset": "profile",
+          "kind": "asset"
+        }
+      },
+      "schema_version": 1,
+      "type_name": "sindri.physics3d.material"
+    },
+    {
       "addable": false,
       "apply": {},
       "default_payload": null,

@@ -3214,5 +3214,31 @@ targets survive; changed values wake contact processing while identical values
 leave sleeping bodies asleep. Native regressions verify friction changes on
 existing contacts, static-floor wakeup, restitution response and checkpoint
 replay. See [the physics contract](physics.md#live-3d-collision-coefficients).
-This is a prerequisite for 3D profiles, not their completion: scene resolution,
-project/editor/browser integration and Explorer game proof remain pending.
+The shared scene and project integration is described below; Explorer game
+proof remains pending.
+
+### Shared 3D physics profiles
+
+`sindri.physics3d.material` reuses the 2D physics profile schema and explicit
+override fields. Scene preparation resolves coefficients on primitive/model/hull
+bodies and voxel sections before solver mutation. Reloads and literal coefficient
+edits retain body motion, geometry, character support and contacts; voxel edits
+keep section groups and consume no geometry rebuild budget. Cached model plans
+restore authored coefficients before resolving each step, including profile removal.
+Session validates one source set for both dimensions and keeps the latest host
+profiles on checkpoint restore. Export includes inactive and prefab references.
+The editor's registered default, profile metadata and Physics family support
+checked generic authoring. Model Collision Lab shares a slide profile between
+its floor and spawned convex prop, with a zero-restitution override. Native
+scene, runtime and export regressions exercise resolution, atomic invalid edits,
+retained motion, latest-asset replay and original-byte deduplication. This is
+feature proof for Explorer; gameplay adoption remains open. See the
+[physics contract](physics.md#live-3d-collision-coefficients).
+
+Rebuilt Chromium fetches the shared physics profile and both GLBs, reaches the
+walker/prop goals and passes rendered-color/error checks. Native editor review
+exercises the profile picker, override Undo/Redo and save/reopen, valid reload
+during Play, invalid-reload last-valid retention, prop goal and Stop restoration.
+See the [review](model-collision-editor-review.md#shared-3d-physics-profiles).
+Native visual evidence uses isolated X11/software Vulkan; broader coverage and
+Explorer game proof remain open.

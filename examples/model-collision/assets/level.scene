@@ -56,6 +56,11 @@
         },
         "sindri.physics3d.model_collider": {
           "asset": "models/level.glb"
+        },
+        "sindri.physics3d.material": {
+          "profile": "materials/slide.profile",
+          "override_restitution": true,
+          "restitution": 0.0
         }
       }
     },

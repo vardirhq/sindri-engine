@@ -105,7 +105,14 @@ impl ModelCollisionBindings3d {
             && previous.component == component
             && previous.scale.map(f32::to_bits) == scale.map(f32::to_bits)
         {
-            return Ok(previous.clone());
+            let mut prepared = previous.clone();
+            // A registered piece may carry last step's resolved profile. Start
+            // each plan from its authored literals before resolving profiles.
+            prepared.piece.material = PhysicsMaterial {
+                friction: component.friction,
+                restitution: component.restitution,
+            };
+            return Ok(prepared);
         }
         let key = (component.asset.clone(), scale.map(f32::to_bits));
         let geometry = if scale.map(f32::to_bits) == [1.0f32.to_bits(); 3] {
@@ -150,10 +157,18 @@ pub(crate) struct PreparedModelCollider3d {
     scale: [f32; 3],
     pub piece: TriangleMeshCollider3d,
 }
+impl PreparedModelCollider3d {
+    pub(crate) fn copy_material_from(&mut self, other: &Self) {
+        self.component.friction = other.component.friction;
+        self.component.restitution = other.component.restitution;
+        self.piece.material = other.piece.material;
+    }
+}
 impl PartialEq for PreparedModelCollider3d {
     fn eq(&self, other: &Self) -> bool {
         Arc::ptr_eq(&self.source, &other.source)
             && self.component == other.component
+            && self.piece.material == other.piece.material
             && self.scale.map(f32::to_bits) == other.scale.map(f32::to_bits)
     }
 }

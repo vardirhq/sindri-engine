@@ -194,6 +194,7 @@ fn model_collision_project_opens_compiles_blocks_and_walks_to_its_goal() {
         .unwrap();
     let mut session = Session::with_sources(scene.components().clone(), project.scripts)
         .with_prefabs(project.prefabs)
+        .with_profiles(project.profiles)
         .with_scenes(project.scenes, scenes);
     install(project.models, &refs, &mut scene, &mut session).unwrap();
     let mut input = InputState::default();

@@ -51,11 +51,25 @@ impl SceneVoxelCollision3d {
         tile_sets: Option<&TileSetBindings>,
         physics: &PhysicsWorld3d,
         reaches: &[VoxelReach],
+        materials: &crate::PhysicsMaterialSources,
     ) -> Result<VoxelCollisionPlan3d, PhysicsSyncError> {
         let mut resolved = Vec::new();
-        for (owner, collider) in components.query::<VoxelCollider3dComponent>(world)? {
+        for (owner, mut collider) in components.query::<VoxelCollider3dComponent>(world)? {
             if !world.is_active(owner) {
                 continue;
+            }
+            if let Some(component) =
+                components.get::<crate::PhysicsMaterial3dComponent>(world, owner)?
+            {
+                let material = materials.resolve(
+                    &component.0,
+                    sindri_physics::PhysicsMaterial {
+                        friction: collider.friction,
+                        restitution: collider.restitution,
+                    },
+                )?;
+                collider.friction = material.friction;
+                collider.restitution = material.restitution;
             }
             resolved.push(self.resolve(world, components, tile_sets, owner, collider, reaches)?);
         }

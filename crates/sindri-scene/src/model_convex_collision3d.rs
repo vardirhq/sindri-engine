@@ -72,7 +72,14 @@ impl ModelConvexBindings3d {
             && previous.component == component
             && previous.scale.map(f32::to_bits) == scale.map(f32::to_bits)
         {
-            return Ok(previous.clone());
+            let mut prepared = previous.clone();
+            // A registered piece may carry last step's resolved profile. Start
+            // each plan from its authored literals before resolving profiles.
+            prepared.piece.material = PhysicsMaterial {
+                friction: component.0.friction,
+                restitution: component.0.restitution,
+            };
+            return Ok(prepared);
         }
         let key = (component.0.asset.clone(), scale.map(f32::to_bits));
         let geometry = if scale.map(f32::to_bits) == [1.0f32.to_bits(); 3] {
@@ -129,10 +136,18 @@ pub(crate) struct PreparedModelConvex3d {
     pub piece: ConvexHullCollider3d,
     pub extent: f32,
 }
+impl PreparedModelConvex3d {
+    pub(crate) fn copy_material_from(&mut self, other: &Self) {
+        self.component.0.friction = other.component.0.friction;
+        self.component.0.restitution = other.component.0.restitution;
+        self.piece.material = other.piece.material;
+    }
+}
 impl PartialEq for PreparedModelConvex3d {
     fn eq(&self, other: &Self) -> bool {
         Arc::ptr_eq(&self.source, &other.source)
             && self.component == other.component
+            && self.piece.material == other.piece.material
             && self.scale.map(f32::to_bits) == other.scale.map(f32::to_bits)
     }
 }

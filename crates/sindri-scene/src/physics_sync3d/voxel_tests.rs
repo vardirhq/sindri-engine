@@ -438,3 +438,40 @@ fn solved_carry_expands_terrain_before_riders_move_and_budget_failure_retains_in
     assert!((world.world_transform(actor).unwrap().position[0] - 17.5).abs() < 0.02);
     assert!(physics.character_motion(actor).unwrap().platform.is_none());
 }
+
+#[test]
+fn voxel_profile_reload_updates_resident_contacts_without_new_start_events() {
+    let mut world = World::default();
+    let voxels = materials(&json!([]));
+    let (_, top) = surface(&voxels, None);
+    let floor = voxel_world(&mut world, voxels, true);
+    let body = ball(&mut world, [0.5, top + 1.0, 0.5]);
+    world.get_mut(floor).unwrap().components.insert(
+        crate::PhysicsMaterial3dComponent::TYPE_NAME.into(),
+        json!({"profile":"ground.profile","override_restitution":true,"restitution":0.0}),
+    );
+    let profile=sindri_core::ProfileDocument::from_json(r#"{"format_version":1,"type":"physics_material","values":{"friction":0.0,"restitution":0.8}}"#).unwrap();
+    let mut physics = earth();
+    assert!(physics.step(&mut world, &components(), STEP).is_err());
+    assert!(physics.world().is_empty());
+    physics.set_materials(
+        crate::PhysicsMaterialSources::from_profiles([("ground.profile", &profile)]).unwrap(),
+    );
+    run(&mut physics, &mut world, None, 400);
+    let mut profile = profile;
+    profile.values.insert("friction".into(), json!(0.1));
+    physics.set_materials(
+        crate::PhysicsMaterialSources::from_profiles([("ground.profile", &profile)]).unwrap(),
+    );
+    let events = run(&mut physics, &mut world, None, 1);
+    assert!(
+        !events
+            .iter()
+            .any(|event| event.kind == PhysicsEventKind::CollisionStarted)
+    );
+    for coefficient in physics.world().materials(floor).unwrap() {
+        assert!((coefficient.friction - 0.1).abs() < 0.001);
+        assert!(coefficient.restitution.abs() < 0.001);
+    }
+    assert!((height(&world, body) - (top + 0.25)).abs() < 0.05);
+}

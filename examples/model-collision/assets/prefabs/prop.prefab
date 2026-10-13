@@ -55,6 +55,11 @@
         "sindri.script": {
           "source": "walker.decay",
           "script": "Prop"
+        },
+        "sindri.physics3d.material": {
+          "profile": "materials/slide.profile",
+          "override_restitution": true,
+          "restitution": 0.0
         }
       }
     }

@@ -28,7 +28,14 @@ fn platformer_exports_the_profile_shared_by_its_crate_and_planks_once() {
 
 #[test]
 fn invalid_materials_fail_export_before_any_output_is_written() {
-    let root = std::env::temp_dir().join(format!("sindri-invalid-material-{}", std::process::id()));
+    for component in ["sindri.physics2d.material", "sindri.physics3d.material"] {
+        invalid_material_export(component);
+    }
+}
+
+fn invalid_material_export(component: &str) {
+    let root =
+        std::env::temp_dir().join(format!("sindri-invalid-{component}-{}", std::process::id()));
     let _ = std::fs::remove_dir_all(&root);
     std::fs::create_dir_all(root.join("assets")).unwrap();
     std::fs::write(
@@ -36,7 +43,7 @@ fn invalid_materials_fail_export_before_any_output_is_written() {
         "format_version = 1\n[project]\nname = \"Materials\"\nmain_scene = \"assets/main.scene\"\n",
     )
     .unwrap();
-    std::fs::write(root.join("assets/main.scene"), r#"{"format_version":10,"entities":[{"id":"floor","components":{"sindri.physics2d.material":{"profile":"bad.profile"}}}]}"#).unwrap();
+    std::fs::write(root.join("assets/main.scene"), r#"{"format_version":10,"entities":[{"id":"floor","components":{"sindri.physics2d.material":{"profile":"bad.profile"}}}]}"#.replace("sindri.physics2d.material", component)).unwrap();
     std::fs::write(root.join("assets/bad.profile"), r#"{"format_version":1,"type":"physics_material","values":{"friction":-0.1,"restitution":0}}"#).unwrap();
     let error = match ProjectExport::gather(&root) {
         Ok(_) => panic!("invalid material exported"),
@@ -55,4 +62,19 @@ fn invalid_materials_fail_export_before_any_output_is_written() {
     };
     std::fs::remove_dir_all(root).unwrap();
     assert!(error.to_string().contains("physics_material"), "{error}");
+}
+
+#[test]
+fn model_lab_exports_scene_and_spawned_prefab_3d_profile_once() {
+    let root = Path::new(env!("CARGO_MANIFEST_DIR")).join("../../examples/model-collision");
+    let export = ProjectExport::gather(&root).unwrap();
+    let profiles: Vec<_> = export
+        .assets
+        .iter()
+        .filter(|asset| asset.kind == AssetKind::Profile)
+        .collect();
+    assert_eq!(profiles.len(), 1);
+    assert_eq!(profiles[0].id, "materials/slide.profile");
+    let original = std::fs::read(root.join("assets/materials/slide.profile")).unwrap();
+    assert_eq!(profiles[0].bytes, original);
 }

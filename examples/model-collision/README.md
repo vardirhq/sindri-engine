@@ -39,3 +39,10 @@ Editor Add Convex Model Collider uses project models, permits body/primitive
 compounds, and withholds incompatible owners. Reload preparation is atomic when
 one GLB supplies both triangle and convex collision. Explorer game adoption
 remains separate work; this example is feature proof.
+
+The floor and spawned prop share `materials/slide.profile`, using the same
+`physics_material` asset format as 2D. Their `sindri.physics3d.material` components
+apply its friction and explicitly override restitution to zero. Coefficients
+reload without replacing model collision or resetting prop motion. The runtime
+regression changes the shared profile and restores a checkpoint while keeping
+the latest host asset; the exported-browser smoke requires the profile fetch.

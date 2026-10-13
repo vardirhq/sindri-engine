@@ -55,6 +55,14 @@ pub(super) fn register(components: &mut ComponentSchemaRegistry) -> Result<(), S
         "asset",
         FieldMeaning::Asset(sindri_core::AssetKind::Model),
     )])?;
+    components.register_with_default::<crate::PhysicsMaterial3dComponent>(
+        "Physics Material 3D",
+        serde_json::json!({"profile": "", "override_friction": false, "friction": 0.5, "override_restitution": false, "restitution": 0.0}),
+    )?;
+    components.describe::<crate::PhysicsMaterial3dComponent>([(
+        "profile",
+        FieldMeaning::Asset(sindri_core::AssetKind::Profile),
+    )])?;
     components.register_with_default::<PhysicsWorld3dComponent>(
         "Physics 3D World",
         serde_json::json!({"gravity": [0.0, -9.81, 0.0], "layers": []}),

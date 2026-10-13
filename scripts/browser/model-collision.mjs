@@ -66,8 +66,9 @@ try {
   assert(imageStatistics(pixels).colors >= 8, 'the lab renders several scene colors');
   assert([...fetched].some((path) => path.endsWith('/models/level.glb')), 'the collision GLB was fetched');
   assert([...fetched].some((path) => path.endsWith('/models/prop.glb')), 'the convex prop GLB was fetched');
+  assert([...fetched].some((path) => path.endsWith('/materials/slide.profile')), 'the shared physics profile was fetched');
   assert.deepEqual(errors, [], 'no runtime or GPU errors');
-  console.log('Model collision: fetched GLB, wall obstruction, bypass, spawned convex controls, dynamic prop impulse and goals passed');
+  console.log('Model collision: fetched GLB, wall obstruction, bypass, spawned convex controls, shared physics profile, dynamic prop impulse and goals passed');
 } finally {
   if (browser) await browser.close();
   await new Promise((done) => server.close(done));

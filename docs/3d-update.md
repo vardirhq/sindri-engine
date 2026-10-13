@@ -404,10 +404,15 @@ placement. The roadmap's "height/mesh terrain next" is this slice.
   - [x] Standalone live coefficient reads/updates for primitive, convex, triangle
     and keyed static colliders, with atomic validation, retained motion/geometry,
     contact wakeup, friction/restitution response and native replay regressions.
-  - [ ] Resolve shared profiles and overrides at the scene boundary, retaining
-    live motion on coefficient-only edits and reloads.
-  - [ ] Exercise project loading/export, editor authoring, native/browser feature
-    proof and Explorer gameplay adoption.
+  - [x] Resolve shared profiles and overrides on primitive/model/convex/voxel
+    colliders, retaining live motion and groups on coefficient edits/reloads.
+    Share Session source validation and preserve latest host assets on restore.
+    Export references from inactive entities and prefabs; use a shared profile
+    in Model Collision Lab and exercise native scene/runtime/export regressions.
+  - [x] Exercise project loading/export and native/browser feature goals;
+    review native editor profile selection, overrides, Undo/Redo, save/reopen,
+    valid/invalid reload and Stop restoration.
+  - [ ] Adopt shared physics profiles in Explorer and prove its game goal.
 
 ### 6b. Skeletal animation
 - [ ] Decode skins (joints, inverse bind matrices, `JOINTS_0`/`WEIGHTS_0`)
