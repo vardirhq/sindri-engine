@@ -692,3 +692,19 @@ resize re-rasterises nothing.
 It is a specimen rather than a test because what an outline or an auto-fit *does*
 is a thing you look at, and an assertion that a number came back is not the same
 as knowing the words are where they should be.
+
+## Orbit camera authoring
+
+The inspector completes Camera Orbit's existing field template with an active
+authored spatial target from the current world. The owner requires a Camera
+and transform; target candidates exclude self, descendants, inactive entities,
+viewport entities and nodes without stable IDs or transforms. This completion
+is editor policy and creates no engine asset or alternate camera loop.
+
+Before adding or editing orbit, the inspector checks the engine's
+`CameraOrbitComponent::is_valid` settings contract and resolves target ownership.
+Rejected orbit changes retain their previous payload; valid edits to other
+components still become commands with their own transaction scope. Runtime
+pose validation remains with the shared camera driver. Tests and the
+[native review](camera-orbit-editor-review.md) exercise creation, validation,
+undo/redo, persistence and authored Play.

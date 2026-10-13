@@ -126,6 +126,7 @@ pub(super) fn component_transaction(
 pub(crate) struct ProjectDefaults<'a> {
     pub(crate) font: Option<&'a str>,
     pub(crate) model: Option<&'a str>,
+    pub(crate) orbit_target: Option<&'a str>,
     pub(crate) sprite: Option<&'a str>,
     pub(crate) grid: Option<&'a str>,
     pub(crate) audio: Option<&'a str>,
@@ -258,12 +259,18 @@ fn withheld(
             "Convex model collision cannot share a character, voxel or static model collider, or 2D physics",
         );
     }
+    if metadata.type_name == "sindri.camera.orbit" && !present.contains_key(CAMERA_COMPONENT) {
+        return Some("Add a Camera to this entity first");
+    }
     if component_default(components, &metadata.type_name, project).is_some() {
         return None;
     }
     // What is missing is whatever the project could not supply, and each of
     // these names the one thing to go and make.
     Some(match metadata.type_name.as_str() {
+        "sindri.camera.orbit" => {
+            "A spatial camera needs another active world entity with a stable ID to orbit"
+        }
         UI_TEXT_COMPONENT => "No font in the project beside this scene",
         "sindri.model"
         | "sindri.physics3d.model_collider"
@@ -295,6 +302,9 @@ pub(crate) fn component_default(
     }
     let template = components.fields(type_name)?;
     match type_name {
+        "sindri.camera.orbit" => {
+            completed(template, [("target", Value::from(project.orbit_target?))])
+        }
         "sindri.model"
         | "sindri.physics3d.model_collider"
         | "sindri.physics3d.model_convex_collider" => {

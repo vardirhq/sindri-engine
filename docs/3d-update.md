@@ -311,7 +311,10 @@ placement. The roadmap's "height/mesh terrain next" is this slice.
   - [x] Explicit perspective FOV and transform look-at.
   - [x] Engine-owned orbit/third-person follow with smoothing and collision
     pull-in (a 3D ray), checked in the [Orbit Camera Lab](../examples/orbit/README.md).
-  - [ ] Explorer gameplay, editor authoring and browser proof.
+  - [x] Editor Camera Orbit creation from a real authored target, checked
+    settings/target edits, Undo/Redo and save/reopen; native authored Play
+    without the camera script observes pull-in/recovery and reaches the goal.
+  - [ ] Dedicated orbit guides and Explorer gameplay/browser proof.
 - [ ] Input:
   - [x] Read-only mouse `Pointer.delta` / `Input.Pointer.delta` in viewport
     pixels per fixed step, with typed access and drag-to-look in Orbit Camera Lab.

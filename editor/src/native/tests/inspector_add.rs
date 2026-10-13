@@ -124,6 +124,7 @@ fn every_offered_default_is_one_the_engine_accepts() {
         audio: Some("audio/pickup.wav"),
         script: Some(("scripts/spin.decay", "Spin")),
         model: Some("models/level.glb"),
+        orbit_target: None,
     };
     for type_name in usable(components, &BTreeMap::new(), project) {
         let payload = component_default(components, &type_name, project)

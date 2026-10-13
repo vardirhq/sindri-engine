@@ -2688,8 +2688,14 @@ colors, so its local smoke used an eight-color minimum plus blue-walker and
 gold-goal pixel checks instead of the generic sixteen-color blank-frame gate. Scene
 regressions cover immediate pull-in, smoothed recovery, sensor/layer/self
 filtering, rotated and scaled parents, Z locks, invalid settings and payload
-preservation. The schema supplies generic inspector field meanings, but no
-editor view has yet been exercised for this component. Collision uses one
+preservation. Editor Add Component now creates Camera Orbit from a real active
+spatial target with a stable ID; a Camera is required. Invalid numeric or target
+edits are refused before commands, retaining the previous component. Unit tests
+exercise defaults, self/child/inactive/UI/unidentified exclusions, validation,
+Undo/Redo and save/reopen. Native [review](camera-orbit-editor-review.md) removes
+the camera script from a scratch Orbit Camera Lab, authors orbit in the inspector
+and reaches the walker goal with engine-owned pull-in/recovery. Dedicated orbit
+guides remain open. Collision uses one
 sight-line ray and synchronized obstacle poses; mouse lock, volume sweeps and
 Explorer's game/browser proof remain pending. This is new general camera
 capability for Explorer in slice 6 of `docs/3d-update.md`.
