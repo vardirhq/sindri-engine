@@ -38,6 +38,12 @@ scene and plays with keyboard input. It brakes near the flag so a jump over the
 sensor can land there; only the read-only observer's win counts as success.
 Run its input-sequence regression with `node --test scripts/browser/*.test.mjs`.
 
+The Physics Playground smoke uses the normal RESET control for the whole
+room before testing the domino chain. Earlier steps deliberately scatter
+bodies with gravity, blasts, a hundred balls and dropped joints; resetting only
+the dominoes can leave another toy's debris in their path. The smoke still
+requires a new red-button press from the pushed chain, on desktop and phone.
+
 The Orbit Camera Lab capture regression uses full Chromium's headless mode
 (`channel: 'chromium'`), which `playwright install chromium` installs alongside
 the headless shell. The shell does not deliver the expected relative motion

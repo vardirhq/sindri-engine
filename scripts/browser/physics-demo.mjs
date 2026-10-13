@@ -60,8 +60,12 @@ export async function physicsDemo(page, viewport, evidence, problems) {
   await page.keyboard.up('KeyD');
   await press('KeyF', 'robot kick');
 
-  // The domino run, set up again, pushed, and the red button it ends on.
+  // Restore the whole room after gravity, blasts and dropped joints. A
+  // domino-only reset leaves other authored debris in the chain's path.
   await press('KeyE', 'toy DOMINO RUN');
+  await press('KeyE', 'toy THE WHOLE ROOM');
+  await press('KeyR', 'reset THE WHOLE ROOM');
+  await press('KeyQ', 'toy DOMINO RUN');
   await press('KeyR', 'reset DOMINO RUN');
   await page.waitForTimeout(1200);
   const presses = times('red button');
