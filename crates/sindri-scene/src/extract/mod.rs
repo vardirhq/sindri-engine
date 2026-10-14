@@ -23,6 +23,7 @@ mod tile_volume;
 mod widget_registry;
 pub(crate) use tile_volume::face_is_occluded;
 mod lighting;
+mod lighting_2d;
 mod tilemap;
 mod tolerance;
 mod ui;
@@ -149,6 +150,8 @@ pub enum SceneExtractError {
     InvalidColorTransform,
     #[error("a sprite's shader parameters must be finite")]
     InvalidShaderParams,
+    #[error(transparent)]
+    Light2d(#[from] crate::Light2dError),
     #[error(transparent)]
     UvRect(#[from] UvRectError),
     #[error(transparent)]
@@ -316,7 +319,10 @@ impl SceneExtractor {
         }
         self.begin_frame();
         let mut frame = ExtractedFrame::new(viewport, environment_clear(self.environment(world)?));
-        frame.set_sprite_environment(SpriteEnvironment { time: seconds });
+        frame.set_sprite_environment(SpriteEnvironment {
+            time: seconds,
+            lighting: self.lighting_2d(world, &cameras)?,
+        });
         self.push_meshes(world, &cameras, textures, &mut frame)?;
         self.push_models(world, &cameras, &mut frame)?;
         self.push_voxel_worlds(world, &cameras, textures, tile_sets, seconds, &mut frame)?;
@@ -380,7 +386,10 @@ impl SceneExtractor {
 
         self.begin_frame();
         let mut frame = ExtractedFrame::new(viewport, environment_clear(self.environment(world)?));
-        frame.set_sprite_environment(SpriteEnvironment { time: seconds });
+        frame.set_sprite_environment(SpriteEnvironment {
+            time: seconds,
+            lighting: self.lighting_2d(world, &cameras)?,
+        });
         self.push_meshes(world, &cameras, textures, &mut frame)?;
         self.push_models(world, &cameras, &mut frame)?;
         self.push_voxel_worlds(world, &cameras, textures, tile_sets, seconds, &mut frame)?;

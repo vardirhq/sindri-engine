@@ -75,6 +75,7 @@ fn describe_drawables(components: &mut ComponentSchemaRegistry) -> Result<(), Sc
         ("texture", texture()),
         ("tint", COLOR),
         ("shader", FieldMeaning::Asset(AssetKind::Shader)),
+        ("normal_map", texture()),
     ])?;
     components.describe::<UiImageComponent>([
         ("texture", texture()),
@@ -84,6 +85,7 @@ fn describe_drawables(components: &mut ComponentSchemaRegistry) -> Result<(), Sc
     components.describe::<EffectBurstComponent>([("texture", texture()), ("tint", COLOR)])?;
     components.describe::<TilemapComponent>([
         ("texture", texture()),
+        ("normal_map", texture()),
         ("tint", COLOR),
         (
             "projection",

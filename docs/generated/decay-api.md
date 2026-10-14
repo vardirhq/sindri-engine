@@ -18,6 +18,7 @@ The machine-readable form of this page is
 What the entity a script runs on offers, beyond the script's own fields.
 
 - `entity`: `Entity` — The object in the game this script is attached to. Pass it to calls that act on an object, such as `World.despawn(this.entity)`.
+- `light2d`: `Light2d` — The 2D light on this script's object, if it has one: its color, brightness and reach.
 - `shape`: `Shape` — The drawn shape on this script's object, if it has one: its colors, outline and how much of it is drawn.
 - `sprite`: `Sprite` — The image (sprite) on this script's object, if it has one: its color and drawing order.
 - `transform`: `Transform` — Where this script's object is, how it is turned and how big it is. Change it to move the object.
@@ -232,6 +233,7 @@ Particle effects, such as sparks and explosions. The particles are only drawn; t
 
 An object in the game, such as a player, an enemy or a button. Scripts get these from calls like `World.find` and can store them, compare them and change their transform, sprite or shape.
 
+- `light2d`: `Light2d` — The object's 2D light, if it has one.
 - `shape`: `Shape` — The object's drawn shape, if it has one.
 - `sprite`: `Sprite` — The object's image (sprite), if it has one.
 - `transform`: `Transform` — Where the object is, how it is turned and how big it is.
@@ -319,6 +321,16 @@ The keyboard, as `Input.Keyboard`. Keys are named by position, such as `"W"`, `"
 - `is_down(key: String)` → `bool` — Whether a key is being held down.
 - `just_pressed(key: String)` → `bool` — Whether a key was pressed this frame. True only once per press, however long it is held.
 - `just_released(key: String)` → `bool` — Whether a key was let go this frame.
+
+### `Light2d`
+
+A light in a 2D scene: it brightens sprites, tiles and shapes near it when the scene's environment turns 2D lighting on. Switch one off with its object's `set_active`.
+
+- `color`: `Color` — The light's color. Lowering `a` dims it, the way it fades a sprite.
+- `falloff`: `f32` — How the light fades toward its edge: 1 fades evenly, higher numbers keep it bright near the middle and drop off sharply.
+- `height`: `f32` — How high above the scene the light hangs. Only images with a normal map notice: low lights rake across their bumps, high ones light them evenly.
+- `intensity`: `f32` — How bright the light is; 0 is off.
+- `radius`: `f32` — How far the light reaches, in world units.
 
 ### `NumberTween`
 

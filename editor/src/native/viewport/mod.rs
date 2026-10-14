@@ -321,6 +321,11 @@ impl EditorApp {
         let painting = volume_painting || (editing && self.tilemap_tool.brush().is_some());
         let camera_before_input = self.scene_camera();
         let collider_owned = editing && self.collider_overlay(context, response, painting);
+        // Drawn whatever else holds the pointer, so the lights do not vanish
+        // while a collider is being sized.
+        let light_owned =
+            editing && self.light2d_overlay(context, response, painting || collider_owned);
+        let collider_owned = collider_owned || light_owned;
         let gizmo_owned = editing
             && !painting
             && !collider_owned

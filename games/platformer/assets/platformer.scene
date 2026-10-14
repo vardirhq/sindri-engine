@@ -84,6 +84,14 @@
             "map_size": 1024,
             "distance": 48.0,
             "bias": 0.002
+          },
+          "lighting_2d": {
+            "enabled": true,
+            "ambient": [
+              0.3,
+              0.3,
+              0.42
+            ]
           }
         }
       }
@@ -1093,7 +1101,8 @@
             1,
             1
           ],
-          "layer": 0
+          "layer": 0,
+          "normal_map": "textures/tiles_n.png"
         },
         "sindri.physics2d.tilemap_collider": {
           "passable": [
@@ -1110,6 +1119,577 @@
           "tags": [
             "solid"
           ]
+        },
+        "sindri.light2d.occluder": {
+          "enabled": true,
+          "shape": "tilemap"
+        }
+      }
+    },
+    {
+      "id": "sun",
+      "name": "Sun",
+      "transform_3d": {
+        "position": [
+          41.0,
+          40.0,
+          0.0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "sindri.light2d": {
+          "enabled": true,
+          "color": [
+            1.0,
+            0.96,
+            0.86,
+            1.0
+          ],
+          "intensity": 0.7,
+          "radius": 80.0,
+          "falloff": 0.05,
+          "height": 30.0,
+          "shadows": true,
+          "shadow_reach": 3.0
+        }
+      }
+    },
+    {
+      "id": "cave-roof",
+      "name": "Cave roof",
+      "transform_3d": {
+        "position": [
+          33,
+          12,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "sindri.tilemap": {
+          "texture": "textures/tiles.png",
+          "palette": [
+            "grass",
+            "dirt",
+            "stone",
+            "plank",
+            "tuft"
+          ],
+          "columns": 15,
+          "rows": 3,
+          "tiles": [
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            null,
+            null,
+            null,
+            2,
+            null,
+            null,
+            null,
+            2,
+            null,
+            null,
+            null,
+            2,
+            2
+          ],
+          "layer": 0,
+          "normal_map": "textures/tiles_n.png"
+        },
+        "sindri.light2d.occluder": {
+          "enabled": true,
+          "shape": "tilemap"
+        }
+      }
+    },
+    {
+      "id": "cave-wall",
+      "name": "Cave back wall",
+      "transform_3d": {
+        "position": [
+          33,
+          10,
+          -0.1
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "sindri.tilemap": {
+          "texture": "textures/tiles.png",
+          "palette": [
+            "grass",
+            "dirt",
+            "stone",
+            "plank",
+            "tuft"
+          ],
+          "columns": 15,
+          "rows": 10,
+          "tiles": [
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2
+          ],
+          "tint": [
+            0.5,
+            0.48,
+            0.55,
+            1.0
+          ],
+          "layer": -1,
+          "normal_map": "textures/tiles_n.png"
+        }
+      }
+    },
+    {
+      "id": "cave-lantern-west-cord",
+      "name": "Cave lantern cord (west)",
+      "transform_3d": {
+        "position": [
+          37.5,
+          8.8,
+          0.35
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          0.025,
+          2.4,
+          1
+        ]
+      },
+      "components": {
+        "sindri.shape": {
+          "kind": "rect",
+          "fill": [
+            0.2,
+            0.15,
+            0.1,
+            1
+          ]
+        }
+      }
+    },
+    {
+      "id": "cave-lantern-west",
+      "name": "Cave lantern (west)",
+      "transform_3d": {
+        "position": [
+          37.5,
+          7.6,
+          0.4
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          0.36,
+          0.36,
+          1
+        ]
+      },
+      "components": {
+        "sindri.shape": {
+          "kind": "ellipse",
+          "fill": [
+            1,
+            0.8,
+            0.25,
+            1
+          ]
+        },
+        "sindri.light2d": {
+          "enabled": true,
+          "color": [
+            1.0,
+            0.72,
+            0.38,
+            1.0
+          ],
+          "intensity": 1.3,
+          "radius": 8.0,
+          "falloff": 1.4,
+          "height": 3.0,
+          "shadows": true,
+          "shadow_reach": 0.6
+        }
+      }
+    },
+    {
+      "id": "cave-lantern-east-cord",
+      "name": "Cave lantern cord (east)",
+      "transform_3d": {
+        "position": [
+          44.5,
+          8.8,
+          0.35
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          0.025,
+          2.4,
+          1
+        ]
+      },
+      "components": {
+        "sindri.shape": {
+          "kind": "rect",
+          "fill": [
+            0.2,
+            0.15,
+            0.1,
+            1
+          ]
+        }
+      }
+    },
+    {
+      "id": "cave-lantern-east",
+      "name": "Cave lantern (east)",
+      "transform_3d": {
+        "position": [
+          44.5,
+          7.6,
+          0.4
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          0.36,
+          0.36,
+          1
+        ]
+      },
+      "components": {
+        "sindri.shape": {
+          "kind": "ellipse",
+          "fill": [
+            1,
+            0.8,
+            0.25,
+            1
+          ]
+        },
+        "sindri.light2d": {
+          "enabled": true,
+          "color": [
+            1.0,
+            0.72,
+            0.38,
+            1.0
+          ],
+          "intensity": 1.3,
+          "radius": 8.0,
+          "falloff": 1.4,
+          "height": 3.0,
+          "shadows": true,
+          "shadow_reach": 0.6
+        }
+      }
+    },
+    {
+      "id": "cave-torch-bracket",
+      "name": "Wall torch bracket",
+      "transform_3d": {
+        "position": [
+          46.5,
+          5.2,
+          0.35
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          0.12,
+          0.5,
+          1
+        ]
+      },
+      "components": {
+        "sindri.shape": {
+          "kind": "rect",
+          "fill": [
+            0.25,
+            0.18,
+            0.12,
+            1
+          ]
+        }
+      }
+    },
+    {
+      "id": "cave-torch",
+      "name": "Wall torch",
+      "transform_3d": {
+        "position": [
+          46.5,
+          5.55,
+          0.4
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          0.22,
+          0.3,
+          1
+        ]
+      },
+      "components": {
+        "sindri.shape": {
+          "kind": "ellipse",
+          "fill": [
+            1,
+            0.62,
+            0.2,
+            1
+          ]
+        },
+        "sindri.light2d": {
+          "enabled": true,
+          "color": [
+            1.0,
+            0.55,
+            0.25,
+            1.0
+          ],
+          "intensity": 2.4,
+          "radius": 5.0,
+          "falloff": 1.3,
+          "height": 0.6,
+          "shadows": false,
+          "shadow_reach": 0.1
         }
       }
     },
@@ -2083,6 +2663,21 @@
         "sindri.script": {
           "source": "scripts/lantern.decay",
           "script": "Lantern"
+        },
+        "sindri.light2d": {
+          "enabled": true,
+          "color": [
+            1.0,
+            0.78,
+            0.42,
+            1.0
+          ],
+          "intensity": 1.2,
+          "radius": 4.5,
+          "falloff": 1.4,
+          "height": 1.0,
+          "shadows": false,
+          "shadow_reach": 0.1
         }
       }
     },

@@ -1,5 +1,6 @@
 //! Drawing sprites in as few passes as the ordering allows.
 
+mod binding;
 mod instance;
 mod pipelines;
 mod stats;
@@ -10,6 +11,7 @@ mod tests;
 pub use instance::{SpriteDepth, SpriteInstance};
 pub use stats::SpriteBatchStats;
 
+use binding::{BindingKey, create_bind_group_layout};
 use instance::BatchUniform;
 use pipelines::PipelineSet;
 
@@ -19,9 +21,10 @@ use glam::Mat4;
 use thiserror::Error;
 use wgpu::util::DeviceExt;
 
+use crate::light2d::Lights2dGpu;
 use crate::{
-    DepthTarget, MeshBuffers, RegistryIdentity, SpriteBlendMode, SpriteEnvironment, SpriteShader,
-    TextureId, TextureRegistry, TexturedVertex,
+    DepthTarget, Lighting2d, MeshBuffers, RegistryIdentity, SpriteBlendMode, SpriteEnvironment,
+    SpriteShader, Texture2D, TextureId, TextureRegistry, TexturedVertex,
 };
 
 const DEFAULT_CAPACITY: u32 = 64;
@@ -50,7 +53,7 @@ struct Batch {
     capacity: u32,
     /// One bind group per texture used in this slot. Keyed per slot because a
     /// bind group names the uniform buffer it reads, and each slot has its own.
-    bind_groups: std::collections::HashMap<TextureId, wgpu::BindGroup>,
+    bind_groups: std::collections::HashMap<BindingKey, wgpu::BindGroup>,
     /// The registry `bind_groups` were made from. Handles are only unique
     /// within one, so a different registry means none of them apply.
     registry: RegistryIdentity,
@@ -74,6 +77,12 @@ pub struct SpriteBatchRenderer {
     next: usize,
     clip: Option<[u32; 4]>,
     time: f32,
+    /// The frame's 2D lights, uploaded on the frame's first batch.
+    lighting: Option<Lighting2d>,
+    lights: Lights2dGpu,
+    /// What a batch with no normal map binds in its place, made on the first
+    /// draw because making a texture needs the queue.
+    flat_normal: Option<Texture2D>,
     blend_mode: SpriteBlendMode,
     stats: SpriteBatchStats,
 }
@@ -117,6 +126,9 @@ impl SpriteBatchRenderer {
             next: 0,
             clip: None,
             time: 0.0,
+            lighting: None,
+            lights: Lights2dGpu::new(device),
+            flat_normal: None,
             blend_mode,
             stats: SpriteBatchStats::default(),
         }
@@ -132,6 +144,7 @@ impl SpriteBatchRenderer {
         } else {
             0.0
         };
+        self.lighting.clone_from(&environment.lighting);
     }
 
     /// Starts a submission, so the next batch takes the first slot again.
@@ -197,6 +210,7 @@ impl SpriteBatchRenderer {
             registry,
             SpriteBatchDraw {
                 texture,
+                normal_map: None,
                 shader: None,
                 view_projection,
                 depth,
@@ -218,6 +232,7 @@ impl SpriteBatchRenderer {
     ) -> Result<SpriteBatchStats, SpriteBatchError> {
         let SpriteBatchDraw {
             texture,
+            normal_map,
             shader,
             view_projection,
             depth,
@@ -237,6 +252,7 @@ impl SpriteBatchRenderer {
             return Ok(stats);
         }
 
+        self.lights.write(queue, self.lighting.as_ref());
         let slot = self.reserve(device, instance_count)?;
         {
             let batch = &self.batches[slot];
@@ -245,12 +261,21 @@ impl SpriteBatchRenderer {
                 0,
                 bytemuck::bytes_of(&BatchUniform {
                     view_projection: view_projection.to_cols_array_2d(),
-                    time: [self.time, 0.0, 0.0, 0.0],
+                    time: [
+                        self.time,
+                        f32::from(u8::from(normal_map.is_some())),
+                        0.0,
+                        0.0,
+                    ],
                 }),
             );
             queue.write_buffer(&batch.instances, 0, bytemuck::cast_slice(instances));
         }
-        self.bind_texture(device, registry, slot, texture);
+        let key = BindingKey {
+            texture,
+            normal_map,
+        };
+        self.bind_texture(device, queue, registry, slot, key);
         self.stats = self.stats.and(stats);
 
         let batch = &self.batches[slot];
@@ -293,7 +318,7 @@ impl SpriteBatchRenderer {
             0,
             batch
                 .bind_groups
-                .get(&texture)
+                .get(&key)
                 .expect("the bind group was just created"),
             &[],
         );
@@ -362,45 +387,39 @@ impl SpriteBatchRenderer {
         Ok(slot)
     }
 
-    /// Builds this slot's bind group for `texture` on first use.
+    /// Builds this slot's bind group for `key` on first use.
     ///
     /// Keyed per slot rather than per renderer because a bind group names the
     /// uniform buffer it reads, and each slot has its own.
     fn bind_texture(
         &mut self,
         device: &wgpu::Device,
+        queue: &wgpu::Queue,
         registry: &TextureRegistry,
         slot: usize,
-        texture: TextureId,
+        key: BindingKey,
     ) {
         let batch = &mut self.batches[slot];
         if batch.registry != registry.identity() {
             batch.bind_groups.clear();
             batch.registry = registry.identity();
         }
-        if batch.bind_groups.contains_key(&texture) {
+        if batch.bind_groups.contains_key(&key) {
             return;
         }
-        let resolved = registry.get(texture);
-        let bind_group = device.create_bind_group(&wgpu::BindGroupDescriptor {
-            label: Some("Sindri sprite batch bind group"),
-            layout: &self.bind_group_layout,
-            entries: &[
-                wgpu::BindGroupEntry {
-                    binding: 0,
-                    resource: self.batches[slot].uniform.as_entire_binding(),
-                },
-                wgpu::BindGroupEntry {
-                    binding: 1,
-                    resource: wgpu::BindingResource::TextureView(resolved.view()),
-                },
-                wgpu::BindGroupEntry {
-                    binding: 2,
-                    resource: wgpu::BindingResource::Sampler(resolved.sampler()),
-                },
-            ],
-        });
-        self.batches[slot].bind_groups.insert(texture, bind_group);
+        let flat_normal = self
+            .flat_normal
+            .get_or_insert_with(|| binding::flat_normal(device, queue));
+        let bind_group = binding::create_bind_group(
+            device,
+            &self.bind_group_layout,
+            &self.batches[slot].uniform,
+            &self.lights,
+            registry,
+            key,
+            flat_normal,
+        );
+        self.batches[slot].bind_groups.insert(key, bind_group);
     }
 
     /// What this frame has drawn since [`Self::begin_submission`], across every
@@ -412,41 +431,6 @@ impl SpriteBatchRenderer {
     pub const fn blend_mode(&self) -> SpriteBlendMode {
         self.blend_mode
     }
-}
-
-fn create_bind_group_layout(device: &wgpu::Device) -> wgpu::BindGroupLayout {
-    device.create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
-        label: Some("Sindri sprite batch bind group layout"),
-        entries: &[
-            wgpu::BindGroupLayoutEntry {
-                binding: 0,
-                // The fragment stage reads the time.
-                visibility: wgpu::ShaderStages::VERTEX_FRAGMENT,
-                ty: wgpu::BindingType::Buffer {
-                    ty: wgpu::BufferBindingType::Uniform,
-                    has_dynamic_offset: false,
-                    min_binding_size: None,
-                },
-                count: None,
-            },
-            wgpu::BindGroupLayoutEntry {
-                binding: 1,
-                visibility: wgpu::ShaderStages::FRAGMENT,
-                ty: wgpu::BindingType::Texture {
-                    sample_type: wgpu::TextureSampleType::Float { filterable: true },
-                    view_dimension: wgpu::TextureViewDimension::D2,
-                    multisampled: false,
-                },
-                count: None,
-            },
-            wgpu::BindGroupLayoutEntry {
-                binding: 2,
-                visibility: wgpu::ShaderStages::FRAGMENT,
-                ty: wgpu::BindingType::Sampler(wgpu::SamplerBindingType::Filtering),
-                count: None,
-            },
-        ],
-    })
 }
 
 fn create_instance_buffer(
@@ -477,6 +461,9 @@ pub struct SpriteBatchTarget<'a> {
 #[derive(Clone, Copy)]
 pub struct SpriteBatchDraw<'a> {
     pub texture: TextureId,
+    /// The texture's normal map, which 2D lights read to light the art as a
+    /// surface rather than a flat picture.
+    pub normal_map: Option<TextureId>,
     /// The project shader the batch is drawn through, or the built-in look.
     pub shader: Option<&'a SpriteShader>,
     pub view_projection: Mat4,

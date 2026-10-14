@@ -14,10 +14,40 @@ fn sindri_shader_input(input: SindriVertexOutput) -> SpriteShaderInput {
     return shader_input;
 }
 
+// The batch's normal map, or a flat one. Bound like a color texture, so it
+// arrives decoded from sRGB and is encoded back before use.
+@group(0) @binding(5)
+var sindri_normal_map: texture_2d<f32>;
+
+fn sindri_srgb_encode(linear: vec3<f32>) -> vec3<f32> {
+    let low = linear * 12.92;
+    let high = 1.055 * pow(max(linear, vec3<f32>(0.0)), vec3<f32>(1.0 / 2.4)) - 0.055;
+    return select(high, low, linear <= vec3<f32>(0.0031308));
+}
+
+// The sprite's color as the frame's 2D lights leave it.
+fn sindri_lit(input: SindriVertexOutput, rgb: vec3<f32>) -> vec3<f32> {
+    if input.flags.x < 0.5 || !sindri_lighting_2d_on() {
+        return rgb;
+    }
+    let use_normal = sindri_uniforms.time.y > 0.5;
+    var normal = vec3<f32>(0.0, 0.0, 1.0);
+    if use_normal {
+        let encoded = sindri_srgb_encode(
+            textureSampleLevel(sindri_normal_map, sprite_sampler, input.uv, 0.0).rgb,
+        );
+        let local = encoded * 2.0 - vec3<f32>(1.0);
+        let right = normalize(input.axes.xy);
+        let up = normalize(input.axes.zw);
+        normal = normalize(vec3<f32>(right * local.x + up * local.y, local.z));
+    }
+    return rgb * sindri_light_2d(input.world_position.xy, normal, use_normal);
+}
+
 @fragment
 fn sindri_fragment(input: SindriVertexOutput) -> @location(0) vec4<f32> {
     let color = sprite_shader(sindri_shader_input(input));
-    return vec4<f32>(color.rgb * input.shade, color.a);
+    return vec4<f32>(sindri_lit(input, color.rgb) * input.shade, color.a);
 }
 
 // Opaque geometry, which writes depth.
@@ -31,5 +61,5 @@ fn sindri_fragment_solid(input: SindriVertexOutput) -> @location(0) vec4<f32> {
     if color.a < 0.5 {
         discard;
     }
-    return vec4<f32>(color.rgb * input.shade, 1.0);
+    return vec4<f32>(sindri_lit(input, color.rgb) * input.shade, 1.0);
 }

@@ -194,6 +194,10 @@ shaped like the tool.
   hot-reloaded in the editor, refused by export when broken, and shown by
   `examples/sprite-shaders`. The rest of the 2D closing round is tracked in
   `docs/2d-update.md`
+- [x] Light 2D scenes — an ambient color and point lights for world sprites,
+  tilemaps, flecks and shapes, normal maps for sprites and tilemaps, and
+  CPU-built polar shadows from box, polygon and tilemap occluders; Decay drives
+  the lights and the platformer's cave proves it (`docs/2d-lights.md`)
 - [ ] Port layers, anchors, and sprite bounds — layers work, and the nine
   anchors are a field of the UI family rather than of every sprite; editor picking uses the renderer's unit-quad geometry directly,
   while reusable component bounds remain. Parallax is not

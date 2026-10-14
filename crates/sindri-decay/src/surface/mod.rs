@@ -21,6 +21,7 @@ mod call;
 pub(crate) mod character;
 pub(crate) mod contact;
 mod gamepad;
+mod light2d;
 mod maths;
 mod member;
 pub(super) mod names;
@@ -39,13 +40,14 @@ pub(crate) use call::{
     TIME_VALUES, TimeValue, UI_CALLS, UiCall, WORLD_CALLS, WorldCall,
 };
 pub(crate) use gamepad::{GAMEPAD_QUERIES, GamepadQuery, gamepad_type};
+pub(crate) use light2d::LIGHT_2D_MEMBERS;
 pub(crate) use maths::{CONSTANTS, FUNCTIONS, HostFunction};
 pub(crate) use member::{SHAPE_MEMBERS, SPRITE_MEMBERS, TRANSFORM_MEMBERS, UI_IMAGE_MEMBERS};
 pub(crate) use names::{
     ACTION, AIM, ANIMATION, CAMERA, EFFECTS, ENTITY, GAME, GAMEPAD, GESTURE, GRID, INPUT, KEYBOARD,
-    PHYSICS, POINTER, PREFAB, PROFILE, PROFILES, RANDOM, SAVE, SCENE, SEQUENCE, SHAPE, SPRITE,
-    STICK, TILE_GRID_COMPONENT, TILEMAP_COMPONENT, TIME, TOUCH, TRANSFORM, UI, UI_IMAGE, VIEWPORT,
-    WORLD,
+    LIGHT_2D, PHYSICS, POINTER, PREFAB, PROFILE, PROFILES, RANDOM, SAVE, SCENE, SEQUENCE, SHAPE,
+    SPRITE, STICK, TILE_GRID_COMPONENT, TILEMAP_COMPONENT, TIME, TOUCH, TRANSFORM, UI, UI_IMAGE,
+    VIEWPORT, WORLD,
 };
 pub(crate) use person::{
     AIM_VALUES, AimValue, CAMERA_CALLS, CAMERA_VALUES, CameraCall, CameraValue, GESTURE_VALUES,
@@ -169,6 +171,7 @@ pub(crate) const THIS: &[(&str, Node)] = &[
     ("sprite", Node::Group(SPRITE, SPRITE_MEMBERS)),
     ("ui_image", Node::Group(UI_IMAGE, UI_IMAGE_MEMBERS)),
     ("shape", Node::Group(SHAPE, SHAPE_MEMBERS)),
+    ("light2d", Node::Group(LIGHT_2D, LIGHT_2D_MEMBERS)),
     ("entity", Node::Handle(Handle::Own)),
 ];
 
@@ -183,6 +186,7 @@ pub(crate) const THROUGH_REFERENCE: &[(&str, Node)] = &[
     ("sprite", Node::Group(SPRITE, SPRITE_MEMBERS)),
     ("ui_image", Node::Group(UI_IMAGE, UI_IMAGE_MEMBERS)),
     ("shape", Node::Group(SHAPE, SHAPE_MEMBERS)),
+    ("light2d", Node::Group(LIGHT_2D, LIGHT_2D_MEMBERS)),
 ];
 
 /// Finds the leaf a path names, given the path's parts after `this`.

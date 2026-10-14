@@ -6,7 +6,8 @@
 
 struct SindriUniforms {
     view_projection: mat4x4<f32>,
-    // x is the frame's time in seconds; the rest is padding.
+    // x is the frame's time in seconds; y is 1 when the batch has a normal
+    // map; the rest is padding.
     time: vec4<f32>,
 }
 
@@ -34,6 +35,8 @@ struct SindriVertexInput {
     // Brightness at each corner, from the quad's own [0,0] round to [0,1].
     @location(10) corner_shade: vec4<f32>,
     @location(11) shader_params: vec4<f32>,
+    // x is 1 when 2D lights light this sprite; the rest is reserved.
+    @location(12) flags: vec4<f32>,
 }
 
 struct SindriVertexOutput {
@@ -47,6 +50,9 @@ struct SindriVertexOutput {
     @location(6) local_uv: vec2<f32>,
     @location(7) @interpolate(flat) uv_rect: vec4<f32>,
     @location(8) @interpolate(flat) params: vec4<f32>,
+    @location(9) @interpolate(flat) flags: vec4<f32>,
+    // The sprite's own right and up in the world, for turning a normal map.
+    @location(10) @interpolate(flat) axes: vec4<f32>,
 }
 
 @vertex
@@ -72,6 +78,8 @@ fn sindri_vertex(input: SindriVertexInput) -> SindriVertexOutput {
     output.local_uv = input.uv;
     output.uv_rect = input.uv_rect;
     output.params = input.shader_params;
+    output.flags = input.flags;
+    output.axes = vec4<f32>(input.model_0.xy, input.model_1.xy);
     return output;
 }
 

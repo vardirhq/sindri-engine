@@ -58,7 +58,8 @@ There is no game code. The game is `assets/`:
   the flag and falling off.
 - `scripts/hud.decay`: the coin count and the banner.
 - `textures/`: pixel art drawn by `art/draw.py`, deterministic, so running it
-  again changes nothing unless the drawing did.
+  again changes nothing unless the drawing did. It draws `tiles_n.png` too,
+  the tiles' normal map, from the same brick, plank and dirt layouts.
 
 It uses, with no Rust of its own:
 
@@ -73,7 +74,10 @@ It uses, with no Rust of its own:
 - **keyboard, gamepad and touch input** through one movement path, including
   Sindri's built-in touch stick;
 - a **camera** that follows the hero and stays inside the level;
-- **screen text** filled from Decay.
+- **screen text** filled from Decay;
+- **2D lights**: a sun high over the level that casts shadows, a stone cave
+  whose roof keeps the daylight out, two lanterns that cast the pillar's shadow
+  and a low wall torch raking the normal-mapped bricks.
 
 ## Playing it
 
@@ -87,6 +91,9 @@ opens in 2D, framed on the game's camera. It is also exported to the site at
 player hold right and jump at every gap and wall until it reaches the flag
 without falling, and checks the camera follows. `src/lib.rs` is the harness
 that plays it without a window, built from the same public pieces a host uses.
+
+`tests/cave_lights.rs` checks that the roof keeps the sun out of the cave,
+that the lanterns warm it, and that the pillar shades its far side from one.
 
 `tests/one_way_platforms.rs` jumps through the authored planks, lands on top,
 drops through using the real input action, stops on the ordinary painted floor

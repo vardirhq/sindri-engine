@@ -46,11 +46,12 @@ impl SceneExtractor {
             )?;
             batches.push(SpriteDraw {
                 shader: None,
+                normal_map: None,
                 clip: None,
                 space: DrawSpace::World,
                 texture: textures.resolve(texture),
                 order,
-                sprite: SpriteInstance::new(model, fleck.drawn_tint()),
+                sprite: SpriteInstance::new(model, fleck.drawn_tint()).lit(true),
             });
         }
         Ok(())

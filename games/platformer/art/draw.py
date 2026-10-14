@@ -131,6 +131,60 @@ def draw_tiles():
     png(OUT / "tiles.png", CELL * len(cells), CELL, sheet(cells))
 
 
+# --- Tile normals -----------------------------------------------------------
+#
+# A height for every texel of every tile, turned into the direction its surface
+# faces: red is right, green is up, blue is out of the picture. Laid out exactly
+# like tiles.png, so the same sprite rectangle reads both.
+
+
+def seam_height(x, y, offset):
+    """How far a brick texel is from the mortar round it, capped: a bevel."""
+    course_x = (x + offset) % 8
+    edge = min(course_x, 8 - course_x, y % 8, 8 - y % 8)
+    return min(edge, 2) / 2.0
+
+
+def stone_height(x, y):
+    return seam_height(x, y, 4 if (y % CELL) // 8 else 0) + noise(x, y, 11) * 0.15
+
+
+def plank_height(x, y):
+    if y >= 6:
+        return 0.0
+    return min(y, 5 - y, 1) * 0.6 + (0.0 if x in (0, 8, 15) else 0.4)
+
+
+def rough_height(salt):
+    return lambda x, y: noise(x, y, salt) * 0.5
+
+
+HEIGHTS = [rough_height(3), rough_height(2), stone_height, plank_height, lambda x, y: 0.0]
+
+
+def normal_cell(height, strength=2.0):
+    def at(x, y):
+        return height(min(max(x, 0), CELL - 1), min(max(y, 0), CELL - 1))
+
+    cell = []
+    for y in range(CELL):
+        row = []
+        for x in range(CELL):
+            across = (at(x + 1, y) - at(x - 1, y)) * strength
+            # Rows run down the picture, and green means up the world.
+            down = (at(x, y + 1) - at(x, y - 1)) * strength
+            length = (across * across + down * down + 1.0) ** 0.5
+            normal = (-across / length, down / length, 1.0 / length)
+            row.append(tuple(round((n * 0.5 + 0.5) * 255) for n in normal) + (255,))
+        cell.append(row)
+    return cell
+
+
+def draw_tile_normals():
+    cells = [normal_cell(height) for height in HEIGHTS]
+    png(OUT / "tiles_n.png", CELL * len(cells), CELL, sheet(cells))
+
+
 # --- The hero ---------------------------------------------------------------
 
 HERO = {
@@ -249,6 +303,7 @@ def draw_flag():
 if __name__ == "__main__":
     OUT.mkdir(parents=True, exist_ok=True)
     draw_tiles()
+    draw_tile_normals()
     draw_hero()
     draw_coin()
     draw_flag()

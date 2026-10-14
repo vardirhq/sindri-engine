@@ -137,6 +137,10 @@ pub const THIS: &[Entry] = &[
         "The object in the game this script is attached to. Pass it to calls that act on an object, such as `World.despawn(this.entity)`.",
     ),
     value(
+        "light2d",
+        "The 2D light on this script's object, if it has one: its color, brightness and reach.",
+    ),
+    value(
         "shape",
         "The drawn shape on this script's object, if it has one: its colors, outline and how much of it is drawn.",
     ),

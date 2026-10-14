@@ -31,6 +31,9 @@ impl SceneExtractor {
             tilemap.validate()?;
             let transform = world.world_transform(entity).unwrap_or_default();
             let texture = textures.resolve(&tilemap.texture);
+            let normal_map = (!tilemap.normal_map.is_empty())
+                .then(|| textures.get(&tilemap.normal_map))
+                .flatten();
             let world_transform = transform_matrix(transform);
             let camera = cameras.world.ok_or(SceneExtractError::MissingWorldCamera)?;
 
@@ -89,11 +92,14 @@ impl SceneExtractor {
                 )?;
                 batches.push(SpriteDraw {
                     shader: None,
+                    normal_map,
                     clip: None,
                     space: DrawSpace::World,
                     texture,
                     order,
-                    sprite: SpriteInstance::new(model, tilemap.tint).with_uv_rect(rect),
+                    sprite: SpriteInstance::new(model, tilemap.tint)
+                        .with_uv_rect(rect)
+                        .lit(true),
                 });
             }
         }
@@ -146,6 +152,7 @@ mod tests {
             tiles: vec![],
             tint: [1.0, 1.0, 1.0, 1.0],
             layer: 0,
+            normal_map: String::new(),
         }
     }
 

@@ -9,6 +9,7 @@ mod encode;
 mod fog;
 mod frame;
 mod glyph;
+mod light2d;
 mod lighting;
 mod mesh;
 mod model;
@@ -46,6 +47,9 @@ pub use frame::{
 pub use glyph::{
     EDGE, FIELD_PER_RASTER_PIXEL, GlyphAtlas, GlyphDrawError, GlyphInstance, GlyphRenderer,
     GlyphSlot, RASTER_EM,
+};
+pub use light2d::{
+    Light2d, Light2dShadow, Lighting2d, MAX_LIGHTS_2D, SHADOW_BINS_2D, shadow_map_2d,
 };
 pub use lighting::WorldLighting;
 pub use mesh::{ColoredVertex, MeshBuffers, TexturedVertex};

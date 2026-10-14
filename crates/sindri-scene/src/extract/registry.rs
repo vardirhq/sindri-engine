@@ -158,6 +158,10 @@ fn register_environment(components: &mut ComponentSchemaRegistry) -> Result<(), 
                 "knee": 0.20,
                 "intensity": 0.45,
                 "passes": 3
+            },
+            "lighting_2d": {
+                "enabled": false,
+                "ambient": [0.25, 0.25, 0.3]
             }
         }),
     )?;
@@ -252,7 +256,9 @@ fn register_drawables(components: &mut ComponentSchemaRegistry) -> Result<(), Sc
             // lying on the ground as somebody standing on it.
             "billboard": false,
             "shader": "",
-            "shader_params": [0.0, 0.0, 0.0, 0.0]
+            "shader_params": [0.0, 0.0, 0.0, 0.0],
+            "normal_map": "",
+            "unlit": false
         }),
     )?;
     // The UI half of the same picture: anchored to the middle of the
@@ -337,6 +343,7 @@ fn register_drawables(components: &mut ComponentSchemaRegistry) -> Result<(), Sc
     // nothing — no fill, no stroke — would add a component that draws
     // absolutely nothing and read as a broken button.
     two_d::register_shapes(components)?;
+    two_d::register_lights(components)?;
     register_tiles(components)?;
     Ok(())
 }
@@ -358,7 +365,8 @@ fn register_tiles(components: &mut ComponentSchemaRegistry) -> Result<(), SceneE
             "projection": "orthogonal",
             "tiles": [null],
             "tint": [1.0, 1.0, 1.0, 1.0],
-            "layer": 0
+            "layer": 0,
+            "normal_map": ""
         }),
     )?;
     components.register_with_default::<TileGridComponent>(

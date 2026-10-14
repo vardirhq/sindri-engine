@@ -58,28 +58,34 @@ game in this repository.
   `docs/sprite-shaders.md`.
 
 ### 2. 2D lights
-- [ ] `sindri.light2d`: a point light in the plane, with color, intensity,
+- [x] `sindri.light2d`: a point light in the plane, with color, intensity,
   radius and falloff. A separate component from `sindri.light`, because a 2D
   light lights pictures by distance in the plane and has no direction.
-- [ ] `sindri.environment` gains `lighting_2d`: whether 2D lighting is on, and
+- [x] `sindri.environment` gains `lighting_2d`: whether 2D lighting is on, and
   the ambient color 2D content is multiplied by where no light reaches.
-- [ ] When it is on, world sprites, tilemaps, shapes and flecks are lit. A
+- [x] When it is on, world sprites, tilemaps, shapes and flecks are lit. A
   sprite can opt out with `unlit`. The UI is never lit.
-- [ ] The Scene view draws each light's radius. Create offers Light 2D.
-- [ ] Decay reads and writes a light's color, intensity, radius and enabled
-  state.
+- [x] The Scene view draws each light's radius. Create offers Light 2D.
+- [x] Decay reads and writes a light's color, intensity, radius, falloff and
+  height; its entity's `set_active` switches it off.
+- [x] Normal maps: a sprite may name a normal map beside its texture, and a
+  light has a height above the plane, so light rakes across the art. A sprite
+  with no normal map is lit exactly as without one. Sprites with different
+  normal maps are different batches. Tilemaps name one too.
 
 ### 3. 2D shadows
-- [ ] `sindri.light2d.occluder`: a box or polygon that blocks 2D light. A light
+- [x] `sindri.light2d.occluder`: a box or polygon that blocks 2D light. A light
   with `shadows` on is blocked by every occluder in its radius.
-- [ ] Shadows are a one-dimensional polar depth map per light, built on the CPU
+- [x] Shadows are a one-dimensional polar depth map per light, built on the CPU
   from occluder edges and sampled in the sprite shader, so they are
   deterministic and testable without a GPU.
-- [ ] A tilemap can cast shadows from its solid cells, through the tilemap
+- [x] A tilemap can cast shadows from its solid cells, through the tilemap
   collider's merged boxes.
-- [ ] The Scene view outlines occluders and their edges drag.
-- [ ] Proof: the platformer gets a dark cave section lit by lanterns, with the
-  level casting shadows.
+- [x] The Scene view outlines occluders; a box occluder's size and a light's
+  radius drag by handle. Polygon points are edited in the inspector.
+- [x] Proof: the platformer gets a dark cave section lit by lanterns, with the
+  level casting shadows. A sun keeps daylight out under the roof, and a low
+  wall torch rakes normal-mapped bricks. Contract: `docs/2d-lights.md`.
 
 ### 4. Particle system
 - [ ] `sindri.particles`: a continuous emitter with rate, bursts, lifetime,
@@ -132,6 +138,4 @@ game in this repository.
 
 - **Ordering one walker against several occluders.** It only arises on
   stackable tile volumes, and no game uses one any more. It stays a parity row.
-- **Normal-mapped 2D lighting.** Possible once lights exist; not needed for a
-  first proof.
 - **A shader graph.** Deferred beyond the first major release by the roadmap.

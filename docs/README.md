@@ -45,6 +45,7 @@ contracts below; dated evidence should not override them.
 - [Colour handling](rendering-color.md)
 - [Transparent rendering](rendering-transparency.md)
 - [Sprite shaders](sprite-shaders.md)
+- [2D lights and shadows](2d-lights.md)
 
 ## Editor
 

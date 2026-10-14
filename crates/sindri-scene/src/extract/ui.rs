@@ -100,6 +100,7 @@ impl SceneExtractor {
             )?;
             batches.push(SpriteDraw {
                 shader: None,
+                normal_map: None,
                 clip: hierarchy.clip_pixels_through(
                     world,
                     entity,

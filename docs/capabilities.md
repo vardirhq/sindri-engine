@@ -1166,6 +1166,20 @@ built-in look. Decay writes `this.sprite.shader_params.{x,y,z,w}`.
 shaders reach `sindri.sprite` only, with one texture and no material asset. See
 `docs/sprite-shaders.md`.
 
+**A 2D scene can be lit.** With `lighting_2d` on in `sindri.environment`, world
+sprites, tilemaps, flecks and world shapes are multiplied by the light reaching
+them: an ambient color plus every `sindri.light2d` point light within its
+radius, faded by its falloff. A sprite opts out with `unlit`, additive shapes
+are light themselves, and the UI is never lit. A sprite or tilemap may name a
+`normal_map` laid out like its texture; a light's `height` then decides how
+squarely it meets each texel, so a low light rakes across the relief. A light
+with `shadows` on is blocked by `sindri.light2d.occluder` boxes, polygons and
+the solid cells of a tilemap, through one-dimensional polar depth maps built on
+the CPU each frame. A frame carries the 16 lights nearest the camera. Decay
+writes a light's color, intensity, radius, falloff and height. The Scene view
+draws light radii and occluder outlines with handles. The platformer's cave is
+the proof. See `docs/2d-lights.md`.
+
 **A sliced image says how it is cut, once.** A sheet document beside a texture —
 `textures/tiles.png` is sliced by `textures/tiles.sheet`, at a derived ID
 nothing has to declare — names the parts of it, either as a grid or as explicit

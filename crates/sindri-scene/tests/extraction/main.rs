@@ -9,6 +9,7 @@ mod assets;
 mod baked_volume;
 mod cameras;
 mod canvas;
+mod lights_2d;
 mod models;
 mod passes;
 mod sprite_shaders;

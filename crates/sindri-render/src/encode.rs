@@ -83,6 +83,7 @@ pub fn encode_prepared_frame(
     cube_renderer.begin_submission();
     sprite_renderer.begin_submission();
     sprite_renderer.set_environment(frame.sprite_environment());
+    shape_renderer.set_environment(frame.sprite_environment());
     glyph_renderer.begin_submission();
     shape_renderer.begin_submission();
     encode_passes(
@@ -172,6 +173,7 @@ pub fn encode_lit_frame(
     cube_renderer.begin_submission();
     sprite_renderer.begin_submission();
     sprite_renderer.set_environment(frame.sprite_environment());
+    shape_renderer.set_environment(frame.sprite_environment());
     glyph_renderer.begin_submission();
     shape_renderer.begin_submission();
 
@@ -376,6 +378,7 @@ fn encode_passes<'p>(
             }
             FrameCommand::SpriteBatch {
                 texture,
+                normal_map,
                 shader,
                 depth,
                 instances,
@@ -391,6 +394,7 @@ fn encode_passes<'p>(
                     textures,
                     SpriteBatchDraw {
                         texture: *texture,
+                        normal_map: *normal_map,
                         shader: shader.as_ref(),
                         view_projection: pass.camera.view_projection,
                         depth: *depth,

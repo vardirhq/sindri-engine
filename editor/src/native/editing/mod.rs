@@ -10,7 +10,7 @@ use sindri_core::{
     CommandBuffer, EntityData, EntityId, SceneComponent, SceneEntityId, Transform3D, World,
     WorldCommand,
 };
-use sindri_scene::{LightComponent, default_sun_transform};
+use sindri_scene::{Light2dComponent, LightComponent, default_sun_transform};
 
 use crate::ordering;
 use crate::project::AssetKind;
@@ -41,6 +41,7 @@ pub(super) enum CreateGameObject {
     Empty { parent: Option<EntityId> },
     UiImage,
     DirectionalLight,
+    Light2d,
 }
 
 /// The parents `entity` may legally be moved under, in the order the hierarchy
@@ -121,6 +122,11 @@ impl EditorApp {
                 LightComponent::TYPE_NAME,
                 "Directional Light",
                 default_sun_transform(),
+            ),
+            CreateGameObject::Light2d => self.create_carrying(
+                Light2dComponent::TYPE_NAME,
+                "Light 2D",
+                Transform3D::default(),
             ),
         }
     }

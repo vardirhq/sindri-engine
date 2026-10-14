@@ -131,6 +131,10 @@ pub struct TilemapComponent {
     pub tint: [f32; 4],
     #[serde(default)]
     pub layer: i32,
+    /// A second image laid out like `texture` whose colors are the tiles'
+    /// surface directions, for 2D lights to rake across. Empty for flat tiles.
+    #[serde(default)]
+    pub normal_map: String,
 }
 
 const fn unit_tile() -> [f32; 2] {
@@ -413,6 +417,7 @@ mod tests {
             tiles: vec![Some(0); (columns * rows) as usize],
             tint: [1.0, 1.0, 1.0, 1.0],
             layer: 0,
+            normal_map: String::new(),
         }
     }
 

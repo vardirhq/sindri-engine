@@ -150,6 +150,10 @@ pub(crate) const SPRITE_COMPONENT: &str = "sindri.sprite";
 pub(crate) const UI_IMAGE_COMPONENT: &str = "sindri.ui.image";
 pub(crate) const SHAPE_COMPONENT: &str = "sindri.shape";
 
+/// A point light in the plane, and the component its fields live in.
+pub(crate) const LIGHT_2D: &str = "Light2d";
+pub(crate) const LIGHT_2D_COMPONENT: &str = "sindri.light2d";
+
 /// The component whose layout and entity transform define a gameplay grid.
 pub(crate) const TILEMAP_COMPONENT: &str = "sindri.tilemap";
 

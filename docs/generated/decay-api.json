@@ -375,6 +375,12 @@
       "type": "Entity"
     },
     {
+      "description": "The 2D light on this script's object, if it has one: its color, brightness and reach.",
+      "kind": "value",
+      "name": "light2d",
+      "type": "Light2d"
+    },
+    {
       "description": "The drawn shape on this script's object, if it has one: its colors, outline and how much of it is drawn.",
       "kind": "value",
       "name": "shape",
@@ -1145,6 +1151,12 @@
       "description": "An object in the game, such as a player, an enemy or a button. Scripts get these from calls like `World.find` and can store them, compare them and change their transform, sprite or shape.",
       "members": [
         {
+          "description": "The object's 2D light, if it has one.",
+          "kind": "value",
+          "name": "light2d",
+          "type": "Light2d"
+        },
+        {
           "description": "The object's drawn shape, if it has one.",
           "kind": "value",
           "name": "shape",
@@ -1808,6 +1820,42 @@
         }
       ],
       "name": "Keyboard"
+    },
+    {
+      "description": "A light in a 2D scene: it brightens sprites, tiles and shapes near it when the scene's environment turns 2D lighting on. Switch one off with its object's `set_active`.",
+      "members": [
+        {
+          "description": "The light's color. Lowering `a` dims it, the way it fades a sprite.",
+          "kind": "value",
+          "name": "color",
+          "type": "Color"
+        },
+        {
+          "description": "How the light fades toward its edge: 1 fades evenly, higher numbers keep it bright near the middle and drop off sharply.",
+          "kind": "value",
+          "name": "falloff",
+          "type": "f32"
+        },
+        {
+          "description": "How high above the scene the light hangs. Only images with a normal map notice: low lights rake across their bumps, high ones light them evenly.",
+          "kind": "value",
+          "name": "height",
+          "type": "f32"
+        },
+        {
+          "description": "How bright the light is; 0 is off.",
+          "kind": "value",
+          "name": "intensity",
+          "type": "f32"
+        },
+        {
+          "description": "How far the light reaches, in world units.",
+          "kind": "value",
+          "name": "radius",
+          "type": "f32"
+        }
+      ],
+      "name": "Light2d"
     },
     {
       "description": "A managed number tween; read with Tween.number_value.",

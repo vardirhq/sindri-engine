@@ -200,6 +200,9 @@ stored, and an integer rounds.
 
 | `this.sprite.layer` | `f32` | yes | yes |
 | `this.sprite.shader_params.{x,y,z,w}` | `f32` | yes | yes |
+| `this.light2d.color` | `Color` | yes | yes |
+| `this.light2d.color.{r,g,b,a}` | `f32` | yes | yes |
+| `this.light2d.{intensity,radius,falloff,height}` | `f32` | yes | yes |
 | `this.ui_image.tint` | `Color` | yes | yes |
 | `this.ui_image.tint.{r,g,b,a}` | `f32` | yes | yes |
 | `this.ui_image.layer` | `f32` | yes | yes |
@@ -283,6 +286,9 @@ table above lists, reaching the same numbers.
 | `this.entity.sprite.color_offset.{r,g,b,a}` | `f32` | yes | yes |
 | `this.entity.sprite.layer` | `f32` | yes | yes |
 | `this.entity.sprite.shader_params.{x,y,z,w}` | `f32` | yes | yes |
+| `this.entity.light2d.color` | `Color` | yes | yes |
+| `this.entity.light2d.color.{r,g,b,a}` | `f32` | yes | yes |
+| `this.entity.light2d.{intensity,radius,falloff,height}` | `f32` | yes | yes |
 | `this.entity.ui_image.tint` | `Color` | yes | yes |
 | `this.entity.ui_image.tint.{r,g,b,a}` | `f32` | yes | yes |
 | `this.entity.ui_image.layer` | `f32` | yes | yes |

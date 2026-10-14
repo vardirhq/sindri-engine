@@ -29,10 +29,12 @@ pub struct ShapeInstance {
     pattern: [f32; 4],
     /// Eight 2D vertices packed into four vec4 attributes.
     points: [[f32; 4]; 4],
+    /// x is 1 when the frame's 2D lights reach this shape.
+    flags: [f32; 4],
 }
 
 impl ShapeInstance {
-    const ATTRIBUTES: [wgpu::VertexAttribute; 12] = wgpu::vertex_attr_array![
+    const ATTRIBUTES: [wgpu::VertexAttribute; 13] = wgpu::vertex_attr_array![
         2 => Float32x4,
         3 => Float32x4,
         4 => Float32x4,
@@ -44,7 +46,8 @@ impl ShapeInstance {
         10 => Float32x4,
         11 => Float32x4,
         12 => Float32x4,
-        13 => Float32x4
+        13 => Float32x4,
+        14 => Float32x4
     ];
 
     /// A filled shape with no stroke.
@@ -65,6 +68,7 @@ impl ShapeInstance {
             // caller that never mentions dashes never pays for them.
             pattern: [0.0, 0.0, 0.0, 1.0],
             points: [[0.0; 4]; 4],
+            flags: [0.0; 4],
         }
     }
 
@@ -154,6 +158,19 @@ impl ShapeInstance {
         self.pattern[2] = start;
         self.pattern[3] = turns;
         self
+    }
+
+    /// Lets the frame's 2D lights reach this shape. Off by default, so a
+    /// shape over the world, or one that is itself light, is never darkened.
+    #[must_use]
+    pub const fn lit(mut self, lit: bool) -> Self {
+        self.flags[0] = if lit { 1.0 } else { 0.0 };
+        self
+    }
+
+    /// Whether 2D lights reach this shape.
+    pub fn is_lit(self) -> bool {
+        self.flags[0] > 0.5
     }
 
     /// The per-instance model transform.

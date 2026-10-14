@@ -249,6 +249,14 @@
           "height_falloff": 0.0,
           "start": 24.0
         },
+        "lighting_2d": {
+          "ambient": [
+            0.25,
+            0.25,
+            0.3
+          ],
+          "enabled": false
+        },
         "post_process": {
           "contrast": 1.0,
           "exposure": 0.0,
@@ -300,6 +308,14 @@
           "height": 0.0,
           "height_falloff": 0.0,
           "start": 24.0
+        },
+        "lighting_2d": {
+          "ambient": [
+            0.25,
+            0.25,
+            0.3
+          ],
+          "enabled": false
         },
         "post_process": {
           "contrast": 1.0,
@@ -374,6 +390,9 @@
           "kind": "range",
           "max": null,
           "min": 0.0
+        },
+        "lighting_2d.ambient": {
+          "kind": "color"
         },
         "post_process.contrast": {
           "kind": "range",
@@ -544,6 +563,113 @@
       },
       "schema_version": 1,
       "type_name": "sindri.light"
+    },
+    {
+      "addable": true,
+      "apply": {},
+      "default_payload": {
+        "color": [
+          1.0,
+          0.8500000238418579,
+          0.6000000238418579,
+          1.0
+        ],
+        "enabled": true,
+        "falloff": 1.5,
+        "height": 1.0,
+        "intensity": 1.0,
+        "radius": 4.0,
+        "shadow_reach": 0.10000000149011612,
+        "shadows": false
+      },
+      "display_name": "Light 2D",
+      "fields": {
+        "color": [
+          1.0,
+          0.8500000238418579,
+          0.6000000238418579,
+          1.0
+        ],
+        "enabled": true,
+        "falloff": 1.5,
+        "height": 1.0,
+        "intensity": 1.0,
+        "radius": 4.0,
+        "shadow_reach": 0.10000000149011612,
+        "shadows": false
+      },
+      "meanings": {
+        "color": {
+          "kind": "color"
+        },
+        "falloff": {
+          "kind": "range",
+          "max": null,
+          "min": 0.01
+        },
+        "height": {
+          "kind": "range",
+          "max": null,
+          "min": 0.0
+        },
+        "intensity": {
+          "kind": "range",
+          "max": null,
+          "min": 0.0
+        },
+        "radius": {
+          "kind": "range",
+          "max": null,
+          "min": 0.01
+        },
+        "shadow_reach": {
+          "kind": "range",
+          "max": null,
+          "min": 0.0
+        }
+      },
+      "schema_version": 1,
+      "type_name": "sindri.light2d"
+    },
+    {
+      "addable": true,
+      "apply": {},
+      "default_payload": {
+        "enabled": true,
+        "points": [],
+        "shape": "box",
+        "size": [
+          1.0,
+          1.0
+        ]
+      },
+      "display_name": "Light Occluder 2D",
+      "fields": {
+        "enabled": true,
+        "points": [],
+        "shape": "box",
+        "size": [
+          1.0,
+          1.0
+        ]
+      },
+      "meanings": {
+        "shape": {
+          "kind": "choice",
+          "options": [
+            "box",
+            "polygon",
+            "tilemap"
+          ]
+        },
+        "size": {
+          "kind": "range",
+          "max": null,
+          "min": 0.01
+        }
+      },
+      "schema_version": 1,
+      "type_name": "sindri.light2d.occluder"
     },
     {
       "addable": true,
@@ -1454,6 +1580,7 @@
           ]
         },
         "layer": 0,
+        "normal_map": "",
         "shader": "",
         "shader_params": [
           0.0,
@@ -1467,7 +1594,8 @@
           1.0,
           1.0,
           1.0
-        ]
+        ],
+        "unlit": false
       },
       "display_name": "Sprite",
       "fields": {
@@ -1487,6 +1615,7 @@
           ]
         },
         "layer": 0,
+        "normal_map": "",
         "shader": "",
         "shader_params": [
           0.0,
@@ -1500,9 +1629,14 @@
           1.0,
           1.0,
           1.0
-        ]
+        ],
+        "unlit": false
       },
       "meanings": {
+        "normal_map": {
+          "asset": "texture",
+          "kind": "asset"
+        },
         "shader": {
           "asset": "shader",
           "kind": "asset"
@@ -1611,6 +1745,7 @@
       "default_payload": {
         "columns": 1,
         "layer": 0,
+        "normal_map": "",
         "palette": [],
         "projection": "orthogonal",
         "rows": 1,
@@ -1634,6 +1769,7 @@
       "fields": {
         "columns": 1,
         "layer": 0,
+        "normal_map": "",
         "palette": [],
         "projection": "orthogonal",
         "rows": 1,
@@ -1654,6 +1790,10 @@
         ]
       },
       "meanings": {
+        "normal_map": {
+          "asset": "texture",
+          "kind": "asset"
+        },
         "projection": {
           "kind": "choice",
           "options": [

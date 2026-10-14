@@ -102,6 +102,14 @@ pub struct SpriteComponent {
     /// has got, how bright a flash is. Meaningless without a shader.
     #[serde(default)]
     pub shader_params: [f32; 4],
+    /// A normal map laid out like `texture`, as an asset path, or empty for
+    /// none. 2D lights read it to light the art as a surface with relief.
+    #[serde(default)]
+    pub normal_map: String,
+    /// Keeps the scene's 2D lights off this sprite, for things that glow on
+    /// their own or sit in front of the lit world.
+    #[serde(default)]
+    pub unlit: bool,
 }
 
 impl SpriteComponent {

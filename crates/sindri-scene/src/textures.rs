@@ -384,6 +384,15 @@ fn sprite_references(world: &World) -> BTreeSet<SpriteRef> {
             if !TEXTURE_NAMING_COMPONENTS.contains(&type_name.as_str()) {
                 continue;
             }
+            // A normal map is a second picture laid out like the first, loaded
+            // the same way.
+            if let Some(normal_map) = payload
+                .get("normal_map")
+                .and_then(serde_json::Value::as_str)
+                && let Ok(reference) = SpriteRef::parse(normal_map)
+            {
+                referenced.insert(reference);
+            }
             let Some(texture) = payload.get("texture").and_then(serde_json::Value::as_str) else {
                 continue;
             };

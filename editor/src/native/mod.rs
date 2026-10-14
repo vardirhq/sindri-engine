@@ -60,6 +60,7 @@ mod hierarchy;
 mod history_view;
 mod inspector_panel;
 mod instances;
+mod light2d_gizmo;
 mod light_gizmo;
 mod occlusion_view;
 mod overlay;

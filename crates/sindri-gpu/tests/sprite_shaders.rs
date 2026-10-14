@@ -108,7 +108,10 @@ fn draw(gpu: &GpuContext, time: f32, batches: &[Batch<'_>]) -> ([u8; 4], [u8; 4]
         ClearOperations::default(),
     );
     sprites.begin_submission();
-    sprites.set_environment(&SpriteEnvironment { time });
+    sprites.set_environment(&SpriteEnvironment {
+        time,
+        lighting: None,
+    });
     for batch in batches {
         sprites
             .draw_shaded(
@@ -122,6 +125,7 @@ fn draw(gpu: &GpuContext, time: f32, batches: &[Batch<'_>]) -> ([u8; 4], [u8; 4]
                 &textures,
                 SpriteBatchDraw {
                     texture: white,
+                    normal_map: None,
                     shader: batch.shader,
                     view_projection,
                     depth: SpriteDepth::Ignore,
@@ -273,6 +277,7 @@ fn a_reloaded_shader_replaces_the_old_one() {
                 &textures,
                 SpriteBatchDraw {
                     texture: TextureId::new(0),
+                    normal_map: None,
                     shader: Some(&reloaded),
                     view_projection: Mat4::IDENTITY,
                     depth: SpriteDepth::Ignore,

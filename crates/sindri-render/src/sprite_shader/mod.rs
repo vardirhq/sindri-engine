@@ -91,13 +91,16 @@ impl SpriteShader {
 
 /// The engine's prelude, the project's source, and the engine's epilogue.
 pub(crate) fn compose(source: &str) -> String {
-    let mut composed = String::with_capacity(PRELUDE.len() + source.len() + EPILOGUE.len() + 1);
+    let light = crate::light2d::LIGHT_2D_WGSL;
+    let mut composed =
+        String::with_capacity(PRELUDE.len() + source.len() + EPILOGUE.len() + light.len() + 1);
     composed.push_str(PRELUDE);
     composed.push_str(source);
     if !source.ends_with('\n') {
         composed.push('\n');
     }
     composed.push_str(EPILOGUE);
+    composed.push_str(light);
     composed
 }
 

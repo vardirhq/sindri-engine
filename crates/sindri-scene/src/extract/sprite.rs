@@ -70,6 +70,8 @@ pub(super) struct SpriteDraw {
     /// The project shader the image is drawn through. Part of what makes two
     /// adjacent images one batch, because it is pipeline state.
     pub(super) shader: Option<SpriteShader>,
+    /// The normal map bound beside the texture, also part of the batch key.
+    pub(super) normal_map: Option<TextureId>,
     pub(super) clip: Option<[u32; 4]>,
     pub(super) order: TransparentOrder,
     pub(super) sprite: SpriteInstance,
@@ -215,8 +217,14 @@ impl SceneExtractor {
                 shader: (!sprite.shader.is_empty())
                     .then(|| textures.shaders().get(&sprite.shader).cloned())
                     .flatten(),
+                // Unbound, it is simply absent: lit by distance alone rather
+                // than as the missing texture's pattern of bumps.
+                normal_map: (!sprite.normal_map.is_empty())
+                    .then(|| textures.get(&sprite.normal_map))
+                    .flatten(),
                 order,
                 sprite: SpriteInstance::new(model, sprite.tint)
+                    .lit(!sprite.unlit)
                     .with_color_transform(
                         sprite.color_transform.multiply,
                         sprite.color_transform.offset,
@@ -243,6 +251,7 @@ impl SceneExtractor {
             let texture = first.texture;
             let clip = first.clip;
             let shader = first.shader;
+            let normal_map = first.normal_map;
             let mut instances = vec![first.sprite];
             while draws.peek().is_some_and(|draw| {
                 draw.space == space
@@ -250,6 +259,7 @@ impl SceneExtractor {
                     && draw.texture == texture
                     && draw.clip == clip
                     && draw.shader == shader
+                    && draw.normal_map == normal_map
             }) {
                 instances.push(
                     draws
@@ -287,6 +297,7 @@ impl SceneExtractor {
                     },
                     FrameCommand::SpriteBatch {
                         texture,
+                        normal_map,
                         shader,
                         depth,
                         instances,

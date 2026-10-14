@@ -95,6 +95,16 @@ const KNOWN: &[Known] = &[
         icon: icons::LIGHT,
     },
     Known {
+        type_name: "sindri.light2d",
+        family: Family::Rendering,
+        icon: icons::SCENE_LIGHTING,
+    },
+    Known {
+        type_name: "sindri.light2d.occluder",
+        family: Family::Rendering,
+        icon: icons::COLLIDER,
+    },
+    Known {
         type_name: "sindri.environment",
         family: Family::Rendering,
         icon: icons::EFFECT,

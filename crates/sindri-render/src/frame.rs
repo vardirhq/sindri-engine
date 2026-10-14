@@ -110,6 +110,9 @@ pub enum FrameCommand {
     /// One batch per texture: instances sharing a texture draw in a single call.
     SpriteBatch {
         texture: TextureId,
+        /// The texture's normal map, read by 2D lights. Part of the batch
+        /// because it is bound beside the texture.
+        normal_map: Option<TextureId>,
         /// The project shader the batch is drawn through, or `None` for the
         /// built-in look. Part of the batch because it is pipeline state.
         shader: Option<SpriteShader>,
@@ -170,11 +173,15 @@ impl FramePass {
     }
 }
 
-/// What every sprite in a frame shares: the clock its shaders read.
+/// What every sprite in a frame shares: the clock its shaders read and the 2D
+/// lights that light it.
 #[derive(Clone, Debug, Default, PartialEq)]
 pub struct SpriteEnvironment {
     /// Seconds since the scene started playing, as sprite shaders see it.
     pub time: f32,
+    /// The frame's 2D lighting, or `None` where the scene has none on, which
+    /// leaves every sprite and shape at its own color.
+    pub lighting: Option<crate::Lighting2d>,
 }
 
 #[derive(Clone, Debug)]
@@ -191,7 +198,10 @@ impl ExtractedFrame {
             viewport,
             clear,
             passes: Vec::new(),
-            sprites: SpriteEnvironment { time: 0.0 },
+            sprites: SpriteEnvironment {
+                time: 0.0,
+                lighting: None,
+            },
         }
     }
 

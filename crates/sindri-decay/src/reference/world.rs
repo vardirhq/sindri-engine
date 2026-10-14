@@ -98,6 +98,7 @@ pub(super) const TYPES: &[TypeEntry] = &[
         name: "Entity",
         text: "An object in the game, such as a player, an enemy or a button. Scripts get these from calls like `World.find` and can store them, compare them and change their transform, sprite or shape.",
         members: &[
+            value("light2d", "The object's 2D light, if it has one."),
             value("shape", "The object's drawn shape, if it has one."),
             value("sprite", "The object's image (sprite), if it has one."),
             value(
@@ -156,6 +157,26 @@ pub(super) const TYPES: &[TypeEntry] = &[
                 "tint",
                 "A color the image is multiplied by. White leaves it unchanged; lowering `a` fades it out.",
             ),
+        ],
+    },
+    TypeEntry {
+        name: "Light2d",
+        text: "A light in a 2D scene: it brightens sprites, tiles and shapes near it when the scene's environment turns 2D lighting on. Switch one off with its object's `set_active`.",
+        members: &[
+            value(
+                "color",
+                "The light's color. Lowering `a` dims it, the way it fades a sprite.",
+            ),
+            value(
+                "falloff",
+                "How the light fades toward its edge: 1 fades evenly, higher numbers keep it bright near the middle and drop off sharply.",
+            ),
+            value(
+                "height",
+                "How high above the scene the light hangs. Only images with a normal map notice: low lights rake across their bumps, high ones light them evenly.",
+            ),
+            value("intensity", "How bright the light is; 0 is off."),
+            value("radius", "How far the light reaches, in world units."),
         ],
     },
     TypeEntry {
