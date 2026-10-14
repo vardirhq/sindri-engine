@@ -49,6 +49,7 @@ contracts below; dated evidence should not override them.
 - [Particles](particles.md)
 - [Nine-slice sprites](nine-slice.md)
 - [Terrains](terrains.md)
+- [Sprite masks](sprite-masks.md)
 
 ## Editor
 

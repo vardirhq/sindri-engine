@@ -7,8 +7,12 @@
 struct SindriUniforms {
     view_projection: mat4x4<f32>,
     // x is the frame's time in seconds; y is 1 when the batch has a normal
-    // map; the rest is padding.
+    // map; z is how it is masked: 0 not, 1 inside, 2 outside.
     time: vec4<f32>,
+    // From the world into the mask quad's own -0.5..0.5 space.
+    mask_from_world: mat4x4<f32>,
+    // The part of the mask texture its quad shows.
+    mask_uv: vec4<f32>,
 }
 
 @group(0) @binding(0)

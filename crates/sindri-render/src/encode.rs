@@ -379,6 +379,7 @@ fn encode_passes<'p>(
             FrameCommand::SpriteBatch {
                 texture,
                 normal_map,
+                mask,
                 shader,
                 depth,
                 instances,
@@ -395,6 +396,7 @@ fn encode_passes<'p>(
                     SpriteBatchDraw {
                         texture: *texture,
                         normal_map: *normal_map,
+                        mask: *mask,
                         shader: shader.as_ref(),
                         view_projection: pass.camera.view_projection,
                         depth: *depth,

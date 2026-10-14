@@ -91,6 +91,7 @@ impl SceneExtractor {
                     tile_submission_index(&tilemap, column, row),
                 )?;
                 batches.push(SpriteDraw {
+                    mask: None,
                     shader: None,
                     normal_map,
                     clip: None,

@@ -65,7 +65,7 @@ pub use shape::{
 pub use sprite::{SpriteBlendMode, SpriteRenderer};
 pub use sprite_batch::{
     SpriteBatchDraw, SpriteBatchError, SpriteBatchRenderer, SpriteBatchStats, SpriteBatchTarget,
-    SpriteDepth, SpriteInstance,
+    SpriteDepth, SpriteInstance, SpriteMask,
 };
 pub use sprite_shader::{SpriteShader, SpriteShaderError};
 pub use target::{ViewportTarget, encode_clear, sampled_format};

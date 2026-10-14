@@ -9,6 +9,7 @@ use crate::{Texture2D, TextureId, TextureRegistry};
 pub(super) struct BindingKey {
     pub(super) texture: TextureId,
     pub(super) normal_map: Option<TextureId>,
+    pub(super) mask: Option<TextureId>,
 }
 
 /// A normal pointing straight out of the picture, for batches without a map.
@@ -35,6 +36,8 @@ pub(super) fn create_bind_group(
 ) -> wgpu::BindGroup {
     let resolved = registry.get(key.texture);
     let normal = key.normal_map.map_or(flat_normal, |id| registry.get(id));
+    // An unmasked batch never reads binding 6, so anything bound will do.
+    let mask = key.mask.map_or(resolved, |id| registry.get(id));
     let [light_uniform, shadow_map] = lights.entries();
     device.create_bind_group(&wgpu::BindGroupDescriptor {
         label: Some("Sindri sprite batch bind group"),
@@ -57,6 +60,10 @@ pub(super) fn create_bind_group(
             wgpu::BindGroupEntry {
                 binding: 5,
                 resource: wgpu::BindingResource::TextureView(normal.view()),
+            },
+            wgpu::BindGroupEntry {
+                binding: 6,
+                resource: wgpu::BindingResource::TextureView(mask.view()),
             },
         ],
     })
@@ -88,6 +95,7 @@ pub(super) fn create_bind_group_layout(device: &wgpu::Device) -> wgpu::BindGroup
             light_uniform,
             shadow_map,
             texture_entry(5),
+            texture_entry(6),
         ],
     })
 }

@@ -325,6 +325,7 @@ fn frame(
                 instances: instances.clone(),
                 shader: None,
                 normal_map: None,
+                mask: None,
             },
         ));
     }

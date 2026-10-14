@@ -1733,6 +1733,8 @@
         },
         "draw": "simple",
         "layer": 0,
+        "mask": "none",
+        "mask_name": "",
         "normal_map": "",
         "shader": "",
         "shader_params": [
@@ -1770,6 +1772,8 @@
         },
         "draw": "simple",
         "layer": 0,
+        "mask": "none",
+        "mask_name": "",
         "normal_map": "",
         "shader": "",
         "shader_params": [
@@ -1795,6 +1799,14 @@
             "sliced"
           ]
         },
+        "mask": {
+          "kind": "choice",
+          "options": [
+            "none",
+            "inside",
+            "outside"
+          ]
+        },
         "normal_map": {
           "asset": "texture",
           "kind": "asset"
@@ -1813,6 +1825,27 @@
       },
       "schema_version": 1,
       "type_name": "sindri.sprite"
+    },
+    {
+      "addable": true,
+      "apply": {},
+      "default_payload": {
+        "name": "",
+        "texture": "procedural:checkerboard"
+      },
+      "display_name": "Sprite Mask",
+      "fields": {
+        "name": "",
+        "texture": "procedural:checkerboard"
+      },
+      "meanings": {
+        "texture": {
+          "asset": "texture",
+          "kind": "asset"
+        }
+      },
+      "schema_version": 1,
+      "type_name": "sindri.sprite_mask"
     },
     {
       "addable": true,

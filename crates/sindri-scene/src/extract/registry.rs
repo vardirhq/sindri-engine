@@ -259,7 +259,7 @@ fn register_drawables(components: &mut ComponentSchemaRegistry) -> Result<(), Sc
             "shader_params": [0.0, 0.0, 0.0, 0.0],
             "normal_map": "",
             "unlit": false,
-            "draw": "simple", "border_scale": 1.0 / 16.0
+            "draw": "simple", "border_scale": 1.0 / 16.0, "mask": "none", "mask_name": ""
         }),
     )?;
     // The UI half of the same picture: anchored to the middle of the
@@ -347,6 +347,7 @@ fn register_drawables(components: &mut ComponentSchemaRegistry) -> Result<(), Sc
     two_d::register_shapes(components)?;
     two_d::register_lights(components)?;
     two_d::register_particles(components)?;
+    two_d::register_sprite_mask(components)?;
     register_tiles(components)?;
     Ok(())
 }

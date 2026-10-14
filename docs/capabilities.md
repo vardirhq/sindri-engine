@@ -1188,6 +1188,13 @@ built-in look. Decay writes `this.sprite.shader_params.{x,y,z,w}`.
 shaders reach `sindri.sprite` only, with one texture and no material asset. See
 `docs/sprite-shaders.md`.
 
+**A sprite can be masked.** `sindri.sprite_mask` places a picture whose alpha is
+a shape, and a sprite with `mask: inside` or `outside` and the mask's name draws
+only within or beyond it, softly where the mask is soft. The mask is batch
+state read in the fragment stage, so masked sprites still share draws and
+nothing needs a stencil. `examples/sprite-masks` reveals a meadow and a hidden
+gem through a wandering keyhole. World sprites only. See `docs/sprite-masks.md`.
+
 **A 2D scene can be lit.** With `lighting_2d` on in `sindri.environment`, world
 sprites, tilemaps, flecks and world shapes are multiplied by the light reaching
 them: an ambient color plus every `sindri.light2d` point light within its

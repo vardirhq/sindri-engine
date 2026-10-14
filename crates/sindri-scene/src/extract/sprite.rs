@@ -11,13 +11,14 @@ use glam::{Mat4, Quat, Vec3};
 use sindri_core::{EntityId, SpriteRef, World};
 use sindri_render::{
     ExtractedFrame, FrameCamera, FrameCommand, FramePass, RenderLayer, RenderStage, SpriteDepth,
-    SpriteInstance, SpriteShader, TextureId, TransparentOrder, UvRect,
+    SpriteInstance, SpriteMask, SpriteShader, TextureId, TransparentOrder, UvRect,
 };
 
 use crate::TileSetBindings;
 use crate::screen_ui::UiHierarchy;
 use crate::{
-    ImageDraw, SpriteAnimationComponent, SpriteAnimations, SpriteComponent, TextureBindings,
+    ImageDraw, MaskInteraction, SpriteAnimationComponent, SpriteAnimations, SpriteComponent,
+    SpriteMaskComponent, TextureBindings,
 };
 
 use super::camera::ResolvedCameras;
@@ -74,6 +75,8 @@ pub(super) struct SpriteDraw {
     pub(super) shader: Option<SpriteShader>,
     /// The normal map bound beside the texture, also part of the batch key.
     pub(super) normal_map: Option<TextureId>,
+    /// Where it may draw, when a sprite mask decides; batch state too.
+    pub(super) mask: Option<SpriteMask>,
     pub(super) clip: Option<[u32; 4]>,
     pub(super) order: TransparentOrder,
     pub(super) sprite: SpriteInstance,
@@ -185,8 +188,22 @@ impl SceneExtractor {
             resting,
             ..
         } = drawing;
+        let masks = self.sprite_masks(world, drawing)?;
         for (entity, sprite) in self.components.query::<SpriteComponent>(world)? {
             let reference = sprite.reference()?;
+            // Inside a mask that is not there is nowhere; outside one is
+            // everywhere.
+            let mask = match sprite.mask {
+                MaskInteraction::None => None,
+                interaction => match masks.get(&sprite.mask_name) {
+                    Some(found) => Some(SpriteMask {
+                        outside: interaction == MaskInteraction::Outside,
+                        ..*found
+                    }),
+                    None if interaction == MaskInteraction::Inside => continue,
+                    None => None,
+                },
+            };
             if !sprite.color_transform.is_finite() {
                 return Err(SceneExtractError::InvalidColorTransform);
             }
@@ -227,6 +244,7 @@ impl SceneExtractor {
                 .flatten();
             for (model, uv) in pieces(model, rect, slicing, sprite.border_scale) {
                 batches.push(SpriteDraw {
+                    mask,
                     clip: None,
                     space: DrawSpace::World,
                     texture,
@@ -247,6 +265,36 @@ impl SceneExtractor {
         Ok(())
     }
 
+    /// Every sprite mask by name, placed as a sprite drawing its picture
+    /// would be. The first of a name wins.
+    fn sprite_masks(
+        &self,
+        world: &World,
+        drawing: Drawing<'_>,
+    ) -> Result<BTreeMap<String, SpriteMask>, SceneExtractError> {
+        let mut masks = BTreeMap::new();
+        for (entity, mask) in self.components.query::<SpriteMaskComponent>(world)? {
+            let reference = mask.reference()?;
+            let transform = world.world_transform(entity).unwrap_or_default();
+            let [offset_x, offset_y] = drawing.textures.sprite_anchor(&reference).offset();
+            let model = transform_matrix(transform)
+                * Mat4::from_translation(Vec3::new(offset_x, offset_y, 0.0));
+            if model.determinant().abs() <= f32::EPSILON {
+                continue;
+            }
+            masks.entry(mask.name.clone()).or_insert(SpriteMask {
+                texture: drawing.textures.resolve(reference.texture()),
+                uv: drawing
+                    .textures
+                    .sprite_rect(&reference)
+                    .unwrap_or(UvRect::FULL),
+                from_world: model.inverse(),
+                outside: false,
+            });
+        }
+        Ok(masks)
+    }
+
     fn flush_batches(
         mut batches: SpriteBatches,
         cameras: &ResolvedCameras,
@@ -261,6 +309,7 @@ impl SceneExtractor {
             let clip = first.clip;
             let shader = first.shader;
             let normal_map = first.normal_map;
+            let mask = first.mask;
             let mut instances = vec![first.sprite];
             while draws.peek().is_some_and(|draw| {
                 draw.space == space
@@ -269,6 +318,7 @@ impl SceneExtractor {
                     && draw.clip == clip
                     && draw.shader == shader
                     && draw.normal_map == normal_map
+                    && draw.mask == mask
             }) {
                 instances.push(
                     draws
@@ -307,6 +357,7 @@ impl SceneExtractor {
                     FrameCommand::SpriteBatch {
                         texture,
                         normal_map,
+                        mask,
                         shader,
                         depth,
                         instances,

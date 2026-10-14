@@ -18,6 +18,7 @@ mod light2d;
 mod mesh;
 mod model;
 mod sprite;
+mod sprite_mask;
 mod tile_volume;
 mod tilemap;
 mod ui;
@@ -51,6 +52,7 @@ pub use light2d::{
 pub use mesh::{MeshComponent, MeshPrimitive};
 pub use model::ModelComponent;
 pub use sprite::{ImageDraw, SpriteColorTransform, SpriteComponent};
+pub use sprite_mask::{MaskInteraction, SpriteMaskComponent};
 pub use tile_volume::{
     TileCellDocument, TileGridComponent, TileGridError, TileSpace, TileVolumeComponent,
     TileVolumeError, TileVolumeIndex, cell_to_local_in,

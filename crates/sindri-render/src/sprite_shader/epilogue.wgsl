@@ -44,10 +44,36 @@ fn sindri_lit(input: SindriVertexOutput, rgb: vec3<f32>) -> vec3<f32> {
     return rgb * sindri_light_2d(input.world_position.xy, normal, use_normal);
 }
 
+// The batch's mask, or anything when it has none.
+@group(0) @binding(6)
+var sindri_mask_texture: texture_2d<f32>;
+
+// How much of this pixel the batch's mask lets through: the mask's alpha
+// inside its quad, nothing outside it, and the other way round for outside.
+fn sindri_masked(world: vec3<f32>) -> f32 {
+    let mode = sindri_uniforms.time.z;
+    if mode < 0.5 {
+        return 1.0;
+    }
+    let local = (sindri_uniforms.mask_from_world * vec4<f32>(world, 1.0)).xy;
+    var coverage = 0.0;
+    if all(abs(local) <= vec2<f32>(0.5)) {
+        // Texture rows run down, the quad's up.
+        let across = vec2<f32>(local.x + 0.5, 0.5 - local.y);
+        let uv = sindri_uniforms.mask_uv.xy + across * sindri_uniforms.mask_uv.zw;
+        coverage = textureSampleLevel(sindri_mask_texture, sprite_sampler, uv, 0.0).a;
+    }
+    if mode > 1.5 {
+        return 1.0 - coverage;
+    }
+    return coverage;
+}
+
 @fragment
 fn sindri_fragment(input: SindriVertexOutput) -> @location(0) vec4<f32> {
     let color = sprite_shader(sindri_shader_input(input));
-    return vec4<f32>(sindri_lit(input, color.rgb) * input.shade, color.a);
+    let alpha = color.a * sindri_masked(input.world_position);
+    return vec4<f32>(sindri_lit(input, color.rgb) * input.shade, alpha);
 }
 
 // Opaque geometry, which writes depth.
@@ -58,7 +84,7 @@ fn sindri_fragment(input: SindriVertexOutput) -> @location(0) vec4<f32> {
 @fragment
 fn sindri_fragment_solid(input: SindriVertexOutput) -> @location(0) vec4<f32> {
     let color = sprite_shader(sindri_shader_input(input));
-    if color.a < 0.5 {
+    if color.a * sindri_masked(input.world_position) < 0.5 {
         discard;
     }
     return vec4<f32>(sindri_lit(input, color.rgb) * input.shade, 1.0);

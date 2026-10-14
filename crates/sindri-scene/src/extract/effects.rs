@@ -47,6 +47,7 @@ impl SceneExtractor {
                 u32::try_from(index).unwrap_or(u32::MAX),
             )?;
             batches.push(SpriteDraw {
+                mask: None,
                 shader: None,
                 normal_map: None,
                 clip: None,

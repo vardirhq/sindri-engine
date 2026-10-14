@@ -116,6 +116,7 @@ impl SceneExtractor {
             let texture = textures.resolve(reference.texture());
             for (model, uv) in pieces(model, uv, slicing, image.border_scale) {
                 batches.push(SpriteDraw {
+                    mask: None,
                     shader: None,
                     normal_map: None,
                     clip,

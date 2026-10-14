@@ -121,10 +121,11 @@ game in this repository.
   `docs/terrains.md`.
 
 ### 7. Sprite masking
-- [ ] `sindri.sprite_mask`: a sprite whose shape is a mask rather than a
+- [x] `sindri.sprite_mask`: a sprite whose shape is a mask rather than a
   picture. Sprites with `mask: inside` draw only within it, and `mask: outside`
-  only outside it.
-- [ ] Proof: a feature example of a keyhole reveal.
+  only outside it. They find it by `mask_name`.
+- [x] Proof: a feature example of a keyhole reveal, `examples/sprite-masks`.
+  Contract: `docs/sprite-masks.md`.
 
 ### 8. World-space and rich text
 - [ ] `sindri.text`: text placed in the world like a sprite, sorted with

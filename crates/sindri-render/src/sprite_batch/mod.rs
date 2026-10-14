@@ -2,6 +2,7 @@
 
 mod binding;
 mod instance;
+mod mask;
 mod pipelines;
 mod stats;
 
@@ -9,6 +10,7 @@ mod stats;
 mod tests;
 
 pub use instance::{SpriteDepth, SpriteInstance};
+pub use mask::SpriteMask;
 pub use stats::SpriteBatchStats;
 
 use binding::{BindingKey, create_bind_group_layout};
@@ -211,6 +213,7 @@ impl SpriteBatchRenderer {
             SpriteBatchDraw {
                 texture,
                 normal_map: None,
+                mask: None,
                 shader: None,
                 view_projection,
                 depth,
@@ -233,6 +236,7 @@ impl SpriteBatchRenderer {
         let SpriteBatchDraw {
             texture,
             normal_map,
+            mask,
             shader,
             view_projection,
             depth,
@@ -264,9 +268,13 @@ impl SpriteBatchRenderer {
                     time: [
                         self.time,
                         f32::from(u8::from(normal_map.is_some())),
-                        0.0,
+                        SpriteMask::mode(mask.as_ref()),
                         0.0,
                     ],
+                    mask_from_world: mask
+                        .map_or(Mat4::IDENTITY, |mask| mask.from_world)
+                        .to_cols_array_2d(),
+                    mask_uv: mask.map_or([0.0, 0.0, 1.0, 1.0], |mask| mask.uv.to_array()),
                 }),
             );
             queue.write_buffer(&batch.instances, 0, bytemuck::cast_slice(instances));
@@ -274,6 +282,7 @@ impl SpriteBatchRenderer {
         let key = BindingKey {
             texture,
             normal_map,
+            mask: mask.map(|mask| mask.texture),
         };
         self.bind_texture(device, queue, registry, slot, key);
         self.stats = self.stats.and(stats);
@@ -365,6 +374,8 @@ impl SpriteBatchRenderer {
                     contents: bytemuck::bytes_of(&BatchUniform {
                         view_projection: Mat4::IDENTITY.to_cols_array_2d(),
                         time: [0.0; 4],
+                        mask_from_world: Mat4::IDENTITY.to_cols_array_2d(),
+                        mask_uv: [0.0, 0.0, 1.0, 1.0],
                     }),
                     usage: wgpu::BufferUsages::UNIFORM | wgpu::BufferUsages::COPY_DST,
                 }),
@@ -464,6 +475,8 @@ pub struct SpriteBatchDraw<'a> {
     /// The texture's normal map, which 2D lights read to light the art as a
     /// surface rather than a flat picture.
     pub normal_map: Option<TextureId>,
+    /// Where the batch may draw, when it is masked.
+    pub mask: Option<SpriteMask>,
     /// The project shader the batch is drawn through, or the built-in look.
     pub shader: Option<&'a SpriteShader>,
     pub view_projection: Mat4,

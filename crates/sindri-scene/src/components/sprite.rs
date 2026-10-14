@@ -119,6 +119,12 @@ pub struct SpriteComponent {
     /// unit unless the art says otherwise.
     #[serde(default = "sprite_border_scale")]
     pub border_scale: f32,
+    /// Whether it shows only inside or only outside a `sindri.sprite_mask`.
+    #[serde(default)]
+    pub mask: super::MaskInteraction,
+    /// The `name` of the mask it meets.
+    #[serde(default)]
+    pub mask_name: String,
 }
 
 /// Whether an image stretches whole or keeps its border.

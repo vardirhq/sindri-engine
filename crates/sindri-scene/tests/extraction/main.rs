@@ -13,6 +13,7 @@ mod lights_2d;
 mod models;
 mod nine_slice;
 mod passes;
+mod sprite_masks;
 mod sprite_shaders;
 mod sprites;
 mod standing_on_ground;

@@ -126,6 +126,7 @@ fn draw(gpu: &GpuContext, time: f32, batches: &[Batch<'_>]) -> ([u8; 4], [u8; 4]
                 SpriteBatchDraw {
                     texture: white,
                     normal_map: None,
+                    mask: None,
                     shader: batch.shader,
                     view_projection,
                     depth: SpriteDepth::Ignore,
@@ -278,6 +279,7 @@ fn a_reloaded_shader_replaces_the_old_one() {
                 SpriteBatchDraw {
                     texture: TextureId::new(0),
                     normal_map: None,
+                    mask: None,
                     shader: Some(&reloaded),
                     view_projection: Mat4::IDENTITY,
                     depth: SpriteDepth::Ignore,

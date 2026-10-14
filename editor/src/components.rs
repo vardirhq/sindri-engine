@@ -225,6 +225,11 @@ const KNOWN: &[Known] = &[
         icon: icons::EFFECT,
     },
     Known {
+        type_name: "sindri.sprite_mask",
+        family: Family::Rendering,
+        icon: icons::SPRITE,
+    },
+    Known {
         type_name: "sindri.physics3d.rigid_body",
         family: Family::Physics,
         icon: icons::PHYSICS,

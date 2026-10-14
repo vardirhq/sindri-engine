@@ -113,6 +113,8 @@ pub enum FrameCommand {
         /// The texture's normal map, read by 2D lights. Part of the batch
         /// because it is bound beside the texture.
         normal_map: Option<TextureId>,
+        /// Where the batch may draw, when a sprite mask decides it.
+        mask: Option<crate::SpriteMask>,
         /// The project shader the batch is drawn through, or `None` for the
         /// built-in look. Part of the batch because it is pipeline state.
         shader: Option<SpriteShader>,

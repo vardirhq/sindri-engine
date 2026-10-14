@@ -200,4 +200,8 @@ pub(super) struct BatchUniform {
     /// the batch has a normal map; the rest is padding to the sixteen bytes a
     /// uniform member is aligned to.
     pub(super) time: [f32; 4],
+    /// From the world into the batch's mask quad, when it has one.
+    pub(super) mask_from_world: [[f32; 4]; 4],
+    /// The part of the mask texture its quad shows: x, y, width, height.
+    pub(super) mask_uv: [f32; 4],
 }

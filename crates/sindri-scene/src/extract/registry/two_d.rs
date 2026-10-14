@@ -129,3 +129,19 @@ pub(super) fn register_particles(
     ])?;
     Ok(())
 }
+
+/// A sprite mask. A fresh one is the checkerboard's square, so a sprite set
+/// to show inside it shows a square at once.
+pub(super) fn register_sprite_mask(
+    components: &mut ComponentSchemaRegistry,
+) -> Result<(), SceneExtractError> {
+    components.register_with_default::<crate::SpriteMaskComponent>(
+        "Sprite Mask",
+        serde_json::json!({ "texture": PROCEDURAL_TEXTURES[0].reference, "name": "" }),
+    )?;
+    components.describe::<crate::SpriteMaskComponent>([(
+        "texture",
+        FieldMeaning::Asset(AssetKind::Texture),
+    )])?;
+    Ok(())
+}

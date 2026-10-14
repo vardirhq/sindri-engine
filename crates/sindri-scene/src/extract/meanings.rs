@@ -27,7 +27,9 @@ use crate::components::{
     SpriteComponent, TileGridComponent, TileProjection, TileVolumeComponent, TilemapComponent,
     UiImageComponent, UiShapeBlend, UiShapeComponent, UiShapeKind, UiTextComponent,
 };
-use crate::components::{ImageDraw, UiAnchor, UiTextCase, UiTextLineAlign, UiTextWrap};
+use crate::components::{
+    ImageDraw, MaskInteraction, UiAnchor, UiTextCase, UiTextLineAlign, UiTextWrap,
+};
 use crate::effects::EffectBurstComponent;
 use crate::physics::{Collider2dComponent, RigidBody2dComponent};
 use crate::screen_ui::{
@@ -77,6 +79,7 @@ fn describe_drawables(components: &mut ComponentSchemaRegistry) -> Result<(), Sc
         ("shader", FieldMeaning::Asset(AssetKind::Shader)),
         ("normal_map", texture()),
         ("draw", FieldMeaning::choice(ImageDraw::NAMES)),
+        ("mask", FieldMeaning::choice(MaskInteraction::NAMES)),
     ])?;
     components.describe::<UiImageComponent>([
         ("texture", texture()),

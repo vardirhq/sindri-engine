@@ -123,6 +123,7 @@ fn draw(gpu: &GpuContext, lighting: Option<Lighting2d>, subject: &Subject) -> ([
                     SpriteBatchDraw {
                         texture: white,
                         normal_map,
+                        mask: None,
                         shader: None,
                         view_projection,
                         depth: SpriteDepth::Ignore,
