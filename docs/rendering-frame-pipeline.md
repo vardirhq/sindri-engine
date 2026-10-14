@@ -237,3 +237,16 @@ facing, including mirrored nodes/entities, follow imported material semantics.
 World-mesh cutout casting remains pending. The fixed workload now issues 602
 shadowed draws and 603 passes, with 126,784 uniform bytes; its unshadowed counts
 remain 301/301 and 104,320 bytes. Geometry residency is unchanged.
+
+## Standard factors on frame passes
+
+`FramePass.material` carries optional renderer-owned numeric factors, validated
+at preparation. Both shadow and color dispatch select factors for each pass,
+including resetting absent overrides; renderer state cannot leak a previous
+entity's material into the next. Scene extraction attaches the owning entity's
+`sindri.material` to primitive, imported and voxel passes. Shared GGX and emission
+are an opt-in mesh path; absent model overrides use original primitive factors.
+Texture/alpha/sidedness ownership stays separate. Textured/model color uniforms
+are 368/416 bytes; the fixed workload now writes 138,032/115,568 bytes with shadows
+on/off, without changing draw/pass counts or geometry residency. See
+[standard materials](rendering-materials.md).

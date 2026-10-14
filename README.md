@@ -113,8 +113,11 @@ Sindri is pre-alpha, but the working surface is already broad. Highlights includ
 - textured/layered sprites, sprite sheets and animation;
 - 3D meshes, perspective/orthographic cameras, lighting and bounded directional shadows;
 - external static GLB model assets with retained hierarchy, material factors/textures,
-  reusable GPU geometry and native/browser project delivery (model shadows and full
-  imported-model editor UX remain deferred);
+  reusable GPU geometry, material-aware directional shadow casting/reception and
+  native/browser project delivery (full imported-model editor UX remains deferred);
+- shared numeric standard material factors and opt-in GGX shading, authored with
+  checked color, metallic/roughness and emission controls; see
+  [`docs/rendering-materials.md`](docs/rendering-materials.md);
 - tilemaps, grids, occupancy, walls, placement validation, and pathfinding;
 - voxel world storage, generation/streaming, meshing, and editor/runtime rendering work;
 - Rapier2D physics with authored bodies/colliders, sensors, masks, events, velocity, and impulses;

@@ -380,3 +380,15 @@ darkened green receiver pixels and the reused startup/ready goal; CI retains
 both pairs. This is feature proof for planned Explorer adoption, not completed
 in-tree game integration. Models now cast and receive; shared materials, improved
 filtering/cascades and shipped-host authored fog delivery remain open.
+
+## Authored numeric material overrides
+
+A model owner may carry `sindri.material`. Shared numeric factors replace its
+primitive base-color/metallic/roughness factors and add emission through the same
+GGX shader as opt-in world meshes; original embedded textures, masks and sidedness
+remain owned by each primitive. Alpha overrides affect color and shadow masks.
+Removing the component restores imported factors, without geometry uploads.
+This is an entity-wide override, not node/primitive inspection or a shared
+material asset. GLB emissive decoding and full material unification remain open.
+See [the contract and proof](rendering-materials.md). Model color uniforms are
+now 416 bytes; 96-byte shadow uniforms remain unchanged.

@@ -74,7 +74,7 @@ impl SceneExtractor {
                 }
                 return Err(error.into());
             }
-            frame.push(FramePass::new(
+            let mut pass = FramePass::new(
                 RenderStage::Opaque3d,
                 RenderLayer(component.layer),
                 FrameCamera {
@@ -85,7 +85,12 @@ impl SceneExtractor {
                     model,
                     asset: Arc::clone(asset),
                 },
-            ));
+            );
+            pass.material = self
+                .components
+                .get::<crate::MaterialComponent>(world, entity)?
+                .map(|component| component.factors);
+            frame.push(pass);
         }
         Ok(())
     }

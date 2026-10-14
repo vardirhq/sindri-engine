@@ -65,6 +65,7 @@ pub(super) fn create(
         source: wgpu::ShaderSource::Wgsl(
             concat!(
                 include_str!("../world_effects.wgsl"),
+                include_str!("../material.wgsl"),
                 include_str!("model.wgsl")
             )
             .into(),

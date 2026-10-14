@@ -27,6 +27,7 @@ pub(crate) struct ModelDraw<'a> {
     pub light_view_projection: Mat4,
     pub shadows: ShadowSettings,
     pub fog: FogSettings,
+    pub material: Option<crate::MaterialFactors>,
 }
 
 #[derive(Debug)]
@@ -79,6 +80,7 @@ struct Uniform {
     shadow: [f32; 4],
     fog_color: [f32; 4],
     fog_params: [f32; 4],
+    emissive: [f32; 4],
 }
 
 impl ModelRenderer {
@@ -236,6 +238,12 @@ impl ModelRenderer {
 }
 
 fn uniform(draw: &ModelDraw<'_>, world: Mat4, surface: &ModelSurface) -> Uniform {
+    let factors = draw.material.unwrap_or(crate::MaterialFactors {
+        base_color: surface.base_color,
+        metallic: surface.metallic,
+        roughness: surface.roughness,
+        emissive: [0.0; 3],
+    });
     let lighting = draw.lighting;
     let ambient = Vec3::from_array(lighting.ambient_color) * lighting.ambient_intensity;
     let light = Vec3::from_array(lighting.directional_color) * lighting.directional_intensity;
@@ -244,10 +252,10 @@ fn uniform(draw: &ModelDraw<'_>, world: Mat4, surface: &ModelSurface) -> Uniform
         view_projection: draw.camera.view_projection.to_cols_array_2d(),
         world: world.to_cols_array_2d(),
         normal: world.inverse().transpose().to_cols_array_2d(),
-        base_color: surface.base_color,
+        base_color: factors.base_color,
         surface: [
-            surface.metallic,
-            surface.roughness,
+            factors.metallic,
+            factors.roughness,
             surface.alpha_cutoff.unwrap_or(-1.0),
             f32::from(surface.double_sided),
         ],
@@ -271,6 +279,12 @@ fn uniform(draw: &ModelDraw<'_>, world: Mat4, surface: &ModelSurface) -> Uniform
             draw.fog.color[1],
             draw.fog.color[2],
             f32::from(draw.fog.enabled),
+        ],
+        emissive: [
+            factors.emissive[0],
+            factors.emissive[1],
+            factors.emissive[2],
+            0.0,
         ],
         fog_params: [
             draw.fog.start,

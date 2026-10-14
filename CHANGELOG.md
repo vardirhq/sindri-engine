@@ -1,5 +1,11 @@
 # Changelog
 
+- Add shared standard material factors and GGX shading for opt-in 3D geometry.
+  Author checked base color, metallic/roughness and self-emission through
+  `sindri.material` in the Rendering inspector. Imported overrides preserve
+  textures/masks and geometry residency; removing overrides restores existing
+  looks. Shared material assets and game adoption remain pending.
+
 - Imported GLB models now cast directional shadows using cached geometry and
   retained hierarchy. Alpha masks, material alpha, mirrored transforms and
   single/double-sided surfaces govern their silhouettes. Shadow and color

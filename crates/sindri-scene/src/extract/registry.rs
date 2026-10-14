@@ -224,6 +224,7 @@ fn register_drawables(components: &mut ComponentSchemaRegistry) -> Result<(), Sc
         "asset",
         sindri_core::FieldMeaning::Asset(sindri_core::AssetKind::Model),
     )])?;
+    register_material(components)?;
     components.register_with_default::<MeshComponent>(
         "Mesh",
         serde_json::json!({
@@ -538,3 +539,14 @@ fn register_gameplay(components: &mut ComponentSchemaRegistry) -> Result<(), Sce
 
 #[cfg(test)]
 mod tests;
+
+fn register_material(components: &mut ComponentSchemaRegistry) -> Result<(), SceneExtractError> {
+    components.register_with_default::<crate::MaterialComponent>(
+        "Material",
+        serde_json::json!({"base_color": [1.0, 1.0, 1.0, 1.0], "metallic": 0.0,
+                           "roughness": 1.0, "emissive": [0.0, 0.0, 0.0]}),
+    )?;
+    components
+        .describe::<crate::MaterialComponent>([("base_color", sindri_core::FieldMeaning::Color)])?;
+    Ok(())
+}

@@ -16,6 +16,7 @@ pub(super) fn encode_mesh_buffers(
     fog: FogSettings,
     camera_position: Vec3,
     surface: MeshSurface,
+    material: Option<crate::MaterialFactors>,
     state: (&wgpu::Buffer, &wgpu::RenderPipeline, &wgpu::BindGroup),
     mesh: &MeshBuffers,
     label: &str,
@@ -35,6 +36,7 @@ pub(super) fn encode_mesh_buffers(
             fog,
             camera_position,
             surface,
+            material,
         )),
     );
     let mut pass = encoder.begin_render_pass(&wgpu::RenderPassDescriptor {

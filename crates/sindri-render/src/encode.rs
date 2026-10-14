@@ -227,6 +227,7 @@ fn encode_directional_shadows(
         .iter()
         .filter(|pass| pass.stage == RenderStage::Opaque3d)
     {
+        cube.set_material(pass.material)?;
         match &pass.command {
             FrameCommand::Model { model, asset } => {
                 cube.encode_shadow_model(device, queue, encoder, asset, *model)?;
@@ -320,6 +321,7 @@ fn encode_passes<'p>(
         glyph_renderer.set_clip(pass.clip);
         shape_renderer.set_clip(pass.clip);
         cube_renderer.set_camera_position(pass.camera.position);
+        cube_renderer.set_material(pass.material)?;
         match &pass.command {
             FrameCommand::Model { model, asset } => {
                 cube_renderer.encode_model(
@@ -475,6 +477,8 @@ fn encode_cached_textured_mesh(
 
 #[derive(Debug, Error)]
 pub enum FrameEncodeError {
+    #[error(transparent)]
+    Material(#[from] crate::MaterialError),
     #[error(transparent)]
     Model(#[from] crate::ModelRenderError),
     #[error(transparent)]

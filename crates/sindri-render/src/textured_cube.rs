@@ -13,11 +13,13 @@ use crate::{
 
 const SHADER: &str = concat!(
     include_str!("world_effects.wgsl"),
+    include_str!("material.wgsl"),
     include_str!("textured_cube.wgsl")
 );
 
 mod draw;
 mod geometry;
+mod material;
 mod model;
 mod shadow_pass;
 mod uniform;
@@ -133,6 +135,7 @@ pub struct TexturedCubeRenderer {
     next: usize,
     mesh: MeshBuffers,
     cached_meshes: TexturedMeshCache,
+    material: Option<crate::MaterialFactors>,
     lighting: WorldLighting,
     shadow_settings: ShadowSettings,
     shadow_map: ShadowMap,
@@ -179,6 +182,7 @@ impl TexturedCubeRenderer {
             next: 0,
             mesh: MeshBuffers::new(device, "Sindri textured cube", &VERTICES, &INDICES),
             cached_meshes: TexturedMeshCache::default(),
+            material: None,
             lighting: WorldLighting::default(),
             shadow_settings: ShadowSettings::default(),
             shadow_map,
@@ -246,6 +250,7 @@ impl TexturedCubeRenderer {
                     FogSettings::default(),
                     Vec3::ZERO,
                     MeshSurface::default(),
+                    self.material,
                 )),
                 usage: wgpu::BufferUsages::UNIFORM | wgpu::BufferUsages::COPY_DST,
             });
@@ -352,6 +357,7 @@ impl TexturedCubeRenderer {
             self.fog,
             self.camera_position,
             MeshSurface::default(),
+            self.material,
             (&batch.uniform, &self.pipeline, bind_group),
             &self.mesh,
             "Sindri textured cube pass",
@@ -389,6 +395,7 @@ impl TexturedCubeRenderer {
             self.fog,
             self.camera_position,
             MeshSurface::default(),
+            self.material,
             (&batch.uniform, &self.pipeline, bind_group),
             &self.mesh,
             "Sindri textured cube pass",
@@ -436,6 +443,7 @@ impl TexturedCubeRenderer {
             self.fog,
             self.camera_position,
             MeshSurface::default(),
+            self.material,
             (&batch.uniform, &self.pipeline, bind_group),
             &mesh,
             "Sindri textured surface pass",
@@ -480,6 +488,7 @@ impl TexturedCubeRenderer {
             self.fog,
             self.camera_position,
             MeshSurface::default(),
+            self.material,
             (&batch.uniform, &self.pipeline, bind_group),
             &mesh,
             "Sindri textured surface pass",
@@ -527,6 +536,7 @@ impl TexturedCubeRenderer {
             self.fog,
             self.camera_position,
             request.surface,
+            self.material,
             (&batch.uniform, &self.pipeline, bind_group),
             mesh,
             "Sindri cached textured mesh pass",

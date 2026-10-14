@@ -62,7 +62,7 @@ impl SceneExtractor {
                     }
                 }
             };
-            frame.push(FramePass::new(
+            let mut pass = FramePass::new(
                 RenderStage::Opaque3d,
                 RenderLayer(mesh.layer),
                 FrameCamera {
@@ -78,7 +78,12 @@ impl SceneExtractor {
                         .transform_point3(glam::Vec3::ZERO),
                 },
                 command,
-            ));
+            );
+            pass.material = self
+                .components
+                .get::<crate::MaterialComponent>(world, entity)?
+                .map(|component| component.factors);
+            frame.push(pass);
         }
         Ok(())
     }

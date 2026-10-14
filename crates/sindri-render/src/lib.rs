@@ -11,6 +11,7 @@ mod fog;
 mod frame;
 mod glyph;
 mod lighting;
+mod material;
 mod mesh;
 mod mesh_stats;
 mod model;
@@ -50,6 +51,7 @@ pub use glyph::{
     GlyphSlot, RASTER_EM,
 };
 pub use lighting::WorldLighting;
+pub use material::{MaterialError, MaterialFactors};
 pub use mesh::{ColoredVertex, MeshBuffers, TexturedVertex};
 pub use mesh_stats::MeshDrawStats;
 pub use model::{

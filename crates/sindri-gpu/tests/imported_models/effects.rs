@@ -96,6 +96,18 @@ impl Scene {
         self.frame = frame.prepare().unwrap();
     }
 
+    pub(super) fn set_caster_material(&mut self, material: sindri_render::MaterialFactors) {
+        let mut frame = ExtractedFrame::new(self.frame.viewport(), self.frame.clear());
+        let last = self.frame.passes().len() - 1;
+        for (index, mut pass) in self.frame.passes().iter().cloned().enumerate() {
+            if index == last {
+                pass.material = Some(material);
+            }
+            frame.push(pass);
+        }
+        self.frame = frame.prepare().unwrap();
+    }
+
     fn move_caster(&mut self, x: f32) {
         let mut frame = ExtractedFrame::new(self.frame.viewport(), self.frame.clear());
         for mut pass in self.frame.passes().iter().cloned() {

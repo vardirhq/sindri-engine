@@ -15,6 +15,7 @@ mod environment;
 mod environment_check;
 mod grid;
 mod light;
+mod material;
 mod mesh;
 mod model;
 mod sprite;
@@ -45,6 +46,7 @@ pub use light::{
     LightComponent, LightError, LightKind, Sun, default_sun_transform, light_direction, lights_in,
     sun_in,
 };
+pub use material::MaterialComponent;
 pub use mesh::{MeshComponent, MeshPrimitive};
 pub use model::ModelComponent;
 pub use sprite::{SpriteColorTransform, SpriteComponent};

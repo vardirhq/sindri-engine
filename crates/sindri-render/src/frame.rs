@@ -141,6 +141,8 @@ pub struct FramePass {
     insertion_order: usize,
     /// Optional physical pixel scissor rectangle (x, y, width, height).
     pub clip: Option<[u32; 4]>,
+    /// Optional standard factors; imported primitives retain their factors when absent.
+    pub material: Option<crate::MaterialFactors>,
 }
 
 impl FramePass {
@@ -163,6 +165,7 @@ impl FramePass {
             command,
             insertion_order: 0,
             clip: None,
+            material: None,
         }
     }
 }
@@ -197,6 +200,11 @@ impl ExtractedFrame {
         if !self.clear.color.into_iter().all(f64::is_finite) || !self.clear.depth.is_finite() {
             return Err(FramePlanError::NonFiniteClearValue);
         }
+        for pass in &self.passes {
+            if let Some(material) = pass.material {
+                material.validate()?;
+            }
+        }
         self.passes
             .sort_by_key(|pass| (pass.stage, pass.layer, pass.insertion_order));
         Ok(PreparedFrame {
@@ -230,6 +238,8 @@ impl PreparedFrame {
 
 #[derive(Clone, Copy, Debug, Error, PartialEq, Eq)]
 pub enum FramePlanError {
+    #[error(transparent)]
+    Material(#[from] crate::MaterialError),
     #[error("render viewport width and height must be non-zero")]
     EmptyViewport,
     #[error("render viewport dimensions exceed the supported 65535-pixel limit")]
@@ -279,6 +289,21 @@ mod tests {
                 (RenderStage::Opaque3d, RenderLayer(5)),
                 (RenderStage::Overlay, RenderLayer(100)),
             ]
+        );
+    }
+
+    #[test]
+    fn preparation_rejects_nonfinite_material_before_encoding() {
+        let mut frame = ExtractedFrame::new(Viewport::new(64, 64), ClearOperations::default());
+        let mut pass = pass(RenderStage::Opaque3d, RenderLayer(0));
+        pass.material = Some(crate::MaterialFactors {
+            roughness: f32::NAN,
+            ..Default::default()
+        });
+        frame.push(pass);
+        assert_eq!(
+            frame.prepare().unwrap_err(),
+            FramePlanError::Material(crate::MaterialError::InvalidFactor("roughness"))
         );
     }
 

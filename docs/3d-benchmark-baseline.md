@@ -224,3 +224,28 @@ Clippy/WASM, formatting/file-size gates and native/editor authored-color checks
 pass. Fresh Chromium also passes both original 300-prop controls (2,110 changed,
 2,088 darkened pixels) and both mixed cube/model receiver controls without
 runtime/GPU errors. No dependency, script, schema or generated API changes.
+
+
+## Standard numeric factors and shared GGX
+
+Opt-in `sindri.material` now supplies shared numeric factors across primitive,
+inline/cached/voxel and imported geometry. Textured/model color uniforms grow to
+368/416 bytes. The current fixed workload remains 602/301 draws and 603/301
+passes; payloads are 138,032/115,568 bytes with shadows on/off. Native consecutive
+controls verify exact counters and required nonzero timestamps. Geometry upload
+counts remain unchanged.
+
+Six authored standard-factor swatches are derived from the checked benchmark,
+using its unchanged startup/ready script and existing white texture/GLB assets.
+At 960×540, native controls change 46,877 pixels and add 7,005 emissive-blue pixels;
+rebuilt Chromium changes 46,873 and adds 6,990. Both browser projects fetch all
+six assets and reach ready without runtime/GPU errors. Captures were inspected.
+See [the material contract and editor review](rendering-materials.md).
+
+Sequential final preflight passes 1,366 affected editor/scene/render/GPU tests;
+all 11 catalog tests pass, for 1,377 unique tests. All 38 GPU-package tests also
+execute with GPU/timestamps required (included in the preflight total).
+Warning-denied Clippy/WASM and format/file-size gates pass. Numeric-factor,
+mask-alpha, legacy-restoration, voxel-residency and scene-undo regressions are
+included. Generated component metadata is refreshed. Material assets, alpha/
+sidedness unification, imported emission and in-tree game adoption remain open.

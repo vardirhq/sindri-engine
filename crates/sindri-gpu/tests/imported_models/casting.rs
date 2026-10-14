@@ -79,7 +79,7 @@ fn model_casters_share_geometry_and_hierarchy_and_preserve_alpha_holes() {
             "two models each have two color and two shadow primitives"
         );
         assert_eq!(delta.render_passes, 9, "including the map clear");
-        assert_eq!(delta.uniform_bytes, 4 * 400 + 4 * 96);
+        assert_eq!(delta.uniform_bytes, 4 * 416 + 4 * 96);
         assert_eq!(delta.transient_geometry_uploads, 0);
         assert_eq!(
             scene.cubes.model_cache_stats().uploads,
@@ -166,4 +166,37 @@ fn invalid_model_shadow_transform_returns_the_frame_error() {
         scene.draw_result(&gpu, true, 256, FogSettings::default()),
         Err(FrameEncodeError::Model(ModelRenderError::InvalidTransform))
     ));
+}
+
+#[test]
+fn authored_material_alpha_updates_model_color_and_shadow_without_uploads() {
+    let Some(gpu) = gpu() else {
+        return;
+    };
+    let mut scene = Scene::new(&gpu);
+    scene.replace_caster(
+        &caster([255; 3], Some(0.5), 1.0, false),
+        Mat4::from_scale_rotation_translation(Vec3::new(0.3, 0.3, 1.0), Quat::IDENTITY, Vec3::Z),
+    );
+    for (alpha, casts) in [(0.0, false), (1.0, true), (0.0, false)] {
+        scene.set_caster_material(sindri_render::MaterialFactors {
+            base_color: [1.0, 1.0, 1.0, alpha],
+            ..Default::default()
+        });
+        let clear = scene.draw(&gpu, false, 256, FogSettings::default());
+        let shadow = scene.draw(&gpu, true, 256, FogSettings::default());
+        let count = darkened(&clear, &shadow);
+        let visible = clear[(64 * 128 + 72) * 4];
+        if casts {
+            assert!(visible > 150, "opaque override draws the caster");
+        } else {
+            assert!(visible < 80, "masked override exposes the background");
+        }
+        if casts {
+            assert!(count > 100);
+        } else {
+            assert_eq!(count, 0);
+        }
+    }
+    assert_eq!(scene.cubes.model_cache_stats().uploads, 2);
 }

@@ -17,6 +17,9 @@ pub(super) struct CubeUniform {
     pub camera_position: [f32; 4],
     /// `uv_offset.xy`, glow, alpha cutoff.
     pub surface: [f32; 4],
+    pub base_color: [f32; 4],
+    pub material: [f32; 4],
+    pub emissive: [f32; 4],
 }
 
 #[allow(clippy::too_many_arguments, clippy::too_many_lines)]
@@ -30,7 +33,10 @@ pub(super) fn cube_uniform(
     fog: FogSettings,
     camera_position: Vec3,
     surface: MeshSurface,
+    material: Option<crate::MaterialFactors>,
 ) -> CubeUniform {
+    let enabled = material.is_some();
+    let material = material.unwrap_or_default();
     CubeUniform {
         model_view_projection: model_view_projection.to_cols_array_2d(),
         model: model.to_cols_array_2d(),
@@ -75,6 +81,19 @@ pub(super) fn cube_uniform(
             camera_position.y,
             camera_position.z,
             fog.height_falloff,
+        ],
+        base_color: material.base_color,
+        material: [
+            material.metallic,
+            material.roughness,
+            f32::from(enabled),
+            0.0,
+        ],
+        emissive: [
+            material.emissive[0],
+            material.emissive[1],
+            material.emissive[2],
+            0.0,
         ],
         surface: [
             surface.uv_offset[0],

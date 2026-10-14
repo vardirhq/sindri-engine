@@ -2579,6 +2579,16 @@ the README.
 
 ### World presentation
 
+Shared `MaterialFactors` and direct GGX now shade opt-in cubes, inline/cached
+meshes, voxel roots and imported primitives. `sindri.material` authors linear
+base color, metallic/roughness and emission, with checked ranges and per-entity
+factor replacement. GPU comparisons, zero-light emission, mask-alpha and cache
+reuse, scene undo and voxel residency regressions, native/browser swatches and
+native editor edit/Undo/Redo/save/reopen review exercise the numeric foundation.
+Absent overrides preserve legacy/imported looks. Material assets, unified
+texture/alpha/sidedness, GLB emissive import and Explorer game adoption remain
+open; see [the material contract](rendering-materials.md).
+
 The fixed [3D Benchmark](../examples/benchmark3d/README.md) supplies 100 cubes,
 100 inline pyramid surfaces and 100 references to one shared GLB, plus a floor.
 Its native asset-queue/Session regression verifies ready, static poses, actual

@@ -602,6 +602,48 @@
       "addable": true,
       "apply": {},
       "default_payload": {
+        "base_color": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        "emissive": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "metallic": 0.0,
+        "roughness": 1.0
+      },
+      "display_name": "Material",
+      "fields": {
+        "base_color": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        "emissive": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "metallic": 0.0,
+        "roughness": 1.0
+      },
+      "meanings": {
+        "base_color": {
+          "kind": "color"
+        }
+      },
+      "schema_version": 1,
+      "type_name": "sindri.material"
+    },
+    {
+      "addable": true,
+      "apply": {},
+      "default_payload": {
         "layer": 0,
         "primitive": "cube",
         "surface": null,

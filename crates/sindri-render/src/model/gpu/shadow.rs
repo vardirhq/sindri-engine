@@ -32,6 +32,7 @@ pub(crate) struct ModelShadowDraw<'a> {
     pub world: Mat4,
     pub projection: Mat4,
     pub target: &'a wgpu::TextureView,
+    pub material: Option<crate::MaterialFactors>,
 }
 
 impl ShadowRenderer {
@@ -144,7 +145,9 @@ impl ModelRenderer {
                     0,
                     bytemuck::bytes_of(&Uniform {
                         light_world: (draw.projection * world).to_cols_array_2d(),
-                        base_color: surface.base_color,
+                        base_color: draw
+                            .material
+                            .map_or(surface.base_color, |factors| factors.base_color),
                         surface: [
                             surface.alpha_cutoff.unwrap_or(-1.0),
                             f32::from(surface.double_sided),

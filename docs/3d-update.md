@@ -22,7 +22,8 @@ GLB decoding, a model GPU path and project export; slice 1 merges it. Read again
    derivative normals with Lambert lighting. #504's models use real normals
    with GGX. Models now cast/receive shadows and accept renderer fog.
    Cutout geometry casts solid shadows. The only light is one sun: there are
-   no point or spot lights, no transparent 3D pass and no material type.
+   no point or spot lights or transparent 3D pass. Numeric standard factors and
+   common GGX are opt-in; shared material assets and legacy migration remain.
 3. **The editor cannot author a 3D scene from models.**
    - `.glb` files are only an icon in the project browser: no loader, no
      thumbnail, no drag-in (only prefabs drop, and onto Z=0).
@@ -135,7 +136,8 @@ Order:
 - Current priority is slices 3 to 4 (one lit path, instancing and lights), which
   terrain (5b) and the showcase need. The first shared shader slice gives models
   directional shadow reception and renderer fog. Models now also cast material-aware
-  shadows; shared materials remain.
+  shadows. Shared numeric factors/GGX and an authored Material component now
+  work; the complete shared material/texture/alpha contract remains.
 - Slice 4b records future runtime environment controls and day/night proof.
   Start it only after unified materials, imported-model shadows, runtime light
   access and point/spot lights are ready. This does not change the current
@@ -195,6 +197,13 @@ cameras face), YXZ order. Build on `Transform3D::yaw_pitch_roll_radians` and
 
 ### 3. One lit 3D path
 - [ ] A `Material` shared by meshes, cubes, voxels and models:
+  - [x] Shared linear numeric factors and GGX shader, authored `sindri.material`
+    overrides on cubes, inline meshes, models and voxel-world owners. Checked
+    ranges, emission, mask-alpha delivery and absent-override restoration have
+    GPU/scene tests. Native/browser swatches and editor edit/Undo/Redo/save/reopen
+    review prove the slice; game adoption remains open. See [materials](rendering-materials.md).
+  - [ ] Shared material assets/texture bindings, unified alpha/sidedness,
+    GLB emissive import and legacy-look migration.
   - base colour (factor and texture);
   - metallic/roughness;
   - emissive (replaces `glow`);
