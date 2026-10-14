@@ -30,8 +30,8 @@ still lists these 2D rendering rows as absent or behind:
 7. **World-space and rich text.** No damage numbers, no name plates, no color
    inside a string.
 
-The advanced sprite color transform is also built everywhere and proven by no
-game in this repository.
+The advanced sprite color transform was also built everywhere and proven by no
+game in this repository; Orbital's charger now proves it.
 
 ## Slices
 
@@ -135,9 +135,9 @@ game in this repository.
 - [x] Proof: damage numbers in Orbital. Contract: `docs/world-text.md`.
 
 ### 9. Final integration
-- [ ] Orbital's charger uses the advanced sprite color transform, so that row
+- [x] Orbital's charger uses the advanced sprite color transform, so that row
   has its proof.
-- [ ] Update `parity.md`, `capabilities.md`, `ROADMAP.md`, the subsystem
+- [x] Update `parity.md`, `capabilities.md`, `ROADMAP.md`, the subsystem
   contracts, the CHANGELOG, and the regenerated `docs/generated`.
 
 ## Out of scope

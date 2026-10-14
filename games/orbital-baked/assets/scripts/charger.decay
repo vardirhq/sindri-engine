@@ -53,6 +53,7 @@ script Charger {
         if this.phase != 0.0 && !visible { this.phase = 0.0; }
 
         if this.phase == 0.0 {
+            this.sprite.color_offset = Color(0.0, 0.0, 0.0, 0.0);
             if far > 0.001 { Physics.set_velocity(this.entity, dx / far * this.approach, dy / far * this.approach); }
             if far < 5.0 && visible { this.phase = 1.0; this.timer = this.wind_up; }
         } else if this.phase == 1.0 {
@@ -62,6 +63,10 @@ script Charger {
             this.sprite.tint.r = 1.0;
             this.sprite.tint.g = 0.22 + charge * 0.78;
             this.sprite.tint.a = 0.35 + charge * 0.58;
+            // A tint can only darken. The heat is added on top through the
+            // colour offset, so the body glows white-hot as the charge peaks.
+            let heat = charge * charge;
+            this.sprite.color_offset = Color(heat * 0.55, heat * 0.4, heat * 0.18, 0.0);
             this.transform.scale.x = 0.38 * (1.0 + charge * 0.22);
             this.transform.scale.y = 0.38 * (1.0 + charge * 0.22);
             if this.timer <= 0.0 {
@@ -72,6 +77,9 @@ script Charger {
         } else {
             this.sprite.tint.g = 1.0;
             this.sprite.tint.a = 1.0;
+            // The dash sheds the heat it built over its first moments.
+            let cool = max(0.0, this.timer / 0.55);
+            this.sprite.color_offset = Color(cool * 0.5, cool * 0.22, 0.0, 0.0);
             Physics.set_velocity(this.entity, this.dash_x * this.dash_speed, this.dash_y * this.dash_speed);
             this.timer -= dt;
             if this.timer <= 0.0 { this.phase = 0.0; this.timer = this.rest; }

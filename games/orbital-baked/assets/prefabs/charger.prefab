@@ -111,6 +111,7 @@
             1.0,
             1.0
           ],
+          "color_transform": { "multiply": [1.0, 1.0, 1.0, 1.0], "offset": [0.0, 0.0, 0.0, 0.0] },
           "layer": 3
         },
         "sindri.animation.sprite": {
