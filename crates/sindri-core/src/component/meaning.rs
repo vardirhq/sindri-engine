@@ -36,6 +36,8 @@ pub enum AssetKind {
     TileSet,
     Weave,
     Model,
+    /// A project sprite shader, a `.wgsl` file.
+    Shader,
 }
 
 impl AssetKind {
@@ -51,6 +53,7 @@ impl AssetKind {
             Self::TileSet => "tile_set",
             Self::Weave => "weave",
             Self::Model => "model",
+            Self::Shader => "shader",
         }
     }
 }

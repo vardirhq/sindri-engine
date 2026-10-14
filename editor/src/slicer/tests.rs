@@ -107,3 +107,30 @@ fn a_slice_that_would_not_load_is_refused() {
         "and nothing was written"
     );
 }
+
+/// A one-cell sheet's border is the whole image's, and a border on a cell
+/// that has since been renamed is not written.
+#[test]
+fn a_border_is_kept_under_the_sprite_it_cuts() {
+    let directory = tempfile::tempdir().expect("a temporary directory");
+    let texture = directory.path().join("panel.png");
+    std::fs::write(&texture, []).expect("writable");
+    let mut slicer = Slicer::open(&texture);
+    slicer.set_border([6, 6, 6, 6]);
+    assert_eq!(slicer.document().borders[""], [6, 6, 6, 6]);
+
+    slicer.columns = 2;
+    slicer.fit_names();
+    slicer.names[1] = "end".to_owned();
+    slicer.selected = 1;
+    slicer.set_border([2, 0, 2, 0]);
+    let document = slicer.document();
+    assert_eq!(document.borders["end"], [2, 0, 2, 0]);
+    assert!(
+        document.grid.expect("a grid").size.is_some(),
+        "a border is pixels"
+    );
+
+    slicer.names[1] = "cap".to_owned();
+    assert!(!slicer.document().borders.contains_key("end"));
+}

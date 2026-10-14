@@ -673,6 +673,11 @@ jobs:
           cargo run --quiet --package sindri-export --bin sindri-export -- \
             games/low-tide target/dist/low-tide --base /examples/low-tide/
           cp -R crates/sindri-player/pkg/. target/dist/low-tide/pkg/
+          for project in sprite-shaders sprite-masks; do
+            cargo run --quiet --package sindri-export --bin sindri-export -- \
+              examples/$project target/dist/$project --base /examples/$project/
+            cp -R crates/sindri-player/pkg/. target/dist/$project/pkg/
+          done
           # Keep the shipped gameplay/starting pose and add read-only telemetry
           # for a real keyboard-driven run to the platformer's goal.
           # Causeway plus a read-only observer that drops its loose block onto
@@ -725,6 +730,10 @@ jobs:
         run: |
           node --test scripts/browser/*.test.mjs
           node scripts/browser/smoke.mjs examples/cube target/render-artifacts/browser-cube.png
+          SINDRI_EXPECT_ASSETS=1 SINDRI_MIN_COLORS=8 SINDRI_BASE_PATH=/examples/sprite-shaders/ \
+            node scripts/browser/smoke.mjs target/dist/sprite-shaders target/render-artifacts/browser-sprite-shaders.png
+          SINDRI_EXPECT_ASSETS=1 SINDRI_BASE_PATH=/examples/sprite-masks/ \
+            node scripts/browser/smoke.mjs target/dist/sprite-masks target/render-artifacts/browser-sprite-masks.png
           SINDRI_BASE_PATH=/examples/benchmark3d/ \
             node scripts/browser/benchmark3d.mjs target/dist/benchmark3d target/render-artifacts/browser-benchmark3d.png
           SINDRI_BASE_PATH=/examples/benchmark3d/ \

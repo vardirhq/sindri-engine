@@ -398,7 +398,10 @@ pub(super) fn add_effects_surface(environment: &mut Environment) {
             *name,
             FunctionType {
                 params: match call {
-                    EffectsCall::Burst => vec![Type::Named(ENTITY.to_owned())],
+                    EffectsCall::Burst | EffectsCall::Play | EffectsCall::Stop => {
+                        vec![Type::Named(ENTITY.to_owned())]
+                    }
+                    EffectsCall::Emit => vec![Type::Named(ENTITY.to_owned()), Type::F32],
                     EffectsCall::BurstAt => {
                         vec![Type::Named(ENTITY.to_owned()), Type::F32, Type::F32]
                     }

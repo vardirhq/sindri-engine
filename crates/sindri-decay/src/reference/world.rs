@@ -98,8 +98,10 @@ pub(super) const TYPES: &[TypeEntry] = &[
         name: "Entity",
         text: "An object in the game, such as a player, an enemy or a button. Scripts get these from calls like `World.find` and can store them, compare them and change their transform, sprite or shape.",
         members: &[
+            value("light2d", "The object's 2D light, if it has one."),
             value("shape", "The object's drawn shape, if it has one."),
             value("sprite", "The object's image (sprite), if it has one."),
+            value("world_text", "The object's world text, if it has some."),
             value(
                 "transform",
                 "Where the object is, how it is turned and how big it is.",
@@ -200,9 +202,65 @@ pub(super) const TYPES: &[TypeEntry] = &[
                 "Drawing order: higher numbers are drawn in front of lower ones.",
             ),
             value(
+                "shader_params",
+                "Four numbers the sprite's shader reads, as `x`, `y`, `z` and `w`. What each one does is up to the shader: how far a dissolve has got, how bright a flash is.",
+            ),
+            value(
                 "tint",
                 "A color the image is multiplied by. White leaves it unchanged; lowering `a` fades it out.",
             ),
+        ],
+    },
+    TypeEntry {
+        name: "Light2d",
+        text: "A light in a 2D scene: it brightens sprites, tiles and shapes near it when the scene's environment turns 2D lighting on. Switch one off with its object's `set_active`.",
+        members: &[
+            value(
+                "color",
+                "The light's color. Lowering `a` dims it, the way it fades a sprite.",
+            ),
+            value(
+                "falloff",
+                "How the light fades toward its edge: 1 fades evenly, higher numbers keep it bright near the middle and drop off sharply.",
+            ),
+            value(
+                "height",
+                "How high above the scene the light hangs. Only images with a normal map notice: low lights rake across their bumps, high ones light them evenly.",
+            ),
+            value("intensity", "How bright the light is; 0 is off."),
+            value("radius", "How far the light reaches, in world units."),
+        ],
+    },
+    TypeEntry {
+        name: "WorldText",
+        text: "Words placed in the game world, such as a damage number or a name over a character. Change the words with `Ui.set_text` and `Ui.set_number`, as for interface text.",
+        members: &[
+            value(
+                "color",
+                "The words' color. Lowering `a` fades them out; colored spans fade with it.",
+            ),
+            value(
+                "font_size",
+                "How tall a line of the words is, in world units.",
+            ),
+            value(
+                "layer",
+                "Drawing order: drawn over sprites in the same layer, under higher ones.",
+            ),
+            value(
+                "visible",
+                "How many letters show, for a typewriter reveal. Negative shows them all.",
+            ),
+        ],
+    },
+    TypeEntry {
+        name: "ShaderParams",
+        text: "The four numbers a sprite's shader reads. What each one means is up to the shader.",
+        members: &[
+            value("w", "The fourth number."),
+            value("x", "The first number."),
+            value("y", "The second number."),
+            value("z", "The third number."),
         ],
     },
     TypeEntry {
@@ -270,6 +328,21 @@ pub(super) const TYPES: &[TypeEntry] = &[
                 "Plays the particle burst set up on an object at another position, such as where an enemy just died.",
             ),
             call("live", &[], "How many particles are currently on screen."),
+            call(
+                "play",
+                &["entity"],
+                "Starts the particle emitter set up on an object. Gives back 1.",
+            ),
+            call(
+                "stop",
+                &["entity"],
+                "Stops the particle emitter set up on an object; particles already out live out their life. Gives back 1.",
+            ),
+            call(
+                "emit",
+                &["entity", "count"],
+                "Throws that many of an object's emitter particles at once, such as dust when landing. Gives back how many were made.",
+            ),
         ],
     },
     super::physics::PHYSICS,
@@ -364,6 +437,11 @@ pub(super) const TYPES: &[TypeEntry] = &[
                 "set_block",
                 &["grid", "column", "row", "level", "tile"],
                 "Places a block, by name, in a cell of a layered grid or a grid whose ground is a voxel world. `\"\"` removes the block.",
+            ),
+            call(
+                "set_terrain",
+                &["grid", "column", "row", "terrain"],
+                "Paints a terrain the map's sheet declares into a flat tile map's cell, choosing its tile and its neighbors' from which of them are the same terrain. `\"\"` empties the cell and redraws its neighbors.",
             ),
             call(
                 "set_tile",

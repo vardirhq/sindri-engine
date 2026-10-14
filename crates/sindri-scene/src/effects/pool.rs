@@ -1,8 +1,9 @@
 //! The pool a burst throws flecks into.
 
+use std::collections::BTreeMap;
 use std::time::Duration;
 
-use sindri_core::Rng;
+use sindri_core::{EntityId, Rng};
 
 use super::EffectBurstComponent;
 
@@ -26,9 +27,35 @@ pub struct Fleck {
     pub layer: i32,
     /// Which texture binding this draws, as an index into the batch's own list.
     pub texture: usize,
+    /// Radians it is turned, and turns a second.
+    pub rotation: f32,
+    pub spin: f32,
+    /// Its size as it dies; `size` is its size when thrown.
+    pub size_end: f32,
+    /// Added to its velocity each second.
+    pub gravity: [f32; 2],
+    /// Which of the pool's color ramps it draws through, instead of `tint`.
+    pub ramp: Option<usize>,
+    /// The emitter that threw it, if one did rather than a burst.
+    pub emitter: Option<EntityId>,
 }
 
 impl Fleck {
+    /// How far through its life it is, 0 to 1.
+    #[must_use]
+    pub fn through(self) -> f32 {
+        if self.lifetime <= 0.0 {
+            return 1.0;
+        }
+        1.0 - (self.remaining / self.lifetime).clamp(0.0, 1.0)
+    }
+
+    /// The size this draws right now.
+    #[must_use]
+    pub fn drawn_size(self) -> f32 {
+        (self.size_end - self.size).mul_add(self.through(), self.size)
+    }
+
     /// The color this draws right now, fade included.
     #[must_use]
     pub fn drawn_tint(self) -> [f32; 4] {
@@ -60,13 +87,17 @@ pub struct Effects2d {
     /// stream would shift every number after it, so turning an explosion up
     /// would change which enemies spawned — a seeded run has to mean the same
     /// run whatever it looked like.
-    rng: Rng,
+    pub(super) rng: Rng,
     /// The textures this pool's flecks name, in the order they were first seen.
     ///
     /// Resolved once at emission rather than per frame, because a texture
     /// lookup per fleck per frame is exactly the per-frame cost this whole
     /// thing exists to avoid.
     textures: Vec<String>,
+    /// The emitters' color ramps, found the way textures are.
+    pub(super) ramps: Vec<Vec<[f32; 4]>>,
+    /// What each emitter carries between steps.
+    pub(super) emitters: BTreeMap<EntityId, super::emitter::EmitterState>,
     /// How many flecks were dropped for want of room, since the last look.
     overflowed: usize,
 }
@@ -97,6 +128,8 @@ impl Effects2d {
             capacity,
             rng: Rng::with_stream(0, Self::EFFECT_STREAM),
             textures: Vec::new(),
+            ramps: Vec::new(),
+            emitters: BTreeMap::new(),
             overflowed: 0,
         }
     }
@@ -128,6 +161,18 @@ impl Effects2d {
         &self.flecks
     }
 
+    /// The color a fleck draws right now: its emitter's ramp, or its tint.
+    #[must_use]
+    pub fn color_of(&self, fleck: &Fleck) -> [f32; 4] {
+        fleck
+            .ramp
+            .and_then(|ramp| self.ramps.get(ramp))
+            .map_or_else(
+                || fleck.drawn_tint(),
+                |ramp| super::ParticlesComponent::color_at(ramp, fleck.through()),
+            )
+    }
+
     /// The texture a fleck's index names.
     #[must_use]
     pub fn texture(&self, index: usize) -> Option<&str> {
@@ -142,14 +187,8 @@ impl Effects2d {
         let texture = self.texture_index(&burst.texture);
         let mut made = 0;
         for _ in 0..burst.count {
-            if self.flecks.len() >= self.capacity {
-                // The newest action is the one worth seeing. A fleck from four
-                // hundred milliseconds ago is not what someone is looking at.
-                if self.flecks.is_empty() {
-                    break;
-                }
-                self.flecks.swap_remove(0);
-                self.overflowed += 1;
+            if !self.make_room() {
+                break;
             }
             let angle = self.rng.next_f32() * std::f32::consts::TAU;
             // `1 ± spread`, so a spread of zero is a clean ring and the default
@@ -170,6 +209,12 @@ impl Effects2d {
                 drag: burst.drag,
                 layer: burst.layer,
                 texture,
+                rotation: 0.0,
+                spin: 0.0,
+                size_end: burst.size,
+                gravity: [0.0, 0.0],
+                ramp: None,
+                emitter: None,
             });
             made += 1;
         }
@@ -191,9 +236,13 @@ impl Effects2d {
             let fleck = &mut self.flecks[index];
             fleck.remaining -= seconds;
             if fleck.remaining <= 0.0 {
-                self.flecks.swap_remove(index);
+                let retired = self.flecks.swap_remove(index);
+                self.retired(retired);
                 continue;
             }
+            fleck.velocity[0] += fleck.gravity[0] * seconds;
+            fleck.velocity[1] += fleck.gravity[1] * seconds;
+            fleck.rotation += fleck.spin * seconds;
             fleck.position[0] += fleck.velocity[0] * seconds;
             fleck.position[1] += fleck.velocity[1] * seconds;
             // Exponential rather than linear, so drag is a rate a designer can
@@ -208,12 +257,48 @@ impl Effects2d {
     /// Forgets every fleck, which is what stopping a scene means.
     pub fn clear(&mut self) {
         self.flecks.clear();
+        self.emitters.clear();
         self.overflowed = 0;
         self.rng = Rng::with_stream(0, Self::EFFECT_STREAM);
     }
 
+    /// Frees a place for one more fleck, retiring the oldest when the pool is
+    /// full. False when there is no room to be had at all.
+    pub(super) fn make_room(&mut self) -> bool {
+        if self.flecks.len() < self.capacity {
+            return true;
+        }
+        // The newest action is the one worth seeing. A fleck from four hundred
+        // milliseconds ago is not what someone is looking at.
+        if self.flecks.is_empty() {
+            return false;
+        }
+        let retired = self.flecks.swap_remove(0);
+        self.retired(retired);
+        self.overflowed += 1;
+        true
+    }
+
+    pub(super) fn push(&mut self, fleck: Fleck) {
+        self.flecks.push(fleck);
+    }
+
+    pub(super) fn flecks_mut(&mut self) -> &mut [Fleck] {
+        &mut self.flecks
+    }
+
+    /// Lets an emitter know one of its particles is gone.
+    fn retired(&mut self, fleck: Fleck) {
+        if let Some(state) = fleck
+            .emitter
+            .and_then(|emitter| self.emitters.get_mut(&emitter))
+        {
+            state.live = state.live.saturating_sub(1);
+        }
+    }
+
     /// Where this texture sits in the pool's list, adding it if it is new.
-    fn texture_index(&mut self, texture: &str) -> usize {
+    pub(super) fn texture_index(&mut self, texture: &str) -> usize {
         if let Some(found) = self.textures.iter().position(|known| known == texture) {
             return found;
         }

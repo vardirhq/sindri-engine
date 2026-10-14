@@ -243,6 +243,13 @@ impl ProjectRun {
                 .bind(&id, tile_set)
                 .map_err(|error| error.to_string())?;
         }
+        // A sheet that does not read is the renderer's to report; here it
+        // only has no terrains.
+        for (id, bytes) in files_under(&assets, ".sheet") {
+            if let Ok(sheet) = sindri_core::SpriteSheetDocument::from_json(&text(&id, bytes)?) {
+                tile_sets.bind_terrains(id, sheet.terrains);
+            }
+        }
         let mut weave_sources = BTreeMap::new();
         for (id, bytes) in files_under(&assets, ".weave") {
             let source = text(&id, bytes)?;

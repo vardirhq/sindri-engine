@@ -47,6 +47,8 @@ pub struct ProjectPlayer {
     /// The project's block and tile sets, which the browser host binds
     /// from the export manifest and the scripts and world read.
     pub tile_sets: TileSetBindings,
+    /// How long it has played, which sprite shaders read as their clock.
+    pub seconds: f32,
 }
 
 impl ProjectPlayer {
@@ -78,6 +80,7 @@ impl ProjectPlayer {
             .step(&mut self.world, &self.input, viewport, STEP)?
             .log();
         self.input.begin_frame(Duration::from_secs_f32(STEP));
+        self.seconds += STEP;
         Ok(())
     }
 
@@ -125,6 +128,16 @@ impl ProjectPlayer {
                 self.input.apply(InputEvent::KeyReleased(key));
                 self.step()?;
             }
+            // Held across the steps that follow, as a run is held.
+            "hold" | "release" => {
+                let key = Key::from_name(rest).ok_or_else(|| format!("no key {rest}"))?;
+                self.input.apply(if verb == "hold" {
+                    InputEvent::KeyPressed(key)
+                } else {
+                    InputEvent::KeyReleased(key)
+                });
+                self.step()?;
+            }
             "type" => {
                 for c in rest.chars() {
                     self.input.apply(InputEvent::TextInput(c));
@@ -167,6 +180,8 @@ pub struct OpenedProject {
     pub player: ProjectPlayer,
     pub images: BTreeMap<String, Vec<u8>>,
     pub sheets: BTreeMap<String, Vec<u8>>,
+    /// The project's sprite shaders, as source.
+    pub shaders: BTreeMap<String, Vec<u8>>,
 }
 
 /// Opens the project at `project` to play on a screen of `size` pixels:
@@ -196,10 +211,12 @@ pub fn open(project: &Path, size: [f32; 2]) -> Result<OpenedProject, Box<dyn Err
         text,
         size,
         tile_sets,
+        seconds: 0.0,
     };
     Ok(OpenedProject {
         player,
         images: files_under(&assets, ".png"),
         sheets: files_under(&assets, ".sheet"),
+        shaders: files_under(&assets, ".wgsl"),
     })
 }

@@ -321,8 +321,9 @@ impl Session {
         laps.lap(StepPhase::ScreenUi);
         // Before the scripts, so a fleck thrown this frame is drawn where it
         // was thrown rather than one frame along.
-        self.effects
-            .advance(std::time::Duration::from_secs_f32(delta_seconds));
+        let step = std::time::Duration::from_secs_f32(delta_seconds);
+        self.effects.advance(step);
+        problems.extend(self.effects.emit(world, &self.components, step)?);
         laps.lap(StepPhase::Effects);
         // Worked out here rather than by the scripts, because this is the
         // layer holding a camera and a viewport. A script asking which block

@@ -32,6 +32,7 @@ pub(super) const fn panel_icon(panel: DockPanel) -> egui_material_icons::Materia
         DockPanel::Audio => icons::AUDIO_MIXER,
         DockPanel::Timeline => icons::TIMELINE,
         DockPanel::SpriteSheet => icons::SPRITE,
+        DockPanel::NormalMap => icons::NORMAL_MAP,
         DockPanel::Assistant => icons::EFFECT,
     }
 }
@@ -180,7 +181,8 @@ impl EditorApp {
             | DockPanel::Profiler
             | DockPanel::Audio
             | DockPanel::Timeline
-            | DockPanel::SpriteSheet => {}
+            | DockPanel::SpriteSheet
+            | DockPanel::NormalMap => {}
         }
     }
 

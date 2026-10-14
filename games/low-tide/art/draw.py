@@ -670,8 +670,17 @@ def instrument_icons():
           for name in ["sun", "hold", "speed", "tide", "pin", "compass", "hand", "tool"]], 8, 32, 32)
 
 
+def puff():
+    """A soft round mote for dust, smoke and spray, tinted by its emitter."""
+    c = Canvas(32, 32)
+    for radius in range(15, 0, -1):
+        c.ellipse(16, 16, radius, radius, (255, 255, 255, 14))
+    png(OUT / "puff.png", 32, 32, c.pixels())
+
+
 def main():
     OUT.mkdir(parents=True, exist_ok=True)
+    puff()
     cabin_art()
     instrument_icons()
     cabin_lamp()
@@ -736,9 +745,11 @@ def main():
     wreck(canvas)
     png(OUT / "wreck.png", 112, 72, canvas.pixels())
 
+    import normals
     import terrain
 
     terrain.main()
+    normals.main()
 
 
 if __name__ == "__main__":

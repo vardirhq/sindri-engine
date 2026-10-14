@@ -40,6 +40,8 @@ pub struct SpritePalette {
     image: Option<egui::ColorImage>,
     texture: Option<egui::TextureHandle>,
     sprites: Vec<PaletteSprite>,
+    /// The sheet's terrains, which a brush can paint instead of one sprite.
+    terrains: std::collections::BTreeMap<String, sindri_core::TerrainDocument>,
     problem: Option<String>,
 }
 
@@ -49,6 +51,7 @@ impl SpritePalette {
         self.image = None;
         self.texture = None;
         self.sprites.clear();
+        self.terrains.clear();
         self.problem = None;
     }
 
@@ -109,7 +112,10 @@ impl SpritePalette {
                 return;
             }
         };
-        match SpriteSheetDocument::from_json(&json).and_then(|sheet| sheet.rects()) {
+        match SpriteSheetDocument::from_json(&json).and_then(|sheet| {
+            self.terrains = sheet.terrains.clone();
+            sheet.rects()
+        }) {
             Ok(rects) => {
                 self.sprites = rects
                     .into_iter()
@@ -136,6 +142,13 @@ impl SpritePalette {
         self.texture.as_ref().map(egui::TextureHandle::id)
     }
 
+    /// The terrains the sheet declares.
+    pub const fn terrains(
+        &self,
+    ) -> &std::collections::BTreeMap<String, sindri_core::TerrainDocument> {
+        &self.terrains
+    }
+
     pub fn sprites(&self) -> &[PaletteSprite] {
         &self.sprites
     }
@@ -156,6 +169,9 @@ pub struct TilemapTool {
     pub enabled: bool,
     pub erase: bool,
     pub sprite: Option<String>,
+    /// A terrain the brush paints instead of `sprite`, choosing each cell's
+    /// sprite and its neighbors' from the sheet.
+    pub terrain: Option<String>,
     pub palette: SpritePalette,
 }
 
@@ -164,6 +180,7 @@ impl TilemapTool {
         self.enabled = false;
         self.erase = false;
         self.sprite = None;
+        self.terrain = None;
         self.palette.invalidate();
     }
 

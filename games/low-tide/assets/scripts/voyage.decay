@@ -94,6 +94,9 @@ state Game {
     // Whether a finger has touched the screen: the phone's controls show
     // from then on, and the hints talk about them instead of keys.
     var touch: bool = false;
+    // How much daylight there is, kept by the sun in step with the tide:
+    // one at low water, nothing at high water.
+    var daylight: f32 = 1.0;
 }
 
 // The Basin's block on top at a point in the plane.

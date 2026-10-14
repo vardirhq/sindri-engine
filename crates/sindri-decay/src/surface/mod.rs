@@ -22,12 +22,14 @@ pub(crate) mod character;
 pub(crate) mod character3d;
 pub(crate) mod contact;
 mod gamepad;
+mod light2d;
 mod maths;
 mod member;
 pub(super) mod names;
 mod person;
 pub(crate) mod physics3d;
 pub(crate) mod raycast;
+mod text;
 pub(crate) mod transform;
 pub(crate) mod tween;
 
@@ -41,15 +43,16 @@ pub(crate) use call::{
     TIME_VALUES, TimeValue, UI_CALLS, UiCall, WORLD_CALLS, WorldCall,
 };
 pub(crate) use gamepad::{GAMEPAD_QUERIES, GamepadQuery, gamepad_type};
+pub(crate) use light2d::LIGHT_2D_MEMBERS;
 pub(crate) use maths::{CONSTANTS, FUNCTIONS, HostFunction};
 pub(crate) use member::{
     QUAT, QUAT_FIELDS, SHAPE_MEMBERS, SPRITE_MEMBERS, TRANSFORM_MEMBERS, UI_IMAGE_MEMBERS,
 };
 pub(crate) use names::{
     ACTION, AIM, ANIMATION, CAMERA, EFFECTS, ENTITY, GAME, GAMEPAD, GESTURE, GRID, INPUT, KEYBOARD,
-    PHYSICS, POINTER, PREFAB, PROFILE, PROFILES, RANDOM, SAVE, SCENE, SEQUENCE, SHAPE, SPRITE,
-    STICK, TILE_GRID_COMPONENT, TILEMAP_COMPONENT, TIME, TOUCH, TRANSFORM, UI, UI_IMAGE, VIEWPORT,
-    WORLD,
+    LIGHT_2D, PHYSICS, POINTER, PREFAB, PROFILE, PROFILES, RANDOM, SAVE, SCENE, SEQUENCE, SHAPE,
+    SPRITE, STICK, TEXT, TILE_GRID_COMPONENT, TILEMAP_COMPONENT, TIME, TOUCH, TRANSFORM, UI,
+    UI_IMAGE, VIEWPORT, WORLD,
 };
 pub(crate) use person::{
     AIM_VALUES, AimValue, CAMERA_CALLS, CAMERA_VALUES, CameraCall, CameraValue, GESTURE_VALUES,
@@ -57,6 +60,7 @@ pub(crate) use person::{
     PointerQuery, PointerValue, STICK_VALUES, StickValue, TOUCH_CALLS, TOUCH_COUNT, TouchCall,
     VIEWPORT_VALUES, ViewportValue, ungrouped,
 };
+pub(crate) use text::TEXT_MEMBERS;
 
 use serde_json::Value as Json;
 use sindri_core::Transform3D;
@@ -212,6 +216,8 @@ pub(crate) const THIS: &[(&str, Node)] = &[
     ("sprite", Node::Group(SPRITE, SPRITE_MEMBERS)),
     ("ui_image", Node::Group(UI_IMAGE, UI_IMAGE_MEMBERS)),
     ("shape", Node::Group(SHAPE, SHAPE_MEMBERS)),
+    ("light2d", Node::Group(LIGHT_2D, LIGHT_2D_MEMBERS)),
+    ("world_text", Node::Group(TEXT, TEXT_MEMBERS)),
     ("entity", Node::Handle(Handle::Own)),
 ];
 
@@ -226,6 +232,8 @@ pub(crate) const THROUGH_REFERENCE: &[(&str, Node)] = &[
     ("sprite", Node::Group(SPRITE, SPRITE_MEMBERS)),
     ("ui_image", Node::Group(UI_IMAGE, UI_IMAGE_MEMBERS)),
     ("shape", Node::Group(SHAPE, SHAPE_MEMBERS)),
+    ("light2d", Node::Group(LIGHT_2D, LIGHT_2D_MEMBERS)),
+    ("world_text", Node::Group(TEXT, TEXT_MEMBERS)),
 ];
 
 /// Finds the leaf a path names, given the path's parts after `this`.

@@ -19,7 +19,7 @@ use crate::ui::widgets::{
 };
 
 use super::EditorApp;
-use super::slicer_view::{slice_grid, slice_names};
+use super::slicer_view::{slice_border, slice_grid, slice_names};
 
 /// How far in and out the picture goes.
 const ZOOM: std::ops::RangeInclusive<f32> = 0.05..=64.0;
@@ -78,12 +78,18 @@ impl EditorApp {
         };
         let mut save = false;
         let mut close = false;
+        let mut studio = false;
         egui::ScrollArea::vertical()
             .id_salt("slice inspector")
             .auto_shrink([false; 2])
             .show(ui, |ui| {
-                (save, close) = sheet_controls(ui, slicer);
+                (save, close, studio) = sheet_controls(ui, slicer);
             });
+        if studio {
+            let path = slicer.path().to_path_buf();
+            self.open_normal_studio(&path);
+            return;
+        }
         if save {
             self.save_slice();
         }
@@ -226,6 +232,9 @@ fn sheet_canvas(
     };
     let drawn: Vec<Rect> = rects.iter().map(|cell| cell_rect(*cell)).collect();
     draw_cells(&painter, &drawn, selected, &named);
+    if let Some(cell) = drawn.get(selected as usize) {
+        super::slice_guides::border_guides(ui, &response, &painter, slicer, *cell, zoom);
+    }
 
     // Picked by hit-testing the drawn rects, so a click lands on the cell it
     // looks like it landed on even when gutters mean the cells do not tile.
@@ -334,7 +343,7 @@ fn readout(
 }
 
 /// The squares behind a transparent sheet, so transparency reads as such.
-fn checkerboard(painter: &egui::Painter, area: Rect, size: f32) {
+pub(super) fn checkerboard(painter: &egui::Painter, area: Rect, size: f32) {
     if area.width() <= 0.0 || area.height() <= 0.0 {
         return;
     }
@@ -354,11 +363,12 @@ fn checkerboard(painter: &egui::Painter, area: Rect, size: f32) {
     }
 }
 
-/// The image's card, the slice, the names and Save. Answers whether Save or
-/// close was pressed.
-fn sheet_controls(ui: &mut egui::Ui, slicer: &mut Slicer) -> (bool, bool) {
+/// The image's card, the slice, the names and Save. Answers whether Save,
+/// close or the normal map studio was pressed.
+fn sheet_controls(ui: &mut egui::Ui, slicer: &mut Slicer) -> (bool, bool, bool) {
     let mut save = false;
     let mut close = false;
+    let mut studio = false;
     let (width, height) = slicer.size();
     egui::Frame::new()
         .fill(color::RAISED)
@@ -393,12 +403,24 @@ fn sheet_controls(ui: &mut egui::Ui, slicer: &mut Slicer) -> (bool, bool) {
                     {
                         close = true;
                     }
+                    if button::row_icon(
+                        ui,
+                        icons::NORMAL_MAP,
+                        Intent::Quiet,
+                        "Make a normal map from this image",
+                    )
+                    .clicked()
+                    {
+                        studio = true;
+                    }
                 });
             });
         });
     slice_grid(ui, slicer);
     ui.add_space(6.0);
     slice_names(ui, slicer);
+    ui.add_space(6.0);
+    slice_border(ui, slicer);
     ui.add_space(10.0);
     ui.horizontal(|ui| {
         ui.add_space(metric::GUTTER);
@@ -417,7 +439,7 @@ fn sheet_controls(ui: &mut egui::Ui, slicer: &mut Slicer) -> (bool, bool) {
         panel::problem(ui, problem);
     }
     ui.add_space(8.0);
-    (save, close)
+    (save, close, studio)
 }
 
 #[cfg(test)]

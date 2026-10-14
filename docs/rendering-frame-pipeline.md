@@ -189,9 +189,12 @@ These reports do not make the interactive Profiler panel a GPU profiler.
 
 `SpriteBatchRenderer`, `ShapeRenderer` and `GlyphRenderer` expose cumulative
 `BatchDrawStats`. Their actual indexed draw sites record physical draws/passes,
-instance counts, the two queue buffer writes per batch and uniform/instance
-payload bytes. Empty batches return before any write or pass. Submission slot
-resets preserve these counters, including the resets between editor views.
+instance counts, the two per-batch queue buffer writes and uniform/instance
+payload bytes. Sprite camera/time/mask uniforms now occupy 160 bytes; shape and
+glyph camera uniforms remain 64. Shared 2D lighting uniforms/shadow textures are
+resource updates outside this per-batch scope. Empty batches return before any
+write or pass. Submission slot resets preserve these counters, including the
+resets between editor views.
 `combined` merges independent snapshots; `since` gives one view's delta.
 
 Standalone reports add `batch_counters`. Editor reports add the same primary
@@ -203,7 +206,10 @@ separately from 3D counters and CPU/GPU timings. Old reports stay readable.
 A real GPU regression encodes empty and nonempty sprite, shape and glyph batches
 through two submissions, reads the target and verifies exact draw/write/byte
 counts and slot reuse. Platformer's native editor/standalone reports exercise
-batch counters in a game; rebuilt browser smoke checks the shared render path.
+batch counters in a game; their check allows transient sprite variation between
+different simulation times while verifying the exact per-batch payload
+accounting against the stable non-sprite workload. Rebuilt browser smoke checks
+the shared render path.
 The fixed 3D workload records measured zeroes for these batches in native CI.
 Resource initialization, atlas/texture uploads, frame clears, post-processing,
 scene-board copies and egui's editor UI remain outside these counters. The

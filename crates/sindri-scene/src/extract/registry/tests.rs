@@ -51,6 +51,7 @@ fn components_requiring_project_references_lack_a_default() {
             "sindri.model",
             "sindri.physics3d.model_collider",
             "sindri.physics3d.model_convex_collider",
+            "sindri.text",
             "sindri.ui.text",
         ])
     );

@@ -1,0 +1,4 @@
+format_version = 1
+[project]
+name = "Sprite Masks"
+main_scene = "assets/sprite-masks.scene"

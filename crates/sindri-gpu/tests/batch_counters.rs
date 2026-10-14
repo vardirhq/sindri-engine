@@ -149,7 +149,7 @@ fn physical_counts_survive_submission_reuse_and_ignore_empty_batches() {
         assert_eq!(delta.render_passes, 3);
         assert_eq!(delta.instances, 9);
         assert_eq!(delta.buffer_writes, 6);
-        assert_eq!(delta.uniform_bytes, 192);
+        assert_eq!(delta.uniform_bytes, 288);
         assert_eq!(delta.instance_bytes, u64::try_from(expected_bytes).unwrap());
         assert_eq!(batches.snapshot().draw_calls, frame * 3);
     }

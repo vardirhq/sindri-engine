@@ -35,6 +35,8 @@ mod placement;
 pub(crate) mod screen_ui;
 mod sequence;
 mod shape_gizmos;
+mod sprite_shaders;
+mod terrain_paint;
 mod textures;
 mod tile_chunk;
 mod tile_surface;
@@ -65,11 +67,12 @@ pub use components::{
     CameraOrbitComponent, CameraShake, EnvironmentAmbientOcclusion, EnvironmentBloom,
     EnvironmentComponent, EnvironmentError, EnvironmentFog, EnvironmentPostProcess,
     EnvironmentShadows, EnvironmentToneMapping, GridNavigationComponent, GridOccupantComponent,
-    GridPlacementComponent, GridWallDocument, LightComponent, LightError, LightKind,
-    MaterialComponent, MeshComponent, MeshPrimitive, ModelComponent, NaturalTerrainDocument,
-    ShapeComponent, ShapeGeometry, SpriteColorTransform, SpriteComponent, Sun, TileCellDocument,
-    TileDraw, TileGridComponent, TileGridError, TileProjection, TileSpace, TileVolumeComponent,
-    TileVolumeError, TileVolumeIndex, TilemapComponent, TilemapError, UiAnchor, UiFill, UiFillEdge,
+    GridPlacementComponent, GridWallDocument, ImageDraw, LightComponent, LightError, LightKind,
+    MaskInteraction, MaterialComponent, MeshComponent, MeshPrimitive, ModelComponent,
+    NaturalTerrainDocument, ShapeComponent, ShapeGeometry, SpriteColorTransform, SpriteComponent,
+    SpriteMaskComponent, Sun, TextComponent, TileCellDocument, TileDraw, TileGridComponent,
+    TileGridError, TileProjection, TileSpace, TileVolumeComponent, TileVolumeError,
+    TileVolumeIndex, TilemapComponent, TilemapError, UiAnchor, UiFill, UiFillEdge,
     UiImageComponent, UiShapeBlend, UiShapeComponent, UiShapeKind, UiShapeShadow, UiTextAutoSize,
     UiTextCase, UiTextComponent, UiTextLineAlign, UiTextOutline, UiTextShadow, UiTextWrap,
     VoxelBlock, VoxelEdit, VoxelGeneratorDocument, VoxelMapFlood, VoxelMaterialDocument, VoxelView,
@@ -77,7 +80,13 @@ pub use components::{
     environment_of, environments_in, light_direction, lights_in, sun_in, ui_text_template,
     update_camera_behaviors,
 };
-pub use effects::{EffectBurstComponent, Effects2d, Fleck};
+pub use components::{
+    EnvironmentLighting2d, Light2dComponent, Light2dError, Light2dOccluderComponent, OccluderShape,
+};
+pub use effects::{
+    EffectBurstComponent, Effects2d, EmissionShape, Fleck, ParticleSpace, ParticlesComponent,
+    ParticlesError,
+};
 pub use extract::{
     CameraView, ExtractProblem, OverlayPlacement, OverlayView, SceneExtractError, SceneExtractor,
     SceneRuntime, UiCanvas, ViewCamera, VoxelGround, VoxelWorldHit, WorldProjection,
@@ -130,8 +139,13 @@ pub use sindri_physics::ConvexHullError3d as ModelConvexGeometryError3d;
 pub use sindri_physics::TriangleMeshError3d as ModelCollisionGeometryError3d;
 /// The shapes a collider is made of, which the editor draws and resizes.
 pub use sindri_physics::{Collider2d, ColliderShape2d};
+pub use sprite_shaders::{
+    SHADER_NAMING_COMPONENTS, SpriteShaderBindings, referenced_sprite_shaders,
+    unresolved_sprite_shaders,
+};
+pub use terrain_paint::{TerrainBindings, TerrainPaintError, paint_terrain, terrain_bindings};
 pub use textures::{
-    FONT_NAMING_COMPONENTS, PROCEDURAL_TEXTURES, ProceduralTexture, SheetBindError,
+    FONT_NAMING_COMPONENTS, PROCEDURAL_TEXTURES, ProceduralTexture, SheetBindError, SliceBorder,
     TEXTURE_NAMING_COMPONENTS, TextureBindings, referenced_fonts, referenced_sheets,
     referenced_textures, unresolved_sprites, unresolved_textures,
 };

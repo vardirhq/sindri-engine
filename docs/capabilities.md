@@ -740,6 +740,29 @@ fleck makes way for the newest, and overflow is counted rather than hidden.
 They batch with ordinary sprites by layer and texture, so a burst is one draw
 call rather than a second rendering path.
 
+`sindri.particles` is an emitter that keeps throwing into the same pool while it
+plays: a rate and a cap, lifetime, speed, direction and spread with variation,
+a point, circle, box or ring shape at an offset, gravity, drag, size over life,
+a color ramp, rotation and spin, and world or local simulation. It owes its rate
+times each step and carries the remainder, so a fractional rate is exact at any
+frame rate, and it draws from the pool's stream. Decay plays, stops and emits a
+handful at once (`Effects.play`, `Effects.stop`, `Effects.emit`); the editor
+runs the selected emitter in the Scene view while nothing plays. The
+platformer's coins sparkle and its hero trails dust; Low Tide's treads kick up
+dust and its engine smokes while it drives. See `docs/particles.md`.
+
+A sprite or UI image drawn `sliced` keeps the border its sheet records, in
+pixels by sprite name, and stretches only the middle: nine quads in the image's
+own space, sharing one draw. `border_scale` sets how big a border pixel is
+drawn. The sheet slicer drags the border's guides on the image. The platformer's
+HUD frame and signboard are one 24-pixel panel. See `docs/nine-slice.md`.
+
+A sheet can declare terrains: the sixteen `edges` or forty-seven `blob` sprites
+a cell draws for each pattern of same-terrain neighbors. The tilemap brush and
+`Grid.set_terrain` paint a terrain and redraw every neighbor whose picture
+depends on the cell, erasing included. The platformer's level is painted with
+its ground terrain. See `docs/terrains.md`.
+
 ### Game saves
 
 `sindri_core::SaveStore` is a flat, versioned key/value document. Flat because
@@ -1228,7 +1251,7 @@ insertion order; stage order is `Opaque3d`, `Transparent2d`, `Overlay`.
 
 What can actually be drawn: a triangle, a coloured cube, a textured cube with
 depth testing, textured sprites with tint, anchor, and layer, and procedural 2D
-shapes. A sprite may also carry an advanced colour transform: independent RGBA multipliers and offsets evaluated as `sample * tint * multiply + offset`, travelling per instance so two sprites recoloured differently still share a draw call. The identity is `multiply = [1, 1, 1, 1]` and `offset = [0, 0, 0, 0]`, so a sprite authored before the transform existed draws exactly as it did. A transform that is not finite is refused at extraction rather than drawn — the reachable case is narrowing, since `1e39` is an ordinary `f64` and an infinity once it is an `f32` — while a finite value outside zero to one is left alone for the render target to clip. The editor draws the two quadruples as labelled RGBA rows inside an advanced section, collapsed until the scene has authored one and resettable to the identity. No companion game in this repository exercises the capability yet; Mujaffa Remaster is the external proof for this round. Rectangles, ellipses, grids, and regular polygons remain evaluated in the
+shapes. A sprite may also carry an advanced colour transform: independent RGBA multipliers and offsets evaluated as `sample * tint * multiply + offset`, travelling per instance so two sprites recoloured differently still share a draw call. The identity is `multiply = [1, 1, 1, 1]` and `offset = [0, 0, 0, 0]`, so a sprite authored before the transform existed draws exactly as it did. A transform that is not finite is refused at extraction rather than drawn — the reachable case is narrowing, since `1e39` is an ordinary `f64` and an infinity once it is an `f32` — while a finite value outside zero to one is left alone for the render target to clip. The editor draws the two quadruples as labelled RGBA rows inside an advanced section, collapsed until the scene has authored one and resettable to the identity. Orbital's charger proves it: its wind-up glows white-hot through the colour offset, which a tint cannot do, and the dash sheds the heat. Rectangles, ellipses, grids, and regular polygons remain evaluated in the
 shape shader. A polygon may also carry up to eight explicit 2D vertices; those
 points travel in the same instanced payload and the shader measures against the
 actual authored edges, so an irregular hull remains crisp without becoming a
@@ -1236,6 +1259,55 @@ texture. When no points are authored, regular polygons keep their existing path.
 The eight-point cap keeps the per-instance vertex attributes inside Sindri's
 conservative WebGPU limits. Orbital Last Stand exercises the capability with the
 Strider's exact six-point hull.
+
+**A sprite can be drawn through the project's own shader.** `sindri.sprite`
+names a `.wgsl` asset in `shader` and carries four `shader_params`. The file
+defines `fn sprite_shader(input: SpriteShaderInput) -> vec4<f32>`, handed the
+pixel as it would draw unshaded, its UVs and the sprite's UV rect, its world
+position, the four parameters and the scene's clock, with `sample_sprite` and
+`sprite_texel_size` to read the texture again; the engine supplies the vertex
+stage and pipeline around it. Parameters ride on the instance, so sprites
+sharing a texture and a shader share a draw. Every host validates a shader with
+naga as it binds it: the editor loads, watches and hot-reloads the ones a scene
+names, `sindri-player` reads them natively and from the export manifest, and
+`sindri-export` refuses one that does not compile. A failure names the file and
+the line in the project's own numbering and the sprite falls back to the
+built-in look. Decay writes `this.sprite.shader_params.{x,y,z,w}`.
+`examples/sprite-shaders` draws an outline, a dissolve, a hit flash and a wave;
+shaders reach `sindri.sprite` only, with one texture and no material asset. See
+`docs/sprite-shaders.md`.
+
+**A sprite can be masked.** `sindri.sprite_mask` places a picture whose alpha is
+a shape, and a sprite with `mask: inside` or `outside` and the mask's name draws
+only within or beyond it, softly where the mask is soft. The mask is batch
+state read in the fragment stage, so masked sprites still share draws and
+nothing needs a stencil. `examples/sprite-masks` reveals a meadow and a hidden
+gem through a wandering keyhole. World sprites only. See `docs/sprite-masks.md`.
+
+**Text can be placed in the world and carry spans.** `sindri.text` is the UI
+label's fields in world units, placed at its entity and drawn over the sprites
+of its layer. With `rich: true`, `[b]`, `[i]` and `[color=#rrggbb]` tags in
+either kind of text are spans. Decay writes the words with `Ui.set_text` and
+`Ui.set_number` and reaches `this.world_text.color`. Orbital's landed shots float
+their damage, critical hits in bold gold. See `docs/world-text.md`.
+
+**A 2D scene can be lit.** With `lighting_2d` on in `sindri.environment`, world
+sprites, tilemaps, flecks and world shapes are multiplied by the light reaching
+them: an ambient color plus every `sindri.light2d` point light within its
+radius, faded by its falloff. A sprite opts out with `unlit`, additive shapes
+are light themselves, and the UI is never lit. A sprite or tilemap may name a
+`normal_map` laid out like its texture; a light's `height` then decides how
+squarely it meets each texel, so a low light rakes across the relief. A light
+with `shadows` on is blocked by `sindri.light2d.occluder` boxes, polygons and
+the solid cells of a tilemap, through one-dimensional polar depth maps built on
+the CPU each frame. A frame carries the 16 lights nearest the camera. Decay
+writes a light's color, intensity, radius, falloff and height. The Scene view
+draws light radii and occluder outlines with handles. The platformer's cave is
+the proof. A voxel world viewed as a map is lit too, and its `normal_maps` name
+a normal map for each texture its squares draw from: Low Tide's Basin is lit by
+a sun that follows the tide from noon through a golden hour to a moonlit flood,
+and its crawler carries lamps and shadow-casting headlights. See
+`docs/2d-lights.md`.
 
 **A sliced image says how it is cut, once.** A sheet document beside a texture —
 `textures/tiles.png` is sliced by `textures/tiles.sheet`, at a derived ID
@@ -1290,6 +1362,19 @@ lists the sprites underneath the image, collapsed until asked for. A sprite's
 animation inspector creates, renames, and removes clips from those named cells,
 orders frames, edits timing and looping, chooses the runtime clip, and previews
 it without changing scene state.
+
+**A normal map is made in the editor, from the sprite.** The Normal map tab
+derives a sprite's `normal_map` from its brightness or a painted height map,
+keeping its size, alpha and pixel edges, with each sheet cell kept apart, and
+material presets as starting values. The preview is the game's own 2D lighting
+rather than an imitation: the studio's surface, light and ambient are a
+`sindri.sprite`, a `sindri.light2d` and a `sindri.environment` in a world of
+its own, extracted and drawn as the Scene view draws, and a test requires the
+frame to equal the one a scene using the saved map extracts. It shows the map
+per channel, splits it against the sprite lit without a map, and orbits a
+plane in 3D. Saving writes the map and a `.normalmap` of the settings, so the
+map is made again from changed art; the platformer's hero is lit through one
+made this way. `docs/normal-map-studio.md` is the contract.
 
 A tilemap is a grid of tiles drawn from one entity: `sindri.tilemap` carries the
 map's grid, a palette of sprite names, and a flat array of cells indexing that
@@ -2184,8 +2269,9 @@ settings gear.
   strata, side-face picking, slice views, and collision and navigation derived
   from occupied cells remain; the accepted contract is in
   `docs/tile-system-2.md`.
-- World-space text, rich spans, and font fallback are missing. Screen text has
-  authored alignment and wrapping, including Weave-controlled wrapping
+- Font fallback is missing, and rich text has color, bold and italic spans
+  only. Screen text has authored alignment and wrapping, including
+  Weave-controlled wrapping
 - Built-in 3D geometry has cube and inline surface meshes; external static GLB
   assets now render. Additional generated primitives and glTF animation/skinning
   remain open.

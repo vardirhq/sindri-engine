@@ -1,18 +1,17 @@
 #!/usr/bin/env python3
-"""Keep Platformer's settled native editor/standalone batch counts comparable."""
+"""Verify physical batch accounting while Platformer's transient sprites vary."""
 
 import json
 import sys
 from pathlib import Path
 
-EXPECTED = {
-    "draw_calls": 9,
-    "render_passes": 9,
-    "instances": 295,
-    "buffer_writes": 18,
-    "uniform_bytes": 576,
-    "instance_bytes": 41968,
-}
+# The settled level has four non-sprite batches. Its mixed shape/glyph
+# payload is 2,656 bytes smaller than storing every instance as a sprite.
+# Sprite counts vary with particle lifetime: standalone advances one fixed step
+# per draw, whereas the editor advances however many steps its clock owes.
+NON_SPRITE_BATCHES = 4
+NON_SPRITE_BYTE_SAVING = 2656
+SPRITE_BYTES = 176
 
 for path in sys.argv[1:]:
     report = json.loads(Path(path).read_text())
@@ -20,5 +19,17 @@ for path in sys.argv[1:]:
     frames = report["sections"]["playing"]
     assert len(frames) >= 2, "need consecutive frames to prove snapshot deltas"
     for frame in frames:
-        assert frame["batch_counters"] == EXPECTED, (path, frame["batch_counters"])
-    print(f"{path}: {len(frames)} frames match physical 2D batch counters")
+        actual = frame["batch_counters"]
+        draws = actual["draw_calls"]
+        instances = actual["instances"]
+        assert draws > NON_SPRITE_BATCHES and instances > 0, (path, actual)
+        expected = {
+            "draw_calls": draws,
+            "render_passes": draws,
+            "instances": instances,
+            "buffer_writes": 2 * draws,
+            "uniform_bytes": 160 * (draws - NON_SPRITE_BATCHES) + 64 * NON_SPRITE_BATCHES,
+            "instance_bytes": SPRITE_BYTES * instances - NON_SPRITE_BYTE_SAVING,
+        }
+        assert actual == expected, (path, actual, expected)
+    print(f"{path}: {len(frames)} frames match physical 2D batch accounting")

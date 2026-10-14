@@ -27,6 +27,9 @@ use crate::AssetId;
 #[cfg(test)]
 mod tests;
 
+mod borders;
+mod terrains;
+
 /// The version this runtime writes and understands.
 pub const SHEET_FORMAT_VERSION: u32 = 1;
 
@@ -163,6 +166,19 @@ pub struct SpriteSheetDocument {
     /// Parts that are not on the grid, named explicitly.
     #[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
     pub sprites: BTreeMap<String, [f32; 4]>,
+    /// The image's size in pixels, when the grid does not already say it.
+    /// A border is a pixel measurement, and this is what makes it a fraction.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub size: Option<[u32; 2]>,
+    /// Nine-slice borders by sprite name, the empty name for the whole image:
+    /// left, top, right and bottom, in pixels. A sliced sprite keeps these
+    /// strips at their size and stretches what is between them.
+    #[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
+    pub borders: BTreeMap<String, [u32; 4]>,
+    /// Terrains by name: the sprite each neighbor pattern of a painted area
+    /// draws. See [`crate::TerrainDocument`].
+    #[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
+    pub terrains: BTreeMap<String, crate::TerrainDocument>,
     /// Editor-only state, carried through untouched — the same arrangement a
     /// scene has. Where a slicer remembers what it was last showing.
     #[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
@@ -317,8 +333,18 @@ impl SpriteSheetDocument {
             tile_overhang_ratio: None,
             grid: Some(SheetGrid::edge_to_edge(columns, rows)),
             sprites: BTreeMap::new(),
+            size: None,
+            borders: BTreeMap::new(),
+            terrains: BTreeMap::new(),
             editor: BTreeMap::new(),
         }
+    }
+
+    /// The image's size in pixels, from the sheet or its grid.
+    #[must_use]
+    pub fn image_size(&self) -> Option<[u32; 2]> {
+        self.size
+            .or_else(|| self.grid.as_ref().and_then(|grid| grid.size))
     }
 
     /// Parses a sheet, rejecting a version this runtime does not write.
@@ -390,7 +416,9 @@ impl SpriteSheetDocument {
                 return Err(SheetError::TileOverhangRatio(ratio));
             }
         }
-        self.rects().map(|_| ())
+        let rects = self.rects()?;
+        self.check_borders(&rects)?;
+        self.check_terrains(&rects)
     }
 }
 
@@ -430,6 +458,23 @@ pub enum SheetError {
     CellDoesNotFit { index: u32 },
     #[error("an anchor sits at ({x}, {y}), which is not a point on the frame")]
     Anchor { x: f32, y: f32 },
+    #[error(
+        "a sheet with nine-slice borders measures them in pixels, so it must record the image's `size`"
+    )]
+    BordersWithoutSize,
+    #[error("a nine-slice border names `{0}`, which the sheet does not")]
+    BorderOnUnknownSprite(String),
+    #[error("the nine-slice border on `{0}` is wider or taller than the sprite it cuts")]
+    BorderTooWide(String),
+    #[error("terrain `{terrain}` lists {found} sprites, and a {kind} terrain lists {wanted}")]
+    TerrainSize {
+        terrain: String,
+        kind: &'static str,
+        found: usize,
+        wanted: usize,
+    },
+    #[error("terrain `{terrain}` draws `{sprite}`, which the sheet does not cut")]
+    TerrainSprite { terrain: String, sprite: String },
     #[error("tile overhang ratio must be finite and non-negative, got {0}")]
     TileOverhangRatio(f32),
     #[error("sheet is not valid json: {message}")]

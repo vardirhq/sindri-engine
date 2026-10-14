@@ -23,11 +23,14 @@
 //! - `layout.rs` — where the words end up, which is arithmetic about boxes and
 //!   alignment and needs no GPU to check.
 //! - `renderer.rs` — shaping, the atlas, and the quads that come out.
+//! - `rich.rs` — the inline tags that give a run of the words its own color,
+//!   weight or slant.
 
 mod instance;
 mod layout;
 mod options;
 mod renderer;
+mod rich;
 
 use thiserror::Error;
 

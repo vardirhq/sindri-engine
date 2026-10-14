@@ -162,6 +162,9 @@ impl SceneExtractor {
                     }
                     for face in &chunk.faces {
                         batches.push(SpriteDraw {
+                            mask: None,
+                            shader: None,
+                            normal_map: None,
                             clip: None,
                             space: DrawSpace::Solid,
                             texture: face.texture,
@@ -183,6 +186,9 @@ impl SceneExtractor {
                 for face in &cell.faces {
                     let order = TransparentOrder::new(volume.layer, depth, face.order)?;
                     batches.push(SpriteDraw {
+                        mask: None,
+                        shader: None,
+                        normal_map: None,
                         clip: None,
                         space: DrawSpace::World,
                         texture: face.texture,

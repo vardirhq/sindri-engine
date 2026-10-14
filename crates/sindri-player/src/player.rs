@@ -66,6 +66,8 @@ pub(crate) struct Player {
     page_visible: bool,
     platform_suspended: bool,
     paused_for_page: bool,
+    /// How long the scene has played, which is the clock sprite shaders read.
+    seconds: f32,
 }
 
 impl Player {
@@ -108,8 +110,21 @@ impl Player {
             }
         }
 
+        for (id, sheet) in &project.sheets {
+            self.tile_sets
+                .bind_terrains(id.as_str(), sheet.terrains.clone());
+        }
         for (id, tile_set) in project.tile_sets {
             self.tile_sets.bind(id.as_str(), tile_set)?;
+        }
+
+        // Checked as they bind. A broken one is reported and its sprites draw
+        // the built-in look; the export refuses one, so a shipped build only
+        // meets this on a project run straight from its folder.
+        for (id, source) in project.shaders {
+            if let Err(error) = self.bindings.shaders_mut().bind(&id, &source) {
+                log::warn!("{error}");
+            }
         }
 
         for (id, asset) in project.fonts {
@@ -259,6 +274,7 @@ impl DesktopApp for Player {
             page_visible: true,
             platform_suspended: false,
             paused_for_page: false,
+            seconds: 0.0,
         })
     }
 
@@ -304,6 +320,9 @@ impl DesktopApp for Player {
         // a pause on Orbital, or Back in a menu, froze the game on a phone.
         let engine = self.engine.as_mut().expect("checked above");
         engine.advance(delta)?;
+        if !self.paused_for_page {
+            self.seconds += delta.as_secs_f32();
+        }
         Ok(Flow::Continue)
     }
 
@@ -391,7 +410,8 @@ impl DesktopApp for Player {
                             .with_animations(engine.game().animations())
                             .with_effects(engine.game().effects())
                             .with_tile_sets(&self.tile_sets)
-                            .with_text_sizes(&sizes),
+                            .with_text_sizes(&sizes)
+                            .with_seconds(self.seconds),
                     )?;
                     engine.game_mut().record_drawn(&world, viewport, sizes)?;
                     Ok(prepared)

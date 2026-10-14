@@ -95,6 +95,11 @@ impl RuntimeViewport {
         }
     }
 
+    /// The picture egui draws of what this viewport last drew.
+    pub(in crate::native) const fn texture_id(&self) -> egui::TextureId {
+        self.texture_id
+    }
+
     /// The shape of what this viewport draws into.
     ///
     /// Read from the target rather than from whatever rect was last laid out,
@@ -107,7 +112,7 @@ impl RuntimeViewport {
         if height <= 0.0 { 1.0 } else { width / height }
     }
 
-    pub(super) fn render(
+    pub(in crate::native) fn render(
         &mut self,
         renderers: &mut SceneRenderers,
         source: SceneSource<'_>,

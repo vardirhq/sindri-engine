@@ -1,5 +1,7 @@
 //! Scene-authored configuration for an engine-owned voxel world.
 
+use std::collections::BTreeMap;
+
 use serde::{Deserialize, Serialize};
 use sindri_core::SceneComponent;
 
@@ -171,6 +173,14 @@ pub struct VoxelWorldComponent {
     /// earlier one, and an edit back to what was generated is dropped.
     #[serde(default)]
     pub edits: Vec<VoxelEdit>,
+    /// Normal maps for a map's squares, by the texture each one names: a
+    /// texture's normal map is laid out exactly like it, so a block's top face
+    /// reads its relief from the same rectangle (`docs/2d-lights.md`).
+    ///
+    /// Only `view: map` reads it, and only 2D lights do anything with it. A
+    /// square whose texture has no entry is lit by distance alone.
+    #[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
+    pub normal_maps: BTreeMap<String, String>,
 }
 
 /// A map-only water surface in voxel height coordinates.

@@ -1,6 +1,7 @@
 //! Physical work recorded by sprite, shape and glyph batch encoders.
 
-/// Lifetime counters, excluding resource initialization and atlas/texture uploads.
+/// Lifetime per-batch counters, excluding resource initialization, shared 2D
+/// lighting updates, and atlas/texture uploads.
 /// Empty batches record nothing. Submission slot resets preserve these counters.
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
 pub struct BatchDrawStats {

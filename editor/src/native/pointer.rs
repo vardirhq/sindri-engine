@@ -259,15 +259,28 @@ impl EditorApp {
             return;
         };
         let chosen = self.tilemap_tool.sprite.clone();
-        let brush = if self.tilemap_tool.erase {
-            TileBrush::Erase
-        } else if let Some(chosen) = chosen.as_deref() {
-            TileBrush::Sprite(chosen)
-        } else {
-            return;
-        };
         let mut payload = original;
-        match paint_tile(&mut payload, hover.column, hover.row, brush) {
+        let tool = &self.tilemap_tool;
+        let terrains = tool.palette.terrains();
+        // A terrain, or erasing beside one, redraws the neighbors too: a cell
+        // emptied from a hill leaves its neighbors an edge to show.
+        let terrain = |payload: &mut serde_json::Value, terrain: Option<&str>| {
+            sindri_scene::paint_terrain(payload, terrains, hover.column, hover.row, terrain)
+                .map_err(|error| error.to_string())
+        };
+        let painted = match (tool.erase, tool.terrain.as_deref(), chosen.as_deref()) {
+            (true, _, _) if !terrains.is_empty() => terrain(&mut payload, None),
+            (true, _, _) => paint_tile(&mut payload, hover.column, hover.row, TileBrush::Erase),
+            (false, Some(name), _) => terrain(&mut payload, Some(name)),
+            (false, None, Some(sprite)) => paint_tile(
+                &mut payload,
+                hover.column,
+                hover.row,
+                TileBrush::Sprite(sprite),
+            ),
+            (false, None, None) => return,
+        };
+        match painted {
             Ok(false) => return,
             Err(error) => {
                 self.console.warning(error);

@@ -395,6 +395,21 @@ impl ProjectTree {
             .collect()
     }
 
+    /// References to every sprite shader the browser can see.
+    ///
+    /// The browser lists a `.wgsl` file as a script, because it is source; a
+    /// sprite's `shader` field is the one thing that can name one.
+    pub fn shaders(&self) -> Vec<String> {
+        self.referenced(AssetKind::Script)
+            .filter(|reference| {
+                Path::new(reference)
+                    .extension()
+                    .is_some_and(|extension| extension.eq_ignore_ascii_case("wgsl"))
+            })
+            .map(str::to_owned)
+            .collect()
+    }
+
     /// References to every Decay script the browser can see.
     ///
     /// Decay only: `.rs` and `.wgsl` are listed as scripts by the browser

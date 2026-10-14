@@ -3,7 +3,9 @@
 //! A new member is an entry in the list for its component, with the two
 //! accessors beside it. Adding one is a single visible edit.
 
-use super::names::{RGBA, SHAPE_COMPONENT, SPRITE_COMPONENT, UI_IMAGE_COMPONENT, VEC3};
+use super::names::{
+    RGBA, SHADER_PARAMS_TYPE, SHAPE_COMPONENT, SPRITE_COMPONENT, UI_IMAGE_COMPONENT, VEC3,
+};
 use super::{Leaf, Node, Scalar, Seg, Vector};
 
 const POSITION: &[(&str, Node)] = &[
@@ -180,6 +182,28 @@ const COLOR_OFFSET: &[(&str, Node)] = &[
     ("a", color_transform(false, 3)),
 ];
 
+/// One of a sprite's four shader parameters, by its place in the array.
+const fn shader_param(index: usize) -> Node {
+    Node::Leaf(Leaf::Component {
+        component: SPRITE_COMPONENT,
+        pointer: match index {
+            0 => &[Seg::Field("shader_params"), Seg::Index(0)],
+            1 => &[Seg::Field("shader_params"), Seg::Index(1)],
+            2 => &[Seg::Field("shader_params"), Seg::Index(2)],
+            _ => &[Seg::Field("shader_params"), Seg::Index(3)],
+        },
+    })
+}
+
+/// Four numbers rather than a color, because what they mean is the shader's
+/// to say: how far a dissolve has got, how bright a flash is.
+const SHADER_PARAMS: &[(&str, Node)] = &[
+    ("x", shader_param(0)),
+    ("y", shader_param(1)),
+    ("z", shader_param(2)),
+    ("w", shader_param(3)),
+];
+
 const UI_IMAGE_TINT: &[(&str, Node)] = &[
     ("r", tint(UI_IMAGE_COMPONENT, 0)),
     ("g", tint(UI_IMAGE_COMPONENT, 1)),
@@ -296,6 +320,10 @@ pub(crate) const SPRITE_MEMBERS: &[(&str, Node)] = &[
     ("tint", Node::Group(RGBA, TINT)),
     ("color_multiply", Node::Group(RGBA, COLOR_MULTIPLY)),
     ("color_offset", Node::Group(RGBA, COLOR_OFFSET)),
+    (
+        "shader_params",
+        Node::Group(SHADER_PARAMS_TYPE, SHADER_PARAMS),
+    ),
     (
         "layer",
         Node::Leaf(Leaf::Component {

@@ -10,6 +10,7 @@ mod encode;
 mod fog;
 mod frame;
 mod glyph;
+mod light2d;
 mod lighting;
 mod material;
 mod mesh;
@@ -20,6 +21,7 @@ mod shadow;
 mod shape;
 mod sprite;
 mod sprite_batch;
+mod sprite_shader;
 mod target;
 mod text;
 mod texture;
@@ -44,11 +46,14 @@ pub use encode::{
 pub use fog::FogSettings;
 pub use frame::{
     ClearOperations, ExtractedFrame, FrameCamera, FrameCommand, FramePass, FramePlanError,
-    PreparedFrame, RenderLayer, RenderStage, Viewport,
+    PreparedFrame, RenderLayer, RenderStage, SpriteEnvironment, Viewport,
 };
 pub use glyph::{
     EDGE, FIELD_PER_RASTER_PIXEL, GlyphAtlas, GlyphDrawError, GlyphInstance, GlyphRenderer,
     GlyphSlot, RASTER_EM,
+};
+pub use light2d::{
+    Light2d, Light2dShadow, Lighting2d, MAX_LIGHTS_2D, SHADOW_BINS_2D, shadow_map_2d,
 };
 pub use lighting::WorldLighting;
 pub use material::{MaterialError, MaterialFactors};
@@ -65,8 +70,10 @@ pub use shape::{
 };
 pub use sprite::{SpriteBlendMode, SpriteRenderer};
 pub use sprite_batch::{
-    SpriteBatchError, SpriteBatchRenderer, SpriteBatchStats, SpriteDepth, SpriteInstance,
+    SpriteBatchDraw, SpriteBatchError, SpriteBatchRenderer, SpriteBatchStats, SpriteBatchTarget,
+    SpriteDepth, SpriteInstance, SpriteMask,
 };
+pub use sprite_shader::{SpriteShader, SpriteShaderError};
 pub use target::{ViewportTarget, encode_clear, sampled_format};
 pub use text::{
     GlyphQuads, LineAlign, TextAlign, TextCase, TextError, TextFit, TextInstance, TextRenderer,

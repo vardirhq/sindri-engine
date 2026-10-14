@@ -55,6 +55,7 @@ mod benchmark {
         .await?;
         let mut renderer = ProjectRenderer::new(&gpu, &opened.images, &opened.sheets, SIZE)?;
         let gpu_timing = renderer.enable_gpu_timing(&gpu);
+        renderer.bind_shaders(&opened.shaders)?;
         let mut playing: Vec<Value> = Vec::with_capacity(frames);
         for at in 0..settle + frames {
             let began = Instant::now();

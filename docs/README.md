@@ -44,6 +44,13 @@ contracts below; dated evidence should not override them.
 - [Presentation surfaces](rendering-surface.md)
 - [Colour handling](rendering-color.md)
 - [Transparent rendering](rendering-transparency.md)
+- [Sprite shaders](sprite-shaders.md)
+- [2D lights and shadows](2d-lights.md)
+- [Particles](particles.md)
+- [Nine-slice sprites](nine-slice.md)
+- [Terrains](terrains.md)
+- [Sprite masks](sprite-masks.md)
+- [World text and rich text](world-text.md)
 
 ## Editor
 

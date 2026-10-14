@@ -9,6 +9,14 @@ use crate::{
     UiTextComponent, VoxelWorldComponent,
 };
 
+/// Where a sliced image's border runs: left, top, right and bottom, as
+/// fractions of the whole texture and as the pixels the sheet authored.
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub struct SliceBorder {
+    pub uv: [f32; 4],
+    pub pixels: [u32; 4],
+}
+
 /// Maps the texture references a scene names to the textures a renderer holds.
 ///
 /// Scenes refer to textures by a stable string; the renderer knows only
@@ -37,11 +45,29 @@ pub struct TextureBindings {
     /// height. Kept with the sheet because it is a property of the picture, not
     /// of whichever tilemap happens to draw it.
     tile_overhang_ratios: BTreeMap<String, f32>,
+    /// Nine-slice borders by texture and then sprite, the empty sprite name
+    /// for the whole image.
+    borders: BTreeMap<String, BTreeMap<String, SliceBorder>>,
+    /// The project's sprite shaders. Here because every host already hands
+    /// these bindings to extraction, and a shader is loaded and named the way
+    /// a texture is.
+    shaders: crate::SpriteShaderBindings,
 }
 
 impl TextureBindings {
     pub fn new() -> Self {
         Self::default()
+    }
+
+    /// The sprite shaders bound so far.
+    #[must_use]
+    pub const fn shaders(&self) -> &crate::SpriteShaderBindings {
+        &self.shaders
+    }
+
+    /// Binds and unbinds sprite shaders.
+    pub fn shaders_mut(&mut self) -> &mut crate::SpriteShaderBindings {
+        &mut self.shaders
     }
 
     /// Binds `reference` to `texture`, returning the handle it replaced.
@@ -94,6 +120,20 @@ impl TextureBindings {
             texture: texture.clone(),
             message: error.to_string(),
         })?;
+        let fractions = sheet
+            .border_fractions()
+            .map_err(|error| SheetBindError::Sheet {
+                texture: texture.clone(),
+                message: error.to_string(),
+            })?;
+        let borders = fractions
+            .into_iter()
+            .map(|(name, uv)| {
+                let pixels = sheet.borders[&name];
+                (name, SliceBorder { uv, pixels })
+            })
+            .collect();
+        self.borders.insert(texture.clone(), borders);
         let mut rects = BTreeMap::new();
         for (name, [x, y, width, height]) in authored {
             let rect = UvRect::new(x, y, width, height).map_err(|error| SheetBindError::Rect {
@@ -139,6 +179,20 @@ impl TextureBindings {
         self.sheets.remove(texture);
         self.anchors.remove(texture);
         self.tile_overhang_ratios.remove(texture);
+        self.borders.remove(texture);
+    }
+
+    /// The nine-slice border `reference` is drawn with: its own sprite's, or
+    /// failing that the whole image's, or `None` when the sheet gives neither
+    /// and a sliced image draws whole.
+    #[must_use]
+    pub fn slice_border(&self, reference: &SpriteRef) -> Option<SliceBorder> {
+        let borders = self.borders.get(reference.texture())?;
+        reference
+            .sprite()
+            .and_then(|name| borders.get(name))
+            .or_else(|| borders.get(""))
+            .copied()
     }
 
     /// Where `reference` meets the ground.
@@ -364,10 +418,30 @@ fn sprite_references(world: &World) -> BTreeSet<SpriteRef> {
                         }
                     }
                 }
+                // A map's normal maps, named by the texture they light.
+                if let Some(normal_maps) = payload
+                    .get("normal_maps")
+                    .and_then(serde_json::Value::as_object)
+                {
+                    for normal_map in normal_maps.values().filter_map(serde_json::Value::as_str) {
+                        if let Ok(reference) = SpriteRef::parse(normal_map) {
+                            referenced.insert(reference);
+                        }
+                    }
+                }
                 continue;
             }
             if !TEXTURE_NAMING_COMPONENTS.contains(&type_name.as_str()) {
                 continue;
+            }
+            // A normal map is a second picture laid out like the first, loaded
+            // the same way.
+            if let Some(normal_map) = payload
+                .get("normal_map")
+                .and_then(serde_json::Value::as_str)
+                && let Ok(reference) = SpriteRef::parse(normal_map)
+            {
+                referenced.insert(reference);
             }
             let Some(texture) = payload.get("texture").and_then(serde_json::Value::as_str) else {
                 continue;
@@ -406,6 +480,8 @@ fn sprite_references(world: &World) -> BTreeSet<SpriteRef> {
 /// carries a texture has to be named here or fail the build.
 pub const TEXTURE_NAMING_COMPONENTS: &[&str] = &[
     crate::effects::EffectBurstComponent::TYPE_NAME,
+    crate::effects::ParticlesComponent::TYPE_NAME,
+    crate::SpriteMaskComponent::TYPE_NAME,
     MeshComponent::TYPE_NAME,
     SpriteComponent::TYPE_NAME,
     TilemapComponent::TYPE_NAME,
@@ -420,7 +496,8 @@ pub const TEXTURE_NAMING_COMPONENTS: &[&str] = &[
 /// it and the text simply does not draw — a blank where a label should be, with
 /// no failed frame to point at it. `TEXTURE_NAMING_COMPONENTS` has the same
 /// contract for textures.
-pub const FONT_NAMING_COMPONENTS: &[&str] = &[UiTextComponent::TYPE_NAME];
+pub const FONT_NAMING_COMPONENTS: &[&str] =
+    &[UiTextComponent::TYPE_NAME, crate::TextComponent::TYPE_NAME];
 
 /// Every texture a world draws with that nothing has bound.
 ///

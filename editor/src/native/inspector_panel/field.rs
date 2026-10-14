@@ -48,6 +48,8 @@ pub(crate) struct FieldAssets<'a> {
     pub(crate) prefabs: &'a [String],
     pub(crate) models: &'a [String],
     pub(crate) tile_sets: &'a [String],
+    /// The project's sprite shaders.
+    pub(crate) shaders: &'a [String],
     /// What each loaded texture reference looks like, for a field that can
     /// show one: a voxel material as a cube.
     pub(crate) pictures: &'a Pictures,
@@ -178,6 +180,7 @@ pub(crate) fn asset_list<'a>(
         AssetKind::TileSet => assets.tile_sets,
         AssetKind::Prefab => assets.prefabs,
         AssetKind::Model => assets.models,
+        AssetKind::Shader => assets.shaders,
         // A stylesheet is not something a component field names.
         AssetKind::Weave => return None,
     })

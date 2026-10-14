@@ -73,6 +73,7 @@ impl EnvironmentComponent {
     pub fn validate(self) -> Result<Self, EnvironmentError> {
         finite("background", &self.background)?;
         finite("ambient_color", &self.ambient_color)?;
+        finite("lighting_2d.ambient", &self.lighting_2d.ambient)?;
         at_least(
             "ambient_intensity",
             self.ambient_intensity,

@@ -140,8 +140,9 @@ whole-frame counters remain open.
 batches. The fixed 3D workload reports measured zeroes for these scopes with
 shadows on and off, while keeping the existing exact 3D counters/timestamps.
 
-Platformer's standalone and native editor Game reports both settle for 30
-frames and record three consecutive frames at 1280×720. Every frame has:
+At the original batch-counter head, Platformer's standalone and native editor
+Game reports both settled for 30 frames and recorded three consecutive frames
+at 1280×720. Every frame had:
 
 | Physical batch work per frame | Standalone / editor Game |
 | --- | ---: |
@@ -151,9 +152,10 @@ frames and record three consecutive frames at 1280×720. Every frame has:
 | Uniform payload bytes | 576 |
 | Instance payload bytes | 41,968 |
 
-Native CI repeats the reports and checks those exact values. A two-view editor
-run records the same values independently for Game and Scene in each of six
-Play frames; the primary count remains nine. Profiler/report regressions cover
+Native CI repeats the reports and checks the current accounting below. The
+original two-view editor run recorded the same values independently for Game
+and Scene in each of six Play frames; the primary count remained nine.
+Profiler/report regressions cover
 scope separation, accumulation, capture/reset and undrawn versus measured zero.
 A required-GPU regression encodes empty and nonempty batches through all three
 renderers over two submissions and verifies exact writes/bytes and slot reuse.
@@ -249,3 +251,52 @@ Warning-denied Clippy/WASM and format/file-size gates pass. Numeric-factor,
 mask-alpha, legacy-restoration, voxel-residency and scene-undo regressions are
 included. Generated component metadata is refreshed. Material assets, alpha/
 sidedness unification, imported emission and in-tree game adoption remain open.
+
+
+## Integration with the 2D closing round
+
+Merging main through `2c36c2e1` preserves the 3D normals/material/collision
+registrations alongside sprite shaders, 2D lighting, normal maps, masks,
+particles and world text. Platformer's newer level and UI change its workload;
+the earlier 9-draw table remains evidence for the original head.
+
+Current 1280×720 samples settle for 30 rendered frames and record three frames:
+
+| Physical batch work per frame | Standalone | Editor Game |
+| --- | ---: | ---: |
+| Draws / render passes | 24 / 24 | 23 / 23 |
+| Instances | 534 | 519–529 |
+| Queue buffer writes | 48 | 46 |
+| Uniform payload bytes | 3,456 | 3,296 |
+| Instance payload bytes | 91,328 | 88,688–90,448 |
+
+These are samples, not identical-workload targets: standalone advances one
+fixed step per draw; the editor sample advances eight. Particle lifetimes
+therefore change the sprite counts and batches. CI preserves that host timing
+behavior and instead checks exact accounting against the stable non-sprite
+workload (four batches and a mixed shape/glyph payload 2,656 bytes smaller than storing
+every instance as a 176-byte sprite), allowing transient sprite variation.
+Every batch must still issue one pass and two writes, with exactly the expected
+160/64-byte uniforms and aggregate instance payload. The GPU regression keeps
+exact draw and instance assertions on controlled inputs.
+
+Sprite uniforms now include the shader clock and mask transform (160 bytes);
+shape/glyph uniforms remain 64 bytes. Sprite/shape instances also carry the
+new rendering fields. These counters count per-batch work, excluding shared
+2D-lighting resources and shadow-map updates. They remain separate from the
+unfinished whole-frame accounting. The three-renderer GPU regression now
+expects 288 uniform bytes for one sprite, shape and glyph batch combined.
+
+The fixed 3D workload retains its existing 602/301 draws, 603/301 passes,
+138,032/115,568 uniform bytes and zero settled geometry uploads with shadows
+on/off. This integration does not add 3D point or spot lights.
+
+Local integration gates pass 2,652 scoped native/catalog tests, including all
+55 GPU-package tests repeated with GPU/timestamps required. Warning-denied
+workspace Clippy/WASM and formatting/file-size checks pass. Native/editor
+authored-color captures pass. Rebuilt Chromium passes both six-asset 3D ready
+controls, Platformer's five-coin/no-fall keyboard goal, sprite shaders/masks and
+Low Tide on a phone viewport. Smooth/flat captures retain 1,449 native and
+1,451 browser changed pixels. CI retains the shader/mask smokes; the shader's
+deliberately small palette uses an explicit eight-color minimum, with the
+generic smoke's default remaining sixteen.

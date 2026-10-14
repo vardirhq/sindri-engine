@@ -323,6 +323,9 @@ fn frame(
                 // covers what.
                 depth: SpriteDepth::Write,
                 instances: instances.clone(),
+                shader: None,
+                normal_map: None,
+                mask: None,
             },
         ));
     }

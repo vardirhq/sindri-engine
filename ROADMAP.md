@@ -187,7 +187,30 @@ shaped like the tool.
 - [x] Add font and text authoring: the inspector edits multiline content and
   chooses from the project browser's OpenType font assets; Add Component offers
   UI Text only when a project font can complete its otherwise dishonest blank
-- [ ] Port particles after the render lifecycle is stable
+- [x] Port particles — `sindri.particles` emitters in the fleck pool, driven
+  from Decay, previewed in the Scene view and proven by the platformer's
+  sparkle and dust (`docs/particles.md`)
+- [x] Let a sprite draw through the project's own shader — a `.wgsl` asset
+  defining `fn sprite_shader`, wrapped in the sprite pipeline, with four
+  per-instance `shader_params` Decay can write; checked on bind everywhere,
+  hot-reloaded in the editor, refused by export when broken, and shown by
+  `examples/sprite-shaders`. The rest of the 2D closing round is tracked in
+  `docs/2d-update.md`
+- [x] Light 2D scenes — an ambient color and point lights for world sprites,
+  tilemaps, flecks and shapes, normal maps for sprites and tilemaps, and
+  CPU-built polar shadows from box, polygon and tilemap occluders; Decay drives
+  the lights and the platformer's cave proves it (`docs/2d-lights.md`)
+- [x] Slice sprites into nine — sheet borders in pixels, `draw: sliced` on
+  sprites and UI images, guides dragged in the sheet slicer, and the
+  platformer's HUD frame and signboard as proof (`docs/nine-slice.md`)
+- [x] Autotile with terrains — 16-edge and 47-blob terrains in the sheet,
+  painted by the tilemap brush and `Grid.set_terrain`, and the platformer's
+  level painted with one (`docs/terrains.md`)
+- [x] Mask sprites — `sindri.sprite_mask` and `mask: inside | outside` on
+  sprites, proven by `examples/sprite-masks` (`docs/sprite-masks.md`)
+- [x] Place text in the world and give it spans — `sindri.text`, and
+  `[b]`, `[i]`, `[color=…]` rich text, proven by Orbital's damage numbers
+  (`docs/world-text.md`)
 - [ ] Port layers, anchors, and sprite bounds — layers work, and the nine
   anchors are a field of the UI family rather than of every sprite; editor picking uses the renderer's unit-quad geometry directly,
   while reusable component bounds remain. Parallax is not

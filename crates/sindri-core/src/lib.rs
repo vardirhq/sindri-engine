@@ -20,6 +20,7 @@ mod scene;
 #[allow(clippy::collapsible_if)]
 mod sheet;
 mod tags;
+mod terrain;
 mod tileset;
 mod time;
 mod transform;
@@ -61,6 +62,9 @@ pub use sheet::{
     SHEET_FORMAT_VERSION, SheetError, SheetGrid, SpriteAnchor, SpriteSheetDocument, sheet_id_for,
 };
 pub use tags::TagsComponent;
+pub use terrain::{
+    Neighbors, TerrainDocument, TerrainKind, blob_index, blob_mask, blob_masks, edge_mask,
+};
 pub use tileset::{
     BUILTIN_BLOCKS, FaceAnimation, TILESET_FORMAT_VERSION, TILESET_SUFFIX, TileBox, TileDefinition,
     TileFace, TileFaceVisual, TileFaces, TileSetDocument, TileSetError,

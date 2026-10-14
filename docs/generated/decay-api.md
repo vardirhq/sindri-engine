@@ -18,10 +18,12 @@ The machine-readable form of this page is
 What the entity a script runs on offers, beyond the script's own fields.
 
 - `entity`: `Entity` — The object in the game this script is attached to. Pass it to calls that act on an object, such as `World.despawn(this.entity)`.
+- `light2d`: `Light2d` — The 2D light on this script's object, if it has one: its color, brightness and reach.
 - `shape`: `Shape` — The drawn shape on this script's object, if it has one: its colors, outline and how much of it is drawn.
 - `sprite`: `Sprite` — The image (sprite) on this script's object, if it has one: its color and drawing order.
 - `transform`: `Transform` — Where this script's object is, how it is turned and how big it is. Change it to move the object.
 - `ui_image`: `UiImage` — The on-screen interface image on this script's object, if it has one: its color and drawing order.
+- `world_text`: `WorldText` — The world text on this script's object, if it has some: its color, size and drawing order.
 
 ## Globals
 
@@ -269,16 +271,21 @@ Particle effects, such as sparks and explosions. The particles are only drawn; t
 
 - `burst(entity: Entity)` → `f32` — Plays the particle burst set up on an object, at that object's position. Gives back how many particles were made.
 - `burst_at(entity: Entity, x: f32, y: f32)` → `f32` — Plays the particle burst set up on an object at another position, such as where an enemy just died.
+- `emit(entity: Entity, count: f32)` → `f32` — Throws that many of an object's emitter particles at once, such as dust when landing. Gives back how many were made.
 - `live()` → `f32` — How many particles are currently on screen.
+- `play(entity: Entity)` → `f32` — Starts the particle emitter set up on an object. Gives back 1.
+- `stop(entity: Entity)` → `f32` — Stops the particle emitter set up on an object; particles already out live out their life. Gives back 1.
 
 ### `Entity`
 
 An object in the game, such as a player, an enemy or a button. Scripts get these from calls like `World.find` and can store them, compare them and change their transform, sprite or shape.
 
+- `light2d`: `Light2d` — The object's 2D light, if it has one.
 - `shape`: `Shape` — The object's drawn shape, if it has one.
 - `sprite`: `Sprite` — The object's image (sprite), if it has one.
 - `transform`: `Transform` — Where the object is, how it is turned and how big it is.
 - `ui_image`: `UiImage` — The object's on-screen interface image, if it has one.
+- `world_text`: `WorldText` — The object's world text, if it has some.
 
 ### `Game`
 
@@ -331,6 +338,7 @@ Grids of tiles, flat or stacked in layers like building blocks: what each cell h
 - `rows(grid: Entity)` → `f32` — How many rows a grid has.
 - `set_block(grid: Entity, column: f32, row: f32, level: f32, tile: String)` → `unit` — Places a block, by name, in a cell of a layered grid or a grid whose ground is a voxel world. `""` removes the block.
 - `set_flood(map: Entity, level: f32, block: String)` → `unit` — Sets a reversible water overlay on a voxel world viewed as a map, using a finite height and a block's top face. An empty block name clears it. Refused on block views.
+- `set_terrain(grid: Entity, column: f32, row: f32, terrain: String)` → `unit` — Paints a terrain the map's sheet declares into a flat tile map's cell, choosing its tile and its neighbors' from which of them are the same terrain. `""` empties the cell and redraws its neighbors.
 - `set_tile(grid: Entity, column: f32, row: f32, index: f32)` → `unit` — Changes a flat tile map's cell to one of its tiles, by number. A negative number empties the cell.
 - `step_toward(mover: Entity, grid: Entity, target: Entity)` → `bool` — Moves a character one cell along the shortest walkable path towards a target. Gives back whether it moved.
 - `surface(grid: Entity, column: f32, row: f32)` → `String` — Which block is on top of a voxel world's column, by name, seen from straight above, or `""` where nothing stands. What a map view of the world draws there.
@@ -362,6 +370,16 @@ The keyboard, as `Input.Keyboard`. Keys are named by position, such as `"W"`, `"
 - `is_down(key: String)` → `bool` — Whether a key is being held down.
 - `just_pressed(key: String)` → `bool` — Whether a key was pressed this frame. True only once per press, however long it is held.
 - `just_released(key: String)` → `bool` — Whether a key was let go this frame.
+
+### `Light2d`
+
+A light in a 2D scene: it brightens sprites, tiles and shapes near it when the scene's environment turns 2D lighting on. Switch one off with its object's `set_active`.
+
+- `color`: `Color` — The light's color. Lowering `a` dims it, the way it fades a sprite.
+- `falloff`: `f32` — How the light fades toward its edge: 1 fades evenly, higher numbers keep it bright near the middle and drop off sharply.
+- `height`: `f32` — How high above the scene the light hangs. Only images with a normal map notice: low lights rake across their bumps, high ones light them evenly.
+- `intensity`: `f32` — How bright the light is; 0 is off.
+- `radius`: `f32` — How far the light reaches, in world units.
 
 ### `NumberTween`
 
@@ -554,6 +572,15 @@ Playing an object's sequences: choreography set up for it in the scene's Timelin
 - `stop(entity: Entity)` → `unit` — Stops an object's sequence where it is.
 - `time(entity: Entity)` → `f32` — How far into its sequence an object has got, in seconds.
 
+### `ShaderParams`
+
+The four numbers a sprite's shader reads. What each one means is up to the shader.
+
+- `w`: `f32` — The fourth number.
+- `x`: `f32` — The first number.
+- `y`: `f32` — The second number.
+- `z`: `f32` — The third number.
+
 ### `Shape`
 
 A shape drawn in the game world, such as a circle, polygon or ring, with an inside color and an outline.
@@ -575,6 +602,7 @@ A 2D image drawn in the game world, and how it is colored.
 - `color_multiply`: `Color` — Another color the image is multiplied by, on top of `tint`.
 - `color_offset`: `Color` — A color added on top of the image, which can make it brighter or flash white. Keep its `a` at 0, or the image's transparent edges become visible.
 - `layer`: `f32` — Drawing order: higher numbers are drawn in front of lower ones.
+- `shader_params`: `ShaderParams` — Four numbers the sprite's shader reads, as `x`, `y`, `z` and `w`. What each one does is up to the shader: how far a dissolve has got, how bright a flash is.
 - `tint`: `Color` — A color the image is multiplied by. White leaves it unchanged; lowering `a` fades it out.
 
 ### `Stick`
@@ -731,3 +759,12 @@ Finding, creating and removing the objects in a game. Every object in a scene (a
 - `take_signal(name: String)` → `f32` — Collects the numbers other scripts sent to this object under a name with `send_signal`, added together. Gives 0 when nothing arrived.
 - `with_tag(tag: String)` → `List<Entity>` — Every switched-on object with a tag, as a list: `for enemy in World.with_tag("enemy") { ... }`. Looks through the whole game, so call it once per frame, not in a loop.
 - `within_radius(tag: String, position: Vec3, radius: f32)` → `List<Entity>` — A snapshot list of active tagged objects within an inclusive world-space radius of a Vec3 position, nearest first; ties keep world order. Skips unusable transforms. Empty when none match; over 8192 results is an error. Negative or NaN radii are errors; positive infinity searches the whole world.
+
+### `WorldText`
+
+Words placed in the game world, such as a damage number or a name over a character. Change the words with `Ui.set_text` and `Ui.set_number`, as for interface text.
+
+- `color`: `Color` — The words' color. Lowering `a` fades them out; colored spans fade with it.
+- `font_size`: `f32` — How tall a line of the words is, in world units.
+- `layer`: `f32` — Drawing order: drawn over sprites in the same layer, under higher ones.
+- `visible`: `f32` — How many letters show, for a typewriter reveal. Negative shows them all.
