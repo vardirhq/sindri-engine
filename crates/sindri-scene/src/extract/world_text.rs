@@ -35,14 +35,19 @@ impl SceneExtractor {
             if !world.is_active(entity) {
                 continue;
             }
-            // Where the entity is, ancestors and all. Its turn and scale are
-            // not the words': a label stays upright and keeps the size it was
-            // authored at, and a script that wants it bigger sets the size.
-            let position = world_model_matrix(world, entity).w_axis;
-            layers
-                .entry(text.layer)
-                .or_default()
-                .push(text.instance([position.x, position.y])?);
+            // Where the entity is, ancestors and all. Its scale is never the
+            // words': a label keeps the size it was authored at, and a script
+            // that wants it bigger sets the size. Its turn is theirs only when
+            // the text asks for it; otherwise a label stays level.
+            let model = world_model_matrix(world, entity);
+            let position = model.w_axis;
+            let mut instance = text.instance([position.x, position.y])?;
+            if text.follow_rotation {
+                // Where the entity's own x axis points, which is its turn in
+                // the plane whatever its scale.
+                instance = instance.with_rotation(model.x_axis.y.atan2(model.x_axis.x));
+            }
+            layers.entry(text.layer).or_default().push(instance);
         }
         for (layer, instances) in layers {
             frame.push(FramePass::new(

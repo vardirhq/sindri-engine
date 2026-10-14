@@ -6,6 +6,10 @@
 //! floats over whatever the camera's zoom. The anchor names which point of the
 //! words sits on the entity, since a world entity has no viewport edge to be
 //! anchored to. It is drawn with the sprites in its `layer`, over them.
+//!
+//! One field is its own: `follow_rotation`. Off, the words stay level however
+//! the entity turns, which is what a damage number or a name plate wants. On,
+//! they turn with it about the anchor point, for words painted on something.
 
 use std::ops::{Deref, DerefMut};
 
@@ -15,20 +19,26 @@ use sindri_core::SceneComponent;
 use super::UiTextComponent;
 
 #[derive(Clone, Debug, Deserialize, PartialEq)]
-#[serde(transparent)]
-pub struct TextComponent(pub UiTextComponent);
+pub struct TextComponent {
+    #[serde(flatten)]
+    pub text: UiTextComponent,
+    /// Whether the words turn with the entity's world rotation about the
+    /// anchor point. Off, they stay level.
+    #[serde(default)]
+    pub follow_rotation: bool,
+}
 
 impl Deref for TextComponent {
     type Target = UiTextComponent;
 
     fn deref(&self) -> &UiTextComponent {
-        &self.0
+        &self.text
     }
 }
 
 impl DerefMut for TextComponent {
     fn deref_mut(&mut self) -> &mut UiTextComponent {
-        &mut self.0
+        &mut self.text
     }
 }
 

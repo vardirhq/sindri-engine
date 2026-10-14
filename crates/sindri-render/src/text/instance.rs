@@ -43,6 +43,9 @@ pub struct TextInstance {
     /// Whether `[b]`, `[i]` and `[color=…]` tags in the words are read as
     /// spans rather than drawn. See `rich.rs`.
     pub(super) rich: bool,
+    /// A turn about `position`, in radians counter-clockwise. Zero for every
+    /// string on the HUD, which turns with its canvas instead.
+    pub(super) rotation: f32,
 }
 
 impl TextInstance {
@@ -87,7 +90,16 @@ impl TextInstance {
             shadow: TextShadow::default(),
             fit: None,
             rich: false,
+            rotation: 0.0,
         })
+    }
+
+    /// Turns the laid-out string about `position` by `radians`,
+    /// counter-clockwise. A turn that is not finite is ignored.
+    #[must_use]
+    pub fn with_rotation(mut self, radians: f32) -> Self {
+        self.rotation = if radians.is_finite() { radians } else { 0.0 };
+        self
     }
 
     /// The rect the text is laid out in, and how it breaks inside it.
@@ -196,6 +208,10 @@ impl TextInstance {
 
     pub const fn font_size(&self) -> f32 {
         self.font_size
+    }
+
+    pub const fn rotation(&self) -> f32 {
+        self.rotation
     }
 
     pub const fn line_height(&self) -> f32 {

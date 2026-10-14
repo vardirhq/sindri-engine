@@ -1884,6 +1884,7 @@
           1.0,
           1.0
         ],
+        "follow_rotation": false,
         "font": "",
         "font_size": 0.5,
         "italic": false,

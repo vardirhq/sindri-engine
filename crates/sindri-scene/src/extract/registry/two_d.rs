@@ -177,7 +177,8 @@ pub(super) fn register_world_text(
                 "softness": 0.0
             },
             "auto_size": { "enabled": false, "min": 0.1 },
-            "rich": false
+            "rich": false,
+            "follow_rotation": false
         }),
     )?;
     Ok(())

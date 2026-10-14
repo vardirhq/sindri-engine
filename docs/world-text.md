@@ -22,9 +22,15 @@ differences that come from where the words live:
   the middle of the words on the entity, `bottom` puts their bottom edge there,
   and so on. There is no viewport edge to anchor to.
 
-The words sit at the entity's world position, parents included. Its rotation
-and scale do not reach them: a label stays upright and keeps its authored size.
-A script that wants a number to pop writes `this.world_text.font_size`.
+The words sit at the entity's world position, parents included. Its scale does
+not reach them: a label keeps its authored size, and a script that wants a
+number to pop writes `this.world_text.font_size`.
+
+Its rotation reaches them only with `follow_rotation: true`. Off, the default,
+a label stays level however the entity under it spins, which is what a damage
+number or a name plate wants. On, the words turn with the entity's world
+rotation about their anchor point, shadow and outline with them, for words
+painted on a crate or a sign hung at an angle.
 
 ```json
 "sindri.text": {
@@ -94,7 +100,7 @@ it clear.
 
 ## Limits
 
-- No text rotation or per-glyph animation.
+- No per-glyph animation.
 - No inline images or size changes inside a string; spans change color, weight
   and slant only.
 - One face per string. Font fallback is still missing.

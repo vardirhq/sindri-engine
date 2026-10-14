@@ -64,3 +64,50 @@ fn world_text_sizes_are_world_units() {
         )
         .expect("a big world label extracts");
 }
+
+/// A label stays level under a turned entity unless it asks to follow the
+/// turn, and then it takes the whole world turn, its parent's included.
+#[test]
+fn world_text_turns_with_its_entity_only_when_asked() {
+    let quarter = std::f32::consts::FRAC_1_SQRT_2;
+    let frame = SceneExtractor::new()
+        .unwrap()
+        .extract(
+            &world_from(&scene(&format!(
+                r#",
+        {{ "id": "crate", "transform_3d": {{ "position": [1.0, 0.0, 0.0],
+            "rotation": [0.0, 0.0, {quarter}, {quarter}] }} }},
+        {{ "id": "level", "parent": "crate", "components": {{ "sindri.text": {{
+            "text": "UP", "font": "fonts/a.ttf", "font_size": 0.4 }} }} }},
+        {{ "id": "painted", "parent": "crate", "components": {{ "sindri.text": {{
+            "text": "FRAGILE", "font": "fonts/a.ttf", "font_size": 0.4,
+            "follow_rotation": true }} }} }}"#
+            ))),
+            VIEWPORT,
+            CameraView::default(),
+            &TextureBindings::new(),
+        )
+        .expect("the scene extracts");
+    let turns: Vec<(String, f32)> = frame
+        .passes()
+        .iter()
+        .filter_map(|pass| match &pass.command {
+            FrameCommand::Text { instances } => Some(instances),
+            _ => None,
+        })
+        .flatten()
+        .map(|instance| (instance.text().to_owned(), instance.rotation()))
+        .collect();
+    let turn = |words: &str| {
+        turns
+            .iter()
+            .find(|(text, _)| text == words)
+            .map(|(_, turn)| *turn)
+            .expect("drawn")
+    };
+    assert!(close(turn("UP"), 0.0), "{turns:?}");
+    assert!(
+        close(turn("FRAGILE"), std::f32::consts::FRAC_PI_2),
+        "{turns:?}"
+    );
+}

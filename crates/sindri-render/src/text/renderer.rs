@@ -405,6 +405,12 @@ impl TextRenderer {
         face: impl Fn(usize) -> [f32; 4],
     ) {
         let scale = laid.scale;
+        // The whole string, shadow included, turns about the point it was
+        // placed at, so the anchor stays where the entity is.
+        let pivot = Vec3::new(instance.position[0], instance.position[1], 0.0);
+        let turn = Mat4::from_translation(pivot)
+            * Mat4::from_rotation_z(instance.rotation)
+            * Mat4::from_translation(-pivot);
         let mut drawn = 0_usize;
         for run in laid.buffer.layout_runs() {
             for glyph in run.glyphs {
@@ -434,7 +440,8 @@ impl TextRenderer {
                     origin[0] + (left + slot.size[0] * 0.5) * scale,
                     origin[1] - (top + slot.size[1] * 0.5) * scale,
                 ];
-                let model = Mat4::from_translation(Vec3::new(centre[0], centre[1], 0.0))
+                let model = turn
+                    * Mat4::from_translation(Vec3::new(centre[0], centre[1], 0.0))
                     * Mat4::from_scale(Vec3::new(size[0], size[1], 1.0));
                 let quad = GlyphInstance::new(model, slot.uv, face(glyph.metadata));
                 let quad = if slot.colored {
