@@ -27,6 +27,7 @@ pub(crate) struct ModelRenderer {
     slots: Vec<Slot>,
     next: usize,
     stats: ModelCacheStats,
+    draw_stats: crate::MeshDrawStats,
 }
 
 #[derive(Debug)]
@@ -76,6 +77,7 @@ impl ModelRenderer {
             slots: Vec::new(),
             next: 0,
             stats: ModelCacheStats::default(),
+            draw_stats: crate::MeshDrawStats::default(),
         }
     }
 
@@ -96,6 +98,10 @@ impl ModelRenderer {
 
     pub(crate) const fn stats(&self) -> ModelCacheStats {
         self.stats
+    }
+
+    pub(crate) const fn draw_stats(&self) -> crate::MeshDrawStats {
+        self.draw_stats
     }
 
     pub(crate) fn encode(
@@ -188,6 +194,7 @@ impl ModelRenderer {
                 pass.set_index_buffer(geometry.index.slice(..), geometry.format);
                 pass.draw_indexed(0..geometry.count, 0, 0..1);
                 self.stats.draws += 1;
+                self.draw_stats.record_draw(std::mem::size_of::<Uniform>());
             }
         }
         Ok(())

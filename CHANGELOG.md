@@ -1,5 +1,9 @@
 # Changelog
 
+- Record physical textured 3D/model draw and render-pass counts, uniform queue
+  writes/bytes, and transient/persistent upload events in standalone benchmark
+  reports. The comparison tool prints these counters without treating older or
+  editor reports as measured zeroes. GPU timestamps and editor counters remain open.
 - Add a fixed 300-prop perspective 3D benchmark project with cubes, inline
   surfaces and repeated GLBs. Native/browser players and offscreen captures now
   honor authored directional shadow settings, matching editor viewports.

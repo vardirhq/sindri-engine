@@ -58,6 +58,15 @@ mod benchmark {
             if at >= settle {
                 playing.push(json!({
                     "steps": 1,
+                    "mesh_counters": {
+                        "draw_calls": drawn.meshes.draw_calls,
+                        "render_passes": drawn.meshes.render_passes,
+                        "uniform_writes": drawn.meshes.uniform_writes,
+                        "uniform_bytes": drawn.meshes.uniform_bytes,
+                        "transient_geometry_uploads": drawn.meshes.transient_geometry_uploads,
+                        "model_uploads": drawn.model_uploads,
+                        "cached_geometry_uploads": drawn.cached_geometry_uploads,
+                    },
                     "phases": {
                         "step": micros(stepped),
                         "presentation": micros(drawn.presentation),

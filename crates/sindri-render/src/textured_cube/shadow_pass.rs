@@ -11,6 +11,7 @@ impl TexturedCubeRenderer {
     ) {
         self.shadow_view_projection =
             light_view_projection(camera_view_projection, self.lighting, self.shadow_settings);
+        self.draw_stats.render_passes += 1;
         let _pass = encoder.begin_render_pass(&wgpu::RenderPassDescriptor {
             label: Some("Sindri directional shadow clear"),
             color_attachments: &[],
@@ -45,6 +46,7 @@ impl TexturedCubeRenderer {
             &self.batches[slot].shadow_bind_group,
             &self.shadow_pipeline,
             &self.mesh,
+            &mut self.draw_stats,
         );
     }
 
@@ -61,6 +63,7 @@ impl TexturedCubeRenderer {
             return;
         }
         let mesh = MeshBuffers::new(device, "Sindri shadow transient mesh", vertices, indices);
+        self.draw_stats.transient_geometry_uploads += 1;
         let slot = self.reserve(device);
         encode_shadow_mesh(
             queue,
@@ -71,6 +74,7 @@ impl TexturedCubeRenderer {
             &self.batches[slot].shadow_bind_group,
             &self.shadow_pipeline,
             &mesh,
+            &mut self.draw_stats,
         );
     }
 
@@ -99,6 +103,7 @@ impl TexturedCubeRenderer {
             &self.batches[slot].shadow_bind_group,
             &self.shadow_pipeline,
             mesh,
+            &mut self.draw_stats,
         );
     }
 }
@@ -113,6 +118,7 @@ fn encode_shadow_mesh(
     bind_group: &wgpu::BindGroup,
     pipeline: &wgpu::RenderPipeline,
     mesh: &MeshBuffers,
+    stats: &mut crate::MeshDrawStats,
 ) {
     queue.write_buffer(
         uniform,
@@ -137,4 +143,5 @@ fn encode_shadow_mesh(
     pass.set_pipeline(pipeline);
     pass.set_bind_group(0, bind_group, &[]);
     mesh.draw(&mut pass);
+    stats.record_draw(std::mem::size_of::<Mat4>());
 }

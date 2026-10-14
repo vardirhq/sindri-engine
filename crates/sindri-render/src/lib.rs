@@ -11,6 +11,7 @@ mod frame;
 mod glyph;
 mod lighting;
 mod mesh;
+mod mesh_stats;
 mod model;
 mod offscreen;
 mod shadow;
@@ -48,6 +49,7 @@ pub use glyph::{
 };
 pub use lighting::WorldLighting;
 pub use mesh::{ColoredVertex, MeshBuffers, TexturedVertex};
+pub use mesh_stats::MeshDrawStats;
 pub use model::{
     ModelCacheStats, ModelData, ModelGeometry, ModelHierarchyNode, ModelImage, ModelIndexData,
     ModelNodeInstance, ModelRenderError, ModelSurface, ModelVertex, RenderModel,

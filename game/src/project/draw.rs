@@ -21,7 +21,7 @@ use sindri_scene::{CameraView, SceneRuntime, TextureBindings, measure_ui_text};
 
 use super::ProjectPlayer;
 
-/// Where one draw's time went, on the CPU.
+/// One draw's CPU timings and scoped renderer counters.
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
 pub struct DrawTimes {
     /// Laying the stylesheets' per-draw states over the world, and taking
@@ -32,6 +32,12 @@ pub struct DrawTimes {
     pub extraction: Duration,
     /// Recording the frame's commands and submitting them.
     pub encoding: Duration,
+    /// Physical textured 3D/model work; excludes the frame clear, 2D and post.
+    pub meshes: sindri_render::MeshDrawStats,
+    /// New imported assets uploaded this draw, not primitive/buffer counts.
+    pub model_uploads: u64,
+    /// Persistent mesh vertex/index buffer pairs uploaded this draw.
+    pub cached_geometry_uploads: u64,
 }
 
 /// The GPU side of playing a project offscreen.
@@ -152,6 +158,9 @@ impl ProjectRenderer {
             .create_command_encoder(&wgpu::CommandEncoderDescriptor {
                 label: Some("project draw"),
             });
+        let before = self.cubes.draw_stats();
+        let model_uploads = self.cubes.model_cache_stats().uploads;
+        let cached_uploads = self.cubes.cached_mesh_stats().buffer_uploads;
         encode_prepared_frame(
             FrameRenderers {
                 cube: &mut self.cubes,
@@ -175,6 +184,17 @@ impl ProjectRenderer {
             presentation: styled.duration_since(began) + unstyled.duration_since(extracted),
             extraction: extracted.duration_since(styled),
             encoding: unstyled.elapsed(),
+            meshes: self.cubes.draw_stats().since(before),
+            model_uploads: self
+                .cubes
+                .model_cache_stats()
+                .uploads
+                .saturating_sub(model_uploads),
+            cached_geometry_uploads: self
+                .cubes
+                .cached_mesh_stats()
+                .buffer_uploads
+                .saturating_sub(cached_uploads),
         })
     }
 }

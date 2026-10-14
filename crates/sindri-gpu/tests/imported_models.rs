@@ -154,7 +154,14 @@ fn imported_models_render_hierarchy_colors_depth_and_reuse_uploads() {
     assert_eq!(renderer.model_cache_stats().uploads, 1);
     assert_eq!(renderer.model_cache_stats().draws, 4);
     assert_eq!(renderer.model_cache_stats().resident_models, 1);
+    let draws = renderer.draw_stats();
+    check_draws(draws);
     renderer.begin_submission();
+    assert_eq!(
+        renderer.draw_stats(),
+        draws,
+        "slot reset preserves lifetime counters"
+    );
     assert_eq!(renderer.model_cache_stats().uploads, 1);
     drop(asset);
     renderer.begin_submission();
@@ -163,6 +170,18 @@ fn imported_models_render_hierarchy_colors_depth_and_reuse_uploads() {
         0,
         "released models free GPU resources"
     );
+}
+
+fn check_draws(stats: sindri_render::MeshDrawStats) {
+    assert_eq!(
+        stats.draw_calls, 4,
+        "two model commands each draw two primitives"
+    );
+    assert_eq!(stats.render_passes, 4);
+    assert_eq!(stats.uniform_writes, 4);
+    assert_eq!(stats.uniform_bytes, 4 * 288);
+    assert_eq!(stats.transient_geometry_uploads, 0);
+    assert_eq!(stats.since(stats), sindri_render::MeshDrawStats::default());
 }
 
 #[test]

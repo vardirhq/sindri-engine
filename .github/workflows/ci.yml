@@ -372,6 +372,9 @@ jobs:
           cargo run --package sindri-causeway --bin project-capture -- examples/benchmark3d target/render-artifacts/native-benchmark3d.png 960 540 wait:0.5
           cargo run --package sindri-causeway --bin project-capture -- target/native-benchmark3d-no-shadows target/render-artifacts/native-benchmark3d-no-shadows.png 960 540 wait:0.5
           node scripts/browser/compare-shadows.mjs target/render-artifacts/native-benchmark3d.png target/render-artifacts/native-benchmark3d-no-shadows.png
+          cargo run --package sindri-causeway --bin project-benchmark -- examples/benchmark3d target/render-artifacts/benchmark3d.json 3 30
+          cargo run --package sindri-causeway --bin project-benchmark -- target/native-benchmark3d-no-shadows target/render-artifacts/benchmark3d-no-shadows.json 3 30
+          python3 scripts/check-3d-benchmark.py target/render-artifacts/benchmark3d.json target/render-artifacts/benchmark3d-no-shadows.json
       - name: Capture the companion game mid-run
         id: causeway_capture
         env:
@@ -405,6 +408,8 @@ jobs:
             target/render-artifacts/scene-frame-pipeline.png
             target/render-artifacts/native-benchmark3d.png
             target/render-artifacts/native-benchmark3d-no-shadows.png
+            target/render-artifacts/benchmark3d.json
+            target/render-artifacts/benchmark3d-no-shadows.json
             target/render-artifacts/causeway.png
             target/render-artifacts/orbital-spectacle-desktop.png
             target/render-artifacts/orbital-spectacle-phone.png

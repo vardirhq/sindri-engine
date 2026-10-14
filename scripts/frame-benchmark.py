@@ -67,8 +67,13 @@ def section_stats(frames: list[dict]) -> dict:
     for frame in frames:
         for key, value in frame["phases"].items():
             phases[key] = phases.get(key, 0.0) + value / 1000.0
+    counters: dict[str, list[int]] = {}
+    for frame in frames:
+        for key, value in frame.get("mesh_counters", {}).items():
+            counters.setdefault(key, []).append(value)
     count = max(len(frames), 1)
     return {
+        "mesh_counters": {key: statistics.fmean(values) for key, values in counters.items()},
         "frames": len(frames),
         "work_mean": statistics.fmean(work) if work else 0.0,
         "work_p50": percentile(work, 0.50),
@@ -101,6 +106,10 @@ def describe(path: Path) -> list[str]:
             "           "
             + "  ".join(f"{key} {value:.2f}" for key, value in ranked if value >= 0.005)
         )
+        if stats["mesh_counters"]:
+            lines.append("           3D/frame " + "  ".join(
+                f"{key} {value:g}" for key, value in stats["mesh_counters"].items()
+            ))
     return lines
 
 

@@ -114,3 +114,29 @@ exercise delivery, rather than inferring it from authored component presence.
 The frame command enum intentionally contains only the render capabilities that exist today. It is
 not a general render graph. New commands should be added when a working renderer needs them, while
 asset resolution and GPU resource ownership remain outside serialized scene data.
+
+## Physical 3D counters
+
+`TexturedCubeRenderer::draw_stats()` returns cumulative `MeshDrawStats` for
+textured cubes, inline/cached meshes, their shadow draws and imported model
+primitives. Snapshot before encoding and call `since` afterwards. Submission
+slot resets do not reset counters, including the reset between shadows and
+color. The counters record executed encoder paths, rather than counting
+`FramePass` records: a model command can draw several primitives, and empty
+inline geometry or a missing cached mesh draws nothing.
+
+`draw_calls` counts indexed draws; `render_passes` includes the shadow-map clear
+as well as each draw's physical render pass. Uniform writes and their payload
+bytes exclude initialization and driver padding. `transient_geometry_uploads`
+counts uploaded vertex/index buffer pairs; a shadowed inline mesh currently
+uploads once for each of its shadow and color draws. Persistent model asset
+uploads and cached voxel geometry pairs remain separate cache counters.
+
+These counters exclude the frame clear, sprites, shapes, glyphs, post-processing,
+texture initialization and UI. They are not whole-frame GPU totals.
+`project-benchmark` records per-frame deltas under `mesh_counters`, and
+`scripts/frame-benchmark.py` prints their means when present. Old reports and
+editor reports without these counters retain their CPU summary. Editor counter
+reporting and GPU timestamp timing remain open; GPU completion wait is a CPU
+stall, not GPU execution time. This is feature-example instrumentation, proven
+with the fixed 3D Benchmark and the imported-model GPU readback regression.

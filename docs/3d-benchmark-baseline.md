@@ -46,5 +46,32 @@ The editor draws one frame during its three-second untouched rest check.
 
 This sample proves the workload and report path are usable. It does not set
 cross-machine performance targets. GPU completion wait is a CPU stall, not a
-GPU timestamp measurement. Actual draw/pass/upload counters, timestamp timing,
-longer optimized samples and batching/instancing targets remain open.
+GPU timestamp measurement. This original report predates physical counters.
+Timestamp timing, longer optimized samples and batching/instancing targets remain open.
+
+
+## Physical 3D counters
+
+Recorded October 14, 2026, with the same native debug/software Vulkan setup.
+Standalone runs settle for 30 frames, then record three consecutive frames for
+the original project and the control with only shadows disabled.
+`scripts/check-3d-benchmark.py` verifies each frame, and CI retains both reports.
+The existing imported-model GPU readback also verifies two model commands draw
+four primitives, upload the shared asset once and keep counters across slot resets.
+
+| Work per frame | Shadows on | Shadows off |
+| --- | ---: | ---: |
+| Indexed 3D draws | 502 | 301 |
+| Physical 3D render passes | 503 | 301 |
+| Uniform queue writes | 502 | 301 |
+| Uniform payload bytes | 105,984 | 93,120 |
+| Transient geometry buffer pairs | 200 | 100 |
+| New imported-model asset uploads | 0 | 0 |
+| New cached mesh geometry pairs | 0 | 0 |
+
+The shadow map has one extra clear pass. The 100 inline pyramids upload once
+for color and once for shadows; shared model geometry stays resident. The
+counters exclude the frame clear, 2D, post-processing, initialization and driver
+padding. They count recorded GPU commands and queue payloads, not GPU execution
+time. Editor reports and GPU timestamps remain open. These three-frame runs
+verify counts, rather than setting performance targets.

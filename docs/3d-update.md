@@ -168,9 +168,12 @@ cameras face), YXZ order. Build on `Transform3D::yaw_pitch_roll_radians` and
   Shared player/capture paths now apply shadow settings; native extraction checks
   counts/resource sharing and Session ready, and real browser smoke draws it.
   See [3D Benchmark](../examples/benchmark3d/README.md).
-- [ ] `scripts/frame-benchmark.py` reports actual draw count, passes, uploads and
-  encode/GPU time. Existing CPU timings and GPU completion wait are not these
-  counters or GPU timestamp measurements.
+- [x] Standalone benchmark records physical textured 3D/model draw/pass counts,
+  uniform writes/bytes, transient geometry pairs and persistent cache events.
+  Consecutive shadowed/unshadowed frames verify deltas; the summary prints means.
+  These are scoped 3D counters, excluding 2D, post and initialization uploads.
+- [ ] Extend counters to editor reports and whole-frame work, and add GPU
+  timestamp timing. Existing GPU completion wait is a CPU stall.
 - [ ] Set the targets the next slice must meet (for example, draws and passes
   per frame independent of repeated props, and zero steady-state uploads).
 

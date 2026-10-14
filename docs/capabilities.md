@@ -2586,8 +2586,12 @@ extracted commands and shared model resources; real Chromium fetches all six
 assets and draws the workload. Native/browser player and offscreen capture paths
 now apply authored shadow settings; on/off captures verify delivery alongside
 editor benchmarks. Imported models still do not cast or receive shadows.
-CPU benchmark phases and GPU completion wait are available; draw/pass/upload
-counters, GPU timestamps and performance targets remain pending. The
+CPU phases and GPU completion wait are available. Standalone reports also record
+physical textured 3D/model draws and passes, uniform queue writes/bytes, transient
+geometry pairs and separate persistent cache upload events. Shadowed/unshadowed
+consecutive-frame CI checks verify deltas; these counters exclude 2D, post and
+initial resource uploads. Editor counters, GPU timestamps and performance targets
+remain pending. The
 [baseline record](3d-benchmark-baseline.md) records the hardware/profile context,
 short editor/standalone sample and native/browser shadow comparisons.
 

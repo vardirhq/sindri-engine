@@ -31,8 +31,8 @@ models still use their separate renderer and do neither. This difference is part
 of the baseline, not evidence of a unified rendering path.
 
 Current reports contain CPU phase timings and the standalone GPU completion
-wait. That wait is not GPU timestamp timing. Actual draw-call/pass/upload
-counters and performance targets remain the next measurement work; extracted
+wait. That wait is not GPU timestamp timing. Editor/whole-frame counters and
+performance targets remain measurement work; extracted
 command counts alone do not measure GPU work. `scripts/browser/benchmark3d.mjs`
 requires all six asset fetches, the ready goal and a rendered capture without
 runtime/GPU errors. CI retains that capture.
@@ -44,3 +44,9 @@ delivery separately from the authored setting and command counts.
 
 A short debug/software-Vulkan sample and the exact capture comparisons are in
 [the baseline record](../../docs/3d-benchmark-baseline.md).
+
+The standalone report now includes `mesh_counters`: physical textured 3D/model
+draws and passes, uniform writes/bytes, transient geometry pairs and separate
+model/voxel cache upload events. `scripts/frame-benchmark.py summarize` prints
+their means. Counts exclude 2D, post, the frame clear and initialization uploads;
+editor counter reporting and GPU timestamps remain open.
