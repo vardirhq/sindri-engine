@@ -55,6 +55,7 @@ mod sequence;
 mod services;
 mod shape_query;
 mod shared;
+mod terrain;
 mod tiles;
 mod tween;
 mod ui;

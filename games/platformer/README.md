@@ -79,6 +79,8 @@ It uses, with no Rust of its own:
   whose roof keeps the daylight out, two lanterns that cast the pillar's shadow
   and a low wall torch raking the normal-mapped bricks;
 - **particles**: coins sparkle and the hero kicks up dust;
+- **terrain**: the level's ground is painted with the `ground` terrain, so
+  every open top grows grass and every gap shows a rim of earth;
 - **nine-slice**: the HUD frame and the signboard by the first gap are one
   24-pixel panel, sliced so each keeps its wooden border.
 
@@ -99,6 +101,7 @@ that plays it without a window, built from the same public pieces a host uses.
 that the lanterns warm it, and that the pillar shades its far side from one.
 `tests/sparkle_and_dust.rs` checks the coins' sparkle and the hero's dust, and
 `tests/sliced_panels.rs` that the HUD frame and signboard are drawn sliced.
+`tests/painted_ground.rs` checks every ground cell is what the terrain paints.
 
 `tests/one_way_platforms.rs` jumps through the authored planks, lands on top,
 drops through using the real input action, stops on the ordinary painted floor

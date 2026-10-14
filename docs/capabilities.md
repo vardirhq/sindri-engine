@@ -668,6 +668,12 @@ own space, sharing one draw. `border_scale` sets how big a border pixel is
 drawn. The sheet slicer drags the border's guides on the image. The platformer's
 HUD frame and signboard are one 24-pixel panel. See `docs/nine-slice.md`.
 
+A sheet can declare terrains: the sixteen `edges` or forty-seven `blob` sprites
+a cell draws for each pattern of same-terrain neighbors. The tilemap brush and
+`Grid.set_terrain` paint a terrain and redraw every neighbor whose picture
+depends on the cell, erasing included. The platformer's level is painted with
+its ground terrain. See `docs/terrains.md`.
+
 ### Game saves
 
 `sindri_core::SaveStore` is a flat, versioned key/value document. Flat because

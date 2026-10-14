@@ -112,12 +112,13 @@ game in this repository.
   slice. Contract: `docs/nine-slice.md`.
 
 ### 6. Autotiling
-- [ ] A sheet can declare terrains: a name and the sprite each of the sixteen
+- [x] A sheet can declare terrains: a name and the sprite each of the sixteen
   edge masks or the forty-seven blob masks paints.
-- [ ] The tilemap brush paints a terrain, choosing each cell and its neighbors'
+- [x] The tilemap brush paints a terrain, choosing each cell and its neighbors'
   sprites from the mask. Erasing updates the neighbors too.
-- [ ] Decay's `Grid` gains `set_terrain`.
-- [ ] Proof: the platformer's level is painted with a terrain.
+- [x] Decay's `Grid` gains `set_terrain`.
+- [x] Proof: the platformer's level is painted with a terrain. Contract:
+  `docs/terrains.md`.
 
 ### 7. Sprite masking
 - [ ] `sindri.sprite_mask`: a sprite whose shape is a mask rather than a

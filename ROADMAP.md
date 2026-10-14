@@ -203,6 +203,9 @@ shaped like the tool.
 - [x] Slice sprites into nine — sheet borders in pixels, `draw: sliced` on
   sprites and UI images, guides dragged in the sheet slicer, and the
   platformer's HUD frame and signboard as proof (`docs/nine-slice.md`)
+- [x] Autotile with terrains — 16-edge and 47-blob terrains in the sheet,
+  painted by the tilemap brush and `Grid.set_terrain`, and the platformer's
+  level painted with one (`docs/terrains.md`)
 - [ ] Port layers, anchors, and sprite bounds — layers work, and the nine
   anchors are a field of the UI family rather than of every sprite; editor picking uses the renderer's unit-quad geometry directly,
   while reusable component bounds remain. Parallax is not

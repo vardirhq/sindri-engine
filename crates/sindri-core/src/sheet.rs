@@ -27,6 +27,9 @@ use crate::AssetId;
 #[cfg(test)]
 mod tests;
 
+mod borders;
+mod terrains;
+
 /// The version this runtime writes and understands.
 pub const SHEET_FORMAT_VERSION: u32 = 1;
 
@@ -172,6 +175,10 @@ pub struct SpriteSheetDocument {
     /// strips at their size and stretches what is between them.
     #[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
     pub borders: BTreeMap<String, [u32; 4]>,
+    /// Terrains by name: the sprite each neighbor pattern of a painted area
+    /// draws. See [`crate::TerrainDocument`].
+    #[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
+    pub terrains: BTreeMap<String, crate::TerrainDocument>,
     /// Editor-only state, carried through untouched — the same arrangement a
     /// scene has. Where a slicer remembers what it was last showing.
     #[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
@@ -328,6 +335,7 @@ impl SpriteSheetDocument {
             sprites: BTreeMap::new(),
             size: None,
             borders: BTreeMap::new(),
+            terrains: BTreeMap::new(),
             editor: BTreeMap::new(),
         }
     }
@@ -409,60 +417,8 @@ impl SpriteSheetDocument {
             }
         }
         let rects = self.rects()?;
-        self.check_borders(&rects)
-    }
-
-    /// Every nine-slice border as fractions of the whole image: left, top,
-    /// right and bottom, the way a texture coordinate measures them.
-    ///
-    /// # Errors
-    /// When a border has no image size to measure against, names a sprite the
-    /// sheet does not, or is wider than its sprite.
-    pub fn border_fractions(&self) -> Result<BTreeMap<String, [f32; 4]>, SheetError> {
-        let rects = self.rects()?;
         self.check_borders(&rects)?;
-        let Some([width, height]) = self.image_size() else {
-            return Ok(BTreeMap::new());
-        };
-        #[allow(clippy::cast_precision_loss)]
-        let [width, height] = [width as f32, height as f32];
-        Ok(self
-            .borders
-            .iter()
-            .map(|(name, [left, top, right, bottom])| {
-                #[allow(clippy::cast_precision_loss)]
-                let fractions = [
-                    *left as f32 / width,
-                    *top as f32 / height,
-                    *right as f32 / width,
-                    *bottom as f32 / height,
-                ];
-                (name.clone(), fractions)
-            })
-            .collect())
-    }
-
-    fn check_borders(&self, rects: &BTreeMap<String, [f32; 4]>) -> Result<(), SheetError> {
-        if self.borders.is_empty() {
-            return Ok(());
-        }
-        let [width, height] = self.image_size().ok_or(SheetError::BordersWithoutSize)?;
-        for (name, [left, top, right, bottom]) in &self.borders {
-            let rect = if name.is_empty() {
-                [0.0, 0.0, 1.0, 1.0]
-            } else {
-                *rects
-                    .get(name)
-                    .ok_or_else(|| SheetError::BorderOnUnknownSprite(name.clone()))?
-            };
-            #[allow(clippy::cast_precision_loss)]
-            let fits = (left + right) as f32 <= rect[2] * width as f32 + 0.5
-                && (top + bottom) as f32 <= rect[3] * height as f32 + 0.5;
-            if !fits {
-                return Err(SheetError::BorderTooWide(name.clone()));
-            }
-        }
-        Ok(())
+        self.check_terrains(&rects)
     }
 }
 
@@ -510,6 +466,15 @@ pub enum SheetError {
     BorderOnUnknownSprite(String),
     #[error("the nine-slice border on `{0}` is wider or taller than the sprite it cuts")]
     BorderTooWide(String),
+    #[error("terrain `{terrain}` lists {found} sprites, and a {kind} terrain lists {wanted}")]
+    TerrainSize {
+        terrain: String,
+        kind: &'static str,
+        found: usize,
+        wanted: usize,
+    },
+    #[error("terrain `{terrain}` draws `{sprite}`, which the sheet does not cut")]
+    TerrainSprite { terrain: String, sprite: String },
     #[error("tile overhang ratio must be finite and non-negative, got {0}")]
     TileOverhangRatio(f32),
     #[error("sheet is not valid json: {message}")]

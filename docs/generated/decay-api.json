@@ -1601,6 +1601,24 @@
           "returns": "unit"
         },
         {
+          "description": "Paints a terrain the map's sheet declares into a flat tile map's cell, choosing its tile and its neighbors' from which of them are the same terrain. `\"\"` empties the cell and redraws its neighbors.",
+          "kind": "function",
+          "name": "set_terrain",
+          "parameter_names": [
+            "grid",
+            "column",
+            "row",
+            "terrain"
+          ],
+          "parameters": [
+            "Entity",
+            "f32",
+            "f32",
+            "String"
+          ],
+          "returns": "unit"
+        },
+        {
           "description": "Changes a flat tile map's cell to one of its tiles, by number. A negative number empties the cell.",
           "kind": "function",
           "name": "set_tile",

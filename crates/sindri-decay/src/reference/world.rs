@@ -365,6 +365,11 @@ pub(super) const TYPES: &[TypeEntry] = &[
                 "Places a block, by name, in a cell of a layered grid or a grid whose ground is a voxel world. `\"\"` removes the block.",
             ),
             call(
+                "set_terrain",
+                &["grid", "column", "row", "terrain"],
+                "Paints a terrain the map's sheet declares into a flat tile map's cell, choosing its tile and its neighbors' from which of them are the same terrain. `\"\"` empties the cell and redraws its neighbors.",
+            ),
+            call(
                 "set_tile",
                 &["grid", "column", "row", "index"],
                 "Changes a flat tile map's cell to one of its tiles, by number. A negative number empties the cell.",

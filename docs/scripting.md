@@ -1509,6 +1509,7 @@ what the map *holds* there.
 | --- | --- |
 | `Grid.tile(map, column, row)` | `f32` |
 | `Grid.set_tile(map, column, row, index)` | nothing |
+| `Grid.set_terrain(map, column, row, terrain)` | nothing |
 | `Grid.columns(map)` | `f32` |
 | `Grid.rows(map)` | `f32` |
 
@@ -1522,6 +1523,10 @@ palette index into a flat array is the flat map's own model, and a volume stacks
 named cells instead. Asked of a grid that carries only `sindri.tile_grid`, both
 fail and name the component they would need rather than reporting that a tilemap
 the entity never had holds no tiles.
+
+`set_terrain` paints a terrain the map's sheet declares and redraws the cell's
+neighbors from the patterns they now make; `""` empties the cell. See
+`docs/terrains.md`.
 
 ### Stacked cells
 

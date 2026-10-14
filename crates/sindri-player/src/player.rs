@@ -115,6 +115,10 @@ impl Player {
             }
         }
 
+        for (id, sheet) in &project.sheets {
+            self.tile_sets
+                .bind_terrains(id.as_str(), sheet.terrains.clone());
+        }
         for (id, tile_set) in project.tile_sets {
             self.tile_sets.bind(id.as_str(), tile_set)?;
         }

@@ -16,6 +16,10 @@ pub struct TileSetBindings {
     /// as. A rebound tile set re-cuts what every cell of a volume draws.
     generation: u64,
     bound: BTreeMap<String, TileSetDocument>,
+    /// What each sheet's terrains paint. Here because these are the bindings
+    /// every host already hands scripts and the editor for what tiles mean,
+    /// and a terrain is a rule about which tile goes where.
+    terrains: crate::TerrainBindings,
 }
 
 /// Texture references used by a decoded tile set's baked faces.
@@ -48,6 +52,21 @@ impl TileSetBindings {
     #[must_use]
     pub fn new() -> Self {
         Self::default()
+    }
+
+    /// Records the terrains of the sheet `sheet` (its asset ID).
+    pub fn bind_terrains(
+        &mut self,
+        sheet: impl Into<String>,
+        terrains: BTreeMap<String, sindri_core::TerrainDocument>,
+    ) {
+        self.terrains.bind(sheet, terrains);
+    }
+
+    /// Every sheet's terrains.
+    #[must_use]
+    pub const fn terrains(&self) -> &crate::TerrainBindings {
+        &self.terrains
     }
 
     pub fn bind(

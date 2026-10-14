@@ -126,9 +126,69 @@ def tuft_cell():
     return cell
 
 
+# The ground terrain: sixteen cells, one per combination of which sides are
+# more ground (north 1, east 2, south 4, west 8). Grass grows on an open top,
+# and an open side or bottom shows a darker rim of earth.
+RIM = hex_color("#4a2d18")
+COLUMNS = 8
+BLANK = [[CLEAR] * CELL for _ in range(CELL)]
+
+
+def ground_sides(mask):
+    return tuple(mask & bit == 0 for bit in (1, 2, 4, 8))
+
+
+def ground_cell(mask):
+    open_n, open_e, open_s, open_w = ground_sides(mask)
+    cell = dirt_cell(20 + mask)
+    for y in range(CELL):
+        for x in range(CELL):
+            edge = min(
+                x if open_w else CELL,
+                CELL - 1 - x if open_e else CELL,
+                CELL - 1 - y if open_s else CELL,
+            )
+            if edge == 0:
+                cell[y][x] = RIM
+            elif edge == 1:
+                cell[y][x] = EARTH[3]
+    if open_n:
+        for x in range(CELL):
+            depth = 4 + (1 if noise(x, 0, 7) > 0.6 else 0)
+            # Grass hangs a little down an open side.
+            if (open_w and x < 2) or (open_e and x > CELL - 3):
+                depth += 2
+            for y in range(depth):
+                cell[y][x] = GRASS[int(noise(x, y, 3) * 3) % 3]
+            cell[0][x] = GRASS[2]
+    return cell
+
+
+def ground_height(mask):
+    open_n, open_e, open_s, open_w = ground_sides(mask)
+
+    def height(x, y):
+        edge = min(
+            x if open_w else CELL,
+            CELL - 1 - x if open_e else CELL,
+            CELL - 1 - y if open_s else CELL,
+            y if open_n else CELL,
+        )
+        return min(edge, 2) / 2.0 * 0.6 + noise(x, y, 20 + mask) * 0.4
+
+    return height
+
+
+def tile_cells(first_row, ground):
+    """The five loose tiles, then the sixteen ground cells, eight a row."""
+    cells = first_row + [BLANK] * (COLUMNS - len(first_row)) + ground
+    return cells, len(cells) // COLUMNS
+
+
 def draw_tiles():
-    cells = [grass_cell(), dirt_cell(2), stone_cell(), plank_cell(), tuft_cell()]
-    png(OUT / "tiles.png", CELL * len(cells), CELL, sheet(cells))
+    loose = [grass_cell(), dirt_cell(2), stone_cell(), plank_cell(), tuft_cell()]
+    cells, rows = tile_cells(loose, [ground_cell(mask) for mask in range(16)])
+    png(OUT / "tiles.png", CELL * COLUMNS, CELL * rows, sheet(cells, rows))
 
 
 # --- Tile normals -----------------------------------------------------------
@@ -181,8 +241,12 @@ def normal_cell(height, strength=2.0):
 
 
 def draw_tile_normals():
-    cells = [normal_cell(height) for height in HEIGHTS]
-    png(OUT / "tiles_n.png", CELL * len(cells), CELL, sheet(cells))
+    loose = [normal_cell(height) for height in HEIGHTS]
+    ground = [normal_cell(ground_height(mask)) for mask in range(16)]
+    flat = [[(128, 128, 255, 255)] * CELL for _ in range(CELL)]
+    cells, rows = tile_cells(loose, ground)
+    cells = [flat if cell is BLANK else cell for cell in cells]
+    png(OUT / "tiles_n.png", CELL * COLUMNS, CELL * rows, sheet(cells, rows))
 
 
 # --- The hero ---------------------------------------------------------------

@@ -57,6 +57,12 @@ pub(crate) fn add_grid_surface(environment: &mut Environment) {
                     }
                     // A cell and a word: the tile's name to write, or the tag
                     // to ask about.
+                    GridCall::SetTerrain => vec![
+                        Type::Named(ENTITY.to_owned()),
+                        Type::F32,
+                        Type::F32,
+                        Type::String,
+                    ],
                     GridCall::SetBlock | GridCall::Tagged => vec![
                         Type::Named(ENTITY.to_owned()),
                         Type::F32,
@@ -75,6 +81,7 @@ pub(crate) fn add_grid_surface(environment: &mut Environment) {
                     GridCall::Height => Type::Optional(Box::new(Type::F32)),
                     GridCall::Place
                     | GridCall::SetTile
+                    | GridCall::SetTerrain
                     | GridCall::SetBlock
                     | GridCall::SetFlood => Type::Unit,
                     GridCall::CanReach

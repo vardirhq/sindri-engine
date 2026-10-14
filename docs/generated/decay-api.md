@@ -293,6 +293,7 @@ Grids of tiles, flat or stacked in layers like building blocks: what each cell h
 - `rows(grid: Entity)` → `f32` — How many rows a grid has.
 - `set_block(grid: Entity, column: f32, row: f32, level: f32, tile: String)` → `unit` — Places a block, by name, in a cell of a layered grid or a grid whose ground is a voxel world. `""` removes the block.
 - `set_flood(map: Entity, level: f32, block: String)` → `unit` — Sets a reversible water overlay on a voxel world viewed as a map, using a finite height and a block's top face. An empty block name clears it. Refused on block views.
+- `set_terrain(grid: Entity, column: f32, row: f32, terrain: String)` → `unit` — Paints a terrain the map's sheet declares into a flat tile map's cell, choosing its tile and its neighbors' from which of them are the same terrain. `""` empties the cell and redraws its neighbors.
 - `set_tile(grid: Entity, column: f32, row: f32, index: f32)` → `unit` — Changes a flat tile map's cell to one of its tiles, by number. A negative number empties the cell.
 - `step_toward(mover: Entity, grid: Entity, target: Entity)` → `bool` — Moves a character one cell along the shortest walkable path towards a target. Gives back whether it moved.
 - `surface(grid: Entity, column: f32, row: f32)` → `String` — Which block is on top of a voxel world's column, by name, seen from straight above, or `""` where nothing stands. What a map view of the world draws there.

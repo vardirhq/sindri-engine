@@ -88,6 +88,9 @@ pub(crate) enum GridCall {
     /// second name for it would be a second meaning for it.
     Tile,
     SetTile,
+    /// Paints a terrain the map's sheet declares into a cell, or empties it,
+    /// and redraws the neighbors whose picture depends on it.
+    SetTerrain,
     /// The map's size, so a script can walk it without asking about cells that
     /// are not there.
     Columns,
@@ -150,6 +153,7 @@ impl GridCall {
             self,
             Self::Tile
                 | Self::SetTile
+                | Self::SetTerrain
                 | Self::Columns
                 | Self::Rows
                 | Self::Block
@@ -184,6 +188,7 @@ pub(crate) const GRID_CALLS: &[(&str, GridCall)] = &[
     ("step_toward", GridCall::StepToward),
     ("tile", GridCall::Tile),
     ("set_tile", GridCall::SetTile),
+    ("set_terrain", GridCall::SetTerrain),
     ("columns", GridCall::Columns),
     ("rows", GridCall::Rows),
     ("block", GridCall::Block),

@@ -194,6 +194,8 @@ impl SceneTextures {
                     let Some(sheet) = sheets.get(&id) else {
                         continue;
                     };
+                    self.tile_set_bindings
+                        .bind_terrains(id.as_str(), sheet.terrains.clone());
                     match self.bindings.bind_sheet(texture, sheet) {
                         Ok(()) => notes.push(TextureNote::Loaded(format!(
                             "{id} ({} sprites)",

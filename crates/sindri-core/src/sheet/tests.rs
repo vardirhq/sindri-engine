@@ -253,3 +253,36 @@ fn a_border_must_fit_a_named_sprite() {
         Err(SheetError::BorderTooWide("left".to_owned()))
     );
 }
+
+/// A terrain lists one sprite per pattern its kind answers, each one the
+/// sheet cuts.
+#[test]
+fn a_terrain_lists_what_its_kind_needs() {
+    let names: Vec<String> = (0..16).map(|index| format!("g{index}")).collect();
+    let refs: Vec<&str> = names.iter().map(String::as_str).collect();
+    let mut sheet = grid(4, 4, &refs);
+    sheet.terrains.insert(
+        "grass".to_owned(),
+        crate::TerrainDocument {
+            kind: crate::TerrainKind::Edges,
+            sprites: names.clone(),
+        },
+    );
+    assert!(sheet.round_trip().is_ok());
+    sheet
+        .terrains
+        .get_mut("grass")
+        .expect("grass")
+        .sprites
+        .pop();
+    assert!(matches!(
+        sheet.round_trip(),
+        Err(SheetError::TerrainSize { found: 15, .. })
+    ));
+}
+
+impl SpriteSheetDocument {
+    fn round_trip(&self) -> Result<Self, SheetError> {
+        Self::from_json(&serde_json::to_string(self).expect("a sheet writes"))
+    }
+}
