@@ -63,7 +63,10 @@ flat. A sprite with no normal map is lit by distance alone, exactly as without
 one. Sprites with different normal maps are different batches.
 
 The platformer's `art/draw.py` writes `textures/tiles_n.png` from the same
-brick, plank and dirt layouts as `tiles.png`, as a worked example.
+brick, plank and dirt layouts as `tiles.png`, as a worked example. A map need
+not be drawn: the editor's Normal map tab makes one from a sprite and lights it
+with these same lights as it is tuned (`docs/normal-map-studio.md`); the
+platformer's `hero_n.png` was made there.
 
 ## Shadows
 

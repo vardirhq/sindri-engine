@@ -22,6 +22,7 @@ sindri-scene = { path = "../../crates/sindri-scene" }
 serde_json.workspace = true
 
 [dev-dependencies]
+sindri-assets = { path = "../../crates/sindri-assets" }
 sindri-render = { path = "../../crates/sindri-render" }
 
 [lints]
