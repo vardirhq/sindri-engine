@@ -10,6 +10,10 @@ struct Uniforms {
     direction: vec4<f32>,
     light: vec4<f32>,
     eye: vec4<f32>,
+    light_view_projection: mat4x4<f32>,
+    shadow: vec4<f32>,
+    fog_color: vec4<f32>,
+    fog_params: vec4<f32>,
 }
 @group(0) @binding(0) var<uniform> u: Uniforms;
 @group(0) @binding(1) var color_texture: texture_2d<f32>;
@@ -57,6 +61,7 @@ fn safe_normalize(v: vec3<f32>) -> vec3<f32> {
     let specular = distribution * visibility * fresnel / max(4.0 * nv * nl, 0.0001);
     let diffuse = (vec3(1.0) - fresnel) * (1.0 - u.surface.x) * base.rgb / 3.14159265;
     // Ambient is the existing world-light approximation, without an IBL map.
-    let color = base.rgb * u.ambient.rgb + (diffuse + specular) * u.light.rgb * nl;
-    return vec4(color, 1.0);
+    let shadow_visibility = directional_visibility(v.position, u.light_view_projection, u.shadow, nl);
+    let color = base.rgb * u.ambient.rgb + (diffuse + specular) * u.light.rgb * nl * shadow_visibility;
+    return vec4(atmosphere(color, v.position, u.eye, u.fog_color, u.fog_params), 1.0);
 }

@@ -1,5 +1,10 @@
 # Changelog
 
+- Imported models now receive directional shadows from world geometry and share
+  its distance/density/height fog shader. Shadow-map resizing preserves model
+  geometry residency and refreshes bindings. Authored model fog is currently
+  delivered by editor viewports; imported-model shadow casting remains pending.
+
 - Record physical sprite, shape and glyph batch draws/passes, instance counts
   and queue buffer payloads in standalone and editor benchmark reports. Empty
   batches record no work; counters survive slot reuse, and extra Scene work

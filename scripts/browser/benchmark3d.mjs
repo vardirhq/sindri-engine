@@ -47,11 +47,14 @@ try {
   await waitFor('3D benchmark ready');
   const pixels = await page.screenshot(shot ? { path: shot } : {});
   assert(imageStatistics(pixels).colors >= 8, 'the lab renders several scene colors');
-  for (const asset of ['benchmark.scene', 'benchmark.decay', 'cube.png', 'surface.png', 'floor.png', 'prop.glb']) {
+  const assets = process.env.SINDRI_MODEL_RECEIVER
+    ? ['benchmark.scene', 'benchmark.decay', 'cube.png', 'prop.glb']
+    : ['benchmark.scene', 'benchmark.decay', 'cube.png', 'surface.png', 'floor.png', 'prop.glb'];
+  for (const asset of assets) {
     assert([...fetched].some((path) => path.endsWith('/' + asset)), `fetched ${asset}`);
   }
   assert.deepEqual(errors, [], 'no runtime or GPU errors');
-  console.log('3D benchmark: fetched six assets, ready goal and rendered workload passed');
+  console.log(`3D benchmark: fetched ${assets.length} assets, ready goal and rendered workload passed`);
 } finally {
   if (browser) await browser.close();
   await new Promise((done) => server.close(done));

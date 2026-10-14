@@ -10,13 +10,20 @@ use super::{
     ModelCacheStats, ModelIndexData, ModelRenderError, ModelSurface, RenderModel, pipeline,
     validate,
 };
-use crate::{FrameCamera, FrameTarget, Texture2D, WorldLighting};
+use crate::{
+    FogSettings, FrameCamera, FrameTarget, ShadowSettings, Texture2D, WorldLighting,
+    shadow::ShadowMap,
+};
 
 #[derive(Clone, Copy)]
-pub(crate) struct ModelDraw {
+pub(crate) struct ModelDraw<'a> {
     pub world: Mat4,
     pub camera: FrameCamera,
     pub lighting: WorldLighting,
+    pub shadow_map: &'a ShadowMap,
+    pub light_view_projection: Mat4,
+    pub shadows: ShadowSettings,
+    pub fog: FogSettings,
 }
 
 #[derive(Debug)]
@@ -64,6 +71,10 @@ struct Uniform {
     direction: [f32; 4],
     light: [f32; 4],
     eye: [f32; 4],
+    light_view_projection: [[f32; 4]; 4],
+    shadow: [f32; 4],
+    fog_color: [f32; 4],
+    fog_params: [f32; 4],
 }
 
 impl ModelRenderer {
@@ -78,6 +89,12 @@ impl ModelRenderer {
             next: 0,
             stats: ModelCacheStats::default(),
             draw_stats: crate::MeshDrawStats::default(),
+        }
+    }
+
+    pub(crate) fn invalidate_bindings(&mut self) {
+        for slot in &mut self.slots {
+            slot.binding = None;
         }
     }
 
@@ -111,7 +128,7 @@ impl ModelRenderer {
         encoder: &mut wgpu::CommandEncoder,
         target: FrameTarget<'_>,
         asset: &Arc<RenderModel>,
-        draw: ModelDraw,
+        draw: &ModelDraw<'_>,
     ) -> Result<(), ModelRenderError> {
         validate::transform(draw.world)?;
         let key = Arc::as_ptr(asset) as usize;
@@ -161,6 +178,7 @@ impl ModelRenderer {
                             &slot.uniform,
                             &cached.textures[texture],
                             &cached.samplers[texture],
+                            draw.shadow_map,
                         ),
                     ));
                 }
@@ -201,7 +219,7 @@ impl ModelRenderer {
     }
 }
 
-fn uniform(draw: ModelDraw, world: Mat4, surface: &ModelSurface) -> Uniform {
+fn uniform(draw: &ModelDraw<'_>, world: Mat4, surface: &ModelSurface) -> Uniform {
     let lighting = draw.lighting;
     let ambient = Vec3::from_array(lighting.ambient_color) * lighting.ambient_intensity;
     let light = Vec3::from_array(lighting.directional_color) * lighting.directional_intensity;
@@ -220,7 +238,30 @@ fn uniform(draw: ModelDraw, world: Mat4, surface: &ModelSurface) -> Uniform {
         ambient: ambient.extend(0.0).to_array(),
         direction: direction.extend(world.determinant().signum()).to_array(),
         light: light.extend(0.0).to_array(),
-        eye: draw.camera.position.extend(0.0).to_array(),
+        eye: draw
+            .camera
+            .position
+            .extend(draw.fog.height_falloff)
+            .to_array(),
+        light_view_projection: draw.light_view_projection.to_cols_array_2d(),
+        shadow: [
+            draw.shadows.bias,
+            f32::from(draw.shadows.enabled && lighting.directional_intensity > 0.0),
+            0.0,
+            0.0,
+        ],
+        fog_color: [
+            draw.fog.color[0],
+            draw.fog.color[1],
+            draw.fog.color[2],
+            f32::from(draw.fog.enabled),
+        ],
+        fog_params: [
+            draw.fog.start,
+            draw.fog.distance,
+            draw.fog.density,
+            draw.fog.height,
+        ],
     }
 }
 
@@ -230,6 +271,7 @@ fn bind(
     uniform: &wgpu::Buffer,
     texture: &Texture2D,
     sampler: &wgpu::Sampler,
+    shadow_map: &ShadowMap,
 ) -> wgpu::BindGroup {
     device.create_bind_group(&wgpu::BindGroupDescriptor {
         label: Some("Imported model draw"),
@@ -246,6 +288,14 @@ fn bind(
             wgpu::BindGroupEntry {
                 binding: 2,
                 resource: wgpu::BindingResource::Sampler(sampler),
+            },
+            wgpu::BindGroupEntry {
+                binding: 3,
+                resource: wgpu::BindingResource::TextureView(shadow_map.view()),
+            },
+            wgpu::BindGroupEntry {
+                binding: 4,
+                resource: wgpu::BindingResource::Sampler(shadow_map.sampler()),
             },
         ],
     })

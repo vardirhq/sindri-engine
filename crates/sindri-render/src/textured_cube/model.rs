@@ -30,10 +30,14 @@ impl TexturedCubeRenderer {
             encoder,
             target,
             asset,
-            ModelDraw {
+            &ModelDraw {
                 world: matrices.0,
                 camera: matrices.1,
                 lighting: self.lighting,
+                shadow_map: &self.shadow_map,
+                light_view_projection: self.shadow_view_projection,
+                shadows: self.shadow_settings,
+                fog: self.fog,
             },
         )
     }

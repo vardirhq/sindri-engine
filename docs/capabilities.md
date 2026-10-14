@@ -57,7 +57,7 @@ references, including inactive entities. Native project capture and the WebGPU
 project host prepare/bind models once through the existing asset queue and
 apply scene lighting. The exact Low Tide cutaway crawler was visually inspected
 in both runtimes at 1200 × 1000, correctly oriented and visibly recognizable.
-Exported bytes match the source hash. Model shadows, full editor authoring,
+Exported bytes match the source hash. Model shadow casting, full editor authoring,
 animation and skinning remain deferred. This external proof does not claim
 the repository's in-tree game completion surface. Model Collision Lab now also
 has native player-window visual proof on X11/software Vulkan, after editor asset
@@ -2585,7 +2585,11 @@ Its native asset-queue/Session regression verifies ready, static poses, actual
 extracted commands and shared model resources; real Chromium fetches all six
 assets and draws the workload. Native/browser player and offscreen capture paths
 now apply authored shadow settings; on/off captures verify delivery alongside
-editor benchmarks. Imported models still do not cast or receive shadows.
+editor benchmarks. Imported models now receive the same directional map. Shared shadow/fog WGSL,
+map-resize/disable/cache GPU regressions and native/browser green-receiver controls
+exercise reception on imported geometry. Renderer fog supports distance, density
+and height terms; authored fog is still forwarded only by editor viewports.
+Models do not yet cast shadows, and Explorer game adoption remains open.
 CPU phases and GPU completion wait are available. Standalone reports also record
 physical textured 3D/model draws and passes, uniform queue writes/bytes, transient
 geometry pairs and separate persistent cache upload events. Shadowed/unshadowed

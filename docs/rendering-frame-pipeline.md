@@ -7,7 +7,7 @@ model GPU cache/pipeline, so the existing `FrameRenderers` host contract and
 inline mesh/voxel vertex layouts stay compatible. Geometry and embedded textures
 upload once per shared resource; draw uniforms are independent per primitive
 instance. See [imported models](imported-models.md) for the supported material
-subset, diagnostics, residency behavior and deferred model shadows.
+subset, diagnostics, residency behavior and model shadow reception and deferred casting.
 
 Sindri separates a frame into three explicit stages:
 
@@ -105,7 +105,8 @@ The shared native/browser player and offscreen `ProjectRenderer` apply the
 validated environment's `shadow_settings` before encoding each frame, as editor
 viewports do. An absent environment restores defaults, so a previous scene's
 shadow state cannot leak into the next. The same encoder handles primitive,
-inline and cached voxel shadow geometry; imported model shadows remain deferred.
+inline and cached voxel shadow geometry; imported models receive that map but
+do not yet cast into it.
 The fixed `examples/benchmark3d` workload and shadow-on/off native/browser captures
 exercise delivery, rather than inferring it from authored component presence.
 
@@ -208,3 +209,18 @@ The fixed 3D workload records measured zeroes for these batches in native CI.
 Resource initialization, atlas/texture uploads, frame clears, post-processing,
 scene-board copies and egui's editor UI remain outside these counters. The
 whole-frame counter item remains open.
+
+## Shared world effects on imported geometry
+
+`world_effects.wgsl` supplies directional-map visibility and atmosphere for both
+textured world and imported-model shaders. The map uses one light projection,
+bias, bounds check and comparison sampler. Only direct model lighting is shadowed;
+ambient remains available. Fog is applied after surface lighting, with the same
+camera-distance, density and height terms as world meshes. Cube shader extraction
+preserves its existing calculations. Model uniforms grow from 288 to 400 bytes;
+physical draw/pass counts and cached geometry residency are unchanged.
+
+Resizing the map invalidates model draw bindings as well as textured-mesh
+bindings, so slot reuse never samples a previous map. The renderer accepts fog
+from every caller; authored fog delivery remains editor-only until shipped hosts
+forward the environment settings. Imported geometry still does not cast shadows.

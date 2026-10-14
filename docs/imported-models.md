@@ -107,8 +107,18 @@ handles mirrored instances and double-sided materials. Embedded base-color
 textures are sampled as sRGB, factors are linear, and alpha masks discard.
 Ambient plus the existing directional world light uses metallic/roughness
 factors in a direct GGX lighting approximation. Environment-map lighting,
-texture mipmaps, model shadows and atmosphere are currently deferred. Existing
-mesh lighting, shadows and vertex layouts are unchanged.
+texture mipmaps and model shadow casting remain deferred. Models now receive the
+same directional shadow map as textured world geometry and use its shared WGSL
+fog calculation. Shadowing attenuates direct diffuse/specular light, preserving
+ambient fill. Fog supports distance, exponential density and low-altitude terms.
+Model bind groups are invalidated when the shadow-map resolution changes, while
+geometry and embedded textures stay resident. Each color uniform is 400 bytes.
+The existing cube/mesh lighting formulas and vertex layouts are unchanged;
+shared materials and one lighting formula are still pending.
+
+`set_fog` applies to models as well as world meshes. Editor viewports already
+forward authored fog; shipped player/capture hosts do not yet forward it. Model
+fog GPU evidence therefore does not claim authored browser fog delivery.
 
 Invalid render resources and singular/nonfinite model matrices return typed
 errors. Geometry buffers and image dimensions are checked against device
@@ -212,7 +222,8 @@ The export carried the scene, a solid ground texture and the original
 Browser smoke confirmed WebGPU, loading completion and HTTP delivery of all
 three kinds. See the external project's
 [proof and reproduction commands](https://github.com/vardirhq/low-tide-3d/blob/poc/isometric-crawler/docs/POC.md).
-Imported-model shadows remain deferred and disabled in the proof.
+That historical proof has shadows disabled. Model shadow reception is now
+implemented; imported-model shadow casting remains deferred.
 
 ## Editor boundary
 
@@ -321,3 +332,23 @@ spawnable prefab GLBs, while scene synchronization supplies actual scaled hull
 mass for queued impulses. Model Collision Lab uses a typed prefab export to
 spawn its prop, verifies copied pending reads and reaches its existing prop goal.
 See [the spawn-window contract](physics.md#convex-model-spawn-window-controls).
+
+## Shared shadow reception and fog proof
+
+`crates/sindri-gpu/tests/imported_models/effects.rs` renders a textured caster and
+an imported receiver through the real prepared-frame encoder, reads back pixels,
+and checks map resizing (256 → 1024 → 256) while moving the caster,
+shadow disable/restore and one retained
+model upload. A second regression checks full distance, exponential and height
+fog on both model and cube pixels, then exact restoration after disabling fog.
+Existing material, hierarchy, normals, mirrored-instance depth and cache tests
+remain in place.
+
+`scripts/browser/prepare-model-receiver.py` derives a small control from the
+checked 3D Benchmark project and its unchanged startup/ready script. Model
+Collision Lab's original GLB provides green ground and an orange wall; only a
+textured cube casts a shadow. Native and real Chromium controls compare shadows
+on/off and require more than 100 darkened green pixels, proving reception on
+imported geometry specifically. CI retains both captures. This is feature proof
+for the planned Explorer showcase; in-tree game adoption remains open. Cutout
+shadow casting, imported casters and unified materials are separate work.

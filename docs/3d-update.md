@@ -20,7 +20,7 @@ GLB decoding, a model GPU path and project export; slice 1 merges it. Read again
    hundred props will be draw-bound long before it is GPU-bound.
 2. **There are two lighting models.** Cubes, meshes and voxels use flat
    derivative normals with Lambert lighting. #504's models use real normals
-   with GGX. Models neither cast nor receive shadows, and they ignore fog.
+   with GGX. Models now receive shadows and accept renderer fog, but do not cast shadows.
    Cutout geometry casts solid shadows. The only light is one sun: there are
    no point or spot lights, no transparent 3D pass and no material type.
 3. **The editor cannot author a 3D scene from models.**
@@ -129,15 +129,16 @@ Order:
   through native Session and exported Chromium. It is feature proof, not Explorer
   completion.
 - Slice 6's feature foundations are implemented; Explorer game adoption and
-  proof remain open. Continue with slice 2 measurement: the fixed workload and
-  CPU baseline are available, while physical draw/pass/upload counters and GPU
-  timestamps remain pending.
-- Then slices 3 to 4 (instancing and one lit path, lights), which terrain (5b)
-  and the showcase need.
+  proof remain open. Slice 2 now provides physical 3D/2D counters and native
+  standalone/editor GPU timestamps. Whole-frame totals and browser timing remain
+  open; they do not block starting visible rendering work.
+- Current priority is slices 3 to 4 (one lit path, instancing and lights), which
+  terrain (5b) and the showcase need. The first shared shader slice gives models
+  directional shadow reception and renderer fog; materials and casting remain.
 - Slice 4b records future runtime environment controls and day/night proof.
   Start it only after unified materials, imported-model shadows, runtime light
   access and point/spot lights are ready. This does not change the current
-  foundation/measurement priority. Keep the work in PR #507.
+  rendering/lighting priority. Keep the work in PR #507.
 
 The yaw/pitch/roll convention is fixed: radians, Y-up, -Z forward (as
 cameras face), YXZ order. Build on `Transform3D::yaw_pitch_roll_radians` and
@@ -205,8 +206,13 @@ cameras face), YXZ order. Build on `Transform3D::yaw_pitch_roll_radians` and
   no per-frame upload. Indices are u32.
 - [ ] Frustum culling of meshes and models at extraction, from cached
   bounds.
-- [ ] Models cast and receive shadows, and are fogged. The shadow pass
-  respects cutout. PCF filtering, and an optional second cascade.
+- [ ] Models cast and receive shadows, and are fogged.
+  - [x] Shared directional shadow reception and renderer fog shading; GPU tests
+    exercise resize/disable/cache reuse and all three fog terms. Native/browser
+    green-receiver controls prove model shadow reception. This is feature proof;
+    Explorer adoption and shipped-host authored fog delivery remain pending.
+  - [ ] Imported-model shadow casting, cutout shadow silhouettes, PCF/cascades
+    and integrated game proof.
 - [ ] Mipmaps generated on upload for smooth-filtered textures.
 - [ ] A sorted, blended transparent 3D pass.
 

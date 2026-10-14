@@ -1,5 +1,8 @@
 //! Read back real GPU pixels: hierarchy, texture color, depth, instances and reuse.
 
+#[path = "imported_models/effects.rs"]
+mod effects;
+
 use std::sync::Arc;
 
 use glam::{Mat4, Vec3};
@@ -179,7 +182,7 @@ fn check_draws(stats: sindri_render::MeshDrawStats) {
     );
     assert_eq!(stats.render_passes, 4);
     assert_eq!(stats.uniform_writes, 4);
-    assert_eq!(stats.uniform_bytes, 4 * 288);
+    assert_eq!(stats.uniform_bytes, 4 * 400);
     assert_eq!(stats.transient_geometry_uploads, 0);
     assert_eq!(stats.since(stats), sindri_render::MeshDrawStats::default());
 }

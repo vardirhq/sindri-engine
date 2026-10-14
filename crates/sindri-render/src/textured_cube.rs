@@ -11,7 +11,10 @@ use crate::{
     textured_mesh_cache::TexturedMeshCache,
 };
 
-const SHADER: &str = include_str!("textured_cube.wgsl");
+const SHADER: &str = concat!(
+    include_str!("world_effects.wgsl"),
+    include_str!("textured_cube.wgsl")
+);
 
 mod draw;
 mod geometry;
@@ -196,6 +199,7 @@ impl TexturedCubeRenderer {
     pub fn set_shadows(&mut self, device: &wgpu::Device, settings: ShadowSettings) {
         self.shadow_settings = settings;
         if self.shadow_map.resize(device, settings.map_size) {
+            self.models.invalidate_bindings();
             for batch in &mut self.batches {
                 batch.bind_groups.clear();
             }
