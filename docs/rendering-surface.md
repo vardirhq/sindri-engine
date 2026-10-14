@@ -71,3 +71,19 @@ So `SurfaceStatus` mirrors the outcome without the texture. Classifying is a tot
 every case of it is checked. This is the same split as `sindri-desktop`, where `winit`'s key events
 cannot be built off a real window and every decision they feed therefore lives in a function that
 can be called directly.
+
+
+## Optional device features
+
+`GpuRequestOptions::required_features` still rejects an adapter missing a
+required feature. `optional_features` enables only the supported intersection,
+without rejecting a baseline device. Defaults require and optionally request
+no features. Adapter capability metadata describes supported features; actual
+`device.features()` determines whether an optional facility may be used.
+
+Native synchronous benchmarks optionally request `TIMESTAMP_QUERY` and
+`TIMESTAMP_QUERY_INSIDE_ENCODERS`. `GpuTimer::new` returns `None` unless both
+are enabled. One reusable query pair brackets frame commands, resolves into a
+persistent buffer and copies into a persistent readback buffer. Submit and read
+before reusing the pair; readback unmaps even after an error. Interactive and
+browser hosts do not enable this blocking timer.

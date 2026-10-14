@@ -1,5 +1,9 @@
 # Changelog
 
+- Measure native standalone GPU frame intervals with optional timestamp queries.
+  Reports record adapter/period/scope and keep execution separate from CPU wait;
+  unsupported devices report unavailable timing. Default and browser devices
+  retain baseline feature requirements.
 - Record physical 3D draw/pass/upload counters in editor benchmarks, separating
   the Game view during Play from the extra Scene view. Missing views stay absent,
   measured zeroes stay visible, and the summary prints both scopes separately.

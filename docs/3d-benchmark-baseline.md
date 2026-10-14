@@ -92,4 +92,20 @@ errors occur. The Game count stays 502 rather than becoming 1,004. The summary
 prints both scopes, while views that were not drawn have no counter object.
 Profiler regressions cover capture, repeated-view accumulation, separation,
 frame reset and Play reset; serialization distinguishes missing views from
-measured zeroes. Whole-frame totals and GPU timestamps remain open.
+measured zeroes. Whole-frame totals and editor/browser GPU timestamps remain open.
+
+
+## Native standalone timestamps
+
+The standalone tool now optionally brackets each prepared frame with native GPU
+queries. Both shadow controls retain the exact counters above and produce
+nonzero `gpu_execution_us` values for three consecutive measured frames after
+30 settling frames. Software-Vulkan CI requires those results; a baseline GPU
+device test proves timing stays unavailable without the optional features.
+
+This run uses `llvmpipe (LLVM 23.1.1, 256 bits)` with Vulkan and a 1 ns timestamp period. Timestamp interval means are 411.51 ms with shadows and 106.61 ms without. These short debug/software samples ran alongside local validation, so they
+prove measurement delivery and do not set performance targets. The interval
+covers frame clear, shadows and prepared draws; query resolution/readback and
+presentation are outside it. Timestamp values do not enter CPU phase or
+frame-interval sums. Backend ordering and precision affect their interpretation.
+Editor/browser timestamps and whole-frame counters remain open.

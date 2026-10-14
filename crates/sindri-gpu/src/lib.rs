@@ -6,6 +6,10 @@
 use thiserror::Error;
 
 mod surface;
+#[cfg(not(target_arch = "wasm32"))]
+mod timing;
+#[cfg(not(target_arch = "wasm32"))]
+pub use timing::{GpuTimer, GpuTimingError, TIMING_FEATURES};
 
 pub use surface::{SurfaceAction, SurfaceProfile, SurfaceSource, SurfaceStatus, WindowSurface};
 pub use wgpu;
@@ -15,6 +19,8 @@ pub struct GpuRequestOptions {
     pub power_preference: wgpu::PowerPreference,
     pub force_fallback_adapter: bool,
     pub required_features: wgpu::Features,
+    /// Enabled when supported; missing optional features never reject an adapter.
+    pub optional_features: wgpu::Features,
     pub required_limits: wgpu::Limits,
     pub memory_hints: wgpu::MemoryHints,
 }
@@ -25,6 +31,7 @@ impl Default for GpuRequestOptions {
             power_preference: wgpu::PowerPreference::default(),
             force_fallback_adapter: false,
             required_features: wgpu::Features::empty(),
+            optional_features: wgpu::Features::empty(),
             required_limits: wgpu::Limits::default(),
             memory_hints: wgpu::MemoryHints::MemoryUsage,
         }
@@ -78,7 +85,8 @@ impl GpuContext {
         let (device, queue) = adapter
             .request_device(&wgpu::DeviceDescriptor {
                 label: Some("Sindri device"),
-                required_features: options.required_features,
+                required_features: options.required_features
+                    | (options.optional_features & available_features),
                 required_limits,
                 experimental_features: wgpu::ExperimentalFeatures::disabled(),
                 memory_hints: options.memory_hints.clone(),

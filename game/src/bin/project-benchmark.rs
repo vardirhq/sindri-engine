@@ -44,8 +44,17 @@ mod benchmark {
         let size = [SIZE.0 as f32, SIZE.1 as f32];
         let mut opened = open(Path::new(project), size)?;
         let instance = wgpu::Instance::default();
-        let gpu = GpuContext::request(&instance, None, &GpuRequestOptions::default()).await?;
+        let gpu = GpuContext::request(
+            &instance,
+            None,
+            &GpuRequestOptions {
+                optional_features: sindri_gpu::TIMING_FEATURES,
+                ..GpuRequestOptions::default()
+            },
+        )
+        .await?;
         let mut renderer = ProjectRenderer::new(&gpu, &opened.images, &opened.sheets, SIZE)?;
+        let gpu_timing = renderer.enable_gpu_timing(&gpu);
         let mut playing: Vec<Value> = Vec::with_capacity(frames);
         for at in 0..settle + frames {
             let began = Instant::now();
@@ -55,9 +64,11 @@ mod benchmark {
             let waiting = Instant::now();
             gpu.device.poll(wgpu::PollType::wait_indefinitely())?;
             let gpu_time = waiting.elapsed();
+            let execution = renderer.gpu_execution(&gpu)?;
             if at >= settle {
                 playing.push(json!({
                     "steps": 1,
+                    "gpu_execution_us": execution.map(micros),
                     "mesh_counters": {
                         "draw_calls": drawn.meshes.draw_calls,
                         "render_passes": drawn.meshes.render_passes,
@@ -79,6 +90,13 @@ mod benchmark {
         }
         let written = json!({
             "host": "standalone",
+            "gpu_timing": {
+                "supported": gpu_timing,
+                "adapter": gpu.capabilities.adapter_name,
+                "backend": format!("{:?}", gpu.capabilities.backend),
+                "timestamp_period_ns": gpu_timing.then(|| gpu.queue.get_timestamp_period()),
+                "scope": "project frame commands; excludes readback and presentation",
+            },
             "opened": project,
             "optimized": !cfg!(debug_assertions),
             "window": [SIZE.0, SIZE.1],

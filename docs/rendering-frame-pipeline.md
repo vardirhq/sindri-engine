@@ -140,6 +140,28 @@ record the same counters per primary view, with `scene_mesh_counters` for the
 extra Scene view beside Play. Missing views are omitted, while an encoded view
 with no 3D work records zero. Repeated draws in one editor frame accumulate;
 frame close/capture and Play reset follow the existing profiler lifecycle.
-GPU timestamp timing remains open; GPU completion wait is a CPU
-stall, not GPU execution time. This is feature-example instrumentation, proven
+Standalone native benchmarks now optionally bracket the prepared frame with
+GPU timestamps; editor timestamp delivery remains open. GPU completion wait
+is still a CPU stall, not GPU execution time. This is feature-example instrumentation, proven
 with the fixed 3D Benchmark and the imported-model GPU readback regression.
+
+
+## Native benchmark timestamps
+
+`project-benchmark` requests optional encoder timestamps and enables timing on
+its offscreen renderer. Each frame writes `gpu_execution_us` separately from
+`phases`; unsupported devices write `null` and metadata says timing is
+unavailable. Metadata records adapter/backend, timestamp period and scope.
+`scripts/frame-benchmark.py` prints GPU execution mean/p95 without adding it to
+CPU work or frame-interval sums. Old reports retain their existing summaries.
+
+The interval covers the frame clear, shadow work and all prepared-frame draws.
+Query resolution/copy, mapping, readback and presentation lie outside it. This
+is the GPU's bracketed command interval, not a sum of shader times; backend
+reordering and timestamp precision can affect it. CPU encoding includes the
+extra query commands, and benchmark readback is deliberately synchronous.
+Software-Vulkan CI requires real nonzero timing for both shadow controls and
+exercises query-buffer reuse. A baseline-device GPU test proves graceful
+unavailability. Editor/browser timing and whole-frame draw/upload totals remain
+open. This measurement foundation is proven by the fixed feature example,
+without claiming gameplay capability completion.

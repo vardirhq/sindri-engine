@@ -2593,8 +2593,12 @@ consecutive-frame CI checks verify deltas; these counters exclude 2D, post and
 initial resource uploads. Editor benchmark frames now carry matching primary-view
 counters and separate extra Scene-view work. Frame capture/reset and missing
 versus measured-zero views have regressions; native editor shadow controls prove
-Game/standalone agreement. Whole-frame totals, GPU timestamps and performance
-targets remain pending. The
+Game/standalone agreement. Native standalone reports optionally record actual
+GPU timestamp intervals separately from CPU completion wait, including adapter,
+period and scope; unsupported devices retain null timing. Real GPU query/reuse
+and baseline-device regressions plus shadow-control CI exercise this.
+Whole-frame counters, editor/browser timestamps and performance targets remain
+pending. The
 [baseline record](3d-benchmark-baseline.md) records the hardware/profile context,
 short editor/standalone sample and native/browser shadow comparisons.
 

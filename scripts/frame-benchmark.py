@@ -75,10 +75,13 @@ def section_stats(frames: list[dict]) -> dict:
     for frame in frames:
         for key, value in frame["phases"].items():
             phases[key] = phases.get(key, 0.0) + value / 1000.0
+    execution = [f["gpu_execution_us"] / 1000.0 for f in frames if f.get("gpu_execution_us") is not None]
     count = max(len(frames), 1)
     return {
         "mesh_counters": counter_means(frames, "mesh_counters"),
         "scene_mesh_counters": counter_means(frames, "scene_mesh_counters"),
+        "gpu_execution_mean": statistics.fmean(execution) if execution else None,
+        "gpu_execution_p95": percentile(execution, 0.95) if execution else None,
         "frames": len(frames),
         "work_mean": statistics.fmean(work) if work else 0.0,
         "work_p50": percentile(work, 0.50),
@@ -94,6 +97,8 @@ def describe(path: Path) -> list[str]:
     report = json.loads(path.read_text())
     build = "optimised" if report.get("optimized") else "debug"
     lines = [f"{path.name}: {report['host']}, {build}, {report['opened']}"]
+    if report.get("gpu_timing", {}).get("supported") is False:
+        lines.append("  GPU timestamps unavailable on this device")
     for error in report.get("errors", []):
         lines.append(f"  error: {error}")
     rest = report.get("rest")
@@ -111,6 +116,9 @@ def describe(path: Path) -> list[str]:
             "           "
             + "  ".join(f"{key} {value:.2f}" for key, value in ranked if value >= 0.005)
         )
+        if stats["gpu_execution_mean"] is not None:
+            lines.append(f"           GPU execution mean {stats['gpu_execution_mean']:.2f} ms  "
+                         f"p95 {stats['gpu_execution_p95']:.2f} ms (timestamps)")
         for field, label in [("mesh_counters", "3D/frame"), ("scene_mesh_counters", "extra Scene 3D/frame")]:
             if stats[field]:
                 lines.append("           " + label + " " + "  ".join(

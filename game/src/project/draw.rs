@@ -51,6 +51,7 @@ pub struct ProjectRenderer {
     glyphs: GlyphRenderer,
     shapes: ShapeRenderer,
     size: (u32, u32),
+    timing: Option<sindri_gpu::GpuTimer>,
 }
 
 impl ProjectRenderer {
@@ -103,11 +104,29 @@ impl ProjectRenderer {
             glyphs: GlyphRenderer::new(&gpu.device, OffscreenTarget::FORMAT),
             shapes: ShapeRenderer::new(&gpu.device, OffscreenTarget::FORMAT),
             size,
+            timing: None,
         })
     }
 
     pub const fn target(&self) -> &OffscreenTarget {
         &self.target
+    }
+
+    /// Enables optional native GPU timestamps for synchronous benchmark draws.
+    pub fn enable_gpu_timing(&mut self, gpu: &GpuContext) -> bool {
+        self.timing = sindri_gpu::GpuTimer::new(&gpu.device, &gpu.queue);
+        self.timing.is_some()
+    }
+
+    /// Read after submission, before drawing again with timing enabled.
+    pub fn gpu_execution(
+        &self,
+        gpu: &GpuContext,
+    ) -> Result<Option<Duration>, sindri_gpu::GpuTimingError> {
+        self.timing
+            .as_ref()
+            .map(|timer| timer.read(&gpu.device))
+            .transpose()
     }
 
     /// Draws the player's world once and submits it.
@@ -158,6 +177,9 @@ impl ProjectRenderer {
             .create_command_encoder(&wgpu::CommandEncoderDescriptor {
                 label: Some("project draw"),
             });
+        if let Some(timer) = &self.timing {
+            timer.begin(&mut encoder);
+        }
         let before = self.cubes.draw_stats();
         let model_uploads = self.cubes.model_cache_stats().uploads;
         let cached_uploads = self.cubes.cached_mesh_stats().buffer_uploads;
@@ -179,6 +201,9 @@ impl ProjectRenderer {
             },
             &prepared,
         )?;
+        if let Some(timer) = &self.timing {
+            timer.finish(&mut encoder);
+        }
         gpu.queue.submit([encoder.finish()]);
         Ok(DrawTimes {
             presentation: styled.duration_since(began) + unstyled.duration_since(extracted),

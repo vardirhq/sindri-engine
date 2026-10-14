@@ -50,5 +50,7 @@ draws and passes, uniform writes/bytes, transient geometry pairs and separate
 model/voxel cache upload events. `scripts/frame-benchmark.py summarize` prints
 their means. Counts exclude 2D, post, the frame clear and initialization uploads;
 editor reports record matching primary counters and separate `scene_mesh_counters`
-for the extra Scene view beside Play. Whole-frame counters and GPU timestamps
-remain open.
+for the extra Scene view beside Play. Native standalone reports optionally record `gpu_execution_us` from GPU
+timestamps, with device/scope metadata and null for unsupported devices. The
+summary prints these intervals separately from CPU work. Whole-frame counters
+and editor/browser timestamps remain open.

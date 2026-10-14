@@ -6,7 +6,7 @@ import sys
 from pathlib import Path
 
 
-def check(path: str, shadows: bool) -> None:
+def check(path: str, shadows: bool, require_timing: bool = False) -> None:
     report = json.loads(Path(path).read_text())
     assert not report.get("errors"), report.get("errors")
     frames = report["sections"]["playing"]
@@ -21,11 +21,16 @@ def check(path: str, shadows: bool) -> None:
         "model_uploads": 0,
         "cached_geometry_uploads": 0,
     }
+    if require_timing:
+        assert report["gpu_timing"]["supported"], "software-Vulkan CI requires timestamp support"
     for frame in frames:
+        if require_timing:
+            assert frame["gpu_execution_us"] > 0, "need a measured GPU interval"
         assert frame["mesh_counters"] == expected, (path, frame["mesh_counters"], expected)
     print(f"{path}: {len(frames)} frames match physical 3D counters")
 
 
 if __name__ == "__main__":
-    check(sys.argv[1], True)
-    check(sys.argv[2], False)
+    require = len(sys.argv) == 4 and sys.argv[3] == "--require-gpu-timing"
+    check(sys.argv[1], True, require)
+    check(sys.argv[2], False, require)

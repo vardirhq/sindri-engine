@@ -175,8 +175,11 @@ cameras face), YXZ order. Build on `Transform3D::yaw_pitch_roll_radians` and
 - [x] Record these counters in editor benchmark frames, separating the primary
   view (Game in Play, Scene while editing) from the extra Scene view beside Play.
   Native shadowed/unshadowed editor runs verify matching Game/standalone counts.
-- [ ] Extend counters to whole-frame work and add GPU timestamp timing. Existing
-  GPU completion wait is a CPU stall.
+- [x] Native standalone reports optionally measure a bracketed GPU frame
+  interval, with explicit unsupported/null results, adapter/period metadata and
+  separate summary means/p95. Software-Vulkan CI requires real timing and query
+  reuse; baseline devices still work. CPU completion wait remains separate.
+- [ ] Extend counters to whole-frame work and GPU timestamps to editor reports.
 - [ ] Set the targets the next slice must meet (for example, draws and passes
   per frame independent of repeated props, and zero steady-state uploads).
 

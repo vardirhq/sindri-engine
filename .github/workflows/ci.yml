@@ -324,6 +324,7 @@ jobs:
         env:
           WGPU_BACKEND: vulkan
           SINDRI_REQUIRE_GPU: 1
+          SINDRI_REQUIRE_GPU_TIMESTAMPS: 1
         # nextest stops at the first failing test by default, which reports
         # one failure per push. Every failure is wanted from the same run.
         run: cargo nextest run --workspace --all-features --no-fail-fast
@@ -374,7 +375,7 @@ jobs:
           node scripts/browser/compare-shadows.mjs target/render-artifacts/native-benchmark3d.png target/render-artifacts/native-benchmark3d-no-shadows.png
           cargo run --package sindri-causeway --bin project-benchmark -- examples/benchmark3d target/render-artifacts/benchmark3d.json 3 30
           cargo run --package sindri-causeway --bin project-benchmark -- target/native-benchmark3d-no-shadows target/render-artifacts/benchmark3d-no-shadows.json 3 30
-          python3 scripts/check-3d-benchmark.py target/render-artifacts/benchmark3d.json target/render-artifacts/benchmark3d-no-shadows.json
+          python3 scripts/check-3d-benchmark.py target/render-artifacts/benchmark3d.json target/render-artifacts/benchmark3d-no-shadows.json --require-gpu-timing
           timeout 120s xvfb-run --auto-servernum --server-args="-screen 0 1600x1200x24" target/debug/sindri-editor examples/benchmark3d --benchmark target/render-artifacts/editor-benchmark3d.json --frames 3 --settle 30
           timeout 120s xvfb-run --auto-servernum --server-args="-screen 0 1600x1200x24" target/debug/sindri-editor target/native-benchmark3d-no-shadows --benchmark target/render-artifacts/editor-benchmark3d-no-shadows.json --frames 3 --settle 30
           python3 scripts/check-3d-benchmark.py target/render-artifacts/editor-benchmark3d.json target/render-artifacts/editor-benchmark3d-no-shadows.json
