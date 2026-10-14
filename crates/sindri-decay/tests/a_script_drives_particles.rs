@@ -83,7 +83,10 @@ fn a_script_throws_a_handful_where_the_emitter_is() {
     assert!(report.failures.is_empty(), "{:?}", report.failures);
     assert_eq!(effects.emitter_live(dust), 6);
     let at = effects.flecks()[0].position;
-    assert!((at[0] - 2.0).abs() < 1.0e-5 && (at[1] - 3.0).abs() < 1.0e-5, "{at:?}");
+    assert!(
+        (at[0] - 2.0).abs() < 1.0e-5 && (at[1] - 3.0).abs() < 1.0e-5,
+        "{at:?}"
+    );
 }
 
 #[test]

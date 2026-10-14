@@ -21,7 +21,11 @@ fn every_coin_sparkles_while_the_hero_stands_still() {
     let mut run = Run::open().expect("the project opens");
     step(&mut run, 120);
     let hero = run.entity("hero").expect("the hero");
-    assert_eq!(run.session.effects().emitter_live(hero), 0, "no dust standing");
+    assert_eq!(
+        run.session.effects().emitter_live(hero),
+        0,
+        "no dust standing"
+    );
     let sparkling = run
         .world
         .entities()
@@ -38,7 +42,10 @@ fn running_kicks_up_dust_and_stopping_lets_it_settle() {
     run.key(Key::ArrowRight, true);
     step(&mut run, 30);
     let running = run.session.effects().emitter_live(hero);
-    assert!(running >= 3, "{running} specks of dust after half a second running");
+    assert!(
+        running >= 3,
+        "{running} specks of dust after half a second running"
+    );
     run.key(Key::ArrowRight, false);
     step(&mut run, 60);
     assert_eq!(run.session.effects().emitter_live(hero), 0, "settled");

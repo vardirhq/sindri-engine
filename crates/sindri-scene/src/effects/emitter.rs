@@ -66,7 +66,10 @@ impl Effects2d {
                 problems.push(format!("{}: {error}", ParticlesComponent::TYPE_NAME));
                 continue;
             }
-            let at = world.world_transform(*entity).unwrap_or_default().position_2d();
+            let at = world
+                .world_transform(*entity)
+                .unwrap_or_default()
+                .position_2d();
             let at = [at[0], at[1]];
             let state = self.emitters.entry(*entity).or_default();
             let moved = state.last.map(|last| [at[0] - last[0], at[1] - last[1]]);

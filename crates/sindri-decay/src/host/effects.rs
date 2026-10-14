@@ -33,7 +33,10 @@ impl WorldHost<'_> {
             #[allow(clippy::cast_precision_loss)]
             return Ok(Value::Number(effects.live() as f64));
         }
-        if matches!(call, EffectsCall::Play | EffectsCall::Stop | EffectsCall::Emit) {
+        if matches!(
+            call,
+            EffectsCall::Play | EffectsCall::Stop | EffectsCall::Emit
+        ) {
             return self.particles_call(call, path, args);
         }
 

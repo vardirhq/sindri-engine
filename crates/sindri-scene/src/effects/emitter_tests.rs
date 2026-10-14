@@ -48,7 +48,10 @@ fn an_emitter_throws_its_rate_each_second() {
     let mut effects = Effects2d::default();
     run(&mut effects, &world, 60);
     let thrown = effects.emitter_live(entity);
-    assert!((29..=31).contains(&thrown), "{thrown} in a second at 30 a second");
+    assert!(
+        (29..=31).contains(&thrown),
+        "{thrown} in a second at 30 a second"
+    );
 }
 
 #[test]
@@ -108,7 +111,10 @@ fn gravity_pulls_and_the_ramp_colors_them() {
         .unwrap();
     assert!(oldest.position[1] < -0.5, "fell: {:?}", oldest.position);
     let color = effects.color_of(&oldest);
-    assert!(color[2] > 0.3 && color[0] < 0.7, "halfway along its ramp: {color:?}");
+    assert!(
+        color[2] > 0.3 && color[0] < 0.7,
+        "halfway along its ramp: {color:?}"
+    );
 }
 
 #[test]
@@ -122,10 +128,19 @@ fn local_particles_follow_their_emitter() {
     let mut effects = Effects2d::default();
     run(&mut effects, &world, 10);
     let before = effects.flecks()[0].position;
-    world.get_mut(entity).unwrap().transform_3d.as_mut().unwrap().position[0] = 3.0;
+    world
+        .get_mut(entity)
+        .unwrap()
+        .transform_3d
+        .as_mut()
+        .unwrap()
+        .position[0] = 3.0;
     run(&mut effects, &world, 1);
     let after = effects.flecks()[0].position;
-    assert!((after[0] - before[0] - 3.0).abs() < 1.0e-4, "{before:?} to {after:?}");
+    assert!(
+        (after[0] - before[0] - 3.0).abs() < 1.0e-4,
+        "{before:?} to {after:?}"
+    );
 }
 
 #[test]

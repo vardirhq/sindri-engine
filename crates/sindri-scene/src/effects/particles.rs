@@ -157,7 +157,10 @@ impl ParticlesComponent {
         let finite = [self.direction, self.spread, self.spin];
         let vectors = self.gravity.iter().chain(&self.offset);
         if !finite.iter().chain(vectors).all(|value| value.is_finite()) {
-            return fail("direction", "spread, spin, gravity and offset must be finite");
+            return fail(
+                "direction",
+                "spread, spin, gravity and offset must be finite",
+            );
         }
         if self.colors.iter().flatten().any(|value| !value.is_finite()) {
             return fail("colors", "must be finite numbers");
@@ -179,7 +182,9 @@ impl ParticlesComponent {
                 #[allow(clippy::cast_precision_loss)]
                 let t = scaled - index as f32;
                 let [from, to] = [colors[index], colors[index + 1]];
-                std::array::from_fn(|channel| (to[channel] - from[channel]).mul_add(t, from[channel]))
+                std::array::from_fn(|channel| {
+                    (to[channel] - from[channel]).mul_add(t, from[channel])
+                })
             }
         }
     }

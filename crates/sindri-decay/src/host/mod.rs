@@ -17,12 +17,12 @@ mod call;
 mod convert;
 mod dispatch;
 mod effects;
-mod particles;
 mod flood;
 mod frame;
 mod gamepad;
 mod geometry;
 mod map;
+mod particles;
 mod peers;
 
 pub(crate) use peers::Peers;

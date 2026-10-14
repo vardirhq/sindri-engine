@@ -164,10 +164,13 @@ impl Effects2d {
     /// The color a fleck draws right now: its emitter's ramp, or its tint.
     #[must_use]
     pub fn color_of(&self, fleck: &Fleck) -> [f32; 4] {
-        fleck.ramp.and_then(|ramp| self.ramps.get(ramp)).map_or_else(
-            || fleck.drawn_tint(),
-            |ramp| super::ParticlesComponent::color_at(ramp, fleck.through()),
-        )
+        fleck
+            .ramp
+            .and_then(|ramp| self.ramps.get(ramp))
+            .map_or_else(
+                || fleck.drawn_tint(),
+                |ramp| super::ParticlesComponent::color_at(ramp, fleck.through()),
+            )
     }
 
     /// The texture a fleck's index names.
@@ -286,7 +289,10 @@ impl Effects2d {
 
     /// Lets an emitter know one of its particles is gone.
     fn retired(&mut self, fleck: Fleck) {
-        if let Some(state) = fleck.emitter.and_then(|emitter| self.emitters.get_mut(&emitter)) {
+        if let Some(state) = fleck
+            .emitter
+            .and_then(|emitter| self.emitters.get_mut(&emitter))
+        {
             state.live = state.live.saturating_sub(1);
         }
     }
