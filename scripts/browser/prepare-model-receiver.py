@@ -1,7 +1,7 @@
 """Make a small 3D Benchmark control with a green imported shadow receiver.
 
 This uses the existing checked benchmark script/goal and Model Collision Lab's
-unchanged GLB. Only the blue textured cube casts a shadow; the green ground is
+unchanged GLB. The blue cube and imported wall cast shadows; the green ground is
 imported geometry, so green-pixel comparisons prove model reception specifically.
 """
 import json
@@ -32,4 +32,8 @@ floor["components"] = {"sindri.model": {"asset": "models/prop.glb"}}
 scene["entities"].append({"id": "Caster", "name": "Caster",
     "transform_3d": {"position": [-2, 1, 0], "scale": [1, 2, 1]},
     "components": {"sindri.mesh": {"primitive": "cube", "texture": "textures/cube.png"}}})
+if "--model-caster" in sys.argv:
+    shutil.copyfile(root / "examples/model-collision/assets/models/prop.glb",
+                    out / "assets/models/caster.glb")
+    scene["entities"][-1]["components"] = {"sindri.model": {"asset": "models/caster.glb"}}
 path.write_text(json.dumps(scene, indent=2) + "\n")

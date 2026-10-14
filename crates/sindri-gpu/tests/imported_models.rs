@@ -1,5 +1,7 @@
 //! Read back real GPU pixels: hierarchy, texture color, depth, instances and reuse.
 
+#[path = "imported_models/casting.rs"]
+mod casting;
 #[path = "imported_models/effects.rs"]
 mod effects;
 

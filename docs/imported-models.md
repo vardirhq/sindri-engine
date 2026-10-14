@@ -107,7 +107,7 @@ handles mirrored instances and double-sided materials. Embedded base-color
 textures are sampled as sRGB, factors are linear, and alpha masks discard.
 Ambient plus the existing directional world light uses metallic/roughness
 factors in a direct GGX lighting approximation. Environment-map lighting,
-texture mipmaps and model shadow casting remain deferred. Models now receive the
+texture mipmaps remain deferred. Models now cast into and receive the
 same directional shadow map as textured world geometry and use its shared WGSL
 fog calculation. Shadowing attenuates direct diffuse/specular light, preserving
 ambient fill. Fog supports distance, exponential density and low-altitude terms.
@@ -223,7 +223,7 @@ Browser smoke confirmed WebGPU, loading completion and HTTP delivery of all
 three kinds. See the external project's
 [proof and reproduction commands](https://github.com/vardirhq/low-tide-3d/blob/poc/isometric-crawler/docs/POC.md).
 That historical proof has shadows disabled. Model shadow reception is now
-implemented; imported-model shadow casting remains deferred.
+implemented; imported-model shadow casting is now implemented.
 
 ## Editor boundary
 
@@ -346,9 +346,37 @@ remain in place.
 
 `scripts/browser/prepare-model-receiver.py` derives a small control from the
 checked 3D Benchmark project and its unchanged startup/ready script. Model
-Collision Lab's original GLB provides green ground and an orange wall; only a
-textured cube casts a shadow. Native and real Chromium controls compare shadows
+Collision Lab's original GLB provides green ground and an orange wall; the
+textured cube and, since model casting landed, the imported wall cast shadows. Native and real Chromium controls compare shadows
 on/off and require more than 100 darkened green pixels, proving reception on
 imported geometry specifically. CI retains both captures. This is feature proof
-for the planned Explorer showcase; in-tree game adoption remains open. Cutout
-shadow casting, imported casters and unified materials are separate work.
+for the planned Explorer showcase; in-tree game adoption remains open. Unified materials, world-mesh cutout casting and game adoption remain separate work.
+
+## Imported shadow casters
+
+The model shadow renderer walks the same retained node hierarchy and cached
+primitive buffers as color rendering, composing entity × accumulated node
+matrices. It handles both index widths, mirrored orientation and authored
+single/double-sidedness without duplicating geometry. Its depth-only fragment
+shader samples the embedded base-color texture with the authored sampler,
+multiplies material alpha and discards below the alpha-mask cutoff. Opaque
+materials cast solid silhouettes regardless of texture/factor alpha. World
+cube/inline/voxel cutout shadows remain a separate gap.
+
+Shadow draws use independent reusable 96-byte uniform slots and bind only their
+material texture/sampler, never the depth map they write. The color draw keeps
+its separate 400-byte slot. The shadow stage reports typed model failures through
+`FrameEncodeError`; malformed transforms do not become silent missing casters.
+One asset upload serves shadow and color. `ModelCacheStats.draws` retains its
+color-primitive meaning; `MeshDrawStats` includes both stages.
+
+Three GPU regressions cover retained primitive instances and both index widths,
+consecutive submissions, material/texture alpha holes and fully masked surfaces,
+opaque-mode alpha, mirrored/single/double-sided facing and typed frame errors.
+The existing moving-caster/map-resize and fog tests still pass. The generated
+`--model-caster` control contains only imported geometry (green ground/orange
+wall and a purple GLB box). Native and real WebGPU shadow on/off comparisons require
+darkened green receiver pixels and the reused startup/ready goal; CI retains
+both pairs. This is feature proof for planned Explorer adoption, not completed
+in-tree game integration. Models now cast and receive; shared materials, improved
+filtering/cascades and shipped-host authored fog delivery remain open.

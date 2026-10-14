@@ -193,3 +193,34 @@ that total. No dependencies, scripts, schemas or generated APIs change.
 This is correctness evidence, not a frame
 performance target. Shared materials, imported casters and game proof remain
 open; authored model fog is still forwarded only by editor viewports.
+
+
+## Imported-model shadow casting
+
+Material-aware imported casters now reuse the color geometry cache and write
+independent 96-byte uniforms. The fixed workload's current shadowed frame is
+602 draws, 603 passes, 602 uniform writes and 126,784 payload bytes; its
+unshadowed frame remains 301/301/301 and 104,320 bytes. Transient geometry pairs
+remain 200/100, with zero settled model/cached-geometry uploads. Three-frame
+native controls verify every field with required GPU timestamps.
+
+The imported-only control generated with `--model-caster` contains the green
+GLB ground/orange wall and a purple GLB box, with no textured world meshes.
+At 960×540, native software Vulkan darkens 10,271 green receiver pixels (10,895
+changed, 10,890 darkened total). Rebuilt Chromium WebGPU darkens the same 10,271
+green pixels (10,892 changed, 10,882 darkened total), fetches both original GLBs
+and reaches the reused ready goal without runtime/GPU errors. Captures were
+visually inspected. CI retains both native/browser on/off pairs.
+
+Three new GPU regressions cover shared uploads/hierarchy/index widths, shadow
+and color slot independence, material/texture alpha and masks, mirrored and
+single/double-sided facing, and typed invalid-transform errors. Game adoption,
+world-mesh cutout casting, shared materials and improved shadow quality remain
+open; this is correctness evidence, not a frame performance target.
+
+Local preflight passes 120 affected render/GPU tests; the required-GPU rerun
+executes all 36 GPU-package tests, including timestamp checks. Warning-denied
+Clippy/WASM, formatting/file-size gates and native/editor authored-color checks
+pass. Fresh Chromium also passes both original 300-prop controls (2,110 changed,
+2,088 darkened pixels) and both mixed cube/model receiver controls without
+runtime/GPU errors. No dependency, script, schema or generated API changes.

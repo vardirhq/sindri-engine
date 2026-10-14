@@ -9,8 +9,8 @@ mod validate;
 use glam::Mat4;
 use thiserror::Error;
 
-pub(crate) use gpu::ModelDraw;
 pub(crate) use gpu::ModelRenderer;
+pub(crate) use gpu::{ModelDraw, ModelShadowDraw};
 
 #[derive(Clone, Copy, Debug, bytemuck::Pod, bytemuck::Zeroable)]
 #[repr(C)]

@@ -1,5 +1,10 @@
 # Changelog
 
+- Imported GLB models now cast directional shadows using cached geometry and
+  retained hierarchy. Alpha masks, material alpha, mirrored transforms and
+  single/double-sided surfaces govern their silhouettes. Shadow and color
+  uniforms stay independent; invalid shadow transforms return typed frame errors.
+
 - Imported models now receive directional shadows from world geometry and share
   its distance/density/height fog shader. Shadow-map resizing preserves model
   geometry residency and refreshes bindings. Authored model fog is currently

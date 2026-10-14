@@ -12,8 +12,8 @@ use sindri_render::{
 };
 use std::sync::Arc;
 
-struct Scene {
-    cubes: TexturedCubeRenderer,
+pub(super) struct Scene {
+    pub(super) cubes: TexturedCubeRenderer,
     sprites: SpriteBatchRenderer,
     shapes: ShapeRenderer,
     glyphs: GlyphRenderer,
@@ -23,7 +23,7 @@ struct Scene {
 }
 
 impl Scene {
-    fn new(gpu: &GpuContext) -> Self {
+    pub(super) fn new(gpu: &GpuContext) -> Self {
         let format = OffscreenTarget::FORMAT;
         let mut textures = TextureRegistry::new(&gpu.device, &gpu.queue);
         let texture = textures.insert(
@@ -82,6 +82,20 @@ impl Scene {
         }
     }
 
+    pub(super) fn replace_caster(&mut self, asset: &Arc<RenderModel>, model: Mat4) {
+        let mut frame = ExtractedFrame::new(self.frame.viewport(), self.frame.clear());
+        for mut pass in self.frame.passes().iter().cloned() {
+            if matches!(pass.command, FrameCommand::TexturedCube { .. }) {
+                pass.command = FrameCommand::Model {
+                    asset: Arc::clone(asset),
+                    model,
+                };
+            }
+            frame.push(pass);
+        }
+        self.frame = frame.prepare().unwrap();
+    }
+
     fn move_caster(&mut self, x: f32) {
         let mut frame = ExtractedFrame::new(self.frame.viewport(), self.frame.clear());
         for mut pass in self.frame.passes().iter().cloned() {
@@ -97,13 +111,23 @@ impl Scene {
         self.frame = frame.prepare().unwrap();
     }
 
-    fn draw(
+    pub(super) fn draw(
         &mut self,
         gpu: &GpuContext,
         shadows: bool,
         map_size: u32,
         fog: FogSettings,
     ) -> Vec<u8> {
+        self.draw_result(gpu, shadows, map_size, fog).unwrap()
+    }
+
+    pub(super) fn draw_result(
+        &mut self,
+        gpu: &GpuContext,
+        shadows: bool,
+        map_size: u32,
+        fog: FogSettings,
+    ) -> Result<Vec<u8>, sindri_render::FrameEncodeError> {
         self.cubes.set_shadows(
             &gpu.device,
             ShadowSettings {
@@ -136,11 +160,10 @@ impl Scene {
                 depth: &depth,
             },
             &self.frame,
-        )
-        .unwrap();
+        )?;
         let readback = target.copy_to_buffer(&gpu.device, &mut encoder).unwrap();
         gpu.queue.submit([encoder.finish()]);
-        readback.read_rgba8(&gpu.device).unwrap()
+        Ok(readback.read_rgba8(&gpu.device).unwrap())
     }
 }
 

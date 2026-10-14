@@ -7,7 +7,7 @@ model GPU cache/pipeline, so the existing `FrameRenderers` host contract and
 inline mesh/voxel vertex layouts stay compatible. Geometry and embedded textures
 upload once per shared resource; draw uniforms are independent per primitive
 instance. See [imported models](imported-models.md) for the supported material
-subset, diagnostics, residency behavior and model shadow reception and deferred casting.
+subset, diagnostics, residency behavior and model shadow casting/reception.
 
 Sindri separates a frame into three explicit stages:
 
@@ -105,8 +105,7 @@ The shared native/browser player and offscreen `ProjectRenderer` apply the
 validated environment's `shadow_settings` before encoding each frame, as editor
 viewports do. An absent environment restores defaults, so a previous scene's
 shadow state cannot leak into the next. The same encoder handles primitive,
-inline and cached voxel shadow geometry; imported models receive that map but
-do not yet cast into it.
+inline and cached voxel shadow geometry; imported models cast into and receive that map using cached geometry.
 The fixed `examples/benchmark3d` workload and shadow-on/off native/browser captures
 exercise delivery, rather than inferring it from authored component presence.
 
@@ -120,7 +119,7 @@ asset resolution and GPU resource ownership remain outside serialized scene data
 
 `TexturedCubeRenderer::draw_stats()` returns cumulative `MeshDrawStats` for
 textured cubes, inline/cached meshes, their shadow draws and imported model
-primitives. Snapshot before encoding and call `since` afterwards. Submission
+color/shadow primitives. Snapshot before encoding and call `since` afterwards. Submission
 slot resets do not reset counters, including the reset between shadows and
 color. The counters record executed encoder paths, rather than counting
 `FramePass` records: a model command can draw several primitives, and empty
@@ -223,4 +222,18 @@ physical draw/pass counts and cached geometry residency are unchanged.
 Resizing the map invalidates model draw bindings as well as textured-mesh
 bindings, so slot reuse never samples a previous map. The renderer accepts fog
 from every caller; authored fog delivery remains editor-only until shipped hosts
-forward the environment settings. Imported geometry still does not cast shadows.
+forward the environment settings. Imported geometry casts shadows through its own material-aware depth pipeline.
+
+## Imported casters in the shadow stage
+
+Both frame encoders now include imported-model primitives in the directional
+shadow stage, with typed errors propagated through the existing frame error.
+The shadow renderer reuses the color cache, retained hierarchy and index widths;
+its independent uniform slots prevent queued color writes from corrupting depth
+transforms. Each primitive writes 96 bytes (light/world matrix, base color and
+mask/facing settings). Shadow bindings exclude the receiving depth texture to
+avoid sampling an attachment being written. Alpha masks and single/double-sided
+facing, including mirrored nodes/entities, follow imported material semantics.
+World-mesh cutout casting remains pending. The fixed workload now issues 602
+shadowed draws and 603 passes, with 126,784 uniform bytes; its unshadowed counts
+remain 301/301 and 104,320 bytes. Geometry residency is unchanged.

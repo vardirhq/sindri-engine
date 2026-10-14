@@ -14,6 +14,27 @@ impl TexturedCubeRenderer {
         self.models.stats()
     }
 
+    pub(crate) fn encode_shadow_model(
+        &mut self,
+        device: &wgpu::Device,
+        queue: &wgpu::Queue,
+        encoder: &mut wgpu::CommandEncoder,
+        asset: &Arc<RenderModel>,
+        world: Mat4,
+    ) -> Result<(), ModelRenderError> {
+        self.models.encode_shadow(
+            device,
+            queue,
+            encoder,
+            asset,
+            crate::model::ModelShadowDraw {
+                world,
+                projection: self.shadow_view_projection,
+                target: self.shadow_map.view(),
+            },
+        )
+    }
+
     /// Draws a shared model using entity and camera transforms.
     pub fn encode_model(
         &mut self,

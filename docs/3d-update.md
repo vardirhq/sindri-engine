@@ -20,7 +20,7 @@ GLB decoding, a model GPU path and project export; slice 1 merges it. Read again
    hundred props will be draw-bound long before it is GPU-bound.
 2. **There are two lighting models.** Cubes, meshes and voxels use flat
    derivative normals with Lambert lighting. #504's models use real normals
-   with GGX. Models now receive shadows and accept renderer fog, but do not cast shadows.
+   with GGX. Models now cast/receive shadows and accept renderer fog.
    Cutout geometry casts solid shadows. The only light is one sun: there are
    no point or spot lights, no transparent 3D pass and no material type.
 3. **The editor cannot author a 3D scene from models.**
@@ -134,7 +134,8 @@ Order:
   open; they do not block starting visible rendering work.
 - Current priority is slices 3 to 4 (one lit path, instancing and lights), which
   terrain (5b) and the showcase need. The first shared shader slice gives models
-  directional shadow reception and renderer fog; materials and casting remain.
+  directional shadow reception and renderer fog. Models now also cast material-aware
+  shadows; shared materials remain.
 - Slice 4b records future runtime environment controls and day/night proof.
   Start it only after unified materials, imported-model shadows, runtime light
   access and point/spot lights are ready. This does not change the current
@@ -211,8 +212,11 @@ cameras face), YXZ order. Build on `Transform3D::yaw_pitch_roll_radians` and
     exercise resize/disable/cache reuse and all three fog terms. Native/browser
     green-receiver controls prove model shadow reception. This is feature proof;
     Explorer adoption and shipped-host authored fog delivery remain pending.
-  - [ ] Imported-model shadow casting, cutout shadow silhouettes, PCF/cascades
-    and integrated game proof.
+  - [x] Imported-model shadow casting with cached hierarchy/geometry, independent
+    uniforms, glTF alpha masks and mirrored/single/double-sided facing. GPU
+    regressions and native/browser imported-only controls exercise it.
+  - [ ] World-mesh cutout shadow silhouettes, improved PCF/cascades, shipped-host
+    authored fog delivery and integrated game proof.
 - [ ] Mipmaps generated on upload for smooth-filtered textures.
 - [ ] A sorted, blended transparent 3D pass.
 

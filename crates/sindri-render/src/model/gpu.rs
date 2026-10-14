@@ -1,3 +1,6 @@
+mod shadow;
+pub(crate) use shadow::ModelShadowDraw;
+
 use std::{
     collections::HashMap,
     sync::{Arc, Weak},
@@ -28,6 +31,7 @@ pub(crate) struct ModelDraw<'a> {
 
 #[derive(Debug)]
 pub(crate) struct ModelRenderer {
+    shadow: shadow::ShadowRenderer,
     pipeline: wgpu::RenderPipeline,
     layout: wgpu::BindGroupLayout,
     cache: HashMap<usize, CachedModel>,
@@ -82,6 +86,7 @@ impl ModelRenderer {
         let layout = pipeline::layout(device);
         let pipeline = pipeline::create(device, format, &layout);
         Self {
+            shadow: shadow::ShadowRenderer::new(device),
             pipeline,
             layout,
             cache: HashMap::new(),
@@ -111,6 +116,7 @@ impl ModelRenderer {
             }
         }
         self.stats.resident_models = self.cache.len();
+        self.shadow.begin_submission(&self.cache);
     }
 
     pub(crate) const fn stats(&self) -> ModelCacheStats {
@@ -119,6 +125,21 @@ impl ModelRenderer {
 
     pub(crate) const fn draw_stats(&self) -> crate::MeshDrawStats {
         self.draw_stats
+    }
+
+    fn ensure_cached(
+        &mut self,
+        device: &wgpu::Device,
+        queue: &wgpu::Queue,
+        asset: &Arc<RenderModel>,
+    ) -> Result<usize, ModelRenderError> {
+        let key = Arc::as_ptr(asset) as usize;
+        if let std::collections::hash_map::Entry::Vacant(entry) = self.cache.entry(key) {
+            entry.insert(upload(device, queue, asset)?);
+            self.stats.uploads += 1;
+            self.stats.resident_models = self.cache.len();
+        }
+        Ok(key)
     }
 
     pub(crate) fn encode(
@@ -131,12 +152,7 @@ impl ModelRenderer {
         draw: &ModelDraw<'_>,
     ) -> Result<(), ModelRenderError> {
         validate::transform(draw.world)?;
-        let key = Arc::as_ptr(asset) as usize;
-        if let std::collections::hash_map::Entry::Vacant(entry) = self.cache.entry(key) {
-            entry.insert(upload(device, queue, asset)?);
-            self.stats.uploads += 1;
-            self.stats.resident_models = self.cache.len();
-        }
+        let key = self.ensure_cached(device, queue, asset)?;
         let cached = &self.cache[&key];
         let fallback = ModelSurface::default();
         for instance in asset.instances() {

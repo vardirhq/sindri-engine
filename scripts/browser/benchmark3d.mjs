@@ -47,7 +47,9 @@ try {
   await waitFor('3D benchmark ready');
   const pixels = await page.screenshot(shot ? { path: shot } : {});
   assert(imageStatistics(pixels).colors >= 8, 'the lab renders several scene colors');
-  const assets = process.env.SINDRI_MODEL_RECEIVER
+  const assets = process.env.SINDRI_MODEL_CASTER
+    ? ['benchmark.scene', 'benchmark.decay', 'caster.glb', 'prop.glb']
+    : process.env.SINDRI_MODEL_RECEIVER
     ? ['benchmark.scene', 'benchmark.decay', 'cube.png', 'prop.glb']
     : ['benchmark.scene', 'benchmark.decay', 'cube.png', 'surface.png', 'floor.png', 'prop.glb'];
   for (const asset of assets) {
