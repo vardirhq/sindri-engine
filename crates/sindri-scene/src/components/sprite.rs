@@ -110,6 +110,34 @@ pub struct SpriteComponent {
     /// their own or sit in front of the lit world.
     #[serde(default)]
     pub unlit: bool,
+    /// `sliced` keeps the border its sheet gives the art at its own size and
+    /// stretches only the middle, so a panel or a platform can be any size
+    /// without smearing its edges.
+    #[serde(default)]
+    pub draw: ImageDraw,
+    /// World units each border pixel covers when sliced: sixteen pixels to a
+    /// unit unless the art says otherwise.
+    #[serde(default = "sprite_border_scale")]
+    pub border_scale: f32,
+}
+
+/// Whether an image stretches whole or keeps its border.
+#[derive(Clone, Copy, Debug, Default, Deserialize, PartialEq, Eq)]
+#[serde(rename_all = "snake_case")]
+pub enum ImageDraw {
+    /// The whole picture stretched to the quad.
+    #[default]
+    Simple,
+    /// Nine pieces: corners kept, edges stretched one way, the middle both.
+    Sliced,
+}
+
+impl ImageDraw {
+    pub const NAMES: [&'static str; 2] = ["simple", "sliced"];
+}
+
+const fn sprite_border_scale() -> f32 {
+    1.0 / 16.0
 }
 
 impl SpriteComponent {

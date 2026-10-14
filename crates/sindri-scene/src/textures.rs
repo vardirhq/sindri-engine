@@ -9,6 +9,14 @@ use crate::{
     UiTextComponent, VoxelWorldComponent,
 };
 
+/// Where a sliced image's border runs: left, top, right and bottom, as
+/// fractions of the whole texture and as the pixels the sheet authored.
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub struct SliceBorder {
+    pub uv: [f32; 4],
+    pub pixels: [u32; 4],
+}
+
 /// Maps the texture references a scene names to the textures a renderer holds.
 ///
 /// Scenes refer to textures by a stable string; the renderer knows only
@@ -37,6 +45,9 @@ pub struct TextureBindings {
     /// height. Kept with the sheet because it is a property of the picture, not
     /// of whichever tilemap happens to draw it.
     tile_overhang_ratios: BTreeMap<String, f32>,
+    /// Nine-slice borders by texture and then sprite, the empty sprite name
+    /// for the whole image.
+    borders: BTreeMap<String, BTreeMap<String, SliceBorder>>,
     /// The project's sprite shaders. Here because every host already hands
     /// these bindings to extraction, and a shader is loaded and named the way
     /// a texture is.
@@ -109,6 +120,20 @@ impl TextureBindings {
             texture: texture.clone(),
             message: error.to_string(),
         })?;
+        let fractions = sheet
+            .border_fractions()
+            .map_err(|error| SheetBindError::Sheet {
+                texture: texture.clone(),
+                message: error.to_string(),
+            })?;
+        let borders = fractions
+            .into_iter()
+            .map(|(name, uv)| {
+                let pixels = sheet.borders[&name];
+                (name, SliceBorder { uv, pixels })
+            })
+            .collect();
+        self.borders.insert(texture.clone(), borders);
         let mut rects = BTreeMap::new();
         for (name, [x, y, width, height]) in authored {
             let rect = UvRect::new(x, y, width, height).map_err(|error| SheetBindError::Rect {
@@ -154,6 +179,20 @@ impl TextureBindings {
         self.sheets.remove(texture);
         self.anchors.remove(texture);
         self.tile_overhang_ratios.remove(texture);
+        self.borders.remove(texture);
+    }
+
+    /// The nine-slice border `reference` is drawn with: its own sprite's, or
+    /// failing that the whole image's, or `None` when the sheet gives neither
+    /// and a sliced image draws whole.
+    #[must_use]
+    pub fn slice_border(&self, reference: &SpriteRef) -> Option<SliceBorder> {
+        let borders = self.borders.get(reference.texture())?;
+        reference
+            .sprite()
+            .and_then(|name| borders.get(name))
+            .or_else(|| borders.get(""))
+            .copied()
     }
 
     /// Where `reference` meets the ground.

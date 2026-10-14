@@ -200,6 +200,9 @@ shaped like the tool.
   tilemaps, flecks and shapes, normal maps for sprites and tilemaps, and
   CPU-built polar shadows from box, polygon and tilemap occluders; Decay drives
   the lights and the platformer's cave proves it (`docs/2d-lights.md`)
+- [x] Slice sprites into nine — sheet borders in pixels, `draw: sliced` on
+  sprites and UI images, guides dragged in the sheet slicer, and the
+  platformer's HUD frame and signboard as proof (`docs/nine-slice.md`)
 - [ ] Port layers, anchors, and sprite bounds — layers work, and the nine
   anchors are a field of the UI family rather than of every sprite; editor picking uses the renderer's unit-quad geometry directly,
   while reusable component bounds remain. Parallax is not

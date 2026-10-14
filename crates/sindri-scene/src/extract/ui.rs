@@ -9,11 +9,11 @@ use glam::{Mat4, Vec2};
 use sindri_core::{Transform3D, World};
 use sindri_render::{SpriteInstance, TransparentOrder};
 
-use crate::UiImageComponent;
 use crate::screen_ui::UiPlaced;
+use crate::{ImageDraw, UiImageComponent};
 
 use super::camera::view::{OverlayExtent, camera_distance};
-use super::sprite::{DrawSpace, Drawing, SpriteBatches, SpriteDraw, drawn_rect};
+use super::sprite::{DrawSpace, Drawing, SpriteBatches, SpriteDraw, drawn_rect, pieces};
 use super::{SceneExtractError, SceneExtractor};
 
 /// Where an already-placed element lands on this viewport.
@@ -72,12 +72,20 @@ impl SceneExtractor {
             // pushing a zero-area quad keeps the empty case out of the renderer
             // entirely, which is where a degenerate rect would be a problem.
             let (fill_offset, fill_scale) = image.fill.sub_rect();
-            let Some(uv) = drawn_rect(entity, &image.reference()?, textures, animations, resting)
-                .part(fill_offset, fill_scale)
-            else {
+            let reference = image.reference()?;
+            let rect = drawn_rect(entity, &reference, textures, animations, resting);
+            let slicing = (image.draw == ImageDraw::Sliced)
+                .then(|| textures.slice_border(&reference))
+                .flatten();
+            // A sliced image keeps its whole picture as the quad shrinks, so a
+            // bar keeps its end caps; a whole one is clipped with its quad.
+            let Some(uv) = (if slicing.is_some() {
+                (fill_scale[0] > 0.0 && fill_scale[1] > 0.0).then_some(rect)
+            } else {
+                rect.part(fill_offset, fill_scale)
+            }) else {
                 continue;
             };
-            let reference = image.reference()?;
             let transform = world
                 .get(entity)
                 .and_then(|data| data.transform_3d)
@@ -98,21 +106,25 @@ impl SceneExtractor {
                 camera_distance(camera.view, position),
                 entity.index(),
             )?;
-            batches.push(SpriteDraw {
-                shader: None,
-                normal_map: None,
-                clip: hierarchy.clip_pixels_through(
-                    world,
-                    entity,
-                    crate::ScreenExtent::new(extent.half_extent.x, extent.half_extent.y),
-                    camera.view_projection,
-                    viewport,
-                ),
-                space: DrawSpace::Screen,
-                texture: textures.resolve(reference.texture()),
-                order,
-                sprite: SpriteInstance::new(model, image.tint).with_uv_rect(uv),
-            });
+            let clip = hierarchy.clip_pixels_through(
+                world,
+                entity,
+                crate::ScreenExtent::new(extent.half_extent.x, extent.half_extent.y),
+                camera.view_projection,
+                viewport,
+            );
+            let texture = textures.resolve(reference.texture());
+            for (model, uv) in pieces(model, uv, slicing, image.border_scale) {
+                batches.push(SpriteDraw {
+                    shader: None,
+                    normal_map: None,
+                    clip,
+                    space: DrawSpace::Screen,
+                    texture,
+                    order,
+                    sprite: SpriteInstance::new(model, image.tint).with_uv_rect(uv),
+                });
+            }
         }
         Ok(())
     }

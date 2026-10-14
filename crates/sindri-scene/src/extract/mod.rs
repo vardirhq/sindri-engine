@@ -12,6 +12,7 @@ mod frustum;
 mod meanings;
 mod mesh;
 mod model;
+mod nine_slice;
 pub use model::referenced_models;
 mod physics3d_registry;
 mod physics_registry;

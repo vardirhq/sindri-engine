@@ -163,6 +163,15 @@ pub struct SpriteSheetDocument {
     /// Parts that are not on the grid, named explicitly.
     #[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
     pub sprites: BTreeMap<String, [f32; 4]>,
+    /// The image's size in pixels, when the grid does not already say it.
+    /// A border is a pixel measurement, and this is what makes it a fraction.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub size: Option<[u32; 2]>,
+    /// Nine-slice borders by sprite name, the empty name for the whole image:
+    /// left, top, right and bottom, in pixels. A sliced sprite keeps these
+    /// strips at their size and stretches what is between them.
+    #[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
+    pub borders: BTreeMap<String, [u32; 4]>,
     /// Editor-only state, carried through untouched — the same arrangement a
     /// scene has. Where a slicer remembers what it was last showing.
     #[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
@@ -317,8 +326,17 @@ impl SpriteSheetDocument {
             tile_overhang_ratio: None,
             grid: Some(SheetGrid::edge_to_edge(columns, rows)),
             sprites: BTreeMap::new(),
+            size: None,
+            borders: BTreeMap::new(),
             editor: BTreeMap::new(),
         }
+    }
+
+    /// The image's size in pixels, from the sheet or its grid.
+    #[must_use]
+    pub fn image_size(&self) -> Option<[u32; 2]> {
+        self.size
+            .or_else(|| self.grid.as_ref().and_then(|grid| grid.size))
     }
 
     /// Parses a sheet, rejecting a version this runtime does not write.
@@ -390,7 +408,61 @@ impl SpriteSheetDocument {
                 return Err(SheetError::TileOverhangRatio(ratio));
             }
         }
-        self.rects().map(|_| ())
+        let rects = self.rects()?;
+        self.check_borders(&rects)
+    }
+
+    /// Every nine-slice border as fractions of the whole image: left, top,
+    /// right and bottom, the way a texture coordinate measures them.
+    ///
+    /// # Errors
+    /// When a border has no image size to measure against, names a sprite the
+    /// sheet does not, or is wider than its sprite.
+    pub fn border_fractions(&self) -> Result<BTreeMap<String, [f32; 4]>, SheetError> {
+        let rects = self.rects()?;
+        self.check_borders(&rects)?;
+        let Some([width, height]) = self.image_size() else {
+            return Ok(BTreeMap::new());
+        };
+        #[allow(clippy::cast_precision_loss)]
+        let [width, height] = [width as f32, height as f32];
+        Ok(self
+            .borders
+            .iter()
+            .map(|(name, [left, top, right, bottom])| {
+                #[allow(clippy::cast_precision_loss)]
+                let fractions = [
+                    *left as f32 / width,
+                    *top as f32 / height,
+                    *right as f32 / width,
+                    *bottom as f32 / height,
+                ];
+                (name.clone(), fractions)
+            })
+            .collect())
+    }
+
+    fn check_borders(&self, rects: &BTreeMap<String, [f32; 4]>) -> Result<(), SheetError> {
+        if self.borders.is_empty() {
+            return Ok(());
+        }
+        let [width, height] = self.image_size().ok_or(SheetError::BordersWithoutSize)?;
+        for (name, [left, top, right, bottom]) in &self.borders {
+            let rect = if name.is_empty() {
+                [0.0, 0.0, 1.0, 1.0]
+            } else {
+                *rects
+                    .get(name)
+                    .ok_or_else(|| SheetError::BorderOnUnknownSprite(name.clone()))?
+            };
+            #[allow(clippy::cast_precision_loss)]
+            let fits = (left + right) as f32 <= rect[2] * width as f32 + 0.5
+                && (top + bottom) as f32 <= rect[3] * height as f32 + 0.5;
+            if !fits {
+                return Err(SheetError::BorderTooWide(name.clone()));
+            }
+        }
+        Ok(())
     }
 }
 
@@ -430,6 +502,14 @@ pub enum SheetError {
     CellDoesNotFit { index: u32 },
     #[error("an anchor sits at ({x}, {y}), which is not a point on the frame")]
     Anchor { x: f32, y: f32 },
+    #[error(
+        "a sheet with nine-slice borders measures them in pixels, so it must record the image's `size`"
+    )]
+    BordersWithoutSize,
+    #[error("a nine-slice border names `{0}`, which the sheet does not")]
+    BorderOnUnknownSprite(String),
+    #[error("the nine-slice border on `{0}` is wider or taller than the sprite it cuts")]
+    BorderTooWide(String),
     #[error("tile overhang ratio must be finite and non-negative, got {0}")]
     TileOverhangRatio(f32),
     #[error("sheet is not valid json: {message}")]

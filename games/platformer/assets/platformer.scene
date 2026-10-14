@@ -2587,6 +2587,107 @@
       }
     },
     {
+      "id": "hud-panel",
+      "name": "HUD panel",
+      "transform_3d": {
+        "position": [
+          0.235,
+          -0.07,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          0.46,
+          0.13,
+          1
+        ]
+      },
+      "components": {
+        "sindri.ui.image": {
+          "texture": "textures/panel.png",
+          "anchor": "top_left",
+          "tint": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "layer": 99,
+          "draw": "sliced",
+          "border_scale": 0.004
+        }
+      }
+    },
+    {
+      "id": "signpost",
+      "name": "Signpost",
+      "transform_3d": {
+        "position": [
+          17.6,
+          3.4,
+          -0.06
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          0.18,
+          0.8,
+          1
+        ]
+      },
+      "components": {
+        "sindri.shape": {
+          "kind": "rect",
+          "fill": [
+            0.36,
+            0.22,
+            0.11,
+            1
+          ],
+          "layer": -1
+        }
+      }
+    },
+    {
+      "id": "signboard",
+      "name": "Signboard",
+      "transform_3d": {
+        "position": [
+          17.6,
+          4.3,
+          -0.05
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          2.2,
+          1.1,
+          1
+        ]
+      },
+      "components": {
+        "sindri.sprite": {
+          "texture": "textures/panel.png",
+          "layer": -1,
+          "draw": "sliced",
+          "border_scale": 0.0625
+        }
+      }
+    },
+    {
       "id": "lantern-anchor",
       "name": "Lantern hook",
       "transform_3d": {

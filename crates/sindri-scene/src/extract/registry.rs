@@ -258,7 +258,8 @@ fn register_drawables(components: &mut ComponentSchemaRegistry) -> Result<(), Sc
             "shader": "",
             "shader_params": [0.0, 0.0, 0.0, 0.0],
             "normal_map": "",
-            "unlit": false
+            "unlit": false,
+            "draw": "simple", "border_scale": 1.0 / 16.0
         }),
     )?;
     // The UI half of the same picture: anchored to the middle of the
@@ -274,7 +275,8 @@ fn register_drawables(components: &mut ComponentSchemaRegistry) -> Result<(), Sc
             // Full, and emptying rightwards: an element added to a scene
             // should appear whole, and a bar that a script never drives is
             // a picture, which is what this component was before.
-            "fill": { "amount": 1.0, "from": "left" }
+            "fill": { "amount": 1.0, "from": "left" },
+            "draw": "simple", "border_scale": 2.0 / 720.0
         }),
     )?;
     // A button is a hit area: its rect is the entity's transform, so one

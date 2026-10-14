@@ -54,16 +54,17 @@ pub use components::{
     CameraShake, EnvironmentAmbientOcclusion, EnvironmentBloom, EnvironmentComponent,
     EnvironmentError, EnvironmentFog, EnvironmentPostProcess, EnvironmentShadows,
     EnvironmentToneMapping, GridNavigationComponent, GridOccupantComponent, GridPlacementComponent,
-    GridWallDocument, LightComponent, LightError, LightKind, MeshComponent, MeshPrimitive,
-    ModelComponent, NaturalTerrainDocument, ShapeComponent, ShapeGeometry, SpriteColorTransform,
-    SpriteComponent, Sun, TileCellDocument, TileDraw, TileGridComponent, TileGridError,
-    TileProjection, TileSpace, TileVolumeComponent, TileVolumeError, TileVolumeIndex,
-    TilemapComponent, TilemapError, UiAnchor, UiFill, UiFillEdge, UiImageComponent, UiShapeBlend,
-    UiShapeComponent, UiShapeKind, UiShapeShadow, UiTextAutoSize, UiTextCase, UiTextComponent,
-    UiTextLineAlign, UiTextOutline, UiTextShadow, UiTextWrap, VoxelBlock, VoxelEdit,
-    VoxelGeneratorDocument, VoxelMapFlood, VoxelMaterialDocument, VoxelView, VoxelWorldComponent,
-    add_camera_trauma, cell_to_local_in, default_sun_transform, environment_of, environments_in,
-    light_direction, lights_in, sun_in, ui_text_template, update_camera_behaviors,
+    GridWallDocument, ImageDraw, LightComponent, LightError, LightKind, MeshComponent,
+    MeshPrimitive, ModelComponent, NaturalTerrainDocument, ShapeComponent, ShapeGeometry,
+    SpriteColorTransform, SpriteComponent, Sun, TileCellDocument, TileDraw, TileGridComponent,
+    TileGridError, TileProjection, TileSpace, TileVolumeComponent, TileVolumeError,
+    TileVolumeIndex, TilemapComponent, TilemapError, UiAnchor, UiFill, UiFillEdge,
+    UiImageComponent, UiShapeBlend, UiShapeComponent, UiShapeKind, UiShapeShadow, UiTextAutoSize,
+    UiTextCase, UiTextComponent, UiTextLineAlign, UiTextOutline, UiTextShadow, UiTextWrap,
+    VoxelBlock, VoxelEdit, VoxelGeneratorDocument, VoxelMapFlood, VoxelMaterialDocument, VoxelView,
+    VoxelWorldComponent, add_camera_trauma, cell_to_local_in, default_sun_transform,
+    environment_of, environments_in, light_direction, lights_in, sun_in, ui_text_template,
+    update_camera_behaviors,
 };
 pub use components::{
     EnvironmentLighting2d, Light2dComponent, Light2dError, Light2dOccluderComponent, OccluderShape,
@@ -123,7 +124,7 @@ pub use sprite_shaders::{
     unresolved_sprite_shaders,
 };
 pub use textures::{
-    FONT_NAMING_COMPONENTS, PROCEDURAL_TEXTURES, ProceduralTexture, SheetBindError,
+    FONT_NAMING_COMPONENTS, PROCEDURAL_TEXTURES, ProceduralTexture, SheetBindError, SliceBorder,
     TEXTURE_NAMING_COMPONENTS, TextureBindings, referenced_fonts, referenced_sheets,
     referenced_textures, unresolved_sprites, unresolved_textures,
 };

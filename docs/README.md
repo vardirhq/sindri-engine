@@ -47,6 +47,7 @@ contracts below; dated evidence should not override them.
 - [Sprite shaders](sprite-shaders.md)
 - [2D lights and shadows](2d-lights.md)
 - [Particles](particles.md)
+- [Nine-slice sprites](nine-slice.md)
 
 ## Editor
 

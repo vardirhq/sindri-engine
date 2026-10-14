@@ -90,6 +90,7 @@ mod scene_menu;
 mod scene_new;
 mod shape_gizmo;
 mod shortcuts;
+mod slice_guides;
 mod slicer_view;
 mod sprite_sheet_view;
 mod startup;

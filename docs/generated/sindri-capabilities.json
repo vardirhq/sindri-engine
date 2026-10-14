@@ -1716,6 +1716,7 @@
       "apply": {},
       "default_payload": {
         "billboard": false,
+        "border_scale": 0.0625,
         "color_transform": {
           "multiply": [
             1.0,
@@ -1730,6 +1731,7 @@
             0.0
           ]
         },
+        "draw": "simple",
         "layer": 0,
         "normal_map": "",
         "shader": "",
@@ -1751,6 +1753,7 @@
       "display_name": "Sprite",
       "fields": {
         "billboard": false,
+        "border_scale": 0.0625,
         "color_transform": {
           "multiply": [
             1.0,
@@ -1765,6 +1768,7 @@
             0.0
           ]
         },
+        "draw": "simple",
         "layer": 0,
         "normal_map": "",
         "shader": "",
@@ -1784,6 +1788,13 @@
         "unlit": false
       },
       "meanings": {
+        "draw": {
+          "kind": "choice",
+          "options": [
+            "simple",
+            "sliced"
+          ]
+        },
         "normal_map": {
           "asset": "texture",
           "kind": "asset"
@@ -2166,6 +2177,8 @@
       "apply": {},
       "default_payload": {
         "anchor": "center",
+        "border_scale": 0.002777777777777778,
+        "draw": "simple",
         "fill": {
           "amount": 1.0,
           "from": "left"
@@ -2182,6 +2195,8 @@
       "display_name": "UI Image",
       "fields": {
         "anchor": "center",
+        "border_scale": 0.002777777777777778,
+        "draw": "simple",
         "fill": {
           "amount": 1.0,
           "from": "left"
@@ -2208,6 +2223,13 @@
             "top_right",
             "bottom_left",
             "bottom_right"
+          ]
+        },
+        "draw": {
+          "kind": "choice",
+          "options": [
+            "simple",
+            "sliced"
           ]
         },
         "texture": {

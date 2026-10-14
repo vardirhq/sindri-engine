@@ -16,7 +16,9 @@ use sindri_render::{
 
 use crate::TileSetBindings;
 use crate::screen_ui::UiHierarchy;
-use crate::{SpriteAnimationComponent, SpriteAnimations, SpriteComponent, TextureBindings};
+use crate::{
+    ImageDraw, SpriteAnimationComponent, SpriteAnimations, SpriteComponent, TextureBindings,
+};
 
 use super::camera::ResolvedCameras;
 use super::camera::view::camera_distance;
@@ -208,32 +210,39 @@ impl SceneExtractor {
                 camera_distance(camera.view, model.w_axis.truncate()),
                 entity.index(),
             )?;
-            batches.push(SpriteDraw {
-                clip: None,
-                space: DrawSpace::World,
-                texture: textures.resolve(reference.texture()),
-                // An unbound shader draws the built-in look; the host reports
-                // the missing file by name, as it does a missing texture.
-                shader: (!sprite.shader.is_empty())
-                    .then(|| textures.shaders().get(&sprite.shader).cloned())
-                    .flatten(),
-                // Unbound, it is simply absent: lit by distance alone rather
-                // than as the missing texture's pattern of bumps.
-                normal_map: (!sprite.normal_map.is_empty())
-                    .then(|| textures.get(&sprite.normal_map))
-                    .flatten(),
-                order,
-                sprite: SpriteInstance::new(model, sprite.tint)
-                    .lit(!sprite.unlit)
-                    .with_color_transform(
-                        sprite.color_transform.multiply,
-                        sprite.color_transform.offset,
-                    )
-                    .with_shader_params(sprite.shader_params)
-                    .with_uv_rect(drawn_rect(
-                        entity, &reference, textures, animations, resting,
-                    )),
-            });
+            let texture = textures.resolve(reference.texture());
+            // An unbound shader draws the built-in look; the host reports the
+            // missing file by name, as it does a missing texture.
+            let shader = (!sprite.shader.is_empty())
+                .then(|| textures.shaders().get(&sprite.shader).cloned())
+                .flatten();
+            // Unbound, it is simply absent: lit by distance alone rather than
+            // as the missing texture's pattern of bumps.
+            let normal_map = (!sprite.normal_map.is_empty())
+                .then(|| textures.get(&sprite.normal_map))
+                .flatten();
+            let rect = drawn_rect(entity, &reference, textures, animations, resting);
+            let slicing = (sprite.draw == ImageDraw::Sliced)
+                .then(|| textures.slice_border(&reference))
+                .flatten();
+            for (model, uv) in pieces(model, rect, slicing, sprite.border_scale) {
+                batches.push(SpriteDraw {
+                    clip: None,
+                    space: DrawSpace::World,
+                    texture,
+                    shader: shader.clone(),
+                    normal_map,
+                    order,
+                    sprite: SpriteInstance::new(model, sprite.tint)
+                        .lit(!sprite.unlit)
+                        .with_color_transform(
+                            sprite.color_transform.multiply,
+                            sprite.color_transform.offset,
+                        )
+                        .with_shader_params(sprite.shader_params)
+                        .with_uv_rect(uv),
+                });
+            }
         }
         Ok(())
     }
@@ -307,6 +316,20 @@ impl SceneExtractor {
             );
         }
         Ok(())
+    }
+}
+
+/// The quads one image draws: itself, or its nine pieces when it is sliced
+/// and its sheet gives it a border to keep.
+pub(super) fn pieces(
+    model: Mat4,
+    rect: UvRect,
+    border: Option<crate::SliceBorder>,
+    scale: f32,
+) -> Vec<(Mat4, UvRect)> {
+    match border {
+        Some(border) => super::nine_slice::nine_slice(model, rect, border, scale),
+        None => vec![(model, rect)],
     }
 }
 

@@ -662,6 +662,12 @@ handful at once (`Effects.play`, `Effects.stop`, `Effects.emit`); the editor
 runs the selected emitter in the Scene view while nothing plays. The
 platformer's coins sparkle and its hero trails dust. See `docs/particles.md`.
 
+A sprite or UI image drawn `sliced` keeps the border its sheet records, in
+pixels by sprite name, and stretches only the middle: nine quads in the image's
+own space, sharing one draw. `border_scale` sets how big a border pixel is
+drawn. The sheet slicer drags the border's guides on the image. The platformer's
+HUD frame and signboard are one 24-pixel panel. See `docs/nine-slice.md`.
+
 ### Game saves
 
 `sindri_core::SaveStore` is a flat, versioned key/value document. Flat because

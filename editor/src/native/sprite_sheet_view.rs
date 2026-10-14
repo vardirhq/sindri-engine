@@ -19,7 +19,7 @@ use crate::ui::widgets::{
 };
 
 use super::EditorApp;
-use super::slicer_view::{slice_grid, slice_names};
+use super::slicer_view::{slice_border, slice_grid, slice_names};
 
 /// How far in and out the picture goes.
 const ZOOM: std::ops::RangeInclusive<f32> = 0.05..=64.0;
@@ -226,6 +226,9 @@ fn sheet_canvas(
     };
     let drawn: Vec<Rect> = rects.iter().map(|cell| cell_rect(*cell)).collect();
     draw_cells(&painter, &drawn, selected, &named);
+    if let Some(cell) = drawn.get(selected as usize) {
+        super::slice_guides::border_guides(ui, &response, &painter, slicer, *cell, zoom);
+    }
 
     // Picked by hit-testing the drawn rects, so a click lands on the cell it
     // looks like it landed on even when gutters mean the cells do not tile.
@@ -399,6 +402,8 @@ fn sheet_controls(ui: &mut egui::Ui, slicer: &mut Slicer) -> (bool, bool) {
     slice_grid(ui, slicer);
     ui.add_space(6.0);
     slice_names(ui, slicer);
+    ui.add_space(6.0);
+    slice_border(ui, slicer);
     ui.add_space(10.0);
     ui.horizontal(|ui| {
         ui.add_space(metric::GUTTER);

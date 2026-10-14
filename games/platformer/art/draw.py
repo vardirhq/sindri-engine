@@ -318,6 +318,49 @@ def draw_particle():
     png(OUT / "particle.png", size, size, pixels)
 
 
+# --- Panel ------------------------------------------------------------------
+
+
+def draw_panel():
+    """A wooden frame round a dark slate: sliced, so any size keeps its frame.
+
+    The frame is the outer 6 pixels, the border `panel.sheet` records; the
+    slate inside is flat so stretching it shows nothing.
+    """
+    size = 24
+    frame = 6
+    outline = hex_color("#3b2412")
+    slate = (34, 30, 44, 225)
+    pixels = []
+    for y in range(size):
+        row = []
+        for x in range(size):
+            edge = min(x, y, size - 1 - x, size - 1 - y)
+            corner = min(x, size - 1 - x) + min(y, size - 1 - y)
+            if corner < 2:
+                row.append(CLEAR)
+            elif edge == 0 or corner == 2:
+                row.append(outline)
+            elif edge < frame - 2:
+                # Grain runs along each side, and the top and left catch light.
+                lit = (y == edge) or (x == edge and y < size - 1 - edge)
+                # Stripes running along the side, so stretching it lengthens
+                # the grain rather than smearing it.
+                side = 0 if edge in (y, size - 1 - y) else 1
+                grain = int(noise(edge, side, 7) * 2)
+                row.append(PLANK[2] if lit else PLANK[grain])
+            elif edge < frame - 1:
+                row.append(PLANK[3])
+            elif edge < frame:
+                row.append(outline)
+            else:
+                row.append(slate)
+        pixels.append(row)
+    for nx, ny in ((3, 3), (size - 4, 3), (3, size - 4), (size - 4, size - 4)):
+        pixels[ny][nx] = hex_color("#e8d9a8")
+    png(OUT / "panel.png", size, size, pixels)
+
+
 if __name__ == "__main__":
     OUT.mkdir(parents=True, exist_ok=True)
     draw_tiles()
@@ -326,3 +369,4 @@ if __name__ == "__main__":
     draw_coin()
     draw_flag()
     draw_particle()
+    draw_panel()

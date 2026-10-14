@@ -77,7 +77,10 @@ It uses, with no Rust of its own:
 - **screen text** filled from Decay;
 - **2D lights**: a sun high over the level that casts shadows, a stone cave
   whose roof keeps the daylight out, two lanterns that cast the pillar's shadow
-  and a low wall torch raking the normal-mapped bricks.
+  and a low wall torch raking the normal-mapped bricks;
+- **particles**: coins sparkle and the hero kicks up dust;
+- **nine-slice**: the HUD frame and the signboard by the first gap are one
+  24-pixel panel, sliced so each keeps its wooden border.
 
 ## Playing it
 
@@ -94,6 +97,8 @@ that plays it without a window, built from the same public pieces a host uses.
 
 `tests/cave_lights.rs` checks that the roof keeps the sun out of the cave,
 that the lanterns warm it, and that the pillar shades its far side from one.
+`tests/sparkle_and_dust.rs` checks the coins' sparkle and the hero's dust, and
+`tests/sliced_panels.rs` that the HUD frame and signboard are drawn sliced.
 
 `tests/one_way_platforms.rs` jumps through the authored planks, lands on top,
 drops through using the real input action, stops on the ordinary painted floor

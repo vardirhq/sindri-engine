@@ -11,6 +11,7 @@ mod cameras;
 mod canvas;
 mod lights_2d;
 mod models;
+mod nine_slice;
 mod passes;
 mod sprite_shaders;
 mod sprites;

@@ -101,12 +101,15 @@ game in this repository.
   Contract: `docs/particles.md`.
 
 ### 5. Nine-slice sprites
-- [ ] A sheet sprite can declare a border: left, top, right and bottom, in
+- [x] A sheet sprite can declare a border: left, top, right and bottom, in
   pixels.
-- [ ] `sindri.ui.image` and `sindri.sprite` gain `draw: simple | sliced` and a
-  size. A sliced image keeps its corners and stretches its edges and middle.
-- [ ] The sheet slicer edits the border by dragging its guides.
-- [ ] Proof: a resizable panel in the UI example.
+- [x] `sindri.ui.image` and `sindri.sprite` gain `draw: simple | sliced` and a
+  `border_scale`; the size is the transform's, as before. A sliced image keeps
+  its corners and stretches its edges and middle.
+- [x] The sheet slicer edits the border by dragging its guides.
+- [x] Proof: the platformer's HUD frame and signboard, one panel at two sizes,
+  rather than the UI example, whose widgets are drawn shapes with no image to
+  slice. Contract: `docs/nine-slice.md`.
 
 ### 6. Autotiling
 - [ ] A sheet can declare terrains: a name and the sprite each of the sixteen

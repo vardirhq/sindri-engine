@@ -50,7 +50,7 @@ pub use light2d::{
 };
 pub use mesh::{MeshComponent, MeshPrimitive};
 pub use model::ModelComponent;
-pub use sprite::{SpriteColorTransform, SpriteComponent};
+pub use sprite::{ImageDraw, SpriteColorTransform, SpriteComponent};
 pub use tile_volume::{
     TileCellDocument, TileGridComponent, TileGridError, TileSpace, TileVolumeComponent,
     TileVolumeError, TileVolumeIndex, cell_to_local_in,
