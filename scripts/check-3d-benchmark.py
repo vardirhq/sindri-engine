@@ -27,6 +27,9 @@ def check(path: str, shadows: bool, require_timing: bool = False) -> None:
         if require_timing:
             assert frame["gpu_execution_us"] > 0, "need a measured GPU interval"
         assert frame["mesh_counters"] == expected, (path, frame["mesh_counters"], expected)
+        assert frame["batch_counters"] == dict.fromkeys(
+            ["draw_calls", "render_passes", "instances", "buffer_writes", "uniform_bytes", "instance_bytes"], 0
+        ), "the fixed 3D workload has no 2D batches"
     print(f"{path}: {len(frames)} frames match physical 3D counters")
 
 

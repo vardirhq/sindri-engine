@@ -379,6 +379,9 @@ jobs:
           timeout 120s xvfb-run --auto-servernum --server-args="-screen 0 1600x1200x24" target/debug/sindri-editor examples/benchmark3d --benchmark target/render-artifacts/editor-benchmark3d.json --frames 3 --settle 30
           timeout 120s xvfb-run --auto-servernum --server-args="-screen 0 1600x1200x24" target/debug/sindri-editor target/native-benchmark3d-no-shadows --benchmark target/render-artifacts/editor-benchmark3d-no-shadows.json --frames 3 --settle 30
           python3 scripts/check-3d-benchmark.py target/render-artifacts/editor-benchmark3d.json target/render-artifacts/editor-benchmark3d-no-shadows.json --require-gpu-timing
+          cargo run --package sindri-causeway --bin project-benchmark -- games/platformer target/render-artifacts/platformer-batches.json 3 30
+          timeout 120s xvfb-run --auto-servernum --server-args="-screen 0 1600x1200x24" target/debug/sindri-editor games/platformer --benchmark target/render-artifacts/editor-platformer-batches.json --frames 3 --settle 30
+          python3 scripts/check-platformer-batches.py target/render-artifacts/platformer-batches.json target/render-artifacts/editor-platformer-batches.json
       - name: Capture the companion game mid-run
         id: causeway_capture
         env:
@@ -416,6 +419,8 @@ jobs:
             target/render-artifacts/benchmark3d-no-shadows.json
             target/render-artifacts/editor-benchmark3d.json
             target/render-artifacts/editor-benchmark3d-no-shadows.json
+            target/render-artifacts/platformer-batches.json
+            target/render-artifacts/editor-platformer-batches.json
             target/render-artifacts/causeway.png
             target/render-artifacts/orbital-spectacle-desktop.png
             target/render-artifacts/orbital-spectacle-phone.png

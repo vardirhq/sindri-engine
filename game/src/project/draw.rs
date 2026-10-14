@@ -34,6 +34,8 @@ pub struct DrawTimes {
     pub encoding: Duration,
     /// Physical textured 3D/model work; excludes the frame clear, 2D and post.
     pub meshes: sindri_render::MeshDrawStats,
+    /// Physical sprite/shape/glyph batches; excludes atlas/texture initialization.
+    pub batches: sindri_render::BatchDrawStats,
     /// New imported assets uploaded this draw, not primitive/buffer counts.
     pub model_uploads: u64,
     /// Persistent mesh vertex/index buffer pairs uploaded this draw.
@@ -129,6 +131,13 @@ impl ProjectRenderer {
             .transpose()
     }
 
+    fn batch_stats(&self) -> sindri_render::BatchDrawStats {
+        self.sprites
+            .draw_stats()
+            .combined(self.shapes.draw_stats())
+            .combined(self.glyphs.draw_stats())
+    }
+
     /// Draws the player's world once and submits it.
     pub fn draw(
         &mut self,
@@ -181,6 +190,7 @@ impl ProjectRenderer {
             timer.begin(&mut encoder);
         }
         let before = self.cubes.draw_stats();
+        let batches = self.batch_stats();
         let model_uploads = self.cubes.model_cache_stats().uploads;
         let cached_uploads = self.cubes.cached_mesh_stats().buffer_uploads;
         encode_prepared_frame(
@@ -210,6 +220,7 @@ impl ProjectRenderer {
             extraction: extracted.duration_since(styled),
             encoding: unstyled.elapsed(),
             meshes: self.cubes.draw_stats().since(before),
+            batches: self.batch_stats().since(batches),
             model_uploads: self
                 .cubes
                 .model_cache_stats()

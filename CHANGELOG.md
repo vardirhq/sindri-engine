@@ -1,5 +1,10 @@
 # Changelog
 
+- Record physical sprite, shape and glyph batch draws/passes, instance counts
+  and queue buffer payloads in standalone and editor benchmark reports. Empty
+  batches record no work; counters survive slot reuse, and extra Scene work
+  stays separate. Clears, post and atlas/resource uploads remain open.
+
 - Measure optional GPU timestamps in native editor benchmarks, with separate
   Game and extra Scene intervals, adapter/period/scope metadata and null for
   unavailable timing. Execution stays outside CPU phases; normal editor

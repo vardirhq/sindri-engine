@@ -81,6 +81,8 @@ def section_stats(frames: list[dict]) -> dict:
     return {
         "mesh_counters": counter_means(frames, "mesh_counters"),
         "scene_mesh_counters": counter_means(frames, "scene_mesh_counters"),
+        "batch_counters": counter_means(frames, "batch_counters"),
+        "scene_batch_counters": counter_means(frames, "scene_batch_counters"),
         "gpu_execution_mean": statistics.fmean(execution) if execution else None,
         "gpu_execution_p95": percentile(execution, 0.95) if execution else None,
         "scene_gpu_execution_mean": statistics.fmean(scene_execution) if scene_execution else None,
@@ -125,7 +127,8 @@ def describe(path: Path) -> list[str]:
         if stats["scene_gpu_execution_mean"] is not None:
             lines.append(f"           Extra Scene GPU execution mean {stats['scene_gpu_execution_mean']:.2f} ms  "
                          f"p95 {stats['scene_gpu_execution_p95']:.2f} ms (timestamps)")
-        for field, label in [("mesh_counters", "3D/frame"), ("scene_mesh_counters", "extra Scene 3D/frame")]:
+        for field, label in [("mesh_counters", "3D/frame"), ("scene_mesh_counters", "extra Scene 3D/frame"),
+                             ("batch_counters", "2D batches/frame"), ("scene_batch_counters", "extra Scene 2D batches/frame")]:
             if stats[field]:
                 lines.append("           " + label + " " + "  ".join(
                     f"{key} {value:g}" for key, value in stats[field].items()

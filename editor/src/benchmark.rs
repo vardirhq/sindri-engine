@@ -104,7 +104,26 @@ pub fn frame_json(frame: &Frame) -> Value {
             written[key] = mesh_json(counters);
         }
     }
+    for (key, counters) in [
+        ("batch_counters", frame.batch_counters),
+        ("scene_batch_counters", frame.scene_batch_counters),
+    ] {
+        if let Some(counters) = counters {
+            written[key] = batch_json(counters);
+        }
+    }
     written
+}
+
+fn batch_json(counters: sindri_render::BatchDrawStats) -> Value {
+    json!({
+        "draw_calls": counters.draw_calls,
+        "render_passes": counters.render_passes,
+        "instances": counters.instances,
+        "buffer_writes": counters.buffer_writes,
+        "uniform_bytes": counters.uniform_bytes,
+        "instance_bytes": counters.instance_bytes,
+    })
 }
 
 fn mesh_json(counters: MeshCounters) -> Value {
@@ -234,7 +253,14 @@ mod mesh_tests {
         assert!(absent.get("scene_mesh_counters").is_none());
         assert!(absent["gpu_execution_us"].is_null());
         assert!(absent["scene_gpu_execution_us"].is_null());
+        assert!(absent.get("batch_counters").is_none());
+        assert!(absent.get("scene_batch_counters").is_none());
         let drawn = Frame {
+            batch_counters: Some(sindri_render::BatchDrawStats::default()),
+            scene_batch_counters: Some(sindri_render::BatchDrawStats {
+                draw_calls: 5,
+                ..Default::default()
+            }),
             gpu_execution: Some(std::time::Duration::ZERO),
             scene_gpu_execution: Some(std::time::Duration::from_micros(23)),
             mesh_counters: Some(MeshCounters::default()),
@@ -249,6 +275,8 @@ mod mesh_tests {
             ..frame
         };
         let written = frame_json(&drawn);
+        assert_eq!(written["batch_counters"]["draw_calls"], 0);
+        assert_eq!(written["scene_batch_counters"]["draw_calls"], 5);
         assert_eq!(written["gpu_execution_us"], 0);
         assert_eq!(written["scene_gpu_execution_us"], 23);
         assert_eq!(written["mesh_counters"]["draw_calls"], 0);

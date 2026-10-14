@@ -31,6 +31,13 @@ pub(in crate::native) struct SceneRenderers {
 }
 
 impl SceneRenderers {
+    fn draw_stats(&self) -> sindri_render::BatchDrawStats {
+        self.sprites
+            .draw_stats()
+            .combined(self.shapes.draw_stats())
+            .combined(self.glyphs.draw_stats())
+    }
+
     pub(in crate::native) fn new(render_state: &eframe::egui_wgpu::RenderState) -> Self {
         Self {
             sprites: SpriteBatchRenderer::new(&render_state.device, ViewportTarget::FORMAT),
@@ -156,6 +163,7 @@ impl RuntimeViewport {
                     label: Some("Sindri editor runtime viewport encoder"),
                 });
         let before = MeshCounters::snapshot(&self.cube);
+        let batches = renderers.draw_stats();
         self.encode(
             renderers,
             source,
@@ -165,6 +173,7 @@ impl RuntimeViewport {
             profiler.waits_for_gpu(),
         )?;
         profiler.add_mesh_counters(MeshCounters::snapshot(&self.cube).since(before));
+        profiler.add_batch_counters(renderers.draw_stats().since(batches));
         profiler.add(Phase::Encoding, extracted.elapsed());
         self.complete_timing(profiler)?;
         Ok(text_sizes)

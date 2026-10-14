@@ -2602,7 +2602,12 @@ altering eframe's device limits; each view owns its own reusable query pair.
 Primary and extra Scene intervals accumulate independently, serialize in
 microseconds and stay outside CPU phases. Capture/reset/null regressions and
 real native shadow-control/two-view runs exercise delivery. Whole-frame
-counters, browser timestamps and performance targets remain pending. The
+counters, browser timestamps and performance targets remain pending.
+`BatchDrawStats` now records physical sprite/shape/glyph batches and queue
+buffer payloads, excluding initialization/atlas uploads. Standalone and editor
+reports carry primary and extra Scene scopes. Real GPU empty/reuse tests,
+Platformer reports and rebuilt browser smoke exercise the shared path; the
+fixed 3D CI workload records measured zeroes for 2D batches. The
 [baseline record](3d-benchmark-baseline.md) records the hardware/profile context,
 short editor/standalone sample and native/browser shadow comparisons.
 

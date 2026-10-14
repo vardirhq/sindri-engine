@@ -63,3 +63,14 @@ impl Profiler {
         *slot = Some(slot.unwrap_or_default() + duration);
     }
 }
+
+impl Profiler {
+    pub(crate) fn add_batch_counters(&mut self, counters: sindri_render::BatchDrawStats) {
+        let slot = if self.scene_beside_run {
+            &mut self.current.scene_batch_counters
+        } else {
+            &mut self.current.batch_counters
+        };
+        *slot = Some(slot.unwrap_or_default().combined(counters));
+    }
+}

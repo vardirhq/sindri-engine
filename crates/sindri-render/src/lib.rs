@@ -1,5 +1,6 @@
 //! Target-independent Sindri rendering building blocks.
 
+mod batch_stats;
 mod bloom;
 mod camera;
 mod color;
@@ -27,6 +28,7 @@ mod transparency;
 mod triangle;
 mod uv_rect;
 
+pub use batch_stats::BatchDrawStats;
 pub use bloom::{Bloom, BloomSettings, PostProcessSettings, ToneMapping};
 pub use camera::{
     OrthographicCamera, PerspectiveCamera, look_at, orthographic_projection, perspective_projection,

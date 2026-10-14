@@ -55,3 +55,8 @@ timestamps, with device/scope metadata and null for unsupported devices. The
 summary prints these intervals separately from CPU work. Whole-frame counters
 and browser timestamps remain open. Editor reports keep the extra Scene interval
 under `scene_gpu_execution_us`, separate from Game and CPU work.
+
+Reports also carry `batch_counters` (and extra `scene_batch_counters` in the
+editor) for sprite/shape/glyph draws and buffer payloads. This fixture measures
+zero for those scopes; Platformer exercises nonempty batches. Atlas/resource
+uploads, clears, post and editor UI are still outside the reported totals.

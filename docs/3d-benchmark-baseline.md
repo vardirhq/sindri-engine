@@ -132,3 +132,35 @@ wait remains separate. GPU intervals exclude editor UI, scene-board copies,
 queued uploads before the encoder bracket, readback and presentation. The
 interactive Profiler panel still shows CPU phases. Browser timestamps and
 whole-frame counters remain open.
+
+
+## Physical 2D batch counters
+
+`BatchDrawStats` extends the measurement path to sprite, shape and glyph
+batches. The fixed 3D workload reports measured zeroes for these scopes with
+shadows on and off, while keeping the existing exact 3D counters/timestamps.
+
+Platformer's standalone and native editor Game reports both settle for 30
+frames and record three consecutive frames at 1280×720. Every frame has:
+
+| Physical batch work per frame | Standalone / editor Game |
+| --- | ---: |
+| Draws / render passes | 9 / 9 |
+| Instances | 295 |
+| Queue buffer writes | 18 |
+| Uniform payload bytes | 576 |
+| Instance payload bytes | 41,968 |
+
+Native CI repeats the reports and checks those exact values. A two-view editor
+run records the same values independently for Game and Scene in each of six
+Play frames; the primary count remains nine. Profiler/report regressions cover
+scope separation, accumulation, capture/reset and undrawn versus measured zero.
+A required-GPU regression encodes empty and nonempty batches through all three
+renderers over two submissions and verifies exact writes/bytes and slot reuse.
+
+The rebuilt WebGPU player renders the 3D fixture and completes Platformer's
+keyboard-to-flag goal with five coins, no falls and eight jumps. Native and
+normal-editor authored-color checks pass. This is measurement foundation work
+exercised by a feature example and an existing genre showcase; it does not close
+the whole-frame item. Clears, post, atlas/resource uploads, scene-board copies
+and egui UI remain outside these counters. Browser timestamps remain open.

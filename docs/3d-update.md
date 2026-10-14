@@ -182,7 +182,12 @@ cameras face), YXZ order. Build on `Transform3D::yaw_pitch_roll_radians` and
 - [x] Editor benchmarks use optional GPU timestamps for each viewport, record
   primary and extra Scene intervals independently, and keep execution outside
   CPU phases. Native shadow controls and a two-view layout prove delivery.
-- [ ] Extend counters to whole-frame work and GPU timestamps to browser reports.
+- [x] Record physical sprite/shape/glyph batch draws, passes, instances and
+  buffer-write bytes in standalone/editor reports, with a separate extra Scene
+  scope. GPU empty/reuse tests and native Platformer reports exercise the path;
+  the fixed 3D fixture records measured zeroes.
+- [ ] Finish whole-frame coverage (clears, post, atlas/resource uploads and editor
+  UI) and GPU timestamps in browser reports.
 - [ ] Set the targets the next slice must meet (for example, draws and passes
   per frame independent of repeated props, and zero steady-state uploads).
 

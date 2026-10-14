@@ -177,6 +177,10 @@ pub struct Frame {
     pub mesh_counters: Option<MeshCounters>,
     /// Extra Scene view drawn beside Play, excluded from the primary counters.
     pub scene_mesh_counters: Option<MeshCounters>,
+    /// Physical sprite/shape/glyph work in the primary view.
+    pub batch_counters: Option<sindri_render::BatchDrawStats>,
+    /// The extra Scene view's sprite/shape/glyph work, kept separate.
+    pub scene_batch_counters: Option<sindri_render::BatchDrawStats>,
     /// GPU interval of the primary view; absent when unsupported or undrawn.
     pub gpu_execution: Option<Duration>,
     /// GPU interval of the extra Scene view beside Play.

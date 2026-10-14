@@ -71,11 +71,17 @@ pub struct SpriteBatchRenderer {
     /// Which slot the next batch of this frame takes.
     next: usize,
     clip: Option<[u32; 4]>,
+    draw_stats: crate::BatchDrawStats,
     blend_mode: SpriteBlendMode,
     stats: SpriteBatchStats,
 }
 
 impl SpriteBatchRenderer {
+    /// Cumulative physical draw/write payloads, including every nonempty batch.
+    pub const fn draw_stats(&self) -> crate::BatchDrawStats {
+        self.draw_stats
+    }
+
     pub fn set_clip(&mut self, clip: Option<[u32; 4]>) {
         self.clip = clip;
     }
@@ -165,6 +171,7 @@ impl SpriteBatchRenderer {
             batches: Vec::new(),
             next: 0,
             clip: None,
+            draw_stats: crate::BatchDrawStats::default(),
             blend_mode,
             stats: SpriteBatchStats::default(),
         }
@@ -291,6 +298,11 @@ impl SpriteBatchRenderer {
         );
         pass.set_vertex_buffer(1, batch.instances.slice(..));
         self.mesh.draw_instances(&mut pass, 0..instance_count);
+        self.draw_stats.record_draw(
+            instance_count,
+            std::mem::size_of::<BatchUniform>(),
+            std::mem::size_of_val(instances),
+        );
         Ok(stats)
     }
 

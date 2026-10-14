@@ -69,6 +69,14 @@ mod benchmark {
                 playing.push(json!({
                     "steps": 1,
                     "gpu_execution_us": execution.map(micros),
+                    "batch_counters": {
+                        "draw_calls": drawn.batches.draw_calls,
+                        "render_passes": drawn.batches.render_passes,
+                        "instances": drawn.batches.instances,
+                        "buffer_writes": drawn.batches.buffer_writes,
+                        "uniform_bytes": drawn.batches.uniform_bytes,
+                        "instance_bytes": drawn.batches.instance_bytes,
+                    },
                     "mesh_counters": {
                         "draw_calls": drawn.meshes.draw_calls,
                         "render_passes": drawn.meshes.render_passes,
