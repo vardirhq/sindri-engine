@@ -51,7 +51,7 @@ two ways to get one:
 - **Height map**: an explicit grayscale image laid out exactly like the sprite,
   for an artist who painted the relief they want.
 
-From the height field, each texel's normal is the slope across its neighbours,
+From the height field, each texel's normal is the slope across its neighbors,
 scaled by **strength**:
 
 ```text
@@ -74,7 +74,7 @@ The settings:
 | `invert` | Dark reads as raised instead |
 | `alpha_height` | Transparent texels count as the lowest height, so a sprite's silhouette bevels toward its outline. Off for opaque tiles, where it changes nothing anyway |
 | `edges` | `clamp` (an edge repeats its last texel) or `wrap` (the far side continues, for a texture that tiles) |
-| `cells` | Whether a sliced sheet's cells are treated as separate pictures, so a tile's slope never reads its neighbour in the sheet |
+| `cells` | Whether a sliced sheet's cells are treated as separate pictures, so a tile's slope never reads its neighbor in the sheet |
 | `green` | `up` (Sindri, OpenGL) or `down` (DirectX), for a map that will be used elsewhere. Sindri reads `up`; the preview shows what Sindri would do with either |
 
 **Presets** set these to a starting point for a material: metal, wood,
@@ -103,16 +103,26 @@ One canvas, four modes, chosen in the strip along its bottom:
 
 ### The lit preview is the game's renderer
 
-The lit preview does not imitate the game's lighting. It draws the sprite with
-`sindri_render::SpriteBatchRenderer`, the same pipeline the Scene view, the
-Game view and every exported build draw sprites with, through the same shader
-(`sprite_shader/epilogue.wgsl` and `light2d/light2d.wgsl`), with the normal map
-bound where a sprite's `normal_map` is bound and the light handed over as the
-same `Lighting2d` a scene's `sindri.light2d` becomes. The texture and the map
-are uploaded as a game uploads them, so the sRGB round trip the shader undoes
-is the one it undoes in the game. There is no second lighting model to drift
-from the first. A GPU test renders a sprite both ways, through the studio and
-through a scene's extraction, and requires the same pixels.
+The lit preview does not imitate the game's lighting. The studio keeps a
+small world of its own, built from the components a scene holds: the surface
+is a `sindri.sprite` naming the picture and the map, the light is a
+`sindri.light2d`, and the dark is a `sindri.environment`'s `lighting_2d`. Each
+frame is extracted from that world by the editor's `SceneExtractor` and drawn
+by `RuntimeViewport::render`, the call the Scene and Game views draw with, so
+the sprite goes through `sindri_render::SpriteBatchRenderer` and the same
+shader (`sprite_shader/epilogue.wgsl` and `light2d/light2d.wgsl`) as in every
+game. The picture and the map are uploaded through `SceneTextures`, as a
+scene's textures are, so the sRGB round trip the shader undoes is the one it
+undoes in the game. There is no second lighting model to drift from the
+first.
+
+A test holds that claim down: it saves a map, builds the scene a game would
+hold once the map is used (the picture and `<name>_n.png` by file name, the
+studio's light as a `sindri.light2d`, its ambient as the environment's), and
+requires the frame extracted from that scene to equal the frame the studio
+draws. Since both are drawn by the same call, equal frames are equal pixels.
+`crates/sindri-gpu/tests/sprite_lights.rs` already checks on a GPU that a
+normal map turns a surface toward or away from a light.
 
 The light's controls are the fields of `sindri.light2d`: color, intensity,
 radius, falloff and height, plus the scene's ambient, so a value that looks
@@ -154,15 +164,33 @@ Save writes two files beside the source:
   again from the new art with the same settings, not painted again by hand.
 
 `Use on sprites` points every sprite and tilemap in the open scene that draws
-from the source texture at the saved map, as one undoable step.
+from the source texture at the saved map, as one undoable step, and reads
+"Used on" once they all do.
+
+`sindri_assets::normal_map::remake` makes a map again from its settings file
+and the art as it is now, without the editor. Export ships the map, which a
+sprite names, and leaves the settings file behind, since only the studio
+reads it.
+
+## Proof
+
+The platformer's hero is lit through `textures/hero_n.png`, made in the
+studio from `hero.png` with the General preset and saved with
+`hero_n.normalmap`. `games/platformer/tests/studio_normal_map.rs` makes the
+map again from those settings and requires the shipped file, so the map cannot
+drift from the art unnoticed. The studio was also tried, without writing
+anything into the game, on copies of Low Tide's `terrain.png`, `ground.png`,
+`ship.png` and `wreck.png`, and on the platformer's `tiles.png`, whose
+hand-made `tiles_n.png` comes from designed shapes rather than brightness, so
+the two differ by design.
 
 ## Checklist
 
 - [x] Plan (this document).
 - [x] Generation library with deterministic tests.
-- [ ] Studio tab with texture, normal and channel views.
-- [ ] Lit preview through the sprite pipeline; split comparison.
-- [ ] 3D inspection.
-- [ ] Save, the settings sidecar, reopening it, and pointing sprites at it.
-- [ ] Presets and polish; validated on Low Tide and platformer textures.
-- [ ] A game drawing a studio-made map.
+- [x] Studio tab with texture, normal and channel views.
+- [x] Lit preview through the sprite pipeline; split comparison.
+- [x] 3D inspection.
+- [x] Save, the settings sidecar, reopening it, and pointing sprites at it.
+- [x] Presets and polish; validated on Low Tide and platformer textures.
+- [x] A game drawing a studio-made map: the platformer's hero.

@@ -78,12 +78,18 @@ impl EditorApp {
         };
         let mut save = false;
         let mut close = false;
+        let mut studio = false;
         egui::ScrollArea::vertical()
             .id_salt("slice inspector")
             .auto_shrink([false; 2])
             .show(ui, |ui| {
-                (save, close) = sheet_controls(ui, slicer);
+                (save, close, studio) = sheet_controls(ui, slicer);
             });
+        if studio {
+            let path = slicer.path().to_path_buf();
+            self.open_normal_studio(&path);
+            return;
+        }
         if save {
             self.save_slice();
         }
@@ -337,7 +343,7 @@ fn readout(
 }
 
 /// The squares behind a transparent sheet, so transparency reads as such.
-fn checkerboard(painter: &egui::Painter, area: Rect, size: f32) {
+pub(super) fn checkerboard(painter: &egui::Painter, area: Rect, size: f32) {
     if area.width() <= 0.0 || area.height() <= 0.0 {
         return;
     }
@@ -357,11 +363,12 @@ fn checkerboard(painter: &egui::Painter, area: Rect, size: f32) {
     }
 }
 
-/// The image's card, the slice, the names and Save. Answers whether Save or
-/// close was pressed.
-fn sheet_controls(ui: &mut egui::Ui, slicer: &mut Slicer) -> (bool, bool) {
+/// The image's card, the slice, the names and Save. Answers whether Save,
+/// close or the normal map studio was pressed.
+fn sheet_controls(ui: &mut egui::Ui, slicer: &mut Slicer) -> (bool, bool, bool) {
     let mut save = false;
     let mut close = false;
+    let mut studio = false;
     let (width, height) = slicer.size();
     egui::Frame::new()
         .fill(color::RAISED)
@@ -396,6 +403,16 @@ fn sheet_controls(ui: &mut egui::Ui, slicer: &mut Slicer) -> (bool, bool) {
                     {
                         close = true;
                     }
+                    if button::row_icon(
+                        ui,
+                        icons::NORMAL_MAP,
+                        Intent::Quiet,
+                        "Make a normal map from this image",
+                    )
+                    .clicked()
+                    {
+                        studio = true;
+                    }
                 });
             });
         });
@@ -422,7 +439,7 @@ fn sheet_controls(ui: &mut egui::Ui, slicer: &mut Slicer) -> (bool, bool) {
         panel::problem(ui, problem);
     }
     ui.add_space(8.0);
-    (save, close)
+    (save, close, studio)
 }
 
 #[cfg(test)]

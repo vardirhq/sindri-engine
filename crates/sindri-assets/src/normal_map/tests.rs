@@ -129,7 +129,7 @@ fn alpha_height_bevels_a_silhouette_toward_its_outline() {
 }
 
 #[test]
-fn a_cell_never_reads_its_neighbour_in_the_sheet() {
+fn a_cell_never_reads_its_neighbor_in_the_sheet() {
     // Two 2x1 cells side by side: dark, then bright.
     let rgba = picture(4, 1, |x, _| if x < 2 { 0 } else { 255 });
     let source = Pixels::new(4, 1, &rgba).unwrap();
@@ -343,4 +343,40 @@ fn a_map_encodes_as_a_png_that_decodes_to_itself() {
     let png = encode_png(3, 2, &map).unwrap();
     let decoded = image::load_from_memory(&png).unwrap().to_rgba8();
     assert_eq!(decoded.into_raw(), map);
+}
+
+#[test]
+fn a_settings_file_makes_its_map_again_from_the_art_as_it_is_now() {
+    let folder = tempfile::tempdir().unwrap();
+    let ramp = picture(8, 4, |x, _| u8::try_from(x * 30).unwrap());
+    std::fs::write(
+        folder.path().join("floor.png"),
+        encode_png(8, 4, &ramp).unwrap(),
+    )
+    .unwrap();
+    let settings = NormalMapSettings {
+        strength: 3.0,
+        ..NormalMapSettings::default()
+    };
+    let document = NormalMapDocument {
+        format_version: NORMAL_MAP_FORMAT_VERSION,
+        source: "floor.png".to_owned(),
+        height_map: None,
+        settings: settings.clone(),
+    };
+    let settings_path = folder.path().join("floor_n.normalmap");
+    std::fs::write(&settings_path, document.to_json()).unwrap();
+    let remade = remake(&settings_path).unwrap();
+    assert_eq!(remade.map_path, folder.path().join("floor_n.png"));
+    let expected = make(8, 4, &ramp, &settings);
+    assert_eq!(remade.png, encode_png(8, 4, &expected).unwrap());
+    assert_eq!(
+        Picture::read(&folder.path().join("floor.png"))
+            .unwrap()
+            .rgba,
+        ramp
+    );
+
+    let missing = folder.path().join("gone_n.normalmap");
+    assert!(matches!(remake(&missing), Err(RemakeError::Read { .. })));
 }

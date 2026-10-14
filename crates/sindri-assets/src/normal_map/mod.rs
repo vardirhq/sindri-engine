@@ -10,6 +10,7 @@
 
 mod document;
 mod generate;
+mod remake;
 mod settings;
 
 #[cfg(test)]
@@ -22,4 +23,5 @@ pub use document::{
 pub use generate::{
     FLAT_NORMAL, NormalMapError, Pixels, cells_of_sheet, encode_png, generate, height_field,
 };
+pub use remake::{Picture, Remade, RemakeError, remake};
 pub use settings::{EdgeMode, GreenAxis, HeightSource, NormalMapPreset, NormalMapSettings};

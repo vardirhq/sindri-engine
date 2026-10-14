@@ -65,7 +65,7 @@ pub struct NormalMapSettings {
     pub alpha_height: bool,
     pub edges: EdgeMode,
     /// Whether a sliced sheet's cells are separate pictures, so no slope
-    /// reads its neighbour in the sheet.
+    /// reads its neighbor in the sheet.
     pub cells: bool,
     pub green: GreenAxis,
 }

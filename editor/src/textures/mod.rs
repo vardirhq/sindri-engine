@@ -224,3 +224,26 @@ impl SceneTextures {
                 .is_some_and(|loader| loader.outstanding() > 0)
     }
 }
+
+impl SceneTextures {
+    /// Puts pixels the editor made itself on the GPU under `reference`,
+    /// releasing whatever that reference named before.
+    ///
+    /// Uploaded exactly as a loaded texture is, so a picture made in the
+    /// editor is sampled by a sprite the way the same file would be.
+    pub fn provide(
+        &mut self,
+        device: &wgpu::Device,
+        queue: &wgpu::Queue,
+        reference: &str,
+        size: (u32, u32),
+        rgba: &[u8],
+    ) -> Result<(), TextureError> {
+        let texture = Texture2D::from_rgba8(device, queue, reference, size.0, size.1, rgba)?;
+        let id = self.registry.insert(texture);
+        if let Some(previous) = self.bindings.bind(reference, id) {
+            self.registry.remove(previous);
+        }
+        Ok(())
+    }
+}

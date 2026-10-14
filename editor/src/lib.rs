@@ -83,6 +83,9 @@ pub mod space;
 #[cfg(not(target_arch = "wasm32"))]
 pub mod timeline;
 
+/// Making a normal map from a picture, and saving it beside it.
+#[cfg(not(target_arch = "wasm32"))]
+pub mod normal_studio;
 /// Where the ground draws over what stands on it.
 #[cfg(not(target_arch = "wasm32"))]
 pub mod occlusion;

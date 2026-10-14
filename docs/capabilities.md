@@ -1270,6 +1270,19 @@ animation inspector creates, renames, and removes clips from those named cells,
 orders frames, edits timing and looping, chooses the runtime clip, and previews
 it without changing scene state.
 
+**A normal map is made in the editor, from the sprite.** The Normal map tab
+derives a sprite's `normal_map` from its brightness or a painted height map,
+keeping its size, alpha and pixel edges, with each sheet cell kept apart, and
+material presets as starting values. The preview is the game's own 2D lighting
+rather than an imitation: the studio's surface, light and ambient are a
+`sindri.sprite`, a `sindri.light2d` and a `sindri.environment` in a world of
+its own, extracted and drawn as the Scene view draws, and a test requires the
+frame to equal the one a scene using the saved map extracts. It shows the map
+per channel, splits it against the sprite lit without a map, and orbits a
+plane in 3D. Saving writes the map and a `.normalmap` of the settings, so the
+map is made again from changed art; the platformer's hero is lit through one
+made this way. `docs/normal-map-studio.md` is the contract.
+
 A tilemap is a grid of tiles drawn from one entity: `sindri.tilemap` carries the
 map's grid, a palette of sprite names, and a flat array of cells indexing that
 palette, with `null` where the map is empty. Its cells become instances in the

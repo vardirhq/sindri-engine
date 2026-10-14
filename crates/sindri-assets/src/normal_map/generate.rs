@@ -222,12 +222,12 @@ fn blur(heights: &[f32], width: u32, regions: &Regions, settings: &NormalMapSett
             let (x, y) = coordinates(at, width);
             let mut sum = 0.0;
             for &(k, weight) in &kernel {
-                let neighbour = if across {
+                let neighbor = if across {
                     index(step(x, k, left, w, settings.edges), y, width)
                 } else {
                     index(x, step(y, k, top, h, settings.edges), width)
                 };
-                sum += input[neighbour] * weight;
+                sum += input[neighbor] * weight;
             }
             *out = sum / total;
         }
