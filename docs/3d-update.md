@@ -172,8 +172,11 @@ cameras face), YXZ order. Build on `Transform3D::yaw_pitch_roll_radians` and
   uniform writes/bytes, transient geometry pairs and persistent cache events.
   Consecutive shadowed/unshadowed frames verify deltas; the summary prints means.
   These are scoped 3D counters, excluding 2D, post and initialization uploads.
-- [ ] Extend counters to editor reports and whole-frame work, and add GPU
-  timestamp timing. Existing GPU completion wait is a CPU stall.
+- [x] Record these counters in editor benchmark frames, separating the primary
+  view (Game in Play, Scene while editing) from the extra Scene view beside Play.
+  Native shadowed/unshadowed editor runs verify matching Game/standalone counts.
+- [ ] Extend counters to whole-frame work and add GPU timestamp timing. Existing
+  GPU completion wait is a CPU stall.
 - [ ] Set the targets the next slice must meet (for example, draws and passes
   per frame independent of repeated props, and zero steady-state uploads).
 

@@ -16,7 +16,7 @@ use std::path::PathBuf;
 
 use serde_json::{Map, Value, json};
 
-use crate::profiler::{Frame, Phase};
+use crate::profiler::{Frame, MeshCounters, Phase};
 
 /// How many frames each section records unless told otherwise.
 pub const DEFAULT_FRAMES: usize = 600;
@@ -89,7 +89,28 @@ pub fn frame_json(frame: &Frame) -> Value {
             (phase.key().to_owned(), Value::from(micros))
         })
         .collect();
-    json!({ "steps": frame.steps, "phases": phases })
+    let mut written = json!({ "steps": frame.steps, "phases": phases });
+    for (key, counters) in [
+        ("mesh_counters", frame.mesh_counters),
+        ("scene_mesh_counters", frame.scene_mesh_counters),
+    ] {
+        if let Some(counters) = counters {
+            written[key] = mesh_json(counters);
+        }
+    }
+    written
+}
+
+fn mesh_json(counters: MeshCounters) -> Value {
+    json!({
+        "draw_calls": counters.meshes.draw_calls,
+        "render_passes": counters.meshes.render_passes,
+        "uniform_writes": counters.meshes.uniform_writes,
+        "uniform_bytes": counters.meshes.uniform_bytes,
+        "transient_geometry_uploads": counters.meshes.transient_geometry_uploads,
+        "model_uploads": counters.model_uploads,
+        "cached_geometry_uploads": counters.cached_geometry_uploads,
+    })
 }
 
 /// A whole report: what was opened, how the editor was built, and each
@@ -191,5 +212,36 @@ mod tests {
         assert_eq!(report["sections"]["playing"].as_array().unwrap().len(), 1);
         assert!(report["sections"]["editing"].as_array().unwrap().is_empty());
         assert_eq!(report["errors"][0], "Hero: no such field");
+    }
+}
+
+#[cfg(test)]
+mod mesh_tests {
+    use super::frame_json;
+    use crate::profiler::{Frame, MeshCounters};
+
+    #[test]
+    fn absent_views_are_omitted_and_measured_zero_views_are_kept() {
+        let frame = Frame::default();
+        let absent = frame_json(&frame);
+        assert!(absent.get("mesh_counters").is_none());
+        assert!(absent.get("scene_mesh_counters").is_none());
+        let drawn = Frame {
+            mesh_counters: Some(MeshCounters::default()),
+            scene_mesh_counters: Some(MeshCounters {
+                meshes: sindri_render::MeshDrawStats {
+                    draw_calls: 3,
+                    ..Default::default()
+                },
+                model_uploads: 2,
+                ..Default::default()
+            }),
+            ..frame
+        };
+        let written = frame_json(&drawn);
+        assert_eq!(written["mesh_counters"]["draw_calls"], 0);
+        assert_eq!(written["scene_mesh_counters"]["draw_calls"], 3);
+        assert_eq!(written["scene_mesh_counters"]["model_uploads"], 2);
+        assert_eq!(written["mesh_counters"].as_object().unwrap().len(), 7);
     }
 }

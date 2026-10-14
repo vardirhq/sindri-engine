@@ -61,19 +61,24 @@ def interval_ms(frame: dict) -> float:
     return sum(frame["phases"].values()) / 1000.0
 
 
+def counter_means(frames: list[dict], field: str) -> dict[str, float]:
+    counters: dict[str, list[int]] = {}
+    for frame in frames:
+        for key, value in frame.get(field, {}).items():
+            counters.setdefault(key, []).append(value)
+    return {key: statistics.fmean(values) for key, values in counters.items()}
+
+
 def section_stats(frames: list[dict]) -> dict:
     work = [work_ms(f) for f in frames]
     phases: dict[str, float] = {}
     for frame in frames:
         for key, value in frame["phases"].items():
             phases[key] = phases.get(key, 0.0) + value / 1000.0
-    counters: dict[str, list[int]] = {}
-    for frame in frames:
-        for key, value in frame.get("mesh_counters", {}).items():
-            counters.setdefault(key, []).append(value)
     count = max(len(frames), 1)
     return {
-        "mesh_counters": {key: statistics.fmean(values) for key, values in counters.items()},
+        "mesh_counters": counter_means(frames, "mesh_counters"),
+        "scene_mesh_counters": counter_means(frames, "scene_mesh_counters"),
         "frames": len(frames),
         "work_mean": statistics.fmean(work) if work else 0.0,
         "work_p50": percentile(work, 0.50),
@@ -106,10 +111,11 @@ def describe(path: Path) -> list[str]:
             "           "
             + "  ".join(f"{key} {value:.2f}" for key, value in ranked if value >= 0.005)
         )
-        if stats["mesh_counters"]:
-            lines.append("           3D/frame " + "  ".join(
-                f"{key} {value:g}" for key, value in stats["mesh_counters"].items()
-            ))
+        for field, label in [("mesh_counters", "3D/frame"), ("scene_mesh_counters", "extra Scene 3D/frame")]:
+            if stats[field]:
+                lines.append("           " + label + " " + "  ".join(
+                    f"{key} {value:g}" for key, value in stats[field].items()
+                ))
     return lines
 
 

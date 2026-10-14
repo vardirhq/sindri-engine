@@ -2590,8 +2590,11 @@ CPU phases and GPU completion wait are available. Standalone reports also record
 physical textured 3D/model draws and passes, uniform queue writes/bytes, transient
 geometry pairs and separate persistent cache upload events. Shadowed/unshadowed
 consecutive-frame CI checks verify deltas; these counters exclude 2D, post and
-initial resource uploads. Editor counters, GPU timestamps and performance targets
-remain pending. The
+initial resource uploads. Editor benchmark frames now carry matching primary-view
+counters and separate extra Scene-view work. Frame capture/reset and missing
+versus measured-zero views have regressions; native editor shadow controls prove
+Game/standalone agreement. Whole-frame totals, GPU timestamps and performance
+targets remain pending. The
 [baseline record](3d-benchmark-baseline.md) records the hardware/profile context,
 short editor/standalone sample and native/browser shadow comparisons.
 

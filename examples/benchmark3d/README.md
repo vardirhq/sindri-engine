@@ -31,7 +31,7 @@ models still use their separate renderer and do neither. This difference is part
 of the baseline, not evidence of a unified rendering path.
 
 Current reports contain CPU phase timings and the standalone GPU completion
-wait. That wait is not GPU timestamp timing. Editor/whole-frame counters and
+wait. That wait is not GPU timestamp timing. Whole-frame counters and
 performance targets remain measurement work; extracted
 command counts alone do not measure GPU work. `scripts/browser/benchmark3d.mjs`
 requires all six asset fetches, the ready goal and a rendered capture without
@@ -49,4 +49,6 @@ The standalone report now includes `mesh_counters`: physical textured 3D/model
 draws and passes, uniform writes/bytes, transient geometry pairs and separate
 model/voxel cache upload events. `scripts/frame-benchmark.py summarize` prints
 their means. Counts exclude 2D, post, the frame clear and initialization uploads;
-editor counter reporting and GPU timestamps remain open.
+editor reports record matching primary counters and separate `scene_mesh_counters`
+for the extra Scene view beside Play. Whole-frame counters and GPU timestamps
+remain open.

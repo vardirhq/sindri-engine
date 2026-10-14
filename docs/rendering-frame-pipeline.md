@@ -135,8 +135,11 @@ uploads and cached voxel geometry pairs remain separate cache counters.
 These counters exclude the frame clear, sprites, shapes, glyphs, post-processing,
 texture initialization and UI. They are not whole-frame GPU totals.
 `project-benchmark` records per-frame deltas under `mesh_counters`, and
-`scripts/frame-benchmark.py` prints their means when present. Old reports and
-editor reports without these counters retain their CPU summary. Editor counter
-reporting and GPU timestamp timing remain open; GPU completion wait is a CPU
+`scripts/frame-benchmark.py` prints their means when present. Reports without these counters retain their CPU summary. Editor reports now
+record the same counters per primary view, with `scene_mesh_counters` for the
+extra Scene view beside Play. Missing views are omitted, while an encoded view
+with no 3D work records zero. Repeated draws in one editor frame accumulate;
+frame close/capture and Play reset follow the existing profiler lifecycle.
+GPU timestamp timing remains open; GPU completion wait is a CPU
 stall, not GPU execution time. This is feature-example instrumentation, proven
 with the fixed 3D Benchmark and the imported-model GPU readback regression.

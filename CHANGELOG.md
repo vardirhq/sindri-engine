@@ -1,5 +1,8 @@
 # Changelog
 
+- Record physical 3D draw/pass/upload counters in editor benchmarks, separating
+  the Game view during Play from the extra Scene view. Missing views stay absent,
+  measured zeroes stay visible, and the summary prints both scopes separately.
 - Record physical textured 3D/model draw and render-pass counts, uniform queue
   writes/bytes, and transient/persistent upload events in standalone benchmark
   reports. The comparison tool prints these counters without treating older or

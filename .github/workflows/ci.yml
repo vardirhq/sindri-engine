@@ -375,6 +375,9 @@ jobs:
           cargo run --package sindri-causeway --bin project-benchmark -- examples/benchmark3d target/render-artifacts/benchmark3d.json 3 30
           cargo run --package sindri-causeway --bin project-benchmark -- target/native-benchmark3d-no-shadows target/render-artifacts/benchmark3d-no-shadows.json 3 30
           python3 scripts/check-3d-benchmark.py target/render-artifacts/benchmark3d.json target/render-artifacts/benchmark3d-no-shadows.json
+          timeout 120s xvfb-run --auto-servernum --server-args="-screen 0 1600x1200x24" target/debug/sindri-editor examples/benchmark3d --benchmark target/render-artifacts/editor-benchmark3d.json --frames 3 --settle 30
+          timeout 120s xvfb-run --auto-servernum --server-args="-screen 0 1600x1200x24" target/debug/sindri-editor target/native-benchmark3d-no-shadows --benchmark target/render-artifacts/editor-benchmark3d-no-shadows.json --frames 3 --settle 30
+          python3 scripts/check-3d-benchmark.py target/render-artifacts/editor-benchmark3d.json target/render-artifacts/editor-benchmark3d-no-shadows.json
       - name: Capture the companion game mid-run
         id: causeway_capture
         env:
@@ -410,6 +413,8 @@ jobs:
             target/render-artifacts/native-benchmark3d-no-shadows.png
             target/render-artifacts/benchmark3d.json
             target/render-artifacts/benchmark3d-no-shadows.json
+            target/render-artifacts/editor-benchmark3d.json
+            target/render-artifacts/editor-benchmark3d-no-shadows.json
             target/render-artifacts/causeway.png
             target/render-artifacts/orbital-spectacle-desktop.png
             target/render-artifacts/orbital-spectacle-phone.png

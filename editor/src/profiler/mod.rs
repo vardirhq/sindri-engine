@@ -32,6 +32,9 @@ use std::time::{Duration, Instant};
 
 use sindri_decay::ScriptTiming;
 
+mod meshes;
+pub use meshes::MeshCounters;
+
 #[cfg(test)]
 mod tests;
 
@@ -170,6 +173,10 @@ pub struct Frame {
     pub steps: u32,
     /// Each script's time, summed over the frame's steps.
     pub scripts: Vec<ScriptTiming>,
+    /// Primary view: Scene while editing, Game during Play. None means undrawn.
+    pub mesh_counters: Option<MeshCounters>,
+    /// Extra Scene view drawn beside Play, excluded from the primary counters.
+    pub scene_mesh_counters: Option<MeshCounters>,
 }
 
 impl Frame {

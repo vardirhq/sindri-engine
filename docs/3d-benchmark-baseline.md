@@ -73,5 +73,23 @@ The shadow map has one extra clear pass. The 100 inline pyramids upload once
 for color and once for shadows; shared model geometry stays resident. The
 counters exclude the frame clear, 2D, post-processing, initialization and driver
 padding. They count recorded GPU commands and queue payloads, not GPU execution
-time. Editor reports and GPU timestamps remain open. These three-frame runs
-verify counts, rather than setting performance targets.
+time. The standalone three-frame runs verify counts, rather than setting
+performance targets.
+
+## Editor view counters
+
+The editor now records the same scoped counters. Native Xvfb/software Vulkan
+runs settle for 30 frames and record three editing and three playing frames,
+with shadows on and off. All Game frames match the standalone table above
+exactly, with no console errors. The native CI gate repeats both runs and retains
+the reports. CPU timings in this short debug run are not performance targets.
+
+A third native run moves the Scene tab into the Inspector group so that Scene
+and Game both draw during Play. Its six playing frames each record 502 draws,
+503 passes, 105,984 uniform bytes and 200 transient geometry pairs independently
+under `mesh_counters` and `scene_mesh_counters`. No persistent uploads or console
+errors occur. The Game count stays 502 rather than becoming 1,004. The summary
+prints both scopes, while views that were not drawn have no counter object.
+Profiler regressions cover capture, repeated-view accumulation, separation,
+frame reset and Play reset; serialization distinguishes missing views from
+measured zeroes. Whole-frame totals and GPU timestamps remain open.

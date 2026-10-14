@@ -8,6 +8,7 @@ from pathlib import Path
 
 def check(path: str, shadows: bool) -> None:
     report = json.loads(Path(path).read_text())
+    assert not report.get("errors"), report.get("errors")
     frames = report["sections"]["playing"]
     assert len(frames) >= 2, "need consecutive frames to prove snapshot deltas"
     expected = {

@@ -15,7 +15,7 @@ use super::super::scene_io::SceneSource;
 use super::super::{
     INITIAL_VIEWPORT_HEIGHT, INITIAL_VIEWPORT_WIDTH, WorkspaceTab, scene_board_view,
 };
-use crate::profiler::{Phase, Profiler};
+use crate::profiler::{MeshCounters, Phase, Profiler};
 
 /// The GPU pipelines every viewport draws with.
 ///
@@ -146,12 +146,35 @@ impl RuntimeViewport {
             profiler.add(Phase::Gpu, waiting.elapsed());
         }
         let extracted = Instant::now();
-        let mut encoder =
+        let encoder =
             self.render_state
                 .device
                 .create_command_encoder(&wgpu::CommandEncoderDescriptor {
                     label: Some("Sindri editor runtime viewport encoder"),
                 });
+        let before = MeshCounters::snapshot(&self.cube);
+        self.encode(renderers, source, camera, &prepared, encoder)?;
+        profiler.add_mesh_counters(MeshCounters::snapshot(&self.cube).since(before));
+        profiler.add(Phase::Encoding, extracted.elapsed());
+        if profiler.waits_for_gpu() {
+            let waiting = Instant::now();
+            self.render_state
+                .device
+                .poll(wgpu::PollType::wait_indefinitely())
+                .map_err(|error| error.to_string())?;
+            profiler.add(Phase::Gpu, waiting.elapsed());
+        }
+        Ok(text_sizes)
+    }
+
+    fn encode(
+        &mut self,
+        renderers: &mut SceneRenderers,
+        source: SceneSource<'_>,
+        camera: CameraView,
+        prepared: &sindri_render::PreparedFrame,
+        mut encoder: wgpu::CommandEncoder,
+    ) -> Result<(), String> {
         let environment = self.light(source, camera)?;
         let frame_renderers = FrameRenderers {
             cube: &mut self.cube,
@@ -175,7 +198,7 @@ impl RuntimeViewport {
                 &self.render_state.queue,
                 &mut encoder,
                 target,
-                &prepared,
+                prepared,
                 Lighting {
                     bloom: &mut self.bloom,
                     settings: post_process,
@@ -188,21 +211,12 @@ impl RuntimeViewport {
                 &self.render_state.queue,
                 &mut encoder,
                 target,
-                &prepared,
+                prepared,
             )
         }
         .map_err(|error| error.to_string())?;
         self.render_state.queue.submit([encoder.finish()]);
-        profiler.add(Phase::Encoding, extracted.elapsed());
-        if profiler.waits_for_gpu() {
-            let waiting = Instant::now();
-            self.render_state
-                .device
-                .poll(wgpu::PollType::wait_indefinitely())
-                .map_err(|error| error.to_string())?;
-            profiler.add(Phase::Gpu, waiting.elapsed());
-        }
-        Ok(text_sizes)
+        Ok(())
     }
 
     /// Sets the cube renderer's light, shadows, fog and ambient occlusion for
