@@ -182,6 +182,8 @@ impl EditorApp {
             profiler: crate::profiler::Profiler::default(),
             play_audio: crate::play_audio::PlayAudio::new(crate::play_audio::native()),
             sheet_camera: super::sprite_sheet_view::SheetCamera::default(),
+            normal_studio: None,
+            studio_canvas: super::normal_studio::StudioCanvas::default(),
             timeline: crate::timeline::TimelineState::default(),
             textured_revision: TexturedAt::default(),
             scene_viewport,
@@ -232,6 +234,12 @@ impl EditorApp {
         app.arrange_for(decided);
         app.request_first_assets();
         app.remember_open_scene();
+        // An asset to show on launch, as a click in the project browser
+        // would: what a scripted capture uses to photograph the slicer or
+        // the normal map studio without steering the pointer to a row.
+        if let Some(asset) = std::env::var_os("SINDRI_EDITOR_ASSET") {
+            app.select_asset(std::path::Path::new(&asset));
+        }
         app
     }
 

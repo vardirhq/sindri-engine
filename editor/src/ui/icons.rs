@@ -15,6 +15,7 @@ pub const CAMERA: MaterialIcon = icons::ICON_CAMERA_ALT;
 pub const LIGHT: MaterialIcon = icons::ICON_SUNNY;
 pub const MESH: MaterialIcon = icons::ICON_VIEW_IN_AR;
 pub const SPRITE: MaterialIcon = icons::ICON_IMAGE;
+pub const NORMAL_MAP: MaterialIcon = icons::ICON_TEXTURE;
 pub const UI_ELEMENT: MaterialIcon = icons::ICON_WEB_ASSET;
 pub const TEXT: MaterialIcon = icons::ICON_TITLE;
 pub const BUTTON: MaterialIcon = icons::ICON_SMART_BUTTON;

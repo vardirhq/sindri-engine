@@ -1935,6 +1935,7 @@
       "components": {
         "sindri.sprite": {
           "texture": "textures/hero.png#idle-0",
+          "normal_map": "textures/hero_n.png",
           "layer": 5
         },
         "sindri.animation.sprite": {

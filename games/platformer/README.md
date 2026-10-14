@@ -60,6 +60,8 @@ There is no game code. The game is `assets/`:
 - `textures/`: pixel art drawn by `art/draw.py`, deterministic, so running it
   again changes nothing unless the drawing did. It draws `tiles_n.png` too,
   the tiles' normal map, from the same brick, plank and dirt layouts.
+  `hero_n.png` was not drawn: the editor's Normal map tab made it from
+  `hero.png`, and `hero_n.normalmap` holds the settings that make it again.
 
 It uses, with no Rust of its own:
 

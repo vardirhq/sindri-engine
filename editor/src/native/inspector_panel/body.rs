@@ -23,6 +23,10 @@ impl EditorApp {
             self.slice_inspector(ui);
             return;
         }
+        if self.normal_studio.is_some() {
+            self.normal_studio_inspector(ui);
+            return;
+        }
         if self.profile.is_some() {
             self.profile_panel(ui);
             return;
@@ -76,6 +80,8 @@ impl EditorApp {
         let selected = self.selection.len();
         if self.slicer.is_some() {
             toolbar::chip(ui, "Slicing", color::FORGE);
+        } else if self.normal_studio.is_some() {
+            toolbar::chip(ui, "Normal map", color::FORGE);
         } else if self.profile.is_some() {
             toolbar::chip(ui, "Profile", color::FORGE);
         } else if self.block_set.is_some() {

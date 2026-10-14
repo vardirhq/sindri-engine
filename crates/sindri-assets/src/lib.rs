@@ -10,6 +10,7 @@ mod decode;
 mod loader;
 mod manifest;
 mod memory;
+pub mod normal_map;
 mod queue;
 mod source;
 mod url;

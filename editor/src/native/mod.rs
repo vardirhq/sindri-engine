@@ -62,6 +62,7 @@ mod inspector_panel;
 mod instances;
 mod light2d_gizmo;
 mod light_gizmo;
+mod normal_studio;
 mod occlusion_view;
 mod overlay;
 mod palette_view;
@@ -298,6 +299,11 @@ struct EditorApp {
     thumbnails: thumbnails::Thumbnails,
     /// Where the Sprite sheet tab's picture is zoomed and panned to.
     sheet_camera: sprite_sheet_view::SheetCamera,
+    /// The picture open in the Normal Map Studio. Beside the slicer, and
+    /// exclusive with it in the inspector for the same reason.
+    normal_studio: Option<crate::normal_studio::NormalStudio>,
+    /// What the Normal map tab keeps between frames: its GPU stage above all.
+    studio_canvas: normal_studio::StudioCanvas,
     /// The Timeline panel's playhead, choice and preview.
     timeline: crate::timeline::TimelineState,
     /// What Play sounds like, and the Audio panel's monitor.

@@ -30,6 +30,7 @@ impl Workspace {
                         Panel::Scenes,
                         Panel::Profiler,
                         Panel::SpriteSheet,
+                        Panel::NormalMap,
                     ],
                 ),
                 (Place::Overlay(TopLeft), &[Panel::Hierarchy]),
@@ -60,6 +61,7 @@ impl Workspace {
                         Panel::Scenes,
                         Panel::Profiler,
                         Panel::SpriteSheet,
+                        Panel::NormalMap,
                         Panel::Timeline,
                     ],
                 ),
@@ -81,6 +83,7 @@ impl Workspace {
                         Panel::Scenes,
                         Panel::Profiler,
                         Panel::SpriteSheet,
+                        Panel::NormalMap,
                     ],
                 ),
                 (
