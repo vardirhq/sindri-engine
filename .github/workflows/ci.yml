@@ -387,12 +387,17 @@ jobs:
           python3 scripts/browser/prepare-standard-materials.py target/standard-materials-legacy --legacy
           python3 scripts/browser/prepare-imported-emission.py target/imported-emission
           python3 scripts/browser/prepare-imported-emission.py target/imported-emission-off --no-emission
+          python3 scripts/browser/prepare-surface-normals.py target/surface-normals
+          python3 scripts/browser/prepare-surface-normals.py target/surface-normals-flat --flat
           cargo run --package sindri-causeway --bin project-capture -- target/standard-materials target/render-artifacts/native-standard-materials.png 960 540 wait:0.5
           cargo run --package sindri-causeway --bin project-capture -- target/standard-materials-legacy target/render-artifacts/native-standard-materials-legacy.png 960 540 wait:0.5
           node scripts/browser/compare-materials.mjs target/render-artifacts/native-standard-materials.png target/render-artifacts/native-standard-materials-legacy.png
           cargo run --package sindri-causeway --bin project-capture -- target/imported-emission target/render-artifacts/native-imported-emission.png 960 540 wait:0.5
           cargo run --package sindri-causeway --bin project-capture -- target/imported-emission-off target/render-artifacts/native-imported-emission-off.png 960 540 wait:0.5
           node scripts/browser/compare-materials.mjs target/render-artifacts/native-imported-emission.png target/render-artifacts/native-imported-emission-off.png
+          cargo run --package sindri-causeway --bin project-capture -- target/surface-normals target/render-artifacts/native-surface-normals.png 960 540 wait:0.5
+          cargo run --package sindri-causeway --bin project-capture -- target/surface-normals-flat target/render-artifacts/native-surface-normals-flat.png 960 540 wait:0.5
+          node scripts/browser/compare-normals.mjs target/render-artifacts/native-surface-normals.png target/render-artifacts/native-surface-normals-flat.png
           cargo run --package sindri-causeway --bin project-benchmark -- examples/benchmark3d target/render-artifacts/benchmark3d.json 3 30
           cargo run --package sindri-causeway --bin project-benchmark -- target/native-benchmark3d-no-shadows target/render-artifacts/benchmark3d-no-shadows.json 3 30
           python3 scripts/check-3d-benchmark.py target/render-artifacts/benchmark3d.json target/render-artifacts/benchmark3d-no-shadows.json --require-gpu-timing
@@ -440,6 +445,8 @@ jobs:
             target/render-artifacts/native-standard-materials-legacy.png
             target/render-artifacts/native-imported-emission.png
             target/render-artifacts/native-imported-emission-off.png
+            target/render-artifacts/native-surface-normals.png
+            target/render-artifacts/native-surface-normals-flat.png
             target/render-artifacts/native-model-caster-no-shadows.png
             target/render-artifacts/native-model-receiver-no-shadows.png
             target/render-artifacts/native-benchmark3d-no-shadows.png
@@ -690,7 +697,9 @@ jobs:
           python3 scripts/browser/prepare-standard-materials.py target/standard-materials-legacy --legacy
           python3 scripts/browser/prepare-imported-emission.py target/imported-emission
           python3 scripts/browser/prepare-imported-emission.py target/imported-emission-off --no-emission
-          for project in model-receiver model-receiver-no-shadows model-caster model-caster-no-shadows standard-materials standard-materials-legacy imported-emission imported-emission-off; do
+          python3 scripts/browser/prepare-surface-normals.py target/surface-normals
+          python3 scripts/browser/prepare-surface-normals.py target/surface-normals-flat --flat
+          for project in model-receiver model-receiver-no-shadows model-caster model-caster-no-shadows standard-materials standard-materials-legacy imported-emission imported-emission-off surface-normals surface-normals-flat; do
             cargo run --quiet --package sindri-export --bin sindri-export -- \
               target/$project target/dist/$project --base /examples/benchmark3d/
             cp -R crates/sindri-player/pkg/. target/dist/$project/pkg/
@@ -741,6 +750,11 @@ jobs:
           SINDRI_BASE_PATH=/examples/benchmark3d/ \
             node scripts/browser/benchmark3d.mjs target/dist/imported-emission-off target/render-artifacts/browser-imported-emission-off.png
           node scripts/browser/compare-materials.mjs target/render-artifacts/browser-imported-emission.png target/render-artifacts/browser-imported-emission-off.png
+          SINDRI_BASE_PATH=/examples/benchmark3d/ \
+            node scripts/browser/benchmark3d.mjs target/dist/surface-normals target/render-artifacts/browser-surface-normals.png
+          SINDRI_BASE_PATH=/examples/benchmark3d/ \
+            node scripts/browser/benchmark3d.mjs target/dist/surface-normals-flat target/render-artifacts/browser-surface-normals-flat.png
+          node scripts/browser/compare-normals.mjs target/render-artifacts/browser-surface-normals.png target/render-artifacts/browser-surface-normals-flat.png
           SINDRI_BASE_PATH=/examples/transform/ \
             node scripts/browser/transform.mjs target/dist/transform target/render-artifacts/browser-transform.png
           SINDRI_BASE_PATH=/examples/orbit/ \
@@ -852,6 +866,8 @@ jobs:
             target/render-artifacts/browser-standard-materials-legacy.png
             target/render-artifacts/browser-imported-emission.png
             target/render-artifacts/browser-imported-emission-off.png
+            target/render-artifacts/browser-surface-normals.png
+            target/render-artifacts/browser-surface-normals-flat.png
             target/render-artifacts/browser-model-caster-no-shadows.png
             target/render-artifacts/browser-model-receiver-no-shadows.png
             target/render-artifacts/browser-benchmark3d-no-shadows.png

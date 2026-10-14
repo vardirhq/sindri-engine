@@ -250,3 +250,13 @@ Texture/alpha/sidedness ownership stays separate. Textured/model color uniforms
 are 368/416 bytes; the fixed workload now writes 138,032/115,568 bytes with shadows
 on/off, without changing draw/pass counts or geometry residency. See
 [standard materials](rendering-materials.md).
+
+
+## Textured vertex normals and orientation
+
+Inline vertices and cached replacements carry optional object-space normals;
+zero requests geometric flat shading. Frame preparation rejects nonfinite values
+with `FramePlanError::NonFiniteNormal` before GPU encoding. Textured vertices
+are now 36 bytes, while color/shadow uniforms are unchanged. World color and
+shadow dispatch select the clockwise pipeline for a negative model determinant,
+including cached draws without replacements. See [normal semantics and proof](rendering-materials.md#textured-geometry-normals).

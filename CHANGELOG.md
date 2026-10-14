@@ -1,5 +1,10 @@
 # Changelog
 
+- Add outward cube normals and optional authored inline/cached mesh normals for
+  smooth 3D shading. Normals transform correctly under nonuniform scale and
+  reflection; world color and shadow draws preserve mirrored front faces.
+  Omitted normals retain flat shading; malformed authored normals are rejected.
+
 - Preserve authored GLB emissive factors through import and rendering. Models
   retain self-emission without scene overrides, and removing an override restores
   it. Alpha masks and shadows remain unchanged; emissive maps remain unsupported.

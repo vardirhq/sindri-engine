@@ -11,6 +11,7 @@ mod cameras;
 mod canvas;
 mod material;
 mod models;
+mod normals;
 mod passes;
 mod sprites;
 mod standing_on_ground;

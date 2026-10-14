@@ -2579,6 +2579,16 @@ the README.
 
 ### World presentation
 
+Cubes now carry outward face normals, while inline mesh documents and cached
+render vertices can supply object-space normals for smooth lighting. Checked
+components reject malformed vectors/counts; absent normals retain flat shading.
+GPU comparisons with imported geometry exercise nonuniform scale, rotation and
+reflection; world color/shadow pipelines correct reflected front-face selection.
+Scene edit/history tests and native/browser smooth/flat ellipsoid controls prove
+the feature. Textured vertices grow from 24 to 36 bytes; per-draw uniforms and
+cache residency are unchanged. Editor authoring review, Decay access and Explorer
+adoption remain open. See [normal semantics](rendering-materials.md#textured-geometry-normals).
+
 Shared `MaterialFactors` and direct GGX now shade opt-in cubes, inline/cached
 meshes, voxel roots and imported primitives. `sindri.material` authors linear
 base color, metallic/roughness and emission, with checked ranges and per-entity

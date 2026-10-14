@@ -137,7 +137,7 @@ struct VertexInput { @location(0) position: vec3<f32>, @location(1) uv: vec2<f32
 
 pub(crate) fn create_shadow_pipeline(
     device: &wgpu::Device,
-) -> (wgpu::BindGroupLayout, wgpu::RenderPipeline) {
+) -> (wgpu::BindGroupLayout, [wgpu::RenderPipeline; 2]) {
     let bind_group_layout = device.create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
         label: Some("Sindri shadow bind group layout"),
         entries: &[wgpu::BindGroupLayoutEntry {
@@ -160,34 +160,37 @@ pub(crate) fn create_shadow_pipeline(
         bind_group_layouts: &[Some(&bind_group_layout)],
         immediate_size: 0,
     });
-    let pipeline = device.create_render_pipeline(&wgpu::RenderPipelineDescriptor {
-        label: Some("Sindri shadow pipeline"),
-        layout: Some(&layout),
-        vertex: wgpu::VertexState {
-            module: &shader,
-            entry_point: Some("vs_main"),
-            buffers: &[Some(crate::TexturedVertex::layout())],
-            compilation_options: wgpu::PipelineCompilationOptions::default(),
-        },
-        fragment: None,
-        primitive: wgpu::PrimitiveState {
-            cull_mode: Some(wgpu::Face::Back),
-            ..Default::default()
-        },
-        depth_stencil: Some(wgpu::DepthStencilState {
-            format: ShadowMap::FORMAT,
-            depth_write_enabled: Some(true),
-            depth_compare: Some(wgpu::CompareFunction::Less),
-            stencil: wgpu::StencilState::default(),
-            bias: wgpu::DepthBiasState {
-                constant: 2,
-                slope_scale: 2.0,
-                clamp: 0.0,
+    let pipeline = [wgpu::FrontFace::Ccw, wgpu::FrontFace::Cw].map(|front_face| {
+        device.create_render_pipeline(&wgpu::RenderPipelineDescriptor {
+            label: Some("Sindri shadow pipeline"),
+            layout: Some(&layout),
+            vertex: wgpu::VertexState {
+                module: &shader,
+                entry_point: Some("vs_main"),
+                buffers: &[Some(crate::TexturedVertex::layout())],
+                compilation_options: wgpu::PipelineCompilationOptions::default(),
             },
-        }),
-        multisample: wgpu::MultisampleState::default(),
-        multiview_mask: None,
-        cache: None,
+            fragment: None,
+            primitive: wgpu::PrimitiveState {
+                cull_mode: Some(wgpu::Face::Back),
+                front_face,
+                ..Default::default()
+            },
+            depth_stencil: Some(wgpu::DepthStencilState {
+                format: ShadowMap::FORMAT,
+                depth_write_enabled: Some(true),
+                depth_compare: Some(wgpu::CompareFunction::Less),
+                stencil: wgpu::StencilState::default(),
+                bias: wgpu::DepthBiasState {
+                    constant: 2,
+                    slope_scale: 2.0,
+                    clamp: 0.0,
+                },
+            }),
+            multisample: wgpu::MultisampleState::default(),
+            multiview_mask: None,
+            cache: None,
+        })
     });
     (bind_group_layout, pipeline)
 }

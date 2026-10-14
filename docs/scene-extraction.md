@@ -44,6 +44,14 @@ let prepared = scene.extract_frame(engine.world(), viewport, &bindings)?;
 
 A game registers its own component types alongside these with `SceneExtractor::register`.
 
+Inline `sindri.mesh` surfaces accept optional `surface.normals`, one usable finite,
+nonzero object-space XYZ vector per vertex. Omitted/null normals retain geometric
+flat shading; invalid counts/vectors reject the component. Extraction preserves
+normals in `TexturedVertex`; checked edit/Undo/Redo restores both authored and
+absent values. Cube face normals and world normal/culling transforms are renderer
+owned. See [the material contract](rendering-materials.md#textured-geometry-normals).
+Surface indices remain u16 and transient; caching/u32 migration remains open.
+
 ## What extraction guarantees
 
 - **Deterministic order.** Passes sort by stage, then layer, then insertion. Entities are visited in

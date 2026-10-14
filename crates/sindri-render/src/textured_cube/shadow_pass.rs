@@ -44,7 +44,7 @@ impl TexturedCubeRenderer {
             self.shadow_view_projection * model,
             &self.batches[slot].shadow_uniform,
             &self.batches[slot].shadow_bind_group,
-            &self.shadow_pipeline,
+            &self.shadow_pipeline[super::orientation(model)],
             &self.mesh,
             &mut self.draw_stats,
         );
@@ -72,7 +72,7 @@ impl TexturedCubeRenderer {
             self.shadow_view_projection * model,
             &self.batches[slot].shadow_uniform,
             &self.batches[slot].shadow_bind_group,
-            &self.shadow_pipeline,
+            &self.shadow_pipeline[super::orientation(model)],
             &mesh,
             &mut self.draw_stats,
         );
@@ -101,7 +101,7 @@ impl TexturedCubeRenderer {
             self.shadow_view_projection * model,
             &self.batches[slot].shadow_uniform,
             &self.batches[slot].shadow_bind_group,
-            &self.shadow_pipeline,
+            &self.shadow_pipeline[super::orientation(model)],
             mesh,
             &mut self.draw_stats,
         );

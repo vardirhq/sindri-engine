@@ -46,8 +46,7 @@ blended transparency or unify geometry-owned alpha/sidedness policy.
 Without the component, existing textured world geometry retains its Lambert
 appearance; imported models retain their authored factors and existing GGX
 response. Opting in selects the common standard path. Migration of legacy
-looks, shared texture/material assets, authored normals for cubes/inline meshes,
-per-node model overrides remain pending.
+looks, shared texture/material assets and per-node model overrides remain pending.
 Factors apply to the owning entity, not its children or 2D sprites/UI.
 
 The editor's Rendering family offers Material with checked generic controls:
@@ -123,3 +122,63 @@ Local gates pass 212 scoped tests (40 GPU tests also run with a required Vulkan
 adapter/timestamps), warnings-denied Clippy and WASM checks, formatting, file-size
 checks and authored-color capture verification. This is correctness evidence,
 not game completion or a benchmark improvement.
+
+## Textured geometry normals
+
+Cubes carry unit outward face normals. Inline `sindri.mesh` surfaces may supply
+`surface.normals`: an array of object-space XYZ vectors with one usable finite,
+nonzero normal per vertex. Missing/null normals preserve geometric flat shading.
+Partial arrays, zero vectors and non-normalizable values are rejected while
+validating the component. Existing position/UV/index contracts remain unchanged.
+
+```json
+"surface": {
+  "vertices": [[-1,-1,0], [1,-1,0], [0,1,0]],
+  "uvs": [[0,0], [1,0], [0.5,1]],
+  "indices": [0,1,2],
+  "normals": [[-0.5,0,1], [0.5,0,1], [0,0.5,1]]
+}
+```
+
+`TexturedVertex::with_normal` also carries normals in cached render geometry;
+zero is its default flat-shading sentinel. Frame preparation rejects nonfinite
+normals in inline vertices or cached replacements before encoding. Shading
+interpolates transformed normals and normalizes per fragment, in both the legacy
+Lambert path and standard GGX. The vertex shader computes the inverse transpose
+from cofactors of the model's linear transform; it handles rotation, nonuniform
+scale and reflection without changing uniforms. Singular/near-singular transforms
+(determinant magnitude below 1e-20) fall back to geometric normals.
+
+World color and directional-shadow pipelines now select clockwise front faces
+for a negative world determinant, preserving exterior culling for reflected
+cubes, inline meshes and cached geometry. Back-face culling remains enabled;
+this does not add shared sidedness or cutout-shadow policy. Legacy low-level
+MVP-only draw methods still assume an identity world transform; project frames
+use the separate-world-transform methods.
+
+The textured vertex stride grows from 24 to 36 bytes, including existing ambient
+occlusion. This adds 12 CPU/GPU bytes per textured vertex, including voxel
+geometry; imported model vertices are unchanged. There is one extra resident
+color pipeline and one extra shadow pipeline per renderer. Per-draw uniforms,
+passes and queue-write counts are unchanged, and cached normal data uploads only
+with geometry replacement. Packing/separate streams remain future optimization.
+
+Cube tests verify outward unit normals and triangle winding. Scene tests exercise
+validation, extraction and edit/Undo/Redo restoration. GPU readback compares
+interpolated inline/cached normals with imported model inverse-transpose shading
+under rotation, nonuniform scale and reflection, and checks reflected cube color
+and shadows, including open inline/cached casters whose wrong winding would
+remove the entire shadow. Native/browser smooth-versus-flat reflected ellipsoid controls reuse the
+3D Benchmark's assets and script/ready goal; CI retains captures. This is feature
+proof for Explorer's material track. Editor authoring review, Decay access and
+in-tree game adoption remain open.
+
+Final 960×540 controls change 1,449 native pixels and 1,451 Chromium pixels,
+with maximum channel difference 45 in both. Both browser controls fetch all six
+assets and reach ready without runtime/GPU errors. Captures were visually
+inspected. Local checks pass 698 scoped tests plus 11 catalog tests (709 unique),
+including 43 GPU tests repeated with required Vulkan/timestamps; native Clippy,
+WASM, authored-color capture, formatting and file-size gates pass. Catalog
+regeneration produces no changes. The fixed 300-prop on/off benchmark reconfirms
+602/301 draws, 603/301 passes and 138,032/115,568 uniform bytes with valid GPU
+timing. These are correctness/counter checks, not a performance improvement.

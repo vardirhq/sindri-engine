@@ -212,7 +212,11 @@ cameras face), YXZ order. Build on `Transform3D::yaw_pitch_roll_radians` and
   - emissive (replaces `glow`);
   - alpha mode (opaque, cutout or blend);
   - double-sided.
-  Inline meshes gain optional normals, and a cube gets real normals.
+  - [x] Cube outward face normals and optional authored inline/cached render normals,
+    with inverse-transpose shading under nonuniform/reflected transforms and
+    orientation-aware world color/shadow culling. Scene validation/extraction/history
+    and GPU readback exercise the path; native/browser ellipsoid controls prove
+    smooth versus flat shading. Editor authoring review and game adoption remain open.
 - [ ] One render pass per stage. Draws are sorted by pipeline, material and
   mesh, and repeated mesh+material pairs are instanced.
 - [ ] Inline meshes are cached by revision, like voxel sections, so there is

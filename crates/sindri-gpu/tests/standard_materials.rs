@@ -12,6 +12,9 @@ use sindri_render::{
 };
 use std::sync::Arc;
 
+#[path = "standard_materials/normals.rs"]
+mod normals;
+
 struct Scene {
     cube: TexturedCubeRenderer,
     sprites: SpriteBatchRenderer,

@@ -260,3 +260,117 @@ fn model_and_cube_share_distance_and_height_fog_and_restore_when_disabled() {
     assert_eq!(scene.draw(&gpu, false, 256, FogSettings::default()), clear);
     assert_eq!(scene.cubes.model_cache_stats().uploads, 1);
 }
+
+#[test]
+fn reflecting_world_caster_preserves_color_and_directional_shadow() {
+    let Some(gpu) = gpu() else {
+        return;
+    };
+    let mut scene = Scene::new(&gpu);
+    let original = scene.draw(&gpu, true, 256, FogSettings::default());
+    let mut frame = ExtractedFrame::new(scene.frame.viewport(), scene.frame.clear());
+    for mut pass in scene.frame.passes().iter().cloned() {
+        if let FrameCommand::TexturedCube { model, .. } = &mut pass.command {
+            *model *= Mat4::from_scale(Vec3::new(-1.0, 1.0, 1.0));
+        }
+        frame.push(pass);
+    }
+    scene.frame = frame.prepare().unwrap();
+    let mirrored = scene.draw(&gpu, true, 256, FogSettings::default());
+    assert!(
+        original
+            .iter()
+            .zip(&mirrored)
+            .all(|(a, b)| a.abs_diff(*b) <= 2),
+        "reflection of a symmetric white cube preserves its exterior and shadow"
+    );
+    let clear = scene.draw(&gpu, false, 256, FogSettings::default());
+    let shadowed = clear
+        .chunks_exact(4)
+        .zip(mirrored.chunks_exact(4))
+        .filter(|(a, b)| a[1] > a[0].saturating_add(30) && a[1] > b[1].saturating_add(20))
+        .count();
+    assert!(shadowed > 50, "the reflected cube casts a visible shadow");
+    assert_eq!(scene.cubes.model_cache_stats().uploads, 1);
+}
+
+fn plane_caster(scene: &mut Scene, cached: bool, mirrored: bool, install: bool) {
+    let vertices: Vec<_> = [
+        [-0.15, -0.15, 0.0],
+        [0.15, -0.15, 0.0],
+        [0.15, 0.15, 0.0],
+        [-0.15, 0.15, 0.0],
+    ]
+    .into_iter()
+    .map(|p| sindri_render::TexturedVertex::new(p, [0.5; 2]).with_normal([0.0, 0.0, 1.0]))
+    .collect();
+    let model = Mat4::from_scale_rotation_translation(
+        Vec3::new(if mirrored { -1.0 } else { 1.0 }, 1.0, 1.0),
+        glam::Quat::IDENTITY,
+        Vec3::Z,
+    );
+    let texture = match &scene.frame.passes()[1].command {
+        FrameCommand::TexturedCube { texture, .. }
+        | FrameCommand::TexturedMesh { texture, .. }
+        | FrameCommand::CachedTexturedMesh { texture, .. } => *texture,
+        _ => panic!("world caster expected"),
+    };
+    let command = if cached {
+        FrameCommand::CachedTexturedMesh {
+            model,
+            texture,
+            cache: sindri_render::CachedMeshId::new(1),
+            revision: 1,
+            replacement: install.then(|| {
+                sindri_render::CachedTexturedMeshUpload::new(vertices, vec![0, 1, 2, 0, 2, 3])
+            }),
+            surface: sindri_render::MeshSurface::default(),
+        }
+    } else {
+        FrameCommand::TexturedMesh {
+            model,
+            texture,
+            vertices,
+            indices: vec![0, 1, 2, 0, 2, 3],
+        }
+    };
+    let mut frame = ExtractedFrame::new(scene.frame.viewport(), scene.frame.clear());
+    for (index, mut pass) in scene.frame.passes().iter().cloned().enumerate() {
+        if index == 1 {
+            pass.command = command.clone();
+        }
+        frame.push(pass);
+    }
+    scene.frame = frame.prepare().unwrap();
+}
+
+#[test]
+fn reflected_open_surfaces_keep_shadow_winding_and_cached_geometry() {
+    let Some(gpu) = gpu() else {
+        return;
+    };
+    for cached in [false, true] {
+        let mut scene = Scene::new(&gpu);
+        plane_caster(&mut scene, cached, false, true);
+        let clear = scene.draw(&gpu, false, 256, FogSettings::default());
+        let original = scene.draw(&gpu, true, 256, FogSettings::default());
+        let shadowed = clear
+            .chunks_exact(4)
+            .zip(original.chunks_exact(4))
+            .filter(|(a, b)| a[1] > a[0].saturating_add(30) && a[1] > b[1].saturating_add(20))
+            .count();
+        assert!(shadowed > 50, "an open quad casts before reflection");
+        plane_caster(&mut scene, cached, true, false);
+        let mirrored = scene.draw(&gpu, true, 256, FogSettings::default());
+        assert!(
+            original
+                .iter()
+                .zip(&mirrored)
+                .all(|(a, b)| a.abs_diff(*b) <= 2),
+            "mirrored quad preserves color and shadow, cached={cached}"
+        );
+        if cached {
+            assert_eq!(scene.cubes.cached_mesh_stats().buffer_uploads, 1);
+        }
+    }
+}

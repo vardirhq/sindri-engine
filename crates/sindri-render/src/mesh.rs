@@ -27,20 +27,29 @@ pub struct TexturedVertex {
     pub uv: [f32; 2],
     /// Vertex ambient-occlusion visibility: 1.0 is open, 0.0 fully occluded.
     pub ambient_occlusion: f32,
+    /// Object-space normal. Zero retains geometric flat shading.
+    pub normal: [f32; 3],
 }
 
 impl TexturedVertex {
     const ATTRIBUTES: [wgpu::VertexAttribute; 2] =
         wgpu::vertex_attr_array![0 => Float32x3, 1 => Float32x2];
-    const AMBIENT_OCCLUSION_ATTRIBUTES: [wgpu::VertexAttribute; 3] =
-        wgpu::vertex_attr_array![0 => Float32x3, 1 => Float32x2, 14 => Float32];
+    const AMBIENT_OCCLUSION_ATTRIBUTES: [wgpu::VertexAttribute; 4] =
+        wgpu::vertex_attr_array![0 => Float32x3, 1 => Float32x2, 14 => Float32, 2 => Float32x3];
 
     pub const fn new(position: [f32; 3], uv: [f32; 2]) -> Self {
         Self {
             position,
             uv,
             ambient_occlusion: 1.0,
+            normal: [0.0; 3],
         }
+    }
+
+    #[must_use]
+    pub const fn with_normal(mut self, normal: [f32; 3]) -> Self {
+        self.normal = normal;
+        self
     }
 
     #[must_use]
