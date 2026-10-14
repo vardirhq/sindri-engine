@@ -25,7 +25,8 @@ Primitives retain positions, normals, UV0, material indices, and 16-bit or 32-bi
 indices. Non-indexed triangles acquire sequential 32-bit indices. Missing
 normals are generated from triangle geometry; missing UVs are zero only when
 the primitive does not need a texture. Base-color factors are linear RGBA.
-Materials retain metallic/roughness factors, double-sidedness and alpha cutoff.
+Materials retain metallic/roughness factors, linear RGB emission, double-sidedness
+and alpha cutoff.
 Embedded PNG/JPEG base-color images use the existing texture decoder; sampler
 wrap and filter enums are retained for GPU upload.
 
@@ -389,6 +390,19 @@ GGX shader as opt-in world meshes; original embedded textures, masks and sidedne
 remain owned by each primitive. Alpha overrides affect color and shadow masks.
 Removing the component restores imported factors, without geometry uploads.
 This is an entity-wide override, not node/primitive inspection or a shared
-material asset. GLB emissive decoding and full material unification remain open.
+material asset. Core GLB emissive factors are retained and rendered; emissive
+maps and full material unification remain open.
 See [the contract and proof](rendering-materials.md). Model color uniforms are
 now 416 bytes; 96-byte shadow uniforms remain unchanged.
+
+## Authored GLB self-emission
+
+The importer preserves core glTF `emissiveFactor` as linear RGB (default zero,
+finite 0–1), and preparation carries it into each shared primitive surface.
+Rendering adds it independently of world lighting before fog. Entity material
+overrides replace it; removal restores it without geometry uploads. Emission
+does not affect alpha masks or shadow coverage. Emissive textures remain
+unsupported, and extension policy is unchanged (required extensions rejected,
+optional extensions warned/ignored). Decoder, facade, GPU readback and native/
+browser GLB controls exercise the path. See [material evidence](rendering-materials.md).
+This feature proof precedes Explorer game adoption.

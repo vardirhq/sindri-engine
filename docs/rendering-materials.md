@@ -47,7 +47,7 @@ Without the component, existing textured world geometry retains its Lambert
 appearance; imported models retain their authored factors and existing GGX
 response. Opting in selects the common standard path. Migration of legacy
 looks, shared texture/material assets, authored normals for cubes/inline meshes,
-per-node model overrides and GLB emissive-factor decoding remain pending.
+per-node model overrides remain pending.
 Factors apply to the owning entity, not its children or 2D sprites/UI.
 
 The editor's Rendering family offers Material with checked generic controls:
@@ -88,3 +88,38 @@ and blue emitting model. Local artifacts are `target/standard-material-inspector
 Color uniforms are now 368 bytes for textured geometry and 416 for models;
 shadow uniforms remain 64/96. The fixed 300-prop workload remains 602/301 draws
 and 603/301 passes with shadows on/off, with 138,032/115,568 uniform bytes.
+
+## Imported emission
+
+Static GLBs retain their authored core `emissiveFactor` through CPU decoding,
+facade preparation, shared model resources and color uniforms. The glTF factor
+is linear RGB in 0–1, defaults to zero and is validated before upload. A renderer
+resource may use finite nonnegative HDR emission, as scene overrides already do.
+Required extensions remain rejected; optional extensions, including
+`KHR_materials_emissive_strength`, remain ignored with a warning. Emissive
+textures still return an explicit unsupported-format error.
+
+A scene override replaces imported emission along with the other numeric factors;
+removing it restores the authored value without re-uploading geometry. Emission
+is added after lighting/shadow attenuation and before fog. It leaves alpha-mask
+coverage and shadow silhouettes unchanged and does not cast light onto neighbors.
+This is an import/rendering slice for the planned Explorer; game adoption remains
+open.
+
+Decoder tests cover retained/default/invalid values and rejected emissive maps;
+facade and resource tests cover transfer and validation. GPU readback checks
+zero-light emission, override/removal and one retained geometry upload, plus
+unchanged masked shadows on the receiver. `prepare-imported-emission.py` derives
+GLB emission on/off controls from the checked 3D Benchmark, keeping scene
+materials absent and its script/ready goal unchanged. Native and Chromium controls
+exercise actual loading, decoding and rendering; CI retains both image pairs.
+Uniform sizes, draw counts and geometry residency are unchanged by this slice.
+
+At 960×540, GLB emission changes 20,962 pixels and adds 18,050 blue pixels
+in the native control; rebuilt Chromium changes 20,960 and adds 18,034. Both
+browser controls fetch all six assets, reach the script's ready goal and finish
+without runtime/GPU errors. Native/browser pairs were visually inspected.
+Local gates pass 212 scoped tests (40 GPU tests also run with a required Vulkan
+adapter/timestamps), warnings-denied Clippy and WASM checks, formatting, file-size
+checks and authored-color capture verification. This is correctness evidence,
+not game completion or a benchmark improvement.

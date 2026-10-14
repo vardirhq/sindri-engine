@@ -1,5 +1,9 @@
 # Changelog
 
+- Preserve authored GLB emissive factors through import and rendering. Models
+  retain self-emission without scene overrides, and removing an override restores
+  it. Alpha masks and shadows remain unchanged; emissive maps remain unsupported.
+
 - Add shared standard material factors and GGX shading for opt-in 3D geometry.
   Author checked base color, metallic/roughness and self-emission through
   `sindri.material` in the Rendering inspector. Imported overrides preserve

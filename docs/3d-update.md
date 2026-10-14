@@ -202,9 +202,12 @@ cameras face), YXZ order. Build on `Transform3D::yaw_pitch_roll_radians` and
     ranges, emission, mask-alpha delivery and absent-override restoration have
     GPU/scene tests. Native/browser swatches and editor edit/Undo/Redo/save/reopen
     review prove the slice; game adoption remains open. See [materials](rendering-materials.md).
-  - [ ] Shared material assets/texture bindings, unified alpha/sidedness,
-    GLB emissive import and legacy-look migration.
-  - base colour (factor and texture);
+  - [x] Preserve and render core GLB emissive factors, including override/removal
+    and masked-shadow invariance, with native/browser imported controls. Emissive
+    maps and game adoption remain open.
+  - [ ] Shared material assets/texture bindings, unified alpha/sidedness
+    and legacy-look migration.
+  - base color (factor and texture);
   - metallic/roughness;
   - emissive (replaces `glow`);
   - alpha mode (opaque, cutout or blend);

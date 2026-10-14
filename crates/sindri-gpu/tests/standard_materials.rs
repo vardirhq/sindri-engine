@@ -23,7 +23,7 @@ struct Scene {
 }
 
 impl Scene {
-    fn new(gpu: &GpuContext) -> Self {
+    fn new(gpu: &GpuContext, emissive: [f32; 3]) -> Self {
         let mut textures = TextureRegistry::new(&gpu.device, &gpu.queue);
         let texture = textures.insert(
             Texture2D::from_rgba8(&gpu.device, &gpu.queue, "white", 1, 1, &[255; 4]).unwrap(),
@@ -38,7 +38,7 @@ impl Scene {
             .into_iter()
             .map(|p| TexturedVertex::new(p, [0.5; 2]))
             .collect();
-        let asset = resource(positions);
+        let asset = resource(positions, emissive);
         let eye = Vec3::Z * 5.0;
         let camera = FrameCamera {
             view_projection: glam::camera::rh::proj::directx::orthographic(
@@ -169,7 +169,7 @@ fn cubes_inline_cached_and_imported_geometry_share_standard_factors() {
             return;
         }
     };
-    let mut scene = Scene::new(&gpu);
+    let mut scene = Scene::new(&gpu, [0.0; 3]);
     let lighting = WorldLighting {
         ambient_intensity: 0.2,
         directional_intensity: 1.0,
@@ -210,7 +210,7 @@ fn cubes_inline_cached_and_imported_geometry_share_standard_factors() {
     assert_eq!(scene.cube.cached_mesh_stats().buffer_uploads, 1);
 }
 
-fn resource(positions: [[f32; 3]; 4]) -> Arc<RenderModel> {
+fn resource(positions: [[f32; 3]; 4], emissive: [f32; 3]) -> Arc<RenderModel> {
     Arc::new(
         RenderModel::new(ModelData {
             nodes: vec![ModelHierarchyNode {
@@ -234,6 +234,7 @@ fn resource(positions: [[f32; 3]; 4]) -> Arc<RenderModel> {
             }]],
             surfaces: vec![ModelSurface {
                 base_color: [0.0, 1.0, 0.0, 1.0],
+                emissive,
                 ..Default::default()
             }],
             images: vec![],
@@ -279,4 +280,41 @@ fn check_emission_and_restore(scene: &mut Scene, gpu: &GpuContext) {
             "absent model override restores imported factors"
         );
     }
+}
+
+#[test]
+fn imported_emission_survives_overrides_and_needs_no_world_light() {
+    let gpu = match pollster::block_on(GpuContext::request(
+        &wgpu::Instance::default(),
+        None,
+        &GpuRequestOptions::default(),
+    )) {
+        Ok(gpu) => gpu,
+        Err(error) => {
+            assert!(
+                std::env::var_os("SINDRI_REQUIRE_GPU").is_none(),
+                "required GPU unavailable: {error}"
+            );
+            return;
+        }
+    };
+    let mut scene = Scene::new(&gpu, [0.2, 0.4, 0.1]);
+    let lighting = WorldLighting {
+        ambient_intensity: 0.0,
+        directional_intensity: 0.0,
+        ..Default::default()
+    };
+    let original = scene.draw(&gpu, 0, None, lighting);
+    assert!(
+        pixel(&original, 95)
+            .iter()
+            .zip([124, 170, 89, 255])
+            .all(|(a, b)| a.abs_diff(b) <= 2)
+    );
+    assert_eq!(pixel(&original, 32), &[0, 0, 0, 255]);
+    let overridden = scene.draw(&gpu, 0, Some(MaterialFactors::default()), lighting);
+    assert_eq!(pixel(&overridden, 95), &[0, 0, 0, 255]);
+    let restored = scene.draw(&gpu, 0, None, lighting);
+    assert_eq!(original, restored);
+    assert_eq!(scene.cube.model_cache_stats().uploads, 1);
 }

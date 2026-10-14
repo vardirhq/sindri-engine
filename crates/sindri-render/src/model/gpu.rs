@@ -242,7 +242,7 @@ fn uniform(draw: &ModelDraw<'_>, world: Mat4, surface: &ModelSurface) -> Uniform
         base_color: surface.base_color,
         metallic: surface.metallic,
         roughness: surface.roughness,
-        emissive: [0.0; 3],
+        emissive: surface.emissive,
     });
     let lighting = draw.lighting;
     let ambient = Vec3::from_array(lighting.ambient_color) * lighting.ambient_intensity;

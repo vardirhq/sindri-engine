@@ -189,6 +189,7 @@ fn material(
         base_color_texture: pbr.base_color_texture().map(|t| t.texture().index()),
         metallic: pbr.metallic_factor(),
         roughness: pbr.roughness_factor(),
+        emissive: material.emissive_factor(),
         double_sided: material.double_sided(),
         alpha_cutoff: (material.alpha_mode() == AlphaMode::Mask)
             .then(|| material.alpha_cutoff().unwrap_or(0.5)),
@@ -197,6 +198,7 @@ fn material(
         .base_color
         .iter()
         .chain([&value.metallic, &value.roughness])
+        .chain(&value.emissive)
         .all(|v| v.is_finite() && (0.0..=1.0).contains(v))
     {
         return Err(invalid(

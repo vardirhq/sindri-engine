@@ -59,6 +59,10 @@ pub(super) fn data(data: &ModelData) -> Result<(), ModelRenderError> {
                 .chain([surface.metallic, surface.roughness])
                 .chain(surface.alpha_cutoff)
                 .all(|v| v.is_finite() && (0.0..=1.0).contains(&v))
+            || !surface
+                .emissive
+                .into_iter()
+                .all(|v| v.is_finite() && v >= 0.0)
         {
             return Err(invalid("invalid material values or texture reference"));
         }

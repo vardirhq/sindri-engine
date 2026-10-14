@@ -200,3 +200,39 @@ fn authored_material_alpha_updates_model_color_and_shadow_without_uploads() {
     }
     assert_eq!(scene.cubes.model_cache_stats().uploads, 2);
 }
+
+#[test]
+fn imported_emission_does_not_change_masked_shadow_coverage() {
+    let Some(gpu) = gpu() else {
+        return;
+    };
+    let base = caster([255, 0, 255], Some(0.5), 1.0, false);
+    let mut data = base.data().clone();
+    for surface in &mut data.surfaces {
+        surface.emissive = [0.0, 0.0, 1.0];
+    }
+    let emitting = Arc::new(RenderModel::new(data).unwrap());
+    let model =
+        Mat4::from_scale_rotation_translation(Vec3::new(0.3, 0.3, 1.0), Quat::IDENTITY, Vec3::Z);
+    let mut images = Vec::new();
+    for asset in [&base, &emitting] {
+        let mut scene = Scene::new(&gpu);
+        scene.replace_caster(asset, model);
+        let clear = scene.draw(&gpu, false, 256, FogSettings::default());
+        let shadow = scene.draw(&gpu, true, 256, FogSettings::default());
+        assert!(darkened(&clear, &shadow) > 50);
+        images.push(shadow);
+    }
+    let mut checked = 0;
+    for (before, after) in images[0].chunks_exact(4).zip(images[1].chunks_exact(4)) {
+        if before[1] > before[0].saturating_add(30) {
+            assert_eq!(
+                before, after,
+                "emission leaves the green receiver's shadow unchanged"
+            );
+            checked += 1;
+        }
+    }
+    assert!(checked > 100);
+    assert_ne!(images[0], images[1], "the caster itself emits blue");
+}

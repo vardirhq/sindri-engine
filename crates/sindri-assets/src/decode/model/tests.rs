@@ -166,3 +166,40 @@ fn repeated_model_requests_share_one_load_and_decoded_value() {
     assert_eq!(address, std::ptr::from_ref(loader.get(&id).unwrap()));
     assert_eq!(loader.outstanding(), 0);
 }
+
+#[test]
+fn emissive_factors_are_preserved_and_invalid_values_rejected() {
+    let model = ModelAssetDecoder
+        .decode(bytes(modified(|j| {
+            j["materials"][0]["emissiveFactor"] = serde_json::json!([0.1, 0.4, 0.8]);
+        })))
+        .unwrap();
+    assert!(
+        model.materials[0]
+            .emissive
+            .into_iter()
+            .zip([0.1, 0.4, 0.8])
+            .all(|(a, b)| (a - b).abs() < f32::EPSILON)
+    );
+    assert!(
+        model.materials[1]
+            .emissive
+            .into_iter()
+            .all(|v| v.abs() < f32::EPSILON)
+    );
+    for value in [-0.1, 1.1, 1e99] {
+        let error = ModelAssetDecoder
+            .decode(bytes(modified(|j| {
+                j["materials"][0]["emissiveFactor"] = serde_json::json!([value, 0.0, 0.0]);
+            })))
+            .unwrap_err();
+        assert_eq!(error.kind(), AssetLoadErrorKind::InvalidData);
+    }
+    let error = ModelAssetDecoder
+        .decode(bytes(modified(|j| {
+            j["materials"][0]["emissiveTexture"] = serde_json::json!({"index": 0});
+        })))
+        .unwrap_err();
+    assert_eq!(error.kind(), AssetLoadErrorKind::UnsupportedFormat);
+    assert!(error.message().contains("emissive"));
+}

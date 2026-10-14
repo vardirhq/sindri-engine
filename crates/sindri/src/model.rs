@@ -68,6 +68,7 @@ pub fn prepare(asset: ModelAsset) -> Result<PreparedModel, ModelRenderError> {
             texture: material.base_color_texture,
             metallic: material.metallic,
             roughness: material.roughness,
+            emissive: material.emissive,
             double_sided: material.double_sided,
             alpha_cutoff: material.alpha_cutoff,
         })
@@ -117,5 +118,34 @@ fn filter(value: Option<u32>) -> Result<sindri_gpu::wgpu::FilterMode, ModelRende
         Some(value) => Err(ModelRenderError::InvalidData(format!(
             "unsupported texture filter {value}"
         ))),
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use sindri_assets::ModelMaterial;
+
+    #[test]
+    fn preparing_models_preserves_authored_emission() {
+        let asset = ModelAsset {
+            nodes: vec![],
+            roots: vec![],
+            meshes: vec![],
+            textures: vec![],
+            warnings: vec![],
+            materials: vec![ModelMaterial {
+                emissive: [0.1, 0.4, 0.8],
+                ..Default::default()
+            }],
+        };
+        let prepared = prepare(asset).unwrap();
+        assert!(
+            prepared.resource.data().surfaces[0]
+                .emissive
+                .into_iter()
+                .zip([0.1, 0.4, 0.8])
+                .all(|(a, b)| (a - b).abs() < f32::EPSILON)
+        );
     }
 }
