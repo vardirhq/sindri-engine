@@ -652,6 +652,16 @@ fleck makes way for the newest, and overflow is counted rather than hidden.
 They batch with ordinary sprites by layer and texture, so a burst is one draw
 call rather than a second rendering path.
 
+`sindri.particles` is an emitter that keeps throwing into the same pool while it
+plays: a rate and a cap, lifetime, speed, direction and spread with variation,
+a point, circle, box or ring shape at an offset, gravity, drag, size over life,
+a color ramp, rotation and spin, and world or local simulation. It owes its rate
+times each step and carries the remainder, so a fractional rate is exact at any
+frame rate, and it draws from the pool's stream. Decay plays, stops and emits a
+handful at once (`Effects.play`, `Effects.stop`, `Effects.emit`); the editor
+runs the selected emitter in the Scene view while nothing plays. The
+platformer's coins sparkle and its hero trails dust. See `docs/particles.md`.
+
 ### Game saves
 
 `sindri_core::SaveStore` is a flat, versioned key/value document. Flat because

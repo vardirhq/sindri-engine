@@ -128,6 +128,16 @@ impl ProjectPlayer {
                 self.input.apply(InputEvent::KeyReleased(key));
                 self.step()?;
             }
+            // Held across the steps that follow, as a run is held.
+            "hold" | "release" => {
+                let key = Key::from_name(rest).ok_or_else(|| format!("no key {rest}"))?;
+                self.input.apply(if verb == "hold" {
+                    InputEvent::KeyPressed(key)
+                } else {
+                    InputEvent::KeyReleased(key)
+                });
+                self.step()?;
+            }
             "type" => {
                 for c in rest.chars() {
                     self.input.apply(InputEvent::TextInput(c));

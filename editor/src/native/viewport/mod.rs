@@ -226,7 +226,15 @@ impl EditorApp {
         } else {
             &mut self.game_viewport
         };
-        if super::animated::moves(source_world, self.textures.tile_sets()) {
+        let previewing = editing
+            && self.session.is_none()
+            && self.still.preview.step(
+                &mut self.still.effects,
+                source_world,
+                self.scene.components(),
+                &self.selection,
+            );
+        if previewing || super::animated::moves(source_world, self.textures.tile_sets()) {
             context.request_repaint_after(super::animated::FRAME);
         }
         let (animations, effects) = self

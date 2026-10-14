@@ -481,12 +481,21 @@ pub(crate) enum EffectsCall {
     BurstAt,
     /// How many flecks are alive.
     Live,
+    /// Starts an entity's `sindri.particles` emitter.
+    Play,
+    /// Stops it; what it already threw lives out its life.
+    Stop,
+    /// Throws a number of its particles at once, whether or not it plays.
+    Emit,
 }
 
 pub(crate) const EFFECTS_CALLS: &[(&str, EffectsCall)] = &[
     ("burst", EffectsCall::Burst),
     ("burst_at", EffectsCall::BurstAt),
     ("live", EffectsCall::Live),
+    ("play", EffectsCall::Play),
+    ("stop", EffectsCall::Stop),
+    ("emit", EffectsCall::Emit),
 ];
 
 /// What a script can ask about the frame it is in.

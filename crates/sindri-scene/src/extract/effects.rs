@@ -33,8 +33,10 @@ impl SceneExtractor {
                 continue;
             };
             let position = Vec3::new(fleck.position[0], fleck.position[1], 0.0);
+            let size = fleck.drawn_size();
             let model = Mat4::from_translation(position)
-                * Mat4::from_scale(Vec3::new(fleck.size, fleck.size, 1.0));
+                * Mat4::from_rotation_z(fleck.rotation)
+                * Mat4::from_scale(Vec3::new(size, size, 1.0));
             // Flecks share a layer and are drawn back to front by distance like
             // any other transparent thing. The index breaks ties, which keeps a
             // frame deterministic without anyone sorting the pool itself — the
@@ -51,7 +53,7 @@ impl SceneExtractor {
                 space: DrawSpace::World,
                 texture: textures.resolve(texture),
                 order,
-                sprite: SpriteInstance::new(model, fleck.drawn_tint()).lit(true),
+                sprite: SpriteInstance::new(model, effects.color_of(fleck)).lit(true),
             });
         }
         Ok(())

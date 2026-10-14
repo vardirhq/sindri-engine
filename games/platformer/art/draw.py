@@ -300,6 +300,24 @@ def draw_flag():
     png(OUT / "flag.png", CELL * len(frames), 32, sheet(frames, cell_h=32))
 
 
+# --- Particles --------------------------------------------------------------
+
+
+def draw_particle():
+    """A soft white dot; an emitter's color ramp tints it."""
+    size = 8
+    centre = (size - 1) / 2
+    pixels = []
+    for y in range(size):
+        row = []
+        for x in range(size):
+            distance = ((x - centre) ** 2 + (y - centre) ** 2) ** 0.5 / (size / 2)
+            alpha = max(0.0, 1.0 - distance) ** 0.7
+            row.append((255, 255, 255, round(alpha * 255)))
+        pixels.append(row)
+    png(OUT / "particle.png", size, size, pixels)
+
+
 if __name__ == "__main__":
     OUT.mkdir(parents=True, exist_ok=True)
     draw_tiles()
@@ -307,3 +325,4 @@ if __name__ == "__main__":
     draw_hero()
     draw_coin()
     draw_flag()
+    draw_particle()

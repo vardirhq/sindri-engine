@@ -17,6 +17,7 @@ mod call;
 mod convert;
 mod dispatch;
 mod effects;
+mod particles;
 mod flood;
 mod frame;
 mod gamepad;

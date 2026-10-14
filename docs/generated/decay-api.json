@@ -1137,11 +1137,49 @@
           "returns": "f32"
         },
         {
+          "description": "Throws that many of an object's emitter particles at once, such as dust when landing. Gives back how many were made.",
+          "kind": "function",
+          "name": "emit",
+          "parameter_names": [
+            "entity",
+            "count"
+          ],
+          "parameters": [
+            "Entity",
+            "f32"
+          ],
+          "returns": "f32"
+        },
+        {
           "description": "How many particles are currently on screen.",
           "kind": "function",
           "name": "live",
           "parameter_names": [],
           "parameters": [],
+          "returns": "f32"
+        },
+        {
+          "description": "Starts the particle emitter set up on an object. Gives back 1.",
+          "kind": "function",
+          "name": "play",
+          "parameter_names": [
+            "entity"
+          ],
+          "parameters": [
+            "Entity"
+          ],
+          "returns": "f32"
+        },
+        {
+          "description": "Stops the particle emitter set up on an object; particles already out live out their life. Gives back 1.",
+          "kind": "function",
+          "name": "stop",
+          "parameter_names": [
+            "entity"
+          ],
+          "parameters": [
+            "Entity"
+          ],
           "returns": "f32"
         }
       ],

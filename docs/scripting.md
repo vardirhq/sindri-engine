@@ -585,6 +585,9 @@ follow-up work.
 | `Effects.burst(entity)` | `f32` — how many flecks were made |
 | `Effects.burst_at(entity, x, y)` | `f32` |
 | `Effects.live()` | `f32` |
+| `Effects.play(entity)` | `f32` — starts the entity's `sindri.particles` emitter |
+| `Effects.stop(entity)` | `f32` — stops it; particles already out live on |
+| `Effects.emit(entity, count)` | `f32` — throws that many of its particles at once |
 
 ```rust
 script Bullet {
@@ -621,6 +624,12 @@ Effects.burst_at(this.explosion, enemy.transform.position.x,
 call — so the usual shape, firing a burst and then despawning what fired it,
 works. `burst_at` throws somewhere else, which is what an explosion where
 something *used to be* needs.
+
+**An emitter is a stream the scene authors.** `sindri.particles` keeps throwing
+particles into the same pool while it plays: sparkle round a pickup, smoke from
+a chimney. `Effects.play` and `Effects.stop` switch its `playing` field, and
+`Effects.emit(this.entity, 8.0)` throws a handful at once whether it plays or
+not, which is dust on landing. `docs/particles.md` describes every field.
 
 **Flecks draw their own random directions from their own stream**, never the
 run's. A fleck drawn from the gameplay stream would shift every number after it,

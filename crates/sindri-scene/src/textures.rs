@@ -430,6 +430,7 @@ fn sprite_references(world: &World) -> BTreeSet<SpriteRef> {
 /// carries a texture has to be named here or fail the build.
 pub const TEXTURE_NAMING_COMPONENTS: &[&str] = &[
     crate::effects::EffectBurstComponent::TYPE_NAME,
+    crate::effects::ParticlesComponent::TYPE_NAME,
     MeshComponent::TYPE_NAME,
     SpriteComponent::TYPE_NAME,
     TilemapComponent::TYPE_NAME,

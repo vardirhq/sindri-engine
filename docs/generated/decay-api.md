@@ -227,7 +227,10 @@ Particle effects, such as sparks and explosions. The particles are only drawn; t
 
 - `burst(entity: Entity)` → `f32` — Plays the particle burst set up on an object, at that object's position. Gives back how many particles were made.
 - `burst_at(entity: Entity, x: f32, y: f32)` → `f32` — Plays the particle burst set up on an object at another position, such as where an enemy just died.
+- `emit(entity: Entity, count: f32)` → `f32` — Throws that many of an object's emitter particles at once, such as dust when landing. Gives back how many were made.
 - `live()` → `f32` — How many particles are currently on screen.
+- `play(entity: Entity)` → `f32` — Starts the particle emitter set up on an object. Gives back 1.
+- `stop(entity: Entity)` → `f32` — Stops the particle emitter set up on an object; particles already out live out their life. Gives back 1.
 
 ### `Entity`
 

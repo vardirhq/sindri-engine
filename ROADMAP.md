@@ -187,7 +187,9 @@ shaped like the tool.
 - [x] Add font and text authoring: the inspector edits multiline content and
   chooses from the project browser's OpenType font assets; Add Component offers
   UI Text only when a project font can complete its otherwise dishonest blank
-- [ ] Port particles after the render lifecycle is stable
+- [x] Port particles — `sindri.particles` emitters in the fleck pool, driven
+  from Decay, previewed in the Scene view and proven by the platformer's
+  sparkle and dust (`docs/particles.md`)
 - [x] Let a sprite draw through the project's own shader — a `.wgsl` asset
   defining `fn sprite_shader`, wrapped in the sprite pipeline, with four
   per-instance `shader_params` Decay can write; checked on bind everywhere,

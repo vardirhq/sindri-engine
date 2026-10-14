@@ -68,7 +68,10 @@ pub use components::{
 pub use components::{
     EnvironmentLighting2d, Light2dComponent, Light2dError, Light2dOccluderComponent, OccluderShape,
 };
-pub use effects::{EffectBurstComponent, Effects2d, Fleck};
+pub use effects::{
+    EffectBurstComponent, Effects2d, EmissionShape, Fleck, ParticleSpace, ParticlesComponent,
+    ParticlesError,
+};
 pub use extract::{
     CameraView, ExtractProblem, OverlayPlacement, OverlayView, SceneExtractError, SceneExtractor,
     SceneRuntime, UiCanvas, ViewCamera, VoxelGround, VoxelWorldHit, WorldProjection,

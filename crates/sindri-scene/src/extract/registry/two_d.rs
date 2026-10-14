@@ -1,11 +1,14 @@
 //! The 2D drawables whose blanks are long enough to be their own file.
 
-use sindri_core::{ComponentSchemaRegistry, FieldMeaning};
+use sindri_core::{AssetKind, ComponentSchemaRegistry, FieldMeaning};
 
 use crate::components::{
     Light2dComponent, Light2dOccluderComponent, OccluderShape, ShapeComponent, UiShapeBlend,
     UiShapeComponent, UiShapeKind,
 };
+
+use crate::effects::{EmissionShape, ParticleSpace, ParticlesComponent};
+use crate::textures::PROCEDURAL_TEXTURES;
 
 use super::super::SceneExtractError;
 
@@ -92,6 +95,37 @@ pub(super) fn register_lights(
     components.describe::<Light2dOccluderComponent>([
         ("shape", FieldMeaning::choice(OccluderShape::NAMES)),
         ("size", at_least(0.01)),
+    ])?;
+    Ok(())
+}
+
+/// A particle emitter. A fresh one is a slow fountain of the checkerboard, so
+/// adding it shows something moving rather than a component that seems inert.
+pub(super) fn register_particles(
+    components: &mut ComponentSchemaRegistry,
+) -> Result<(), SceneExtractError> {
+    let blank = ParticlesComponent {
+        texture: PROCEDURAL_TEXTURES[0].reference.to_owned(),
+        ..ParticlesComponent::default()
+    };
+    components.register_with_default::<ParticlesComponent>(
+        "Particles",
+        serde_json::to_value(blank).expect("an emitter serializes"),
+    )?;
+    let at_least = |min: f64| FieldMeaning::Range {
+        min,
+        max: f64::INFINITY,
+    };
+    components.describe::<ParticlesComponent>([
+        ("texture", FieldMeaning::Asset(AssetKind::Texture)),
+        ("rate", at_least(0.0)),
+        ("lifetime", at_least(0.01)),
+        ("speed", at_least(0.0)),
+        ("drag", at_least(0.0)),
+        ("size", at_least(0.0)),
+        ("size_end", at_least(0.0)),
+        ("shape", FieldMeaning::choice(EmissionShape::NAMES)),
+        ("space", FieldMeaning::choice(ParticleSpace::NAMES)),
     ])?;
     Ok(())
 }

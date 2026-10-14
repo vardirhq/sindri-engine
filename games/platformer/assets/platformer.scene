@@ -2053,6 +2053,52 @@
           "snap_distance": 0.2,
           "step_height": 0.3,
           "carry_platforms": true
+        },
+        "sindri.particles": {
+          "playing": false,
+          "texture": "textures/particle.png",
+          "rate": 14.0,
+          "max": 40,
+          "lifetime": 0.45,
+          "lifetime_spread": 0.3,
+          "speed": 0.9,
+          "speed_spread": 0.4,
+          "direction": 90.0,
+          "spread": 120.0,
+          "shape": "box",
+          "offset": [
+            0.0,
+            -0.45
+          ],
+          "shape_size": [
+            0.4,
+            0.05
+          ],
+          "gravity": [
+            0.0,
+            -1.5
+          ],
+          "drag": 2.0,
+          "size": 0.22,
+          "size_end": 0.5,
+          "colors": [
+            [
+              0.62,
+              0.5,
+              0.36,
+              0.9
+            ],
+            [
+              0.55,
+              0.45,
+              0.34,
+              0.0
+            ]
+          ],
+          "random_rotation": false,
+          "spin": 0.0,
+          "space": "world",
+          "layer": 4
         }
       }
     },

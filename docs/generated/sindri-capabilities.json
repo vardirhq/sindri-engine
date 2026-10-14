@@ -713,6 +713,157 @@
       "addable": true,
       "apply": {},
       "default_payload": {
+        "colors": [
+          [
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          [
+            1.0,
+            1.0,
+            1.0,
+            0.0
+          ]
+        ],
+        "direction": 90.0,
+        "drag": 0.0,
+        "gravity": [
+          0.0,
+          0.0
+        ],
+        "layer": 0,
+        "lifetime": 1.0,
+        "lifetime_spread": 0.20000000298023224,
+        "max": 200,
+        "offset": [
+          0.0,
+          0.0
+        ],
+        "playing": true,
+        "random_rotation": false,
+        "rate": 10.0,
+        "shape": "point",
+        "shape_size": [
+          1.0,
+          1.0
+        ],
+        "size": 0.10000000149011612,
+        "size_end": 0.10000000149011612,
+        "space": "world",
+        "speed": 2.0,
+        "speed_spread": 0.30000001192092896,
+        "spin": 0.0,
+        "spread": 30.0,
+        "texture": "procedural:checkerboard"
+      },
+      "display_name": "Particles",
+      "fields": {
+        "colors": [
+          [
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          [
+            1.0,
+            1.0,
+            1.0,
+            0.0
+          ]
+        ],
+        "direction": 90.0,
+        "drag": 0.0,
+        "gravity": [
+          0.0,
+          0.0
+        ],
+        "layer": 0,
+        "lifetime": 1.0,
+        "lifetime_spread": 0.20000000298023224,
+        "max": 200,
+        "offset": [
+          0.0,
+          0.0
+        ],
+        "playing": true,
+        "random_rotation": false,
+        "rate": 10.0,
+        "shape": "point",
+        "shape_size": [
+          1.0,
+          1.0
+        ],
+        "size": 0.10000000149011612,
+        "size_end": 0.10000000149011612,
+        "space": "world",
+        "speed": 2.0,
+        "speed_spread": 0.30000001192092896,
+        "spin": 0.0,
+        "spread": 30.0,
+        "texture": "procedural:checkerboard"
+      },
+      "meanings": {
+        "drag": {
+          "kind": "range",
+          "max": null,
+          "min": 0.0
+        },
+        "lifetime": {
+          "kind": "range",
+          "max": null,
+          "min": 0.01
+        },
+        "rate": {
+          "kind": "range",
+          "max": null,
+          "min": 0.0
+        },
+        "shape": {
+          "kind": "choice",
+          "options": [
+            "point",
+            "circle",
+            "box",
+            "ring"
+          ]
+        },
+        "size": {
+          "kind": "range",
+          "max": null,
+          "min": 0.0
+        },
+        "size_end": {
+          "kind": "range",
+          "max": null,
+          "min": 0.0
+        },
+        "space": {
+          "kind": "choice",
+          "options": [
+            "world",
+            "local"
+          ]
+        },
+        "speed": {
+          "kind": "range",
+          "max": null,
+          "min": 0.0
+        },
+        "texture": {
+          "asset": "texture",
+          "kind": "asset"
+        }
+      },
+      "schema_version": 1,
+      "type_name": "sindri.particles"
+    },
+    {
+      "addable": true,
+      "apply": {},
+      "default_payload": {
         "carry_platforms": true,
         "max_iterations": 8,
         "max_slope_angle": 0.7853981852531433,

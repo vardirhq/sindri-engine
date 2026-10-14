@@ -9,7 +9,8 @@
 //!
 //! Steps after the size run in order: `click:<entity>` presses and releases
 //! over an element, `wheel:<entity>:<pixels>` scrolls over one (positive is
-//! down the list), `key:<Key>` taps a key, `type:<text>` commits characters,
+//! down the list), `key:<Key>` taps a key, `hold:<Key>` and `release:<Key>`
+//! press one across the steps between, `type:<text>` commits characters,
 //! `set:<name>=<value>` writes a shared board value, `move:<x>,<y>` puts the
 //! pointer at a pixel, `down` and `up` press and release the left button
 //! there, and `wait:<seconds>` plays on. Each prints what it hit, so a picture of the

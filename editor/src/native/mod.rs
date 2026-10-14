@@ -71,6 +71,7 @@ pub(crate) mod prefab_drop;
 mod prefab_panel;
 mod prefab_pointer;
 mod prefab_writes;
+mod particle_preview;
 mod presentation;
 mod preview_view;
 mod profile_view;
@@ -428,6 +429,8 @@ impl EditorApp {
 struct Stillness {
     animations: SpriteAnimations,
     effects: sindri_scene::Effects2d,
+    /// The selected emitter, playing in `effects` while nothing else does.
+    preview: particle_preview::ParticlePreview,
     screen_ui: ScreenUi,
 }
 

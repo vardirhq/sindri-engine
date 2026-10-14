@@ -254,6 +254,21 @@ pub(super) const TYPES: &[TypeEntry] = &[
                 "Plays the particle burst set up on an object at another position, such as where an enemy just died.",
             ),
             call("live", &[], "How many particles are currently on screen."),
+            call(
+                "play",
+                &["entity"],
+                "Starts the particle emitter set up on an object. Gives back 1.",
+            ),
+            call(
+                "stop",
+                &["entity"],
+                "Stops the particle emitter set up on an object; particles already out live out their life. Gives back 1.",
+            ),
+            call(
+                "emit",
+                &["entity", "count"],
+                "Throws that many of an object's emitter particles at once, such as dust when landing. Gives back how many were made.",
+            ),
         ],
     },
     super::physics::PHYSICS,

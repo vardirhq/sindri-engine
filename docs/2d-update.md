@@ -88,16 +88,17 @@ game in this repository.
   wall torch rakes normal-mapped bricks. Contract: `docs/2d-lights.md`.
 
 ### 4. Particle system
-- [ ] `sindri.particles`: a continuous emitter with rate, bursts, lifetime,
+- [x] `sindri.particles`: a continuous emitter with rate, bursts (`Effects.emit`), lifetime,
   speed, direction and spread, an emission shape (point, circle, box, ring),
   gravity, drag, size over life, a color ramp, rotation and spin, local or
-  world simulation, and a cap.
-- [ ] Particles live in the existing effect pool, so they cost what flecks
+  world simulation, and a cap, plus an `offset` for where the shape sits.
+- [x] Particles live in the existing effect pool, so they cost what flecks
   cost, and use their own random stream so a seeded run stays the same run.
-- [ ] Decay plays, stops and bursts an emitter.
-- [ ] The editor previews the selected emitter in the Scene view without
+- [x] Decay plays, stops and bursts an emitter.
+- [x] The editor previews the selected emitter in the Scene view without
   entering Play.
-- [ ] Proof: the platformer's coins sparkle and the hero kicks up dust.
+- [x] Proof: the platformer's coins sparkle and the hero kicks up dust.
+  Contract: `docs/particles.md`.
 
 ### 5. Nine-slice sprites
 - [ ] A sheet sprite can declare a border: left, top, right and bottom, in

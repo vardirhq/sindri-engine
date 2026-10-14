@@ -343,7 +343,7 @@ Sindri's strongest domain relative to the baseline.
 | Feature | Engine | Editor | Decay | Proof | vs. baseline | Gap that matters |
 | --- | :-: | :-: | :-: | :-: | --- | --- |
 | Pooled fleck bursts, batched with sprites | ✅ | 🟡 | ✅ | ✅ | **Behind** | Measured and fast, but it is one effect shape |
-| **Particle system (emitters, curves, shapes)** | ❌ | ❌ | ❌ | ❌ | **Absent** | No emission shape, lifetime curve, colour ramp, sub-emitter, or trail |
+| **Particle system (emitters, curves, shapes)** | ✅ | 🟡 | ✅ | ✅ | **Behind** | `sindri.particles` emits into the fleck pool with rate, cap, lifetime, speed, direction and spread, point, circle, box and ring shapes, gravity, drag, size over life, a color ramp, rotation, spin and world or local simulation, from its own random stream. Decay plays, stops and emits; the Scene view previews the selected emitter. The platformer's coins sparkle and its hero trails dust. Linear size only rather than curves, no sheet animation over life, sub-emitters, trails or collision, and no curve or ramp editor beyond the inspector. Contract: `docs/particles.md` |
 | **Effect preview in the editor** | — | ❌ | — | — | **Absent** | Authored blind through the generic inspector |
 | **Trails / line renderer** | ❌ | ❌ | ❌ | ❌ | **Absent** | — |
 | **Screen-space feedback (shake, flash, hitstop)** | ❌ | ❌ | ❌ | ❌ | **Absent** | The `Feel` package sells on precisely this |
