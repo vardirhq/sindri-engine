@@ -8,6 +8,9 @@ script CameraFx {
     var ambience: f32 = 0.0;
     var grid: Entity = null;
     var backdrop: Entity = null;
+    // The grid's authored size and line count, from the scene.
+    @export let grid_extent: f32 = 60.0;
+    @export let grid_cells: f32 = 52.0;
 
     fn start() {
         this.grid = World.find("backdrop-grid");
@@ -32,7 +35,15 @@ script CameraFx {
         }
 
         if grid != null && World.exists(grid) {
-            grid.transform.rotation_z = sin(this.ambience * 0.11) * 0.012 + boss_energy * sin(this.ambience * 0.42) * 0.009;
+            // The original's grid drifts left and up, 8 and 4 pixels a second
+            // at 540 pixels tall, and never turns: a turning grid reads as a
+            // tilted one. It moves by less than one cell and wraps, so the
+            // sheet never runs out at an edge.
+            let cell = this.grid_extent / this.grid_cells;
+            let drift_x = this.ambience * 0.163;
+            let drift_y = this.ambience * 0.0815;
+            grid.transform.position.x = -(drift_x % cell);
+            grid.transform.position.y = drift_y % cell;
             grid.shape.stroke.r = 0.0085 + boss_energy * 0.12;
             grid.shape.stroke.g = 0.034 + pulse * 0.012 + boss_energy * 0.035;
             grid.shape.stroke.b = 0.024 + pulse * 0.010;

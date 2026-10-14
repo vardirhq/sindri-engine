@@ -41,17 +41,19 @@
 }
 
 /* Hull and XP, bottom left: each label on its own line above its meter.
-   Panels and meters are placed by their centre; text by its anchor. */
-.hud-vitals-back { width: 380px; height: 96px; x: 206px; y: 64px; anchor: bottom_left; }
+   Panels and meters are placed by their centre; text by its anchor. Kept
+   narrow, about a quarter of a 960-wide screen, because the field is the
+   game: the original carries these readings in one small top cluster. */
+.hud-vitals-back { width: 260px; height: 74px; x: 146px; y: 53px; anchor: bottom_left; }
 .hud-meter-label {
-    width: 352px; height: 16px; x: 30px; anchor: bottom_left;
-    font-size: 13px; line-height: 15px; letter-spacing: 2px; text-align: start;
+    width: 232px; height: 14px; x: 30px; anchor: bottom_left;
+    font-size: 12px; line-height: 14px; letter-spacing: 2px; text-align: start;
 }
-.hud-health-label { y: 78px; color: var(--ink); }
-.hud-xp-label { y: 40px; color: var(--cyan); }
-.hud-player-meter { width: 352px; x: 206px; anchor: bottom_left; }
-.health-meter { height: 16px; y: 66px; }
-.cores-meter { height: 8px; y: 30px; }
+.hud-health-label { y: 64px; color: var(--ink); }
+.hud-xp-label { y: 35px; color: var(--cyan); }
+.hud-player-meter { width: 232px; x: 146px; anchor: bottom_left; }
+.health-meter { height: 12px; y: 54px; }
+.cores-meter { height: 6px; y: 27px; }
 
 /* Boss: a warm frame under the clock that no other reading uses. */
 .hud-boss-frame {
