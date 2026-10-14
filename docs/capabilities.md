@@ -660,7 +660,8 @@ times each step and carries the remainder, so a fractional rate is exact at any
 frame rate, and it draws from the pool's stream. Decay plays, stops and emits a
 handful at once (`Effects.play`, `Effects.stop`, `Effects.emit`); the editor
 runs the selected emitter in the Scene view while nothing plays. The
-platformer's coins sparkle and its hero trails dust. See `docs/particles.md`.
+platformer's coins sparkle and its hero trails dust; Low Tide's treads kick up
+dust and its engine smokes while it drives. See `docs/particles.md`.
 
 A sprite or UI image drawn `sliced` keeps the border its sheet records, in
 pixels by sprite name, and stretches only the middle: nine quads in the image's
@@ -1214,7 +1215,11 @@ the solid cells of a tilemap, through one-dimensional polar depth maps built on
 the CPU each frame. A frame carries the 16 lights nearest the camera. Decay
 writes a light's color, intensity, radius, falloff and height. The Scene view
 draws light radii and occluder outlines with handles. The platformer's cave is
-the proof. See `docs/2d-lights.md`.
+the proof. A voxel world viewed as a map is lit too, and its `normal_maps` name
+a normal map for each texture its squares draw from: Low Tide's Basin is lit by
+a sun that follows the tide from noon through a golden hour to a moonlit flood,
+and its crawler carries lamps and shadow-casting headlights. See
+`docs/2d-lights.md`.
 
 **A sliced image says how it is cut, once.** A sheet document beside a texture —
 `textures/tiles.png` is sliced by `textures/tiles.sheet`, at a derived ID

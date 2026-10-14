@@ -88,4 +88,5 @@ with Decay scripts driving the dissolve and the flash.
 `game/tests/the_sprite_shader_demo_works.rs` compiles every shader it names and
 plays the scripts; `crates/sindri-gpu/tests/sprite_shaders.rs` reads drawn
 pixels back to show the shader, its per-instance parameters and the clock reach
-the screen.
+the screen. Low Tide draws its submerged wrecks through
+`shaders/underwater.wgsl`, bent and rippled with light by the brine above them.

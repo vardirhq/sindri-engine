@@ -69,4 +69,6 @@ together; past that the oldest go first and the overflow is counted.
 
 The platformer: every coin sparkles from `prefabs/coin.prefab`, and the hero
 trails dust while it runs and puffs on a hard landing, switched by
-`scripts/hero.decay`. `games/platformer/tests/sparkle_and_dust.rs` checks both.
+`scripts/hero.decay`. `games/platformer/tests/sparkle_and_dust.rs` checks both. Low Tide's treads throw
+dust and its engine smokes while the crawler drives, and a swimmer and a diver
+throw spray and bubbles (`games/low-tide/tests/the_basin_is_lit.rs`).

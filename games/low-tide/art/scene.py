@@ -104,6 +104,9 @@ BASIN = {
 # Z runs down the map, so the column at (-129, -53) is centred at
 # (-128.5, 52.5). Found by searching the generated world for flat dry ground.
 START = (-128.5, 52.5)
+# A hull blocks the crawler's headlights; in the wreck's own space, which its
+# transform stretches to the drawn size.
+WRECK_OCCLUDER = {"enabled": True, "shape": "box", "size": [0.78, 0.5], "points": []}
 # One introductory wreck; the rest are streamed by Decay across the Basin.
 WRECKS = [(-116.5, 72.5, 0.4)]
 
@@ -138,6 +141,25 @@ def text(anchor, size, words, color=(1.0, 0.96, 0.88, 1.0)):
     }
 
 
+def light(color, intensity, radius, falloff=1.5, height=1.0, shadows=False):
+    return {"enabled": True, "color": list(color), "intensity": intensity,
+            "radius": radius, "falloff": falloff, "height": height,
+            "shadows": shadows, "shadow_reach": 0.3}
+
+
+def particles(rate, lifetime, speed, colors, size, size_end, layer, **more):
+    """An emitter of soft motes; `more` sets any other field by name."""
+    return {
+        "playing": False, "texture": "textures/puff.png", "rate": rate, "max": 200,
+        "lifetime": lifetime, "lifetime_spread": 0.3, "speed": speed,
+        "speed_spread": 0.4, "direction": 90.0, "spread": 360.0, "shape": "point",
+        "offset": [0.0, 0.0], "shape_size": [1.0, 1.0], "gravity": [0.0, 0.0],
+        "drag": 0.0, "size": size, "size_end": size_end,
+        "colors": [list(color) for color in colors], "random_rotation": True,
+        "spin": 0.0, "space": "world", "layer": layer,
+    } | more
+
+
 def script(source, name, properties=None):
     return {"source": source, "script": name, "properties": properties or {}}
 
@@ -166,6 +188,9 @@ def entities():
             "id": "environment", "name": "Environment",
             "components": {"sindri.environment": {
                 "background": [0.8, 0.77, 0.69, 1.0],
+                # Lit: the sun keeps time with the tide (scripts/daylight.decay)
+                # and the crawler carries its own lamps into the night.
+                "lighting_2d": {"enabled": True, "ambient": [0.05, 0.07, 0.13]},
                 "shadows": {"enabled": False, "map_size": 1024, "distance": 48.0,
                             "bias": 0.002},
             }},
@@ -200,6 +225,7 @@ def entities():
             "components": {"sindri.voxel_world": {
                 "generator": BASIN, "blocks": "basin.tileset", "view": "map",
                 "variant_seed": 5, "layer": -10, "edits": [],
+                "normal_maps": {"textures/terrain.png": "textures/terrain_n.png"},
             }, "sindri.script": script("scripts/tide.decay", "Tide")},
         },
     ]
@@ -208,9 +234,11 @@ def entities():
             "id": f"wreck-{index}", "name": f"Wreck {index}",
             "transform_3d": transform(x, y, 0.05, turn, (7.0, 4.5)),
             "components": {
-                "sindri.sprite": {"texture": "textures/wreck.png", "layer": 1, "tint": [1, 1, 1, 1]},
+                "sindri.sprite": {"texture": "textures/wreck.png", "layer": 1, "tint": [1, 1, 1, 1],
+                                  "normal_map": "textures/wreck_n.png"},
                 "sindri.tags": {"tags": ["wreck"]},
                 "sindri.script": script("scripts/wreck.decay", "Wreck", {"template": "prefabs/cargo.prefab"}),
+                "sindri.light2d.occluder": WRECK_OCCLUDER,
             },
         })
     found += [
@@ -236,6 +264,7 @@ def entities():
             "components": {"sindri.tilemap": {
                 "texture": "textures/ship.png", "palette": SHIP_TILES,
                 "columns": width, "rows": height, "tiles": crawler_tiles(), "layer": 4,
+                "normal_map": "textures/ship_n.png",
             }},
         },
         {
@@ -244,6 +273,7 @@ def entities():
             "components": {"sindri.tilemap": {
                 "texture": "textures/ship.png", "palette": SHIP_TILES,
                 "columns": width, "rows": height, "layer": 3,
+                "normal_map": "textures/ship_n.png",
                 "tiles": [None if ch == " " else (14 if row < 6 else 13 if row < 8 else 15)
                           for row, line in enumerate(CRAWLER) for ch in line],
             }},
@@ -252,7 +282,8 @@ def entities():
             "id": "crew", "name": "Crew", "parent": "deck",
             "transform_3d": transform(5.5, -7.5, 0.1, 0.0, (1.1, 1.1)),
             "components": {
-                "sindri.sprite": {"texture": "textures/crew.png#down-0", "layer": 6},
+                "sindri.sprite": {"texture": "textures/crew.png#down-0", "layer": 6,
+                                  "normal_map": "textures/crew_n.png"},
                 "sindri.animation.sprite": {
                     "clips": {
                         "down": {"frames": ["down-0", "down-1"], "seconds_per_frame": 0.18, "looping": True},
@@ -282,7 +313,8 @@ def entities():
             "id": "carried", "name": "Carried", "parent": "crew",
             "transform_3d": transform(0.0, 0.42, 0.01, 0.0, (0.5, 0.5)),
             "components": {
-                "sindri.sprite": {"texture": "textures/ship.png#crate", "layer": 7, "tint": [1, 1, 1, 1]},
+                "sindri.sprite": {"texture": "textures/ship.png#crate", "layer": 7, "tint": [1, 1, 1, 1],
+                                  "normal_map": "textures/ship_n.png"},
                 "sindri.animation.sprite": {
                     "clips": {kind: {"frames": ["crate" if kind == "scrap" else f"crate-{kind}"],
                                      "seconds_per_frame": 1.0, "looping": False}
@@ -305,7 +337,7 @@ def entities():
             "transform_3d": transform(0.0, 0.06),
             "components": {"sindri.ui.text": text("bottom", 0.029, "")},
         },
-    ] + crawler_motion() + cabin_details() + instrument_panel() + touch_controls() + workbench() + dive_cutaway() + [
+    ] + crawler_motion() + crawler_lights() + crawler_effects() + cabin_details() + instrument_panel() + touch_controls() + workbench() + dive_cutaway() + [
     ]
     return found
 
@@ -333,7 +365,8 @@ def crawler_motion():
                 "name": f"{side.title()} tread {row}", "parent": "deck",
                 "transform_3d": transform(column, -row - 0.5, 0.02, 0, (1, 1)),
                 "components": {
-                    "sindri.sprite": {"texture": f"textures/treads.png#{side}-0", "layer": 5},
+                    "sindri.sprite": {"texture": f"textures/treads.png#{side}-0", "layer": 5,
+                                      "normal_map": "textures/treads_n.png"},
                     "sindri.animation.sprite": {
                         "clips": {
                             "forward": {"frames": [f"{side}-{i}" for i in reversed(range(8))],
@@ -349,17 +382,82 @@ def crawler_motion():
     return found
 
 
+def crawler_lights():
+    """The sun, and the lamps the crawler carries into the night.
+
+    Light positions are in the deck's own space: the bow is row 3, so the
+    headlights sit just ahead of it and turn with the crawler. The headlights
+    cast shadows, so a wreck caught in them throws one across the salt."""
+    lamp = (1.0, 0.72, 0.4, 1.0)
+    found = [{
+        "id": "sun", "name": "Sun",
+        "transform_3d": transform(START[0] - 30, START[1] + 30),
+        "components": {
+            "sindri.light2d": light((1.0, 0.94, 0.82, 1.0), 2.9, 400.0, 0.05, 14.0),
+            "sindri.script": script("scripts/daylight.decay", "Sun"),
+        },
+    }]
+    for i, (x, y) in enumerate([(4.5, -5.0), (6.5, -5.0), (4.5, -10.0), (6.5, -10.0)]):
+        found.append({"id": f"cabin-light-{i}", "name": f"Cabin light {i}", "parent": "deck",
+            "transform_3d": transform(x, y, 0.2),
+            "components": {"sindri.light2d": light(lamp, 1.0, 3.2, 1.8, 1.0),
+                           "sindri.script": script("scripts/daylight.decay", "Lamp",
+                                                   {"by_day": 0.0, "by_night": 0.8})}})
+    for side, x in (("port", 3.6), ("starboard", 7.4)):
+        found.append({"id": f"headlight-{side}", "name": f"Headlight {side}", "parent": "deck",
+            "transform_3d": transform(x, -1.2, 0.2),
+            "components": {"sindri.light2d": light((1.0, 0.95, 0.85, 1.0), 0.0, 12.0, 1.1, 1.6, True),
+                           "sindri.script": script("scripts/daylight.decay", "Lamp",
+                                                   {"by_day": 0.0, "by_night": 2.2, "flicker": 0.0})}})
+    found.append({"id": "lantern", "name": "Crew lantern", "parent": "crew",
+        "transform_3d": transform(0.25, 0.1, 0.1),
+        "components": {"sindri.light2d": light(lamp, 0.0, 3.2, 1.4, 1.0),
+                       "sindri.script": script("scripts/daylight.decay", "Lamp",
+                                               {"by_day": 0.0, "by_night": 1.0, "flicker": 0.08})}})
+    return found
+
+
+def crawler_effects():
+    """Dust off both treads, smoke from the engine, spray round a swimmer."""
+    dust = [(0.66, 0.6, 0.5, 0.0), (0.66, 0.6, 0.5, 0.5), (0.72, 0.67, 0.58, 0.0)]
+    found = []
+    for side, x in (("port", 2.5), ("starboard", 8.5)):
+        found.append({"id": f"{side}-dust", "name": f"{side.title()} tread dust", "parent": "deck",
+            "transform_3d": transform(x, -8.0, 0.0),
+            "components": {
+                "sindri.particles": particles(16.0, 1.4, 0.5, dust, 0.35, 1.3, 2,
+                                              shape="box", shape_size=[0.9, 6.5], drag=1.2),
+                "sindri.script": script("scripts/daylight.decay", "TreadDust"),
+            }})
+    found.append({"id": "exhaust", "name": "Engine exhaust", "parent": "deck",
+        "transform_3d": transform(7.6, -9.4, 0.3),
+        "components": {
+            "sindri.particles": particles(
+                7.0, 2.6, 0.35,
+                [(0.25, 0.23, 0.22, 0.0), (0.3, 0.28, 0.26, 0.5), (0.55, 0.53, 0.5, 0.0)],
+                0.3, 1.6, 10, gravity=[0.35, 0.2], drag=0.4, spin=25.0),
+            "sindri.script": script("scripts/daylight.decay", "Exhaust"),
+        }})
+    found.append({"id": "swim-spray", "name": "Swim spray", "parent": "swim-wake",
+        "transform_3d": transform(0.0, 0.0, 0.0),
+        "components": {"sindri.particles": particles(
+            9.0, 1.0, 0.6, [(0.8, 0.96, 0.92, 0.0), (0.8, 0.96, 0.92, 0.6), (0.8, 0.96, 0.92, 0.0)],
+            0.08, 0.3, 5, playing=True, shape="ring", shape_size=[0.5, 0.5], drag=1.5)}})
+    return found
+
+
 def cabin_details():
     # Fixed fittings decorate the frame; furniture still comes from upgrades.
     found = []
     for i, (x, y) in enumerate([(3.5, -4.5), (7.5, -4.5), (3.5, -10.5), (7.5, -10.5)]):
         found.append({"id": f"cabin-lamp-{i}", "name": f"Frame lamp {i}", "parent": "deck",
             "transform_3d": transform(x, y, 0.2, 0, (1.4, 1.4)),
-            "components": {"sindri.sprite": {"texture": "textures/lamp.png", "layer": 9}}})
+            "components": {"sindri.sprite": {"texture": "textures/lamp.png", "layer": 9, "unlit": True}}})
     for side, x in [("port", 3.3), ("starboard", 7.7)]:
         found.append({"id": "pipe-"+side, "name": "Frame pipe "+side, "parent": "deck",
             "transform_3d": transform(x, -7.2, 0.1, 0, (0.25, 4.0)),
-            "components": {"sindri.sprite": {"texture": "textures/pipe.png", "layer": 5}}})
+            "components": {"sindri.sprite": {"texture": "textures/pipe.png", "layer": 5,
+                                             "normal_map": "textures/pipe_n.png"}}})
     return found
 
 
@@ -542,13 +640,27 @@ def dive_cutaway():
         "transform_3d": transform(-7, 1),
         "components": {"sindri.tilemap": {"texture": "textures/dive.png",
             "palette": ["water", "hull"], "columns": 14, "rows": 12,
-            "tiles": tiles, "layer": 26}}})
+            "tiles": tiles, "layer": 26, "normal_map": "textures/dive_n.png"}}})
     found.append({"id": "dive-cache", "name": "Sealed salvage", "parent": "dive-stage",
         "transform_3d": transform(2.5, -7.5, 0.1, 0, (0.8, 0.7)),
-        "components": {"sindri.sprite": {"texture": "textures/dive.png#salvage", "layer": 28}}})
+        "components": {"sindri.sprite": {"texture": "textures/dive.png#salvage", "layer": 28,
+                                         "normal_map": "textures/dive_n.png"}}})
+    found.append({"id": "cache-glow", "name": "Salvage glow", "parent": "dive-cache",
+        "transform_3d": transform(0, 0, 0.1),
+        "components": {"sindri.light2d": light((1.0, 0.78, 0.4, 1.0), 0.9, 2.6, 1.6, 0.8)}})
     found.append({"id": "diver", "name": "Diver", "parent": "dive-stage",
         "transform_3d": transform(-1.5, 0, 0.2, 0, (0.9, 0.9)),
-        "components": {"sindri.sprite": {"texture": "textures/dive.png#diver", "layer": 30}}})
+        "components": {"sindri.sprite": {"texture": "textures/dive.png#diver", "layer": 30,
+                                         "normal_map": "textures/dive_n.png"}}})
+    found.append({"id": "diver-lamp", "name": "Diver lamp", "parent": "diver",
+        "transform_3d": transform(0.6, 0.1, 0.1),
+        "components": {"sindri.light2d": light((0.9, 0.97, 1.0, 1.0), 1.5, 5.0, 1.3, 1.2, True)}})
+    found.append({"id": "diver-bubbles", "name": "Diver bubbles", "parent": "diver",
+        "transform_3d": transform(0.4, 0.3, 0.1),
+        "components": {"sindri.particles": particles(
+            3.0, 2.2, 0.4, [(0.75, 0.95, 0.92, 0.0), (0.75, 0.95, 0.92, 0.75), (0.75, 0.95, 0.92, 0.0)],
+            0.08, 0.2, 31, playing=True, direction=90.0, spread=25.0,
+            gravity=[0.0, 0.8], drag=0.6)}})
     return found
 
 
@@ -572,9 +684,11 @@ def main():
             "id": "wreck", "name": "Basin wreck",
             "transform_3d": transform(0.0, 0.0, 0.05, 0.0, (7.0, 4.5)),
             "components": {
-                "sindri.sprite": {"texture": "textures/wreck.png", "layer": 1, "tint": [1, 1, 1, 1]},
+                "sindri.sprite": {"texture": "textures/wreck.png", "layer": 1, "tint": [1, 1, 1, 1],
+                                  "normal_map": "textures/wreck_n.png"},
                 "sindri.tags": {"tags": ["wreck"]},
                 "sindri.script": script("scripts/wreck.decay", "Wreck", {"template": "prefabs/cargo.prefab"}),
+                "sindri.light2d.occluder": WRECK_OCCLUDER,
             },
         }],
     }
@@ -585,7 +699,8 @@ def main():
         "transform_3d": transform(0, 0, 0.2, 0, (0.9, 0.9)),
         "components": {
             "sindri.tags": {"tags": ["loose-cargo"]},
-            "sindri.sprite": {"texture": "textures/ship.png#crate", "layer": 4, "tint": [1, 1, 1, 1]},
+            "sindri.sprite": {"texture": "textures/ship.png#crate", "layer": 4, "tint": [1, 1, 1, 1],
+                              "normal_map": "textures/ship_n.png"},
             "sindri.animation.sprite": {
                 "clips": {kind: {"frames": ["crate" if kind == "scrap" else f"crate-{kind}"],
                                  "seconds_per_frame": 1.0, "looping": False}
@@ -599,14 +714,20 @@ def main():
     sunken = {"format_version": 1, "metadata": {"name": "Submerged wreck"}, "entities": [
         {"id": "sunken-wreck", "name": "Submerged wreck", "transform_3d": transform(0, 0, 0.05, 0, (6, 4)),
          "components": {"sindri.sprite": {"texture": "textures/wreck.png", "layer": 1,
-                            "tint": [0.22, 0.50, 0.48, 0.6]},
+                            "tint": [0.22, 0.50, 0.48, 0.6],
+                            # Seen through the brine: bent, rippled with light.
+                            "shader": "shaders/underwater.wgsl",
+                            "shader_params": [0.012, 0.35, 0.55, 0.7]},
                         "sindri.tags": {"tags": ["sunken-wreck"]}}},
         {"id": "wreck-float", "name": "Wreck float", "parent": "sunken-wreck",
          "transform_3d": transform(0.25, 0.25, 0.1, 0, (0.1, 0.15)),
          "components": {"sindri.shape": shape([0.9, 0.68, 0.3, 1], 7, 0.1)}},
         {"id": "float-light", "name": "Float light", "parent": "wreck-float",
          "transform_3d": transform(0, 0, 0.1, 0, (0.3, 0.3)),
-         "components": {"sindri.shape": shape([1, 0.91, 0.6, 1], 8, 0.1)}}
+         "components": {"sindri.shape": shape([1, 0.91, 0.6, 1], 8, 0.1),
+                        "sindri.light2d": light((1.0, 0.8, 0.42, 1.0), 0.0, 3.0, 1.5, 0.8),
+                        "sindri.script": script("scripts/daylight.decay", "Lamp",
+                                                {"by_day": 0.15, "by_night": 1.1, "flicker": 0.1})}}
     ]}
     (ROOT / "prefabs/sunken-wreck.prefab").write_text(json.dumps(sunken, indent=1) + "\n")
 
