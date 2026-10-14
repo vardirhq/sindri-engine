@@ -17,7 +17,7 @@ pub(crate) const SERVER_NOT_INITIALIZED: i64 = -32002;
 
 pub(crate) fn error(
     output: &mut impl Write,
-    id: Value,
+    id: &Value,
     code: i64,
     message: &str,
 ) -> io::Result<()> {
@@ -82,7 +82,7 @@ pub(crate) fn serve(input: &mut impl BufRead, output: &mut impl Write) -> io::Re
             Incoming::Message(message) => message,
             Incoming::Unparsable(problem) => {
                 eprintln!("decay-lsp: ignoring a message that is not JSON: {problem}");
-                error(output, Value::Null, PARSE_ERROR, &problem.to_string())?;
+                error(output, &Value::Null, PARSE_ERROR, &problem.to_string())?;
                 continue;
             }
         };
@@ -90,5 +90,5 @@ pub(crate) fn serve(input: &mut impl BufRead, output: &mut impl Write) -> io::Re
             break;
         }
     }
-    Ok(if server.shutdown { 0 } else { 1 })
+    Ok(i32::from(!server.shutdown))
 }

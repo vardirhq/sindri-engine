@@ -64,7 +64,7 @@ impl Server {
         match rpc::gate(message, self.initialized, self.shutdown) {
             rpc::Gate::Handle => {}
             rpc::Gate::Reject(code, reason) => {
-                rpc::error(output, id.unwrap_or(Value::Null), code, reason)?;
+                rpc::error(output, &id.unwrap_or(Value::Null), code, reason)?;
                 return Ok(true);
             }
             rpc::Gate::Drop => return Ok(true),
@@ -98,7 +98,7 @@ impl Server {
             _ => {
                 if let Some(id) = id {
                     let reason = format!("unsupported method {method:?}");
-                    rpc::error(output, id, rpc::METHOD_NOT_FOUND, &reason)?;
+                    rpc::error(output, &id, rpc::METHOD_NOT_FOUND, &reason)?;
                 }
             }
         }
@@ -566,10 +566,7 @@ fn main() -> io::Result<()> {
 fn run_server() -> io::Result<()> {
     let stdin = io::stdin();
     let stdout = io::stdout();
-    let code = rpc::serve(&mut stdin.lock(), &mut stdout.lock()).unwrap_or_else(|error| {
-        eprintln!("decay-lsp: {error}");
-        1
-    });
+    let code = rpc::serve(&mut stdin.lock(), &mut stdout.lock())?;
     if code != 0 {
         std::process::exit(code);
     }

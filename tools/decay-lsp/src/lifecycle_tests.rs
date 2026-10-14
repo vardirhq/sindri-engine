@@ -15,17 +15,17 @@ fn frame_raw(body: &str) -> Vec<u8> {
     format!("Content-Length: {}\r\n\r\n{body}", body.len()).into_bytes()
 }
 
-fn request(id: i64, method: &str, params: Value) -> Vec<u8> {
+fn request(id: i64, method: &str, params: &Value) -> Vec<u8> {
     frame(&json!({"jsonrpc":"2.0","id":id,"method":method,"params":params}))
 }
 
-fn notification(method: &str, params: Value) -> Vec<u8> {
+fn notification(method: &str, params: &Value) -> Vec<u8> {
     frame(&json!({"jsonrpc":"2.0","method":method,"params":params}))
 }
 
 fn initialize() -> Vec<u8> {
-    let mut stream = request(1, "initialize", json!({"capabilities":{}}));
-    stream.extend(notification("initialized", json!({})));
+    let mut stream = request(1, "initialize", &json!({"capabilities":{}}));
+    stream.extend(notification("initialized", &json!({})));
     stream
 }
 
@@ -60,8 +60,8 @@ fn error_code(messages: &[Value], id: i64) -> Option<i64> {
 fn shutdown_then_exit_exits_cleanly() {
     let (code, messages) = run(&[
         initialize(),
-        request(2, "shutdown", Value::Null),
-        notification("exit", Value::Null),
+        request(2, "shutdown", &Value::Null),
+        notification("exit", &Value::Null),
     ]);
     assert_eq!(code, 0);
     assert_eq!(reply(&messages, 2)["result"], Value::Null);
@@ -70,14 +70,14 @@ fn shutdown_then_exit_exits_cleanly() {
 
 #[test]
 fn exit_without_shutdown_exits_with_an_error_code() {
-    let (code, _) = run(&[initialize(), notification("exit", Value::Null)]);
+    let (code, _) = run(&[initialize(), notification("exit", &Value::Null)]);
     assert_eq!(code, 1);
 }
 
 #[test]
 fn input_closing_without_shutdown_is_an_unclean_exit() {
     assert_eq!(run(&[initialize()]).0, 1);
-    let (code, _) = run(&[initialize(), request(2, "shutdown", Value::Null)]);
+    let (code, _) = run(&[initialize(), request(2, "shutdown", &Value::Null)]);
     assert_eq!(code, 0);
 }
 
@@ -85,8 +85,8 @@ fn input_closing_without_shutdown_is_an_unclean_exit() {
 fn exit_stops_reading_further_messages() {
     let (_, messages) = run(&[
         initialize(),
-        notification("exit", Value::Null),
-        request(2, "textDocument/hover", json!({})),
+        notification("exit", &Value::Null),
+        request(2, "textDocument/hover", &json!({})),
     ]);
     assert!(messages.iter().all(|message| message["id"] != 2));
 }
@@ -104,10 +104,10 @@ fn initialize_advertises_the_implemented_features() {
 #[test]
 fn requests_before_initialize_are_refused_and_notifications_dropped() {
     let (_, messages) = run(&[
-        request(5, "textDocument/hover", json!({})),
+        request(5, "textDocument/hover", &json!({})),
         notification(
             "textDocument/didOpen",
-            json!({"textDocument":{"uri":"file:///a.decay","text":"fn (","version":1}}),
+            &json!({"textDocument":{"uri":"file:///a.decay","text":"fn (","version":1}}),
         ),
     ]);
     assert_eq!(error_code(&messages, 5), Some(rpc::SERVER_NOT_INITIALIZED));
@@ -116,7 +116,7 @@ fn requests_before_initialize_are_refused_and_notifications_dropped() {
 
 #[test]
 fn a_second_initialize_is_invalid() {
-    let (_, messages) = run(&[initialize(), request(2, "initialize", json!({}))]);
+    let (_, messages) = run(&[initialize(), request(2, "initialize", &json!({}))]);
     assert_eq!(error_code(&messages, 2), Some(rpc::INVALID_REQUEST));
 }
 
@@ -124,11 +124,11 @@ fn a_second_initialize_is_invalid() {
 fn requests_after_shutdown_are_invalid() {
     let (_, messages) = run(&[
         initialize(),
-        request(2, "shutdown", Value::Null),
-        request(3, "textDocument/hover", json!({})),
+        request(2, "shutdown", &Value::Null),
+        request(3, "textDocument/hover", &json!({})),
         notification(
             "textDocument/didOpen",
-            json!({"textDocument":{"uri":"file:///a.decay","text":"fn (","version":1}}),
+            &json!({"textDocument":{"uri":"file:///a.decay","text":"fn (","version":1}}),
         ),
     ]);
     assert_eq!(error_code(&messages, 3), Some(rpc::INVALID_REQUEST));
@@ -143,11 +143,11 @@ fn requests_after_shutdown_are_invalid() {
 fn unknown_requests_are_method_not_found_and_unknown_notifications_ignored() {
     let (code, messages) = run(&[
         initialize(),
-        request(2, "textDocument/rename", json!({})),
-        notification("$/setTrace", json!({"value":"off"})),
-        notification("workspace/didChangeConfiguration", json!({})),
-        request(3, "shutdown", Value::Null),
-        notification("exit", Value::Null),
+        request(2, "textDocument/rename", &json!({})),
+        notification("$/setTrace", &json!({"value":"off"})),
+        notification("workspace/didChangeConfiguration", &json!({})),
+        request(3, "shutdown", &Value::Null),
+        notification("exit", &Value::Null),
     ]);
     assert_eq!(error_code(&messages, 2), Some(rpc::METHOD_NOT_FOUND));
     assert_eq!(code, 0);
@@ -161,8 +161,8 @@ fn malformed_json_is_a_parse_error_and_the_server_carries_on() {
     let (code, messages) = run(&[
         initialize(),
         frame_raw("{\"id\": 2, \"method\""),
-        request(3, "shutdown", Value::Null),
-        notification("exit", Value::Null),
+        request(3, "shutdown", &Value::Null),
+        notification("exit", &Value::Null),
     ]);
     let parse_error = messages
         .iter()
@@ -197,9 +197,12 @@ fn a_document_publishes_diagnostics_and_clears_them_on_close() {
         initialize(),
         notification(
             "textDocument/didOpen",
-            json!({"textDocument":{"uri":uri,"text":"script Broken { fn update( }","version":1}}),
+            &json!({"textDocument":{"uri":uri,"text":"script Broken { fn update( }","version":1}}),
         ),
-        notification("textDocument/didClose", json!({"textDocument":{"uri":uri}})),
+        notification(
+            "textDocument/didClose",
+            &json!({"textDocument":{"uri":uri}}),
+        ),
     ]);
     let published = messages
         .iter()
@@ -225,9 +228,9 @@ fn completion_and_hover_offer_every_reserved_keyword() {
         initialize(),
         notification(
             "textDocument/didOpen",
-            json!({"textDocument":{"uri":uri,"text":source,"version":1}}),
+            &json!({"textDocument":{"uri":uri,"text":source,"version":1}}),
         ),
-        request(2, "textDocument/completion", position),
+        request(2, "textDocument/completion", &position),
     ]);
     let labels = reply(&messages, 2)["result"]
         .as_array()
@@ -248,12 +251,12 @@ fn completion_and_hover_offer_every_reserved_keyword() {
         initialize(),
         notification(
             "textDocument/didOpen",
-            json!({"textDocument":{"uri":uri,"text":source,"version":1}}),
+            &json!({"textDocument":{"uri":uri,"text":source,"version":1}}),
         ),
         request(
             2,
             "textDocument/hover",
-            json!({"textDocument":{"uri":uri},"position":{"line":0,"character":character}}),
+            &json!({"textDocument":{"uri":uri},"position":{"line":0,"character":character}}),
         ),
     ]);
     assert_eq!(
