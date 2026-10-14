@@ -82,6 +82,7 @@ struct PanelContext {
     profiles: Vec<String>,
     prefabs: Vec<String>,
     tile_sets: Vec<String>,
+    shaders: Vec<String>,
     pictures: super::thumbnails::Pictures,
     block_sets: TileSetBindings,
     /// What the scene's physics world calls its collision layers.
@@ -134,6 +135,7 @@ impl PanelContext {
             profiles: &self.profiles,
             prefabs: &self.prefabs,
             tile_sets: &self.tile_sets,
+            shaders: &self.shaders,
             pictures: &self.pictures,
             block_sets: Some(&self.block_sets),
             layers: &self.layers,
@@ -385,6 +387,7 @@ impl EditorApp {
             tile_sets: std::iter::once(sindri_core::BUILTIN_BLOCKS.to_owned())
                 .chain(self.project.tile_sets())
                 .collect(),
+            shaders: self.project.shaders(),
             pictures: self.thumbnails.pictures().clone(),
             block_sets: blocks::named_block_set(components, self.textures.tile_sets()),
             animation_sprites: animation_texture

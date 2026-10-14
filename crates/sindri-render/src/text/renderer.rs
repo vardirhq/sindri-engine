@@ -17,6 +17,7 @@ use super::TextError;
 use super::instance::TextInstance;
 use super::layout::{LaidOut, laid_out, layout_origin, line_alignment, outer_corner};
 use super::options::TextWrap;
+use super::rich::rich_spans;
 
 /// One glyph batch, ready to draw through the pass's own camera.
 pub struct GlyphQuads<'a> {
@@ -133,6 +134,14 @@ impl TextRenderer {
             wrapped: instance.wraps(),
             scale,
             block: [width * scale, height * scale],
+            faces: if instance.rich {
+                rich_spans(&instance.text)
+                    .into_iter()
+                    .map(|span| span.color)
+                    .collect()
+            } else {
+                Vec::new()
+            },
         }
     }
 
@@ -221,12 +230,36 @@ impl TextRenderer {
             // over the authored size.
             attrs = attrs.letter_spacing(instance.letter_spacing / size);
         }
-        buffer.set_text(
-            &instance.case.applied(&instance.text),
-            &attrs,
-            Shaping::Advanced,
-            None,
-        );
+        if instance.rich {
+            let spans: Vec<_> = rich_spans(&instance.text)
+                .into_iter()
+                .map(|span| (instance.case.applied(&span.text).into_owned(), span))
+                .collect();
+            // Each span's index rides on its glyphs as metadata, one past it so
+            // that cosmic-text's own zero still means "the string's color".
+            buffer.set_rich_text(
+                spans.iter().enumerate().map(|(index, (text, span))| {
+                    let mut own = attrs.clone().metadata(index + 1);
+                    if span.bold {
+                        own = own.weight(Weight::BOLD);
+                    }
+                    if span.italic {
+                        own = own.style(Style::Italic);
+                    }
+                    (text.as_str(), own)
+                }),
+                &attrs,
+                Shaping::Advanced,
+                None,
+            );
+        } else {
+            buffer.set_text(
+                &instance.case.applied(&instance.text),
+                &attrs,
+                Shaping::Advanced,
+                None,
+            );
+        }
 
         // Line alignment is per line rather than per buffer in cosmic-text, and
         // it only means anything with a width to align within.
@@ -339,7 +372,7 @@ impl TextRenderer {
                     origin[0] + instance.shadow.offset[0],
                     origin[1] + instance.shadow.offset[1],
                 ],
-                instance.shadow.color,
+                |_| instance.shadow.color,
             );
         }
 
@@ -356,12 +389,12 @@ impl TextRenderer {
                 }
             },
             origin,
-            instance.color,
+            |span| face_color(laid, instance.color, span),
         );
     }
 
-    /// Every drawn glyph of one string, placed from `origin` and colored
-    /// `face`, with `adjust` applied to each.
+    /// Every drawn glyph of one string, placed from `origin` and colored by
+    /// `face` from the span it is in, with `adjust` applied to each.
     fn push_glyphs(
         &mut self,
         quads: &mut Vec<GlyphInstance>,
@@ -369,9 +402,15 @@ impl TextRenderer {
         laid: &LaidOut,
         adjust: impl Fn(GlyphInstance) -> GlyphInstance,
         origin: [f32; 2],
-        face: [f32; 4],
+        face: impl Fn(usize) -> [f32; 4],
     ) {
         let scale = laid.scale;
+        // The whole string, shadow included, turns about the point it was
+        // placed at, so the anchor stays where the entity is.
+        let pivot = Vec3::new(instance.position[0], instance.position[1], 0.0);
+        let turn = Mat4::from_translation(pivot)
+            * Mat4::from_rotation_z(instance.rotation)
+            * Mat4::from_translation(-pivot);
         let mut drawn = 0_usize;
         for run in laid.buffer.layout_runs() {
             for glyph in run.glyphs {
@@ -401,9 +440,10 @@ impl TextRenderer {
                     origin[0] + (left + slot.size[0] * 0.5) * scale,
                     origin[1] - (top + slot.size[1] * 0.5) * scale,
                 ];
-                let model = Mat4::from_translation(Vec3::new(centre[0], centre[1], 0.0))
+                let model = turn
+                    * Mat4::from_translation(Vec3::new(centre[0], centre[1], 0.0))
                     * Mat4::from_scale(Vec3::new(size[0], size[1], 1.0));
-                let quad = GlyphInstance::new(model, slot.uv, face);
+                let quad = GlyphInstance::new(model, slot.uv, face(glyph.metadata));
                 let quad = if slot.colored {
                     quad.colored()
                 } else {
@@ -420,5 +460,17 @@ impl TextRenderer {
     #[must_use]
     pub fn glyph_count(&self) -> usize {
         self.atlas.glyph_count()
+    }
+}
+
+/// The color a glyph is drawn in: its span's own, if it has one, faded by the
+/// string's alpha so a whole rich line still fades as one.
+fn face_color(laid: &LaidOut, string: [f32; 4], span: usize) -> [f32; 4] {
+    match span
+        .checked_sub(1)
+        .and_then(|index| laid.faces.get(index).copied().flatten())
+    {
+        Some([r, g, b, a]) => [r, g, b, a * string[3]],
+        None => string,
     }
 }

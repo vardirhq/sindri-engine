@@ -95,6 +95,16 @@ const KNOWN: &[Known] = &[
         icon: icons::LIGHT,
     },
     Known {
+        type_name: "sindri.light2d",
+        family: Family::Rendering,
+        icon: icons::SCENE_LIGHTING,
+    },
+    Known {
+        type_name: "sindri.light2d.occluder",
+        family: Family::Rendering,
+        icon: icons::COLLIDER,
+    },
+    Known {
         type_name: "sindri.environment",
         family: Family::Rendering,
         icon: icons::EFFECT,
@@ -208,6 +218,21 @@ const KNOWN: &[Known] = &[
         type_name: "sindri.effect.burst",
         family: Family::Rendering,
         icon: icons::EFFECT,
+    },
+    Known {
+        type_name: "sindri.particles",
+        family: Family::Rendering,
+        icon: icons::EFFECT,
+    },
+    Known {
+        type_name: "sindri.sprite_mask",
+        family: Family::Rendering,
+        icon: icons::SPRITE,
+    },
+    Known {
+        type_name: "sindri.text",
+        family: Family::Rendering,
+        icon: icons::TEXT,
     },
     Known {
         type_name: "sindri.physics3d.rigid_body",

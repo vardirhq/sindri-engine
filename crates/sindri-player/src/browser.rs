@@ -81,6 +81,8 @@ pub(crate) struct ProjectLoaders {
     profiles: AssetLoader<ProfileAssetDecoder>,
     styles: AssetLoader<TextAssetDecoder>,
     style_ids: Vec<String>,
+    /// Sprite shaders arrive through the same text loader as stylesheets.
+    shader_ids: Vec<String>,
     /// Kept, because what was asked for is also what has to be collected.
     manifest: AssetManifest,
 }
@@ -173,7 +175,12 @@ impl ProjectLoaders {
             .filter(|id| id.as_str().ends_with(".weave"))
             .map(|id| id.as_str().to_owned())
             .collect::<Vec<_>>();
-        for id in &style_ids {
+        let shader_ids = manifest
+            .ids_of(AssetKind::Other)
+            .filter(|id| id.as_str().ends_with(".wgsl"))
+            .map(|id| id.as_str().to_owned())
+            .collect::<Vec<_>>();
+        for id in style_ids.iter().chain(&shader_ids) {
             styles.request(AssetId::new(id.as_str())?)?;
         }
 
@@ -184,6 +191,7 @@ impl ProjectLoaders {
             profiles,
             styles,
             style_ids,
+            shader_ids,
             models,
             textures,
             fonts,
@@ -273,6 +281,11 @@ impl ProjectLoaders {
             .into_iter()
             .map(|(_, sheet)| sheet)
             .collect();
+        let shaders = self
+            .shader_ids
+            .iter()
+            .map(|id| loaded(&self.styles, id).map(|source| (id.clone(), source)))
+            .collect::<Result<Vec<_>, _>>()?;
         let asset_count = self.manifest.len();
         Ok(Some(ProjectAssets {
             scenes,
@@ -286,6 +299,7 @@ impl ProjectLoaders {
             sheets,
             tile_sets,
             stylesheets,
+            shaders,
             asset_count,
         }))
     }

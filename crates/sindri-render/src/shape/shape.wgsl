@@ -37,6 +37,8 @@ struct InstanceInput {
     @location(11) points_1: vec4<f32>,
     @location(12) points_2: vec4<f32>,
     @location(13) points_3: vec4<f32>,
+    // x is 1 when 2D lights light this shape.
+    @location(14) flags: vec4<f32>,
 };
 
 struct VertexOutput {
@@ -50,6 +52,8 @@ struct VertexOutput {
     @location(6) points_1: vec4<f32>,
     @location(7) points_2: vec4<f32>,
     @location(8) points_3: vec4<f32>,
+    @location(9) world: vec3<f32>,
+    @location(10) @interpolate(flat) flags: vec4<f32>,
 };
 
 const TAU: f32 = 6.283185307179586;
@@ -91,8 +95,10 @@ fn vs_main(vertex: VertexInput, instance: InstanceInput) -> VertexOutput {
     let corner = vertex.position.xy * (1.0 + bleed * 2.0);
 
     var out: VertexOutput;
-    out.clip_position =
-        camera.view_projection * model * vec4<f32>(corner, vertex.position.z, 1.0);
+    let world = model * vec4<f32>(corner, vertex.position.z, 1.0);
+    out.clip_position = camera.view_projection * world;
+    out.world = world.xyz;
+    out.flags = instance.flags;
     // Shape space: the shape itself still spans -0.5 to 0.5, so every distance
     // below is a fraction of the shape's own size and scales with it. Past that
     // is the bleed.
@@ -323,5 +329,9 @@ fn fs_main(in: VertexOutput) -> @location(0) vec4<f32> {
     if color.a <= 0.0 {
         discard;
     }
-    return vec4<f32>(color.rgb * color.a, color.a);
+    var rgb = color.rgb;
+    if in.flags.x > 0.5 && sindri_lighting_2d_on() {
+        rgb = rgb * sindri_light_2d(in.world.xy, vec3<f32>(0.0, 0.0, 1.0), false);
+    }
+    return vec4<f32>(rgb * color.a, color.a);
 }

@@ -60,10 +60,12 @@ mod hierarchy;
 mod history_view;
 mod inspector_panel;
 mod instances;
+mod light2d_gizmo;
 mod light_gizmo;
 mod occlusion_view;
 mod overlay;
 mod palette_view;
+mod particle_preview;
 mod pointer;
 mod prefab_authoring;
 pub(crate) mod prefab_drop;
@@ -88,6 +90,7 @@ mod scene_menu;
 mod scene_new;
 mod shape_gizmo;
 mod shortcuts;
+mod slice_guides;
 mod slicer_view;
 mod sprite_sheet_view;
 mod startup;
@@ -427,6 +430,8 @@ impl EditorApp {
 struct Stillness {
     animations: SpriteAnimations,
     effects: sindri_scene::Effects2d,
+    /// The selected emitter, playing in `effects` while nothing else does.
+    preview: particle_preview::ParticlePreview,
     screen_ui: ScreenUi,
 }
 

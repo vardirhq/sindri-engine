@@ -249,6 +249,14 @@
           "height_falloff": 0.0,
           "start": 24.0
         },
+        "lighting_2d": {
+          "ambient": [
+            0.25,
+            0.25,
+            0.3
+          ],
+          "enabled": false
+        },
         "post_process": {
           "contrast": 1.0,
           "exposure": 0.0,
@@ -300,6 +308,14 @@
           "height": 0.0,
           "height_falloff": 0.0,
           "start": 24.0
+        },
+        "lighting_2d": {
+          "ambient": [
+            0.25,
+            0.25,
+            0.3
+          ],
+          "enabled": false
         },
         "post_process": {
           "contrast": 1.0,
@@ -374,6 +390,9 @@
           "kind": "range",
           "max": null,
           "min": 0.0
+        },
+        "lighting_2d.ambient": {
+          "kind": "color"
         },
         "post_process.contrast": {
           "kind": "range",
@@ -549,6 +568,113 @@
       "addable": true,
       "apply": {},
       "default_payload": {
+        "color": [
+          1.0,
+          0.8500000238418579,
+          0.6000000238418579,
+          1.0
+        ],
+        "enabled": true,
+        "falloff": 1.5,
+        "height": 1.0,
+        "intensity": 1.0,
+        "radius": 4.0,
+        "shadow_reach": 0.10000000149011612,
+        "shadows": false
+      },
+      "display_name": "Light 2D",
+      "fields": {
+        "color": [
+          1.0,
+          0.8500000238418579,
+          0.6000000238418579,
+          1.0
+        ],
+        "enabled": true,
+        "falloff": 1.5,
+        "height": 1.0,
+        "intensity": 1.0,
+        "radius": 4.0,
+        "shadow_reach": 0.10000000149011612,
+        "shadows": false
+      },
+      "meanings": {
+        "color": {
+          "kind": "color"
+        },
+        "falloff": {
+          "kind": "range",
+          "max": null,
+          "min": 0.01
+        },
+        "height": {
+          "kind": "range",
+          "max": null,
+          "min": 0.0
+        },
+        "intensity": {
+          "kind": "range",
+          "max": null,
+          "min": 0.0
+        },
+        "radius": {
+          "kind": "range",
+          "max": null,
+          "min": 0.01
+        },
+        "shadow_reach": {
+          "kind": "range",
+          "max": null,
+          "min": 0.0
+        }
+      },
+      "schema_version": 1,
+      "type_name": "sindri.light2d"
+    },
+    {
+      "addable": true,
+      "apply": {},
+      "default_payload": {
+        "enabled": true,
+        "points": [],
+        "shape": "box",
+        "size": [
+          1.0,
+          1.0
+        ]
+      },
+      "display_name": "Light Occluder 2D",
+      "fields": {
+        "enabled": true,
+        "points": [],
+        "shape": "box",
+        "size": [
+          1.0,
+          1.0
+        ]
+      },
+      "meanings": {
+        "shape": {
+          "kind": "choice",
+          "options": [
+            "box",
+            "polygon",
+            "tilemap"
+          ]
+        },
+        "size": {
+          "kind": "range",
+          "max": null,
+          "min": 0.01
+        }
+      },
+      "schema_version": 1,
+      "type_name": "sindri.light2d.occluder"
+    },
+    {
+      "addable": true,
+      "apply": {},
+      "default_payload": {
         "layer": 0,
         "primitive": "cube",
         "surface": null,
@@ -582,6 +708,157 @@
       "meanings": {},
       "schema_version": 1,
       "type_name": "sindri.model"
+    },
+    {
+      "addable": true,
+      "apply": {},
+      "default_payload": {
+        "colors": [
+          [
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          [
+            1.0,
+            1.0,
+            1.0,
+            0.0
+          ]
+        ],
+        "direction": 90.0,
+        "drag": 0.0,
+        "gravity": [
+          0.0,
+          0.0
+        ],
+        "layer": 0,
+        "lifetime": 1.0,
+        "lifetime_spread": 0.20000000298023224,
+        "max": 200,
+        "offset": [
+          0.0,
+          0.0
+        ],
+        "playing": true,
+        "random_rotation": false,
+        "rate": 10.0,
+        "shape": "point",
+        "shape_size": [
+          1.0,
+          1.0
+        ],
+        "size": 0.10000000149011612,
+        "size_end": 0.10000000149011612,
+        "space": "world",
+        "speed": 2.0,
+        "speed_spread": 0.30000001192092896,
+        "spin": 0.0,
+        "spread": 30.0,
+        "texture": "procedural:checkerboard"
+      },
+      "display_name": "Particles",
+      "fields": {
+        "colors": [
+          [
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          [
+            1.0,
+            1.0,
+            1.0,
+            0.0
+          ]
+        ],
+        "direction": 90.0,
+        "drag": 0.0,
+        "gravity": [
+          0.0,
+          0.0
+        ],
+        "layer": 0,
+        "lifetime": 1.0,
+        "lifetime_spread": 0.20000000298023224,
+        "max": 200,
+        "offset": [
+          0.0,
+          0.0
+        ],
+        "playing": true,
+        "random_rotation": false,
+        "rate": 10.0,
+        "shape": "point",
+        "shape_size": [
+          1.0,
+          1.0
+        ],
+        "size": 0.10000000149011612,
+        "size_end": 0.10000000149011612,
+        "space": "world",
+        "speed": 2.0,
+        "speed_spread": 0.30000001192092896,
+        "spin": 0.0,
+        "spread": 30.0,
+        "texture": "procedural:checkerboard"
+      },
+      "meanings": {
+        "drag": {
+          "kind": "range",
+          "max": null,
+          "min": 0.0
+        },
+        "lifetime": {
+          "kind": "range",
+          "max": null,
+          "min": 0.01
+        },
+        "rate": {
+          "kind": "range",
+          "max": null,
+          "min": 0.0
+        },
+        "shape": {
+          "kind": "choice",
+          "options": [
+            "point",
+            "circle",
+            "box",
+            "ring"
+          ]
+        },
+        "size": {
+          "kind": "range",
+          "max": null,
+          "min": 0.0
+        },
+        "size_end": {
+          "kind": "range",
+          "max": null,
+          "min": 0.0
+        },
+        "space": {
+          "kind": "choice",
+          "options": [
+            "world",
+            "local"
+          ]
+        },
+        "speed": {
+          "kind": "range",
+          "max": null,
+          "min": 0.0
+        },
+        "texture": {
+          "asset": "texture",
+          "kind": "asset"
+        }
+      },
+      "schema_version": 1,
+      "type_name": "sindri.particles"
     },
     {
       "addable": true,
@@ -1439,6 +1716,7 @@
       "apply": {},
       "default_payload": {
         "billboard": false,
+        "border_scale": 0.0625,
         "color_transform": {
           "multiply": [
             1.0,
@@ -1453,18 +1731,31 @@
             0.0
           ]
         },
+        "draw": "simple",
         "layer": 0,
+        "mask": "none",
+        "mask_name": "",
+        "normal_map": "",
+        "shader": "",
+        "shader_params": [
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
         "texture": "procedural:checkerboard",
         "tint": [
           1.0,
           1.0,
           1.0,
           1.0
-        ]
+        ],
+        "unlit": false
       },
       "display_name": "Sprite",
       "fields": {
         "billboard": false,
+        "border_scale": 0.0625,
         "color_transform": {
           "multiply": [
             1.0,
@@ -1479,16 +1770,51 @@
             0.0
           ]
         },
+        "draw": "simple",
         "layer": 0,
+        "mask": "none",
+        "mask_name": "",
+        "normal_map": "",
+        "shader": "",
+        "shader_params": [
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
         "texture": "procedural:checkerboard",
         "tint": [
           1.0,
           1.0,
           1.0,
           1.0
-        ]
+        ],
+        "unlit": false
       },
       "meanings": {
+        "draw": {
+          "kind": "choice",
+          "options": [
+            "simple",
+            "sliced"
+          ]
+        },
+        "mask": {
+          "kind": "choice",
+          "options": [
+            "none",
+            "inside",
+            "outside"
+          ]
+        },
+        "normal_map": {
+          "asset": "texture",
+          "kind": "asset"
+        },
+        "shader": {
+          "asset": "shader",
+          "kind": "asset"
+        },
         "texture": {
           "asset": "texture",
           "kind": "asset"
@@ -1504,6 +1830,27 @@
       "addable": true,
       "apply": {},
       "default_payload": {
+        "name": "",
+        "texture": "procedural:checkerboard"
+      },
+      "display_name": "Sprite Mask",
+      "fields": {
+        "name": "",
+        "texture": "procedural:checkerboard"
+      },
+      "meanings": {
+        "texture": {
+          "asset": "texture",
+          "kind": "asset"
+        }
+      },
+      "schema_version": 1,
+      "type_name": "sindri.sprite_mask"
+    },
+    {
+      "addable": true,
+      "apply": {},
+      "default_payload": {
         "tags": []
       },
       "display_name": "Tags",
@@ -1513,6 +1860,123 @@
       "meanings": {},
       "schema_version": 1,
       "type_name": "sindri.tags"
+    },
+    {
+      "addable": false,
+      "apply": {},
+      "default_payload": null,
+      "display_name": "Text",
+      "fields": {
+        "anchor": "center",
+        "auto_size": {
+          "enabled": false,
+          "min": 0.1
+        },
+        "bold": false,
+        "bounds": [
+          0.0,
+          0.0
+        ],
+        "case": "as_written",
+        "color": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        "follow_rotation": false,
+        "font": "",
+        "font_size": 0.5,
+        "italic": false,
+        "layer": 0,
+        "letter_spacing": 0.0,
+        "line_align": "follow",
+        "line_height": 0.6,
+        "outline": {
+          "color": [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          "width": 0.0
+        },
+        "rich": false,
+        "shadow": {
+          "color": [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          "offset": [
+            0.0,
+            0.0
+          ],
+          "softness": 0.0
+        },
+        "text": "Text",
+        "values": [],
+        "visible": -1.0,
+        "wrap": "none"
+      },
+      "meanings": {
+        "anchor": {
+          "kind": "choice",
+          "options": [
+            "center",
+            "top",
+            "bottom",
+            "left",
+            "right",
+            "top_left",
+            "top_right",
+            "bottom_left",
+            "bottom_right"
+          ]
+        },
+        "case": {
+          "kind": "choice",
+          "options": [
+            "as_written",
+            "upper",
+            "lower"
+          ]
+        },
+        "color": {
+          "kind": "color"
+        },
+        "font": {
+          "asset": "font",
+          "kind": "asset"
+        },
+        "line_align": {
+          "kind": "choice",
+          "options": [
+            "follow",
+            "left",
+            "center",
+            "right",
+            "justify"
+          ]
+        },
+        "outline.color": {
+          "kind": "color"
+        },
+        "shadow.color": {
+          "kind": "color"
+        },
+        "wrap": {
+          "kind": "choice",
+          "options": [
+            "none",
+            "word",
+            "glyph"
+          ]
+        }
+      },
+      "schema_version": 1,
+      "type_name": "sindri.text"
     },
     {
       "addable": true,
@@ -1593,6 +2057,7 @@
       "default_payload": {
         "columns": 1,
         "layer": 0,
+        "normal_map": "",
         "palette": [],
         "projection": "orthogonal",
         "rows": 1,
@@ -1616,6 +2081,7 @@
       "fields": {
         "columns": 1,
         "layer": 0,
+        "normal_map": "",
         "palette": [],
         "projection": "orthogonal",
         "rows": 1,
@@ -1636,6 +2102,10 @@
         ]
       },
       "meanings": {
+        "normal_map": {
+          "asset": "texture",
+          "kind": "asset"
+        },
         "projection": {
           "kind": "choice",
           "options": [
@@ -1857,6 +2327,8 @@
       "apply": {},
       "default_payload": {
         "anchor": "center",
+        "border_scale": 0.002777777777777778,
+        "draw": "simple",
         "fill": {
           "amount": 1.0,
           "from": "left"
@@ -1873,6 +2345,8 @@
       "display_name": "UI Image",
       "fields": {
         "anchor": "center",
+        "border_scale": 0.002777777777777778,
+        "draw": "simple",
         "fill": {
           "amount": 1.0,
           "from": "left"
@@ -1899,6 +2373,13 @@
             "top_right",
             "bottom_left",
             "bottom_right"
+          ]
+        },
+        "draw": {
+          "kind": "choice",
+          "options": [
+            "simple",
+            "sliced"
           ]
         },
         "texture": {
@@ -2212,6 +2693,7 @@
           ],
           "width": 0.0
         },
+        "rich": false,
         "shadow": {
           "color": [
             0.0,

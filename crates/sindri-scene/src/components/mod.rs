@@ -14,9 +14,11 @@ mod environment;
 mod environment_check;
 mod grid;
 mod light;
+mod light2d;
 mod mesh;
 mod model;
 mod sprite;
+mod sprite_mask;
 mod tile_volume;
 mod tilemap;
 mod ui;
@@ -25,6 +27,7 @@ mod ui_text_options;
 pub mod ui_text_template;
 mod voxel_terrain;
 mod voxel_world;
+mod world_text;
 
 pub use camera::{
     CameraBehaviorComponent, CameraBounds, CameraComponent, CameraFit, CameraFollow, CameraShake,
@@ -43,9 +46,14 @@ pub use light::{
     LightComponent, LightError, LightKind, Sun, default_sun_transform, light_direction, lights_in,
     sun_in,
 };
+pub use light2d::{
+    EnvironmentLighting2d, Light2dComponent, Light2dError, Light2dOccluderComponent, OccluderShape,
+    outline,
+};
 pub use mesh::{MeshComponent, MeshPrimitive};
 pub use model::ModelComponent;
-pub use sprite::{SpriteColorTransform, SpriteComponent};
+pub use sprite::{ImageDraw, SpriteColorTransform, SpriteComponent};
+pub use sprite_mask::{MaskInteraction, SpriteMaskComponent};
 pub use tile_volume::{
     TileCellDocument, TileGridComponent, TileGridError, TileSpace, TileVolumeComponent,
     TileVolumeError, TileVolumeIndex, cell_to_local_in,
@@ -63,6 +71,7 @@ pub use voxel_world::{
     VoxelBlock, VoxelEdit, VoxelGeneratorDocument, VoxelMapFlood, VoxelMaterialDocument, VoxelView,
     VoxelWorldComponent,
 };
+pub use world_text::TextComponent;
 
 /// The tint a component that does not name one draws with.
 ///

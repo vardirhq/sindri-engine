@@ -12,6 +12,7 @@ mod frustum;
 mod meanings;
 mod mesh;
 mod model;
+mod nine_slice;
 pub use model::referenced_models;
 mod physics3d_registry;
 mod physics_registry;
@@ -21,8 +22,10 @@ mod sprite;
 mod text;
 mod tile_volume;
 mod widget_registry;
+mod world_text;
 pub(crate) use tile_volume::face_is_occluded;
 mod lighting;
+mod lighting_2d;
 mod tilemap;
 mod tolerance;
 mod ui;
@@ -50,7 +53,7 @@ use sindri_core::{
     SceneDocument, SpriteRefError, Transform3D, UnknownComponentPolicy, World,
 };
 use sindri_render::{
-    ClearOperations, ExtractedFrame, FramePlanError, PreparedFrame, TextError,
+    ClearOperations, ExtractedFrame, FramePlanError, PreparedFrame, SpriteEnvironment, TextError,
     TransparentOrderError, UvRectError, Viewport,
 };
 use thiserror::Error;
@@ -147,6 +150,10 @@ pub enum SceneExtractError {
     InvalidCameraPan,
     #[error("a sprite's color transform must be finite")]
     InvalidColorTransform,
+    #[error("a sprite's shader parameters must be finite")]
+    InvalidShaderParams,
+    #[error(transparent)]
+    Light2d(#[from] crate::Light2dError),
     #[error(transparent)]
     UvRect(#[from] UvRectError),
     #[error(transparent)]
@@ -314,6 +321,10 @@ impl SceneExtractor {
         }
         self.begin_frame();
         let mut frame = ExtractedFrame::new(viewport, environment_clear(self.environment(world)?));
+        frame.set_sprite_environment(SpriteEnvironment {
+            time: seconds,
+            lighting: self.lighting_2d(world, &cameras)?,
+        });
         self.push_meshes(world, &cameras, textures, &mut frame)?;
         self.push_models(world, &cameras, &mut frame)?;
         self.push_voxel_worlds(world, &cameras, textures, tile_sets, seconds, &mut frame)?;
@@ -338,6 +349,7 @@ impl SceneExtractor {
             &mut frame,
         )?;
         self.push_world_shapes(world, &cameras, &mut frame)?;
+        self.push_world_text(world, &cameras, &mut frame)?;
         self.push_shapes(world, &cameras, &hierarchy, &mut frame)?;
         self.push_text(world, &cameras, &hierarchy, &mut frame)?;
         Ok(frame.prepare()?)
@@ -377,6 +389,10 @@ impl SceneExtractor {
 
         self.begin_frame();
         let mut frame = ExtractedFrame::new(viewport, environment_clear(self.environment(world)?));
+        frame.set_sprite_environment(SpriteEnvironment {
+            time: seconds,
+            lighting: self.lighting_2d(world, &cameras)?,
+        });
         self.push_meshes(world, &cameras, textures, &mut frame)?;
         self.push_models(world, &cameras, &mut frame)?;
         self.push_voxel_worlds(world, &cameras, textures, tile_sets, seconds, &mut frame)?;
@@ -401,6 +417,7 @@ impl SceneExtractor {
             &mut frame,
         )?;
         self.push_world_shapes(world, &cameras, &mut frame)?;
+        self.push_world_text(world, &cameras, &mut frame)?;
         self.push_shapes(world, &cameras, &hierarchy, &mut frame)?;
         self.push_text(world, &cameras, &hierarchy, &mut frame)?;
         Ok(frame.prepare()?)

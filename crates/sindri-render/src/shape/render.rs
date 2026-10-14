@@ -15,7 +15,10 @@ use std::borrow::Cow;
 use glam::Mat4;
 use wgpu::util::DeviceExt;
 
-use crate::{DepthTarget, MeshBuffers, SpriteBlendMode, TexturedVertex};
+use crate::light2d::{LIGHT_2D_WGSL, Lights2dGpu};
+use crate::{
+    DepthTarget, Lighting2d, MeshBuffers, SpriteBlendMode, SpriteEnvironment, TexturedVertex,
+};
 
 use super::instance::{ShapeInstance, ShapeUniform};
 
@@ -53,6 +56,9 @@ pub struct ShapeRenderer {
     batches: Vec<Batch>,
     next: usize,
     clip: Option<[u32; 4]>,
+    /// The frame's 2D lights, uploaded on the frame's first batch.
+    lighting: Option<Lighting2d>,
+    lights: Lights2dGpu,
 }
 
 impl ShapeRenderer {
@@ -65,7 +71,7 @@ impl ShapeRenderer {
         let bind_group_layout = create_bind_group_layout(device);
         let shader = device.create_shader_module(wgpu::ShaderModuleDescriptor {
             label: Some("Sindri shape shader"),
-            source: wgpu::ShaderSource::Wgsl(Cow::Borrowed(SHADER)),
+            source: wgpu::ShaderSource::Wgsl(Cow::Owned(format!("{SHADER}\n{LIGHT_2D_WGSL}"))),
         });
         let layout = device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
             label: Some("Sindri shape pipeline layout"),
@@ -126,7 +132,14 @@ impl ShapeRenderer {
             batches: Vec::new(),
             next: 0,
             clip: None,
+            lighting: None,
+            lights: Lights2dGpu::new(device),
         }
+    }
+
+    /// What every shape in the frame being encoded shares: its 2D lights.
+    pub fn set_environment(&mut self, environment: &SpriteEnvironment) {
+        self.lighting.clone_from(&environment.lighting);
     }
 
     /// Starts a submission, so the next batch takes the first slot again.
@@ -158,6 +171,7 @@ impl ShapeRenderer {
         if instance_count == 0 {
             return Ok(());
         }
+        self.lights.write(queue, self.lighting.as_ref());
         let slot = self.reserve(device, instance_count)?;
         let batch = &self.batches[slot];
         queue.write_buffer(
@@ -213,13 +227,18 @@ impl ShapeRenderer {
                 }),
                 usage: wgpu::BufferUsages::UNIFORM | wgpu::BufferUsages::COPY_DST,
             });
+            let [light_uniform, shadow_map] = self.lights.entries();
             let bind_group = device.create_bind_group(&wgpu::BindGroupDescriptor {
                 label: Some("Sindri shape bind group"),
                 layout: &self.bind_group_layout,
-                entries: &[wgpu::BindGroupEntry {
-                    binding: 0,
-                    resource: uniform.as_entire_binding(),
-                }],
+                entries: &[
+                    wgpu::BindGroupEntry {
+                        binding: 0,
+                        resource: uniform.as_entire_binding(),
+                    },
+                    light_uniform,
+                    shadow_map,
+                ],
             });
             self.batches.push(Batch {
                 uniform,
@@ -257,18 +276,23 @@ pub enum ShapeBlend {
 }
 
 fn create_bind_group_layout(device: &wgpu::Device) -> wgpu::BindGroupLayout {
+    let [light_uniform, shadow_map] = Lights2dGpu::layout_entries();
     device.create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
         label: Some("Sindri shape bind group layout"),
-        entries: &[wgpu::BindGroupLayoutEntry {
-            binding: 0,
-            visibility: wgpu::ShaderStages::VERTEX,
-            ty: wgpu::BindingType::Buffer {
-                ty: wgpu::BufferBindingType::Uniform,
-                has_dynamic_offset: false,
-                min_binding_size: None,
+        entries: &[
+            wgpu::BindGroupLayoutEntry {
+                binding: 0,
+                visibility: wgpu::ShaderStages::VERTEX,
+                ty: wgpu::BindingType::Buffer {
+                    ty: wgpu::BufferBindingType::Uniform,
+                    has_dynamic_offset: false,
+                    min_binding_size: None,
+                },
+                count: None,
             },
-            count: None,
-        }],
+            light_uniform,
+            shadow_map,
+        ],
     })
 }
 

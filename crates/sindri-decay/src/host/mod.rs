@@ -22,6 +22,7 @@ mod frame;
 mod gamepad;
 mod geometry;
 mod map;
+mod particles;
 mod peers;
 
 pub(crate) use peers::Peers;
@@ -54,6 +55,7 @@ mod sequence;
 mod services;
 mod shape_query;
 mod shared;
+mod terrain;
 mod tiles;
 mod tween;
 mod ui;

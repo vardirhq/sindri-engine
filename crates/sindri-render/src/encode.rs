@@ -13,8 +13,9 @@
 use crate::{
     Bloom, DepthTarget, DrawContext, FrameCommand, FramePass, GlyphDrawError, GlyphRenderer,
     PostProcessSettings, PreparedFrame, RenderStage, ShapeDrawError, ShapeRenderer,
-    SpriteBatchError, SpriteBatchRenderer, SpriteBatchStats, TextError, TextRenderer,
-    TextureRegistry, TexturedCubeRenderer, encode_clear, textured_cube::CachedMeshRequest,
+    SpriteBatchDraw, SpriteBatchError, SpriteBatchRenderer, SpriteBatchStats, SpriteBatchTarget,
+    TextError, TextRenderer, TextureRegistry, TexturedCubeRenderer, encode_clear,
+    textured_cube::CachedMeshRequest,
 };
 use thiserror::Error;
 
@@ -81,6 +82,8 @@ pub fn encode_prepared_frame(
     // slot per batch per frame for as long as it ran.
     cube_renderer.begin_submission();
     sprite_renderer.begin_submission();
+    sprite_renderer.set_environment(frame.sprite_environment());
+    shape_renderer.set_environment(frame.sprite_environment());
     glyph_renderer.begin_submission();
     shape_renderer.begin_submission();
     encode_passes(
@@ -169,6 +172,8 @@ pub fn encode_lit_frame(
     );
     cube_renderer.begin_submission();
     sprite_renderer.begin_submission();
+    sprite_renderer.set_environment(frame.sprite_environment());
+    shape_renderer.set_environment(frame.sprite_environment());
     glyph_renderer.begin_submission();
     shape_renderer.begin_submission();
 
@@ -373,20 +378,30 @@ fn encode_passes<'p>(
             }
             FrameCommand::SpriteBatch {
                 texture,
+                normal_map,
+                mask,
+                shader,
                 depth,
                 instances,
             } => {
-                sprite_renderer.draw(
+                sprite_renderer.draw_shaded(
                     device,
                     queue,
                     encoder,
-                    target.color,
-                    target.depth,
+                    SpriteBatchTarget {
+                        color: target.color,
+                        depth: target.depth,
+                    },
                     textures,
-                    *texture,
-                    pass.camera.view_projection,
-                    *depth,
-                    instances,
+                    SpriteBatchDraw {
+                        texture: *texture,
+                        normal_map: *normal_map,
+                        mask: *mask,
+                        shader: shader.as_ref(),
+                        view_projection: pass.camera.view_projection,
+                        depth: *depth,
+                        instances,
+                    },
                 )?;
             }
             // Text is geometry, drawn through the same camera as the pass it

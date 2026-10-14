@@ -213,3 +213,76 @@ fn an_anchor_off_the_frame_is_refused() {
     sheet.anchor = Some(SpriteAnchor::Fraction([0.5, 1.5]));
     assert!(matches!(sheet.rects(), Err(SheetError::Anchor { .. })));
 }
+
+/// A border is pixels, so a sheet that does not say how big its image is
+/// cannot turn one into a texture coordinate, and says so.
+#[test]
+fn a_border_needs_the_image_size() {
+    let mut sheet = SpriteSheetDocument::from_grid(1, 1);
+    sheet.borders.insert(String::new(), [4, 4, 4, 4]);
+    assert_eq!(
+        sheet.border_fractions(),
+        Err(SheetError::BordersWithoutSize)
+    );
+    sheet.size = Some([32, 16]);
+    let fractions = sheet.border_fractions().expect("measured, it converts");
+    let expected = [0.125, 0.25, 0.125, 0.25];
+    assert!(
+        fractions[""]
+            .iter()
+            .zip(expected)
+            .all(|(got, want)| (got - want).abs() < 1.0e-6)
+    );
+}
+
+/// A border on a sprite the sheet does not cut, or wider than the sprite, is a
+/// typo rather than a picture.
+#[test]
+fn a_border_must_fit_a_named_sprite() {
+    let mut sheet = grid(2, 1, &["left", "right"]);
+    sheet.size = Some([32, 16]);
+    sheet.borders.insert("middle".to_owned(), [1, 1, 1, 1]);
+    assert_eq!(
+        sheet.border_fractions(),
+        Err(SheetError::BorderOnUnknownSprite("middle".to_owned()))
+    );
+    sheet.borders.clear();
+    sheet.borders.insert("left".to_owned(), [10, 1, 10, 1]);
+    assert_eq!(
+        sheet.border_fractions(),
+        Err(SheetError::BorderTooWide("left".to_owned()))
+    );
+}
+
+/// A terrain lists one sprite per pattern its kind answers, each one the
+/// sheet cuts.
+#[test]
+fn a_terrain_lists_what_its_kind_needs() {
+    let names: Vec<String> = (0..16).map(|index| format!("g{index}")).collect();
+    let refs: Vec<&str> = names.iter().map(String::as_str).collect();
+    let mut sheet = grid(4, 4, &refs);
+    sheet.terrains.insert(
+        "grass".to_owned(),
+        crate::TerrainDocument {
+            kind: crate::TerrainKind::Edges,
+            sprites: names.clone(),
+        },
+    );
+    assert!(sheet.round_trip().is_ok());
+    sheet
+        .terrains
+        .get_mut("grass")
+        .expect("grass")
+        .sprites
+        .pop();
+    assert!(matches!(
+        sheet.round_trip(),
+        Err(SheetError::TerrainSize { found: 15, .. })
+    ));
+}
+
+impl SpriteSheetDocument {
+    fn round_trip(&self) -> Result<Self, SheetError> {
+        Self::from_json(&serde_json::to_string(self).expect("a sheet writes"))
+    }
+}

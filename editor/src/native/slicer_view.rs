@@ -122,3 +122,22 @@ pub(super) fn slice_names(ui: &mut egui::Ui, slicer: &mut Slicer) {
         slicer.selected = jump;
     }
 }
+
+/// The picked cell's nine-slice border, as numbers beside the guides that
+/// drag it on the image.
+pub(super) fn slice_border(ui: &mut egui::Ui, slicer: &mut Slicer) {
+    section::group(ui, icons::TILEMAP, "Nine-slice border");
+    let border = slicer.border();
+    let mut sides = border.map(f64::from);
+    let mut changed = false;
+    for (label, side) in ["Left", "Top", "Right", "Bottom"].iter().zip(&mut sides) {
+        changed |= number_row(ui, label, side, 10.0, true);
+    }
+    if changed {
+        slicer.set_border(sides.map(pixel_count));
+    }
+    section::caption(
+        ui,
+        "Drag the dashed guides on the image. A sliced sprite keeps this border at its size and stretches the middle.",
+    );
+}

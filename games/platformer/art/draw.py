@@ -126,9 +126,127 @@ def tuft_cell():
     return cell
 
 
+# The ground terrain: sixteen cells, one per combination of which sides are
+# more ground (north 1, east 2, south 4, west 8). Grass grows on an open top,
+# and an open side or bottom shows a darker rim of earth.
+RIM = hex_color("#4a2d18")
+COLUMNS = 8
+BLANK = [[CLEAR] * CELL for _ in range(CELL)]
+
+
+def ground_sides(mask):
+    return tuple(mask & bit == 0 for bit in (1, 2, 4, 8))
+
+
+def ground_cell(mask):
+    open_n, open_e, open_s, open_w = ground_sides(mask)
+    cell = dirt_cell(20 + mask)
+    for y in range(CELL):
+        for x in range(CELL):
+            edge = min(
+                x if open_w else CELL,
+                CELL - 1 - x if open_e else CELL,
+                CELL - 1 - y if open_s else CELL,
+            )
+            if edge == 0:
+                cell[y][x] = RIM
+            elif edge == 1:
+                cell[y][x] = EARTH[3]
+    if open_n:
+        for x in range(CELL):
+            depth = 4 + (1 if noise(x, 0, 7) > 0.6 else 0)
+            # Grass hangs a little down an open side.
+            if (open_w and x < 2) or (open_e and x > CELL - 3):
+                depth += 2
+            for y in range(depth):
+                cell[y][x] = GRASS[int(noise(x, y, 3) * 3) % 3]
+            cell[0][x] = GRASS[2]
+    return cell
+
+
+def ground_height(mask):
+    open_n, open_e, open_s, open_w = ground_sides(mask)
+
+    def height(x, y):
+        edge = min(
+            x if open_w else CELL,
+            CELL - 1 - x if open_e else CELL,
+            CELL - 1 - y if open_s else CELL,
+            y if open_n else CELL,
+        )
+        return min(edge, 2) / 2.0 * 0.6 + noise(x, y, 20 + mask) * 0.4
+
+    return height
+
+
+def tile_cells(first_row, ground):
+    """The five loose tiles, then the sixteen ground cells, eight a row."""
+    cells = first_row + [BLANK] * (COLUMNS - len(first_row)) + ground
+    return cells, len(cells) // COLUMNS
+
+
 def draw_tiles():
-    cells = [grass_cell(), dirt_cell(2), stone_cell(), plank_cell(), tuft_cell()]
-    png(OUT / "tiles.png", CELL * len(cells), CELL, sheet(cells))
+    loose = [grass_cell(), dirt_cell(2), stone_cell(), plank_cell(), tuft_cell()]
+    cells, rows = tile_cells(loose, [ground_cell(mask) for mask in range(16)])
+    png(OUT / "tiles.png", CELL * COLUMNS, CELL * rows, sheet(cells, rows))
+
+
+# --- Tile normals -----------------------------------------------------------
+#
+# A height for every texel of every tile, turned into the direction its surface
+# faces: red is right, green is up, blue is out of the picture. Laid out exactly
+# like tiles.png, so the same sprite rectangle reads both.
+
+
+def seam_height(x, y, offset):
+    """How far a brick texel is from the mortar round it, capped: a bevel."""
+    course_x = (x + offset) % 8
+    edge = min(course_x, 8 - course_x, y % 8, 8 - y % 8)
+    return min(edge, 2) / 2.0
+
+
+def stone_height(x, y):
+    return seam_height(x, y, 4 if (y % CELL) // 8 else 0) + noise(x, y, 11) * 0.15
+
+
+def plank_height(x, y):
+    if y >= 6:
+        return 0.0
+    return min(y, 5 - y, 1) * 0.6 + (0.0 if x in (0, 8, 15) else 0.4)
+
+
+def rough_height(salt):
+    return lambda x, y: noise(x, y, salt) * 0.5
+
+
+HEIGHTS = [rough_height(3), rough_height(2), stone_height, plank_height, lambda x, y: 0.0]
+
+
+def normal_cell(height, strength=2.0):
+    def at(x, y):
+        return height(min(max(x, 0), CELL - 1), min(max(y, 0), CELL - 1))
+
+    cell = []
+    for y in range(CELL):
+        row = []
+        for x in range(CELL):
+            across = (at(x + 1, y) - at(x - 1, y)) * strength
+            # Rows run down the picture, and green means up the world.
+            down = (at(x, y + 1) - at(x, y - 1)) * strength
+            length = (across * across + down * down + 1.0) ** 0.5
+            normal = (-across / length, down / length, 1.0 / length)
+            row.append(tuple(round((n * 0.5 + 0.5) * 255) for n in normal) + (255,))
+        cell.append(row)
+    return cell
+
+
+def draw_tile_normals():
+    loose = [normal_cell(height) for height in HEIGHTS]
+    ground = [normal_cell(ground_height(mask)) for mask in range(16)]
+    flat = [[(128, 128, 255, 255)] * CELL for _ in range(CELL)]
+    cells, rows = tile_cells(loose, ground)
+    cells = [flat if cell is BLANK else cell for cell in cells]
+    png(OUT / "tiles_n.png", CELL * COLUMNS, CELL * rows, sheet(cells, rows))
 
 
 # --- The hero ---------------------------------------------------------------
@@ -246,9 +364,73 @@ def draw_flag():
     png(OUT / "flag.png", CELL * len(frames), 32, sheet(frames, cell_h=32))
 
 
+# --- Particles --------------------------------------------------------------
+
+
+def draw_particle():
+    """A soft white dot; an emitter's color ramp tints it."""
+    size = 8
+    centre = (size - 1) / 2
+    pixels = []
+    for y in range(size):
+        row = []
+        for x in range(size):
+            distance = ((x - centre) ** 2 + (y - centre) ** 2) ** 0.5 / (size / 2)
+            alpha = max(0.0, 1.0 - distance) ** 0.7
+            row.append((255, 255, 255, round(alpha * 255)))
+        pixels.append(row)
+    png(OUT / "particle.png", size, size, pixels)
+
+
+# --- Panel ------------------------------------------------------------------
+
+
+def draw_panel():
+    """A wooden frame round a dark slate: sliced, so any size keeps its frame.
+
+    The frame is the outer 6 pixels, the border `panel.sheet` records; the
+    slate inside is flat so stretching it shows nothing.
+    """
+    size = 24
+    frame = 6
+    outline = hex_color("#3b2412")
+    slate = (34, 30, 44, 225)
+    pixels = []
+    for y in range(size):
+        row = []
+        for x in range(size):
+            edge = min(x, y, size - 1 - x, size - 1 - y)
+            corner = min(x, size - 1 - x) + min(y, size - 1 - y)
+            if corner < 2:
+                row.append(CLEAR)
+            elif edge == 0 or corner == 2:
+                row.append(outline)
+            elif edge < frame - 2:
+                # Grain runs along each side, and the top and left catch light.
+                lit = (y == edge) or (x == edge and y < size - 1 - edge)
+                # Stripes running along the side, so stretching it lengthens
+                # the grain rather than smearing it.
+                side = 0 if edge in (y, size - 1 - y) else 1
+                grain = int(noise(edge, side, 7) * 2)
+                row.append(PLANK[2] if lit else PLANK[grain])
+            elif edge < frame - 1:
+                row.append(PLANK[3])
+            elif edge < frame:
+                row.append(outline)
+            else:
+                row.append(slate)
+        pixels.append(row)
+    for nx, ny in ((3, 3), (size - 4, 3), (3, size - 4), (size - 4, size - 4)):
+        pixels[ny][nx] = hex_color("#e8d9a8")
+    png(OUT / "panel.png", size, size, pixels)
+
+
 if __name__ == "__main__":
     OUT.mkdir(parents=True, exist_ok=True)
     draw_tiles()
+    draw_tile_normals()
     draw_hero()
     draw_coin()
     draw_flag()
+    draw_particle()
+    draw_panel()

@@ -9,6 +9,7 @@
 //! the renderer's `TextureRegistry`. That registry exists to draw a *scene*, and
 //! a picture of an asset nothing in the scene references has no business in it.
 
+use std::collections::BTreeMap;
 use std::path::{Path, PathBuf};
 
 use eframe::egui;
@@ -45,6 +46,9 @@ pub struct Slicer {
     /// One name per cell, row-major. Empty means "call it by its index", which
     /// is what an unnamed cell resolves to anyway.
     pub names: Vec<String>,
+    /// Nine-slice borders by sprite name, in pixels: left, top, right, bottom.
+    /// A one-cell sheet keeps its border under the empty name, the whole image.
+    pub borders: BTreeMap<String, [u32; 4]>,
     /// What went wrong reading or writing, for the panel to show.
     pub problem: Option<String>,
 }
@@ -69,6 +73,7 @@ impl Slicer {
             spacing: [0, 0],
             selected: 0,
             names: Vec::new(),
+            borders: BTreeMap::new(),
             problem: None,
         };
         slicer.read_image();
@@ -137,6 +142,34 @@ impl Slicer {
             .collect()
     }
 
+    /// The name the picked cell's border is kept under: its sprite's, or the
+    /// empty name when the sheet is one cell and that cell is the image.
+    pub fn border_key(&self) -> String {
+        if self.cells() == 1 {
+            String::new()
+        } else {
+            self.name_of(self.selected)
+        }
+    }
+
+    /// The picked cell's border, zero where it has none.
+    pub fn border(&self) -> [u32; 4] {
+        self.borders
+            .get(&self.border_key())
+            .copied()
+            .unwrap_or_default()
+    }
+
+    /// Sets the picked cell's border; all zero removes it.
+    pub fn set_border(&mut self, border: [u32; 4]) {
+        let key = self.border_key();
+        if border == [0; 4] {
+            self.borders.remove(&key);
+        } else {
+            self.borders.insert(key, border);
+        }
+    }
+
     /// Keeps the selection on a cell that exists.
     pub const fn clamp_selection(&mut self) {
         let cells = self.cells();
@@ -179,7 +212,16 @@ impl Slicer {
         while names.last().is_some_and(String::is_empty) {
             names.pop();
         }
-        let measured = self.margin != [0, 0] || self.spacing != [0, 0];
+        // A border on a cell since renamed or cut away names nothing, and is
+        // left behind rather than refusing the save.
+        let cells: Vec<String> = (0..self.cells()).map(|index| self.name_of(index)).collect();
+        let borders: BTreeMap<String, [u32; 4]> = self
+            .borders
+            .iter()
+            .filter(|(name, _)| name.is_empty() || cells.contains(name))
+            .map(|(name, border)| (name.clone(), *border))
+            .collect();
+        let measured = self.margin != [0, 0] || self.spacing != [0, 0] || !borders.is_empty();
         SpriteSheetDocument {
             format_version: SHEET_FORMAT_VERSION,
             grid: Some(SheetGrid {
@@ -193,6 +235,7 @@ impl Slicer {
                 spacing: self.spacing,
                 names,
             }),
+            borders,
             ..SpriteSheetDocument::default()
         }
     }
@@ -265,6 +308,7 @@ impl Slicer {
                     self.spacing = grid.spacing;
                     self.names = grid.names;
                 }
+                self.borders = document.borders;
                 self.fit_names();
             }
             // A sheet that will not parse is shown as a problem with the grid

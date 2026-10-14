@@ -188,7 +188,24 @@ leave it at zero unless that is the intent. Nothing is clamped: a channel that
 lands outside zero to one is clipped by the render target, while one that is
 not a number at all is refused when the scene is extracted.
 
+**`shader_params` are the sprite shader's four numbers.** A sprite drawn
+through a project shader (`sindri.sprite.shader`, see
+[the sprite shader contract](sprite-shaders.md)) hands it
+`this.sprite.shader_params` as `input.params`; what each one means is the
+shader's to say, so a script sets how far a dissolve has got or how bright a
+hit flash is and leaves the drawing to the shader. They ride on the instance,
+so changing them every frame never splits a draw. Author them as decimals in a
+hand-written scene (`0.0`, not `0`): a write keeps the number kind the scene
+stored, and an integer rounds.
+
 | `this.sprite.layer` | `f32` | yes | yes |
+| `this.sprite.shader_params.{x,y,z,w}` | `f32` | yes | yes |
+| `this.light2d.color` | `Color` | yes | yes |
+| `this.light2d.color.{r,g,b,a}` | `f32` | yes | yes |
+| `this.light2d.{intensity,radius,falloff,height}` | `f32` | yes | yes |
+| `this.world_text.color` | `Color` | yes | yes |
+| `this.world_text.color.{r,g,b,a}` | `f32` | yes | yes |
+| `this.world_text.{font_size,visible,layer}` | `f32` | yes | yes |
 | `this.ui_image.tint` | `Color` | yes | yes |
 | `this.ui_image.tint.{r,g,b,a}` | `f32` | yes | yes |
 | `this.ui_image.layer` | `f32` | yes | yes |
@@ -271,9 +288,16 @@ table above lists, reaching the same numbers.
 | `this.entity.sprite.color_multiply.{r,g,b,a}` | `f32` | yes | yes |
 | `this.entity.sprite.color_offset.{r,g,b,a}` | `f32` | yes | yes |
 | `this.entity.sprite.layer` | `f32` | yes | yes |
+| `this.entity.sprite.shader_params.{x,y,z,w}` | `f32` | yes | yes |
+| `this.entity.light2d.color` | `Color` | yes | yes |
+| `this.entity.light2d.color.{r,g,b,a}` | `f32` | yes | yes |
+| `this.entity.light2d.{intensity,radius,falloff,height}` | `f32` | yes | yes |
 | `this.entity.ui_image.tint` | `Color` | yes | yes |
 | `this.entity.ui_image.tint.{r,g,b,a}` | `f32` | yes | yes |
 | `this.entity.ui_image.layer` | `f32` | yes | yes |
+| `this.entity.world_text.color` | `Color` | yes | yes |
+| `this.entity.world_text.color.{r,g,b,a}` | `f32` | yes | yes |
+| `this.entity.world_text.{font_size,visible,layer}` | `f32` | yes | yes |
 | `this.entity.shape.{fill,stroke}` | `Color` | yes | yes |
 | `this.entity.shape.fill.{r,g,b,a}` | `f32` | yes | yes |
 | `this.entity.shape.stroke.{r,g,b,a}` | `f32` | yes | yes |
@@ -567,6 +591,9 @@ follow-up work.
 | `Effects.burst(entity)` | `f32` — how many flecks were made |
 | `Effects.burst_at(entity, x, y)` | `f32` |
 | `Effects.live()` | `f32` |
+| `Effects.play(entity)` | `f32` — starts the entity's `sindri.particles` emitter |
+| `Effects.stop(entity)` | `f32` — stops it; particles already out live on |
+| `Effects.emit(entity, count)` | `f32` — throws that many of its particles at once |
 
 ```rust
 script Bullet {
@@ -603,6 +630,12 @@ Effects.burst_at(this.explosion, enemy.transform.position.x,
 call — so the usual shape, firing a burst and then despawning what fired it,
 works. `burst_at` throws somewhere else, which is what an explosion where
 something *used to be* needs.
+
+**An emitter is a stream the scene authors.** `sindri.particles` keeps throwing
+particles into the same pool while it plays: sparkle round a pickup, smoke from
+a chimney. `Effects.play` and `Effects.stop` switch its `playing` field, and
+`Effects.emit(this.entity, 8.0)` throws a handful at once whether it plays or
+not, which is dust on landing. `docs/particles.md` describes every field.
 
 **Flecks draw their own random directions from their own stream**, never the
 run's. A fleck drawn from the gameplay stream would shift every number after it,
@@ -1482,6 +1515,7 @@ what the map *holds* there.
 | --- | --- |
 | `Grid.tile(map, column, row)` | `f32` |
 | `Grid.set_tile(map, column, row, index)` | nothing |
+| `Grid.set_terrain(map, column, row, terrain)` | nothing |
 | `Grid.columns(map)` | `f32` |
 | `Grid.rows(map)` | `f32` |
 
@@ -1495,6 +1529,10 @@ palette index into a flat array is the flat map's own model, and a volume stacks
 named cells instead. Asked of a grid that carries only `sindri.tile_grid`, both
 fail and name the component they would need rather than reporting that a tilemap
 the entity never had holds no tiles.
+
+`set_terrain` paints a terrain the map's sheet declares and redraws the cell's
+neighbors from the patterns they now make; `""` empties the cell. See
+`docs/terrains.md`.
 
 ### Stacked cells
 

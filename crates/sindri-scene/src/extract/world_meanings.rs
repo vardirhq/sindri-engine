@@ -80,6 +80,7 @@ fn describe_environment(components: &mut ComponentSchemaRegistry) -> Result<(), 
         ("bloom.knee", range(1.0e-4, 1.0)),
         ("bloom.intensity", at_least(0.0)),
         ("bloom.passes", range(1.0, 8.0)),
+        ("lighting_2d.ambient", COLOR),
     ])?;
     Ok(())
 }

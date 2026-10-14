@@ -1,0 +1,28 @@
+// Drives each sprite's shader through its four parameters. The shaders do the
+// drawing; the script only says how far a burn has got or how bright a flash
+// is, which is the split a game keeps too.
+script Burn {
+    @export let seconds: f32 = 3.0;
+    var clock: f32 = 0.0;
+
+    fn update(dt: f32) {
+        this.clock = this.clock + dt;
+        // Burns away, then grows back, over and over.
+        let phase = this.clock / this.seconds;
+        this.sprite.shader_params.x = 0.5 - 0.5 * cos(phase * 6.2831853);
+    }
+}
+
+script HitFlash {
+    @export let every: f32 = 1.2;
+    var since: f32 = 0.0;
+
+    fn update(dt: f32) {
+        this.since = this.since + dt;
+        if this.since > this.every || Input.just_pressed("Space") {
+            this.since = 0.0;
+        }
+        // Full white on the hit, faded out over a quarter of a second.
+        this.sprite.shader_params.x = clamp(1.0 - this.since * 4.0, 0.0, 1.0);
+    }
+}

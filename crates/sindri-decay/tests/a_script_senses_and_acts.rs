@@ -476,3 +476,67 @@ fn the_board_is_cleared_with_the_instances() {
     scripts.clear();
     assert!(!scripts.blackboard().has("score"), "a new run starts fresh");
 }
+
+/// A sprite shader's four parameters are the script's to drive: a dissolve
+/// advances, a flash fades.
+#[test]
+fn a_script_drives_its_sprite_shader_parameters() {
+    let (mut world, entity, sources) = world(
+        r"script S { fn update(dt: f32) {
+            this.sprite.shader_params.x = 0.25;
+            this.sprite.shader_params.w = this.sprite.shader_params.x * 2.0;
+        } }",
+    );
+    // As the editor authors a sprite: every field present, at its default.
+    world
+        .get_mut(entity)
+        .expect("the entity exists")
+        .components
+        .get_mut(SPRITE)
+        .expect("the sprite exists")["shader_params"] = json!([0.0, 0.0, 0.0, 0.0]);
+    let report = Scripts::new().advance(
+        &mut world,
+        &registry(),
+        ScriptFrame::new(&sources, &InputState::default(), 0.5),
+    );
+    assert!(report.is_quiet(), "{report:?}");
+    let sprite = sprite(&world, entity);
+    assert_eq!(sprite["shader_params"], json!([0.25, 0.0, 0.0, 0.5]));
+}
+
+/// A 2D light is reached the way a sprite is: its color whole or a channel at
+/// a time, and its brightness and reach as numbers. A flickering torch is
+/// this, every frame.
+#[test]
+fn a_script_drives_its_2d_light() {
+    let (mut world, entity, sources) = world(
+        r##"script S { fn update(dt: f32) {
+            this.light2d.intensity = 0.5;
+            this.light2d.radius = this.light2d.radius * 2.0;
+            this.light2d.color = Color("#ff8000");
+            this.light2d.color.a = 0.25;
+        } }"##,
+    );
+    world
+        .get_mut(entity)
+        .expect("the entity exists")
+        .components
+        .insert(
+            "sindri.light2d".to_owned(),
+            json!({
+                "color": [1.0, 1.0, 1.0, 1.0], "intensity": 1.0, "radius": 3.0,
+                "falloff": 1.0, "height": 1.0
+            }),
+        );
+    let report = Scripts::new().advance(
+        &mut world,
+        &registry(),
+        ScriptFrame::new(&sources, &InputState::default(), 0.5),
+    );
+    assert!(report.is_quiet(), "{report:?}");
+    let light = &world.get(entity).expect("the entity exists").components["sindri.light2d"];
+    assert_eq!(light["intensity"], json!(0.5));
+    assert_eq!(light["radius"], json!(6.0));
+    assert_eq!(light["color"][3], json!(0.25));
+    assert_eq!(light["color"][0], json!(1.0));
+}

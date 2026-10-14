@@ -58,7 +58,7 @@ fn authored_points(world: &World, entity: EntityId, component: &str) -> Vec<[f32
 /// local `(0, 0)` sits on its parent and follows it. The composition is the
 /// world's own, so a shape and a sprite under the same parent agree; a child
 /// with no transform of its own sits where its parent is.
-fn world_model_matrix(world: &World, entity: EntityId) -> Mat4 {
+pub(super) fn world_model_matrix(world: &World, entity: EntityId) -> Mat4 {
     transform_matrix(
         world
             .world_transform(entity)
@@ -225,16 +225,19 @@ impl SceneExtractor {
             if !world.is_active(entity) {
                 continue;
             }
-            batches
-                .entry((shape.layer, shape.geometry.blend() == ShapeBlend::Add))
-                .or_default()
-                .push(shape_instance(
+            let additive = shape.geometry.blend() == ShapeBlend::Add;
+            // A shape added to the picture is light itself, so only painted
+            // shapes are lit.
+            batches.entry((shape.layer, additive)).or_default().push(
+                shape_instance(
                     world,
                     entity,
                     "sindri.shape",
                     &shape.geometry,
                     world_model_matrix(world, entity),
-                ));
+                )
+                .lit(!additive),
+            );
         }
 
         for ((layer, additive), instances) in batches {

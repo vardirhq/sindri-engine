@@ -58,10 +58,14 @@ pub struct SpriteInstance {
     color_multiply: [f32; 4],
     color_offset: [f32; 4],
     corner_shade: [f32; 4],
+    shader_params: [f32; 4],
+    /// x is 1 when the frame's 2D lights reach this sprite; the rest is kept
+    /// for per-instance switches still to come.
+    flags: [f32; 4],
 }
 
 impl SpriteInstance {
-    const ATTRIBUTES: [wgpu::VertexAttribute; 9] = wgpu::vertex_attr_array![
+    const ATTRIBUTES: [wgpu::VertexAttribute; 11] = wgpu::vertex_attr_array![
         2 => Float32x4,
         3 => Float32x4,
         4 => Float32x4,
@@ -70,7 +74,9 @@ impl SpriteInstance {
         7 => Float32x4,
         8 => Float32x4,
         9 => Float32x4,
-        10 => Float32x4
+        10 => Float32x4,
+        11 => Float32x4,
+        12 => Float32x4
     ];
 
     /// A sprite drawn from the whole of its texture with identity color math.
@@ -82,6 +88,8 @@ impl SpriteInstance {
             color_multiply: [1.0; 4],
             color_offset: [0.0; 4],
             corner_shade: [1.0; 4],
+            shader_params: [0.0; 4],
+            flags: [0.0; 4],
         }
     }
 
@@ -117,6 +125,37 @@ impl SpriteInstance {
         self.color_multiply = multiply;
         self.color_offset = offset;
         self
+    }
+
+    /// The four numbers a sprite shader reads as `input.params`.
+    ///
+    /// Per instance, so sprites sharing a shader and a texture still share a
+    /// draw while each dissolves, flashes or waves by its own amount.
+    #[must_use]
+    pub const fn with_shader_params(mut self, params: [f32; 4]) -> Self {
+        self.shader_params = params;
+        self
+    }
+
+    /// The four numbers a sprite shader reads as `input.params`.
+    pub const fn shader_params(self) -> [f32; 4] {
+        self.shader_params
+    }
+
+    /// Lets the frame's 2D lights reach this sprite.
+    ///
+    /// Off by default, so the UI and anything else drawn over the world is
+    /// never darkened by a scene's ambient; the extractor turns it on for
+    /// world sprites, tiles and flecks.
+    #[must_use]
+    pub const fn lit(mut self, lit: bool) -> Self {
+        self.flags[0] = if lit { 1.0 } else { 0.0 };
+        self
+    }
+
+    /// Whether 2D lights reach this sprite.
+    pub fn is_lit(self) -> bool {
+        self.flags[0] > 0.5
     }
 
     /// The part of the texture this instance draws.
@@ -157,4 +196,12 @@ impl SpriteInstance {
 #[derive(Clone, Copy, bytemuck::Pod, bytemuck::Zeroable)]
 pub(super) struct BatchUniform {
     pub(super) view_projection: [[f32; 4]; 4],
+    /// The frame's time in seconds in the first lane and 1 in the second when
+    /// the batch has a normal map; the rest is padding to the sixteen bytes a
+    /// uniform member is aligned to.
+    pub(super) time: [f32; 4],
+    /// From the world into the batch's mask quad, when it has one.
+    pub(super) mask_from_world: [[f32; 4]; 4],
+    /// The part of the mask texture its quad shows: x, y, width, height.
+    pub(super) mask_uv: [f32; 4],
 }

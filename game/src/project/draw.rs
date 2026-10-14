@@ -100,6 +100,21 @@ impl ProjectRenderer {
         })
     }
 
+    /// Checks and binds the project's sprite shaders, refusing the first one
+    /// that does not compile: a capture of a broken shader is a capture of
+    /// the built-in look, which proves nothing about the shader.
+    pub fn bind_shaders(
+        &mut self,
+        shaders: &BTreeMap<String, Vec<u8>>,
+    ) -> Result<(), Box<dyn Error>> {
+        for (id, bytes) in shaders {
+            self.bindings
+                .shaders_mut()
+                .bind(id, std::str::from_utf8(bytes)?)?;
+        }
+        Ok(())
+    }
+
     pub const fn target(&self) -> &OffscreenTarget {
         &self.target
     }
@@ -128,7 +143,8 @@ impl ProjectRenderer {
                         .with_animations(player.session.animations())
                         .with_effects(player.session.effects())
                         .with_text_sizes(&sizes)
-                        .with_tile_sets(&player.tile_sets),
+                        .with_tile_sets(&player.tile_sets)
+                        .with_seconds(player.seconds),
                 )?;
                 // As a host does: what was drawn is what the next step's
                 // pointer is hit-tested against.

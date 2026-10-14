@@ -66,9 +66,14 @@ export async function platformerGoal(page, root, evidence, problems) {
       if (approachingGoal) continue;
       const column = Math.floor(state.x - corner[0]);
       const under = groundAt(column);
+      // A hop off a ledge carries the hero several columns, so it is only
+      // taken when nothing past the drop needs a jump of its own: off the
+      // ledge before a gap, the hero walks down and jumps the gap instead.
+      const gapPastDrop = [2, 3, 4, 5].some(ahead => groundAt(column + ahead) === null);
       const blocked = [1, 2].some(ahead => {
         const top = groundAt(column + ahead);
-        return top === null || top > state.y || (under !== null && top < under - 0.5 && ahead === 1);
+        if (top === null || top > state.y) return true;
+        return under !== null && top < under - 0.5 && ahead === 1 && !gapPastDrop;
       });
       if (state.grounded && blocked) {
         await page.keyboard.down('Space');

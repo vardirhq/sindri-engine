@@ -18,6 +18,7 @@ mod builtin;
 mod models;
 mod poll;
 mod request;
+mod shaders;
 
 #[cfg(test)]
 mod tests;
@@ -93,6 +94,8 @@ pub struct SceneTextures {
     sheets: Option<AssetLoader<SpriteSheetAssetDecoder>>,
     /// Semantic block assets used by stackable tile volumes.
     tile_sets: Option<AssetLoader<TileSetAssetDecoder>>,
+    /// Project sprite shaders, checked as they bind (`shaders.rs`).
+    shaders: Option<AssetLoader<sindri_assets::TextAssetDecoder>>,
     /// Imported models, decoded here and bound to the scene's extractor
     /// (`models.rs`).
     models: Option<AssetLoader<ModelAssetDecoder>>,
@@ -213,6 +216,10 @@ impl SceneTextures {
                 .is_some_and(|loader| loader.outstanding() > 0)
             || self
                 .models
+                .as_ref()
+                .is_some_and(|loader| loader.outstanding() > 0)
+            || self
+                .shaders
                 .as_ref()
                 .is_some_and(|loader| loader.outstanding() > 0)
     }

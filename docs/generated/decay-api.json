@@ -375,6 +375,12 @@
       "type": "Entity"
     },
     {
+      "description": "The 2D light on this script's object, if it has one: its color, brightness and reach.",
+      "kind": "value",
+      "name": "light2d",
+      "type": "Light2d"
+    },
+    {
       "description": "The drawn shape on this script's object, if it has one: its colors, outline and how much of it is drawn.",
       "kind": "value",
       "name": "shape",
@@ -397,6 +403,12 @@
       "kind": "value",
       "name": "ui_image",
       "type": "UiImage"
+    },
+    {
+      "description": "The world text on this script's object, if it has some: its color, size and drawing order.",
+      "kind": "value",
+      "name": "world_text",
+      "type": "WorldText"
     }
   ],
   "types": [
@@ -1131,11 +1143,49 @@
           "returns": "f32"
         },
         {
+          "description": "Throws that many of an object's emitter particles at once, such as dust when landing. Gives back how many were made.",
+          "kind": "function",
+          "name": "emit",
+          "parameter_names": [
+            "entity",
+            "count"
+          ],
+          "parameters": [
+            "Entity",
+            "f32"
+          ],
+          "returns": "f32"
+        },
+        {
           "description": "How many particles are currently on screen.",
           "kind": "function",
           "name": "live",
           "parameter_names": [],
           "parameters": [],
+          "returns": "f32"
+        },
+        {
+          "description": "Starts the particle emitter set up on an object. Gives back 1.",
+          "kind": "function",
+          "name": "play",
+          "parameter_names": [
+            "entity"
+          ],
+          "parameters": [
+            "Entity"
+          ],
+          "returns": "f32"
+        },
+        {
+          "description": "Stops the particle emitter set up on an object; particles already out live out their life. Gives back 1.",
+          "kind": "function",
+          "name": "stop",
+          "parameter_names": [
+            "entity"
+          ],
+          "parameters": [
+            "Entity"
+          ],
           "returns": "f32"
         }
       ],
@@ -1144,6 +1194,12 @@
     {
       "description": "An object in the game, such as a player, an enemy or a button. Scripts get these from calls like `World.find` and can store them, compare them and change their transform, sprite or shape.",
       "members": [
+        {
+          "description": "The object's 2D light, if it has one.",
+          "kind": "value",
+          "name": "light2d",
+          "type": "Light2d"
+        },
         {
           "description": "The object's drawn shape, if it has one.",
           "kind": "value",
@@ -1167,6 +1223,12 @@
           "kind": "value",
           "name": "ui_image",
           "type": "UiImage"
+        },
+        {
+          "description": "The object's world text, if it has some.",
+          "kind": "value",
+          "name": "world_text",
+          "type": "WorldText"
         }
       ],
       "name": "Entity"
@@ -1551,6 +1613,24 @@
           "returns": "unit"
         },
         {
+          "description": "Paints a terrain the map's sheet declares into a flat tile map's cell, choosing its tile and its neighbors' from which of them are the same terrain. `\"\"` empties the cell and redraws its neighbors.",
+          "kind": "function",
+          "name": "set_terrain",
+          "parameter_names": [
+            "grid",
+            "column",
+            "row",
+            "terrain"
+          ],
+          "parameters": [
+            "Entity",
+            "f32",
+            "f32",
+            "String"
+          ],
+          "returns": "unit"
+        },
+        {
           "description": "Changes a flat tile map's cell to one of its tiles, by number. A negative number empties the cell.",
           "kind": "function",
           "name": "set_tile",
@@ -1808,6 +1888,42 @@
         }
       ],
       "name": "Keyboard"
+    },
+    {
+      "description": "A light in a 2D scene: it brightens sprites, tiles and shapes near it when the scene's environment turns 2D lighting on. Switch one off with its object's `set_active`.",
+      "members": [
+        {
+          "description": "The light's color. Lowering `a` dims it, the way it fades a sprite.",
+          "kind": "value",
+          "name": "color",
+          "type": "Color"
+        },
+        {
+          "description": "How the light fades toward its edge: 1 fades evenly, higher numbers keep it bright near the middle and drop off sharply.",
+          "kind": "value",
+          "name": "falloff",
+          "type": "f32"
+        },
+        {
+          "description": "How high above the scene the light hangs. Only images with a normal map notice: low lights rake across their bumps, high ones light them evenly.",
+          "kind": "value",
+          "name": "height",
+          "type": "f32"
+        },
+        {
+          "description": "How bright the light is; 0 is off.",
+          "kind": "value",
+          "name": "intensity",
+          "type": "f32"
+        },
+        {
+          "description": "How far the light reaches, in world units.",
+          "kind": "value",
+          "name": "radius",
+          "type": "f32"
+        }
+      ],
+      "name": "Light2d"
     },
     {
       "description": "A managed number tween; read with Tween.number_value.",
@@ -3414,6 +3530,36 @@
       "name": "Sequence"
     },
     {
+      "description": "The four numbers a sprite's shader reads. What each one means is up to the shader.",
+      "members": [
+        {
+          "description": "The fourth number.",
+          "kind": "value",
+          "name": "w",
+          "type": "f32"
+        },
+        {
+          "description": "The first number.",
+          "kind": "value",
+          "name": "x",
+          "type": "f32"
+        },
+        {
+          "description": "The second number.",
+          "kind": "value",
+          "name": "y",
+          "type": "f32"
+        },
+        {
+          "description": "The third number.",
+          "kind": "value",
+          "name": "z",
+          "type": "f32"
+        }
+      ],
+      "name": "ShaderParams"
+    },
+    {
       "description": "A shape drawn in the game world, such as a circle, polygon or ring, with an inside color and an outline.",
       "members": [
         {
@@ -3493,6 +3639,12 @@
           "kind": "value",
           "name": "layer",
           "type": "f32"
+        },
+        {
+          "description": "Four numbers the sprite's shader reads, as `x`, `y`, `z` and `w`. What each one does is up to the shader: how far a dissolve has got, how bright a flash is.",
+          "kind": "value",
+          "name": "shader_params",
+          "type": "ShaderParams"
         },
         {
           "description": "A color the image is multiplied by. White leaves it unchanged; lowering `a` fades it out.",
@@ -4553,6 +4705,36 @@
         }
       ],
       "name": "World"
+    },
+    {
+      "description": "Words placed in the game world, such as a damage number or a name over a character. Change the words with `Ui.set_text` and `Ui.set_number`, as for interface text.",
+      "members": [
+        {
+          "description": "The words' color. Lowering `a` fades them out; colored spans fade with it.",
+          "kind": "value",
+          "name": "color",
+          "type": "Color"
+        },
+        {
+          "description": "How tall a line of the words is, in world units.",
+          "kind": "value",
+          "name": "font_size",
+          "type": "f32"
+        },
+        {
+          "description": "Drawing order: drawn over sprites in the same layer, under higher ones.",
+          "kind": "value",
+          "name": "layer",
+          "type": "f32"
+        },
+        {
+          "description": "How many letters show, for a typewriter reveal. Negative shows them all.",
+          "kind": "value",
+          "name": "visible",
+          "type": "f32"
+        }
+      ],
+      "name": "WorldText"
     }
   ]
 }
