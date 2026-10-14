@@ -1,6 +1,7 @@
 //! Drawing sprites in as few passes as the ordering allows.
 
 mod instance;
+mod pipelines;
 mod stats;
 
 #[cfg(test)]
@@ -10,19 +11,18 @@ pub use instance::{SpriteDepth, SpriteInstance};
 pub use stats::SpriteBatchStats;
 
 use instance::BatchUniform;
+use pipelines::PipelineSet;
 
-use std::borrow::Cow;
+use std::collections::HashMap;
 
 use glam::Mat4;
 use thiserror::Error;
 use wgpu::util::DeviceExt;
 
 use crate::{
-    DepthTarget, MeshBuffers, RegistryIdentity, SpriteBlendMode, TextureId, TextureRegistry,
-    TexturedVertex,
+    DepthTarget, MeshBuffers, RegistryIdentity, SpriteBlendMode, SpriteEnvironment, SpriteShader,
+    TextureId, TextureRegistry, TexturedVertex,
 };
-
-const SHADER: &str = include_str!("../sprite_batch.wgsl");
 
 const DEFAULT_CAPACITY: u32 = 64;
 
@@ -58,12 +58,14 @@ struct Batch {
 
 #[derive(Debug)]
 pub struct SpriteBatchRenderer {
-    /// One pipeline per depth behaviour, because the comparison is pipeline
-    /// state: a batch cannot choose between them at draw time otherwise.
-    over_the_world: wgpu::RenderPipeline,
-    within_the_world: wgpu::RenderPipeline,
-    /// Opaque, depth-writing surfaces: the blocks a camera can go round.
-    solid_in_the_world: wgpu::RenderPipeline,
+    /// The built-in look, which a batch with no shader draws with.
+    built_in: PipelineSet,
+    /// Pipelines for project shaders, by asset path, with the revision they
+    /// were built from. A reload has a new revision and replaces its entry
+    /// rather than adding one, so editing a shader fifty times holds one set.
+    shaded: HashMap<String, (u64, PipelineSet)>,
+    layout: wgpu::PipelineLayout,
+    target_format: wgpu::TextureFormat,
     bind_group_layout: wgpu::BindGroupLayout,
     mesh: MeshBuffers,
     /// Grown as a frame needs them and reused every frame after.
@@ -71,6 +73,7 @@ pub struct SpriteBatchRenderer {
     /// Which slot the next batch of this frame takes.
     next: usize,
     clip: Option<[u32; 4]>,
+    time: f32,
     blend_mode: SpriteBlendMode,
     stats: SpriteBatchStats,
 }
@@ -90,84 +93,45 @@ impl SpriteBatchRenderer {
         blend_mode: SpriteBlendMode,
     ) -> Self {
         let bind_group_layout = create_bind_group_layout(device);
-        let shader = device.create_shader_module(wgpu::ShaderModuleDescriptor {
-            label: Some("Sindri sprite batch shader"),
-            source: wgpu::ShaderSource::Wgsl(Cow::Borrowed(SHADER)),
-        });
         let layout = device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
             label: Some("Sindri sprite batch pipeline layout"),
             bind_group_layouts: &[Some(&bind_group_layout)],
             immediate_size: 0,
         });
-        let pipeline = |depth: SpriteDepth| {
-            device.create_render_pipeline(&wgpu::RenderPipelineDescriptor {
-                label: Some("Sindri sprite batch pipeline"),
-                layout: Some(&layout),
-                vertex: wgpu::VertexState {
-                    module: &shader,
-                    entry_point: Some("vs_main"),
-                    buffers: &[
-                        Some(TexturedVertex::layout()),
-                        Some(SpriteInstance::layout()),
-                    ],
-                    compilation_options: wgpu::PipelineCompilationOptions::default(),
-                },
-                fragment: Some(wgpu::FragmentState {
-                    module: &shader,
-                    // A writing batch discards what it cannot show, so the
-                    // shape a cutout leaves is a hole in the geometry rather
-                    // than a hole in the world behind it.
-                    entry_point: Some(if depth.writes() {
-                        "fs_solid"
-                    } else {
-                        "fs_main"
-                    }),
-                    compilation_options: wgpu::PipelineCompilationOptions::default(),
-                    targets: &[Some(wgpu::ColorTargetState {
-                        format: target_format,
-                        blend: Some(if depth.writes() {
-                            wgpu::BlendState::REPLACE
-                        } else {
-                            blend_mode.blend_state()
-                        }),
-                        write_mask: wgpu::ColorWrites::ALL,
-                    })],
-                }),
-                primitive: wgpu::PrimitiveState {
-                    // Solid geometry is closed, so a face pointing away from
-                    // the camera is a face on the far side of the thing it
-                    // belongs to: drawing it costs fill and, where the solid is
-                    // open at the edges, shows its inside. A blended sprite is
-                    // not closed and often faces away on purpose, so only the
-                    // writing pipeline culls.
-                    cull_mode: depth.writes().then_some(wgpu::Face::Back),
-                    ..wgpu::PrimitiveState::default()
-                },
-                depth_stencil: Some(wgpu::DepthStencilState {
-                    format: DepthTarget::FORMAT,
-                    depth_write_enabled: Some(depth.writes()),
-                    depth_compare: Some(depth.compare()),
-                    stencil: wgpu::StencilState::default(),
-                    bias: wgpu::DepthBiasState::default(),
-                }),
-                multisample: wgpu::MultisampleState::default(),
-                multiview_mask: None,
-                cache: None,
-            })
-        };
+        let built_in = PipelineSet::new(
+            device,
+            &layout,
+            target_format,
+            blend_mode,
+            &crate::sprite_shader::compose(crate::sprite_shader::BUILT_IN),
+        );
 
         Self {
-            over_the_world: pipeline(SpriteDepth::Ignore),
-            within_the_world: pipeline(SpriteDepth::Test),
-            solid_in_the_world: pipeline(SpriteDepth::Write),
+            built_in,
+            shaded: HashMap::new(),
+            layout,
+            target_format,
             bind_group_layout,
             mesh: MeshBuffers::new(device, "Sindri sprite batch quad", &VERTICES, &INDICES),
             batches: Vec::new(),
             next: 0,
             clip: None,
+            time: 0.0,
             blend_mode,
             stats: SpriteBatchStats::default(),
         }
+    }
+
+    /// What every sprite in the frame being encoded shares.
+    ///
+    /// Set once per frame by whoever encodes it, the way the clip is: the
+    /// whole frame shares one clock.
+    pub fn set_environment(&mut self, environment: &SpriteEnvironment) {
+        self.time = if environment.time.is_finite() {
+            environment.time
+        } else {
+            0.0
+        };
     }
 
     /// Starts a submission, so the next batch takes the first slot again.
@@ -222,6 +186,50 @@ impl SpriteBatchRenderer {
         depth: SpriteDepth,
         instances: &[SpriteInstance],
     ) -> Result<SpriteBatchStats, SpriteBatchError> {
+        self.draw_shaded(
+            device,
+            queue,
+            encoder,
+            SpriteBatchTarget {
+                color: target,
+                depth: depth_target,
+            },
+            registry,
+            SpriteBatchDraw {
+                texture,
+                shader: None,
+                view_projection,
+                depth,
+                instances,
+            },
+        )
+    }
+
+    /// [`Self::draw`], with the batch drawn through a project shader when it
+    /// names one.
+    pub fn draw_shaded(
+        &mut self,
+        device: &wgpu::Device,
+        queue: &wgpu::Queue,
+        encoder: &mut wgpu::CommandEncoder,
+        target: SpriteBatchTarget<'_>,
+        registry: &TextureRegistry,
+        batch: SpriteBatchDraw<'_>,
+    ) -> Result<SpriteBatchStats, SpriteBatchError> {
+        let SpriteBatchDraw {
+            texture,
+            shader,
+            view_projection,
+            depth,
+            instances,
+        } = batch;
+        let SpriteBatchTarget {
+            color: target,
+            depth: depth_target,
+        } = target;
+        if let Some(shader) = shader {
+            self.prepare_shader(device, shader);
+        }
         let instance_count =
             u32::try_from(instances.len()).map_err(|_| SpriteBatchError::TooManyInstances)?;
         let stats = SpriteBatchStats::for_sprite_count(instance_count);
@@ -237,6 +245,7 @@ impl SpriteBatchRenderer {
                 0,
                 bytemuck::bytes_of(&BatchUniform {
                     view_projection: view_projection.to_cols_array_2d(),
+                    time: [self.time, 0.0, 0.0, 0.0],
                 }),
             );
             queue.write_buffer(&batch.instances, 0, bytemuck::cast_slice(instances));
@@ -276,11 +285,10 @@ impl SpriteBatchRenderer {
         if let Some([x, y, w, h]) = self.clip {
             pass.set_scissor_rect(x, y, w, h);
         }
-        pass.set_pipeline(match depth {
-            SpriteDepth::Ignore => &self.over_the_world,
-            SpriteDepth::Test => &self.within_the_world,
-            SpriteDepth::Write => &self.solid_in_the_world,
-        });
+        let pipelines = shader
+            .and_then(|shader| self.shaded.get(shader.name()))
+            .map_or(&self.built_in, |(_, pipelines)| pipelines);
+        pass.set_pipeline(pipelines.for_depth(depth));
         pass.set_bind_group(
             0,
             batch
@@ -294,6 +302,32 @@ impl SpriteBatchRenderer {
         Ok(stats)
     }
 
+    /// Builds the pipelines for `shader` unless the ones for its revision exist.
+    fn prepare_shader(&mut self, device: &wgpu::Device, shader: &SpriteShader) {
+        if self
+            .shaded
+            .get(shader.name())
+            .is_some_and(|(revision, _)| *revision == shader.revision())
+        {
+            return;
+        }
+        let pipelines = PipelineSet::new(
+            device,
+            &self.layout,
+            self.target_format,
+            self.blend_mode,
+            shader.composed(),
+        );
+        self.shaded
+            .insert(shader.name().to_owned(), (shader.revision(), pipelines));
+    }
+
+    /// How many project shaders this renderer has pipelines for.
+    #[must_use]
+    pub fn shader_count(&self) -> usize {
+        self.shaded.len()
+    }
+
     /// The slot this frame's next batch draws from, grown to hold `capacity`.
     fn reserve(&mut self, device: &wgpu::Device, capacity: u32) -> Result<usize, SpriteBatchError> {
         let slot = self.next;
@@ -305,6 +339,7 @@ impl SpriteBatchRenderer {
                     label: Some("Sindri sprite batch uniform"),
                     contents: bytemuck::bytes_of(&BatchUniform {
                         view_projection: Mat4::IDENTITY.to_cols_array_2d(),
+                        time: [0.0; 4],
                     }),
                     usage: wgpu::BufferUsages::UNIFORM | wgpu::BufferUsages::COPY_DST,
                 }),
@@ -385,7 +420,8 @@ fn create_bind_group_layout(device: &wgpu::Device) -> wgpu::BindGroupLayout {
         entries: &[
             wgpu::BindGroupLayoutEntry {
                 binding: 0,
-                visibility: wgpu::ShaderStages::VERTEX,
+                // The fragment stage reads the time.
+                visibility: wgpu::ShaderStages::VERTEX_FRAGMENT,
                 ty: wgpu::BindingType::Buffer {
                     ty: wgpu::BufferBindingType::Uniform,
                     has_dynamic_offset: false,
@@ -428,6 +464,24 @@ fn create_instance_buffer(
         usage: wgpu::BufferUsages::VERTEX | wgpu::BufferUsages::COPY_DST,
         mapped_at_creation: false,
     }))
+}
+
+/// Where a sprite batch draws.
+#[derive(Clone, Copy)]
+pub struct SpriteBatchTarget<'a> {
+    pub color: &'a wgpu::TextureView,
+    pub depth: &'a DepthTarget,
+}
+
+/// One batch: what it draws, how, and through which camera.
+#[derive(Clone, Copy)]
+pub struct SpriteBatchDraw<'a> {
+    pub texture: TextureId,
+    /// The project shader the batch is drawn through, or the built-in look.
+    pub shader: Option<&'a SpriteShader>,
+    pub view_projection: Mat4,
+    pub depth: SpriteDepth,
+    pub instances: &'a [SpriteInstance],
 }
 
 #[derive(Clone, Copy, Debug, Error, PartialEq, Eq)]

@@ -44,6 +44,7 @@ contracts below; dated evidence should not override them.
 - [Presentation surfaces](rendering-surface.md)
 - [Colour handling](rendering-color.md)
 - [Transparent rendering](rendering-transparency.md)
+- [Sprite shaders](sprite-shaders.md)
 
 ## Editor
 

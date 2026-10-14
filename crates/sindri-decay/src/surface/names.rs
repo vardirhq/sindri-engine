@@ -11,6 +11,9 @@ pub(crate) const SHAPE: &str = "Shape";
 
 pub(crate) const RGBA: &str = "Rgba";
 
+/// A sprite's four shader parameters, read and written as `x`, `y`, `z`, `w`.
+pub(crate) const SHADER_PARAMS_TYPE: &str = "ShaderParams";
+
 /// Every way the person reaches the game, gathered under one name.
 ///
 /// A script looking for touch controls starts at `Input`, so that is where

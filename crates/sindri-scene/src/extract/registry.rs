@@ -25,9 +25,9 @@ use crate::audio::AudioSourceComponent;
 use crate::components::{
     CameraBehaviorComponent, CameraComponent, EnvironmentComponent, GridNavigationComponent,
     GridOccupantComponent, GridPlacementComponent, LightComponent, MeshComponent,
-    NaturalTerrainDocument, ShapeComponent, SpriteComponent, TileGridComponent,
-    TileVolumeComponent, TilemapComponent, UiImageComponent, UiShapeBlend, UiShapeComponent,
-    UiShapeKind, UiTextComponent, VoxelGeneratorDocument, VoxelWorldComponent,
+    NaturalTerrainDocument, SpriteComponent, TileGridComponent, TileVolumeComponent,
+    TilemapComponent, UiImageComponent, UiTextComponent, VoxelGeneratorDocument,
+    VoxelWorldComponent,
 };
 use crate::effects::EffectBurstComponent;
 use crate::screen_ui::{
@@ -45,59 +45,6 @@ pub(super) fn builtin_components() -> Result<ComponentSchemaRegistry, SceneExtra
     // What the fields are for, once every field exists to be described.
     super::meanings::describe_builtins(&mut components)?;
     Ok(components)
-}
-
-/// The two shape components, whose blanks are long enough to be their own
-/// function.
-///
-/// Long because a shape is described entirely by numbers — there is no texture
-/// standing in for the look — and because a blank that drew nothing would read
-/// as a broken add rather than an empty one. Both default to a mint outline.
-fn register_shapes(components: &mut ComponentSchemaRegistry) -> Result<(), SceneExtractError> {
-    // The same blank as the overlay shape, minus the anchor: a mint outline,
-    // because a shape whose default drew nothing would read as a broken add.
-    components.register_with_default::<ShapeComponent>(
-        "Shape",
-        serde_json::json!({
-            "kind": UiShapeKind::default().as_str(),
-            "count": 6.0,
-            "fill": [0.0, 0.0, 0.0, 0.0],
-            "stroke": [0.49, 1.0, 0.77, 1.0],
-            "stroke_width": 0.06,
-            "corner_radius": 0.0,
-            "dashes": 0.0,
-            "dash_duty": 0.5,
-            "sweep_start": 0.0,
-            "sweep_turns": 1.0,
-            "blend": UiShapeBlend::default().as_str(),
-            "layer": 0
-        }),
-    )?;
-    components.register_with_default::<UiShapeComponent>(
-        "UI Shape",
-        serde_json::json!({
-            "kind": UiShapeKind::default().as_str(),
-            "count": 6.0,
-            "fill": [0.0, 0.0, 0.0, 0.0],
-            "stroke": [0.49, 1.0, 0.77, 1.0],
-            "stroke_width": 0.04,
-            "corner_radius": 0.0,
-            "dashes": 0.0,
-            "dash_duty": 0.5,
-            "sweep_start": 0.0,
-            "sweep_turns": 1.0,
-            "blend": UiShapeBlend::default().as_str(),
-            "anchor": "center",
-            "layer": 0,
-            "shadow": {
-                "color": [0.0, 0.0, 0.0, 0.0],
-                "offset": [0.0, 0.0],
-                "blur": 0.0,
-                "spread": 0.0
-            }
-        }),
-    )?;
-    Ok(())
 }
 
 fn register_cameras(components: &mut ComponentSchemaRegistry) -> Result<(), SceneExtractError> {
@@ -303,7 +250,9 @@ fn register_drawables(components: &mut ComponentSchemaRegistry) -> Result<(), Sc
             "layer": 0,
             // Off by default: a new sprite is as likely to be something
             // lying on the ground as somebody standing on it.
-            "billboard": false
+            "billboard": false,
+            "shader": "",
+            "shader_params": [0.0, 0.0, 0.0, 0.0]
         }),
     )?;
     // The UI half of the same picture: anchored to the middle of the
@@ -387,7 +336,7 @@ fn register_drawables(components: &mut ComponentSchemaRegistry) -> Result<(), Sc
     // which is the panel border that most of a UI is made of. A default of
     // nothing — no fill, no stroke — would add a component that draws
     // absolutely nothing and read as a broken button.
-    register_shapes(components)?;
+    two_d::register_shapes(components)?;
     register_tiles(components)?;
     Ok(())
 }
@@ -593,6 +542,8 @@ fn register_gameplay(components: &mut ComponentSchemaRegistry) -> Result<(), Sce
     )?;
     Ok(())
 }
+
+mod two_d;
 
 #[cfg(test)]
 mod tests;

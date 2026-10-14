@@ -17,6 +17,7 @@ mod shadow;
 mod shape;
 mod sprite;
 mod sprite_batch;
+mod sprite_shader;
 mod target;
 mod text;
 mod texture;
@@ -40,7 +41,7 @@ pub use encode::{
 pub use fog::FogSettings;
 pub use frame::{
     ClearOperations, ExtractedFrame, FrameCamera, FrameCommand, FramePass, FramePlanError,
-    PreparedFrame, RenderLayer, RenderStage, Viewport,
+    PreparedFrame, RenderLayer, RenderStage, SpriteEnvironment, Viewport,
 };
 pub use glyph::{
     EDGE, FIELD_PER_RASTER_PIXEL, GlyphAtlas, GlyphDrawError, GlyphInstance, GlyphRenderer,
@@ -59,8 +60,10 @@ pub use shape::{
 };
 pub use sprite::{SpriteBlendMode, SpriteRenderer};
 pub use sprite_batch::{
-    SpriteBatchError, SpriteBatchRenderer, SpriteBatchStats, SpriteDepth, SpriteInstance,
+    SpriteBatchDraw, SpriteBatchError, SpriteBatchRenderer, SpriteBatchStats, SpriteBatchTarget,
+    SpriteDepth, SpriteInstance,
 };
+pub use sprite_shader::{SpriteShader, SpriteShaderError};
 pub use target::{ViewportTarget, encode_clear, sampled_format};
 pub use text::{
     GlyphQuads, LineAlign, TextAlign, TextCase, TextError, TextFit, TextInstance, TextRenderer,

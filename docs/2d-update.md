@@ -36,24 +36,26 @@ game in this repository.
 ## Slices
 
 ### 1. Sprite shaders
-- [ ] A sprite shader is a project `.wgsl` asset that defines one function,
+- [x] A sprite shader is a project `.wgsl` asset that defines one function,
   `fn sprite_shader(input: SpriteShaderInput) -> vec4<f32>`. The engine wraps
   it in the sprite pipeline's own vertex stage and prelude: the sampled color,
   UV, the sprite's UV rect, world position, the instance's four shader
   parameters, the frame's time, and the texture and sampler for further
   samples.
-- [ ] `sindri.sprite` gains `shader` (an asset path, empty for none) and
+- [x] `sindri.sprite` gains `shader` (an asset path, empty for none) and
   `shader_params` (four numbers). Params ride on the instance, so sprites
   sharing a texture and a shader still share a draw.
-- [ ] A shader that fails to compile is reported, naming the file and the
+- [x] A shader that fails to compile is reported, naming the file and the
   line, and the sprite falls back to the built-in shader rather than the frame
   failing. The same holds in the browser.
-- [ ] Shaders load through the asset queue on every host, hot reload natively,
+- [x] Shaders load through the asset queue on every host, hot reload natively,
   and export with the project.
-- [ ] The inspector picks a shader from the project's `.wgsl` assets and edits
+- [x] The inspector picks a shader from the project's `.wgsl` assets and edits
   the four params; Decay reads and writes `sprite.shader_params`.
-- [ ] Proof: a feature example, `examples/sprite-shaders`, with an outline, a
-  dissolve, a hit flash and a wave, each driven by a script.
+- [x] Proof: a feature example, `examples/sprite-shaders`, with an outline, a
+  dissolve, a hit flash and a wave; scripts drive the dissolve and the flash,
+  the scene's clock the outline and the wave. Contract:
+  `docs/sprite-shaders.md`.
 
 ### 2. 2D lights
 - [ ] `sindri.light2d`: a point light in the plane, with color, intensity,

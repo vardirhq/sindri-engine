@@ -58,10 +58,11 @@ pub struct SpriteInstance {
     color_multiply: [f32; 4],
     color_offset: [f32; 4],
     corner_shade: [f32; 4],
+    shader_params: [f32; 4],
 }
 
 impl SpriteInstance {
-    const ATTRIBUTES: [wgpu::VertexAttribute; 9] = wgpu::vertex_attr_array![
+    const ATTRIBUTES: [wgpu::VertexAttribute; 10] = wgpu::vertex_attr_array![
         2 => Float32x4,
         3 => Float32x4,
         4 => Float32x4,
@@ -70,7 +71,8 @@ impl SpriteInstance {
         7 => Float32x4,
         8 => Float32x4,
         9 => Float32x4,
-        10 => Float32x4
+        10 => Float32x4,
+        11 => Float32x4
     ];
 
     /// A sprite drawn from the whole of its texture with identity color math.
@@ -82,6 +84,7 @@ impl SpriteInstance {
             color_multiply: [1.0; 4],
             color_offset: [0.0; 4],
             corner_shade: [1.0; 4],
+            shader_params: [0.0; 4],
         }
     }
 
@@ -117,6 +120,21 @@ impl SpriteInstance {
         self.color_multiply = multiply;
         self.color_offset = offset;
         self
+    }
+
+    /// The four numbers a sprite shader reads as `input.params`.
+    ///
+    /// Per instance, so sprites sharing a shader and a texture still share a
+    /// draw while each dissolves, flashes or waves by its own amount.
+    #[must_use]
+    pub const fn with_shader_params(mut self, params: [f32; 4]) -> Self {
+        self.shader_params = params;
+        self
+    }
+
+    /// The four numbers a sprite shader reads as `input.params`.
+    pub const fn shader_params(self) -> [f32; 4] {
+        self.shader_params
     }
 
     /// The part of the texture this instance draws.
@@ -157,4 +175,7 @@ impl SpriteInstance {
 #[derive(Clone, Copy, bytemuck::Pod, bytemuck::Zeroable)]
 pub(super) struct BatchUniform {
     pub(super) view_projection: [[f32; 4]; 4],
+    /// The frame's time in seconds in the first lane; the rest is padding to
+    /// the sixteen bytes a uniform member is aligned to.
+    pub(super) time: [f32; 4],
 }

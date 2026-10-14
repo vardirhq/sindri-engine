@@ -46,6 +46,7 @@ mod benchmark {
         let instance = wgpu::Instance::default();
         let gpu = GpuContext::request(&instance, None, &GpuRequestOptions::default()).await?;
         let mut renderer = ProjectRenderer::new(&gpu, &opened.images, &opened.sheets, SIZE)?;
+        renderer.bind_shaders(&opened.shaders)?;
         let mut playing: Vec<Value> = Vec::with_capacity(frames);
         for at in 0..settle + frames {
             let began = Instant::now();

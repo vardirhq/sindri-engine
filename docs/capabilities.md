@@ -1149,6 +1149,23 @@ The eight-point cap keeps the per-instance vertex attributes inside Sindri's
 conservative WebGPU limits. Orbital Last Stand exercises the capability with the
 Strider's exact six-point hull.
 
+**A sprite can be drawn through the project's own shader.** `sindri.sprite`
+names a `.wgsl` asset in `shader` and carries four `shader_params`. The file
+defines `fn sprite_shader(input: SpriteShaderInput) -> vec4<f32>`, handed the
+pixel as it would draw unshaded, its UVs and the sprite's UV rect, its world
+position, the four parameters and the scene's clock, with `sample_sprite` and
+`sprite_texel_size` to read the texture again; the engine supplies the vertex
+stage and pipeline around it. Parameters ride on the instance, so sprites
+sharing a texture and a shader share a draw. Every host validates a shader with
+naga as it binds it: the editor loads, watches and hot-reloads the ones a scene
+names, `sindri-player` reads them natively and from the export manifest, and
+`sindri-export` refuses one that does not compile. A failure names the file and
+the line in the project's own numbering and the sprite falls back to the
+built-in look. Decay writes `this.sprite.shader_params.{x,y,z,w}`.
+`examples/sprite-shaders` draws an outline, a dissolve, a hit flash and a wave;
+shaders reach `sindri.sprite` only, with one texture and no material asset. See
+`docs/sprite-shaders.md`.
+
 **A sliced image says how it is cut, once.** A sheet document beside a texture —
 `textures/tiles.png` is sliced by `textures/tiles.sheet`, at a derived ID
 nothing has to declare — names the parts of it, either as a grid or as explicit

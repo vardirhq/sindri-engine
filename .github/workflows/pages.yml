@@ -74,6 +74,7 @@ jobs:
             "examples/input:input" \
             "examples/audio:audio" \
             "examples/sequence:sequence" \
+            "examples/sprite-shaders:sprite-shaders" \
             "examples/ui:ui" \
             "game:causeway" \
             "games/flappy:flappy" \

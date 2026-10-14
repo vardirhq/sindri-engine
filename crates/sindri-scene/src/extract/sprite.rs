@@ -11,7 +11,7 @@ use glam::{Mat4, Quat, Vec3};
 use sindri_core::{EntityId, SpriteRef, World};
 use sindri_render::{
     ExtractedFrame, FrameCamera, FrameCommand, FramePass, RenderLayer, RenderStage, SpriteDepth,
-    SpriteInstance, TextureId, TransparentOrder, UvRect,
+    SpriteInstance, SpriteShader, TextureId, TransparentOrder, UvRect,
 };
 
 use crate::TileSetBindings;
@@ -67,6 +67,9 @@ pub(super) enum DrawSpace {
 pub(super) struct SpriteDraw {
     pub(super) space: DrawSpace,
     pub(super) texture: TextureId,
+    /// The project shader the image is drawn through. Part of what makes two
+    /// adjacent images one batch, because it is pipeline state.
+    pub(super) shader: Option<SpriteShader>,
     pub(super) clip: Option<[u32; 4]>,
     pub(super) order: TransparentOrder,
     pub(super) sprite: SpriteInstance,
@@ -183,6 +186,9 @@ impl SceneExtractor {
             if !sprite.color_transform.is_finite() {
                 return Err(SceneExtractError::InvalidColorTransform);
             }
+            if !sprite.shader_params.iter().all(|value| value.is_finite()) {
+                return Err(SceneExtractError::InvalidShaderParams);
+            }
             let transform = world.world_transform(entity).unwrap_or_default();
             let camera = cameras.world.ok_or(SceneExtractError::MissingWorldCamera)?;
             // The anchor moves the quad in its own space, so it scales and
@@ -204,12 +210,18 @@ impl SceneExtractor {
                 clip: None,
                 space: DrawSpace::World,
                 texture: textures.resolve(reference.texture()),
+                // An unbound shader draws the built-in look; the host reports
+                // the missing file by name, as it does a missing texture.
+                shader: (!sprite.shader.is_empty())
+                    .then(|| textures.shaders().get(&sprite.shader).cloned())
+                    .flatten(),
                 order,
                 sprite: SpriteInstance::new(model, sprite.tint)
                     .with_color_transform(
                         sprite.color_transform.multiply,
                         sprite.color_transform.offset,
                     )
+                    .with_shader_params(sprite.shader_params)
                     .with_uv_rect(drawn_rect(
                         entity, &reference, textures, animations, resting,
                     )),
@@ -230,12 +242,14 @@ impl SceneExtractor {
             let layer = first.order.layer();
             let texture = first.texture;
             let clip = first.clip;
+            let shader = first.shader;
             let mut instances = vec![first.sprite];
             while draws.peek().is_some_and(|draw| {
                 draw.space == space
                     && draw.order.layer() == layer
                     && draw.texture == texture
                     && draw.clip == clip
+                    && draw.shader == shader
             }) {
                 instances.push(
                     draws
@@ -273,6 +287,7 @@ impl SceneExtractor {
                     },
                     FrameCommand::SpriteBatch {
                         texture,
+                        shader,
                         depth,
                         instances,
                     },

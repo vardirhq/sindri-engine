@@ -26,6 +26,7 @@ impl SceneTextures {
         notes.extend(self.poll_tile_sets());
         notes.extend(self.poll_sheets());
         notes.extend(self.poll_fonts(text));
+        notes.extend(self.poll_shaders());
         let Self {
             loader: Some(loader),
             watch,

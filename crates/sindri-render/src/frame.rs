@@ -3,7 +3,7 @@ use thiserror::Error;
 
 use crate::{
     CachedMeshId, CachedTexturedMeshUpload, MeshSurface, ShapeBlend, ShapeInstance, SpriteDepth,
-    SpriteInstance, TextInstance, TextureId, TexturedVertex,
+    SpriteInstance, SpriteShader, TextInstance, TextureId, TexturedVertex,
 };
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -110,6 +110,9 @@ pub enum FrameCommand {
     /// One batch per texture: instances sharing a texture draw in a single call.
     SpriteBatch {
         texture: TextureId,
+        /// The project shader the batch is drawn through, or `None` for the
+        /// built-in look. Part of the batch because it is pipeline state.
+        shader: Option<SpriteShader>,
         /// Whether the batch is in the world, and so hidden by what is in front
         /// of it, or over it. The batch carries it because the pipeline does:
         /// the answer cannot be read off the instances.
@@ -167,11 +170,19 @@ impl FramePass {
     }
 }
 
+/// What every sprite in a frame shares: the clock its shaders read.
+#[derive(Clone, Debug, Default, PartialEq)]
+pub struct SpriteEnvironment {
+    /// Seconds since the scene started playing, as sprite shaders see it.
+    pub time: f32,
+}
+
 #[derive(Clone, Debug)]
 pub struct ExtractedFrame {
     viewport: Viewport,
     clear: ClearOperations,
     passes: Vec<FramePass>,
+    sprites: SpriteEnvironment,
 }
 
 impl ExtractedFrame {
@@ -180,7 +191,17 @@ impl ExtractedFrame {
             viewport,
             clear,
             passes: Vec::new(),
+            sprites: SpriteEnvironment { time: 0.0 },
         }
+    }
+
+    /// What every sprite in this frame shares.
+    pub fn set_sprite_environment(&mut self, environment: SpriteEnvironment) {
+        self.sprites = environment;
+    }
+
+    pub const fn sprite_environment(&self) -> &SpriteEnvironment {
+        &self.sprites
     }
 
     pub const fn viewport(&self) -> Viewport {
@@ -203,6 +224,7 @@ impl ExtractedFrame {
             viewport: self.viewport,
             clear: self.clear,
             passes: self.passes,
+            sprites: self.sprites,
         })
     }
 }
@@ -212,6 +234,7 @@ pub struct PreparedFrame {
     viewport: Viewport,
     clear: ClearOperations,
     passes: Vec<FramePass>,
+    sprites: SpriteEnvironment,
 }
 
 impl PreparedFrame {
@@ -225,6 +248,11 @@ impl PreparedFrame {
 
     pub fn passes(&self) -> &[FramePass] {
         &self.passes
+    }
+
+    /// What every sprite in this frame shares.
+    pub const fn sprite_environment(&self) -> &SpriteEnvironment {
+        &self.sprites
     }
 }
 

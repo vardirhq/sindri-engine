@@ -476,3 +476,30 @@ fn the_board_is_cleared_with_the_instances() {
     scripts.clear();
     assert!(!scripts.blackboard().has("score"), "a new run starts fresh");
 }
+
+/// A sprite shader's four parameters are the script's to drive: a dissolve
+/// advances, a flash fades.
+#[test]
+fn a_script_drives_its_sprite_shader_parameters() {
+    let (mut world, entity, sources) = world(
+        r"script S { fn update(dt: f32) {
+            this.sprite.shader_params.x = 0.25;
+            this.sprite.shader_params.w = this.sprite.shader_params.x * 2.0;
+        } }",
+    );
+    // As the editor authors a sprite: every field present, at its default.
+    world
+        .get_mut(entity)
+        .expect("the entity exists")
+        .components
+        .get_mut(SPRITE)
+        .expect("the sprite exists")["shader_params"] = json!([0.0, 0.0, 0.0, 0.0]);
+    let report = Scripts::new().advance(
+        &mut world,
+        &registry(),
+        ScriptFrame::new(&sources, &InputState::default(), 0.5),
+    );
+    assert!(report.is_quiet(), "{report:?}");
+    let sprite = sprite(&world, entity);
+    assert_eq!(sprite["shader_params"], json!([0.25, 0.0, 0.0, 0.5]));
+}

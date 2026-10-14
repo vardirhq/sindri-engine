@@ -496,6 +496,15 @@ Playing an object's sequences: choreography set up for it in the scene's Timelin
 - `stop(entity: Entity)` → `unit` — Stops an object's sequence where it is.
 - `time(entity: Entity)` → `f32` — How far into its sequence an object has got, in seconds.
 
+### `ShaderParams`
+
+The four numbers a sprite's shader reads. What each one means is up to the shader.
+
+- `w`: `f32` — The fourth number.
+- `x`: `f32` — The first number.
+- `y`: `f32` — The second number.
+- `z`: `f32` — The third number.
+
 ### `Shape`
 
 A shape drawn in the game world, such as a circle, polygon or ring, with an inside color and an outline.
@@ -517,6 +526,7 @@ A 2D image drawn in the game world, and how it is colored.
 - `color_multiply`: `Color` — Another color the image is multiplied by, on top of `tint`.
 - `color_offset`: `Color` — A color added on top of the image, which can make it brighter or flash white. Keep its `a` at 0, or the image's transparent edges become visible.
 - `layer`: `f32` — Drawing order: higher numbers are drawn in front of lower ones.
+- `shader_params`: `ShaderParams` — Four numbers the sprite's shader reads, as `x`, `y`, `z` and `w`. What each one does is up to the shader: how far a dissolve has got, how bright a flash is.
 - `tint`: `Color` — A color the image is multiplied by. White leaves it unchanged; lowering `a` fades it out.
 
 ### `Stick`

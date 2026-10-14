@@ -30,6 +30,7 @@ mod placement;
 pub(crate) mod screen_ui;
 mod sequence;
 mod shape_gizmos;
+mod sprite_shaders;
 mod textures;
 mod tile_chunk;
 mod tile_surface;
@@ -111,6 +112,10 @@ pub use sequence::{
 pub use shape_gizmos::{GizmoKind, GizmoStroke, ShapeGizmo, shape_gizmos};
 /// The shapes a collider is made of, which the editor draws and resizes.
 pub use sindri_physics::{Collider2d, ColliderShape2d};
+pub use sprite_shaders::{
+    SHADER_NAMING_COMPONENTS, SpriteShaderBindings, referenced_sprite_shaders,
+    unresolved_sprite_shaders,
+};
 pub use textures::{
     FONT_NAMING_COMPONENTS, PROCEDURAL_TEXTURES, ProceduralTexture, SheetBindError,
     TEXTURE_NAMING_COMPONENTS, TextureBindings, referenced_fonts, referenced_sheets,

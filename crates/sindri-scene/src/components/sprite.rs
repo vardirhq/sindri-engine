@@ -94,6 +94,14 @@ pub struct SpriteComponent {
     /// viewer would stand it upright.
     #[serde(default)]
     pub billboard: bool,
+    /// The project sprite shader this sprite is drawn through, as an asset
+    /// path, or empty for the built-in look.
+    #[serde(default)]
+    pub shader: String,
+    /// Four numbers the shader reads as `input.params`: how far a dissolve
+    /// has got, how bright a flash is. Meaningless without a shader.
+    #[serde(default)]
+    pub shader_params: [f32; 4],
 }
 
 impl SpriteComponent {

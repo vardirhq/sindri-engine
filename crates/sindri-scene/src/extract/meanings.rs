@@ -71,7 +71,11 @@ fn describe_drawables(components: &mut ComponentSchemaRegistry) -> Result<(), Sc
     )])?;
     describe_projections(components)?;
     components.describe::<MeshComponent>([("texture", texture())])?;
-    components.describe::<SpriteComponent>([("texture", texture()), ("tint", COLOR)])?;
+    components.describe::<SpriteComponent>([
+        ("texture", texture()),
+        ("tint", COLOR),
+        ("shader", FieldMeaning::Asset(AssetKind::Shader)),
+    ])?;
     components.describe::<UiImageComponent>([
         ("texture", texture()),
         ("tint", COLOR),

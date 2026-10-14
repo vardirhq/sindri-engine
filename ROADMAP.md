@@ -188,6 +188,12 @@ shaped like the tool.
   chooses from the project browser's OpenType font assets; Add Component offers
   UI Text only when a project font can complete its otherwise dishonest blank
 - [ ] Port particles after the render lifecycle is stable
+- [x] Let a sprite draw through the project's own shader — a `.wgsl` asset
+  defining `fn sprite_shader`, wrapped in the sprite pipeline, with four
+  per-instance `shader_params` Decay can write; checked on bind everywhere,
+  hot-reloaded in the editor, refused by export when broken, and shown by
+  `examples/sprite-shaders`. The rest of the 2D closing round is tracked in
+  `docs/2d-update.md`
 - [ ] Port layers, anchors, and sprite bounds — layers work, and the nine
   anchors are a field of the UI family rather than of every sprite; editor picking uses the renderer's unit-quad geometry directly,
   while reusable component bounds remain. Parallax is not

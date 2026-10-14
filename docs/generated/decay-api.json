@@ -3414,6 +3414,36 @@
       "name": "Sequence"
     },
     {
+      "description": "The four numbers a sprite's shader reads. What each one means is up to the shader.",
+      "members": [
+        {
+          "description": "The fourth number.",
+          "kind": "value",
+          "name": "w",
+          "type": "f32"
+        },
+        {
+          "description": "The first number.",
+          "kind": "value",
+          "name": "x",
+          "type": "f32"
+        },
+        {
+          "description": "The second number.",
+          "kind": "value",
+          "name": "y",
+          "type": "f32"
+        },
+        {
+          "description": "The third number.",
+          "kind": "value",
+          "name": "z",
+          "type": "f32"
+        }
+      ],
+      "name": "ShaderParams"
+    },
+    {
       "description": "A shape drawn in the game world, such as a circle, polygon or ring, with an inside color and an outline.",
       "members": [
         {
@@ -3493,6 +3523,12 @@
           "kind": "value",
           "name": "layer",
           "type": "f32"
+        },
+        {
+          "description": "Four numbers the sprite's shader reads, as `x`, `y`, `z` and `w`. What each one does is up to the shader: how far a dissolve has got, how bright a flash is.",
+          "kind": "value",
+          "name": "shader_params",
+          "type": "ShaderParams"
         },
         {
           "description": "A color the image is multiplied by. White leaves it unchanged; lowering `a` fades it out.",

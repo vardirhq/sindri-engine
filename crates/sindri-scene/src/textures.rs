@@ -37,11 +37,26 @@ pub struct TextureBindings {
     /// height. Kept with the sheet because it is a property of the picture, not
     /// of whichever tilemap happens to draw it.
     tile_overhang_ratios: BTreeMap<String, f32>,
+    /// The project's sprite shaders. Here because every host already hands
+    /// these bindings to extraction, and a shader is loaded and named the way
+    /// a texture is.
+    shaders: crate::SpriteShaderBindings,
 }
 
 impl TextureBindings {
     pub fn new() -> Self {
         Self::default()
+    }
+
+    /// The sprite shaders bound so far.
+    #[must_use]
+    pub const fn shaders(&self) -> &crate::SpriteShaderBindings {
+        &self.shaders
+    }
+
+    /// Binds and unbinds sprite shaders.
+    pub fn shaders_mut(&mut self) -> &mut crate::SpriteShaderBindings {
+        &mut self.shaders
     }
 
     /// Binds `reference` to `texture`, returning the handle it replaced.

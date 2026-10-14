@@ -26,5 +26,8 @@ pub struct ProjectAssets {
     pub sheets: BTreeMap<String, SpriteSheetDocument>,
     pub tile_sets: Vec<(AssetId, TileSetDocument)>,
     pub stylesheets: Vec<Stylesheet>,
+    /// Every sprite shader the project ships, as its path and its source.
+    /// Checked when the host binds it, not here.
+    pub shaders: Vec<(String, String)>,
     pub asset_count: usize,
 }

@@ -115,6 +115,11 @@ pub(crate) fn read(project: &Path) -> Result<ProjectAssets, PlayerError> {
         let source = text(&id, bytes)?;
         weave_sources.insert(id, source);
     }
+    let mut shaders = Vec::new();
+    for (id, bytes) in files_under(&assets, ".wgsl") {
+        let source = text(&id, bytes)?;
+        shaders.push((id, source));
+    }
     let mut stylesheets = Vec::new();
     for id in sheet_ids {
         stylesheets.push(
@@ -124,7 +129,7 @@ pub(crate) fn read(project: &Path) -> Result<ProjectAssets, PlayerError> {
     }
     count +=
         models.len() + textures.len() + fonts.len() + audio.len() + sheets.len() + tile_sets.len();
-    count += stylesheets.len();
+    count += stylesheets.len() + shaders.len();
     Ok(ProjectAssets {
         scenes,
         scripts,
@@ -137,6 +142,7 @@ pub(crate) fn read(project: &Path) -> Result<ProjectAssets, PlayerError> {
         sheets,
         tile_sets,
         stylesheets,
+        shaders,
         asset_count: count,
     })
 }

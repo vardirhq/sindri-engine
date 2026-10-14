@@ -261,6 +261,10 @@ impl ProjectExport {
             for font in referenced_fonts(&world) {
                 wanted.insert(font, AssetKind::Font);
             }
+            for shader in sindri_scene::referenced_sprite_shaders(&world) {
+                let kind = AssetKind::for_id(&shader);
+                wanted.insert(shader, kind);
+            }
             // Audio is named by a component like anything else, and was the one
             // kind with no walker in the engine — a scene's music would have
             // been left behind by an export that looked complete.
@@ -394,6 +398,9 @@ impl ProjectExport {
             let bytes = read(&path)?;
             if kind == AssetKind::Profile {
                 validate_profile(&id, &bytes, physics_profiles.contains(&id))?;
+            }
+            if id.ends_with(".wgsl") {
+                super::shaders::validate(&id, &bytes)?;
             }
             assets.push(GatheredAsset {
                 id: id.clone(),

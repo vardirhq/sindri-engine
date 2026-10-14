@@ -1454,6 +1454,13 @@
           ]
         },
         "layer": 0,
+        "shader": "",
+        "shader_params": [
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
         "texture": "procedural:checkerboard",
         "tint": [
           1.0,
@@ -1480,6 +1487,13 @@
           ]
         },
         "layer": 0,
+        "shader": "",
+        "shader_params": [
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
         "texture": "procedural:checkerboard",
         "tint": [
           1.0,
@@ -1489,6 +1503,10 @@
         ]
       },
       "meanings": {
+        "shader": {
+          "asset": "shader",
+          "kind": "asset"
+        },
         "texture": {
           "asset": "texture",
           "kind": "asset"

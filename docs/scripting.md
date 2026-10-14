@@ -188,7 +188,18 @@ leave it at zero unless that is the intent. Nothing is clamped: a channel that
 lands outside zero to one is clipped by the render target, while one that is
 not a number at all is refused when the scene is extracted.
 
+**`shader_params` are the sprite shader's four numbers.** A sprite drawn
+through a project shader (`sindri.sprite.shader`, see
+[the sprite shader contract](sprite-shaders.md)) hands it
+`this.sprite.shader_params` as `input.params`; what each one means is the
+shader's to say, so a script sets how far a dissolve has got or how bright a
+hit flash is and leaves the drawing to the shader. They ride on the instance,
+so changing them every frame never splits a draw. Author them as decimals in a
+hand-written scene (`0.0`, not `0`): a write keeps the number kind the scene
+stored, and an integer rounds.
+
 | `this.sprite.layer` | `f32` | yes | yes |
+| `this.sprite.shader_params.{x,y,z,w}` | `f32` | yes | yes |
 | `this.ui_image.tint` | `Color` | yes | yes |
 | `this.ui_image.tint.{r,g,b,a}` | `f32` | yes | yes |
 | `this.ui_image.layer` | `f32` | yes | yes |
@@ -271,6 +282,7 @@ table above lists, reaching the same numbers.
 | `this.entity.sprite.color_multiply.{r,g,b,a}` | `f32` | yes | yes |
 | `this.entity.sprite.color_offset.{r,g,b,a}` | `f32` | yes | yes |
 | `this.entity.sprite.layer` | `f32` | yes | yes |
+| `this.entity.sprite.shader_params.{x,y,z,w}` | `f32` | yes | yes |
 | `this.entity.ui_image.tint` | `Color` | yes | yes |
 | `this.entity.ui_image.tint.{r,g,b,a}` | `f32` | yes | yes |
 | `this.entity.ui_image.layer` | `f32` | yes | yes |

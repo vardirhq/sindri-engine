@@ -51,6 +51,7 @@ mod capture {
         let instance = wgpu::Instance::default();
         let gpu = GpuContext::request(&instance, None, &GpuRequestOptions::default()).await?;
         let mut renderer = ProjectRenderer::new(&gpu, &opened.images, &opened.sheets, size)?;
+        renderer.bind_shaders(&opened.shaders)?;
         renderer.draw(&mut opened.player, &gpu)?;
         let mut encoder = gpu
             .device

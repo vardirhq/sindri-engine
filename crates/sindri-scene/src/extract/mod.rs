@@ -50,7 +50,7 @@ use sindri_core::{
     SceneDocument, SpriteRefError, Transform3D, UnknownComponentPolicy, World,
 };
 use sindri_render::{
-    ClearOperations, ExtractedFrame, FramePlanError, PreparedFrame, TextError,
+    ClearOperations, ExtractedFrame, FramePlanError, PreparedFrame, SpriteEnvironment, TextError,
     TransparentOrderError, UvRectError, Viewport,
 };
 use thiserror::Error;
@@ -147,6 +147,8 @@ pub enum SceneExtractError {
     InvalidCameraPan,
     #[error("a sprite's color transform must be finite")]
     InvalidColorTransform,
+    #[error("a sprite's shader parameters must be finite")]
+    InvalidShaderParams,
     #[error(transparent)]
     UvRect(#[from] UvRectError),
     #[error(transparent)]
@@ -314,6 +316,7 @@ impl SceneExtractor {
         }
         self.begin_frame();
         let mut frame = ExtractedFrame::new(viewport, environment_clear(self.environment(world)?));
+        frame.set_sprite_environment(SpriteEnvironment { time: seconds });
         self.push_meshes(world, &cameras, textures, &mut frame)?;
         self.push_models(world, &cameras, &mut frame)?;
         self.push_voxel_worlds(world, &cameras, textures, tile_sets, seconds, &mut frame)?;
@@ -377,6 +380,7 @@ impl SceneExtractor {
 
         self.begin_frame();
         let mut frame = ExtractedFrame::new(viewport, environment_clear(self.environment(world)?));
+        frame.set_sprite_environment(SpriteEnvironment { time: seconds });
         self.push_meshes(world, &cameras, textures, &mut frame)?;
         self.push_models(world, &cameras, &mut frame)?;
         self.push_voxel_worlds(world, &cameras, textures, tile_sets, seconds, &mut frame)?;

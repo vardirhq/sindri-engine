@@ -149,9 +149,23 @@ pub(super) const TYPES: &[TypeEntry] = &[
                 "Drawing order: higher numbers are drawn in front of lower ones.",
             ),
             value(
+                "shader_params",
+                "Four numbers the sprite's shader reads, as `x`, `y`, `z` and `w`. What each one does is up to the shader: how far a dissolve has got, how bright a flash is.",
+            ),
+            value(
                 "tint",
                 "A color the image is multiplied by. White leaves it unchanged; lowering `a` fades it out.",
             ),
+        ],
+    },
+    TypeEntry {
+        name: "ShaderParams",
+        text: "The four numbers a sprite's shader reads. What each one means is up to the shader.",
+        members: &[
+            value("w", "The fourth number."),
+            value("x", "The first number."),
+            value("y", "The second number."),
+            value("z", "The third number."),
         ],
     },
     TypeEntry {

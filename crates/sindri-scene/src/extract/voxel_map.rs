@@ -256,6 +256,7 @@ fn push_map(
                         },
                     );
                 batches.push(SpriteDraw {
+                    shader: None,
                     clip: None,
                     space: DrawSpace::World,
                     texture,
