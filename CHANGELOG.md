@@ -1,5 +1,9 @@
 # Changelog
 
+- Measure optional GPU timestamps in native editor benchmarks, with separate
+  Game and extra Scene intervals, adapter/period/scope metadata and null for
+  unavailable timing. Execution stays outside CPU phases; normal editor
+  launches retain their device policy.
 - Measure native standalone GPU frame intervals with optional timestamp queries.
   Reports record adapter/period/scope and keep execution separate from CPU wait;
   unsupported devices report unavailable timing. Default and browser devices

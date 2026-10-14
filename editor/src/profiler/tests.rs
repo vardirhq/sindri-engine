@@ -160,6 +160,7 @@ fn view_counters_follow_frame_capture_without_mixing_scene_and_game() {
     frame(&mut profiler, &mut at, true, |profiler| {
         for (beside, draws, uploads) in [(false, 2, 1), (true, 9, 3), (false, 4, 0)] {
             profiler.set_scene_beside_run(beside);
+            profiler.add_gpu_execution(ms(draws));
             profiler.add_mesh_counters(super::MeshCounters {
                 meshes: sindri_render::MeshDrawStats {
                     draw_calls: draws,
@@ -176,6 +177,13 @@ fn view_counters_follow_frame_capture_without_mixing_scene_and_game() {
     });
     profiler.begin(at, None, true);
     let captured = profiler.take_captured();
+    assert_eq!(captured[0].gpu_execution, Some(ms(6)));
+    assert_eq!(captured[0].scene_gpu_execution, Some(ms(9)));
+    assert_eq!(
+        captured[0].work(),
+        ms(10),
+        "GPU intervals stay outside CPU phases"
+    );
     let primary = captured[0].mesh_counters.unwrap();
     assert_eq!(primary.meshes.draw_calls, 6);
     assert_eq!(primary.meshes.render_passes, 8);
@@ -197,7 +205,10 @@ fn view_counters_follow_frame_capture_without_mixing_scene_and_game() {
         "undrawn is not measured zero"
     );
     assert!(profiler.frames()[1].scene_mesh_counters.is_none());
+    assert!(profiler.frames()[1].gpu_execution.is_none());
+    assert!(profiler.frames()[1].scene_gpu_execution.is_none());
     profiler.add_mesh_counters(super::MeshCounters::default());
+    profiler.add_gpu_execution(ms(4));
     profiler.clear();
     profiler.begin(at + ms(40), None, true);
     profiler.end(ms(1));
@@ -206,4 +217,5 @@ fn view_counters_follow_frame_capture_without_mixing_scene_and_game() {
         profiler.frames()[0].mesh_counters.is_none(),
         "Play reset clears counters"
     );
+    assert!(profiler.frames()[0].gpu_execution.is_none());
 }

@@ -92,7 +92,7 @@ errors occur. The Game count stays 502 rather than becoming 1,004. The summary
 prints both scopes, while views that were not drawn have no counter object.
 Profiler regressions cover capture, repeated-view accumulation, separation,
 frame reset and Play reset; serialization distinguishes missing views from
-measured zeroes. Whole-frame totals and editor/browser GPU timestamps remain open.
+measured zeroes. Whole-frame totals and browser GPU timestamps remain open.
 
 
 ## Native standalone timestamps
@@ -108,4 +108,27 @@ prove measurement delivery and do not set performance targets. The interval
 covers frame clear, shadows and prepared draws; query resolution/readback and
 presentation are outside it. Timestamp values do not enter CPU phase or
 frame-interval sums. Backend ordering and precision affect their interpretation.
-Editor/browser timestamps and whole-frame counters remain open.
+Browser timestamps and whole-frame counters remain open.
+
+
+## Native editor timestamps
+
+Editor benchmark launches now optionally enable the same query features while
+preserving eframe's device descriptor policy. Each viewport owns its own timer.
+Shadowed/unshadowed native runs settle for 30 frames and record three editing
+and three playing frames. Every playing frame retains the exact physical
+counters above, records a nonzero primary interval and reports no console
+errors. The unused extra Scene interval stays null. Native CI requires both
+shadow controls to provide timing and retains their reports.
+
+On the same debug/llvmpipe Vulkan setup (1 ns period), primary Play interval means are 106.67 ms with shadows and 53.62 ms without.
+A third run drags Scene into the Inspector group, leaving Game as the main
+view. All six playing frames retain 502 draws per view and record independent,
+nonzero primary/extra Scene intervals. The inspected capture shows both views.
+Their mean intervals are 68.27 ms for Game and 41.21 ms for Scene.
+These short software/debug samples prove delivery, without setting targets.
+CPU work/interval totals exclude both execution values; CPU completion/readback
+wait remains separate. GPU intervals exclude editor UI, scene-board copies,
+queued uploads before the encoder bracket, readback and presentation. The
+interactive Profiler panel still shows CPU phases. Browser timestamps and
+whole-frame counters remain open.

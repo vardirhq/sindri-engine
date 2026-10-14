@@ -141,7 +141,7 @@ extra Scene view beside Play. Missing views are omitted, while an encoded view
 with no 3D work records zero. Repeated draws in one editor frame accumulate;
 frame close/capture and Play reset follow the existing profiler lifecycle.
 Standalone native benchmarks now optionally bracket the prepared frame with
-GPU timestamps; editor timestamp delivery remains open. GPU completion wait
+GPU timestamps. Native editor benchmarks reuse the same timer per viewport. GPU completion wait
 is still a CPU stall, not GPU execution time. This is feature-example instrumentation, proven
 with the fixed 3D Benchmark and the imported-model GPU readback regression.
 
@@ -162,6 +162,24 @@ reordering and timestamp precision can affect it. CPU encoding includes the
 extra query commands, and benchmark readback is deliberately synchronous.
 Software-Vulkan CI requires real nonzero timing for both shadow controls and
 exercises query-buffer reuse. A baseline-device GPU test proves graceful
-unavailability. Editor/browser timing and whole-frame draw/upload totals remain
-open. This measurement foundation is proven by the fixed feature example,
+unavailability. Browser timing and whole-frame draw/upload totals remain open. This measurement foundation is proven by the fixed feature example,
 without claiming gameplay capability completion.
+
+
+Editor benchmark launches wrap eframe's existing device descriptor to request
+only supported timestamp features while preserving its limits and required
+features. Interactive launches keep the default descriptor. Each viewport owns
+its own query pair through the existing engine facade, without a new dependency.
+Reports add primary `gpu_execution_us` and extra `scene_gpu_execution_us`, with
+null for unavailable or undrawn intervals. Repeated draws accumulate per scope;
+capture, frame and Play resets follow the existing profiler lifecycle. Execution
+never enters CPU phases; `gpu` continues to book CPU completion/readback wait.
+
+Editor metadata records adapter/backend, period and interval scope. Intervals
+cover viewport clear/shadows/draws and optional world post-processing, excluding
+egui painting, scene-board copies, query readback and presentation. Queue
+uploads scheduled before encoder execution are outside the timestamp bracket. Native CI
+requires nonzero primary timestamps for both shadow controls. A real two-view
+layout exercises independent Scene/Game intervals; profiler/report regressions
+protect accumulation, reset, microsecond serialization, null and measured zero.
+These reports do not make the interactive Profiler panel a GPU profiler.

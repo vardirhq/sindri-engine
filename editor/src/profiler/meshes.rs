@@ -51,3 +51,15 @@ impl Profiler {
         slot.get_or_insert_with(MeshCounters::default).add(counters);
     }
 }
+
+impl Profiler {
+    /// Records a view's GPU interval separately from CPU work and completion wait.
+    pub(crate) fn add_gpu_execution(&mut self, duration: std::time::Duration) {
+        let slot = if self.scene_beside_run {
+            &mut self.current.scene_gpu_execution
+        } else {
+            &mut self.current.gpu_execution
+        };
+        *slot = Some(slot.unwrap_or_default() + duration);
+    }
+}

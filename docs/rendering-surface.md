@@ -85,5 +85,6 @@ Native synchronous benchmarks optionally request `TIMESTAMP_QUERY` and
 `TIMESTAMP_QUERY_INSIDE_ENCODERS`. `GpuTimer::new` returns `None` unless both
 are enabled. One reusable query pair brackets frame commands, resolves into a
 persistent buffer and copies into a persistent readback buffer. Submit and read
-before reusing the pair; readback unmaps even after an error. Interactive and
-browser hosts do not enable this blocking timer.
+before reusing the pair; readback unmaps even after an error. Native editor benchmark launches reuse this timer through the existing
+`sindri::gpu` facade and wrap eframe's descriptor to preserve its device policy.
+Interactive and browser hosts do not enable this blocking timer.

@@ -89,7 +89,13 @@ pub fn frame_json(frame: &Frame) -> Value {
             (phase.key().to_owned(), Value::from(micros))
         })
         .collect();
-    let mut written = json!({ "steps": frame.steps, "phases": phases });
+    let micros =
+        |duration: std::time::Duration| u64::try_from(duration.as_micros()).unwrap_or(u64::MAX);
+    let mut written = json!({
+        "steps": frame.steps, "phases": phases,
+        "gpu_execution_us": frame.gpu_execution.map(micros),
+        "scene_gpu_execution_us": frame.scene_gpu_execution.map(micros),
+    });
     for (key, counters) in [
         ("mesh_counters", frame.mesh_counters),
         ("scene_mesh_counters", frame.scene_mesh_counters),
@@ -226,7 +232,11 @@ mod mesh_tests {
         let absent = frame_json(&frame);
         assert!(absent.get("mesh_counters").is_none());
         assert!(absent.get("scene_mesh_counters").is_none());
+        assert!(absent["gpu_execution_us"].is_null());
+        assert!(absent["scene_gpu_execution_us"].is_null());
         let drawn = Frame {
+            gpu_execution: Some(std::time::Duration::ZERO),
+            scene_gpu_execution: Some(std::time::Duration::from_micros(23)),
             mesh_counters: Some(MeshCounters::default()),
             scene_mesh_counters: Some(MeshCounters {
                 meshes: sindri_render::MeshDrawStats {
@@ -239,6 +249,8 @@ mod mesh_tests {
             ..frame
         };
         let written = frame_json(&drawn);
+        assert_eq!(written["gpu_execution_us"], 0);
+        assert_eq!(written["scene_gpu_execution_us"], 23);
         assert_eq!(written["mesh_counters"]["draw_calls"], 0);
         assert_eq!(written["scene_mesh_counters"]["draw_calls"], 3);
         assert_eq!(written["scene_mesh_counters"]["model_uploads"], 2);

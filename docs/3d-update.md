@@ -179,7 +179,10 @@ cameras face), YXZ order. Build on `Transform3D::yaw_pitch_roll_radians` and
   interval, with explicit unsupported/null results, adapter/period metadata and
   separate summary means/p95. Software-Vulkan CI requires real timing and query
   reuse; baseline devices still work. CPU completion wait remains separate.
-- [ ] Extend counters to whole-frame work and GPU timestamps to editor reports.
+- [x] Editor benchmarks use optional GPU timestamps for each viewport, record
+  primary and extra Scene intervals independently, and keep execution outside
+  CPU phases. Native shadow controls and a two-view layout prove delivery.
+- [ ] Extend counters to whole-frame work and GPU timestamps to browser reports.
 - [ ] Set the targets the next slice must meet (for example, draws and passes
   per frame independent of repeated props, and zero steady-state uploads).
 

@@ -51,6 +51,7 @@ pub(in crate::native) struct RuntimeViewport {
     /// each other's every frame — a voxel world's Game view recorded in
     /// 8.7 ms what it records alone in 3.5.
     cube: TexturedCubeRenderer,
+    timing: Option<sindri::gpu::GpuTimer>,
 }
 
 impl RuntimeViewport {
@@ -76,12 +77,14 @@ impl RuntimeViewport {
             INITIAL_VIEWPORT_HEIGHT,
         );
         let cube = TexturedCubeRenderer::new(&render_state.device, ViewportTarget::FORMAT);
+        let timing = sindri::gpu::GpuTimer::new(&render_state.device, &render_state.queue);
         Self {
             render_state,
             target,
             texture_id,
             bloom,
             cube,
+            timing,
         }
     }
 
@@ -153,17 +156,17 @@ impl RuntimeViewport {
                     label: Some("Sindri editor runtime viewport encoder"),
                 });
         let before = MeshCounters::snapshot(&self.cube);
-        self.encode(renderers, source, camera, &prepared, encoder)?;
+        self.encode(
+            renderers,
+            source,
+            camera,
+            &prepared,
+            encoder,
+            profiler.waits_for_gpu(),
+        )?;
         profiler.add_mesh_counters(MeshCounters::snapshot(&self.cube).since(before));
         profiler.add(Phase::Encoding, extracted.elapsed());
-        if profiler.waits_for_gpu() {
-            let waiting = Instant::now();
-            self.render_state
-                .device
-                .poll(wgpu::PollType::wait_indefinitely())
-                .map_err(|error| error.to_string())?;
-            profiler.add(Phase::Gpu, waiting.elapsed());
-        }
+        self.complete_timing(profiler)?;
         Ok(text_sizes)
     }
 
@@ -174,8 +177,12 @@ impl RuntimeViewport {
         camera: CameraView,
         prepared: &sindri_render::PreparedFrame,
         mut encoder: wgpu::CommandEncoder,
+        timed: bool,
     ) -> Result<(), String> {
         let environment = self.light(source, camera)?;
+        if timed && let Some(timer) = &self.timing {
+            timer.begin(&mut encoder);
+        }
         let frame_renderers = FrameRenderers {
             cube: &mut self.cube,
             sprites: &mut renderers.sprites,
@@ -215,8 +222,41 @@ impl RuntimeViewport {
             )
         }
         .map_err(|error| error.to_string())?;
+        if timed && let Some(timer) = &self.timing {
+            timer.finish(&mut encoder);
+        }
         self.render_state.queue.submit([encoder.finish()]);
         Ok(())
+    }
+
+    fn complete_timing(&self, profiler: &mut Profiler) -> Result<(), String> {
+        if !profiler.waits_for_gpu() {
+            return Ok(());
+        }
+        let waiting = Instant::now();
+        self.render_state
+            .device
+            .poll(wgpu::PollType::wait_indefinitely())
+            .map_err(|error| error.to_string())?;
+        if let Some(timer) = &self.timing {
+            let execution = timer
+                .read(&self.render_state.device)
+                .map_err(|error| error.to_string())?;
+            profiler.add_gpu_execution(execution);
+        }
+        profiler.add(Phase::Gpu, waiting.elapsed());
+        Ok(())
+    }
+
+    pub(in crate::native) fn timing_metadata(&self) -> serde_json::Value {
+        let info = self.render_state.adapter.get_info();
+        serde_json::json!({
+            "supported": self.timing.is_some(),
+            "adapter": info.name,
+            "backend": format!("{:?}", info.backend),
+            "timestamp_period_ns": self.timing.as_ref().map(|_| self.render_state.queue.get_timestamp_period()),
+            "scope": "primary viewport commands; extra Scene interval separate; excludes editor UI, readback and presentation",
+        })
     }
 
     /// Sets the cube renderer's light, shadows, fog and ambient occlusion for

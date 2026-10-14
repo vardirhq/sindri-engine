@@ -76,12 +76,15 @@ def section_stats(frames: list[dict]) -> dict:
         for key, value in frame["phases"].items():
             phases[key] = phases.get(key, 0.0) + value / 1000.0
     execution = [f["gpu_execution_us"] / 1000.0 for f in frames if f.get("gpu_execution_us") is not None]
+    scene_execution = [f["scene_gpu_execution_us"] / 1000.0 for f in frames if f.get("scene_gpu_execution_us") is not None]
     count = max(len(frames), 1)
     return {
         "mesh_counters": counter_means(frames, "mesh_counters"),
         "scene_mesh_counters": counter_means(frames, "scene_mesh_counters"),
         "gpu_execution_mean": statistics.fmean(execution) if execution else None,
         "gpu_execution_p95": percentile(execution, 0.95) if execution else None,
+        "scene_gpu_execution_mean": statistics.fmean(scene_execution) if scene_execution else None,
+        "scene_gpu_execution_p95": percentile(scene_execution, 0.95) if scene_execution else None,
         "frames": len(frames),
         "work_mean": statistics.fmean(work) if work else 0.0,
         "work_p50": percentile(work, 0.50),
@@ -119,6 +122,9 @@ def describe(path: Path) -> list[str]:
         if stats["gpu_execution_mean"] is not None:
             lines.append(f"           GPU execution mean {stats['gpu_execution_mean']:.2f} ms  "
                          f"p95 {stats['gpu_execution_p95']:.2f} ms (timestamps)")
+        if stats["scene_gpu_execution_mean"] is not None:
+            lines.append(f"           Extra Scene GPU execution mean {stats['scene_gpu_execution_mean']:.2f} ms  "
+                         f"p95 {stats['scene_gpu_execution_p95']:.2f} ms (timestamps)")
         for field, label in [("mesh_counters", "3D/frame"), ("scene_mesh_counters", "extra Scene 3D/frame")]:
             if stats[field]:
                 lines.append("           " + label + " " + "  ".join(

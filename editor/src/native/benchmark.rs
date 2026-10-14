@@ -167,14 +167,7 @@ impl EditorApp {
                 Stage::Playing { editing }
             }
             Stage::Playing { editing } => {
-                let playing = self.profiler.take_captured();
-                let errors: Vec<String> = self
-                    .console
-                    .at_least(crate::console::Level::Error)
-                    .map(|entry| format!("{} (x{})", entry.message, entry.count))
-                    .collect();
-                write_report(&run, context, &editing, &playing, &errors);
-                self.toggle_play_mode();
+                self.finish_benchmark(&run, context, &editing);
                 Stage::Closing
             }
             Stage::Closing => {
@@ -183,6 +176,24 @@ impl EditorApp {
             }
         };
         self.benchmark = Some(run);
+    }
+
+    fn finish_benchmark(&mut self, run: &BenchmarkRun, context: &egui::Context, editing: &[Frame]) {
+        let playing = self.profiler.take_captured();
+        let errors: Vec<String> = self
+            .console
+            .at_least(crate::console::Level::Error)
+            .map(|entry| format!("{} (x{})", entry.message, entry.count))
+            .collect();
+        write_report(
+            run,
+            context,
+            editing,
+            &playing,
+            &errors,
+            self.game_viewport.timing_metadata(),
+        );
+        self.toggle_play_mode();
     }
 }
 
@@ -193,10 +204,11 @@ fn write_report(
     editing: &[Frame],
     playing: &[Frame],
     errors: &[String],
+    gpu_timing: serde_json::Value,
 ) {
     let window = context.content_rect().size();
     let rest = run.rest_frames.map(|frames| (REST.as_secs_f32(), frames));
-    let report = report_json(
+    let mut report = report_json(
         &run.opened,
         [window.x, window.y],
         rest,
@@ -204,6 +216,7 @@ fn write_report(
         playing,
         errors,
     );
+    report["gpu_timing"] = gpu_timing;
     let written = serde_json::to_string_pretty(&report)
         .map_err(|error| error.to_string())
         .and_then(|text| std::fs::write(&run.plan.report, text).map_err(|error| error.to_string()));

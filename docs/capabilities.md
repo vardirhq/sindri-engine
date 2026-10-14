@@ -2597,8 +2597,12 @@ Game/standalone agreement. Native standalone reports optionally record actual
 GPU timestamp intervals separately from CPU completion wait, including adapter,
 period and scope; unsupported devices retain null timing. Real GPU query/reuse
 and baseline-device regressions plus shadow-control CI exercise this.
-Whole-frame counters, editor/browser timestamps and performance targets remain
-pending. The
+Native editor benchmarks now request supported timestamp features without
+altering eframe's device limits; each view owns its own reusable query pair.
+Primary and extra Scene intervals accumulate independently, serialize in
+microseconds and stay outside CPU phases. Capture/reset/null regressions and
+real native shadow-control/two-view runs exercise delivery. Whole-frame
+counters, browser timestamps and performance targets remain pending. The
 [baseline record](3d-benchmark-baseline.md) records the hardware/profile context,
 short editor/standalone sample and native/browser shadow comparisons.
 

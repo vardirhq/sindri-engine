@@ -177,6 +177,10 @@ pub struct Frame {
     pub mesh_counters: Option<MeshCounters>,
     /// Extra Scene view drawn beside Play, excluded from the primary counters.
     pub scene_mesh_counters: Option<MeshCounters>,
+    /// GPU interval of the primary view; absent when unsupported or undrawn.
+    pub gpu_execution: Option<Duration>,
+    /// GPU interval of the extra Scene view beside Play.
+    pub scene_gpu_execution: Option<Duration>,
 }
 
 impl Frame {
