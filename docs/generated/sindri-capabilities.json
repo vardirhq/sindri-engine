@@ -2951,6 +2951,7 @@
             "voxel": 3
           }
         ],
+        "normal_maps": {},
         "render_radius": 2,
         "variant_seed": 0,
         "vertical_radius": 1,
@@ -3087,6 +3088,7 @@
             "voxel": 3
           }
         ],
+        "normal_maps": {},
         "render_radius": 2,
         "variant_seed": 0,
         "vertical_radius": 1,

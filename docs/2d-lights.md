@@ -17,7 +17,8 @@ Off by default, and off means every picture is its own color, exactly as
 before. On, every lit pixel is multiplied by the light reaching it: the
 ambient color plus each light's contribution. The clear color is never lit.
 
-What is lit: world sprites, tilemaps, flecks and world shapes. A sprite opts out
+What is lit: world sprites, tilemaps, voxel worlds viewed as maps, flecks and
+world shapes. A sprite opts out
 with `"unlit": true` (a glow, a pickup that should read in the dark); an
 additive shape is light itself and is never darkened. The UI and screen-space
 content are never lit.
@@ -61,6 +62,20 @@ the surface faces it, `max(dot(normal, normalize(to_light, height)), 0)`. A low
 light rakes across the art and shows its relief; a high one lights it almost
 flat. A sprite with no normal map is lit by distance alone, exactly as without
 one. Sprites with different normal maps are different batches.
+
+A voxel world viewed as a map draws each column from whichever texture its
+block's top face names, so it names its normal maps by texture instead:
+
+```json
+"sindri.voxel_world": {
+  "view": "map",
+  "normal_maps": { "textures/terrain.png": "textures/terrain_n.png" }
+}
+```
+
+A square whose texture has no entry, or whose normal map has not bound, is lit
+by distance alone. The flood overlay reads the normal map of the texture its
+water block draws from.
 
 The platformer's `art/draw.py` writes `textures/tiles_n.png` from the same
 brick, plank and dirt layouts as `tiles.png`, as a worked example.
@@ -112,3 +127,13 @@ low wall torch, with the level's tiles normal-mapped. The sun casts the roof's
 shadow over the cave, the lanterns cast the pillar's, and the torch rakes the
 bricks. `games/platformer/tests/cave_lights.rs` checks the shadows,
 `crates/sindri-gpu/tests/sprite_lights.rs` reads the pixels back.
+
+Low Tide lights a voxel map (a genre showcase using a capability that existed;
+normal maps on a map's squares were added for it). Its sun is one wide light
+kept to the north-west of the camera and recoloured by `scripts/daylight.decay`
+as the tide turns: day at low water, a golden hour as it runs out, moonlight at
+high water. The crawler's cabin lamps, headlights and the crew's lantern come on
+at dusk, and a wreck's box occluder throws a shadow in the headlights.
+`art/normals.py` writes every lit picture's normal map from the picture itself,
+reading brightness as height. `games/low-tide/tests/the_basin_is_lit.rs` checks
+the cycle and the lamps.

@@ -418,6 +418,17 @@ fn sprite_references(world: &World) -> BTreeSet<SpriteRef> {
                         }
                     }
                 }
+                // A map's normal maps, named by the texture they light.
+                if let Some(normal_maps) = payload
+                    .get("normal_maps")
+                    .and_then(serde_json::Value::as_object)
+                {
+                    for normal_map in normal_maps.values().filter_map(serde_json::Value::as_str) {
+                        if let Ok(reference) = SpriteRef::parse(normal_map) {
+                            referenced.insert(reference);
+                        }
+                    }
+                }
                 continue;
             }
             if !TEXTURE_NAMING_COMPONENTS.contains(&type_name.as_str()) {
