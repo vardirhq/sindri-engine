@@ -1195,6 +1195,13 @@ state read in the fragment stage, so masked sprites still share draws and
 nothing needs a stencil. `examples/sprite-masks` reveals a meadow and a hidden
 gem through a wandering keyhole. World sprites only. See `docs/sprite-masks.md`.
 
+**Text can be placed in the world and carry spans.** `sindri.text` is the UI
+label's fields in world units, placed at its entity and drawn over the sprites
+of its layer. With `rich: true`, `[b]`, `[i]` and `[color=#rrggbb]` tags in
+either kind of text are spans. Decay writes the words with `Ui.set_text` and
+`Ui.set_number` and reaches `this.world_text.color`. Orbital's landed shots float
+their damage, critical hits in bold gold. See `docs/world-text.md`.
+
 **A 2D scene can be lit.** With `lighting_2d` on in `sindri.environment`, world
 sprites, tilemaps, flecks and world shapes are multiplied by the light reaching
 them: an ambient color plus every `sindri.light2d` point light within its
@@ -2156,8 +2163,9 @@ settings gear.
   strata, side-face picking, slice views, and collision and navigation derived
   from occupied cells remain; the accepted contract is in
   `docs/tile-system-2.md`.
-- World-space text, rich spans, and font fallback are missing. Screen text has
-  authored alignment and wrapping, including Weave-controlled wrapping
+- Font fallback is missing, and rich text has color, bold and italic spans
+  only. Screen text has authored alignment and wrapping, including
+  Weave-controlled wrapping
 - Built-in 3D geometry has cube and inline surface meshes; external static GLB
   assets now render. Additional generated primitives and glTF animation/skinning
   remain open.

@@ -149,6 +149,10 @@ pub const THIS: &[Entry] = &[
         "The image (sprite) on this script's object, if it has one: its color and drawing order.",
     ),
     value(
+        "world_text",
+        "The world text on this script's object, if it has some: its color, size and drawing order.",
+    ),
+    value(
         "transform",
         "Where this script's object is, how it is turned and how big it is. Change it to move the object.",
     ),

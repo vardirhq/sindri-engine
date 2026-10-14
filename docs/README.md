@@ -50,6 +50,7 @@ contracts below; dated evidence should not override them.
 - [Nine-slice sprites](nine-slice.md)
 - [Terrains](terrains.md)
 - [Sprite masks](sprite-masks.md)
+- [World text and rich text](world-text.md)
 
 ## Editor
 

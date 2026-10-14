@@ -151,7 +151,8 @@ fn describe_drawables(components: &mut ComponentSchemaRegistry) -> Result<(), Sc
         "align_self",
         FieldMeaning::choice(UiAlignSelf::ALL.into_iter().map(UiAlignSelf::as_str)),
     )])?;
-    describe_text(components)?;
+    describe_text::<UiTextComponent>(components)?;
+    describe_text::<crate::TextComponent>(components)?;
     Ok(())
 }
 
@@ -186,8 +187,11 @@ fn describe_projections(components: &mut ComponentSchemaRegistry) -> Result<(), 
     Ok(())
 }
 
-fn describe_text(components: &mut ComponentSchemaRegistry) -> Result<(), SceneExtractError> {
-    components.describe::<UiTextComponent>([
+/// The UI label and the world one share every field, so they share this.
+fn describe_text<Text: sindri_core::SceneComponent>(
+    components: &mut ComponentSchemaRegistry,
+) -> Result<(), SceneExtractError> {
+    components.describe::<Text>([
         ("font", FieldMeaning::Asset(AssetKind::Font)),
         ("color", COLOR),
         ("anchor", anchors()),
@@ -290,6 +294,7 @@ mod tests {
             ("sindri.tile_volume", "tileset", AssetKind::TileSet),
             ("sindri.effect.burst", "texture", AssetKind::Texture),
             ("sindri.ui.text", "font", AssetKind::Font),
+            ("sindri.text", "font", AssetKind::Font),
             ("sindri.audio.source", "clip", AssetKind::Audio),
         ] {
             assert_eq!(

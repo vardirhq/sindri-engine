@@ -128,11 +128,11 @@ game in this repository.
   Contract: `docs/sprite-masks.md`.
 
 ### 8. World-space and rich text
-- [ ] `sindri.text`: text placed in the world like a sprite, sorted with
+- [x] `sindri.text`: text placed in the world like a sprite, sorted with
   sprites.
-- [ ] Rich text spans in `sindri.ui.text` and `sindri.text`: color, bold and
+- [x] Rich text spans in `sindri.ui.text` and `sindri.text`: color, bold and
   italic.
-- [ ] Proof: damage numbers in Scorchball or Orbital.
+- [x] Proof: damage numbers in Orbital. Contract: `docs/world-text.md`.
 
 ### 9. Final integration
 - [ ] Orbital's charger uses the advanced sprite color transform, so that row

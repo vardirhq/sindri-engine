@@ -403,6 +403,12 @@
       "kind": "value",
       "name": "ui_image",
       "type": "UiImage"
+    },
+    {
+      "description": "The world text on this script's object, if it has some: its color, size and drawing order.",
+      "kind": "value",
+      "name": "world_text",
+      "type": "WorldText"
     }
   ],
   "types": [
@@ -1217,6 +1223,12 @@
           "kind": "value",
           "name": "ui_image",
           "type": "UiImage"
+        },
+        {
+          "description": "The object's world text, if it has some.",
+          "kind": "value",
+          "name": "world_text",
+          "type": "WorldText"
         }
       ],
       "name": "Entity"
@@ -4693,6 +4705,36 @@
         }
       ],
       "name": "World"
+    },
+    {
+      "description": "Words placed in the game world, such as a damage number or a name over a character. Change the words with `Ui.set_text` and `Ui.set_number`, as for interface text.",
+      "members": [
+        {
+          "description": "The words' color. Lowering `a` fades them out; colored spans fade with it.",
+          "kind": "value",
+          "name": "color",
+          "type": "Color"
+        },
+        {
+          "description": "How tall a line of the words is, in world units.",
+          "kind": "value",
+          "name": "font_size",
+          "type": "f32"
+        },
+        {
+          "description": "Drawing order: drawn over sprites in the same layer, under higher ones.",
+          "kind": "value",
+          "name": "layer",
+          "type": "f32"
+        },
+        {
+          "description": "How many letters show, for a typewriter reveal. Negative shows them all.",
+          "kind": "value",
+          "name": "visible",
+          "type": "f32"
+        }
+      ],
+      "name": "WorldText"
     }
   ]
 }

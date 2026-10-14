@@ -22,6 +22,7 @@ mod sprite;
 mod text;
 mod tile_volume;
 mod widget_registry;
+mod world_text;
 pub(crate) use tile_volume::face_is_occluded;
 mod lighting;
 mod lighting_2d;
@@ -348,6 +349,7 @@ impl SceneExtractor {
             &mut frame,
         )?;
         self.push_world_shapes(world, &cameras, &mut frame)?;
+        self.push_world_text(world, &cameras, &mut frame)?;
         self.push_shapes(world, &cameras, &hierarchy, &mut frame)?;
         self.push_text(world, &cameras, &hierarchy, &mut frame)?;
         Ok(frame.prepare()?)
@@ -415,6 +417,7 @@ impl SceneExtractor {
             &mut frame,
         )?;
         self.push_world_shapes(world, &cameras, &mut frame)?;
+        self.push_world_text(world, &cameras, &mut frame)?;
         self.push_shapes(world, &cameras, &hierarchy, &mut frame)?;
         self.push_text(world, &cameras, &hierarchy, &mut frame)?;
         Ok(frame.prepare()?)

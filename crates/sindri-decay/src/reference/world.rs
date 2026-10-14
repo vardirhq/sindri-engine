@@ -101,6 +101,7 @@ pub(super) const TYPES: &[TypeEntry] = &[
             value("light2d", "The object's 2D light, if it has one."),
             value("shape", "The object's drawn shape, if it has one."),
             value("sprite", "The object's image (sprite), if it has one."),
+            value("world_text", "The object's world text, if it has some."),
             value(
                 "transform",
                 "Where the object is, how it is turned and how big it is.",
@@ -177,6 +178,28 @@ pub(super) const TYPES: &[TypeEntry] = &[
             ),
             value("intensity", "How bright the light is; 0 is off."),
             value("radius", "How far the light reaches, in world units."),
+        ],
+    },
+    TypeEntry {
+        name: "WorldText",
+        text: "Words placed in the game world, such as a damage number or a name over a character. Change the words with `Ui.set_text` and `Ui.set_number`, as for interface text.",
+        members: &[
+            value(
+                "color",
+                "The words' color. Lowering `a` fades them out; colored spans fade with it.",
+            ),
+            value(
+                "font_size",
+                "How tall a line of the words is, in world units.",
+            ),
+            value(
+                "layer",
+                "Drawing order: drawn over sprites in the same layer, under higher ones.",
+            ),
+            value(
+                "visible",
+                "How many letters show, for a typewriter reveal. Negative shows them all.",
+            ),
         ],
     },
     TypeEntry {

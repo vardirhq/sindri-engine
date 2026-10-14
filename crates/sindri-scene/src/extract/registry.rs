@@ -496,9 +496,12 @@ fn register_ui_text(components: &mut ComponentSchemaRegistry) -> Result<(), Scen
                 "color": [0.0, 0.0, 0.0, 1.0],
                 "softness": 0.0
             },
-            "auto_size": { "enabled": false, "min": 0.02 }
+            "auto_size": { "enabled": false, "min": 0.02 },
+            "rich": false
         }),
     )?;
+    // The world label: the same fields, in world units.
+    two_d::register_world_text(components)?;
     Ok(())
 }
 

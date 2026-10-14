@@ -154,6 +154,10 @@ pub(crate) const SHAPE_COMPONENT: &str = "sindri.shape";
 pub(crate) const LIGHT_2D: &str = "Light2d";
 pub(crate) const LIGHT_2D_COMPONENT: &str = "sindri.light2d";
 
+/// Words placed in the world, and the component their fields live in.
+pub(crate) const TEXT: &str = "WorldText";
+pub(crate) const TEXT_COMPONENT: &str = "sindri.text";
+
 /// The component whose layout and entity transform define a gameplay grid.
 pub(crate) const TILEMAP_COMPONENT: &str = "sindri.tilemap";
 

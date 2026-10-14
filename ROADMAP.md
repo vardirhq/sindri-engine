@@ -208,6 +208,9 @@ shaped like the tool.
   level painted with one (`docs/terrains.md`)
 - [x] Mask sprites — `sindri.sprite_mask` and `mask: inside | outside` on
   sprites, proven by `examples/sprite-masks` (`docs/sprite-masks.md`)
+- [x] Place text in the world and give it spans — `sindri.text`, and
+  `[b]`, `[i]`, `[color=…]` rich text, proven by Orbital's damage numbers
+  (`docs/world-text.md`)
 - [ ] Port layers, anchors, and sprite bounds — layers work, and the nine
   anchors are a field of the UI family rather than of every sprite; editor picking uses the renderer's unit-quad geometry directly,
   while reusable component bounds remain. Parallax is not

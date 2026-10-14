@@ -57,7 +57,7 @@ pub use components::{
     EnvironmentToneMapping, GridNavigationComponent, GridOccupantComponent, GridPlacementComponent,
     GridWallDocument, ImageDraw, LightComponent, LightError, LightKind, MaskInteraction,
     MeshComponent, MeshPrimitive, ModelComponent, NaturalTerrainDocument, ShapeComponent,
-    ShapeGeometry, SpriteColorTransform, SpriteComponent, SpriteMaskComponent, Sun,
+    ShapeGeometry, SpriteColorTransform, SpriteComponent, SpriteMaskComponent, Sun, TextComponent,
     TileCellDocument, TileDraw, TileGridComponent, TileGridError, TileProjection, TileSpace,
     TileVolumeComponent, TileVolumeError, TileVolumeIndex, TilemapComponent, TilemapError,
     UiAnchor, UiFill, UiFillEdge, UiImageComponent, UiShapeBlend, UiShapeComponent, UiShapeKind,

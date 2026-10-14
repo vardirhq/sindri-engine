@@ -339,6 +339,11 @@ pub struct UiTextComponent {
     pub shadow: UiTextShadow,
     #[serde(default)]
     pub auto_size: UiTextAutoSize,
+    /// Whether `[b]`, `[i]` and `[color=#rrggbb]` tags in the words are spans
+    /// rather than characters. Off, so a bracket typed before rich text existed
+    /// still draws as one.
+    #[serde(default)]
+    pub rich: bool,
 }
 
 impl UiTextComponent {
@@ -421,7 +426,8 @@ impl UiTextComponent {
         .with_style(self.style())
         .with_case(self.case.case())
         .with_outline(self.outline.stroke())
-        .with_shadow(self.shadow.shadow());
+        .with_shadow(self.shadow.shadow())
+        .with_rich(self.rich);
         if let Some(glyphs) = self.visible_glyphs() {
             instance = instance.with_visible_glyphs(glyphs);
         }

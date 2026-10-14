@@ -485,7 +485,8 @@ pub const TEXTURE_NAMING_COMPONENTS: &[&str] = &[
 /// it and the text simply does not draw — a blank where a label should be, with
 /// no failed frame to point at it. `TEXTURE_NAMING_COMPONENTS` has the same
 /// contract for textures.
-pub const FONT_NAMING_COMPONENTS: &[&str] = &[UiTextComponent::TYPE_NAME];
+pub const FONT_NAMING_COMPONENTS: &[&str] =
+    &[UiTextComponent::TYPE_NAME, crate::TextComponent::TYPE_NAME];
 
 /// Every texture a world draws with that nothing has bound.
 ///

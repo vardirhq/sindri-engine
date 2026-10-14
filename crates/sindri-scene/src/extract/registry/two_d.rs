@@ -145,3 +145,40 @@ pub(super) fn register_sprite_mask(
     )])?;
     Ok(())
 }
+
+/// `sindri.text`: the UI label's fields, in world units. A fresh one is half a
+/// unit tall, which reads beside a one-unit sprite, and centred on its entity.
+pub(super) fn register_world_text(
+    components: &mut ComponentSchemaRegistry,
+) -> Result<(), SceneExtractError> {
+    components.register_with_fields::<crate::TextComponent>(
+        "Text",
+        serde_json::json!({
+            "text": "Text",
+            "font": "",
+            "font_size": 0.5,
+            "line_height": 0.6,
+            "color": [1.0, 1.0, 1.0, 1.0],
+            "anchor": "center",
+            "layer": 0,
+            "values": [],
+            "bounds": [0.0, 0.0],
+            "wrap": "none",
+            "line_align": "follow",
+            "letter_spacing": 0.0,
+            "bold": false,
+            "italic": false,
+            "case": "as_written",
+            "visible": -1.0,
+            "outline": { "width": 0.0, "color": [0.0, 0.0, 0.0, 1.0] },
+            "shadow": {
+                "offset": [0.0, 0.0],
+                "color": [0.0, 0.0, 0.0, 1.0],
+                "softness": 0.0
+            },
+            "auto_size": { "enabled": false, "min": 0.1 },
+            "rich": false
+        }),
+    )?;
+    Ok(())
+}

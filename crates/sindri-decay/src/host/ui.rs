@@ -13,7 +13,7 @@ use decay_ir::Path;
 use decay_runtime::{RuntimeError, Value};
 use serde_json::json;
 use sindri_core::{EntityId, SceneComponent};
-use sindri_scene::{UiImageComponent, UiSliderComponent, UiTextComponent};
+use sindri_scene::{TextComponent, UiImageComponent, UiSliderComponent, UiTextComponent};
 
 use crate::surface::UiCall;
 
@@ -237,22 +237,19 @@ impl WorldHost<'_> {
         path: &Path,
         edit: impl FnOnce(&mut serde_json::Value),
     ) -> Result<Value, RuntimeError> {
-        let mut edited = self
-            .world
-            .get(entity)
-            .ok_or_else(|| gone(path, entity))?
-            .components
-            .get(UiTextComponent::TYPE_NAME)
-            .ok_or_else(|| not_a(path, entity, "text"))?
-            .clone();
-        edit(&mut edited);
+        // A HUD label or a world one: the same fields, so the same calls.
         let data = self.world.get(entity).ok_or_else(|| gone(path, entity))?;
-        if data.components.get(UiTextComponent::TYPE_NAME) == Some(&edited) {
+        let kind = [UiTextComponent::TYPE_NAME, TextComponent::TYPE_NAME]
+            .into_iter()
+            .find(|kind| data.components.contains_key(*kind))
+            .ok_or_else(|| not_a(path, entity, "text"))?;
+        let mut edited = data.components[kind].clone();
+        edit(&mut edited);
+        if data.components.get(kind) == Some(&edited) {
             return Ok(Value::Unit);
         }
         if let Some(data) = self.world.get_mut(entity) {
-            data.components
-                .insert(UiTextComponent::TYPE_NAME.to_owned(), edited);
+            data.components.insert(kind.to_owned(), edited);
         }
         Ok(Value::Unit)
     }

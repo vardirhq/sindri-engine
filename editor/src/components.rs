@@ -230,6 +230,11 @@ const KNOWN: &[Known] = &[
         icon: icons::SPRITE,
     },
     Known {
+        type_name: "sindri.text",
+        family: Family::Rendering,
+        icon: icons::TEXT,
+    },
+    Known {
         type_name: "sindri.physics3d.rigid_body",
         family: Family::Physics,
         icon: icons::PHYSICS,

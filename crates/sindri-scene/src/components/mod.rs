@@ -27,6 +27,7 @@ mod ui_text_options;
 pub mod ui_text_template;
 mod voxel_terrain;
 mod voxel_world;
+mod world_text;
 
 pub use camera::{
     CameraBehaviorComponent, CameraBounds, CameraComponent, CameraFit, CameraFollow, CameraShake,
@@ -70,6 +71,7 @@ pub use voxel_world::{
     VoxelBlock, VoxelEdit, VoxelGeneratorDocument, VoxelMapFlood, VoxelMaterialDocument, VoxelView,
     VoxelWorldComponent,
 };
+pub use world_text::TextComponent;
 
 /// The tint a component that does not name one draws with.
 ///

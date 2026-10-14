@@ -40,6 +40,9 @@ pub struct TextInstance {
     pub(super) outline: TextStroke,
     pub(super) shadow: TextShadow,
     pub(super) fit: Option<TextFit>,
+    /// Whether `[b]`, `[i]` and `[color=…]` tags in the words are read as
+    /// spans rather than drawn. See `rich.rs`.
+    pub(super) rich: bool,
 }
 
 impl TextInstance {
@@ -83,6 +86,7 @@ impl TextInstance {
             outline: TextStroke::default(),
             shadow: TextShadow::default(),
             fit: None,
+            rich: false,
         })
     }
 
@@ -159,6 +163,16 @@ impl TextInstance {
     #[must_use]
     pub const fn fitted(mut self, fit: TextFit) -> Self {
         self.fit = Some(fit);
+        self
+    }
+
+    /// Reads the words' `[b]`, `[i]` and `[color=…]` tags as spans.
+    ///
+    /// Off unless asked for, so a string that happens to hold a bracket draws
+    /// it exactly as it did before rich text existed.
+    #[must_use]
+    pub const fn with_rich(mut self, rich: bool) -> Self {
+        self.rich = rich;
         self
     }
 

@@ -1,0 +1,34 @@
+// A number that pops out of a hit, drifts up and fades. World text, so it
+// sits over the enemy it names and moves with the camera; a critical hit
+// is a bold gold span, which fades with the rest because a span's color
+// is multiplied by the text's own alpha.
+script DamageNumber {
+    @export let amount: f32 = 10.0;
+    @export let crit: f32 = 0.0;
+    @export let life: f32 = 0.75;
+
+    var age: f32 = 0.0;
+    var drift_x: f32 = 0.0;
+    var size: f32 = 0.34;
+
+    fn start() {
+        if this.crit > 0.0 {
+            Ui.set_text(this.entity, "[b][color=#ffd34d]{.0}![/color][/b]");
+            this.size = 0.48;
+        }
+        Ui.set_number(this.entity, this.amount);
+        this.drift_x = Random.range(-0.6, 0.6);
+        this.world_text.font_size = this.size * 1.4;
+    }
+
+    fn update(dt: f32) {
+        this.age += dt;
+        let t = min(1.0, this.age / this.life);
+        // A quick pop from oversized to its own size, then a slow rise.
+        this.world_text.font_size = this.size * (1.0 + 0.4 * max(0.0, 1.0 - t * 6.0));
+        this.transform.position.x += this.drift_x * dt;
+        this.transform.position.y += (1.6 - t * 1.2) * dt;
+        this.world_text.color.a = 1.0 - t * t;
+        if this.age >= this.life { World.despawn(this.entity); }
+    }
+}

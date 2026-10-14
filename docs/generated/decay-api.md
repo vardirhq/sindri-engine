@@ -23,6 +23,7 @@ What the entity a script runs on offers, beyond the script's own fields.
 - `sprite`: `Sprite` — The image (sprite) on this script's object, if it has one: its color and drawing order.
 - `transform`: `Transform` — Where this script's object is, how it is turned and how big it is. Change it to move the object.
 - `ui_image`: `UiImage` — The on-screen interface image on this script's object, if it has one: its color and drawing order.
+- `world_text`: `WorldText` — The world text on this script's object, if it has some: its color, size and drawing order.
 
 ## Globals
 
@@ -241,6 +242,7 @@ An object in the game, such as a player, an enemy or a button. Scripts get these
 - `sprite`: `Sprite` — The object's image (sprite), if it has one.
 - `transform`: `Transform` — Where the object is, how it is turned and how big it is.
 - `ui_image`: `UiImage` — The object's on-screen interface image, if it has one.
+- `world_text`: `WorldText` — The object's world text, if it has some.
 
 ### `Game`
 
@@ -690,3 +692,12 @@ Finding, creating and removing the objects in a game. Every object in a scene (a
 - `take_signal(name: String)` → `f32` — Collects the numbers other scripts sent to this object under a name with `send_signal`, added together. Gives 0 when nothing arrived.
 - `with_tag(tag: String)` → `List<Entity>` — Every switched-on object with a tag, as a list: `for enemy in World.with_tag("enemy") { ... }`. Looks through the whole game, so call it once per frame, not in a loop.
 - `within_radius(tag: String, position: Vec3, radius: f32)` → `List<Entity>` — A snapshot list of active tagged objects within an inclusive world-space radius of a Vec3 position, nearest first; ties keep world order. Skips unusable transforms. Empty when none match; over 8192 results is an error. Negative or NaN radii are errors; positive infinity searches the whole world.
+
+### `WorldText`
+
+Words placed in the game world, such as a damage number or a name over a character. Change the words with `Ui.set_text` and `Ui.set_number`, as for interface text.
+
+- `color`: `Color` — The words' color. Lowering `a` fades them out; colored spans fade with it.
+- `font_size`: `f32` — How tall a line of the words is, in world units.
+- `layer`: `f32` — Drawing order: drawn over sprites in the same layer, under higher ones.
+- `visible`: `f32` — How many letters show, for a typewriter reveal. Negative shows them all.

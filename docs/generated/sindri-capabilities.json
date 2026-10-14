@@ -1862,6 +1862,122 @@
       "type_name": "sindri.tags"
     },
     {
+      "addable": false,
+      "apply": {},
+      "default_payload": null,
+      "display_name": "Text",
+      "fields": {
+        "anchor": "center",
+        "auto_size": {
+          "enabled": false,
+          "min": 0.1
+        },
+        "bold": false,
+        "bounds": [
+          0.0,
+          0.0
+        ],
+        "case": "as_written",
+        "color": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        "font": "",
+        "font_size": 0.5,
+        "italic": false,
+        "layer": 0,
+        "letter_spacing": 0.0,
+        "line_align": "follow",
+        "line_height": 0.6,
+        "outline": {
+          "color": [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          "width": 0.0
+        },
+        "rich": false,
+        "shadow": {
+          "color": [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          "offset": [
+            0.0,
+            0.0
+          ],
+          "softness": 0.0
+        },
+        "text": "Text",
+        "values": [],
+        "visible": -1.0,
+        "wrap": "none"
+      },
+      "meanings": {
+        "anchor": {
+          "kind": "choice",
+          "options": [
+            "center",
+            "top",
+            "bottom",
+            "left",
+            "right",
+            "top_left",
+            "top_right",
+            "bottom_left",
+            "bottom_right"
+          ]
+        },
+        "case": {
+          "kind": "choice",
+          "options": [
+            "as_written",
+            "upper",
+            "lower"
+          ]
+        },
+        "color": {
+          "kind": "color"
+        },
+        "font": {
+          "asset": "font",
+          "kind": "asset"
+        },
+        "line_align": {
+          "kind": "choice",
+          "options": [
+            "follow",
+            "left",
+            "center",
+            "right",
+            "justify"
+          ]
+        },
+        "outline.color": {
+          "kind": "color"
+        },
+        "shadow.color": {
+          "kind": "color"
+        },
+        "wrap": {
+          "kind": "choice",
+          "options": [
+            "none",
+            "word",
+            "glyph"
+          ]
+        }
+      },
+      "schema_version": 1,
+      "type_name": "sindri.text"
+    },
+    {
       "addable": true,
       "apply": {},
       "default_payload": {
@@ -2576,6 +2692,7 @@
           ],
           "width": 0.0
         },
+        "rich": false,
         "shadow": {
           "color": [
             0.0,

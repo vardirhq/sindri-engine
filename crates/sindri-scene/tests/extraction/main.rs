@@ -30,3 +30,4 @@ mod voxel_blocks;
 mod voxel_map;
 mod voxel_surfaces;
 mod voxel_world;
+mod world_text;

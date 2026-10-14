@@ -193,3 +193,18 @@ fn a_string_measures_in_proportion_to_the_size_it_was_asked_for() {
         "{double:?} is not twice {single:?}"
     );
 }
+
+/// Rich text's tags are not words: a colored run covers what the run alone
+/// would, and the same string read plainly is wider by its brackets.
+#[test]
+fn rich_tags_take_no_room() {
+    let mut text = renderer();
+    let plain = text.measure(&instance("GO")).expect("measures");
+    let tagged = "[color=#ff0000]GO[/color]";
+    let rich = text
+        .measure(&instance(tagged).with_rich(true))
+        .expect("measures");
+    let literal = text.measure(&instance(tagged)).expect("measures");
+    assert!((rich[0] - plain[0]).abs() < 1.0e-4, "{rich:?} vs {plain:?}");
+    assert!(literal[0] > plain[0] * 3.0, "{literal:?}");
+}
