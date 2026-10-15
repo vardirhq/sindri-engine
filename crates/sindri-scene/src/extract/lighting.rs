@@ -39,6 +39,7 @@ impl SceneExtractor {
                     sun_found = true;
                 }
                 if light.kind == LightKind::Directional
+                    || !light.enabled
                     || !world.is_active(entity)
                     || light.intensity == 0.0
                 {

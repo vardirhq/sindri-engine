@@ -106,8 +106,8 @@ impl Host for WorldHost<'_> {
             }));
         }
 
-        if let Some(rotation) = self.load_rotation(subject, path, &under)? {
-            return Ok(Some(rotation));
+        if let Some(value) = self.load_copied_value(subject, path, &under)? {
+            return Ok(Some(value));
         }
 
         let found = if subject.is_some() {
@@ -122,6 +122,9 @@ impl Host for WorldHost<'_> {
             return self.peer_load(subject, path);
         };
         let entity = self.subject(subject, path)?;
+        if let Leaf::Light(field) = leaf {
+            return self.load_light(entity, field, path).map(Some);
+        }
         let transform = self.transform_of(entity);
         // Read in place. Every load used to serialize all of the entity's
         // components into a fresh JSON object to look one number up, which was
@@ -158,6 +161,9 @@ impl Host for WorldHost<'_> {
         let Some(under) = Self::addressed(subject, path) else {
             return Ok(false);
         };
+        if self.store_light_color(subject, path, &under, &value)? {
+            return Ok(true);
+        }
         if self.store_rotation(subject, path, &under, &value)? {
             return Ok(true);
         }
@@ -179,12 +185,16 @@ impl Host for WorldHost<'_> {
             )));
         }
         let entity = self.subject(subject, path)?;
+        if let Leaf::Light(field) = leaf {
+            return self.store_light(entity, field, path, &value);
+        }
         let number = number(path, &value)?;
 
         match leaf {
             Leaf::TransformAxis(..) | Leaf::TransformScalar(_) => {
                 self.store_transform_leaf(entity, leaf, number, path)
             }
+            Leaf::Light(_) => unreachable!("handled by store_light"),
             Leaf::TransformRotation(_) => unreachable!("handled by store_rotation"),
             Leaf::Component { component, pointer } => {
                 let Some(data) = self.world.get_mut(entity) else {
@@ -268,6 +278,19 @@ impl Host for WorldHost<'_> {
 }
 
 impl WorldHost<'_> {
+    /// Whole copied values with checked specialized storage at the host seam.
+    fn load_copied_value(
+        &self,
+        subject: Option<u64>,
+        path: &Path,
+        under: &[&str],
+    ) -> Result<Option<Value>, RuntimeError> {
+        if let Some(color) = self.load_light_color(subject, path, under)? {
+            return Ok(Some(color));
+        }
+        self.load_rotation(subject, path, under)
+    }
+
     /// Everything the script printed during the call.
     pub fn take_printed(&mut self) -> Vec<String> {
         std::mem::take(&mut self.printed)

@@ -1,11 +1,11 @@
 # 3D point and spot lights
 
 This is feature proof for Explorer's planned lighting track. No in-tree game
-uses 3D local lights yet. GLB light import, local-light shadows and typed Decay
-light properties remain open; 2D lights have their own independent contract.
+uses 3D local lights yet. GLB light import and local-light shadows remain open; 2D lights have their own independent contract.
 
 `sindri.light.kind` accepts `directional` (the default), `point` or `spot`.
-Existing scenes keep their directional light. All kinds carry color and
+Existing scenes keep their directional light. `enabled` defaults to true and
+controls illumination independently of entity activity. All kinds carry color and
 intensity; `range` defaults to eight world units and must be finite and
 positive. A local light requires finite nonnegative linear RGB and intensity.
 The first active directional light remains the sun. Invalid lights fail strict
@@ -16,7 +16,7 @@ Local-light positions come from the composed entity transform every rendered
 frame. Moving, turning or scaling a parent moves its light; a point's rotation
 has no effect, while a spot shines along the composed forward axis (`-Z`). Range
 and cone angles ignore entity scale. An inactive entity or ancestor removes its
-contribution. Zero-intensity local lights consume no slot. Scene extraction
+contribution. Disabled and zero-intensity local lights consume no slot. Scene extraction
 validates all lights, then selects the eight strongest active local-light
 intensities; stable world iteration breaks ties. Selection is shared by every
 geometry kind, independent of camera and distance. There is no spatial light
@@ -144,3 +144,43 @@ range eight, and 20°/30° cones; one Undo/Redo removes/restores the whole entit
 Reopen/Play reaches the reused ready goal with the authored spot pools, and
 Stop/save restores the 13-entity scene with two spots. This remains feature
 proof; scripted mounted-light and in-tree game proof are separate requirements.
+
+## Typed runtime light access
+
+`this.light` and an entity's `.light` expose `Color`, numeric intensity/range and
+inner/outer half-angles, and boolean `enabled`, through one typed host surface.
+Reads honor omitted defaults. Every write validates a full candidate before
+committing; an error keeps the old payload. Whole Color writes are atomic and
+channel writes retain other channels. RGB is finite and nonnegative; Color
+alpha is one and writes must keep it one. Non-finite/overflowing values, invalid
+cone intervals, absent lights and stale references report runtime errors.
+
+`enabled` changes illumination independently of entity activity, so a light's
+own script continues ticking while off. Inactive ancestors still suppress it.
+Directional selection skips disabled suns; points/spots consume no slots when
+disabled. Position and direction continue to derive from live composed transforms.
+No renderer uniforms or passes change in this slice.
+
+`examples/lighting3d` is a feature example for Explorer's planned lighting track,
+not in-tree game adoption. Lights start authored black, intensity zero and off.
+Decay sets their values, alternates a blue point and a warm spot, translates and
+turns/tilts their scaled parent, and rotates the sun. After three seconds the
+ready goal restores the carrier and leaves all lights on, or off if the Camera's
+exported `lit` is false. The goal test opens the real project, compiles the script
+and steps Session to both goals, checking intermediate world light data, entity
+activity, the sun, and cube/inline/GLB extraction. Native/browser phase captures
+and final on/off pairs exercise the script-driven rendering; editor Play uses the
+same Session. This is separate from day/night environment control and game proof.
+
+
+The local validation includes 1,936 tests across the affected crates and editor,
+warning-denied workspace Clippy, a workspace WASM check and typed script preflight.
+Native phase captures add 7,568 red pixels and remove 61,462 blue pixels;
+browser phases add 5,065 red pixels and remove 71,641 blue pixels. Final lit/off
+pairs brighten 91,624 native and 91,020 browser pixels. The browser fetches all six
+assets, reaches the goal and reports no runtime or GPU errors. Native editor
+Play reaches both exported goals, and Stop/save restores all 13 authored entities
+and their black, zero-intensity, disabled lights while retaining the edited `lit`
+property. The original 300-prop browser workload and its shadow comparison also
+pass (2,088 darkened pixels). Day/night, runtime environment controls, dynamic
+sun-shadow direction proof and in-tree game adoption remain open.

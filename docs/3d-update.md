@@ -246,10 +246,10 @@ cameras face), YXZ order. Build on `Transform3D::yaw_pitch_roll_radians` and
   every geometry kind.
 - [x] The editor shows range spheres and cone gizmos. Create Point Light and
   Create Spot Light.
-- [ ] Decay can read and set directional, point and spot light color,
-  intensity and enabled state. Prefer entity property access, such as
-  `sun.light.intensity`, if it fits the existing typed host surface; settle
-  the exact API against current Decay conventions before implementing it.
+- [x] Typed `this.light` / `entity.light` color, intensity, range, cone angles
+  and independent enabled state, with atomic validation. Lighting Lab opens,
+  compiles and plays to both goals; live native/browser phases and editor
+  Play/Stop exercise the controls. This is feature proof, not game adoption.
 - [ ] Directional lights rotate through the existing 3D transform API.
   Runtime property and transform changes update lighting and shadow direction
   in the next rendered frame in native, browser and editor Play runtimes.

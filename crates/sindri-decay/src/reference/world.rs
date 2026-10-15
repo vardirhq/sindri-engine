@@ -98,6 +98,7 @@ pub(super) const TYPES: &[TypeEntry] = &[
         name: "Entity",
         text: "An object in the game, such as a player, an enemy or a button. Scripts get these from calls like `World.find` and can store them, compare them and change their transform, sprite or shape.",
         members: &[
+            value("light", "The object's 3D light, if it has one."),
             value("light2d", "The object's 2D light, if it has one."),
             value("shape", "The object's drawn shape, if it has one."),
             value("sprite", "The object's image (sprite), if it has one."),
@@ -208,6 +209,36 @@ pub(super) const TYPES: &[TypeEntry] = &[
             value(
                 "tint",
                 "A color the image is multiplied by. White leaves it unchanged; lowering `a` fades it out.",
+            ),
+        ],
+    },
+    TypeEntry {
+        name: "Light",
+        text: "A directional, point or spot 3D light. Writes validate the whole candidate before changing the payload. Missing components and invalid values are errors. Rotation/position come from the entity transform.",
+        members: &[
+            value(
+                "color",
+                "Linear RGB as a Color, whole or by channel. Alpha reads one and writes must keep it one; RGB is finite and nonnegative. Whole writes are atomic.",
+            ),
+            value(
+                "intensity",
+                "Finite nonnegative brightness; zero contributes no light.",
+            ),
+            value(
+                "range",
+                "Finite positive range in world units, independent of entity scale; used by points and spots.",
+            ),
+            value(
+                "inner_angle",
+                "Inner spotlight half-angle in radians, at least zero and strictly below outer_angle; use an order that keeps each write valid.",
+            ),
+            value(
+                "outer_angle",
+                "Outer spotlight half-angle in radians, above inner_angle and at most pi/2, with distinct f32 cosines.",
+            ),
+            value(
+                "enabled",
+                "Whether this light illuminates. Switching it off leaves its entity, scripts and children active.",
             ),
         ],
     },

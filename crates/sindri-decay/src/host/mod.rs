@@ -21,6 +21,7 @@ mod flood;
 mod frame;
 mod gamepad;
 mod geometry;
+mod light;
 mod map;
 mod particles;
 mod peers;

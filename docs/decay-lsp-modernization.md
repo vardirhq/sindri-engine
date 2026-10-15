@@ -43,6 +43,9 @@ language model.
   the movement signature, typed batch preflight accepts the checked fixtures, and
   compiler regressions reject Vec2 displacement and wrong result-field types.
 
+- [x] Exercise 3D light completion/hover and typed checking through the shared
+  host surface, including boolean enabled state, numeric intensity and Color.
+
 ## P0 — correctness and drift
 
 These are defects or sources of actively misleading tooling.

@@ -404,6 +404,13 @@
       "type": "Entity"
     },
     {
+      "description": "The 3D light on this object: checked color, intensity, range, cone angles and independent enabled state.",
+      "kind": "value",
+      "name": "light",
+      "read_only": false,
+      "type": "Light"
+    },
+    {
       "description": "The 2D light on this script's object, if it has one: its color, brightness and reach.",
       "kind": "value",
       "name": "light2d",
@@ -1497,6 +1504,13 @@
       "description": "An object in the game, such as a player, an enemy or a button. Scripts get these from calls like `World.find` and can store them, compare them and change their transform, sprite or shape.",
       "members": [
         {
+          "description": "The object's 3D light, if it has one.",
+          "kind": "value",
+          "name": "light",
+          "read_only": false,
+          "type": "Light"
+        },
+        {
           "description": "The object's 2D light, if it has one.",
           "kind": "value",
           "name": "light2d",
@@ -2214,6 +2228,54 @@
         }
       ],
       "name": "Keyboard"
+    },
+    {
+      "description": "A directional, point or spot 3D light. Writes validate the whole candidate before changing the payload. Missing components and invalid values are errors. Rotation/position come from the entity transform.",
+      "members": [
+        {
+          "description": "Linear RGB as a Color, whole or by channel. Alpha reads one and writes must keep it one; RGB is finite and nonnegative. Whole writes are atomic.",
+          "kind": "value",
+          "name": "color",
+          "read_only": false,
+          "type": "Color"
+        },
+        {
+          "description": "Whether this light illuminates. Switching it off leaves its entity, scripts and children active.",
+          "kind": "value",
+          "name": "enabled",
+          "read_only": false,
+          "type": "bool"
+        },
+        {
+          "description": "Inner spotlight half-angle in radians, at least zero and strictly below outer_angle; use an order that keeps each write valid.",
+          "kind": "value",
+          "name": "inner_angle",
+          "read_only": false,
+          "type": "f32"
+        },
+        {
+          "description": "Finite nonnegative brightness; zero contributes no light.",
+          "kind": "value",
+          "name": "intensity",
+          "read_only": false,
+          "type": "f32"
+        },
+        {
+          "description": "Outer spotlight half-angle in radians, above inner_angle and at most pi/2, with distinct f32 cosines.",
+          "kind": "value",
+          "name": "outer_angle",
+          "read_only": false,
+          "type": "f32"
+        },
+        {
+          "description": "Finite positive range in world units, independent of entity scale; used by points and spots.",
+          "kind": "value",
+          "name": "range",
+          "read_only": false,
+          "type": "f32"
+        }
+      ],
+      "name": "Light"
     },
     {
       "description": "A light in a 2D scene: it brightens sprites, tiles and shapes near it when the scene's environment turns 2D lighting on. Switch one off with its object's `set_active`.",

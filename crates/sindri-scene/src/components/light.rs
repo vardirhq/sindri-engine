@@ -43,6 +43,8 @@ pub struct LightComponent {
     pub kind: LightKind,
     pub color: [f32; 3],
     pub intensity: f32,
+    /// Switches only illumination; the entity and its script keep running.
+    pub enabled: bool,
     /// Local-light reach in world units, independent of entity scale.
     pub range: f32,
     /// Spotlight half-angles in radians: 0 <= inner < outer <= pi/2.
@@ -60,6 +62,7 @@ impl Default for LightComponent {
             kind: LightKind::Directional,
             color: [1.0, 0.95, 0.86],
             intensity: 1.0,
+            enabled: true,
             range: 8.0,
             inner_angle: 20.0_f32.to_radians(),
             outer_angle: 30.0_f32.to_radians(),
@@ -187,7 +190,7 @@ pub fn lights_in(world: &World) -> Vec<(EntityId, Result<LightComponent, LightEr
 /// An entity switched off, or under one that is, does not light anything.
 #[must_use]
 pub fn sun_in(world: &World, light: LightComponent, entity: EntityId) -> Option<Sun> {
-    if !world.is_active(entity) || light.kind != LightKind::Directional {
+    if !light.enabled || !world.is_active(entity) || light.kind != LightKind::Directional {
         return None;
     }
     world.get(entity)?;

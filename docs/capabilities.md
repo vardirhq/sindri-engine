@@ -3440,8 +3440,9 @@ transforms and inactive ancestors suppress the light. Editor creation uses one
 checked transaction and selected world-range circles; studio lighting omits
 authored points. Native/browser feature controls and GPU/scene regressions are
 described in [the 3D light contract](3d-lights.md). This is Explorer feature
-proof, with no in-tree game adoption yet; local shadows and typed
-Decay light properties are absent. Points now share the spotlight records
+proof, with no in-tree game adoption yet; local shadows are absent.
+Typed runtime light properties are described below. Points now share the
+spotlight records
 described below. The fixed uniform cost is 512 additional
 bytes per color draw; shared buffers and spatial light assignment remain open.
 
@@ -3458,5 +3459,21 @@ textured/model draws (eight 64-byte records); shadow uniforms, passes, writes
 and persistent geometry uploads are unchanged. The editor creates down-facing
 spots in one undo step and paints clipped selected inner/outer range cones.
 Native/browser aimed/away controls and Scene/GPU/guide regressions provide
-feature evidence. Local shadows, typed Decay properties, dynamic scripted mounted
-light proof and Explorer adoption remain open; see `3d-lights.md`.
+feature evidence. Local shadows and Explorer adoption remain open; runtime light
+controls and mounted-light feature evidence are described below and in `3d-lights.md`.
+
+### Checked 3D lighting from Decay
+
+`this.light` and `Entity.light` expose color, intensity, range, spotlight
+half-angles and independent boolean enabled state from the shared typed surface.
+Setters validate full candidates before mutation, including f32 narrowing and
+cross-field cone bounds; failed writes retain payloads and whole colors are
+atomic. Reads honor omitted defaults; Color alpha stays one. The enabled flag
+changes illumination without deactivating the entity or stopping its scripts.
+`examples/lighting3d` is feature proof for Explorer's planned lighting track:
+its checked script animates parented points/spots and the sun, reaches lit/dark
+Session goals and exercises cube, inline and imported geometry. Completion,
+hover, generated docs and typed batch checks share the same metadata. Native,
+real WebGPU and editor Play controls are recorded in `3d-lights.md`. In-tree
+game adoption, local shadows and runtime environment/day-night control remain
+open; no new uniform or pass cost is introduced.

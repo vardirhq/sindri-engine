@@ -1,5 +1,10 @@
 # Changelog
 
+- Drive 3D lights from Decay through typed color, intensity, range, cone angles
+  and enabled state. Invalid writes retain the previous settings; switching a
+  light off leaves its entity and script active. The new 3D Lighting Lab animates
+  parented lights and the sun through the shared runtime, with lit/dark goals.
+
 - Aim 3D spotlights with feathered inner/outer cone angles. They share eight
   local-light slots with point lights across meshes, voxels and imported models.
   The editor creates downward-facing spots, shows selected cone guides and

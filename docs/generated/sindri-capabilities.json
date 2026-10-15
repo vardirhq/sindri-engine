@@ -585,6 +585,7 @@
           0.949999988079071,
           0.8600000143051147
         ],
+        "enabled": true,
         "inner_angle": 0.3490658402442932,
         "intensity": 1.0,
         "kind": "directional",
@@ -598,6 +599,7 @@
           0.949999988079071,
           0.8600000143051147
         ],
+        "enabled": true,
         "inner_angle": 0.3490658402442932,
         "intensity": 1.0,
         "kind": "directional",

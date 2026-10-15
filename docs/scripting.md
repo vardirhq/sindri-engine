@@ -277,6 +277,10 @@ stored, and an integer rounds.
 
 | `this.sprite.layer` | `f32` | yes | yes |
 | `this.sprite.shader_params.{x,y,z,w}` | `f32` | yes | yes |
+| `this.light.color` | `Color` | yes | yes |
+| `this.light.color.{r,g,b,a}` | `f32` | yes | yes |
+| `this.light.{intensity,range,inner_angle,outer_angle}` | `f32` | yes | yes |
+| `this.light.enabled` | `bool` | yes | yes |
 | `this.light2d.color` | `Color` | yes | yes |
 | `this.light2d.color.{r,g,b,a}` | `f32` | yes | yes |
 | `this.light2d.{intensity,radius,falloff,height}` | `f32` | yes | yes |
@@ -375,6 +379,10 @@ table above lists, reaching the same numbers.
 | `this.entity.sprite.color_offset.{r,g,b,a}` | `f32` | yes | yes |
 | `this.entity.sprite.layer` | `f32` | yes | yes |
 | `this.entity.sprite.shader_params.{x,y,z,w}` | `f32` | yes | yes |
+| `this.entity.light.color` | `Color` | yes | yes |
+| `this.entity.light.color.{r,g,b,a}` | `f32` | yes | yes |
+| `this.entity.light.{intensity,range,inner_angle,outer_angle}` | `f32` | yes | yes |
+| `this.entity.light.enabled` | `bool` | yes | yes |
 | `this.entity.light2d.color` | `Color` | yes | yes |
 | `this.entity.light2d.color.{r,g,b,a}` | `f32` | yes | yes |
 | `this.entity.light2d.{intensity,radius,falloff,height}` | `f32` | yes | yes |
@@ -3124,3 +3132,23 @@ with a visible Game view and the pointer inside it. Escape, window focus loss,
 pause/stop, text editing, picking or hiding the Game view releases capture;
 resuming or regaining focus does not recapture. Raw native motion uses device
 counts without applying the editor display scale.
+
+
+## Checked 3D light properties
+
+`this.light` and an `Entity`'s `.light` expose a `sindri.light` without changing
+its authored kind. Reads honor omitted defaults. Color uses linear RGB through
+`Color`; alpha reads one and must remain one. RGB and intensity are finite and
+nonnegative, range is finite and positive, and cone half-angles in radians obey
+`0 <= inner < outer <= pi/2` with distinct f32 cosine values. Each setter checks
+the entire candidate and retains the previous payload on error; whole color
+writes are atomic. Set outer before inner when widening both cones, and inner
+before outer when narrowing them. Missing lights and stale references are
+runtime errors; access never creates a light. Writes preserve unrelated payload
+fields. Invalid preexisting payloads must be fixed through authoring first.
+
+`light.enabled` switches illumination independently of the entity's active
+state: its script keeps ticking and can turn its light back on. Inactive parents
+still suppress lighting. Scene extraction observes light and transform writes
+after the shared Session script step; directional shadows use that same updated
+sun. `examples/lighting3d` is feature proof; in-tree game adoption remains open.

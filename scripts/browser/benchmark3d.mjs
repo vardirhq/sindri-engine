@@ -5,6 +5,7 @@ import { readFile } from 'node:fs/promises';
 import { extname, join, normalize, resolve } from 'node:path';
 import { chromium } from 'playwright';
 import { imageStatistics } from './png.mjs';
+import { compareLightPhases } from './compare-light-phases.mjs';
 
 const root = resolve(process.argv[2]);
 const shot = process.argv[3];
@@ -47,11 +48,19 @@ try {
     assert(logs.some((line) => line.includes(words)), `missing ${words}: ${logs.slice(-10).join(' | ')}`);
   };
   await page.goto(origin + base);
-  await waitFor('3D benchmark loaded');
-  await waitFor('3D benchmark ready');
+  await waitFor(process.env.SINDRI_LIGHTING3D ? '3D lighting loaded' : '3D benchmark loaded');
+  if (process.env.SINDRI_LIGHTING3D) {
+    const point = await page.screenshot(shot ? { path: shot.replace(/\.png$/, '-point-phase.png') } : {});
+    await waitFor('3D lighting spot phase');
+    const spot = await page.screenshot(shot ? { path: shot.replace(/\.png$/, '-spot-phase.png') } : {});
+    compareLightPhases(point, spot);
+  }
+  await waitFor(process.env.SINDRI_LIGHTING3D ? '3D lighting ready' : '3D benchmark ready');
   const pixels = await page.screenshot(shot ? { path: shot } : {});
   assert(imageStatistics(pixels).colors >= minColors, 'the lab renders several scene colors');
-  const assets = process.env.SINDRI_MODEL_CASTER
+  const assets = process.env.SINDRI_LIGHTING3D
+    ? ['lighting.scene', 'lighting.decay', 'cube.png', 'surface.png', 'floor.png', 'prop.glb']
+    : process.env.SINDRI_MODEL_CASTER
     ? ['benchmark.scene', 'benchmark.decay', 'caster.glb', 'prop.glb']
     : process.env.SINDRI_MODEL_RECEIVER
     ? ['benchmark.scene', 'benchmark.decay', 'cube.png', 'prop.glb']
