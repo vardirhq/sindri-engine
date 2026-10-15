@@ -450,10 +450,13 @@
 
     // Everything here is set as text, never as markup: the detail is whatever
     // a browser or the engine said, and that is not the page's to trust.
-    const fail = ({ kind = "crash", title, message, tips = [], detail = "" }) => {
+    const fail = ({ kind = "crash", reason, title, message, tips = [], detail = "" }) => {
       document.querySelector("#sindri-loading")?.remove();
       canvas?.remove();
       errorBox.dataset.kind = kind;
+      // Which failure this is, for whatever checks the page, so the wording
+      // stays free to change without breaking a test that reads it.
+      errorBox.dataset.reason = reason;
       errorBox.querySelector("h1").textContent = title;
       errorBox.querySelector(".message").textContent = message;
       errorBox.querySelector(".tips").replaceChildren(...tips.map((tip) => {
@@ -497,6 +500,7 @@
       console.error(detail);
       const summary = detail.split("\n")[0].trim();
       fail({
+        reason: "stopped",
         title: "The game stopped",
         message: summary.length > 200 ? `${summary.slice(0, 200)}…` : summary,
         tips: ["Reloading the page often gets past it.",
@@ -543,6 +547,7 @@
     // no adapter to give is usually a device, driver or setting.
     const NO_WEBGPU = {
       kind: "device",
+      reason: "webgpu",
       title: "This browser can't run WebGPU",
       message: `${game} is drawn with WebGPU, a modern graphics feature this browser doesn't offer yet.`,
       tips: [
@@ -552,6 +557,7 @@
     };
     const NO_ADAPTER = {
       kind: "device",
+      reason: "adapter",
       title: "WebGPU couldn't reach your graphics card",
       message: `This browser supports WebGPU, but it didn't give ${game} access to a graphics adapter. Some devices and drivers are held back on purpose.`,
       tips: [
@@ -563,6 +569,7 @@
 
     if (!(canvas instanceof HTMLCanvasElement)) {
       fail({
+        reason: "canvas",
         title: "The game couldn't start",
         message: "This page is missing the canvas Sindri draws into.",
         detail: "No <canvas id=\"sindri-canvas\"> element was found on the page.",
@@ -592,6 +599,7 @@
       } catch (error) {
         console.error(error);
         fail({
+          reason: "host",
           title: "The game couldn't load",
           message: "Part of the game didn't download or start. This is usually a dropped connection.",
           tips: ["Check your connection, then try again."],
