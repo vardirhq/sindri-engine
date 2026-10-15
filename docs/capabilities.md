@@ -3475,7 +3475,7 @@ its checked script animates parented points/spots and the sun, reaches lit/dark
 Session goals and exercises cube, inline and imported geometry. Completion,
 hover, generated docs and typed batch checks share the same metadata. Native,
 real WebGPU and editor Play controls are recorded in `3d-lights.md`. In-tree
-game adoption, local shadows and a full day/night clock remain
+game adoption and local shadows remain
 open; no new uniform or pass cost is introduced.
 
 
@@ -3490,6 +3490,21 @@ Lighting Lab extends its first two phases with cool/warm ambient and clear-color
 changes, restoring original settings at the ready goal. Shared Session tests
 observe the resulting lighting and frame clear; native/browser captures and
 editor Play exercise rendering. This is feature proof for Explorer/Low Tide 3D's
-planned lighting track, with in-tree game adoption, day/night clock and fog/post
-controls open. No renderer layout, resource lifetime or dependency changes.
+planned lighting track, with in-tree game adoption and fog/post controls open.
+Day/Night Lab below exercises the project clock and mounted-light integration. No renderer layout, resource lifetime or dependency changes.
 See `runtime-environment.md` for the contract and validation evidence.
+
+
+### Scripted day/night on the shared 3D path
+
+`examples/daynight` is feature proof for Explorer and external Low Tide 3D's
+planned lighting track. Its Decay-owned clock smoothly changes sun brightness,
+color and rotation, ambient light and background through four phases. A moving
+GLB carries a point and spotlight; night illumination works while the sun is
+disabled. Real-project Session tests exercise two clock configurations, all
+phases, composed night positions, continued motion after the goal, frozen hours
+and independent night controls. Native/browser images isolate moving sun
+shadows on imported ground with fixed model poses, and local illumination at
+midnight. Native editor Play runs the same scene. See `daynight.md` for measured
+evidence. No new host API, renderer path, dependency or engine time service;
+in-tree game adoption and fog/post controls remain open.

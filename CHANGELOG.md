@@ -1,5 +1,9 @@
 # Changelog
 
+- Add Day/Night Lab: a configurable Decay clock blends sunrise, midday, sunset
+  and night, rotates the shadow-casting sun, and moves an imported prop carrying
+  night lights. Frozen-hour controls isolate imported shadows and illumination.
+
 - Change scene ambient intensity/color and background from typed Decay
   environment properties. Writes validate atomically and appear in the next
   frame; Lighting Lab now switches cool/warm ambient fill and sky during play.

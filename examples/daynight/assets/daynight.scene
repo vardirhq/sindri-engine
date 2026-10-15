@@ -1,0 +1,229 @@
+{
+  "format_version": 10,
+  "metadata": {
+    "name": "Day/Night Lab"
+  },
+  "entities": [
+    {
+      "id": "Camera",
+      "name": "Camera",
+      "transform_3d": {
+        "position": [
+          8,
+          9,
+          12
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ],
+        "rotation": [
+          -0.2635350713876335,
+          0.2785822852913061,
+          0.07979199930413745,
+          0.9200947849638301
+        ]
+      },
+      "components": {
+        "sindri.camera": {
+          "projection": "perspective",
+          "vertical_fov_degrees": 35,
+          "near": 0.1,
+          "far": 200
+        },
+        "sindri.script": {
+          "source": "daynight.decay",
+          "script": "DayNight",
+          "properties": {
+            "day_seconds": 12,
+            "start_hour": 6,
+            "preview_hour": -1,
+            "move_carrier": true,
+            "night_lights": true
+          }
+        }
+      }
+    },
+    {
+      "id": "Sun",
+      "name": "Sun",
+      "transform_3d": {
+        "position": [
+          0,
+          20,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ],
+        "rotation": [
+          -0.17101007166283438,
+          -0.8137976813493737,
+          -0.2961981327260238,
+          0.4698463103929543
+        ]
+      },
+      "components": {
+        "sindri.light": {
+          "kind": "directional",
+          "intensity": 0,
+          "enabled": false
+        }
+      }
+    },
+    {
+      "id": "World",
+      "name": "World",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "sindri.environment": {
+          "ambient_intensity": 0.03,
+          "shadows": {
+            "enabled": true,
+            "distance": 16,
+            "map_size": 1024,
+            "bias": 0.001
+          },
+          "background": [
+            0.008,
+            0.012,
+            0.035,
+            1
+          ]
+        }
+      }
+    },
+    {
+      "id": "Floor",
+      "name": "Floor",
+      "transform_3d": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "components": {
+        "sindri.model": {
+          "asset": "models/prop.glb"
+        }
+      }
+    },
+    {
+      "id": "Carrier",
+      "name": "Carrier",
+      "transform_3d": {
+        "position": [
+          -2,
+          1,
+          0
+        ],
+        "scale": [
+          1,
+          2,
+          1
+        ]
+      },
+      "components": {
+        "sindri.model": {
+          "asset": "models/caster.glb"
+        }
+      }
+    },
+    {
+      "id": "Work-spot",
+      "name": "Work spot",
+      "parent": "Carrier",
+      "transform_3d": {
+        "position": [
+          0,
+          0.55,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ],
+        "rotation": [
+          -0.434965534,
+          0,
+          0,
+          0.9004471
+        ]
+      },
+      "components": {
+        "sindri.light": {
+          "kind": "spot",
+          "color": [
+            1,
+            0.3,
+            0.06
+          ],
+          "intensity": 24,
+          "range": 7,
+          "inner_angle": 0.4,
+          "outer_angle": 0.7,
+          "enabled": false
+        }
+      }
+    },
+    {
+      "id": "Blue-point",
+      "name": "Blue point",
+      "parent": "Carrier",
+      "transform_3d": {
+        "position": [
+          0.75,
+          0.5,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ]
+      },
+      "components": {
+        "sindri.light": {
+          "kind": "point",
+          "color": [
+            0.04,
+            0.2,
+            1
+          ],
+          "intensity": 14,
+          "range": 7,
+          "inner_angle": 0.4,
+          "outer_angle": 0.7,
+          "enabled": false
+        }
+      }
+    }
+  ]
+}

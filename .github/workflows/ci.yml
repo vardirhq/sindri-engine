@@ -414,6 +414,22 @@ jobs:
           cargo run --package sindri-causeway --bin project-capture -- examples/lighting3d target/render-artifacts/native-lighting3d-point-phase.png 960 540 wait:0
           cargo run --package sindri-causeway --bin project-capture -- examples/lighting3d target/render-artifacts/native-lighting3d-spot-phase.png 960 540 wait:0.6
           node scripts/browser/compare-light-phases.mjs target/render-artifacts/native-lighting3d-point-phase.png target/render-artifacts/native-lighting3d-spot-phase.png
+          for daynight_phase in sunrise:0 midday:2.2 sunset:4.7 night:6.2; do
+            cargo run --package sindri-causeway --bin project-capture -- examples/daynight target/render-artifacts/native-daynight-${daynight_phase%:*}.png 960 540 wait:${daynight_phase#*:}
+          done
+          node scripts/browser/compare-daynight.mjs cycle target/render-artifacts/native-daynight-{sunrise,midday,sunset,night}.png
+          for daynight_hour in 10 14; do
+            python3 scripts/browser/prepare-daynight.py target/daynight-$daynight_hour --hour $daynight_hour --stationary
+            python3 scripts/browser/prepare-daynight.py target/daynight-$daynight_hour-off --hour $daynight_hour --stationary --no-shadows
+            cargo run --package sindri-causeway --bin project-capture -- target/daynight-$daynight_hour target/render-artifacts/native-daynight-$daynight_hour.png 960 540 wait:0
+            cargo run --package sindri-causeway --bin project-capture -- target/daynight-$daynight_hour-off target/render-artifacts/native-daynight-$daynight_hour-off.png 960 540 wait:0
+          done
+          node scripts/browser/compare-daynight.mjs shadows target/render-artifacts/native-daynight-{10,10-off,14,14-off}.png
+          python3 scripts/browser/prepare-daynight.py target/daynight-night --hour 0 --stationary
+          python3 scripts/browser/prepare-daynight.py target/daynight-night-off --hour 0 --stationary --no-night
+          cargo run --package sindri-causeway --bin project-capture -- target/daynight-night target/render-artifacts/native-daynight-lights.png 960 540 wait:0
+          cargo run --package sindri-causeway --bin project-capture -- target/daynight-night-off target/render-artifacts/native-daynight-lights-off.png 960 540 wait:0
+          node scripts/browser/compare-daynight.mjs night target/render-artifacts/native-daynight-lights{,-off}.png
           cargo run --package sindri-causeway --bin project-benchmark -- examples/benchmark3d target/render-artifacts/benchmark3d.json 3 30
           cargo run --package sindri-causeway --bin project-benchmark -- target/native-benchmark3d-no-shadows target/render-artifacts/benchmark3d-no-shadows.json 3 30
           python3 scripts/check-3d-benchmark.py target/render-artifacts/benchmark3d.json target/render-artifacts/benchmark3d-no-shadows.json --require-gpu-timing
@@ -467,6 +483,7 @@ jobs:
             target/render-artifacts/native-point-lights-off.png
             target/render-artifacts/native-spot-lights.png
             target/render-artifacts/native-spot-lights-away.png
+            target/render-artifacts/native-daynight-*.png
             target/render-artifacts/native-lighting3d.png
             target/render-artifacts/native-lighting3d-off.png
             target/render-artifacts/native-lighting3d-point-phase.png
@@ -745,6 +762,22 @@ jobs:
               "$lighting_source" target/dist/$lighting_project --base /examples/lighting3d/
             cp -R crates/sindri-player/pkg/. target/dist/$lighting_project/pkg/
           done
+          for daynight_hour in 10 14; do
+            python3 scripts/browser/prepare-daynight.py target/daynight-$daynight_hour --hour $daynight_hour --stationary
+            python3 scripts/browser/prepare-daynight.py target/daynight-$daynight_hour-off --hour $daynight_hour --stationary --no-shadows
+          done
+          python3 scripts/browser/prepare-daynight.py target/daynight-night --hour 0 --stationary
+          python3 scripts/browser/prepare-daynight.py target/daynight-night-off --hour 0 --stationary --no-night
+          python3 scripts/browser/prepare-daynight.py target/daynight-sunrise --hour 7.6 --stationary
+          python3 scripts/browser/prepare-daynight.py target/daynight-midday --hour 12 --stationary
+          python3 scripts/browser/prepare-daynight.py target/daynight-sunset --hour 17 --stationary
+          for daynight_project in daynight daynight-sunrise daynight-midday daynight-sunset daynight-10 daynight-10-off daynight-14 daynight-14-off daynight-night daynight-night-off; do
+            daynight_source=target/$daynight_project
+            if [ "$daynight_project" = daynight ]; then daynight_source=examples/daynight; fi
+            cargo run --quiet --package sindri-export --bin sindri-export -- \
+              "$daynight_source" target/dist/$daynight_project --base /examples/daynight/
+            cp -R crates/sindri-player/pkg/. target/dist/$daynight_project/pkg/
+          done
           cargo run --quiet --package sindri-export --bin sindri-export -- \
             examples/transform target/dist/transform --base /examples/transform/
           cp -R crates/sindri-player/pkg/. target/dist/transform/pkg/
@@ -816,6 +849,13 @@ jobs:
           SINDRI_LIGHTING3D=1 SINDRI_MIN_COLORS=4 SINDRI_BASE_PATH=/examples/lighting3d/ \
             node scripts/browser/benchmark3d.mjs target/dist/lighting3d-off target/render-artifacts/browser-lighting3d-off.png
           node scripts/browser/compare-point-lights.mjs target/render-artifacts/browser-lighting3d.png target/render-artifacts/browser-lighting3d-off.png
+          node scripts/browser/daynight.mjs target/dist/daynight target/render-artifacts/browser-daynight.png
+          for daynight_project in daynight-sunrise daynight-midday daynight-sunset daynight-10 daynight-10-off daynight-14 daynight-14-off daynight-night daynight-night-off; do
+            SINDRI_DAYNIGHT_PREVIEW=1 node scripts/browser/daynight.mjs target/dist/$daynight_project target/render-artifacts/browser-$daynight_project.png
+          done
+          node scripts/browser/compare-daynight.mjs cycle target/render-artifacts/browser-daynight-{sunrise,midday,sunset,night}.png
+          node scripts/browser/compare-daynight.mjs shadows target/render-artifacts/browser-daynight-{10,10-off,14,14-off}.png
+          node scripts/browser/compare-daynight.mjs night target/render-artifacts/browser-daynight-night{,-off}.png
           SINDRI_BASE_PATH=/examples/transform/ \
             node scripts/browser/transform.mjs target/dist/transform target/render-artifacts/browser-transform.png
           SINDRI_BASE_PATH=/examples/orbit/ \
@@ -933,6 +973,7 @@ jobs:
             target/render-artifacts/browser-point-lights-off.png
             target/render-artifacts/browser-spot-lights.png
             target/render-artifacts/browser-spot-lights-away.png
+            target/render-artifacts/browser-daynight*.png
             target/render-artifacts/browser-lighting3d.png
             target/render-artifacts/browser-lighting3d-off.png
             target/render-artifacts/browser-lighting3d-point-phase.png

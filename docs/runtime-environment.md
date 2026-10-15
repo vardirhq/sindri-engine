@@ -2,7 +2,7 @@
 
 This is feature proof for Explorer and external Low Tide 3D's planned lighting
 track. Lighting Lab (`examples/lighting3d`) exercises it; in-tree game adoption
-and a full day/night clock remain open.
+remains open. `daynight.md` records the full project-clock example.
 
 `this.environment` and `entity.environment` refer to an existing
 `sindri.environment` component. They expose `ambient_intensity` as a number,
@@ -39,8 +39,8 @@ goal. Its open/compile/play test checks both goals and intermediate extracted
 lighting and frame clear. The phase image comparison checks the changing clear
 color as well as the colored geometry. Final lit/off controls retain the same
 ambient and background, isolating local-light illumination. This is separate
-from full sunrise/midday/sunset/night transitions, mounted-GLB sun-shadow proof,
-fog/post delivery and game adoption.
+from fog/post delivery and game adoption. Full transitions and mounted-GLB
+sun-shadow proof now have their own feature example in `daynight.md`.
 
 
 Local validation passes 535 scoped LSP/game/Decay/catalogue tests, warning-denied

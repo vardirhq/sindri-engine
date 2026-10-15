@@ -182,8 +182,9 @@ assets, reaches the goal and reports no runtime or GPU errors. Native editor
 Play reaches both exported goals, and Stop/save restores all 13 authored entities
 and their black, zero-intensity, disabled lights while retaining the edited `lit`
 property. The original 300-prop browser workload and its shadow comparison also
-pass (2,088 darkened pixels). Day/night, fog/post environment controls, dynamic
-sun-shadow direction proof and in-tree game adoption remain open.
+pass (2,088 darkened pixels). Fog/post environment controls and in-tree game
+adoption remain open. Day/Night Lab now exercises dynamic sun-shadow direction
+and a project clock; see `daynight.md`.
 
 Lighting Lab now also exercises runtime ambient/background transitions; see
 [`runtime-environment.md`](runtime-environment.md) for that separate slice.

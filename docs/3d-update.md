@@ -250,13 +250,15 @@ cameras face), YXZ order. Build on `Transform3D::yaw_pitch_roll_radians` and
   and independent enabled state, with atomic validation. Lighting Lab opens,
   compiles and plays to both goals; live native/browser phases and editor
   Play/Stop exercise the controls. This is feature proof, not game adoption.
-- [ ] Directional lights rotate through the existing 3D transform API.
+- [x] Directional lights rotate through the existing 3D transform API.
   Runtime property and transform changes update lighting and shadow direction
   in the next rendered frame in native, browser and editor Play runtimes.
-- [ ] Point and spot lights can ride moving 3D parents: composed world
+- [x] Point and spot lights can ride moving 3D parents: composed world
   translation and rotation determine position and spotlight direction.
   Decay can change their properties, and imported GLB geometry is lit through
-  the unified renderer in native, browser and editor Play.
+  the unified renderer in native, browser and editor Play. Day/Night Lab
+  exercises a moving GLB carrier; frozen-hour controls isolate dynamic sun
+  shadows on imported ground. See `daynight.md`.
 
 ### 4b. Runtime environment controls and day/night proof
 
@@ -283,24 +285,26 @@ second lighting path or Low Tide gameplay in Rust.
 - [x] Apply ambient/background edits on the next extraction without restarting
   or rebuilding render resources, using the authored environment and existing
   shared lighting/clear path. Fog/post controls remain separate.
-- [ ] Add a small, self-contained feature example with a configurable Decay
+- [x] Add a small, self-contained feature example with a configurable Decay
   game clock, sunrise, midday, sunset and night; a rotating directional sun;
   smooth sun brightness/color, ambient and background transitions; and night
   illumination while the sun is disabled. No visible-sun renderer is required.
-- [ ] The example moves an imported GLB object carrying a functional point
+- [x] The example moves an imported GLB object carrying a functional point
   or spot light. Imported models cast and receive dynamic shadows that follow
   the sun. This proves generic mounted lights rather than crawler-specific
   headlights, cabin/work lights or floodlight logic.
-- [ ] Test typed property reads/writes, invalid values and atomic rejection,
-  runtime frame updates, parenting and shadow direction where practical.
+- [x] Test typed property reads/writes, invalid values and atomic rejection
+  (in the light/environment slices), runtime frame updates, parenting and
+  shadow direction.
   Open the example, compile its scripts and run a scripted clock to its goal
   through Session; visually verify native and real WebGPU browser output and
   exercise the same scene in editor Play before claiming completion.
-- [ ] Update scripting and subsystem contracts, generated Decay API docs and
+- [x] Update scripting and subsystem contracts, generated Decay API docs and
   machine-readable metadata (via the generator), LSP/semantic validation where
   relevant, capability/parity evidence and the changelog. Name the external
   integration and feature example honestly; retain in-tree game proof as a
-  separate completion requirement under AGENTS.md.
+  separate completion requirement under AGENTS.md. Day/Night Lab reuses the
+  generated typed APIs; this example adds no host surface.
 
 Acceptance: a Decay script continuously advances its own clock and changes
 the sun, ambient illumination and background; the same scene renders correctly

@@ -3182,5 +3182,6 @@ Scene extraction still selects the active environment and rejects multiple
 active environments. Writes to inactive environments affect them when activated.
 The next extraction reads ambient lighting and clear color from the same world,
 without a restart or render-resource rebuild. Lighting Lab is the native/browser/
-editor feature proof; day/night clock, fog/post controls and game adoption remain
+editor feature proof. Day/Night Lab adds a configurable project clock and
+mounted-light/shadow integration; fog/post controls and game adoption remain
 separate work.
