@@ -212,10 +212,9 @@ jobs:
       - name: Check the fixture is still what its recipe bakes
         working-directory: tools/isometric-baker
         run: node src/cli.ts fixtures/project/prefabs/standing-stone.isobake --out fixtures/project --check
-      # Orbital Baked is a whole game's art rather than one asset, and it is the
-      # reason this check matters more than it did: seven sheets are committed
-      # here, and a recipe that stops producing what is checked in would show up
-      # as art that quietly drifts from its source rather than as a failure.
+      # Orbital draws itself with vector shapes now; its mine blast is the one
+      # baked sheet left, and a recipe that stops producing what is checked in
+      # would show up as art that quietly drifts from its source.
       - name: Check the baked variant's art is still what its recipes bake
         working-directory: tools/isometric-baker
         run: |

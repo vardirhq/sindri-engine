@@ -1,7 +1,7 @@
 // A gravity well. Drags the player in for the whole fight.
 //
-// Its hull is baked from `textures/singularity.isobake`; everything this
-// script does to it beyond that is motion.
+// Its hull is a vector polygon drawn by its prefab; beyond its colour,
+// everything this script does to it is motion.
 script Singularity {
     @export let shot: Prefab;
     @export let core: Prefab;
@@ -37,9 +37,10 @@ script Singularity {
     }
 
     fn tint() {
-        this.sprite.tint.r = 0.78;
-        this.sprite.tint.g = 0.49;
-        this.sprite.tint.b = 1.0;
+        // The original's #c77dff, in the linear light the renderer blends in.
+        this.shape.fill.r = 0.5711;
+        this.shape.fill.g = 0.2051;
+        this.shape.fill.b = 1.0;
     }
 
     fn update(dt: f32) {
@@ -88,9 +89,9 @@ script Singularity {
         }
         if this.phase_flash > 0.0 {
             this.phase_flash -= dt;
-            this.sprite.tint.r = 1.0;
-            this.sprite.tint.g = 1.0;
-            this.sprite.tint.b = 1.0;
+            this.shape.fill.r = 1.0;
+            this.shape.fill.g = 1.0;
+            this.shape.fill.b = 1.0;
         } else {
             tint();
         }

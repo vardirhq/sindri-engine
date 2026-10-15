@@ -1,11 +1,13 @@
-//! The charger heats up before it dashes. A tint can only darken a sprite, so
-//! the glow is added through the sprite's colour offset, and it is shed again
-//! once the dash is spent.
+//! The charger heats up before it dashes. Its amber body runs towards white as
+//! the wind-up peaks, and the heat is shed again once the dash is spent.
 
 use orbital_baked::Run;
 use sindri_core::EntityId;
 
 const STEP: f32 = 1.0 / 60.0;
+
+/// The blue of the dart's amber body, in linear light. White-hot is one.
+const AMBER_BLUE: f64 = 0.1022;
 
 fn step(run: &mut Run) {
     let notes = run.step(STEP);
@@ -16,9 +18,9 @@ fn heat(run: &Run, charger: EntityId) -> f64 {
     run.world
         .get(charger)
         .expect("the charger is there")
-        .components["sindri.sprite"]["color_transform"]["offset"][0]
+        .components["sindri.shape"]["fill"][2]
         .as_f64()
-        .unwrap_or(0.0)
+        .map_or(0.0, |blue| (blue - AMBER_BLUE) / (1.0 - AMBER_BLUE))
 }
 
 #[test]

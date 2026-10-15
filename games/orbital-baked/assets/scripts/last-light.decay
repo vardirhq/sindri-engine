@@ -1,8 +1,8 @@
 // Borrows the others' attacks in turn. Knowing which one it is doing
 // is most of the fight.
 //
-// Its hull is baked from `textures/last-light.isobake`; everything this
-// script does to it beyond that is motion.
+// Its hull is a vector polygon drawn by its prefab; beyond its colour,
+// everything this script does to it is motion.
 script LastLight {
     @export let shot: Prefab;
     @export let core: Prefab;
@@ -40,9 +40,10 @@ script LastLight {
     }
 
     fn tint() {
-        this.sprite.tint.r = 1.0;
-        this.sprite.tint.g = 0.95;
-        this.sprite.tint.b = 0.6;
+        // The original's #fff19a, in the linear light the renderer blends in.
+        this.shape.fill.r = 1.0;
+        this.shape.fill.g = 0.8796;
+        this.shape.fill.b = 0.3231;
     }
 
     fn update(dt: f32) {
@@ -91,9 +92,9 @@ script LastLight {
         }
         if this.phase_flash > 0.0 {
             this.phase_flash -= dt;
-            this.sprite.tint.r = 1.0;
-            this.sprite.tint.g = 1.0;
-            this.sprite.tint.b = 1.0;
+            this.shape.fill.r = 1.0;
+            this.shape.fill.g = 1.0;
+            this.shape.fill.b = 1.0;
         } else {
             tint();
         }

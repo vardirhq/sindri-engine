@@ -105,31 +105,29 @@
             "prong_mark": "prefabs/enemy-prong.prefab"
           }
         },
-        "sindri.sprite": {
-          "texture": "textures/drifter.png#body-0",
-          "tint": [
+        "sindri.shape": {
+          "kind": "polygon",
+          "count": 5.0,
+          "fill": [
             1.0,
-            1.0,
-            1.0,
+            0.2307,
+            0.1144,
             1.0
           ],
+          "stroke": [
+            1.0,
+            0.577,
+            0.513,
+            0.9
+          ],
+          "stroke_width": 0.07,
+          "corner_radius": 0.0,
+          "dashes": 0.0,
+          "dash_duty": 0.5,
+          "sweep_start": 0.0,
+          "sweep_turns": 1.0,
+          "blend": "over",
           "layer": 3
-        },
-        "sindri.animation.sprite": {
-          "clips": {
-            "idle": {
-              "frames": [
-                "body-0",
-                "body-1",
-                "body-2",
-                "body-3"
-              ],
-              "seconds_per_frame": 0.13,
-              "looping": true
-            }
-          },
-          "playing": "idle",
-          "speed": 1.0
         }
       }
     }

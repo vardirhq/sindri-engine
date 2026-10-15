@@ -1,8 +1,8 @@
 // Aggressive pentagonal ram. Charges, overshoots, and is worth hitting
 // exactly when it has just missed.
 //
-// Its hull is baked from `textures/harrower.isobake`; everything this
-// script does to it beyond that is motion.
+// Its hull is a vector polygon drawn by its prefab; beyond its colour,
+// everything this script does to it is motion.
 script Harrower {
     @export let shot: Prefab;
     @export let core: Prefab;
@@ -43,9 +43,10 @@ script Harrower {
     }
 
     fn tint() {
-        this.sprite.tint.r = 1.0;
-        this.sprite.tint.g = 0.61;
-        this.sprite.tint.b = 0.36;
+        // The original's #ff9b5d, in the linear light the renderer blends in.
+        this.shape.fill.r = 1.0;
+        this.shape.fill.g = 0.3278;
+        this.shape.fill.b = 0.1095;
     }
 
     fn update(dt: f32) {
@@ -96,9 +97,9 @@ script Harrower {
         }
         if this.phase_flash > 0.0 {
             this.phase_flash -= dt;
-            this.sprite.tint.r = 1.0;
-            this.sprite.tint.g = 1.0;
-            this.sprite.tint.b = 1.0;
+            this.shape.fill.r = 1.0;
+            this.shape.fill.g = 1.0;
+            this.shape.fill.b = 1.0;
         } else {
             tint();
         }
@@ -220,9 +221,9 @@ script Harrower {
         if this.telegraph > 0.0 {
             this.telegraph -= dt;
             Physics.set_velocity(this.entity, 0.0, 0.0);
-            this.sprite.tint.r = 1.0;
-            this.sprite.tint.g = 1.0;
-            this.sprite.tint.b = 1.0;
+            this.shape.fill.r = 1.0;
+            this.shape.fill.g = 1.0;
+            this.shape.fill.b = 1.0;
             if this.telegraph <= 0.0 { this.dash_time = 0.42; }
         } else if this.dash_time > 0.0 {
             this.dash_time -= dt;

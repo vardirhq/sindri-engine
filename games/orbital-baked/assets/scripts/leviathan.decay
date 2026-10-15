@@ -1,7 +1,7 @@
 // Anchors and sweeps one turning beam. The safe ground is behind it.
 //
-// Its hull is baked from `textures/leviathan.isobake`; everything this
-// script does to it beyond that is motion.
+// Its hull is a vector polygon drawn by its prefab; beyond its colour,
+// everything this script does to it is motion.
 script Leviathan {
     @export let shot: Prefab;
     @export let core: Prefab;
@@ -38,9 +38,14 @@ script Leviathan {
     }
 
     fn tint() {
-        this.sprite.tint.r = 0.43;
-        this.sprite.tint.g = 1.0;
-        this.sprite.tint.b = 0.79;
+        // The original draws the Leviathan as a dark hull, rgba(6,28,31),
+        // ringed in its #6dffca; both in the linear light the renderer uses.
+        this.shape.fill.r = 0.0018;
+        this.shape.fill.g = 0.0116;
+        this.shape.fill.b = 0.0137;
+        this.shape.stroke.r = 0.1529;
+        this.shape.stroke.g = 1.0;
+        this.shape.stroke.b = 0.5906;
     }
 
     fn update(dt: f32) {
@@ -89,9 +94,9 @@ script Leviathan {
         }
         if this.phase_flash > 0.0 {
             this.phase_flash -= dt;
-            this.sprite.tint.r = 1.0;
-            this.sprite.tint.g = 1.0;
-            this.sprite.tint.b = 1.0;
+            this.shape.stroke.r = 1.0;
+            this.shape.stroke.g = 1.0;
+            this.shape.stroke.b = 1.0;
         } else {
             tint();
         }

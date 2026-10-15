@@ -20,8 +20,8 @@
           1.0
         ],
         "scale": [
-          1.59,
-          1.59,
+          1.51,
+          1.51,
           1.0
         ]
       },
@@ -96,31 +96,143 @@
             "death_burst": "prefabs/nova.prefab"
           }
         },
-        "sindri.sprite": {
-          "texture": "textures/prism.png#body-0",
-          "tint": [
-            1.0,
-            1.0,
+        "sindri.shape": {
+          "kind": "polygon",
+          "count": 7.0,
+          "fill": [
+            0.2705,
+            0.807,
             1.0,
             1.0
           ],
+          "stroke": [
+            0.6717,
+            0.9132,
+            1.0,
+            0.95
+          ],
+          "stroke_width": 0.04,
+          "corner_radius": 0.0,
+          "dashes": 0.0,
+          "dash_duty": 0.5,
+          "sweep_start": 0.0,
+          "sweep_turns": 1.0,
+          "blend": "over",
           "layer": 3
+        }
+      }
+    },
+    {
+      "id": "prism-ring",
+      "name": "Prism Ring",
+      "parent": "prism",
+      "transform_3d": {
+        "position": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "rotation": [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        "scale": [
+          1.27,
+          1.27,
+          1.0
+        ]
+      },
+      "components": {
+        "sindri.script": {
+          "source": "scripts/boss-ring.decay",
+          "script": "BossRing",
+          "properties": {
+            "spin": 1.0,
+            "width": 0.03
+          }
         },
-        "sindri.animation.sprite": {
-          "clips": {
-            "idle": {
-              "frames": [
-                "body-0",
-                "body-1",
-                "body-2",
-                "body-3"
-              ],
-              "seconds_per_frame": 0.12,
-              "looping": true
-            }
-          },
-          "playing": "idle",
-          "speed": 1.0
+        "sindri.shape": {
+          "kind": "polygon",
+          "count": 7.0,
+          "fill": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "stroke": [
+            1.0,
+            0.9047,
+            0.7379,
+            0.7
+          ],
+          "stroke_width": 0.03,
+          "corner_radius": 0.0,
+          "dashes": 0.0,
+          "dash_duty": 0.5,
+          "sweep_start": 0.0,
+          "sweep_turns": 1.0,
+          "blend": "over",
+          "layer": 4
+        }
+      }
+    },
+    {
+      "id": "prism-core",
+      "name": "Prism Core",
+      "parent": "prism",
+      "transform_3d": {
+        "position": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "rotation": [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        "scale": [
+          0.46,
+          0.46,
+          1.0
+        ]
+      },
+      "components": {
+        "sindri.script": {
+          "source": "scripts/boss-ring.decay",
+          "script": "BossRing",
+          "properties": {
+            "spin": -1.6,
+            "width": 0.07
+          }
+        },
+        "sindri.shape": {
+          "kind": "polygon",
+          "count": 7.0,
+          "fill": [
+            0.0487,
+            0.1453,
+            0.18,
+            0.92
+          ],
+          "stroke": [
+            0.6717,
+            0.9132,
+            1.0,
+            0.8
+          ],
+          "stroke_width": 0.07,
+          "corner_radius": 0.0,
+          "dashes": 0.0,
+          "dash_duty": 0.5,
+          "sweep_start": 0.0,
+          "sweep_turns": 1.0,
+          "blend": "over",
+          "layer": 4
         }
       }
     }

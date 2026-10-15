@@ -2,7 +2,7 @@
 //
 // Each plate owns its own script, health, collider and kinematic body. The
 // script drives the physics body around the boss instead of moving only the
-// visible transform. That keeps sprite and collider on the same entity and in
+// visible transform. That keeps shape and collider on the same entity and in
 // the same place, so a shot that visually reaches a plate actually hits it.
 script ShieldSegment {
     @export let angle: f32 = 0.0;
@@ -36,7 +36,7 @@ script ShieldSegment {
         let a = this.angle + this.turn;
         this.transform.position.x = hull.transform.position.x + cos(a) * this.radius;
         this.transform.position.y = hull.transform.position.y + sin(a) * this.radius;
-        // The artwork is authored facing away from the core at rotation 0, so
+        // The plate is authored facing away from the core at rotation 0, so
         // its visual rotation should always match its current radial angle.
         this.transform.rotation_z = a;
     }
@@ -95,9 +95,27 @@ script ShieldSegment {
         else { wear(0.0, "failing"); }
     }
 
+    // Whole is the hub's blue with a bright rim; cracked dims and breaks the
+    // rim into dashes; failing burns ember with a sparse, guttering rim.
     fn wear(next: f32, clip: String) {
         if next == this.state { return; }
         this.state = next;
-        Animation.play(this.entity, clip);
+        if clip == "whole" {
+            plate(0.0953, 0.7084, 1.0, 0.807, 0.982, 1.0, 0.0);
+        } else if clip == "cracked" {
+            plate(0.0242, 0.159, 0.262, 0.332, 0.855, 1.0, 10.0);
+        } else {
+            plate(0.0423, 0.0176, 0.0296, 1.0, 0.195, 0.0595, 5.0);
+        }
+    }
+
+    fn plate(r: f32, g: f32, b: f32, rim_r: f32, rim_g: f32, rim_b: f32, dashes: f32) {
+        this.shape.fill.r = r;
+        this.shape.fill.g = g;
+        this.shape.fill.b = b;
+        this.shape.stroke.r = rim_r;
+        this.shape.stroke.g = rim_g;
+        this.shape.stroke.b = rim_b;
+        this.shape.dashes = dashes;
     }
 }

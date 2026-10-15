@@ -26,10 +26,7 @@ script Player {
 
     fn start() {
         this.hurt = World.find("PlayerHurt");
-        this.sprite.tint.a = 1.0;
-        this.sprite.tint.r = 0.913725;
-        this.sprite.tint.g = 0.992157;
-        this.sprite.tint.b = 1.0;
+        paint_hull(false);
         this.transform.rotation_z = 0.0;
     }
 
@@ -55,9 +52,24 @@ script Player {
 
         if this.mercy > 0.0 {
             this.mercy -= dt;
-            this.sprite.tint.a = 0.45;
+            // The original blinks the hull white twenty times a second while
+            // it cannot be hurt.
+            paint_hull(floor(this.mercy * 20.0) % 2.0 == 1.0);
         } else {
-            this.sprite.tint.a = 1.0;
+            paint_hull(false);
+        }
+    }
+
+    // The Strider's #78ebff hull, or white while it blinks.
+    fn paint_hull(white: bool) {
+        if white {
+            this.shape.fill.r = 1.0;
+            this.shape.fill.g = 1.0;
+            this.shape.fill.b = 1.0;
+        } else {
+            this.shape.fill.r = 0.1878;
+            this.shape.fill.g = 0.8308;
+            this.shape.fill.b = 1.0;
         }
     }
 

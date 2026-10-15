@@ -6,22 +6,22 @@ script CombatLabTarget {
 
     fn start() {
         this.hp = this.health;
-        this.sprite.tint.r = 0.62;
-        this.sprite.tint.g = 0.74;
-        this.sprite.tint.b = 0.82;
+        this.shape.stroke.r = 0.188;
+        this.shape.stroke.g = 0.296;
+        this.shape.stroke.b = 0.381;
     }
 
     fn update(dt: f32) {
         let damage = World.take_signal("hazard_damage");
         if damage > 0.0 {
             this.hp -= damage;
-            this.sprite.tint.r = 1.0;
-            this.sprite.tint.g = 0.72;
-            this.sprite.tint.b = 0.5;
+            this.shape.stroke.r = 1.0;
+            this.shape.stroke.g = 0.48;
+            this.shape.stroke.b = 0.21;
         } else {
-            this.sprite.tint.r = 0.62;
-            this.sprite.tint.g = 0.74;
-            this.sprite.tint.b = 0.82;
+            this.shape.stroke.r = 0.188;
+            this.shape.stroke.g = 0.296;
+            this.shape.stroke.b = 0.381;
         }
         if this.hp <= 0.0 {
             Effects.burst(this.entity);
