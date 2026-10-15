@@ -18,19 +18,151 @@
        follows it, so this only has to stop the browser adding a scrollbar and
        letting the element keep an intrinsic size it was born with. */
     canvas { display: block; width: 100vw; height: 100vh; touch-action: none; }
+    /* When the game cannot run: the loading screen's ground, mark and type,
+       so a failure still reads as Sindri rather than as a browser's bare
+       error, and a sentence a player can act on rather than a stack. */
     #sindri-error {
+      --ink: #0d1117; --cream: #e6e1d4; --line: #2a3038; --muted: #8a8580;
+      --panel: #131922; --edge: #262d38; --accent: #f0c050; --ember: #e8714a;
+      position: fixed;
+      inset: 0;
+      z-index: 20;
       display: none;
-      box-sizing: border-box;
-      max-width: 42rem;
-      margin: 2rem;
-      padding: 1.25rem 1.5rem;
-      border: 1px solid #505b72;
-      border-radius: .75rem;
-      background: #1b2230;
-      line-height: 1.5;
+      overflow-y: auto;
+      background: var(--ink);
+      color: var(--cream);
+      font: 400 1rem/1.55 system-ui, sans-serif;
     }
-    #sindri-error[data-visible="true"] { display: block; }
-    #sindri-error strong { display: block; margin-bottom: .35rem; }
+    #sindri-error[data-visible="true"] { display: grid; place-items: center; }
+    #sindri-error .grid {
+      position: fixed;
+      inset: 0;
+      background-image: linear-gradient(var(--line) 1px, transparent 1px),
+        linear-gradient(90deg, var(--line) 1px, transparent 1px);
+      background-size: 90px 90px;
+      background-position: center;
+      opacity: .22;
+      -webkit-mask-image: radial-gradient(70% 70% at 50% 45%, #000, transparent 85%);
+      mask-image: radial-gradient(70% 70% at 50% 45%, #000, transparent 85%);
+    }
+    #sindri-error .glow {
+      position: fixed;
+      inset: 0;
+      background: radial-gradient(50% 45% at 50% 38%, var(--glow, rgba(232, 113, 74, .09)), rgba(13, 17, 23, 0) 70%);
+    }
+    #sindri-error[data-kind="device"] { --glow: rgba(240, 192, 80, .08); }
+    #sindri-error .panel {
+      position: relative;
+      box-sizing: border-box;
+      width: min(34rem, calc(100vw - 32px));
+      margin: 2.5rem 0 3.5rem;
+      padding: clamp(1.5rem, 5vw, 2.25rem);
+      border: 1px solid var(--edge);
+      border-radius: 14px;
+      background: linear-gradient(180deg, rgba(255, 255, 255, .025), rgba(255, 255, 255, 0) 40%), var(--panel);
+      box-shadow: 0 30px 80px -30px rgba(0, 0, 0, .7);
+      animation: sindri-rise .5s cubic-bezier(.2, .8, .2, 1) both;
+    }
+    #sindri-error .mark { display: block; width: 60px; height: 60px; margin-bottom: 1.25rem; overflow: visible; }
+    #sindri-error .mark .core { fill: var(--ember); }
+    #sindri-error .mark .halo { fill: var(--ember); opacity: .3; }
+    #sindri-error .mark .outer { stroke: var(--ember); }
+    #sindri-error[data-kind="device"] .mark .core,
+    #sindri-error[data-kind="device"] .mark .halo { fill: var(--accent); }
+    #sindri-error[data-kind="device"] .mark .outer { stroke: var(--accent); }
+    #sindri-error .eyebrow {
+      margin: 0 0 .5rem;
+      font: 500 .72rem/1.3 ui-monospace, "JetBrains Mono", monospace;
+      letter-spacing: .2em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+    #sindri-error h1 {
+      margin: 0 0 .6rem;
+      font: 700 clamp(1.4rem, 4.6vw, 1.85rem)/1.2 system-ui, sans-serif;
+      letter-spacing: -.01em;
+      text-wrap: balance;
+    }
+    #sindri-error .message { margin: 0; color: #c9c4b8; }
+    #sindri-error .tips { margin: 1.25rem 0 0; padding: 0; list-style: none; display: grid; gap: .55rem; }
+    #sindri-error .tips:empty { display: none; }
+    #sindri-error .tips li {
+      position: relative;
+      padding-left: 1.35rem;
+      color: #c9c4b8;
+      font-size: .95rem;
+    }
+    #sindri-error .tips li::before {
+      content: "";
+      position: absolute;
+      left: .15rem;
+      top: .55em;
+      width: 7px;
+      height: 8px;
+      background: var(--accent);
+      clip-path: polygon(50% 0, 100% 25%, 100% 75%, 50% 100%, 0 75%, 0 25%);
+    }
+    #sindri-error .actions { display: flex; flex-wrap: wrap; gap: .6rem; margin-top: 1.6rem; }
+    #sindri-error button {
+      appearance: none;
+      border: 1px solid var(--edge);
+      border-radius: 8px;
+      padding: .6rem 1.05rem;
+      font: 600 .9rem/1 system-ui, sans-serif;
+      color: var(--cream);
+      background: #1b222d;
+      cursor: pointer;
+    }
+    #sindri-error button:hover { border-color: #3a4352; background: #212a36; }
+    #sindri-error button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+    #sindri-error button.primary { border-color: var(--accent); background: var(--accent); color: #17130a; }
+    #sindri-error button.primary:hover { background: #f5cd6a; }
+    #sindri-error details {
+      margin-top: 1.5rem;
+      border-top: 1px solid var(--edge);
+      padding-top: 1rem;
+    }
+    #sindri-error details[hidden] { display: none; }
+    #sindri-error summary {
+      cursor: pointer;
+      font: 500 .75rem/1.3 ui-monospace, "JetBrains Mono", monospace;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+    #sindri-error summary:hover { color: var(--cream); }
+    #sindri-error pre {
+      margin: .8rem 0 0;
+      max-height: 14rem;
+      overflow: auto;
+      padding: .8rem .9rem;
+      border-radius: 8px;
+      background: #0a0d12;
+      font: 12px/1.5 ui-monospace, "JetBrains Mono", monospace;
+      color: #b9c2d0;
+      white-space: pre-wrap;
+      word-break: break-word;
+      user-select: text;
+    }
+    #sindri-error .signature {
+      position: fixed;
+      left: 0;
+      right: 0;
+      bottom: 1rem;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: .5rem;
+      font: 500 .68rem/1 ui-monospace, "JetBrains Mono", monospace;
+      letter-spacing: .26em;
+      text-transform: uppercase;
+      color: #5d6470;
+      pointer-events: none;
+    }
+    #sindri-error .signature svg { height: .7rem; width: auto; fill: var(--muted); }
+    #sindri-error .signature .gold { fill: var(--accent); }
+    @keyframes sindri-rise { from { opacity: 0; transform: translateY(12px); } }
+    @media (prefers-reduced-motion: reduce) { #sindri-error .panel { animation: none; } }
     /* Which build this is. Small and in a corner, because a player does not
        need it and anyone reporting a fault does: "it still does not work" and
        "it still does not work in build a1b2c3d" are different reports, and only
@@ -40,6 +172,7 @@
       right: .5rem;
       bottom: .35rem;
       font: 11px/1 ui-monospace, monospace;
+      z-index: 30;
       color: #7c88a1;
       user-select: text;
       pointer-events: auto;
@@ -257,18 +390,80 @@
       settle();
     }, { once: true });
   </script>
-  <div id="sindri-error" role="alert" aria-live="assertive"></div>
+  <section id="sindri-error" role="alert" aria-live="assertive">
+    <div class="grid"></div>
+    <div class="glow"></div>
+    <div class="panel">
+      <svg class="mark" viewBox="0 0 32 32" fill="none" aria-hidden="true">
+        <polygon points="16,3 27.26,9.5 27.26,22.5 16,29 4.74,22.5 4.74,9.5" stroke="#2a3038" stroke-width="1.6"/>
+        <polygon class="outer" points="16,3 27.26,9.5 27.26,22.5 16,29 4.74,22.5 4.74,9.5" stroke-width="1.6" stroke-dasharray="20 58" stroke-dashoffset="-6"/>
+        <polygon points="16,9 22.06,12.5 22.06,19.5 16,23 9.94,19.5 9.94,12.5" stroke="#e6e1d4" stroke-width="1.2" opacity=".35"/>
+        <polygon class="halo" points="16,11.6 20.5,14.2 20.5,19.4 16,22 11.5,19.4 11.5,14.2" transform="translate(0 -1.6)"/>
+        <polygon class="core" points="16,13.2 18.42,14.6 18.42,17.4 16,18.8 13.58,17.4 13.58,14.6"/>
+      </svg>
+      <p class="eyebrow">{{name}}</p>
+      <h1></h1>
+      <p class="message"></p>
+      <ul class="tips"></ul>
+      <div class="actions">
+        <button type="button" class="primary" data-action="reload">Try again</button>
+        <button type="button" data-action="copy" hidden>Copy details</button>
+      </div>
+      <details hidden>
+        <summary>Technical details</summary>
+        <pre></pre>
+      </details>
+    </div>
+    <div class="signature" aria-hidden="true">Built with</div>
+  </section>
   <pre id="sindri-input"></pre>
   <div id="sindri-build">{{build}}</div>
   <script type="module">
     const canvas = document.querySelector("#sindri-canvas");
     const errorBox = document.querySelector("#sindri-error");
+    // The wordmark is borrowed from the loading screen while it is still
+    // here, rather than drawn twice in the page: a failure after the game
+    // started comes when the loading screen is long gone.
+    const wordmark = document.querySelector("#sindri-loading .wordmark")?.cloneNode(true);
+    if (wordmark) errorBox.querySelector(".signature").append(wordmark);
 
-    const fail = (title, detail) => {
+    // The title the page was given, decoded, so a name with an ampersand in
+    // it reads as one in text set with `textContent`.
+    const game = document.title;
+
+    // Everything here is set as text, never as markup: the detail is whatever
+    // a browser or the engine said, and that is not the page's to trust.
+    const fail = ({ kind = "crash", title, message, tips = [], detail = "" }) => {
       document.querySelector("#sindri-loading")?.remove();
       canvas?.remove();
+      errorBox.dataset.kind = kind;
+      errorBox.querySelector("h1").textContent = title;
+      errorBox.querySelector(".message").textContent = message;
+      errorBox.querySelector(".tips").replaceChildren(...tips.map((tip) => {
+        const item = document.createElement("li");
+        item.textContent = tip;
+        return item;
+      }));
+      // What someone reporting the fault would be asked for anyway: what
+      // broke, which build, and which browser.
+      const build = document.querySelector("#sindri-build")?.textContent.trim();
+      const report = [
+        title,
+        detail,
+        build ? `${game} · build ${build}` : game,
+        navigator.userAgent,
+      ].filter(Boolean).join("\n");
+      const details = errorBox.querySelector("details");
+      details.hidden = !detail;
+      details.querySelector("pre").textContent = report;
+      const copy = errorBox.querySelector('[data-action="copy"]');
+      copy.hidden = !detail || !navigator.clipboard;
+      copy.onclick = () => navigator.clipboard.writeText(report).then(
+        () => { copy.textContent = "Copied"; },
+        () => { details.open = true; },
+      );
+      errorBox.querySelector('[data-action="reload"]').onclick = () => location.reload();
       errorBox.dataset.visible = "true";
-      errorBox.innerHTML = `<strong>${title}</strong>${detail}`;
     };
 
     // Startup does not finish when `init()` resolves: winit hands the loop to
@@ -284,7 +479,13 @@
       // shows the first line, which is the part written for a human.
       console.error(detail);
       const summary = detail.split("\n")[0].trim();
-      fail("{{name}} stopped", summary.length > 200 ? `${summary.slice(0, 200)}…` : summary);
+      fail({
+        title: "The game stopped",
+        message: summary.length > 200 ? `${summary.slice(0, 200)}…` : summary,
+        tips: ["Reloading the page often gets past it.",
+               "If it happens again, copy the details below into your report."],
+        detail,
+      });
     });
 
     // What the page sees, before winit or wasm is involved. Three fixes deep
@@ -320,19 +521,43 @@
       }
     }
 
-    const WEBGPU_MISSING =
-      "{{name}} requires a browser and device with WebGPU enabled. Update your browser or check its graphics/WebGPU settings.";
+    // The two ways WebGPU can be missing want different advice: a browser
+    // without it needs a different browser, while a browser that has it and
+    // no adapter to give is usually a device, driver or setting.
+    const NO_WEBGPU = {
+      kind: "device",
+      title: "This browser can't run WebGPU",
+      message: `${game} is drawn with WebGPU, a modern graphics feature this browser doesn't offer yet.`,
+      tips: [
+        "Open the page in an up-to-date Chrome, Edge, Firefox or Safari.",
+        "On an older browser, updating it is usually enough.",
+      ],
+    };
+    const NO_ADAPTER = {
+      kind: "device",
+      title: "WebGPU couldn't reach your graphics card",
+      message: `This browser supports WebGPU, but it didn't give ${game} access to a graphics adapter. Some devices and drivers are held back on purpose.`,
+      tips: [
+        "Turn on hardware acceleration in your browser's settings, then restart it.",
+        "Update your browser and your graphics drivers or system.",
+        "Try another browser or device.",
+      ],
+    };
 
     if (!(canvas instanceof HTMLCanvasElement)) {
-      fail("{{name}} could not start", "The page is missing the #sindri-canvas canvas Sindri was configured to use.");
+      fail({
+        title: "The game couldn't start",
+        message: "This page is missing the canvas Sindri draws into.",
+        detail: "No <canvas id=\"sindri-canvas\"> element was found on the page.",
+      });
     } else if (!navigator.gpu) {
-      fail("WebGPU is unavailable", WEBGPU_MISSING);
+      fail(NO_WEBGPU);
     } else if (!(await navigator.gpu.requestAdapter().catch(() => null))) {
       // `navigator.gpu` existing is not the same as WebGPU working. Chrome on
       // Android exposes the interface more widely than its drivers can serve,
       // so asking for an actual adapter is the difference between telling a
       // player their device cannot run this and showing them nothing at all.
-      fail("WebGPU is unavailable", WEBGPU_MISSING);
+      fail(NO_ADAPTER);
     } else {
       try {
         // Imported here rather than at the top, so a host that is missing or
@@ -349,7 +574,12 @@
         await init({ module_or_path: "./pkg/{{host}}_bg.wasm{{cachebust}}" });
       } catch (error) {
         console.error(error);
-        fail("{{name}} could not start", String(error?.message ?? error));
+        fail({
+          title: "The game couldn't load",
+          message: "Part of the game didn't download or start. This is usually a dropped connection.",
+          tips: ["Check your connection, then try again."],
+          detail: String(error?.stack ?? error?.message ?? error),
+        });
       }
     }
   </script>
