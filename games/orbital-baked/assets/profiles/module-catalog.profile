@@ -47,7 +47,7 @@
         "id": 3,
         "key": "pulse-divider",
         "name": "Pulse Divider",
-        "description": "Projectile mass up.",
+        "description": "Adds a split round; every round hits slightly softer.",
         "rarity": "COMMON",
         "weight": 8,
         "pool_mask": 1,
@@ -229,7 +229,7 @@
         "id": 17,
         "key": "glass-reactor",
         "name": "Glass Reactor",
-        "description": "Projectile speed up.",
+        "description": "Damage up.",
         "rarity": "COMMON",
         "weight": 8,
         "pool_mask": 1,
@@ -242,7 +242,7 @@
         "id": 18,
         "key": "gyro-stabilizer",
         "name": "Gyro Stabilizer",
-        "description": "Projectile mass up.",
+        "description": "Critical chance up.",
         "rarity": "COMMON",
         "weight": 8,
         "pool_mask": 1,
@@ -255,7 +255,7 @@
         "id": 19,
         "key": "ion-choke",
         "name": "Ion Choke",
-        "description": "Hull integrity up.",
+        "description": "Projectile speed up.",
         "rarity": "COMMON",
         "weight": 8,
         "pool_mask": 1,
@@ -268,7 +268,7 @@
         "id": 20,
         "key": "reinforced-hull",
         "name": "Reinforced Hull",
-        "description": "Hull integrity up.",
+        "description": "Maximum hull up.",
         "rarity": "UNCOMMON",
         "weight": 5,
         "pool_mask": 1,
@@ -281,7 +281,7 @@
         "id": 21,
         "key": "titanium-ribs",
         "name": "Titanium Ribs",
-        "description": "Hull integrity up.",
+        "description": "Maximum hull up. Damage resistance up.",
         "rarity": "COMMON",
         "weight": 8,
         "pool_mask": 1,
@@ -294,7 +294,7 @@
         "id": 22,
         "key": "emergency-foam",
         "name": "Emergency Foam",
-        "description": "Damage resistance up.",
+        "description": "Repairs hull when installed.",
         "rarity": "RARE",
         "weight": 2,
         "pool_mask": 3,
@@ -307,7 +307,7 @@
         "id": 23,
         "key": "repair-nanites",
         "name": "Repair Nanites",
-        "description": "Movement speed up.",
+        "description": "Hull slowly repairs itself.",
         "rarity": "COMMON",
         "weight": 8,
         "pool_mask": 1,
@@ -320,7 +320,7 @@
         "id": 24,
         "key": "reactive-plating",
         "name": "Reactive Plating",
-        "description": "Salvage acquisition improved.",
+        "description": "Damage resistance up.",
         "rarity": "UNCOMMON",
         "weight": 5,
         "pool_mask": 1,
@@ -333,7 +333,7 @@
         "id": 25,
         "key": "ablative-shell",
         "name": "Ablative Shell",
-        "description": "Salvage acquisition improved.",
+        "description": "Damage resistance up.",
         "rarity": "COMMON",
         "weight": 8,
         "pool_mask": 1,
@@ -346,7 +346,7 @@
         "id": 26,
         "key": "vector-thrusters",
         "name": "Vector Thrusters",
-        "description": "Critical chance up.",
+        "description": "Movement speed up.",
         "rarity": "COMMON",
         "weight": 8,
         "pool_mask": 1,
@@ -359,7 +359,7 @@
         "id": 27,
         "key": "afterburner",
         "name": "Afterburner",
-        "description": "Damage up. Projectile speed up.",
+        "description": "Movement speed up.",
         "rarity": "COMMON",
         "weight": 8,
         "pool_mask": 1,
@@ -372,7 +372,7 @@
         "id": 28,
         "key": "slipstream",
         "name": "Slipstream",
-        "description": "Hull integrity up. Damage resistance up.",
+        "description": "Projectile speed up.",
         "rarity": "UNCOMMON",
         "weight": 5,
         "pool_mask": 1,
@@ -385,7 +385,7 @@
         "id": 29,
         "key": "gravity-well",
         "name": "Gravity Well",
-        "description": "Fire rate up. Movement speed up.",
+        "description": "Salvage pull range up.",
         "rarity": "COMMON",
         "weight": 8,
         "pool_mask": 1,
@@ -398,7 +398,7 @@
         "id": 30,
         "key": "signal-harvest",
         "name": "Signal Harvest",
-        "description": "Damage up.",
+        "description": "Experience gain up.",
         "rarity": "COMMON",
         "weight": 8,
         "pool_mask": 1,
@@ -411,7 +411,7 @@
         "id": 31,
         "key": "black-box",
         "name": "Black Box",
-        "description": "Fire rate up.",
+        "description": "Experience gain up.",
         "rarity": "COMMON",
         "weight": 8,
         "pool_mask": 1,
@@ -424,7 +424,7 @@
         "id": 32,
         "key": "combat-medic",
         "name": "Combat Medic",
-        "description": "Projectile speed up.",
+        "description": "Repairs hull when installed.",
         "rarity": "UNCOMMON",
         "weight": 5,
         "pool_mask": 1,
@@ -437,7 +437,7 @@
         "id": 33,
         "key": "thin-skin",
         "name": "Thin Skin",
-        "description": "Projectile mass up.",
+        "description": "Movement speed up.",
         "rarity": "RARE",
         "weight": 2,
         "pool_mask": 3,
@@ -450,7 +450,7 @@
         "id": 34,
         "key": "heavy-frame",
         "name": "Heavy Frame",
-        "description": "Hull integrity up.",
+        "description": "Maximum hull up. Damage resistance up.",
         "rarity": "COMMON",
         "weight": 8,
         "pool_mask": 1,
@@ -528,7 +528,7 @@
         "id": 40,
         "key": "saw-moon",
         "name": "Saw Moon",
-        "description": "Salvage acquisition improved.",
+        "description": "Damage up.",
         "rarity": "UNCOMMON",
         "weight": 5,
         "pool_mask": 1,
@@ -554,7 +554,7 @@
         "id": 42,
         "key": "halo-shard",
         "name": "Halo Shard",
-        "description": "Damage up. Projectile speed up.",
+        "description": "Maximum hull up. Damage resistance up.",
         "rarity": "COMMON",
         "weight": 8,
         "pool_mask": 1,
@@ -567,7 +567,7 @@
         "id": 43,
         "key": "mirror-moon",
         "name": "Mirror Moon",
-        "description": "Hull integrity up. Damage resistance up.",
+        "description": "Damage resistance up.",
         "rarity": "COMMON",
         "weight": 8,
         "pool_mask": 1,
@@ -580,7 +580,7 @@
         "id": 44,
         "key": "storm-sprite",
         "name": "Storm Sprite",
-        "description": "Fire rate up. Movement speed up.",
+        "description": "Fire rate up.",
         "rarity": "RARE",
         "weight": 2,
         "pool_mask": 3,
@@ -593,7 +593,7 @@
         "id": 45,
         "key": "seeker-sprite",
         "name": "Seeker Sprite",
-        "description": "Damage up.",
+        "description": "Critical chance up.",
         "rarity": "COMMON",
         "weight": 8,
         "pool_mask": 1,
@@ -606,7 +606,7 @@
         "id": 46,
         "key": "nova-mote",
         "name": "Nova Mote",
-        "description": "Fire rate up.",
+        "description": "Damage up.",
         "rarity": "COMMON",
         "weight": 8,
         "pool_mask": 1,
@@ -619,7 +619,7 @@
         "id": 47,
         "key": "gravity-mote",
         "name": "Gravity Mote",
-        "description": "Projectile speed up.",
+        "description": "Salvage pull range up.",
         "rarity": "COMMON",
         "weight": 8,
         "pool_mask": 1,
@@ -632,7 +632,7 @@
         "id": 48,
         "key": "phase-drone",
         "name": "Phase Drone",
-        "description": "Projectile mass up.",
+        "description": "Rounds pierce one more target.",
         "rarity": "UNCOMMON",
         "weight": 5,
         "pool_mask": 1,
@@ -645,7 +645,7 @@
         "id": 49,
         "key": "fork-drone",
         "name": "Fork Drone",
-        "description": "Hull integrity up.",
+        "description": "Adds a split round; every round hits slightly softer.",
         "rarity": "COMMON",
         "weight": 8,
         "pool_mask": 1,
@@ -658,7 +658,7 @@
         "id": 50,
         "key": "mercury-switch",
         "name": "Mercury Switch",
-        "description": "Hull integrity up.",
+        "description": "Fire rate up.",
         "rarity": "COMMON",
         "weight": 8,
         "pool_mask": 1,
@@ -671,7 +671,7 @@
         "id": 51,
         "key": "copper-heart",
         "name": "Copper Heart",
-        "description": "Hull integrity up.",
+        "description": "Hull slowly repairs itself.",
         "rarity": "COMMON",
         "weight": 8,
         "pool_mask": 1,
@@ -697,7 +697,7 @@
         "id": 53,
         "key": "blue-capacitor",
         "name": "Blue Capacitor",
-        "description": "Movement speed up.",
+        "description": "Fire rate up.",
         "rarity": "COMMON",
         "weight": 8,
         "pool_mask": 1,
@@ -710,7 +710,7 @@
         "id": 54,
         "key": "gold-capacitor",
         "name": "Gold Capacitor",
-        "description": "Salvage acquisition improved.",
+        "description": "Salvage pull range up.",
         "rarity": "COMMON",
         "weight": 8,
         "pool_mask": 1,
@@ -723,7 +723,7 @@
         "id": 55,
         "key": "fat-capacitor",
         "name": "Fat Capacitor",
-        "description": "Salvage acquisition improved.",
+        "description": "Projectile mass up.",
         "rarity": "RARE",
         "weight": 2,
         "pool_mask": 3,
@@ -736,7 +736,7 @@
         "id": 56,
         "key": "long-barrel",
         "name": "Long Barrel",
-        "description": "Critical chance up.",
+        "description": "Projectile speed up.",
         "rarity": "UNCOMMON",
         "weight": 5,
         "pool_mask": 1,
@@ -749,7 +749,7 @@
         "id": 57,
         "key": "short-barrel",
         "name": "Short Barrel",
-        "description": "Damage up. Projectile speed up.",
+        "description": "Fire rate up.",
         "rarity": "COMMON",
         "weight": 8,
         "pool_mask": 1,
@@ -762,7 +762,7 @@
         "id": 58,
         "key": "warped-lens",
         "name": "Warped Lens",
-        "description": "Hull integrity up. Damage resistance up.",
+        "description": "Projectile mass up.",
         "rarity": "COMMON",
         "weight": 8,
         "pool_mask": 1,
@@ -775,7 +775,7 @@
         "id": 59,
         "key": "dead-channel",
         "name": "Dead Channel",
-        "description": "Fire rate up. Movement speed up.",
+        "description": "Damage up.",
         "rarity": "COMMON",
         "weight": 8,
         "pool_mask": 1,
@@ -788,7 +788,7 @@
         "id": 60,
         "key": "live-channel",
         "name": "Live Channel",
-        "description": "Damage up.",
+        "description": "Fire rate up.",
         "rarity": "UNCOMMON",
         "weight": 5,
         "pool_mask": 1,
@@ -801,7 +801,7 @@
         "id": 61,
         "key": "spare-bulkhead",
         "name": "Spare Bulkhead",
-        "description": "Fire rate up.",
+        "description": "Maximum hull up.",
         "rarity": "COMMON",
         "weight": 8,
         "pool_mask": 1,
@@ -814,7 +814,7 @@
         "id": 62,
         "key": "field-rations",
         "name": "Field Rations",
-        "description": "Projectile speed up.",
+        "description": "Repairs hull when installed.",
         "rarity": "COMMON",
         "weight": 8,
         "pool_mask": 1,
@@ -827,7 +827,7 @@
         "id": 63,
         "key": "mag-clamp",
         "name": "Mag Clamp",
-        "description": "Projectile mass up.",
+        "description": "Salvage pull range up.",
         "rarity": "COMMON",
         "weight": 8,
         "pool_mask": 1,
@@ -840,7 +840,7 @@
         "id": 64,
         "key": "data-leech",
         "name": "Data Leech",
-        "description": "Hull integrity up.",
+        "description": "Experience gain up.",
         "rarity": "UNCOMMON",
         "weight": 5,
         "pool_mask": 1,
@@ -853,7 +853,7 @@
         "id": 65,
         "key": "hot-wiring",
         "name": "Hot Wiring",
-        "description": "Hull integrity up.",
+        "description": "Fire rate up.",
         "rarity": "COMMON",
         "weight": 8,
         "pool_mask": 1,
@@ -866,7 +866,7 @@
         "id": 66,
         "key": "coolant-loop",
         "name": "Coolant Loop",
-        "description": "Hull integrity up.",
+        "description": "Fire rate up.",
         "rarity": "RARE",
         "weight": 2,
         "pool_mask": 3,
@@ -879,7 +879,7 @@
         "id": 67,
         "key": "overpressure",
         "name": "Overpressure",
-        "description": "Damage resistance up.",
+        "description": "Projectile speed up.",
         "rarity": "COMMON",
         "weight": 8,
         "pool_mask": 1,
@@ -892,7 +892,7 @@
         "id": 68,
         "key": "needle-rounds",
         "name": "Needle Rounds",
-        "description": "Movement speed up.",
+        "description": "Rounds pierce one more target.",
         "rarity": "UNCOMMON",
         "weight": 5,
         "pool_mask": 1,
@@ -905,7 +905,7 @@
         "id": 69,
         "key": "soft-rounds",
         "name": "Soft Rounds",
-        "description": "Salvage acquisition improved.",
+        "description": "Projectile mass up.",
         "rarity": "COMMON",
         "weight": 8,
         "pool_mask": 1,
@@ -918,7 +918,7 @@
         "id": 70,
         "key": "salvage-map",
         "name": "Salvage Map",
-        "description": "Salvage acquisition improved.",
+        "description": "Salvage pull range up.",
         "rarity": "COMMON",
         "weight": 8,
         "pool_mask": 1,
@@ -944,7 +944,7 @@
         "id": 72,
         "key": "shock-mount",
         "name": "Shock Mount",
-        "description": "Damage up. Projectile speed up.",
+        "description": "Damage resistance up.",
         "rarity": "UNCOMMON",
         "weight": 5,
         "pool_mask": 1,
@@ -957,7 +957,7 @@
         "id": 73,
         "key": "drive-belt",
         "name": "Drive Belt",
-        "description": "Hull integrity up. Damage resistance up.",
+        "description": "Fire rate up. Movement speed up.",
         "rarity": "COMMON",
         "weight": 8,
         "pool_mask": 1,
@@ -970,7 +970,7 @@
         "id": 74,
         "key": "ballast",
         "name": "Ballast",
-        "description": "Fire rate up. Movement speed up.",
+        "description": "Maximum hull up. Damage resistance up.",
         "rarity": "COMMON",
         "weight": 8,
         "pool_mask": 1,
@@ -996,7 +996,7 @@
         "id": 76,
         "key": "bright-powder",
         "name": "Bright Powder",
-        "description": "Fire rate up.",
+        "description": "Damage up.",
         "rarity": "UNCOMMON",
         "weight": 5,
         "pool_mask": 1,
@@ -1022,7 +1022,7 @@
         "id": 78,
         "key": "fast-clock",
         "name": "Fast Clock",
-        "description": "Projectile mass up.",
+        "description": "Fire rate up.",
         "rarity": "COMMON",
         "weight": 8,
         "pool_mask": 1,
@@ -1035,7 +1035,7 @@
         "id": 79,
         "key": "slow-clock",
         "name": "Slow Clock",
-        "description": "Hull integrity up.",
+        "description": "Projectile mass up.",
         "rarity": "COMMON",
         "weight": 8,
         "pool_mask": 1,
@@ -1048,7 +1048,7 @@
         "id": 80,
         "key": "spare-reactor",
         "name": "Spare Reactor",
-        "description": "Hull integrity up.",
+        "description": "Maximum hull up.",
         "rarity": "UNCOMMON",
         "weight": 5,
         "pool_mask": 1,
@@ -1061,7 +1061,7 @@
         "id": 81,
         "key": "dirty-reactor",
         "name": "Dirty Reactor",
-        "description": "Hull integrity up.",
+        "description": "Damage up.",
         "rarity": "COMMON",
         "weight": 8,
         "pool_mask": 1,
@@ -1074,7 +1074,7 @@
         "id": 82,
         "key": "clean-reactor",
         "name": "Clean Reactor",
-        "description": "Damage resistance up.",
+        "description": "Hull slowly repairs itself.",
         "rarity": "COMMON",
         "weight": 8,
         "pool_mask": 1,
@@ -1087,7 +1087,7 @@
         "id": 83,
         "key": "twin-pump",
         "name": "Twin Pump",
-        "description": "Movement speed up.",
+        "description": "Fire rate up.",
         "rarity": "COMMON",
         "weight": 8,
         "pool_mask": 1,
@@ -1100,7 +1100,7 @@
         "id": 84,
         "key": "wide-nozzle",
         "name": "Wide Nozzle",
-        "description": "Salvage acquisition improved.",
+        "description": "Projectile mass up.",
         "rarity": "UNCOMMON",
         "weight": 5,
         "pool_mask": 1,
@@ -1113,7 +1113,7 @@
         "id": 85,
         "key": "pinpoint-nozzle",
         "name": "Pinpoint Nozzle",
-        "description": "Salvage acquisition improved.",
+        "description": "Critical chance up.",
         "rarity": "COMMON",
         "weight": 8,
         "pool_mask": 1,
@@ -1126,7 +1126,7 @@
         "id": 86,
         "key": "hunter-array",
         "name": "Hunter Array",
-        "description": "Critical chance up.",
+        "description": "Damage up. Projectile speed up.",
         "rarity": "COMMON",
         "weight": 8,
         "pool_mask": 1,
@@ -1139,7 +1139,7 @@
         "id": 87,
         "key": "surveyor",
         "name": "Surveyor",
-        "description": "Damage up. Projectile speed up.",
+        "description": "Salvage pull range up.",
         "rarity": "COMMON",
         "weight": 8,
         "pool_mask": 1,
@@ -1152,7 +1152,7 @@
         "id": 88,
         "key": "vacuum-scoop",
         "name": "Vacuum Scoop",
-        "description": "Hull integrity up. Damage resistance up.",
+        "description": "Salvage pull range up.",
         "rarity": "RARE",
         "weight": 2,
         "pool_mask": 3,
@@ -1165,7 +1165,7 @@
         "id": 89,
         "key": "learning-core",
         "name": "Learning Core",
-        "description": "Fire rate up. Movement speed up.",
+        "description": "Experience gain up.",
         "rarity": "COMMON",
         "weight": 8,
         "pool_mask": 1,
@@ -1867,7 +1867,7 @@
         "id": 143,
         "key": "red-tape",
         "name": "Red Tape",
-        "description": "Movement speed up.",
+        "description": "Damage up.",
         "rarity": "RARE",
         "weight": 2,
         "pool_mask": 3,
@@ -1880,7 +1880,7 @@
         "id": 144,
         "key": "blue-tape",
         "name": "Blue Tape",
-        "description": "Salvage acquisition improved.",
+        "description": "Damage resistance up.",
         "rarity": "UNCOMMON",
         "weight": 5,
         "pool_mask": 1,
@@ -1893,7 +1893,7 @@
         "id": 145,
         "key": "green-tape",
         "name": "Green Tape",
-        "description": "Salvage acquisition improved.",
+        "description": "Hull slowly repairs itself.",
         "rarity": "COMMON",
         "weight": 8,
         "pool_mask": 1,
@@ -1919,7 +1919,7 @@
         "id": 147,
         "key": "tiny-magnet",
         "name": "Tiny Magnet",
-        "description": "Damage up. Projectile speed up.",
+        "description": "Salvage pull range up.",
         "rarity": "COMMON",
         "weight": 8,
         "pool_mask": 1,
@@ -1932,7 +1932,7 @@
         "id": 148,
         "key": "training-manual",
         "name": "Training Manual",
-        "description": "Hull integrity up. Damage resistance up.",
+        "description": "Experience gain up.",
         "rarity": "UNCOMMON",
         "weight": 5,
         "pool_mask": 1,
@@ -1945,7 +1945,7 @@
         "id": 149,
         "key": "polished-casing",
         "name": "Polished Casing",
-        "description": "Fire rate up. Movement speed up.",
+        "description": "Projectile speed up.",
         "rarity": "COMMON",
         "weight": 8,
         "pool_mask": 1,
@@ -2106,9 +2106,15 @@
       },
       {
         "module_id": 3,
+        "operation": "add",
+        "key": "shots_add",
+        "value": 1
+      },
+      {
+        "module_id": 3,
         "operation": "multiply",
-        "key": "bullet_size_mul",
-        "value": 1.16
+        "key": "damage_mul",
+        "value": 0.9
       },
       {
         "module_id": 4,
@@ -2209,128 +2215,122 @@
       {
         "module_id": 17,
         "operation": "multiply",
-        "key": "bullet_speed_mul",
-        "value": 1.16
+        "key": "damage_mul",
+        "value": 1.14
       },
       {
         "module_id": 18,
-        "operation": "multiply",
-        "key": "bullet_size_mul",
-        "value": 1.16
-      },
-      {
-        "module_id": 19,
-        "operation": "add",
-        "key": "max_hp_add",
-        "value": 0.9
-      },
-      {
-        "module_id": 20,
-        "operation": "heal",
-        "key": "hp",
-        "value": 1.2
-      },
-      {
-        "module_id": 21,
-        "operation": "add",
-        "key": "regen_add",
-        "value": 0.18
-      },
-      {
-        "module_id": 22,
-        "operation": "add",
-        "key": "armor_add",
-        "value": 0.045
-      },
-      {
-        "module_id": 23,
-        "operation": "multiply",
-        "key": "move_speed_mul",
-        "value": 1.1
-      },
-      {
-        "module_id": 24,
-        "operation": "multiply",
-        "key": "magnet_mul",
-        "value": 1.3
-      },
-      {
-        "module_id": 25,
-        "operation": "multiply",
-        "key": "xp_gain_mul",
-        "value": 1.12
-      },
-      {
-        "module_id": 26,
         "operation": "add",
         "key": "crit_add",
         "value": 0.05
       },
       {
-        "module_id": 27,
-        "operation": "multiply",
-        "key": "damage_mul",
-        "value": 1.08
-      },
-      {
-        "module_id": 27,
+        "module_id": 19,
         "operation": "multiply",
         "key": "bullet_speed_mul",
-        "value": 1.1
+        "value": 1.16
       },
       {
-        "module_id": 28,
+        "module_id": 20,
         "operation": "add",
-        "key": "armor_add",
-        "value": 0.025
+        "key": "max_hp_add",
+        "value": 0.9
       },
       {
-        "module_id": 28,
+        "module_id": 21,
         "operation": "add",
         "key": "max_hp_add",
         "value": 0.6
       },
       {
-        "module_id": 29,
+        "module_id": 21,
+        "operation": "add",
+        "key": "armor_add",
+        "value": 0.025
+      },
+      {
+        "module_id": 22,
+        "operation": "heal",
+        "key": "hp",
+        "value": 1.2
+      },
+      {
+        "module_id": 23,
+        "operation": "add",
+        "key": "regen_add",
+        "value": 0.18
+      },
+      {
+        "module_id": 24,
+        "operation": "add",
+        "key": "armor_add",
+        "value": 0.045
+      },
+      {
+        "module_id": 25,
+        "operation": "add",
+        "key": "armor_add",
+        "value": 0.045
+      },
+      {
+        "module_id": 26,
         "operation": "multiply",
         "key": "move_speed_mul",
-        "value": 1.06
+        "value": 1.1
       },
       {
-        "module_id": 29,
+        "module_id": 27,
         "operation": "multiply",
-        "key": "fire_rate_mul",
-        "value": 1.06382979
+        "key": "move_speed_mul",
+        "value": 1.1
       },
       {
-        "module_id": 30,
-        "operation": "multiply",
-        "key": "damage_mul",
-        "value": 1.14
-      },
-      {
-        "module_id": 31,
-        "operation": "multiply",
-        "key": "fire_rate_mul",
-        "value": 1.11111111
-      },
-      {
-        "module_id": 32,
+        "module_id": 28,
         "operation": "multiply",
         "key": "bullet_speed_mul",
         "value": 1.16
       },
       {
+        "module_id": 29,
+        "operation": "multiply",
+        "key": "magnet_mul",
+        "value": 1.3
+      },
+      {
+        "module_id": 30,
+        "operation": "multiply",
+        "key": "xp_gain_mul",
+        "value": 1.12
+      },
+      {
+        "module_id": 31,
+        "operation": "multiply",
+        "key": "xp_gain_mul",
+        "value": 1.12
+      },
+      {
+        "module_id": 32,
+        "operation": "heal",
+        "key": "hp",
+        "value": 1.2
+      },
+      {
         "module_id": 33,
         "operation": "multiply",
-        "key": "bullet_size_mul",
-        "value": 1.16
+        "key": "move_speed_mul",
+        "value": 1.1
       },
       {
         "module_id": 34,
         "operation": "add",
         "key": "max_hp_add",
-        "value": 0.9
+        "value": 0.6
+      },
+      {
+        "module_id": 34,
+        "operation": "add",
+        "key": "armor_add",
+        "value": 0.025
       },
       {
         "module_id": 35,
@@ -2365,8 +2365,8 @@
       {
         "module_id": 40,
         "operation": "multiply",
-        "key": "xp_gain_mul",
-        "value": 1.12
+        "key": "damage_mul",
+        "value": 1.14
       },
       {
         "module_id": 41,
@@ -2376,18 +2376,12 @@
       },
       {
         "module_id": 42,
-        "operation": "multiply",
-        "key": "damage_mul",
-        "value": 1.08
+        "operation": "add",
+        "key": "max_hp_add",
+        "value": 0.6
       },
       {
         "module_id": 42,
-        "operation": "multiply",
-        "key": "bullet_speed_mul",
-        "value": 1.1
-      },
-      {
-        "module_id": 43,
         "operation": "add",
         "key": "armor_add",
         "value": 0.025
@@ -2395,56 +2389,56 @@
       {
         "module_id": 43,
         "operation": "add",
-        "key": "max_hp_add",
-        "value": 0.6
+        "key": "armor_add",
+        "value": 0.045
       },
       {
         "module_id": 44,
-        "operation": "multiply",
-        "key": "move_speed_mul",
-        "value": 1.06
-      },
-      {
-        "module_id": 44,
-        "operation": "multiply",
-        "key": "fire_rate_mul",
-        "value": 1.06382979
-      },
-      {
-        "module_id": 45,
-        "operation": "multiply",
-        "key": "damage_mul",
-        "value": 1.14
-      },
-      {
-        "module_id": 46,
         "operation": "multiply",
         "key": "fire_rate_mul",
         "value": 1.11111111
       },
       {
+        "module_id": 45,
+        "operation": "add",
+        "key": "crit_add",
+        "value": 0.05
+      },
+      {
+        "module_id": 46,
+        "operation": "multiply",
+        "key": "damage_mul",
+        "value": 1.14
+      },
+      {
         "module_id": 47,
         "operation": "multiply",
-        "key": "bullet_speed_mul",
-        "value": 1.16
+        "key": "magnet_mul",
+        "value": 1.3
       },
       {
         "module_id": 48,
-        "operation": "multiply",
-        "key": "bullet_size_mul",
-        "value": 1.16
+        "operation": "add",
+        "key": "pierce_add",
+        "value": 1
       },
       {
         "module_id": 49,
         "operation": "add",
-        "key": "max_hp_add",
+        "key": "shots_add",
+        "value": 1
+      },
+      {
+        "module_id": 49,
+        "operation": "multiply",
+        "key": "damage_mul",
         "value": 0.9
       },
       {
         "module_id": 50,
-        "operation": "heal",
-        "key": "hp",
-        "value": 1.2
+        "operation": "multiply",
+        "key": "fire_rate_mul",
+        "value": 1.11111111
       },
       {
         "module_id": 51,
@@ -2461,8 +2455,8 @@
       {
         "module_id": 53,
         "operation": "multiply",
-        "key": "move_speed_mul",
-        "value": 1.1
+        "key": "fire_rate_mul",
+        "value": 1.11111111
       },
       {
         "module_id": 54,
@@ -2473,116 +2467,98 @@
       {
         "module_id": 55,
         "operation": "multiply",
-        "key": "xp_gain_mul",
-        "value": 1.12
+        "key": "bullet_size_mul",
+        "value": 1.16
       },
       {
         "module_id": 56,
-        "operation": "add",
-        "key": "crit_add",
-        "value": 0.05
-      },
-      {
-        "module_id": 57,
-        "operation": "multiply",
-        "key": "damage_mul",
-        "value": 1.08
-      },
-      {
-        "module_id": 57,
         "operation": "multiply",
         "key": "bullet_speed_mul",
-        "value": 1.1
+        "value": 1.16
       },
       {
-        "module_id": 58,
-        "operation": "add",
-        "key": "armor_add",
-        "value": 0.025
-      },
-      {
-        "module_id": 58,
-        "operation": "add",
-        "key": "max_hp_add",
-        "value": 0.6
-      },
-      {
-        "module_id": 59,
-        "operation": "multiply",
-        "key": "move_speed_mul",
-        "value": 1.06
-      },
-      {
-        "module_id": 59,
-        "operation": "multiply",
-        "key": "fire_rate_mul",
-        "value": 1.06382979
-      },
-      {
-        "module_id": 60,
-        "operation": "multiply",
-        "key": "damage_mul",
-        "value": 1.14
-      },
-      {
-        "module_id": 61,
+        "module_id": 57,
         "operation": "multiply",
         "key": "fire_rate_mul",
         "value": 1.11111111
       },
       {
-        "module_id": 62,
-        "operation": "multiply",
-        "key": "bullet_speed_mul",
-        "value": 1.16
-      },
-      {
-        "module_id": 63,
+        "module_id": 58,
         "operation": "multiply",
         "key": "bullet_size_mul",
         "value": 1.16
       },
       {
-        "module_id": 64,
+        "module_id": 59,
+        "operation": "multiply",
+        "key": "damage_mul",
+        "value": 1.14
+      },
+      {
+        "module_id": 60,
+        "operation": "multiply",
+        "key": "fire_rate_mul",
+        "value": 1.11111111
+      },
+      {
+        "module_id": 61,
         "operation": "add",
         "key": "max_hp_add",
         "value": 0.9
       },
       {
-        "module_id": 65,
+        "module_id": 62,
         "operation": "heal",
         "key": "hp",
         "value": 1.2
       },
       {
-        "module_id": 66,
-        "operation": "add",
-        "key": "regen_add",
-        "value": 0.18
-      },
-      {
-        "module_id": 67,
-        "operation": "add",
-        "key": "armor_add",
-        "value": 0.045
-      },
-      {
-        "module_id": 68,
-        "operation": "multiply",
-        "key": "move_speed_mul",
-        "value": 1.1
-      },
-      {
-        "module_id": 69,
+        "module_id": 63,
         "operation": "multiply",
         "key": "magnet_mul",
         "value": 1.3
       },
       {
-        "module_id": 70,
+        "module_id": 64,
         "operation": "multiply",
         "key": "xp_gain_mul",
         "value": 1.12
+      },
+      {
+        "module_id": 65,
+        "operation": "multiply",
+        "key": "fire_rate_mul",
+        "value": 1.11111111
+      },
+      {
+        "module_id": 66,
+        "operation": "multiply",
+        "key": "fire_rate_mul",
+        "value": 1.11111111
+      },
+      {
+        "module_id": 67,
+        "operation": "multiply",
+        "key": "bullet_speed_mul",
+        "value": 1.16
+      },
+      {
+        "module_id": 68,
+        "operation": "add",
+        "key": "pierce_add",
+        "value": 1
+      },
+      {
+        "module_id": 69,
+        "operation": "multiply",
+        "key": "bullet_size_mul",
+        "value": 1.16
+      },
+      {
+        "module_id": 70,
+        "operation": "multiply",
+        "key": "magnet_mul",
+        "value": 1.3
       },
       {
         "module_id": 71,
@@ -2592,39 +2568,33 @@
       },
       {
         "module_id": 72,
-        "operation": "multiply",
-        "key": "damage_mul",
-        "value": 1.08
-      },
-      {
-        "module_id": 72,
-        "operation": "multiply",
-        "key": "bullet_speed_mul",
-        "value": 1.1
-      },
-      {
-        "module_id": 73,
         "operation": "add",
         "key": "armor_add",
-        "value": 0.025
+        "value": 0.045
       },
       {
         "module_id": 73,
-        "operation": "add",
-        "key": "max_hp_add",
-        "value": 0.6
+        "operation": "multiply",
+        "key": "fire_rate_mul",
+        "value": 1.06382979
       },
       {
-        "module_id": 74,
+        "module_id": 73,
         "operation": "multiply",
         "key": "move_speed_mul",
         "value": 1.06
       },
       {
         "module_id": 74,
-        "operation": "multiply",
-        "key": "fire_rate_mul",
-        "value": 1.06382979
+        "operation": "add",
+        "key": "max_hp_add",
+        "value": 0.6
+      },
+      {
+        "module_id": 74,
+        "operation": "add",
+        "key": "armor_add",
+        "value": 0.025
       },
       {
         "module_id": 75,
@@ -2635,8 +2605,8 @@
       {
         "module_id": 76,
         "operation": "multiply",
-        "key": "fire_rate_mul",
-        "value": 1.11111111
+        "key": "damage_mul",
+        "value": 1.14
       },
       {
         "module_id": 77,
@@ -2647,92 +2617,80 @@
       {
         "module_id": 78,
         "operation": "multiply",
+        "key": "fire_rate_mul",
+        "value": 1.11111111
+      },
+      {
+        "module_id": 79,
+        "operation": "multiply",
         "key": "bullet_size_mul",
         "value": 1.16
       },
       {
-        "module_id": 79,
+        "module_id": 80,
         "operation": "add",
         "key": "max_hp_add",
         "value": 0.9
       },
       {
-        "module_id": 80,
-        "operation": "heal",
-        "key": "hp",
-        "value": 1.2
+        "module_id": 81,
+        "operation": "multiply",
+        "key": "damage_mul",
+        "value": 1.14
       },
       {
-        "module_id": 81,
+        "module_id": 82,
         "operation": "add",
         "key": "regen_add",
         "value": 0.18
       },
       {
-        "module_id": 82,
-        "operation": "add",
-        "key": "armor_add",
-        "value": 0.045
-      },
-      {
         "module_id": 83,
         "operation": "multiply",
-        "key": "move_speed_mul",
-        "value": 1.1
+        "key": "fire_rate_mul",
+        "value": 1.11111111
       },
       {
         "module_id": 84,
         "operation": "multiply",
-        "key": "magnet_mul",
-        "value": 1.3
+        "key": "bullet_size_mul",
+        "value": 1.16
       },
       {
         "module_id": 85,
-        "operation": "multiply",
-        "key": "xp_gain_mul",
-        "value": 1.12
-      },
-      {
-        "module_id": 86,
         "operation": "add",
         "key": "crit_add",
         "value": 0.05
       },
       {
-        "module_id": 87,
+        "module_id": 86,
         "operation": "multiply",
         "key": "damage_mul",
         "value": 1.08
       },
       {
-        "module_id": 87,
+        "module_id": 86,
         "operation": "multiply",
         "key": "bullet_speed_mul",
         "value": 1.1
       },
       {
-        "module_id": 88,
-        "operation": "add",
-        "key": "armor_add",
-        "value": 0.025
+        "module_id": 87,
+        "operation": "multiply",
+        "key": "magnet_mul",
+        "value": 1.3
       },
       {
         "module_id": 88,
-        "operation": "add",
-        "key": "max_hp_add",
-        "value": 0.6
+        "operation": "multiply",
+        "key": "magnet_mul",
+        "value": 1.3
       },
       {
         "module_id": 89,
         "operation": "multiply",
-        "key": "move_speed_mul",
-        "value": 1.06
-      },
-      {
-        "module_id": 89,
-        "operation": "multiply",
-        "key": "fire_rate_mul",
-        "value": 1.06382979
+        "key": "xp_gain_mul",
+        "value": 1.12
       },
       {
         "module_id": 90,
@@ -3823,20 +3781,20 @@
       {
         "module_id": 143,
         "operation": "multiply",
-        "key": "move_speed_mul",
-        "value": 1.1
+        "key": "damage_mul",
+        "value": 1.14
       },
       {
         "module_id": 144,
-        "operation": "multiply",
-        "key": "magnet_mul",
-        "value": 1.3
+        "operation": "add",
+        "key": "armor_add",
+        "value": 0.045
       },
       {
         "module_id": 145,
-        "operation": "multiply",
-        "key": "xp_gain_mul",
-        "value": 1.12
+        "operation": "add",
+        "key": "regen_add",
+        "value": 0.18
       },
       {
         "module_id": 146,
@@ -3847,38 +3805,20 @@
       {
         "module_id": 147,
         "operation": "multiply",
-        "key": "damage_mul",
-        "value": 1.08
+        "key": "magnet_mul",
+        "value": 1.3
       },
       {
-        "module_id": 147,
+        "module_id": 148,
+        "operation": "multiply",
+        "key": "xp_gain_mul",
+        "value": 1.12
+      },
+      {
+        "module_id": 149,
         "operation": "multiply",
         "key": "bullet_speed_mul",
-        "value": 1.1
-      },
-      {
-        "module_id": 148,
-        "operation": "add",
-        "key": "armor_add",
-        "value": 0.025
-      },
-      {
-        "module_id": 148,
-        "operation": "add",
-        "key": "max_hp_add",
-        "value": 0.6
-      },
-      {
-        "module_id": 149,
-        "operation": "multiply",
-        "key": "move_speed_mul",
-        "value": 1.06
-      },
-      {
-        "module_id": 149,
-        "operation": "multiply",
-        "key": "fire_rate_mul",
-        "value": 1.06382979
+        "value": 1.16
       },
       {
         "module_id": 150,
