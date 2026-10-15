@@ -1,0 +1,13 @@
+{
+  "format_version": 1,
+  "metadata": { "name": "Fork Prism" },
+  "entities": [{
+    "id": "fork-prism", "name": "ForkPrism",
+    "transform_3d": { "position": [0.0, 0.0, 0.0], "rotation": [0.0, 0.0, 0.0, 1.0], "scale": [0.42, 0.42, 1.0] },
+    "components": {
+      "sindri.tags": { "tags": ["fork_prism"] },
+      "sindri.shape": { "kind": "polygon", "count": 3.0, "fill": [0.62, 0.86, 1.0, 0.22], "stroke": [0.86, 0.97, 1.0, 1.0], "stroke_width": 0.07, "corner_radius": 0.0, "dashes": 0.0, "dash_duty": 0.5, "sweep_start": 0.0, "sweep_turns": 1.0, "blend": "add", "layer": 5 },
+      "sindri.script": { "source": "scripts/fork-prism.decay", "script": "ForkPrism", "properties": {} }
+    }
+  }]
+}

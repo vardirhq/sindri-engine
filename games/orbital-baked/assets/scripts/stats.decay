@@ -39,7 +39,7 @@ script Stats {
         clear("magnet");
         clear("xp_gain");
         clear_flag("missile"); clear_flag("arc"); clear_flag("nova"); clear_flag("mines"); clear_flag("beam");
-        clear_flag("comp_blade"); clear_flag("comp_shield"); clear_flag("comp_ember"); clear_flag("comp_wisp"); clear_flag("comp_drone"); clear_flag("comp_wrecking");
+        clear_flag("comp_blade"); clear_flag("comp_shield"); clear_flag("comp_ember"); clear_flag("comp_wisp"); clear_flag("comp_drone"); clear_flag("comp_wrecking"); clear_flag("comp_prism");
         clear_flag("transform_storm"); clear_flag("transform_horizon"); clear_flag("transform_recursive"); clear_flag("transform_rail_prism"); clear_flag("transform_critical_mass");
         clear_flag("transform_thunder_choir"); clear_flag("transform_razor_prism"); clear_flag("transform_guardian_swarm"); clear_flag("transform_singularity_court");
         clear_specials();

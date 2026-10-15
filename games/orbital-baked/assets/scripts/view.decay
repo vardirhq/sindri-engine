@@ -33,3 +33,6 @@ shared fn on_screen(thing: Entity, view_size: f32) -> bool {
 // regular enemy's collider (0.24) plus the ship's (0.22), which are the
 // original's 10 and 11 px at 49 px a unit.
 shared const CONTACT_REACH: f32 = 0.46;
+
+// How near the Fork Drone's prism a round has to pass to be split by it.
+shared const PRISM_REACH: f32 = 0.34;

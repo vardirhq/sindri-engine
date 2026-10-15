@@ -123,6 +123,7 @@ script Director {
         clear_tag("drop_roll");
         clear_tag("hostile_shot");
         clear_tag("hazard");
+        clear_tag("fork_prism");
         World.set_active(this.title, false);
         World.set_active(this.hud, true);
         World.set_active(this.result_screen, false);

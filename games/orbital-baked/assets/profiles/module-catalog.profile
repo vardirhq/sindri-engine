@@ -645,7 +645,7 @@
         "id": 49,
         "key": "fork-drone",
         "name": "Fork Drone",
-        "description": "Adds a split round; every round hits slightly softer.",
+        "description": "An orbiting prism. Rounds fired through it split in three.",
         "rarity": "COMMON",
         "weight": 8,
         "pool_mask": 1,
@@ -2425,14 +2425,8 @@
       {
         "module_id": 49,
         "operation": "add",
-        "key": "shots_add",
+        "key": "comp_prism",
         "value": 1
-      },
-      {
-        "module_id": 49,
-        "operation": "multiply",
-        "key": "damage_mul",
-        "value": 0.9
       },
       {
         "module_id": 50,

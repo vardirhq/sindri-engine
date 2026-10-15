@@ -18,6 +18,7 @@ state Game {
     var comp_blade: f32 = 0.0;
     var comp_drone: f32 = 0.0;
     var comp_ember: f32 = 0.0;
+    var comp_prism: f32 = 0.0;
     var comp_shield: f32 = 0.0;
     var comp_wisp: f32 = 0.0;
     var comp_wrecking: f32 = 0.0;

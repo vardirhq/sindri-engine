@@ -1,0 +1,17 @@
+// The Fork Drone: a prism that circles the ship close and unhurried, so a
+// stream of fire sweeps across it often. It hits nothing itself; the Player
+// splits whatever rounds cross it (see `split_through_prism`).
+script ForkPrism {
+    var age: f32 = 0.0;
+
+    fn update(dt: f32) {
+        if Game.run_state != 1.0 { return; }
+        let player = World.find("Player");
+        if player == null { return; }
+        this.age += dt;
+        let angle = this.age * 1.5 + 0.8;
+        this.transform.position.x = player.transform.position.x + cos(angle) * 0.95;
+        this.transform.position.y = player.transform.position.y + sin(angle) * 0.95;
+        this.transform.rotation_z = this.age * 2.4;
+    }
+}

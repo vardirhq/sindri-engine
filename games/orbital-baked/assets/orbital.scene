@@ -4745,6 +4745,7 @@
           "properties": {
             "bullet": "prefabs/bullet.prefab",
             "edge_padding": 0.28,
+            "fork_prism": "prefabs/fork-prism.prefab",
             "invulnerable_for": 0.22,
             "mine": "prefabs/mine.prefab",
             "muzzle_fx": "prefabs/spectacle.prefab"
