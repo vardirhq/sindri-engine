@@ -75,36 +75,37 @@ script Drifter {
         let dx = player.transform.position.x - this.transform.position.x;
         let dy = player.transform.position.y - this.transform.position.y;
         let far = sqrt(dx * dx + dy * dy);
+        press_on(far);
 
         let visible = is_visible();
         if this.kind == 3.0 {
-            steer_range(dx, dy, far, 4.2, 0.18);
+            steer_range(dx, dy, far, 2.95, 0.18);
         } else if this.kind == 4.0 {
-            steer_range(dx, dy, far, 5.2, 0.72);
+            steer_range(dx, dy, far, 3.56, 0.72);
         } else if this.kind == 5.0 {
-            steer_range(dx, dy, far, 5.6, 0.05);
+            steer_range(dx, dy, far, 3.77, 0.05);
             if visible { radial_fire(dt, 2.65, 8.0, 3.1); }
         } else if this.kind == 6.0 {
-            steer_range(dx, dy, far, 5.8, 0.58);
+            steer_range(dx, dy, far, 4.68, 0.58);
             if visible { aimed_fire(dt, dx, dy, far, 1.95, 3.5); }
         } else if this.kind == 7.0 {
             wobble_chase(dx, dy, far, 1.35);
         } else if this.kind == 8.0 {
-            steer_range(dx, dy, far, 5.4, 0.65);
+            steer_range(dx, dy, far, 4.28, 0.65);
             if visible { aimed_fire(dt, dx, dy, far, 1.6, 3.7); }
         } else if this.kind == 9.0 {
             steer_range(dx, dy, far, 7.0, 0.12);
             if visible { aimed_fire(dt, dx, dy, far, 2.1, 5.2); }
         } else if this.kind == 10.0 {
-            steer_range(dx, dy, far, 5.8, 0.92);
+            steer_range(dx, dy, far, 4.38, 0.92);
             if visible { paired_fire(dt, dx, dy, far, 1.75, 3.8); }
         } else if this.kind == 11.0 {
             burrow_move(dt, dx, dy, far);
         } else if this.kind == 12.0 {
-            steer_range(dx, dy, far, 4.0, 0.82);
+            steer_range(dx, dy, far, 2.75, 0.82);
             if visible { paired_fire(dt, dx, dy, far, 1.7, 4.0); }
         } else if this.kind == 13.0 {
-            steer_range(dx, dy, far, 7.2, 0.08);
+            steer_range(dx, dy, far, 5.8, 0.08);
             if visible { fan_fire(dt, dx, dy, far, 2.15, 4.0); }
         } else if this.kind == 14.0 {
             phaser_move(dt, dx, dy, far, player, visible);
@@ -118,8 +119,8 @@ script Drifter {
 
     fn chase(dx: f32, dy: f32, far: f32, scale: f32) {
         if far > 0.001 {
-            Physics.set_velocity(this.entity, dx / far * this.speed * scale,
-                                 dy / far * this.speed * scale);
+            Physics.set_velocity(this.entity, dx / far * this.speed * scale * Game.event_enemy_speed,
+                                 dy / far * this.speed * scale * Game.event_enemy_speed);
         }
     }
 
@@ -127,8 +128,8 @@ script Drifter {
         if far <= 0.001 { return; }
         let tangent = sin(this.clock * 5.0) * 0.42;
         Physics.set_velocity(this.entity,
-            (dx / far - dy / far * tangent) * this.speed * scale,
-            (dy / far + dx / far * tangent) * this.speed * scale);
+            (dx / far - dy / far * tangent) * this.speed * scale * Game.event_enemy_speed,
+            (dy / far + dx / far * tangent) * this.speed * scale * Game.event_enemy_speed);
     }
 
     fn steer_range(dx: f32, dy: f32, far: f32, target: f32, tangent: f32) {
@@ -139,8 +140,8 @@ script Drifter {
         let nx = dx / far;
         let ny = dy / far;
         Physics.set_velocity(this.entity,
-            (nx * radial - ny * tangent) * this.speed,
-            (ny * radial + nx * tangent) * this.speed);
+            (nx * radial - ny * tangent) * this.speed * Game.event_enemy_speed,
+            (ny * radial + nx * tangent) * this.speed * Game.event_enemy_speed);
     }
 
     fn aimed_fire(dt: f32, dx: f32, dy: f32, far: f32, gap: f32, velocity: f32) {
@@ -190,6 +191,9 @@ script Drifter {
         bolt.transform.position.y = this.transform.position.y;
         bolt.transform.rotation_z = atan2(ny, nx);
         World.set_property(bolt, "speed", velocity);
+        // The original's regular enemies fire 9 to 15 of 100 hull, taken at
+        // Normal's 1.08: about 0.6 of this ship's five.
+        World.set_property(bolt, "damage", 0.6);
     }
 
     fn burrow_move(dt: f32, dx: f32, dy: f32, far: f32) {
@@ -215,6 +219,14 @@ script Drifter {
         this.transform.position.y = player.transform.position.y + sin(a) * r;
         Effects.burst(this.entity);
         this.attack = Random.range(2.7, 3.5);
+    }
+
+    // Contact hurts for as long as it lasts, as in the original: the ship's
+    // short mercy window is what spaces the hits, not the moment of touching.
+    fn press_on(far: f32) {
+        if far < CONTACT_REACH {
+            Game.player_damage_taken = max(Game.player_damage_taken, this.touch_damage);
+        }
     }
 
     fn receive_hits(player: Entity) {
@@ -359,12 +371,9 @@ script Drifter {
     fn die() {
         burst_on_death();
         Effects.burst(this.entity);
-        var trauma: f32 = 0.12;
-        if this.elite > 0.0 { trauma = 0.28; }
-        Camera.impact(trauma);
         Audio.play("audio/kill.wav", 0.3);
         Game.kills = Game.kills + 1.0;
-        Game.score = Game.score + this.worth * 10.0;
+        Game.score = Game.score + (20.0 + this.worth) * Game.event_score;
         let drop = World.spawn(this.core);
         drop.transform.position.x = this.transform.position.x;
         drop.transform.position.y = this.transform.position.y;

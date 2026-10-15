@@ -15,6 +15,9 @@ script Bullet {
     @export let crit_hit: f32 = 0.0;
     @export let companion_kind: f32 = 0.0;
     @export let companion_slot: f32 = 0.0;
+    // Set once a round has passed through the Fork Drone's prism, so it and
+    // its shards are not split again.
+    @export var split: f32 = 0.0;
     @export let arc_effect: Prefab;
     @export let beam_effect: Prefab;
     @export let impact_fx: Prefab;
@@ -134,9 +137,6 @@ script Bullet {
         if this.crit_hit > 0.0 { end_size = 1.75; }
         World.set_property(flash, "end_size", end_size);
         World.set_property(flash, "spin", 4.0 + this.visual_style);
-        var trauma: f32 = 0.08;
-        if this.crit_hit > 0.0 { trauma = 0.36; }
-        Camera.impact(trauma);
     }
 
     // The number pops where the shot landed. Shown at ten times the stored

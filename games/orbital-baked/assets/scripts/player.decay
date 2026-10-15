@@ -4,6 +4,7 @@ script Player {
     @export let bullet: Prefab;
     @export let mine: Prefab;
     @export let muzzle_fx: Prefab;
+    @export let fork_prism: Prefab;
     @export let invulnerable_for: f32 = 0.9;
     @export let edge_padding: f32 = 0.28;
 
@@ -23,6 +24,7 @@ script Player {
     var wisp_spawned: f32 = 0.0;
     var drone_spawned: f32 = 0.0;
     var wrecking_spawned: f32 = 0.0;
+    var prism: Entity = null;
 
     fn start() {
         this.hurt = World.find("PlayerHurt");
@@ -47,6 +49,7 @@ script Player {
         track_target();
         sync_companions();
         shoot(dt);
+        split_through_prism();
         drop_mine(dt);
         special_attacks(dt);
 
@@ -91,6 +94,7 @@ script Player {
         this.wisp_spawned = 0.0;
         this.drone_spawned = 0.0;
         this.wrecking_spawned = 0.0;
+        this.prism = null;
         Game.shield_impact = 0.0;
         Physics.set_velocity(this.entity, 0.0, 0.0);
     }
@@ -144,7 +148,7 @@ script Player {
             this.mercy = 0.18;
             return;
         }
-        var damage: f32 = raw * (1.0 - Game.armor);
+        var damage: f32 = raw * (1.0 - Game.armor) * Game.event_hurt;
         if Game.special_mutual_defense > 0.0 {
             damage *= 1.0 - min(0.2, companion_count() * 0.04);
         }
@@ -173,6 +177,7 @@ script Player {
         if target == null { return; }
         if Game.overdrive > 0.0 { this.cooldown = Game.fire_gap * 0.55; }
         else { this.cooldown = Game.fire_gap; }
+        this.cooldown *= Game.event_fire;
         let to_x = target.transform.position.x - this.transform.position.x;
         let to_y = target.transform.position.y - this.transform.position.y;
         let far = sqrt(to_x * to_x + to_y * to_y);
@@ -222,7 +227,7 @@ script Player {
         World.set_property(flash, "spin", 8.0);
     }
 
-    fn fire_one(x: f32, y: f32, dx: f32, dy: f32, damage: f32, crit: bool, size_scale: f32) {
+    fn fire_one(x: f32, y: f32, dx: f32, dy: f32, damage: f32, crit: bool, size_scale: f32) -> Entity {
         let shot = World.spawn(this.bullet);
         shot.transform.position.x = x;
         shot.transform.position.y = y;
@@ -239,6 +244,7 @@ script Player {
         World.set_property(shot, "nova", Game.nova);
         World.set_property(shot, "beam", Game.beam);
         World.set_property(shot, "crit_hit", if_number(crit));
+        return shot;
     }
 
     fn special_damage_multiplier() -> f32 {
@@ -289,6 +295,32 @@ script Player {
         while this.wisp_spawned < Game.comp_wisp { spawn_companion(4.0, this.wisp_spawned); this.wisp_spawned += 1.0; }
         while this.drone_spawned < Game.comp_drone { spawn_companion(5.0, this.drone_spawned); this.drone_spawned += 1.0; }
         while this.wrecking_spawned < Game.comp_wrecking { spawn_companion(6.0, this.wrecking_spawned); this.wrecking_spawned += 1.0; }
+        if Game.comp_prism > 0.0 && this.prism == null { this.prism = World.spawn(this.fork_prism); }
+    }
+
+    // Fork Drone: an orbiting prism, Isaac's Angelic Prism rather than a
+    // spread upgrade. Only a round that actually crosses it splits, into
+    // itself and two softer shards fanned either side. A shard never splits
+    // again, so one prism cannot snowball a volley.
+    fn split_through_prism() {
+        let prism = this.prism;
+        if prism == null || !World.exists(prism) { return; }
+        for shot in World.within_radius("bullet", prism.transform.world_position, PRISM_REACH) {
+            if !World.exists(shot) { continue; }
+            let round = Bullet.on(shot);
+            if round == null || round.companion_kind > 0.0 || round.split > 0.0 { continue; }
+            round.split = 1.0;
+            let heading = atan2(round.heading_y, round.heading_x);
+            let damage = round.damage * 0.6;
+            let crit = round.crit_hit > 0.0;
+            shard(shot, heading - 0.3, damage, crit);
+            shard(shot, heading + 0.3, damage, crit);
+        }
+    }
+
+    fn shard(from: Entity, angle: f32, damage: f32, crit: bool) {
+        let made = fire_one(from.transform.position.x, from.transform.position.y, cos(angle), sin(angle), damage, crit, 0.8);
+        World.set_property(made, "split", 1.0);
     }
 
     fn spawn_companion(kind: f32, slot: f32) {

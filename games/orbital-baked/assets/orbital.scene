@@ -1656,6 +1656,197 @@
       }
     },
     {
+      "id": "hud-event",
+      "name": "EventPanel",
+      "parent": "hud",
+      "transform_3d": {
+        "position": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "rotation": [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "disabled": true
+    },
+    {
+      "id": "hud-event-frame",
+      "name": "EventFrame",
+      "parent": "hud-event",
+      "transform_3d": {
+        "position": [
+          0.0,
+          -0.34167,
+          0.0
+        ],
+        "rotation": [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        "scale": [
+          1.55556,
+          0.20556,
+          1.0
+        ]
+      },
+      "components": {
+        "weave.style": {
+          "classes": [
+            "hud-event-frame"
+          ]
+        },
+        "sindri.ui.shape": {
+          "anchor": "top",
+          "corner_radius": 0.13514,
+          "fill": [
+            0.0012,
+            0.0037,
+            0.007,
+            0.82
+          ],
+          "kind": "rect",
+          "layer": 122,
+          "stroke": [
+            0.212,
+            0.799,
+            1.0,
+            1.0
+          ],
+          "stroke_width": 0.01351
+        }
+      }
+    },
+    {
+      "id": "hud-event-title",
+      "name": "EventTitle",
+      "parent": "hud-event",
+      "transform_3d": {
+        "position": [
+          0.0,
+          -0.26111,
+          0.0
+        ],
+        "rotation": [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        "scale": [
+          1.44444,
+          0.03889,
+          1.0
+        ]
+      },
+      "components": {
+        "weave.style": {
+          "classes": [
+            "hud-event-title"
+          ]
+        },
+        "sindri.ui.text": {
+          "anchor": "top",
+          "bold": false,
+          "bounds": [
+            1.44444,
+            0.03889
+          ],
+          "case": "as_written",
+          "color": [
+            0.212,
+            0.799,
+            1.0,
+            1.0
+          ],
+          "font": "fonts/ChakraPetch-Bold.ttf",
+          "font_size": 0.03056,
+          "layer": 140,
+          "letter_spacing": 0.00556,
+          "line_align": "center",
+          "line_height": 0.03611,
+          "text": "SYSTEM OVERLOAD",
+          "wrap": "word"
+        },
+        "sindri.ui.box": {
+          "fit_content": [
+            false,
+            false
+          ]
+        }
+      }
+    },
+    {
+      "id": "hud-event-text",
+      "name": "EventText",
+      "parent": "hud-event",
+      "transform_3d": {
+        "position": [
+          0.0,
+          -0.26111,
+          0.0
+        ],
+        "rotation": [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        "scale": [
+          1.44444,
+          0.03889,
+          1.0
+        ]
+      },
+      "components": {
+        "weave.style": {
+          "classes": [
+            "hud-event-text"
+          ]
+        },
+        "sindri.ui.text": {
+          "anchor": "top",
+          "bold": false,
+          "bounds": [
+            1.44444,
+            0.03889
+          ],
+          "case": "as_written",
+          "color": [
+            0.694,
+            0.791,
+            0.855,
+            1.0
+          ],
+          "font": "fonts/ChakraPetch-Regular.ttf",
+          "font_size": 0.03056,
+          "layer": 140,
+          "letter_spacing": 0.00556,
+          "line_align": "center",
+          "line_height": 0.03611,
+          "text": "Fire rate doubled. Hostiles accelerate.",
+          "wrap": "word"
+        },
+        "sindri.ui.box": {
+          "fit_content": [
+            false,
+            false
+          ]
+        }
+      }
+    },
+    {
       "id": "music",
       "name": "Music",
       "transform_3d": {
@@ -4527,7 +4718,7 @@
           "rotation": 0.0,
           "sensor": true,
           "shape": {
-            "radius": 0.16,
+            "radius": 0.22,
             "shape": "circle"
           }
         },
@@ -4554,7 +4745,8 @@
           "properties": {
             "bullet": "prefabs/bullet.prefab",
             "edge_padding": 0.28,
-            "invulnerable_for": 0.9,
+            "fork_prism": "prefabs/fork-prism.prefab",
+            "invulnerable_for": 0.22,
             "mine": "prefabs/mine.prefab",
             "muzzle_fx": "prefabs/spectacle.prefab"
           },

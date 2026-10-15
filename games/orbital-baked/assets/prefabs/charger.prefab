@@ -53,7 +53,7 @@
         "sindri.physics2d.collider": {
           "shape": {
             "shape": "circle",
-            "radius": 0.5
+            "radius": 0.24
           },
           "offset": [
             0.0,
@@ -90,12 +90,12 @@
           "script": "Charger",
           "properties": {
             "health": 3.0,
-            "worth": 2.0,
+            "worth": 14.0,
             "approach": 1.2,
             "wind_up": 0.75,
             "dash_speed": 9.5,
             "rest": 1.1,
-            "touch_damage": 1.0,
+            "touch_damage": 0.54,
             "core": "prefabs/core.prefab",
             "death_burst": "prefabs/nova.prefab",
             "drop_roll": "prefabs/drop-roll.prefab",

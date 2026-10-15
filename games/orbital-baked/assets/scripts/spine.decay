@@ -21,9 +21,8 @@ script Spine {
     var turn_clock: f32 = 0.0;
 
     fn start() {
-        let elapsed = Game.elapsed;
-        let scale = 1.0 + min(1.35, max(0.0, elapsed - 60.0) * 0.0025);
-        this.hp = 118.0 * scale;
+        let scale = boss_scale();
+        this.hp = 60.0 * scale;
         Game.boss_max = this.hp;
         Game.boss_hp = this.hp;
         Game.boss_kind = 8.0;
@@ -244,7 +243,7 @@ script Spine {
             let drop = World.spawn(this.core);
             drop.transform.position.x = this.transform.position.x + cos(angle) * 1.2;
             drop.transform.position.y = this.transform.position.y + sin(angle) * 1.2;
-            World.set_property(drop, "worth", 5.0);
+            World.set_property(drop, "worth", 48.0);
             made += 1.0;
         }
         let roll = World.spawn(this.drop_roll);

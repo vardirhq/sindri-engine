@@ -25,10 +25,9 @@ script Crown {
     fn start() {
         // Bosses that arrive later in a run are the same boss with more to
         // chew through, which is the reference game's curve rather than a
-        // second set of numbers per boss.
-        let elapsed = Game.elapsed;
-        let scale = 1.0 + min(1.35, max(0.0, elapsed - 60.0) * 0.0025);
-        this.hp = 184.0 * scale;
+        // second set of numbers per boss (see boss-scale.decay).
+        let scale = boss_scale();
+        this.hp = 159.2 * scale;
         this.offset = Random.range(0.0, 6.2831853);
         Game.boss_max = this.hp;
         Game.boss_hp = this.hp;
@@ -201,7 +200,7 @@ script Crown {
             let drop = World.spawn(this.core);
             drop.transform.position.x = this.transform.position.x + cos(angle) * 1.2;
             drop.transform.position.y = this.transform.position.y + sin(angle) * 1.2;
-            World.set_property(drop, "worth", 5.0);
+            World.set_property(drop, "worth", 48.0);
             made += 1.0;
         }
         let roll = World.spawn(this.drop_roll);

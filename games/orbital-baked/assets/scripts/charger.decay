@@ -1,12 +1,12 @@
 // Closes to a distance, broadcasts its intent, then turns into a neon missile.
 script Charger {
     @export let health: f32 = 3.0;
-    @export let worth: f32 = 2.0;
+    @export let worth: f32 = 14.0;
     @export let approach: f32 = 1.2;
     @export let wind_up: f32 = 0.75;
     @export let dash_speed: f32 = 9.5;
     @export let rest: f32 = 1.1;
-    @export let touch_damage: f32 = 1.0;
+    @export let touch_damage: f32 = 0.54;
     @export let elite: f32 = 0.0;
     @export let elite_trait: f32 = 0.0;
     @export let hazard_damage: f32 = 0.0;
@@ -52,12 +52,15 @@ script Charger {
         let dx = player.transform.position.x - this.transform.position.x;
         let dy = player.transform.position.y - this.transform.position.y;
         let far = sqrt(dx * dx + dy * dy);
+        if far < CONTACT_REACH {
+            Game.player_damage_taken = max(Game.player_damage_taken, this.touch_damage);
+        }
         let visible = is_visible();
         if this.phase != 0.0 && !visible { this.phase = 0.0; }
 
         if this.phase == 0.0 {
             this.heat = 0.0;
-            if far > 0.001 { Physics.set_velocity(this.entity, dx / far * this.approach, dy / far * this.approach); }
+            if far > 0.001 { Physics.set_velocity(this.entity, dx / far * this.approach * Game.event_enemy_speed, dy / far * this.approach * Game.event_enemy_speed); }
             if far < 5.0 && visible { this.phase = 1.0; this.timer = this.wind_up; }
         } else if this.phase == 1.0 {
             Physics.set_velocity(this.entity, 0.0, 0.0);
@@ -77,7 +80,7 @@ script Charger {
             this.body_alpha = 1.0;
             // The dash sheds the heat it built over its first moments.
             this.heat = max(0.0, this.timer / 0.55) * 0.8;
-            Physics.set_velocity(this.entity, this.dash_x * this.dash_speed, this.dash_y * this.dash_speed);
+            Physics.set_velocity(this.entity, this.dash_x * this.dash_speed * Game.event_enemy_speed, this.dash_y * this.dash_speed * Game.event_enemy_speed);
             this.timer -= dt;
             if this.timer <= 0.0 { this.phase = 0.0; this.timer = this.rest; }
         }
@@ -140,8 +143,7 @@ script Charger {
 
     fn die() {
         burst_on_death(); Effects.burst(this.entity); Audio.play("audio/kill.wav", 0.3);
-        Camera.impact(0.12);
-        Game.kills = Game.kills + 1.0; Game.score = Game.score + this.worth * 10.0;
+        Game.kills = Game.kills + 1.0; Game.score = Game.score + (20.0 + this.worth) * Game.event_score;
         let drop = World.spawn(this.core); drop.transform.position.x = this.transform.position.x; drop.transform.position.y = this.transform.position.y; World.set_property(drop, "worth", this.worth);
         let roll = World.spawn(this.drop_roll); roll.transform.position.x = this.transform.position.x; roll.transform.position.y = this.transform.position.y; World.set_property(roll, "elite", this.elite);
         World.despawn(this.entity);
