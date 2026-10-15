@@ -325,14 +325,14 @@ script SpineSegment {
         let share = this.hp / max(this.health, 0.001);
         if share < 0.34 && this.state < 2.0 {
             this.state = 2.0;
-            this.sprite.tint.r = 1.0;
-            this.sprite.tint.g = 0.30;
-            this.sprite.tint.b = 0.40;
+            this.shape.fill.r = 1.0;
+            this.shape.fill.g = 0.0742;
+            this.shape.fill.b = 0.1329;
         } else if share < 0.67 && this.state < 1.0 {
             this.state = 1.0;
-            this.sprite.tint.r = 1.0;
-            this.sprite.tint.g = 0.46;
-            this.sprite.tint.b = 0.60;
+            this.shape.fill.r = 1.0;
+            this.shape.fill.g = 0.1786;
+            this.shape.fill.b = 0.3185;
         }
     }
 

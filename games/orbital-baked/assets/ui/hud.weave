@@ -41,29 +41,48 @@
 }
 
 /* Hull and XP, bottom left: each label on its own line above its meter.
-   Panels and meters are placed by their centre; text by its anchor. */
-.hud-vitals-back { width: 380px; height: 96px; x: 206px; y: 64px; anchor: bottom_left; }
+   Panels and meters are placed by their centre; text by its anchor. Kept
+   narrow, about a quarter of a 960-wide screen, because the field is the
+   game: the original carries these readings in one small top cluster. */
+.hud-vitals-back { width: 260px; height: 74px; x: 146px; y: 53px; anchor: bottom_left; }
 .hud-meter-label {
-    width: 352px; height: 16px; x: 30px; anchor: bottom_left;
-    font-size: 13px; line-height: 15px; letter-spacing: 2px; text-align: start;
+    width: 232px; height: 14px; x: 30px; anchor: bottom_left;
+    font-size: 12px; line-height: 14px; letter-spacing: 2px; text-align: start;
 }
-.hud-health-label { y: 78px; color: var(--ink); }
-.hud-xp-label { y: 40px; color: var(--cyan); }
-.hud-player-meter { width: 352px; x: 206px; anchor: bottom_left; }
-.health-meter { height: 16px; y: 66px; }
-.cores-meter { height: 8px; y: 30px; }
+.hud-health-label { y: 64px; color: var(--ink); }
+.hud-xp-label { y: 35px; color: var(--cyan); }
+.hud-player-meter { width: 232px; x: 146px; anchor: bottom_left; }
+.health-meter { height: 12px; y: 54px; }
+.cores-meter { height: 6px; y: 27px; }
 
-/* Boss: a warm frame under the clock that no other reading uses. */
+/* Boss: a warm strip under the clock that no other reading uses. Kept slim,
+   because a boss enters from the top and the original names it in one thin
+   line rather than a panel over the field. */
 .hud-boss-frame {
-    width: 560px; height: 74px; x: 0px; y: -123px; anchor: top;
-    background: #1a0710e6; border-color: #9f2c43; border-width: 1px; border-radius: 10px;
+    width: 360px; height: 50px; x: 0px; y: -101px; anchor: top;
+    background: #1a0710cc; border-color: #9f2c43; border-width: 1px; border-radius: 8px;
 }
-.hud-boss-kicker { width: 520px; x: 0px; y: -94px; color: #f59e0b; text-align: center; }
+.hud-boss-kicker { width: 330px; x: 0px; y: -80px; color: #f59e0b; text-align: center; }
 .hud-boss-name {
-    width: 520px; height: 22px; x: 0px; y: -109px; anchor: top;
-    font-size: 18px; line-height: 20px; letter-spacing: 5px; color: var(--danger); text-align: center;
+    width: 330px; height: 18px; x: 0px; y: -93px; anchor: top;
+    font-size: 14px; line-height: 16px; letter-spacing: 4px; color: var(--danger); text-align: center;
 }
-.hud-boss-meter { width: 520px; height: 12px; x: 0px; y: -144px; anchor: top; }
+.hud-boss-meter { width: 320px; height: 6px; x: 0px; y: -116px; anchor: top; }
+
+/* Event: the original's sector event banner, a cool strip under the boss
+   strip so the two can show together. */
+.hud-event-frame {
+    width: 360px; height: 56px; x: 0px; y: -159px; anchor: top;
+    border-width: 1px; border-radius: 8px;
+}
+.hud-event-title {
+    width: 340px; height: 16px; x: 0px; y: -139px; anchor: top;
+    font-size: 13px; line-height: 15px; letter-spacing: 3px; text-align: center;
+}
+.hud-event-text {
+    width: 340px; height: 14px; x: 0px; y: -160px; anchor: top;
+    font-size: 12px; line-height: 14px; letter-spacing: 0px; text-align: center;
+}
 
 @media (max-width: 700px) {
     .hud-kicker { height: 3.2vw; font-size: 2.5vw; line-height: 3vw; letter-spacing: 0.4vw; }
@@ -84,8 +103,11 @@
     .hud-player-meter { width: 86vw; x: 50vw; }
     .health-meter { height: 3.8vw; y: 15.5vw; }
     .cores-meter { height: 2vw; y: 7vw; }
-    .hud-boss-frame { width: 90vw; height: 17vw; y: -42.5vw; }
-    .hud-boss-kicker { width: 84vw; y: -36vw; }
-    .hud-boss-name { width: 84vw; height: 5vw; y: -39.6vw; font-size: 3.8vw; line-height: 4.6vw; letter-spacing: 0.8vw; }
-    .hud-boss-meter { width: 84vw; height: 3vw; y: -47.5vw; }
+    .hud-boss-frame { width: 80vw; height: 12vw; y: -39.5vw; }
+    .hud-boss-kicker { width: 74vw; y: -34.6vw; }
+    .hud-boss-name { width: 74vw; height: 4vw; y: -37.6vw; font-size: 3.2vw; line-height: 3.8vw; letter-spacing: 0.8vw; }
+    .hud-boss-meter { width: 74vw; height: 1.6vw; y: -43.2vw; }
+    .hud-event-frame { width: 80vw; height: 14vw; y: -54vw; }
+    .hud-event-title { width: 74vw; height: 3.6vw; y: -48.6vw; font-size: 3vw; line-height: 3.4vw; letter-spacing: 0.6vw; }
+    .hud-event-text { width: 74vw; height: 7vw; y: -52.6vw; font-size: 3vw; line-height: 3.5vw; }
 }

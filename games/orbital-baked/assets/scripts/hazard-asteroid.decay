@@ -115,20 +115,41 @@ script HazardAsteroid {
         }
     }
 
+    // Every rock is its own outline, as in the original: eight corners round
+    // the centre at the original's 0.78 / 0.88 / 0.98 radius rhythm, each
+    // nudged a little in angle and reach so no two rocks share a silhouette.
+    // Points are in the shape's own unit square, so 0.5 is the prefab's radius.
     fn author_rock() {
+        var corner: f32 = 0.0;
+        while corner < 8.0 {
+            let rhythm = corner - 3.0 * floor(corner / 3.0);
+            let reach = 0.5 * (0.78 + rhythm * 0.1) * Random.range(0.92, 1.04);
+            let angle = corner / 8.0 * 6.2831853 + Random.range(-0.16, 0.16);
+            World.set_shape_point(corner, cos(angle) * reach, sin(angle) * reach);
+            corner += 1.0;
+        }
     }
 
     fn update_damage_visual() {
         let damage = 1.0 - this.hp / max(this.health, 0.001);
-        if this.hit_flash > 0.0 {
-            this.sprite.tint.r = 1.0;
-            this.sprite.tint.g = 1.0;
-            this.sprite.tint.b = 1.0;
-        } else {
-            this.sprite.tint.r = 0.47 + damage * 0.28;
-            this.sprite.tint.g = 0.58 + damage * 0.24;
-            this.sprite.tint.b = 0.65 + damage * 0.20;
+        // The original's slate rim, which pales once the rock is more than
+        // half broken; a hit lights the rim white for a moment.
+        var rim_r: f32 = 0.188;
+        var rim_g: f32 = 0.296;
+        var rim_b: f32 = 0.381;
+        if damage > 0.55 {
+            rim_r = 0.474;
+            rim_g = 0.565;
+            rim_b = 0.610;
         }
+        let flash = min(1.0, this.hit_flash * 8.0);
+        this.shape.stroke.r = rim_r + (1.0 - rim_r) * flash;
+        this.shape.stroke.g = rim_g + (1.0 - rim_g) * flash;
+        this.shape.stroke.b = rim_b + (1.0 - rim_b) * flash;
+        this.shape.stroke_width = 0.035 + flash * 0.02;
+        this.shape.fill.r = 0.009 + damage * 0.02;
+        this.shape.fill.g = 0.019 + damage * 0.025;
+        this.shape.fill.b = 0.031 + damage * 0.03;
     }
 
     fn knock_from(player: Entity) {

@@ -53,7 +53,7 @@
         "sindri.physics2d.collider": {
           "shape": {
             "shape": "circle",
-            "radius": 0.5
+            "radius": 0.17
           },
           "offset": [
             0.0,
@@ -73,36 +73,34 @@
           "script": "Core",
           "properties": {
             "worth": 1.0,
-            "pull": 7.0,
-            "reach": 2.2,
-            "life": 22.0
+            "pull": 11.4,
+            "reach": 0.0,
+            "life": 120.0
           }
         },
-        "sindri.sprite": {
-          "texture": "textures/core.png#hull-0",
-          "tint": [
-            1.0,
-            1.0,
+        "sindri.shape": {
+          "kind": "polygon",
+          "count": 4.0,
+          "fill": [
+            0.1981,
+            0.9131,
             1.0,
             1.0
           ],
+          "stroke": [
+            0.75,
+            1.0,
+            0.97,
+            0.9
+          ],
+          "stroke_width": 0.08,
+          "corner_radius": 0.0,
+          "dashes": 0.0,
+          "dash_duty": 0.5,
+          "sweep_start": 0.0,
+          "sweep_turns": 1.0,
+          "blend": "over",
           "layer": 2
-        },
-        "sindri.animation.sprite": {
-          "clips": {
-            "idle": {
-              "frames": [
-                "hull-0",
-                "hull-1",
-                "hull-2",
-                "hull-3"
-              ],
-              "seconds_per_frame": 0.1,
-              "looping": true
-            }
-          },
-          "playing": "idle",
-          "speed": 1.0
         }
       }
     }

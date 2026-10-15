@@ -142,7 +142,9 @@ fn every_prefab_the_scripts_spawn_is_loaded() {
 /// Their textures are named only by the prefabs a script spawns, and the
 /// editor asked only for what the scene's own entities draw with. The
 /// prefabs are spawned into a world of their own so their textures can be
-/// asked for alongside the scene's, before anything spawns them.
+/// asked for alongside the scene's, before anything spawns them. The enemies
+/// are vector shapes now, so the mine blast is the spawned texture left to
+/// stand for them.
 #[test]
 fn every_texture_a_spawned_enemy_draws_with_is_asked_for() {
     let (scripts, world, _components) = opened_at(&game_scene("orbital-baked"));
@@ -150,18 +152,13 @@ fn every_texture_a_spawned_enemy_draws_with_is_asked_for() {
     let from_prefabs = sindri_scene::referenced_textures(&sindri_editor::textures::prefab_world(
         scripts.prefabs(),
     ));
-    for texture in [
-        "textures/asteroid.png",
-        "textures/drifter.png",
-        "textures/charger.png",
-    ] {
-        assert!(
-            !from_scene.contains(texture),
-            "{texture} is named by the scene itself, so this would prove nothing"
-        );
-        assert!(
-            from_prefabs.contains(texture),
-            "{texture} is drawn by a spawned enemy but never asked for"
-        );
-    }
+    let texture = "textures/detonation.png";
+    assert!(
+        !from_scene.contains(texture),
+        "{texture} is named by the scene itself, so this would prove nothing"
+    );
+    assert!(
+        from_prefabs.contains(texture),
+        "{texture} is drawn by a spawned enemy but never asked for"
+    );
 }

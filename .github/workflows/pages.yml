@@ -175,7 +175,7 @@ jobs:
           test -f target/pages/examples/voxel-lab/pkg/voxel_lab_bg.wasm
           grep -q 'voxel-stats' target/pages/examples/voxel-lab/index.html
           grep -q '"kind": "prefab"' target/pages/examples/orbital-baked/assets/sindri.manifest
-          grep -q 'player.sheet' target/pages/examples/orbital-baked/assets/sindri.manifest
+          grep -q 'detonation.sheet' target/pages/examples/orbital-baked/assets/sindri.manifest
           grep -q '"kind": "script"' target/pages/examples/shapes-lab/assets/sindri.manifest
           grep -q '"demo.weave"' target/pages/examples/weave-poc/assets/sindri.manifest
           grep -q 'hero.sheet' target/pages/examples/platformer/assets/sindri.manifest

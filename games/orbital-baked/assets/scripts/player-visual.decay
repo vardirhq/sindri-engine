@@ -3,7 +3,7 @@
 // pulsing canopy core and two live engine plumes. Module families deliberately
 // leak into the presentation so a run changes the ship, not just its numbers.
 script PlayerVisual {
-    // 1 = shield, 2 = engine trail, 3 = canopy core.
+    // 1 = shield, 2 = engine trail, 3 = canopy core, 4 = hull chevron.
     @export let kind: f32 = 1.0;
     @export let side: f32 = 0.0;
 
@@ -37,6 +37,7 @@ script PlayerVisual {
 
         if this.kind == 1.0 { update_shield(dt, state); }
         else if this.kind == 2.0 { update_engine(); }
+        else if this.kind == 4.0 { update_chevron(); }
         else { update_core(); }
     }
 
@@ -67,8 +68,8 @@ script PlayerVisual {
         let forward_y = sin(facing);
         let right_x = -forward_y;
         let right_y = forward_x;
-        this.transform.position.x += -forward_x * 0.20 + right_x * this.side;
-        this.transform.position.y += -forward_y * 0.20 + right_y * this.side;
+        this.transform.position.x += -forward_x * 0.12 + right_x * this.side;
+        this.transform.position.y += -forward_y * 0.12 + right_y * this.side;
         this.transform.rotation_z = facing - 1.5707963;
 
         let thrust = Game.player_thrust;
@@ -89,10 +90,16 @@ script PlayerVisual {
         this.shape.stroke_width = 0.035 + thrust * 0.025 + overdrive * 0.025;
     }
 
+    // The original's accent line down the hull: a V from the wing roots to
+    // just behind the nose, turning with the ship.
+    fn update_chevron() {
+        this.transform.rotation_z = Game.player_facing - 1.5707963;
+    }
+
     fn update_core() {
         let facing = Game.player_facing;
-        this.transform.position.x += cos(facing) * 0.045;
-        this.transform.position.y += sin(facing) * 0.045;
+        this.transform.position.x += cos(facing) * 0.058;
+        this.transform.position.y += sin(facing) * 0.058;
         let overdrive = min(1.0, max(0.0, Game.overdrive / 4.0));
         let arc = min(1.0, Game.arc);
         let nova = min(1.0, Game.nova);
