@@ -424,7 +424,7 @@ script Crew {
         } else {
             Animation.play(this.entity, this.view + "-still");
         }
-        this.transform.scale.x = 1.1;
+        this.transform.scale.x = 1.5;
         if Game.aboard {
             this.transform.rotation_z = Game.view_rot - Game.heading;
         } else {
