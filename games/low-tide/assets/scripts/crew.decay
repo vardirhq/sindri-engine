@@ -20,7 +20,7 @@ const RAMP: f32 = 10.0;
 
 script Crew {
     @export let cargo_template: Prefab;
-    @export let walk_speed: f32 = 3.4;
+    @export let walk_speed: f32 = 2.6;
     @export let radius: f32 = 0.3;
     @export let reach: f32 = 3.8;
 
