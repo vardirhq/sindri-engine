@@ -199,21 +199,22 @@ await page.goto(`http://127.0.0.1:${port}${BASE}`, { waitUntil: 'load' });
 if (EXPECT_FAILURE) {
   await page.waitForSelector('#sindri-error[data-visible="true"]');
   const message = await page.locator('#sindri-error').innerText();
+  const reason = await page.locator('#sindri-error').getAttribute('data-reason');
+  // The page names the failure in `data-reason` rather than this reading its
+  // wording, which is written for players and free to change. For a device
+  // failure what matters is that a failure raised after startup finished
+  // arrived on the page at all.
   const expected = {
-    canvas: 'missing the #sindri-canvas',
-    adapter: 'WebGPU is unavailable',
-    // Not the message's wording, which belongs to wgpu, and not the project's
-    // name, which belongs to whichever project this was pointed at: what
-    // matters is that a failure raised after startup finished arrived on the
-    // page at all. Naming the game here meant renaming the game broke this.
+    canvas: 'canvas',
+    adapter: 'adapter',
     device: 'stopped',
   }[EXPECT_FAILURE];
   if (SHOT) await page.screenshot({ path: SHOT });
   await browser.close();
   server.close();
   console.log(`expected startup failure: ${message.replaceAll('\n', ' ')}`);
-  if (!message.includes(expected)) {
-    console.log(`problem: expected the failure UI to mention '${expected}'`);
+  if (reason !== expected) {
+    console.log(`problem: expected the failure UI to report '${expected}', not '${reason}'`);
     process.exit(1);
   }
   console.log('the page surfaced the expected startup failure');
