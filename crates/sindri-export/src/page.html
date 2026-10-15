@@ -33,7 +33,18 @@
       color: var(--cream);
       font: 400 1rem/1.55 system-ui, sans-serif;
     }
-    #sindri-error[data-visible="true"] { display: grid; place-items: center; }
+    /* A column rather than a centered overlay, so on a short screen (a phone
+       on its side) the panel and the signature scroll instead of overlapping.
+       Centered with auto margins, not justify-content, which would push the
+       top of a too-tall panel off the screen where no scroll can reach it. */
+    #sindri-error[data-visible="true"] {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1.25rem;
+      padding: 2rem 0 1.25rem;
+      box-sizing: border-box;
+    }
     #sindri-error .grid {
       position: fixed;
       inset: 0;
@@ -55,7 +66,7 @@
       position: relative;
       box-sizing: border-box;
       width: min(34rem, calc(100vw - 32px));
-      margin: 2.5rem 0 3.5rem;
+      margin: auto 0 0;
       padding: clamp(1.5rem, 5vw, 2.25rem);
       border: 1px solid var(--edge);
       border-radius: 14px;
@@ -145,10 +156,8 @@
       user-select: text;
     }
     #sindri-error .signature {
-      position: fixed;
-      left: 0;
-      right: 0;
-      bottom: 1rem;
+      position: relative;
+      margin-top: auto;
       display: flex;
       justify-content: center;
       align-items: center;
@@ -161,6 +170,14 @@
     }
     #sindri-error .signature svg { height: .7rem; width: auto; fill: var(--muted); }
     #sindri-error .signature .gold { fill: var(--accent); }
+    @media (max-height: 520px) {
+      #sindri-error[data-visible="true"] { padding-top: 1rem; }
+      #sindri-error .panel { padding: 1.25rem 1.5rem; }
+      #sindri-error .mark { width: 40px; height: 40px; margin-bottom: .75rem; }
+      #sindri-error h1 { font-size: 1.35rem; }
+      #sindri-error .tips { margin-top: .9rem; gap: .35rem; }
+      #sindri-error .actions { margin-top: 1.1rem; }
+    }
     @keyframes sindri-rise { from { opacity: 0; transform: translateY(12px); } }
     @media (prefers-reduced-motion: reduce) { #sindri-error .panel { animation: none; } }
     /* Which build this is. Small and in a corner, because a player does not
