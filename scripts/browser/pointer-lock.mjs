@@ -61,8 +61,12 @@ try {
   assert.deepEqual(sum, [1420, 60], `unbounded motion reached Decay once: ${JSON.stringify(motion)}`);
   await page.keyboard.press('u');
   await page.waitForFunction(() => !document.pointerLockElement);
-  await page.waitForTimeout(150);
-  assert(logs.some((text) => text.includes('Pointer released')), 'Decay saw explicit release');
+  // DOM release precedes the next shared fixed step and console delivery.
+  for (let i = 0; i < 100 && !logs.some((text) => text.includes('Pointer released')); i++) {
+    await page.waitForTimeout(100);
+  }
+  assert(logs.some((text) => text.includes('Pointer released')),
+    `Decay saw explicit release: ${logs.slice(-10).join(' | ')}`);
   await page.mouse.click(200, 200);
   await page.waitForFunction(() => document.pointerLockElement);
   await page.keyboard.press('Escape');
