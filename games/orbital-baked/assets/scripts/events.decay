@@ -1,0 +1,67 @@
+// The original's random sector events: one at 0:42, then one every 38 to 60
+// seconds after the last ends, until 9:20. Each bends the run for 13 to 18
+// seconds and is announced by a banner.
+//
+// The director runs the clock; everything an event changes reads one of the
+// `event_*` board values below, which rest at 1 (or 0 for the elite bonus).
+// Ids, in the original's order: 1 System Overload, 2 Signal Harvest,
+// 3 Elite Hunt, 4 Swarm Tide, 5 Glass Space, 6 Temporal Echo.
+
+shared fn event_duration(id: f32) -> f32 {
+    if id == 1.0 { return 14.0; }
+    if id == 2.0 { return 16.0; }
+    if id == 3.0 { return 18.0; }
+    if id == 4.0 { return 16.0; }
+    if id == 5.0 { return 14.0; }
+    return 13.0;
+}
+
+// Writes the board values an event changes; 0 puts them all back.
+shared fn apply_event(id: f32) {
+    Game.event_fire = 1.0;
+    Game.event_enemy_speed = 1.0;
+    Game.event_magnet = 1.0;
+    Game.event_elite = 0.0;
+    Game.event_score = 1.0;
+    Game.event_spawn = 1.0;
+    Game.event_xp = 1.0;
+    Game.event_hurt = 1.0;
+    if id == 1.0 {
+        Game.event_fire = 0.5;
+        Game.event_enemy_speed = 1.22;
+    } else if id == 2.0 {
+        Game.event_magnet = 2.8;
+    } else if id == 3.0 {
+        Game.event_elite = 0.38;
+        Game.event_score = 1.5;
+    } else if id == 4.0 {
+        Game.event_spawn = 1.65;
+        Game.event_xp = 1.55;
+        Game.event_score = 1.25;
+    } else if id == 5.0 {
+        Game.event_hurt = 1.75;
+        Game.event_score = 2.0;
+    } else if id == 6.0 {
+        Game.event_fire = 0.68;
+        Game.event_enemy_speed = 0.7;
+        Game.event_score = 1.35;
+    }
+}
+
+shared fn event_name(id: f32) -> String {
+    if id == 1.0 { return "SYSTEM OVERLOAD"; }
+    if id == 2.0 { return "SIGNAL HARVEST"; }
+    if id == 3.0 { return "ELITE HUNT"; }
+    if id == 4.0 { return "SWARM TIDE"; }
+    if id == 5.0 { return "GLASS SPACE"; }
+    return "TEMPORAL ECHO";
+}
+
+shared fn event_text(id: f32) -> String {
+    if id == 1.0 { return "Fire rate doubled. Hostiles accelerate."; }
+    if id == 2.0 { return "XP attraction massively increased."; }
+    if id == 3.0 { return "Elites flood the sector. Score bonus active."; }
+    if id == 4.0 { return "Hostile density surges. Salvage yield amplified."; }
+    if id == 5.0 { return "Hull damage becomes severe. Score transmission doubled."; }
+    return "Weapons and hostiles fall into asymmetric slow time.";
+}

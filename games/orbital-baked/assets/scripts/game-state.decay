@@ -14,7 +14,7 @@ state Game {
     var boss_max: f32 = 0.0;
     var boss_pool: f32 = 0.0;
     var bullet_size: f32 = 1.0;
-    var bullet_speed: f32 = 9.0;
+    var bullet_speed: f32 = 10.6;
     var comp_blade: f32 = 0.0;
     var comp_drone: f32 = 0.0;
     var comp_ember: f32 = 0.0;
@@ -24,7 +24,7 @@ state Game {
     var companion_spawn_reset: f32 = 0.0;
     var constellation_count: f32 = 0.0;
     var cores: f32 = 0.0;
-    var crit: f32 = 0.0;
+    var crit: f32 = 0.05;
     var crit_power: f32 = 2.0;
     var damage: f32 = 1.0;
     var damage_mul: f32 = 1.0;
@@ -32,6 +32,17 @@ state Game {
     var elite_bonus: f32 = 0.0;
     var elite_kills: f32 = 0.0;
     var elite_spawned: f32 = 0.0;
+    var event: f32 = 0.0;
+    var event_banner: f32 = 0.0;
+    var event_elite: f32 = 0.0;
+    var event_enemy_speed: f32 = 1.0;
+    var event_fire: f32 = 1.0;
+    var event_hurt: f32 = 1.0;
+    var event_magnet: f32 = 1.0;
+    var event_score: f32 = 1.0;
+    var event_shown: f32 = 0.0;
+    var event_spawn: f32 = 1.0;
+    var event_xp: f32 = 1.0;
     var fire_gap: f32 = 0.42;
     var fire_rate: f32 = 2.38;
     var grave_echo_time: f32 = 0.0;

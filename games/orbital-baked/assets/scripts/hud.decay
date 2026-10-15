@@ -16,6 +16,10 @@ script Hud {
     var boss_panel: Entity = null;
     var boss_bar: Entity = null;
     var boss_name: Entity = null;
+    var event_panel: Entity = null;
+    var event_title: Entity = null;
+    var event_body: Entity = null;
+    var shown_event: f32 = -1.0;
     var pilot: Entity = null;
     var callsign: Entity = null;
     var shown_pilot: String = "?";
@@ -52,6 +56,9 @@ script Hud {
         this.boss_panel = World.find("BossPanel");
         this.boss_bar = World.find("BossBar");
         this.boss_name = World.find("BossName");
+        this.event_panel = World.find("EventPanel");
+        this.event_title = World.find("EventTitle");
+        this.event_body = World.find("EventText");
         this.pilot = World.find("HudPilot");
         this.callsign = World.find("TitleCallsign");
 
@@ -140,6 +147,7 @@ script Hud {
         cores_bar.transform.scale.y = this.cores_bar_scale_y * (1.0 + this.core_flash * 0.85);
 
         update_boss(dt);
+        update_event();
     }
 
     fn animate_player_health() {
@@ -212,6 +220,26 @@ script Hud {
         else if current == 3.0 { Ui.set_text(this.sector, "VIOLET WAKE"); }
         else if current == 4.0 { Ui.set_text(this.sector, "NULL LATTICE"); }
         else { Ui.set_text(this.sector, "CORE APPROACH"); }
+    }
+
+    // The event banner: the event's name and what it does while it starts,
+    // then "EVENT COMPLETE" over its name as it ends. Text is written only
+    // when what the banner says changes.
+    fn update_event() {
+        let showing = Game.event_banner > 0.0 && Game.event_shown > 0.0;
+        World.set_active(this.event_panel, showing);
+        if !showing { return; }
+        var key: f32 = Game.event_shown;
+        if Game.event == 0.0 { key = -Game.event_shown; }
+        if key == this.shown_event { return; }
+        this.shown_event = key;
+        if key > 0.0 {
+            Ui.set_text(this.event_title, event_name(key));
+            Ui.set_text(this.event_body, event_text(key));
+        } else {
+            Ui.set_text(this.event_title, "EVENT COMPLETE");
+            Ui.set_text(this.event_body, event_name(Game.event_shown));
+        }
     }
 
     fn update_boss_name() {

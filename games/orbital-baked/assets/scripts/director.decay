@@ -45,6 +45,8 @@ script Director {
     var elapsed: f32 = 0.0;
     var spawn_timer: f32 = 0.0;
     var next_boss: f32 = 60.0;
+    var event_next: f32 = 42.0;
+    var event_left: f32 = 0.0;
     var boss_was_alive: f32 = 0.0;
     var rush_index: f32 = 0.0;
     var boss_count: f32 = 0.0;
@@ -103,6 +105,12 @@ script Director {
         Game.kills_since_repair = 0.0;
         Game.powerups_dropped = 0.0;
         Game.overdrive = 0.0;
+        this.event_next = 42.0;
+        this.event_left = 0.0;
+        Game.event = 0.0;
+        Game.event_shown = 0.0;
+        Game.event_banner = 0.0;
+        apply_event(0.0);
         Game.stats_reset = 1.0;
         Game.player_reset = 1.0;
         Game.modules_reset = 1.0;
@@ -170,6 +178,7 @@ script Director {
         this.elapsed += dt;
         Game.elapsed = this.elapsed;
         publish_sector();
+        update_events(dt);
         if this.elapsed >= this.run_limit {
             this.elapsed = this.run_limit;
             Game.elapsed = this.run_limit;
@@ -268,7 +277,32 @@ script Director {
 
     fn spawn_rate() -> f32 {
         return max(0.085, 0.7 - this.elapsed * 0.00092) /
-               (this.normal_spawn * sector_pressure());
+               (this.normal_spawn * sector_pressure() * Game.event_spawn);
+    }
+
+    // The event clock (see events.decay). A rush is bosses only, so it has
+    // none. `event_shown` is what the banner names: the event while it runs,
+    // and the one that just ended while "EVENT COMPLETE" is up.
+    fn update_events(dt: f32) {
+        if rushing() > 0.0 { return; }
+        Game.event_banner = max(0.0, Game.event_banner - dt);
+        if this.event_left > 0.0 {
+            this.event_left -= dt;
+            if this.event_left <= 0.0 {
+                this.event_left = 0.0;
+                Game.event = 0.0;
+                Game.event_banner = 2.4;
+                apply_event(0.0);
+                this.event_next = this.elapsed + Random.range(38.0, 60.0);
+            }
+        } else if this.elapsed >= this.event_next && this.elapsed < 560.0 {
+            let id = Random.int(1.0, 6.0);
+            Game.event = id;
+            Game.event_shown = id;
+            Game.event_banner = 3.2;
+            this.event_left = event_duration(id);
+            apply_event(id);
+        }
     }
 
     fn sector_pressure() -> f32 {
@@ -355,7 +389,7 @@ script Director {
         let bonus = Game.elite_bonus;
         let chance = min(this.elite_cap,
             this.elite_base + this.elapsed / this.elite_time_divisor +
-            bonus * this.elite_bonus_scale);
+            bonus * this.elite_bonus_scale) + Game.event_elite;
         if Random.value() >= chance { return; }
 
         let trait = Random.int(0.0, 4.0);

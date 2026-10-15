@@ -60,7 +60,7 @@ script Charger {
 
         if this.phase == 0.0 {
             this.heat = 0.0;
-            if far > 0.001 { Physics.set_velocity(this.entity, dx / far * this.approach, dy / far * this.approach); }
+            if far > 0.001 { Physics.set_velocity(this.entity, dx / far * this.approach * Game.event_enemy_speed, dy / far * this.approach * Game.event_enemy_speed); }
             if far < 5.0 && visible { this.phase = 1.0; this.timer = this.wind_up; }
         } else if this.phase == 1.0 {
             Physics.set_velocity(this.entity, 0.0, 0.0);
@@ -80,7 +80,7 @@ script Charger {
             this.body_alpha = 1.0;
             // The dash sheds the heat it built over its first moments.
             this.heat = max(0.0, this.timer / 0.55) * 0.8;
-            Physics.set_velocity(this.entity, this.dash_x * this.dash_speed, this.dash_y * this.dash_speed);
+            Physics.set_velocity(this.entity, this.dash_x * this.dash_speed * Game.event_enemy_speed, this.dash_y * this.dash_speed * Game.event_enemy_speed);
             this.timer -= dt;
             if this.timer <= 0.0 { this.phase = 0.0; this.timer = this.rest; }
         }
@@ -143,7 +143,7 @@ script Charger {
 
     fn die() {
         burst_on_death(); Effects.burst(this.entity); Audio.play("audio/kill.wav", 0.3);
-        Game.kills = Game.kills + 1.0; Game.score = Game.score + 20.0 + this.worth;
+        Game.kills = Game.kills + 1.0; Game.score = Game.score + (20.0 + this.worth) * Game.event_score;
         let drop = World.spawn(this.core); drop.transform.position.x = this.transform.position.x; drop.transform.position.y = this.transform.position.y; World.set_property(drop, "worth", this.worth);
         let roll = World.spawn(this.drop_roll); roll.transform.position.x = this.transform.position.x; roll.transform.position.y = this.transform.position.y; World.set_property(roll, "elite", this.elite);
         World.despawn(this.entity);

@@ -119,8 +119,8 @@ script Drifter {
 
     fn chase(dx: f32, dy: f32, far: f32, scale: f32) {
         if far > 0.001 {
-            Physics.set_velocity(this.entity, dx / far * this.speed * scale,
-                                 dy / far * this.speed * scale);
+            Physics.set_velocity(this.entity, dx / far * this.speed * scale * Game.event_enemy_speed,
+                                 dy / far * this.speed * scale * Game.event_enemy_speed);
         }
     }
 
@@ -128,8 +128,8 @@ script Drifter {
         if far <= 0.001 { return; }
         let tangent = sin(this.clock * 5.0) * 0.42;
         Physics.set_velocity(this.entity,
-            (dx / far - dy / far * tangent) * this.speed * scale,
-            (dy / far + dx / far * tangent) * this.speed * scale);
+            (dx / far - dy / far * tangent) * this.speed * scale * Game.event_enemy_speed,
+            (dy / far + dx / far * tangent) * this.speed * scale * Game.event_enemy_speed);
     }
 
     fn steer_range(dx: f32, dy: f32, far: f32, target: f32, tangent: f32) {
@@ -140,8 +140,8 @@ script Drifter {
         let nx = dx / far;
         let ny = dy / far;
         Physics.set_velocity(this.entity,
-            (nx * radial - ny * tangent) * this.speed,
-            (ny * radial + nx * tangent) * this.speed);
+            (nx * radial - ny * tangent) * this.speed * Game.event_enemy_speed,
+            (ny * radial + nx * tangent) * this.speed * Game.event_enemy_speed);
     }
 
     fn aimed_fire(dt: f32, dx: f32, dy: f32, far: f32, gap: f32, velocity: f32) {
@@ -373,7 +373,7 @@ script Drifter {
         Effects.burst(this.entity);
         Audio.play("audio/kill.wav", 0.3);
         Game.kills = Game.kills + 1.0;
-        Game.score = Game.score + 20.0 + this.worth;
+        Game.score = Game.score + (20.0 + this.worth) * Game.event_score;
         let drop = World.spawn(this.core);
         drop.transform.position.x = this.transform.position.x;
         drop.transform.position.y = this.transform.position.y;
