@@ -101,7 +101,7 @@ fn authored_normals_match_models_under_nonuniform_rotation_and_reflection() {
             transform,
         );
         for kind in [1, 2] {
-            let image = scene.draw(&gpu, kind, Some(material), lighting);
+            let image = scene.draw(&gpu, kind, Some(material), &lighting);
             assert!(
                 pixel(&image, 32)
                     .iter()

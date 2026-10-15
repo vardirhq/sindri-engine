@@ -91,7 +91,7 @@ impl ShadowMap {
 
 pub(crate) fn light_view_projection(
     camera_view_projection: Mat4,
-    lighting: WorldLighting,
+    lighting: &WorldLighting,
     settings: ShadowSettings,
 ) -> Mat4 {
     let inverse = camera_view_projection.inverse();

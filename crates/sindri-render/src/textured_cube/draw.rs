@@ -9,7 +9,7 @@ pub(super) fn encode_mesh_buffers(
     target: (&wgpu::TextureView, &DepthTarget),
     model: Mat4,
     model_view_projection: Mat4,
-    lighting: WorldLighting,
+    lighting: &WorldLighting,
     light_view_projection: Mat4,
     shadows: ShadowSettings,
     ambient_occlusion_strength: f32,

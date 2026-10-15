@@ -1,5 +1,10 @@
 # Changelog
 
+- Add bounded 3D point lighting with range falloff across meshes, voxels and
+  imported models. Lights follow active parent transforms; the editor creates
+  points and shows selected range guides. Point shadows, spotlights and typed
+  Decay light properties remain open.
+
 - Add outward cube normals and optional authored inline/cached mesh normals for
   smooth 3D shading. Normals transform correctly under nonuniform scale and
   reflection; world color and shadow draws preserve mirrored front faces.

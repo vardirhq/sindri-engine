@@ -55,7 +55,7 @@ pub use glyph::{
 pub use light2d::{
     Light2d, Light2dShadow, Lighting2d, MAX_LIGHTS_2D, SHADOW_BINS_2D, shadow_map_2d,
 };
-pub use lighting::WorldLighting;
+pub use lighting::{MAX_POINT_LIGHTS, PointLight, PointLightError, WorldLighting};
 pub use material::{MaterialError, MaterialFactors};
 pub use mesh::{ColoredVertex, MeshBuffers, TexturedVertex};
 pub use mesh_stats::MeshDrawStats;

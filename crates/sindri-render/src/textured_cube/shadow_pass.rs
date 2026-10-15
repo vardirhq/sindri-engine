@@ -10,7 +10,7 @@ impl TexturedCubeRenderer {
         camera_view_projection: Mat4,
     ) {
         self.shadow_view_projection =
-            light_view_projection(camera_view_projection, self.lighting, self.shadow_settings);
+            light_view_projection(camera_view_projection, &self.lighting, self.shadow_settings);
         self.draw_stats.render_passes += 1;
         let _pass = encoder.begin_render_pass(&wgpu::RenderPassDescriptor {
             label: Some("Sindri directional shadow clear"),

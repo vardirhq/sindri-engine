@@ -9,6 +9,10 @@ import { imageStatistics } from './png.mjs';
 const root = resolve(process.argv[2]);
 const shot = process.argv[3];
 const base = process.env.SINDRI_BASE_PATH || '/';
+const minColors = Number(process.env.SINDRI_MIN_COLORS ?? 8);
+if (!Number.isInteger(minColors) || minColors <= 0) {
+  throw new Error('SINDRI_MIN_COLORS must be a positive integer');
+}
 const types = { '.html': 'text/html', '.js': 'text/javascript', '.wasm': 'application/wasm', '.json': 'application/json' };
 const fetched = new Set();
 const server = createServer(async (request, response) => {
@@ -46,7 +50,7 @@ try {
   await waitFor('3D benchmark loaded');
   await waitFor('3D benchmark ready');
   const pixels = await page.screenshot(shot ? { path: shot } : {});
-  assert(imageStatistics(pixels).colors >= 8, 'the lab renders several scene colors');
+  assert(imageStatistics(pixels).colors >= minColors, 'the lab renders several scene colors');
   const assets = process.env.SINDRI_MODEL_CASTER
     ? ['benchmark.scene', 'benchmark.decay', 'caster.glb', 'prop.glb']
     : process.env.SINDRI_MODEL_RECEIVER

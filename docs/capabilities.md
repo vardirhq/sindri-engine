@@ -3429,3 +3429,17 @@ during Play, invalid-reload last-valid retention, prop goal and Stop restoration
 See the [review](model-collision-editor-review.md#shared-3d-physics-profiles).
 Native visual evidence uses isolated X11/software Vulkan; broader coverage and
 Explorer game proof remain open.
+
+
+## Bounded 3D point-light foundation
+
+`sindri.light` now supports point lights with world-unit range. The strongest
+eight active points shade primitive, inline/cached/voxel and imported geometry
+through shared Lambert/GGX point lighting. Positions follow composed live
+transforms and inactive ancestors suppress the light. Editor creation uses one
+checked transaction and selected world-range circles; studio lighting omits
+authored points. Native/browser feature controls and GPU/scene regressions are
+described in [the 3D light contract](3d-lights.md). This is Explorer feature
+proof, with no in-tree game adoption yet; spotlights, point shadows and typed
+Decay light properties are absent. The fixed uniform cost is 256 additional
+bytes per color draw; shared buffers and spatial light assignment remain open.

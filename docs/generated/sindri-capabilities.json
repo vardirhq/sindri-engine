@@ -586,7 +586,8 @@
           0.8600000143051147
         ],
         "intensity": 1.0,
-        "kind": "directional"
+        "kind": "directional",
+        "range": 8.0
       },
       "display_name": "Light",
       "fields": {
@@ -596,7 +597,8 @@
           0.8600000143051147
         ],
         "intensity": 1.0,
-        "kind": "directional"
+        "kind": "directional",
+        "range": 8.0
       },
       "meanings": {
         "color": {
@@ -610,8 +612,14 @@
         "kind": {
           "kind": "choice",
           "options": [
-            "directional"
+            "directional",
+            "point"
           ]
+        },
+        "range": {
+          "kind": "range",
+          "max": null,
+          "min": 0.001
         }
       },
       "schema_version": 1,

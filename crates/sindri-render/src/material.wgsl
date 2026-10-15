@@ -1,5 +1,38 @@
+struct PointLight {
+    position_range: vec4<f32>,
+    color_intensity: vec4<f32>,
+}
+
 fn safe_normalize(v: vec3<f32>) -> vec3<f32> {
     return v * inverseSqrt(max(dot(v, v), 0.0000001));
+}
+
+// Finite center, inverse-square falloff beyond one world unit, and a smooth
+// zero at range. Local lights are independent of the directional shadow map.
+fn point_lighting(lights: array<PointLight, 8>, base: vec3<f32>, normal: vec3<f32>,
+                  position: vec3<f32>, view: vec3<f32>, metallic: f32,
+                  roughness: f32, standard: bool) -> vec3<f32> {
+    var color = vec3<f32>(0.0);
+    for (var i = 0u; i < 8u; i += 1u) {
+        let light = lights[i];
+        let delta = light.position_range.xyz - position;
+        let distance_squared = dot(delta, delta);
+        let range = light.position_range.w;
+        if light.color_intensity.w > 0.0 && range > 0.0 && distance_squared < range * range {
+            let relative = sqrt(distance_squared) / range;
+            let window = 1.0 - relative * relative;
+            let radiance = light.color_intensity.rgb * light.color_intensity.w
+                * window * window / max(distance_squared, 1.0);
+            let direction = safe_normalize(delta);
+            if standard {
+                color += standard_lighting(base, normal, direction, view, metallic,
+                    roughness, vec3<f32>(0.0), radiance);
+            } else {
+                color += base * radiance * max(dot(normal, direction), 0.0);
+            }
+        }
+    }
+    return color;
 }
 // Direct GGX plus the shared ambient approximation; no environment map.
 fn standard_lighting(base: vec3<f32>, n: vec3<f32>, l: vec3<f32>, view: vec3<f32>,

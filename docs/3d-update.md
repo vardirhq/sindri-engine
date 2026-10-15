@@ -237,6 +237,10 @@ cameras face), YXZ order. Build on `Transform3D::yaw_pitch_roll_radians` and
 - [ ] A sorted, blended transparent 3D pass.
 
 ### 4. Lights
+- [x] Point-light foundation: strongest-eight shared forward set, world-space
+  range falloff across world/imported geometry, composed parent positions,
+  editor creation/range guides, strict/tolerant validation and native/browser
+  controls. See `3d-lights.md`; game proof, spots and local shadows remain open.
 - [ ] `sindri.light` gains point and spot lights (range, cone), a bounded
   forward set per frame (for example 8, nearest/most intense first), lit on
   every geometry kind.

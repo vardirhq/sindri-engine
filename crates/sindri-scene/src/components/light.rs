@@ -16,9 +16,7 @@ use crate::extract::safe_rotation;
 
 /// What kind of light an entity is.
 ///
-/// Only the sun for now. Point and spot lights will be further kinds of this
-/// one component rather than components of their own, so an entity switches
-/// between them by a choice, as a camera switches projection.
+/// An entity switches kinds by a choice, as a camera switches projection.
 #[derive(Clone, Copy, Debug, Default, Eq, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum LightKind {
@@ -27,20 +25,24 @@ pub enum LightKind {
     /// it.
     #[default]
     Directional,
+    /// Light from a world-space position, fading to zero at its range.
+    Point,
 }
 
 impl LightKind {
     /// Every spelling, in the order a picker offers them.
-    pub const NAMES: [&'static str; 1] = ["directional"];
+    pub const NAMES: [&'static str; 2] = ["directional", "point"];
 }
 
-/// A light, shining along its entity's forward axis.
+/// A directional or point light. Only directionals use the entity's forward axis.
 #[derive(Clone, Copy, Debug, PartialEq, Serialize, Deserialize)]
 #[serde(default, deny_unknown_fields)]
 pub struct LightComponent {
     pub kind: LightKind,
     pub color: [f32; 3],
     pub intensity: f32,
+    /// Point-light reach in world units, independent of entity scale.
+    pub range: f32,
 }
 
 impl SceneComponent for LightComponent {
@@ -53,6 +55,7 @@ impl Default for LightComponent {
             kind: LightKind::Directional,
             color: [1.0, 0.95, 0.86],
             intensity: 1.0,
+            range: 8.0,
         }
     }
 }
@@ -60,6 +63,8 @@ impl Default for LightComponent {
 /// Why a light was refused.
 #[derive(Clone, Copy, Debug, Eq, PartialEq, thiserror::Error)]
 pub enum LightError {
+    #[error(transparent)]
+    Point(#[from] sindri_render::PointLightError),
     #[error("the light payload does not match the authored schema")]
     InvalidPayload,
     #[error("light `{field}` {expected}")]
@@ -84,7 +89,27 @@ impl LightComponent {
                 expected: "must be a finite number of at least 0",
             });
         }
+        if !self.range.is_finite() || self.range <= 0.0 {
+            return Err(LightError::Field {
+                field: "range",
+                expected: "must be finite and greater than zero",
+            });
+        }
+        if self.kind == LightKind::Point {
+            self.point_at([0.0; 3]).validate()?;
+        }
         Ok(self)
+    }
+
+    /// Resolves the renderer value after the scene has composed the position.
+    #[must_use]
+    pub(crate) fn point_at(self, position: [f32; 3]) -> sindri_render::PointLight {
+        sindri_render::PointLight {
+            position,
+            color: self.color,
+            intensity: self.intensity,
+            range: self.range,
+        }
     }
 }
 
@@ -146,10 +171,9 @@ pub fn lights_in(world: &World) -> Vec<(EntityId, Result<LightComponent, LightEr
 /// An entity switched off, or under one that is, does not light anything.
 #[must_use]
 pub fn sun_in(world: &World, light: LightComponent, entity: EntityId) -> Option<Sun> {
-    if !world.is_active(entity) {
+    if !world.is_active(entity) || light.kind != LightKind::Directional {
         return None;
     }
-    let LightKind::Directional = light.kind;
     world.get(entity)?;
     let transform = world.world_transform(entity).unwrap_or_default();
     Some(Sun {

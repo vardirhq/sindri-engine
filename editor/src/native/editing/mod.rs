@@ -19,6 +19,7 @@ use crate::space::space_of;
 
 pub(super) mod choosing;
 pub(super) mod clipboard;
+mod create;
 pub(super) mod duplicate;
 mod structure;
 
@@ -26,7 +27,6 @@ use duplicate::duplicate_into;
 
 use super::hierarchy::row::entity_name;
 use super::hierarchy::rows::{hierarchy_preference_key, hierarchy_rows};
-use super::inspector_panel::draft::{ProjectDefaults, component_default};
 use super::runtime::initialized_lifecycle;
 use super::scene_io::load_world;
 use super::{EditorApp, UI_IMAGE_COMPONENT};
@@ -41,6 +41,7 @@ pub(super) enum CreateGameObject {
     Empty { parent: Option<EntityId> },
     UiImage,
     DirectionalLight,
+    PointLight,
     Light2d,
 }
 
@@ -118,6 +119,7 @@ impl EditorApp {
             CreateGameObject::UiImage => {
                 self.create_carrying(UI_IMAGE_COMPONENT, "UI Image", Transform3D::default());
             }
+            CreateGameObject::PointLight => self.create_point_light(),
             CreateGameObject::DirectionalLight => self.create_carrying(
                 LightComponent::TYPE_NAME,
                 "Directional Light",
@@ -129,43 +131,6 @@ impl EditorApp {
                 Transform3D::default(),
             ),
         }
-    }
-
-    /// Creates an entity carrying one component at its registered blank, and
-    /// selects it.
-    ///
-    /// A UI image arrives carrying `sindri.ui.image`, which is what puts it in
-    /// the UI group and what makes it visible: an empty entity called "UI
-    /// something" would be in neither space and would draw nothing. A
-    /// directional light arrives aimed down and across the world, so the first
-    /// thing it does is light it.
-    fn create_carrying(&mut self, type_name: &str, name: &str, transform: Transform3D) {
-        let Some(payload) = component_default(
-            self.scene.components(),
-            type_name,
-            ProjectDefaults::default(),
-        ) else {
-            return;
-        };
-        let entity = self.world.next_handle();
-        let mut buffer = CommandBuffer::new();
-        buffer.push(WorldCommand::Spawn {
-            entity,
-            data: Box::new(EntityData {
-                source_id: Some(next_game_object_id(&self.world)),
-                name: Some(name.to_owned()),
-                transform_3d: Some(transform),
-                components: [(type_name.to_owned(), payload)].into_iter().collect(),
-                ..EntityData::default()
-            }),
-        });
-        self.break_merge_runs();
-        if let Err(error) = self.apply_edit(buffer.into_transaction(format!("Create {name}"))) {
-            self.report(error.to_string());
-            return;
-        }
-        self.select(Some(entity));
-        self.refresh_textures();
     }
 
     /// Creates an empty `GameObject`, optionally under another, and selects it.

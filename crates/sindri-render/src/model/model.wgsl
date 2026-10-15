@@ -15,6 +15,7 @@ struct Uniforms {
     fog_color: vec4<f32>,
     fog_params: vec4<f32>,
     emissive: vec4<f32>,
+    point_lights: array<PointLight, 8>,
 }
 @group(0) @binding(0) var<uniform> u: Uniforms;
 @group(0) @binding(1) var color_texture: texture_2d<f32>;
@@ -45,6 +46,8 @@ struct Vertex {
     let nl = max(dot(n, l), 0.0);
     let shadow_visibility = directional_visibility(v.position, u.light_view_projection, u.shadow, nl);
     let color = standard_lighting(base.rgb, n, l, view, u.surface.x, u.surface.y,
-        u.ambient.rgb, u.light.rgb * shadow_visibility) + u.emissive.rgb;
+        u.ambient.rgb, u.light.rgb * shadow_visibility) + u.emissive.rgb
+        + point_lighting(u.point_lights, base.rgb, n, v.position, view,
+            u.surface.x, u.surface.y, true);
     return vec4(atmosphere(color, v.position, u.eye, u.fog_color, u.fog_params), 1.0);
 }

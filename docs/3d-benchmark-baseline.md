@@ -300,3 +300,15 @@ Low Tide on a phone viewport. Smooth/flat captures retain 1,449 native and
 1,451 browser changed pixels. CI retains the shader/mask smokes; the shader's
 deliberately small palette uses an explicit eight-color minimum, with the
 generic smoke's default remaining sixteen.
+
+## Point-light uniforms
+
+The bounded point-light foundation appends eight 32-byte records to every 3D
+color uniform, including empty sets. Textured/model color payloads are now
+624/672 bytes. Fixed workload totals rise to 215,088/192,624 uniform bytes with
+shadows on/off; draws, passes, writes, transient geometry pairs and settled
+geometry uploads remain unchanged. Three consecutive standalone and editor
+Game frames verify those totals with required nonzero GPU timings. This adds
+lighting capability rather than meeting a performance target; shared light
+buffers and spatial assignment remain open. See [the light contract and
+native/browser/editor evidence](3d-lights.md).

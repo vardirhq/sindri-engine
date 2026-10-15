@@ -184,7 +184,7 @@ fn check_draws(stats: sindri_render::MeshDrawStats) {
     );
     assert_eq!(stats.render_passes, 4);
     assert_eq!(stats.uniform_writes, 4);
-    assert_eq!(stats.uniform_bytes, 4 * 416);
+    assert_eq!(stats.uniform_bytes, 4 * 672);
     assert_eq!(stats.transient_geometry_uploads, 0);
     assert_eq!(stats.since(stats), sindri_render::MeshDrawStats::default());
 }

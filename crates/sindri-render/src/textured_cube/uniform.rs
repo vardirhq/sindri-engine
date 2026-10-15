@@ -20,13 +20,14 @@ pub(super) struct CubeUniform {
     pub base_color: [f32; 4],
     pub material: [f32; 4],
     pub emissive: [f32; 4],
+    pub point_lights: [crate::lighting::PointLightUniform; crate::MAX_POINT_LIGHTS],
 }
 
 #[allow(clippy::too_many_arguments, clippy::too_many_lines)]
 pub(super) fn cube_uniform(
     model: Mat4,
     model_view_projection: Mat4,
-    lighting: WorldLighting,
+    lighting: &WorldLighting,
     light_view_projection: Mat4,
     shadows: ShadowSettings,
     ambient_occlusion_strength: f32,
@@ -38,6 +39,7 @@ pub(super) fn cube_uniform(
     let enabled = material.is_some();
     let material = material.unwrap_or_default();
     CubeUniform {
+        point_lights: lighting.point_uniforms(),
         model_view_projection: model_view_projection.to_cols_array_2d(),
         model: model.to_cols_array_2d(),
         ambient: [

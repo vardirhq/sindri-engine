@@ -15,6 +15,7 @@ mod models;
 mod nine_slice;
 mod normals;
 mod passes;
+mod points;
 mod sprite_masks;
 mod sprite_shaders;
 mod sprites;

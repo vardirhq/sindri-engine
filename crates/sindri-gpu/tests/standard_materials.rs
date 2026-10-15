@@ -14,6 +14,8 @@ use std::sync::Arc;
 
 #[path = "standard_materials/normals.rs"]
 mod normals;
+#[path = "standard_materials/points.rs"]
+mod points;
 
 struct Scene {
     cube: TexturedCubeRenderer,
@@ -112,9 +114,9 @@ impl Scene {
         gpu: &GpuContext,
         kind: usize,
         material: Option<MaterialFactors>,
-        lighting: WorldLighting,
+        lighting: &WorldLighting,
     ) -> Vec<u8> {
-        self.cube.set_lighting(lighting);
+        self.cube.set_lighting(*lighting);
         let mut frame =
             ExtractedFrame::new(self.frames[kind].viewport(), self.frames[kind].clear());
         for mut pass in self.frames[kind].passes().iter().cloned() {
@@ -188,7 +190,7 @@ fn cubes_inline_cached_and_imported_geometry_share_standard_factors() {
             ..Default::default()
         };
         for kind in 0..3 {
-            let image = scene.draw(&gpu, kind, Some(factors), lighting);
+            let image = scene.draw(&gpu, kind, Some(factors), &lighting);
             assert!(
                 pixel(&image, 32)
                     .iter()
@@ -255,7 +257,7 @@ fn check_emission_and_restore(scene: &mut Scene, gpu: &GpuContext) {
                 emissive: [0.2, 0.4, 0.1],
                 ..Default::default()
             }),
-            WorldLighting {
+            &WorldLighting {
                 ambient_intensity: 0.0,
                 directional_intensity: 0.0,
                 ..Default::default()
@@ -271,7 +273,7 @@ fn check_emission_and_restore(scene: &mut Scene, gpu: &GpuContext) {
                 pixel(&image, x)
             );
         }
-        let image = scene.draw(gpu, kind, None, WorldLighting::default());
+        let image = scene.draw(gpu, kind, None, &WorldLighting::default());
         assert_eq!(
             pixel(&image, 32),
             &[255; 4],
@@ -307,7 +309,7 @@ fn imported_emission_survives_overrides_and_needs_no_world_light() {
         directional_intensity: 0.0,
         ..Default::default()
     };
-    let original = scene.draw(&gpu, 0, None, lighting);
+    let original = scene.draw(&gpu, 0, None, &lighting);
     assert!(
         pixel(&original, 95)
             .iter()
@@ -315,9 +317,9 @@ fn imported_emission_survives_overrides_and_needs_no_world_light() {
             .all(|(a, b)| a.abs_diff(b) <= 2)
     );
     assert_eq!(pixel(&original, 32), &[0, 0, 0, 255]);
-    let overridden = scene.draw(&gpu, 0, Some(MaterialFactors::default()), lighting);
+    let overridden = scene.draw(&gpu, 0, Some(MaterialFactors::default()), &lighting);
     assert_eq!(pixel(&overridden, 95), &[0, 0, 0, 255]);
-    let restored = scene.draw(&gpu, 0, None, lighting);
+    let restored = scene.draw(&gpu, 0, None, &lighting);
     assert_eq!(original, restored);
     assert_eq!(scene.cube.model_cache_stats().uploads, 1);
 }
