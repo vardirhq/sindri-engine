@@ -15,6 +15,7 @@
 
 mod character;
 mod character3d;
+mod environment;
 mod game;
 mod input;
 mod physics;
@@ -138,6 +139,10 @@ pub const THIS: &[Entry] = &[
         "The object in the game this script is attached to. Pass it to calls that act on an object, such as `World.despawn(this.entity)`.",
     ),
     value(
+        "environment",
+        "The scene environment on this object, if authored: ambient intensity/color and background with checked runtime writes.",
+    ),
+    value(
         "light",
         "The 3D light on this object: checked color, intensity, range, cone angles and independent enabled state.",
     ),
@@ -170,6 +175,7 @@ pub const THIS: &[Entry] = &[
 /// Every host type, and each of its members.
 pub const TYPES: &[&[TypeEntry]] = &[
     world::TYPES,
+    environment::TYPES,
     game::TYPES,
     input::TYPES,
     tween::TYPES,

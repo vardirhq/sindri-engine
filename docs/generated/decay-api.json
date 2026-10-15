@@ -404,6 +404,13 @@
       "type": "Entity"
     },
     {
+      "description": "The scene environment on this object, if authored: ambient intensity/color and background with checked runtime writes.",
+      "kind": "value",
+      "name": "environment",
+      "read_only": false,
+      "type": "SceneEnvironment"
+    },
+    {
       "description": "The 3D light on this object: checked color, intensity, range, cone angles and independent enabled state.",
       "kind": "value",
       "name": "light",
@@ -1503,6 +1510,13 @@
     {
       "description": "An object in the game, such as a player, an enemy or a button. Scripts get these from calls like `World.find` and can store them, compare them and change their transform, sprite or shape.",
       "members": [
+        {
+          "description": "The authored scene environment on this object, if present.",
+          "kind": "value",
+          "name": "environment",
+          "read_only": false,
+          "type": "SceneEnvironment"
+        },
         {
           "description": "The object's 3D light, if it has one.",
           "kind": "value",
@@ -3921,6 +3935,33 @@
         }
       ],
       "name": "Scene"
+    },
+    {
+      "description": "The existing authored scene environment on an entity. Changes affect the next extracted frame without restarting. Missing components and stale entities are runtime errors; writes validate the full payload atomically. Fog and post-processing controls are not exposed here.",
+      "members": [
+        {
+          "description": "Ambient RGB as a Color with alpha one. Whole and channel writes are checked; alpha must remain one. RGB follows the authored environment contract: finite f32 values.",
+          "kind": "value",
+          "name": "ambient_color",
+          "read_only": false,
+          "type": "Color"
+        },
+        {
+          "description": "Finite nonnegative ambient strength. Fractional writes preserve their value even when the authored JSON number was an integer.",
+          "kind": "value",
+          "name": "ambient_intensity",
+          "read_only": false,
+          "type": "f32"
+        },
+        {
+          "description": "The scene clear color as RGBA Color. Whole and channel writes retain finite f32 values, including authored alpha. Failed writes preserve the old payload.",
+          "kind": "value",
+          "name": "background",
+          "read_only": false,
+          "type": "Color"
+        }
+      ],
+      "name": "SceneEnvironment"
     },
     {
       "description": "Playing an object's sequences: choreography set up for it in the scene's Timeline, such as a title sliding in or a door opening, with named cues along the way.",

@@ -18,6 +18,7 @@ The machine-readable form of this page is
 What the entity a script runs on offers, beyond the script's own fields.
 
 - `entity`: `Entity` — The object in the game this script is attached to. Pass it to calls that act on an object, such as `World.despawn(this.entity)`.
+- `environment`: `SceneEnvironment` — The scene environment on this object, if authored: ambient intensity/color and background with checked runtime writes.
 - `light`: `Light` — The 3D light on this object: checked color, intensity, range, cone angles and independent enabled state.
 - `light2d`: `Light2d` — The 2D light on this script's object, if it has one: its color, brightness and reach.
 - `shape`: `Shape` — The drawn shape on this script's object, if it has one: its colors, outline and how much of it is drawn.
@@ -281,6 +282,7 @@ Particle effects, such as sparks and explosions. The particles are only drawn; t
 
 An object in the game, such as a player, an enemy or a button. Scripts get these from calls like `World.find` and can store them, compare them and change their transform, sprite or shape.
 
+- `environment`: `SceneEnvironment` — The authored scene environment on this object, if present.
 - `light`: `Light` — The object's 3D light, if it has one.
 - `light2d`: `Light2d` — The object's 2D light, if it has one.
 - `shape`: `Shape` — The object's drawn shape, if it has one.
@@ -571,6 +573,14 @@ Scenes are a game's separate places or screens, such as a menu, a level or a sho
 
 - `current()` → `String` — The name of the scene being played.
 - `go(name: String)` → `unit` — Moves to another scene by name, at the end of this frame.
+
+### `SceneEnvironment`
+
+The existing authored scene environment on an entity. Changes affect the next extracted frame without restarting. Missing components and stale entities are runtime errors; writes validate the full payload atomically. Fog and post-processing controls are not exposed here.
+
+- `ambient_color`: `Color` — Ambient RGB as a Color with alpha one. Whole and channel writes are checked; alpha must remain one. RGB follows the authored environment contract: finite f32 values.
+- `ambient_intensity`: `f32` — Finite nonnegative ambient strength. Fractional writes preserve their value even when the authored JSON number was an integer.
+- `background`: `Color` — The scene clear color as RGBA Color. Whole and channel writes retain finite f32 values, including authored alpha. Failed writes preserve the old payload.
 
 ### `Sequence`
 

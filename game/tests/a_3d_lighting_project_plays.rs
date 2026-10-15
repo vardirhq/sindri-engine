@@ -56,6 +56,16 @@ fn check_geometry(player: &ProjectPlayer) {
         }
     }
     assert_eq!(counts, [4, 1, 2]);
+    let environment = player.scene.environment(&player.world).unwrap().unwrap();
+    assert!((environment.ambient_intensity - 0.025).abs() < 1e-6);
+    assert_close(environment.ambient_color.map(f64::from), [1.0; 3]);
+    assert_close(
+        environment.background.map(f64::from),
+        sindri_scene::EnvironmentComponent::default()
+            .background
+            .map(f64::from),
+    );
+    assert_close(frame.clear().color, environment.background.map(f64::from));
 }
 
 #[test]
@@ -80,6 +90,7 @@ fn lighting_lab_alternates_composed_lights_and_reaches_both_control_goals() {
         for i in 0..240 {
             ready |= step(player);
             if i == 5 || i == 85 {
+                check_environment(player, i == 85);
                 let lights = player.scene.lighting(&player.world).unwrap();
                 let locals: Vec<_> = lights.local_lights.iter().flatten().collect();
                 assert_eq!(locals.len(), 1);
@@ -138,4 +149,41 @@ fn lighting_lab_alternates_composed_lights_and_reaches_both_control_goals() {
         }
         assert_eq!(player.world.world_transform(rig).unwrap(), settled);
     }
+}
+
+fn check_environment(player: &ProjectPlayer, warm: bool) {
+    use sindri_render::Viewport;
+    use sindri_scene::{CameraView, TextureBindings};
+    let environment = player.scene.environment(&player.world).unwrap().unwrap();
+    let lighting = player.scene.lighting(&player.world).unwrap();
+    let expected = if warm {
+        [1.0, 0.25, 0.1]
+    } else {
+        [0.1, 0.2, 1.0]
+    };
+    assert_close(environment.ambient_color.map(f64::from), expected);
+    assert_close(lighting.ambient_color.map(f64::from), expected);
+    let intensity = if warm { 0.3 } else { 0.15 };
+    assert!((lighting.ambient_intensity - intensity).abs() < 1e-6);
+    let frame = player
+        .scene
+        .extract(
+            &player.world,
+            Viewport::new(960, 540),
+            CameraView::default(),
+            &TextureBindings::new(),
+        )
+        .unwrap();
+    assert_close(frame.clear().color, environment.background.map(f64::from));
+    assert!((environment.background[0] - if warm { 0.12 } else { 0.015 }).abs() < 1e-6);
+}
+
+fn assert_close<const N: usize>(actual: [f64; N], expected: [f64; N]) {
+    assert!(
+        actual
+            .into_iter()
+            .zip(expected)
+            .all(|(a, b)| (a - b).abs() < 1e-6),
+        "{actual:?} != {expected:?}"
+    );
 }

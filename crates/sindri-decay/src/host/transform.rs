@@ -115,7 +115,10 @@ impl WorldHost<'_> {
             Leaf::TransformScalar(scalar) => {
                 scalar.set(&mut transform, as_f32(number));
             }
-            Leaf::Component { .. } | Leaf::TransformRotation(_) | Leaf::Light(_) => {
+            Leaf::Component { .. }
+            | Leaf::TransformRotation(_)
+            | Leaf::Light(_)
+            | Leaf::Environment(_) => {
                 unreachable!("matched above")
             }
         }

@@ -1,5 +1,9 @@
 # Changelog
 
+- Change scene ambient intensity/color and background from typed Decay
+  environment properties. Writes validate atomically and appear in the next
+  frame; Lighting Lab now switches cool/warm ambient fill and sky during play.
+
 - Drive 3D lights from Decay through typed color, intensity, range, cone angles
   and enabled state. Invalid writes retain the previous settings; switching a
   light off leaves its entity and script active. The new 3D Lighting Lab animates

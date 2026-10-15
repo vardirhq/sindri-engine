@@ -3475,5 +3475,21 @@ its checked script animates parented points/spots and the sun, reaches lit/dark
 Session goals and exercises cube, inline and imported geometry. Completion,
 hover, generated docs and typed batch checks share the same metadata. Native,
 real WebGPU and editor Play controls are recorded in `3d-lights.md`. In-tree
-game adoption, local shadows and runtime environment/day-night control remain
+game adoption, local shadows and a full day/night clock remain
 open; no new uniform or pass cost is introduced.
+
+
+### Live ambient and background controls
+
+Typed `this.environment` / `entity.environment` address an existing authored
+environment. Ambient intensity, RGB Color and RGBA background reads honor
+defaults; writes validate the full payload before mutation and preserve unrelated
+settings. Whole Color writes are atomic, fractional numbers stay fractional,
+ambient alpha stays one, and stale/missing targets are runtime errors.
+Lighting Lab extends its first two phases with cool/warm ambient and clear-color
+changes, restoring original settings at the ready goal. Shared Session tests
+observe the resulting lighting and frame clear; native/browser captures and
+editor Play exercise rendering. This is feature proof for Explorer/Low Tide 3D's
+planned lighting track, with in-tree game adoption, day/night clock and fog/post
+controls open. No renderer layout, resource lifetime or dependency changes.
+See `runtime-environment.md` for the contract and validation evidence.

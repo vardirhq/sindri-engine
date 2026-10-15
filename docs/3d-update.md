@@ -258,9 +258,9 @@ cameras face), YXZ order. Build on `Transform3D::yaw_pitch_roll_radians` and
   Decay can change their properties, and imported GLB geometry is lit through
   the unified renderer in native, browser and editor Play.
 
-### 4b. Runtime environment controls and day/night proof (future work)
+### 4b. Runtime environment controls and day/night proof
 
-Scheduled only; do not start this example before its dependencies are ready.
+The day/night example follows its runtime dependencies below.
 Implementation order within the lighting track is unified 3D materials and
 lighting (3), imported-model shadow casting/receiving (3), runtime Decay light
 access (4), point/spot lights (4), runtime environment access, then the example
@@ -273,13 +273,16 @@ dependency. Time progression, sunrise/sunset transitions and gameplay
 consequences belong to game Decay scripts. There is no engine day/night API,
 second lighting path or Low Tide gameplay in Rust.
 
-- [ ] Expose scene environment properties to Decay: ambient intensity,
-  ambient color (already supported by the authored renderer contract), and
-  background/clear color. Expose fog color, density and distance once unified
-  fog is ready; existing textured/voxel fog does not yet cover imported models.
-- [ ] Apply runtime environment edits without restarting the scene or
-  unnecessarily rebuilding render resources. Share the authored environment
-  and unified material/lighting/shadow path across all hosts.
+- [x] Typed scene environment ambient intensity/color and background/clear
+  color, with default-aware reads and atomic checked whole/channel writes.
+  Lighting Lab exercises the live cool/warm phases through Session and native,
+  browser and editor Play; see `runtime-environment.md`.
+- [ ] Expose fog color, density and distance once shipped-host fog delivery is
+  unified; imported-model fog shading has GPU proof, but project hosts still
+  omit authored fog.
+- [x] Apply ambient/background edits on the next extraction without restarting
+  or rebuilding render resources, using the authored environment and existing
+  shared lighting/clear path. Fog/post controls remain separate.
 - [ ] Add a small, self-contained feature example with a configurable Decay
   game clock, sunrise, midday, sunset and night; a rotating directional sun;
   smooth sun brightness/color, ambient and background transitions; and night

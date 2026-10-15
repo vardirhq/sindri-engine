@@ -98,6 +98,10 @@ pub(super) const TYPES: &[TypeEntry] = &[
         name: "Entity",
         text: "An object in the game, such as a player, an enemy or a button. Scripts get these from calls like `World.find` and can store them, compare them and change their transform, sprite or shape.",
         members: &[
+            value(
+                "environment",
+                "The authored scene environment on this object, if present.",
+            ),
             value("light", "The object's 3D light, if it has one."),
             value("light2d", "The object's 2D light, if it has one."),
             value("shape", "The object's drawn shape, if it has one."),

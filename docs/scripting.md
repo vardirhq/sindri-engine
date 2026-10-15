@@ -277,6 +277,10 @@ stored, and an integer rounds.
 
 | `this.sprite.layer` | `f32` | yes | yes |
 | `this.sprite.shader_params.{x,y,z,w}` | `f32` | yes | yes |
+| `this.environment.ambient_intensity` | `f32` | yes | yes |
+| `this.environment.{ambient_color,background}` | `Color` | yes | yes |
+| `this.environment.ambient_color.{r,g,b,a}` | `f32` | yes | yes |
+| `this.environment.background.{r,g,b,a}` | `f32` | yes | yes |
 | `this.light.color` | `Color` | yes | yes |
 | `this.light.color.{r,g,b,a}` | `f32` | yes | yes |
 | `this.light.{intensity,range,inner_angle,outer_angle}` | `f32` | yes | yes |
@@ -379,6 +383,10 @@ table above lists, reaching the same numbers.
 | `this.entity.sprite.color_offset.{r,g,b,a}` | `f32` | yes | yes |
 | `this.entity.sprite.layer` | `f32` | yes | yes |
 | `this.entity.sprite.shader_params.{x,y,z,w}` | `f32` | yes | yes |
+| `this.entity.environment.ambient_intensity` | `f32` | yes | yes |
+| `this.entity.environment.{ambient_color,background}` | `Color` | yes | yes |
+| `this.entity.environment.ambient_color.{r,g,b,a}` | `f32` | yes | yes |
+| `this.entity.environment.background.{r,g,b,a}` | `f32` | yes | yes |
 | `this.entity.light.color` | `Color` | yes | yes |
 | `this.entity.light.color.{r,g,b,a}` | `f32` | yes | yes |
 | `this.entity.light.{intensity,range,inner_angle,outer_angle}` | `f32` | yes | yes |
@@ -3152,3 +3160,27 @@ state: its script keeps ticking and can turn its light back on. Inactive parents
 still suppress lighting. Scene extraction observes light and transform writes
 after the shared Session script step; directional shadows use that same updated
 sun. `examples/lighting3d` is feature proof; in-tree game adoption remains open.
+
+
+## Live scene environment properties
+
+`this.environment` and `entity.environment` address an existing
+`sindri.environment`, using the same ownership rules as `entity.light`.
+`ambient_intensity` is finite and nonnegative. `ambient_color` is a Color over
+the authored RGB with alpha one; assignments must keep that alpha. `background`
+is an RGBA Color, including its alpha. Whole colors and channels are writable.
+Color channels retain the existing authored contract: finite f32 values; they
+are not clamped to the unit interval. Fractional numbers stay fractional even
+when the original JSON number was an integer.
+
+Every write checks the full candidate before committing, preserving omitted
+defaults, untouched channels and unrelated environment settings. Failed writes,
+including non-finite values, overflow, invalid ambient alpha and invalid
+preexisting settings, leave the payload unchanged. Missing components and stale
+references are runtime errors; access never creates or selects an environment.
+Scene extraction still selects the active environment and rejects multiple
+active environments. Writes to inactive environments affect them when activated.
+The next extraction reads ambient lighting and clear color from the same world,
+without a restart or render-resource rebuild. Lighting Lab is the native/browser/
+editor feature proof; day/night clock, fog/post controls and game adoption remain
+separate work.

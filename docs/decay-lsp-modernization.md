@@ -46,6 +46,9 @@ language model.
 - [x] Exercise 3D light completion/hover and typed checking through the shared
   host surface, including boolean enabled state, numeric intensity and Color.
 
+- [x] Exercise scene-environment Color and numeric completion/hover and typed
+  diagnostics from the same host surface as runtime and generated references.
+
 ## P0 — correctness and drift
 
 These are defects or sources of actively misleading tooling.

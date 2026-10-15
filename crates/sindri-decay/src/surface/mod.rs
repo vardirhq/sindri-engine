@@ -21,6 +21,7 @@ mod call;
 pub(crate) mod character;
 pub(crate) mod character3d;
 pub(crate) mod contact;
+pub(crate) mod environment;
 mod gamepad;
 pub(crate) mod light;
 mod light2d;
@@ -109,6 +110,7 @@ pub(crate) enum Leaf {
     /// One component of the stored parent-relative quaternion.
     TransformRotation(usize),
     Light(light::LightField),
+    Environment(environment::EnvironmentField),
     /// A number inside a component's stored JSON payload.
     ///
     /// Reached by pointer rather than through the typed view, because a
@@ -218,6 +220,10 @@ pub(crate) const THIS: &[(&str, Node)] = &[
     ("sprite", Node::Group(SPRITE, SPRITE_MEMBERS)),
     ("ui_image", Node::Group(UI_IMAGE, UI_IMAGE_MEMBERS)),
     ("shape", Node::Group(SHAPE, SHAPE_MEMBERS)),
+    (
+        "environment",
+        Node::Group(environment::ENVIRONMENT, environment::MEMBERS),
+    ),
     ("light", Node::Group(light::LIGHT, light::MEMBERS)),
     ("light2d", Node::Group(LIGHT_2D, LIGHT_2D_MEMBERS)),
     ("world_text", Node::Group(TEXT, TEXT_MEMBERS)),
@@ -235,6 +241,10 @@ pub(crate) const THROUGH_REFERENCE: &[(&str, Node)] = &[
     ("sprite", Node::Group(SPRITE, SPRITE_MEMBERS)),
     ("ui_image", Node::Group(UI_IMAGE, UI_IMAGE_MEMBERS)),
     ("shape", Node::Group(SHAPE, SHAPE_MEMBERS)),
+    (
+        "environment",
+        Node::Group(environment::ENVIRONMENT, environment::MEMBERS),
+    ),
     ("light", Node::Group(light::LIGHT, light::MEMBERS)),
     ("light2d", Node::Group(LIGHT_2D, LIGHT_2D_MEMBERS)),
     ("world_text", Node::Group(TEXT, TEXT_MEMBERS)),
@@ -343,7 +353,7 @@ impl Leaf {
             Self::TransformAxis(vector, index) => f64::from(vector.get(transform?)[index]),
             Self::TransformScalar(scalar) => f64::from(scalar.get(transform?)),
             Self::TransformRotation(index) => f64::from(transform?.rotation[index]),
-            Self::Light(_) => return None,
+            Self::Light(_) | Self::Environment(_) => return None,
             Self::Component { component, pointer } => {
                 follow(components?.get(component)?, pointer)?.as_f64()?
             }

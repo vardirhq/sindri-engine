@@ -175,3 +175,46 @@ fn light_completion_hover_and_checking_share_bool_and_numeric_metadata() {
             .is_empty()
     );
 }
+
+#[test]
+fn environment_completion_hover_and_checking_share_color_and_numeric_metadata() {
+    for (member, ty) in [
+        ("ambient_intensity", "f32"),
+        ("ambient_color", "Color"),
+        ("background", "Color"),
+    ] {
+        let source = format!(
+            "script Test {{ fn update(dt: f32) {{ let value = this.environment.{member}; }} }}"
+        );
+        let uri = "file:///tmp/light.decay";
+        let mut server = Server::new();
+        server.documents.insert(
+            uri.into(),
+            Document {
+                text: source.clone(),
+                version: 1,
+            },
+        );
+        let offset = source.find(&format!("{member};")).unwrap();
+        let params = json!({"textDocument":{"uri":uri},"position":{"line":0,"character":offset}});
+        let Value::Array(items) = server.completion(&params) else {
+            panic!("completion array")
+        };
+        let item = items.iter().find(|item| item["label"] == member).unwrap();
+        assert_eq!(item["detail"], ty);
+        assert!(
+            server.hover(&params)["contents"]["value"]
+                .as_str()
+                .unwrap()
+                .contains(ty)
+        );
+        assert!(sindri_decay::check_source(&source).diagnostics.is_empty());
+    }
+    assert!(
+        !sindri_decay::check_source(
+            "script S { fn start() { this.environment.ambient_intensity = false; } }"
+        )
+        .diagnostics
+        .is_empty()
+    );
+}

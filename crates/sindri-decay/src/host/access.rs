@@ -122,8 +122,8 @@ impl Host for WorldHost<'_> {
             return self.peer_load(subject, path);
         };
         let entity = self.subject(subject, path)?;
-        if let Leaf::Light(field) = leaf {
-            return self.load_light(entity, field, path).map(Some);
+        if let Some(value) = self.load_checked_leaf(entity, leaf, path)? {
+            return Ok(Some(value));
         }
         let transform = self.transform_of(entity);
         // Read in place. Every load used to serialize all of the entity's
@@ -161,6 +161,9 @@ impl Host for WorldHost<'_> {
         let Some(under) = Self::addressed(subject, path) else {
             return Ok(false);
         };
+        if self.store_environment_color(subject, path, &under, &value)? {
+            return Ok(true);
+        }
         if self.store_light_color(subject, path, &under, &value)? {
             return Ok(true);
         }
@@ -188,12 +191,16 @@ impl Host for WorldHost<'_> {
         if let Leaf::Light(field) = leaf {
             return self.store_light(entity, field, path, &value);
         }
+        if let Leaf::Environment(field) = leaf {
+            return self.store_environment(entity, field, path, &value);
+        }
         let number = number(path, &value)?;
 
         match leaf {
             Leaf::TransformAxis(..) | Leaf::TransformScalar(_) => {
                 self.store_transform_leaf(entity, leaf, number, path)
             }
+            Leaf::Environment(_) => unreachable!("handled by store_environment"),
             Leaf::Light(_) => unreachable!("handled by store_light"),
             Leaf::TransformRotation(_) => unreachable!("handled by store_rotation"),
             Leaf::Component { component, pointer } => {
@@ -278,6 +285,20 @@ impl Host for WorldHost<'_> {
 }
 
 impl WorldHost<'_> {
+    /// Component leaves whose typed defaults and validation own their reads.
+    fn load_checked_leaf(
+        &self,
+        entity: EntityId,
+        leaf: Leaf,
+        path: &Path,
+    ) -> Result<Option<Value>, RuntimeError> {
+        match leaf {
+            Leaf::Light(field) => self.load_light(entity, field, path).map(Some),
+            Leaf::Environment(field) => self.load_environment(entity, field, path).map(Some),
+            _ => Ok(None),
+        }
+    }
+
     /// Whole copied values with checked specialized storage at the host seam.
     fn load_copied_value(
         &self,
@@ -285,6 +306,9 @@ impl WorldHost<'_> {
         path: &Path,
         under: &[&str],
     ) -> Result<Option<Value>, RuntimeError> {
+        if let Some(color) = self.load_environment_color(subject, path, under)? {
+            return Ok(Some(color));
+        }
         if let Some(color) = self.load_light_color(subject, path, under)? {
             return Ok(Some(color));
         }
