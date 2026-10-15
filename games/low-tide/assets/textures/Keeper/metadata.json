@@ -1,0 +1,161 @@
+{
+  "group_id": "721d65ff-4502-4018-bdc4-3e21d6189340",
+  "states": [
+    {
+      "character": {
+        "id": "47d8e4ac-1345-4936-8f85-7b3262fd1178",
+        "name": "Idle",
+        "prompt": "Full-body pixel art character for \"Low Tide\", a top-down 2D survival and exploration game set on a desolate seabed after the ocean mysteriously receded.\n\nCharacter: \"The Keeper\", a resourceful mechanic, sailor and salvager who lives aboard a massive tracked crawler. A practical survivor, not a soldier or conventional post-apocalyptic hero.\n\nAppearance:\n\n- Adult, sturdy build, slightly tired but approachable.\n- Short, messy dark hair.\n- Weathered dark teal work jacket with rolled sleeves and repair patches.\n- Distinctive faded rust-orange scarf.\n- Charcoal work trousers with reinforced knees.\n- Heavy worn leather boots and fingerless gloves.\n- Cross-body utility belt with tools.\n- Small canvas backpack with a brass lantern attached.\n\nArt style:\n\n- Beautiful handcrafted 16-bit-inspired pixel art.\n- Strong, recognizable silhouette.\n- Muted maritime-industrial palette: teal, charcoal, rust orange, brown and brass.\n- Clean, deliberate pixel clusters with minimal noise.\n- Slightly exaggerated proportions for readability at 64\u00d764 pixels.\n- Charming, grounded and atmospheric, not overly cartoonish.\n- Minimal baked-in lighting, suitable for dynamic lighting and normal maps.\n\nPerspective:\n\n- Three-quarter top-down view, approximately 45 degrees above.\n- Facing downward toward the viewer.\n- Full body visible, neutral standing idle pose.\n- Consistent proportions suitable for directional animations.\n\nSingle character, centered, transparent background. No environment, text, UI, weapons or ground shadow.",
+        "size": {
+          "width": 64,
+          "height": 64
+        },
+        "template_id": "mannequin",
+        "directions": 8,
+        "view": "low top-down",
+        "created_at": "2026-10-15T12:12:04.751175+00:00"
+      },
+      "folder": "Idle",
+      "frames": {
+        "rotations": {
+          "south": "Idle/rotations/south.png",
+          "south-east": "Idle/rotations/south-east.png",
+          "east": "Idle/rotations/east.png",
+          "north-east": "Idle/rotations/north-east.png",
+          "north": "Idle/rotations/north.png",
+          "north-west": "Idle/rotations/north-west.png",
+          "west": "Idle/rotations/west.png",
+          "south-west": "Idle/rotations/south-west.png"
+        },
+        "animations": {
+          "Running": {
+            "north-west": [
+              "Idle/animations/Running/north-west/frame_000.png",
+              "Idle/animations/Running/north-west/frame_001.png",
+              "Idle/animations/Running/north-west/frame_002.png",
+              "Idle/animations/Running/north-west/frame_003.png",
+              "Idle/animations/Running/north-west/frame_004.png",
+              "Idle/animations/Running/north-west/frame_005.png"
+            ],
+            "south": [
+              "Idle/animations/Running/south/frame_000.png",
+              "Idle/animations/Running/south/frame_001.png",
+              "Idle/animations/Running/south/frame_002.png",
+              "Idle/animations/Running/south/frame_003.png",
+              "Idle/animations/Running/south/frame_004.png",
+              "Idle/animations/Running/south/frame_005.png"
+            ],
+            "west": [
+              "Idle/animations/Running/west/frame_000.png",
+              "Idle/animations/Running/west/frame_001.png",
+              "Idle/animations/Running/west/frame_002.png",
+              "Idle/animations/Running/west/frame_003.png",
+              "Idle/animations/Running/west/frame_004.png",
+              "Idle/animations/Running/west/frame_005.png"
+            ],
+            "south-west": [
+              "Idle/animations/Running/south-west/frame_000.png",
+              "Idle/animations/Running/south-west/frame_001.png",
+              "Idle/animations/Running/south-west/frame_002.png",
+              "Idle/animations/Running/south-west/frame_003.png",
+              "Idle/animations/Running/south-west/frame_004.png",
+              "Idle/animations/Running/south-west/frame_005.png"
+            ],
+            "north": [
+              "Idle/animations/Running/north/frame_000.png",
+              "Idle/animations/Running/north/frame_001.png",
+              "Idle/animations/Running/north/frame_002.png",
+              "Idle/animations/Running/north/frame_003.png",
+              "Idle/animations/Running/north/frame_004.png",
+              "Idle/animations/Running/north/frame_005.png"
+            ],
+            "south-east": [
+              "Idle/animations/Running/south-east/frame_000.png",
+              "Idle/animations/Running/south-east/frame_001.png",
+              "Idle/animations/Running/south-east/frame_002.png",
+              "Idle/animations/Running/south-east/frame_003.png",
+              "Idle/animations/Running/south-east/frame_004.png",
+              "Idle/animations/Running/south-east/frame_005.png"
+            ],
+            "north-east": [
+              "Idle/animations/Running/north-east/frame_000.png",
+              "Idle/animations/Running/north-east/frame_001.png",
+              "Idle/animations/Running/north-east/frame_002.png",
+              "Idle/animations/Running/north-east/frame_003.png",
+              "Idle/animations/Running/north-east/frame_004.png",
+              "Idle/animations/Running/north-east/frame_005.png"
+            ],
+            "east": [
+              "Idle/animations/Running/east/frame_000.png",
+              "Idle/animations/Running/east/frame_001.png",
+              "Idle/animations/Running/east/frame_002.png",
+              "Idle/animations/Running/east/frame_003.png",
+              "Idle/animations/Running/east/frame_004.png",
+              "Idle/animations/Running/east/frame_005.png"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "character": {
+        "id": "513ea3c7-9a65-4d5c-90d0-a6f16b7f9291",
+        "name": "Sitting on ground",
+        "prompt": "Full-body pixel art character for \"Low Tide\", a top-down 2D survival and exploration game set on a desolate seabed after the ocean mysteriously receded.\n\nCharacter: \"The Keeper\", a resourceful mechanic, sailor and salvager who lives aboard a massive tracked crawler. A practical survivor, not a soldier or conventional post-apocalyptic hero.\n\nAppearance:\n\n- Adult, sturdy build, slightly tired but approachable.\n- Short, messy dark hair.\n- Weathered dark teal work jacket with rolled sleeves and repair patches.\n- Distinctive faded rust-orange scarf.\n- Charcoal work trousers with reinforced knees.\n- Heavy worn leather boots and fingerless gloves.\n- Cross-body utility belt with tools.\n- Small canvas backpack with a brass lantern attached.\n\nArt style:\n\n- Beautiful handcrafted 16-bit-inspired pixel art.\n- Strong, recognizable silhouette.\n- Muted maritime-industrial palette: teal, charcoal, rust orange, brown and brass.\n- Clean, deliberate pixel clusters with minimal noise.\n- Slightly exaggerated proportions for readability at 64\u00d764 pixels.\n- Charming, grounded and atmospheric, not overly cartoonish.\n- Minimal baked-in lighting, suitable for dynamic lighting and normal maps.\n\nPerspective:\n\n- Three-quarter top-down view, approximately 45 degrees above.\n- Facing downward toward the viewer.\n- Full body visible, neutral standing idle pose.\n- Consistent proportions suitable for directional animations.\n\nSingle character, centered, transparent background. No environment, text, UI, weapons or ground shadow.",
+        "size": {
+          "width": 64,
+          "height": 64
+        },
+        "template_id": "mannequin",
+        "directions": 8,
+        "view": "low top-down",
+        "created_at": "2026-10-15T12:19:25.207234+00:00"
+      },
+      "folder": "Sitting_on_ground",
+      "frames": {
+        "rotations": {
+          "south": "Sitting_on_ground/rotations/south.png",
+          "south-east": "Sitting_on_ground/rotations/south-east.png",
+          "east": "Sitting_on_ground/rotations/east.png",
+          "north-east": "Sitting_on_ground/rotations/north-east.png",
+          "north": "Sitting_on_ground/rotations/north.png",
+          "north-west": "Sitting_on_ground/rotations/north-west.png",
+          "west": "Sitting_on_ground/rotations/west.png",
+          "south-west": "Sitting_on_ground/rotations/south-west.png"
+        },
+        "animations": {}
+      }
+    },
+    {
+      "character": {
+        "id": "28cdf420-c6b6-4d7d-83e8-05894c48a465",
+        "name": "Laying down, sleepin",
+        "prompt": "Full-body pixel art character for \"Low Tide\", a top-down 2D survival and exploration game set on a desolate seabed after the ocean mysteriously receded.\n\nCharacter: \"The Keeper\", a resourceful mechanic, sailor and salvager who lives aboard a massive tracked crawler. A practical survivor, not a soldier or conventional post-apocalyptic hero.\n\nAppearance:\n\n- Adult, sturdy build, slightly tired but approachable.\n- Short, messy dark hair.\n- Weathered dark teal work jacket with rolled sleeves and repair patches.\n- Distinctive faded rust-orange scarf.\n- Charcoal work trousers with reinforced knees.\n- Heavy worn leather boots and fingerless gloves.\n- Cross-body utility belt with tools.\n- Small canvas backpack with a brass lantern attached.\n\nArt style:\n\n- Beautiful handcrafted 16-bit-inspired pixel art.\n- Strong, recognizable silhouette.\n- Muted maritime-industrial palette: teal, charcoal, rust orange, brown and brass.\n- Clean, deliberate pixel clusters with minimal noise.\n- Slightly exaggerated proportions for readability at 64\u00d764 pixels.\n- Charming, grounded and atmospheric, not overly cartoonish.\n- Minimal baked-in lighting, suitable for dynamic lighting and normal maps.\n\nPerspective:\n\n- Three-quarter top-down view, approximately 45 degrees above.\n- Facing downward toward the viewer.\n- Full body visible, neutral standing idle pose.\n- Consistent proportions suitable for directional animations.\n\nSingle character, centered, transparent background. No environment, text, UI, weapons or ground shadow.",
+        "size": {
+          "width": 64,
+          "height": 64
+        },
+        "template_id": "mannequin",
+        "directions": 8,
+        "view": "low top-down",
+        "created_at": "2026-10-15T12:22:55.145933+00:00"
+      },
+      "folder": "Laying_down_sleepin",
+      "frames": {
+        "rotations": {
+          "south": "Laying_down_sleepin/rotations/south.png",
+          "south-east": "Laying_down_sleepin/rotations/south-east.png",
+          "east": "Laying_down_sleepin/rotations/east.png",
+          "north-east": "Laying_down_sleepin/rotations/north-east.png",
+          "north": "Laying_down_sleepin/rotations/north.png",
+          "north-west": "Laying_down_sleepin/rotations/north-west.png",
+          "west": "Laying_down_sleepin/rotations/west.png",
+          "south-west": "Laying_down_sleepin/rotations/south-west.png"
+        },
+        "animations": {}
+      }
+    }
+  ],
+  "export_version": "3.1",
+  "export_date": "2026-10-15T18:35:22.562121"
+}
