@@ -31,7 +31,9 @@ pub(crate) enum LoadPhase {
 
 impl BrowserProjectLoader {
     pub(crate) fn new() -> Result<Self, PlayerError> {
-        let source = FetchAssetSource::new("assets")?;
+        // Revalidated, because the manifest keeps its URL across deploys while
+        // the content directory it names does not survive them.
+        let source = FetchAssetSource::new("assets")?.revalidating();
         let mut manifest =
             AssetLoader::new(source, AssetLoadQueueConfig::default(), TextAssetDecoder)?;
         manifest.request(AssetId::new(MANIFEST_FILE_NAME)?)?;
