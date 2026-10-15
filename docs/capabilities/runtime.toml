@@ -1,0 +1,166 @@
+# Runtime capabilities beside the world, as data. See physics.toml for the
+# rules the generator applies; `runtime.md` is generated from this file.
+
+title = "Effects, saves and randomness"
+order = 4
+intro = """
+Short-lived visual effects kept out of the entity world, persistent game saves,
+and the seeded random stream every script shares.
+"""
+
+[[capability]]
+id = "fleck-bursts"
+group = "Effects"
+title = "Pooled fleck bursts, batched with sprites"
+summary = "Short-lived flecks live as plain values in one bounded pool, drawn in the same batches as sprites."
+status = { engine = "yes", editor = "partial", decay = "yes", proof = "yes" }
+parity = "Pooled fleck bursts, batched with sprites"
+tests = [
+  "crates/sindri-scene/src/effects/pool.rs",
+  "crates/sindri-decay/tests/a_script_throws_flecks.rs",
+]
+proof = ["games/orbital-baked"]
+docs = ["docs/effect-scaling.md"]
+detail = """
+`Effects2d` holds short-lived visual flecks as plain values in one array. A
+fleck has no identity a script can hold, no components, no place in the
+hierarchy, and nothing can collide with it — everything an entity is *for* is
+given up, and `docs/effect-scaling.md` is why: 8,000 flecks-as-entities cost
+5.25 ms a frame, a third of a 60 Hz budget, against 0.018 ms pooled. Over half
+the entity cost was `serde_json` re-reading each one's payload, every entity,
+every frame.
+
+What a burst looks like is authored on the entity as `sindri.effect.burst` —
+count, speed, spread, lifetime, size, tint, fade, drag — because those are a
+designer's numbers and a call naming all of them would be unreadable. Flecks
+draw their directions from a stream of their own, never the run's, so turning
+an explosion up cannot change which enemies spawn. The pool is bounded, the
+oldest fleck makes way for the newest, and overflow is counted rather than
+hidden.
+
+They batch with ordinary sprites by layer and texture, so a burst is one draw
+call rather than a second rendering path.
+"""
+
+[[capability]]
+id = "particle-emitters"
+group = "Effects"
+title = "Particle system (emitters, curves, shapes)"
+summary = "`sindri.particles` emitters throw into the fleck pool at an exact rate, with shapes, ramps and world or local simulation."
+status = { engine = "yes", editor = "partial", decay = "yes", proof = "yes" }
+parity = "Particle system (emitters, curves, shapes)"
+tests = [
+  "crates/sindri-scene/src/effects/emitter_tests.rs",
+  "crates/sindri-scene/src/effects/particles.rs",
+  "crates/sindri-decay/tests/a_script_drives_particles.rs",
+  "games/platformer/tests/sparkle_and_dust.rs",
+]
+proof = ["games/platformer", "games/low-tide"]
+docs = ["docs/particles.md"]
+detail = """
+`sindri.particles` is an emitter that keeps throwing into the same pool while
+it plays: a rate and a cap, lifetime, speed, direction and spread with
+variation, a point, circle, box or ring shape at an offset, gravity, drag, size
+over life, a color ramp, rotation and spin, and world or local simulation. It
+owes its rate times each step and carries the remainder, so a fractional rate
+is exact at any frame rate, and it draws from the pool's stream. Decay plays,
+stops and emits a handful at once (`Effects.play`, `Effects.stop`,
+`Effects.emit`); the editor runs the selected emitter in the Scene view while
+nothing plays. The platformer's coins sparkle and its hero trails dust; Low
+Tide's treads kick up dust and its engine smokes while it drives.
+"""
+
+[[capability]]
+id = "game-saves"
+group = "Game saves"
+title = "Game saves"
+summary = "A flat, versioned key/value save written atomically to disk or `localStorage` by the host, never by a script."
+status = { engine = "yes", editor = "yes", decay = "yes", proof = "yes" }
+tests = [
+  "crates/sindri-core/src/save.rs",
+  "crates/sindri-platform/src/saves/file.rs",
+  "crates/sindri-platform/src/saves/mod.rs",
+  "crates/sindri-decay/tests/a_script_remembers.rs",
+  "games/orbital-baked/tests/the_mixer.rs",
+]
+proof = ["games/orbital-baked"]
+limits = ["Decay's store holds numbers, truths and text; it has no world snapshot operation."]
+detail = """
+`sindri_core::SaveStore` is a flat, versioned key/value document. Flat because
+Decay holds numbers, truths and text and nothing else: a structure a script
+could not build is a structure nothing could write, and the file stays
+something a person can read and repair. Ordered keys, so the same saved state
+is the same bytes and a save can be diffed.
+
+Three absences are distinguished, because they call for different things: a
+first run starts cheerfully, a **damaged** save is worth telling someone about
+before their progress is written over, and one written by a **newer** build is
+reported without being read — a reader that guessed at a format it does not
+know would corrupt it the moment it wrote back.
+
+`sindri_platform::SaveBackend` is where the bytes go. `MemorySaves` is the
+default so a headless run and a test have somewhere to write without choosing a
+path; `DamagedSaves` exists so the unreadable path can be proven without
+corrupting a real file; `FileSaves` writes beside the target and renames over
+it, because a save half written is a save destroyed at the exact moment
+someone's machine lost power mid-run; `BrowserSaves` uses `localStorage`,
+chosen over every larger browser store because the alternatives are
+asynchronous and a game should not have to ask whether its progress has landed
+yet.
+
+Nothing in Decay writes to storage. The store is in memory, marked dirty on
+change, and the host writes it out on a cadence and before it stops — how often
+someone's disk is touched is a decision about their machine. Writing the same
+value again is not a change, so a game storing its volume every frame does not
+keep a disk busy.
+
+Editor Play keeps a save in memory for the editor's lifetime and never writes
+it to disk: `Save.*` calls work and round-trip inside a session so persistence
+can be play-tested, but putting a file into someone's project because they
+pressed Play would be a side effect they did not ask for. Editor preferences
+are a separate thing and stay separate.
+"""
+
+[[capability]]
+id = "seeded-randomness"
+group = "Randomness"
+title = "Seeded, portable randomness"
+summary = "A written-out PCG-XSH-RR generator: the same seed is the same run on every host, and Play restarts it."
+status = { engine = "yes", editor = "yes", decay = "yes", proof = "yes" }
+tests = ["crates/sindri-core/src/random.rs"]
+proof = ["games/orbital-baked"]
+limits = [
+  "One stream is shared by every script, so a number drawn early shifts every number after it.",
+  "Not a source of secrets: a handful of outputs reveals the state.",
+]
+detail = """
+`sindri_core::Rng` is a **PCG-XSH-RR 64/32** generator written out rather than
+depended on. Every general-purpose crate reaches the operating system for a
+seed, which on `wasm32-unknown-unknown` means `getrandom` and a target that
+refuses to compile without an opt-in — and more to the point, entropy is the
+opposite of what this is for. A run that cannot be replayed from its seed is
+not seeded at all.
+
+Everything in it is integer arithmetic and the one division is by a power of
+two, which is what makes a seed mean the same thing on every host. Fractions
+are built from the top 24 bits, so `[0, 1)` is never `1.0`; bounded integers
+reject the draws that would make the low values slightly more likely, because
+modulo bias on a drop table over a long run is exactly the kind of wrongness
+that gets blamed on the game design. Seeding takes two steps around the state,
+so neighbouring seeds do not produce neighbouring first outputs.
+
+The engine never asks the platform for entropy and does not pretend to: a host
+that seeds nothing gets a fixed stream. The editor puts the stream back to its
+seed on every fresh Play, so pressing Play twice gives the same run twice and a
+bug found once can be found again; resuming from a pause deliberately does
+not, since that would replay numbers the scene has already acted on. A game
+that wants variety calls `Random.seed` with something it knows. A run's seed is
+worth storing while a frame's numbers are not.
+"""
+
+[[capability]]
+id = "parallax"
+group = "Not yet"
+title = "Authored parallax"
+summary = "There is no authored parallax system."
+status = { engine = "no", editor = "no", decay = "no", proof = "n/a" }

@@ -6,19 +6,16 @@
 //! component without regenerating is a failing test rather than a reference
 //! that quietly lies to whoever reads it next.
 
-use std::{fs, path::Path};
+use std::fs;
 
-use sindri_capabilities::{REGENERATE_COMMAND, documents};
+use sindri_capabilities::{REGENERATE_COMMAND, documents, repository_root};
 
 #[test]
 fn the_generated_documents_match_the_engine() {
-    let root = Path::new(env!("CARGO_MANIFEST_DIR"))
-        .parent()
-        .and_then(Path::parent)
-        .expect("the crate lives two directories below the repository root");
+    let root = repository_root();
 
     for document in documents().expect("the engine describes itself") {
-        let found = fs::read_to_string(root.join(document.path)).unwrap_or_else(|error| {
+        let found = fs::read_to_string(root.join(&document.path)).unwrap_or_else(|error| {
             panic!(
                 "{} could not be read ({error}); run `{REGENERATE_COMMAND}`",
                 document.path
