@@ -190,23 +190,18 @@ script Director {
 
         let boss_alive = Game.boss_hp > 0.0;
 
-        // The gap between bosses is measured from the end of the last fight
-        // rather than from when it was scheduled to start.
-        //
-        // It used to advance the clock by one interval per boss sent, which
-        // works only while fights are shorter than the interval. They are not:
-        // a boss that takes ninety seconds to kill runs straight past its own
-        // next slot, so the moment it dies the clock is already overdue and the
-        // next one arrives at once. The intended minute of ordinary play in
-        // between simply never happened, and the longer a fight ran the less
-        // breathing room it earned.
+        // Bosses keep the original's clock: one a minute, scheduled from when
+        // the last one arrived rather than from when it died, so a run meets a
+        // boss at 1:00, 2:00, 3:00 and so on. A fight that runs past the next
+        // slot still leaves six seconds to collect its salvage before the next
+        // one, where the original sends it at once.
         if this.boss_was_alive > 0.0 && !boss_alive {
             if rushing() > 0.0 {
                 // Long enough to breathe and take the upgrade, short enough
                 // that the next one is clearly the point.
                 this.next_boss = this.elapsed + 4.0;
             } else {
-                this.next_boss = this.elapsed + this.boss_interval;
+                this.next_boss = max(this.next_boss, this.elapsed + 6.0);
             }
         }
         if boss_alive { this.boss_was_alive = 1.0; } else { this.boss_was_alive = 0.0; }
@@ -214,6 +209,11 @@ script Director {
         if !boss_alive && this.elapsed >= this.next_boss {
             this.boss_count += 1.0;
             Game.boss_count = this.boss_count;
+            this.next_boss += this.boss_interval;
+            // Counted as alive from the moment it is sent, before its own
+            // script has published its hull, so a boss that dies on its first
+            // frame still frees the clock.
+            this.boss_was_alive = 1.0;
             send_boss();
             return;
         }
@@ -338,11 +338,16 @@ script Director {
         place(enemy);
     }
 
+    // The table above was converted from the original at about 41.5 px per
+    // unit; the arena is 49.1, so speeds are scaled to match how fast an enemy
+    // crosses the screen there. Worth is in the original's experience (a scout
+    // is 8), and touch is its contact damage of 100 hull at Normal's 1.08,
+    // taken on this ship's five.
     fn configure(enemy: Entity, speed: f32, health: f32, worth: f32, touch: f32) {
-        World.set_property(enemy, "speed", speed);
+        World.set_property(enemy, "speed", speed * 0.845);
         World.set_property(enemy, "health", health);
-        World.set_property(enemy, "worth", worth);
-        World.set_property(enemy, "touch_damage", touch);
+        World.set_property(enemy, "worth", worth * 8.0);
+        World.set_property(enemy, "touch_damage", touch * 0.54);
     }
 
     fn make_elite(enemy: Entity, charger_enemy: bool) {

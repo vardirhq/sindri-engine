@@ -53,7 +53,7 @@
         "sindri.physics2d.collider": {
           "shape": {
             "shape": "circle",
-            "radius": 0.5
+            "radius": 0.17
           },
           "offset": [
             0.0,
@@ -73,9 +73,9 @@
           "script": "Core",
           "properties": {
             "worth": 1.0,
-            "pull": 7.0,
-            "reach": 2.2,
-            "life": 22.0
+            "pull": 11.4,
+            "reach": 0.0,
+            "life": 120.0
           }
         },
         "sindri.shape": {

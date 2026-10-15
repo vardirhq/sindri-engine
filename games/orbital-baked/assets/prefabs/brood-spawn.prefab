@@ -54,7 +54,7 @@
         "sindri.physics2d.collider": {
           "shape": {
             "shape": "circle",
-            "radius": 0.5
+            "radius": 0.24
           },
           "offset": [
             0.0,
@@ -93,8 +93,8 @@
             "kind": 0.0,
             "speed": 1.5,
             "health": 2.0,
-            "worth": 1.0,
-            "touch_damage": 1.0,
+            "worth": 8.0,
+            "touch_damage": 0.54,
             "core": "prefabs/core.prefab",
             "death_burst": "prefabs/nova.prefab",
             "shot": "prefabs/enemy-bullet.prefab",

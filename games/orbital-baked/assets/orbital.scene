@@ -4527,7 +4527,7 @@
           "rotation": 0.0,
           "sensor": true,
           "shape": {
-            "radius": 0.16,
+            "radius": 0.22,
             "shape": "circle"
           }
         },
@@ -4554,7 +4554,7 @@
           "properties": {
             "bullet": "prefabs/bullet.prefab",
             "edge_padding": 0.28,
-            "invulnerable_for": 0.9,
+            "invulnerable_for": 0.22,
             "mine": "prefabs/mine.prefab",
             "muzzle_fx": "prefabs/spectacle.prefab"
           },

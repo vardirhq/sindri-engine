@@ -96,11 +96,11 @@ script Stats {
     fn derive() {
         stat("damage", "damage_add", "damage_mul", 1.0);
         stat("fire_rate", "fire_rate_add", "fire_rate_mul", 2.38);
-        stat("bullet_speed", "bullet_speed_add", "bullet_speed_mul", 9.0);
+        stat("bullet_speed", "bullet_speed_add", "bullet_speed_mul", 10.6);
         stat("bullet_size", "bullet_size_add", "bullet_size_mul", 1.0);
         stat("shots", "shots_add", "shots_mul", 1.0);
         stat("pierce", "pierce_add", "pierce_mul", 0.0);
-        stat("crit", "crit_add", "crit_mul", 0.0);
+        stat("crit", "crit_add", "crit_mul", 0.05);
         stat("crit_power", "crit_power_add", "crit_power_mul", 2.0);
         stat("move_speed", "move_speed_add", "move_speed_mul", 5.2);
         stat("max_hp", "max_hp_add", "max_hp_mul", 5.0);

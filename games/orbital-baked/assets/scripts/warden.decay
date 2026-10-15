@@ -4,7 +4,7 @@
 //   2  telegraphed charges followed by a close-range fan
 //   3  faster rings and charges, with occasional reinforcements
 script Warden {
-    @export let health: f32 = 120.0;
+    @export let health: f32 = 58.0;
     @export let worth: f32 = 40.0;
     @export let touch_damage: f32 = 2.0;
     @export let ring_shots: f32 = 12.0;
@@ -33,7 +33,7 @@ script Warden {
     var phase_flash: f32 = 0.0;
 
     fn start() {
-        this.hp = this.health * (1.0 + Game.elapsed * 0.012);
+        this.hp = this.health * boss_scale();
         this.until_volley = 1.2;
         this.until_summon = 5.0;
         this.dash_timer = 1.4;
@@ -280,7 +280,7 @@ script Warden {
         Camera.impact(0.9);
         Audio.play("audio/kill.wav", 0.6);
         Game.kills = Game.kills + 1.0;
-        Game.score = Game.score + this.worth * 10.0;
+        Game.score = Game.score + 20.0 + this.worth;
         Game.boss_hp = 0.0;
         Game.boss_max = 0.0;
         Save.set_flag("beat_warden", true);
@@ -291,7 +291,7 @@ script Warden {
             let drop = World.spawn(this.core);
             drop.transform.position.x = this.transform.position.x + cos(angle) * 1.2;
             drop.transform.position.y = this.transform.position.y + sin(angle) * 1.2;
-            World.set_property(drop, "worth", 5.0);
+            World.set_property(drop, "worth", 48.0);
             made += 1.0;
         }
         let roll = World.spawn(this.drop_roll);
