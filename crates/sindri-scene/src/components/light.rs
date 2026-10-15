@@ -27,22 +27,27 @@ pub enum LightKind {
     Directional,
     /// Light from a world-space position, fading to zero at its range.
     Point,
+    /// A ranged source shining along its forward axis within a feathered cone.
+    Spot,
 }
 
 impl LightKind {
     /// Every spelling, in the order a picker offers them.
-    pub const NAMES: [&'static str; 2] = ["directional", "point"];
+    pub const NAMES: [&'static str; 3] = ["directional", "point", "spot"];
 }
 
-/// A directional or point light. Only directionals use the entity's forward axis.
+/// A directional, point or spot light. Directional and spot lights shine forward.
 #[derive(Clone, Copy, Debug, PartialEq, Serialize, Deserialize)]
 #[serde(default, deny_unknown_fields)]
 pub struct LightComponent {
     pub kind: LightKind,
     pub color: [f32; 3],
     pub intensity: f32,
-    /// Point-light reach in world units, independent of entity scale.
+    /// Local-light reach in world units, independent of entity scale.
     pub range: f32,
+    /// Spotlight half-angles in radians: 0 <= inner < outer <= pi/2.
+    pub inner_angle: f32,
+    pub outer_angle: f32,
 }
 
 impl SceneComponent for LightComponent {
@@ -56,6 +61,8 @@ impl Default for LightComponent {
             color: [1.0, 0.95, 0.86],
             intensity: 1.0,
             range: 8.0,
+            inner_angle: 20.0_f32.to_radians(),
+            outer_angle: 30.0_f32.to_radians(),
         }
     }
 }
@@ -95,10 +102,19 @@ impl LightComponent {
                 expected: "must be finite and greater than zero",
             });
         }
-        if self.kind == LightKind::Point {
+        if self.kind != LightKind::Directional {
             self.point_at([0.0; 3]).validate()?;
         }
+        self.spot_cone([0.0, 0.0, -1.0]).validate()?;
         Ok(self)
+    }
+
+    pub(crate) fn spot_cone(self, direction: [f32; 3]) -> sindri_render::SpotCone {
+        sindri_render::SpotCone {
+            direction,
+            inner_angle: self.inner_angle,
+            outer_angle: self.outer_angle,
+        }
     }
 
     /// Resolves the renderer value after the scene has composed the position.

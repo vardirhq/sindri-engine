@@ -16,6 +16,8 @@ use std::sync::Arc;
 mod normals;
 #[path = "standard_materials/points.rs"]
 mod points;
+#[path = "standard_materials/spots.rs"]
+mod spots;
 
 struct Scene {
     cube: TexturedCubeRenderer,

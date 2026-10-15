@@ -18,6 +18,8 @@ use crate::ui::theme::color;
 use super::EditorApp;
 use super::projection::{distance_to_segment, project_point, project_segment};
 
+mod spot;
+
 const LIGHT_OVERLAY_LAYER: &str = "sindri-light-overlay";
 const LIGHT_PICK_STATE: &str = "sindri-light-pick";
 
@@ -200,6 +202,16 @@ impl EditorApp {
                         entity,
                         Vec3::from_array(transform.position),
                         light.range,
+                        rect,
+                        scene_camera.view_projection,
+                        self.selection.contains(entity),
+                    );
+                }
+                if light.kind == LightKind::Spot {
+                    return spot::visual(
+                        entity,
+                        transform,
+                        light,
                         rect,
                         scene_camera.view_projection,
                         self.selection.contains(entity),

@@ -51,17 +51,26 @@ impl EditorApp {
         self.refresh_textures();
     }
 
-    pub(super) fn create_point_light(&mut self) {
+    pub(super) fn create_local_light(&mut self, spot: bool) {
         let light = sindri_scene::LightComponent {
-            kind: sindri_scene::LightKind::Point,
+            kind: if spot {
+                sindri_scene::LightKind::Spot
+            } else {
+                sindri_scene::LightKind::Point
+            },
             intensity: 8.0,
             ..sindri_scene::LightComponent::default()
         };
         self.create_component_object(
             sindri_scene::LightComponent::TYPE_NAME,
-            "Point Light",
+            if spot { "Spot Light" } else { "Point Light" },
             Transform3D {
                 position: [0.0, 2.0, 0.0],
+                rotation: if spot {
+                    glam::Quat::from_rotation_x(-std::f32::consts::FRAC_PI_2).to_array()
+                } else {
+                    glam::Quat::IDENTITY.to_array()
+                },
                 ..Transform3D::default()
             },
             serde_json::to_value(light).expect("a light serializes"),

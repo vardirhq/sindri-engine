@@ -1,6 +1,8 @@
-struct PointLight {
+struct LocalLight {
     position_range: vec4<f32>,
     color_intensity: vec4<f32>,
+    direction_outer: vec4<f32>,
+    inner_spot: vec4<f32>,
 }
 
 fn safe_normalize(v: vec3<f32>) -> vec3<f32> {
@@ -9,7 +11,7 @@ fn safe_normalize(v: vec3<f32>) -> vec3<f32> {
 
 // Finite center, inverse-square falloff beyond one world unit, and a smooth
 // zero at range. Local lights are independent of the directional shadow map.
-fn point_lighting(lights: array<PointLight, 8>, base: vec3<f32>, normal: vec3<f32>,
+fn local_lighting(lights: array<LocalLight, 8>, base: vec3<f32>, normal: vec3<f32>,
                   position: vec3<f32>, view: vec3<f32>, metallic: f32,
                   roughness: f32, standard: bool) -> vec3<f32> {
     var color = vec3<f32>(0.0);
@@ -21,9 +23,14 @@ fn point_lighting(lights: array<PointLight, 8>, base: vec3<f32>, normal: vec3<f3
         if light.color_intensity.w > 0.0 && range > 0.0 && distance_squared < range * range {
             let relative = sqrt(distance_squared) / range;
             let window = 1.0 - relative * relative;
-            let radiance = light.color_intensity.rgb * light.color_intensity.w
-                * window * window / max(distance_squared, 1.0);
             let direction = safe_normalize(delta);
+            var cone = 1.0;
+            if light.inner_spot.y > 0.0 {
+                cone = smoothstep(light.direction_outer.w, light.inner_spot.x,
+                    dot(light.direction_outer.xyz, -direction));
+            }
+            let radiance = light.color_intensity.rgb * light.color_intensity.w
+                * cone * window * window / max(distance_squared, 1.0);
             if standard {
                 color += standard_lighting(base, normal, direction, view, metallic,
                     roughness, vec3<f32>(0.0), radiance);

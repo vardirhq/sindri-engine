@@ -1,5 +1,11 @@
 # Changelog
 
+- Aim 3D spotlights with feathered inner/outer cone angles. They share eight
+  local-light slots with point lights across meshes, voxels and imported models.
+  The editor creates downward-facing spots, shows selected cone guides and
+  retains valid light settings when an inspector edit is refused.
+  Local-light shadows, Decay light properties and game adoption remain open.
+
 - Add bounded 3D point lighting with range falloff across meshes, voxels and
   imported models. Lights follow active parent transforms; the editor creates
   points and shows selected range guides. Point shadows, spotlights and typed

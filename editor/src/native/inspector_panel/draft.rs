@@ -86,6 +86,12 @@ pub(crate) fn component_commands(
             refused.push(error.to_string());
             continue;
         }
+        if type_name == "sindri.light"
+            && let Err(error) = super::light::validate(payload)
+        {
+            refused.push(error);
+            continue;
+        }
         buffer.push(WorldCommand::SetComponent {
             entity,
             type_name: type_name.clone(),

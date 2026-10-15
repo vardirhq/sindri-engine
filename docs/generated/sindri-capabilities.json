@@ -585,8 +585,10 @@
           0.949999988079071,
           0.8600000143051147
         ],
+        "inner_angle": 0.3490658402442932,
         "intensity": 1.0,
         "kind": "directional",
+        "outer_angle": 0.5235987901687622,
         "range": 8.0
       },
       "display_name": "Light",
@@ -596,13 +598,18 @@
           0.949999988079071,
           0.8600000143051147
         ],
+        "inner_angle": 0.3490658402442932,
         "intensity": 1.0,
         "kind": "directional",
+        "outer_angle": 0.5235987901687622,
         "range": 8.0
       },
       "meanings": {
         "color": {
           "kind": "color"
+        },
+        "inner_angle": {
+          "kind": "angle"
         },
         "intensity": {
           "kind": "range",
@@ -613,8 +620,12 @@
           "kind": "choice",
           "options": [
             "directional",
-            "point"
+            "point",
+            "spot"
           ]
+        },
+        "outer_angle": {
+          "kind": "angle"
         },
         "range": {
           "kind": "range",

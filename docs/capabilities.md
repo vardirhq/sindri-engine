@@ -3440,6 +3440,23 @@ transforms and inactive ancestors suppress the light. Editor creation uses one
 checked transaction and selected world-range circles; studio lighting omits
 authored points. Native/browser feature controls and GPU/scene regressions are
 described in [the 3D light contract](3d-lights.md). This is Explorer feature
-proof, with no in-tree game adoption yet; spotlights, point shadows and typed
-Decay light properties are absent. The fixed uniform cost is 256 additional
+proof, with no in-tree game adoption yet; local shadows and typed
+Decay light properties are absent. Points now share the spotlight records
+described below. The fixed uniform cost is 512 additional
 bytes per color draw; shared buffers and spatial light assignment remain open.
+
+
+### 3D spotlights on the shared local-light path
+
+Explorer's planned lighting track now has unshadowed spotlights as feature proof;
+no in-tree game uses them yet. `sindri.light.kind = "spot"` uses composed world
+position/forward with validated inner/outer half-angles in radians. Points and
+spots share eight strongest-intensity slots, range falloff and Lambert/GGX
+shading across world/voxel meshes and imported models. Cone strength feathers
+with smoothstep between angle cosines. Color uniforms are now 880/928 bytes for
+textured/model draws (eight 64-byte records); shadow uniforms, passes, writes
+and persistent geometry uploads are unchanged. The editor creates down-facing
+spots in one undo step and paints clipped selected inner/outer range cones.
+Native/browser aimed/away controls and Scene/GPU/guide regressions provide
+feature evidence. Local shadows, typed Decay properties, dynamic scripted mounted
+light proof and Explorer adoption remain open; see `3d-lights.md`.

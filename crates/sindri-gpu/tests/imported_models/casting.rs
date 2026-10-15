@@ -79,7 +79,7 @@ fn model_casters_share_geometry_and_hierarchy_and_preserve_alpha_holes() {
             "two models each have two color and two shadow primitives"
         );
         assert_eq!(delta.render_passes, 9, "including the map clear");
-        assert_eq!(delta.uniform_bytes, 4 * 672 + 4 * 96);
+        assert_eq!(delta.uniform_bytes, 4 * 928 + 4 * 96);
         assert_eq!(delta.transient_geometry_uploads, 0);
         assert_eq!(
             scene.cubes.model_cache_stats().uploads,

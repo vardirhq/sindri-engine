@@ -240,11 +240,11 @@ cameras face), YXZ order. Build on `Transform3D::yaw_pitch_roll_radians` and
 - [x] Point-light foundation: strongest-eight shared forward set, world-space
   range falloff across world/imported geometry, composed parent positions,
   editor creation/range guides, strict/tolerant validation and native/browser
-  controls. See `3d-lights.md`; game proof, spots and local shadows remain open.
-- [ ] `sindri.light` gains point and spot lights (range, cone), a bounded
+  controls. See `3d-lights.md`; game proof and local shadows remain open.
+- [x] `sindri.light` gains point and spot lights (range, cone), a bounded
   forward set per frame (for example 8, nearest/most intense first), lit on
   every geometry kind.
-- [ ] The editor shows range spheres and cone gizmos. Create Point Light and
+- [x] The editor shows range spheres and cone gizmos. Create Point Light and
   Create Spot Light.
 - [ ] Decay can read and set directional, point and spot light color,
   intensity and enabled state. Prefer entity property access, such as

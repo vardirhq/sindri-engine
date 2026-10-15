@@ -20,6 +20,7 @@ pub(super) mod header;
 mod held;
 mod instance;
 mod keys;
+mod light;
 pub(super) mod list;
 mod mask;
 mod orbit;

@@ -1,4 +1,4 @@
-// Same-host local lights on/off: only the light carrier's active state changes.
+// Same-host local-light controls: geometry, materials and ambient stay fixed.
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { decodePng } from './png.mjs';
@@ -11,6 +11,6 @@ for (let p = 0; p < on.data.length; p += on.channels) {
   if (on.data[p] > off.data[p] + 20 && on.data[p] > on.data[p + 2] + 20) red++;
   if (on.data[p + 2] > off.data[p + 2] + 20 && on.data[p + 2] > on.data[p] + 20) blue++;
 }
-assert(changed > 1000, `point lights brighten visible surfaces: ${changed}`);
+assert(changed > 1000, `local lights brighten visible surfaces: ${changed}`);
 assert(red > 100 && blue > 100, `both colored lights contribute: red=${red}, blue=${blue}`);
-console.log(`Point lights: ${changed} brightened pixels; ${red} red and ${blue} blue pixels`);
+console.log(`Local lights: ${changed} brightened pixels; ${red} red and ${blue} blue pixels`);

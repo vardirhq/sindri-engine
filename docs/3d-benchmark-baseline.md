@@ -312,3 +312,15 @@ Game frames verify those totals with required nonzero GPU timings. This adds
 lighting capability rather than meeting a performance target; shared light
 buffers and spatial assignment remain open. See [the light contract and
 native/browser/editor evidence](3d-lights.md).
+
+
+## Spotlight uniform accounting
+
+The shared point/spot set now carries eight 64-byte records per color draw:
+textured uniforms are 880 bytes and model uniforms 928 bytes. The fixed workload
+therefore writes 292,144 bytes with shadows and 269,680 without. Standalone and editor three-frame
+controls verify those exact totals with nonzero GPU timestamps, while retaining
+602/301 draws, 603/301 passes, 602/301 writes, 200/100 transient geometry pairs
+and zero settled geometry uploads. Adding a spotlight does not add a render pass
+or shadow work; local-light occlusion remains unimplemented. These controls
+establish accounting rather than a performance target.

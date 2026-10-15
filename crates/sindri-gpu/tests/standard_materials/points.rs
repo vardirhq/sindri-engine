@@ -7,7 +7,7 @@ fn lighting(point: PointLight) -> WorldLighting {
         ambient_intensity: 0.0,
         ..WorldLighting::default()
     };
-    lighting.point_lights[0] = Some(point);
+    lighting.local_lights[0] = Some(point.into());
     lighting
 }
 
@@ -90,10 +90,13 @@ fn point_lights_share_shading_range_and_updates_without_geometry_uploads() {
         let image = scene.draw(&gpu, kind, None, &lighting(point));
         assert!(pixel(&image, 32)[2] > pixel(&image, 32)[0] + 10);
         let mut two = lighting(point);
-        two.point_lights[7] = Some(PointLight {
-            color: [1.0, 0.0, 0.0],
-            ..point
-        });
+        two.local_lights[7] = Some(
+            PointLight {
+                color: [1.0, 0.0, 0.0],
+                ..point
+            }
+            .into(),
+        );
         let image = scene.draw(&gpu, kind, Some(material), &two);
         assert!(pixel(&image, 32)[0] > left[0] + 10, "second light adds red");
     }

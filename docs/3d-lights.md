@@ -1,51 +1,71 @@
-# 3D point lights
+# 3D point and spot lights
 
 This is feature proof for Explorer's planned lighting track. No in-tree game
-uses 3D point lights yet. GLB light import remains open. Spotlights, local-light shadows and typed Decay light
-properties remain open; 2D lights have their own independent contract.
+uses 3D local lights yet. GLB light import, local-light shadows and typed Decay
+light properties remain open; 2D lights have their own independent contract.
 
-`sindri.light.kind` accepts `directional` (the default) or `point`. Existing
-scenes keep their directional light. Both kinds carry color and intensity;
-`range` defaults to eight world units and must be finite and positive. A point
-requires finite nonnegative linear RGB and intensity. The first active
-directional light remains the sun. Invalid lights fail strict frame extraction;
-the editor's tolerant extractor reports them and omits their contribution.
+`sindri.light.kind` accepts `directional` (the default), `point` or `spot`.
+Existing scenes keep their directional light. All kinds carry color and
+intensity; `range` defaults to eight world units and must be finite and
+positive. A local light requires finite nonnegative linear RGB and intensity.
+The first active directional light remains the sun. Invalid lights fail strict
+frame extraction; the editor's tolerant extractor reports them and omits their
+contribution.
 
-Point positions come from the composed entity transform every rendered frame.
-Moving, turning or scaling a parent moves its light; the light's own rotation
-has no effect, and its range stays in world units. An inactive entity or ancestor
-removes its contribution. Zero-intensity points consume no slot. Scene extraction
-validates all lights, then selects the eight strongest active point intensities;
-stable world iteration breaks ties. Selection is shared by every geometry kind,
-independent of camera and distance. There is no spatial light assignment yet.
+Local-light positions come from the composed entity transform every rendered
+frame. Moving, turning or scaling a parent moves its light; a point's rotation
+has no effect, while a spot shines along the composed forward axis (`-Z`). Range
+and cone angles ignore entity scale. An inactive entity or ancestor removes its
+contribution. Zero-intensity local lights consume no slot. Scene extraction
+validates all lights, then selects the eight strongest active local-light
+intensities; stable world iteration breaks ties. Selection is shared by every
+geometry kind, independent of camera and distance. There is no spatial light
+assignment yet.
 
-The renderer accepts eight optional `PointLight` values on `WorldLighting`.
-`validate` returns a typed field error; invalid low-level values pack as disabled
-lights. Cubes, inline/cached meshes, voxel meshes and imported primitives use the
-same world-space point-light function. Standard materials use the shared GGX
-response; legacy world materials use Lambert diffuse. Ambient fill is added once.
-For distance `d` below range `r`, radiance scales by
-`(1 - (d / r)^2)^2 / max(d*d, 1)`: finite near the source, inverse-square beyond
-one world unit, smoothly zero at the range. A surface exactly at the source has
-zero directional contribution. Local light is added before fog and post.
+The renderer accepts eight optional `LocalLight` values on
+`WorldLighting.local_lights`. `validate` returns a typed field error; invalid
+low-level values pack as disabled lights. Cubes, inline/cached meshes, voxel
+meshes and imported primitives use the same world-space local-light function.
+Standard materials use the shared GGX response; legacy world materials use
+Lambert diffuse. Ambient fill is added once. For distance `d` below range `r`,
+radiance scales by `(1 - (d / r)^2)^2 / max(d*d, 1)`: finite near the source,
+inverse-square beyond one world unit, smoothly zero at the range. A surface
+exactly at the source has zero directional contribution. Local light is added
+before fog and post.
 
-Point light is independent of directional-shadow visibility. Points do not cast
-shadows or respect occluders; that limitation is visible around walls. Emission
-still lights only its own material. World-mesh AO applies to point shading as it
-does to sun shading; imported geometry still has no authored mesh-AO channel.
+Spots add `inner_angle` and `outer_angle`, half-angles in radians, defaulting
+respectively to 20° and 30°. Validation requires `0 <= inner < outer <= pi/2`
+and distinct f32 cosine values, including on non-spot kinds so switching kinds
+retains valid settings. Inside the inner cone the light has full strength;
+between the two boundaries it fades with smoothstep in cosine space; outside it
+contributes zero. The same eight slots select points and spots together, without
+an extra pass. Raw invalid renderer inputs pack as disabled lights.
 
-Each color draw carries eight 32-byte records, including empty slots. Textured
-color uniforms grow from 368 to 624 bytes and model color uniforms from 416 to
-672 bytes; pass/write counts, shadow uniforms and retained geometry do not
-change. Batching, shared light buffers and whole-frame performance targets remain
-open. The fixed 3D workload now uploads 215,088/192,624 uniform bytes with
-shadows on/off, retaining 602/301 draws and 603/301 passes.
+Local light is independent of directional-shadow visibility. Points and spots do
+not cast shadows or respect occluders; that limitation is visible around walls.
+Emission still lights only its own material. World-mesh AO applies to point
+shading as it does to sun shading; imported geometry still has no authored
+mesh-AO channel.
 
-The editor offers Create Point Light, with one checked spawn/undo transaction,
-and the existing Light kind/color/intensity/range inspector. A selected point
-shows three clipped world-space range circles and a pickable center icon.
-Directional arrows remain specific to the sun. Scene studio lighting replaces
-both sun and points; Game and authored Scene lighting use the extracted set.
+Each color draw carries eight 64-byte records, including empty slots. Textured
+color uniforms are 880 bytes and model color uniforms 928 bytes; pass/write
+counts, shadow uniforms and retained geometry do not change. Batching, shared
+light buffers and whole-frame performance targets remain open. The fixed 3D
+workload now uploads 292,144/269,680 uniform bytes with shadows on/off,
+retaining 602/301 draws and 603/301 passes.
+
+The editor offers Create Point Light and Create Spot Light, with one checked
+spawn/undo transaction, and the existing Light kind/color/intensity/range
+inspector. Cone angles use degree controls in the editor; scenes store radians.
+Invalid inspector light edits are rejected before commands are emitted, retaining
+the last valid payload and undo history. Externally authored invalid lights still
+use the strict/tolerant extraction policy above. A selected point shows three clipped world-space range circles and a
+pickable center icon. Selected spots show inner/outer cone rings at the radial
+range cutoff plus four rays each; spots also show their forward arrow. Create
+Spot Light starts at `[0, 2, 0]`, aimed down, with intensity/range eight. Guides
+use composed rotation and world units, clip at the near plane and do not author
+geometry. Scene studio lighting replaces sun, points and spots; Game and
+authored Scene lighting use the extracted set.
 
 Scene tests cover composed moving/turning/scaled parents, disable/re-enable,
 strongest-eight selection and invalid overflow lights in strict/tolerant modes.
@@ -56,7 +76,7 @@ controls generated by `prepare-point-lights.py` reuse the checked 3D Benchmark
 assets and ready script; only the scaled/turned light carrier's active state
 differs. CI retains both captures and verifies red and blue surface lighting.
 
-## Verification
+## Point-light verification (before spotlight extension)
 
 Final local preflight passes 1,474 native tests across render/GPU/scene/editor;
 all 11 catalog tests pass (1,485 unique). All 56 GPU-package tests repeat with
@@ -64,19 +84,63 @@ GPU/timestamps required. Warning-denied workspace Clippy/WASM, format/file-size
 checks and native/editor authored-color captures pass. No dependencies or Decay
 scripts change; generated light metadata includes point kind and range.
 
-The native 960×540 pair brightens 97,490 pixels (9,083 red, 66,347 blue).
-Fresh Chromium brightens 97,397 (9,016 red, 66,149 blue), fetches all six original
+The native 960×540 pair brightens 97,490 pixels (9,083 red, 66,347 blue). Fresh
+Chromium brightens 97,397 (9,016 red, 66,149 blue), fetches all six original
 assets and reaches ready in both controls without runtime/GPU errors. The
 ambient-only off control deliberately has four colors; its browser smoke uses a
 scoped threshold, while the default remains eight. Existing 300-prop browser
-shadow controls retain 2,110 changed and 2,088 darkened pixels. Standalone/editor
-three-frame shadow controls verify the exact updated counters and nonzero GPU
-timestamps. These are correctness checks, not a performance claim.
+shadow controls retain 2,110 changed and 2,088 darkened pixels.
+Standalone/editor three-frame shadow controls verify the exact updated counters
+and nonzero GPU timestamps. These are correctness checks, not a performance
+claim.
 
 Native editor review selects the parented warm point and inspects its clipped
 range guides, edits range 6 to 3, saves, undoes/redoes and restores 6. Create
 Point Light persists position `[0, 2, 0]`, intensity 8 and range 8, and one
-Undo/Redo removes/restores the whole entity. Reopen/Play reaches the reused ready
-goal with colored lighting on imported and world geometry; Stop/save restores
-the authored 13-entity scene. The review uses X11/software Vulkan; broader GPU
-and native-platform review remains open.
+Undo/Redo removes/restores the whole entity. Reopen/Play reaches the reused
+ready goal with colored lighting on imported and world geometry; Stop/save
+restores the authored 13-entity scene. The review uses X11/software Vulkan;
+broader GPU and native-platform review remains open.
+
+## Spotlight verification
+
+Spot cone GPU regressions aim the same light left/right across each world mesh
+path and imported geometry, compare RGB, exercise feathering, legacy diffuse,
+invalid raw inputs and retained geometry across updates. Scene regression mixes
+points/spots past the shared capacity, rotates a scaled parent, checks world
+position/direction and refuses invalid angle pairs in strict/tolerant
+extraction. The editor guide regression checks selection, composed direction,
+scale independence and behind-camera hiding. `prepare-spot-lights.py` derives
+the same checked Benchmark assets/ready script; controls differ only in local
+pitch, aiming colored cones down toward surfaces or up into empty sky. CI
+retains native/browser pairs and reuses the local-light RGB comparison.
+
+
+Final local validation covers 1,490 unique native/catalog tests: the four-crate
+preflight's 1,478 tests, the additional inspector-command regression, and all
+11 catalog tests. All 57 GPU-package tests run again with Vulkan/timestamps
+required. After the authoring fix, repeat all editor tests, warning-denied
+native checks, workspace Clippy/WASM and the native editor build. Regeneration,
+format/file-size gates and native authored-color verification pass. There are
+no dependency or Decay-script changes.
+
+Native spotlight controls brighten 34,135 pixels (3,965 red and 26,020 blue);
+rebuilt Chromium brightens 34,093 (3,955 red and 25,974 blue). All six browser
+cases fetch six assets and reach ready without runtime/GPU errors: spot
+on/away, point on/off and original 300-prop shadow on/off. Point controls retain
+97,490/97,397 brightened pixels and browser shadows retain 2,110 changed / 2,088
+darkened pixels. Inspect both spotlight captures; three consecutive standalone
+shadow frames verify the updated counters and nonzero GPU intervals. The final
+editor on/off three-frame reports match the same physical counts and bytes,
+with required nonzero timestamps. The native editor authored-color capture
+passes at 1400×1000.
+
+Native X11/software-Vulkan editor review selects the parented warm spot, pulls
+back to inspect both clipped cone rings and degree controls, rejects a 10° outer
+angle below the inner cone without altering the saved 0.75-radian value, and
+saves a valid 50° edit. Undo/Redo restores/reapplies it, then restores the
+original cone. Create Spot Light saves its down-facing transform, intensity and
+range eight, and 20°/30° cones; one Undo/Redo removes/restores the whole entity.
+Reopen/Play reaches the reused ready goal with the authored spot pools, and
+Stop/save restores the 13-entity scene with two spots. This remains feature
+proof; scripted mounted-light and in-tree game proof are separate requirements.

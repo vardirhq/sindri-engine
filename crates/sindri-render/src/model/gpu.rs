@@ -81,7 +81,7 @@ struct Uniform {
     fog_color: [f32; 4],
     fog_params: [f32; 4],
     emissive: [f32; 4],
-    point_lights: [crate::lighting::PointLightUniform; crate::MAX_POINT_LIGHTS],
+    local_lights: [crate::lighting::LocalLightUniform; crate::MAX_LOCAL_LIGHTS],
 }
 
 impl ModelRenderer {
@@ -250,7 +250,7 @@ fn uniform(draw: &ModelDraw<'_>, world: Mat4, surface: &ModelSurface) -> Uniform
     let light = Vec3::from_array(lighting.directional_color) * lighting.directional_intensity;
     let direction = -Vec3::from_array(lighting.directional_direction);
     Uniform {
-        point_lights: lighting.point_uniforms(),
+        local_lights: lighting.local_uniforms(),
         view_projection: draw.camera.view_projection.to_cols_array_2d(),
         world: world.to_cols_array_2d(),
         normal: world.inverse().transpose().to_cols_array_2d(),

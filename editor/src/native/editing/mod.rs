@@ -42,6 +42,7 @@ pub(super) enum CreateGameObject {
     UiImage,
     DirectionalLight,
     PointLight,
+    SpotLight,
     Light2d,
 }
 
@@ -119,7 +120,8 @@ impl EditorApp {
             CreateGameObject::UiImage => {
                 self.create_carrying(UI_IMAGE_COMPONENT, "UI Image", Transform3D::default());
             }
-            CreateGameObject::PointLight => self.create_point_light(),
+            CreateGameObject::PointLight => self.create_local_light(false),
+            CreateGameObject::SpotLight => self.create_local_light(true),
             CreateGameObject::DirectionalLight => self.create_carrying(
                 LightComponent::TYPE_NAME,
                 "Directional Light",
