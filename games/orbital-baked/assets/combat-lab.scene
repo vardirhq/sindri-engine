@@ -19,10 +19,10 @@
     },
     {
       "id": "lab-player", "name": "Player", "parent": null,
-      "transform_3d": { "position": [0.0,0.0,0.0], "rotation": [0.0,0.0,0.0,1.0], "scale": [0.42,0.42,1.0] },
+      "transform_3d": { "position": [0.0,0.0,0.0], "rotation": [0.0,0.0,0.0,1.0], "scale": [0.622,0.622,1.0] },
       "components": {
         "sindri.tags": { "tags": ["player", "combat_lab_player"] },
-        "sindri.sprite": { "texture": "textures/player.png#hull-0", "tint": [1.0,1.0,1.0,1.0], "layer": 10 },
+        "sindri.shape": { "kind": "polygon", "count": 6.0, "fill": [0.1878,0.8308,1.0,1.0], "stroke": [0.8148,0.9823,1.0,0.9], "stroke_width": 0.03, "corner_radius": 0.0, "dashes": 0.0, "dash_duty": 0.5, "sweep_start": 0.0, "sweep_turns": 1.0, "blend": "over", "layer": 10, "points": [[0.0,0.5004],[0.2736,-0.2448],[0.09,-0.1728],[0.0,-0.3024],[-0.09,-0.1728],[-0.2736,-0.2448]] },
         "sindri.physics2d.rigid_body": { "kind": "dynamic", "pose": { "position": [0.0,0.0], "rotation": 0.0 }, "linear_velocity": [0.0,0.0], "angular_velocity": 0.0, "gravity_scale": 0.0, "linear_damping": 0.0, "angular_damping": 0.0, "lock_rotation": true },
         "sindri.physics2d.collider": { "shape": { "shape": "circle", "radius": 0.28 }, "offset": [0.0,0.0], "rotation": 0.0, "sensor": true, "layers": { "memberships": 4, "filter": 2 }, "friction": 0.0, "restitution": 0.0 },
         "sindri.script": { "source": "scripts/combat-lab-player.decay", "script": "CombatLabPlayer", "properties": { "speed": 5.2 } }

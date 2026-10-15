@@ -246,14 +246,13 @@ fn fire_lands_on_the_plates_rather_than_the_hull() {
     );
 }
 
-/// The Aegis wears its own steel.
+/// The Aegis wears its own blue.
 ///
 /// For a long time every boss but this one was a single orange gunship
-/// recolored by a script tint, and the Aegis was too: a blue asked for once at
+/// recoloured by a script tint, and the Aegis was too: a blue asked for once at
 /// configuration and overwritten every frame after by the cream its neighbours
-/// shared. Neither color was one anybody chose for it, and neither belonged
-/// beside its own blue plates. Every boss wears its own hull now, so the guard
-/// is two-sided — the right texture, and no tint over it.
+/// shared. Now it is a polygon filled in the original's cyan-blue, so the guard
+/// is that the fill is still that blue once its script has been running.
 #[test]
 fn it_wears_its_own_hull_rather_than_a_tinted_gunship() {
     let mut run = isolated_run();
@@ -262,27 +261,13 @@ fn it_wears_its_own_hull_rather_than_a_tinted_gunship() {
         step(&mut run);
     }
 
-    let sprite = run
-        .session
-        .components()
-        .get::<sindri_scene::SpriteComponent>(&run.world, aegis)
-        .expect("the sprite store answers")
-        .expect("the Aegis draws a sprite")
+    let fill = run.world.get(aegis).expect("the Aegis survives").components["sindri.shape"]["fill"]
         .clone();
-
+    let channel = |index: usize| fill[index].as_f64().expect("a fill channel");
     assert!(
-        sprite.texture.starts_with("textures/aegis.png#"),
-        "the Aegis draws its own sheet, not {}",
-        sprite.texture
+        channel(2) > 0.9 && channel(0) < 0.3,
+        "the Aegis is filled {fill}, not its own blue"
     );
-
-    for (channel, name) in sprite.tint.iter().take(3).zip(["red", "green", "blue"]) {
-        assert!(
-            (channel - 1.0).abs() < 1e-3,
-            "the {name} channel is {channel}: a tint would recolor a hull that \
-             is already the color it should be"
-        );
-    }
 }
 
 /// The ring goes where the boss goes.

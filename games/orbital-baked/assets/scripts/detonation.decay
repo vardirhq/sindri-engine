@@ -6,17 +6,27 @@
 // it is not a parameter of anything, it happens once and it is over, and the
 // frames were drawn rather than derived.
 //
-// So this is the whole script. It starts the clip and gets out of the way, and
-// the one thing it has to know is when the clip ended -- which is what
-// `Animation.is_finished` is for. Before it existed a one-shot had to be timed
-// by a countdown the script kept in step with the clip's own frame times by
-// hand, and the two drifted the moment anybody re-timed the animation.
+// So this is nearly the whole script. It starts the clip, and the one thing it
+// has to know is when the clip ended -- which is what `Animation.is_finished`
+// is for. Before it existed a one-shot had to be timed by a countdown the
+// script kept in step with the clip's own frame times by hand, and the two
+// drifted the moment anybody re-timed the animation.
+//
+// The first instant of the blast is white-hot. A tint can only darken a
+// sprite, so the flash is added through its colour offset and shed over the
+// first few frames.
 script Detonation {
+    var age: f32 = 0.0;
+
     fn start() {
         Animation.play(this.entity, "boom");
+        this.sprite.color_offset = Color(0.6, 0.5, 0.35, 0.0);
     }
 
     fn update(dt: f32) {
+        this.age += dt;
+        let heat = max(0.0, 1.0 - this.age / 0.16);
+        this.sprite.color_offset = Color(heat * 0.6, heat * 0.5, heat * 0.35, 0.0);
         if Animation.is_finished(this.entity) {
             World.despawn(this.entity);
         }

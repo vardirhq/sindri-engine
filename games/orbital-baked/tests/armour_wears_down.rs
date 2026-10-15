@@ -1,8 +1,8 @@
-//! Spine is now a segmented boss rather than a baked armour-state boss.
+//! Spine is a segmented boss rather than an armour-state boss.
 //!
-//! Keep the old sheet-wiring check because the head still uses that baked art,
-//! but prove the encounter's new identity at runtime: spawning Spine must build
-//! its full independent body without Decay errors.
+//! Its identity is proved at runtime: spawning Spine must build its full
+//! independent body without Decay errors, and the head sheds polygon sides as
+//! the body is cut down.
 
 use orbital_baked::Run;
 use sindri_core::EntityId;
@@ -349,46 +349,44 @@ fn a_severed_rear_chain_keeps_its_unvisited_route() {
     );
 }
 
-/// The legacy armour clips still back the head's baked animation. Even though
-/// health no longer selects them as armour tiers, every referenced frame must
-/// remain valid so the existing Spine art cannot silently rot.
+/// The head sheds sides as its body goes: ten, then eight, then five.
+///
+/// The original draws the Spine as a polygon that loses sides with its armour,
+/// and the vector redraw brought that back. A side count that never changes
+/// would leave a boss whose last phase looks like its first.
 #[test]
-fn every_armour_clip_names_frames_the_sheet_holds() {
-    let run = Run::open().expect("the project opens");
-    let prefab = run
-        .session
-        .prefabs()
-        .get("prefabs/spine.prefab")
-        .expect("the boss prefab ships");
-    let text =
-        std::fs::read_to_string(orbital_baked::project().join("assets/textures/spine.sheet"))
-            .expect("the sheet reads");
-    let sheet: serde_json::Value = serde_json::from_str(&text).expect("the sheet parses");
-    let names: Vec<&str> = sheet["grid"]["names"]
-        .as_array()
-        .expect("frame names")
-        .iter()
-        .filter_map(serde_json::Value::as_str)
-        .collect();
+fn the_head_sheds_sides_as_its_body_goes() {
+    let mut run = isolated_run();
+    let boss = spawn_spine(&mut run);
+    step(&mut run);
+    step(&mut run);
+    let sides = |run: &Run| {
+        run.world.get(boss).expect("the boss survives").components["sindri.shape"]["count"]
+            .as_f64()
+            .expect("the head is a polygon")
+    };
+    assert_eq!(sides(&run), 10.0, "a whole Spine has ten sides");
 
-    let json = serde_json::to_value(prefab).expect("the prefab serialises");
-    let clips = json["entities"][0]["components"]["sindri.animation.sprite"]["clips"]
-        .as_object()
-        .expect("the boss has clips");
-    assert_eq!(
-        clips.len(),
-        5,
-        "the baked head still ships five clips: {clips:?}"
-    );
-    for (name, clip) in clips {
-        let frames = clip["frames"].as_array().expect("frames");
-        assert!(!frames.is_empty(), "clip {name} has no frames");
-        for frame in frames {
-            let frame = frame.as_str().expect("a frame name");
-            assert!(
-                names.contains(&frame),
-                "clip {name} names frame {frame}, which the sheet does not hold"
-            );
+    let cut = |run: &mut Run, keep: usize| {
+        let parts = tagged(run, "spine_segment");
+        for part in parts.into_iter().skip(keep) {
+            run.world
+                .despawn_recursive(part)
+                .expect("a section despawns");
         }
-    }
+        step(run);
+        step(run);
+    };
+    cut(&mut run, 5);
+    assert_eq!(
+        sides(&run),
+        8.0,
+        "with five sections left the head has eight sides"
+    );
+    cut(&mut run, 2);
+    assert_eq!(
+        sides(&run),
+        5.0,
+        "with two sections left the head has five sides"
+    );
 }

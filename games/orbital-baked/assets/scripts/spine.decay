@@ -120,8 +120,9 @@ script Spine {
             Effects.burst(this.entity);
             Camera.impact(0.35);
             Audio.play("audio/boss.wav", 0.5);
-            if this.phase == 2.0 { Animation.play(this.entity, "armour8"); }
-            if this.phase == 3.0 { Animation.play(this.entity, "armour5"); }
+            // The hull sheds sides as its plates go: ten, then eight, then five.
+            if this.phase == 2.0 { this.shape.count = 8.0; }
+            if this.phase == 3.0 { this.shape.count = 5.0; }
         }
     }
 

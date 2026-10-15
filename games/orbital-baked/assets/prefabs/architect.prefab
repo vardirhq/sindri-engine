@@ -20,8 +20,8 @@
           1.0
         ],
         "scale": [
-          1.0,
-          1.0,
+          1.83,
+          1.83,
           1.0
         ]
       },
@@ -54,7 +54,7 @@
         "sindri.physics2d.collider": {
           "shape": {
             "shape": "circle",
-            "radius": 0.5
+            "radius": 0.92
           },
           "offset": [
             0.0,
@@ -96,31 +96,192 @@
             "death_burst": "prefabs/nova.prefab"
           }
         },
-        "sindri.sprite": {
-          "texture": "textures/architect.png#body-0",
-          "tint": [
-            1.0,
-            1.0,
+        "sindri.shape": {
+          "kind": "polygon",
+          "count": 6.0,
+          "fill": [
+            0.1683,
+            0.9047,
             1.0,
             1.0
           ],
+          "stroke": [
+            0.6257,
+            0.9571,
+            1.0,
+            0.95
+          ],
+          "stroke_width": 0.04,
+          "corner_radius": 0.0,
+          "dashes": 0.0,
+          "dash_duty": 0.5,
+          "sweep_start": 0.0,
+          "sweep_turns": 1.0,
+          "blend": "over",
           "layer": 3
+        }
+      }
+    },
+    {
+      "id": "architect-ring",
+      "name": "Architect Ring",
+      "parent": "architect",
+      "transform_3d": {
+        "position": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "rotation": [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        "scale": [
+          1.222,
+          1.222,
+          1.0
+        ]
+      },
+      "components": {
+        "sindri.script": {
+          "source": "scripts/boss-ring.decay",
+          "script": "BossRing",
+          "properties": {
+            "spin": 1.0,
+            "width": 0.03
+          }
         },
-        "sindri.animation.sprite": {
-          "clips": {
-            "idle": {
-              "frames": [
-                "body-0",
-                "body-1",
-                "body-2",
-                "body-3"
-              ],
-              "seconds_per_frame": 0.12,
-              "looping": true
-            }
-          },
-          "playing": "idle",
-          "speed": 1.0
+        "sindri.shape": {
+          "kind": "polygon",
+          "count": 6.0,
+          "fill": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "stroke": [
+            1.0,
+            0.9047,
+            0.7379,
+            0.7
+          ],
+          "stroke_width": 0.03,
+          "corner_radius": 0.0,
+          "dashes": 0.0,
+          "dash_duty": 0.5,
+          "sweep_start": 0.0,
+          "sweep_turns": 1.0,
+          "blend": "over",
+          "layer": 4
+        }
+      }
+    },
+    {
+      "id": "architect-core",
+      "name": "Architect Core",
+      "parent": "architect",
+      "transform_3d": {
+        "position": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "rotation": [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        "scale": [
+          0.46,
+          0.46,
+          1.0
+        ]
+      },
+      "components": {
+        "sindri.script": {
+          "source": "scripts/boss-ring.decay",
+          "script": "BossRing",
+          "properties": {
+            "spin": -1.6,
+            "width": 0.07
+          }
+        },
+        "sindri.shape": {
+          "kind": "polygon",
+          "count": 6.0,
+          "fill": [
+            0.0303,
+            0.1628,
+            0.18,
+            0.92
+          ],
+          "stroke": [
+            0.6257,
+            0.9571,
+            1.0,
+            0.8
+          ],
+          "stroke_width": 0.07,
+          "corner_radius": 0.0,
+          "dashes": 0.0,
+          "dash_duty": 0.5,
+          "sweep_start": 0.0,
+          "sweep_turns": 1.0,
+          "blend": "over",
+          "layer": 4
+        }
+      }
+    },
+    {
+      "id": "architect-frame",
+      "name": "Architect Frame",
+      "parent": "architect",
+      "transform_3d": {
+        "position": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "rotation": [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        "scale": [
+          1.356,
+          1.356,
+          1.0
+        ]
+      },
+      "components": {
+        "sindri.shape": {
+          "kind": "rect",
+          "count": 4.0,
+          "fill": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "stroke": [
+            1.0,
+            0.9047,
+            0.7379,
+            0.55
+          ],
+          "stroke_width": 0.025,
+          "corner_radius": 0.0,
+          "dashes": 0.0,
+          "dash_duty": 0.5,
+          "sweep_start": 0.0,
+          "sweep_turns": 1.0,
+          "blend": "over",
+          "layer": 4
         }
       }
     }

@@ -1,8 +1,8 @@
 // Anchors, and builds slow walls across the arena until there is
 // nowhere left to stand.
 //
-// Its hull is baked from `textures/architect.isobake`; everything this
-// script does to it beyond that is motion.
+// Its hull is a vector polygon drawn by its prefab; beyond its colour,
+// everything this script does to it is motion.
 script Architect {
     @export let shot: Prefab;
     @export let core: Prefab;
@@ -38,9 +38,10 @@ script Architect {
     }
 
     fn tint() {
-        this.sprite.tint.r = 0.45;
-        this.sprite.tint.g = 0.96;
-        this.sprite.tint.b = 1.0;
+        // The original's #72f4ff, in the linear light the renderer blends in.
+        this.shape.fill.r = 0.1683;
+        this.shape.fill.g = 0.9047;
+        this.shape.fill.b = 1.0;
     }
 
     fn update(dt: f32) {
@@ -89,9 +90,9 @@ script Architect {
         }
         if this.phase_flash > 0.0 {
             this.phase_flash -= dt;
-            this.sprite.tint.r = 1.0;
-            this.sprite.tint.g = 1.0;
-            this.sprite.tint.b = 1.0;
+            this.shape.fill.r = 1.0;
+            this.shape.fill.g = 1.0;
+            this.shape.fill.b = 1.0;
         } else {
             tint();
         }

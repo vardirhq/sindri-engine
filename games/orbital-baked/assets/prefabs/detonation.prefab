@@ -5,7 +5,7 @@
     "id": "detonation", "name": "Detonation",
     "transform_3d": { "position": [0.0, 0.0, 0.0], "rotation": [0.0, 0.0, 0.0, 1.0], "scale": [1.8571, 1.8571, 1.0] },
     "components": {
-      "sindri.sprite": { "texture": "textures/detonation.png#boom-0", "tint": [1.0, 1.0, 1.0, 1.0], "layer": 9 },
+      "sindri.sprite": { "texture": "textures/detonation.png#boom-0", "tint": [1.0, 1.0, 1.0, 1.0], "layer": 9, "color_transform": { "multiply": [1.0, 1.0, 1.0, 1.0], "offset": [0.0, 0.0, 0.0, 0.0] } },
       "sindri.animation.sprite": {
         "clips": {
           "boom": {

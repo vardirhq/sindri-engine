@@ -106,7 +106,12 @@ script Hud {
         let hp = max(Game.hp, 0.0);
         let max_hp = max(Game.max_hp, 1.0);
         Ui.set_fill(this.health_bar, hp / max_hp);
-        Ui.set_numbers(this.health_text, hp, max_hp);
+        // Hull is kept on a five-point scale and damage takes fractions of a
+        // point, so the raw value reads "0.65/5". Round up for the label: a
+        // ship that is still flying shows at least one point left.
+        var shown_hp: f32 = hp - hp % 1.0;
+        if shown_hp < hp { shown_hp += 1.0; }
+        Ui.set_numbers(this.health_text, shown_hp, max_hp);
         animate_player_health();
 
         let cores = Game.cores;
@@ -184,7 +189,7 @@ script Hud {
         let name = Ui.input_text(this.callsign);
         if name == this.shown_pilot { return; }
         this.shown_pilot = name;
-        if name == "" { Ui.set_text(this.pilot, "PILOT"); }
+        if name == "" { Ui.set_text(this.pilot, "SCORE"); }
         else { Ui.set_text(this.pilot, "PILOT  /  " + name); }
     }
 

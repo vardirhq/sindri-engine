@@ -55,7 +55,7 @@ $C site/screenshots/orbital-baked-combat.png 1440 900 click:title-start wait:5
 $C site/screenshots/orbital-baked-upgrade.png 1440 900 click:title-start wait:3 set:cores=40 wait:1
 $C site/screenshots/orbital-baked-phone.png 390 844 click:title-start wait:5
 $C site/screenshots/orbital-baked-aegis.png 1440 900 \
-  $(printf 'click:title-pick %.0s' $(seq 11)) click:title-rush wait:7
+  set:rush_from=11 wait:0.1 click:title-rush wait:7
 
 cargo run -p sindri-causeway --bin causeway-capture -- site/screenshots/causeway.png
 cargo run -p sindri-cube --bin capture -- site/screenshots/scene-frame-pipeline.png

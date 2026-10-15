@@ -31,6 +31,8 @@ struct Shot {
     /// Press these elements in order once play has settled, by the names the
     /// scene gave them.
     clicks: Vec<String>,
+    /// The roster index a boss rush opens on, when the shot is of a boss.
+    rush_from: Option<f32>,
 }
 
 fn shot_for(name: &str) -> Shot {
@@ -39,17 +41,16 @@ fn shot_for(name: &str) -> Shot {
     if let Some(index) = name.strip_prefix("boss-")
         && let Ok(index) = index.parse::<usize>()
     {
-        // Open the roster, choose the boss, then start the rush.
-        let clicks = vec![
-            "TitlePick".to_owned(),
-            format!("TitlePick{index}"),
-            "TitleRush".to_owned(),
-        ];
+        // Choose the boss, then start the rush. The choice is written to the
+        // board the picker reads rather than clicked: a click on the seventh
+        // row onward landed on nothing, so every later shot photographed the
+        // Warden.
         return Shot {
             // Long enough for the boss to descend into the frame and open with
             // whatever it opens with.
             seconds: 7.0,
-            clicks,
+            clicks: vec!["TitleRush".to_owned()],
+            rush_from: Some(index as f32),
         };
     }
     match name {
@@ -57,6 +58,7 @@ fn shot_for(name: &str) -> Shot {
         "playing" => Shot {
             seconds: 12.0,
             clicks: vec!["TitleStart".to_owned()],
+            rush_from: None,
         },
         // Mid-fight, before the first upgrade interrupts it. This is the shot
         // that shows the cast, which "playing" at twelve seconds does not:
@@ -64,12 +66,14 @@ fn shot_for(name: &str) -> Shot {
         "combat" => Shot {
             seconds: 5.0,
             clicks: vec!["TitleStart".to_owned()],
+            rush_from: None,
         },
         // A deliberately excessive combat build used to inspect the complete
         // effect vocabulary together: spread fire, every proc, and companions.
         "spectacle" => Shot {
             seconds: 5.0,
             clicks: vec!["TitleStart".to_owned()],
+            rush_from: None,
         },
         // The real development playground with its stress combination active.
         // Opening the scene directly keeps this deterministic and ensures the
@@ -79,12 +83,14 @@ fn shot_for(name: &str) -> Shot {
             // shockwave reaches the mines and resolves the whole composition.
             seconds: 0.32,
             clicks: Vec::new(),
+            rush_from: None,
         },
         // The title screen, which is what a player sees first and what every
         // layout mistake shows up on.
         _ => Shot {
             seconds: 0.2,
             clicks: Vec::new(),
+            rush_from: None,
         },
     }
 }
@@ -162,6 +168,10 @@ async fn capture(
         run.set_board("lab_autoplay", 0.0);
         run.set_board("lab_combo", 3.0);
         run.set_board("lab_invulnerable", 1.0);
+    }
+    if let Some(index) = shot.rush_from {
+        run.set_board("rush_from", index);
+        run.step(1.0 / 60.0);
     }
     for element in &shot.clicks {
         run.click(element);

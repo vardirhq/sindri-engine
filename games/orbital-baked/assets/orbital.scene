@@ -78,7 +78,7 @@
       "components": {
         "sindri.shape": {
           "kind": "grid",
-          "count": 52.0,
+          "count": 61.0,
           "fill": [
             0,
             0,
@@ -4507,8 +4507,8 @@
           1.0
         ],
         "scale": [
-          0.42,
-          0.42,
+          0.622,
+          0.622,
           1.0
         ]
       },
@@ -4566,31 +4566,55 @@
             "player"
           ]
         },
-        "sindri.sprite": {
-          "texture": "textures/player.png#hull-0",
-          "tint": [
-            1.0,
-            1.0,
+        "sindri.shape": {
+          "kind": "polygon",
+          "count": 6.0,
+          "fill": [
+            0.1878,
+            0.8308,
             1.0,
             1.0
           ],
-          "layer": 5
-        },
-        "sindri.animation.sprite": {
-          "clips": {
-            "idle": {
-              "frames": [
-                "hull-0",
-                "hull-1",
-                "hull-2",
-                "hull-3"
-              ],
-              "seconds_per_frame": 0.09,
-              "looping": true
-            }
-          },
-          "playing": "idle",
-          "speed": 1.0
+          "stroke": [
+            0.8148,
+            0.9823,
+            1.0,
+            0.9
+          ],
+          "stroke_width": 0.03,
+          "corner_radius": 0.0,
+          "dashes": 0.0,
+          "dash_duty": 0.5,
+          "sweep_start": 0.0,
+          "sweep_turns": 1.0,
+          "blend": "over",
+          "layer": 5,
+          "points": [
+            [
+              0.0,
+              0.5004
+            ],
+            [
+              0.2736,
+              -0.2448
+            ],
+            [
+              0.09,
+              -0.1728
+            ],
+            [
+              0.0,
+              -0.3024
+            ],
+            [
+              -0.09,
+              -0.1728
+            ],
+            [
+              -0.2736,
+              -0.2448
+            ]
+          ]
         },
         "sindri.effect.burst": {
           "texture": "textures/fleck.png",
@@ -4645,14 +4669,14 @@
           "kind": "polygon",
           "count": 6.0,
           "fill": [
-            0.47059,
-            0.92157,
+            0.1878,
+            0.8308,
             1.0,
             0.0
           ],
           "stroke": [
-            0.47059,
-            0.92157,
+            0.1878,
+            0.8308,
             1.0,
             0.5
           ],
@@ -4692,7 +4716,7 @@
         "sindri.script": {
           "properties": {
             "kind": 2.0,
-            "side": -0.075
+            "side": -0.067
           },
           "script": "PlayerVisual",
           "source": "scripts/player-visual.decay"
@@ -4701,14 +4725,14 @@
           "kind": "polygon",
           "count": 3.0,
           "fill": [
-            0.47059,
-            0.92157,
+            0.1878,
+            0.8308,
             1.0,
             0.42
           ],
           "stroke": [
-            0.91373,
-            0.99216,
+            0.8149,
+            0.9823,
             1.0,
             0.2
           ],
@@ -4748,7 +4772,7 @@
         "sindri.script": {
           "properties": {
             "kind": 2.0,
-            "side": 0.075
+            "side": 0.067
           },
           "script": "PlayerVisual",
           "source": "scripts/player-visual.decay"
@@ -4757,14 +4781,14 @@
           "kind": "polygon",
           "count": 3.0,
           "fill": [
-            0.47059,
-            0.92157,
+            0.1878,
+            0.8308,
             1.0,
             0.42
           ],
           "stroke": [
-            0.91373,
-            0.99216,
+            0.8149,
+            0.9823,
             1.0,
             0.2
           ],
@@ -4813,14 +4837,14 @@
           "kind": "ellipse",
           "count": 6.0,
           "fill": [
-            0.91373,
-            0.99216,
+            0.8149,
+            0.9823,
             1.0,
             0.88
           ],
           "stroke": [
-            0.47059,
-            0.92157,
+            0.1878,
+            0.8308,
             1.0,
             1.0
           ],
@@ -4832,6 +4856,88 @@
           "sweep_turns": 1.0,
           "blend": "add",
           "layer": 6
+        }
+      }
+    },
+    {
+      "id": "player-chevron",
+      "name": "Player Chevron",
+      "transform_3d": {
+        "position": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "rotation": [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        "scale": [
+          0.622,
+          0.622,
+          1.0
+        ]
+      },
+      "components": {
+        "sindri.script": {
+          "properties": {
+            "kind": 4.0,
+            "side": 0.0
+          },
+          "script": "PlayerVisual",
+          "source": "scripts/player-visual.decay"
+        },
+        "sindri.shape": {
+          "kind": "polygon",
+          "count": 6.0,
+          "fill": [
+            0.8148,
+            0.9823,
+            1.0,
+            0.78
+          ],
+          "stroke": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "stroke_width": 0.0,
+          "corner_radius": 0.0,
+          "dashes": 0.0,
+          "dash_duty": 0.5,
+          "sweep_start": 0.0,
+          "sweep_turns": 1.0,
+          "blend": "over",
+          "layer": 6,
+          "points": [
+            [
+              -0.18,
+              -0.1728
+            ],
+            [
+              0.0,
+              0.3096
+            ],
+            [
+              0.18,
+              -0.1728
+            ],
+            [
+              0.1368,
+              -0.1728
+            ],
+            [
+              0.0,
+              0.2304
+            ],
+            [
+              -0.1368,
+              -0.1728
+            ]
+          ]
         }
       }
     },

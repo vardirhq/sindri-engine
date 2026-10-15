@@ -1,7 +1,7 @@
 // Cannot be hurt while any of its children lives.
 //
-// Its hull is baked from `textures/brood.isobake`; everything this
-// script does to it beyond that is motion.
+// Its hull is a vector polygon drawn by its prefab; beyond its colour,
+// everything this script does to it is motion.
 script Brood {
     @export let shot: Prefab;
     @export let core: Prefab;
@@ -39,9 +39,10 @@ script Brood {
     }
 
     fn tint() {
-        this.sprite.tint.r = 0.72;
-        this.sprite.tint.g = 1.0;
-        this.sprite.tint.b = 0.4;
+        // The original's #b7ff65, in the linear light the renderer blends in.
+        this.shape.fill.r = 0.4735;
+        this.shape.fill.g = 1.0;
+        this.shape.fill.b = 0.1301;
     }
 
     fn update(dt: f32) {
@@ -91,9 +92,9 @@ script Brood {
         }
         if this.phase_flash > 0.0 {
             this.phase_flash -= dt;
-            this.sprite.tint.r = 1.0;
-            this.sprite.tint.g = 1.0;
-            this.sprite.tint.b = 1.0;
+            this.shape.fill.r = 1.0;
+            this.shape.fill.g = 1.0;
+            this.shape.fill.b = 1.0;
         } else {
             tint();
         }

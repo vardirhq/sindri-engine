@@ -185,7 +185,7 @@ The ordered work required to close these gaps is tracked in
 | Feature | Engine | Editor | Decay | Proof | vs. baseline | Gap that matters |
 | --- | :-: | :-: | :-: | :-: | --- | --- |
 | Sprites, sheets, UVs, layers, blending | ✅ | ✅ | 🟡 | ✅ | **Par** | Decay has sprite asset and visibility paths only |
-| **Advanced sprite colour transform** | ✅ | ✅ | ✅ | ✅ | **Par** | Per-channel multiply and offset beyond tint, as `sample * tint * multiply + offset`, collapsed behind an advanced section with a reset. A transform that is not finite is refused at extraction; one merely outside zero to one is left to clip. Orbital's charger glows white-hot through its wind-up by its colour offset, which a tint cannot do, and sheds the heat as it dashes (`games/orbital-baked/tests/the_charger_glows.rs`) |
+| **Advanced sprite colour transform** | ✅ | ✅ | ✅ | ✅ | **Par** | Per-channel multiply and offset beyond tint, as `sample * tint * multiply + offset`, collapsed behind an advanced section with a reset. A transform that is not finite is refused at extraction; one merely outside zero to one is left to clip. Orbital's mine blast opens white-hot through its colour offset, which a tint cannot do, and sheds the flash within its first frames (`games/orbital-baked/tests/the_blast_flashes.rs`) |
 | Sheet-declared ground anchor | ✅ | ✅ | — | ✅ | **Ahead** | Says where a sprite meets the ground, so sorting is authored rather than guessed |
 | Procedural shapes | ✅ | 🟡 | ✅ | ✅ | **Ahead** | Instanced with sprites; Unity needs a plugin or a mesh. No point-handle authoring |
 | Tilemaps (ortho + iso, overhang) | ✅ | ✅ | ✅ | ✅ | **Par** | `Grid.tile`/`set_tile` read and write cells; `Grid.columns`/`rows` give the size. The platformer's level is a painted tilemap and is the proof. Low Tide's scripts read its deck for walls and its Basin for soft sand, and write typed resource bundles into and out of its starter's four-slot hold with `Grid.set_tile`; its workbench spends physical cargo on up to three stern extensions (sixteen slots), a bunk and an engine upgrade, preserving the deck origin and crew while driving. Keyboard and phone-touch runtime tests exercise construction and refusal; this is fixed-blueprint Decay gameplay using existing engine APIs. Low Tide's high-tide dive also reads an authored side-view hull for swimming collision and returns recovered cargo to the original deck; keys and phone touch play the trip, air loss and ebb recovery. Its site history is session-only, and the authored interior is not a voxel cross-section |
@@ -650,7 +650,7 @@ the absent systems below.
 The advanced sprite colour transform and the UI slider were both found by
 Mujaffa Remaster, an external project, and for a while neither had a user
 here. Both now do: the slider in Orbital's pause mixer and Sound Mixer, and
-the colour transform in Orbital's charger, which adds its wind-up glow through
+the colour transform in Orbital's mine blast, which flashes white-hot through
 the colour offset because a tint, being a multiply, can only darken.
 
 ---
