@@ -132,7 +132,7 @@ fn the_platformer_sounds_render_from_their_committed_sources() {
             std::fs::read_to_string(audio.join(format!("{name}.sindrisfx"))).expect("the source");
         let file = SfxFile::from_json(&text).expect("a valid source");
         let rendered: Vec<i16> = crate::lab::wav::decode(
-            &crate::lab::wav::encode(&file.sound.render()).expect("encodes"),
+            &crate::lab::wav::encode(&file.sound.render(), 1).expect("encodes"),
         )
         .expect("decodes");
         let committed = crate::lab::wav::decode(

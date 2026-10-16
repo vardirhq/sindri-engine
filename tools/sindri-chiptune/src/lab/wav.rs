@@ -2,10 +2,11 @@
 use super::RATE;
 use std::error::Error;
 
-/// Encodes normalized samples as a 44.1 kHz, 16-bit, mono RIFF/WAVE file.
+/// Encodes normalized samples as a 44.1 kHz, 16-bit RIFF/WAVE file; stereo
+/// samples are interleaved, left first.
 // Samples are clamped to the signed 16-bit range before the cast.
 #[allow(clippy::cast_possible_truncation)]
-pub(super) fn encode(samples: &[f32]) -> Result<Vec<u8>, Box<dyn Error>> {
+pub(super) fn encode(samples: &[f32], channels: u16) -> Result<Vec<u8>, Box<dyn Error>> {
     let bytes = u32::try_from(samples.len())?
         .checked_mul(2)
         .ok_or("WAV too long")?;
@@ -15,10 +16,10 @@ pub(super) fn encode(samples: &[f32]) -> Result<Vec<u8>, Box<dyn Error>> {
     out.extend_from_slice(b"WAVEfmt ");
     out.extend_from_slice(&16_u32.to_le_bytes());
     out.extend_from_slice(&1_u16.to_le_bytes()); // PCM
-    out.extend_from_slice(&1_u16.to_le_bytes()); // mono
+    out.extend_from_slice(&channels.to_le_bytes());
     out.extend_from_slice(&RATE.to_le_bytes());
-    out.extend_from_slice(&(RATE * 2).to_le_bytes());
-    out.extend_from_slice(&2_u16.to_le_bytes());
+    out.extend_from_slice(&(RATE * 2 * u32::from(channels)).to_le_bytes());
+    out.extend_from_slice(&(2 * channels).to_le_bytes());
     out.extend_from_slice(&16_u16.to_le_bytes());
     out.extend_from_slice(b"data");
     out.extend_from_slice(&bytes.to_le_bytes());
@@ -30,8 +31,12 @@ pub(super) fn encode(samples: &[f32]) -> Result<Vec<u8>, Box<dyn Error>> {
 }
 
 #[cfg(not(target_arch = "wasm32"))]
-pub(super) fn write(path: &std::path::Path, samples: &[f32]) -> Result<(), Box<dyn Error>> {
-    std::fs::write(path, encode(samples)?)?;
+pub(super) fn write(
+    path: &std::path::Path,
+    samples: &[f32],
+    channels: u16,
+) -> Result<(), Box<dyn Error>> {
+    std::fs::write(path, encode(samples, channels)?)?;
     Ok(())
 }
 

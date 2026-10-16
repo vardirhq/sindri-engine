@@ -178,7 +178,7 @@ impl ComposerApp {
         }
         #[cfg(target_arch = "wasm32")]
         {
-            let result = wav::encode(&render_samples(&settings, &notes))
+            let result = wav::encode(&render_samples(&settings, &notes), 2)
                 .map_err(|e| e.to_string())
                 .and_then(|bytes| self.files.save(&save, &bytes));
             self.report(result);
@@ -212,7 +212,7 @@ impl ComposerApp {
             },
         };
         let bytes = if as_wav {
-            wav::encode(&self.sfx.samples).map_err(|e| e.to_string())
+            wav::encode(&self.sfx.samples, 1).map_err(|e| e.to_string())
         } else {
             Ok(self.sfx.file.to_json().into_bytes())
         };
@@ -233,11 +233,11 @@ impl ComposerApp {
         if self.mode == Mode::Music {
             let song = self.song_file();
             let samples = render_samples(&song.settings(), &song.tracks);
-            let bytes = wav::encode(&samples).map_err(|e| e.to_string())?;
+            let bytes = wav::encode(&samples, 2).map_err(|e| e.to_string())?;
             Ok((self.song_name.clone(), bytes, "sindrisong", song.to_json()))
         } else {
             self.sfx.refresh();
-            let bytes = wav::encode(&self.sfx.samples).map_err(|e| e.to_string())?;
+            let bytes = wav::encode(&self.sfx.samples, 1).map_err(|e| e.to_string())?;
             Ok((
                 self.sfx.name.clone(),
                 bytes,

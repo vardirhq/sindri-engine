@@ -1,6 +1,5 @@
-//! Independent instrument definitions for the standalone chiptune renderer.
+//! The sounds a song is played with: presets, and the mixer that holds them.
 use serde::{Deserialize, Serialize};
-use std::f64::consts::TAU;
 
 #[derive(Clone, Copy, PartialEq, Eq, Debug, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
@@ -56,76 +55,6 @@ impl Preset {
             Self::IndustrialNoise => "Industrial Kit",
         }
     }
-    fn wave(self, phase: f64) -> f64 {
-        let p = phase.fract();
-        match self {
-            Self::WarmTriangle => 1.0 - 4.0 * (p - 0.5).abs(),
-            Self::DeepBass => (TAU * p).sin() * 0.85 + (TAU * p * 2.0).sin() * 0.15,
-            Self::RubberBass => (TAU * p).sin() * 0.55 + Self::pulse(p, 0.3) * 0.3,
-            Self::SoftSquare => {
-                if p < 0.5 {
-                    0.7
-                } else {
-                    -0.7
-                }
-            }
-            Self::BrightSquare => {
-                if p < 0.5 {
-                    1.0
-                } else {
-                    -1.0
-                }
-            }
-            Self::HollowPulse => Self::pulse(p, 0.125),
-            Self::Bell => (TAU * p).sin() * 0.65 + (TAU * phase * 2.51).sin() * 0.3,
-            Self::Glass => (TAU * p).sin() * 0.6 + (TAU * p * 4.0).sin() * 0.32,
-            Self::Detuned => Self::pulse(p, 0.25) * 0.6 + (TAU * phase * 1.009).sin() * 0.4,
-            Self::SawLead => 2.0 * p - 1.0,
-            Self::Organ => {
-                (TAU * p).sin() * 0.5 + (TAU * p * 2.0).sin() * 0.3 + (TAU * p * 3.0).sin() * 0.2
-            }
-            Self::SoftPluck => (TAU * p).sin() * 0.8 + (TAU * p * 3.0).sin() * 0.15,
-            _ => 0.0,
-        }
-    }
-    // A narrow pulse must have zero mean to avoid a large DC offset in the mix.
-    fn pulse(phase: f64, duty: f64) -> f64 {
-        if phase < duty {
-            1.0
-        } else {
-            -duty / (1.0 - duty)
-        }
-    }
-    pub(super) fn sample(self, phase: f64, age: f64, duration: f64) -> f64 {
-        let attack = (age / 0.006).min(1.0);
-        let release = ((duration - age) / 0.025).clamp(0.0, 1.0);
-        let decay = match self {
-            Self::Bell | Self::Glass => (-7.0 * age).exp(),
-            Self::SoftPluck => (-11.0 * age).exp(),
-            Self::RubberBass => (-2.0 * age).exp(),
-            Self::BrightSquare | Self::SawLead => (-0.7 * age).exp(),
-            _ => (-1.1 * age).exp(),
-        };
-        self.wave(phase) * attack * release * decay
-    }
-    pub(super) fn noise(self, white: f64, age: f64) -> f64 {
-        let length = match self {
-            Self::SoftNoise => 0.075,
-            Self::CrispNoise => 0.12,
-            Self::IndustrialNoise => 0.22,
-            _ => 0.0,
-        };
-        if age > length || length == 0.0 {
-            return 0.0;
-        }
-        let texture = match self {
-            Self::SoftNoise => 0.45,
-            Self::CrispNoise => 0.8,
-            Self::IndustrialNoise => 1.1,
-            _ => 0.0,
-        };
-        white * texture * (1.0 - age / length).powi(2)
-    }
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Serialize, Deserialize)]
@@ -152,24 +81,51 @@ impl TrackSound {
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub(super) struct Rack {
+    /// Bass, arpeggio, lead and drums.
     pub(super) tracks: [TrackSound; 4],
+    /// The chords under the song, read from the bass line.
+    #[serde(default = "default_pad")]
+    pub(super) pad: TrackSound,
+    /// How much room and echo the mix has, 0..1.
+    #[serde(default = "default_space")]
+    pub(super) space: f32,
+}
+fn default_pad() -> TrackSound {
+    TrackSound::new(Preset::Detuned, 0.5)
+}
+fn default_space() -> f32 {
+    0.5
 }
 impl Default for Rack {
     fn default() -> Self {
         Self {
             tracks: [
-                TrackSound::new(Preset::WarmTriangle, 0.65),
-                TrackSound::new(Preset::Glass, 0.42),
-                TrackSound::new(Preset::HollowPulse, 0.65),
-                TrackSound::new(Preset::SoftNoise, 0.38),
+                TrackSound::new(Preset::DeepBass, 0.7),
+                TrackSound::new(Preset::Glass, 0.55),
+                TrackSound::new(Preset::SawLead, 0.65),
+                TrackSound::new(Preset::CrispNoise, 0.6),
             ],
+            pad: default_pad(),
+            space: default_space(),
         }
     }
 }
 impl Rack {
+    /// Channel 0..3 is a track, 4 the pad.
+    pub(super) fn channel(&self, index: usize) -> &TrackSound {
+        if index == 4 {
+            &self.pad
+        } else {
+            &self.tracks[index]
+        }
+    }
     pub(super) fn audible(&self, index: usize) -> bool {
-        let any_solo = self.tracks.iter().any(|track| track.solo);
-        let track = self.tracks[index];
+        let any_solo = self
+            .tracks
+            .iter()
+            .chain([&self.pad])
+            .any(|track| track.solo);
+        let track = self.channel(index);
         !track.muted && (!any_solo || track.solo)
     }
 }
@@ -183,28 +139,21 @@ mod tests {
         rack.tracks[2].solo = true;
         assert!(rack.audible(2));
         assert!(!rack.audible(0));
+        assert!(!rack.audible(4));
+        rack.pad.solo = true;
+        assert!(rack.audible(4));
         rack.tracks[2].muted = true;
         assert!(!rack.audible(2));
     }
     #[test]
-    fn hollow_pulse_has_no_dc_offset() {
-        let sum: f64 = (0..128)
-            .map(|i| Preset::HollowPulse.wave(f64::from(i) / 128.0))
-            .sum();
-        assert!(sum.abs() < 1e-10);
-    }
-    #[test]
-    fn detuned_partial_does_not_reset_every_fundamental_cycle() {
-        let a = Preset::Detuned.wave(0.23);
-        let b = Preset::Detuned.wave(1.23);
-        assert!((a - b).abs() > 0.001);
-    }
-    #[test]
-    fn presets_have_different_samples() {
-        assert!(
-            (Preset::Bell.sample(0.23, 0.1, 0.4) - Preset::BrightSquare.sample(0.23, 0.1, 0.4))
-                .abs()
-                > 0.01
-        );
+    fn a_rack_saved_before_the_pad_existed_still_loads() {
+        let old = r#"{"tracks":[
+            {"preset":"warm_triangle","volume":0.65,"muted":false,"solo":false,"octave":0},
+            {"preset":"glass","volume":0.42,"muted":false,"solo":false,"octave":0},
+            {"preset":"hollow_pulse","volume":0.65,"muted":false,"solo":false,"octave":0},
+            {"preset":"soft_noise","volume":0.38,"muted":false,"solo":false,"octave":0}]}"#;
+        let rack: Rack = serde_json::from_str(old).expect("old rack");
+        assert_eq!(rack.pad, default_pad());
+        assert!((rack.space - 0.5).abs() < f32::EPSILON);
     }
 }

@@ -1,5 +1,7 @@
-//! Continuous sample source: the audio thread owns its timeline and synth state.
-use super::{Note, RATE, STEPS, Settings, noise, voice};
+//! Continuous playback: the audio thread owns an engine and takes commands.
+#[cfg(not(target_arch = "wasm32"))]
+use super::RATE;
+use super::{Note, Settings, synth::Engine};
 #[cfg(not(target_arch = "wasm32"))]
 use rodio::Source;
 use std::sync::{
@@ -18,28 +20,30 @@ pub(super) enum Command {
     Loop(bool),
 }
 
-/// How many of the most recent output samples the oscilloscope sees.
+/// How many of the most recent output frames the oscilloscope sees.
 pub(super) const SCOPE: usize = 1024;
+/// Frames rendered at a time between commands.
+const BLOCK: usize = 256;
 
 pub(super) struct Transport {
     pub(super) tx: Sender<Command>,
     pub(super) position: Arc<AtomicU64>,
-    /// The latest output, oldest first, for drawing. Never blocks the audio thread.
+    /// The latest output as mono, oldest first. Never blocks the audio thread.
     pub(super) scope: Arc<Mutex<Vec<f32>>>,
 }
 
 pub(super) struct LiveSource {
-    settings: Settings,
-    tracks: [Vec<Note>; 3],
+    engine: Engine,
     rx: Receiver<Command>,
     position: Arc<AtomicU64>,
     scope: Arc<Mutex<Vec<f32>>>,
-    sample: u64,
     looped: bool,
-    buffer: [f32; 256],
-    cursors: [usize; 3],
+    finished: bool,
+    buffer: Vec<[f32; 2]>,
+    /// The next interleaved sample to hand out, counting both channels.
     offset: usize,
 }
+
 impl LiveSource {
     pub(super) fn new(settings: Settings, tracks: [Vec<Note>; 3]) -> (Self, Transport) {
         let (tx, rx) = mpsc::channel();
@@ -51,153 +55,91 @@ impl LiveSource {
             scope: Arc::clone(&scope),
         };
         let source = Self {
-            settings,
-            tracks,
+            engine: Engine::new(settings, tracks),
             rx,
             position,
             scope,
-            sample: 0,
             looped: true,
-            buffer: [0.0; 256],
-            offset: 256,
-            cursors: [0; 3],
+            finished: false,
+            buffer: Vec::new(),
+            offset: 0,
         };
         (source, transport)
     }
-    // Song length and seek position are bounded to minutes at 44.1 kHz.
-    #[allow(clippy::cast_possible_truncation, clippy::cast_sign_loss)]
+
     fn refresh(&mut self) {
         while let Ok(command) = self.rx.try_recv() {
             match command {
-                Command::Update(settings) => {
-                    // Preserve musical position across tempo changes, then re-seek cursors.
-                    self.sample = (f64::from(u32::try_from(self.sample).expect("short song"))
-                        * self.settings.bpm
-                        / settings.bpm)
-                        .round() as u64;
-                    self.settings = settings;
-                    self.cursors = [0; 3];
-                }
-                Command::Edit(tracks) => {
-                    self.tracks = tracks;
-                    self.cursors = [0; 3];
-                }
+                Command::Update(settings) => self.engine.set_settings(settings),
+                Command::Edit(tracks) => self.engine.set_tracks(tracks),
                 Command::Replace(settings, tracks) => {
-                    self.settings = settings;
-                    self.tracks = tracks;
-                    self.sample = 0;
-                    self.cursors = [0; 3];
+                    self.engine.set_settings(settings);
+                    self.engine.set_tracks(tracks);
+                    self.engine.seek(0);
+                    self.finished = false;
                 }
                 Command::Seek(bar) => {
-                    self.sample = (f64::from(u32::try_from(bar.min(31)).expect("bar"))
-                        * 16.0
-                        * self.step()
-                        * f64::from(RATE)) as u64;
-                    self.cursors = [0; 3];
+                    self.engine.seek_bar(bar);
+                    self.finished = false;
                 }
                 Command::Loop(value) => self.looped = value,
             }
         }
     }
-    fn step(&self) -> f64 {
-        60.0 / self.settings.bpm / 4.0
-    }
-    // The timeline is always below u32::MAX samples; conversion retains precision.
-    #[allow(clippy::cast_possible_truncation, clippy::cast_sign_loss)]
+
     fn fill(&mut self) {
         self.refresh();
-        let step = self.step();
-        let total =
-            (f64::from(u32::try_from(STEPS).expect("step count")) * step * f64::from(RATE)) as u64;
-        for sample in &mut self.buffer {
-            if self.sample >= total {
-                if self.looped {
-                    self.sample = 0;
-                    self.cursors = [0; 3];
-                } else {
-                    *sample = 0.0;
-                    continue;
-                }
-            }
-            let t =
-                f64::from(u32::try_from(self.sample).expect("short composition")) / f64::from(RATE);
-            for (cursor, notes) in self.cursors.iter_mut().zip(&self.tracks) {
-                while *cursor < notes.len()
-                    && f64::from(
-                        u32::try_from(notes[*cursor].start + notes[*cursor].len)
-                            .expect("note step"),
-                    ) * step
-                        <= t
-                {
-                    *cursor += 1;
-                }
-            }
-            let mut mixed = 0.0;
-            for channel in 0..3 {
-                if self.settings.rack.audible(channel) {
-                    let sound = self.settings.rack.tracks[channel];
-                    mixed += voice(
-                        &self.tracks[channel][self.cursors[channel]..],
-                        t,
-                        step,
-                        sound,
-                    ) * f64::from(sound.volume)
-                        * 0.45;
-                }
-            }
-            if self.settings.rack.audible(3) {
-                let sound = self.settings.rack.tracks[3];
-                mixed += noise(
-                    self.settings.seed,
-                    t,
-                    step,
-                    self.settings.energy,
-                    self.settings.mood,
-                    sound.preset,
-                ) * f64::from(sound.volume)
-                    * 0.55;
-            }
-            *sample = mixed.clamp(-1.0, 1.0) as f32;
-            self.sample += 1;
+        self.buffer.resize(BLOCK, [0.0; 2]);
+        let written = self.engine.render(&mut self.buffer, self.looped);
+        self.buffer.truncate(written);
+        if written == 0 {
+            self.finished = true;
         }
-        self.position.store(self.sample, Ordering::Relaxed);
+        self.position
+            .store(self.engine.position(), Ordering::Relaxed);
         // A frame the UI is reading is skipped rather than waited for.
         if let Ok(mut scope) = self.scope.try_lock() {
-            scope.drain(..self.buffer.len());
-            scope.extend_from_slice(&self.buffer);
+            let fresh = self.buffer.len().min(SCOPE);
+            scope.drain(..fresh);
+            scope.extend(self.buffer[..fresh].iter().map(|[l, r]| (l + r) * 0.5));
         }
         self.offset = 0;
     }
+
+    /// The position in samples the transport shows, for tests.
+    #[cfg(test)]
+    fn sample(&self) -> u64 {
+        self.engine.position()
+    }
 }
+
 impl Iterator for LiveSource {
     type Item = f32;
-    // The fixed song length fits in u64 samples for the supported tempo range.
-    #[allow(clippy::cast_possible_truncation, clippy::cast_sign_loss)]
+
     fn next(&mut self) -> Option<Self::Item> {
-        if self.offset == self.buffer.len() {
-            self.refresh();
-            if !self.looped
-                && self.sample
-                    >= (f64::from(u32::try_from(STEPS).expect("steps"))
-                        * self.step()
-                        * f64::from(RATE)) as u64
-            {
+        if self.offset >= self.buffer.len() * 2 {
+            if self.finished {
                 return None;
             }
             self.fill();
+            if self.buffer.is_empty() {
+                return None;
+            }
         }
-        let sample = self.buffer[self.offset];
+        let frame = self.buffer[self.offset / 2];
+        let sample = frame[self.offset % 2];
         self.offset += 1;
         Some(sample)
     }
 }
+
 #[cfg(not(target_arch = "wasm32"))]
 impl Source for LiveSource {
     fn current_span_len(&self) -> Option<usize> {
         None
     }
     fn channels(&self) -> NonZero<u16> {
-        NonZero::new(1).expect("mono")
+        NonZero::new(2).expect("stereo")
     }
     fn sample_rate(&self) -> NonZero<u32> {
         NonZero::new(RATE).expect("rate")
@@ -210,57 +152,64 @@ impl Source for LiveSource {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    fn source() -> (LiveSource, Transport) {
+        let settings = Settings::default();
+        LiveSource::new(settings.clone(), crate::lab::compose_with(&settings))
+    }
+
+    fn play(source: &mut LiveSource, frames: usize) {
+        for _ in 0..frames * 2 {
+            source.next();
+        }
+    }
+
     #[test]
     fn tempo_updates_preserve_musical_position() {
-        let settings = Settings::default();
-        let (mut source, transport) =
-            LiveSource::new(settings.clone(), crate::lab::compose_with(&settings));
-        source.sample = 44_100;
-        let mut changed = settings;
-        changed.bpm *= 2.0;
-        transport.tx.send(Command::Update(changed)).expect("send");
+        let (mut source, transport) = source();
+        play(&mut source, 44_100);
+        let before = source.sample();
+        let mut faster = Settings::default();
+        faster.bpm *= 2.0;
+        transport.tx.send(Command::Update(faster)).expect("send");
         source.refresh();
-        assert_eq!(source.sample, 22_050);
-        assert_eq!(source.cursors, [0; 3]);
+        assert!(source.sample().abs_diff(before / 2) <= 1);
     }
+
     #[test]
     fn note_edits_preserve_the_timeline() {
-        let settings = Settings::default();
-        let (mut source, transport) =
-            LiveSource::new(settings.clone(), crate::lab::compose_with(&settings));
-        source.sample = 44_100;
+        let (mut source, transport) = source();
+        play(&mut source, 22_050);
+        let before = source.sample();
         transport
             .tx
             .send(Command::Edit(std::array::from_fn(|_| Vec::new())))
             .expect("send");
         source.refresh();
-        assert_eq!(source.sample, 44_100);
-        assert!(source.tracks.iter().all(Vec::is_empty));
+        assert_eq!(source.sample(), before);
     }
+
     #[test]
-    fn non_looping_playback_finishes() {
-        let settings = Settings::default();
-        let (mut source, transport) =
-            LiveSource::new(settings.clone(), crate::lab::compose_with(&settings));
-        source.sample = 6_000_000;
+    fn non_looping_playback_finishes_after_its_tails() {
+        let (mut source, transport) = source();
         transport.tx.send(Command::Loop(false)).expect("send");
-        assert!(source.next().is_none());
+        transport.tx.send(Command::Seek(31)).expect("send");
+        let mut count = 0_u64;
+        while source.next().is_some() {
+            count += 1;
+            assert!(count < 20_000_000, "never finished");
+        }
+        assert!(count > 0);
     }
+
     #[test]
-    fn live_updates_do_not_reset_position() {
-        let settings = Settings::default();
-        let notes = super::super::compose_with(&settings);
-        let (mut source, transport) = LiveSource::new(settings.clone(), notes);
-        for _ in 0..1024 {
-            source.next();
-        }
-        let before = source.sample;
-        let mut changed = settings;
-        changed.rack.tracks[2].volume = 0.0;
-        transport.tx.send(Command::Update(changed)).expect("send");
-        for _ in 0..512 {
-            source.next();
-        }
-        assert!(source.sample > before);
+    fn playback_is_stereo_and_audible() {
+        let (mut source, transport) = source();
+        transport.tx.send(Command::Seek(9)).expect("send");
+        let samples: Vec<f32> = (0..88_200).filter_map(|_| source.next()).collect();
+        let peak = samples.iter().fold(0.0_f32, |a, b| a.max(b.abs()));
+        let side: f32 = samples.chunks(2).map(|f| (f[0] - f[1]).abs()).sum();
+        assert!(peak > 0.1 && peak <= 1.0, "{peak}");
+        assert!(side > 1.0, "left and right should differ");
     }
 }

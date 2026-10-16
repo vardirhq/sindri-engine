@@ -118,7 +118,7 @@ fn music(args: Vec<String>) -> Result<(), Box<dyn Error>> {
         "  seed {}, {} BPM, 32 bars, {:.1} s",
         song.seed,
         song.bpm,
-        seconds(&samples)
+        seconds(&samples) / 2.0
     );
     Ok(())
 }
@@ -188,9 +188,16 @@ fn deliver(
     source: &str,
     music: bool,
 ) -> Result<(), Box<dyn Error>> {
+    let channels = if music { 2 } else { 1 };
     if let Some(root) = &out.project {
         let name = out.name.as_deref().unwrap_or(fallback);
-        let placed = project::place(root, name, &wav::encode(samples)?, extension, source)?;
+        let placed = project::place(
+            root,
+            name,
+            &wav::encode(samples, channels)?,
+            extension,
+            source,
+        )?;
         println!(
             "Wrote {} and {}",
             placed.wav.display(),
@@ -210,7 +217,7 @@ fn deliver(
             .then(|| format!("{fallback}.wav").into())
     });
     if let Some(path) = wav_path {
-        wav::write(&path, samples)?;
+        wav::write(&path, samples, channels)?;
         println!("Wrote {}", path.display());
     }
     if let Some(path) = &out.source {

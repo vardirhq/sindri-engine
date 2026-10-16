@@ -13,10 +13,10 @@ mod gui;
 mod instruments;
 mod live;
 mod midi;
-mod percussion;
 mod project;
 mod sfx;
 mod song;
+mod synth;
 mod wav;
 
 #[derive(Clone, Debug, PartialEq)]
@@ -89,90 +89,22 @@ fn compose_with(settings: &Settings) -> [Vec<Note>; 3] {
     composer::compose(settings)
 }
 
-fn freq(midi: i32) -> f64 {
-    440.0 * 2_f64.powf((f64::from(midi) - 69.0) / 12.0)
-}
 #[cfg(test)]
 fn step_seconds() -> f64 {
     60.0 / BPM / 4.0
 }
 
-fn voice(notes: &[Note], t: f64, step: f64, sound: instruments::TrackSound) -> f64 {
-    let active = notes.first().filter(|n| {
-        let start = f64::from(u32::try_from(n.start).expect("start")) * step;
-        t >= start && t < start + f64::from(u32::try_from(n.len).expect("length")) * step
-    });
-    let Some(note) = active else {
-        return 0.0;
-    };
-    let local = t - f64::from(u32::try_from(note.start).expect("start")) * step;
-    let duration = f64::from(u32::try_from(note.len).expect("length")) * step;
-    let hz = freq(note.pitch + sound.octave * 12);
-    sound.preset.sample(t * hz, local, duration) * f64::from(note.velocity) / 127.0
-}
-
-fn noise(
-    seed: u64,
-    time: f64,
-    step: f64,
-    energy: f64,
-    mood: Mood,
-    preset: instruments::Preset,
-) -> f64 {
-    percussion::sample(seed, time, step, energy, mood, preset)
-}
-
-// Supported tempos bound the sample count; normalized audio is clamped to i16 PCM.
-#[allow(clippy::cast_possible_truncation, clippy::cast_sign_loss)]
+/// A whole song as interleaved stereo samples, ready to loop.
 fn render_samples(settings: &Settings, tracks: &[Vec<Note>; 3]) -> Vec<f32> {
-    let step = 60.0 / settings.bpm / 4.0;
-    let seconds = f64::from(u32::try_from(STEPS).expect("step count")) * step;
-    let samples = (seconds * f64::from(RATE)).round() as u32;
-    let mut audio = Vec::with_capacity(samples as usize);
-    // Cache current notes by advancing cursors, not searching all notes per sample.
-    let mut cursors = [0_usize; 3];
-    for i in 0..samples {
-        let t = f64::from(i) / f64::from(RATE);
-        for (cursor, notes) in cursors.iter_mut().zip(tracks) {
-            while *cursor < notes.len()
-                && f64::from(
-                    u32::try_from(notes[*cursor].start + notes[*cursor].len).expect("step"),
-                ) * step
-                    <= t
-            {
-                *cursor += 1;
-            }
-        }
-        let mut mixed = 0.0;
-        for channel in 0..3 {
-            if settings.rack.audible(channel) {
-                let sound = settings.rack.tracks[channel];
-                mixed += voice(&tracks[channel][cursors[channel]..], t, step, sound)
-                    * f64::from(sound.volume)
-                    * 0.45;
-            }
-        }
-        if settings.rack.audible(3) {
-            let sound = settings.rack.tracks[3];
-            mixed += noise(
-                settings.seed,
-                t,
-                step,
-                settings.energy,
-                settings.mood,
-                sound.preset,
-            ) * f64::from(sound.volume)
-                * 0.55;
-        }
-        let sample = (mixed.clamp(-1.0, 1.0) * 32767.0).round() as i16;
-        audio.push(f32::from(sample) / 32767.0);
-    }
-    audio
+    synth::render_song(settings, tracks)
+        .into_iter()
+        .flatten()
+        .collect()
 }
 
 #[cfg(not(target_arch = "wasm32"))]
 fn render_with(settings: &Settings, tracks: &[Vec<Note>; 3]) -> Result<(), Box<dyn Error>> {
-    wav::write(&settings.output, &render_samples(settings, tracks))
+    wav::write(&settings.output, &render_samples(settings, tracks), 2)
 }
 
 #[cfg(not(target_arch = "wasm32"))]
