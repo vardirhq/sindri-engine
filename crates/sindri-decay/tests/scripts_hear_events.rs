@@ -167,7 +167,7 @@ fn a_mistake_about_an_event_in_another_file_does_not_compile() {
     assert!(
         failures.iter().any(|failure| failure
             .to_string()
-            .contains("cannot assign `String` to `f32`")),
+            .contains("cannot assign `String` to `number`")),
         "{failures:?}"
     );
 }
